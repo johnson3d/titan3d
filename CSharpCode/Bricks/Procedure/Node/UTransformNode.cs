@@ -204,7 +204,7 @@ namespace EngineNS.Bricks.Procedure.Node
         public UBufferCreator InputMatIdDesc = UBufferCreator.CreateInstance<USuperBuffer<float, FFloatOperator>>(-1, -1, -1);
         public UBufferCreator InputHMappinDesc = UBufferCreator.CreateInstance<USuperBuffer<float, FFloatOperator>>(-1, -1, -1);
         public UBufferCreator OutputTransDesc = UBufferCreator.CreateInstance<USuperBuffer<FTransform, FTransformOperator>>(0, 0, 0);
-        public UBufferCreator OutputPlantDesc = UBufferCreator.CreateInstance<USuperBuffer<Int32_2, FInt2Operator>>(0, 0, 0);
+        public UBufferCreator OutputPlantDesc = UBufferCreator.CreateInstance<USuperBuffer<Vector2i, FInt2Operator>>(0, 0, 0);
         //public UBufferCreator OutputGrassDesc = UBufferCreator.CreateInstance<USuperBuffer<FGrassTransformData, FGrassTransformDataOperator>>(0, 0, 0);
         public UTransformBuilder()
         {
@@ -290,14 +290,14 @@ namespace EngineNS.Bricks.Procedure.Node
                                 var plantDesc = trMtlDesc.Plants[iPlant];
 
                                 FTransform tmp = FTransform.Identity;
-                                Int32_2 plt = Int32_2.Zero;
+                                Vector2i plt = Vector2i.Zero;
                                 plt.X = id;
                                 plt.Y = iPlant;
 
                                 tmp.Position = new DVector3(x, y, z);
-                                var scale = CoreDefine.Lerp(plantDesc.MinScale, plantDesc.MaxScale, randObj.GetUnit());
+                                var scale = MathHelper.Lerp(plantDesc.MinScale, plantDesc.MaxScale, randObj.GetUnit());
                                 tmp.Scale = new Vector3(scale);
-                                tmp.Quat = Quaternion.RotationAxis(in Vector3.Up, CoreDefine.TWO_PI * randObj.GetUnit());
+                                tmp.Quat = Quaternion.RotationAxis(in Vector3.Up, MathHelper.TWO_PI * randObj.GetUnit());
                                 trans.AddPixel(in tmp);
                                 plants.AddPixel(in plt);
                             }

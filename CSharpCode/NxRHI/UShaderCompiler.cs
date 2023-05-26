@@ -54,6 +54,10 @@ namespace EngineNS.NxRHI
         {
             mCoreObject.AddDefine(name, value);
         }
+        public void AddDefine(string name, int value)
+        {
+            mCoreObject.AddDefine(name, value.ToString());
+        }
         public void ClearDefines()
         {
             mCoreObject.ClearDefines();
@@ -69,6 +73,7 @@ namespace EngineNS.NxRHI
     }
     public class UShaderDesc : AuxPtrType<NxRHI.FShaderDesc>
     {
+        public Graphics.Pipeline.Shader.UShadingEnv.FPermutationId PermutationId { get; set; }
         public UShaderDesc()
         {
             mCoreObject = FShaderDesc.CreateInstance();
@@ -91,9 +96,9 @@ namespace EngineNS.NxRHI
             mCoreObject.SetCallback(fn);
         }
         
-        public bool CompileShader(UShaderDesc shaderDesc, string shader, string entry, EShaderType type, string sm, UShaderDefinitions defines, EShaderLanguage sl, bool bDebugShader)
+        public bool CompileShader(UShaderDesc shaderDesc, string shader, string entry, EShaderType type, string sm, UShaderDefinitions defines, EShaderLanguage sl, bool bDebugShader, string extHlslVersion)
         {
-            return mCoreObject.CompileShader(shaderDesc.mCoreObject, shader, entry, type, sm, defines.mCoreObject, sl, bDebugShader);
+            return mCoreObject.CompileShader(shaderDesc.mCoreObject, shader, entry, type, sm, defines.mCoreObject, sl, bDebugShader, extHlslVersion);
         }
     }
 }

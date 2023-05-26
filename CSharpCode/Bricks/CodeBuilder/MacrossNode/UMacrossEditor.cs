@@ -1,6 +1,7 @@
 ﻿using Microsoft.CodeAnalysis;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
@@ -10,21 +11,22 @@ using System.Xml.Linq;
 
 namespace EngineNS.Bricks.CodeBuilder.MacrossNode
 {
-    public partial class UMacrossEditor : IO.ISerializer, Editor.IAssetEditor, IRootForm
+    public partial class UMacrossEditor : IO.ISerializer, Editor.IAssetEditor, IRootForm, NodeGraph.IGraphEditor
     {
         public UMacrossEditor()
         {
             mNewMethodMenuState.Reset();
             mOverrideMenuState.Reset();
         }
-        public void Cleanup()
+        public void Dispose()
         {
 
         }
-        public async System.Threading.Tasks.Task<bool> Initialize()
+        public virtual async System.Threading.Tasks.Task<bool> Initialize()
         {
             InitializeManMenu();
             await PGMember.Initialize();
+            await mUnionNodeConfigRenderer.Initialize();
             return true;
         }
 
@@ -102,7 +104,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
         //[Rtti.Meta(Order = 1)]
         public List<UMacrossMethodGraph> Methods { get; } = new List<UMacrossMethodGraph>();
         public RName AssetName { get; set; }
-        bool mVisible = true;
+        protected bool mVisible = true;
         public bool Visible 
         {
             get => mVisible;
@@ -136,8 +138,8 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
             var xmlRoot = xml.CreateElement($"Root", xml.NamespaceURI);
             xml.AppendChild(xmlRoot);
             IO.SerializerHelper.WriteObjectMetaFields(xml, xmlRoot, this);
-            var xmlText = IO.FileManager.GetXmlText(xml);
-            IO.FileManager.WriteAllText($"{rn.Address}/class_graph.dat", xmlText);
+            var xmlText = IO.TtFileManager.GetXmlText(xml);
+            IO.TtFileManager.WriteAllText($"{rn.Address}/class_graph.dat", xmlText);
 
             for(int i=0; i<Methods.Count; i++)
             {
@@ -145,8 +147,8 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
                 var funcXmlRoot = funcXml.CreateElement($"Root", funcXml.NamespaceURI);
                 funcXml.AppendChild(funcXmlRoot);
                 IO.SerializerHelper.WriteObjectMetaFields(funcXml, funcXmlRoot, Methods[i]);
-                var funcXmlText = IO.FileManager.GetXmlText(funcXml);
-                IO.FileManager.WriteAllText($"{rn.Address}/{Methods[i].Name}.func", funcXmlText);
+                var funcXmlText = IO.TtFileManager.GetXmlText(funcXml);
+                IO.TtFileManager.WriteAllText($"{rn.Address}/{Methods[i].Name}.func", funcXmlText);
             }
 
             //LoadClassGraph(rn);
@@ -165,13 +167,13 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
                 //IO.SerializerHelper.ReadObjectMetaFields(this, xml.LastChild as System.Xml.XmlElement, ref pThis, null);
             }
             {
-                var xml = IO.FileManager.LoadXml($"{rn.Address}/class_graph.dat");
+                var xml = IO.TtFileManager.LoadXml($"{rn.Address}/class_graph.dat");
                 if (xml == null)
                     return;
                 object pThis = this;
                 IO.SerializerHelper.ReadObjectMetaFields(this, xml.LastChild as System.Xml.XmlElement, ref pThis, null);
 
-                var nsName = IO.FileManager.GetBaseDirectory(rn.Name).TrimEnd('/').Replace("/", ".");
+                var nsName = IO.TtFileManager.GetBaseDirectory(rn.Name).TrimEnd('/').Replace("/", ".");
                 if (Regex.IsMatch(nsName, "[A-Za-z0-9_]"))
                     DefClass.Namespace = new UNamespaceDeclaration("NS_" + nsName);
                 else
@@ -180,12 +182,12 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
                     Profiler.Log.WriteLine(Profiler.ELogTag.Warning, "Macross", $"Get namespace failed, {rn.Name} has invalid char!");
                 }    
                 DefClass.ClearMethods();
-                var funcFiles = IO.FileManager.GetFiles(rn.Address, "*.func", false);
+                var funcFiles = IO.TtFileManager.GetFiles(rn.Address, "*.func", false);
                 for (int i = 0; i < funcFiles.Length; i++)
                 {
                     try
                     {
-                        var funcXml = IO.FileManager.LoadXml(funcFiles[i]);
+                        var funcXml = IO.TtFileManager.LoadXml(funcFiles[i]);
                         var funcGraph = UMacrossMethodGraph.NewGraph(this);
                         object pFuncGraph = funcGraph;
                         IO.SerializerHelper.ReadObjectMetaFields(null, funcXml.LastChild as System.Xml.XmlElement, ref pFuncGraph, null);
@@ -248,7 +250,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
                 string code = "";
                 mCSCodeGen.GenerateClassCode(DefClass, AssetName, ref code);
                 SaveCSFile(code);
-                GenerateAssemblyDescCreateInstanceCode();
+                //GenerateAssemblyDescCreateInstanceCode();
 
                 EngineNS.UEngine.Instance.MacrossManager.GenerateProjects();
                 return code;
@@ -270,88 +272,88 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
             }
         }
 
-        void GenerateAssemblyDescCreateInstanceCode()
-        {
-            var projFolder = UEngine.Instance.FileManager.GetRoot(IO.FileManager.ERootDir.EngineSource) + IO.FileManager.GetParentPathName(UEngine.Instance.EditorInstance.Config.GameProject);
-            var assemblyFileName = projFolder + "/Assembly.cs";
-            string assemblyDescCodes = "";
-            using(var sr = new System.IO.StreamReader(assemblyFileName, Encoding.UTF8, true))
-            {
-                assemblyDescCodes = sr.ReadToEnd();
-            }
+        //void GenerateAssemblyDescCreateInstanceCode()
+        //{
+        //    var projFolder = UEngine.Instance.FileManager.GetRoot(IO.TtFileManager.ERootDir.EngineSource) + IO.TtFileManager.GetParentPathName(UEngine.Instance.EditorInstance.Config.GameProject);
+        //    var assemblyFileName = projFolder + "/Assembly.cs";
+        //    string assemblyDescCodes = "";
+        //    using(var sr = new System.IO.StreamReader(assemblyFileName, Encoding.UTF8, true))
+        //    {
+        //        assemblyDescCodes = sr.ReadToEnd();
+        //    }
 
-            var startKeyword = "#region MacrossGenerated Start";
-            var idx = assemblyDescCodes.IndexOf(startKeyword);
-            var startIdx = idx + startKeyword.Length + 1;
-            var keyStr = $"if (name == RName.GetRName(\"{this.AssetName.Name}\", {this.AssetName.RNameType.GetType().FullName.Replace("+", ".")}.{this.AssetName.RNameType.ToString()}))";
-            var keyIdx = assemblyDescCodes.IndexOf(keyStr, idx);
-            var tab = "                ";
-            var str = tab + keyStr + "\r\n";
-            str += tab + "{\r\n";
-            str += $"{tab}    return new {DefClass.GetFullName()}();\r\n";
-            str += tab + "}\r\n";
-            if (keyIdx < 0)
-            {
-                assemblyDescCodes = assemblyDescCodes.Insert(startIdx, str);
-            }
-            else
-            {
-                keyIdx -= tab.Length;
-                var endIdx = assemblyDescCodes.IndexOf("}\r\n", keyIdx) + "}\r\n".Length;
-                assemblyDescCodes = assemblyDescCodes.Remove(keyIdx, endIdx - keyIdx);
-                assemblyDescCodes = assemblyDescCodes.Insert(keyIdx, str);
-            }
-            using(var sw = new System.IO.StreamWriter(assemblyFileName, false, Encoding.UTF8))
-            {
-                sw.Write(assemblyDescCodes);
-            }
-        }
-        public static bool RemoveAssemblyDescCreateInstanceCode(string name, RName.ERNameType type)
-        {
-            try
-            {
-                var projFolder = UEngine.Instance.FileManager.GetRoot(IO.FileManager.ERootDir.EngineSource) + IO.FileManager.GetParentPathName(UEngine.Instance.EditorInstance.Config.GameProject);
-                var assemblyFileName = projFolder + "/Assembly.cs";
-                string assemblyDescCodes = "";
-                using (var sr = new System.IO.StreamReader(assemblyFileName, Encoding.UTF8, true))
-                {
-                    assemblyDescCodes = sr.ReadToEnd();
-                }
-                if(string.IsNullOrEmpty(assemblyDescCodes))
-                {
-                    Profiler.Log.WriteLine(Profiler.ELogTag.Error, "Macross", "Remove macross create instance code failed, Assembly file is empty!");
-                    return false;
-                }
-                var startKeyword = "#region MacrossGenerated Start";
-                var idx = assemblyDescCodes.IndexOf(startKeyword);
-                var startIdx = idx + startKeyword.Length + 1;
-                var keyStr = $"if (name == RName.GetRName(\"{name}\", {type.GetType().FullName.Replace("+", ".")}.{type.ToString()}))";
-                var keyIdx = assemblyDescCodes.IndexOf(keyStr, idx);
-                var tab = "                ";
-                if (keyIdx >= 0)
-                {
-                    keyIdx -= tab.Length;
-                    var endIdx = assemblyDescCodes.IndexOf("}\r\n", keyIdx) + "}\r\n".Length;
-                    assemblyDescCodes = assemblyDescCodes.Remove(keyIdx, endIdx - keyIdx);
-                    using (var sw = new System.IO.StreamWriter(assemblyFileName, false, Encoding.UTF8))
-                    {
-                        sw.Write(assemblyDescCodes);
-                    }
-                    return true;
-                }
-            }
-            catch(System.Exception ex)
-            {
-                Profiler.Log.WriteLine(Profiler.ELogTag.Error, "Macross", ex.ToString());
-                return false;
-            }
-            return false;
-        }
+        //    var startKeyword = "#region MacrossGenerated Start";
+        //    var idx = assemblyDescCodes.IndexOf(startKeyword);
+        //    var startIdx = idx + startKeyword.Length + 1;
+        //    var keyStr = $"if (name == RName.GetRName(\"{this.AssetName.Name}\", {this.AssetName.RNameType.GetType().FullName.Replace("+", ".")}.{this.AssetName.RNameType.ToString()}))";
+        //    var keyIdx = assemblyDescCodes.IndexOf(keyStr, idx);
+        //    var tab = "                ";
+        //    var str = tab + keyStr + "\r\n";
+        //    str += tab + "{\r\n";
+        //    str += $"{tab}    return new {DefClass.GetFullName()}();\r\n";
+        //    str += tab + "}\r\n";
+        //    if (keyIdx < 0)
+        //    {
+        //        assemblyDescCodes = assemblyDescCodes.Insert(startIdx, str);
+        //    }
+        //    else
+        //    {
+        //        keyIdx -= tab.Length;
+        //        var endIdx = assemblyDescCodes.IndexOf("}\r\n", keyIdx) + "}\r\n".Length;
+        //        assemblyDescCodes = assemblyDescCodes.Remove(keyIdx, endIdx - keyIdx);
+        //        assemblyDescCodes = assemblyDescCodes.Insert(keyIdx, str);
+        //    }
+        //    using(var sw = new System.IO.StreamWriter(assemblyFileName, false, Encoding.UTF8))
+        //    {
+        //        sw.Write(assemblyDescCodes);
+        //    }
+        //}
+        //public static bool RemoveAssemblyDescCreateInstanceCode(string name, RName.ERNameType type)
+        //{
+        //    try
+        //    {
+        //        var projFolder = UEngine.Instance.FileManager.GetRoot(IO.TtFileManager.ERootDir.EngineSource) + IO.TtFileManager.GetParentPathName(UEngine.Instance.EditorInstance.Config.GameProject);
+        //        var assemblyFileName = projFolder + "/Assembly.cs";
+        //        string assemblyDescCodes = "";
+        //        using (var sr = new System.IO.StreamReader(assemblyFileName, Encoding.UTF8, true))
+        //        {
+        //            assemblyDescCodes = sr.ReadToEnd();
+        //        }
+        //        if(string.IsNullOrEmpty(assemblyDescCodes))
+        //        {
+        //            Profiler.Log.WriteLine(Profiler.ELogTag.Error, "Macross", "Remove macross create instance code failed, Assembly file is empty!");
+        //            return false;
+        //        }
+        //        var startKeyword = "#region MacrossGenerated Start";
+        //        var idx = assemblyDescCodes.IndexOf(startKeyword);
+        //        var startIdx = idx + startKeyword.Length + 1;
+        //        var keyStr = $"if (name == RName.GetRName(\"{name}\", {type.GetType().FullName.Replace("+", ".")}.{type.ToString()}))";
+        //        var keyIdx = assemblyDescCodes.IndexOf(keyStr, idx);
+        //        var tab = "                ";
+        //        if (keyIdx >= 0)
+        //        {
+        //            keyIdx -= tab.Length;
+        //            var endIdx = assemblyDescCodes.IndexOf("}\r\n", keyIdx) + "}\r\n".Length;
+        //            assemblyDescCodes = assemblyDescCodes.Remove(keyIdx, endIdx - keyIdx);
+        //            using (var sw = new System.IO.StreamWriter(assemblyFileName, false, Encoding.UTF8))
+        //            {
+        //                sw.Write(assemblyDescCodes);
+        //            }
+        //            return true;
+        //        }
+        //    }
+        //    catch(System.Exception ex)
+        //    {
+        //        Profiler.Log.WriteLine(Profiler.ELogTag.Error, "Macross", ex.ToString());
+        //        return false;
+        //    }
+        //    return false;
+        //}
 
         public void CompileCode()
         {
             UEngine.Instance.MacrossManager.ClearGameProjectTemplateBuildFiles();
-            var assemblyFile = UEngine.Instance.FileManager.GetRoot(IO.FileManager.ERootDir.EngineSource) + UEngine.Instance.EditorInstance.Config.GameAssembly;
+            var assemblyFile = UEngine.Instance.FileManager.GetRoot(IO.TtFileManager.ERootDir.EngineSource) + UEngine.Instance.EditorInstance.Config.GameAssembly;
             if (UEngine.Instance.MacrossModule.CompileCode(assemblyFile))
             {
                 UEngine.Instance.MacrossModule.ReloadAssembly(assemblyFile);
@@ -415,7 +417,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
             };
         }
 
-        void OnDrawMainMenu()
+        protected void OnDrawMainMenu()
         {
             if (ImGuiAPI.BeginMenuBar())
             {
@@ -428,8 +430,9 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
         }
 
         bool mDockInitialized = false;
-        ImGuiWindowClass mDockKeyClass;
-        unsafe void ResetDockspace(bool force = false)
+        protected ImGuiWindowClass mDockKeyClass;
+        public ImGuiWindowClass DockKeyClass => mDockKeyClass;
+        protected unsafe void ResetDockspace(bool force = false)
         {
             var pos = ImGuiAPI.GetCursorPos();
             var id = ImGuiAPI.GetID(AssetName.Name + "_Dockspace");
@@ -448,16 +451,14 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
             ImGuiAPI.DockBuilderSplitNode(graphId, ImGuiDir_.ImGuiDir_Left, 0.2f, ref leftId, ref graphId);
             uint propertyId = 0;
             ImGuiAPI.DockBuilderSplitNode(graphId, ImGuiDir_.ImGuiDir_Right, 0.2f, ref propertyId, ref graphId);
+            uint unionConfigId = 0;
+            ImGuiAPI.DockBuilderSplitNode(graphId, ImGuiDir_.ImGuiDir_Right, 0.4f, ref unionConfigId, ref graphId);
 
-            ImGuiAPI.DockBuilderDockWindow(GetDockWindowName("GraphWindow"), graphId);
-            ImGuiAPI.DockBuilderDockWindow(GetDockWindowName("NodeProperty"), propertyId);
-            ImGuiAPI.DockBuilderDockWindow(GetDockWindowName("ClassView"), leftId);
+            ImGuiAPI.DockBuilderDockWindow(EGui.UIProxy.DockProxy.GetDockWindowName("GraphWindow", mDockKeyClass), graphId);
+            ImGuiAPI.DockBuilderDockWindow(EGui.UIProxy.DockProxy.GetDockWindowName("NodeProperty", mDockKeyClass), propertyId);
+            ImGuiAPI.DockBuilderDockWindow(EGui.UIProxy.DockProxy.GetDockWindowName("UnionNodeConfig", mDockKeyClass), unionConfigId);
+            ImGuiAPI.DockBuilderDockWindow(EGui.UIProxy.DockProxy.GetDockWindowName("ClassView", mDockKeyClass), leftId);
             ImGuiAPI.DockBuilderFinish(id);
-        }
-
-        string GetDockWindowName(string name)
-        {
-            return name + "##" + mDockKeyClass.m_ClassId;
         }
 
         struct STToolButtonData
@@ -466,7 +467,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
             public bool IsMouseHover;
         }
         STToolButtonData[] mToolBtnDatas = new STToolButtonData[7];
-        void DrawToolbar()
+        protected void DrawToolbar()
         {
             var drawList = ImGuiAPI.GetWindowDrawList();
 
@@ -524,10 +525,10 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
                 
             EGui.UIProxy.Toolbar.EndToolbar();
         }
-        public unsafe void OnDraw()
+        public virtual unsafe void OnDraw()
         {
             //ImGuiAPI.SetNextWindowDockID(DockId, DockCond);
-            if (EGui.UIProxy.DockProxy.BeginMainForm($"Macross:{IO.FileManager.GetPureName(AssetName!=null? AssetName.Name :"NoName")}", ref mVisible, ImGuiWindowFlags_.ImGuiWindowFlags_None| ImGuiWindowFlags_.ImGuiWindowFlags_MenuBar))
+            if (EGui.UIProxy.DockProxy.BeginMainForm($"Macross:{IO.TtFileManager.GetPureName(AssetName!=null? AssetName.Name :"NoName")}", this, ImGuiWindowFlags_.ImGuiWindowFlags_None| ImGuiWindowFlags_.ImGuiWindowFlags_MenuBar))
             {
                 DrawToolbar();
 
@@ -542,7 +543,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
                         mainEditor.AssetEditorManager.CurrentActiveEditor = this;
                 }
 
-                OnDrawMainMenu();
+                OnDrawMainMenu(); 
 
                 //ImGuiAPI.Columns(2, null, true);
                 //if (bFirstDraw)
@@ -577,6 +578,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
             DrawClassView();
             DrawGraph();
             DrawPropertyGrid();
+            DrawUnionNodeConfig();
 
             if (IsDraggingMember == true && ImGuiAPI.IsMouseDown(ImGuiMouseButton_.ImGuiMouseButton_Left) == false)
             {
@@ -589,7 +591,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
         {
             if (AssetName != null)
             {
-                IO.FileManager.DeleteFile($"{AssetName.Address}/{method.Name}.func");
+                IO.TtFileManager.DeleteFile($"{AssetName.Address}/{method.Name}.func");
             }
             Methods.Remove(method);
             for (int methodIdx = 0; methodIdx < method.MethodDatas.Count; methodIdx++)
@@ -615,7 +617,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
         protected unsafe void DrawClassView()
         {
             ImGuiTreeNodeFlags_ flags = ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_NoTreePushOnOpen | ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_Bullet | ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_SpanFullWidth;// | ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_AllowItemOverlap;
-            if (EGui.UIProxy.DockProxy.BeginPanel(mDockKeyClass, GetDockWindowName("ClassView"), ref mClassViewShow, ImGuiWindowFlags_.ImGuiWindowFlags_None))
+            if (EGui.UIProxy.DockProxy.BeginPanel(mDockKeyClass, "ClassView", ref mClassViewShow, ImGuiWindowFlags_.ImGuiWindowFlags_None))
             {
                 Vector2 buttonSize = new Vector2(16, 16);
                 float buttonOffset = 16;
@@ -795,20 +797,38 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
             EGui.UIProxy.DockProxy.EndPanel();
         }
         bool mNodePropertyShow = true;
-        void DrawPropertyGrid()
+        protected void DrawPropertyGrid()
         {
-            if(EGui.UIProxy.DockProxy.BeginPanel(mDockKeyClass, GetDockWindowName("NodeProperty"), ref mNodePropertyShow, ImGuiWindowFlags_.ImGuiWindowFlags_None))
+            if(EGui.UIProxy.DockProxy.BeginPanel(mDockKeyClass, "NodeProperty", ref mNodePropertyShow, ImGuiWindowFlags_.ImGuiWindowFlags_None))
             {
                 PGMember.OnDraw(true, false, false);
             }
             EGui.UIProxy.DockProxy.EndPanel();
         }
+        NodeGraph.UnionNodeConfigRenderer mUnionNodeConfigRenderer = new NodeGraph.UnionNodeConfigRenderer();
+        bool mUnionNodeConfigShow = false;
+        protected void DrawUnionNodeConfig()
+        {
+            if (!mUnionNodeConfigShow)
+                return;
+            if(EGui.UIProxy.DockProxy.BeginPanel(mDockKeyClass, "UnionNodeConfig", ref mUnionNodeConfigShow, ImGuiWindowFlags_.ImGuiWindowFlags_None))
+            {
+                mUnionNodeConfigRenderer.DrawConfigPanel();
+            }
+            EGui.UIProxy.DockProxy.EndPanel();
+        }
+        public void SetConfigUnionNode(NodeGraph.IUnionNode node)
+        {
+            mUnionNodeConfigRenderer?.SetUnionNode(node);
+            mUnionNodeConfigShow = (node != null);
+        }
+
         Macross.UMacrossBreak mBreakerStore = null;
         bool mGraphWindowShow = true;
         int mSettingCurrentFuncIndex = -1;
         protected unsafe void DrawGraph()
         {
-            if(EGui.UIProxy.DockProxy.BeginPanel(mDockKeyClass, GetDockWindowName("GraphWindow"), ref mGraphWindowShow, ImGuiWindowFlags_.ImGuiWindowFlags_None))
+            if(EGui.UIProxy.DockProxy.BeginPanel(mDockKeyClass, "GraphWindow", ref mGraphWindowShow, ImGuiWindowFlags_.ImGuiWindowFlags_None))
             {
                 var vMin = ImGuiAPI.GetWindowContentRegionMin();
                 var vMax = ImGuiAPI.GetWindowContentRegionMax();
@@ -880,7 +900,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
         {
             LoadClassGraph(AssetName);
             //LoadClassGraph(RName.GetRName("UTest/class_graph.xml"));
-            await Thread.AsyncDummyClass.DummyFunc();
+            await Thread.TtAsyncDummyClass.DummyFunc();
             return true;
         }
 
@@ -926,29 +946,87 @@ namespace EngineNS.Macross
         }
         partial void TryCompileCode(string assemblyFile, ref bool success)
         {
-            var csFiles = new List<string>(IO.FileManager.GetFiles(UEngine.Instance.FileManager.GetRoot(IO.FileManager.ERootDir.Game), "*.cs"));
-            var projectPath = UEngine.Instance.FileManager.GetRoot(IO.FileManager.ERootDir.EngineSource) + UEngine.Instance.EditorInstance.Config.GameProjectPath;
-            csFiles.AddRange(IO.FileManager.GetFiles(projectPath, "*.cs"));
-            var arguments = new List<string>();
+            var csFilesPath = UEngine.Instance.FileManager.GetRoot(IO.TtFileManager.ERootDir.Game);
+            var projectFile = UEngine.Instance.FileManager.GetRoot(IO.TtFileManager.ERootDir.EngineSource) + UEngine.Instance.EditorInstance.Config.GameProject;
+            success = CompileGameProject(csFilesPath, projectFile, assemblyFile);
+        }
+        public static bool CompileGameProject(string csFilesPath, string projectFile, string assemblyFile)
+        {
+            csFilesPath = EngineNS.IO.TtFileManager.GetValidDirectory(csFilesPath);
+            var csFiles = new List<string>(EngineNS.IO.TtFileManager.GetFiles(csFilesPath, "*.cs"));
+            List<string> arguments = new List<string>();
             for (int i = 0; i < csFiles.Count; ++i)
-                arguments.Add(CodeCompiler.CSharpCompiler.GetCommandArguments(CodeCompiler.CSharpCompiler.enCommandType.CSFile, csFiles[i]));
+                arguments.Add(EngineNS.CodeCompiler.CSharpCompiler.GetCommandArguments(EngineNS.CodeCompiler.CSharpCompiler.enCommandType.CSFile, csFiles[i]));
 
-            var projectFile = UEngine.Instance.FileManager.GetRoot(IO.FileManager.ERootDir.EngineSource) + UEngine.Instance.EditorInstance.Config.GameProject;
-            var projDef = XDocument.Load(projectFile);
-            var references = projDef.Element("Project").Elements("ItemGroup").Elements("Reference").Select(refElem => refElem.Value);
-            foreach (var reference in references)
+            var createInstanceCode = $@"
+namespace EngineNS.Rtti
+{{
+    public partial class AssemblyEntry
+    {{
+        public partial class GameAssemblyDesc
+        {{
+            public override object CreateInstance(EngineNS.RName name)
+            {{
+                var nameHash = Standart.Hash.xxHash.xxHash64.ComputeHash(name.ToString());
+                switch(nameHash)
+                {{";
+            foreach (var csFile in csFiles)
             {
-                arguments.Add(CodeCompiler.CSharpCompiler.GetCommandArguments(CodeCompiler.CSharpCompiler.enCommandType.RefAssemblyFile, projectPath + reference));
+                var relativeFile = EngineNS.IO.TtFileManager.GetValidFileName(csFile).Replace(csFilesPath, "");
+                var relativePath = EngineNS.IO.TtFileManager.GetBaseDirectory(relativeFile, 2).TrimEnd('/').ToLower();
+                var fileName = EngineNS.IO.TtFileManager.GetPureName(relativeFile).ToLower();
+                var hashCode = Standart.Hash.xxHash.xxHash64.ComputeHash($"{relativePath}/{fileName}.macross:{EngineNS.RName.ERNameType.Game}");
+                createInstanceCode += $@"
+                case {hashCode}:
+                    return new NS_{relativePath.Replace("/", ".")}.{fileName}();";
             }
+            createInstanceCode += $@"
+                }}
+                return null;
+            }}
+        }}
+    }}
+}}";
+            var projectPath = EngineNS.IO.TtFileManager.GetBaseDirectory(projectFile, 1);
+            var objDir = projectPath + "obj";
+            if(!EngineNS.IO.TtFileManager.DirectoryExists(objDir))
+            {
+                EngineNS.IO.TtFileManager.CreateDirectory(objDir);
+            }
+            var genCodeFileName = objDir + "/_gencode.cs";
+            using (var extCodeWriter = new StreamWriter(genCodeFileName, false, System.Text.Encoding.UTF8))
+            {
+                extCodeWriter.Write(createInstanceCode);
+            }
+            arguments.Add(EngineNS.CodeCompiler.CSharpCompiler.GetCommandArguments(EngineNS.CodeCompiler.CSharpCompiler.enCommandType.CSFile, genCodeFileName));
+
+            var projCSFiles = EngineNS.IO.TtFileManager.GetFiles(projectPath, "*.cs");
+            foreach (var csFile in projCSFiles)
+            {
+                if (csFile.Contains(projectPath + "obj"))
+                    continue;
+                arguments.Add(EngineNS.CodeCompiler.CSharpCompiler.GetCommandArguments(EngineNS.CodeCompiler.CSharpCompiler.enCommandType.CSFile, csFile));
+            }
+
+            var projDef = XDocument.Load(projectFile);
+            if (projDef != null)
+            {
+                var references = projDef.Element("Project").Elements("ItemGroup").Elements("Reference").Select(refElem => refElem.Value);
+                foreach (var reference in references)
+                {
+                    arguments.Add(EngineNS.CodeCompiler.CSharpCompiler.GetCommandArguments(EngineNS.CodeCompiler.CSharpCompiler.enCommandType.RefAssemblyFile, projectPath + reference));
+                }
+            }
+
             //var references = projDef.Element(projDef.n) 
+            arguments.Add(EngineNS.CodeCompiler.CSharpCompiler.GetCommandArguments(EngineNS.CodeCompiler.CSharpCompiler.enCommandType.OutputFile, assemblyFile));
+            arguments.Add(EngineNS.CodeCompiler.CSharpCompiler.GetCommandArguments(EngineNS.CodeCompiler.CSharpCompiler.enCommandType.PdbFile, assemblyFile.Replace(".dll", ".tpdb")));
+            arguments.Add(EngineNS.CodeCompiler.CSharpCompiler.GetCommandArguments(EngineNS.CodeCompiler.CSharpCompiler.enCommandType.Outputkind, Microsoft.CodeAnalysis.OutputKind.DynamicallyLinkedLibrary.ToString()));
+            arguments.Add(EngineNS.CodeCompiler.CSharpCompiler.GetCommandArguments(EngineNS.CodeCompiler.CSharpCompiler.enCommandType.OptimizationLevel, Microsoft.CodeAnalysis.OptimizationLevel.Debug.ToString()));
+            arguments.Add(EngineNS.CodeCompiler.CSharpCompiler.GetCommandArguments(EngineNS.CodeCompiler.CSharpCompiler.enCommandType.AllowUnsafe, "true"));
 
-            arguments.Add(CodeCompiler.CSharpCompiler.GetCommandArguments(CodeCompiler.CSharpCompiler.enCommandType.OutputFile, assemblyFile));
-            arguments.Add(CodeCompiler.CSharpCompiler.GetCommandArguments(CodeCompiler.CSharpCompiler.enCommandType.PdbFile, assemblyFile.Replace(".dll", ".tpdb")));
-            arguments.Add(CodeCompiler.CSharpCompiler.GetCommandArguments(CodeCompiler.CSharpCompiler.enCommandType.Outputkind, OutputKind.DynamicallyLinkedLibrary.ToString()));
-            arguments.Add(CodeCompiler.CSharpCompiler.GetCommandArguments(CodeCompiler.CSharpCompiler.enCommandType.OptimizationLevel, OptimizationLevel.Debug.ToString()));
-            arguments.Add(CodeCompiler.CSharpCompiler.GetCommandArguments(CodeCompiler.CSharpCompiler.enCommandType.AllowUnsafe, "true"));
-
-            success = CodeCompiler.CSharpCompiler.CompilerCSharpWithArguments(arguments.ToArray());
+            var retVal = EngineNS.CodeCompiler.CSharpCompiler.CompilerCSharpWithArguments(arguments.ToArray());
+            return retVal;
         }
     }
 }

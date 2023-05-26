@@ -14,45 +14,48 @@ namespace EngineNS.IO
         System.Threading.Tasks.Task<bool> LoadLOD(int level);
     }
 
-    public class UStreamingManager
+    public class TtStreamingManager
     {
         [ThreadStatic]
-        private static Profiler.TimeScope ScopeUpdateStreamingState = Profiler.TimeScopeManager.GetTimeScope(typeof(UStreamingManager), nameof(UpdateStreamingState));
+        private static Profiler.TimeScope ScopeUpdateStreamingState = Profiler.TimeScopeManager.GetTimeScope(typeof(TtStreamingManager), nameof(UpdateStreamingState));
         public Dictionary<RName, IStreaming> StreamingAssets { get; } = new Dictionary<RName, IStreaming>();
         public void UpdateStreamingState()
         {
             using (new Profiler.TimeScopeHelper(ScopeUpdateStreamingState))
             {
-                foreach (var i in StreamingAssets.Values)
+                lock (StreamingAssets)
                 {
-                    if (i.CurLoadTask != null)
+                    foreach (var i in StreamingAssets.Values)
                     {
-                        if (i.CurLoadTask.IsCompleted == false)
+                        if (i.CurLoadTask != null)
+                        {
+                            if (i.CurLoadTask.IsCompleted == false)
+                                continue;
+                            else
+                                i.CurLoadTask = null;
+                        }
+
+                        if (false == UpdateTargetLOD(i))
+                        {
                             continue;
+                        }
+
+                        if (i.LevelOfDetail == i.TargetLOD)
+                        {
+                            continue;
+                        }
+                        else if (i.LevelOfDetail < i.TargetLOD)
+                        {
+                            i.LevelOfDetail++;
+                            i.CurLoadTask = i.LoadLOD(i.LevelOfDetail);
+                        }
                         else
-                            i.CurLoadTask = null;
+                        {
+                            i.LevelOfDetail = i.TargetLOD;
+                            i.CurLoadTask = i.LoadLOD(i.LevelOfDetail);
+                        }
                     }
-
-                    if (false == UpdateTargetLOD(i))
-                    {
-                        continue;
-                    }
-
-                    if (i.LevelOfDetail == i.TargetLOD)
-                    {
-                        continue;
-                    }
-                    else if (i.LevelOfDetail < i.TargetLOD)
-                    {
-                        i.LevelOfDetail++;
-                        i.CurLoadTask = i.LoadLOD(i.LevelOfDetail);
-                    }
-                    else
-                    {
-                        i.LevelOfDetail = i.TargetLOD;
-                        i.CurLoadTask = i.LoadLOD(i.LevelOfDetail);
-                    }
-                }
+                }   
             }
         }
         public virtual bool UpdateTargetLOD(IStreaming asset)

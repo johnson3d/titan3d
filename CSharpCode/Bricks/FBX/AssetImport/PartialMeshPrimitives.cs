@@ -88,7 +88,7 @@ namespace EngineNS.Graphics.Mesh
                                             mFBXImporter = UEngine.Instance.FBXFactoryModule.Instance.CreateImporter();
                                             var fileDesc = mFBXImporter.PreImport(mSourceFile);
                                             PGAsset.Target = fileDesc;
-                                            mName = IO.FileManager.GetPureName(mSourceFile);
+                                            mName = IO.TtFileManager.GetPureName(mSourceFile);
                                         }
                                     }
                                     // close
@@ -131,7 +131,7 @@ namespace EngineNS.Graphics.Mesh
                     bool nameChanged = ImGuiAPI.InputText("##in_rname", ref mName);
                     if (nameChanged)
                     {
-                        if (IO.FileManager.FileExists(mDir.Address + mName + UMeshPrimitives.AssetExt))
+                        if (IO.TtFileManager.FileExists(mDir.Address + mName + UMeshPrimitives.AssetExt))
                             eErrorType = enErrorType.IsExisting;
                     }
                     ImGuiAPI.Separator();
@@ -152,7 +152,7 @@ namespace EngineNS.Graphics.Mesh
                                 case "Box":
                                     {
                                         var mesh = UMeshDataProvider.MakeBox(BoxParameter.Position.X, BoxParameter.Position.Y, BoxParameter.Position.Z,
-                                            BoxParameter.Extent.X, BoxParameter.Extent.Y, BoxParameter.Extent.Z, new Color4(BoxParameter.Color).ToArgb(), BoxParameter.FaceFlags);
+                                            BoxParameter.Extent.X, BoxParameter.Extent.Y, BoxParameter.Extent.Z, new Color4f(BoxParameter.Color).ToArgb(), BoxParameter.FaceFlags);
 
                                         var name = this.GetAssetRName();
                                         var ameta = new UMeshPrimitivesAMeta();
@@ -190,7 +190,7 @@ namespace EngineNS.Graphics.Mesh
                                 case "Sphere":
                                     {
                                         var mesh = UMeshDataProvider.MakeSphere(SphereParameter.Radius, SphereParameter.Slices,
-                                            SphereParameter.Stacks, new Color4(SphereParameter.Color).ToArgb());
+                                            SphereParameter.Stacks, new Color4f(SphereParameter.Color).ToArgb());
 
                                         var name = this.GetAssetRName();
                                         var ameta = new UMeshPrimitivesAMeta();
@@ -209,7 +209,7 @@ namespace EngineNS.Graphics.Mesh
                                 case "Cylinder":
                                     {
                                         var mesh = UMeshDataProvider.MakeCylinder(CylinderParameter.Radius1, CylinderParameter.Radius2, CylinderParameter.Length,
-                                            CylinderParameter.Slices, CylinderParameter.Stacks, new Color4(CylinderParameter.Color).ToArgb());
+                                            CylinderParameter.Slices, CylinderParameter.Stacks, new Color4f(CylinderParameter.Color).ToArgb());
 
                                         var name = this.GetAssetRName();
                                         var ameta = new UMeshPrimitivesAMeta();
@@ -228,7 +228,7 @@ namespace EngineNS.Graphics.Mesh
                                 case "Torus":
                                     {
                                         var mesh = UMeshDataProvider.MakeTorus(TorusParameter.InnerRadius, TorusParameter.OutRadius2,
-                                            TorusParameter.Slices, TorusParameter.Rings, new Color4(TorusParameter.Color).ToArgb());
+                                            TorusParameter.Slices, TorusParameter.Rings, new Color4f(TorusParameter.Color).ToArgb());
 
                                         var name = this.GetAssetRName();
                                         var ameta = new UMeshPrimitivesAMeta();
@@ -247,7 +247,7 @@ namespace EngineNS.Graphics.Mesh
                                 case "Capsule":
                                     {
                                         var mesh = UMeshDataProvider.MakeCapsule(CapsuleParameter.Radius, CapsuleParameter.Depth,
-                                            (int)CapsuleParameter.Latitudes, (int)CapsuleParameter.Longitudes, (int)CapsuleParameter.Rings, CapsuleParameter.UvProfile, new Color4(TorusParameter.Color).ToArgb());
+                                            (int)CapsuleParameter.Latitudes, (int)CapsuleParameter.Longitudes, (int)CapsuleParameter.Rings, CapsuleParameter.UvProfile, new Color4f(TorusParameter.Color).ToArgb());
 
                                         var name = this.GetAssetRName();
                                         var ameta = new UMeshPrimitivesAMeta();

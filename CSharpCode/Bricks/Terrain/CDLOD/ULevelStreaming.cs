@@ -4,13 +4,13 @@ using System.Text;
 
 namespace EngineNS.Bricks.Terrain.CDLOD
 {
-    public class ULevelStreaming
+    public class ULevelStreaming : IDisposable
     {
         ~ULevelStreaming()
         {
-            Cleanup();
+            Dispose();
         }
-        public void Cleanup()
+        public void Dispose()
         {
             lock (this)
             {
@@ -22,7 +22,7 @@ namespace EngineNS.Bricks.Terrain.CDLOD
                     if (i.LevelData == null)
                         continue;
 
-                    i.LevelData?.Cleanup();
+                    i.LevelData?.Dispose();
                     i.LevelData = null;
                 }
                 UnloadingLevels.Clear();
@@ -89,7 +89,7 @@ namespace EngineNS.Bricks.Terrain.CDLOD
                 if (IsStreaming == false)
                 {
                     Profiler.Log.WriteLine(Profiler.ELogTag.Warning, "LevelStreaming", $"CreateLevelData({level.LevelX},{level.LevelX}): IsStreaming == false");
-                    level.LevelData?.Cleanup();
+                    level.LevelData?.Dispose();
                     level.LevelData = null;
                 }
             }
@@ -123,7 +123,7 @@ namespace EngineNS.Bricks.Terrain.CDLOD
                         tmp.LevelData.RemainUnloadTime -= elapsedSecond;
                         if (tmp.LevelData.RemainUnloadTime < 0)
                         {
-                            tmp.LevelData?.Cleanup();
+                            tmp.LevelData?.Dispose();
                             tmp.LevelData = null;
                             
                             UnloadingLevels.RemoveAt(i);

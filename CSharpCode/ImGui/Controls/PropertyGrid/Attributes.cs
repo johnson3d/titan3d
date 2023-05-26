@@ -7,6 +7,10 @@ namespace EngineNS.EGui.Controls.PropertyGrid
 {
     public class PGHideBaseClassPropertiesAttribute : Attribute { }
     public class PGShowInPropertyGridAttribute : Attribute { }
+    public class PGCategoryFilters : Attribute 
+    {
+        public string[] ExcludeFilters = null;
+    }
     public class PGValueRange : Attribute
     {
         public double Max;
@@ -31,6 +35,14 @@ namespace EngineNS.EGui.Controls.PropertyGrid
         public PGValueFormat(string format)
         {
             Format = format;
+        }
+    }
+    public class PGBaseType : Attribute
+    {
+        public Type BaseType;
+        public PGBaseType(Type baseType)
+        {
+            BaseType = baseType;
         }
     }
 

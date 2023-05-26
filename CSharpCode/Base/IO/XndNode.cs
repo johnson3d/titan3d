@@ -4,9 +4,9 @@ using System.Text;
 
 namespace EngineNS.IO
 {
-    public class CXndNode : AuxPtrType<XndNode>
+    public class TtXndNode : AuxPtrType<XndNode>
     {
-        public CXndNode(XndNode ptr)
+        public TtXndNode(XndNode ptr)
         {
             mCoreObject = ptr;
         }
@@ -74,9 +74,9 @@ namespace EngineNS.IO
                 return new XndNode(mCoreObject.GetNode(index));
             }
         }
-        public CXndNode GetNode(UInt32 index)
+        public TtXndNode GetNode(UInt32 index)
         {
-            var result = new CXndNode(GetNodePtr(index));
+            var result = new TtXndNode(GetNodePtr(index));
             result.Core_AddRef();
             return result;
         }

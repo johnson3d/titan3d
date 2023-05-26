@@ -6,6 +6,10 @@ namespace EngineNS.GamePlay
 {
     public class UGameApplication : USlateApplication, ITickable
     {
+        public int GetTickOrder()
+        {
+            return -1;
+        }
         public UGameInstance GameInstance;
         //public override EGui.Slate.UWorldViewportSlate GetWorldViewportSlate()
         //{
@@ -34,15 +38,19 @@ namespace EngineNS.GamePlay
             UEngine.RootFormManager.DrawRootForms();
         }
         #region Tick
-        public virtual void TickLogic(int ellapse)
+        public virtual void TickLogic(float ellapse)
         {
             
         }
-        public virtual void TickRender(int ellapse)
+        public virtual void TickRender(float ellapse)
         {
             
         }
-        public virtual void TickSync(int ellapse)
+        public void TickBeginFrame(float ellapse)
+        {
+
+        }
+        public virtual void TickSync(float ellapse)
         {
             //OnDrawSlate();
         }

@@ -10,6 +10,17 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="$(MSBuildThisFileDirectory)CCamera.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Common\ExpHeightFog.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Common\FogNode.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Common\Post\FsrNode.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Common\GpuScene_Instance.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Common\GpuScene_Light.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Common\AntiAliasingNode.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Common\Post\AdditiveNode.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Common\Post\BloomNode.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Common\Post\GauseNode.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Common\Post\LuminanceThresholeNode.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Common\Post\SunShaftNode.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Common\UAvgBrightnessNode.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Common\UBasePassNode.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Common\UCopy2SwapChainNode.cs" />

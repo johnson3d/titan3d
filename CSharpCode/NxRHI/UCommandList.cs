@@ -7,6 +7,16 @@ namespace EngineNS.NxRHI
 {
     public class UCommandList : AuxPtrType<NxRHI.ICommandList>
     {
+        public override void Dispose()
+        {
+            if (mCoreObject.IsValidPointer)
+                mCoreObject.ResetGpuDraws();
+            base.Dispose();
+        }
+        public string DebugName
+        {
+            get => mCoreObject.GetDebugName();
+        }
         public void BeginEvent(string info)
         {
             mCoreObject.BeginEvent(info);
@@ -23,8 +33,12 @@ namespace EngineNS.NxRHI
         {
             mCoreObject.EndCommand();
         }
+        private NxRHI.TtGpuScope CurrentGpuScope;
         public void BeginPass(UFrameBuffers fb, in FRenderPassClears passClears, string name)
         {
+            CurrentGpuScope = UEngine.Instance.ProfilerModule.GpuTimeScopeManager.GetGpuScope(name);
+            if (CurrentGpuScope != null)
+                CurrentGpuScope.Begin(this);
             mCoreObject.BeginPass(fb.mCoreObject, in passClears, name);
             unsafe
             {
@@ -50,6 +64,13 @@ namespace EngineNS.NxRHI
         public void EndPass()
         {
             mCoreObject.EndPass();
+            if (CurrentGpuScope != null)
+                CurrentGpuScope.End(this);
+            CurrentGpuScope = null;
+        }
+        public void InheritPass(UCommandList cmdlist)
+        {
+            mCoreObject.InheritPass(cmdlist.mCoreObject);
         }
         public void SetShader(UShader shader)
         {
@@ -93,9 +114,9 @@ namespace EngineNS.NxRHI
         {
             mCoreObject.DrawIndexed(topology, BaseVertex, StartIndex, DrawCount, Instance);
         }
-        public void IndirectDrawIndexed(EPrimitiveType topology, UBuffer indirectArg, uint indirectArgOffset = 0)
+        public void IndirectDrawIndexed(EPrimitiveType topology, UBuffer indirectArg, uint indirectArgOffset = 0, UBuffer countBuffer = null)
         {
-            mCoreObject.IndirectDrawIndexed(topology, indirectArg.mCoreObject, indirectArgOffset);
+            mCoreObject.IndirectDrawIndexed(topology, indirectArg.mCoreObject, indirectArgOffset, countBuffer.mCoreObject);
         }
         public void Dispatch(uint x, uint y, uint z)
         {
@@ -108,6 +129,10 @@ namespace EngineNS.NxRHI
         public void CopyTextureRegion(UTexture target, uint tarSubRes, uint DstX, uint DstY, uint DstZ, UTexture src, uint srcSubRes, in EngineNS.NxRHI.FSubresourceBox box)
         {
             mCoreObject.CopyTextureRegion(target.mCoreObject, tarSubRes, DstX, DstY, DstZ, src.mCoreObject, srcSubRes, in box);
+        }
+        public unsafe void CopyTexture(UTexture target, uint tarSubRes, UTexture src, uint srcSubRes)
+        {
+            mCoreObject.CopyTextureRegion(target.mCoreObject, tarSubRes, 0, 0, 0, src.mCoreObject, srcSubRes, (NxRHI.FSubresourceBox*)IntPtr.Zero.ToPointer());
         }
         #endregion
 
@@ -165,237 +190,102 @@ namespace EngineNS.NxRHI
         #endregion
     }
 
-    public class URenderCmdQueue : ITickable
+    public class TtGpuScope : AuxPtrType<NxRHI.IGpuScope>
     {
-        public delegate void FRenderCmd(ICommandList ImCmdlist, string name);
-        public struct FRCmdInfo
+        ulong ScopeFrameValue = 0;
+        public ulong TimeUS { get; private set; }
+        public string Name
         {
-            public FRenderCmd Cmd;
-            public string Name;
-        }
-        public class UQueueStat
-        {
-            public uint NumOfCmdlist;
-            public uint NumOfDrawcall;
-            public uint NumOfPrimitive;
-            public void Reset()
+            get => mCoreObject.GetName();
+            set
             {
-                NumOfCmdlist = 0;
-                NumOfDrawcall = 0;
-                NumOfPrimitive = 0;
+                mCoreObject.SetName(value);
             }
         }
-        public UQueueStat GetStat()
+        public bool IsFinished()
         {
-            return QueueStats[1];
+            return mCoreObject.IsFinished();
         }
-        public UQueueStat[] QueueStats = new UQueueStat[2];
-        public readonly Queue<FRCmdInfo>[] RenderCmds = new Queue<FRCmdInfo>[2];
-        public readonly Queue<FRCmdInfo>[] RenderPreCmds = new Queue<FRCmdInfo>[2];
-        public readonly Queue<FRCmdInfo>[] RenderPostCmds = new Queue<FRCmdInfo>[2];
-        public URenderCmdQueue()
+        public ulong GetDeltaTime()
         {
-            QueueStats[0] = new UQueueStat();
-            QueueStats[1] = new UQueueStat();
-
-            RenderCmds[0] = new Queue<FRCmdInfo>();
-            RenderCmds[1] = new Queue<FRCmdInfo>();
-
-            RenderPreCmds[0] = new Queue<FRCmdInfo>();
-            RenderPreCmds[1] = new Queue<FRCmdInfo>();
-
-            RenderPostCmds[0] = new Queue<FRCmdInfo>();
-            RenderPostCmds[1] = new Queue<FRCmdInfo>();
+            return mCoreObject.GetDeltaTime();
         }
-        public void Reset()
+        public void Begin(UCommandList cmdlist)
         {
-            //RenderCmds[0]?.Clear();
-            //RenderCmds[1]?.Clear();
-            //RenderPreCmds[0]?.Clear();
-            //RenderPreCmds[1]?.Clear();
-            //RenderPostCmds[0]?.Clear();
-            //RenderPostCmds[1]?.Clear();
-            //UEngine.Instance.GfxDevice.RenderContext.CmdQueue.Flush();
-            //RenderCmds[0]?.Clear();
-            //RenderCmds[1]?.Clear();
-            //RenderPreCmds[0]?.Clear();
-            //RenderPreCmds[1]?.Clear();
-            //RenderPostCmds[0]?.Clear();
-            //RenderPostCmds[1]?.Clear();
-
-            TickRender(0);
-            TickSync(0);
-            TickRender(0);
-            TickSync(0);
-
-            UEngine.Instance.GfxDevice.RenderContext.CmdQueue.Flush();
-            var count = RenderCmds[0].Count + RenderCmds[1].Count + RenderPreCmds[0].Count + RenderPreCmds[1].Count + RenderPostCmds[0].Count + RenderPostCmds[0].Count;
-            System.Diagnostics.Debug.Assert(count == 0);
+            if (ScopeFrameValue == 0)
+                mCoreObject.Begin(cmdlist.mCoreObject);
         }
-        public void QueueCmd(FRenderCmd cmd, string name)
+        public void End(UCommandList cmdlist)
         {
-            lock (RenderCmds)
+            if (ScopeFrameValue == 0)
             {
-                var info = new FRCmdInfo();
-                info.Name = name;
-                info.Cmd = cmd;
-                RenderCmds[0].Enqueue(info);
+                mCoreObject.End(cmdlist.mCoreObject);
+                ScopeFrameValue = UEngine.Instance.GfxDevice.RenderContext.mCoreObject.GetFrameFence().GetExpectValue();
             }
         }
-        public void QueuePreCmd(FRenderCmd cmd, string name)
+        public void Update()
         {
-            lock (RenderPreCmds)
+            if (ScopeFrameValue != 0)
             {
-                var info = new FRCmdInfo();
-                info.Name = name;
-                info.Cmd = cmd;
-                RenderPreCmds[0].Enqueue(info);
-            }
-        }
-        public void QueuePostCmd(FRenderCmd cmd, string name)
-        {
-            lock (RenderPostCmds)
-            {
-                var info = new FRCmdInfo();
-                info.Name = name;
-                info.Cmd = cmd;
-                RenderPostCmds[0].Enqueue(info);
-            }
-        }
-        public void QueueCmdlist(UCommandList cmd, string name = null)
-        {
-            lock (RenderCmds)
-            {
-                var info = new FRCmdInfo();
-                info.Name = name;
-                info.Cmd = (im_cmd, name) =>
+                var completed = UEngine.Instance.GfxDevice.RenderContext.mCoreObject.GetFrameFence().GetCompletedValue();
+                if (completed >= ScopeFrameValue)
                 {
-                    UEngine.Instance.GfxDevice.RenderContext.CmdQueue.ExecuteCommandList(cmd);
-                };
-                RenderCmds[0].Enqueue(info);
-                QueueStats[0].NumOfDrawcall += cmd.mCoreObject.GetDrawcallNumber();
-                QueueStats[0].NumOfCmdlist++;
-                QueueStats[0].NumOfPrimitive += cmd.mCoreObject.GetPrimitiveNumber();
-            }
-        }
-        public void TickLogic(int ellapse)
-        {
+                    var delta = GetDeltaTime();
 
-        }
-        [ThreadStatic]
-        private static Profiler.TimeScope ScopeRenderTick = Profiler.TimeScopeManager.GetTimeScope(typeof(URenderCmdQueue), nameof(TickRender));
-        public void TickRender(int ellapse)
-        {
-            var cmdQueue = UEngine.Instance.GfxDevice.RenderContext.CmdQueue;
-            
-            using (new Profiler.TimeScopeHelper(ScopeRenderTick))
-            {
-                var im_cmd = cmdQueue.GetIdleCmdlist(EQueueCmdlist.QCL_Read);
-                TickAways(im_cmd);
-                cmdQueue.ReleaseIdleCmdlist(im_cmd, EQueueCmdlist.QCL_Read);
-            }
-        }
-        [ThreadStatic]
-        private static Profiler.TimeScope ScopeSyncTick = Profiler.TimeScopeManager.GetTimeScope(typeof(URenderCmdQueue), nameof(TickRender));
-        public void TickSync(int ellapse)
-        {
-            using (new Profiler.TimeScopeHelper(ScopeRenderTick))
-            {
-                var cmdQueue = UEngine.Instance.GfxDevice.RenderContext.CmdQueue;
-                var im_cmd = cmdQueue.GetIdleCmdlist(EQueueCmdlist.QCL_FramePost);
-                im_cmd.EndCommand();
-                cmdQueue.mCoreObject.ExecuteCommandList(im_cmd);
-                im_cmd.BeginCommand();
-                cmdQueue.ReleaseIdleCmdlist(im_cmd, EQueueCmdlist.QCL_FramePost);
+                    var freq = UEngine.Instance.GfxDevice.RenderContext.mCoreObject.GetCmdQueue().mDefaultQueueFrequence;
+                    TimeUS = (delta * 1000000) / freq;
 
-                //UEngine.Instance.EventPoster.TickPostTickSyncEvents();
-                //UEngine.Instance.GfxDevice.RenderContext.TickPostEvents();
-
-                Swap(ref RenderCmds[0], ref RenderCmds[1]);
-                Swap(ref RenderPreCmds[0], ref RenderPreCmds[1]);
-                Swap(ref RenderPostCmds[0], ref RenderPostCmds[1]);
-                Swap(ref QueueStats[0], ref QueueStats[1]);
-                QueueStats[0].Reset();
-                //{
-                //    var save = RenderCmds[0];
-                //    RenderCmds[0] = RenderCmds[1];
-                //    RenderCmds[1] = save;
-                //}
-                //{
-                //    var save = RenderPreCmds[0];
-                //    RenderPreCmds[0] = RenderPreCmds[1];
-                //    RenderPreCmds[1] = save;
-                //}
-                //{
-                //    var save = RenderPostCmds[0];
-                //    RenderPostCmds[0] = RenderPostCmds[1];
-                //    RenderPostCmds[1] = save;
-                //}
-            }
-        }
-        public void Swap<T>(ref T l, ref T r)
-        {
-            var save = l;
-            l = r;
-            r = save;
-        }
-        public void TickAways(ICommandList ImCmdlist)
-        {
-            var curCmds = RenderPreCmds[1];
-            while (curCmds.Count > 0)
-            {
-                try
-                {
-                    FRCmdInfo cmd;
-                    lock (RenderPreCmds)
-                    {
-                        cmd = curCmds.Peek();
-                        curCmds.Dequeue();
-                    }
-                    cmd.Cmd(ImCmdlist, cmd.Name);
-                }
-                catch (Exception ex)
-                {
-                    Profiler.Log.WriteException(ex);
+                    ScopeFrameValue = 0;
                 }
             }
+        }
+    }
 
-            curCmds = RenderCmds[1];
-            while (curCmds.Count > 0)
-            {
-                try
-                {
-                    FRCmdInfo cmd;
-                    lock (RenderCmds)
-                    {
-                        cmd = curCmds.Peek();
-                        curCmds.Dequeue();
-                    }
-                    cmd.Cmd(ImCmdlist, cmd.Name);
-                }
-                catch (Exception ex)
-                {
-                    Profiler.Log.WriteException(ex);
-                }
-            }
+    public struct TtGpuScopeHelper : IDisposable//Waiting for C#8 ,ref struct -> Dispose
+    {
+        public TtGpuScope mTime;
+        public UCommandList mCmdList;
+        public TtGpuScopeHelper(TtGpuScope t, UCommandList cmdlist)
+        {
+            mTime = t;
+            mCmdList = cmdlist;
+            if (t == null)
+                return;
+            mTime.Begin(cmdlist);
+        }
+        public void Dispose()
+        {
+            if (mTime == null)
+                return;
+            mTime.End(mCmdList);
+            mTime = null;
+            mCmdList = null;
+        }
+    }
 
-            curCmds = RenderPostCmds[1];
-            while (curCmds.Count > 0)
+    public class TtGpuTimeScopeManager
+    {
+        public bool IsGpuProfiling { get; set; } = true;
+        public Dictionary<string, TtGpuScope> Scopes { get; } = new Dictionary<string, TtGpuScope>();
+        public TtGpuScope GetGpuScope(string name)
+        {
+            if (IsGpuProfiling == false)
+                return null;
+            TtGpuScope scope;
+            if (Scopes.TryGetValue(name, out scope))
+                return scope;
+            scope = UEngine.Instance.GfxDevice.RenderContext.CreateGpuScope();
+            if (scope == null)
+                return null;
+            scope.Name = name;
+            Scopes.Add(name, scope);
+            return scope;
+        }
+        public void UpdateSync()
+        {
+            foreach(var i in Scopes)
             {
-                try
-                {
-                    FRCmdInfo cmd;
-                    lock (RenderPostCmds)
-                    {
-                        cmd = curCmds.Peek();
-                        curCmds.Dequeue();
-                    }
-                    cmd.Cmd(ImCmdlist, cmd.Name);
-                }
-                catch (Exception ex)
-                {
-                    Profiler.Log.WriteException(ex);
-                }
+                i.Value.Update();
             }
         }
     }

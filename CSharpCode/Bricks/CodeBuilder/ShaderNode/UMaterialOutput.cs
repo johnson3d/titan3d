@@ -210,6 +210,7 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode
         public override void BuildStatements(NodePin pin, ref BuildCodeStatementsData data)
         {
             var graph = data.NodeGraph as UMaterialGraph;
+
             PSFunction.MethodName = "DO_PS_MATERIAL_IMPL";
             PSFunction.Arguments.Clear();
             PSFunction.Arguments.Add(

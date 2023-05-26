@@ -9,6 +9,31 @@ namespace EngineNS.EGui.UIProxy
 
     public class MenuItemProxy : IUIProxyBase
     {
+        public static MenuItemProxy FindSubMenu(MenuItemProxy item, string[] nameTree)
+        {
+            var cur = item;
+            for (int i = 0; i < nameTree.Length; i++)
+            {
+                bool find = false;
+                foreach (var j in cur.SubMenus)
+                {
+                    var t = j as MenuItemProxy;
+                    if (t == null)
+                        continue;
+                    if (t.MenuName == nameTree[i])
+                    {
+                        cur = t;
+                        find = true;
+                        break;
+                    }
+                }
+                if (find == false)
+                {
+                    return null;
+                }
+            }
+            return cur;
+        }
         public string MenuName = "Unknow";
         public string Shortcut = null;
         public bool IsTopMenuItem = false;
@@ -57,7 +82,7 @@ namespace EngineNS.EGui.UIProxy
         }
         public async System.Threading.Tasks.Task<bool> Initialize()
         {
-            await EngineNS.Thread.AsyncDummyClass.DummyFunc();
+            await EngineNS.Thread.TtAsyncDummyClass.DummyFunc();
             return true;
         }
 
@@ -310,7 +335,7 @@ namespace EngineNS.EGui.UIProxy
         }
         public async System.Threading.Tasks.Task<bool> Initialize()
         {
-            await EngineNS.Thread.AsyncDummyClass.DummyFunc();
+            await EngineNS.Thread.TtAsyncDummyClass.DummyFunc();
             return true;
         }
 

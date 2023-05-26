@@ -19,8 +19,8 @@ namespace EngineNS.Bricks.VXGI
             var codeBuilder = new Bricks.CodeBuilder.Backends.UHLSLCodeGenerator();
             string sourceCode = "";
             //var codeBuilder = new Bricks.CodeBuilder.HLSL.UHLSLGen();
-            codeBuilder.AddLine($"#include \"{RName.GetRName("Shaders/Compute/VXGI/VxDebugModifier.cginc", RName.ERNameType.Engine).Address}\"", ref sourceCode);
-            codeBuilder.AddLine("void MdfQueueDoModifiers(inout PS_INPUT output, VS_INPUT input)", ref sourceCode);
+            codeBuilder.AddLine($"#include \"{RName.GetRName("Shaders/Bricks/VXGI/VxDebugModifier.cginc", RName.ERNameType.Engine).Address}\"", ref sourceCode);
+            codeBuilder.AddLine("void MdfQueueDoModifiers(inout PS_INPUT output, VS_MODIFIER input)", ref sourceCode);
             codeBuilder.PushSegment(ref sourceCode);
             {
                 codeBuilder.AddLine($"DoVoxelDebugMeshVS(output, input);", ref sourceCode);
@@ -40,8 +40,10 @@ namespace EngineNS.Bricks.VXGI
             SourceCode = new NxRHI.UShaderCode();
             SourceCode.TextCode = sourceCode;
         }
-        public unsafe override void OnDrawCall(Graphics.Pipeline.URenderPolicy.EShadingType shadingType, NxRHI.UGraphicDraw drawcall, Graphics.Pipeline.URenderPolicy policy, Graphics.Mesh.UMesh mesh)
+        public unsafe override void OnDrawCall(Graphics.Pipeline.URenderPolicy.EShadingType shadingType, NxRHI.UGraphicDraw drawcall, Graphics.Pipeline.URenderPolicy policy, Graphics.Mesh.UMesh mesh, int atom)
         {
+            base.OnDrawCall(shadingType, drawcall, policy, mesh, atom);
+
             var vxNode = this.MdfDatas as UVoxelsNode;
             if (vxNode == null)
             {
@@ -103,6 +105,7 @@ namespace EngineNS.Bricks.VXGI
         private unsafe void ResetComputeDrawcall()
         {
             var rc = UEngine.Instance.GfxDevice.RenderContext;
+            CoreSDK.DisposeObject(ref SetupVxDebuggerDrawcall);
             SetupVxDebuggerDrawcall = rc.CreateComputeDraw();
             SetupVxDebuggerDrawcall.SetComputeEffect(SetupVxDebugger);
             SetupVxDebuggerDrawcall.SetDispatch(1, 1, 1);
@@ -118,22 +121,18 @@ namespace EngineNS.Bricks.VXGI
                 SetupVxDebuggerDrawcall.BindUav(srvIdx, UavVxIndirectDebugDraws);
             }
 
+            CoreSDK.DisposeObject(ref CollectVxDebuggerDrawcall);
             CollectVxDebuggerDrawcall = rc.CreateComputeDraw();
             CollectVxDebuggerDrawcall.SetComputeEffect(CollectVxDebugger);
-            CollectVxDebuggerDrawcall.SetDispatch(CoreDefine.Roundup(VxSceneX, Dispatch_SetupDimArray3.X), 
-                CoreDefine.Roundup(VxSceneY, Dispatch_SetupDimArray3.Y), 
-                CoreDefine.Roundup(VxSceneZ, Dispatch_SetupDimArray3.Z));
+            CollectVxDebuggerDrawcall.SetDispatch(MathHelper.Roundup(VxGroupPoolSize, Dispatch_SetupDimArray1.X),
+                1,
+                1);
 
             // renwind test
-            srvIdx = CollectVxDebuggerDrawcall.FindBinder(NxRHI.EShaderBindType.SBT_UAV, "VxPool");
+            srvIdx = CollectVxDebuggerDrawcall.FindBinder(NxRHI.EShaderBindType.SBT_UAV, "VxGroupPool");
             if (srvIdx.IsValidPointer)
             {
                 CollectVxDebuggerDrawcall.BindUav(srvIdx, UavVoxelPool);
-            }
-            srvIdx = CollectVxDebuggerDrawcall.FindBinder(NxRHI.EShaderBindType.SBT_UAV, "VxScene");
-            if (srvIdx.IsValidPointer)
-            {
-                CollectVxDebuggerDrawcall.BindUav(srvIdx, UavVoxelScene);
             }
             srvIdx = CollectVxDebuggerDrawcall.FindBinder(NxRHI.EShaderBindType.SBT_UAV, "VxIndirectDebugDraws");
             if (srvIdx.IsValidPointer)
@@ -196,8 +195,8 @@ namespace EngineNS.Bricks.VXGI
             var rc = UEngine.Instance.GfxDevice.RenderContext;
 
             var desc = new NxRHI.FBufferDesc();
-            desc.SetDefault();
-            desc.Type = NxRHI.EBufferType.BFT_UAV;// | NxRHI.EBufferType.TBuffer;
+            desc.SetDefault(false);
+            desc.Type = NxRHI.EBufferType.BFT_SRV | NxRHI.EBufferType.BFT_UAV;// | NxRHI.EBufferType.TBuffer;
             desc.Size = VxGroupPoolSize * (uint)sizeof(FVoxelDebugger);
             desc.StructureStride = (uint)sizeof(FVoxelDebugger);
             VoxelGroupDebugger = rc.CreateBuffer(in desc);
@@ -221,6 +220,7 @@ namespace EngineNS.Bricks.VXGI
 
             desc.Size = 2 * (uint)sizeof(FIndirectDrawArgs);
             desc.StructureStride = (uint)sizeof(uint);
+            desc.Type = NxRHI.EBufferType.BFT_UAV | NxRHI.EBufferType.BFT_IndirectArgs;
             desc.MiscFlags = NxRHI.EResourceMiscFlag.RM_DRAWINDIRECT_ARGS | NxRHI.EResourceMiscFlag.RM_BUFFER_ALLOW_RAW_VIEWS;
             VxIndirectDebugDraws = rc.CreateBuffer(in desc);
             desc.MiscFlags = NxRHI.EResourceMiscFlag.RM_BUFFER_STRUCTURED;
@@ -243,14 +243,14 @@ namespace EngineNS.Bricks.VXGI
             defines.mCoreObject.AddDefine("DispatchX", $"2");
             defines.mCoreObject.AddDefine("DispatchY", $"1");
             defines.mCoreObject.AddDefine("DispatchZ", $"1");
-            SetupVxDebugger = UEngine.Instance.GfxDevice.EffectManager.GetComputeEffect(RName.GetRName("Shaders/Compute/VXGI/VxVisualDebugger.compute", RName.ERNameType.Engine).Address,
-                "CS_SetupVxDebugger", NxRHI.EShaderType.SDT_ComputeShader, null, null, null, defines, null);
+            SetupVxDebugger = UEngine.Instance.GfxDevice.EffectManager.GetComputeEffect(RName.GetRName("Shaders/Bricks/VXGI/VxVisualDebugger.compute", RName.ERNameType.Engine),
+                "CS_SetupVxDebugger", NxRHI.EShaderType.SDT_ComputeShader, null, defines, null);
             
-            defines.mCoreObject.AddDefine("DispatchX", $"{Dispatch_SetupDimArray3.X}");
-            defines.mCoreObject.AddDefine("DispatchY", $"{Dispatch_SetupDimArray3.Y}");
-            defines.mCoreObject.AddDefine("DispatchZ", $"{Dispatch_SetupDimArray3.Z}");
-            CollectVxDebugger = UEngine.Instance.GfxDevice.EffectManager.GetComputeEffect(RName.GetRName("Shaders/Compute/VXGI/VxVisualDebugger.compute", RName.ERNameType.Engine).Address,
-                "CS_CollectVxDebugger", NxRHI.EShaderType.SDT_ComputeShader, null, null, null, defines, null);
+            defines.mCoreObject.AddDefine("DispatchX", $"{Dispatch_SetupDimArray1.X}");
+            defines.mCoreObject.AddDefine("DispatchY", $"1");
+            defines.mCoreObject.AddDefine("DispatchZ", $"1");
+            CollectVxDebugger = UEngine.Instance.GfxDevice.EffectManager.GetComputeEffect(RName.GetRName("Shaders/Bricks/VXGI/VxVisualDebugger.compute", RName.ERNameType.Engine),
+                "CS_CollectVxDebugger", NxRHI.EShaderType.SDT_ComputeShader, null, defines, null);
 
             VxDebugMesh = new Graphics.Mesh.UMesh();
             var rect = Graphics.Mesh.UMeshDataProvider.MakeBox(-0.5f, -0.5f, -0.5f, 1, 1, 1);
@@ -265,6 +265,7 @@ namespace EngineNS.Bricks.VXGI
         #endregion
 
         bool mDebugVoxels = false;
+        [Rtti.Meta]
         public bool DebugVoxels
         {
             get => mDebugVoxels;
@@ -288,7 +289,6 @@ namespace EngineNS.Bricks.VXGI
             {
                 return;
             }
-
             
             var cmd = BasePass.DrawCmdList;
             SetupVxDebuggerDrawcall.Commit(cmd);

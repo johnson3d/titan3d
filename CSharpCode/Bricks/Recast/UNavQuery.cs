@@ -36,7 +36,7 @@ namespace EngineNS.Bricks.Recast
         {
             return mCoreObject.GetHeight(in pos, in pickext, ref h);
         }
-        public bool FindStraightPath(in Vector3 start, in Vector3 end, Support.CBlobObject blob)
+        public bool FindStraightPath(in Vector3 start, in Vector3 end, Support.UBlobObject blob)
         {
             return mCoreObject.FindStraightPath(in start, in end, blob.mCoreObject);
         }

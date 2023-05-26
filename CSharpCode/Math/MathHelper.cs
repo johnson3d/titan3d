@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 using System.Runtime.InteropServices;
+using NPOI.SS.Formula.Functions;
 
 namespace EngineNS
 {
@@ -631,6 +632,9 @@ namespace EngineNS
 
     public partial class MathHelper
     {
+        public const float Epsilon = ((float)0.00001);
+        public const float DEpsilon = 0.0000001f;
+        public const float TWO_PI = V_PI * 2.0f;
         public const float V_PI = ((float)3.1415926535);
         [Rtti.Meta]
         public static float PI
@@ -651,11 +655,22 @@ namespace EngineNS
         {
             get => V_Rad2Deg;
         }
+        public static T MaxSameType<T>(in T a, in T b) where T : IComparable<T>
+        {
+            return a.CompareTo(b) > 0 ? a : b;
+        }
+        public static T MinSameType<T>(in T a, in T b) where T : IComparable<T>
+        {
+            return a.CompareTo(b) < 0 ? a : b;
+        }
+        public static float Floor(float v)
+        {
+            return (float)Math.Floor(v);
+        }
         public static float Sqrt(float v)
         {
             return (float)System.Math.Sqrt(v);
         }
-        public const float Epsilon = ((float)0.00001);
         [Rtti.Meta]
         public static float Abs(float v)
         {
@@ -713,19 +728,24 @@ namespace EngineNS
         {
             return sRandom.Next(start, end);
         }
+        public static float RandomRange(float start, float end)
+        {
+            return RandomDouble() * (end - start);
+        }
         [Rtti.Meta]
         public static float RandomDouble()
         {
             return (float)sRandom.NextDouble();
         }
         [Rtti.Meta]
-        public static Vector3 RandomDirection()
+        public static Vector3 RandomDirection(bool bNormalize = true)
         {
             Vector3 result;
             result.X = RandomDouble();
             result.Y = RandomDouble();
             result.Z = RandomDouble();
-            result.Normalize();
+            if (bNormalize)
+                result.Normalize();
             return result;
         }
         [Rtti.Meta]
@@ -756,9 +776,13 @@ namespace EngineNS
             return result;
         }
         [Rtti.Meta]
-        public static float FloatLerp(float from, float to, float t)
+        public static float Lerp(float from, float to, float t)
         {
             return to * t + from * (1.0f - t);
+        }
+        public static int Lerp(int from, int to, float t)
+        {
+            return (int)((float)to * t + (float)from * (1.0f - t));
         }
         // 圆与线段碰撞检测
         // 圆心p(x, y), 半径r, 线段两端点p1(x1, y1)和p2(x2, y2)
@@ -845,6 +869,88 @@ namespace EngineNS
             //return res;
         }
 
+
+        /** Spreads bits to every other. */
+        [Rtti.Meta]
+        public static UInt32 MortonCode2(UInt32 x)
+        {
+            x &= 0x0000ffff;
+            x = (x ^ (x << 8)) & 0x00ff00ff;
+            x = (x ^ (x << 4)) & 0x0f0f0f0f;
+            x = (x ^ (x << 2)) & 0x33333333;
+            x = (x ^ (x << 1)) & 0x55555555;
+            return x;
+        }
+        [Rtti.Meta]
+        public static UInt64 MortonCode2_64(UInt64 x)
+        {
+            x &= 0x00000000ffffffff;
+            x = (x ^ (x << 16)) & 0x0000ffff0000ffff;
+            x = (x ^ (x << 8)) & 0x00ff00ff00ff00ff;
+            x = (x ^ (x << 4)) & 0x0f0f0f0f0f0f0f0f;
+            x = (x ^ (x << 2)) & 0x3333333333333333;
+            x = (x ^ (x << 1)) & 0x5555555555555555;
+            return x;
+        }
+
+        /** Reverses MortonCode2. Compacts every other bit to the right. */
+        [Rtti.Meta]
+        public static UInt32 ReverseMortonCode2(UInt32 x)
+        {
+            x &= 0x55555555;
+            x = (x ^ (x >> 1)) & 0x33333333;
+            x = (x ^ (x >> 2)) & 0x0f0f0f0f;
+            x = (x ^ (x >> 4)) & 0x00ff00ff;
+            x = (x ^ (x >> 8)) & 0x0000ffff;
+            return x;
+        }
+        [Rtti.Meta]
+        public static UInt64 ReverseMortonCode2_64(UInt64 x)
+        {
+            x &= 0x5555555555555555;
+            x = (x ^ (x >> 1)) & 0x3333333333333333;
+            x = (x ^ (x >> 2)) & 0x0f0f0f0f0f0f0f0f;
+            x = (x ^ (x >> 4)) & 0x00ff00ff00ff00ff;
+            x = (x ^ (x >> 8)) & 0x0000ffff0000ffff;
+            x = (x ^ (x >> 16)) & 0x00000000ffffffff;
+            return x;
+        }
+
+        /** Spreads bits to every 3rd. */
+        [Rtti.Meta]
+        public static UInt32 MortonCode3(UInt32 x)
+        {
+            x &= 0x000003ff;
+            x = (x ^ (x << 16)) & 0xff0000ff;
+            x = (x ^ (x << 8)) & 0x0300f00f;
+            x = (x ^ (x << 4)) & 0x030c30c3;
+            x = (x ^ (x << 2)) & 0x09249249;
+            return x;
+        }
+
+        /** Reverses MortonCode3. Compacts every 3rd bit to the right. */
+        [Rtti.Meta]
+        public static UInt32 ReverseMortonCode3(UInt32 x)
+        {
+            x &= 0x09249249;
+            x = (x ^ (x >> 2)) & 0x030c30c3;
+            x = (x ^ (x >> 4)) & 0x0300f00f;
+            x = (x ^ (x >> 8)) & 0xff0000ff;
+            x = (x ^ (x >> 16)) & 0x000003ff;
+            return x;
+        }
+
+        [Rtti.Meta]
+        public static UInt32 ILog2Const(UInt32 n)
+        {
+            return (n > 1) ? 1 + ILog2Const(n / 2) : 0;
+        }
+
+        [Rtti.Meta]
+        public static uint DivideAndRoundUp(uint Dividend, uint Divisor)
+        {
+            return (Dividend + Divisor - 1) / Divisor;
+        }
         #region SDK
         public const string ModuleNC = CoreSDK.CoreModule;
         [System.Runtime.InteropServices.DllImport(ModuleNC, CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]

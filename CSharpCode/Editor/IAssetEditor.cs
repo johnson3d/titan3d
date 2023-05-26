@@ -108,6 +108,7 @@ namespace EngineNS.Editor
                     OpenedEditors[i].OnCloseEditor();
                     OpenedEditors.RemoveAt(i);
                     i--;
+                    System.GC.Collect();
                 }
                 else
                 {

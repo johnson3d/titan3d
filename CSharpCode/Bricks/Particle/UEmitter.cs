@@ -27,8 +27,37 @@ namespace EngineNS.Bricks.Particle
         public Vector3 Location;
         public uint Flags;
     }
-    public class UGpuParticleResources
+    public class UGpuParticleResources : IDisposable
     {
+        public void Dispose()
+        {
+            CoreSDK.DisposeObject(ref ParticlesBuffer);
+            CoreSDK.DisposeObject(ref ParticlesUav);
+            CoreSDK.DisposeObject(ref ParticlesSrv);
+
+            CoreSDK.DisposeObject(ref FreeParticlesBuffer);
+            CoreSDK.DisposeObject(ref FreeParticlesUav);
+
+            CoreSDK.DisposeObject(ref TempReturnParticlesBuffer);
+            CoreSDK.DisposeObject(ref TempReturnParticlesUav);
+
+            CoreSDK.DisposeObject(ref SystemDataBuffer);
+            CoreSDK.DisposeObject(ref SystemDataUav);
+
+            CoreSDK.DisposeObject(ref CurAlivesBuffer);
+            CoreSDK.DisposeObject(ref CurAlivesUav);
+            CoreSDK.DisposeObject(ref CurAlivesSrv);
+
+            CoreSDK.DisposeObject(ref BackendAlivesBuffer);
+            CoreSDK.DisposeObject(ref BackendAlivesUav);
+            CoreSDK.DisposeObject(ref BackendAlivesSrv);
+
+            CoreSDK.DisposeObject(ref DispatchArgBuffer);
+            CoreSDK.DisposeObject(ref DispatchArgUav);
+
+            CoreSDK.DisposeObject(ref DrawArgBuffer);
+            CoreSDK.DisposeObject(ref DrawArgUav);
+        }
         public static uint BufferHeadSize = 4;//uint 
         public NxRHI.UBuffer ParticlesBuffer;
         public NxRHI.UUaView ParticlesUav;
@@ -51,6 +80,7 @@ namespace EngineNS.Bricks.Particle
         public NxRHI.UUaView BackendAlivesUav;
         public NxRHI.USrView BackendAlivesSrv;
 
+        public NxRHI.UCbView DrawIdBuffer;
         public NxRHI.UBuffer DispatchArgBuffer;
         public NxRHI.UUaView DispatchArgUav;
 
@@ -62,7 +92,7 @@ namespace EngineNS.Bricks.Particle
         {
             var rc = UEngine.Instance.GfxDevice.RenderContext;
             var bfDesc = new NxRHI.FBufferDesc();
-            bfDesc.SetDefault();
+            bfDesc.SetDefault(false);
             bfDesc.Type = NxRHI.EBufferType.BFT_UAV | NxRHI.EBufferType.BFT_SRV;
             bfDesc.StructureStride = (uint)sizeof(FParticle);
             bfDesc.Size = (uint)sizeof(FParticle) * emitter.MaxParticle;
@@ -169,15 +199,23 @@ namespace EngineNS.Bricks.Particle
                 bfDesc.Type |= NxRHI.EBufferType.BFT_IndirectArgs;
                 bfDesc.MiscFlags = (NxRHI.EResourceMiscFlag.RM_DRAWINDIRECT_ARGS | NxRHI.EResourceMiscFlag.RM_BUFFER_ALLOW_RAW_VIEWS);
 
+                //Urgly DX12: For pass the member DrawID, Argument buffer must have some padding data to read whole stride
+                //1.SV_DrawId doesn't provide by DX12
+                //2.D3D12_INDIRECT_ARGUMENT_TYPE_DRAW_INDEXED must be put in latest desc;
+                //3.ExecuteIndirect will crash, if argument buffer is not big enough
+                //So, We create n+1 FIndirectDispatchArgument/FIndirectDrawArgument for the buffer
+                const int NumOfArgument = 2;
                 bfDesc.StructureStride = (uint)sizeof(uint);
-                bfDesc.Size = (uint)sizeof(uint) * 3;
-                var pInitData = stackalloc uint[3];
-                pInitData[0] = 1;
-                pInitData[1] = 1;
-                pInitData[2] = 1;
-                bfDesc.InitData = pInitData;
+                bfDesc.Size = (uint)sizeof(NxRHI.FIndirectDispatchArgument) * NumOfArgument;
+                NxRHI.FIndirectDispatchArgument pInitData = new NxRHI.FIndirectDispatchArgument();
+                pInitData.DrawID = 0;
+                pInitData.X = 1;
+                pInitData.Y = 1;
+                pInitData.Z = 1;
+                bfDesc.InitData = &pInitData;
                 DispatchArgBuffer = rc.CreateBuffer(in bfDesc);
-                bfDesc.Size = (uint)sizeof(uint) * 5;
+                
+                bfDesc.Size = (uint)sizeof(NxRHI.FIndirectDrawArgument) * NumOfArgument;
                 bfDesc.InitData = IntPtr.Zero.ToPointer();
                 DrawArgBuffer = rc.CreateBuffer(in bfDesc);
 
@@ -185,27 +223,29 @@ namespace EngineNS.Bricks.Particle
                 uavDesc.Format = EPixelFormat.PXF_R32_TYPELESS;
                 //uavDesc.Buffer.Flags = (UInt32)EUAVBufferFlag.UAV_FLAG_RAW;
                 uavDesc.Buffer.FirstElement = 0;
-                uavDesc.Buffer.NumElements = 3;
+                uavDesc.Buffer.NumElements = (uint)(sizeof(NxRHI.FIndirectDispatchArgument) / sizeof(int)) * NumOfArgument;
                 uavDesc.Buffer.StructureByteStride = bfDesc.StructureStride;
                 DispatchArgUav = rc.CreateUAV(DispatchArgBuffer, in uavDesc);
-                uavDesc.Buffer.NumElements = 5;
+                uavDesc.Buffer.NumElements = (uint)(sizeof(NxRHI.FIndirectDrawArgument) / sizeof(int)) * NumOfArgument;
                 DrawArgUav = rc.CreateUAV(DrawArgBuffer, in uavDesc);                
             }
             bfDesc.Type &= (~NxRHI.EBufferType.BFT_RAW);
         }
-        public void Cleanup()
-        {
-            
-        }
         public void SwapBuffer()
         {
-            CoreDefine.Swap(ref CurAlivesBuffer, ref BackendAlivesBuffer);
-            CoreDefine.Swap(ref CurAlivesUav, ref BackendAlivesUav);
-            CoreDefine.Swap(ref CurAlivesSrv, ref BackendAlivesSrv);
+            MathHelper.Swap(ref CurAlivesBuffer, ref BackendAlivesBuffer);
+            MathHelper.Swap(ref CurAlivesUav, ref BackendAlivesUav);
+            MathHelper.Swap(ref CurAlivesSrv, ref BackendAlivesSrv);
         }
     }
-    public class UEffectorQueue
+    public class UEffectorQueue : IDisposable
     {
+        public void Dispose()
+        {
+            CoreSDK.DisposeObject(ref CBuffer);
+            CoreSDK.DisposeObject(ref mParticleUpdateDrawcall);
+            CoreSDK.DisposeObject(ref mParticleSetupDrawcall);
+        }
         public string Name;
         public List<IEffector> Effectors { get; } = new List<IEffector>();
         public UNebulaShader Shader { get; set; }
@@ -346,11 +386,11 @@ namespace EngineNS.Bricks.Particle
             }
         }
     }
-    public interface IParticleEmitter
+    public interface IParticleEmitter : IDisposable
     {
         IParticleEmitter CloneEmitter();
         void InitEmitter(NxRHI.UGpuDevice rc, Graphics.Mesh.UMesh mesh, uint maxParticle);
-        void Cleanup();
+        //void Cleanup();
         bool SetCurrentQueue(string name);
         void Update(UParticleGraphNode particleSystem, float elapsed);
         unsafe void Flush2GPU(NxRHI.ICommandList cmd);
@@ -376,6 +416,21 @@ namespace EngineNS.Bricks.Particle
         where FParticle : unmanaged
         where FParticleSystem : unmanaged
     {
+        public override void Dispose()
+        {
+            //CoreSDK.DisposeObject(ref mMesh);
+            //GpuResources.Dispose();
+
+            //foreach (var i in EffectorQueues)
+            //{
+            //    i.Value.Dispose();
+            //}
+            //EffectorQueues.Clear();
+            //CurrentQueue = null;
+
+            base.Dispose();
+        }
+
         public virtual IParticleEmitter CloneEmitter()
         {
             return null;
@@ -390,16 +445,10 @@ namespace EngineNS.Bricks.Particle
         {
             mCoreObject = IEmitter.CreateInstance();
         }
-        ~UEmitter()
-        {
-            Cleanup();
-        }
-        public virtual void Cleanup()
-        {
-            GpuResources.Cleanup();
-        }
+        
         public uint MaxParticle { get; set; }
-        public Graphics.Mesh.UMesh Mesh { get; set; }
+        Graphics.Mesh.UMesh mMesh;
+        public Graphics.Mesh.UMesh Mesh { get => mMesh; set => mMesh = value; }
         #region HLSL
         string GetTypeDef(Type type)
         {
@@ -579,11 +628,11 @@ namespace EngineNS.Bricks.Particle
                 return;
             if (mGpuResources.ParticlesBuffer != null)
             {
-                mGpuResources.ParticlesBuffer.UpdateGpuData(cmd, 16, mCoreObject.GetParticleAddress(), MaxParticle * (uint)sizeof(FParticle));
+                mGpuResources.ParticlesBuffer.UpdateGpuData(16, mCoreObject.GetParticleAddress(), MaxParticle * (uint)sizeof(FParticle));
             }
             if (mGpuResources.CurAlivesBuffer != null)
             {
-                mGpuResources.CurAlivesBuffer.UpdateGpuData(cmd, 16, mCoreObject.GetCurrentAliveAddress(), MaxParticle * (uint)sizeof(uint));//mCoreObject.GetLiveNumber()
+                mGpuResources.CurAlivesBuffer.UpdateGpuData(16, mCoreObject.GetCurrentAliveAddress(), MaxParticle * (uint)sizeof(uint));//mCoreObject.GetLiveNumber()
             }
         }
         public void SetCBuffer(NxRHI.UCbView CBuffer)

@@ -1,26 +1,59 @@
-﻿using System;
+﻿using NPOI.SS.Formula.Functions;
+using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Text;
 
 namespace EngineNS.Support
 {
-    public struct UNativeArray<T> : IDisposable, IEnumerable<T> where T : unmanaged
+    //https://www.codeproject.com/Articles/28405/Make-the-debugger-show-the-contents-of-your-custom
+    public class TtCollectionDebugView<T>
+    {
+        private ICollection<T> mCollection;
+
+        public TtCollectionDebugView(ICollection<T> collection)
+        {
+            if (collection == null)
+                throw new ArgumentNullException("collection");
+            this.mCollection = collection;
+        }
+
+        [DebuggerBrowsable(DebuggerBrowsableState.RootHidden)]
+        public T[] Items
+        {
+            get
+            {
+                T[] array = new T[this.mCollection.Count];
+                this.mCollection.CopyTo(array, 0);
+                return array;
+            }
+        }
+    }
+    
+    [DebuggerTypeProxy(typeof(TtCollectionDebugView<>))]
+    [DebuggerDisplay("Count = {Count}")]
+    public struct UNativeArray<T> : IDisposable, IList<T> where T : unmanaged
     {
         public CsValueList mCoreObject;
-        public static UNativeArray<T> CreateInstance()
+        public UNativeArray(CsValueList ptr)
         {
-            UNativeArray<T> result = new UNativeArray<T>();
+            mCoreObject = ptr;
+        }
+        public UNativeArray()
+        {
             unsafe
             {
-                result.mCoreObject = CsValueList.CreateInstance(sizeof(T));
+                mCoreObject = CsValueList.CreateInstance(sizeof(T));
             }
-            return result;
+        }
+        public static UNativeArray<T> CreateInstance()
+        {
+            return new UNativeArray<T>();
         }
         public static UNativeArray<T> CreateInstance(CsValueList nativeObject)
         {
-            UNativeArray<T> result = new UNativeArray<T>();
-            result.mCoreObject = nativeObject;
+            UNativeArray<T> result = new UNativeArray<T>(nativeObject);
             return result;
         }
         public struct UNativeArrayEnumerator : IEnumerator<T>
@@ -105,6 +138,50 @@ namespace EngineNS.Support
                 mCoreObject.NativePointer = IntPtr.Zero;
             }
         }
+        public int IndexOf(object value)
+        {
+            return IndexOf((T)value);
+        }
+        public int IndexOf(T item)
+        {
+            return IndexOf(in item);
+        }
+        public void Insert(int index, T item) 
+        {
+            unsafe
+            {
+                mCoreObject.InsertAt((uint)index, (byte*)&item);
+            }
+        }
+        public Span<T> AsSpan()
+        {
+            unsafe
+            {
+                return new Span<T>(mCoreObject.GetAddressAt(0), Count);
+            }
+        }
+        public void CopyTo(T[] array, int arrayIndex)
+        {
+            var src = AsSpan();
+            var dst = array.AsSpan();
+
+            for (int i = 0; i < Count && arrayIndex + i < array.Length; i++)
+            {
+                dst[arrayIndex + i] = src[i];
+            }
+        }
+        public bool IsReadOnly 
+        { 
+            get { return false; } 
+        }
+        public bool Remove(T item) 
+        {
+            var pos = IndexOf(in item);
+            if(pos == -1)
+                return false;
+            RemoveAt(pos);
+            return true;
+        }
         public void Add(T item)
         {
             unsafe
@@ -130,9 +207,17 @@ namespace EngineNS.Support
         {
             mCoreObject.RemoveAt((uint)index);
         }
+        public void Clear() 
+        {
+            Clear(false);
+        }
         public void Clear(bool bFreeMemory = true)
         {
             mCoreObject.Clear(bFreeMemory ? 1 : 0);
+        }
+        public void SetSize(int Count)
+        {
+            mCoreObject.SetSize(Count);
         }
         public IntPtr UnsafeAddressAt(int index)
         {
@@ -177,6 +262,10 @@ namespace EngineNS.Support
                 }
             }
         }
+        public bool Contains(T item) 
+        { 
+            return Contains(in item); 
+        }
         public bool Contains(in T item)
         {
             var count = mCoreObject.GetCount();
@@ -218,7 +307,6 @@ namespace EngineNS.Support
             }
 
             return -1;
-
         }
     }
 }

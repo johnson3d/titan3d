@@ -46,6 +46,16 @@ namespace EngineNS.Bricks.CodeBuilder.Backends
             }
         }
 
+        class TtIncludeDeclarationCodeGen : ICodeObjectGen
+        {
+            public void GenCodes(UCodeObject obj, ref string sourceCode, ref UCodeGeneratorData data)
+            {
+                var varDec = obj as TtIncludeDeclaration;
+                string codeStr = $"#include \"{varDec.FilePath}\"";
+                data.CodeGen.AddLine(codeStr, ref sourceCode);
+            }
+        }
+
         class UMethodDeclarationCodeGen : ICodeObjectGen
         {
             public void GenCodes(UCodeObject obj, ref string sourceCode, ref UCodeGeneratorData data)
@@ -640,6 +650,7 @@ namespace EngineNS.Bricks.CodeBuilder.Backends
         }
 
         UVariableDeclarationCodeGen mVariableDeclarationCodeGen = new UVariableDeclarationCodeGen();
+        TtIncludeDeclarationCodeGen mIncludeDeclarationCodeGen = new TtIncludeDeclarationCodeGen();
         UMethodDeclarationCodeGen mMethodDeclarationCodeGen = new UMethodDeclarationCodeGen();
         UClassDeclarationCodeGen mClassDeclarationCodeGen = new UClassDeclarationCodeGen();
         UClassReferenceExpressionCodeGen mClassReferenceExpressionCodeGen = new UClassReferenceExpressionCodeGen();
@@ -670,6 +681,8 @@ namespace EngineNS.Bricks.CodeBuilder.Backends
         {
             if (type.IsEqual(typeof(UVariableDeclaration)))
                 return mVariableDeclarationCodeGen;
+            if (type.IsEqual(typeof(TtIncludeDeclaration)))
+                return mIncludeDeclarationCodeGen;
             else if (type.IsEqual(typeof(UMethodDeclaration)))
                 return mMethodDeclarationCodeGen;
             else if (type.IsEqual(typeof(UClassDeclaration)))
@@ -736,19 +749,19 @@ namespace EngineNS.Bricks.CodeBuilder.Backends
                 return "matrix";
             else if (t.IsEqual(typeof(int)))
                 return "int";
-            else if (t.IsEqual(typeof(Int32_2)))
+            else if (t.IsEqual(typeof(Vector2i)))
                 return "int2";
-            else if (t.IsEqual(typeof(Int32_3)))
+            else if (t.IsEqual(typeof(Vector3i)))
                 return "int3";
-            else if (t.IsEqual(typeof(Int32_4)))
+            else if (t.IsEqual(typeof(Vector4i)))
                 return "int4";
             else if (t.IsEqual(typeof(uint)))
                 return "uint";
-            else if (t.IsEqual(typeof(UInt32_2)))
+            else if (t.IsEqual(typeof(Vector2ui)))
                 return "uint2";
-            else if (t.IsEqual(typeof(UInt32_3)))
+            else if (t.IsEqual(typeof(Vector3ui)))
                 return "uint3";
-            else if (t.IsEqual(typeof(UInt32_4)))
+            else if (t.IsEqual(typeof(Vector4ui)))
                 return "uint4";
             else if (t.IsEqual(typeof(EngineNS.Bricks.CodeBuilder.ShaderNode.Var.Texture2D)))
                 return "Texture2D";

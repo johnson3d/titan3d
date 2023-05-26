@@ -144,7 +144,7 @@ namespace EngineNS.Bricks.Procedure.Node
                 var vzValue = BezierCalculate.ValueOnBezier(bzNode.BzPoints, height);// - bzNode.MinX);// ((double)j) * rangeX / (double)resultComp.Width);
 
                 var norValue = (vzValue.Y - bzNode.MinY) / rangeY;
-                norValue = CoreDefine.Clamp(norValue, 0, 1);
+                norValue = MathHelper.Clamp(norValue, 0, 1);
                 int idx = (int)((float)idMapNode.MaterialIdManager.MaterialIdArray.Count * norValue);
                 if (idx >= idMapNode.MaterialIdManager.MaterialIdArray.Count)
                     idx = idMapNode.MaterialIdManager.MaterialIdArray.Count - 1;
@@ -195,7 +195,7 @@ namespace EngineNS.Bricks.Procedure.Node
             {
                 var vzValue = BezierCalculate.ValueOnBezier(bzNode.BzPoints, height + i * step);
                 var norValue = (vzValue.Y - bzNode.MinY) / rangeY;
-                norValue = CoreDefine.Clamp(norValue, 0, 1);
+                norValue = MathHelper.Clamp(norValue, 0, 1);
                 int idx = (int)((float)madIdNode.MaterialIdManager.MaterialIdArray.Count * norValue);
                 if (idx >= madIdNode.MaterialIdManager.MaterialIdArray.Count)
                     idx = madIdNode.MaterialIdManager.MaterialIdArray.Count - 1;
@@ -460,7 +460,7 @@ namespace EngineNS.Bricks.Procedure.Node
         public int NoneWaterLimit { get; set; } = 0;
         private struct FPixelWater
         {
-            public Int32_2 MoveTarget;
+            public Vector2i MoveTarget;
             public float Water;
         }
         private class UProcedureProfiler
@@ -471,20 +471,20 @@ namespace EngineNS.Bricks.Procedure.Node
             public int NumOfLowWater = 0;
         }
 
-        private Int32_2 DoPixel(int x, int y, UBufferConponent curHMap, FPixelWater[,] PixelWaters, UProcedureProfiler profiler)
+        private Vector2i DoPixel(int x, int y, UBufferConponent curHMap, FPixelWater[,] PixelWaters, UProcedureProfiler profiler)
         {
             ref var center = ref curHMap.GetPixel<Vector2>(x, y, 0);
             if (center.Y <= 0)
             {
                 center.Y = 0;
                 profiler.NumOfDry++;
-                return Int32_2.MinusOne;
+                return Vector2i.MinusOne;
             }
             ref var slt = ref PixelWaters[y, x];
             if (slt.MoveTarget.X == -1 || slt.MoveTarget.Y == -1)
             {
                 profiler.NumOfLowWater++;
-                return Int32_2.MinusOne;
+                return Vector2i.MinusOne;
             }
             profiler.NumOfLostWater++;
             ref var target = ref curHMap.GetPixel<Vector2>(slt.MoveTarget.X, slt.MoveTarget.Y, 0);
@@ -545,7 +545,7 @@ namespace EngineNS.Bricks.Procedure.Node
                     int selectIndex = -1;
                     unsafe
                     {
-                        var neighbours = stackalloc Int32_2[8];
+                        var neighbours = stackalloc Vector2i[8];
                         {
                             neighbours[0].X = x - 1;
                             neighbours[0].Y = y - 1;
@@ -602,7 +602,7 @@ namespace EngineNS.Bricks.Procedure.Node
                         }
                         else
                         {
-                            PixelWaters[y, x].MoveTarget = new Int32_2(-1, -1);
+                            PixelWaters[y, x].MoveTarget = new Vector2i(-1, -1);
                             PixelWaters[y, x].Water = 0;
                         }
                     }
@@ -621,7 +621,7 @@ namespace EngineNS.Bricks.Procedure.Node
 
                 curHMap.DispatchPixels((result, x, y, z) =>
                 {
-                    Int32_2 cur = new Int32_2(x, y);
+                    Vector2i cur = new Vector2i(x, y);
                     for (int i = 0; i < SimStep; i++)
                     {
                         cur = DoPixel(cur.X, cur.Y, curHMap, PixelWaters, profiler);

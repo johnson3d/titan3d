@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Numerics;
 using System.Text;
 
 namespace EngineNS.Graphics.Mesh
@@ -21,20 +22,42 @@ namespace EngineNS.Graphics.Mesh
                 return mCoreObject.IsIndex32;
             }
         }
+        public uint NumAtom
+        {
+            get
+            {
+                return mCoreObject.GetAtomNumber();
+            }
+        }
+        public VIUnknown GetAtomExtData(uint index)
+        {
+            return mCoreObject.GetAtomExtData(index);
+        }
+
         public UMeshPrimitives ToMesh()
         {
             unsafe
             {
                 var rc = UEngine.Instance.GfxDevice.RenderContext;
                 var result = new UMeshPrimitives();
-                result.mCoreObject.Init(rc.mCoreObject, "", 1);
+                result.Init("", 1);
                 
                 mCoreObject.ToMesh(rc.mCoreObject, result.mCoreObject);
                 result.AssetName = AssetName;
                 return result;
             }
         }
+        public void ToMesh(UMeshPrimitives mesh)
+        {
+            unsafe
+            {
+                var rc = UEngine.Instance.GfxDevice.RenderContext;
+
+                mCoreObject.ToMesh(rc.mCoreObject, mesh.mCoreObject);
+            }
+        }
         public RName AssetName { get; set; }
+        #region box
         [Flags]
         public enum EBoxFace : byte
         {
@@ -265,6 +288,9 @@ namespace EngineNS.Graphics.Mesh
             builder.PushAtomLOD(0, &dpDesc);
             return meshBuilder;
         }
+        #endregion
+
+        #region Rect2D
         public class UMakeRect2DParameter
         {
             public Vector3 Position { get; set; }
@@ -305,16 +331,16 @@ namespace EngineNS.Graphics.Mesh
                 }
 
                 Vector3[] vbPos = new Vector3[4];
-                vbPos[0].SetValue(x, y, z);
-                vbPos[1].SetValue(x + w, y, z);
-                vbPos[2].SetValue(x + w, y + h, z);
-                vbPos[3].SetValue(x, y + h, z);
+                vbPos[(int)ENUM_FRUSTUM_CORNER.ENUM_FRUSTUMCN_0].SetValue(x, y, z);
+                vbPos[(int)ENUM_FRUSTUM_CORNER.ENUM_FRUSTUMCN_1].SetValue(x + w, y, z);
+                vbPos[(int)ENUM_FRUSTUM_CORNER.ENUM_FRUSTUMCN_2].SetValue(x + w, y + h, z);
+                vbPos[(int)ENUM_FRUSTUM_CORNER.ENUM_FRUSTUMCN_3].SetValue(x, y + h, z);
                 
                 Vector2[] vbUV = new Vector2[4];
-                vbUV[0].SetValue(0, 0);
-                vbUV[1].SetValue(1, 0);
-                vbUV[2].SetValue(1, 1);
-                vbUV[3].SetValue(0, 1);
+                vbUV[(int)ENUM_FRUSTUM_CORNER.ENUM_FRUSTUMCN_0].SetValue(0, 0);
+                vbUV[(int)ENUM_FRUSTUM_CORNER.ENUM_FRUSTUMCN_1].SetValue(1, 0);
+                vbUV[(int)ENUM_FRUSTUM_CORNER.ENUM_FRUSTUMCN_2].SetValue(1, 1);
+                vbUV[(int)ENUM_FRUSTUM_CORNER.ENUM_FRUSTUMCN_3].SetValue(0, 1);
                 if (lh == false && (UEngine.Instance.GfxDevice.RenderContext.mCoreObject.Desc.RhiType == NxRHI.ERhiType.RHI_D3D11 ||
                     UEngine.Instance.GfxDevice.RenderContext.mCoreObject.Desc.RhiType == NxRHI.ERhiType.RHI_D3D12 ||
                     UEngine.Instance.GfxDevice.RenderContext.mCoreObject.Desc.RhiType == NxRHI.ERhiType.RHI_VK))
@@ -346,6 +372,9 @@ namespace EngineNS.Graphics.Mesh
 
             return meshBuilder;
         }
+        #endregion
+
+        #region Sphere
         private static uint MakeIndex(ushort x, ushort z)
         {
             return x | ((uint)z) << 16;
@@ -408,7 +437,7 @@ namespace EngineNS.Graphics.Mesh
             vertex = 0;
             face = 0;
 
-            var faces = new UInt32_3[(int)number_of_faces];
+            var faces = new Vector3ui[(int)number_of_faces];
             var pPos = new Vector3[(int)number_of_vertices];
             var pNor = new Vector3[(int)number_of_vertices];
             var pUV = new Vector2[(int)number_of_vertices];
@@ -544,6 +573,9 @@ namespace EngineNS.Graphics.Mesh
             builder.PushAtomLOD(0, &dpDesc);
             return meshBuilder;
         }
+        #endregion
+
+        #region Cyliner
         public class UMakeCylinderParameter
         {
             public float Radius1 { get; set; } = 1.0f;
@@ -593,7 +625,7 @@ namespace EngineNS.Graphics.Mesh
                 z_normal = 0.0f;
             }
 
-            var faces = new UInt32_3[(int)number_of_faces];
+            var faces = new Vector3ui[(int)number_of_faces];
             var pPos = new Vector3[(int)number_of_vertices];
             var pNor = new Vector3[(int)number_of_vertices];
             var pUV = new Vector2[(int)number_of_vertices];
@@ -754,6 +786,9 @@ namespace EngineNS.Graphics.Mesh
             builder.PushAtomLOD(0, &dpDesc);
             return meshBuilder;
         }
+        #endregion
+
+        #region Torus
         public class UMakeTorusParameter
         {
             public float InnerRadius { get; set; } = 0.5f;
@@ -772,7 +807,7 @@ namespace EngineNS.Graphics.Mesh
             numvert = sides * rings;
             numfaces = numvert * 2;
 
-            var faces = new UInt32_3[(int)numfaces];
+            var faces = new Vector3ui[(int)numfaces];
             var pPos = new Vector3[(int)numvert];
             var pNor = new Vector3[(int)numvert];
             var pUV = new Vector2[(int)numvert];
@@ -861,6 +896,9 @@ namespace EngineNS.Graphics.Mesh
             builder.PushAtomLOD(0, &dpDesc);
             return meshBuilder;
         }
+        #endregion
+
+        #region Capsule
         public enum ECapsuleUvProfile
         {
             Aspect,
@@ -1217,6 +1255,9 @@ namespace EngineNS.Graphics.Mesh
             builder.PushAtomLOD(0, &dpDesc);
             return meshBuilder;
         }
+        #endregion
+
+        #region Plane
         public static unsafe UMeshDataProvider MakeGridIndices(ushort NumX, ushort NumZ)
         {
             var meshBuilder = new Graphics.Mesh.UMeshDataProvider();
@@ -1258,6 +1299,7 @@ namespace EngineNS.Graphics.Mesh
 
             return meshBuilder;
         }
+        
         public static unsafe UMeshDataProvider MakeGridForTerrain(ushort NumX, ushort NumZ)
         {
             var meshBuilder = new Graphics.Mesh.UMeshDataProvider();
@@ -1302,6 +1344,7 @@ namespace EngineNS.Graphics.Mesh
 
             return meshBuilder;
         }
+
         public static float Lerp(float start, float end, float factor)
         {
             return start + factor * (end - start);
@@ -1314,7 +1357,8 @@ namespace EngineNS.Graphics.Mesh
             uint streams = (uint)((1 << (int)NxRHI.EVertexStreamType.VST_Position) |
                 (1 << (int)NxRHI.EVertexStreamType.VST_Normal) |
                 (1 << (int)NxRHI.EVertexStreamType.VST_Color) |
-                (1 << (int)NxRHI.EVertexStreamType.VST_UV));
+                (1 << (int)NxRHI.EVertexStreamType.VST_UV) |
+                (1 << (int)NxRHI.EVertexStreamType.VST_LightMap));
             builder.Init(streams, true, 1);
 
             var dpDesc = new NxRHI.FMeshAtomDesc();
@@ -1325,6 +1369,7 @@ namespace EngineNS.Graphics.Mesh
             using (var posArray = Support.UNativeArray<Vector3>.CreateInstance())
             using (var normalArray = Support.UNativeArray<Vector3>.CreateInstance())
             using (var tangentArray = Support.UNativeArray<Vector4>.CreateInstance())
+            using (var lightmapUVArray = Support.UNativeArray<Vector4>.CreateInstance())
             using (var uvArray = Support.UNativeArray<Vector2>.CreateInstance())
             using (var indexArray = Support.UNativeArray<UInt32>.CreateInstance())
             {
@@ -1336,8 +1381,10 @@ namespace EngineNS.Graphics.Mesh
                     float z0 = y * Step - 1.0f;
                     float z1 = (y + 1) * Step - 1.0f;
 
-                    float V0 = Lerp(uvMin.Y, uvMax.Y, z0 * 0.5f + 0.5f);
-                    float V1 = Lerp(uvMin.Y, uvMax.Y, z1 * 0.5f + 0.5f);
+                    //float V0 = Lerp(uvMin.Y, uvMax.Y, z0 * 0.5f + 0.5f);
+                    //float V1 = Lerp(uvMin.Y, uvMax.Y, z1 * 0.5f + 0.5f);
+                    float V0 = z0 * 0.5f + 0.5f;
+                    float V1 = z1 * 0.5f + 0.5f;
 
                     for (Int32 x = 0; x < tileCount; ++x)
                     {
@@ -1345,30 +1392,39 @@ namespace EngineNS.Graphics.Mesh
                         float x0 = x * Step - 1.0f;
                         float x1 = (x + 1) * Step - 1.0f;
 
-                        float U0 = Lerp(uvMin.X, uvMax.X, x0 * 0.5f + 0.5f);
-                        float U1 = Lerp(uvMin.X, uvMax.X, x1 * 0.5f + 0.5f);
+                        //float U0 = Lerp(uvMin.X, uvMax.X, x0 * 0.5f + 0.5f);
+                        //float U1 = Lerp(uvMin.X, uvMax.X, x1 * 0.5f + 0.5f);
+                        float U0 = x0 * 0.5f + 0.5f;
+                        float U1 = x1 * 0.5f + 0.5f;
+
+                        var lightmapUV = new Quaternion();
+                        lightmapUV.X = U0;
+                        lightmapUV.Y = U1;
+                        lightmapUV.Z = V0;
+                        lightmapUV.W = V1;
 
                         // Calculate verts for a face pointing down Z
                         var pos = new Vector3(x0, 0, z0);
                         var nor = new Vector3(0, 1, 0);
                         //var uv = new Vector2(U0, V0);
-                        var uv = new Vector2(x0, z0);
-                        builder.AddVertex(in pos, in nor, in uv, 0xFFFFFFFF);
+                        var uv = new Vector2(0, 0);
+
+                        builder.AddVertex(in pos, in nor, in uv, in lightmapUV, 0xFFFFFFFF);
                         pos = new Vector3(x0, 0, z1);
                         nor = new Vector3(0, 1, 0);
                         //uv = new Vector2(U0, V1);
-                        uv = new Vector2(x0, z1);
-                        builder.AddVertex(in pos, in nor, in uv, 0xFFFFFFFF);
+                        uv = new Vector2(1, 0);
+                        builder.AddVertex(in pos, in nor, in uv, in lightmapUV, 0xFFFFFFFF);
                         pos = new Vector3(x1, 0, z1);
                         nor = new Vector3(0, 1, 0);
                         //uv = new Vector2(U1, V1);
-                        uv = new Vector2(x1, z1);
-                        builder.AddVertex(in pos, in nor, in uv, 0xFFFFFFFF);
+                        uv = new Vector2(2, 0);
+                        builder.AddVertex(in pos, in nor, in uv, in lightmapUV, 0xFFFFFFFF);
                         pos = new Vector3(x1, 0, z0);
                         nor = new Vector3(0, 1, 0);
                         //uv = new Vector2(U1, V0);
-                        uv = new Vector2(x1, z0);
-                        builder.AddVertex(in pos, in nor, in uv, 0xFFFFFFFF);
+                        uv = new Vector2(3, 0);
+                        builder.AddVertex(in pos, in nor, in uv, in lightmapUV, 0xFFFFFFFF);
 
                         UInt32 Index = (UInt32)((x + y * tileCount) * 4);
                         builder.AddTriangle(Index + 0, Index + 1, Index + 2);
@@ -1440,6 +1496,38 @@ namespace EngineNS.Graphics.Mesh
             builder.PushAtomLOD(0, &dpDesc);
             return meshBuilder;
         }
+        #endregion
+
+        #region line
+        public static unsafe UMeshDataProvider MakeLine(in Vector3 from, in Vector3 to, uint color)
+        {
+            var meshBuilder = new Graphics.Mesh.UMeshDataProvider();
+            meshBuilder.AssetName = RName.GetRName("@MakeLine", RName.ERNameType.Transient);
+            var builder = meshBuilder.mCoreObject;
+            uint streams = (uint)((1 << (int)NxRHI.EVertexStreamType.VST_Position) |
+               (1 << (int)NxRHI.EVertexStreamType.VST_Normal) |
+               (1 << (int)NxRHI.EVertexStreamType.VST_Color) |
+               (1 << (int)NxRHI.EVertexStreamType.VST_UV));
+            builder.Init(streams, false, 1);
+
+            var dpDesc = new NxRHI.FMeshAtomDesc();
+            dpDesc.SetDefault();
+            dpDesc.PrimitiveType = NxRHI.EPrimitiveType.EPT_LineList;
+            dpDesc.NumPrimitives = 0;
+            dpDesc.StartIndex = 0xffffffff;
+
+            var aabb = new BoundingBox();
+            aabb.InitEmptyBox();
+            aabb.Merge(in from);
+            aabb.Merge(in to);
+            builder.AddVertex(in from, in Vector3.UnitX, in Vector2.Zero, color);
+            builder.AddVertex(in to, in Vector3.UnitX, in Vector2.Zero, color);
+            dpDesc.NumPrimitives++;
+
+            builder.PushAtomLOD(0, &dpDesc);
+            builder.SetAABB(ref aabb);
+            return meshBuilder;
+        }
         public static unsafe UMeshDataProvider MakeBezier3DSpline(UBezier3DSpline spline, uint color)
         {
             var meshBuilder = new Graphics.Mesh.UMeshDataProvider();
@@ -1481,5 +1569,6 @@ namespace EngineNS.Graphics.Mesh
             builder.SetAABB(ref aabb);
             return meshBuilder;
         }
+        #endregion
     }
 }

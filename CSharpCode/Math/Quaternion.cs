@@ -30,9 +30,9 @@ namespace EngineNS
                     //var v = (Quaternion)info.Value;
                     //var el = v.ToEuler();
                     //Vector3 angle;
-                    //angle.X = CoreDefine.Radian_To_Angle(el.X).X;
-                    //angle.Y = CoreDefine.Radian_To_Angle(el.Y).X;
-                    //angle.Z = CoreDefine.Radian_To_Angle(el.Z).X;
+                    //angle.X = MathHelper.Radian_To_Angle(el.X).X;
+                    //angle.Y = MathHelper.Radian_To_Angle(el.Y).X;
+                    //angle.Z = MathHelper.Radian_To_Angle(el.Z).X;
 
                     //ImGuiAPI.Text(multiValue.MultiValueString);
 
@@ -41,9 +41,9 @@ namespace EngineNS
                     if (multiValue.DrawVector<Vector4>(in info) && !info.Readonly)
                     {
                         //angle = (Vector3)tmpInfo.Value;
-                        //el.X = CoreDefine.Angle_To_Tadian(angle.X, 0, 0);
-                        //el.Y = CoreDefine.Angle_To_Tadian(angle.Y, 0, 0);
-                        //el.Z = CoreDefine.Angle_To_Tadian(angle.Z, 0, 0);
+                        //el.X = MathHelper.Angle_To_Tadian(angle.X, 0, 0);
+                        //el.Y = MathHelper.Angle_To_Tadian(angle.Y, 0, 0);
+                        //el.Z = MathHelper.Angle_To_Tadian(angle.Z, 0, 0);
 
                         //info.Value = el;
 
@@ -71,26 +71,26 @@ namespace EngineNS
                     }
                     var el = v.ToEuler();
                     Vector3 angle;
-                    angle.X = CoreDefine.Radian_To_Angle(el.X).X;
-                    angle.Y = CoreDefine.Radian_To_Angle(el.Y).X;
-                    angle.Z = CoreDefine.Radian_To_Angle(el.Z).X;
+                    angle.X = MathHelper.Radian_To_Angle(el.X).X;
+                    angle.Y = MathHelper.Radian_To_Angle(el.Y).X;
+                    angle.Z = MathHelper.Radian_To_Angle(el.Z).X;
                     var changed = ImGuiAPI.DragScalarN2(TName.FromString2("##", info.Name).ToString(), ImGuiDataType_.ImGuiDataType_Float, (float*)&angle, 3, speed, &minValue, &maxValue, "%0.6f", ImGuiSliderFlags_.ImGuiSliderFlags_None);
                     //ImGuiAPI.InputFloat3(TName.FromString2("##", info.Name).ToString(), (float*)&v, "%.6f", ImGuiInputTextFlags_.ImGuiInputTextFlags_CharsDecimal);
                     //ImGuiAPI.PopStyleVar(1);
                     if (changed && !info.Readonly)//(v != saved)
                     {
-                        el.X = CoreDefine.Angle_To_Tadian(angle.X, 0, 0);
-                        el.Y = CoreDefine.Angle_To_Tadian(angle.Y, 0, 0);
-                        el.Z = CoreDefine.Angle_To_Tadian(angle.Z, 0, 0);
+                        el.X = MathHelper.Angle_To_Tadian(angle.X, 0, 0);
+                        el.Y = MathHelper.Angle_To_Tadian(angle.Y, 0, 0);
+                        el.Z = MathHelper.Angle_To_Tadian(angle.Z, 0, 0);
                         newValue = Quaternion.FromEuler(in el);
                         retValue = true;
                     }
 
                     if (Vector4.Vector4EditorAttribute.OnDrawVectorValue<Vector3>(in info, ref angle, ref angle) && !info.Readonly)
                     {
-                        el.X = CoreDefine.Angle_To_Tadian(angle.X, 0, 0);
-                        el.Y = CoreDefine.Angle_To_Tadian(angle.Y, 0, 0);
-                        el.Z = CoreDefine.Angle_To_Tadian(angle.Z, 0, 0);
+                        el.X = MathHelper.Angle_To_Tadian(angle.X, 0, 0);
+                        el.Y = MathHelper.Angle_To_Tadian(angle.Y, 0, 0);
+                        el.Z = MathHelper.Angle_To_Tadian(angle.Z, 0, 0);
                         newValue = Quaternion.FromEuler(in el);
                         retValue = true;
                     }
@@ -139,11 +139,41 @@ namespace EngineNS
         {
             try
             {
-                var segs = text.Split(',');
-                return new Quaternion(System.Convert.ToSingle(segs[0]),
-                    System.Convert.ToSingle(segs[1]),
-                    System.Convert.ToSingle(segs[2]),
-                    System.Convert.ToSingle(segs[3]));
+                var result = new Quaternion();
+                ReadOnlySpan<char> chars = text.ToCharArray();
+                int iStart = 0;
+                int j = 0;
+                for (int i = 0; i < chars.Length; i++)
+                {
+                    if (chars[i] == ',')
+                    {
+                        switch (j)
+                        {
+                            case 0:
+                                result.X = float.Parse(chars.Slice(iStart, i - iStart));
+                                break;
+                            case 1:
+                                result.Y = float.Parse(chars.Slice(iStart, i - iStart));
+                                break;
+                            case 2:
+                                result.Z = float.Parse(chars.Slice(iStart, i - iStart));
+                                break;
+                            case 3:
+                                result.W = float.Parse(chars.Slice(iStart, chars.Length - iStart));
+                                return result;
+                            default:
+                                break;
+                        }
+                        iStart = i + 1;
+                        j++;
+                    }
+                }
+                return result;
+                //var segs = text.Split(',');
+                //return new Quaternion(System.Convert.ToSingle(segs[0]),
+                //    System.Convert.ToSingle(segs[1]),
+                //    System.Convert.ToSingle(segs[2]),
+                //    System.Convert.ToSingle(segs[3]));
             }
             catch
             {
@@ -180,10 +210,10 @@ namespace EngineNS
         /// <returns>如果两个对象相等返回true，否则返回false</returns>
 	    public bool Equals(Quaternion value)
         {
-            bool reX = (Math.Abs(X - value.X) < CoreDefine.Epsilon);
-            bool reY = (Math.Abs(Y - value.Y) < CoreDefine.Epsilon);
-            bool reZ = (Math.Abs(Z - value.Z) < CoreDefine.Epsilon);
-            bool reW = (Math.Abs(W - value.W) < CoreDefine.Epsilon);
+            bool reX = (Math.Abs(X - value.X) < MathHelper.Epsilon);
+            bool reY = (Math.Abs(Y - value.Y) < MathHelper.Epsilon);
+            bool reZ = (Math.Abs(Z - value.Z) < MathHelper.Epsilon);
+            bool reW = (Math.Abs(W - value.W) < MathHelper.Epsilon);
             return (reX && reY && reZ && reW);
         }
         /// <summary>
@@ -192,13 +222,14 @@ namespace EngineNS
         /// <param name="value1">旋转四元数</param>
         /// <param name="value2">旋转四元数</param>
         /// <returns>如果两个对象相等返回true，否则返回false</returns>
-	    public static bool Equals(in Quaternion value1, in Quaternion value2, float epsilon = CoreDefine.Epsilon)
+	    public static Bool4 Equals(in Quaternion value1, in Quaternion value2, float epsilon = MathHelper.Epsilon)
         {
-            bool reX = (Math.Abs(value1.X - value2.X) < epsilon);
-            bool reY = (Math.Abs(value1.Y - value2.Y) < epsilon);
-            bool reZ = (Math.Abs(value1.Z - value2.Z) < epsilon);
-            bool reW = (Math.Abs(value1.W - value2.W) < epsilon);
-            return (reX && reY && reZ && reW);
+            Bool4 result;
+            result.X = (Math.Abs(value1.X - value2.X) < epsilon);
+            result.Y = (Math.Abs(value1.Y - value2.Y) < epsilon);
+            result.Z = (Math.Abs(value1.Z - value2.Z) < epsilon);
+            result.W = (Math.Abs(value1.W - value2.W) < epsilon);
+            return result;
         }
         #endregion
         /// <summary>

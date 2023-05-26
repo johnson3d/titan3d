@@ -14,13 +14,19 @@ namespace EngineNS.Editor.Forms
 
         public async System.Threading.Tasks.Task<bool> Initialize()
         {
-            await EngineNS.Thread.AsyncDummyClass.DummyFunc();
+            await EngineNS.Thread.TtAsyncDummyClass.DummyFunc();
             return true;
         }
 
-        public void Cleanup() { }
-        public bool Visible { get; set; } = true;
+        public void Dispose() { }
+        bool mVisible = true;
+        public bool Visible 
+        {
+            get => mVisible; 
+            set => mVisible = value;
+        }
         public uint DockId { get; set; }
+        public ImGuiWindowClass DockKeyClass { get; }
         public ImGuiCond_ DockCond { get; set; } = ImGuiCond_.ImGuiCond_FirstUseEver;
         Task<Profiler.URpcProfiler.RpcProfilerData> mRpcProfilerData;
         Task<Profiler.URpcProfiler.RpcProfilerThreads> mRpcProfilerThreads;
@@ -142,7 +148,7 @@ namespace EngineNS.Editor.Forms
 
             var size = new Vector2(800, 600);
             ImGuiAPI.SetNextWindowSize(in size, ImGuiCond_.ImGuiCond_FirstUseEver);
-            if (EGui.UIProxy.DockProxy.BeginMainForm("CpuProfiler", null, ImGuiWindowFlags_.ImGuiWindowFlags_None))
+            if (EGui.UIProxy.DockProxy.BeginMainForm("CpuProfiler", this, ImGuiWindowFlags_.ImGuiWindowFlags_None))
             {
                 var cmdlst = ImGuiAPI.GetWindowDrawList();
                 var stats = UEngine.Instance.GfxDevice.RenderCmdQueue.GetStat();

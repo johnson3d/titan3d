@@ -111,12 +111,12 @@ namespace EngineNS.Graphics.Pipeline.Deferred
         #endregion
         public override NxRHI.USrView GetFinalShowRSV()
         {
-            var attachBuffer = Copy2SwapChainNode.FindAttachBuffer(Copy2SwapChainNode.ColorPinInOut);
+            var attachBuffer = Copy2SwapChainNode.FindAttachBuffer(Copy2SwapChainNode.ColorPinOut);
             if (attachBuffer == null)
                 return null;
             return attachBuffer.Srv;
         }
-        public override Shader.UShadingEnv GetPassShading(EShadingType type, Mesh.UMesh mesh, int atom, Pipeline.Common.URenderGraphNode node)
+        public override Shader.UGraphicsShadingEnv GetPassShading(EShadingType type, Mesh.UMesh mesh, int atom, Pipeline.Common.URenderGraphNode node)
         {
             switch (type)
             {
@@ -231,15 +231,15 @@ namespace EngineNS.Graphics.Pipeline.Deferred
             AddLinker(ParticleNode.ColorPinInOut, HdrNode.ColorPinIn);            
             AddLinker(AvgBrightnessNode.GpuScenePinInOut, HdrNode.GpuScenePinIn);
 
-            AddLinker(HdrNode.ResultPinOut, Copy2SwapChainNode.ColorPinInOut);
+            AddLinker(HdrNode.ResultPinOut, Copy2SwapChainNode.ColorPinOut);
             AddLinker(HitproxyNode.HitIdPinOut, Copy2SwapChainNode.HitIdPinIn);
 
             // vxgi
-            AddLinker(GpuSceneNode.GpuScenePinOut, VoxelsNode.GpuScenePinIn);
-            AddLinker(BasePassNode.Rt0PinOut, VoxelsNode.AlbedoPinIn);
-            AddLinker(BasePassNode.DepthStencilPinOut, VoxelsNode.DepthPinIn);
-            AddLinker(mShadowMapNode.DepthPinOut, VoxelsNode.ShadowMaskPinIn);
-            AddLinker(VoxelsNode.GpuScenePinIn, AvgBrightnessNode.GpuScenePinInOut);
+            AddLinker(GpuSceneNode.GpuScenePinOut, VoxelsNode.GpuScenePinInOut);
+            AddLinker(BasePassNode.Rt0PinOut, VoxelsNode.AlbedoPinInOut);
+            AddLinker(BasePassNode.DepthStencilPinOut, VoxelsNode.DepthPinInOut);
+            
+            AddLinker(VoxelsNode.GpuScenePinInOut, AvgBrightnessNode.GpuScenePinInOut);
 
 
             RootNode = Copy2SwapChainNode;
@@ -274,7 +274,7 @@ namespace EngineNS.Graphics.Pipeline.Deferred
 
             //HdrNode?.OnResize(this, x, y);
         }
-        public override void Cleanup()
+        public override void Dispose()
         {
             //BasePassNode.Cleanup();
 
@@ -317,7 +317,7 @@ namespace EngineNS.Graphics.Pipeline.Deferred
             //HdrNode?.Cleanup();
             //HdrNode = null;
 
-            base.Cleanup();
+            base.Dispose();
         }
         public override void BeginTickLogic(GamePlay.UWorld world)
         {

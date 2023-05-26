@@ -1,4 +1,6 @@
-﻿using System;
+﻿using EngineNS.GamePlay;
+using EngineNS.Graphics.Pipeline;
+using System;
 using System.Collections.Generic;
 using System.Text;
 
@@ -17,14 +19,13 @@ namespace EngineNS.Bricks.Particle
             AddInputOutput(ColorPinInOut, NxRHI.EBufferType.BFT_RTV | NxRHI.EBufferType.BFT_SRV);
             AddInputOutput(DepthPinInOut, NxRHI.EBufferType.BFT_DSV | NxRHI.EBufferType.BFT_SRV);
         }
-        public Graphics.Pipeline.UDrawBuffers BasePass = new Graphics.Pipeline.UDrawBuffers();
         public async override System.Threading.Tasks.Task Initialize(Graphics.Pipeline.URenderPolicy policy,
                     string debugName)
         {
-            await Thread.AsyncDummyClass.DummyFunc();
+            await Thread.TtAsyncDummyClass.DummyFunc();
 
             var rc = UEngine.Instance.GfxDevice.RenderContext;
-            BasePass.Initialize(rc, debugName);
+            BasePass.Initialize(rc, debugName + ".BasePass");
         }
         public List<GamePlay.Scene.UMeshNode> ParticleNodes = new List<GamePlay.Scene.UMeshNode>();
         public override unsafe void BeginTickLogic(GamePlay.UWorld world, Graphics.Pipeline.URenderPolicy policy, bool bClear)
@@ -40,9 +41,13 @@ namespace EngineNS.Bricks.Particle
             cmd.EndCommand();
             UEngine.Instance.GfxDevice.RenderCmdQueue.QueueCmdlist(cmd);
         }
-        public unsafe override void TickSync(Graphics.Pipeline.URenderPolicy policy)
+        public override void FrameBuild(URenderPolicy policy)
         {
-            BasePass.SwapBuffer();
+            base.FrameBuild(policy);
+        }
+        public override void TickLogic(UWorld world, URenderPolicy policy, bool bClear)
+        {
+            base.TickLogic(world, policy, bClear);
         }
     }
 }

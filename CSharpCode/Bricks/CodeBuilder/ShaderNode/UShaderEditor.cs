@@ -30,23 +30,26 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode
 
     public partial class UShaderEditor : Editor.IAssetEditor, IO.ISerializer, ITickable, IRootForm
     {
+        public int GetTickOrder()
+        {
+            return 0;
+        }
         public UShaderEditor()
         {
             PreviewViewport = new Editor.UPreviewViewport();
         }
         ~UShaderEditor()
         {
-            Cleanup();
+            Dispose();
         }
-        public void Cleanup()
+        public void Dispose()
         {
-            PreviewViewport?.Cleanup();
-            PreviewViewport = null;
+            CoreSDK.DisposeObject(ref PreviewViewport);
             MaterialPropGrid.Target = null;
         }
         public async System.Threading.Tasks.Task<bool> Initialize()
         {
-            await EngineNS.Thread.AsyncDummyClass.DummyFunc();
+            await EngineNS.Thread.TtAsyncDummyClass.DummyFunc();
             return true;
         }
         protected bool mVisible = true;
@@ -68,15 +71,19 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode
         }
         #endregion
         #region Tickable
-        public void TickLogic(int ellapse)
+        public void TickLogic(float ellapse)
         {
             PreviewViewport.TickLogic(ellapse);
         }
-        public void TickRender(int ellapse)
+        public void TickRender(float ellapse)
         {
             PreviewViewport.TickRender(ellapse);
         }
-        public void TickSync(int ellapse)
+        public void TickBeginFrame(float ellapse)
+        {
+
+        }
+        public void TickSync(float ellapse)
         {
             PreviewViewport.TickSync(ellapse);
         }
@@ -145,7 +152,7 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode
 
             //EngineNS.EGui.Controls.NodeGraph.PinLinker
             var graphStr = Material.GraphXMLString.Replace("EngineNS.EGui.Controls.NodeGraph.PinLinker", "EngineNS.Bricks.NodeGraph.UPinLinker");
-            var xml = IO.FileManager.LoadXmlFromString(graphStr);            
+            var xml = IO.TtFileManager.LoadXmlFromString(graphStr);            
             
             if (xml != null)
             {
@@ -190,7 +197,7 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode
         public void OnCloseEditor()
         {
             UEngine.Instance.TickableManager.RemoveTickable(this);
-            Cleanup();
+            Dispose();
         }
         public void OnEvent(in Bricks.Input.Event e)
         {
@@ -228,6 +235,8 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode
         public EGui.Controls.PropertyGrid.PropertyGrid PreviewPropGrid = new EGui.Controls.PropertyGrid.PropertyGrid();
         public Editor.UPreviewViewport PreviewViewport;
         #region DrawUI
+        protected ImGuiWindowClass mDockKeyClass;
+        public ImGuiWindowClass DockKeyClass => mDockKeyClass;
         public unsafe void OnDraw()
         {
             if (Material == null)
@@ -240,7 +249,7 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode
             var pivot = new Vector2(0);
             ImGuiAPI.SetNextWindowSize(in WindowSize, ImGuiCond_.ImGuiCond_FirstUseEver);
             ImGuiAPI.SetNextWindowDockID(DockId, DockCond);
-            if (ImGuiAPI.Begin(Material.AssetName.Name, ref mVisible, ImGuiWindowFlags_.ImGuiWindowFlags_None |
+            if (EGui.UIProxy.DockProxy.BeginMainForm(Material.AssetName.Name, this, ImGuiWindowFlags_.ImGuiWindowFlags_None |
                 ImGuiWindowFlags_.ImGuiWindowFlags_NoSavedSettings))
             {
                 if (ImGuiAPI.IsWindowDocked())
@@ -278,7 +287,7 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode
             {
                 drawing = false;
             }
-            ImGuiAPI.End();
+            EGui.UIProxy.DockProxy.EndMainForm();
 
             if (drawing)
             {
@@ -309,7 +318,7 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode
                 var xmlRoot = xml.CreateElement($"Root", xml.NamespaceURI);
                 xml.AppendChild(xmlRoot);
                 IO.SerializerHelper.WriteObjectMetaFields(xml, xmlRoot, this);
-                var xmlText = IO.FileManager.GetXmlText(xml);
+                var xmlText = IO.TtFileManager.GetXmlText(xml);
                 Material.GraphXMLString = xmlText;
                 Material.UpdateShaderCode(false);
                 Material.HLSLCode = code;// GenHLSLCode();
@@ -323,7 +332,7 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode
             var xmlRoot = xml.CreateElement($"Root", xml.NamespaceURI);
             xml.AppendChild(xmlRoot);
             IO.SerializerHelper.WriteObjectMetaFields(xml, xmlRoot, this);
-            var xmlText = IO.FileManager.GetXmlText(xml);
+            var xmlText = IO.TtFileManager.GetXmlText(xml);
             Material.GraphXMLString = xmlText;
             Material.UpdateShaderCode(false);
             Material.HLSLCode = GenHLSLCode();
@@ -408,17 +417,32 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode
             Material.UsedUniformVars.Clear();
             Material.UsedSamplerStates.Clear();
 
+            var MaterialClass = new UClassDeclaration();
+
             var gen = mHLSLCodeGen.GetCodeObjectGen(Rtti.UTypeDescGetter<UMethodDeclaration>.TypeDesc);
             BuildCodeStatementsData data = new BuildCodeStatementsData()
             {
+                ClassDec = MaterialClass,
                 NodeGraph = MaterialGraph,
                 UserData = Material,
                 CodeGen = mHLSLCodeGen,
             };
             MaterialOutput.BuildStatements(null, ref data);
-
             string code = "";
+            var incGen = mHLSLCodeGen.GetCodeObjectGen(Rtti.UTypeDescGetter<TtIncludeDeclaration>.TypeDesc);
             UCodeGeneratorData genData = new UCodeGeneratorData()
+            {
+                Method = null,
+                CodeGen = mHLSLCodeGen,
+                UserData = Material,
+            };
+            Material.IncludeFiles.Clear();
+            foreach (var i in MaterialClass.PreIncludeHeads)
+            {
+                incGen.GenCodes(i, ref code, ref genData);
+                Material.IncludeFiles.Add(i.FilePath);
+            }
+            genData = new UCodeGeneratorData()
             {
                 Method = MaterialOutput.VSFunction,
                 CodeGen = mHLSLCodeGen,

@@ -424,7 +424,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
             //Method = m;
             if (string.IsNullOrEmpty(mMethodMeta))
             {
-                mMethodMeta = Rtti.UTypeDesc.TypeStr(m.DeclaringType) + "#" + m.GetMethodDeclareString();
+                mMethodMeta = Rtti.UTypeDesc.TypeStr(m.DeclaringType) + "#" + m.GetMethodDeclareString(false);
             }
             var method = Method;
             Name = method.MethodName;

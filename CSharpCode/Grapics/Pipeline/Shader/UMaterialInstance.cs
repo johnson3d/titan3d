@@ -82,52 +82,55 @@ namespace EngineNS.Graphics.Pipeline.Shader
             }
 
             var typeStr = Rtti.UTypeDescManager.Instance.GetTypeStringFromType(this.GetType());
-            var xnd = new IO.CXndHolder(typeStr, 0, 0);
+            var xnd = new IO.TtXndHolder(typeStr, 0, 0);
             using (var attr = xnd.NewAttribute("MaterialInstance", 0, 0))
             {
-                var ar = attr.GetWriter(512);
-                ar.Write(this);
-                attr.ReleaseWriter(ref ar);
+                using (var ar = attr.GetWriter(512))
+                {
+                    ar.Write(this);
+                }
                 xnd.RootNode.AddAttribute(attr);
             }
 
             xnd.SaveXnd(name.Address);
         }
-        public static bool ReloadXnd(UMaterialInstance material, UMaterialInstanceManager manager, IO.CXndNode node)
+        public static bool ReloadXnd(UMaterialInstance material, UMaterialInstanceManager manager, IO.TtXndNode node)
         {
             var attr = node.TryGetAttribute("MaterialInstance");
             if (attr.NativePointer != IntPtr.Zero)
             {
-                var ar = attr.GetReader(null);
-                try
+                using (var ar = attr.GetReader(null))
                 {
-                    ar.ReadTo(material, null);
-                    material.SerialId++;
+                    try
+                    {
+                        ar.ReadTo(material, null);
+                        material.SerialId++;
+                    }
+                    catch (Exception ex)
+                    {
+                        Profiler.Log.WriteException(ex);
+                    }
                 }
-                catch (Exception ex)
-                {
-                    Profiler.Log.WriteException(ex);
-                }
-                attr.ReleaseReader(ref ar);
             }
             return true;
         }
-        public static UMaterialInstance LoadXnd(UMaterialInstanceManager manager, IO.CXndNode node)
+        public static UMaterialInstance LoadXnd(UMaterialInstanceManager manager, IO.TtXndNode node)
         {
             IO.ISerializer result = null;
             var attr = node.TryGetAttribute("MaterialInstance");
             if (attr.NativePointer != IntPtr.Zero)
             {
-                var ar = attr.GetReader(null);
-                try
+                using (var ar = attr.GetReader(null))
                 {
-                    ar.Read(out result, null);
+                    try
+                    {
+                        ar.Read(out result, null);
+                    }
+                    catch (Exception ex)
+                    {
+                        Profiler.Log.WriteException(ex);
+                    }
                 }
-                catch(Exception ex)
-                {
-                    Profiler.Log.WriteException(ex);
-                }
-                attr.ReleaseReader(ref ar);
             }
 
             var material = result as UMaterialInstance;
@@ -176,8 +179,9 @@ namespace EngineNS.Graphics.Pipeline.Shader
         public UMaterialInstance CloneMaterialInstance()
         {
             var result = new UMaterialInstance();
+            result.AssetName = AssetName;
             result.ParentMaterial = ParentMaterial;
-            result.AssetState = IO.EAssetState.LoadFinished;
+            result.MaterialHash = MaterialHash;
             result.RenderLayer = RenderLayer;
 
             foreach (var i in this.UsedRSView)
@@ -196,8 +200,10 @@ namespace EngineNS.Graphics.Pipeline.Shader
             }
 
             result.mPipelineDesc = mPipelineDesc;
+            result.UpdatePipeline();
 
             result.SerialId++;
+            result.AssetState = IO.EAssetState.LoadFinished;
             return result;
         }
         [Browsable(false)]
@@ -420,9 +426,9 @@ namespace EngineNS.Graphics.Pipeline.Shader
                 return mWireColorMateria;
             }
         }
-        public async System.Threading.Tasks.Task<bool> Initialize(UEngine engine)
+        public async Thread.Async.TtTask<bool> Initialize(UEngine engine)
         {
-            await Thread.AsyncDummyClass.DummyFunc();
+            await Thread.TtAsyncDummyClass.DummyFunc();
 
             await GetMaterialInstance(RName.GetRName("material/whitecolor.uminst", RName.ERNameType.Engine));
             await GetMaterialInstance(RName.GetRName("material/redcolor.uminst", RName.ERNameType.Engine));
@@ -455,39 +461,43 @@ namespace EngineNS.Graphics.Pipeline.Shader
             var task = CreateMaterialInstance(rn);
             return null;
         }
-        public async System.Threading.Tasks.Task<UMaterialInstance> CreateMaterialInstance(RName rn)
+        public async Thread.Async.TtTask<UMaterialInstance> CreateMaterialInstance(RName rn)
         {
-            UMaterialInstance result;
-            result = await UEngine.Instance.EventPoster.Post(() =>
-            {
-                using (var xnd = IO.CXndHolder.LoadXnd(rn.Address))
-                {
-                    if (xnd != null)
-                    {
-                        var material = UMaterialInstance.LoadXnd(this, xnd.RootNode);
-                        if (material == null)
-                            return null;
+            var origin = await GetMaterialInstance(rn);
+            if (origin == null)
+                return null;
+            return origin.CloneMaterialInstance();
+            //UMaterialInstance result;
+            //result = await UEngine.Instance.EventPoster.Post((state) =>
+            //{
+            //    using (var xnd = IO.TtXndHolder.LoadXnd(rn.Address))
+            //    {
+            //        if (xnd != null)
+            //        {
+            //            var material = UMaterialInstance.LoadXnd(this, xnd.RootNode);
+            //            if (material == null)
+            //                return null;
 
-                        material.AssetName = rn;
-                        return material;
-                    }
-                    else
-                    {
-                        return null;
-                    }
-                }
-            }, Thread.Async.EAsyncTarget.AsyncIO);
-            return result;
+            //            material.AssetName = rn;
+            //            return material;
+            //        }
+            //        else
+            //        {
+            //            return null;
+            //        }
+            //    }
+            //}, Thread.Async.EAsyncTarget.AsyncIO);
+            //return result;
         }
-        public async System.Threading.Tasks.Task<bool> ReloadMaterialInstance(RName rn)
+        public async Thread.Async.TtTask<bool> ReloadMaterialInstance(RName rn)
         {
             UMaterialInstance result;
             if (Materials.TryGetValue(rn, out result)==false)
                 return true;
 
-            var ok = await UEngine.Instance.EventPoster.Post(() =>
+            var ok = await UEngine.Instance.EventPoster.Post((state) =>
             {
-                using (var xnd = IO.CXndHolder.LoadXnd(rn.Address))
+                using (var xnd = IO.TtXndHolder.LoadXnd(rn.Address))
                 {
                     if (xnd != null)
                     {
@@ -502,7 +512,7 @@ namespace EngineNS.Graphics.Pipeline.Shader
 
             return ok;
         }
-        public async System.Threading.Tasks.Task<UMaterialInstance> GetMaterialInstance(RName rn)
+        public async Thread.Async.TtTask<UMaterialInstance> GetMaterialInstance(RName rn)
         {
             if (rn == null)
                 return null;
@@ -511,9 +521,9 @@ namespace EngineNS.Graphics.Pipeline.Shader
             if (Materials.TryGetValue(rn, out result))
                 return result;
 
-            result = await UEngine.Instance.EventPoster.Post(() =>
+            result = await UEngine.Instance.EventPoster.Post((state) =>
             {
-                using (var xnd = IO.CXndHolder.LoadXnd(rn.Address))
+                using (var xnd = IO.TtXndHolder.LoadXnd(rn.Address))
                 {
                     if (xnd != null)
                     {

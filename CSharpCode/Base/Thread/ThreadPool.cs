@@ -4,9 +4,9 @@ using System.Text;
 
 namespace EngineNS.Thread
 {
-    public class ThreadPool : ContextThread
+    public class TtThreadPool : TtContextThread
     {
-        public ThreadPool()
+        public TtThreadPool()
         {
             Interval = 0;
         }
@@ -35,16 +35,19 @@ namespace EngineNS.Thread
             UEngine.Instance.ContextThreadManager.mTPoolTrigger.WaitOne(5);
             
             var events = UEngine.Instance.ContextThreadManager.TPoolEvents;
-            while(true)
+            var numOfEvent = events.Count;
+            while (true)
             {
                 TickJobThread();
 
-                Async.PostEvent e = null;
+                Async.TtAsyncTaskStateBase e = null;
+                
                 lock (events)
                 {
-                    if (events.Count > 0)
+                    if (events.Count > 0 && numOfEvent > 0)
                     {
                         e = events.Dequeue();
+                        numOfEvent--;
                     }
                     else
                     {
@@ -56,14 +59,22 @@ namespace EngineNS.Thread
                 {
                     try
                     {
-                        e.PostAction();
+                        var state = e.ExecutePostEvent();
+                        if (state.TaskState == Async.EAsyncTaskState.Suspended)
+                        {
+                            lock (events)
+                            {
+                                events.Enqueue(e);
+                            }
+                            return;
+                        }
                     }
                     catch (Exception ex)
                     {
                         Profiler.Log.WriteException(ex);
                         e.ExceptionInfo = ex;
                     }
-                    UEngine.Instance.EventPoster.mRunOnPEAllocator.ReleaseObject(e);
+                    e.Dispose();
                 }
             }
 

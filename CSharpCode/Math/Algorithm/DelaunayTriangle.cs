@@ -1439,8 +1439,8 @@ namespace EngineNS.Algorithm
 
             if (points != null && points.Length > 0)
             {
-                Int32_2 indexMin = Int32_2.Zero;
-                Int32_2 indexMax = Int32_2.Zero;
+                Vector2i indexMin = Vector2i.Zero;
+                Vector2i indexMax = Vector2i.Zero;
                 Min = points[0];
                 Max = points[0];
                 for (int i = 0; i < points.Length; i++)
@@ -1564,8 +1564,8 @@ namespace EngineNS.Algorithm
 
             if(points != null && points.Length > 0)
             {
-                Int32_3 indexMin = Int32_3.Zero;
-                Int32_3 indexMax = Int32_3.Zero;
+                Vector3i indexMin = Vector3i.Zero;
+                Vector3i indexMax = Vector3i.Zero;
                 Min = points[0];
                 Max = points[0];
                 for(int i=0; i<points.Length; i++)

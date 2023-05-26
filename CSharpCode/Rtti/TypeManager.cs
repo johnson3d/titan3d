@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Reflection;
+using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Channels;
 using static EngineNS.EGui.UIProxy.SingleInputDialog;
@@ -176,6 +177,16 @@ namespace EngineNS.Rtti
         public bool IsRemoved = false;
         public Type SystemType;
         public UAssemblyDesc Assembly;
+        public bool IsPrimitive
+        {
+            get
+            {
+                if (SystemType == null)
+                    return false;
+                return SystemType.IsPrimitive;
+            }
+        }
+
         public string FullName
         {
             get
@@ -245,12 +256,22 @@ namespace EngineNS.Rtti
                 return SystemType.Namespace;
             }
         }
-        public bool IsValueType => SystemType.IsValueType;
-        public bool IsEnum => SystemType.IsEnum;
-        public bool IsArray => SystemType.IsArray;
-        public bool IsSealed => SystemType.IsSealed;
+        public bool IsValueType => (SystemType != null) ? SystemType.IsValueType : false;
+        public bool IsEnum => (SystemType != null) ? SystemType.IsEnum : false;
+        public bool IsArray => (SystemType != null) ? SystemType.IsArray : false;
+        public bool IsSealed => (SystemType != null) ? SystemType.IsSealed : false;
         public bool IsDelegate => typeof(Delegate).IsAssignableFrom(SystemType);
-        public bool IsPointer => SystemType.IsPointer;
+        public bool IsPointer => (SystemType != null) ? SystemType.IsPointer : false;
+        public UTypeDesc BaseType
+        {
+            get
+            {
+                if (SystemType != null)
+                    return TypeOf(SystemType.BaseType);
+                return null;
+            }
+        }
+
         string mTypeString;
         public static System.Reflection.FieldInfo GetField(System.Type type, string name)
         {
@@ -262,6 +283,17 @@ namespace EngineNS.Rtti
             if (type == null)
                 return null;
             return GetField(type, name);
+        }
+        public static System.Reflection.PropertyInfo GetProperty(System.Type type, string name)
+        {
+            var fld = type.GetProperty(name);
+            if (fld != null)
+                return fld;
+
+            type = type.BaseType;
+            if (type == null)
+                return null;
+            return GetProperty(type, name);
         }
         public static bool CanCast(System.Type from, System.Type to)
         {
@@ -299,6 +331,8 @@ namespace EngineNS.Rtti
                 return null;
 
             var typeStr = UTypeDescManager.Instance.GetTypeStringFromType(type);
+            if (typeStr == null)
+                return null;
             return TypeOf(typeStr);
         }
         public static UTypeDesc TypeOfFullName(string fullName)
@@ -335,6 +369,10 @@ namespace EngineNS.Rtti
         {
             return SystemType.IsSubclassOf(type);
         }
+        public bool HasInterface(string name)
+        {
+            return (SystemType.GetInterface(name) != null);
+        }
         public Type[] GetGenericArguments()
         {
             return SystemType.GetGenericArguments();
@@ -342,7 +380,7 @@ namespace EngineNS.Rtti
         public object[] GetCustomAttributes(Type type, bool inherit)
         {
             return SystemType.GetCustomAttributes(type, inherit);
-        }
+        } 
         public Type GetInterface(string name)
         {
             return SystemType.GetInterface(name);
@@ -352,7 +390,26 @@ namespace EngineNS.Rtti
         {
             return SystemType.GetMethod(name);
         }
+        public Attribute? GetCustomAttribute(Type type, bool inherit)
+        {
+            return SystemType.GetCustomAttribute(type, inherit);
+        }
+        public T? GetCustomAttribute<T>(bool inherit) where T : Attribute
+        {
+            return SystemType.GetCustomAttribute<T>(inherit);
+        }
+        public bool IsInstanceOfType(object? obj)
+        {
+            if (SystemType != null)
+                return SystemType.IsInstanceOfType(obj);
+            return false;
+        }
 #nullable disable
+        public void RunClassConstructor()
+        {
+            if(SystemType != null)
+                RuntimeHelpers.RunClassConstructor(SystemType.TypeHandle);
+        }
     }
     public struct UTypeDescGetter<T>
     {
@@ -466,6 +523,14 @@ namespace EngineNS.Rtti
         }
         public static UTypeDescManager Instance { get; } = new UTypeDescManager();
         public Dictionary<string, ServiceManager> Services { get; } = new Dictionary<string, ServiceManager>();
+        public Dictionary<string, UTypeDesc> NameAliasTypes { get; } = new Dictionary<string, UTypeDesc>();
+        public UTypeDesc FindNameAlias(string name)
+        {
+            UTypeDesc result;
+            if (NameAliasTypes.TryGetValue(name, out result))
+                return result;
+            return null;
+        }
         public bool GetInheritTypes(UTypeDesc baseType, ref List<UTypeDesc> types)
         {
             bool finded = false;
@@ -515,6 +580,21 @@ namespace EngineNS.Rtti
                     i.Value.AddAssemblyDesc(j.Value);
                 }
             }
+
+            foreach (var i in Services)
+            {
+                foreach (var j in i.Value.Types)
+                {
+                    var attr = j.Value.SystemType.GetCustomAttribute(typeof(Rtti.MetaAttribute), false) as Rtti.MetaAttribute;
+                    if (attr == null || attr.NameAlias == null)
+                        continue;
+                    foreach(var k in attr.NameAlias)
+                    {
+                        NameAliasTypes[k] = j.Value;
+                    }
+                }
+            }
+            
         }
         public class ServiceManager
         {
@@ -600,23 +680,29 @@ namespace EngineNS.Rtti
         public Dictionary<string, string> StringMap = new Dictionary<string, string>();
         public string GetTypeStringFromType(Type type, bool tryAdd2Manager = true)
         {
-            if (@type.IsGenericParameter || type.FullName == null)
+            var originName = type.ToString();// type.FullName;
+            if (originName == null)
             {
                 return null;
             }
-            if (type.FullName.StartsWith("<>"))
+            else if (type.IsGenericParameter)
+            {
+                return "#" + type.Name;
+            }
+            if (originName.StartsWith("<>"))
             {
                 return null;
             }
             string result;
-            if (StringMap.TryGetValue(type.FullName, out result))
+            if (StringMap.TryGetValue(originName, out result))
                 return result;
+            
             UAssemblyDesc assm = FindAssemblyDesc(type.Assembly);
             if (assm == null)
             {
                 return null;
             }
-            var fullName = type.FullName.Replace('+', '.');
+            var fullName = originName.Replace('+', '.');
             var templatePos = fullName.IndexOf('`');
             if (templatePos >=0 )
             {
@@ -635,7 +721,7 @@ namespace EngineNS.Rtti
             }
 
             result = $"{fullName}{agTypeStr}@{assm.Name}";
-            StringMap[type.FullName] = result;
+            StringMap[originName] = result;
             if (tryAdd2Manager)
             {
                 if (GetTypeDescFromString(result) == null)

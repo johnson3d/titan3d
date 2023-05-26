@@ -8,6 +8,11 @@ namespace EngineNS.GamePlay.Scene
     [UNode(NodeDataType = typeof(UPointLightNode.ULightNodeData), DefaultNamePrefix = "PointLight")]
     public partial class UPointLightNode : USceneActorNode
     {
+        public override void Dispose()
+        {
+            CoreSDK.DisposeObject(ref mDebugMesh);
+            base.Dispose();
+        }
         public class ULightNodeData : UNodeData
         {
             internal UPointLightNode HostNode;
@@ -51,7 +56,7 @@ namespace EngineNS.GamePlay.Scene
 
             return meshNode;
         }
-        public UInt16 IndexInGpuScene = UInt16.MaxValue;
+        public int IndexInGpuScene = -1;
         internal void OnLightColorChanged()
         {
             if (mDebugMesh != null)
@@ -190,6 +195,11 @@ namespace EngineNS.GamePlay.Scene
     [UNode(NodeDataType = typeof(UDirLightNode.UDirLightNodeData), DefaultNamePrefix = "Sun")]
     public partial class UDirLightNode : USceneActorNode
     {
+        public override void Dispose()
+        {
+            CoreSDK.DisposeObject(ref mDebugMesh);
+            base.Dispose();
+        }
         public class UDirLightNodeData : UNodeData
         {
             [Rtti.Meta]

@@ -120,11 +120,11 @@ namespace EngineNS.EGui.Controls
             //    return 0;
             if (data->Buf.Length == 0)
                 return 0;
-            if (ImGuiAPI.IsKeyDown((int)ImGuiKey_.ImGuiKey_Backspace))
+            if (ImGuiAPI.IsKeyDown(ImGuiKey.ImGuiKey_Backspace))
             {
                 return 0;
             }
-            if (ImGuiAPI.IsKeyDown((int)ImGuiKey_.ImGuiKey_Delete))
+            if (ImGuiAPI.IsKeyDown(ImGuiKey.ImGuiKey_Delete))
             {
                 return 0;
             }

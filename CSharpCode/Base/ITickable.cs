@@ -5,17 +5,19 @@ namespace EngineNS
 {
     public interface ITickable
     {
-        void TickLogic(int ellapse);
-        void TickRender(int ellapse);
-        void TickSync(int ellapse);
+        //int GetTickOrder();
+        void TickLogic(float ellapse);
+        void TickRender(float ellapse);
+        void TickBeginFrame(float ellapse);
+        void TickSync(float ellapse);
     }
     public interface IMemberTickable
     {
         System.Threading.Tasks.Task<bool> Initialize(object host);
         void Cleanup(object host);
-        void TickLogic(object host, int ellapse);
-        void TickRender(object host, int ellapse);
-        void TickSync(object host, int ellapse);
+        void TickLogic(object host, float ellapse);
+        void TickRender(object host, float ellapse);
+        void TickSync(object host, float ellapse);
     }
     public class UMemberTickables
     {
@@ -50,21 +52,21 @@ namespace EngineNS
                 i.Cleanup(host);
             }
         }
-        public void TickLogic(object host, int ellapse)
+        public void TickLogic(object host, float ellapse)
         {
             foreach(var i in Members)
             {
                 i.TickLogic(host, ellapse);
             }
         }
-        public void TickRender(object host, int ellapse)
+        public void TickRender(object host, float ellapse)
         {
             foreach (var i in Members)
             {
                 i.TickRender(host, ellapse);
             }
         }
-        public void TickSync(object host, int ellapse)
+        public void TickSync(object host, float ellapse)
         {
             foreach (var i in Members)
             {
@@ -95,6 +97,23 @@ namespace EngineNS
                     }
                 }
                 Tickables.Add(new WeakReference<ITickable>(tickable));
+                for (int i = 0; i < Tickables.Count; i++)
+                {
+                    ITickable xx;
+                    Tickables[i].TryGetTarget(out xx);
+                    if (xx == null)
+                    {
+                        Tickables.RemoveAt(i);
+                        i--;
+                    }
+                }
+                //Tickables.Sort((x, y) =>
+                //{
+                //    ITickable xx, yy;
+                //    x.TryGetTarget(out xx);
+                //    y.TryGetTarget(out yy);
+                //    return xx.GetTickOrder().CompareTo(yy.GetTickOrder());
+                //}); 
             }
         }
         [Rtti.Meta]

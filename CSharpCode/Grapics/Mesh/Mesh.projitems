@@ -12,6 +12,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)Modifier\CSkinModifier.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Modifier\UInstanceModifier.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)UMaterialMesh.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)UMdfGridUVMesh.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)UMdfSkinMesh.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)UMdfStaticMesh.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)UMesh.cs" />

@@ -13,13 +13,13 @@ namespace EngineNS.Thread.Async
     };
 
     [System.ComponentModel.TypeConverterAttribute("System.ComponentModel.ExpandableObjectConverter")]
-    public class TSafeDictionary<K, V>
+    public class TtSafeDictionary<K, V>
     {
-        public TSafeDictionary(IEqualityComparer<K> equalityComparer)
+        public TtSafeDictionary(IEqualityComparer<K> equalityComparer)
         {
             mObjects = new Dictionary<K, V>(equalityComparer);
         }
-        public TSafeDictionary()
+        public TtSafeDictionary()
         {
             mObjects = new Dictionary<K, V>();
         }

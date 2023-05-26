@@ -25,6 +25,7 @@ namespace EngineNS.GamePlay.Scene
         }
         public Graphics.Pipeline.UViewportSlate ViewportSlate;
         public Graphics.Pipeline.Shader.UMaterialInstance mGridlineMaterial;
+        public Graphics.Mesh.UMdfGridUVMesh GridUVModifier;
         public static async System.Threading.Tasks.Task<UGridNode> AddGridNode(GamePlay.UWorld world, UNode parent)
         {
             var rc = UEngine.Instance.GfxDevice.RenderContext;
@@ -33,17 +34,25 @@ namespace EngineNS.GamePlay.Scene
             materialInstance.RenderLayer = Graphics.Pipeline.ERenderLayer.RL_Translucent;
             unsafe
             {
+                var rsState = materialInstance.Rasterizer;
+                rsState.CullMode = NxRHI.ECullMode.CMD_NONE;
+                materialInstance.Rasterizer = rsState;
+
                 var blend0 = materialInstance.Blend;
                 blend0.RenderTarget[0].BlendEnable = 1;
                 materialInstance.Blend = blend0;
+
+                var dsState = materialInstance.DepthStencil;
+                dsState.DepthWriteMask = 0;
+                materialInstance.DepthStencil = dsState;
             }
             if (materialInstance.UsedSamplerStates.Count > 0)
             {
                 var samp = materialInstance.UsedSamplerStates[0].Value;
-                samp.MaxAnisotropy = 15;
-                samp.Filter = NxRHI.ESamplerFilter.SPF_ANISOTROPIC;
-                samp.m_MaxLOD = 0;
-                
+                //samp.Filter = NxRHI.ESamplerFilter.SPF_COMPARISON_MIN_MAG_LINEAR_MIP_POINT;
+                samp.Filter = NxRHI.ESamplerFilter.SPF_MIN_MAG_LINEAR_MIP_POINT;
+                samp.m_MaxLOD = float.MaxValue;
+
                 materialInstance.UsedSamplerStates[0].Value = samp;
             }
             var gridColor = materialInstance.FindVar("GridColor");
@@ -57,7 +66,7 @@ namespace EngineNS.GamePlay.Scene
             var tMaterials = new Graphics.Pipeline.Shader.UMaterial[1];
             tMaterials[0] = materialInstance;
             var ok = gridMesh.Initialize(mesh, tMaterials,
-                Rtti.UTypeDescGetter<Graphics.Mesh.UMdfStaticMeshPermutation<Graphics.Pipeline.Shader.UMdf_NoShadow>>.TypeDesc);
+                Rtti.UTypeDescGetter<Graphics.Mesh.UMdfGridUVMesh>.TypeDesc);
             if (ok == false)
                 return null;
 
@@ -72,6 +81,8 @@ namespace EngineNS.GamePlay.Scene
             meshNode.IsCastShadow = false;
             meshNode.SetStyle(ENodeStyles.VisibleFollowParent);
 
+            meshNode.GridUVModifier = gridMesh.MdfQueue as Graphics.Mesh.UMdfGridUVMesh;
+
             return meshNode;
         }
         float SnapGridSize = 10.0f; //1,10,50... GEditor->GetGridSize();
@@ -81,20 +92,20 @@ namespace EngineNS.GamePlay.Scene
         //private static RHI.FNameVarIndex ShaderIdx_GridColor = new RHI.FNameVarIndex("GridColor");
         //private static RHI.FNameVarIndex ShaderIdx_UVMin = new RHI.FNameVarIndex("UVMin");
         //private static RHI.FNameVarIndex ShaderIdx_UVMax = new RHI.FNameVarIndex("UVMax");
+        double WorldToUVScale = 0.0001f;
         public override bool OnTickLogic(GamePlay.UWorld world, Graphics.Pipeline.URenderPolicy policy)
         {
             if (mGridlineMaterial == null || mGridlineMaterial.PerMaterialCBuffer == null)
                 return true;
-            bool bLarger1mGrid = true;
-            double WorldToUVScale = 0.001f;
-
-            if (bLarger1mGrid)
-            {
-                WorldToUVScale *= 0.1f;
-            }
+            //bool bLarger1mGrid = true;
+            
+            //if (bLarger1mGrid)
+            //{
+            //    WorldToUVScale *= 0.1f;
+            //}
 
             bool bIsPerspective = true;
-            float Darken = 1.0f;
+            float Darken = 0.5f;
             if (bIsPerspective)
             {
                 var gridColor = new EngineNS.Vector4(0.6f * Darken, 0.6f * Darken, 0.6f * Darken, mEditor3DGridFade);
@@ -119,7 +130,7 @@ namespace EngineNS.GamePlay.Scene
             if (bIsPerspective)
             {
                 // the higher we get the larger we make the geometry to give the illusion of an infinite grid while maintains the precision nearby
-                Radii *= System.Math.Max(1.0, System.Math.Abs(mPreCameraPos.Y) / 1000.0f);
+                Radii *= System.Math.Max(1.0, System.Math.Abs(mPreCameraPos.Y) / 1000.0);
             }
 
             DVector2 UVMid;
@@ -130,9 +141,14 @@ namespace EngineNS.GamePlay.Scene
             var UVMin = UVMid + new DVector2(-UVRadi, -UVRadi);
             var UVMax = UVMid + new DVector2(UVRadi, UVRadi);
 
-            mGridlineMaterial.PerMaterialCBuffer.SetValue("UVMin", UVMin.AsSingleVector());
-            mGridlineMaterial.PerMaterialCBuffer.SetValue("UVMax", UVMax.AsSingleVector());
-
+            if (GridUVModifier != null)
+            {
+                var min = UVMin.AsSingleVector();
+                var max = UVMax.AsSingleVector();
+                GridUVModifier.SetUVMinAndMax(in min, in max);
+            }
+            //mGridlineMaterial.PerMaterialCBuffer.SetValue("UVMin", UVMin.AsSingleVector());
+            //mGridlineMaterial.PerMaterialCBuffer.SetValue("UVMax", UVMax.AsSingleVector());
 
             var camPos = new DVector3(mPreCameraPos.X, 0, mPreCameraPos.Z);
             if (this.Placement.Position != camPos)

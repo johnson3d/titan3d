@@ -110,7 +110,7 @@ namespace EngineNS
         /// <param name="angle">旋转角度</param>
         /// <param name="centerPoint">旋转的中心点</param>
         /// <returns>返回计算后的矩阵</returns>
-        public static Matrix3x2 Rotation(float angle, PointF centerPoint)
+        public static Matrix3x2 Rotation(float angle, Point2f centerPoint)
 	    {
 		    return Translation( -centerPoint.X, -centerPoint.Y ) *
 			       Rotation( angle ) *
@@ -122,7 +122,7 @@ namespace EngineNS
         /// <param name="angle">旋转角度</param>
         /// <param name="centerPoint">旋转的中心点</param>
         /// <param name="result">计算后的矩阵</param>
-        public static void Rotation(float angle, ref PointF centerPoint, out Matrix3x2 result)
+        public static void Rotation(float angle, ref Point2f centerPoint, out Matrix3x2 result)
 	    {
 		    result = Translation( -centerPoint.X, -centerPoint.Y ) *
 				     Rotation( angle ) *
@@ -242,7 +242,7 @@ namespace EngineNS
         /// <param name="size">缩放尺寸</param>
         /// <param name="centerPoint">缩放中心</param>
         /// <returns>返回计算后的矩阵</returns>
-        public static Matrix3x2 Scale(SizeF size, PointF centerPoint)
+        public static Matrix3x2 Scale(SizeF size, Point2f centerPoint)
 	    {
 		    Matrix3x2 r;
 
@@ -260,7 +260,7 @@ namespace EngineNS
         /// <param name="size">缩放尺寸</param>
         /// <param name="centerPoint">缩放中心</param>
         /// <param name="result">计算后的矩阵</param>
-        public static void Scale(ref SizeF size, ref PointF centerPoint, out Matrix3x2 result)
+        public static void Scale(ref SizeF size, ref Point2f centerPoint, out Matrix3x2 result)
 	    {
 		    Matrix3x2 r;
 
@@ -279,7 +279,7 @@ namespace EngineNS
         /// <param name="y">Y方向的缩放值</param>
         /// <param name="centerPoint">缩放中心点</param>
         /// <returns>返回计算后的矩阵</returns>
-        public static Matrix3x2 Scale(float x, float y, PointF centerPoint)
+        public static Matrix3x2 Scale(float x, float y, Point2f centerPoint)
 	    {
 		    Matrix3x2 r;
 
@@ -298,7 +298,7 @@ namespace EngineNS
         /// <param name="y">Y方向的缩放值</param>
         /// <param name="centerPoint">缩放中心点</param>
         /// <param name="result">计算后的矩阵</param>
-        public static void Scale(float x, float y, ref PointF centerPoint, out Matrix3x2 result)
+        public static void Scale(float x, float y, ref Point2f centerPoint, out Matrix3x2 result)
 	    {
 		    Matrix3x2 r;
 
@@ -311,7 +311,7 @@ namespace EngineNS
 		    result = r;
 	    }
 
-        //public static Matrix3x2 Skew(float angleX, float angleY, CSUtility.Support.PointF centerPoint)
+        //public static Matrix3x2 Skew(float angleX, float angleY, CSUtility.Support.Point2f centerPoint)
         //{
         //    D2D1_POINT_2F centerPoint_n = D2D1.Point2F( centerPoint.X, centerPoint.Y );
 
@@ -326,7 +326,7 @@ namespace EngineNS
         //    return r;
         //}
 
-        //public static void Skew(float angleX, float angleY, ref CSUtility.Support.PointF centerPoint, out Matrix3x2 result)
+        //public static void Skew(float angleX, float angleY, ref CSUtility.Support.Point2f centerPoint, out Matrix3x2 result)
         //{
         //    D2D1_POINT_2F centerPoint_n = D2D1.Point2F( centerPoint.X, centerPoint.Y );
 
@@ -345,7 +345,7 @@ namespace EngineNS
         /// </summary>
         /// <param name="point">平移向量</param>
         /// <returns>返回计算后的矩阵</returns>
-        public static Matrix3x2 Translation(PointF point)
+        public static Matrix3x2 Translation(Point2f point)
 	    {
 		    Matrix3x2 r;
 
@@ -360,7 +360,7 @@ namespace EngineNS
         /// </summary>
         /// <param name="point">平移向量</param>
         /// <param name="result">计算后的矩阵</param>
-        public static void Translation(ref PointF point, out Matrix3x2 result)
+        public static void Translation(ref Point2f point, out Matrix3x2 result)
 	    {
 		    Matrix3x2 r;
 
@@ -408,9 +408,9 @@ namespace EngineNS
         /// <param name="mat">变换矩阵</param>
         /// <param name="point">位置坐标</param>
         /// <returns>返回变换后的位置</returns>
-        public static PointF TransformPoint(Matrix3x2 mat, PointF point)
+        public static Point2f TransformPoint(Matrix3x2 mat, Point2f point)
 	    {
-		    PointF result;
+		    Point2f result;
 
             result._X = (point.X * mat.M11) + (point.Y * mat.M21) + mat.M31;
             result._Y = (point.X * mat.M12) + (point.Y * mat.M22) + mat.M32;
@@ -423,9 +423,9 @@ namespace EngineNS
         /// <param name="mat">变换矩阵</param>
         /// <param name="point">位置坐标</param>
         /// <param name="result">变换后的位置</param>
-        public static void TransformPoint(ref Matrix3x2 mat, ref PointF point, out PointF result)
+        public static void TransformPoint(ref Matrix3x2 mat, ref Point2f point, out Point2f result)
 	    {
-            PointF r;
+            Point2f r;
 
 		    r._X = (point.X * mat.M11) + (point.Y * mat.M21) + mat.M31;
 		    r._Y = (point.X * mat.M12) + (point.Y * mat.M22) + mat.M32;

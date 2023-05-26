@@ -22,21 +22,19 @@ namespace EngineNS.EGui.Slate
         {
             CameraController = new Editor.Controller.EditorCameraController();
         }
-        ~UWorldViewportSlate()
-        {
-            Cleanup();
-        }
-        public void Cleanup()
+        public override void Dispose()
         {
             PresentWindow?.UnregEventProcessor(this);
-            World?.Cleanup();
+            World?.Dispose();
             World = null;
-            RenderPolicy?.Cleanup();
+            RenderPolicy?.Dispose();
             RenderPolicy = null;
+
+            base.Dispose();
         }
         public async System.Threading.Tasks.Task<bool> Initialize()
         {
-            await EngineNS.Thread.AsyncDummyClass.DummyFunc();
+            await EngineNS.Thread.TtAsyncDummyClass.DummyFunc();
             return true;
         }
         public async System.Threading.Tasks.Task Initialize_Default(Graphics.Pipeline.UViewportSlate viewport, USlateApplication application, Graphics.Pipeline.URenderPolicy policy, float zMin, float zMax)
@@ -60,6 +58,8 @@ namespace EngineNS.EGui.Slate
             await Initialize();
             
             await policy.Initialize(null);
+            if (mViewport.Width > 1 && mViewport.Height > 1)
+                policy.OnResize(mViewport.Width, mViewport.Height);
 
             if (OnInitialize == null)
             {
@@ -76,9 +76,6 @@ namespace EngineNS.EGui.Slate
         }
         protected override void OnClientChanged(bool bSizeChanged)
         {
-            if (RenderPolicy == null)
-                return;
-
             var vpSize = this.ClientSize;
             
             mViewport.TopLeftX = WindowPos.X + ClientMin.X;
@@ -98,6 +95,8 @@ namespace EngineNS.EGui.Slate
         }
         protected override IntPtr GetShowTexture()
         {
+            if (RenderPolicy == null)
+                return IntPtr.Zero;
             var srv = RenderPolicy.GetFinalShowRSV();
             if (srv == null)
                 return IntPtr.Zero;
@@ -207,7 +206,7 @@ namespace EngineNS.EGui.Slate
         private static Profiler.TimeScope ScopeTick = Profiler.TimeScopeManager.GetTimeScope(typeof(UWorldViewportSlate), nameof(TickLogic));
         [ThreadStatic]
         private static Profiler.TimeScope ScopeRPolicyTick = Profiler.TimeScopeManager.GetTimeScope(typeof(UWorldViewportSlate), "TickRPolicy");
-        public unsafe void TickLogic(int ellapse)
+        public unsafe void TickLogic(float ellapse)
         {
             using (new Profiler.TimeScopeHelper(ScopeTick))
             {
@@ -247,7 +246,7 @@ namespace EngineNS.EGui.Slate
                 }
             }   
         }
-        public void TickSync(int ellapse)
+        public void TickSync(float ellapse)
         {
             if (IsDrawing == false)
                 return;

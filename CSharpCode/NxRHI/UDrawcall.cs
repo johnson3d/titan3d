@@ -1,4 +1,5 @@
-﻿using System;
+﻿using EngineNS.Graphics.Pipeline;
+using System;
 using System.Collections.Generic;
 using System.Text;
 
@@ -6,6 +7,14 @@ namespace EngineNS.NxRHI
 {
     public partial class UGraphicDraw : AuxPtrType<NxRHI.IGraphicDraw>
     {
+        public object TagObject = null;
+        public override void Dispose()
+        {
+            TagObject = null;
+            if (IsDisposed == false)
+                TtStatistic.Instance.GraphicsDrawcall--;
+            base.Dispose();
+        }
         public uint DrawInstance
         {
             get { return mCoreObject.DrawInstance; }
@@ -111,6 +120,14 @@ namespace EngineNS.NxRHI
     }
     public class UComputeDraw : AuxPtrType<NxRHI.IComputeDraw>
     {
+        public object TagObject = null;
+        public override void Dispose()
+        {
+            TagObject = null;
+            if (IsDisposed == false)
+                TtStatistic.Instance.ComputeDrawcall--;
+            base.Dispose();
+        }
         public void Commit(ICommandList cmdlist)
         {
             mCoreObject.NativeSuper.Commit(cmdlist);
@@ -178,6 +195,12 @@ namespace EngineNS.NxRHI
     }
     public class UCopyDraw : AuxPtrType<NxRHI.ICopyDraw>
     {
+        public override void Dispose()
+        {
+            if (IsDisposed == false)
+                TtStatistic.Instance.TransferDrawcall--;
+            base.Dispose();
+        }
         public void Commit(ICommandList cmdlist)
         {
             mCoreObject.NativeSuper.Commit(cmdlist);
@@ -186,19 +209,30 @@ namespace EngineNS.NxRHI
         {
             mCoreObject.NativeSuper.Commit(cmdlist.mCoreObject);
         }
+        public ECopyDrawMode Mode
+        {
+            get
+            {
+                return mCoreObject.Mode;
+            }
+            set
+            {
+                mCoreObject.Mode = value;
+            }
+        }
         public void BindSrc(UGpuResource res)
         {
             var bf = res as UBuffer;
             if (bf != null)
             {
-                mCoreObject.BindSrc(bf.mCoreObject.NativeSuper);
+                mCoreObject.BindBufferSrc(bf.mCoreObject);
             }
             else
             {
                 var tex = res as UTexture;
                 if (tex != null)
                 {
-                    mCoreObject.BindSrc(tex.mCoreObject.NativeSuper);
+                    mCoreObject.BindTextureSrc(tex.mCoreObject);
                 }
             }
         }
@@ -207,32 +241,32 @@ namespace EngineNS.NxRHI
             var bf = res as UBuffer;
             if (bf != null)
             {
-                mCoreObject.BindDest(bf.mCoreObject.NativeSuper);
+                mCoreObject.BindBufferDest(bf.mCoreObject);
             }
             else
             {
                 var tex = res as UTexture;
                 if (tex != null)
                 {
-                    mCoreObject.BindDest(tex.mCoreObject.NativeSuper);
+                    mCoreObject.BindTextureDest(tex.mCoreObject);
                 }
             }
         }
-        public void BindSrcBuffer(UBuffer res)
+        public void BindBufferSrc(UBuffer res)
         {
-            mCoreObject.BindSrc(res.mCoreObject.NativeSuper);
+            mCoreObject.BindBufferSrc(res.mCoreObject);
         }
-        public void BindSrcTexture(UTexture res)
+        public void BindTextureSrc(UTexture res)
         {
-            mCoreObject.BindSrc(res.mCoreObject.NativeSuper);
+            mCoreObject.BindTextureSrc(res.mCoreObject);
         }
-        public void BindDestBuffer(UBuffer res)
+        public void BindBufferDest(UBuffer res)
         {
-            mCoreObject.BindDest(res.mCoreObject.NativeSuper);
+            mCoreObject.BindBufferDest(res.mCoreObject);
         }
-        public void BindDestTexture(UTexture res)
+        public void BindTextureDest(UTexture res)
         {
-            mCoreObject.BindDest(res.mCoreObject.NativeSuper);
+            mCoreObject.BindTextureDest(res.mCoreObject);
         }
     }
 }

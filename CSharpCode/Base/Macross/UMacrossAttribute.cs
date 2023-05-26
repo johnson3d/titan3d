@@ -88,7 +88,7 @@ namespace EngineNS.Macross
         [Rtti.Meta]
         public virtual async Task<bool> TaskFunction() 
         {
-            await EngineNS.Thread.AsyncDummyClass.DummyFunc();
+            await EngineNS.Thread.TtAsyncDummyClass.DummyFunc();
             return false;
         }
 

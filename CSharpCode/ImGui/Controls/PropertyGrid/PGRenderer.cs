@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Runtime.InteropServices;
 using System.Text;
 using EngineNS;
+using NPOI.HSSF.Record.AutoFilter;
 
 namespace EngineNS.EGui.Controls.PropertyGrid
 {
@@ -66,7 +68,7 @@ namespace EngineNS.EGui.Controls.PropertyGrid
         public EGui.UIProxy.ImageProxy IndentDec;
         EGui.UIProxy.ImageProxy mDropShadowDec;
 
-        public void Cleanup()
+        public void Dispose()
         {
             mSearchBar?.Cleanup();
             mSearchBar = null;
@@ -89,7 +91,7 @@ namespace EngineNS.EGui.Controls.PropertyGrid
 
         public async System.Threading.Tasks.Task<bool> Initialize()
         {
-            await EngineNS.Thread.AsyncDummyClass.DummyFunc();
+            await EngineNS.Thread.TtAsyncDummyClass.DummyFunc();
 
             if(mSearchBar == null)
             {
@@ -314,7 +316,7 @@ namespace EngineNS.EGui.Controls.PropertyGrid
             return true;
         }
 
-        private bool DrawNameLabel(string displayName, ImGuiTreeNodeFlags_ flags, ref PGCustomValueEditorAttribute.EditorInfo itemEditorInfo)
+        private unsafe bool DrawNameLabel(string displayName, ImGuiTreeNodeFlags_ flags, ref PGCustomValueEditorAttribute.EditorInfo itemEditorInfo)
         {
             ImGuiAPI.TableSetColumnIndex(0);
             var frameHeight = ImGuiAPI.GetFrameHeight();
@@ -323,6 +325,13 @@ namespace EngineNS.EGui.Controls.PropertyGrid
             ImGuiAPI.PushStyleVar(ImGuiStyleVar_.ImGuiStyleVar_FramePadding, in itemNamePadding);
             ImGuiAPI.AlignTextToFramePadding();
             var treeNodeRet = ImGuiAPI.TreeNodeEx(displayName, flags, displayName);
+            if(ImGuiAPI.BeginDragDropSource(ImGuiDragDropFlags_.ImGuiDragDropFlags_None))
+            {
+                var handle = GCHandle.Alloc(itemEditorInfo);
+                ImGuiAPI.SetDragDropPayload("PropertyDragDrop", GCHandle.ToIntPtr(handle).ToPointer(), (uint)Marshal.SizeOf<PGCustomValueEditorAttribute.EditorInfo>(), ImGuiCond_.ImGuiCond_None);
+                ImGuiAPI.Text(itemEditorInfo.Name);
+                ImGuiAPI.EndDragDropSource();
+            }
             itemEditorInfo.Expand = treeNodeRet && ((flags & ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_Leaf) == 0);
             ImGuiAPI.PopStyleVar(1);
             return treeNodeRet;
@@ -341,6 +350,16 @@ namespace EngineNS.EGui.Controls.PropertyGrid
         Dictionary<object, Dictionary<string, CustomPropertyDescriptorCollection>> mDrawTargetDic = new Dictionary<object, Dictionary<string, CustomPropertyDescriptorCollection>>();
         private unsafe bool OnDraw(object target, out object targetNewValue, bool isSubPropertyGrid = false)
         {
+            string[] CategoryExcludeFilters = null;
+            if (target != null)
+            {
+                var categoryAtts = target.GetType().GetCustomAttributes(typeof(PGCategoryFilters), true);
+                if (categoryAtts.Length > 0)
+                {
+                    var ctAttr = categoryAtts[0] as PGCategoryFilters;
+                    CategoryExcludeFilters = ctAttr.ExcludeFilters;
+                }
+            }
             targetNewValue = target;
             if (target == null)
                 return false;
@@ -362,6 +381,20 @@ namespace EngineNS.EGui.Controls.PropertyGrid
             var drawList = ImGuiAPI.GetWindowDrawList();
             foreach (var proDicValue in propertiesDic)
             {
+                if (CategoryExcludeFilters != null)
+                {
+                    bool find = false;
+                    foreach (var c in CategoryExcludeFilters)
+                    {
+                        if (c == proDicValue.Key)
+                        {
+                            find = true;
+                            break;
+                        }
+                    }
+                    if (find)
+                        continue;
+                }
                 string categoryName = proDicValue.Key ?? "Other";
                 bool showCollection = true;
                 if (useCategory)
@@ -726,19 +759,23 @@ namespace EngineNS.EGui.Controls.PropertyGrid
                 }
                 else if (info.Type.IsEnum)
                 {
-                    valueChanged = EngineNS.UEngine.Instance.PGTypeEditorManagerInstance.EnumEditor.OnDraw(in info, out newValue);
+                    if (EngineNS.UEngine.Instance.PGTypeEditorManagerInstance.EnumEditor != null)
+                        valueChanged = EngineNS.UEngine.Instance.PGTypeEditorManagerInstance.EnumEditor.OnDraw(in info, out newValue);
                 }
                 else if (info.Type.IsArray)
                 {
-                    valueChanged = EngineNS.UEngine.Instance.PGTypeEditorManagerInstance.ArrayEditor.OnDraw(in info, out newValue);
+                    if (EngineNS.UEngine.Instance.PGTypeEditorManagerInstance.ArrayEditor != null)
+                        valueChanged = EngineNS.UEngine.Instance.PGTypeEditorManagerInstance.ArrayEditor.OnDraw(in info, out newValue);
                 }
                 else if (info.Type.SystemType.GetInterface(typeof(System.Collections.IList).FullName) != null)
                 {
-                    valueChanged = EngineNS.UEngine.Instance.PGTypeEditorManagerInstance.ListEditor.OnDraw(in info, out newValue);
+                    if (EngineNS.UEngine.Instance.PGTypeEditorManagerInstance.ListEditor != null)
+                        valueChanged = EngineNS.UEngine.Instance.PGTypeEditorManagerInstance.ListEditor.OnDraw(in info, out newValue);
                 }
                 else if (info.Type.SystemType.GetInterface(typeof(System.Collections.IDictionary).FullName) != null)
                 {
-                    valueChanged = EngineNS.UEngine.Instance.PGTypeEditorManagerInstance.DictionaryEditor.OnDraw(in info, out newValue);
+                    if (EngineNS.UEngine.Instance.PGTypeEditorManagerInstance.DictionaryEditor != null)
+                        valueChanged = EngineNS.UEngine.Instance.PGTypeEditorManagerInstance.DictionaryEditor.OnDraw(in info, out newValue);
                 }
                 else
                 {

@@ -4,7 +4,7 @@ using System.Text;
 
 namespace EngineNS.Graphics.Pipeline.Shader.CommanShading
 {
-    public class USlateGUIShading : UShadingEnv
+    public class USlateGUIShading : UGraphicsShadingEnv
     {
         public USlateGUIShading()
         {
@@ -25,14 +25,14 @@ namespace EngineNS.Graphics.Pipeline.Shader.CommanShading
             //    {
             //        PerShadingCBuffer = UEngine.Instance.GfxDevice.RenderContext.CreateConstantBuffer(gpuProgram, cbIndex);
             //        PerShadingCBuffer.SetMatrix(0, in Matrix.Identity);
-            //        var RenderColor = new Color4(1, 1, 1, 1);
+            //        var RenderColor = new Color4f(1, 1, 1, 1);
             //        PerShadingCBuffer.SetValue(1, in RenderColor);
             //    }
             //    drawcall.mCoreObject.BindCBufferAll(cbIndex, PerShadingCBuffer.mCoreObject);
             //}
         }
     }
-    public class UCopy2DShading : UShadingEnv
+    public class UCopy2DShading : UGraphicsShadingEnv
     {
         public UCopy2DShading()
         {
@@ -53,7 +53,7 @@ namespace EngineNS.Graphics.Pipeline.Shader.CommanShading
                 {
                     PerShadingCBuffer = UEngine.Instance.GfxDevice.RenderContext.CreateCBV(cbIndex.GetShaderBinder(NxRHI.EShaderType.SDT_Unknown));
                     PerShadingCBuffer.SetValue(cbIndex.FindField("RenderMatrix"), in Matrix.Identity);
-                    var RenderColor = new Color4(1, 1, 1, 1);
+                    var RenderColor = new Color4f(1, 1, 1, 1);
                     PerShadingCBuffer.SetValue(cbIndex.FindField("RenderColor"), in RenderColor);
                 }
                 drawcall.BindCBuffer(cbIndex, PerShadingCBuffer);
@@ -79,7 +79,7 @@ namespace EngineNS.Graphics.Pipeline.Shader.CommanShading
             //}
         }
     }
-    public class URect2DShading : UShadingEnv
+    public class URect2DShading : UGraphicsShadingEnv
     {
         public URect2DShading()
         {
@@ -100,7 +100,7 @@ namespace EngineNS.Graphics.Pipeline.Shader.CommanShading
                 {
                     PerShadingCBuffer = UEngine.Instance.GfxDevice.RenderContext.CreateCBV(cbIndex.GetShaderBinder(NxRHI.EShaderType.SDT_Unknown));
                     PerShadingCBuffer.SetValue(cbIndex.FindField("RenderMatrix"), in Matrix.Identity);
-                    var RenderColor = new Color4(1, 1, 1, 1);
+                    var RenderColor = new Color4f(1, 1, 1, 1);
                     PerShadingCBuffer.SetValue(cbIndex.FindField("RenderColor"), in RenderColor);
                 }
                 drawcall.BindCBuffer(cbIndex, PerShadingCBuffer);

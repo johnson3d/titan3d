@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using static Org.BouncyCastle.Math.EC.ECCurve;
 
 namespace EngineNS.Rtti
 {
@@ -33,6 +34,7 @@ namespace EngineNS
     [Rtti.Meta]
     public partial class UEngineConfig
     {
+        [Rtti.Meta]
         public bool UseRenderDoc { get; set; } = false;
         public string ConfigName;
         [Rtti.Meta]
@@ -101,6 +103,8 @@ namespace EngineNS
         public string RootServerURL { get; set; } = "127.0.0.1:2333";
         [Rtti.Meta]
         public Bricks.Network.RPC.EAuthority DefaultAuthority { get; set; } = Bricks.Network.RPC.EAuthority.Server;
+        [Rtti.Meta]
+        public List<TtGlobalConfig> GlobalConfigs { get; set; } = new List<TtGlobalConfig>();
     }
     public partial class URuntimeConfig
     {
@@ -114,10 +118,10 @@ namespace EngineNS
         [Rtti.Meta]
         public UEngineConfig Config { get; set; } = new UEngineConfig();
         public URuntimeConfig RuntimeConfig { get; } = new URuntimeConfig();
-        public IO.FileManager FileManager
+        public IO.TtFileManager FileManager
         {
             get;
-        } = new IO.FileManager();
+        } = new IO.TtFileManager();
         [Rtti.Meta]
         public UTickableManager TickableManager
         {
@@ -130,7 +134,7 @@ namespace EngineNS
 
         public ulong CurrentTickFrame { get; set; } = 0;
         public long CurrentTickCount { get; set; }
-        public int ElapseTickCount { get; set; }
+        public float ElapseTickCount { get; set; }  // 毫秒
         public int FrameCount { get; set; }
         public float TickCountSecond { get; set; }
         public float ElapsedSecond { get; set; }
@@ -142,18 +146,18 @@ namespace EngineNS
         {
             get;
         } = new Profiler.UNativeMemory();
-        public static async System.Threading.Tasks.Task<bool> StartEngine(UEngine engine, string cfgFile, bool useRenderDoc)
+        public static async System.Threading.Tasks.Task<bool> StartEngine(UEngine engine, string cfgFile)
         {
             System.Threading.Thread.CurrentThread.Name = "Main";
             mInstance = engine;
-            return await mInstance.PreInitEngine(cfgFile, useRenderDoc);
+            return await mInstance.PreInitEngine(cfgFile);
         }
         static unsafe void NativeAssertEvent(void* arg0, void* arg1, int arg2)
         {
             System.Diagnostics.Debug.Assert(false);
         }
         static unsafe CoreSDK.FDelegate_FAssertEvent OnNativeAssertEvent = NativeAssertEvent;
-        public async System.Threading.Tasks.Task<bool> PreInitEngine(string cfgFile, bool useRenderDoc)
+        public async System.Threading.Tasks.Task<bool> PreInitEngine(string cfgFile)
         {
             RttiStructManager.GetInstance().BuildRtti();
 
@@ -178,10 +182,10 @@ namespace EngineNS
             StartSystemThreads();
 
             if (cfgFile == null)
-                cfgFile = FileManager.GetRoot(IO.FileManager.ERootDir.Game) + "EngineConfig.cfg";
+                cfgFile = FileManager.GetRoot(IO.TtFileManager.ERootDir.Game) + "EngineConfig.cfg";
             Profiler.Log.WriteLine(Profiler.ELogTag.Info, "System", $"Load Application Config:{cfgFile}");
 
-            Config = IO.FileManager.LoadXmlToObject<UEngineConfig>(cfgFile);
+            Config = IO.TtFileManager.LoadXmlToObject<UEngineConfig>(cfgFile);
             if (Config == null)
             {
                 Config = new UEngineConfig();
@@ -190,10 +194,28 @@ namespace EngineNS
                 Config.DefaultMaterialInstance = RName.GetRName("material/box_wite.uminst", RName.ERNameType.Game);
                 Config.MainWindowType = Rtti.UTypeDesc.TypeStr(typeof(EngineNS.Editor.UMainEditorApplication));
                 Config.MainRPolicyName = RName.GetRName("utest/deferred.rpolicy", RName.ERNameType.Game);
-                IO.FileManager.SaveObjectToXml(cfgFile, Config);
+                Config.GlobalConfigs.Add(new TtGlobalConfig()
+                {
+                    Name = "RenderDocCallStacks",
+                    Value = 1.ToString(),
+                    ValueType = NxRHI.EShaderVarType.SVT_Int
+                });
+                Config.GlobalConfigs.Add(new TtGlobalConfig()
+                {
+                    Name = "RenderDocSaveAllInitials",
+                    Value = 1.ToString(),
+                    ValueType = NxRHI.EShaderVarType.SVT_Int
+                });
+                IO.TtFileManager.SaveObjectToXml(cfgFile, Config);
             }
-            Config.ConfigName = "Titan3D  [" + IO.FileManager.GetPureName(cfgFile) + "]";
-            Config.UseRenderDoc = useRenderDoc;
+            Config.ConfigName = "Titan3D  [" + IO.TtFileManager.GetPureName(cfgFile) + "]";
+            //Config.UseRenderDoc = useRenderDoc;
+            foreach(var i in Config.GlobalConfigs)
+            {
+                i.SetToGlobalConfig();
+            }
+
+            this.PluginModuleManager.InitPlugins(this);
 
             GatherModules();
 
@@ -221,18 +243,16 @@ namespace EngineNS
             var tEnd = Support.Time.HighPrecision_GetTickCount();
             Profiler.Log.WriteLine(Profiler.ELogTag.Info, "System", $"Engine PreInit Time:{(tEnd - t1) / 1000} ms");
 
-            this.PluginModuleManager.InitPlugins(this);
             return true;
         }
         [ThreadStatic]
         static Profiler.TimeScope Scope_Tick = Profiler.TimeScopeManager.GetTimeScope(typeof(UEngine), nameof(Tick));
-        public uint CaptureRenderDocFrame = uint.MaxValue;
         public bool Tick()
         {
             using(new Profiler.TimeScopeHelper(Scope_Tick))
             {
                 var t1 = Support.Time.HighPrecision_GetTickCount();
-                ElapseTickCount = (int)((t1 - CurrentTickCount) / 1000);
+                ElapseTickCount = (t1 - CurrentTickCount) * 0.001f;
                 CurrentTickCount = t1;
                 CurrentTickFrame++;
                 CoreSDK.UpdateEngineFrame(CurrentTickFrame);
@@ -242,26 +262,20 @@ namespace EngineNS
                     return false;
                 }
 
-                base.TickModules();
+                var bCapturing = GfxDevice.RenderCmdQueue.BeginFrameCapture();
 
-                if (CaptureRenderDocFrame == 0)
-                    IRenderDocTool.GetInstance().StartFrameCapture();
-                this.ThreadMain.Tick();
-                if (CaptureRenderDocFrame == 0)
+                //Do engine frame tick
                 {
-                    IRenderDocTool.GetInstance().EndFrameCapture();
-                    ulong timeStamp = 0;
-                    var file = IRenderDocTool.GetInstance().GetCapture(0, ref timeStamp);
-                    if (!string.IsNullOrEmpty(file))
-                    {
-                        var tarFile = IO.FileManager.GetPureName(file) + ".rdc";
-                        System.IO.File.Move(file, FileManager.GetPath(IO.FileManager.ERootDir.Cache, IO.FileManager.ESystemDir.RenderDoc) + tarFile); 
-                    }
-                    CaptureRenderDocFrame = uint.MaxValue;
+                    TickBeginFrame();
+                    base.TickModules();
+                    this.ThreadMain.Tick();
+                    TickSync();
+                    FContextTickableManager.GetInstance().ThreadTick();
+                    base.EndFrameModules();
                 }
-                CaptureRenderDocFrame--;
 
-                base.EndFrameModules();
+                if (bCapturing)
+                    GfxDevice.RenderCmdQueue.EndFrameCapture();
 
                 InputSystem.AfterTick();
 
@@ -300,6 +314,8 @@ namespace EngineNS
             EngineNS.UCs2CppBase.FinalCleanupNativeCoreProvider();
             CoreSDK.FinalF2MManager();
             RootFormManager.ClearRootForms();
+
+            TtObjectPoolManager.Instance.Cleanup();
             mInstance = null;
         }
     }

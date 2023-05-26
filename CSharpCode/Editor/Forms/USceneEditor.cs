@@ -6,6 +6,10 @@ namespace EngineNS.Editor.Forms
 {
     public class USceneEditor : Editor.IAssetEditor, ITickable, IRootForm
     {
+        public int GetTickOrder()
+        {
+            return 0;
+        }
         public class USceneEditorViewport : EGui.Slate.UWorldViewportSlate
         {
             public EGui.Controls.PropertyGrid.PropertyGrid NodeInspector = new EGui.Controls.PropertyGrid.PropertyGrid();
@@ -48,6 +52,8 @@ namespace EngineNS.Editor.Forms
         protected bool mVisible = true;
         public bool Visible { get => mVisible; set => mVisible = value; }
         public uint DockId { get; set; }
+        ImGuiWindowClass mDockKeyClass;
+        public ImGuiWindowClass DockKeyClass => mDockKeyClass;
         public ImGuiCond_ DockCond { get; set; } = ImGuiCond_.ImGuiCond_FirstUseEver;
 
         public GamePlay.Scene.UScene Scene;
@@ -55,6 +61,9 @@ namespace EngineNS.Editor.Forms
         public USceneEditorOutliner mWorldOutliner;
         
         public EGui.Controls.PropertyGrid.PropertyGrid ScenePropGrid = new EGui.Controls.PropertyGrid.PropertyGrid();
+        public EGui.Controls.PropertyGrid.PropertyGrid EditorPropGrid = new EGui.Controls.PropertyGrid.PropertyGrid();
+        public Graphics.Pipeline.URenderPolicy RenderPolicy { get => PreviewViewport.RenderPolicy; }
+
         List<EGui.UIProxy.MenuItemProxy> mMenuItems = new List<EGui.UIProxy.MenuItemProxy>();
         public void InitMainMenu()
         {
@@ -95,6 +104,67 @@ namespace EngineNS.Editor.Forms
                                 PreviewViewport.RenderPolicy.DisableHDR = !this.PreviewViewport.RenderPolicy.DisableHDR;
                                 item.Selected = PreviewViewport.RenderPolicy.DisableHDR;
                             },
+                        },
+                        new EGui.UIProxy.MenuItemProxy()
+                        {
+                            MenuName = "TypeAA",
+                            SubMenus = new List<EGui.UIProxy.IUIProxyBase>()
+                            {
+                                new EGui.UIProxy.MenuItemProxy()
+                                {
+                                    MenuName = "None",
+                                    //Selected = PreviewViewport.RenderPolicy.TypeAA == Graphics.Pipeline.URenderPolicy.ETypeAA.None,
+                                    Action = (EGui.UIProxy.MenuItemProxy item, Support.UAnyPointer data)=>
+                                    {
+                                        PreviewViewport.RenderPolicy.TypeAA = Graphics.Pipeline.URenderPolicy.ETypeAA.None;
+                                        item.Selected = PreviewViewport.RenderPolicy.TypeAA == Graphics.Pipeline.URenderPolicy.ETypeAA.None;                                        
+                                        var typeAA = EGui.UIProxy.MenuItemProxy.FindSubMenu(this.mMenuItems[0], new string[]{"TypeAA" });
+                                        if (typeAA != null)
+                                        {
+                                            var tm = typeAA.SubMenus[1] as EGui.UIProxy.MenuItemProxy;
+                                            tm.Selected = false;
+                                            tm = typeAA.SubMenus[2] as EGui.UIProxy.MenuItemProxy;
+                                            tm.Selected = false;
+                                        }
+                                    },
+                                },
+                                new EGui.UIProxy.MenuItemProxy()
+                                {
+                                    MenuName = "FSAA",
+                                    //Selected = PreviewViewport.RenderPolicy.TypeAA == Graphics.Pipeline.URenderPolicy.ETypeAA.Fsaa,
+                                    Action = (EGui.UIProxy.MenuItemProxy item, Support.UAnyPointer data)=>
+                                    {
+                                        PreviewViewport.RenderPolicy.TypeAA = Graphics.Pipeline.URenderPolicy.ETypeAA.Fsaa;
+                                        item.Selected = PreviewViewport.RenderPolicy.TypeAA == Graphics.Pipeline.URenderPolicy.ETypeAA.Fsaa;
+                                        var typeAA = EGui.UIProxy.MenuItemProxy.FindSubMenu(this.mMenuItems[0], new string[]{"TypeAA" });
+                                        if (typeAA != null)
+                                        {
+                                            var tm = typeAA.SubMenus[0] as EGui.UIProxy.MenuItemProxy;
+                                            tm.Selected = false;
+                                            tm = typeAA.SubMenus[2] as EGui.UIProxy.MenuItemProxy;
+                                            tm.Selected = false;
+                                        }
+                                    },
+                                },
+                                new EGui.UIProxy.MenuItemProxy()
+                                {
+                                    MenuName = "TAA",
+                                    //Selected = PreviewViewport.RenderPolicy.TypeAA == Graphics.Pipeline.URenderPolicy.ETypeAA.Taa,
+                                    Action = (EGui.UIProxy.MenuItemProxy item, Support.UAnyPointer data)=>
+                                    {
+                                        PreviewViewport.RenderPolicy.TypeAA = Graphics.Pipeline.URenderPolicy.ETypeAA.Taa;
+                                        item.Selected = PreviewViewport.RenderPolicy.TypeAA == Graphics.Pipeline.URenderPolicy.ETypeAA.Taa;
+                                        var typeAA = EGui.UIProxy.MenuItemProxy.FindSubMenu(this.mMenuItems[0], new string[]{"TypeAA" });
+                                        if (typeAA != null)
+                                        {
+                                            var tm = typeAA.SubMenus[0] as EGui.UIProxy.MenuItemProxy;
+                                            tm.Selected = false;
+                                            tm = typeAA.SubMenus[1] as EGui.UIProxy.MenuItemProxy;
+                                            tm.Selected = false;
+                                        }
+                                    },
+                                },
+                            }
                         },
                         new EGui.UIProxy.MenuItemProxy()
                         {
@@ -171,18 +241,19 @@ namespace EngineNS.Editor.Forms
         }
         ~USceneEditor()
         {
-            Cleanup();
+            Dispose();
         }
-        public void Cleanup()
+        public void Dispose()
         {
             Scene = null;
-            PreviewViewport?.Cleanup();
-            PreviewViewport = null;
+            CoreSDK.DisposeObject(ref PreviewViewport);
             ScenePropGrid.Target = null;
+            EditorPropGrid.Target = null;
         }
         public async System.Threading.Tasks.Task<bool> Initialize()
         {
             await ScenePropGrid.Initialize();
+            await EditorPropGrid.Initialize();
 
             InitMainMenu();
             return true;
@@ -220,6 +291,7 @@ namespace EngineNS.Editor.Forms
             Scene.Parent = PreviewViewport.World.Root;
 
             ScenePropGrid.Target = Scene;
+            EditorPropGrid.Target = this;
 
             mWorldOutliner.Title = $"Outliner:{name}";
 
@@ -231,9 +303,31 @@ namespace EngineNS.Editor.Forms
             //UEngine.Instance.EventProcessorManager.UnregProcessor(PreviewViewport);
             PreviewViewport.NodeInspector.Target = null;
             UEngine.Instance.TickableManager.RemoveTickable(this);
-            Cleanup();
+            Dispose();
         }
-        public float LeftWidth = 0;
+        bool mDockInitialized = false;
+        protected void ResetDockspace(bool force = false)
+        {
+            var pos = ImGuiAPI.GetCursorPos();
+            var id = ImGuiAPI.GetID(AssetName.Name + "_Dockspace");
+            mDockKeyClass.ClassId = id;
+            ImGuiAPI.DockSpace(id, Vector2.Zero, ImGuiDockNodeFlags_.ImGuiDockNodeFlags_None, mDockKeyClass);
+            if (mDockInitialized && !force)
+                return;
+            ImGuiAPI.DockBuilderRemoveNode(id);
+            ImGuiAPI.DockBuilderAddNode(id, ImGuiDockNodeFlags_.ImGuiDockNodeFlags_None);
+            ImGuiAPI.DockBuilderSetNodePos(id, pos);
+            ImGuiAPI.DockBuilderSetNodeSize(id, Vector2.One);
+            mDockInitialized = true;
+
+            var rightId = id;
+            uint leftId = 0;
+            ImGuiAPI.DockBuilderSplitNode(rightId, ImGuiDir_.ImGuiDir_Left, 0.2f, ref leftId, ref rightId);
+
+            ImGuiAPI.DockBuilderDockWindow(EGui.UIProxy.DockProxy.GetDockWindowName("Left", mDockKeyClass), leftId);
+            ImGuiAPI.DockBuilderDockWindow(EGui.UIProxy.DockProxy.GetDockWindowName("Preview", mDockKeyClass), rightId);
+            ImGuiAPI.DockBuilderFinish(id);
+        }
         public Vector2 WindowPos;
         public Vector2 WindowSize = new Vector2(800, 600);
         public unsafe void OnDraw()
@@ -243,17 +337,12 @@ namespace EngineNS.Editor.Forms
 
             var pivot = new Vector2(0);
             ImGuiAPI.SetNextWindowSize(in WindowSize, ImGuiCond_.ImGuiCond_FirstUseEver);
-            ImGuiAPI.SetNextWindowDockID(DockId, DockCond);
-            if (ImGuiAPI.Begin(AssetName.Name, ref mVisible, 
+            if (EGui.UIProxy.DockProxy.BeginMainForm(AssetName.Name, this, 
                 ImGuiWindowFlags_.ImGuiWindowFlags_NoSavedSettings |
                 ImGuiWindowFlags_.ImGuiWindowFlags_MenuBar))
             {
                 DrawMainMenu();
 
-                if (ImGuiAPI.IsWindowDocked())
-                {
-                    DockId = ImGuiAPI.GetWindowDockID();
-                }
                 if (ImGuiAPI.IsWindowFocused(ImGuiFocusedFlags_.ImGuiFocusedFlags_RootAndChildWindows))
                 {
                     var mainEditor = UEngine.Instance.GfxDevice.SlateApplication as Editor.UMainEditorApplication;
@@ -266,24 +355,12 @@ namespace EngineNS.Editor.Forms
                 //var sz = new Vector2(-1);
                 //ImGuiAPI.BeginChild("Client", ref sz, false, ImGuiWindowFlags_.)
                 ImGuiAPI.Separator();
-                ImGuiAPI.Columns(2, null, true);
-                if (LeftWidth == 0)
-                {
-                    ImGuiAPI.SetColumnWidth(0, 300);
-                }
-                LeftWidth = ImGuiAPI.GetColumnWidth(0);
-                var min = ImGuiAPI.GetWindowContentRegionMin();
-                var max = ImGuiAPI.GetWindowContentRegionMin();
-
-                DrawLeft(ref min, ref max);
-                ImGuiAPI.NextColumn();
-
-                DrawRight(ref min, ref max);
-                ImGuiAPI.NextColumn();
-
-                ImGuiAPI.Columns(1, null, true);
             }
-            ImGuiAPI.End();
+            ResetDockspace();
+            EGui.UIProxy.DockProxy.EndMainForm();
+
+            DrawLeft();
+            DrawRight();
         }
         protected void DrawToolBar()
         {
@@ -355,10 +432,11 @@ namespace EngineNS.Editor.Forms
             }
             ImGuiAPI.EndGroup();
         }
-        protected unsafe void DrawLeft(ref Vector2 min, ref Vector2 max)
+        bool mLeftShow = true;
+        protected unsafe void DrawLeft()
         {
             var sz = new Vector2(-1);
-            if (ImGuiAPI.BeginChild("LeftView", in sz, true, ImGuiWindowFlags_.ImGuiWindowFlags_None))
+            if (EGui.UIProxy.DockProxy.BeginPanel(mDockKeyClass, "Left", ref mLeftShow, ImGuiWindowFlags_.ImGuiWindowFlags_None))
             {
                 if (ImGuiAPI.BeginTabBar("SceneTab", ImGuiTabBarFlags_.ImGuiTabBarFlags_None))
                 {
@@ -400,6 +478,10 @@ namespace EngineNS.Editor.Forms
                         {
                             ScenePropGrid.OnDraw(true, false, false);
                         }
+                        if (ImGuiAPI.CollapsingHeader("Editor", ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_None))
+                        {
+                            EditorPropGrid.OnDraw(true, false, false);
+                        }
                         mWorldOutliner.DrawAsChildWindow(ref sz);
 
                         ImGuiAPI.EndTabItem();
@@ -412,12 +494,17 @@ namespace EngineNS.Editor.Forms
                     ImGuiAPI.EndTabBar();
                 }   
             }
-            ImGuiAPI.EndChild();
+            EGui.UIProxy.DockProxy.EndPanel();
         }
-        protected unsafe void DrawRight(ref Vector2 min, ref Vector2 max)
+        bool mRightShow = true;
+        protected unsafe void DrawRight()
         {
-            PreviewViewport.VieportType = Graphics.Pipeline.UViewportSlate.EVieportType.ChildWindow;
-            PreviewViewport.OnDraw();
+            if (EGui.UIProxy.DockProxy.BeginPanel(mDockKeyClass, "Preview", ref mRightShow, ImGuiWindowFlags_.ImGuiWindowFlags_None))
+            {
+                PreviewViewport.VieportType = Graphics.Pipeline.UViewportSlate.EVieportType.ChildWindow;
+                PreviewViewport.OnDraw();
+            }
+            EGui.UIProxy.DockProxy.EndPanel();
         }
 
         public void OnEvent(in Bricks.Input.Event e)
@@ -427,18 +514,22 @@ namespace EngineNS.Editor.Forms
         #region Tickable
         [ThreadStatic]
         private static Profiler.TimeScope ScopeTick = Profiler.TimeScopeManager.GetTimeScope(typeof(USceneEditor), nameof(TickLogic));
-        public void TickLogic(int ellapse)
+        public void TickLogic(float ellapse)
         {
             using (new Profiler.TimeScopeHelper(ScopeTick))
             {
                 PreviewViewport.TickLogic(ellapse);
             }
         }
-        public void TickRender(int ellapse)
+        public void TickRender(float ellapse)
         {
             
         }
-        public void TickSync(int ellapse)
+        public void TickBeginFrame(float ellapse)
+        {
+
+        }
+        public void TickSync(float ellapse)
         {
             PreviewViewport.TickSync(ellapse);
         }

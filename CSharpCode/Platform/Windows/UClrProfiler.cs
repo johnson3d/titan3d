@@ -13,17 +13,18 @@ namespace EngineNS.Windows
 
         public async System.Threading.Tasks.Task<bool> Initialize()
         {
-            await EngineNS.Thread.AsyncDummyClass.DummyFunc();
+            await EngineNS.Thread.TtAsyncDummyClass.DummyFunc();
             return true;
         }
 
-        public void Cleanup()
+        public void Dispose()
         {
 
         }
 
         public bool Visible { get; set; } = true;
         public uint DockId { get; set; }
+        public ImGuiWindowClass DockKeyClass { get; }
         public ImGuiCond_ DockCond { get; set; } = ImGuiCond_.ImGuiCond_FirstUseEver;
         public List<ClrString> mClrLogs = new List<ClrString>();
         protected void UpdateLogs()
@@ -46,12 +47,12 @@ namespace EngineNS.Windows
                 return;
             
             Vector2 size = new Vector2(0, 0);
-            if (EGui.UIProxy.DockProxy.BeginMainForm("ClrProfiler", null, ImGuiWindowFlags_.ImGuiWindowFlags_None))
+            if (EGui.UIProxy.DockProxy.BeginMainForm("ClrProfiler", this, ImGuiWindowFlags_.ImGuiWindowFlags_None))
             {
                 UpdateLogs();
                 foreach (var i in mClrLogs)
                 {
-                    ImGuiAPI.TextAsiPointer(&i.m_mString);
+                    ImGuiAPI.TextAsPointer((sbyte*)&i.m_mString);
                 }
             }
             EGui.UIProxy.DockProxy.EndMainForm();

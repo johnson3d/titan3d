@@ -1,5 +1,7 @@
-﻿using System;
+﻿using NPOI.HPSF;
+using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Runtime.InteropServices;
 
 namespace EngineNS.Editor.ShaderCompiler
@@ -47,11 +49,58 @@ namespace EngineNS.Editor.ShaderCompiler
             GetShaderCodeStream = this.GetHLSLCode;
             mShaderCompiler = new NxRHI.UShaderCompiler(GetShaderCodeStream);
         }
+        private static void FixRootPath(ref string file)
+        {
+            var repPos = file.IndexOf("@Engine/");
+            if (repPos >= 0)
+            {
+                file = file.Substring(repPos);
+                file = file.Replace("@Engine/", UEngine.Instance.FileManager.GetRoot(IO.TtFileManager.ERootDir.Engine));
+            }
+            else
+            {
+                repPos = file.IndexOf("@Game/");
+                if (repPos >= 0)
+                {
+                    file = file.Substring(repPos);
+                    file = file.Replace("@Game/", UEngine.Instance.FileManager.GetRoot(IO.TtFileManager.ERootDir.Game));
+                }
+            }
+        }
+        public static NxRHI.FShaderCode GetIncludeCode(string file)
+        {
+            FixRootPath(ref file);
+            RName rn = null;
+            if (file.StartsWith(UEngine.Instance.FileManager.GetRoot(IO.TtFileManager.ERootDir.Engine)))
+            {
+                var path = IO.TtFileManager.GetRelativePath(UEngine.Instance.FileManager.GetRoot(IO.TtFileManager.ERootDir.Engine), file);
+                rn = RName.GetRName(path, RName.ERNameType.Engine);
+            }
+            else if (file.StartsWith(UEngine.Instance.FileManager.GetRoot(IO.TtFileManager.ERootDir.Game)))
+            {
+                var path = IO.TtFileManager.GetRelativePath(UEngine.Instance.FileManager.GetRoot(IO.TtFileManager.ERootDir.Game), file);
+                rn = RName.GetRName(path, RName.ERNameType.Game);
+            }
+            else
+            {
+                rn = RName.GetRName(file, RName.ERNameType.Engine);
+            }
+            if (rn != null)
+            {
+                var code = UShaderCodeManager.Instance.GetShaderCodeProvider(rn);
+                if (code != null)
+                {
+                    return code.SourceCode.mCoreObject;
+                }
+            }
+            return new NxRHI.FShaderCode();
+        }
         private NxRHI.FShaderCompiler.FDelegate_FnGetShaderCodeStream GetShaderCodeStream;
         //[UnmanagedFunctionPointer(System.Runtime.InteropServices.CallingConvention.Cdecl)]
         private NxRHI.FShaderCode* GetHLSLCode(sbyte* includeName)
         {
             var file = System.Runtime.InteropServices.Marshal.PtrToStringAnsi((IntPtr)includeName);
+            FixRootPath(ref file);
 
             if (UserInclude != null)
             {
@@ -84,14 +133,14 @@ namespace EngineNS.Editor.ShaderCompiler
                 else
                     return (NxRHI.FShaderCode*)0;
             }
-            else if (file.StartsWith(UEngine.Instance.FileManager.GetRoot(IO.FileManager.ERootDir.Engine)))
+            else if (file.StartsWith(UEngine.Instance.FileManager.GetRoot(IO.TtFileManager.ERootDir.Engine)))
             {
-                var path = IO.FileManager.GetRelativePath(UEngine.Instance.FileManager.GetRoot(IO.FileManager.ERootDir.Engine), file);
+                var path = IO.TtFileManager.GetRelativePath(UEngine.Instance.FileManager.GetRoot(IO.TtFileManager.ERootDir.Engine), file);
                 rn = RName.GetRName(path, RName.ERNameType.Engine);
             }
-            else if (file.StartsWith(UEngine.Instance.FileManager.GetRoot(IO.FileManager.ERootDir.Game)))
+            else if (file.StartsWith(UEngine.Instance.FileManager.GetRoot(IO.TtFileManager.ERootDir.Game)))
             {
-                var path = IO.FileManager.GetRelativePath(UEngine.Instance.FileManager.GetRoot(IO.FileManager.ERootDir.Game), file);
+                var path = IO.TtFileManager.GetRelativePath(UEngine.Instance.FileManager.GetRoot(IO.TtFileManager.ERootDir.Game), file);
                 rn = RName.GetRName(path, RName.ERNameType.Game);
             }
             else
@@ -155,9 +204,43 @@ namespace EngineNS.Editor.ShaderCompiler
         }
         public NxRHI.UShaderDesc CompileShader(string shader, string entry, NxRHI.EShaderType type,
             Graphics.Pipeline.Shader.UShadingEnv shadingEnvshadingEnv, Graphics.Pipeline.Shader.UMaterial mtl, Type mdfType,
-            NxRHI.UShaderDefinitions defines, UHLSLInclude incProvider, string sm = null, bool bDebugShader = true)
+            NxRHI.UShaderDefinitions defines, UHLSLInclude incProvider, string sm = null, bool bDebugShader = true, string extHlslVersion = null)
         {
+            var code_text = IO.TtFileManager.ReadAllText(shader);
+            var metaIndex = code_text.IndexOf($"/**Meta Begin:({entry})");
+            if (metaIndex >= 0)
+            {
+                code_text = code_text.Substring(metaIndex + $"/**Meta Begin:({entry})".Length);
+                metaIndex = code_text.IndexOf($"Meta End:({entry})**/");
+                if (metaIndex >= 0)
+                {
+                    code_text = code_text.Substring(0, metaIndex);
+                    var lines = code_text.Split("\r\n");
+                    foreach(var i in lines)
+                    {
+                        if (string.IsNullOrEmpty(i))
+                            continue;
+                        var pairs = i.Split('=');
+                        if (pairs.Length == 2)
+                        {
+                            switch (pairs[0])
+                            {
+                                case "SM":
+                                    sm = pairs[1];
+                                    break;
+                                case "HLSL":
+                                    extHlslVersion = pairs[1];
+                                    if (extHlslVersion == "none")
+                                        extHlslVersion = null;
+                                    break;
+                            }
+                        }
+                    }
+                }
+            }
             var desc = new NxRHI.UShaderDesc(type);
+            if (shadingEnvshadingEnv != null)
+                desc.PermutationId = shadingEnvshadingEnv.CurrentPermutationId;
             UserInclude = incProvider;
             Material = mtl;
             MdfQueueType = Rtti.UTypeDesc.TypeOf(mdfType);
@@ -174,9 +257,10 @@ namespace EngineNS.Editor.ShaderCompiler
                     {
                         defPtr.MergeDefinitions(mtl.Defines);
                     }
-                    if (shadingEnvshadingEnv != null)
+                    var graphicsEnv = shadingEnvshadingEnv as Graphics.Pipeline.Shader.UGraphicsShadingEnv;
+                    if (graphicsEnv != null)
                     {
-                        var shadingNeeds = shadingEnvshadingEnv.GetNeedStreams();
+                        var shadingNeeds = graphicsEnv.GetNeedStreams();
                         if(shadingNeeds!=null)
                         {
                             foreach (var i in shadingNeeds)
@@ -195,6 +279,16 @@ namespace EngineNS.Editor.ShaderCompiler
                                     defPtr.AddDefine(GetVertexStreamDefine(i), "1");
                                 }
                             }
+                        }
+                    }
+                    else
+                    {
+                        var computeEnv = shadingEnvshadingEnv as Graphics.Pipeline.Shader.UComputeShadingEnv;
+                        if (computeEnv != null)
+                        {
+                            defines.mCoreObject.AddDefine("DispatchX", $"{computeEnv.DispatchArg.X}");
+                            defines.mCoreObject.AddDefine("DispatchY", $"{computeEnv.DispatchArg.Y}");
+                            defines.mCoreObject.AddDefine("DispatchZ", $"{computeEnv.DispatchArg.Z}");
                         }
                     }
                     switch (type)
@@ -224,55 +318,71 @@ namespace EngineNS.Editor.ShaderCompiler
                         {
                             compile_sm = "5_0";
                         }
-                        var ok = mShaderCompiler.CompileShader(desc, shader, entry, type, compile_sm, defPtr, NxRHI.EShaderLanguage.SL_DXBC, bDebugShader);
+                        var ok = mShaderCompiler.CompileShader(desc, shader, entry, type, compile_sm, defPtr, NxRHI.EShaderLanguage.SL_DXBC, bDebugShader, extHlslVersion);
                         if (ok == false)
                             return null;
                     }
                     if (cfg.CookDXIL)
                     {
                         defPtr.AddDefine("RHI_TYPE", "RHI_DX12");
+                        if (extHlslVersion != null)
+                        {
+                            defPtr.AddDefine("HLSL_VERSION", extHlslVersion);
+                        }
                         var compile_sm = sm;
                         if (sm == null)
                         {
-                            compile_sm = "6_2";
+                            compile_sm = "6_5";
                         }
-                        var ok = mShaderCompiler.CompileShader(desc, shader, entry, type, compile_sm, defPtr, NxRHI.EShaderLanguage.SL_DXIL, bDebugShader);
+                        var ok = mShaderCompiler.CompileShader(desc, shader, entry, type, compile_sm, defPtr, NxRHI.EShaderLanguage.SL_DXIL, bDebugShader, extHlslVersion);
                         if (ok == false)
                             return null;
                     }
                     if (cfg.CookGLSL)
                     {
                         defPtr.AddDefine("RHI_TYPE", "RHI_GL");
+                        if (extHlslVersion != null)
+                        {
+                            defPtr.AddDefine("HLSL_VERSION", extHlslVersion);
+                        }
                         var compile_sm = sm;
                         if (sm == null)
                         {
-                            compile_sm = "6_2";
+                            compile_sm = "6_5";
                         }
-                        var ok = mShaderCompiler.CompileShader(desc, shader, entry, type, compile_sm, defPtr, NxRHI.EShaderLanguage.SL_DXBC, bDebugShader);
+                        var ok = mShaderCompiler.CompileShader(desc, shader, entry, type, compile_sm, defPtr, NxRHI.EShaderLanguage.SL_DXBC, bDebugShader, extHlslVersion);
                         if (ok == false)
                             return null;
                     }
                     if(cfg.CookMETAL)
                     {
                         defPtr.AddDefine("RHI_TYPE", "RHI_MTL");
+                        if (extHlslVersion != null)
+                        {
+                            defPtr.AddDefine("HLSL_VERSION", extHlslVersion);
+                        }
                         var compile_sm = sm;
                         if (sm == null)
                         {
-                            compile_sm = "6_2";
+                            compile_sm = "6_5";
                         }
-                        var ok = mShaderCompiler.CompileShader(desc, shader, entry, type, compile_sm, defPtr, NxRHI.EShaderLanguage.SL_DXBC, bDebugShader);
+                        var ok = mShaderCompiler.CompileShader(desc, shader, entry, type, compile_sm, defPtr, NxRHI.EShaderLanguage.SL_DXBC, bDebugShader, extHlslVersion);
                         if (ok == false)
                             return null;
                     }
                     if (cfg.CookSPIRV)
                     {
                         defPtr.AddDefine("RHI_TYPE", "RHI_VK");
+                        if (extHlslVersion != null)
+                        {
+                            defPtr.AddDefine("HLSL_VERSION", extHlslVersion);
+                        }
                         var compile_sm = sm;
                         if (sm == null)
                         {
-                            compile_sm = "6_2";
+                            compile_sm = "6_5";
                         }
-                        var ok = mShaderCompiler.CompileShader(desc, shader, entry, type, compile_sm, defPtr, NxRHI.EShaderLanguage.SL_SPIRV, bDebugShader);
+                        var ok = mShaderCompiler.CompileShader(desc, shader, entry, type, compile_sm, defPtr, NxRHI.EShaderLanguage.SL_SPIRV, bDebugShader, extHlslVersion);
                         if (ok == false)
                             return null;
                     }

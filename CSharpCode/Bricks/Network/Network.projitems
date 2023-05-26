@@ -9,6 +9,7 @@
     <Import_RootNamespace>EngineNS.Bricks.Network</Import_RootNamespace>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="$(MSBuildThisFileDirectory)AutoSync\UAutoSyncObject.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)INetConnect.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)RPC\FPkgHeader.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)RPC\NetPacketParser.cs" />

@@ -33,7 +33,7 @@ namespace EngineNS.Editor
             }
             var texture = UEngine.Instance.GfxDevice.RenderContext.CreateTextureToCpuBuffer(in cpuDesc, in CopyBufferFootPrint);
 
-            UEngine.Instance.GfxDevice.RenderCmdQueue.QueueCmd((im_cmd, name) =>
+            UEngine.Instance.GfxDevice.RenderCmdQueue.QueueCmd((NxRHI.ICommandList im_cmd, ref NxRHI.URenderCmdQueue.FRCmdInfo info) =>
             {
                 var dstTex = texture as NxRHI.UTexture;
                 var dstBf = texture as NxRHI.UBuffer;
@@ -53,25 +53,25 @@ namespace EngineNS.Editor
                 {
                     im_cmd.CopyTextureToBuffer(dstBf.mCoreObject, in CopyBufferFootPrint, tex, 0);
                 }
-                UEngine.Instance.GfxDevice.RenderContext.CmdQueue.IncreaseSignal(fence);
+                UEngine.Instance.GfxDevice.RenderContext.GpuQueue.IncreaseSignal(fence);
             }, "Copy Snap Texture");
 
-            UEngine.Instance.EventPoster.RunOn(() =>
+            UEngine.Instance.EventPoster.RunOn((state) =>
             {
                 fence.Wait(1);
-                UEngine.Instance.GfxDevice.RenderCmdQueue.QueueCmd((im_cmd, name) =>
+                UEngine.Instance.GfxDevice.RenderCmdQueue.QueueCmd((NxRHI.ICommandList im_cmd, ref NxRHI.URenderCmdQueue.FRCmdInfo info) =>
                 {
-                    var gpuDataBlob = new Support.CBlobObject();
-                    var bufferData = new Support.CBlobObject();
-                    texture.GetGpuBufferDataPointer().FetchGpuData(im_cmd, 0, gpuDataBlob.mCoreObject);
+                    var gpuDataBlob = new Support.UBlobObject();
+                    var bufferData = new Support.UBlobObject();
+                    texture.GetGpuBufferDataPointer().FetchGpuData(0, gpuDataBlob.mCoreObject);
                     NxRHI.ITexture.BuildImage2DBlob(bufferData.mCoreObject, gpuDataBlob.mCoreObject, cpuDesc);
-                    UEngine.Instance.EventPoster.RunOn(() =>
+                    UEngine.Instance.EventPoster.RunOn((state) =>
                     {
                         SavePng(ameta, file, bufferData);
-                        return null;
+                        return true;
                     }, Thread.Async.EAsyncTarget.AsyncEditor);
                 }, "Fetch");
-                return null;
+                return true;
             }, Thread.Async.EAsyncTarget.AsyncEditor);
         }
         public unsafe static void Save(RName rname, IO.IAssetMeta ameta, NxRHI.USrView srv)
@@ -99,7 +99,7 @@ namespace EngineNS.Editor
             }
             var texture = UEngine.Instance.GfxDevice.RenderContext.CreateTextureToCpuBuffer(in cpuDesc, in CopyBufferFootPrint);
 
-            UEngine.Instance.GfxDevice.RenderCmdQueue.QueueCmd((im_cmd, name) =>
+            UEngine.Instance.GfxDevice.RenderCmdQueue.QueueCmd((NxRHI.ICommandList im_cmd, ref NxRHI.URenderCmdQueue.FRCmdInfo info) =>
             {
                 var dstTex = texture as NxRHI.UTexture;
                 var dstBf = texture as NxRHI.UBuffer;
@@ -111,28 +111,28 @@ namespace EngineNS.Editor
                 {
                     im_cmd.CopyTextureToBuffer(dstBf.mCoreObject, in CopyBufferFootPrint, srv.mCoreObject.GetBufferAsTexture(), 0);
                 }
-                UEngine.Instance.GfxDevice.RenderContext.CmdQueue.IncreaseSignal(fence);
+                UEngine.Instance.GfxDevice.RenderContext.GpuQueue.IncreaseSignal(fence);
             }, "Copy Snap SRV");
 
-            UEngine.Instance.EventPoster.RunOn(() =>
+            UEngine.Instance.EventPoster.RunOn((state) =>
             {
                 fence.Wait(1);
-                UEngine.Instance.GfxDevice.RenderCmdQueue.QueueCmd((im_cmd, name) =>
+                UEngine.Instance.GfxDevice.RenderCmdQueue.QueueCmd((NxRHI.ICommandList im_cmd, ref NxRHI.URenderCmdQueue.FRCmdInfo info) =>
                 {
-                    var gpuDataBlob = new Support.CBlobObject();
-                    var bufferData = new Support.CBlobObject();
-                    texture.GetGpuBufferDataPointer().FetchGpuData(im_cmd, 0, gpuDataBlob.mCoreObject);
+                    var gpuDataBlob = new Support.UBlobObject();
+                    var bufferData = new Support.UBlobObject();
+                    texture.GetGpuBufferDataPointer().FetchGpuData(0, gpuDataBlob.mCoreObject);
                     NxRHI.ITexture.BuildImage2DBlob(bufferData.mCoreObject, gpuDataBlob.mCoreObject, cpuDesc);
-                    UEngine.Instance.EventPoster.RunOn(() =>
+                    UEngine.Instance.EventPoster.RunOn((state) =>
                     {
                         SavePng(ameta, file, bufferData);
-                        return null;
+                        return true;
                     }, Thread.Async.EAsyncTarget.AsyncEditor);
                 }, "Fetch");
-                return null;
+                return true;
             }, Thread.Async.EAsyncTarget.AsyncEditor);
         }
-        public unsafe static bool SavePng(IO.IAssetMeta ameta, string file, Support.CBlobObject bufferData)
+        public unsafe static bool SavePng(IO.IAssetMeta ameta, string file, Support.UBlobObject bufferData)
         {
             byte* pPixelData = (byte*)bufferData.mCoreObject.GetData();
             if (pPixelData == (byte*)0)
@@ -156,7 +156,7 @@ namespace EngineNS.Editor
             }
             return true;
         }
-        public unsafe static bool SavePng(IO.IAssetMeta ameta, string file, Support.CBlobObject bufferData, uint TarW, uint TarH, uint SrcX, uint SrcY)
+        public unsafe static bool SavePng(IO.IAssetMeta ameta, string file, Support.UBlobObject bufferData, uint TarW, uint TarH, uint SrcX, uint SrcY)
         {
             byte* pPixelData = (byte*)bufferData.mCoreObject.GetData();
             if (pPixelData == (byte*)0)

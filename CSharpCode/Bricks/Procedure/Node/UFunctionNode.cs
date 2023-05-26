@@ -582,7 +582,7 @@ namespace EngineNS.Bricks.Procedure.Node
                 height = (UInt64)maskBuffer.Height;
             }
 
-            var points = Algorithm.FastPoissonDisk.Calculate2D(width, height, radius, Seed, CalculateDeep);
+            var points = EngineNS.Algorithm.FastPoissonDisk.Calculate2D(width, height, radius, Seed, CalculateDeep);
 
             unsafe
             {

@@ -4,14 +4,14 @@ using System.Text;
 
 namespace EngineNS.Thread
 {
-    public class ThreadRender : ContextThread
+    public class TtThreadRender : TtContextThread
     {
-        public ThreadRender()
+        public TtThreadRender()
         {
             Interval = 0;
         }
         [ThreadStatic]
-        private static Profiler.TimeScope ScopeTick = Profiler.TimeScopeManager.GetTimeScope(typeof(ThreadRender), nameof(Tick));
+        private static Profiler.TimeScope ScopeTick = Profiler.TimeScopeManager.GetTimeScope(typeof(TtThreadRender), nameof(Tick));
         public override void Tick()
         {
             mRenderBegin.WaitOne();
@@ -51,7 +51,7 @@ namespace EngineNS.Thread
             mRenderBegin.Set();
         }
         [ThreadStatic]
-        private static Profiler.TimeScope ScopeWaitRender = Profiler.TimeScopeManager.GetTimeScope(typeof(ThreadRender), nameof(WaitRender));
+        private static Profiler.TimeScope ScopeWaitRender = Profiler.TimeScopeManager.GetTimeScope(typeof(TtThreadRender), nameof(WaitRender));
         public void WaitRender()
         {
             using (new Profiler.TimeScopeHelper(ScopeWaitRender))

@@ -12,6 +12,7 @@ namespace EngineNS.EGui.Controls
             Profiler.Log.OnReportLog += OnReportLog;
 
             UpdateCategoryFilters();
+            Visible = true;
         }
         ~ULogWatcher()
         {
@@ -19,12 +20,13 @@ namespace EngineNS.EGui.Controls
         }
         public async System.Threading.Tasks.Task<bool> Initialize()
         {
-            await EngineNS.Thread.AsyncDummyClass.DummyFunc();
+            await EngineNS.Thread.TtAsyncDummyClass.DummyFunc();
             return true;
         }
-        public void Cleanup() { }
-        public bool Visible { get; set; } = true;
+        public void Dispose() { }
+        public bool Visible { get; set; }
         public uint DockId { get; set; }
+        public ImGuiWindowClass DockKeyClass { get; }
         public ImGuiCond_ DockCond { get; set; } = ImGuiCond_.ImGuiCond_FirstUseEver;
         public unsafe void OnDraw()
         {
@@ -33,7 +35,7 @@ namespace EngineNS.EGui.Controls
             ImGuiAPI.SetNextWindowDockID(DockId, DockCond);
             var size = new Vector2(800, 600);
             ImGuiAPI.SetNextWindowSize(in size, ImGuiCond_.ImGuiCond_FirstUseEver);
-            if (EGui.UIProxy.DockProxy.BeginMainForm("LogWatcher", null, ImGuiWindowFlags_.ImGuiWindowFlags_None))
+            if (EGui.UIProxy.DockProxy.BeginMainForm("LogWatcher", this, ImGuiWindowFlags_.ImGuiWindowFlags_None))
             {
                 DockId = ImGuiAPI.GetWindowDockID();
 
@@ -90,9 +92,46 @@ namespace EngineNS.EGui.Controls
                 ImGuiAPI.SameLine(0, 25);
                 ImGuiAPI.Text("Category:");
                 ImGuiAPI.SameLine(0, -1);
-                if (ImGuiAPI.InputText("##", ref CategoryFilterText))
+                if (ImGuiAPI.InputText("##CategoryFilter", ref CategoryFilterText))
                 {
                     UpdateCategoryFilters();
+                }
+                #endregion
+
+                #region Command
+                ImGuiAPI.Text("Cmd:");
+                ImGuiAPI.SameLine(0, -1);
+                if (ImGuiAPI.InputText("##Command", ref CommandText))
+                {
+                    
+                }
+                ImGuiAPI.SameLine(0, -1);
+                if (ImGuiAPI.Button("OK"))
+                {
+                    var pos = CommandText.IndexOf(' ');
+                    if (pos < 0)
+                    {
+                        pos = CommandText.Length;
+                    }
+                    var cmdName = CommandText.Substring(0, pos);
+                    var cmd = TtCommandManager.Instance.TryGetCommand(cmdName);
+                    if (cmd != null)
+                    {
+                        if (CommandText.Length > pos)
+                        {
+                            var args = CommandText.Substring(pos + 1);
+                            cmd.Execute(args);
+                        }
+                        else
+                        {
+                            cmd.Execute(null);
+                        }
+                    }
+                    else
+                    {
+                        Profiler.Log.WriteLine(Profiler.ELogTag.Info, "Commands", $"Command {cmdName} is not found");
+                    }
+                    CommandText = "";
                 }
                 #endregion
 
@@ -188,6 +227,7 @@ namespace EngineNS.EGui.Controls
         public Profiler.ELogTag TagFilters { get; set; } = Profiler.ELogTag.All;
         private string[] CategoryFilters;
         public string CategoryFilterText;
+        public string CommandText;
         private bool IsCategory(string cate)
         {
             if (CategoryFilters == null)

@@ -29,6 +29,10 @@ namespace EngineNS.Bricks.NodeGraph
         }
     }
 
+    public interface IGraphEditor
+    {
+
+    }
     public partial class UNodeGraph : IO.ISerializer
     {
         public virtual void OnPreRead(object tagObject, object hostObject, bool fromXml) { }
@@ -43,6 +47,18 @@ namespace EngineNS.Bricks.NodeGraph
         public virtual UGraphRenderer GetGraphRenderer() 
         {
             throw new MissingMethodException("Need override this method");
+        }
+        IGraphEditor mEditor;
+        [Browsable(false)]
+        public IGraphEditor Editor
+        {
+            get
+            {
+                if (mEditor == null && ParentGraph != null)
+                    return ParentGraph.Editor;
+                return mEditor;
+            }
+            set { mEditor = value; }
         }
         [Rtti.Meta]
         [Browsable(false)]
@@ -69,28 +85,52 @@ namespace EngineNS.Bricks.NodeGraph
             {
                 if (Node == null)
                     return;
-                var pros = TypeDescriptor.GetProperties(Node);
-                collection.InitValue(Node, Rtti.UTypeDesc.TypeOf(Node.GetType()), pros, parentIsValueType);
+                var proCustom = Node as EGui.Controls.PropertyGrid.IPropertyCustomization;
+                if (proCustom != null)
+                {
+                    proCustom.GetProperties(ref collection, parentIsValueType);
+                }
+                else
+                {
+                    var pros = TypeDescriptor.GetProperties(Node);
+                    collection.InitValue(Node, Rtti.UTypeDesc.TypeOf(Node.GetType()), pros, parentIsValueType);
+                }
             }
 
             public object GetPropertyValue(string propertyName)
             {
                 if (Node == null)
                     return null;
-                var pro = Node.GetType().GetProperty(propertyName);
-                if (pro == null)
-                    return null;
-                return pro.GetValue(Node);
+                var proCustom = Node as EGui.Controls.PropertyGrid.IPropertyCustomization;
+                if(proCustom != null)
+                {
+                    return proCustom.GetPropertyValue(propertyName);
+                }
+                else
+                {
+                    var pro = Node.GetType().GetProperty(propertyName);
+                    if (pro == null)
+                        return null;
+                    return pro.GetValue(Node);
+                }
             }
 
             public void SetPropertyValue(string propertyName, object value)
             {
                 if (Node == null)
                     return;
-                var pro = Node.GetType().GetProperty(propertyName);
-                if (pro == null)
-                    return;
-                pro.SetValue(Node, value);
+                var proCustom = Node as EGui.Controls.PropertyGrid.IPropertyCustomization;
+                if(proCustom != null)
+                {
+                    proCustom.SetPropertyValue(propertyName, value);
+                }
+                else
+                {
+                    var pro = Node.GetType().GetProperty(propertyName);
+                    if (pro == null)
+                        return;
+                    pro.SetValue(Node, value);
+                }
             }
         }
         public bool SelectedNodesDirty = false;
@@ -121,21 +161,31 @@ namespace EngineNS.Bricks.NodeGraph
             PreOrderPinOut = null;
         }
         [Rtti.Meta]
-        public UNodeBase FindFirstNode(string name)
+        public UNodeBase FindFirstNode(string name, bool findInSubGraphs = true)
         {
-            foreach (var i in Nodes)
+            for(int i=0; i<Nodes.Count; i++)
             {
-                if (i.Name == name)
-                    return i;
+                if (Nodes[i].Name == name)
+                    return Nodes[i];
+            }
+            foreach(var subGraph in SubGraphs.Values)
+            {
+                var node = subGraph.FindFirstNode(name, findInSubGraphs);
+                if(node != null) return node;
             }
             return null;
         }
-        public UNodeBase FindNode(in Guid id)
+        public UNodeBase FindNode(in Guid id, bool findInSubGraphs = true)
         {
-            foreach (var i in Nodes)
+            for(int i=0; i<Nodes.Count; i++)
             {
-                if (i.NodeId == id)
-                    return i;
+                if (Nodes[i].NodeId == id)
+                    return Nodes[i];
+            }
+            foreach(var subGraph in SubGraphs.Values)
+            {
+                var node = subGraph.FindNode(id, findInSubGraphs);
+                if(node != null) return node;
             }
             return null;
         }
@@ -748,6 +798,19 @@ namespace EngineNS.Bricks.NodeGraph
 
                     return false;
                 });
+
+            if(SelectedNodes.Count == 1)
+            {
+                var cNode = SelectedNodes[0].Node as INodeWithContextMenu;
+                if(cNode != null)
+                {
+                    var subMenus = cNode.ContextMenu.SubMenuItems;
+                    for(int cmIdx = 0; cmIdx < subMenus.Count; cmIdx++)
+                    {
+                        NodeMenus.SubMenuItems.Add(subMenus[cmIdx]);
+                    }
+                }
+            }
         }
         public virtual void CollapseNodes(List<UNodeBase> nodeList)
         {
@@ -1374,6 +1437,8 @@ namespace EngineNS.Bricks.NodeGraph
             PreOrderPinOut = null;
             if (SelectedNodes.Count != 1)
                 return;
+            if (!IsKeydown(EKey.Ctl))
+                return;
             var selNode = SelectedNodes[0].Node;
             float minDis = 20.0f;
             for (int i = 0; i < Linkers.Count; i++)
@@ -1381,7 +1446,7 @@ namespace EngineNS.Bricks.NodeGraph
                 var linker = Linkers[i];
                 var pointA = linker.InPin.HotPosition + linker.InPin.HotSize * 0.5f;
                 var pointB = linker.OutPin.HotPosition + linker.OutPin.HotSize * 0.5f;
-                var dis = PointF.DistanceToLine(dragPosition.X, dragPosition.Y, pointA.X, pointA.Y, pointB.X, pointB.Y);
+                var dis = Point2f.DistanceToLine(dragPosition.X, dragPosition.Y, pointA.X, pointA.Y, pointB.X, pointB.Y);
                 if(dis < minDis)
                 {
                     if (selNode.Inputs.Contains(linker.InPin))
@@ -1560,5 +1625,7 @@ namespace EngineNS.Bricks.NodeGraph
             }
             return null;
         }
+
+        public virtual void SetConfigUnionNode(IUnionNode node) { }
     }
 }

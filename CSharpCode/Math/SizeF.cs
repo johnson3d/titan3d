@@ -47,13 +47,13 @@ namespace EngineNS
         public override bool Equals(object obj)
         {
             var size = (SizeF)obj;
-            return ((Math.Abs(this.Width - size.Width) < EngineNS.CoreDefine.Epsilon) &&
-                    (Math.Abs(this.Height - size.Height) < EngineNS.CoreDefine.Epsilon));
+            return ((Math.Abs(this.Width - size.Width) < EngineNS.MathHelper.Epsilon) &&
+                    (Math.Abs(this.Height - size.Height) < EngineNS.MathHelper.Epsilon));
         }
-        public bool Equals(ref SizeF size)
+        public bool Equals(in SizeF size)
         {
-            return ((Math.Abs(this.Width - size.Width) < EngineNS.CoreDefine.Epsilon) &&
-                    (Math.Abs(this.Height - size.Height) < EngineNS.CoreDefine.Epsilon));
+            return ((Math.Abs(this.Width - size.Width) < EngineNS.MathHelper.Epsilon) &&
+                    (Math.Abs(this.Height - size.Height) < EngineNS.MathHelper.Epsilon));
         }
 
         public override int GetHashCode()

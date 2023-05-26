@@ -54,12 +54,12 @@ namespace EngineNS.Graphics.Pipeline.Mobile
 
             BasePassNode.OnResize(this, x, y);
         }
-        public override void Cleanup()
+        public override void Dispose()
         {
-            BasePassNode.Cleanup();
-            base.Cleanup();
+            CoreSDK.DisposeObject(ref BasePassNode);
+            base.Dispose();
         }
-        public override Shader.UShadingEnv GetPassShading(EShadingType type, Mesh.UMesh mesh, int atom, Pipeline.Common.URenderGraphNode node)
+        public override Shader.UGraphicsShadingEnv GetPassShading(EShadingType type, Mesh.UMesh mesh, int atom, Pipeline.Common.URenderGraphNode node)
         {
             switch (type)
             {

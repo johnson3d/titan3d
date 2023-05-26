@@ -16,7 +16,7 @@ namespace EngineNS.Editor
             {
                 if (string.IsNullOrEmpty(GameProject))
                     return "";
-                return IO.FileManager.GetBaseDirectory(GameProject);
+                return IO.TtFileManager.GetBaseDirectory(GameProject);
             }
         }
         [Rtti.Meta]
@@ -40,25 +40,24 @@ namespace EngineNS.Editor
         public EGui.UUvAnim MacrossIcon { get; set; }
         public override void Cleanup(UEngine host)
         {
-            RNamePopupContentBrowser?.Cleanup();
-            RNamePopupContentBrowser = null;
+            CoreSDK.DisposeObject(ref RNamePopupContentBrowser);
             base.Cleanup(host);
         }
 
         public override async Task<bool> Initialize(UEngine host)
         {
-            var cfgFile = host.FileManager.GetRoot(IO.FileManager.ERootDir.Editor) + "EditorConfig.cfg";
-            Config = IO.FileManager.LoadXmlToObject<UEditorConfig>(cfgFile);
+            var cfgFile = host.FileManager.GetRoot(IO.TtFileManager.ERootDir.Editor) + "EditorConfig.cfg";
+            Config = IO.TtFileManager.LoadXmlToObject<UEditorConfig>(cfgFile);
             if (Config == null)
             {
                 Config = new UEditorConfig();
                 Config.GameProject = "Module/GameProject/GameProject.csproj";
                 Config.GameAssembly = $"binaries/{UEngine.DotNetVersion}/GameProject.dll";
                 Config.PhyMaterialIconName = RName.GetRName("icons/phymaterialicon.uvanim", RName.ERNameType.Engine);
-                IO.FileManager.SaveObjectToXml(cfgFile, Config);
+                IO.TtFileManager.SaveObjectToXml(cfgFile, Config);
             }
 
-            var gameAssembly = UEngine.Instance.FileManager.GetRoot(IO.FileManager.ERootDir.EngineSource) + Config.GameAssembly;
+            var gameAssembly = UEngine.Instance.FileManager.GetRoot(IO.TtFileManager.ERootDir.EngineSource) + Config.GameAssembly;
             
             UEngine.Instance.MacrossModule.ReloadAssembly(gameAssembly);
 

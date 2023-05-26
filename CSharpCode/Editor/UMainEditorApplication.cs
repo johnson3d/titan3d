@@ -7,18 +7,26 @@ using System.Linq;
 using System.Xml;
 using System.Xml.Linq;
 using NPOI.SS.Formula.Functions;
+using EngineNS.UI.Editor;
+using EngineNS.Macross;
 //using SDL2;
 
 namespace EngineNS.Editor
 {
     public partial class UMainEditorApplication : USlateApplication, ITickable
     {
+        public int GetTickOrder()
+        {
+            return 0;
+        }
         public UAssetEditorManager AssetEditorManager { get; } = new UAssetEditorManager();
         
         public UMainEditorApplication()
         {
             mLogWatcher = new EGui.Controls.ULogWatcher();
             mCpuProfiler = new Editor.Forms.UCpuProfiler();
+            mGpuProfiler = new Editor.Forms.TtGpuProfiler();
+            mMemProfiler = new Forms.TtMemoryProfiler();
             mMainInspector = new Forms.UInspector();
             //WorldViewportSlate = new UEditorWorldViewportSlate(true);
             //mWorldOutliner = new Editor.Forms.UWorldOutliner(WorldViewportSlate);
@@ -31,6 +39,8 @@ namespace EngineNS.Editor
         //public Editor.Forms.UWorldOutliner mWorldOutliner;
         public EGui.Controls.ULogWatcher mLogWatcher;
         public Editor.Forms.UCpuProfiler mCpuProfiler;
+        public Editor.Forms.TtGpuProfiler mGpuProfiler;
+        public Editor.Forms.TtMemoryProfiler mMemProfiler;
         public Editor.Forms.UInspector mMainInspector;
         public Bricks.ProjectGen.UBrickManager mBrickManager = null;
         public Editor.Forms.UEditorSettings mEditorSettings;
@@ -40,7 +50,8 @@ namespace EngineNS.Editor
         //public override EGui.Slate.UWorldViewportSlate GetWorldViewportSlate()
         //{
         //    return WorldViewportSlate;
-        //}
+        //}        
+        ///////////////////////////////////////////
         public EGui.Controls.UContentBrowser ContentBrowser = new EGui.Controls.UContentBrowser();
         public override void Cleanup()
         {
@@ -140,36 +151,25 @@ namespace EngineNS.Editor
                             MenuName = "CompileMacross",
                             Action = (EGui.UIProxy.MenuItemProxy item, Support.UAnyPointer data)=>
                             {
-                                var csFiles = new List<string>(IO.FileManager.GetFiles(UEngine.Instance.FileManager.GetRoot(IO.FileManager.ERootDir.Game), "*.cs"));
-                                var projectPath = UEngine.Instance.FileManager.GetRoot(IO.FileManager.ERootDir.EngineSource) + UEngine.Instance.EditorInstance.Config.GameProjectPath;
-                                csFiles.AddRange(IO.FileManager.GetFiles(projectPath, "*.cs"));
-                                List<string> arguments = new List<string>();
-                                for (int i = 0; i < csFiles.Count; ++i)
-                                    arguments.Add(CodeCompiler.CSharpCompiler.GetCommandArguments(CodeCompiler.CSharpCompiler.enCommandType.CSFile, csFiles[i]));
+                                var csFilesPath = UEngine.Instance.FileManager.GetRoot(IO.TtFileManager.ERootDir.Game);
+                                var projectFile = UEngine.Instance.FileManager.GetRoot(IO.TtFileManager.ERootDir.EngineSource) + UEngine.Instance.EditorInstance.Config.GameProject;
+                                var assemblyFile = UEngine.Instance.FileManager.GetRoot(IO.TtFileManager.ERootDir.EngineSource) + UEngine.Instance.EditorInstance.Config.GameAssembly;
 
-                                var projectFile = UEngine.Instance.FileManager.GetRoot(IO.FileManager.ERootDir.EngineSource) + UEngine.Instance.EditorInstance.Config.GameProject;
-                                var projDef = XDocument.Load(projectFile);
-                                var references = projDef.Element("Project").Elements("ItemGroup").Elements("Reference").Select(refElem => refElem.Value);
-                                foreach (var reference in references)
-                                {
-                                    arguments.Add(CodeCompiler.CSharpCompiler.GetCommandArguments(CodeCompiler.CSharpCompiler.enCommandType.RefAssemblyFile, projectPath + reference));
-                                }
-                                //var references = projDef.Element(projDef.n) 
-
-                                var assemblyFile = UEngine.Instance.FileManager.GetRoot(IO.FileManager.ERootDir.EngineSource) + UEngine.Instance.EditorInstance.Config.GameAssembly;
-                                arguments.Add(CodeCompiler.CSharpCompiler.GetCommandArguments(CodeCompiler.CSharpCompiler.enCommandType.OutputFile, assemblyFile));
-                                arguments.Add(CodeCompiler.CSharpCompiler.GetCommandArguments(CodeCompiler.CSharpCompiler.enCommandType.PdbFile, assemblyFile.Replace(".dll", ".tpdb")));
-                                arguments.Add(CodeCompiler.CSharpCompiler.GetCommandArguments(CodeCompiler.CSharpCompiler.enCommandType.Outputkind, Microsoft.CodeAnalysis.OutputKind.DynamicallyLinkedLibrary.ToString()));
-                                arguments.Add(CodeCompiler.CSharpCompiler.GetCommandArguments(CodeCompiler.CSharpCompiler.enCommandType.OptimizationLevel, Microsoft.CodeAnalysis.OptimizationLevel.Debug.ToString()));
-                                arguments.Add(CodeCompiler.CSharpCompiler.GetCommandArguments(CodeCompiler.CSharpCompiler.enCommandType.AllowUnsafe, "true"));
-
-                                if (CodeCompiler.CSharpCompiler.CompilerCSharpWithArguments(arguments.ToArray()))
+                                if (UMacrossModule.CompileGameProject(csFilesPath, projectFile, assemblyFile))
                                 {
                                     UEngine.Instance.MacrossModule.ReloadAssembly(assemblyFile);
                                 }
                                 //var gameAssembly = UEngine.Instance.FileManager.GetRoot(IO.FileManager.ERootDir.Root) + UEngine.Instance.EditorInstance.Config.GameAssembly;
 
                                 //UEngine.Instance.MacrossModule.ReloadAssembly(gameAssembly);
+                            },
+                        },
+                        new EGui.UIProxy.MenuItemProxy()
+                        {
+                            MenuName = "PrintAttachmentPool",
+                            Action = (EGui.UIProxy.MenuItemProxy item, Support.UAnyPointer data)=>
+                            {
+                                UEngine.Instance.GfxDevice.AttachBufferManager.PrintCachedBuffer = true;
                             },
                         },
                         new EGui.UIProxy.MenuItemProxy()
@@ -181,7 +181,7 @@ namespace EngineNS.Editor
                                 {
                                     IRenderDocTool.GetInstance().SetGpuDevice(UEngine.Instance.GfxDevice.RenderContext.mCoreObject);
                                     IRenderDocTool.GetInstance().SetActiveWindow(this.NativeWindow.HWindow.ToPointer());
-                                    UEngine.Instance.CaptureRenderDocFrame = 1;
+                                    UEngine.Instance.GfxDevice.RenderCmdQueue.CaptureRenderDocFrame = true;
                                 }
                             },
                         },
@@ -193,16 +193,26 @@ namespace EngineNS.Editor
                     IsTopMenuItem = true,
                     SubMenus = new List<EGui.UIProxy.IUIProxyBase>()
                     {
-                        //new EGui.UIProxy.MenuItemProxy()
-                        //{
-                        //    MenuName = "WorldOutliner",
-                        //    Selected = true,
-                        //    Action = (EGui.UIProxy.MenuItemProxy item, Support.UAnyPointer data)=>
-                        //    {
-                        //        mWorldOutliner.Visible = !mWorldOutliner.Visible;
-                        //        item.Selected = mWorldOutliner.Visible;
-                        //    },
-                        //},
+                        new EGui.UIProxy.MenuItemProxy()
+                        {
+                            MenuName = "GC",
+                            Selected = false,
+                            Action = (EGui.UIProxy.MenuItemProxy item, Support.UAnyPointer data)=>
+                            {
+                                System.GC.Collect();
+                            },
+                        },
+                        new EGui.UIProxy.MenuItemProxy()
+                        {
+                            MenuName = "LogWatcher",
+                            Selected = true,
+                            Action = (EGui.UIProxy.MenuItemProxy item, Support.UAnyPointer data)=>
+                            {
+                                mLogWatcher.Visible = !mLogWatcher.Visible;
+                                var application = UEngine.Instance.GfxDevice.SlateApplication as EngineNS.Editor.UMainEditorApplication;
+                                item.Selected = mLogWatcher.Visible;
+                            },
+                        },
                         new EGui.UIProxy.MenuItemProxy()
                         {
                             MenuName = "CpuProfiler",
@@ -213,6 +223,29 @@ namespace EngineNS.Editor
                                 var application = UEngine.Instance.GfxDevice.SlateApplication as EngineNS.Editor.UMainEditorApplication;
                                 //mCpuProfiler.DockId = application.CenterDockId;
                                 item.Selected = mCpuProfiler.Visible;
+                            },
+                        },
+                        new EGui.UIProxy.MenuItemProxy()
+                        {
+                            MenuName = "GpuProfiler",
+                            Selected = true,
+                            Action = (EGui.UIProxy.MenuItemProxy item, Support.UAnyPointer data)=>
+                            {
+                                mGpuProfiler.Visible = !mGpuProfiler.Visible;
+                                var application = UEngine.Instance.GfxDevice.SlateApplication as EngineNS.Editor.UMainEditorApplication;
+                                //mCpuProfiler.DockId = application.CenterDockId;
+                                item.Selected = mGpuProfiler.Visible;
+                            },
+                        },
+                        new EGui.UIProxy.MenuItemProxy()
+                        {
+                            MenuName = "MemProfiler",
+                            Selected = true,
+                            Action = (EGui.UIProxy.MenuItemProxy item, Support.UAnyPointer data)=>
+                            {
+                                mMemProfiler.Visible = !mMemProfiler.Visible;
+                                var application = UEngine.Instance.GfxDevice.SlateApplication as EngineNS.Editor.UMainEditorApplication;
+                                item.Selected = mMemProfiler.Visible;
                             },
                         },
                         new EGui.UIProxy.MenuItemProxy()
@@ -331,9 +364,10 @@ namespace EngineNS.Editor
                 ImGuiAPI.SetNextWindowPos(in mainPos, ImGuiCond_.ImGuiCond_FirstUseEver, in mainPos);
                 var wsz = new Vector2(1290, 800);
                 ImGuiAPI.SetNextWindowSize(in wsz, ImGuiCond_.ImGuiCond_FirstUseEver);
-                if (ImGuiAPI.Begin(UEngine.Instance.Config.ConfigName, ref IsVisible, //ImGuiWindowFlags_.ImGuiWindowFlags_NoMove |
+                uint dockId = 0;
+                if (EGui.UIProxy.DockProxy.BeginMainForm(UEngine.Instance.Config.ConfigName, ref IsVisible, ref dockId, //ImGuiWindowFlags_.ImGuiWindowFlags_NoMove |
                     //ImGuiWindowFlags_.ImGuiWindowFlags_NoResize |
-                    ImGuiWindowFlags_.ImGuiWindowFlags_NoCollapse |
+                    ImGuiWindowFlags_.ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_.ImGuiWindowFlags_NoTitleBar |
                     ImGuiWindowFlags_.ImGuiWindowFlags_MenuBar))
                 {
                     wsz = ImGuiAPI.GetWindowSize();
@@ -374,7 +408,7 @@ namespace EngineNS.Editor
                     }
                     ImGuiAPI.EndChild();
                 }
-                ImGuiAPI.End();
+                EGui.UIProxy.DockProxy.EndMainForm();
 
                 //WorldViewportSlate.DockId = CenterDockId;
 
@@ -766,15 +800,19 @@ namespace EngineNS.Editor
         #endregion
 
         #region Tick
-        public void TickLogic(int ellapse)
+        public void TickLogic(float ellapse)
         {
             //WorldViewportSlate.TickLogic(ellapse);
         }
-        public void TickRender(int ellapse)
+        public void TickRender(float ellapse)
         {
             //WorldViewportSlate.TickRender(ellapse);
         }
-        public void TickSync(int ellapse)
+        public void TickBeginFrame(float ellapse)
+        {
+
+        }
+        public void TickSync(float ellapse)
         {
             //WorldViewportSlate.TickSync(ellapse);
 

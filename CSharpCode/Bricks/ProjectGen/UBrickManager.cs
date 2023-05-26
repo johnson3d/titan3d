@@ -11,19 +11,24 @@ namespace EngineNS.Bricks.ProjectGen
         {
             UEngine.RootFormManager.RegRootForm(this);
         }
-        public bool Visible { get; set; } = false;
+        bool mVisible = false;
+        public bool Visible 
+        {
+            get => mVisible;
+            set => mVisible = value;
+        }
         public uint DockId { get; set; }
         public ImGuiCond_ DockCond { get; set; } = ImGuiCond_.ImGuiCond_FirstUseEver;
         public async System.Threading.Tasks.Task<bool> Initialize()
         {
-            await EngineNS.Thread.AsyncDummyClass.DummyFunc();
-            var path = UEngine.Instance.FileManager.GetRoot(IO.FileManager.ERootDir.EngineSource);
-            var files = IO.FileManager.GetFiles(path, "*.brick", true);
+            await EngineNS.Thread.TtAsyncDummyClass.DummyFunc();
+            var path = UEngine.Instance.FileManager.GetRoot(IO.TtFileManager.ERootDir.EngineSource);
+            var files = IO.TtFileManager.GetFiles(path, "*.brick", true);
             foreach(var i in files)
             {
                 try
                 {
-                    string jsonString = IO.FileManager.ReadAllText(i);
+                    string jsonString = IO.TtFileManager.ReadAllText(i);
                     var desc = IO.SerializerHelper.LoadFromJson<UBrickDesc>(jsonString);
                     AllBricks.Add(desc);
                 }
@@ -51,8 +56,8 @@ namespace EngineNS.Bricks.ProjectGen
                 testObj.DllModules.Add("3rd/csharp/System.Windows.Forms.dll");
                 testObj.Configs.Add(new UCompileConfig());
                 var jsonString = IO.SerializerHelper.SaveAsJson(testObj);
-                var file = IO.FileManager.CombinePath(path, testObj.FullName + ".bbb");
-                IO.FileManager.WriteAllText(file, jsonString);
+                var file = IO.TtFileManager.CombinePath(path, testObj.FullName + ".bbb");
+                IO.TtFileManager.WriteAllText(file, jsonString);
                 //string jsonString = IO.FileManager.ReadAllText(@"F:\titan2.0\CSharpCode\Base\Base.brick");
                 //var testObj2 = IO.SerializerHelper.LoadFromJson<UBrickDesc>(jsonString);
             }
@@ -79,11 +84,13 @@ namespace EngineNS.Bricks.ProjectGen
             releaseConfig.Arch = UCompileConfig.ECpuArch.AnyCPU;
             ProjectDesc.Configs.Add(releaseConfig);
 
-            var path = UEngine.Instance.FileManager.GetRoot(IO.FileManager.ERootDir.EngineSource);
+            var path = UEngine.Instance.FileManager.GetRoot(IO.TtFileManager.ERootDir.EngineSource);
             ProjectDesc.Build();
-            ProjectDesc.SaveVSProject(IO.FileManager.CombinePath(path, projName));
+            ProjectDesc.SaveVSProject(IO.TtFileManager.CombinePath(path, projName));
         }
-        public void Cleanup() { }
+        public void Dispose() { }
+        protected ImGuiWindowClass mDockKeyClass;
+        public ImGuiWindowClass DockKeyClass => mDockKeyClass;
         public unsafe void OnDraw()
         {
             if (Visible == false)
@@ -91,7 +98,7 @@ namespace EngineNS.Bricks.ProjectGen
             ImGuiAPI.SetNextWindowDockID(DockId, DockCond);
 
             Vector2 size = new Vector2(0, 0);
-            if (EGui.UIProxy.DockProxy.BeginMainForm("BrickManager", null, ImGuiWindowFlags_.ImGuiWindowFlags_None))
+            if (EGui.UIProxy.DockProxy.BeginMainForm("BrickManager", this, ImGuiWindowFlags_.ImGuiWindowFlags_None))
             {
                 for (int i = 0; i < AllBricks.Count; i++)
                 {

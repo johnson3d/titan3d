@@ -32,7 +32,7 @@ namespace EngineNS.Bricks.Terrain.Grass
             string codeString = "";
             var mdfSourceName = RName.GetRName("shaders/Bricks/Terrain/GrassModifier.cginc", RName.ERNameType.Engine);
             codeBuilder.AddLine($"#include \"{mdfSourceName.Address}\"", ref codeString);
-            codeBuilder.AddLine("void MdfQueueDoModifiers(inout PS_INPUT output, VS_INPUT input)", ref codeString);
+            codeBuilder.AddLine("void MdfQueueDoModifiers(inout PS_INPUT output, VS_MODIFIER input)", ref codeString);
             codeBuilder.PushSegment(ref codeString);
             {
                 codeBuilder.AddLine($"DoGrassModifierVS(output, input);", ref codeString);
@@ -42,7 +42,7 @@ namespace EngineNS.Bricks.Terrain.Grass
             codeBuilder.AddLine("#define MDFQUEUE_FUNCTION", ref codeString);
 
             var code = Editor.ShaderCompiler.UShaderCodeManager.Instance.GetShaderCodeProvider(mdfSourceName);
-            codeBuilder.AddLine($"//Hash for {mdfSourceName}:{UniHash.APHash(code.SourceCode.TextCode)}", ref codeString);
+            codeBuilder.AddLine($"//Hash for {mdfSourceName}:{UniHash32.APHash(code.SourceCode.TextCode)}", ref codeString);
 
             SourceCode = new NxRHI.UShaderCode();
             SourceCode.TextCode = codeString;
@@ -51,12 +51,13 @@ namespace EngineNS.Bricks.Terrain.Grass
         }
         [ThreadStatic]
         private static Profiler.TimeScope ScopeOnDrawCall = Profiler.TimeScopeManager.GetTimeScope(typeof(UMdfGrassStaticMesh), nameof(OnDrawCall));
-        public override void OnDrawCall(Graphics.Pipeline.URenderPolicy.EShadingType shadingType, NxRHI.UGraphicDraw drawcall, Graphics.Pipeline.URenderPolicy policy, Graphics.Mesh.UMesh mesh)
+        public override void OnDrawCall(Graphics.Pipeline.URenderPolicy.EShadingType shadingType, NxRHI.UGraphicDraw drawcall, Graphics.Pipeline.URenderPolicy policy, Graphics.Mesh.UMesh mesh, int atom)
         {
             using (new Profiler.TimeScopeHelper(ScopeOnDrawCall))
             {
                 mGrassModifier?.OnDrawCall(shadingType, drawcall, policy, mesh);
-            }   
+            }
+            base.OnDrawCall(shadingType, drawcall, policy, mesh, atom);
         }
     }
 

@@ -6,14 +6,14 @@ using System.Text;
 
 namespace EngineNS.Thread
 {
-    public class ContextThread
+    public class TtContextThread
     {
         [ThreadStatic]
-        public static ContextThread CurrentContext;
+        public static TtContextThread CurrentContext;
         //这个Flag是解决主线程同时是:RHIContext，MainContext
         [ThreadStatic]
         public static int TickStage = 0;
-        public ContextThread()
+        public TtContextThread()
         {
             Interval = 20;
         }
@@ -67,7 +67,7 @@ namespace EngineNS.Thread
             }
             this.OnThreadStart();
         }
-        public delegate void FOnThreadTick(ContextThread ctx);
+        public delegate void FOnThreadTick(TtContextThread ctx);
         public FOnThreadTick TickAction = null;
         public virtual bool StartThread(string name, FOnThreadTick action)
         {
@@ -161,7 +161,7 @@ namespace EngineNS.Thread
                 }
                 finally
                 {
-                    ContextThread.CurrentContext.ExitWhenFrameFinished();
+                    TtContextThread.CurrentContext.ExitWhenFrameFinished();
                 }
                 var time2 = Support.Time.GetTickCount();
                 if (time2 - time1 < Interval)
@@ -173,7 +173,7 @@ namespace EngineNS.Thread
             CurrentContext = null;
         }
         [ThreadStatic]
-        private static Profiler.TimeScope ScopeTick = Profiler.TimeScopeManager.GetTimeScope(typeof(ContextThread), nameof(Tick));
+        private static Profiler.TimeScope ScopeTick = Profiler.TimeScopeManager.GetTimeScope(typeof(TtContextThread), nameof(Tick));
         public virtual void Tick()
         {
             if(TickAction!=null)
@@ -212,11 +212,11 @@ namespace EngineNS.Thread
             }
         }
         [Browsable(false)]
-        protected Queue<Async.PostEvent> PriorityEvents
+        protected Queue<Async.TtAsyncTaskStateBase> PriorityEvents
         {
             get;
-        } = new Queue<Async.PostEvent>();
-        public void EnqueuePriority(Async.PostEvent evt)
+        } = new Queue<Async.TtAsyncTaskStateBase>();
+        public void EnqueuePriority(Async.TtAsyncTaskStateBase evt)
         {
             System.Diagnostics.Debug.Assert(IsFinished == false);
             lock (PriorityEvents)
@@ -225,11 +225,11 @@ namespace EngineNS.Thread
             }
         }
         [Browsable(false)]
-        protected Queue<Async.PostEvent> AsyncEvents
+        protected Queue<Async.TtAsyncTaskStateBase> AsyncEvents
         {
             get;
-        } = new Queue<Async.PostEvent>();
-        public void EnqueueAsync(Async.PostEvent evt)
+        } = new Queue<Async.TtAsyncTaskStateBase>();
+        public void EnqueueAsync(Async.TtAsyncTaskStateBase evt)
         {
             System.Diagnostics.Debug.Assert(IsFinished == false);
             lock (AsyncEvents)
@@ -238,11 +238,11 @@ namespace EngineNS.Thread
             }
         }
         [Browsable(false)]
-        protected Queue<Async.PostEvent> ContinueEvents
+        protected Queue<Async.TtAsyncTaskStateBase> ContinueEvents
         {
             get;
-        } = new Queue<Async.PostEvent>();
-        public void EnqueueContinue(Async.PostEvent evt)
+        } = new Queue<Async.TtAsyncTaskStateBase>();
+        public void EnqueueContinue(Async.TtAsyncTaskStateBase evt)
         {
             System.Diagnostics.Debug.Assert(IsFinished == false);
             lock (ContinueEvents)
@@ -251,10 +251,10 @@ namespace EngineNS.Thread
             }
         }
         [Browsable(false)]
-        public List<Async.PostEvent> RunUntilFinishEvents
+        public List<Async.TtAsyncTaskStateBase> RunUntilFinishEvents
         {
             get;
-        } = new List<Async.PostEvent>();
+        } = new List<Async.TtAsyncTaskStateBase>();
         public long LimitTime
         {
             get;
@@ -273,7 +273,7 @@ namespace EngineNS.Thread
                 LimitTimeScalar = 1;
             }
             long limit = LimitTime * LimitTimeScalar;
-            Async.PostEvent cur;
+            Async.TtAsyncTaskStateBase cur;
             var t1 = Support.Time.HighPrecision_GetTickCount();
             int count = 0;
             while(DoOnePriorityEvent(out cur))
@@ -292,7 +292,7 @@ namespace EngineNS.Thread
                 //}
                 //else
                 {
-                    UEngine.Instance.EventPoster.mRunOnPEAllocator.ReleaseObject(cur);
+                    cur.Dispose();
                 }
             }
             //DoPriorityEvents();
@@ -304,7 +304,7 @@ namespace EngineNS.Thread
                 {
                     if(UEngine.Instance.EventPoster.IsThread(Async.EAsyncTarget.Logic) )
                     {
-                        Profiler.Log.WriteLine(Profiler.ELogTag.Warning, "Async", $"Logic Thread[Async] is Blocked({t2 - t1}):{cur.PostAction.ToString()}");
+                        Profiler.Log.WriteLine(Profiler.ELogTag.Warning, "Async", $"Logic Thread[Async] is Blocked({t2 - t1}):{cur.ToString()}");
 
                         //if (cur.CallStackTrace != null)
                         //{
@@ -313,7 +313,7 @@ namespace EngineNS.Thread
                     }
                     else if (UEngine.Instance.EventPoster.IsThread(Async.EAsyncTarget.Render))
                     {
-                        Profiler.Log.WriteLine(Profiler.ELogTag.Warning, "Async", $"Render Thread[Async] is Blocked({t2 - t1}):{cur.PostAction.ToString()}");
+                        Profiler.Log.WriteLine(Profiler.ELogTag.Warning, "Async", $"Render Thread[Async] is Blocked({t2 - t1}):{cur.ToString()}");
 
                         //if (cur.CallStackTrace != null)
                         //{
@@ -324,7 +324,7 @@ namespace EngineNS.Thread
                     return;
                 }
             }
-            while(DoOneContnueEvent(out cur))
+            while(DoOneContinueEvent(out cur))
             {
                 var t2 = Support.Time.HighPrecision_GetTickCount();
                 if (t2 - t1 > limit)
@@ -333,7 +333,7 @@ namespace EngineNS.Thread
                     {
                         if(t2 - t1>200000)
                         {
-                            Profiler.Log.WriteLine(Profiler.ELogTag.Warning, "Async", $"Logic Thread[Continue] is Blocked({t2 - t1}):{cur.Awaiter}");
+                            Profiler.Log.WriteLine(Profiler.ELogTag.Warning, "Async", $"Logic Thread[Continue] is Blocked({t2 - t1}):{cur}");
                             //if(cur.CallStackTrace!=null)
                             //{
                             //    Profiler.Log.WriteLine(Profiler.ELogTag.Warning, "Async", $"StackInof=>{cur.CallStackTrace}");
@@ -349,26 +349,24 @@ namespace EngineNS.Thread
                 for (int i = RunUntilFinishEvents.Count - 1; i >= 0; i--)
                 {
                     var e = RunUntilFinishEvents[i];
-                    if(e.PostActionCondition != null)
+                    
                     {
                         bool bFinish;
-                        var ret = e.PostActionCondition(out bFinish);
-                        var caw = e.Awaiter as Async.TaskAwaiter;
-                        if (caw != null)
-                            caw.SetResult(ret);
+                        e.ExecutePostEventCondition(out bFinish);
                         if (bFinish)
                         {
                             RunUntilFinishEvents.RemoveAt(i);
+                            e.Dispose();
                         }
                     }
                 }
             }
             TimeOut = false;
         }
-        public bool DoOnePriorityEvent(out Async.PostEvent oe)
+        public bool DoOnePriorityEvent(out Async.TtAsyncTaskStateBase oe)
         {
             oe = null;
-            Async.PostEvent e;
+            Async.TtAsyncTaskStateBase e;
             lock (PriorityEvents)
             {
                 if (PriorityEvents.Count == 0)
@@ -378,14 +376,18 @@ namespace EngineNS.Thread
 
             try
             {
-                if (e.PostAction != null)
+                var state = e.ExecutePostEvent();
+                if (state.TaskState == Async.EAsyncTaskState.Suspended)
                 {
-                    var ret = e.PostAction();
-                    var caw = e.Awaiter as Async.TaskAwaiter;
-                    if (caw != null)
-                        caw.SetResult(ret);
+                    lock (PriorityEvents)
+                    {
+                        PriorityEvents.Enqueue(e);
+                    }
                 }
-                ExecuteContinue(e.Awaiter);
+                else
+                {
+                    e.ExecuteContinue();
+                }
             }
             catch (Exception ex)
             {
@@ -395,37 +397,10 @@ namespace EngineNS.Thread
             oe = e;
             return true;
         }
-        //protected void DoPriorityEvents()
-        //{
-        //    while(PriorityEvents.Count>0)
-        //    {
-        //        Async.PostEvent e;
-        //        lock (PriorityEvents)
-        //        {
-        //            e = PriorityEvents.Dequeue();
-        //        }
-        //        try
-        //        {
-        //            if (e.PostAction != null)
-        //            {
-        //                var ret = e.PostAction();
-        //                var caw = e.Awaiter as Async.TaskAwaiter;
-        //                if(caw!=null)
-        //                    caw.SetResult(ret);
-        //            }
-        //            ExecuteContinue(e.Awaiter);
-        //        }
-        //        catch (Exception ex)
-        //        {
-        //            Profiler.Log.WriteException(ex);
-        //            e.ExceptionInfo = ex;
-        //        }
-        //    }
-        //}
-        protected bool DoOneAsyncEvent(out Async.PostEvent oe)
+        protected bool DoOneAsyncEvent(out Async.TtAsyncTaskStateBase oe)
         {
             oe = null;
-            Async.PostEvent e;
+            Async.TtAsyncTaskStateBase e;
             lock (AsyncEvents)
             {
                 if (AsyncEvents.Count == 0)
@@ -434,16 +409,21 @@ namespace EngineNS.Thread
             }
             try
             {
-                var ret = e.PostAction();
-                var caw = e.Awaiter as Async.TaskAwaiter;
-                caw.SetResult(ret);
+                var state = e.ExecutePostEvent();
+                if (state.TaskState == Async.EAsyncTaskState.Suspended)
+                {
+                    lock (AsyncEvents)
+                    {
+                        AsyncEvents.Enqueue(e);
+                    }
+                    oe = e;
+                    return true;
+                }
             }
             catch (Exception ex)
             {
                 Profiler.Log.WriteException(ex);
                 e.ExceptionInfo = ex;
-                var caw = e.Awaiter as Async.TaskAwaiter;
-                caw.SetResult(null);
             }
             if(e.Tag==null)
             {
@@ -459,10 +439,10 @@ namespace EngineNS.Thread
             oe = e;
             return true;
         }
-        protected bool DoOneContnueEvent(out Async.PostEvent oe)
+        protected bool DoOneContinueEvent(out Async.TtAsyncTaskStateBase oe)
         {
             oe = null;
-            Async.PostEvent e;
+            Async.TtAsyncTaskStateBase e;
             lock (ContinueEvents)
             {
                 if (ContinueEvents.Count == 0)
@@ -471,7 +451,7 @@ namespace EngineNS.Thread
             }
             try
             {
-                ExecuteContinue(e.Awaiter);
+                e.ExecuteContinue();
             }
             catch (Exception ex)
             {
@@ -480,20 +460,6 @@ namespace EngineNS.Thread
             }
             oe = e;
             return true;
-        }
-        private void ExecuteContinue(Async.TaskAwaiter awaiter)
-        {
-            if (awaiter!=null && awaiter.IsContinueAction())
-            {
-#if PWindow
-                var saved = System.Threading.SynchronizationContext.Current;
-                System.Threading.SynchronizationContext.SetSynchronizationContext(null);
-                awaiter.DoContinueAction();
-                System.Threading.SynchronizationContext.SetSynchronizationContext(saved);
-#else
-                awaiter.DoContinueAction();
-#endif
-            }
         }
 
         public bool IsThisThread()

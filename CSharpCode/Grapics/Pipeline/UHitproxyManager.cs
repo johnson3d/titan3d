@@ -28,7 +28,7 @@ namespace EngineNS.Graphics.Pipeline
             return new Vector4(((ProxyId >> 24) & 0x000000ff) / 255.0f, ((ProxyId >> 16) & 0x000000ff) / 255.0f, ((ProxyId >> 8) & 0x000000ff) / 255.0f,
                 ((ProxyId >> 0) & 0x000000ff) / 255.0f);
         }
-        public static UInt32 ConvertCpuTexColorToHitProxyId(IntColor PixelColor)
+        public static UInt32 ConvertCpuTexColorToHitProxyId(Byte4 PixelColor)
         {
             return ((UInt32)PixelColor.R << 24 | (UInt32)PixelColor.G << 16 | (UInt32)PixelColor.B << 8 | (UInt32)PixelColor.A << 0);
         }

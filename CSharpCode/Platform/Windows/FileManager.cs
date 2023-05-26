@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace EngineNS.IO
 {
-    partial class FileManager
+    partial class TtFileManager
     {
         partial void InitDirectory()
         {
@@ -26,11 +26,7 @@ namespace EngineNS.IO
             SetRoot(ERootDir.Game, root + "content");
             SetRoot(ERootDir.Editor, root + "editorcontent");
             SetRoot(ERootDir.Cache, root + "cache");
-#if DEBUG
-            SetRoot(ERootDir.Plugin, root + $"binaries/Plugins/Debug/{UEngine.DotNetVersion}");
-#else
-            SetRoot(ERootDir.Plugin, root + $"binaries/Plugins/Release/{UEngine.DotNetVersion}");
-#endif
+            SetRoot(ERootDir.Plugin, root + $"binaries/Plugins/");
             SetRoot(ERootDir.EngineSource, root);
             SetRoot(ERootDir.GameSource, root);
         }

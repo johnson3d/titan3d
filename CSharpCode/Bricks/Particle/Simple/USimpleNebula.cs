@@ -92,7 +92,7 @@ namespace EngineNS.Bricks.Particle.Simple
             string sourceCode = "";
             //var codeBuilder = new Bricks.CodeBuilder.HLSL.UHLSLGen();
 
-            var code = IO.FileManager.ReadAllText($"{RName.GetRName("UTest\\Particles\\USimpleEmitter\\Emitter.compute").Address}");
+            var code = IO.TtFileManager.ReadAllText($"{RName.GetRName("UTest\\Particles\\USimpleEmitter\\Emitter.compute").Address}");
             codeBuilder.AddLine(code, ref sourceCode);
 
             codeBuilder.AddLine("\nvoid DoParticleEmitShape(uint3 id, inout FParticle cur, uint shapeIndex)", ref sourceCode);
@@ -136,7 +136,7 @@ namespace EngineNS.Bricks.Particle.Simple
 
         public override async Task<bool> InitializeNode(UWorld world, UNodeData data, EBoundVolumeType bvType, Type placementType)
         {
-            var dd = CoreDefine.RoundUpPow2(512, 32);
+            var dd = MathHelper.RoundUpPow2(512, 32);
             var nebulaData = data as UNebulaNodeData;
             nebulaData.MdfQueueType = Rtti.UTypeDesc.TypeStr(typeof(USimpleMdfQueue));
 

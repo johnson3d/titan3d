@@ -42,6 +42,8 @@ namespace EngineNS.Bricks.Procedure
         }
         public static void CopyTo(UBufferCreator src, UBufferCreator tag)
         {
+            if (src == null || tag == null)
+                return;
             tag.BufferType = src.BufferType;
             tag.XSize = src.XSize;
             tag.YSize = src.YSize;
@@ -125,9 +127,9 @@ namespace EngineNS.Bricks.Procedure
                 return typeof(FFloat4Operator);
             else if (type == typeof(int))
                 return typeof(FIntOperator);
-            else if (type == typeof(Int32_2))
+            else if (type == typeof(Vector2i))
                 return typeof(FInt2Operator);
-            else if (type == typeof(Int32_3))
+            else if (type == typeof(Vector3i))
                 return typeof(FInt3Operator);
             else if (type == typeof(DVector3))
                 return typeof(FDouble3Operator);
@@ -179,7 +181,7 @@ namespace EngineNS.Bricks.Procedure
         public int Slice { get; private set; }
         public int ElementSize { get; private set; }
         public Vector3 UVWStep = Vector3.Zero;
-        public Support.CBlobObject SuperPixels = new Support.CBlobObject();
+        public Support.UBlobObject SuperPixels = new Support.UBlobObject();
         protected UBufferConponent()
         {
 
@@ -195,7 +197,7 @@ namespace EngineNS.Bricks.Procedure
         }
         public void SaveToCache(string name, in Hash160 dataHash)
         {
-            var xnd = new IO.CXndHolder("PgcBuffer", 0, 0);
+            var xnd = new IO.TtXndHolder("PgcBuffer", 0, 0);
             unsafe
             {
                 SaveXnd(xnd, xnd.RootNode.mCoreObject, in dataHash);
@@ -204,7 +206,7 @@ namespace EngineNS.Bricks.Procedure
         }
         public bool LoadFromCache(string name, in Hash160 testHash)
         {
-            using (var xnd = IO.CXndHolder.LoadXnd(name))
+            using (var xnd = IO.TtXndHolder.LoadXnd(name))
             {
                 if (xnd == null)
                     return false;
@@ -215,24 +217,26 @@ namespace EngineNS.Bricks.Procedure
                 }
             }
         }
-        public unsafe void SaveXnd(IO.CXndHolder xnd, XndNode node, in Hash160 dataHash)
+        public unsafe void SaveXnd(IO.TtXndHolder xnd, XndNode node, in Hash160 dataHash)
         {
             using(var attr = xnd.NewAttribute("BufferCreator", 0, 0))
             {
-                var ar = attr.GetWriter(30);
-                ar.Write(dataHash);
-                ar.Write(ElementSize);
-                ar.Write(BufferCreator);
-                attr.ReleaseWriter(ref ar);
+                using (var ar = attr.GetWriter(30))
+                {
+                    ar.Write(dataHash);
+                    ar.Write(ElementSize);
+                    ar.Write(BufferCreator);
+                }
                 node.AddAttribute(attr);
             }
 
             using(var attr = xnd.NewAttribute("BufferData", 0, 0))
-            {   
-                var ar = attr.GetWriter(SuperPixels.mCoreObject.GetSize());
-                int bfSize = ElementSize * BufferCreator.XSize* BufferCreator.YSize* BufferCreator.ZSize;
-                ar.WritePtr(SuperPixels.mCoreObject.GetData(), bfSize);
-                attr.ReleaseWriter(ref ar);
+            {
+                using (var ar = attr.GetWriter(SuperPixels.mCoreObject.GetSize()))
+                {
+                    int bfSize = ElementSize * BufferCreator.XSize * BufferCreator.YSize * BufferCreator.ZSize;
+                    ar.WritePtr(SuperPixels.mCoreObject.GetData(), bfSize);
+                }
                 node.AddAttribute(attr);
             }
         }
@@ -241,14 +245,15 @@ namespace EngineNS.Bricks.Procedure
             var attr = node.TryGetAttribute("BufferCreator");
             if (attr.IsValidPointer)
             {
-                var ar = attr.GetReader(this);
                 Hash160 dataHash;
-                ar.Read(out dataHash);
                 int elemSize;
-                ar.Read(out elemSize);
                 IO.ISerializer creator;
-                ar.Read(out creator, this);
-                attr.ReleaseReader(ref ar);
+                using (var ar = attr.GetReader(this))
+                {   
+                    ar.Read(out dataHash);
+                    ar.Read(out elemSize);
+                    ar.Read(out creator, this);
+                }
 
                 if (dataHash != testHash)
                     return false;
@@ -267,11 +272,12 @@ namespace EngineNS.Bricks.Procedure
                     Pitch = bfCreator.XSize * ElementSize;
                     Slice = Pitch * bfCreator.YSize;
 
-                    ar = attr.GetReader(this);
-                    int bfSize = elemSize * BufferCreator.XSize * BufferCreator.YSize * BufferCreator.ZSize;
-                    SuperPixels.mCoreObject.ReSize((uint)bfSize);
-                    ar.ReadPtr(SuperPixels.mCoreObject.GetData(), bfSize);
-                    attr.ReleaseReader(ref ar);
+                    using (var ar = attr.GetReader(this))
+                    {
+                        int bfSize = elemSize * BufferCreator.XSize * BufferCreator.YSize * BufferCreator.ZSize;
+                        SuperPixels.mCoreObject.ReSize((uint)bfSize);
+                        ar.ReadPtr(SuperPixels.mCoreObject.GetData(), bfSize);
+                    }
 
                     //var t1 = Support.Time.HighPrecision_GetTickCount();
                     //var contentHash = CalcPixelHash();
@@ -493,7 +499,7 @@ namespace EngineNS.Bricks.Procedure
                     case EPixelFormat.PXF_R8G8_UNORM:
                         {//如果希望表达更高的精度，而不是浪费在half上的指数位，可以RG8UNorm格式，让高度信息有65535级别
                             var Count = Width * Height;
-                            var tarPixels = new UInt8_2[Width * Height];
+                            var tarPixels = new Byte2[Width * Height];
                             var pSlice = (float*)this.GetSliceAddress(0);
                             float range = maxHeight - minHeight;
                             for (int i = 0; i < Count; i++)
@@ -504,9 +510,9 @@ namespace EngineNS.Bricks.Procedure
                                 tarPixels[i].X = (byte)(value & 0xFF);
                                 tarPixels[i].Y = (byte)((value >> 8) & 0xFF);
                             }
-                            fixed (UInt8_2* p = &tarPixels[0])
+                            fixed (Byte2* p = &tarPixels[0])
                             {
-                                initData.RowPitch = (uint)(desc.Width * sizeof(UInt8_2));
+                                initData.RowPitch = (uint)(desc.Width * sizeof(Byte2));
                                 initData.pData = p;
                                 texture = UEngine.Instance.GfxDevice.RenderContext.CreateTexture(in desc);
                             }
@@ -626,9 +632,9 @@ namespace EngineNS.Bricks.Procedure
         }
         public unsafe void* GetSuperPixelAddress(in Vector3 uvw, EPixelAddressMode mode = EPixelAddressMode.Clamp)
         {
-            int x = CoreDefine.FloorToInt(uvw.X * (float)Width);
-            int y = CoreDefine.FloorToInt(uvw.Y * (float)Height);
-            int z = CoreDefine.FloorToInt(uvw.Z * (float)Depth);
+            int x = MathHelper.FloorToInt(uvw.X * (float)Width);
+            int y = MathHelper.FloorToInt(uvw.Y * (float)Height);
+            int z = MathHelper.FloorToInt(uvw.Z * (float)Depth);
             if (x >= Width)
                 if (x >= Width)
             {
@@ -846,7 +852,7 @@ namespace EngineNS.Bricks.Procedure
             else
             {
                 var evt = new System.Threading.AutoResetEvent(false);
-                var smp = Thread.ASyncSemaphore.CreateSemaphore(Depth * Height * Width, evt);
+                var smp = Thread.TtSemaphore.CreateSemaphore(Depth * Height * Width, evt);
                 
                 if (Depth == 1 && Height == 1)
                 {
@@ -859,11 +865,11 @@ namespace EngineNS.Bricks.Procedure
                                 int x = k;
                                 int y = j;
                                 int z = i;
-                                UEngine.Instance.EventPoster.RunOn(() =>
+                                UEngine.Instance.EventPoster.RunOn((state) =>
                                 {
                                     onPerPiexel(this, x, y, z);
                                     smp.Release();
-                                    return null;
+                                    return true;
                                 }, Thread.Async.EAsyncTarget.TPools);
                             }
                         }
@@ -877,14 +883,14 @@ namespace EngineNS.Bricks.Procedure
                         {
                             int y = j;
                             int z = i;
-                            UEngine.Instance.EventPoster.RunOn(() =>
+                            UEngine.Instance.EventPoster.RunOn((state) =>
                             {
                                 for (int k = 0; k < Width; k++)
                                 {
                                     onPerPiexel(this, k, y, z);
                                     smp.Release();
                                 }
-                                return null;
+                                return true;
                             }, Thread.Async.EAsyncTarget.TPools);
                         }
                     }
@@ -894,7 +900,7 @@ namespace EngineNS.Bricks.Procedure
                     for (int i = 0; i < Depth; i++)
                     {
                         int z = i;
-                        UEngine.Instance.EventPoster.RunOn(() =>
+                        UEngine.Instance.EventPoster.RunOn((state) =>
                         {
                             for (int j = 0; j < Height; j++)
                             {
@@ -904,7 +910,7 @@ namespace EngineNS.Bricks.Procedure
                                     smp.Release();
                                 }
                             }
-                            return null;
+                            return true;
                         }, Thread.Async.EAsyncTarget.TPools);
                     }
                 }
@@ -963,18 +969,41 @@ namespace EngineNS.Bricks.Procedure
         public Vector3 GetClampedUVW(int x, int y, int z)
         {
             Vector3 result;
-            result.X = CoreDefine.Clamp((float)x / (float)Width, 0, 1);
-            result.Y = CoreDefine.Clamp((float)y / (float)Height, 0, 1);
-            result.Z = CoreDefine.Clamp((float)z / (float)Depth, 0, 1);
+            result.X = MathHelper.Clamp((float)x / (float)Width, 0, 1);
+            result.Y = MathHelper.Clamp((float)y / (float)Height, 0, 1);
+            result.Z = MathHelper.Clamp((float)z / (float)Depth, 0, 1);
+            return result;
+        }
+        [Rtti.Meta(MethodGenericParameters = new System.Type[]
+                {
+                    typeof(float), typeof(Vector2), typeof(Vector3)
+                })]
+        public unsafe Span<T> GetSuperPixelSpan<T>(int x, int y, int z, int num = -1) where T : unmanaged
+        {
+            if (x < 0 || x >= Width || y < 0 || y >= Height || z < 0 || z >= Depth)
+                return null;
+            var total = BufferCreator.XSize* BufferCreator.YSize * BufferCreator.XSize* BufferCreator.XSize;
+            var offset = z * BufferCreator.XSize * BufferCreator.YSize + y * BufferCreator.XSize + x;
+            if (num < 0)
+            {
+                num = total;
+            }
+            if (offset + num >= total)
+            {
+                num = total - offset;
+            }
+            var pBuffer = (byte*)SuperPixels.mCoreObject.GetData();
+            var ptr = &pBuffer[Slice * z + y * Pitch + x * ElementSize];
+            Span<T> result = new Span<T>(ptr, num);
             return result;
         }
         [Rtti.Meta]
-        public unsafe void* GetSuperPixelAddress(int x, int y, int z,
-           [Rtti.MetaParameter(TypeList = new System.Type[]
+        protected unsafe void* GetSuperPixelAddress(int x, int y, int z,
+                [Rtti.MetaParameter(TypeList = new System.Type[]
                 {
                     typeof(float*), typeof(Vector2*), typeof(Vector3*)
                 },
-            ConvertOutArguments = Rtti.MetaParameterAttribute.EArgumentFilter.R)]
+                ConvertOutArguments = Rtti.MetaParameterAttribute.EArgumentFilter.R)]
             System.Type retType)
         {
             if (retType.IsValueType == false)
@@ -1053,9 +1082,9 @@ namespace EngineNS.Bricks.Procedure
                     }
                 case EBufferSamplerType.Linear:
                     {
-                        var rx = CoreDefine.Mod(u, UVWStep.X);
-                        var ry = CoreDefine.Mod(v, UVWStep.Y);
-                        var rz = CoreDefine.Mod(w, UVWStep.Z);
+                        var rx = MathHelper.Mod(u, UVWStep.X);
+                        var ry = MathHelper.Mod(v, UVWStep.Y);
+                        var rz = MathHelper.Mod(w, UVWStep.Z);
                         var bx = u - rx;
                         var by = v - ry;
                         var bz = v - rz;
@@ -1066,15 +1095,15 @@ namespace EngineNS.Bricks.Procedure
                         var v11 = GetPixel<float>(new Vector3(bx + UVWStep.X, by + UVWStep.Y, bz), address);
 
                         var lx = rx / UVWStep.X;
-                        var f1 = CoreDefine.Lerp(v00, v01, lx);
-                        var f2 = CoreDefine.Lerp(v10, v11, lx);
-                        return CoreDefine.Lerp(f1, f2, ry / UVWStep.Y);
+                        var f1 = MathHelper.Lerp(v00, v01, lx);
+                        var f2 = MathHelper.Lerp(v10, v11, lx);
+                        return MathHelper.Lerp(f1, f2, ry / UVWStep.Y);
                     }
                 case EBufferSamplerType.Box:
                     {
-                        var rx = CoreDefine.Mod(u, UVWStep.X);
-                        var ry = CoreDefine.Mod(v, UVWStep.Y);
-                        var rz = CoreDefine.Mod(w, UVWStep.Z);
+                        var rx = MathHelper.Mod(u, UVWStep.X);
+                        var ry = MathHelper.Mod(v, UVWStep.Y);
+                        var rz = MathHelper.Mod(w, UVWStep.Z);
                         var bx = u - rx;
                         var by = v - ry;
                         var bz = v - rz;
@@ -1086,19 +1115,19 @@ namespace EngineNS.Bricks.Procedure
                         var v010 = GetPixel<float>(new Vector3(bx + UVWStep.X, by, bz), address);
                         var v100 = GetPixel<float>(new Vector3(bx, by + UVWStep.Y, bz), address);
                         var v110 = GetPixel<float>(new Vector3(bx + UVWStep.X, by + UVWStep.Y, bz), address);
-                        var f10 = CoreDefine.Lerp(v000, v010, lx);
-                        var f20 = CoreDefine.Lerp(v100, v110, lx);
-                        var z0 = CoreDefine.Lerp(f10, f20, ly);
+                        var f10 = MathHelper.Lerp(v000, v010, lx);
+                        var f20 = MathHelper.Lerp(v100, v110, lx);
+                        var z0 = MathHelper.Lerp(f10, f20, ly);
 
                         var v001 = GetPixel<float>(new Vector3(bx, by, bz + UVWStep.Z), address);
                         var v011 = GetPixel<float>(new Vector3(bx + UVWStep.X, by, bz + UVWStep.Z), address);
                         var v101 = GetPixel<float>(new Vector3(bx, by + UVWStep.Y, bz + UVWStep.Z), address);
                         var v111 = GetPixel<float>(new Vector3(bx + UVWStep.X, by + UVWStep.Y, bz + UVWStep.Z), address);
-                        var f11 = CoreDefine.Lerp(v001, v011, lx);
-                        var f21 = CoreDefine.Lerp(v101, v111, lx);
-                        var z1 = CoreDefine.Lerp(f11, f21, ly);
+                        var f11 = MathHelper.Lerp(v001, v011, lx);
+                        var f21 = MathHelper.Lerp(v101, v111, lx);
+                        var z1 = MathHelper.Lerp(f11, f21, ly);
 
-                        return CoreDefine.Lerp(z0, z1, lz);
+                        return MathHelper.Lerp(z0, z1, lz);
                     }
             }
             return 0;
@@ -1149,24 +1178,24 @@ namespace EngineNS.Bricks.Procedure
             SetPixel<int>(x, y, z, v);
         }
         [Rtti.Meta]
-        public Int32_2 GetInt2(int x, int y, int z)
+        public Vector2i GetInt2(int x, int y, int z)
         {
-            return GetPixel<Int32_2>(x, y, z);
+            return GetPixel<Vector2i>(x, y, z);
         }
         [Rtti.Meta]
-        public void SetInt2(int x, int y, int z, in Int32_2 v)
+        public void SetInt2(int x, int y, int z, in Vector2i v)
         {
-            SetPixel<Int32_2>(x, y, z, in v);
+            SetPixel<Vector2i>(x, y, z, in v);
         }
         [Rtti.Meta]
-        public Int32_3 GetInt3(int x, int y, int z)
+        public Vector3i GetInt3(int x, int y, int z)
         {
-            return GetPixel<Int32_3>(x, y, z);
+            return GetPixel<Vector3i>(x, y, z);
         }
         [Rtti.Meta]
-        public void SetInt3(int x, int y, int z, in Int32_3 v)
+        public void SetInt3(int x, int y, int z, in Vector3i v)
         {
-            SetPixel<Int32_3>(x, y, z, in v);
+            SetPixel<Vector3i>(x, y, z, in v);
         }
         #endregion
     }

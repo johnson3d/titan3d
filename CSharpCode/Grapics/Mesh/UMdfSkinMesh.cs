@@ -28,6 +28,7 @@ namespace EngineNS.Graphics.Mesh
         }
         public override void CopyFrom(UMdfQueue mdf)
         {
+            base.CopyFrom(mdf);
             mCoreObject.ClearModifiers();
             SkinModifier = (mdf as UMdfSkinMesh).SkinModifier;
             PerSkinMeshCBuffer = (mdf as UMdfSkinMesh).PerSkinMeshCBuffer;
@@ -41,7 +42,7 @@ namespace EngineNS.Graphics.Mesh
             var codeString = "";
             var mdfSourceName = RName.GetRName("shaders/modifier/SkinModifier.cginc", RName.ERNameType.Engine);
             codeBuilder.AddLine($"#include \"{mdfSourceName.Address}\"", ref codeString);
-            codeBuilder.AddLine("void MdfQueueDoModifiers(inout PS_INPUT output, VS_INPUT input)", ref codeString);
+            codeBuilder.AddLine("void MdfQueueDoModifiers(inout PS_INPUT output, VS_MODIFIER input)", ref codeString);
             codeBuilder.PushSegment(ref codeString);
             {
                 codeBuilder.AddLine("DoSkinModifierVS(output, input);", ref codeString);
@@ -51,14 +52,15 @@ namespace EngineNS.Graphics.Mesh
             codeBuilder.AddLine("#define MDFQUEUE_FUNCTION", ref codeString);
 
             var code = Editor.ShaderCompiler.UShaderCodeManager.Instance.GetShaderCodeProvider(mdfSourceName);
-            codeBuilder.AddLine($"//Hash for {mdfSourceName}:{UniHash.APHash(code.SourceCode.TextCode)}", ref codeString);
+            codeBuilder.AddLine($"//Hash for {mdfSourceName}:{UniHash32.APHash(code.SourceCode.TextCode)}", ref codeString);
 
             SourceCode = new NxRHI.UShaderCode();
             SourceCode.TextCode = codeString;
             return codeString;
         }
-        public override void OnDrawCall(Pipeline.URenderPolicy.EShadingType shadingType, NxRHI.UGraphicDraw drawcall, Pipeline.URenderPolicy policy, Mesh.UMesh mesh)
+        public override void OnDrawCall(Pipeline.URenderPolicy.EShadingType shadingType, NxRHI.UGraphicDraw drawcall, Pipeline.URenderPolicy policy, Mesh.UMesh mesh, int atom)
         {
+            base.OnDrawCall(shadingType, drawcall, policy, mesh, atom);
             unsafe
             {
                 var bones = mesh.MaterialMesh.Mesh.PartialSkeleton.GetLimb<Animation.SkeletonAnimation.Skeleton.Limb.UBone>();

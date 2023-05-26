@@ -199,7 +199,7 @@ namespace EngineNS.Bricks.Terrain.CDLOD
 
             if (MaterialIdArray.Count == 0)
                 return false;
-            NxRHI.ICommandList cmd = UEngine.Instance.GfxDevice.RenderContext.CmdQueue.GetIdleCmdlist(NxRHI.EQueueCmdlist.QCL_FramePost);
+            var cmd = UEngine.Instance.GfxDevice.RenderContext.GpuQueue.FramePostCmdList.mCoreObject;
             var dftLayer = MaterialIdArray[0];
             {
                 var txDesc = NxRHI.USrView.LoadPictureDesc(dftLayer.TexDiffuse);
@@ -239,24 +239,18 @@ namespace EngineNS.Bricks.Terrain.CDLOD
                         System.Diagnostics.Debug.Assert(txDesc.Format == desc.Format);
                         for (int j = 0; j < desc.m_MipLevels; j++)
                         {
-                            var subRes = DiffuseTextureArray.mCoreObject.GetSubResource((uint)j, (uint)i);
-                            
-                            DiffuseTextureArray.UpdateGpuData(cmd, subRes, mipDatas[j].mCoreObject.GetData(),
-                                (NxRHI.FSubresourceBox*)IntPtr.Zero.ToPointer(), 
-                                (uint)(txDesc.MipSizes[j].Z),
-                                (uint)(txDesc.MipSizes[j].Z * txDesc.MipSizes[j].Y));
-                            //fixed (byte* pSrcData = &mipDatas[j].Data[0])
-                            //{
-                            //    //var box = new NxRHI.FSubresourceBox();
-                            //    //box.m_Front = 0;
-                            //    //box.m_Back = 0;
-                            //    //box.m_Left = 0;
-                            //    //box.m_Right = (uint)mipDatas[j].Width;
-                            //    //box.m_Top = 0;
-                            //    //box.m_Bottom = (uint)mipDatas[j].Height;
-                            //    var subRes = DiffuseTextureArray.mCoreObject.GetSubResource(j, (uint)i);
-                            //    DiffuseTextureArray.UpdateGpuData(cmd, subRes, pSrcData, (NxRHI.FSubresourceBox*)IntPtr.Zero.ToPointer(), (uint)(mipDatas[j].Width * sizeof(uint)), (uint)(mipDatas[j].Width * mipDatas[j].Height * sizeof(uint)));
-                            //}
+                            var subRes = DiffuseTextureArray.mCoreObject.GetSubResource((uint)j, (uint)i, 0);
+                            //DiffuseTextureArray.UpdateGpuData(0, mipDatas[j].mCoreObject.GetData(),
+                            //    (uint)(txDesc.MipSizes[j].Z * txDesc.MipSizes[j].Y), subRes);
+                            var fp = new NxRHI.FSubResourceFootPrint();
+                            fp.SetDefault();
+                            fp.Format = desc.Format;
+                            fp.Width = (uint)txDesc.MipSizes[j].X;
+                            fp.Height = (uint)txDesc.MipSizes[j].Y;
+                            fp.Depth = 1;
+                            fp.RowPitch = (uint)txDesc.MipSizes[j].Z;
+                            fp.TotalSize = fp.RowPitch * fp.Height;
+                            DiffuseTextureArray.UpdateGpuData(subRes, mipDatas[j].mCoreObject.GetData(), &fp);
                         }
                     }
                 }
@@ -293,7 +287,7 @@ namespace EngineNS.Bricks.Terrain.CDLOD
                     for (int i = 0; i < MaterialIdArray.Count; i++)
                     {
                         //var mipDatas = NxRHI.USrView.LoadImageLevels(MaterialIdArray[i].TexNormal, 0, ref txDesc);
-                        var mipDatas = NxRHI.USrView.LoadPixelMipLevels(MaterialIdArray[i].TexDiffuse, 0, txDesc);
+                        var mipDatas = NxRHI.USrView.LoadPixelMipLevels(MaterialIdArray[i].TexNormal, 0, txDesc);
                         if (txDesc.Width != desc.Width || txDesc.Height != desc.Height || mipDatas.Length != desc.m_MipLevels)
                         {
                             continue;
@@ -301,29 +295,24 @@ namespace EngineNS.Bricks.Terrain.CDLOD
                         System.Diagnostics.Debug.Assert(txDesc.Format == desc.Format);
                         for (int j = 0; j < desc.m_MipLevels; j++)
                         {
-                            var subRes = NormalTextureArray.mCoreObject.GetSubResource((uint)j, (uint)i);
-                            NormalTextureArray.UpdateGpuData(cmd, subRes, mipDatas[j].mCoreObject.GetData(), 
-                                (NxRHI.FSubresourceBox*)IntPtr.Zero.ToPointer(), 
-                                (uint)(txDesc.MipSizes[j].Z), 
-                                (uint)(txDesc.MipSizes[j].Z * txDesc.MipSizes[j].Y));
-                            //fixed (byte* pSrcData = &mipDatas[j].Data[0])
-                            //{
-                            //    //var box = new NxRHI.FSubresourceBox();
-                            //    //box.m_Front = 0;
-                            //    //box.m_Back = 0;
-                            //    //box.m_Left = 0;
-                            //    //box.m_Right = (uint)mipDatas[j].Width;
-                            //    //box.m_Top = 0;
-                            //    //box.m_Bottom = (uint)mipDatas[j].Height;
-                            //    var subRes = NormalTextureArray.mCoreObject.GetSubResource(j, (uint)i);
-                            //    NormalTextureArray.UpdateGpuData(cmd, subRes, pSrcData, (NxRHI.FSubresourceBox*)IntPtr.Zero.ToPointer(), (uint)(mipDatas[j].Width * sizeof(uint)), (uint)(mipDatas[j].Width * mipDatas[j].Height * sizeof(uint)));
-                            //}
+                            var subRes = NormalTextureArray.mCoreObject.GetSubResource((uint)j, (uint)i, 0);
+                            //NormalTextureArray.UpdateGpuData(0, mipDatas[j].mCoreObject.GetData(), 
+                            //    (uint)(txDesc.MipSizes[j].Z * txDesc.MipSizes[j].Y), subRes);
+
+                            var fp = new NxRHI.FSubResourceFootPrint();
+                            fp.SetDefault();
+                            fp.Format = desc.Format;
+                            fp.Width = (uint)txDesc.MipSizes[j].X;
+                            fp.Height = (uint)txDesc.MipSizes[j].Y;
+                            fp.Depth = 1;
+                            fp.RowPitch = (uint)txDesc.MipSizes[j].Z;
+                            fp.TotalSize = fp.RowPitch * fp.Height;
+                            NormalTextureArray.UpdateGpuData(subRes, mipDatas[j].mCoreObject.GetData(), &fp);
                         }
                     }
                 }
             }
 
-            UEngine.Instance.GfxDevice.RenderContext.CmdQueue.ReleaseIdleCmdlist(cmd, NxRHI.EQueueCmdlist.QCL_FramePost);
             return true;
         }
     }

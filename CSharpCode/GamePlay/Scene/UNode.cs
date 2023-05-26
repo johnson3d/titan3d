@@ -1,6 +1,7 @@
-﻿using System;
+﻿using EngineNS.Bricks.GpuDriven;
+using System;
 using System.Collections.Generic;
-using System.Text;
+using System.ComponentModel;
 
 namespace EngineNS.GamePlay.Scene
 {
@@ -51,8 +52,23 @@ namespace EngineNS.GamePlay.Scene
             NodeStyles &= ~style;
         }
     }
-    public partial class UNode
+    public partial class UNode : IDisposable
     {
+        public virtual void Dispose()
+        {
+
+        }
+        public void DisposeWithChildren()
+        {
+            foreach (var i in Children)
+            {
+                i.UnsafeNullParent();
+                i.DisposeWithChildren();
+            }
+            Children.Clear();
+            //this.UpdateAABB();
+            this.Dispose();
+        }
         public const string EditorKeyword = "UNode";
         public virtual async System.Threading.Tasks.Task<bool> InitializeNode(GamePlay.UWorld world, UNodeData data, EBoundVolumeType bvType, Type placementType)
         {
@@ -328,6 +344,7 @@ namespace EngineNS.GamePlay.Scene
         {
             return NodeData as T;
         }
+        [Category("Option")]
         public DVector3 Location
         {
             get
@@ -337,10 +354,12 @@ namespace EngineNS.GamePlay.Scene
                 return Placement.AbsTransform.Position;
             }
         }
+        [Category("Option")]
         public virtual UPlacementBase Placement
         {
             get { return NodeData?.Placement; }
         }
+        [Category("Option")]
         public UBoundVolume BoundVolume
         {
             get { return NodeData?.BoundVolume; }
@@ -460,9 +479,9 @@ namespace EngineNS.GamePlay.Scene
                     {
                         using (var dataAttr = xnd.NewAttribute(Rtti.UTypeDesc.TypeStr(i.NodeData.GetType()), 1, NodeDescAttributeFlags))
                         {
-                            var attrProxy = new EngineNS.IO.XndAttributeWriter(dataAttr);
+                            var attrProxy = new EngineNS.IO.TtXndAttributeWriter(dataAttr);
 
-                            var ar = new EngineNS.IO.AuxWriter<EngineNS.IO.XndAttributeWriter>(attrProxy);
+                            var ar = new EngineNS.IO.AuxWriter<EngineNS.IO.TtXndAttributeWriter>(attrProxy);
                             dataAttr.BeginWrite((ulong)NodeData.GetStructSize() * 2);
                             ar.Write(i.NodeData);
                             dataAttr.EndWrite();
@@ -493,41 +512,37 @@ namespace EngineNS.GamePlay.Scene
                     Profiler.Log.WriteLine(Profiler.ELogTag.Warning, "Scene", $"SceneNode Load failed: NodeDataType={attr.Name}, NodeData={cldTypeStr}");
                     continue;
                 }
-                var ar = attr.GetReader(scene);
-                IO.ISerializer data = nodeData;
-                try
+                using (var ar = attr.GetReader(nd))
                 {
-                    ar.Tag = nd;
-                    if(false == ar.ReadTo(data, this))
+                    IO.ISerializer data = nodeData;
+                    try
                     {
-                        continue;
-                    }
+                        //ar.Tag = nd;
+                        if (false == ar.ReadTo(data, this))
+                        {
+                            continue;
+                        }
 
-                    var ok = await nd.InitializeNode(world, nodeData, EBoundVolumeType.None, null);
-                    if (ok == false)
+                        var ok = await nd.InitializeNode(world, nodeData, EBoundVolumeType.None, null);
+                        if (ok == false)
+                        {
+                            Profiler.Log.WriteLine(Profiler.ELogTag.Warning, "Scene", $"SceneNode Load Initialize failed: NodeDataType={attr.Name}, NodeData={cldTypeStr}");
+                            continue;
+                        }
+                        //nd.NodeData = data as UNodeData;
+
+                        nd.OnNodeLoaded(this);
+                    }
+                    catch (Exception ex)
                     {
-                        Profiler.Log.WriteLine(Profiler.ELogTag.Warning, "Scene", $"SceneNode Load Initialize failed: NodeDataType={attr.Name}, NodeData={cldTypeStr}");
-                        continue;
+                        Profiler.Log.WriteException(ex);
+                        Profiler.Log.WriteLine(Profiler.ELogTag.Warning, "IO", $"Scene({scene.AssetName}): Node({nd.NodeData?.Name}) load failed");
                     }
-                    //nd.NodeData = data as UNodeData;
-
-                    nd.OnNodeLoaded(this);
                 }
-                catch (Exception ex)
+                if (nd.Placement != null)
                 {
-                    Profiler.Log.WriteException(ex);
-                    Profiler.Log.WriteLine(Profiler.ELogTag.Warning, "IO", $"Scene({scene.AssetName}): Node({nd.NodeData?.Name}) load failed");
-                }
-                finally
-                {
-                    ar.Tag = null;
-                    attr.ReleaseReader(ref ar);
-
-                    if (nd.Placement != null)
-                    {
-                        nd.Parent = this;
-                        await nd.LoadChildNode(world, scene, cld);
-                    }
+                    nd.Parent = this;
+                    await nd.LoadChildNode(world, scene, cld);
                 }
             }
             return true;
@@ -772,6 +787,16 @@ namespace EngineNS.GamePlay.Scene
         public virtual Guid ActorId
         {
             get { return Guid.Empty; }
+        }
+    }
+    public partial class TtGpuSceneNode : USceneActorNode
+    {
+        public int GpuSceneIndex = -1;
+
+        public List<TtClusteredMesh> ClusteredMeshs = new List<TtClusteredMesh>();
+
+        public void BuildClusterBuffer()
+        { 
         }
     }
     [Bricks.CodeBuilder.ContextMenu("SubTree", "SubTree", UNode.EditorKeyword)]

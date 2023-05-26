@@ -2,6 +2,7 @@
 using SDL2;
 using System;
 using System.Collections.Generic;
+using System.Runtime.InteropServices;
 using System.Text;
 
 namespace EngineNS
@@ -19,6 +20,38 @@ namespace EngineNS
 
     public partial class UNativeWindow
     {
+        public enum DwmWindowAttribute : uint
+        {
+            NCRenderingEnabled = 1,
+            NCRenderingPolicy,
+            TransitionsForceDisabled,
+            AllowNCPaint,
+            CaptionButtonBounds,
+            NonClientRtlLayout,
+            ForceIconicRepresentation,
+            Flip3DPolicy,
+            ExtendedFrameBounds,
+            HasIconicBitmap,
+            DisallowPeek,
+            ExcludedFromPeek,
+            Cloak,
+            Cloaked,
+            FreezeRepresentation,
+            PassiveUpdateMode,
+            UseHostBackdropBrush,
+            UseImmersiveDarkMode = 20,
+            WindowCornerPreference = 33,
+            BorderColor,
+            CaptionColor,
+            TextColor,
+            VisibleFrameBorderThickness,
+            SystemBackdropType,
+            Last
+        }
+
+        [DllImport("dwmapi.dll", PreserveSig = true)]
+        public static extern int DwmSetWindowAttribute(IntPtr hwnd, DwmWindowAttribute attr, ref int attrValue, int attrSize);
+
         ~UNativeWindow()
         {
             Cleanup();
@@ -90,7 +123,7 @@ namespace EngineNS
 
         public virtual async System.Threading.Tasks.Task<bool> Initialize(string title, int x, int y, int w, int h)
         {
-            await Thread.AsyncDummyClass.DummyFunc();
+            await Thread.TtAsyncDummyClass.DummyFunc();
 
             SDL.SDL_WindowFlags sdl_flags = 0;
             sdl_flags |= SDL.SDL_WindowFlags.SDL_WINDOW_HIDDEN | SDL.SDL_WindowFlags.SDL_WINDOW_ALLOW_HIGHDPI;
@@ -110,6 +143,11 @@ namespace EngineNS
             Window = SDL.SDL_CreateWindow(title, x, y, w, h, (SDL.SDL_WindowFlags)sdl_flags);
             ThisHandle = System.Runtime.InteropServices.GCHandle.ToIntPtr(System.Runtime.InteropServices.GCHandle.Alloc(this));
             SDL.SDL_SetWindowData(Window, "UNativeWindow", ThisHandle);
+            SDL.SDL_SysWMinfo wmInfo = new SDL.SDL_SysWMinfo();
+            SDL.SDL_GetWindowWMInfo(Window, ref wmInfo);
+            var hwnd = wmInfo.info.win.window;
+            int darkMode = 1;
+            DwmSetWindowAttribute(hwnd, (DwmWindowAttribute)20, ref darkMode, sizeof(int));
             return Window;
         }
         public void ShowNativeWindow()
@@ -163,6 +201,11 @@ namespace EngineNS
                 case Bricks.Input.WindowEventID.WINDOWEVENT_SIZE_CHANGED:
                     {
                         OnResize(e.Window.Data1, e.Window.Data2);
+                    }
+                    break;
+                case Bricks.Input.WindowEventID.WINDOWEVENT_CLOSE:
+                    {
+
                     }
                     break;
             }
@@ -260,28 +303,28 @@ namespace EngineNS
             {
                 var pKeyMap = (int*)&io.UnsafeAsLayout->KeyMap;
                 // Keyboard mapping. ImGui will use those indices to peek into the io.KeysDown[] array.
-                pKeyMap[(int)ImGuiKey_.ImGuiKey_Tab] = (int)SDL.SDL_Scancode.SDL_SCANCODE_TAB;
-                pKeyMap[(int)ImGuiKey_.ImGuiKey_LeftArrow] = (int)SDL.SDL_Scancode.SDL_SCANCODE_LEFT;
-                pKeyMap[(int)ImGuiKey_.ImGuiKey_RightArrow] = (int)SDL.SDL_Scancode.SDL_SCANCODE_RIGHT;
-                pKeyMap[(int)ImGuiKey_.ImGuiKey_UpArrow] = (int)SDL.SDL_Scancode.SDL_SCANCODE_UP;
-                pKeyMap[(int)ImGuiKey_.ImGuiKey_DownArrow] = (int)SDL.SDL_Scancode.SDL_SCANCODE_DOWN;
-                pKeyMap[(int)ImGuiKey_.ImGuiKey_PageUp] = (int)SDL.SDL_Scancode.SDL_SCANCODE_PAGEUP;
-                pKeyMap[(int)ImGuiKey_.ImGuiKey_PageDown] = (int)SDL.SDL_Scancode.SDL_SCANCODE_PAGEDOWN;
-                pKeyMap[(int)ImGuiKey_.ImGuiKey_Home] = (int)SDL.SDL_Scancode.SDL_SCANCODE_HOME;
-                pKeyMap[(int)ImGuiKey_.ImGuiKey_End] = (int)SDL.SDL_Scancode.SDL_SCANCODE_END;
-                pKeyMap[(int)ImGuiKey_.ImGuiKey_Insert] = (int)SDL.SDL_Scancode.SDL_SCANCODE_INSERT;
-                pKeyMap[(int)ImGuiKey_.ImGuiKey_Delete] = (int)SDL.SDL_Scancode.SDL_SCANCODE_DELETE;
-                pKeyMap[(int)ImGuiKey_.ImGuiKey_Backspace] = (int)SDL.SDL_Scancode.SDL_SCANCODE_BACKSPACE;
-                pKeyMap[(int)ImGuiKey_.ImGuiKey_Space] = (int)SDL.SDL_Scancode.SDL_SCANCODE_SPACE;
-                pKeyMap[(int)ImGuiKey_.ImGuiKey_Enter] = (int)SDL.SDL_Scancode.SDL_SCANCODE_RETURN;
-                pKeyMap[(int)ImGuiKey_.ImGuiKey_Escape] = (int)SDL.SDL_Scancode.SDL_SCANCODE_ESCAPE;
-                pKeyMap[(int)ImGuiKey_.ImGuiKey_KeyPadEnter] = (int)SDL.SDL_Scancode.SDL_SCANCODE_KP_ENTER;
-                pKeyMap[(int)ImGuiKey_.ImGuiKey_A] = (int)SDL.SDL_Scancode.SDL_SCANCODE_A;
-                pKeyMap[(int)ImGuiKey_.ImGuiKey_C] = (int)SDL.SDL_Scancode.SDL_SCANCODE_C;
-                pKeyMap[(int)ImGuiKey_.ImGuiKey_V] = (int)SDL.SDL_Scancode.SDL_SCANCODE_V;
-                pKeyMap[(int)ImGuiKey_.ImGuiKey_X] = (int)SDL.SDL_Scancode.SDL_SCANCODE_X;
-                pKeyMap[(int)ImGuiKey_.ImGuiKey_Y] = (int)SDL.SDL_Scancode.SDL_SCANCODE_Y;
-                pKeyMap[(int)ImGuiKey_.ImGuiKey_Z] = (int)SDL.SDL_Scancode.SDL_SCANCODE_Z;
+                pKeyMap[(int)ImGuiKey.ImGuiKey_Tab] = (int)SDL.SDL_Scancode.SDL_SCANCODE_TAB;
+                pKeyMap[(int)ImGuiKey.ImGuiKey_LeftArrow] = (int)SDL.SDL_Scancode.SDL_SCANCODE_LEFT;
+                pKeyMap[(int)ImGuiKey.ImGuiKey_RightArrow] = (int)SDL.SDL_Scancode.SDL_SCANCODE_RIGHT;
+                pKeyMap[(int)ImGuiKey.ImGuiKey_UpArrow] = (int)SDL.SDL_Scancode.SDL_SCANCODE_UP;
+                pKeyMap[(int)ImGuiKey.ImGuiKey_DownArrow] = (int)SDL.SDL_Scancode.SDL_SCANCODE_DOWN;
+                pKeyMap[(int)ImGuiKey.ImGuiKey_PageUp] = (int)SDL.SDL_Scancode.SDL_SCANCODE_PAGEUP;
+                pKeyMap[(int)ImGuiKey.ImGuiKey_PageDown] = (int)SDL.SDL_Scancode.SDL_SCANCODE_PAGEDOWN;
+                pKeyMap[(int)ImGuiKey.ImGuiKey_Home] = (int)SDL.SDL_Scancode.SDL_SCANCODE_HOME;
+                pKeyMap[(int)ImGuiKey.ImGuiKey_End] = (int)SDL.SDL_Scancode.SDL_SCANCODE_END;
+                pKeyMap[(int)ImGuiKey.ImGuiKey_Insert] = (int)SDL.SDL_Scancode.SDL_SCANCODE_INSERT;
+                pKeyMap[(int)ImGuiKey.ImGuiKey_Delete] = (int)SDL.SDL_Scancode.SDL_SCANCODE_DELETE;
+                pKeyMap[(int)ImGuiKey.ImGuiKey_Backspace] = (int)SDL.SDL_Scancode.SDL_SCANCODE_BACKSPACE;
+                pKeyMap[(int)ImGuiKey.ImGuiKey_Space] = (int)SDL.SDL_Scancode.SDL_SCANCODE_SPACE;
+                pKeyMap[(int)ImGuiKey.ImGuiKey_Enter] = (int)SDL.SDL_Scancode.SDL_SCANCODE_RETURN;
+                pKeyMap[(int)ImGuiKey.ImGuiKey_Escape] = (int)SDL.SDL_Scancode.SDL_SCANCODE_ESCAPE;
+                pKeyMap[(int)ImGuiKey.ImGuiKey_KeyPadEnter] = (int)SDL.SDL_Scancode.SDL_SCANCODE_KP_ENTER;
+                pKeyMap[(int)ImGuiKey.ImGuiKey_A] = (int)SDL.SDL_Scancode.SDL_SCANCODE_A;
+                pKeyMap[(int)ImGuiKey.ImGuiKey_C] = (int)SDL.SDL_Scancode.SDL_SCANCODE_C;
+                pKeyMap[(int)ImGuiKey.ImGuiKey_V] = (int)SDL.SDL_Scancode.SDL_SCANCODE_V;
+                pKeyMap[(int)ImGuiKey.ImGuiKey_X] = (int)SDL.SDL_Scancode.SDL_SCANCODE_X;
+                pKeyMap[(int)ImGuiKey.ImGuiKey_Y] = (int)SDL.SDL_Scancode.SDL_SCANCODE_Y;
+                pKeyMap[(int)ImGuiKey.ImGuiKey_Z] = (int)SDL.SDL_Scancode.SDL_SCANCODE_Z;
             }
         }
 
@@ -378,6 +421,9 @@ namespace EngineNS
                 io.SetClipboardTextFn = EGui.UDockWindowSDL.ImGui_ImplSDL2_SetClipboardText;
                 io.GetClipboardTextFn = EGui.UDockWindowSDL.ImGui_ImplSDL2_GetClipboardText;
                 io.ClipboardUserData = (void*)0;
+
+                io.MouseDoubleClickTime = 0.5f;
+                io.ConfigViewportsNoDecoration = false;
 
                 var pKeyMap = (int*)&io.UnsafeAsLayout->KeyMap;
                 // Keyboard mapping. ImGui will use those indices to peek into the io.KeysDown[] array.

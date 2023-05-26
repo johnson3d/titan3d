@@ -95,9 +95,15 @@ namespace EngineNS
         {
             try
             {
-                var segs = text.Split(',');
-                return new Vector2(System.Convert.ToSingle(segs[0]),
-                    System.Convert.ToSingle(segs[1]));
+                Vector2 result = new Vector2();
+                ReadOnlySpan<char> chars = text.ToCharArray();
+                var pos = chars.IndexOf(',');
+                result.X = float.Parse(chars.Slice(0, pos));
+                result.Y = float.Parse(chars.Slice(pos + 1, chars.Length - pos - 1));
+                return result;
+                //var segs = text.Split(',');
+                //return new Vector2(System.Convert.ToSingle(segs[0]),
+                //    System.Convert.ToSingle(segs[1]));
             }
             catch
             {
@@ -596,7 +602,7 @@ namespace EngineNS
         /// <param name="factor">插值因子</param>
         /// <returns>返回计算后的向量</returns>
         [Rtti.Meta]
-        public static Vector2 Lerp(Vector2 start, Vector2 end, float factor)
+        public static Vector2 Lerp(in Vector2 start, in Vector2 end, float factor)
         {
             Vector2 vector;
 
@@ -605,6 +611,16 @@ namespace EngineNS
 
             return vector;
 	    }
+        [Rtti.Meta]
+        public static Vector2 Lerp(in Vector2 start, in Vector2 end, in Vector2 factor)
+        {
+            Vector2 vector;
+
+            vector.X = start.X + ((end.X - start.X) * factor.X);
+            vector.Y = start.Y + ((end.Y - start.Y) * factor.Y);
+
+            return vector;
+        }
         /// <summary>
         /// 计算线性插值
         /// </summary>
@@ -613,7 +629,7 @@ namespace EngineNS
         /// <param name="factor">插值因子</param>
         /// <param name="result">计算后的向量</param>
         [Rtti.Meta]
-        public static void Lerp( ref Vector2 start, ref Vector2 end, float factor, out Vector2 result )
+        public static void Lerp(in Vector2 start, in Vector2 end, float factor, out Vector2 result )
 	    {
 		    Vector2 r;
 		    r.X = start.X + ((end.X - start.X) * factor);
@@ -1146,62 +1162,34 @@ namespace EngineNS
 
             return ret;
         }
-    }
 
-    //public struct DVector2
-    //{
-    //    public double X;
-    //    public double Y;
-    //    public DVector2(double x, double y)
-    //    {
-    //        X = x;
-    //        Y = y;
-    //    }
-    //    public Vector2 AsSingleVector()
-    //    {
-    //        return new Vector2((float)X, (float)Y);
-    //    }
-    //    public static DVector2 operator +(in DVector2 left, in DVector2 right)
-    //    {
-    //        DVector2 result;
-    //        result.X = left.X + right.X;
-    //        result.Y = left.Y + right.Y;
-    //        return result;
-    //    }
-    //    public static DVector2 operator -(in DVector2 left, in DVector2 right)
-    //    {
-    //        DVector2 result;
-    //        result.X = left.X - right.X;
-    //        result.Y = left.Y - right.Y;
-    //        return result;
-    //    }
-    //    public static DVector2 operator *(in DVector2 value, in DVector2 scale)
-    //    {
-    //        DVector2 result;
-    //        result.X = value.X * scale.X;
-    //        result.Y = value.Y * scale.Y;
-    //        return result;
-    //    }
-    //    public static DVector2 operator *(in DVector2 value, double scale)
-    //    {
-    //        DVector2 result;
-    //        result.X = value.X * scale;
-    //        result.Y = value.Y * scale;
-    //        return result;
-    //    }
-    //    public static DVector2 operator /(in DVector2 value, in DVector2 scale)
-    //    {
-    //        DVector2 result;
-    //        result.X = value.X / scale.X;
-    //        result.Y = value.Y / scale.Y;
-    //        return result;
-    //    }
-    //    public static DVector2 operator /(in DVector2 value, double scale)
-    //    {
-    //        DVector2 result;
-    //        result.X = value.X / scale;
-    //        result.Y = value.Y / scale;
-    //        return result;
-    //    }
-    //}
+        public static Bool2 Less(in Vector2 value1, in Vector2 value2)
+        {
+            Bool2 result;
+            result.X = value1.X < value2.X;
+            result.Y = value1.Y < value2.Y;
+            return result;
+        }
+        public static Bool2 LessEqual(in Vector2 value1, in Vector2 value2)
+        {
+            Bool2 result;
+            result.X = value1.X <= value2.X;
+            result.Y = value1.Y <= value2.Y;
+            return result;
+        }
+        public static Bool2 Great(in Vector2 value1, in Vector2 value2)
+        {
+            Bool2 result;
+            result.X = value1.X > value2.X;
+            result.Y = value1.Y > value2.Y;
+            return result;
+        }
+        public static Bool2 GreatEqual(in Vector2 value1, in Vector2 value2)
+        {
+            Bool2 result;
+            result.X = value1.X >= value2.X;
+            result.Y = value1.Y >= value2.Y;
+            return result;
+        }
+    }
 }

@@ -89,12 +89,12 @@ namespace EngineNS.Bricks.Terrain.Grass
                 fixed(UInt32* p = &mData[0])
                 {
                     var dataSize = (UInt32)sizeof(UInt32) * mdf.mCurNumber;
-                    mDataVB.UpdateGpuData(cmd, 0, p, dataSize);
+                    mDataVB.UpdateGpuData(0, p, dataSize);
                 }
                 fixed(float* p = &mHeight[0])
                 {
                     var dataSize = (UInt32)sizeof(float) * mdf.mCurNumber;
-                    mHeightVB.UpdateGpuData(cmd, 0, p, dataSize);
+                    mHeightVB.UpdateGpuData(0, p, dataSize);
                 }
 
                 mAttachVBs.BindVB(NxRHI.EVertexStreamType.VST_Color, mDataVB);
@@ -148,7 +148,7 @@ namespace EngineNS.Bricks.Terrain.Grass
                 InstData = new FVSGrassData[mdf.mMaxNumber];
 
                 var bfDesc = new NxRHI.FBufferDesc();
-                bfDesc.SetDefault();
+                bfDesc.SetDefault(false);
                 bfDesc.Type = NxRHI.EBufferType.BFT_SRV;
                 bfDesc.CpuAccess = NxRHI.ECpuAccess.CAS_WRITE;
                 bfDesc.Usage = NxRHI.EGpuUsage.USAGE_DYNAMIC;
@@ -219,7 +219,7 @@ namespace EngineNS.Bricks.Terrain.Grass
                     var rc = UEngine.Instance.GfxDevice.RenderContext;
                     fixed(FVSGrassData* pTar = &InstData[0])
                     {
-                        InstantBuffer.UpdateGpuData(cmd, 0, pTar, (NxRHI.FSubresourceBox*)IntPtr.Zero.ToPointer(), mdf.mCurNumber * (uint)sizeof(FVSGrassData), 1);
+                        InstantBuffer.UpdateGpuData(0, pTar, mdf.mCurNumber * (uint)sizeof(FVSGrassData));
                     }
                     IsDirty = false;
                 }
@@ -371,9 +371,8 @@ namespace EngineNS.Bricks.Terrain.Grass
                 //var binder = drawcall.FindBinder("VSGrassDataArray");
                 if (effectBinder.VSGrassDataArray != null)
                 {
-                    var cmd = UEngine.Instance.GfxDevice.RenderContext.CmdQueue.GetIdleCmdlist(NxRHI.EQueueCmdlist.QCL_FramePost);
+                    var cmd = UEngine.Instance.GfxDevice.RenderContext.GpuQueue.FramePostCmdList.mCoreObject;
                     this.Flush2VB(cmd);
-                    UEngine.Instance.GfxDevice.RenderContext.CmdQueue.ReleaseIdleCmdlist(cmd, NxRHI.EQueueCmdlist.QCL_FramePost);
                     drawcall.BindSRV(effectBinder.VSGrassDataArray.mCoreObject, InstantSSBO.InstantSRV);
                 }
             }

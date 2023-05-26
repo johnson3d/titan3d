@@ -4,11 +4,11 @@ using System.Text;
 
 namespace EngineNS.UI.Layout
 {
-    internal class UILayoutManager : UModule<UEngine>
+    internal class TtUILayoutManager : UModule<UEngine>
     {
         // 在极端情况下（内存溢出等），树的强制刷新包含该元素
-        private UI.Controls.UIElement mForceLayoutElement;
-        internal void SetForceLayout(UI.Controls.UIElement ui)
+        private UI.Controls.TtUIElement mForceLayoutElement;
+        internal void SetForceLayout(UI.Controls.TtUIElement ui)
         {
             mForceLayoutElement = ui;
         }
@@ -21,23 +21,23 @@ namespace EngineNS.UI.Layout
         private bool mGotException; // 当UpdateLayout有异常退出时为true
         private bool mLayoutRequestPosted = false;
 
-        private InternalMeasureQueue mMeasureQueue;
-        internal LayoutQueue MeasureQueue
+        private TtInternalMeasureQueue mMeasureQueue;
+        internal TtLayoutQueue MeasureQueue
         {
             get
             {
                 if (mMeasureQueue == null)
-                    mMeasureQueue = new InternalMeasureQueue();
+                    mMeasureQueue = new TtInternalMeasureQueue();
                 return mMeasureQueue;
             }
         }
-        private InternalArrangeQueue mArrangeQueue;
-        internal LayoutQueue ArrangeQueue
+        private TtInternalArrangeQueue mArrangeQueue;
+        internal TtLayoutQueue ArrangeQueue
         {
             get
             {
                 if (mArrangeQueue == null)
-                    mArrangeQueue = new InternalArrangeQueue();
+                    mArrangeQueue = new TtInternalArrangeQueue();
                 return mArrangeQueue;
             }
         }
@@ -62,7 +62,7 @@ namespace EngineNS.UI.Layout
 
             int cnt = 0;
             bool gotException = true;
-            UI.Controls.UIElement currentElement = null;
+            UI.Controls.TtUIElement currentElement = null;
             try
             {
                 InvalidateTreeIfRecovering();
@@ -118,13 +118,13 @@ namespace EngineNS.UI.Layout
                             }
                         }
 
-                        currentElement.Measure(ref measureSize);
+                        currentElement.Measure(in measureSize);
                     }
 
                     // Arrange
                     loopCounter = 0;
                     loopStartTime = new DateTime(0);
-                    while (MeasureQueue.IsEmpty)
+                    while (!ArrangeQueue.IsEmpty)
                     {
                         if (++loopCounter > LayoutUpdateDeep)
                         {
@@ -148,7 +148,7 @@ namespace EngineNS.UI.Layout
                             break;
 
                         var finalRect = GetProperArrangeRect(currentElement);
-                        currentElement.Arrange(ref finalRect);
+                        currentElement.Arrange(in finalRect);
                     }
                 }
 
@@ -168,7 +168,7 @@ namespace EngineNS.UI.Layout
                 }
             }
         }
-        EngineNS.RectangleF GetProperArrangeRect(UI.Controls.UIElement uiElement)
+        EngineNS.RectangleF GetProperArrangeRect(UI.Controls.TtUIElement uiElement)
         {
             var arrangeRect = uiElement.PreviousArrangeRect;
             if (uiElement.Parent == null)
@@ -201,7 +201,7 @@ namespace EngineNS.UI.Layout
                 mGotException = false;
             }
         }
-        void MarkTreeDirty(UI.Controls.UIElement ui)
+        void MarkTreeDirty(UI.Controls.TtUIElement ui)
         {
             while (true)
             {
@@ -215,7 +215,7 @@ namespace EngineNS.UI.Layout
             MeasureQueue.Add(ui);
             ArrangeQueue.Add(ui);
         }
-        void MarkTreeDirtyHelper(UI.Controls.UIElement ui)
+        void MarkTreeDirtyHelper(UI.Controls.TtUIElement ui)
         {
             ui?.MarkTreeDirty();
         }
@@ -240,9 +240,9 @@ namespace EngineNS.UI.Layout
             mArrangesOnStack--;
         }
 
-        internal UI.Controls.UIElement LastExceptionElement;
+        internal UI.Controls.TtUIElement LastExceptionElement;
 
-        public override void Tick(UEngine host)
+        public override void TickLogic(UEngine host)
         {
             UpdateLayout();
         }
@@ -253,6 +253,6 @@ namespace EngineNS
 {
     public partial class UEngine
     {
-        internal UI.Layout.UILayoutManager UILayoutManager => new UI.Layout.UILayoutManager();
+        internal UI.Layout.TtUILayoutManager UILayoutManager { get; } = new UI.Layout.TtUILayoutManager();
     }
 }

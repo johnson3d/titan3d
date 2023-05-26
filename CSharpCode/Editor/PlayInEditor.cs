@@ -37,6 +37,7 @@ namespace EngineNS.Editor
             }
         }
         public uint DockId { get; set; }
+        public ImGuiWindowClass DockKeyClass { get; }
         public ImGuiCond_ DockCond { get; set; } = ImGuiCond_.ImGuiCond_FirstUseEver;
 
         RName.PGRNameAttribute mRNameEditor = new RName.PGRNameAttribute();
@@ -47,7 +48,7 @@ namespace EngineNS.Editor
             UEngine.RootFormManager.RegRootForm(this);
         }
 
-        public void Cleanup()
+        public void Dispose()
         {
         }
 
@@ -66,7 +67,7 @@ namespace EngineNS.Editor
         bool[] mToolBtn_IsMouseHover = new bool[4];
         public void OnDraw()
         {
-            if(ImGuiAPI.Begin("PIEController", ref mVisible, ImGuiWindowFlags_.ImGuiWindowFlags_None))
+            if(EGui.UIProxy.DockProxy.BeginMainForm("PIEController", this, ImGuiWindowFlags_.ImGuiWindowFlags_None))
             {
                 var drawList = ImGuiAPI.GetWindowDrawList();
                 //EGui.UIProxy.Toolbar.BeginToolbar(drawList);
@@ -104,7 +105,7 @@ namespace EngineNS.Editor
 
                 //EGui.UIProxy.Toolbar.EndToolbar();
             }
-            ImGuiAPI.End();
+            EGui.UIProxy.DockProxy.EndMainForm();
         }
 
         async System.Threading.Tasks.Task OnPlayGame(RName assetName)
@@ -126,7 +127,7 @@ namespace EngineNS
             if (this.GameInstance != null)
                 return false;
 
-            var root = UEngine.Instance.FileManager.GetRoot(IO.FileManager.ERootDir.Execute);
+            var root = UEngine.Instance.FileManager.GetRoot(IO.TtFileManager.ERootDir.Execute);
             UEngine.Instance.MacrossModule.ReloadAssembly(root + $"/{DotNetVersion}/GameProject.dll");
 
             this.GameInstance = new GamePlay.UGameInstance();

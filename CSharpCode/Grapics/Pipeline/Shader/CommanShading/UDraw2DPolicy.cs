@@ -6,8 +6,8 @@ namespace EngineNS.Graphics.Pipeline.Shader.CommanShading
 {
     public class UBasePassPolicy : URenderPolicy
     {
-        public UShadingEnv mBasePassShading;
-        public override Shader.UShadingEnv GetPassShading(EShadingType type, Mesh.UMesh mesh, int atom, Pipeline.Common.URenderGraphNode node)
+        public UGraphicsShadingEnv mBasePassShading;
+        public override Shader.UGraphicsShadingEnv GetPassShading(EShadingType type, Mesh.UMesh mesh, int atom, Pipeline.Common.URenderGraphNode node)
         {
             switch (type)
             {
@@ -25,7 +25,7 @@ namespace EngineNS.Graphics.Pipeline.Shader.CommanShading
     {//坐标在-1,1，直接拷贝给ps
         UCopy2DShading mBasePassShading;
         public Graphics.Pipeline.URenderPolicy ViewPolicy;
-        public override Shader.UShadingEnv GetPassShading(EShadingType type, Mesh.UMesh mesh, int atom, Pipeline.Common.URenderGraphNode node)
+        public override Shader.UGraphicsShadingEnv GetPassShading(EShadingType type, Mesh.UMesh mesh, int atom, Pipeline.Common.URenderGraphNode node)
         {
             switch (type)
             {
@@ -44,7 +44,7 @@ namespace EngineNS.Graphics.Pipeline.Shader.CommanShading
     public class UDraw2DPolicy : URenderPolicy
     {//屏幕像素坐标
         URect2DShading mBasePassShading;
-        public override Shader.UShadingEnv GetPassShading(EShadingType type, Mesh.UMesh mesh, int atom, Pipeline.Common.URenderGraphNode node)
+        public override Shader.UGraphicsShadingEnv GetPassShading(EShadingType type, Mesh.UMesh mesh, int atom, Pipeline.Common.URenderGraphNode node)
         {
             switch (type)
             {

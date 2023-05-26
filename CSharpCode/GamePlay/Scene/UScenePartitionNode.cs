@@ -46,7 +46,7 @@ namespace EngineNS.GamePlay.Scene
             return await base.InitializeNode(world, data, bvType, placementType);
         }
 
-        Int32_2 CurrentActiveCenterLevel = new Int32_2(-1, -1);
+        Vector2i CurrentActiveCenterLevel = new Vector2i(-1, -1);
         public bool SetActiveCenter(in DVector3 pos)
         {
             var idxLevel = GetLevelIndex(in pos);
@@ -152,10 +152,10 @@ namespace EngineNS.GamePlay.Scene
         }
 
 
-        public Int32_2 GetLevelIndex(in DVector3 pos)
+        public Vector2i GetLevelIndex(in DVector3 pos)
         {
             var nsPos = pos - this.Placement.AbsTransform.mPosition;
-            Int32_2 result;
+            Vector2i result;
             result.X = (int)(nsPos.X / LevelSize);
             result.Y = (int)(nsPos.Z / LevelSize);
             return result;

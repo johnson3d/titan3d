@@ -74,10 +74,15 @@ namespace EngineNS.Bricks.Network.RPC
             }
             if (realRetType != typeof(void) &&
                 realRetType != typeof(string) &&
+                realRetType != typeof(RName) &&
                 realRetType.IsValueType == false &&
                 realRetType.Name != "ISerializer" &&
                 realRetType.GetInterface("ISerializer") == null)
+            {
+                Profiler.Log.WriteLine(Profiler.ELogTag.Error, "RPC", $"{mtd.Name} return type is invalid");
                 return false;
+            }
+                
             var parms = mtd.GetParameters();
             //if (parms.Length != 2)
             //    return false;
@@ -85,10 +90,15 @@ namespace EngineNS.Bricks.Network.RPC
             for (int i = 0; i < parms.Length - 1; i++)
             {
                 if (parms[i].ParameterType != typeof(string) &&
+                    parms[i].ParameterType != typeof(RName) &&
                     parms[i].ParameterType.IsValueType == false &&
                     parms[i].ParameterType.Name != "ISerializer" &&
                     parms[i].ParameterType.GetInterface("ISerializer") == null)
+                {
+                    Profiler.Log.WriteLine(Profiler.ELogTag.Error, "RPC", $"{mtd.Name} parameter{i} type is invalid");
                     return false;
+                }
+                    
             }
             if (parms[parms.Length - 1].ParameterType != typeof(UCallContext))
                 return false;

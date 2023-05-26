@@ -1,24 +1,21 @@
-﻿using System;
+﻿using NPOI.SS.Formula.Functions;
+using System;
 using System.Collections.Generic;
 using System.Text;
 
 namespace EngineNS.Graphics.Pipeline.Common
 {
-    public class UGpuSceneNode : Graphics.Pipeline.Common.URenderGraphNode
+    public partial class UGpuSceneNode : Graphics.Pipeline.Common.URenderGraphNode
     {
         public Common.URenderGraphPin GpuScenePinOut = Common.URenderGraphPin.CreateOutput("GpuScene", false, EPixelFormat.PXF_UNKNOWN);
-        public Common.URenderGraphPin PointLightsPinOut = Common.URenderGraphPin.CreateOutput("PointLights", false, EPixelFormat.PXF_UNKNOWN);
         public UGpuSceneNode()
         {
             Name = "GpuSceneNode";
         }
-        ~UGpuSceneNode()
+        public override void Dispose()
         {
-            Cleanup();
-        }
-        public override void Cleanup()
-        {
-            PointLights.Cleanup();
+            Dispose_Light();
+            Dispose_Instance();
 
             GpuSceneDescSRV?.Dispose();
             GpuSceneDescSRV = null;
@@ -27,7 +24,7 @@ namespace EngineNS.Graphics.Pipeline.Common
             GpuSceneDescBuffer?.Dispose();
             GpuSceneDescBuffer = null;
 
-            base.Cleanup();
+            base.Dispose();
         }
         public override void InitNodePins()
         {
@@ -35,8 +32,10 @@ namespace EngineNS.Graphics.Pipeline.Common
             AddOutput(GpuScenePinOut, NxRHI.EBufferType.BFT_SRV | NxRHI.EBufferType.BFT_UAV);
             PointLightsPinOut.LifeMode = UAttachBuffer.ELifeMode.Imported;
             AddOutput(PointLightsPinOut, NxRHI.EBufferType.BFT_SRV | NxRHI.EBufferType.BFT_UAV);
+            InstancePinOut.LifeMode = UAttachBuffer.ELifeMode.Imported;
+            AddOutput(InstancePinOut, NxRHI.EBufferType.BFT_SRV | NxRHI.EBufferType.BFT_UAV);
         }
-        public unsafe override void FrameBuild()
+        public unsafe override void FrameBuild(Graphics.Pipeline.URenderPolicy policy)
         {
             GpuScenePinOut.Attachement.Height = 1;
             GpuScenePinOut.Attachement.Width = (uint)sizeof(FGpuSceneDesc);
@@ -47,16 +46,8 @@ namespace EngineNS.Graphics.Pipeline.Common
             attachement.Uav = GpuSceneDescUAV;
             attachement.CBuffer = PerGpuSceneCBuffer;
 
-            PointLightsPinOut.Attachement.Height = (uint)PointLights.DataArray.Count;
-            PointLightsPinOut.Attachement.Width = (uint)sizeof(FPointLight);
-            attachement = RenderGraph.AttachmentCache.ImportAttachment(PointLightsPinOut);
-            //if (attachement.Buffer == null)
-            //{
-            //    PointLights.Flush2GPU(this.BasePass.DrawCmdList.mCoreObject);
-            //}
-            attachement.Buffer = PointLights.GpuBuffer;
-            attachement.Srv = PointLights.DataSRV;
-            attachement.Uav = PointLights.DataUAV;
+            FrameBuild_Light();
+            FrameBuild_Instance();
         }
         [System.Runtime.InteropServices.StructLayout(System.Runtime.InteropServices.LayoutKind.Sequential, Pack = 16)]
         public struct FGpuSceneDesc
@@ -145,8 +136,67 @@ namespace EngineNS.Graphics.Pipeline.Common
         }
         #endregion
 
-        public Graphics.Pipeline.UDrawBuffers BasePass = new Graphics.Pipeline.UDrawBuffers();
-        public class UGpuDataArray<T> where T : unmanaged
+        public class TtGpuBuffer<T> : IDisposable where T : unmanaged
+        {
+            public NxRHI.UBuffer GpuBuffer;
+            public NxRHI.UUaView DataUAV;
+            public NxRHI.USrView DataSRV;
+
+            ~TtGpuBuffer()
+            {
+                Dispose();
+            }
+            public void Dispose()
+            {
+                CoreSDK.DisposeObject(ref DataUAV);
+                CoreSDK.DisposeObject(ref DataSRV);
+                CoreSDK.DisposeObject(ref GpuBuffer);
+            }
+            public unsafe void SetSize(uint Count, void* pInitData)
+            {
+                Dispose();
+
+                var bfDesc = new NxRHI.FBufferDesc();
+                bfDesc.SetDefault(false);
+                bfDesc.Size = (uint)sizeof(T) * Count;
+                bfDesc.StructureStride = (uint)sizeof(T);
+                bfDesc.InitData = pInitData;
+                bfDesc.Type = NxRHI.EBufferType.BFT_UAV;
+                if (typeof(T) == typeof(uint) || typeof(T) == typeof(int) || typeof(T) == typeof(float))
+                {
+                    bfDesc.MiscFlags = NxRHI.EResourceMiscFlag.RM_BUFFER_ALLOW_RAW_VIEWS;
+                }
+                
+                GpuBuffer = UEngine.Instance.GfxDevice.RenderContext.CreateBuffer(in bfDesc);
+
+                var uavDesc = new NxRHI.FUavDesc();
+                uavDesc.SetBuffer(0);
+                uavDesc.Buffer.NumElements = (uint)Count;
+                uavDesc.Buffer.StructureByteStride = bfDesc.StructureStride;
+                DataUAV = UEngine.Instance.GfxDevice.RenderContext.CreateUAV(GpuBuffer, in uavDesc);
+
+                var srvDesc = new NxRHI.FSrvDesc();
+                srvDesc.SetBuffer(0);
+                srvDesc.Buffer.NumElements = (uint)Count;
+                srvDesc.Buffer.StructureByteStride = bfDesc.StructureStride;
+                DataSRV = UEngine.Instance.GfxDevice.RenderContext.CreateSRV(GpuBuffer, in srvDesc);
+            }
+        }
+
+        public struct TtClusteDrawArgs
+        {
+            public Int32 GpuSceneIndex;
+            public UInt32 MaxInstance;
+            public TtGpuBuffer<uint> IndirectArgsBuffer;
+            public TtGpuBuffer<uint> IndirectCountBuffer;
+        }
+
+
+        public class TtClusterBuffer
+        {
+            public Int32 ClusterCount = 0;
+        }
+        public class UGpuDataArray<T> : IDisposable where T : unmanaged
         {
             public Support.UNativeArray<T> DataArray;
             private uint GpuCapacity = 0;
@@ -158,7 +208,7 @@ namespace EngineNS.Graphics.Pipeline.Common
             public bool Initialize(bool gpuWrite)
             {
                 IsGpuWrite = gpuWrite;
-                Cleanup();
+                Dispose();
                 DataArray = Support.UNativeArray<T>.CreateInstance();
                 return true;
             }
@@ -168,15 +218,14 @@ namespace EngineNS.Graphics.Pipeline.Common
             }
             ~UGpuDataArray()
             {
-                Cleanup();
+                Dispose();
             }
-            public void Cleanup()
+            public void Dispose()
             {
+                DataArray.Clear();
+                DataArray.Dispose();
                 if (GpuBuffer != null)
                 {
-                    DataArray.Clear();
-                    DataArray.Dispose();
-
                     DataUAV?.Dispose();
                     DataUAV = null;
 
@@ -187,16 +236,21 @@ namespace EngineNS.Graphics.Pipeline.Common
                     GpuBuffer = null;
                 }
             }
-            public UInt16 PushData(in T data)
+            public void SetSize(int Count)
             {
                 Dirty = true;
-                UInt16 result = (UInt16)DataArray.Count;
+                DataArray.SetSize(Count);
+            }
+            public int PushData(in T data)
+            {
+                Dirty = true;
+                var result = DataArray.Count;
                 DataArray.Add(data);
                 return result;
             }
-            public void UpdateData(UInt16 index, in T data)
+            public void UpdateData(int index, in T data)
             {
-                if (index >= DataArray.Count)
+                if (index >= DataArray.Count || index < 0)
                     return;
 
                 Dirty = true;
@@ -219,7 +273,7 @@ namespace EngineNS.Graphics.Pipeline.Common
                     GpuCapacity = (uint)DataArray.Count + GpuCapacity / 2 + 1;
 
                     var bfDesc = new NxRHI.FBufferDesc();
-                    bfDesc.SetDefault();
+                    bfDesc.SetDefault(false);
                     bfDesc.Size = (uint)sizeof(T) * GpuCapacity;
                     bfDesc.StructureStride = (uint)sizeof(T);
                     bfDesc.InitData = DataArray.UnsafeGetElementAddress(0);
@@ -259,27 +313,22 @@ namespace EngineNS.Graphics.Pipeline.Common
                     if (IsGpuWrite == false)
                     {
                         if (DataArray.Count > 0)
-                            GpuBuffer.mCoreObject.UpdateGpuData(cmd, 0, DataArray.UnsafeGetElementAddress(0), (uint)(sizeof(T) * DataArray.Count));
+                            GpuBuffer.UpdateGpuData(0, DataArray.UnsafeGetElementAddress(0), (uint)(sizeof(T) * DataArray.Count));
                     }
                 }
             }
         }
 
-        public struct FPointLight
-        {
-            public Vector4 PositionAndRadius;
-            public Vector4 ColorAndIntensity;
-        }
-        public UGpuDataArray<FPointLight> PointLights = new UGpuDataArray<FPointLight>();
+        
         public async override System.Threading.Tasks.Task Initialize(URenderPolicy policy, string debugName)
         {
-            await Thread.AsyncDummyClass.DummyFunc();
+            await Thread.TtAsyncDummyClass.DummyFunc();
 
             var rc = UEngine.Instance.GfxDevice.RenderContext;
-            BasePass.Initialize(rc, debugName);
+            BasePass.Initialize(rc, debugName + ".BasePass");
 
             var desc = new NxRHI.FBufferDesc();
-            desc.SetDefault();
+            desc.SetDefault(false);
             desc.Type = NxRHI.EBufferType.BFT_UAV | NxRHI.EBufferType.BFT_SRV;
             unsafe
             {
@@ -302,9 +351,10 @@ namespace EngineNS.Graphics.Pipeline.Common
             }
             GpuSceneDescSRV = rc.CreateSRV(GpuSceneDescBuffer, in srvDesc);
 
-            PointLights.Initialize(false);
-
             PerGpuSceneCBuffer = rc.CreateCBV(UEngine.Instance.GfxDevice.CoreShaderBinder.CBPerGpuScene.Binder.mCoreObject);
+
+            Initialize_Light(policy, debugName);
+            Initialize_Instance(policy, debugName);
 
             HdrMiddleGrey = 0.6f;
             HdrMinLuminance = 0.01f;
@@ -325,29 +375,15 @@ namespace EngineNS.Graphics.Pipeline.Common
             {
                 if (policy.VisibleNodes == null)
                     return;
+
                 var cmd = BasePass.DrawCmdList;
                 cmd.BeginCommand();
-                PointLights.Clear();
-                if (policy.DisablePointLight == false)
-                {
-                    foreach (var i in policy.VisibleNodes)
-                    {
-                        var pointLight = i as GamePlay.Scene.UPointLightNode;
-                        if (pointLight == null)
-                            continue;
 
-                        var lightData = pointLight.NodeData as GamePlay.Scene.UPointLightNode.ULightNodeData;
+                TickLogic_Light(world, policy, cmd);
+                TickLogic_Instance(world, policy, cmd);
 
-                        FPointLight light;
-                        var pos = pointLight.Placement.Position;
-                        light.PositionAndRadius = new Vector4(pos.ToSingleVector3(), lightData.Radius);
-                        light.ColorAndIntensity = new Vector4(lightData.Color.X, lightData.Color.Y, lightData.Color.Z, lightData.Intensity);
-                        pointLight.IndexInGpuScene = PointLights.PushData(light);
-                    }
-                    PointLights.Flush2GPU(cmd.mCoreObject);
-                }
                 //if PerFrameCBuffer dirty :flush
-                UEngine.Instance.GfxDevice.PerFrameCBuffer.mCoreObject.FlushDirty(cmd.mCoreObject, false);
+                //UEngine.Instance.GfxDevice.PerFrameCBuffer.mCoreObject.FlushDirty(false);
                 cmd.EndCommand();
 
                 UEngine.Instance.GfxDevice.RenderCmdQueue.QueueCmdlist(cmd);

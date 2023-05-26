@@ -9,6 +9,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
     public partial class SequenceNode : UNodeBase, IBeforeExecNode, IBreakableNode
     {
         int mSequenceCount = 0;
+        [Browsable(false)]
         [Rtti.Meta]
         public int SequenceCount 
         {
@@ -22,6 +23,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
                 OnPositionChanged();
             }
         }
+        [Browsable(false)]
         public PinIn BeforeExec { get; set; } = new PinIn();
 
         public SequenceNode()
@@ -40,11 +42,13 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
             AddPinIn(BeforeExec);
             AddPinOut(FirstPin);
         }
+        [Browsable(false)]
         public PinOut FirstPin { get; set; } = new PinOut();
-
+        [Browsable(false)]
         public string BreakerName => "breaker_sequence_" + (uint)NodeId.GetHashCode();
 
         EBreakerState mBreakerState = EBreakerState.Hidden;
+        [Browsable(false)]
         public EBreakerState BreakerState
         {
             get => mBreakerState;
@@ -150,11 +154,14 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
     [ContextMenu("if", "FlowControl\\If", UMacross.MacrossEditorKeyword, ShaderNode.UMaterialGraph.MaterialEditorKeyword)]
     public partial class IfNode : UNodeBase, IBeforeExecNode, IAfterExecNode, IBreakableNode
     {
+        [Browsable(false)]
         public PinIn BeforeExec { get; set; } = new PinIn();
+        [Browsable(false)]
         public PinOut AfterExec { get; set; } = new PinOut();
-
+        [Browsable(false)]
         public string BreakerName => "breaker_if_" + (uint)NodeId.GetHashCode();
         EBreakerState mBreakerState = EBreakerState.Hidden;
+        [Browsable(false)]
         public EBreakerState BreakerState
         {
             get => mBreakerState;
@@ -180,6 +187,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
         }
 
         int mConditionCount = 1;
+        [Browsable(false)]
         [Rtti.Meta]
         public int ConditionCount
         {
@@ -245,6 +253,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
         //public PinIn ConditionPin { get; set; } = new PinIn();
         //public PinOut TruePin { get; set; } = new PinOut();
         public List<KeyValuePair<PinIn, PinOut>> ConditionResultPairs = new List<KeyValuePair<PinIn, PinOut>>();
+        [Browsable(false)]
         public PinOut FalsePin { get; set; } = new PinOut();
         public override bool CanLinkFrom(PinIn iPin, UNodeBase OutNode, PinOut oPin)
         {
@@ -475,10 +484,12 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
     [ContextMenu("return", "FlowControl\\Return", UMacross.MacrossEditorKeyword, ShaderNode.UMaterialGraph.MaterialEditorKeyword)]
     public partial class ReturnNode : UNodeBase, IBeforeExecNode, IBreakableNode
     {
+        [Browsable(false)]
         public PinIn BeforeExec { get; set; } = new PinIn();
-
+        [Browsable(false)]
         public string BreakerName => "breaker_return_" + (uint)NodeId.GetHashCode();
         EBreakerState mBreakerState = EBreakerState.Hidden;
+        [Browsable(false)]
         public EBreakerState BreakerState
         {
             get => mBreakerState;
@@ -813,10 +824,11 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
         public PinIn BeforeExec { get; set; } = new PinIn();
         [Browsable(false)]
         public PinOut AfterExec { get; set; } = new PinOut();
-
+        [Browsable(false)]
         public string BreakerName => "breaker_for_" + (uint)NodeId.GetHashCode();
 
         EBreakerState mBreakerState = EBreakerState.Hidden;
+        [Browsable(false)]
         public EBreakerState BreakerState
         {
             get => mBreakerState;
@@ -987,12 +999,15 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
     {
         public PinIn ConditionPin;
         public PinOut LoopBodyPin;
+        [Browsable(false)]
         public PinIn BeforeExec { get; set; } = new PinIn();
+        [Browsable(false)]
         public PinOut AfterExec { get; set; } = new PinOut();
-
+        [Browsable(false)]
         public string BreakerName => "breaker_while_" + (uint)NodeId.GetHashCode();
 
         EBreakerState mBreakerState = EBreakerState.Hidden;
+        [Browsable(false)]
         public EBreakerState BreakerState
         {
             get => mBreakerState;
@@ -1105,10 +1120,12 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
     [ContextMenu("continue", "FlowControl\\Continue", UMacross.MacrossEditorKeyword, ShaderNode.UMaterialGraph.MaterialEditorKeyword)]
     public partial class ContinueNode : UNodeBase, IBeforeExecNode, IBreakableNode
     {
+        [Browsable(false)]
         public PinIn BeforeExec { get; set; } = new PinIn();
-
+        [Browsable(false)]
         public string BreakerName => "breaker_continue_" + (uint)NodeId.GetHashCode();
         EBreakerState mBreakerState = EBreakerState.Hidden;
+        [Browsable(false)]
         public EBreakerState BreakerState
         {
             get => mBreakerState;
@@ -1177,10 +1194,12 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
     [ContextMenu("break", "FlowControl\\Break", UMacross.MacrossEditorKeyword, ShaderNode.UMaterialGraph.MaterialEditorKeyword)]
     public partial class BreakNode : UNodeBase, IBeforeExecNode, IBreakableNode
     {
+        [Browsable(false)]
         public PinIn BeforeExec { get; set; } = new PinIn();
-
+        [Browsable(false)]
         public string BreakerName => "breaker_break_" + (uint)NodeId.GetHashCode();
         EBreakerState mBreakerState = EBreakerState.Hidden;
+        [Browsable(false)]
         public EBreakerState BreakerState
         {
             get => mBreakerState;

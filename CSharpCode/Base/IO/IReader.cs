@@ -32,10 +32,9 @@ namespace EngineNS.IO
         void Read(out byte[] v);
         void Read(out VNameString v);
         void Read(out RName v);
-
+        void Read(ref Support.UBitset v);
         void Read<T>(out T v) where T : unmanaged;
         T Read<T>() where T : unmanaged;
-        string ReadString();
     }
 
     public interface ICoreReader
@@ -45,15 +44,59 @@ namespace EngineNS.IO
         void Seek(ulong pos);
         unsafe void ReadPtr(void* p, int length);
     }
-    public struct AuxReader<TR> : IReader where TR : ICoreReader
+
+    public struct UMemReader : IO.ICoreReader, IDisposable
     {
+        public unsafe static UMemReader CreateInstance(byte* ptr, ulong len)
+        {
+            UMemReader result = new UMemReader();
+            result.Reader = MemStreamReader.CreateInstance();
+            result.Reader.ProxyPointer(ptr, len);
+            return result;
+        }
+        public unsafe static UMemReader CreateInstance(in UMemWriter writer)
+        {
+            UMemReader result = new UMemReader();
+            result.Reader = MemStreamReader.CreateInstance();
+            result.Reader.ProxyPointer((byte*)writer.Ptr, writer.GetPosition());
+            return result;
+        }
+        public MemStreamReader Reader;
+        public IO.EIOType IOType { get => IO.EIOType.Network; }
+        public ulong GetPosition()
+        {
+            return Reader.Tell();
+        }
+        public void Seek(ulong pos)
+        {
+            Reader.Seek(pos);
+        }
+        public unsafe void ReadPtr(void* p, int length)
+        {
+            Reader.Read(p, (uint)length);
+        }
+        public void Dispose()
+        {
+            Reader.Dispose();
+        }
+    }
+
+    public struct AuxReader<TR> : IReader, IDisposable where TR : ICoreReader
+    {
+        public System.Action DisposeAction = null;
         public TR CoreReader;
         public AuxReader(TR cr, object tag)
         {
             CoreReader = cr;
             Tag = tag;
         }
-        
+        public void Dispose()
+        {
+            if (DisposeAction != null)
+            {
+                DisposeAction();
+            }
+        }
         public object Tag
         {
             get;
@@ -132,6 +175,33 @@ namespace EngineNS.IO
             Read(out name);
             v = RName.GetRName(name, type);
         }
+        public void Read(ref Support.UBitset v)
+        {
+            uint bitCount = 0;
+            Read(out bitCount);
+            if (v == null)
+            {
+                v = new Support.UBitset(bitCount);
+            }
+            else if(v.BitCount != bitCount)
+            {
+                v.SetBitCount(bitCount);
+            }
+            unsafe
+            {
+                ReadPtr(v.Data, (int)v.DataByteSize);
+            }
+        }
+        public unsafe void Read(out UMemWriter v)
+        {
+            uint len = 0;
+            Read(out len);
+            v = UMemWriter.CreateInstance();
+            v.ResetSize(len + 1);
+            v.Seek(len);
+            ReadPtr(v.Ptr, (int)len);
+        }
+
         public void ReadBigSize(out byte[] v)
         {
             unsafe
@@ -153,6 +223,19 @@ namespace EngineNS.IO
             unsafe
             {
                 v = new byte[len];
+                if (len > 0)
+                {
+                    fixed (byte* p = &v[0])
+                    {
+                        ReadPtr(p, len);
+                    }
+                }
+            }
+        }
+        public void ReadNoSize(byte[] v, int len)
+        {
+            unsafe
+            {
                 if (len > 0)
                 {
                     fixed (byte* p = &v[0])
@@ -190,12 +273,6 @@ namespace EngineNS.IO
                 ReadPtr(&v, sizeof(T));
                 return v;
             }
-        }
-        public string ReadString()
-        {
-            string v;
-            Read(out v);
-            return v;
         }
         public void Read(out ISerializer v, object hostObject = null)
         {
@@ -280,33 +357,6 @@ namespace EngineNS.IO
             SerializerHelper.Read(this, v, metaVersion);
             //SerializerHelper.Read(this, out v, hostObject);
             return true;
-        }
-    }
-    public class CMemStreamReader : AuxPtrType<MemStreamReader>
-    {
-        public CMemStreamReader()
-        {
-            mCoreObject = MemStreamReader.CreateInstance();
-        }
-        public unsafe uint Read<T>(out T v) where T : unmanaged
-        {
-            fixed(T* p = &v)
-            {
-                return mCoreObject.Read(p, (uint)sizeof(T));
-            }
-        }
-        public unsafe uint Read(void* pSrc, uint t)
-        {
-            return mCoreObject.Read(pSrc, t);
-        }
-        public unsafe byte[] ReadByteArray(uint size)
-        {
-            var result = new byte[size];
-            fixed (byte* p = &result[0])
-            {
-                mCoreObject.Read(p, size);
-            }
-            return result;
         }
     }
 }

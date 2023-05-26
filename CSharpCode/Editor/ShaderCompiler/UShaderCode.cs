@@ -37,8 +37,8 @@ namespace EngineNS.Editor.ShaderCompiler
                         inc = code.Substring(start, cur - start);
                     }
 
-                    var curPath = IO.FileManager.GetParentPathName(CodeName.Name);
-                    var file = IO.FileManager.CombinePath(curPath, inc);
+                    var curPath = IO.TtFileManager.GetParentPathName(CodeName.Name);
+                    var file = IO.TtFileManager.CombinePath(curPath, inc);
                     var rn = UShaderCodeManager.Instance.GetShaderCode(RName.GetRName(file, CodeName.RNameType));
                     if (rn != null)
                     {
@@ -79,18 +79,18 @@ namespace EngineNS.Editor.ShaderCompiler
         }
         public void Initialize(RName shaderDir)
         {
-            var files = IO.FileManager.GetFiles(shaderDir.Address, "*.*", true);
+            var files = IO.TtFileManager.GetFiles(shaderDir.Address, "*.*", true);
             string root;
             if(shaderDir.RNameType == RName.ERNameType.Engine)
-                root = UEngine.Instance.FileManager.GetRoot(IO.FileManager.ERootDir.Engine);
+                root = UEngine.Instance.FileManager.GetRoot(IO.TtFileManager.ERootDir.Engine);
             else
-                root = UEngine.Instance.FileManager.GetRoot(IO.FileManager.ERootDir.Game);
+                root = UEngine.Instance.FileManager.GetRoot(IO.TtFileManager.ERootDir.Game);
             foreach (var i in files)
             {
                 if (i.EndsWith(".vcxitems") || i.EndsWith(".filters"))
                     continue;
 
-                var path = IO.FileManager.GetRelativePath(root, i);
+                var path = IO.TtFileManager.GetRelativePath(root, i);
                 var rn = RName.GetRName(path, shaderDir.RNameType);
                 var code = LoadCode(rn);
                 Codes.Add(rn, code);
@@ -113,11 +113,11 @@ namespace EngineNS.Editor.ShaderCompiler
         {
             if (name.ExtName == Graphics.Pipeline.Shader.UMaterial.AssetExt)
             {
-                var saveMode = Thread.Async.UContextThreadManager.ImmidiateMode;
-                Thread.Async.UContextThreadManager.ImmidiateMode = true;
+                var saveMode = Thread.Async.TtContextThreadManager.ImmidiateMode;
+                Thread.Async.TtContextThreadManager.ImmidiateMode = true;
                 var task = UEngine.Instance.GfxDevice.MaterialManager.GetMaterial(name);
                 task.Wait();
-                Thread.Async.UContextThreadManager.ImmidiateMode = saveMode;
+                Thread.Async.TtContextThreadManager.ImmidiateMode = saveMode;
                 var material = task.Result;
                 if (material != null)
                     return material;
@@ -144,10 +144,10 @@ namespace EngineNS.Editor.ShaderCompiler
         }
         protected UShaderSourceCode LoadCode(RName name)
         {
-            if (IO.FileManager.FileExists(name.Address) == false)
+            if (IO.TtFileManager.FileExists(name.Address) == false)
                 return null;
 
-            var code = IO.FileManager.ReadAllText(name.Address);
+            var code = IO.TtFileManager.ReadAllText(name.Address);
             var result = new UShaderSourceCode();
             result.SourceCode.TextCode = code;
             result.CodeName = name;

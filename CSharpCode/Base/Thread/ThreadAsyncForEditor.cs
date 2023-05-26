@@ -4,9 +4,9 @@ using System.Text;
 
 namespace EngineNS.Thread
 {
-    public class ThreadAsyncForEditor : ContextThread
+    public class TtThreadAsyncForEditor : TtContextThread
     {
-        public ThreadAsyncForEditor()
+        public TtThreadAsyncForEditor()
         {
             this.Interval = 10;
             this.LimitTime = long.MaxValue;
@@ -28,7 +28,7 @@ namespace EngineNS.Thread
         }
     }
 
-    public class ThreadAsyncEditorSlow : ContextThread
+    public class ThreadAsyncEditorSlow : TtContextThread
     {
         public ThreadAsyncEditorSlow()
         {

@@ -153,7 +153,7 @@ namespace EngineNS.Bricks.Procedure
             {
                 rValue = *(float*)right;
             }
-            (*(float*)result) = CoreDefine.Lerp(*(float*)left, rValue, factor);
+            (*(float*)result) = MathHelper.Lerp(*(float*)left, rValue, factor);
         }
         public unsafe void Max(void* result, void* left, void* right)
         {
@@ -161,7 +161,7 @@ namespace EngineNS.Bricks.Procedure
             ref var r = ref *(float*)right;
             ref var t = ref *(float*)result;
 
-            t = CoreDefine.Max(l, r);
+            t = MathHelper.Max(l, r);
         }
         public unsafe void Min(void* result, void* left, void* right)
         {
@@ -169,13 +169,13 @@ namespace EngineNS.Bricks.Procedure
             ref var r = ref *(float*)right;
             ref var t = ref *(float*)result;
 
-            t = CoreDefine.Min(l, r);
+            t = MathHelper.Min(l, r);
         }
         public unsafe void Abs(void* result, void* left)
         {
             ref var l = ref *(float*)left;
             ref var t = ref *(float*)result;
-            t = CoreDefine.Abs(l);
+            t = MathHelper.Abs(l);
         }
     }
     public struct FFloat2Operator : ISuperPixelOperator<Vector2>
@@ -337,8 +337,8 @@ namespace EngineNS.Bricks.Procedure
         {
             ref var l = ref *(Vector2*)left;
             ref var t = ref *(Vector2*)result;
-            t.X = CoreDefine.Abs(l.X);
-            t.Y = CoreDefine.Abs(l.Y);
+            t.X = MathHelper.Abs(l.X);
+            t.Y = MathHelper.Abs(l.Y);
         }
     }
     public struct FFloat3Operator : ISuperPixelOperator<Vector3>
@@ -500,9 +500,9 @@ namespace EngineNS.Bricks.Procedure
         {
             ref var l = ref *(Vector3*)left;
             ref var t = ref *(Vector3*)result;
-            t.X = CoreDefine.Abs(l.X);
-            t.Y = CoreDefine.Abs(l.Y);
-            t.Z = CoreDefine.Abs(l.Z);
+            t.X = MathHelper.Abs(l.X);
+            t.Y = MathHelper.Abs(l.Y);
+            t.Z = MathHelper.Abs(l.Z);
         }
     }
     public struct FFloat4Operator : ISuperPixelOperator<Vector4>
@@ -664,10 +664,10 @@ namespace EngineNS.Bricks.Procedure
         {
             ref var l = ref *(Vector4*)left;
             ref var t = ref *(Vector4*)result;
-            t.X = CoreDefine.Abs(l.X);
-            t.Y = CoreDefine.Abs(l.Y);
-            t.Z = CoreDefine.Abs(l.Z);
-            t.W = CoreDefine.Abs(l.W);
+            t.X = MathHelper.Abs(l.X);
+            t.Y = MathHelper.Abs(l.Y);
+            t.Z = MathHelper.Abs(l.Z);
+            t.W = MathHelper.Abs(l.W);
         }
     }
     public struct FQuaternionOperator : ISuperPixelOperator<Quaternion>
@@ -897,7 +897,7 @@ namespace EngineNS.Bricks.Procedure
             {
                 rValue = *(int*)right;
             }
-            (*(int*)result) = (int)CoreDefine.Lerp((float)*(int*)left, (float)rValue, factor);
+            (*(int*)result) = (int)MathHelper.Lerp((float)*(int*)left, (float)rValue, factor);
         }
         public unsafe void Max(void* result, void* left, void* right)
         {
@@ -905,7 +905,7 @@ namespace EngineNS.Bricks.Procedure
             ref var r = ref *(int*)right;
             ref var t = ref *(int*)result;
 
-            t = CoreDefine.Max(l, r);
+            t = MathHelper.Max(l, r);
         }
         public unsafe void Min(void* result, void* left, void* right)
         {
@@ -913,40 +913,40 @@ namespace EngineNS.Bricks.Procedure
             ref var r = ref *(int*)right;
             ref var t = ref *(int*)result;
 
-            t = CoreDefine.Min(l, r);
+            t = MathHelper.Min(l, r);
         }
         public unsafe void Abs(void* result, void* left)
         {
             ref var l = ref *(int*)left;
             ref var t = ref *(int*)result;
-            t = CoreDefine.Abs(l);
+            t = MathHelper.Abs(l);
         }
     }
-    public struct FInt2Operator : ISuperPixelOperator<Int32_2>
+    public struct FInt2Operator : ISuperPixelOperator<Vector2i>
     {
         public Rtti.UTypeDesc ElementType
         {
             get
             {
-                return Rtti.UTypeDescGetter<Int32_2>.TypeDesc;
+                return Rtti.UTypeDescGetter<Vector2i>.TypeDesc;
             }
         }
         public Rtti.UTypeDesc BufferType
         {
             get
             {
-                return Rtti.UTypeDescGetter<USuperBuffer<Int32_2, FInt2Operator>>.TypeDesc;
+                return Rtti.UTypeDescGetter<USuperBuffer<Vector2i, FInt2Operator>>.TypeDesc;
             }
         }
-        public Int32_2 MaxValue { get => Int32_2.MaxValue; }
-        public Int32_2 MinValue { get => Int32_2.MinValue; }
+        public Vector2i MaxValue { get => Vector2i.MaxValue; }
+        public Vector2i MinValue { get => Vector2i.MinValue; }
         public unsafe int Compare(void* left, void* right)
         {
-            ref var l = ref *(Int32_2*)left;
-            ref var r = ref *(Int32_2*)right;
+            ref var l = ref *(Vector2i*)left;
+            ref var r = ref *(Vector2i*)right;
             return Compare(in l, in r);
         }
-        public int Compare(in Int32_2 left, in Int32_2 right)
+        public int Compare(in Vector2i left, in Vector2i right)
         {
             //if (left.X < right.X ||
             //    left.Y < right.Y ||
@@ -958,72 +958,72 @@ namespace EngineNS.Bricks.Procedure
         }
         public unsafe void SetIfGreateThan(Rtti.UTypeDesc tarTyp, void* tar, Rtti.UTypeDesc srcType, void* src)
         {
-            ref var sVec3 = ref *(Int32_2*)src;
-            ref var tVec3 = ref *(Int32_2*)tar;
-            tVec3 = Int32_2.Maximize(in sVec3, in tVec3);
+            ref var sVec3 = ref *(Vector2i*)src;
+            ref var tVec3 = ref *(Vector2i*)tar;
+            tVec3 = Vector2i.Maximize(in sVec3, in tVec3);
         }
         public unsafe void SetIfLessThan(Rtti.UTypeDesc tarTyp, void* tar, Rtti.UTypeDesc srcType, void* src)
         {
-            ref var sVec3 = ref *(Int32_2*)src;
-            ref var tVec3 = ref *(Int32_2*)tar;
-            tVec3 = Int32_2.Minimize(in sVec3, in tVec3);
+            ref var sVec3 = ref *(Vector2i*)src;
+            ref var tVec3 = ref *(Vector2i*)tar;
+            tVec3 = Vector2i.Minimize(in sVec3, in tVec3);
         }
-        public Int32_2 Add(in Int32_2 left, in Int32_2 right)
+        public Vector2i Add(in Vector2i left, in Vector2i right)
         {
             return left + right;
         }
         public unsafe void SetAsMaxValue(void* tar)
         {
-            (*(Int32_2*)tar) = Int32_2.MaxValue;
+            (*(Vector2i*)tar) = Vector2i.MaxValue;
         }
         public unsafe void SetAsMinValue(void* tar)
         {
-            (*(Int32_2*)tar) = Int32_2.MinValue;
+            (*(Vector2i*)tar) = Vector2i.MinValue;
         }
         public unsafe void Copy(Rtti.UTypeDesc tarTyp, void* tar, Rtti.UTypeDesc srcType, void* src)
         {
-            (*(Int32_2*)tar) = (*(Int32_2*)src);
+            (*(Vector2i*)tar) = (*(Vector2i*)src);
         }
         public unsafe void Add(Rtti.UTypeDesc resultType, void* result, Rtti.UTypeDesc leftType, void* left, Rtti.UTypeDesc rightType, void* right)
         {
-            if (resultType != Rtti.UTypeDescGetter<Int32_2>.TypeDesc && resultType != leftType && resultType != rightType)
+            if (resultType != Rtti.UTypeDescGetter<Vector2i>.TypeDesc && resultType != leftType && resultType != rightType)
             {
                 return;
             }
-            Int32_2 rValue = Int32_2.Zero;
+            Vector2i rValue = Vector2i.Zero;
             if (right != (void*)0)
             {
-                rValue = *(Int32_2*)right;
+                rValue = *(Vector2i*)right;
             }
-            (*(Int32_2*)result) = (*(Int32_2*)left) + rValue;
+            (*(Vector2i*)result) = (*(Vector2i*)left) + rValue;
         }
         public unsafe void Sub(Rtti.UTypeDesc resultType, void* result, Rtti.UTypeDesc leftType, void* left, Rtti.UTypeDesc rightType, void* right)
         {
-            if (resultType != Rtti.UTypeDescGetter<Int32_2>.TypeDesc && resultType != leftType && resultType != rightType)
+            if (resultType != Rtti.UTypeDescGetter<Vector2i>.TypeDesc && resultType != leftType && resultType != rightType)
             {
                 return;
             }
-            Int32_2 rValue = Int32_2.Zero;
+            Vector2i rValue = Vector2i.Zero;
             if (right != (void*)0)
             {
-                rValue = *(Int32_2*)right;
+                rValue = *(Vector2i*)right;
             }
-            (*(Int32_2*)result) = (*(Int32_2*)left) - rValue;
+            (*(Vector2i*)result) = (*(Vector2i*)left) - rValue;
         }
         public unsafe void Mul(Rtti.UTypeDesc resultType, void* result, Rtti.UTypeDesc leftType, void* left, Rtti.UTypeDesc rightType, void* right)
         {
-            if (resultType != Rtti.UTypeDescGetter<Int32_2>.TypeDesc && resultType != leftType)
+            if (resultType != Rtti.UTypeDescGetter<Vector2i>.TypeDesc && resultType != leftType)
             {
                 return;
             }
-            if (rightType == Rtti.UTypeDescGetter<Int32_2>.TypeDesc)
+            if (rightType == Rtti.UTypeDescGetter<Vector2i>.TypeDesc)
             {
-                Int32_2 rValue = Int32_2.One;
+                Vector2i rValue = Vector2i.One;
                 if (right != (void*)0)
                 {
-                    rValue = *(Int32_2*)right;
+                    rValue = *(Vector2i*)right;
                 }
-                (*(Int32_2*)result) = (*(Int32_2*)left) * rValue;
+                (*(Vector2i*)result) = (*(Vector2i*)left) * rValue;
             }
             else if (rightType == Rtti.UTypeDescGetter<int>.TypeDesc)
             {
@@ -1032,87 +1032,87 @@ namespace EngineNS.Bricks.Procedure
                 {
                     rValue = *(int*)right;
                 }
-                (*(Int32_2*)result) = (*(Int32_2*)left) * rValue;
+                (*(Vector2i*)result) = (*(Vector2i*)left) * rValue;
             }
         }
         public unsafe void Div(Rtti.UTypeDesc resultType, void* result, Rtti.UTypeDesc leftType, void* left, Rtti.UTypeDesc rightType, void* right)
         {
-            if (resultType != Rtti.UTypeDescGetter<Int32_2>.TypeDesc && resultType != leftType && resultType != rightType)
+            if (resultType != Rtti.UTypeDescGetter<Vector2i>.TypeDesc && resultType != leftType && resultType != rightType)
             {
                 return;
             }
-            Int32_2 rValue = Int32_2.One;
+            Vector2i rValue = Vector2i.One;
             if (right != (void*)0)
             {
-                rValue = *(Int32_2*)right;
+                rValue = *(Vector2i*)right;
             }
-            (*(Int32_2*)result) = (*(Int32_2*)left) / rValue;
+            (*(Vector2i*)result) = (*(Vector2i*)left) / rValue;
         }
         public unsafe void Lerp(Rtti.UTypeDesc resultType, void* result, Rtti.UTypeDesc leftType, void* left, Rtti.UTypeDesc rightType, void* right, float factor)
         {
-            if (resultType != Rtti.UTypeDescGetter<Int32_2>.TypeDesc && resultType != leftType && resultType != rightType)
+            if (resultType != Rtti.UTypeDescGetter<Vector2i>.TypeDesc && resultType != leftType && resultType != rightType)
             {
                 return;
             }
-            var rValue = Int32_2.One;
+            var rValue = Vector2i.One;
             if (right != (void*)0)
             {
-                rValue = *(Int32_2*)right;
+                rValue = *(Vector2i*)right;
             }
-            var l =(Int32_2*)left;
-            var r = (Int32_2*)result;
-            r->X = (int)CoreDefine.Lerp((float)l->X, (float)rValue.X, factor);
-            r->Y = (int)CoreDefine.Lerp((float)l->Y, (float)rValue.Y, factor);
+            var l =(Vector2i*)left;
+            var r = (Vector2i*)result;
+            r->X = (int)MathHelper.Lerp((float)l->X, (float)rValue.X, factor);
+            r->Y = (int)MathHelper.Lerp((float)l->Y, (float)rValue.Y, factor);
         }
         public unsafe void Max(void* result, void* left, void* right)
         {
-            ref var l = ref *(Int32_2*)left;
-            ref var r = ref *(Int32_2*)right;
-            ref var t = ref *(Int32_2*)result;
+            ref var l = ref *(Vector2i*)left;
+            ref var r = ref *(Vector2i*)right;
+            ref var t = ref *(Vector2i*)result;
 
-            t = Int32_2.Maximize(l, r);
+            t = Vector2i.Maximize(l, r);
         }
         public unsafe void Min(void* result, void* left, void* right)
         {
-            ref var l = ref *(Int32_2*)left;
-            ref var r = ref *(Int32_2*)right;
-            ref var t = ref *(Int32_2*)result;
+            ref var l = ref *(Vector2i*)left;
+            ref var r = ref *(Vector2i*)right;
+            ref var t = ref *(Vector2i*)result;
 
-            t = Int32_2.Minimize(l, r);
+            t = Vector2i.Minimize(l, r);
         }
         public unsafe void Abs(void* result, void* left)
         {
-            ref var l = ref *(Int32_2*)left;
-            ref var t = ref *(Int32_2*)result;
-            t.X = CoreDefine.Abs(l.X);
-            t.Y = CoreDefine.Abs(l.Y);
+            ref var l = ref *(Vector2i*)left;
+            ref var t = ref *(Vector2i*)result;
+            t.X = MathHelper.Abs(l.X);
+            t.Y = MathHelper.Abs(l.Y);
         }
     }
-    public struct FInt3Operator : ISuperPixelOperator<Int32_3>
+    public struct FInt3Operator : ISuperPixelOperator<Vector3i>
     {
         public Rtti.UTypeDesc ElementType
         {
             get
             {
-                return Rtti.UTypeDescGetter<Int32_3>.TypeDesc;
+                return Rtti.UTypeDescGetter<Vector3i>.TypeDesc;
             }
         }
         public Rtti.UTypeDesc BufferType
         {
             get
             {
-                return Rtti.UTypeDescGetter<USuperBuffer<Int32_3, FInt3Operator>>.TypeDesc;
+                return Rtti.UTypeDescGetter<USuperBuffer<Vector3i, FInt3Operator>>.TypeDesc;
             }
         }
-        public Int32_3 MaxValue { get => Int32_3.MaxValue; }
-        public Int32_3 MinValue { get => Int32_3.MinValue; }
+        public Vector3i MaxValue { get => Vector3i.MaxValue; }
+        public Vector3i MinValue { get => Vector3i.MinValue; }
         public unsafe int Compare(void* left, void* right)
         {
-            ref var l = ref *(Int32_3*)left;
-            ref var r = ref *(Int32_3*)right;
+            ref var l = ref *(Vector3i*)left;
+            ref var r = ref *(Vector3i*)right;
             return Compare(in l, in r);
         }
-        public int Compare(in Int32_3 left, in Int32_3 right)
+        public int Compare(in Vector3i left, in Vector3i right)
         {
             //if (left.X < right.X ||
             //    left.Y < right.Y ||
@@ -1124,72 +1124,72 @@ namespace EngineNS.Bricks.Procedure
         }
         public unsafe void SetIfGreateThan(Rtti.UTypeDesc tarTyp, void* tar, Rtti.UTypeDesc srcType, void* src)
         {
-            ref var sVec3 = ref *(Int32_3*)src;
-            ref var tVec3 = ref *(Int32_3*)tar;
-            tVec3 = Int32_3.Maximize(in sVec3, in tVec3);
+            ref var sVec3 = ref *(Vector3i*)src;
+            ref var tVec3 = ref *(Vector3i*)tar;
+            tVec3 = Vector3i.Maximize(in sVec3, in tVec3);
         }
         public unsafe void SetIfLessThan(Rtti.UTypeDesc tarTyp, void* tar, Rtti.UTypeDesc srcType, void* src)
         {
-            ref var sVec3 = ref *(Int32_3*)src;
-            ref var tVec3 = ref *(Int32_3*)tar;
-            tVec3 = Int32_3.Minimize(in sVec3, in tVec3);
+            ref var sVec3 = ref *(Vector3i*)src;
+            ref var tVec3 = ref *(Vector3i*)tar;
+            tVec3 = Vector3i.Minimize(in sVec3, in tVec3);
         }
-        public Int32_3 Add(in Int32_3 left, in Int32_3 right)
+        public Vector3i Add(in Vector3i left, in Vector3i right)
         {
             return left + right;
         }
         public unsafe void SetAsMaxValue(void* tar)
         {
-            (*(Int32_3*)tar) = Int32_3.MaxValue;
+            (*(Vector3i*)tar) = Vector3i.MaxValue;
         }
         public unsafe void SetAsMinValue(void* tar)
         {
-            (*(Int32_3*)tar) = Int32_3.MinValue;
+            (*(Vector3i*)tar) = Vector3i.MinValue;
         }
         public unsafe void Copy(Rtti.UTypeDesc tarTyp, void* tar, Rtti.UTypeDesc srcType, void* src)
         {
-            (*(Int32_3*)tar) = (*(Int32_3*)src);
+            (*(Vector3i*)tar) = (*(Vector3i*)src);
         }
         public unsafe void Add(Rtti.UTypeDesc resultType, void* result, Rtti.UTypeDesc leftType, void* left, Rtti.UTypeDesc rightType, void* right)
         {
-            if (resultType != Rtti.UTypeDescGetter<Int32_3>.TypeDesc && resultType != leftType && resultType != rightType)
+            if (resultType != Rtti.UTypeDescGetter<Vector3i>.TypeDesc && resultType != leftType && resultType != rightType)
             {
                 return;
             }
-            Int32_3 rValue = Int32_3.Zero;
+            Vector3i rValue = Vector3i.Zero;
             if (right != (void*)0)
             {
-                rValue = *(Int32_3*)right;
+                rValue = *(Vector3i*)right;
             }
-            (*(Int32_3*)result) = (*(Int32_3*)left) + rValue;
+            (*(Vector3i*)result) = (*(Vector3i*)left) + rValue;
         }
         public unsafe void Sub(Rtti.UTypeDesc resultType, void* result, Rtti.UTypeDesc leftType, void* left, Rtti.UTypeDesc rightType, void* right)
         {
-            if (resultType != Rtti.UTypeDescGetter<Int32_3>.TypeDesc && resultType != leftType && resultType != rightType)
+            if (resultType != Rtti.UTypeDescGetter<Vector3i>.TypeDesc && resultType != leftType && resultType != rightType)
             {
                 return;
             }
-            Int32_3 rValue = Int32_3.Zero;
+            Vector3i rValue = Vector3i.Zero;
             if (right != (void*)0)
             {
-                rValue = *(Int32_3*)right;
+                rValue = *(Vector3i*)right;
             }
-            (*(Int32_3*)result) = (*(Int32_3*)left) - rValue;
+            (*(Vector3i*)result) = (*(Vector3i*)left) - rValue;
         }
         public unsafe void Mul(Rtti.UTypeDesc resultType, void* result, Rtti.UTypeDesc leftType, void* left, Rtti.UTypeDesc rightType, void* right)
         {
-            if (resultType != Rtti.UTypeDescGetter<Int32_3>.TypeDesc && resultType != leftType)
+            if (resultType != Rtti.UTypeDescGetter<Vector3i>.TypeDesc && resultType != leftType)
             {
                 return;
             }
-            if (rightType == Rtti.UTypeDescGetter<Int32_3>.TypeDesc)
+            if (rightType == Rtti.UTypeDescGetter<Vector3i>.TypeDesc)
             {
-                Int32_3 rValue = Int32_3.One;
+                Vector3i rValue = Vector3i.One;
                 if (right != (void*)0)
                 {
-                    rValue = *(Int32_3*)right;
+                    rValue = *(Vector3i*)right;
                 }
-                (*(Int32_3*)result) = (*(Int32_3*)left) * rValue;
+                (*(Vector3i*)result) = (*(Vector3i*)left) * rValue;
             }
             else if (rightType == Rtti.UTypeDescGetter<int>.TypeDesc)
             {
@@ -1198,62 +1198,62 @@ namespace EngineNS.Bricks.Procedure
                 {
                     rValue = *(int*)right;
                 }
-                (*(Int32_3*)result) = (*(Int32_3*)left) * rValue;
+                (*(Vector3i*)result) = (*(Vector3i*)left) * rValue;
             }
         }
         public unsafe void Div(Rtti.UTypeDesc resultType, void* result, Rtti.UTypeDesc leftType, void* left, Rtti.UTypeDesc rightType, void* right)
         {
-            if (resultType != Rtti.UTypeDescGetter<Int32_3>.TypeDesc && resultType != leftType && resultType != rightType)
+            if (resultType != Rtti.UTypeDescGetter<Vector3i>.TypeDesc && resultType != leftType && resultType != rightType)
             {
                 return;
             }
-            Int32_3 rValue = Int32_3.One;
+            Vector3i rValue = Vector3i.One;
             if (right != (void*)0)
             {
-                rValue = *(Int32_3*)right;
+                rValue = *(Vector3i*)right;
             }
-            (*(Int32_3*)result) = (*(Int32_3*)left) / rValue;
+            (*(Vector3i*)result) = (*(Vector3i*)left) / rValue;
         }
         public unsafe void Lerp(Rtti.UTypeDesc resultType, void* result, Rtti.UTypeDesc leftType, void* left, Rtti.UTypeDesc rightType, void* right, float factor)
         {
-            if (resultType != Rtti.UTypeDescGetter<Int32_3>.TypeDesc && resultType != leftType && resultType != rightType)
+            if (resultType != Rtti.UTypeDescGetter<Vector3i>.TypeDesc && resultType != leftType && resultType != rightType)
             {
                 return;
             }
-            var rValue = Int32_3.One;
+            var rValue = Vector3i.One;
             if (right != (void*)0)
             {
-                rValue = *(Int32_3*)right;
+                rValue = *(Vector3i*)right;
             }
-            var l = (Int32_3*)left;
-            var r = (Int32_3*)result;
-            r->X = (int)CoreDefine.Lerp((float)l->X, (float)rValue.X, factor);
-            r->Y = (int)CoreDefine.Lerp((float)l->Y, (float)rValue.Y, factor);
-            r->Z = (int)CoreDefine.Lerp((float)l->Z, (float)rValue.Z, factor);
+            var l = (Vector3i*)left;
+            var r = (Vector3i*)result;
+            r->X = (int)MathHelper.Lerp((float)l->X, (float)rValue.X, factor);
+            r->Y = (int)MathHelper.Lerp((float)l->Y, (float)rValue.Y, factor);
+            r->Z = (int)MathHelper.Lerp((float)l->Z, (float)rValue.Z, factor);
         }
         public unsafe void Max(void* result, void* left, void* right)
         {
-            ref var l = ref *(Int32_3*)left;
-            ref var r = ref *(Int32_3*)right;
-            ref var t = ref *(Int32_3*)result;
+            ref var l = ref *(Vector3i*)left;
+            ref var r = ref *(Vector3i*)right;
+            ref var t = ref *(Vector3i*)result;
 
-            t = Int32_3.Maximize(l, r);
+            t = Vector3i.Maximize(l, r);
         }
         public unsafe void Min(void* result, void* left, void* right)
         {
-            ref var l = ref *(Int32_3*)left;
-            ref var r = ref *(Int32_3*)right;
-            ref var t = ref *(Int32_3*)result;
+            ref var l = ref *(Vector3i*)left;
+            ref var r = ref *(Vector3i*)right;
+            ref var t = ref *(Vector3i*)result;
 
-            t = Int32_3.Minimize(l, r);
+            t = Vector3i.Minimize(l, r);
         }
         public unsafe void Abs(void* result, void* left)
         {
-            ref var l = ref *(Int32_3*)left;
-            ref var t = ref *(Int32_3*)result;
-            t.X = CoreDefine.Abs(l.X);
-            t.Y = CoreDefine.Abs(l.Y);
-            t.Z = CoreDefine.Abs(l.Z);
+            ref var l = ref *(Vector3i*)left;
+            ref var t = ref *(Vector3i*)result;
+            t.X = MathHelper.Abs(l.X);
+            t.Y = MathHelper.Abs(l.Y);
+            t.Z = MathHelper.Abs(l.Z);
         }
     }
 
@@ -1416,9 +1416,9 @@ namespace EngineNS.Bricks.Procedure
         {
             ref var l = ref *(DVector3*)left;
             ref var t = ref *(DVector3*)result;
-            t.X = CoreDefine.Abs(l.X);
-            t.Y = CoreDefine.Abs(l.Y);
-            t.Z = CoreDefine.Abs(l.Z);
+            t.X = MathHelper.Abs(l.X);
+            t.Y = MathHelper.Abs(l.Y);
+            t.Z = MathHelper.Abs(l.Z);
         }
     }
     public struct FByteOperator : ISuperPixelOperator<byte>
@@ -1542,7 +1542,7 @@ namespace EngineNS.Bricks.Procedure
             {
                 rValue = *(byte*)right;
             }
-            *(byte*)result = (byte)CoreDefine.Lerp((float)*(byte*)left, (float)rValue, factor);
+            *(byte*)result = (byte)MathHelper.Lerp((float)*(byte*)left, (float)rValue, factor);
         }
         public unsafe void Max(void* result, void* left, void* right)
         {
@@ -1550,7 +1550,7 @@ namespace EngineNS.Bricks.Procedure
             ref var r = ref *(byte*)right;
             ref var t = ref *(byte*)result;
 
-            t = (byte)CoreDefine.Max((int)l, (int)r);
+            t = (byte)MathHelper.Max((int)l, (int)r);
         }
         public unsafe void Min(void* result, void* left, void* right)
         {
@@ -1558,13 +1558,13 @@ namespace EngineNS.Bricks.Procedure
             ref var r = ref *(byte*)right;
             ref var t = ref *(byte*)result;
 
-            t = (byte)CoreDefine.Min((int)l, (int)r);
+            t = (byte)MathHelper.Min((int)l, (int)r);
         }
         public unsafe void Abs(void* result, void* left)
         {
             ref var l = ref *(byte*)left;
             ref var t = ref *(byte*)result;
-            t = (byte)CoreDefine.Abs((int)l);
+            t = (byte)MathHelper.Abs((int)l);
         }
     }
     public struct FSByteOperator : ISuperPixelOperator<sbyte>
@@ -1688,7 +1688,7 @@ namespace EngineNS.Bricks.Procedure
             {
                 rValue = *(sbyte*)right;
             }
-            *(sbyte*)result = (sbyte)CoreDefine.Lerp((float)*(sbyte*)left, (float)rValue, factor);
+            *(sbyte*)result = (sbyte)MathHelper.Lerp((float)*(sbyte*)left, (float)rValue, factor);
         }
         public unsafe void Max(void* result, void* left, void* right)
         {
@@ -1696,7 +1696,7 @@ namespace EngineNS.Bricks.Procedure
             ref var r = ref *(sbyte*)right;
             ref var t = ref *(sbyte*)result;
 
-            t = (sbyte)CoreDefine.Max((int)l, (int)r);
+            t = (sbyte)MathHelper.Max((int)l, (int)r);
         }
         public unsafe void Min(void* result, void* left, void* right)
         {
@@ -1704,13 +1704,13 @@ namespace EngineNS.Bricks.Procedure
             ref var r = ref *(sbyte*)right;
             ref var t = ref *(sbyte*)result;
 
-            t = (sbyte)CoreDefine.Min((int)l, (int)r);
+            t = (sbyte)MathHelper.Min((int)l, (int)r);
         }
         public unsafe void Abs(void* result, void* left)
         {
             ref var l = ref *(sbyte*)left;
             ref var t = ref *(sbyte*)result;
-            t = (sbyte)CoreDefine.Abs((int)l);
+            t = (sbyte)MathHelper.Abs((int)l);
         }
     }
     public struct FTransformOperator : ISuperPixelOperator<FTransform>
@@ -1749,15 +1749,15 @@ namespace EngineNS.Bricks.Procedure
         }
         public unsafe void SetIfGreateThan(Rtti.UTypeDesc tarTyp, void* tar, Rtti.UTypeDesc srcType, void* src)
         {
-            //ref var sVec3 = ref *(Int32_3*)src;
-            //ref var tVec3 = ref *(Int32_3*)tar;
-            //tVec3 = Int32_3.Maximize(in sVec3, in tVec3);
+            //ref var sVec3 = ref *(Vector3i*)src;
+            //ref var tVec3 = ref *(Vector3i*)tar;
+            //tVec3 = Vector3i.Maximize(in sVec3, in tVec3);
         }
         public unsafe void SetIfLessThan(Rtti.UTypeDesc tarTyp, void* tar, Rtti.UTypeDesc srcType, void* src)
         {
-            //ref var sVec3 = ref *(Int32_3*)src;
-            //ref var tVec3 = ref *(Int32_3*)tar;
-            //tVec3 = Int32_3.Minimize(in sVec3, in tVec3);
+            //ref var sVec3 = ref *(Vector3i*)src;
+            //ref var tVec3 = ref *(Vector3i*)tar;
+            //tVec3 = Vector3i.Minimize(in sVec3, in tVec3);
         }
         public FTransform Add(in FTransform left, in FTransform right)
         {
@@ -1857,13 +1857,13 @@ namespace EngineNS.Bricks.Procedure
             ref var r = ref *(FTransform*)right;
             ref var t = ref *(FTransform*)result;
 
-            //t = (sbyte)CoreDefine.Min((int)l, (int)r);
+            //t = (sbyte)MathHelper.Min((int)l, (int)r);
         }
         public unsafe void Abs(void* result, void* left)
         {
             ref var l = ref *(FTransform*)left;
             ref var t = ref *(FTransform*)result;
-            //t = (sbyte)CoreDefine.Abs((int)l);
+            //t = (sbyte)MathHelper.Abs((int)l);
         }
     }
 
@@ -1963,13 +1963,13 @@ namespace EngineNS.Bricks.Procedure
             ref var r = ref *(FSquareSurface*)right;
             ref var t = ref *(FSquareSurface*)result;
 
-            //t = (sbyte)CoreDefine.Min((int)l, (int)r);
+            //t = (sbyte)MathHelper.Min((int)l, (int)r);
         }
         public unsafe void Abs(void* result, void* left)
         {
             ref var l = ref *(FSquareSurface*)left;
             ref var t = ref *(FSquareSurface*)result;
-            //t = (sbyte)CoreDefine.Abs((int)l);
+            //t = (sbyte)MathHelper.Abs((int)l);
         }
     }
 }

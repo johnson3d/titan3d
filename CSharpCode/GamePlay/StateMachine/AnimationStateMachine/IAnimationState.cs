@@ -8,7 +8,7 @@ using System.Text;
 
 namespace EngineNS.GamePlay.StateMachine.AnimationStateMachine
 {
-    public interface IAnimationState : IState
+    public interface IAnimationState //: IState
     {
         UAnimationCommand<ULocalSpaceRuntimePose> ConstructAnimationCommandTree(IAnimationCommand parentNode, ref FConstructAnimationCommandTreeContext context);
     }

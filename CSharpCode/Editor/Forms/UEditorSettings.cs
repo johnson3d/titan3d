@@ -29,9 +29,15 @@ namespace EngineNS.Editor.Forms
                 UEngine.Instance.Config = value;
             }
         }
-        public void Cleanup() { }
-        public bool Visible { get; set; } = true;
+        public void Dispose() { }
+        bool mVisible = true;
+        public bool Visible 
+        { 
+            get => mVisible; 
+            set => mVisible = value; 
+        }
         public uint DockId { get; set; }
+        public ImGuiWindowClass DockKeyClass { get; }
         public ImGuiCond_ DockCond { get; set; } = ImGuiCond_.ImGuiCond_FirstUseEver;
 
         public EGui.Controls.PropertyGrid.PropertyGrid SettingsPropGrid = new EGui.Controls.PropertyGrid.PropertyGrid();
@@ -43,12 +49,12 @@ namespace EngineNS.Editor.Forms
 
             Vector2 size = Vector2.Zero;
             var fileDlg = UEngine.Instance.EditorInstance.FileDialog.mFileDialog;
-            if (EGui.UIProxy.DockProxy.BeginMainForm("EditorSettings", null, ImGuiWindowFlags_.ImGuiWindowFlags_None))
+            if (EGui.UIProxy.DockProxy.BeginMainForm("EditorSettings", this, ImGuiWindowFlags_.ImGuiWindowFlags_None))
             {
                 DockId = ImGuiAPI.GetWindowDockID();
                 if (ImGuiAPI.Button("Save"))
                 {
-                    fileDlg.OpenModal("ChooseConfigKey", "Choose Config", ".cfg", UEngine.Instance.FileManager.GetRoot(IO.FileManager.ERootDir.Game));
+                    fileDlg.OpenModal("ChooseConfigKey", "Choose Config", ".cfg", UEngine.Instance.FileManager.GetRoot(IO.TtFileManager.ERootDir.Game));
                 }
                 SettingsPropGrid.OnDraw(true, false, false);
             }
@@ -59,7 +65,7 @@ namespace EngineNS.Editor.Forms
                 {
                     var sltFile = fileDlg.GetFilePathName();
 
-                    IO.FileManager.SaveObjectToXml(sltFile, Config);
+                    IO.TtFileManager.SaveObjectToXml(sltFile, Config);
                 }
                 fileDlg.CloseDialog();
             }

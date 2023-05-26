@@ -62,7 +62,7 @@ namespace EngineNS.NxRHI
             //SwapChainPassDesc.m_AttachmentDepthStencil.StoreAction = NxRHI.EFrameBufferStoreAction.StoreActionStore;
             //SwapChainPassDesc.m_AttachmentDepthStencil.StencilLoadAction = NxRHI.EFrameBufferLoadAction.LoadActionClear;
             //SwapChainPassDesc.m_AttachmentDepthStencil.StencilStoreAction = NxRHI.EFrameBufferStoreAction.StoreActionStore;
-            //SwapChainPassDesc.mFBClearColorRT0 = new Color4(1, 0, 0, 0);
+            //SwapChainPassDesc.mFBClearColorRT0 = new Color4f(1, 0, 0, 0);
             //SwapChainPassDesc.mDepthClearValue = 1.0f;
             //SwapChainPassDesc.mStencilClearValue = 0u;
 

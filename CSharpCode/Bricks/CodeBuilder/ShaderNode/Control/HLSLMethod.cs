@@ -2,14 +2,23 @@
 using EngineNS.Graphics.Pipeline.Shader;
 using System;
 using System.Collections.Generic;
+using System.Reflection;
 using System.Text;
 
 namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Control
 {
+    public class TtHLSLProviderAttribute : Attribute
+    {
+        public string Name;
+        public string Include;
+    }
+
     [Rtti.Meta]
-    public partial class HLSLMethod
+    [TtHLSLProvider]
+    public partial class TtCoreHLSLMethod
     {
         [Rtti.Meta]
+        [TtHLSLProvider(Name = "SampleLevel2D")]
         [UserCallNode(CallNodeType = typeof(SampleLevel2DNode))]
         [ContextMenu("samplelevel2d", "Sample\\Level2D", UMaterialGraph.MaterialEditorKeyword)]
         public static Vector4 SampleLevel2D(Var.Texture2D texture, Var.SamplerState sampler, Vector2 uv, float level, out Vector3 rgb)
@@ -18,6 +27,7 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Control
             return new Vector4();
         }
         [Rtti.Meta]
+        [TtHLSLProvider(Name = "Sample2D")]
         [UserCallNode(CallNodeType = typeof(Sample2DNode))]
         public static Vector4 Sample2D(Var.Texture2D texture, Var.SamplerState sampler, Vector2 uv, out Vector3 rgb)
         {
@@ -25,6 +35,7 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Control
             return new Vector4();
         }
         [Rtti.Meta]
+        [TtHLSLProvider(Name = "SampleArrayLevel2D")]
         [UserCallNode(CallNodeType = typeof(SampleArrayLevel2DNode))]
         public static Vector4 SampleArrayLevel2D(Var.Texture2DArray texture, Var.SamplerState sampler, Vector2 uv, float arrayIndex, float level, out Vector3 rgb)
         {
@@ -32,6 +43,7 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Control
             return new Vector4();
         }
         [Rtti.Meta]
+        [TtHLSLProvider(Name = "SampleArray2D")]
         [UserCallNode(CallNodeType = typeof(SampleArray2DNode))]
         public static Vector4 SampleArray2D(Var.Texture2DArray texture, Var.SamplerState sampler, Vector2 uv, float arrayIndex, out Vector3 rgb)
         {
@@ -39,48 +51,57 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Control
             return new Vector4();
         }
         [Rtti.Meta]
+        [TtHLSLProvider(Name = "GetTerrainDiffuse")]
         public static Vector3 GetTerrainDiffuse(Vector2 uv, Graphics.Pipeline.Shader.UMaterial.PSInput input)
         {
             return Vector3.Zero;
         }
         [Rtti.Meta]
+        [TtHLSLProvider(Name = "GetTerrainNormal")]
         public static Vector3 GetTerrainNormal(Vector2 uv, Graphics.Pipeline.Shader.UMaterial.PSInput input)
         {
             return Vector3.Zero;
         }
         [Rtti.Meta]
+        [TtHLSLProvider(Name = "Clamp")]
         public static void Clamp(float x, float min, float max, out float ret)
         {
             ret = 0;
         }
         [Rtti.Meta]
+        [TtHLSLProvider(Name = "SinCos")]
         public static void SinCos(float x, out float sin, out float cos)
         {
             sin = (float)Math.Sin(x);
             cos = (float)Math.Cos(x);
         }
         [Rtti.Meta]
+        [TtHLSLProvider(Name = "Max")]
         public static void Max(float v1, float v2, out float ret)
         {
             ret = Math.Max(v1, v2);
         }
         [Rtti.Meta]
+        [TtHLSLProvider(Name = "Min")]
         public static void Min(float v1, float v2, out float ret)
         {
             ret = Math.Min(v1, v2);
         }
         [Rtti.Meta]
+        [TtHLSLProvider(Name = "Lerp")]
         public static void Lerp(float v1, float v2, float s, out float ret)
         {
             ret = v1 + s * (v2 - v1);
         }
         [Rtti.Meta]
+        [TtHLSLProvider(Name = "Lerp2D")]
         public static void Lerp2D(Vector2 v1, Vector2 v2, Vector2 s, out Vector2 ret)
         {
             ret.X = v1.X + s.X * (v2.X - v1.X);
             ret.Y = v1.Y + s.Y * (v2.Y - v1.Y);
         }
         [Rtti.Meta]
+        [TtHLSLProvider(Name = "Lerp3D")]
         public static void Lerp3D(Vector3 v1, Vector3 v2, Vector3 s, out Vector3 ret)
         {
             ret.X = v1.X + s.X * (v2.X - v1.X);
@@ -88,6 +109,7 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Control
             ret.Z = v1.Z + s.Z * (v2.Z - v1.Z);
         }
         [Rtti.Meta]
+        [TtHLSLProvider(Name = "NormalMap")]
         public static void NormalMap(Vector3 Nt, Vector4 Tw, Vector3 Nw, out Vector3 UnpackedNormal)
         {
             //   Vector3 Bw = new Vector3(0.0h, 0.0h, 0.0h);
@@ -108,6 +130,7 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Control
             UnpackedNormal = Vector3.Zero;
         }
         [Rtti.Meta]
+        [TtHLSLProvider(Name = "Panner")]
         public static void Panner(Vector2 uv, float time, Vector2 speed, Vector2 scale, out Vector2 outUV)
         {
             Vector2 uvTrans = speed * time;
@@ -124,6 +147,7 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Control
             }
         }
         [Rtti.Meta]
+        [TtHLSLProvider(Name = "Rotator")]
         public static void Rotator(Vector2 uv, float time, Vector2 center, Vector2 scale, float speed, out Vector2 outUV)
         {
             outUV = Vector2.Zero;
@@ -184,12 +208,14 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Control
             */
         }
         [Rtti.Meta]
+        [TtHLSLProvider(Name = "Distortion")]
         public static void Distortion(Vector4 localPos, Vector4 localNorm, Vector4 viewPos, Vector4 projPos, Vector3 localCameraPos, float strength, float transparency, float distortionOffset, out Vector2 distortionUV, out float distortionAlpha)
         {
             distortionUV = Vector2.Zero;
             distortionAlpha = 0;
         }
         [Rtti.Meta]
+        [TtHLSLProvider(Name = "RimLight")]
         public static void RimLight(Vector3 localPos, Vector3 localNormal, float rimStart, float rimEnd, Vector4 rimColor, float rimMultiply, out Vector3 outColor)
         {
             outColor = Vector3.Zero;
@@ -206,6 +232,7 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Control
             //outColor = rim * rimMultiply * rimColor;
         }
         [Rtti.Meta]
+        [TtHLSLProvider(Name = "VecMultiplyQuat")]
         public static void VecMultiplyQuat(Vector3 vec, Vector4 quat, out Vector3 outVector)
         {
             outVector = Vector3.Zero;
@@ -217,16 +244,19 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Control
             //outVector = vec + uv + uuv;
         }
         [Rtti.Meta]
-        public static Vector3 smoothstep3D(Vector3 InColor)
+        [TtHLSLProvider(Name = "SmoothStep3D")]
+        public static Vector3 Smoothstep3D(Vector3 InColor)
         {
             return Vector3.Zero;
         }
         [Rtti.Meta]
+        [TtHLSLProvider(Name = "floor3D")]
         public static Vector3 floor3D(Vector3 InColor)
         {
             return Vector3.Zero;
         }
         [Rtti.Meta]
+        [TtHLSLProvider(Name = "PolarCoodP2D")]
         public static void PolarCoodP2D(Vector2 uv, out Vector2 polar)
         {
             float a, b, x, y;
@@ -238,6 +268,7 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Control
             polar.Y = b;
         }
         [Rtti.Meta]
+        [TtHLSLProvider(Name = "PolarCoodD2P")]
         public static void PolarCoodD2P(Vector2 uv, out Vector2 polar)
         {
             float pi;
@@ -260,6 +291,71 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Control
             y = y1;
             polar.X = x;
             polar.Y = y;
+        }
+        //[Rtti.Meta]
+        //public static void GetGridUV(Vector2 uv, Vector4 lightmapUV, Vector2 min, Vector2 max, out Vector2 outUV)
+        //{
+        //    var v = new Vector2(lightmapUV.X, lightmapUV.Y);
+        //    var u = new Vector2(lightmapUV.Z, lightmapUV.W);
+        //    var min_v = new Vector2(min.Y);
+        //    var max_v = new Vector2(max.Y);
+        //    var min_u = new Vector2(min.X);
+        //    var max_u = new Vector2(max.X);
+        //    var t1 = Vector2.Lerp(in min_u, in max_u, in u);
+        //    var t2 = Vector2.Lerp(in min_v, in max_v, in v);
+            
+        //    var slt = new Vector2[4]
+        //        {
+        //            new Vector2(t1.X, t2.X),
+        //            new Vector2(t1.X, t2.Y),
+        //            new Vector2(t1.Y, t2.Y),
+        //            new Vector2(t1.Y, t2.X),
+        //        };
+        //    outUV = slt[(int)uv.X];
+        //}
+    }
+
+    public partial class TtHLSLMethodManager
+    {
+        public Dictionary<string, Rtti.UClassMeta.MethodMeta> Methods { get; } = new Dictionary<string, Rtti.UClassMeta.MethodMeta>();
+        public void SureMethods()
+        {
+            if (Methods.Count > 0)
+                return;
+            foreach (var i in Rtti.UClassMetaManager.Instance.Metas)
+            {
+                var hlslAttr = i.Value.ClassType.GetCustomAttribute<TtHLSLProviderAttribute>(false);
+                if (hlslAttr == null)
+                    continue;
+                foreach (var j in i.Value.Methods)
+                {
+                    var methodAttr = j.GetMethod().GetCustomAttribute<TtHLSLProviderAttribute>();
+                    if (hlslAttr == null)
+                        continue;
+                    System.Diagnostics.Debug.Assert(Methods.TryGetValue(methodAttr.Name, out var m) == false);
+                    Methods[methodAttr.Name] = j;
+                }
+            }
+        }
+        public Rtti.UClassMeta.MethodMeta GetMethod(string fun)
+        {
+            SureMethods();
+            if(Methods.TryGetValue(fun, out var result))
+            {
+                return result;
+            }
+            return null;
+        }
+        public Rtti.UClassMeta.MethodMeta GetMethodByDeclString(string declStr)
+        {
+            SureMethods();
+            declStr = Rtti.UClassMeta.RemoveDeclstringDllVersion(declStr);
+            foreach (var i in Methods)
+            {
+                if (i.Value.GetMethodDeclareString(true) == declStr)
+                    return i.Value;
+            }
+            return null;
         }
     }
 
@@ -433,7 +529,6 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Control
         }
     }
 
-
     public class Sample2DNode : CallNode
     {
         public Sample2DNode()
@@ -602,7 +697,6 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Control
             base.BuildStatements(pin, ref data);
         }
     }
-
 
     public class SampleArrayLevel2DNode : CallNode
     {
@@ -773,7 +867,6 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Control
         }
     }
 
-
     public class SampleArray2DNode : CallNode
     {
         public SampleArray2DNode()
@@ -940,6 +1033,22 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Control
                 }
             }
             base.BuildStatements(pin, ref data);
+        }
+    }
+}
+
+namespace EngineNS
+{
+    public partial class UEngine
+    {
+        Bricks.CodeBuilder.ShaderNode.Control.TtHLSLMethodManager mHLSLMethodManager = new Bricks.CodeBuilder.ShaderNode.Control.TtHLSLMethodManager();
+        public Bricks.CodeBuilder.ShaderNode.Control.TtHLSLMethodManager HLSLMethodManager 
+        { 
+            get
+            {
+                mHLSLMethodManager.SureMethods();
+                return mHLSLMethodManager;
+            }
         }
     }
 }

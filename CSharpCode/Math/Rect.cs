@@ -118,6 +118,18 @@
         /// <summary>
         /// 带参构造函数
         /// </summary>
+        /// <param name="location">对象位置坐标</param>
+        /// <param name="size">对象大小</param>
+        public Rect(EngineNS.Vector2 location, SizeF size)
+        {
+            _x = location.X;
+            _y = location.Y;
+            _width = size.Width;
+            _height = size.Height;
+        }
+        /// <summary>
+        /// 带参构造函数
+        /// </summary>
         /// <param name="x">X坐标</param>
         /// <param name="y">Y坐标</param>
         /// <param name="width">宽度</param>

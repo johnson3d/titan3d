@@ -4,18 +4,18 @@ using System.Text;
 
 namespace EngineNS
 {
-    public class CNativeString
+    public class TtNativeString
     {
         FNativeString mNativeString;
-        public CNativeString(string txt)
+        public TtNativeString(string txt)
         {
             mNativeString = FNativeString.CreateInstance(txt);
         }
-        public CNativeString()
+        public TtNativeString()
         {
             mNativeString = FNativeString.CreateInstance();
         }
-        ~CNativeString()
+        ~TtNativeString()
         {
             mNativeString.Dispose();
         }

@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Microsoft.CodeAnalysis.CSharp.Syntax;
+using System;
 using System.Collections.Generic;
 using System.Reflection;
 using System.Text;
@@ -9,6 +10,10 @@ namespace EngineNS.Graphics.Pipeline.Shader
     {
         public const string AssetExt = ".effect";
 
+        public override string ToString()
+        {
+            return base.ToString();
+        }
         public class UEffectDesc : IO.ISerializer
         {
             public void OnPreRead(object tagObject, object hostObject, bool fromXml)
@@ -50,14 +55,15 @@ namespace EngineNS.Graphics.Pipeline.Shader
 
         public unsafe void SaveTo(Hash160 hash)
         {
-            var path = UEngine.Instance.FileManager.GetPath(IO.FileManager.ERootDir.Cache, IO.FileManager.ESystemDir.Effect);
+            var path = UEngine.Instance.FileManager.GetPath(IO.TtFileManager.ERootDir.Cache, IO.TtFileManager.ESystemDir.Effect);
             var file = path + hash.ToString() + UEffect.AssetExt;
-            var xnd = new IO.CXndHolder("UEffect", 0, 0);
+            var xnd = new IO.TtXndHolder("UEffect", 0, 0);
 
             var descAttr = new XndAttribute(xnd.RootNode.mCoreObject.GetOrAddAttribute("Desc", 0, 0));
-            var ar = descAttr.GetWriter(30);
-            ar.Write(Desc);
-            descAttr.ReleaseWriter(ref ar);
+            using (var ar = descAttr.GetWriter(30))
+            {
+                ar.Write(Desc);
+            }
 
             var vsNode = xnd.mCoreObject.NewNode("VSCode", 0, 0);
             xnd.RootNode.mCoreObject.AddNode(vsNode);
@@ -71,13 +77,13 @@ namespace EngineNS.Graphics.Pipeline.Shader
 
             xnd.SaveXnd(file);
         }
-        public static async System.Threading.Tasks.Task<UEffect> LoadEffect(Hash160 hash, UShadingEnv shading, UMaterial material, UMdfQueue mdf)
+        public static async Thread.Async.TtTask<UEffect> LoadEffect(Hash160 hash, UShadingEnv shading, UMaterial material, UMdfQueue mdf)
         {
-            var path = UEngine.Instance.FileManager.GetPath(IO.FileManager.ERootDir.Cache, IO.FileManager.ESystemDir.Effect);
+            var path = UEngine.Instance.FileManager.GetPath(IO.TtFileManager.ERootDir.Cache, IO.TtFileManager.ESystemDir.Effect);
             var file = path + hash.ToString() + UEffect.AssetExt;
 
             UEffect result = null;
-            using (var xnd = IO.CXndHolder.LoadXnd(file))
+            using (var xnd = IO.TtXndHolder.LoadXnd(file))
             {
                 if (xnd == null)
                     return null;
@@ -98,13 +104,14 @@ namespace EngineNS.Graphics.Pipeline.Shader
                         return null;
                 }
 
-                result = await UEngine.Instance.EventPoster.Post(() =>
+                result = await UEngine.Instance.EventPoster.Post((state) =>
                 {
                     var effect = new UEffect();
                     IO.ISerializer desc;
-                    var ar = descAttr.GetReader(effect);
-                    IO.SerializerHelper.Read(ar, out desc, effect);
-                    descAttr.ReleaseReader(ref ar);
+                    using (var ar = descAttr.GetReader(effect))
+                    {
+                        IO.SerializerHelper.Read(ar, out desc, effect);
+                    }
                     var effectDesc = desc as UEffectDesc;
                     if (effectDesc == null)
                         return null;
@@ -143,7 +150,7 @@ namespace EngineNS.Graphics.Pipeline.Shader
             var rc = UEngine.Instance.GfxDevice.RenderContext;
             NxRHI.UShader VertexShader = null;
             NxRHI.UShader PixelShader = null;
-            bool created = await UEngine.Instance.EventPoster.Post(() =>
+            bool created = await UEngine.Instance.EventPoster.Post((state) =>
             {
                 VertexShader = rc.CreateShader(result.DescVS);
                 if (VertexShader == null)
@@ -155,9 +162,6 @@ namespace EngineNS.Graphics.Pipeline.Shader
             }, Thread.Async.EAsyncTarget.Render);
             if (created == false)
                 return null;
-
-            VertexShader.SetDebugName($"VS:{shading},{material.AssetName},{Rtti.UTypeDescManager.Instance.GetTypeStringFromType(mdf.GetType())}");
-            PixelShader.SetDebugName($"PS:{shading},{material.AssetName},{Rtti.UTypeDescManager.Instance.GetTypeStringFromType(mdf.GetType())}");
 
             NxRHI.UInputLayout InputLayout = null;
             unsafe
@@ -174,6 +178,10 @@ namespace EngineNS.Graphics.Pipeline.Shader
                 result.ShaderEffect.mCoreObject.BindInputLayout(InputLayout.mCoreObject);
             }
 
+            var dbg_name = $"{shading},{material.AssetName},{Rtti.UTypeDescManager.Instance.GetTypeStringFromType(mdf.GetType())}";
+            VertexShader.SetDebugName($"VS:{dbg_name}");
+            PixelShader.SetDebugName($"PS:{dbg_name}");
+            result.ShaderEffect.DebugName = dbg_name;
             if (await LinkShaders(result) == false)
                 return null;
 
@@ -181,7 +189,7 @@ namespace EngineNS.Graphics.Pipeline.Shader
             result.ShadingEnv = shading;
             return result;
         }
-        public static async System.Threading.Tasks.Task<UEffect> CreateEffect(UShadingEnv shading, UShadingEnv.FPermutationId permutationId, UMaterial material, UMdfQueue mdf)
+        public static async Thread.Async.TtTask<UEffect> CreateEffect(UShadingEnv shading, UShadingEnv.FPermutationId permutationId, UMaterial material, UMdfQueue mdf)
         {
             var rc = UEngine.Instance.GfxDevice.RenderContext;
 
@@ -199,7 +207,7 @@ namespace EngineNS.Graphics.Pipeline.Shader
             shading.GetShaderDefines(in permutationId, defines);
 
             var cfg = UEngine.Instance.Config;
-            result.DescVS = await UEngine.Instance.EventPoster.Post(() =>
+            result.DescVS = await UEngine.Instance.EventPoster.Post((state) =>
             {
                 var compilier = new Editor.ShaderCompiler.UHLSLCompiler();
                 return compilier.CompileShader(shading.CodeName.Address, "VS_Main", NxRHI.EShaderType.SDT_VertexShader,
@@ -208,7 +216,7 @@ namespace EngineNS.Graphics.Pipeline.Shader
             if (result.DescVS == null)
                 return null;
 
-            result.DescPS = await UEngine.Instance.EventPoster.Post(() =>
+            result.DescPS = await UEngine.Instance.EventPoster.Post((state) =>
             {
                 var compilier = new Editor.ShaderCompiler.UHLSLCompiler();
                 return compilier.CompileShader(shading.CodeName.Address, "PS_Main", NxRHI.EShaderType.SDT_PixelShader, 
@@ -219,7 +227,7 @@ namespace EngineNS.Graphics.Pipeline.Shader
 
             NxRHI.UShader VertexShader = null;
             NxRHI.UShader PixelShader = null;
-            bool created = await UEngine.Instance.EventPoster.Post(() =>
+            bool created = await UEngine.Instance.EventPoster.Post((state) =>
             {
                 VertexShader = rc.CreateShader(result.DescVS);
                 if (VertexShader == null)
@@ -248,16 +256,19 @@ namespace EngineNS.Graphics.Pipeline.Shader
             }
             if (await LinkShaders(result) == false)
                 return null;
-            
+
+            VertexShader.SetDebugName($"VS:{shading},{material.AssetName},{Rtti.UTypeDescManager.Instance.GetTypeStringFromType(mdf.GetType())}");
+            PixelShader.SetDebugName($"PS:{shading},{material.AssetName},{Rtti.UTypeDescManager.Instance.GetTypeStringFromType(mdf.GetType())}");
+            result.ShaderEffect.DebugName = $"{shading},{material.AssetName},{Rtti.UTypeDescManager.Instance.GetTypeStringFromType(mdf.GetType())}";
             return result;
         }
-        public async System.Threading.Tasks.Task<bool> RefreshEffect(UMaterial material)
+        public async Thread.Async.TtTask<bool> RefreshEffect(UMaterial material)
         {
             {
-                var path = UEngine.Instance.FileManager.GetPath(IO.FileManager.ERootDir.Cache, IO.FileManager.ESystemDir.Effect);
+                var path = UEngine.Instance.FileManager.GetPath(IO.TtFileManager.ERootDir.Cache, IO.TtFileManager.ESystemDir.Effect);
                 var file = path + this.Desc.EffectHash.ToString() + UEffect.AssetExt;
-                if (IO.FileManager.FileExists(file))
-                    IO.FileManager.DeleteFile(file);
+                if (IO.TtFileManager.FileExists(file))
+                    IO.TtFileManager.DeleteFile(file);
             }
 
             var rc = UEngine.Instance.GfxDevice.RenderContext;
@@ -278,7 +289,7 @@ namespace EngineNS.Graphics.Pipeline.Shader
             if (mdf == null)
                 return false;
 
-            var descVS = await UEngine.Instance.EventPoster.Post(() =>
+            var descVS = await UEngine.Instance.EventPoster.Post((state) =>
             {
                 var compilier = new Editor.ShaderCompiler.UHLSLCompiler();
                 return compilier.CompileShader(shading.CodeName.Address, "VS_Main", NxRHI.EShaderType.SDT_VertexShader, 
@@ -287,7 +298,7 @@ namespace EngineNS.Graphics.Pipeline.Shader
             if (descVS == null)
                 return false;
 
-            var descPS = await UEngine.Instance.EventPoster.Post(() =>
+            var descPS = await UEngine.Instance.EventPoster.Post((state) =>
             {
                 var compilier = new Editor.ShaderCompiler.UHLSLCompiler();
                 return compilier.CompileShader(shading.CodeName.Address, "PS_Main", NxRHI.EShaderType.SDT_PixelShader, 
@@ -326,6 +337,11 @@ namespace EngineNS.Graphics.Pipeline.Shader
             ShaderEffect.mCoreObject.BindInputLayout(InputLayout.mCoreObject);
             if (await LinkShaders(this) == false)
                 return false;
+
+            var dbg_name = $"{shading},{material.AssetName},{Rtti.UTypeDescManager.Instance.GetTypeStringFromType(mdf.GetType())}";
+            VertexShader.SetDebugName($"VS:{dbg_name}");
+            PixelShader.SetDebugName($"PS:{dbg_name}");
+            ShaderEffect.DebugName = dbg_name;
             return true;
         }
         private static async System.Threading.Tasks.Task<bool> LinkShaders(UEffect result)
@@ -403,7 +419,7 @@ namespace EngineNS.Graphics.Pipeline.Shader
             //return Hash160.CreateHash160($"{shading},{material.AssetName},{mdf},{caps}");
             return Hash160.CreateHash160($"{shading},{material.AssetName},{mdf}");
         }
-        public async System.Threading.Tasks.Task<UEffect> GetEffect(UShadingEnv shading, UMaterial material, UMdfQueue mdf)
+        public async Thread.Async.TtTask<UEffect> GetEffect(UShadingEnv shading, UMaterial material, UMdfQueue mdf)
         {
             UEffect result = null;
             if (material.IsEditingMaterial)
@@ -455,7 +471,7 @@ namespace EngineNS.Graphics.Pipeline.Shader
                 if (result != null)
                 {
                     result.Desc.PermutationId = shading.mCurrentPermutationId;
-                    await UEngine.Instance.EventPoster.Post(() =>
+                    await UEngine.Instance.EventPoster.Post((state) =>
                     {
                         result.SaveTo(hash);
                         return true;
@@ -486,13 +502,17 @@ namespace EngineNS.Graphics.Pipeline.Shader
                 mCreatingSession.FinishSession(hash, session, result);
             }
         }
-        public NxRHI.UComputeEffect GetComputeEffect(string shader, string entry, NxRHI.EShaderType type,
-            Graphics.Pipeline.Shader.UShadingEnv shadingEnv, Graphics.Pipeline.Shader.UMaterial mtl, Type mdfType,
-            NxRHI.UShaderDefinitions defines, Editor.ShaderCompiler.UHLSLInclude incProvider, string sm = null, bool bDebugShader = true)
+        public NxRHI.UComputeEffect GetComputeEffect(RName shaderName, string entry, NxRHI.EShaderType type,
+            Graphics.Pipeline.Shader.UShadingEnv shadingEnv, NxRHI.UShaderDefinitions defines, 
+            Editor.ShaderCompiler.UHLSLInclude incProvider, string sm = null, bool bDebugShader = true)
         {
-            var hashStr = shader.ToString();
+            var shader = shaderName.Address;
+            var hashStr = shaderName.Address;
             hashStr += entry;
-            hashStr += defines.mCoreObject.NativeSuper.GetHash64().ToString();
+            if (shadingEnv != null)
+                hashStr += shadingEnv.CurrentPermutationId;
+            if (defines != null)
+                hashStr += defines.mCoreObject.NativeSuper.GetHash64().ToString();
             var hash = Hash160.CreateHash160(hashStr);
             lock (Effects)
             {
@@ -509,17 +529,24 @@ namespace EngineNS.Graphics.Pipeline.Shader
 
                 var rc = UEngine.Instance.GfxDevice.RenderContext;
                 var compiler = new Editor.ShaderCompiler.UHLSLCompiler();
-                var shaderDesc = compiler.CompileShader(shader, entry, type, shadingEnv, mtl, mdfType, defines, incProvider, sm, bDebugShader);
+                if (defines == null)
+                {
+                    defines = new NxRHI.UShaderDefinitions();
+                }
+                if (shadingEnv != null)
+                    shadingEnv.GetShaderDefines(shadingEnv.CurrentPermutationId, defines);
+                var shaderDesc = compiler.CompileShader(shader, entry, type, shadingEnv, null, null, defines, incProvider, sm, bDebugShader);
                 var csShader = rc.CreateShader(shaderDesc);
                 if (csShader == null)
                     return null;
+
                 result = UEngine.Instance.GfxDevice.RenderContext.CreateComputeEffect(csShader);
 
                 ComputeEffects.Add(hash, result);
 
-                UEngine.Instance.EventPoster.RunOn(() =>
+                UEngine.Instance.EventPoster.RunOn((state) =>
                 {
-                    result.SaveTo(hash);
+                    result.SaveTo(shaderName, hash);
                     return true;
                 }, Thread.Async.EAsyncTarget.AsyncIO);
 

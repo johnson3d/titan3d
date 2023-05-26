@@ -5,10 +5,10 @@ using System.Runtime.InteropServices;
 
 namespace EngineNS.Thread
 {
-    public class ThreadAsync : ContextThread
+    public class TtThreadAsync : TtContextThread
     {
         [ThreadStatic]
-        private static Profiler.TimeScope ScopeTick = Profiler.TimeScopeManager.GetTimeScope(typeof(ThreadAsync), nameof(Tick));
+        private static Profiler.TimeScope ScopeTick = Profiler.TimeScopeManager.GetTimeScope(typeof(TtThreadAsync), nameof(Tick));
         public override void Tick()
         {
             //把异步事件做完
@@ -24,6 +24,15 @@ namespace EngineNS.Thread
             if (AsyncEvents.Count + ContinueEvents.Count == 0)
             {
                 System.Threading.Thread.Sleep(50);
+
+                lock (UEngine.Instance.ContextThreadManager.AsyncIOEmptys)
+                {
+                    foreach (var i in UEngine.Instance.ContextThreadManager.AsyncIOEmptys)
+                    {
+                        i.ExecutePostEvent();
+                        i.ExecuteContinue();
+                    }
+                }
             }
 
             base.Tick();

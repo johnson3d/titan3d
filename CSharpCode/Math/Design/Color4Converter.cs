@@ -13,7 +13,7 @@ namespace EngineNS.Design
 	//	private System.ComponentModel.PropertyDescriptorCollection m_Properties;
  //       public Color4Converter()
 	//    {
-	//	    Type type = typeof(Color4);
+	//	    Type type = typeof(Color4f);
  //           PropertyDescriptor[] propArray = new PropertyDescriptor[]
 	//	    {
 	//		    new FieldPropertyDescriptor(type.GetField("Red")),
@@ -49,7 +49,7 @@ namespace EngineNS.Design
 	//	    if( culture == null )
 	//		    culture = CultureInfo.CurrentCulture;
 
-	//	    Color4 color = (Color4)( value );
+	//	    Color4f color = (Color4f)( value );
 
 	//	    if( destinationType == typeof(string) && color != null )
 	//	    {
@@ -66,7 +66,7 @@ namespace EngineNS.Design
 	//	    }
 	//	    else if( destinationType == typeof(InstanceDescriptor) && color != null )
 	//	    {
-	//		    ConstructorInfo info = (typeof(Color4)).GetConstructor( new Type[] { typeof(float), typeof(float), typeof(float), typeof(float) } );
+	//		    ConstructorInfo info = (typeof(Color4f)).GetConstructor( new Type[] { typeof(float), typeof(float), typeof(float), typeof(float) } );
 	//		    if( info != null )
 	//			    return new InstanceDescriptor( info, new Object[] { color.Alpha, color.Red, color.Green, color.Blue } );
 	//	    }
@@ -94,10 +94,10 @@ namespace EngineNS.Design
  //                   {
  //                       uint number = 0;
  //                       if (uint.TryParse(Str, out number))
- //                           return new Color4(number);
+ //                           return new Color4f(number);
 
  //                       TypeConverter colorConverter = TypeDescriptor.GetConverter(typeof(Color));
- //                       return new Color4((Color)(colorConverter.ConvertFromString(context, culture, Str)));
+ //                       return new Color4f((Color)(colorConverter.ConvertFromString(context, culture, Str)));
  //                   }
  //                   else if (stringArray.Length == 3)
  //                   {
@@ -105,13 +105,13 @@ namespace EngineNS.Design
  //                       int green;
  //                       int blue;
  //                       if (int.TryParse(stringArray[0], out red) && int.TryParse(stringArray[1], out green) && int.TryParse(stringArray[2], out blue))
- //                           return new Color4(Color.FromArgb(red, green, blue));
+ //                           return new Color4f(Color.FromArgb(red, green, blue));
 
  //                       float r = (float)(floatConverter.ConvertFromString(context, culture, stringArray[0]));
  //                       float g = (float)(floatConverter.ConvertFromString(context, culture, stringArray[1]));
  //                       float b = (float)(floatConverter.ConvertFromString(context, culture, stringArray[2]));
 
- //                       return new Color4(r, g, b);
+ //                       return new Color4f(r, g, b);
  //                   }
  //                   else if (stringArray.Length == 4)
  //                   {
@@ -120,14 +120,14 @@ namespace EngineNS.Design
  //                       int blue;
  //                       int alpha;
  //                       if (int.TryParse(stringArray[0], out alpha) && int.TryParse(stringArray[1], out red) && int.TryParse(stringArray[2], out green) && int.TryParse(stringArray[3], out blue))
- //                           return new Color4(Color.FromArgb(alpha, red, green, blue));
+ //                           return new Color4f(Color.FromArgb(alpha, red, green, blue));
 
  //                       float a = (float)(floatConverter.ConvertFromString(context, culture, stringArray[0]));
  //                       float r = (float)(floatConverter.ConvertFromString(context, culture, stringArray[1]));
  //                       float g = (float)(floatConverter.ConvertFromString(context, culture, stringArray[2]));
  //                       float b = (float)(floatConverter.ConvertFromString(context, culture, stringArray[3]));
 
- //                       return new Color4(a, r, g, b);
+ //                       return new Color4f(a, r, g, b);
  //                   }
  //                   else
  //                       throw new ArgumentException("Invalid color format.");
@@ -136,7 +136,7 @@ namespace EngineNS.Design
  //           else if(valueType == typeof(EngineNS.Color))
  //           {
  //               var cl = (EngineNS.Color)value;
- //               return new Color4(cl.A, cl.R, cl.G, cl.B);
+ //               return new Color4f(cl.A, cl.R, cl.G, cl.B);
  //           }
 
  //           return base.ConvertFrom(context, culture, value);
@@ -156,7 +156,7 @@ namespace EngineNS.Design
 	//	    if( propertyValues == null )
 	//		    throw new ArgumentNullException( "propertyValues" );
 
-	//	    return new Color4( (float)( propertyValues["Alpha"] ), (float)( propertyValues["Red"] ),
+	//	    return new Color4f( (float)( propertyValues["Alpha"] ), (float)( propertyValues["Red"] ),
 	//		    (float)( propertyValues["Green"] ), (float)( propertyValues["Blue"] ) );
 	//    }
 

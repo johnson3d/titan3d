@@ -1203,15 +1203,15 @@ namespace EngineNS.UTest
         public void UnitTestEntrance()
         {
             var rn = RName.GetRName("UTest/t1.xnd");
-            IO.FileManager.SureDirectory(RName.GetRName("UTest").Address);
+            IO.TtFileManager.SureDirectory(RName.GetRName("UTest").Address);
             {
-                var xnd = new EngineNS.IO.CXndHolder("TestRoot", 1, 0);
+                var xnd = new EngineNS.IO.TtXndHolder("TestRoot", 1, 0);
                 var tobj = new UTest_MetaObject();
 
                 using (var attr = xnd.NewAttribute("Att0", 1, 0))
                 {
-                    var attrProxy = new EngineNS.IO.XndAttributeWriter(attr);
-                    var ar = new EngineNS.IO.AuxWriter<EngineNS.IO.XndAttributeWriter>(attrProxy);
+                    var attrProxy = new EngineNS.IO.TtXndAttributeWriter(attr);
+                    var ar = new EngineNS.IO.AuxWriter<EngineNS.IO.TtXndAttributeWriter>(attrProxy);
                     attr.BeginWrite(100);
                     int a = 1;
                     ar.Write(a);
@@ -1242,11 +1242,11 @@ namespace EngineNS.UTest
                 var xmlRoot = xml.CreateElement($"Root", xml.NamespaceURI);
                 xml.AppendChild(xmlRoot);
                 IO.SerializerHelper.WriteObjectMetaFields(xml, xmlRoot, tobj);
-                var xmlText = IO.FileManager.GetXmlText(xml);
-                IO.FileManager.WriteAllText(RName.GetRName("UTest/t1.xml").Address, xmlText);
+                var xmlText = IO.TtFileManager.GetXmlText(xml);
+                IO.TtFileManager.WriteAllText(RName.GetRName("UTest/t1.xml").Address, xmlText);
             }
             {
-                var xnd = IO.CXndHolder.LoadXnd(rn.Address);
+                var xnd = IO.TtXndHolder.LoadXnd(rn.Address);
                 for (uint i = 0; i < xnd.RootNode.NumOfAttribute; i++)
                 {
                     var attr = xnd.RootNode.GetAttribute(i);
@@ -1255,15 +1255,21 @@ namespace EngineNS.UTest
 
                     if (attr.Name == "Att0")
                     {
-                        var attrProxy = new EngineNS.IO.XndAttributeReader(attr);
-                        var ar = new EngineNS.IO.AuxReader<EngineNS.IO.XndAttributeReader>(attrProxy, this);
-                        attr.BeginRead();
+                        var attrProxy = new EngineNS.IO.TtXndAttributeReader(attr);
+                        var ar = new EngineNS.IO.AuxReader<EngineNS.IO.TtXndAttributeReader>(attrProxy, this);
                         int a;
-                        ar.Read(out a);
-                        ar.Read(out a);
                         IO.ISerializer tObj;
-                        ar.Read(out tObj, this);
-                        attr.EndRead();
+                        try
+                        {
+                            attr.BeginRead();
+                            ar.Read(out a);
+                            ar.Read(out a);
+                            ar.Read(out tObj, this);
+                        }
+                        finally
+                        {
+                            attr.EndRead();
+                        }
 
                         var tmo = tObj as UTest_MetaObject;
                         UnitTestManager.TAssert(tmo != null, "tmo!=null");
@@ -1275,7 +1281,7 @@ namespace EngineNS.UTest
                 }
 
                 object xmlLoader = new UTest_MetaObject();
-                var xml = IO.FileManager.LoadXml(RName.GetRName("UTest/t1.xml").Address);
+                var xml = IO.TtFileManager.LoadXml(RName.GetRName("UTest/t1.xml").Address);
                 IO.SerializerHelper.ReadObjectMetaFields(xmlLoader, xml.LastChild as System.Xml.XmlElement, ref xmlLoader, null);
             }
         }

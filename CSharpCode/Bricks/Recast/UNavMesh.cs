@@ -40,11 +40,11 @@ namespace EngineNS.Bricks.Recast
         {
             return mCoreObject.GetBoundBoxMinAt(tileindex);
         }
-        public bool LoadXnd(IO.CXndNode node)
+        public bool LoadXnd(IO.TtXndNode node)
         {
             return mCoreObject.LoadXnd(node.mCoreObject);
         }
-        public void Save2Xnd(IO.CXndNode node)
+        public void Save2Xnd(IO.TtXndNode node)
         {
             mCoreObject.Save2Xnd(node.mCoreObject);
         }

@@ -36,7 +36,7 @@ namespace EngineNS.Animation.Asset
                                 mFBXImporter = UEngine.Instance.FBXFactoryModule.Instance.CreateImporter();
                                 var fileDesc = mFBXImporter.PreImport(mSourceFile);
                                 PGAsset.Target = fileDesc;
-                                mName = IO.FileManager.GetPureName(mSourceFile);
+                                mName = IO.TtFileManager.GetPureName(mSourceFile);
                             }
                         }
                         // close
@@ -57,7 +57,7 @@ namespace EngineNS.Animation.Asset
                     bool nameChanged = ImGuiAPI.InputText("##in_rname", ref mName);
                     if (nameChanged)
                     {
-                        if (IO.FileManager.FileExists(mDir.Address + mName + UAnimationClip.AssetExt))
+                        if (IO.TtFileManager.FileExists(mDir.Address + mName + UAnimationClip.AssetExt))
                             eErrorType = enErrorType.IsExisting;
                     }
 
@@ -173,7 +173,7 @@ namespace AssetImportAndExport.FBX
                 objectClassDesc.ClassType = EngineNS.Rtti.UTypeDesc.TypeOf(typeof(EngineNS.Animation.SkeletonAnimation.AnimatablePose.UAnimatableBonePose));
                 var t = objectClassDesc.ClassType;
                 objectClassDesc.Name = animElement.Desc.Name.Text;
-                uint hash = UniHash.APHash(objectClassDesc.Name.ToString());
+                uint hash = UniHash32.APHash(objectClassDesc.Name.ToString());
 
                 //Position
                 {

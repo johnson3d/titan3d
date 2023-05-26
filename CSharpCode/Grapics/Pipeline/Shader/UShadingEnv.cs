@@ -1,4 +1,5 @@
-﻿using System;
+﻿using EngineNS.NxRHI;
+using System;
 using System.Collections.Generic;
 using System.Text;
 
@@ -10,7 +11,7 @@ namespace EngineNS.Graphics.Pipeline.Shader
         TrueValue = 1,
         BitWidth = 1,
     }
-    public abstract class UShadingEnv
+    public class UShadingEnv
     {
         public UShadingEnv()
         {
@@ -159,15 +160,17 @@ namespace EngineNS.Graphics.Pipeline.Shader
             PermutationBitWidth = 0;
             PermutationValues.Clear();
         }
-        public UPermutationItem PushPermutation<T>(string name, int NumEnumMember, uint value = 0) where T : struct, IConvertible
+        public UPermutationItem PushPermutation<T>(string name, int bitwidth, uint value = 0) where T : struct, IConvertible
         {
-            var result = FPermutationId.GetMask(PermutationBitWidth, NumEnumMember);
+            var result = FPermutationId.GetMask(PermutationBitWidth, bitwidth);
             result.Name = name;
             result.TypeDesc = Rtti.UTypeDesc.TypeOf<T>();
             result.Value.SetValue(value, result);
 
             PermutationValues.Add(result);
-            PermutationBitWidth += NumEnumMember;
+            PermutationBitWidth += bitwidth;
+            System.Diagnostics.Debug.Assert(PermutationBitWidth <= 32);
+
             return result;
         }
         public void UpdatePermutation()
@@ -193,8 +196,7 @@ namespace EngineNS.Graphics.Pipeline.Shader
             //}
             return result;
         }
-        public abstract NxRHI.EVertexStreamType[] GetNeedStreams();
-        public virtual void OnBuildDrawCall(URenderPolicy policy, NxRHI.UGraphicDraw drawcall) { }
+        
         public FPermutationId mCurrentPermutationId;
         public FPermutationId CurrentPermutationId
         {
@@ -210,14 +212,69 @@ namespace EngineNS.Graphics.Pipeline.Shader
                 //var valueStr = PermutationValues[i].GetValueString(in id);
                 defines.mCoreObject.AddDefine(PermutationValues[i].Name, $"{v}");
             }
+            EnvShadingDefines(id, defines);
             return true;
         }
-        public virtual void OnDrawCall(Pipeline.URenderPolicy.EShadingType shadingType, NxRHI.UGraphicDraw drawcall, URenderPolicy policy, Mesh.UMesh mesh)
+        protected virtual void EnvShadingDefines(in FPermutationId id, NxRHI.UShaderDefinitions defines)
         {
-            
+
         }
     }
-    public class UDummyShading : Shader.UShadingEnv
+
+    public abstract class UGraphicsShadingEnv
+        : UShadingEnv
+    {
+        public abstract NxRHI.EVertexStreamType[] GetNeedStreams();
+        public virtual void OnBuildDrawCall(URenderPolicy policy, NxRHI.UGraphicDraw drawcall) { }
+        public virtual void OnDrawCall(Pipeline.URenderPolicy.EShadingType shadingType, NxRHI.UGraphicDraw drawcall, URenderPolicy policy, Mesh.UMesh mesh)
+        {
+
+        }
+    }
+    public abstract class UComputeShadingEnv : UShadingEnv
+    {
+        [Rtti.Meta]
+        public string MainName { get; set; }
+        private NxRHI.UComputeEffect CurrentEffect;
+        public abstract Vector3ui DispatchArg { get; }
+        public NxRHI.UComputeEffect GetEffect()
+        {
+            if (CurrentEffect == null || CurrentEffect.PermutationId != this.CurrentPermutationId)
+            {
+                CurrentEffect = OnCreateEffect();
+            }
+            return CurrentEffect;
+        }
+        protected abstract NxRHI.UComputeEffect OnCreateEffect();
+        public virtual void OnDrawCall(NxRHI.UComputeDraw drawcall, URenderPolicy policy)
+        {
+
+        }
+        public void SetDrawcallDispatch(URenderPolicy policy, NxRHI.UComputeDraw drawcall, uint x, uint y, uint z, bool bRoundupXYZ)
+        {
+            drawcall.TagObject = policy;
+            drawcall.SetComputeEffect(GetEffect());
+            if (bRoundupXYZ)
+            {
+                drawcall.SetDispatch(MathHelper.Roundup(x, DispatchArg.X),
+                MathHelper.Roundup(y, DispatchArg.Y),
+                MathHelper.Roundup(z, DispatchArg.Z));
+            }
+            else
+            {
+                drawcall.SetDispatch(x, y, z);
+            }
+
+            this.OnDrawCall(drawcall, policy);
+        }
+        protected override void EnvShadingDefines(in FPermutationId id, UShaderDefinitions defines)
+        {
+            defines.AddDefine("DispatchX", (int)DispatchArg.X);
+            defines.AddDefine("DispatchY", (int)DispatchArg.Y);
+            defines.AddDefine("DispatchZ", (int)DispatchArg.Z);
+        }
+    }
+    public class UDummyShading : Shader.UGraphicsShadingEnv
     {
         public UDummyShading()
         {

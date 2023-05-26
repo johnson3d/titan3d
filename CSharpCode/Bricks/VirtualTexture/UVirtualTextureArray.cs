@@ -86,14 +86,15 @@ namespace EngineNS.Bricks.VirtualTexture
             {
                 fixed (byte* pSrcData = &mipDatas[i].Data[0])
                 {
-                    var box = new NxRHI.FSubresourceBox();
-                    box.m_Front = 0;
-                    box.m_Back = 0;
-                    box.m_Left = 0;
-                    box.m_Right = (uint)mipDatas[i].Width;
-                    box.m_Top = 0;
-                    box.m_Bottom = (uint)mipDatas[i].Height;
-                    Tex2DArray.UpdateGpuData(cmd, (uint)i, pSrcData, &box, (uint)(mipDatas[i].Width * sizeof(uint)), (uint)(mipDatas[i].Width * mipDatas[i].Height * pixelByte));
+                    var fp = new NxRHI.FSubResourceFootPrint();
+                    fp.SetDefault();
+                    fp.Width = (uint)mipDatas[i].Width;
+                    fp.Height = (uint)mipDatas[i].Height;
+                    fp.Format = ArrayDesc.Format;
+                    fp.RowPitch = (uint)(mipDatas[i].Width * sizeof(uint));
+                    fp.TotalSize = (uint)(mipDatas[i].Width * mipDatas[i].Height * pixelByte);
+
+                    Tex2DArray.UpdateGpuData((uint)i, pSrcData, &fp);
                 }
             }
             return Textures[index];

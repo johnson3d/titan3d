@@ -10,32 +10,32 @@ namespace EngineNS.Bricks.NodeGraph
         {
             var styles = UNodeGraphStyles.DefaultStyles;
 
-            if (UEngine.Instance.UIManager[styles.NodeBodyImg] == null)
-                UEngine.Instance.UIManager[styles.NodeBodyImg] = new EGui.UIProxy.BoxImageProxy(RName.GetRName(styles.NodeBodyImg, RName.ERNameType.Engine), new Thickness(16.0f / 64.0f, 25.0f / 64.0f, 16.0f / 64.0f, 16.0f / 64.0f));
-            if (UEngine.Instance.UIManager[styles.NodeTitleImg] == null)
-                UEngine.Instance.UIManager[styles.NodeTitleImg] = new EGui.UIProxy.BoxImageProxy(RName.GetRName(styles.NodeTitleImg, RName.ERNameType.Engine), new Thickness(12.0f / 64.0f));
-            if (UEngine.Instance.UIManager[styles.NodeColorSpillImg] == null)
-                UEngine.Instance.UIManager[styles.NodeColorSpillImg] = new EGui.UIProxy.BoxImageProxy(RName.GetRName(styles.NodeColorSpillImg, RName.ERNameType.Engine), new Thickness(8.0f / 64.0f, 3.0f / 32.0f, 0, 0));
-            if (UEngine.Instance.UIManager[styles.NodeTitleHighlightImg] == null)
-                UEngine.Instance.UIManager[styles.NodeTitleHighlightImg] = new EGui.UIProxy.BoxImageProxy(RName.GetRName(styles.NodeTitleHighlightImg, RName.ERNameType.Engine), new Thickness(16.0f / 64.0f, 1.0f, 16.0f / 64.0f, 0.0f));
-            if (UEngine.Instance.UIManager[styles.NodeShadowImg] == null)
-                UEngine.Instance.UIManager[styles.NodeShadowImg] = new EGui.UIProxy.BoxImageProxy(RName.GetRName(styles.NodeShadowImg, RName.ERNameType.Engine), new Thickness(18.0f / 64.0f));
-            if (UEngine.Instance.UIManager[styles.NodeShadowSelectedImg] == null)
-                UEngine.Instance.UIManager[styles.NodeShadowSelectedImg] = new EGui.UIProxy.BoxImageProxy(RName.GetRName(styles.NodeShadowSelectedImg, RName.ERNameType.Engine), new Thickness(18.0f / 64.0f));
+            if (UEngine.Instance.UIProxyManager[styles.NodeBodyImg] == null)
+                UEngine.Instance.UIProxyManager[styles.NodeBodyImg] = new EGui.UIProxy.BoxImageProxy(RName.GetRName(styles.NodeBodyImg, RName.ERNameType.Engine), new Thickness(16.0f / 64.0f, 25.0f / 64.0f, 16.0f / 64.0f, 16.0f / 64.0f));
+            if (UEngine.Instance.UIProxyManager[styles.NodeTitleImg] == null)
+                UEngine.Instance.UIProxyManager[styles.NodeTitleImg] = new EGui.UIProxy.BoxImageProxy(RName.GetRName(styles.NodeTitleImg, RName.ERNameType.Engine), new Thickness(12.0f / 64.0f));
+            if (UEngine.Instance.UIProxyManager[styles.NodeColorSpillImg] == null)
+                UEngine.Instance.UIProxyManager[styles.NodeColorSpillImg] = new EGui.UIProxy.BoxImageProxy(RName.GetRName(styles.NodeColorSpillImg, RName.ERNameType.Engine), new Thickness(8.0f / 64.0f, 3.0f / 32.0f, 0, 0));
+            if (UEngine.Instance.UIProxyManager[styles.NodeTitleHighlightImg] == null)
+                UEngine.Instance.UIProxyManager[styles.NodeTitleHighlightImg] = new EGui.UIProxy.BoxImageProxy(RName.GetRName(styles.NodeTitleHighlightImg, RName.ERNameType.Engine), new Thickness(16.0f / 64.0f, 1.0f, 16.0f / 64.0f, 0.0f));
+            if (UEngine.Instance.UIProxyManager[styles.NodeShadowImg] == null)
+                UEngine.Instance.UIProxyManager[styles.NodeShadowImg] = new EGui.UIProxy.BoxImageProxy(RName.GetRName(styles.NodeShadowImg, RName.ERNameType.Engine), new Thickness(18.0f / 64.0f));
+            if (UEngine.Instance.UIProxyManager[styles.NodeShadowSelectedImg] == null)
+                UEngine.Instance.UIProxyManager[styles.NodeShadowSelectedImg] = new EGui.UIProxy.BoxImageProxy(RName.GetRName(styles.NodeShadowSelectedImg, RName.ERNameType.Engine), new Thickness(18.0f / 64.0f));
 
-            if (UEngine.Instance.UIManager[styles.PinConnectedVarImg] == null)
-                UEngine.Instance.UIManager[styles.PinConnectedVarImg] = new EGui.UIProxy.ImageProxy(RName.GetRName(styles.PinConnectedVarImg, RName.ERNameType.Engine));
-            if (UEngine.Instance.UIManager[styles.PinDisconnectedVarImg] == null)
-                UEngine.Instance.UIManager[styles.PinDisconnectedVarImg] = new EGui.UIProxy.ImageProxy(RName.GetRName(styles.PinDisconnectedVarImg, RName.ERNameType.Engine));
-            if (UEngine.Instance.UIManager[styles.PinConnectedExecImg] == null)
-                UEngine.Instance.UIManager[styles.PinConnectedExecImg] = new EGui.UIProxy.ImageProxy(RName.GetRName(styles.PinConnectedExecImg, RName.ERNameType.Engine));
-            if (UEngine.Instance.UIManager[styles.PinDisconnectedExecImg] == null)
-                UEngine.Instance.UIManager[styles.PinDisconnectedExecImg] = new EGui.UIProxy.ImageProxy(RName.GetRName(styles.PinDisconnectedExecImg, RName.ERNameType.Engine));
-            if (UEngine.Instance.UIManager[styles.PinHoverCueImg] == null)
-                UEngine.Instance.UIManager[styles.PinHoverCueImg] = new EGui.UIProxy.ImageProxy(RName.GetRName(styles.PinHoverCueImg, RName.ERNameType.Engine));
+            if (UEngine.Instance.UIProxyManager[styles.PinConnectedVarImg] == null)
+                UEngine.Instance.UIProxyManager[styles.PinConnectedVarImg] = new EGui.UIProxy.ImageProxy(RName.GetRName(styles.PinConnectedVarImg, RName.ERNameType.Engine));
+            if (UEngine.Instance.UIProxyManager[styles.PinDisconnectedVarImg] == null)
+                UEngine.Instance.UIProxyManager[styles.PinDisconnectedVarImg] = new EGui.UIProxy.ImageProxy(RName.GetRName(styles.PinDisconnectedVarImg, RName.ERNameType.Engine));
+            if (UEngine.Instance.UIProxyManager[styles.PinConnectedExecImg] == null)
+                UEngine.Instance.UIProxyManager[styles.PinConnectedExecImg] = new EGui.UIProxy.ImageProxy(RName.GetRName(styles.PinConnectedExecImg, RName.ERNameType.Engine));
+            if (UEngine.Instance.UIProxyManager[styles.PinDisconnectedExecImg] == null)
+                UEngine.Instance.UIProxyManager[styles.PinDisconnectedExecImg] = new EGui.UIProxy.ImageProxy(RName.GetRName(styles.PinDisconnectedExecImg, RName.ERNameType.Engine));
+            if (UEngine.Instance.UIProxyManager[styles.PinHoverCueImg] == null)
+                UEngine.Instance.UIProxyManager[styles.PinHoverCueImg] = new EGui.UIProxy.ImageProxy(RName.GetRName(styles.PinHoverCueImg, RName.ERNameType.Engine));
             
-            if (UEngine.Instance.UIManager[styles.BreakpointNodeImg] == null)
-                UEngine.Instance.UIManager[styles.BreakpointNodeImg] = new EGui.UIProxy.ImageProxy(RName.GetRName(styles.BreakpointNodeImg, RName.ERNameType.Engine));
+            if (UEngine.Instance.UIProxyManager[styles.BreakpointNodeImg] == null)
+                UEngine.Instance.UIProxyManager[styles.BreakpointNodeImg] = new EGui.UIProxy.ImageProxy(RName.GetRName(styles.BreakpointNodeImg, RName.ERNameType.Engine));
         }
 
         UNodeGraph mGraph = null;
@@ -45,7 +45,10 @@ namespace EngineNS.Bricks.NodeGraph
         public void SetGraph(UNodeGraph graph)
         {
             if(mGraph != null)
+            {
                 mGraph.ResetButtonPress();
+                mGraph.ClearSelected();
+            }
             mGraph = graph;
             // Update inherit
             mGraphInherit.Clear();
@@ -279,6 +282,7 @@ namespace EngineNS.Bricks.NodeGraph
                 }
                 if (ImGuiAPI.IsMouseDoubleClicked(ImGuiMouseButton_.ImGuiMouseButton_Left))
                 {
+                    mGraph.LeftRelease(in screenPt);
                     mGraph.LeftDoubleClicked(in screenPt);
                 }
 
@@ -298,6 +302,7 @@ namespace EngineNS.Bricks.NodeGraph
                 }
                 if (ImGuiAPI.IsMouseDoubleClicked(ImGuiMouseButton_.ImGuiMouseButton_Right))
                 {
+                    mGraph.RightRelease(in screenPt);
                     mGraph.RightDoubleClicked(screenPt);
                 }
             }
@@ -331,30 +336,30 @@ namespace EngineNS.Bricks.NodeGraph
             //cmdlist.AddRectFilled(in nodeStart, in nodeEnd, node.BackColor, 0, 0);
             if (node.Selected)
             {
-                var selImg = UEngine.Instance.UIManager[styles.NodeShadowSelectedImg] as EGui.UIProxy.ImageProxy;
+                var selImg = UEngine.Instance.UIProxyManager[styles.NodeShadowSelectedImg] as EGui.UIProxy.ImageProxy;
                 if(selImg != null)
                     selImg.OnDraw(cmdlist, nodeStart - shadowExt, nodeEnd + shadowExt);
             }
             else
             {
-                var shadowImg = UEngine.Instance.UIManager[styles.NodeShadowImg] as EGui.UIProxy.ImageProxy;
+                var shadowImg = UEngine.Instance.UIProxyManager[styles.NodeShadowImg] as EGui.UIProxy.ImageProxy;
                 if(shadowImg != null)
                     shadowImg.OnDraw(cmdlist, nodeStart - shadowExt, nodeEnd + shadowExt);
             }
-            var nodeBodyImg = UEngine.Instance.UIManager[styles.NodeBodyImg] as EGui.UIProxy.ImageProxy;
+            var nodeBodyImg = UEngine.Instance.UIProxyManager[styles.NodeBodyImg] as EGui.UIProxy.ImageProxy;
             if(nodeBodyImg != null)
                 nodeBodyImg.OnDraw(cmdlist, nodeStart, nodeEnd);
 
             var endTitle = mGraph.CanvasToViewport(node.Position + new Vector2(node.Size.X, node.TitleHeight)) + DrawOffset;
             //cmdlist.AddRectFilled(in nodeStart, in endTitle, node.TitleColor, 0, 0);
             {//DrawTitle
-                var titleImg = UEngine.Instance.UIManager[styles.NodeTitleImg] as EGui.UIProxy.ImageProxy;
+                var titleImg = UEngine.Instance.UIProxyManager[styles.NodeTitleImg] as EGui.UIProxy.ImageProxy;
                 if(titleImg != null)
                     titleImg.OnDraw(cmdlist, nodeStart, endTitle);
-                var colorSpillImg = UEngine.Instance.UIManager[styles.NodeColorSpillImg] as EGui.UIProxy.ImageProxy;
+                var colorSpillImg = UEngine.Instance.UIProxyManager[styles.NodeColorSpillImg] as EGui.UIProxy.ImageProxy;
                 if(colorSpillImg != null)
                     colorSpillImg.OnDraw(cmdlist, nodeStart, endTitle, node.TitleColor);
-                var titleHighlightImg = UEngine.Instance.UIManager[styles.NodeTitleHighlightImg] as EGui.UIProxy.ImageProxy;
+                var titleHighlightImg = UEngine.Instance.UIProxyManager[styles.NodeTitleHighlightImg] as EGui.UIProxy.ImageProxy;
                 if (titleHighlightImg != null)
                     titleHighlightImg.OnDraw(cmdlist, nodeStart, endTitle);
                 //var curStart = node.Position;
@@ -530,7 +535,7 @@ namespace EngineNS.Bricks.NodeGraph
 
                 if(BreakerName == breakableNode.BreakerName)
                 {
-                    var breakpointImg = UEngine.Instance.UIManager[styles.BreakpointNodeImg] as EGui.UIProxy.ImageProxy;
+                    var breakpointImg = UEngine.Instance.UIProxyManager[styles.BreakpointNodeImg] as EGui.UIProxy.ImageProxy;
                     if (breakpointImg != null)
                     {
                         var imgSize = new Vector2(50.0f, 50.0f) / mGraph.ScaleVP;
@@ -846,13 +851,13 @@ namespace EngineNS.Bricks.NodeGraph
                 };
                 mGraph.OnAfterDrawMenu(styles);
 
-                if (ImGuiAPI.IsKeyPressed((int)ImGuiKey_.ImGuiKey_UpArrow, true))
+                if (ImGuiAPI.IsKeyPressed(ImGuiKey.ImGuiKey_UpArrow, true))
                 {
                     mSelectQuickMenuIdx--;
                     if (mSelectQuickMenuIdx < 0)
                         mSelectQuickMenuIdx = 0;
                 }
-                if (ImGuiAPI.IsKeyPressed((int)ImGuiKey_.ImGuiKey_DownArrow, true))
+                if (ImGuiAPI.IsKeyPressed(ImGuiKey.ImGuiKey_DownArrow, true))
                 {
                     mSelectQuickMenuIdx++;
                     if (mSelectQuickMenuIdx >= mCurrentQuickMenuIdx)
@@ -901,7 +906,7 @@ namespace EngineNS.Bricks.NodeGraph
                     if (mSelectQuickMenuIdx == mCurrentQuickMenuIdx && !string.IsNullOrEmpty(filter))
                     {
                         flag |= ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_Selected;
-                        if(ImGuiAPI.IsKeyPressed((int)ImGuiKey_.ImGuiKey_Enter, false))
+                        if(ImGuiAPI.IsKeyPressed(ImGuiKey.ImGuiKey_Enter, false))
                         {
                             if(item.Action != null)
                             {

@@ -24,7 +24,7 @@ namespace EngineNS.CodeCompiler
         {
             get
             {
-                return IO.FileManager.GetBaseDirectory(UEngine.Instance.FileManager.GetRoot(IO.FileManager.ERootDir.EngineSource) + UEngine.Instance.EditorInstance.Config.GameProject) + ProjectFile;
+                return IO.TtFileManager.GetBaseDirectory(UEngine.Instance.FileManager.GetRoot(IO.TtFileManager.ERootDir.EngineSource) + UEngine.Instance.EditorInstance.Config.GameProject) + ProjectFile;
             }
         }
         [Rtti.Meta]
@@ -40,8 +40,8 @@ namespace EngineNS.CodeCompiler
         public static bool GenerateSharedProject(ProjectConfig config)
         {
             var absProjFile = config.AbsProjectFile;
-            var projFolder = IO.FileManager.GetParentPathName(absProjFile);
-            var projName = IO.FileManager.GetPureName(absProjFile);
+            var projFolder = IO.TtFileManager.GetParentPathName(absProjFile);
+            var projName = IO.TtFileManager.GetPureName(absProjFile);
             var version = "1.0";
             var encode = "utf-8";
             var nsUrl = "http://schemas.microsoft.com/developer/msbuild/2003";
@@ -78,7 +78,7 @@ namespace EngineNS.CodeCompiler
 
                 import = xml.CreateElement("Import", nsUrl);
                 import.SetAttribute("Project", $"{projName}.projitems");
-                import.SetAttribute("Label", "Shared");
+                import.SetAttribute("DisplayName", "Shared");
                 root.AppendChild(import);
 
                 import = xml.CreateElement("Import", nsUrl);
@@ -110,7 +110,7 @@ namespace EngineNS.CodeCompiler
                 root.AppendChild(proGroup);
 
                 proGroup = xml.CreateElement("PropertyGroup", nsUrl);
-                proGroup.SetAttribute("Label", "Configuration");
+                proGroup.SetAttribute("DisplayName", "Configuration");
                 var rootNameSpace = xml.CreateElement("Import_RootNamespace", nsUrl);
                 rootNameSpace.InnerText = "MacrossGenCSharp";
                 proGroup.AppendChild(rootNameSpace);
@@ -119,14 +119,14 @@ namespace EngineNS.CodeCompiler
                 var itemGroup = xml.CreateElement("ItemGroup", nsUrl);
                 foreach (var file in config.CodeFiles)
                 {
-                    var relFile = EngineNS.IO.FileManager.GetRelativePath(projFolder, file);
+                    var relFile = EngineNS.IO.TtFileManager.GetRelativePath(projFolder, file);
                     var node = xml.CreateElement("Compile", nsUrl);
                     node.SetAttribute("Include", $"$(MSBuildThisFileDirectory){relFile}");
                     itemGroup.AppendChild(node);
                 }
                 root.AppendChild(itemGroup);
 
-                var projItemFileName = IO.FileManager.RemoveExtName(absProjFile) + ".projitems";
+                var projItemFileName = IO.TtFileManager.RemoveExtName(absProjFile) + ".projitems";
                 xml.Save(projItemFileName);
             }
 

@@ -14,6 +14,7 @@ namespace EngineNS.Graphics.Pipeline
             Cleanup();
         }
         public bool IsCreatedByImGui = false;
+        public bool IsClosed = false;
         public NxRHI.USwapChain SwapChain { get; set; }
         
         public void BeginFrame()
@@ -64,7 +65,7 @@ namespace EngineNS.Graphics.Pipeline
         }
         public virtual async System.Threading.Tasks.Task<bool> InitializeGraphics(NxRHI.UGpuDevice rc, Type rpType)
         {
-            await Thread.AsyncDummyClass.DummyFunc();
+            await Thread.TtAsyncDummyClass.DummyFunc();
 
             InitSwapChain(rc);
 
@@ -105,7 +106,7 @@ namespace EngineNS.Graphics.Pipeline
             //{
             //    var passClears = new NxRHI.FRenderPassClears();
             //    passClears.SetDefault();
-            //    passClears.SetClearColor(0, new Color4(1, 0, 0, 0));
+            //    passClears.SetClearColor(0, new Color4f(1, 0, 0, 0));
             //    SwapChainBuffer.BuildFrameBuffers(null);
             //    cmdlist.BeginPass(SwapChainBuffer.FrameBuffers, in passClears, "PresentSwapChain");
             //    {

@@ -6,17 +6,45 @@
     <SharedGUID>a78776fc-f5ba-4eec-b8f6-f17b2202e1b0</SharedGUID>
   </PropertyGroup>
   <PropertyGroup Label="Configuration">
-    <Import_RootNamespace>UI</Import_RootNamespace>
+    <Import_RootNamespace>EngineNS.Bricks.UI</Import_RootNamespace>
   </PropertyGroup>
   <ItemGroup>
     <None Include="$(MSBuildThisFileDirectory)UI.brick" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="$(MSBuildThisFileDirectory)Assist.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Bind\BindCommon.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Bind\BindingOperations.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Bind\BindManager.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Bind\TypeConverter.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Canvas\Canvas.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Canvas\CanvasDrawBatch.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Canvas\CanvasDrawCmdList.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Canvas\Path.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Common.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Controls\Containers\Canvas.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Controls\Containers\Container.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Controls\Image.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Controls\UIControl.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Controls\UIElement.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Controls\UIElement_Bind.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Controls\UIElement_Layout.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Controls\UIElement_Msg.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Controls\UIElement_Render.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Controls\UIElement_Template.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Editor\TtUIEditor.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Layout\LayoutQueue.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Layout\UILayoutManager.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Template\Assist.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Template\ControlTemplate.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Template\UITemplate.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)UIAsset.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)UIConfig.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)UIHost.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)UIHost_Msg.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)UIHost_Render.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)UIManager.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)UIManager_Msg.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)UIRender.cs" />
   </ItemGroup>
 </Project>

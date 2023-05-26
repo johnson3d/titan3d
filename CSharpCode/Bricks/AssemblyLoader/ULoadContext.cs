@@ -9,18 +9,18 @@ using EngineNS.Rtti;
 
 namespace EngineNS.Bricks.AssemblyLoader
 {
-    public class ULoadContext : AssemblyLoadContext
+    public class TtLoadContext : AssemblyLoadContext
     {
         //https://docs.microsoft.com/en-us/dotnet/standard/assembly/unloadability
         // Resolver of the locations of the assemblies that are dependencies of the
         // main plugin assembly.
         private AssemblyDependencyResolver _resolver;
 
-        public ULoadContext(string pluginPath) : base(isCollectible: true)
+        public TtLoadContext(string pluginPath) : base(isCollectible: true)
         {
             _resolver = new AssemblyDependencyResolver(pluginPath);
         }
-        ~ULoadContext()
+        ~TtLoadContext()
         {
 
         }
@@ -78,7 +78,7 @@ namespace EngineNS.Bricks.AssemblyLoader
                 var mrs = new System.IO.MemoryStream(buffer);
                 try
                 {
-                    if (pdbPath != null && IO.FileManager.FileExists(pdbPath))
+                    if (pdbPath != null && IO.TtFileManager.FileExists(pdbPath))
                     {
                         using (FileStream pdbStream = new FileStream(pdbPath, FileMode.Open, FileAccess.Read))
                         {
@@ -103,7 +103,7 @@ namespace EngineNS.Bricks.AssemblyLoader
         static void ExecuteAndUnload(string assemblyPath, out WeakReference alcWeakRef)
         {
             // Create the unloadable HostAssemblyLoadContext
-            var alc = new ULoadContext(assemblyPath);
+            var alc = new TtLoadContext(assemblyPath);
 
             // Create a weak reference to the AssemblyLoadContext that will allow us to detect
             // when the unload completes.
@@ -155,10 +155,10 @@ namespace EngineNS.Bricks.AssemblyLoader
         Loaded,
         ReloadReady,
     }
-    public abstract class UPlugin
+    public interface IPlugin
     {
-        public abstract void OnLoadedPlugin();
-        public abstract void OnUnloadPlugin();
+        void OnLoadedPlugin();
+        void OnUnloadPlugin();
     }
 
     [Rtti.Meta]
@@ -175,10 +175,10 @@ namespace EngineNS.Bricks.AssemblyLoader
         public List<string> Dependencies { get; set; } = new List<string>();
         public void SaveDescriptor()
         {
-            IO.FileManager.SaveObjectToXml(FilePath, this);
+            IO.TtFileManager.SaveObjectToXml(FilePath, this);
         }
     }
-    public class UPluginModule
+    public class TtPluginModule
     {
         public UPluginModuleManager Manager;
         public string Name { get; set; }
@@ -271,7 +271,7 @@ namespace EngineNS.Bricks.AssemblyLoader
                     return false;
             }
 
-            var context = new ULoadContext(AssemblyPath);// Manager.CoreBinDirectory);
+            var context = new TtLoadContext(AssemblyPath);// Manager.CoreBinDirectory);
             //var assembly = context.LoadFromAssemblyPath(AssemblyPath);
             var assembly = context.LoadOnMemory(AssemblyPath);
             Rtti.UAssemblyDesc.UpdateRtti(this.Name, assembly, UnsafeGetAssembly());
@@ -303,7 +303,7 @@ namespace EngineNS.Bricks.AssemblyLoader
                 return false;
             }
             var obj = method.Invoke(null, null);
-            PluginObject = obj as UPlugin;
+            PluginObject = obj as IPlugin;
             if (PluginObject == null)
             {
                 Profiler.Log.WriteLine(Profiler.ELogTag.Warning, "Plugin", $"PluginModule({AssemblyPath}): EngineNS.Plugin.UPluginLoader.GetPluginObject return null");
@@ -331,7 +331,7 @@ namespace EngineNS.Bricks.AssemblyLoader
             }
             PluginObject = null;
 
-            ULoadContext context = mLoader.Target as ULoadContext;
+            TtLoadContext context = mLoader.Target as TtLoadContext;
             if (context != null)
             {
                 context.Unload();
@@ -361,11 +361,11 @@ namespace EngineNS.Bricks.AssemblyLoader
             ModuleSate = EPluginModuleState.Unloaded;
             return true;
         }
-        private UPlugin PluginObject;//do not store this object any where
-        public T GetPluginObject<T>() where T : UPlugin
+        private IPlugin PluginObject;//do not store this object any where
+        public T GetPluginObject<T>() where T : class, IPlugin
         {
             if (SureLoad() == false)
-                return null;
+                return default(T);
             return PluginObject as T;
         }
     }
@@ -373,10 +373,10 @@ namespace EngineNS.Bricks.AssemblyLoader
     {
         public string CoreBinDirectory;
         private FileSystemWatcher mWatcher;
-        public Dictionary<string, UPluginModule> PluginModules { get; } = new Dictionary<string, UPluginModule>();
-        public UPluginModule GetPluginModule(string type)
+        public Dictionary<string, TtPluginModule> PluginModules { get; } = new Dictionary<string, TtPluginModule>();
+        public TtPluginModule GetPluginModule(string type)
         {
-            UPluginModule module;
+            TtPluginModule module;
             if (PluginModules.TryGetValue(type, out module))
                 return module;
             return null;
@@ -387,7 +387,7 @@ namespace EngineNS.Bricks.AssemblyLoader
             {
                 path = path.Substring(0, path.Length - PlatformSuffix.Length);
                 path += ".plugin";
-                var name = IO.FileManager.GetPureName(path);
+                var name = IO.TtFileManager.GetPureName(path);
                 var module = GetPluginModule(name);
                 if (module != null && module.PluginDescriptor.Enable)
                 {
@@ -399,12 +399,12 @@ namespace EngineNS.Bricks.AssemblyLoader
         private string PlatformSuffix;
         public void InitPlugins(UEngine engine)
         {
-            CoreBinDirectory = engine.FileManager.GetRoot(IO.FileManager.ERootDir.Execute);
-            var path = engine.FileManager.GetRoot(IO.FileManager.ERootDir.Plugin);
+            CoreBinDirectory = engine.FileManager.GetRoot(IO.TtFileManager.ERootDir.Execute);
+            var path = engine.FileManager.GetRoot(IO.TtFileManager.ERootDir.Plugin);
 
             mWatcher = new FileSystemWatcher();
             mWatcher.Path = path;
-            mWatcher.IncludeSubdirectories = false;
+            mWatcher.IncludeSubdirectories = true;
             mWatcher.Filter = "*.dll";
             mWatcher.NotifyFilter = NotifyFilters.LastWrite | NotifyFilters.FileName;
             mWatcher.Changed += (sender, e) => OnPluginChanged(e.FullPath);
@@ -413,9 +413,10 @@ namespace EngineNS.Bricks.AssemblyLoader
             //mWatcher.Renamed += (sender, e) => { OnPluginChanged(e.FullPath); OnPluginChanged(e.OldFullPath); };
             mWatcher.EnableRaisingEvents = true;
 
-            var files = IO.FileManager.GetFiles(path, "*.plugin", false);
+            var files = IO.TtFileManager.GetFiles(path, "*.plugin", false);
 #if PWindow
-            if (false)
+            bool bTest = false;
+            if (bTest)
             {
                 var template = new UPluginDescriptor();
                 template.FilePath = path + "template.xml";
@@ -437,7 +438,7 @@ namespace EngineNS.Bricks.AssemblyLoader
 
             foreach (var i in files)
             {
-                var descriptor = IO.FileManager.LoadXmlToObject<UPluginDescriptor>(i);
+                var descriptor = IO.TtFileManager.LoadXmlToObject<UPluginDescriptor>(i);
                 if (descriptor == null)
                     continue;
                 descriptor.FilePath = i;
@@ -445,13 +446,13 @@ namespace EngineNS.Bricks.AssemblyLoader
                 if (descriptor.Platforms.Contains(engine.CurrentPlatform) == false)
                     continue;
 
-                var name = IO.FileManager.GetPureName(i);
-                var module = new UPluginModule();
+                var name = IO.TtFileManager.GetPureName(i);
+                var module = new TtPluginModule();
                 module.PluginDescriptor = descriptor;
                 module.Manager = this;
                 module.Name = name;
-                var dir = IO.FileManager.GetBaseDirectory(i);
-                module.AssemblyPath = dir + name + PlatformSuffix;
+                var dir = IO.TtFileManager.GetBaseDirectory(i);
+                module.AssemblyPath = dir + name + "/" + name + PlatformSuffix;
                 PluginModules.Add(name, module);
             }
 
@@ -484,13 +485,13 @@ namespace EngineNS.Macross
 {
     public class UMacrosAssemblyLoader : IAssemblyLoader
     {
-        Bricks.AssemblyLoader.ULoadContext Loader = null;
+        Bricks.AssemblyLoader.TtLoadContext Loader = null;
         public List<string> IncludeAssemblies { get; } = new List<string>();
         public System.Reflection.Assembly LoadAssembly(string assemblyPath, string pdbPath = null)
         {
             TryUnload();
 
-            Loader = new Bricks.AssemblyLoader.ULoadContext(assemblyPath);
+            Loader = new Bricks.AssemblyLoader.TtLoadContext(assemblyPath);
             Loader.IncludeAssemblies = IncludeAssemblies;
 
             using (FileStream sr = new FileStream(assemblyPath, FileMode.OpenOrCreate, FileAccess.Read))
@@ -500,7 +501,7 @@ namespace EngineNS.Macross
                 var mrs = new System.IO.MemoryStream(buffer);
                 try
                 {
-                    if (pdbPath != null && IO.FileManager.FileExists(pdbPath))
+                    if (pdbPath != null && IO.TtFileManager.FileExists(pdbPath))
                     {
                         using (FileStream pdbStream = new FileStream(pdbPath, FileMode.Open, FileAccess.Read))
                         {

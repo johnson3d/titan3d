@@ -296,7 +296,7 @@ namespace EngineNS.Bricks.Procedure.Node
                     for (int k = 0; k < result.Width; k++)
                     {
                         var Value = src.GetFloat1(k, j, i);
-                        Value = CoreDefine.Clamp(Value, MinValue, MaxValue);
+                        Value = MathHelper.Clamp(Value, MinValue, MaxValue);
                         result.SetFloat1(k, j, i, Value);
                     }
                 }
@@ -590,7 +590,7 @@ namespace EngineNS.Bricks.Procedure.Node
                         + pixels[1 * 3 + 0] * Gy[1, 0] + pixels[1 * 3 + 1] * Gy[1, 1] + pixels[1 * 3 + 2] * Gy[1, 2]
                         + pixels[2 * 3 + 0] * Gy[2, 0] + pixels[2 * 3 + 1] * Gy[2, 1] + pixels[2 * 3 + 2] * Gy[2, 2];
 
-                    float value = CoreDefine.Sqrt(ddx * ddx + ddy * ddy);
+                    float value = MathHelper.Sqrt(ddx * ddx + ddy * ddy);
                     result.SetPixel(x, y, value);
                     dxComp.SetPixel(x, y, ddx);
                     dyComp.SetPixel(x, y, ddy);

@@ -19,47 +19,42 @@ namespace EngineNS.Graphics.Pipeline.Common
             HzbPinOut.LifeMode = UAttachBuffer.ELifeMode.Imported;
             AddOutput(HzbPinOut, NxRHI.EBufferType.BFT_SRV);
         }
-        public override void FrameBuild()
+        public override void FrameBuild(Graphics.Pipeline.URenderPolicy policy)
         {
             var hzbBuffer = RenderGraph.AttachmentCache.ImportAttachment(HzbPinOut);
             hzbBuffer.Buffer = HzbTexture;
             hzbBuffer.Srv = HzbSRV;
         }
-        public readonly UInt32_3 Dispatch_SetupDimArray2 = new UInt32_3(32, 32, 1);
+        public readonly Vector3ui Dispatch_SetupDimArray2 = new Vector3ui(32, 32, 1);
 
         public NxRHI.UTexture HzbTexture;
         public NxRHI.USrView HzbSRV;
         public NxRHI.UUaView[] HzbMipsUAVs;
-
-        public Graphics.Pipeline.UDrawBuffers BasePass = new Graphics.Pipeline.UDrawBuffers();
 
         private NxRHI.UComputeEffect Setup;
         private NxRHI.UComputeDraw SetupDrawcall;
 
         private NxRHI.UComputeEffect DownSample;
         private NxRHI.UComputeDraw[] MipsDrawcalls;
-        ~UHzbNode()
-        {
-            Cleanup();
-        }
+        
         public async override System.Threading.Tasks.Task Initialize(URenderPolicy policy, string debugName)
         {
-            await Thread.AsyncDummyClass.DummyFunc();
+            await Thread.TtAsyncDummyClass.DummyFunc();
 
             var rc = UEngine.Instance.GfxDevice.RenderContext;
 
-            BasePass.Initialize(rc, debugName);
+            BasePass.Initialize(rc, debugName + ".BasePass" + ".BasePass");
 
             var defines = new NxRHI.UShaderDefinitions();
             defines.mCoreObject.AddDefine("DispatchX", $"{Dispatch_SetupDimArray2.X}");
             defines.mCoreObject.AddDefine("DispatchY", $"{Dispatch_SetupDimArray2.Y}");
             defines.mCoreObject.AddDefine("DispatchZ", $"{Dispatch_SetupDimArray2.Z}");
 
-            Setup = UEngine.Instance.GfxDevice.EffectManager.GetComputeEffect(RName.GetRName("Shaders/Compute/GpuDriven/Hzb.compute", RName.ERNameType.Engine).Address,
-                "CS_Setup", NxRHI.EShaderType.SDT_ComputeShader, null, null, null, defines, null);
+            Setup = UEngine.Instance.GfxDevice.EffectManager.GetComputeEffect(RName.GetRName("Shaders/Compute/GpuDriven/Hzb.compute", RName.ERNameType.Engine),
+                "CS_Setup", NxRHI.EShaderType.SDT_ComputeShader, null, defines, null);
 
-            DownSample = UEngine.Instance.GfxDevice.EffectManager.GetComputeEffect(RName.GetRName("Shaders/Compute/GpuDriven/Hzb.compute", RName.ERNameType.Engine).Address,
-                "CS_DownSample", NxRHI.EShaderType.SDT_ComputeShader, null, null, null, defines, null);
+            DownSample = UEngine.Instance.GfxDevice.EffectManager.GetComputeEffect(RName.GetRName("Shaders/Compute/GpuDriven/Hzb.compute", RName.ERNameType.Engine),
+                "CS_DownSample", NxRHI.EShaderType.SDT_ComputeShader, null, defines, null);
 
             SetupDrawcall = rc.CreateComputeDraw();
             //ResetComputeDrawcall(policy);
@@ -109,9 +104,10 @@ namespace EngineNS.Graphics.Pipeline.Common
                     height = 1;
                 }
                 var drawcall = UEngine.Instance.GfxDevice.RenderContext.CreateComputeDraw();
+                CoreSDK.DisposeObject(ref MipsDrawcalls[i - 1]);
                 MipsDrawcalls[i - 1] = drawcall;
                 drawcall.SetComputeEffect(DownSample);
-                drawcall.SetDispatch(CoreDefine.Roundup(width, Dispatch_SetupDimArray2.X), CoreDefine.Roundup(height, Dispatch_SetupDimArray2.Y), 1);
+                drawcall.SetDispatch(MathHelper.Roundup(width, Dispatch_SetupDimArray2.X), MathHelper.Roundup(height, Dispatch_SetupDimArray2.Y), 1);
                 srvIdx = drawcall.FindBinder(NxRHI.EShaderBindType.SBT_UAV, "SrcBuffer");
                 if (srvIdx.IsValidPointer)
                 {
@@ -125,23 +121,29 @@ namespace EngineNS.Graphics.Pipeline.Common
                 }
             }
         }
-        public override void Cleanup()
+        public override void Dispose()
         {
+            CoreSDK.DisposeObject(ref SetupDrawcall);
+            if (MipsDrawcalls != null)
+            {
+                for (int i = 0; i < MipsDrawcalls.Length; i++)
+                {
+                    CoreSDK.DisposeObject(ref MipsDrawcalls[i]);
+                }
+                MipsDrawcalls = null;
+            }
             if (HzbMipsUAVs != null)
             {
                 for (int i = 0; i < HzbMipsUAVs.Length; i++)
                 {
-                    HzbMipsUAVs[i]?.Dispose();
+                    CoreSDK.DisposeObject(ref HzbMipsUAVs[i]);
                 }
                 HzbMipsUAVs = null;
             }
-            HzbTexture?.Dispose();
-            HzbTexture = null;
+            CoreSDK.DisposeObject(ref HzbTexture);
+            CoreSDK.DisposeObject(ref HzbSRV);
 
-            HzbSRV?.Dispose();
-            HzbSRV = null;
-
-            base.Cleanup();
+            base.Dispose();
         }
         uint MaxSRVWidth;
         uint MaxSRVHeight;
@@ -226,10 +228,6 @@ namespace EngineNS.Graphics.Pipeline.Common
                 }
                 UEngine.Instance.GfxDevice.RenderCmdQueue.QueueCmdlist(cmd);
             }   
-        }
-        public unsafe override void TickSync(Graphics.Pipeline.URenderPolicy policy)
-        {
-            BasePass.SwapBuffer();
         }
     }
 }

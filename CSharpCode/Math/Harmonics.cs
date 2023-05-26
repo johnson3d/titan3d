@@ -175,7 +175,7 @@ namespace EngineNS
             float SampleWeight = 1.0f / (UniformPDF * Normals.Length);
             for (int i = 0; i < Normals.Length; i++)
             {
-                GenerateData(Normals[i], Color.FromArgb(255, 255, 255), SampleWeight); //Color -> Compute Color 
+                GenerateData(Normals[i], Color.FromRgb(255, 255, 255), SampleWeight); //Color -> Compute Color 
             }
         }
 
@@ -185,7 +185,7 @@ namespace EngineNS
             float SampleWeight = 1.0f / (UniformPDF * count);
             for (int i = 0; i < count; i++)
             {
-                GenerateData(Normals[i], Color.FromArgb(255, 255, 255), SampleWeight); //Color -> Compute Color 
+                GenerateData(Normals[i], Color.FromRgb(255, 255, 255), SampleWeight); //Color -> Compute Color 
             }
         }
 

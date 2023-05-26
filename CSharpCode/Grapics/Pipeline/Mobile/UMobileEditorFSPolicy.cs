@@ -135,7 +135,8 @@ namespace EngineNS.Graphics.Pipeline.Mobile
             AddLinker(PickHollowNode.ResultPinOut, FinalCopyNode.PickPinIn);
             AddLinker(VignetteNode.ImagePinOut, FinalCopyNode.VignettePinIn);
 
-            RootNode = FinalCopyNode;
+            System.Diagnostics.Debug.Assert(false);
+            //RootNode = FinalCopyNode;
         }
         public override void OnResize(float x, float y)
         {
@@ -161,45 +162,45 @@ namespace EngineNS.Graphics.Pipeline.Mobile
 
             GpuSceneNode?.OnResize(this, x, y);
         }
-        public unsafe override void Cleanup()
+        public unsafe override void Dispose()
         {
-            mShadowMapNode?.Cleanup();
+            mShadowMapNode?.Dispose();
             mShadowMapNode = null;
 
-            ScreenTilingNode?.Cleanup();
+            ScreenTilingNode?.Dispose();
             ScreenTilingNode = null;
 
-            TranslucentNode?.Cleanup();
+            TranslucentNode?.Dispose();
             TranslucentNode = null;
 
-            PickedNode?.Cleanup();
+            PickedNode?.Dispose();
             PickedNode = null;
 
-            PickBlurNode?.Cleanup();
+            PickBlurNode?.Dispose();
             PickBlurNode = null;
 
-            PickHollowNode?.Cleanup();
+            PickHollowNode?.Dispose();
             PickHollowNode = null;
 
-            FinalCopyNode?.Cleanup();
+            FinalCopyNode?.Dispose();
             FinalCopyNode = null;
 
-            HitproxyNode?.Cleanup();
+            HitproxyNode?.Dispose();
             HitproxyNode = null;
 
-            VoxelsNode?.Cleanup();
+            VoxelsNode?.Dispose();
             VoxelsNode = null;
 
-            HzbNode?.Cleanup();
+            HzbNode?.Dispose();
             HzbNode = null;
 
-            GpuSceneNode?.Cleanup();
+            GpuSceneNode?.Dispose();
             GpuSceneNode = null;
 
-            base.Cleanup();
+            base.Dispose();
         }
         //Build DrawCall的时候调用，如果本渲染策略不提供指定的EShadingType，那么UAtom内的s对应的Drawcall就不会产生出来
-        public override Shader.UShadingEnv GetPassShading(EShadingType type, Mesh.UMesh mesh, int atom, Pipeline.Common.URenderGraphNode node)
+        public override Shader.UGraphicsShadingEnv GetPassShading(EShadingType type, Mesh.UMesh mesh, int atom, Pipeline.Common.URenderGraphNode node)
         {
             switch (type)
             {
@@ -237,7 +238,7 @@ namespace EngineNS.Graphics.Pipeline.Mobile
         //渲染DrawCall的时候调用，如果产生了对应的ShadingType的Drawcall，则会callback到这里设置一些这个shading的特殊参数
         public override void OnDrawCall(Pipeline.URenderPolicy.EShadingType shadingType, NxRHI.UGraphicDraw drawcall, Mesh.UMesh mesh, int atom)
         {
-            mesh.MdfQueue.OnDrawCall(shadingType, drawcall, this, mesh);
+            mesh.MdfQueue.OnDrawCall(shadingType, drawcall, this, mesh, atom);
             //drawcall.Effect.ShadingEnv
             if (shadingType == EShadingType.BasePass)
             {

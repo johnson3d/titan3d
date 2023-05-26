@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Drawing;
 using System.Text;
 
 namespace EngineNS.EGui.UIProxy
@@ -11,18 +12,48 @@ namespace EngineNS.EGui.UIProxy
             m_ClassId = ImGuiAPI.GetID("MainEditorApplication"),
         };
         // 只能dock到Main window中
-        public static bool BeginMainForm(string name, ref bool open, ImGuiWindowFlags_ flags)
+        public static bool BeginMainForm(string name, IRootForm form, ImGuiWindowFlags_ flags)
+        {
+            ImGuiAPI.SetNextWindowClass(MainFormDockClass);
+            ImGuiAPI.SetNextWindowDockID(MainFormDockClass.m_ClassId, ImGuiCond_.ImGuiCond_FirstUseEver);
+            var vis = form.Visible;
+            var retValue = ImGuiAPI.Begin(name, ref vis, flags);
+            form.Visible = vis;
+            //var presentWin = ImGuiAPI.GetWindowViewportData();
+            //if (presentWin != null)
+            //{
+            //    form.Visible = !presentWin.IsClosed;
+            //}
+            if (ImGuiAPI.IsWindowDocked())
+                form.DockId = ImGuiAPI.GetWindowDockID();
+            return retValue;
+        }
+        public static bool BeginMainForm(string name, ref bool open, ref uint dockId, ImGuiWindowFlags_ flags)
         {
             ImGuiAPI.SetNextWindowClass(MainFormDockClass);
             ImGuiAPI.SetNextWindowDockID(MainFormDockClass.m_ClassId, ImGuiCond_.ImGuiCond_FirstUseEver);
             var retValue = ImGuiAPI.Begin(name, ref open, flags);
+            //var presentWin = ImGuiAPI.GetWindowViewportData();
+            //if (presentWin != null)
+            //{
+            //    open = !presentWin.IsClosed;
+            //}
+            if (ImGuiAPI.IsWindowDocked())
+                dockId = ImGuiAPI.GetWindowDockID();
             return retValue;
         }
-        public static unsafe bool BeginMainForm(string name, bool* open, ImGuiWindowFlags_ flags)
+        public static unsafe bool BeginMainForm(string name, bool* open, ref uint dockId, ImGuiWindowFlags_ flags)
         {
             ImGuiAPI.SetNextWindowClass(MainFormDockClass);
             ImGuiAPI.SetNextWindowDockID(MainFormDockClass.m_ClassId, ImGuiCond_.ImGuiCond_FirstUseEver);
             var retValue = ImGuiAPI.Begin(name, open, flags);
+            //var presentWin = ImGuiAPI.GetWindowViewportData();
+            //if (presentWin != null && open != null)
+            //{
+            //    *open = !presentWin.IsClosed;
+            //}
+            if (ImGuiAPI.IsWindowDocked())
+                dockId = ImGuiAPI.GetWindowDockID();
             return retValue;
         }
         public static void EndMainForm()
@@ -32,6 +63,7 @@ namespace EngineNS.EGui.UIProxy
         // 只能dock到指定window中
         public static bool BeginPanel(in ImGuiWindowClass dockClass, string name, ref bool open, ImGuiWindowFlags_ flags)
         {
+            name = GetDockWindowName(name, dockClass);
             ImGuiAPI.SetNextWindowClass(dockClass);
             ImGuiAPI.PushStyleVar(ImGuiStyleVar_.ImGuiStyleVar_FramePadding, StyleConfig.Instance.PanelFramePadding);
             ImGuiAPI.PushStyleColor(ImGuiCol_.ImGuiCol_WindowBg, StyleConfig.Instance.PanelBackground);
@@ -41,6 +73,7 @@ namespace EngineNS.EGui.UIProxy
         }
         public static unsafe bool BeginPanel(in ImGuiWindowClass dockClass, string name, bool* open, ImGuiWindowFlags_ flags)
         {
+            name = GetDockWindowName(name, dockClass);
             ImGuiAPI.SetNextWindowClass(dockClass);
             ImGuiAPI.PushStyleVar(ImGuiStyleVar_.ImGuiStyleVar_FramePadding, StyleConfig.Instance.PanelFramePadding);
             ImGuiAPI.PushStyleColor(ImGuiCol_.ImGuiCol_WindowBg, StyleConfig.Instance.PanelBackground);
@@ -72,6 +105,11 @@ namespace EngineNS.EGui.UIProxy
             ImGuiAPI.PopStyleVar(1);
             ImGuiAPI.PopStyleColor(2);
             ImGuiAPI.End();
+        }
+
+        public static string GetDockWindowName(string name, in ImGuiWindowClass dockKeyClass)
+        {
+            return name + "##" + dockKeyClass.m_ClassId;
         }
     }
 }

@@ -12,6 +12,10 @@ namespace EngineNS.GamePlay.Scene
     [UNode(NodeDataType = typeof(USceneCapture.USceneCaptureData), DefaultNamePrefix = "Capture")]
     public partial class USceneCapture : USceneActorNode, ITickable, IRootForm
     {
+        public int GetTickOrder()
+        {
+            return 0;
+        }
         public enum ECaptureMode
         {
             Normal,
@@ -52,10 +56,11 @@ namespace EngineNS.GamePlay.Scene
                 policy = rpAsset.CreateRenderPolicy();
             }
             await policy.Initialize(null);
+            policy.OnResize(nd.TargetSize.X, nd.TargetSize.Y);
+
             RenderPolicy = policy;
             CameraController.ControlCamera(RenderPolicy.DefaultCamera);
 
-            RenderPolicy.OnResize(nd.TargetSize.X, nd.TargetSize.Y);
             CaptureWorld = world;
 
             UpdateCamera();
@@ -129,7 +134,7 @@ namespace EngineNS.GamePlay.Scene
             UpdateCamera();
         }
         bool IsCaptureVisible = false;
-        public void TickLogic(int ellapse)
+        public void TickLogic(float ellapse)
         {
             var absAABB = DBoundingBox.TransformNoScale(in AABB, in Placement.AbsTransform);
             var type = CameraController.Camera.WhichContainTypeFast(CaptureWorld, in absAABB, false);
@@ -151,11 +156,15 @@ namespace EngineNS.GamePlay.Scene
             RenderPolicy?.TickLogic(CaptureWorld);
             RenderPolicy?.EndTickLogic(CaptureWorld);
         }
-        public void TickRender(int ellapse)
+        public void TickRender(float ellapse)
         {
             
         }
-        public void TickSync(int ellapse)
+        public void TickBeginFrame(float ellapse)
+        {
+
+        }
+        public void TickSync(float ellapse)
         {
             if (IsCaptureVisible)
                 RenderPolicy?.TickSync();
@@ -176,10 +185,11 @@ namespace EngineNS.GamePlay.Scene
             }
         }
         public uint DockId { get; set; }
+        public ImGuiWindowClass DockKeyClass { get; }
         public ImGuiCond_ DockCond { get; set; }
         public async Task<bool> Initialize()
         {
-            await EngineNS.Thread.AsyncDummyClass.DummyFunc();
+            await EngineNS.Thread.TtAsyncDummyClass.DummyFunc();
             return true;
         }
         public void Cleanup()
@@ -192,7 +202,7 @@ namespace EngineNS.GamePlay.Scene
                 return;
 
             ImGuiAPI.SetNextWindowSize(GetNodeData<USceneCaptureData>().TargetSize, ImGuiCond_.ImGuiCond_FirstUseEver);
-            if (ImGuiAPI.Begin($"Capture:{this.NodeName}", ref mVisible, ImGuiWindowFlags_.ImGuiWindowFlags_None))
+            if (EGui.UIProxy.DockProxy.BeginMainForm($"Capture:{this.NodeName}", this, ImGuiWindowFlags_.ImGuiWindowFlags_None))
             {
                 if (ImGuiAPI.BeginChild("FinalTexture", in Vector2.MinusOne, true, ImGuiWindowFlags_.ImGuiWindowFlags_None))
                 {
@@ -209,7 +219,7 @@ namespace EngineNS.GamePlay.Scene
                 }
                 ImGuiAPI.EndChild();
             }
-            ImGuiAPI.End();
+            EGui.UIProxy.DockProxy.EndMainForm();
         }
         #endregion
     }

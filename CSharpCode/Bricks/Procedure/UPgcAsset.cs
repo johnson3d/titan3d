@@ -110,7 +110,7 @@ namespace EngineNS.Bricks.Procedure
             ameta.SaveAMeta();
 
             AssetGraph.Version++;
-            IO.FileManager.SaveObjectToXml(name.Address, AssetGraph);
+            IO.TtFileManager.SaveObjectToXml(name.Address, AssetGraph);
         }
         [Rtti.Meta]
         public RName AssetName
@@ -127,7 +127,7 @@ namespace EngineNS.Bricks.Procedure
         {
             var result = new UPgcAsset();
 
-            if (IO.FileManager.LoadXmlToObject(name.Address, result.AssetGraph) == false)
+            if (IO.TtFileManager.LoadXmlToObject(name.Address, result.AssetGraph) == false)
                 return null;
 
             result.AssetName = name;

@@ -53,12 +53,13 @@ namespace EngineNS.Animation.Asset
         {
             AssetName = name;
             var typeStr = Rtti.UTypeDescManager.Instance.GetTypeStringFromType(this.GetType());
-            var xnd = new IO.CXndHolder(typeStr, 0, 0);
+            var xnd = new IO.TtXndHolder(typeStr, 0, 0);
             using (var attr = xnd.NewAttribute("SkeletonAsset", 0, 0))
             {
-                var ar = attr.GetWriter(512);
-                ar.Write(this);
-                attr.ReleaseWriter(ref ar);
+                using (var ar = attr.GetWriter(512))
+                {
+                    ar.Write(this);
+                }
                 xnd.RootNode.AddAttribute(attr);
             }
 
@@ -71,7 +72,7 @@ namespace EngineNS.Animation.Asset
         }
         #endregion
 
-        public static USkeletonAsset LoadXnd(USkeletonAssetManager manager, IO.CXndNode node)
+        public static USkeletonAsset LoadXnd(USkeletonAssetManager manager, IO.TtXndNode node)
         {
             unsafe
             {
@@ -79,9 +80,10 @@ namespace EngineNS.Animation.Asset
                 var attr = node.TryGetAttribute("SkeletonAsset");
                 if ((IntPtr)attr.CppPointer != IntPtr.Zero)
                 {
-                    var ar = attr.GetReader(manager);
-                    ar.Read(out result, manager);
-                    attr.ReleaseReader(ref ar);
+                    using (var ar = attr.GetReader(manager))
+                    {
+                        ar.Read(out result, manager);
+                    }
                 }
 
                 var mesh = result as USkeletonAsset;
@@ -103,9 +105,9 @@ namespace EngineNS.Animation.Asset
             if (SkeletonAssets.TryGetValue(name, out result))
                 return result;
 
-            result = await UEngine.Instance.EventPoster.Post(() =>
+            result = await UEngine.Instance.EventPoster.Post((state) =>
             {
-                using (var xnd = IO.CXndHolder.LoadXnd(name.Address))
+                using (var xnd = IO.TtXndHolder.LoadXnd(name.Address))
                 {
                     if (xnd != null)
                     {

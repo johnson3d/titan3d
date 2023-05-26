@@ -91,7 +91,7 @@ namespace EngineNS.Bricks.Particle
             string sourceCode = "";
             //var codeBuilder = new Bricks.CodeBuilder.HLSL.UHLSLGen();
 
-            var code = IO.FileManager.ReadAllText($"{RName.GetRName("Shaders\\Bricks\\Particle\\Effectors.compute", RName.ERNameType.Engine).Address}");
+            var code = IO.TtFileManager.ReadAllText($"{RName.GetRName("Shaders\\Bricks\\Particle\\Effectors.compute", RName.ERNameType.Engine).Address}");
             codeBuilder.AddLine(code, ref sourceCode);
 
             return sourceCode;

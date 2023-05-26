@@ -5,8 +5,9 @@ using System.Text;
 
 namespace EngineNS.Graphics.Pipeline.Deferred
 {
-    public class UDeferredDirLightingShading : Shader.UShadingEnv
+    public partial class UDeferredDirLightingShading : Shader.UGraphicsShadingEnv
     {
+        #region Permutation
         public UPermutationItem DisableAO
         {
             get;
@@ -37,6 +38,7 @@ namespace EngineNS.Graphics.Pipeline.Deferred
             get;
             set;
         }
+        #endregion
         public UDeferredDirLightingShading()
         {
             CodeName = RName.GetRName("shaders/ShadingEnv/Deferred/DeferredDirLighting.cginc", RName.ERNameType.Engine);
@@ -72,10 +74,19 @@ namespace EngineNS.Graphics.Pipeline.Deferred
         {
             base.OnDrawCall(shadingType, drawcall, policy, mesh);
 
-            var Manager = policy.TagObject as URenderPolicy;
-            var dirLightingNode = Manager.FindFirstNode<UDeferredDirLightingNode>();
+            var deferredPolicy = policy.TagObject as URenderPolicy;
+            var dirLightingNode = deferredPolicy.FindFirstNode<UDeferredDirLightingNode>();
 
-            var index = drawcall.FindBinder("GBufferRT0");
+            var index = drawcall.FindBinder("cbPerGpuScene");
+            if (index.IsValidPointer)
+            {
+                //drawcall.mCoreObject.BindShaderCBuffer(index, Manager.GetGpuSceneNode().PerGpuSceneCBuffer.mCoreObject);
+                var attachBuffer = dirLightingNode.GetAttachBuffer(dirLightingNode.GpuScenePinIn);
+                drawcall.BindCBuffer(index, attachBuffer.CBuffer);
+            }
+
+            #region MRT
+            index = drawcall.FindBinder("GBufferRT0");
             if (index.IsValidPointer)
             {
                 var attachBuffer = dirLightingNode.GetAttachBuffer(dirLightingNode.Rt0PinIn);
@@ -83,7 +94,7 @@ namespace EngineNS.Graphics.Pipeline.Deferred
             }
             index = drawcall.FindBinder("Samp_GBufferRT0");
             if (index.IsValidPointer)
-                drawcall.BindSampler(index, UEngine.Instance.GfxDevice.SamplerStateManager.PointState);
+                drawcall.BindSampler(index, UEngine.Instance.GfxDevice.SamplerStateManager.LinearClampState);
 
             index = drawcall.FindBinder("GBufferRT1");
             if (index.IsValidPointer)
@@ -105,6 +116,16 @@ namespace EngineNS.Graphics.Pipeline.Deferred
             if (index.IsValidPointer)
                 drawcall.BindSampler(index, UEngine.Instance.GfxDevice.SamplerStateManager.PointState);
 
+            index = drawcall.FindBinder("GBufferRT3");
+            if (index.IsValidPointer)
+            {
+                var attachBuffer = dirLightingNode.GetAttachBuffer(dirLightingNode.Rt3PinIn);
+                drawcall.BindSRV(index, attachBuffer.Srv);
+            }
+            index = drawcall.FindBinder("Samp_GBufferRT3");
+            if (index.IsValidPointer)
+                drawcall.BindSampler(index, UEngine.Instance.GfxDevice.SamplerStateManager.PointState);
+
             index = drawcall.FindBinder("DepthBuffer");
             if (index.IsValidPointer)
             {
@@ -113,8 +134,10 @@ namespace EngineNS.Graphics.Pipeline.Deferred
             }
             index = drawcall.FindBinder("Samp_DepthBuffer");
             if (index.IsValidPointer)
-                drawcall.BindSampler(index, UEngine.Instance.GfxDevice.SamplerStateManager.DefaultState);
+                drawcall.BindSampler(index, UEngine.Instance.GfxDevice.SamplerStateManager.PointState);
+            #endregion
 
+            #region shadow
             index = drawcall.FindBinder("GShadowMap");
             if (index.IsValidPointer)
             {
@@ -123,8 +146,10 @@ namespace EngineNS.Graphics.Pipeline.Deferred
             }
             index = drawcall.FindBinder("Samp_GShadowMap");
             if (index.IsValidPointer)
-                drawcall.BindSampler(index, UEngine.Instance.GfxDevice.SamplerStateManager.DefaultState);
+                drawcall.BindSampler(index, UEngine.Instance.GfxDevice.SamplerStateManager.LinearClampState);
+            #endregion
 
+            #region effect
             index = drawcall.FindBinder("gEnvMap");
             if (index.IsValidPointer)
             {
@@ -154,15 +179,9 @@ namespace EngineNS.Graphics.Pipeline.Deferred
             index = drawcall.FindBinder("Samp_GPickedTex");
             if (index.IsValidPointer)
                 drawcall.BindSampler(index, UEngine.Instance.GfxDevice.SamplerStateManager.DefaultState);
+            #endregion
 
-            index = drawcall.FindBinder("cbPerGpuScene");
-            if (index.IsValidPointer)
-            {
-                //drawcall.mCoreObject.BindShaderCBuffer(index, Manager.GetGpuSceneNode().PerGpuSceneCBuffer.mCoreObject);
-                var attachBuffer = dirLightingNode.GetAttachBuffer(dirLightingNode.GpuScenePinIn);
-                drawcall.BindCBuffer(index, attachBuffer.CBuffer);
-            }
-
+            #region MultiLights
             index = drawcall.FindBinder("TilingBuffer");
             if (index.IsValidPointer)
             {
@@ -177,6 +196,8 @@ namespace EngineNS.Graphics.Pipeline.Deferred
                 if (attachBuffer.Srv != null)
                     drawcall.BindSRV(index, attachBuffer.Srv);
             }
+            #endregion
+
         }
         public void SetDisableShadow(bool value)
         {
@@ -209,12 +230,14 @@ namespace EngineNS.Graphics.Pipeline.Deferred
             UpdatePermutation();
         }
     }
-    public class UDeferredDirLightingNode : Common.USceenSpaceNode
+    public partial class UDeferredDirLightingNode : Common.USceenSpaceNode
     {
         public Common.URenderGraphPin Rt0PinIn = Common.URenderGraphPin.CreateInput("MRT0");
         public Common.URenderGraphPin Rt1PinIn = Common.URenderGraphPin.CreateInput("MRT1");
         public Common.URenderGraphPin Rt2PinIn = Common.URenderGraphPin.CreateInput("MRT2");
-        public Common.URenderGraphPin DepthStencilPinIn = Common.URenderGraphPin.CreateInput("DepthStencil");
+        public Common.URenderGraphPin Rt3PinIn = Common.URenderGraphPin.CreateInputOutput("MRT3");
+        public Common.URenderGraphPin DepthStencilPinIn = Common.URenderGraphPin.CreateInputOutput("DepthStencil");
+        
         public Common.URenderGraphPin ShadowMapPinIn = Common.URenderGraphPin.CreateInput("ShadowMap");
         public Common.URenderGraphPin EnvMapPinIn = Common.URenderGraphPin.CreateInput("EnvMap");
         public Common.URenderGraphPin VignettePinIn = Common.URenderGraphPin.CreateInput("Vignette");
@@ -232,7 +255,9 @@ namespace EngineNS.Graphics.Pipeline.Deferred
             AddInput(Rt0PinIn, NxRHI.EBufferType.BFT_SRV);
             AddInput(Rt1PinIn, NxRHI.EBufferType.BFT_SRV);
             AddInput(Rt2PinIn, NxRHI.EBufferType.BFT_SRV);
-            AddInput(DepthStencilPinIn, NxRHI.EBufferType.BFT_SRV);
+            AddInputOutput(Rt3PinIn, NxRHI.EBufferType.BFT_SRV);
+            //Rt3PinIn.IsAllowInputNull = true;
+            AddInputOutput(DepthStencilPinIn, NxRHI.EBufferType.BFT_SRV);
             AddInput(ShadowMapPinIn, NxRHI.EBufferType.BFT_SRV);
             AddInput(EnvMapPinIn, NxRHI.EBufferType.BFT_SRV);
             AddInput(VignettePinIn, NxRHI.EBufferType.BFT_SRV);
@@ -241,12 +266,12 @@ namespace EngineNS.Graphics.Pipeline.Deferred
             AddInput(PointLightsPinIn, NxRHI.EBufferType.BFT_SRV);
             AddInput(GpuScenePinIn, NxRHI.EBufferType.BFT_SRV | NxRHI.EBufferType.BFT_UAV);
 
-            ResultPinOut.Attachement.Format = EPixelFormat.PXF_R10G10B10A2_UNORM;
+            ResultPinOut.Attachement.Format = EPixelFormat.PXF_R16G16B16A16_FLOAT;
             base.InitNodePins();
         }
-        public override void FrameBuild()
+        public override void FrameBuild(Graphics.Pipeline.URenderPolicy policy)
         {
-            
+            base.FrameBuild(policy);
         }
         public override async System.Threading.Tasks.Task Initialize(URenderPolicy policy, string debugName)
         {
@@ -263,7 +288,7 @@ namespace EngineNS.Graphics.Pipeline.Deferred
                 cBuffer.SetValue(coreBinder.CBPerViewport.gShadowTransitionScale, in shadowNode.mShadowTransitionScale);
                 cBuffer.SetValue(coreBinder.CBPerViewport.gShadowMapSizeAndRcp, in shadowNode.mShadowMapSizeAndRcp);
                 cBuffer.SetValue(coreBinder.CBPerViewport.gViewer2ShadowMtx, in shadowNode.mViewer2ShadowMtx);
-                
+
                 cBuffer.SetValue(coreBinder.CBPerViewport.gShadowDistance, in shadowNode.mShadowDistance);
 
                 cBuffer.SetValue(coreBinder.CBPerViewport.gCsmDistanceArray, in shadowNode.mSumDistanceFarVec);
@@ -303,7 +328,11 @@ namespace EngineNS.Graphics.Pipeline.Deferred
                 if (cBuffer != null)
                     SetCBuffer(world, cBuffer, policy);
                 base.TickLogic(world, policy, bClear);
-            }   
+            }
+        }
+        public override void TickSync(URenderPolicy policy)
+        {
+            base.TickSync(policy);
         }
     }
 }

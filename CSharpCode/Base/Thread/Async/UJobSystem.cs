@@ -25,7 +25,7 @@ namespace EngineNS.Thread.Async
         void ReleaseTask();
         void FinishJobs();
         bool IsFinshed();
-        Async.PostEvent PostEvent { get; set; }
+        Async.TtAsyncTaskStateBase PostEvent { get; set; }
     }
     //public class UJob : IJob
     //{
@@ -35,7 +35,7 @@ namespace EngineNS.Thread.Async
             
     //    }
     //}
-    public class UJobThread<T> : IJobThread where T : IJob
+    public class TtJobThread<T> : IJobThread where T : IJob
     {
         public List<T> Jobs = new List<T>();
         public void DoWorks()
@@ -59,13 +59,13 @@ namespace EngineNS.Thread.Async
             Jobs.Clear();
         }
     }
-    public class UJobSystem<T> : IJobSystem where T : IJob
+    public class TtJobSystem<T> : IJobSystem where T : IJob
     {
-        public UJobThread<T>[] JobThreads = new UJobThread<T>[UEngine.Instance.ContextThreadManager.PooledThreadNum];
+        public TtJobThread<T>[] JobThreads = new TtJobThread<T>[UEngine.Instance.ContextThreadManager.PooledThreadNum];
         private int NumOfRemainTasks = 0;
         public List<T> Jobs = new List<T>();
         private System.Threading.AutoResetEvent mFinishEvent = new System.Threading.AutoResetEvent(false);
-        public Async.PostEvent PostEvent { get; set; }
+        public Async.TtAsyncTaskStateBase PostEvent { get; set; }
         public void ReleaseTask()
         {
             var num = System.Threading.Interlocked.Decrement(ref NumOfRemainTasks);
@@ -91,7 +91,7 @@ namespace EngineNS.Thread.Async
             return NumOfRemainTasks == 0;
         }
         private int CurThread = 0;
-        private UJobThread<T> GetJobThread()
+        private TtJobThread<T> GetJobThread()
         {
             CurThread++;
             if (CurThread >= JobThreads.Length)
@@ -99,7 +99,7 @@ namespace EngineNS.Thread.Async
                 CurThread = 0;
             }
             if (JobThreads[CurThread] == null)
-                JobThreads[CurThread] = new UJobThread<T>();
+                JobThreads[CurThread] = new TtJobThread<T>();
             return JobThreads[CurThread];
         }
         public void AddJob(ref T job)
@@ -133,21 +133,21 @@ namespace EngineNS.Thread.Async
 
 namespace EngineNS.UTest
 {
-    public struct UTestJob : Thread.Async.IJob
+    public struct TtTestJob : Thread.Async.IJob
     {
         public Thread.Async.IJobSystem JobSystem { get; set; }
         public Thread.Async.EJobState JobState { get; set; }
-        public UTest_UJobSystem Data;
+        public TtTest_UJobSystem Data;
         public void DoWork()
         {
             System.Threading.Interlocked.Increment(ref Data.NumSum);
         }
     }
     [UTest.UTest]
-    public class UTest_UJobSystem
+    public class TtTest_UJobSystem
     {
         public static bool IsFinal = false;
-        ~UTest_UJobSystem()
+        ~TtTest_UJobSystem()
         {
             NumSum = 0;
             IsFinal = true;
@@ -159,11 +159,11 @@ namespace EngineNS.UTest
         }
         public async System.Threading.Tasks.Task AsyncTest()
         {
-            await Thread.AsyncDummyClass.DummyFunc();
-            var jobSystem = new Thread.Async.UJobSystem<UTestJob>();
+            await Thread.TtAsyncDummyClass.DummyFunc();
+            var jobSystem = new Thread.Async.TtJobSystem<TtTestJob>();
             for (int i = 0; i < 1000; i++)
             {
-                var job = new UTestJob();
+                var job = new TtTestJob();
                 job.Data = this;
                 jobSystem.AddJob(ref job);
             }

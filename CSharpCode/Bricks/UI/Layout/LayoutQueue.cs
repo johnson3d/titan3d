@@ -5,11 +5,11 @@ using System.Text;
 
 namespace EngineNS.UI.Layout
 {
-    internal abstract class LayoutQueue
+    internal abstract class TtLayoutQueue
     {
         internal class Request
         {
-            internal UIElement Target;
+            internal TtUIElement Target;
             internal Request Next;
             internal Request Prev;
         }
@@ -23,12 +23,12 @@ namespace EngineNS.UI.Layout
         private Request mCurrentRequest;
         private int mRequestSize;
 
-        internal abstract Request GetRequest(UIElement ui);
-        internal abstract void SetRequest(UIElement ui, Request r);
-        internal abstract bool CanRelyOnParentRecalc(UIElement parent);
-        internal abstract void Invalidate(UIElement ui);
+        internal abstract Request GetRequest(TtUIElement ui);
+        internal abstract void SetRequest(TtUIElement ui, Request r);
+        internal abstract bool CanRelyOnParentRecalc(TtUIElement parent);
+        internal abstract void Invalidate(TtUIElement ui);
 
-        internal LayoutQueue()
+        internal TtLayoutQueue()
         {
             Request r;
             for (int i = 0; i < mRequestParentPoolMaxCount; i++)
@@ -39,7 +39,7 @@ namespace EngineNS.UI.Layout
             }
             mRequestSize = mRequestParentPoolMaxCount;
         }
-        private Request GetNewRequest(UIElement ui)
+        private Request GetNewRequest(TtUIElement ui)
         {
             Request r;
             if (mCurrentRequest != null)
@@ -65,7 +65,7 @@ namespace EngineNS.UI.Layout
             r.Target = ui;
             return r;
         }
-        private void AddRequest(UIElement ui)
+        private void AddRequest(TtUIElement ui)
         {
             var r = GetNewRequest(ui);
             if (r != null)
@@ -78,7 +78,7 @@ namespace EngineNS.UI.Layout
                 SetRequest(ui, r);
             }
         }
-        internal void Add(UIElement ui)
+        internal void Add(TtUIElement ui)
         {
             System.Diagnostics.Debug.Assert(UEngine.Instance.ThreadLogic.IsThisThread());
 
@@ -124,7 +124,7 @@ namespace EngineNS.UI.Layout
 
             UEngine.Instance.UILayoutManager.NeedsRecalculate();
         }
-        internal void Remove(UIElement ui)
+        internal void Remove(TtUIElement ui)
         {
             System.Diagnostics.Debug.Assert(UEngine.Instance.ThreadLogic.IsThisThread());
 
@@ -134,7 +134,7 @@ namespace EngineNS.UI.Layout
             RemoveRequest(r);
             SetRequest(ui, null);
         }
-        internal void RemoveOrphans(UIElement parent)
+        internal void RemoveOrphans(TtUIElement parent)
         {
             System.Diagnostics.Debug.Assert(UEngine.Instance.ThreadLogic.IsThisThread());
 
@@ -161,16 +161,16 @@ namespace EngineNS.UI.Layout
             get { return (mRequestHead == null); }
         }
 
-        internal UIElement GetTopMost()
+        internal TtUIElement GetTopMost()
         {
             System.Diagnostics.Debug.Assert(UEngine.Instance.ThreadLogic.IsThisThread());
 
-            UIElement found = null;
+            TtUIElement found = null;
             var treeLevel = UInt32.MaxValue;
 
             for (Request r = mRequestHead; r != null; r = r.Next)
             {
-                UIElement t = r.Target;
+                TtUIElement t = r.Target;
                 //if (t.Visibility == Visibility.Collapsed)
                 //    continue;
 
@@ -211,41 +211,41 @@ namespace EngineNS.UI.Layout
         }
     }
 
-    internal class InternalMeasureQueue : LayoutQueue
+    internal class TtInternalMeasureQueue : TtLayoutQueue
     {
-        internal override void SetRequest(UIElement ui, Request r)
+        internal override void SetRequest(TtUIElement ui, Request r)
         {
             ui.MeasureRequest = r;
         }
-        internal override Request GetRequest(UIElement ui)
+        internal override Request GetRequest(TtUIElement ui)
         {
             return ui.MeasureRequest;
         }
-        internal override bool CanRelyOnParentRecalc(UIElement parent)
+        internal override bool CanRelyOnParentRecalc(TtUIElement parent)
         {
             return !parent.IsMeasureValid && !parent.MeasureInProgress;
         }
-        internal override void Invalidate(UIElement ui)
+        internal override void Invalidate(TtUIElement ui)
         {
             ui.InvalidateMeasureInternal();
         }
     }
 
-    internal class InternalArrangeQueue : LayoutQueue
+    internal class TtInternalArrangeQueue : TtLayoutQueue
     {
-        internal override void SetRequest(UIElement ui, Request r)
+        internal override void SetRequest(TtUIElement ui, Request r)
         {
             ui.ArrangeRequest = r;
         }
-        internal override Request GetRequest(UIElement ui)
+        internal override Request GetRequest(TtUIElement ui)
         {
             return ui.ArrangeRequest;
         }
-        internal override bool CanRelyOnParentRecalc(UIElement parent)
+        internal override bool CanRelyOnParentRecalc(TtUIElement parent)
         {
             return !parent.IsArrangeValid && !parent.ArrangeInProgress;
         }
-        internal override void Invalidate(UIElement ui)
+        internal override void Invalidate(TtUIElement ui)
         {
             ui.InvalidateArrangeInternal();
         }

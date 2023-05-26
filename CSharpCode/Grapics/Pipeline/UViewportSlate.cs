@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace EngineNS.Graphics.Pipeline
 {
-    public partial class UViewportSlate : IEventProcessor
+    public partial class UViewportSlate : IEventProcessor, IDisposable
     {
         public UViewportSlate()
         {
@@ -14,9 +14,15 @@ namespace EngineNS.Graphics.Pipeline
         {
             PresentWindow?.UnregEventProcessor(this);
             UEngine.Instance?.ViewportSlateManager.RemoveViewport(this);
+            Dispose();
         }
+        public virtual void Dispose()
+        {
+            CoreSDK.DisposeObject(ref mWorld);
+        }
+        GamePlay.UWorld mWorld;
         [Rtti.Meta()]
-        public GamePlay.UWorld World { get; protected set; } 
+        public GamePlay.UWorld World { get => mWorld; protected set => mWorld = value; }
         public void SetCameraOffset(in DVector3 offset)
         {
             World.CameraOffset = offset;
@@ -37,6 +43,7 @@ namespace EngineNS.Graphics.Pipeline
             }
         }
         public uint DockId { get; set; }
+        public ImGuiWindowClass DockKeyClass { get; }
         public Vector2 ViewportPos { get; protected set; }
         public Vector2 WindowPos { get; protected set; }
         public Vector2 ClientMin { get; protected set; }
@@ -61,7 +68,7 @@ namespace EngineNS.Graphics.Pipeline
         protected bool mSizeChanged = false;
         public bool IsValidClientArea()
         {
-            return (ClientSize.X > 1 && ClientSize.Y > 1);
+            return (ClientSize.X >= 1 && ClientSize.Y >= 1);
         }
         public bool IsFocused { get; protected set; }
         public bool IsDrawing { get; protected set; }
@@ -80,12 +87,13 @@ namespace EngineNS.Graphics.Pipeline
         public bool IsViewportSlateFocused { get; private set; }
         public virtual void OnDrawViewportUI(in Vector2 startDrawPos) { }
         public bool IsHoverGuiItem { get; set; }
+        public Vector2 WindowSize = Vector2.Zero;
         public virtual unsafe void OnDraw()
         {
             if (mVisible == false)
                 return;
-            ImGuiAPI.SetNextWindowDockID(DockId, DockCond);
-            var sz = new Vector2(-1);
+            //ImGuiAPI.SetNextWindowDockID(DockId, DockCond);
+            var sz = WindowSize;
             //ImGuiAPI.SetNextWindowSize(ref sz, ImGuiCond_.ImGuiCond_FirstUseEver);
             IsDrawing = false;
             bool bShow = false;
@@ -102,13 +110,16 @@ namespace EngineNS.Graphics.Pipeline
                     bShow = ImGuiAPI.Begin(Title, (bool*)0, ImGuiWindowFlags_.ImGuiWindowFlags_NoBackground | ImGuiWindowFlags_.ImGuiWindowFlags_NoSavedSettings);
                     break;
                 case EVieportType.ChildWindow:
-                    bShow = ImGuiAPI.BeginChild(Title, in sz, false, ImGuiWindowFlags_.ImGuiWindowFlags_NoBackground | ImGuiWindowFlags_.ImGuiWindowFlags_NoSavedSettings);
+                    //if(sz == Vector2.Zero)
+                    //    sz = ImGuiAPI.GetWindowSize();
+                    bShow = ImGuiAPI.BeginChild(Title, in sz, false, ImGuiWindowFlags_.ImGuiWindowFlags_NoBackground | 
+                        ImGuiWindowFlags_.ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_.ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_.ImGuiWindowFlags_NoScrollWithMouse);
                     break;
             }
-            if (ImGuiAPI.IsWindowDocked())
-            {
-                DockId = ImGuiAPI.GetWindowDockID();
-            }
+            //if (ImGuiAPI.IsWindowDocked())
+            //{
+            //    DockId = ImGuiAPI.GetWindowDockID();
+            //}
             if (bShow)
             {
                 sz = ImGuiAPI.GetWindowSize();
@@ -158,7 +169,7 @@ namespace EngineNS.Graphics.Pipeline
                 var showTexture = GetShowTexture();
                 if (showTexture != IntPtr.Zero)
                 {
-                    var drawlist = new ImDrawList(ImGuiAPI.GetWindowDrawList());
+                    var drawlist = ImGuiAPI.GetWindowDrawList();
                     var uv1 = Vector2.Zero;
                     var uv2 = Vector2.One;
                     unsafe

@@ -121,7 +121,7 @@ namespace EngineNS.Bricks.ProjectGen
             //file + ".Console.csproj";
 
             System.Xml.XmlDocument xml = new System.Xml.XmlDocument();
-            var path = UEngine.Instance.FileManager.GetRoot(IO.FileManager.ERootDir.EngineSource);
+            var path = UEngine.Instance.FileManager.GetRoot(IO.TtFileManager.ERootDir.EngineSource);
             var proj = path + "Module/Template.csproj";
             xml.Load(proj);
             var root = xml.LastChild;
@@ -168,7 +168,7 @@ namespace EngineNS.Bricks.ProjectGen
                 attr.Value = i.FullName;
                 prop.Attributes.Append(attr);
 
-                attr = xml.CreateAttribute($"Label");
+                attr = xml.CreateAttribute($"DisplayName");
                 attr.Value = "Shared";
                 prop.Attributes.Append(attr);
                 root.AppendChild(prop);
@@ -209,7 +209,7 @@ namespace EngineNS.Bricks.ProjectGen
                     prop.AppendChild(hintPath);
                 }
             }
-            var text = IO.FileManager.GetXmlText(xml);
+            var text = IO.TtFileManager.GetXmlText(xml);
         }
         public UBrickDesc FindBrick(string fullname)
         {

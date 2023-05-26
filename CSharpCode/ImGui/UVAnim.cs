@@ -24,7 +24,7 @@ namespace EngineNS.EGui
         }
         public override async System.Threading.Tasks.Task<IO.IAsset> LoadAsset()
         {
-            await Thread.AsyncDummyClass.DummyFunc();
+            await Thread.TtAsyncDummyClass.DummyFunc();
             return null;
         }
         public override bool CanRefAssetType(IO.IAssetMeta ameta)
@@ -55,18 +55,18 @@ namespace EngineNS.EGui
                 cmdlist.AddText(in start, 0xFFFFFFFF, "UVAnim", null);
                 return;
             }
-            else if (SnapTask.IsCompleted == false)
+            else if (SnapTask.Value.IsCompleted == false)
             {
                 cmdlist.AddText(in start, 0xFFFFFFFF, "UVAnim", null);
                 return;
             }
             unsafe
             {
-                if (SnapTask.Result != null)
+                if (SnapTask.Value.Result != null)
                 {
                     var uv0 = SnapUVStart;
                     var uv1 = SnapUVEnd;
-                    cmdlist.AddImage(SnapTask.Result.GetTextureHandle().ToPointer(), in start, in end, in uv0, in uv1, 0xFFFFFFFF);
+                    cmdlist.AddImage(SnapTask.Value.Result.GetTextureHandle().ToPointer(), in start, in end, in uv0, in uv1, 0xFFFFFFFF);
                 }
                 else
                 {
@@ -76,7 +76,7 @@ namespace EngineNS.EGui
 
             //cmdlist.AddText(in start, 0xFFFFFFFF, "UVAnim", null);
         }
-        System.Threading.Tasks.Task<NxRHI.USrView> SnapTask;
+        Thread.Async.TtTask<NxRHI.USrView>? SnapTask;
     }
     [Rtti.Meta]
     [UUvAnim.Import]
@@ -147,39 +147,41 @@ namespace EngineNS.EGui
             }
 
             var typeStr = Rtti.UTypeDescManager.Instance.GetTypeStringFromType(this.GetType());
-            var xnd = new IO.CXndHolder(typeStr, 0, 0);
+            var xnd = new IO.TtXndHolder(typeStr, 0, 0);
             using (var attr = xnd.NewAttribute("UVAnim", 0, 0))
             {
-                var ar = attr.GetWriter(512);
-                ar.Write(this);
-                attr.ReleaseWriter(ref ar);
+                using (var ar = attr.GetWriter(512))
+                {
+                    ar.Write(this);
+                }
                 xnd.RootNode.AddAttribute(attr);
             }
 
             xnd.SaveXnd(name.Address);
         }
-        public static UUvAnim LoadXnd(UUvAnimManager manager, IO.CXndNode node)
+        public static UUvAnim LoadXnd(UUvAnimManager manager, IO.TtXndNode node)
         {
             UUvAnim result = new UUvAnim();
             if (ReloadXnd(result, manager, node) == false)
                 return null;
             return result;
         }
-        public static bool ReloadXnd(UUvAnim material, UUvAnimManager manager, IO.CXndNode node)
+        public static bool ReloadXnd(UUvAnim material, UUvAnimManager manager, IO.TtXndNode node)
         {
             var attr = node.TryGetAttribute("UVAnim");
             if (attr.NativePointer != IntPtr.Zero)
             {
-                var ar = attr.GetReader(null);
-                try
+                using (var ar = attr.GetReader(null))
                 {
-                    ar.ReadTo(material, null);
+                    try
+                    {
+                        ar.ReadTo(material, null);
+                    }
+                    catch (Exception ex)
+                    {
+                        Profiler.Log.WriteException(ex);
+                    }
                 }
-                catch (Exception ex)
-                {
-                    Profiler.Log.WriteException(ex);
-                }
-                attr.ReleaseReader(ref ar);
             }
             return true;
         }
@@ -196,6 +198,7 @@ namespace EngineNS.EGui
         RName mTextureName;
         public NxRHI.USrView mTexture;
         [Rtti.Meta]
+        [RName.PGRName(FilterExts = NxRHI.USrView.AssetExt)]
         public RName TextureName 
         { 
             get=> mTextureName; 
@@ -236,6 +239,8 @@ namespace EngineNS.EGui
         [EGui.Controls.PropertyGrid.UByte4ToColor4PickerEditor]
         [Rtti.Meta]
         public UInt32 Color { get; set; } = 0xFFFFFFFF;
+        [Rtti.Meta]
+        public float Duration { get; set; } = 1000.0f;
         public void OnDraw(ImDrawList cmdlist, in Vector2 rectMin, in Vector2 rectMax, int frame)
         {
             if (mTexture != null)
@@ -271,9 +276,9 @@ namespace EngineNS.EGui
             if (UVAnims.TryGetValue(rn, out result))
                 return result;
 
-            result = await UEngine.Instance.EventPoster.Post(() =>
+            result = await UEngine.Instance.EventPoster.Post((state) =>
             {
-                using (var xnd = IO.CXndHolder.LoadXnd(rn.Address))
+                using (var xnd = IO.TtXndHolder.LoadXnd(rn.Address))
                 {
                     if (xnd != null)
                     {
@@ -302,9 +307,9 @@ namespace EngineNS.EGui
         public async System.Threading.Tasks.Task<UUvAnim> CreateUVAnim(RName rn)
         {
             UUvAnim result;
-            result = await UEngine.Instance.EventPoster.Post(() =>
+            result = await UEngine.Instance.EventPoster.Post((state) =>
             {
-                using (var xnd = IO.CXndHolder.LoadXnd(rn.Address))
+                using (var xnd = IO.TtXndHolder.LoadXnd(rn.Address))
                 {
                     if (xnd != null)
                     {
@@ -329,9 +334,9 @@ namespace EngineNS.EGui
             if (UVAnims.TryGetValue(rn, out result) == false)
                 return true;
 
-            var ok = await UEngine.Instance.EventPoster.Post(() =>
+            var ok = await UEngine.Instance.EventPoster.Post((state) =>
             {
-                using (var xnd = IO.CXndHolder.LoadXnd(rn.Address))
+                using (var xnd = IO.TtXndHolder.LoadXnd(rn.Address))
                 {
                     if (xnd != null)
                     {

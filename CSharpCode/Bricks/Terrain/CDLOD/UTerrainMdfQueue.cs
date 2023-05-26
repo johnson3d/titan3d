@@ -29,12 +29,13 @@ namespace EngineNS.Bricks.Terrain.CDLOD
         }
         public override void CopyFrom(UMdfQueue mdf)
         {
+            base.CopyFrom(mdf);
             Dimension = (mdf as UTerrainMdfQueue).Dimension;
             IsWater = (mdf as UTerrainMdfQueue).IsWater;
         }
         public override Hash160 GetHash()
         {
-            string CodeString = IO.FileManager.ReadAllText(RName.GetRName("shaders/Bricks/Terrain/TerrainCDLOD.cginc", RName.ERNameType.Engine).Address);
+            string CodeString = IO.TtFileManager.ReadAllText(RName.GetRName("shaders/Bricks/Terrain/TerrainCDLOD.cginc", RName.ERNameType.Engine).Address);
             mMdfQueueHash = Hash160.CreateHash160(CodeString);
             return mMdfQueueHash;
         }
@@ -87,11 +88,11 @@ namespace EngineNS.Bricks.Terrain.CDLOD
         }
         [ThreadStatic]
         private static Profiler.TimeScope ScopeOnDrawCall = Profiler.TimeScopeManager.GetTimeScope(typeof(UTerrainMdfQueue), nameof(OnDrawCall));
-        public unsafe override void OnDrawCall(Graphics.Pipeline.URenderPolicy.EShadingType shadingType, NxRHI.UGraphicDraw drawcall, Graphics.Pipeline.URenderPolicy policy, Graphics.Mesh.UMesh mesh)
+        public unsafe override void OnDrawCall(Graphics.Pipeline.URenderPolicy.EShadingType shadingType, NxRHI.UGraphicDraw drawcall, Graphics.Pipeline.URenderPolicy policy, Graphics.Mesh.UMesh mesh, int atom)
         {
             using (new Profiler.TimeScopeHelper(ScopeOnDrawCall))
             {
-                base.OnDrawCall(shadingType, drawcall, policy, mesh);
+                base.OnDrawCall(shadingType, drawcall, policy, mesh, atom);
 
                 var effectBinder = drawcall.Effect.mBindIndexer as UMdfShaderBinder;
                 if (effectBinder == null)

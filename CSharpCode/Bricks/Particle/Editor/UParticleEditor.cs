@@ -7,6 +7,10 @@ namespace EngineNS.Bricks.Particle.Editor
 {
     public partial class UParticleEditor : EngineNS.Editor.IAssetEditor, IO.ISerializer, ITickable, IRootForm
     {
+        public int GetTickOrder()
+        {
+            return 0;
+        }
         public static LinkDesc NewInOutPinDesc(string linkType = "Value")
         {
             var result = new LinkDesc();
@@ -23,23 +27,24 @@ namespace EngineNS.Bricks.Particle.Editor
         }
         ~UParticleEditor()
         {
-            Cleanup();
+            Dispose();
         }
         public async System.Threading.Tasks.Task<bool> Initialize()
         {
-            await EngineNS.Thread.AsyncDummyClass.DummyFunc();
+            await EngineNS.Thread.TtAsyncDummyClass.DummyFunc();
             return true;
         }
-        public void Cleanup()
+        public void Dispose()
         {
-            PreviewViewport?.Cleanup();
-            PreviewViewport = null;
+            CoreSDK.DisposeObject(ref PreviewViewport);
         }
         protected bool mVisible = true;
         public bool Visible { get => mVisible; set => mVisible = value; }
         public uint DockId { get; set; }
         public ImGuiCond_ DockCond { get; set; } = ImGuiCond_.ImGuiCond_FirstUseEver;
         public UNebulaParticle NebulaParticle;
+        protected ImGuiWindowClass mDockKeyClass;
+        public ImGuiWindowClass DockKeyClass => mDockKeyClass;
         public IRootForm GetRootForm()
         {
             return this;
@@ -53,7 +58,7 @@ namespace EngineNS.Bricks.Particle.Editor
             var pivot = new Vector2(0);
             ImGuiAPI.SetNextWindowSize(in WindowSize, ImGuiCond_.ImGuiCond_FirstUseEver);
             ImGuiAPI.SetNextWindowDockID(DockId, DockCond);
-            if (ImGuiAPI.Begin(AssetName.Name, ref mVisible, ImGuiWindowFlags_.ImGuiWindowFlags_None |
+            if (EGui.UIProxy.DockProxy.BeginMainForm(AssetName.Name, this, ImGuiWindowFlags_.ImGuiWindowFlags_None |
                 ImGuiWindowFlags_.ImGuiWindowFlags_NoSavedSettings))
             {
                 if (ImGuiAPI.IsWindowDocked())
@@ -91,7 +96,7 @@ namespace EngineNS.Bricks.Particle.Editor
             {
                 drawing = false;
             }
-            ImGuiAPI.End();
+            EGui.UIProxy.DockProxy.EndMainForm();
 
             if (drawing)
             {
@@ -174,15 +179,19 @@ namespace EngineNS.Bricks.Particle.Editor
         }
         #endregion
         #region Tickable
-        public void TickLogic(int ellapse)
+        public void TickLogic(float ellapse)
         {
             PreviewViewport.TickLogic(ellapse);
         }
-        public void TickRender(int ellapse)
+        public void TickRender(float ellapse)
         {
             PreviewViewport.TickRender(ellapse);
         }
-        public void TickSync(int ellapse)
+        public void TickBeginFrame(float ellapse)
+        {
+
+        }
+        public void TickSync(float ellapse)
         {
             PreviewViewport.TickSync(ellapse);
         }
@@ -286,7 +295,7 @@ namespace EngineNS.Bricks.Particle.Editor
         public void OnCloseEditor()
         {
             UEngine.Instance.TickableManager.RemoveTickable(this);
-            Cleanup();
+            Dispose();
         }
         public void OnEvent(in Bricks.Input.Event e)
         {

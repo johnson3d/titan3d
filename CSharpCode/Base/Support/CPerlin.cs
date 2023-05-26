@@ -75,18 +75,18 @@ namespace EngineNS.Support
                         result += Noise(coord) * amp;
                         break;
                     case EFbmMode.Turbulence:
-                        result += CoreDefine.Abs(Noise(coord) * amp);
+                        result += MathHelper.Abs(Noise(coord) * amp);
                         break;
                     case EFbmMode.Ridge:
                         {
-                            var n = CoreDefine.Abs(Noise(coord));
+                            var n = MathHelper.Abs(Noise(coord));
                             n = RidgeOffset - n;
                             result += amp * n;
                         }
                         break;
                     case EFbmMode.RidgeSharp:
                         {
-                            var n = CoreDefine.Abs(Noise(coord));
+                            var n = MathHelper.Abs(Noise(coord));
                             n = RidgeOffset - n;
                             n = n * n;
                             result += amp * n;
@@ -116,7 +116,7 @@ namespace EngineNS.Support
 
             for (int i = 0; i < terms; i++)
             {
-                result += CoreDefine.Abs(Noise(coord)) * amp;
+                result += MathHelper.Abs(Noise(coord)) * amp;
                 coord *= 2.0f;
 
                 amp *= 0.5f;
@@ -150,7 +150,7 @@ namespace EngineNS.Support
             for (int i = 0; i < terms; i++)
             {
                 var n = Noise(coord);
-                n = CoreDefine.Abs(n) * amp;
+                n = MathHelper.Abs(n) * amp;
                 n = n * n;
                 result += n;
                 
@@ -169,21 +169,21 @@ namespace EngineNS.Support
 
         public double Noise(double x)
         {
-            //var X = CoreDefine.FloorToInt(x) & 0xff;
-            var X = ClampPermIndex(CoreDefine.FloorToInt(x));
-            x -= CoreDefine.Floor(x);
+            //var X = MathHelper.FloorToInt(x) & 0xff;
+            var X = ClampPermIndex(MathHelper.FloorToInt(x));
+            x -= MathHelper.Floor(x);
             var u = Fade(x);
             return Lerp(u, Grad(mPerm[X], x), Grad(mPerm[X + 1], x - 1)) * 2;
         }
 
         public double Noise(double x, double y)
         {
-            //var X = CoreDefine.FloorToInt(x) & 0xff;
-            //var Y = CoreDefine.FloorToInt(y) & 0xff;
-            var X = ClampPermIndex(CoreDefine.FloorToInt(x));
-            var Y = ClampPermIndex(CoreDefine.FloorToInt(y));
-            x -= CoreDefine.Floor(x);
-            y -= CoreDefine.Floor(y);
+            //var X = MathHelper.FloorToInt(x) & 0xff;
+            //var Y = MathHelper.FloorToInt(y) & 0xff;
+            var X = ClampPermIndex(MathHelper.FloorToInt(x));
+            var Y = ClampPermIndex(MathHelper.FloorToInt(y));
+            x -= MathHelper.Floor(x);
+            y -= MathHelper.Floor(y);
             var u = Fade(x);
             var v = Fade(y);
             //var A = (mPerm[X] + Y) & 0xff;
@@ -201,15 +201,15 @@ namespace EngineNS.Support
 
         public double Noise(double x, double y, double z)
         {
-            //var X = CoreDefine.FloorToInt(x) & 0xff;
-            //var Y = CoreDefine.FloorToInt(y) & 0xff;
-            //var Z = CoreDefine.FloorToInt(z) & 0xff;
-            var X = ClampPermIndex(CoreDefine.FloorToInt(x));
-            var Y = ClampPermIndex(CoreDefine.FloorToInt(y));
-            var Z = ClampPermIndex(CoreDefine.FloorToInt(z));
-            x -= CoreDefine.Floor(x);
-            y -= CoreDefine.Floor(y);
-            z -= CoreDefine.Floor(z);
+            //var X = MathHelper.FloorToInt(x) & 0xff;
+            //var Y = MathHelper.FloorToInt(y) & 0xff;
+            //var Z = MathHelper.FloorToInt(z) & 0xff;
+            var X = ClampPermIndex(MathHelper.FloorToInt(x));
+            var Y = ClampPermIndex(MathHelper.FloorToInt(y));
+            var Z = ClampPermIndex(MathHelper.FloorToInt(z));
+            x -= MathHelper.Floor(x);
+            y -= MathHelper.Floor(y);
+            z -= MathHelper.Floor(z);
             var u = Fade(x);
             var v = Fade(y);
             var w = Fade(z);

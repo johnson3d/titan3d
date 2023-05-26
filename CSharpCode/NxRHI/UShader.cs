@@ -77,7 +77,14 @@ namespace EngineNS.NxRHI
 
                     var varAttr = attrs[0] as UShaderVarAttribute;
                     var fld = binder.FindField(i.Name);
-                    i.SetValue(this, fld);
+                    if (fld.IsValidPointer)
+                    {
+                        i.SetValue(this, fld);
+                    }
+                    else
+                    {
+                        Profiler.Log.WriteLine(Profiler.ELogTag.Warning, "Shader", $"CB({binder.mCoreObject.Name.c_str()}) can't find {i.Name}");
+                    }
                 }
             }
             public UShaderVarIndexer NextIndexer = null;
@@ -97,18 +104,24 @@ namespace EngineNS.NxRHI
             }
         }
 
+        public Graphics.Pipeline.Shader.UShadingEnv.FPermutationId PermutationId { get; set; }
         public const string AssetExt = ".shader";
-        public unsafe void SaveTo(Hash160 hash)
+        public unsafe void SaveTo(RName shader, in Hash160 hash)
         {
-            var path = UEngine.Instance.FileManager.GetPath(IO.FileManager.ERootDir.Cache, IO.FileManager.ESystemDir.Shader);
+            var path = UEngine.Instance.FileManager.GetPath(IO.TtFileManager.ERootDir.Cache, IO.TtFileManager.ESystemDir.Shader);
             var file = path + hash.ToString() + UShader.AssetExt;
-            var xnd = new IO.CXndHolder("UShader", 0, 0);
+            var xnd = new IO.TtXndHolder("UShader", 0, 0);
 
             var descAttr = new XndAttribute(xnd.RootNode.mCoreObject.GetOrAddAttribute("Desc", 0, 0));
-            var ar = descAttr.GetWriter(30);
-            //ar.Write(Desc);
-            ar.Write(mCoreObject.GetDesc().Type);
-            descAttr.ReleaseWriter(ref ar);
+            using (var ar = descAttr.GetWriter(30))
+            {
+                ar.Write(shader);
+                ar.Write(this.PermutationId);
+                var shadingCode = Editor.ShaderCompiler.UShaderCodeManager.Instance.GetShaderCode(shader);
+                ar.Write(shadingCode.CodeHash);
+
+                ar.Write(mCoreObject.GetDesc().Type);
+            }
 
             using (var vsNode = xnd.mCoreObject.NewNode("ShaderDesc", 0, 0))
             {
@@ -118,33 +131,36 @@ namespace EngineNS.NxRHI
 
             xnd.SaveXnd(file);
         }
-        public unsafe static UShader Load(Hash160 hash)
+        public unsafe static UShader Load(IO.TtXndHolder xnd)
         {
-            var path = UEngine.Instance.FileManager.GetPath(IO.FileManager.ERootDir.Cache, IO.FileManager.ESystemDir.Shader);
-            var file = path + hash.ToString() + UShader.AssetExt;
-            using (var xnd = IO.CXndHolder.LoadXnd(file))
+            var descAttr = xnd.RootNode.mCoreObject.TryGetAttribute("Desc");
+            if (descAttr.IsValidPointer == false)
+                return null;
+            Graphics.Pipeline.Shader.UShadingEnv.FPermutationId permutationId = new Graphics.Pipeline.Shader.UShadingEnv.FPermutationId();
+            using (var ar = descAttr.GetReader(null))
             {
-                if (xnd == null)
+                RName shader;
+                ar.Read(out shader);
+                ar.Read(out permutationId);
+                Hash160 hash;
+                ar.Read(out hash);
+                var shadingCode = Editor.ShaderCompiler.UShaderCodeManager.Instance.GetShaderCode(shader);
+                if (shadingCode.CodeHash != hash)
                     return null;
-
-                var descAttr = xnd.RootNode.mCoreObject.TryGetAttribute("Desc");
-                if (descAttr.IsValidPointer == false)
-                    return null;
-                var vsNode = xnd.RootNode.mCoreObject.TryGetChildNode("ShaderDesc");
-                if (vsNode.IsValidPointer == false)
-                    return null;
-                var ar = descAttr.GetReader(null);
-                var shaderType = NxRHI.EShaderType.SDT_ComputeShader;
-                ar.Read(out shaderType);
-                descAttr.ReleaseReader(ref ar);
-
-                var desc = new UShaderDesc();
-                if (desc.mCoreObject.LoadXnd(UEngine.Instance.GfxDevice.RenderContext.mCoreObject, vsNode) == false)
-                    return null;
-                
-                var rc = UEngine.Instance.GfxDevice.RenderContext;
-                return rc.CreateShader(desc);
             }
+            
+            var vsNode = xnd.RootNode.mCoreObject.TryGetChildNode("ShaderDesc");
+            if (vsNode.IsValidPointer == false)
+                return null;
+
+            var desc = new UShaderDesc();
+            if (desc.mCoreObject.LoadXnd(UEngine.Instance.GfxDevice.RenderContext.mCoreObject, vsNode) == false)
+                return null;
+
+            var rc = UEngine.Instance.GfxDevice.RenderContext;
+            var result = rc.CreateShader(desc);
+            result.PermutationId = permutationId;
+            return result;
         }
         public void SetDebugName(string name)
         {

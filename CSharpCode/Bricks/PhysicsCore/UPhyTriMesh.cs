@@ -123,40 +123,41 @@ namespace EngineNS.Bricks.PhysicsCore
         public void SaveAssetTo(RName name)
         {
             var typeStr = Rtti.UTypeDescManager.Instance.GetTypeStringFromType(this.GetType());
-            var xnd = new IO.CXndHolder(typeStr, 0, 0);
+            var xnd = new IO.TtXndHolder(typeStr, 0, 0);
             using (var attr = xnd.NewAttribute("PhyTriMesh", 0, 0))
             {
-                var ar = attr.GetWriter(512);
-                ar.Write(this);
-                attr.ReleaseWriter(ref ar);
+                using (var ar = attr.GetWriter(512))
+                {
+                    ar.Write(this);
+                }
                 xnd.RootNode.AddAttribute(attr);
             }
 
             xnd.SaveXnd(name.Address);
         }
-        public static UPhyTriMesh LoadXnd(UPhyMeshManager manager, IO.CXndNode node)
+        public static UPhyTriMesh LoadXnd(UPhyMeshManager manager, IO.TtXndNode node)
         {
             UPhyTriMesh result = new UPhyTriMesh();
             if (ReloadXnd(result, manager, node) == false)
                 return null;
             return result;
         }
-        public static bool ReloadXnd(UPhyTriMesh mesh, UPhyMeshManager manager, IO.CXndNode node)
+        public static bool ReloadXnd(UPhyTriMesh mesh, UPhyMeshManager manager, IO.TtXndNode node)
         {
             var attr = node.TryGetAttribute("PhyTriMesh");
             if (attr.NativePointer != IntPtr.Zero)
             {
-                var ar = attr.GetReader(null);
-                try
+                using (var ar = attr.GetReader(null))
                 {
-                    ar.ReadTo(mesh, null);
+                    try
+                    {
+                        ar.ReadTo(mesh, null);
+                    }
+                    catch (Exception ex)
+                    {
+                        Profiler.Log.WriteException(ex);
+                    }
                 }
-                catch (Exception ex)
-                {
-                    Profiler.Log.WriteException(ex);
-                }
-                attr.ReleaseReader(ref ar);
-
             }
             return true;
         }
@@ -183,7 +184,7 @@ namespace EngineNS.Bricks.PhysicsCore
             {
                 System.Diagnostics.Debug.Assert(propName == "MeshDataSave");
                 var mesh = host as UPhyTriMesh;
-                var blob = new Support.CBlobObject();
+                var blob = new Support.UBlobObject();
                 uint size;
                 ar.Read(out size);
                 blob.mCoreObject.ReSize(size);
@@ -226,7 +227,7 @@ namespace EngineNS.Bricks.PhysicsCore
             if (TriMeshes.TryGetValue(rn, out result))
                 return result;
 
-            using (var xnd = IO.CXndHolder.LoadXnd(rn.Address))
+            using (var xnd = IO.TtXndHolder.LoadXnd(rn.Address))
             {
                 if (xnd != null)
                 {
@@ -253,9 +254,9 @@ namespace EngineNS.Bricks.PhysicsCore
             if (TriMeshes.TryGetValue(rn, out result))
                 return result;
 
-            result = await UEngine.Instance.EventPoster.Post(() =>
+            result = await UEngine.Instance.EventPoster.Post((state) =>
             {
-                using (var xnd = IO.CXndHolder.LoadXnd(rn.Address))
+                using (var xnd = IO.TtXndHolder.LoadXnd(rn.Address))
                 {
                     if (xnd != null)
                     {

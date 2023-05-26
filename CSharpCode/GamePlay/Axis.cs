@@ -1903,7 +1903,7 @@ namespace EngineNS.GamePlay
                 if(mShiftKeyIsDown)
                 {
                     // todo: 复制
-                    await Thread.AsyncDummyClass.DummyFunc();
+                    await Thread.TtAsyncDummyClass.DummyFunc();
                 }
                 mFirstTransAxis = false;
             }

@@ -48,6 +48,20 @@ namespace EngineNS.Macross
             mFrameStates[name] = tmp;
         }
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public void SetWatchVariable<T>(string name, T value, bool dummy = false) where T : struct
+        {
+            Support.UAnyPointer tmp;
+            if (mFrameStates.TryGetValue(name, out tmp))
+            {
+                tmp.SetValue(value);
+            }
+            else
+            {
+                tmp.SetValue(value);
+            }
+            mFrameStates[name] = tmp;
+        }
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void SetWatchVariable(string name, object value)
         {
             Support.UAnyPointer tmp = new Support.UAnyPointer();
@@ -97,7 +111,7 @@ namespace EngineNS.Macross
         public static List<UMacrossStackTracer> mThreadMacrossStacks = new List<UMacrossStackTracer>();
         [ThreadStatic]
         private static UMacrossStackTracer mThreadInstance;
-        public Thread.ContextThread mThreadContext { get; private set; }
+        public Thread.TtContextThread mThreadContext { get; private set; }
         public static UMacrossStackTracer ThreadInstance
         {
             get
@@ -105,7 +119,7 @@ namespace EngineNS.Macross
                 if (mThreadInstance == null)
                 {
                     mThreadInstance = new UMacrossStackTracer();
-                    mThreadInstance.mThreadContext = Thread.ContextThread.CurrentContext;
+                    mThreadInstance.mThreadContext = Thread.TtContextThread.CurrentContext;
                     lock (mThreadMacrossStacks)
                     {
                         mThreadMacrossStacks.Add(mThreadInstance);

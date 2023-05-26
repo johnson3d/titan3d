@@ -129,14 +129,14 @@ namespace EngineNS
         }
         public virtual void OnEvent(in Bricks.Input.Event e)
         {
-            switch (e.Window.WindowEventID)
-            {
-                //case SDL.SDL_WindowEventID.SDL_WINDOWEVENT_SIZE_CHANGED:
-                //    {
-                //        OnResize(e.window.data1, e.window.data2);
-                //    }
-                //    break;
-            }
+            //switch (e.Window.WindowEventID)
+            //{
+            //    //case SDL.SDL_WindowEventID.SDL_WINDOWEVENT_SIZE_CHANGED:
+            //    //    {
+            //    //        OnResize(e.window.data1, e.window.data2);
+            //    //    }
+            //    //    break;
+            //}
 
             if (mEventProcessors != null)
             {

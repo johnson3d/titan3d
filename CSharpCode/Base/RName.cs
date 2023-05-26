@@ -209,10 +209,10 @@ namespace EngineNS
         {
             get
             {
-                return IO.FileManager.GetExtName(mName);
+                return IO.TtFileManager.GetExtName(mName);
             }
         }
-        public string PureName => IO.FileManager.GetPureName(mName);
+        public string PureName => IO.TtFileManager.GetPureName(mName);
         public static RName GetRName(string name, ERNameType rNameType = ERNameType.Game)
         {
             return RNameManager.Instance.GetRName(name, rNameType);
@@ -245,9 +245,9 @@ namespace EngineNS
             switch (type)
             {
                 case ERNameType.Engine:
-                    return UEngine.Instance.FileManager.GetRoot(IO.FileManager.ERootDir.Engine) + name;
+                    return UEngine.Instance.FileManager.GetRoot(IO.TtFileManager.ERootDir.Engine) + name;
                 case ERNameType.Game:
-                    return UEngine.Instance.FileManager.GetRoot(IO.FileManager.ERootDir.Game) + name;
+                    return UEngine.Instance.FileManager.GetRoot(IO.TtFileManager.ERootDir.Game) + name;
                 default:
                     {
                         return null;
@@ -289,8 +289,10 @@ namespace EngineNS
                 name = name.ToLower();
                 lock (this)
                 {
-                    var dict = mNameSets[(int)rNameType];
+                    if ((int)rNameType >= (int)ERNameType.Count)
+                        return null;
                     RName result;
+                    var dict = mNameSets[(int)rNameType];
                     if (dict.TryGetValue(name, out result) == false)
                     {
                         result = new RName(name, rNameType);

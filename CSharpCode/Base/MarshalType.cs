@@ -1,7 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Runtime.InteropServices;
 using EngineNS;
+using NPOI.SS.Formula.PTG;
+using System.Linq;
+using Org.BouncyCastle.Crypto.Agreement;
 
 public struct Wchar16
 {
@@ -11,6 +15,16 @@ public struct Wchar32
 {
     public UInt32 Value;
 }
+
+public struct wchar_t
+{
+#if PWindow
+    public ushort Value;
+#else
+    public uint Value;
+#endif
+}
+
 
 [CppBool.PropEditor()]
 public struct CppBool
@@ -145,5 +159,95 @@ public struct vBOOL
     public override int GetHashCode()
     {
         return Value;
+    }
+}
+
+//接口数据为utf-8编码所设置
+public class UTF8Marshaler : System.Runtime.InteropServices.ICustomMarshaler
+{
+    public void CleanUpManagedData(object managedObj)
+    {
+    }
+
+    public unsafe void CleanUpNativeData(IntPtr pNativeData)
+    {
+        CoreSDK.Free(pNativeData.ToPointer());
+    }
+
+    public int GetNativeDataSize()
+    {
+        return -1;
+    }
+
+    public unsafe IntPtr MarshalManagedToNative(object managedObj)
+    {
+        if (object.ReferenceEquals(managedObj, null))
+            return IntPtr.Zero;
+        
+        if (!(managedObj is string))
+            throw new InvalidOperationException();
+
+        var str = managedObj as string;
+        var len = Encoding.UTF8.GetByteCount(str);
+        IntPtr ptr = (IntPtr)CoreSDK.Alloc((uint)len + 1, "MarshalType.cs", 190);
+        var utf8Buffer = new Span<byte>(ptr.ToPointer(), len);
+        Encoding.UTF8.GetBytes(str, utf8Buffer);
+        ((byte*)ptr.ToPointer())[len] = 0;
+        return ptr;
+    }
+
+    public unsafe object MarshalNativeToManaged(IntPtr pNativeData)
+    {
+        if (pNativeData == IntPtr.Zero)
+            return null;
+
+        var len = (int)CoreSDK.SDK_StrLen(pNativeData.ToPointer());
+        var utf8Buffer = new ReadOnlySpan<byte>(pNativeData.ToPointer(), len);
+        return Encoding.UTF8.GetString(utf8Buffer);
+    }
+
+    private static UTF8Marshaler instance = new UTF8Marshaler();
+    public static ICustomMarshaler GetInstance(string cookie)
+    {
+        return instance;
+    }
+}
+
+//namespace System.Collections.Generic
+//{
+
+//}
+
+public static class ListExtra
+{
+    public static List<T> CreateList<T>(int sz, T c = default(T))
+    {
+        var result = new List<T>();
+        result.Resize(sz, c);
+        return result;
+    }
+    public static List<T> CreateList<T>(T[] src)
+    {
+        var result = new List<T>();
+        result.Resize(src.Length);
+        for (int i = 0; i < src.Length; i++)
+        {
+            result[i] = src[i];
+        }
+        return result;
+    }
+    public static void Resize<T>(this List<T> list, int sz, T c = default(T))
+    {
+        int cur = list.Count;
+        if (sz < cur)
+        {
+            list.RemoveRange(sz, cur - sz);
+        }
+        else if (sz > cur)
+        {
+            if (sz > list.Capacity)//this bit is purely an optimisation, to avoid multiple automatic capacity changes.
+                list.Capacity = sz;
+            list.AddRange(Enumerable.Repeat(c, sz - cur));
+        }
     }
 }

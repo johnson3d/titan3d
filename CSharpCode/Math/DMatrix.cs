@@ -69,24 +69,24 @@ namespace EngineNS
                      M31 == value.M31 && M32 == value.M32 && M33 == value.M33 && M34 == value.M34 &&
                      M41 == value.M41 && M42 == value.M42 && M43 == value.M43 && M44 == value.M44);
         }
-        public static bool Equals(in DMatrix value1, in DMatrix value2, double epsilon = CoreDefine.DEpsilon)
+        public static bool Equals(in DMatrix value1, in DMatrix value2, double epsilon = MathHelper.DEpsilon)
         {
-            return CoreDefine.DoubleEuqal(value1.M11, value2.M11, epsilon) &&
-                    CoreDefine.DoubleEuqal(value1.M12, value2.M12, epsilon) &&
-                    CoreDefine.DoubleEuqal(value1.M13, value2.M13, epsilon) &&
-                    CoreDefine.DoubleEuqal(value1.M14, value2.M14, epsilon) &&
-                    CoreDefine.DoubleEuqal(value1.M21, value2.M21, epsilon) &&
-                    CoreDefine.DoubleEuqal(value1.M22, value2.M22, epsilon) &&
-                    CoreDefine.DoubleEuqal(value1.M23, value2.M23, epsilon) &&
-                    CoreDefine.DoubleEuqal(value1.M24, value2.M24, epsilon) &&
-                    CoreDefine.DoubleEuqal(value1.M31, value2.M31, epsilon) &&
-                    CoreDefine.DoubleEuqal(value1.M32, value2.M32, epsilon) &&
-                    CoreDefine.DoubleEuqal(value1.M33, value2.M33, epsilon) &&
-                    CoreDefine.DoubleEuqal(value1.M34, value2.M34, epsilon) &&
-                    CoreDefine.DoubleEuqal(value1.M41, value2.M41, epsilon) &&
-                    CoreDefine.DoubleEuqal(value1.M42, value2.M42, epsilon) &&
-                    CoreDefine.DoubleEuqal(value1.M43, value2.M43, epsilon) &&
-                    CoreDefine.DoubleEuqal(value1.M44, value2.M44, epsilon);
+            return MathHelper.DoubleEuqal(value1.M11, value2.M11, epsilon) &&
+                    MathHelper.DoubleEuqal(value1.M12, value2.M12, epsilon) &&
+                    MathHelper.DoubleEuqal(value1.M13, value2.M13, epsilon) &&
+                    MathHelper.DoubleEuqal(value1.M14, value2.M14, epsilon) &&
+                    MathHelper.DoubleEuqal(value1.M21, value2.M21, epsilon) &&
+                    MathHelper.DoubleEuqal(value1.M22, value2.M22, epsilon) &&
+                    MathHelper.DoubleEuqal(value1.M23, value2.M23, epsilon) &&
+                    MathHelper.DoubleEuqal(value1.M24, value2.M24, epsilon) &&
+                    MathHelper.DoubleEuqal(value1.M31, value2.M31, epsilon) &&
+                    MathHelper.DoubleEuqal(value1.M32, value2.M32, epsilon) &&
+                    MathHelper.DoubleEuqal(value1.M33, value2.M33, epsilon) &&
+                    MathHelper.DoubleEuqal(value1.M34, value2.M34, epsilon) &&
+                    MathHelper.DoubleEuqal(value1.M41, value2.M41, epsilon) &&
+                    MathHelper.DoubleEuqal(value1.M42, value2.M42, epsilon) &&
+                    MathHelper.DoubleEuqal(value1.M43, value2.M43, epsilon) &&
+                    MathHelper.DoubleEuqal(value1.M44, value2.M44, epsilon);
         }
         #endregion
 

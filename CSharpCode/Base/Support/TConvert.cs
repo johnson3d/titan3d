@@ -254,6 +254,36 @@ namespace EngineNS.Support
                 return 0;
             }
         }
+        public static object ToObject(Type type, object obj)
+        {
+            if (obj == null)
+                return null;
+            if (obj.GetType() == type)
+            {
+                return obj;
+            }
+            else if(type == typeof(Vector4))
+            {
+                return Vector4.FromObject(obj);
+            }
+            else if (type == typeof(Vector3))
+            {
+                return Vector3.FromObject(obj);
+            }
+            else if (type == typeof(Color4f))
+            {
+                return Color4f.FromObject(obj);
+            }
+            else if (type == typeof(Color3f))
+            {
+                return Color3f.FromObject(obj);
+            }
+            else
+            {
+                System.Diagnostics.Debug.Assert(false);
+                return obj;
+            }
+        }
         public static object ToObject(Rtti.UTypeDesc type, string text)
         {
             return ToObject(type.SystemType, text);
@@ -299,6 +329,14 @@ namespace EngineNS.Support
                 else if (type == typeof(FTransform))
                 {
                     return FTransform.Parse(text);
+                }
+                else if (type == typeof(Color3f))
+                {
+                    return Color3f.FromString(text);
+                }
+                else if (type == typeof(Color4f))
+                {
+                    return Color4f.FromString(text);
                 }
                 else if (type.IsEnum)
                 {

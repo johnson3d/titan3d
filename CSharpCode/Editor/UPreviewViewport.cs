@@ -12,13 +12,14 @@ namespace EngineNS.Editor
         }
         ~UPreviewViewport()
         {
-            Cleanup();
+            Dispose();
         }
-        public void Cleanup()
+        public override void Dispose()
         {
             PresentWindow?.UnregEventProcessor(this);
-            RenderPolicy?.Cleanup();
+            RenderPolicy?.Dispose();
             RenderPolicy = null;
+            base.Dispose();
         }
         protected async System.Threading.Tasks.Task Initialize_Default(Graphics.Pipeline.UViewportSlate viewport, USlateApplication application, Graphics.Pipeline.URenderPolicy policy, float zMin, float zMax)
         {
@@ -60,6 +61,14 @@ namespace EngineNS.Editor
                 policy = rpAsset.CreateRenderPolicy();
             }
             await policy.Initialize(null);
+            if (ClientSize.X == 0 || ClientSize.Y == 0)
+            {
+                policy.OnResize(1, 1);
+            }
+            else
+            {
+                policy.OnResize(ClientSize.X, ClientSize.Y);
+            }
 
             await World.InitWorld();
 
@@ -69,14 +78,6 @@ namespace EngineNS.Editor
             }
             await OnInitialize(this, application, policy, zMin, zMax);
 
-            if (ClientSize.X == 0 || ClientSize.Y == 0)
-            {
-                RenderPolicy.OnResize(1, 1);
-            }
-            else
-            {
-                RenderPolicy.OnResize(ClientSize.X, ClientSize.Y);
-            }
             Initialized = true;
         }
         protected override void OnClientChanged(bool bSizeChanged)
@@ -94,7 +95,7 @@ namespace EngineNS.Editor
             {
                 Editor.USnapshot.Save(PreviewAsset, UEngine.Instance.AssetMetaManager.GetAssetMeta(PreviewAsset), RenderPolicy.GetFinalShowRSV());
             }
-            if (ShowWorldAxis)
+            if (ShowWorldAxis && CameraController.Camera != null)
                 DrawWorldAxis(this.CameraController.Camera);
         }
         protected override IntPtr GetShowTexture()
@@ -124,6 +125,10 @@ namespace EngineNS.Editor
                     {
                         CameraController.Rotate(Graphics.Pipeline.ECameraAxis.Up, (e.MouseMotion.X - mPreMousePt.X) * 0.01f);
                         CameraController.Rotate(Graphics.Pipeline.ECameraAxis.Right, (e.MouseMotion.Y - mPreMousePt.Y) * 0.01f);
+                        /*if (keyboards.IsKeyDown(Bricks.Input.Keycode.KEY_LCTRL))
+                        {
+                            UEngine.Instance.GfxDevice.RenderCmdQueue.CaptureRenderDocFrame = true;
+                        }*/
                     }
                 }
                 else if (e.MouseButton.Button == (byte)Bricks.Input.EMouseButton.BUTTON_MIDDLE)
@@ -189,7 +194,7 @@ namespace EngineNS.Editor
             get => mVisParameter;
         }
 
-        public void TickLogic(int ellapse)
+        public void TickLogic(float ellapse)
         {
             if (Initialized == false)
                 return;
@@ -215,12 +220,12 @@ namespace EngineNS.Editor
 
             RenderPolicy?.EndTickLogic(World);
         }
-        public void TickRender(int ellapse)
+        public void TickRender(float ellapse)
         {
             
         }
         public Action AfterTickSync;
-        public void TickSync(int ellapse)
+        public void TickSync(float ellapse)
         {
             if (Initialized == false)
                 return;

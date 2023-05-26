@@ -1153,6 +1153,7 @@ namespace EngineNS.EGui.Controls.PropertyGrid
             else
             {
                 var listOpAtt = info.HostProperty.GetAttribute<PGListOperationCallbackAttribute>();
+                var baseTypeAtt = info.HostProperty.GetAttribute<PGBaseType>();
                 if (info.Readonly == false)
                 {
                     //ImGuiAPI.SameLine(0, -1);
@@ -1171,13 +1172,17 @@ namespace EngineNS.EGui.Controls.PropertyGrid
                         var dict = info.Value as System.Collections.IList;
                         if (dict.GetType().GenericTypeArguments.Length == 1)
                         {
-                            var listElementType = dict.GetType().GenericTypeArguments[0];
+                            Type baseType = null;
+                            if(baseTypeAtt != null)
+                                baseType = baseTypeAtt.BaseType;
+                            else
+                                baseType = dict.GetType().GenericTypeArguments[0];
                             var typeSlt = new EGui.Controls.UTypeSelector();
-                            typeSlt.BaseType = Rtti.UTypeDescManager.Instance.GetTypeDescFromFullName(listElementType.FullName);
+                            typeSlt.BaseType = Rtti.UTypeDescManager.Instance.GetTypeDescFromFullName(baseType.FullName);
                             typeSlt.OnDraw(150, 6);
                             if (typeSlt.SelectedType != null)
                             {
-                                var newItem = Rtti.UTypeDescManager.CreateInstance(listElementType);
+                                var newItem = Rtti.UTypeDescManager.CreateInstance(typeSlt.SelectedType);
                                 var idx = dict.Count;
                                 listOpAtt?.OnPreInsert(idx, newItem, info.ObjectInstance);
                                 dict.Insert(idx, newItem);

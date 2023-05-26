@@ -1,12 +1,46 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Runtime.InteropServices;
 using System.Text;
+using System.Threading.Tasks;
 
 namespace EngineNS.Bricks.NodeGraph
 {
     public abstract class UNodePinDefineBase : IO.BaseSerializer
     {
+        public Action<string, string> OnNameChanged = null;
+        string mName = "UserPin";
+        [Rtti.Meta]
+        [NameCheckAttribute]
+        public virtual string Name 
+        {
+            get => mName;
+            set
+            {
+                var oldName = mName;
+                mName = value;
+                OnNameChanged?.Invoke(oldName, value);
+            }
+        }
+        public delegate string Delegate_GetErrorString(in EGui.Controls.PropertyGrid.PGCustomValueEditorAttribute.EditorInfo info, UNodePinDefineBase def, object newValue);
+        public Delegate_GetErrorString GetErrorStringAction;
+        class NameCheckAttribute : EGui.Controls.PropertyGrid.PGCustomValueEditorAttribute
+        {
+            public NameCheckAttribute()
+            {
+                UserDraw = false;
+            }
+            public override string GetErrorString<T>(in EditorInfo info, T newValue)
+            {
+                var def = info.ObjectInstance as UNodePinDefineBase;
+                return def?.GetErrorStringAction?.Invoke(in info, def, newValue);
+            }
+        }
+        [Rtti.Meta]
+        public virtual string TypeValue { get; set; } = "Value";
+
         public static UNodePinDefineBase CreatePinDefineFromPin<T, T_Pin>(T_Pin pin) 
             where T : UNodePinDefineBase, new()
             where T_Pin : NodePin
@@ -32,7 +66,31 @@ namespace EngineNS.Bricks.NodeGraph
         public void UpdateLayout();
         public void UpdatePinWithDefine(NodePin pin, UNodePinDefineBase pinDef);
     }
-    public interface IUnionNode
+    public class UnionNodePropertyData : IO.BaseSerializer
+    {
+        [Rtti.Meta]
+        [Browsable(false)]
+        public Guid NodeId { get; set; }
+        [Rtti.Meta]
+        [ReadOnly(true)]
+        public string Name { get; set; }
+        [Rtti.Meta]
+        public string DisplayName { get; set; }
+        [Rtti.Meta]
+        public string Category { get; set; } = "Custom";
+        [Rtti.Meta]
+        public bool ReadOnly { get; set; } = false;
+
+        public void CopyTo(ref UnionNodePropertyData data)
+        {
+            data.NodeId = NodeId;
+            data.Name = Name;
+            data.DisplayName = DisplayName;
+            data.Category = Category;
+            data.ReadOnly = ReadOnly;
+        }
+    }
+    public interface IUnionNode : EGui.Controls.PropertyGrid.IPropertyCustomization
     {
         public UNodeGraph ContentGraph { get; set; }
         public Guid InputNodeId { get; set; }
@@ -43,6 +101,7 @@ namespace EngineNS.Bricks.NodeGraph
         public Vector2 Size { get; set; }
         public List<PinIn> Inputs { get; }
         public List<PinOut> Outputs { get; }
+        public List<UnionNodePropertyData> PropertyDatas { get; set; }
 
         public PinOut AddPinOut(PinOut pin);
         public PinIn AddPinIn(PinIn pin);
@@ -140,7 +199,9 @@ namespace EngineNS.Bricks.NodeGraph
                     var outPin = mCreateTempPins[linker.OutPin] as PinOut;
                     contentGraph.AddLink(outPin, pinIn, true);
 
+                    linker.InPin.HostNode.OnRemoveLinker(linker);
                     linker.OutPin = pinOut;
+                    linker.InPin.HostNode.OnLinkedFrom(linker.InPin, pinOut.HostNode, pinOut);
                 }
                 else if (hasInNode)
                 {
@@ -161,7 +222,9 @@ namespace EngineNS.Bricks.NodeGraph
                     var inPin = mCreateTempPins[linker.InPin] as PinIn;
                     contentGraph.AddLink(pinOut, inPin, true);
 
+                    linker.OutPin.HostNode.OnRemoveLinker(linker);
                     linker.InPin = pinIn;
+                    linker.OutPin.HostNode.OnLinkedTo(linker.OutPin, pinIn.HostNode, pinIn);
                 }
             }
 
@@ -262,6 +325,140 @@ namespace EngineNS.Bricks.NodeGraph
             }
 
             graph.RemoveNode(unionNode as UNodeBase);
+        }
+    }
+    public class UnionNodeConfigRenderer
+    {
+        int mSelectedIndex = -1;
+        List<UnionNodePropertyData> mEditingDatas = new List<UnionNodePropertyData>();
+        EGui.Controls.PropertyGrid.PropertyGrid mPGMember = new EGui.Controls.PropertyGrid.PropertyGrid();
+        IUnionNode mUnionNode;
+
+        public async Task<bool> Initialize()
+        {
+            return await mPGMember.Initialize();
+        }
+
+        public void SetUnionNode(IUnionNode node)
+        {
+            mSelectedIndex = -1;
+            if(mUnionNode != node)
+            {
+                mPGMember.Target = null;
+                mEditingDatas.Clear();
+            }
+            mUnionNode = node;
+            if(mUnionNode != null)
+            {
+                for(int i=0; i<mUnionNode.PropertyDatas.Count; i++)
+                {
+                    var data = new UnionNodePropertyData();
+                    mUnionNode.PropertyDatas[i].CopyTo(ref data);
+                    mEditingDatas.Add(data);
+                }
+            }
+        }
+
+        public unsafe void DrawConfigPanel()
+        {
+            if (mUnionNode == null)
+                return;
+            if (ImGuiAPI.BeginChild("Config", in Vector2.Zero, false, ImGuiWindowFlags_.ImGuiWindowFlags_NoMove | ImGuiWindowFlags_.ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_.ImGuiWindowFlags_NoScrollWithMouse))
+            {
+                var min = ImGuiAPI.GetWindowContentRegionMin();
+                var max = ImGuiAPI.GetWindowContentRegionMax();
+                var size = max - min;
+                size.Y -= 40;
+                if (ImGuiAPI.BeginChild("Setting", size, false, ImGuiWindowFlags_.ImGuiWindowFlags_NoMove))
+                {
+                    ImGuiAPI.Columns(2, "SettingColumns", true);
+                    if (ImGuiAPI.BeginChild("Properties", in Vector2.Zero, false, ImGuiWindowFlags_.ImGuiWindowFlags_None))
+                    {
+                        for (int i = 0; i < mEditingDatas.Count; i++)
+                        {
+                            var selected = (mSelectedIndex == i);
+                            var name = mEditingDatas[i].DisplayName + "(" + mEditingDatas[i].Name + ")";
+                            if (ImGuiAPI.Selectable(name, ref selected, ImGuiSelectableFlags_.ImGuiSelectableFlags_None, in Vector2.Zero))
+                            {
+                                mSelectedIndex = i;
+                                mPGMember.Target = mEditingDatas[i];
+                            }
+                        }
+                    }
+                    ImGuiAPI.EndChild();
+                    if (ImGuiAPI.BeginDragDropTarget())
+                    {
+                        var payLoad = ImGuiAPI.AcceptDragDropPayload("PropertyDragDrop", ImGuiDragDropFlags_.ImGuiDragDropFlags_None);
+                        if (payLoad != null)
+                        {
+                            var handle = GCHandle.FromIntPtr((IntPtr)(payLoad->Data));
+                            var info = (EGui.Controls.PropertyGrid.PGCustomValueEditorAttribute.EditorInfo)handle.Target;
+                            if(info.ObjectInstance != null) 
+                            {
+                                var enumrableInterface = info.ObjectInstance.GetType().GetInterface(typeof(IEnumerable).FullName);
+                                if(enumrableInterface != null)
+                                {
+                                    foreach(var objIns in (IEnumerable)info.ObjectInstance)
+                                    {
+                                        if(objIns == null)
+                                            continue;
+
+                                        UNodeBase node = null;
+                                        if (objIns is UNodeBase)
+                                            node = objIns as UNodeBase;
+                                        else if (objIns is UNodeGraph.FSelNodeState)
+                                            node = ((UNodeGraph.FSelNodeState)objIns).Node;
+                                        if (node == null)
+                                            continue;
+
+                                        var data = new UnionNodePropertyData()
+                                        {
+                                            NodeId = node.NodeId,
+                                            Name = info.HostProperty.Name,
+                                            DisplayName = info.HostProperty.DisplayName,
+                                            Category = "Custom"
+                                        };
+                                        mEditingDatas.Add(data);
+                                    }
+                                }
+                            }
+                       }
+                    }
+                    ImGuiAPI.NextColumn();
+                    if (ImGuiAPI.BeginChild("Details", in Vector2.Zero, false, ImGuiWindowFlags_.ImGuiWindowFlags_None))
+                    {
+                        mPGMember.OnDraw(false, false, false);
+                    }
+                    ImGuiAPI.EndChild();
+                }
+                ImGuiAPI.EndChild();
+                if(EGui.UIProxy.CustomButton.ToolButton("Delete", in Vector2.Zero))
+                {
+                    if(mSelectedIndex >= 0 && mSelectedIndex < mEditingDatas.Count)
+                        mEditingDatas.RemoveAt(mSelectedIndex);
+                }
+                ImGuiAPI.SameLine(0, -1);
+                var posX = size.X - 120;
+                ImGuiAPI.SetCursorPosX(posX);
+                if(EGui.UIProxy.CustomButton.ToolButton("Accept", in Vector2.Zero))
+                {
+                    mUnionNode.PropertyDatas.Clear();
+                    for(int i=0; i<mEditingDatas.Count; i++)
+                    {
+                        var data = new UnionNodePropertyData();
+                        mEditingDatas[i].CopyTo(ref data);
+                        mUnionNode.PropertyDatas.Add(data);
+                    }
+                    mUnionNode.IsPropertyVisibleDirty = true;
+                    ((UNodeBase)mUnionNode).ParentGraph.SetConfigUnionNode(null);
+                }
+                ImGuiAPI.SameLine(0, -1);
+                if(EGui.UIProxy.CustomButton.ToolButton("Cancel", in Vector2.Zero))
+                {
+                    ((UNodeBase)mUnionNode).ParentGraph.SetConfigUnionNode(null);
+                }
+            }
+            ImGuiAPI.EndChild();
         }
     }
 }

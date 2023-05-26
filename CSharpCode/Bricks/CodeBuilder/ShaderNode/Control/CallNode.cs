@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using EngineNS.Bricks.NodeGraph;
+using MathNet.Numerics.LinearAlgebra.Factorization;
 
 namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Control
 {
@@ -29,12 +30,19 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Control
             {
                 if (Method == null)
                     return null;
-                return Method.GetMethodDeclareString();
+                return Method.GetMethodDeclareString(true);
             }
             set
             {
-                var meta = Rtti.UClassMetaManager.Instance.GetMetaFromFullName(typeof(HLSLMethod).FullName);
-                Method = meta.GetMethod(value);
+                //var meta = Rtti.UClassMetaManager.Instance.GetMetaFromFullName(typeof(HLSLMethod).FullName);
+                //Method = meta.GetMethod(value);
+
+                Method = UEngine.Instance.HLSLMethodManager.GetMethodByDeclString(value);
+                if (Method == null)
+                {
+                    var name = Rtti.UClassMeta.GetNameByDeclstring(value);
+                    Method = UEngine.Instance.HLSLMethodManager.GetMethod(name);
+                }
                 this.Initialize(Method);
             }
         }
@@ -105,44 +113,6 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Control
                 }
                 Arguments.Add(pinData);
             }
-
-            //OutArguments.Clear();
-            //foreach (var i in Method.Parameters)
-            //{
-            //    var pin = new PinIn();
-            //    pin.Link = UShaderEditorStyles.Instance.NewInOutPinDesc();
-            //    pin.Link.CanLinks.Add("Value");
-            //    pin.Name = i.Name;
-
-            //    Arguments.Add(pin);
-            //    AddPinIn(pin);
-            //    if (i.IsOut)
-            //    {
-            //        var pinOut = new PinOut();
-            //        pinOut.Link = UShaderEditorStyles.Instance.NewInOutPinDesc();
-            //        pin.Link.CanLinks.Add("Value");
-            //        pinOut.Name = i.Name;
-            //        OutArguments.Add(pinOut);
-            //        AddPinOut(pinOut);
-            //    }
-            //    //else if (i.ParamInfo.ParameterType.IsByRef)
-            //    //{
-            //    //    Arguments.Add(pin);
-            //    //    AddPinIn(pin);
-
-            //    //    var pinOut = new EGui.Controls.NodeGraph.PinOut();
-            //    //    pinOut.Link = UShaderEditorStyles.Instance.NewInOutPinDesc();
-            //    //    pin.Link.CanLinks.Add("Value");
-            //    //    pinOut.Name = i.ParamInfo.Name;
-            //    //    OutArguments.Add(pinOut);
-            //    //    AddPinOut(pinOut);
-            //    //}
-            //    //else
-            //    //{
-            //    //    Arguments.Add(pin);
-            //    //    AddPinIn(pin);
-            //    //}
-            //}
         }
         public override void OnMouseStayPin(NodePin pin)
         {
@@ -435,12 +405,13 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Control
             var paramName = GetParamValueName(pin.Name);
             if (!data.MethodDec.HasLocalVariable(paramName))
             {
+                var arg = Method.FindParameter(pin.Name);
                 var type = pin.Tag as Rtti.UTypeDesc;
                 var varDec = new UVariableDeclaration()
                 {
                     VariableType = new UTypeReference(type),
                     VariableName = paramName,
-                    InitValue = new UDefaultValueExpression(type),
+                    InitValue = (type.IsPrimitive && arg.DefaultValue != null) ? new UPrimitiveExpression(type, arg.DefaultValue) : new UDefaultValueExpression(type),
                 };
                 data.MethodDec.AddLocalVar(varDec);
             }
@@ -512,6 +483,11 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Control
         public override void BuildStatements(NodePin pin, ref BuildCodeStatementsData data)
         {
             var method = Method;
+            var incAttr = Method.DeclaringType.GetCustomAttribute<EngineNS.Bricks.CodeBuilder.ShaderNode.Control.TtHLSLProviderAttribute>(false);
+            if (incAttr != null && incAttr.Include != null)
+            {
+                data.ClassDec.PushPreInclude(incAttr.Include);
+            }
 
             var methodInvokeExp = new UMethodInvokeStatement()
             {

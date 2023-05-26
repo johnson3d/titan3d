@@ -7,12 +7,7 @@ namespace EngineNS.Bricks.Procedure.Node
     public class UNodePinDefine : NodeGraph.UNodePinDefineBase
     {
         [Rtti.Meta]
-        public string Name { get; set; } = "UserPin";
-        [Rtti.Meta]
-        public string TypeValue { get; set; } = "Value";
-        [Rtti.Meta]
         public UBufferCreator BufferCreator { get; } = UBufferCreator.CreateInstance<USuperBuffer<float, FFloatOperator>>(-1, - 1, -1);
-
         protected override void InitFromPin<T>(T pin)
         {
             Name = pin.Name;
@@ -72,7 +67,7 @@ namespace EngineNS.Bricks.Procedure.Node
                 {
                     newValue = info.Value;
                     var nodeDef = newValue as UProgramNodeDefine;
-                    Int32_2 NumOfPin = new Int32_2(nodeDef.HostNode.UserInputs.Count, nodeDef.HostNode.UserOutputs.Count);
+                    Vector2i NumOfPin = new Vector2i(nodeDef.HostNode.UserInputs.Count, nodeDef.HostNode.UserOutputs.Count);
                     if (ImGuiAPI.InputInt2("NumOfPin", (int*)&NumOfPin, ImGuiInputTextFlags_.ImGuiInputTextFlags_None))
                     {
                         if (NumOfPin.X <= 0)
@@ -218,7 +213,7 @@ namespace EngineNS.Bricks.Procedure.Node
                 var btSize = ImGuiAPI.GetItemRectSize();
                 ctrlPos = prevStart;
                 ctrlPos.Y += btSize.Y;
-                var pureName = IO.FileManager.GetPureName(ProgramName.Name);
+                var pureName = IO.TtFileManager.GetPureName(ProgramName.Name);
                 cmdlist.AddText(in ctrlPos, 0xffffffff, pureName, null);
             }
             ImGuiAPI.PopID();

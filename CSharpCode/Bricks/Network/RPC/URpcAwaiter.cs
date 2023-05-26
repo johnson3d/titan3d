@@ -1,4 +1,5 @@
-﻿using System;
+﻿using NPOI.SS.Formula.Functions;
+using System;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using System.Threading;
@@ -10,62 +11,67 @@ namespace EngineNS.Bricks.Network.RPC
     //1.返回值为unmanaged类型，直接走Read<T>(out T) where T : unmanaged
     //2.返回值为IO.ISerializer接口，走Read(out IO.ISerializer)
     //3.字符串类型，不能走Read<T>，所以也需要一个特殊流程走Read(out string)
-    public class URpcAwaiter
+    public class URpcAwaiterBase
     {
         [ThreadStatic]
         public static bool IsTimeout = false;
-        static TaskCompletionSource<object> source = new TaskCompletionSource<object>();
-        public static async Task<T> AwaitReturn<T>(UReturnAwaiter waiter) where T : unmanaged
+    }
+
+    public class URpcAwaiter : URpcAwaiterBase
+    {
+        public static async Task<T> AwaitReturn<T>(UReturnAwaiter<T> waiter) where T : unmanaged
         {
-            T rt = await source.Task.RPCWaitReturn<T>(waiter);
+            T rt = await TaskExtension.RPCWaitReturn<T>(waiter);
             return rt;
         }
-        public static async Task<T> AwaitReturn<T>(UReturnAwaiter waiter, int noused = 0) where T : class, IO.ISerializer
+        public static async Task<T> AwaitReturn<T>(UReturnAwaiter<T> waiter, int noused = 0) where T : class, IO.ISerializer
         {
-            T rt = await source.Task.RPCWaitReturn_ISerializer<T>(waiter);
+            T rt = await TaskExtension.RPCWaitReturn_ISerializer<T>(waiter);
             return rt;
         }
-        public static async Task<T> AwaitReturn_ISerializer<T>(UReturnAwaiter waiter) where T : IO.ISerializer
+        public static async Task<T> AwaitReturn_ISerializer<T>(UReturnAwaiter<T> waiter) where T : IO.ISerializer
         {
-            T rt = await source.Task.RPCWaitReturn_ISerializer<T>(waiter);
+            T rt = await TaskExtension.RPCWaitReturn_ISerializer<T>(waiter);
             return rt;
         }
-        public static async Task<string> AwaitReturn_String(UReturnAwaiter waiter)
+        public static async Task<string> AwaitReturn_String(UReturnAwaiter<string> waiter)
         {
-            var rt = await source.Task.RPCWaitReturn_String(waiter);
+            var rt = await TaskExtension.RPCWaitReturn_String(waiter);
             return rt;
         }
     }
-    public class CustomTaskAwaiter<T> : INotifyCompletion where T : unmanaged
+    public struct FRpcTaskAwaiter<T> : INotifyCompletion where T : unmanaged
     {
-        Task task;
-        public UReturnAwaiter Waiter;
-        public CustomTaskAwaiter(Task task, UReturnAwaiter waiter)
+        //Task task;
+        public UReturnAwaiter<T> Waiter;
+        public FRpcTaskAwaiter(UReturnAwaiter<T> waiter)
         {
             Waiter = waiter;
-            this.task = task;
+            //this.task = task;
         }
-        public CustomTaskAwaiter<T> GetAwaiter()
+        public FRpcTaskAwaiter<T> GetAwaiter()
         {
             return this;
         }
         public void OnCompleted(Action continuation)
         {
-            Waiter.RetCallBack = (ref IO.AuxReader<UMemReader> pkg, bool isTimeOut) =>
+            Waiter.ContinuationAction = continuation;
+            Waiter.RetCallBack = static (ref IO.AuxReader<EngineNS.IO.UMemReader> pkg, bool isTimeOut, TtReturnAwaiterBase awaiter) =>
             {
+                var typedAwaiter = (UReturnAwaiter<T>)awaiter;
                 if (isTimeOut)
                 {
                     //throw Timeout exception : UReturnAwaiter & coneinuation;
-                    Profiler.Log.WriteLine(Profiler.ELogTag.Warning, "RPC", $"{continuation.ToString()} timeout");
+                    Profiler.Log.WriteLine(Profiler.ELogTag.Warning, "RPC", $"{typedAwaiter.ContinuationAction.ToString()} timeout");
                 }
                 else
                 {
-                    pkg.Read(out Result);
+                    pkg.Read(out ((UReturnAwaiter<T>)awaiter).Result);
                 }
                 try
                 {
                     URpcAwaiter.IsTimeout = isTimeOut;
-                    continuation();
+                    typedAwaiter.ContinuationAction();
                 }
                 catch (Exception ex)
                 {
@@ -80,37 +86,39 @@ namespace EngineNS.Bricks.Network.RPC
         {
             get
             {
-                return task.IsCompleted;
+                //return task.IsCompleted;
+                return Waiter.IsCompleted;
             }
         }
-        public T Result = default(T);
         public T GetResult()
         {
-            return Result;
+            return Waiter.Result;
         }
     }
-    public class CustomTaskAwaiter_ISerializer<T> : INotifyCompletion where T : IO.ISerializer
+    public struct FRpcTaskAwaiter_ISerializer<T> : INotifyCompletion where T : IO.ISerializer
     {
-        Task task;
-        public UReturnAwaiter Waiter;
-        public CustomTaskAwaiter_ISerializer(Task task, UReturnAwaiter waiter)
+        //Task task;
+        public UReturnAwaiter<T> Waiter;
+        public FRpcTaskAwaiter_ISerializer(UReturnAwaiter<T> waiter)
         {
             Waiter = waiter;
-            this.task = task;
+            //this.task = task;
         }
-        public CustomTaskAwaiter_ISerializer<T> GetAwaiter()
+        public FRpcTaskAwaiter_ISerializer<T> GetAwaiter()
         {
             return this;
         }
         public void OnCompleted(Action continuation)
         {
-            Waiter.RetCallBack = (ref IO.AuxReader<UMemReader> pkg, bool isTimeOut) =>
+            Waiter.ContinuationAction = continuation;
+            Waiter.RetCallBack = static (ref IO.AuxReader<EngineNS.IO.UMemReader> pkg, bool isTimeOut, TtReturnAwaiterBase awaiter) =>
             {
+                var typedAwaiter = (UReturnAwaiter<T>)awaiter;
                 EngineNS.IO.ISerializer tmp;
                 if (isTimeOut)
                 {
                     tmp = null;//应该给一个错误的对象用来判断超时间
-                    Profiler.Log.WriteLine(Profiler.ELogTag.Warning, "RPC", $"{continuation.ToString()} timeout");
+                    Profiler.Log.WriteLine(Profiler.ELogTag.Warning, "RPC", $"{typedAwaiter.ContinuationAction.ToString()} timeout");
                 }
                 else
                 {
@@ -118,9 +126,9 @@ namespace EngineNS.Bricks.Network.RPC
                 }
                 try
                 {
-                    Result = (T)tmp;
+                    ((UReturnAwaiter<T>)awaiter).Result = (T)tmp;
                     URpcAwaiter.IsTimeout = isTimeOut;
-                    continuation();
+                    typedAwaiter.ContinuationAction();
                 }
                 catch (Exception ex)
                 {
@@ -135,43 +143,46 @@ namespace EngineNS.Bricks.Network.RPC
         {
             get
             {
-                return task.IsCompleted;
+                //return task.IsCompleted;
+                return Waiter.IsCompleted;
             }
         }
-        public T Result = default(T);
         public T GetResult()
         {
-            return Result;
+            return Waiter.Result;
         }
     }
-    public class CustomTaskAwaiter_String : INotifyCompletion
+    public struct FRpcTaskAwaiter_String : INotifyCompletion
     {
-        Task task;
-        public UReturnAwaiter Waiter;
-        public CustomTaskAwaiter_String(Task task, UReturnAwaiter waiter)
+        //Task task;
+        public UReturnAwaiter<string> Waiter;
+        public FRpcTaskAwaiter_String(UReturnAwaiter<string> waiter)
         {
             Waiter = waiter;
-            this.task = task;
+            //this.task = task;
         }
-        public CustomTaskAwaiter_String GetAwaiter()
+        public FRpcTaskAwaiter_String GetAwaiter()
         {
             return this;
         }
         public void OnCompleted(Action continuation)
         {
-            Waiter.RetCallBack = (ref IO.AuxReader<UMemReader> pkg, bool isTimeOut) =>
+            Waiter.ContinuationAction = continuation;
+            Waiter.RetCallBack = static (ref IO.AuxReader<EngineNS.IO.UMemReader> pkg, bool isTimeOut, TtReturnAwaiterBase awaiter) =>
             {
+                var typedAwaiter = (UReturnAwaiter<string>)awaiter;
                 if (isTimeOut)
                 {
-                    Result = "@RPC_TimeOut@";
+                    ((UReturnAwaiter<string>)awaiter).Result = "@RPC_TimeOut@";
+                    Profiler.Log.WriteLine(Profiler.ELogTag.Warning, "RPC", $"{typedAwaiter.ContinuationAction.ToString()} timeout");
                 }
                 else
                 {
-                    pkg.Read(out Result);
+                    pkg.Read(out ((UReturnAwaiter<string>)awaiter).Result);
                 }
                 try
                 {
-                    continuation();
+                    typedAwaiter.ContinuationAction();
                 }
                 catch (Exception ex)
                 {
@@ -186,28 +197,28 @@ namespace EngineNS.Bricks.Network.RPC
         {
             get
             {
-                return task.IsCompleted;
+                //return task.IsCompleted;
+                return Waiter.IsCompleted;
             }
         }
-        public string Result = null;
         public string GetResult()
         {
-            return Result;
+            return Waiter.Result;
         }
     }
     public static class TaskExtension
     {
-        public static CustomTaskAwaiter<T> RPCWaitReturn<T>(this Task task, UReturnAwaiter waiter) where T : unmanaged
+        public static FRpcTaskAwaiter<T> RPCWaitReturn<T>(UReturnAwaiter<T> waiter) where T : unmanaged
         {
-            return new CustomTaskAwaiter<T>(task, waiter);
+            return new FRpcTaskAwaiter<T>(waiter);
         }
-        public static CustomTaskAwaiter_ISerializer<T> RPCWaitReturn_ISerializer<T>(this Task task, UReturnAwaiter waiter) where T : IO.ISerializer
+        public static FRpcTaskAwaiter_ISerializer<T> RPCWaitReturn_ISerializer<T>(UReturnAwaiter<T> waiter) where T : IO.ISerializer
         {
-            return new CustomTaskAwaiter_ISerializer<T>(task, waiter);
+            return new FRpcTaskAwaiter_ISerializer<T>(waiter);
         }
-        public static CustomTaskAwaiter_String RPCWaitReturn_String(this Task task, UReturnAwaiter waiter)
+        public static FRpcTaskAwaiter_String RPCWaitReturn_String(UReturnAwaiter<string> waiter)
         {
-            return new CustomTaskAwaiter_String(task, waiter);
+            return new FRpcTaskAwaiter_String(waiter);
         }
     }
 }

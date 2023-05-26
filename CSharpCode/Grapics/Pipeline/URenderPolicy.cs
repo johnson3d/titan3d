@@ -1,12 +1,29 @@
-﻿using EngineNS.Thread;
+﻿using EngineNS.Graphics.Pipeline.Common;
+using EngineNS.Thread;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Text;
 
 namespace EngineNS.Graphics.Pipeline
-{   
+{
+    [EGui.Controls.PropertyGrid.PGCategoryFilters(ExcludeFilters = new string[] { "Misc" })]
     public class URenderPolicy : Common.URenderGraph
     {
+        public URenderPolicy()
+        {
+            NodeList.Host = this;
+        }
+        public override void Dispose()
+        {
+            //foreach(var i in VisibleMeshes)
+            //{
+            //    i.Dispose();
+            //}
+            VisibleMeshes.Clear();
+            VisibleNodes.Clear();
+            base.Dispose();
+        }
         public enum EShadingType
         {
             BasePass,
@@ -15,10 +32,40 @@ namespace EngineNS.Graphics.Pipeline
             Picked,//Mesh绘制选择高亮
             Count,
         }
+        public class TtNodeListDefine
+        {
+            internal URenderPolicy Host;
+            public class UValueEditorAttribute : EGui.Controls.PropertyGrid.PGCustomValueEditorAttribute
+            {
+                public unsafe override bool OnDraw(in EditorInfo info, out object newValue)
+                {
+                    newValue = info.Value;
+                    var nodeDef = newValue as TtNodeListDefine;
+                    var Host = nodeDef.Host;
+                    if (Host == null)
+                        return false;
+
+                    foreach (var i in Host.NodeLayers)
+                    {
+                        foreach (var j in i)
+                        {
+                            ImGuiAPI.Text(j.Name);
+                        }
+                    }
+                    return false;
+                }
+            }
+        }
+        [TtNodeListDefine.UValueEditor]
+        public TtNodeListDefine NodeList
+        {
+            get;
+        } = new TtNodeListDefine();
         //TagObject通常用来处理ShadingEnv.OnDrawCall的特殊参数设置
         //public Common.URenderGraphNode TagObject;
         public object TagObject;
         protected UCamera mDefaultCamera;
+        public bool IsInitialized { get; set; } = false;
         public UCamera DefaultCamera { get => mDefaultCamera; }
         public Dictionary<string, UCamera> CameraAttachments { get; } = new Dictionary<string, UCamera>();
         public bool AddCamera(string name, UCamera camera)
@@ -45,11 +92,14 @@ namespace EngineNS.Graphics.Pipeline
         }
         public virtual NxRHI.USrView GetFinalShowRSV()
         {
-            var attachBuffer = AttachmentCache.FindAttachement(in RootNode.GetOutput(0).Attachement.AttachmentName);
-            if (attachBuffer == null)
+            if (RootNode.ColorAttachement == null)
                 return null;
-            return attachBuffer.Srv;
-        }        
+            return RootNode.ColorAttachement.Srv;
+            //var attachBuffer = AttachmentCache.FindAttachement(in RootNode.GetOutput(0).Attachement.AttachmentName);
+            //if (attachBuffer == null)
+            //    return null;
+            //return attachBuffer.Srv;
+        }
         public virtual IProxiable GetHitproxy(UInt32 MouseX, UInt32 MouseY)
         {
             var hitproxyNode = FindFirstNode<Common.UHitproxyNode>();
@@ -63,21 +113,24 @@ namespace EngineNS.Graphics.Pipeline
         {
             using (new Profiler.TimeScopeHelper(ScopeTickSync))
             {
-                base.TickSync();
                 foreach (var i in CameraAttachments)
                 {
                     i.Value.UpdateConstBufferData(UEngine.Instance.GfxDevice.RenderContext);
                 }
+                base.TickSync();
             }   
         }
+
         #region Turn On/Off
         protected bool mDisableShadow;
+        [Category("Option")]
         public virtual bool DisableShadow
         {
             get => mDisableShadow;
             set => mDisableShadow = value;
         }
         protected bool mDisableAO;
+        [Category("Option")]
         public virtual bool DisableAO
         {
             get => mDisableAO;
@@ -87,6 +140,7 @@ namespace EngineNS.Graphics.Pipeline
             }
         }
         protected bool mDisablePointLight;
+        [Category("Option")]
         public virtual bool DisablePointLight
         {
             get => mDisableAO;
@@ -96,6 +150,7 @@ namespace EngineNS.Graphics.Pipeline
             }
         }
         protected bool mDisableHDR;
+        [Category("Option")]
         public virtual bool DisableHDR
         {
             get => mDisableHDR;
@@ -104,12 +159,31 @@ namespace EngineNS.Graphics.Pipeline
                 mDisableHDR = value;
             }
         }
+        public enum ETypeAA
+        {
+            None = 0,
+            Fsaa,
+            Taa,
+            
+            TypeCount,
+        }
+        [Category("Option")]
+        public virtual ETypeAA TypeAA { get; set; } = ETypeAA.Taa;
+
+        public enum ETypeFog
+        {
+            None = 0,
+            ExpHeight,
+            TypeCount,
+        }
+        [Category("Option")]
+        public virtual ETypeFog TypeFog { get; set; } = ETypeFog.None;
         #endregion
         public Common.UPickedProxiableManager PickedProxiableManager { get; protected set; } = new Common.UPickedProxiableManager();
         public List<Mesh.UMesh> VisibleMeshes = new List<Mesh.UMesh>();
         public List<GamePlay.Scene.UNode> VisibleNodes = new List<GamePlay.Scene.UNode>();
 
-        public virtual Shader.UShadingEnv GetPassShading(EShadingType type, Mesh.UMesh mesh, int atom, Pipeline.Common.URenderGraphNode node)
+        public virtual Shader.UGraphicsShadingEnv GetPassShading(EShadingType type, Mesh.UMesh mesh, int atom, Pipeline.Common.URenderGraphNode node)
         {
             switch (type)
             {
@@ -158,12 +232,13 @@ namespace EngineNS.Graphics.Pipeline
             }
             return null;
         }
-        public virtual void OnDrawCall(Pipeline.URenderPolicy.EShadingType shadingType, NxRHI.UGraphicDraw drawcall, Mesh.UMesh mesh, int atom) 
+        public virtual void OnDrawCall(Pipeline.URenderPolicy.EShadingType shadingType, NxRHI.UGraphicDraw drawcall, Mesh.UMesh mesh, int atom)
         {
-            mesh.MdfQueue.OnDrawCall(shadingType, drawcall, this, mesh);
+            mesh.MdfQueue.OnDrawCall(shadingType, drawcall, this, mesh, atom);
         }
         public virtual async System.Threading.Tasks.Task Initialize(UCamera camera)
         {
+            IsInitialized = false;
             if (camera == null)
             {
                 camera = new UCamera();
@@ -189,13 +264,10 @@ namespace EngineNS.Graphics.Pipeline
             {
                 await i.Value.Initialize((URenderPolicy)this, i.Value.Name);
             }
-        }
-        public override void Cleanup()
-        {
-            VisibleMeshes.Clear();
-            VisibleNodes.Clear();
 
-            base.Cleanup();
+            this.OnResize(1, 1);
+
+            IsInitialized = true;
         }
         public override void OnResize(float x, float y)
         {
@@ -255,11 +327,21 @@ namespace EngineNS.Graphics.Pipeline
             }
         }
         #endregion
+
+        [Category("Option")]
+        public Common.TtFogNode FogNode
+        {
+            get
+            {
+                return FindFirstNode<Common.TtFogNode>();
+            }
+        }
     }
 
     public class UDeferredPolicyBase : URenderPolicy
     {
         #region Feature On/Off
+        [Category("Option")]
         public override bool DisableShadow
         {
             get => mDisableShadow;
@@ -271,6 +353,7 @@ namespace EngineNS.Graphics.Pipeline
                 shading?.SetDisableShadow(value);
             }
         }
+        [Category("Option")]
         public override bool DisablePointLight
         {
             get
@@ -285,6 +368,7 @@ namespace EngineNS.Graphics.Pipeline
                 shading?.SetDisablePointLights(value);
             }
         }
+        [Category("Option")]
         public override bool DisableHDR
         {
             get
@@ -297,6 +381,21 @@ namespace EngineNS.Graphics.Pipeline
                 var shading = this.FindFirstNode<Deferred.UDeferredDirLightingNode>()?.ScreenDrawPolicy.mBasePassShading as Deferred.UDeferredDirLightingShading;
                 //var shading = DirLightingNode.ScreenDrawPolicy.mBasePassShading as UDeferredDirLightingShading;
                 shading?.SetDisableHDR(value);
+            }
+        }
+        [Category("Option")]
+        public override ETypeAA TypeAA 
+        {
+            get => base.TypeAA;
+            set
+            {
+                base.TypeAA = value;
+                var shading = this.FindFirstNode<Common.TtAntiAliasingNode>()?.ScreenDrawPolicy.mBasePassShading as Common.TtAntiAliasingShading;
+                if (shading != null)
+                {
+                    shading.TypeAA.SetValue((uint)value);
+                    shading.UpdatePermutation();
+                }
             }
         }
         #endregion
@@ -360,7 +459,7 @@ namespace EngineNS.Graphics.Pipeline
                 return mPickedNode;
             }
         }
-        public override Shader.UShadingEnv GetPassShading(EShadingType type, Mesh.UMesh mesh, int atom, Pipeline.Common.URenderGraphNode node)
+        public override Shader.UGraphicsShadingEnv GetPassShading(EShadingType type, Mesh.UMesh mesh, int atom, Pipeline.Common.URenderGraphNode node)
         {
             switch (type)
             {
@@ -498,7 +597,7 @@ namespace EngineNS.Graphics.Pipeline
                 return mPickedNode;
             }
         }
-        public override Shader.UShadingEnv GetPassShading(EShadingType type, Mesh.UMesh mesh, int atom, Pipeline.Common.URenderGraphNode node)
+        public override Shader.UGraphicsShadingEnv GetPassShading(EShadingType type, Mesh.UMesh mesh, int atom, Pipeline.Common.URenderGraphNode node)
         {
             switch (type)
             {

@@ -181,11 +181,17 @@ namespace EngineNS.Bricks.NodeGraph
     }
     public interface IBreakableNode
     {
+        [Browsable(false)]
         public string BreakerName { get; }
+        [Browsable(false)]
         public EBreakerState BreakerState { get; set; }
         public void AddMenuItems(UMenuItem parentItem);
     }
 
+    public interface INodeWithContextMenu
+    {
+        public UMenuItem ContextMenu { get; set; }
+    }
     public class UNodeBase : IO.ISerializer
     {
         public bool LayoutDirty = true;
@@ -233,6 +239,7 @@ namespace EngineNS.Bricks.NodeGraph
                 return this.GetType().Name;
             }
         }
+        [System.ComponentModel.Browsable(false)]
         public bool Selected { get; set; }
         internal Vector2 mPosition;
         [Rtti.Meta]
@@ -279,7 +286,7 @@ namespace EngineNS.Bricks.NodeGraph
             }
         }
 
-        [Rtti.Meta(Order = 1)]
+        [Rtti.Meta(Order = 1), Browsable(false)]
         public List<UInputEditableValueInfo> InputEditableValues
         {
             get

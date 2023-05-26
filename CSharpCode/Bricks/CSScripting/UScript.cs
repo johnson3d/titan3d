@@ -123,7 +123,7 @@ namespace EngineNS.UTest
                 }
             }
 
-            var dllName = UEngine.Instance.FileManager.GetRoot(IO.FileManager.ERootDir.Execute) + $"{UEngine.DotNetVersion}/Engine.Window.dll";
+            var dllName = UEngine.Instance.FileManager.GetRoot(IO.TtFileManager.ERootDir.Execute) + $"{UEngine.DotNetVersion}/Engine.Window.dll";
             var option = new ReaderParameters();
             option.ReadSymbols = true;
             //option.ReadingMode = ReadingMode.Immediate;

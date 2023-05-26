@@ -11,10 +11,10 @@ namespace EngineNS.Graphics.Pipeline.Common
         {
             Name = "ImageAssetNode";
         }
-        public override void Cleanup()
+        public override void Dispose()
         {
             ImageSrv = null;
-            base.Cleanup();
+            base.Dispose();
         }
         public EPixelFormat ImageFormat 
         { 
@@ -30,10 +30,14 @@ namespace EngineNS.Graphics.Pipeline.Common
 
             ImageName = RName.GetRName("texture/default_envmap.srv", RName.ERNameType.Engine);
         }
-        public unsafe override void FrameBuild()
+        public unsafe override void FrameBuild(Graphics.Pipeline.URenderPolicy policy)
         {
-            var attachement = RenderGraph.AttachmentCache.ImportAttachment(ImagePinOut);            
+            var attachement = RenderGraph.AttachmentCache.ImportAttachment(ImagePinOut);
             attachement.Srv = ImageSrv;
+            var desc = ImageSrv.mCoreObject.Desc;
+            attachement.BufferDesc.Format = desc.Format;
+            attachement.BufferDesc.Width = (uint)ImageSrv.PicDesc.Width;
+            attachement.BufferDesc.Height = (uint)ImageSrv.PicDesc.Height;
         }
         public NxRHI.USrView ImageSrv;
         [Rtti.Meta]

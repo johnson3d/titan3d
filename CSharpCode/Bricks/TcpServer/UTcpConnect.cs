@@ -62,7 +62,7 @@ namespace EngineNS.Bricks.TcpServer
                 return;
             mCoreObject.Send((byte*)ptr, (int)size);
         }
-        public void Send(in IO.AuxWriter<Bricks.Network.RPC.UMemWriter> pkg)
+        public void Send(in IO.AuxWriter<IO.UMemWriter> pkg)
         {
             unsafe 
             {

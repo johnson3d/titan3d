@@ -26,14 +26,10 @@ namespace EngineNS.Rtti
         public EArgumentFilter ConvertOutArguments;//最高位是控制返回值，其他是参数的顺序 
         
     }
-    public class GenMetaClassAttribute : Attribute
-    {
-        public bool IsOverrideBitset = true;
-    }
-    public class GenMetaAttribute : Attribute
-    {//使用在Field上，系统自动产生Meta标志过的Property
-        public MetaAttribute.EMetaFlags Flags = 0;
-    }
+    //public class GenMetaClassAttribute : Attribute
+    //{
+    //    public bool IsOverrideBitset = true;
+    //}
     public class UStructAttrubte : Attribute
     {
         public int ReadSize;
@@ -58,6 +54,8 @@ namespace EngineNS.Rtti
         }
         public int Order = 0;
         public EMetaFlags Flags = 0;
+        public string[] NameAlias = null;
+        public System.Type[] MethodGenericParameters = null;
         public bool IsReadOnly
         {
             get
@@ -277,10 +275,10 @@ namespace EngineNS.Rtti
             try
             {
                 Path = path;
-                var versions = EngineNS.IO.FileManager.GetFiles(path, "*.metadata", false);
+                var versions = EngineNS.IO.TtFileManager.GetFiles(path, "*.metadata", false);
                 foreach (var i in versions)
                 {
-                    var filename = EngineNS.IO.FileManager.GetPureName(i);
+                    var filename = EngineNS.IO.TtFileManager.GetPureName(i);
                     var myXmlDoc = new System.Xml.XmlDocument();
                     myXmlDoc.Load(i);
                     var ver = new UMetaVersion(this);
@@ -309,12 +307,13 @@ namespace EngineNS.Rtti
             //var path = EngineNS.IO.FileManager.CombinePath(metaRoot, typeDesc.Assembly.Service);
             //path = EngineNS.IO.FileManager.CombinePath(path, typeDesc.Assembly.Name);
             var tmpPath = Path;// EngineNS.IO.FileManager.CombinePath(Path, $"{MetaDirectoryName}");
-            if (!EngineNS.IO.FileManager.DirectoryExists(tmpPath))
+            if (!EngineNS.IO.TtFileManager.DirectoryExists(tmpPath))
             {
-                EngineNS.IO.FileManager.CreateDirectory(tmpPath);
+                EngineNS.IO.TtFileManager.CreateDirectory(tmpPath);
             }
-            var txtFilepath = EngineNS.IO.FileManager.CombinePath(tmpPath, $"typedesc.txt");
-            EngineNS.IO.FileManager.WriteAllText(txtFilepath, ClassType.TypeString);
+            var txtFilepath = EngineNS.IO.TtFileManager.CombinePath(tmpPath, $"typedesc.txt");
+            EngineNS.IO.TtFileManager.WriteAllText(txtFilepath, ClassType.TypeString);
+            UEngine.Instance.SourceControlModule.AddFile(txtFilepath);
         }
         public UMetaVersion BuildCurrentVersion()
         {
@@ -350,7 +349,7 @@ namespace EngineNS.Rtti
             {
                 hashString += i.ToString();
             }
-            result.MetaHash = EngineNS.UniHash.APHash(hashString);
+            result.MetaHash = EngineNS.UniHash32.APHash(hashString);
             if (MetaAttribute != null || type.GetInterface(nameof(IO.ISerializer)) != null)
             {
                 if (MetaVersions.TryGetValue(result.MetaHash, out mCurrentVersion) == false)
@@ -507,7 +506,7 @@ namespace EngineNS.Rtti
             {
                 return DeclarName;
             }
-            public string GetMethodDeclareString()
+            public string GetMethodDeclareString(bool removeDllVersion)
             {
                 var result = $"{Method.ReturnType.FullName} {Method.Name}(";
                 var parameters = Method.GetParameters();
@@ -518,7 +517,10 @@ namespace EngineNS.Rtti
                         result += ",";
                 }
                 result += ')';
-                return result;
+                if (removeDllVersion)
+                    return RemoveDeclstringDllVersion(result);
+                else
+                    return result;
             }
             public object[] GetCustomAttributes(Type type, bool inherit)
             {
@@ -594,7 +596,13 @@ namespace EngineNS.Rtti
                 return (ReturnType.IsEqual(typeof(System.Threading.Tasks.Task)) || ReturnType.IsSubclassOf(typeof(System.Threading.Tasks.Task)));
             }
         }
-        public string RemoveDeclstringDllVersion(string declString)
+        public static string GetNameByDeclstring(string declString)
+        {
+            var start = declString.IndexOf(" ") + 1;
+            var end = declString.IndexOf("(");
+            return declString.Substring(start, end - start);
+        }
+        public static string RemoveDeclstringDllVersion(string declString)
         {
             var verIdx = declString.IndexOf("Version=");
             if (verIdx >= 0)
@@ -610,8 +618,17 @@ namespace EngineNS.Rtti
             declString = RemoveDeclstringDllVersion(declString);
             foreach(var i in Methods)
             {
-                var str = RemoveDeclstringDllVersion(i.GetMethodDeclareString());
+                var str = i.GetMethodDeclareString(true);
                 if (str == declString)
+                    return i;
+            }
+            return null;
+        }
+        public MethodMeta GetMethodByName(string name)
+        {
+            foreach (var i in Methods)
+            {
+                if (name == i.MethodName)
                     return i;
             }
             return null;
@@ -838,8 +855,39 @@ namespace EngineNS.Rtti
             }
             foreach (var i in Propertys)
             {
-                i.PropInfo = HostClass.ClassType.SystemType.GetProperty(i.PropertyName);
+                i.PropInfo = FindPropertyByName(i.PropInfo.PropertyType, i.PropertyName);
             }
+        }
+        private System.Reflection.PropertyInfo FindPropertyByName(System.Type type, string name)
+        {
+            //var result = HostClass.ClassType.SystemType.GetProperty(name);
+            var result = Rtti.UTypeDesc.GetProperty(HostClass.ClassType.SystemType, name);
+            if (result == null && type != null)
+            {
+                var props = HostClass.ClassType.SystemType.GetProperties();
+                foreach (var i in props)
+                {
+                    if (i.PropertyType != type)
+                        continue;
+
+                    var attrs = i.GetCustomAttributes(typeof(MetaAttribute), false);
+                    if (attrs.Length == 0)
+                        continue;
+                    var metaAttr = attrs[0] as MetaAttribute;
+                    if (metaAttr.NameAlias == null)
+                        continue;
+                    foreach (var j in metaAttr.NameAlias)
+                    {
+                        if (j == name)
+                            return i;
+                    }
+                }
+            }
+            else
+            {
+                //System.Diagnostics.Debug.Assert(result.PropertyType == type);
+            }
+            return result;
         }
         public bool LoadVersion(uint hash, System.Xml.XmlNode node)
         {
@@ -860,7 +908,7 @@ namespace EngineNS.Rtti
                     }
                 }
                 fd.FieldType = Rtti.UTypeDesc.TypeOf(fd.FieldTypeStr);
-                fd.PropInfo = HostClass.ClassType.SystemType.GetProperty(fd.PropertyName);
+                fd.PropInfo = FindPropertyByName(fd.FieldType?.SystemType, fd.PropertyName);
                 fd.Build();
                 if (fd.FieldType == null)
                 {
@@ -876,6 +924,12 @@ namespace EngineNS.Rtti
         }
         public void SaveVersion()
         {
+            var tmpPath = HostClass.Path;
+            var xmlFilepath = EngineNS.IO.TtFileManager.CombinePath(tmpPath, $"{MetaHash}.metadata");
+            if (EngineNS.IO.TtFileManager.FileExists(xmlFilepath))
+            {
+                return;
+            }
             var xml = new System.Xml.XmlDocument();
             var root = xml.CreateElement($"Hash_{MetaHash}", xml.NamespaceURI);
             var fdType = xml.CreateAttribute("Type");
@@ -893,7 +947,7 @@ namespace EngineNS.Rtti
                 fd.Attributes.Append(fdType);
                 root.AppendChild(fd);
             }
-            var xmlText = EngineNS.IO.FileManager.GetXmlText(xml);
+            var xmlText = EngineNS.IO.TtFileManager.GetXmlText(xml);
 
             //var typeStr = UTypeDescManager.Instance.GetTypeStringFromType(HostClass.ClassType.SystemType);
             //var typeDesc = UTypeDescManager.Instance.GetTypeDescFromString(typeStr);
@@ -908,13 +962,15 @@ namespace EngineNS.Rtti
             //var rootDir = UEngine.Instance.FileManager.GetPath(rootDirType, IO.FileManager.ESystemDir.MetaData);
             //rootDir += assmemblyDir;
             //var tmpPath = EngineNS.IO.FileManager.CombinePath(rootDir, $"{HostClass.MetaDirectoryName}");
-            var tmpPath = HostClass.Path;
-            if (!EngineNS.IO.FileManager.DirectoryExists(tmpPath))
+            
+            if (!EngineNS.IO.TtFileManager.DirectoryExists(tmpPath))
             {
-                EngineNS.IO.FileManager.CreateDirectory(tmpPath);
+                EngineNS.IO.TtFileManager.CreateDirectory(tmpPath);
             }
-            var xmlFilepath = EngineNS.IO.FileManager.CombinePath(tmpPath, $"{MetaHash}.metadata");
-            EngineNS.IO.FileManager.WriteAllText(xmlFilepath, xmlText);
+            
+            EngineNS.IO.TtFileManager.WriteAllText(xmlFilepath, xmlText);
+
+            UEngine.Instance.SourceControlModule.AddFile(xmlFilepath);
         }
     }
 
@@ -929,97 +985,54 @@ namespace EngineNS.Rtti
         Dictionary<Hash64, UClassMeta> mHashMetas = new Dictionary<Hash64, UClassMeta>();
         public UTypeTreeManager TreeManager = new UTypeTreeManager();
         public string MetaRoot;
-        public void LoadMetas1()
-        {
-            var rootTypes = new IO.FileManager.ERootDir[2] { IO.FileManager.ERootDir.Engine, IO.FileManager.ERootDir.Game };
-            foreach(var r in rootTypes)
-            {
-                var metaRoot = UEngine.Instance.FileManager.GetPath(r, IO.FileManager.ESystemDir.MetaData);
-                if (EngineNS.IO.FileManager.DirectoryExists(metaRoot) == false)
-                {
-                    continue;
-                }
-                var services = EngineNS.IO.FileManager.GetDirectories(metaRoot, "*.*", false);
-                foreach (var i in services)
-                {
-                    var assemblies = EngineNS.IO.FileManager.GetDirectories(i, "*.*", false);
-                    foreach (var j in assemblies)
-                    {
-                        var kls = EngineNS.IO.FileManager.GetDirectories(j, "*.*", false);
-                        foreach (var k in kls)
-                        {
-                            var tmpPath = EngineNS.IO.FileManager.CombinePath(k, $"typedesc.txt");
-                            var strName = EngineNS.IO.FileManager.ReadAllText(tmpPath);
-                            if (strName == null)
-                                continue;
-                            var type = UTypeDesc.TypeOf(strName);// EngineNS.Rtti.UTypeDescManager.Instance.GetTypeDescFromString(strName);
-                            if (type != null)
-                            {
-                                var meta = new UClassMeta(type);
-                                meta.LoadClass(k);
-
-                                mMetas.Add(meta.ClassMetaName, meta);
-                            }
-                        }
-                    }
-                }
-            }
-
-            //编辑器状态，程序修改过执行
-            BuildMeta();
-
-            foreach(var i in mMetas)
-            {
-                var hashCode = Hash64.FromString(i.Key);
-                UClassMeta meta;
-                if (mHashMetas.TryGetValue(hashCode, out meta))
-                {
-                    Profiler.Log.WriteLine(Profiler.ELogTag.Fatal, "Meta", $"Same Hash:{i.Value.ClassMetaName} == {meta.ClassMetaName}");
-                    System.Diagnostics.Debug.Assert(false);
-                    continue;
-                }
-                mHashMetas[hashCode] = i.Value;
-
-                TreeManager.RegType(i.Value);
-                i.Value.BuildMethods();
-                i.Value.BuildFields();
-            }
-
-            ForceSaveAll();
-        }
         public void LoadMetas(string moduleName = null)
         {
-            var rootTypes = new IO.FileManager.ERootDir[2] { IO.FileManager.ERootDir.Engine, IO.FileManager.ERootDir.Game };
+            var rootTypes = new IO.TtFileManager.ERootDir[2] { IO.TtFileManager.ERootDir.Engine, IO.TtFileManager.ERootDir.Game };
             foreach (var r in rootTypes)
             {
-                var metaRoot = UEngine.Instance.FileManager.GetPath(r, IO.FileManager.ESystemDir.MetaData);
-                if (EngineNS.IO.FileManager.DirectoryExists(metaRoot) == false)
+                var metaRoot = UEngine.Instance.FileManager.GetPath(r, IO.TtFileManager.ESystemDir.MetaData);
+                if (EngineNS.IO.TtFileManager.DirectoryExists(metaRoot) == false)
                 {
                     continue;
                 }
-                var services = EngineNS.IO.FileManager.GetDirectories(metaRoot, "*.*", false);
+                var services = EngineNS.IO.TtFileManager.GetDirectories(metaRoot, "*.*", false);
                 foreach (var i in services)
                 {
-                    var assemblies = EngineNS.IO.FileManager.GetDirectories(i, "*.*", true);
+                    var assemblies = EngineNS.IO.TtFileManager.GetDirectories(i, "*.*", true);
                     foreach (var j in assemblies)
                     {
-                        var kls = EngineNS.IO.FileManager.GetDirectories(j, "*.*", false);
+                        var kls = EngineNS.IO.TtFileManager.GetDirectories(j, "*.*", false);
                         foreach (var k in kls)
                         {
-                            var tmpPath = EngineNS.IO.FileManager.CombinePath(k, $"typedesc.txt");
-                            var strName = EngineNS.IO.FileManager.ReadAllText(tmpPath);
+                            var tmpPath = EngineNS.IO.TtFileManager.CombinePath(k, $"typedesc.txt");
+                            var strName = EngineNS.IO.TtFileManager.ReadAllText(tmpPath);
                             if (strName == null)
                                 continue;
                             var type = UTypeDesc.TypeOf(strName);// EngineNS.Rtti.UTypeDescManager.Instance.GetTypeDescFromString(strName);
                             if (type != null)
                             {
-                                if (moduleName != null && type.Assembly.Name == moduleName)
+                                if (moduleName == null || (moduleName != null && type.Assembly.Name == moduleName))
                                 {
                                     var meta = new UClassMeta(type);
                                     meta.LoadClass(k);
 
                                     //mMetas.Add(meta.ClassMetaName, meta);
                                     mMetas[meta.ClassMetaName] = meta;
+                                }
+                            }
+                            else
+                            {
+                                type = EngineNS.Rtti.UTypeDescManager.Instance.FindNameAlias(strName);
+                                if(type != null)
+                                {
+                                    if (moduleName == null || (moduleName != null && type.Assembly.Name == moduleName))
+                                    {
+                                        var meta = new UClassMeta(type);
+                                        meta.LoadClass(k);
+
+                                        //mMetas.Add(meta.ClassMetaName, meta);
+                                        mMetas[meta.ClassMetaName] = meta;
+                                    }
                                 }
                             }
                         }
@@ -1052,7 +1065,8 @@ namespace EngineNS.Rtti
 
             if (moduleName != null)
                 return;
-            ForceSaveAll();
+            
+            //ForceSaveAll();
 
             GetMeta(UTypeDesc.TypeOf(typeof(void)));
             GetMeta(UTypeDesc.TypeOf(typeof(char)));
@@ -1119,23 +1133,27 @@ namespace EngineNS.Rtti
             foreach (var i in mMetas)
             {
                 i.Value.Path = GetPath(i.Value);
-                IO.FileManager.SureDirectory(i.Value.Path);
+                IO.TtFileManager.SureDirectory(i.Value.Path);
                 foreach (var j in i.Value.MetaVersions)
                 {
                     j.Value.SaveVersion();
                 }
 
-                var txtFilepath = EngineNS.IO.FileManager.CombinePath(i.Value.Path, $"typedesc.txt");
-                EngineNS.IO.FileManager.WriteAllText(txtFilepath, i.Value.ClassType.TypeString);
+                var txtFilepath = EngineNS.IO.TtFileManager.CombinePath(i.Value.Path, $"typedesc.txt");
+                if (EngineNS.IO.TtFileManager.FileExists(txtFilepath) == false)
+                {
+                    EngineNS.IO.TtFileManager.WriteAllText(txtFilepath, i.Value.ClassType.TypeString);
+                    UEngine.Instance.SourceControlModule.AddFile(txtFilepath);
+                }
             }
         }
         string GetPath(UClassMeta classMeta)
         {
             string root = "";
             if (classMeta.ClassType.Assembly.IsGameModule)
-                root = UEngine.Instance.FileManager.GetPath(IO.FileManager.ERootDir.Game, IO.FileManager.ESystemDir.MetaData);
+                root = UEngine.Instance.FileManager.GetPath(IO.TtFileManager.ERootDir.Game, IO.TtFileManager.ESystemDir.MetaData);
             else
-                root = UEngine.Instance.FileManager.GetPath(IO.FileManager.ERootDir.Engine, IO.FileManager.ESystemDir.MetaData);
+                root = UEngine.Instance.FileManager.GetPath(IO.TtFileManager.ERootDir.Engine, IO.TtFileManager.ESystemDir.MetaData);
 
             var dir = classMeta.ClassType.Assembly.Service;
             dir += "." + classMeta.ClassType.Assembly.Name;

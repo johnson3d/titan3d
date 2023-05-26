@@ -6,14 +6,13 @@ using EngineNS;
 
 namespace EngineNS.EGui
 {
-    public interface IPanel
+    public interface IPanel : IDisposable
     {
         bool Visible { get; set; }
         void OnDraw();
         uint DockId { get; set; }
         ImGuiCond_ DockCond { get; set; }
         Task<bool> Initialize();
-        void Cleanup();
     }
     public class UIFormBase
     {

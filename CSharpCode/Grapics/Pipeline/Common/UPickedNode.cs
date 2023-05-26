@@ -4,7 +4,7 @@ using System.Text;
 
 namespace EngineNS.Graphics.Pipeline.Common
 {
-    public class UPickSetupShading : Shader.UShadingEnv
+    public class UPickSetupShading : Shader.UGraphicsShadingEnv
     {
         public UPickSetupShading()
         {
@@ -46,21 +46,20 @@ namespace EngineNS.Graphics.Pipeline.Common
             DepthPinOut.Attachement.Height = (uint)(y * scaleFactor);
 
             if (PickedBuffer != null)
-                PickedBuffer.OnResize(x * scaleFactor, y * scaleFactor);
+                PickedBuffer.SetSize(x * scaleFactor, y * scaleFactor);
         }
         public UPickedProxiableManager PickedManager;
         public UPickSetupShading PickedShading = null;
         public UGraphicsBuffers PickedBuffer { get; protected set; } = new UGraphicsBuffers();
-        public UDrawBuffers BasePass = new UDrawBuffers();
         public NxRHI.URenderPass RenderPass;
 
         public async override System.Threading.Tasks.Task Initialize(URenderPolicy policy, string debugName)
         {
-            await Thread.AsyncDummyClass.DummyFunc();
+            await Thread.TtAsyncDummyClass.DummyFunc();
             PickedShading = UEngine.Instance.ShadingEnvManager.GetShadingEnv<UPickSetupShading>();
 
             var rc = UEngine.Instance.GfxDevice.RenderContext;
-            BasePass.Initialize(rc, debugName);
+            BasePass.Initialize(rc, debugName + ".BasePass");
             BasePass.SetDebugName("UPickedProxiableManager");
 
             var PassDesc = new NxRHI.FRenderPassDesc();
@@ -77,7 +76,7 @@ namespace EngineNS.Graphics.Pipeline.Common
                 PassDesc.m_AttachmentDepthStencil.StoreAction = NxRHI.EFrameBufferStoreAction.StoreActionStore;
                 PassDesc.m_AttachmentDepthStencil.StencilLoadAction = NxRHI.EFrameBufferLoadAction.LoadActionClear;
                 PassDesc.m_AttachmentDepthStencil.StencilStoreAction = NxRHI.EFrameBufferStoreAction.StoreActionStore;
-                //PassDesc.mFBClearColorRT0 = new Color4(1, 0, 1, 0);
+                //PassDesc.mFBClearColorRT0 = new Color4f(1, 0, 1, 0);
                 //PassDesc.mDepthClearValue = 1.0f;
                 //PassDesc.mStencilClearValue = 0u;
             }
@@ -91,12 +90,12 @@ namespace EngineNS.Graphics.Pipeline.Common
 
             PickedManager = policy.PickedProxiableManager;
         }
-        public override void Cleanup()
+        public override void Dispose()
         {
-            PickedBuffer?.Cleanup();
+            PickedBuffer?.Dispose();
             PickedBuffer = null;
 
-            base.Cleanup();
+            base.Dispose();
         }
         List<Mesh.UMesh> mPickedMeshes = new List<Mesh.UMesh>();
         [ThreadStatic]
@@ -118,7 +117,7 @@ namespace EngineNS.Graphics.Pipeline.Common
                     if (mesh == null || mesh.Atoms == null)
                         continue;
 
-                    for (int j = 0; j < mesh.Atoms.Length; j++)
+                    for (int j = 0; j < mesh.Atoms.Count; j++)
                     {
                         var drawcall = mesh.GetDrawCall(PickedBuffer, j, policy, Graphics.Pipeline.URenderPolicy.EShadingType.Picked, this);
                         if (drawcall != null)
@@ -138,7 +137,7 @@ namespace EngineNS.Graphics.Pipeline.Common
                     cmdlist.SetViewport(in PickedBuffer.Viewport);
                     var passClears = new NxRHI.FRenderPassClears();
                     passClears.SetDefault();
-                    passClears.SetClearColor(0, new Color4(1, 0, 1, 0));
+                    passClears.SetClearColor(0, new Color4f(1, 0, 1, 0));
                     PickedBuffer.BuildFrameBuffers(policy);
                     cmdlist.BeginPass(PickedBuffer.FrameBuffers, in passClears, "Picked");
                     cmdlist.FlushDraws();
@@ -147,10 +146,6 @@ namespace EngineNS.Graphics.Pipeline.Common
                 }
                 UEngine.Instance.GfxDevice.RenderCmdQueue.QueueCmdlist(cmdlist);
             }   
-        }
-        public unsafe override void TickSync(URenderPolicy policy)
-        {
-            BasePass.SwapBuffer();
         }
     }
 }

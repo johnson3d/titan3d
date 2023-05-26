@@ -4,11 +4,11 @@ using System.Text;
 
 namespace EngineNS.Thread
 {
-    public class ThreadLogic : ContextThread
+    public class TtThreadLogic : TtContextThread
     {
         [ThreadStatic]
-        private static Profiler.TimeScope ScopeTick = Profiler.TimeScopeManager.GetTimeScope(typeof(ThreadLogic), nameof(Tick));
-        public ThreadLogic()
+        private static Profiler.TimeScope ScopeTick = Profiler.TimeScopeManager.GetTimeScope(typeof(TtThreadLogic), nameof(Tick));
+        public TtThreadLogic()
         {
             this.Interval = 0;
             LogicEndEvents[(int)EEndEvent.Normal] = LogicEnd;

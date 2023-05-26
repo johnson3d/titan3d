@@ -31,7 +31,7 @@ namespace EngineNS.EGui.UIProxy
             //    UVMax = new Vector2(559.0f / 1024, 19.0f / 1024),
             //};
             //return await mImage.Initialize();
-            await Thread.AsyncDummyClass.DummyFunc();
+            await Thread.TtAsyncDummyClass.DummyFunc();
             return true;
         }
         public unsafe bool OnDraw(in ImDrawList drawList, in Support.UAnyPointer drawData)

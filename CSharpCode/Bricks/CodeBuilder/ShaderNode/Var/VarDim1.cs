@@ -122,6 +122,14 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Var
                 return IsHalfPrecision ? "half3" : "float3";
             else if (type.IsEqual(typeof(Vector4)))
                 return IsHalfPrecision ? "half4" : "float4";
+            else if (type.IsEqual(typeof(int)))
+                return IsHalfPrecision ? "min16int" : "int";
+            else if (type.IsEqual(typeof(Vector2i)))
+                return IsHalfPrecision ? "min16int2" : "int2";
+            else if (type.IsEqual(typeof(Vector3i)))
+                return IsHalfPrecision ? "min16int3" : "int3";
+            else if (type.IsEqual(typeof(Vector4i)))
+                return IsHalfPrecision ? "min16int4" : "int4";
             return type.FullName;
         }
         //public virtual IExpression GetVarExpr(UMaterialGraph funGraph, ICodeGen cGen, PinOut oPin, bool bTakeResult)
@@ -282,6 +290,95 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Var
         public override UExpressionBase GetExpression(NodePin pin, ref BuildCodeStatementsData data)
         {
             if(pin == OutX)
+                return new UVariableReferenceExpression(Name);
+            return null;
+        }
+    }
+
+    [ContextMenu("i1,int1", "Data\\int@_serial@", UMaterialGraph.MaterialEditorKeyword)]
+    public class VarDimI1 : VarNode
+    {
+        public override Rtti.UTypeDesc GetOutPinType(PinOut pin)
+        {
+            return VarType;
+        }
+        public override bool CanLinkFrom(PinIn iPin, UNodeBase OutNode, PinOut oPin)
+        {
+            if (base.CanLinkFrom(iPin, OutNode, oPin) == false)
+                return false;
+
+            var nodeExpr = OutNode as UNodeBase;
+            var type = nodeExpr.GetOutPinType(oPin);
+
+            if (iPin == InX)
+            {
+                if (!type.IsEqual(typeof(int)))
+                    return false;
+            }
+            return true;
+        }
+        protected override string GetDefaultValue()
+        {
+            return Value.ToString();
+        }
+        [Rtti.Meta]
+        public float Value { get; set; } = 0;
+        [EGui.Controls.PropertyGrid.PGCustomValueEditor(HideInPG = true)]
+        public PinIn InX { get; set; } = new PinIn();
+        [EGui.Controls.PropertyGrid.PGCustomValueEditor(HideInPG = true)]
+        public PinOut OutX { get; set; } = new PinOut();
+        public VarDimI1()
+        {
+            VarType = Rtti.UTypeDescGetter<int>.TypeDesc;
+
+            //Name = $"{Value}";
+
+            InX.Name = "x";
+            InX.LinkDesc = UShaderEditorStyles.Instance.NewInOutPinDesc();
+            this.AddPinIn(InX);
+
+            OutX.Name = "x";
+            OutX.LinkDesc = UShaderEditorStyles.Instance.NewInOutPinDesc();
+            this.AddPinOut(OutX);
+        }
+        public override void BuildStatements(NodePin pin, ref BuildCodeStatementsData data)
+        {
+            base.BuildStatements(pin, ref data);
+            if (data.NodeGraph.PinHasLinker(InX))
+            {
+                var pinNode = data.NodeGraph.GetOppositePinNode(InX);
+                var opPin = data.NodeGraph.GetOppositePin(InX);
+                pinNode.BuildStatements(opPin, ref data);
+
+                var assignStatement = new UAssignOperatorStatement()
+                {
+                    From = pinNode.GetExpression(opPin, ref data),
+                    To = new UVariableReferenceExpression(Name),
+                };
+                if (!data.CurrentStatements.Contains(assignStatement))
+                    data.CurrentStatements.Add(assignStatement);
+            }
+
+            if (!data.MethodDec.HasLocalVariable(Name))
+            {
+                var val = new UVariableDeclaration()
+                {
+                    VariableType = new UTypeReference(Type2HLSLType(VarType, IsHalfPrecision)),
+                    VariableName = Name,
+                    InitValue = new UPrimitiveExpression(Value),
+                };
+                if (IsUniform)
+                {
+                    var graph = data.NodeGraph as UMaterialGraph;
+                    graph.ShaderEditor.MaterialOutput.UniformVars.Add(val);
+                }
+                else
+                    data.MethodDec.AddLocalVar(val);
+            }
+        }
+        public override UExpressionBase GetExpression(NodePin pin, ref BuildCodeStatementsData data)
+        {
+            if (pin == OutX)
                 return new UVariableReferenceExpression(Name);
             return null;
         }

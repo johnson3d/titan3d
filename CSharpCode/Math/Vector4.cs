@@ -11,6 +11,18 @@ namespace EngineNS
     [Vector4.TypeConverter]
     public struct Vector4 : System.IEquatable<Vector4>
 	{
+        public static Vector4 FromObject(object obj)
+        {
+            if (obj.GetType() == typeof(Vector4))
+                return (Vector4)obj;
+            if (obj.GetType() == typeof(Color4f))
+                return (Color4f)obj;
+            else
+            {
+                System.Diagnostics.Debug.Assert(false);
+            }
+            return Vector4.Zero;
+        }
         public class TypeConverterAttribute : Support.TypeConverterAttributeBase
         {
             public override bool ConvertFromString(ref object obj, string text)
@@ -145,7 +157,7 @@ namespace EngineNS
                 return retValue;
             }
 
-            public unsafe static bool OnDrawVectorValue<T>(in EditorInfo info, ref T v, ref T newValue) where T : unmanaged
+            public unsafe static bool OnDrawVectorValue<T>(in EditorInfo info, ref T v, ref T newValue, string dimName0 = "X", string dimName1 = "Y", string dimName2 = "Z", string dimName3 = "W") where T : unmanaged
             {
                 bool retValue = false;
                 if (info.Expand)
@@ -175,16 +187,16 @@ namespace EngineNS
                         switch (dimIdx)
                         {
                             case 0:
-                                dimName = "X";
+                                dimName = dimName0;
                                 break;
                             case 1:
-                                dimName = "Y";
+                                dimName = dimName1;
                                 break;
                             case 2:
-                                dimName = "Z";
+                                dimName = dimName2;
                                 break;
                             case 3:
-                                dimName = "W";
+                                dimName = dimName3;
                                 break;
                         }
                         ImGuiAPI.Indent(15);
@@ -216,11 +228,28 @@ namespace EngineNS
         {
             try
             {
-                var segs = text.Split(',');
-                return new Vector4(System.Convert.ToSingle(segs[0]),
-                    System.Convert.ToSingle(segs[1]),
-                    System.Convert.ToSingle(segs[2]),
-                    System.Convert.ToSingle(segs[3]));
+                var result = new Vector4();
+                ReadOnlySpan<char> chars = text.ToCharArray();
+                int iStart = 0;
+                int j = 0;
+                for (int i = 0; i < chars.Length; i++)
+                {
+                    if (chars[i] == ',')
+                    {
+                        result[j] = float.Parse(chars.Slice(iStart, i - iStart));
+                        iStart = i + 1;
+                        j++;
+                        if (j == 3)
+                            break;
+                    }
+                }
+                result[j] = float.Parse(chars.Slice(iStart, chars.Length - iStart));
+                return result;
+                //var segs = text.Split(',');
+                //return new Vector4(System.Convert.ToSingle(segs[0]),
+                //    System.Convert.ToSingle(segs[1]),
+                //    System.Convert.ToSingle(segs[2]),
+                //    System.Convert.ToSingle(segs[3]));
             }
             catch
             {
@@ -303,7 +332,7 @@ namespace EngineNS
 	        }
         }
 
-        public Vector4(Color4 src)
+        public Vector4(Color4f src)
         {
             W = src.Alpha;
             X = src.Red;
@@ -317,6 +346,8 @@ namespace EngineNS
             Y = v.Y;
             Z = v.Z;
         }
+        public static implicit operator Vector3(Vector4 d) => new Vector3(d.X, d.Y, d.Z);
+        public static implicit operator Color3f(Vector4 d) => new Color3f(d.X, d.Y, d.Z);
 
         #region StaticMember
         /// <summary>
@@ -451,10 +482,15 @@ namespace EngineNS
         /// <param name="value1">Vector4对象</param>
         /// <param name="value2">Vector4对象</param>
         /// <returns>如果两个对象相等返回true，否则返回false</returns>
-	    public static bool Equals(in Vector4 value1, in Vector4 value2 )
+	    public static Bool4 Equals(in Vector4 value1, in Vector4 value2 )
 	    {
-		    return ( value1.X == value2.X && value1.Y == value2.Y && value1.Z == value2.Z && value1.W == value2.W );
-	    }
+            Bool4 result;
+            result.X = (Math.Abs(value1.X - value2.X) <= MathHelper.Epsilon);
+            result.Y = (Math.Abs(value1.Y - value2.Y) <= MathHelper.Epsilon);
+            result.Z = (Math.Abs(value1.Z - value2.Z) <= MathHelper.Epsilon);
+            result.W = (Math.Abs(value1.W - value2.W) <= MathHelper.Epsilon);
+            return result;
+        }
         #endregion
         public static Vector4 Minimize(in Vector4 left, in Vector4 right)
         {
@@ -1330,7 +1366,7 @@ namespace EngineNS
         /// <returns>如果两个向量相等返回true，否则返回false</returns>
 	    public static bool operator == (in Vector4 left, in Vector4 right)
 	    {
-		    return Equals( left, right );
+		    return Equals( left, right ).All();
 	    }
         /// <summary>
         /// 重载"!="号运算符
@@ -1340,7 +1376,43 @@ namespace EngineNS
         /// <returns>如果两个向量不相等返回true，否则返回false</returns>
 	    public static bool operator != (in Vector4 left, in Vector4 right )
 	    {
-		    return !Equals( left, right );
+		    return !Equals( left, right ).All();
 	    }
+        public static Bool4 Less(in Vector4 value1, in Vector4 value2)
+        {
+            Bool4 result;
+            result.X = value1.X < value2.X;
+            result.Y = value1.Y < value2.Y;
+            result.Z = value1.Z < value2.Z;
+            result.W = value1.W < value2.W;
+            return result;
+        }
+        public static Bool4 LessEqual(in Vector4 value1, in Vector4 value2)
+        {
+            Bool4 result;
+            result.X = value1.X <= value2.X;
+            result.Y = value1.Y <= value2.Y;
+            result.Z = value1.Z <= value2.Z;
+            result.W = value1.W <= value2.W;
+            return result;
+        }
+        public static Bool4 Great(in Vector4 value1, in Vector4 value2)
+        {
+            Bool4 result;
+            result.X = value1.X > value2.X;
+            result.Y = value1.Y > value2.Y;
+            result.Z = value1.Z > value2.Z;
+            result.W = value1.W > value2.W;
+            return result;
+        }
+        public static Bool4 GreatEqual(in Vector4 value1, in Vector4 value2)
+        {
+            Bool4 result;
+            result.X = value1.X >= value2.X;
+            result.Y = value1.Y >= value2.Y;
+            result.Z = value1.Z >= value2.Z;
+            result.W = value1.W >= value2.W;
+            return result;
+        }
     }
 }

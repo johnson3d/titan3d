@@ -28,7 +28,7 @@ namespace EngineNS.IO
                 return false;
 
             var address = RName.GetAddress(targetType, targetPath) + IAssetMeta.MetaExt;
-            if (IO.FileManager.FileExists(address))
+            if (IO.TtFileManager.FileExists(address))
             {//不支持覆盖
                 return false;
             }
@@ -75,8 +75,8 @@ namespace EngineNS.IO
 
                 UEngine.Instance.AssetMetaManager.RegAsset(ameta);
 
-                if (IO.FileManager.FileExists(src + ".snap"))
-                    IO.FileManager.CopyFile(src + ".snap", tar + ".snap");
+                if (IO.TtFileManager.FileExists(src + ".snap"))
+                    IO.TtFileManager.CopyFile(src + ".snap", tar + ".snap");
 
                 ameta.SaveAMeta();
             }

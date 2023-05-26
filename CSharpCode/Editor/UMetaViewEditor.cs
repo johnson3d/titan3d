@@ -10,10 +10,12 @@ namespace EngineNS.Editor
         protected bool mVisible = true;
         public bool Visible { get => mVisible; set => mVisible = value; }
         public uint DockId { get; set; }
+        ImGuiWindowClass mDockKeyClass;
+        public ImGuiWindowClass DockKeyClass => mDockKeyClass;
         public ImGuiCond_ DockCond { get; set; } = ImGuiCond_.ImGuiCond_FirstUseEver;
         public EGui.Controls.PropertyGrid.PropertyGrid VersionPropGrid = new EGui.Controls.PropertyGrid.PropertyGrid();
         public Rtti.UMetaVersion CurrentMetaVersion;
-        public void Cleanup()
+        public void Dispose()
         {
             VersionPropGrid.Target = null;
         }
@@ -30,15 +32,15 @@ namespace EngineNS.Editor
             AssetName = name;
 
             var absFile = name.Address;
-            var dir = IO.FileManager.GetBaseDirectory(absFile);
-            var pureName = IO.FileManager.GetPureName(absFile);
+            var dir = IO.TtFileManager.GetBaseDirectory(absFile);
+            var pureName = IO.TtFileManager.GetPureName(absFile);
             var version = System.Convert.ToUInt32(pureName);
-            var descName = IO.FileManager.CombinePath(dir, "typedesc.txt");
-            var typeStr = IO.FileManager.ReadAllText(descName);
+            var descName = IO.TtFileManager.CombinePath(dir, "typedesc.txt");
+            var typeStr = IO.TtFileManager.ReadAllText(descName);
             if (typeStr == null)
             {
-                descName = IO.FileManager.CombinePath(dir, "typename.txt");
-                typeStr = IO.FileManager.ReadAllText(descName);
+                descName = IO.TtFileManager.CombinePath(dir, "typename.txt");
+                typeStr = IO.TtFileManager.ReadAllText(descName);
                 if (typeStr == null)
                     return false;
             }
@@ -57,7 +59,29 @@ namespace EngineNS.Editor
         {
 
         }
-        public float LeftWidth = 0;
+        bool mDockInitialized = false;
+        protected void ResetDockspace(bool force = false)
+        {
+            var pos = ImGuiAPI.GetCursorPos();
+            var id = ImGuiAPI.GetID(AssetName.Name + "_Dockspace");
+            mDockKeyClass.ClassId = id;
+            ImGuiAPI.DockSpace(id, Vector2.Zero, ImGuiDockNodeFlags_.ImGuiDockNodeFlags_None, mDockKeyClass);
+            if (mDockInitialized && !force)
+                return;
+            ImGuiAPI.DockBuilderRemoveNode(id);
+            ImGuiAPI.DockBuilderAddNode(id, ImGuiDockNodeFlags_.ImGuiDockNodeFlags_None);
+            ImGuiAPI.DockBuilderSetNodePos(id, pos);
+            ImGuiAPI.DockBuilderSetNodeSize(id, Vector2.One);
+            mDockInitialized = true;
+
+            var rightId = id;
+            uint leftId = 0;
+            ImGuiAPI.DockBuilderSplitNode(rightId, ImGuiDir_.ImGuiDir_Left, 0.2f, ref leftId, ref rightId);
+
+            ImGuiAPI.DockBuilderDockWindow(EGui.UIProxy.DockProxy.GetDockWindowName("LeftView", mDockKeyClass), leftId);
+            ImGuiAPI.DockBuilderDockWindow(EGui.UIProxy.DockProxy.GetDockWindowName("TextureView", mDockKeyClass), rightId);
+            ImGuiAPI.DockBuilderFinish(id);
+        }
         public Vector2 WindowSize = new Vector2(800, 600);
         public Vector2 ImageSize = new Vector2(512, 512);
         public float ScaleFactor = 1.0f;
@@ -68,35 +92,17 @@ namespace EngineNS.Editor
 
             var pivot = new Vector2(0);
             ImGuiAPI.SetNextWindowSize(in WindowSize, ImGuiCond_.ImGuiCond_FirstUseEver);
-            ImGuiAPI.SetNextWindowDockID(DockId, DockCond);
-            if (ImGuiAPI.Begin(AssetName.Name, ref mVisible, ImGuiWindowFlags_.ImGuiWindowFlags_None |
+            if (EGui.UIProxy.DockProxy.BeginMainForm(AssetName.Name, this, ImGuiWindowFlags_.ImGuiWindowFlags_None |
                 ImGuiWindowFlags_.ImGuiWindowFlags_NoSavedSettings))
             {
-                if (ImGuiAPI.IsWindowDocked())
-                {
-                    DockId = ImGuiAPI.GetWindowDockID();
-                }
                 DrawToolBar();
                 ImGuiAPI.Separator();
-                ImGuiAPI.Columns(2, null, true);
-                if (LeftWidth == 0)
-                {
-                    ImGuiAPI.SetColumnWidth(0, 300);
-                }
-                LeftWidth = ImGuiAPI.GetColumnWidth(0);
-
-                var min = ImGuiAPI.GetWindowContentRegionMin();
-                var max = ImGuiAPI.GetWindowContentRegionMin();
-
-                DrawLeft(ref min, ref max);
-                ImGuiAPI.NextColumn();
-
-                DrawRight(ref min, ref max);
-                ImGuiAPI.NextColumn();
-
-                ImGuiAPI.Columns(1, null, true);
             }
-            ImGuiAPI.End();
+            ResetDockspace();
+            EGui.UIProxy.DockProxy.EndMainForm();
+
+            DrawLeft();
+            DrawRight();
         }
         protected void DrawToolBar()
         {
@@ -111,22 +117,22 @@ namespace EngineNS.Editor
 
             }
         }
-        protected unsafe void DrawLeft(ref Vector2 min, ref Vector2 max)
+        bool mLeftShow = true;
+        protected unsafe void DrawLeft()
         {
-            var sz = new Vector2(-1);
-            if (ImGuiAPI.BeginChild("LeftView", in sz, true, ImGuiWindowFlags_.ImGuiWindowFlags_None))
+            if (EGui.UIProxy.DockProxy.BeginPanel(mDockKeyClass, "LeftView", ref mLeftShow, ImGuiWindowFlags_.ImGuiWindowFlags_None))
             {
                 VersionPropGrid.OnDraw(true, false, false);
             }
-            ImGuiAPI.EndChild();
+            EGui.UIProxy.DockProxy.EndPanel();
         }
-        protected unsafe void DrawRight(ref Vector2 min, ref Vector2 max)
+        bool mRightShow = true;
+        protected unsafe void DrawRight()
         {
-            var sz = new Vector2(-1);
-            if (ImGuiAPI.BeginChild("TextureView", in sz, true, ImGuiWindowFlags_.ImGuiWindowFlags_None))
+            if (EGui.UIProxy.DockProxy.BeginPanel(mDockKeyClass, "TextureView", ref mRightShow, ImGuiWindowFlags_.ImGuiWindowFlags_None))
             {
             }
-            ImGuiAPI.EndChild();
+            EGui.UIProxy.DockProxy.EndPanel();
         }
         public void OnEvent(in Bricks.Input.Event e)
         {

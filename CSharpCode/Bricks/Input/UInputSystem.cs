@@ -26,6 +26,7 @@ namespace EngineNS.Bricks.Input
 
     public partial class UInputSystem 
     {
+        public static readonly int MaxMultiTouchNumber = 10;    // 最多支持的触控点数量
         Dictionary<EventType, UEventTrigger> EventTriggerDic = new Dictionary<EventType, UEventTrigger>();
 
         public bool[] OldKeyboards = new bool[(int)Scancode.NUM_SCANCODES];

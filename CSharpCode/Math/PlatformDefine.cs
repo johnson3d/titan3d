@@ -23,7 +23,7 @@
 //        }
 //    }
 
-//    public struct PointF
+//    public struct Point2f
 //    {
 //        public float X { get; set; }
 //        public float Y { get; set; }

@@ -5,53 +5,54 @@ using System.Runtime.InteropServices;
 
 namespace EngineNS.Support
 {
-    public class UBitset
+    public class UBitset : AuxPtrType<FBitset>
     {
-        byte[] mData;
-        uint mBitCount;
+        public UBitset()
+        {
+            mCoreObject = FBitset.CreateInstance();
+        }
         public uint BitCount
         {
-            get => mBitCount;
+            get => mCoreObject.GetBitCount();
+        }
+        public unsafe byte* Data
+        {
+            get
+            {
+                return mCoreObject.GetDataPtr();
+            }
+        }
+        public uint DataByteSize
+        {
+            get
+            {
+                return mCoreObject.GetDataByteSize();
+            }
+        }
+        public void SetBitCount(uint Count)
+        {
+            mCoreObject.SetBitCount(Count);
         }
         public UBitset(uint Count)
         {
-            mBitCount = Count;
-            if (Count % 8 == 0)
-                mData = new byte[Count / 8];
-            else
-                mData = new byte[Count / 8 + 1];
+            mCoreObject = FBitset.CreateInstance();
+            SetBitCount(Count);
         }
         public void SetBit(uint index)
         {
-            if (index >= mBitCount)
-                return;
-            uint a = index / 8;
-            int b = (int)index % 8;
-            mData[a] |= (byte)(1 << b);
+            mCoreObject.SetBit(index);
         }
         public void UnsetBit(uint index)
         {
-            if (index >= mBitCount)
-                return;
-            uint a = index / 8;
-            int b = (int)index % 8;
-            byte v =  ((byte)(1 << b));
-            mData[a] &= (byte)(~v);
+            mCoreObject.UnsetBit(index);
         }
         public bool IsSet(uint index)
         {
-            if (index >= mBitCount)
-                return false;
-            uint a = index / 8;
-            int b = (int)index % 8;
-            return (mData[a] & (byte)(1 << b))!=0;
+            return mCoreObject.IsSet(index);
         }
         public void Clear()
         {
-            for (int i = 0; i < mData.Length; i++)
-            {
-                mData[i] = 0;
-            }
+            mCoreObject.Clear();
         }
     }
     [System.Runtime.InteropServices.StructLayout(System.Runtime.InteropServices.LayoutKind.Explicit, Pack = 4)]

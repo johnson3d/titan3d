@@ -12,6 +12,11 @@ namespace EngineNS.Bricks.Particle
         where FParticleSystem : unmanaged
         where TEmitter : UEmitter<FParticle, FParticleSystem>, new()
     {
+        public override void Dispose()
+        {
+            CoreSDK.DisposeObject(ref mNebulaParticle);
+            base.Dispose();
+        }
         public abstract class UNebulaNodeData : GamePlay.Scene.UMeshNode.UMeshNodeData
         {
             public UNebulaNodeData()

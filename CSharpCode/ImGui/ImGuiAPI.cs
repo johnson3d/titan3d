@@ -54,9 +54,9 @@ namespace EngineNS
         {
             if (text == null)
                 text = "";
-            using (var buffer = BigStackBuffer.CreateInstance((text.Length + 1) * 4))
+            using (var buffer = BigStackBuffer.CreateInstance(128))
             {
-                buffer.SetText(text);
+                buffer.SetTextUtf8(text);
                 bool changed = false;
                 if (user_data == null)
                 {

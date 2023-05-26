@@ -29,26 +29,26 @@ namespace EngineNS.Bricks.CodeBuilder
 
         public override async Task<bool> Initialize(UEngine host)
         {
-            var cfgFile = host.FileManager.GetRoot(IO.FileManager.ERootDir.Editor) + "MacrossConfig.cfg";
-            Config = IO.FileManager.LoadXmlToObject<UMacrossConfig>(cfgFile);
+            var cfgFile = host.FileManager.GetRoot(IO.TtFileManager.ERootDir.Editor) + "MacrossConfig.cfg";
+            Config = IO.TtFileManager.LoadXmlToObject<UMacrossConfig>(cfgFile);
             if(Config == null)
             {
                 Config = new UMacrossConfig();
                 Config.TargetFramework = UEngine.DotNetVersion;
                 Config.GameReferenceAssemblies = new List<string>()
                 {
-                    IO.FileManager.GetRelativePath(
-                        IO.FileManager.GetBaseDirectory(UEngine.Instance.FileManager.GetRoot(IO.FileManager.ERootDir.EngineSource) + UEngine.Instance.EditorInstance.Config.GameProject),
-                        UEngine.Instance.FileManager.GetRoot(IO.FileManager.ERootDir.Execute)) + "Engine.Window.dll",
+                    IO.TtFileManager.GetRelativePath(
+                        IO.TtFileManager.GetBaseDirectory(UEngine.Instance.FileManager.GetRoot(IO.TtFileManager.ERootDir.EngineSource) + UEngine.Instance.EditorInstance.Config.GameProject),
+                        UEngine.Instance.FileManager.GetRoot(IO.TtFileManager.ERootDir.Execute)) + "Engine.Window.dll",
                 };
                 Config.GenProjects = new List<CodeCompiler.ProjectConfig>()
                 {
                     new CodeCompiler.ProjectConfig()
                     {
                         ProjectType = CodeCompiler.ProjectConfig.enProjectType.DefaultGame,
-                        ProjectFile = IO.FileManager.GetRelativePath(
-                            IO.FileManager.GetBaseDirectory(UEngine.Instance.FileManager.GetRoot(IO.FileManager.ERootDir.EngineSource) + UEngine.Instance.EditorInstance.Config.GameProject),
-                            UEngine.Instance.FileManager.GetRoot(IO.FileManager.ERootDir.Game)) + "MacrossGenCSharp.shproj",
+                        ProjectFile = IO.TtFileManager.GetRelativePath(
+                            IO.TtFileManager.GetBaseDirectory(UEngine.Instance.FileManager.GetRoot(IO.TtFileManager.ERootDir.EngineSource) + UEngine.Instance.EditorInstance.Config.GameProject),
+                            UEngine.Instance.FileManager.GetRoot(IO.TtFileManager.ERootDir.Game)) + "MacrossGenCSharp.shproj",
                         ProjectGuid = Guid.NewGuid(),
                         MinVSVersion = new Version(14, 0),
                     }
@@ -67,8 +67,8 @@ namespace EngineNS.Bricks.CodeBuilder
         void GenerateSharedProjects()
         {
             // 根据配置生成多个共享工程
-            var folder = UEngine.Instance.FileManager.GetRoot(IO.FileManager.ERootDir.Game);
-            var codeFiles = new HashSet<string>(IO.FileManager.GetFiles(folder, "*.cs"));
+            var folder = UEngine.Instance.FileManager.GetRoot(IO.TtFileManager.ERootDir.Game);
+            var codeFiles = new HashSet<string>(IO.TtFileManager.GetFiles(folder, "*.cs"));
             for(int i=0; i<Config.GenProjects.Count; ++i)
             {
                 var projConfig = Config.GenProjects[i];
@@ -99,8 +99,8 @@ namespace EngineNS.Bricks.CodeBuilder
                 return;
 
             var projFile = UEngine.Instance.EditorInstance.Config.GameProject;
-            var projFolder = IO.FileManager.GetParentPathName(projFile);
-            var outputPath = IO.FileManager.GetRelativePath(UEngine.Instance.FileManager.GetRoot(IO.FileManager.ERootDir.Execute), projFile);
+            var projFolder = IO.TtFileManager.GetParentPathName(projFile);
+            var outputPath = IO.TtFileManager.GetRelativePath(UEngine.Instance.FileManager.GetRoot(IO.TtFileManager.ERootDir.Execute), projFile);
             string nsUrl = null;// "http://schemas.microsoft.com/developer/msbuild/2003";
 
             var xml = new XmlDocument();
@@ -140,11 +140,11 @@ namespace EngineNS.Bricks.CodeBuilder
         public void ClearGameProjectTemplateBuildFiles()
         {
             var projFile = UEngine.Instance.EditorInstance.Config.GameProject;
-            var projFolder = IO.FileManager.GetParentPathName(projFile);
-            var objFolder = UEngine.Instance.FileManager.GetRoot(IO.FileManager.ERootDir.EngineSource) + projFolder.TrimEnd('/') + "/obj";
-            if(IO.FileManager.DirectoryExists(objFolder))
+            var projFolder = IO.TtFileManager.GetParentPathName(projFile);
+            var objFolder = UEngine.Instance.FileManager.GetRoot(IO.TtFileManager.ERootDir.EngineSource) + projFolder.TrimEnd('/') + "/obj";
+            if(IO.TtFileManager.DirectoryExists(objFolder))
             {
-                IO.FileManager.DeleteDirectory(objFolder);
+                IO.TtFileManager.DeleteDirectory(objFolder);
             }
         }
 

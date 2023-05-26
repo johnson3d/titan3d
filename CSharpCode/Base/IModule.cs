@@ -14,7 +14,7 @@ namespace EngineNS
         protected void GatherModules()
         {
             mModules.Clear();
-            var props = this.GetType().GetProperties();
+            var props = this.GetType().GetProperties(System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.Static);
             foreach (var i in props)
             {
                 if (i.PropertyType.IsSubclassOf(typeof(UModule<THost>)))
@@ -70,6 +70,26 @@ namespace EngineNS
                 i.Tick(host);
             }
         }
+        protected void TickLogicModules()
+        {
+            var host = GetHost();
+            foreach (var i in mModules)
+            {
+                if (i.IsModuleRun(UEngine.Instance.PlayMode) == false)
+                    continue;
+                i.TickLogic(host);
+            }
+        }
+        protected void TickRenderModules()
+        {
+            var host = GetHost();
+            foreach (var i in mModules)
+            {
+                if (i.IsModuleRun(UEngine.Instance.PlayMode) == false)
+                    continue;
+                i.TickRender(host);
+            }
+        }
         protected void EndFrameModules()
         {
             var host = GetHost();
@@ -116,21 +136,28 @@ namespace EngineNS
         }
         public virtual int GetOrder()
         {
-            return 0;
+            return 1;
         }
         public virtual async System.Threading.Tasks.Task<bool> Initialize(THost host)
         {
-            await Thread.AsyncDummyClass.DummyFunc();
+            await Thread.TtAsyncDummyClass.DummyFunc();
             return true;
         }
         public virtual async System.Threading.Tasks.Task<bool> PostInitialize(THost host)
         {
-            await Thread.AsyncDummyClass.DummyFunc();
+            await Thread.TtAsyncDummyClass.DummyFunc();
             return true;
         }
         public virtual void Tick(THost host)
         {
 
+        }
+        public virtual void TickLogic(THost host)
+        {
+        }
+
+        public virtual void TickRender(THost host)
+        {
         }
         public virtual void EndFrame(THost host)
         {

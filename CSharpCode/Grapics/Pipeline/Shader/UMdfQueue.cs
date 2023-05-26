@@ -43,7 +43,7 @@ namespace EngineNS.Graphics.Pipeline.Shader
         //}
         public virtual void CopyFrom(UMdfQueue mdf)
         {
-
+            OnDrawCallCallback = mdf.OnDrawCallCallback;
         }
         public RName CodeName { get; set; }
         public NxRHI.UShaderCode DefineCode { get; protected set; }
@@ -57,10 +57,13 @@ namespace EngineNS.Graphics.Pipeline.Shader
             var codeBuilder = new Bricks.CodeBuilder.Backends.UHLSLCodeGenerator();
             GetBaseBuilder(codeBuilder);
         }
-        
-        public virtual void OnDrawCall(Pipeline.URenderPolicy.EShadingType shadingType, NxRHI.UGraphicDraw drawcall, URenderPolicy policy, Mesh.UMesh mesh)
-        {
 
+        public delegate void FOnDrawCall(Pipeline.URenderPolicy.EShadingType shadingType, NxRHI.UGraphicDraw drawcall, URenderPolicy policy, Mesh.UMesh mesh, int atom);
+        public FOnDrawCall OnDrawCallCallback = null;
+        public virtual void OnDrawCall(Pipeline.URenderPolicy.EShadingType shadingType, NxRHI.UGraphicDraw drawcall, URenderPolicy policy, Mesh.UMesh mesh, int atom)
+        {
+            if (OnDrawCallCallback != null)
+                OnDrawCallCallback(shadingType, drawcall, policy, mesh, atom);
         }
 
         public virtual Rtti.UTypeDesc GetPermutation(List<string> features)

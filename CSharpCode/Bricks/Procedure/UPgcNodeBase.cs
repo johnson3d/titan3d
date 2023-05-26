@@ -229,9 +229,9 @@ namespace EngineNS.Bricks.Procedure
             var hash = GetOutBufferHash(pin);
             if (hash == Hash160.Emtpy)
                 return;
-            var rootDir = UEngine.Instance.FileManager.GetRoot(IO.FileManager.ERootDir.Cache) + "pgcbuffer/";
-            var dir = IO.FileManager.CombinePath(rootDir, graph.AssetName.Name);
-            IO.FileManager.SureDirectory(dir);
+            var rootDir = UEngine.Instance.FileManager.GetRoot(IO.TtFileManager.ERootDir.Cache) + "pgcbuffer/";
+            var dir = IO.TtFileManager.CombinePath(rootDir, graph.AssetName.Name);
+            IO.TtFileManager.SureDirectory(dir);
             buffer.SaveToCache($"{dir}/{this.Name}_{NodeId}_{pin.Name}.bfpgc", in hash);
         }
         public void SaveOutBufferToCache(UPgcGraph graph, PinOut pin, in Hash160 hash)
@@ -241,9 +241,9 @@ namespace EngineNS.Bricks.Procedure
             var buffer = graph.BufferCache.FindBuffer(pin);
             if (buffer == null)
                 return;
-            var rootDir = UEngine.Instance.FileManager.GetRoot(IO.FileManager.ERootDir.Cache) + "pgcbuffer/";
-            var dir = IO.FileManager.CombinePath(rootDir, graph.AssetName.Name);
-            IO.FileManager.SureDirectory(dir);
+            var rootDir = UEngine.Instance.FileManager.GetRoot(IO.TtFileManager.ERootDir.Cache) + "pgcbuffer/";
+            var dir = IO.TtFileManager.CombinePath(rootDir, graph.AssetName.Name);
+            IO.TtFileManager.SureDirectory(dir);
             buffer.SaveToCache($"{dir}/{this.Name}_{NodeId}_{pin.Name}.bfpgc", in hash);
         }
         public bool TryLoadOutBufferFromCache(UPgcGraph graph, PinOut pin)
@@ -254,8 +254,8 @@ namespace EngineNS.Bricks.Procedure
             if (buffer == null)
                 return false;
             var hash = GetOutBufferHash(pin);
-            var rootDir = UEngine.Instance.FileManager.GetRoot(IO.FileManager.ERootDir.Cache) + "pgcbuffer/";
-            var dir = IO.FileManager.CombinePath(rootDir, graph.AssetName.Name);
+            var rootDir = UEngine.Instance.FileManager.GetRoot(IO.TtFileManager.ERootDir.Cache) + "pgcbuffer/";
+            var dir = IO.TtFileManager.CombinePath(rootDir, graph.AssetName.Name);
 
             return buffer.LoadFromCache($"{dir}/{this.Name}_{NodeId}_{pin.Name}.bfpgc", in hash);
         }
@@ -266,8 +266,8 @@ namespace EngineNS.Bricks.Procedure
             var buffer = graph.BufferCache.FindBuffer(pin);
             if (buffer == null)
                 return false;
-            var rootDir = UEngine.Instance.FileManager.GetRoot(IO.FileManager.ERootDir.Cache) + "pgcbuffer/";
-            var dir = IO.FileManager.CombinePath(rootDir, graph.AssetName.Name);
+            var rootDir = UEngine.Instance.FileManager.GetRoot(IO.TtFileManager.ERootDir.Cache) + "pgcbuffer/";
+            var dir = IO.TtFileManager.CombinePath(rootDir, graph.AssetName.Name);
 
             return buffer.LoadFromCache($"{dir}/{this.Name}_{NodeId}_{pin.Name}.bfpgc", in hash);
         }
@@ -375,7 +375,7 @@ namespace EngineNS.Bricks.Procedure
             }
             else
             {
-                var smp = Thread.ASyncSemaphore.CreateSemaphore(result.Depth * result.Height * result.Width);
+                var smp = Thread.TtSemaphore.CreateSemaphore(result.Depth * result.Height * result.Width);
                 if (result.Depth == 1 && result.Height == 1)
                 {
                     for (int i = 0; i < result.Depth; i++)
@@ -387,11 +387,11 @@ namespace EngineNS.Bricks.Procedure
                                 int x = k;
                                 int y = j;
                                 int z = i;
-                                UEngine.Instance.EventPoster.RunOn(() =>
+                                UEngine.Instance.EventPoster.RunOn((state) =>
                                 {
                                     OnPerPixel(graph, this, result, x, y, z, tag);
                                     smp.Release();
-                                    return null;
+                                    return true;
                                 }, Thread.Async.EAsyncTarget.TPools);
                             }
                         }
@@ -405,14 +405,14 @@ namespace EngineNS.Bricks.Procedure
                         {
                             int y = j;
                             int z = i;
-                            UEngine.Instance.EventPoster.RunOn(() =>
+                            UEngine.Instance.EventPoster.RunOn((state) =>
                             {
                                 for (int k = 0; k < result.Width; k++)
                                 {
                                     OnPerPixel(graph, this, result, k, y, z, tag);
                                     smp.Release();
                                 }
-                                return null;
+                                return true;
                             }, Thread.Async.EAsyncTarget.TPools);
                         }
                     }
@@ -422,7 +422,7 @@ namespace EngineNS.Bricks.Procedure
                     for (int i = 0; i < result.Depth; i++)
                     {
                         int z = i;
-                        UEngine.Instance.EventPoster.RunOn(() =>
+                        UEngine.Instance.EventPoster.RunOn((state) =>
                         {
                             for (int j = 0; j < result.Height; j++)
                             {
@@ -432,7 +432,7 @@ namespace EngineNS.Bricks.Procedure
                                     smp.Release();
                                 }
                             }
-                            return null;
+                            return true;
                         }, Thread.Async.EAsyncTarget.TPools);
                     }
                 }
@@ -496,7 +496,7 @@ namespace EngineNS.Bricks.Procedure
         #region PG
         [Browsable(false)]
         public bool IsPropertyVisibleDirty { get; set; } = false;
-        public void GetProperties(ref EGui.Controls.PropertyGrid.CustomPropertyDescriptorCollection collection, bool parentIsValueType)
+        public virtual void GetProperties(ref EGui.Controls.PropertyGrid.CustomPropertyDescriptorCollection collection, bool parentIsValueType)
         {
             var thisType = Rtti.UTypeDesc.TypeOf(this.GetType());
             var pros = System.ComponentModel.TypeDescriptor.GetProperties(this);
@@ -523,7 +523,7 @@ namespace EngineNS.Bricks.Procedure
             }
         }
 
-        public object GetPropertyValue(string propertyName)
+        public virtual object GetPropertyValue(string propertyName)
         {
             var proInfo = this.GetType().GetProperty(propertyName);
             if (proInfo != null)
@@ -534,7 +534,7 @@ namespace EngineNS.Bricks.Procedure
             return null;
         }
 
-        public void SetPropertyValue(string propertyName, object value)
+        public virtual void SetPropertyValue(string propertyName, object value)
         {
             var proInfo = this.GetType().GetProperty(propertyName);
             if (proInfo != null && proInfo.CanWrite)

@@ -4,7 +4,7 @@ using System.Text;
 
 namespace EngineNS.Graphics.Pipeline.Common
 {
-    public class UHitproxyShading : Shader.UShadingEnv
+    public class UHitproxyShading : Shader.UGraphicsShadingEnv
     {
         public UHitproxyShading()
         {
@@ -29,7 +29,7 @@ namespace EngineNS.Graphics.Pipeline.Common
             AddOutput(DepthPinOut, NxRHI.EBufferType.BFT_DSV | NxRHI.EBufferType.BFT_SRV);
         }
         #region GetHitproxy
-        private Support.CBlobObject mHitProxyData = new Support.CBlobObject();
+        private Support.UBlobObject mHitProxyData = new Support.UBlobObject();
         unsafe private NxRHI.UGpuResource mReadableHitproxyTexture;
         private NxRHI.UFence mCopyFence;
         private Int32 Clamp(Int32 ValueIn, Int32 MinValue, Int32 MaxValue)
@@ -72,7 +72,7 @@ namespace EngineNS.Graphics.Pipeline.Common
             var pBitmapDesc = (NxRHI.FPixelDesc*)pPixelData;
             pPixelData += sizeof(NxRHI.FPixelDesc);
 
-            IntColor* HitProxyIdArray = (IntColor*)pPixelData;
+            var HitProxyIdArray = (Byte4*)pPixelData;
 
             Int32 RegionMinX = (Int32)(MouseX - mHitCheckRegion);
             Int32 RegionMinY = (Int32)(MouseY - mHitCheckRegion);
@@ -100,7 +100,7 @@ namespace EngineNS.Graphics.Pipeline.Common
                 UInt32 HitProxyArrayIdx = 0;
                 for (Int32 PointY = RegionMinY; PointY < RegionMaxY; PointY++)
                 {
-                    IntColor* TempHitProxyIdCache = &HitProxyIdArray[PointY * pBitmapDesc->Width];
+                    var TempHitProxyIdCache = &HitProxyIdArray[PointY * pBitmapDesc->Width];
                     for (Int32 PointX = RegionMinX; PointX < RegionMaxX; PointX++)
                     {
                         mHitProxyIdArray[HitProxyArrayIdx] = UHitProxy.ConvertCpuTexColorToHitProxyId(TempHitProxyIdCache[PointX]);
@@ -128,14 +128,14 @@ namespace EngineNS.Graphics.Pipeline.Common
         public UGraphicsBuffers GHitproxyBuffers { get; protected set; } = new UGraphicsBuffers();
         public UGraphicsBuffers GGizmosBuffers { get; protected set; } = new UGraphicsBuffers();
         public Common.UHitproxyShading mHitproxyShading;
-        public UPassDrawBuffers HitproxyPass = new UPassDrawBuffers();
+        public TtLayerDrawBuffers HitproxyPass = new TtLayerDrawBuffers();
         public NxRHI.URenderPass HitproxyRenderPass;
         public NxRHI.URenderPass GizmosRenderPass;
         [Rtti.Meta]
         public float ScaleFactor { get; set; } = 0.5f;
         public override async System.Threading.Tasks.Task Initialize(URenderPolicy policy, string debugName)
         {
-            await Thread.AsyncDummyClass.DummyFunc();
+            await Thread.TtAsyncDummyClass.DummyFunc();
 
             var rc = UEngine.Instance.GfxDevice.RenderContext;
             HitproxyPass.Initialize(rc, debugName);
@@ -154,7 +154,7 @@ namespace EngineNS.Graphics.Pipeline.Common
                 HitproxyPassDesc.m_AttachmentDepthStencil.StoreAction = NxRHI.EFrameBufferStoreAction.StoreActionStore;
                 HitproxyPassDesc.m_AttachmentDepthStencil.StencilLoadAction = NxRHI.EFrameBufferLoadAction.LoadActionClear;
                 HitproxyPassDesc.m_AttachmentDepthStencil.StencilStoreAction = NxRHI.EFrameBufferStoreAction.StoreActionStore;
-                //HitproxyPassDesc.mFBClearColorRT0 = new Color4(0, 0, 0, 0);
+                //HitproxyPassDesc.mFBClearColorRT0 = new Color4f(0, 0, 0, 0);
                 //HitproxyPassDesc.mDepthClearValue = 1.0f;
                 //HitproxyPassDesc.mStencilClearValue = 0u;
             }            
@@ -174,7 +174,7 @@ namespace EngineNS.Graphics.Pipeline.Common
                 GizmosPassDesc.m_AttachmentDepthStencil.StoreAction = NxRHI.EFrameBufferStoreAction.StoreActionStore;
                 GizmosPassDesc.m_AttachmentDepthStencil.StencilLoadAction = NxRHI.EFrameBufferLoadAction.LoadActionClear;
                 GizmosPassDesc.m_AttachmentDepthStencil.StencilStoreAction = NxRHI.EFrameBufferStoreAction.StoreActionStore;
-                //GizmosPassDesc.mFBClearColorRT0 = new Color4(1, 0, 0, 0);
+                //GizmosPassDesc.mFBClearColorRT0 = new Color4f(1, 0, 0, 0);
                 //GizmosPassDesc.mDepthClearValue = 1.0f;
                 //GizmosPassDesc.mStencilClearValue = 0u;
             }
@@ -194,18 +194,18 @@ namespace EngineNS.Graphics.Pipeline.Common
 
             mCopyFence = rc.CreateFence(new NxRHI.FFenceDesc(), "Copy Hitproxy Texture");
         }
-        public unsafe override void Cleanup()
+        public unsafe override void Dispose()
         {
             mReadableHitproxyTexture?.Dispose();
             mReadableHitproxyTexture = null;
             
-            GHitproxyBuffers?.Cleanup();
+            GHitproxyBuffers?.Dispose();
             GHitproxyBuffers = null;
 
-            GGizmosBuffers?.Cleanup();
+            GGizmosBuffers?.Dispose();
             GGizmosBuffers = null;
 
-            base.Cleanup();
+            base.Dispose();
         }
         public override unsafe void OnResize(URenderPolicy policy, float x, float y)
         {
@@ -215,11 +215,11 @@ namespace EngineNS.Graphics.Pipeline.Common
             DepthPinOut.Attachement.Height = (uint)(y * ScaleFactor);
             if (GHitproxyBuffers != null)
             {
-                GHitproxyBuffers.OnResize(x * ScaleFactor, y * ScaleFactor);
+                GHitproxyBuffers.SetSize(x * ScaleFactor, y * ScaleFactor);
             }
             if (GGizmosBuffers != null)
             {
-                GGizmosBuffers.OnResize(x * ScaleFactor, y * ScaleFactor);
+                GGizmosBuffers.SetSize(x * ScaleFactor, y * ScaleFactor);
             }
 
             CopyTexDesc.SetDefault();
@@ -271,7 +271,7 @@ namespace EngineNS.Graphics.Pipeline.Common
 
                     if (i.IsDrawHitproxy)
                     {
-                        for (int j = 0; j < i.Atoms.Length; j++)
+                        for (int j = 0; j < i.Atoms.Count; j++)
                         {
                             var hpDrawcall = i.GetDrawCall(GHitproxyBuffers, j, policy, URenderPolicy.EShadingType.HitproxyPass, this);
                             if (hpDrawcall != null)
@@ -289,7 +289,7 @@ namespace EngineNS.Graphics.Pipeline.Common
                     //draw mesh first
                     var passClears = new NxRHI.FRenderPassClears();
                     passClears.SetDefault();
-                    passClears.SetClearColor(0, new Color4(0, 0, 0, 0));
+                    passClears.SetClearColor(0, new Color4f(0, 0, 0, 0));
                     GHitproxyBuffers.BuildFrameBuffers(policy);
                     GGizmosBuffers.BuildFrameBuffers(policy);
                     HitproxyPass.BuildRenderPass(policy, in GHitproxyBuffers.Viewport, in passClears, GHitproxyBuffers, GGizmosBuffers, "Hitproxy:");
@@ -326,10 +326,10 @@ namespace EngineNS.Graphics.Pipeline.Common
             UEngine.Instance.GfxDevice.RenderCmdQueue.QueueCmdlist(HitproxyPass.PostCmds.DrawCmdList);
 
             var fence = mCopyFence;
-            UEngine.Instance.GfxDevice.RenderCmdQueue.QueueCmd((im_cmd, name) =>
+            UEngine.Instance.GfxDevice.RenderCmdQueue.QueueCmd((NxRHI.ICommandList im_cmd, ref NxRHI.URenderCmdQueue.FRCmdInfo info) =>
             {
-                rc.CmdQueue.IncreaseSignal(fence);
-                var targetValue = fence.AspectValue;
+                rc.GpuQueue.IncreaseSignal(fence);
+                var targetValue = fence.ExpectValue;
                 var postTime = Support.Time.GetTickCount();
                 UEngine.Instance.EventPoster.PostTickSyncEvent((tickCount) =>
                 {
@@ -340,9 +340,8 @@ namespace EngineNS.Graphics.Pipeline.Common
                     }
                     if (fence.CompletedValue >= targetValue)
                     {
-                        var im_cmd = UEngine.Instance.GfxDevice.RenderContext.CmdQueue.GetIdleCmdlist(NxRHI.EQueueCmdlist.QCL_Read);
-                        var gpuDataBlob = new Support.CBlobObject();
-                        readTexture.GetGpuBufferDataPointer().FetchGpuData(im_cmd, 0, gpuDataBlob.mCoreObject);
+                        var gpuDataBlob = new Support.UBlobObject();
+                        readTexture.GetGpuBufferDataPointer().FetchGpuData(0, gpuDataBlob.mCoreObject);
                         //var ptr = (uint*)gpuDataBlob.mCoreObject.GetData();
                         //var num = gpuDataBlob.mCoreObject.GetSize() / 4;
                         //for (int i = 2; i < num; i++)
@@ -352,7 +351,6 @@ namespace EngineNS.Graphics.Pipeline.Common
                         //        int xxx = 0;
                         //    }
                         //}
-                        UEngine.Instance.GfxDevice.RenderContext.CmdQueue.ReleaseIdleCmdlist(im_cmd, NxRHI.EQueueCmdlist.QCL_Read);
                         NxRHI.ITexture.BuildImage2DBlob(mHitProxyData.mCoreObject, gpuDataBlob.mCoreObject, in CopyTexDesc);
                         IsHitproxyBuilding = false;
 

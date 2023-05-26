@@ -4,9 +4,9 @@ using System.Text;
 
 namespace EngineNS.Thread
 {
-    public class ThreadPhysics : ContextThread
+    public class TtThreadPhysics : TtContextThread
     {
-        public ThreadPhysics()
+        public TtThreadPhysics()
         {
             this.LimitTime = long.MaxValue;
             Interval = 15;

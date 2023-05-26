@@ -51,9 +51,9 @@ namespace EngineNS
             }
         }
         [Rtti.Meta]
-        public PointF Location
+        public Point2f Location
         {
-            get { return new PointF(X, Y); }
+            get { return new Point2f(X, Y); }
             set
             {
                 X = value.X;
@@ -102,14 +102,14 @@ namespace EngineNS
             Height = height;
         }
 
-        public RectangleF(PointF pt, SizeF size)
+        public RectangleF(Point2f pt, SizeF size)
         {
             X = pt.X;
             Y = pt.Y;
             Width = size.Width;
             Height = size.Height;
         }
-        public bool Contains(ref PointF pt)
+        public bool Contains(in Point2f pt)
         {
             if ((pt.X >= Left) && (pt.Y >= Top) && (pt.X < Right) && (pt.Y < Bottom))
                 return true;
@@ -117,9 +117,9 @@ namespace EngineNS
             return false;
         }
         [Rtti.Meta]
-        public bool Contains(PointF pt)
+        public bool Contains(Point2f pt)
         {
-            return Contains(ref pt);
+            return Contains(in pt);
         }
         [Rtti.Meta]
         public bool Contains(float x, float y)
@@ -133,9 +133,9 @@ namespace EngineNS
         [Rtti.Meta]
         public static RectangleF Intersect( RectangleF a, RectangleF b )
         {
-            return Intersect(ref a, ref b);
+            return Intersect(in a, in b);
         }
-        public static RectangleF Intersect(ref RectangleF a, ref RectangleF b)
+        public static RectangleF Intersect(in RectangleF a, in RectangleF b)
         {
             if (a.Left > b.Right || a.Top > b.Bottom || a.Right < b.Left || a.Bottom < b.Top)
                 return RectangleF.Empty;
@@ -148,27 +148,27 @@ namespace EngineNS
             return new RectangleF(left, top, right - left, bottom - top);
         }
         [Rtti.Meta]
-        public RectangleF Intersect(ref RectangleF rect)
+        public RectangleF Intersect(in RectangleF rect)
         {
-            return Intersect(ref this, ref rect);
+            return Intersect(in this, in rect);
         }
 
         public override bool Equals(object obj)
         {
             var tag = (RectangleF)obj;
-            if ((System.Math.Abs(X - tag.X) <= CoreDefine.Epsilon) &&
-                (System.Math.Abs(Y - tag.Y) <= CoreDefine.Epsilon) &&
-                (System.Math.Abs(Width - tag.Width) <= CoreDefine.Epsilon) &&
-                (System.Math.Abs(Height - tag.Height) <= CoreDefine.Epsilon))
+            if ((System.Math.Abs(X - tag.X) <= MathHelper.Epsilon) &&
+                (System.Math.Abs(Y - tag.Y) <= MathHelper.Epsilon) &&
+                (System.Math.Abs(Width - tag.Width) <= MathHelper.Epsilon) &&
+                (System.Math.Abs(Height - tag.Height) <= MathHelper.Epsilon))
                 return true;
             return false;
         }
-        public bool Equals(ref RectangleF tag)
+        public bool Equals(in RectangleF tag)
         {
-            if ((System.Math.Abs(X - tag.X) <= CoreDefine.Epsilon) &&
-                (System.Math.Abs(Y - tag.Y) <= CoreDefine.Epsilon) &&
-                (System.Math.Abs(Width - tag.Width) <= CoreDefine.Epsilon) &&
-                (System.Math.Abs(Height - tag.Height) <= CoreDefine.Epsilon))
+            if ((System.Math.Abs(X - tag.X) <= MathHelper.Epsilon) &&
+                (System.Math.Abs(Y - tag.Y) <= MathHelper.Epsilon) &&
+                (System.Math.Abs(Width - tag.Width) <= MathHelper.Epsilon) &&
+                (System.Math.Abs(Height - tag.Height) <= MathHelper.Epsilon))
                 return true;
             return false;
         }

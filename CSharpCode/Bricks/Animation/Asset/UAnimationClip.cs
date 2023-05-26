@@ -93,25 +93,27 @@ namespace EngineNS.Animation.Asset
                 ameta.SaveAMeta();
             }
             var typeStr = Rtti.UTypeDescManager.Instance.GetTypeStringFromType(this.GetType());
-            var xnd = new IO.CXndHolder(typeStr, 0, 0);
+            var xnd = new IO.TtXndHolder(typeStr, 0, 0);
             using (var attr = xnd.NewAttribute("AnimationClip", 0, 0))
             {
-                var ar = attr.GetWriter(512);
-                ar.Write(this);
-                attr.ReleaseWriter(ref ar);
+                using (var ar = attr.GetWriter(512))
+                {
+                    ar.Write(this);
+                }
                 xnd.RootNode.AddAttribute(attr);
             }
             using (var attr = xnd.NewAttribute("AnimationChunk", 0, 0))
             {
-                var ar = attr.GetWriter(512);
-                ar.Write(AnimationChunk);
-                attr.ReleaseWriter(ref ar);
+                using (var ar = attr.GetWriter(512))
+                {
+                    ar.Write(AnimationChunk);
+                }
                 xnd.RootNode.AddAttribute(attr);
             }
 
             xnd.SaveXnd(name.Address);
         }
-        public static UAnimationClip LoadXnd(UAnimationClipManager manager, IO.CXndHolder holder)
+        public static UAnimationClip LoadXnd(UAnimationClipManager manager, IO.TtXndHolder holder)
         {
             unsafe
             {
@@ -119,9 +121,10 @@ namespace EngineNS.Animation.Asset
                 var attr = holder.RootNode.TryGetAttribute("AnimationClip");
                 if ((IntPtr)attr.CppPointer != IntPtr.Zero)
                 {
-                    var ar = attr.GetReader(manager);
-                    ar.Read(out result, manager);
-                    attr.ReleaseReader(ref ar);
+                    using (var ar = attr.GetReader(manager))
+                    {
+                        ar.Read(out result, manager);
+                    }
                 }
                 var clip = result as UAnimationClip;
                 if (clip != null)
@@ -137,9 +140,10 @@ namespace EngineNS.Animation.Asset
                         var chunkAttr = holder.RootNode.TryGetAttribute("AnimationChunk");
                         if ((IntPtr)chunkAttr.CppPointer != IntPtr.Zero)
                         {
-                            var ar = chunkAttr.GetReader(manager);
-                            ar.Read(out result, manager);
-                            chunkAttr.ReleaseReader(ref ar);
+                            using (var ar = chunkAttr.GetReader(manager))
+                            {
+                                ar.Read(out result, manager);
+                            }
                             chunk = result as UAnimationChunk;
                             if (chunk != null)
                             {
@@ -232,9 +236,24 @@ namespace EngineNS.Animation.Asset
             if (AnimationClips.TryGetValue(name, out result))
                 return result;
 
-            result = await UEngine.Instance.EventPoster.Post(() =>
+            //this is a demo for suspend&cancel operation
+            Thread.Async.TtAsyncTaskToken token = null;// new Thread.Async.TtAsyncTaskToken();
+            result = await UEngine.Instance.EventPoster.Post((state) =>
             {
-                using (var xnd = IO.CXndHolder.LoadXnd(name.Address))
+                if (state.TaskToken != null)
+                {
+                    if (state.TaskToken.TaskState == Thread.Async.EAsyncTaskState.Suspended)
+                    {
+                        state.TaskState = Thread.Async.EAsyncTaskState.Suspended;
+                        return null;
+                    }
+                    else if (state.TaskToken.TaskState == Thread.Async.EAsyncTaskState.Canceled)
+                    {
+                        state.TaskState = Thread.Async.EAsyncTaskState.Canceled;
+                        return null;
+                    }
+                }
+                using (var xnd = IO.TtXndHolder.LoadXnd(name.Address))
                 {
                     if (xnd != null)
                     {
@@ -250,7 +269,7 @@ namespace EngineNS.Animation.Asset
                         return null;
                     }
                 }
-            }, Thread.Async.EAsyncTarget.AsyncIO);
+            }, Thread.Async.EAsyncTarget.AsyncIO).WithToken(token);
 
             if (result != null)
             {

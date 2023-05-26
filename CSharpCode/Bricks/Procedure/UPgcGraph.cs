@@ -271,5 +271,10 @@ namespace EngineNS.Bricks.Procedure
             node.Name = "Collapse Node";
             DeleteSelectedNodes();
         }
+
+        public override void SetConfigUnionNode(IUnionNode node)
+        {
+            this.GraphEditor.SetConfigUnionNode(node);
+        }
     }
 }

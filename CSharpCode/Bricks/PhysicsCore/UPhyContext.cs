@@ -145,7 +145,7 @@ namespace EngineNS.Bricks.PhysicsCore
                 return null;
             return new UPhyConvexMesh(self);
         }
-        public UPhyTriMesh CookTriMesh(Graphics.Mesh.UMeshDataProvider mesh, Support.CBlobObject uvblob, Support.CBlobObject faceblob, Support.CBlobObject posblob)
+        public UPhyTriMesh CookTriMesh(Graphics.Mesh.UMeshDataProvider mesh, Support.UBlobObject uvblob, Support.UBlobObject faceblob, Support.UBlobObject posblob)
         {
             var self = mCoreObject.CookTriMesh(mesh.mCoreObject, (uvblob != null) ? uvblob.mCoreObject : new IBlobObject(),
                 (faceblob != null) ? faceblob.mCoreObject : new IBlobObject(),
@@ -169,7 +169,7 @@ namespace EngineNS.Bricks.PhysicsCore
         }
         public override async System.Threading.Tasks.Task<bool> Initialize(UEngine host)
         {
-            await Thread.AsyncDummyClass.DummyFunc();
+            await Thread.TtAsyncDummyClass.DummyFunc();
             mPhyContext = new UPhyContext();
             if (mPhyContext.mCoreObject.Init(0xFFFFFFFF) == 0)
                 return false;

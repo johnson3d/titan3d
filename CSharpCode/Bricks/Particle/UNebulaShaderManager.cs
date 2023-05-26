@@ -6,7 +6,7 @@ namespace EngineNS.Bricks.Particle
 {
     public class UNebulaShader
     {
-        public static readonly UInt32_3 Dispatch_SetupDimArray1 = new UInt32_3(32, 1, 1);
+        public static readonly Vector3ui Dispatch_SetupDimArray1 = new Vector3ui(32, 1, 1);
         public NxRHI.UComputeEffect Particle_Update;
 
         public NxRHI.UComputeEffect Particle_SetupParameters;
@@ -78,11 +78,11 @@ namespace EngineNS.Bricks.Particle
             var rc = UEngine.Instance.GfxDevice.RenderContext;
             var incProvider = new UNebulaInclude();
             incProvider.Host = this;
-            Particle_Update = UEngine.Instance.GfxDevice.EffectManager.GetComputeEffect(RName.GetRName("Shaders/Bricks/Particle/Particle.compute", RName.ERNameType.Engine).Address,
-                "CS_Particle_Update", NxRHI.EShaderType.SDT_ComputeShader, null, null, null, defines, incProvider);
+            Particle_Update = UEngine.Instance.GfxDevice.EffectManager.GetComputeEffect(RName.GetRName("Shaders/Bricks/Particle/Particle.compute", RName.ERNameType.Engine),
+                "CS_Particle_Update", NxRHI.EShaderType.SDT_ComputeShader, null, defines, incProvider);
 
-            Particle_SetupParameters = UEngine.Instance.GfxDevice.EffectManager.GetComputeEffect(RName.GetRName("Shaders/Bricks/Particle/Particle.compute", RName.ERNameType.Engine).Address,
-                "CS_Particle_SetupParameters", NxRHI.EShaderType.SDT_ComputeShader, null, null, null, defines, incProvider);
+            Particle_SetupParameters = UEngine.Instance.GfxDevice.EffectManager.GetComputeEffect(RName.GetRName("Shaders/Bricks/Particle/Particle.compute", RName.ERNameType.Engine),
+                "CS_Particle_SetupParameters", NxRHI.EShaderType.SDT_ComputeShader, null, defines, incProvider);
         }
     }
     public class UNebulaShaderManager
@@ -104,14 +104,14 @@ namespace EngineNS.Bricks.Particle
         }
         public override async System.Threading.Tasks.Task<bool> Initialize(UEngine host)
         {
-            await Thread.AsyncDummyClass.DummyFunc();
+            await Thread.TtAsyncDummyClass.DummyFunc();
             
             var rc = UEngine.Instance.GfxDevice.RenderContext;
             unsafe
             {
                 var bfDesc = new NxRHI.FBufferDesc();
 
-                bfDesc.SetDefault();
+                bfDesc.SetDefault(false);
                 bfDesc.Type = NxRHI.EBufferType.BFT_UAV | NxRHI.EBufferType.BFT_SRV;
                 //bfDesc.MiscFlags = (UInt32)(EResourceMiscFlag.BUFFER_ALLOW_RAW_VIEWS);
                 bfDesc.Size = (uint)sizeof(Vector4) * ShaderRandomPoolSize;

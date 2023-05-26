@@ -820,8 +820,11 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
         [Browsable(false)]
         public UMacrossEditor MacrossEditor
         {
-            get;
-            private set;
+            get => (UMacrossEditor)Editor;
+            private set
+            {
+                Editor = value;
+            }
         }
         [GraphName]
         public string Name
@@ -1607,7 +1610,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
                     case "Inputs":
                     case "Outputs":
                         {
-                            if (!MethodDatas[0].MethodDec.IsOverride)
+                            if (MethodDatas.Count > 0 && !MethodDatas[0].MethodDec.IsOverride)
                                 collection.Add(proDesc);
                         }
                         break;
@@ -1627,6 +1630,11 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
         public void SetPropertyValue(string propertyName, object value)
         {
             PropertyCustomizationHelper<UMacrossMethodGraph>.SetPropertyValue(this, propertyName, value);
+        }
+
+        public override void SetConfigUnionNode(IUnionNode node)
+        {
+            this.MacrossEditor.SetConfigUnionNode(node);
         }
     }
 }

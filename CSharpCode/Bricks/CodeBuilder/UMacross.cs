@@ -59,19 +59,19 @@ namespace EngineNS.Bricks.CodeBuilder
         }
         public override async System.Threading.Tasks.Task<IO.IAsset> LoadAsset()
         {
-            await EngineNS.Thread.AsyncDummyClass.DummyFunc();
+            await EngineNS.Thread.TtAsyncDummyClass.DummyFunc();
             return null;
         }
         public override void DeleteAsset(string name, RName.ERNameType type)
         {
             var address = RName.GetAddress(type, name);
-            IO.FileManager.DeleteDirectory(address);
-            IO.FileManager.DeleteFile(address + IAssetMeta.MetaExt);
+            IO.TtFileManager.DeleteDirectory(address);
+            IO.TtFileManager.DeleteFile(address + IAssetMeta.MetaExt);
 
-            if(UMacrossEditor.RemoveAssemblyDescCreateInstanceCode(name, type))
+            //if(UMacrossEditor.RemoveAssemblyDescCreateInstanceCode(name, type))
             {
                 EngineNS.UEngine.Instance.MacrossManager.GenerateProjects();
-                var assemblyFile = UEngine.Instance.FileManager.GetRoot(IO.FileManager.ERootDir.EngineSource) + UEngine.Instance.EditorInstance.Config.GameAssembly;
+                var assemblyFile = UEngine.Instance.FileManager.GetRoot(IO.TtFileManager.ERootDir.EngineSource) + UEngine.Instance.EditorInstance.Config.GameAssembly;
                 if (UEngine.Instance.MacrossModule.CompileCode(assemblyFile))
                 {
                     UEngine.Instance.MacrossModule.ReloadAssembly(assemblyFile);
@@ -142,7 +142,7 @@ namespace EngineNS.Bricks.CodeBuilder
                     if(EGui.UIProxy.ComboBox.BeginCombo("##TypeSel", (mSelectedType == null)? "None" : mSelectedType.Name))
                     {
                         var comboDrawList = ImGuiAPI.GetWindowDrawList();
-                        var searchBar = UEngine.Instance.UIManager["MacrossTypeSearchBar"] as EGui.UIProxy.SearchBarProxy;
+                        var searchBar = UEngine.Instance.UIProxyManager["MacrossTypeSearchBar"] as EGui.UIProxy.SearchBarProxy;
                         if(searchBar == null)
                         {
                             searchBar = new EGui.UIProxy.SearchBarProxy()
@@ -150,7 +150,7 @@ namespace EngineNS.Bricks.CodeBuilder
                                 InfoText = "Search macross base type",
                                 Width = -1,
                             };
-                            UEngine.Instance.UIManager["MacrossTypeSearchBar"] = searchBar;
+                            UEngine.Instance.UIProxyManager["MacrossTypeSearchBar"] = searchBar;
                         }
                         if(!ImGuiAPI.IsAnyItemActive() && !ImGuiAPI.IsMouseClicked(0, false))
                             ImGuiAPI.SetKeyboardFocusHere(0);
@@ -196,14 +196,14 @@ namespace EngineNS.Bricks.CodeBuilder
                         var rn = RName.GetRName(mDir.Name + mName + ExtName, mDir.RNameType);
                         if (mAsset != null)
                             mAsset.AssetName = rn;
-                        if (IO.FileManager.FileExists(rn.Address))
+                        if (IO.TtFileManager.FileExists(rn.Address))
                             eErrorType = enErrorType.IsExisting;
                     }
 
                     if(ImGuiAPI.Button("Create Asset", in Vector2.Zero))
                     {
                         var rn = RName.GetRName(mDir.Name + mName + ExtName, mDir.RNameType);
-                        if(IO.FileManager.FileExists(rn.Address) == false && string.IsNullOrWhiteSpace(mName) == false)
+                        if(IO.TtFileManager.FileExists(rn.Address) == false && string.IsNullOrWhiteSpace(mName) == false)
                         {
                             ((UMacross)mAsset).mSelectedType = mSelectedType;
                             if (DoImportAsset())
@@ -285,16 +285,18 @@ namespace EngineNS.Bricks.CodeBuilder
             //    UpdateAMetaReferences(ameta);
             //    ameta.SaveAMeta();
             //}
-            IO.FileManager.CreateDirectory(name.Address);
+            IO.TtFileManager.CreateDirectory(name.Address);
 
             if (MacrossEditor == null)
                 MacrossEditor = new MacrossNode.UMacrossEditor();
             MacrossEditor.AssetName = name;
             MacrossEditor.DefClass.ClassName = name.PureName;
-            MacrossEditor.DefClass.Namespace = new UNamespaceDeclaration(IO.FileManager.GetParentPathName(name.Name).TrimEnd('/').Replace('/', '.'));
+            MacrossEditor.DefClass.Namespace = new UNamespaceDeclaration(IO.TtFileManager.GetParentPathName(name.Name).TrimEnd('/').Replace('/', '.'));
             if (mSelectedType != null)
                 MacrossEditor.DefClass.SupperClassNames.Add(mSelectedType.FullName);
             MacrossEditor.SaveClassGraph(name);
+            MacrossEditor.GenerateCode();
+            MacrossEditor.CompileCode();
         }
     }
 }

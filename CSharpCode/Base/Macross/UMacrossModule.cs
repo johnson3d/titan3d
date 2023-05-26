@@ -90,7 +90,7 @@ namespace EngineNS.Macross
         {
             try
             {
-                if (!IO.FileManager.FileExists(assemblyPath))
+                if (!IO.TtFileManager.FileExists(assemblyPath))
                 {
                     bool success = false;
                     TryCompileCode(assemblyPath, ref success);
@@ -130,7 +130,7 @@ namespace EngineNS.Macross
             CreateAssemblyLoader(ref loader);
             if (loader == null)
                 return;
-            var pdbPath = IO.FileManager.RemoveExtName(assemblyPath);
+            var pdbPath = IO.TtFileManager.RemoveExtName(assemblyPath);
             pdbPath += ".tpdb";
             var newAssembly = loader.LoadAssembly(assemblyPath, pdbPath);
 

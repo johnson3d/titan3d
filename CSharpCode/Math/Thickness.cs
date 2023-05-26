@@ -193,7 +193,7 @@ namespace EngineNS
         //     A hash code for this instance of CSUtility.Support.Thickness.
         public override int GetHashCode()
         {
-            return (int)EngineNS.UniHash.DefaultHash(this.ToString());// ToString().GetHashCode();
+            return (int)EngineNS.UniHash32.DefaultHash(this.ToString());// ToString().GetHashCode();
         }
         //
         // Summary:

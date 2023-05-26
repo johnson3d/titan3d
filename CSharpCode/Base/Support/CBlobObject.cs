@@ -4,9 +4,9 @@ using System.Text;
 
 namespace EngineNS.Support
 {
-    public class CBlobObject : AuxPtrType<IBlobObject>
+    public class UBlobObject : AuxPtrType<IBlobObject>
     {
-        public CBlobObject()
+        public UBlobObject()
         {
             mCoreObject = IBlobObject.CreateInstance();
         }
@@ -31,10 +31,9 @@ namespace EngineNS.Support
         {
             mCoreObject.PushData(data, size);
         }
-        public unsafe IO.CMemStreamReader CreateReader()
+        public unsafe IO.UMemReader CreateReader()
         {
-            var result = new IO.CMemStreamReader();
-            result.mCoreObject.ProxyPointer((byte*)mCoreObject.GetData(), (ulong)mCoreObject.GetSize());
+            var result = IO.UMemReader.CreateInstance((byte*)mCoreObject.GetData(), (ulong)mCoreObject.GetSize());
             return result;
         }
     }

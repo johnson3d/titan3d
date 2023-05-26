@@ -16,7 +16,7 @@ namespace EngineNS.GamePlay
             return true;
         }
         [Rtti.Meta]
-        public virtual void Tick(UGameInstance host, int elapsedMillisecond)
+        public virtual void Tick(UGameInstance host, float elapsedMillisecond)
         {
 
         }
@@ -29,15 +29,23 @@ namespace EngineNS.GamePlay
     [Rtti.Meta(Flags = Rtti.MetaAttribute.EMetaFlags.NoMacrossCreate)]
     public partial class UGameInstance : UModuleHost<UGameInstance>, ITickable
     {
-        public virtual void TickLogic(int ellapse)
+        public int GetTickOrder()
+        {
+            return -1;
+        }
+        public virtual void TickLogic(float ellapse)
         {
             WorldViewportSlate?.TickLogic(ellapse);
         }
-        public virtual void TickRender(int ellapse)
+        public virtual void TickRender(float ellapse)
         {
             
         }
-        public virtual void TickSync(int ellapse)
+        public void TickBeginFrame(float ellapse)
+        {
+
+        }
+        public virtual void TickSync(float ellapse)
         {
             WorldViewportSlate?.TickSync(ellapse);
         }
@@ -63,7 +71,7 @@ namespace EngineNS.GamePlay
         {
             return await McObject?.Get()?.BeginPlay(this);
         }
-        public virtual void Tick(int elapsedMillisecond)
+        public virtual void Tick(float elapsedMillisecond)
         {
             McObject?.Get()?.Tick(this, elapsedMillisecond);
         }

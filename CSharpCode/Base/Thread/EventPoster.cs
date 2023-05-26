@@ -5,30 +5,40 @@ using System.Threading.Tasks;
 
 namespace EngineNS.Thread
 {
-    public class AsyncDummyClass
+    public class TtAsyncDummyClass
+
     {
 #pragma warning disable 1998
-        public static async System.Threading.Tasks.Task DummyFunc()
+        public static async Async.TtTask DummyFunc()
         {
-
+            //if (UEngine.Instance == null)
+            //    return;
+            //await UEngine.Instance.EventPoster.Post((state) =>
+            //{
+            //    return true;
+            //});
+            return;
         }
 #pragma warning restore 1998
     }
-    public class ASyncSemaphore
+    public class TtSemaphore
     {
-        public Async.PostEvent PostEvent;
+        public Async.TtAsyncTaskStateBase PostEvent;
         private System.Threading.AutoResetEvent Waiter;
-        int mCount = -1;
+        private int mCount = -1;
+        private bool ContinueEnqueued = false;
+        public object Tag1;
+        public object Tag2;
         public bool IsValid
         {
             get => mCount > 0;
         }
-        public static ASyncSemaphore CreateSemaphore(int num, System.Threading.AutoResetEvent waiter = null)
+        public static TtSemaphore CreateSemaphore(int num, System.Threading.AutoResetEvent waiter = null)
         {
-            var se = new ASyncSemaphore(num, waiter);
+            var se = new TtSemaphore(num, waiter);
             return se;
         }
-        private ASyncSemaphore(int num, System.Threading.AutoResetEvent waiter=null)
+        private TtSemaphore(int num, System.Threading.AutoResetEvent waiter=null)
         {
             PostEvent = null;
             Waiter = waiter;
@@ -52,7 +62,6 @@ namespace EngineNS.Thread
                 EqueueContinue();
             }
         }
-        private bool ContinueEnqueued = false;
         public void EqueueContinue()
         {
             if (PostEvent == null)
@@ -89,10 +98,10 @@ namespace EngineNS.Thread
             await UEngine.Instance.EventPoster.AwaitSemaphore(this);
         }
     }
-    public class ThreadSafeNumber
+    public class TtThreadSafeNumber
     {
         int mCount = -1;
-        public ThreadSafeNumber(int num)
+        public TtThreadSafeNumber(int num)
         {
             mCount = num;
         }
@@ -118,13 +127,13 @@ namespace EngineNS.Thread
     {
         public class UAwaitSession
         {
-            private List<Thread.ASyncSemaphore> Smph = new List<Thread.ASyncSemaphore>();
+            private List<Thread.TtSemaphore> Smph = new List<Thread.TtSemaphore>();
             public T Result;
-            public Thread.ASyncSemaphore AddSemaphore()
+            public Thread.TtSemaphore AddSemaphore()
             {
                 lock (Smph)
                 {
-                    var tmp = Thread.ASyncSemaphore.CreateSemaphore(1);
+                    var tmp = Thread.TtSemaphore.CreateSemaphore(1);
                     Smph.Add(tmp);
                     return tmp;
                 }

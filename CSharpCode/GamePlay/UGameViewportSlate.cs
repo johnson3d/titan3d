@@ -13,7 +13,7 @@ namespace EngineNS.GamePlay
                 UEngine.RootFormManager.RegRootForm(this);
             CameraController = new Editor.Controller.EditorCameraController();
         }
-        CNativeString mNstrTitle = new CNativeString();
+        TtNativeString mNstrTitle = new TtNativeString();
         public override string Title 
         {
             get => base.Title;
@@ -34,7 +34,6 @@ namespace EngineNS.GamePlay
         //public static bool bMessageBox = false;
         public override unsafe void OnDraw()
         {
-            ImGuiAPI.SetNextWindowDockID(DockId, DockCond);
             //if (IsSetViewportPos)
             {
                 ImGuiAPI.SetNextWindowPos(in GameViewportPos, ImGuiCond_.ImGuiCond_FirstUseEver, in Vector2.Zero);
@@ -43,11 +42,7 @@ namespace EngineNS.GamePlay
             IsDrawing = false;
             //ClrLogger.SetMessageBox(bMessageBox);
             //CoreSDK.Print2Console2("aaa", true);
-            bool bShow = ImGuiAPI.Begin(Title, ref mVisible, ImGuiWindowFlags_.ImGuiWindowFlags_NoBackground);
-            if (ImGuiAPI.IsWindowDocked())
-            {
-                DockId = ImGuiAPI.GetWindowDockID();
-            }
+            bool bShow = EGui.UIProxy.DockProxy.BeginMainForm(Title, this, ImGuiWindowFlags_.ImGuiWindowFlags_NoBackground);
             if (bShow)
             {
                 var sz = ImGuiAPI.GetWindowSize();
@@ -114,7 +109,7 @@ namespace EngineNS.GamePlay
                 mPresentWindow?.UnregEventProcessor(this);
                 mPresentWindow = null;
             }
-            ImGuiAPI.End();
+            EGui.UIProxy.DockProxy.EndMainForm();
             if (mClientChanged && IsValidClientArea())
             {
                 OnClientChanged(mSizeChanged);

@@ -7,6 +7,12 @@ namespace EngineNS.Graphics.Pipeline.Common
 {
     public class UAvgBrightnessNode : Graphics.Pipeline.Common.URenderGraphNode
     {
+        public override void Dispose()
+        {
+            CoreSDK.DisposeObject(ref SetupAvgBrightnessDrawcall);
+            CoreSDK.DisposeObject(ref CountAvgBrightnessDrawcall);
+            base.Dispose();
+        }
         public Common.URenderGraphPin GpuScenePinInOut = Common.URenderGraphPin.CreateInputOutput("GpuScene");
         public Common.URenderGraphPin ColorPinIn = Common.URenderGraphPin.CreateInput("Color");
         public UAvgBrightnessNode()
@@ -18,10 +24,8 @@ namespace EngineNS.Graphics.Pipeline.Common
             AddInputOutput(GpuScenePinInOut, NxRHI.EBufferType.BFT_UAV);
             AddInput(ColorPinIn, NxRHI.EBufferType.BFT_SRV);
         }
-        public readonly UInt32_3 Dispatch_SetupDimArray1 = new UInt32_3(1, 1, 1);
-        public readonly UInt32_3 Dispatch_SetupDimArray2 = new UInt32_3(32, 32, 1);
-
-        public Graphics.Pipeline.UDrawBuffers BasePass = new Graphics.Pipeline.UDrawBuffers();
+        public readonly Vector3ui Dispatch_SetupDimArray1 = new Vector3ui(1, 1, 1);
+        public readonly Vector3ui Dispatch_SetupDimArray2 = new Vector3ui(32, 32, 1);
 
         private NxRHI.UComputeEffect SetupAvgBrightness;
         private NxRHI.UComputeDraw SetupAvgBrightnessDrawcall;
@@ -30,23 +34,23 @@ namespace EngineNS.Graphics.Pipeline.Common
         private NxRHI.UComputeDraw CountAvgBrightnessDrawcall;
         public override async System.Threading.Tasks.Task Initialize(URenderPolicy policy, string debugName)
         {
-            await Thread.AsyncDummyClass.DummyFunc();
+            await Thread.TtAsyncDummyClass.DummyFunc();
 
             var rc = UEngine.Instance.GfxDevice.RenderContext;
-            BasePass.Initialize(rc, debugName);
+            BasePass.Initialize(rc, debugName + ".BasePass");
 
             var defines = new NxRHI.UShaderDefinitions();
             defines.mCoreObject.AddDefine("DispatchX", $"{Dispatch_SetupDimArray2.X}");
             defines.mCoreObject.AddDefine("DispatchY", $"{Dispatch_SetupDimArray2.Y}");
             defines.mCoreObject.AddDefine("DispatchZ", $"{Dispatch_SetupDimArray2.Z}");
-            CountAvgBrightness = UEngine.Instance.GfxDevice.EffectManager.GetComputeEffect(RName.GetRName("Shaders/Compute/ScreenSpace/AvgBrightness.compute", RName.ERNameType.Engine).Address,
-                "CS_CountAvgBrightness", NxRHI.EShaderType.SDT_ComputeShader, null, null, null, defines, null);
+            CountAvgBrightness = UEngine.Instance.GfxDevice.EffectManager.GetComputeEffect(RName.GetRName("Shaders/Compute/ScreenSpace/AvgBrightness.compute", RName.ERNameType.Engine),
+                "CS_CountAvgBrightness", NxRHI.EShaderType.SDT_ComputeShader, null, defines, null);
 
             defines.mCoreObject.AddDefine("DispatchX", $"{Dispatch_SetupDimArray2.X}");
             defines.mCoreObject.AddDefine("DispatchY", $"{Dispatch_SetupDimArray2.Y}");
             defines.mCoreObject.AddDefine("DispatchZ", $"{Dispatch_SetupDimArray2.Z}");
-            SetupAvgBrightness = UEngine.Instance.GfxDevice.EffectManager.GetComputeEffect(RName.GetRName("Shaders/Compute/ScreenSpace/AvgBrightness.compute", RName.ERNameType.Engine).Address,
-                "CS_SetupAvgBrightness", NxRHI.EShaderType.SDT_ComputeShader, null, null ,null , defines, null);
+            SetupAvgBrightness = UEngine.Instance.GfxDevice.EffectManager.GetComputeEffect(RName.GetRName("Shaders/Compute/ScreenSpace/AvgBrightness.compute", RName.ERNameType.Engine),
+                "CS_SetupAvgBrightness", NxRHI.EShaderType.SDT_ComputeShader, null, defines, null);
 
             ResetComputeDrawcall(policy);
         }
@@ -56,7 +60,8 @@ namespace EngineNS.Graphics.Pipeline.Common
                 return;
             var rc = UEngine.Instance.GfxDevice.RenderContext;
             var gpuScene = policy.GetGpuSceneNode();
-            
+
+            CoreSDK.DisposeObject(ref SetupAvgBrightnessDrawcall);
             SetupAvgBrightnessDrawcall = rc.CreateComputeDraw();
             SetupAvgBrightnessDrawcall.SetComputeEffect(SetupAvgBrightness);
             SetupAvgBrightnessDrawcall.SetDispatch(1, 1, 1);
@@ -75,13 +80,10 @@ namespace EngineNS.Graphics.Pipeline.Common
             //var lightSRV = policy.QuerySRV("LightRT");
             //if (lightSRV != null)
             {
+                CoreSDK.DisposeObject(ref CountAvgBrightnessDrawcall);
                 CountAvgBrightnessDrawcall = rc.CreateComputeDraw();
                 CountAvgBrightnessDrawcall.SetComputeEffect(CountAvgBrightness);
             }
-        }
-        public override void Cleanup()
-        {
-            base.Cleanup();
         }
         public override void OnResize(URenderPolicy policy, float x, float y)
         {
@@ -96,6 +98,9 @@ namespace EngineNS.Graphics.Pipeline.Common
                 var gpuScene = policy.GetGpuSceneNode();
 
                 var cmd = BasePass.DrawCmdList;
+
+                cmd.BeginCommand();
+
                 #region Setup
                 {
                     var srvIdx = SetupAvgBrightnessDrawcall.FindBinder(NxRHI.EShaderBindType.SBT_UAV, "GpuSceneDesc");
@@ -113,34 +118,32 @@ namespace EngineNS.Graphics.Pipeline.Common
                     if (CountAvgBrightnessDrawcall != null)
                     {
                         var attachment = this.GetAttachBuffer(ColorPinIn);
-                        var lightSRV = attachment.Srv;
-                        uint targetWidth = (uint)lightSRV.PicDesc.Width;
-                        uint targetHeight = (uint)lightSRV.PicDesc.Height;
+                        uint targetWidth = (uint)attachment.BufferDesc.Width;
+                        uint targetHeight = (uint)attachment.BufferDesc.Height;
                         var srvIdx = CountAvgBrightnessDrawcall.FindBinder(NxRHI.EShaderBindType.SBT_SRV, "TargetBuffer");
                         if (srvIdx.IsValidPointer)
                         {
-                            CountAvgBrightnessDrawcall.BindSrv(srvIdx, lightSRV);
+                            CountAvgBrightnessDrawcall.BindSrv(srvIdx, attachment.Srv);
+                        }
+                        srvIdx = CountAvgBrightnessDrawcall.FindBinder(NxRHI.EShaderBindType.SBT_UAV, "GpuSceneDesc");
+                        if (srvIdx.IsValidPointer)
+                        {
+                            attachment = this.GetAttachBuffer(GpuScenePinInOut);
+                            CountAvgBrightnessDrawcall.BindUav(srvIdx, attachment.Uav);
                         }
                         CountAvgBrightnessDrawcall.SetDispatch(
-                            CoreDefine.Roundup(targetWidth, Dispatch_SetupDimArray2.X),
-                            CoreDefine.Roundup(targetHeight, Dispatch_SetupDimArray2.Y),
+                            MathHelper.Roundup(targetWidth, Dispatch_SetupDimArray2.X),
+                            MathHelper.Roundup(targetHeight, Dispatch_SetupDimArray2.Y),
                             1);
                         CountAvgBrightnessDrawcall.Commit(cmd);
                     }
                 }
                 #endregion
 
-                if (cmd.BeginCommand())
-                {
-                    cmd.EndCommand();
-                }
+                cmd.EndCommand();
                 UEngine.Instance.GfxDevice.RenderCmdQueue.QueueCmdlist(cmd);
             }   
         }
         
-        public override void TickSync(URenderPolicy policy)
-        {
-            BasePass.SwapBuffer();
-        }
     }
 }

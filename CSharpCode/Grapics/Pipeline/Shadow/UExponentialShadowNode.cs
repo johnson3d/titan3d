@@ -5,7 +5,7 @@ using System.Text;
 
 namespace EngineNS.Graphics.Pipeline.Shadow
 {
-    public class UExponentialShadowShading : Shader.UShadingEnv
+    public class UExponentialShadowShading : Shader.UGraphicsShadingEnv
     {
         public UExponentialShadowShading()
         {
@@ -25,7 +25,7 @@ namespace EngineNS.Graphics.Pipeline.Shadow
             //    {
             //        PerShadingCBuffer = UEngine.Instance.GfxDevice.RenderContext.CreateConstantBuffer(gpuProgram, cbIndex);
             //        PerShadingCBuffer.SetMatrix(0, ref Matrix.mIdentity);
-            //        var RenderColor = new Color4(1, 1, 1, 1);
+            //        var RenderColor = new Color4f(1, 1, 1, 1);
             //        PerShadingCBuffer.SetValue(1, ref RenderColor);
             //    }
             //    drawcall.mCoreObject.BindCBufferAll(cbIndex, PerShadingCBuffer.mCoreObject.Ptr);
@@ -77,7 +77,7 @@ namespace EngineNS.Graphics.Pipeline.Shadow
         {
             //ResultPinOut.Attachement.Format = PickedPinIn.Attachement.Format;
         }
-        public override void FrameBuild()
+        public override void FrameBuild(Graphics.Pipeline.URenderPolicy policy)
         {
 
         }

@@ -166,8 +166,16 @@ namespace EngineNS.Bricks.Terrain.CDLOD
             return MaxScale - MinScale;
         }
     }
-    public class UTerrainGrassManager
+    public class UTerrainGrassManager : IDisposable
     {
+        public void Dispose()
+        {
+            foreach(var i in GrassTypes)
+            {
+                i.Value.Dispose();
+            }
+            GrassTypes.Clear();
+        }
         public class UGrassInstance
         {
             public UGrassType GrassType;
@@ -185,8 +193,13 @@ namespace EngineNS.Bricks.Terrain.CDLOD
                 
             }
         }
-        public class UGrassType
+        public class UGrassType : IDisposable
         {
+            public void Dispose()
+            {
+                CoreSDK.DisposeObject(ref Mesh);
+                CoreSDK.DisposeObject(ref GrassCBuffer);
+            }
             public UPatch Patch;
             public UTerrainGrass GrassDesc { get; set; }
             public List<UGrassInstance> ObjInstances { get; } = new List<UGrassInstance>();
@@ -267,8 +280,11 @@ namespace EngineNS.Bricks.Terrain.CDLOD
                 Mesh.IsDrawHitproxy = false;
                 var meshTrans = FTransform.CreateTransform(in patchOffset, in Vector3.One, in Quaternion.Identity);
                 var world = patch.Level.Level.Node.GetWorld();
-                Mesh.SetWorldTransform(meshTrans, world, false);
-                Mesh.UpdateCameraOffset(world);
+                if (world != null)
+                {
+                    Mesh.SetWorldTransform(meshTrans, world, false);
+                    Mesh.UpdateCameraOffset(world);
+                }
 
                 CreateFinished = true;
             }
@@ -322,12 +338,12 @@ namespace EngineNS.Bricks.Terrain.CDLOD
             {
                 var tempPatchOffset = patchOffset;
                 var tempTrans = trans;
-                UEngine.Instance.EventPoster.RunOnUntilFinish((out bool isFinish) =>
+                UEngine.Instance.EventPoster.RunOnUntilFinish((out bool isFinish, Thread.Async.TtAsyncTaskStateBase state) =>
                 {
                     isFinish = type.CreateFinished;
                     if (isFinish)
                         PushInstance(mHostPatch, type, tempPatchOffset, grass, tempTrans, capacity);
-                    return null;
+                    return true;
                 }, Thread.Async.EAsyncTarget.Logic);
             }
             else
@@ -440,12 +456,12 @@ namespace EngineNS.Bricks.Terrain.CDLOD
             }
             if(type.CreateFinished == false)
             {
-                UEngine.Instance.EventPoster.RunOnUntilFinish((out bool isFinish) =>
+                UEngine.Instance.EventPoster.RunOnUntilFinish((out bool isFinish, Thread.Async.TtAsyncTaskStateBase state) =>
                 {
                     isFinish = type.CreateFinished;
                     if(isFinish)
                         UpdateGrass(mHostPatch, type);
-                    return null;
+                    return true;
                 }, Thread.Async.EAsyncTarget.Logic);
             }
             else

@@ -13,15 +13,19 @@ namespace EngineNS.EGui.Controls
 
         public async System.Threading.Tasks.Task<bool> Initialize()
         {
-            await EngineNS.Thread.AsyncDummyClass.DummyFunc();
+            await EngineNS.Thread.TtAsyncDummyClass.DummyFunc();
             return true;
         }
-        public void Cleanup() 
+        public void Dispose() 
         {
             UEngine.RootFormManager.UnregRootForm(this);
         }
-        public bool Visible { get; set; } = true;
-        public uint DockId { get; set; }
+        protected bool mVisible = true;
+        public bool Visible { get => mVisible; set => mVisible = value; }
+        uint mDockId = uint.MaxValue;
+        public uint DockId { get => mDockId; set => mDockId = value; }
+        protected ImGuiWindowClass mDockKeyClass;
+        public ImGuiWindowClass DockKeyClass => mDockKeyClass;
         public ImGuiCond_ DockCond { get; set; } = ImGuiCond_.ImGuiCond_FirstUseEver;
         public unsafe void OnDraw()
         {
@@ -40,7 +44,7 @@ namespace EngineNS.EGui.Controls
             ImGuiAPI.SetNextWindowSize(CurItem.Size, ImGuiCond_.ImGuiCond_Always);
             var msPt = ImGuiAPI.GetMousePos();
             ImGuiAPI.SetNextWindowPos(in msPt, ImGuiCond_.ImGuiCond_Always, new Vector2(0.5f));
-            if (ImGuiAPI.Begin("ItemDragging", null, ImGuiWindowFlags_.ImGuiWindowFlags_NoCollapse | 
+            if (EGui.UIProxy.DockProxy.BeginMainForm("ItemDragging", this, ImGuiWindowFlags_.ImGuiWindowFlags_NoCollapse | 
                 ImGuiWindowFlags_.ImGuiWindowFlags_NoDocking |
                 ImGuiWindowFlags_.ImGuiWindowFlags_NoNav | ImGuiWindowFlags_.ImGuiWindowFlags_NoDecoration))
             {
@@ -49,7 +53,7 @@ namespace EngineNS.EGui.Controls
                 //CurItem.Icon.OnDraw(ref cmdlst, start, start + CurItem.Icon.Size, 0);
                 CurItem.AMeta.OnDraw(in cmdlst, in CurItem.Size, CurItem.Browser);
             }
-            ImGuiAPI.End();
+            EGui.UIProxy.DockProxy.EndMainForm();
         }
         public class UItem
         {

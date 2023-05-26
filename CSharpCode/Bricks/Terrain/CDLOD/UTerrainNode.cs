@@ -9,6 +9,23 @@ namespace EngineNS.Bricks.Terrain.CDLOD
     [GamePlay.Scene.UNode(NodeDataType = typeof(UTerrainData), DefaultNamePrefix = "Terrain")]
     public class UTerrainNode : GamePlay.Scene.USceneActorNode
     {
+        public override void Dispose()
+        {
+            LevelStreaming.Dispose();
+
+            ActiveLevels = null;
+            if (Levels != null)
+            {
+                foreach (var i in Levels)
+                {
+                    i.LevelData?.Dispose();
+                }
+                Levels = null;
+            }
+
+            TerrainMaterialIdManager?.Cleanup();
+            TerrainMaterialIdManager = null;
+        }
         public class UTerrainData : GamePlay.Scene.UNodeData
         {
             public UTerrainData()
@@ -112,27 +129,7 @@ namespace EngineNS.Bricks.Terrain.CDLOD
 
         public VirtualTexture.UVirtualTextureArray RVTextureArray;
         public UTerrainMaterialIdManager TerrainMaterialIdManager { get; set; }
-        ~UTerrainNode()
-        {
-            Cleanup();
-        }
-        public void Cleanup()
-        {
-            LevelStreaming.Cleanup();
-
-            ActiveLevels = null;
-            if (Levels != null)
-            {
-                foreach (var i in Levels)
-                {
-                    i.LevelData?.Cleanup();
-                }
-                Levels = null;
-            }
-
-            TerrainMaterialIdManager?.Cleanup();
-            TerrainMaterialIdManager = null;
-        }
+        
         public override async System.Threading.Tasks.Task<bool> InitializeNode(GamePlay.UWorld world, GamePlay.Scene.UNodeData data, GamePlay.Scene.EBoundVolumeType bvType, Type placementType)
         {
             if (data as UTerrainData == null)
@@ -182,7 +179,7 @@ namespace EngineNS.Bricks.Terrain.CDLOD
 
             mTerrainGen = Procedure.UPgcAsset.LoadAsset(trData.PgcName);// RName.GetRName("UTest/terraingen.pgc"));            
             {
-                var pgcText = IO.FileManager.ReadAllText(trData.PgcName.Address);
+                var pgcText = IO.TtFileManager.ReadAllText(trData.PgcName.Address);
                 var refAssets = mTerrainGen.GetAMeta().RefAssetRNames;
                 refAssets.Sort();
                 foreach (var i in refAssets)
@@ -280,13 +277,13 @@ namespace EngineNS.Bricks.Terrain.CDLOD
             {
                 sphere.Radius = radius[i];
                 this.MorphRange[i].Y = (float)sphere.Radius;
-                this.MorphRange[i].X = (float)CoreDefine.Lerp(morphStart, sphere.Radius, 0.8f);
+                this.MorphRange[i].X = (float)MathHelper.Lerp(morphStart, sphere.Radius, 0.8f);
 
                 morphStart = SphereCover(in sphere, i, radius.Count - 1);
                 morphStart = Math.Sqrt(morphStart);
             }
             this.MorphRange[radius.Count - 1].Y = radius[radius.Count - 1];
-            this.MorphRange[radius.Count - 1].X = (float)CoreDefine.Lerp(morphStart, radius[radius.Count - 1], 0.8f);
+            this.MorphRange[radius.Count - 1].X = (float)MathHelper.Lerp(morphStart, radius[radius.Count - 1], 0.8f);
 
             for (int i = 0; i < radius.Count; i++)
             {
@@ -343,13 +340,13 @@ namespace EngineNS.Bricks.Terrain.CDLOD
             {
                 sphere.Radius = radius[i];
                 this.MorphRange[i].Y = (float)sphere.Radius;
-                this.MorphRange[i].X = (float)CoreDefine.Lerp(morphStart, sphere.Radius, 0.8f);
+                this.MorphRange[i].X = (float)MathHelper.Lerp(morphStart, sphere.Radius, 0.8f);
 
                 morphStart = SphereCover(in sphere, i, radius.Count - 1, patches);
                 morphStart = Math.Sqrt(morphStart);
             }
             this.MorphRange[radius.Count - 1].Y = radius[radius.Count - 1];
-            this.MorphRange[radius.Count - 1].X = (float)CoreDefine.Lerp(morphStart, radius[radius.Count - 1], 0.8f);
+            this.MorphRange[radius.Count - 1].X = (float)MathHelper.Lerp(morphStart, radius[radius.Count - 1], 0.8f);
 
             for (int i = 0; i < radius.Count; i++)
             {
@@ -473,6 +470,11 @@ namespace EngineNS.Bricks.Terrain.CDLOD
                     continue;
                 i.LevelData?.PlantManager.OnGatherVisibleMeshes(rp);
             }
+
+            if (rp.VisibleNodes != null)
+            {
+                rp.VisibleNodes.Add(this);
+            }
         }
         public List<UPatch> VisiblePatches = new List<UPatch>();
         public void FrustumCull(GamePlay.UWorld.UVisParameter rp, List<UPatch> patches)
@@ -487,10 +489,10 @@ namespace EngineNS.Bricks.Terrain.CDLOD
         }
 
         #region LevelManager        
-        public Int32_2 GetLevelIndex(in DVector3 pos)
+        public Vector2i GetLevelIndex(in DVector3 pos)
         {
             var nsPos = pos - this.Placement.AbsTransform.mPosition;
-            Int32_2 result;
+            Vector2i result;
             result.X = (int)(nsPos.X / LevelSize);
             result.Y = (int)(nsPos.Z / LevelSize);
             return result;
@@ -504,7 +506,7 @@ namespace EngineNS.Bricks.Terrain.CDLOD
             }
             return Levels[idxLevel.Y, idxLevel.X];
         }
-        Int32_2 CurrentActiveCenterLevel = new Int32_2(-1, -1);
+        Vector2i CurrentActiveCenterLevel = new Vector2i(-1, -1);
         public bool SetActiveCenter(in DVector3 pos)
         {
             var idxLevel = GetLevelIndex(in pos);

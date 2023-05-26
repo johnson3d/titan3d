@@ -172,10 +172,10 @@ namespace EngineNS.EGui
                     indexOffsetInElements += (uint)cmd_list.IdxBufferSize;
                 }
 
-                rhiData.VertexBuffer.UpdateGpuData(rhiData.CmdList, 0,
+                rhiData.VertexBuffer.UpdateGpuData(0,
                     rhiData.DataVB.UnsafeAddressAt(0).ToPointer(), (uint)(vertexOffsetInVertices * sizeof(ImDrawVert)));
 
-                rhiData.IndexBuffer.UpdateGpuData(rhiData.CmdList, 0,
+                rhiData.IndexBuffer.UpdateGpuData(0,
                     rhiData.DataIB.UnsafeAddressAt(0).ToPointer(), (uint)(indexOffsetInElements * sizeof(ushort)));
 
                 rhiData.GeomMesh.mCoreObject.GetVertexArray().BindVB(NxRHI.EVertexStreamType.VST_Position, rhiData.VertexBuffer.mCoreObject);
@@ -206,7 +206,7 @@ namespace EngineNS.EGui
             {
                 var passClears = new NxRHI.FRenderPassClears();
                 passClears.SetDefault();
-                passClears.SetClearColor(0, new Color4(1, 0, 0, 0));
+                passClears.SetClearColor(0, new Color4f(1, 0, 0, 0));
 
                 var swapChain = presentWindow.SwapChain;
                 if (drawCmd.BeginPass(swapChain.BeginFrameBuffers(drawCmd).mCoreObject, in passClears, "ImGui"))
@@ -286,7 +286,7 @@ namespace EngineNS.EGui
                 drawCmd.EndCommand();
             }
             presentWindow.EndFrame();
-            rc.CmdQueue.ExecuteCommandList(drawCmd);
+            rc.GpuQueue.ExecuteCommandList(drawCmd);
             //drawCmd.Commit(rc.mCoreObject);
         }
     }

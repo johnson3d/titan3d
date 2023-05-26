@@ -134,9 +134,15 @@ namespace EngineNS.EGui
                                 if (window_event == SDL.SDL_WindowEventID.SDL_WINDOWEVENT_CLOSE)
                                 {
                                     viewport->PlatformRequestClose = true;
-                                    var closeEvent = new SDL.SDL_Event();
-                                    closeEvent.type = SDL.SDL_EventType.SDL_QUIT;
-                                    SDL.SDL_PushEvent(ref closeEvent);
+                                    if ((IntPtr)viewport->PlatformUserData != IntPtr.Zero)
+                                    {
+                                        var gcHandle = System.Runtime.InteropServices.GCHandle.FromIntPtr((IntPtr)viewport->PlatformUserData);
+                                        var myWindow = gcHandle.Target as Graphics.Pipeline.UPresentWindow;
+                                        myWindow.IsClosed = true;
+                                    }
+                                    //var closeEvent = new SDL.SDL_Event();
+                                    //closeEvent.type = SDL.SDL_EventType.SDL_QUIT;
+                                    //SDL.SDL_PushEvent(ref closeEvent);
                                 }
                                 if (window_event == SDL.SDL_WindowEventID.SDL_WINDOWEVENT_MOVED)
                                     viewport->PlatformRequestMove = true;

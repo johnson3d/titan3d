@@ -6,8 +6,14 @@ namespace EngineNS.GamePlay.Scene
 {
     [Bricks.CodeBuilder.ContextMenu("MeshNode", "MeshNode", UNode.EditorKeyword)]
     [UNode(NodeDataType = typeof(UMeshNode.UMeshNodeData), DefaultNamePrefix = "Mesh")]
-    public partial class UMeshNode : USceneActorNode
+    [EGui.Controls.PropertyGrid.PGCategoryFilters(ExcludeFilters = new string[] { "Misc" })]
+    public partial class UMeshNode : TtGpuSceneNode
     {
+        public override void Dispose()
+        {
+            CoreSDK.DisposeObject(ref mMesh);
+            base.Dispose();
+        }
         public class UMeshNodeData : UNodeData
         {
             [Rtti.Meta]
@@ -210,9 +216,12 @@ namespace EngineNS.GamePlay.Scene
                 }
                 UpdateAABB();
                 Parent?.UpdateAABB();
+
+                mMesh.HostNode = this;
             }
         }
         [RName.PGRName(FilterExts = Graphics.Mesh.UMaterialMesh.AssetExt)]
+        [Category("Option")]
         public RName MeshName 
         {
             get

@@ -14,9 +14,9 @@ namespace EngineNS.Graphics.Mesh.Modifier
         public uint CustomData2;
 
         public Quaternion Quat;
-        public UInt32_4 UserData;
+        public Vector4ui UserData;
 
-        public UInt32_4 PointLightIndices;
+        public Vector4ui PointLightIndices;
     };
 
     public class UInstanceModifier
@@ -36,7 +36,7 @@ namespace EngineNS.Graphics.Mesh.Modifier
             public Vector3[] mPosData = null;
             public Vector4[] mScaleData = null;
             public Quaternion[] mRotateData = null;
-            public UInt32_4[] mF41Data = null;
+            public Vector4ui[] mF41Data = null;
 
             public NxRHI.UVbView mPosVB;
             public NxRHI.UVbView mScaleVB;
@@ -79,7 +79,7 @@ namespace EngineNS.Graphics.Mesh.Modifier
                 mPosData = new Vector3[mdf.mMaxNumber];
                 mScaleData = new Vector4[mdf.mMaxNumber];
                 mRotateData = new Quaternion[mdf.mMaxNumber];
-                mF41Data = new UInt32_4[mdf.mMaxNumber];
+                mF41Data = new Vector4ui[mdf.mMaxNumber];
 
                 if (mdf.mCurNumber > 0)
                 {
@@ -101,10 +101,10 @@ namespace EngineNS.Graphics.Mesh.Modifier
                         CoreSDK.MemoryCopy(pTar, pSrc, mdf.mCurNumber * (uint)sizeof(Quaternion));
                     }
 
-                    fixed (UInt32_4* pSrc = &oldF41[0])
-                    fixed (UInt32_4* pTar = &mF41Data[0])
+                    fixed (Vector4ui* pSrc = &oldF41[0])
+                    fixed (Vector4ui* pTar = &mF41Data[0])
                     {
-                        CoreSDK.MemoryCopy(pTar, pSrc, mdf.mCurNumber * (uint)sizeof(UInt32_4));
+                        CoreSDK.MemoryCopy(pTar, pSrc, mdf.mCurNumber * (uint)sizeof(Vector4ui));
                     }
                 }
 
@@ -138,22 +138,22 @@ namespace EngineNS.Graphics.Mesh.Modifier
                 fixed (Vector3* p = &mPosData[0])
                 {
                     var dataSize = (UInt32)sizeof(Vector3) * mdf.mCurNumber;
-                    mPosVB.UpdateGpuData(cmd, 0, p, dataSize);
+                    mPosVB.UpdateGpuData(0, p, dataSize);
                 }
                 fixed (Vector4* p = &mScaleData[0])
                 {
                     var dataSize = (UInt32)sizeof(Vector4) * mdf.mCurNumber;
-                    mScaleVB.UpdateGpuData(cmd, 0, p, dataSize);
+                    mScaleVB.UpdateGpuData(0, p, dataSize);
                 }
                 fixed (Quaternion* p = &mRotateData[0])
                 {
                     var dataSize = (UInt32)sizeof(Quaternion) * mdf.mCurNumber;
-                    mRotateVB.UpdateGpuData(cmd, 0, p, dataSize);
+                    mRotateVB.UpdateGpuData(0, p, dataSize);
                 }
-                fixed (UInt32_4* p = &mF41Data[0])
+                fixed (Vector4ui* p = &mF41Data[0])
                 {
-                    var dataSize = (UInt32)sizeof(UInt32_4) * mdf.mCurNumber;
-                    mF41VB.UpdateGpuData(cmd, 0, p, dataSize);
+                    var dataSize = (UInt32)sizeof(Vector4ui) * mdf.mCurNumber;
+                    mF41VB.UpdateGpuData(0, p, dataSize);
                 }
 
                 mAttachVBs.BindVB(NxRHI.EVertexStreamType.VST_InstPos, mPosVB);
@@ -162,7 +162,7 @@ namespace EngineNS.Graphics.Mesh.Modifier
                 mAttachVBs.BindVB(NxRHI.EVertexStreamType.VST_F4_1, mF41VB);
             }
 
-            public uint PushInstance(UInstanceModifier mdf, in Vector3 pos, in Vector3 scale, in Quaternion quat, in UInt32_4 f41, uint hitProxyId)
+            public uint PushInstance(UInstanceModifier mdf, in Vector3 pos, in Vector3 scale, in Quaternion quat, in Vector4ui f41, uint hitProxyId)
             {
                 var rc = UEngine.Instance.GfxDevice.RenderContext;
                 SureBuffers(mdf, mdf.mCurNumber + 1);
@@ -179,7 +179,7 @@ namespace EngineNS.Graphics.Mesh.Modifier
                 mdf.mCurNumber++;
                 return result;
             }
-            public unsafe void SetInstance(uint index, Vector3* pos, Vector3* scale, Quaternion* quat, UInt32_4* f41, uint* hitProxyId)
+            public unsafe void SetInstance(uint index, Vector3* pos, Vector3* scale, Quaternion* quat, Vector4ui* f41, uint* hitProxyId)
             {
                 if (pos != IntPtr.Zero.ToPointer())
                     mPosData[index] = *pos;
@@ -231,7 +231,7 @@ namespace EngineNS.Graphics.Mesh.Modifier
                 InstData = new FVSInstantData[mdf.mMaxNumber];
 
                 var bfDesc = new NxRHI.FBufferDesc();
-                bfDesc.SetDefault();
+                bfDesc.SetDefault(false);
                 bfDesc.Type = NxRHI.EBufferType.BFT_SRV;// | NxRHI.EBufferType.BFT_UAV;
                 bfDesc.CpuAccess = NxRHI.ECpuAccess.CAS_WRITE;
                 bfDesc.Usage = NxRHI.EGpuUsage.USAGE_DYNAMIC;
@@ -259,7 +259,7 @@ namespace EngineNS.Graphics.Mesh.Modifier
                 srvDesc.Buffer.StructureByteStride = bfDesc.StructureStride;
                 InstantSRV = UEngine.Instance.GfxDevice.RenderContext.CreateSRV(InstantBuffer, in srvDesc);
             }
-            public uint PushInstance(UInstanceModifier mdf, in Vector3 pos, in Vector3 scale, in Quaternion quat, in UInt32_4 f41, uint hitProxyId)
+            public uint PushInstance(UInstanceModifier mdf, in Vector3 pos, in Vector3 scale, in Quaternion quat, in Vector4ui f41, uint hitProxyId)
             {
                 var rc = UEngine.Instance.GfxDevice.RenderContext;
 
@@ -283,7 +283,7 @@ namespace EngineNS.Graphics.Mesh.Modifier
                 IsDirty = true;
                 return result;
             }
-            public unsafe void SetInstance(uint index, Vector3* pos, Vector3* scale, Quaternion* quat, UInt32_4* f41, uint* hitProxyId)
+            public unsafe void SetInstance(uint index, Vector3* pos, Vector3* scale, Quaternion* quat, Vector4ui* f41, uint* hitProxyId)
             {
                 if (pos != IntPtr.Zero.ToPointer())
                     InstData[index].Position = *pos;
@@ -308,7 +308,7 @@ namespace EngineNS.Graphics.Mesh.Modifier
                     var rc = UEngine.Instance.GfxDevice.RenderContext;
                     fixed (FVSInstantData* pTar = &InstData[0])
                     {
-                        InstantBuffer.UpdateGpuData(cmd, 0,  pTar, mdf.mCurNumber * (uint)sizeof(FVSInstantData));
+                        InstantBuffer.UpdateGpuData(0,  pTar, mdf.mCurNumber * (uint)sizeof(FVSInstantData));
                     }
                     IsDirty = false;
                 }
@@ -355,7 +355,7 @@ namespace EngineNS.Graphics.Mesh.Modifier
             }
         }
 
-        public uint PushInstance(in Vector3 pos, in Vector3 scale, in Quaternion quat, in UInt32_4 f41, uint hitProxyId)
+        public uint PushInstance(in Vector3 pos, in Vector3 scale, in Quaternion quat, in Vector4ui f41, uint hitProxyId)
         {
             if (InstantSSBO != null)
             {
@@ -367,7 +367,7 @@ namespace EngineNS.Graphics.Mesh.Modifier
             }
             return uint.MaxValue;
         }
-        public unsafe void SetInstance(uint index, Vector3* pos, Vector3* scale, Quaternion* quat, UInt32_4* f41, uint* hitProxyId)
+        public unsafe void SetInstance(uint index, Vector3* pos, Vector3* scale, Quaternion* quat, Vector4ui* f41, uint* hitProxyId)
         {
             if (InstantSSBO != null)
             {
@@ -398,9 +398,8 @@ namespace EngineNS.Graphics.Mesh.Modifier
                 var binder = drawcall.FindBinder("VSInstantDataArray");
                 if (binder.IsValidPointer == false)
                     return;
-                var cmd = UEngine.Instance.GfxDevice.RenderContext.CmdQueue.GetIdleCmdlist(NxRHI.EQueueCmdlist.QCL_FramePost);
+                var cmd = UEngine.Instance.GfxDevice.RenderContext.GpuQueue.FramePostCmdList.mCoreObject;
                 this.Flush2VB(cmd);
-                UEngine.Instance.GfxDevice.RenderContext.CmdQueue.ReleaseIdleCmdlist(cmd, NxRHI.EQueueCmdlist.QCL_FramePost);
                 drawcall.BindSRV(binder, InstantSSBO.InstantSRV);
             }
             else if (InstantVBs != null)

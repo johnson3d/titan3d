@@ -100,12 +100,13 @@ namespace EngineNS.Graphics.Mesh
                 ameta.SaveAMeta();
             }
             var typeStr = Rtti.UTypeDescManager.Instance.GetTypeStringFromType(this.GetType());
-            var xnd = new IO.CXndHolder(typeStr, 0, 0);
+            var xnd = new IO.TtXndHolder(typeStr, 0, 0);
             using (var attr = xnd.NewAttribute("MaterialMesh", 0, 0))
             {
-                var ar = attr.GetWriter(512);
-                ar.Write(this);
-                attr.ReleaseWriter(ref ar);
+                using (var ar = attr.GetWriter(512))
+                {
+                    ar.Write(this);
+                }
                 xnd.RootNode.AddAttribute(attr);
             }
 
@@ -143,7 +144,7 @@ namespace EngineNS.Graphics.Mesh
 
             return true;
         }
-        public static UMaterialMesh LoadXnd(UMaterialMeshManager manager, IO.CXndNode node)
+        public static UMaterialMesh LoadXnd(UMaterialMeshManager manager, IO.TtXndNode node)
         {
             unsafe
             {
@@ -151,9 +152,10 @@ namespace EngineNS.Graphics.Mesh
                 var attr = node.TryGetAttribute("MaterialMesh");
                 if ((IntPtr)attr.CppPointer != IntPtr.Zero)
                 {
-                    var ar = attr.GetReader(manager);
-                    ar.Read(out result, manager);
-                    attr.ReleaseReader(ref ar);
+                    using (var ar = attr.GetReader(manager))
+                    {
+                        ar.Read(out result, manager);
+                    }
                 }
 
                 var mesh = result as UMaterialMesh;
@@ -164,16 +166,17 @@ namespace EngineNS.Graphics.Mesh
                 return null;
             }
         }
-        public static bool ReloadXnd(UMaterialMesh mesh, UMaterialMeshManager manager, IO.CXndNode node)
+        public static bool ReloadXnd(UMaterialMesh mesh, UMaterialMeshManager manager, IO.TtXndNode node)
         {
             unsafe
             {
                 var attr = node.TryGetAttribute("MaterialMesh");
                 if ((IntPtr)attr.CppPointer != IntPtr.Zero)
                 {
-                    var ar = attr.GetReader(manager);
-                    ar.ReadTo(mesh, null);
-                    attr.ReleaseReader(ref ar);
+                    using (var ar = attr.GetReader(manager))
+                    {
+                        ar.ReadTo(mesh, null);
+                    }
                 }
                 return true;
             }
@@ -216,13 +219,14 @@ namespace EngineNS.Graphics.Mesh
                 mMesh = value;
                 if (value == null)
                 {
-                    Materials = null;
+                    Materials.Clear();
+                    Materials.Capacity = 0;
                     return;
                 }
 
-                if (Materials == null || Materials.Length != value.mCoreObject.GetAtomNumber())
+                if (Materials.Count != value.NumAtom)
                 {
-                    Materials = new Pipeline.Shader.UMaterial[value.mCoreObject.GetAtomNumber()];
+                    Materials.Resize((int)value.NumAtom);
                 }
             }
         }
@@ -352,11 +356,10 @@ namespace EngineNS.Graphics.Mesh
             }
         }
         [PGMaterials]
-        public Pipeline.Shader.UMaterial[] Materials
+        public List<Pipeline.Shader.UMaterial> Materials
         {
             get;
-            private set;
-        }
+        } = new List<Pipeline.Shader.UMaterial>();
         [Browsable(false)]
         public IO.EAssetState AssetState { get; private set; } = IO.EAssetState.Initialized;
         public class TSaveData : IO.BaseSerializer
@@ -374,7 +377,7 @@ namespace EngineNS.Graphics.Mesh
             {
                 var tmp = new TSaveData();
                 tmp.MeshName = this.Mesh.AssetName;
-                for (int i = 0; i < Materials.Length; i++)
+                for (int i = 0; i < Materials.Count; i++)
                 {
                     if (Materials[i] == null)
                         tmp.Materials.Add(RName.GetRName("material/sysdft_color.material", RName.ERNameType.Engine));
@@ -398,7 +401,7 @@ namespace EngineNS.Graphics.Mesh
                         return;
                     }
                     var mtlMgr = UEngine.Instance.GfxDevice.MaterialInstanceManager;
-                    for (int i = 0; i < Materials.Length; i++)
+                    for (int i = 0; i < Materials.Count; i++)
                     {
                         if (i < value.Materials.Count)
                         {
@@ -423,11 +426,11 @@ namespace EngineNS.Graphics.Mesh
     public class UMaterialMeshManager
     {
         public Dictionary<RName, UMaterialMesh> Meshes { get; } = new Dictionary<RName, UMaterialMesh>();
-        public async System.Threading.Tasks.Task<UMaterialMesh> CreateMaterialMesh(RName name)
+        public async Thread.Async.TtTask<UMaterialMesh> CreateMaterialMesh(RName name)
         {
-            var result = await UEngine.Instance.EventPoster.Post(() =>
+            var result = await UEngine.Instance.EventPoster.Post((state) =>
             {
-                using (var xnd = IO.CXndHolder.LoadXnd(name.Address))
+                using (var xnd = IO.TtXndHolder.LoadXnd(name.Address))
                 {
                     if (xnd != null)
                     {
@@ -445,15 +448,15 @@ namespace EngineNS.Graphics.Mesh
             }, Thread.Async.EAsyncTarget.AsyncIO);
             return result;
         }
-        public async System.Threading.Tasks.Task<bool> ReloadMaterialMesh(RName rn)
+        public async Thread.Async.TtTask<bool> ReloadMaterialMesh(RName rn)
         {
             UMaterialMesh result;
             if (Meshes.TryGetValue(rn, out result) == false)
                 return true;
 
-            var ok = await UEngine.Instance.EventPoster.Post(() =>
+            var ok = await UEngine.Instance.EventPoster.Post((state) =>
             {
-                using (var xnd = IO.CXndHolder.LoadXnd(rn.Address))
+                using (var xnd = IO.TtXndHolder.LoadXnd(rn.Address))
                 {
                     if (xnd != null)
                     {
@@ -477,7 +480,7 @@ namespace EngineNS.Graphics.Mesh
                 return result;
             return null;
         }
-        public async System.Threading.Tasks.Task<UMaterialMesh> GetMaterialMesh(RName name)
+        public async Thread.Async.TtTask<UMaterialMesh> GetMaterialMesh(RName name)
         {
             if (name == null)
                 return null;
@@ -485,9 +488,9 @@ namespace EngineNS.Graphics.Mesh
             if (Meshes.TryGetValue(name, out result))
                 return result;
 
-            result = await UEngine.Instance.EventPoster.Post(() =>
+            result = await UEngine.Instance.EventPoster.Post((state) =>
             {
-                using (var xnd = IO.CXndHolder.LoadXnd(name.Address))
+                using (var xnd = IO.TtXndHolder.LoadXnd(name.Address))
                 {
                     if (xnd != null)
                     {

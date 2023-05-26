@@ -102,7 +102,7 @@ namespace EngineNS.Bricks.PhysicsCore
         }
         public async System.Threading.Tasks.Task<bool> Initialize(object host)
         {
-            await Thread.AsyncDummyClass.DummyFunc();
+            await Thread.TtAsyncDummyClass.DummyFunc();
 
             var scene = host as GamePlay.Scene.UScene;
             if (scene == null)
@@ -128,18 +128,18 @@ namespace EngineNS.Bricks.PhysicsCore
         }
         [ThreadStatic]
         private static Profiler.TimeScope ScopeTick = Profiler.TimeScopeManager.GetTimeScope(typeof(UPhySceneMember), nameof(TickLogic));
-        public void TickLogic(object host, int ellapse)
+        public void TickLogic(object host, float ellapse)
         {
             using (new Profiler.TimeScopeHelper(ScopeTick))
             {
-                PxScene?.Tick(((float)ellapse) * 0.001f);
+                PxScene?.Tick(ellapse * 0.001f);
             }   
         }
-        public void TickRender(object host, int ellapse)
+        public void TickRender(object host, float ellapse)
         {
 
         }
-        public void TickSync(object host, int ellapse)
+        public void TickSync(object host, float ellapse)
         {
 
         }

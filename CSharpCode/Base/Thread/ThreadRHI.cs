@@ -4,12 +4,12 @@ using System.Text;
 
 namespace EngineNS.Thread
 {
-    public class ThreadRHI : ContextThread
+    public class TtThreadRHI : TtContextThread
     {
         [ThreadStatic]
-        private static Profiler.TimeScope ScopeTick = Profiler.TimeScopeManager.GetTimeScope(typeof(ThreadRHI), nameof(Tick));
+        private static Profiler.TimeScope ScopeTick = Profiler.TimeScopeManager.GetTimeScope(typeof(TtThreadRHI), nameof(Tick));
         [ThreadStatic]
-        private static Profiler.TimeScope ScopeTickAwaitEvent = Profiler.TimeScopeManager.GetTimeScope(typeof(ThreadRHI), nameof(TickAwaitEvent));
+        private static Profiler.TimeScope ScopeTickAwaitEvent = Profiler.TimeScopeManager.GetTimeScope(typeof(TtThreadRHI), nameof(TickAwaitEvent));
         public override void Tick()
         {
             TickStage = 2;

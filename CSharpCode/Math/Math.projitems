@@ -18,8 +18,8 @@
     <Compile Include="$(MSBuildThisFileDirectory)BoundingCapsule.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)BoundingSphere.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Color.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Color3.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Color4.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Color3f.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Color4f.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Converter.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Convex.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)DBoundingBox.cs" />
@@ -56,8 +56,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)Plane.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)PlatformDefine.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Point.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Point3i.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)PointF.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Point2f.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Quaternion.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Ray.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Rect.cs" />
@@ -67,8 +66,14 @@
     <Compile Include="$(MSBuildThisFileDirectory)SizeF.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Thickness.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Vector2.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Vector2i.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Vector2ui.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Vector3.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Vector3i.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Vector3ui.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Vector4.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Vector4i.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Vector4ui.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="$(MSBuildThisFileDirectory)Math.brick" />

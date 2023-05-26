@@ -6,8 +6,21 @@ using System.Text;
 
 namespace EngineNS.Graphics.Mesh
 {
-    public class UMesh
+    public class UMesh : IDisposable
     {
+        public void Dispose() 
+        {
+            if (Atoms != null)
+            {
+                foreach(var i in Atoms)
+                {
+                    if (i != null)
+                        i.Dispose();
+                }
+                Atoms = null;
+            }
+            CoreSDK.DisposeObject(ref mPerMeshCBuffer);
+        }
         public GamePlay.Scene.UNode HostNode { get; set; }
         bool mIsCastShadow = false;
         public bool IsCastShadow 
@@ -96,12 +109,40 @@ namespace EngineNS.Graphics.Mesh
         }
         public bool IsDrawHitproxy = false;
         public UMeshAttachment Tag { get; set; }
-        public class UAtom
+        public class UAtom : IDisposable
         {
+            public void Dispose()
+            {
+                if (TargetViews != null)
+                {
+                    foreach (var i in TargetViews)
+                    {
+                        i.Dispose();
+                    }
+                    TargetViews.Clear();
+                    TargetViews = null;
+                }
+                Mesh = null;
+                Material = null;
+            }
             public uint MaterialSerialId;
             public Pipeline.Shader.UMaterial Material;
-            public class ViewDrawCalls
+            public UMeshPrimitives Mesh;
+            public class ViewDrawCalls : IDisposable
             {
+                public void Dispose()
+                {
+                    if (DrawCalls != null)
+                    {
+                        foreach (var i in DrawCalls)
+                        {
+                            if (i == null)
+                                continue;
+                            i.Dispose();
+                        }
+                        DrawCalls = null;
+                    }
+                }
                 internal int State = 0;
                 public WeakReference<Pipeline.UGraphicsBuffers.UTargetViewIdentifier> TargetView;
                 public NxRHI.UGraphicDraw[] DrawCalls;
@@ -110,17 +151,17 @@ namespace EngineNS.Graphics.Mesh
             }
             public List<ViewDrawCalls> TargetViews;
             
-            private async System.Threading.Tasks.Task BuildDrawCall(ViewDrawCalls vdc, UMesh mesh, int atom, Pipeline.URenderPolicy policy,
+            private async Thread.Async.TtTask BuildDrawCall(ViewDrawCalls vdc, UMesh mesh, int atom, Pipeline.URenderPolicy policy,
                 Pipeline.URenderPolicy.EShadingType shadingType, Pipeline.Common.URenderGraphNode node)
             {
-                if (atom >= mesh.MaterialMesh.Materials.Length)
+                if (atom >= mesh.MaterialMesh.Materials.Count)
                     return;
                 var device = UEngine.Instance.GfxDevice;
                 NxRHI.UGraphicDraw[] drawCalls = vdc.DrawCalls;
                 for (Pipeline.URenderPolicy.EShadingType i = Pipeline.URenderPolicy.EShadingType.BasePass;
                     i < Pipeline.URenderPolicy.EShadingType.Count; i++)
                 {
-                    Graphics.Pipeline.Shader.UShadingEnv shading = null;
+                    Graphics.Pipeline.Shader.UGraphicsShadingEnv shading = null;
                     try
                     {
                         shading = policy.GetPassShading(i, mesh, atom, node);
@@ -202,6 +243,10 @@ namespace EngineNS.Graphics.Mesh
 
                         shading.OnBuildDrawCall(policy, drawcall);
                         //drawcall.MaterialSerialId = Material.SerialId;
+                        if (drawCalls[(int)i] != null)
+                        {
+                            drawCalls[(int)i].Dispose();
+                        }
                         drawCalls[(int)i] = drawcall;
                     }
                 }
@@ -210,8 +255,15 @@ namespace EngineNS.Graphics.Mesh
             }
             internal void ResetDrawCalls()
             {
-                TargetViews?.Clear();
-                TargetViews = null;
+                if (TargetViews != null)
+                {
+                    foreach(var i in TargetViews)
+                    {
+                        i.Dispose();
+                    }
+                    TargetViews.Clear();
+                    TargetViews = null;
+                }
             }            
             private ViewDrawCalls GetOrCreateDrawCalls(Pipeline.UGraphicsBuffers.UTargetViewIdentifier id, Pipeline.URenderPolicy policy)
             {
@@ -222,6 +274,7 @@ namespace EngineNS.Graphics.Mesh
                     Pipeline.UGraphicsBuffers.UTargetViewIdentifier identifier;
                     if (TargetViews[i].TargetView.TryGetTarget(out identifier) == false)
                     {//多开的窗口已经关闭
+                        TargetViews[i].Dispose();
                         TargetViews.RemoveAt(i);
                         i--;
                         continue;
@@ -249,10 +302,15 @@ namespace EngineNS.Graphics.Mesh
             {
                 if (Material == null)
                     return null;
-                if (Material != mesh.MaterialMesh.Materials[atom] || 
-                    Material.SerialId != MaterialSerialId)
+
+                if (mesh.MaterialMesh.Mesh.NumAtom <= atom)
+                    return null;
+                if (Mesh != mesh.MaterialMesh.Mesh ||
+                    Material != mesh.MaterialMesh.Materials[atom] ||
+                    (Material!=null && Material.SerialId != MaterialSerialId))
                 {
                     Material = mesh.MaterialMesh.Materials[atom];
+                    Mesh = mesh.MaterialMesh.Mesh;
                     if (Material == null)
                         return null;
                     MaterialSerialId = Material.SerialId;
@@ -315,6 +373,7 @@ namespace EngineNS.Graphics.Mesh
                     ResetDrawCalls();
                     return null;
                 }
+                result.TagObject = node;
                 //result.CheckPermutation(Material.ParentMaterial, mesh.MdfQueue);
                 //检查材质参数被修改
                 //if (result.CheckMaterialParameters(Material))
@@ -332,7 +391,7 @@ namespace EngineNS.Graphics.Mesh
                 return result;
             }
         }
-        public UAtom[] Atoms;
+        public List<UAtom> Atoms = new List<UAtom>();
         [ReadOnly(true)]
         public string MdfQueueType
         {
@@ -354,7 +413,7 @@ namespace EngineNS.Graphics.Mesh
             mdf.CopyFrom(MdfQueue);
             MdfQueue = mdf;
 
-            for (int i = 0; i < Atoms.Length; i++)
+            for (int i = 0; i < Atoms.Count; i++)
             {
                 Atoms[i].ResetDrawCalls();
             }
@@ -372,8 +431,8 @@ namespace EngineNS.Graphics.Mesh
             if (MdfQueue == null)
                 return false;
 
-            Atoms = new UAtom[MaterialMesh.Materials.Length];
-            for (int i = 0; i < Atoms.Length; i++)
+            Atoms.Resize(MaterialMesh.Materials.Count);
+            for (int i = 0; i < Atoms.Count; i++)
             {
                 Atoms[i] = Rtti.UTypeDescManager.CreateInstance(atomType) as UAtom;
                 Atoms[i].Material = MaterialMesh.Materials[i];
@@ -381,7 +440,7 @@ namespace EngineNS.Graphics.Mesh
 
             return true;
         }
-        public async System.Threading.Tasks.Task<bool> Initialize(RName materialMesh, Rtti.UTypeDesc mdfQueueType, Rtti.UTypeDesc atomType = null)
+        public async Thread.Async.TtTask<bool> Initialize(RName materialMesh, Rtti.UTypeDesc mdfQueueType, Rtti.UTypeDesc atomType = null)
         {
             if (atomType == null)
                 atomType = Rtti.UTypeDesc.TypeOf(typeof(UAtom));
@@ -395,8 +454,8 @@ namespace EngineNS.Graphics.Mesh
             if (MdfQueue == null)
                 return false;
 
-            Atoms = new UAtom[MaterialMesh.Materials.Length];
-            for (int i = 0; i < Atoms.Length; i++)
+            Atoms.Resize(MaterialMesh.Materials.Count);
+            for (int i = 0; i < Atoms.Count; i++)
             {
                 Atoms[i] = Rtti.UTypeDescManager.CreateInstance(atomType) as UAtom;
                 Atoms[i].Material = MaterialMesh.Materials[i];
@@ -404,7 +463,7 @@ namespace EngineNS.Graphics.Mesh
 
             return true;
         }
-        public async System.Threading.Tasks.Task<bool> Initialize(RName meshSource, Pipeline.Shader.UMaterial[] materials,
+        public async Thread.Async.TtTask<bool> Initialize(RName meshSource, Pipeline.Shader.UMaterial[] materials,
             Rtti.UTypeDesc mdfQueueType, Rtti.UTypeDesc atomType = null)
         {
             if (atomType == null)
@@ -415,7 +474,7 @@ namespace EngineNS.Graphics.Mesh
             MaterialMesh = new UMaterialMesh();
             MaterialMesh.Mesh = await UEngine.Instance.GfxDevice.MeshPrimitiveManager.GetMeshPrimitive(meshSource);
 
-            if (MaterialMesh.Materials.Length != materials.Length)
+            if (MaterialMesh.Materials.Count != materials.Length)
                 return false;
 
             for (int i = 0; i < materials.Length; i++)
@@ -427,8 +486,8 @@ namespace EngineNS.Graphics.Mesh
             if (MdfQueue == null)
                 return false;
 
-            Atoms = new UAtom[MaterialMesh.Materials.Length];
-            for (int i = 0; i < Atoms.Length; i++)
+            Atoms.Resize(MaterialMesh.Materials.Count);
+            for (int i = 0; i < Atoms.Count; i++)
             {
                 Atoms[i] = Rtti.UTypeDescManager.CreateInstance(atomType) as UAtom;
                 Atoms[i].Material = MaterialMesh.Materials[i];
@@ -436,34 +495,85 @@ namespace EngineNS.Graphics.Mesh
             return true;
         }
 
-        public bool Initialize(UMeshPrimitives mesh, Pipeline.Shader.UMaterial[] materials,
+        public bool Initialize(UMeshPrimitives mesh, List<Pipeline.Shader.UMaterial> materials,
             Rtti.UTypeDesc mdfQueueType, Rtti.UTypeDesc atomType = null)
         {
-            if (atomType == null)
-                atomType = Rtti.UTypeDescGetter<UAtom>.TypeDesc;
-            if (atomType != Rtti.UTypeDescGetter<UAtom>.TypeDesc && atomType.IsSubclassOf(typeof(UAtom)) == false)
-                return false;
+            UpdateMesh(mesh, materials, atomType);
+            //if (atomType == null)
+            //    atomType = Rtti.UTypeDescGetter<UAtom>.TypeDesc;
+            //if (atomType != Rtti.UTypeDescGetter<UAtom>.TypeDesc && atomType.IsSubclassOf(typeof(UAtom)) == false)
+            //    return false;
 
-            MaterialMesh = new UMaterialMesh();
-            MaterialMesh.Mesh = mesh;
+            //MaterialMesh = new UMaterialMesh();
+            //MaterialMesh.Mesh = mesh;
 
-            if (MaterialMesh.Materials.Length > materials.Length)
-                return false;
+            //if (MaterialMesh.Materials.Length > materials.Length)
+            //    return false;
 
-            for (int i = 0; i < MaterialMesh.Materials.Length; i++)
-            {
-                MaterialMesh.Materials[i] = materials[i];
-            }
+            //for (int i = 0; i < MaterialMesh.Materials.Length; i++)
+            //{
+            //    MaterialMesh.Materials[i] = materials[i];
+            //}
+
+            //Atoms = new UAtom[MaterialMesh.Materials.Length];
+            //for (int i = 0; i < Atoms.Length; i++)
+            //{
+            //    Atoms[i] = Rtti.UTypeDescManager.CreateInstance(atomType) as UAtom;
+            //    Atoms[i].Material = MaterialMesh.Materials[i];
+            //}
 
             MdfQueue = Rtti.UTypeDescManager.CreateInstance(mdfQueueType) as Pipeline.Shader.UMdfQueue;
             if (MdfQueue == null)
                 return false;
-
-            Atoms = new UAtom[MaterialMesh.Materials.Length];
-            for (int i = 0; i < Atoms.Length; i++)
+            return true; 
+        }
+        public bool Initialize(UMeshPrimitives mesh, Pipeline.Shader.UMaterial[] mats,
+            Rtti.UTypeDesc mdfQueueType, Rtti.UTypeDesc atomType = null)
+        {
+            var materials = ListExtra.CreateList(mats);
+            return Initialize(mesh, materials, mdfQueueType, atomType);
+        }
+        public bool UpdateMesh(UMeshPrimitives mesh, List<Pipeline.Shader.UMaterial> materials, Rtti.UTypeDesc atomType = null)
+        {
+            if (MaterialMesh == null)
             {
-                Atoms[i] = Rtti.UTypeDescManager.CreateInstance(atomType) as UAtom;
-                Atoms[i].Material = MaterialMesh.Materials[i];
+                MaterialMesh = new UMaterialMesh();
+            }
+            MaterialMesh.Mesh = mesh;
+            if (MaterialMesh.Materials.Count > materials.Count)
+                return false;
+
+            for (int i = 0; i < MaterialMesh.Materials.Count; i++)
+            {
+                MaterialMesh.Materials[i] = materials[i];
+            }
+
+            if (atomType == null)
+                atomType = Rtti.UTypeDescGetter<UAtom>.TypeDesc;
+
+            if (Atoms == null || Atoms.Count != MaterialMesh.Materials.Count)
+            {
+                Atoms.Resize(MaterialMesh.Materials.Count);
+            }
+            for (int i = 0; i < Atoms.Count; i++)
+            {
+                if (Atoms[i] == null || Atoms[i].GetType() != atomType.SystemType)
+                {
+                    Atoms[i] = Rtti.UTypeDescManager.CreateInstance(atomType) as UAtom;
+                    if (Atoms[i].Material != MaterialMesh.Materials[i])
+                    {
+                        Atoms[i].Material = MaterialMesh.Materials[i];
+                        Atoms[i].MaterialSerialId = MaterialMesh.Materials[i].SerialId - 1;
+                    }
+                }
+                else
+                {
+                    if (Atoms[i].Material != MaterialMesh.Materials[i])
+                    {
+                        Atoms[i].Material = MaterialMesh.Materials[i];
+                        Atoms[i].MaterialSerialId = MaterialMesh.Materials[i].SerialId - 1;
+                    }
+                }
             }
             return true;
         }
@@ -475,7 +585,7 @@ namespace EngineNS.Graphics.Mesh
         public NxRHI.UGraphicDraw GetDrawCall(Pipeline.UGraphicsBuffers targetView, int atom, Pipeline.URenderPolicy policy, 
             Pipeline.URenderPolicy.EShadingType shadingType, Pipeline.Common.URenderGraphNode node)
         {
-            if (atom >= Atoms.Length)
+            if (atom >= Atoms.Count)
                 return null;
 
             if (this.MaterialMesh.Mesh.mCoreObject.IsValidPointer == false)
@@ -487,7 +597,7 @@ namespace EngineNS.Graphics.Mesh
         {
             if (PerMeshCBuffer == null)
                 return;
-            var tm = PerMeshCBuffer.GetValue<Matrix>(UEngine.Instance.GfxDevice.CoreShaderBinder.CBPerMesh.WorldMatrix);
+            var tm = PerMeshCBuffer.GetMatrix(UEngine.Instance.GfxDevice.CoreShaderBinder.CBPerMesh.WorldMatrix);
             var realPos = WorldLocation - world.CameraOffset;
             tm.Translation = realPos.ToSingleVector3();
             this.SetWorldMatrix(in tm);

@@ -4,10 +4,10 @@ using System.Text;
 
 namespace EngineNS.Bricks.StateMachine
 {
-    public interface IAttachmentRule
+    public interface IAttachmentRule<T>
     {
-        public IAttachment Attachment { get; set; }
-        public void Tick(float elapseSecond);
+        public IAttachment<T> Attachment { get; set; }
+        public void Tick(float elapseSecond, in T context);
         public bool Check();
     }
 }

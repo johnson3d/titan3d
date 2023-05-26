@@ -399,14 +399,14 @@ namespace EngineNS.EGui.Controls
                         //pos = new Vector2(System.Math.Max(System.Math.Min(pt.Position.X, MaxX), MinX),
                         //                  System.Math.Max(System.Math.Min(mousePosInBezier.Y, MaxY), MinY));
                         pos.X = MinX;
-                        pos.Y = CoreDefine.Clamp(mousePosInBezier.Y, MinY, MaxY);
+                        pos.Y = MathHelper.Clamp(mousePosInBezier.Y, MinY, MaxY);
                     }
                     else if(mHoverPointIdx == BezierPoints.Count - 1)
                     {
                         //pos = new Vector2(System.Math.Max(System.Math.Min(pt.Position.X, MaxX), MinX),
                         //                  System.Math.Max(System.Math.Min(mousePosInBezier.Y, MaxY), MinY));
                         pos.X = MaxX;
-                        pos.Y = CoreDefine.Clamp(mousePosInBezier.Y, MinY, MaxY);
+                        pos.Y = MathHelper.Clamp(mousePosInBezier.Y, MinY, MaxY);
                     }
                     else
                     {

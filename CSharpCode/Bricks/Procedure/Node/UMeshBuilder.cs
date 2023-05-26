@@ -23,7 +23,7 @@ namespace EngineNS.Bricks.Procedure.Node
                 mPreviewResultIndex = -1;
             }
         }
-        public UBufferCreator IndexBufferCreator { get; } = UBufferCreator.CreateInstance<USuperBuffer<Int32_3, FInt3Operator>>(-1, -1, -1);
+        public UBufferCreator IndexBufferCreator { get; } = UBufferCreator.CreateInstance<USuperBuffer<Vector3i, FInt3Operator>>(-1, -1, -1);
         public UBufferCreator Vec3BufferCreator { get; } = UBufferCreator.CreateInstance<USuperBuffer<Vector3, FFloat3Operator>>(-1, -1, -1);
 
         public Graphics.Mesh.UMaterialMesh PreviewMesh;
@@ -92,18 +92,18 @@ namespace EngineNS.Bricks.Procedure.Node
                 NunPfTrian += (int)desc.NumPrimitives;
             }
             
-            var idxBuffer = UBufferConponent.CreateInstance(UBufferCreator.CreateInstance<USuperBuffer<Int32_3, FInt3Operator>>(NunPfTrian, 1, 1));
+            var idxBuffer = UBufferConponent.CreateInstance(UBufferCreator.CreateInstance<USuperBuffer<Vector3i, FInt3Operator>>(NunPfTrian, 1, 1));
             
             if (Mesh.Mesh.MeshDataProvider.mCoreObject.IsIndex32)
             {
                 var pIndices = (int*)Mesh.Mesh.MeshDataProvider.mCoreObject.GetIndices().GetData();
                 for (int i = 0; i < (int)NunPfTrian; i++)
                 {
-                    Int32_3 tmp;
+                    Vector3i tmp;
                     tmp.X = pIndices[3 * i];
                     tmp.Y = pIndices[3 * i + 1];
                     tmp.Z = pIndices[3 * i + 2];
-                    idxBuffer.SetPixel<Int32_3>(i, in tmp);
+                    idxBuffer.SetPixel<Vector3i>(i, in tmp);
                 }
             }
             else
@@ -111,11 +111,11 @@ namespace EngineNS.Bricks.Procedure.Node
                 var pIndices = (ushort*)Mesh.Mesh.MeshDataProvider.mCoreObject.GetIndices().GetData();
                 for (int i = 0; i < (int)NunPfTrian; i++)
                 {
-                    Int32_3 tmp;
+                    Vector3i tmp;
                     tmp.X = pIndices[3 * i];
                     tmp.Y = pIndices[3 * i + 1];
                     tmp.Z = pIndices[3 * i + 2];
-                    idxBuffer.SetPixel<Int32_3>(i, in tmp);
+                    idxBuffer.SetPixel<Vector3i>(i, in tmp);
                 }
             }
 
@@ -191,7 +191,7 @@ namespace EngineNS.Bricks.Procedure.Node
         [EGui.Controls.PropertyGrid.PGCustomValueEditor(HideInPG = true)]
         public PinOut NorPin { get; set; } = new PinOut();
 
-        public UBufferCreator IndexBufferCreator { get; } = UBufferCreator.CreateInstance<USuperBuffer<Int32_3, FInt3Operator>>(-1, -1, -1);
+        public UBufferCreator IndexBufferCreator { get; } = UBufferCreator.CreateInstance<USuperBuffer<Vector3i, FInt3Operator>>(-1, -1, -1);
         public UBufferCreator XYZBufferCreator { get; } = UBufferCreator.CreateInstance<USuperBuffer<Vector3, FFloat3Operator>>(-1, -1, -1);
         public UPreviewMesh()
         {
@@ -222,7 +222,7 @@ namespace EngineNS.Bricks.Procedure.Node
         {
             var meshBuilder = new Graphics.Mesh.UMeshDataProvider();
             {
-                var indices = graph.BufferCache.FindBuffer(InIndices) as USuperBuffer<Int32_3, FInt3Operator>;
+                var indices = graph.BufferCache.FindBuffer(InIndices) as USuperBuffer<Vector3i, FInt3Operator>;
                 var pos = graph.BufferCache.FindBuffer(InPos) as USuperBuffer<Vector3, FFloat3Operator>;
                 var nor = graph.BufferCache.FindBuffer(InNor) as USuperBuffer<Vector3, FFloat3Operator>;
 
@@ -252,7 +252,7 @@ namespace EngineNS.Bricks.Procedure.Node
                 dpDesc.NumPrimitives = (uint)indices.Width;
                 for (int i = 0; i < indices.Width; i++)
                 {
-                    var index = indices.GetPixel<Int32_3>(i, 0, 0);
+                    var index = indices.GetPixel<Vector3i>(i, 0, 0);
                     builder.AddTriangle((uint)(index.X % pos.Width), (uint)(index.Y % pos.Width), (uint)(index.Z % pos.Width));
                     //builder.AddTriangle((uint)index.X, (uint)index.Y, (uint)index.Z);
                     //dpDesc.NumPrimitives++;
@@ -328,7 +328,7 @@ namespace EngineNS.Bricks.Procedure.Node
         }
         public override bool OnProcedure(UPgcGraph graph)
         {
-            var indices = graph.BufferCache.FindBuffer(InIndices) as USuperBuffer<Int32_3, FInt3Operator>;
+            var indices = graph.BufferCache.FindBuffer(InIndices) as USuperBuffer<Vector3i, FInt3Operator>;
             var pos = graph.BufferCache.FindBuffer(InPos) as USuperBuffer<Vector3, FFloat3Operator>;
             var nor = graph.BufferCache.FindBuffer(InNor) as USuperBuffer<Vector3, FFloat3Operator>;
 

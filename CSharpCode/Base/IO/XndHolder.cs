@@ -18,9 +18,9 @@ namespace EngineNS
 
 namespace EngineNS.IO
 {
-    public class CXndHolder : AuxPtrType<XndHolder> , IDisposable
+    public class TtXndHolder : AuxPtrType<XndHolder> , IDisposable
     {
-        private CXndHolder()
+        private TtXndHolder()
         {
             mCoreObject = XndHolder.CreateInstance();
         }
@@ -45,24 +45,24 @@ namespace EngineNS.IO
                 return new XndNode(p);
             }
         }
-        public static CXndHolder LoadXnd(string file)
+        public static TtXndHolder LoadXnd(string file)
         {
-            var result = new CXndHolder();
+            var result = new TtXndHolder();
             if (result.mCoreObject.LoadXnd(file) == false)
                 return null;
             unsafe
             {
-                result.mRootNode = new CXndNode(new XndNode(result.mCoreObject.GetRootNode()));
+                result.mRootNode = new TtXndNode(new XndNode(result.mCoreObject.GetRootNode()));
                 result.mRootNode.Core_AddRef();
                 return result;
             }
         }
-        public CXndHolder(string name, UInt32 ver, UInt32 flags)
+        public TtXndHolder(string name, UInt32 ver, UInt32 flags)
         {
             mCoreObject = XndHolder.CreateInstance();
             using (var ptr = NewNode(name, ver, flags))
             {
-                mRootNode = new CXndNode(ptr);
+                mRootNode = new TtXndNode(ptr);
                 mRootNode.Core_AddRef();
                 unsafe
                 {
@@ -72,12 +72,12 @@ namespace EngineNS.IO
         }
         public void SaveXnd(string file)
         {
-            var path = IO.FileManager.GetParentPathName(file);
-            IO.FileManager.SureDirectory(path);
+            var path = IO.TtFileManager.GetParentPathName(file);
+            IO.TtFileManager.SureDirectory(path);
             mCoreObject.SaveXnd(file);
         }
-        CXndNode mRootNode;
-        public CXndNode RootNode
+        TtXndNode mRootNode;
+        public TtXndNode RootNode
         {
             get { return mRootNode; }
             set
@@ -97,9 +97,9 @@ namespace EngineNS.IO
         public unsafe void UnitTestEntrance()
         {
             var rn = RName.GetRName("UTest/t0.xnd");
-            IO.FileManager.SureDirectory(RName.GetRName("UTest").Address);
+            IO.TtFileManager.SureDirectory(RName.GetRName("UTest").Address);
             {
-                var xnd = new CXndHolder("TestRoot", 1, 0);
+                var xnd = new TtXndHolder("TestRoot", 1, 0);
                 using (var attr = xnd.NewAttribute("Att0", 1, 0))
                 {
                     attr.BeginWrite(100);
@@ -138,7 +138,7 @@ namespace EngineNS.IO
                 xnd.SaveXnd(rn.Address);
             }
             {
-                var xnd = CXndHolder.LoadXnd(rn.Address);
+                var xnd = TtXndHolder.LoadXnd(rn.Address);
                 for (uint i = 0; i < xnd.RootNode.NumOfAttribute; i++)
                 {
                     var attr = xnd.RootNode.GetAttribute(i);

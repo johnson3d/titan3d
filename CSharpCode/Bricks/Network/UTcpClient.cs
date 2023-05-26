@@ -29,7 +29,7 @@ namespace EngineNS.Bricks.Network
                 return;
             mCoreObject.Send((sbyte*)ptr, size);
         }
-        public void Send(in IO.AuxWriter<RPC.UMemWriter> pkg)
+        public void Send(in IO.AuxWriter<IO.UMemWriter> pkg)
         {
             if (Connected == false)
                 return;
@@ -54,7 +54,7 @@ namespace EngineNS.Bricks.Network
             else
                 mPkgBuilder.NetPackageManager = UEngine.Instance.RpcModule.NetPackageManager;
             ConnectId = connId;
-            var ok = await UEngine.Instance.EventPoster.Post(() =>
+            var ok = await UEngine.Instance.EventPoster.Post((state) =>
             {
                 return mCoreObject.Connect(ip, port, timeOut);
             }, Thread.Async.EAsyncTarget.TPools);

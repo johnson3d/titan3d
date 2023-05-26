@@ -4,20 +4,17 @@ using System.Text;
 
 namespace EngineNS.Thread
 {
-    public class ThreadMain : ContextThread
+    public class TtThreadMain : TtContextThread
     {
         [ThreadStatic]
-        private static Profiler.TimeScope ScopeTickSync = Profiler.TimeScopeManager.GetTimeScope(typeof(ThreadMain), nameof(TickSync));
+        private static Profiler.TimeScope ScopeTickSync = Profiler.TimeScopeManager.GetTimeScope(typeof(TtThreadMain), nameof(TickSync));
         [ThreadStatic]
-        private static Profiler.TimeScope ScopeWaitTickLogic = Profiler.TimeScopeManager.GetTimeScope(typeof(ThreadMain), "WaitTickLogic");
+        private static Profiler.TimeScope ScopeWaitTickLogic = Profiler.TimeScopeManager.GetTimeScope(typeof(TtThreadMain), "WaitTickLogic");
         public override void Tick()
         {
             BeforeFrame();
 
             RenderMT();
-
-            TickSync();
-            FContextTickableManager.GetInstance().ThreadTick();
         }
         private void BeforeFrame()
         {
@@ -52,7 +49,7 @@ namespace EngineNS.Thread
             using (new Profiler.TimeScopeHelper(ScopeWaitTickLogic))
             {
                 var evtIndex = System.Threading.WaitHandle.WaitAny(UEngine.Instance.ThreadLogic.LogicEndEvents);
-                if (evtIndex == (int)ThreadLogic.EEndEvent.MacrossDebug)
+                if (evtIndex == (int)TtThreadLogic.EEndEvent.MacrossDebug)
                 {
                     System.Diagnostics.Debug.Assert(Macross.UMacrossDebugger.Instance.CurrrentBreak != null);
                 }

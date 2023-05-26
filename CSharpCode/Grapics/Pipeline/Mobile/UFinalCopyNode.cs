@@ -4,7 +4,7 @@ using System.Text;
 
 namespace EngineNS.Graphics.Pipeline.Mobile
 {
-    public class UFinalCopyShading : Shader.UShadingEnv
+    public class UFinalCopyShading : Shader.UGraphicsShadingEnv
     {
         public UPermutationItem DisableAO
         {

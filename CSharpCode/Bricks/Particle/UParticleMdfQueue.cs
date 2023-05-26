@@ -22,16 +22,30 @@ namespace EngineNS.Bricks.Particle
         }
         public override void CopyFrom(Graphics.Pipeline.Shader.UMdfQueue mdf)
         {
+            base.CopyFrom(mdf);
             Emitter = (mdf as UParticleMdfQueue<FParticle, FParticleSystem>).Emitter;
         }
         public UEmitter<FParticle, FParticleSystem> Emitter;
-        public override unsafe void OnDrawCall(URenderPolicy.EShadingType shadingType, NxRHI.UGraphicDraw drawcall, URenderPolicy policy, UMesh mesh)
+        public override unsafe void OnDrawCall(URenderPolicy.EShadingType shadingType, NxRHI.UGraphicDraw drawcall, URenderPolicy policy, UMesh mesh, int atom)
         {
+            base.OnDrawCall(shadingType, drawcall, policy, mesh, atom);
+
             if (Emitter != null)
             {
                 drawcall.BindSRV(drawcall.FindBinder("sbParticleInstance"), Emitter.GpuResources.ParticlesSrv);
                 drawcall.BindSRV(drawcall.FindBinder("sbAlives"), Emitter.GpuResources.CurAlivesSrv);
-                
+                var binder = drawcall.FindBinder("cbForMultiDraw");
+                if (binder.IsValidPointer)
+                {
+                    if (Emitter.GpuResources.DrawIdBuffer == null)
+                    {
+                        Emitter.GpuResources.DrawIdBuffer = UEngine.Instance.GfxDevice.RenderContext.CreateCBV(binder);
+                    }
+                    
+                    drawcall.BindCBuffer(binder, Emitter.GpuResources.DrawIdBuffer);
+                }   
+
+
                 if (Emitter.IsGpuDriven)
                 {
                     drawcall.BindIndirectDrawArgsBuffer(Emitter.GpuResources.DrawArgBuffer, 0);
@@ -48,7 +62,7 @@ namespace EngineNS.Bricks.Particle
         }
         public override Hash160 GetHash()
         {
-            string CodeString = IO.FileManager.ReadAllText(RName.GetRName("shaders/Bricks/Particle/NebulaParticle.cginc", RName.ERNameType.Engine).Address);
+            string CodeString = IO.TtFileManager.ReadAllText(RName.GetRName("shaders/Bricks/Particle/NebulaParticle.cginc", RName.ERNameType.Engine).Address);
             mMdfQueueHash = Hash160.CreateHash160(CodeString);
             return mMdfQueueHash;
         }

@@ -11,6 +11,17 @@
   <ItemGroup>
     <Compile Include="$(MSBuildThisFileDirectory)Image2D.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)ISuperPixelOperator.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Node\Algorithm\Common\MaskNode.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Node\Algorithm\Common\WrapNode.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Node\Algorithm\ErosionNode.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Node\Algorithm\FloodNode.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Node\Algorithm\FlowNode.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Node\Algorithm\Morphology.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Node\Algorithm\NoiseNode.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Node\Algorithm\RiverNode.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Node\Algorithm\SDFNode.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Node\Algorithm\SimulateRainDrop.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Node\Algorithm\TerrainNode.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Node\UAssistNodes.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Node\UBinocular.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Node\UEndingNode.cs" />

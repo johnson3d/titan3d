@@ -43,12 +43,16 @@ namespace EngineNS.NxRHI
                 return mCoreObject.GetCompletedValue();
             }
         }
-        public ulong AspectValue
+        public ulong ExpectValue
         {
             get
             {
-                return mCoreObject.GetAspectValue();
+                return mCoreObject.GetExpectValue();
             }
+        }
+        public void IncreaseExpect(ICmdQueue queue, ulong value, EQueueType type)
+        {
+            mCoreObject.IncreaseExpect(queue, value, type);
         }
         public void Wait(ulong value, uint time = uint.MaxValue)
         {

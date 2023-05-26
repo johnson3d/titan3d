@@ -20,7 +20,7 @@ namespace EngineNS.NxRHI
         {
             var result = new UGpuDevice();
             result.mCoreObject = mCoreObject.CreateDevice(in desc);
-            result.mCmdQueue = new UCmdQueue(result.mCoreObject.GetCmdQueue());
+            result.mGpuQueue = new UGpuQueue(result, result.mCoreObject.GetCmdQueue());
             return result;
         }
         public int NumOfContext
@@ -63,6 +63,11 @@ namespace EngineNS.NxRHI
     }
     public class UGpuDevice : AuxPtrType<NxRHI.IGpuDevice>
     {
+        public override void Dispose()
+        {
+            this.GpuQueue.Dispose();
+            base.Dispose();
+        }
         public ERhiType RhiType
         {
             get
@@ -85,6 +90,14 @@ namespace EngineNS.NxRHI
                 return null;
             return result;
         }
+        public TtGpuScope CreateGpuScope()
+        {
+            var result = new TtGpuScope();
+            result.mCoreObject = mCoreObject.CreateGpuScope();
+            if (result.mCoreObject.IsValidPointer == false)
+                return null;
+            return result;
+        }
         public UBuffer CreateBuffer(in FBufferDesc desc)
         {
             var result = new UBuffer();
@@ -98,6 +111,10 @@ namespace EngineNS.NxRHI
             if (binder == null)
                 return null;
             return CreateCBV(binder.mCoreObject.GetShaderBinder(EShaderType.SDT_Unknown));
+        }
+        public UCbView CreateCBV(FEffectBinder binder)
+        {
+            return CreateCBV(binder.GetShaderBinder(EShaderType.SDT_Unknown));
         }
         public UCbView CreateCBV(FShaderBinder binder)
         {
@@ -155,9 +172,9 @@ namespace EngineNS.NxRHI
             switch (mCoreObject.Desc.RhiType)
             {
                 case ERhiType.RHI_D3D11:
-                    {
-                        return UEngine.Instance.GfxDevice.RenderContext.CreateTexture(in texDesc);
-                    }
+                    //{
+                    //    return UEngine.Instance.GfxDevice.RenderContext.CreateTexture(in texDesc);
+                    //}
                 case ERhiType.RHI_D3D12:
                 case ERhiType.RHI_VK:
                     {
@@ -289,6 +306,7 @@ namespace EngineNS.NxRHI
         public UShader CreateShader(UShaderDesc desc)
         {
             var result = new UShader();
+            result.PermutationId = desc.PermutationId;
             result.mCoreObject = mCoreObject.CreateShader(desc.mCoreObject);
             if (result.mCoreObject.IsValidPointer == false)
                 return null;
@@ -335,6 +353,7 @@ namespace EngineNS.NxRHI
             result.mCoreObject = mCoreObject.CreateGraphicDraw();
             if (result.mCoreObject.IsValidPointer == false)
                 return null;
+            TtStatistic.Instance.GraphicsDrawcall++;
             return result;
         }
         public UComputeDraw CreateComputeDraw()
@@ -343,6 +362,7 @@ namespace EngineNS.NxRHI
             result.mCoreObject = mCoreObject.CreateComputeDraw();
             if (result.mCoreObject.IsValidPointer == false)
                 return null;
+            TtStatistic.Instance.ComputeDrawcall++;
             return result;
         }
         public UCopyDraw CreateCopyDraw()
@@ -351,6 +371,7 @@ namespace EngineNS.NxRHI
             result.mCoreObject = mCoreObject.CreateCopyDraw();
             if (result.mCoreObject.IsValidPointer == false)
                 return null;
+            TtStatistic.Instance.TransferDrawcall++;
             return result;
         }
         public UEvent CreateGpuEvent(in FEventDesc desc, string name)
@@ -369,50 +390,374 @@ namespace EngineNS.NxRHI
                 return null;
             return result;
         }
+        public void SetBreakOnId(int id, bool open)
+        {
+            mCoreObject.SetBreakOnID(id, open);
+        }
 
-        internal UCmdQueue mCmdQueue;
-        public UCmdQueue CmdQueue { get => mCmdQueue; }
+        internal UGpuQueue mGpuQueue;
+        public UGpuQueue GpuQueue { get => mGpuQueue; }
 
         public void TickPostEvents()
         {
             mCoreObject.TickPostEvents();
         }
     }
-    public class UCmdQueue : AuxPtrType<NxRHI.ICmdQueue>
+    public class UGpuQueue : AuxPtrType<NxRHI.ICmdQueue>
     {
-        public UCmdQueue(ICmdQueue ptr)
+        public override void Dispose()
+        {
+            FramePostCmdList = null;
+            base.Dispose();
+        }
+        public UCommandList FramePostCmdList { get; set; } = null;
+        public UGpuQueue(UGpuDevice device, ICmdQueue ptr)
         {
             mCoreObject = ptr;
             mCoreObject.NativeSuper.AddRef();
+            FramePostCmdList = device.CreateCommandList();
         }
-        public void Flush()
+        public void Flush(EngineNS.NxRHI.EQueueType type = EQueueType.QU_Default)
         {
-            mCoreObject.Flush();
+            mCoreObject.Flush(type);
         }
-        public void ExecuteCommandList(UCommandList Cmdlist)
+        public void ExecuteCommandList(UCommandList Cmdlist, EngineNS.NxRHI.EQueueType type = EQueueType.QU_Default)
         {
-            mCoreObject.ExecuteCommandList(Cmdlist.mCoreObject);
+            ExecuteCommandList(Cmdlist.mCoreObject, type);
         }
-        public void ExecuteCommandList(ICommandList Cmdlist)
+        public void ExecuteCommandList(ICommandList Cmdlist, EngineNS.NxRHI.EQueueType type = EQueueType.QU_Default)
         {
-            mCoreObject.ExecuteCommandList(Cmdlist);
+            if (Cmdlist.IsValidPointer == false)
+                return;
+            mCoreObject.ExecuteCommandListSingle(Cmdlist, type);
         }
-        public ulong SignalFence(UFence fence, ulong value = ulong.MaxValue)
+        public ulong IncreaseSignal(UFence fence, EngineNS.NxRHI.EQueueType type = EQueueType.QU_Default)
         {
-            return mCoreObject.SignalFence(fence.mCoreObject, value);
-        }
-        public ulong IncreaseSignal(UFence fence)
-        {
-            return mCoreObject.IncreaseSignal(fence.mCoreObject);
+            return mCoreObject.IncreaseSignal(fence.mCoreObject, type);
         }
 
-        public ICommandList GetIdleCmdlist(EQueueCmdlist type)
+        public ICommandList GetIdleCmdlist()
         {
-            return mCoreObject.GetIdleCmdlist(type);
+            return mCoreObject.GetIdleCmdlist();
         }
-		public void ReleaseIdleCmdlist(ICommandList cmd, EQueueCmdlist type)
+		public void ReleaseIdleCmdlist(ICommandList cmd)
         {
-            mCoreObject.ReleaseIdleCmdlist(cmd, type);
+            mCoreObject.ReleaseIdleCmdlist(cmd);
+        }
+
+    }
+
+    public struct FTransientCmd : IDisposable
+    {
+        ICommandList mCmdList;
+        EQueueType mType;
+        public ICommandList CmdList { get => mCmdList; }
+        public FTransientCmd(EQueueType type)
+        {
+            mType = type;
+            mCmdList = UEngine.Instance.GfxDevice.RenderContext.GpuQueue.GetIdleCmdlist();
+            mCmdList.BeginCommand();
+        }
+        public void Dispose()
+        {
+            mCmdList.EndCommand();
+            UEngine.Instance.GfxDevice.RenderContext.GpuQueue.ExecuteCommandList(mCmdList, mType);
+            UEngine.Instance.GfxDevice.RenderContext.GpuQueue.ReleaseIdleCmdlist(mCmdList);
+        }
+    }
+
+
+    public class URenderCmdQueue : ITickable
+    {
+        public int GetTickOrder()
+        {
+            return 0;
+        }
+        public delegate void FRenderCmd(ICommandList ImCmdlist, ref FRCmdInfo info);
+        public struct FRCmdInfo
+        {
+            public FRenderCmd Cmd;
+            public string Name;
+            public object Tag;
+        }
+        public class UQueueStat
+        {
+            public uint NumOfCmdlist;
+            public uint NumOfDrawcall;
+            public uint NumOfPrimitive;
+            public void Reset()
+            {
+                NumOfCmdlist = 0;
+                NumOfDrawcall = 0;
+                NumOfPrimitive = 0;
+            }
+        }
+        public UQueueStat GetStat()
+        {
+            return QueueStats[1];
+        }
+        public UQueueStat[] QueueStats = new UQueueStat[2];
+        public readonly Queue<FRCmdInfo>[] RenderCmds = new Queue<FRCmdInfo>[2];
+        public readonly Queue<FRCmdInfo>[] RenderPreCmds = new Queue<FRCmdInfo>[2];
+        public readonly Queue<FRCmdInfo>[] RenderPostCmds = new Queue<FRCmdInfo>[2];
+        public URenderCmdQueue()
+        {
+            QueueStats[0] = new UQueueStat();
+            QueueStats[1] = new UQueueStat();
+
+            RenderCmds[0] = new Queue<FRCmdInfo>();
+            RenderCmds[1] = new Queue<FRCmdInfo>();
+
+            RenderPreCmds[0] = new Queue<FRCmdInfo>();
+            RenderPreCmds[1] = new Queue<FRCmdInfo>();
+
+            RenderPostCmds[0] = new Queue<FRCmdInfo>();
+            RenderPostCmds[1] = new Queue<FRCmdInfo>();
+        }
+        public void Reset()
+        {
+            //RenderCmds[0]?.Clear();
+            //RenderCmds[1]?.Clear();
+            //RenderPreCmds[0]?.Clear();
+            //RenderPreCmds[1]?.Clear();
+            //RenderPostCmds[0]?.Clear();
+            //RenderPostCmds[1]?.Clear();
+            //UEngine.Instance.GfxDevice.RenderContext.CmdQueue.Flush();
+            //RenderCmds[0]?.Clear();
+            //RenderCmds[1]?.Clear();
+            //RenderPreCmds[0]?.Clear();
+            //RenderPreCmds[1]?.Clear();
+            //RenderPostCmds[0]?.Clear();
+            //RenderPostCmds[1]?.Clear();
+
+            TickRender(0);
+            TickSync(0);
+            TickRender(0);
+            TickSync(0);
+
+            UEngine.Instance.GfxDevice.RenderContext.GpuQueue.Flush();
+            var count = RenderCmds[0].Count + RenderCmds[1].Count + RenderPreCmds[0].Count + RenderPreCmds[1].Count + RenderPostCmds[0].Count + RenderPostCmds[0].Count;
+            System.Diagnostics.Debug.Assert(count == 0);
+        }
+        public void QueueCmd(FRenderCmd cmd, string name, object tag = null)
+        {
+            lock (RenderCmds)
+            {
+                var info = new FRCmdInfo();
+                info.Name = name;
+                info.Cmd = cmd;
+                info.Tag = tag;
+                RenderCmds[0].Enqueue(info);
+            }
+        }
+        public void QueuePreCmd(FRenderCmd cmd, string name, object tag = null)
+        {
+            lock (RenderPreCmds)
+            {
+                var info = new FRCmdInfo();
+                info.Name = name;
+                info.Cmd = cmd;
+                info.Tag = tag;
+                RenderPreCmds[0].Enqueue(info);
+            }
+        }
+        public void QueuePostCmd(FRenderCmd cmd, string name, object tag = null)
+        {
+            lock (RenderPostCmds)
+            {
+                var info = new FRCmdInfo();
+                info.Name = name;
+                info.Cmd = cmd;
+                info.Tag = tag;
+                RenderPostCmds[0].Enqueue(info);
+            }
+        }
+        public void QueueCmdlist(UCommandList cmd, string name = null)
+        {
+            System.Diagnostics.Debug.Assert(cmd.mCoreObject.IsRecording() == false);
+            lock (RenderCmds)
+            {
+                var info = new FRCmdInfo();
+                info.Name = name;
+                info.Tag = cmd;
+                info.Cmd = static (NxRHI.ICommandList im_cmd, ref NxRHI.URenderCmdQueue.FRCmdInfo info) =>
+                {
+                    UEngine.Instance.GfxDevice.RenderContext.GpuQueue.ExecuteCommandList(info.Tag as UCommandList);
+                };
+                RenderCmds[0].Enqueue(info);
+                QueueStats[0].NumOfDrawcall += cmd.mCoreObject.GetDrawcallNumber();
+                QueueStats[0].NumOfCmdlist++;
+                QueueStats[0].NumOfPrimitive += cmd.mCoreObject.GetPrimitiveNumber();
+            }
+        }
+        public void TickLogic(float ellapse)
+        {
+
+        }
+        [ThreadStatic]
+        private static Profiler.TimeScope ScopeRenderTick = Profiler.TimeScopeManager.GetTimeScope(typeof(URenderCmdQueue), nameof(TickRender));
+        public void TickRender(float ellapse)
+        {
+            var cmdQueue = UEngine.Instance.GfxDevice.RenderContext.GpuQueue;
+
+            using (new Profiler.TimeScopeHelper(ScopeRenderTick))
+            {
+                using (var cmd = new FTransientCmd(EQueueType.QU_Default))
+                {
+                    TickAways(cmd.CmdList);
+                }
+                /*var cmd = UEngine.Instance.GfxDevice.RenderContext.GpuQueue.GetIdleCmdlist();
+                cmd.BeginCommand();
+                TickAways(cmd);
+                cmd.EndCommand();
+                cmdQueue.ExecuteCommandList(cmd, EQueueType.QU_Default);
+                cmdQueue.ReleaseIdleCmdlist(cmd);*/
+            }
+        }
+        public void TickBeginFrame(float ellapse)
+        {
+            var cmd = UEngine.Instance.GfxDevice.RenderContext.GpuQueue.FramePostCmdList;
+            if (cmd != null)
+            {
+                cmd.BeginCommand();
+            }
+        }
+        [ThreadStatic]
+        private static Profiler.TimeScope ScopeSyncTick = Profiler.TimeScopeManager.GetTimeScope(typeof(URenderCmdQueue), nameof(TickRender));
+        public void TickSync(float ellapse)
+        {
+            using (new Profiler.TimeScopeHelper(ScopeRenderTick))
+            {
+                var cmdQueue = UEngine.Instance.GfxDevice.RenderContext.GpuQueue;
+                var cmd = UEngine.Instance.GfxDevice.RenderContext.GpuQueue.FramePostCmdList;
+                if (cmd != null)
+                {
+                    cmd.EndCommand();
+                    cmdQueue.mCoreObject.ExecuteCommandListSingle(cmd.mCoreObject, EQueueType.QU_Default);
+                }
+
+                Swap(ref RenderCmds[0], ref RenderCmds[1]);
+                Swap(ref RenderPreCmds[0], ref RenderPreCmds[1]);
+                Swap(ref RenderPostCmds[0], ref RenderPostCmds[1]);
+                Swap(ref QueueStats[0], ref QueueStats[1]);
+                QueueStats[0].Reset();
+                //{
+                //    var save = RenderCmds[0];
+                //    RenderCmds[0] = RenderCmds[1];
+                //    RenderCmds[1] = save;
+                //}
+                //{
+                //    var save = RenderPreCmds[0];
+                //    RenderPreCmds[0] = RenderPreCmds[1];
+                //    RenderPreCmds[1] = save;
+                //}
+                //{
+                //    var save = RenderPostCmds[0];
+                //    RenderPostCmds[0] = RenderPostCmds[1];
+                //    RenderPostCmds[1] = save;
+                //}
+            }
+        }
+        public void Swap<T>(ref T l, ref T r)
+        {
+            var save = l;
+            l = r;
+            r = save;
+        }
+        public void TickAways(ICommandList ImCmdlist)
+        {
+            var curCmds = RenderPreCmds[1];
+            while (curCmds.Count > 0)
+            {
+                try
+                {
+                    FRCmdInfo cmd;
+                    lock (RenderPreCmds)
+                    {
+                        cmd = curCmds.Peek();
+                        curCmds.Dequeue();
+                    }
+                    cmd.Cmd(ImCmdlist, ref cmd);
+                }
+                catch (Exception ex)
+                {
+                    Profiler.Log.WriteException(ex);
+                }
+            }
+
+            curCmds = RenderCmds[1];
+            while (curCmds.Count > 0)
+            {
+                try
+                {
+                    FRCmdInfo cmd;
+                    lock (RenderCmds)
+                    {
+                        cmd = curCmds.Peek();
+                        curCmds.Dequeue();
+                    }
+                    cmd.Cmd(ImCmdlist, ref cmd);
+                }
+                catch (Exception ex)
+                {
+                    Profiler.Log.WriteException(ex);
+                }
+            }
+
+            curCmds = RenderPostCmds[1];
+            while (curCmds.Count > 0)
+            {
+                try
+                {
+                    FRCmdInfo cmd;
+                    lock (RenderPostCmds)
+                    {
+                        cmd = curCmds.Peek();
+                        curCmds.Dequeue();
+                    }
+                    cmd.Cmd(ImCmdlist, ref cmd);
+                }
+                catch (Exception ex)
+                {
+                    Profiler.Log.WriteException(ex);
+                }
+            }
+        }
+
+        public bool CaptureRenderDocFrame = false;
+        public bool BeginFrameCapture()
+        {
+            if (CaptureRenderDocFrame == false)
+            {
+                return false;
+            }
+            if (IRenderDocTool.GetInstance().IsFrameCapturing())
+            {
+                return false;
+            }
+            IRenderDocTool.GetInstance().StartFrameCapture();
+            return true;
+        }
+        public string EndFrameCapture()
+        {
+            if (CaptureRenderDocFrame == false)
+            {
+                return null;
+            }
+            System.Diagnostics.Debug.Assert(IRenderDocTool.GetInstance().IsFrameCapturing());
+            CaptureRenderDocFrame = false;
+            IRenderDocTool.GetInstance().EndFrameCapture();
+
+            ulong timeStamp = 0;
+            var idx = IRenderDocTool.GetInstance().GetNumCaptures() - 1;
+            var file = IRenderDocTool.GetInstance().GetCapture(idx, ref timeStamp);
+            if (!string.IsNullOrEmpty(file) && IO.TtFileManager.FileExists(file))
+            {
+                var tarFile = IO.TtFileManager.GetPureName(file) + ".rdc";
+                System.IO.File.Move(file, UEngine.Instance.FileManager.GetPath(IO.TtFileManager.ERootDir.Cache, IO.TtFileManager.ESystemDir.RenderDoc) + tarFile);
+                return tarFile;
+            }
+            return null;
         }
     }
 }

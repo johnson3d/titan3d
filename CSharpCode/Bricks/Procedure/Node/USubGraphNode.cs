@@ -82,13 +82,16 @@ namespace EngineNS.Bricks.Procedure.Node
             throw new NotImplementedException();
         }
     }
-    public class UUnionNode : UPgcNodeBase, IUnionNode
+    public class UUnionNode : UPgcNodeBase, IUnionNode, INodeWithContextMenu
     {
         [Rtti.Meta]
+        [Browsable(false)]
         public UNodeGraph ContentGraph { get; set; }
         [Rtti.Meta]
+        [Browsable(false)]
         public Guid InputNodeId { get; set; }
         [Rtti.Meta]
+        [Browsable(false)]
         public Guid OutputNodeId { get; set; }
 
         List<UNodePinDefineBase> mUserInputs = new List<UNodePinDefineBase>();
@@ -113,10 +116,20 @@ namespace EngineNS.Bricks.Procedure.Node
                 UpdateOutputs();
             }
         }
+        [Browsable(false), Rtti.Meta]
+        public List<UnionNodePropertyData> PropertyDatas { get; set; } = new List<UnionNodePropertyData>();
+        [Browsable(false)]
+        public UMenuItem ContextMenu { get; set; } = new UMenuItem();
 
         public UUnionNode()
         {
             Icon.Size = new Vector2(25, 25);
+
+            ContextMenu.AddMenuItem("Config", null,
+                (UMenuItem item, object sender) =>
+                {
+                    this.ParentGraph.SetConfigUnionNode(this);
+                }, null);
         }
         public override void OnDoubleClick()
         {
@@ -173,6 +186,114 @@ namespace EngineNS.Bricks.Procedure.Node
         {
             throw new NotImplementedException();
         }
+
+        struct PropertyValueData
+        {
+            public string Name;
+            public UNodeBase Node;
+            public EGui.Controls.PropertyGrid.CustomPropertyDescriptor ProInfo;
+            public bool IsPropertyCustomization;
+        }
+        Dictionary<string, PropertyValueData> mProValueDataDic = new Dictionary<string, PropertyValueData>();
+        public override void GetProperties(ref EGui.Controls.PropertyGrid.CustomPropertyDescriptorCollection collection, bool parentIsValueType)
+        {
+            mProValueDataDic.Clear();
+            var pros = TypeDescriptor.GetProperties(this);
+            var objType = Rtti.UTypeDesc.TypeOf(this.GetType());
+            collection.InitValue(this, objType, pros, parentIsValueType);
+
+            for (int i = 0; i < PropertyDatas.Count; i++)
+            {
+                var name = PropertyDatas[i].Name;
+                var displayName = PropertyDatas[i].DisplayName;
+                var node = ContentGraph.FindNode(PropertyDatas[i].NodeId);
+                if (node == null)
+                    continue;
+                var proDesc = EGui.Controls.PropertyGrid.PropertyCollection.PropertyDescPool.QueryObjectSync();
+                if (node is EGui.Controls.PropertyGrid.IPropertyCustomization)
+                {
+                    var tempProperties = EGui.Controls.PropertyGrid.PropertyCollection.PropertyDescCollectionPool.QueryObjectSync();
+                    ((EGui.Controls.PropertyGrid.IPropertyCustomization)node).GetProperties(ref tempProperties, parentIsValueType);
+                    bool find = false;
+                    for (int proIdx = 0; proIdx < tempProperties.Count; proIdx++)
+                    {
+                        if (tempProperties[proIdx].Name == name)
+                        {
+                            proDesc = tempProperties[proIdx];
+                            find = true;
+                            break;
+                        }
+                    }
+                    if (!find)
+                        continue;
+                }
+                else
+                {
+                    var nodeType = node.GetType();
+                    var nodePros = TypeDescriptor.GetProperties(node);
+                    var nodePro = nodePros[name];
+                    if (nodePro == null)
+                        continue;
+                    proDesc.InitValue(node, Rtti.UTypeDesc.TypeOf(nodeType), nodePro, parentIsValueType);
+                }
+                proDesc.DisplayName = displayName;
+                proDesc.IsReadonly = PropertyDatas[i].ReadOnly;
+                proDesc.Category = PropertyDatas[i].Category;
+                var valData = new PropertyValueData()
+                {
+                    Name = name,
+                    Node = node,
+                    ProInfo = proDesc,
+                    IsPropertyCustomization = (node is EGui.Controls.PropertyGrid.IPropertyCustomization)
+                };
+                mProValueDataDic[displayName] = valData;
+                var proDescInThisNode = EGui.Controls.PropertyGrid.PropertyCollection.PropertyDescPool.QueryObjectSync();
+                proDescInThisNode.CopyFrom(proDesc);
+                proDescInThisNode.Name = displayName;
+                collection.Add(proDescInThisNode);
+            }
+            IsPropertyVisibleDirty = false;
+        }
+
+        public override object GetPropertyValue(string propertyName)
+        {
+            if (mProValueDataDic.TryGetValue(propertyName, out var valData))
+            {
+                if (valData.IsPropertyCustomization)
+                    return ((EGui.Controls.PropertyGrid.IPropertyCustomization)valData.Node).GetPropertyValue(valData.Name);
+                else
+                    return valData.ProInfo.GetValue(valData.Node);
+            }
+            else
+            {
+                var proInfo = GetType().GetProperty(propertyName);
+                if (proInfo != null)
+                    return proInfo.GetValue(this);
+            }
+
+            return null;
+        }
+
+        public override void SetPropertyValue(string propertyName, object value)
+        {
+            if (mProValueDataDic.TryGetValue(propertyName, out var valData))
+            {
+                if (valData.IsPropertyCustomization)
+                    ((EGui.Controls.PropertyGrid.IPropertyCustomization)valData.Node).SetPropertyValue(valData.Name, value);
+                else
+                {
+                    var obj = (object)(valData.Node);
+                    valData.ProInfo.SetValue(ref obj, value);
+                    valData.Node = (UNodeBase)obj;
+                }
+            }
+            else
+            {
+                var proInfo = GetType().GetProperty(propertyName);
+                if (proInfo != null)
+                    proInfo.SetValue(this, value);
+            }
+        }
     }
 
 
@@ -199,7 +320,7 @@ namespace EngineNS.Bricks.Procedure.Node
                 {
                     newValue = info.Value;
                     var nodeDef = newValue as USubGraphNodeDefine;
-                    Int32_2 NumOfPin = new Int32_2(nodeDef.HostNode.UserInputs.Count, nodeDef.HostNode.UserOutputs.Count);
+                    Vector2i NumOfPin = new Vector2i(nodeDef.HostNode.UserInputs.Count, nodeDef.HostNode.UserOutputs.Count);
                     if (ImGuiAPI.InputInt2("NumOfPin", (int*)&NumOfPin, ImGuiInputTextFlags_.ImGuiInputTextFlags_None))
                     {
                         if (NumOfPin.X <= 0)
@@ -446,7 +567,7 @@ namespace EngineNS.Bricks.Procedure.Node
             ctrlPos.Y += btSize.Y;
             if (GraphName != null)
             {
-                var pureName = IO.FileManager.GetPureName(GraphName.Name);
+                var pureName = IO.TtFileManager.GetPureName(GraphName.Name);
                 ImGuiAPI.SetCursorPos(in ctrlPos);
                 ImGuiAPI.Text(pureName);
             }
@@ -460,10 +581,10 @@ namespace EngineNS.Bricks.Procedure.Node
                     {
                         var file = mFileDialog.GetFilePathName();
                         var rootType = UEngine.Instance.FileManager.GetRootDirType(file);
-                        var rPath = IO.FileManager.GetRelativePath(UEngine.Instance.FileManager.GetRoot(rootType), file);
-                        if (rootType == IO.FileManager.ERootDir.Game)
+                        var rPath = IO.TtFileManager.GetRelativePath(UEngine.Instance.FileManager.GetRoot(rootType), file);
+                        if (rootType == IO.TtFileManager.ERootDir.Game)
                             mGraphName = RName.GetRName(rPath, RName.ERNameType.Game);
-                        else if (rootType == IO.FileManager.ERootDir.Engine)
+                        else if (rootType == IO.TtFileManager.ERootDir.Engine)
                             mGraphName = RName.GetRName(rPath, RName.ERNameType.Engine);
 
                         GraphAsset.AssetName = GraphName;

@@ -22,6 +22,9 @@ namespace EngineNS.Graphics.Pipeline
             binder = effect.FindBinder("cbPerMesh");
             if (binder != null)
                 CBPerMesh.UpdateFieldVar(binder.GetShaderBinder());
+            binder = effect.FindBinder("cbPreFramePerMesh");
+            if (binder != null)
+                CBPreFramePerMesh.UpdateFieldVar(binder.GetShaderBinder());
             binder = effect.FindBinder("cbPerGpuScene");
             if (binder != null)
                 CBPerGpuScene.UpdateFieldVar(binder.GetShaderBinder());
@@ -30,6 +33,8 @@ namespace EngineNS.Graphics.Pipeline
         {
             [NxRHI.UShader.UShaderVar(VarType = typeof(float))]
             public NxRHI.FShaderVarDesc Time;
+            [NxRHI.UShader.UShaderVar(VarType = typeof(float))]
+            public NxRHI.FShaderVarDesc TimeFracSecond; 
             [NxRHI.UShader.UShaderVar(VarType = typeof(float))]
             public NxRHI.FShaderVarDesc TimeSin;
             [NxRHI.UShader.UShaderVar(VarType = typeof(float))]
@@ -114,14 +119,27 @@ namespace EngineNS.Graphics.Pipeline
             public NxRHI.FShaderVarDesc CameraViewMatrix;
             [NxRHI.UShader.UShaderVar(VarType = typeof(Matrix))]
             public NxRHI.FShaderVarDesc CameraViewInverse;
+            
+            [NxRHI.UShader.UShaderVar(VarType = typeof(Matrix))]
+            public NxRHI.FShaderVarDesc PrjMtx;
+            [NxRHI.UShader.UShaderVar(VarType = typeof(Matrix))]
+            public NxRHI.FShaderVarDesc PrjInvMtx;
             [NxRHI.UShader.UShaderVar(VarType = typeof(Matrix))]
             public NxRHI.FShaderVarDesc ViewPrjMtx;
             [NxRHI.UShader.UShaderVar(VarType = typeof(Matrix))]
             public NxRHI.FShaderVarDesc ViewPrjInvMtx;
             [NxRHI.UShader.UShaderVar(VarType = typeof(Matrix))]
-            public NxRHI.FShaderVarDesc PrjMtx;
+            public NxRHI.FShaderVarDesc PreFrameViewPrjMtx;
             [NxRHI.UShader.UShaderVar(VarType = typeof(Matrix))]
-            public NxRHI.FShaderVarDesc PrjInvMtx;
+            public NxRHI.FShaderVarDesc JitterPrjMtx;
+            [NxRHI.UShader.UShaderVar(VarType = typeof(Matrix))]
+            public NxRHI.FShaderVarDesc JitterPrjInvMtx;
+            [NxRHI.UShader.UShaderVar(VarType = typeof(Matrix))]
+            public NxRHI.FShaderVarDesc JitterViewPrjMtx;
+            [NxRHI.UShader.UShaderVar(VarType = typeof(Matrix))]
+            public NxRHI.FShaderVarDesc JitterViewPrjInvMtx;
+            [NxRHI.UShader.UShaderVar(VarType = typeof(Matrix))]
+            public NxRHI.FShaderVarDesc JitterPreFrameViewPrjMtx;
 
             [NxRHI.UShader.UShaderVar(VarType = typeof(Vector3))]
             public NxRHI.FShaderVarDesc CameraPosition;
@@ -147,6 +165,8 @@ namespace EngineNS.Graphics.Pipeline
             public NxRHI.FShaderVarDesc WorldMatrix;
             [NxRHI.UShader.UShaderVar(VarType = typeof(Matrix))]
             public NxRHI.FShaderVarDesc WorldMatrixInverse;
+            [NxRHI.UShader.UShaderVar(VarType = typeof(Matrix))]
+            public NxRHI.FShaderVarDesc PreWorldMatrix;
             [NxRHI.UShader.UShaderVar(VarType = typeof(Vector4))]
             public NxRHI.FShaderVarDesc HitProxyId;
             [NxRHI.UShader.UShaderVar(VarType = typeof(Vector4))]
@@ -163,6 +183,11 @@ namespace EngineNS.Graphics.Pipeline
             public NxRHI.FShaderVarDesc ObjectFLags_2Bit;
         }
         public readonly UCBufferPerMeshIndexer CBPerMesh = new UCBufferPerMeshIndexer();
+        public class UCBufferPreFramePerMeshIndexer : NxRHI.UShader.UShaderVarIndexer
+        {
+            
+        }
+        public readonly UCBufferPreFramePerMeshIndexer CBPreFramePerMesh = new UCBufferPreFramePerMeshIndexer();
 
         public class UCBufferPerGpuSceneIndexer : NxRHI.UShader.UShaderVarIndexer
         {
@@ -257,6 +282,8 @@ namespace EngineNS.Graphics.Pipeline
             public NxRHI.UEffectBinder cbPerCamera;
             [NxRHI.UShader.UShaderVar(VarType = typeof(NxRHI.UBuffer))]
             public NxRHI.UEffectBinder cbPerMesh;
+            [NxRHI.UShader.UShaderVar(VarType = typeof(NxRHI.UBuffer))]
+            public NxRHI.UEffectBinder cbPreFramePerMesh;
             [NxRHI.UShader.UShaderVar(VarType = typeof(NxRHI.UBuffer))]
             public NxRHI.UEffectBinder cbPerMaterial;
             [NxRHI.UShader.UShaderVar(VarType = typeof(NxRHI.USrView))]

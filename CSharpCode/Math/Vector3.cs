@@ -13,6 +13,25 @@ namespace EngineNS
 	[System.Runtime.InteropServices.StructLayout( System.Runtime.InteropServices.LayoutKind.Sequential, Pack = 4 )]
     public struct Vector3 : System.IEquatable<Vector3>
     {
+        public static Vector3 FromObject(object obj)
+        {
+            if (obj.GetType() == typeof(Vector3))
+                return (Vector3)obj;
+            if (obj.GetType() == typeof(Color3f))
+                return (Color3f)obj;
+            else
+            {
+                System.Diagnostics.Debug.Assert(false);
+            }
+            return Vector3.Zero;
+        }
+        public static implicit operator Vector3(Color3f d) => new Vector3(d.Red, d.Green, d.Blue);
+        public Vector3(in Color3f clr)
+        {
+            X = clr.Red;
+            Y = clr.Green;
+            Z = clr.Blue;
+        }
         public class TypeConverterAttribute : Support.TypeConverterAttributeBase
         {
             public override bool ConvertFromString(ref object obj, string text)
@@ -102,10 +121,27 @@ namespace EngineNS
         {
             try
             {
-                var segs = text.Split(',');
-                return new Vector3(System.Convert.ToSingle(segs[0]),
-                    System.Convert.ToSingle(segs[1]),
-                    System.Convert.ToSingle(segs[2]));
+                var result = new Vector3();
+                ReadOnlySpan<char> chars = text.ToCharArray();                
+                int iStart = 0;
+                int j = 0;
+                for (int i = 0; i < chars.Length; i++)
+                {
+                    if (chars[i] == ',')
+                    {
+                        result[j] = float.Parse(chars.Slice(iStart, i - iStart));
+                        iStart = i + 1;
+                        j++;
+                        if (j == 2)
+                            break;
+                    }
+                }
+                result[j] = float.Parse(chars.Slice(iStart, chars.Length - iStart));
+                return result;
+                //var segs = text.Split(',');
+                //return new Vector3(System.Convert.ToSingle(segs[0]),
+                //    System.Convert.ToSingle(segs[1]),
+                //    System.Convert.ToSingle(segs[2]));
             }
             catch
             {
@@ -147,6 +183,17 @@ namespace EngineNS
         {
             return Math.Min(X, Math.Min(Y, Z));
         }
+
+        public UInt32 GetMortonCode()
+        {
+            UInt32 Morton;
+            Morton = MathHelper.MortonCode3((UInt32)(X * 1023));
+            Morton |= MathHelper.MortonCode3((UInt32)(Y * 1023)) << 1;
+            Morton |= MathHelper.MortonCode3((UInt32)(Z * 1023)) << 2;
+
+            return Morton;
+        }
+
         #region Def Struct
         /// <summary>
         /// Gets or sets the X component of the vector.
@@ -765,7 +812,7 @@ namespace EngineNS
             if (lhsMag < MathHelper.Epsilon|| rhsMag < MathHelper.Epsilon)
                 return Lerp(start, end, factor);
 
-            float lerpedMagnitude = MathHelper.FloatLerp(lhsMag, rhsMag, factor);
+            float lerpedMagnitude = MathHelper.Lerp(lhsMag, rhsMag, factor);
 
             float dot = Dot(start, end) / (lhsMag * rhsMag);
             // direction is almost the same
@@ -1637,6 +1684,14 @@ namespace EngineNS
             result.Z = left.Z + right.Z;
             return result;
         }
+        public static Vector3 operator +(in Vector3 left, float right)
+        {
+            Vector3 result;
+            result.X = left.X + right;
+            result.Y = left.Y + right;
+            result.Z = left.Z + right;
+            return result;
+        }
         /// <summary>
         /// 重载"-"号运算符
         /// </summary>
@@ -1778,9 +1833,9 @@ namespace EngineNS
         /// <returns>如果两个向量相等返回true，否则返回false</returns>
         public bool Equals(Vector3 value)
         {
-            bool reX = (Math.Abs(X - value.X) < CoreDefine.Epsilon);
-            bool reY = (Math.Abs(Y - value.Y) < CoreDefine.Epsilon);
-            bool reZ = (Math.Abs(Z - value.Z) < CoreDefine.Epsilon);
+            bool reX = (Math.Abs(X - value.X) < MathHelper.Epsilon);
+            bool reY = (Math.Abs(Y - value.Y) < MathHelper.Epsilon);
+            bool reZ = (Math.Abs(Z - value.Z) < MathHelper.Epsilon);
             return (reX && reY && reZ);
         }
         /// <summary>
@@ -1789,12 +1844,53 @@ namespace EngineNS
         /// <param name="value1">Vector3对象</param>
         /// <param name="value2">Vector3对象</param>
         /// <returns>如果两个向量相等返回true，否则返回false</returns>        
-        public static bool Equals(in Vector3 value1, in Vector3 value2, float epsilon = CoreDefine.Epsilon)
+        public static Bool3 Equals(in Vector3 value1, in Vector3 value2, float epsilon = MathHelper.Epsilon)
         {
-            bool reX = (Math.Abs(value1.X - value2.X) < epsilon);
-            bool reY = (Math.Abs(value1.Y - value2.Y) < epsilon);
-            bool reZ = (Math.Abs(value1.Z - value2.Z) < epsilon);
-            return (reX && reY && reZ);
+            Bool3 result;
+            result.X = (Math.Abs(value1.X - value2.X) < epsilon);
+            result.Y = (Math.Abs(value1.Y - value2.Y) < epsilon);
+            result.Z = (Math.Abs(value1.Z - value2.Z) < epsilon);
+            return result;
+        }
+        public static Bool3 Less(in Vector3 value1, in Vector3 value2)
+        {
+            Bool3 result;
+            result.X = value1.X < value2.X;
+            result.Y = value1.Y < value2.Y;
+            result.Z = value1.Z < value2.Z;
+            return result;
+        }
+        public static Bool3 LessEqual(in Vector3 value1, in Vector3 value2)
+        {
+            Bool3 result;
+            result.X = value1.X <= value2.X;
+            result.Y = value1.Y <= value2.Y;
+            result.Z = value1.Z <= value2.Z;
+            return result;
+        }
+        public static Bool3 Great(in Vector3 value1, in Vector3 value2)
+        {
+            Bool3 result;
+            result.X = value1.X > value2.X;
+            result.Y = value1.Y > value2.Y;
+            result.Z = value1.Z > value2.Z;
+            return result;
+        }
+        public static Bool3 GreatEqual(in Vector3 value1, in Vector3 value2)
+        {
+            Bool3 result;
+            result.X = value1.X >= value2.X;
+            result.Y = value1.Y >= value2.Y;
+            result.Z = value1.Z >= value2.Z;
+            return result;
+        }
+        public static Vector3 Mod(in Vector3 value1, in Vector3 value2)
+        {
+            Vector3 result;
+            result.X = value1.X % value2.X;
+            result.Y = value1.Y % value2.Y;
+            result.Z = value1.Z % value2.Z;
+            return result;
         }
     }
 }

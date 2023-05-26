@@ -11,15 +11,17 @@ namespace EngineNS.Editor.Forms
         protected bool mVisible = true;
         public bool Visible { get => mVisible; set => mVisible = value; }
         public uint DockId { get; set; }
+        ImGuiWindowClass mDockKeyClass;
+        public ImGuiWindowClass DockKeyClass => mDockKeyClass;
         public ImGuiCond_ DockCond { get; set; } = ImGuiCond_.ImGuiCond_FirstUseEver;
 
         public NxRHI.USrView TextureSRV;
         public EGui.Controls.PropertyGrid.PropertyGrid TexturePropGrid = new EGui.Controls.PropertyGrid.PropertyGrid();
         ~UTextureViewer()
         {
-            Cleanup();
+            Dispose();
         }
-        public void Cleanup()
+        public void Dispose()
         {
             TexturePropGrid.Target = null;
             if (TextureSRV != null)
@@ -50,9 +52,31 @@ namespace EngineNS.Editor.Forms
         }
         public void OnCloseEditor()
         {
-            Cleanup();
+            Dispose();
         }
-        public float LeftWidth = 0;
+        bool mDockInitialized = false;
+        protected void ResetDockspace(bool force = false)
+        {
+            var pos = ImGuiAPI.GetCursorPos();
+            var id = ImGuiAPI.GetID(AssetName.Name + "_Dockspace");
+            mDockKeyClass.ClassId = id;
+            ImGuiAPI.DockSpace(id, Vector2.Zero, ImGuiDockNodeFlags_.ImGuiDockNodeFlags_None, mDockKeyClass);
+            if (mDockInitialized && !force)
+                return;
+            ImGuiAPI.DockBuilderRemoveNode(id);
+            ImGuiAPI.DockBuilderAddNode(id, ImGuiDockNodeFlags_.ImGuiDockNodeFlags_None);
+            ImGuiAPI.DockBuilderSetNodePos(id, pos);
+            ImGuiAPI.DockBuilderSetNodeSize(id, Vector2.One);
+            mDockInitialized = true;
+
+            var rightId = id;
+            uint leftId = 0;
+            ImGuiAPI.DockBuilderSplitNode(rightId, ImGuiDir_.ImGuiDir_Left, 0.2f, ref leftId, ref rightId);
+
+            ImGuiAPI.DockBuilderDockWindow(EGui.UIProxy.DockProxy.GetDockWindowName("Left", mDockKeyClass), leftId);
+            ImGuiAPI.DockBuilderDockWindow(EGui.UIProxy.DockProxy.GetDockWindowName("TextureView", mDockKeyClass), rightId);
+            ImGuiAPI.DockBuilderFinish(id);
+        }
         public Vector2 WindowSize = new Vector2(800, 600);
         public Vector2 ImageSize = new Vector2(512, 512);
         public float ScaleFactor = 1.0f;
@@ -63,66 +87,74 @@ namespace EngineNS.Editor.Forms
 
             var pivot = new Vector2(0);
             ImGuiAPI.SetNextWindowSize(in WindowSize, ImGuiCond_.ImGuiCond_FirstUseEver);
-            ImGuiAPI.SetNextWindowDockID(DockId, DockCond);
-            if (ImGuiAPI.Begin(TextureSRV.AssetName.Name, ref mVisible, ImGuiWindowFlags_.ImGuiWindowFlags_None |
+            if (EGui.UIProxy.DockProxy.BeginMainForm(TextureSRV.AssetName.Name, this, ImGuiWindowFlags_.ImGuiWindowFlags_None |
                 ImGuiWindowFlags_.ImGuiWindowFlags_NoSavedSettings))
             {
-                if (ImGuiAPI.IsWindowDocked())
-                {
-                    DockId = ImGuiAPI.GetWindowDockID();
-                }
                 DrawToolBar();
                 ImGuiAPI.Separator();
-                ImGuiAPI.Columns(2, null, true);
-                if (LeftWidth == 0)
-                {
-                    ImGuiAPI.SetColumnWidth(0, 300);
-                }
-                LeftWidth = ImGuiAPI.GetColumnWidth(0);
-
-                var min = ImGuiAPI.GetWindowContentRegionMin();
-                var max = ImGuiAPI.GetWindowContentRegionMin();
-
-                DrawLeft(ref min, ref max);
-                ImGuiAPI.NextColumn();
-
-                DrawRight(ref min, ref max);
-                ImGuiAPI.NextColumn();
-
-                ImGuiAPI.Columns(1, null, true);
             }
-            ImGuiAPI.End();
+            ResetDockspace();
+            EGui.UIProxy.DockProxy.EndMainForm();
+
+            DrawLeft();
+            DrawRight();
         }
         protected void DrawToolBar()
         {
             var btSize = Vector2.Zero;
             if (EGui.UIProxy.CustomButton.ToolButton("Save", in btSize))
             {
-                StbImageSharp.ImageResult image = NxRHI.USrView.LoadOriginImage(AssetName);
-                using (var xnd = new IO.CXndHolder("USrView", 0, 0))
+                var imgType = NxRHI.USrView.GetOriginImageType(AssetName);
+
+                switch(imgType)
                 {
-                    NxRHI.USrView.SaveTexture(AssetName, xnd.RootNode.mCoreObject, image, this.TextureSRV.PicDesc);
-                    xnd.SaveXnd(AssetName.Address);
+                    case EngienNS.Bricks.ImageDecoder.UImageType.PNG:
+                        {
+                            StbImageSharp.ImageResult image = NxRHI.USrView.LoadOriginImage(AssetName);
+                            using (var xnd = new IO.TtXndHolder("USrView", 0, 0))
+                            {
+                                NxRHI.USrView.SaveTexture(AssetName, xnd.RootNode.mCoreObject, image, this.TextureSRV.PicDesc);
+                                xnd.SaveXnd(AssetName.Address);
+                            }
+                        }
+                        break;
+                    case EngienNS.Bricks.ImageDecoder.UImageType.HDR:
+                        {
+                            StbImageSharp.ImageResultFloat imageFloat = new StbImageSharp.ImageResultFloat();
+                            NxRHI.USrView.LoadOriginImage(AssetName, ref imageFloat);
+                            using (var xnd = new IO.TtXndHolder("USrView", 0, 0))
+                            {
+                                NxRHI.USrView.SaveTexture(AssetName, xnd.RootNode.mCoreObject, imageFloat, this.TextureSRV.PicDesc);
+                                xnd.SaveXnd(AssetName.Address);
+                            }
+                        }
+                        break;
                 }
+                if(imgType == EngienNS.Bricks.ImageDecoder.UImageType.PNG)
+                {
+                }
+                
             }
             ImGuiAPI.SameLine(0, -1);
-            if (EGui.UIProxy.CustomButton.ToolButton("SavePng", in btSize))
+            if (EGui.UIProxy.CustomButton.ToolButton("SaveOriginFile", in btSize))
             {
                 USrView.SaveOriginPng(AssetName);
             }
         }
-        protected unsafe void DrawLeft(ref Vector2 min, ref Vector2 max)
+        bool mLeftShow = true;
+        protected unsafe void DrawLeft()
         {
             var sz = new Vector2(-1);
-            if (ImGuiAPI.BeginChild("LeftView", in sz, true, ImGuiWindowFlags_.ImGuiWindowFlags_None))
+            if (EGui.UIProxy.DockProxy.BeginPanel(mDockKeyClass, "Left", ref mLeftShow, ImGuiWindowFlags_.ImGuiWindowFlags_None))
             {
                 TexturePropGrid.OnDraw(true, false, false);
             }
-            ImGuiAPI.EndChild();
+            EGui.UIProxy.DockProxy.EndPanel();
         }
-        protected unsafe void DrawRight(ref Vector2 min, ref Vector2 max)
+        bool mTextureViewShow = true;
+        protected unsafe void DrawRight()
         {
-            if (ImGuiAPI.BeginChild("TextureView", in Vector2.MinusOne, true, ImGuiWindowFlags_.ImGuiWindowFlags_None))
+            if (EGui.UIProxy.DockProxy.BeginPanel(mDockKeyClass, "TextureView", ref mTextureViewShow, ImGuiWindowFlags_.ImGuiWindowFlags_None))
             {
                 if (ImGuiAPI.IsWindowFocused(ImGuiFocusedFlags_.ImGuiFocusedFlags_ChildWindows))
                 {
@@ -148,7 +180,7 @@ namespace EngineNS.Editor.Forms
                 drawlist.AddImage(TextureSRV.GetTextureHandle().ToPointer(), in min1, in max1, in uv1, in uv2, 0xFFFFFFFF);
                 drawlist.AddRect(in min1, in max1, 0xFF00FF00, 0, ImDrawFlags_.ImDrawFlags_None, 0);
             }
-            ImGuiAPI.EndChild();
+            EGui.UIProxy.DockProxy.EndPanel();
         }
         public void OnEvent(in Bricks.Input.Event e)
         {

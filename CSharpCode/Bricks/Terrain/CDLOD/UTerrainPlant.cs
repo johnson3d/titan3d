@@ -29,8 +29,15 @@ namespace EngineNS.Bricks.Terrain.CDLOD
         [Rtti.Meta]
         public int Density { get; set; }
     }
-    public class UTerainPlantManager
+    public class UTerainPlantManager : IDisposable
     {
+        public void Dispose()
+        {
+            foreach(var i in PlantTypes)
+            {
+                i.Value.Mesh.Dispose();
+            }
+        }
         public class UPlantInstance : GamePlay.Scene.UNode //Graphics.Pipeline.IProxiable
         {
             public UPlantInstance()
@@ -50,7 +57,7 @@ namespace EngineNS.Bricks.Terrain.CDLOD
                 var pos = (Placement.Position - PlantType.InstanceOffset).ToSingleVector3();
                 var scale = Placement.Scale;
                 var quat = Placement.Quat;
-                PlantType.InstanceMdf.InstanceModifier.SetInstance(InstanceIndex, &pos, &scale, &quat, (UInt32_4*)IntPtr.Zero.ToPointer(), (uint*)IntPtr.Zero.ToPointer());
+                PlantType.InstanceMdf.InstanceModifier.SetInstance(InstanceIndex, &pos, &scale, &quat, (Vector4ui*)IntPtr.Zero.ToPointer(), (uint*)IntPtr.Zero.ToPointer());
                 DebugHitproxyMesh?.SetWorldTransform(Placement.TransformData, PlantType.Terrain.GetWorld(), false);
             }
             public override void OnHitProxyChanged()
@@ -114,7 +121,7 @@ namespace EngineNS.Bricks.Terrain.CDLOD
                 ObjInstances.Add(obj);
 
                 var pos = (obj.Placement.Position - InstanceOffset).ToSingleVector3();
-                obj.InstanceIndex = InstanceMdf.InstanceModifier.PushInstance(in pos, obj.Placement.Scale, obj.Placement.Quat, in UInt32_4.Zero, obj.HitProxy.ProxyId);
+                obj.InstanceIndex = InstanceMdf.InstanceModifier.PushInstance(in pos, obj.Placement.Scale, obj.Placement.Quat, in Vector4ui.Zero, obj.HitProxy.ProxyId);
                 //InstanceMdf.InstanceModifier.PushInstance(obj.Transform.mPosition.ToSingleVector3(), in obj.Transform.mScale, in obj.Transform.mQuat, in UInt32_4.Zero, obj.HitProxy.ProxyId);
             }
             public void OnHitProxyChanged()
@@ -148,16 +155,16 @@ namespace EngineNS.Bricks.Terrain.CDLOD
             if(type.CreateFinished == false)
             {
                 var tempTrans = trans;
-                UEngine.Instance.EventPoster.RunOnUntilFinish((out bool isFinish)=>
+                UEngine.Instance.EventPoster.RunOnUntilFinish((out bool isFinish, Thread.Async.TtAsyncTaskStateBase state) =>
                 {
                     isFinish = type.CreateFinished;
-                    if(isFinish)
+                    if (isFinish)
                     {
                         var inst = new UPlantInstance();
                         inst.Placement.TransformData = tempTrans;
                         type.PushInstance(inst, capacity);
                     }
-                    return null;
+                    return true;
                 }, Thread.Async.EAsyncTarget.Logic);
             }
             else

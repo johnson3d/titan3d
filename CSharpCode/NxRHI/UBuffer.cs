@@ -76,11 +76,11 @@ namespace EngineNS.NxRHI
     public interface UGpuResource : IDisposable
     {
         IGpuBufferData GetGpuBufferDataPointer();
-        unsafe void Map(ICommandList cmd, uint subRes, FMappedSubResource* mapped, bool forRead);
-        unsafe void Umap(ICommandList cmd, uint subRes);
+        unsafe void Map(uint subRes, FMappedSubResource* mapped, bool forRead);
+        unsafe void Umap(uint subRes);
         void TransitionTo(ICommandList cmd, EGpuResourceState state);
         void TransitionTo(UCommandList cmd, EGpuResourceState state);
-        unsafe void UpdateGpuData(UCommandList cmd, uint subRes, void* pData, FSubresourceBox* box, uint rowPitch, uint depthPitch);
+        unsafe void UpdateGpuData(uint subRes, void* pData, EngineNS.NxRHI.FSubResourceFootPrint* footPrint);
         void SetDebugName(string name);
         EGpuResourceState GpuState
         {
@@ -102,37 +102,25 @@ namespace EngineNS.NxRHI
         {
             return mCoreObject.NativeSuper;
         }
-        public unsafe void Map(ICommandList cmd, uint subRes, FMappedSubResource* mapped, bool forRead)
+        public unsafe void Map(uint subRes, FMappedSubResource* mapped, bool forRead)
         {
-            mCoreObject.Map(cmd, subRes, mapped, forRead);
+            mCoreObject.Map(subRes, mapped, forRead);
         }
-        public unsafe void Umap(ICommandList cmd, uint subRes)
+        public unsafe void Umap(uint subRes)
         {
-            mCoreObject.Unmap(cmd, subRes);
+            mCoreObject.Unmap(subRes);
         }
-        public void FlushDirty(UCommandList cmd, bool clear = false)
+        public void FlushDirty(bool clear = false)
         {
-            mCoreObject.FlushDirty(cmd.mCoreObject, clear);
+            mCoreObject.FlushDirty(clear);
         }
-        public void FlushDirty(ICommandList cmd, bool clear = false)
+        public unsafe void UpdateGpuData(uint subRes, void* pData, EngineNS.NxRHI.FSubResourceFootPrint* footPrint)
         {
-            mCoreObject.FlushDirty(cmd, clear);
+            mCoreObject.NativeSuper.UpdateGpuData(subRes, pData, footPrint);
         }
-        public unsafe void UpdateGpuData(UCommandList cmd, uint subRes, void* pData, FSubresourceBox* box, uint rowPitch, uint depthPitch)
+        public unsafe void UpdateGpuData(uint offset, void* pData, uint size, uint subRes = 0)
         {
-            mCoreObject.NativeSuper.UpdateGpuData(cmd.mCoreObject, subRes, pData, box, rowPitch, depthPitch);
-        }
-        public unsafe void UpdateGpuData(ICommandList cmd, uint subRes, void* pData, FSubresourceBox* box, uint rowPitch, uint depthPitch)
-        {
-            mCoreObject.NativeSuper.UpdateGpuData(cmd, subRes, pData, box, rowPitch, depthPitch);
-        }
-        public unsafe void UpdateGpuData(UCommandList cmd, uint offset, void* pData, uint size)
-        {
-            mCoreObject.UpdateGpuData(cmd.mCoreObject, offset, pData, size);
-        }
-        public unsafe void UpdateGpuData(ICommandList cmd, uint offset, void* pData, uint size)
-        {
-            mCoreObject.UpdateGpuData(cmd, offset, pData, size);
+            mCoreObject.NativeSuper.UpdateGpuDataSimple(offset, pData, size, subRes);
         }
         public void TransitionTo(ICommandList cmd, EGpuResourceState state)
         {
@@ -153,6 +141,15 @@ namespace EngineNS.NxRHI
     }
     public class UTexture : AuxPtrType<NxRHI.ITexture>, UGpuResource
     {
+        //public static UTexture CreateTexture2D(EPixelFormat format, uint w, uint h)
+        //{
+        //    var texDesc = new FTextureDesc();
+        //    texDesc.SetDefault();
+        //    texDesc.Width = w;
+        //    texDesc.Height = h;
+        //    texDesc.Format = format;
+        //    return UEngine.Instance.GfxDevice.RenderContext.CreateTexture(in texDesc);
+        //}
         public UTexture(ITexture ptr)
         {
             mCoreObject = ptr;
@@ -162,21 +159,21 @@ namespace EngineNS.NxRHI
         {
             return mCoreObject.NativeSuper;
         }
-        public unsafe void Map(ICommandList cmd, uint subRes, FMappedSubResource* mapped, bool forRead)
+        public unsafe void Map(uint subRes, FMappedSubResource* mapped, bool forRead)
         {
-            mCoreObject.Map(cmd, subRes, mapped, forRead);
+            mCoreObject.Map(subRes, mapped, forRead);
         }
-        public unsafe void Umap(ICommandList cmd, uint subRes)
+        public unsafe void Umap(uint subRes)
         {
-            mCoreObject.Unmap(cmd, subRes);
+            mCoreObject.Unmap(subRes);
         }
-        public unsafe void UpdateGpuData(UCommandList cmd, uint subRes, void* pData, FSubresourceBox* box, uint rowPitch, uint depthPitch)
+        public unsafe void UpdateGpuData(uint subRes, void* pData, EngineNS.NxRHI.FSubResourceFootPrint* footPrint)
         {
-            mCoreObject.NativeSuper.UpdateGpuData(cmd.mCoreObject, subRes, pData, box, rowPitch, depthPitch);
+            mCoreObject.NativeSuper.UpdateGpuData(subRes, pData, footPrint);
         }
-        public unsafe void UpdateGpuData(ICommandList cmd, uint subRes, void* pData, FSubresourceBox* box, uint rowPitch, uint depthPitch)
+        public unsafe void UpdateGpuData(uint offset, void* pData, uint size, uint subRes = 0)
         {
-            mCoreObject.NativeSuper.UpdateGpuData(cmd, subRes, pData, box, rowPitch, depthPitch);
+            mCoreObject.NativeSuper.UpdateGpuDataSimple(offset, pData, size, subRes);
         }
         public void TransitionTo(ICommandList cmd, EGpuResourceState state)
         {
@@ -220,13 +217,9 @@ namespace EngineNS.NxRHI
         {
 
         }
-        public void FlushDirty(UCommandList cmd, bool clear = false)
+        public void FlushDirty(bool clear = false)
         {
-            mCoreObject.FlushDirty(cmd.mCoreObject, clear);
-        }
-        public void FlushDirty(ICommandList cmd, bool clear = false)
-        {
-            mCoreObject.FlushDirty(cmd, clear);
+            mCoreObject.FlushDirty(clear);
         }
         public FShaderBinder ShaderBinder
         {
@@ -301,24 +294,16 @@ namespace EngineNS.NxRHI
     }
     public class UVbView : AuxPtrType<NxRHI.IVbView>
     {
-        public unsafe void UpdateGpuData(ICommandList cmd, uint offset, void* pData, uint size)
+        public unsafe void UpdateGpuData(uint offset, void* pData, uint size)
         {
-            mCoreObject.UpdateGpuData(cmd, offset, pData, size);
-        }
-        public unsafe void UpdateGpuData(UCommandList cmd, uint offset, void* pData, uint size)
-        {
-            mCoreObject.UpdateGpuData(cmd.mCoreObject, offset, pData, size);
+            mCoreObject.UpdateGpuData(offset, pData, size);
         }
     }
     public class UIbView : AuxPtrType<NxRHI.IIbView>
     {
-        public unsafe void UpdateGpuData(ICommandList cmd, uint offset, void* pData, uint size)
+        public unsafe void UpdateGpuData(uint offset, void* pData, uint size)
         {
-            mCoreObject.UpdateGpuData(cmd, offset, pData, size);
-        }
-        public unsafe void UpdateGpuData(UCommandList cmd, uint offset, void* pData, uint size)
-        {
-            mCoreObject.UpdateGpuData(cmd.mCoreObject, offset, pData, size);
+            mCoreObject.UpdateGpuData(offset, pData, size);
         }
     }
     public class UUaView : AuxPtrType<NxRHI.IUaView>

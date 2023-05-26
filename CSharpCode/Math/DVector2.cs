@@ -99,9 +99,15 @@ namespace EngineNS
         {
             try
             {
-                var segs = text.Split(',');
-                return new DVector2(System.Convert.ToSingle(segs[0]),
-                    System.Convert.ToSingle(segs[1]));
+                var result = new DVector2();
+                ReadOnlySpan<char> chars = text.ToCharArray();
+                var pos = chars.IndexOf(',');
+                result.X = float.Parse(chars.Slice(0, pos));
+                result.Y = float.Parse(chars.Slice(pos + 1, chars.Length - pos - 1));
+                return result;
+                //var segs = text.Split(',');
+                //return new DVector2(System.Convert.ToSingle(segs[0]),
+                //    System.Convert.ToSingle(segs[1]));
             }
             catch
             {

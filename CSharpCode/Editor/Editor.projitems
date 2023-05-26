@@ -10,6 +10,8 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="$(MSBuildThisFileDirectory)Controller\EditorCameraController.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Forms\GpuProfiler.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Forms\MemoryProfiler.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Forms\UAnimationClipEditor.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Forms\UAssetReferViewer.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Forms\UCpuProfiler.cs" />

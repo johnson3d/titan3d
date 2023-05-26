@@ -11,7 +11,7 @@ namespace EngineNS.EGui.UIProxy
             var len = string.IsNullOrEmpty(text) ? 256 : text.Length + 256;
             using (var buffer = BigStackBuffer.CreateInstance(len))
             {
-                buffer.SetText(text);
+                buffer.SetTextUtf8(text);
                 ImGuiAPI.PushID(label);
                 ImGuiAPI.Text(label);
                 ImGuiAPI.SameLine(0, 0);

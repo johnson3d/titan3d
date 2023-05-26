@@ -4,17 +4,9 @@ using System.Text;
 
 namespace EngineNS
 {
-    public class CoreDefine
-    {
-        public const float Epsilon = 0.00001f;
-        public const float DEpsilon = 0.00001f;
-        public const float PI = 3.14159f;
-        public const float TWO_PI = PI * 2.0f;
+    public partial class MathHelper
+    {   
         #region math
-        public static float Sqrt(float v)
-        {
-            return (float)Math.Sqrt(v);
-        }
         public static double Sqrt(double v)
         {
             return Math.Sqrt(v);
@@ -23,17 +15,9 @@ namespace EngineNS
         {
             return Math.Abs(v);
         }
-        public static float Abs(float v)
-        {
-            return Math.Abs(v);
-        }
         public static double Abs(double v)
         {
             return Math.Abs(v);
-        }
-        public static float Mod(float v, float d)
-        {
-            return v % d;
         }
         public static double Mod(double v, double d)
         {
@@ -99,11 +83,6 @@ namespace EngineNS
         {
             return Math.Abs(f2 - f1) < epsilon;
         }
-        public static float Lerp(float f1, float f2, float lp)
-        {
-            return f1 + (f2 - f1) * lp;
-            //return f1 * lp + (1.0f - lp) * f2;
-        }
         public static double Lerp(double f1, double f2, double lp)
         {
             return f1 + (f2 - f1) * lp;
@@ -127,10 +106,11 @@ namespace EngineNS
         }
         public static uint Roundup(uint a, uint b)
         {
-            uint result = a / b;
-            if (a % b != 0)
-                result += 1;
-            return result;
+            return (a + (b - 1)) / b;
+            //uint result = a / b;
+            //if (a % b != 0)
+            //    result += 1;
+            //return result;
         }
         public static int RoundUpPow2(int numToRound, int multiple)
         {
@@ -143,10 +123,6 @@ namespace EngineNS
             lh = rh;
             rh = tmp;
         }
-        public static float Floor(float v)
-        {
-            return (float)Math.Floor(v);
-        }
         public static double Floor(double v)
         {
             return Math.Floor(v);
@@ -158,6 +134,35 @@ namespace EngineNS
         public static int FloorToInt(double v)
         {
             return (int)Math.Floor(v);
+        }
+        public static float Exp(float v)
+        {
+            return (float)Math.Exp(v);
+        }
+        public static float Exp2(float v)
+        {
+            return (float)Math.Pow(2, v);
+        }
+        public static double Halton(int index, int range)
+        {
+            double frac = 1.0 / (double)range;
+            double result = 0.0;
+            while (index > 0)
+            {
+                result += frac * (index % range);
+                index = (int)((double)index / (double)range);
+                frac /= (double)range;
+            }
+            return result;
+        }
+        public static double[] GenHaltonSequence(int Num)
+        {
+            var result = new double[Num - 1];
+            for (int i = 1; i < Num; ++i)
+            {
+                result[i - 1] = Halton(i, 2);
+            }
+            return result;
         }
         #endregion
     }

@@ -10,6 +10,10 @@ namespace EngineNS.IO
         {
             get;
         }
+        unsafe void* Ptr
+        {
+            get;
+        }
         ulong GetPosition();
         void Seek(ulong pos);
         unsafe void WritePtr(void* p, int length);
@@ -19,6 +23,7 @@ namespace EngineNS.IO
         void Write(byte[] v);
         void Write(VNameString v);
         void Write(RName v);
+        void Write(Support.UBitset v);
 
         void Write<T>(T v) where T : unmanaged;
     }
@@ -29,18 +34,72 @@ namespace EngineNS.IO
         ulong GetPosition();
         void Seek(ulong pos);
         unsafe void WritePtr(void* p, int length);
+        unsafe void* Ptr { get; }
     }
 
-    public struct AuxWriter<TR> : IWriter where TR : ICoreWriter
+    public partial struct UMemWriter : IO.ICoreWriter, IDisposable
     {
+        public static UMemWriter CreateInstance()
+        {
+            UMemWriter result = new UMemWriter();
+            result.Writer = MemStreamWriter.CreateInstance();
+            return result;
+        }
+        public object Tag;
+        public MemStreamWriter Writer;
+        public unsafe void* Ptr
+        {
+            get
+            {
+                return Writer.GetPointer();
+            }
+        }
+        public void ResetSize(ulong size)
+        {
+            Writer.ResetBufferSize(size);
+        }
+        public IO.EIOType IOType { get => IO.EIOType.Network; }
+        public ulong GetPosition()
+        {
+            return Writer.Tell();
+        }
+        public void Seek(ulong pos)
+        {
+            Writer.Seek(pos);
+        }
+        public unsafe void WritePtr(void* p, int length)
+        {
+            Writer.Write(p, (uint)length);
+        }
+        public void Dispose()
+        {
+            Writer.Dispose();
+        }
+    }
+
+    public struct AuxWriter<TR> : IWriter, IDisposable where TR : ICoreWriter
+    {
+        public System.Action DisposeAction = null;
         public TR CoreWriter;
         public AuxWriter(TR cr)
         {
             CoreWriter = cr;
         }
+        public void Dispose()
+        {
+            if (DisposeAction != null)
+                DisposeAction();
+        }
         public EIOType IOType
         {
             get { return CoreWriter.IOType; }
+        }
+        public unsafe void* Ptr
+        {
+            get
+            {
+                return CoreWriter.Ptr;
+            }
         }
         public ulong GetPosition()
         {
@@ -61,7 +120,13 @@ namespace EngineNS.IO
                 WritePtr(&v, sizeof(T));
             }
         }
-
+        public unsafe void Write<T>(in T v) where T : unmanaged
+        {
+            fixed(T* p = &v)
+            {
+                WritePtr(p, sizeof(T));
+            }
+        }
         public void Write(string v)
         {
             unsafe
@@ -106,17 +171,6 @@ namespace EngineNS.IO
             Write(v.RNameType);
             Write(v.Name);
         }
-        public void WriteIntSize(byte[] v)
-        {
-            unsafe
-            {
-                var len = (UInt16)v.Length;
-                fixed (byte* p = &v[0])
-                {
-                    WritePtr(p, len);
-                }
-            }
-        }
         public void WriteNoSize(byte[] v, int len)
         {
             System.Diagnostics.Debug.Assert(len <= v.Length);
@@ -132,35 +186,19 @@ namespace EngineNS.IO
         {
             SerializerHelper.Write(this, v);
         }
-    }
-
-    public class CMemStreamWriter : AuxPtrType<MemStreamWriter>
-    {
-        public CMemStreamWriter()
+        public void Write(Support.UBitset v)
         {
-            mCoreObject = MemStreamWriter.CreateInstance();
-        }
-        public void SetText(string txt)
-        {
+            Write(v.BitCount);
             unsafe
             {
-                var ptr = System.Runtime.InteropServices.Marshal.StringToHGlobalAnsi(txt);
-                mCoreObject.Seek(0);
-                mCoreObject.Write(ptr.ToPointer(), CoreSDK.SDK_StrLen(ptr.ToPointer()));
-                System.Runtime.InteropServices.Marshal.FreeHGlobal(ptr);
+                WritePtr(v.Data, (int)v.DataByteSize);
             }
         }
-        public string AsText
+        public unsafe void Write(UMemWriter v)
         {
-            get
-            {
-                unsafe
-                {
-                    if (mCoreObject.Tell() == 0)
-                        return null;
-                    return System.Runtime.InteropServices.Marshal.PtrToStringAnsi((IntPtr)mCoreObject.GetPointer(), (int)mCoreObject.Tell());
-                }
-            }
+            Write((uint)v.GetPosition());
+            WritePtr(v.Ptr, (int)v.GetPosition());
         }
     }
+
 }

@@ -6,13 +6,13 @@ namespace EngineNS.Bricks.Network
 {
     public class UNetPackageManager
     {
-        public List<RPC.UMemWriter> RcvPacakages = new List<RPC.UMemWriter>();
-        public List<RPC.UMemWriter> PushList = new List<RPC.UMemWriter>();
+        public List<IO.UMemWriter> RcvPacakages = new List<IO.UMemWriter>();
+        public List<IO.UMemWriter> PushList = new List<IO.UMemWriter>();
         public unsafe void PushPackage(void* ptr, uint size, INetConnect connect)
         {
-            using (var reader = UMemReader.CreateInstance((byte*)ptr, size))
+            using (var reader = IO.UMemReader.CreateInstance((byte*)ptr, size))
             {
-                var pkg = new IO.AuxReader<UMemReader>(reader, null);
+                var pkg = new IO.AuxReader<IO.UMemReader>(reader, null);
                 var pkgHeader = new RPC.FPkgHeader();
                 pkg.Read(out pkgHeader);
                 if (pkgHeader.IsHasReturn())
@@ -60,7 +60,7 @@ namespace EngineNS.Bricks.Network
                     }
                 }
             }
-            RPC.UMemWriter tmp = RPC.UMemWriter.CreateInstance();
+            EngineNS.IO.UMemWriter tmp = EngineNS.IO.UMemWriter.CreateInstance();
             tmp.WritePtr(ptr, (int)size);
             tmp.Tag = connect;
 
@@ -81,9 +81,9 @@ namespace EngineNS.Bricks.Network
 
             foreach (var i in RcvPacakages)
             {
-                using (var reader = UMemReader.CreateInstance((byte*)i.Writer.GetPointer(), i.Writer.Tell()))
+                using (var reader = EngineNS.IO.UMemReader.CreateInstance((byte*)i.Writer.GetPointer(), i.Writer.Tell()))
                 {
-                    var pkg = new IO.AuxReader<UMemReader>(reader, null);
+                    var pkg = new IO.AuxReader<EngineNS.IO.UMemReader>(reader, null);
                     var pkgHeader = new RPC.FPkgHeader();
                     pkg.Read(out pkgHeader);
                     if (pkgHeader.IsHasReturn())

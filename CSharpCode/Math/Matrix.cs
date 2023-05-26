@@ -333,24 +333,24 @@ namespace EngineNS
         /// <param name="value1">矩阵对象</param>
         /// <param name="value2">矩阵对象</param>
         /// <returns>如果value1与value2相等返回true，否则返回false</returns>	    
-        public static bool Equals(in Matrix value1, in Matrix value2, float epsilon = CoreDefine.Epsilon)
+        public static bool Equals(in Matrix value1, in Matrix value2, float epsilon = MathHelper.Epsilon)
         {
-            return CoreDefine.FloatEuqal(value1.M11, value2.M11, epsilon) &&
-                    CoreDefine.FloatEuqal(value1.M12, value2.M12, epsilon) &&
-                    CoreDefine.FloatEuqal(value1.M13, value2.M13, epsilon) &&
-                    CoreDefine.FloatEuqal(value1.M14, value2.M14, epsilon) &&
-                    CoreDefine.FloatEuqal(value1.M21, value2.M21, epsilon) &&
-                    CoreDefine.FloatEuqal(value1.M22, value2.M22, epsilon) &&
-                    CoreDefine.FloatEuqal(value1.M23, value2.M23, epsilon) &&
-                    CoreDefine.FloatEuqal(value1.M24, value2.M24, epsilon) &&
-                    CoreDefine.FloatEuqal(value1.M31, value2.M31, epsilon) &&
-                    CoreDefine.FloatEuqal(value1.M32, value2.M32, epsilon) &&
-                    CoreDefine.FloatEuqal(value1.M33, value2.M33, epsilon) &&
-                    CoreDefine.FloatEuqal(value1.M34, value2.M34, epsilon) &&
-                    CoreDefine.FloatEuqal(value1.M41, value2.M41, epsilon) &&
-                    CoreDefine.FloatEuqal(value1.M42, value2.M42, epsilon) &&
-                    CoreDefine.FloatEuqal(value1.M43, value2.M43, epsilon) &&
-                    CoreDefine.FloatEuqal(value1.M44, value2.M44, epsilon);
+            return MathHelper.FloatEuqal(value1.M11, value2.M11, epsilon) &&
+                    MathHelper.FloatEuqal(value1.M12, value2.M12, epsilon) &&
+                    MathHelper.FloatEuqal(value1.M13, value2.M13, epsilon) &&
+                    MathHelper.FloatEuqal(value1.M14, value2.M14, epsilon) &&
+                    MathHelper.FloatEuqal(value1.M21, value2.M21, epsilon) &&
+                    MathHelper.FloatEuqal(value1.M22, value2.M22, epsilon) &&
+                    MathHelper.FloatEuqal(value1.M23, value2.M23, epsilon) &&
+                    MathHelper.FloatEuqal(value1.M24, value2.M24, epsilon) &&
+                    MathHelper.FloatEuqal(value1.M31, value2.M31, epsilon) &&
+                    MathHelper.FloatEuqal(value1.M32, value2.M32, epsilon) &&
+                    MathHelper.FloatEuqal(value1.M33, value2.M33, epsilon) &&
+                    MathHelper.FloatEuqal(value1.M34, value2.M34, epsilon) &&
+                    MathHelper.FloatEuqal(value1.M41, value2.M41, epsilon) &&
+                    MathHelper.FloatEuqal(value1.M42, value2.M42, epsilon) &&
+                    MathHelper.FloatEuqal(value1.M43, value2.M43, epsilon) &&
+                    MathHelper.FloatEuqal(value1.M44, value2.M44, epsilon);
         }
         #endregion
         /// <summary>

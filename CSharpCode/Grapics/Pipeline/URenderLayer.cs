@@ -4,8 +4,14 @@ using System.Text;
 
 namespace EngineNS.Graphics.Pipeline
 {
-    public class UDrawBuffers
+    public class UDrawBuffers : IDisposable
     {
+        public void Dispose() 
+        {
+            //don't do it, sth maybe executing
+            //CoreSDK.DisposeObject(ref mCmdLists[0]);
+            //CoreSDK.DisposeObject(ref mCmdLists[1]);
+        }
         private NxRHI.UCommandList[] mCmdLists = new NxRHI.UCommandList[2];
         public void Initialize(NxRHI.UGpuDevice rc, string debugName)
         {
@@ -51,6 +57,8 @@ namespace EngineNS.Graphics.Pipeline
 
     public enum ERenderLayer : sbyte
     {
+        RL_Begin = 0,
+        RL_Background = 0,
         RL_Opaque,
         RL_Translucent,
         RL_Sky,
@@ -61,14 +69,14 @@ namespace EngineNS.Graphics.Pipeline
         RL_Num,
     }
 
-    public class UPassDrawBuffers
+    public class TtLayerDrawBuffers
     {
         public NxRHI.UGpuPipeline mPipeline;
         public UDrawBuffers[] PassBuffers = new UDrawBuffers[(int)ERenderLayer.RL_Num];
         public UDrawBuffers PostCmds = new UDrawBuffers();
         public void Initialize(NxRHI.UGpuDevice rc, string debugName)
         {
-            for (ERenderLayer i = ERenderLayer.RL_Opaque; i < ERenderLayer.RL_Num; i++)
+            for (ERenderLayer i = ERenderLayer.RL_Begin; i < ERenderLayer.RL_Num; i++)
             {
                 PassBuffers[(int)i] = new UDrawBuffers();
                 PassBuffers[(int)i].Initialize(rc, $"{debugName}:{i.ToString()}");
@@ -79,7 +87,7 @@ namespace EngineNS.Graphics.Pipeline
         }
         public void ClearMeshDrawPassArray()
         {
-            for (ERenderLayer i = ERenderLayer.RL_Opaque; i < ERenderLayer.RL_Num; i++)
+            for (ERenderLayer i = ERenderLayer.RL_Begin; i < ERenderLayer.RL_Num; i++)
             {
                 PassBuffers[(int)i].DrawCmdList.mCoreObject.ResetGpuDraws();
             }
@@ -88,7 +96,7 @@ namespace EngineNS.Graphics.Pipeline
         {
             fixed(NxRHI.FViewPort* p = &vp)
             {
-                for (ERenderLayer i = ERenderLayer.RL_Opaque; i < ERenderLayer.RL_Num; i++)
+                for (ERenderLayer i = ERenderLayer.RL_Begin; i < ERenderLayer.RL_Num; i++)
                 {
                     PassBuffers[(int)i].DrawCmdList.SetViewport(1, p);
                 }
@@ -156,12 +164,26 @@ namespace EngineNS.Graphics.Pipeline
         }
         public unsafe void BuildRenderPass(URenderPolicy policy, in NxRHI.FViewPort viewport, in NxRHI.FRenderPassClears passClear, UGraphicsBuffers frameBuffers, UGraphicsBuffers gizmosFrameBuffers, string debugName)
         {
+            PassBuffers[(int)ERenderLayer.RL_Background].DrawcallNumber = PassBuffers[(int)ERenderLayer.RL_Background].DrawCmdList.DrawcallNumber;
             PassBuffers[(int)ERenderLayer.RL_Opaque].DrawcallNumber = PassBuffers[(int)ERenderLayer.RL_Opaque].DrawCmdList.DrawcallNumber;
             PassBuffers[(int)ERenderLayer.RL_Translucent].DrawcallNumber = PassBuffers[(int)ERenderLayer.RL_Translucent].DrawCmdList.DrawcallNumber;
             PassBuffers[(int)ERenderLayer.RL_Sky].DrawcallNumber = PassBuffers[(int)ERenderLayer.RL_Sky].DrawCmdList.DrawcallNumber;
             PassBuffers[(int)ERenderLayer.RL_Gizmos].DrawcallNumber = PassBuffers[(int)ERenderLayer.RL_Gizmos].DrawCmdList.DrawcallNumber;
             PassBuffers[(int)ERenderLayer.RL_TranslucentGizmos].DrawcallNumber = PassBuffers[(int)ERenderLayer.RL_TranslucentGizmos].DrawCmdList.DrawcallNumber;
 
+            {
+                var cmdlist = PassBuffers[(int)ERenderLayer.RL_Background].DrawCmdList;
+
+                cmdlist.BeginCommand();
+                cmdlist.SetViewport(in viewport);
+                //frameBuffers.BuildFrameBuffers(policy);
+                cmdlist.BeginPass(frameBuffers.FrameBuffers, in passClear, debugName + ERenderLayer.RL_Background.ToString());
+                cmdlist.FlushDraws();
+                cmdlist.EndPass();
+                cmdlist.EndCommand();
+
+                UEngine.Instance.GfxDevice.RenderCmdQueue.QueueCmdlist(cmdlist);
+            }
             {
                 var cmdlist = PassBuffers[(int)ERenderLayer.RL_Opaque].DrawCmdList;
 

@@ -24,7 +24,7 @@ namespace EngineNS.EGui.UIProxy
         public UInt32 Color = 0xFFFFFFFF;
         public bool IntersectWithCurrentClipRect = true;
 
-        protected System.Threading.Tasks.Task<NxRHI.USrView> mTask;
+        protected Thread.Async.TtTask<NxRHI.USrView>? mTask;
         public unsafe virtual IntPtr GetImagePtrPointer()
         {
             if (mTask == null)
@@ -33,17 +33,17 @@ namespace EngineNS.EGui.UIProxy
                 mTask = UEngine.Instance.GfxDevice.TextureManager.GetTexture(ImageFile);
                 return IntPtr.Zero;
             }
-            else if (mTask.IsCompleted == false)
+            else if (mTask.Value.IsCompleted == false)
             {
                 return IntPtr.Zero;
             }
             else
             {
-                if (mTask.Result == null)
+                if (mTask.Value.Result == null)
                     return IntPtr.Zero;
                 if(ImageSize == Vector2.Zero)
-                    ImageSize = new Vector2(mTask.Result.PicDesc.Width, mTask.Result.PicDesc.Height);
-                return mTask.Result.GetTextureHandle();
+                    ImageSize = new Vector2(mTask.Value.Result.PicDesc.Width, mTask.Value.Result.PicDesc.Height);
+                return mTask.Value.Result.GetTextureHandle();
             }
         }
 
@@ -62,7 +62,7 @@ namespace EngineNS.EGui.UIProxy
         public async System.Threading.Tasks.Task<bool> Initialize()
         {
             // 图片加载不放到初始化里是为了不绘制就不加载
-            await EngineNS.Thread.AsyncDummyClass.DummyFunc();
+            await EngineNS.Thread.TtAsyncDummyClass.DummyFunc();
             return true;
         }
         public void Cleanup()
@@ -73,7 +73,7 @@ namespace EngineNS.EGui.UIProxy
         {
             if (mTask != null)
             {
-                mTask.Result?.FreeTextureHandle();
+                mTask.Value.Result?.FreeTextureHandle();
                 mTask = null;
             }
         }
@@ -121,8 +121,8 @@ namespace EngineNS.EGui.UIProxy
             var ptr = base.GetImagePtrPointer();
             if(ptr != IntPtr.Zero && mSizeMargin == Thickness.Empty)
             {
-                var textureWidth = mTask.Result.PicDesc.Width;
-                var textureHeight = mTask.Result.PicDesc.Height;
+                var textureWidth = mTask.Value.Result.PicDesc.Width;
+                var textureHeight = mTask.Value.Result.PicDesc.Height;
                 var uvSize = UVMax - UVMin;
                 mSizeMargin.Left = (mUVMargin.Left * uvSize.X) * textureWidth;
                 mSizeMargin.Right = (mUVMargin.Right * uvSize.X) * textureWidth;

@@ -35,7 +35,7 @@ namespace EngineNS.CodeCompiler
 
             // base reference
             var metaRefs = new PortableExecutableReference[refAssemblyFiles.Length + mBaseAssemblys.Length];
-            var baseAssembDir = IO.FileManager.GetBaseDirectory(typeof(object).Assembly.Location);
+            var baseAssembDir = IO.TtFileManager.GetBaseDirectory(typeof(object).Assembly.Location);
             for(int i=0; i<mBaseAssemblys.Length; i++)
             {
                 metaRefs[i] = MetadataReference.CreateFromFile(baseAssembDir + mBaseAssemblys[i]);
@@ -46,7 +46,7 @@ namespace EngineNS.CodeCompiler
                 metaRefs[i + mBaseAssemblys.Length] = MetadataReference.CreateFromFile(refAssemblyFiles[i]);
             }
 
-            var name = IO.FileManager.GetPureName(outputFile);
+            var name = IO.TtFileManager.GetPureName(outputFile);
             var compilation = CSharpCompilation.Create(name, syntaxTrees, metaRefs, option);
             bool retValue = true;
             using (var outStream = new MemoryStream())
@@ -72,8 +72,8 @@ namespace EngineNS.CodeCompiler
                     {
                         try
                         {
-                            if (IO.FileManager.FileExists(pdbFile))
-                                IO.FileManager.DeleteFile(pdbFile);
+                            if (IO.TtFileManager.FileExists(pdbFile))
+                                IO.TtFileManager.DeleteFile(pdbFile);
                             using (var fs = new FileStream(pdbFile, FileMode.Create))
                             {
                                 fs.Write(pdbStream.ToArray());
@@ -93,7 +93,7 @@ namespace EngineNS.CodeCompiler
                     }
                     foreach (var i in emitResult.Diagnostics)
                     {
-                        Profiler.Log.WriteLine(Profiler.ELogTag.Error, "Macross", i.ToString());
+                        Console.WriteLine(i.ToString());
                     }
                     retValue = false;
                 }

@@ -7,8 +7,9 @@ using System.Text;
 
 namespace EngineNS.EGui.Controls.PropertyGrid
 {
-    public class CustomPropertyDescriptor : IPooledObjectBase
+    public class CustomPropertyDescriptor : IPooledObject, IObjectPoolBase
     {
+        public bool IsAlloc { get; set; } = false;
         public CustomPropertyDescriptor ParentPropertyDesc;
 
         public object ObjectInstance;   // 包含此属性的对象的值
@@ -195,6 +196,11 @@ namespace EngineNS.EGui.Controls.PropertyGrid
                 IsBrowsable = ((BrowsableAttribute)browsableAtt[0]).Browsable;
             else
                 IsBrowsable = true;
+            var readonlyAtt = field.GetCustomAttributes(typeof(ReadOnlyAttribute), true);
+            if (readonlyAtt != null && readonlyAtt.Length > 0)
+                mIsReadonly = ((ReadOnlyAttribute)readonlyAtt[0]).IsReadOnly;
+            else
+                mIsReadonly = false;
             var atts = field.GetCustomAttributes(true);
             Attribute[] tAtts = new Attribute[atts.Length];
             for (int i = 0; i < atts.Length; i++)
@@ -353,12 +359,12 @@ namespace EngineNS.EGui.Controls.PropertyGrid
             if (CustomValueEditor != null && CustomValueEditor.Provider != null && useProvider)
             {
                 var proIns = pro.GetValue(objIns);
-                CustomValueEditor.Provider.SetValue(proIns, value);
+                CustomValueEditor.Provider.SetValue(proIns, Support.TConvert.ToObject(pro.PropertyType, value));
             }
             else
             {
                 if (pro.CanWrite)
-                    pro.SetValue(objIns, value);
+                    pro.SetValue(objIns, Support.TConvert.ToObject(pro.PropertyType, value));
             }
         }
         void _FieldSetValue(FieldInfo field, object objIns, object value, bool useProvider)
@@ -366,10 +372,10 @@ namespace EngineNS.EGui.Controls.PropertyGrid
             if (CustomValueEditor != null && CustomValueEditor.Provider != null && useProvider)
             {
                 var fieldIns = field.GetValue(objIns);
-                CustomValueEditor.Provider.SetValue(fieldIns, value);
+                CustomValueEditor.Provider.SetValue(fieldIns, Support.TConvert.ToObject(field.FieldType, value));
             }
             else
-                field.SetValue(objIns, value);
+                field.SetValue(objIns, Support.TConvert.ToObject(field.FieldType, value));
         }
         public void SetValue(ref object objIns, object value, bool useProvider = true)
         {
@@ -473,8 +479,11 @@ namespace EngineNS.EGui.Controls.PropertyGrid
             var type = GetPropertyType(ObjectInstance);
             return type.ToString();
         }
+        public void Cleanup()
+        {
 
-        public bool ReleaseObject(object obj = null)
+        }
+        public bool ReleaseObject(IPooledObject obj = null)
         {
             ParentPropertyDesc = default;
             ObjectInstance = default;
@@ -724,7 +733,11 @@ namespace EngineNS.EGui.Controls.PropertyGrid
             return retValue;
         }
 
-        public unsafe bool DrawVector<T>(in PGCustomValueEditorAttribute.EditorInfo info) where T : unmanaged
+        public unsafe bool DrawVector<T>(in PGCustomValueEditorAttribute.EditorInfo info, 
+            string dimName0 = "X", 
+            string dimName1 = "Y", 
+            string dimName2 = "Z",
+            string dimName3 = "W") where T : unmanaged
         {
             bool retValue = false;
             var minValue = float.MinValue;
@@ -768,16 +781,16 @@ namespace EngineNS.EGui.Controls.PropertyGrid
                     switch (dimIdx)
                     {
                         case 0:
-                            dimName = "X";
+                            dimName = dimName0;
                             break;
                         case 1:
-                            dimName = "Y";
+                            dimName = dimName1;
                             break;
                         case 2:
-                            dimName = "Z";
+                            dimName = dimName2;
                             break;
                         case 3:
-                            dimName = "W";
+                            dimName = dimName3;
                             break;
                     }
                     ImGuiAPI.Indent(15);
@@ -840,8 +853,9 @@ namespace EngineNS.EGui.Controls.PropertyGrid
         }
     }
 
-    public class CustomPropertyDescriptorCollection : IPooledObjectBase
+    public class CustomPropertyDescriptorCollection : IPooledObject, IObjectPoolBase
     {
+        public bool IsAlloc { get; set; } = false;
         List<CustomPropertyDescriptor> mProperties;
 
         public int Count { get; private set; } = 0;
@@ -1058,7 +1072,7 @@ namespace EngineNS.EGui.Controls.PropertyGrid
             mProperties.Sort(comparer);
         }
 
-        public bool ReleaseObject(object obj = null)
+        public bool ReleaseObject(IPooledObject obj = null)
         {
             Cleanup();
             PropertyCollection.PropertyDescCollectionPool.ReleaseObject(this);
@@ -1083,8 +1097,8 @@ namespace EngineNS.EGui.Controls.PropertyGrid
 
     public class PropertyCollection
     {
-        public static UPooledObject<CustomPropertyDescriptor> PropertyDescPool = new UPooledObject<CustomPropertyDescriptor>();
-        public static UPooledObject<CustomPropertyDescriptorCollection> PropertyDescCollectionPool = new UPooledObject<CustomPropertyDescriptorCollection>();
+        public static TtObjectPool<CustomPropertyDescriptor> PropertyDescPool = new TtObjectPool<CustomPropertyDescriptor>();
+        public static TtObjectPool<CustomPropertyDescriptorCollection> PropertyDescCollectionPool = new TtObjectPool<CustomPropertyDescriptorCollection>();
 
         public static Dictionary<string, CustomPropertyDescriptorCollection> CollectionProperties(object instance, bool withCategoryGroup, bool parentIsValueType)
         {

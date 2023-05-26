@@ -4,7 +4,7 @@ using System.Text;
 
 namespace EngineNS.Graphics.Pipeline.Common
 {
-    public class UPickBlurShading : Shader.UShadingEnv
+    public class UPickBlurShading : Shader.UGraphicsShadingEnv
     {
         public UPickBlurShading()
         {
@@ -24,7 +24,7 @@ namespace EngineNS.Graphics.Pipeline.Common
             //    {
             //        PerShadingCBuffer = UEngine.Instance.GfxDevice.RenderContext.CreateConstantBuffer(gpuProgram, cbIndex);
             //        PerShadingCBuffer.SetMatrix(0, ref Matrix.mIdentity);
-            //        var RenderColor = new Color4(1, 1, 1, 1);
+            //        var RenderColor = new Color4f(1, 1, 1, 1);
             //        PerShadingCBuffer.SetValue(1, ref RenderColor);
             //    }
             //    drawcall.mCoreObject.BindCBufferAll(cbIndex, PerShadingCBuffer.mCoreObject.Ptr);
@@ -74,7 +74,7 @@ namespace EngineNS.Graphics.Pipeline.Common
         {
             //ResultPinOut.Attachement.Format = PickedPinIn.Attachement.Format;
         }
-        public override void FrameBuild()
+        public override void FrameBuild(Graphics.Pipeline.URenderPolicy policy)
         {
             
         }

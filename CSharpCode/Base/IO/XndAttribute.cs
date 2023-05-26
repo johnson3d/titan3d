@@ -60,39 +60,53 @@ namespace EngineNS
             }
             
         }
-        public IO.AuxReader<IO.XndAttributeReader> GetReader(object tag)
+        public IO.AuxReader<IO.TtXndAttributeReader> GetReader(object tag)
         {
             unsafe
             {
                 this.BeginRead();
-                return new IO.AuxReader<IO.XndAttributeReader>(new IO.XndAttributeReader(this), tag);
+                var result = new IO.AuxReader<IO.TtXndAttributeReader>(new IO.TtXndAttributeReader(this), tag);
+                var This = this;
+                result.DisposeAction = () =>
+                {
+                    This.EndRead();
+                };
+
+                return result;
             }
         }
-        public void ReleaseReader(ref IO.AuxReader<IO.XndAttributeReader> reader)
-        {
-            this.EndRead();
-        }
-        public IO.AuxWriter<IO.XndAttributeWriter> GetWriter(ulong length)
+        //public void ReleaseReader(ref IO.AuxReader<IO.TtXndAttributeReader> reader)
+        //{
+        //    this.EndRead();
+        //}
+        public IO.AuxWriter<IO.TtXndAttributeWriter> GetWriter(ulong length)
         {
             unsafe
             {
                 this.BeginWrite(length);
-                return new IO.AuxWriter<IO.XndAttributeWriter>(new IO.XndAttributeWriter(this));
+                var result = new IO.AuxWriter<IO.TtXndAttributeWriter>(new IO.TtXndAttributeWriter(this));
+                var This = this;
+                result.DisposeAction = () =>
+                {
+                    This.EndWrite();
+                };
+
+                return result;
             }
         }
-        public void ReleaseWriter(ref IO.AuxWriter<IO.XndAttributeWriter> writer)
-        {
-            this.EndWrite();
-        }
+        //public void ReleaseWriter(ref IO.AuxWriter<IO.TtXndAttributeWriter> writer)
+        //{
+        //    this.EndWrite();
+        //}
     }
 }
 
 namespace EngineNS.IO
 {
-    public struct XndAttributeReader : ICoreReader
+    public struct TtXndAttributeReader : ICoreReader
     {
         XndAttribute mAttribute;
-        public XndAttributeReader(XndAttribute attr)
+        public TtXndAttributeReader(XndAttribute attr)
         {
             mAttribute = attr;
         }
@@ -113,10 +127,10 @@ namespace EngineNS.IO
             mAttribute.Read(p, (uint)length);
         }
     }
-    public struct XndAttributeWriter : ICoreWriter
+    public struct TtXndAttributeWriter : ICoreWriter
     {
         XndAttribute mAttribute;
-        public XndAttributeWriter(XndAttribute attr)
+        public TtXndAttributeWriter(XndAttribute attr)
         {
             mAttribute = attr;
         }
@@ -124,6 +138,14 @@ namespace EngineNS.IO
         {
             get { return EIOType.File; }
         }
+        public unsafe void* Ptr
+        {
+            get
+            {
+                return mAttribute.GetWriterPtr();
+            }
+        }
+
         public ulong GetPosition()
         {
             return mAttribute.GetWriterPosition();

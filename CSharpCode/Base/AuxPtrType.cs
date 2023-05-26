@@ -8,12 +8,19 @@ namespace EngineNS
     {
         IntPtr NativePointer { get; set; }
     }
-    public class AuxPtrType<T> where T : unmanaged, IPtrType
+    public class AuxPtrType<T> : IDisposable where T : unmanaged, IPtrType
     {
         public T mCoreObject;
         ~AuxPtrType()
         {
             Dispose();
+        }
+        public bool IsDisposed
+        {
+            get
+            {
+                return mCoreObject.NativePointer == IntPtr.Zero;
+            }
         }
         public virtual void Dispose()
         {
@@ -40,6 +47,13 @@ namespace EngineNS
             unsafe
             {
                 CoreSDK.IUnknown_Release(mCoreObject.NativePointer.ToPointer());
+            }
+        }
+        public int Core_UnsafeGetRefCount()
+        {
+            unsafe
+            {
+                return CoreSDK.IUnknown_UnsafeGetRefCount(mCoreObject.NativePointer.ToPointer());
             }
         }
         public unsafe void Core_SetMemDebugInfo(string info)

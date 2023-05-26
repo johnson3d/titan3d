@@ -196,7 +196,7 @@ namespace EngineNS.GamePlay.Scene
                         UEngine.Instance.GfxDevice.HitproxyManager.MapProxy(sPoint);
                         SplinePoints.Add(sPoint);
                         //instantMesh.InstanceModifier.PushInstance(in i.End, in Vector3.UnitXYZ, in Quaternion.Identity, in UInt32_4.Zero, this.HitProxy.ProxyId);
-                        instantMesh.InstanceModifier.PushInstance(in Spline.Curves[i].mEnd, in Vector3.One, in Quaternion.Identity, in UInt32_4.Zero, sPoint.HitProxy.ProxyId);
+                        instantMesh.InstanceModifier.PushInstance(in Spline.Curves[i].mEnd, in Vector3.One, in Quaternion.Identity, in Vector4ui.Zero, sPoint.HitProxy.ProxyId);
 
                         //var cache = i.GetPointCache(Spline.Segments);
                         //for (int j = 0; j < cache.CachedPoints.Length; j++)

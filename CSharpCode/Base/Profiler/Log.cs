@@ -77,6 +77,10 @@ namespace EngineNS.Profiler
         {
             CoreSDK.SetWriteLogStringCallback(null);
         }
+        public static void WriteInfoSimple(string info)
+        {
+            WriteLine(ELogTag.Info, "Default", info);
+        }
         [Rtti.Meta]
         public static void WriteLine(ELogTag tag, string category, string info, 
                 [System.Runtime.CompilerServices.CallerMemberName] string memberName = "",

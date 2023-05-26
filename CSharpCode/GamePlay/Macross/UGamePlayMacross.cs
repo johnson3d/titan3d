@@ -97,7 +97,9 @@ namespace EngineNS.GamePlay.GamePlayMacross
         {
             base.OnNodeLoaded(parent);
             var animMesh = parent as UMeshNode;
-            var task = GetNodeData<UGamePlayMacrossNodeData>().McGamePlay.Get().ConstructAnimGraph(animMesh);
+            var data = GetNodeData<UGamePlayMacrossNodeData>();
+            var mcrs = data.McGamePlay;
+            var task = mcrs.Get().ConstructAnimGraph(animMesh);
         }
         //public static async System.Threading.Tasks.Task<UGamePlayMacrossNode> AddGamePlayMacrossNodeNode(GamePlay.UWorld world, UNode parent, UNodeData data, EBoundVolumeType bvType, Type placementType)
         //{
@@ -111,7 +113,7 @@ namespace EngineNS.GamePlay.GamePlayMacross
     [UMacross]
     public class UGameplayMacross
     {
-        protected UGamePlayStateMachine mGamePlayStateMachine = new UGamePlayStateMachine();
+        protected TtGamePlayStateMachine<UGameplayMacross> mGamePlayStateMachine = new TtGamePlayStateMachine<UGameplayMacross>();
 
         protected UMeshSpaceRuntimePose mMeshSpaceRuntimePose = null;
 
@@ -126,13 +128,11 @@ namespace EngineNS.GamePlay.GamePlayMacross
             mMeshSpaceRuntimePose = URuntimePoseUtility.CreateMeshSpaceRuntimePose(animatablePose);
             skinMDfQueue.SkinModifier.RuntimeMeshSpacePose = mMeshSpaceRuntimePose;
 
-            mGamePlayStateMachine = new UGamePlayStateMachine();
-            var idleState = new UGamePlayState(mGamePlayStateMachine);
-            idleState.LogicalState = new ULogicalState(mGamePlayStateMachine);
-            var idleAnimState = new UAnimationState(mGamePlayStateMachine);
+            mGamePlayStateMachine = new TtGamePlayStateMachine<UGameplayMacross>();
+            var idleState = new TtGamePlayState<UGameplayMacross>(mGamePlayStateMachine);
+            idleState.LogicalState = new TtLogicalState<UGameplayMacross>(mGamePlayStateMachine);
+            var idleAnimState = new TtAnimationState<UGameplayMacross>(mGamePlayStateMachine);
             idleAnimState.Animation = await EngineNS.UEngine.Instance.AnimationModule.AnimationClipManager.GetAnimationClip(RName.GetRName("utest/puppet/animation/w2_stand_aim_idle_ip.animclip"));
-            if (idleAnimState.Animation == null)
-                return false;
             idleAnimState.Initialize();
             idleAnimState.mExtractPoseFromClipCommand.SetExtractedPose(ref animatablePose);
             idleState.AnimationState = idleAnimState;
@@ -142,7 +142,7 @@ namespace EngineNS.GamePlay.GamePlayMacross
 
         public virtual void TickLogic(float elapseSecnod)
         {
-            mGamePlayStateMachine.Tick(elapseSecnod);
+            mGamePlayStateMachine.Tick(elapseSecnod, this);
 
         }
         public virtual void TickAnimation(float elapseSecnod)
@@ -181,10 +181,10 @@ namespace EngineNS.GamePlay.GamePlayMacross
             mMeshSpaceRuntimePose = URuntimePoseUtility.CreateMeshSpaceRuntimePose(animatablePose);
             skinMDfQueue.SkinModifier.RuntimeMeshSpacePose = mMeshSpaceRuntimePose;
 
-            mGamePlayStateMachine = new UGamePlayStateMachine();
-            var idleState = new UGamePlayState(mGamePlayStateMachine);
-            idleState.LogicalState = new ULogicalState(mGamePlayStateMachine);
-            var idleAnimState = new UAnimationState(mGamePlayStateMachine);
+            mGamePlayStateMachine = new TtGamePlayStateMachine<UGameplayMacross>();
+            var idleState = new TtGamePlayState<UGameplayMacross>(mGamePlayStateMachine);
+            idleState.LogicalState = new TtLogicalState<UGameplayMacross>(mGamePlayStateMachine);
+            var idleAnimState = new TtAnimationState<UGameplayMacross>(mGamePlayStateMachine);
             idleAnimState.Animation = await EngineNS.UEngine.Instance.AnimationModule.AnimationClipManager.GetAnimationClip(RName.GetRName("utest/puppet/animation/w2_stand_aim_idle_ip.animclip"));
             idleAnimState.Initialize();
             idleAnimState.mExtractPoseFromClipCommand.SetExtractedPose(ref animatablePose);

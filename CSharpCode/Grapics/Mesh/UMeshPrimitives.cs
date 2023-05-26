@@ -69,14 +69,30 @@ namespace EngineNS.Graphics.Mesh
         {
             mCoreObject = NxRHI.FMeshPrimitives.CreateInstance();
         }
+        public UMeshPrimitives(string name, uint atom)
+        {
+            mCoreObject = NxRHI.FMeshPrimitives.CreateInstance();
+            mCoreObject.Init(UEngine.Instance.GfxDevice.RenderContext.mCoreObject, name, atom);
+        }
         public UMeshPrimitives(NxRHI.FMeshPrimitives iMeshPrimitives)
         {
             mCoreObject = iMeshPrimitives;
             System.Diagnostics.Debug.Assert(mCoreObject.IsValidPointer);
         }
+        public bool Init(string name, uint atom)
+        {
+            return mCoreObject.Init(UEngine.Instance.GfxDevice.RenderContext.mCoreObject, name, atom);
+        }
         public void PushAtom(uint index, in EngineNS.NxRHI.FMeshAtomDesc desc)
         {
             mCoreObject.PushAtom(index, in desc);
+        }
+        public uint NumAtom
+        {
+            get
+            {
+                return mCoreObject.GetAtomNumber();
+            }
         }
         #region IAsset
         public override void Dispose()
@@ -106,15 +122,16 @@ namespace EngineNS.Graphics.Mesh
             }
             //这里需要存盘的情况很少，正常来说vms是fbx导入的时候生成的，不是保存出来的
             var rc = UEngine.Instance?.GfxDevice.RenderContext;
-            var xnd = new IO.CXndHolder("UMeshPrimitives", 0, 0);
+            var xnd = new IO.TtXndHolder("UMeshPrimitives", 0, 0);
             unsafe
             {
                 mCoreObject.Save2Xnd(rc.mCoreObject, xnd.RootNode.mCoreObject);
             }
             var attr = xnd.RootNode.mCoreObject.GetOrAddAttribute("PartialSkeleton",0,0);
-            var ar = attr.GetWriter(512);
-            ar.Write(PartialSkeleton);
-            attr.ReleaseWriter(ref ar);
+            using (var ar = attr.GetWriter(512))
+            {
+                ar.Write(PartialSkeleton);
+            }
             xnd.SaveXnd(name.Address);
         }
         [Rtti.Meta]
@@ -130,7 +147,7 @@ namespace EngineNS.Graphics.Mesh
             get;
             set;
         }
-        public static UMeshPrimitives LoadXnd(UMeshPrimitiveManager manager, IO.CXndHolder xnd)
+        public static UMeshPrimitives LoadXnd(UMeshPrimitiveManager manager, IO.TtXndHolder xnd)
         {
             var result = new UMeshPrimitives();
             unsafe
@@ -141,10 +158,11 @@ namespace EngineNS.Graphics.Mesh
                 var attr = xnd.RootNode.mCoreObject.TryGetAttribute("PartialSkeleton");
                 if (attr.IsValidPointer)
                 {
-                    var ar = attr.GetReader(manager);
                     IO.ISerializer partialSkeleton = null;
-                    ar.Read(out partialSkeleton, manager);
-                    attr.ReleaseReader(ref ar);
+                    using (var ar = attr.GetReader(manager))
+                    {
+                        ar.Read(out partialSkeleton, manager);
+                    }
                     if(partialSkeleton is Animation.SkeletonAnimation.Skeleton.USkinSkeleton)
                     {
                         result.PartialSkeleton = partialSkeleton as Animation.SkeletonAnimation.Skeleton.USkinSkeleton;
@@ -162,9 +180,9 @@ namespace EngineNS.Graphics.Mesh
 
             if (mMeshDataProvider == null)
             {
-                var result = await UEngine.Instance.EventPoster.Post(() =>
+                var result = await UEngine.Instance.EventPoster.Post((state) =>
                 {
-                    using (var xnd = IO.CXndHolder.LoadXnd(AssetName.Address))
+                    using (var xnd = IO.TtXndHolder.LoadXnd(AssetName.Address))
                     {
                         if (xnd != null)
                         {
@@ -199,6 +217,19 @@ namespace EngineNS.Graphics.Mesh
         {
             mUnitSphere?.Dispose();
             mUnitSphere = null;
+            //foreach (var i in Meshes)
+            //{
+            //    int n = i.Value.Core_UnsafeGetRefCount();
+            //    if (n != 1)
+            //    {
+
+            //    }
+            //    else
+            //    {
+            //        i.Value.Dispose();
+            //    }
+            //}
+            Meshes.Clear();
         }
         UMeshPrimitives mUnitSphere;
         public UMeshPrimitives UnitSphere
@@ -227,7 +258,8 @@ namespace EngineNS.Graphics.Mesh
         public Dictionary<RName, UMeshPrimitives> Meshes { get; } = new Dictionary<RName, UMeshPrimitives>();
         public async System.Threading.Tasks.Task Initialize()
         {
-            await GetMeshPrimitive(RName.GetRName("axis/movex.vms", RName.ERNameType.Engine));
+            var t = GetMeshPrimitive(RName.GetRName("axis/movex.vms", RName.ERNameType.Engine));
+            await t;
         }
         public UMeshPrimitives FindMeshPrimitive(RName name)
         {
@@ -236,15 +268,16 @@ namespace EngineNS.Graphics.Mesh
                 return result;
             return null;
         }
-        public async System.Threading.Tasks.Task<UMeshPrimitives> GetMeshPrimitive(RName name)
+        //public async System.Threading.Tasks.Task<UMeshPrimitives> GetMeshPrimitive(RName name)
+        public async Thread.Async.TtTask<UMeshPrimitives> GetMeshPrimitive(RName name)
         {
             UMeshPrimitives result;
             if (Meshes.TryGetValue(name, out result))
                 return result;
 
-            result = await UEngine.Instance.EventPoster.Post(() =>
+            result = await UEngine.Instance.EventPoster.Post((state) =>
             {
-                using (var xnd = IO.CXndHolder.LoadXnd(name.Address))
+                using (var xnd = IO.TtXndHolder.LoadXnd(name.Address))
                 {
                     if (xnd != null)
                     {

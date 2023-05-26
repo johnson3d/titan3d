@@ -4,7 +4,7 @@ using System.Text;
 
 namespace EngineNS.Graphics.Pipeline.Common
 {
-    public class UPickHollowShading : Shader.UShadingEnv
+    public class UPickHollowShading : Shader.UGraphicsShadingEnv
     {
         public UPickHollowShading()
         {
@@ -72,7 +72,7 @@ namespace EngineNS.Graphics.Pipeline.Common
         {
             //ResultPinOut.Attachement.Format = PickedPinIn.Attachement.Format;
         }
-        public override void FrameBuild()
+        public override void FrameBuild(Graphics.Pipeline.URenderPolicy policy)
         {
             
         }

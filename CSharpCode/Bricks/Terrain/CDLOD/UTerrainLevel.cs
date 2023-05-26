@@ -53,7 +53,7 @@ namespace EngineNS.Bricks.Terrain.CDLOD
             return Node?.TerrainMaterialIdManager;
         }
     }
-    public class UTerrainLevelData
+    public class UTerrainLevelData : IDisposable
     {
         public UTerrainLevel Level;
         public UPatch[,] TiledPatch;
@@ -74,9 +74,9 @@ namespace EngineNS.Bricks.Terrain.CDLOD
         public UTerainPlantManager PlantManager = new UTerainPlantManager();
         ~UTerrainLevelData()
         {
-            Cleanup();
+            Dispose();
         }
-        public void Cleanup()
+        public void Dispose()
         {
             PhyActor?.AddToScene(null);
             PhyActor = null;
@@ -85,17 +85,16 @@ namespace EngineNS.Bricks.Terrain.CDLOD
             {
                 foreach (var i in TiledPatch)
                 {
-                    i.Cleanup();
+                    i.Dispose();
                 }
                 TiledPatch = null;
             }
 
-            HeightMapSRV?.Dispose();
-            HeightMapSRV = null;
-            NormalMapSRV?.Dispose();
-            NormalMapSRV = null;
-            MaterialIdMapSRV?.Dispose();
-            MaterialIdMapSRV = null;
+            CoreSDK.DisposeObject(ref PlantManager);
+
+            CoreSDK.DisposeObject(ref HeightMapSRV);
+            CoreSDK.DisposeObject(ref NormalMapSRV);
+            CoreSDK.DisposeObject(ref MaterialIdMapSRV);
         }
         public UTerrainNode GetTerrainNode()
         {
@@ -111,7 +110,7 @@ namespace EngineNS.Bricks.Terrain.CDLOD
             }
             else
             {
-                await UEngine.Instance.EventPoster.Post(() =>
+                await UEngine.Instance.EventPoster.Post((state) =>
                 {
                     BuildLevelDataFromPGC(Level.Node.GetNodeData<UTerrainNode.UTerrainData>());
                     return true;
@@ -135,9 +134,9 @@ namespace EngineNS.Bricks.Terrain.CDLOD
             var waterMap = Procedure.UBufferConponent.CreateInstance(Procedure.UBufferCreator.CreateInstance<Procedure.USuperBuffer<float, Procedure.FFloatOperator>>(1, 1, 1));
             var idMap = Procedure.UBufferConponent.CreateInstance(Procedure.UBufferCreator.CreateInstance<Procedure.USuperBuffer<float, Procedure.FFloatOperator>>(1, 1, 1));
             var transform = Procedure.UBufferConponent.CreateInstance(Procedure.UBufferCreator.CreateInstance<Procedure.USuperBuffer<FTransform, Procedure.FTransformOperator>>(1, 1, 1));
-            var plants = Procedure.UBufferConponent.CreateInstance(Procedure.UBufferCreator.CreateInstance<Procedure.USuperBuffer<Int32_2, Procedure.FInt2Operator>>(1, 1, 1));
+            var plants = Procedure.UBufferConponent.CreateInstance(Procedure.UBufferCreator.CreateInstance<Procedure.USuperBuffer<Vector2i, Procedure.FInt2Operator>>(1, 1, 1));
 
-            using (var xnd = IO.CXndHolder.LoadXnd(file))
+            using (var xnd = IO.TtXndHolder.LoadXnd(file))
             {
                 if (xnd == null)
                     return false;
@@ -146,10 +145,11 @@ namespace EngineNS.Bricks.Terrain.CDLOD
                 if (attr.IsValidPointer == false)
                     return false;
 
-                var ar = attr.GetReader(null);
                 Hash160 hash;
-                ar.Read(out hash);
-                attr.ReleaseReader(ref ar);
+                using (var ar = attr.GetReader(null))
+                {
+                    ar.Read(out hash);
+                }
                 if (hash != testHash)
                     return false;
 
@@ -204,11 +204,12 @@ namespace EngineNS.Bricks.Terrain.CDLOD
                         if (!gAtt.IsValidPointer)
                             continue;
 
-                        var gReader = gAtt.GetReader(grassData);
-                        IO.ISerializer serializer;
-                        gReader.Read(out serializer, null);
-                        grassData = (UTerrainGrass)serializer;
-                        gAtt.ReleaseReader(ref gReader);
+                        using (var gReader = gAtt.GetReader(grassData))
+                        {
+                            IO.ISerializer serializer;
+                            gReader.Read(out serializer, null);
+                            grassData = (UTerrainGrass)serializer;
+                        }
 
                         var gBuffer = Procedure.UBufferConponent.CreateInstance(Procedure.UBufferCreator.CreateInstance<Procedure.USuperBuffer<float, Procedure.FFloatOperator>>(1, 1, 1));
                         gBuffer.LoadXnd(subNode, Hash160.Emtpy);
@@ -311,7 +312,7 @@ namespace EngineNS.Bricks.Terrain.CDLOD
                 for (int i = 0; i < plants.Width; i++)
                 {
                     ref var t = ref transform.GetPixel<FTransform>(i, 0, 0);
-                    ref var p = ref plants.GetPixel<Int32_2>(i, 0, 0);
+                    ref var p = ref plants.GetPixel<Vector2i>(i, 0, 0);
 
                     var material = IdMapNode.MaterialIdManager.MaterialIdArray[p.X];
                     var plt = material.Plants[p.Y];
@@ -455,14 +456,15 @@ namespace EngineNS.Bricks.Terrain.CDLOD
                 linkedGrassNode = terrainGen.AssetGraph.Root.GetInputNode(terrainGen.AssetGraph.Root.ParentGraph as Procedure.UPgcGraph, grassPin) as Procedure.Node.UGrassNode;
             }
 
-            using (var xnd = new IO.CXndHolder("TrLevel", 0, 0))
+            using (var xnd = new IO.TtXndHolder("TrLevel", 0, 0))
             {
                 using (var attr = xnd.NewAttribute("Desc", 0, 0))
                 {
                     xnd.RootNode.AddAttribute(attr);
-                    var ar = attr.GetWriter(24);
-                    ar.Write(hash);
-                    attr.ReleaseWriter(ref ar);
+                    using (var ar = attr.GetWriter(24))
+                    {
+                        ar.Write(hash);
+                    }
                 }
 
                 if (hMap != null)
@@ -539,9 +541,10 @@ namespace EngineNS.Bricks.Terrain.CDLOD
                                 var grassData = linkedGrassNode.GrassDefines[i].GrassData;
                                 using (var gAtt = xnd.NewAttribute("GrassData", 0, 0))
                                 {
-                                    var gWriter = gAtt.GetWriter(0);
-                                    IO.SerializerHelper.Write(gWriter, grassData);
-                                    gAtt.ReleaseWriter(ref gWriter);
+                                    using (var gWriter = gAtt.GetWriter(0))
+                                    {
+                                        IO.SerializerHelper.Write(gWriter, grassData);
+                                    }
                                     subNode.AddAttribute(gAtt);
                                 }
 
@@ -569,9 +572,9 @@ namespace EngineNS.Bricks.Terrain.CDLOD
             var patchSide = Level.PatchSide;
             var terrainGen = Level.Node.TerrainGen;
 
-            var dir = UEngine.Instance.FileManager.GetRoot(IO.FileManager.ERootDir.Cache) + "terrain/";
-            dir = IO.FileManager.CombinePath(dir, terrainName.Name);
-            IO.FileManager.SureDirectory(dir);
+            var dir = UEngine.Instance.FileManager.GetRoot(IO.TtFileManager.ERootDir.Cache) + "terrain/";
+            dir = IO.TtFileManager.CombinePath(dir, terrainName.Name);
+            IO.TtFileManager.SureDirectory(dir);
             var lvlFile = $"{dir}/X{Level.LevelX}_Y{Level.LevelZ}.trlvl";
             if (terrainName != null)
             {
@@ -615,7 +618,7 @@ namespace EngineNS.Bricks.Terrain.CDLOD
             var idMap = root.GetResultBuffer("MatId") as Procedure.USuperBuffer<float, Procedure.FFloatOperator>;
             var waterMap = root.GetResultBuffer("Water") as Procedure.USuperBuffer<float, Procedure.FFloatOperator>;
             var transform = root.GetResultBuffer("Transform") as Procedure.USuperBuffer<FTransform, Procedure.FTransformOperator>;
-            var plants = root.GetResultBuffer("Plants") as Procedure.USuperBuffer<Int32_2, Procedure.FInt2Operator>;
+            var plants = root.GetResultBuffer("Plants") as Procedure.USuperBuffer<Vector2i, Procedure.FInt2Operator>;
             CreateFromBuffer(hMap, norMap, waterMap, idMap, transform, plants);
             var grassPin = root.FindPinIn("Grass");
             if (grassPin != null)
@@ -689,9 +692,9 @@ namespace EngineNS.Bricks.Terrain.CDLOD
             var h1 = (float)(PxHeightfieldSamples[(z2) * HeightfieldWidth + xGrid].height) * PxHeightfieldScale;
             var h2 = (float)(PxHeightfieldSamples[(z2) * HeightfieldWidth + x2].height) * PxHeightfieldScale;
             var h3 = (float)(PxHeightfieldSamples[zGrid * HeightfieldWidth + x2].height) * PxHeightfieldScale;
-            var zT1 = CoreDefine.Lerp(h0, h1, zLerp);
-            var zT2 = CoreDefine.Lerp(h3, h2, zLerp);
-            return CoreDefine.Lerp(zT1, zT2, xLerp) + (HeightMapMinHeight + HeightMapMaxHeight) * 0.5f;
+            var zT1 = MathHelper.Lerp(h0, h1, zLerp);
+            var zT2 = MathHelper.Lerp(h3, h2, zLerp);
+            return MathHelper.Lerp(zT1, zT2, xLerp) + (HeightMapMinHeight + HeightMapMaxHeight) * 0.5f;
         }
         #endregion
         public void SetAcceptShadow(bool value)

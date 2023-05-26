@@ -4,40 +4,113 @@ using System.Text;
 
 namespace EngineNS.Graphics.Pipeline
 {
-    public class UAttachmentDesc
+    public struct FAttachBufferDesc : IComparable<FAttachBufferDesc>
     {
-        public FHashText AttachmentName;
-        public NxRHI.EBufferType BufferViewTypes = NxRHI.EBufferType.BFT_RTV | NxRHI.EBufferType.BFT_SRV;
+        public NxRHI.EBufferType BufferViewTypes;// = NxRHI.EBufferType.BFT_RTV | NxRHI.EBufferType.BFT_SRV
         public EPixelFormat Format;
         public uint Width;
         public uint Height;
-    }
-    public class UAttachment
-    {
-        public UAttachmentDesc AttachmentDesc;
-        //public UAttachBuffer AttachBuffer;        
-        public bool OnResize(float x, float y)
+        public bool IsMatch(in FAttachBufferDesc desc)
         {
-            AttachmentDesc.Width = (uint)x;
-            AttachmentDesc.Height = (uint)y;
-            return true;
+            return (Format == desc.Format) && (Width == desc.Width) && (Height == desc.Height);
+        }
+        public override string ToString()
+        {
+            return $"{Format}({Width},{Height})";
+        }
+        public int CompareTo(FAttachBufferDesc other)
+        {
+            var cmp = Format.CompareTo(other.Format);
+            if (cmp == 0)
+            {
+                cmp = Width.CompareTo(other.Width);
+                if (cmp == 0)
+                {
+                    return Height.CompareTo(other.Height);
+                }
+                else
+                {
+                    return cmp;
+                }
+            }
+            else
+            {
+                return cmp;
+            }
         }
     }
-    public class UAttachBuffer
+    public class UAttachmentDesc
     {
+        public FHashText AttachmentName;
+        public FAttachBufferDesc BufferDesc;
+        public void SetDesc(UAttachmentDesc desc)
+        {
+            AttachmentName = desc.AttachmentName;
+            BufferDesc = desc.BufferDesc;
+        }
+        public EPixelFormat Format
+        {
+            get => BufferDesc.Format;
+            set => BufferDesc.Format = value;
+        }
+        public NxRHI.EBufferType BufferViewTypes
+        {
+            get => BufferDesc.BufferViewTypes;
+            set => BufferDesc.BufferViewTypes = value;
+        }
+        public uint Width
+        {
+            get => BufferDesc.Width;
+            set => BufferDesc.Width = value;
+        }
+        public uint Height
+        {
+            get => BufferDesc.Height;
+            set => BufferDesc.Height = value;
+        }
+    }
+    public class UAttachBuffer : IPooledObject, IDisposable
+    {
+        public bool IsAlloc { get; set; } = false;
+        int mRefCount = 0;
+        public int RefCount
+        {
+            get => mRefCount;
+        }
+        public void AddRef()
+        {
+            System.Threading.Interlocked.Increment(ref mRefCount);
+        }
+        public void AddRef(int Num)
+        {
+            System.Threading.Interlocked.Add(ref mRefCount, Num);
+        }
+        public int Release()
+        {
+            return System.Threading.Interlocked.Decrement(ref mRefCount);           
+        }
+        public void FreeBuffer()
+        {
+            if (LifeMode == UAttachBuffer.ELifeMode.Imported)
+                return;
+            var manager = UEngine.Instance.GfxDevice.AttachBufferManager;
+            mRefCount = 0;
+            manager.Free(this);
+        }
         public enum ELifeMode
         {
             Imported,
             Transient,
         }
         public ELifeMode LifeMode = ELifeMode.Imported;
+        public FAttachBufferDesc BufferDesc;
         public NxRHI.UGpuResource Buffer;
         public NxRHI.URenderTargetView Rtv;
         public NxRHI.UDepthStencilView Dsv;
         public NxRHI.UUaView Uav;
         public NxRHI.USrView Srv;
         public NxRHI.UCbView CBuffer;
-        public void Cleanup()
+        public void Dispose()
         {
             if (LifeMode == ELifeMode.Imported)
             {
@@ -49,33 +122,30 @@ namespace EngineNS.Graphics.Pipeline
             }
             else
             {
-                Srv?.Dispose();
-                Srv = null;
-                Rtv?.Dispose();
-                Rtv = null;
-                Dsv?.Dispose();
-                Dsv = null;
-                Uav?.Dispose();
-                Uav = null;
-                Buffer?.Dispose();
-                Buffer = null;
+                CoreSDK.DisposeObject(ref Srv);
+                CoreSDK.DisposeObject(ref Rtv);
+                CoreSDK.DisposeObject(ref Dsv);
+                CoreSDK.DisposeObject(ref Uav);
+                CoreSDK.DisposeObject(ref Buffer);
             }
         }
-        public bool CreateBufferViews(NxRHI.EBufferType types, UAttachmentDesc AttachmentDesc, bool isCpuRead = false)
+        public bool CreateBufferViews(in FAttachBufferDesc abfdesc)
         {
             LifeMode = ELifeMode.Transient;
+            BufferDesc = abfdesc;
+            var types = BufferDesc.BufferViewTypes;
             var rc = UEngine.Instance.GfxDevice.RenderContext;
-            if (AttachmentDesc.Format != EPixelFormat.PXF_UNKNOWN || (types & (NxRHI.EBufferType.BFT_RTV | NxRHI.EBufferType.BFT_DSV)) != 0)
+            if (BufferDesc.Format != EPixelFormat.PXF_UNKNOWN || (BufferDesc.BufferViewTypes & (NxRHI.EBufferType.BFT_RTV | NxRHI.EBufferType.BFT_DSV)) != 0)
             {
                 var desc = new NxRHI.FTextureDesc();
                 desc.SetDefault();
-                if (isCpuRead)
-                {
-                    desc.CpuAccess = (NxRHI.ECpuAccess.CAS_WRITE | NxRHI.ECpuAccess.CAS_READ);
-                }
-                desc.m_Width = AttachmentDesc.Width;
-                desc.m_Height = AttachmentDesc.Height;
-                desc.m_Format = AttachmentDesc.Format;
+                //if (isCpuRead)
+                //{
+                //    desc.CpuAccess = (NxRHI.ECpuAccess.CAS_WRITE | NxRHI.ECpuAccess.CAS_READ);
+                //}
+                desc.m_Width = BufferDesc.Width;
+                desc.m_Height = BufferDesc.Height;
+                desc.m_Format = BufferDesc.Format;
 
                 if ((types & NxRHI.EBufferType.BFT_DSV) != 0)
                 {
@@ -93,6 +163,13 @@ namespace EngineNS.Graphics.Pipeline
                 {
                     desc.m_BindFlags |= NxRHI.EBufferType.BFT_UAV;
                 }
+                if (desc.Format == EPixelFormat.PXF_D24_UNORM_S8_UINT ||
+                    desc.Format == EPixelFormat.PXF_D16_UNORM ||
+                    desc.Format == EPixelFormat.PXF_D32_FLOAT ||
+                    desc.Format == EPixelFormat.PXF_D32_FLOAT_S8X24_UINT)
+                {
+                    desc.m_BindFlags |= NxRHI.EBufferType.BFT_DSV;
+                }
                 Buffer = rc.CreateTexture(in desc);
                 System.Diagnostics.Debug.Assert(Buffer != null);
 
@@ -100,9 +177,9 @@ namespace EngineNS.Graphics.Pipeline
                 {
                     var viewDesc = new NxRHI.FRtvDesc();
                     viewDesc.SetTexture2D();
-                    viewDesc.Format = AttachmentDesc.Format;
-                    viewDesc.Width = AttachmentDesc.Width;
-                    viewDesc.Height = AttachmentDesc.Height;
+                    viewDesc.Format = BufferDesc.Format;
+                    viewDesc.Width = BufferDesc.Width;
+                    viewDesc.Height = BufferDesc.Height;
                     viewDesc.Texture2D.MipSlice = 0;
                     Rtv = rc.CreateRTV(Buffer as NxRHI.UTexture, in viewDesc);
                 }
@@ -110,9 +187,9 @@ namespace EngineNS.Graphics.Pipeline
                 {
                     var viewDesc = new NxRHI.FDsvDesc();
                     viewDesc.SetDefault();
-                    viewDesc.Format = AttachmentDesc.Format;
-                    viewDesc.Width = AttachmentDesc.Width;
-                    viewDesc.Height = AttachmentDesc.Height;
+                    viewDesc.Format = BufferDesc.Format;
+                    viewDesc.Width = BufferDesc.Width;
+                    viewDesc.Height = BufferDesc.Height;
                     viewDesc.MipLevel = 0;
                     Dsv = rc.CreateDSV(Buffer as NxRHI.UTexture, in viewDesc);
                 }
@@ -121,7 +198,7 @@ namespace EngineNS.Graphics.Pipeline
                     var viewDesc = new NxRHI.FSrvDesc();
                     viewDesc.SetTexture2D();
                     viewDesc.Type = NxRHI.ESrvType.ST_Texture2D;
-                    viewDesc.Format = AttachmentDesc.Format;
+                    viewDesc.Format = BufferDesc.Format;
                     viewDesc.Texture2D.MipLevels = 1;
                     Srv = rc.CreateSRV(Buffer as NxRHI.UTexture, in viewDesc);
                 }
@@ -129,7 +206,7 @@ namespace EngineNS.Graphics.Pipeline
                 {
                     var viewDesc = new NxRHI.FUavDesc();
                     viewDesc.SetTexture2D();
-                    viewDesc.Format = AttachmentDesc.Format;
+                    viewDesc.Format = BufferDesc.Format;
                     viewDesc.Texture2D.MipSlice = 0;
                     Uav = rc.CreateUAV(Buffer as NxRHI.UTexture, in viewDesc);
                 }
@@ -137,9 +214,9 @@ namespace EngineNS.Graphics.Pipeline
             else
             {
                 var desc = new NxRHI.FBufferDesc();
-                desc.SetDefault();
-                desc.Size = AttachmentDesc.Width * AttachmentDesc.Height;
-                desc.StructureStride = AttachmentDesc.Width;
+                desc.SetDefault(false);
+                desc.Size = BufferDesc.Width * BufferDesc.Height;
+                desc.StructureStride = BufferDesc.Width;
                 if ((types & NxRHI.EBufferType.BFT_Vertex) != 0)
                 {
                     desc.Type |= NxRHI.EBufferType.BFT_Vertex;
@@ -170,9 +247,9 @@ namespace EngineNS.Graphics.Pipeline
                     var viewDesc = new NxRHI.FSrvDesc();
                     viewDesc.SetBuffer(0);
                     viewDesc.Type = NxRHI.ESrvType.ST_BufferSRV;
-                    viewDesc.Format = AttachmentDesc.Format;
+                    viewDesc.Format = BufferDesc.Format;
                     //viewDesc.Buffer.FirstElement = 1;
-                    viewDesc.Buffer.NumElements = AttachmentDesc.Height;
+                    viewDesc.Buffer.NumElements = BufferDesc.Height;
                     viewDesc.Buffer.StructureByteStride = desc.StructureStride;
                     Srv = rc.CreateSRV(Buffer as NxRHI.UBuffer, in viewDesc);
                 }
@@ -180,9 +257,9 @@ namespace EngineNS.Graphics.Pipeline
                 {
                     var viewDesc = new NxRHI.FUavDesc();
                     viewDesc.SetBuffer(0);
-                    viewDesc.Format = AttachmentDesc.Format;
+                    viewDesc.Format = BufferDesc.Format;
                     viewDesc.Buffer.FirstElement = 0;
-                    viewDesc.Buffer.NumElements = AttachmentDesc.Height;
+                    viewDesc.Buffer.NumElements = BufferDesc.Height;
                     viewDesc.Buffer.StructureByteStride = desc.StructureStride;
                     Uav = rc.CreateUAV(Buffer as NxRHI.UBuffer, in viewDesc);
                 }
@@ -190,16 +267,140 @@ namespace EngineNS.Graphics.Pipeline
 
             return false;
         }
-        public UAttachBuffer Clone(bool CpuAccess, UAttachmentDesc desc)
+        public UAttachBuffer Clone()
         {
             var result = new UAttachBuffer();
-            result.CreateBufferViews(desc.BufferViewTypes, desc, true);
+            result.BufferDesc = BufferDesc;
+            result.CreateBufferViews(in BufferDesc);
             return result;
         }
     }
-    
-    public class UGraphicsBuffers
+
+    public class TtAttachBufferManager : IDisposable
     {
+        public class TtAttachBufferPool : TtObjectPool<UAttachBuffer>, IDisposable
+        {
+            public void Dispose()
+            {
+                this.Cleanup();
+            }
+            public string Name;
+            public FAttachBufferDesc BufferDesc;
+            public int FrameMaxLiveCount = 0;
+            public int FrameLiveCount = 0;
+            public int FrameAllocCount = 0;
+            protected override UAttachBuffer CreateObjectSync()
+            {
+                var result = new UAttachBuffer();
+                result.CreateBufferViews(in BufferDesc);
+                return result;
+            }
+            protected override void OnFinalObject(UAttachBuffer obj)
+            {
+                obj.Dispose();
+                base.OnFinalObject(obj);
+            }
+            protected override void OnObjectQuery(UAttachBuffer obj)
+            {
+                System.Diagnostics.Debug.Assert(obj.IsAlloc == false);
+                FrameAllocCount++;
+                FrameLiveCount++;
+                if (FrameMaxLiveCount < FrameLiveCount)
+                    FrameMaxLiveCount = FrameLiveCount;
+            }
+            protected override bool OnObjectRelease(UAttachBuffer obj)
+            {
+                FrameLiveCount--;
+                return true;
+            }
+
+        }
+        ~TtAttachBufferManager()
+        {
+            Dispose();
+        }
+        public void Dispose()
+        {
+            foreach (var i in Pools)
+            {
+                i.Value.Dispose();
+            }
+            Pools.Clear();
+        }
+        public Dictionary<FAttachBufferDesc, TtAttachBufferPool> Pools { get; } = new Dictionary<FAttachBufferDesc, TtAttachBufferPool>();
+        public UAttachBuffer Alloc(in FAttachBufferDesc desc)
+        {
+            TtAttachBufferPool pool;
+            if (false == Pools.TryGetValue(desc, out pool))
+            {
+                pool = new TtAttachBufferPool();
+                pool.GrowStep = 1;
+                pool.BufferDesc = desc;
+                Pools.Add(desc, pool);
+            }
+            return pool.QueryObjectSync();
+        }
+        public void Free(UAttachBuffer buffer)
+        {
+            TtAttachBufferPool pool;
+            if (Pools.TryGetValue(buffer.BufferDesc, out pool))
+            {
+                pool.ReleaseObject(buffer);
+            }
+            else
+            {
+                System.Diagnostics.Debug.Assert(false);
+            }
+        }
+        private List<FAttachBufferDesc> mRmvPools = new List<FAttachBufferDesc>();
+        public void Tick()
+        {
+            TryPrintCachedBuffer();
+            mRmvPools.Clear();
+            foreach (var i in Pools)
+            {
+                if (i.Value.FrameMaxLiveCount == 0)
+                {
+                    i.Value.Dispose();
+                    mRmvPools.Add(i.Key);
+                    continue;
+                }
+                else if(i.Value.PoolSize > i.Value.FrameMaxLiveCount + 3)
+                {
+                    //i.Value.Shrink(i.Value.FrameMaxLiveCount);
+                }
+                i.Value.FrameMaxLiveCount = 0;
+                i.Value.FrameLiveCount = 0;
+                i.Value.FrameAllocCount = 0;
+            }
+            foreach (var i in mRmvPools)
+            {
+                Pools.Remove(i);
+            }
+            mRmvPools.Clear();
+        }
+        public bool PrintCachedBuffer { get; set; } = false;
+        public void TryPrintCachedBuffer()
+        {
+            if (PrintCachedBuffer == false)
+                return;
+            PrintCachedBuffer = false;
+            Profiler.Log.WriteLine(Profiler.ELogTag.Info, "Graphics", "Begin AttachBuffer====");
+            foreach (var i in Pools)
+            {
+                Profiler.Log.WriteLine(Profiler.ELogTag.Info, "Graphics", $"{i.Key.ToString()} X {i.Value.PoolSize} => Max({i.Value.FrameMaxLiveCount}) / Alloc({i.Value.FrameAllocCount})");
+            }
+            Profiler.Log.WriteLine(Profiler.ELogTag.Info, "Graphics", "End AttachBuffer====");
+        }
+    }
+    
+    public class UGraphicsBuffers : IDisposable
+    {
+        public void Dispose()
+        {
+            CoreSDK.DisposeObject(ref mFrameBuffers);
+            FrameBuffers = null;
+        }
         public class UTargetViewIdentifier
         {
             static int CurrentTargetViewId = 0;
@@ -217,7 +418,8 @@ namespace EngineNS.Graphics.Pipeline
         }
         public UTargetViewIdentifier TargetViewIdentifier;
         public NxRHI.FViewPort Viewport = new NxRHI.FViewPort();
-        public NxRHI.UFrameBuffers FrameBuffers { get; set; }
+        NxRHI.UFrameBuffers mFrameBuffers;
+        public NxRHI.UFrameBuffers FrameBuffers { get => mFrameBuffers; set => mFrameBuffers = value; }
         public Common.URenderGraphPin[] RenderTargets;
         public Common.URenderGraphPin DepthStencil;
         NxRHI.UCbView mPerViewportCBuffer;
@@ -234,12 +436,7 @@ namespace EngineNS.Graphics.Pipeline
                 }
                 return mPerViewportCBuffer;
             }
-        }
-        public void Cleanup()
-        {
-            FrameBuffers?.Dispose();
-            FrameBuffers = null;            
-        }        
+        }    
         public void BuildFrameBuffers(Common.URenderGraph policy)
         {
             for (int i = 0; i < RenderTargets.Length; i++)
@@ -319,7 +516,7 @@ namespace EngineNS.Graphics.Pipeline
             DepthStencil = pin;            
             return true;
         }
-        public unsafe void OnResize(float x, float y)
+        public unsafe void SetSize(float x, float y)
         {
             if (x < 1.0f)
                 x = 1.0f;

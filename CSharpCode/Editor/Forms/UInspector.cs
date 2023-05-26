@@ -12,14 +12,15 @@ namespace EngineNS.Editor.Forms
         }
         public bool Visible { get; set; } = true;
         public uint DockId { get => mPropertyGrid.DockId; set => mPropertyGrid.DockId = value; }
+        public ImGuiWindowClass DockKeyClass { get; }
         public ImGuiCond_ DockCond { get => mPropertyGrid.DockCond; set => mPropertyGrid.DockCond = value; }
         public bool ShowReadOnly { get; set; } = true;
         protected EGui.Controls.PropertyGrid.PropertyGrid mPropertyGrid = new EGui.Controls.PropertyGrid.PropertyGrid();
         public EGui.Controls.PropertyGrid.PropertyGrid PropertyGrid { get => mPropertyGrid; }
         
-        public void Cleanup()
+        public void Dispose()
         {
-            mPropertyGrid.Cleanup();
+            mPropertyGrid.Dispose();
         }
 
         public async System.Threading.Tasks.Task<bool> Initialize()

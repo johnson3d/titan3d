@@ -34,7 +34,7 @@ namespace EngineNS.Bricks.Particle
     [UNebulaParticle.UNebulaParticleImport]
     [IO.AssetCreateMenu(MenuName = "NubulaParticle")]
     [EngineNS.Editor.UAssetEditor(EditorType = typeof(Editor.UParticleEditor))]
-    public class UNebulaParticle : IO.IAsset
+    public class UNebulaParticle : IO.IAsset, IDisposable
     {
         public const string AssetExt = ".nebula";
         public class UNebulaParticleImportAttribute : IO.CommonCreateAttribute
@@ -71,11 +71,11 @@ namespace EngineNS.Bricks.Particle
             get;
             set;
         }
-        public void Cleanup()
+        public void Dispose()
         {
             foreach(var i in Emitter.Values)
             {
-                i.Cleanup();
+                i.Dispose();
             }
             Emitter.Clear();
         }

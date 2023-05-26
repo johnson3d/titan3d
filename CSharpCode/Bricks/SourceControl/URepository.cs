@@ -17,23 +17,3 @@ namespace EngineNS.Bricks.SourceControl
         }
     }
 }
-
-namespace EngineNS
-{
-    partial class UEngine
-    {
-        System.Type SourceControlType = typeof(Bricks.SourceControl.Git.UGitRepository);
-        Bricks.SourceControl.URepository mSourceControl;
-        public Bricks.SourceControl.URepository SourceControl
-        {
-            get
-            {
-                if (mSourceControl == null)
-                {
-                    mSourceControl = Rtti.UTypeDescManager.CreateInstance(SourceControlType) as Bricks.SourceControl.URepository;
-                }
-                return mSourceControl;
-            }
-        }
-    }
-}

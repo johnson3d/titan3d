@@ -23,18 +23,54 @@ namespace EngineNS.Editor.Forms
             UpdateAddNodeMenu();
         }
 
-        public void Cleanup()
+        public void Dispose()
         {
 
         }
+        //List<EGui.UIProxy.MenuItemProxy> mDirContextMenu;
         public async System.Threading.Tasks.Task<bool> Initialize()
         {
-            await EngineNS.Thread.AsyncDummyClass.DummyFunc();
+            await EngineNS.Thread.TtAsyncDummyClass.DummyFunc();
+
+            //mDirContextMenu = new List<EGui.UIProxy.MenuItemProxy>()
+            //{
+            //    new EGui.UIProxy.MenuItemProxy()
+            //    {
+            //        MenuName = "Goto",
+            //        Action = (item, data)=>
+            //        {
+            //            var node = data.Value.ToObject() as GamePlay.Scene.UNode;
+            //            var camera = WorldViewportState.CameraController.Camera;
+            //            var radius = (node.AABB.GetMaxSide()) *  5.0f;
+            //            camera.LookAtLH(node.Placement.Position - camera.GetDirection().AsDVector() * radius, node.Placement.Position, Vector3.Up);
+            //        },
+            //    },
+            //    new EGui.UIProxy.MenuItemProxy()
+            //    {
+            //        MenuName = "DoCommand",
+            //        Action = (item, data)=>
+            //        {
+            //            var node = data.Value.ToObject() as GamePlay.Scene.UNode;
+            //            node.OnCommand("WorldOutliner");
+            //        },
+            //    },
+            //    new EGui.UIProxy.MenuItemProxy()
+            //    {
+            //        MenuName = "Delete",
+            //        Action = (item, data)=>
+            //        {
+            //            var node = data.Value.ToObject() as GamePlay.Scene.UNode;
+            //            node.Parent = null;
+            //        },
+            //    },
+            //};
+
             return true;
         }
         public string Title { get; set; } = "WorldOutliner";
         public bool Visible { get; set; } = true;
         public uint DockId { get; set; }
+        public ImGuiWindowClass DockKeyClass { get; }
         public ImGuiCond_ DockCond { get; set; } = ImGuiCond_.ImGuiCond_FirstUseEver;
         public unsafe void DrawAsChildWindow(ref Vector2 size)
         {
@@ -58,7 +94,7 @@ namespace EngineNS.Editor.Forms
             if (Visible == false)
                 return;
             ImGuiAPI.SetNextWindowDockID(DockId, DockCond);
-            if (ImGuiAPI.Begin(Title, null, ImGuiWindowFlags_.ImGuiWindowFlags_None))
+            if (EGui.UIProxy.DockProxy.BeginMainForm(Title, this, ImGuiWindowFlags_.ImGuiWindowFlags_None))
             {
                 if (ImGuiAPI.IsWindowDocked())
                 {
@@ -71,7 +107,7 @@ namespace EngineNS.Editor.Forms
             }
             if (OnDrawMenu != null)
                 OnDrawMenu();
-            ImGuiAPI.End();
+            EGui.UIProxy.DockProxy.EndMainForm();
         }
         public List<INodeUIProvider> SelectedNodes = new List<INodeUIProvider>();
         protected override void AfterNodeShow(INodeUIProvider provider, int index)
@@ -98,7 +134,7 @@ namespace EngineNS.Editor.Forms
             if (ImGuiAPI.IsItemHovered(ImGuiHoveredFlags_.ImGuiHoveredFlags_None) && ImGuiAPI.IsMouseDown(ImGuiMouseButton_.ImGuiMouseButton_Left))
             {
                 //这里考虑一下单选多选的问题
-                if (ImGuiAPI.IsKeyDown((int)Bricks.Input.Scancode.SCANCODE_LCTRL))
+                if (ImGuiAPI.IsKeyDown((ImGuiKey)Bricks.Input.Scancode.SCANCODE_LCTRL))
                 {
                     provider.Selected = !provider.Selected;
                     if (provider.Selected == false)
@@ -264,6 +300,10 @@ namespace EngineNS.Editor.Forms
                         var radius = (node.AABB.GetMaxSide()) *  5.0f;
                         camera.LookAtLH(node.Placement.Position - camera.GetDirection().AsDVector() * radius, node.Placement.Position, Vector3.Up);
                     }
+                    if (ImGuiAPI.MenuItem($"DoCommand", null, false, true))
+                    {
+                        node.OnCommand("WorldOutliner");
+                    }
                     if (ImGuiAPI.BeginMenu("AddChild", true))
                     {
                         var drawList = ImGuiAPI.GetWindowDrawList();
@@ -285,7 +325,7 @@ namespace EngineNS.Editor.Forms
                 }
                 else
                 {
-                    mAddToNode = null;
+                    //mAddToNode = null;
                     if (mNodeMenuShow)
                     {
                         OnDrawMenu = null;

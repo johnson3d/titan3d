@@ -5,11 +5,16 @@ using System.Runtime.InteropServices;
 
 namespace EngineNS
 {
-    public class UniHash
+    public class UniHash32
     {
         public static uint DefaultHash(string str)
         {
             return JSHash(str);
+        }
+        public static uint XXHash(string str)
+        {
+            byte[] data = Encoding.UTF8.GetBytes(str);
+            return Standart.Hash.xxHash.xxHash32.ComputeHash(data, data.Length);
         }
         public static uint RSHash(string str)
         {
@@ -148,6 +153,23 @@ namespace EngineNS
         }
     }
 
+    public class UniHash64
+    {
+        public static ulong XXHash(string str)
+        {
+            byte[] data = Encoding.UTF8.GetBytes(str);
+            return Standart.Hash.xxHash.xxHash64.ComputeHash(data, data.Length);
+        }
+    }
+    //public class UniHash128
+    //{
+    //    public static System.UInt128 XXHash(string str)
+    //    {
+    //        byte[] data = Encoding.UTF8.GetBytes(str);
+    //        return Standart.Hash.xxHash.xxHash128.ComputeHash(data, data.Length);
+    //    }
+    //}
+
     [StructLayout(LayoutKind.Explicit, Pack = 4)]
     public struct Hash64 : IComparable<Hash64>
     {
@@ -228,14 +250,14 @@ namespace EngineNS
         public static Hash64 FromString(string source)
         {
             Hash64 result = new Hash64();
-            CalcHash64(ref result, source);
+            CalcHash64(in result, source);
             return result;
         }
-        public static void CalcHash64(ref Hash64 hash, string source)
+        public static void CalcHash64(in Hash64 hash, string source)
         {
-            CalcHash64(ref hash, System.Text.Encoding.ASCII.GetBytes(source));
+            CalcHash64(in hash, System.Text.Encoding.ASCII.GetBytes(source));
         }
-        public static void CalcHash64(ref Hash64 hash, byte[] source)
+        public static void CalcHash64(in Hash64 hash, byte[] source)
         {
             unsafe
             {
@@ -348,7 +370,7 @@ namespace EngineNS
         }
         public override int GetHashCode()
         {
-            return (int)UniHash.APHash(this.ToString());
+            return (int)UniHash32.APHash(this.ToString());
         }
         public static Hash160 Emtpy = new Hash160();
         public static Hash160 CreateHash160(string src)

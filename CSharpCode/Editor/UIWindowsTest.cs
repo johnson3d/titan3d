@@ -147,17 +147,17 @@ namespace EngineNS.Editor
 
     public class UIWindowsTest : EngineNS.IRootForm
     {
-        public void Cleanup()
+        public void Dispose()
         {
             for(int i=0; i<mForms.Count; i++)
             {
-                mForms[i].Cleanup();
+                mForms[i].Dispose();
             }
         }
 
         public async Task<bool> Initialize()
         {
-            await EngineNS.Thread.AsyncDummyClass.DummyFunc();
+            await EngineNS.Thread.TtAsyncDummyClass.DummyFunc();
 
             mMenuItems = new List<EGui.UIProxy.MenuItemProxy>()
             {
@@ -184,7 +184,7 @@ namespace EngineNS.Editor
                             },
                             Action = (item, data)=>
                             {
-                                var files = IO.FileManager.GetFiles(@"I:\titan3d\icons", "*.*");
+                                var files = IO.TtFileManager.GetFiles(@"I:\titan3d\icons", "*.*");
                                 var tagDir = RName.GetRName("icons", RName.ERNameType.Engine);
                                 foreach(var file in files)
                                 {
@@ -372,6 +372,7 @@ namespace EngineNS.Editor
 
         public bool Visible { get; set; }
         public uint DockId { get; set; }
+        public ImGuiWindowClass DockKeyClass { get; }
         public ImGuiCond_ DockCond { get; set; }
 
         public unsafe void OnDraw()
@@ -384,8 +385,7 @@ namespace EngineNS.Editor
             ImGuiAPI.SetNextWindowPos(in mainPos, ImGuiCond_.ImGuiCond_FirstUseEver, in mainPos);
             var wSize = new Vector2(1290, 800);
             ImGuiAPI.SetNextWindowSize(in wSize, ImGuiCond_.ImGuiCond_FirstUseEver);
-            bool visible = true;
-            if (ImGuiAPI.Begin("UI Test", ref visible, 
+            if (EGui.UIProxy.DockProxy.BeginMainForm("UI Test", this, 
                 ImGuiWindowFlags_.ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_.ImGuiWindowFlags_MenuBar))
             {
 
@@ -420,9 +420,9 @@ namespace EngineNS.Editor
                 ImGuiAPI.DockSpace(mMainDockId, in size, ImGuiDockNodeFlags_.ImGuiDockNodeFlags_None, in dockClass);
                 for (int i = 0; i < mForms.Count; ++i)
                 {
-                    if (mForms[i].DockId == uint.MaxValue)
-                        mForms[i].DockId = mMainDockId;
-                    ImGuiAPI.SetNextWindowDockID(mForms[i].DockId, mForms[i].DockCond);
+                    //if (mForms[i].DockId == uint.MaxValue)
+                    //    mForms[i].DockId = mMainDockId;
+                    //ImGuiAPI.SetNextWindowDockID(mForms[i].DockId, mForms[i].DockCond);
                     mForms[i].OnDraw();
                 }
 
@@ -438,7 +438,7 @@ namespace EngineNS.Editor
                 //var drawList = ImGuiAPI.GetWindowDrawList();
                 //drawList.AddRect(ref menubarMin, ref menubarMax, 0xFF0000FF, 0, ImDrawFlags_.ImDrawFlags_None, 2);
             }
-            ImGuiAPI.End();
+            EGui.UIProxy.DockProxy.EndMainForm();
 
             //ImGuiAPI.PopFont();
         }
@@ -457,6 +457,7 @@ namespace EngineNS.Editor
             get;
             set;
         } = uint.MaxValue;
+        public ImGuiWindowClass DockKeyClass { get; }
         public ImGuiCond_ DockCond
         {
             get;
@@ -465,17 +466,17 @@ namespace EngineNS.Editor
 
         EGui.UIProxy.Toolbar mToolbar;
 
-        public void Cleanup()
+        public void Dispose()
         {
             for(int i=0; i<mPanels.Count; i++)
             {
-                mPanels[i].Cleanup();
+                mPanels[i].Dispose();
             }
         }
 
         public async Task<bool> Initialize()
         {
-            await EngineNS.Thread.AsyncDummyClass.DummyFunc();
+            await EngineNS.Thread.TtAsyncDummyClass.DummyFunc();
 
             unsafe
             {
@@ -659,10 +660,10 @@ namespace EngineNS.Editor
         //    UVMax = new Vector2((303.0f + 32) / 1024, (270.0f + 32) / 1024),
         //};
 
-        public void Cleanup() { }
+        public void Dispose() { }
         public async Task<bool> Initialize() 
         {
-            await EngineNS.Thread.AsyncDummyClass.DummyFunc();
+            await EngineNS.Thread.TtAsyncDummyClass.DummyFunc();
 
             mBezierControl.Initialize(10.0f, 10.0f, 30.0f, 20.0f);
 
@@ -697,14 +698,14 @@ namespace EngineNS.Editor
 
         EGui.UIProxy.Toolbar mToolbar;
 
-        public void Cleanup()
+        public void Dispose()
         {
             mToolbar.Cleanup();
         }
 
         public async Task<bool> Initialize()
         {
-            await EngineNS.Thread.AsyncDummyClass.DummyFunc();
+            await EngineNS.Thread.TtAsyncDummyClass.DummyFunc();
 
             mToolbar = new EGui.UIProxy.Toolbar();
             mToolbar.AddToolbarItems(

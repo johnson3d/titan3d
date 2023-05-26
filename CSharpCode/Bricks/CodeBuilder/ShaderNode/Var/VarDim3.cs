@@ -5,7 +5,6 @@ using EngineNS.Bricks.NodeGraph;
 namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Var
 {
     [ContextMenu("f3,float3", "Data\\float3@_serial@", UMaterialGraph.MaterialEditorKeyword)]
-
     public class VarDimF3 : VarNode
     {
         public override Rtti.UTypeDesc GetOutPinType(PinOut pin)
@@ -322,5 +321,190 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Var
         }
         [EGui.Controls.PropertyGrid.Color3PickerEditor()]
         public Vector3 Color { get => mValue; set => mValue = value; }
+    }
+
+    [ContextMenu("i3,int3", "Data\\int3@_serial@", UMaterialGraph.MaterialEditorKeyword)]
+    public class VarDimI3 : VarNode
+    {
+        public override Rtti.UTypeDesc GetOutPinType(PinOut pin)
+        {
+            if (pin == OutXYZ)
+                return Rtti.UTypeDesc.TypeOf(typeof(Vector3i));
+            else if (pin == OutX ||
+                pin == OutY ||
+                pin == OutZ)
+                return Rtti.UTypeDesc.TypeOf(typeof(int));
+            return null;
+        }
+        public override bool CanLinkFrom(PinIn iPin, UNodeBase OutNode, PinOut oPin)
+        {
+            if (base.CanLinkFrom(iPin, OutNode, oPin) == false)
+                return false;
+
+            var nodeExpr = OutNode as UNodeBase;
+            var type = nodeExpr.GetOutPinType(oPin);
+
+            if (iPin == InXYZ)
+            {
+                if (!type.IsEqual(typeof(Vector3)))
+                    return false;
+            }
+            else if (iPin == InX ||
+                iPin == InY ||
+                iPin == InZ)
+            {
+                if (!type.IsEqual(typeof(float)))
+                    return false;
+            }
+            return true;
+        }
+        protected override string GetDefaultValue()
+        {
+            if (IsHalfPrecision)
+                return $"min16int3({Value.X}, {Value.Y}, {Value.Z})";
+            else
+                return $"int3({Value.X}, {Value.Y}, {Value.Z})";
+        }
+        public override void BuildStatements(NodePin pin, ref BuildCodeStatementsData data)
+        {
+            base.BuildStatements(pin, ref data);
+            if (data.NodeGraph.PinHasLinker(InXYZ))
+            {
+                var pinNode = data.NodeGraph.GetOppositePinNode(InXYZ);
+                var opPin = data.NodeGraph.GetOppositePin(InXYZ);
+                pinNode.BuildStatements(opPin, ref data);
+
+                var assignStatement = new UAssignOperatorStatement()
+                {
+                    From = pinNode.GetExpression(opPin, ref data),
+                    To = new UVariableReferenceExpression(Name),
+                };
+                if (!data.CurrentStatements.Contains(assignStatement))
+                    data.CurrentStatements.Add(assignStatement);
+            }
+            if (data.NodeGraph.PinHasLinker(InX))
+            {
+                var pinNode = data.NodeGraph.GetOppositePinNode(InX);
+                var opPin = data.NodeGraph.GetOppositePin(InX);
+                pinNode.BuildStatements(opPin, ref data);
+
+                var assignStatement = new UAssignOperatorStatement()
+                {
+                    From = pinNode.GetExpression(opPin, ref data),
+                    To = new UVariableReferenceExpression("x", new UVariableReferenceExpression(Name)),
+                };
+                if (!data.CurrentStatements.Contains(assignStatement))
+                    data.CurrentStatements.Add(assignStatement);
+            }
+            if (data.NodeGraph.PinHasLinker(InY))
+            {
+                var pinNode = data.NodeGraph.GetOppositePinNode(InY);
+                var opPin = data.NodeGraph.GetOppositePin(InY);
+                pinNode.BuildStatements(opPin, ref data);
+
+                var assignStatment = new UAssignOperatorStatement()
+                {
+                    From = pinNode.GetExpression(opPin, ref data),
+                    To = new UVariableReferenceExpression("y", new UVariableReferenceExpression(Name)),
+                };
+                if (!data.CurrentStatements.Contains(assignStatment))
+                    data.CurrentStatements.Add(assignStatment);
+            }
+            if (data.NodeGraph.PinHasLinker(InZ))
+            {
+                var pinNode = data.NodeGraph.GetOppositePinNode(InZ);
+                var opPin = data.NodeGraph.GetOppositePin(InZ);
+                pinNode.BuildStatements(opPin, ref data);
+
+                var assignStatment = new UAssignOperatorStatement()
+                {
+                    From = pinNode.GetExpression(opPin, ref data),
+                    To = new UVariableReferenceExpression("z", new UVariableReferenceExpression(Name)),
+                };
+                if (!data.CurrentStatements.Contains(assignStatment))
+                    data.CurrentStatements.Add(assignStatment);
+            }
+
+            if (!data.MethodDec.HasLocalVariable(Name))
+            {
+                var val = new UVariableDeclaration()
+                {
+                    VariableType = new UTypeReference(Type2HLSLType(VarType, IsHalfPrecision)),
+                    VariableName = Name,
+                    InitValue = new UPrimitiveExpression(Value),
+                };
+                if (IsUniform)
+                {
+                    var graph = data.NodeGraph as UMaterialGraph;
+                    graph.ShaderEditor.MaterialOutput.UniformVars.Add(val);
+                }
+                else
+                    data.MethodDec.AddLocalVar(val);
+            }
+        }
+        public override UExpressionBase GetExpression(NodePin pin, ref BuildCodeStatementsData data)
+        {
+            if (pin == OutXYZ)
+                return new UVariableReferenceExpression(Name);
+            else if (pin == OutX)
+                return new UVariableReferenceExpression("x", new UVariableReferenceExpression(Name));
+            else if (pin == OutY)
+                return new UVariableReferenceExpression("y", new UVariableReferenceExpression(Name));
+            else if (pin == OutZ)
+                return new UVariableReferenceExpression("z", new UVariableReferenceExpression(Name));
+            return null;
+        }
+
+        protected Vector3i mValue = Vector3i.Zero;
+        [Rtti.Meta]
+        public Vector3i Value { get => mValue; set => mValue = value; }
+        [EGui.Controls.PropertyGrid.PGCustomValueEditor(HideInPG = true)]
+        public PinIn InXYZ { get; set; } = new PinIn();
+        [EGui.Controls.PropertyGrid.PGCustomValueEditor(HideInPG = true)]
+        public PinIn InX { get; set; } = new PinIn();
+        [EGui.Controls.PropertyGrid.PGCustomValueEditor(HideInPG = true)]
+        public PinIn InY { get; set; } = new PinIn();
+        [EGui.Controls.PropertyGrid.PGCustomValueEditor(HideInPG = true)]
+        public PinIn InZ { get; set; } = new PinIn();
+        [EGui.Controls.PropertyGrid.PGCustomValueEditor(HideInPG = true)]
+        public PinOut OutXYZ { get; set; } = new PinOut();
+        [EGui.Controls.PropertyGrid.PGCustomValueEditor(HideInPG = true)]
+        public PinOut OutX { get; set; } = new PinOut();
+        [EGui.Controls.PropertyGrid.PGCustomValueEditor(HideInPG = true)]
+        public PinOut OutY { get; set; } = new PinOut();
+        [EGui.Controls.PropertyGrid.PGCustomValueEditor(HideInPG = true)]
+        public PinOut OutZ { get; set; } = new PinOut();
+        public VarDimI3()
+        {
+            VarType = Rtti.UTypeDescGetter<Vector3i>.TypeDesc;
+
+            //Name = $"{Value}";
+
+            InXYZ.Name = "in ";
+            InXYZ.LinkDesc = UShaderEditorStyles.Instance.NewInOutPinDesc();
+            this.AddPinIn(InXYZ);
+            InX.Name = "x ";
+            InX.LinkDesc = UShaderEditorStyles.Instance.NewInOutPinDesc();
+            this.AddPinIn(InX);
+            InY.Name = "y ";
+            InY.LinkDesc = UShaderEditorStyles.Instance.NewInOutPinDesc();
+            this.AddPinIn(InY);
+            InZ.Name = "z ";
+            InZ.LinkDesc = UShaderEditorStyles.Instance.NewInOutPinDesc();
+            this.AddPinIn(InZ);
+
+            OutXYZ.Name = " xyz";
+            OutXYZ.LinkDesc = UShaderEditorStyles.Instance.NewInOutPinDesc();
+            this.AddPinOut(OutXYZ);
+            OutX.Name = " x";
+            OutX.LinkDesc = UShaderEditorStyles.Instance.NewInOutPinDesc();
+            this.AddPinOut(OutX);
+            OutY.Name = " y";
+            OutY.LinkDesc = UShaderEditorStyles.Instance.NewInOutPinDesc();
+            this.AddPinOut(OutY);
+            OutZ.Name = " z";
+            OutZ.LinkDesc = UShaderEditorStyles.Instance.NewInOutPinDesc();
+            this.AddPinOut(OutZ);
+        }
     }
 }

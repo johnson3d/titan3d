@@ -4,10 +4,10 @@ using System.Text;
 
 namespace EngineNS.Bricks.StateMachine
 {
-    public interface ITransition
+    public interface ITransition<T>
     {
-        public IState From { get; set; } 
-        public IState To { get; set; }
+        public IState<T> From { get; set; }
+        public IState<T> To { get; set; }
         public void OnTransition();
         public bool Check();
     }

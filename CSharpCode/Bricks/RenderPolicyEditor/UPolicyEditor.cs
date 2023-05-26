@@ -9,7 +9,10 @@ namespace EngineNS.Bricks.RenderPolicyEditor
         public RName AssetName { get; set; }
         protected bool mVisible = true;
         public bool Visible { get => mVisible; set => mVisible = value; }
-        public uint DockId { get; set; }
+        uint mDockId = uint.MaxValue;
+        public uint DockId { get => mDockId; set => mDockId = value; }
+        protected ImGuiWindowClass mDockKeyClass;
+        public ImGuiWindowClass DockKeyClass => mDockKeyClass;
         public ImGuiCond_ DockCond { get; set; } = ImGuiCond_.ImGuiCond_FirstUseEver;
         public URenderPolicyAsset PolicyGraph { get; private set; }
         public UGraphRenderer GraphRenderer { get; } = new UGraphRenderer();
@@ -23,9 +26,9 @@ namespace EngineNS.Bricks.RenderPolicyEditor
         }
         ~UPolicyEditor()
         {
-            Cleanup();
+            Dispose();
         }
-        public void Cleanup()
+        public void Dispose()
         {
             NodePropGrid.Target = null;
         }
@@ -35,7 +38,7 @@ namespace EngineNS.Bricks.RenderPolicyEditor
         }
         public async System.Threading.Tasks.Task<bool> Initialize()
         {
-            await EngineNS.Thread.AsyncDummyClass.DummyFunc();
+            await EngineNS.Thread.TtAsyncDummyClass.DummyFunc();
             return true;
         }
         #region ISerializer
@@ -72,7 +75,7 @@ namespace EngineNS.Bricks.RenderPolicyEditor
         }
         public void OnCloseEditor()
         {
-            Cleanup();
+            Dispose();
         }
         public void OnEvent(in Bricks.Input.Event e)
         {
@@ -80,6 +83,29 @@ namespace EngineNS.Bricks.RenderPolicyEditor
         #endregion
 
         #region DrawUI
+        bool mDockInitialized = false;
+        protected void ResetDockspace(bool force = false)
+        {
+            var pos = ImGuiAPI.GetCursorPos();
+            var id = ImGuiAPI.GetID(AssetName.Name + "_Dockspace");
+            mDockKeyClass.ClassId = id;
+            ImGuiAPI.DockSpace(id, Vector2.Zero, ImGuiDockNodeFlags_.ImGuiDockNodeFlags_None, mDockKeyClass);
+            if (mDockInitialized && !force)
+                return;
+            ImGuiAPI.DockBuilderRemoveNode(id);
+            ImGuiAPI.DockBuilderAddNode(id, ImGuiDockNodeFlags_.ImGuiDockNodeFlags_None);
+            ImGuiAPI.DockBuilderSetNodePos(id, pos);
+            ImGuiAPI.DockBuilderSetNodeSize(id, Vector2.One);
+            mDockInitialized = true;
+
+            var rightId = id;
+            uint leftId = 0;
+            ImGuiAPI.DockBuilderSplitNode(rightId, ImGuiDir_.ImGuiDir_Left, 0.2f, ref leftId, ref rightId);
+
+            ImGuiAPI.DockBuilderDockWindow(EGui.UIProxy.DockProxy.GetDockWindowName("Left", mDockKeyClass), leftId);
+            ImGuiAPI.DockBuilderDockWindow(EGui.UIProxy.DockProxy.GetDockWindowName("Right", mDockKeyClass), rightId);
+            ImGuiAPI.DockBuilderFinish(id);
+        }
         public unsafe void OnDraw()
         {
             if (Visible == false)
@@ -88,14 +114,9 @@ namespace EngineNS.Bricks.RenderPolicyEditor
             bool drawing = true;
             var pivot = new Vector2(0);
             ImGuiAPI.SetNextWindowSize(in WindowSize, ImGuiCond_.ImGuiCond_FirstUseEver);
-            ImGuiAPI.SetNextWindowDockID(DockId, DockCond);
-            if (ImGuiAPI.Begin(AssetName.Name, ref mVisible, ImGuiWindowFlags_.ImGuiWindowFlags_None |
+            if (EGui.UIProxy.DockProxy.BeginMainForm(AssetName.Name, this, ImGuiWindowFlags_.ImGuiWindowFlags_None |
                 ImGuiWindowFlags_.ImGuiWindowFlags_NoSavedSettings))
             {
-                if (ImGuiAPI.IsWindowDocked())
-                {
-                    DockId = ImGuiAPI.GetWindowDockID();
-                }
                 if (ImGuiAPI.IsWindowFocused(ImGuiFocusedFlags_.ImGuiFocusedFlags_RootAndChildWindows))
                 {
                     var mainEditor = UEngine.Instance.GfxDevice.SlateApplication as Editor.UMainEditorApplication;
@@ -106,28 +127,16 @@ namespace EngineNS.Bricks.RenderPolicyEditor
                 WindowSize = ImGuiAPI.GetWindowSize();
                 DrawToolBar();
                 ImGuiAPI.Separator();
-                ImGuiAPI.Columns(2, null, true);
-                if (LeftWidth == 0)
-                {
-                    ImGuiAPI.SetColumnWidth(0, 300);
-                }
-                LeftWidth = ImGuiAPI.GetColumnWidth(0);
-                var min = ImGuiAPI.GetWindowContentRegionMin();
-                var max = ImGuiAPI.GetWindowContentRegionMin();
-
-                DrawLeft(ref min, ref max);
-                ImGuiAPI.NextColumn();
-
-                DrawRight(ref min, ref max);
-                ImGuiAPI.NextColumn();
-
-                ImGuiAPI.Columns(1, null, true);
             }
             else
             {
                 drawing = false;
             }
-            ImGuiAPI.End();
+            ResetDockspace();
+            EGui.UIProxy.DockProxy.EndMainForm();
+
+            DrawLeft();
+            DrawRight();
 
             if (drawing)
             {
@@ -221,41 +230,43 @@ namespace EngineNS.Bricks.RenderPolicyEditor
             {
 
             }
-            root.Cleanup();
+            root.Dispose();
         }
-        protected unsafe void DrawLeft(ref Vector2 min, ref Vector2 max)
+        bool mLeftShow = true;
+        protected unsafe void DrawLeft()
         {
             if (PreviewDockId == 0)
                 PreviewDockId = ImGuiAPI.GetID($"{AssetName}");
 
             var size = new Vector2(-1, -1);
-            if (ImGuiAPI.BeginChild("LeftWindow", in size, false, ImGuiWindowFlags_.ImGuiWindowFlags_None))
+            if (EGui.UIProxy.DockProxy.BeginPanel(mDockKeyClass, "Left", ref mLeftShow, ImGuiWindowFlags_.ImGuiWindowFlags_None))
             {
                 if (ImGuiAPI.CollapsingHeader("Preview", ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_None))
                 {
-                    ImGuiDockNodeFlags_ dockspace_flags = ImGuiDockNodeFlags_.ImGuiDockNodeFlags_None;
-                    var winClass = new ImGuiWindowClass();
-                    winClass.UnsafeCallConstructor();
-                    var sz = ImGuiAPI.GetWindowSize();
-                    sz.Y = sz.X;
-                    ImGuiAPI.DockSpace(PreviewDockId, in sz, dockspace_flags, in winClass);
-                    winClass.UnsafeCallDestructor();
+                    //ImGuiDockNodeFlags_ dockspace_flags = ImGuiDockNodeFlags_.ImGuiDockNodeFlags_None;
+                    //var winClass = new ImGuiWindowClass();
+                    //winClass.UnsafeCallConstructor();
+                    //var sz = ImGuiAPI.GetWindowSize();
+                    //sz.Y = sz.X;
+                    //ImGuiAPI.DockSpace(PreviewDockId, in sz, dockspace_flags, in winClass);
+                    //winClass.UnsafeCallDestructor();
                 }
                 if (ImGuiAPI.CollapsingHeader("NodeProperty", ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_DefaultOpen))
                 {
                     NodePropGrid.OnDraw(true, false, false);
                 }
             }
-            ImGuiAPI.EndChild();
+            EGui.UIProxy.DockProxy.EndPanel();
         }
-        protected unsafe void DrawRight(ref Vector2 min, ref Vector2 max)
+        bool mRightShow = true;
+        protected unsafe void DrawRight()
         {
             var size = new Vector2(-1, -1);
-            if (ImGuiAPI.BeginChild("RightWindow", in size, false, ImGuiWindowFlags_.ImGuiWindowFlags_None))
+            if (EGui.UIProxy.DockProxy.BeginPanel(mDockKeyClass, "Right", ref mRightShow, ImGuiWindowFlags_.ImGuiWindowFlags_None))
             {
                 GraphRenderer.OnDraw();
             }
-            ImGuiAPI.EndChild();
+            EGui.UIProxy.DockProxy.EndPanel();
         }
         #endregion
     }

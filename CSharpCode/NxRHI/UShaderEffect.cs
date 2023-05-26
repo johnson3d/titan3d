@@ -17,6 +17,17 @@ namespace EngineNS.NxRHI
                 return null;
             return new UEffectBinder(ptr);
         }
+        public string DebugName
+        {
+            get
+            {
+                return mCoreObject.NativeSuper.GetDebugName();
+            }
+            set
+            {
+                mCoreObject.NativeSuper.SetDebugName(value);
+            }
+        }
     }
     public class UEffectBinder : AuxPtrType<NxRHI.FEffectBinder>
     {
@@ -42,6 +53,7 @@ namespace EngineNS.NxRHI
     }
     public class UComputeEffect : AuxPtrType<NxRHI.IComputeEffect>
     {
+        public Graphics.Pipeline.Shader.UShadingEnv.FPermutationId PermutationId { get => mComputeShader.PermutationId; }
         internal UShader mComputeShader;
         public UShader ComputeShader
         {
@@ -61,15 +73,22 @@ namespace EngineNS.NxRHI
         }
         public unsafe static UComputeEffect Load(Hash160 hash)
         {
-            var csShader = NxRHI.UShader.Load(hash);
-            if (csShader == null)
-                return null;
-            var result = UEngine.Instance.GfxDevice.RenderContext.CreateComputeEffect(csShader);
-            return result;
+            var path = UEngine.Instance.FileManager.GetPath(IO.TtFileManager.ERootDir.Cache, IO.TtFileManager.ESystemDir.Shader);
+            var file = path + hash.ToString() + UShader.AssetExt;
+            using (var xnd = IO.TtXndHolder.LoadXnd(file))
+            {
+                if (xnd == null)
+                    return null;
+                var csShader = NxRHI.UShader.Load(xnd);
+                if (csShader == null)
+                    return null;
+                var result = UEngine.Instance.GfxDevice.RenderContext.CreateComputeEffect(csShader);
+                return result;
+            }   
         }
-        public void SaveTo(in Hash160 hash)
+        public void SaveTo(RName shader, in Hash160 hash)
         {
-            ComputeShader.SaveTo(hash);
+            ComputeShader.SaveTo(shader, in hash);
         }
     }
 }

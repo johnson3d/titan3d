@@ -24,25 +24,16 @@ namespace EngineNS
                 var posStr = GetMatchPair(text, ref cur, '(', ')');
                 if (posStr == null)
                     return false;
+                result.mPosition = DVector3.FromString(posStr);
                 var segs = posStr.Split(',');
-                result.mPosition = new DVector3(System.Convert.ToDouble(segs[0]),
-                    System.Convert.ToDouble(segs[1]),
-                    System.Convert.ToDouble(segs[2]));
                 var scaleStr = GetMatchPair(text, ref cur, '(', ')');
                 if (scaleStr == null)
                     return false;
-                segs = scaleStr.Split(',');
-                result.mScale = new Vector3(System.Convert.ToSingle(segs[0]),
-                    System.Convert.ToSingle(segs[1]),
-                    System.Convert.ToSingle(segs[2]));
+                result.mScale = Vector3.FromString(scaleStr);
                 var quatStr = GetMatchPair(text, ref cur, '(', ')');
                 if (quatStr == null)
                     return false;
-                segs = quatStr.Split(',');
-                result.mQuat = new Quaternion(System.Convert.ToSingle(segs[0]),
-                    System.Convert.ToSingle(segs[1]),
-                    System.Convert.ToSingle(segs[2]),
-                    System.Convert.ToSingle(segs[3]));
+                result.mQuat = Quaternion.FromString(quatStr);
 
                 obj = result;
                 return true;
@@ -84,18 +75,18 @@ namespace EngineNS
         {
             get
             {
-                return Vector3.Equals(in mScale, in Vector3.One) == false;
+                return Vector3.Equals(in mScale, in Vector3.One).All() == false;
             }
         }
         public bool IsIdentity
         {
             get
             {
-                if (Vector3.Equals(in mScale, in Vector3.One) == false)
+                if (Vector3.Equals(in mScale, in Vector3.One).All() == false)
                     return false;
-                if (DVector3.Equals(in mPosition, in DVector3.Zero) == false)
+                if (DVector3.Equals(in mPosition, in DVector3.Zero).All() == false)
                     return false;
-                if (Quaternion.Equals(in mQuat, in Quaternion.Identity) == false)
+                if (Quaternion.Equals(in mQuat, in Quaternion.Identity).All() == false)
                     return false;
                 return true;
             }
@@ -360,12 +351,12 @@ namespace EngineNS
         }
         public void Blend(in FTransform Atom1, in FTransform Atom2, float Alpha)
         {
-            if (Alpha <= CoreDefine.Epsilon)
+            if (Alpha <= MathHelper.Epsilon)
             {
                 // if blend is all the way for child1, then just copy its bone atoms
                 this = Atom1;
             }
-            else if (Alpha >= 1.0f - CoreDefine.Epsilon)
+            else if (Alpha >= 1.0f - MathHelper.Epsilon)
             {
                 // if blend is all the way for child2, then just copy its bone atoms
                 this = Atom2;
@@ -383,9 +374,9 @@ namespace EngineNS
         }
         public void BlendWith(in FTransform OtherAtom, float Alpha)
         {
-            if (Alpha > CoreDefine.Epsilon)
+            if (Alpha > MathHelper.Epsilon)
             {
-                if (Alpha >= 1.0f - CoreDefine.Epsilon)
+                if (Alpha >= 1.0f - MathHelper.Epsilon)
                 {
                     // if blend is all the way for child2, then just copy its bone atoms
                     this = OtherAtom;
@@ -545,7 +536,7 @@ namespace EngineNS
         #endregion
 
         #region Scale
-        public Vector3 GetSafeScaleReciprocal(in Vector3 InScale, float Tolerance = CoreDefine.Epsilon)
+        public Vector3 GetSafeScaleReciprocal(in Vector3 InScale, float Tolerance = MathHelper.Epsilon)
         {
             Vector3 SafeReciprocalScale;
             if (Math.Abs(InScale.X) <= Tolerance)
@@ -674,9 +665,9 @@ namespace EngineNS
             int x = (int)tmp.X;
             int y = (int)tmp.Y;
             int z = (int)tmp.Z;
-            x = CoreDefine.Clamp(x, 0, (int)Bricks.GetLongLength(0));
-            y = CoreDefine.Clamp(y, 0, (int)Bricks.GetLongLength(1));
-            z = CoreDefine.Clamp(z, 0, (int)Bricks.GetLongLength(2));
+            x = MathHelper.Clamp(x, 0, (int)Bricks.GetLongLength(0));
+            y = MathHelper.Clamp(y, 0, (int)Bricks.GetLongLength(1));
+            z = MathHelper.Clamp(z, 0, (int)Bricks.GetLongLength(2));
 
             lock(Bricks)
             {

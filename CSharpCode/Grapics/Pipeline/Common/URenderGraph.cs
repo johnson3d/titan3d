@@ -63,11 +63,15 @@ namespace EngineNS.Graphics.Pipeline.Common
             return true;
         }
     }
-    public class URenderGraphNode : IO.BaseSerializer
+    public class URenderGraphNode : IO.BaseSerializer, IDisposable
     {
-        public virtual void Cleanup()
+        ~URenderGraphNode()
         {
-
+            Dispose();
+        }
+        public virtual void Dispose()
+        {
+            CoreSDK.DisposeObject(ref BasePass);
         }
         internal int mMaxLeafDistance = 0;
         public int MaxLeafDistance
@@ -75,6 +79,7 @@ namespace EngineNS.Graphics.Pipeline.Common
             get => mMaxLeafDistance;
         }
         public int TempRootDistance = 0;
+        public bool IsUsed { get; set; } = true;
         public bool Enable { get; set; } = true;
         private string mName;
         public virtual string Name 
@@ -89,6 +94,7 @@ namespace EngineNS.Graphics.Pipeline.Common
                 }
             }
         }
+        public UDrawBuffers BasePass = new UDrawBuffers();
         public URenderGraph RenderGraph { get; internal set; }
         protected List<URenderGraphPin> InputGraphPins { get; } = new List<URenderGraphPin>();
         protected List<URenderGraphPin> OutputGraphPins { get; } = new List<URenderGraphPin>();
@@ -189,18 +195,28 @@ namespace EngineNS.Graphics.Pipeline.Common
         {
             return RenderGraph.AttachmentCache.GetAttachement(pin.Attachement.AttachmentName, pin.Attachement);
         }
+        public bool MoveAttachment(Common.URenderGraphPin pinFrom, Common.URenderGraphPin pinTo)
+        {
+            UAttachBuffer attachment;
+            if (RenderGraph.AttachmentCache.CachedAttachments.TryGetValue(pinFrom.Attachement.AttachmentName, out attachment))
+            {
+                RenderGraph.AttachmentCache.CachedAttachments.Remove(pinFrom.Attachement.AttachmentName);
+                RenderGraph.AttachmentCache.CachedAttachments.Add(pinTo.Attachement.AttachmentName, attachment);
+                return true;
+            }
+            return false;
+        }
 
         public virtual async System.Threading.Tasks.Task Initialize(URenderPolicy policy, string debugName)
         {
-            await Thread.AsyncDummyClass.DummyFunc();
+            await Thread.TtAsyncDummyClass.DummyFunc();
         }
         public virtual void InitNodePins()
         {
             
         }
-        public virtual void FrameBuild()
+        public virtual void FrameBuild(URenderPolicy policy)
         {
-
         }
         public virtual void OnLinkIn(URenderGraphLinker linker)
         {
@@ -226,13 +242,60 @@ namespace EngineNS.Graphics.Pipeline.Common
         {
 
         }
+        public virtual void BeforeTickLogic(URenderPolicy policy)
+        {
+            
+        }
         public virtual void TickLogic(GamePlay.UWorld world, URenderPolicy policy, bool bClear)
         {
 
         }
         public virtual void TickSync(URenderPolicy policy)
         {
+            BasePass.SwapBuffer();
+        }
 
+        public void TryReleaseBufers(List<URenderGraphLinker> linkers)
+        {
+            var j = this;
+            for (int k = 0; k < j.NumOfOutput; k++)
+            {
+                var t = j.GetOutput(k);
+                RenderGraph.FindOutLinkers(t, linkers);
+                if (linkers.Count > 0)
+                {
+                    var buffer = RenderGraph.AttachmentCache.FindAttachement(t.Attachement.AttachmentName);
+                    if (buffer != null && buffer.LifeMode == UAttachBuffer.ELifeMode.Transient)
+                    {
+                        buffer.AddRef(linkers.Count);
+                    }
+                }
+                else
+                {
+                    var buffer = RenderGraph.AttachmentCache.FindAttachement(t.Attachement.AttachmentName);
+                    if (buffer != null && buffer.LifeMode == UAttachBuffer.ELifeMode.Transient)
+                    {
+                        if (buffer.RefCount == 0)
+                        {
+                            RenderGraph.AttachmentCache.RemoveAttachement(t.Attachement.AttachmentName);
+                        }
+                    }
+                }
+            }
+
+            for (int k = 0; k < j.NumOfInput; k++)
+            {
+                var t = j.GetInput(k);
+                var buffer = RenderGraph.AttachmentCache.FindAttachement(t.Attachement.AttachmentName);
+                if (buffer != null && buffer.LifeMode == UAttachBuffer.ELifeMode.Transient)
+                {
+                    var count = buffer.Release();
+                    if (count <= 0)
+                    {
+                        this.RenderGraph.AttachmentCache.RemoveAttachement(t.Attachement.AttachmentName);
+                    }
+                }
+            }
         }
         
         public void UpdateNodeDistance(URenderGraph graph, Common.URenderGraphNode root)
@@ -260,15 +323,23 @@ namespace EngineNS.Graphics.Pipeline.Common
 
     public class UAttachmentCache
     {
-        public void Cleanup()
+        public void ResetCache(bool bFree = true)
         {
-            foreach(var i in CachedAttachments)
+            if (bFree)
             {
-                i.Value.Cleanup();
+                foreach (var i in CachedAttachments)
+                {
+                    i.Value.FreeBuffer();
+                }
             }
+            
             CachedAttachments.Clear();
         }
         public Dictionary<FHashText, UAttachBuffer> CachedAttachments = new Dictionary<FHashText, UAttachBuffer>();
+        public UAttachBuffer FindAttachement(Common.URenderGraphPin pin)
+        {
+            return FindAttachement(pin.Attachement.AttachmentName);
+        }
         public UAttachBuffer FindAttachement(in FHashText name)
         {
             UAttachBuffer result;
@@ -287,8 +358,9 @@ namespace EngineNS.Graphics.Pipeline.Common
             }
             else
             {
-                result = new UAttachBuffer();
-                result.CreateBufferViews(desc.BufferViewTypes, desc);
+                //result = new UAttachBuffer();
+                //result.CreateBufferViews(in desc.BufferDesc);
+                result = UEngine.Instance.GfxDevice.AttachBufferManager.Alloc(desc.BufferDesc);
                 CachedAttachments.Add(name, result);
                 return result;
             }
@@ -303,11 +375,20 @@ namespace EngineNS.Graphics.Pipeline.Common
             CachedAttachments.Add(pin.Attachement.AttachmentName, result);
             return result;
         }
+        public void RemoveAttachement(in FHashText name)
+        {
+            UAttachBuffer result;
+            if (CachedAttachments.TryGetValue(name, out result))
+            {
+                result.FreeBuffer();
+                CachedAttachments.Remove(name);
+            }
+        }
     }
 
-    public class URenderGraph
+    public class URenderGraph : IDisposable
     {
-        public virtual void Cleanup()
+        public virtual void Dispose()
         {
             RootNode = null;
             if(NodeLayers!=null)
@@ -319,14 +400,14 @@ namespace EngineNS.Graphics.Pipeline.Common
                 NodeLayers = null;
             }
             
-            AttachmentCache.Cleanup();
+            AttachmentCache.ResetCache(true);
             foreach(var i in GraphNodes)
             {
-                i.Value.Cleanup();
+                i.Value.Dispose();
             }
             GraphNodes.Clear();
         }
-        public Common.URenderGraphNode RootNode { get; set; }
+        public Common.UCopy2SwapChainNode RootNode { get; set; }
         public Dictionary<string, Common.URenderGraphNode> GraphNodes { get; } = new Dictionary<string, Common.URenderGraphNode>();
         public List<Common.URenderGraphNode>[] NodeLayers;
         public List<URenderGraphLinker> Linkers { get; } = new List<URenderGraphLinker>();
@@ -336,6 +417,7 @@ namespace EngineNS.Graphics.Pipeline.Common
             Common.URenderGraphNode fNode;
             if (GraphNodes.TryGetValue(name, out fNode))
             {
+                Profiler.Log.WriteLine(Profiler.ELogTag.Error, "Graphics", $"Policy() node({name}) is repeated");
                 return false;
             }
             node.RenderGraph = this;
@@ -408,12 +490,41 @@ namespace EngineNS.Graphics.Pipeline.Common
             }
             return result;
         }
+        public void FindOutLinkers(URenderGraphPin outPin, List<URenderGraphLinker> result)
+        {
+            result.Clear();
+            foreach (var i in Linkers)
+            {
+                if (i.OutPin == outPin)
+                {
+                    result.Add(i);
+                }
+            }
+        }
+        private void SetUsedNode(URenderGraphNode node)
+        {
+            if (node.IsUsed)
+                return;
+            node.IsUsed = true;
+            for (int i = 0; i < node.NumOfInput; i++)
+            {
+                var lnk = this.FindInLinker(node.GetInput(i));
+                if (lnk == null)
+                    continue;
+                SetUsedNode(lnk.OutPin.HostNode);
+            }
+        }
         public void BuildGraph(ref bool hasInputError)
         {
+            if (RootNode == null)
+                return;
             foreach (var i in GraphNodes)
             {
                 i.Value.InitNodePins();
+                i.Value.IsUsed = false;
             }
+
+            SetUsedNode(RootNode);
 
             OnBuildGraph();
 
@@ -498,16 +609,18 @@ namespace EngineNS.Graphics.Pipeline.Common
         {
 
         }
-        public void FrameBuild()
+        public void FrameBuild(Graphics.Pipeline.URenderPolicy policy)
         {
             foreach (var i in GraphNodes)
             {
-                i.Value.FrameBuild();
+                if (i.Value.IsUsed == false)
+                    continue;
+                i.Value.FrameBuild(policy);
             }
         }
         public virtual void BeginTickLogic(GamePlay.UWorld world)
         {
-            FrameBuild();
+            FrameBuild(this as URenderPolicy);
 
             if (NodeLayers != null)
             {
@@ -515,6 +628,8 @@ namespace EngineNS.Graphics.Pipeline.Common
                 {
                     foreach (var j in i)
                     {
+                        if (j.IsUsed == false)
+                            continue;
                         if (j.Enable)
                             j.BeginTickLogic(world, this as URenderPolicy, true);
                     }
@@ -529,29 +644,56 @@ namespace EngineNS.Graphics.Pipeline.Common
                 {
                     foreach (var j in i)
                     {
+                        if (j.IsUsed == false)
+                            continue;
                         if (j.Enable)
                             j.EndTickLogic(world, this as URenderPolicy, true);
                     }
                 }
             }
         }
+        private List<URenderGraphLinker> mTempTryReleaseLinkers = new List<URenderGraphLinker>();
         public virtual void TickLogic(GamePlay.UWorld world)
         {
             //FrameBuild();
 
             //BeginTickLogic(world);
+            
             if (NodeLayers != null)
             {
                 foreach (var i in NodeLayers)
                 {
                     foreach(var j in i)
                     {
+                        if (j.IsUsed == false)
+                            continue;
                         if (j.Enable)
+                        {
+                            j.BeforeTickLogic((URenderPolicy)this);
+
                             j.TickLogic(world, (URenderPolicy)this, true);
+
+                            j.TryReleaseBufers(mTempTryReleaseLinkers);
+
+                            //int NunOfRefZero = 0; 
+                            //foreach (var ca in this.AttachmentCache.CachedAttachments)
+                            //{
+                            //    if(ca.Value.RefCount == 0 && ca.Value.LifeMode == UAttachBuffer.ELifeMode.Transient)
+                            //    {
+                            //        NunOfRefZero++;
+                            //    }
+                            //}
+                            //if(NunOfRefZero!=0)
+                            //{
+                            //    int xxx = 0;
+                            //}
+                        }   
                     }
                 }
             }
             //EndTickLogic(world);
+
+            mTempTryReleaseLinkers.Clear();
         }
         public virtual void TickSync()
         {
@@ -566,6 +708,7 @@ namespace EngineNS.Graphics.Pipeline.Common
                     }
                 }
             }
+            AttachmentCache.ResetCache(true);
         }
         public virtual void OnResize(float x, float y)
         {
@@ -591,7 +734,7 @@ namespace EngineNS.Graphics.Pipeline.Common
                 }
                 i.Value.OnResize((URenderPolicy)this, x, y);
             }
-            AttachmentCache.CachedAttachments.Clear();
+            AttachmentCache.ResetCache(true);
         }
         public virtual void BuildCache()
         {

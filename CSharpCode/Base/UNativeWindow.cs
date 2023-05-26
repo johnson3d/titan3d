@@ -37,6 +37,16 @@ namespace EngineNS
         partial void OnTickWindow(in Bricks.Input.Event evt);
         public void TickEvent(in Bricks.Input.Event evt)
         {
+            if (evt.Type == Bricks.Input.EventType.KEYDOWN && evt.Keyboard.Keysym.Scancode == Bricks.Input.Scancode.SCANCODE_F1)
+            {
+                unsafe
+                {
+                    IRenderDocTool.GetInstance().SetGpuDevice(UEngine.Instance.GfxDevice.RenderContext.mCoreObject);
+                    //IRenderDocTool.GetInstance().SetActiveWindow(HWindow.ToPointer());
+                    UEngine.Instance.GfxDevice.RenderCmdQueue.CaptureRenderDocFrame = true;
+                }
+            }
+
             OnTickWindow(in evt);
             
             for (int i = 0; i < Processors.Count; i++)

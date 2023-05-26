@@ -29,10 +29,17 @@ namespace EngineNS.Bricks.Procedure
     }
     public class UPgcEditor : Editor.IAssetEditor, IO.ISerializer, IRootForm, ITickable
     {
+        public int GetTickOrder()
+        {
+            return 0;
+        }
         public RName AssetName { get; set; }
         protected bool mVisible = true;
         public bool Visible { get => mVisible; set => mVisible = value; }
-        public uint DockId { get; set; }
+        uint mDockId = uint.MaxValue;
+        public uint DockId { get => mDockId; set => mDockId = value; }
+        protected ImGuiWindowClass mDockKeyClass;
+        public ImGuiWindowClass DockKeyClass => mDockKeyClass;
         public ImGuiCond_ DockCond { get; set; } = ImGuiCond_.ImGuiCond_FirstUseEver;
         public UPgcAsset EditAsset { get; private set; }
         public UGraphRenderer GraphRenderer { get; } = new UGraphRenderer();
@@ -53,12 +60,11 @@ namespace EngineNS.Bricks.Procedure
         }
         ~UPgcEditor()
         {
-            Cleanup();
+            Dispose();
         }
-        public void Cleanup()
+        public void Dispose()
         {
-            PreviewViewport?.Cleanup();
-            PreviewViewport = null;
+            CoreSDK.DisposeObject(ref PreviewViewport);
             NodePropGrid.Target = null;
         }
         public IRootForm GetRootForm()
@@ -67,8 +73,8 @@ namespace EngineNS.Bricks.Procedure
         }
         public async System.Threading.Tasks.Task<bool> Initialize()
         {
-            await EngineNS.Thread.AsyncDummyClass.DummyFunc();
-
+            await EngineNS.Thread.TtAsyncDummyClass.DummyFunc();
+            await mUnionNodeConfigRenderer.Initialize();
             var gpuDesc = new NxRHI.FGpuSystemDesc();
             unsafe
             {
@@ -109,15 +115,19 @@ namespace EngineNS.Bricks.Procedure
         }
         #endregion
         #region Tickable
-        public void TickLogic(int ellapse)
+        public void TickLogic(float ellapse)
         {
             PreviewViewport.TickLogic(ellapse);
         }
-        public void TickRender(int ellapse)
+        public void TickRender(float ellapse)
         {
             PreviewViewport.TickRender(ellapse);
         }
-        public void TickSync(int ellapse)
+        public void TickBeginFrame(float ellapse)
+        {
+
+        }
+        public void TickSync(float ellapse)
         {
             PreviewViewport.TickSync(ellapse);
         }
@@ -168,7 +178,7 @@ namespace EngineNS.Bricks.Procedure
         public void OnCloseEditor()
         {
             UEngine.Instance.TickableManager.RemoveTickable(this);
-            Cleanup();
+            Dispose();
         }
         public void OnEvent(in Bricks.Input.Event e)
         {
@@ -177,7 +187,6 @@ namespace EngineNS.Bricks.Procedure
 
         #region DrawUI
         bool mDockInitialized = false;
-        ImGuiWindowClass mDockKeyClass;
         unsafe void ResetDockspace(bool force = false)
         {
             //if (mDockInitialized)
@@ -204,19 +213,18 @@ namespace EngineNS.Bricks.Procedure
             ImGuiAPI.DockBuilderSplitNode(graphId, ImGuiDir_.ImGuiDir_Left, 0.2f, ref leftId, ref graphId);
             uint propertyId = 0;
             ImGuiAPI.DockBuilderSplitNode(graphId, ImGuiDir_.ImGuiDir_Right, 0.2f, ref propertyId, ref graphId);
+            uint unionConfigId = 0;
+            ImGuiAPI.DockBuilderSplitNode(graphId, ImGuiDir_.ImGuiDir_Right, 0.4f, ref unionConfigId, ref graphId);
             uint previewId = 0;
             ImGuiAPI.DockBuilderSplitNode(leftId, ImGuiDir_.ImGuiDir_Up, 0.3f, ref previewId, ref leftId);
 
-            ImGuiAPI.DockBuilderDockWindow(GetDockWindowName("GraphWindow"), graphId);
-            ImGuiAPI.DockBuilderDockWindow(GetDockWindowName("PreviewWindow"), previewId);
-            ImGuiAPI.DockBuilderDockWindow(GetDockWindowName("NodeProperty"), propertyId);
-            ImGuiAPI.DockBuilderDockWindow(GetDockWindowName("EditorProperty"), propertyId);
-            ImGuiAPI.DockBuilderDockWindow(GetDockWindowName("Hierarchy"), leftId);
+            ImGuiAPI.DockBuilderDockWindow(EGui.UIProxy.DockProxy.GetDockWindowName("GraphWindow", mDockKeyClass), graphId);
+            ImGuiAPI.DockBuilderDockWindow(EGui.UIProxy.DockProxy.GetDockWindowName("PreviewWindow", mDockKeyClass), previewId);
+            ImGuiAPI.DockBuilderDockWindow(EGui.UIProxy.DockProxy.GetDockWindowName("NodeProperty", mDockKeyClass), propertyId);
+            ImGuiAPI.DockBuilderDockWindow(EGui.UIProxy.DockProxy.GetDockWindowName("UnionNodeConfig", mDockKeyClass), unionConfigId);
+            ImGuiAPI.DockBuilderDockWindow(EGui.UIProxy.DockProxy.GetDockWindowName("EditorProperty", mDockKeyClass), propertyId);
+            ImGuiAPI.DockBuilderDockWindow(EGui.UIProxy.DockProxy.GetDockWindowName("Hierarchy", mDockKeyClass), leftId);
             ImGuiAPI.DockBuilderFinish(id);
-        }
-        string GetDockWindowName(string name)
-        {
-            return name + "##" + mDockKeyClass.m_ClassId;
         }
         public unsafe void OnDraw()
         {
@@ -227,7 +235,7 @@ namespace EngineNS.Bricks.Procedure
             var pivot = new Vector2(0);
             ImGuiAPI.SetNextWindowSize(in WindowSize, ImGuiCond_.ImGuiCond_FirstUseEver);
             //ImGuiAPI.SetNextWindowDockID(DockId, DockCond);
-            if (EGui.UIProxy.DockProxy.BeginMainForm(AssetName.Name, ref mVisible, ImGuiWindowFlags_.ImGuiWindowFlags_NoScrollbar))
+            if (EGui.UIProxy.DockProxy.BeginMainForm(AssetName.Name, this, ImGuiWindowFlags_.ImGuiWindowFlags_NoScrollbar))
             {
                 if (ImGuiAPI.IsWindowFocused(ImGuiFocusedFlags_.ImGuiFocusedFlags_RootAndChildWindows))
                 {
@@ -278,6 +286,7 @@ namespace EngineNS.Bricks.Procedure
             DrawPreview();
             DrawGraph();
             DrawPropertyGrid();
+            DrawUnionNodeConfig();
             //if (drawing)
             //{
             //    if (PreviewDockId != 0)
@@ -309,7 +318,7 @@ namespace EngineNS.Bricks.Procedure
         }
         private async System.Threading.Tasks.Task Compile()
         {
-            await UEngine.Instance.EventPoster.Post(() =>
+            await UEngine.Instance.EventPoster.Post((state) =>
             {
                 EditAsset.Compile(EditAsset.AssetGraph.Root);
                 return true;
@@ -319,10 +328,14 @@ namespace EngineNS.Bricks.Procedure
         {
             var size = new Vector2(-1, -1);
             bool bOpen = true;
-            if (EGui.UIProxy.DockProxy.BeginPanel(mDockKeyClass, GetDockWindowName("PreviewWindow"), ref bOpen, ImGuiWindowFlags_.ImGuiWindowFlags_None))
+            if (EGui.UIProxy.DockProxy.BeginPanel(mDockKeyClass, "PreviewWindow", ref bOpen, ImGuiWindowFlags_.ImGuiWindowFlags_None))
             {
                 if (EGui.UIProxy.CollapsingHeaderProxy.CollapsingHeader("Preview", ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_None))
                 {
+                    var winWidth = ImGuiAPI.GetWindowWidth();
+                    PreviewViewport.WindowSize = new Vector2(winWidth, winWidth);
+                    PreviewViewport.VieportType = Graphics.Pipeline.UViewportSlate.EVieportType.ChildWindow;
+                    PreviewViewport.OnDraw();
                     if (EGui.UIProxy.CollapsingHeaderProxy.CollapsingHeader("Camera", ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_DefaultOpen))
                     {
                         float v = PreviewViewport.CameraMoveSpeed;
@@ -390,7 +403,7 @@ namespace EngineNS.Bricks.Procedure
         {
             var size = new Vector2(-1, -1);
             bool bOpen = true;
-            if (EGui.UIProxy.DockProxy.BeginPanel(mDockKeyClass, GetDockWindowName("GraphWindow"), ref bOpen, ImGuiWindowFlags_.ImGuiWindowFlags_None))
+            if (EGui.UIProxy.DockProxy.BeginPanel(mDockKeyClass, "GraphWindow", ref bOpen, ImGuiWindowFlags_.ImGuiWindowFlags_None))
             {
                 GraphRenderer.OnDraw();
             }
@@ -400,13 +413,13 @@ namespace EngineNS.Bricks.Procedure
         {
             var size = new Vector2(-1, -1);
             bool editorOpen = true;
-            if (EGui.UIProxy.DockProxy.BeginPanel(mDockKeyClass, GetDockWindowName("EditorProperty"), ref editorOpen, ImGuiWindowFlags_.ImGuiWindowFlags_None))
+            if (EGui.UIProxy.DockProxy.BeginPanel(mDockKeyClass, "EditorProperty", ref editorOpen, ImGuiWindowFlags_.ImGuiWindowFlags_None))
             {
                 GraphPropGrid.OnDraw(true, false, false);
             }
             EGui.UIProxy.DockProxy.EndPanel();
             bool bOpen = true;
-            if (EGui.UIProxy.DockProxy.BeginPanel(mDockKeyClass, GetDockWindowName("NodeProperty"), ref bOpen, ImGuiWindowFlags_.ImGuiWindowFlags_None))
+            if (EGui.UIProxy.DockProxy.BeginPanel(mDockKeyClass, "NodeProperty", ref bOpen, ImGuiWindowFlags_.ImGuiWindowFlags_None))
             {
                 if (GraphRenderer.Graph != null && GraphRenderer.Graph.SelectedNodesDirty)
                 {
@@ -416,6 +429,23 @@ namespace EngineNS.Bricks.Procedure
                 NodePropGrid.OnDraw(true, false, false);
             }
             EGui.UIProxy.DockProxy.EndPanel();
+        }
+        NodeGraph.UnionNodeConfigRenderer mUnionNodeConfigRenderer = new NodeGraph.UnionNodeConfigRenderer();
+        bool mUnionNodeConfigShow = false;
+        protected void DrawUnionNodeConfig()
+        {
+            if (!mUnionNodeConfigShow)
+                return;
+            if (EGui.UIProxy.DockProxy.BeginPanel(mDockKeyClass, "UnionNodeConfig", ref mUnionNodeConfigShow, ImGuiWindowFlags_.ImGuiWindowFlags_None))
+            {
+                mUnionNodeConfigRenderer.DrawConfigPanel();
+            }
+            EGui.UIProxy.DockProxy.EndPanel();
+        }
+        public void SetConfigUnionNode(NodeGraph.IUnionNode node)
+        {
+            mUnionNodeConfigRenderer?.SetUnionNode(node);
+            mUnionNodeConfigShow = (node != null);
         }
         #endregion
     }

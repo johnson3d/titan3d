@@ -2,14 +2,6 @@
 
 namespace EngineNS
 {
-    public struct IntColor
-    {
-        public Byte R;
-        public Byte G;
-        public Byte B;
-        public Byte A;
-    };
-
     //
     // 摘要:
     //     指定已知的系统颜色。
@@ -715,27 +707,27 @@ namespace EngineNS
 
     public struct Color
     {
+        public Byte4 Value;
         public Byte R
         {
-            get;
-            set;
+            get => Value.R;
+            set => Value.R = value;
         }
         public Byte G
         {
-            get;
-            set;
+            get => Value.G;
+            set => Value.G = value;
         }
         public Byte B
         {
-            get;
-            set;
+            get => Value.B;
+            set => Value.B = value;
         }
         public Byte A
         {
-            get;
-            set;
+            get => Value.A;
+            set => Value.A = value;
         }
-
         public string Name
         {
             get
@@ -744,7 +736,7 @@ namespace EngineNS
             }
         }
 
-        public static Color FromArgb(Int32 r, Int32 g, Int32 b)
+        public static Color FromRgb(Int32 r, Int32 g, Int32 b)
         {
             var ret = new Color();
             ret.A = (byte)255;
@@ -784,18 +776,18 @@ namespace EngineNS
             ret.B = (byte)(value);
             return ret;
         }
-        public int ToArgb()
+        public uint ToArgb()
         {
-            return (((int)(B)) | ((int)(G) << 8) | ((int)(R << 16)) | ((int)(A << 24)));
+            return (((uint)(B)) | ((uint)(G) << 8) | ((uint)(R << 16)) | ((uint)(A << 24)));
         }
-        public int ToAbgr()
+        public uint ToAbgr()
         {
-            return (((int)(R)) | ((int)(G) << 8) | ((int)(B << 16)) | ((int)(A << 24)));
+            return (((uint)(R)) | ((uint)(G) << 8) | ((uint)(B << 16)) | ((uint)(A << 24)));
         }
         [Rtti.Meta]
-        public Color4 ToColor4Float()
+        public Color4f ToColor4Float()
         {
-            var result = new Color4();
+            var result = new Color4f();
             result.Alpha = (float)A / 255.0f;
             result.Red = (float)R / 255.0f;
             result.Green = (float)G / 255.0f;
@@ -812,15 +804,57 @@ namespace EngineNS
         }
         public static Color FromString(string val)
         {
-            var ret = Color.White;
-            var segs = val.Split(',');
-            if (segs.Length < 4)
-                return ret;
-            ret.R = System.Convert.ToByte(segs[0]);
-            ret.G = System.Convert.ToByte(segs[1]);
-            ret.B = System.Convert.ToByte(segs[2]);
-            ret.A = System.Convert.ToByte(segs[3]);
-            return ret;
+            //var ret = Color.White;
+            //var segs = val.Split(',');
+            //if (segs.Length < 4)
+            //    return ret;
+            //ret.R = System.Convert.ToByte(segs[0]);
+            //ret.G = System.Convert.ToByte(segs[1]);
+            //ret.B = System.Convert.ToByte(segs[2]);
+            //ret.A = System.Convert.ToByte(segs[3]);
+
+            try
+            {
+                var result = Color.White;
+                ReadOnlySpan<char> chars = val.ToCharArray();
+                int iStart = 0;
+                int j = 0;
+                for (int i = 0; i < chars.Length; i++)
+                {
+                    if (chars[i] == ',')
+                    {
+                        switch (j)
+                        {
+                            case 0:
+                                result.R = byte.Parse(chars.Slice(iStart, i - iStart));
+                                break;
+                            case 1:
+                                result.G = byte.Parse(chars.Slice(iStart, i - iStart));
+                                break;
+                            case 2:
+                                result.B = byte.Parse(chars.Slice(iStart, i - iStart));
+                                break;
+                            case 3:
+                                result.A = byte.Parse(chars.Slice(iStart, chars.Length - iStart));
+                                return result;
+                            default:
+                                break;
+                        }
+                        iStart = i + 1;
+                        j++;
+                    }
+                }
+                return result;
+                //var segs = text.Split(',');
+                //return new Vector4(System.Convert.ToSingle(segs[0]),
+                //    System.Convert.ToSingle(segs[1]),
+                //    System.Convert.ToSingle(segs[2]),
+                //    System.Convert.ToSingle(segs[3]));
+            }
+            catch
+            {
+                return Color.White;
+            }
         }
 
         #region 颜色

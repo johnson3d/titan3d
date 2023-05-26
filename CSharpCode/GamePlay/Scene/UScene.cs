@@ -172,7 +172,7 @@ namespace EngineNS.GamePlay.Scene
             }
 
             var typeStr = Rtti.UTypeDesc.TypeStr(GetType());
-            var xndHolder = new EngineNS.IO.CXndHolder(typeStr, 1, 0);
+            var xndHolder = new EngineNS.IO.TtXndHolder(typeStr, 1, 0);
             var xnd = xndHolder;
             var node = xndHolder.RootNode;
             if (SceneData != null)
@@ -180,9 +180,10 @@ namespace EngineNS.GamePlay.Scene
                 using (var dataAttr = xnd.NewAttribute(Rtti.UTypeDesc.TypeStr(SceneData.GetType()), 1, SceneDescAttributeFlags))
                 {
                     node.AddAttribute(dataAttr);
-                    var ar = dataAttr.GetWriter((ulong)SceneData.GetStructSize() * 2);
-                    ar.Write(SceneData);
-                    dataAttr.ReleaseWriter(ref ar);
+                    using (var ar = dataAttr.GetWriter((ulong)SceneData.GetStructSize() * 2))
+                    {
+                        ar.Write(SceneData);
+                    }
                 }
             }
 
@@ -192,7 +193,7 @@ namespace EngineNS.GamePlay.Scene
         }
         internal static async System.Threading.Tasks.Task<UScene> LoadScene(GamePlay.UWorld world, RName name)
         {
-            using (var xnd = IO.CXndHolder.LoadXnd(name.Address))
+            using (var xnd = IO.TtXndHolder.LoadXnd(name.Address))
             {
                 var descAttr = xnd.RootNode.mCoreObject.FindFirstAttributeByFlags(SceneDescAttributeFlags);
                 if (descAttr.NativePointer == IntPtr.Zero)
@@ -208,25 +209,24 @@ namespace EngineNS.GamePlay.Scene
                 if (scene == null)
                     return null;
 
-                var ar = descAttr.GetReader(null);
-                ar.Tag = scene;
-                IO.ISerializer desc = nodeData;
-                try
+                using (var ar = descAttr.GetReader(scene))
                 {
-                    ar.ReadTo(desc, scene);
-                    if (await scene.InitializeNode(world, nodeData, EBoundVolumeType.None, null) == false)
+                    IO.ISerializer desc = nodeData;
+                    try
                     {
-                        Profiler.Log.WriteLine(Profiler.ELogTag.Warning, "Scene", $"InitializeNode failed: NodeDataType={descAttr.Name}, NodeData={xnd.RootNode.Name}");
-                        return null;
+                        ar.ReadTo(desc, scene);
+                        if (await scene.InitializeNode(world, nodeData, EBoundVolumeType.None, null) == false)
+                        {
+                            Profiler.Log.WriteLine(Profiler.ELogTag.Warning, "Scene", $"InitializeNode failed: NodeDataType={descAttr.Name}, NodeData={xnd.RootNode.Name}");
+                            return null;
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        Profiler.Log.WriteException(ex);
+                        Profiler.Log.WriteLine(Profiler.ELogTag.Warning, "IO", $"SceneData({scene.AssetName}): load failed");
                     }
                 }
-                catch(Exception ex)
-                {
-                    Profiler.Log.WriteException(ex);
-                    Profiler.Log.WriteLine(Profiler.ELogTag.Warning, "IO", $"SceneData({scene.AssetName}): load failed");
-                }
-                ar.Tag = null;
-                descAttr.ReleaseReader(ref ar);
 
                 scene.AssetName = name;
                 if (await scene.LoadChildNode(world, scene, xnd.RootNode.mCoreObject) == false)

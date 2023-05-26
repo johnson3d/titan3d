@@ -66,6 +66,6 @@ namespace EngineNS
 {
     public partial class UEngine
     {
-        public EGui.UIProxy.UIManager UIManager { get; } = new EGui.UIProxy.UIManager();
+        public EGui.UIProxy.UIManager UIProxyManager { get; } = new EGui.UIProxy.UIManager();
     }
 }

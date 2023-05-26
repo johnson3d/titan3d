@@ -22,7 +22,7 @@ namespace EngineNS.Macross
         {
             if (Enable)
             {
-                if (Thread.ContextThread.CurrentContext.ThreadId == UEngine.Instance.ThreadMain.ThreadId)
+                if (Thread.TtContextThread.CurrentContext.ThreadId == UEngine.Instance.ThreadMain.ThreadId)
                 {//不能在主线程break住，否则没法调试了
                     return;
                 }

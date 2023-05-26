@@ -383,6 +383,12 @@ namespace EngineNS.Bricks.CodeBuilder
         }
     }
 
+    public class TtIncludeDeclaration : UStatementBase, IO.ISerializer
+    {
+        [Rtti.Meta]
+        public string FilePath { get; set; }
+    }
+
     public class UMethodArgumentDeclaration : UCodeObject, IO.ISerializer, EGui.Controls.PropertyGrid.IPropertyCustomization, NodeGraph.UEditableValue.IValueEditNotify
     {
         [Browsable(false)]
@@ -920,6 +926,21 @@ namespace EngineNS.Bricks.CodeBuilder
 
         public List<UVariableDeclaration> PreDefineVariables = new List<UVariableDeclaration>();
 
+        public List<TtIncludeDeclaration> PreIncludeHeads = new List<TtIncludeDeclaration>();
+        public void PushPreInclude(string file)
+        {
+            foreach (var i in PreIncludeHeads)
+            {
+                if(i.FilePath == file)
+                {
+                    return;
+                }
+            }
+            PreIncludeHeads.Add(new TtIncludeDeclaration()
+            {
+                FilePath = file,
+            });
+        }
 
         public string GetFullName()
         {
@@ -1437,6 +1458,21 @@ namespace EngineNS.Bricks.CodeBuilder
             Type = Rtti.UTypeDesc.TypeOf(typeof(Vector4));
             mValueStr = val.ToString();
         }
+        public UPrimitiveExpression(Vector2i val)
+        {
+            Type = Rtti.UTypeDesc.TypeOf(typeof(Vector2i));
+            mValueStr = val.ToString();
+        }
+        public UPrimitiveExpression(Vector3i val)
+        {
+            Type = Rtti.UTypeDesc.TypeOf(typeof(Vector3i));
+            mValueStr = val.ToString();
+        }
+        public UPrimitiveExpression(Vector4i val)
+        {
+            Type = Rtti.UTypeDesc.TypeOf(typeof(Vector4i));
+            mValueStr = val.ToString();
+        }
         public UPrimitiveExpression(Rtti.UTypeDesc type, object value)
         {
             Type = type;
@@ -1499,9 +1535,15 @@ namespace EngineNS.Bricks.CodeBuilder
             else if(Type.IsEqual(typeof(Vector2)))
                 return Vector2.FromString(ValueStr);
             else if (Type.IsEqual(typeof(Vector3)))
-                return Vector2.FromString(ValueStr);
+                return Vector3.FromString(ValueStr);
             else if (Type.IsEqual(typeof(Vector4)))
-                return Vector2.FromString(ValueStr);
+                return Vector4.FromString(ValueStr);
+            else if (Type.IsEqual(typeof(Vector2i)))
+                return Vector2i.FromString(ValueStr);
+            else if (Type.IsEqual(typeof(Vector3i)))
+                return Vector3i.FromString(ValueStr);
+            else if (Type.IsEqual(typeof(Vector4i)))
+                return Vector4i.FromString(ValueStr);
             else if(Type.IsEqual(typeof(RName)))
             {
                 var idxStart = ValueStr.IndexOf('(');

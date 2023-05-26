@@ -140,10 +140,37 @@ namespace EngineNS
         {
             try
             {
-                var segs = text.Split(',');
-                return new DVector3(System.Convert.ToDouble(segs[0]),
-                    System.Convert.ToDouble(segs[1]),
-                    System.Convert.ToDouble(segs[2]));
+                var result = new DVector3();
+                ReadOnlySpan<char> chars = text.ToCharArray();
+                int iStart = 0;
+                int j = 0;
+                for (int i = 0; i < chars.Length; i++)
+                {
+                    if (chars[i] == ',')
+                    {
+                        switch (j)
+                        {
+                            case 0:
+                                result.X = float.Parse(chars.Slice(iStart, i - iStart));
+                                break;
+                            case 1:
+                                result.Y = float.Parse(chars.Slice(iStart, i - iStart));
+                                break;
+                            case 2:
+                                result.Z = float.Parse(chars.Slice(iStart, chars.Length - iStart));
+                                return result;
+                            default:
+                                break;
+                        }
+                        iStart = i + 1;
+                        j++;
+                    }
+                }
+                return result;
+                //var segs = text.Split(',');
+                //return new DVector3(System.Convert.ToDouble(segs[0]),
+                //    System.Convert.ToDouble(segs[1]),
+                //    System.Convert.ToDouble(segs[2]));
             }
             catch
             {
@@ -768,19 +795,52 @@ namespace EngineNS
             TransformCoordinate(in v, in matrix, out v);
             return v;
         }
-        public static bool Equals(in DVector3 value1, in DVector3 value2, double epsilon = CoreDefine.DEpsilon)
+        public static Bool3 Equals(in DVector3 value1, in DVector3 value2, double epsilon = MathHelper.DEpsilon)
         {
-            bool reX = (Math.Abs(value1.X - value2.X) < epsilon);
-            bool reY = (Math.Abs(value1.Y - value2.Y) < epsilon);
-            bool reZ = (Math.Abs(value1.Z - value2.Z) < epsilon);
-            return (reX && reY && reZ);
+            Bool3 result;
+            result.X = (Math.Abs(value1.X - value2.X) < epsilon);
+            result.Y = (Math.Abs(value1.Y - value2.Y) < epsilon);
+            result.Z = (Math.Abs(value1.Z - value2.Z) < epsilon);
+            return result;
         }
         public bool Equals(DVector3 value)
         {
-            bool reX = (Math.Abs(X - value.X) < CoreDefine.DEpsilon);
-            bool reY = (Math.Abs(Y - value.Y) < CoreDefine.DEpsilon);
-            bool reZ = (Math.Abs(Z - value.Z) < CoreDefine.DEpsilon);
+            bool reX = (Math.Abs(X - value.X) < MathHelper.DEpsilon);
+            bool reY = (Math.Abs(Y - value.Y) < MathHelper.DEpsilon);
+            bool reZ = (Math.Abs(Z - value.Z) < MathHelper.DEpsilon);
             return (reX && reY && reZ);
+        }
+        public static Bool3 Less(in Vector3 value1, in Vector3 value2)
+        {
+            Bool3 result;
+            result.X = value1.X < value2.X;
+            result.Y = value1.Y < value2.Y;
+            result.Z = value1.Z < value2.Z;
+            return result;
+        }
+        public static Bool3 LessEqual(in DVector3 value1, in DVector3 value2)
+        {
+            Bool3 result;
+            result.X = value1.X <= value2.X;
+            result.Y = value1.Y <= value2.Y;
+            result.Z = value1.Z <= value2.Z;
+            return result;
+        }
+        public static Bool3 Great(in DVector3 value1, in DVector3 value2)
+        {
+            Bool3 result;
+            result.X = value1.X > value2.X;
+            result.Y = value1.Y > value2.Y;
+            result.Z = value1.Z > value2.Z;
+            return result;
+        }
+        public static Bool3 GreatEqual(in DVector3 value1, in DVector3 value2)
+        {
+            Bool3 result;
+            result.X = value1.X >= value2.X;
+            result.Y = value1.Y >= value2.Y;
+            result.Z = value1.Z >= value2.Z;
+            return result;
         }
     }
 }

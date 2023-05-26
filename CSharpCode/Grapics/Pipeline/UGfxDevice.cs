@@ -10,6 +10,10 @@ namespace EngineNS.Graphics.Pipeline
 {
     public partial class UGfxDevice : UModule<UEngine>
     {
+        public override int GetOrder()
+        {
+            return 0;
+        }
         public readonly NxRHI.URenderCmdQueue RenderCmdQueue = new NxRHI.URenderCmdQueue();
         public override async System.Threading.Tasks.Task<bool> Initialize(UEngine engine)
         {
@@ -78,9 +82,11 @@ namespace EngineNS.Graphics.Pipeline
             {
                 var timeOfSecend = (float)engine.CurrentTickCount * 0.001f;
                 PerFrameCBuffer.SetValue(binder.CBPerFrame.Time, in timeOfSecend);
-                var timeSin = (float)Math.Sin(timeOfSecend);
+                var fracTime = (float)(engine.CurrentTickCount % 1000) * 0.001f;
+                PerFrameCBuffer.SetValue(binder.CBPerFrame.TimeFracSecond, in fracTime);
+                var timeSin = (float)Math.Sin(fracTime * Math.PI * 2);
                 PerFrameCBuffer.SetValue(binder.CBPerFrame.TimeSin, in timeSin);
-                var timeCos = (float)Math.Cos(timeOfSecend);
+                var timeCos = (float)Math.Cos(fracTime * Math.PI * 2);
                 PerFrameCBuffer.SetValue(binder.CBPerFrame.TimeCos, in timeCos);
 
                 float elapsed = (float)engine.ElapseTickCount / 1000.0f;
@@ -92,6 +98,8 @@ namespace EngineNS.Graphics.Pipeline
             var testTime = Support.Time.GetTickCount();
             UEngine.Instance.EventPoster.TickPostTickSyncEvents(testTime);
             UEngine.Instance.GfxDevice.RenderContext.TickPostEvents();
+
+            AttachBufferManager.Tick();
         }
         public override void EndFrame(UEngine engine)
         {
@@ -103,6 +111,7 @@ namespace EngineNS.Graphics.Pipeline
 
             engine.TickableManager.RemoveTickable(RenderCmdQueue);
 
+            AttachBufferManager?.Dispose();
             TextureManager?.Cleanup();
             MaterialManager?.Cleanup();
             MaterialManager = null;
@@ -151,6 +160,9 @@ namespace EngineNS.Graphics.Pipeline
                     gpuDesc.UseRenderDoc = 1;
                 gpuDesc.CreateDebugLayer = 1;
                 gpuDesc.WindowHandle = window.ToPointer();
+                var renderDoc = engine.FileManager.GetRoot(IO.TtFileManager.ERootDir.EngineSource);
+                renderDoc += "3rd/native/renderdoc/bin/renderdoc.dll";
+                gpuDesc.RenderDocPath = VNameString.FromString(renderDoc);
                 RenderSystem = NxRHI.UGpuSystem.CreateGpuSystem(rhi, in gpuDesc);
                 if (RenderSystem == null)
                     return false;
@@ -223,6 +235,10 @@ namespace EngineNS.Graphics.Pipeline
         {
             get;
         } = new Graphics.Pipeline.UHitproxyManager();
+        public Graphics.Pipeline.TtAttachBufferManager AttachBufferManager
+        {
+            get;
+        } = new TtAttachBufferManager();
         #endregion
 
         #region GraphicsData

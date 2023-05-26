@@ -86,7 +86,7 @@ namespace EngineNS.Bricks.Procedure.Node
 
             StbImageSharp.ImageResult image = null;
 
-            using (var xnd = IO.CXndHolder.LoadXnd(ImageName.Address))
+            using (var xnd = IO.TtXndHolder.LoadXnd(ImageName.Address))
             {
                 if (xnd == null)
                     return false;
@@ -95,10 +95,11 @@ namespace EngineNS.Bricks.Procedure.Node
                 if (pngAttr.IsValidPointer == false)
                     return false;
 
-                var ar = pngAttr.GetReader(null);
                 byte[] data;
-                ar.ReadNoSize(out data, (int)pngAttr.GetReaderLength());
-                pngAttr.ReleaseReader(ref ar);
+                using (var ar = pngAttr.GetReader(null))
+                {
+                    ar.ReadNoSize(out data, (int)pngAttr.GetReaderLength());
+                }
 
                 using (var memStream = new System.IO.MemoryStream(data, false))
                 {
@@ -123,7 +124,7 @@ namespace EngineNS.Bricks.Procedure.Node
                         {
                             PixelSize = 3;
                             LineSize = 3 * image.Width;
-                            LineSize = (int)CoreDefine.Roundup((uint)LineSize, 4);
+                            LineSize = (int)MathHelper.Roundup((uint)LineSize, 4);
 
                             Float1Desc.XSize = image.Width;
                             Float1Desc.YSize = image.Height;

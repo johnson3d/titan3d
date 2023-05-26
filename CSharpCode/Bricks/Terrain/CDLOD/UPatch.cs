@@ -4,7 +4,7 @@ using System.Text;
 
 namespace EngineNS.Bricks.Terrain.CDLOD
 {
-    public class UPatch
+    public class UPatch : IDisposable
     {
         public int IndexX;
         public int IndexZ;
@@ -35,12 +35,36 @@ namespace EngineNS.Bricks.Terrain.CDLOD
         }
         ~UPatch()
         {
-            Cleanup();
+            Dispose();
         }
-        public void Cleanup()
+        public void Dispose()
         {
-            PatchCBuffer?.Dispose();
-            PatchCBuffer = null;
+            CoreSDK.DisposeObject(ref PatchCBuffer);
+            if (TerrainMesh != null)
+            {
+                foreach(var i in TerrainMesh)
+                {
+                    i.Dispose();
+                }
+                TerrainMesh = null;
+            }
+            if (WaterMesh != null)
+            {
+                foreach (var i in WaterMesh)
+                {
+                    i.Dispose();
+                }
+                WaterMesh = null;
+            }
+            if (WireFrameTerrainMesh != null)
+            {
+                foreach (var i in WireFrameTerrainMesh)
+                {
+                    i.Dispose();
+                }
+                WireFrameTerrainMesh = null;
+            }
+            CoreSDK.DisposeObject(ref GrassManager);
         }
         public void Initialize(UTerrainLevelData level, int x, int z, Bricks.Procedure.UBufferConponent HeightMap)
         {

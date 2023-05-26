@@ -4,7 +4,7 @@ using System.Text;
 
 namespace EngineNS.Graphics.Pipeline.Common
 {
-    public class UHdrShading : Shader.UShadingEnv
+    public class UHdrShading : Shader.UGraphicsShadingEnv
     {
         public UHdrShading()
         {
@@ -50,10 +50,6 @@ namespace EngineNS.Graphics.Pipeline.Common
         public UHdrNode()
         {
             Name = "HdrNode";            
-        }
-        public override void Cleanup()
-        {
-            base.Cleanup();
         }
         public override void InitNodePins()
         {

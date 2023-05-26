@@ -11,6 +11,7 @@ namespace EngineNS.GamePlay.Scene
     {
         public override bool OnTickLogic(UWorld world, URenderPolicy policy)
         {
+            this.Mesh.IsUnlit = true;
             var camPos = policy.DefaultCamera.mCoreObject.GetPosition();
             camPos = new DVector3(camPos.X, Placement.TransformRef.mPosition.Y, camPos.Z);
             if (Placement.Position != camPos)

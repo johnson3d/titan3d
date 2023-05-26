@@ -28,8 +28,16 @@ namespace EngineNS.GamePlay
         }
     }
 
-    public partial class UWorld
+    public partial class UWorld : IDisposable
     {
+        public void Dispose()
+        {
+            //Root.ClearChildren();
+            Root.DisposeWithChildren();
+            mBoundingDebugMaterial = null;
+
+            mMemberTickables.CleanupMembers(this);
+        }
         public Graphics.Pipeline.UViewportSlate CurViewport { get; set; }
         public UWorld(Graphics.Pipeline.UViewportSlate viewport)
         {
@@ -54,13 +62,6 @@ namespace EngineNS.GamePlay
 
             await mMemberTickables.InitializeMembers(this);
             return true;
-        }
-        public void Cleanup()
-        {
-            Root.ClearChildren();
-            mBoundingDebugMaterial = null;
-
-            mMemberTickables.CleanupMembers(this);
         }
         internal DVector3 mCameraOffset = DVector3.Zero;
         internal uint CameralOffsetSerialId = 1;
@@ -233,9 +234,9 @@ namespace EngineNS.GamePlay
         public bool Pause { get; set; } = false;
         public float TimeScale { get; set; } = 1.0f;
 
-        public void TickTime(int ellapseMillisecond)
+        public void TickTime(float ellapseMillisecond)
         {
-            int scaledTime = (int)Math.Truncate((float)ellapseMillisecond * TimeScale);
+            int scaledTime = (int)Math.Truncate(ellapseMillisecond * TimeScale);
             mRealtimeMillisecondSinceStartup += scaledTime;
             if (!Pause)
             {
@@ -255,7 +256,7 @@ namespace EngineNS.GamePlay
         }
         [ThreadStatic]
         private static Profiler.TimeScope ScopeTick = Profiler.TimeScopeManager.GetTimeScope(typeof(UWorld), nameof(TickLogic));
-        public virtual void TickLogic(Graphics.Pipeline.URenderPolicy policy, int ellapse)
+        public virtual void TickLogic(Graphics.Pipeline.URenderPolicy policy, float ellapse)
         {
             using (new Profiler.TimeScopeHelper(ScopeTick))
             {

@@ -4,9 +4,9 @@ using System.Text;
 
 namespace EngineNS.IO
 {
-    public partial class FileManager
+    public partial class TtFileManager
     {
-        internal FileManager()
+        internal TtFileManager()
         {
             InitDirectory();
             SetSysDir(ESystemDir.MetaData, "metadata");
@@ -45,7 +45,7 @@ namespace EngineNS.IO
         public void SetRoot(ERootDir type, string path)
         {
             Roots[(int)type] = GetValidDirectory(path);
-            IO.FileManager.SureDirectory(Roots[(int)type]);
+            IO.TtFileManager.SureDirectory(Roots[(int)type]);
         }
         public void SetSysDir(ESystemDir type, string path)
         {
@@ -256,7 +256,7 @@ namespace EngineNS.IO
         }
         public static string GetPureNameImpl(string str)
         {
-            var filename = EngineNS.IO.FileManager.GetLastestPathName(str);
+            var filename = EngineNS.IO.TtFileManager.GetLastestPathName(str);
             var pos = filename.LastIndexOf('.');
             if (pos < 0)
                 return str;
@@ -264,7 +264,7 @@ namespace EngineNS.IO
         }
         public static string GetExtName(string str)
         {
-            var filename = EngineNS.IO.FileManager.GetLastestPathName(str);
+            var filename = EngineNS.IO.TtFileManager.GetLastestPathName(str);
             var pos = filename.LastIndexOf('.');
             if (pos < 0)
                 return "";
@@ -353,12 +353,12 @@ namespace EngineNS.IO
             var xmlRoot = xml.CreateElement($"Root", xml.NamespaceURI);
             xml.AppendChild(xmlRoot);
             IO.SerializerHelper.WriteObjectMetaFields(xml, xmlRoot, obj);
-            var xmlText = IO.FileManager.GetXmlText(xml);
-            IO.FileManager.WriteAllText(file, xmlText);
+            var xmlText = IO.TtFileManager.GetXmlText(xml);
+            IO.TtFileManager.WriteAllText(file, xmlText);
         }
         public static object LoadXmlToObject(string file, System.Type type)
         {
-            var xml = IO.FileManager.LoadXml(file);
+            var xml = IO.TtFileManager.LoadXml(file);
             if (xml == null)
                 return null;
             object pThis = Rtti.UTypeDescManager.CreateInstance(type);
@@ -367,7 +367,7 @@ namespace EngineNS.IO
         }
         public static object LoadXmlToObject(string file)
         {
-            var xml = IO.FileManager.LoadXml(file);
+            var xml = IO.TtFileManager.LoadXml(file);
             if (xml == null)
                 return null;
             Rtti.UTypeDesc type = null;
@@ -387,7 +387,7 @@ namespace EngineNS.IO
         }
         public static T LoadXmlToObject<T>(string file) where T : class, new()
         {
-            var xml = IO.FileManager.LoadXml(file);
+            var xml = IO.TtFileManager.LoadXml(file);
             if (xml == null)
                 return null;
             object pThis = null;
@@ -396,7 +396,7 @@ namespace EngineNS.IO
         }
         public static bool LoadXmlToObject<T>(string file, T host) where T : class, new()
         {
-            var xml = IO.FileManager.LoadXml(file);
+            var xml = IO.TtFileManager.LoadXml(file);
             if (xml == null)
                 return false;
             object pThis = host;
@@ -433,11 +433,11 @@ namespace EngineNS.UTest
     {
         public void UnitTestEntrance()
         {
-            var path = IO.FileManager.CombinePath("abc/cda\\bad/", "fdsa/dac");
+            var path = IO.TtFileManager.CombinePath("abc/cda\\bad/", "fdsa/dac");
 
-            var path2 = IO.FileManager.CombinePath("abc/cda\\bad/", "../fdsa/dac");
+            var path2 = IO.TtFileManager.CombinePath("abc/cda\\bad/", "../fdsa/dac");
 
-            var path3 = IO.FileManager.CombinePath("abc/cda\\bad/", "/../fdsa/dac");
+            var path3 = IO.TtFileManager.CombinePath("abc/cda\\bad/", "/../fdsa/dac");
         }
     }
 }

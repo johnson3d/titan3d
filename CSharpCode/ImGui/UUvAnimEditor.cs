@@ -7,18 +7,19 @@ namespace EngineNS.EGui
     public class UUvAnimEditor : Editor.IAssetEditor, IRootForm
     {
         public RName AssetName { get; set; }
-        protected bool mVisible = true;
-        public bool Visible { get => mVisible; set => mVisible = value; }
+        public bool Visible { get; set; } = true;
         public uint DockId { get; set; }
+        ImGuiWindowClass mDockKeyClass;
+        public ImGuiWindowClass DockKeyClass => mDockKeyClass;
         public ImGuiCond_ DockCond { get; set; } = ImGuiCond_.ImGuiCond_FirstUseEver;
 
         public UUvAnim UvAnim;
         public EGui.Controls.PropertyGrid.PropertyGrid UvAnimPropGrid = new EGui.Controls.PropertyGrid.PropertyGrid();
         ~UUvAnimEditor()
         {
-            Cleanup();
+            Dispose();
         }
-        public void Cleanup()
+        public void Dispose()
         {
             UvAnimPropGrid.Target = null;
             UvAnim = null;
@@ -48,7 +49,30 @@ namespace EngineNS.EGui
         }
         public void OnCloseEditor()
         {
-            Cleanup();
+            Dispose();
+        }
+        bool mDockInitialized = false;
+        protected void ResetDockspace(bool force = false)
+        {
+            var pos = ImGuiAPI.GetCursorPos();
+            var id = ImGuiAPI.GetID(AssetName.Name + "_Dockspace");
+            mDockKeyClass.ClassId = id;
+            ImGuiAPI.DockSpace(id, Vector2.Zero, ImGuiDockNodeFlags_.ImGuiDockNodeFlags_None, mDockKeyClass);
+            if (mDockInitialized && !force)
+                return;
+            ImGuiAPI.DockBuilderRemoveNode(id);
+            ImGuiAPI.DockBuilderAddNode(id, ImGuiDockNodeFlags_.ImGuiDockNodeFlags_None);
+            ImGuiAPI.DockBuilderSetNodePos(id, pos);
+            ImGuiAPI.DockBuilderSetNodeSize(id, Vector2.One);
+            mDockInitialized = true;
+
+            var rightId = id;
+            uint leftId = 0;
+            ImGuiAPI.DockBuilderSplitNode(rightId, ImGuiDir_.ImGuiDir_Left, 0.2f, ref leftId, ref rightId);
+
+            ImGuiAPI.DockBuilderDockWindow(EGui.UIProxy.DockProxy.GetDockWindowName("Property", mDockKeyClass), leftId);
+            ImGuiAPI.DockBuilderDockWindow(EGui.UIProxy.DockProxy.GetDockWindowName("TextureView", mDockKeyClass), rightId);
+            ImGuiAPI.DockBuilderFinish(id);
         }
         public float LeftWidth = 0;
         public Vector2 WindowSize = new Vector2(800, 600);
@@ -62,35 +86,17 @@ namespace EngineNS.EGui
 
             var pivot = new Vector2(0);
             ImGuiAPI.SetNextWindowSize(in WindowSize, ImGuiCond_.ImGuiCond_FirstUseEver);
-            ImGuiAPI.SetNextWindowDockID(DockId, DockCond);
-            if (ImGuiAPI.Begin(UvAnim.AssetName.Name, ref mVisible, ImGuiWindowFlags_.ImGuiWindowFlags_None |
+            if (EGui.UIProxy.DockProxy.BeginMainForm(UvAnim.AssetName.Name, this, ImGuiWindowFlags_.ImGuiWindowFlags_None |
                 ImGuiWindowFlags_.ImGuiWindowFlags_NoSavedSettings))
             {
-                if (ImGuiAPI.IsWindowDocked())
-                {
-                    DockId = ImGuiAPI.GetWindowDockID();
-                }
                 DrawToolBar();
                 ImGuiAPI.Separator();
-                ImGuiAPI.Columns(2, null, true);
-                if (LeftWidth == 0)
-                {
-                    ImGuiAPI.SetColumnWidth(0, 300);
-                }
-                LeftWidth = ImGuiAPI.GetColumnWidth(0);
-
-                var min = ImGuiAPI.GetWindowContentRegionMin();
-                var max = ImGuiAPI.GetWindowContentRegionMin();
-
-                DrawLeft(ref min, ref max);
-                ImGuiAPI.NextColumn();
-
-                DrawRight(ref min, ref max);
-                ImGuiAPI.NextColumn();
-
-                ImGuiAPI.Columns(1, null, true);
             }
-            ImGuiAPI.End();
+            ResetDockspace();
+            EGui.UIProxy.DockProxy.EndMainForm();
+
+            DrawProperty();
+            DrawTextureView();
         }
         int CurFrameIndex = 0;
         protected void DrawToolBar()
@@ -129,14 +135,15 @@ namespace EngineNS.EGui
                 UvAnim.FrameUVs.RemoveAt(CurFrameIndex);
             }
         }
-        protected unsafe void DrawLeft(ref Vector2 min, ref Vector2 max)
+        bool mPropertyShow = true;
+        protected unsafe void DrawProperty()
         {
             var sz = new Vector2(-1);
-            if (ImGuiAPI.BeginChild("LeftView", in sz, true, ImGuiWindowFlags_.ImGuiWindowFlags_None))
+            if (EGui.UIProxy.DockProxy.BeginPanel(mDockKeyClass, "Property", ref mPropertyShow, ImGuiWindowFlags_.ImGuiWindowFlags_None))
             {
                 UvAnimPropGrid.OnDraw(true, false, false);
             }
-            ImGuiAPI.EndChild();
+            EGui.UIProxy.DockProxy.EndPanel();
         }
         bool IsMovingImage = false;
         bool IsSelectingRect = false;
@@ -145,11 +152,12 @@ namespace EngineNS.EGui
         Vector2 SelectEnd;
         bool mIsShowFrames = false;
         bool mIsWriteFrame = false;
+        bool mTextureViewShow = true;
         public bool IsShowFrames { get => mIsShowFrames; set => mIsShowFrames = value; }
-        protected unsafe void DrawRight(ref Vector2 min, ref Vector2 max)
+        protected unsafe void DrawTextureView()
         {
             var sz = new Vector2(-1);
-            if (ImGuiAPI.BeginChild("TextureView", in sz, true, ImGuiWindowFlags_.ImGuiWindowFlags_NoMove))
+            if (EGui.UIProxy.DockProxy.BeginPanel(mDockKeyClass, "TextureView", ref mTextureViewShow, ImGuiWindowFlags_.ImGuiWindowFlags_NoMove))
             {
                 var winPt = ImGuiAPI.GetWindowPos();
                 if (ImGuiAPI.IsWindowHovered(ImGuiHoveredFlags_.ImGuiHoveredFlags_None))
@@ -253,7 +261,7 @@ namespace EngineNS.EGui
                     }
                 }
             }
-            ImGuiAPI.EndChild();
+            EGui.UIProxy.DockProxy.EndPanel();
         }
         public void OnEvent(in Bricks.Input.Event e)
         {

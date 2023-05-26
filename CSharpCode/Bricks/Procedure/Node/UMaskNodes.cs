@@ -399,7 +399,7 @@ namespace EngineNS.Bricks.Procedure.Node
     {
         [EGui.Controls.PropertyGrid.PGCustomValueEditor(HideInPG = true)]
         public PinOut ClosestPin { get; set; } = new PinOut();
-        public UBufferCreator ClosestDesc { get; } = UBufferCreator.CreateInstance<USuperBuffer<Int32_3, FInt3Operator>>(-1, -1, -1);
+        public UBufferCreator ClosestDesc { get; } = UBufferCreator.CreateInstance<USuperBuffer<Vector3i, FInt3Operator>>(-1, -1, -1);
         public USdfCalculator()
         {
             SourceDesc.BufferType = Rtti.UTypeDescGetter<USuperBuffer<sbyte, FSByteOperator>>.TypeDesc;

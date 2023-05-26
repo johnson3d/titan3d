@@ -22,8 +22,8 @@ namespace EngineNS.Graphics.Pipeline.Shader
         public override void DeleteAsset(string name, RName.ERNameType type)
         {
             var address = RName.GetAddress(type, name);
-            IO.FileManager.DeleteFile(address);
-            IO.FileManager.DeleteFile(address + IO.IAssetMeta.MetaExt);
+            IO.TtFileManager.DeleteFile(address);
+            IO.TtFileManager.DeleteFile(address + IO.IAssetMeta.MetaExt);
         }
         public override bool CanRefAssetType(IO.IAssetMeta ameta)
         {
@@ -43,6 +43,7 @@ namespace EngineNS.Graphics.Pipeline.Shader
     [Rtti.Meta]
     [UMaterial.MaterialImport]
     [IO.AssetCreateMenu(MenuName = "Material")]
+    [EGui.Controls.PropertyGrid.PGCategoryFilters(ExcludeFilters = new string[] { "Misc" })]
     public partial class UMaterial : IO.ISerializer, IO.IAsset, IShaderCodeProvider
     {
         public const string AssetExt = ".material";
@@ -61,14 +62,14 @@ namespace EngineNS.Graphics.Pipeline.Shader
 	        public Vector4 vColor;
 	        public Vector2 vUV;
 	        public Vector2 vLightMap;
-	        public UInt32_4 vSkinIndex;
+	        public Vector4ui vSkinIndex;
 	        public Vector4 vSkinWeight;
-	        public UInt32_4 vTerrainIndex;
-	        public UInt32_4 vTerrainGradient;
+	        public Vector4ui vTerrainIndex;
+	        public Vector4ui vTerrainGradient;
 	        public Vector3 vInstPos;
 	        public Vector4 vInstQuat;
 	        public Vector4 vInstScale;
-	        public UInt32_4 vF4_1;
+	        public Vector4ui vF4_1;
 	        public Vector4 vF4_2;
 	        public Vector4 vF4_3;
             public uint vInstanceId;
@@ -87,11 +88,11 @@ namespace EngineNS.Graphics.Pipeline.Shader
 	        public Vector4 psCustomUV2;
 	        public Vector4 psCustomUV3;
 	        public Vector4 psCustomUV4;
-	        public UInt32_4 PointLightIndices;
-	        public UInt32_4 vF4_1;
+	        public Vector4ui PointLightIndices;
+	        public Vector4ui vF4_1;
 	        public Vector4 vF4_2;
 	        public Vector4 vF4_3;
-            public UInt32_4 SpecialData;
+            public Vector4ui SpecialData;
         }
         public class MTLOutput
         {
@@ -196,39 +197,42 @@ namespace EngineNS.Graphics.Pipeline.Shader
             }
 
             var typeStr = Rtti.UTypeDescManager.Instance.GetTypeStringFromType(this.GetType());
-            var xnd = new IO.CXndHolder(typeStr, 0, 0);
+            var xnd = new IO.TtXndHolder(typeStr, 0, 0);
             using (var attr = xnd.NewAttribute("Material", 0, 0))
             {
-                var ar = attr.GetWriter(512);
-                ar.Write(this);
-                attr.ReleaseWriter(ref ar);
+                using (var ar = attr.GetWriter(512))
+                {
+                    ar.Write(this);
+                }
                 xnd.RootNode.AddAttribute(attr);
             }
 
             xnd.SaveXnd(name.Address);
         }
-        public static bool ReloadXnd(UMaterial material, UMaterialManager manager, IO.CXndNode node)
+        public static bool ReloadXnd(UMaterial material, UMaterialManager manager, IO.TtXndNode node)
         {
             var attr = node.TryGetAttribute("Material");
             if (attr.NativePointer != IntPtr.Zero)
             {
-                var ar = attr.GetReader(null);
-                try
+                using (var ar = attr.GetReader(null))
                 {
-                    ar.ReadTo(material, null);
-                    material.UpdateShaderCode(false);
-                    material.SerialId++;
+                    try
+                    {
+                        ar.ReadTo(material, null);
+                        material.UpdateShaderCode(false);
+                        material.SerialId++;
+                    }
+                    catch (Exception ex)
+                    {
+                        Profiler.Log.WriteException(ex);
+                    }
                 }
-                catch (Exception ex)
-                {
-                    Profiler.Log.WriteException(ex);
-                }
-                attr.ReleaseReader(ref ar);
             }
             return true;
         }
         [Rtti.Meta]
         [RName.PGRName(ReadOnly = true)]
+        [Category("Option")]
         public RName AssetName
         {
             get;
@@ -253,15 +257,16 @@ namespace EngineNS.Graphics.Pipeline.Shader
         public virtual void GetDefines(List<KeyValuePair<string, string>> vars)
         {
         }
-        public static UMaterial LoadXnd(UMaterialManager manager, IO.CXndNode node)
+        public static UMaterial LoadXnd(UMaterialManager manager, IO.TtXndNode node)
         {
             IO.ISerializer result = null;
             var attr = node.TryGetAttribute("Material");
             if (attr.NativePointer != IntPtr.Zero)
             {
-                var ar = attr.GetReader(null);
-                ar.Read(out result, null);
-                attr.ReleaseReader(ref ar);
+                using (var ar = attr.GetReader(null))
+                {
+                    ar.Read(out result, null);
+                }
             }
 
             var material = result as UMaterial;
@@ -282,6 +287,7 @@ namespace EngineNS.Graphics.Pipeline.Shader
             Eye,
         }
         [Rtti.Meta]
+        [Category("Option")]
         public ELightingMode LightingMode 
         { 
             get; 
@@ -289,6 +295,7 @@ namespace EngineNS.Graphics.Pipeline.Shader
         } = ELightingMode.Stand;
         protected ERenderLayer mRenderLayer = ERenderLayer.RL_Opaque;
         [Rtti.Meta]
+        [Category("Option")]
         public ERenderLayer RenderLayer
         {
             get => mRenderLayer;
@@ -299,6 +306,7 @@ namespace EngineNS.Graphics.Pipeline.Shader
             }
         }
         [Rtti.Meta]
+        [Category("Option")]
         public bool AlphaTest
         {
             get;
@@ -325,6 +333,15 @@ namespace EngineNS.Graphics.Pipeline.Shader
 
             //Defines.AddDefine("USE_VS_UV", "1");
             //Defines.AddDefine("USE_VS_Color", "1");
+            foreach (var i in IncludeFiles)
+            {
+                var incCode = EngineNS.Editor.ShaderCompiler.UHLSLCompiler.GetIncludeCode(i);
+                if (incCode.IsValidPointer)
+                {
+                    var t = UniHash32.XXHash(incCode.GetSourceCode());
+                    sourceCode += $"//{i}:{t}\r\n";
+                }
+            }
 
             if (EmptyMaterial)
             {
@@ -445,6 +462,8 @@ namespace EngineNS.Graphics.Pipeline.Shader
                 MaterialHash = GetHash();
             }
         }
+        [Rtti.Meta(Flags = Rtti.MetaAttribute.EMetaFlags.DiscardWhenCooked)]
+        public List<string> IncludeFiles { get; set; } = new List<string>();
         #endregion
         #region Texture
         public class NameRNamePair : IO.BaseSerializer
@@ -625,6 +644,20 @@ namespace EngineNS.Graphics.Pipeline.Shader
                         HostMaterial.SerialId++;
                 }
             }
+            public bool SetValue(in Color3f v)
+            {
+                if (VarType != "float3")
+                    return false;
+                Value = v.ToVector3().ToString();
+                return true;
+            }
+            public bool SetValue(in Color4f v)
+            {
+                if (VarType != "float4")
+                    return false;
+                Value = v.ToVector4().ToString();
+                return true;
+            }
             public bool SetValue(in Vector4 v)
             {
                 if (VarType != "float4")
@@ -688,6 +721,11 @@ namespace EngineNS.Graphics.Pipeline.Shader
             if (index < 0 || index >= UsedUniformVars.Count)
                 return null;
             return UsedUniformVars[index]?.Name;
+        }
+        public void UpdateUniformVars()
+        {
+            if (PerMaterialCBuffer != null)
+                this.UpdateUniformVars(PerMaterialCBuffer, PerMaterialCBuffer.ShaderBinder);
         }
         internal unsafe virtual void UpdateUniformVars(NxRHI.UCbView cBuffer, NxRHI.FShaderBinder binder)
         {
@@ -779,7 +817,7 @@ namespace EngineNS.Graphics.Pipeline.Shader
                 return mPipeline;
             }
         }
-        private void UpdatePipeline()
+        internal void UpdatePipeline()
         {
             mPipeline = UEngine.Instance.GfxDevice.PipelineManager.GetPipelineState(UEngine.Instance.GfxDevice.RenderContext, in mPipelineDesc);
         }
@@ -841,9 +879,9 @@ namespace EngineNS.Graphics.Pipeline.Shader
         {
             Materials.Clear();
         }
-        public async System.Threading.Tasks.Task Initialize(UGfxDevice device)
+        public async Thread.Async.TtTask Initialize(UGfxDevice device)
         {
-            await Thread.AsyncDummyClass.DummyFunc();
+            await Thread.TtAsyncDummyClass.DummyFunc();
             ScreenMaterial = new UMaterial();
 
             var dsDesc = new NxRHI.FDepthStencilDesc();
@@ -857,12 +895,12 @@ namespace EngineNS.Graphics.Pipeline.Shader
         public UMaterial ScreenMaterial;
         public UMaterial PxDebugMaterial;
         public Dictionary<RName, UMaterial> Materials { get; } = new Dictionary<RName, UMaterial>();
-        public async System.Threading.Tasks.Task<UMaterial> CreateMaterial(RName rn)
+        public async Thread.Async.TtTask<UMaterial> CreateMaterial(RName rn)
         {
             UMaterial result;
-            result = await UEngine.Instance.EventPoster.Post(() =>
+            result = await UEngine.Instance.EventPoster.Post((state) =>
             {
-                using (var xnd = IO.CXndHolder.LoadXnd(rn.Address))
+                using (var xnd = IO.TtXndHolder.LoadXnd(rn.Address))
                 {
                     if (xnd != null)
                     {
@@ -882,15 +920,15 @@ namespace EngineNS.Graphics.Pipeline.Shader
 
             return result;
         }
-        public async System.Threading.Tasks.Task<bool> ReloadMaterial(RName rn)
+        public async Thread.Async.TtTask<bool> ReloadMaterial(RName rn)
         {
             UMaterial result;
             if (Materials.TryGetValue(rn, out result) == false)
                 return true;
 
-            var ok = await UEngine.Instance.EventPoster.Post(() =>
+            var ok = await UEngine.Instance.EventPoster.Post((state) =>
             {
-                using (var xnd = IO.CXndHolder.LoadXnd(rn.Address))
+                using (var xnd = IO.TtXndHolder.LoadXnd(rn.Address))
                 {
                     if (xnd != null)
                     {
@@ -917,7 +955,7 @@ namespace EngineNS.Graphics.Pipeline.Shader
 
             return ok;
         }
-        public async System.Threading.Tasks.Task<UMaterial> GetMaterial(RName rn)
+        public async Thread.Async.TtTask<UMaterial> GetMaterial(RName rn)
         {
             if (rn == null)
                 return null;
@@ -926,9 +964,9 @@ namespace EngineNS.Graphics.Pipeline.Shader
             if (Materials.TryGetValue(rn, out result))
                 return result;
 
-            result = await UEngine.Instance.EventPoster.Post(() =>
+            result = await UEngine.Instance.EventPoster.Post((state) =>
             {
-                using (var xnd = IO.CXndHolder.LoadXnd(rn.Address))
+                using (var xnd = IO.TtXndHolder.LoadXnd(rn.Address))
                 {
                     if (xnd != null)
                     {

@@ -113,9 +113,19 @@ namespace EngineNS.Graphics.Pipeline
                 return mCoreObject.mHeight;
             }
         }
+        public Vector2 JitterOffset
+        {
+            get
+            {
+                return mCoreObject.GetJitterOffset();
+            }
+            set
+            {
+                mCoreObject.SetJitterOffset(in value);
+            }
+        }
         #endregion
         #region Function
-
         public void Cleanup()
         {
             mCoreObject.Cleanup();
@@ -225,6 +235,10 @@ namespace EngineNS.Graphics.Pipeline
         {
             return mCoreObject.GetViewProjection();
         }
+        public EngineNS.Matrix GetJitterViewProjection()
+        {
+            return mCoreObject.GetJitterViewProjection();
+        }
         public EngineNS.Matrix GetViewProjectionInverse()
         {
             return mCoreObject.GetViewProjectionInverse();
@@ -235,8 +249,23 @@ namespace EngineNS.Graphics.Pipeline
         }
         public void UpdateConstBufferData(NxRHI.UGpuDevice rc)
         {
-            mCoreObject.UpdateConstBufferData(PerCameraCBuffer.mCoreObject);
+            if (PreFrameViewProjectionMatrix == null)
+            {
+                PreFrameViewProjectionMatrix = GetViewProjection();
+            }
+            if (JitterPreFrameViewProjectionMatrix == null)
+            {
+                JitterPreFrameViewProjectionMatrix = GetJitterViewProjection();
+            }
+            PerCameraCBuffer.SetMatrix(UEngine.Instance.GfxDevice.CoreShaderBinder.CBPerCamera.PreFrameViewPrjMtx, PreFrameViewProjectionMatrix.Value);
+            PerCameraCBuffer.SetMatrix(UEngine.Instance.GfxDevice.CoreShaderBinder.CBPerCamera.JitterPreFrameViewPrjMtx, JitterPreFrameViewProjectionMatrix.Value);
+            mCoreObject.UpdateConstBufferData(rc.mCoreObject, PerCameraCBuffer.mCoreObject);
+            PerCameraCBuffer.FlushDirty(false);
+            PreFrameViewProjectionMatrix = GetViewProjection();
+            JitterPreFrameViewProjectionMatrix = GetJitterViewProjection();
         }
+        Matrix? PreFrameViewProjectionMatrix = null;
+        Matrix? JitterPreFrameViewProjectionMatrix = null;
         #endregion
     }
 

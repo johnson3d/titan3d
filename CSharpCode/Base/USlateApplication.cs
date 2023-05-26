@@ -10,13 +10,13 @@ namespace EngineNS
     {
         void OnDraw();
     }
-    public interface IRootForm : IGuiModule
+    public interface IRootForm : IGuiModule, IDisposable
     {
         bool Visible { get; set; }
         uint DockId { get; set; }
+        ImGuiWindowClass DockKeyClass { get; }
         ImGuiCond_ DockCond { get; set; }
         Task<bool> Initialize();
-        void Cleanup();
     }
     public class URootFormManager
     {
@@ -92,14 +92,13 @@ namespace EngineNS
                 {
                     if (rf.Visible == false)
                         continue;
+                    rf.OnDraw();
                 }
                 else
                 {
                     RootForms.RemoveAt(i);
                     i--;
                 }
-
-                rf.OnDraw();
             }
         }
         public void ClearRootForms()
@@ -109,7 +108,7 @@ namespace EngineNS
                 IRootForm rf;
                 if (AppendForms[i].TryGetTarget(out rf))
                 {
-                    rf.Cleanup();
+                    rf.Dispose();
                 }
             }
             AppendForms.Clear();
@@ -118,7 +117,7 @@ namespace EngineNS
                 IRootForm rf;
                 if (RootForms[i].TryGetTarget(out rf))
                 {
-                    rf.Cleanup();
+                    rf.Dispose();
                 }
             }
             RootForms.Clear();
@@ -145,7 +144,7 @@ namespace EngineNS
 
         public virtual async Task<bool> InitializeApplication(NxRHI.UGpuDevice rc, RName rpName)
         {
-            await Thread.AsyncDummyClass.DummyFunc();
+            await Thread.TtAsyncDummyClass.DummyFunc();
 
             NativeWindow.InitSwapChain(rc);
             unsafe
@@ -263,7 +262,7 @@ namespace EngineNS
                 return;
             ImGuiAPI.SetCurrentContext(mImGuiContext.ToPointer());
 
-            Update((UEngine.Instance.ElapseTickCount) / 1000.0f);
+            Update((UEngine.Instance.ElapseTickCount) * 0.001f);
 
             using (new Profiler.TimeScopeHelper(ScopeOnDrawUI))
             {
@@ -312,6 +311,10 @@ namespace EngineNS
 
     public class USlateAppBase : USlateApplication, ITickable
     {
+        public int GetTickOrder()
+        {
+            return -2;
+        }
         public override void Cleanup()
         {
             UEngine.Instance.TickableManager.RemoveTickable(this);
@@ -347,15 +350,19 @@ namespace EngineNS
             UEngine.RootFormManager.DrawRootForms();
         }
         #region Tick
-        public virtual void TickLogic(int ellapse)
+        public virtual void TickLogic(float ellapse)
         {
 
         }
-        public virtual void TickRender(int ellapse)
+        public virtual void TickRender(float ellapse)
         {
 
         }
-        public virtual void TickSync(int ellapse)
+        public void TickBeginFrame(float ellapse)
+        {
+            
+        }
+        public virtual void TickSync(float ellapse)
         {
             //OnDrawSlate();
         }

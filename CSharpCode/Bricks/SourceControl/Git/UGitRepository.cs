@@ -4,7 +4,5 @@ using System.Text;
 
 namespace EngineNS.Bricks.SourceControl.Git
 {
-    public class UGitRepository : URepository
-    {
-    }
+    
 }

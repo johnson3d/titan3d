@@ -1,4 +1,5 @@
 ﻿using EngineNS.Graphics.Pipeline;
+using EngineNS.NxRHI;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -25,7 +26,7 @@ namespace EngineNS.Graphics.Mesh
         protected override string GetBaseBuilder(Bricks.CodeBuilder.Backends.UHLSLCodeGenerator codeBuilder)
         {
             string codeString = "";
-            codeBuilder.AddLine("void MdfQueueDoModifiers(inout PS_INPUT output, VS_INPUT input)", ref codeString);
+            codeBuilder.AddLine("void MdfQueueDoModifiers(inout PS_INPUT output, VS_MODIFIER input)", ref codeString);
             codeBuilder.PushSegment(ref codeString);
             {
 
@@ -103,7 +104,7 @@ namespace EngineNS.Graphics.Mesh
             string codeString = "";
             var mdfSourceName = RName.GetRName("shaders/modifier/InstancingModifier.cginc", RName.ERNameType.Engine);
             codeBuilder.AddLine($"#include \"{mdfSourceName.Address}\"", ref codeString);
-            codeBuilder.AddLine("void MdfQueueDoModifiers(inout PS_INPUT output, VS_INPUT input)", ref codeString);
+            codeBuilder.AddLine("void MdfQueueDoModifiers(inout PS_INPUT output, VS_MODIFIER input)", ref codeString);
             codeBuilder.PushSegment(ref codeString);
             {
                 codeBuilder.AddLine($"DoInstancingModifierVS(output, input);", ref codeString);
@@ -113,15 +114,16 @@ namespace EngineNS.Graphics.Mesh
             codeBuilder.AddLine("#define MDFQUEUE_FUNCTION", ref codeString);
 
             var code = Editor.ShaderCompiler.UShaderCodeManager.Instance.GetShaderCodeProvider(mdfSourceName);
-            codeBuilder.AddLine($"//Hash for {mdfSourceName}:{UniHash.APHash(code.SourceCode.TextCode)}", ref codeString);
+            codeBuilder.AddLine($"//Hash for {mdfSourceName}:{UniHash32.APHash(code.SourceCode.TextCode)}", ref codeString);
 
             SourceCode = new NxRHI.UShaderCode();
             SourceCode.TextCode = codeString;
 
             return codeString;
         }
-        public override void OnDrawCall(URenderPolicy.EShadingType shadingType, NxRHI.UGraphicDraw drawcall, URenderPolicy policy, UMesh mesh)
+        public override void OnDrawCall(URenderPolicy.EShadingType shadingType, NxRHI.UGraphicDraw drawcall, URenderPolicy policy, UMesh mesh, int atom)
         {
+            base.OnDrawCall(shadingType, drawcall, policy, mesh, atom);
             mInstanceModifier?.OnDrawCall(shadingType, drawcall, policy, mesh);
         }
     }

@@ -37,7 +37,7 @@ namespace EngineNS.Graphics.Pipeline.Common
             ResultPinOut.LifeMode = UAttachBuffer.ELifeMode.Imported;
             AddOutput(ResultPinOut, NxRHI.EBufferType.BFT_SRV | NxRHI.EBufferType.BFT_UAV);
         }
-        public unsafe override void FrameBuild()
+        public unsafe override void FrameBuild(Graphics.Pipeline.URenderPolicy policy)
         {
             var node = RenderGraph.FindNode(ProxyNodeName);
             if (node == null)

@@ -13,7 +13,7 @@ namespace EngineNS.Design
     //    private System.ComponentModel.PropertyDescriptorCollection m_Properties;
     //    public Color3Converter()
 	   // {
-		  //  Type type = typeof(Color3);
+		  //  Type type = typeof(Color3f);
     //        PropertyDescriptor[] propArray = new PropertyDescriptor[]
 		  //  {
 			 //   new FieldPropertyDescriptor(type.GetField("Red")),
@@ -48,7 +48,7 @@ namespace EngineNS.Design
 		  //  if( culture == null )
 			 //   culture = CultureInfo.CurrentCulture;
 
-		  //  Color3 color = (Color3)( value );
+		  //  Color3f color = (Color3f)( value );
 
 		  //  if( destinationType == typeof(string) && color != null )
 		  //  {
@@ -64,7 +64,7 @@ namespace EngineNS.Design
 		  //  }
 		  //  else if( destinationType == typeof(InstanceDescriptor) && color != null )
 		  //  {
-			 //   ConstructorInfo info = (typeof(Color3)).GetConstructor( new Type[] { typeof(float), typeof(float), typeof(float) } );
+			 //   ConstructorInfo info = (typeof(Color3f)).GetConstructor( new Type[] { typeof(float), typeof(float), typeof(float) } );
 			 //   if( info != null )
 				//    return new InstanceDescriptor( info, new Object[] { color.Red, color.Green, color.Blue } );
 		  //  }
@@ -90,14 +90,14 @@ namespace EngineNS.Design
 				//    uint number = 0;
 				//    if( uint.TryParse( Str,out number ) )
 				//    {
-				//	    Color4 color = new Color4( number );
-				//	    return new Color3( color.Red, color.Green, color.Blue );
+				//	    Color4f color = new Color4f( number );
+				//	    return new Color3f( color.Red, color.Green, color.Blue );
 				//    }
 
 				//    TypeConverter colorConverter = TypeDescriptor.GetConverter(typeof(Color));
     //                object colorFromStr = colorConverter.ConvertFromString( context, culture, Str );
-    //                Color4 valueColor = new Color4((Color)(colorFromStr));
-    //                return new Color3(valueColor.Red, valueColor.Green, valueColor.Blue);
+    //                Color4f valueColor = new Color4f((Color)(colorFromStr));
+    //                return new Color3f(valueColor.Red, valueColor.Green, valueColor.Blue);
 			 //   }
 			 //   else if( stringArray.Length == 3 )
 			 //   {
@@ -106,15 +106,15 @@ namespace EngineNS.Design
 				//    int blue;
 				//    if( int.TryParse( stringArray[0], out red ) && int.TryParse( stringArray[1], out green ) && int.TryParse( stringArray[2], out blue ) )
 				//    {
-    //                    Color4 color = new Color4(Color.FromArgb(red, green, blue));
-				//	    return new Color3( color.Red, color.Green, color.Blue );
+    //                    Color4f color = new Color4f(Color.FromArgb(red, green, blue));
+				//	    return new Color3f( color.Red, color.Green, color.Blue );
 				//    }
 
 				//    float r = (float)( floatConverter.ConvertFromString( context, culture, stringArray[0] ) );
 				//    float g = (float)( floatConverter.ConvertFromString( context, culture, stringArray[1] ) );
 				//    float b = (float)( floatConverter.ConvertFromString( context, culture, stringArray[2] ) );
 
-				//    return new Color3( r, g, b );
+				//    return new Color3f( r, g, b );
 			 //   }
 			 //   else
 				//    throw new ArgumentException("Invalid color format.");
@@ -137,7 +137,7 @@ namespace EngineNS.Design
 		  //  if( propertyValues == null )
 			 //   throw new ArgumentNullException( "propertyValues" );
 
-		  //  return new Color3( (float)( propertyValues["Red"] ),
+		  //  return new Color3f( (float)( propertyValues["Red"] ),
 			 //   (float)( propertyValues["Green"] ), (float)( propertyValues["Blue"] ) );
 	   // }
 

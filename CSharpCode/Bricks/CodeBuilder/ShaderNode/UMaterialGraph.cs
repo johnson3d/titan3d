@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using EngineNS.Bricks.NodeGraph;
+using System.Linq;
 
 namespace EngineNS.Bricks.CodeBuilder.ShaderNode
 {
@@ -57,9 +58,10 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode
                     }
                 }
             }
-            var kls = Rtti.UClassMetaManager.Instance.GetMetaFromFullName(typeof(Control.HLSLMethod).FullName);
+            //var kls = Rtti.UClassMetaManager.Instance.GetMetaFromFullName(typeof(Control.HLSLMethod).FullName);
+            var methods = UEngine.Instance.HLSLMethodManager.Methods;
             var funcMenu = CanvasMenus.AddMenuItem("Function", null, null);
-            foreach(var i in kls.Methods)
+            foreach(var i in methods.Values)
             {
                 var attrs = i.GetMethod().GetCustomAttributes(typeof(Bricks.CodeBuilder.ShaderNode.Control.UserCallNodeAttribute), false);
                 var menuAtts = i.GetMethod().GetCustomAttributes(typeof(ContextMenuAttribute), true);

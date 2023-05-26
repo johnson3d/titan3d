@@ -98,7 +98,7 @@ namespace EngineNS.Bricks.RenderPolicyEditor
 
             //IO.FileManager.WriteAllText(name.Address, xmlText);
 
-            IO.FileManager.SaveObjectToXml(name.Address, PolicyGraph);
+            IO.TtFileManager.SaveObjectToXml(name.Address, PolicyGraph);
         }
         [Rtti.Meta]
         public RName AssetName
@@ -112,7 +112,7 @@ namespace EngineNS.Bricks.RenderPolicyEditor
         {
             var result = new URenderPolicyAsset();
 
-            if (IO.FileManager.LoadXmlToObject(name.Address, result.PolicyGraph) == false)
+            if (IO.TtFileManager.LoadXmlToObject(name.Address, result.PolicyGraph) == false)
                 return null;
 
             result.PolicyGraph.AssetName = name;
@@ -127,7 +127,7 @@ namespace EngineNS.Bricks.RenderPolicyEditor
             {
                 if (false == policy.RegRenderNode(i.Name, i.GraphNode))
                 {
-                    policy.Cleanup();
+                    policy.Dispose();
                     return null;
                 }
             }
@@ -153,7 +153,7 @@ namespace EngineNS.Bricks.RenderPolicyEditor
             policy.BuildGraph(ref hasInputError);
             if (hasInputError)
             {
-                policy.Cleanup();
+                policy.Dispose();
                 return null;
             }
             return policy;

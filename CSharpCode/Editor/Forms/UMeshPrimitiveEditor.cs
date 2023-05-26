@@ -2,28 +2,37 @@
 using System.Collections.Generic;
 using System.Text;
 
+//using EngineNS.Graphics.Canvas;
+
 namespace EngineNS.Editor.Forms
 {
     public class UMeshPrimitiveEditor : Editor.IAssetEditor, ITickable, IRootForm
     {
+        public int GetTickOrder()
+        {
+            return 0;
+        }
         public RName AssetName { get; set; }
         protected bool mVisible = true;
         public bool Visible { get => mVisible; set => mVisible = value; }
         public uint DockId { get; set; }
+        ImGuiWindowClass mDockKeyClass;
+        public ImGuiWindowClass DockKeyClass => mDockKeyClass;
         public ImGuiCond_ DockCond { get; set; } = ImGuiCond_.ImGuiCond_FirstUseEver;
+
+        //public Graphics.Canvas.TtCanvas TestCanvas { get; set; }
 
         public Graphics.Mesh.UMeshPrimitives Mesh;
         public Editor.UPreviewViewport PreviewViewport = new Editor.UPreviewViewport();
         public EGui.Controls.PropertyGrid.PropertyGrid MeshPropGrid = new EGui.Controls.PropertyGrid.PropertyGrid();
         ~UMeshPrimitiveEditor()
         {
-            Cleanup();
+            Dispose();
         }
-        public void Cleanup()
+        public void Dispose()
         {
             Mesh = null;
-            PreviewViewport?.Cleanup();
-            PreviewViewport = null;
+            CoreSDK.DisposeObject(ref PreviewViewport);
             MeshPropGrid.Target = null;
         }
         public async System.Threading.Tasks.Task<bool> Initialize()
@@ -43,23 +52,21 @@ namespace EngineNS.Editor.Forms
 
             (viewport as Editor.UPreviewViewport).CameraController.ControlCamera(viewport.RenderPolicy.DefaultCamera);
 
+            var mtl = await UEngine.Instance.GfxDevice.MaterialManager.GetMaterial(UEngine.Instance.Config.DefaultMaterial);
             var materials = new Graphics.Pipeline.Shader.UMaterial[Mesh.mCoreObject.GetAtomNumber()];
             for (int i = 0; i < materials.Length; i++)
             {
-                materials[i] = await UEngine.Instance.GfxDevice.MaterialManager.GetMaterial(UEngine.Instance.Config.DefaultMaterial);
+                materials[i] = mtl;
             }
             var mesh = new Graphics.Mesh.UMesh();
-            
-            var ok = mesh.Initialize(Mesh, materials, Rtti.UTypeDescGetter<Graphics.Mesh.UMdfStaticMesh>.TypeDesc);
-            if (ok)
-            {
-                var meshNode = await GamePlay.Scene.UMeshNode.AddMeshNode(viewport.World, viewport.World.Root, new GamePlay.Scene.UMeshNode.UMeshNodeData(), typeof(GamePlay.UPlacement), mesh, 
-                    DVector3.Zero, Vector3.One, Quaternion.Identity);
-                meshNode.HitproxyType = Graphics.Pipeline.UHitProxy.EHitproxyType.Root;
-                meshNode.NodeData.Name = "PreviewObject";
-                meshNode.IsAcceptShadow = false;
-                meshNode.IsCastShadow = true;
-            }
+            mesh.Initialize(Mesh, materials, Rtti.UTypeDescGetter<Graphics.Mesh.UMdfStaticMesh>.TypeDesc);
+
+            var meshNode = await GamePlay.Scene.UMeshNode.AddMeshNode(viewport.World, viewport.World.Root, new GamePlay.Scene.UMeshNode.UMeshNodeData(), typeof(GamePlay.UPlacement), mesh,
+                        DVector3.Zero, Vector3.One, Quaternion.Identity);
+            meshNode.HitproxyType = Graphics.Pipeline.UHitProxy.EHitproxyType.Root;
+            meshNode.NodeData.Name = "PreviewObject";
+            meshNode.IsAcceptShadow = false;
+            meshNode.IsCastShadow = true;
 
             var aabb = mesh.MaterialMesh.Mesh.mCoreObject.mAABB;
             float radius = aabb.GetMaxSide();
@@ -82,16 +89,6 @@ namespace EngineNS.Editor.Forms
                     return false;
             }
 
-           // EngineNS.Canvas.FCanvas canvas = EngineNS.Canvas.FCanvas.CreateInstance();
-           // Graphics.Mesh.UMeshDataProvider MeshProvider = new Graphics.Mesh.UMeshDataProvider();
-
-           // var builder = MeshProvider.mCoreObject;
-           // uint streams = (uint)((1 << (int)NxRHI.EVertexStreamType.VST_Position) |
-           //     (1 << (int)NxRHI.EVertexStreamType.VST_Normal) |
-           //     (1 << (int)NxRHI.EVertexStreamType.VST_Color) |
-           //     (1 << (int)NxRHI.EVertexStreamType.VST_UV));
-          //  builder.Init(streams, false, 1);
-          //  canvas.DemoDraw(MeshProvider.mCoreObject);
             PreviewViewport.PreviewAsset = AssetName;
             PreviewViewport.Title = $"Mesh:{name}";
             PreviewViewport.OnInitialize = Initialize_PreviewMaterialInstance;
@@ -104,9 +101,31 @@ namespace EngineNS.Editor.Forms
         public void OnCloseEditor()
         {
             UEngine.Instance.TickableManager.RemoveTickable(this);
-            Cleanup();
+            Dispose();
         }
-        public float LeftWidth = 0;
+        bool mDockInitialized = false;
+        protected void ResetDockspace(bool force = false)
+        {
+            var pos = ImGuiAPI.GetCursorPos();
+            var id = ImGuiAPI.GetID(AssetName.Name + "_Dockspace");
+            mDockKeyClass.ClassId = id;
+            ImGuiAPI.DockSpace(id, Vector2.Zero, ImGuiDockNodeFlags_.ImGuiDockNodeFlags_None, mDockKeyClass);
+            if (mDockInitialized && !force)
+                return;
+            ImGuiAPI.DockBuilderRemoveNode(id);
+            ImGuiAPI.DockBuilderAddNode(id, ImGuiDockNodeFlags_.ImGuiDockNodeFlags_None);
+            ImGuiAPI.DockBuilderSetNodePos(id, pos);
+            ImGuiAPI.DockBuilderSetNodeSize(id, Vector2.One);
+            mDockInitialized = true;
+
+            var rightId = id;
+            uint leftId = 0;
+            ImGuiAPI.DockBuilderSplitNode(rightId, ImGuiDir_.ImGuiDir_Left, 0.2f, ref leftId, ref rightId);
+
+            ImGuiAPI.DockBuilderDockWindow(EGui.UIProxy.DockProxy.GetDockWindowName("Left", mDockKeyClass), leftId);
+            ImGuiAPI.DockBuilderDockWindow(EGui.UIProxy.DockProxy.GetDockWindowName("Right", mDockKeyClass), rightId);
+            ImGuiAPI.DockBuilderFinish(id);
+        }
         public Vector2 WindowPos;
         public Vector2 WindowSize = new Vector2(800, 600);
         public unsafe void OnDraw()
@@ -117,13 +136,9 @@ namespace EngineNS.Editor.Forms
             var pivot = new Vector2(0);
             ImGuiAPI.SetNextWindowSize(in WindowSize, ImGuiCond_.ImGuiCond_FirstUseEver);
             ImGuiAPI.SetNextWindowDockID(DockId, DockCond);
-            if (ImGuiAPI.Begin(Mesh.AssetName.Name, ref mVisible, ImGuiWindowFlags_.ImGuiWindowFlags_None |
+            if (EGui.UIProxy.DockProxy.BeginMainForm(Mesh.AssetName.Name, this, ImGuiWindowFlags_.ImGuiWindowFlags_None |
                 ImGuiWindowFlags_.ImGuiWindowFlags_NoSavedSettings))
             {
-                if (ImGuiAPI.IsWindowDocked())
-                {
-                    DockId = ImGuiAPI.GetWindowDockID();
-                }
                 if (ImGuiAPI.IsWindowFocused(ImGuiFocusedFlags_.ImGuiFocusedFlags_RootAndChildWindows))
                 {
                     var mainEditor = UEngine.Instance.GfxDevice.SlateApplication as Editor.UMainEditorApplication;
@@ -136,24 +151,12 @@ namespace EngineNS.Editor.Forms
                 //var sz = new Vector2(-1);
                 //ImGuiAPI.BeginChild("Client", ref sz, false, ImGuiWindowFlags_.)
                 ImGuiAPI.Separator();
-                ImGuiAPI.Columns(2, null, true);
-                if (LeftWidth == 0)
-                {
-                    ImGuiAPI.SetColumnWidth(0, 300);
-                }
-                LeftWidth = ImGuiAPI.GetColumnWidth(0);
-                var min = ImGuiAPI.GetWindowContentRegionMin();
-                var max = ImGuiAPI.GetWindowContentRegionMin();
-
-                DrawLeft(ref min, ref max);
-                ImGuiAPI.NextColumn();
-
-                DrawRight(ref min, ref max);
-                ImGuiAPI.NextColumn();
-
-                ImGuiAPI.Columns(1, null, true);
             }
-            ImGuiAPI.End();
+            ResetDockspace();
+            EGui.UIProxy.DockProxy.EndMainForm();
+
+            DrawLeft();
+            DrawRight();
         }
         protected unsafe void DrawToolBar()
         {
@@ -181,22 +184,28 @@ namespace EngineNS.Editor.Forms
                 
             }
         }
-        protected unsafe void DrawLeft(ref Vector2 min, ref Vector2 max)
+        bool mLeftShow = true;
+        protected unsafe void DrawLeft()
         {
             var sz = new Vector2(-1);
-            if (ImGuiAPI.BeginChild("LeftView", in sz, true, ImGuiWindowFlags_.ImGuiWindowFlags_None))
+            if (EGui.UIProxy.DockProxy.BeginPanel(mDockKeyClass, "Left", ref mLeftShow, ImGuiWindowFlags_.ImGuiWindowFlags_None))
             {
                 if (ImGuiAPI.CollapsingHeader("MeshProperty", ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_None))
                 {
                     MeshPropGrid.OnDraw(true, false, false);
                 }
             }
-            ImGuiAPI.EndChild();
+            EGui.UIProxy.DockProxy.EndPanel();
         }
-        protected unsafe void DrawRight(ref Vector2 min, ref Vector2 max)
+        bool mRightShow = true;
+        protected unsafe void DrawRight()
         {
-            PreviewViewport.VieportType = Graphics.Pipeline.UViewportSlate.EVieportType.ChildWindow;
-            PreviewViewport.OnDraw();
+            if (EGui.UIProxy.DockProxy.BeginPanel(mDockKeyClass, "Right", ref mRightShow, ImGuiWindowFlags_.ImGuiWindowFlags_None))
+            {
+                PreviewViewport.VieportType = Graphics.Pipeline.UViewportSlate.EVieportType.ChildWindow;
+                PreviewViewport.OnDraw();
+            }
+            EGui.UIProxy.DockProxy.EndPanel();
         }
 
         public void OnEvent(in Bricks.Input.Event e)
@@ -204,15 +213,19 @@ namespace EngineNS.Editor.Forms
             //throw new NotImplementedException();
         }
         #region Tickable
-        public void TickLogic(int ellapse)
+        public void TickLogic(float ellapse)
         {
             PreviewViewport.TickLogic(ellapse);
         }
-        public void TickRender(int ellapse)
+        public void TickRender(float ellapse)
         {
             PreviewViewport.TickRender(ellapse);
         }
-        public void TickSync(int ellapse)
+        public void TickBeginFrame(float ellapse)
+        {
+
+        }
+        public void TickSync(float ellapse)
         {
             PreviewViewport.TickSync(ellapse);
         }

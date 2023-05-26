@@ -7,54 +7,54 @@ namespace EngineNS
 {
     public partial class UEngine
     {
-        public Thread.ThreadMain ThreadMain
+        public Thread.TtThreadMain ThreadMain
         {
             get;
-        } = new Thread.ThreadMain();
+        } = new Thread.TtThreadMain();
 
-        public Thread.ThreadRHI ThreadRHI
+        public Thread.TtThreadRHI ThreadRHI
         {
             get;
-        } = new Thread.ThreadRHI();
+        } = new Thread.TtThreadRHI();
 
-        public Thread.ThreadLogic ThreadLogic
+        public Thread.TtThreadLogic ThreadLogic
         {
             get;
-        } = new Thread.ThreadLogic();
+        } = new Thread.TtThreadLogic();
 
-        public Thread.ThreadRender ThreadRender
+        public Thread.TtThreadRender ThreadRender
         {
             get;
-        } = new Thread.ThreadRender();
+        } = new Thread.TtThreadRender();
 
-        public Thread.ThreadAsync ThreadAsync
+        public Thread.TtThreadAsync ThreadAsync
         {
             get;
-        } = new Thread.ThreadAsync();
+        } = new Thread.TtThreadAsync();
 
-        public Thread.ThreadPhysics ThreadPhysics
+        public Thread.TtThreadPhysics ThreadPhysics
         {
             get;
-        } = new Thread.ThreadPhysics();
+        } = new Thread.TtThreadPhysics();
 
-        public Thread.ThreadAsyncForEditor ThreadAsyncEditor
+        public Thread.TtThreadAsyncForEditor ThreadAsyncEditor
         {
             get;
-        } = new Thread.ThreadAsyncForEditor();
+        } = new Thread.TtThreadAsyncForEditor();
         public Thread.ThreadAsyncEditorSlow ThreadAsyncEditorSlow
         {
             get;
         } = new Thread.ThreadAsyncEditorSlow();
-        public Thread.Async.UContextThreadManager EventPoster
+        public Thread.Async.TtContextThreadManager EventPoster
         {
             get
             {
                 return ContextThreadManager;
             }
         }
-        public Thread.ContextThread GetContext(Thread.Async.EAsyncTarget target)
+        public Thread.TtContextThread GetContext(Thread.Async.EAsyncTarget target)
         {
-            Thread.ContextThread ctx = null;
+            Thread.TtContextThread ctx = null;
             switch (target)
             {
                 case Thread.Async.EAsyncTarget.AsyncIO:
@@ -83,7 +83,7 @@ namespace EngineNS
         }
         public bool IsThread(Thread.Async.EAsyncTarget target)
         {
-            var ctx = Thread.ContextThread.CurrentContext;
+            var ctx = Thread.TtContextThread.CurrentContext;
             switch (target)
             {
                 case Thread.Async.EAsyncTarget.AsyncIO:
@@ -168,6 +168,7 @@ namespace EngineNS
         {
             try
             {
+                TickRenderModules();
                 for (int i = 0; i < TickableManager.Tickables.Count; i++)
                 {
                     try
@@ -198,6 +199,7 @@ namespace EngineNS
         {
             try
             {
+                TickLogicModules();
                 for (int i = 0; i < TickableManager.Tickables.Count; i++)
                 {
                     try
@@ -217,6 +219,53 @@ namespace EngineNS
                     {
                         Profiler.Log.WriteException(ex);
                     }
+                }
+            }
+            catch (Exception ex)
+            {
+                Profiler.Log.WriteException(ex);
+            }
+        }
+        public void TickBeginFrame()
+        {
+            try
+            {
+                for (int i = 0; i < TickableManager.Tickables.Count; i++)
+                {
+                    try
+                    {
+                        ITickable cur;
+                        if (TickableManager.Tickables[i].TryGetTarget(out cur))
+                        {
+                            cur.TickBeginFrame(ElapseTickCount);
+                        }
+                        else
+                        {
+                            TickableManager.Tickables.RemoveAt(i);
+                            i--;
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        Profiler.Log.WriteException(ex);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Profiler.Log.WriteException(ex);
+            }
+
+            try
+            {
+                using (new Profiler.TimeScopeHelper(ScopeDrawSlateWindow))
+                {
+                    DrawSlateWindow();
+                    UEngine.Instance.GfxDevice.SlateApplication?.OnDrawSlate();
+                }
+                if (this.PlayMode != EPlayMode.Game)
+                {
+                    UEngine.Instance.AssetMetaManager.EditorCheckShowIconTimeout();
                 }
             }
             catch (Exception ex)
@@ -271,6 +320,14 @@ namespace EngineNS
                 Profiler.Log.WriteException(ex);
             }
             GfxDevice?.TickSync();
+        }
+
+        public static async System.Threading.Tasks.Task RunCoroutine<T>(IAsyncEnumerable<T> enumerable)
+        {
+            await foreach (var it in enumerable)
+            {
+
+            }
         }
         [ThreadStatic]
         private static Profiler.TimeScope ScopeDrawSlateWindow = Profiler.TimeScopeManager.GetTimeScope(typeof(UEngine), nameof(DrawSlateWindow));

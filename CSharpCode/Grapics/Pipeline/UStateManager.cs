@@ -100,6 +100,30 @@ namespace EngineNS.Graphics.Pipeline
                 return mDefaultState;
             }
         }
+        NxRHI.USampler mLinearClampState;
+        public NxRHI.USampler LinearClampState
+        {
+            get
+            {
+                if (mLinearClampState == null)
+                {
+                    var desc = new NxRHI.FSamplerDesc();
+                    desc.SetDefault();
+                    desc.Filter = NxRHI.ESamplerFilter.SPF_MIN_MAG_MIP_LINEAR;
+                    desc.CmpMode = NxRHI.EComparisionMode.CMP_NEVER;
+                    desc.AddressU = NxRHI.EAddressMode.ADM_CLAMP;
+                    desc.AddressV = NxRHI.EAddressMode.ADM_CLAMP;
+                    desc.AddressW = NxRHI.EAddressMode.ADM_CLAMP;
+                    desc.MaxAnisotropy = 0;
+                    desc.MipLODBias = 0;
+                    desc.MinLOD = 0;
+                    desc.MaxLOD = 3.402823466e+38f;
+                    mLinearClampState = UEngine.Instance.GfxDevice.SamplerStateManager.GetPipelineState(
+                        UEngine.Instance.GfxDevice.RenderContext, in desc);
+                }
+                return mLinearClampState;
+            }
+        }
         NxRHI.USampler mPointState;
         public NxRHI.USampler PointState
         {
