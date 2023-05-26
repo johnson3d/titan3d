@@ -19,47 +19,11 @@
     <Filter Include="Compressor">
       <UniqueIdentifier>{36bb787f-91cc-474b-9ab3-9a6547381e93}</UniqueIdentifier>
     </Filter>
+    <Filter Include="decoder\tinyexr">
+      <UniqueIdentifier>{9914f5d6-5cfa-407c-96ea-ea5e11de0ed4}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="$(MSBuildThisFileDirectory)XImageBuffer.cpp">
-      <Filter>decoder</Filter>
-    </ClCompile>
-    <ClCompile Include="$(MSBuildThisFileDirectory)XImageDecoder.cpp">
-      <Filter>decoder</Filter>
-    </ClCompile>
-    <ClCompile Include="$(MSBuildThisFileDirectory)XImageDecoder_Jpg.cpp">
-      <Filter>decoder</Filter>
-    </ClCompile>
-    <ClCompile Include="$(MSBuildThisFileDirectory)XImageDecoder_Png.cpp">
-      <Filter>decoder</Filter>
-    </ClCompile>
-    <ClCompile Include="$(MSBuildThisFileDirectory)zlib-1.2.8\adler32.c">
-      <Filter>decoder\zlib</Filter>
-    </ClCompile>
-    <ClCompile Include="$(MSBuildThisFileDirectory)zlib-1.2.8\compress.c">
-      <Filter>decoder\zlib</Filter>
-    </ClCompile>
-    <ClCompile Include="$(MSBuildThisFileDirectory)zlib-1.2.8\crc32.c">
-      <Filter>decoder\zlib</Filter>
-    </ClCompile>
-    <ClCompile Include="$(MSBuildThisFileDirectory)zlib-1.2.8\deflate.c">
-      <Filter>decoder\zlib</Filter>
-    </ClCompile>
-    <ClCompile Include="$(MSBuildThisFileDirectory)zlib-1.2.8\inffast.c">
-      <Filter>decoder\zlib</Filter>
-    </ClCompile>
-    <ClCompile Include="$(MSBuildThisFileDirectory)zlib-1.2.8\inflate.c">
-      <Filter>decoder\zlib</Filter>
-    </ClCompile>
-    <ClCompile Include="$(MSBuildThisFileDirectory)zlib-1.2.8\inftrees.c">
-      <Filter>decoder\zlib</Filter>
-    </ClCompile>
-    <ClCompile Include="$(MSBuildThisFileDirectory)zlib-1.2.8\trees.c">
-      <Filter>decoder\zlib</Filter>
-    </ClCompile>
-    <ClCompile Include="$(MSBuildThisFileDirectory)zlib-1.2.8\zutil.c">
-      <Filter>decoder\zlib</Filter>
-    </ClCompile>
     <ClCompile Include="$(MSBuildThisFileDirectory)jpeg-9a\jaricom.c">
       <Filter>decoder\libjpeg9a</Filter>
     </ClCompile>
@@ -285,20 +249,11 @@
     <ClCompile Include="$(MSBuildThisFileDirectory)png\pngrutil.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="$(MSBuildThisFileDirectory)XImageBuffer.h">
-      <Filter>decoder</Filter>
-    </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)XImageDecoder.h">
-      <Filter>decoder</Filter>
-    </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)XImageDecoder_Jpg.h">
-      <Filter>decoder</Filter>
-    </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)XImageDecoder_Png.h">
-      <Filter>decoder</Filter>
-    </ClInclude>
     <ClInclude Include="$(MSBuildThisFileDirectory)stb_dxt.h">
       <Filter>Compressor</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)tinyexr\tinyexr.h">
+      <Filter>decoder\tinyexr</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

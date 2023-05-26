@@ -1,0 +1,58 @@
+﻿  bfp_LUSOL.c
+c:\program files (x86)\windows kits\8.1\include\um\winnt.h(31): fatal error C1083: 无法打开包括文件: “ctype.h”: No such file or directory
+  lp_LUSOL.c
+f:\cjgame\branches\ue4181-cj\engine\source\thirdparty\lp_solve\lp_solve\bfp\bfp_lusol\lp_lusol.c(22): fatal error C1083: 无法打开包括文件: “stdlib.h”: No such file or directory
+  lusol.c
+f:\cjgame\branches\ue4181-cj\engine\source\thirdparty\lp_solve\lp_solve\bfp\bfp_lusol\lusol\lusol.c(44): fatal error C1083: 无法打开包括文件: “stdlib.h”: No such file or directory
+  colamd.c
+f:\cjgame\branches\ue4181-cj\engine\source\thirdparty\lp_solve\lp_solve\colamd\colamd.h(66): fatal error C1083: 无法打开包括文件: “stdlib.h”: No such file or directory
+  fortify.c
+  ini.c
+f:\cjgame\branches\ue4181-cj\engine\source\thirdparty\lp_solve\lp_solve\ini.c(1): fatal error C1083: 无法打开包括文件: “stdio.h”: No such file or directory
+  lp_crash.c
+f:\cjgame\branches\ue4181-cj\engine\source\thirdparty\lp_solve\lp_solve\lp_crash.c(19): fatal error C1083: 无法打开包括文件: “string.h”: No such file or directory
+  lp_Hash.c
+f:\cjgame\branches\ue4181-cj\engine\source\thirdparty\lp_solve\lp_solve\lp_hash.c(2): fatal error C1083: 无法打开包括文件: “stdlib.h”: No such file or directory
+  lp_lib.c
+f:\cjgame\branches\ue4181-cj\engine\source\thirdparty\lp_solve\lp_solve\lp_lib.c(24): fatal error C1083: 无法打开包括文件: “signal.h”: No such file or directory
+  lp_matrix.c
+f:\cjgame\branches\ue4181-cj\engine\source\thirdparty\lp_solve\lp_solve\lp_matrix.c(2): fatal error C1083: 无法打开包括文件: “string.h”: No such file or directory
+  lp_MDO.c
+f:\cjgame\branches\ue4181-cj\engine\source\thirdparty\lp_solve\lp_solve\lp_mdo.c(21): fatal error C1083: 无法打开包括文件: “string.h”: No such file or directory
+  lp_mipbb.c
+f:\cjgame\branches\ue4181-cj\engine\source\thirdparty\lp_solve\lp_solve\lp_mipbb.c(28): fatal error C1083: 无法打开包括文件: “string.h”: No such file or directory
+  lp_MPS.c
+f:\cjgame\branches\ue4181-cj\engine\source\thirdparty\lp_solve\lp_solve\lp_mps.c(2): fatal error C1083: 无法打开包括文件: “string.h”: No such file or directory
+  lp_params.c
+f:\cjgame\branches\ue4181-cj\engine\source\thirdparty\lp_solve\lp_solve\lp_params.c(1): fatal error C1083: 无法打开包括文件: “stdio.h”: No such file or directory
+  lp_presolve.c
+f:\cjgame\branches\ue4181-cj\engine\source\thirdparty\lp_solve\lp_solve\lp_presolve.c(35): fatal error C1083: 无法打开包括文件: “string.h”: No such file or directory
+  lp_price.c
+f:\cjgame\branches\ue4181-cj\engine\source\thirdparty\lp_solve\lp_solve\lp_price.c(2): fatal error C1083: 无法打开包括文件: “string.h”: No such file or directory
+  lp_pricePSE.c
+f:\cjgame\branches\ue4181-cj\engine\source\thirdparty\lp_solve\lp_solve\lp_pricepse.c(2): fatal error C1083: 无法打开包括文件: “string.h”: No such file or directory
+  lp_report.c
+f:\cjgame\branches\ue4181-cj\engine\source\thirdparty\lp_solve\lp_solve\lp_report.c(19): fatal error C1083: 无法打开包括文件: “stdio.h”: No such file or directory
+  lp_rlp.c
+f:\cjgame\branches\ue4181-cj\engine\source\thirdparty\lp_solve\lp_solve\lp_rlp.c(30): fatal error C1083: 无法打开包括文件: “string.h”: No such file or directory
+  lp_scale.c
+f:\cjgame\branches\ue4181-cj\engine\source\thirdparty\lp_solve\lp_solve\lp_scale.c(2): fatal error C1083: 无法打开包括文件: “string.h”: No such file or directory
+  正在生成代码...
+  正在编译...
+  lp_simplex.c
+f:\cjgame\branches\ue4181-cj\engine\source\thirdparty\lp_solve\lp_solve\lp_simplex.c(26): fatal error C1083: 无法打开包括文件: “string.h”: No such file or directory
+  lp_SOS.c
+f:\cjgame\branches\ue4181-cj\engine\source\thirdparty\lp_solve\lp_solve\lp_sos.c(2): fatal error C1083: 无法打开包括文件: “string.h”: No such file or directory
+  lp_utils.c
+f:\cjgame\branches\ue4181-cj\engine\source\thirdparty\lp_solve\lp_solve\lp_utils.c(3): fatal error C1083: 无法打开包括文件: “string.h”: No such file or directory
+  lp_wlp.c
+f:\cjgame\branches\ue4181-cj\engine\source\thirdparty\lp_solve\lp_solve\lp_wlp.c(2): fatal error C1083: 无法打开包括文件: “stdio.h”: No such file or directory
+  commonlib.c
+f:\cjgame\branches\ue4181-cj\engine\source\thirdparty\lp_solve\lp_solve\shared\commonlib.c(2): fatal error C1083: 无法打开包括文件: “sys/types.h”: No such file or directory
+  mmio.c
+f:\cjgame\branches\ue4181-cj\engine\source\thirdparty\lp_solve\lp_solve\shared\mmio.c(10): fatal error C1083: 无法打开包括文件: “stdlib.h”: No such file or directory
+  myblas.c
+f:\cjgame\branches\ue4181-cj\engine\source\thirdparty\lp_solve\lp_solve\shared\myblas.c(2): fatal error C1083: 无法打开包括文件: “stdlib.h”: No such file or directory
+  yacc_read.c
+f:\cjgame\branches\ue4181-cj\engine\source\thirdparty\lp_solve\lp_solve\yacc_read.c(33): fatal error C1083: 无法打开包括文件: “string.h”: No such file or directory
+  正在生成代码...

@@ -10,962 +10,137 @@
     <Filter Include="src\FT_MODULES">
       <UniqueIdentifier>{251c2041-104f-4599-a533-416bff2e2fef}</UniqueIdentifier>
     </Filter>
-    <Filter Include="internal">
-      <UniqueIdentifier>{ddc42db6-f58c-4da5-b10d-51f421ce1a34}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="internal\type42">
-      <UniqueIdentifier>{5f2d0392-d701-42e3-8eec-cc68c1c193df}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="internal\type1">
-      <UniqueIdentifier>{149fc167-8810-4cec-b2bd-2df82f6a0ce6}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="internal\cid">
-      <UniqueIdentifier>{85147d83-b884-4a97-99f1-60d222281dd3}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="internal\truetype">
-      <UniqueIdentifier>{6c7c7036-cd60-4d2d-93a5-5ed19c190ede}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="internal\sfnt">
-      <UniqueIdentifier>{26c9a5ff-e039-44b7-9b8a-7aeb81e37563}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="internal\pshinter">
-      <UniqueIdentifier>{777727cb-0a9b-4871-ae56-8ed74c92ba9a}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="internal\psaux">
-      <UniqueIdentifier>{3e88ca5a-3dd2-4b0d-85a3-9015d676985e}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="internal\pfr">
-      <UniqueIdentifier>{e52eb1cb-28a1-4763-840c-8d85f3d45426}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="internal\pcf">
-      <UniqueIdentifier>{0454cec2-1342-4930-b04a-7cf8c8d59a4e}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="internal\lzw">
-      <UniqueIdentifier>{e0c8be99-bb10-4c68-b11d-6b592994fa44}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="internal\gzip">
-      <UniqueIdentifier>{105bf78e-2a04-4fb1-8190-f9af2761d123}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="internal\cache">
-      <UniqueIdentifier>{1de37f58-6121-4fc4-93d3-0f0f04c87073}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="internal\base">
-      <UniqueIdentifier>{ef061964-73dd-40b8-9495-4e7668171b12}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="internal\cff">
-      <UniqueIdentifier>{d26461ba-e127-4974-9631-c8f5cf204b5e}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="internal\bdf">
-      <UniqueIdentifier>{4196400e-3ca3-4cf1-b33c-11e64edbc98d}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="internal\autofit">
-      <UniqueIdentifier>{d0eb5fa2-f80b-4734-9556-83a6ce3b853c}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="internal\smooth">
-      <UniqueIdentifier>{42071e6f-294b-4a28-9a26-5922dc9a0c68}</UniqueIdentifier>
-    </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="$(MSBuildThisFileDirectory)include\config\ftheader.h">
-      <Filter>include</Filter>
-    </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)include\config\ftmodule.h">
-      <Filter>include</Filter>
-    </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)include\config\ftoption.h">
-      <Filter>include</Filter>
-    </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)include\config\ftstdlib.h">
-      <Filter>include</Filter>
-    </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)include\config\ftconfig.h">
-      <Filter>include</Filter>
-    </ClInclude>
     <ClInclude Include="$(MSBuildThisFileDirectory)include\ft2build.h">
       <Filter>include</Filter>
     </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)src\type42\t42drivr.h">
-      <Filter>internal\type42</Filter>
-    </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)src\type42\t42error.h">
-      <Filter>internal\type42</Filter>
-    </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)src\type42\t42objs.h">
-      <Filter>internal\type42</Filter>
-    </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)src\type42\t42parse.h">
-      <Filter>internal\type42</Filter>
-    </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)src\type42\t42types.h">
-      <Filter>internal\type42</Filter>
-    </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)src\type42\t42drivr.c.h">
-      <Filter>internal\type42</Filter>
-    </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)src\type42\t42objs.c.h">
-      <Filter>internal\type42</Filter>
-    </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)src\type42\t42parse.c.h">
-      <Filter>internal\type42</Filter>
-    </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)src\type1\t1afm.h">
-      <Filter>internal\type1</Filter>
-    </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)src\type1\t1driver.c.h">
-      <Filter>internal\type1</Filter>
-    </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)src\type1\t1driver.h">
-      <Filter>internal\type1</Filter>
-    </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)src\type1\t1errors.h">
-      <Filter>internal\type1</Filter>
-    </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)src\type1\t1gload.c.h">
-      <Filter>internal\type1</Filter>
-    </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)src\type1\t1gload.h">
-      <Filter>internal\type1</Filter>
-    </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)src\type1\t1load.c.h">
-      <Filter>internal\type1</Filter>
-    </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)src\type1\t1load.h">
-      <Filter>internal\type1</Filter>
-    </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)src\type1\t1objs.c.h">
-      <Filter>internal\type1</Filter>
-    </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)src\type1\t1objs.h">
-      <Filter>internal\type1</Filter>
-    </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)src\type1\t1parse.c.h">
-      <Filter>internal\type1</Filter>
-    </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)src\type1\t1parse.h">
-      <Filter>internal\type1</Filter>
-    </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)src\type1\t1tokens.h">
-      <Filter>internal\type1</Filter>
-    </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)src\type1\t1afm.c.h">
-      <Filter>internal\type1</Filter>
-    </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)src\cid\ciderrs.h">
-      <Filter>internal\cid</Filter>
-    </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)src\cid\cidgload.c.h">
-      <Filter>internal\cid</Filter>
-    </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)src\cid\cidgload.h">
-      <Filter>internal\cid</Filter>
-    </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)src\cid\cidload.c.h">
-      <Filter>internal\cid</Filter>
-    </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)src\cid\cidload.h">
-      <Filter>internal\cid</Filter>
-    </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)src\cid\cidobjs.c.h">
-      <Filter>internal\cid</Filter>
-    </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)src\cid\cidobjs.h">
-      <Filter>internal\cid</Filter>
-    </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)src\cid\cidparse.c.h">
-      <Filter>internal\cid</Filter>
-    </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)src\cid\cidparse.h">
-      <Filter>internal\cid</Filter>
-    </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)src\cid\cidriver.c.h">
-      <Filter>internal\cid</Filter>
-    </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)src\cid\cidriver.h">
-      <Filter>internal\cid</Filter>
-    </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)src\cid\cidtoken.h">
-      <Filter>internal\cid</Filter>
-    </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)src\truetype\ttdriver.c.h">
-      <Filter>internal\truetype</Filter>
-    </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)src\truetype\ttdriver.h">
-      <Filter>internal\truetype</Filter>
-    </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)src\truetype\tterrors.h">
-      <Filter>internal\truetype</Filter>
-    </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)src\truetype\ttgload.c.h">
-      <Filter>internal\truetype</Filter>
-    </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)src\truetype\ttgload.h">
-      <Filter>internal\truetype</Filter>
-    </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)src\truetype\ttgxvar.c.h">
-      <Filter>internal\truetype</Filter>
-    </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)src\truetype\ttgxvar.h">
-      <Filter>internal\truetype</Filter>
-    </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)src\truetype\ttinterp.c.h">
-      <Filter>internal\truetype</Filter>
-    </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)src\truetype\ttinterp.h">
-      <Filter>internal\truetype</Filter>
-    </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)src\truetype\ttobjs.c.h">
-      <Filter>internal\truetype</Filter>
-    </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)src\truetype\ttobjs.h">
-      <Filter>internal\truetype</Filter>
-    </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)src\truetype\ttpic.c.h">
-      <Filter>internal\truetype</Filter>
-    </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)src\truetype\ttpic.h">
-      <Filter>internal\truetype</Filter>
-    </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)src\truetype\ttpload.c.h">
-      <Filter>internal\truetype</Filter>
-    </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)src\truetype\ttpload.h">
-      <Filter>internal\truetype</Filter>
-    </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)src\truetype\ttsubpix.c.h">
-      <Filter>internal\truetype</Filter>
-    </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)src\truetype\ttsubpix.h">
-      <Filter>internal\truetype</Filter>
-    </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)src\sfnt\pngshim.c.h">
-      <Filter>internal\sfnt</Filter>
-    </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)src\sfnt\pngshim.h">
-      <Filter>internal\sfnt</Filter>
-    </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)src\sfnt\sfdriver.c.h">
-      <Filter>internal\sfnt</Filter>
-    </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)src\sfnt\sfdriver.h">
-      <Filter>internal\sfnt</Filter>
-    </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)src\sfnt\sferrors.h">
-      <Filter>internal\sfnt</Filter>
-    </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)src\sfnt\sfntpic.c.h">
-      <Filter>internal\sfnt</Filter>
-    </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)src\sfnt\sfntpic.h">
-      <Filter>internal\sfnt</Filter>
-    </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)src\sfnt\sfobjs.c.h">
-      <Filter>internal\sfnt</Filter>
-    </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)src\sfnt\sfobjs.h">
-      <Filter>internal\sfnt</Filter>
-    </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)src\sfnt\ttbdf.c.h">
-      <Filter>internal\sfnt</Filter>
-    </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)src\sfnt\ttbdf.h">
-      <Filter>internal\sfnt</Filter>
-    </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)src\sfnt\ttcmap.c.h">
-      <Filter>internal\sfnt</Filter>
-    </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)src\sfnt\ttcmap.h">
-      <Filter>internal\sfnt</Filter>
-    </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)src\sfnt\ttcmapc.h">
-      <Filter>internal\sfnt</Filter>
-    </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)src\sfnt\ttkern.c.h">
-      <Filter>internal\sfnt</Filter>
-    </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)src\sfnt\ttkern.h">
-      <Filter>internal\sfnt</Filter>
-    </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)src\sfnt\ttload.c.h">
-      <Filter>internal\sfnt</Filter>
-    </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)src\sfnt\ttload.h">
-      <Filter>internal\sfnt</Filter>
-    </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)src\sfnt\ttmtx.c.h">
-      <Filter>internal\sfnt</Filter>
-    </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)src\sfnt\ttmtx.h">
-      <Filter>internal\sfnt</Filter>
-    </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)src\sfnt\ttpost.c.h">
-      <Filter>internal\sfnt</Filter>
-    </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)src\sfnt\ttpost.h">
-      <Filter>internal\sfnt</Filter>
-    </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)src\sfnt\ttsbit.c.h">
-      <Filter>internal\sfnt</Filter>
-    </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)src\sfnt\ttsbit.h">
-      <Filter>internal\sfnt</Filter>
-    </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)src\pshinter\pshalgo.c.h">
-      <Filter>internal\pshinter</Filter>
-    </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)src\pshinter\pshalgo.h">
-      <Filter>internal\pshinter</Filter>
-    </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)src\pshinter\pshglob.c.h">
-      <Filter>internal\pshinter</Filter>
-    </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)src\pshinter\pshglob.h">
-      <Filter>internal\pshinter</Filter>
-    </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)src\pshinter\pshmod.c.h">
-      <Filter>internal\pshinter</Filter>
-    </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)src\pshinter\pshmod.h">
-      <Filter>internal\pshinter</Filter>
-    </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)src\pshinter\pshnterr.h">
-      <Filter>internal\pshinter</Filter>
-    </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)src\pshinter\pshpic.c.h">
-      <Filter>internal\pshinter</Filter>
-    </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)src\pshinter\pshpic.h">
-      <Filter>internal\pshinter</Filter>
-    </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)src\pshinter\pshrec.c.h">
-      <Filter>internal\pshinter</Filter>
-    </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)src\pshinter\pshrec.h">
-      <Filter>internal\pshinter</Filter>
-    </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)src\psaux\afmparse.c.h">
-      <Filter>internal\psaux</Filter>
-    </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)src\psaux\afmparse.h">
-      <Filter>internal\psaux</Filter>
-    </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)src\psaux\psauxerr.h">
-      <Filter>internal\psaux</Filter>
-    </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)src\psaux\psauxmod.c.h">
-      <Filter>internal\psaux</Filter>
-    </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)src\psaux\psauxmod.h">
-      <Filter>internal\psaux</Filter>
-    </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)src\psaux\psconv.c.h">
-      <Filter>internal\psaux</Filter>
-    </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)src\psaux\psconv.h">
-      <Filter>internal\psaux</Filter>
-    </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)src\psaux\psobjs.c.h">
-      <Filter>internal\psaux</Filter>
-    </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)src\psaux\psobjs.h">
-      <Filter>internal\psaux</Filter>
-    </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)src\psaux\t1cmap.c.h">
-      <Filter>internal\psaux</Filter>
-    </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)src\psaux\t1cmap.h">
-      <Filter>internal\psaux</Filter>
-    </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)src\psaux\t1decode.c.h">
-      <Filter>internal\psaux</Filter>
-    </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)src\psaux\t1decode.h">
-      <Filter>internal\psaux</Filter>
-    </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)src\pfr\pfrcmap.c.h">
-      <Filter>internal\pfr</Filter>
-    </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)src\pfr\pfrcmap.h">
-      <Filter>internal\pfr</Filter>
-    </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)src\pfr\pfrdrivr.c.h">
-      <Filter>internal\pfr</Filter>
-    </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)src\pfr\pfrdrivr.h">
-      <Filter>internal\pfr</Filter>
-    </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)src\pfr\pfrerror.h">
-      <Filter>internal\pfr</Filter>
-    </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)src\pfr\pfrgload.c.h">
-      <Filter>internal\pfr</Filter>
-    </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)src\pfr\pfrgload.h">
-      <Filter>internal\pfr</Filter>
-    </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)src\pfr\pfrload.c.h">
-      <Filter>internal\pfr</Filter>
-    </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)src\pfr\pfrload.h">
-      <Filter>internal\pfr</Filter>
-    </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)src\pfr\pfrobjs.c.h">
-      <Filter>internal\pfr</Filter>
-    </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)src\pfr\pfrobjs.h">
-      <Filter>internal\pfr</Filter>
-    </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)src\pfr\pfrsbit.c.h">
-      <Filter>internal\pfr</Filter>
-    </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)src\pfr\pfrsbit.h">
-      <Filter>internal\pfr</Filter>
-    </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)src\pfr\pfrtypes.h">
-      <Filter>internal\pfr</Filter>
-    </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)src\pcf\pcf.h">
-      <Filter>internal\pcf</Filter>
-    </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)src\pcf\pcfdrivr.c.h">
-      <Filter>internal\pcf</Filter>
-    </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)src\pcf\pcfdrivr.h">
-      <Filter>internal\pcf</Filter>
-    </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)src\pcf\pcferror.h">
-      <Filter>internal\pcf</Filter>
-    </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)src\pcf\pcfread.c.h">
-      <Filter>internal\pcf</Filter>
-    </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)src\pcf\pcfread.h">
-      <Filter>internal\pcf</Filter>
-    </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)src\pcf\pcfutil.c.h">
-      <Filter>internal\pcf</Filter>
-    </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)src\pcf\pcfutil.h">
-      <Filter>internal\pcf</Filter>
-    </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)src\lzw\ftzopen.c.h">
-      <Filter>internal\lzw</Filter>
-    </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)src\lzw\ftzopen.h">
-      <Filter>internal\lzw</Filter>
-    </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)src\gzip\adler32.c.h">
-      <Filter>internal\gzip</Filter>
-    </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)src\gzip\ftgzip.c.h">
-      <Filter>internal\gzip</Filter>
-    </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)src\gzip\infblock.c.h">
-      <Filter>internal\gzip</Filter>
-    </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)src\gzip\infblock.h">
-      <Filter>internal\gzip</Filter>
-    </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)src\gzip\infcodes.c.h">
-      <Filter>internal\gzip</Filter>
-    </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)src\gzip\infcodes.h">
-      <Filter>internal\gzip</Filter>
-    </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)src\gzip\inffixed.h">
-      <Filter>internal\gzip</Filter>
-    </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)src\gzip\inflate.c.h">
-      <Filter>internal\gzip</Filter>
-    </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)src\gzip\inftrees.c.h">
-      <Filter>internal\gzip</Filter>
-    </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)src\gzip\inftrees.h">
-      <Filter>internal\gzip</Filter>
-    </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)src\gzip\infutil.c.h">
-      <Filter>internal\gzip</Filter>
-    </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)src\gzip\infutil.h">
-      <Filter>internal\gzip</Filter>
-    </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)src\gzip\zconf.h">
-      <Filter>internal\gzip</Filter>
-    </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)src\gzip\zlib.h">
-      <Filter>internal\gzip</Filter>
-    </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)src\gzip\zutil.c.h">
-      <Filter>internal\gzip</Filter>
-    </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)src\gzip\zutil.h">
-      <Filter>internal\gzip</Filter>
-    </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)src\cache\ftcbasic.c.h">
-      <Filter>internal\cache</Filter>
-    </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)src\cache\ftccache.c.h">
-      <Filter>internal\cache</Filter>
-    </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)src\cache\ftccache.h">
-      <Filter>internal\cache</Filter>
-    </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)src\cache\ftccback.h">
-      <Filter>internal\cache</Filter>
-    </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)src\cache\ftccmap.c.h">
-      <Filter>internal\cache</Filter>
-    </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)src\cache\ftcerror.h">
-      <Filter>internal\cache</Filter>
-    </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)src\cache\ftcglyph.c.h">
-      <Filter>internal\cache</Filter>
-    </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)src\cache\ftcglyph.h">
-      <Filter>internal\cache</Filter>
-    </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)src\cache\ftcimage.c.h">
-      <Filter>internal\cache</Filter>
-    </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)src\cache\ftcimage.h">
-      <Filter>internal\cache</Filter>
-    </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)src\cache\ftcmanag.c.h">
-      <Filter>internal\cache</Filter>
-    </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)src\cache\ftcmanag.h">
-      <Filter>internal\cache</Filter>
-    </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)src\cache\ftcmru.c.h">
-      <Filter>internal\cache</Filter>
-    </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)src\cache\ftcmru.h">
-      <Filter>internal\cache</Filter>
-    </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)src\cache\ftcsbits.c.h">
-      <Filter>internal\cache</Filter>
-    </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)src\cache\ftcsbits.h">
-      <Filter>internal\cache</Filter>
-    </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)src\base\basepic.c.h">
-      <Filter>internal\base</Filter>
-    </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)src\base\basepic.h">
-      <Filter>internal\base</Filter>
-    </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)src\base\ftadvanc.c.h">
-      <Filter>internal\base</Filter>
-    </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)src\base\ftbase.h">
-      <Filter>internal\base</Filter>
-    </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)src\base\ftcalc.c.h">
-      <Filter>internal\base</Filter>
-    </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)src\base\ftdbgmem.c.h">
-      <Filter>internal\base</Filter>
-    </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)src\base\ftgloadr.c.h">
-      <Filter>internal\base</Filter>
-    </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)src\base\ftmac.c.h">
-      <Filter>internal\base</Filter>
-    </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)src\base\ftobjs.c.h">
-      <Filter>internal\base</Filter>
-    </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)src\base\ftoutln.c.h">
-      <Filter>internal\base</Filter>
-    </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)src\base\ftpic.c.h">
-      <Filter>internal\base</Filter>
-    </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)src\base\ftrfork.c.h">
-      <Filter>internal\base</Filter>
-    </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)src\base\ftsnames.c.h">
-      <Filter>internal\base</Filter>
-    </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)src\base\ftstream.c.h">
-      <Filter>internal\base</Filter>
-    </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)src\base\fttrigon.c.h">
-      <Filter>internal\base</Filter>
-    </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)src\base\ftutil.c.h">
-      <Filter>internal\base</Filter>
-    </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)src\cff\cf2arrst.c.h">
-      <Filter>internal\cff</Filter>
-    </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)src\cff\cf2arrst.h">
-      <Filter>internal\cff</Filter>
-    </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)src\cff\cf2blues.c.h">
-      <Filter>internal\cff</Filter>
-    </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)src\cff\cf2blues.h">
-      <Filter>internal\cff</Filter>
-    </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)src\cff\cf2error.c.h">
-      <Filter>internal\cff</Filter>
-    </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)src\cff\cf2error.h">
-      <Filter>internal\cff</Filter>
-    </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)src\cff\cf2fixed.h">
-      <Filter>internal\cff</Filter>
-    </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)src\cff\cf2font.c.h">
-      <Filter>internal\cff</Filter>
-    </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)src\cff\cf2font.h">
-      <Filter>internal\cff</Filter>
-    </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)src\cff\cf2ft.h">
-      <Filter>internal\cff</Filter>
-    </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)src\cff\cf2glue.h">
-      <Filter>internal\cff</Filter>
-    </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)src\cff\cf2hints.c.h">
-      <Filter>internal\cff</Filter>
-    </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)src\cff\cf2hints.h">
-      <Filter>internal\cff</Filter>
-    </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)src\cff\cf2intrp.c.h">
-      <Filter>internal\cff</Filter>
-    </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)src\cff\cf2intrp.h">
-      <Filter>internal\cff</Filter>
-    </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)src\cff\cf2read.c.h">
-      <Filter>internal\cff</Filter>
-    </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)src\cff\cf2read.h">
-      <Filter>internal\cff</Filter>
-    </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)src\cff\cf2stack.c.h">
-      <Filter>internal\cff</Filter>
-    </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)src\cff\cf2stack.h">
-      <Filter>internal\cff</Filter>
-    </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)src\cff\cf2types.h">
-      <Filter>internal\cff</Filter>
-    </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)src\cff\cffcmap.c.h">
-      <Filter>internal\cff</Filter>
-    </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)src\cff\cffcmap.h">
-      <Filter>internal\cff</Filter>
-    </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)src\cff\cffdrivr.c.h">
-      <Filter>internal\cff</Filter>
-    </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)src\cff\cffdrivr.h">
-      <Filter>internal\cff</Filter>
-    </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)src\cff\cfferrs.h">
-      <Filter>internal\cff</Filter>
-    </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)src\cff\cffgload.c.h">
-      <Filter>internal\cff</Filter>
-    </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)src\cff\cffgload.h">
-      <Filter>internal\cff</Filter>
-    </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)src\cff\cffload.c.h">
-      <Filter>internal\cff</Filter>
-    </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)src\cff\cffload.h">
-      <Filter>internal\cff</Filter>
-    </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)src\cff\cffobjs.c.h">
-      <Filter>internal\cff</Filter>
-    </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)src\cff\cffobjs.h">
-      <Filter>internal\cff</Filter>
-    </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)src\cff\cffparse.c.h">
-      <Filter>internal\cff</Filter>
-    </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)src\cff\cffparse.h">
-      <Filter>internal\cff</Filter>
-    </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)src\cff\cffpic.c.h">
-      <Filter>internal\cff</Filter>
-    </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)src\cff\cffpic.h">
-      <Filter>internal\cff</Filter>
-    </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)src\cff\cfftoken.h">
-      <Filter>internal\cff</Filter>
-    </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)src\cff\cfftypes.h">
-      <Filter>internal\cff</Filter>
-    </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)src\cff\cf2ft.c.h">
-      <Filter>internal\cff</Filter>
-    </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)src\bdf\bdfdrivr.c.h">
-      <Filter>internal\bdf</Filter>
-    </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)src\bdf\bdfdrivr.h">
-      <Filter>internal\bdf</Filter>
-    </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)src\bdf\bdferror.h">
-      <Filter>internal\bdf</Filter>
-    </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)src\bdf\bdflib.c.h">
-      <Filter>internal\bdf</Filter>
-    </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)src\autofit\afangles.c.h">
-      <Filter>internal\autofit</Filter>
-    </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)src\autofit\afangles.h">
-      <Filter>internal\autofit</Filter>
-    </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)src\autofit\afblue.c.h">
-      <Filter>internal\autofit</Filter>
-    </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)src\autofit\afblue.h">
-      <Filter>internal\autofit</Filter>
-    </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)src\autofit\afcjk.c.h">
-      <Filter>internal\autofit</Filter>
-    </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)src\autofit\afcjk.h">
-      <Filter>internal\autofit</Filter>
-    </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)src\autofit\afcover.h">
-      <Filter>internal\autofit</Filter>
-    </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)src\autofit\afdummy.c.h">
-      <Filter>internal\autofit</Filter>
-    </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)src\autofit\afdummy.h">
-      <Filter>internal\autofit</Filter>
-    </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)src\autofit\aferrors.h">
-      <Filter>internal\autofit</Filter>
-    </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)src\autofit\afglobal.c.h">
-      <Filter>internal\autofit</Filter>
-    </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)src\autofit\afglobal.h">
-      <Filter>internal\autofit</Filter>
-    </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)src\autofit\afhints.c.h">
-      <Filter>internal\autofit</Filter>
-    </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)src\autofit\afhints.h">
-      <Filter>internal\autofit</Filter>
-    </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)src\autofit\afindic.c.h">
-      <Filter>internal\autofit</Filter>
-    </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)src\autofit\afindic.h">
-      <Filter>internal\autofit</Filter>
-    </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)src\autofit\aflatin.c.h">
-      <Filter>internal\autofit</Filter>
-    </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)src\autofit\aflatin.h">
-      <Filter>internal\autofit</Filter>
-    </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)src\autofit\aflatin2.c.h">
-      <Filter>internal\autofit</Filter>
-    </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)src\autofit\aflatin2.h">
-      <Filter>internal\autofit</Filter>
-    </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)src\autofit\afloader.c.h">
-      <Filter>internal\autofit</Filter>
-    </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)src\autofit\afloader.h">
-      <Filter>internal\autofit</Filter>
-    </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)src\autofit\afmodule.c.h">
-      <Filter>internal\autofit</Filter>
-    </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)src\autofit\afmodule.h">
-      <Filter>internal\autofit</Filter>
-    </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)src\autofit\afpic.c.h">
-      <Filter>internal\autofit</Filter>
-    </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)src\autofit\afpic.h">
-      <Filter>internal\autofit</Filter>
-    </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)src\autofit\afranges.c.h">
-      <Filter>internal\autofit</Filter>
-    </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)src\autofit\afranges.h">
-      <Filter>internal\autofit</Filter>
-    </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)src\autofit\afscript.h">
-      <Filter>internal\autofit</Filter>
-    </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)src\autofit\afstyles.h">
-      <Filter>internal\autofit</Filter>
-    </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)src\autofit\aftypes.h">
-      <Filter>internal\autofit</Filter>
-    </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)src\autofit\afwarp.c.h">
-      <Filter>internal\autofit</Filter>
-    </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)src\autofit\afwarp.h">
-      <Filter>internal\autofit</Filter>
-    </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)src\autofit\afwrtsys.h">
-      <Filter>internal\autofit</Filter>
-    </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)src\autofit\autofit.c.h">
-      <Filter>internal\autofit</Filter>
-    </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)src\autofit\hbshim.c.h">
-      <Filter>internal\autofit</Filter>
-    </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)src\autofit\hbshim.h">
-      <Filter>internal\autofit</Filter>
+    <ClInclude Include="$(MSBuildThisFileDirectory)include\freetype\freetype.h">
+      <Filter>include</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="$(MSBuildThisFileDirectory)src\psnames\psmodule.c">
+    <ClCompile Include="$(MSBuildThisFileDirectory)src\base\ftbbox.c">
       <Filter>src\FT_MODULES</Filter>
     </ClCompile>
-    <ClCompile Include="$(MSBuildThisFileDirectory)src\raster\ftraster.c">
+    <ClCompile Include="$(MSBuildThisFileDirectory)src\base\ftbdf.c">
       <Filter>src\FT_MODULES</Filter>
-    </ClCompile>
-    <ClCompile Include="$(MSBuildThisFileDirectory)src\winfonts\winfnt.c">
-      <Filter>src\FT_MODULES</Filter>
-    </ClCompile>
-    <ClCompile Include="$(MSBuildThisFileDirectory)src\pfr\pfr.c">
-      <Filter>internal\pfr</Filter>
-    </ClCompile>
-    <ClCompile Include="$(MSBuildThisFileDirectory)src\psaux\psaux.c">
-      <Filter>internal\psaux</Filter>
-    </ClCompile>
-    <ClCompile Include="$(MSBuildThisFileDirectory)src\pshinter\pshinter.c">
-      <Filter>internal\pshinter</Filter>
-    </ClCompile>
-    <ClCompile Include="$(MSBuildThisFileDirectory)src\sfnt\sfnt.c">
-      <Filter>internal\sfnt</Filter>
-    </ClCompile>
-    <ClCompile Include="$(MSBuildThisFileDirectory)src\type42\type42.c">
-      <Filter>internal\type42</Filter>
-    </ClCompile>
-    <ClCompile Include="$(MSBuildThisFileDirectory)src\type1\type1.c">
-      <Filter>internal\type1</Filter>
-    </ClCompile>
-    <ClCompile Include="$(MSBuildThisFileDirectory)src\cid\type1cid.c">
-      <Filter>internal\cid</Filter>
-    </ClCompile>
-    <ClCompile Include="$(MSBuildThisFileDirectory)src\truetype\truetype.c">
-      <Filter>internal\truetype</Filter>
-    </ClCompile>
-    <ClCompile Include="$(MSBuildThisFileDirectory)src\pcf\pcf.c">
-      <Filter>internal\pcf</Filter>
-    </ClCompile>
-    <ClCompile Include="$(MSBuildThisFileDirectory)src\lzw\ftlzw.c">
-      <Filter>internal\lzw</Filter>
-    </ClCompile>
-    <ClCompile Include="$(MSBuildThisFileDirectory)src\gzip\ftgzip.c">
-      <Filter>internal\gzip</Filter>
-    </ClCompile>
-    <ClCompile Include="$(MSBuildThisFileDirectory)src\cache\ftcache.c">
-      <Filter>internal\cache</Filter>
-    </ClCompile>
-    <ClCompile Include="$(MSBuildThisFileDirectory)src\base\ftbase.c">
-      <Filter>internal\base</Filter>
     </ClCompile>
     <ClCompile Include="$(MSBuildThisFileDirectory)src\base\ftbitmap.c">
-      <Filter>internal\base</Filter>
+      <Filter>src\FT_MODULES</Filter>
     </ClCompile>
-    <ClCompile Include="$(MSBuildThisFileDirectory)src\cff\cff.c">
-      <Filter>internal\cff</Filter>
-    </ClCompile>
-    <ClCompile Include="$(MSBuildThisFileDirectory)src\bdf\bdf.c">
-      <Filter>internal\bdf</Filter>
-    </ClCompile>
-    <ClCompile Include="$(MSBuildThisFileDirectory)src\autofit\autofit.c">
-      <Filter>internal\autofit</Filter>
-    </ClCompile>
-    <ClCompile Include="$(MSBuildThisFileDirectory)src\base\ftbbox.c">
-      <Filter>internal\base</Filter>
+    <ClCompile Include="$(MSBuildThisFileDirectory)src\base\ftcid.c">
+      <Filter>src\FT_MODULES</Filter>
     </ClCompile>
     <ClCompile Include="$(MSBuildThisFileDirectory)src\base\ftfstype.c">
-      <Filter>internal\base</Filter>
+      <Filter>src\FT_MODULES</Filter>
     </ClCompile>
     <ClCompile Include="$(MSBuildThisFileDirectory)src\base\ftgasp.c">
-      <Filter>internal\base</Filter>
+      <Filter>src\FT_MODULES</Filter>
     </ClCompile>
     <ClCompile Include="$(MSBuildThisFileDirectory)src\base\ftglyph.c">
-      <Filter>internal\base</Filter>
-    </ClCompile>
-    <ClCompile Include="$(MSBuildThisFileDirectory)src\base\ftinit.c">
-      <Filter>internal\base</Filter>
-    </ClCompile>
-    <ClCompile Include="$(MSBuildThisFileDirectory)src\base\ftstroke.c">
-      <Filter>internal\base</Filter>
-    </ClCompile>
-    <ClCompile Include="$(MSBuildThisFileDirectory)src\base\ftsystem.c">
-      <Filter>internal\base</Filter>
-    </ClCompile>
-    <ClCompile Include="$(MSBuildThisFileDirectory)src\base\fttype1.c">
-      <Filter>internal\base</Filter>
-    </ClCompile>
-    <ClCompile Include="$(MSBuildThisFileDirectory)src\base\ftpfr.c">
-      <Filter>internal\base</Filter>
-    </ClCompile>
-    <ClCompile Include="$(MSBuildThisFileDirectory)src\base\ftwinfnt.c">
-      <Filter>internal\base</Filter>
-    </ClCompile>
-    <ClCompile Include="$(MSBuildThisFileDirectory)src\base\ftsynth.c">
-      <Filter>internal\base</Filter>
-    </ClCompile>
-    <ClCompile Include="$(MSBuildThisFileDirectory)src\base\ftpatent.c">
-      <Filter>internal\base</Filter>
-    </ClCompile>
-    <ClCompile Include="$(MSBuildThisFileDirectory)src\base\ftmm.c">
-      <Filter>internal\base</Filter>
+      <Filter>src\FT_MODULES</Filter>
     </ClCompile>
     <ClCompile Include="$(MSBuildThisFileDirectory)src\base\ftgxval.c">
-      <Filter>internal\base</Filter>
+      <Filter>src\FT_MODULES</Filter>
     </ClCompile>
-    <ClCompile Include="$(MSBuildThisFileDirectory)src\base\ftfntfmt.c">
-      <Filter>internal\base</Filter>
-    </ClCompile>
-    <ClCompile Include="$(MSBuildThisFileDirectory)src\base\ftlcdfil.c">
-      <Filter>internal\base</Filter>
+    <ClCompile Include="$(MSBuildThisFileDirectory)src\base\ftmm.c">
+      <Filter>src\FT_MODULES</Filter>
     </ClCompile>
     <ClCompile Include="$(MSBuildThisFileDirectory)src\base\ftotval.c">
-      <Filter>internal\base</Filter>
+      <Filter>src\FT_MODULES</Filter>
     </ClCompile>
-    <ClCompile Include="$(MSBuildThisFileDirectory)src\smooth\ftsmooth.c">
-      <Filter>internal\smooth</Filter>
+    <ClCompile Include="$(MSBuildThisFileDirectory)src\base\ftpatent.c">
+      <Filter>src\FT_MODULES</Filter>
     </ClCompile>
-    <ClCompile Include="$(MSBuildThisFileDirectory)src\smooth\ftgrays.c">
-      <Filter>internal\smooth</Filter>
+    <ClCompile Include="$(MSBuildThisFileDirectory)src\base\ftpfr.c">
+      <Filter>src\FT_MODULES</Filter>
     </ClCompile>
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="$(MSBuildThisFileDirectory)src\sfnt\rules.mk">
-      <Filter>internal\sfnt</Filter>
-    </None>
-    <None Include="$(MSBuildThisFileDirectory)src\autofit\afblue.cin">
-      <Filter>internal\autofit</Filter>
-    </None>
-    <None Include="$(MSBuildThisFileDirectory)src\autofit\afblue.dat">
-      <Filter>internal\autofit</Filter>
-    </None>
-    <None Include="$(MSBuildThisFileDirectory)src\autofit\afblue.hin">
-      <Filter>internal\autofit</Filter>
-    </None>
+    <ClCompile Include="$(MSBuildThisFileDirectory)src\base\ftstroke.c">
+      <Filter>src\FT_MODULES</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)src\base\ftsynth.c">
+      <Filter>src\FT_MODULES</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)src\base\fttype1.c">
+      <Filter>src\FT_MODULES</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)src\base\ftwinfnt.c">
+      <Filter>src\FT_MODULES</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)src\autofit\autofit.c">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)src\bdf\bdf.c">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)src\cff\cff.c">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)src\dlg\dlgwrap.c">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)src\base\ftbase.c">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)src\cache\ftcache.c">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)windows\ftdebug.c" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)src\gzip\ftgzip.c">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)src\base\ftinit.c">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)src\lzw\ftlzw.c">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)windows\ftsystem.c" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)src\pcf\pcf.c">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)src\pfr\pfr.c">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)src\psaux\psaux.c">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)src\pshinter\pshinter.c">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)src\psnames\psmodule.c">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)src\sdf\sdf.c">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)src\sfnt\sfnt.c">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)src\svg\svg.c">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)src\truetype\truetype.c">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)src\type1\type1.c">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)src\cid\type1cid.c">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)src\type42\type42.c">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)src\winfonts\winfnt.c">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)src\raster\raster.c">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)src\smooth\smooth.c">
+      <Filter>src</Filter>
+    </ClCompile>
   </ItemGroup>
 </Project>

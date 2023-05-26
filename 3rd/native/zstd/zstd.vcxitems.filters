@@ -1,0 +1,246 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="lib">
+      <UniqueIdentifier>{0b853421-eb18-49e4-89c2-ec297992edda}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="programs">
+      <UniqueIdentifier>{1829f5ea-8fb8-4c7c-8722-e6c7a1ae1e07}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="zlibWrapper">
+      <UniqueIdentifier>{4ea334c2-ac96-48d5-a05f-833428f2897c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="lib\common">
+      <UniqueIdentifier>{49002948-538c-453a-a050-4a6ebec6122f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="lib\compress">
+      <UniqueIdentifier>{1f1d68f5-3048-4491-b707-73515cbf21a9}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="lib\decompress">
+      <UniqueIdentifier>{4a89a744-5640-4d25-a9f8-3fa4b823cfdc}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="lib\dictBuilder">
+      <UniqueIdentifier>{f1871f10-d50f-458d-9a92-778f21511d56}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="lib\legacy">
+      <UniqueIdentifier>{0155dc5b-aded-48ff-8525-28fbfa72dd8a}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="$(MSBuildThisFileDirectory)lib\common\bitstream.h">
+      <Filter>lib\common</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)lib\dictBuilder\cover.h">
+      <Filter>lib\dictBuilder</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)lib\common\debug.h">
+      <Filter>lib\common</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)lib\dictBuilder\divsufsort.h">
+      <Filter>lib\dictBuilder</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)lib\common\error_private.h">
+      <Filter>lib\common</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)lib\common\fse.h">
+      <Filter>lib\common</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)lib\compress\hist.h">
+      <Filter>lib\compress</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)lib\common\mem.h">
+      <Filter>lib\common</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)lib\common\pool.h">
+      <Filter>lib\common</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)lib\common\threading.h">
+      <Filter>lib\common</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)lib\common\xxhash.h">
+      <Filter>lib\common</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)lib\zdict.h">
+      <Filter>lib</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)lib\zstd.h">
+      <Filter>lib</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)lib\zstd_errors.h">
+      <Filter>lib</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)lib\compress\zstd_compress_literals.h">
+      <Filter>lib\compress</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)lib\compress\zstd_compress_sequences.h">
+      <Filter>lib\compress</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)lib\compress\zstd_compress_superblock.h">
+      <Filter>lib\compress</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)lib\compress\zstd_cwksp.h">
+      <Filter>lib\compress</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)lib\decompress\zstd_ddict.h">
+      <Filter>lib\decompress</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)lib\decompress\zstd_decompress_block.h">
+      <Filter>lib\decompress</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)lib\decompress\zstd_decompress_internal.h">
+      <Filter>lib\decompress</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)lib\compress\zstd_double_fast.h">
+      <Filter>lib\compress</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)lib\compress\zstd_fast.h">
+      <Filter>lib\compress</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)lib\compress\zstd_lazy.h">
+      <Filter>lib\compress</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)lib\compress\zstd_ldm.h">
+      <Filter>lib\compress</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)lib\legacy\zstd_legacy.h">
+      <Filter>lib\legacy</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)lib\compress\zstd_opt.h">
+      <Filter>lib\compress</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)lib\legacy\zstd_v01.h">
+      <Filter>lib\legacy</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)lib\legacy\zstd_v02.h">
+      <Filter>lib\legacy</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)lib\legacy\zstd_v03.h">
+      <Filter>lib\legacy</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)lib\legacy\zstd_v04.h">
+      <Filter>lib\legacy</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)lib\legacy\zstd_v05.h">
+      <Filter>lib\legacy</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)lib\legacy\zstd_v06.h">
+      <Filter>lib\legacy</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)lib\legacy\zstd_v07.h">
+      <Filter>lib\legacy</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)lib\compress\zstdmt_compress.h">
+      <Filter>lib\compress</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="$(MSBuildThisFileDirectory)lib\dictBuilder\cover.c">
+      <Filter>lib\dictBuilder</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)lib\common\debug.c">
+      <Filter>lib\common</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)lib\dictBuilder\divsufsort.c">
+      <Filter>lib\dictBuilder</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)lib\dictBuilder\fastcover.c">
+      <Filter>lib\dictBuilder</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)lib\dictBuilder\zdict.c">
+      <Filter>lib\dictBuilder</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)lib\common\entropy_common.c">
+      <Filter>lib\common</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)lib\common\error_private.c">
+      <Filter>lib\common</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)lib\common\fse_decompress.c">
+      <Filter>lib\common</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)lib\compress\fse_compress.c">
+      <Filter>lib\compress</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)lib\compress\hist.c">
+      <Filter>lib\compress</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)lib\compress\huf_compress.c">
+      <Filter>lib\compress</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)lib\decompress\huf_decompress.c">
+      <Filter>lib\decompress</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)lib\common\pool.c">
+      <Filter>lib\common</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)lib\common\threading.c">
+      <Filter>lib\common</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)lib\common\xxhash.c">
+      <Filter>lib\common</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)lib\common\zstd_common.c">
+      <Filter>lib\common</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)lib\compress\zstd_compress.c">
+      <Filter>lib\compress</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)lib\compress\zstd_compress_literals.c">
+      <Filter>lib\compress</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)lib\compress\zstd_compress_sequences.c">
+      <Filter>lib\compress</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)lib\compress\zstd_compress_superblock.c">
+      <Filter>lib\compress</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)lib\decompress\zstd_ddict.c">
+      <Filter>lib\decompress</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)lib\decompress\zstd_decompress.c">
+      <Filter>lib\decompress</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)lib\decompress\zstd_decompress_block.c">
+      <Filter>lib\decompress</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)lib\compress\zstd_double_fast.c">
+      <Filter>lib\compress</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)lib\compress\zstd_fast.c">
+      <Filter>lib\compress</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)lib\compress\zstd_lazy.c">
+      <Filter>lib\compress</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)lib\compress\zstd_ldm.c">
+      <Filter>lib\compress</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)lib\compress\zstd_opt.c">
+      <Filter>lib\compress</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)lib\legacy\zstd_v01.c">
+      <Filter>lib\legacy</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)lib\legacy\zstd_v02.c">
+      <Filter>lib\legacy</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)lib\legacy\zstd_v03.c">
+      <Filter>lib\legacy</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)lib\legacy\zstd_v04.c">
+      <Filter>lib\legacy</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)lib\legacy\zstd_v05.c">
+      <Filter>lib\legacy</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)lib\legacy\zstd_v06.c">
+      <Filter>lib\legacy</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)lib\legacy\zstd_v07.c">
+      <Filter>lib\legacy</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)lib\compress\zstdmt_compress.c">
+      <Filter>lib\compress</Filter>
+    </ClCompile>
+  </ItemGroup>
+</Project>

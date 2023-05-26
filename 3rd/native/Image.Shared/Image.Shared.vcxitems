@@ -90,25 +90,9 @@
     <ClCompile Include="$(MSBuildThisFileDirectory)png\pngwrite.c" />
     <ClCompile Include="$(MSBuildThisFileDirectory)png\pngwtran.c" />
     <ClCompile Include="$(MSBuildThisFileDirectory)png\pngwutil.c" />
-    <ClCompile Include="$(MSBuildThisFileDirectory)XImageBuffer.cpp" />
-    <ClCompile Include="$(MSBuildThisFileDirectory)XImageDecoder.cpp" />
-    <ClCompile Include="$(MSBuildThisFileDirectory)XImageDecoder_Jpg.cpp" />
-    <ClCompile Include="$(MSBuildThisFileDirectory)XImageDecoder_Png.cpp" />
-    <ClCompile Include="$(MSBuildThisFileDirectory)zlib-1.2.8\adler32.c" />
-    <ClCompile Include="$(MSBuildThisFileDirectory)zlib-1.2.8\compress.c" />
-    <ClCompile Include="$(MSBuildThisFileDirectory)zlib-1.2.8\crc32.c" />
-    <ClCompile Include="$(MSBuildThisFileDirectory)zlib-1.2.8\deflate.c" />
-    <ClCompile Include="$(MSBuildThisFileDirectory)zlib-1.2.8\inffast.c" />
-    <ClCompile Include="$(MSBuildThisFileDirectory)zlib-1.2.8\inflate.c" />
-    <ClCompile Include="$(MSBuildThisFileDirectory)zlib-1.2.8\inftrees.c" />
-    <ClCompile Include="$(MSBuildThisFileDirectory)zlib-1.2.8\trees.c" />
-    <ClCompile Include="$(MSBuildThisFileDirectory)zlib-1.2.8\zutil.c" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="$(MSBuildThisFileDirectory)stb_dxt.h" />
-    <ClInclude Include="$(MSBuildThisFileDirectory)XImageBuffer.h" />
-    <ClInclude Include="$(MSBuildThisFileDirectory)XImageDecoder.h" />
-    <ClInclude Include="$(MSBuildThisFileDirectory)XImageDecoder_Jpg.h" />
-    <ClInclude Include="$(MSBuildThisFileDirectory)XImageDecoder_Png.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)tinyexr\tinyexr.h" />
   </ItemGroup>
 </Project>

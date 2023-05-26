@@ -1,0 +1,33 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup Label="Globals">
+    <MSBuildAllProjects Condition="'$(MSBuildVersion)' == '' Or '$(MSBuildVersion)' &lt; '16.0'">$(MSBuildAllProjects);$(MSBuildThisFileFullPath)</MSBuildAllProjects>
+    <HasSharedItems>true</HasSharedItems>
+    <ItemsProjectGuid>{f1dd2a4a-55d2-4799-8cb5-070049e33055}</ItemsProjectGuid>
+  </PropertyGroup>
+  <ItemDefinitionGroup>
+    <ClCompile>
+      <AdditionalIncludeDirectories>%(AdditionalIncludeDirectories);$(MSBuildThisFileDirectory)</AdditionalIncludeDirectories>
+    </ClCompile>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <ProjectCapability Include="SourceItemsFromImports" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="$(MSBuildThisFileDirectory)adler32.c" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)compress.c" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)crc32.c" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)deflate.c" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)inffast.c" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)inftrees.c" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)trees.c" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)zutil.c" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="$(MSBuildThisFileDirectory)deflate.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)inffast.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)inftrees.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)trees.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)zutil.h" />
+  </ItemGroup>
+</Project>

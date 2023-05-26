@@ -1,0 +1,34 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup Label="Globals">
+    <MSBuildAllProjects Condition="'$(MSBuildVersion)' == '' Or '$(MSBuildVersion)' &lt; '16.0'">$(MSBuildAllProjects);$(MSBuildThisFileFullPath)</MSBuildAllProjects>
+    <HasSharedItems>true</HasSharedItems>
+    <ItemsProjectGuid>{bb5c9f78-44f7-4300-8c3e-0502f529e1cc}</ItemsProjectGuid>
+  </PropertyGroup>
+  <ItemDefinitionGroup>
+    <ClCompile>
+      <AdditionalIncludeDirectories>%(AdditionalIncludeDirectories);$(MSBuildThisFileDirectory)</AdditionalIncludeDirectories>
+    </ClCompile>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <ProjectCapability Include="SourceItemsFromImports" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="$(MSBuildThisFileDirectory)LICENSE" />
+    <None Include="$(MSBuildThisFileDirectory)miniz.pc.in" />
+    <None Include="$(MSBuildThisFileDirectory)readme.md" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="$(MSBuildThisFileDirectory)miniz.c" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)miniz_tdef.c" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)miniz_tinfl.c" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)miniz_zip.c" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="$(MSBuildThisFileDirectory)miniz.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)miniz_common.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)miniz_tdef.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)miniz_tinfl.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)miniz_zip.h" />
+  </ItemGroup>
+</Project>
