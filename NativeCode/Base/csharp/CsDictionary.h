@@ -9,7 +9,7 @@ NS_BEGIN
 struct FCsDictionaryIterator;
 
 struct TR_CLASS()
-CsDictionaryImpl : public VIUnknown
+CsDictionaryImpl : public IWeakReference
 {
 	CsDictionaryImpl()
 	{

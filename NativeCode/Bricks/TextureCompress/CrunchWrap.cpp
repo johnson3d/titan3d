@@ -13,6 +13,8 @@
 
 #define new VNEW
 
+//https://registry.khronos.org/OpenGL/extensions/KHR/KHR_texture_compression_astc_hdr.txt
+//https://blog.csdn.net/eric_dma/article/details/124588576
 //extern "C" const void* __stdcall __std_find_trivial_2(const void* _First, const void* _Last, uint16_t _Val) noexcept
 //{
 //	const uint16_t* pCur = (const uint16_t*)_First;

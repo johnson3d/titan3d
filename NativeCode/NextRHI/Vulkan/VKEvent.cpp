@@ -1,5 +1,6 @@
 #include "VKEvent.h"
 #include "VKGpuDevice.h"
+#include "VKCommandList.h"
 
 #define new VNEW
 
@@ -62,7 +63,7 @@ namespace NxRHI
 		timelineCreateInfo.sType = VK_STRUCTURE_TYPE_SEMAPHORE_TYPE_CREATE_INFO;
 		timelineCreateInfo.semaphoreType = VkSemaphoreType::VK_SEMAPHORE_TYPE_TIMELINE;
 		timelineCreateInfo.initialValue = desc.InitValue;
-		AspectValue = desc.InitValue;
+		ExpectValue = desc.InitValue;
 
 		info.pNext = &timelineCreateInfo;
 
@@ -100,12 +101,81 @@ namespace NxRHI
 		info.value = value;
 		VKGpuSystem::vkSignalSemaphore(device->mDevice, &info);
 	}
-	void VKFence::Signal(ICmdQueue* queue, UINT64 value)
+	void VKFence::Signal(ICmdQueue* queue1, UINT64 value, EQueueType type)
 	{
-		queue->SignalFence(this, value);
+		auto queue = (VKCmdQueue*)queue1;
+		ASSERT(value != UINT64_MAX);
+		auto signalFence = this;
+
+		VkSubmitInfo submitInfo{};
+		submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
+		submitInfo.commandBufferCount = 1;
+		submitInfo.pCommandBuffers = &queue->mDummyCmdList->mCommandBuffer->RealObject;
+
+		submitInfo.waitSemaphoreCount = 0;
+		submitInfo.pWaitSemaphores = nullptr;
+		VkPipelineStageFlags waitStage = VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT |
+			VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT |
+			VK_PIPELINE_STAGE_ALL_COMMANDS_BIT;
+		submitInfo.pWaitDstStageMask = &waitStage;
+		submitInfo.signalSemaphoreCount = 1;
+		VkSemaphore signalSmp[1]{};
+		signalSmp[0] = signalFence->mSemaphore;
+		submitInfo.pSignalSemaphores = signalSmp;
+
+		VkTimelineSemaphoreSubmitInfo timelineInfo{};
+		submitInfo.pNext = &timelineInfo;
+		timelineInfo.sType = VK_STRUCTURE_TYPE_TIMELINE_SEMAPHORE_SUBMIT_INFO;
+
+		timelineInfo.waitSemaphoreValueCount = 0;
+		timelineInfo.pWaitSemaphoreValues = nullptr;
+
+		UINT64 signalValue[1]{};
+		signalValue[0] = value;
+		timelineInfo.signalSemaphoreValueCount = 1;
+		timelineInfo.pSignalSemaphoreValues = signalValue;
+
+		auto hr = vkQueueSubmit(queue->mGraphicsQueue, 1, &submitInfo, nullptr);
+		ASSERT(hr == VK_SUCCESS);
+
+		return;
 	}
 	bool VKFence::Wait(UINT64 value, UINT timeOut)
 	{
+		//VkSubmitInfo submitInfo{};
+		//submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
+		//submitInfo.commandBufferCount = 1;
+		//submitInfo.pCommandBuffers = &mDummyCmdList->mCommandBuffer->RealObject;
+
+		//VkPipelineStageFlags waitStage = VK_PIPELINE_STAGE_ALL_COMMANDS_BIT;/*VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT |
+		//	VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT |
+		//	VK_PIPELINE_STAGE_ALL_COMMANDS_BIT;*/
+		//VkSemaphore waitSmp[1]{};
+		//waitSmp[0] = waitFence->mSemaphore;
+		//submitInfo.waitSemaphoreCount = 1;
+		//submitInfo.pWaitSemaphores = waitSmp;
+		//VkPipelineStageFlags waitStages[1];
+		//waitStages[0] = waitStage;
+		//submitInfo.pWaitDstStageMask = waitStages;
+
+		//submitInfo.signalSemaphoreCount = 0;
+		//submitInfo.pSignalSemaphores = nullptr;
+
+		//VkTimelineSemaphoreSubmitInfo timelineInfo{};
+		//submitInfo.pNext = &timelineInfo;
+		//timelineInfo.sType = VK_STRUCTURE_TYPE_TIMELINE_SEMAPHORE_SUBMIT_INFO;
+
+		//UINT64 waitValue[1]{};
+		//waitValue[0] = value;
+		//timelineInfo.waitSemaphoreValueCount = 2;
+		//timelineInfo.pWaitSemaphoreValues = waitValue;
+
+		//timelineInfo.signalSemaphoreValueCount = 0;
+		//timelineInfo.pSignalSemaphoreValues = nullptr;
+
+		//auto hr = vkQueueSubmit(mGraphicsQueue, 1, &submitInfo, nullptr);
+		//ASSERT(hr == VK_SUCCESS);
+
 		//temp code
 		auto device = mDeviceRef.GetPtr();
 		VkSemaphoreWaitInfo info{};

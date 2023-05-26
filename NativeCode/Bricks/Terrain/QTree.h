@@ -129,7 +129,7 @@ public:
 };
 
 class TR_CLASS()
-	QTree : public VIUnknown
+	QTree : public IWeakReference
 {
 public:
 	QTree();

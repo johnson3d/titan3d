@@ -8,24 +8,24 @@
 
 NS_BEGIN
 
-void VIUnknownBase::DeleteThis()
+void VIUnknown::DeleteThis()
 {
 	delete this;
 }
 
-UINT64 VIUnknown::EngineCurrentFrame = 0;
+UINT64 IWeakReference::EngineCurrentFrame = 0;
 
 FOnManagedObjectHolderDestroy IManagedObjectHolder::OnManagedObjectHolderDestroy = nullptr;
 
 vfxObjectLocker gDefaultObjectLocker;
 
-VIUnknown::VIUnknown()
+IWeakReference::IWeakReference()
 {
 	//Handle = ObjectHandle::NewHandle(this);
 	Handle = nullptr;
 }
 
-VIUnknown::~VIUnknown()
+IWeakReference::~IWeakReference()
 {
 	if (Handle != nullptr)
 	{
@@ -34,46 +34,46 @@ VIUnknown::~VIUnknown()
 	}
 }
 
-void VIUnknown::Cleanup()
+void IWeakReference::Cleanup()
 {
 
 }
 
-vfxObjectLocker* VIUnknown::GetLocker(int index) const
+vfxObjectLocker* IWeakReference::GetLocker(int index) const
 {
 	return &gDefaultObjectLocker;
 }
 
-ObjectHandle* VIUnknown::GetHandle()
+WeakRefHandle* IWeakReference::GetHandle()
 {
 	if (Handle == nullptr)
 	{
-		Handle = ObjectHandle::NewHandle(this);
+		Handle = WeakRefHandle::NewHandle(this);
 	}
 	Handle->AddRef();
 	return Handle;
 }
 
-Hash64 VIUnknown::GetHash64() 
+Hash64 IWeakReference::GetHash64() 
 {
 	return Hash64::Empty;
 }
 
-int ObjectHandle::AddRef()
+int WeakRefHandle::AddRef()
 {
 	return ++RefCount;
 }
 
-void ObjectHandle::Release()
+void WeakRefHandle::Release()
 {
 	RefCount--;
 	if (RefCount == 0)
 		delete this;
 }
 
-ObjectHandle* ObjectHandle::NewHandle(VIUnknown* ptr)
+WeakRefHandle* WeakRefHandle::NewHandle(IWeakReference* ptr)
 {
-	auto handle = new ObjectHandle();
+	auto handle = new WeakRefHandle();
 	handle->mPtrAddress = ptr;
 	return handle;
 }
@@ -91,7 +91,7 @@ void VDefferedDeleteManager::Cleanup()
 }
 
 VCritical GDefferedDeleteLocker;
-void VDefferedDeleteManager::PushObject(VIUnknown* obj)
+void VDefferedDeleteManager::PushObject(IWeakReference* obj)
 {
 	if (IsCleared == 1)
 	{
@@ -118,7 +118,7 @@ void VDefferedDeleteManager::Tick(int limitTimes)
 {
 	while (ObjectPool.size() > 0)
 	{
-		VIUnknown* cur;
+		IWeakReference* cur;
 		{
 			VAutoLock(GDefferedDeleteLocker);
 			cur = ObjectPool.front();

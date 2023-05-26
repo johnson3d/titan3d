@@ -19,7 +19,7 @@ namespace TextureCompress
 	};
 
 	class TR_CLASS()
-		CrunchWrap : public VIUnknown
+		CrunchWrap : public IWeakReference
 	{
 	public:
 		static bool CompressPixels(UINT numOfThreads, IBlobObject* result, UINT width, UINT height, const FCubeImage* pSrcImage, EngineNS::NxRHI::ETextureCompressFormat fmt, bool genMips = true, bool srgb = true, float bitrate = 0.0f, int quality_level = -1);

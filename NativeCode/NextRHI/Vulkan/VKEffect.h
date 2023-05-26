@@ -14,7 +14,7 @@ namespace NxRHI
 		virtual void BuildState(IGpuDevice* device) override;
 		virtual void Commit(ICommandList* cmdlist, IGraphicDraw* drawcall) override;
 	public:
-		TObjectHandle<VKGpuDevice>		mDeviceRef;
+		TWeakRefHandle<VKGpuDevice>		mDeviceRef;
 		
 		VkPipelineLayout				mPipelineLayout = nullptr;
 	};
@@ -27,7 +27,7 @@ namespace NxRHI
 		virtual void BuildState(IGpuDevice* device) override;
 		virtual void Commit(ICommandList* cmdlist) override;
 	public:
-		TObjectHandle<VKGpuDevice>		mDeviceRef;
+		TWeakRefHandle<VKGpuDevice>		mDeviceRef;
 
 		VkPipelineLayout				mPipelineLayout = nullptr;
 		VkPipeline						mComputePipeline = nullptr;

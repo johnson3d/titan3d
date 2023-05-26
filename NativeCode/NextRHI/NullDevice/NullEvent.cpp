@@ -34,7 +34,7 @@ namespace NxRHI
 	{
 
 	}
-	void NullFence::Signal(ICmdQueue* queue, UINT64 value)
+	void NullFence::Signal(ICmdQueue* queue, UINT64 value, EQueueType type)
 	{
 
 	}

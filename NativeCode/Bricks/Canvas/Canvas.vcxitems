@@ -15,8 +15,22 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="$(MSBuildThisFileDirectory)FCanvas.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)FCanvasBrush.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)FCanvasDefine.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)FDrawCmdList.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)FTFont.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)FTWord.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)Path.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)Utility.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="$(MSBuildThisFileDirectory)FCanvas.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)FCanvasBrush.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)FCanvasDefine.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)FDrawCmdList.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)FTFont.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)FTWord.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)Path.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)Utility.cpp" />
   </ItemGroup>
 </Project>

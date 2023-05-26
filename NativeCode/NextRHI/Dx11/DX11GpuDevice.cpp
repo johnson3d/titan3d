@@ -100,6 +100,14 @@ namespace NxRHI
 		return mCmdQueue;
 	}
 	
+	void DX11GpuDevice::SetBreakOnID(int id, bool open)
+	{
+		if (mDebugInfoQueue != nullptr)
+		{
+			mDebugInfoQueue->SetBreakOnID((D3D11_MESSAGE_ID)id, open ? TRUE : FALSE);
+		}
+	}
+
 	bool DX11GpuDevice::InitDevice(IGpuSystem* pGpuSystem, const FGpuDeviceDesc* desc)
 	{
 		Desc = *desc;
@@ -123,7 +131,7 @@ namespace NxRHI
 
 		UINT createDeviceFlags = 0;
 		if (desc->CreateDebugLayer)
-			createDeviceFlags |= D3D11_CREATE_DEVICE_DEBUG;
+			createDeviceFlags |= (D3D11_CREATE_DEVICE_DEBUG | D3D11_CREATE_DEVICE_DISABLE_GPU_TIMEOUT);
 		D3D_FEATURE_LEVEL featureLevels[] =
 		{
 			D3D_FEATURE_LEVEL_11_0,
@@ -149,6 +157,12 @@ namespace NxRHI
 			}
 		}*/
 
+		mDevice->QueryInterface(IID_ID3D11InfoQueue, (void**)mDebugInfoQueue.GetAddressOf());
+		if (mDebugInfoQueue != nullptr)
+		{
+			mDebugInfoQueue->SetBreakOnID(D3D11_MESSAGE_ID_DEVICE_CSSETUNORDEREDACCESSVIEWS_HAZARD, TRUE);
+			mDebugInfoQueue->SetBreakOnID(D3D11_MESSAGE_ID_DEVICE_DRAW_SAMPLER_MISMATCH, TRUE);
+		}
 		mCaps.NumOfSwapchainFormats = 6;
 		mCaps.SwapchainFormats[0] = EPixelFormat::PXF_R8G8B8A8_UNORM;
 		mCaps.SwapchainFormats[1] = EPixelFormat::PXF_R8G8B8A8_UNORM_SRGB;
@@ -159,6 +173,7 @@ namespace NxRHI
 
 		mCmdQueue->mHardwareContext = MakeWeakRef(new DX11CommandList());
 		mCmdQueue->mHardwareContext->Init(this, pImmContext);
+		mCmdQueue->mHardwareContext->IsImmContext = true;
 		pImmContext->Release();
 
 		QueryDevice();
@@ -404,6 +419,22 @@ namespace NxRHI
 		auto result = new DX11GraphicDraw();
 		return result;
 	}
+	IGpuScope* DX11GpuDevice::CreateGpuScope()
+	{
+		auto result = new DX11GpuScope();
+		if (result->Init(this) == false)
+		{
+			result->Release();
+			return nullptr;
+		}
+		return result;
+	}
+
+	void DX11GpuDevice::TickPostEvents()
+	{
+		IGpuDevice::TickPostEvents();
+		
+	}
 
 	DX11CmdQueue::DX11CmdQueue()
 	{
@@ -427,118 +458,47 @@ namespace NxRHI
 	}
 	void DX11CmdQueue::Init(DX11GpuDevice* device)
 	{
-		FFenceDesc fcDesc{};
-		mQueueExecuteFence = MakeWeakRef(device->CreateFence(&fcDesc, "QueueExecute"));
-		mQueueFence = MakeWeakRef(device->CreateFence(&fcDesc, "CmdQueue Fence"));
+		mDefaultQueueFrequence = 1;
+		mFramePost = MakeWeakRef(device->CreateCommandList());
+		mFramePost->BeginCommand();
 	}
-	void DX11CmdQueue::ExecuteCommandList(ICommandList* Cmdlist, UINT NumOfWait, ICommandList** ppWaitCmdlists)
-	{
-		auto dx11Cmd = (DX11CommandList*)Cmdlist;
-		VAutoVSLLock locker(mImmCmdListLocker);
-		if (NumOfWait == UINT_MAX)
-		{
-			this->WaitFence(mQueueExecuteFence, mQueueExecuteFence->GetAspectValue());
-		}
-		else
-		{
-			for (UINT i = 0; i < NumOfWait; i++)
-			{
-				this->WaitFence(ppWaitCmdlists[i]->mCommitFence, ppWaitCmdlists[i]->mCommitFence->GetAspectValue());
-			}
-		}
-		dx11Cmd->Commit(mHardwareContext->mContext);
-		this->IncreaseSignal(dx11Cmd->mCommitFence);
-		this->IncreaseSignal(mQueueExecuteFence);
-	}
-	void DX11CmdQueue::ExecuteCommandList(UINT num, ICommandList** ppCmdlist)
+	void DX11CmdQueue::ExecuteCommandList(UINT NumOfExe, ICommandList** Cmdlist, UINT NumOfWait, ICommandList** ppWaitCmdlists, EQueueType type)
 	{
 		VAutoVSLLock locker(mImmCmdListLocker);
-		for (UINT i = 0; i < num; i++)
+		for (UINT i = 0; i < NumOfWait; i++)
 		{
-			auto dx11Cmd = (DX11CommandList*)ppCmdlist[i];
-			if (dx11Cmd == mHardwareContext)
-				continue;
-			//dx11Cmd->Commit(mHardwareContext->mContext);
+			ppWaitCmdlists[i]->mCommitFence->WaitToExpect();
+		}
 
-			ExecuteCommandList(dx11Cmd, UINT_MAX, nullptr);
-		}
-	}
-	UINT64 DX11CmdQueue::SignalFence(IFence* fence, UINT64 value)
-	{
-		fence->Signal(this, value);
-		return fence->GetCompletedValue();
-	}
-	void DX11CmdQueue::WaitFence(IFence* fence, UINT64 value)
-	{
-		auto dxFence = ((DX11Fence*)fence);
-		dxFence->mFence->SetEventOnCompletion(value, dxFence->mEvent->mHandle);
-		mHardwareContext->mContext4->Wait(dxFence->mFence, value);
-	}
-	ICommandList* DX11CmdQueue::GetIdleCmdlist(EQueueCmdlist type)
-	{
-		switch (type)
+		for (UINT i = 0; i < NumOfExe; i++)
 		{
-			case QCL_Read:
-				{
-					mImmCmdListLocker.Lock();
-					return mHardwareContext;
-				}
-			case QCL_Transient:
-				{
-					VAutoVSLLock locker(mImmCmdListLocker);
-					if (mIdleCmdlist.empty())
-					{
-						mIdleCmdlist.push(mDevice->CreateCommandList());
-					}
-					auto result = mIdleCmdlist.front();
-					mIdleCmdlist.pop();
-					return result;
-				}
-			case QCL_FramePost:
-				{
-					mImmCmdListLocker.Lock();
-					if (mFramePost == nullptr)
-					{
-						mFramePost = MakeWeakRef((DX11CommandList*)mDevice->CreateCommandList());
-					}
-					return mFramePost;
-				}
-				break;
-			default:
-				return nullptr;
+			auto dx11Cmd = (DX11CommandList*)Cmdlist[i];
+			dx11Cmd->Commit(mHardwareContext->mContext);
+			this->IncreaseSignal(dx11Cmd->mCommitFence, type);
 		}
 	}
-	void DX11CmdQueue::ReleaseIdleCmdlist(ICommandList* cmd, EQueueCmdlist type)
+	ICommandList* DX11CmdQueue::GetIdleCmdlist()
 	{
-		switch (type)
+		VAutoVSLLock locker(mImmCmdListLocker);
+		if (mIdleCmdlist.empty())
 		{
-			case QCL_Read:
-			{
-				mImmCmdListLocker.Unlock();
-				return;
-			}
-			case QCL_Transient:
-			{
-				VAutoVSLLock locker(mImmCmdListLocker);
-				mIdleCmdlist.push(cmd);
-				return;
-			}
-			case QCL_FramePost:
-			{
-				mImmCmdListLocker.Unlock();
-				return;
-			}
-			default:
-				return;
+			mIdleCmdlist.push(mDevice->CreateCommandList());
 		}
+		auto result = mIdleCmdlist.front();
+		mIdleCmdlist.pop();
+		return result;
 	}
-	void DX11CmdQueue::Flush()
+	void DX11CmdQueue::ReleaseIdleCmdlist(ICommandList* cmd)
 	{
-		if (mQueueFence == nullptr)
+		VAutoVSLLock locker(mImmCmdListLocker);
+		mIdleCmdlist.push(cmd);
+		return;
+	}
+	void DX11CmdQueue::Flush(EQueueType type)
+	{
+		if (type == EQueueType::QU_Unknown)
 			return;
-		auto targetValue = mQueueFence->GetAspectValue() + 1;
-		SignalFence(mQueueFence, targetValue);
-		mQueueFence->Wait(targetValue);
+		mHardwareContext->mContext->Flush();
 	}
 }
 

@@ -8,6 +8,15 @@ NS_BEGIN
 
 namespace NxRHI
 {
+	class ITexture;
+	enum TR_ENUM()
+		EQueueType
+	{
+		QU_Unknown = 0,
+			QU_Default = 1,
+			QU_Compute = (1 << 1),
+			QU_Transfer = (1 << 2),
+	};
 	enum TR_ENUM(SV_EnumNoFlags = true)
 		EColorSpace {
 		SRGB_NONLINEAR = 0,
@@ -48,19 +57,52 @@ namespace NxRHI
 		ETextureCompressFormat
 	{
 		TCF_None = 0,//no compress
-			TCF_Dxt1,//rgb:5-6-5 a:0
-			TCF_Dxt1a,//rgb:5-6-5 a:1
-			TCF_Dxt3,//rgb:5-6-5 a:8
-			TCF_Dxt5,//rg:8-8
-			TCF_Etc1,
+			TCF_Dxt1,//rgb:5-6-5 a:0 = bc1
+			TCF_Dxt1a,//rgb:5-6-5 a:1 = bc1
+			TCF_Dxt3,//rgb:5-6-5 a:8 = bc2
+			TCF_Dxt5,//rgba 8 = bc3
+			TCF_BC4,//r channel
+			TCF_BC5,//rg:8-8
+			TCF_BC6,//hdr, Does not support negative values
+			TCF_BC6_FLOAT,//signed float
+			TCF_BC7_UNORM,//Very high Quality rgba or rgb encoding
+			
 			TCF_Etc2_RGB8,
+			TCF_Etc2_RGBA1,
 			TCF_Etc2_RGBA8,
 			TCF_Etc2_R11,
 			TCF_Etc2_SIGNED_R11,
 			TCF_Etc2_RG11,
 			TCF_Etc2_SIGNED_RG11,
-			TCF_Etc2_RGBA1,
-			TCF_Astc,
+			
+			TCF_Astc_4x4,
+			TCF_Astc_4x4_Float,
+			TCF_Astc_5x4,
+			TCF_Astc_5x4_Float,
+			TCF_Astc_5x5,
+			TCF_Astc_5x5_Float,
+			TCF_Astc_6x5,
+			TCF_Astc_6x5_Float,
+			TCF_Astc_6x6,
+			TCF_Astc_6x6_Float,
+			TCF_Astc_8x5,
+			TCF_Astc_8x5_Float,
+			TCF_Astc_8x6,
+			TCF_Astc_8x6_Float,
+			TCF_Astc_8x8,
+			TCF_Astc_8x8_Float,
+			TCF_Astc_10x5,
+			TCF_Astc_10x5_Float,
+			TCF_Astc_10x6,
+			TCF_Astc_10x6_Float,
+			TCF_Astc_10x8,
+			TCF_Astc_10x8_Float,
+			TCF_Astc_10x10,
+			TCF_Astc_10x10_Float,
+			TCF_Astc_12x10,
+			TCF_Astc_12x10_Float,
+			TCF_Astc_12x12,
+			TCF_Astc_12x12_Float,
 	};
 	enum TR_ENUM()
 		ECubeFace
@@ -288,6 +330,15 @@ namespace NxRHI
 	struct TR_CLASS(SV_LayoutStruct = 8)
 		FSubresourceBox
 	{
+		void SetDefault() {
+			Left = 0;
+			Top = 0;
+			Front = 0;
+			Right = 0xFFFFFFFF;
+			Bottom = 0xFFFFFFFF;
+			Back = 0xFFFFFFFF;
+		}
+		void SetWhole(ITexture* texture);
 		UINT Left;
 		UINT Top;
 		UINT Front;
@@ -299,12 +350,12 @@ namespace NxRHI
 	class IGpuDevice;
 	struct FGpuHeapSizedPool;
 	struct IGpuPooledMemAllocator;
-	struct IGpuHeap : public VIUnknownBase
+	struct IGpuHeap : public VIUnknown
 	{
 		virtual UINT64 GetGPUVirtualAddress() = 0;
 		virtual void* GetHWBuffer() = 0;
 	};
-	struct FGpuMemory : public VIUnknownBase
+	struct FGpuMemory : public VIUnknown
 	{
 		IGpuHeap* GpuHeap = nullptr;
 		UINT64 Offset = -1;
@@ -320,21 +371,21 @@ namespace NxRHI
 			return GpuHeap->GetHWBuffer();
 		}
 	};
-	struct IGpuMemAllocator : public VIUnknown
+	struct IGpuMemAllocator : public IWeakReference
 	{
 		virtual AutoRef<FGpuMemory> Alloc(IGpuDevice* device, UINT64 size) = 0;
 		virtual void Free(FGpuMemory* memory) = 0;
 	};
 	struct FPooledGpuMemory : public FGpuMemory
 	{
-		TObjectHandle<FGpuHeapSizedPool> HostPool;
+		TWeakRefHandle<FGpuHeapSizedPool> HostPool;
 		FPooledGpuMemory* Next = nullptr;
 		virtual void FreeMemory() override;
 	};
-	struct FGpuHeapSizedPool : public VIUnknown
+	struct FGpuHeapSizedPool : public IWeakReference
 	{//pool for different size;
 		~FGpuHeapSizedPool();
-		TObjectHandle<IGpuPooledMemAllocator> HostAllocator;
+		TWeakRefHandle<IGpuPooledMemAllocator> HostAllocator;
 		UINT64 ChunkSize;
 		FPooledGpuMemory* FreePoint = nullptr;
 		FGpuMemory* Alloc(IGpuDevice* device, IGpuPooledMemAllocator* allocator, UINT64 size);
@@ -368,14 +419,14 @@ namespace NxRHI
 	struct IGpuLinearMemAllocator;
 	struct FLinearGpuMemory : public FGpuMemory
 	{
-		TObjectHandle<FLinearGpuHeapPool> HostPool;
+		TWeakRefHandle<FLinearGpuHeapPool> HostPool;
 		FAddressRange			AddressRange{};
 		virtual void FreeMemory() override;
 	};
-	struct FLinearGpuHeapPool : public VIUnknown
+	struct FLinearGpuHeapPool : public IWeakReference
 	{
 		~FLinearGpuHeapPool();
-		TObjectHandle<IGpuLinearMemAllocator> HostAllocator;
+		TWeakRefHandle<IGpuLinearMemAllocator> HostAllocator;
 		std::vector<FAddressRange>	FreeRanges;
 		AutoRef<IGpuHeap>			GpuHeap;
 		UINT64						MaxSize = 0;

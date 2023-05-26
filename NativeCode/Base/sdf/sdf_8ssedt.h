@@ -19,19 +19,31 @@ struct TR_CLASS(SV_LayoutStruct = 8)
 		dy = y;
 	}
 	int dx, dy;
+	float DistanceValue = 0;
 	int DistSq() const {
 		return dx * dx + dy * dy;
 	}
-	float Distance() const {
+	void UpdateDistanceValue()
+	{
+		DistanceValue = sqrtf((float)DistSq());
+	}
+	float Distance() const{
 		return sqrtf((float)DistSq());
+	}
+	bool operator ==(const SdfPoint& rh) const {
+		return dx == rh.dx && dy == rh.dy;
+	}
+	bool operator !=(const SdfPoint& rh) const {
+		return dx != rh.dx || dy != rh.dy;
 	}
 	static SdfPoint Empty;
 	static SdfPoint Inside;
 };
 
 class TR_CLASS()
-	SdfGrid : public VIUnknown
+	SdfGrid : public IWeakReference
 {
+public:
 	std::vector<SdfPoint> mGrid;
 	int Width;
 	int Height;
@@ -47,7 +59,14 @@ public:
 		Height = h;
 		mGrid.resize(w * h);
 	}
-	SdfPoint Get(int x, int y)
+	const SdfPoint& GetRef(int x, int y) const
+	{
+		if (x >= 0 && y >= 0 && x < Width && y < Height)
+			return mGrid[y * Width + x];
+		else
+			return SdfPoint::Empty;
+	}
+	SdfPoint Get(int x, int y) const
 	{
 		if (x >= 0 && y >= 0 && x < Width && y < Height)
 			return mGrid[y * Width + x];
@@ -120,6 +139,27 @@ public:
 			}
 		}
 	}
+
+	void UpdateDistanceValues(float& minValue, float& maxValue)
+	{
+		minValue = FLT_MAX;
+		maxValue = -FLT_MAX;
+		for (auto& i : mGrid)
+		{
+			i.UpdateDistanceValue();
+			if (i.DistanceValue > maxValue)
+			{
+				maxValue = i.DistanceValue;
+			}
+			if (i.DistanceValue < minValue)
+			{
+				minValue = i.DistanceValue;
+			}
+		}
+	}
+
+	static void Generate_SDF(BYTE* pTargetBuffer, int targetPitch, BYTE* pSrcBuffer, int w, int h, int srcW, int srcH, int downScale, int spread = 5);
+	static std::vector<float> Generate_SDF2(const std::vector<bool>& in_filled, int width);
 };
 
 NS_END

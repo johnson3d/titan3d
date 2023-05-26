@@ -1,6 +1,9 @@
 #pragma once
 #include "../Base/IUnknown.h"
 #include "../Base/thread/vfxevent.h"
+#include "NxRHIDefine.h"
+#include <mutex>
+
 NS_BEGIN
 
 namespace NxRHI
@@ -12,7 +15,7 @@ namespace NxRHI
 
 	};
 	class TR_CLASS()
-		IEvent : public VIUnknownBase
+		IEvent : public VIUnknown
 	{
 	public:
 		ENGINE_RTTI(IEvent);
@@ -38,29 +41,37 @@ namespace NxRHI
 		UINT64 InitValue = 0;
 	};
 	class TR_CLASS()
-		IFence : public VIUnknown
+		IFence : public IWeakReference
 	{
 	public:
 		ENGINE_RTTI(IFence);
 		virtual UINT64 GetCompletedValue() = 0;
-		virtual void CpuSignal(UINT64 value) = 0;
-		virtual void Signal(ICmdQueue * queue, UINT64 value) = 0;
 		virtual bool Wait(UINT64 value, UINT timeOut = INFINITE) = 0;
 		const char* GetName() const {
 			return Name.c_str();
 		}
 		virtual void SetDebugName(const char* name) {}
-		inline UINT64 GetAspectValue() const {
-			return AspectValue;
+		inline bool WaitToExpect(UINT timeOut = INFINITE) {
+			return Wait(ExpectValue, timeOut);
 		}
-		inline bool WaitToAspect(UINT timeOut = INFINITE) {
-			return Wait(AspectValue, timeOut);
+		UINT64 IncreaseExpect(ICmdQueue* queue, UINT64 num, EQueueType type) {
+			std::lock_guard<std::mutex> lck(mLocker);
+			ExpectValue += num;
+			Signal(queue, ExpectValue, type);
+			return ExpectValue;
 		}
+		inline UINT64 GetExpectValue() const {
+			return ExpectValue;
+		}
+	protected:
+		virtual void CpuSignal(UINT64 value) = 0;
+		virtual void Signal(ICmdQueue* queue, UINT64 value, EQueueType type) = 0;
 	public:
 		std::string		Name;
 		FFenceDesc		Desc{};
 	
-		UINT64			AspectValue = 0;
+		UINT64			ExpectValue;
+		std::mutex		mLocker;
 	};
 }
 

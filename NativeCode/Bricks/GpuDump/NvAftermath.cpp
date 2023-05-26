@@ -11,8 +11,8 @@ NS_BEGIN
 
 namespace GpuDump
 {
-	GpuCrashTracker::MarkerMap markerMapVK;
-	GpuCrashTracker gNvGpuCrashTrackerVK(markerMapVK);
+	GpuCrashTracker::MarkerMap markerMap;
+	GpuCrashTracker gNvGpuCrashTracker(markerMap);
 	/*void GFSDK_AFTERMATH_CALL Aftermath_GpuCrashDumpCb(const void* pGpuCrashDump, const uint32_t gpuCrashDumpSize, void* pUserData)
 	{
 
@@ -39,10 +39,11 @@ namespace GpuDump
 			break;
 		case EngineNS::NxRHI::RHI_D3D12:
 			apiType = GFSDK_Aftermath_GpuCrashDumpWatchedApiFlags::GFSDK_Aftermath_GpuCrashDumpWatchedApiFlags_DX;
+			gNvGpuCrashTracker.Initialize(apiType);
 			break;
 		case EngineNS::NxRHI::RHI_VK:
 			apiType = GFSDK_Aftermath_GpuCrashDumpWatchedApiFlags::GFSDK_Aftermath_GpuCrashDumpWatchedApiFlags_Vulkan;
-			gNvGpuCrashTrackerVK.Initialize(apiType);
+			gNvGpuCrashTracker.Initialize(apiType);
 			break;
 		case EngineNS::NxRHI::RHI_GL:
 			break;
@@ -65,17 +66,17 @@ namespace GpuDump
 	
 	void NvAftermath::RegSpirv(void* pCode, UINT size)
 	{
-		if (gNvGpuCrashTrackerVK.IsInitialized() == false)
+		if (gNvGpuCrashTracker.IsInitialized() == false)
 			return;
 		std::vector<uint8_t> data, debugData;
 		data.resize(size);
 		memcpy(&data[0], pCode, size);
-		gNvGpuCrashTrackerVK.GetShaderDatabase()->AddShaderBinary(data);
+		gNvGpuCrashTracker.GetShaderDatabase()->AddShaderBinary(data);
 		/*data.resize(size);
 		memcpy(&data[0], pCode, size);*/
 		debugData.resize(size);
 		memcpy(&debugData[0], pCode, size);
-		gNvGpuCrashTrackerVK.GetShaderDatabase()->AddShaderBinaryWithDebugInfo(debugData, data);
+		gNvGpuCrashTracker.GetShaderDatabase()->AddShaderBinaryWithDebugInfo(debugData, data);
 	}
 };
 

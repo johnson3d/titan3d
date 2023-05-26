@@ -112,7 +112,7 @@ IShaderConductor* IShaderConductor::GetInstance()
 //}
 
 bool IShaderConductor::CompileShader(NxRHI::FShaderCompiler* compiler, NxRHI::FShaderDesc* desc, const char* shader, const char* entry, NxRHI::EShaderType type, const char* sm,
-			const NxRHI::IShaderDefinitions* defines, bool bDebugShader, NxRHI::EShaderLanguage sl, bool debugShader)
+			const NxRHI::IShaderDefinitions* defines, bool bDebugShader, NxRHI::EShaderLanguage sl, bool debugShader, const char* extHlslVersion)
 {
 	if (sl == NxRHI::EShaderLanguage::SL_DXBC)
 	{
@@ -190,7 +190,7 @@ bool IShaderConductor::CompileShader(NxRHI::FShaderCompiler* compiler, NxRHI::FS
 		sl == NxRHI::EShaderLanguage::SL_GLSL ||
 		sl == NxRHI::EShaderLanguage::SL_METAL)
 	{
-		CompileHLSL(compiler, desc, shader, entry, type, sm, defines, sl, debugShader);
+		CompileHLSL(compiler, desc, shader, entry, type, sm, defines, sl, debugShader, extHlslVersion);
 	}
 
 	if (sl == NxRHI::EShaderLanguage::SL_SPIRV)
@@ -201,7 +201,7 @@ bool IShaderConductor::CompileShader(NxRHI::FShaderCompiler* compiler, NxRHI::FS
 }
 
 bool IShaderConductor::CompileHLSL(NxRHI::FShaderCompiler* compiler, NxRHI::FShaderDesc* desc, const char* hlsl, const char* entry, NxRHI::EShaderType type, std::string sm,
-	const NxRHI::IShaderDefinitions* defines, NxRHI::EShaderLanguage sl, bool debugShader)
+	const NxRHI::IShaderDefinitions* defines, NxRHI::EShaderLanguage sl, bool debugShader, const char* extHlslVersion)
 {
 #if defined(PLATFORM_WIN)
 	auto ar = compiler->GetShaderCodeStream(hlsl);
@@ -247,6 +247,7 @@ bool IShaderConductor::CompileHLSL(NxRHI::FShaderCompiler* compiler, NxRHI::FSha
 	ShaderConductor::Compiler::SourceDesc src;
 	src.source = codeText.c_str();
 	src.entryPoint = entry;
+	src.hlslExtVersion = extHlslVersion;
 	src.stage = stage;
 	src.fileName = hlsl;
 	src.loadIncludeCallback = [=](const char* includeName)->ShaderConductor::Blob
@@ -281,7 +282,19 @@ bool IShaderConductor::CompileHLSL(NxRHI::FShaderCompiler* compiler, NxRHI::FSha
 	opt.enableDebugInfo = debugShader;
 	opt.packMatricesInRowMajor = false;
 	opt.enable16bitTypes = true;
-	opt.shaderModel = { 6,2 };
+	auto _pos = sm.find_first_of('_');
+	auto f1 = sm.substr(0, _pos);
+	auto f2 = sm.substr(_pos + 1);
+	opt.shaderModel.major_ver = atoi(f1.c_str());
+	opt.shaderModel.minor_ver = atoi(f2.c_str());
+	/*if (sm == "6_2")
+		opt.shaderModel = { 6,2 };
+	else if (sm == "6_6")
+		opt.shaderModel = { 6,6 };
+	else if (sm == "6_5")
+		opt.shaderModel = { 6,5 };
+	else
+		opt.shaderModel = { 6,6 };*/
 	opt.shiftAllTexturesBindings = 0;
 	opt.shiftAllSamplersBindings = 0;
 	opt.shiftAllCBuffersBindings = 0;
@@ -301,7 +314,7 @@ bool IShaderConductor::CompileHLSL(NxRHI::FShaderCompiler* compiler, NxRHI::FSha
 		case NxRHI::EShaderLanguage::SL_DXBC:
 			break;
 		case NxRHI::EShaderLanguage::SL_DXIL:
-			tmp.version = "6_2";
+			tmp.version = sm.c_str();// "6_2";
 			tmp.language = ShaderConductor::ShadingLanguage::Dxil;
 			dest.push_back(tmp);
 			result.push_back(tmp2);

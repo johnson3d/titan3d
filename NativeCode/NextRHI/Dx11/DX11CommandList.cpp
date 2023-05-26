@@ -49,14 +49,14 @@ namespace NxRHI
 	}
 	bool DX11CommandList::BeginCommand()
 	{
-		IsRecording = true;
+		mIsRecording = true;
 		Safe_Release(mCmdList);
 		return true;
 	}
 	void DX11CommandList::EndCommand()
 	{
 		mContext->FinishCommandList(0, &mCmdList);
-		IsRecording = false;
+		mIsRecording = false;
 	}
 	bool DX11CommandList::BeginPass(IFrameBuffers* fb, const FRenderPassClears* passClears, const char* name)
 	{
@@ -96,7 +96,8 @@ namespace NxRHI
 			{
 				if (pRenderPassDesc->AttachmentMRTs[RTVIdx].LoadAction == EFrameBufferLoadAction::LoadActionClear)
 				{
-					mContext->ClearRenderTargetView(dxFB->mDX11RTVArray[RTVIdx], (const float*)&passClears->ClearColor[RTVIdx]);
+					if (dxFB->mDX11RTVArray[RTVIdx] != nullptr)
+						mContext->ClearRenderTargetView(dxFB->mDX11RTVArray[RTVIdx], (const float*)&passClears->ClearColor[RTVIdx]);
 				}
 			}
 		}
@@ -138,7 +139,7 @@ namespace NxRHI
 	}
 	void DX11CommandList::BeginEvent(const char* info)
 	{
-		if (IsRecording)
+		if (mIsRecording)
 			return;
 		auto anno = GetDX11Device()->mDefinedAnnotation;
 		if (anno != nullptr)
@@ -153,7 +154,7 @@ namespace NxRHI
 	}
 	void DX11CommandList::EndEvent()
 	{
-		if (IsRecording)
+		if (mIsRecording)
 			return;
 		auto anno = GetDX11Device()->mDefinedAnnotation;
 		if (anno != nullptr)
@@ -178,7 +179,9 @@ namespace NxRHI
 	void DX11CommandList::SetCBV(EShaderType type, const FShaderBinder* binder, ICbView* buffer)
 	{
 		//ASSERT(binder->Space == type);
-		buffer->FlushDirty(this);
+		//buffer->FlushDirty();
+		buffer->Buffer->PushFlushDirty(mDevice.GetPtr());
+
 		switch (type)
 		{
 			case EShaderType::SDT_ComputeShader:
@@ -206,7 +209,9 @@ namespace NxRHI
 	}
 	void DX11CommandList::SetSrv(EShaderType type, const FShaderBinder* binder, ISrView* view)
 	{
-		view->GetResourceState()->SetAccessFrame(VIUnknown::EngineCurrentFrame);
+		if (view == nullptr)
+			return;
+		view->GetResourceState()->SetAccessFrame(IWeakReference::EngineCurrentFrame);
 		switch (type)
 		{
 			case EShaderType::SDT_ComputeShader:
@@ -240,7 +245,11 @@ namespace NxRHI
 			case EShaderType::SDT_ComputeShader:
 			{
 				auto d11View = (DX11UaView*)view;
-				auto pSrv = d11View->mView;
+				ID3D11UnorderedAccessView* pSrv = nullptr;
+				if (d11View != nullptr)
+				{
+					pSrv = d11View->mView;
+				}
 				mContext->CSSetUnorderedAccessViews(binder->Slot, 1, &pSrv, &nUavInitialCounts);
 			}
 			break;
@@ -369,12 +378,14 @@ namespace NxRHI
 		else
 			mContext->DrawIndexedInstanced(dpCount, Instance, StartIndex, BaseVertex, 0);
 	}
-	void DX11CommandList::IndirectDrawIndexed(EPrimitiveType topology, IBuffer* indirectArg, UINT indirectArgOffset)
+	void DX11CommandList::IndirectDrawIndexed(EPrimitiveType topology, IBuffer* indirectArg, UINT indirectArgOffset, IBuffer* countBuffer)
 	{
 		UINT dpCount = 0;
 		mContext->IASetPrimitiveTopology(PrimitiveTypeToDX(topology, 0, &dpCount));
 
-		mContext->DrawIndexedInstancedIndirect(((DX11Buffer*)indirectArg)->mBuffer, indirectArgOffset);
+		ASSERT(countBuffer == nullptr);
+		const auto argOffset = offsetof(FIndirectDrawArgument, VertexCountPerInstance);
+		mContext->DrawIndexedInstancedIndirect(((DX11Buffer*)indirectArg)->mBuffer, indirectArgOffset + argOffset);
 	}
 	void DX11CommandList::Dispatch(UINT x, UINT y, UINT z)
 	{
@@ -382,7 +393,8 @@ namespace NxRHI
 	}
 	void DX11CommandList::IndirectDispatch(IBuffer* indirectArg, UINT indirectArgOffset)
 	{
-		mContext->DispatchIndirect(((DX11Buffer*)indirectArg)->mBuffer, indirectArgOffset);
+		const auto argOffset = offsetof(FIndirectDispatchArgument, X);
+		mContext->DispatchIndirect(((DX11Buffer*)indirectArg)->mBuffer, indirectArgOffset + argOffset);
 	}
 	void DX11CommandList::SetMemoryBarrier(EPipelineStage srcStage, EPipelineStage dstStage, EBarrierAccess srcAccess, EBarrierAccess dstAccess)
 	{
@@ -396,31 +408,6 @@ namespace NxRHI
 	{
 
 	}
-	/*UINT64 DX11CommandList::SignalFence(IFence* fence, UINT64 value, IEvent* evt)
-	{
-		ASSERT(mContext4);
-		if (mContext4 == nullptr)
-			return -1;
-		auto dxFence = ((DX11Fence*)fence);
-		if (evt != nullptr)
-		{
-			dxFence->mFence->SetEventOnCompletion(value, ((DX11Event*)evt)->mHandle);
-		}
-		else
-		{
-			dxFence->mFence->SetEventOnCompletion(value, dxFence->mEvent->mHandle);
-		}
-		mContext4->Signal(dxFence->mFence, value);
-		return value;
-	}
-	void DX11CommandList::WaitGpuFence(IFence* fence, UINT64 value)
-	{
-		ASSERT(mContext4);
-		if (mContext4 == nullptr)
-			return;
-		auto dxFence = ((DX11Fence*)fence);
-		mContext4->Wait(dxFence->mFence, value);
-	}*/
 	void DX11CommandList::CopyBufferRegion(IBuffer* target, UINT64 DstOffset, IBuffer* src, UINT64 SrcOffset, UINT64 Size)
 	{
 		if (target->GetRtti() != src->GetRtti())
@@ -444,22 +431,143 @@ namespace NxRHI
 	}
 	void DX11CommandList::CopyBufferToTexture(ITexture* target, UINT subRes, IBuffer* src, const FSubResourceFootPrint* footprint)
 	{
-		ASSERT(false);
+		auto pDevice = GetDX11Device();
+		auto cmd = ((DX11CmdQueue*)pDevice->GetCmdQueue())->mHardwareContext;
+
+		AutoRef<NxRHI::IBuffer> copyBuffer;
+		if ((src->Desc.CpuAccess & ECpuAccess::CAS_READ)&&
+			src->Desc.Usage == EGpuUsage::USAGE_STAGING)
+		{
+			copyBuffer = src;
+		}
+		else
+		{
+			auto copyDesc = src->Desc;
+			copyDesc.CpuAccess = ECpuAccess::CAS_READ;
+			copyDesc.Usage = EGpuUsage::USAGE_STAGING;
+			copyDesc.MiscFlags = (EResourceMiscFlag)0;
+
+			copyBuffer = MakeWeakRef(pDevice->CreateBuffer(&copyDesc));
+			cmd->mContext->CopyResource((ID3D11Resource*)copyBuffer->GetHWBuffer(), (ID3D11Resource*)src->GetHWBuffer());
+		}
+		
+		auto pixelStride = GetPixelByteWidth(footprint->Format);
+		FMappedSubResource lockBuffer{};
+		FMappedSubResource lockTexture{};
+		if (copyBuffer->Map(0, &lockBuffer, true))
+		{
+			NxRHI::FSubresourceBox box;
+			box.Left = footprint->X;
+			box.Top = footprint->Y;
+			box.Front = footprint->Z;
+			box.Right = footprint->X + footprint->Width;
+			box.Bottom = footprint->Y + footprint->Height;
+			box.Back = footprint->Z + footprint->Depth;
+			target->UpdateGpuData(subRes, lockBuffer.pData, footprint);
+			/*if (target->Map(cmd, subRes, &lockTexture, false))
+			{
+				for (UINT z = 0; z < footprint->Depth; z++)
+				{
+					auto pSliceStart = (BYTE*)lockTexture.pData + lockTexture.DepthPitch * (z + footprint->Z);
+					auto pBufferStart = (BYTE*)lockBuffer.pData + footprint->RowPitch * footprint->Height * z;
+					for (UINT y = 0; y < footprint->Height; y++)
+					{
+						auto pRowStart = pSliceStart +
+							(y + footprint->Y) * lockTexture.RowPitch +
+							footprint->X * pixelStride;
+						memcpy(pRowStart, pBufferStart, pixelStride * footprint->Width);
+
+						pBufferStart += footprint->RowPitch;
+					}
+				}
+
+				target->Unmap(cmd, subRes);
+			}*/
+			copyBuffer->Unmap(0);
+		}
 	}
 	void DX11CommandList::CopyTextureToBuffer(IBuffer* target, const FSubResourceFootPrint* footprint, ITexture* source, UINT subRes)
 	{
-		D3D11_BOX box;
+		auto copyDesc = source->Desc;
+		copyDesc.CpuAccess = ECpuAccess::CAS_READ;
+		copyDesc.Usage = EGpuUsage::USAGE_STAGING;
+		copyDesc.BindFlags = EBufferType(0);
+		
+		auto pDevice = ((DX11Texture*)source)->mDeviceRef.GetPtr();
+		auto copyTexture = MakeWeakRef(pDevice->CreateTexture(&copyDesc));
+
+		auto cmd = ((DX11CmdQueue*)pDevice->GetCmdQueue())->mHardwareContext;
+		cmd->mContext->CopyResource((ID3D11Resource*)copyTexture->GetHWBuffer(), (ID3D11Resource*)source->GetHWBuffer());
+		/*if (IsImmContext == false)
+		{
+			pDevice->GetCmdQueue()->ExecuteCommandList(this, EQueueType::QU_Default);
+		}*/
+		
+		auto pixelStride = GetPixelByteWidth(footprint->Format);
+		FMappedSubResource lockTexture{};
+		if (copyTexture->Map(subRes, &lockTexture, true))
+		{
+			/*for (UINT z = 0; z < footprint->Depth; z++)
+			{
+				auto pSliceStart = (BYTE*)lockTexture.pData + lockTexture.DepthPitch * (z + footprint->Z);
+				for (UINT y = 0; y < footprint->Height; y++)
+				{
+					auto pRowStart = pSliceStart + lockTexture.RowPitch * (y + footprint->Y);
+					for (UINT x = 0; x < footprint->Width; x++)
+					{
+						if (((DWORD*)pRowStart)[x] != 0)
+						{
+							int xxx = ((DWORD*)pRowStart)[x];
+						}
+					}
+				}
+			}*/
+			FMappedSubResource lockBuffer{};
+			if (target->Map(0, &lockBuffer, false))
+			{
+				for (UINT z = 0; z < footprint->Depth; z++)
+				{
+					auto pSliceStart = (BYTE*)lockTexture.pData + lockTexture.DepthPitch * (z + footprint->Z);
+					auto pWrite = (BYTE*)lockBuffer.pData + footprint->RowPitch * footprint->Height * z;
+					for (UINT y = 0; y < footprint->Height; y++)
+					{
+						auto pRowStart = pSliceStart +
+							(y + footprint->Y) * lockTexture.RowPitch +
+							footprint->X * pixelStride;
+						memcpy(pWrite, pRowStart, pixelStride * footprint->Width);
+
+						pWrite += footprint->RowPitch;
+					}
+				}
+
+				/*for (UINT z = 0; z < footprint->Depth; z++)
+				{
+					auto pSliceStart = (BYTE*)lockBuffer.pData + footprint->RowPitch * footprint->Height * z;
+					for (UINT y = 0; y < footprint->Height; y++)
+					{
+						auto pRowStart = pSliceStart + lockBuffer.RowPitch * y;
+						for (UINT x = 0; x < footprint->Width; x++)
+						{
+							if (((DWORD*)pRowStart)[x] != 0)
+							{
+								int xxx = ((DWORD*)pRowStart)[x];
+							}
+						}
+					}
+				}*/
+
+				target->Unmap(0);
+			}
+			copyTexture->Unmap(subRes);
+		}
+		/*D3D11_BOX box;
 		box.left = footprint->X;
 		box.top = footprint->Y;
 		box.front = footprint->Z;
 		box.right = box.left + footprint->Width;
 		box.bottom = box.top + footprint->Height;
 		box.back = box.front + footprint->Depth;
-		mContext->CopySubresourceRegion((ID3D11Resource*)target->GetHWBuffer(), subRes, footprint->X, footprint->Y, footprint->Z, (ID3D11Resource*)source->GetHWBuffer(), subRes, &box);
-	}
-	void DX11CommandList::Flush()
-	{
-		mContext->Flush();
+		mContext->CopySubresourceRegion((ID3D11Resource*)copyTexture->GetHWBuffer(), subRes, 0, 0, 0, (ID3D11Resource*)source->GetHWBuffer(), subRes, &box);*/
 	}
 	void DX11CommandList::Commit(ID3D11DeviceContext* imContex)
 	{
@@ -471,6 +579,71 @@ namespace NxRHI
 		imContex->ExecuteCommandList(mCmdList, 0);
 		Safe_Release(mCmdList);
 		EndEvent();
+
+		this->ResetGpuDraws();
+	}
+
+	//////////////////////////////////////////////////////////////////////////
+	DX11GpuScope::~DX11GpuScope()
+	{
+		
+	}
+	bool DX11GpuScope::Init(DX11GpuDevice* device)
+	{
+		mDeviceRef.FromObject(device);
+
+		D3D11_QUERY_DESC queryDesc{};
+		queryDesc.Query = D3D11_QUERY::D3D11_QUERY_TIMESTAMP;
+		
+		device->mDevice->CreateQuery(&queryDesc, mQueryStart.GetAddressOf());
+		device->mDevice->CreateQuery(&queryDesc, mQueryEnd.GetAddressOf());
+
+		queryDesc.Query = D3D11_QUERY::D3D11_QUERY_TIMESTAMP_DISJOINT;
+		device->mDevice->CreateQuery(&queryDesc, mQueryJoint.GetAddressOf());
+		return true;
+	}
+
+	bool DX11GpuScope::IsFinished()
+	{
+		return true;
+	}
+	UINT64 DX11GpuScope::GetDeltaTime()
+	{
+		/*auto device = mDeviceRef.GetPtr();
+		UINT64 start = 0,end = 0;
+		D3D11_QUERY_DATA_TIMESTAMP_DISJOINT disjoint = { 1, TRUE };
+		auto context = ((DX11CmdQueue*)device->GetCmdQueue())->mHardwareContext->mContext;
+		HRESULT hr = S_OK;
+		while ((hr = context->GetData(mQueryJoint, &disjoint, sizeof(disjoint), 0)) == S_FALSE)
+		{
+		}
+		device->GetCmdQueue()->mDefaultQueueFrequence = disjoint.Frequency;
+		while ((hr = context->GetData(mQueryStart, &start, sizeof(UINT64), 0)) == S_FALSE)
+		{
+		}
+		while ((hr = context->GetData(mQueryEnd, &end, sizeof(UINT64), 0)) == S_FALSE)
+		{
+		}
+		return end - start;*/
+		return 0;
+	}
+	void DX11GpuScope::Begin(ICommandList* cmdlist)
+	{
+		auto cmd = (DX11CommandList*)cmdlist;
+		cmd->mContext->Begin(mQueryJoint);
+		cmd->mContext->End(mQueryStart);
+	}
+	void DX11GpuScope::End(ICommandList* cmdlist)
+	{
+		auto cmd = (DX11CommandList*)cmdlist;
+		cmd->mContext->End(mQueryEnd);
+		cmd->mContext->End(mQueryJoint);
+	}
+	void DX11GpuScope::SetName(const char* name)
+	{
+		mName = name;
+		//std::wstring n = StringHelper::strtowstr(name);
+		//mQueryHeap->SetName(n.c_str());
 	}
 }
 

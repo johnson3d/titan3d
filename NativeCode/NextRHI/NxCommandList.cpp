@@ -1,5 +1,6 @@
 #include "NxCommandList.h"
 #include "NxDrawcall.h"
+#include "NxFrameBuffers.h"
 #include "../../Base/vfxsampcounter.h"
 
 #define new VNEW
@@ -15,6 +16,7 @@ namespace NxRHI
 	}
 	void ICommandList::FlushDraws()
 	{
+		//VAutoVSLLock al(mLocker);
 		for (auto i : mDrawcallArray)
 		{
 			i->Commit(this);
@@ -22,8 +24,13 @@ namespace NxRHI
 	}
 	void ICommandList::ResetGpuDraws() 
 	{
+		//VAutoVSLLock al(mLocker);
 		mDrawcallArray.clear();
 		mPrimitiveNum = 0;
+	}
+	void ICommandList::InheritPass(ICommandList* cmdlist)
+	{
+		mCurrentFrameBuffers = cmdlist->mCurrentFrameBuffers;
 	}
 }
 

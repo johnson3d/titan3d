@@ -63,7 +63,7 @@ void FRttiProperty::SetValue(void* pHost, const void* pValueAddress) const
 	MemberType.SetValue(pAddr, pValueAddress);
 	if (DeclareClass != nullptr)
 	{
-		auto pIUnknown = (VIUnknownBase*)DeclareClass->CastSuper(pHost, GetClassObject<VIUnknownBase>());
+		auto pIUnknown = (VIUnknown*)DeclareClass->CastSuper(pHost, GetClassObject<VIUnknown>());
 		if (pIUnknown != nullptr)
 		{
 			pIUnknown->OnPropertyChanged(this->MemberName, MemberType);
@@ -88,14 +88,14 @@ AuxRttiBuilderBase::AuxRttiBuilderBase()
 	RttiStructManager::GetInstance()->RegStructBuilder(this);
 }
 
-const FRttiStruct* VIUnknownBase::GetRtti() const
+const FRttiStruct* VIUnknown::GetRtti() const
 {
-	return AuxRttiStruct<VIUnknownBase>::GetClassObject();
+	return AuxRttiStruct<VIUnknown>::GetClassObject();
 }
 
-VIUnknownBase* VIUnknownBase::CastTo(FRttiStruct* type)
+VIUnknown* VIUnknown::CastTo(FRttiStruct* type)
 {
-	return (VIUnknownBase*)type->DownCast(this, GetRtti());
+	return (VIUnknown*)type->DownCast(this, GetRtti());
 }
 
 void RttiEnum::Init()
@@ -184,7 +184,7 @@ RttiStructManager::~RttiStructManager()
 	FinalCleanup();
 }
 
-struct Test_ConstantVarDesc : public VIUnknown, public v3dxVector3
+struct Test_ConstantVarDesc : public IWeakReference, public v3dxVector3
 {
 	Test_ConstantVarDesc()
 	{
@@ -280,12 +280,12 @@ StructBegin(Test_ConstantVarDesc, EngineNS)
 		AppendConstructorMetaInfo(FTestMeta, "Test_ConstantVarDesc info");
 	}
 }
-StructEnd(Test_ConstantVarDesc, v3dxVector3, VIUnknown)
+StructEnd(Test_ConstantVarDesc, v3dxVector3, IWeakReference)
 
 void TestReflection()
 {
-	AutoRef<VIUnknown> a = MakeWeakRef(new VIUnknown());
-	AutoRef<VIUnknownBase> b = MakeWeakRef(new VIUnknown());
+	AutoRef<IWeakReference> a = MakeWeakRef(new IWeakReference());
+	AutoRef<VIUnknown> b = MakeWeakRef(new IWeakReference());
 	b = a;
 	{
 		typedef VTypeList<std::string, float> TestTypeList_base;
@@ -368,15 +368,15 @@ void TestReflection()
 	ASSERT(pMember->Offset == __vsizeof(Test_ConstantVarDesc, Size));
 	ASSERT(pMember->MemberName == "Size");
 
-	bool isIUnknown = rtti->IsA(GetClassObject<VIUnknown>());
+	bool isIUnknown = rtti->IsA(GetClassObject<IWeakReference>());
 	ASSERT(isIUnknown);
 	auto pCastVector3 = (v3dxVector3*)rtti->CastSuper(tmp, GetClassObject<v3dxVector3>());
 	ASSERT(pCastVector3->x==1 && pCastVector3->y == 1 && pCastVector3->z == 1);
-	auto pCastIUnknown = (VIUnknown*)rtti->CastSuper(tmp, GetClassObject<VIUnknown>());
+	auto pCastIUnknown = (IWeakReference*)rtti->CastSuper(tmp, GetClassObject<IWeakReference>());
 	ASSERT(pCastIUnknown!=nullptr);
 
 	[[maybe_unused]] auto pDownCastTest = (Test_ConstantVarDesc*)GetClassObject<Test_ConstantVarDesc>()->DownCast(pCastVector3, GetClassObject<v3dxVector3>());
-	[[maybe_unused]] auto pDownCastTest2 = (Test_ConstantVarDesc*)GetClassObject<Test_ConstantVarDesc>()->DownCast(pCastIUnknown, GetClassObject<VIUnknown>());
+	[[maybe_unused]] auto pDownCastTest2 = (Test_ConstantVarDesc*)GetClassObject<Test_ConstantVarDesc>()->DownCast(pCastIUnknown, GetClassObject<IWeakReference>());
 	tmp->Release();
 }
 
@@ -412,10 +412,10 @@ void RttiStructManager::BuildRtti()
 	pRtti->BuildClassInfo<double>("double", nullptr);
 	pRtti = GetClassObject<std::string>();
 	pRtti->BuildClassInfo<std::string>("string", "std");	
-	pRtti = GetClassObject<VIUnknownBase>();
-	pRtti->BuildClassInfo<VIUnknownBase>("VIUnknownBase", "EngineNS");
 	pRtti = GetClassObject<VIUnknown>();
-	pRtti->BuildClassInfo<VIUnknown>("VIUnknown", "EngineNS");
+	pRtti->BuildClassInfo<VIUnknown>("VIUnknownBase", "EngineNS");
+	pRtti = GetClassObject<IWeakReference>();
+	pRtti->BuildClassInfo<IWeakReference>("VIUnknown", "EngineNS");
 
 	for (auto i : StructBuilders)
 	{

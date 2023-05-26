@@ -1,0 +1,28 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup Label="Globals">
+    <MSBuildAllProjects Condition="'$(MSBuildVersion)' == '' Or '$(MSBuildVersion)' &lt; '16.0'">$(MSBuildAllProjects);$(MSBuildThisFileFullPath)</MSBuildAllProjects>
+    <HasSharedItems>true</HasSharedItems>
+    <ItemsProjectGuid>{1dfd86bc-f082-409c-a396-ca30902519b5}</ItemsProjectGuid>
+  </PropertyGroup>
+  <ItemDefinitionGroup>
+    <ClCompile>
+      <AdditionalIncludeDirectories>%(AdditionalIncludeDirectories);$(MSBuildThisFileDirectory)</AdditionalIncludeDirectories>
+    </ClCompile>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <ProjectCapability Include="SourceItemsFromImports" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="$(MSBuildThisFileDirectory)SurfaceAreaHeuristic.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)TestStrip.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)TTCluster.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)TTStripifier.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="$(MSBuildThisFileDirectory)SurfaceAreaHeuristic.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)TTCluster.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)TTStrip.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)TTStripifier.h" />
+  </ItemGroup>
+</Project>

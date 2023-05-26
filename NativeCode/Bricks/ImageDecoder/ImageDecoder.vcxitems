@@ -1,0 +1,30 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup Label="Globals">
+    <MSBuildAllProjects Condition="'$(MSBuildVersion)' == '' Or '$(MSBuildVersion)' &lt; '16.0'">$(MSBuildAllProjects);$(MSBuildThisFileFullPath)</MSBuildAllProjects>
+    <HasSharedItems>true</HasSharedItems>
+    <ItemsProjectGuid>{414404d4-3771-482c-9f20-4b962de071b0}</ItemsProjectGuid>
+  </PropertyGroup>
+  <ItemDefinitionGroup>
+    <ClCompile>
+      <AdditionalIncludeDirectories>%(AdditionalIncludeDirectories);$(MSBuildThisFileDirectory)</AdditionalIncludeDirectories>
+    </ClCompile>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <ProjectCapability Include="SourceItemsFromImports" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="$(MSBuildThisFileDirectory)XImageBuffer.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)IImageDecoder.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)XImageDecoder_Exr.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)XImageDecoder_Jpg.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)XImageDecoder_Png.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="$(MSBuildThisFileDirectory)XImageBuffer.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)IImageDecoder.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)XImageDecoder_Exr.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)XImageDecoder_Jpg.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)XImageDecoder_Png.h" />
+  </ItemGroup>
+</Project>

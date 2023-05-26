@@ -506,4 +506,46 @@ struct UAnyValue_t
 };
 #pragma pack(pop)
 
+class TR_CLASS()
+	FGlobalConfig
+{
+	struct FConfigValue
+	{
+		FConfigValue()
+		{
+			I32 = 0;
+		}
+		std::string Name;
+		union 
+		{
+			int I32;
+			UINT UI32;
+			float F32;
+		};
+	};
+	std::vector<FConfigValue>	Values;
+	FConfigValue* GetOrCreateConfig(const char* name, UINT& outIndex);
+	FConfigValue* GetConfig(UINT index);
+public:
+	static FGlobalConfig* GetInstance();
+	const char* GetName(UINT handle);
+	UINT GetConfigHandle(const char* name);
+
+	UINT SetConfigValueI32(const char* name, int value);
+	UINT SetConfigValueUI32(const char* name, UINT value);
+	UINT SetConfigValueF32(const char* name, float value);
+
+	void SetConfigValueI32(UINT handle, int value);
+	void SetConfigValueUI32(UINT handle, UINT value);
+	void SetConfigValueF32(UINT handle, float value);
+
+	int GetConfigValueI32(const char* name);
+	UINT GetConfigValueUI32(const char* name);
+	float GetConfigValueF32(const char* name);
+
+	int GetConfigValueI32(UINT handle);
+	UINT GetConfigValueUI32(UINT handle);
+	float GetConfigValueF32(UINT handle);
+};
+
 NS_END

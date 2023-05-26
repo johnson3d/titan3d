@@ -24,10 +24,10 @@ namespace NxRHI
 				parent = iter->second;
 			}
 
+			//std::string incFile = pFileName;
 			std::string root = parent + pFileName;
-			if (strlen(pFileName) > 2 && pFileName[1] == ':')
+			if ((strlen(pFileName) > 2 && pFileName[1] == ':') || (pFileName[0] == '@'))
 			{
-				//todo: not windows platform
 				root = pFileName;
 			}
 			auto ar = Compiler->GetShaderCodeStream(root.c_str());

@@ -110,6 +110,8 @@ namespace NxRHI
 
 		virtual IGraphicDraw* CreateGraphicDraw() override;
 		virtual IComputeDraw* CreateComputeDraw() override;
+		virtual IGpuScope* CreateGpuScope() override;
+		virtual void SetBreakOnID(int id, bool open) override;
 
 		virtual void TickPostEvents() override;
 	private: 
@@ -143,7 +145,7 @@ namespace NxRHI
 			return false;
 		}
 	public:
-		TObjectHandle<VKGpuSystem>		mGpuSystem;
+		TWeakRefHandle<VKGpuSystem>		mGpuSystem;
 		VkPhysicalDeviceProperties		mDeviceProperties{};
 		VkPhysicalDeviceFeatures		mDeviceFeatures{};
 		VkPhysicalDeviceMemoryProperties mMemProperties{};
@@ -179,28 +181,26 @@ namespace NxRHI
 	class VKCmdQueue : public ICmdQueue
 	{
 	public:
-		virtual void ExecuteCommandList(ICommandList* Cmdlist, UINT NumOfWait, ICommandList** ppWaitCmdlists) override;
-		virtual void ExecuteCommandList(UINT num, ICommandList** ppCmdlist) override;
-		virtual UINT64 SignalFence(IFence* fence, UINT64 value) override;
-		virtual void WaitFence(IFence* fence, UINT64 value) override;
-		virtual ICommandList* GetIdleCmdlist(EQueueCmdlist type) override;
-		virtual void ReleaseIdleCmdlist(ICommandList* cmd, EQueueCmdlist type) override;
-		virtual void Flush() override;
+		virtual void ExecuteCommandList(UINT NumOfExe, ICommandList** Cmdlist, UINT NumOfWait, ICommandList** ppWaitCmdlists, EQueueType type) override;
+		virtual ICommandList* GetIdleCmdlist() override;
+		virtual void ReleaseIdleCmdlist(ICommandList* cmd) override;
+		virtual void Flush(EQueueType type) override;
 
 		bool GraphicsEqualPresentQueue() const {
 			return mGraphicsQueueIndex == mPresentQueueIndex;
 		}
-		UINT64 QueueSignal(IFence* fence, UINT64 value, VkFence g2hFence);
+
+		UINT64 QueueSignal(IFence* fence, UINT64 value, VkFence g2hFence, EQueueType type);
+		void WaitFence(IFence* fence, UINT64 value);
 	private:
-		void QueueExecuteCommandList(ICommandList* Cmdlist);
+		void QueueExecuteCommandList(ICommandList* Cmdlist, EQueueType type);
 	public:
 		VKCmdQueue();
 		~VKCmdQueue();
 		void Init(VKGpuDevice* device);
 		void ClearIdleCmdlists();
 		VKGpuDevice*					mDevice = nullptr;
-		VCritical						mImmCmdListLocker;
-		AutoRef<VKCommandList>			mFramePost;
+		VCritical						mQueueLocker;
 		std::queue<AutoRef<ICommandList>>	mIdleCmdlist;
 		AutoRef<VKCommandList>			mDummyCmdList;
 		
@@ -208,6 +208,8 @@ namespace NxRHI
 		UINT							mPresentQueueIndex = -1;
 		VkQueue							mGraphicsQueue = nullptr;
 		VkQueue							mPresentQueue = nullptr;
+
+		AutoRef<IFence>					mFlushFence;
 	};
 }
 

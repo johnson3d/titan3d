@@ -41,6 +41,7 @@
     <ClCompile Include="$(MSBuildThisFileDirectory)v3dxTransform.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)v3dxVector2.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)v3dxVector3.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)v3dxVector4.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="$(MSBuildThisFileDirectory)IntegerType.h" />
@@ -77,6 +78,8 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)v3dxVector2.inl.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)v3dxVector3.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)v3dxVector3.inl.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)v3dxVector4.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)v3dxVector4.inl.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)vfxgeometry.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)vfxGeomTypes.h" />
   </ItemGroup>

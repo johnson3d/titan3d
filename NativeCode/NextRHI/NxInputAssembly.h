@@ -19,7 +19,7 @@ namespace NxRHI
 	};
 
 	struct TR_CLASS()
-		FInputLayoutDesc : public VIUnknownBase
+		FInputLayoutDesc : public VIUnknown
 	{
 		ENGINE_RTTI(FInputLayoutDesc);
 		FInputLayoutDesc()

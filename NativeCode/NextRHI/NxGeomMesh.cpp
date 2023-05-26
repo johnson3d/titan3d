@@ -53,7 +53,7 @@ namespace NxRHI
 			case VST_LightMap:
 			{
 				result.XndName = "LightMapUV";
-				result.Stride = sizeof(v3dxVector2);
+				result.Stride = sizeof(v3dVector4_t);
 				break;
 			}
 			case VST_SkinIndex:
@@ -123,6 +123,11 @@ namespace NxRHI
 		return result;
 	}
 
+	void FVertexArray::GetStreamInfo(EVertexStreamType type, UINT* stride, UINT* element, int* varType)
+	{
+		NxRHI::GetVertexStreamInfo(type, stride, element, (EShaderVarType*)varType);
+	}
+
 	FVertexArray::FVertexArray()
 	{
 
@@ -147,6 +152,16 @@ namespace NxRHI
 	FGeomMesh::FGeomMesh()
 	{
 		VertexArray = MakeWeakRef(new FVertexArray());
+	}
+	void FGeomMesh::Reset(bool bClearBuffer)
+	{
+		if (bClearBuffer)
+		{
+			IndexBuffer = nullptr;
+			if (VertexArray != nullptr)
+				VertexArray->Reset();
+		}
+		Atoms.clear();
 	}
 	void FGeomMesh::Commit(ICommandList* cmdlist)
 	{
@@ -265,6 +280,15 @@ namespace NxRHI
 		
 	}
 
+	void FMeshPrimitives::Reset(bool bClearBuffer)
+	{
+		mDesc.SetDefault(); 
+		mAtomExtData.clear();
+
+		if (mGeometryMesh != nullptr)
+			mGeometryMesh->Reset(bClearBuffer);
+	}
+
 	bool FMeshPrimitives::Init(IGpuDevice* device, const char* name, UINT atom)
 	{
 		mName = name;
@@ -280,7 +304,7 @@ namespace NxRHI
 	{
 		//ASSERT(GLogicThreadId == vfxThread::GetCurrentThreadId());
 		mDesc.AtomNumber = (UINT)mesh->Atoms.size();
-
+		
 		mGeometryMesh = mesh;
 
 		mAABB = *aabb;
@@ -364,19 +388,7 @@ namespace NxRHI
 			}
 
 			IBlobObject buffData;
-			auto cmd = device->GetCmdQueue()->GetIdleCmdlist(EQueueCmdlist::QCL_Read);
-			
-			FBufferDesc copyDesc{};
-			copyDesc.SetDefault();
-			copyDesc.StructureStride = ib->Desc.Stride;
-			copyDesc.Size = ib->Desc.Size;
-			copyDesc.CpuAccess = ECpuAccess::CAS_READ;
-			copyDesc.Usage = EGpuUsage::USAGE_STAGING;
-			auto pCopyIB = MakeWeakRef(device->CreateBuffer(&copyDesc));
-			cmd->CopyBufferRegion(pCopyIB, 0, ib->Buffer, 0, 0);
-			device->GetCmdQueue()->Flush();
-			pCopyIB->FetchGpuData(cmd, 0, &buffData);
-			device->GetCmdQueue()->ReleaseIdleCmdlist(cmd, EQueueCmdlist::QCL_Read);
+			ib->Buffer->FetchGpuData(0, &buffData);
 			pAttr->Write((BYTE*)buffData.GetData() + sizeof(UINT) * 2, desc.Size);
 			pAttr->EndWrite();
 		}
@@ -456,13 +468,37 @@ namespace NxRHI
 		pAttr->Read(uVert);
 		pAttr->Read(uKey);
 		tkeys.Load(*pAttr);
+		
 		FVbvDesc vbvDesc{};
-		vbvDesc.Stride = uStride;
-		ASSERT(vbvDesc.Stride == stride);
-		vbvDesc.Size = uStride * uKey * uVert;
+		vbvDesc.Stride = stride;
+		vbvDesc.Size = stride * uKey * uVert;
 		BYTE* data = new BYTE[vbvDesc.Size];
-		//data = new BYTE[desc.ByteWidth];
-		pAttr->Read(data, vbvDesc.Size);
+		if (stride == uStride)
+		{	
+			pAttr->Read(data, vbvDesc.Size);
+		}
+		else if (stride > uStride)
+		{
+			for (UINT i = 0; i<uKey; i++)
+			{
+				BYTE* pCurKeyAddr = data + i * (uVert * stride);
+				for (UINT j = 0; j < uVert; j++)
+				{
+					pAttr->Read(pCurKeyAddr + j * stride, uStride);
+				}
+			}
+		}
+		else
+		{
+			for (UINT i = 0; i < uKey; i++)
+			{
+				BYTE* pCurKeyAddr = data + i * (uVert * stride);
+				for (UINT j = 0; j < uVert; j++)
+				{
+					pAttr->Read(pCurKeyAddr + j * stride, vbvDesc.Stride);
+				}
+			}
+		}
 		vbvDesc.InitData = data;
 		pAttr->EndRead();
 
@@ -487,18 +523,7 @@ namespace NxRHI
 	void FMeshPrimitives::SaveVB(IGpuDevice* device, XndAttribute* pAttr, IVbView* vb, TimeKeys& tkeys, UINT stride)
 	{
 		IBlobObject buffData;
-		auto cmd = device->GetCmdQueue()->GetIdleCmdlist(EQueueCmdlist::QCL_Read);
-		FBufferDesc copyDesc{}; 
-		copyDesc.SetDefault();// = vb->Desc;
-		copyDesc.StructureStride = vb->Desc.Stride;
-		copyDesc.Size = vb->Desc.Size;
-		copyDesc.CpuAccess = ECpuAccess::CAS_READ;
-		copyDesc.Usage = EGpuUsage::USAGE_STAGING;
-		auto pCopyVB = MakeWeakRef(device->CreateBuffer(&copyDesc));
-		cmd->CopyBufferRegion(pCopyVB, 0, vb->Buffer, 0, 0);
-		device->GetCmdQueue()->Flush();
-		pCopyVB->FetchGpuData(cmd, 0, &buffData);
-		device->GetCmdQueue()->ReleaseIdleCmdlist(cmd, EQueueCmdlist::QCL_Read);
+		vb->Buffer->FetchGpuData(0, &buffData);
 
 		if (buffData.GetSize() == 0)
 			return;
@@ -509,12 +534,12 @@ namespace NxRHI
 		uKey = tkeys.GetKeyCount();
 		if (uKey == 0)
 			uKey = 1;
-		uVert = (UINT)copyDesc.Size / (uKey * stride);
+		uVert = (UINT)vb->Desc.Size / (uKey * stride);
 		pAttr->Write(stride);
 		pAttr->Write(uVert);
 		pAttr->Write(uKey);
 		tkeys.Save(*pAttr);
-		pAttr->Write((BYTE*)buffData.GetData() + sizeof(UINT) * 2, (UINT)copyDesc.Size);
+		pAttr->Write((BYTE*)buffData.GetData() + sizeof(UINT) * 2, (UINT)vb->Desc.Size);
 
 		pAttr->EndWrite();
 	}
@@ -535,7 +560,7 @@ namespace NxRHI
 		return false;
 	}
 
-	bool FMeshPrimitives::RestoreResource(VIUnknown* pDevice)
+	bool FMeshPrimitives::RestoreResource(IWeakReference* pDevice)
 	{
 		if (mXnd == nullptr)
 			return false;
@@ -616,6 +641,16 @@ namespace NxRHI
 
 	bool FMeshPrimitives::SetGeomtryMeshStream(IGpuDevice* device, EVertexStreamType stream, void* data, UINT size, UINT stride, ECpuAccess cpuAccess)
 	{
+		IVbView* ovb = nullptr;
+		if (mGeometryMesh != nullptr &&
+			(ovb = mGeometryMesh->VertexArray->VertexBuffers[stream]) != nullptr &&
+			ovb->Desc.Stride == stride &&
+			ovb->Desc.Size >= size)
+		{
+			ovb->UpdateGpuData(0, data, size);
+			return true;
+		}
+
 		FVbvDesc vbvDesc{};
 		vbvDesc.Stride = stride;
 		vbvDesc.Size = size;
@@ -629,6 +664,16 @@ namespace NxRHI
 
 	bool FMeshPrimitives::SetGeomtryMeshIndex(IGpuDevice* device, void* data, UINT size, bool isBit32, ECpuAccess cpuAccess)
 	{
+		IIbView* oib = nullptr;
+		if (mGeometryMesh != nullptr &&
+			(oib = mGeometryMesh->IndexBuffer) != nullptr &&
+			oib->Desc.Stride == (isBit32 ? sizeof(UINT) : sizeof(USHORT)) &&
+			oib->Desc.Size >= size)
+		{
+			oib->UpdateGpuData(0, data, size);
+			return true;
+		}
+
 		FIbvDesc ibvDesc{};
 		ibvDesc.Stride = isBit32 ? sizeof(UINT) : sizeof(USHORT);
 		ibvDesc.Size = size;
@@ -672,11 +717,15 @@ namespace NxRHI
 
 	bool FMeshDataProvider::ToMesh(IGpuDevice* device, FMeshPrimitives* mesh)
 	{		
+		mesh->Reset(false);
 		UINT resSize = 0;
 		for (int i = 0; i < VST_Number; i++)
 		{
 			auto vb = mVertexBuffers[i];// geom->GetVertexBuffer((EVertexSteamType)i);
 			if (vb == nullptr)
+				continue;
+
+			if (mVertexBuffers[i]->GetSize() == 0 || mVertexBuffers[i]->GetData() == nullptr)
 				continue;
 
 			resSize += mVertexBuffers[i]->GetSize();
@@ -685,7 +734,8 @@ namespace NxRHI
 				mVertexBuffers[i]->GetSize(),
 				GetStreamTypeInfo((EVertexStreamType)i).Stride, ECpuAccess::CAS_DEFAULT);
 		}
-		mesh->SetGeomtryMeshIndex(device, IndexBuffer->GetData(), IndexBuffer->GetSize(), IsIndex32, ECpuAccess::CAS_DEFAULT);
+		if (IndexBuffer->GetSize() > 0)
+			mesh->SetGeomtryMeshIndex(device, IndexBuffer->GetData(), IndexBuffer->GetSize(), IsIndex32, ECpuAccess::CAS_DEFAULT);
 		//mesh->mGeometryMesh->BindInputLayout();
 		
 		mesh->mGeometryMesh->Atoms = mAtoms;
@@ -706,6 +756,15 @@ namespace NxRHI
 		mesh->mDesc.AtomNumber = (UINT)mAtoms.size();
 		mesh->mDesc.VertexNumber = VertexNumber;
 		mesh->mDesc.PolyNumber = PrimitiveNumber;
+		if (mAtomExtDatas.size() > 0)
+		{
+			mesh->ValidAtomExtData();
+			for (UINT i = 0; i < mAtomExtDatas.size(); i++)
+			{
+				mesh->SetAtomExtData(i, GetAtomExtData(i));
+			}
+		}
+
 		mesh->GetResourceState()->SetStreamState(SS_Valid);
 		mesh->GetResourceState()->SetResourceSize(resSize);
 		return TRUE;
@@ -727,38 +786,18 @@ namespace NxRHI
 			if (vb == nullptr)
 				continue;
 
-			mVertexBuffers[i] = new IBlobObject();
-			auto cmd = device->GetCmdQueue()->GetIdleCmdlist(EQueueCmdlist::QCL_Read);
-			FBufferDesc copyDesc;
-			copyDesc.SetDefault();
-			copyDesc.StructureStride = vb->Desc.Stride;
-			copyDesc.Size = vb->Desc.Size;
-			copyDesc.CpuAccess = ECpuAccess::CAS_READ;
-			copyDesc.Usage = EGpuUsage::USAGE_STAGING;
-			auto pCopyVB = MakeWeakRef(device->CreateBuffer(&copyDesc));
-			cmd->CopyBufferRegion(pCopyVB, 0, vb->Buffer, 0, 0);
-			device->GetCmdQueue()->Flush();
+			mVertexBuffers[i] = MakeWeakRef(new IBlobObject());
 			IBlobObject buffData;
-			pCopyVB->FetchGpuData(cmd, 0, &buffData);
-			device->GetCmdQueue()->ReleaseIdleCmdlist(cmd, EQueueCmdlist::QCL_Read);
-			mVertexBuffers[i]->PushData((BYTE*)buffData.GetData() + sizeof(UINT) * 2, copyDesc.Size);
+			vb->Buffer->FetchGpuData(0, &buffData);
+
+			mVertexBuffers[i]->PushData((BYTE*)buffData.GetData() + sizeof(UINT) * 2, vb->Buffer->Desc.Size);
 		}
 
-		IndexBuffer = new IBlobObject();
-		auto cmd = device->GetCmdQueue()->GetIdleCmdlist(EQueueCmdlist::QCL_Read);
-		FBufferDesc copyDesc{};
-		copyDesc.SetDefault();
-		copyDesc.StructureStride = ib->Desc.Stride;
-		copyDesc.Size = ib->Desc.Size;
-		copyDesc.CpuAccess = ECpuAccess::CAS_READ;
-		copyDesc.Usage = EGpuUsage::USAGE_STAGING;
-		auto pCopyIB = MakeWeakRef(device->CreateBuffer(&copyDesc));
-		cmd->CopyBufferRegion(pCopyIB, 0, ib->Buffer, 0, 0);
-		device->GetCmdQueue()->Flush();
+		IndexBuffer = MakeWeakRef(new IBlobObject());
 		IBlobObject buffData;
-		ib->Buffer->FetchGpuData(cmd, 0, &buffData);
-		device->GetCmdQueue()->ReleaseIdleCmdlist(cmd, EQueueCmdlist::QCL_Read);
-		IndexBuffer->PushData((BYTE*)buffData.GetData() + sizeof(UINT) * 2, copyDesc.Size);
+		ib->Buffer->FetchGpuData(0, &buffData);
+		
+		IndexBuffer->PushData((BYTE*)buffData.GetData() + sizeof(UINT) * 2, ib->Buffer->Desc.Size);
 		IsIndex32 = mesh->mGeometryMesh->IsIndex32;
 
 		PrimitiveNumber = mesh->mDesc.PolyNumber;
@@ -780,7 +819,31 @@ namespace NxRHI
 
 	void FMeshDataProvider::Reset()
 	{
-		Init();
+		PrimitiveNumber = 0;
+		VertexNumber = 0;
+
+		AtomSize = 0;
+		mAtoms.resize(0);
+		mAtomExtDatas.resize(0);
+		for (int i = 0; i < VST_Number; i++)
+		{
+			if (StreamTypes & (1 << i))
+			{
+				if (mVertexBuffers[i] == nullptr)
+				{
+					mVertexBuffers[i] = MakeWeakRef(new IBlobObject());
+				}
+				else
+				{
+					mVertexBuffers[i]->ReSize(0);
+				}
+			}
+		}
+
+		if (IndexBuffer == nullptr)
+			IndexBuffer = MakeWeakRef(new IBlobObject());
+		else
+			IndexBuffer->ReSize(0);
 	}
 	bool FMeshDataProvider::Init(DWORD streams, bool isIndex32, int atom)
 	{
@@ -962,7 +1025,7 @@ namespace NxRHI
 
 		return &mAtoms[index][lod];
 	}
-	void FMeshDataProvider::PushAtom(const FMeshAtomDesc* pDescLODs, UINT count, const AutoRef<VIUnknownBase>& ext)
+	void FMeshDataProvider::PushAtom(const FMeshAtomDesc* pDescLODs, UINT count, VIUnknown* ext)
 	{
 		std::vector<FMeshAtomDesc> tmp;
 		for (UINT i = 0; i < count; i++)
@@ -1248,6 +1311,207 @@ namespace NxRHI
 		return VertexNumber++;
 	}
 
+	UINT FMeshDataProvider::AddVertex(const v3dxVector3* pos, const v3dxVector3* nor, const v3dxVector2* uv, const v3dxQuaternion* lighmapUV, DWORD color)
+	{
+		auto cur = mVertexBuffers[VST_Position];
+		if (cur != nullptr && pos != nullptr)
+		{
+			cur->PushData(pos, sizeof(v3dxVector3));
+		}
+		cur = mVertexBuffers[VST_Normal];
+		if (cur != nullptr && nor != nullptr)
+		{
+			cur->PushData(nor, sizeof(v3dxVector3));
+		}
+		cur = mVertexBuffers[VST_Tangent];
+		if (cur != nullptr)
+		{
+			cur->PushData(&v3dxQuaternion::ZERO, sizeof(v3dxQuaternion));
+		}
+		cur = mVertexBuffers[VST_Color];
+		if (cur != nullptr)
+		{
+			cur->PushData(&color, sizeof(DWORD));
+		}
+		cur = mVertexBuffers[VST_UV];
+		if (cur != nullptr && uv != nullptr)
+		{
+			cur->PushData(uv, sizeof(v3dxVector2));
+		}
+		cur = mVertexBuffers[VST_LightMap];
+		if (cur != nullptr)
+		{
+			cur->PushData(lighmapUV, sizeof(v3dxQuaternion));
+		}
+		cur = mVertexBuffers[VST_SkinIndex];
+		if (cur != nullptr)
+		{
+			DWORD value = 0;
+			cur->PushData(&value, sizeof(DWORD));
+		}
+		cur = mVertexBuffers[VST_SkinWeight];
+		if (cur != nullptr)
+		{
+			cur->PushData(&v3dxQuaternion::ZERO, sizeof(v3dxQuaternion));
+		}
+		cur = mVertexBuffers[VST_TerrainIndex];
+		if (cur != nullptr)
+		{
+			DWORD value = 0;
+			cur->PushData(&value, sizeof(DWORD));
+		}
+		cur = mVertexBuffers[VST_TerrainGradient];
+		if (cur != nullptr)
+		{
+			DWORD value = 0;
+			cur->PushData(&value, sizeof(DWORD));
+		}
+
+		return VertexNumber++;
+	}
+
+	void FMeshDataProvider::AddVertex(const FMeshVertex* pVertex, UINT num)
+	{
+		//todo optimize
+		for (UINT i = 0; i < num; i++)
+		{
+			AddVertex(pVertex[i]);
+		}
+	}
+	bool FMeshDataProvider::AddVertex_Pos_UV_Color(const void* pVertex, UINT num, bool bInvertY, float CanvasHeight)
+	{
+		struct FTmpVertex
+		{
+			v3dxVector3 Pos;
+			v3dxVector2 UV;
+			DWORD Color;
+		};
+		auto verts = (FTmpVertex*)pVertex;
+
+		size_t posOffset = 0;
+		size_t uvOffset = 0;
+		size_t colorOffset = 0;
+
+		this->VertexNumber += num;
+
+		auto posVB = mVertexBuffers[VST_Position];		
+		if (posVB != nullptr)
+		{
+			posOffset = posVB->GetSize();
+			posVB->PushData(nullptr, sizeof(v3dxVector3) * num);
+		}
+		else
+		{
+			return false;
+		}
+		auto uvVB = mVertexBuffers[VST_UV];
+		if (uvVB != nullptr)
+		{
+			uvOffset = uvVB->GetSize();
+			uvVB->PushData(nullptr, sizeof(v3dxVector2) * num);
+		}
+		else
+		{
+			return false;
+		}
+		auto colorVB = mVertexBuffers[VST_Color];
+		if (colorVB != nullptr)
+		{
+			colorOffset = colorVB->GetSize();
+			colorVB->PushData(nullptr, sizeof(DWORD) * num);
+		}
+		else
+		{
+			return false;
+		}
+		if (bInvertY)
+		{
+			for (UINT i = 0; i < num; i++)
+			{
+				auto pos = verts[i].Pos;
+				pos.y = CanvasHeight - pos.y;
+				posVB->SetValueToOffset((UINT)posOffset, pos);
+				posOffset += sizeof(v3dxVector3);
+				uvVB->SetValueToOffset((UINT)uvOffset, verts[i].UV);
+				uvOffset += sizeof(v3dxVector2);
+				colorVB->SetValueToOffset((UINT)colorOffset, verts[i].Color);
+				colorOffset += sizeof(DWORD);
+			}
+		}
+		else
+		{
+			for (UINT i = 0; i < num; i++)
+			{
+				posVB->SetValueToOffset((UINT)posOffset, verts[i].Pos);
+				posOffset += sizeof(v3dxVector3);
+				uvVB->SetValueToOffset((UINT)uvOffset, verts[i].UV);
+				uvOffset += sizeof(v3dxVector2);
+				colorVB->SetValueToOffset((UINT)colorOffset, verts[i].Color);
+				colorOffset += sizeof(DWORD);
+			}
+		}
+		
+		return true;
+	}
+	UINT FMeshDataProvider::AddVertex(const FMeshVertex& vertex)
+	{
+		auto cur = mVertexBuffers[VST_Position];
+		if (cur != nullptr)
+		{
+			cur->PushData(&vertex.Position, sizeof(v3dxVector3));
+		}
+		cur = mVertexBuffers[VST_Normal];
+		if (cur != nullptr)
+		{
+			cur->PushData(&vertex.Normal, sizeof(v3dxVector3));
+		}
+		cur = mVertexBuffers[VST_Tangent];
+		if (cur != nullptr)
+		{
+			cur->PushData(&vertex.Tangent, sizeof(v3dxQuaternion));
+		}
+		cur = mVertexBuffers[VST_Color];
+		if (cur != nullptr)
+		{
+			cur->PushData(&vertex.Color, sizeof(DWORD));
+		}
+		cur = mVertexBuffers[VST_UV];
+		if (cur != nullptr)
+		{
+			cur->PushData(&vertex.UV, sizeof(v3dxVector2));
+		}
+		cur = mVertexBuffers[VST_LightMap];
+		if (cur != nullptr)
+		{
+			cur->PushData(&vertex.LightMap, sizeof(v3dxQuaternion));
+		}
+		cur = mVertexBuffers[VST_SkinIndex];
+		if (cur != nullptr)
+		{
+			DWORD value = 0;
+			cur->PushData(&vertex.SkinIndex, sizeof(DWORD));
+		}
+		cur = mVertexBuffers[VST_SkinWeight];
+		if (cur != nullptr)
+		{
+			cur->PushData(&vertex.SkinWeight, sizeof(v3dxQuaternion));
+		}
+		cur = mVertexBuffers[VST_TerrainIndex];
+		if (cur != nullptr)
+		{
+			DWORD value = 0;
+			cur->PushData(&value, sizeof(DWORD));
+		}
+		cur = mVertexBuffers[VST_TerrainGradient];
+		if (cur != nullptr)
+		{
+			DWORD value = 0;
+			cur->PushData(&value, sizeof(DWORD));
+		}
+
+		return VertexNumber++;
+	}
+
 	vBOOL FMeshDataProvider::AddTriangle(UINT a, UINT b, UINT c)
 	{
 		if (VertexNumber > 0)
@@ -1271,6 +1535,12 @@ namespace NxRHI
 			IndexBuffer->PushData(&c, sizeof(USHORT));
 		}
 
+		if (FaceBuffer != nullptr)
+		{
+			USHORT faceData = 0;
+			FaceBuffer->PushData(&faceData, sizeof(USHORT));
+		}
+
 		PrimitiveNumber++;
 		return TRUE;
 	}
@@ -1281,6 +1551,35 @@ namespace NxRHI
 		if (FALSE == AddTriangle(a, b, c))
 			return FALSE;
 		return TRUE;
+	}
+
+	vBOOL FMeshDataProvider::AddTriangle(UINT* pTri, UINT numOfTri)
+	{
+		if (IsIndex32)
+		{
+			IndexBuffer->PushData(pTri, sizeof(UINT) * numOfTri * 3);
+		}
+		else
+		{
+			for (UINT i = 0; i < numOfTri; i++)
+			{
+				USHORT a, b, c;
+				a = (USHORT)pTri[i * 3 + 0];
+				b = (USHORT)pTri[i * 3 + 1];
+				c = (USHORT)pTri[i * 3 + 2];
+				IndexBuffer->PushData(&a, sizeof(USHORT));
+				IndexBuffer->PushData(&b, sizeof(USHORT));
+				IndexBuffer->PushData(&c, sizeof(USHORT));
+			}
+		}
+
+		if (FaceBuffer)
+		{
+			FaceBuffer->PushData(nullptr, sizeof(USHORT) * numOfTri);
+		}
+
+		PrimitiveNumber += numOfTri;
+		return true;
 	}
 
 	vBOOL FMeshDataProvider::AddLine(UINT a, UINT b)

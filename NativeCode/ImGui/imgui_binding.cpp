@@ -59,7 +59,7 @@ int propose(ImGuiInputTextCallbackData* data) {
 
 	//We need to give the user a chance to remove wrong input
 	//We use SFML Keycodes here, because the Imgui Keys aren't working the way I thought they do...	
-	if (ImGui::IsKeyDown(ImGuiKey_::ImGuiKey_Backspace)) 
+	if (ImGui::IsKeyDown(ImGuiKey::ImGuiKey_Backspace)) 
 	{
 		//We delete the last char automatically, since it is what the user wants to delete, but only if there is something (selected/marked/hovered)
 		//FIXME: This worked fine, when not used as helper function
@@ -69,7 +69,7 @@ int propose(ImGuiInputTextCallbackData* data) {
 					data->DeleteChars(data->CursorPos - 1, 1);
 		return 0;
 	}
-	if (ImGui::IsKeyDown(ImGuiKey_::ImGuiKey_Delete))
+	if (ImGui::IsKeyDown(ImGuiKey::ImGuiKey_Delete))
 		return 0; //TODO: Replace with imgui key
 
 	for (int i = 0; i < length; i++) {
@@ -155,9 +155,9 @@ static const char* PatchFormatStringFloatToInt(const char* fmt)
 #ifndef IMGUI_DISABLE_OBSOLETE_FUNCTIONS
 		if (fmt_start == fmt && fmt_end[0] == 0)
 			return "%d";
-		ImGuiContext& g = *GImGui;
-		ImFormatString(g.TempBuffer, IM_ARRAYSIZE(g.TempBuffer), "%.*s%%d%s", (int)(fmt_start - fmt), fmt, fmt_end); // Honor leading and trailing decorations, but lose alignment/precision.
-		return g.TempBuffer;
+		ImGuiContext* g = GImGui;
+		ImFormatString(GImGui->TempBuffer.Data, IM_ARRAYSIZE(GImGui->TempBuffer.Data), "%.*s%%d%s", (int)(fmt_start - fmt), fmt, fmt_end); // Honor leading and trailing decorations, but lose alignment/precision.
+		return GImGui->TempBuffer.Data;
 #else
 		IM_ASSERT(0 && "DragInt(): Invalid format string!"); // Old versions used a default parameter of "%.0f", please replace with e.g. "%d"
 #endif

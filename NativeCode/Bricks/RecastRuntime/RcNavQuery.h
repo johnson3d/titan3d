@@ -5,7 +5,7 @@
 NS_BEGIN
 
 class TR_CLASS()
-	RcNavQuery : public VIUnknown
+	RcNavQuery : public IWeakReference
 {
 public:
 	enum SamplePolyAreas

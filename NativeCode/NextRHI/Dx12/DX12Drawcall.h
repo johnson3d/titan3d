@@ -25,10 +25,10 @@ namespace NxRHI
 		void BindResourceToDescriptSets(DX12GpuDevice* device, const FEffectBinder* binder, IGpuResource* resource);
 		void BindDescriptors(DX12GpuDevice* device, DX12CommandList* dx12Cmd, DX12GraphicsEffect* effect);
 	public:
-		TObjectHandle<DX12GpuDevice>	mDeviceRef;
+		TWeakRefHandle<DX12GpuDevice>	mDeviceRef;
 		bool							IsDirty = false;
-		AutoRef<DX12DescriptorSetPagedObject>	mSrvTable = nullptr;
-		AutoRef<DX12DescriptorSetPagedObject>	mSamplerTable = nullptr;
+		AutoRef<DX12DescriptorSetPagedObject>	mCbvSrvUavHeap = nullptr;
+		AutoRef<DX12DescriptorSetPagedObject>	mSamplerHeap = nullptr;
 		UINT							FingerPrient = 0;
 	};
 
@@ -45,10 +45,10 @@ namespace NxRHI
 		void BindResourceToDescriptSets(DX12GpuDevice* device, const FShaderBinder* binder, IGpuResource* resource);
 		void BindDescriptors(DX12GpuDevice* device, DX12CommandList* dx12Cmd, DX12ComputeEffect* effect);
 	public:
-		TObjectHandle<DX12GpuDevice>			mDeviceRef;
-		AutoRef<DX12DescriptorSetPagedObject>	mSrvTable = nullptr;
-		AutoRef<DX12DescriptorSetPagedObject>	mSamplerTable = nullptr;
+		TWeakRefHandle<DX12GpuDevice>			mDeviceRef;
 		bool									IsDirty = false;
+		AutoRef<DX12DescriptorSetPagedObject>	mCbvSrvUavHeap = nullptr;
+		AutoRef<DX12DescriptorSetPagedObject>	mSamplerHeap = nullptr;		
 		UINT									FingerPrient = 0;
 	};
 }

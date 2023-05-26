@@ -599,41 +599,41 @@ public:
 		return ImGui::GetID(ptr_id);
 	}
 	// Widgets: Text
-	static void          TextUnformatted(const char* text)
+	static void          TextUnformatted(TR_META(SV_MarshalCS = UTF8Marshaler) const char* text)
 	{
 		return ImGui::TextUnformatted(text);
 	}
-	static void          TextAsiPointer(void* fmt)
+	static void          TextAsPointer(TR_META(SV_NoStringConverter) const char* fmt)
 	{
 		if (fmt == nullptr)
-			return ImGui::Text("");
-		return ImGui::Text("%s", fmt);
+			return ImGui::TextUnformatted("");
+		return ImGui::TextUnformatted(fmt);
 	}
-	static void          Text(const char* fmt)
+	static void          Text(TR_META(SV_MarshalCS = UTF8Marshaler) const char* fmt)
 	{
 		if (fmt == nullptr)
-			return ImGui::Text("");
-		return ImGui::Text("%s", fmt);
+			return ImGui::TextUnformatted("");
+		return ImGui::TextUnformatted(fmt);
 	}
 	static void          TextColored(const ImVec4* col, const char* fmt)
 	{
-		return ImGui::TextColored(*col, "%s", fmt);
+		return ImGui::TextColored(*col, fmt);
 	}
 	static void          TextDisabled(const char* fmt)
 	{
-		return ImGui::TextDisabled("%s", fmt);
+		return ImGui::TextDisabled( fmt);
 	}
 	static void          TextWrapped(const char* fmt)
 	{
-		return ImGui::TextWrapped("%s", fmt);
+		return ImGui::TextWrapped(fmt);
 	}
 	static void          LabelText(const char* label, const char* fmt)
 	{
-		return ImGui::LabelText(label, "%s", fmt);
+		return ImGui::LabelText(label, fmt);
 	}
 	static void          BulletText(const char* fmt)
 	{
-		return ImGui::BulletText("%s", fmt);
+		return ImGui::BulletText(fmt);
 	}
 	// Widgets: Main
 	static bool          Button(const char* label, const ImVec2* size/* = &ImVec2(0, 0)*/)
@@ -1563,23 +1563,23 @@ public:
 		return ImGui::ColorConvertHSVtoRGB(h, s, v, *out_r, *out_g, *out_b);
 	}
 	// Inputs Utilities: Keyboard
-	static int           GetKeyIndex(ImGuiKey_ imgui_key)
+	static int           GetKeyIndex(ImGuiKey imgui_key)
 	{
 		return ImGui::GetKeyIndex(imgui_key);
 	}
-	static bool          IsKeyDown(int user_key_index)
+	static bool          IsKeyDown(ImGuiKey user_key_index)
 	{
 		return ImGui::IsKeyDown(user_key_index);
 	}
-	static bool          IsKeyPressed(int user_key_index, bool repeat = true)
+	static bool          IsKeyPressed(ImGuiKey user_key_index, bool repeat = true)
 	{
 		return ImGui::IsKeyPressed(user_key_index, repeat);
 	}
-	static bool          IsKeyReleased(int user_key_index)
+	static bool          IsKeyReleased(ImGuiKey user_key_index)
 	{
 		return ImGui::IsKeyReleased(user_key_index);
 	}
-	static int           GetKeyPressedAmount(int key_index, float repeat_delay, float rate)
+	static int           GetKeyPressedAmount(ImGuiKey key_index, float repeat_delay, float rate)
 	{
 		return ImGui::GetKeyPressedAmount(key_index, repeat_delay, rate);
 	}

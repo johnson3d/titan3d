@@ -170,4 +170,32 @@ void v3dSampMgr::Update()
 	}
 }
 
+template <typename... A>
+struct ContainA
+{
+
+};
+
+template <typename... B>
+struct ContainB
+{
+
+};
+
+template <typename T, typename A, typename B, typename C>
+struct TestAB;
+
+template <typename T, typename... A, typename... B>
+struct TestAB<T, ContainA<A...>, ContainB<B...>, ContainB<B...>>
+{
+	void TestA(A... arg)
+	{
+
+	}
+	void TestB(B... arg)
+	{
+
+	}
+};
+
 NS_END

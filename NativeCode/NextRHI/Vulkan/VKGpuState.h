@@ -17,7 +17,7 @@ namespace NxRHI
 			return mView;
 		}
 	public:
-		TObjectHandle<VKGpuDevice>	mDeviceRef;
+		TWeakRefHandle<VKGpuDevice>	mDeviceRef;
 		VkSampler		mView = nullptr;
 	};
 

@@ -1,4 +1,5 @@
 #include "NxRHIDefine.h"
+#include "NxBuffer.h"
 
 #define new VNEW
 
@@ -6,6 +7,19 @@ NS_BEGIN
 
 namespace NxRHI
 {
+	void FSubresourceBox::SetWhole(ITexture* texture)
+	{
+		Left = 0;
+		Top = 0;
+		Front = 0;
+		Right = texture->Desc.Width;
+		Bottom = texture->Desc.Height;
+		if (Bottom == 0)
+			Bottom = 1;
+		Back = texture->Desc.Depth;
+		if (Back == 0)
+			Back = 1;
+	}
 	void FPooledGpuMemory::FreeMemory()
 	{
 		auto pool = HostPool.GetPtr();

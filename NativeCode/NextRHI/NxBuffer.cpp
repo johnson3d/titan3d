@@ -1,15 +1,27 @@
 #include "NxBuffer.h"
 #include "../../Base/float16/float16.h"
-#include "../../../3rd/native/Image.Shared/XImageDecoder.h"
-#include "../../../3rd/native/Image.Shared/XImageBuffer.h"
+//#include "../Bricks/ImageDecoder/XImageDecoder.h"
+#include "../Bricks/ImageDecoder/XImageBuffer.h"
 
 #define new VNEW
 
 NS_BEGIN
 
+ENGINE_RTTI_IMPL(ISrView);
+StructBegin(ISrView, EngineNS::NxRHI)
+StructEnd(EngineNS::NxRHI::ISrView, VIUnknown)
+
 namespace NxRHI
 {
-	bool IBuffer::FetchGpuData(ICommandList* cmd, UINT index, IBlobObject* blob)
+	void IBuffer::PushFlushDirty(IGpuDevice* pDevice)
+	{
+		if (DirtyState == EDirtyState::NotDirty || DirtyState == EDirtyState::WaitFlush)
+			return;
+		DirtyState = EDirtyState::WaitFlush;
+
+		pDevice->PushWaitFlushBuffer(this);
+	}
+	/*bool IBuffer::FetchGpuData(ICommandList* cmd, UINT index, IBlobObject* blob)
 	{
 		FMappedSubResource subRes;
 		if (Map(cmd, index, &subRes, true))
@@ -34,7 +46,7 @@ namespace NxRHI
 			return true;
 		}
 		return false;
-	}
+	}*/
 	void ITexture::BuildImage2DBlob(IBlobObject* blob, void* pData, UINT RowPitch, const FTextureDesc* desc)
 	{
 		int nStride = (desc->Width * 32 + 7) / 8;

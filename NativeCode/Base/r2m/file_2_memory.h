@@ -18,22 +18,23 @@
 
 NS_BEGIN
 
-const vIID vIID_VFile2Memory = 0x149386ee4ccfeb6a;
 class VFile2Memory : public VRes2Memory
 {
 	VCritical					mLocker;
 public:
 	ENGINE_RTTI(VFile2Memory);
 	/*!	\copydoc VRes2Memory::Ptr */
-	virtual  VResPtr	Ptr(UINT_PTR offset , UINT_PTR size=-1) override;
+	virtual  VResPtr	Ptr(UINT64 offset , UINT64 size=-1) override;
 	/*!	\copydoc VRes2Memory::Free */
 	virtual  vBOOL		Free() override;
 	/*!	\copydoc VRes2Memory::Length */
-	virtual  UINT_PTR	Length() const override;
+	virtual  UINT64		Length() const override;
 	/*!	\copydoc VRes2Memory::Name */
 	virtual  LPCSTR		Name() const override; 
 
 	virtual  void		TryReleaseHolder() override;
+
+	void ClearCache();
 
 	 VFile2Memory();
 	 ~VFile2Memory();
@@ -50,9 +51,9 @@ private:
 	VStringA	mName;
 	
 	ViseFile	mFile;
-	BYTE*		mCachedBuffer;
-	INT_PTR		mCachedStarter;
-	INT_PTR		mCachedSize;
+	UINT64		mCachedStarter;
+	std::vector<BYTE>	mCachedBuffer;
+	
 	//INT			mPtrRef;
 	std::atomic<long> mPtrRef;
 	vBOOL		mIsClosing;
@@ -61,9 +62,9 @@ private:
 class VMemoryResPtr : public VRes2Memory
 {
 public:
-	virtual  VResPtr	Ptr(UINT_PTR offset=0 , UINT_PTR size=0);
+	virtual  VResPtr	Ptr(UINT64 offset=0 , UINT64 size=0);
 	virtual  vBOOL		Free();
-	virtual  UINT_PTR	Length() const;
+	virtual  UINT64		Length() const;
 	virtual  LPCSTR		Name() const; 
 
 	 VMemoryResPtr();
@@ -72,7 +73,7 @@ public:
 	 vBOOL Create(LPCSTR pszName,VResPtr pPtr,DWORD dwLength);
 private:
 	VResPtr		m_ptrBase;
-	UINT_PTR	m_dwLength;
+	UINT64	m_dwLength;
 	VStringA	m_strName;
 };
 

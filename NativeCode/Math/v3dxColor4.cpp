@@ -2,20 +2,20 @@
 
 #define new VNEW
 
-const Rgba Rgba::Zero = Rgba(0, 0, 0, 0);
-const Rgba Rgba::Black = Rgba(0, 0, 0, 255);
-const Rgba Rgba::Red = Rgba(255, 0, 0, 255);
-const Rgba Rgba::Green = Rgba(0, 255, 0, 255);
-const Rgba Rgba::Blue = Rgba(0, 0, 255, 255);
-const Rgba Rgba::Yellow = Rgba(255, 255, 0, 255);
-const Rgba Rgba::Magenta = Rgba(255, 0, 255, 255);
-const Rgba Rgba::Cyan = Rgba(0, 255, 255, 255);
-const Rgba Rgba::White = Rgba(255, 255, 255, 255);
-const Rgba Rgba::LtGrey = Rgba(191, 191, 191, 255);
-const Rgba Rgba::MdGrey = Rgba(127, 127, 127, 255);
-const Rgba Rgba::DkGrey = Rgba(63, 63, 63, 255);
+const FColor FColor::Zero = FColor(0, 0, 0, 0);
+const FColor FColor::Black = FColor(0, 0, 0, 255);
+const FColor FColor::Red = FColor(255, 0, 0, 255);
+const FColor FColor::Green = FColor(0, 255, 0, 255);
+const FColor FColor::Blue = FColor(0, 0, 255, 255);
+const FColor FColor::Yellow = FColor(255, 255, 0, 255);
+const FColor FColor::Magenta = FColor(255, 0, 255, 255);
+const FColor FColor::Cyan = FColor(0, 255, 255, 255);
+const FColor FColor::White = FColor(255, 255, 255, 255);
+const FColor FColor::LtGrey = FColor(191, 191, 191, 255);
+const FColor FColor::MdGrey = FColor(127, 127, 127, 255);
+const FColor FColor::DkGrey = FColor(63, 63, 63, 255);
 
-const Rgba Rgba::ColorTable[]= {
+const FColor FColor::ColorTable[]= {
 	Black ,	
 	Red ,	
 	Green ,	

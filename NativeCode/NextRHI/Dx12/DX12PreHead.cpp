@@ -107,6 +107,175 @@ namespace NxRHI
 			&mResDesc, mResState, nullptr, IID_PPV_ARGS(result->mGpuResource.GetAddressOf()));
 		return result;
 	}
+
+	/// DX12DescriptorSetPagedObject-----------------------------------------------------------
+	D3D12_GPU_DESCRIPTOR_HANDLE	DX12DescriptorSetPagedObject::GetGpuAddress(int index)
+	{
+		auto pManager = (DX12DescriptorSetAllocator*)GetAllocator();
+		ASSERT(pManager);
+		D3D12_GPU_DESCRIPTOR_HANDLE result = RealObject->GetGPUDescriptorHandleForHeapStart();
+		result.ptr += this->OffsetInPage + pManager->mDescriptorStride * index;
+		return result;
+	}
+	D3D12_CPU_DESCRIPTOR_HANDLE	DX12DescriptorSetPagedObject::GetCpuAddress(int index)
+	{
+		auto pManager = (DX12DescriptorSetAllocator*)GetAllocator();
+		if (pManager == nullptr)
+			return D3D12_CPU_DESCRIPTOR_HANDLE{};
+		D3D12_CPU_DESCRIPTOR_HANDLE result = RealObject->GetCPUDescriptorHandleForHeapStart();
+		result.ptr += this->OffsetInPage + pManager->mDescriptorStride * index;
+		return result;
+	}
+	DX12DescriptorSetCreator::PageType* DX12DescriptorSetCreator::CreatePage(UINT pageSize)
+	{
+		auto device = mDeviceRef.GetPtr();
+		auto result = new DX12DescriptorSetCreator::PageType();
+		auto desc = mDesc;
+		desc.NumDescriptors = mDesc.NumDescriptors * pageSize;
+		auto hr = device->mDevice->CreateDescriptorHeap(&desc, IID_ID3D12DescriptorHeap, (void**)result->mGpuHeap.GetAddressOf());
+		if (hr != S_OK)
+		{
+			hr = device->mDevice->GetDeviceRemovedReason();
+			ASSERT(false);
+			result->Release();
+			return nullptr;
+		}
+		return result;
+	}
+	DX12DescriptorSetCreator::PagedObjectType* DX12DescriptorSetCreator::CreatePagedObject(
+		DX12DescriptorSetCreator::PageType* page, UINT index)
+	{
+		//auto device = mDeviceRef.GetPtr();
+		auto pAllocator = (DX12DescriptorSetAllocator*)page->Allocator.GetPtr();
+
+		auto result = new DX12DescriptorSetPagedObject();
+		result->OffsetInPage = pAllocator->mDescriptorStride * mDesc.NumDescriptors * index;
+		result->RealObject = page->mGpuHeap;
+		/*auto hr = device->mDevice->CreateDescriptorHeap(&mDesc, IID_ID3D12DescriptorHeap, (void**)result->RealObject.GetAddressOf());
+		if (hr != S_OK)
+		{
+			ASSERT(false);
+			result->Release();
+			return nullptr;
+		}
+		result->RealObject->SetName(DebugName.c_str());*/
+		//result->ShaderEffect = mShaderEffect;
+
+		/*for (auto& i : result->ShaderEffect->mBinders)
+		{
+			if (i.second->BindType == EShaderBindType::SBT_CBuffer)
+			{
+				auto pVSBinder = (FShaderBinder*)i.second->VSBinder;
+				FillRange(&usb, pVSBinder, D3D12_DESCRIPTOR_RANGE_TYPE_CBV);
+			}
+			else if (i.second->BindType == EShaderBindType::SBT_SRV)
+			{
+				auto pVSBinder = (FShaderBinder*)i.second->VSBinder;
+				FillRange(&usb, pVSBinder, D3D12_DESCRIPTOR_RANGE_TYPE_SRV);
+			}
+			else if (i.second->BindType == EShaderBindType::SBT_UAV)
+			{
+				auto pVSBinder = (FShaderBinder*)i.second->VSBinder;
+				FillRange(&usb, pVSBinder, D3D12_DESCRIPTOR_RANGE_TYPE_UAV);
+			}
+			else if (i.second->BindType == EShaderBindType::SBT_Sampler)
+			{
+				auto pVSBinder = (FShaderBinder*)i.second->VSBinder;
+				FillRange(&sampler, pVSBinder, D3D12_DESCRIPTOR_RANGE_TYPE_SAMPLER);
+			}
+		}*/
+
+		return result;
+	}
+	void DX12DescriptorSetCreator::OnAlloc(DX12DescriptorSetCreator::AllocatorType* pAllocator,
+		DX12DescriptorSetCreator::PagedObjectType* obj)
+	{
+		//auto name = DebugName + L"_" + std::to_wstring(SerialId++);
+		//obj->RealObject->SetName(name.c_str());
+	}
+	void DX12DescriptorSetCreator::OnFree(DX12DescriptorSetCreator::AllocatorType* pAllocator,
+		DX12DescriptorSetCreator::PagedObjectType* obj)
+	{
+		if (IsDescriptorSet == false)
+			return;
+		//obj->RealObject->SetName(DebugName.c_str());
+		
+		auto device = mDeviceRef.GetPtr();
+		if (device == nullptr)
+			return;
+
+		auto pDescriptorObj = (DX12DescriptorSetPagedObject*)obj;
+		AutoRef<DX12DescriptorSetPagedObject> nullDescriptor;
+		switch (HeapType)
+		{
+			case D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV:
+				nullDescriptor = device->mNullCBV_SRV_UAV;
+				break;
+			case D3D12_DESCRIPTOR_HEAP_TYPE_SAMPLER:
+				nullDescriptor = device->mNullSampler;
+				break;
+			case D3D12_DESCRIPTOR_HEAP_TYPE_RTV:
+				nullDescriptor = device->mNullRTV;
+				break;
+			case D3D12_DESCRIPTOR_HEAP_TYPE_DSV:
+				nullDescriptor = device->mNullDSV;
+				break;
+			default:
+				break;
+		}
+		if (nullDescriptor == nullptr)
+			return;
+		if (pDescriptorObj == nullDescriptor)
+			return;
+		
+		for (int i = 0; i < (int)mDesc.NumDescriptors; i++)
+		{
+			/*auto dst = pDescriptorObj->GetCpuAddress(i);
+			auto src = nullDescriptor->GetCpuAddress(0);
+			device->mDevice->CopyDescriptorsSimple(1, dst, src, HeapType);*/
+		}
+	}
+	void DX12DescriptorSetCreator::FinalCleanup(MemAlloc::FPage<ObjectType>* page)
+	{
+		auto device = mDeviceRef.GetPtr();
+		if (device == nullptr)
+			return;
+		auto pPage = (DX12DescriptorSetPage*)page;
+	}
+	AutoRef<DX12DescriptorSetPagedObject> DX12DescriptorAllocatorManager::AllocDescriptorSet(DX12GpuDevice* pDevice,
+		UINT numOfDescriptor, D3D12_DESCRIPTOR_HEAP_TYPE type)
+	{
+		UINT64 key = (((UINT64)type) << 32) | numOfDescriptor;
+		AutoRef<DX12DescriptorSetAllocator> allocator;
+		auto iter = mAllocators.find(key);
+		if (iter == mAllocators.end())
+		{
+			allocator = MakeWeakRef(new DX12DescriptorSetAllocator());
+			allocator->Creator.Type = DX12DescriptorSetCreator::EDescriptorType::Graphics;
+			allocator->Creator.IsDescriptorSet = true;
+			allocator->Creator.DebugName = L"DescriptorSet";
+			allocator->Creator.mDesc.Type = type;
+			/*if (type == D3D12_DESCRIPTOR_HEAP_TYPE_RTV || type == D3D12_DESCRIPTOR_HEAP_TYPE_DSV)
+			{
+				allocator->Creator.mDesc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_NONE;
+			}
+			else
+			{
+				allocator->Creator.mDesc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE;
+			}*/
+			allocator->Creator.mDesc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE;
+			allocator->Creator.mDesc.NumDescriptors = numOfDescriptor;
+			allocator->Creator.mDeviceRef.FromObject(pDevice);
+			allocator->mDescriptorStride = pDevice->mDevice->GetDescriptorHandleIncrementSize(type);
+			mAllocators.insert(std::make_pair(key, allocator));
+		}
+		else
+		{
+			allocator = iter->second;
+		}
+
+		return allocator->Alloc<DX12DescriptorSetPagedObject>();
+	}
 }
 
 NS_END

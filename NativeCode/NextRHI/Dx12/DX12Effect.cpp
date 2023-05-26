@@ -10,184 +10,31 @@ NS_BEGIN
 namespace NxRHI
 {
 	template<>
-	struct AuxGpuResourceDestroyer<AutoRef<MemAlloc::FPagedObject<AutoRef<ID3D12DescriptorHeap>>>>
+	struct AuxGpuResourceDestroyer<AutoRef<ID3D12RootSignature>>
 	{
-		static void Destroy(AutoRef<MemAlloc::FPagedObject<AutoRef<ID3D12DescriptorHeap>>> obj, IGpuDevice* device1)
+		static void Destroy(AutoRef<ID3D12RootSignature> obj, IGpuDevice* device1)
 		{
-			obj->Free();
+
+		}
+	};
+	template<>
+	struct AuxGpuResourceDestroyer<AutoRef<ID3D12CommandSignature>>
+	{
+		static void Destroy(AutoRef<ID3D12CommandSignature> obj, IGpuDevice* device1)
+		{
+
+		}
+	};
+	template<>
+	struct AuxGpuResourceDestroyer<AutoRef<ID3D12PipelineState>>
+	{
+		static void Destroy(AutoRef<ID3D12PipelineState> obj, IGpuDevice* device1)
+		{
+
 		}
 	};
 
-	D3D12_CPU_DESCRIPTOR_HANDLE	DX12DescriptorSetPagedObject::GetHandle(int index)
-	{
-		auto pManager = (DX12DescriptorSetAllocator*)GetAllocator();
-		if (pManager == nullptr)
-			return D3D12_CPU_DESCRIPTOR_HANDLE{};
-		D3D12_CPU_DESCRIPTOR_HANDLE result = RealObject->GetCPUDescriptorHandleForHeapStart();
-		result.ptr += pManager->mDescriptorStride * index;
-		return result;
-	}
-	MemAlloc::FPage<AutoRef<ID3D12DescriptorHeap>>* DX12DescriptorSetCreator::CreatePage(UINT pageSize)
-	{
-		auto result = new DX12DescriptorSetPage();
-		//result->mDescriptorPool = descPool;
-		return result;
-	}
-	MemAlloc::FPagedObject<AutoRef<ID3D12DescriptorHeap>>* DX12DescriptorSetCreator::CreatePagedObject(MemAlloc::FPage<AutoRef<ID3D12DescriptorHeap>>* page, UINT index)
-	{
-		auto device = mDeviceRef.GetPtr();
-
-		auto result = new DX12DescriptorSetPagedObject();
-		device->mDevice->CreateDescriptorHeap(&mDesc, IID_ID3D12DescriptorHeap, (void**)result->RealObject.GetAddressOf());
-		//result->ShaderEffect = mShaderEffect;
-
-		/*for (auto& i : result->ShaderEffect->mBinders)
-		{
-			if (i.second->BindType == EShaderBindType::SBT_CBuffer)
-			{
-				auto pVSBinder = (FShaderBinder*)i.second->VSBinder;
-				FillRange(&usb, pVSBinder, D3D12_DESCRIPTOR_RANGE_TYPE_CBV);
-			}
-			else if (i.second->BindType == EShaderBindType::SBT_SRV)
-			{
-				auto pVSBinder = (FShaderBinder*)i.second->VSBinder;
-				FillRange(&usb, pVSBinder, D3D12_DESCRIPTOR_RANGE_TYPE_SRV);
-			}
-			else if (i.second->BindType == EShaderBindType::SBT_UAV)
-			{
-				auto pVSBinder = (FShaderBinder*)i.second->VSBinder;
-				FillRange(&usb, pVSBinder, D3D12_DESCRIPTOR_RANGE_TYPE_UAV);
-			}
-			else if (i.second->BindType == EShaderBindType::SBT_Sampler)
-			{
-				auto pVSBinder = (FShaderBinder*)i.second->VSBinder;
-				FillRange(&sampler, pVSBinder, D3D12_DESCRIPTOR_RANGE_TYPE_SAMPLER);
-			}
-		}*/
-
-		return result;
-	}
-	void DX12DescriptorSetCreator::OnFree(MemAlloc::FPagedObject<AutoRef<ID3D12DescriptorHeap>>* obj)
-	{
-		if (mShaderEffect == nullptr)
-			return;
-
-		auto device = mDeviceRef.GetPtr();
-		if (device == nullptr)
-			return;
-
-		auto pDescriptorObj = (DX12DescriptorSetPagedObject*)obj;
-		if (IsSampler)
-		{
-			switch (Type)
-			{
-				case EngineNS::NxRHI::DX12DescriptorSetCreator::Graphics:
-					ASSERT(mShaderEffect->mSamplerTableSize == mDesc.NumDescriptors);
-					for (int i = 0; i < mShaderEffect->mSamplerTableSize; i++)
-					{
-						device->mDevice->CopyDescriptorsSimple(1, pDescriptorObj->GetHandle(i), device->mNullSampler->GetHandle(0), D3D12_DESCRIPTOR_HEAP_TYPE_SAMPLER);
-					}
-					break;
-				case EngineNS::NxRHI::DX12DescriptorSetCreator::Compute:
-					ASSERT(mComputeEffect->mSamplerTableSize == mDesc.NumDescriptors);
-					for (int i = 0; i < mComputeEffect->mSamplerTableSize; i++)
-					{
-						device->mDevice->CopyDescriptorsSimple(1, pDescriptorObj->GetHandle(i), device->mNullSampler->GetHandle(0), D3D12_DESCRIPTOR_HEAP_TYPE_SAMPLER);
-					}
-					break;
-				default:
-					break;
-			}
-		}
-		else
-		{
-			switch (Type)
-			{
-				case EngineNS::NxRHI::DX12DescriptorSetCreator::Graphics:
-					ASSERT(mShaderEffect->mSrvTableSize == mDesc.NumDescriptors);
-					for (int i = 0; i < mShaderEffect->mSrvTableSize; i++)
-					{
-						device->mDevice->CopyDescriptorsSimple(1, pDescriptorObj->GetHandle(i), device->mNullCBV->GetHandle(0), D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
-					}
-					break;
-				case EngineNS::NxRHI::DX12DescriptorSetCreator::Compute:
-					ASSERT(mComputeEffect->mSrvTableSize == mDesc.NumDescriptors);
-					for (int i = 0; i < mComputeEffect->mSrvTableSize; i++)
-					{
-						device->mDevice->CopyDescriptorsSimple(1, pDescriptorObj->GetHandle(i), device->mNullCBV->GetHandle(0), D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
-					}
-					break;
-				default:
-					break;
-			}
-		}
-	}
-	void DX12DescriptorSetCreator::FinalCleanup(MemAlloc::FPage<AutoRef<ID3D12DescriptorHeap>>* page)
-	{
-		auto device = mDeviceRef.GetPtr();
-		if (device == nullptr)
-			return;
-		auto pPage = (DX12DescriptorSetPage*)page;
-	}
-
-	void FillRange(std::vector<D3D12_DESCRIPTOR_RANGE>* pOutRanges, FShaderBinder* pVSBinder, FShaderBinder* pPSBinder, D3D12_DESCRIPTOR_RANGE_TYPE type)
-	{
-		if (pVSBinder != nullptr && pPSBinder == nullptr)
-		{
-			D3D12_DESCRIPTOR_RANGE rangeVS{};
-			rangeVS.RangeType = type;
-			rangeVS.NumDescriptors = 1;
-			rangeVS.BaseShaderRegister = pVSBinder->Slot;
-			rangeVS.RegisterSpace = pVSBinder->Space;
-			rangeVS.OffsetInDescriptorsFromTableStart = D3D12_DESCRIPTOR_RANGE_OFFSET_APPEND;
-			pVSBinder->DescriptorIndex = (UINT)pOutRanges->size();
-			pOutRanges->push_back(rangeVS);
-		}
-		else if (pVSBinder == nullptr && pPSBinder != nullptr)
-		{
-			D3D12_DESCRIPTOR_RANGE rangePS{};
-			rangePS.RangeType = type;
-			rangePS.NumDescriptors = 1;
-			rangePS.BaseShaderRegister = pPSBinder->Slot;
-			rangePS.RegisterSpace = pPSBinder->Space;
-			rangePS.OffsetInDescriptorsFromTableStart = D3D12_DESCRIPTOR_RANGE_OFFSET_APPEND;
-			pPSBinder->DescriptorIndex = (UINT)pOutRanges->size();
-			pOutRanges->push_back(rangePS);
-		}
-		else if (pVSBinder->Slot == pPSBinder->Slot && pVSBinder->Space == pPSBinder->Space)
-		{
-			D3D12_DESCRIPTOR_RANGE rangeVSPS{};
-			rangeVSPS.RangeType = type;
-			rangeVSPS.NumDescriptors = 1;
-			rangeVSPS.BaseShaderRegister = pVSBinder->Slot;
-			rangeVSPS.RegisterSpace = pVSBinder->Space;
-			rangeVSPS.OffsetInDescriptorsFromTableStart = D3D12_DESCRIPTOR_RANGE_OFFSET_APPEND;
-			pVSBinder->DescriptorIndex = (UINT)pOutRanges->size();
-			pPSBinder->DescriptorIndex = (UINT)pOutRanges->size();
-			pOutRanges->push_back(rangeVSPS);
-		}
-		else
-		{
-			D3D12_DESCRIPTOR_RANGE rangeVS{};
-			rangeVS.RangeType = type;
-			rangeVS.NumDescriptors = 1;
-			rangeVS.BaseShaderRegister = pVSBinder->Slot;
-			rangeVS.RegisterSpace = pVSBinder->Space;
-			rangeVS.OffsetInDescriptorsFromTableStart = D3D12_DESCRIPTOR_RANGE_OFFSET_APPEND;
-			pVSBinder->DescriptorIndex = (UINT)pOutRanges->size();
-			pOutRanges->push_back(rangeVS);
-
-			D3D12_DESCRIPTOR_RANGE rangePS{};
-			rangePS.RangeType = type;
-			rangePS.NumDescriptors = 1;
-			rangePS.BaseShaderRegister = pPSBinder->Slot;
-			rangePS.RegisterSpace = pPSBinder->Space;
-			rangePS.OffsetInDescriptorsFromTableStart = D3D12_DESCRIPTOR_RANGE_OFFSET_APPEND;
-			pPSBinder->DescriptorIndex = (UINT)pOutRanges->size();
-			pOutRanges->push_back(rangePS);
-		}
-	}
-	void FillRange(std::vector<D3D12_DESCRIPTOR_RANGE>* pOutRanges, FShaderBinder* pBinder, D3D12_DESCRIPTOR_RANGE_TYPE type)
+	void FillRange(std::vector<D3D12_DESCRIPTOR_RANGE>* pRanges, FShaderBinder* pBinder, D3D12_DESCRIPTOR_RANGE_TYPE type)
 	{
 		if (pBinder == nullptr)
 			return;
@@ -197,95 +44,201 @@ namespace NxRHI
 		rangeVS.BaseShaderRegister = pBinder->Slot;
 		rangeVS.RegisterSpace = pBinder->Space;
 		rangeVS.OffsetInDescriptorsFromTableStart = D3D12_DESCRIPTOR_RANGE_OFFSET_APPEND;
-		pBinder->DescriptorIndex = (UINT)pOutRanges->size();
-		pOutRanges->push_back(rangeVS);
+		pBinder->DescriptorIndex = (UINT)pRanges->size();
+		pRanges->push_back(rangeVS);
+	}
+	void FillRange(FRootParameter* rootParameter, FShaderBinder* pBinder, D3D12_DESCRIPTOR_RANGE_TYPE type)
+	{
+		if (pBinder == nullptr)
+			return;
+		D3D12_DESCRIPTOR_RANGE rangeVS{};
+		rangeVS.RangeType = type;
+		rangeVS.NumDescriptors = 1;
+		rangeVS.BaseShaderRegister = pBinder->Slot;
+		rangeVS.RegisterSpace = pBinder->Space;
+		rangeVS.OffsetInDescriptorsFromTableStart = D3D12_DESCRIPTOR_RANGE_OFFSET_APPEND;
+		pBinder->DescriptorIndex = (UINT)rootParameter->Descriptors.size();
+		rootParameter->Descriptors.push_back(rangeVS);
+		rootParameter->TempShaderBinders.push_back(pBinder);
+	}
+
+	void BuildRoot(int& HeapStartIndex, D3D12_ROOT_PARAMETER& tmp, FRootParameter& rp, std::vector<D3D12_ROOT_PARAMETER>& dxRootParameters)
+	{
+		if (tmp.DescriptorTable.NumDescriptorRanges > 0)
+		{
+			tmp.DescriptorTable.pDescriptorRanges = rp.GetDescriptorAddress();
+			rp.RootIndex = (UINT)dxRootParameters.size();
+			dxRootParameters.push_back(tmp);
+			rp.HeapStartIndex = HeapStartIndex;
+			HeapStartIndex += (int)tmp.DescriptorTable.NumDescriptorRanges;
+			rp.BuildShaderBinders();
+		}
+	}
+	DX12GraphicsEffect::~DX12GraphicsEffect()
+	{
+		auto device = mDeviceRef.GetPtr();
+		if (device == nullptr)
+			return;
+
+		device->DelayDestroy(mSignature);
+		mSignature = nullptr;
+		device->DelayDestroy(mCmdSignature);
+		mCmdSignature = nullptr;
 	}
 	void DX12GraphicsEffect::BuildState(IGpuDevice* device1)
 	{
+		mDeviceRef.FromObject(device1);
 		auto device = ((DX12GpuDevice*)device1);
-		std::vector<D3D12_ROOT_PARAMETER>	mRootParameters;
-		std::vector<D3D12_DESCRIPTOR_RANGE>	usb;
-		std::vector<D3D12_DESCRIPTOR_RANGE>	sampler;
-		mRootParameters.clear();
-		for (auto& i : mBinders)
-		{
-			if (i.second->BindType == EShaderBindType::SBT_CBuffer)
-			{
-				auto pVSBinder = (FShaderBinder*)i.second->VSBinder;
-				FillRange(&usb, pVSBinder, D3D12_DESCRIPTOR_RANGE_TYPE_CBV);
-			}
-			else if (i.second->BindType == EShaderBindType::SBT_SRV)
-			{
-				auto pVSBinder = (FShaderBinder*)i.second->VSBinder;
-				FillRange(&usb, pVSBinder, D3D12_DESCRIPTOR_RANGE_TYPE_SRV);
-			}
-			else if (i.second->BindType == EShaderBindType::SBT_UAV)
-			{
-				auto pVSBinder = (FShaderBinder*)i.second->VSBinder;
-				FillRange(&usb, pVSBinder, D3D12_DESCRIPTOR_RANGE_TYPE_UAV);
-			}
-			else if (i.second->BindType == EShaderBindType::SBT_Sampler)
-			{
-				auto pVSBinder = (FShaderBinder*)i.second->VSBinder;
-				FillRange(&sampler, pVSBinder, D3D12_DESCRIPTOR_RANGE_TYPE_SAMPLER);
-			}
-		}
 
+		std::vector<D3D12_ROOT_PARAMETER>	dxRootParameters;
 		for (auto& i : mBinders)
 		{
-			if (i.second->BindType == EShaderBindType::SBT_CBuffer)
-			{
-				auto pPSBinder = (FShaderBinder*)i.second->PSBinder;
-				FillRange(&usb, pPSBinder, D3D12_DESCRIPTOR_RANGE_TYPE_CBV);
-			}
-			else if (i.second->BindType == EShaderBindType::SBT_SRV)
-			{
-				auto pPSBinder = (FShaderBinder*)i.second->PSBinder;
-				FillRange(&usb, pPSBinder, D3D12_DESCRIPTOR_RANGE_TYPE_SRV);
-			}
-			else if (i.second->BindType == EShaderBindType::SBT_UAV)
-			{
-				auto pPSBinder = (FShaderBinder*)i.second->PSBinder;
-				FillRange(&usb, pPSBinder, D3D12_DESCRIPTOR_RANGE_TYPE_UAV);
-			}
-			else if (i.second->BindType == EShaderBindType::SBT_Sampler)
-			{
-				auto pPSBinder = (FShaderBinder*)i.second->PSBinder;
-				FillRange(&sampler, pPSBinder, D3D12_DESCRIPTOR_RANGE_TYPE_SAMPLER);
-			}
+			Push2Root(i.second);
 		}
 
 		D3D12_ROOT_PARAMETER tmp{};
 		tmp.ParameterType = D3D12_ROOT_PARAMETER_TYPE_DESCRIPTOR_TABLE;
-		
-		tmp.ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL;//D3D12_SHADER_VISIBILITY_VERTEX;
-		tmp.DescriptorTable.NumDescriptorRanges = (UINT)usb.size();
-		mSrvTableSize = tmp.DescriptorTable.NumDescriptorRanges;
-		if (usb.size() > 0)
+
 		{
-			tmp.DescriptorTable.pDescriptorRanges = &usb[0];
-			mSrvTableSizeIndex = (UINT)mRootParameters.size();
-			mRootParameters.push_back(tmp);
+			int HeapStartIndex = 0;
+			tmp.ShaderVisibility = D3D12_SHADER_VISIBILITY_VERTEX;
+			{
+				auto& rp = mRootParameters[FRootParameter::VS_Cbv];
+				tmp.DescriptorTable.NumDescriptorRanges = (UINT)rp.Descriptors.size();
+				BuildRoot(HeapStartIndex, tmp, rp, dxRootParameters);
+				/*if (tmp.DescriptorTable.NumDescriptorRanges > 0)
+				{
+					tmp.DescriptorTable.pDescriptorRanges = rp.GetDescriptorAddress();
+					rp.RootIndex = (UINT)dxRootParameters.size();
+					dxRootParameters.push_back(tmp);
+					rp.HeapStartIndex = HeapStartIndex;
+					HeapStartIndex += (int)tmp.DescriptorTable.NumDescriptorRanges;
+					rp.BuildShaderBinders();
+				}*/
+			}
+
+			{
+				auto& rp = mRootParameters[FRootParameter::VS_Srv];
+				tmp.DescriptorTable.NumDescriptorRanges = (UINT)rp.Descriptors.size();
+				BuildRoot(HeapStartIndex, tmp, rp, dxRootParameters);
+				/*if (tmp.DescriptorTable.NumDescriptorRanges > 0)
+				{
+					tmp.DescriptorTable.pDescriptorRanges = rp.GetDescriptorAddress();
+					rp.RootIndex = (UINT)dxRootParameters.size();
+					dxRootParameters.push_back(tmp);
+					rp.HeapStartIndex = HeapStartIndex;
+					HeapStartIndex += (int)tmp.DescriptorTable.NumDescriptorRanges;
+					rp.BuildShaderBinders();
+				}*/
+			}
+
+			{
+				auto& rp = mRootParameters[FRootParameter::VS_Uav];
+				tmp.DescriptorTable.NumDescriptorRanges = (UINT)rp.Descriptors.size();
+				BuildRoot(HeapStartIndex, tmp, rp, dxRootParameters);
+				/*if (tmp.DescriptorTable.NumDescriptorRanges > 0)
+				{
+					tmp.DescriptorTable.pDescriptorRanges = rp.GetDescriptorAddress();
+					rp.RootIndex = (UINT)dxRootParameters.size();
+					dxRootParameters.push_back(tmp);
+					rp.HeapStartIndex = HeapStartIndex;
+					HeapStartIndex += (int)tmp.DescriptorTable.NumDescriptorRanges;
+					rp.BuildShaderBinders();
+				}*/
+			}
+			//////////////////////////////////////////////////////////////////////////
+			tmp.ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL;
+			{
+				auto& rp = mRootParameters[FRootParameter::PS_Cbv];
+				tmp.DescriptorTable.NumDescriptorRanges = (UINT)rp.Descriptors.size();
+				BuildRoot(HeapStartIndex, tmp, rp, dxRootParameters);
+				/*if (tmp.DescriptorTable.NumDescriptorRanges > 0)
+				{
+					tmp.DescriptorTable.pDescriptorRanges = rp.GetDescriptorAddress();
+					rp.RootIndex = (UINT)dxRootParameters.size();
+					dxRootParameters.push_back(tmp);
+					rp.HeapStartIndex = HeapStartIndex;
+					HeapStartIndex += (int)tmp.DescriptorTable.NumDescriptorRanges;
+					rp.BuildShaderBinders();
+				}*/
+			}
+
+			{
+				auto& rp = mRootParameters[FRootParameter::PS_Srv];
+				tmp.DescriptorTable.NumDescriptorRanges = (UINT)rp.Descriptors.size();
+				BuildRoot(HeapStartIndex, tmp, rp, dxRootParameters);
+				/*if (tmp.DescriptorTable.NumDescriptorRanges > 0)
+				{
+					tmp.DescriptorTable.pDescriptorRanges = rp.GetDescriptorAddress();
+					rp.RootIndex = (UINT)dxRootParameters.size();
+					dxRootParameters.push_back(tmp);
+					rp.HeapStartIndex = HeapStartIndex;
+					HeapStartIndex += (int)tmp.DescriptorTable.NumDescriptorRanges;
+					rp.BuildShaderBinders();
+				}*/
+			}
+
+			{
+				auto& rp = mRootParameters[FRootParameter::PS_Uav];
+				tmp.DescriptorTable.NumDescriptorRanges = (UINT)rp.Descriptors.size();
+				BuildRoot(HeapStartIndex, tmp, rp, dxRootParameters);
+				/*if (tmp.DescriptorTable.NumDescriptorRanges > 0)
+				{
+					tmp.DescriptorTable.pDescriptorRanges = rp.GetDescriptorAddress();
+					rp.RootIndex = (UINT)dxRootParameters.size();
+					dxRootParameters.push_back(tmp);
+					rp.HeapStartIndex = HeapStartIndex;
+					HeapStartIndex += (int)tmp.DescriptorTable.NumDescriptorRanges;
+					rp.BuildShaderBinders();
+				}*/
+			}
+
+			mCbvSrvUavNumber = HeapStartIndex;
 		}
-		else
+
 		{
-			mSrvTableSizeIndex = -1;
+			int HeapStartIndex = 0;
+			mRootParameters[FRootParameter::VS_Sampler].IsSamplers = true;
+			mRootParameters[FRootParameter::PS_Sampler].IsSamplers = true;
+
+			tmp.ShaderVisibility = D3D12_SHADER_VISIBILITY_VERTEX;
+			{
+				auto& rp = mRootParameters[FRootParameter::VS_Sampler];
+				tmp.DescriptorTable.NumDescriptorRanges = (UINT)rp.Descriptors.size();
+				BuildRoot(HeapStartIndex, tmp, rp, dxRootParameters);
+				/*if (tmp.DescriptorTable.NumDescriptorRanges > 0)
+				{
+					tmp.DescriptorTable.pDescriptorRanges = rp.GetDescriptorAddress();
+					rp.RootIndex = (UINT)dxRootParameters.size();
+					dxRootParameters.push_back(tmp);
+					rp.HeapStartIndex = HeapStartIndex;
+					HeapStartIndex += (int)tmp.DescriptorTable.NumDescriptorRanges;
+					rp.BuildShaderBinders();
+				}*/
+			}
+
+			tmp.ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL;
+			{	
+				auto& rp = mRootParameters[FRootParameter::PS_Sampler];
+				tmp.DescriptorTable.NumDescriptorRanges = (UINT)rp.Descriptors.size();
+				BuildRoot(HeapStartIndex, tmp, rp, dxRootParameters);
+				/*if (tmp.DescriptorTable.NumDescriptorRanges > 0)
+				{
+					tmp.DescriptorTable.pDescriptorRanges = rp.GetDescriptorAddress();
+					rp.RootIndex = (UINT)dxRootParameters.size();
+					dxRootParameters.push_back(tmp);
+					rp.HeapStartIndex = HeapStartIndex;
+					HeapStartIndex += (int)tmp.DescriptorTable.NumDescriptorRanges;
+					rp.BuildShaderBinders();
+				}*/
+			}
+
+			mSamplerNumber = HeapStartIndex;
 		}
-		tmp.DescriptorTable.NumDescriptorRanges = (UINT)sampler.size();
-		mSamplerTableSize = tmp.DescriptorTable.NumDescriptorRanges;
-		if (sampler.size() > 0)
-		{
-			tmp.DescriptorTable.pDescriptorRanges = &sampler[0];
-			mSamplerTableSizeIndex = (UINT)mRootParameters.size();
-			mRootParameters.push_back(tmp);
-		}
-		else
-		{
-			mSamplerTableSizeIndex = -1;
-		}
+
 		D3D12_ROOT_SIGNATURE_DESC sigDesc{};
-		sigDesc.NumParameters = (UINT)mRootParameters.size();
-		sigDesc.pParameters = &mRootParameters[0];
+		sigDesc.NumParameters = (UINT)dxRootParameters.size();
+		sigDesc.pParameters = &dxRootParameters[0];
 		sigDesc.NumStaticSamplers = 0;
 		sigDesc.pStaticSamplers = nullptr;
 		sigDesc.Flags = D3D12_ROOT_SIGNATURE_FLAG_ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT;
@@ -302,55 +255,72 @@ namespace NxRHI
 
 		auto bfSize = serializedRootSig->GetBufferSize();
 		ID3D12RootSignature* pRootSig = nullptr;
-		device->mDevice->CreateRootSignature(0,
+		hr = device->mDevice->CreateRootSignature(0,
 			serializedRootSig->GetBufferPointer(),
 			bfSize,
-			IID_PPV_ARGS(&pRootSig));
-		mSignature = pRootSig;
+			IID_PPV_ARGS(mSignature.GetAddressOf()));
 
-		if (mSrvTableSize > 0)
+		ASSERT(hr == S_OK);
+	}
+	void DX12GraphicsEffect::Push2Root(FEffectBinder* binder)
+	{
+		auto pVSBinder = (FShaderBinder*)binder->VSBinder;
+		auto pPSBinder = (FShaderBinder*)binder->PSBinder;
+		switch (binder->BindType)
 		{
-			mDescriptorAllocatorCSU = MakeWeakRef(new DX12DescriptorSetAllocator());
-			mDescriptorAllocatorCSU->Creator.Type = DX12DescriptorSetCreator::EDescriptorType::Graphics;
-			mDescriptorAllocatorCSU->Creator.mDesc.Type = D3D12_DESCRIPTOR_HEAP_TYPE::D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV;
-			mDescriptorAllocatorCSU->Creator.mDesc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_NONE;
-			mDescriptorAllocatorCSU->Creator.mDesc.NumDescriptors = mSrvTableSize;
-			mDescriptorAllocatorCSU->Creator.mDesc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE;
-			mDescriptorAllocatorCSU->Creator.mShaderEffect = this;
-			mDescriptorAllocatorCSU->Creator.IsSampler = false;
-			mDescriptorAllocatorCSU->Creator.mDeviceRef.FromObject(device);
-			mDescriptorAllocatorCSU->mDescriptorStride = device->mDevice->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE::D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
-		}
-
-		if (mSamplerTableSize > 0)
-		{
-			mDescriptorAllocatorSampler = MakeWeakRef(new DX12DescriptorSetAllocator());
-			mDescriptorAllocatorSampler->Creator.Type = DX12DescriptorSetCreator::EDescriptorType::Graphics;
-			mDescriptorAllocatorSampler->Creator.mDesc.Type = D3D12_DESCRIPTOR_HEAP_TYPE::D3D12_DESCRIPTOR_HEAP_TYPE_SAMPLER;
-			mDescriptorAllocatorSampler->Creator.mDesc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_NONE;
-			mDescriptorAllocatorSampler->Creator.mDesc.NumDescriptors = mSamplerTableSize;
-			mDescriptorAllocatorSampler->Creator.mDesc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE;
-			mDescriptorAllocatorSampler->Creator.mShaderEffect = this;
-			mDescriptorAllocatorSampler->Creator.IsSampler = true;
-			mDescriptorAllocatorSampler->Creator.mDeviceRef.FromObject(device);
-			mDescriptorAllocatorSampler->mDescriptorStride = device->mDevice->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE::D3D12_DESCRIPTOR_HEAP_TYPE_SAMPLER);
+			case EShaderBindType::SBT_CBuffer:
+			{
+				FillRange(&mRootParameters[FRootParameter::VS_Cbv], pVSBinder, D3D12_DESCRIPTOR_RANGE_TYPE_CBV);
+				FillRange(&mRootParameters[FRootParameter::PS_Cbv], pPSBinder, D3D12_DESCRIPTOR_RANGE_TYPE_CBV);
+			}
+			break;
+			case EShaderBindType::SBT_SRV:
+			{
+				FillRange(&mRootParameters[FRootParameter::VS_Srv], pVSBinder, D3D12_DESCRIPTOR_RANGE_TYPE_SRV);
+				FillRange(&mRootParameters[FRootParameter::PS_Srv], pPSBinder, D3D12_DESCRIPTOR_RANGE_TYPE_SRV);
+			}
+			break;
+			case EShaderBindType::SBT_UAV:
+			{
+				FillRange(&mRootParameters[FRootParameter::VS_Uav], pVSBinder, D3D12_DESCRIPTOR_RANGE_TYPE_UAV);
+				FillRange(&mRootParameters[FRootParameter::PS_Uav], pPSBinder, D3D12_DESCRIPTOR_RANGE_TYPE_UAV);
+			}
+			break;
+			case EShaderBindType::SBT_Sampler:
+			{
+				FillRange(&mRootParameters[FRootParameter::VS_Sampler], pVSBinder, D3D12_DESCRIPTOR_RANGE_TYPE_SAMPLER);
+				FillRange(&mRootParameters[FRootParameter::PS_Sampler], pPSBinder, D3D12_DESCRIPTOR_RANGE_TYPE_SAMPLER);
+			}
+			break;
 		}
 	}
-	AutoRef<ID3D12CommandSignature> DX12GraphicsEffect::GetIndirectDrawIndexCmdSig(ICommandList* cmdlist)
+	
+	AutoRef<ID3D12CommandSignature> DX12GraphicsEffect::GetIndirectDrawIndexCmdSig(DX12GpuDevice* device, ICommandList* cmdlist)
 	{
-		return nullptr;
-		/*if (CmdSigForIndirectDrawIndex == nullptr)
+		if (mCmdSignature != nullptr)
+			return mCmdSignature;
+		if (mVSMutiDrawRootIndex == -1)
 		{
-			auto device = (DX12GpuDevice*)cmdlist->mDevice.GetPtr();
-			D3D12_COMMAND_SIGNATURE_DESC desc{};
-			D3D12_INDIRECT_ARGUMENT_DESC argDesc{};
-			argDesc.Type = D3D12_INDIRECT_ARGUMENT_TYPE_DRAW_INDEXED;
-			desc.ByteStride = 20;
-			desc.NumArgumentDescs = 1;
-			desc.pArgumentDescs = &argDesc;
-			device->mDevice->CreateCommandSignature(&desc, nullptr, IID_PPV_ARGS(CmdSigForIndirectDrawIndex.GetAddressOf()));
+			mCmdSignature = device->CmdSigForIndirectDrawIndex;
+			mIndirectOffset = offsetof(FIndirectDrawArgument, VertexCountPerInstance);
 		}
-		return CmdSigForIndirectDrawIndex;*/
+		else
+		{
+			D3D12_COMMAND_SIGNATURE_DESC desc{};
+			D3D12_INDIRECT_ARGUMENT_DESC argDesc[2]{};
+			argDesc[0].Type = D3D12_INDIRECT_ARGUMENT_TYPE_CONSTANT;
+			argDesc[0].Constant.RootParameterIndex = mVSMutiDrawRootIndex;
+			argDesc[0].Constant.DestOffsetIn32BitValues = 0;
+			argDesc[0].Constant.Num32BitValuesToSet = 1;
+			argDesc[1].Type = D3D12_INDIRECT_ARGUMENT_TYPE_DRAW_INDEXED;
+			desc.ByteStride = sizeof(FIndirectDrawArgument);
+			desc.NumArgumentDescs = sizeof(argDesc) / sizeof(D3D12_INDIRECT_ARGUMENT_DESC);
+			desc.pArgumentDescs = argDesc;
+			auto hr = device->mDevice->CreateCommandSignature(&desc, mSignature, IID_PPV_ARGS(mCmdSignature.GetAddressOf()));
+			ASSERT(hr == S_OK);
+			mIndirectOffset = 0;
+		}
+		return mCmdSignature;
 	}
 	void DX12GraphicsEffect::Commit(ICommandList* cmdlist, IGraphicDraw* drawcall)
 	{
@@ -405,67 +375,146 @@ namespace NxRHI
 			dx12Cmd->mCurrentIndirectDrawIndexSig = nullptr;
 		}*/
 	}
-
-	void DX12ComputeEffect::BuildState(IGpuDevice* device)
+	void DX12ComputeEffect::Push2Root(FShaderBinder* binder)
 	{
-		auto dxDevice = (DX12GpuDevice*)device;
-		std::vector<D3D12_ROOT_PARAMETER>	mRootParameters;
-		std::vector<D3D12_DESCRIPTOR_RANGE>	usb;
-		std::vector<D3D12_DESCRIPTOR_RANGE>	sampler;
-		mRootParameters.clear();
-		auto pReflector = mComputeShader->GetReflector();
-		for (auto& i : pReflector->CBuffers)
+		switch (binder->Type)
 		{
-			auto pBinder = i;
-			FillRange(&usb, pBinder, D3D12_DESCRIPTOR_RANGE_TYPE_CBV);
+			case EShaderBindType::SBT_CBuffer:
+			{
+				FillRange(&mRootParameters[FRootParameter::CS_Cbv], binder, D3D12_DESCRIPTOR_RANGE_TYPE_CBV);
+			}
+			break;
+			case EShaderBindType::SBT_SRV:
+			{
+				FillRange(&mRootParameters[FRootParameter::CS_Srv], binder, D3D12_DESCRIPTOR_RANGE_TYPE_SRV);
+			}
+			break;
+			case EShaderBindType::SBT_UAV:
+			{
+				FillRange(&mRootParameters[FRootParameter::CS_Uav], binder, D3D12_DESCRIPTOR_RANGE_TYPE_UAV);
+			}
+			break;
+			case EShaderBindType::SBT_Sampler:
+			{
+				FillRange(&mRootParameters[FRootParameter::CS_Sampler], binder, D3D12_DESCRIPTOR_RANGE_TYPE_SAMPLER);
+			}
+			break;
 		}
-		for (auto& i : pReflector->Uavs)
+	}
+	DX12ComputeEffect::~DX12ComputeEffect()
+	{
+		auto device = mDeviceRef.GetPtr();
+		if (device == nullptr)
+			return;
+
+		device->DelayDestroy(mSignature);
+		mSignature = nullptr;
+		device->DelayDestroy(mCmdSignature);
+		mCmdSignature = nullptr;
+	}
+	void DX12ComputeEffect::BuildState(IGpuDevice* device1)
+	{
+		mDeviceRef.FromObject(device1);
+		auto device = ((DX12GpuDevice*)device1);
+
+		std::vector<D3D12_ROOT_PARAMETER>	dxRootParameters;
+		for (auto& i : mComputeShader->Reflector->CBuffers)
 		{
-			auto pBinder = i;
-			FillRange(&usb, pBinder, D3D12_DESCRIPTOR_RANGE_TYPE_UAV);
+			FillRange(&mRootParameters[FRootParameter::CS_Cbv], i, D3D12_DESCRIPTOR_RANGE_TYPE_CBV);
 		}
-		for (auto& i : pReflector->Srvs)
+		for (auto& i : mComputeShader->Reflector->Srvs)
 		{
-			auto pBinder = i;
-			FillRange(&usb, pBinder, D3D12_DESCRIPTOR_RANGE_TYPE_SRV);
+			FillRange(&mRootParameters[FRootParameter::CS_Srv], i, D3D12_DESCRIPTOR_RANGE_TYPE_SRV);
 		}
-		for (auto& i : pReflector->Samplers)
+		for (auto& i : mComputeShader->Reflector->Uavs)
 		{
-			auto pBinder = i;
-			FillRange(&sampler, pBinder, D3D12_DESCRIPTOR_RANGE_TYPE_SAMPLER);
+			FillRange(&mRootParameters[FRootParameter::CS_Uav], i, D3D12_DESCRIPTOR_RANGE_TYPE_UAV);
+		}
+		for (auto& i : mComputeShader->Reflector->Samplers)
+		{
+			FillRange(&mRootParameters[FRootParameter::CS_Sampler], i, D3D12_DESCRIPTOR_RANGE_TYPE_SAMPLER);
 		}
 
 		D3D12_ROOT_PARAMETER tmp{};
 		tmp.ParameterType = D3D12_ROOT_PARAMETER_TYPE_DESCRIPTOR_TABLE;
 
-		tmp.ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL;//D3D12_SHADER_VISIBILITY_VERTEX;
-		tmp.DescriptorTable.NumDescriptorRanges = (UINT)usb.size();
-		mSrvTableSize = tmp.DescriptorTable.NumDescriptorRanges;
-		if (usb.size() > 0)
 		{
-			tmp.DescriptorTable.pDescriptorRanges = &usb[0];
-			mSrvTableSizeIndex = (UINT)mRootParameters.size();
-			mRootParameters.push_back(tmp);
+			int HeapStartIndex = 0;
+			tmp.ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL;
+			{
+				auto& rp = mRootParameters[FRootParameter::CS_Cbv];
+				tmp.DescriptorTable.NumDescriptorRanges = (UINT)rp.Descriptors.size();
+				BuildRoot(HeapStartIndex, tmp, rp, dxRootParameters);
+				/*if (tmp.DescriptorTable.NumDescriptorRanges > 0)
+				{
+					tmp.DescriptorTable.pDescriptorRanges = rp.GetDescriptorAddress();
+					rp.RootIndex = (UINT)dxRootParameters.size();
+					dxRootParameters.push_back(tmp);
+					rp.HeapStartIndex = HeapStartIndex;
+					HeapStartIndex += (int)tmp.DescriptorTable.NumDescriptorRanges;
+					rp.BuildShaderBinders();
+				}*/
+			}
+
+			{
+				auto& rp = mRootParameters[FRootParameter::CS_Srv];
+				tmp.DescriptorTable.NumDescriptorRanges = (UINT)rp.Descriptors.size();
+				BuildRoot(HeapStartIndex, tmp, rp, dxRootParameters);
+				/*if (tmp.DescriptorTable.NumDescriptorRanges > 0)
+				{
+					tmp.DescriptorTable.pDescriptorRanges = rp.GetDescriptorAddress();
+					rp.RootIndex = (UINT)dxRootParameters.size();
+					dxRootParameters.push_back(tmp);
+					rp.HeapStartIndex = HeapStartIndex;
+					HeapStartIndex += (int)tmp.DescriptorTable.NumDescriptorRanges;
+					rp.BuildShaderBinders();
+				}*/
+			}
+
+			{
+				auto& rp = mRootParameters[FRootParameter::CS_Uav];
+				tmp.DescriptorTable.NumDescriptorRanges = (UINT)rp.Descriptors.size();
+				BuildRoot(HeapStartIndex, tmp, rp, dxRootParameters);
+				/*if (tmp.DescriptorTable.NumDescriptorRanges > 0)
+				{
+					tmp.DescriptorTable.pDescriptorRanges = rp.GetDescriptorAddress();
+					rp.RootIndex = (UINT)dxRootParameters.size();
+					dxRootParameters.push_back(tmp);
+					rp.HeapStartIndex = HeapStartIndex;
+					HeapStartIndex += (int)tmp.DescriptorTable.NumDescriptorRanges;
+					rp.BuildShaderBinders();
+				}*/
+			}
+
+			mCbvSrvUavNumber = HeapStartIndex;
 		}
-		else
+
 		{
-			mSrvTableSizeIndex = -1;
+			int HeapStartIndex = 0;
+			mRootParameters[FRootParameter::CS_Sampler].IsSamplers = true;
+
+			tmp.ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL;
+			{
+				auto& rp = mRootParameters[FRootParameter::CS_Sampler];
+				tmp.DescriptorTable.NumDescriptorRanges = (UINT)rp.Descriptors.size();
+				BuildRoot(HeapStartIndex, tmp, rp, dxRootParameters);
+				/*if (tmp.DescriptorTable.NumDescriptorRanges > 0)
+				{
+					tmp.DescriptorTable.pDescriptorRanges = rp.GetDescriptorAddress();
+					rp.RootIndex = (UINT)dxRootParameters.size();
+					dxRootParameters.push_back(tmp);
+					rp.HeapStartIndex = HeapStartIndex;
+					HeapStartIndex += (int)tmp.DescriptorTable.NumDescriptorRanges;
+					rp.BuildShaderBinders();
+				}*/
+			}
+
+			mSamplerNumber = HeapStartIndex;
 		}
-		tmp.DescriptorTable.NumDescriptorRanges = (UINT)sampler.size();
-		mSamplerTableSize = tmp.DescriptorTable.NumDescriptorRanges;
-		if (sampler.size() > 0)
-		{
-			tmp.DescriptorTable.pDescriptorRanges = &sampler[0];
-			mSamplerTableSizeIndex = (UINT)mRootParameters.size();
-			mRootParameters.push_back(tmp);
-		}
-		else
-		{
-			mSamplerTableSizeIndex = -1;
-		}
+
 		D3D12_ROOT_SIGNATURE_DESC sigDesc{};
-		sigDesc.NumParameters = (UINT)mRootParameters.size();
-		sigDesc.pParameters = &mRootParameters[0];
+		sigDesc.NumParameters = (UINT)dxRootParameters.size();
+		sigDesc.pParameters = &dxRootParameters[0];
 		sigDesc.NumStaticSamplers = 0;
 		sigDesc.pStaticSamplers = nullptr;
 		sigDesc.Flags = D3D12_ROOT_SIGNATURE_FLAG_ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT;
@@ -482,7 +531,7 @@ namespace NxRHI
 
 		auto bfSize = serializedRootSig->GetBufferSize();
 		ID3D12RootSignature* pRootSig = nullptr;
-		dxDevice->mDevice->CreateRootSignature(0,
+		device->mDevice->CreateRootSignature(0,
 			serializedRootSig->GetBufferPointer(),
 			bfSize,
 			IID_PPV_ARGS(&pRootSig));
@@ -496,35 +545,8 @@ namespace NxRHI
 			mComputeShader->Desc->DxIL.size()
 		};
 		pipeDesc.Flags = D3D12_PIPELINE_STATE_FLAG_NONE;
-		dxDevice->mDevice->CreateComputePipelineState(&pipeDesc, IID_PPV_ARGS(mPipelineState.GetAddressOf()));
-
-		if (mSrvTableSize > 0)
-		{
-			mDescriptorAllocatorCSU = MakeWeakRef(new DX12DescriptorSetAllocator());
-			mDescriptorAllocatorCSU->Creator.Type = DX12DescriptorSetCreator::EDescriptorType::Compute;
-			mDescriptorAllocatorCSU->Creator.mDesc.Type = D3D12_DESCRIPTOR_HEAP_TYPE::D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV;
-			mDescriptorAllocatorCSU->Creator.mDesc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_NONE;
-			mDescriptorAllocatorCSU->Creator.mDesc.NumDescriptors = mSrvTableSize;
-			mDescriptorAllocatorCSU->Creator.mDesc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE;
-			mDescriptorAllocatorCSU->Creator.mComputeEffect = this;
-			mDescriptorAllocatorCSU->Creator.IsSampler = false;
-			mDescriptorAllocatorCSU->Creator.mDeviceRef.FromObject(device);
-			mDescriptorAllocatorCSU->mDescriptorStride = dxDevice->mDevice->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE::D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
-		}
-
-		if (mSamplerTableSize > 0)
-		{
-			mDescriptorAllocatorSampler = MakeWeakRef(new DX12DescriptorSetAllocator());
-			mDescriptorAllocatorSampler->Creator.Type = DX12DescriptorSetCreator::EDescriptorType::Compute;
-			mDescriptorAllocatorSampler->Creator.mDesc.Type = D3D12_DESCRIPTOR_HEAP_TYPE::D3D12_DESCRIPTOR_HEAP_TYPE_SAMPLER;
-			mDescriptorAllocatorSampler->Creator.mDesc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_NONE;
-			mDescriptorAllocatorSampler->Creator.mDesc.NumDescriptors = mSamplerTableSize;
-			mDescriptorAllocatorSampler->Creator.mDesc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE;
-			mDescriptorAllocatorSampler->Creator.mComputeEffect = this;
-			mDescriptorAllocatorSampler->Creator.IsSampler = true;
-			mDescriptorAllocatorSampler->Creator.mDeviceRef.FromObject(device);
-			mDescriptorAllocatorSampler->mDescriptorStride = dxDevice->mDevice->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE::D3D12_DESCRIPTOR_HEAP_TYPE_SAMPLER);
-		}
+		hr = device->mDevice->CreateComputePipelineState(&pipeDesc, IID_PPV_ARGS(mPipelineState.GetAddressOf()));
+		ASSERT(hr == S_OK);
 	}
 	
 	void DX12ComputeEffect::Commit(ICommandList* cmdlist)
@@ -570,6 +592,34 @@ namespace NxRHI
 		{
 			dx12Cmd->mContext->SetComputeRootDescriptorTable(mSamplerTableSizeIndex, dx12Cmd->mCurrentComputeSamplerTable->mHeap->GetGPUDescriptorHandleForHeapStart());
 		}*/
+	}
+
+	AutoRef<ID3D12CommandSignature> DX12ComputeEffect::GetIndirectDispatchCmdSig(DX12GpuDevice* device, ICommandList* cmdlist)
+	{
+		if (mCmdSignature != nullptr)
+			return mCmdSignature;
+		if (mCSMutiDrawRootIndex == -1)
+		{
+			mCmdSignature = device->CmdSigForIndirectDispatch;
+			mIndirectOffset = offsetof(FIndirectDispatchArgument, X);
+		}
+		else
+		{
+			D3D12_COMMAND_SIGNATURE_DESC desc{};
+			D3D12_INDIRECT_ARGUMENT_DESC argDesc[2]{};
+			argDesc[0].Type = D3D12_INDIRECT_ARGUMENT_TYPE_CONSTANT;
+			argDesc[0].Constant.RootParameterIndex = mCSMutiDrawRootIndex;
+			argDesc[0].Constant.DestOffsetIn32BitValues = 0;
+			argDesc[0].Constant.Num32BitValuesToSet = 1;
+			argDesc[1].Type = D3D12_INDIRECT_ARGUMENT_TYPE_DISPATCH;
+			desc.ByteStride = sizeof(FIndirectDispatchArgument);
+			desc.NumArgumentDescs = sizeof(argDesc) / sizeof(D3D12_INDIRECT_ARGUMENT_DESC);
+			desc.pArgumentDescs = argDesc;
+			auto hr = device->mDevice->CreateCommandSignature(&desc, mSignature, IID_PPV_ARGS(mCmdSignature.GetAddressOf()));
+			ASSERT(hr == S_OK);
+			mIndirectOffset = 0;
+		}
+		return mCmdSignature;
 	}
 }
 

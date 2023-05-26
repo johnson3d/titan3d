@@ -30,7 +30,7 @@ struct VPakPair
 	UINT			Pad0;
 };
 
-class VPakFile : public VIUnknown
+class VPakFile : public IWeakReference
 {
 	friend class VPackFile2Memory;
 private:
@@ -91,7 +91,7 @@ class VPackFile2Memory : public VRes2Memory
 {
 	friend class VPakFile;
 protected:
-	TObjectHandle<VPakFile>			mPakFile;
+	TWeakRefHandle<VPakFile>			mPakFile;
 	
 	VPakAssetDesc					mAssetDesc;
 	UINT_PTR						mPtrOffset;

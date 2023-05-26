@@ -65,6 +65,113 @@ void UAnyValue::FreeManagedHandle()
 	}
 }
 
+FGlobalConfig* FGlobalConfig::GetInstance()
+{
+	static FGlobalConfig obj;
+	return &obj;
+}
+const char* FGlobalConfig::GetName(UINT handle)
+{
+	auto pConfig = GetConfig(handle);
+	return (pConfig != nullptr) ? pConfig->Name.c_str() : nullptr;
+}
+UINT FGlobalConfig::GetConfigHandle(const char* name)
+{
+	for (size_t i = 0; i < Values.size(); i++)
+	{
+		if (Values[i].Name == name)
+			return (UINT)i;
+	}
+	return 0xFFFFFFFF;
+}
+FGlobalConfig::FConfigValue* FGlobalConfig::GetOrCreateConfig(const char* name, UINT& index)
+{
+	index = GetConfigHandle(name);
+	if (index == 0xFFFFFFFF)
+	{
+		index = (UINT)Values.size();
+		FConfigValue v;
+		v.Name = name;
+		Values.push_back(v);
+	}
+	return &Values[index];
+}
+FGlobalConfig::FConfigValue* FGlobalConfig::GetConfig(UINT index)
+{
+	if (index >= Values.size())
+		return nullptr;
+	return &Values[index];
+}
+UINT FGlobalConfig::SetConfigValueI32(const char* name, int value)
+{
+	UINT index;
+	auto pConfig = GetOrCreateConfig(name, index);
+	pConfig->I32 = value;
+	return index;
+}
+UINT FGlobalConfig::SetConfigValueUI32(const char* name, UINT value)
+{
+	UINT index;
+	auto pConfig = GetOrCreateConfig(name, index);
+	pConfig->UI32 = value;
+	return index;
+}
+UINT FGlobalConfig::SetConfigValueF32(const char* name, float value)
+{
+	UINT index;
+	auto pConfig = GetOrCreateConfig(name, index);
+	pConfig->F32 = value;
+	return index;
+}
+
+void FGlobalConfig::SetConfigValueI32(UINT handle, int value)
+{
+	auto pConfig = GetConfig(handle);
+	pConfig->I32 = value;
+}
+void FGlobalConfig::SetConfigValueUI32(UINT handle, UINT value)
+{
+	auto pConfig = GetConfig(handle);
+	pConfig->UI32 = value;
+}
+void FGlobalConfig::SetConfigValueF32(UINT handle, float value)
+{
+	auto pConfig = GetConfig(handle);
+	pConfig->F32 = value;
+}
+
+int FGlobalConfig::GetConfigValueI32(const char* name)
+{
+	auto handle = GetConfigHandle(name);
+	return GetConfigValueI32(handle);
+}
+UINT FGlobalConfig::GetConfigValueUI32(const char* name)
+{
+	auto handle = GetConfigHandle(name);
+	return GetConfigValueUI32(handle);
+}
+float FGlobalConfig::GetConfigValueF32(const char* name)
+{
+	auto handle = GetConfigHandle(name);
+	return GetConfigValueF32(handle);
+}
+
+int FGlobalConfig::GetConfigValueI32(UINT handle)
+{
+	auto pConfig = GetConfig(handle);
+	return (pConfig != nullptr)? pConfig->I32 : 0;
+}
+UINT FGlobalConfig::GetConfigValueUI32(UINT handle)
+{
+	auto pConfig = GetConfig(handle);
+	return (pConfig != nullptr) ? pConfig->UI32 : 0;
+}
+float FGlobalConfig::GetConfigValueF32(UINT handle)
+{
+	auto pConfig = GetConfig(handle);
+	return (pConfig != nullptr) ? pConfig->F32 : 0;
+}
+
 void UCs2CppBase::UnitTest()
 {
 	///test code

@@ -101,7 +101,7 @@ void GetEngineVertexLayout(std::vector<NxRHI::FLayoutElement>& GLayouts)
 		//VST_LightMap,
 		tmpElem.SemanticName = "TEXCOORD";
 		tmpElem.SemanticIndex = 2;
-		tmpElem.Format = PXF_R32G32_FLOAT;
+		tmpElem.Format = PXF_R32G32B32A32_FLOAT;
 		tmpElem.InputSlot = VST_LightMap;
 		tmpElem.AlignedByteOffset = 0;
 		tmpElem.IsInstanceData = false;

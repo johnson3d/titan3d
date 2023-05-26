@@ -9,7 +9,7 @@ NS_BEGIN
 namespace GpuDump
 {
 	class TR_CLASS()
-		NvAftermath : public VIUnknown
+		NvAftermath : public IWeakReference
 	{
 	public:
 		static void InitDump(NxRHI::ERhiType type);

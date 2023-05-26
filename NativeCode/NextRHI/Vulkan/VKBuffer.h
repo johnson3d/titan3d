@@ -17,11 +17,9 @@ namespace NxRHI
 		virtual void* GetHWBuffer() override{
 			return (void*)mBuffer;
 		}
-		virtual void Flush2Device(ICommandList* cmd, void* pBuffer, UINT Size) override;
-		virtual bool Map(ICommandList* cmd, UINT index, FMappedSubResource* res, bool forRead) override;
-		virtual void Unmap(ICommandList* cmd, UINT index) override;
-		virtual void UpdateGpuData(ICommandList* cmd, UINT subRes, void* pData, const FSubresourceBox* box, UINT rowPitch, UINT depthPitch) override;
-		virtual void UpdateGpuData(ICommandList* cmd, UINT offset, void* pData, UINT size) override;
+		virtual bool Map(UINT index, FMappedSubResource* res, bool forRead) override;
+		virtual void Unmap(UINT index) override;
+		virtual void UpdateGpuData(UINT subRes, void* pData, const FSubResourceFootPrint* footPrint) override;
 		virtual void TransitionTo(ICommandList* cmd, EGpuResourceState state) override;
 		virtual void SetDebugName(const char* name) override;
 
@@ -30,7 +28,7 @@ namespace NxRHI
 			return 0;
 		}
 	public:
-		TObjectHandle<VKGpuDevice>		mDeviceRef;
+		TWeakRefHandle<VKGpuDevice>		mDeviceRef;
 		VkBuffer						mBuffer = (VkBuffer)nullptr;
 		AutoRef<FGpuMemory>				mGpuMemory;
 	};
@@ -44,9 +42,9 @@ namespace NxRHI
 		virtual void* GetHWBuffer() override {
 			return (void*)mImage;
 		}
-		virtual bool Map(ICommandList* cmd, UINT subRes, FMappedSubResource* res, bool forRead) override;
-		virtual void Unmap(ICommandList* cmd, UINT subRes) override;
-		virtual void UpdateGpuData(ICommandList* cmd, UINT subRes, void* pData, const FSubresourceBox* box, UINT rowPitch, UINT depthPitch) override;
+		virtual bool Map(UINT subRes, FMappedSubResource* res, bool forRead) override;
+		virtual void Unmap(UINT subRes) override;
+		virtual void UpdateGpuData(UINT subRes, void* pData, const FSubResourceFootPrint* footPrint) override;
 		virtual void TransitionTo(ICommandList* cmd, EGpuResourceState state) override;
 		virtual void SetDebugName(const char* name) override;
 		virtual IGpuBufferData* CreateBufferData(IGpuDevice* device, UINT mipIndex, ECpuAccess cpuAccess, FSubResourceFootPrint* outFootPrint) override;
@@ -54,7 +52,7 @@ namespace NxRHI
 		VkImageLayout GetImageLayout();
 		VkImageAspectFlagBits GetImageAspect();
 	public:
-		TObjectHandle<VKGpuDevice>	mDeviceRef;
+		TWeakRefHandle<VKGpuDevice>	mDeviceRef;
 		VkImage						mImage = (VkImage)nullptr;
 		//VkImageLayout				mLayout = VkImageLayout::VK_IMAGE_LAYOUT_UNDEFINED;
 		AutoRef<FGpuMemory>			mGpuMemory;
@@ -72,7 +70,7 @@ namespace NxRHI
 		}
 		bool Init(VKGpuDevice* device, IBuffer* pBuffer, const FCbvDesc& desc);
 	public:
-		TObjectHandle<VKGpuDevice>	mDeviceRef;
+		TWeakRefHandle<VKGpuDevice>	mDeviceRef;
 		//VkBufferView				mView = nullptr;
 	};
 
@@ -83,7 +81,7 @@ namespace NxRHI
 		~VKVbView();
 		bool Init(VKGpuDevice* device, IBuffer* pBuffer, const FVbvDesc* desc);
 	public:
-		TObjectHandle<VKGpuDevice>	mDeviceRef;
+		TWeakRefHandle<VKGpuDevice>	mDeviceRef;
 		//VkBufferView				mView = nullptr;
 	};
 
@@ -94,7 +92,7 @@ namespace NxRHI
 		~VKIbView();
 		bool Init(VKGpuDevice* device, IBuffer* pBuffer, const FIbvDesc* desc);
 	public:
-		TObjectHandle<VKGpuDevice>	mDeviceRef;
+		TWeakRefHandle<VKGpuDevice>	mDeviceRef;
 		//VkBufferView				mView = nullptr;
 	};
 
@@ -126,7 +124,7 @@ namespace NxRHI
 		void FreeView();
 		virtual void SetDebugName(const char* name) override;
 	public:
-		TObjectHandle<VKGpuDevice>	mDeviceRef;
+		TWeakRefHandle<VKGpuDevice>	mDeviceRef;
 		
 		VkImageView					mImageView = (VkImageView)nullptr;
 		UINT						mFingerPrint = 0;
@@ -155,7 +153,7 @@ namespace NxRHI
 		bool Init(VKGpuDevice* device, IGpuBufferData* pBuffer, const FUavDesc& desc);
 		virtual void SetDebugName(const char* name) override;
 	public:
-		TObjectHandle<VKGpuDevice>	mDeviceRef;
+		TWeakRefHandle<VKGpuDevice>	mDeviceRef;
 		VkImageView					mImageView = (VkImageView)nullptr;
 	};
 
@@ -170,7 +168,7 @@ namespace NxRHI
 		bool Init(VKGpuDevice* device, ITexture* pBuffer, const FRtvDesc* desc);
 		virtual void SetDebugName(const char* name) override;
 	public:
-		TObjectHandle<VKGpuDevice>	mDeviceRef;
+		TWeakRefHandle<VKGpuDevice>	mDeviceRef;
 		VkImageView					mView = (VkImageView)nullptr;
 	};
 
@@ -185,7 +183,7 @@ namespace NxRHI
 		bool Init(VKGpuDevice* device, ITexture* pBuffer, const FDsvDesc& desc);
 		virtual void SetDebugName(const char* name) override;
 	public:
-		TObjectHandle<VKGpuDevice>	mDeviceRef;
+		TWeakRefHandle<VKGpuDevice>	mDeviceRef;
 		VkImageView					mView = (VkImageView)nullptr;
 	};
 }

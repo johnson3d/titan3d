@@ -4,7 +4,7 @@
 NS_BEGIN
 
 class TR_CLASS(SV_CSImplement=true)
-	IEffector : public VIUnknown
+	IEffector : public IWeakReference
 {
 public:
 	TR_FUNCTION(SV_CSImplement = true)

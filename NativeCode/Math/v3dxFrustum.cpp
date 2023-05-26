@@ -31,8 +31,14 @@ v3dxVector3	g_StandFrustum[8] =
 	v3dxVector3( 1.0f,  1.0f,  1.0f), // XYZ
 };
 
-
-HRESULT v3dxFrustum::build(const v3dxVector3* pvTipPt,const v3dxVector3 avDir[ENUM_FRUSTUMCN_NUMBER],
+/*
+corner arrange
+	3----2
+	|    |
+	0----1
+	number = 4
+*/
+/*HRESULT v3dxFrustum::build(const v3dxVector3* pvTipPt,const v3dxVector3 avDir[ENUM_FRUSTUMCN_NUMBER],
 					   const v3dxVector3* pvDirection,FLOAT fHeight)
 {
 	m_vTipPt = *pvTipPt;
@@ -55,7 +61,7 @@ HRESULT v3dxFrustum::build(const v3dxVector3* pvTipPt,const v3dxVector3 avDir[EN
 	m_aPlane[ENUM_FRUSTUMPL_FAR].set( &vNormal , &upt);
 
 	return S_OK;
-}
+}*/
 
 void v3dxFrustum::buildFrustum( const v3dxVector3* pvTipPt , 
 				  const v3dxVector3* pv1,

@@ -19,7 +19,7 @@ namespace NxRHI
 		}
 		bool Init(DX12GpuDevice* device, const FSamplerDesc& desc);
 	public:
-		TObjectHandle<DX12GpuDevice>			mDeviceRef;
+		TWeakRefHandle<DX12GpuDevice>			mDeviceRef;
 		AutoRef<DX12DescriptorSetPagedObject>	mView;
 	};
 

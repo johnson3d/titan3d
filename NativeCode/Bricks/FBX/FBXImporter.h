@@ -37,6 +37,7 @@ namespace AssetImportAndExport
 				Type = FOT_Unknown;
 				Scale = 1.f;
 				Imported = true;
+				FBXNode = nullptr;
 			}
 			~FBXObjectImportDesc()
 			{
@@ -58,6 +59,17 @@ namespace AssetImportAndExport
 		{
 			friend class FBXImporter;
 		public:
+			FBXMeshImportDesc()
+			{
+				ReCalculateTangent = false;
+				AsCollision = false;
+				AsLocalSpace = false;
+				HaveSkin = false;
+				AsStaticMesh = false;
+				RenderAtom = 0;
+				TransformVertexToAbsolute = false;
+				BakePivotInVertex = false;
+			}
 			bool ReCalculateTangent;
 			bool AsCollision;
 			bool AsLocalSpace;
@@ -74,6 +86,14 @@ namespace AssetImportAndExport
 		{
 			friend class FBXImporter;
 		public:
+			FBXAnimImportDesc()
+			{
+				Duration = 0;
+				SampleRate = 1.0f;
+				AnimationType = EFBXAnimType::AT_Skeleton;
+				AnimStack = nullptr;
+				AnimLayer = nullptr;
+			}
 			VNameString Name;
 			float Duration;
 			float SampleRate;

@@ -41,7 +41,7 @@ namespace NxRHI
 		bool Init(NullGpuDevice * pDevice, const FFenceDesc & desc, const char* name);
 		virtual UINT64 GetCompletedValue() override;
 		virtual void CpuSignal(UINT64 value) override;
-		virtual void Signal(ICmdQueue* queue, UINT64 value) override;
+		virtual void Signal(ICmdQueue* queue, UINT64 value, EQueueType type) override;
 		virtual bool Wait(UINT64 value, UINT timeOut = INFINITE) override;
 	public:
 	};

@@ -2,6 +2,7 @@
 #include "IUnknown.h"
 #include "debug/vfxmemory.h"
 #include "r2m/F2MManager.h"
+#include "../../3rd/native/zstd/lib/zstd.h"
 
 
 #define new VNEW
@@ -135,19 +136,24 @@ void CoreSDK::SetMemDebugInfo(void* memory, const char* info)
 
 void CoreSDK::UpdateEngineFrame(UINT64 frame)
 {
-	VIUnknown::EngineCurrentFrame = frame;
+	IWeakReference::EngineCurrentFrame = frame;
 }
 
 void CoreSDK::IUnknown_Release(void* unk)
 {
-	auto p = (VIUnknown*)unk;
+	auto p = (IWeakReference*)unk;
 	Safe_Release(p);
 }
 
 int CoreSDK::IUnknown_AddRef(void* unk)
 {
-	auto p = (VIUnknown*)unk;
+	auto p = (IWeakReference*)unk;
 	return p->AddRef();
+}
+int CoreSDK::IUnknown_UnsafeGetRefCount(void* unk)
+{
+	auto p = (IWeakReference*)unk;
+	return p->UnsafeGetRefCount();
 }
 
 void CoreSDK::SetWriteLogStringCallback(FWriteLogString wls)
@@ -221,7 +227,12 @@ void CoreSDK::Free(void* ptr)
 {
 	delete[] (unsigned char*)ptr;
 }
-
+void CoreSDK::MessageDialog(char* txt)
+{
+#if PLATFORM_WIN
+	::MessageBoxA(nullptr, txt, "CoreSDK MessageBox", MB_OK);
+#endif
+}
 void CoreSDK::Print2Console(TR_META(SV_NoStringConverter = true) char* txt, bool newLine) {
 	printf("%s", txt);
 	if (newLine)
@@ -231,6 +242,29 @@ void CoreSDK::Print2Console2(const char* txt, bool newLine) {
 	printf("%s", txt);
 	if (newLine)
 		printf("\n");
+}
+
+UINT64 CoreSDK::Compress_ZSTD(void* dst, UINT64 dstCapacity,
+	const void* src, UINT64 srcSize,
+	int compressionLevel)
+{
+	return ZSTD_compress(dst, (size_t)dstCapacity, src, (size_t)srcSize, compressionLevel);
+}
+
+UINT64 CoreSDK::Decompress_ZSTD(void* dst, UINT64 dstCapacity,
+	const void* src, UINT64 compressedSize)
+{
+	return ZSTD_decompress(dst, (size_t)dstCapacity, src, (size_t)compressedSize);
+}
+
+UINT64 CoreSDK::GetFrameContentSize_ZSTD(const void* src, UINT64 srcSize)
+{
+	return ZSTD_getFrameContentSize(src, (size_t)srcSize);
+}
+
+UINT64 CoreSDK::CompressBound_ZSTD(UINT64 srcSize)
+{
+	return ZSTD_compressBound((size_t)srcSize);
 }
 
 NS_END

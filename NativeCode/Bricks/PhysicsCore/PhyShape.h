@@ -38,7 +38,7 @@ public:
 	ENGINE_RTTI(PhyShape)
 
 public:
-	TObjectHandle<PhyActor>			mActor;
+	TWeakRefHandle<PhyActor>			mActor;
 	EPhysShapeType					mType;
 	physx::PxShape*					mShape;
 

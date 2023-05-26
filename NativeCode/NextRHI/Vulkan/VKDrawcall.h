@@ -22,7 +22,7 @@ namespace NxRHI
 			AutoRef<VKDescriptorSetPagedObject>& dsSetPS,
 			const FEffectBinder* binder, IGpuResource* resource);
 	public:
-		TObjectHandle<VKGpuDevice>				mDeviceRef;
+		TWeakRefHandle<VKGpuDevice>				mDeviceRef;
 		AutoRef<VKDescriptorSetPagedObject>		mDescriptorSetVS;
 		AutoRef<VKDescriptorSetPagedObject>		mDescriptorSetPS;
 		bool									IsDirty = false;
@@ -37,7 +37,7 @@ namespace NxRHI
 
 		void RebuildDescriptorSets();
 	public:
-		TObjectHandle<VKGpuDevice>				mDeviceRef;
+		TWeakRefHandle<VKGpuDevice>				mDeviceRef;
 		AutoRef<MemAlloc::FPagedObject<VkDescriptorSet>>		mDescriptorSetCS;
 		bool									IsDirty = false;
 		UINT									FingerPrient = 0;

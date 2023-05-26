@@ -16,7 +16,7 @@
 
 NS_BEGIN
 
-class IStreamWriter : public VIUnknown
+class IStreamWriter : public IWeakReference
 {
 public:
 	virtual UINT64 Tell() = 0;
@@ -36,7 +36,7 @@ public:
 	}
 };
 
-class IStreamReader : public VIUnknown
+class IStreamReader : public IWeakReference
 {
 public:
 	virtual UINT64 GetLength() const = 0;
@@ -87,6 +87,7 @@ public:
 	TR_FUNCTION(SV_SuppressGC = true)
 	virtual bool Seek(UINT64 offset);
 	virtual void Write(const void* pSrc, UINT t);
+	
 	template<typename _Type>
 	void Write(const _Type& v)
 	{
@@ -135,7 +136,7 @@ public:
 	}
 	TR_FUNCTION(SV_SuppressGC = true)
 	virtual bool Seek(UINT64 offset) {
-		if (mPosition <= offset)
+		if (mLength <= offset)
 		{
 			return false;
 		}

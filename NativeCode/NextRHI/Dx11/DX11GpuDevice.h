@@ -54,6 +54,12 @@ namespace NxRHI
 		virtual ICmdQueue* GetCmdQueue() override;
 
 		virtual IGraphicDraw* CreateGraphicDraw() override;
+
+		virtual IGpuScope* CreateGpuScope() override;
+
+		virtual void SetBreakOnID(int id, bool open) override;
+
+		virtual void TickPostEvents() override;
 	private:
 		void QueryDevice();
 	public:
@@ -62,6 +68,7 @@ namespace NxRHI
 		ID3D11Device5*					mDevice5;
 		D3D_FEATURE_LEVEL               mFeatureLevel;
 		
+		AutoRef<ID3D11InfoQueue>		mDebugInfoQueue;
 		ID3DUserDefinedAnnotation*		mDefinedAnnotation = nullptr;
 
 		AutoRef<DX11CmdQueue>			mCmdQueue;
@@ -71,13 +78,10 @@ namespace NxRHI
 	{
 	public:
 		void Init(DX11GpuDevice* device);
-		virtual void ExecuteCommandList(ICommandList* Cmdlist, UINT NumOfWait, ICommandList** ppWaitCmdlists) override;
-		virtual void ExecuteCommandList(UINT num, ICommandList** ppCmdlist) override;
-		virtual UINT64 SignalFence(IFence* fence, UINT64 value) override;
-		virtual void WaitFence(IFence* fence, UINT64 value) override;
-		virtual ICommandList* GetIdleCmdlist(EQueueCmdlist type) override;
-		virtual void ReleaseIdleCmdlist(ICommandList* cmd, EQueueCmdlist type) override;
-		virtual void Flush() override;
+		virtual void ExecuteCommandList(UINT NumOfExe, ICommandList** Cmdlist, UINT NumOfWait, ICommandList** ppWaitCmdlists, EQueueType type) override;
+		virtual ICommandList* GetIdleCmdlist() override;
+		virtual void ReleaseIdleCmdlist(ICommandList* cmd) override;
+		virtual void Flush(EQueueType type) override;
 	public:
 		DX11CmdQueue();
 		~DX11CmdQueue();
@@ -85,7 +89,6 @@ namespace NxRHI
 		DX11GpuDevice*					mDevice = nullptr;
 		VCritical						mImmCmdListLocker;
 		AutoRef<DX11CommandList>		mHardwareContext;
-		AutoRef<DX11CommandList>		mFramePost;
 		std::queue<ICommandList*>		mIdleCmdlist;
 	};
 }

@@ -19,7 +19,7 @@ namespace NxRHI
 {
 	DX12CommandList::DX12CommandList()
 	{
-		mContext = nullptr;
+		
 	}
 	DX12CommandList::~DX12CommandList()
 	{
@@ -77,12 +77,10 @@ namespace NxRHI
 		mDebugName = name;
 		BeginEvent(name);
 		mCurrentFrameBuffers = fb;
-		mCurRtvs.clear();
-		mCurRtvs.resize(fb->mRenderPass->Desc.NumOfMRT);
+		
 		for (UINT i = 0; i < fb->mRenderPass->Desc.NumOfMRT; i++)
 		{
 			auto rtv = fb->mRenderTargets[i].UnsafeConvertTo<DX12RenderTargetView>();
-			mCurRtvs[i] = rtv;
 			if (rtv != nullptr)
 			{
 				auto pDxTexture = rtv->GpuResource.UnsafeConvertTo<DX12Texture>();
@@ -110,7 +108,7 @@ namespace NxRHI
 				//	//auto rtv = dxFB->mRenderTargets[i].UnsafeConvertTo<DX12RenderTargetView>()->mView->Handle;
 				//	mContext->OMSetRenderTargets(1, &rtv, true, &dxFB->mDepthStencilView.UnsafeConvertTo<DX12DepthStencilView>()->mView->Handle);
 				//}
-				auto handle = dxFB->mDepthStencilView.UnsafeConvertTo<DX12DepthStencilView>()->mView->GetHandle(0);
+				auto handle = dxFB->mDepthStencilView.UnsafeConvertTo<DX12DepthStencilView>()->mView->GetCpuAddress(0);
 				mContext->OMSetRenderTargets((UINT)dxFB->mDX11RTVArray.size(), &dxFB->mDX11RTVArray[0], false, &handle);
 			}	
 			else
@@ -128,7 +126,7 @@ namespace NxRHI
 		{
 			if (dxFB->mDepthStencilView != nullptr)
 			{
-				auto handle = dxFB->mDepthStencilView.UnsafeConvertTo<DX12DepthStencilView>()->mView->GetHandle(0);
+				auto handle = dxFB->mDepthStencilView.UnsafeConvertTo<DX12DepthStencilView>()->mView->GetCpuAddress(0);
 				mContext->OMSetRenderTargets(0, nullptr, true, &handle);
 			}
 			else
@@ -172,7 +170,10 @@ namespace NxRHI
 
 			if (flag != 0)
 			{
-				auto handle = dxFB->mDepthStencilView.UnsafeConvertTo<DX12DepthStencilView>()->mView->GetHandle(0);
+				auto dsView = dxFB->mDepthStencilView.UnsafeConvertTo<DX12DepthStencilView>();
+				auto pDxTexture = dsView->GpuResource.UnsafeConvertTo<DX12Texture>();
+				ASSERT(pDxTexture->GpuState == EGpuResourceState::GRS_DepthStencil);
+				auto handle = dsView->mView->GetCpuAddress(0);
 				mContext->ClearDepthStencilView(handle, flag, passClears->DepthClearValue, passClears->StencilClearValue, 0, nullptr);
 			}
 		}
@@ -191,13 +192,26 @@ namespace NxRHI
 	}
 	void DX12CommandList::EndPass()
 	{
-		mCurrentFrameBuffers = nullptr;
-		for (auto& i : mCurRtvs)
+		ASSERT(mCurrentFrameBuffers != nullptr);
+		for (UINT i = 0; i < mCurrentFrameBuffers->mRenderPass->Desc.NumOfMRT; i++)
 		{
-			auto pDxTexture = i->GpuResource.UnsafeConvertTo<DX12Texture>();
-			pDxTexture->TransitionTo(this, EGpuResourceState::GRS_GenericRead);
+			auto rtv = mCurrentFrameBuffers->mRenderTargets[i].UnsafeConvertTo<DX12RenderTargetView>();
+			if (rtv != nullptr)
+			{
+				auto pDxTexture = rtv->GpuResource.UnsafeConvertTo<DX12Texture>();
+				pDxTexture->TransitionTo(this, EGpuResourceState::GRS_GenericRead);
+			}
 		}
-		mCurRtvs.clear();
+		if (mCurrentFrameBuffers->mDepthStencilView != nullptr)
+		{
+			auto dsv = mCurrentFrameBuffers->mDepthStencilView.UnsafeConvertTo<DX12DepthStencilView>();
+			if (dsv != nullptr)
+			{
+				auto pDxTexture = dsv->GpuResource.UnsafeConvertTo<DX12Texture>();
+				pDxTexture->TransitionTo(this, EGpuResourceState::GRS_GenericRead);
+			}
+		}
+		mCurrentFrameBuffers = nullptr;
 		EndEvent();
 		ASSERT(mIsRecording);
 	}
@@ -233,7 +247,9 @@ namespace NxRHI
 	void DX12CommandList::SetCBV(EShaderType type, const FShaderBinder* binder, ICbView* buffer)
 	{
 		ASSERT(mIsRecording);
-		buffer->FlushDirty(this);
+		if (buffer == nullptr)
+			return;
+		buffer->Buffer->PushFlushDirty(mDevice.GetPtr());
 		//mContext->SetGraphicsRootConstantBufferView(binder->DescriptorIndex, ((DX12Buffer*)buffer)->mGpuResource->GetGPUVirtualAddress());
 
 #ifndef DESCRIPTOR_IN_DRAWCALL
@@ -253,7 +269,9 @@ namespace NxRHI
 	void DX12CommandList::SetSrv(EShaderType type, const FShaderBinder* binder, ISrView* view)
 	{
 		ASSERT(mIsRecording);
-		view->GetResourceState()->SetAccessFrame(VIUnknown::EngineCurrentFrame);
+		if (view == nullptr)
+			return;
+		view->GetResourceState()->SetAccessFrame(IWeakReference::EngineCurrentFrame);
 		ASSERT(view->Buffer->GetGpuResourceState() != EGpuResourceState::GRS_RenderTarget);
 
 		if (type == EShaderType::SDT_PixelShader)
@@ -276,6 +294,8 @@ namespace NxRHI
 	void DX12CommandList::SetUav(EShaderType type, const FShaderBinder* binder, IUaView* view)
 	{
 		ASSERT(mIsRecording);
+		if (view == nullptr)
+			return;
 		/*auto pAddr = ((ID3D12Resource*)view->Buffer->GetHWBuffer())->GetGPUVirtualAddress();
 		mContext->SetGraphicsRootUnorderedAccessView(binder->DescriptorIndex, pAddr);*/
 		view->Buffer->TransitionTo(this, EGpuResourceState::GRS_Uav);
@@ -388,18 +408,33 @@ namespace NxRHI
 		mContext->IASetPrimitiveTopology(PrimitiveTypeToDX12(topology, DrawCount, &dpCount));
 		mContext->DrawIndexedInstanced(dpCount, Instance, StartIndex, BaseVertex, 0);
 	}
-	void DX12CommandList::IndirectDrawIndexed(EPrimitiveType topology, IBuffer* indirectArg, UINT indirectArgOffset)
+	void DX12CommandList::IndirectDrawIndexed(EPrimitiveType topology, IBuffer* indirectArg, UINT indirectArgOffset, IBuffer* countBuffer)
 	{
 		ASSERT(mIsRecording);
 		auto device = (DX12GpuDevice*)mDevice.GetPtr();
-		if (device->CmdSigForIndirectDrawIndex == nullptr)
+		if (mCurrentCmdSig == nullptr)
 			return;
+
+		indirectArgOffset += mCurrentIndirectOffset;
 
 		UINT dpCount = 0;
 		mContext->IASetPrimitiveTopology(PrimitiveTypeToDX12(topology, 0, &dpCount));
 		auto dx12Buffer = (DX12Buffer*)indirectArg;
 		auto offset = (UINT)dx12Buffer->mGpuMemory->Offset + indirectArgOffset;
-		mContext->ExecuteIndirect(device->CmdSigForIndirectDrawIndex, 1, (ID3D12Resource*)dx12Buffer->GetHWBuffer(), offset, nullptr, 0);
+
+		if (countBuffer != nullptr)
+		{
+			auto dx12CountBuffer = (DX12Buffer*)countBuffer;
+			auto countBufferOffset = (UINT)dx12CountBuffer->mGpuMemory->Offset;
+
+			mContext->ExecuteIndirect(mCurrentCmdSig, 1024, (ID3D12Resource*)dx12Buffer->GetHWBuffer(), offset,
+				(ID3D12Resource*)dx12CountBuffer->GetHWBuffer(), countBufferOffset);
+		}
+		else
+		{
+			mContext->ExecuteIndirect(mCurrentCmdSig, 1, (ID3D12Resource*)dx12Buffer->GetHWBuffer(), offset,
+				nullptr, 0);
+		}
 	}
 	void DX12CommandList::Dispatch(UINT x, UINT y, UINT z)
 	{
@@ -412,20 +447,32 @@ namespace NxRHI
 		//mContext->ExecuteIndirect()
 		//mContext->DispatchIndirect(((DX12Buffer*)indirectArg)->mBuffer, indirectArgOffset);
 		auto device = (DX12GpuDevice*)mDevice.GetPtr();
-		if (device->CmdSigForIndirectDispatch == nullptr)
+		if (mCurrentCmdSig == nullptr)
 			return;
+		indirectArgOffset += mCurrentIndirectOffset;
 
 		auto dx12Buffer = (DX12Buffer*)indirectArg;
 		auto offset = (UINT)dx12Buffer->mGpuMemory->Offset + indirectArgOffset;
 		auto saved = dx12Buffer->GetGpuResourceState();
 		dx12Buffer->TransitionTo(this, EGpuResourceState::GRS_UavIndirect);
-		mContext->ExecuteIndirect(device->CmdSigForIndirectDispatch, 1, (ID3D12Resource*)dx12Buffer->GetHWBuffer(), offset, nullptr, 0);
+		mContext->ExecuteIndirect(mCurrentCmdSig, 1, (ID3D12Resource*)dx12Buffer->GetHWBuffer(), offset, nullptr, 0);
 		dx12Buffer->TransitionTo(this, saved);
 	}
 	void DX12CommandList::SetMemoryBarrier(EPipelineStage srcStage, EPipelineStage dstStage, EBarrierAccess srcAccess, EBarrierAccess dstAccess)
 	{
 		//D3D12_RESOURCE_BARRIER
 		//mContext->ResourceBarrier()
+		//D3D12_RESOURCE_BARRIER tmp{};
+		//tmp.Type = D3D12_RESOURCE_BARRIER_TYPE_UAV;
+		//tmp.Flags = D3D12_RESOURCE_BARRIER_FLAG_NONE;
+		//auto pTarGpuResource = (ID3D12Resource*)pResource->GetHWBuffer();
+		//tmp.Transition.pResource = pTarGpuResource;
+		//tmp.Transition.StateBefore = GpuStateToDX12(srcAccess);
+		//tmp.Transition.StateAfter = GpuStateToDX12(dstAccess);
+		///*if (tmp.Transition.StateBefore == tmp.Transition.StateAfter)
+		//	return;*/
+		//tmp.Transition.Subresource = D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES;
+		//mContext->ResourceBarrier(1, &tmp); 
 	}
 	D3D12_RESOURCE_STATES GpuStateToDX12(EGpuResourceState state)
 	{
@@ -531,7 +578,15 @@ namespace NxRHI
 		tmp.Transition.StateBefore = GpuStateToDX12(srcAccess);
 		tmp.Transition.StateAfter = GpuStateToDX12(dstAccess);
 		if (tmp.Transition.StateBefore == tmp.Transition.StateAfter)
+		{
+			if (dstAccess == GRS_Uav)
+			{
+				tmp.Type = D3D12_RESOURCE_BARRIER_TYPE_UAV;
+				tmp.UAV.pResource = pTarGpuResource;
+				mContext->ResourceBarrier(1, &tmp);
+			}
 			return;
+		}	
 		tmp.Transition.Subresource = D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES;
 		mContext->ResourceBarrier(1, &tmp);
 	}
@@ -545,7 +600,15 @@ namespace NxRHI
 		tmp.Transition.StateBefore = GpuStateToDX12(srcAccess);
 		tmp.Transition.StateAfter = GpuStateToDX12(dstAccess);
 		if (tmp.Transition.StateBefore == tmp.Transition.StateAfter)
+		{
+			if (dstAccess == GRS_Uav)
+			{
+				tmp.Type = D3D12_RESOURCE_BARRIER_TYPE_UAV;
+				tmp.UAV.pResource = pTarGpuResource;
+				mContext->ResourceBarrier(1, &tmp);
+			}
 			return;
+		}
 		tmp.Transition.Subresource = D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES;
 		mContext->ResourceBarrier(1, &tmp);
 	}
@@ -681,25 +744,125 @@ namespace NxRHI
 		source->TransitionTo(this, srcSave);
 
 	}
-	void DX12CommandList::Flush()
+	
+	void DX12CommandList::Commit(DX12CmdQueue* cmdQueue, EQueueType type)
 	{
-		ASSERT(mIsRecording);
-		ASSERT(false);
-		//mContext->Flush();
-	}
-	void DX12CommandList::Commit(DX12CmdQueue* cmdQueue)
-	{
-		//ASSERT(mIsRecording == false);
+		ASSERT(mIsRecording == false);
 		if (mAllocator == nullptr)
 			return;
 		//BeginEvent(mDebugName.c_str());
 		cmdQueue->mCmdQueue->ExecuteCommandLists(1, (ID3D12CommandList**)&mContext);
-		auto targetValue = mCommitFence->GetAspectValue() + 1;
-		cmdQueue->SignalFence(mCommitFence, targetValue);
+		auto targetValue = cmdQueue->IncreaseSignal(mCommitFence, type);
 		//EndEvent();
 		
 		GetDX12Device()->mCmdAllocatorManager->Free(mAllocator, targetValue, mCommitFence);
 		mAllocator = nullptr;
+
+		this->ResetGpuDraws();
+	}
+	template<>
+	struct AuxGpuResourceDestroyer<AutoRef<FGpuMemory>>
+	{
+		static void Destroy(AutoRef<FGpuMemory> obj, IGpuDevice* device1)
+		{
+			obj->FreeMemory();
+		}
+	};
+	DX12GpuScope::~DX12GpuScope()
+	{
+		auto device = mDeviceRef.GetPtr();
+		if (device == nullptr)
+			return;
+
+		device->DelayDestroy(mResultBuffer);
+		mResultBuffer = nullptr;
+	}
+	bool DX12GpuScope::Init(DX12GpuDevice* device)
+	{
+		mDeviceRef.FromObject(device);
+
+		D3D12_QUERY_HEAP_DESC timestampHeapDesc = {};
+		timestampHeapDesc.Type = D3D12_QUERY_HEAP_TYPE_TIMESTAMP;
+		timestampHeapDesc.Count = 2;
+		auto hr = device->mDevice->CreateQueryHeap(&timestampHeapDesc, IID_PPV_ARGS(mQueryHeap.GetAddressOf()));
+		if (hr != S_OK)
+			return false;
+
+		D3D12_RESOURCE_STATES resState = D3D12_RESOURCE_STATES::D3D12_RESOURCE_STATE_COMMON;
+		auto GpuState = EGpuResourceState::GRS_CopyDst;
+		D3D12_HEAP_PROPERTIES properties{};
+		properties.CPUPageProperty = D3D12_CPU_PAGE_PROPERTY::D3D12_CPU_PAGE_PROPERTY_UNKNOWN;
+		properties.Type = D3D12_HEAP_TYPE_READBACK;
+		
+		D3D12_RESOURCE_DESC resDesc{};
+		resDesc.Dimension = D3D12_RESOURCE_DIMENSION_BUFFER;
+		//resDesc.Width = desc.Size;
+		resDesc.Width = sizeof(UINT64) * 2;
+		resDesc.Height = 1;
+		resDesc.DepthOrArraySize = 1;
+		resDesc.MipLevels = 1;
+		resDesc.SampleDesc.Count = 1;
+		resDesc.SampleDesc.Quality = 0;
+		resDesc.Layout = D3D12_TEXTURE_LAYOUT_ROW_MAJOR;
+		resDesc.Flags = D3D12_RESOURCE_FLAG_NONE;
+		resDesc.Alignment = D3D12_DEFAULT_RESOURCE_PLACEMENT_ALIGNMENT;
+		resDesc.Flags = D3D12_RESOURCE_FLAG_NONE;
+		resState = D3D12_RESOURCE_STATE_COPY_DEST;
+		
+		mResultBuffer = DX12GpuDefaultMemAllocator::Alloc(device, &resDesc, &properties, resState);
+
+		/*FFenceDesc fcDesc{};
+		mFence = MakeWeakRef(device->CreateFence(&fcDesc, "DX12GpuScope"));*/
+		return true;
+	}
+
+	bool DX12GpuScope::IsFinished()
+	{
+		return true;
+	}
+	UINT64 DX12GpuScope::GetDeltaTime()
+	{
+		auto pTarGpuResource = ((DX12GpuHeap*)mResultBuffer->GpuHeap)->mGpuResource;
+		D3D12_RANGE range{};
+		range.Begin = mResultBuffer->Offset;
+		range.End = range.Begin + 2 * sizeof(UINT64);
+		BYTE* pData = nullptr;
+		if (pTarGpuResource->Map(0, &range, (void**)&pData) != S_OK)
+			return 0;
+
+		auto pTimes = (UINT64*)(pData + range.Begin);
+		auto result = pTimes[1] - pTimes[0];
+		pTarGpuResource->Unmap(0, nullptr);
+
+		return result;
+	}
+	void DX12GpuScope::Begin(ICommandList* cmdlist)
+	{
+		auto cmd = (DX12CommandList*)cmdlist;
+		cmd->mContext->EndQuery(mQueryHeap, D3D12_QUERY_TYPE_TIMESTAMP, 0);
+	}
+	void DX12GpuScope::End(ICommandList* cmdlist)
+	{
+		auto cmd = (DX12CommandList*)cmdlist;
+		cmd->mContext->EndQuery(mQueryHeap, D3D12_QUERY_TYPE_TIMESTAMP, 1);
+
+		auto pTarGpuResource = ((DX12GpuHeap*)mResultBuffer->GpuHeap)->mGpuResource;
+		cmd->mContext->ResolveQueryData(mQueryHeap, D3D12_QUERY_TYPE_TIMESTAMP, 0, 2, pTarGpuResource, 0);
+		
+		/*D3D12_RESOURCE_BARRIER tmp{};
+		tmp.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
+		tmp.Flags = D3D12_RESOURCE_BARRIER_FLAG_NONE;
+		tmp.Transition.pResource = pTarGpuResource;
+		tmp.Transition.StateBefore = D3D12_RESOURCE_STATES::D3D12_RESOURCE_STATE_COPY_DEST;
+		tmp.Transition.StateAfter = D3D12_RESOURCE_STATES::D3D12_RESOURCE_STATE_GENERIC_READ;
+		tmp.Transition.Subresource = D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES;
+		cmd->mContext->ResourceBarrier(1, &tmp);*/
+	}
+	void DX12GpuScope::SetName(const char* name)
+	{
+		mName = name;
+		std::wstring n = StringHelper::strtowstr(name);
+		mQueryHeap->SetName(n.c_str());
 	}
 }
 

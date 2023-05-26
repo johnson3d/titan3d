@@ -36,7 +36,7 @@ class TR_CLASS()
 public:
 	ENGINE_RTTI(PhyActor)
 public:
-	TObjectHandle<PhyScene>			mScene;
+	TWeakRefHandle<PhyScene>			mScene;
 	v3dxVector3						mPosition;
 	v3dxQuaternion					mRotation;
 

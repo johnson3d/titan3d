@@ -726,7 +726,7 @@ namespace AssetImportAndExport
 			v3dxVector3* normalStream = new v3dxVector3[renderVertexCount];
 			v3dVector4_t* tangentStream = new v3dVector4_t[renderVertexCount];
 			v3dxVector2* uvStream = new v3dxVector2[renderVertexCount];
-			v3dxVector2* lightMapStream = new v3dxVector2[renderVertexCount];
+			v3dVector4_t* lightMapStream = new v3dVector4_t[renderVertexCount];
 			DWORD* vertexColorStream = new DWORD[renderVertexCount];
 			UINT16* renderIndex16 = NULL;
 			UINT* renderIndex32 = NULL;
@@ -755,7 +755,10 @@ namespace AssetImportAndExport
 					tangentStream[i] = renderVertexs[i].TangentChirality;
 					vertexColorStream[i] = renderVertexs[i].Color.getABGR();
 					uvStream[i] = renderVertexs[i].UV;
-					lightMapStream[i] = renderVertexs[i].UV2;
+					lightMapStream[i].x = renderVertexs[i].UV2.x;
+					lightMapStream[i].y = renderVertexs[i].UV2.y;
+					lightMapStream[i].z = 0;
+					lightMapStream[i].w = 0;
 				}
 			}
 			bool hasVertexColor = true;
@@ -783,7 +786,7 @@ namespace AssetImportAndExport
 					mMeshPrimitives->SetGeomtryMeshStream(rc, NxRHI::EVertexStreamType::VST_Color, vertexColorStream, (UINT)((UINT)sizeof(DWORD) * renderVertexCount), sizeof(DWORD), NxRHI::ECpuAccess::CAS_DEFAULT);
 				mMeshPrimitives->SetGeomtryMeshStream(rc, NxRHI::EVertexStreamType::VST_Normal, normalStream, (UINT)((UINT)sizeof(v3dxVector3) * renderVertexCount), sizeof(v3dxVector3), NxRHI::ECpuAccess::CAS_DEFAULT);
 				mMeshPrimitives->SetGeomtryMeshStream(rc, NxRHI::EVertexStreamType::VST_UV, uvStream, (UINT)((UINT)sizeof(v3dxVector2) * renderVertexCount), sizeof(v3dxVector2), NxRHI::ECpuAccess::CAS_DEFAULT);
-				mMeshPrimitives->SetGeomtryMeshStream(rc, NxRHI::EVertexStreamType::VST_LightMap, lightMapStream, (UINT)((UINT)sizeof(v3dxVector2) * renderVertexCount), sizeof(v3dxVector2), NxRHI::ECpuAccess::CAS_DEFAULT);
+				mMeshPrimitives->SetGeomtryMeshStream(rc, NxRHI::EVertexStreamType::VST_LightMap, lightMapStream, (UINT)((UINT)sizeof(v3dVector4_t) * renderVertexCount), sizeof(v3dVector4_t), NxRHI::ECpuAccess::CAS_DEFAULT);
 				mMeshPrimitives->SetGeomtryMeshStream(rc, NxRHI::EVertexStreamType::VST_Tangent, tangentStream, (UINT)((UINT)sizeof(v3dVector4_t) * renderVertexCount), sizeof(v3dVector4_t), NxRHI::ECpuAccess::CAS_DEFAULT);
 				if (isIndex32)
 					mMeshPrimitives->SetGeomtryMeshIndex(rc, renderIndex32, polyVertexCount * sizeof(UINT), isIndex32, NxRHI::ECpuAccess::CAS_DEFAULT);
@@ -813,7 +816,7 @@ namespace AssetImportAndExport
 				Safe_DeleteArray<v3dxVector3>(normalStream);
 				Safe_DeleteArray<v3dVector4_t>(tangentStream);
 				Safe_DeleteArray<v3dxVector2>(uvStream);
-				Safe_DeleteArray<v3dxVector2>(lightMapStream);
+				Safe_DeleteArray<v3dVector4_t>(lightMapStream);
 				Safe_DeleteArray<DWORD>(vertexColorStream);
 				Safe_DeleteArray<BYTE>(skinIndexsStream);
 				Safe_DeleteArray<float>(skinWeightsStream);

@@ -1443,12 +1443,12 @@ namespace IGFD
 			if (m_InputPathActivated)
 			{
 				auto gio = ImGui::GetIO();
-				if (ImGui::IsKeyReleased(gio.KeyMap[ImGuiKey_Enter]))
+				if (ImGui::IsKeyReleased((ImGuiKey)gio.KeyMap[ImGuiKey_Enter]))
 				{
 					SetPath(std::string(InputPathBuffer));
 					m_InputPathActivated = false;
 				}
-				if (ImGui::IsKeyReleased(gio.KeyMap[ImGuiKey_Escape]))
+				if (ImGui::IsKeyReleased((ImGuiKey)gio.KeyMap[ImGuiKey_Escape]))
 				{
 					m_InputPathActivated = false;
 				}

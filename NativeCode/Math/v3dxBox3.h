@@ -215,6 +215,11 @@ public:
 			|| maxbox.z < box.Min().z);
 	}
 
+	float GetSurface()
+	{
+		return GetWidth() * GetHeight() + GetWidth() * GetLength() + GetLength() * GetHeight();
+	}
+
 	 bool Between (const v3dxBox3& box1, const v3dxBox3& box2) const;
 	 void ManhattanDistance (const v3dxBox3& other, v3dxVector3& dist) const;
 	 float SquaredOriginDist() const;

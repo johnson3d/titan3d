@@ -5,7 +5,7 @@
 NS_BEGIN
 
 template<class VThreadContext>
-class VThreadDispatcher : public VIUnknown
+class VThreadDispatcher : public IWeakReference
 {
 	thread_local static VThreadContext*		Context;
 	std::vector<VThreadContext**>			mThreadContexts;
@@ -47,7 +47,7 @@ thread_local VThreadContext* VThreadDispatcher<VThreadContext>::Context = nullpt
 typedef bool (FThreadContextTick)();
 
 class TR_CLASS()
-	FContextTickableManager : public VIUnknown
+	FContextTickableManager : public IWeakReference
 {
 	std::vector<std::function<FThreadContextTick>>	mTickables;
 public:

@@ -549,8 +549,8 @@ namespace NxRHI
 			vkGetSwapchainImagesKHR(((VKGpuDevice*)device)->mDevice, mSwapChain, &Desc.BufferCount, swapChainImages.data());
 		}
 
-		auto cmd = (VKCommandList*)device->GetCmdQueue()->GetIdleCmdlist(EQueueCmdlist::QCL_Transient);
-		cmd->BeginCommand();
+		FTransientCmd tsCmd(device, QU_Default);
+		auto cmd = tsCmd.GetCmdList();
 		for (UINT i = 0; i < Desc.BufferCount; i++)
 		{
 			ASSERT(BackBuffers[i]->Texture);
@@ -573,9 +573,6 @@ namespace NxRHI
 			}
 			BackBuffers[i]->CreateRtvAndSrv(device);
 		}
-		cmd->EndCommand();
-		device->GetCmdQueue()->ExecuteCommandList(cmd);
-		device->GetCmdQueue()->ReleaseIdleCmdlist(cmd, EQueueCmdlist::QCL_Transient);
 
 		//CurrentBackBuffer = 0;
 
@@ -657,8 +654,8 @@ namespace NxRHI
 			vkGetSwapchainImagesKHR(((VKGpuDevice*)device)->mDevice, mSwapChain, &Desc.BufferCount, swapChainImages.data());
 		}
 
-		auto cmd = (VKCommandList*)device->GetCmdQueue()->GetIdleCmdlist(EQueueCmdlist::QCL_Transient);
-		cmd->BeginCommand();
+		FTransientCmd tsCmd(device, QU_Default);
+		auto cmd = tsCmd.GetCmdList();
 		for (UINT i = 0; i < Desc.BufferCount; i++)
 		{
 			if (BackBuffers[i]->Texture == nullptr)
@@ -695,9 +692,6 @@ namespace NxRHI
 			}
 			BackBuffers[i]->CreateRtvAndSrv(device);
 		}
-		cmd->EndCommand();
-		device->GetCmdQueue()->ExecuteCommandList(cmd);
-		device->GetCmdQueue()->ReleaseIdleCmdlist(cmd, EQueueCmdlist::QCL_Transient);
 
 		//CurrentBackBuffer = 0;
 
@@ -742,11 +736,10 @@ namespace NxRHI
 		//cmdQueue->SignalFence(semaphore, 0);// semaphore->GetAspectValue());
 		
 		//rfinishFence->Reset();
-		auto aspect1 = cmdQueue->mQueueExecuteFence->GetAspectValue();
 
-		cmdQueue->QueueSignal(rfinishSemaphore, 0, rfinishFence->mFence);
+		cmdQueue->QueueSignal(rfinishSemaphore, 0, rfinishFence->mFence, EQueueType::QU_Default);
 		
-		cmdQueue->Flush();//temp code
+		//cmdQueue->Flush();//temp code
 		
 		VkPresentInfoKHR presentInfo{};
 		presentInfo.sType = VK_STRUCTURE_TYPE_PRESENT_INFO_KHR;
@@ -765,7 +758,7 @@ namespace NxRHI
 		CurrentFrame = (CurrentFrame + 1) % (UINT)BackBuffers.size();
 
 		//device->mFrameFence->WaitToAspect();
-		device->GetCmdQueue()->IncreaseSignal(PresentFence);
+		device->GetCmdQueue()->IncreaseSignal(PresentFence, EQueueType::QU_Default);
 	}
 	void VKSwapChain::FBackBuffer::CreateRtvAndSrv(IGpuDevice* device)
 	{

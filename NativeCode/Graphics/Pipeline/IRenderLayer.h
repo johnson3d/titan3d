@@ -5,7 +5,7 @@
 NS_BEGIN
 
 class TR_CLASS()
-	IRenderLayer : public VIUnknown
+	IRenderLayer : public IWeakReference
 {
 public:
 	IRenderLayer()

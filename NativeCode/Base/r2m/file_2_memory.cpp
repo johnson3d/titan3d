@@ -1,10 +1,3 @@
-// VFile2Memory.cpp
-//
-// Author : johnson,lanzhengpeng
-// Modifer :	
-// Create Timer :	 2004-10-24 4:23
-// Modify Timer :	
-//-------------------------------------------------------------------------------------------------
 #include <stdio.h>
 #include "file_2_memory.h"
 
@@ -25,7 +18,6 @@ ENGINE_RTTI_IMPL(VFile2Memory);
 VFile2Memory::VFile2Memory()
 	: mCachedBuffer(NULL)
 	, mCachedStarter(0)
-	, mCachedSize(1024*4)
 	, mPtrRef(0)
 {
 	mIsClosing = FALSE;
@@ -36,7 +28,7 @@ VFile2Memory::~VFile2Memory()
 	Close();
 }
 
-VResPtr VFile2Memory::Ptr(UINT_PTR offset , UINT_PTR size)
+VResPtr VFile2Memory::Ptr(UINT64 offset , UINT64 size)
 {
 	mLocker.Lock();
     if(mPtrRef != 0)
@@ -69,27 +61,30 @@ VResPtr VFile2Memory::Ptr(UINT_PTR offset , UINT_PTR size)
 	{
 		size = (INT_PTR)mFile.GetLength() - offset;
 	}
-	Safe_DeleteArray(mCachedBuffer);
-	mCachedBuffer = new BYTE[size];
-	mCachedSize = size;
-	mCachedStarter = offset;
-
-	mFile.Seek(offset, VFile::begin);
-	auto readCount = mFile.Read(mCachedBuffer, size);
-	if (readCount != size)
+	if (mCachedStarter > offset || mCachedStarter + mCachedBuffer.size() < offset + size)
 	{
-		ASSERT(false);
-		VFX_LTRACE(ELTT_Error, "VFile2Memory::Ptr readCount[%d]!=size[%d]", (int)readCount, (int)size);
+		mCachedBuffer.resize(size);
+		mCachedStarter = offset;
+
+		mFile.Seek(offset, VFile::begin);
+		auto readCount = mFile.Read(&mCachedBuffer[0], size);
+		if (readCount != size)
+		{
+			ASSERT(false);
+			VFX_LTRACE(ELTT_Error, "VFile2Memory::Ptr readCount[%d]!=size[%d]", (int)readCount, (int)size);
+		}
+
+		return &mCachedBuffer[0];
 	}
-	
-	return mCachedBuffer;
+	else
+	{
+		return &mCachedBuffer[offset - mCachedStarter];
+	}
 }
 
 vBOOL VFile2Memory::Free()
 {
-	mCachedSize = 0;
-	mCachedStarter = 0;
-	Safe_DeleteArray(mCachedBuffer);
+	//ClearCache();
 
 	--mPtrRef;
 	mLocker.Unlock();
@@ -97,13 +92,17 @@ vBOOL VFile2Memory::Free()
 	return TRUE;
 }
 
+void VFile2Memory::ClearCache()
+{
+	mCachedStarter = 0;
+	mCachedBuffer = std::vector<BYTE>();
+}
+
 void VFile2Memory::TryReleaseHolder()
 {
-	//VAutoLock(mLocker);
+	VAutoLock(mLocker);
 	
-	/*mCachedSize = 0;
-	mCachedStarter = 0;
-	Safe_DeleteArray(mCachedBuffer);*/
+	ClearCache();
 
 	if(mPtrRef == 0)
 	{
@@ -116,7 +115,7 @@ void VFile2Memory::TryReleaseHolder()
 	}
 }
 
-UINT_PTR VFile2Memory::Length() const
+UINT64 VFile2Memory::Length() const
 {
 	if (mFile.IsFileOpened() == false)
 	{
@@ -148,9 +147,7 @@ void VFile2Memory::Close()
 {
 	VAutoLock(mLocker);
 	mIsClosing = TRUE;
-	Safe_DeleteArray(mCachedBuffer);
-	mCachedStarter = 0;
-	mCachedSize = 0;
+	ClearCache();
 	mPtrRef = 0;
 
 	if(mFile.IsFileOpened())
@@ -183,7 +180,7 @@ vBOOL VMemoryResPtr::Create(LPCSTR pszName,VResPtr pPtr,DWORD dwLength)
 	return TRUE;
 }
 
-VResPtr VMemoryResPtr::Ptr(UINT_PTR offset , UINT_PTR size)
+VResPtr VMemoryResPtr::Ptr(UINT64 offset , UINT64 size)
 {
 	return (const BYTE*)m_ptrBase+offset;
 }
@@ -193,7 +190,7 @@ vBOOL VMemoryResPtr::Free()
 	return TRUE;
 }
 
-UINT_PTR VMemoryResPtr::Length() const
+UINT64 VMemoryResPtr::Length() const
 {
 	return m_dwLength;
 }

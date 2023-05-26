@@ -73,7 +73,7 @@ namespace NxRHI
 	bool DX12Sampler::Init(DX12GpuDevice* device, const FSamplerDesc& desc)
 	{
 		Desc = desc;
-		mView = device->mSamplerAllocHeapManager->Alloc<DX12DescriptorSetPagedObject>();
+		mView = device->mSamplerAllocator->Alloc<DX12DescriptorSetPagedObject>();
 		mDeviceRef.FromObject(device);
 
 		D3D12_SAMPLER_DESC				mDxDesc;
@@ -88,7 +88,7 @@ namespace NxRHI
 		mDxDesc.MaxAnisotropy = desc.MaxAnisotropy;
 		mDxDesc.MipLODBias = desc.MipLODBias;
 
-		device->mDevice->CreateSampler(&mDxDesc, mView->GetHandle(0));
+		device->mDevice->CreateSampler(&mDxDesc, mView->GetCpuAddress(0));
 		return true;
 	}
 

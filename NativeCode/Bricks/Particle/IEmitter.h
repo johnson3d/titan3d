@@ -4,7 +4,7 @@
 NS_BEGIN
 
 class TR_CLASS()
-	IEmitter : public VIUnknownBase
+	IEmitter : public VIUnknown
 {
 public:
 	std::vector<IEffector*>	mEffectors;

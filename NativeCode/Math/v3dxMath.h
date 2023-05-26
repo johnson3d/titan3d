@@ -354,6 +354,9 @@ inline FLOAT v3dxVec2LengthSq(const v3dVector2_t* pvt){
 /**
    
 **/
+inline float v3dxVec2Dot(const v3dVector2_t* v1, const v3dVector2_t* v2) {
+	return v1->x * v2->x + v1->y * v2->y;
+}
 inline float v3dxVec3Dot( const v3dVector3_t* v1,const v3dVector3_t* v2 ){ 
 	return v1->x*v2->x+v1->y*v2->y+v1->z*v2->z; 
 }

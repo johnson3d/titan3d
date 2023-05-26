@@ -50,7 +50,7 @@ namespace NxRHI
 	{
 		//Allocator.GetPtr();
 	}
-	MemAlloc::FPage<VkCommandBuffer>* VKCommandBufferCreator::CreatePage(UINT pageSize)
+	VKCommandBufferCreator::PageType* VKCommandBufferCreator::CreatePage(UINT pageSize)
 	{
 		auto device = mDeviceRef.GetPtr();
 		VkCommandPoolCreateInfo poolInfo = {};
@@ -68,7 +68,7 @@ namespace NxRHI
 		result->mCommandPool = descPool;
 		return result;
 	}
-	MemAlloc::FPagedObject<VkCommandBuffer>* VKCommandBufferCreator::CreatePagedObject(MemAlloc::FPage<VkCommandBuffer>* page, UINT index)
+	VKCommandBufferCreator::PagedObjectType* VKCommandBufferCreator::CreatePagedObject(PageType* page, UINT index)
 	{
 		auto device = mDeviceRef.GetPtr();
 
@@ -90,7 +90,11 @@ namespace NxRHI
 
 		return result;
 	}
-	void VKCommandBufferCreator::OnFree(MemAlloc::FPagedObject<VkCommandBuffer>* obj)
+	void VKCommandBufferCreator::OnAlloc(AllocatorType* pAllocator, PagedObjectType* obj)
+	{
+
+	}
+	void VKCommandBufferCreator::OnFree(AllocatorType* pAllocator, PagedObjectType* obj)
 	{
 		//vkResetCommandBuffer(obj->RealObject, VK_COMMAND_BUFFER_RESET_RELEASE_RESOURCES_BIT);
 	}
@@ -179,7 +183,7 @@ namespace NxRHI
 		mIsRecording = false;
 	}
 		
-	void VKCommandList::Commit(VKCmdQueue* queue)
+	void VKCommandList::Commit(VKCmdQueue* queue, EQueueType type)
 	{
 		auto device = GetVKDevice();
 		if (mCommandBuffer != nullptr)
@@ -412,7 +416,7 @@ namespace NxRHI
 	void VKCommandList::SetSrv(EShaderType type, const FShaderBinder* binder, ISrView* view)
 	{
 		ASSERT(mIsRecording);
-		view->GetResourceState()->SetAccessFrame(VIUnknown::EngineCurrentFrame);
+		view->GetResourceState()->SetAccessFrame(IWeakReference::EngineCurrentFrame);
 		/*if (type == EShaderType::SDT_PixelShader)
 			view->Buffer->TransitionTo(this, EGpuResourceState::GRS_SrvPS);
 		else
@@ -550,11 +554,17 @@ namespace NxRHI
 
 		vkCmdDrawIndexed(mCommandBuffer->RealObject, dpCount, Instance, StartIndex, BaseVertex, 0);
 	}
-	void VKCommandList::IndirectDrawIndexed(EPrimitiveType topology, IBuffer* indirectArg, UINT indirectArgOffset)
+	void VKCommandList::IndirectDrawIndexed(EPrimitiveType topology, IBuffer* indirectArg, UINT indirectArgOffset, IBuffer* countBuffer)
 	{
 		ASSERT(mIsRecording);
 		
-		vkCmdDrawIndexedIndirect(mCommandBuffer->RealObject, ((VKBuffer*)indirectArg)->mBuffer, indirectArgOffset, 1, sizeof(UINT) * 5);
+		const auto argOffset = offsetof(FIndirectDrawArgument, VertexCountPerInstance);
+		
+		if (countBuffer == nullptr)
+			vkCmdDrawIndexedIndirect(mCommandBuffer->RealObject, ((VKBuffer*)indirectArg)->mBuffer, indirectArgOffset + argOffset, 1, sizeof(UINT) * 5);
+		else
+			vkCmdDrawIndexedIndirectCount(mCommandBuffer->RealObject, ((VKBuffer*)indirectArg)->mBuffer, indirectArgOffset + argOffset,
+				((VKBuffer*)countBuffer)->mBuffer, 0, 1024, sizeof(UINT) * 5);
 	}
 	void VKCommandList::Dispatch(UINT x, UINT y, UINT z)
 	{
@@ -565,7 +575,9 @@ namespace NxRHI
 	{
 		ASSERT(mIsRecording);
 		
-		vkCmdDispatchIndirect(mCommandBuffer->RealObject, ((VKBuffer*)indirectArg)->mBuffer, indirectArgOffset);
+		const auto argOffset = offsetof(FIndirectDispatchArgument, X);
+
+		vkCmdDispatchIndirect(mCommandBuffer->RealObject, ((VKBuffer*)indirectArg)->mBuffer, indirectArgOffset + argOffset);
 	}
 	VkAccessFlags BarrierAccessToVK(EBarrierAccess flags)
 	{
@@ -929,12 +941,6 @@ namespace NxRHI
 
 		target->TransitionTo(this, tarSave);
 		source->TransitionTo(this, srcSave);
-	}
-	void VKCommandList::Flush()
-	{
-		ASSERT(mIsRecording);
-		ASSERT(false);
-		//mContext->Flush();
 	}
 }
 

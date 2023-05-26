@@ -18,7 +18,7 @@ EPhyControllerCollisionFlag
 
 
 class TR_CLASS()
-	PhyControllerDesc : public VIUnknown
+	PhyControllerDesc : public IWeakReference
 {
 public:
 	PhyControllerDesc()
@@ -96,7 +96,7 @@ class TR_CLASS()
 {
 	PhyActor*					mActor;
 	physx::PxController*		mController;
-	TObjectHandle<PhyScene>		mScene;
+	TWeakRefHandle<PhyScene>		mScene;
 public:
 	ENGINE_RTTI(PhyController);
 

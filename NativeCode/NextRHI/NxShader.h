@@ -19,7 +19,7 @@ namespace NxRHI
 	};
 	
 	struct TR_CLASS()
-		FShaderVarDesc : public VIUnknownBase
+		FShaderVarDesc : public VIUnknown
 	{
 		ENGINE_RTTI(FShaderVarDesc);
 		int GetShaderVarTypeSize(EShaderVarType type)
@@ -42,7 +42,7 @@ namespace NxRHI
 		UINT				Size;
 	};
 	struct TR_CLASS()
-		FShaderBinder : public VIUnknownBase
+		FShaderBinder : public VIUnknown
 	{
 		ENGINE_RTTI(FShaderBinder);
 
@@ -68,7 +68,7 @@ namespace NxRHI
 		bool LoadXnd(IGpuDevice* device, XndAttribute* pAttr);
 	};
 	class TR_CLASS()
-		IShaderReflector : public VIUnknown
+		IShaderReflector : public IWeakReference
 	{
 	public:
 		ENGINE_RTTI(IShaderReflector);
@@ -93,7 +93,7 @@ namespace NxRHI
 			SDT_AllStages = SDT_VertexShader | SDT_PixelShader | SDT_ComputeShader,
 	};
 	class TR_CLASS()
-		IShader : public VIUnknown
+		IShader : public IWeakReference
 	{
 	public:
 		ENGINE_RTTI(IShader);
@@ -108,7 +108,7 @@ namespace NxRHI
 		}
 	};
 	struct TR_CLASS()
-		FShaderDesc : public VIUnknown
+		FShaderDesc : public IWeakReference
 	{
 		ENGINE_RTTI(FShaderDesc);
 		FShaderDesc()
@@ -175,7 +175,7 @@ namespace NxRHI
 		}
 	};
 	class TR_CLASS()
-		IShaderDefinitions : public VIUnknown
+		IShaderDefinitions : public IWeakReference
 	{
 	public:
 		ENGINE_RTTI(IShaderDefinitions);
@@ -221,7 +221,7 @@ namespace NxRHI
 		SL_METAL = (1 << 4)
 	};
 	struct TR_CLASS()
-		FShaderCode : public VIUnknown
+		FShaderCode : public IWeakReference
 	{
 		ENGINE_RTTI(FShaderCode);
 		FShaderCode()
@@ -242,7 +242,7 @@ namespace NxRHI
 	TR_CALLBACK(SV_CallConvention = System.Runtime.InteropServices.CallingConvention.Cdecl, SV_NameSpace = EngineNS)
 	typedef FShaderCode* (*FnGetShaderCodeStream)(TR_META(SV_NoStringConverter) const char* name);
 	class TR_CLASS()
-		FShaderCompiler : public VIUnknown
+		FShaderCompiler : public IWeakReference
 	{
 		typedef FShaderCode* (*FnGetShaderCodeStream)(TR_META(SV_NoStringConverter) const char* name);
 		FnGetShaderCodeStream			GetShaderCodeStreamPtr;
@@ -257,7 +257,7 @@ namespace NxRHI
 			GetShaderCodeStreamPtr = fn;
 		}
 		FShaderCode* GetShaderCodeStream(const char* name);
-		bool CompileShader(FShaderDesc* desc, const char* shader, const char* entry, EShaderType type, const char* sm, const IShaderDefinitions* defines, EShaderLanguage sl, bool bDebugShader);
+		bool CompileShader(FShaderDesc* desc, const char* shader, const char* entry, EShaderType type, const char* sm, const IShaderDefinitions* defines, EShaderLanguage sl, bool bDebugShader, const char* extHlslVersion);
 	};
 }
 

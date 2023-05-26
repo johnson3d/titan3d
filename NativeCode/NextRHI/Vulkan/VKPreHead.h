@@ -175,8 +175,6 @@ namespace NxRHI
             return VK_FORMAT_BC7_UNORM_BLOCK;
 		case PXF_BC7_UNORM_SRGB:
             return VK_FORMAT_BC7_SRGB_BLOCK;
-		case PXF_ETC1:
-            return VK_FORMAT_ETC2_R8G8B8_UNORM_BLOCK;
 		case PXF_ETC2_RGB8:
             return VK_FORMAT_ETC2_R8G8B8_UNORM_BLOCK;
 		case PXF_ETC2_SRGB8:
@@ -193,9 +191,9 @@ namespace NxRHI
             return VK_FORMAT_EAC_R11G11_UNORM_BLOCK;
 		case PXF_ETC2_SIGNED_RG11:
             return VK_FORMAT_EAC_R11G11_SNORM_BLOCK;
-		case PXF_ETC2_RGB8A1:
+		case PXF_ETC2_RGBA1:
             return VK_FORMAT_ETC2_R8G8B8A1_UNORM_BLOCK;
-		case PXF_ETC2_SRGB8A1:
+		case PXF_ETC2_SRGBA1:
             return VK_FORMAT_ETC2_R8G8B8A1_SRGB_BLOCK;
 		default:
 			ASSERT(false);

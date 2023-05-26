@@ -20,7 +20,7 @@ namespace NxRHI
 		~VKRenderPass();
 		bool Init(VKGpuDevice* device, const FRenderPassDesc& desc);
 	public:
-		TObjectHandle<VKGpuDevice>		mDeviceRef;
+		TWeakRefHandle<VKGpuDevice>		mDeviceRef;
 		VkRenderPass		mRenderPass = nullptr;
 	};
 	class VKFrameBuffers : public IFrameBuffers
@@ -32,7 +32,7 @@ namespace NxRHI
 
 		void DestroyFrameBuffer();
 	public:
-		TObjectHandle<VKGpuDevice>		mDeviceRef;
+		TWeakRefHandle<VKGpuDevice>		mDeviceRef;
 		VkFramebuffer		mFrameBuffer = nullptr;
 	}; 
 
@@ -58,11 +58,11 @@ namespace NxRHI
 
 		bool Create(IGpuDevice* device, UINT w, UINT h);
 	public:
-		TObjectHandle<VKGpuDevice>		mDeviceRef;
+		TWeakRefHandle<VKGpuDevice>		mDeviceRef;
 		VkSurfaceKHR					mSurface = nullptr;
 		VkSwapchainKHR					mSwapChain = nullptr;
 		VkSurfaceCapabilitiesKHR		mCapabilities{};
-		struct FBackBuffer : public VIUnknown
+		struct FBackBuffer : public IWeakReference
 		{
 			FBackBuffer();
 			void CleanupVK(VKGpuDevice* device);

@@ -68,7 +68,7 @@ namespace NxRHI
 	}
 	void NullCommandList::SetSrv(EShaderType type, const FShaderBinder* binder, ISrView* view)
 	{
-		view->GetResourceState()->SetAccessFrame(VIUnknown::EngineCurrentFrame);
+		view->GetResourceState()->SetAccessFrame(IWeakReference::EngineCurrentFrame);
 	}
 	void NullCommandList::SetUav(EShaderType type, const FShaderBinder* binder, IUaView* view)
 	{
@@ -106,7 +106,7 @@ namespace NxRHI
 	{
 		
 	}
-	void NullCommandList::IndirectDrawIndexed(EPrimitiveType topology, IBuffer* indirectArg, UINT indirectArgOffset)
+	void NullCommandList::IndirectDrawIndexed(EPrimitiveType topology, IBuffer* indirectArg, UINT indirectArgOffset, IBuffer* countBuffer)
 	{
 		
 	}
@@ -153,10 +153,6 @@ namespace NxRHI
 	void NullCommandList::CopyTextureToBuffer(IBuffer* target, const FSubResourceFootPrint* footprint, ITexture* src, UINT subRes)
 	{
 
-	}
-	void NullCommandList::Flush()
-	{
-		
 	}
 }
 

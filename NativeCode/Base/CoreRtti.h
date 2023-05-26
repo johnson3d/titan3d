@@ -1,26 +1,12 @@
 #pragma once
-#include <string>
-#include <map>
-#include <vector>
-#include <functional>
-#if defined(PLATFORM_WIN)
-#include <WinSock2.h>
-#include <mswsock.h>
-#include <windows.h>
-#else
-#include "vfxtypes_nw.h"
-#endif
+#include "BaseHead.h"
 
 #include "TypeUtility.h"
 #include "string/vfxstring.h"
 
-typedef unsigned long long	vIID;
 typedef int	vBOOL;
 
 NS_BEGIN
-
-//#define NEW_INHEAD new(__FILE__, __LINE__)
-#define NEW_INHEAD new
 
 typedef VNameString RttiNameString;
 struct FRttiStruct;
@@ -30,24 +16,24 @@ static const char* EngineNSStringEx = "EngineNS::";
 
 //IUnknownBase:====================================================================================
 class TR_CLASS()
-	VIUnknownBase
+	VIUnknown
 {
 protected:
 	std::atomic<int>	RefCount;
 public:
-	VIUnknownBase(const VIUnknownBase & rh)
+	VIUnknown(const VIUnknown & rh)
 	{
 		assert(false);
 	}
-	inline VIUnknownBase& operator = (const VIUnknownBase & rh) {
+	inline VIUnknown& operator = (const VIUnknown & rh) {
 		assert(false);
 		return *this;
 	}
-	VIUnknownBase()
+	VIUnknown()
 	{
 		RefCount = 1;
 	}
-	virtual ~VIUnknownBase() {}
+	virtual ~VIUnknown() {}
 
 	virtual long AddRef()
 	{
@@ -69,9 +55,13 @@ public:
 
 	template<class _CastType>
 	_CastType* CastTo();
-	VIUnknownBase* CastTo(FRttiStruct* type);
+	VIUnknown* CastTo(FRttiStruct* type);
 
 	virtual void OnPropertyChanged([[maybe_unused]] const RttiNameString& name, [[maybe_unused]] const FRttiType& type) {}
+
+	virtual bool IsEqual(VIUnknown* other) const {
+		return this == other;
+	}
 };
 
 #define ENGINE_RTTI(name) virtual const FRttiStruct* GetRtti() const override\
@@ -82,7 +72,7 @@ public:
 
 #define ENGINE_RTTI_IMPL(name) //FRttiStruct AuxRttiStruct<name>::Instance;
 
-struct FMetaBase : public VIUnknownBase
+struct FMetaBase : public VIUnknown
 {
 	virtual const FRttiStruct* GetRtti() const = 0;
 };
@@ -403,7 +393,7 @@ struct TR_CLASS()
 	}
 };
 
-struct VIEnumerator : public VIUnknownBase
+struct VIEnumerator : public VIUnknown
 {
 	virtual FRttiStruct* GetElementType() = 0;
 
@@ -669,6 +659,17 @@ struct TR_CLASS()
 		}
 		return nullptr;
 	}
+	bool IsSubClass(FRttiStruct* baseType) const
+	{
+		if (this == baseType)
+			return true;
+		for (auto i : BaseTypes)
+		{
+			if (i.ClassType->IsSubClass(baseType))
+				return true;
+		}
+		return false;
+	}
 	template<typename _MemberType>
 	FRttiProperty* PushMember(unsigned int offset, unsigned int size, const char* name)
 	{
@@ -732,7 +733,7 @@ _MetaType* FRttiMetaInfo::GetFirstMeta() const
 }
 
 template<class _CastType>
-_CastType* VIUnknownBase::CastTo()
+_CastType* VIUnknown::CastTo()
 {
 	return (_CastType*)AuxRttiStruct<_CastType>::GetClassObject()->DownCast(this, GetRtti());
 }
@@ -1424,8 +1425,8 @@ struct RttiConstructorImpl : public FRttiConstructor
 template <>\
 struct AuxRttiBuilder<CombineFullName(ns, Type)> : public AuxRttiBuilderBase\
 {\
-	static AuxRttiBuilder<Type> Instance;\
 	typedef CombineFullName(ns, Type) ThisType;\
+	static AuxRttiBuilder<ThisType> Instance;\
 	virtual void BuildRtti() override\
 	{\
 		auto pRtti = AuxRttiStruct<ThisType>::GetClassObject();\

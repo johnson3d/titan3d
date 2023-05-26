@@ -30,7 +30,7 @@ namespace NxRHI
 		if (pDevice->mDevice5 == nullptr)
 			return false;
 
-		AspectValue = desc.InitValue;
+		ExpectValue = desc.InitValue;
 		mEvent = MakeWeakRef(new DX11Event(Name.c_str()));
 		if (S_OK != pDevice->mDevice5->CreateFence(desc.InitValue, (D3D11_FENCE_FLAG)desc.Type, __uuidof(ID3D11Fence), (void**)&mFence))
 		{
@@ -47,16 +47,12 @@ namespace NxRHI
 		ASSERT(false);
 		//mFence->Sig
 	}
-	void DX11Fence::Signal(ICmdQueue* queue, UINT64 value)
+	void DX11Fence::Signal(ICmdQueue* queue, UINT64 value, EQueueType type)
 	{
-		if (AspectValue >= value)
-		{
-			ASSERT(false);
-			return;
-		}
-		AspectValue = value;
 		mFence->SetEventOnCompletion(value, mEvent->mHandle);
-		((DX11CmdQueue*)queue)->mHardwareContext->mContext4->Signal(mFence, value);
+		auto dx11Queue =((DX11CmdQueue*)queue);
+		VAutoVSLLock locker(dx11Queue->mImmCmdListLocker);
+		dx11Queue->mHardwareContext->mContext4->Signal(mFence, value);
 	}
 	bool DX11Fence::Wait(UINT64 value, UINT timeOut)
 	{
@@ -66,7 +62,7 @@ namespace NxRHI
 		}*/
 		if (mFence->GetCompletedValue() < value)
 		{
-			return mEvent->Wait(timeOut);
+			mEvent->Wait(timeOut);
 		}
 		return true;
 	}

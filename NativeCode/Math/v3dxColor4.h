@@ -28,7 +28,7 @@
 
 class v3dxColor4;
 
-struct  Rgba {
+struct  FColor {
 	enum {
 		B, G, R, A
 	};
@@ -39,26 +39,26 @@ struct  Rgba {
 		unsigned int dword;
 	};
 
-	Rgba();
-	Rgba(unsigned char ir, unsigned char ig, unsigned char ib, unsigned char ia=0xFF);
-	Rgba(int ir, int ig, int ib, int ia=0xFF);
-	Rgba(float _r, float _g, float _b, float _a = 1.0f);
-	Rgba(const v3dxVector3 &vec);
+	FColor();
+	FColor(unsigned char ir, unsigned char ig, unsigned char ib, unsigned char ia=0xFF);
+	FColor(int ir, int ig, int ib, int ia=0xFF);
+	FColor(float _r, float _g, float _b, float _a = 1.0f);
+	FColor(const v3dxVector3 &vec);
 	//Rgba(const v3dxVector4 &vec);
-	Rgba(const v3dxColor4 &rhs);
+	FColor(const v3dxColor4 &rhs);
 
-	bool operator==(const Rgba &color) const;
-	bool operator!=(const Rgba &color) const ;
+	bool operator==(const FColor &color) const;
+	bool operator!=(const FColor &color) const ;
 	operator const unsigned char*() const;
 	void clear();
-	Rgba &set(unsigned char ir, unsigned char ig, unsigned char ib, unsigned char ia=255);
+	FColor &set(unsigned char ir, unsigned char ig, unsigned char ib, unsigned char ia=255);
 	//Rgba &set(const Rgb &rgb);
-	Rgba operator*(const Rgba &other) const;
-	Rgba operator*(float scale) const;
-	Rgba operator+(const Rgba &other) const;
-	Rgba operator-(const Rgba &other) const;
-	Rgba &operator*=(float scale);
-	Rgba &operator+=(const Rgba &other);
+	FColor operator*(const FColor &other) const;
+	FColor operator*(float scale) const;
+	FColor operator+(const FColor &other) const;
+	FColor operator-(const FColor &other) const;
+	FColor &operator*=(float scale);
+	FColor &operator+=(const FColor &other);
 	//Vector4 toVector4() const;
 	unsigned char &operator[](int index);
 	unsigned char operator[](int index) const;
@@ -71,35 +71,35 @@ struct  Rgba {
 	//std::string toString() const;
 	//void fromString(const char *str);
 
-	static Rgba randColor();
+	static FColor randColor();
 
-	const static Rgba Zero;	// r=g=b=a=0
-	const static Rgba Black;	// r=g=b=0, a=255
-	const static Rgba Red;
-	const static Rgba Green;
-	const static Rgba Blue;
-	const static Rgba Yellow;
-	const static Rgba Magenta;
-	const static Rgba Cyan;
-	const static Rgba White;
-	const static Rgba LtGrey;
-	const static Rgba MdGrey;
-	const static Rgba DkGrey;
-	const static Rgba ColorTable[];
+	const static FColor Zero;	// r=g=b=a=0
+	const static FColor Black;	// r=g=b=0, a=255
+	const static FColor Red;
+	const static FColor Green;
+	const static FColor Blue;
+	const static FColor Yellow;
+	const static FColor Magenta;
+	const static FColor Cyan;
+	const static FColor White;
+	const static FColor LtGrey;
+	const static FColor MdGrey;
+	const static FColor DkGrey;
+	const static FColor ColorTable[];
 };
 
-inline Rgba::Rgba()
+inline FColor::FColor()
 {}
 
-inline Rgba::Rgba(unsigned char ir, unsigned char ig, unsigned char ib, unsigned char ia)
+inline FColor::FColor(unsigned char ir, unsigned char ig, unsigned char ib, unsigned char ia)
 	: r(ir), g(ig), b(ib), a(ia)
 {}
 
-inline Rgba::Rgba(int ir, int ig, int ib, int ia)
+inline FColor::FColor(int ir, int ig, int ib, int ia)
 	: r(ir), g(ig), b(ib), a(ia)
 {}
 
-inline Rgba::Rgba(float _r, float _g, float _b, float _a)
+inline FColor::FColor(float _r, float _g, float _b, float _a)
 	: r(Math::clampByte((int)(_r*255.f)))
 	, g(Math::clampByte((int)(_g*255.f)))
 	, b(Math::clampByte((int)(_b*255.f)))
@@ -107,7 +107,7 @@ inline Rgba::Rgba(float _r, float _g, float _b, float _a)
 {}
 
 
-inline Rgba::Rgba(const v3dxVector3 &vec)
+inline FColor::FColor(const v3dxVector3 &vec)
 	: r(Math::clampByte((int)(vec.x*255.f)))
 	, g(Math::clampByte((int)(vec.y*255.f)))
 	, b(Math::clampByte((int)(vec.z*255.f)))
@@ -121,23 +121,23 @@ inline Rgba::Rgba(const v3dxVector3 &vec)
 //	, a(Math::clampByte(vec.w*255.f))
 //{}
 
-inline bool Rgba::operator==(const Rgba &rhs) const
+inline bool FColor::operator==(const FColor &rhs) const
 {
 	return dword == rhs.dword;
 }
 
-inline bool Rgba::operator!=(const Rgba &rhs) const
+inline bool FColor::operator!=(const FColor &rhs) const
 {
 	return dword != rhs.dword;
 }
 
-inline Rgba::operator const unsigned char*() const
+inline FColor::operator const unsigned char*() const
 { return &r; }
 
-inline void Rgba::clear()
+inline void FColor::clear()
 { r=g=b=a=0; }
 
-inline Rgba &Rgba::set(unsigned char ir, unsigned char ig, unsigned char ib, unsigned char ia)
+inline FColor &FColor::set(unsigned char ir, unsigned char ig, unsigned char ib, unsigned char ia)
 {
 	r=ir; g=ig; b=ib; a=ia; return *this;
 }
@@ -147,9 +147,9 @@ inline Rgba &Rgba::set(unsigned char ir, unsigned char ig, unsigned char ib, uns
 //	r=rgb.r; g=rgb.g; b=rgb.b; a=255; return *this;
 //}
 
-inline Rgba Rgba::operator*(const Rgba &other) const
+inline FColor FColor::operator*(const FColor &other) const
 {
-	Rgba c;
+	FColor c;
 	c.r = ((int)r * other.r) >> 8;
 	c.g = ((int)g * other.g) >> 8;
 	c.b = ((int)b * other.b) >> 8;
@@ -157,9 +157,9 @@ inline Rgba Rgba::operator*(const Rgba &other) const
 	return c;
 }
 
-inline Rgba Rgba::operator*(float scale) const
+inline FColor FColor::operator*(float scale) const
 {
-	Rgba c;
+	FColor c;
 
 	c.r = (unsigned char)(scale * r);
 	c.g = (unsigned char)(scale * g);
@@ -168,9 +168,9 @@ inline Rgba Rgba::operator*(float scale) const
 	return c;
 }
 
-inline Rgba Rgba::operator+(const Rgba &other) const
+inline FColor FColor::operator+(const FColor &other) const
 {
-	Rgba c;
+	FColor c;
 
 	c.r = r + other.r;
 	c.g = g + other.g;
@@ -180,9 +180,9 @@ inline Rgba Rgba::operator+(const Rgba &other) const
 	return c;
 }
 
-inline Rgba Rgba::operator-(const Rgba &other) const
+inline FColor FColor::operator-(const FColor &other) const
 {
-	Rgba c;
+	FColor c;
 
 	c.r = r - other.r;
 	c.g = g - other.g;
@@ -192,12 +192,12 @@ inline Rgba Rgba::operator-(const Rgba &other) const
 	return c;
 }
 
-inline Rgba &Rgba::operator*=(float scale)
+inline FColor &FColor::operator*=(float scale)
 {
 	return *this = (*this * scale);
 }
 
-inline Rgba &Rgba::operator+=(const Rgba &other)
+inline FColor &FColor::operator+=(const FColor &other)
 {
 	return *this = (*this + other);
 }
@@ -213,14 +213,14 @@ inline Rgba &Rgba::operator+=(const Rgba &other)
 //	return result;
 //}
 
-inline unsigned char &Rgba::operator[](int index)
+inline unsigned char &FColor::operator[](int index)
 {
 	//ASSERT(index>=0);
 	//ASSERT(index<4);
 	return *(&r+index);
 }
 
-inline unsigned char Rgba::operator[](int index) const
+inline unsigned char FColor::operator[](int index) const
 {
 	//ASSERT(index>=0);
 	//ASSERT(index<4);
@@ -244,15 +244,19 @@ inline unsigned char Rgba::operator[](int index) const
 //	r = _r; g = _g; b = _b; a = 255;
 //}
 
-inline Rgba Rgba::randColor()
+inline FColor FColor::randColor()
 {
-	Rgba result;
+	FColor result;
 	result.r = rand() % 255;
 	result.g = rand() % 255;
 	result.b = rand() % 255;
 	result.a = 255;
 	return result;
 }
+
+/// <summary>
+/// ====================================================================================================
+/// </summary>
 
 class v3dxColor4 : public v3dVector4_t
 {
@@ -301,16 +305,16 @@ public:
 		a = a < 0 ? 0 : (a > 1 ? 1 : a);
 		return *this;
 	}
-	inline BYTE getA(){
+	inline BYTE getA() const {
 		return (BYTE)(a*255.f);
 	}
-	inline BYTE getR(){
+	inline BYTE getR() const {
 		return (BYTE)(r*255.f);
 	}
-	inline BYTE getG(){
+	inline BYTE getG() const {
 		return (BYTE)(g*255.f);
 	}
-	inline BYTE getB(){
+	inline BYTE getB() const {
 		return (BYTE)(b*255.f);
 	}
 	// ARGB format, with alpha

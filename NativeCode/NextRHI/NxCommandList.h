@@ -23,6 +23,26 @@ namespace NxRHI
 	struct FViewPort;
 	struct FScissorRect;
 	struct FSubResourceFootPrint;
+	class ICommandList;
+
+	struct TR_CLASS(SV_LayoutStruct = 8)
+		FIndirectDrawArgument
+	{
+		UINT DrawID;
+		UINT VertexCountPerInstance;
+		UINT InstanceCount;
+		UINT StartIndex;
+		UINT StartVertex;
+		UINT StartInstance;
+	};
+	struct TR_CLASS(SV_LayoutStruct = 8)
+		FIndirectDispatchArgument
+	{
+		UINT DrawID;
+		UINT X;
+		UINT Y;
+		UINT Z;
+	};
 
 	enum TR_ENUM()
 		EPipelineStage 
@@ -57,12 +77,13 @@ namespace NxRHI
 	};
 
 	class TR_CLASS()
-		ICommandList : public VIUnknown
+		ICommandList : public IWeakReference
 	{
 	public:
 		ENGINE_RTTI(ICommandList);
 		virtual bool BeginCommand() = 0;
 		virtual void EndCommand() = 0;
+		virtual bool IsRecording() const = 0;
 		virtual void SetShader(IShader* shader) = 0;
 		virtual void SetCBV(EShaderType type, const FShaderBinder* binder, ICbView * buffer) = 0;
 		virtual void SetSrv(EShaderType type, const FShaderBinder* binder, ISrView* view) = 0;
@@ -87,9 +108,11 @@ namespace NxRHI
 		}
 		virtual void EndPass() = 0;
 
+		void InheritPass(ICommandList* cmdlist);
+
 		virtual void Draw(EPrimitiveType topology, UINT BaseVertex, UINT DrawCount, UINT Instance = 1) = 0;
 		virtual void DrawIndexed(EPrimitiveType topology, UINT BaseVertex, UINT StartIndex, UINT DrawCount, UINT Instance = 1) = 0;
-		virtual void IndirectDrawIndexed(EPrimitiveType topology, IBuffer* indirectArg, UINT indirectArgOffset = 0) = 0;
+		virtual void IndirectDrawIndexed(EPrimitiveType topology, IBuffer* indirectArg, UINT indirectArgOffset = 0, IBuffer* countBuffer = nullptr) = 0;
 		virtual void Dispatch(UINT x, UINT y, UINT z) = 0;
 		virtual void IndirectDispatch(IBuffer* indirectArg, UINT indirectArgOffset = 0) = 0;
 		virtual void SetMemoryBarrier(EPipelineStage srcStage, EPipelineStage dstStage, EBarrierAccess srcAccess, EBarrierAccess dstAccess) = 0;
@@ -104,7 +127,6 @@ namespace NxRHI
 		virtual void CopyBufferToTexture(ITexture* target, UINT subRes, IBuffer* src, const FSubResourceFootPrint* footprint) = 0;
 		virtual void CopyTextureToBuffer(IBuffer* target, const FSubResourceFootPrint* footprint, ITexture* src, UINT subRes) = 0;
 
-		virtual void Flush() = 0;
 		virtual void BeginEvent(const char* info) = 0;
 		virtual void EndEvent() = 0;
 
@@ -115,6 +137,9 @@ namespace NxRHI
 
 		void SetDebugName(const char* name) {
 			mDebugName = name;
+		}
+		const char* GetDebugName() const{
+			return mDebugName.c_str();
 		}
 		IGpuPipeline* GetDefaultPipeline() {
 			return mPipelineDesc;
@@ -131,8 +156,11 @@ namespace NxRHI
 		IGpuDevice* GetGpuDevice() {
 			return mDevice.GetPtr();
 		}
+		IFence* GetCommitFence() {
+			return mCommitFence;
+		}
 	public:
-		TObjectHandle<IGpuDevice>			mDevice;
+		TWeakRefHandle<IGpuDevice>			mDevice;
 		std::vector<AutoRef<IGpuDraw>>		mDrawcallArray;
 		std::string							mDebugName;
 		UINT								mPrimitiveNum = 0;
@@ -141,6 +169,44 @@ namespace NxRHI
 		AutoRef<IFrameBuffers>				mCurrentFrameBuffers;
 
 		AutoRef<IFence>						mCommitFence;
+		//VSLLock								mLocker;
+	};
+
+	class TR_CLASS()
+		IGpuScope : public VIUnknown
+	{
+	public:
+		virtual bool IsFinished() = 0;
+		virtual UINT64 GetDeltaTime() = 0;
+		virtual void Begin(ICommandList * cmdlist) = 0;
+		virtual void End(ICommandList * cmdlist) = 0;
+		virtual const char* GetName() = 0;
+		virtual void SetName(const char* name) = 0;
+	public:
+	};
+
+	class FTransientCmd
+	{
+		IGpuDevice* mDevice = nullptr;
+		ICommandList* mCmdList = nullptr;
+		EQueueType mType = EQueueType::QU_Default;
+	public:
+		FTransientCmd(IGpuDevice* device, EQueueType type = EQueueType::QU_Default)
+		{
+			mDevice = device;
+			mCmdList = mDevice->GetCmdQueue()->GetIdleCmdlist();
+			mCmdList->BeginCommand();
+		}
+		~FTransientCmd()
+		{
+			mCmdList->EndCommand();
+			mDevice->GetCmdQueue()->ExecuteCommandListSingle(mCmdList, mType);
+			mDevice->GetCmdQueue()->ReleaseIdleCmdlist(mCmdList);
+			mCmdList = nullptr;
+		}
+		inline ICommandList* GetCmdList() {
+			return mCmdList;
+		}
 	};
 }
 

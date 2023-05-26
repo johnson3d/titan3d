@@ -2,6 +2,7 @@
 
 #include "../NxGpuDevice.h"
 #include "../NxRHIDefine.h"
+#include "../../Base/allocator/PagedAllocator.h"
 
 #pragma warning(push)
 #pragma warning(disable:4005)
@@ -15,6 +16,8 @@ NS_BEGIN
 
 namespace NxRHI
 {
+	class DX12GpuDevice;
+
 	inline DXGI_FORMAT FormatToDX12Format(EPixelFormat pixel_fmt)
 	{
 		switch (pixel_fmt)
@@ -205,7 +208,6 @@ namespace NxRHI
 			return DXGI_FORMAT_BC7_UNORM;
 		case PXF_BC7_UNORM_SRGB:
 			return DXGI_FORMAT_BC7_UNORM_SRGB;
-		case PXF_ETC1:
 		case PXF_ETC2_RGB8:
 		case PXF_ETC2_SRGB8:
 		case PXF_ETC2_RGBA8:
@@ -214,15 +216,15 @@ namespace NxRHI
 		case PXF_ETC2_SIGNED_R11:
 		case PXF_ETC2_RG11:
 		case PXF_ETC2_SIGNED_RG11:
-		case PXF_ETC2_RGB8A1:
-		case PXF_ETC2_SRGB8A1:
+		case PXF_ETC2_RGBA1:
+		case PXF_ETC2_SRGBA1:
 		default:
 			break;
 		}
 		return DXGI_FORMAT_UNKNOWN;
 	}
 
-	class DX12CommandAllocatorManager : public VIUnknownBase
+	class DX12CommandAllocatorManager : public VIUnknown
 	{
 	public:
 		AutoRef<ID3D12CommandAllocator> Alloc(ID3D12Device* device);
@@ -284,6 +286,78 @@ namespace NxRHI
 		}
 		virtual IGpuHeap* CreateGpuHeap(IGpuDevice* device, UINT64 size, UINT count) override;
 	};
+
+	///-----------------------------------------------------------
+	///DX12DescriptorSetPagedObject
+	struct DX12DescriptorSetPagedObject : public MemAlloc::FPagedObject<AutoRef<ID3D12DescriptorHeap>>
+	{
+		//DX12ShaderEffect*		ShaderEffect = nullptr;
+		D3D12_GPU_DESCRIPTOR_HANDLE	GetGpuAddress(int index = 0);
+		D3D12_CPU_DESCRIPTOR_HANDLE	GetCpuAddress(int index);
+		SIZE_T						OffsetInPage = 0;
+	};
+	template<>
+	struct AuxGpuResourceDestroyer<AutoRef<DX12DescriptorSetPagedObject>>
+	{
+		static void Destroy(AutoRef<DX12DescriptorSetPagedObject> obj, IGpuDevice* device1)
+		{
+			obj->Free();
+		}
+	};
+	struct DX12DescriptorSetCreator
+	{
+		struct DX12DescriptorSetPage : public MemAlloc::FPage<AutoRef<ID3D12DescriptorHeap>>
+		{
+			AutoRef<ID3D12DescriptorHeap>		mGpuHeap;
+		};
+
+		DX12DescriptorSetCreator()
+		{
+			
+		}
+		TWeakRefHandle<DX12GpuDevice>		mDeviceRef;
+
+		enum EDescriptorType
+		{
+			Graphics,
+			Compute,
+		};
+		EDescriptorType Type = EDescriptorType::Graphics;
+		bool			IsDescriptorSet = false;
+		
+		D3D12_DESCRIPTOR_HEAP_TYPE			HeapType = D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV;
+		D3D12_DESCRIPTOR_HEAP_DESC			mDesc{};
+		//bool								IsSampler = false;
+		std::wstring						DebugName;
+		UINT								SerialId = 0;
+		using ObjectType = AutoRef<ID3D12DescriptorHeap>;
+		using PagedObjectType = MemAlloc::FPagedObject<ObjectType>;
+		using PageType = DX12DescriptorSetPage;// MemAlloc::FPage<ObjectType>;
+		using AllocatorType = MemAlloc::FAllocatorBase<ObjectType>;
+
+		UINT GetPageSize() const{
+			return PageSize;
+		}
+		UINT PageSize = 128;
+
+		PageType* CreatePage(UINT pageSize);
+		PagedObjectType* CreatePagedObject(PageType* page, UINT index);
+		void OnAlloc(AllocatorType* pAllocator, PagedObjectType* obj);
+		void OnFree(AllocatorType* pAllocator, PagedObjectType* obj);
+		void FinalCleanup(MemAlloc::FPage<ObjectType>* page);
+	};
+	struct DX12DescriptorSetAllocator : public MemAlloc::FPagedObjectAllocator<DX12DescriptorSetCreator::ObjectType, DX12DescriptorSetCreator>
+	{
+		UINT			mDescriptorStride = 0;
+	};
+
+	class DX12DescriptorAllocatorManager : public IWeakReference
+	{
+		std::map<UINT64, AutoRef<DX12DescriptorSetAllocator>>		mAllocators;
+	public:
+		AutoRef<DX12DescriptorSetPagedObject> AllocDescriptorSet(DX12GpuDevice* pDevice, UINT numOfDescriptor, D3D12_DESCRIPTOR_HEAP_TYPE type);
+	};
+	///-----------------------------------------------------------
 }
 
 NS_END

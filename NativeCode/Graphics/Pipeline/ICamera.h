@@ -6,7 +6,7 @@
 NS_BEGIN
 
 class TR_CLASS()
-	ICamera : public VIUnknown
+	ICamera : public IWeakReference
 {
 public:
 	struct CameraData
@@ -23,12 +23,19 @@ public:
 		v3dxVector3				mUp;
 		v3dxMatrix4				mViewMatrix;
 		v3dxMatrix4				mViewInverse;
+		
 		v3dxMatrix4				mProjectionMatrix;
 		v3dxMatrix4				mProjectionInverse;
 		v3dxMatrix4				mViewProjection;
 		v3dxMatrix4				mViewProjectionInverse;
+		v3dxMatrix4				mJitterProjectionMatrix;
+		v3dxMatrix4				mJitterProjectionInverse;
+		v3dxMatrix4				mJitterViewProjection;
+		v3dxMatrix4				mJitterViewProjectionInverse;
+
 		v3dxMatrix4				mViewPortOffsetMatrix;
 		v3dxMatrix4				mToViewPortMatrix;
+		v3dxMatrix4				mJitterToViewPortMatrix;
 
 		v3dxVector3 GetLocalPosition() {
 			v3dxVector3 result;
@@ -59,6 +66,19 @@ public:
 	void LookAtLH(const v3dxDVector3* eye, const v3dxDVector3* lookAt, const v3dxVector3* up);
 
 	vBOOL GetPickRay(v3dxVector3* pvPickRay, float x, float y, float sw, float sh);
+	v3dxVector2 GetJitterOffset() const {
+		return mJitterOffset;
+	}
+	void SetJitterOffset(const v3dxVector2& v) {
+		mJitterOffset = v;
+		PerspectiveFovLH(mFov, mWidth, mHeight, mZNear, mZFar);
+	}
+	v3dxVector2 GetJitterUV() const{
+		v3dxVector2 jitterUV;
+		jitterUV.x = (mJitterOffset.x - 0.5f) / mWidth;
+		jitterUV.y = (mJitterOffset.y - 0.5f) / mHeight;
+		return jitterUV;
+	}
 	
 	v3dxFrustum* GetFrustum() {
 		return &mFrustum;
@@ -103,11 +123,17 @@ public:
 	v3dxMatrix4 GetProjectionInverse() const {
 		return mLogicData->mProjectionInverse;
 	}
+	v3dxMatrix4 GetJitterProjectionMatrix() const {
+		return mLogicData->mJitterProjectionMatrix;
+	}
 	v3dxMatrix4 GetViewProjection() const {
 		return mLogicData->mViewProjection;
 	}
 	v3dxMatrix4 GetViewProjectionInverse() const {
 		return mLogicData->mViewProjectionInverse;
+	}
+	v3dxMatrix4 GetJitterViewProjection() const {
+		return mLogicData->mJitterViewProjection;
 	}
 	v3dxMatrix4 GetToViewPortMatrix() const {
 		return mLogicData->mToViewPortMatrix;
@@ -115,11 +141,12 @@ public:
 	v3dxMatrix4 GetViewPortOffsetMatrix() const {
 		return mLogicData->mViewPortOffsetMatrix;
 	}
-	void UpdateConstBufferData(EngineNS::NxRHI::ICbView* buffer);
+	void UpdateConstBufferData(EngineNS::NxRHI::IGpuDevice* device, EngineNS::NxRHI::ICbView* buffer);
 protected:
 	void UpdateFrustum();
 	void UpdateFrustumOrtho();
 protected:
+	VSLLock					mLocker;
 	float					mFov;
 	float					mZNear;
 	float					mZFar;
@@ -130,6 +157,7 @@ protected:
 	float					mWidth;
 	float					mHeight;
 
+	v3dxVector2				mJitterOffset;//0-1
 public:
 	CameraData*				mLogicData = nullptr;
 	CameraData*				mRenderData = nullptr;

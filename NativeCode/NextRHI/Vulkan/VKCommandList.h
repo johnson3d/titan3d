@@ -32,12 +32,22 @@ namespace NxRHI
 	};
 	struct VKCommandBufferCreator
 	{
-		TObjectHandle<VKGpuDevice>		mDeviceRef;
+		TWeakRefHandle<VKGpuDevice>		mDeviceRef;
 		
-		MemAlloc::FPage<VkCommandBuffer>* CreatePage(UINT pageSize);
-		MemAlloc::FPagedObject<VkCommandBuffer>* CreatePagedObject(MemAlloc::FPage<VkCommandBuffer>* page, UINT index);
-		void OnFree(MemAlloc::FPagedObject<VkCommandBuffer>* obj);
-		void FinalCleanup(MemAlloc::FPage<VkCommandBuffer>* page);
+		using ObjectType = VkCommandBuffer;
+		using PagedObjectType = MemAlloc::FPagedObject<ObjectType>;
+		using PageType = MemAlloc::FPage<VkCommandBuffer>;
+		using AllocatorType = MemAlloc::FAllocatorBase<ObjectType>;
+
+		UINT GetPageSize() const {
+			return PageSize;
+		}
+		UINT PageSize = 128;
+		PageType* CreatePage(UINT pageSize);
+		PagedObjectType* CreatePagedObject(PageType* page, UINT index);
+		void OnAlloc(AllocatorType* pAllocator, PagedObjectType* obj);
+		void OnFree(AllocatorType* pAllocator, PagedObjectType* obj);
+		void FinalCleanup(MemAlloc::FPage<ObjectType>* page);
 	};
 
 	struct VKCommandbufferAllocator : public MemAlloc::FPagedObjectAllocator<VkCommandBuffer, VKCommandBufferCreator>
@@ -64,7 +74,10 @@ namespace NxRHI
 		virtual void EndCommand() override;
 		bool BeginCommand(VkCommandBufferUsageFlagBits flags);
 		void EndCommand(bool bRecycle);
-		void Commit(VKCmdQueue* queue);
+		virtual bool IsRecording() const override {
+			return mIsRecording;
+		}
+		void Commit(VKCmdQueue* queue, EQueueType type);
 		virtual void SetShader(IShader* shader) override;
 		virtual void SetCBV(EShaderType type, const FShaderBinder* binder, ICbView* buffer) override;
 		virtual void SetSrv(EShaderType type, const FShaderBinder* binder, ISrView* view) override;
@@ -83,7 +96,7 @@ namespace NxRHI
 
 		virtual void Draw(EPrimitiveType topology, UINT BaseVertex, UINT DrawCount, UINT Instance = 1) override;
 		virtual void DrawIndexed(EPrimitiveType topology, UINT BaseVertex, UINT StartIndex, UINT DrawCount, UINT Instance = 1) override;
-		virtual void IndirectDrawIndexed(EPrimitiveType topology, IBuffer* indirectArg, UINT indirectArgOffset = 0) override;
+		virtual void IndirectDrawIndexed(EPrimitiveType topology, IBuffer* indirectArg, UINT indirectArgOffset = 0, IBuffer* countBuffer = nullptr) override;
 		virtual void Dispatch(UINT x, UINT y, UINT z) override;
 		virtual void IndirectDispatch(IBuffer* indirectArg, UINT indirectArgOffset = 0) override;
 		virtual void SetMemoryBarrier(EPipelineStage srcStage, EPipelineStage dstStage, EBarrierAccess srcAccess, EBarrierAccess dstAccess) override;
@@ -98,7 +111,6 @@ namespace NxRHI
 		virtual void CopyBufferToTexture(ITexture* target, UINT subRes, IBuffer* src, const FSubResourceFootPrint* footprint) override;
 		virtual void CopyTextureToBuffer(IBuffer* target, const FSubResourceFootPrint* footprint, ITexture* src, UINT subRes) override;
 
-		virtual void Flush() override;
 		virtual void BeginEvent(const char* info) override;
 		virtual void EndEvent() override;
 	public:

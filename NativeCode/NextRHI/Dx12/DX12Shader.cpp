@@ -3,6 +3,10 @@
 #include "../NxRHIDefine.h"
 #include "../../Bricks/CrossShaderCompiler/IShaderConductor.h"
 
+#if defined(HasModule_GpuDump)
+#include "../../Bricks/GpuDump/NvAftermath.h"
+#endif
+
 #define new VNEW
 
 NS_BEGIN
@@ -78,7 +82,9 @@ namespace NxRHI
 		if (ar == nullptr)
 			return false;
 
+		//modify as DX11 for d3dcompiler
 		((IShaderDefinitions*)defines)->AddDefine("RHI_TYPE", "RHI_DX11");
+		((IShaderDefinitions*)defines)->RemoveDefine("HLSL_VERSION");
 
 		std::vector<D3D_SHADER_MACRO> d11macros;
 		if (defines != nullptr)
@@ -161,11 +167,13 @@ namespace NxRHI
 		return true;
 	}
 
-	bool DX12Shader::CompileShader(FShaderCompiler* compiler, FShaderDesc* desc, const char* shader, const char* entry, EShaderType type, const char* sm, const IShaderDefinitions* defines, EShaderLanguage sl, bool bDebugShader)
+	bool DX12Shader::CompileShader(FShaderCompiler* compiler, FShaderDesc* desc, const char* shader, const char* entry, EShaderType type, const char* sm, const IShaderDefinitions* defines, EShaderLanguage sl, bool bDebugShader, const char* extHlslVersion)
 	{
 		desc->FunctionName = entry;
-		//return DX12Shader_CompileShader2(compiler, desc, shader, entry, type, "5_0", defines, sl, bDebugShader);
-		return IShaderConductor::GetInstance()->CompileShader(compiler, desc, shader, entry, type, sm, defines, bDebugShader, sl, bDebugShader);
+		if (extHlslVersion == nullptr)
+			return DX12Shader_CompileShader2(compiler, desc, shader, entry, type, "5_0", defines, sl, bDebugShader);
+		else
+			return IShaderConductor::GetInstance()->CompileShader(compiler, desc, shader, entry, type, sm, defines, bDebugShader, sl, bDebugShader, extHlslVersion);
 	}
 	
 	DX12Shader::DX12Shader()
@@ -181,6 +189,10 @@ namespace NxRHI
 		Desc = desc;
 		if (Desc->DxIL.size() == 0)
 			return false;
+
+#if defined(HasModule_GpuDump)
+		GpuDump::NvAftermath::RegSpirv(&Desc->DxIL[0], (UINT)Desc->DxIL.size());
+#endif
 
 		//Reflect(desc);
 		Reflector = desc->DxILReflector;

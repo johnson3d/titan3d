@@ -1,7 +1,6 @@
 #pragma once
 #include "../NxEffect.h"
 #include "DX12PreHead.h"
-#include "../../Base/allocator/PagedAllocator.h"
 
 NS_BEGIN
 
@@ -11,89 +10,103 @@ namespace NxRHI
 	class DX12Shader;
 	class DX12GraphicsEffect;
 	class DX12ComputeEffect;
-	struct DX12DescriptorSetPagedObject : public MemAlloc::FPagedObject<AutoRef<ID3D12DescriptorHeap>>
-	{
-		//DX12ShaderEffect*		ShaderEffect = nullptr;
 
-		D3D12_CPU_DESCRIPTOR_HANDLE	GetHandle(int index);
-	};
-	template<>
-	struct AuxGpuResourceDestroyer<AutoRef<DX12DescriptorSetPagedObject>>
+	struct FRootParameter
 	{
-		static void Destroy(AutoRef<DX12DescriptorSetPagedObject> obj, IGpuDevice* device1)
+		enum EGraphicsRootType
 		{
-			obj->Free();
+			VS_Begin = 0,
+			VS_Cbv = VS_Begin,
+			VS_Srv,
+			VS_Uav,
+			VS_Sampler,
+			VS_End = VS_Sampler,
+
+			PS_Begin = VS_End + 1,
+			PS_Cbv = PS_Begin,
+			PS_Srv,
+			PS_Uav,
+			PS_Sampler,
+			PS_End = PS_Sampler,
+
+			GraphicsNumber,
+		};
+		enum EComputeRootType
+		{
+			CS_Begin = 0,
+			CS_Cbv = CS_Begin,
+			CS_Srv,
+			CS_Uav,
+			CS_Sampler,
+			CS_End = CS_Sampler,
+
+			ComputeNumber,
+		};
+		bool					IsSamplers = false;
+		int						RootIndex = -1;
+		int						HeapStartIndex = -1;
+		std::vector<D3D12_DESCRIPTOR_RANGE>		Descriptors;
+		std::vector<FShaderBinder*>				TempShaderBinders;
+		void BuildShaderBinders() {
+			for (auto& i : TempShaderBinders)
+			{
+				i->DescriptorIndex += HeapStartIndex;
+			}
+			TempShaderBinders.clear();
+		}
+		D3D12_DESCRIPTOR_RANGE* GetDescriptorAddress() {
+			if (Descriptors.size() == 0)
+				return nullptr;
+			return &Descriptors[0];
+		}
+		inline bool IsValidRoot() const {
+			return Descriptors.size() > 0;
 		}
 	};
-	struct DX12DescriptorSetPage : public MemAlloc::FPage<AutoRef<ID3D12DescriptorHeap>>
-	{
-		
-	};
-	struct DX12DescriptorSetCreator
-	{
-		DX12DescriptorSetCreator()
-		{
-			mShaderEffect = nullptr;
-		}
-		TObjectHandle<DX12GpuDevice>		mDeviceRef;
-		
-		enum EDescriptorType
-		{
-			Graphics,
-			Compute,
-		};
-		EDescriptorType Type = EDescriptorType::Graphics;
-		union
-		{
-			DX12GraphicsEffect* mShaderEffect;
-			DX12ComputeEffect* mComputeEffect;
-		};
-		
-		D3D12_DESCRIPTOR_HEAP_DESC			mDesc{};
-		bool								IsSampler = false;
-		MemAlloc::FPage<AutoRef<ID3D12DescriptorHeap>>* CreatePage(UINT pageSize);
-		MemAlloc::FPagedObject<AutoRef<ID3D12DescriptorHeap>>* CreatePagedObject(MemAlloc::FPage<AutoRef<ID3D12DescriptorHeap>>* page, UINT index);
-		void OnFree(MemAlloc::FPagedObject<AutoRef<ID3D12DescriptorHeap>>* obj);
-		void FinalCleanup(MemAlloc::FPage<AutoRef<ID3D12DescriptorHeap>>* page);
-	};
-	struct DX12DescriptorSetAllocator : public MemAlloc::FPagedObjectAllocator<AutoRef<ID3D12DescriptorHeap>, DX12DescriptorSetCreator, 128>
-	{
-		UINT			mDescriptorStride = 0;
-	};
+	
 	class DX12GraphicsEffect : public IGraphicsEffect
 	{
 	public:
+		~DX12GraphicsEffect();
 		virtual void BuildState(IGpuDevice* device) override;
 		virtual void Commit(ICommandList* cmdlist, IGraphicDraw* drawcall) override;
 
-		AutoRef<ID3D12CommandSignature> GetIndirectDrawIndexCmdSig(ICommandList* cmdlist);
+		void Push2Root(FEffectBinder* binder);
+		AutoRef<ID3D12CommandSignature> GetIndirectDrawIndexCmdSig(DX12GpuDevice* device, ICommandList* cmdlist);
 	public:
-		int								mSrvTableSizeIndex;
-		int								mSrvTableSize;
-		int								mSamplerTableSizeIndex;
-		int								mSamplerTableSize;
+		TWeakRefHandle<DX12GpuDevice>	mDeviceRef;
+		int								mVSMutiDrawRootIndex = -1;
 		AutoRef<ID3D12RootSignature>	mSignature;
+		AutoRef<ID3D12CommandSignature>	mCmdSignature;
+		UINT							mIndirectOffset = 0;
 
 		//AutoRef<ID3D12CommandSignature>	CmdSigForIndirectDrawIndex;
-		AutoRef<DX12DescriptorSetAllocator>	mDescriptorAllocatorCSU;
-		AutoRef<DX12DescriptorSetAllocator>	mDescriptorAllocatorSampler;
+		UINT							mCbvSrvUavNumber = 0;
+		UINT							mSamplerNumber = 0;
+
+		FRootParameter					mRootParameters[FRootParameter::GraphicsNumber];
 	};
 
 	class DX12ComputeEffect : public IComputeEffect
 	{
 	public:
+		~DX12ComputeEffect();
 		virtual void BuildState(IGpuDevice* device) override;
 		virtual void Commit(ICommandList* cmdlist) override;
+
+		void Push2Root(FShaderBinder* binder);
+		AutoRef<ID3D12CommandSignature> GetIndirectDispatchCmdSig(DX12GpuDevice* device, ICommandList* cmdlist);
 	public:
-		int								mSrvTableSizeIndex;
-		int								mSrvTableSize;
-		int								mSamplerTableSizeIndex;
-		int								mSamplerTableSize;
+		TWeakRefHandle<DX12GpuDevice>	mDeviceRef;
+		int								mCSMutiDrawRootIndex = -1;
 		AutoRef<ID3D12RootSignature>	mSignature;
+		UINT							mIndirectOffset = 0;
+		AutoRef<ID3D12CommandSignature>	mCmdSignature;
 		AutoRef<ID3D12PipelineState>	mPipelineState;
 
-		AutoRef<DX12DescriptorSetAllocator>	mDescriptorAllocatorCSU;
-		AutoRef<DX12DescriptorSetAllocator>	mDescriptorAllocatorSampler;
+		UINT							mCbvSrvUavNumber = 0;
+		UINT							mSamplerNumber = 0;
+		FRootParameter					mRootParameters[FRootParameter::ComputeNumber];
 	};
 }
 

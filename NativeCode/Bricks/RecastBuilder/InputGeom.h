@@ -18,7 +18,7 @@ struct ConvexVolume
 };
 
 class TR_CLASS()
-	InputGeom : public VIUnknown
+	InputGeom : public IWeakReference
 {
 public:
 	std::vector<v3dVector3_t> WalkDatas;

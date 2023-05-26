@@ -27,7 +27,7 @@ namespace NxRHI
 		Name = name;
 
 		mEvent = MakeWeakRef(new DX12Event(Name.c_str()));
-		AspectValue = desc.InitValue;
+		ExpectValue = desc.InitValue;
 		if (S_OK != pDevice->mDevice->CreateFence(desc.InitValue, (D3D12_FENCE_FLAGS)desc.Type, __uuidof(ID3D12Fence), (void**)&mFence))
 		{
 			return false;
@@ -43,16 +43,12 @@ namespace NxRHI
 	{
 		mFence->Signal(value);
 	}
-	void DX12Fence::Signal(ICmdQueue* queue, UINT64 value)
+	void DX12Fence::Signal(ICmdQueue* queue, UINT64 value, EQueueType type)
 	{
-		if (AspectValue >= value)
-		{
-			ASSERT(false);
-			return;
-		}
-		AspectValue = value;
 		mFence->SetEventOnCompletion(value, mEvent->mHandle);
-		((DX12CmdQueue*)queue)->mCmdQueue->Signal(mFence, value);
+		auto dx12Queue = ((DX12CmdQueue*)queue);
+		VAutoVSLLock locker(dx12Queue->mQueueLocker);
+		dx12Queue->mCmdQueue->Signal(mFence, value);
 	}
 	bool DX12Fence::Wait(UINT64 value, UINT timeOut)
 	{
@@ -60,9 +56,9 @@ namespace NxRHI
 		{
 
 		}*/
-		if (mFence->GetCompletedValue() < value)
+		while (mFence->GetCompletedValue() < value)
 		{
-			return mEvent->Wait(timeOut);
+			mEvent->Wait(timeOut);
 		}
 		return true;
 	}

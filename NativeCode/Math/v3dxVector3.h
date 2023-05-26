@@ -28,6 +28,7 @@
 
 class v3dxQuaternion;
 class v3dxMatrix3;
+class v3dxVector2;
 
 #pragma pack(push,4)
 class v3dxVector3 : public v3dVector3_t
@@ -66,6 +67,7 @@ public:
 		y = rkVector.y;
 		z = rkVector.z;
 	}
+	void setValue(const v3dxVector2& v);
 
 
 	void setValue(float ix,float iy,float iz){ 

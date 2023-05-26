@@ -22,7 +22,7 @@ class XndNode;
 class XndHolder;
 
 struct TR_CLASS()
-	XndElement : public VIUnknownBase
+	XndElement : public VIUnknown
 {
 	std::string			mName;
 	UINT				mVersion;
@@ -34,7 +34,7 @@ struct TR_CLASS()
 		mName = v;
 	}
 	static UINT NameToHash(const std::string& name);
-	TObjectHandle<XndHolder>	mHolder;
+	TWeakRefHandle<XndHolder>	mHolder;
 };
 
 class TR_CLASS(SV_Dispose = self->Release())
@@ -72,6 +72,9 @@ public:
 			return 0;
 		return mMemWriter->Tell();
 	}
+	void* GetWriterPtr() {
+		return mMemWriter->GetPointer();
+	}
 	void ReaderSeek(UINT64 offset)
 	{
 		if (mMemReader == 0)
@@ -84,7 +87,6 @@ public:
 			return;
 		mMemWriter->Seek(offset);
 	}
-
 	UINT Read(void* pSrc, UINT t) {
 		return mMemReader->Read(pSrc, t);
 	}
@@ -214,7 +216,7 @@ public:
 };
 
 class TR_CLASS(SV_Dispose = self->Release())
-	XndHolder : public VIUnknown
+	XndHolder : public IWeakReference
 {
 	AutoRef<XndNode>			mRootNode;
 	AutoRef<VRes2Memory>		mResource;

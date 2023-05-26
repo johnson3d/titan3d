@@ -18,11 +18,9 @@ namespace NxRHI
 		virtual void* GetHWBuffer() override{
 			return ((DX12GpuHeap*)mGpuMemory->GpuHeap)->mGpuResource;
 		}
-		virtual void Flush2Device(ICommandList* cmd, void* pBuffer, UINT Size) override;
-		virtual bool Map(ICommandList* cmd, UINT index, FMappedSubResource* res, bool forRead) override;
-		virtual void Unmap(ICommandList* cmd, UINT index) override;
-		virtual void UpdateGpuData(ICommandList* cmd, UINT subRes, void* pData, const FSubresourceBox* box, UINT rowPitch, UINT depthPitch) override;
-		virtual void UpdateGpuData(ICommandList* cmd, UINT offset, void* pData, UINT size) override;
+		virtual bool Map(UINT index, FMappedSubResource* res, bool forRead) override;
+		virtual void Unmap(UINT index) override;
+		virtual void UpdateGpuData(UINT subRes, void* pData, const FSubResourceFootPrint* footPrint) override;
 		virtual void TransitionTo(ICommandList* cmd, EGpuResourceState state) override;
 		virtual void SetDebugName(const char* name) override;
 
@@ -32,7 +30,7 @@ namespace NxRHI
 		}
 	public:
 		AutoRef<FGpuMemory>				mGpuMemory;
-		TObjectHandle<DX12GpuDevice>	mDeviceRef;
+		TWeakRefHandle<DX12GpuDevice>	mDeviceRef;
 	};
 
 	class DX12Texture : public ITexture
@@ -44,14 +42,14 @@ namespace NxRHI
 		virtual void* GetHWBuffer() override {
 			return (void*)mGpuResource;
 		}
-		virtual bool Map(ICommandList* cmd, UINT subRes, FMappedSubResource* res, bool forRead) override;
-		virtual void Unmap(ICommandList* cmd, UINT subRes) override;
-		virtual void UpdateGpuData(ICommandList* cmd, UINT subRes, void* pData, const FSubresourceBox* box, UINT rowPitch, UINT depthPitch) override;
+		virtual bool Map(UINT subRes, FMappedSubResource* res, bool forRead) override;
+		virtual void Unmap(UINT subRes) override;
+		virtual void UpdateGpuData(UINT subRes, void* pData, const FSubResourceFootPrint* footPrint) override;
 		virtual void TransitionTo(ICommandList* cmd, EGpuResourceState state) override;
 		virtual void SetDebugName(const char* name) override;
 		virtual IGpuBufferData* CreateBufferData(IGpuDevice* device, UINT mipIndex, ECpuAccess cpuAccess, FSubResourceFootPrint* outFootPrint) override;
 	public:
-		TObjectHandle<DX12GpuDevice> mDeviceRef;
+		TWeakRefHandle<DX12GpuDevice> mDeviceRef;
 		AutoRef<ID3D12Resource>		mGpuResource;
 	};
 
@@ -63,9 +61,10 @@ namespace NxRHI
 		virtual void* GetHWBuffer() override {
 			return mView;
 		}
+		D3D12_GPU_VIRTUAL_ADDRESS GetBufferVirtualAddress();
 		bool Init(DX12GpuDevice* device, IBuffer* pBuffer, const FCbvDesc& desc);
 	public:
-		TObjectHandle<DX12GpuDevice> mDeviceRef;
+		TWeakRefHandle<DX12GpuDevice> mDeviceRef;
 		AutoRef<DX12DescriptorSetPagedObject> mView;
 	};
 
@@ -95,7 +94,7 @@ namespace NxRHI
 			return mFingerPrint;
 		}
 	public:
-		TObjectHandle<DX12GpuDevice> mDeviceRef;
+		TWeakRefHandle<DX12GpuDevice> mDeviceRef;
 		AutoRef<DX12DescriptorSetPagedObject> mView;
 		UINT						mFingerPrint = 0;
 	};
@@ -110,7 +109,7 @@ namespace NxRHI
 		}
 		bool Init(DX12GpuDevice* device, IGpuBufferData* pBuffer, const FUavDesc& desc);
 	public:
-		TObjectHandle<DX12GpuDevice> mDeviceRef;
+		TWeakRefHandle<DX12GpuDevice> mDeviceRef;
 		AutoRef<DX12DescriptorSetPagedObject> mView;
 	};
 
@@ -124,7 +123,7 @@ namespace NxRHI
 		}
 		bool Init(DX12GpuDevice* device, ITexture* pBuffer, const FRtvDesc* desc);
 	public:
-		TObjectHandle<DX12GpuDevice> mDeviceRef;
+		TWeakRefHandle<DX12GpuDevice> mDeviceRef;
 		AutoRef<DX12DescriptorSetPagedObject> mView;
 	};
 
@@ -138,7 +137,7 @@ namespace NxRHI
 		}
 		bool Init(DX12GpuDevice* device, ITexture* pBuffer, const FDsvDesc& desc);
 	public:
-		TObjectHandle<DX12GpuDevice> mDeviceRef;
+		TWeakRefHandle<DX12GpuDevice> mDeviceRef;
 		AutoRef<DX12DescriptorSetPagedObject> mView;
 	};
 }

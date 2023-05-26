@@ -10,7 +10,7 @@ namespace NxRHI
 }
 class IRenderContext;
 class TR_CLASS()
-	IRenderDocTool : public VIUnknown
+	IRenderDocTool : public IWeakReference
 {
 	RENDERDOC_API_1_4_0* mApi;
 	NxRHI::IGpuDevice*					mRenderContext = nullptr;
@@ -20,7 +20,7 @@ class TR_CLASS()
 public:
 	static IRenderDocTool* GetInstance();
 	IRenderDocTool();
-	void InitRenderDoc();
+	void InitRenderDoc(const char* path);
 	void SetGpuDevice(NxRHI::IGpuDevice* rc);
 
 	void SetActiveWindow(void* wndHandle);
@@ -30,6 +30,7 @@ public:
 	UINT EndFrameCapture();
 	UINT DiscardFrameCapture();
 
+	UINT GetNumCaptures();
 	const char* GetCapture(UINT idx, UINT64* timestamp);
 };
 

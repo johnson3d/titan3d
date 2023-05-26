@@ -7,7 +7,7 @@ class XndAttribute;
 class PhyContext;
 
 class TR_CLASS()
-	PhyTriMesh : public VIUnknown
+	PhyTriMesh : public IWeakReference
 {
 public:
 	physx::PxTriangleMesh*		mMesh;
@@ -27,7 +27,7 @@ public:
 };
 
 class TR_CLASS()
-	PhyConvexMesh : public VIUnknown
+	PhyConvexMesh : public IWeakReference
 {
 public:
 	physx::PxConvexMesh*		mMesh;

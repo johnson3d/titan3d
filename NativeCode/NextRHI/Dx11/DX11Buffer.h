@@ -7,6 +7,7 @@ NS_BEGIN
 namespace NxRHI
 {
 	class DX11GpuDevice;
+	class DX11CommandList;
 	class DX11Buffer : public IBuffer
 	{
 	public:
@@ -17,14 +18,14 @@ namespace NxRHI
 		virtual void* GetHWBuffer() override{
 			return mBuffer;
 		}
-		virtual void Flush2Device(ICommandList* cmd, void* pBuffer, UINT Size) override;
-		virtual bool Map(ICommandList* cmd, UINT index, FMappedSubResource* res, bool forRead) override;
-		virtual void Unmap(ICommandList* cmd, UINT index) override;
-		virtual void UpdateGpuData(ICommandList* cmd, UINT subRes, void* pData, const FSubresourceBox* box, UINT rowPitch, UINT depthPitch) override;
-		virtual void UpdateGpuData(ICommandList* cmd, UINT offset, void* pData, UINT size) override;
+		virtual bool Map(UINT index, FMappedSubResource* res, bool forRead) override;
+		virtual void Unmap(UINT index) override;
+		virtual void UpdateGpuData(UINT subRes, void* pData, const FSubResourceFootPrint* footPrint) override;
 		virtual void SetDebugName(const char* name) override;
 	public:
 		ID3D11Buffer* mBuffer;
+		TWeakRefHandle<DX11GpuDevice>	mDeviceRef;
+		DX11CommandList*				mMappingCmdList = nullptr;
 	};
 
 	class DX11Texture : public ITexture
@@ -38,9 +39,9 @@ namespace NxRHI
 			return mTexture1D;
 		}
 		virtual void* GetSharedHandle() override;
-		virtual bool Map(ICommandList* cmd, UINT subRes, FMappedSubResource* res, bool forRead) override;
-		virtual void Unmap(ICommandList* cmd, UINT subRes) override;
-		virtual void UpdateGpuData(ICommandList* cmd, UINT subRes, void* pData, const FSubresourceBox* box, UINT rowPitch, UINT depthPitch) override;
+		virtual bool Map(UINT subRes, FMappedSubResource* res, bool forRead) override;
+		virtual void Unmap(UINT subRes) override;
+		virtual void UpdateGpuData(UINT subRes, void* pData, const FSubResourceFootPrint* footPrint) override;
 		virtual void SetDebugName(const char* name) override;
 		virtual IGpuBufferData* CreateBufferData(IGpuDevice* device, UINT mipIndex, ECpuAccess cpuAccess, FSubResourceFootPrint* outFootPrint) override;
 	public:
@@ -50,6 +51,8 @@ namespace NxRHI
 			ID3D11Texture2D* mTexture2D;
 			ID3D11Texture3D* mTexture3D;
 		};
+		TWeakRefHandle<DX11GpuDevice>	mDeviceRef;
+		DX11CommandList*				mMappingCmdList = nullptr;
 	};
 
 	class DX11CbView : public ICbView

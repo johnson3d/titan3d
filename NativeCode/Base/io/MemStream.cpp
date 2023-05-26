@@ -1,4 +1,5 @@
 #include "MemStream.h"
+#include "../CoreSDK.h"
 
 #define new VNEW
 
@@ -38,13 +39,23 @@ void MemStreamWriter::ResetBufferSize(UINT64 size)
 
 bool MemStreamWriter::Seek(UINT64 offset)
 {
-	if (mBufferSize <= offset)
+	if (mBufferSize < offset)
 	{
 		return false;
 	}
 	mPosition = offset;
 	return true;
 }
+
+//void MemStreamWriter::WriteAsZSTD(const void* pSrc, UINT t)
+//{
+//	auto len = CoreSDK::CompressBound_ZSTD(t);
+//	auto pDst = new BYTE[len + 10];
+//	auto wSize = (UINT)CoreSDK::Compress_ZSTD(pDst, len, pSrc, t, 1);
+//	Write(wSize);
+//	Write(pDst, wSize);
+//	delete[] pDst;
+//}
 
 void MemStreamWriter::Write(const void* pSrc, UINT t)
 {
@@ -74,5 +85,15 @@ UINT MemStreamReader::Read(void* pSrc, UINT t)
 	mPosition += t;
 	return t;
 }
+
+//UINT MemStreamReader::ReadAsZSTD(const void* pSrc, UINT t)
+//{
+//	UINT wSize = 0;
+//	Read(wSize);
+//	auto pDst = new BYTE[wSize];
+//	Read(pDst, wSize);
+//	CoreSDK::Decompress_ZSTD(pSrc, t, pDst, wSize);
+//	delete[] pDst;
+//}
 
 NS_END

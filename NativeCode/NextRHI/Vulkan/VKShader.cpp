@@ -34,7 +34,7 @@ namespace NxRHI
 			vkDestroyDescriptorSetLayout(device->mDevice, obj, device->GetVkAllocCallBacks());
 		}
 	};
-	MemAlloc::FPage<VkDescriptorSet>* VKDescriptorSetCreator::CreatePage(UINT pageSize)
+	VKDescriptorSetCreator::PageType* VKDescriptorSetCreator::CreatePage(UINT pageSize)
 	{
 		std::vector<VkDescriptorPoolSize> psz;
 		if (NumOfUbo > 0)
@@ -97,7 +97,7 @@ namespace NxRHI
 		result->mDescriptorPool = descPool;
 		return result;
 	}
-	MemAlloc::FPagedObject<VkDescriptorSet>* VKDescriptorSetCreator::CreatePagedObject(MemAlloc::FPage<VkDescriptorSet>* page, UINT index)
+	VKDescriptorSetCreator::PagedObjectType* VKDescriptorSetCreator::CreatePagedObject(VKDescriptorSetCreator::PageType* page, UINT index)
 	{
 		auto device = mDeviceRef.GetPtr();
 
@@ -118,7 +118,11 @@ namespace NxRHI
 
 		return result;
 	}
-	void VKDescriptorSetCreator::OnFree(MemAlloc::FPagedObject<VkDescriptorSet>* obj)
+	void VKDescriptorSetCreator::OnAlloc(VKDescriptorSetCreator::AllocatorType* pAllocator, VKDescriptorSetCreator::PagedObjectType* obj)
+	{
+
+	}
+	void VKDescriptorSetCreator::OnFree(VKDescriptorSetCreator::AllocatorType* pAllocator, VKDescriptorSetCreator::PagedObjectType* obj)
 	{
 		auto device = mDeviceRef.GetPtr();
 		if (device == nullptr)
@@ -209,10 +213,10 @@ namespace NxRHI
 		pOutRanges->push_back(binding);
 	}
 
-	bool VKShader::CompileShader(FShaderCompiler* compiler, FShaderDesc* desc, const char* shader, const char* entry, EShaderType type, const char* sm, const IShaderDefinitions* defines, EShaderLanguage sl, bool bDebugShader)
+	bool VKShader::CompileShader(FShaderCompiler* compiler, FShaderDesc* desc, const char* shader, const char* entry, EShaderType type, const char* sm, const IShaderDefinitions* defines, EShaderLanguage sl, bool bDebugShader, const char* extHlslVersion)
 	{
 		desc->FunctionName = entry;
-		return IShaderConductor::GetInstance()->CompileShader(compiler, desc, shader, entry, type, sm, defines, bDebugShader, sl, bDebugShader);
+		return IShaderConductor::GetInstance()->CompileShader(compiler, desc, shader, entry, type, sm, defines, bDebugShader, sl, bDebugShader, extHlslVersion);
 	}
 
 	VKShader::VKShader()

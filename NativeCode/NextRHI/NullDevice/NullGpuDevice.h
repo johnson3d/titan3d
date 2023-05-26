@@ -44,6 +44,14 @@ namespace NxRHI
 		virtual IFence* CreateFence(const FFenceDesc* desc, const char* name) override;
 		virtual IEvent* CreateGpuEvent(const FEventDesc* desc, const char* name) override;
 		virtual ICmdQueue* GetCmdQueue() override;
+		virtual IGpuScope* CreateGpuScope() override
+		{
+			return nullptr;
+		}
+		virtual void SetBreakOnID(int id, bool open) override
+		{
+
+		}
 	private:
 		void QueryDevice();
 	public:
@@ -53,13 +61,10 @@ namespace NxRHI
 	class NullCmdQueue : public ICmdQueue
 	{
 	public:
-		virtual void ExecuteCommandList(ICommandList* Cmdlist, UINT NumOfWait, ICommandList** ppWaitCmdlists) override;
-		virtual void ExecuteCommandList(UINT num, ICommandList** ppCmdlist) override;
-		virtual UINT64 SignalFence(IFence* fence, UINT64 value) override;
-		virtual void WaitFence(IFence* fence, UINT64 value) override;
-		virtual ICommandList* GetIdleCmdlist(EQueueCmdlist type) override;
-		virtual void ReleaseIdleCmdlist(ICommandList* cmd, EQueueCmdlist type) override;
-		virtual void Flush() override;
+		virtual void ExecuteCommandList(UINT NumOfExe, ICommandList** Cmdlist, UINT NumOfWait, ICommandList** ppWaitCmdlists, EQueueType type) override;
+		virtual ICommandList* GetIdleCmdlist() override;
+		virtual void ReleaseIdleCmdlist(ICommandList* cmd) override;
+		virtual void Flush(EQueueType type) override;
 	public:
 		NullCmdQueue();
 		~NullCmdQueue();

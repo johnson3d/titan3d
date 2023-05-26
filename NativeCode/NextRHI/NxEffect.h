@@ -14,7 +14,7 @@ namespace NxRHI
 	class ICommandList;
 	class IRenderPass;
 	class TR_CLASS()
-		FEffectBinder : public VIUnknownBase
+		FEffectBinder : public VIUnknown
 	{
 	public:
 		VNameString				Name;
@@ -46,9 +46,16 @@ namespace NxRHI
 	};
 
 	class TR_CLASS()
-		IGpuEffect : public VIUnknownBase
+		IGpuEffect : public VIUnknown
 	{
-
+	public:
+		std::string		mDebugName;
+		const char* GetDebugName() {
+			return mDebugName.c_str();
+		}
+		void SetDebugName(const char* n) {
+			mDebugName = n;
+		}
 	};
 	class TR_CLASS()
 		IGraphicsEffect : public IGpuEffect

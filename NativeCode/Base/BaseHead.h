@@ -1,5 +1,10 @@
 #pragma once
 
+//#if _HAS_CXX20 
+	#define _SILENCE_CXX20_CISO646_REMOVED_WARNING
+	//#define _SILENCE_ALL_CXX20_DEPRECATION_WARNINGS
+//#endif
+
 #if defined(PLATFORM_WIN)
 
 #define HasModule_Windows
@@ -35,6 +40,7 @@
 #define HasModule_TextureCompress
 #define HasModule_EtcLib
 #define HasModule_GpuDump
+#define HasModule_ImageDecoder
 
 #include <WinSock2.h>
 #include <mswsock.h>
@@ -98,6 +104,7 @@
 #include <list>
 #include <map>
 #include <atomic>
+#include <queue>
 #include <cstdint>
 #include <fstream>
 #include <sstream>
@@ -160,3 +167,6 @@ inline void _vfxTraceA(LPCSTR lpszFormat, ...)
 #else
 #		define VFX_API
 #endif
+
+//#define NEW_INHEAD new(__FILE__, __LINE__)
+#define NEW_INHEAD new

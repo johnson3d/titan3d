@@ -13,7 +13,7 @@
 
 NS_BEGIN
 
-class v3dxBezier : public EngineNS::VIUnknown , public VMem::PooledObject<v3dxBezier, 128>
+class v3dxBezier : public EngineNS::IWeakReference , public VMem::PooledObject<v3dxBezier, 128>
 {
 public:
 	static const char* GetPooledObjectClassName() {
@@ -158,7 +158,7 @@ typedef v3dxRange<int> v3dxIntRange;
 typedef v3dxRange<float> v3dxScalarRange;
 typedef v3dxRange<unsigned long> v3dxColorRange;
 
-class v3dVariable : public VIUnknown
+class v3dVariable : public IWeakReference
 {
 public:
 	enum Type

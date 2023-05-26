@@ -20,7 +20,7 @@ namespace NxRHI
 	class IGpuDrawState;
 
 	class TR_CLASS()
-		IGpuDraw : public VIUnknownBase
+		IGpuDraw : public VIUnknown
 	{
 	public:
 		ENGINE_RTTI(IGpuDraw);
@@ -32,6 +32,14 @@ namespace NxRHI
 	{
 	public:
 		ENGINE_RTTI(IGraphicDraw);
+		IGraphicDraw()
+		{
+			NumOfInstance++;
+		}
+		~IGraphicDraw()
+		{
+			NumOfInstance--;
+		}
 		const FEffectBinder* FindBinder(const char* name) const;
 		bool BindResource(VNameString name, IGpuResource* resource);
 		void BindResource(const FEffectBinder* binder, IGpuResource * resource);
@@ -63,7 +71,11 @@ namespace NxRHI
 			auto desc = GetMeshAtomDesc();
 			return desc->NumPrimitives * desc->NumInstances;
 		}
+		static int GetNumOfInstance() {
+			return NumOfInstance;
+		}
 	public:
+		static std::atomic<int>		NumOfInstance;
 		std::map<const FEffectBinder*, AutoRef<IGpuResource>>	BindResources;
 		AutoRef<IGraphicsEffect>		ShaderEffect;
 		AutoRef<IGpuPipeline>		Pipeline;
@@ -87,6 +99,14 @@ namespace NxRHI
 	{
 	public:
 		ENGINE_RTTI(IComputeDraw);
+		IComputeDraw()
+		{
+			NumOfInstance++;
+		}
+		~IComputeDraw()
+		{
+			NumOfInstance--;
+		}
 		virtual void Commit(ICommandList * cmdlist) override;
 		void SetComputeEffect(IComputeEffect * effect) {
 			mEffect = effect;
@@ -111,6 +131,10 @@ namespace NxRHI
 			return mDispatchX * mDispatchY * mDispatchZ;
 		}
 	public:
+		static int GetNumOfInstance() {
+			return NumOfInstance;
+		}
+		static std::atomic<int>		NumOfInstance;
 		UINT					mDispatchX = 0;
 		UINT					mDispatchY = 0;
 		UINT					mDispatchZ = 0;
@@ -120,20 +144,52 @@ namespace NxRHI
 	protected:
 		virtual void OnBindResource(const FShaderBinder* binder, IGpuResource* resource) {}
 	};
+	enum TR_ENUM()
+		ECopyDrawMode
+	{
+		CDM_Buffer2Buffer,
+			CDM_Texture2Texture,
+			CDM_Buffer2Texture,
+			CDM_Texture2Buffer,
+	};
 	class TR_CLASS()
 		ICopyDraw : public IGpuDraw
 	{
 	public:
 		ENGINE_RTTI(ICopyDraw);
+		ICopyDraw()
+		{
+			NumOfInstance++;
+		}
+		~ICopyDraw()
+		{
+			NumOfInstance--;
+		}
 		virtual void Commit(ICommandList * cmdlist) override;
-		void BindSrc(IGpuBufferData * res);
-		void BindDest(IGpuBufferData * res);
+		void BindBufferSrc(IBuffer* res);
+		void BindBufferDest(IBuffer* res);
+		void BindTextureSrc(ITexture* res);
+		void BindTextureDest(ITexture* res);
+		
 		virtual UINT GetPrimitiveNum() override{
 			return 1;
 		}
 	public:
+		static int GetNumOfInstance() {
+			return NumOfInstance;
+		}
+		static std::atomic<int>		NumOfInstance;
+		ECopyDrawMode Mode = ECopyDrawMode::CDM_Buffer2Buffer;
 		AutoRef<IGpuBufferData>	mSrc;
 		AutoRef<IGpuBufferData>	mDest;
+		UINT SrcSubResource = 0;
+		UINT DestSubResource = 0;
+
+		UINT DstX = 0;
+		UINT DstY = 0;
+		UINT DstZ = 0;
+		
+		FSubResourceFootPrint FootPrint{};
 	};
 }
 

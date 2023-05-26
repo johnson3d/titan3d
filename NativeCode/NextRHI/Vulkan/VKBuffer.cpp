@@ -61,6 +61,7 @@ namespace NxRHI
 			obj->FreeMemory();
 		}
 	};
+
 	VKBuffer::VKBuffer()
 	{
 	}
@@ -113,10 +114,10 @@ namespace NxRHI
 		vkBindBufferMemory(device->mDevice, result->mBuffer, (VkDeviceMemory)result->mGpuMemory->GetHWBuffer(), result->mGpuMemory->Offset);
 
 		FMappedSubResource subRes{};
-		if (result->Map(nullptr, 0, &subRes, false))
+		if (result->Map(0, &subRes, false))
 		{
 			memcpy(subRes.pData, pData, size);
-			result->Unmap(nullptr, 0);
+			result->Unmap(0);
 		}
 
 		return result;
@@ -239,24 +240,24 @@ namespace NxRHI
 			if (desc.Usage == EGpuUsage::USAGE_DYNAMIC)
 			{
 				FMappedSubResource subRes{};
-				if (this->Map(nullptr, 0, &subRes, false))
+				if (this->Map(0, &subRes, false))
 				{
 					memcpy(subRes.pData, desc.InitData, desc.Size);
-					this->Unmap(nullptr, 0);
+					this->Unmap(0);
 				}
 			}
 			else
 			{
 				auto bf = CreateUploadBuffer(device, desc.InitData, memSize, desc.Size);
-				auto cmd = device->GetCmdQueue()->GetIdleCmdlist(EQueueCmdlist::QCL_Transient);
+				auto cmd = device->GetCmdQueue()->GetIdleCmdlist();
 				cmd->BeginCommand();
 				auto saved = this->GpuState;
 				this->TransitionTo(cmd, EGpuResourceState::GRS_CopyDst);
 				cmd->CopyBufferRegion(this, 0, bf, 0, Desc.Size);
 				this->TransitionTo(cmd, saved);
 				cmd->EndCommand();
-				device->GetCmdQueue()->ExecuteCommandList(cmd);
-				device->GetCmdQueue()->ReleaseIdleCmdlist(cmd, EQueueCmdlist::QCL_Transient);
+				device->GetCmdQueue()->ExecuteCommandListSingle(cmd, EQueueType::QU_Default);
+				device->GetCmdQueue()->ReleaseIdleCmdlist(cmd);
 			}
 		}
 
@@ -309,77 +310,35 @@ namespace NxRHI
 		GpuState = state;
 	}
 
-	void VKBuffer::Flush2Device(ICommandList* cmd, void* pBuffer, UINT Size)
-	{
-		if (Size > Desc.Size || pBuffer == NULL)
-			return;
-		ASSERT(Size == Desc.Size);
-
-		FMappedSubResource mapped{};
-		if (this->Map(cmd, 0, &mapped, false))
-		{
-			memcpy(mapped.pData, pBuffer, Size);
-			this->Unmap(cmd, 0);
-		}
-	}
-
-	void VKBuffer::UpdateGpuData(ICommandList* cmd, UINT subRes, void* pData, const FSubresourceBox* box, UINT rowPitch, UINT depthPitch)
-	{
-		if (Desc.Usage == EGpuUsage::USAGE_DEFAULT)
-		{
-			[[maybe_unused]] auto copyDesc = this->Desc;
-		}
-		else
-		{
-			FMappedSubResource mapped{};
-			if (this->Map(cmd, subRes, &mapped, false))
-			{
-				memcpy(mapped.pData, pData, rowPitch);
-				this->Unmap(cmd, subRes);
-			}
-		}
-	}
-
-	void VKBuffer::UpdateGpuData(ICommandList* cmd, UINT offset, void* pData, UINT size)
+	void VKBuffer::UpdateGpuData(UINT subRes, void* pData, const FSubResourceFootPrint* footPrint)
 	{
 		if (Desc.Usage == EGpuUsage::USAGE_DEFAULT)
 		{
 			auto copyDesc = this->Desc;
 			copyDesc.Usage = EGpuUsage::USAGE_STAGING;
-			copyDesc.Size = size;
+			copyDesc.Size = footPrint->TotalSize;
 			copyDesc.InitData = pData;
 			copyDesc.CpuAccess = ECpuAccess::CAS_WRITE;
 
 			auto device = mDeviceRef.GetPtr();
 			auto bf = MakeWeakRef(device->CreateBuffer(&copyDesc));
 
-			cmd->CopyBufferRegion(this, offset, bf, 0, size);
+			FTransientCmd cmd(device, EQueueType::QU_Transfer);
+			cmd.GetCmdList()->CopyBufferRegion(this, footPrint->GetOffset(), bf, 0, footPrint->TotalSize);
 			device->DelayDestroy(bf);
-			/*auto fence = ((VKCommandList*)cmd)->mCommitFence;
-			auto tarValue = fence->GetCompletedValue() + 1;
-
-			device->PushPostEvent([fence, bf, tarValue](IGpuDevice* pDevice)->bool
-				{
-					if (fence->GetCompletedValue() >= tarValue)
-					{
-						pDevice->DelayDestroy(bf);
-						return true;
-					}
-					return false;
-				});*/
 		}
 		else
 		{
 			FMappedSubResource mapped{};
-			if (this->Map(cmd, 0, &mapped, false))
+			if (this->Map(subRes, &mapped, false))
 			{
-				memcpy(mapped.pData, pData, size);
-				this->Unmap(cmd, 0);
+				memcpy(mapped.pData, pData, footPrint->RowPitch);
+				this->Unmap(subRes);
 			}
 		}
 	}
 
-	bool VKBuffer::Map(ICommandList* cmd, UINT index, FMappedSubResource* res, bool forRead)
+	bool VKBuffer::Map(UINT index, FMappedSubResource* res, bool forRead)
 	{
 		auto device = mDeviceRef.GetPtr();
 		void* data;
@@ -393,7 +352,7 @@ namespace NxRHI
 		return true;
 	}
 
-	void VKBuffer::Unmap(ICommandList* cmd, UINT index)
+	void VKBuffer::Unmap(UINT index)
 	{
 		auto device = mDeviceRef.GetPtr();
 		vkUnmapMemory(device->mDevice, (VkDeviceMemory)mGpuMemory->GetHWBuffer());
@@ -437,9 +396,9 @@ namespace NxRHI
 		for (UINT i = 0; i < desc.MipLevels; i++)
 		{
 			auto& data = srcDesc.InitData[i];
-			if (result->Map(nullptr, i, &data, false))
+			if (result->Map(i, &data, false))
 			{
-				result->Unmap(nullptr, i);
+				result->Unmap(i);
 			}
 		}
 		
@@ -628,10 +587,10 @@ namespace NxRHI
 				for (UINT i = 0; i < desc.MipLevels; i++)
 				{
 					FMappedSubResource mapped{};
-					if (this->Map(nullptr, i, &mapped, false))
+					if (this->Map(i, &mapped, false))
 					{
 						memcpy(mapped.pData, &desc.InitData[i], desc.InitData[i].DepthPitch);
-						this->Unmap(nullptr, i);
+						this->Unmap(i);
 					}
 				}
 			}
@@ -690,17 +649,11 @@ namespace NxRHI
 						if (depth == 0)
 							depth = 1;
 
-						auto cmd = (VKCommandList*)device->GetCmdQueue()->GetIdleCmdlist(EQueueCmdlist::QCL_Transient);
-						cmd->BeginCommand();
-						
-						this->TransitionTo(cmd, EGpuResourceState::GRS_CopyDst);
+						FTransientCmd cmd(device);						
+						this->TransitionTo(cmd.GetCmdList(), EGpuResourceState::GRS_CopyDst);
 						VkBuffer srcBuffer = bf[i]->mBuffer;
-						vkCmdCopyBufferToImage(cmd->mCommandBuffer->RealObject, srcBuffer, mImage, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, 1, &region);
-						this->TransitionTo(cmd, EGpuResourceState::GRS_GenericRead);
-
-						cmd->EndCommand();
-						device->GetCmdQueue()->ExecuteCommandList(cmd);
-						device->GetCmdQueue()->ReleaseIdleCmdlist(cmd, EQueueCmdlist::QCL_Transient);
+						vkCmdCopyBufferToImage(((VKCommandList*)cmd.GetCmdList())->mCommandBuffer->RealObject, srcBuffer, mImage, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, 1, &region);
+						this->TransitionTo(cmd.GetCmdList(), EGpuResourceState::GRS_GenericRead);
 					}
 				}
 			}
@@ -709,8 +662,8 @@ namespace NxRHI
 		{
 			if (GpuState == EGpuResourceState::GRS_Undefine)
 			{
-				auto cmd = (VKCommandList*)device->GetCmdQueue()->GetIdleCmdlist(EQueueCmdlist::QCL_Transient);
-				cmd->BeginCommand();
+				FTransientCmd tsCmd(device);
+				auto cmd = (VKCommandList*)tsCmd.GetCmdList();
 				if (Desc.BindFlags & EBufferType::BFT_SRV)
 				{
 					/*if (Desc.BindFlags & EBufferType::BFT_DSV)
@@ -731,9 +684,6 @@ namespace NxRHI
 				{
 					this->TransitionTo(cmd, EGpuResourceState::GRS_DepthStencil);
 				}
-				cmd->EndCommand();
-				device->GetCmdQueue()->ExecuteCommandList(cmd);
-				device->GetCmdQueue()->ReleaseIdleCmdlist(cmd, EQueueCmdlist::QCL_Transient);
 			}
 		}
 
@@ -787,7 +737,7 @@ namespace NxRHI
 
 		return result;
 	}
-	bool VKTexture::Map(ICommandList* cmd, UINT subRes, FMappedSubResource* res, bool forRead)
+	bool VKTexture::Map(UINT subRes, FMappedSubResource* res, bool forRead)
 	{
 		auto device = mDeviceRef.GetPtr();
 
@@ -813,7 +763,7 @@ namespace NxRHI
 		res->DepthPitch = (UINT)subLayout.depthPitch;
 		return true;
 	}
-	void VKTexture::Unmap(ICommandList* cmd, UINT subRes)
+	void VKTexture::Unmap(UINT subRes)
 	{
 		//UINT subRes = mipIndex + Desc.MipLevels * arrayIndex;
 		//mGpuResource->Unmap(subRes, nullptr);
@@ -821,8 +771,7 @@ namespace NxRHI
 
 		vkUnmapMemory(device->mDevice, (VkDeviceMemory)mGpuMemory->GetHWBuffer());
 	}
-
-	void VKTexture::UpdateGpuData(ICommandList* cmd, UINT subRes, void* pData, const FSubresourceBox* box, UINT rowPitch, UINT depthPitch)
+	void VKTexture::UpdateGpuData(UINT subRes, void* pData, const FSubResourceFootPrint* footPrint)
 	{
 		////UINT subRes = mipIndex + Desc.MipLevels * arrayIndex;
 		//auto refCmdList = (VKCommandList*)cmd;
@@ -908,7 +857,11 @@ namespace NxRHI
 		mDeviceRef.FromObject(device);
 		ShaderBinder = desc.ShaderBinder;
 
-		UINT alignedSize = ShaderBinder->Size;
+		UINT alignedSize = desc.BufferSize;
+		if (ShaderBinder != nullptr)
+		{
+			alignedSize = ShaderBinder->Size;
+		}
 		auto pAlignment = device->GetGpuResourceAlignment();
 		if (alignedSize % pAlignment->CBufferAlignment)
 		{

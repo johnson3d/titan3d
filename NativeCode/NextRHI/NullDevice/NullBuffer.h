@@ -17,11 +17,9 @@ namespace NxRHI
 		virtual void* GetHWBuffer() override{
 			return nullptr;
 		}
-		virtual void Flush2Device(ICommandList* cmd, void* pBuffer, UINT Size) override;
-		virtual bool Map(ICommandList* cmd, UINT index, FMappedSubResource* res, bool forRead) override;
-		virtual void Unmap(ICommandList* cmd, UINT index) override;
-		virtual void UpdateGpuData(ICommandList* cmd, UINT subRes, void* pData, const FSubresourceBox* box, UINT rowPitch, UINT depthPitch) override;
-		virtual void UpdateGpuData(ICommandList* cmd, UINT offset, void* pData, UINT size) override;
+		virtual bool Map(UINT index, FMappedSubResource* res, bool forRead) override;
+		virtual void Unmap(UINT index) override;
+		virtual void UpdateGpuData(UINT subRes, void* pData, const FSubResourceFootPrint* footPrint) override;
 	public:
 		
 	};
@@ -35,9 +33,9 @@ namespace NxRHI
 		virtual void* GetHWBuffer() override {
 			return nullptr;
 		}
-		virtual bool Map(ICommandList* cmd, UINT subRes, FMappedSubResource* res, bool forRead) override;
-		virtual void Unmap(ICommandList* cmd, UINT subRes) override;
-		virtual void UpdateGpuData(ICommandList* cmd, UINT subRes, void* pData, const FSubresourceBox* box, UINT rowPitch, UINT depthPitch) override;
+		virtual bool Map(UINT subRes, FMappedSubResource* res, bool forRead) override;
+		virtual void Unmap(UINT subRes) override;
+		virtual void UpdateGpuData(UINT subRes, void* pData, const FSubResourceFootPrint* footPrint) override;
 		virtual IGpuBufferData* CreateBufferData(IGpuDevice* device, UINT mipIndex, ECpuAccess cpuAccess, FSubResourceFootPrint* outFootPrint) override;
 	public:
 	};

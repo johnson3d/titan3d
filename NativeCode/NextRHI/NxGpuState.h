@@ -310,7 +310,7 @@ namespace NxRHI
 		FGpuPipelineDesc		Desc;
 	};
 	
-	class IGpuDrawState : public VIUnknownBase
+	class IGpuDrawState : public VIUnknown
 	{
 	public:
 		EPrimitiveType			TopologyType = EPrimitiveType::EPT_TriangleList;
@@ -323,7 +323,7 @@ namespace NxRHI
 	};
 
 	class TR_CLASS()
-		FGpuPipelineManager : public VIUnknown
+		FGpuPipelineManager : public IWeakReference
 	{
 	public:
 		const IGpuDrawState* GetOrCreate(IGpuDevice* device, IRenderPass * rpass, IGraphicsEffect* effect, IGpuPipeline* pipeline, EPrimitiveType topology);

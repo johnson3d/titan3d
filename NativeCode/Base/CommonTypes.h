@@ -142,23 +142,82 @@ enum TR_ENUM(SV_EnumNoFlags = true)
 		PXF_BC7_UNORM,
 		PXF_BC7_UNORM_SRGB,
 
-		PXF_ETC1,
 		PXF_ETC2_RGB8,
 		PXF_ETC2_SRGB8,
+		PXF_ETC2_RGBA1,
+		PXF_ETC2_SRGBA1,		
 		PXF_ETC2_RGBA8,
 		PXF_ETC2_SRGBA8,
 		PXF_ETC2_R11,
 		PXF_ETC2_SIGNED_R11,
 		PXF_ETC2_RG11,
 		PXF_ETC2_SIGNED_RG11,
-		PXF_ETC2_RGB8A1,
-		PXF_ETC2_SRGB8A1,
+
+		PXF_ASTC_4X4_TYPELESS,
+		PXF_ASTC_4X4_UNORM,
+		PXF_ASTC_4X4_UNORM_SRGB,
+		PXF_ASTC_4X4_FLOAT,
+		PXF_ASTC_5X4_TYPELESS,
+		PXF_ASTC_5X4_UNORM,
+		PXF_ASTC_5X4_UNORM_SRGB,
+		PXF_ASTC_5X4_FLOAT,
+		PXF_ASTC_5X5_TYPELESS,
+		PXF_ASTC_5X5_UNORM,
+		PXF_ASTC_5X5_UNORM_SRGB,
+		PXF_ASTC_5X5_FLOAT,
+		PXF_ASTC_6X5_TYPELESS,
+		PXF_ASTC_6X5_UNORM,
+		PXF_ASTC_6X5_UNORM_SRGB,
+		PXF_ASTC_6X5_FLOAT,
+		PXF_ASTC_6X6_TYPELESS,
+		PXF_ASTC_6X6_UNORM,
+		PXF_ASTC_6X6_UNORM_SRGB,
+		PXF_ASTC_6X6_FLOAT,
+		PXF_ASTC_8X5_TYPELESS,
+		PXF_ASTC_8X5_UNORM,
+		PXF_ASTC_8X5_UNORM_SRGB,
+		PXF_ASTC_8X5_FLOAT,
+		PXF_ASTC_8X6_TYPELESS,
+		PXF_ASTC_8X6_UNORM,
+		PXF_ASTC_8X6_UNORM_SRGB,
+		PXF_ASTC_8X6_FLOAT,
+		PXF_ASTC_8X8_TYPELESS,
+		PXF_ASTC_8X8_UNORM,
+		PXF_ASTC_8X8_UNORM_SRGB,
+		PXF_ASTC_8X8_FLOAT,
+		PXF_ASTC_10X5_TYPELESS,
+		PXF_ASTC_10X5_UNORM,
+		PXF_ASTC_10X5_UNORM_SRGB,
+		PXF_ASTC_10X5_FLOAT,
+		PXF_ASTC_10X6_TYPELESS,
+		PXF_ASTC_10X6_UNORM,
+		PXF_ASTC_10X6_UNORM_SRGB,
+		PXF_ASTC_10X6_FLOAT,
+		PXF_ASTC_10X8_TYPELESS,
+		PXF_ASTC_10X8_UNORM,
+		PXF_ASTC_10X8_UNORM_SRGB,
+		PXF_ASTC_10X8_FLOAT,
+		PXF_ASTC_10X10_TYPELESS,
+		PXF_ASTC_10X10_UNORM,
+		PXF_ASTC_10X10_UNORM_SRGB,
+		PXF_ASTC_10X10_FLOAT,
+		PXF_ASTC_12X10_TYPELESS,
+		PXF_ASTC_12X10_UNORM,
+		PXF_ASTC_12X10_UNORM_SRGB,
+		PXF_ASTC_12X10_FLOAT,
+		PXF_ASTC_12X12_TYPELESS,
+		PXF_ASTC_12X12_UNORM,
+		PXF_ASTC_12X12_UNORM_SRGB,
+		PXF_ASTC_12X12_FLOAT,
 };
 
 inline unsigned int GetPixelByteWidth(EPixelFormat fmt)
 {
 	switch (fmt)
 	{
+	case PXF_A8_UNORM:
+	case PXF_R8_UNORM:
+		return 1;
 	case PXF_R16_FLOAT:
 		return 2;
 	case PXF_R16_UINT:
@@ -228,6 +287,17 @@ inline unsigned int GetPixelByteWidth(EPixelFormat fmt)
 		return 4;
 	case PXF_D32_FLOAT:
 		return 4;
+	case PXF_B10G10R10A2_TYPELESS:
+	case PXF_R10G10B10A2_SINT:
+	case PXF_R10G10B10A2_UINT:
+	case PXF_R10G10B10A2_SNORM:
+	case PXF_R10G10B10A2_UNORM:
+	case PXF_R10G10B10A2_TYPELESS:
+	case PXF_B10G10R10A2_SINT:
+	case PXF_B10G10R10A2_UINT:
+	case PXF_B10G10R10A2_SNORM:
+	case PXF_B10G10R10A2_UNORM:
+		return 4;
 	case PXF_D32_FLOAT_S8X24_UINT:
 		return 8;
 	case PXF_D16_UNORM:
@@ -236,5 +306,38 @@ inline unsigned int GetPixelByteWidth(EPixelFormat fmt)
 		return 0;
 	}
 }
+
+template <typename T>
+class FSpan
+{
+private:
+	T*				mPointer = nullptr;
+	unsigned int	mLength = 0;
+public:
+	FSpan(T* ptr, unsigned int len) {
+		mPointer = ptr;
+		mLength = len;
+	}
+	unsigned int Length() const{
+		return mLength;
+	}
+	T& operator[](unsigned int index) {
+		if (index >= mLength)
+			return mPointer[0];
+		return mPointer[index];
+	}
+	const T& operator[](unsigned int index) const{
+		if (index >= mLength)
+			return mPointer[0];
+		return mPointer[index];
+	}
+	bool SafeCopy(const T* src, unsigned int index, unsigned int num)
+	{
+		if (index + num >= mLength)
+			return false;
+		memcpy(&mPointer[index], src, num);
+		return true;
+	}
+};
 
 NS_END

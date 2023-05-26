@@ -246,31 +246,19 @@ namespace NxRHI
 	{
 		
 	}
-	void NullCmdQueue::ExecuteCommandList(ICommandList* Cmdlist, UINT NumOfWait, ICommandList** ppWaitCmdlists)
+	void NullCmdQueue::ExecuteCommandList(UINT NumOfExe, ICommandList** Cmdlist, UINT NumOfWait, ICommandList** ppWaitCmdlists, EQueueType type)
 	{
 
 	}
-	void NullCmdQueue::ExecuteCommandList(UINT num, ICommandList** ppCmdlist)
-	{
-		
-	}
-	UINT64 NullCmdQueue::SignalFence(IFence* fence, UINT64 value)
-	{
-		return value;
-	}
-	void NullCmdQueue::WaitFence(IFence* fence, UINT64 value)
-	{
-
-	}
-	ICommandList* NullCmdQueue::GetIdleCmdlist(EQueueCmdlist type)
+	ICommandList* NullCmdQueue::GetIdleCmdlist()
 	{
 		return nullptr;
 	}
-	void NullCmdQueue::ReleaseIdleCmdlist(ICommandList* cmd, EQueueCmdlist type)
+	void NullCmdQueue::ReleaseIdleCmdlist(ICommandList* cmd)
 	{
 		
 	}
-	void NullCmdQueue::Flush()
+	void NullCmdQueue::Flush(EQueueType type)
 	{
 
 	}

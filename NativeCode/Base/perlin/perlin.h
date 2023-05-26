@@ -14,7 +14,7 @@ This source provides a C++ wrapper around Ken Perlin's noise function. I know th
 NS_BEGIN
 
 class TR_CLASS()
-	vfxRandom : public VIUnknownBase
+	vfxRandom : public VIUnknown
 {
 	int rand_lcg(UINT& rng_state)
 	{
@@ -45,7 +45,7 @@ public:
 //#define SAMPLE_SIZE 1024
 
 class TR_CLASS()
-	Perlin : public VIUnknownBase
+	Perlin : public VIUnknown
 {
 public:
 	Perlin(int octaves, double freq, double amp, int seed, int samplerSize = 1024);

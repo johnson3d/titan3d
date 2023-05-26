@@ -53,6 +53,8 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)r2m\file_2_memory.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)r2m\res_2_memory.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)r2m\VPakFile.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)random\halton.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)random\mt.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)sdf\sdf_8ssedt.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)string\vfxHashString.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)string\vfxstring.h" />
@@ -95,6 +97,8 @@
     <ClCompile Include="$(MSBuildThisFileDirectory)r2m\F2MManager.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)r2m\file_2_memory.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)r2m\VPakFile.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)random\halton.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)random\mt.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)sdf\sdf_8ssedt.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)string\vfxstring.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)thread\vfxcritical.cpp" />

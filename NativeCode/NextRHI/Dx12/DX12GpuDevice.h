@@ -14,7 +14,14 @@ namespace NxRHI
 	class DX12GpuSystem : public IGpuSystem
 	{
 	public:
+		virtual bool InitGpuSystem(ERhiType type, const FGpuSystemDesc* desc) override;
 		virtual IGpuDevice* CreateDevice(const FGpuDeviceDesc* desc) override;
+		virtual int GetNumOfGpuDevice() const override;
+		virtual void GetDeviceDesc(int index, FGpuDeviceDesc* desc) const override;
+	public:
+		AutoRef<IDXGIFactory>					mDXGIFactory;
+		std::vector<AutoRef<IDXGIAdapter>>		mGIAdapters;
+		AutoRef<ID3D12Debug>					mDebugLayer;
 	};
 
 	class DX12GpuDevice : public IGpuDevice
@@ -50,22 +57,20 @@ namespace NxRHI
 
 		virtual IGraphicDraw* CreateGraphicDraw() override;
 		virtual IComputeDraw* CreateComputeDraw() override;
+		virtual IGpuScope* CreateGpuScope() override;
+
+		virtual void SetBreakOnID(int id, bool open) override;
 		virtual void TickPostEvents() override;
 	private: 
 		void QueryDevice();
 	public:
-		IDXGIFactory4*					mDXGIFactory = nullptr;
-		ID3D12Device*					mDevice;
+		TWeakRefHandle<DX12GpuSystem>	mGpuSystem;
+		AutoRef<ID3D12Device>			mDevice;
 		D3D_FEATURE_LEVEL               mFeatureLevel;
 		
-		AutoRef<ID3D12Debug>			mDebugLayer;
 		AutoRef<ID3D12InfoQueue>		mDebugInfoQueue;
 		AutoRef<DX12CmdQueue>			mCmdQueue;
-		AutoRef<DX12DescriptorSetAllocator>	mRtvHeapManager;
-		AutoRef<DX12DescriptorSetAllocator>	mDsvHeapManager;
-		AutoRef<DX12DescriptorSetAllocator>	mSamplerAllocHeapManager;
-		AutoRef<DX12DescriptorSetAllocator>	mSrvAllocHeapManager;
-
+		
 		AutoRef<DX12CommandAllocatorManager>	mCmdAllocatorManager;
 		AutoRef<DX12GpuPooledMemAllocator>		mCBufferMemAllocator;
 		AutoRef<DX12GpuDefaultMemAllocator>		mDefaultBufferMemAllocator;
@@ -75,22 +80,25 @@ namespace NxRHI
 		AutoRef<ID3D12CommandSignature>		CmdSigForIndirectDrawIndex;
 		AutoRef<ID3D12CommandSignature>		CmdSigForIndirectDispatch;
 
-		AutoRef<DX12DescriptorSetPagedObject>	mNullCBV;
-		AutoRef<DX12DescriptorSetPagedObject>	mNullSRV;
-		AutoRef<DX12DescriptorSetPagedObject>	mNullUAV;
+		AutoRef<DX12DescriptorSetAllocator>	mRtvAllocator;
+		AutoRef<DX12DescriptorSetAllocator>	mDsvAllocator;
+		AutoRef<DX12DescriptorSetAllocator>	mSamplerAllocator;
+		AutoRef<DX12DescriptorSetAllocator>	mCbvSrvUavAllocator;
+		AutoRef<DX12DescriptorAllocatorManager>	mDescriptorSetAllocator;
+
+		AutoRef<DX12DescriptorSetPagedObject>	mNullCBV_SRV_UAV;
 		AutoRef<DX12DescriptorSetPagedObject>	mNullSampler;
+		AutoRef<DX12DescriptorSetPagedObject>	mNullRTV;
+		AutoRef<DX12DescriptorSetPagedObject>	mNullDSV;
 	};
 
 	class DX12CmdQueue : public ICmdQueue
 	{
 	public:
-		virtual void ExecuteCommandList(ICommandList* Cmdlist, UINT NumOfWait, ICommandList** ppWaitCmdlists) override;
-		virtual void ExecuteCommandList(UINT num, ICommandList** ppCmdlist) override;
-		virtual UINT64 SignalFence(IFence* fence, UINT64 value) override;
-		virtual void WaitFence(IFence* fence, UINT64 value) override;
-		virtual ICommandList* GetIdleCmdlist(EQueueCmdlist type) override;
-		virtual void ReleaseIdleCmdlist(ICommandList* cmd, EQueueCmdlist type) override;
-		virtual void Flush() override;
+		virtual void ExecuteCommandList(UINT NumOfExe, ICommandList** Cmdlist, UINT NumOfWait, ICommandList** ppWaitCmdlists, EQueueType type) override;
+		virtual ICommandList* GetIdleCmdlist() override;
+		virtual void ReleaseIdleCmdlist(ICommandList* cmd) override;
+		virtual void Flush(EQueueType type) override;
 	public:
 		DX12CmdQueue();
 		~DX12CmdQueue();
@@ -98,8 +106,7 @@ namespace NxRHI
 		void ClearIdleCmdlists();
 		void TryRecycle();
 		DX12GpuDevice*					mDevice = nullptr;
-		VCritical						mImmCmdListLocker;
-		AutoRef<DX12CommandList>		mFramePost;
+		VCritical						mQueueLocker;
 		std::queue<AutoRef<ICommandList>>	mIdleCmdlist;
 		struct FWaitRecycle 
 		{
@@ -109,6 +116,7 @@ namespace NxRHI
 		std::vector<FWaitRecycle>		mWaitRecycleCmdlists;
 
 		AutoRef<ID3D12CommandQueue>		mCmdQueue;
+		AutoRef<IFence>					mFlushFence;
 	};
 }
 

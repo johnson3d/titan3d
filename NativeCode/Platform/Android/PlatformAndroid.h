@@ -4,7 +4,7 @@
 NS_BEGIN
 
 class TR_CLASS()
-PlatformAndroid : public VIUnknown
+PlatformAndroid : public IWeakReference
 {
 public:
 	JNIEnv*			mEnv;

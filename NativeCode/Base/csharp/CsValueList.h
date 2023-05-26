@@ -7,14 +7,14 @@
 NS_BEGIN
 
 class TR_CLASS()
-CsValueList : public VIUnknown
+CsValueList : public IWeakReference
 {
 public:
 	ENGINE_RTTI(CsValueList);
 	
 	UINT					mStride;
-	VArray<BYTE, BYTE>		mMemData;
-
+	std::vector<BYTE>		mMemData;
+	
 	CsValueList()
 	{
 		mStride = 0;
@@ -22,7 +22,8 @@ public:
 	CsValueList(int stride);
 	~CsValueList();
 	void SetCapacity(int capacity);
-	void SetSize(int capacity);
+	int GetCapacity();
+	void SetSize(int size);
 	UINT GetCount();
 	TR_FUNCTION(SV_NoStarToRef = ptr)
 	void AddValue(BYTE* ptr);
@@ -31,6 +32,7 @@ public:
 	TR_FUNCTION(SV_NoStarToRef = src)
 	void AppendArray(BYTE* src, int count);
 	void RemoveAt(UINT index);
+	void InsertAt(UINT index, BYTE* ptr);
 	void Clear(vBOOL bFreeMemory);
 	BYTE* GetAddressAt(UINT index);
 	TR_FUNCTION(SV_NoStarToRef = ptr)
@@ -75,8 +77,8 @@ struct CSList
 	}
 };
 
-class TR_CLASS(SV_NameSpace = EngineNS, SV_UsingNS = EngineNS)
-CsQueue : public VIUnknown
+class TR_CLASS()
+	CsQueue : public IWeakReference
 {
 protected:
 	TR_MEMBER()

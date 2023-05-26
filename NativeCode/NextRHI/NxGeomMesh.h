@@ -66,7 +66,7 @@ namespace NxRHI
 		}
 	};
 	class TR_CLASS()
-		FVertexArray : public VIUnknownBase
+		FVertexArray : public VIUnknown
 	{
 	public:
 		FVertexArray();
@@ -83,14 +83,16 @@ namespace NxRHI
 				VertexBuffers[i] = nullptr;
 			}
 		}
+		static void GetStreamInfo(EVertexStreamType type, UINT* stride = nullptr, UINT* element = nullptr, int* varType = nullptr);
 	public:
 		AutoRef<IVbView>			VertexBuffers[VST_Number];
 	};
 	class TR_CLASS()
-		FGeomMesh : public VIUnknownBase
+		FGeomMesh : public VIUnknown
 	{
 	public:
 		FGeomMesh();
+		void Reset(bool bClearBuffer);
 		void Commit(ICommandList * cmdlist);
 		UINT GetAtomNum() {
 			return (UINT)Atoms.size();
@@ -137,6 +139,14 @@ namespace NxRHI
 	public:
 		struct FModelDesc
 		{
+			void SetDefault() {
+				Flags = 0;
+				UnUsed = 0;
+				VertexNumber = 0;
+				GeoTabeNumber = 0;
+				PolyNumber = 0;
+				AtomNumber = 0;
+			}
 			DWORD				Flags;
 			DWORD				UnUsed;
 			UINT				VertexNumber;
@@ -149,11 +159,13 @@ namespace NxRHI
 		FMeshPrimitives();
 		~FMeshPrimitives();
 
+		void Reset(bool bClearBuffer);
+
 		virtual FResourceState* GetResourceState() override {
 			return &mResourceState;
 		}
 		virtual void InvalidateResource() override;
-		virtual bool RestoreResource(VIUnknown* pDevice) override;
+		virtual bool RestoreResource(IWeakReference* pDevice) override;
 
 		bool Init(IGpuDevice* device, const char* name, UINT atom);
 		bool Init(IGpuDevice* device, FGeomMesh* mesh, const v3dxBox3 * aabb);
@@ -185,12 +197,28 @@ namespace NxRHI
 		}
 		static void CalcNormals32(OUT std::vector<v3dxVector3>&normals, const v3dxVector3 * pos, UINT nVert, const UINT * triangles, UINT nTri);
 		static void CalcNormals16(OUT std::vector<v3dxVector3>&normals, const v3dxVector3 * pos, UINT nVert, const USHORT * triangles, UINT nTri);
+
+		void ValidAtomExtData()
+		{
+			mAtomExtData.resize(mGeometryMesh->Atoms.size());
+		}
+		void SetAtomExtData(UINT index, VIUnknown* data) {
+			if (index >= (UINT)mAtomExtData.size())
+				return;
+			mAtomExtData[index] = data;
+		}
+		VIUnknown* GetAtomExtData(UINT index) {
+			if (index >= (UINT)mAtomExtData.size())
+				return nullptr;
+			return mAtomExtData[index];
+		}
 	private:
 		AutoRef<IVbView> LoadVB(IGpuDevice* device, XndAttribute * pAttr, UINT stride, TimeKeys & tkeys, UINT & resSize, EVertexStreamType stream);
 		void SaveVB(IGpuDevice* device, XndAttribute * pAttr, IVbView* vb, TimeKeys & tkeys, UINT stride);
 	protected:
 		std::string				mName;
 		AutoRef<FGeomMesh>		mGeometryMesh;
+		std::vector<AutoRef<VIUnknown>> mAtomExtData;
 		TimeKeys				mMopherKeys[VST_Number];
 
 		AutoRef<XndHolder>		mXnd;
@@ -199,13 +227,25 @@ namespace NxRHI
 		TR_MEMBER(SV_NoBind)
 		FResourceState			mResourceState;
 	};
-
+	
+	struct TR_CLASS(SV_LayoutStruct = 8)
+		FMeshVertex
+	{
+		v3dxVector3 Position;
+		v3dxVector3 Normal;
+		v3dVector4_t Tangent;
+		DWORD Color;
+		v3dxVector2 UV;
+		v3dVector4_t LightMap;
+		DWORD SkinIndex;
+		v3dVector4_t SkinWeight;
+	};
 	class TR_CLASS()
-		FMeshDataProvider : public VIUnknown
+		FMeshDataProvider : public IWeakReference
 	{
 	public:
 		std::vector<std::vector<FMeshAtomDesc>>	mAtoms;
-		std::vector<AutoRef<VIUnknownBase>>		mAtomExtDatas;
+		std::vector<AutoRef<VIUnknown>>		mAtomExtDatas;
 		v3dxBox3				mAABB;
 		AutoRef<IBlobObject>	mVertexBuffers[VST_Number];
 		AutoRef<IBlobObject>	IndexBuffer;
@@ -244,10 +284,12 @@ namespace NxRHI
 		IBlobObject* GetIndices();
 
 		FMeshAtomDesc* GetAtom(UINT index, UINT lod);
-		VIUnknownBase* GetAtomExtData(UINT index) const{
+		VIUnknown* GetAtomExtData(UINT index) const{
+			if (index >= mAtomExtDatas.size())
+				return nullptr;
 			return mAtomExtDatas[index];
 		}
-		void PushAtom(const FMeshAtomDesc* pDescLODs, UINT count, const AutoRef<VIUnknownBase>& ext);
+		void PushAtom(const FMeshAtomDesc* pDescLODs, UINT count, VIUnknown* ext);
 		bool SetAtom(UINT index, UINT lod, const FMeshAtomDesc& desc);
 		void PushAtomLOD(UINT index, const FMeshAtomDesc& desc);
 		UINT GetAtomLOD(UINT index);
@@ -257,11 +299,18 @@ namespace NxRHI
 		void* GetVertexPtr(EVertexStreamType stream, UINT index);
 
 		UINT AddVertex(const v3dxVector3 * pos, const v3dxVector3 * nor, const v3dxVector2 * uv, DWORD color);
+		UINT AddVertex(const v3dxVector3* pos, const v3dxVector3* nor, const v3dxVector2* uv, const v3dxQuaternion* lighmapUV, DWORD color);
+		UINT AddVertex(const FMeshVertex& vertex);
+		void AddVertex(const FMeshVertex* pVertex, UINT num);
+		
+		bool AddVertex_Pos_UV_Color(const void* pVertex, UINT num, bool bInvertY = false, float CanvasHeight = 0);
+
 		void ResizeVertexBuffers(UINT size);
 
 		//alternative interface for same mesh
 		vBOOL AddTriangle(UINT a, UINT b, UINT c);
 		vBOOL AddTriangle(UINT a, UINT b, UINT c, USHORT faceData);
+		vBOOL AddTriangle(UINT* pTri, UINT numOfTri);
 
 		vBOOL AddLine(UINT a, UINT b);
 

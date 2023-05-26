@@ -20,21 +20,28 @@
 
 #pragma pack(push,4)
 
+class v3dxVector3;
 class v3dxVector2 : public v3dVector2_t
 {
 public:
 	static v3dxVector2 Zero;
 	v3dxVector2();
+	v3dxVector2(float v)
+	{
+		x = v; y = v;
+	}
 	v3dxVector2(float ix,float iy);
 	v3dxVector2(const v3dxVector2& v){
 		x = v.x; y = v.y;
 	}
+	v3dxVector2(const v3dxVector3& v);
 
 	void setValue(float ix,float iy);
 
 	float getLength() const;
 	float getLengthSq() const;
 	void normalize();
+	v3dxVector2 GetNormalize() const;
 	void rotate (float angle);
 
 	v3dxVector2& operator+= (const v3dxVector2& v){ 

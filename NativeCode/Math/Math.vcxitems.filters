@@ -28,6 +28,7 @@
     <ClCompile Include="$(MSBuildThisFileDirectory)IntegerType.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)v3dxTransform.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)v3dxDBox3.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)v3dxVector4.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="$(MSBuildThisFileDirectory)v3dxBezier.h" />
@@ -78,6 +79,10 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)v3dxTransform.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)v3dxDVector3.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)v3dxDBox3.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)v3dxVector4.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)v3dxVector4.inl.h">
+      <Filter>inl</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="inl">

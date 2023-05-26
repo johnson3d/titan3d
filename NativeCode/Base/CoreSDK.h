@@ -42,6 +42,7 @@ public:
 	static FAssertEvent mAssertEvent;
 public:
 	static int GetPixelFormatByteWidth(EPixelFormat fmt);
+	static void MessageDialog(char* txt);
 	static void Print2Console(TR_META(SV_NoStringConverter = true) char* txt, bool newLine);
 	static void Print2Console2(const char* txt, bool newLine);
 	static void SetAssertEvent(FAssertEvent fn);
@@ -51,6 +52,7 @@ public:
 	static void UpdateEngineFrame(UINT64 frame);
 	static void IUnknown_Release(void* unk);
 	static int IUnknown_AddRef(void* unk);
+	static int IUnknown_UnsafeGetRefCount(void* unk);
 	static void SetWriteLogStringCallback(FWriteLogString wls);
 	static void StartNativeMemWatcher();
 	static void DumpNativeMemoryState(const char* name, vBOOL dumpUnknown);
@@ -98,40 +100,46 @@ public:
 	{
 		return "hoho";
 	}
+
+	static UINT64 Compress_ZSTD(void* dst, UINT64 dstCapacity,
+		const void* src, UINT64 srcSize,
+		int compressionLevel);
+	static UINT64 Decompress_ZSTD(void* dst, UINT64 dstCapacity,
+		const void* src, UINT64 compressedSize);
+	static UINT64 GetFrameContentSize_ZSTD(const void* src, UINT64 srcSize);
+	static UINT64 CompressBound_ZSTD(UINT64 srcSize);
 };
 
 class TR_CLASS(SV_Dispose = delete self)
 	BigStackBuffer
 {
-	BYTE*		mBuffer;
-	int			mSize;
+	std::vector<BYTE> mBuffer;
 public:
 	BigStackBuffer(int size)
 	{
-		mBuffer = new BYTE[size];
-		memset(mBuffer, 0, size);
-		mSize = size;
+		Resize(size);
 	}
 	BigStackBuffer(int size, const char* text)
 	{
 		if ((int)strlen(text) > size)
 			size = (int)strlen(text) * 2;
-		mBuffer = new BYTE[size];
-		memset(mBuffer, 0, size);
-		mSize = size;
+		mBuffer.resize(size);
 
-		strcpy((char*)mBuffer, text);
+		strcpy((char*)&mBuffer[0], text);
 	}
 	~BigStackBuffer()
 	{
-		delete[] mBuffer;
-		mBuffer = nullptr;
+		
 	}
 	void* GetBuffer() {
-		return mBuffer;
+		return &mBuffer[0];
 	}
 	int GetSize() const{
-		return mSize;
+		return (int)mBuffer.size();
+	}
+	void Resize(int size)
+	{
+		mBuffer.resize(size);
 	}
 };
 

@@ -16,6 +16,9 @@ namespace NxRHI
 		bool Init(DX11GpuDevice* device, ID3D11DeviceContext* context);
 		virtual bool BeginCommand() override;
 		virtual void EndCommand() override;
+		virtual bool IsRecording() const override {
+			return mIsRecording;
+		}
 		virtual void SetShader(IShader* shader) override;
 		virtual void SetCBV(EShaderType type, const FShaderBinder* binder, ICbView* buffer) override;
 		virtual void SetSrv(EShaderType type, const FShaderBinder* binder, ISrView* view) override;
@@ -34,7 +37,7 @@ namespace NxRHI
 
 		virtual void Draw(EPrimitiveType topology, UINT BaseVertex, UINT DrawCount, UINT Instance = 1) override;
 		virtual void DrawIndexed(EPrimitiveType topology, UINT BaseVertex, UINT StartIndex, UINT DrawCount, UINT Instance = 1) override;
-		virtual void IndirectDrawIndexed(EPrimitiveType topology, IBuffer* indirectArg, UINT indirectArgOffset = 0) override;
+		virtual void IndirectDrawIndexed(EPrimitiveType topology, IBuffer* indirectArg, UINT indirectArgOffset = 0, IBuffer* countBuffer = nullptr) override;
 		virtual void Dispatch(UINT x, UINT y, UINT z) override;
 		virtual void IndirectDispatch(IBuffer* indirectArg, UINT indirectArgOffset = 0) override;
 		virtual void SetMemoryBarrier(EPipelineStage srcStage, EPipelineStage dstStage, EBarrierAccess srcAccess, EBarrierAccess dstAccess) override;
@@ -49,7 +52,6 @@ namespace NxRHI
 		virtual void CopyBufferToTexture(ITexture* target, UINT subRes, IBuffer* src, const FSubResourceFootPrint* footprint) override;
 		virtual void CopyTextureToBuffer(IBuffer* target, const FSubResourceFootPrint* footprint, ITexture* source, UINT subRes) override;
 
-		virtual void Flush() override;
 		virtual void BeginEvent(const char* info) override;
 		virtual void EndEvent() override;
 	public:
@@ -61,7 +63,32 @@ namespace NxRHI
 		ID3D11DeviceContext* mContext;
 		ID3D11DeviceContext4* mContext4;
 		ID3D11CommandList* mCmdList;
-		bool IsRecording = false;
+		bool mIsRecording = false;
+		bool IsImmContext = false;
+	};
+
+	class DX11GpuScope : public IGpuScope
+	{
+	public:
+		~DX11GpuScope();
+		bool Init(DX11GpuDevice* device);
+
+		virtual bool IsFinished() override;
+		virtual UINT64 GetDeltaTime() override;
+		virtual void Begin(ICommandList* cmdlist) override;
+		virtual void End(ICommandList* cmdlist) override;
+
+		virtual const char* GetName() override {
+			return mName.c_str();
+		}
+		virtual void SetName(const char* name) override;
+	public:
+		TWeakRefHandle<DX11GpuDevice>	mDeviceRef;
+		std::string					mName;
+		AutoRef<ID3D11Query>		mQueryJoint;
+		AutoRef<ID3D11Query>		mQueryStart;
+		AutoRef<ID3D11Query>		mQueryEnd;
+		//AutoRef<IFence>				mFence;
 	};
 }
 

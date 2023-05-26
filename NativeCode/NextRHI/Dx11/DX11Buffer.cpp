@@ -20,6 +20,8 @@ namespace NxRHI
 
 	bool DX11Buffer::Init(DX11GpuDevice* device, const FBufferDesc& desc)
 	{
+		mDeviceRef.FromObject(device);
+
 		Desc = desc;
 		Desc.InitData = nullptr;
 		
@@ -40,7 +42,8 @@ namespace NxRHI
 			BufferDesc.BindFlags |= D3D11_BIND_UNORDERED_ACCESS;
 			BufferDesc.CPUAccessFlags = 0;
 			BufferDesc.Usage = D3D11_USAGE_DEFAULT;
-			BufferDesc.MiscFlags |= D3D11_RESOURCE_MISC_BUFFER_STRUCTURED;
+			if ((desc.Type & EBufferType::BFT_IndirectArgs) == 0)
+				BufferDesc.MiscFlags |= D3D11_RESOURCE_MISC_BUFFER_STRUCTURED;
 		}
 		if (desc.Type & EBufferType::BFT_SRV)
 		{
@@ -72,6 +75,7 @@ namespace NxRHI
 			BufferDesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE | D3D11_CPU_ACCESS_READ;
 		}
 
+		ASSERT((BufferDesc.MiscFlags & (D3D11_RESOURCE_MISC_BUFFER_ALLOW_RAW_VIEWS | D3D11_RESOURCE_MISC_BUFFER_STRUCTURED)) != (D3D11_RESOURCE_MISC_BUFFER_ALLOW_RAW_VIEWS | D3D11_RESOURCE_MISC_BUFFER_STRUCTURED));
 		HRESULT hr = S_OK;
 		if (desc.InitData != nullptr)
 		{
@@ -91,89 +95,75 @@ namespace NxRHI
 		return true;
 	}
 
-	void DX11Buffer::Flush2Device(ICommandList* cmd, void* pBuffer, UINT Size)
+	void DX11Buffer::UpdateGpuData(UINT subRes, void* pData, const FSubResourceFootPrint* footPrint)
 	{
-		if (Size > Desc.Size || pBuffer == NULL)
-			return;
-		ASSERT(Size == Desc.Size);
-
-		auto refCmdList = (DX11CommandList*)cmd;
-		auto pContext = refCmdList->mContext;
-		if (Size <= Desc.Size && (Desc.CpuAccess & ECpuAccess::CAS_WRITE))
+		if (Desc.Usage == USAGE_DEFAULT)
 		{
-			D3D11_MAPPED_SUBRESOURCE MappedSubresource;
-			if (pContext->Map(mBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &MappedSubresource) == S_OK)
-			{
-				memcpy(MappedSubresource.pData, pBuffer, Size);
-				pContext->Unmap(mBuffer, 0);
-			}
+			auto device = mDeviceRef.GetPtr();
+			auto cmd = ((DX11CmdQueue*)device->GetCmdQueue())->mHardwareContext;
+			cmd->mContext->UpdateSubresource(mBuffer, subRes, nullptr, pData, footPrint->RowPitch, footPrint->TotalSize);
 		}
 		else
 		{
-			pContext->UpdateSubresource(mBuffer, 0, nullptr, pBuffer, Size, 0);
-		}
-	}
+			auto device = mDeviceRef.GetPtr();
+			FTransientCmd tsCmd(device, QU_Transfer);
+			auto cmd = (DX11CommandList*)tsCmd.GetCmdList();
 
-	void DX11Buffer::UpdateGpuData(ICommandList* cmd, UINT subRes, void* pData, const FSubresourceBox* box, UINT rowPitch, UINT depthPitch)
-	{
-		auto refCmdList = (DX11CommandList*)cmd;
-		//refCmdList->mContext->UpdateSubresource(mBuffer, mipIndex, (D3D11_BOX*)box, pData, rowPitch, depthPitch);
-		auto pContext = refCmdList->mContext;
-		//UINT subRes = D3D11CalcSubresource(mipIndex, arrayIndex, 1);
-		if (Desc.Usage == USAGE_DYNAMIC)//rowPitch < Desc.Size && (Desc.CpuAccess & ECpuAccess::CAS_WRITE))
-		{
+			D3D11_MAP flags = D3D11_MAP_READ;
+			if (Desc.Usage == USAGE_DYNAMIC)
+				flags = D3D11_MAP_WRITE_DISCARD;
+			else
+				flags = D3D11_MAP_WRITE;
+
 			D3D11_MAPPED_SUBRESOURCE mapData;
-			if (S_OK == pContext->Map(mBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mapData))
+			auto ret = cmd->mContext->Map(mBuffer, subRes, flags, 0, (D3D11_MAPPED_SUBRESOURCE*)&mapData);
+			if (ret == S_OK)
 			{
-				memcpy(mapData.pData, pData, rowPitch);
-				pContext->Unmap(mBuffer, 0);
+				memcpy(mapData.pData, pData, footPrint->TotalSize);
+				cmd->mContext->Unmap(mBuffer, subRes);
 			}
-		}
-		else
-		{
-			pContext->UpdateSubresource(mBuffer, subRes, nullptr, pData, rowPitch, depthPitch);
-		}
-	}
-
-	void DX11Buffer::UpdateGpuData(ICommandList* cmd, UINT offset, void* pData, UINT size)
-	{
-		if (/*offset == 0 && */Desc.Usage == USAGE_DEFAULT)// && size == Desc.Size)
-		{
-			auto refCmdList = (DX11CommandList*)cmd;
-			refCmdList->mContext->UpdateSubresource(mBuffer, 0, nullptr, pData, size, size);
-			return;
-		}
-		FMappedSubResource subRes;
-		memset(&subRes, 0, sizeof(subRes));
-		if (Map(cmd, 0, &subRes, false))
-		{
-			memcpy((BYTE*)subRes.pData + offset, pData, size);
-			Unmap(cmd, 0);
+			/*FMappedSubResource mapData;
+			if (true == this->Map(0, &mapData, false))
+			{
+				memcpy(mapData.pData, pData, footPrint->TotalSize);
+				this->Unmap(0);
+			}*/
 		}
 	}
 
-	bool DX11Buffer::Map(ICommandList* cmd, UINT index, FMappedSubResource* res, bool forRead)
+	bool DX11Buffer::Map(UINT index, FMappedSubResource* res, bool forRead)
 	{
+		ASSERT(mMappingCmdList == nullptr);
+		auto device = mDeviceRef.GetPtr();
 		D3D11_MAP flags = D3D11_MAP_READ;
 		if (forRead)
 		{
-			ASSERT(cmd == ((DX11CmdQueue*)cmd->GetGpuDevice()->GetCmdQueue())->mHardwareContext);
-			cmd->Flush();
+			mMappingCmdList = ((DX11CmdQueue*)device->GetCmdQueue())->mHardwareContext;
+			//cmd->Flush();
 			flags = D3D11_MAP_READ;
 		}
 		else
-			flags = D3D11_MAP_WRITE_DISCARD;
+		{
+			mMappingCmdList = ((DX11CmdQueue*)device->GetCmdQueue())->mHardwareContext;
+			//mMappingCmdList = ((DX11CmdQueue*)device->GetCmdQueue())->mFramePost.UnsafeConvertTo<DX11CommandList>();
+			if (Desc.Usage == USAGE_DYNAMIC)
+				flags = D3D11_MAP_WRITE_DISCARD;
+			else
+				flags = D3D11_MAP_WRITE;
+		}
 
-		auto refCmdList = (DX11CommandList*)cmd;
-		auto ret = (refCmdList->mContext->Map(mBuffer, index, flags, 0, (D3D11_MAPPED_SUBRESOURCE*)res) == S_OK);
-		ASSERT(ret == true);
-		return ret;
+		auto ret = mMappingCmdList->mContext->Map(mBuffer, index, flags, 0, (D3D11_MAPPED_SUBRESOURCE*)res);
+		res->RowPitch = Desc.RowPitch;
+		res->DepthPitch = Desc.DepthPitch;
+		ASSERT(ret == S_OK);
+		return ret == S_OK;
 	}
 
-	void DX11Buffer::Unmap(ICommandList* cmd, UINT index)
+	void DX11Buffer::Unmap(UINT index)
 	{
-		auto refCmdList = (DX11CommandList*)cmd;
-		refCmdList->mContext->Unmap(mBuffer, index);
+		ASSERT(mMappingCmdList != nullptr);
+		mMappingCmdList->mContext->Unmap(mBuffer, index);
+		mMappingCmdList = nullptr;
 	}
 
 	void DX11Buffer::SetDebugName(const char* name)
@@ -192,6 +182,7 @@ namespace NxRHI
 	{
 		Safe_Release(mTexture1D);
 	}
+	
 	UINT BufferTypeToDXBindFlags(EBufferType type)
 	{
 		UINT flags = 0;
@@ -247,6 +238,7 @@ namespace NxRHI
 	}
 	bool DX11Texture::Init(DX11GpuDevice* device, void* pSharedObject)
 	{
+		mDeviceRef.FromObject(device);
 		IDXGIResource* dxgiRes;
 		auto hr = device->mDevice->OpenSharedResource(pSharedObject, IID_IDXGIResource, (void**)&dxgiRes);
 		if (FAILED(hr))
@@ -323,6 +315,7 @@ namespace NxRHI
 	}
 	bool DX11Texture::Init(DX11GpuDevice* device, const FTextureDesc& desc)
 	{
+		mDeviceRef.FromObject(device);
 		Desc = desc;
 		if (Desc.CpuAccess & ECpuAccess::CAS_READ)
 		{
@@ -446,28 +439,34 @@ namespace NxRHI
 		}
 		return true;
 	}
-	bool DX11Texture::Map(ICommandList* cmd, UINT subRes, FMappedSubResource* res, bool forRead)
+	bool DX11Texture::Map(UINT subRes, FMappedSubResource* res, bool forRead)
 	{
+		ASSERT(mMappingCmdList == nullptr);
+		auto device = mDeviceRef.GetPtr();
 		D3D11_MAP flags = D3D11_MAP_READ;
 		if (forRead)
 		{
-			ASSERT(cmd == ((DX11CmdQueue*)cmd->GetGpuDevice()->GetCmdQueue())->mHardwareContext);
-			cmd->Flush();
+			mMappingCmdList = ((DX11CmdQueue*)device->GetCmdQueue())->mHardwareContext;
+			//cmd->Flush();
 			flags = D3D11_MAP_READ;
 		}
 		else
-			flags = D3D11_MAP_WRITE_DISCARD;
-		//UINT subRes = D3D11CalcSubresource(mipIndex, arrayIndex, Desc.MipLevels);
-		auto refCmdList = (DX11CommandList*)cmd;
-		auto hr = refCmdList->mContext->Map(mTexture1D, subRes, flags, 0, (D3D11_MAPPED_SUBRESOURCE*)res);
+		{
+			mMappingCmdList = ((DX11CmdQueue*)device->GetCmdQueue())->mFramePost.UnsafeConvertTo<DX11CommandList>();
+			if (Desc.Usage == USAGE_DYNAMIC)
+				flags = D3D11_MAP_WRITE_DISCARD;
+			else
+				flags = D3D11_MAP_WRITE;
+		}
+		auto hr = mMappingCmdList->mContext->Map(mTexture1D, subRes, flags, 0, (D3D11_MAPPED_SUBRESOURCE*)res);
 		ASSERT(hr == S_OK);
 		return (hr == S_OK);
 	}
-	void DX11Texture::Unmap(ICommandList* cmd, UINT subRes)
+	void DX11Texture::Unmap(UINT subRes)
 	{
-		//UINT subRes = D3D11CalcSubresource(mipIndex, arrayIndex, Desc.MipLevels);
-		auto refCmdList = (DX11CommandList*)cmd;
-		refCmdList->mContext->Unmap(mTexture1D, subRes);
+		ASSERT(mMappingCmdList != nullptr);
+		mMappingCmdList->mContext->Unmap(mTexture1D, subRes);
+		mMappingCmdList = nullptr;
 	}
 	IGpuBufferData* DX11Texture::CreateBufferData(IGpuDevice* device, UINT mipIndex, ECpuAccess cpuAccess, FSubResourceFootPrint* outFootPrint)
 	{
@@ -513,11 +512,42 @@ namespace NxRHI
 
 		return result;
 	}
-	void DX11Texture::UpdateGpuData(ICommandList* cmd, UINT subRes, void* pData, const FSubresourceBox* box, UINT rowPitch, UINT depthPitch)
+	void DX11Texture::UpdateGpuData(UINT subRes, void* pData, const FSubResourceFootPrint* footPrint)
 	{
-		//UINT subRes = D3D11CalcSubresource(mipIndex, arrayIndex, Desc.MipLevels);
-		auto refCmdList = (DX11CommandList*)cmd;
-		refCmdList->mContext->UpdateSubresource(mTexture1D, subRes, (D3D11_BOX*)box, pData, rowPitch, depthPitch);
+		if (Desc.Usage == USAGE_DEFAULT)
+		{
+			auto device = mDeviceRef.GetPtr();
+			//FTransientCmd tsCmd(device, QU_Transfer);
+			//auto cmd = (DX11CommandList*)tsCmd.GetCmdList();
+			auto cmd = ((DX11CmdQueue*)device->GetCmdQueue())->mHardwareContext;
+			cmd->mContext->UpdateSubresource(mTexture1D, subRes, nullptr, pData, footPrint->RowPitch, footPrint->TotalSize);
+		}
+		else
+		{
+			auto device = mDeviceRef.GetPtr();
+			FTransientCmd tsCmd(device, QU_Transfer);
+			auto cmd = (DX11CommandList*)tsCmd.GetCmdList();
+
+			D3D11_MAP flags = D3D11_MAP_READ;
+			if (Desc.Usage == USAGE_DYNAMIC)
+				flags = D3D11_MAP_WRITE_DISCARD;
+			else
+				flags = D3D11_MAP_WRITE;
+
+			D3D11_MAPPED_SUBRESOURCE mapData;
+			auto ret = cmd->mContext->Map(mTexture1D, subRes, flags, 0, (D3D11_MAPPED_SUBRESOURCE*)&mapData);
+			if (ret == S_OK)
+			{
+				memcpy(mapData.pData, pData, footPrint->TotalSize);
+				cmd->mContext->Unmap(mTexture1D, subRes);
+			}
+			/*FMappedSubResource mapData;
+			if (true == this->Map(0, &mapData, false))
+			{
+				memcpy(mapData.pData, pData, footPrint->TotalSize);
+				this->Unmap(0);
+			}*/
+		}
 	}
 	void DX11Texture::SetDebugName(const char* name)
 	{
@@ -532,7 +562,10 @@ namespace NxRHI
 		{
 			FBufferDesc bfDesc{};
 			bfDesc.SetDefault();
-			bfDesc.Size = ShaderBinder->Size;
+			if (ShaderBinder)
+				bfDesc.Size = ShaderBinder->Size;
+			else
+				bfDesc.Size = desc.BufferSize;
 			//bfDesc.StructureStride = ShaderBinder->;
 			//bfDesc.InitData = desc->InitData;
 			bfDesc.Type = EBufferType::BFT_CBuffer;
@@ -849,11 +882,12 @@ namespace NxRHI
 		if (desc.ViewDimension == EDimensionUAV::UAV_DIMENSION_BUFFER)
 		{
 			tmp.Format = DXGI_FORMAT::DXGI_FORMAT_UNKNOWN;
+			if (tmp.Buffer.Flags & D3D11_BUFFER_UAV_FLAG_RAW)
+			{
+				tmp.Format = DXGI_FORMAT::DXGI_FORMAT_R32_TYPELESS;
+			}
 		}
-		if (tmp.Buffer.Flags & D3D11_BUFFER_UAV_FLAG_RAW)
-		{
-			tmp.Format = DXGI_FORMAT::DXGI_FORMAT_R32_TYPELESS;
-		}
+		
 		//tmp.Format = FormatToDXFormat(desc.Format);
 		//if (desc.ViewDimension == UAV_DIMENSION_BUFFER)
 		//{

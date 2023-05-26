@@ -88,6 +88,12 @@
     <ClCompile Include="$(MSBuildThisFileDirectory)thread\vfxThreadDispatcher.cpp">
       <Filter>thread</Filter>
     </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)random\halton.cpp">
+      <Filter>random</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)random\mt.cpp">
+      <Filter>random</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="$(MSBuildThisFileDirectory)BaseHead.h" />
@@ -221,6 +227,12 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)mix_defs\dds_defs.h">
       <Filter>mix_defs</Filter>
     </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)random\halton.h">
+      <Filter>random</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)random\mt.h">
+      <Filter>random</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="io">
@@ -270,6 +282,9 @@
     </Filter>
     <Filter Include="mix_defs">
       <UniqueIdentifier>{df71e943-4b24-4db9-9400-469b0e711ac4}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="random">
+      <UniqueIdentifier>{8640acc9-993b-48c6-9331-39147eed03a3}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
 </Project>

@@ -23,29 +23,17 @@ namespace NxRHI
 		return true;
 	}
 
-	void NullBuffer::Flush2Device(ICommandList* cmd, void* pBuffer, UINT Size)
-	{
-		if (Size > Desc.Size || pBuffer == NULL)
-			return;
-	}
-
-	void NullBuffer::UpdateGpuData(ICommandList* cmd, UINT subRes, void* pData, const FSubresourceBox* box, UINT rowPitch, UINT depthPitch)
-	{
-		auto refCmdList = (NullCommandList*)cmd;
-		
-	}
-
-	void NullBuffer::UpdateGpuData(ICommandList* cmd, UINT offset, void* pData, UINT size)
+	void NullBuffer::UpdateGpuData(UINT subRes, void* pData, const FSubResourceFootPrint* footPrint)
 	{
 		
 	}
 
-	bool NullBuffer::Map(ICommandList* cmd, UINT index, FMappedSubResource* res, bool forRead)
+	bool NullBuffer::Map(UINT index, FMappedSubResource* res, bool forRead)
 	{
 		return false;
 	}
 
-	void NullBuffer::Unmap(ICommandList* cmd, UINT index)
+	void NullBuffer::Unmap(UINT index)
 	{
 		
 	}
@@ -66,16 +54,15 @@ namespace NxRHI
 		
 		return true;
 	}
-	bool NullTexture::Map(ICommandList* cmd, UINT subRes, FMappedSubResource* res, bool forRead)
+	bool NullTexture::Map(UINT subRes, FMappedSubResource* res, bool forRead)
 	{
 		return false;
 	}
-	void NullTexture::Unmap(ICommandList* cmd, UINT subRes)
+	void NullTexture::Unmap(UINT subRes)
 	{
 		
 	}
-
-	void NullTexture::UpdateGpuData(ICommandList* cmd, UINT subRes, void* pData, const FSubresourceBox* box, UINT rowPitch, UINT depthPitch)
+	void NullTexture::UpdateGpuData(UINT subRes, void* pData, const FSubResourceFootPrint* footPrint)
 	{
 		
 	}

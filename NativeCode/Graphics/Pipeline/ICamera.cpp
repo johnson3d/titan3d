@@ -1,4 +1,5 @@
 #include "ICamera.h"
+#include "../../Math/v3dxVector4.h"
 
 #define new VNEW
 
@@ -18,6 +19,8 @@ ICamera::ICamera()
 	mFov = V_PI / 2.0f;
 	mZNear = 0.1f;
 	mZFar = 500.0f;
+	mJitterOffset.x = 0.5f;
+	mJitterOffset.y = 0.5f;
 	PerspectiveFovLH(mFov, 800.0f, 600.0f, mZNear, mZFar);
 	v3dxDVector3 eye(0, 10, -10);
 	v3dxDVector3 lookAt(0, 0, 0);
@@ -37,8 +40,9 @@ void ICamera::Cleanup()
 	
 }
 
-void ICamera::UpdateConstBufferData(EngineNS::NxRHI::ICbView* buffer)
+void ICamera::UpdateConstBufferData(EngineNS::NxRHI::IGpuDevice* device, EngineNS::NxRHI::ICbView* buffer)
 {
+	VAutoVSLLock lk(mLocker);
 	auto pBinder = buffer->GetShaderBinder();
 	v3dxMatrix4 tempM;	
 	memcpy(mRenderData, mLogicData, sizeof(CameraData));
@@ -51,30 +55,45 @@ void ICamera::UpdateConstBufferData(EngineNS::NxRHI::ICbView* buffer)
 		buffer->SetValue(pBinder->FindField("CameraDirection"), mLogicData->mDirection);
 		buffer->SetValue(pBinder->FindField("CameraRight"), mLogicData->mRight);
 		buffer->SetValue(pBinder->FindField("CameraUp"), mLogicData->mUp);
-		v3dxTransposeMatrix4(&tempM, &mLogicData->mViewMatrix);
-		buffer->SetValue(pBinder->FindField("CameraViewMatrix"), tempM);
-		v3dxTransposeMatrix4(&tempM, &mLogicData->mViewInverse);
-		buffer->SetValue(pBinder->FindField("CameraViewInverse"), tempM);
-		v3dxTransposeMatrix4(&tempM, &mLogicData->mViewProjection);
-		buffer->SetValue(pBinder->FindField("ViewPrjMtx"), tempM);
-		v3dxTransposeMatrix4(&tempM, &mLogicData->mViewProjectionInverse);
-		buffer->SetValue(pBinder->FindField("ViewPrjInvMtx"), tempM);
+		
+		buffer->SetMatrix(pBinder->FindField("CameraViewMatrix"), mLogicData->mViewMatrix);
+		buffer->SetMatrix(pBinder->FindField("CameraViewInverse"), mLogicData->mViewInverse);
+		
+		buffer->SetMatrix(pBinder->FindField("PrjMtx"), mLogicData->mProjectionMatrix);
+		buffer->SetMatrix(pBinder->FindField("PrjInvMtx"), mLogicData->mProjectionInverse);
+		buffer->SetMatrix(pBinder->FindField("ViewPrjMtx"), mLogicData->mViewProjection);
+		buffer->SetMatrix(pBinder->FindField("ViewPrjInvMtx"), mLogicData->mViewProjectionInverse);
 
-		v3dxTransposeMatrix4(&tempM, &mLogicData->mProjectionMatrix);
-		buffer->SetValue(pBinder->FindField("PrjMtx"), tempM);
-		v3dxTransposeMatrix4(&tempM, &mLogicData->mProjectionInverse);
-		buffer->SetValue(pBinder->FindField("PrjInvMtx"), tempM);
+		{
+			const NxRHI::FShaderVarDesc* fld = pBinder->FindField("CornerRays");
+			buffer->SetValue(fld, ENUM_FRUSTUMCN_0, mFrustum.GetCornerRay(ENUM_FRUSTUMCN_0));
+			buffer->SetValue(fld, ENUM_FRUSTUMCN_1, mFrustum.GetCornerRay(ENUM_FRUSTUMCN_1));
+			buffer->SetValue(fld, ENUM_FRUSTUMCN_2, mFrustum.GetCornerRay(ENUM_FRUSTUMCN_2));
+			buffer->SetValue(fld, ENUM_FRUSTUMCN_3, mFrustum.GetCornerRay(ENUM_FRUSTUMCN_3));
+		}
+		{
+			const NxRHI::FShaderVarDesc* fld = pBinder->FindField("ClipPlanes");
+			buffer->SetValue(fld, ENUM_FRUSTUMPL_TOP, mFrustum.GetPlane(ENUM_FRUSTUMPL_TOP));
+			buffer->SetValue(fld, ENUM_FRUSTUMPL_RIGHT, mFrustum.GetPlane(ENUM_FRUSTUMPL_RIGHT));
+			buffer->SetValue(fld, ENUM_FRUSTUMPL_BOTTOM, mFrustum.GetPlane(ENUM_FRUSTUMPL_BOTTOM));
+			buffer->SetValue(fld, ENUM_FRUSTUMPL_LEFT, mFrustum.GetPlane(ENUM_FRUSTUMPL_LEFT));
+			buffer->SetValue(fld, ENUM_FRUSTUMPL_NEAR, mFrustum.GetPlane(ENUM_FRUSTUMPL_NEAR));
+			buffer->SetValue(fld, ENUM_FRUSTUMPL_FAR, mFrustum.GetPlane(ENUM_FRUSTUMPL_FAR));
+		}
 
+		//ASSERT(mLogicData->mJitterViewProjection.m11 == mLogicData->mViewProjection.m11);
+		buffer->SetMatrix(pBinder->FindField("JitterPrjMtx"), mLogicData->mJitterProjectionMatrix);
+		buffer->SetMatrix(pBinder->FindField("JitterPrjInvMtx"), mLogicData->mJitterProjectionInverse);
+		buffer->SetMatrix(pBinder->FindField("JitterViewPrjMtx"), mLogicData->mJitterViewProjection);
+		buffer->SetMatrix(pBinder->FindField("JitterViewPrjInvMtx"), mLogicData->mJitterViewProjectionInverse);
+		
+		buffer->SetValue(pBinder->FindField("JitterOffset"), GetJitterUV());
+		
 		buffer->SetValue(pBinder->FindField("gZNear"), mZNear);
 		buffer->SetValue(pBinder->FindField("gZFar"), mZFar);
 
 		auto cameraOffset = GetMatrixStartPosition().ToSingleVector();
 		buffer->SetValue(pBinder->FindField("CameraOffset"), cameraOffset);
-
-		/*auto cmd = rc->GetCmdQueue()->GetIdleCmdlist(true);
-		mCBuffer->FlushDirty(cmd);
-		rc->GetCmdQueue()->QueueCommit(1, &cmd);
-		rc->GetCmdQueue()->ReleaseIdleCmdlist(cmd, true);*/
 	}
 }
 
@@ -100,17 +119,19 @@ void ICamera::UpdateFrustum()
 		const v3dVector3_t vecFrustum[8] =
 		{
 			{ -1.0f, -1.0f,  0.0f }, // xyz
-		{ 1.0f, -1.0f,  0.0f }, // Xyz
-		{ -1.0f,  1.0f,  0.0f }, // xYz
-		{ 1.0f,  1.0f,  0.0f }, // XYz
-		{ -1.0f, -1.0f,  1.0f }, // xyZ
-		{ 1.0f, -1.0f,  1.0f }, // XyZ
-		{ -1.0f,  1.0f,  1.0f }, // xYZ
-		{ 1.0f,  1.0f,  1.0f }, // XYZ
+			{ 1.0f, -1.0f,  0.0f }, // Xyz
+			{ -1.0f,  1.0f,  0.0f }, // xYz
+			{ 1.0f,  1.0f,  0.0f }, // XYz
+			{ -1.0f, -1.0f,  1.0f }, // xyZ
+			{ 1.0f, -1.0f,  1.0f }, // XyZ
+			{ -1.0f,  1.0f,  1.0f }, // xYZ
+			{ 1.0f,  1.0f,  1.0f }, // XYZ
 		};
 
 		for (INT i = 0; i < 8; i++)
+		{
 			v3dxVec3TransformCoord(&vec[i], &vecFrustum[i], &mLogicData->mViewProjectionInverse);
+		}
 	}
 	else
 	{
@@ -140,7 +161,9 @@ void ICamera::UpdateFrustum()
 		//	avEnd[ENUM_FRUSTUMCN_LEFTBOTTOM] += m_vCameraPt;
 
 		for (INT i = 0; i < 8; i++)
+		{
 			v3dxVec3TransformCoord(&vec[i], &vecFrustum[i], &mLogicData->mViewInverse);
+		}	
 	}
 
 	mFrustum.m_vTipPt = mLogicData->GetLocalPosition();
@@ -202,6 +225,7 @@ void ICamera::UpdateFrustumOrtho()
 
 void ICamera::PerspectiveFovLH(float fov, float width, float height, float zMin, float zMax)
 {
+	VAutoVSLLock lk(mLocker);
 	mIsOrtho = false;
 	mZNear = zMin;
 	mZFar = zMax;
@@ -215,26 +239,30 @@ void ICamera::PerspectiveFovLH(float fov, float width, float height, float zMin,
 	mAspect = width / height;
 
 	v3dxMatrix4Perspective(&mLogicData->mProjectionMatrix, fov, mAspect, zMin, zMax);
+	mLogicData->mJitterProjectionMatrix = mLogicData->mProjectionMatrix;
+	auto jitterUV = GetJitterUV();
+	mLogicData->mJitterProjectionMatrix.m31 += jitterUV.x * 2.0f;
+	mLogicData->mJitterProjectionMatrix.m32 += jitterUV.y * 2.0f;
 	v3dxMatrix4Inverse(&mLogicData->mProjectionInverse, &mLogicData->mProjectionMatrix, NULL);
+	v3dxMatrix4Inverse(&mLogicData->mJitterProjectionInverse, &mLogicData->mJitterProjectionMatrix, NULL);
 
 	mLogicData->mViewProjection = mLogicData->mViewMatrix * mLogicData->mProjectionMatrix;
+	mLogicData->mJitterViewProjection = mLogicData->mViewMatrix * mLogicData->mJitterProjectionMatrix;
 	v3dxMatrix4Inverse(&mLogicData->mViewProjectionInverse, &mLogicData->mViewProjection, NULL);
+	v3dxMatrix4Inverse(&mLogicData->mJitterViewProjectionInverse, &mLogicData->mJitterViewProjection, NULL);
 
 	mLogicData->mViewPortOffsetMatrix.scaleMatrix(width * 0.5f, height * -0.5f, 1.0f);
 	mLogicData->mViewPortOffsetMatrix.setTrans(width * 0.5f, height * 0.5f, 0.0f);
 	
 	v3dxMatrix4Mul(&mLogicData->mToViewPortMatrix, &mLogicData->mViewProjection, &mLogicData->mViewPortOffsetMatrix);
+	v3dxMatrix4Mul(&mLogicData->mJitterToViewPortMatrix, &mLogicData->mJitterViewProjection, &mLogicData->mViewPortOffsetMatrix);
 	//UpdateConstBufferData();
 	UpdateFrustum();
-	
-	mLogicData->mProjectionMatrix = mLogicData->mProjectionMatrix;
-	mLogicData->mProjectionInverse = mLogicData->mProjectionInverse;
-	mLogicData->mViewPortOffsetMatrix = mLogicData->mViewPortOffsetMatrix;
-	mLogicData->mToViewPortMatrix = mLogicData->mToViewPortMatrix;
 }
 
 void ICamera::MakeOrtho(float w, float h, float zn, float zf)
 {
+	VAutoVSLLock lk(mLocker);
 	mIsOrtho = true;
 
 	mWidth = w;
@@ -287,6 +315,7 @@ void ICamera::DoOrthoProjectionForShadow(float w, float h, float znear, float zf
 
 void ICamera::LookAtLH(const v3dxDVector3* eye, const v3dxDVector3* lookAt, const v3dxVector3* up)
 {
+	VAutoVSLLock lk(mLocker);
 	//mLogicData->mMatrixStartPosition = v3dxDVector3(0,0,0);
 	mLogicData->mPosition = *eye;
 	mLogicData->mLookAt = *lookAt;
@@ -310,9 +339,12 @@ void ICamera::LookAtLH(const v3dxDVector3* eye, const v3dxDVector3* lookAt, cons
 	v3dxMatrix4Inverse(&mLogicData->mViewInverse, &mLogicData->mViewMatrix, NULL);
 
 	mLogicData->mViewProjection = mLogicData->mViewMatrix * mLogicData->mProjectionMatrix;
+	mLogicData->mJitterViewProjection = mLogicData->mViewMatrix * mLogicData->mJitterProjectionMatrix;
 	v3dxMatrix4Inverse(&mLogicData->mViewProjectionInverse, &mLogicData->mViewProjection, NULL);
+	v3dxMatrix4Inverse(&mLogicData->mJitterViewProjectionInverse, &mLogicData->mJitterViewProjection, NULL);
 
 	v3dxMatrix4Mul(&mLogicData->mToViewPortMatrix, &mLogicData->mViewProjection, &mLogicData->mViewPortOffsetMatrix);
+	v3dxMatrix4Mul(&mLogicData->mJitterToViewPortMatrix, &mLogicData->mJitterViewProjection, &mLogicData->mViewPortOffsetMatrix);
 	//UpdateConstBufferData();
 	UpdateFrustum();
 }

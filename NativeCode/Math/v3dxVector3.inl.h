@@ -15,12 +15,18 @@
 
 #include "v3dxMatrix3.h"
 #include "v3dxQuaternion.h"
+#include "v3dxVector2.h"
 
 #if !defined(PLATFORM_WIN)
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wunused-value"
 #endif
 
+inline void v3dxVector3::setValue(const v3dxVector2& v)
+{
+	x = v.x;
+	y = v.y;
+}
 //inline void	v3dxVector3::operator*=(const v3dxMatrix3 &m)
 //{
 //	float ox = x;

@@ -2,6 +2,7 @@
 #include "NxGpuState.h"
 #include "NxGeomMesh.h"
 #include "NxDrawcall.h"
+#include "NxCommandList.h"
 #include "NullDevice/NullGpuDevice.h"
 
 #if defined(HasModule_RenderDoc)
@@ -60,7 +61,7 @@ namespace NxRHI
 		if (desc->UseRenderDoc)
 		{
 #if defined(HasModule_RenderDoc)
-			IRenderDocTool::GetInstance()->InitRenderDoc();
+			IRenderDocTool::GetInstance()->InitRenderDoc(desc->RenderDocPath.c_str());
 #endif
 		}
 		switch (type)
@@ -142,6 +143,11 @@ namespace NxRHI
 		auto result = new ICopyDraw();
 		return result;
 	}
+	void IGpuDevice::PushWaitFlushBuffer(IBuffer* buffer)
+	{
+		VAutoVSLLock lk(mPostEventLocker);
+		mWaitFlushBuffers.push_back(buffer);
+	}
 	void IGpuDevice::TickPostEvents()
 	{
 		if (mFrameFence != nullptr)
@@ -150,8 +156,19 @@ namespace NxRHI
 				VAutoVSLLock lk(mPostEventLocker);
 				mTickingPostEvents.insert(mTickingPostEvents.begin(), mPostEvents.begin(), mPostEvents.end());
 				mPostEvents.clear();
+
+				for (auto& i : mWaitFlushBuffers)
+				{
+					i->FlushDirty();
+				}
+				mWaitFlushBuffers.clear();
 			}
 
+			auto expect = mFrameFence->GetExpectValue();
+			if (expect > 3)
+			{
+				mFrameFence->Wait(expect - 3);
+			}
 			auto completed = mFrameFence->GetCompletedValue();
 			for (size_t i = 0; i < mTickingPostEvents.size(); i++)
 			{
@@ -161,19 +178,13 @@ namespace NxRHI
 					i--;
 				}
 			}
-			ASSERT(completed <= mFrameFence->GetAspectValue());
-			GetCmdQueue()->IncreaseSignal(mFrameFence);
-			
-			//if (completed < mFrameFence->GetAspectValue())
-			//{
-			//	//mFrameFence->Wait(mFrameFence->GetAspectValue());
-			//	GetCmdQueue()->IncreaseSignal(mFrameFence);
-			//}
-			//else
-			//{
-			//	GetCmdQueue()->IncreaseSignal(mFrameFence);
-			//}
+			ASSERT(completed <= mFrameFence->GetExpectValue());
+			GetCmdQueue()->IncreaseSignal(mFrameFence, EQueueType::QU_Default);
 		}
+
+		GetCmdQueue()->mFramePost->EndCommand();
+		GetCmdQueue()->ExecuteCommandListSingle(GetCmdQueue()->mFramePost, QU_Default);
+		GetCmdQueue()->mFramePost->BeginCommand();
 	}
 }
 

@@ -20,66 +20,100 @@ CsValueList::~CsValueList()
 UINT CsValueList::GetCount()
 {
 	ASSERT(mStride != 0);
-	ASSERT(mMemData.GetSize() % mStride == 0);
- 	return mMemData.GetSize() / mStride;
+	ASSERT(mMemData.size() % mStride == 0);
+ 	return (UINT)mMemData.size() / mStride;
 }
 
 void CsValueList::SetCapacity(int capacity)
 {
 	ASSERT(mStride != 0);
-	mMemData.InstantArray(mMemData.GetSize(), capacity * mStride, FALSE);
+	mMemData.reserve(capacity * mStride);
 }
 
-void CsValueList::SetSize(int capacity)
+int CsValueList::GetCapacity()
 {
 	ASSERT(mStride != 0);
-	mMemData.SetSize(capacity * mStride, capacity * mStride, FALSE);
+	return (int)(mMemData.capacity() / mStride);
+}
+
+void CsValueList::SetSize(int size)
+{
+	ASSERT(mStride != 0);
+	mMemData.resize(size * mStride);
 }
 
 void CsValueList::AddValue(BYTE* ptr)
 {
 	ASSERT(mStride != 0);
 
-	for (UINT i = 0; i < mStride; i++)
+	auto index = mMemData.size();
+	mMemData.resize(mMemData.size() + mStride);
+	memcpy(&mMemData[index], ptr, mStride);
+	/*for (UINT i = 0; i < mStride; i++)
 	{
 		mMemData.Add(ptr[i]);
-	}
+	}*/
 }
 
 void CsValueList::Append(CsValueList* src)
 {
 	ASSERT(mStride != 0);
 
-	mMemData.Append(src->mMemData);
+	mMemData.insert(mMemData.end(), src->mMemData.begin(), src->mMemData.end());
+	//mMemData.Append(src->mMemData);
 }
 
 void CsValueList::AppendArray(BYTE* src, int count)
 {
-	mMemData.Append(src, mStride * count);
+	auto index = mMemData.size();
+	mMemData.resize(mMemData.size() + mStride * count);
+	memcpy(&mMemData[index], src, mStride * count);
+	//mMemData.Append(src, mStride * count);
 }
 
 void CsValueList::RemoveAt(UINT index)
 {
 	ASSERT(mStride != 0);
-
 	UINT offset = index * mStride;
-	for (UINT i = 0; i < mStride; i++)
+	auto s = mMemData.begin() + offset;
+	
+	mMemData.erase(s, s + mStride);
+	/*for (UINT i = 0; i < mStride; i++)
 	{
 		mMemData.RemoveAt(offset);
-	}
+	}*/
+}
+
+void CsValueList::InsertAt(UINT index, BYTE* ptr)
+{
+	ASSERT(mStride != 0);
+	UINT offset = index * mStride;
+	auto oldSize = mMemData.size();	
+	mMemData.resize(oldSize + mStride);
+	
+	memmove(&mMemData[offset + mStride], &mMemData[offset], oldSize - offset);
+	memcpy(&mMemData[offset], ptr, mStride);
 }
 
 void CsValueList::Clear(vBOOL bFreeMemory)
 {
-	mMemData.RemoveAll(bFreeMemory);
+	//mMemData.RemoveAll(bFreeMemory);
+	if (bFreeMemory)
+	{
+		mMemData = std::vector<BYTE>();
+	}
+	else
+	{
+		mMemData.clear();
+	}
 }
 
 BYTE* CsValueList::GetAddressAt(UINT index)
 {
 	ASSERT(mStride != 0);
 
-	UINT offset = index * mStride;
-	if ((int)offset >= mMemData.GetSize())
+	size_t offset = index * mStride;
+	if (offset >= mMemData.size())
 		return nullptr;
 	return &mMemData[offset];
 }
@@ -89,8 +123,8 @@ void CsValueList::SetDatas(BYTE* ptr, int countOfObj)
 	ASSERT(mStride != 0);
 
 	UINT size = countOfObj * mStride;
-	mMemData.SetSize(size);
-	memcpy(mMemData.GetData(), ptr, size);
+	mMemData.resize(size);
+	memcpy(&mMemData[0], ptr, size);
 }
 
 void CsQueue::Enqueue(BYTE* p)

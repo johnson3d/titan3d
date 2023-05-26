@@ -1,8 +1,14 @@
 #include "v3dxMath.h"
+#include "v3dxVector3.h"
 
 inline v3dxVector2::v3dxVector2()
 {
 	x=y=0.0f;
+}
+
+inline v3dxVector2::v3dxVector2(const v3dxVector3& v)
+{
+	x = v.x; y = v.y;
 }
 
 inline v3dxVector2::v3dxVector2(float ix,float iy)
@@ -30,6 +36,16 @@ inline void v3dxVector2::normalize(){
 		x=x/fLen;
 		y=y/fLen;
 	} 
+}
+
+inline v3dxVector2 v3dxVector2::GetNormalize() const {
+	v3dxVector2 result;
+	float fLen = getLength();
+	if (fLen > 0) {
+		result.x = x / fLen;
+		result.y = y / fLen;
+	}
+	return result;
 }
 
 

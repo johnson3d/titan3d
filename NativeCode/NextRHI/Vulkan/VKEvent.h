@@ -49,7 +49,7 @@ namespace NxRHI
 		bool Init(VKGpuDevice * pDevice, const FFenceDesc & desc, const char* name);
 		virtual UINT64 GetCompletedValue() override;
 		virtual void CpuSignal(UINT64 value) override;
-		virtual void Signal(ICmdQueue* queue, UINT64 value) override;
+		virtual void Signal(ICmdQueue* queue, UINT64 value, EQueueType type) override;
 		virtual bool Wait(UINT64 value, UINT timeOut = INFINITE) override;
 		virtual void SetDebugName(const char* name) override;
 
@@ -57,7 +57,7 @@ namespace NxRHI
 			return false;
 		}
 	public:
-		TObjectHandle<VKGpuDevice>	mDeviceRef;
+		TWeakRefHandle<VKGpuDevice>	mDeviceRef;
 		AutoRef<VKEvent>	mEvent;
 		VkSemaphore			mSemaphore = (VkSemaphore)nullptr;
 	};
@@ -74,7 +74,7 @@ namespace NxRHI
 		}
 		virtual bool Wait(UINT64 value, UINT timeOut = INFINITE) override;
 	};
-	class VKGpuToHostFence : public VIUnknownBase
+	class VKGpuToHostFence : public VIUnknown
 	{
 	public:
 		VKGpuToHostFence(VKGpuDevice* pDevice, bool signal);
@@ -83,7 +83,7 @@ namespace NxRHI
 		void Reset();
 		bool IsSignaled();
 	public:
-		TObjectHandle<VKGpuDevice>	mDeviceRef;
+		TWeakRefHandle<VKGpuDevice>	mDeviceRef;
 		VkFence				mFence = (VkFence)nullptr;
 	};
 }

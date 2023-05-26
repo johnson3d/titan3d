@@ -69,32 +69,32 @@ namespace NxRHI
 			{
 				switch (i.first->BindType)
 				{
-				case SBT_CBuffer:
-				{
-					IGpuResource* t = i.second;
-					effect->BindCBV(cmdlist, i.first, (ICbView*)t);
-				}
-				break;
-				case SBT_SRV:
-				{
-					IGpuResource* t = i.second;
-					effect->BindSrv(cmdlist, i.first, (ISrView*)t);
-				}
-				break;
-				case SBT_UAV:
-				{
-					IGpuResource* t = i.second;
-					effect->BindUav(cmdlist, i.first, (IUaView*)t);
-				}
-				break;
-				case SBT_Sampler:
-				{
-					IGpuResource* t = i.second;
-					effect->BindSampler(cmdlist, i.first, (ISampler*)t);
-				}
-				break;
-				default:
+					case SBT_CBuffer:
+					{
+						IGpuResource* t = i.second;
+						effect->BindCBV(cmdlist, i.first, (ICbView*)t);
+					}
 					break;
+					case SBT_SRV:
+					{
+						IGpuResource* t = i.second;
+						effect->BindSrv(cmdlist, i.first, (ISrView*)t);
+					}
+					break;
+					case SBT_UAV:
+					{
+						IGpuResource* t = i.second;
+						effect->BindUav(cmdlist, i.first, (IUaView*)t);
+					}
+					break;
+					case SBT_Sampler:
+					{
+						IGpuResource* t = i.second;
+						effect->BindSampler(cmdlist, i.first, (ISampler*)t);
+					}
+					break;
+					default:
+						break;
 				}
 			}
 		}

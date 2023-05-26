@@ -7,7 +7,7 @@ TR_CALLBACK(SV_CallConvention = System.Runtime.InteropServices.CallingConvention
 typedef void (*FOnTcpConnectRcvData)(TcpConnect* pConnect, BYTE* ptr, int size);
 
 class TR_CLASS()
-TcpConnect : public VIUnknown
+TcpConnect : public IWeakReference
 {
 public:
 	void* GCHandle;

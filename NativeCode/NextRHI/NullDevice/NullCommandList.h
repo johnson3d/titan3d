@@ -15,6 +15,9 @@ namespace NxRHI
 		bool Init(NullGpuDevice* device);
 		virtual bool BeginCommand() override;
 		virtual void EndCommand() override;
+		virtual bool IsRecording() const override {
+			return false;
+		}
 		virtual void SetShader(IShader* shader) override;
 		virtual void SetCBV(EShaderType type, const FShaderBinder* binder, ICbView* buffer) override;
 		virtual void SetSrv(EShaderType type, const FShaderBinder* binder, ISrView* view) override;
@@ -33,7 +36,7 @@ namespace NxRHI
 
 		virtual void Draw(EPrimitiveType topology, UINT BaseVertex, UINT DrawCount, UINT Instance = 1) override;
 		virtual void DrawIndexed(EPrimitiveType topology, UINT BaseVertex, UINT StartIndex, UINT DrawCount, UINT Instance = 1) override;
-		virtual void IndirectDrawIndexed(EPrimitiveType topology, IBuffer* indirectArg, UINT indirectArgOffset = 0) override;
+		virtual void IndirectDrawIndexed(EPrimitiveType topology, IBuffer* indirectArg, UINT indirectArgOffset = 0, IBuffer* countBuffer = nullptr) override;
 		virtual void Dispatch(UINT x, UINT y, UINT z) override;
 		virtual void IndirectDispatch(IBuffer* indirectArg, UINT indirectArgOffset = 0) override;
 		virtual void SetMemoryBarrier(EPipelineStage srcStage, EPipelineStage dstStage, EBarrierAccess srcAccess, EBarrierAccess dstAccess) override;
@@ -48,7 +51,6 @@ namespace NxRHI
 		virtual void CopyBufferToTexture(ITexture* target, UINT subRes, IBuffer* src, const FSubResourceFootPrint* footprint) override;
 		virtual void CopyTextureToBuffer(IBuffer* target, const FSubResourceFootPrint* footprint, ITexture* src, UINT subRes) override;
 
-		virtual void Flush() override;
 		virtual void BeginEvent(const char* info) override;
 		virtual void EndEvent() override;
 	};

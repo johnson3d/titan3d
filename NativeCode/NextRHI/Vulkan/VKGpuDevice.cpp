@@ -298,6 +298,10 @@ namespace NxRHI
 		VkStructureType                     sType;
 		const void* pNext;
 	};
+	void VKGpuDevice::SetBreakOnID(int id, bool open)
+	{
+
+	}
 	bool VKGpuDevice::InitDevice(IGpuSystem* pGpuSystem, const FGpuDeviceDesc* desc)
 	{
 		auto pVkGpuSys = (VKGpuSystem*)pGpuSystem;
@@ -902,12 +906,13 @@ namespace NxRHI
 		result->mDeviceRef.FromObject(this);
 		return result;
 	}
+	IGpuScope* VKGpuDevice::CreateGpuScope()
+	{
+		return nullptr;
+	}
 	void VKGpuDevice::TickPostEvents()
 	{
 		IGpuDevice::TickPostEvents();
-		auto completed = mCmdQueue->mQueueExecuteFence->GetCompletedValue();
-		auto aspect = mCmdQueue->mQueueExecuteFence->GetAspectValue();
-		ASSERT(completed <= aspect);
 		/*auto delta = (UINT)(aspect - completed);
 		if (delta > 1)
 		{
@@ -935,9 +940,11 @@ namespace NxRHI
 	}
 	void VKCmdQueue::Init(VKGpuDevice* device)
 	{
+		mFramePost = MakeWeakRef(device->CreateCommandList());
+		mFramePost->BeginCommand();
+
 		FFenceDesc fcDesc{};
-		//mQueueFence = MakeWeakRef(device->CreateFence(&fcDesc, "CmdQueue Fence"));
-		mQueueExecuteFence = MakeWeakRef(device->CreateFence(&fcDesc, "QueueExecute"));
+		mFlushFence = MakeWeakRef(device->CreateFence(&fcDesc, "CmdQueue Fence"));
 		
 		mDummyCmdList = MakeWeakRef((VKCommandList*)device->CreateCommandList());
 		mDummyCmdList->BeginCommand(VK_COMMAND_BUFFER_USAGE_SIMULTANEOUS_USE_BIT);
@@ -945,10 +952,9 @@ namespace NxRHI
 		mDummyCmdList->EndEvent();*/
 		mDummyCmdList->EndCommand(false);
 	}
-	void VKCmdQueue::QueueExecuteCommandList(ICommandList* Cmdlist)
+	void VKCmdQueue::QueueExecuteCommandList(ICommandList* Cmdlist, EQueueType type)
 	{
 		auto dx11Cmd = (VKCommandList*)Cmdlist;
-		auto dxFence = mQueueExecuteFence.UnsafeConvertTo<VKFence>();
 		auto cmdFence = dx11Cmd->mCommitFence.UnsafeConvertTo<VKFence>();
 		if (dx11Cmd->mCommandBuffer == nullptr)
 			return;
@@ -959,204 +965,53 @@ namespace NxRHI
 			submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
 			submitInfo.commandBufferCount = 1;
 			submitInfo.pCommandBuffers = &dx11Cmd->mCommandBuffer->RealObject;
-			submitInfo.waitSemaphoreCount = 1;
-			submitInfo.pWaitSemaphores = &dxFence->mSemaphore;
+			submitInfo.waitSemaphoreCount = 0;
+			submitInfo.pWaitSemaphores = nullptr;
 			VkPipelineStageFlags waitStage = VK_PIPELINE_STAGE_ALL_COMMANDS_BIT;/*VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT |
 				VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT |
 				VK_PIPELINE_STAGE_ALL_COMMANDS_BIT;*/
 			submitInfo.pWaitDstStageMask = &waitStage;
-			submitInfo.signalSemaphoreCount = 2;
-			VkSemaphore signalSemas[2]{};
-			signalSemas[0] = dxFence->mSemaphore;
-			signalSemas[1] = cmdFence->mSemaphore;
+			submitInfo.signalSemaphoreCount = 1;
+			VkSemaphore signalSemas[1]{};
+			signalSemas[0] = cmdFence->mSemaphore;
 			submitInfo.pSignalSemaphores = signalSemas;
 
 			VkTimelineSemaphoreSubmitInfo timelineInfo{};
 			submitInfo.pNext = &timelineInfo;
 			timelineInfo.sType = VK_STRUCTURE_TYPE_TIMELINE_SEMAPHORE_SUBMIT_INFO;
 
-			UINT64 waitValue = dxFence->AspectValue;
-			timelineInfo.waitSemaphoreValueCount = 1;
-			timelineInfo.pWaitSemaphoreValues = &waitValue;
+			timelineInfo.waitSemaphoreValueCount = 0;
+			timelineInfo.pWaitSemaphoreValues = nullptr;
 
-			UINT64 signalValues[2]{};
-			signalValues[0] = ++dxFence->AspectValue;
-			signalValues[1] = ++cmdFence->AspectValue;
+			UINT64 signalValues[1]{};
+			signalValues[0] = ++cmdFence->ExpectValue;
 			timelineInfo.signalSemaphoreValueCount = 2;
 			timelineInfo.pSignalSemaphoreValues = signalValues;
 
 			auto hr = vkQueueSubmit(mGraphicsQueue, 1, &submitInfo, nullptr);
 			ASSERT(hr == VK_SUCCESS);
 			//dx11Cmd->mCommandBuffer = nullptr;
-			dx11Cmd->Commit(this);
+			dx11Cmd->Commit(this, type);
 		}
 	}
-	void VKCmdQueue::ExecuteCommandList(ICommandList* Cmdlist, UINT NumOfWait, ICommandList** ppWaitCmdlists)
+	void VKCmdQueue::ExecuteCommandList(UINT NumOfExe, ICommandList** Cmdlist, UINT NumOfWait, ICommandList** ppWaitCmdlists, EQueueType type)
 	{
-		//((VKCommandList*)Cmdlist)->Commit(this);
-		//auto dx11Cmd = (VKCommandList*)Cmdlist;
-		//if (dx11Cmd->mCommandBuffer == nullptr)
-		//	return;
+		for (UINT i = 0; i < NumOfWait; i++)
+		{
+			ppWaitCmdlists[i]->mCommitFence->WaitToExpect();
+		}
 
-		//if (VKGpuSystem::vkQueueSubmit2 != nullptr)
-		//{
-		//	VAutoVSLLock locker(mImmCmdListLocker);
-
-		//	VkCommandBufferSubmitInfo cmdbufferInfo{};
-		//	cmdbufferInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_SUBMIT_INFO;
-		//	cmdbufferInfo.commandBuffer = ((VKCommandList*)Cmdlist)->mCommandBuffer->RealObject;
-
-		//	VkSubmitInfo2 submitInfo{};
-		//	submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO_2;
-		//	submitInfo.commandBufferInfoCount = 1;
-		//	submitInfo.pCommandBufferInfos = &cmdbufferInfo;
-
-		//	std::vector<VkSemaphoreSubmitInfo> waitSmp{};
-		//	VkSemaphoreSubmitInfo signalSmp[2]{};
-		//	{
-		//		auto dxFence = mQueueExecuteFence.UnsafeConvertTo<VKFence>();
-		//		signalSmp[0].sType = VK_STRUCTURE_TYPE_SEMAPHORE_SUBMIT_INFO;
-		//		signalSmp[0].semaphore = dxFence->mSemaphore;
-		//		signalSmp[0].value = dxFence->GetAspectValue() + 1;
-		//		signalSmp[0].stageMask = VK_PIPELINE_STAGE_ALL_COMMANDS_BIT;
-
-		//		dxFence = Cmdlist->mCommitFence.UnsafeConvertTo<VKFence>();
-		//		signalSmp[1].sType = VK_STRUCTURE_TYPE_SEMAPHORE_SUBMIT_INFO;
-		//		signalSmp[1].semaphore = dxFence->mSemaphore;
-		//		signalSmp[1].value = dxFence->GetAspectValue() + 1;
-		//		signalSmp[1].stageMask = VK_PIPELINE_STAGE_ALL_COMMANDS_BIT;
-		//	}
-		//	submitInfo.signalSemaphoreInfoCount = (UINT)2;
-		//	submitInfo.pSignalSemaphoreInfos = signalSmp;
-
-		//	if (NumOfWait == UINT_MAX)
-		//	{
-		//		auto dxFence = mQueueExecuteFence.UnsafeConvertTo<VKFence>();
-		//		VkSemaphoreSubmitInfo tmp{};
-		//		tmp.sType = VK_STRUCTURE_TYPE_SEMAPHORE_SUBMIT_INFO;
-		//		tmp.semaphore = dxFence->mSemaphore;
-		//		tmp.value = dxFence->GetAspectValue();
-		//		tmp.stageMask = VK_PIPELINE_STAGE_ALL_COMMANDS_BIT;
-
-		//		submitInfo.waitSemaphoreInfoCount = 1;
-		//		submitInfo.pWaitSemaphoreInfos = &tmp;
-
-		//		VKGpuSystem::vkQueueSubmit2(mGraphicsQueue, 1, &submitInfo, nullptr);
-		//	}
-		//	else
-		//	{
-		//		for (UINT i = 0; i < NumOfWait; i++)
-		//		{
-		//			auto dxFence = ppWaitCmdlists[i]->mCommitFence.UnsafeConvertTo<VKFence>();
-		//			VkSemaphoreSubmitInfo tmp{};
-		//			tmp.sType = VK_STRUCTURE_TYPE_SEMAPHORE_SUBMIT_INFO;
-		//			tmp.semaphore = dxFence->mSemaphore;
-		//			tmp.value = dxFence->GetAspectValue();
-		//			tmp.stageMask = VK_PIPELINE_STAGE_ALL_COMMANDS_BIT;
-		//			waitSmp.push_back(tmp);
-		//		}
-		//		if (waitSmp.size() > 0)
-		//		{
-		//			submitInfo.waitSemaphoreInfoCount = (UINT)waitSmp.size();
-		//			submitInfo.pWaitSemaphoreInfos = &waitSmp[0];
-		//		}
-
-		//		VKGpuSystem::vkQueueSubmit2(mGraphicsQueue, 1, &submitInfo, nullptr);
-		//	}
-		//}
-		//else
-		//{
-		//	VAutoVSLLock locker(mImmCmdListLocker);
-
-		//	VkSubmitInfo submitInfo{};
-		//	submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
-		//	submitInfo.commandBufferCount = 1;
-		//	submitInfo.pCommandBuffers = &dx11Cmd->mCommandBuffer->RealObject;
-
-		//	VkSemaphore signalSmp[2]{};
-		//	UINT64 signalSmpValue[2]{};
-
-		//	UINT64 singleValue = mQueueExecuteFence->GetAspectValue();
-		//	VkPipelineStageFlags singleWaitStages = VK_PIPELINE_STAGE_ALL_COMMANDS_BIT;
-		//	std::vector<VkSemaphore> waitSmps;
-		//	std::vector<UINT64> waitSmpValues;
-		//	std::vector<VkPipelineStageFlags> waitSmpStages;
-		//	
-		//	VkTimelineSemaphoreSubmitInfo timelineInfo{};
-		//	timelineInfo.sType = VK_STRUCTURE_TYPE_TIMELINE_SEMAPHORE_SUBMIT_INFO;
-		//	timelineInfo.signalSemaphoreValueCount = (UINT)2;
-		//	timelineInfo.pSignalSemaphoreValues = signalSmpValue;
-		//	
-		//	submitInfo.pNext = &timelineInfo;
-		//	submitInfo.signalSemaphoreCount = (UINT)2;
-		//	submitInfo.pSignalSemaphores = signalSmp;
-
-		//	if (NumOfWait == UINT_MAX)
-		//	{
-		//		auto dxFence = mQueueExecuteFence.UnsafeConvertTo<VKFence>();
-		//		
-		//		timelineInfo.sType = VK_STRUCTURE_TYPE_TIMELINE_SEMAPHORE_SUBMIT_INFO;
-		//		timelineInfo.waitSemaphoreValueCount = 1;
-		//		timelineInfo.pWaitSemaphoreValues = &singleValue;
-
-		//		submitInfo.waitSemaphoreCount = 1;
-		//		submitInfo.pWaitSemaphores = &dxFence->mSemaphore;
-		//		submitInfo.pWaitDstStageMask = &singleWaitStages;
-		//	}
-		//	else
-		//	{
-		//		for (UINT i = 0; i < NumOfWait; i++)
-		//		{
-		//			auto dxFence = ppWaitCmdlists[i]->mCommitFence.UnsafeConvertTo<VKFence>();
-		//			waitSmps.push_back(dxFence->mSemaphore);
-		//			waitSmpValues.push_back(dxFence->GetAspectValue());
-		//			waitSmpStages.push_back(VK_PIPELINE_STAGE_ALL_COMMANDS_BIT);
-		//		}
-		//		
-
-		//		if (waitSmps.size() > 0)
-		//		{
-		//			submitInfo.waitSemaphoreCount = (UINT)waitSmps.size();
-		//			submitInfo.pWaitSemaphores = &waitSmps[0];
-		//			submitInfo.pWaitDstStageMask = &waitSmpStages[0];
-		//			
-		//			timelineInfo.waitSemaphoreValueCount = (UINT)waitSmps.size();
-		//			timelineInfo.pWaitSemaphoreValues = &waitSmpValues[0];
-		//		}
-		//	}
-
-		//	{
-		//		auto dxFence = mQueueExecuteFence.UnsafeConvertTo<VKFence>();
-		//		signalSmp[0] = dxFence->mSemaphore;
-		//		signalSmpValue[0] = ++dxFence->AspectValue;
-
-		//		dxFence = Cmdlist->mCommitFence.UnsafeConvertTo<VKFence>();
-		//		signalSmp[1] = dxFence->mSemaphore;
-		//		signalSmpValue[1] = ++dxFence->AspectValue;
-
-		//		vkQueueSubmit(mGraphicsQueue, 1, &submitInfo, nullptr);
-		//	}
-
-		//	/*VAutoVSLLock locker(mImmCmdListLocker);
-		//	if (NumOfWait == UINT_MAX)
-		//	{
-		//		this->WaitFence(mQueueExecuteFence, mQueueExecuteFence->GetAspectValue());
-		//	}
-		//	else
-		//	{
-		//		for (UINT i = 0; i < NumOfWait; i++)
-		//		{
-		//			this->WaitFence(ppWaitCmdlists[i]->mCommitFence, ppWaitCmdlists[i]->mCommitFence->GetAspectValue());
-		//		}
-		//	}
-		//	dx11Cmd->Commit(this);
-		//	this->IncreaseSignal(Cmdlist->mCommitFence);
-		//	this->IncreaseSignal(mQueueExecuteFence);*/
-		//}
+		for (UINT i = 0; i < NumOfExe; i++)
+		{
+			auto vkCmd = (VKCommandList*)Cmdlist[i];
+			//vkCmd->Commit(this);
+			QueueExecuteCommandList(vkCmd, type);
+			this->IncreaseSignal(vkCmd->mCommitFence, type);
+			vkCmd->ResetGpuDraws();
+		}
 	}
 	void VKCmdQueue::WaitFence(IFence* fence, UINT64 value)
 	{
-		auto dxFence = mQueueExecuteFence.UnsafeConvertTo<VKFence>();
 		auto waitFence = (VKFence*)fence;
 
 		VAutoVSLLock lk(mGraphicsQueueLocker);
@@ -1169,73 +1024,47 @@ namespace NxRHI
 		VkPipelineStageFlags waitStage = VK_PIPELINE_STAGE_ALL_COMMANDS_BIT;/*VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT |
 			VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT |
 			VK_PIPELINE_STAGE_ALL_COMMANDS_BIT;*/
-		VkSemaphore waitSmp[2]{};
-		waitSmp[0] = dxFence->mSemaphore;
-		waitSmp[1] = waitFence->mSemaphore;
-		submitInfo.waitSemaphoreCount = 2;
+		VkSemaphore waitSmp[1]{};
+		waitSmp[0] = waitFence->mSemaphore;
+		submitInfo.waitSemaphoreCount = 1;
 		submitInfo.pWaitSemaphores = waitSmp;
-		VkPipelineStageFlags waitStages[2];
+		VkPipelineStageFlags waitStages[1];
 		waitStages[0] = waitStage;
-		waitStages[1] = waitStage;
 		submitInfo.pWaitDstStageMask = waitStages;
 
-		submitInfo.signalSemaphoreCount = 1;
-		VkSemaphore signalSmp[1]{};
-		signalSmp[0] = dxFence->mSemaphore;
-		submitInfo.pSignalSemaphores = signalSmp;
+		submitInfo.signalSemaphoreCount = 0;
+		submitInfo.pSignalSemaphores = nullptr;
 
 		VkTimelineSemaphoreSubmitInfo timelineInfo{};
 		submitInfo.pNext = &timelineInfo;
 		timelineInfo.sType = VK_STRUCTURE_TYPE_TIMELINE_SEMAPHORE_SUBMIT_INFO;
 
-		UINT64 waitValue[2]{};
-		waitValue[0] = dxFence->AspectValue;
-		waitValue[1] = value;
+		UINT64 waitValue[1]{};
+		waitValue[0] = value;
 		timelineInfo.waitSemaphoreValueCount = 2;
 		timelineInfo.pWaitSemaphoreValues = waitValue;
 
-		UINT64 signalValue[1]{};
-		signalValue[0] = ++dxFence->AspectValue;
-		timelineInfo.signalSemaphoreValueCount = 1;
-		timelineInfo.pSignalSemaphoreValues = signalValue;
+		timelineInfo.signalSemaphoreValueCount = 0;
+		timelineInfo.pSignalSemaphoreValues = nullptr;
 
 		auto hr = vkQueueSubmit(mGraphicsQueue, 1, &submitInfo, nullptr);
 		ASSERT(hr == VK_SUCCESS);
 	}
-	void VKCmdQueue::ExecuteCommandList(UINT num, ICommandList** ppCmdlist)
-	{
-		this->Flush();//temp code
-		VAutoVSLLock locker(mImmCmdListLocker);
-		for (UINT i = 0; i < num; i++)
-		{
-			auto vkCmd = (VKCommandList*)ppCmdlist[i];
-			//vkCmd->Commit(this);
-			QueueExecuteCommandList(vkCmd);
-		}
-	}
-	UINT64 VKCmdQueue::SignalFence(IFence* fence, UINT64 value)
-	{
-		fence->WaitToAspect();//temp code
-		return QueueSignal(fence, value, nullptr);
-	}
-	UINT64 VKCmdQueue::QueueSignal(IFence* fence, UINT64 value, VkFence g2hFence)
+	UINT64 VKCmdQueue::QueueSignal(IFence* fence, UINT64 value, VkFence g2hFence, EQueueType type)
 	{
 		ASSERT(value != UINT64_MAX);
-		auto dxFence = mQueueExecuteFence.UnsafeConvertTo<VKFence>();
 		auto signalFence = (VKFence*)fence;
 
 		VAutoVSLLock lk(mGraphicsQueueLocker);
 
-		auto completedValue = dxFence->GetCompletedValue();
-		
 		if (signalFence->IsBinary() == false)
 		{
-			if (signalFence->AspectValue >= value)
+			if (signalFence->ExpectValue >= value)
 			{
 				ASSERT(false);
 				return signalFence->GetCompletedValue();
 			}
-			signalFence->AspectValue = value;
+			signalFence->ExpectValue = value;
 		}
 
 		VkSubmitInfo submitInfo{};
@@ -1243,100 +1072,56 @@ namespace NxRHI
 		submitInfo.commandBufferCount = 1;
 		submitInfo.pCommandBuffers = &mDummyCmdList->mCommandBuffer->RealObject;
 
-		submitInfo.waitSemaphoreCount = 1;
-		submitInfo.pWaitSemaphores = &dxFence->mSemaphore;
+		submitInfo.waitSemaphoreCount = 0;
+		submitInfo.pWaitSemaphores = nullptr;
 		VkPipelineStageFlags waitStage = VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT |
 			VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT |
 			VK_PIPELINE_STAGE_ALL_COMMANDS_BIT;
 		submitInfo.pWaitDstStageMask = &waitStage;
-		submitInfo.signalSemaphoreCount = 2;
-		VkSemaphore signalSmp[2]{};
-		signalSmp[0] = signalFence->mSemaphore; 
-		signalSmp[1] = dxFence->mSemaphore;
+		submitInfo.signalSemaphoreCount = 1;
+		VkSemaphore signalSmp[1]{};
+		signalSmp[0] = signalFence->mSemaphore;
 		submitInfo.pSignalSemaphores = signalSmp;
 
 		VkTimelineSemaphoreSubmitInfo timelineInfo{};
 		submitInfo.pNext = &timelineInfo;
 		timelineInfo.sType = VK_STRUCTURE_TYPE_TIMELINE_SEMAPHORE_SUBMIT_INFO;
 
-		UINT64 waitValue = dxFence->AspectValue;
-		timelineInfo.waitSemaphoreValueCount = 1;
-		timelineInfo.pWaitSemaphoreValues = &waitValue;
+		timelineInfo.waitSemaphoreValueCount = 0;
+		timelineInfo.pWaitSemaphoreValues = nullptr;
 
-		UINT64 signalValue[2]{};
+		UINT64 signalValue[1]{};
 		signalValue[0] = value;
-		signalValue[1] = ++dxFence->AspectValue; 
-		timelineInfo.signalSemaphoreValueCount = 2;
+		timelineInfo.signalSemaphoreValueCount = 1;
 		timelineInfo.pSignalSemaphoreValues = signalValue;
 
 		auto hr = vkQueueSubmit(mGraphicsQueue, 1, &submitInfo, g2hFence);
 		ASSERT(hr == VK_SUCCESS);
 
-		return completedValue;
+		return 0;
 	}
-	ICommandList* VKCmdQueue::GetIdleCmdlist(EQueueCmdlist type)
+	ICommandList* VKCmdQueue::GetIdleCmdlist()
 	{
-		switch (type)
+		VAutoVSLLock locker(mQueueLocker);
+		if (mIdleCmdlist.empty())
 		{
-			case QCL_Read:
-				{
-					mImmCmdListLocker.Lock();
-					return nullptr;
-				}
-			case QCL_Transient:
-				{
-					VAutoVSLLock locker(mImmCmdListLocker);
-					if (mIdleCmdlist.empty())
-					{
-						mIdleCmdlist.push(MakeWeakRef(mDevice->CreateCommandList()));
-					}
-					auto result = mIdleCmdlist.front();
-					result->AddRef();
-					mIdleCmdlist.pop();
-					return result;
-				}
-			case QCL_FramePost:
-				{
-					mImmCmdListLocker.Lock();
-					if (mFramePost == nullptr)
-					{
-						mFramePost = MakeWeakRef((VKCommandList*)mDevice->CreateCommandList());
-					}
-					return mFramePost;
-				}
-				break;
-			default:
-				return nullptr;
+			mIdleCmdlist.push(MakeWeakRef(mDevice->CreateCommandList()));
 		}
+		auto result = mIdleCmdlist.front();
+		result->AddRef();
+		mIdleCmdlist.pop();
+		return result;
 	}
-	void VKCmdQueue::ReleaseIdleCmdlist(ICommandList* cmd, EQueueCmdlist type)
+	void VKCmdQueue::ReleaseIdleCmdlist(ICommandList* cmd)
 	{
-		switch (type)
-		{
-			case QCL_Read:
-			{
-				mImmCmdListLocker.Unlock();
-				return;
-			}
-			case QCL_Transient:
-			{
-				VAutoVSLLock locker(mImmCmdListLocker);
-				mIdleCmdlist.push(cmd);
-				cmd->Release();
-				return;
-			}
-			case QCL_FramePost:
-			{
-				mImmCmdListLocker.Unlock();
-				return;
-			}
-			default:
-				return;
-		}
+		VAutoVSLLock locker(mQueueLocker);
+		mIdleCmdlist.push(cmd);
+		cmd->Release();
+		return;
 	}
-	void VKCmdQueue::Flush()
+	void VKCmdQueue::Flush(EQueueType type)
 	{
-		mQueueExecuteFence->WaitToAspect();
+		mFlushFence->WaitToExpect();
 	}
 }
 

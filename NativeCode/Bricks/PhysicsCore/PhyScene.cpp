@@ -13,8 +13,6 @@ using namespace physx;
 
 NS_BEGIN
 
-
-
 ENGINE_RTTI_IMPL(EngineNS::PhySceneDesc);
 ENGINE_RTTI_IMPL(EngineNS::PhyScene);
 

@@ -33,7 +33,7 @@ namespace NxRHI
 			}
 			ASSERT(refRTV->GetHWBuffer() != nullptr);
 			auto dxRtv = (DX12DescriptorSetPagedObject*)refRTV->GetHWBuffer();
-			mDX11RTVArray[RTVIdx] = dxRtv->GetHandle(0);
+			mDX11RTVArray[RTVIdx] = dxRtv->GetCpuAddress(0);
 		}
 	}
 
@@ -77,7 +77,7 @@ namespace NxRHI
 	{
 		//return true;
 		//return Create(device, w, h);
-		device->GetCmdQueue()->Flush();
+		device->GetCmdQueue()->Flush((EQueueType)(EQueueType::QU_Default | EQueueType::QU_Compute | EQueueType::QU_Transfer));
 		for (auto& i : BackBuffers)
 		{
 			auto pDxTexture = i.Texture.UnsafeConvertTo<DX12Texture>();
@@ -142,7 +142,7 @@ namespace NxRHI
 		mSwapChainDesc.SwapEffect = DXGI_SWAP_EFFECT_FLIP_DISCARD;
 		mSwapChainDesc.Flags = DXGI_SWAP_CHAIN_FLAG_ALLOW_MODE_SWITCH;
 
-		auto hr = device->mDXGIFactory->CreateSwapChain(device->mCmdQueue->mCmdQueue, &mSwapChainDesc, (IDXGISwapChain**)&mView);
+		auto hr = device->mGpuSystem.GetPtr()->mDXGIFactory->CreateSwapChain(device->mCmdQueue->mCmdQueue, &mSwapChainDesc, (IDXGISwapChain**)&mView);
 		if (FAILED(hr))
 			return false;
 		mView->QueryInterface(IID_IDXGISwapChain3, (void**)mView3.GetAddressOf());
@@ -192,7 +192,7 @@ namespace NxRHI
 		if (PresentFence != nullptr)
 		{
 			//PresentFence->Wait(CurrentFenceTargetValue);
-			PresentFence->WaitToAspect();
+			PresentFence->WaitToExpect();
 		}
 	}
 	void DX12SwapChain::Present(IGpuDevice* device, UINT SyncInterval, UINT Flags)
@@ -214,8 +214,7 @@ namespace NxRHI
 		else
 			CurrentBackBuffer = (CurrentBackBuffer + 1) % (UINT)BackBuffers.size();
 		
-		//CurrentFenceTargetValue = PresentFence->GetAspectValue() + 1;
-		device->GetCmdQueue()->IncreaseSignal(PresentFence);
+		device->GetCmdQueue()->IncreaseSignal(PresentFence, EQueueType::QU_Default);
 	}
 	void DX12SwapChain::FBackBuffer::CreateRtvAndSrv(IGpuDevice* device)
 	{

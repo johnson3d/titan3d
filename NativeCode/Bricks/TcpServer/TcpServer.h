@@ -26,7 +26,7 @@ TR_CALLBACK(SV_CallConvention = System.Runtime.InteropServices.CallingConvention
 typedef void (*FOnTcpServerShutdown)(TcpServer* pServer);
 
 class TR_CLASS()
-TcpServer : public VIUnknown
+TcpServer : public IWeakReference
 {
 public:
 	void* GCHandle;
@@ -76,7 +76,7 @@ public:
 };
 
 class TR_CLASS()
-	TcpServerManager : public VIUnknown
+	TcpServerManager : public IWeakReference
 {
 	VSLLock mLocker;
 	std::vector<TcpServer*>	mServers;

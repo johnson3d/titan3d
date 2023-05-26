@@ -12,6 +12,10 @@ NS_BEGIN
 
 namespace NxRHI
 {
+	std::atomic<int>		IGraphicDraw::NumOfInstance;
+	std::atomic<int>		IComputeDraw::NumOfInstance;
+	std::atomic<int>		ICopyDraw::NumOfInstance;
+	
 	void IGraphicDraw::UpdateGpuDrawState(IGpuDevice* device, ICommandList* cmdlist, IRenderPass* rpass)
 	{
 		auto topo = EPrimitiveType::EPT_TriangleList;
@@ -290,19 +294,78 @@ namespace NxRHI
 		{
 			cmdlist->Dispatch(mDispatchX, mDispatchY, mDispatchZ);
 		}
+
+		for (auto& i : BindResources)
+		{
+			switch (i.first->Type)
+			{
+				case SBT_UAV:
+				{
+					IGpuResource* t = i.second;
+					cmdlist->SetUav(EShaderType::SDT_ComputeShader, i.first, nullptr);
+				}
+				break;
+				default:
+					break;
+			}
+		}
 	}
 
-	void ICopyDraw::BindSrc(IGpuBufferData* res)
+	void ICopyDraw::BindBufferSrc(IBuffer* res)
 	{
 		mSrc = res;
 	}
-	void ICopyDraw::BindDest(IGpuBufferData* res)
+	void ICopyDraw::BindBufferDest(IBuffer* res)
+	{
+		mDest = res;
+	}
+	void ICopyDraw::BindTextureSrc(ITexture* res)
+	{
+		mSrc = res;
+	}
+	void ICopyDraw::BindTextureDest(ITexture* res)
 	{
 		mDest = res;
 	}
 	void ICopyDraw::Commit(ICommandList* cmdlist)
 	{
-		//cmdlist->CopyBuffer(mSrc, mDest);
+		switch (Mode)
+		{
+		case EngineNS::NxRHI::CDM_Buffer2Buffer:
+			cmdlist->CopyBufferRegion(mDest.UnsafeConvertTo<IBuffer>(), DstX, mSrc.UnsafeConvertTo<IBuffer>(), FootPrint.X, FootPrint.Width);
+			break;
+		case EngineNS::NxRHI::CDM_Texture2Texture:
+			{
+				if (FootPrint.Width == 0 && FootPrint.Height == 0 && FootPrint.Depth == 0)
+				{
+					cmdlist->CopyTextureRegion(mDest.UnsafeConvertTo<ITexture>(), SrcSubResource, 0,
+						0, 0, mSrc.UnsafeConvertTo<ITexture>(), DestSubResource, nullptr);
+				}
+				else
+				{
+					FSubresourceBox box;
+					box.SetDefault();
+					box.Left = FootPrint.X;
+					box.Top = FootPrint.Y;
+					box.Front = FootPrint.Z;
+					box.Right = box.Left + FootPrint.Width;
+					box.Bottom = box.Top + FootPrint.Height;
+					box.Back = box.Front + FootPrint.Depth;
+					cmdlist->CopyTextureRegion(mDest.UnsafeConvertTo<ITexture>(), SrcSubResource, DstX,
+						DstY, DstZ, mSrc.UnsafeConvertTo<ITexture>(), DestSubResource, &box);
+				}
+			}
+			break;
+		case EngineNS::NxRHI::CDM_Buffer2Texture:
+			ASSERT(false);
+			break;
+		case EngineNS::NxRHI::CDM_Texture2Buffer:
+			ASSERT(false);
+			break;
+		default:
+			ASSERT(false);
+			break;
+		}
 	}
 }
 

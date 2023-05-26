@@ -2,6 +2,7 @@
 #include "../Base/IUnknown.h"
 #include "../Base/thread/vfxcritical.h"
 #include "NxEvent.h"
+#include "NxRHIDefine.h"
 
 NS_BEGIN
 
@@ -56,6 +57,7 @@ namespace NxRHI
 	class ICmdQueue;
 	class IComputeEffect;
 	class IGpuBufferData;
+	class IGpuScope;
 
 	enum TR_ENUM(SV_EnumNoFlags)
 		ERhiType
@@ -73,9 +75,10 @@ namespace NxRHI
 		vBOOL		UseRenderDoc = TRUE;
 		vBOOL		CreateDebugLayer = FALSE;
 		void*		WindowHandle = nullptr;
+		VNameString	RenderDocPath;
 	};
 	class TR_CLASS()
-		IGpuSystem : public VIUnknown
+		IGpuSystem : public IWeakReference
 	{
 	public:
 		static IGpuSystem* CreateGpuSystem(ERhiType type, const FGpuSystemDesc* desc);
@@ -158,7 +161,7 @@ namespace NxRHI
 		}
 	};
 	class TR_CLASS()
-		IGpuDevice : public VIUnknown
+		IGpuDevice : public IWeakReference
 	{
 	public:
 		ENGINE_RTTI(IGpuDevice);
@@ -194,6 +197,7 @@ namespace NxRHI
 		virtual IComputeDraw* CreateComputeDraw();
 		virtual ICopyDraw* CreateCopyDraw();
 
+		virtual IGpuScope* CreateGpuScope() = 0;
 		inline const FGpuResourceAlignment* GetGpuResourceAlignment() const{
 			return &mGpuResourceAlignment;
 		}
@@ -204,6 +208,12 @@ namespace NxRHI
 			return mCaps.IsSupportSwapchainFormat(format);
 		}
 		FGpuPipelineManager* GetGpuPipelineManager();
+
+		virtual void SetBreakOnID(int id, bool open) = 0;
+
+		inline IFence* GetFrameFence() {
+			return mFrameFence;
+		}
 	public:
 		FGpuDeviceDesc		Desc;
 		FGpuDeviceCaps		mCaps;
@@ -215,6 +225,8 @@ namespace NxRHI
 		typedef bool (FGpuPostEvent)(IGpuDevice* device, UINT64 completed);
 		std::vector<std::function<FGpuPostEvent>>	mPostEvents;
 		std::vector<std::function<FGpuPostEvent>>	mTickingPostEvents;
+		std::vector<AutoRef<IBuffer>>				mWaitFlushBuffers;
+		void PushWaitFlushBuffer(IBuffer* buffer);
 		VSLLock mPostEventLocker;
 		void PushPostEvent(const std::function<FGpuPostEvent>& evt)
 		{
@@ -222,9 +234,9 @@ namespace NxRHI
 			mPostEvents.push_back(evt);
 		}
 		template<class _DestroyType>
-		void DelayDestroy(_DestroyType obj, UINT delayFrame = 4)
+		void DelayDestroy(_DestroyType obj, UINT delayFrame = 3)
 		{
-			auto targetValue = mFrameFence->GetAspectValue() + delayFrame;
+			auto targetValue = mFrameFence->GetExpectValue() + delayFrame;
 			this->PushPostEvent([targetValue, obj](IGpuDevice* pDevice, UINT64 completed)->bool
 				{
 					if (completed >= targetValue)
@@ -237,43 +249,37 @@ namespace NxRHI
 		}
 		virtual void TickPostEvents();
 	};
-	enum TR_ENUM()
-		EQueueCmdlist
-	{
-		QCL_Read = 0,
-			QCL_Transient,
-			QCL_FramePost,
-	};
 	class TR_CLASS()
-		ICmdQueue : public VIUnknown
+		ICmdQueue : public IWeakReference
 	{
 	public:
 		ENGINE_RTTI(ICmdQueue);
 
-		void ExecuteCommandList(ICommandList * pCmdlist)
+		void ExecuteCommandListSingle(ICommandList * pCmdlist, EQueueType type)
 		{
-			ExecuteCommandList(1, &pCmdlist);
+			ExecuteCommandList(1, &pCmdlist, 0, nullptr, type);
 		}
 		//NumOfWait = 0: No wait
 		//NumOfWait = 0xFFFFFFFF: Prev Queued Cmdlist
-		virtual void ExecuteCommandList(ICommandList* Cmdlist, UINT NumOfWait, ICommandList** ppWaitCmdlists) = 0;
-		virtual void ExecuteCommandList(UINT num, ICommandList** ppCmdlist) = 0;
-		virtual UINT64 SignalFence(IFence * fence, UINT64 value) = 0;
-		virtual void WaitFence(IFence* fence, UINT64 value) = 0;
-		virtual ICommandList* GetIdleCmdlist(EQueueCmdlist type) = 0;
-		virtual void ReleaseIdleCmdlist(ICommandList* cmd, EQueueCmdlist type) = 0;
-		virtual void Flush() = 0;
+		virtual void ExecuteCommandList(UINT NumOfExe, ICommandList** Cmdlist, UINT NumOfWait, ICommandList** ppWaitCmdlists, EQueueType type) = 0;
+		virtual ICommandList* GetIdleCmdlist() = 0;
+		virtual void ReleaseIdleCmdlist(ICommandList* cmd) = 0;
+		virtual void Flush(EQueueType type) = 0;
 		
-		inline UINT64 IncreaseSignal(IFence* fence)
+		inline ICommandList* GetFramePostCmdList() {
+			return mFramePost;
+		}
+		inline UINT64 IncreaseSignal(IFence* fence, EQueueType type)
 		{
-			VAutoVSLLock lk(mGraphicsQueueLocker);
-			UINT64 target = fence->GetAspectValue() + 1;
-			return SignalFence(fence, target);
+			return fence->IncreaseExpect(this, 1, type);
 		}
 	public:
 		VCritical						mGraphicsQueueLocker;
-		AutoRef<IFence>					mQueueFence;
-		AutoRef<IFence>					mQueueExecuteFence;
+		AutoRef<ICommandList>			mFramePost;
+
+		UINT64							mDefaultQueueFrequence = 0;
+		UINT64							mComputeQueueFrequence = 0;
+		UINT64							mTransferQueueFrequence = 0;
 	};
 }
 
