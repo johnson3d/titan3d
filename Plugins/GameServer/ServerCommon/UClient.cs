@@ -20,11 +20,11 @@ namespace EngineNS.Plugins.ServerCommon
     public class UClientManager
     {
         public UClient[] Clients = new UClient[UInt16.MaxValue];
-        public UClient GetClient(UInt16 index)
+        public T GetClient<T>(UInt16 index) where T : UClient
         {
             if (index == UInt16.MaxValue)
                 return null;
-            return Clients[index];
+            return Clients[index] as T;
         }
         public int ClientCount { get; private set; }
         public UClient FindClient(in Guid sessionId)

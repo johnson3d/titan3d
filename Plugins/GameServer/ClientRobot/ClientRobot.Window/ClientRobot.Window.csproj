@@ -22,8 +22,12 @@
 
   <Import Project="..\ClientRobot\ClientRobot.projitems" Label="Shared" />
 
+  <Import Project="..\..\CSCommon\CSCommon.projitems" Label="Shared" />
+
+  <Import Project="..\..\ClientCommon\ClientCommon.projitems" Label="Shared" />
+
   <Target Name="PreBuild" BeforeTargets="PreBuildEvent">
-    <Exec Command="$(SolutionDir)CS_Rpc_Engine.bat" />
+    <Exec Command="$(SolutionDir)CS_Rpc_AutoSync.bat" />
   </Target>
 
 </Project>

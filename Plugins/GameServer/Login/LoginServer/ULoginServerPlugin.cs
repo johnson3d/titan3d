@@ -34,14 +34,14 @@ namespace EngineNS.Plugins.LoginServer
     public class UPluginLoader
     {
         public static ULoginServerPlugin mPluginObject = new ULoginServerPlugin();
-        public static Bricks.AssemblyLoader.UPlugin GetPluginObject()
+        public static Bricks.AssemblyLoader.IPlugin GetPluginObject()
         {
             return mPluginObject;
         }
     }
-    public class ULoginServerPlugin : Bricks.AssemblyLoader.UPlugin
+    public class ULoginServerPlugin : Bricks.AssemblyLoader.IPlugin
     {
-        public override void OnLoadedPlugin()
+        public void OnLoadedPlugin()
         {
             var server = new ULoginServer();
             UEngine.Instance.RpcModule.RpcManager = server;
@@ -53,7 +53,7 @@ namespace EngineNS.Plugins.LoginServer
             };
             action();
         }
-        public override void OnUnloadPlugin()
+        public void OnUnloadPlugin()
         {
 
         }

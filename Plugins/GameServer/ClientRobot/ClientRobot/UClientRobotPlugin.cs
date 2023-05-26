@@ -35,21 +35,21 @@ namespace EngineNS.Plugins.ClientRobot
     public class UPluginLoader
     {
         public static ULevelServerPlugin mPluginObject = new ULevelServerPlugin();
-        public static Bricks.AssemblyLoader.UPlugin GetPluginObject()
+        public static Bricks.AssemblyLoader.IPlugin GetPluginObject()
         {
             return mPluginObject;
         }
     }
-    public class ULevelServerPlugin : Bricks.AssemblyLoader.UPlugin
+    public class ULevelServerPlugin : Bricks.AssemblyLoader.IPlugin
     {
         RobotClient.URobot Robot;
-        public override void OnLoadedPlugin()
+        public void OnLoadedPlugin()
         {
             Robot = new RobotClient.URobot();
             UEngine.Instance.TickableManager.AddTickable(Robot);
             var nu = Robot.Initialize();
         }
-        public override void OnUnloadPlugin()
+        public void OnUnloadPlugin()
         {
             UEngine.Instance.TickableManager.RemoveTickable(Robot);
             Robot = null;

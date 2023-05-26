@@ -35,15 +35,15 @@ namespace EngineNS.Plugins.LevelServer
 {
     public class UPluginLoader
     {
-        public static ULevelServerPlugin? mPluginObject = new ULevelServerPlugin();
-        public static Bricks.AssemblyLoader.UPlugin GetPluginObject()
+        public static ULevelServerPlugin mPluginObject = new ULevelServerPlugin();
+        public static Bricks.AssemblyLoader.IPlugin GetPluginObject()
         {
             return mPluginObject;
         }
     }
-    public class ULevelServerPlugin : Bricks.AssemblyLoader.UPlugin
+    public class ULevelServerPlugin : Bricks.AssemblyLoader.IPlugin
     {
-        public override void OnLoadedPlugin()
+        public void OnLoadedPlugin()
         {
             var server = new ULevelServer();
             UEngine.Instance.RpcModule.RpcManager = server;
@@ -55,10 +55,10 @@ namespace EngineNS.Plugins.LevelServer
             };
             action();
         }
-        public override void OnUnloadPlugin()
+        public void OnUnloadPlugin()
         {
             var server = UEngine.Instance.RpcModule.RpcManager as ULevelServer;
-            server.StopServer();
+            server?.StopServer();
         }
     }
 }

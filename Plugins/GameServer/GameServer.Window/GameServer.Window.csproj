@@ -18,13 +18,15 @@
 
   <Import Project="..\ServerCommon\ServerCommon.projitems" Label="Shared" />
 
+  <Import Project="..\CSCommon\CSCommon.projitems" Label="Shared" />
+
   <ItemGroup>
     <ProjectReference Include="..\..\..\Module\Engine.Window\Engine.Window.csproj" />
     <ProjectReference Include="..\..\RpcCaller\RpcCaller.Window\RpcCaller.Window.csproj" />
   </ItemGroup>
 
   <Target Name="PreBuild" BeforeTargets="PreBuildEvent">
-    <Exec Command="$(SolutionDir)CS_Rpc_Engine.bat" />
+    <Exec Command="$(SolutionDir)CS_Rpc_AutoSync.bat" />
   </Target>
 
 </Project>

@@ -6,16 +6,20 @@ namespace EngineNS.Plugins.ServerCommon
 {
     public class UServerBase : Bricks.Network.RPC.URpcManager, ITickable
     {
+        public int GetTickOrder()
+        {
+            return 0;
+        }
         public Bricks.Network.INetConnect Connect { get; set; } = null;
         public Guid ServerId { get; set; } = Guid.NewGuid();
         public Bricks.Network.FNetworkPoint ListenPoint { get; } = new Bricks.Network.FNetworkPoint();
         public Bricks.TcpServer.UTcpServer TcpServer { get; protected set; } = null;
         public long Payload { get; set; } = 0;
-        public ServerCommon.UClientManager ClientManager { get; } = new ServerCommon.UClientManager();
+        public ServerCommon.UClientManager ClientManager { get; set; } = new ServerCommon.UClientManager();
 
         public virtual async System.Threading.Tasks.Task<bool> StartServer(string ip, UInt16 port)
         {
-            await Thread.AsyncDummyClass.DummyFunc();
+            await Thread.TtAsyncDummyClass.DummyFunc();
             UEngine.Instance.TickableManager.AddTickable(this);
             TcpServer = new Bricks.TcpServer.UTcpServer();
             return TcpServer.StartServer(ip, port);
@@ -42,15 +46,19 @@ namespace EngineNS.Plugins.ServerCommon
             return GetRunTargetConnect(target.RunTarget, target.Index, connect);
         }
         #region tickable
-        public void TickLogic(int ellapse)
+        public void TickLogic(float ellapse)
         {
             Tick();
         }
-        public void TickRender(int ellapse)
+        public void TickRender(float ellapse)
         {
 
         }
-        public void TickSync(int ellapse)
+        public void TickBeginFrame(float ellapse)
+        {
+
+        }
+        public void TickSync(float ellapse)
         {
 
         }

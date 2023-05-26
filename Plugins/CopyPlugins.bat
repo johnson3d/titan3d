@@ -1,9 +1,0 @@
-copy RpcCaller\RpcCaller.plugin ..\binaries\Plugins\Debug\net6.0\RpcCaller.plugin
-copy GameItems\GameItems.plugin ..\binaries\Plugins\Debug\net6.0\GameItems.plugin
-copy GameTasks\GameTasks.plugin ..\binaries\Plugins\Debug\net6.0\GameTasks.plugin
-copy GameServer\GameServer.plugin ..\binaries\Plugins\Debug\net6.0\GameServer.plugin
-copy GameServer\Root\RootServer.plugin ..\binaries\Plugins\Debug\net6.0\RootServer.plugin
-copy GameServer\Login\LoginServer.plugin ..\binaries\Plugins\Debug\net6.0\LoginServer.plugin
-copy GameServer\Level\LevelServer.plugin ..\binaries\Plugins\Debug\net6.0\LevelServer.plugin
-copy GameServer\Gate\GateServer.plugin ..\binaries\Plugins\Debug\net6.0\GateServer.plugin
-copy GameServer\ClientRobot\ClientRobot.plugin ..\binaries\Plugins\Debug\net6.0\ClientRobot.plugin

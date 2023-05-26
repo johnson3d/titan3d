@@ -198,7 +198,7 @@ namespace EngineNS.Plugins.RootServer
 {
 	partial class URootServer
 	{
-		public static EngineNS.Bricks.Network.RPC.FCallMethod rpc_RegLogin = (EngineNS.IO.AuxReader<UMemReader> reader, object host, EngineNS.Bricks.Network.RPC.UCallContext context) =>
+		public static EngineNS.Bricks.Network.RPC.FCallMethod rpc_RegLogin = (EngineNS.IO.AuxReader<EngineNS.IO.UMemReader> reader, object host, EngineNS.Bricks.Network.RPC.UCallContext context) =>
 		{
 			string psw;
 			reader.Read(out psw);
@@ -211,9 +211,9 @@ namespace EngineNS.Plugins.RootServer
 			UReturnContext retContext;
 			reader.Read(out retContext);
 			var ret = ((EngineNS.Plugins.RootServer.URootServer)host).RegLogin(psw, serverId, ip, port, context);
-			using (var writer = UMemWriter.CreateInstance())
+			using (var writer = EngineNS.IO.UMemWriter.CreateInstance())
 			{
-				var pkg = new IO.AuxWriter<UMemWriter>(writer);
+				var pkg = new IO.AuxWriter<EngineNS.IO.UMemWriter>(writer);
 				var pkgHeader = new FPkgHeader();
 				pkgHeader.SetHasReturn(true);
 				pkg.Write(pkgHeader);
@@ -223,7 +223,7 @@ namespace EngineNS.Plugins.RootServer
 				context.NetConnect?.Send(in pkg);
 			}
 		};
-		public static EngineNS.Bricks.Network.RPC.FCallMethod rpc_RegGate = (EngineNS.IO.AuxReader<UMemReader> reader, object host, EngineNS.Bricks.Network.RPC.UCallContext context) =>
+		public static EngineNS.Bricks.Network.RPC.FCallMethod rpc_RegGate = (EngineNS.IO.AuxReader<EngineNS.IO.UMemReader> reader, object host, EngineNS.Bricks.Network.RPC.UCallContext context) =>
 		{
 			string psw;
 			reader.Read(out psw);
@@ -236,9 +236,9 @@ namespace EngineNS.Plugins.RootServer
 			UReturnContext retContext;
 			reader.Read(out retContext);
 			var ret = ((EngineNS.Plugins.RootServer.URootServer)host).RegGate(psw, serverId, ip, port, context);
-			using (var writer = UMemWriter.CreateInstance())
+			using (var writer = EngineNS.IO.UMemWriter.CreateInstance())
 			{
-				var pkg = new IO.AuxWriter<UMemWriter>(writer);
+				var pkg = new IO.AuxWriter<EngineNS.IO.UMemWriter>(writer);
 				var pkgHeader = new FPkgHeader();
 				pkgHeader.SetHasReturn(true);
 				pkg.Write(pkgHeader);
@@ -248,7 +248,7 @@ namespace EngineNS.Plugins.RootServer
 				context.NetConnect?.Send(in pkg);
 			}
 		};
-		public static EngineNS.Bricks.Network.RPC.FCallMethod rpc_RegLevel = (EngineNS.IO.AuxReader<UMemReader> reader, object host, EngineNS.Bricks.Network.RPC.UCallContext context) =>
+		public static EngineNS.Bricks.Network.RPC.FCallMethod rpc_RegLevel = (EngineNS.IO.AuxReader<EngineNS.IO.UMemReader> reader, object host, EngineNS.Bricks.Network.RPC.UCallContext context) =>
 		{
 			string psw;
 			reader.Read(out psw);
@@ -261,9 +261,9 @@ namespace EngineNS.Plugins.RootServer
 			UReturnContext retContext;
 			reader.Read(out retContext);
 			var ret = ((EngineNS.Plugins.RootServer.URootServer)host).RegLevel(psw, serverId, ip, port, context);
-			using (var writer = UMemWriter.CreateInstance())
+			using (var writer = EngineNS.IO.UMemWriter.CreateInstance())
 			{
-				var pkg = new IO.AuxWriter<UMemWriter>(writer);
+				var pkg = new IO.AuxWriter<EngineNS.IO.UMemWriter>(writer);
 				var pkgHeader = new FPkgHeader();
 				pkgHeader.SetHasReturn(true);
 				pkg.Write(pkgHeader);
@@ -273,7 +273,7 @@ namespace EngineNS.Plugins.RootServer
 				context.NetConnect?.Send(in pkg);
 			}
 		};
-		public static EngineNS.Bricks.Network.RPC.FCallMethod rpc_SelectGateway = async (EngineNS.IO.AuxReader<UMemReader> reader, object host,  EngineNS.Bricks.Network.RPC.UCallContext context) =>
+		public static EngineNS.Bricks.Network.RPC.FCallMethod rpc_SelectGateway = async (EngineNS.IO.AuxReader<EngineNS.IO.UMemReader> reader, object host,  EngineNS.Bricks.Network.RPC.UCallContext context) =>
 		{
 			string user;
 			reader.Read(out user);
@@ -282,9 +282,9 @@ namespace EngineNS.Plugins.RootServer
 			UReturnContext retContext;
 			reader.Read(out retContext);
 			var ret = await ((EngineNS.Plugins.RootServer.URootServer)host).SelectGateway(user, sessionId, context);
-			using (var writer = UMemWriter.CreateInstance())
+			using (var writer = EngineNS.IO.UMemWriter.CreateInstance())
 			{
-				var pkg = new IO.AuxWriter<UMemWriter>(writer);
+				var pkg = new IO.AuxWriter<EngineNS.IO.UMemWriter>(writer);
 				var pkgHeader = new FPkgHeader();
 				pkgHeader.SetHasReturn(true);
 				pkg.Write(pkgHeader);
@@ -294,7 +294,7 @@ namespace EngineNS.Plugins.RootServer
 				context.NetConnect?.Send(in pkg);
 			}
 		};
-		public static EngineNS.Bricks.Network.RPC.FCallMethod rpc_UpdatePayload = (EngineNS.IO.AuxReader<UMemReader> reader, object host, EngineNS.Bricks.Network.RPC.UCallContext context) =>
+		public static EngineNS.Bricks.Network.RPC.FCallMethod rpc_UpdatePayload = (EngineNS.IO.AuxReader<EngineNS.IO.UMemReader> reader, object host, EngineNS.Bricks.Network.RPC.UCallContext context) =>
 		{
 			ERunTarget target;
 			reader.Read(out target);
@@ -305,9 +305,9 @@ namespace EngineNS.Plugins.RootServer
 			UReturnContext retContext;
 			reader.Read(out retContext);
 			var ret = ((EngineNS.Plugins.RootServer.URootServer)host).UpdatePayload(target, index, value, context);
-			using (var writer = UMemWriter.CreateInstance())
+			using (var writer = EngineNS.IO.UMemWriter.CreateInstance())
 			{
-				var pkg = new IO.AuxWriter<UMemWriter>(writer);
+				var pkg = new IO.AuxWriter<EngineNS.IO.UMemWriter>(writer);
 				var pkgHeader = new FPkgHeader();
 				pkgHeader.SetHasReturn(true);
 				pkg.Write(pkgHeader);
@@ -317,7 +317,7 @@ namespace EngineNS.Plugins.RootServer
 				context.NetConnect?.Send(in pkg);
 			}
 		};
-		public static EngineNS.Bricks.Network.RPC.FCallMethod rpc_RegClient = (EngineNS.IO.AuxReader<UMemReader> reader, object host, EngineNS.Bricks.Network.RPC.UCallContext context) =>
+		public static EngineNS.Bricks.Network.RPC.FCallMethod rpc_RegClient = (EngineNS.IO.AuxReader<EngineNS.IO.UMemReader> reader, object host, EngineNS.Bricks.Network.RPC.UCallContext context) =>
 		{
 			Guid gateId;
 			reader.Read(out gateId);
@@ -328,9 +328,9 @@ namespace EngineNS.Plugins.RootServer
 			UReturnContext retContext;
 			reader.Read(out retContext);
 			var ret = ((EngineNS.Plugins.RootServer.URootServer)host).RegClient(gateId, sessionId, user, context);
-			using (var writer = UMemWriter.CreateInstance())
+			using (var writer = EngineNS.IO.UMemWriter.CreateInstance())
 			{
-				var pkg = new IO.AuxWriter<UMemWriter>(writer);
+				var pkg = new IO.AuxWriter<EngineNS.IO.UMemWriter>(writer);
 				var pkgHeader = new FPkgHeader();
 				pkgHeader.SetHasReturn(true);
 				pkg.Write(pkgHeader);

@@ -37,16 +37,16 @@ namespace EngineNS.Plugins.GameItems
     public class UPluginLoader
     {
         public static UGameItemPlugin? mPluginObject = new UGameItemPlugin();
-        public static Bricks.AssemblyLoader.UPlugin GetPluginObject()
+        public static Bricks.AssemblyLoader.IPlugin GetPluginObject()
         {
             return mPluginObject;
         }
     }
 
-    public class UGameItemPlugin : Bricks.AssemblyLoader.UPlugin
+    public class UGameItemPlugin : Bricks.AssemblyLoader.IPlugin
     {
         public AGameItemDescriptorManager ItemDescriptorManager = new AGameItemDescriptorManager();
-        public override void OnLoadedPlugin()
+        public void OnLoadedPlugin()
         {
             //ItemDescriptorManager.Initialize();
             var editor = UEngine.Instance.GfxDevice.SlateApplication as Editor.UMainEditorApplication;
@@ -55,7 +55,7 @@ namespace EngineNS.Plugins.GameItems
                 editor.ContentBrowser.OnTypeChanged();
             }
         }
-        public override void OnUnloadPlugin()
+        public void OnUnloadPlugin()
         {
             //UPluginDescriptor.mPluginObject = null;
             var editor = UEngine.Instance.GfxDevice.SlateApplication as Editor.UMainEditorApplication;
@@ -79,7 +79,7 @@ namespace EngineNS.Plugins.GameItems
         }
         public override async System.Threading.Tasks.Task<IO.IAsset> LoadAsset()
         {
-            await Thread.AsyncDummyClass.DummyFunc();
+            await Thread.TtAsyncDummyClass.DummyFunc();
             return ((UGameItemPlugin)UPluginLoader.mPluginObject).ItemDescriptorManager.FindDescriptor(GetAssetName());
         }
         public override bool CanRefAssetType(IO.IAssetMeta ameta)
@@ -126,7 +126,7 @@ namespace EngineNS.Plugins.GameItems
                 UpdateAMetaReferences(ameta);
                 ameta.SaveAMeta();
             }
-            IO.FileManager.SaveObjectToXml(name.Address, this);
+            IO.TtFileManager.SaveObjectToXml(name.Address, this);
         }
         [Rtti.Meta]
         public RName AssetName
@@ -178,10 +178,10 @@ namespace EngineNS.Plugins.GameItems
 
         public bool Initialize(RName location)
         {
-            var files = IO.FileManager.GetFiles(location.Address, "*.item", false);
+            var files = IO.TtFileManager.GetFiles(location.Address, "*.item", false);
             foreach (var i in files)
             {
-                var descriptor = IO.FileManager.LoadXmlToObject(i) as AGameItemDescriptor;
+                var descriptor = IO.TtFileManager.LoadXmlToObject(i) as AGameItemDescriptor;
                 if (descriptor == null)
                     continue;
                 RegDescriptor(descriptor);

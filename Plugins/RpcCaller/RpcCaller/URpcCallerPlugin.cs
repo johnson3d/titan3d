@@ -36,18 +36,18 @@ namespace EngineNS.Plugins.RpcCaller
     public class UPluginLoader
     {
         public static URpcCallerPlugin mPluginObject = new URpcCallerPlugin();
-        public static Bricks.AssemblyLoader.UPlugin GetPluginObject()
+        public static Bricks.AssemblyLoader.IPlugin GetPluginObject()
         {
             return mPluginObject;
         }
     }
-    public class URpcCallerPlugin : Bricks.AssemblyLoader.UPlugin
+    public class URpcCallerPlugin : Bricks.AssemblyLoader.IPlugin
     {
-        public override void OnLoadedPlugin()
+        public void OnLoadedPlugin()
         {
             
         }
-        public override void OnUnloadPlugin()
+        public void OnUnloadPlugin()
         {
             
         }

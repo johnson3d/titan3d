@@ -8,9 +8,16 @@ namespace EngineNS.Plugins.LevelServer
     [URpcClass(RunTarget = ERunTarget.Level, Executer = EExecuter.Root)]
     public partial class ULevelServer : ServerCommon.UServerBase
     {
+        static ULevelServer mInstance = null;
+        public static ULevelServer Instance { get => mInstance; }
+        public UClientAllConnects ClientAllConnects = null;
         public ULevelServer()
         {
             CurrentTarget = ERunTarget.Level;
+            System.Diagnostics.Debug.Assert(mInstance == null);
+            mInstance = this;
+            ClientAllConnects = new UClientAllConnects();
+            ClientAllConnects.ClientManager = ClientManager;
         }
         public override object GetExecuter(in URouter router)
         {
@@ -20,7 +27,7 @@ namespace EngineNS.Plugins.LevelServer
                     return this;
                 case EExecuter.Client:
                     {
-                        return ClientManager.GetClient(router.Index);
+                        return ClientManager.GetClient<ULevelClient>(router.Index);
                     }
             }
             return null;
@@ -45,6 +52,9 @@ namespace EngineNS.Plugins.LevelServer
         }
         public override async System.Threading.Tasks.Task<bool> StartServer(string ip, UInt16 port)
         {
+            ClientManager = new ULevelClientManager();
+            ClientAllConnects.ClientManager = ClientManager;
+
             var ret = await base.StartServer(ip, port);
             if (ret == false)
                 return false;
@@ -81,17 +91,11 @@ namespace EngineNS.Plugins.LevelServer
         {
             RootConnectPackages.Tick();
             base.Tick();
-            TickClients();
+
+            LevelManager.Tick();
         }
-        private void TickClients()
-        {
-            foreach (var i in ClientManager.Clients)
-            {
-                if (i == null)
-                    continue;
-                i.Tick();
-            }
-        }
+        public ULevelManager LevelManager { get; } = new ULevelManager();
+
         #region Connect
         public UInt16 IndexInRoot { get; private set; } = UInt16.MaxValue;
         protected Bricks.Network.UNetPackageManager RootConnectPackages = new Bricks.Network.UNetPackageManager();
@@ -107,7 +111,37 @@ namespace EngineNS.Plugins.LevelServer
             client.UserName = user;
             client.ClientConnect = context.NetConnect;
             client.IndexInGame = indexInGate;
+            client.AutoSyncData.IsGhostSyncObject = true;
             return client.ClientIndex;
+        }
+        [URpcMethod(Index = 100 + 1, Authority = EAuthority.Server)]
+        public bool RegLevel(Guid id, RName name, UCallContext context)
+        {
+            var level = new ULevel();
+            level.AssetName = name;
+            return LevelManager.RegLevel(in id, level);
+        }
+        [URpcMethod(Index = 100 + 2, Authority = EAuthority.Server)]
+        public uint TryClientEnterLevel(UInt16 clientIndex, Guid levelId, UCallContext context)
+        {
+            var clt = ClientManager.GetClient<ULevelClient>(clientIndex);
+            if (clt == null)
+                return uint.MaxValue;
+            var level = LevelManager.FindLevel(in levelId);
+            if (level == null)
+                return uint.MaxValue;
+            return level.EnterActor(clt, CSCommon.ESyncIdType.Dynamic);
+        }
+        [URpcMethod(Index = 100 + 3, Authority = EAuthority.Server)]
+        public bool TryClientLeaveLevel(UInt16 clientIndex, Guid levelId, UCallContext context)
+        {
+            var clt = ClientManager.GetClient<ULevelClient>(clientIndex);
+            if (clt == null)
+                return false;
+            var level = LevelManager.FindLevel(in levelId);
+            if (level == null)
+                return false;
+            return level.LeaveActor(clt, CSCommon.ESyncIdType.Dynamic);
         }
         #endregion
     }
@@ -120,7 +154,7 @@ namespace EngineNS.Plugins.LevelServer
 {
 	partial class ULevelServer
 	{
-		public static EngineNS.Bricks.Network.RPC.FCallMethod rpc_RegClient = (EngineNS.IO.AuxReader<UMemReader> reader, object host, EngineNS.Bricks.Network.RPC.UCallContext context) =>
+		public static EngineNS.Bricks.Network.RPC.FCallMethod rpc_RegClient = (EngineNS.IO.AuxReader<EngineNS.IO.UMemReader> reader, object host, EngineNS.Bricks.Network.RPC.UCallContext context) =>
 		{
 			Guid sessionId;
 			reader.Read(out sessionId);
@@ -131,9 +165,72 @@ namespace EngineNS.Plugins.LevelServer
 			UReturnContext retContext;
 			reader.Read(out retContext);
 			var ret = ((EngineNS.Plugins.LevelServer.ULevelServer)host).RegClient(sessionId, user, indexInGate, context);
-			using (var writer = UMemWriter.CreateInstance())
+			using (var writer = EngineNS.IO.UMemWriter.CreateInstance())
 			{
-				var pkg = new IO.AuxWriter<UMemWriter>(writer);
+				var pkg = new IO.AuxWriter<EngineNS.IO.UMemWriter>(writer);
+				var pkgHeader = new FPkgHeader();
+				pkgHeader.SetHasReturn(true);
+				pkg.Write(pkgHeader);
+				pkg.Write(retContext);
+				pkg.Write(ret);
+				pkg.CoreWriter.SurePkgHeader();
+				context.NetConnect?.Send(in pkg);
+			}
+		};
+		public static EngineNS.Bricks.Network.RPC.FCallMethod rpc_RegLevel = (EngineNS.IO.AuxReader<EngineNS.IO.UMemReader> reader, object host, EngineNS.Bricks.Network.RPC.UCallContext context) =>
+		{
+			Guid id;
+			reader.Read(out id);
+			RName name;
+			reader.Read(out name);
+			UReturnContext retContext;
+			reader.Read(out retContext);
+			var ret = ((EngineNS.Plugins.LevelServer.ULevelServer)host).RegLevel(id, name, context);
+			using (var writer = EngineNS.IO.UMemWriter.CreateInstance())
+			{
+				var pkg = new IO.AuxWriter<EngineNS.IO.UMemWriter>(writer);
+				var pkgHeader = new FPkgHeader();
+				pkgHeader.SetHasReturn(true);
+				pkg.Write(pkgHeader);
+				pkg.Write(retContext);
+				pkg.Write(ret);
+				pkg.CoreWriter.SurePkgHeader();
+				context.NetConnect?.Send(in pkg);
+			}
+		};
+		public static EngineNS.Bricks.Network.RPC.FCallMethod rpc_TryClientEnterLevel = (EngineNS.IO.AuxReader<EngineNS.IO.UMemReader> reader, object host, EngineNS.Bricks.Network.RPC.UCallContext context) =>
+		{
+			UInt16 clientIndex;
+			reader.Read(out clientIndex);
+			Guid levelId;
+			reader.Read(out levelId);
+			UReturnContext retContext;
+			reader.Read(out retContext);
+			var ret = ((EngineNS.Plugins.LevelServer.ULevelServer)host).TryClientEnterLevel(clientIndex, levelId, context);
+			using (var writer = EngineNS.IO.UMemWriter.CreateInstance())
+			{
+				var pkg = new IO.AuxWriter<EngineNS.IO.UMemWriter>(writer);
+				var pkgHeader = new FPkgHeader();
+				pkgHeader.SetHasReturn(true);
+				pkg.Write(pkgHeader);
+				pkg.Write(retContext);
+				pkg.Write(ret);
+				pkg.CoreWriter.SurePkgHeader();
+				context.NetConnect?.Send(in pkg);
+			}
+		};
+		public static EngineNS.Bricks.Network.RPC.FCallMethod rpc_TryClientLeaveLevel = (EngineNS.IO.AuxReader<EngineNS.IO.UMemReader> reader, object host, EngineNS.Bricks.Network.RPC.UCallContext context) =>
+		{
+			UInt16 clientIndex;
+			reader.Read(out clientIndex);
+			Guid levelId;
+			reader.Read(out levelId);
+			UReturnContext retContext;
+			reader.Read(out retContext);
+			var ret = ((EngineNS.Plugins.LevelServer.ULevelServer)host).TryClientLeaveLevel(clientIndex, levelId, context);
+			using (var writer = EngineNS.IO.UMemWriter.CreateInstance())
+			{
+				var pkg = new IO.AuxWriter<EngineNS.IO.UMemWriter>(writer);
 				var pkgHeader = new FPkgHeader();
 				pkgHeader.SetHasReturn(true);
 				pkg.Write(pkgHeader);

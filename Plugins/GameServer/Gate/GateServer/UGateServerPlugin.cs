@@ -36,14 +36,14 @@ namespace EngineNS.Plugins.GateServer
     public class UPluginLoader
     {
         public static UGateServerPlugin mPluginObject = new UGateServerPlugin();
-        public static Bricks.AssemblyLoader.UPlugin GetPluginObject()
+        public static Bricks.AssemblyLoader.IPlugin GetPluginObject()
         {
             return mPluginObject;
         }
     }
-    public class UGateServerPlugin : Bricks.AssemblyLoader.UPlugin
+    public class UGateServerPlugin : Bricks.AssemblyLoader.IPlugin
     {
-        public override void OnLoadedPlugin()
+        public void OnLoadedPlugin()
         {
             var server = new UGateServer();
             UEngine.Instance.RpcModule.RpcManager = server;
@@ -55,7 +55,7 @@ namespace EngineNS.Plugins.GateServer
             };
             action();
         }
-        public override void OnUnloadPlugin()
+        public void OnUnloadPlugin()
         {
             var server = UEngine.Instance.RpcModule.RpcManager as UGateServer;
             server?.StopServer();

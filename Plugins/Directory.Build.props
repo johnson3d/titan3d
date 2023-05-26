@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ImportGroup Label="PropertySheets">
+  </ImportGroup>
+
+  <!-- Define macros for easy and consistent access to various parts of the tree -->
+  <PropertyGroup Label="UserMacros">
+    <TtOsDir Condition="$([MSBuild]::IsOSPlatform('Linux'))">Linux</TtOsDir>
+	<TtOsDir Condition="$([MSBuild]::IsOSPlatform('Windows'))">Win64</TtOsDir>
+	<TtOsDir Condition="$([MSBuild]::IsOSPlatform('OSX'))">MacOS</TtOsDir>
+	<TtPluginName>$(MSBuildProjectName.Split('.')[0])</TtPluginName>
+	<TtPluginSourceRoot>$(ProjectDir)..\</TtPluginSourceRoot>
+    <TtIntermediateBasePath>$(SolutionDir)intermediate\csharp\plugins\</TtIntermediateBasePath>
+    <!--<TtOutputBasePath>$(SolutionDir)binaries\Plugins\$(Configuration)\$(TargetFramework)\</TtOutputBasePath>-->
+	<TtOutputBasePath>$(SolutionDir)binaries\Plugins\$(TtPluginName)\</TtOutputBasePath>
+  </PropertyGroup>
+  <ItemDefinitionGroup />
+
+  <!-- Default Compiler settings -->
+  <ItemDefinitionGroup>
+    <ClCompile>
+      <!-- .... -->
+    </ClCompile>
+  </ItemDefinitionGroup>
+
+  <!-- Default Folders for target output -->
+  <!--<PropertyGroup Condition="'$(MSBuildProjectExtension)' == '.vcxproj'">
+    <IntDir>$(myIntermediatePath)$(MSBuildProjectName)\$(Configuration)\</IntDir>
+    <OutDir>$(myOutputPathCpp)</OutDir>
+  </PropertyGroup>-->
+  
+  <!-- for csharp project -->
+  <PropertyGroup Condition="'$(MSBuildProjectExtension)' == '.csproj'">
+    <BaseIntermediateOutputPath>$(TtIntermediateBasePath)$(MSBuildProjectName)\</BaseIntermediateOutputPath>
+    <!--<BaseOutputPath>$(TtOutputBasePath)</BaseOutputPath>-->
+    <!--<IntDir>$(myIntermediatePath)$(MSBuildProjectName)\$(Configuration)\</IntDir>-->
+    <OutDir>$(TtOutputBasePath)</OutDir >
+    <!--AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
+    <AppendRuntimeIdentifierToOutputPath>false</AppendRuntimeIdentifierToOutputPath-->
+  </PropertyGroup>
+
+</Project>

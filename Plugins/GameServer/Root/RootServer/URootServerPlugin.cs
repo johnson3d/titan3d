@@ -36,14 +36,14 @@ namespace EngineNS.Plugins.RootServer
     public class UPluginLoader
     {
         public static URootServerPlugin mPluginObject = new URootServerPlugin();
-        public static Bricks.AssemblyLoader.UPlugin GetPluginObject()
+        public static Bricks.AssemblyLoader.IPlugin GetPluginObject()
         {
             return mPluginObject;
         }
     }
-    public class URootServerPlugin : Bricks.AssemblyLoader.UPlugin
+    public class URootServerPlugin : Bricks.AssemblyLoader.IPlugin
     {
-        public override void OnLoadedPlugin()
+        public void OnLoadedPlugin()
         {
             var server = new URootServer();
             UEngine.Instance.RpcModule.RpcManager = server;
@@ -55,7 +55,7 @@ namespace EngineNS.Plugins.RootServer
             };
             action();
         }
-        public override void OnUnloadPlugin()
+        public void OnUnloadPlugin()
         {
             var server = UEngine.Instance.RpcModule.RpcManager as URootServer;
             server?.StopServer();

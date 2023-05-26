@@ -12,6 +12,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)GameClient\UGameClient.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)GateServer\UGateClient.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)GateServer\UGateServer.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)LevelServer\ULevel.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)LevelServer\ULevelClient.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)LevelServer\ULevelServer.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)LoginServer\UAccountManager.cs" />

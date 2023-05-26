@@ -96,7 +96,7 @@ namespace EngineNS.Plugins.LoginServer
 {
 	partial class ULoginServer
 	{
-		public static EngineNS.Bricks.Network.RPC.FCallMethod rpc_LoginAccount = async (EngineNS.IO.AuxReader<UMemReader> reader, object host,  EngineNS.Bricks.Network.RPC.UCallContext context) =>
+		public static EngineNS.Bricks.Network.RPC.FCallMethod rpc_LoginAccount = async (EngineNS.IO.AuxReader<EngineNS.IO.UMemReader> reader, object host,  EngineNS.Bricks.Network.RPC.UCallContext context) =>
 		{
 			string user;
 			reader.Read(out user);
@@ -105,9 +105,9 @@ namespace EngineNS.Plugins.LoginServer
 			UReturnContext retContext;
 			reader.Read(out retContext);
 			var ret = await ((EngineNS.Plugins.LoginServer.ULoginServer)host).LoginAccount(user, psw, context);
-			using (var writer = UMemWriter.CreateInstance())
+			using (var writer = EngineNS.IO.UMemWriter.CreateInstance())
 			{
-				var pkg = new IO.AuxWriter<UMemWriter>(writer);
+				var pkg = new IO.AuxWriter<EngineNS.IO.UMemWriter>(writer);
 				var pkgHeader = new FPkgHeader();
 				pkgHeader.SetHasReturn(true);
 				pkg.Write(pkgHeader);

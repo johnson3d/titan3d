@@ -35,19 +35,19 @@ namespace EngineNS.Plugins.GameServer
 {
     public class UPluginLoader
     {
-        public static UGameServerPlugin? mPluginObject = new UGameServerPlugin();
-        public static Bricks.AssemblyLoader.UPlugin GetPluginObject()
+        public static UGameServerPlugin mPluginObject = new UGameServerPlugin();
+        public static Bricks.AssemblyLoader.IPlugin GetPluginObject()
         {
             return mPluginObject;
         }
     }
-    public class UGameServerPlugin : Bricks.AssemblyLoader.UPlugin
+    public class UGameServerPlugin : Bricks.AssemblyLoader.IPlugin
     {
-        public override void OnLoadedPlugin()
+        public virtual void OnLoadedPlugin()
         {
             
         }
-        public override void OnUnloadPlugin()
+        public virtual void OnUnloadPlugin()
         {
         }
     }
