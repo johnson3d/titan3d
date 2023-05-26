@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Hash_3306615589 Type="EngineNS.Plugins.GameItems.AGameItem@GameItems">
+  <DescriptorName Type="EngineNS.RName@EngineCore" Order="0" />
+  <Uid Type="System.Guid@Unknown" Order="0" />
+</Hash_3306615589>

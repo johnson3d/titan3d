@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Hash_1438740292 Type="EngineNS.GamePlay.Scene.UBezierSplineNode.UBezierSplineNodeData@EngineCore">
+  <Name Type="System.String@Unknown" Order="0" />
+  <NodeStyles Type="EngineNS.GamePlay.Scene.UNode.ENodeStyles@EngineCore" Order="0" />
+  <PointRadius Type="System.Single@Unknown" Order="0" />
+  <PointSmooth Type="System.UInt32@Unknown" Order="0" />
+  <Spline Type="EngineNS.UBezier3DSpline@EngineCore" Order="0" />
+  <BoundVolume Type="EngineNS.GamePlay.Scene.UBoundVolume@EngineCore" Order="1" />
+  <Placement Type="EngineNS.GamePlay.UPlacementBase@EngineCore" Order="2" />
+</Hash_1438740292>

@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Hash_155355019 Type="EngineNS.Plugins.GameItems.AGameItemDescriptor@GameItems">
+  <AssetName Type="EngineNS.RName@EngineCore" Order="0" />
+  <MaxStack Type="System.Int32@Unknown" Order="0" />
+  <Name Type="System.String@Unknown" Order="0" />
+</Hash_155355019>

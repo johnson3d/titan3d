@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Hash_60438721 Type="EngineNS.Bricks.Network.FNetworkPoint@EngineCore">
+  <Ip Type="System.String@Unknown" Order="0" />
+  <Port Type="System.UInt16@Unknown" Order="0" />
+</Hash_60438721>

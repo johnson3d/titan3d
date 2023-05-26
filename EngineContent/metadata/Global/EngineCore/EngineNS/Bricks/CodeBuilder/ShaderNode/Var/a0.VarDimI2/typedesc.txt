@@ -1,0 +1,1 @@
+EngineNS.Bricks.CodeBuilder.ShaderNode.Var.VarDimI2@EngineCore

@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Hash_2892931573 Type="EngineNS.Bricks.CodeBuilder.ULambdaExpression@EngineCore">
+  <IsAsync Type="System.Boolean@Unknown" Order="0" />
+  <LambdaArguments Type="System.Collections.Generic.List&lt;EngineNS.Bricks.CodeBuilder.UMethodInvokeArgumentExpression@EngineCore,&gt;@Unknown" Order="0" />
+  <MethodInvoke Type="EngineNS.Bricks.CodeBuilder.UMethodInvokeStatement@EngineCore" Order="0" />
+  <ReturnType Type="EngineNS.Bricks.CodeBuilder.UTypeReference@EngineCore" Order="0" />
+</Hash_2892931573>

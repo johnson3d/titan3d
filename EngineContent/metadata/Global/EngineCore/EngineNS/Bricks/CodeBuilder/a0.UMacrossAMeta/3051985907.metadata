@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Hash_3051985907 Type="EngineNS.Bricks.CodeBuilder.UMacrossAMeta@EngineCore">
+  <AssetId Type="System.Guid@Unknown" Order="0" />
+  <BaseTypeStr Type="System.String@Unknown" Order="0" />
+  <Description Type="System.String@Unknown" Order="0" />
+  <Icon Type="EngineNS.EGui.UUvAnim@EngineCore" Order="0" />
+  <RefAssetRNames Type="System.Collections.Generic.List&lt;EngineNS.RName@EngineCore,&gt;@Unknown" Order="0" />
+  <TypeStr Type="System.String@Unknown" Order="0" />
+</Hash_3051985907>

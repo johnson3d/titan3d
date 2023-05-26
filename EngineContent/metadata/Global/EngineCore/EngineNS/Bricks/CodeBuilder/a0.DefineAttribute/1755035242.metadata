@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Hash_1755035242 Type="EngineNS.Bricks.CodeBuilder.DefineAttribute@EngineCore">
+  <AttributeName Type="System.String@Unknown" Order="0" />
+  <Members Type="System.Collections.Generic.List&lt;EngineNS.Bricks.CodeBuilder.DefineVar@EngineCore,&gt;@Unknown" Order="0" />
+  <NameSpace Type="System.String@Unknown" Order="0" />
+</Hash_1755035242>

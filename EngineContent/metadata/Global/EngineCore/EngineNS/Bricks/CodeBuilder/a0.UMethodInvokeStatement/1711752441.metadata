@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Hash_1711752441 Type="EngineNS.Bricks.CodeBuilder.UMethodInvokeStatement@EngineCore">
+  <Arguments Type="System.Collections.Generic.List&lt;EngineNS.Bricks.CodeBuilder.UMethodInvokeArgumentExpression@EngineCore,&gt;@Unknown" Order="0" />
+  <ForceCastReturnType Type="System.Boolean@Unknown" Order="0" />
+  <Host Type="EngineNS.Bricks.CodeBuilder.UExpressionBase@EngineCore" Order="0" />
+  <IsAsync Type="System.Boolean@Unknown" Order="0" />
+  <IsUnsafe Type="System.Boolean@Unknown" Order="0" />
+  <MethodName Type="System.String@Unknown" Order="0" />
+  <ReturnValue Type="EngineNS.Bricks.CodeBuilder.UVariableDeclaration@EngineCore" Order="0" />
+</Hash_1711752441>

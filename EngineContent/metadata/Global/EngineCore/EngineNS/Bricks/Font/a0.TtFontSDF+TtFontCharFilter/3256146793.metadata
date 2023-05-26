@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Hash_3256146793 Type="EngineNS.Bricks.Font.TtFontSDF.TtFontCharFilter@EngineCore">
+  <CharBegin Type="System.UInt32@Unknown" Order="0" />
+  <CharEnd Type="System.UInt32@Unknown" Order="0" />
+  <Excludes Type="System.Collections.Generic.List&lt;EngineNS.Vector2ui@EngineCore,&gt;@Unknown" Order="0" />
+  <IncludeChars Type="System.String@Unknown" Order="0" />
+  <Includes Type="System.Collections.Generic.List&lt;EngineNS.Vector2ui@EngineCore,&gt;@Unknown" Order="0" />
+</Hash_3256146793>

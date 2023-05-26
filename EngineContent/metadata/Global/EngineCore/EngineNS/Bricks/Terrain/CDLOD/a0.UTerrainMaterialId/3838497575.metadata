@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Hash_3838497575 Type="EngineNS.Bricks.Terrain.CDLOD.UTerrainMaterialId@EngineCore">
+  <NullPlantDensity Type="System.Int32@Unknown" Order="0" />
+  <Plants Type="System.Collections.Generic.List&lt;EngineNS.Bricks.Terrain.CDLOD.UTerrainPlant@EngineCore,&gt;@Unknown" Order="0" />
+  <TexDiffuse Type="EngineNS.RName@EngineCore" Order="0" />
+  <TexNormal Type="EngineNS.RName@EngineCore" Order="0" />
+  <TransitionRange Type="System.Single@Unknown" Order="0" />
+</Hash_3838497575>

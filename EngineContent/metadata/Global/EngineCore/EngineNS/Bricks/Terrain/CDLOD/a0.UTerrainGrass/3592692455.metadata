@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Hash_3592692455 Type="EngineNS.Bricks.Terrain.CDLOD.UTerrainGrass@EngineCore">
+  <Density Type="System.Int32@Unknown" Order="0" />
+  <MaxScale Type="System.Single@Unknown" Order="0" />
+  <MeshName Type="EngineNS.RName@EngineCore" Order="0" />
+  <MinScale Type="System.Single@Unknown" Order="0" />
+  <RandomRotation Type="System.Boolean@Unknown" Order="0" />
+</Hash_3592692455>

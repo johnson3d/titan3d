@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Hash_2642953941 Type="EngineNS.Bricks.AssemblyLoader.UPluginDescriptor@EngineCore">
+  <LoadOnInit Type="System.Boolean@Unknown" Order="0" />
+  <Platforms Type="System.Collections.Generic.List&lt;EngineNS.EPlatformType@EngineCore,&gt;@Unknown" Order="0" />
+</Hash_2642953941>

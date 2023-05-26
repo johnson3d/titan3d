@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Hash_4011469805 Type="EngineNS.Bricks.CodeBuilder.UIndexerOperatorExpression@EngineCore">
+  <Indices Type="System.Collections.Generic.List&lt;EngineNS.Bricks.CodeBuilder.UExpressionBase@EngineCore,&gt;@Unknown" Order="0" />
+  <Target Type="EngineNS.Bricks.CodeBuilder.UExpressionBase@EngineCore" Order="0" />
+</Hash_4011469805>

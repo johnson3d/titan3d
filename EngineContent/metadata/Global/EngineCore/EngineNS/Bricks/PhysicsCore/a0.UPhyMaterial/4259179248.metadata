@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Hash_4259179248 Type="EngineNS.Bricks.PhysicsCore.UPhyMaterial@EngineCore">
+  <AssetName Type="EngineNS.RName@EngineCore" Order="0" />
+  <DynamicFriction Type="System.Single@Unknown" Order="0" />
+  <Restitution Type="System.Single@Unknown" Order="0" />
+  <StaticFriction Type="System.Single@Unknown" Order="0" />
+</Hash_4259179248>

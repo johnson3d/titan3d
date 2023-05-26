@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Hash_2087461059 Type="EngineNS.Bricks.CodeBuilder.UVariableDeclaration@EngineCore">
+  <Comment Type="EngineNS.Bricks.CodeBuilder.UCommentStatement@EngineCore" Order="0" />
+  <InitValue Type="EngineNS.Bricks.CodeBuilder.UExpressionBase@EngineCore" Order="0" />
+  <VariableName Type="System.String@Unknown" Order="0" />
+  <VariableType Type="EngineNS.Bricks.CodeBuilder.UTypeReference@EngineCore" Order="0" />
+  <VisitMode Type="EngineNS.Bricks.CodeBuilder.EVisisMode@EngineCore" Order="0" />
+</Hash_2087461059>

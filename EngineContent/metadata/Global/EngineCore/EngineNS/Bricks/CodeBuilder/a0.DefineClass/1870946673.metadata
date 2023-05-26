@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Hash_1870946673 Type="EngineNS.Bricks.CodeBuilder.DefineClass@EngineCore">
+  <ClassName Type="System.String@Unknown" Order="0" />
+  <Functions Type="System.Collections.Generic.List&lt;EngineNS.Bricks.CodeBuilder.DefineFunction@EngineCore,&gt;@Unknown" Order="0" />
+  <Members Type="System.Collections.Generic.List&lt;EngineNS.Bricks.CodeBuilder.DefineVar@EngineCore,&gt;@Unknown" Order="0" />
+  <NameSpace Type="System.String@Unknown" Order="0" />
+  <SuperClassName Type="System.String@Unknown" Order="0" />
+</Hash_1870946673>

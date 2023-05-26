@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Hash_901025180 Type="EngineNS.Editor.UEditorConfig@EngineCore">
+  <GameAssembly Type="System.String@Unknown" Order="0" />
+  <GameProject Type="System.String@Unknown" Order="0" />
+  <MacrossIconName Type="EngineNS.RName@EngineCore" Order="0" />
+  <PhyMaterialIconName Type="EngineNS.RName@EngineCore" Order="0" />
+</Hash_901025180>

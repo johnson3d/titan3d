@@ -1,0 +1,1 @@
+EngineNS.UBezier3DSpline@EngineCore
