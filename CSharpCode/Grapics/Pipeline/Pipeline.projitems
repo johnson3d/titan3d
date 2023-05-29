@@ -22,6 +22,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)Common\Post\LensFlareNode.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Common\Post\LuminanceThresholeNode.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Common\Post\SunShaftNode.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Common\Post\SWRasterizerNode.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Common\UAvgBrightnessNode.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Common\UBasePassNode.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Common\UCopy2SwapChainNode.cs" />

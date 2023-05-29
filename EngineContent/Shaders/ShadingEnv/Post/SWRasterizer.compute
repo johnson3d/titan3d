@@ -1,0 +1,16 @@
+#ifndef __SWRasterizer_SHADING_H__
+#define __SWRasterizer_SHADING_H__
+
+
+Texture2D<float4> InputTriangle;
+RWTexture2D<float4> OutputColor;
+
+[numthreads(DispatchX, DispatchY, DispatchZ)]
+void CS_Main(uint3 LocalThreadId : SV_GroupThreadID, uint3 WorkGroupId : SV_GroupID, uint3 DTid : SV_DispatchThreadID)
+{
+    if (DTid.x > 50 && DTid.x < 100 && DTid.y > 50 && DTid.y < 100)
+        OutputColor[DTid.xy] = float4(1, 0, 0, 1);
+}
+
+#endif
+//
