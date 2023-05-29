@@ -388,7 +388,20 @@ namespace NxRHI
 			}
 
 			IBlobObject buffData;
-			ib->Buffer->FetchGpuData(0, &buffData);
+			AutoRef<NxRHI::IBuffer> copyVB;
+			{
+				FTransientCmd cmd(device, NxRHI::QU_Transfer);
+				auto copyDesc = ib->Buffer->Desc;
+				copyDesc.Usage = USAGE_STAGING;
+				copyDesc.CpuAccess = ECpuAccess::CAS_READ;
+				copyDesc.MiscFlags = (EResourceMiscFlag)0;
+				copyDesc.RowPitch = copyDesc.Size;
+				copyDesc.DepthPitch = copyDesc.Size;
+				copyVB = MakeWeakRef(device->CreateBuffer(&copyDesc));
+				cmd.GetCmdList()->CopyBufferRegion(copyVB, 0, ib->Buffer, 0, copyDesc.Size);
+			}
+			device->GetCmdQueue()->Flush(EQueueType::QU_Transfer);
+			copyVB->FetchGpuData(0, &buffData);
 			pAttr->Write((BYTE*)buffData.GetData() + sizeof(UINT) * 2, desc.Size);
 			pAttr->EndWrite();
 		}
@@ -522,8 +535,21 @@ namespace NxRHI
 
 	void FMeshPrimitives::SaveVB(IGpuDevice* device, XndAttribute* pAttr, IVbView* vb, TimeKeys& tkeys, UINT stride)
 	{
+		AutoRef<NxRHI::IBuffer> copyVB;
 		IBlobObject buffData;
-		vb->Buffer->FetchGpuData(0, &buffData);
+		{
+			FTransientCmd cmd(device, NxRHI::QU_Transfer);
+			auto copyDesc = vb->Buffer->Desc;
+			copyDesc.Usage = USAGE_STAGING;
+			copyDesc.CpuAccess = ECpuAccess::CAS_READ;
+			copyDesc.MiscFlags = (EResourceMiscFlag)0;
+			copyDesc.RowPitch = copyDesc.Size;
+			copyDesc.DepthPitch = copyDesc.Size;
+			copyVB = MakeWeakRef(device->CreateBuffer(&copyDesc));
+			cmd.GetCmdList()->CopyBufferRegion(copyVB, 0, vb->Buffer, 0, copyDesc.Size);
+		}
+		device->GetCmdQueue()->Flush(EQueueType::QU_Transfer);
+		copyVB->FetchGpuData(0, &buffData);
 
 		if (buffData.GetSize() == 0)
 			return;

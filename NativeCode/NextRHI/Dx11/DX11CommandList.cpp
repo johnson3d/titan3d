@@ -423,6 +423,10 @@ namespace NxRHI
 		D3D11_BOX box{};
 		box.left = (UINT)SrcOffset;
 		box.right = (UINT)(SrcOffset + Size);
+		box.top = 0;
+		box.bottom = 1;
+		box.front = 0;
+		box.back = 1;
 		mContext->CopySubresourceRegion((ID3D11Resource*)target->GetHWBuffer(), 0, (UINT)DstOffset, 0, 0, (ID3D11Resource*)src->GetHWBuffer(), 0, &box);
 	}
 	void DX11CommandList::CopyTextureRegion(ITexture* target, UINT tarSubRes, UINT DstX, UINT DstY, UINT DstZ, ITexture* src, UINT srcSubRes, const FSubresourceBox* box)
