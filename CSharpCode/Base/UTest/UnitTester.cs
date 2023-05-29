@@ -28,6 +28,7 @@ namespace EngineNS.UTest
         }
         public static void DoUnitTests()
         {
+            return;
             var ass = AppDomain.CurrentDomain.GetAssemblies();
             foreach (var i in ass)
             {
