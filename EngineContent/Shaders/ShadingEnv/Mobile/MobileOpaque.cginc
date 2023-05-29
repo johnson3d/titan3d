@@ -41,11 +41,12 @@ PS_INPUT VS_Main(VS_INPUT input1)
 #if !defined(VS_NO_WorldTransform)
 	output.vPosition.xyz += mtl.mVertexOffset;
 
-	output.vWorldPos = mul(float4(output.vPosition.xyz, 1), WorldMatrix).xyz;
+	float4 wp4 = mul(float4(output.vPosition.xyz, 1), WorldMatrix);
+	output.vWorldPos = wp4.xyz;
 	output.vNormal = normalize(mul(float4(output.vNormal.xyz, 0), WorldMatrix).xyz);
 	output.vTangent.xyz = normalize(mul(float4(output.vTangent.xyz, 0), WorldMatrix).xyz);
 #endif
-	output.vPosition = mul(float4(output.vWorldPos, 1), GetViewPrjMtx(true));
+	output.vPosition = mul(wp4, GetViewPrjMtx(true));
 	
 #if ENV_DISABLE_POINTLIGHTS == 0
 	output.psCustomUV0.xy = float2(output.vPosition.xy / output.vPosition.w) * float2(0.5f, -0.5f) + float2(0.5f, 0.5f);

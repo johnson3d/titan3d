@@ -13,6 +13,7 @@
 #include "MdfQueue"
 
 #include "../../Inc/SysFunctionDefImpl.cginc"
+#include "../CommonLighting.cginc"
 
 #ifdef MDFQUEUE_FUNCTION
 MDFQUEUE_FUNCTION
@@ -45,11 +46,12 @@ PS_INPUT VS_Main(VS_INPUT input1)
 #if !defined(VS_NO_WorldTransform)
 	output.vPosition.xyz += mtl.mVertexOffset;
 	
-	output.vWorldPos = mul(float4(output.vPosition.xyz, 1), WorldMatrix).xyz;
+	float4 wp4 = mul(float4(output.vPosition.xyz, 1), WorldMatrix);
+	output.vWorldPos = wp4.xyz;
 	output.vNormal = normalize(mul(float4(output.vNormal.xyz, 0), WorldMatrix).xyz);
 	output.vTangent.xyz = normalize(mul(float4(output.vTangent.xyz, 0), WorldMatrix).xyz);
 #endif
-	output.vPosition = mul(float4(output.vWorldPos, 1), GetViewPrjMtx(false));
+	output.vPosition = mul(wp4, GetViewPrjMtx(false));
 
 	return output;
 }
@@ -78,6 +80,7 @@ PS_OUTPUT PS_Main(PS_INPUT input)
 
 	half Alpha = (half)mtl.mAlpha;
 	half AlphaTestThreshold = (half)mtl.mAlphaTest;
+	half3 Albedo = sRGB2Linear((half3)mtl.mAlbedo);
 
 #ifdef ALPHA_TEST
 	clip(Alpha - AlphaTestThreshold);
@@ -86,26 +89,16 @@ PS_OUTPUT PS_Main(PS_INPUT input)
 	{
 		half3 Emissive = (half3)mtl.mEmissive;
 		half3 BaseShading = half3(0.0h, 0.0h, 0.0h);
-		half3 Albedo = (half3)mtl.mAlbedo;
-
-		/*half3 N = normalize((half3)mtl.mNormal);
-		half Metallic = (half)mtl.mMetallic;
-		half Roughness = 1.0h - (half)mtl.mRough;
-		half AbsSpecular = (half)mtl.mAbsSpecular;
-		
-		half Alpha = (half)mtl.mAlpha;
-		half Transmit = (half)mtl.mTransmit;
-		half3 SubAlbedo = sRGB2Linear((half3)mtl.mSubAlbedo);
-		
-		half3 WorldPos = (half3)input.vWorldPos;
-		half3 L = -(half3)normalize(gDirLightDirection_Leak.xyz);
-		half3 V = (half3)normalize(CameraPosition - WorldPos);*/
 
 #ifdef MTL_ID_UNLIT
-		BaseShading = Albedo;
+		BaseShading = (half3)mtl.mAlbedo;
 #else
 		//lighting for translucent
-		BaseShading = Albedo;
+		half3 diffColor, specColor;
+		GetDirLightingColor(diffColor, specColor, input.vWorldPos, mtl, 1.0h);
+		half3 skyColor = GetSkyColor(Albedo, mtl, 1.0h);
+		BaseShading = Linear2sRGB(diffColor + specColor + skyColor);
+		//BaseShading = (half3)mtl.mAlbedo;
 #endif
 
 		BaseShading += Emissive;

@@ -24,6 +24,7 @@ float3 ToneMap(float3 color)
 
 float3 ACESToneMapping(float3 color)
 {
+	//https://www.desmos.com/calculator/h8rbdpawxj?lang=zh-CN
 	const float A = 2.51;
 	const float B = 0.03;
 	const float C = 2.43;

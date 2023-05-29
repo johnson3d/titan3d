@@ -33,6 +33,9 @@ void PushLight(int tileIdx, uint lightIndex)
 	DstBuffer[tileIdx].NumPointLight++;
 }
 
+/**Meta Begin:(CS_SetupTileData)
+HLSL=2021
+Meta End:(CS_SetupTileData)**/
 [numthreads(DispatchX, DispatchY, DispatchZ)]
 void CS_SetupTileData(uint3 id : SV_DispatchThreadID,
 	uint3 GroupId : SV_GroupID,
@@ -46,7 +49,8 @@ void CS_SetupTileData(uint3 id : SV_DispatchThreadID,
 	float3 boxmin = float3(BIG_FLOAT, BIG_FLOAT, BIG_FLOAT);
 	float3 boxmax = float3(-BIG_FLOAT, -BIG_FLOAT, -BIG_FLOAT);
 	uint2 startPixel = id.xy * TileSize;
-	uint2 offset = uint2(0, 0);;
+	uint2 offset = uint2(0, 0);
+
 	for (int i = 0; i < TileSize; i++)
 	{
 		offset.y = i;

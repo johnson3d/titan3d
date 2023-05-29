@@ -414,6 +414,9 @@
     <None Include="$(MSBuildThisFileDirectory)ShadingEnv\Post\AdditiveShading.cginc">
       <Filter>ShadingEnv\Post</Filter>
     </None>
+    <None Include="$(MSBuildThisFileDirectory)ShadingEnv\CommonLighting.cginc" />
+    <None Include="$(MSBuildThisFileDirectory)Occlusion\SetupDrawClusterArgs.cginc" />
+    <None Include="$(MSBuildThisFileDirectory)ShadingEnv\DrawViewportShading.cginc" />
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="$(MSBuildThisFileDirectory)Compute\calcrate.compute">
