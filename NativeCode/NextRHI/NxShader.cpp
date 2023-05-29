@@ -246,6 +246,7 @@ namespace NxRHI
 			auto pAttr = node->GetOrAddAttribute("ShaderDesc", 0, 0);
 			pAttr->BeginWrite();
 			pAttr->Write(Type);
+			pAttr->Write(DebugName);
 			pAttr->Write(FunctionName);
 			pAttr->EndWrite();
 		}
@@ -317,6 +318,7 @@ namespace NxRHI
 			auto pAttr = node->FindFirstAttribute("ShaderDesc");
 			pAttr->BeginRead();
 			pAttr->Read(Type);
+			pAttr->Read(DebugName);
 			pAttr->Read(FunctionName);
 			pAttr->EndRead();
 		}

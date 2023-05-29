@@ -13,7 +13,8 @@ namespace GpuDump
 	{
 	public:
 		static void InitDump(NxRHI::ERhiType type);
-		static void RegSpirv(void* pCode, UINT size);
+		static void DeviceCreated(NxRHI::ERhiType type, NxRHI::IGpuDevice * device);
+		static void RegByteCode(const char* name, void* pCode, UINT size);
 	};
 };
 

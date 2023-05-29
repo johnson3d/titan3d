@@ -145,7 +145,7 @@ namespace NxRHI
 	}
 	void IGpuDevice::PushWaitFlushBuffer(IBuffer* buffer)
 	{
-		VAutoVSLLock lk(mPostEventLocker);
+		VAutoVSLLock lk(mWaitFlushLocker);
 		mWaitFlushBuffers.push_back(buffer);
 	}
 	void IGpuDevice::TickPostEvents()
@@ -156,7 +156,9 @@ namespace NxRHI
 				VAutoVSLLock lk(mPostEventLocker);
 				mTickingPostEvents.insert(mTickingPostEvents.begin(), mPostEvents.begin(), mPostEvents.end());
 				mPostEvents.clear();
-
+			}
+			{
+				VAutoVSLLock lk(mWaitFlushLocker);
 				for (auto& i : mWaitFlushBuffers)
 				{
 					i->FlushDirty();

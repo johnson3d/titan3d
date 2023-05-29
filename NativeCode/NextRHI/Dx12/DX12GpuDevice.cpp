@@ -11,6 +11,10 @@
 #include "../NxEffect.h"
 #include <dxgi1_3.h>
 
+#if defined(HasModule_GpuDump)
+#include "../../Bricks/GpuDump/NvAftermath.h"
+#endif
+
 #define new VNEW
 
 NS_BEGIN
@@ -142,10 +146,21 @@ namespace NxRHI
 
 		IDXGIAdapter* pIAdapter;
 		((DX12GpuSystem*)pGpuSystem)->mDXGIFactory->EnumAdapters(desc->AdapterId, &pIAdapter);
-
+#if defined(HasModule_GpuDump)
+		if (desc->GpuDump)
+		{
+			GpuDump::NvAftermath::InitDump(NxRHI::RHI_D3D12);
+		}
+#endif
 		auto hr = D3D12CreateDevice(pIAdapter, D3D_FEATURE_LEVEL_12_1, IID_PPV_ARGS(mDevice.GetAddressOf()));
 		if (FAILED(hr))
 			return false;
+#if defined(HasModule_GpuDump)
+		if (desc->GpuDump)
+		{
+			GpuDump::NvAftermath::DeviceCreated(NxRHI::RHI_D3D12, this);
+		}
+#endif
 		/*ID3D12Device* tmp;
 		hr = D3D12CreateDevice(pIAdapter, D3D_FEATURE_LEVEL_12_1, IID_PPV_ARGS(&tmp));*/
 

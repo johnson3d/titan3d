@@ -261,7 +261,7 @@ namespace NxRHI
 		}
 
 #if defined(HasModule_GpuDump)
-		GpuDump::NvAftermath::RegSpirv(&desc->SpirV[0], (UINT)createInfo.codeSize);
+		GpuDump::NvAftermath::RegByteCode(desc->DebugName.c_str(), &desc->SpirV[0], (UINT)createInfo.codeSize);
 #endif
 
 		VkShaderStageFlagBits shaderStage = (VkShaderStageFlagBits)0;

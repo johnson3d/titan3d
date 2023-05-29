@@ -30,10 +30,11 @@
 #include <sstream>
 
 #include <vulkan/vulkan.hpp>
+#include <d3d12.h>
+
 #include "../../../../3rd/native/NVAftermath/include/GFSDK_Aftermath.h"
 #include "../../../../3rd/native/NVAftermath/include/GFSDK_Aftermath_GpuCrashDump.h"
 #include "../../../../3rd/native/NVAftermath/include/GFSDK_Aftermath_GpuCrashDumpDecoding.h"
-
 //*********************************************************
 // Some std::to_string overloads for some Nsight Aftermath
 // API types.

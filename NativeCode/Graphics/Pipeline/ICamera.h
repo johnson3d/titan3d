@@ -135,6 +135,9 @@ public:
 	v3dxMatrix4 GetJitterViewProjection() const {
 		return mLogicData->mJitterViewProjection;
 	}
+	v3dxMatrix4 GetJitterViewProjectionInverse() const {
+		return mLogicData->mJitterViewProjectionInverse;
+	}
 	v3dxMatrix4 GetToViewPortMatrix() const {
 		return mLogicData->mToViewPortMatrix;
 	}
