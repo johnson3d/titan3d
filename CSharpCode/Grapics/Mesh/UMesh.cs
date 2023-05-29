@@ -1,4 +1,5 @@
 ﻿using EngineNS.Graphics.Pipeline.Deferred;
+using Org.BouncyCastle.Asn1.Mozilla;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -8,6 +9,7 @@ namespace EngineNS.Graphics.Mesh
 {
     public class UMesh : IDisposable
     {
+        public Graphics.Pipeline.Shader.UGraphicsShadingEnv UserShading = null;
         public void Dispose() 
         {
             if (Atoms != null)
@@ -97,7 +99,7 @@ namespace EngineNS.Graphics.Mesh
                     }
                     else
                     {
-                        SetWorldMatrix(in Matrix.Identity);
+                        DirectSetWorldMatrix(in Matrix.Identity);
                     }
                 }
                 return mPerMeshCBuffer;
@@ -600,7 +602,7 @@ namespace EngineNS.Graphics.Mesh
             var tm = PerMeshCBuffer.GetMatrix(UEngine.Instance.GfxDevice.CoreShaderBinder.CBPerMesh.WorldMatrix);
             var realPos = WorldLocation - world.CameraOffset;
             tm.Translation = realPos.ToSingleVector3();
-            this.SetWorldMatrix(in tm);
+            this.DirectSetWorldMatrix(in tm);
         }
         private DVector3 WorldLocation = DVector3.Zero;
         public void SetWorldTransform(in FTransform transform, GamePlay.UWorld world, bool isNoScale)
@@ -609,19 +611,19 @@ namespace EngineNS.Graphics.Mesh
             if (world != null)
             {
                 if (isNoScale == false)
-                    this.SetWorldMatrix(transform.ToMatrixWithScale(in world.mCameraOffset));
+                    this.DirectSetWorldMatrix(transform.ToMatrixWithScale(in world.mCameraOffset));
                 else
-                    this.SetWorldMatrix(transform.ToMatrixNoScale(in world.mCameraOffset));
+                    this.DirectSetWorldMatrix(transform.ToMatrixNoScale(in world.mCameraOffset));
             }
             else
             {
                 if (isNoScale == false)
-                    this.SetWorldMatrix(transform.ToMatrixWithScale(in transform.mPosition));
+                    this.DirectSetWorldMatrix(transform.ToMatrixWithScale(in transform.mPosition));
                 else
-                    this.SetWorldMatrix(transform.ToMatrixNoScale(in transform.mPosition));
+                    this.DirectSetWorldMatrix(transform.ToMatrixNoScale(in transform.mPosition));
             }
         }
-        private void SetWorldMatrix(in Matrix tm)
+        public void DirectSetWorldMatrix(in Matrix tm)
         {
             if (PerMeshCBuffer == null)
             {

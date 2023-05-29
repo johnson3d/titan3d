@@ -87,6 +87,16 @@ namespace EngineNS.NxRHI
         {
             return false;
         }
+        public string DebugName
+        {
+            get => mCoreObject.DebugName.c_str();
+            set => mCoreObject.DebugName = VNameString.FromString(value);
+        }
+        public string FunctionName
+        {
+            get => mCoreObject.FunctionName.c_str();
+            set => mCoreObject.FunctionName = VNameString.FromString(value);
+        }
     }
     public class UShaderCompiler : AuxPtrType<NxRHI.FShaderCompiler>
     {

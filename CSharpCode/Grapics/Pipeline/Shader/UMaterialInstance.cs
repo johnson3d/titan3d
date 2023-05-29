@@ -349,6 +349,7 @@ namespace EngineNS.Graphics.Pipeline.Shader
                 
             }
         }
+        [Category("Option")]
         [RName.PGRName(FilterExts = UMaterial.AssetExt)]
         public RName MaterialName
         {

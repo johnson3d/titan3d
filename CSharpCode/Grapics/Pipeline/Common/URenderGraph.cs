@@ -30,13 +30,13 @@ namespace EngineNS.Graphics.Pipeline.Common
             result.Attachement.Format = EPixelFormat.PXF_UNKNOWN;
             return result;
         }
-        public static URenderGraphPin CreateOutput(string name, bool isAutoSize, EPixelFormat format)
+        public static URenderGraphPin CreateOutput(string name, bool isAutoSize, EPixelFormat defaultFormat)
         {
             var result = new URenderGraphPin();
             result.Name = name;
             result.PinType = EPinType.Output;
             result.IsAutoResize = isAutoSize;
-            result.Attachement.Format = format;
+            result.Attachement.Format = defaultFormat;
             return result;
         }
         public static URenderGraphPin CreateInputOutput(string name)

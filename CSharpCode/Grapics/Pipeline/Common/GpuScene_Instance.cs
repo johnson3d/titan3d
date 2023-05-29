@@ -75,6 +75,17 @@ namespace EngineNS.Graphics.Pipeline.Common
             public int ClusterCount;
         }
 
+        public struct TtVisibleClusterMeshData
+        {
+            public int GpuSceneIndex;
+            public uint ClusterId;
+        }
+
+        public struct TtNumnerVisibleClusterMeshData
+        {
+            public uint ClusterCount;
+        }
+
         public UGpuDataArray<TtCullInstanceData> CullInstancesBuffer = new UGpuDataArray<TtCullInstanceData>();
         public UGpuDataArray<TtCullClusterData> CullClustersBuffer = new UGpuDataArray<TtCullClusterData>();
 
@@ -87,12 +98,18 @@ namespace EngineNS.Graphics.Pipeline.Common
         public TtGpuBuffer<TtNeedCullClusterMeshData> NeedCullClusterMesBuffer = new TtGpuBuffer<TtNeedCullClusterMeshData>();
 
         public TtGpuBuffer<TtNumberVisibilityGpuActorBuffer> NumberVisibilityGpuActorBuffer = new TtGpuBuffer<TtNumberVisibilityGpuActorBuffer>();
+
+        public TtGpuBuffer<TtVisibleClusterMeshData> VisibleClusterMeshData = new TtGpuBuffer<TtVisibleClusterMeshData>();
+        public TtGpuBuffer<TtNumnerVisibleClusterMeshData> NumnerVisibleClusterMeshData = new TtGpuBuffer<TtNumnerVisibleClusterMeshData>();
+
         public TtGpuBuffer<uint> NumberGpuActorsBuffer = new TtGpuBuffer<uint>();
 
         public TtGpuBuffer<uint> VisibilityClusterBuffer = new TtGpuBuffer<uint>();
 
         public TtGpuBuffer<uint> CullClusterIndirectArgs = new TtGpuBuffer<uint>();
-        
+
+        public TtGpuBuffer<uint> SetupDrawClusterIndirectArgs = new TtGpuBuffer<uint>();
+
 
         public List<TtClusteDrawArgs> ClusteDrawArgsList = new List<TtClusteDrawArgs>();
 
@@ -100,13 +117,13 @@ namespace EngineNS.Graphics.Pipeline.Common
         public NxRHI.UComputeEffect Cull_SetupCullClusterArgs;
 
         public NxRHI.UComputeEffect Cull_CullCluster;
-        public NxRHI.UComputeEffect Cull_SetupArgsBuffer;
+        public NxRHI.UComputeEffect Cull_SetupDrawClusterArgsBuffer;
 
         public NxRHI.UComputeDraw Cull_CullGpuIndexsDrawcall;
         public NxRHI.UComputeDraw Cull_SetupCullClusterArgsDrawcall;
 
         public NxRHI.UComputeDraw Cull_CullClusterDrawcall;
-        public NxRHI.UComputeDraw Cull_SetupArgsBufferDrawcall;
+        public NxRHI.UComputeDraw Cull_SetupDrawClusterArgsDrawcall;
 
         public NxRHI.UShaderBinder cbPerHZBCullData_CullInstance;
         public NxRHI.UShaderBinder cbPerHZBCullData_CullCluster;
@@ -134,8 +151,6 @@ namespace EngineNS.Graphics.Pipeline.Common
             defines.mCoreObject.AddDefine("DispatchY", $"1");
             defines.mCoreObject.AddDefine("DispatchZ", $"1");
 
-
-
             Cull_CullGpuIndexs = UEngine.Instance.GfxDevice.EffectManager.GetComputeEffect(RName.GetRName("Shaders/Occlusion/GpuSceneCullInstance.cginc", RName.ERNameType.Engine),
                 "GpuSceneCullInstance", NxRHI.EShaderType.SDT_ComputeShader, null, defines, null);
 
@@ -152,8 +167,14 @@ namespace EngineNS.Graphics.Pipeline.Common
             defines.mCoreObject.AddDefine("DispatchY", $"1");
             defines.mCoreObject.AddDefine("DispatchZ", $"1");
             //defines.mCoreObject.AddDefine("NumThreadsPerGroup", $"{NumThreadsPerGroup}"); 
-            //Cull_CullCluster = UEngine.Instance.GfxDevice.EffectManager.GetComputeEffect(RName.GetRName("Shaders/Occlusion/GpuSceneCullCluster.cginc", RName.ERNameType.Engine),
-            //    "GpuSceneCullCluster", NxRHI.EShaderType.SDT_ComputeShader, null, null, null, defines, null);
+            Cull_CullCluster = UEngine.Instance.GfxDevice.EffectManager.GetComputeEffect(RName.GetRName("Shaders/Occlusion/GpuSceneCullCluster.cginc", RName.ERNameType.Engine),
+                "GpuSceneCullCluster", NxRHI.EShaderType.SDT_ComputeShader, null, defines, null);
+
+            defines.mCoreObject.AddDefine("DispatchX", $"1");
+            defines.mCoreObject.AddDefine("DispatchY", $"1");
+            defines.mCoreObject.AddDefine("DispatchZ", $"1");
+            Cull_SetupDrawClusterArgsBuffer = UEngine.Instance.GfxDevice.EffectManager.GetComputeEffect(RName.GetRName("Shaders/Occlusion/SetupDrawClusterArgs.cginc", RName.ERNameType.Engine),
+                "SetupDrawClusterArgsCS", NxRHI.EShaderType.SDT_ComputeShader, null, defines, null);
 
             //cbPerHZBCullData_CullCluster = Cull_CullCluster.FindBinder("cbPerPatchHZBCullData");
             //HZBCullClusterCBuffer = UEngine.Instance.GfxDevice.RenderContext.CreateCBV(HZBCullClusterData.Binder.mCoreObject);
@@ -287,7 +308,7 @@ namespace EngineNS.Graphics.Pipeline.Common
                     Cull_CullGpuIndexsDrawcall.SetComputeEffect(Cull_CullGpuIndexs);
                 }
 
-                HZBCullInstanceData.UpdateFieldVar(Cull_CullGpuIndexs.mComputeShader, "cbParticleDesc");
+                HZBCullInstanceData.UpdateFieldVar(Cull_CullGpuIndexs.mComputeShader, "cbPerPatchHZBCullData");
                 HZBCullInstanceCBuffer = UEngine.Instance.GfxDevice.RenderContext.CreateCBV(HZBCullInstanceData.Binder.mCoreObject);
 
                 //HZBCullInstanceCBuffer.SetValue
@@ -318,6 +339,12 @@ namespace EngineNS.Graphics.Pipeline.Common
             }
 
             {
+                VisibleClusterMeshData.SetSize((uint)CullClustersBuffer.DataArray.Count, null);
+                TtNumnerVisibleClusterMeshData InitNumnerVisibleClusterMeshData;
+                InitNumnerVisibleClusterMeshData.ClusterCount = 0;
+                NumnerVisibleClusterMeshData.SetSize(1u, &InitNumnerVisibleClusterMeshData);
+
+                //uint InitSetupDrawClusterIndirectArgs = 0;
                 if (Cull_CullClusterDrawcall == null)
                 {
                     Cull_CullClusterDrawcall = rc.CreateComputeDraw();
@@ -326,7 +353,26 @@ namespace EngineNS.Graphics.Pipeline.Common
                 }
 
                 Cull_CullClusterDrawcall.BindSrv("NumberVisibilityGpuActorBuffer", NumberVisibilityGpuActorBuffer.DataSRV);
+                Cull_CullClusterDrawcall.BindUav("VisibleClusterMeshData", VisibleClusterMeshData.DataUAV);
+                Cull_CullClusterDrawcall.BindUav("NumnerVisibleClusterMeshData", NumnerVisibleClusterMeshData.DataUAV);
+
                 Cull_CullClusterDrawcall.Commit(cmd);
+            }
+
+            {
+                uint InitSetupDrawClusterIndirectArgs = 0u;
+                SetupDrawClusterIndirectArgs.SetSize(3u, &InitSetupDrawClusterIndirectArgs);
+
+                if (Cull_SetupDrawClusterArgsDrawcall == null)
+                {
+                    Cull_SetupDrawClusterArgsDrawcall = rc.CreateComputeDraw();
+                    Cull_SetupDrawClusterArgsDrawcall.SetComputeEffect(Cull_SetupDrawClusterArgsBuffer);
+                }
+
+                Cull_SetupDrawClusterArgsDrawcall.BindSrv("NumnerVisibleClusterMeshData", NumnerVisibleClusterMeshData.DataSRV);
+                Cull_SetupDrawClusterArgsDrawcall.BindUav("DrawClusterIndirectArgs", SetupDrawClusterIndirectArgs.DataUAV);
+
+                Cull_SetupDrawClusterArgsDrawcall.Commit(cmd);
             }
             //Cull_CullGpuIndexsDrawcall.
             

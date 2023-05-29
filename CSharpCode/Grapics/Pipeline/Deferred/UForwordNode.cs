@@ -196,6 +196,9 @@ namespace EngineNS.Graphics.Pipeline.Deferred
             {
                 if (mOpaqueShading == null)
                     return;
+
+                GBuffers?.SetViewportCBuffer(world, policy);
+                
                 LayerBasePass.ClearMeshDrawPassArray();
 
                 foreach (var i in policy.VisibleMeshes)

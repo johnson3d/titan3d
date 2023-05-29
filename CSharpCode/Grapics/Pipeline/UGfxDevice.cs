@@ -158,7 +158,7 @@ namespace EngineNS.Graphics.Pipeline
                 var gpuDesc = new NxRHI.FGpuSystemDesc();
                 if (useRenderDoc)
                     gpuDesc.UseRenderDoc = 1;
-                gpuDesc.CreateDebugLayer = 1;
+                gpuDesc.CreateDebugLayer = bDebugLayer ? 1 : 0;
                 gpuDesc.WindowHandle = window.ToPointer();
                 var renderDoc = engine.FileManager.GetRoot(IO.TtFileManager.ERootDir.EngineSource);
                 renderDoc += "3rd/native/renderdoc/bin/renderdoc.dll";
@@ -188,6 +188,7 @@ namespace EngineNS.Graphics.Pipeline
                     }
                 }
 
+                rcDesc.GpuDump = engine.Config.IsGpuDump;
                 rcDesc.CreateDebugLayer = bDebugLayer;
                 //rcDesc.Han = window.ToPointer();
                 rcDesc.AdapterId = (int)Adapter;

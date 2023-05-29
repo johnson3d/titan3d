@@ -1,5 +1,6 @@
 ﻿using EngineNS.Graphics.Pipeline.Common;
 using EngineNS.Thread;
+using Microsoft.CodeAnalysis.Host.Mef;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -461,6 +462,8 @@ namespace EngineNS.Graphics.Pipeline
         }
         public override Shader.UGraphicsShadingEnv GetPassShading(EShadingType type, Mesh.UMesh mesh, int atom, Pipeline.Common.URenderGraphNode node)
         {
+            if (mesh.UserShading != null)
+                return mesh.UserShading;
             switch (type)
             {
                 case EShadingType.BasePass:
