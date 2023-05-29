@@ -191,7 +191,7 @@ namespace NxRHI
 			return false;
 
 #if defined(HasModule_GpuDump)
-		GpuDump::NvAftermath::RegSpirv(&Desc->DxIL[0], (UINT)Desc->DxIL.size());
+		GpuDump::NvAftermath::RegByteCode(desc->DebugName.c_str(), &Desc->DxIL[0], (UINT)Desc->DxIL.size());
 #endif
 
 		//Reflect(desc);

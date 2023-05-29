@@ -263,43 +263,6 @@ namespace EngineNS.Graphics.Pipeline.Mobile
                 GGizmosBuffers.SetSize(x, y);
             }
         }
-        protected void SetCBuffer(GamePlay.UWorld world, NxRHI.UCbView cBuffer, URenderPolicy mobilePolicy)
-        {
-            var coreBinder = UEngine.Instance.GfxDevice.CoreShaderBinder;
-            var shadowNode = mobilePolicy.FindFirstNode<Shadow.UShadowMapNode>();
-            if (shadowNode != null)
-            {
-                cBuffer.SetValue(coreBinder.CBPerViewport.gFadeParam, in shadowNode.mFadeParam);
-                cBuffer.SetValue(coreBinder.CBPerViewport.gShadowTransitionScale, in shadowNode.mShadowTransitionScale);
-                cBuffer.SetValue(coreBinder.CBPerViewport.gShadowMapSizeAndRcp, in shadowNode.mShadowMapSizeAndRcp);
-                cBuffer.SetValue(coreBinder.CBPerViewport.gViewer2ShadowMtx, in shadowNode.mViewer2ShadowMtx);
-                cBuffer.SetValue(coreBinder.CBPerViewport.gShadowDistance, in shadowNode.mShadowDistance);
-                
-                cBuffer.SetValue(coreBinder.CBPerViewport.gCsmDistanceArray, in shadowNode.mSumDistanceFarVec);
-                cBuffer.SetValue(coreBinder.CBPerViewport.gViewer2ShadowMtxArrayEditor, 0, in shadowNode.mViewer2ShadowMtxArray[0]);
-                cBuffer.SetValue(coreBinder.CBPerViewport.gViewer2ShadowMtxArrayEditor, 1, in shadowNode.mViewer2ShadowMtxArray[1]);
-                cBuffer.SetValue(coreBinder.CBPerViewport.gViewer2ShadowMtxArrayEditor, 2, in shadowNode.mViewer2ShadowMtxArray[2]);
-                cBuffer.SetValue(coreBinder.CBPerViewport.gViewer2ShadowMtxArrayEditor, 3, in shadowNode.mViewer2ShadowMtxArray[3]);
-
-                cBuffer.SetValue(coreBinder.CBPerViewport.gShadowTransitionScaleArrayEditor, in shadowNode.mShadowTransitionScaleVec);
-                cBuffer.SetValue(coreBinder.CBPerViewport.gCsmNum, in shadowNode.mCsmNum);
-            }
-
-            var dirLight = world.DirectionLight;
-            //dirLight.mDirection = MathHelper.RandomDirection();
-            var dir = dirLight.Direction;
-            var gDirLightDirection_Leak = new Vector4(dir.X, dir.Y, dir.Z, dirLight.mSunLightLeak);
-            cBuffer.SetValue(coreBinder.CBPerViewport.gDirLightDirection_Leak, in gDirLightDirection_Leak);
-            var gDirLightColor_Intensity = new Vector4(dirLight.mSunLightColor.X, dirLight.mSunLightColor.Y, dirLight.mSunLightColor.Z, dirLight.mSunLightIntensity);
-            cBuffer.SetValue(coreBinder.CBPerViewport.gDirLightColor_Intensity, in gDirLightColor_Intensity);
-
-            cBuffer.SetValue(coreBinder.CBPerViewport.mSkyLightColor, in dirLight.mSkyLightColor);
-            cBuffer.SetValue(coreBinder.CBPerViewport.mGroundLightColor, in dirLight.mGroundLightColor);
-
-            float EnvMapMaxMipLevel = 1.0f;
-            cBuffer.SetValue(coreBinder.CBPerViewport.gEnvMapMaxMipLevel, in EnvMapMaxMipLevel);
-            cBuffer.SetValue(coreBinder.CBPerViewport.gEyeEnvMapMaxMipLevel, in EnvMapMaxMipLevel);
-        }
         [ThreadStatic]
         private static Profiler.TimeScope ScopeTick = Profiler.TimeScopeManager.GetTimeScope(typeof(UMobileOpaqueNode), nameof(TickLogic));
         public override void TickLogic(GamePlay.UWorld world, URenderPolicy policy, bool bClear)
@@ -307,9 +270,7 @@ namespace EngineNS.Graphics.Pipeline.Mobile
             using (new Profiler.TimeScopeHelper(ScopeTick))
             {
                 var mobilePolicy = policy;
-                var cBuffer = GBuffers.PerViewportCBuffer;
-                if (cBuffer != null)
-                    SetCBuffer(world, cBuffer, mobilePolicy);
+                GBuffers?.SetViewportCBuffer(world, policy);
 
                 LayerBasePass.ClearMeshDrawPassArray();
                 LayerBasePass.SetViewport(in GBuffers.Viewport);
@@ -452,40 +413,6 @@ namespace EngineNS.Graphics.Pipeline.Mobile
 
             base.Dispose();
         }
-        protected void SetCBuffer(GamePlay.UWorld world, NxRHI.UCbView cBuffer, UMobileFSPolicy mobilePolicy)
-        {
-            var coreBinder = UEngine.Instance.GfxDevice.CoreShaderBinder;
-            cBuffer.SetValue(coreBinder.CBPerViewport.gFadeParam, in mobilePolicy.mShadowMapNode.mFadeParam);
-            cBuffer.SetValue(coreBinder.CBPerViewport.gShadowTransitionScale, in mobilePolicy.mShadowMapNode.mShadowTransitionScale);
-            cBuffer.SetValue(coreBinder.CBPerViewport.gShadowMapSizeAndRcp, in mobilePolicy.mShadowMapNode.mShadowMapSizeAndRcp);
-            cBuffer.SetValue(coreBinder.CBPerViewport.gViewer2ShadowMtx, in mobilePolicy.mShadowMapNode.mViewer2ShadowMtx);
-            cBuffer.SetValue(coreBinder.CBPerViewport.gShadowDistance, in mobilePolicy.mShadowMapNode.mShadowDistance);
-
-            cBuffer.SetValue(coreBinder.CBPerViewport.gCsmDistanceArray, in mobilePolicy.mShadowMapNode.mSumDistanceFarVec);
-
-            cBuffer.SetValue(coreBinder.CBPerViewport.gViewer2ShadowMtxArrayEditor, 0, in mobilePolicy.mShadowMapNode.mViewer2ShadowMtxArray[0]);
-            cBuffer.SetValue(coreBinder.CBPerViewport.gViewer2ShadowMtxArrayEditor, 1, in mobilePolicy.mShadowMapNode.mViewer2ShadowMtxArray[1]);
-            cBuffer.SetValue(coreBinder.CBPerViewport.gViewer2ShadowMtxArrayEditor, 2, in mobilePolicy.mShadowMapNode.mViewer2ShadowMtxArray[2]);
-            cBuffer.SetValue(coreBinder.CBPerViewport.gViewer2ShadowMtxArrayEditor, 3, in mobilePolicy.mShadowMapNode.mViewer2ShadowMtxArray[3]);
-
-            cBuffer.SetValue(coreBinder.CBPerViewport.gShadowTransitionScaleArrayEditor, in mobilePolicy.mShadowMapNode.mShadowTransitionScaleVec);
-            cBuffer.SetValue(coreBinder.CBPerViewport.gCsmNum, in mobilePolicy.mShadowMapNode.mCsmNum);
-
-            var dirLight = world.DirectionLight;
-            //dirLight.mDirection = MathHelper.RandomDirection();
-            var dir = dirLight.Direction;
-            var gDirLightDirection_Leak = new Vector4(dir.X, dir.Y, dir.Z, dirLight.mSunLightLeak);
-            cBuffer.SetValue(coreBinder.CBPerViewport.gDirLightDirection_Leak, in gDirLightDirection_Leak);
-            var gDirLightColor_Intensity = new Vector4(dirLight.mSunLightColor.X, dirLight.mSunLightColor.Y, dirLight.mSunLightColor.Z, dirLight.mSunLightIntensity);
-            cBuffer.SetValue(coreBinder.CBPerViewport.gDirLightColor_Intensity, in gDirLightColor_Intensity);
-
-            cBuffer.SetValue(coreBinder.CBPerViewport.mSkyLightColor, in dirLight.mSkyLightColor);
-            cBuffer.SetValue(coreBinder.CBPerViewport.mGroundLightColor, in dirLight.mGroundLightColor);
-
-            float EnvMapMaxMipLevel = 1.0f;
-            cBuffer.SetValue(coreBinder.CBPerViewport.gEnvMapMaxMipLevel, in EnvMapMaxMipLevel);
-            cBuffer.SetValue(coreBinder.CBPerViewport.gEyeEnvMapMaxMipLevel, in EnvMapMaxMipLevel);
-        }
         public override void OnResize(URenderPolicy policy, float x, float y)
         {
             if (GBuffers != null)
@@ -505,12 +432,7 @@ namespace EngineNS.Graphics.Pipeline.Mobile
             using (new Profiler.TimeScopeHelper(ScopeTick))
             {
                 var mobilePolicy = policy as UMobileFSPolicy;
-                var cBuffer = GBuffers.PerViewportCBuffer;
-                if (mobilePolicy != null)
-                {
-                    if (cBuffer != null)
-                        SetCBuffer(world, cBuffer, mobilePolicy);
-                }
+                GBuffers?.SetViewportCBuffer(world, policy);
 
                 LayerBasePass.ClearMeshDrawPassArray();
                 LayerBasePass.SetViewport(in GBuffers.Viewport);

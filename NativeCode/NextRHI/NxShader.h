@@ -116,6 +116,7 @@ namespace NxRHI
 			
 		}
 		EShaderType		Type;
+		VNameString		DebugName;
 		VNameString		FunctionName;
 		std::vector<EVertexStreamType>	InputStreams;
 		std::string		HLSL;

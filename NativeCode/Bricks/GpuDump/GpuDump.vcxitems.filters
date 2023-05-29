@@ -19,11 +19,9 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)NsightDumpVK\NsightAftermathGpuCrashTracker.h">
       <Filter>NsightDumpVK</Filter>
     </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)NsightDumpVK\NsightAftermathHelpers.h">
-      <Filter>NsightDumpVK</Filter>
-    </ClInclude>
     <ClInclude Include="$(MSBuildThisFileDirectory)NsightDumpVK\NsightAftermathShaderDatabase.h">
       <Filter>NsightDumpVK</Filter>
     </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)NsightAftermathHelpers.h" />
   </ItemGroup>
 </Project>

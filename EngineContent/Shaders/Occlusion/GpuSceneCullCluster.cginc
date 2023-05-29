@@ -25,11 +25,24 @@ struct TtNumberVisibilityGpuActorBuffer
 	int ClusterCount;
 };
 
-StructuredBuffer<TtNumberVisibilityGpuActorBuffer> NumberVisibilityGpuActorBuffer;
+struct TtVisibleClusterMeshData
+{
+	int GpuSceneIndex;
+	uint ClusterId;
+};
 
-StructuredBuffer<TtCullClusterData> CullClusterDatas;
-StructuredBuffer<TtNeedCullClusterMeshData> NeedCullClusterMeshData;
+struct TtNumnerVisibleClusterMeshData
+{
+	uint ClusterCount;
+};
 
+StructuredBuffer<TtNumberVisibilityGpuActorBuffer> NumberVisibilityGpuActorBuffer DX_AUTOBIND;
+
+StructuredBuffer<TtCullClusterData> CullClusterDatas DX_AUTOBIND;
+StructuredBuffer<TtNeedCullClusterMeshData> NeedCullClusterMeshData DX_AUTOBIND;
+
+RWStructuredBuffer<TtVisibleClusterMeshData> VisibleClusterMeshData;
+RWStructuredBuffer<TtNumnerVisibleClusterMeshData> NumnerVisibleClusterMeshData;
 //matrix PrevTranslatedWorldToClip;
 //matrix PrevPreViewTranslation;
 //matrix WorldToClip;
@@ -70,8 +83,10 @@ void GpuSceneCullCluster(uint DispatchThreadId : SV_DispatchThreadID)
 
 			if (Cull.bIsVisible)
 			{
-				//TODO
-
+				int NumnerVisibleCluster = NumnerVisibleClusterMeshData[0].ClusterCount;
+				NumnerVisibleClusterMeshData[0].ClusterCount = NumnerVisibleCluster + 1;
+				VisibleClusterMeshData[NumnerVisibleCluster].ClusterId = CullClusterMeshDataInfo.ClusterId;
+				VisibleClusterMeshData[NumnerVisibleCluster].GpuSceneIndex = CullClusterMeshDataInfo.GpuSceneIndex;
 			}
 		}
 	}

@@ -202,7 +202,7 @@ namespace EngineNS.Editor.ShaderCompiler
             }
             return null;
         }
-        public NxRHI.UShaderDesc CompileShader(string shader, string entry, NxRHI.EShaderType type,
+        public unsafe NxRHI.UShaderDesc CompileShader(string shader, string entry, NxRHI.EShaderType type,
             Graphics.Pipeline.Shader.UShadingEnv shadingEnvshadingEnv, Graphics.Pipeline.Shader.UMaterial mtl, Type mdfType,
             NxRHI.UShaderDefinitions defines, UHLSLInclude incProvider, string sm = null, bool bDebugShader = true, string extHlslVersion = null)
         {
@@ -239,157 +239,161 @@ namespace EngineNS.Editor.ShaderCompiler
                 }
             }
             var desc = new NxRHI.UShaderDesc(type);
+            var mtlName = "";
+            if (mtl != null)
+                mtlName = mtl.ToString();
+            var mdfName = "";
+            if (mdfType != null)
+                mdfName = mdfType.FullName;
+            desc.DebugName = $"{shader}:{entry}[id,{shadingEnvshadingEnv?.CurrentPermutationId}][mtl,{mtlName}][mdf,{mdfName}]";
             if (shadingEnvshadingEnv != null)
                 desc.PermutationId = shadingEnvshadingEnv.CurrentPermutationId;
             UserInclude = incProvider;
             Material = mtl;
             MdfQueueType = Rtti.UTypeDesc.TypeOf(mdfType);
             //IShaderDefinitions defPtr = new IShaderDefinitions((void*)0);
-            unsafe
+            using (var defPtr = new NxRHI.UShaderDefinitions())
             {
-                using (var defPtr = new NxRHI.UShaderDefinitions())
+                if (defines != null)
                 {
-                    if (defines != null)
+                    defPtr.MergeDefinitions(defines);
+                }
+                if (mtl != null && mtl.Defines != null)
+                {
+                    defPtr.MergeDefinitions(mtl.Defines);
+                }
+                var graphicsEnv = shadingEnvshadingEnv as Graphics.Pipeline.Shader.UGraphicsShadingEnv;
+                if (graphicsEnv != null)
+                {
+                    var shadingNeeds = graphicsEnv.GetNeedStreams();
+                    if (shadingNeeds != null)
                     {
-                        defPtr.MergeDefinitions(defines);
-                    }
-                    if (mtl != null && mtl.Defines != null)
-                    {
-                        defPtr.MergeDefinitions(mtl.Defines);
-                    }
-                    var graphicsEnv = shadingEnvshadingEnv as Graphics.Pipeline.Shader.UGraphicsShadingEnv;
-                    if (graphicsEnv != null)
-                    {
-                        var shadingNeeds = graphicsEnv.GetNeedStreams();
-                        if(shadingNeeds!=null)
+                        foreach (var i in shadingNeeds)
                         {
-                            foreach (var i in shadingNeeds)
+                            defPtr.AddDefine(GetVertexStreamDefine(i), "1");
+                        }
+                    }
+                    var mdfObj = Rtti.UTypeDescManager.CreateInstance(MdfQueueType) as Graphics.Pipeline.Shader.UMdfQueue;
+                    if (mdfObj != null)
+                    {
+                        var mdfNeeds = mdfObj.GetNeedStreams();
+                        if (mdfNeeds != null)
+                        {
+                            foreach (var i in mdfNeeds)
                             {
                                 defPtr.AddDefine(GetVertexStreamDefine(i), "1");
                             }
                         }
-                        var mdfObj = Rtti.UTypeDescManager.CreateInstance(MdfQueueType) as Graphics.Pipeline.Shader.UMdfQueue;
-                        if (mdfObj != null)
-                        {
-                            var mdfNeeds = mdfObj.GetNeedStreams();
-                            if (mdfNeeds != null)
-                            {
-                                foreach (var i in mdfNeeds)
-                                {
-                                    defPtr.AddDefine(GetVertexStreamDefine(i), "1");
-                                }
-                            }
-                        }
                     }
-                    else
-                    {
-                        var computeEnv = shadingEnvshadingEnv as Graphics.Pipeline.Shader.UComputeShadingEnv;
-                        if (computeEnv != null)
-                        {
-                            defines.mCoreObject.AddDefine("DispatchX", $"{computeEnv.DispatchArg.X}");
-                            defines.mCoreObject.AddDefine("DispatchY", $"{computeEnv.DispatchArg.Y}");
-                            defines.mCoreObject.AddDefine("DispatchZ", $"{computeEnv.DispatchArg.Z}");
-                        }
-                    }
-                    switch (type)
-                    {
-                        case NxRHI.EShaderType.SDT_VertexShader:
-                            defPtr.AddDefine("ShaderStage", "0");//VSStage
-                            break;
-                        case NxRHI.EShaderType.SDT_PixelShader:
-                            defPtr.AddDefine("ShaderStage", "1");//PSStage
-                            break;
-                        case NxRHI.EShaderType.SDT_ComputeShader:
-                            defPtr.AddDefine("ShaderStage", "0");//CSStage
-                            break;
-                        default:
-                            System.Diagnostics.Debugger.Break();
-                            break;
-                    }
-
-                    UEngine.Instance.GfxDevice.RenderContext.DeviceCaps.SetShaderGlobalEnv(defPtr.mCoreObject);
-
-                    var cfg = UEngine.Instance.Config;
-                    if (cfg.CookDXBC)
-                    {
-                        defPtr.AddDefine("RHI_TYPE", "RHI_DX11");
-                        var compile_sm = sm;
-                        if (sm == null)
-                        {
-                            compile_sm = "5_0";
-                        }
-                        var ok = mShaderCompiler.CompileShader(desc, shader, entry, type, compile_sm, defPtr, NxRHI.EShaderLanguage.SL_DXBC, bDebugShader, extHlslVersion);
-                        if (ok == false)
-                            return null;
-                    }
-                    if (cfg.CookDXIL)
-                    {
-                        defPtr.AddDefine("RHI_TYPE", "RHI_DX12");
-                        if (extHlslVersion != null)
-                        {
-                            defPtr.AddDefine("HLSL_VERSION", extHlslVersion);
-                        }
-                        var compile_sm = sm;
-                        if (sm == null)
-                        {
-                            compile_sm = "6_5";
-                        }
-                        var ok = mShaderCompiler.CompileShader(desc, shader, entry, type, compile_sm, defPtr, NxRHI.EShaderLanguage.SL_DXIL, bDebugShader, extHlslVersion);
-                        if (ok == false)
-                            return null;
-                    }
-                    if (cfg.CookGLSL)
-                    {
-                        defPtr.AddDefine("RHI_TYPE", "RHI_GL");
-                        if (extHlslVersion != null)
-                        {
-                            defPtr.AddDefine("HLSL_VERSION", extHlslVersion);
-                        }
-                        var compile_sm = sm;
-                        if (sm == null)
-                        {
-                            compile_sm = "6_5";
-                        }
-                        var ok = mShaderCompiler.CompileShader(desc, shader, entry, type, compile_sm, defPtr, NxRHI.EShaderLanguage.SL_DXBC, bDebugShader, extHlslVersion);
-                        if (ok == false)
-                            return null;
-                    }
-                    if(cfg.CookMETAL)
-                    {
-                        defPtr.AddDefine("RHI_TYPE", "RHI_MTL");
-                        if (extHlslVersion != null)
-                        {
-                            defPtr.AddDefine("HLSL_VERSION", extHlslVersion);
-                        }
-                        var compile_sm = sm;
-                        if (sm == null)
-                        {
-                            compile_sm = "6_5";
-                        }
-                        var ok = mShaderCompiler.CompileShader(desc, shader, entry, type, compile_sm, defPtr, NxRHI.EShaderLanguage.SL_DXBC, bDebugShader, extHlslVersion);
-                        if (ok == false)
-                            return null;
-                    }
-                    if (cfg.CookSPIRV)
-                    {
-                        defPtr.AddDefine("RHI_TYPE", "RHI_VK");
-                        if (extHlslVersion != null)
-                        {
-                            defPtr.AddDefine("HLSL_VERSION", extHlslVersion);
-                        }
-                        var compile_sm = sm;
-                        if (sm == null)
-                        {
-                            compile_sm = "6_5";
-                        }
-                        var ok = mShaderCompiler.CompileShader(desc, shader, entry, type, compile_sm, defPtr, NxRHI.EShaderLanguage.SL_SPIRV, bDebugShader, extHlslVersion);
-                        if (ok == false)
-                            return null;
-                    }
-
-                    return desc;
                 }
-            }   
+                else
+                {
+                    var computeEnv = shadingEnvshadingEnv as Graphics.Pipeline.Shader.UComputeShadingEnv;
+                    if (computeEnv != null)
+                    {
+                        defines.mCoreObject.AddDefine("DispatchX", $"{computeEnv.DispatchArg.X}");
+                        defines.mCoreObject.AddDefine("DispatchY", $"{computeEnv.DispatchArg.Y}");
+                        defines.mCoreObject.AddDefine("DispatchZ", $"{computeEnv.DispatchArg.Z}");
+                    }
+                }
+                switch (type)
+                {
+                    case NxRHI.EShaderType.SDT_VertexShader:
+                        defPtr.AddDefine("ShaderStage", "0");//VSStage
+                        break;
+                    case NxRHI.EShaderType.SDT_PixelShader:
+                        defPtr.AddDefine("ShaderStage", "1");//PSStage
+                        break;
+                    case NxRHI.EShaderType.SDT_ComputeShader:
+                        defPtr.AddDefine("ShaderStage", "0");//CSStage
+                        break;
+                    default:
+                        System.Diagnostics.Debugger.Break();
+                        break;
+                }
+
+                UEngine.Instance.GfxDevice.RenderContext.DeviceCaps.SetShaderGlobalEnv(defPtr.mCoreObject);
+
+                var cfg = UEngine.Instance.Config;
+                if (cfg.CookDXBC)
+                {
+                    defPtr.AddDefine("RHI_TYPE", "RHI_DX11");
+                    var compile_sm = sm;
+                    if (sm == null)
+                    {
+                        compile_sm = "5_0";
+                    }
+                    var ok = mShaderCompiler.CompileShader(desc, shader, entry, type, compile_sm, defPtr, NxRHI.EShaderLanguage.SL_DXBC, bDebugShader, extHlslVersion);
+                    if (ok == false)
+                        return null;
+                }
+                if (cfg.CookDXIL)
+                {
+                    defPtr.AddDefine("RHI_TYPE", "RHI_DX12");
+                    if (extHlslVersion != null)
+                    {
+                        defPtr.AddDefine("HLSL_VERSION", extHlslVersion);
+                    }
+                    var compile_sm = sm;
+                    if (sm == null)
+                    {
+                        compile_sm = "6_5";
+                    }
+                    var ok = mShaderCompiler.CompileShader(desc, shader, entry, type, compile_sm, defPtr, NxRHI.EShaderLanguage.SL_DXIL, bDebugShader, extHlslVersion);
+                    if (ok == false)
+                        return null;
+                }
+                if (cfg.CookGLSL)
+                {
+                    defPtr.AddDefine("RHI_TYPE", "RHI_GL");
+                    if (extHlslVersion != null)
+                    {
+                        defPtr.AddDefine("HLSL_VERSION", extHlslVersion);
+                    }
+                    var compile_sm = sm;
+                    if (sm == null)
+                    {
+                        compile_sm = "6_5";
+                    }
+                    var ok = mShaderCompiler.CompileShader(desc, shader, entry, type, compile_sm, defPtr, NxRHI.EShaderLanguage.SL_DXBC, bDebugShader, extHlslVersion);
+                    if (ok == false)
+                        return null;
+                }
+                if (cfg.CookMETAL)
+                {
+                    defPtr.AddDefine("RHI_TYPE", "RHI_MTL");
+                    if (extHlslVersion != null)
+                    {
+                        defPtr.AddDefine("HLSL_VERSION", extHlslVersion);
+                    }
+                    var compile_sm = sm;
+                    if (sm == null)
+                    {
+                        compile_sm = "6_5";
+                    }
+                    var ok = mShaderCompiler.CompileShader(desc, shader, entry, type, compile_sm, defPtr, NxRHI.EShaderLanguage.SL_DXBC, bDebugShader, extHlslVersion);
+                    if (ok == false)
+                        return null;
+                }
+                if (cfg.CookSPIRV)
+                {
+                    defPtr.AddDefine("RHI_TYPE", "RHI_VK");
+                    if (extHlslVersion != null)
+                    {
+                        defPtr.AddDefine("HLSL_VERSION", extHlslVersion);
+                    }
+                    var compile_sm = sm;
+                    if (sm == null)
+                    {
+                        compile_sm = "6_5";
+                    }
+                    var ok = mShaderCompiler.CompileShader(desc, shader, entry, type, compile_sm, defPtr, NxRHI.EShaderLanguage.SL_SPIRV, bDebugShader, extHlslVersion);
+                    if (ok == false)
+                        return null;
+                }
+
+                return desc;
+            }
         }
     }
 }

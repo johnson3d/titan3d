@@ -108,7 +108,7 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode
             var ok = mesh.Initialize(rectMesh, materials, Rtti.UTypeDescGetter<Graphics.Mesh.UMdfStaticMesh>.TypeDesc);
             if (ok)
             {
-                //mesh.SetWorldMatrix(ref Matrix.mIdentity);
+                //mesh.DirectSetWorldMatrix(ref Matrix.mIdentity);
                 //viewport.RenderPolicy.VisibleMeshes.Add(mesh);
 
                 var meshNode = await GamePlay.Scene.UMeshNode.AddMeshNode(viewport.World, viewport.World.Root, new GamePlay.Scene.UMeshNode.UMeshNodeData(), typeof(GamePlay.UPlacement), mesh, DVector3.Zero, Vector3.One, Quaternion.Identity);

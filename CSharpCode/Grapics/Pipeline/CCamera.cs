@@ -239,6 +239,10 @@ namespace EngineNS.Graphics.Pipeline
         {
             return mCoreObject.GetJitterViewProjection();
         }
+        public EngineNS.Matrix GetJitterViewProjectionInverse()
+        {
+            return mCoreObject.GetJitterViewProjectionInverse();
+        }
         public EngineNS.Matrix GetViewProjectionInverse()
         {
             return mCoreObject.GetViewProjectionInverse();

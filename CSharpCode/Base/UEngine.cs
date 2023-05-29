@@ -71,6 +71,8 @@ namespace EngineNS
         [Rtti.Meta]
         public bool IsDebugShader { get; set; } = false;
         [Rtti.Meta]
+        public bool IsGpuDump { get; set; } = true;
+        [Rtti.Meta]
         public string MainWindowType { get; set; }// = Rtti.TypeManager.Instance.GetTypeStringFromType(typeof(Editor.MainEditorWindow));
         [Rtti.Meta]
         public RName MainRPolicyName { get; set; }

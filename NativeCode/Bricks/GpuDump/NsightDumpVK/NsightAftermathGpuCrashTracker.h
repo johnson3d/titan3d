@@ -27,26 +27,26 @@
 #include <map>
 #include <mutex>
 
-#include "NsightAftermathHelpers.h"
+#include "../NsightAftermathHelpers.h"
 #include "NsightAftermathShaderDatabase.h"
 
 //*********************************************************
 // Implements GPU crash dump tracking using the Nsight
 // Aftermath API.
 //
-class GpuCrashTracker
+class VKGpuCrashTracker
 {
 public:
     // keep four frames worth of marker history
     const static unsigned int c_markerFrameHistory = 4;
     typedef std::array<std::map<uint64_t, std::string>, c_markerFrameHistory> MarkerMap;
 
-    GpuCrashTracker(const MarkerMap& markerMap);
-    ~GpuCrashTracker();
+    VKGpuCrashTracker(const MarkerMap& markerMap);
+    ~VKGpuCrashTracker();
 
     // Initialize the GPU crash dump tracker.
     void Initialize(GFSDK_Aftermath_GpuCrashDumpWatchedApiFlags api);
-    ShaderDatabase* GetShaderDatabase() {
+    VKShaderDatabase* GetShaderDatabase() {
         return &m_shaderDatabase;
     }
     bool IsInitialized() const {
@@ -163,7 +163,7 @@ private:
     std::map<GFSDK_Aftermath_ShaderDebugInfoIdentifier, std::vector<uint8_t>> m_shaderDebugInfo;
 
     // The mock shader database.
-    ShaderDatabase m_shaderDatabase;
+    VKShaderDatabase m_shaderDatabase;
 
     // App-managed marker tracking
     const MarkerMap& m_markerMap;

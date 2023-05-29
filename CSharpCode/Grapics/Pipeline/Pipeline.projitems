@@ -19,6 +19,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)Common\Post\AdditiveNode.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Common\Post\BloomNode.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Common\Post\GauseNode.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Common\Post\LensFlareNode.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Common\Post\LuminanceThresholeNode.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Common\Post\SunShaftNode.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Common\UAvgBrightnessNode.cs" />

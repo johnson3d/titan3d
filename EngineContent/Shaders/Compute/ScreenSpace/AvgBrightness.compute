@@ -56,7 +56,8 @@ void CS_CountAvgBrightness(uint3 id : SV_DispatchThreadID,
 	uint groupIndex = GroupThreadId.y * DispatchX + GroupThreadId.x;
 	if (all(id.xy < texSize))
 	{	
-		CachedGroupColors[groupIndex] = CalcLuminanceYCbCr(sRGB2Linear((half3)TargetBuffer[id.xy].rgb));
+		//CachedGroupColors[groupIndex] = CalcLuminanceYCbCr(sRGB2Linear((half3)TargetBuffer[id.xy].rgb));
+		CachedGroupColors[groupIndex] = CalcLuminance(sRGB2Linear((half3)TargetBuffer[id.xy].rgb));
 		uint oldValue;
 		InterlockedAdd(NumOfValidPixel, 1, oldValue);
 	}

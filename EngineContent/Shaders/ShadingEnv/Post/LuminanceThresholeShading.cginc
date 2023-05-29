@@ -48,7 +48,7 @@ PS_OUTPUT PS_Main(PS_INPUT input)
 
     half4 color = (half4)ColorBuffer.SampleLevel(Samp_ColorBuffer, uv, 0);
     half lum = CalcLuminance(color.rgb);
-    if (lum > LuminanceThresholeStruct.Threshole)
+    if (lum >= LuminanceThresholeStruct.Threshole)
     {
 #if defined(ENV_OUT_COLOR)
         output.RT0 = color;

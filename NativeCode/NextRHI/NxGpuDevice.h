@@ -228,6 +228,7 @@ namespace NxRHI
 		std::vector<AutoRef<IBuffer>>				mWaitFlushBuffers;
 		void PushWaitFlushBuffer(IBuffer* buffer);
 		VSLLock mPostEventLocker;
+		VSLLock mWaitFlushLocker;
 		void PushPostEvent(const std::function<FGpuPostEvent>& evt)
 		{
 			VAutoVSLLock lk(mPostEventLocker);
