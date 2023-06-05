@@ -134,7 +134,7 @@ namespace EngineNS.Graphics.Pipeline.Common
         public NxRHI.UCbView HZBCullInstanceCBuffer;
         public NxRHI.UCbView HZBCullClusterCBuffer;
 
-        public UDrawBuffers BasePass = new UDrawBuffers();
+        //public UDrawBuffers BasePass = new UDrawBuffers();
 
         public int NumThreadsPerGroup = 64;
 
@@ -284,9 +284,9 @@ namespace EngineNS.Graphics.Pipeline.Common
             }
 
 
-            GpuInstances.Flush2GPU(cmd.mCoreObject);
+            GpuInstances.Flush2GPU();
 
-            CullInstancesBuffer.Flush2GPU(cmd.mCoreObject);
+            CullInstancesBuffer.Flush2GPU();
         }
 
         private unsafe void Cull(NxRHI.UGpuDevice rc)

@@ -46,11 +46,6 @@ namespace EngineNS.Graphics.Pipeline.Common.Post
             defines.AddDefine("UpSampleMode_Bilinear", (int)EUpSampleMode.Bilinear);
             defines.AddDefine("UpSampleMode_EASU", (int)EUpSampleMode.EASU);
         }
-        protected override NxRHI.UComputeEffect OnCreateEffect()
-        {
-            return UEngine.Instance.GfxDevice.EffectManager.GetComputeEffect(CodeName,
-                MainName, NxRHI.EShaderType.SDT_ComputeShader, this, null, null);
-        }
         public override void OnDrawCall(NxRHI.UComputeDraw drawcall, URenderPolicy policy)
         {
             var aaNode = drawcall.TagObject as TtFsrNode;
@@ -109,11 +104,6 @@ namespace EngineNS.Graphics.Pipeline.Common.Post
             base.EnvShadingDefines(in id, defines);
 
             defines.AddDefine("USE_RCAS", (int)1);
-        }
-        protected override NxRHI.UComputeEffect OnCreateEffect()
-        {
-            return UEngine.Instance.GfxDevice.EffectManager.GetComputeEffect(CodeName,
-                MainName, NxRHI.EShaderType.SDT_ComputeShader, this, null, null);
         }
         public override void OnDrawCall(NxRHI.UComputeDraw drawcall, URenderPolicy policy)
         {

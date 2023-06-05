@@ -25,6 +25,7 @@ namespace NxRHI
 	{
 		Desc = desc;
 		Name = name;
+		mDeviceRef.FromObject(pDevice);
 
 		mEvent = MakeWeakRef(new DX12Event(Name.c_str()));
 		ExpectValue = desc.InitValue;
@@ -37,7 +38,12 @@ namespace NxRHI
 	}
 	UINT64 DX12Fence::GetCompletedValue()
 	{
-		return mFence->GetCompletedValue();
+		auto result = mFence->GetCompletedValue();
+		if (result == 0xffffffffffffffff)
+		{
+			mDeviceRef.GetPtr()->OnDeviceRemoved();
+		}
+		return result;
 	}
 	void DX12Fence::CpuSignal(UINT64 value)
 	{
@@ -48,19 +54,29 @@ namespace NxRHI
 		mFence->SetEventOnCompletion(value, mEvent->mHandle);
 		auto dx12Queue = ((DX12CmdQueue*)queue);
 		VAutoVSLLock locker(dx12Queue->mQueueLocker);
-		dx12Queue->mCmdQueue->Signal(mFence, value);
+		auto hr = dx12Queue->mCmdQueue->Signal(mFence, value);
+		if (hr == DXGI_ERROR_DEVICE_REMOVED)
+		{
+			mDeviceRef.GetPtr()->OnDeviceRemoved();
+		}
 	}
-	bool DX12Fence::Wait(UINT64 value, UINT timeOut)
+	UINT64 DX12Fence::Wait(UINT64 value, UINT timeOut)
 	{
 		/*while (mFence->GetCompletedValue() < value)
 		{
 
 		}*/
-		while (mFence->GetCompletedValue() < value)
+		auto completed = mFence->GetCompletedValue();
+		while (completed < value)
 		{
+			if (completed == 0xffffffffffffffff)
+			{
+				mDeviceRef.GetPtr()->OnDeviceRemoved();
+			}
 			mEvent->Wait(timeOut);
+			completed = mFence->GetCompletedValue();
 		}
-		return true;
+		return completed;
 	}
 	void DX12Fence::SetDebugName(const char* name)
 	{

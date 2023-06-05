@@ -61,6 +61,10 @@ namespace NxRHI
 
 		virtual void SetBreakOnID(int id, bool open) override;
 		virtual void TickPostEvents() override;
+
+		typedef void FDeviceRemovedCallback();
+		std::function<FDeviceRemovedCallback> mDeviceRemovedCallback;
+		void OnDeviceRemoved();
 	private: 
 		void QueryDevice();
 	public:
@@ -69,6 +73,8 @@ namespace NxRHI
 		D3D_FEATURE_LEVEL               mFeatureLevel;
 		
 		AutoRef<ID3D12InfoQueue>		mDebugInfoQueue;
+		VCritical						mDredLocker;
+		AutoRef<ID3D12DeviceRemovedExtendedDataSettings>	mDredSettings;
 		AutoRef<DX12CmdQueue>			mCmdQueue;
 		
 		AutoRef<DX12CommandAllocatorManager>	mCmdAllocatorManager;
@@ -98,7 +104,7 @@ namespace NxRHI
 		virtual void ExecuteCommandList(UINT NumOfExe, ICommandList** Cmdlist, UINT NumOfWait, ICommandList** ppWaitCmdlists, EQueueType type) override;
 		virtual ICommandList* GetIdleCmdlist() override;
 		virtual void ReleaseIdleCmdlist(ICommandList* cmd) override;
-		virtual void Flush(EQueueType type) override;
+		virtual UINT64 Flush(EQueueType type) override;
 	public:
 		DX12CmdQueue();
 		~DX12CmdQueue();

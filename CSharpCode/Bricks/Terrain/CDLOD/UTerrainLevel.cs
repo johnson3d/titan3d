@@ -271,6 +271,8 @@ namespace EngineNS.Bricks.Terrain.CDLOD
             InitPhysics(Level);
 
             HeightMapSRV = hMap.CreateAsHeightMapTexture2D(HeightMapMinHeight, HeightMapMaxHeight, EPixelFormat.PXF_R16_FLOAT);
+            HeightMapSRV.mCoreObject.NativeSuper.SetTagName("HeightMapSRV");
+            HeightMapSRV.mCoreObject.Buffer.NativeSuper.SetTagName("HeightMapSRV");
         }
 
         public void UpdateWaterMap(Procedure.UBufferConponent waterMap)

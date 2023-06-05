@@ -81,6 +81,12 @@ namespace EngineNS.NxRHI
                 return;
             mCoreObject.BindResource(binder, srv.mCoreObject.NativeSuper);
         }
+        public void BindSRV(NxRHI.UEffectBinder binder, USrView srv)
+        {
+            if (binder == null)
+                return;
+            mCoreObject.BindResource(binder.mCoreObject, srv.mCoreObject.NativeSuper);
+        }
         public bool BindUAV(VNameString name, UUaView uav)
         {
             return mCoreObject.BindResource(name, uav.mCoreObject.NativeSuper);

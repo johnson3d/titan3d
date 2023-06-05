@@ -13,6 +13,18 @@ StructEnd(EngineNS::NxRHI::ISrView, VIUnknown)
 
 namespace NxRHI
 {
+	long ISrView::AddRef()
+	{
+		/*if (Buffer != nullptr)
+			Buffer->AddRef();*/
+		return IGpuResource::AddRef();
+	}
+	void ISrView::Release()
+	{
+		/*if (Buffer != nullptr)
+			Buffer->Release();*/
+		IGpuResource::Release();
+	}
 	void IBuffer::PushFlushDirty(IGpuDevice* pDevice)
 	{
 		if (DirtyState == EDirtyState::NotDirty || DirtyState == EDirtyState::WaitFlush)

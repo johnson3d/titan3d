@@ -26,6 +26,11 @@ namespace NxRHI
 		ENGINE_RTTI(IGpuDraw);
 		virtual void Commit(ICommandList * cmdlist) = 0;
 		virtual UINT GetPrimitiveNum() = 0;
+
+		typedef bool FOnVisit(EShaderBindType type, IGpuResource* resource);
+		virtual void ForeachGpuResource(const std::function<FOnVisit>&fun) {
+
+		}
 	};
 	class TR_CLASS()
 		IGraphicDraw : public IGpuDraw
@@ -36,10 +41,7 @@ namespace NxRHI
 		{
 			NumOfInstance++;
 		}
-		~IGraphicDraw()
-		{
-			NumOfInstance--;
-		}
+		~IGraphicDraw();
 		const FEffectBinder* FindBinder(const char* name) const;
 		bool BindResource(VNameString name, IGpuResource* resource);
 		void BindResource(const FEffectBinder* binder, IGpuResource * resource);
@@ -74,10 +76,18 @@ namespace NxRHI
 		static int GetNumOfInstance() {
 			return NumOfInstance;
 		}
+		virtual void ForeachGpuResource(const std::function<FOnVisit>& fun) override
+		{
+			for (auto& i : BindResources)
+			{
+				if (fun(i.first->BindType, i.second) == false)
+					return;
+			}
+		}
 	public:
 		static std::atomic<int>		NumOfInstance;
 		std::map<const FEffectBinder*, AutoRef<IGpuResource>>	BindResources;
-		AutoRef<IGraphicsEffect>		ShaderEffect;
+		AutoRef<IGraphicsEffect>	ShaderEffect;
 		AutoRef<IGpuPipeline>		Pipeline;
 		AutoRef<FGeomMesh>			Mesh;
 		AutoRef<FVertexArray>		AttachVB;
@@ -129,6 +139,14 @@ namespace NxRHI
 
 		virtual UINT GetPrimitiveNum() override{
 			return mDispatchX * mDispatchY * mDispatchZ;
+		}
+		virtual void ForeachGpuResource(const std::function<FOnVisit>& fun) override
+		{
+			for (auto& i : BindResources)
+			{
+				if (fun(i.first->Type, i.second) == false)
+					return;
+			}
 		}
 	public:
 		static int GetNumOfInstance() {

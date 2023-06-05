@@ -9,24 +9,115 @@ NS_BEGIN
 
 namespace NxRHI
 {
-	void ICommandList::PushGpuDraw(IGpuDraw* draw) 
+	IGpuResource* ICmdRecorder::FindGpuResourceByTagName(const char* name)
+	{
+		for (auto i : mDrawcallArray)
+		{
+			IGpuResource* findRes = nullptr;
+			i->ForeachGpuResource([&findRes, name](EShaderBindType type, IGpuResource* resource)
+				{
+					if (resource->TagName == name)
+					{
+						findRes = resource;
+						return false;
+					}
+					return true;
+				});
+
+			if (findRes != nullptr)
+				return findRes;
+		}
+		return nullptr;
+	}
+	int ICmdRecorder::CountGpuResourceByTagName(const char* name)
+	{
+		int count = 0;
+		for (auto i : mRefBuffers)
+		{
+			if (i->TagName == name)
+			{
+				auto p = (IUnknown*)i->GetHWBuffer();
+				auto ref = p->AddRef();
+				count++;
+			}
+		}
+		/*for (auto i : mDrawcallArray)
+		{
+			IGpuResource* findRes = nullptr;
+			i->ForeachGpuResource([&count, name](EShaderBindType type, IGpuResource* resource)
+				{
+					if (resource->TagName == name)
+					{
+						count++;
+					}
+					return true;
+				});
+		}*/
+		return count;
+	}
+	void ICmdRecorder::PushGpuDraw(IGpuDraw* draw)
 	{
 		mDrawcallArray.push_back(draw);
 		mPrimitiveNum += draw->GetPrimitiveNum();
 	}
-	void ICommandList::FlushDraws()
+	void ICmdRecorder::ResetGpuDraws()
 	{
-		//VAutoVSLLock al(mLocker);
+		/*auto count = CountGpuResourceByTagName("InstantSRV");
+		if (count > 0)
+		{
+			int xxx = 0;
+		}*/
+		mDrawcallArray.clear();
+		mRefBuffers.clear();
+	}
+	void ICmdRecorder::FlushDraws(ICommandList* cmdlist, bool bRefBuffer)
+	{
 		for (auto i : mDrawcallArray)
 		{
-			i->Commit(this);
+			i->Commit(cmdlist);
+			if (bRefBuffer == false)
+				continue;
+			i->ForeachGpuResource([this](EShaderBindType type, IGpuResource* resource)
+				{
+					switch (type)
+					{
+						/*case EShaderBindType::SBT_SRV:
+							if (resource->TagName == "InstantSRV")
+							{
+								int xxx = 0;
+							}
+							mRefBuffers.push_back(((ISrView*)resource)->Buffer);
+							break;
+						case EShaderBindType::SBT_UAV:
+							mRefBuffers.push_back(((IUaView*)resource)->Buffer);
+							break;
+						case EShaderBindType::SBT_CBuffer:
+							mRefBuffers.push_back(((ICbView*)resource)->Buffer);
+							break;*/
+						default:
+							break;
+					}
+					return true;
+				});
 		}
 	}
-	void ICommandList::ResetGpuDraws() 
+	ICmdRecorder* ICommandList::BeginCommand()
 	{
-		//VAutoVSLLock al(mLocker);
-		mDrawcallArray.clear();
+		if (mCmdRecorder == nullptr)
+		{
+			mCmdRecorder = MakeWeakRef(new ICmdRecorder());
+		}
+		mCmdRecorder->ResetGpuDraws();
 		mPrimitiveNum = 0;
+		return mCmdRecorder;
+	}
+	void ICommandList::EndCommand()
+	{
+		if (mCmdRecorder == nullptr)
+		{
+			ASSERT(false);
+			return;
+		}
 	}
 	void ICommandList::InheritPass(ICommandList* cmdlist)
 	{

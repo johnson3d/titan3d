@@ -38,6 +38,10 @@ namespace EngineNS.Graphics.Pipeline.Shader
             mCoreObject = IMdfQueue.CreateInstance();
         }
         public abstract NxRHI.EVertexStreamType[] GetNeedStreams();
+        public virtual EPixelShaderInput[] GetPSNeedInputs()
+        {
+            return null;
+        }
         //{
         //    return new EVertexSteamType[] { EVertexSteamType.VST_Position, };
         //}

@@ -9,13 +9,18 @@ namespace NxRHI
 	class DX12GpuDevice;
 	class DX12CmdQueue;
 	class DX12RenderTargetView;
+	class DX12CmdRecorder : public ICmdRecorder
+	{
+	public:
+		AutoRef<ID3D12CommandAllocator>		mAllocator;
+	};
 	class DX12CommandList : public ICommandList
 	{
 	public:
 		DX12CommandList();
 		~DX12CommandList();
 		bool Init(DX12GpuDevice* device);
-		virtual bool BeginCommand() override;
+		virtual ICmdRecorder* BeginCommand() override;
 		virtual void EndCommand() override;
 		virtual bool IsRecording() const override {
 			return mIsRecording;
@@ -61,7 +66,6 @@ namespace NxRHI
 		{
 			return (DX12GpuDevice*)mDevice.GetPtr();
 		}
-		AutoRef<ID3D12CommandAllocator>		mAllocator;
 		AutoRef<ID3D12GraphicsCommandList>	mContext;
 		
 		//AutoRef<ID3D12CommandSignature>	mCurrentIndirectDrawIndexSig;
@@ -70,6 +74,15 @@ namespace NxRHI
 		AutoRef<ID3D12CommandSignature>		mCurrentCmdSig;
 
 		bool						mIsRecording = false;
+	private:
+		DX12CmdRecorder* GetDX12CmdRecorder()
+		{
+			if (mCmdRecorder == nullptr)
+			{
+				return nullptr;
+			}
+			return mCmdRecorder.UnsafeConvertTo<DX12CmdRecorder>();
+		}
 	};
 
 	class DX12GpuScope : public IGpuScope

@@ -17,6 +17,7 @@ NS_BEGIN
 namespace NxRHI
 {
 	class DX12GpuDevice;
+	class DX12CmdRecorder;
 
 	inline DXGI_FORMAT FormatToDX12Format(EPixelFormat pixel_fmt)
 	{
@@ -227,17 +228,17 @@ namespace NxRHI
 	class DX12CommandAllocatorManager : public VIUnknown
 	{
 	public:
-		AutoRef<ID3D12CommandAllocator> Alloc(ID3D12Device* device);
-		void Free(const AutoRef<ID3D12CommandAllocator>& allocator, UINT64 waitValue, AutoRef<IFence>& fence);
+		AutoRef<DX12CmdRecorder> Alloc(ID3D12Device* device);
+		void Free(const AutoRef<DX12CmdRecorder>& allocator, UINT64 waitValue, AutoRef<IFence>& fence);
 		void TickRecycle();
 	public:
 		VSLLock				mLocker;
-		std::queue<AutoRef<ID3D12CommandAllocator>>		CmdAllocators;
+		std::queue<AutoRef<DX12CmdRecorder>>		CmdAllocators;
 		struct FWaitRecycle
 		{
 			UINT64							WaitValue = 0;
 			AutoRef<IFence>					Fence;
-			AutoRef<ID3D12CommandAllocator> Allocator;
+			AutoRef<DX12CmdRecorder>		Allocator;
 		};
 		std::vector<FWaitRecycle>	Recycles;
 	};
@@ -248,7 +249,9 @@ namespace NxRHI
 		AutoRef<ID3D12Resource>		mGpuResource;
 		virtual UINT64 GetGPUVirtualAddress() override
 		{
-			return mGpuResource->GetGPUVirtualAddress();
+			auto result = mGpuResource->GetGPUVirtualAddress();
+			ASSERT(result != 0);
+			return result;
 		}
 		virtual void* GetHWBuffer() override {
 			return mGpuResource;

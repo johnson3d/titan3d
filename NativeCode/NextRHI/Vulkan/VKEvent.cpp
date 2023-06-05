@@ -140,7 +140,7 @@ namespace NxRHI
 
 		return;
 	}
-	bool VKFence::Wait(UINT64 value, UINT timeOut)
+	UINT64 VKFence::Wait(UINT64 value, UINT timeOut)
 	{
 		//VkSubmitInfo submitInfo{};
 		//submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
@@ -201,7 +201,7 @@ namespace NxRHI
 		//	//completed = GetCompletedValue();
 		//}
 
-		return true;
+		return value;
 	}
 	void VKFence::SetDebugName(const char* name)
 	{
@@ -229,10 +229,10 @@ namespace NxRHI
 		device->DelayDestroy(mSemaphore);
 		mSemaphore = nullptr;
 	}
-	bool VKBinaryFence::Wait(UINT64 value, UINT timeOut)
+	UINT64 VKBinaryFence::Wait(UINT64 value, UINT timeOut)
 	{
 		ASSERT(false);
-		return false;
+		return 0;
 	}
 	/// ====================================
 	VKGpuToHostFence::VKGpuToHostFence(VKGpuDevice* device, bool signal)

@@ -27,6 +27,14 @@ namespace EngineNS.Bricks.Terrain.CDLOD
                 NxRHI.EVertexStreamType.VST_Normal,
                 NxRHI.EVertexStreamType.VST_UV,};
         }
+        public override EPixelShaderInput[] GetPSNeedInputs()
+        {
+            return new EPixelShaderInput[] {
+                EPixelShaderInput.PST_Normal,
+                EPixelShaderInput.PST_UV,
+                EPixelShaderInput.PST_LightMap,
+            };
+        }
         public override void CopyFrom(UMdfQueue mdf)
         {
             base.CopyFrom(mdf);

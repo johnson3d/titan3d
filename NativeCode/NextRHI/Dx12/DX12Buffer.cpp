@@ -46,6 +46,14 @@ namespace NxRHI
 		if (device == nullptr)
 			return;
 
+		if (TagName == "InstantSRV")
+		{
+			/*mGpuMemory->AddRef();
+			mGpuMemory->FreeMemory();
+			mGpuMemory = nullptr;
+			return;*/
+		}
+		
 		device->DelayDestroy(mGpuMemory);
 		mGpuMemory = nullptr;
 	}
@@ -77,7 +85,10 @@ namespace NxRHI
 		AutoRef<ID3D12Resource> uploadBuffer;
 		auto hr = device->mDevice->CreateCommittedResource(&properties, D3D12_HEAP_FLAG_NONE, &resDesc,
 			D3D12_RESOURCE_STATE_GENERIC_READ, NULL, IID_PPV_ARGS(uploadBuffer.GetAddressOf()));
-		ASSERT(hr == S_OK);
+		if (hr == DXGI_ERROR_DEVICE_REMOVED)
+		{
+			device->OnDeviceRemoved();
+		}
 		BYTE* mapped = NULL;
 		D3D12_RANGE range = { 0, size };
 		hr = uploadBuffer->Map(0, nullptr, (void**)&mapped);
@@ -252,7 +263,7 @@ namespace NxRHI
 				auto bf = CreateUploadBuffer(device, desc.InitData, totalSize, Desc.Size);
 
 				{
-					FTransientCmd tsCmd(device, QU_Transfer);
+					FTransientCmd tsCmd(device, QU_Transfer, "BufferCopy");
 					auto cmd = (DX12CommandList*)tsCmd.GetCmdList();
 					auto saved = this->GpuState;
 					this->TransitionTo(cmd, EGpuResourceState::GRS_CopyDst);
@@ -356,7 +367,7 @@ namespace NxRHI
 			auto bf = CreateUploadBuffer(device, pData, totalSize, pFootPrint->RowPitch);//.Size);
 
 			{
-				FTransientCmd tsCmd(device, QU_Transfer);
+				FTransientCmd tsCmd(device, QU_Transfer, "BufferCopy");
 				auto cmd = (DX12CommandList*)tsCmd.GetCmdList();
 				auto saved = this->GpuState;
 				this->TransitionTo(cmd, EGpuResourceState::GRS_CopyDst);
@@ -390,7 +401,6 @@ namespace NxRHI
 	{
 		if (Desc.Usage == EGpuUsage::USAGE_DEFAULT)
 		{
-			ASSERT(false);
 			return false;
 		}
 		else
@@ -433,6 +443,10 @@ namespace NxRHI
 
 	DX12Texture::~DX12Texture()
 	{
+		if (TagName == "HeightMapSRV")
+		{
+			//auto num = mGpuResource->AddRef();
+		}
 		auto device = mDeviceRef.GetPtr();
 		if (device == nullptr)
 			return;
@@ -482,23 +496,30 @@ namespace NxRHI
 		resDesc.Alignment = D3D12_DEFAULT_RESOURCE_PLACEMENT_ALIGNMENT;
 
 		AutoRef<ID3D12Resource> uploadBuffer;
+		auto completed = device->mFrameFence->GetCompletedValue();
 		auto hr = device->mDevice->CreateCommittedResource(&properties, D3D12_HEAP_FLAG_NONE, &resDesc,
 			D3D12_RESOURCE_STATE_GENERIC_READ, NULL, IID_PPV_ARGS(uploadBuffer.GetAddressOf()));
-		ASSERT(hr == S_OK);
-		BYTE* mapped = NULL;
-		D3D12_RANGE range = { 0, uploadSize };
-		hr = uploadBuffer->Map(0, nullptr, (void**)&mapped);
-		if (hr == S_OK)
+		if (hr == 0x887a0005 || hr == DXGI_ERROR_DEVICE_REMOVED)
 		{
-			BYTE* pCopyTar = mapped;
-			BYTE* pCopySrc = (BYTE*)mappedResource->pData;
-			for (UINT y = 0; y < numOfRows; y++)
+			device->OnDeviceRemoved();
+		}
+		if (uploadBuffer != nullptr)
+		{
+			BYTE* mapped = NULL;
+			D3D12_RANGE range = { 0, uploadSize };
+			hr = uploadBuffer->Map(0, nullptr, (void**)&mapped);
+			if (hr == S_OK)
 			{
-				memcpy(pCopyTar, pCopySrc, rowSize);
-				pCopyTar += rowPitch;
-				pCopySrc += mappedResource->RowPitch;
+				BYTE* pCopyTar = mapped;
+				BYTE* pCopySrc = (BYTE*)mappedResource->pData;
+				for (UINT y = 0; y < numOfRows; y++)
+				{
+					memcpy(pCopyTar, pCopySrc, rowSize);
+					pCopyTar += rowPitch;
+					pCopySrc += mappedResource->RowPitch;
+				}
+				uploadBuffer->Unmap(0, &range);
 			}
-			uploadBuffer->Unmap(0, &range);
 		}
 
 		return uploadBuffer;
@@ -583,6 +604,7 @@ namespace NxRHI
 		{
 			resState |= D3D12_RESOURCE_STATES::D3D12_RESOURCE_STATE_COPY_DEST;
 		}*/
+		auto completed = device->mFrameFence->GetCompletedValue();
 		if (desc.BindFlags & EBufferType::BFT_DSV)
 		{
 			/*switch (desc.Format)
@@ -614,15 +636,28 @@ namespace NxRHI
 			{
 				data.Format = DXGI_FORMAT::DXGI_FORMAT_D16_UNORM;
 			}*/
+			
 			auto hr = device->mDevice->CreateCommittedResource(&properties, D3D12_HEAP_FLAG_NONE, &resDesc, resState, &data, IID_PPV_ARGS(mGpuResource.GetAddressOf()));
 			if (FAILED(hr))
+			{
+				if (hr == DXGI_ERROR_DEVICE_REMOVED)
+				{
+					device->OnDeviceRemoved();
+				}
 				return false;
+			}	
 		}
 		else
 		{
 			auto hr = device->mDevice->CreateCommittedResource(&properties, D3D12_HEAP_FLAG_NONE, &resDesc, resState, nullptr, IID_PPV_ARGS(mGpuResource.GetAddressOf()));
 			if (FAILED(hr))
+			{
+				if (hr == DXGI_ERROR_DEVICE_REMOVED)
+				{
+					device->OnDeviceRemoved();
+				}
 				return false;
+			}
 		}
 		//mGpuResource->SetName(L"Texture");
 		
@@ -672,7 +707,7 @@ namespace NxRHI
 			dstLocation.SubresourceIndex = 0;
 
 			{
-				FTransientCmd tsCmd(device, QU_Transfer);
+				FTransientCmd tsCmd(device, QU_Transfer, "TextureCopy");
 				auto cmd = (DX12CommandList*)tsCmd.GetCmdList();
 				//auto saved = this->GpuState;
 				this->TransitionTo(cmd, EGpuResourceState::GRS_CopyDst);
@@ -693,7 +728,7 @@ namespace NxRHI
 		}
 		else
 		{
-			FTransientCmd tsCmd(device, QU_Default);
+			FTransientCmd tsCmd(device, QU_Transfer, "TextureTransition");
 			auto cmd = (DX12CommandList*)tsCmd.GetCmdList();
 			this->TransitionTo(cmd, EGpuResourceState::GRS_GenericRead);
 		}
@@ -850,7 +885,7 @@ namespace NxRHI
 			dstLocation.SubresourceIndex = subRes;
 
 			{
-				FTransientCmd tsCmd(device, QU_Transfer);
+				FTransientCmd tsCmd(device, QU_Transfer, "TextureCopy");
 				auto cmd = (DX12CommandList*)tsCmd.GetCmdList();
 				auto saved = this->GpuState;
 				this->TransitionTo(cmd, EGpuResourceState::GRS_CopyDst);
@@ -1188,6 +1223,8 @@ namespace NxRHI
 	}
 	bool DX12SrView::UpdateBuffer(IGpuDevice* device, IGpuBufferData* pBuffer)
 	{
+		/*if (Buffer != nullptr)
+			Buffer->AddRef();*/
 		Buffer = pBuffer;
 		mFingerPrint++;
 		D3D12_SHADER_RESOURCE_VIEW_DESC d3dDesc{};

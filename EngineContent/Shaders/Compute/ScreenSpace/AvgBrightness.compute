@@ -38,6 +38,9 @@ void CS_SetupAvgBrightness(uint3 id : SV_DispatchThreadID,
 	GpuSceneDesc[0].AverageColorDivider = 0;
 }
 
+/**Meta Begin:(CS_CountAvgBrightness)
+HLSL=none
+Meta End:(CS_CountAvgBrightness)**/
 [numthreads(DispatchX, DispatchY, DispatchZ)]
 void CS_CountAvgBrightness(uint3 id : SV_DispatchThreadID,
 	uint3 GroupId : SV_GroupID,

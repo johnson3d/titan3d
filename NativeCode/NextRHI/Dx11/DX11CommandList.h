@@ -6,6 +6,11 @@ NS_BEGIN
 
 namespace NxRHI
 {
+	class DX11CmdRecorder : public ICmdRecorder
+	{
+	public:
+		AutoRef<ID3D11CommandList> mCmdList;
+	};
 	class DX11GpuDevice;
 	class DX11CommandList : public ICommandList
 	{
@@ -14,7 +19,7 @@ namespace NxRHI
 		~DX11CommandList();
 		bool Init(DX11GpuDevice* device);
 		bool Init(DX11GpuDevice* device, ID3D11DeviceContext* context);
-		virtual bool BeginCommand() override;
+		virtual ICmdRecorder* BeginCommand() override;
 		virtual void EndCommand() override;
 		virtual bool IsRecording() const override {
 			return mIsRecording;
@@ -62,9 +67,17 @@ namespace NxRHI
 		}
 		ID3D11DeviceContext* mContext;
 		ID3D11DeviceContext4* mContext4;
-		ID3D11CommandList* mCmdList;
 		bool mIsRecording = false;
 		bool IsImmContext = false;
+	private:
+		DX11CmdRecorder* GetDX11CmdRecorder()
+		{
+			if (mCmdRecorder == nullptr)
+			{
+				return nullptr;
+			}
+			return mCmdRecorder.UnsafeConvertTo<DX11CmdRecorder>();
+		}
 	};
 
 	class DX11GpuScope : public IGpuScope

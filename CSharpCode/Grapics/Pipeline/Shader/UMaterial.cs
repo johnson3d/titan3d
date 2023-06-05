@@ -57,42 +57,83 @@ namespace EngineNS.Graphics.Pipeline.Shader
         public class VSInput
         {
             public Vector3 vPosition;
-	        public Vector3 vNormal;
-	        public Vector4 vTangent;
-	        public Vector4 vColor;
-	        public Vector2 vUV;
-	        public Vector2 vLightMap;
-	        public Vector4ui vSkinIndex;
-	        public Vector4 vSkinWeight;
-	        public Vector4ui vTerrainIndex;
-	        public Vector4ui vTerrainGradient;
-	        public Vector3 vInstPos;
-	        public Vector4 vInstQuat;
-	        public Vector4 vInstScale;
-	        public Vector4ui vF4_1;
-	        public Vector4 vF4_2;
-	        public Vector4 vF4_3;
+            public Vector3 vNormal;
+            public Vector4 vTangent;
+            public Vector4 vColor;
+            public Vector2 vUV;
+            public Vector2 vLightMap;
+            public Vector4ui vSkinIndex;
+            public Vector4 vSkinWeight;
+            public Vector4ui vTerrainIndex;
+            public Vector4ui vTerrainGradient;
+            public Vector3 vInstPos;
+            public Vector4 vInstQuat;
+            public Vector4 vInstScale;
+            public Vector4ui vF4_1;
+            public Vector4 vF4_2;
+            public Vector4 vF4_3;
             public uint vInstanceId;
         }
         public class PSInput
         {
             public Vector4 vPosition;
             public Vector3 vNormal;
-	        public Vector4 vColor;
+            public Vector4 vColor;
             public Vector2 vUV;
-	        public Vector3 vWorldPos;   //the 4th channel is unused just for now;
-	        public Vector4 vTangent;
-	        public Vector4 vLightMap;
-	        public Vector4 psCustomUV0;
-	        public Vector4 psCustomUV1;
-	        public Vector4 psCustomUV2;
-	        public Vector4 psCustomUV3;
-	        public Vector4 psCustomUV4;
-	        public Vector4ui PointLightIndices;
-	        public Vector4ui vF4_1;
-	        public Vector4 vF4_2;
-	        public Vector4 vF4_3;
+            public Vector3 vWorldPos;   //the 4th channel is unused just for now;
+            public Vector4 vTangent;
+            public Vector4 vLightMap;
+            public Vector4 psCustomUV0;
+            public Vector4 psCustomUV1;
+            public Vector4 psCustomUV2;
+            public Vector4 psCustomUV3;
+            public Vector4 psCustomUV4;
+            public Vector4ui PointLightIndices;
+            public Vector4ui vF4_1;
+            public Vector4 vF4_2;
+            public Vector4 vF4_3;
             public Vector4ui SpecialData;
+            public static Graphics.Pipeline.Shader.EPixelShaderInput NameToInput(string name)
+            {
+                switch(name)
+                {
+                    case "vPosition":
+                        return Graphics.Pipeline.Shader.EPixelShaderInput.PST_Position;
+                    case "vNormal":
+                        return Graphics.Pipeline.Shader.EPixelShaderInput.PST_Normal;
+                    case "vColor":
+                        return Graphics.Pipeline.Shader.EPixelShaderInput.PST_Color;
+                    case "vUV":
+                        return Graphics.Pipeline.Shader.EPixelShaderInput.PST_UV;
+                    case "vWorldPos":
+                        return Graphics.Pipeline.Shader.EPixelShaderInput.PST_WorldPos;
+                    case "vTangent":
+                        return Graphics.Pipeline.Shader.EPixelShaderInput.PST_Tangent;
+                    case "vLightMap":
+                        return Graphics.Pipeline.Shader.EPixelShaderInput.PST_LightMap;
+                    case "psCustomUV0":
+                        return Graphics.Pipeline.Shader.EPixelShaderInput.PST_Custom0;
+                    case "psCustomUV1":
+                        return Graphics.Pipeline.Shader.EPixelShaderInput.PST_Custom1;
+                    case "psCustomUV2":
+                        return Graphics.Pipeline.Shader.EPixelShaderInput.PST_Custom2;
+                    case "psCustomUV3":
+                        return Graphics.Pipeline.Shader.EPixelShaderInput.PST_Custom3;
+                    case "psCustomUV4":
+                        return Graphics.Pipeline.Shader.EPixelShaderInput.PST_Custom4;
+                    case "PointLightIndices":
+                        return Graphics.Pipeline.Shader.EPixelShaderInput.PST_PointLightIndices;
+                    case "vF4_1":
+                        return Graphics.Pipeline.Shader.EPixelShaderInput.PST_F4_1;
+                    case "vF4_2":
+                        return Graphics.Pipeline.Shader.EPixelShaderInput.PST_F4_2;
+                    case "vF4_3":
+                        return Graphics.Pipeline.Shader.EPixelShaderInput.PST_F4_3;
+                    case "SpecialData":
+                        return Graphics.Pipeline.Shader.EPixelShaderInput.PST_SpecialData;
+                }
+                return Graphics.Pipeline.Shader.EPixelShaderInput.PST_Number;
+            }
         }
         public class MTLOutput
         {
@@ -288,10 +329,10 @@ namespace EngineNS.Graphics.Pipeline.Shader
         }
         [Rtti.Meta]
         [Category("Option")]
-        public ELightingMode LightingMode 
-        { 
-            get; 
-            set; 
+        public ELightingMode LightingMode
+        {
+            get;
+            set;
         } = ELightingMode.Stand;
         protected ERenderLayer mRenderLayer = ERenderLayer.RL_Opaque;
         [Rtti.Meta]
@@ -346,7 +387,7 @@ namespace EngineNS.Graphics.Pipeline.Shader
             if (EmptyMaterial)
             {
                 this.HLSLCode = "void DO_VS_MATERIAL_IMPL(in PS_INPUT input, inout MTL_OUTPUT mtl)\n{\n}\n";
-                this.HLSLCode += "void DO_PS_MATERIAL_IMPL(in PS_INPUT input, inout MTL_OUTPUT mtl)\n"+
+                this.HLSLCode += "void DO_PS_MATERIAL_IMPL(in PS_INPUT input, inout MTL_OUTPUT mtl)\n" +
                     "{\n" +
                         "mtl.mAlbedo = float3(0.5,0.5,0.5);\n" +
                         "mtl.mMetallic = 1.0f;\n" +
@@ -440,8 +481,37 @@ namespace EngineNS.Graphics.Pipeline.Shader
         [EGui.Controls.PropertyGrid.PGCustomValueEditor(HideInPG = true)]
         public NxRHI.UShaderDefinitions Defines { get; } = new NxRHI.UShaderDefinitions();
 
+        public EPixelShaderInput[] GetPSNeedInputs()
+        {
+            if (PSNeedInputs == null)
+            {
+                return new EPixelShaderInput[] {
+                    EPixelShaderInput.PST_Position,
+                    EPixelShaderInput.PST_Normal,
+                    EPixelShaderInput.PST_Color,
+                    EPixelShaderInput.PST_UV,
+                    EPixelShaderInput.PST_WorldPos,
+                    EPixelShaderInput.PST_Tangent,
+                    EPixelShaderInput.PST_LightMap,
+                    EPixelShaderInput.PST_Custom0,
+                    EPixelShaderInput.PST_Custom1,
+                    EPixelShaderInput.PST_Custom2,
+                    EPixelShaderInput.PST_Custom3,
+                    EPixelShaderInput.PST_Custom4,
+                    EPixelShaderInput.PST_PointLightIndices,
+                    EPixelShaderInput.PST_F4_1,
+                    EPixelShaderInput.PST_F4_2,
+                    EPixelShaderInput.PST_F4_3,
+                    EPixelShaderInput.PST_SpecialData,
+                 };
+            }
+            else
+            {
+                return PSNeedInputs.ToArray();
+            }
+        }
         #region Data
-        
+
         #region Code&Graph
         [Rtti.Meta(Flags = Rtti.MetaAttribute.EMetaFlags.DiscardWhenCooked)]
         [Browsable(false)]
@@ -464,6 +534,12 @@ namespace EngineNS.Graphics.Pipeline.Shader
         }
         [Rtti.Meta(Flags = Rtti.MetaAttribute.EMetaFlags.DiscardWhenCooked)]
         public List<string> IncludeFiles { get; set; } = new List<string>();
+        [Rtti.Meta()]
+        public List<Graphics.Pipeline.Shader.EPixelShaderInput> PSNeedInputs 
+        { 
+            get; 
+            set;
+        } = null;
         #endregion
         #region Texture
         public class NameRNamePair : IO.BaseSerializer

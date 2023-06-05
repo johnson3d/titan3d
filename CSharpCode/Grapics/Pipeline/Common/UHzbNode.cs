@@ -205,6 +205,7 @@ namespace EngineNS.Graphics.Pipeline.Common
                 if (Setup == null)
                     return;
                 var cmd = BasePass.DrawCmdList;
+                cmd.BeginCommand();
 
                 var srvIdx = SetupDrawcall.FindBinder(NxRHI.EShaderBindType.SBT_SRV, "DepthBuffer");
                 if (srvIdx.IsValidPointer)
@@ -212,20 +213,17 @@ namespace EngineNS.Graphics.Pipeline.Common
                     var depth = this.GetAttachBuffer(this.DepthPinIn).Srv;
                     SetupDrawcall.BindSrv(srvIdx, depth);
                 }
-                SetupDrawcall.Commit(cmd);
+                cmd.PushGpuDraw(SetupDrawcall);
 
                 if (MipsDrawcalls != null)
                 {
                     for (int i = 0; i < MipsDrawcalls.Length; i++)
                     {
-                        MipsDrawcalls[i].Commit(cmd);
+                        cmd.PushGpuDraw(MipsDrawcalls[i]);
                     }
                 }
-
-                if (cmd.BeginCommand())
-                {
-                    cmd.EndCommand();
-                }
+                cmd.FlushDraws();
+                cmd.EndCommand();
                 UEngine.Instance.GfxDevice.RenderCmdQueue.QueueCmdlist(cmd);
             }   
         }

@@ -1,6 +1,8 @@
 #include "DX12PreHead.h"
 #include "DX12Event.h"
 #include "DX12GpuDevice.h"
+#include "DX12CommandList.h"
+#include "DX12Drawcall.h"
 
 #define new VNEW
 
@@ -17,15 +19,15 @@ namespace NxRHI
 	/// </summary>
 	//const int NumHeapDescriptor = 2;//cbv,srv,uav:(vs,ps)|sampler(vs,ps)
 	
-	AutoRef<ID3D12CommandAllocator> DX12CommandAllocatorManager::Alloc(ID3D12Device* device)
+	AutoRef<DX12CmdRecorder> DX12CommandAllocatorManager::Alloc(ID3D12Device* device)
 	{
 		VAutoVSLLock lk(mLocker);
 		if (CmdAllocators.size() == 0)
 		{
 			for (int i = 0; i < 10; i++)
 			{
-				AutoRef<ID3D12CommandAllocator> tmp;
-				auto hr = device->CreateCommandAllocator(D3D12_COMMAND_LIST_TYPE_DIRECT, IID_PPV_ARGS(tmp.GetAddressOf()));
+				AutoRef<DX12CmdRecorder> tmp = MakeWeakRef(new DX12CmdRecorder());
+				auto hr = device->CreateCommandAllocator(D3D12_COMMAND_LIST_TYPE_DIRECT, IID_PPV_ARGS(tmp->mAllocator.GetAddressOf()));
 				ASSERT(hr == S_OK);
 
 				CmdAllocators.push(tmp);
@@ -35,7 +37,7 @@ namespace NxRHI
 		CmdAllocators.pop();
 		return result;
 	}
-	void DX12CommandAllocatorManager::Free(const AutoRef<ID3D12CommandAllocator>& allocator, UINT64 waitValue, AutoRef<IFence>& fence) 
+	void DX12CommandAllocatorManager::Free(const AutoRef<DX12CmdRecorder>& allocator, UINT64 waitValue, AutoRef<IFence>& fence)
 	{
 		VAutoVSLLock lk(mLocker);
 		FWaitRecycle tmp;
@@ -49,8 +51,12 @@ namespace NxRHI
 		VAutoVSLLock lk(mLocker);
 		for (auto i = Recycles.begin(); i != Recycles.end(); )
 		{
-			if (i->Fence->GetCompletedValue() >= i->WaitValue)
+			auto value = i->Fence->GetCompletedValue();
+			if (value >= i->WaitValue + 1)
 			{
+				i->Allocator->mAllocator->Reset();
+				i->Allocator->ResetGpuDraws();
+				
 				CmdAllocators.push(i->Allocator);
 				i = Recycles.erase(i);
 			}
@@ -115,6 +121,7 @@ namespace NxRHI
 		ASSERT(pManager);
 		D3D12_GPU_DESCRIPTOR_HANDLE result = RealObject->GetGPUDescriptorHandleForHeapStart();
 		result.ptr += this->OffsetInPage + pManager->mDescriptorStride * index;
+		ASSERT(result.ptr != 0);
 		return result;
 	}
 	D3D12_CPU_DESCRIPTOR_HANDLE	DX12DescriptorSetPagedObject::GetCpuAddress(int index)
@@ -136,6 +143,7 @@ namespace NxRHI
 		if (hr != S_OK)
 		{
 			hr = device->mDevice->GetDeviceRemovedReason();
+			device->OnDeviceRemoved();
 			ASSERT(false);
 			result->Release();
 			return nullptr;

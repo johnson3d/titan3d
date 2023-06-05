@@ -5,6 +5,128 @@ using System.Text;
 
 namespace EngineNS.Graphics.Pipeline.Common
 {
+    public class UGpuDataArray<T> : IDisposable where T : unmanaged
+    {
+        public Support.UNativeArray<T> DataArray;
+        private uint GpuCapacity = 0;
+        public NxRHI.UBuffer GpuBuffer;
+        public bool IsGpuWrite { get; private set; } = false;
+        public NxRHI.UUaView DataUAV;
+        public NxRHI.USrView DataSRV;
+        private bool Dirty = false;
+        public bool Initialize(bool gpuWrite)
+        {
+            IsGpuWrite = gpuWrite;
+            Dispose();
+            DataArray = Support.UNativeArray<T>.CreateInstance();
+            return true;
+        }
+        public UGpuDataArray()
+        {
+
+        }
+        ~UGpuDataArray()
+        {
+            Dispose();
+        }
+        public void Dispose()
+        {
+            DataArray.Clear();
+            DataArray.Dispose();
+            if (GpuBuffer != null)
+            {
+                DataUAV?.Dispose();
+                DataUAV = null;
+
+                DataSRV?.Dispose();
+                DataSRV = null;
+
+                GpuBuffer?.Dispose();
+                GpuBuffer = null;
+            }
+        }
+        public void SetSize(int Count)
+        {
+            Dirty = true;
+            DataArray.SetSize(Count);
+        }
+        public int PushData(in T data)
+        {
+            Dirty = true;
+            var result = DataArray.Count;
+            DataArray.Add(data);
+            return result;
+        }
+        public void UpdateData(int index, in T data)
+        {
+            if (index >= DataArray.Count || index < 0)
+                return;
+
+            Dirty = true;
+            DataArray[index] = data;
+        }
+        public void Clear()
+        {
+            Dirty = true;
+            DataArray.Clear();
+        }
+        public unsafe void Flush2GPU()
+        {
+            if (Dirty == false)
+                return;
+            Dirty = false;
+            if (DataArray.Count >= GpuCapacity)
+            {
+                GpuBuffer?.Dispose();
+
+                GpuCapacity = (uint)DataArray.Count + GpuCapacity / 2 + 1;
+
+                var bfDesc = new NxRHI.FBufferDesc();
+                bfDesc.SetDefault(false);
+                bfDesc.Size = (uint)sizeof(T) * GpuCapacity;
+                bfDesc.StructureStride = (uint)sizeof(T);
+                bfDesc.InitData = DataArray.UnsafeGetElementAddress(0);
+                if (IsGpuWrite)
+                {
+                    bfDesc.Type = NxRHI.EBufferType.BFT_UAV;
+                    bfDesc.Usage = NxRHI.EGpuUsage.USAGE_DYNAMIC;
+                }
+                else
+                {
+                    bfDesc.Type = NxRHI.EBufferType.BFT_SRV;
+                    bfDesc.CpuAccess = NxRHI.ECpuAccess.CAS_WRITE;
+                    bfDesc.Usage = NxRHI.EGpuUsage.USAGE_DYNAMIC;
+                }
+                GpuBuffer = UEngine.Instance.GfxDevice.RenderContext.CreateBuffer(in bfDesc);
+                System.Diagnostics.Debug.Assert(GpuBuffer != null);
+
+                if (IsGpuWrite)
+                {
+                    var uavDesc = new NxRHI.FUavDesc();
+                    uavDesc.SetBuffer(0);
+                    uavDesc.Buffer.NumElements = (uint)GpuCapacity;
+                    uavDesc.Buffer.StructureByteStride = bfDesc.StructureStride;
+                    DataUAV = UEngine.Instance.GfxDevice.RenderContext.CreateUAV(GpuBuffer, in uavDesc);
+                }
+                else
+                {
+                    var srvDesc = new NxRHI.FSrvDesc();
+                    srvDesc.SetBuffer(0);
+                    srvDesc.Buffer.NumElements = (uint)GpuCapacity;
+                    srvDesc.Buffer.StructureByteStride = bfDesc.StructureStride;
+                    DataSRV = UEngine.Instance.GfxDevice.RenderContext.CreateSRV(GpuBuffer, in srvDesc);
+                }
+            }
+            else
+            {
+                if (IsGpuWrite == false)
+                {
+                    if (DataArray.Count > 0)
+                        GpuBuffer.UpdateGpuData(0, DataArray.UnsafeGetElementAddress(0), (uint)(sizeof(T) * DataArray.Count));
+                }
+            }
+        }
+    }
     public partial class UGpuSceneNode : Graphics.Pipeline.Common.URenderGraphNode
     {
         public Common.URenderGraphPin GpuScenePinOut = Common.URenderGraphPin.CreateOutput("GpuScene", false, EPixelFormat.PXF_UNKNOWN);
@@ -196,128 +318,7 @@ namespace EngineNS.Graphics.Pipeline.Common
         {
             public Int32 ClusterCount = 0;
         }
-        public class UGpuDataArray<T> : IDisposable where T : unmanaged
-        {
-            public Support.UNativeArray<T> DataArray;
-            private uint GpuCapacity = 0;
-            public NxRHI.UBuffer GpuBuffer;
-            public bool IsGpuWrite { get; private set; } = false;
-            public NxRHI.UUaView DataUAV;
-            public NxRHI.USrView DataSRV;
-            private bool Dirty = false;
-            public bool Initialize(bool gpuWrite)
-            {
-                IsGpuWrite = gpuWrite;
-                Dispose();
-                DataArray = Support.UNativeArray<T>.CreateInstance();
-                return true;
-            }
-            public UGpuDataArray()
-            {
-                
-            }
-            ~UGpuDataArray()
-            {
-                Dispose();
-            }
-            public void Dispose()
-            {
-                DataArray.Clear();
-                DataArray.Dispose();
-                if (GpuBuffer != null)
-                {
-                    DataUAV?.Dispose();
-                    DataUAV = null;
-
-                    DataSRV?.Dispose();
-                    DataSRV = null;
-
-                    GpuBuffer?.Dispose();
-                    GpuBuffer = null;
-                }
-            }
-            public void SetSize(int Count)
-            {
-                Dirty = true;
-                DataArray.SetSize(Count);
-            }
-            public int PushData(in T data)
-            {
-                Dirty = true;
-                var result = DataArray.Count;
-                DataArray.Add(data);
-                return result;
-            }
-            public void UpdateData(int index, in T data)
-            {
-                if (index >= DataArray.Count || index < 0)
-                    return;
-
-                Dirty = true;
-                DataArray[index] = data;
-            }
-            public void Clear()
-            {
-                Dirty = true;
-                DataArray.Clear();
-            }
-            public unsafe void Flush2GPU(NxRHI.ICommandList cmd)
-            {
-                if (Dirty == false)
-                    return;
-                Dirty = false;
-                if (DataArray.Count >= GpuCapacity)
-                {
-                    GpuBuffer?.Dispose();
-
-                    GpuCapacity = (uint)DataArray.Count + GpuCapacity / 2 + 1;
-
-                    var bfDesc = new NxRHI.FBufferDesc();
-                    bfDesc.SetDefault(false);
-                    bfDesc.Size = (uint)sizeof(T) * GpuCapacity;
-                    bfDesc.StructureStride = (uint)sizeof(T);
-                    bfDesc.InitData = DataArray.UnsafeGetElementAddress(0);
-                    if (IsGpuWrite)
-                    {
-                        bfDesc.Type = NxRHI.EBufferType.BFT_UAV;
-                        bfDesc.Usage = NxRHI.EGpuUsage.USAGE_DYNAMIC;
-                    }
-                    else
-                    {
-                        bfDesc.Type = NxRHI.EBufferType.BFT_SRV;
-                        bfDesc.CpuAccess = NxRHI.ECpuAccess.CAS_WRITE;
-                        bfDesc.Usage = NxRHI.EGpuUsage.USAGE_DYNAMIC;
-                    }
-                    GpuBuffer = UEngine.Instance.GfxDevice.RenderContext.CreateBuffer(in bfDesc);
-                    System.Diagnostics.Debug.Assert(GpuBuffer != null);
-
-                    if (IsGpuWrite)
-                    {
-                        var uavDesc = new NxRHI.FUavDesc();
-                        uavDesc.SetBuffer(0);
-                        uavDesc.Buffer.NumElements = (uint)GpuCapacity;
-                        uavDesc.Buffer.StructureByteStride = bfDesc.StructureStride;
-                        DataUAV = UEngine.Instance.GfxDevice.RenderContext.CreateUAV(GpuBuffer, in uavDesc);
-                    }
-                    else
-                    {
-                        var srvDesc = new NxRHI.FSrvDesc();
-                        srvDesc.SetBuffer(0);
-                        srvDesc.Buffer.NumElements = (uint)GpuCapacity;
-                        srvDesc.Buffer.StructureByteStride = bfDesc.StructureStride;
-                        DataSRV = UEngine.Instance.GfxDevice.RenderContext.CreateSRV(GpuBuffer, in srvDesc);
-                    }
-                }
-                else
-                {
-                    if (IsGpuWrite == false)
-                    {
-                        if (DataArray.Count > 0)
-                            GpuBuffer.UpdateGpuData(0, DataArray.UnsafeGetElementAddress(0), (uint)(sizeof(T) * DataArray.Count));
-                    }
-                }
-            }
-        }
+        
 
         
         public async override System.Threading.Tasks.Task Initialize(URenderPolicy policy, string debugName)

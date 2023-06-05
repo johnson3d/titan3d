@@ -201,27 +201,73 @@ VS_MODIFIER VS_INPUT_TO_VS_MODIFIER(VS_INPUT input)
 
 struct PS_INPUT
 {
+#if USE_PS_Position == 1
 	VK_LOCATION(0) float4 vPosition		: SV_POSITION;
+#endif
+
+#if USE_PS_Normal == 1
 	VK_LOCATION(1) float3 vNormal			: NORMAL;
+#endif
+
+#if USE_PS_Color == 1
 	VK_LOCATION(2) float4 vColor			: COLOR;
+#endif
 
+#if USE_PS_UV == 1
 	VK_LOCATION(3) float2 vUV				: TEXCOORD;
-	VK_LOCATION(4) float3 vWorldPos		: TEXCOORD1;   //the 4th channel is unused just for now;
-	VK_LOCATION(5) float4 vTangent			: TEXCOORD2;
-	VK_LOCATION(6) float4 vLightMap		: TEXCOORD3;
-	
-	VK_LOCATION(7) float4 psCustomUV0	: TEXCOORD4;
-	VK_LOCATION(8) float4 psCustomUV1	: TEXCOORD5;
-	VK_LOCATION(9) float4 psCustomUV2	: TEXCOORD6;
-	VK_LOCATION(10) float4 psCustomUV3	: TEXCOORD7;
-	VK_LOCATION(11) float4 psCustomUV4	: TEXCOORD8;
-	
-	VK_LOCATION(12) nointerpolation uint4 PointLightIndices	: TEXCOORD9;
-	VK_LOCATION(13) nointerpolation uint4 vF4_1 : TEXCOORD10;
-	VK_LOCATION(14) float4 vF4_2 : TEXCOORD11;
-	VK_LOCATION(15) float4 vF4_3 : TEXCOORD12;
+#endif
 
+#if USE_PS_WorldPos == 1
+	VK_LOCATION(4) float3 vWorldPos		: TEXCOORD1;   //the 4th channel is unused just for now;
+#endif
+
+#if USE_PS_Tangent == 1
+	VK_LOCATION(5) float4 vTangent			: TEXCOORD2;
+#endif
+
+#if USE_PS_LightMap == 1
+	VK_LOCATION(6) float4 vLightMap		: TEXCOORD3;
+#endif
+
+#if USE_PS_Custom0 == 1
+	VK_LOCATION(7) float4 psCustomUV0	: TEXCOORD4;
+#endif
+
+#if USE_PS_Custom1 == 1
+	VK_LOCATION(8) float4 psCustomUV1	: TEXCOORD5;
+#endif
+
+#if USE_PS_Custom2 == 1
+	VK_LOCATION(9) float4 psCustomUV2	: TEXCOORD6;
+#endif
+
+#if USE_PS_Custom3 == 1
+	VK_LOCATION(10) float4 psCustomUV3	: TEXCOORD7;
+#endif
+
+#if USE_PS_Custom4 == 1
+	VK_LOCATION(11) float4 psCustomUV4	: TEXCOORD8;
+#endif
+	
+#if USE_PS_PointLightIndices == 1
+	VK_LOCATION(12) nointerpolation uint4 PointLightIndices	: TEXCOORD9;
+#endif
+
+#if USE_PS_F4_1 == 1
+	VK_LOCATION(13) nointerpolation uint4 vF4_1 : TEXCOORD10;
+#endif
+
+#if USE_PS_F4_2 == 1
+	VK_LOCATION(14) float4 vF4_2 : TEXCOORD11;
+#endif
+
+#if USE_PS_F4_3 == 1
+	VK_LOCATION(15) float4 vF4_3 : TEXCOORD12;
+#endif
+
+#if USE_PS_SpecialData == 1
 	VK_LOCATION(16) nointerpolation uint4 SpecialData : TEXCOORD13;
+#endif
 };
 
 struct VSInstantData
@@ -247,41 +293,41 @@ void Default_VSInput2PSInput(inout PS_INPUT output, VS_MODIFIER input)
 	output.vPosition = float4(input.vPosition.xyz, 1);
 #endif
 
-#if USE_VS_Normal == 1
+#if USE_VS_Normal == 1 && USE_PS_Normal == 1
     output.vNormal = input.vNormal;
 #endif
 
-#if USE_VS_Tangent == 1
+#if USE_VS_Tangent == 1 && USE_PS_Tangent == 1
 	output.vTangent = input.vTangent;
 #endif
 
 	//output.vBinormal = input.vBinormal; cross
 
-#if USE_VS_Color == 1
+#if USE_VS_Color == 1 && USE_PS_Color == 1
 	output.vColor = input.vColor;
 #endif
 
-#if USE_VS_UV == 1
+#if USE_VS_UV == 1 && USE_PS_UV == 1
 	output.vUV = input.vUV;
 #endif
 
-#if USE_VS_LightMap == 1
+#if USE_VS_LightMap == 1 && USE_PS_LightMap == 1
 	output.vLightMap = input.vLightMap;
 #endif
 
-#if USE_VS_Position == 1
+#if USE_VS_Position == 1 && USE_PS_WorldPos == 1
 	output.vWorldPos = input.vPosition;
 #endif
 
-#if USE_VS_F4_1 == 1
+#if USE_VS_F4_1 == 1 && USE_PS_F4_1 == 1
 	output.vF4_1 = input.vF4_1;
 #endif
 
-#if USE_VS_F4_2 == 1
+#if USE_VS_F4_2 == 1 && USE_PS_F4_2 == 2
 	output.vF4_2 = input.vF4_2;
 #endif
 
-#if USE_VS_F4_3 == 1
+#if USE_VS_F4_3 == 1 && USE_PS_F4_3 == 1
 	output.vF4_3 = input.vF4_3;
 #endif
 }
@@ -313,7 +359,9 @@ struct MTL_OUTPUT
 MTL_OUTPUT Default_PSInput2Material(PS_INPUT input)
 {
 	MTL_OUTPUT mtl = (MTL_OUTPUT)0;
+#if USE_PS_Normal == 1
 	mtl.mNormal = input.vNormal;
+#endif
 	mtl.mAbsSpecular = 0.0h;
 	//mtl.mEmissive = float3(0,0,0);
 	//mtl.mSubAlbedo = half3(0.3h, 0.3h, 0.3h);

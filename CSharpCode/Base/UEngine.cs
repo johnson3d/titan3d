@@ -71,7 +71,7 @@ namespace EngineNS
         [Rtti.Meta]
         public bool IsDebugShader { get; set; } = false;
         [Rtti.Meta]
-        public bool IsGpuDump { get; set; } = true;
+        public bool IsGpuDump { get; set; } = true;//if true, engine will disable debuglayer&renderdoc
         [Rtti.Meta]
         public string MainWindowType { get; set; }// = Rtti.TypeManager.Instance.GetTypeStringFromType(typeof(Editor.MainEditorWindow));
         [Rtti.Meta]
@@ -209,6 +209,20 @@ namespace EngineNS
                     ValueType = NxRHI.EShaderVarType.SVT_Int
                 });
                 IO.TtFileManager.SaveObjectToXml(cfgFile, Config);
+            }
+
+            if (Config.IsGpuDump)
+            {
+                if (Config.HasDebugLayer)
+                {
+                    Profiler.Log.WriteLine(Profiler.ELogTag.Warning, "Graphics", $"Config: GpuDump = true; HasDebugLayer will be set as false");
+                    Config.HasDebugLayer = false;
+                }
+                if (Config.UseRenderDoc)
+                {
+                    Profiler.Log.WriteLine(Profiler.ELogTag.Warning, "Graphics", $"Config: GpuDump = true; UseRenderDoc will be set as false");
+                    Config.UseRenderDoc = false;
+                }
             }
             Config.ConfigName = "Titan3D  [" + IO.TtFileManager.GetPureName(cfgFile) + "]";
             //Config.UseRenderDoc = useRenderDoc;

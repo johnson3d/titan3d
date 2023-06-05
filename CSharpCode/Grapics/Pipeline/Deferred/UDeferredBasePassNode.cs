@@ -3,7 +3,7 @@ using EngineNS.Graphics.Pipeline.Shadow;
 using NPOI.HSSF.Record.AutoFilter;
 using System;
 using System.Collections.Generic;
-using System.Text;
+using EngineNS.Graphics.Pipeline.Shader;
 
 namespace EngineNS.Graphics.Pipeline.Deferred
 {
@@ -20,6 +20,17 @@ namespace EngineNS.Graphics.Pipeline.Deferred
                 NxRHI.EVertexStreamType.VST_Tangent,
                 NxRHI.EVertexStreamType.VST_UV,
                 NxRHI.EVertexStreamType.VST_Color};
+        }
+        public override EPixelShaderInput[] GetPSNeedInputs()
+        {
+            return new EPixelShaderInput[] {
+                EPixelShaderInput.PST_Position,
+                EPixelShaderInput.PST_Normal,
+                EPixelShaderInput.PST_UV,
+                EPixelShaderInput.PST_Color,
+                EPixelShaderInput.PST_Custom1,
+                EPixelShaderInput.PST_Custom2,
+            };
         }
     }
     public class UDeferredBasePassNode : Common.UBasePassNode
@@ -119,7 +130,10 @@ namespace EngineNS.Graphics.Pipeline.Deferred
 
             base.Dispose();
         }
-
+        public override Shader.UGraphicsShadingEnv GetPassShading(Graphics.Pipeline.URenderPolicy.EShadingType type, Mesh.UMesh mesh, int atom)
+        {
+            return mOpaqueShading;
+        }
         public override void BeforeTickLogic(URenderPolicy policy)
         {
             if (policy.DisableHDR)
@@ -148,10 +162,11 @@ namespace EngineNS.Graphics.Pipeline.Deferred
         {
             using (new Profiler.TimeScopeHelper(ScopeTick))
             {
+                BasePass.DrawCmdList.BeginCommand();
+                BackgroundPass.DrawCmdList.BeginCommand();
+
                 using (new Profiler.TimeScopeHelper(ScopePushGpuDraw))
                 {
-                    BasePass.DrawCmdList.ResetGpuDraws();
-                    BackgroundPass.DrawCmdList.ResetGpuDraws();
                     //BasePass.DrawCmdList.SetViewport(GBuffers.ViewPort.mCoreObject);
                     foreach (var i in policy.VisibleMeshes)
                     {
@@ -170,7 +185,7 @@ namespace EngineNS.Graphics.Pipeline.Deferred
                                 {
                                     drawcall.BindGBuffer(policy.DefaultCamera, GBuffers);
 
-                                    BackgroundPass.DrawCmdList.PushGpuDraw(drawcall.mCoreObject);
+                                    BackgroundPass.DrawCmdList.PushGpuDraw(drawcall);
                                 }
                             }
                             else if (layer == ERenderLayer.RL_Opaque)
@@ -180,7 +195,7 @@ namespace EngineNS.Graphics.Pipeline.Deferred
                                 {
                                     drawcall.BindGBuffer(policy.DefaultCamera, GBuffers);
 
-                                    BasePass.DrawCmdList.PushGpuDraw(drawcall.mCoreObject);
+                                    BasePass.DrawCmdList.PushGpuDraw(drawcall);
                                 }
                             }
                         }
@@ -202,7 +217,6 @@ namespace EngineNS.Graphics.Pipeline.Deferred
                 GBuffers.BuildFrameBuffers(policy);
 
                 {
-                    bgCmdlist.BeginCommand();
                     bgCmdlist.SetViewport(in GBuffers.Viewport);
                     bgCmdlist.BeginPass(GBuffers.FrameBuffers, in passClears, ERenderLayer.RL_Background.ToString());
                     
@@ -213,7 +227,6 @@ namespace EngineNS.Graphics.Pipeline.Deferred
                 }
 
                 {
-                    cmdlist.BeginCommand();
                     cmdlist.SetViewport(in GBuffers.Viewport);
                     passClears.ClearFlags = (NxRHI.ERenderPassClearFlags)0;
                     cmdlist.BeginPass(GBuffers.FrameBuffers, in passClears, ERenderLayer.RL_Opaque.ToString());
@@ -224,8 +237,8 @@ namespace EngineNS.Graphics.Pipeline.Deferred
                     cmdlist.EndCommand();
                 }
 
-                UEngine.Instance.GfxDevice.RenderCmdQueue.QueueCmdlist(bgCmdlist);
-                UEngine.Instance.GfxDevice.RenderCmdQueue.QueueCmdlist(cmdlist);
+                UEngine.Instance.GfxDevice.RenderCmdQueue.QueueCmdlist(bgCmdlist, "DSNodeBackground");
+                UEngine.Instance.GfxDevice.RenderCmdQueue.QueueCmdlist(cmdlist, "DSNodeBase");
             }
         }
         public override void TickSync(URenderPolicy policy)

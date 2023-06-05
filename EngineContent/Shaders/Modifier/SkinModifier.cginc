@@ -28,20 +28,24 @@ void DoSkinModifierVS(inout PS_INPUT vsOut, inout VS_MODIFIER vert)
 	if(weight  == 0.0f)
 	{
 		vert.vPosition.xyz = (float3)AbsBonePos[vert.vSkinIndex[0]].xyz;
+#if USE_PS_Normal == 1
 		vert.vNormal.xyz = (float3)vert.vNormal.xyz;	
+#endif
 		return;
 	}
 	Pos.xyz += ((half3)AbsBonePos[vert.vSkinIndex[0]].xyz + transform_quat((half3)vert.vPosition, (half4)AbsBoneQuat[vert.vSkinIndex[0]])) * (half)vert.vSkinWeight[0];
-	Normal.xyz += transform_quat((half3)vert.vNormal.xyz, (half4)AbsBoneQuat[vert.vSkinIndex[0]]) * (half)vert.vSkinWeight[0];
 	Pos.xyz += ((half3)AbsBonePos[vert.vSkinIndex[1]].xyz + transform_quat((half3)vert.vPosition, (half4)AbsBoneQuat[vert.vSkinIndex[1]])) * (half)vert.vSkinWeight[1];
-	Normal.xyz += transform_quat((half3)vert.vNormal.xyz, (half4)AbsBoneQuat[vert.vSkinIndex[1]]) * (half)vert.vSkinWeight[1];
 	Pos.xyz += ((half3)AbsBonePos[vert.vSkinIndex[2]].xyz + transform_quat((half3)vert.vPosition, (half4)AbsBoneQuat[vert.vSkinIndex[2]])) * (half)vert.vSkinWeight[2];
-	Normal.xyz += transform_quat((half3)vert.vNormal.xyz, (half4)AbsBoneQuat[vert.vSkinIndex[2]]) * (half)vert.vSkinWeight[2];
 	Pos.xyz += ((half3)AbsBonePos[vert.vSkinIndex[3]].xyz + transform_quat((half3)vert.vPosition, (half4)AbsBoneQuat[vert.vSkinIndex[3]])) * (half)vert.vSkinWeight[3];
-	Normal.xyz += transform_quat((half3)vert.vNormal.xyz, (half4)AbsBoneQuat[vert.vSkinIndex[3]]) * (half)vert.vSkinWeight[3];
-
 	vsOut.vPosition.xyz = Pos.xyz;
+
+#if USE_PS_Normal == 1
+	Normal.xyz += transform_quat((half3)vert.vNormal.xyz, (half4)AbsBoneQuat[vert.vSkinIndex[0]]) * (half)vert.vSkinWeight[0];
+	Normal.xyz += transform_quat((half3)vert.vNormal.xyz, (half4)AbsBoneQuat[vert.vSkinIndex[1]]) * (half)vert.vSkinWeight[1];
+	Normal.xyz += transform_quat((half3)vert.vNormal.xyz, (half4)AbsBoneQuat[vert.vSkinIndex[2]]) * (half)vert.vSkinWeight[2];
+	Normal.xyz += transform_quat((half3)vert.vNormal.xyz, (half4)AbsBoneQuat[vert.vSkinIndex[3]]) * (half)vert.vSkinWeight[3];
 	vsOut.vNormal.xyz = (float3)Normal;	
+#endif
 }
 
 //#define DO_VS_MODIFIER DoSkinModifierVS

@@ -630,7 +630,6 @@ namespace Canvas
 		if (Dirty)
 		{
 			Dirty = false;
-			auto cmdlist = device->GetCmdQueue()->GetIdleCmdlist();
 			NxRHI::FTransientCmd tsCmd(device, NxRHI::QU_Transfer);
 			auto cmd = tsCmd.GetCmdList();
 			for (auto& i : mWords)

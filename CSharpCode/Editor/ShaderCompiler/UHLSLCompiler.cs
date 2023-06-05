@@ -96,6 +96,7 @@ namespace EngineNS.Editor.ShaderCompiler
             return new NxRHI.FShaderCode();
         }
         private NxRHI.FShaderCompiler.FDelegate_FnGetShaderCodeStream GetShaderCodeStream;
+        public string MaterialCodeForDebug;
         //[UnmanagedFunctionPointer(System.Runtime.InteropServices.CallingConvention.Cdecl)]
         private NxRHI.FShaderCode* GetHLSLCode(sbyte* includeName)
         {
@@ -115,6 +116,7 @@ namespace EngineNS.Editor.ShaderCompiler
             {
                 if (Material == null)
                     return (NxRHI.FShaderCode*)0;
+                MaterialCodeForDebug = Material.SourceCode.TextCode;
                 return Material.SourceCode.mCoreObject;
             }
             else if (file.EndsWith("/MaterialVar"))
@@ -202,6 +204,47 @@ namespace EngineNS.Editor.ShaderCompiler
             }
             return null;
         }
+        private string GetPixelInputDefine(Graphics.Pipeline.Shader.EPixelShaderInput type)
+        {
+            switch(type)
+            {
+                case Graphics.Pipeline.Shader.EPixelShaderInput.PST_Position:
+                    return "USE_PS_Position";
+                case Graphics.Pipeline.Shader.EPixelShaderInput.PST_Normal:
+                    return "USE_PS_Normal";
+                case Graphics.Pipeline.Shader.EPixelShaderInput.PST_Color:
+                    return "USE_PS_Color";
+                case Graphics.Pipeline.Shader.EPixelShaderInput.PST_UV:
+                    return "USE_PS_UV";
+                case Graphics.Pipeline.Shader.EPixelShaderInput.PST_WorldPos:
+                    return "USE_PS_WorldPos";
+                case Graphics.Pipeline.Shader.EPixelShaderInput.PST_Tangent:
+                    return "USE_PS_Tangent";
+                case Graphics.Pipeline.Shader.EPixelShaderInput.PST_LightMap:
+                    return "USE_PS_LightMap";
+                case Graphics.Pipeline.Shader.EPixelShaderInput.PST_Custom0:
+                    return "USE_PS_Custom0";
+                case Graphics.Pipeline.Shader.EPixelShaderInput.PST_Custom1:
+                    return "USE_PS_Custom1";
+                case Graphics.Pipeline.Shader.EPixelShaderInput.PST_Custom2:
+                    return "USE_PS_Custom2";
+                case Graphics.Pipeline.Shader.EPixelShaderInput.PST_Custom3:
+                    return "USE_PS_Custom3";
+                case Graphics.Pipeline.Shader.EPixelShaderInput.PST_Custom4:
+                    return "USE_PS_Custom4";
+                case Graphics.Pipeline.Shader.EPixelShaderInput.PST_PointLightIndices:
+                    return "USE_PS_PointLightIndices";
+                case Graphics.Pipeline.Shader.EPixelShaderInput.PST_F4_1:
+                    return "USE_PS_F4_1";
+                case Graphics.Pipeline.Shader.EPixelShaderInput.PST_F4_2:
+                    return "USE_PS_F4_2";
+                case Graphics.Pipeline.Shader.EPixelShaderInput.PST_F4_3:
+                    return "USE_PS_F4_3";
+                case Graphics.Pipeline.Shader.EPixelShaderInput.PST_SpecialData:
+                    return "USE_PS_SpecialData";
+            }
+            return null;
+        }
         public unsafe NxRHI.UShaderDesc CompileShader(string shader, string entry, NxRHI.EShaderType type,
             Graphics.Pipeline.Shader.UShadingEnv shadingEnvshadingEnv, Graphics.Pipeline.Shader.UMaterial mtl, Type mdfType,
             NxRHI.UShaderDefinitions defines, UHLSLInclude incProvider, string sm = null, bool bDebugShader = true, string extHlslVersion = null)
@@ -261,27 +304,55 @@ namespace EngineNS.Editor.ShaderCompiler
                 if (mtl != null && mtl.Defines != null)
                 {
                     defPtr.MergeDefinitions(mtl.Defines);
+                    var psInputs = mtl.GetPSNeedInputs();
+                    if (psInputs != null)
+                    {
+                        foreach (var i in psInputs)
+                        {
+                            defPtr.AddDefine(GetPixelInputDefine(i), "1");
+                        }
+                    }
                 }
                 var graphicsEnv = shadingEnvshadingEnv as Graphics.Pipeline.Shader.UGraphicsShadingEnv;
                 if (graphicsEnv != null)
                 {
-                    var shadingNeeds = graphicsEnv.GetNeedStreams();
-                    if (shadingNeeds != null)
                     {
-                        foreach (var i in shadingNeeds)
+                        var shadingNeeds = graphicsEnv.GetNeedStreams();
+                        if (shadingNeeds != null)
                         {
-                            defPtr.AddDefine(GetVertexStreamDefine(i), "1");
-                        }
-                    }
-                    var mdfObj = Rtti.UTypeDescManager.CreateInstance(MdfQueueType) as Graphics.Pipeline.Shader.UMdfQueue;
-                    if (mdfObj != null)
-                    {
-                        var mdfNeeds = mdfObj.GetNeedStreams();
-                        if (mdfNeeds != null)
-                        {
-                            foreach (var i in mdfNeeds)
+                            foreach (var i in shadingNeeds)
                             {
                                 defPtr.AddDefine(GetVertexStreamDefine(i), "1");
+                            }
+                        }
+                        var shadingPSNeeds = graphicsEnv.GetPSNeedInputs();
+                        if (shadingPSNeeds != null)
+                        {
+                            foreach (var i in shadingPSNeeds)
+                            {
+                                defPtr.AddDefine(GetPixelInputDefine(i), "1");
+                            }
+                        }
+                    }
+                    {
+                        var mdfObj = Rtti.UTypeDescManager.CreateInstance(MdfQueueType) as Graphics.Pipeline.Shader.UMdfQueue;
+                        if (mdfObj != null)
+                        {
+                            var mdfNeeds = mdfObj.GetNeedStreams();
+                            if (mdfNeeds != null)
+                            {
+                                foreach (var i in mdfNeeds)
+                                {
+                                    defPtr.AddDefine(GetVertexStreamDefine(i), "1");
+                                }
+                            }
+                            var mdfPSNeeds = mdfObj.GetPSNeedInputs();
+                            if (mdfPSNeeds != null)
+                            {
+                                foreach (var i in mdfPSNeeds)
+                                {
+                                    defPtr.AddDefine(GetPixelInputDefine(i), "1");
+                                }
                             }
                         }
                     }

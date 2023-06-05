@@ -187,7 +187,7 @@ namespace EngineNS.Graphics.Pipeline
                         }
                     }
                 }
-
+                RenderSystem.GetDeviceDesc(Adapter, ref rcDesc);
                 rcDesc.GpuDump = engine.Config.IsGpuDump;
                 rcDesc.CreateDebugLayer = bDebugLayer;
                 //rcDesc.Han = window.ToPointer();

@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Text;
+using EngineNS.Graphics.Pipeline.Shader;
 
 namespace EngineNS.Bricks.Terrain.Grass
 {
@@ -11,6 +11,12 @@ namespace EngineNS.Bricks.Terrain.Grass
             mGrassModifier = new UGrassModifier();
             mGrassModifier.SetMode(true);
             UpdateShaderCode();
+        }
+        public override void Dispose()
+        {
+            mGrassModifier?.Dispose();
+            mGrassModifier = null;
+            base.Dispose();
         }
         UGrassModifier mGrassModifier;
         public UGrassModifier GrassModifier => mGrassModifier;
@@ -27,6 +33,7 @@ namespace EngineNS.Bricks.Terrain.Grass
                 NxRHI.EVertexStreamType.VST_Color,
             };
         }
+        
         protected override string GetBaseBuilder(Bricks.CodeBuilder.Backends.UHLSLCodeGenerator codeBuilder)
         {
             string codeString = "";

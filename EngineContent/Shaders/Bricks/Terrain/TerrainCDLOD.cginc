@@ -136,12 +136,16 @@ void DoTerrainModifierVS(inout PS_INPUT vsOut, inout VS_MODIFIER vert)
 	vsOut.vPosition.y = HeightMapTexture.SampleLevel(Samp_HeightMapTexture, heightUV.xy, 0).r;
 	//vsOut.vPosition.y += StartPosition.y;
 	vsOut.vPosition.xyz += StartPosition;
+#if USE_PS_WorldPos == 1
 	vsOut.vWorldPos = vsOut.vPosition.xyz;
+#endif
 
+#if USE_PS_Normal == 1
 	vsOut.vNormal = NormalMapTexture.SampleLevel(Samp_NormalMapTexture, heightUV.xy, 0).xyz;
 	vsOut.vNormal = normalize(vsOut.vNormal * 2.0f - float3(1.0f, 1.0f, 1.0f));
 	//vsOut.vNormal.xy = heightUV.xy;
 	//vsOut.vTangent.xyz = normalize(mul(float4(vertexData.Tangent.xyz, 0), instData.Matrix).xyz);
+#endif
 
 	vsOut.vUV = GetGlobalUV(final_pos.xy);
 	//vsOut.vUV = uv;
@@ -151,8 +155,10 @@ void DoTerrainModifierVS(inout PS_INPUT vsOut, inout VS_MODIFIER vert)
 	vert.vUV = vsOut.vUV;
 	
 	//vert.vLightMap.xy = heightUV.xy;
+#if USE_PS_LightMap == 1
 	vsOut.vLightMap.xy = heightUV.xy;
-	
+#endif
+
 	/*uint v0_0 = (uint)(GetMaterialId(heightUV.xy).r * 255.0f + 0.1f);
 	uint v1_0 = (uint)(GetMaterialId(heightUV.xy + float2(MaterialIdUVStep, 0)).r * 255.0f + 0.1f);
 	uint v1_1 = (uint)(GetMaterialId(heightUV.xy + float2(MaterialIdUVStep, MaterialIdUVStep)).r * 255.0f + 0.1f);

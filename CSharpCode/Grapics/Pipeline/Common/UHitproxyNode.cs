@@ -263,7 +263,7 @@ namespace EngineNS.Graphics.Pipeline.Common
 
             using (new Profiler.TimeScopeHelper(ScopeTick))
             {
-                HitproxyPass.ClearMeshDrawPassArray();
+                HitproxyPass.PrepareForDraw();
                 foreach (var i in policy.VisibleMeshes)
                 {
                     if (i.Atoms == null)
@@ -284,15 +284,22 @@ namespace EngineNS.Graphics.Pipeline.Common
                         }
                     }
                 }
-
+                
                 {
                     //draw mesh first
-                    var passClears = new NxRHI.FRenderPassClears();
-                    passClears.SetDefault();
-                    passClears.SetClearColor(0, new Color4f(0, 0, 0, 0));
+                    var passClears = stackalloc NxRHI.FRenderPassClears[(int)ERenderLayer.RL_Num];
+                    for (int i = 0; i < (int)ERenderLayer.RL_Num; i++)
+                    {
+                        passClears[i].SetDefault();
+                        passClears[i].SetClearColor(0, new Color4f(0, 0, 0, 0));
+                        passClears[i].ClearFlags = 0;
+                    }
+                    passClears[(int)ERenderLayer.RL_Background].ClearFlags = NxRHI.ERenderPassClearFlags.CLEAR_ALL;
+                    passClears[(int)ERenderLayer.RL_Gizmos].ClearFlags = NxRHI.ERenderPassClearFlags.CLEAR_DEPTH;
+
                     GHitproxyBuffers.BuildFrameBuffers(policy);
                     GGizmosBuffers.BuildFrameBuffers(policy);
-                    HitproxyPass.BuildRenderPass(policy, in GHitproxyBuffers.Viewport, in passClears, GHitproxyBuffers, GGizmosBuffers, "Hitproxy:");
+                    HitproxyPass.BuildRenderPass(policy, in GHitproxyBuffers.Viewport, passClears, (int)ERenderLayer.RL_Num, GHitproxyBuffers, GGizmosBuffers, "Hitproxy:");
                 }
             }   
 

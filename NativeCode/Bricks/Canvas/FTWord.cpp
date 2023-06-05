@@ -1,5 +1,6 @@
 #include "FTWord.h"
 #include "FTFont.h"
+#include "../../NextRHI/NxGpuDevice.h"
 #include "../../NextRHI/NxCommandList.h"
 #include "../../Base/sdf/sdf_8ssedt.h"
 #include "../Canvas/FCanvas.h"
@@ -249,11 +250,22 @@ namespace Canvas
 		bfDesc.SetDefault();
 		bfDesc.Usage = NxRHI::USAGE_STAGING;
 		bfDesc.CpuAccess = NxRHI::CAS_READ;
-		bfDesc.InitData = &Pixels[0];
-		bfDesc.Size = (UINT)Pixels.size();
-		bfDesc.RowPitch = PixelWidth * sizeof(BYTE);
-		bfDesc.DepthPitch = PixelWidth * PixelHeight * sizeof(BYTE);
+		bfDesc.InitData = nullptr;
+		bfDesc.RowPitch = device->GetGpuResourceAlignment()->RoundupTexturePitch(PixelWidth * sizeof(BYTE));
+		bfDesc.DepthPitch = bfDesc.RowPitch * PixelHeight;
+		bfDesc.Size = bfDesc.RowPitch * PixelHeight;
 		auto buffer = MakeWeakRef(device->CreateBuffer(&bfDesc));
+		NxRHI::FMappedSubResource mapped{};
+		if (buffer->Map(0, &mapped, false))
+		{
+			auto pWrite = (BYTE*)mapped.pData;
+			for (int i = 0; i < PixelHeight; i++)
+			{
+				memcpy(pWrite, &Pixels[i * PixelWidth], PixelWidth);
+				pWrite += mapped.RowPitch;
+			}
+			buffer->Unmap(0);
+		}
 		NxRHI::FSubResourceFootPrint footPrint{};
 		footPrint.Format = EPixelFormat::PXF_A8_UNORM;
 		footPrint.X = TexX;

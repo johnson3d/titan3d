@@ -218,6 +218,8 @@ namespace EngineNS.NxRHI
         }
         public USrView CreateSRV(UBuffer buffer, in FSrvDesc desc)
         {
+            if (buffer == null)
+                return null;
             if (desc.Type == ESrvType.ST_BufferSRV)
             {
                 var result = new USrView();
@@ -230,6 +232,8 @@ namespace EngineNS.NxRHI
         }
         public USrView CreateSRV(UTexture texture, in FSrvDesc desc)
         {
+            if (texture == null)
+                return null;
             if (desc.Type == ESrvType.ST_BufferSRV)
                 return null;
             var result = new USrView();
@@ -407,15 +411,15 @@ namespace EngineNS.NxRHI
     {
         public override void Dispose()
         {
-            FramePostCmdList = null;
+            //FramePostCmdList = null;
             base.Dispose();
         }
-        public UCommandList FramePostCmdList { get; set; } = null;
+        //public UCommandList FramePostCmdList { get; set; } = null;
         public UGpuQueue(UGpuDevice device, ICmdQueue ptr)
         {
             mCoreObject = ptr;
             mCoreObject.NativeSuper.AddRef();
-            FramePostCmdList = device.CreateCommandList();
+            //FramePostCmdList = device.CreateCommandList();
         }
         public void Flush(EngineNS.NxRHI.EQueueType type = EQueueType.QU_Default)
         {
@@ -616,11 +620,7 @@ namespace EngineNS.NxRHI
         }
         public void TickBeginFrame(float ellapse)
         {
-            var cmd = UEngine.Instance.GfxDevice.RenderContext.GpuQueue.FramePostCmdList;
-            if (cmd != null)
-            {
-                cmd.BeginCommand();
-            }
+            
         }
         [ThreadStatic]
         private static Profiler.TimeScope ScopeSyncTick = Profiler.TimeScopeManager.GetTimeScope(typeof(URenderCmdQueue), nameof(TickRender));
@@ -629,12 +629,12 @@ namespace EngineNS.NxRHI
             using (new Profiler.TimeScopeHelper(ScopeRenderTick))
             {
                 var cmdQueue = UEngine.Instance.GfxDevice.RenderContext.GpuQueue;
-                var cmd = UEngine.Instance.GfxDevice.RenderContext.GpuQueue.FramePostCmdList;
-                if (cmd != null)
-                {
-                    cmd.EndCommand();
-                    cmdQueue.mCoreObject.ExecuteCommandListSingle(cmd.mCoreObject, EQueueType.QU_Default);
-                }
+                //var cmd = UEngine.Instance.GfxDevice.RenderContext.GpuQueue.FramePostCmdList;
+                //if (cmd != null)
+                //{
+                //    cmd.EndCommand();
+                //    cmdQueue.mCoreObject.ExecuteCommandListSingle(cmd.mCoreObject, EQueueType.QU_Default);
+                //}
 
                 Swap(ref RenderCmds[0], ref RenderCmds[1]);
                 Swap(ref RenderPreCmds[0], ref RenderPreCmds[1]);

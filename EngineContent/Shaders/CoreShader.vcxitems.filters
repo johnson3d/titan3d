@@ -76,6 +76,9 @@
     <Filter Include="ShadingEnv\Post\SunShaft">
       <UniqueIdentifier>{88d4a34e-e03f-40af-a55d-2ea8615b1c80}</UniqueIdentifier>
     </Filter>
+    <Filter Include="ShadingEnv\Forword">
+      <UniqueIdentifier>{7935f9c4-0d4d-421f-9991-c89d1d049e29}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <None Include="$(MSBuildThisFileDirectory)Material\TestMaterial.mtl">
@@ -315,9 +318,6 @@
     <None Include="$(MSBuildThisFileDirectory)ShadingEnv\DummyShading.cginc">
       <Filter>ShadingEnv</Filter>
     </None>
-    <None Include="$(MSBuildThisFileDirectory)ShadingEnv\Deferred\DeferredTranslucent.cginc">
-      <Filter>ShadingEnv\Deffered</Filter>
-    </None>
     <None Include="$(MSBuildThisFileDirectory)Inc\GpuSceneCommon.cginc">
       <Filter>Inc</Filter>
     </None>
@@ -383,7 +383,6 @@
     </None>
     <None Include="$(MSBuildThisFileDirectory)Bricks\SoftRaster\FRaster.cginc" />
     <None Include="$(MSBuildThisFileDirectory)CBuffer\VarBase_PreFramePerMesh.cginc" />
-    <None Include="$(MSBuildThisFileDirectory)Inc\BaseStructure\Box2.cginc" />
     <None Include="$(MSBuildThisFileDirectory)ShadingEnv\FogShading.cginc">
       <Filter>ShadingEnv</Filter>
     </None>
@@ -417,6 +416,18 @@
     <None Include="$(MSBuildThisFileDirectory)ShadingEnv\CommonLighting.cginc" />
     <None Include="$(MSBuildThisFileDirectory)Occlusion\SetupDrawClusterArgs.cginc" />
     <None Include="$(MSBuildThisFileDirectory)ShadingEnv\DrawViewportShading.cginc" />
+    <None Include="$(MSBuildThisFileDirectory)Inc\BaseStructure\Box2.cginc">
+      <Filter>Inc\BaseStructure</Filter>
+    </None>
+    <None Include="$(MSBuildThisFileDirectory)ShadingEnv\Forword\ForwordBasePassPS.cginc">
+      <Filter>ShadingEnv\Forword</Filter>
+    </None>
+    <None Include="$(MSBuildThisFileDirectory)ShadingEnv\Forword\ForwordOpaque.cginc">
+      <Filter>ShadingEnv\Forword</Filter>
+    </None>
+    <None Include="$(MSBuildThisFileDirectory)ShadingEnv\Forword\ForwordTranslucent.cginc">
+      <Filter>ShadingEnv\Forword</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="$(MSBuildThisFileDirectory)Compute\calcrate.compute">

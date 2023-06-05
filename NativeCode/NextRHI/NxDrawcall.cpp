@@ -92,6 +92,10 @@ namespace NxRHI
 		
 		return true;
 	}
+	IGraphicDraw::~IGraphicDraw()
+	{
+		NumOfInstance--;
+	}
 	void IGraphicDraw::BindResource(const FEffectBinder* binder, IGpuResource* resource)
 	{
 		AutoRef<IGpuResource> tmp(resource);

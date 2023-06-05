@@ -2,7 +2,7 @@
 using EngineNS.NxRHI;
 using System;
 using System.Collections.Generic;
-using System.Text;
+using EngineNS.Graphics.Pipeline.Shader;
 
 namespace EngineNS.Graphics.Pipeline.Shadow
 {
@@ -15,6 +15,12 @@ namespace EngineNS.Graphics.Pipeline.Shadow
         public override NxRHI.EVertexStreamType[] GetNeedStreams()
         {
             return new NxRHI.EVertexStreamType[] { NxRHI.EVertexStreamType.VST_Position, NxRHI.EVertexStreamType.VST_UV,};
+        }
+        public override EPixelShaderInput[] GetPSNeedInputs()
+        {
+            return new EPixelShaderInput[] {
+                EPixelShaderInput.PST_Position,
+            };
         }
         public override void OnBuildDrawCall(URenderPolicy policy, NxRHI.UGraphicDraw drawcall)
         {
@@ -437,13 +443,10 @@ namespace EngineNS.Graphics.Pipeline.Shadow
                     mShadowCameraArray[CsmIdx].UpdateConstBufferData(UEngine.Instance.GfxDevice.RenderContext);
                     CSMPass[CsmIdx].SwapBuffer();
 
-                    
-
                     var cmdlist = CSMPass[CsmIdx].DrawCmdList;
+                    cmdlist.BeginCommand();
                     using (new Profiler.TimeScopeHelper(ScopePushGpuDraw))
                     {
-                        cmdlist.ResetGpuDraws();
-
                         foreach (var i in mVisParameter.VisibleMeshes)
                         {
                             if (i.IsCastShadow == false)
@@ -465,7 +468,6 @@ namespace EngineNS.Graphics.Pipeline.Shadow
                         }
                     }
 
-                    if (cmdlist.BeginCommand())
                     {
                         FViewPort Viewport = new FViewPort();
                         Viewport.MinDepth = GBuffersArray[CsmIdx].Viewport.MinDepth;
@@ -479,11 +481,6 @@ namespace EngineNS.Graphics.Pipeline.Shadow
                         cmdlist.SetViewport(in Viewport);
 
                         var passClear = new NxRHI.FRenderPassClears();
-                        //passClear.SetDefault();
-                        //passClear.m_DepthClearValue = 1.0f;
-                        //passClear.m_StencilClearValue = 0;
-                        
-
                         //if (CsmIdx == 0)
                         {
                             passClear.SetDefault();
@@ -511,10 +508,10 @@ namespace EngineNS.Graphics.Pipeline.Shadow
                         //    cmdlist.BeginRenderPass(policy, GBuffers, "ShadowDepth");
                         cmdlist.FlushDraws();
                         cmdlist.EndPass();
-                        cmdlist.EndCommand();
                     }
+
+                    cmdlist.EndCommand();
                     UEngine.Instance.GfxDevice.RenderCmdQueue.QueueCmdlist(cmdlist);
-                   
                 }
 
                 mShadowTransitionScaleVec.X = mShadowTransitionScaleArray[0];

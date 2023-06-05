@@ -17,13 +17,11 @@ namespace NxRHI
 {
 	DX11CommandList::DX11CommandList()
 	{
-		mCmdList = nullptr;
 		mContext = nullptr;
 		mContext4 = nullptr;
 	}
 	DX11CommandList::~DX11CommandList()
 	{
-		Safe_Release(mCmdList);
 		Safe_Release(mContext4);
 		Safe_Release(mContext);
 	}
@@ -47,15 +45,23 @@ namespace NxRHI
 		mContext->QueryInterface(IID_ID3D11DeviceContext4, (void**)&mContext4);
 		return true;
 	}
-	bool DX11CommandList::BeginCommand()
+	ICmdRecorder* DX11CommandList::BeginCommand()
 	{
 		mIsRecording = true;
-		Safe_Release(mCmdList);
-		return true;
+		if (mCmdRecorder == nullptr)
+		{
+			mCmdRecorder = MakeWeakRef(new DX11CmdRecorder());
+		}
+		mCmdRecorder->ResetGpuDraws();
+		GetDX11CmdRecorder()->mCmdList = nullptr;
+		mPrimitiveNum = 0;
+		return mCmdRecorder;
 	}
 	void DX11CommandList::EndCommand()
 	{
-		mContext->FinishCommandList(0, &mCmdList);
+		ICommandList::EndCommand();
+
+		mContext->FinishCommandList(0, GetDX11CmdRecorder()->mCmdList.GetAddressOf());
 		mIsRecording = false;
 	}
 	bool DX11CommandList::BeginPass(IFrameBuffers* fb, const FRenderPassClears* passClears, const char* name)
@@ -575,16 +581,15 @@ namespace NxRHI
 	}
 	void DX11CommandList::Commit(ID3D11DeviceContext* imContex)
 	{
-		if (mCmdList == nullptr)
+		if (GetDX11CmdRecorder() == nullptr)
 		{
 			return;
 		}
 		BeginEvent(mDebugName.c_str());
-		imContex->ExecuteCommandList(mCmdList, 0);
-		Safe_Release(mCmdList);
+		imContex->ExecuteCommandList(GetDX11CmdRecorder()->mCmdList, 0);
+		GetDX11CmdRecorder()->mCmdList = nullptr;
+		GetDX11CmdRecorder()->ResetGpuDraws();
 		EndEvent();
-
-		this->ResetGpuDraws();
 	}
 
 	//////////////////////////////////////////////////////////////////////////

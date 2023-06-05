@@ -163,7 +163,7 @@ namespace EngineNS.Editor.Forms
             var btSize = Vector2.Zero;
             if (EGui.UIProxy.CustomButton.ToolButton("Save", in btSize))
             {
-                //Mesh.SaveAssetTo(Mesh.AssetName);
+                Mesh.SaveAssetTo(Mesh.AssetName);
                 //var unused = UEngine.Instance.GfxDevice.MaterialInstanceManager.ReloadMaterialInstance(Mesh.AssetName);
 
                 //USnapshot.Save(Mesh.AssetName, Mesh.GetAMeta(), PreviewViewport.RenderPolicy.GetFinalShowRSV(), UEngine.Instance.GfxDevice.RenderContext.mCoreObject.GetImmCommandList());

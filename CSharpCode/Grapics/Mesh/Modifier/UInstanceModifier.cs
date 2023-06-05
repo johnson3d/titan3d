@@ -129,7 +129,7 @@ namespace EngineNS.Graphics.Mesh.Modifier
                 mF41VB = rc.CreateVBV(null, in desc);
             }
 
-            public unsafe void Flush2VB(NxRHI.ICommandList cmd, UInstanceModifier mdf)
+            public unsafe void Flush2VB(UInstanceModifier mdf)
             {
                 if (mdf.mCurNumber == 0)
                     return;
@@ -298,7 +298,7 @@ namespace EngineNS.Graphics.Mesh.Modifier
 
                 IsDirty = true;
             }
-            public unsafe void Flush2VB(NxRHI.ICommandList cmd, UInstanceModifier mdf)
+            public unsafe void Flush2VB(UInstanceModifier mdf)
             {
                 if (mdf.mCurNumber == 0)
                     return;
@@ -379,15 +379,15 @@ namespace EngineNS.Graphics.Mesh.Modifier
             }
         }
 
-        public unsafe void Flush2VB(NxRHI.ICommandList cmd)
+        public unsafe void Flush2VB()
         {
             if (InstantSSBO != null)
             {
-                InstantSSBO.Flush2VB(cmd, this);
+                InstantSSBO.Flush2VB(this);
             }
             else if (InstantVBs != null)
             {
-                InstantVBs.Flush2VB(cmd, this);
+                InstantVBs.Flush2VB(this);
             }
         }
         public unsafe void OnDrawCall(Pipeline.URenderPolicy.EShadingType shadingType, NxRHI.UGraphicDraw drawcall, Pipeline.URenderPolicy policy, UMesh mesh)
@@ -398,8 +398,7 @@ namespace EngineNS.Graphics.Mesh.Modifier
                 var binder = drawcall.FindBinder("VSInstantDataArray");
                 if (binder.IsValidPointer == false)
                     return;
-                var cmd = UEngine.Instance.GfxDevice.RenderContext.GpuQueue.FramePostCmdList.mCoreObject;
-                this.Flush2VB(cmd);
+                this.Flush2VB();
                 drawcall.BindSRV(binder, InstantSSBO.InstantSRV);
             }
             else if (InstantVBs != null)

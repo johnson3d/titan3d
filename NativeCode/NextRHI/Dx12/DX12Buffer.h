@@ -93,10 +93,14 @@ namespace NxRHI
 		virtual UINT GetFingerPrint() const override {
 			return mFingerPrint;
 		}
+		virtual void SetFingerPrint(UINT fp) {
+			mFingerPrint = fp;
+		}
 	public:
 		TWeakRefHandle<DX12GpuDevice> mDeviceRef;
 		AutoRef<DX12DescriptorSetPagedObject> mView;
 		UINT						mFingerPrint = 0;
+		
 	};
 
 	class DX12UaView : public IUaView

@@ -275,6 +275,15 @@ namespace EngineNS.IO
         }
         private static void WriteObject(IWriter ar, Type t, object obj)
         {
+            bool isNull = false;
+            if (obj == null)
+            {
+                isNull = true;
+                ar.Write(isNull);
+                return;
+            }
+            ar.Write(isNull);
+
             if (t.IsEnum)
             {
                 var v = System.Convert.ToString(obj);
@@ -426,8 +435,16 @@ namespace EngineNS.IO
                 var meta = Rtti.UClassMetaManager.Instance.GetMeta(typeStr);
             }
         }
+        //public static bool DoIsNull = true;
         public static object ReadObject(IReader ar, Type t, object hostObject)
         {
+            //if (DoIsNull)
+            {
+                bool isNull = false;
+                ar.Read(out isNull);
+                if (isNull)
+                    return null;
+            }
             if (t.IsEnum)
             {
                 string v;

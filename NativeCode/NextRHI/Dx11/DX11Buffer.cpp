@@ -520,7 +520,14 @@ namespace NxRHI
 			//FTransientCmd tsCmd(device, QU_Transfer);
 			//auto cmd = (DX11CommandList*)tsCmd.GetCmdList();
 			auto cmd = ((DX11CmdQueue*)device->GetCmdQueue())->mHardwareContext;
-			cmd->mContext->UpdateSubresource(mTexture1D, subRes, nullptr, pData, footPrint->RowPitch, footPrint->TotalSize);
+			D3D11_BOX box{};
+			box.left = footPrint->X;
+			box.top = footPrint->Y;
+			box.front = footPrint->Z;
+			box.right = box.left + footPrint->Width;
+			box.bottom = box.top + footPrint->Height;
+			box.back = box.front + footPrint->Depth;
+			cmd->mContext->UpdateSubresource(mTexture1D, subRes, &box, pData, footPrint->RowPitch, footPrint->TotalSize);
 		}
 		else
 		{

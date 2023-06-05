@@ -63,7 +63,7 @@ void VKGpuCrashTracker::Initialize(GFSDK_Aftermath_GpuCrashDumpWatchedApiFlags a
     // in memory. If the flag is set, ShaderDebugInfoCallback will be called only
     // in the event of a crash, right before GpuCrashDumpCallback. If the flag is not set,
     // ShaderDebugInfoCallback will be called for every shader that is compiled.
-    AFTERMATH_CHECK_ERROR(GFSDK_Aftermath_EnableGpuCrashDumps(
+    GFSDK_Aftermath_Result _result = GFSDK_Aftermath_EnableGpuCrashDumps(
         GFSDK_Aftermath_Version_API,
         api,
         GFSDK_Aftermath_GpuCrashDumpFeatureFlags_DeferDebugInfoCallbacks, // Let the Nsight Aftermath library cache shader debug information.
@@ -71,8 +71,8 @@ void VKGpuCrashTracker::Initialize(GFSDK_Aftermath_GpuCrashDumpWatchedApiFlags a
         ShaderDebugInfoCallback,                                          // Register callback for shader debug information.
         CrashDumpDescriptionCallback,                                     // Register callback for GPU crash dump description.
         ResolveMarkerCallback,                                            // Register callback for resolving application-managed markers.
-        this));                                                           // Set the GpuCrashTracker object as user data for the above callbacks.
-
+        this);                                                           // Set the GpuCrashTracker object as user data for the above callbacks.
+    ASSERT(_result == GFSDK_Aftermath_Result::GFSDK_Aftermath_Result_Success);
     m_initialized = true;
 }
 
@@ -82,8 +82,10 @@ void VKGpuCrashTracker::OnCrashDump(const void* pGpuCrashDump, const uint32_t gp
     // Make sure only one thread at a time...
     std::lock_guard<std::mutex> lock(m_mutex);
 
+    VFX_LTRACE(ELTT_Graphics, "Gpu crash dump:begin\r\n");
     // Write to file for later in-depth analysis with Nsight Graphics.
     WriteGpuCrashDumpToFile(pGpuCrashDump, gpuCrashDumpSize);
+    VFX_LTRACE(ELTT_Graphics, "Gpu crash dump:end\r\n");
 }
 
 // Handler for shader debug information callbacks

@@ -458,6 +458,7 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode
             gen.GenCodes(MaterialOutput.PSFunction, ref code, ref genData);
 
             Material.HLSLCode = code;
+            Material.PSNeedInputs = MaterialOutput.GetPSNeedInputs();
 
             Material.UpdateShaderCode(false);
             Material.SerialId++;

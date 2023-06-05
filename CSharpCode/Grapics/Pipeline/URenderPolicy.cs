@@ -400,30 +400,7 @@ namespace EngineNS.Graphics.Pipeline
             }
         }
         #endregion
-        Deferred.UDeferredBasePassNode mBasePassNode;
-        Deferred.UDeferredBasePassNode BasePassNode
-        {
-            get
-            {
-                if (mBasePassNode == null)
-                {
-                    mBasePassNode = FindFirstNode<Deferred.UDeferredBasePassNode>();
-                }
-                return mBasePassNode;
-            }
-        }
-        Deferred.UForwordNode mForwordNode;
-        Deferred.UForwordNode ForwordNode
-        {
-            get
-            {
-                if (mForwordNode == null)
-                {
-                    mForwordNode = FindFirstNode<Deferred.UForwordNode>();
-                }
-                return mForwordNode;
-            }
-        }
+        
         Shadow.UShadowMapNode mShadowMapNode;
         Shadow.UShadowMapNode ShadowMapNode
         {
@@ -468,29 +445,8 @@ namespace EngineNS.Graphics.Pipeline
             {
                 case EShadingType.BasePass:
                     {
-                        //var BasePassNode = FindFirstNode<Deferred.UDeferredBasePassNode>();
-                        if (node == BasePassNode)
-                        {
-                            return BasePassNode.mOpaqueShading;
-                        }
-                        else
-                        {
-                            //var ForwordNode = FindFirstNode<Deferred.UForwordNode>();
-                            if (node == ForwordNode)
-                            {
-                                switch (mesh.Atoms[atom].Material.RenderLayer)
-                                {
-                                    case ERenderLayer.RL_Translucent:
-                                        return ForwordNode.mTranslucentShading;
-                                    case ERenderLayer.RL_Sky:
-                                        return ForwordNode.mTranslucentShading;
-                                    default:
-                                        return ForwordNode.mOpaqueShading;
-                                }
-                            }
-                        }
+                        return node.GetPassShading(type, mesh, atom);
                     }
-                    break;
                 case EShadingType.DepthPass:
                     {
                         //var ShadowMapNode = FindFirstNode<Shadow.UShadowMapNode>();

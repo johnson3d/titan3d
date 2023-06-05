@@ -202,7 +202,7 @@ namespace EngineNS.EGui
 
             var drawCmd = rhiData.CmdList.mCoreObject;
             presentWindow.BeginFrame();
-            if (drawCmd.BeginCommand())
+            drawCmd.BeginCommand();
             {
                 var passClears = new NxRHI.FRenderPassClears();
                 passClears.SetDefault();
@@ -283,8 +283,8 @@ namespace EngineNS.EGui
                 fullRect.m_MaxY = (int)fwSize.X;
                 drawCmd.SetScissor(in fullRect);
                 swapChain.EndFrameBuffers(drawCmd);
-                drawCmd.EndCommand();
             }
+            drawCmd.EndCommand();
             presentWindow.EndFrame();
             rc.GpuQueue.ExecuteCommandList(drawCmd);
             //drawCmd.Commit(rc.mCoreObject);

@@ -26,6 +26,7 @@ namespace NxRHI
 		virtual int GetNumOfGpuDevice() const override{
 			return (int)mHwDevices.size();
 		}
+		virtual void GetDeviceDesc(int index, FGpuDeviceDesc* desc) const override;
 		const VkExtensionProperties* FindExtension(const char* name) const
 		{
 			for (auto& i : mDeviceExtensions)
@@ -184,7 +185,7 @@ namespace NxRHI
 		virtual void ExecuteCommandList(UINT NumOfExe, ICommandList** Cmdlist, UINT NumOfWait, ICommandList** ppWaitCmdlists, EQueueType type) override;
 		virtual ICommandList* GetIdleCmdlist() override;
 		virtual void ReleaseIdleCmdlist(ICommandList* cmd) override;
-		virtual void Flush(EQueueType type) override;
+		virtual UINT64 Flush(EQueueType type) override;
 
 		bool GraphicsEqualPresentQueue() const {
 			return mGraphicsQueueIndex == mPresentQueueIndex;

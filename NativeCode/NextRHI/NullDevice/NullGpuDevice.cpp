@@ -258,9 +258,9 @@ namespace NxRHI
 	{
 		
 	}
-	void NullCmdQueue::Flush(EQueueType type)
+	UINT64 NullCmdQueue::Flush(EQueueType type)
 	{
-
+		return 0;
 	}
 }
 

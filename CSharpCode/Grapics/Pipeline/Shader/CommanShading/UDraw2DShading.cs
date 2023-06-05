@@ -15,6 +15,14 @@ namespace EngineNS.Graphics.Pipeline.Shader.CommanShading
             return new NxRHI.EVertexStreamType[] { NxRHI.EVertexStreamType.VST_Position,
                 NxRHI.EVertexStreamType.VST_UV,};
         }
+        public override EPixelShaderInput[] GetPSNeedInputs()
+        {
+            return new EPixelShaderInput[] {
+                EPixelShaderInput.PST_Position,
+                EPixelShaderInput.PST_UV,
+                EPixelShaderInput.PST_Color,
+            };
+        }
         public unsafe override void OnBuildDrawCall(URenderPolicy policy, NxRHI.UGraphicDraw drawcall)
         {
             //var gpuProgram = drawcall.Effect.GraphicsEffect;
@@ -42,6 +50,15 @@ namespace EngineNS.Graphics.Pipeline.Shader.CommanShading
         {
             return new NxRHI.EVertexStreamType[] { NxRHI.EVertexStreamType.VST_Position,
                 NxRHI.EVertexStreamType.VST_UV,};
+        }
+        public override EPixelShaderInput[] GetPSNeedInputs()
+        {
+            return new EPixelShaderInput[] {
+                EPixelShaderInput.PST_Position,
+                EPixelShaderInput.PST_Normal,
+                EPixelShaderInput.PST_UV,
+                EPixelShaderInput.PST_Color,
+            };
         }
         public unsafe override void OnBuildDrawCall(URenderPolicy policy, NxRHI.UGraphicDraw drawcall)
         {

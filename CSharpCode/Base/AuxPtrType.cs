@@ -49,6 +49,10 @@ namespace EngineNS
                 CoreSDK.IUnknown_Release(mCoreObject.NativePointer.ToPointer());
             }
         }
+        public int UnsafeRefCount
+        {
+            get => Core_UnsafeGetRefCount();
+        }
         public int Core_UnsafeGetRefCount()
         {
             unsafe

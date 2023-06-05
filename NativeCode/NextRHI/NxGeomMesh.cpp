@@ -389,19 +389,23 @@ namespace NxRHI
 
 			IBlobObject buffData;
 			AutoRef<NxRHI::IBuffer> copyVB;
+			if (false == ib->Buffer->FetchGpuData(0, &buffData))
 			{
-				FTransientCmd cmd(device, NxRHI::QU_Transfer);
-				auto copyDesc = ib->Buffer->Desc;
-				copyDesc.Usage = USAGE_STAGING;
-				copyDesc.CpuAccess = ECpuAccess::CAS_READ;
-				copyDesc.MiscFlags = (EResourceMiscFlag)0;
-				copyDesc.RowPitch = copyDesc.Size;
-				copyDesc.DepthPitch = copyDesc.Size;
-				copyVB = MakeWeakRef(device->CreateBuffer(&copyDesc));
-				cmd.GetCmdList()->CopyBufferRegion(copyVB, 0, ib->Buffer, 0, copyDesc.Size);
+				{
+					FTransientCmd cmd(device, NxRHI::QU_Transfer);
+					auto copyDesc = ib->Buffer->Desc;
+					copyDesc.Usage = USAGE_STAGING;
+					copyDesc.CpuAccess = ECpuAccess::CAS_READ;
+					copyDesc.MiscFlags = (EResourceMiscFlag)0;
+					copyDesc.RowPitch = copyDesc.Size;
+					copyDesc.DepthPitch = copyDesc.Size;
+					copyVB = MakeWeakRef(device->CreateBuffer(&copyDesc));
+					cmd.GetCmdList()->CopyBufferRegion(copyVB, 0, ib->Buffer, 0, copyDesc.Size);
+				}
+				device->GetCmdQueue()->Flush(EQueueType::QU_Transfer);
+				copyVB->FetchGpuData(0, &buffData);
 			}
-			device->GetCmdQueue()->Flush(EQueueType::QU_Transfer);
-			copyVB->FetchGpuData(0, &buffData);
+
 			pAttr->Write((BYTE*)buffData.GetData() + sizeof(UINT) * 2, desc.Size);
 			pAttr->EndWrite();
 		}
@@ -537,19 +541,22 @@ namespace NxRHI
 	{
 		AutoRef<NxRHI::IBuffer> copyVB;
 		IBlobObject buffData;
+		if (false == vb->Buffer->FetchGpuData(0, &buffData))
 		{
-			FTransientCmd cmd(device, NxRHI::QU_Transfer);
-			auto copyDesc = vb->Buffer->Desc;
-			copyDesc.Usage = USAGE_STAGING;
-			copyDesc.CpuAccess = ECpuAccess::CAS_READ;
-			copyDesc.MiscFlags = (EResourceMiscFlag)0;
-			copyDesc.RowPitch = copyDesc.Size;
-			copyDesc.DepthPitch = copyDesc.Size;
-			copyVB = MakeWeakRef(device->CreateBuffer(&copyDesc));
-			cmd.GetCmdList()->CopyBufferRegion(copyVB, 0, vb->Buffer, 0, copyDesc.Size);
+			{
+				FTransientCmd cmd(device, NxRHI::QU_Transfer);
+				auto copyDesc = vb->Buffer->Desc;
+				copyDesc.Usage = USAGE_STAGING;
+				copyDesc.CpuAccess = ECpuAccess::CAS_READ;
+				copyDesc.MiscFlags = (EResourceMiscFlag)0;
+				copyDesc.RowPitch = copyDesc.Size;
+				copyDesc.DepthPitch = copyDesc.Size;
+				copyVB = MakeWeakRef(device->CreateBuffer(&copyDesc));
+				cmd.GetCmdList()->CopyBufferRegion(copyVB, 0, vb->Buffer, 0, copyDesc.Size);
+			}
+			device->GetCmdQueue()->Flush(EQueueType::QU_Transfer);
+			copyVB->FetchGpuData(0, &buffData);
 		}
-		device->GetCmdQueue()->Flush(EQueueType::QU_Transfer);
-		copyVB->FetchGpuData(0, &buffData);
 
 		if (buffData.GetSize() == 0)
 			return;

@@ -183,6 +183,18 @@ namespace NxRHI
 #endif
 		return true;
 	}
+	void VKGpuSystem::GetDeviceDesc(int index, FGpuDeviceDesc* desc) const
+	{
+		if (index < 0 || index >= (int)mHwDevices.size())
+			return;
+		VkPhysicalDeviceProperties dxdesc{};
+		vkGetPhysicalDeviceProperties(mHwDevices[index], &dxdesc);
+		desc->RhiType = ERhiType::RHI_VK;
+		desc->VendorId = dxdesc.vendorID;
+		desc->AdapterId = index;
+		//desc->DedicatedVideoMemory = dxdesc.limits.memor dxdesc.DedicatedVideoMemory;
+		strcpy(desc->Name, dxdesc.deviceName);
+	}
 	IGpuDevice* VKGpuSystem::CreateDevice(const FGpuDeviceDesc* desc)
 	{
 		auto result = new VKGpuDevice();
@@ -499,7 +511,7 @@ namespace NxRHI
 		}
 
 #if defined(HasModule_GpuDump)
-		if (desc->GpuDump)
+		if (desc->GpuDump && desc->IsNVIDIA())
 		{
 			GpuDump::NvAftermath::InitDump(NxRHI::RHI_VK);
 			VkDeviceDiagnosticsConfigCreateInfoNV nvDiagnosticsInfo{};
@@ -1007,7 +1019,7 @@ namespace NxRHI
 			//vkCmd->Commit(this);
 			QueueExecuteCommandList(vkCmd, type);
 			this->IncreaseSignal(vkCmd->mCommitFence, type);
-			vkCmd->ResetGpuDraws();
+			//vkCmd->ResetGpuDraws();
 		}
 	}
 	void VKCmdQueue::WaitFence(IFence* fence, UINT64 value)
@@ -1119,9 +1131,9 @@ namespace NxRHI
 		cmd->Release();
 		return;
 	}
-	void VKCmdQueue::Flush(EQueueType type)
+	UINT64 VKCmdQueue::Flush(EQueueType type)
 	{
-		mFlushFence->WaitToExpect();
+		return mFlushFence->WaitToExpect();
 	}
 }
 

@@ -342,6 +342,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)EngineNS/NxRHI/IBuffer_910209287.cpp2cs.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)EngineNS/NxRHI/ICbView_910209287.cpp2cs.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)EngineNS/NxRHI/ICmdQueue_910209287.cpp2cs.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)EngineNS/NxRHI/ICmdRecorder_910209287.cpp2cs.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)EngineNS/NxRHI/ICommandList_910209287.cpp2cs.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)EngineNS/NxRHI/IComputeDraw_910209287.cpp2cs.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)EngineNS/NxRHI/IComputeEffect_910209287.cpp2cs.cs" />

@@ -14,7 +14,7 @@
   </Icon>
   <RefAssetRNames Type="System.Collections.Generic.List&lt;EngineNS.RName@EngineCore,&gt;@Unknown" Count="2">
     <e_0 Value="Engine,material/sysdft.material,8c2e9c64-ae7a-4172-9e64-114a3d36cc40" />
-    <e_1 Value="Game,utest/texture/rooitou_park_2k.srv,1e625731-7c5e-4099-a65e-4ee5feecd18e" />
+    <e_1 Value="Game,utest/texture/kloppenheim_07_2k.srv,734e1a84-4c80-4b53-89ba-cb952e55e2c0" />
   </RefAssetRNames>
   <TypeStr Type="System.String@Unknown" Value="EngineNS.Graphics.Pipeline.Shader.UMaterialInstance@EngineCore" />
 </Root>

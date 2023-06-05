@@ -137,18 +137,18 @@ namespace NxRHI
 		mIsRecording = false;
 		return true;
 	}
-	bool VKCommandList::BeginCommand()
+	ICmdRecorder* VKCommandList::BeginCommand()
 	{
 		return BeginCommand(VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT);
 	}
-	bool VKCommandList::BeginCommand(VkCommandBufferUsageFlagBits flags)
+	ICmdRecorder* VKCommandList::BeginCommand(VkCommandBufferUsageFlagBits flags)
 	{
 		if (mIsRecording)
 		{
 			ASSERT(false);
-			return true;
+			return nullptr;
 		}
-
+		ICommandList::BeginCommand();
 		ASSERT(mCommandBuffer == nullptr);
 		/*if (mCommandBuffer != nullptr)
 		{
@@ -167,7 +167,7 @@ namespace NxRHI
 		vkBeginCommandBuffer(mCommandBuffer->RealObject, &beginInfo);
 		
 		mIsRecording = true;
-		return true;
+		return nullptr;
 	}
 	void VKCommandList::EndCommand()
 	{
@@ -175,6 +175,7 @@ namespace NxRHI
 	}
 	void VKCommandList::EndCommand(bool bRecycle)
 	{
+		ICommandList::EndCommand();
 		if (mIsRecording)
 		{
 			SetMemoryBarrier(EPipelineStage::PPLS_ALL_COMMANDS, EPipelineStage::PPLS_ALL_COMMANDS, EBarrierAccess::BAS_MemoryWrite, (EBarrierAccess)(EBarrierAccess::BAS_MemoryRead | EBarrierAccess::BAS_MemoryWrite));

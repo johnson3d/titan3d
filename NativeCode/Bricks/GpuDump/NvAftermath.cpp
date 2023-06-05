@@ -1,4 +1,5 @@
 #include "NvAftermath.h"
+#include "../../NextRHI/Dx11/DX11GpuDevice.h"
 #include "../../NextRHI/Dx12/DX12GpuDevice.h"
 
 #define VULKAN_HPP_NO_TO_STRING
@@ -38,7 +39,10 @@ namespace GpuDump
 		switch (type)
 		{
 		case EngineNS::NxRHI::RHI_D3D11:
-			apiType = GFSDK_Aftermath_GpuCrashDumpWatchedApiFlags::GFSDK_Aftermath_GpuCrashDumpWatchedApiFlags_DX;
+			{
+				apiType = GFSDK_Aftermath_GpuCrashDumpWatchedApiFlags::GFSDK_Aftermath_GpuCrashDumpWatchedApiFlags_DX;
+				gNvGpuCrashTracker.Initialize(apiType);
+			}
 			break;
 		case EngineNS::NxRHI::RHI_D3D12:
 			{
@@ -75,6 +79,20 @@ namespace GpuDump
 		switch (type)
 		{
 		case EngineNS::NxRHI::RHI_D3D11:
+			{
+				const uint32_t aftermathFlags =
+					GFSDK_Aftermath_FeatureFlags_EnableMarkers |             // Enable event marker tracking. Only effective in combination with the Nsight Aftermath Crash Dump Monitor.
+					GFSDK_Aftermath_FeatureFlags_EnableResourceTracking |    // Enable tracking of resources.
+					GFSDK_Aftermath_FeatureFlags_CallStackCapturing |        // Capture call stacks for all draw calls, compute dispatches, and resource copies.
+					GFSDK_Aftermath_FeatureFlags_GenerateShaderDebugInfo;    // Generate debug information for shaders.
+
+				auto dx11Device = ((NxRHI::DX11GpuDevice*)device)->mDevice;
+				GFSDK_Aftermath_Result _result = GFSDK_Aftermath_DX11_Initialize(
+					GFSDK_Aftermath_Version_API,
+					aftermathFlags,
+					dx11Device);
+				ASSERT(_result == GFSDK_Aftermath_Result_Success);
+			}
 			break;
 		case EngineNS::NxRHI::RHI_D3D12:
 			{

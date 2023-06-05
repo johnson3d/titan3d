@@ -90,7 +90,7 @@ namespace EngineNS.Graphics.Pipeline.Common
             if (mCopyDrawcall == null)
                 return;
             var cmdlist = BasePass.DrawCmdList;
-            if (cmdlist.BeginCommand())
+            cmdlist.BeginCommand();
             {
                 var srcPin = GetAttachBuffer(ColorPinIn);
                 var tarPin = GetAttachBuffer(ColorPinOut);
@@ -98,11 +98,9 @@ namespace EngineNS.Graphics.Pipeline.Common
                 mCopyDrawcall.BindSrc(srcPin.Buffer);
                 mCopyDrawcall.BindDest(tarPin.Buffer);
 
-
                 mCopyDrawcall.Commit(cmdlist);
-
-                cmdlist.EndCommand();
             }
+            cmdlist.EndCommand();
             UEngine.Instance.GfxDevice.RenderCmdQueue.QueueCmdlist(cmdlist);
         }
     }

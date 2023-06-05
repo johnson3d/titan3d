@@ -114,6 +114,7 @@ namespace NxRHI
 	{
 		GRS_Undefine = 0,
 			GRS_SrvPS,
+			GRS_SrvNonPS,
 			GRS_GenericRead,
 			GRS_Uav,
 			GRS_UavIndirect,
@@ -147,6 +148,18 @@ namespace NxRHI
 		virtual UINT GetFingerPrint() const{
 			return 0;
 		}
+		virtual void SetFingerPrint(UINT fp) {
+			
+		}
+		void SetTagName(const char* name) {
+			TagName = name;
+		}
+		const char* GetTagName() const {
+			return TagName.c_str();
+		}
+
+	public:
+		std::string		TagName;
 	};
 	struct TR_CLASS(SV_LayoutStruct = 8)
 		FMappedSubResource
@@ -275,6 +288,10 @@ namespace NxRHI
 			{
 				MapBuffer.resize(Desc.Size);
 			}
+			if (memcmp(&MapBuffer[binder.Offset], pData, size) == 0)
+			{
+				return;
+			}
 			memcpy(&MapBuffer[binder.Offset], pData, size);
 			DirtyState = EDirtyState::Dirty;
 		}
@@ -287,6 +304,10 @@ namespace NxRHI
 				MapBuffer.resize(Desc.Size);
 			}
 			auto offset = binder.Offset + stride * (UINT)index;
+			if (memcmp(&MapBuffer[binder.Offset], pData, size) == 0)
+			{
+				return;
+			}
 			memcpy(&MapBuffer[offset], pData, size);
 			DirtyState = EDirtyState::Dirty;
 		}
@@ -721,6 +742,9 @@ namespace NxRHI
 		virtual FResourceState* GetResourceState() override{
 			return &ResourceState;
 		}
+		virtual long AddRef() override;
+		virtual void Release() override;
+		
 	public:
 		TR_MEMBER(SV_NoBind)
 		FResourceState			ResourceState;

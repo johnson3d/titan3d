@@ -319,6 +319,11 @@ namespace EngineNS.Graphics.Pipeline.Common
                 //}
             }
         }
+
+        public virtual Shader.UGraphicsShadingEnv GetPassShading(Graphics.Pipeline.URenderPolicy.EShadingType type, Mesh.UMesh mesh, int atom)
+        {
+            return null;
+        }
     }
 
     public class UAttachmentCache

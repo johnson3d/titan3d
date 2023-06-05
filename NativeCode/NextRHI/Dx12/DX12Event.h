@@ -49,9 +49,10 @@ namespace NxRHI
 		virtual UINT64 GetCompletedValue() override;
 		virtual void CpuSignal(UINT64 value) override;
 		virtual void Signal(ICmdQueue* queue, UINT64 value, EQueueType type) override;
-		virtual bool Wait(UINT64 value, UINT timeOut = INFINITE) override;
+		virtual UINT64 Wait(UINT64 value, UINT timeOut = INFINITE) override;
 		virtual void SetDebugName(const char* name) override;
 	public:
+		TWeakRefHandle<DX12GpuDevice> mDeviceRef;
 		AutoRef<DX12Event>	mEvent;
 		ID3D12Fence*		mFence;
 	};

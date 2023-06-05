@@ -35,7 +35,10 @@ PS_INPUT VS_Main(VS_INPUT input1)
 
 #if !defined(VS_NO_WorldTransform)
 	output.vPosition.xyz += mtl.mVertexOffset;
+#if USE_PS_WorldPos == 1
 	output.vWorldPos = mul(float4(output.vPosition.xyz, 1), WorldMatrix).xyz;
+#endif
+
 #endif
 
 	output.vPosition = mul(float4(output.vWorldPos, 1), GetViewPrjMtx(true));
