@@ -2,6 +2,7 @@
 #include "NxBuffer.h"
 #include "NxCommandList.h"
 #include "NxInputAssembly.h"
+#include "NxDrawcall.h"
 #include "../../Math/v3dxRayCast.h"
 
 #define new VNEW
@@ -400,7 +401,25 @@ namespace NxRHI
 					copyDesc.RowPitch = copyDesc.Size;
 					copyDesc.DepthPitch = copyDesc.Size;
 					copyVB = MakeWeakRef(device->CreateBuffer(&copyDesc));
-					cmd.GetCmdList()->CopyBufferRegion(copyVB, 0, ib->Buffer, 0, copyDesc.Size);
+					//cmd.GetCmdList()->CopyBufferRegion(copyVB, 0, ib->Buffer, 0, copyDesc.Size);
+
+					AutoRef<ICopyDraw> cpDraw = MakeWeakRef(device->CreateCopyDraw());
+					cpDraw->BindBufferDest(copyVB);
+					cpDraw->BindBufferSrc(ib->Buffer);
+					cpDraw->Mode = ECopyDrawMode::CDM_Buffer2Buffer;
+					cpDraw->FootPrint.Format = PXF_UNKNOWN;
+					cpDraw->FootPrint.X = 0;
+					cpDraw->FootPrint.Y = 0;
+					cpDraw->FootPrint.Z = 0;
+					cpDraw->FootPrint.Width = copyDesc.Size;
+					cpDraw->FootPrint.Height = 1;
+					cpDraw->FootPrint.Depth = 1;
+					cpDraw->FootPrint.RowPitch = copyDesc.RowPitch;
+					cpDraw->FootPrint.TotalSize = copyDesc.RowPitch * 1;
+
+					cmd.GetCmdList()->PushGpuDraw(cpDraw);
+					cmd.GetCmdList()->FlushDraws(true);
+					
 				}
 				device->GetCmdQueue()->Flush(EQueueType::QU_Transfer);
 				copyVB->FetchGpuData(0, &buffData);
@@ -552,7 +571,24 @@ namespace NxRHI
 				copyDesc.RowPitch = copyDesc.Size;
 				copyDesc.DepthPitch = copyDesc.Size;
 				copyVB = MakeWeakRef(device->CreateBuffer(&copyDesc));
-				cmd.GetCmdList()->CopyBufferRegion(copyVB, 0, vb->Buffer, 0, copyDesc.Size);
+				//cmd.GetCmdList()->CopyBufferRegion(copyVB, 0, vb->Buffer, 0, copyDesc.Size);
+
+				AutoRef<ICopyDraw> cpDraw = MakeWeakRef(device->CreateCopyDraw());
+				cpDraw->BindBufferDest(copyVB);
+				cpDraw->BindBufferSrc(vb->Buffer);
+				cpDraw->Mode = ECopyDrawMode::CDM_Buffer2Buffer;
+				cpDraw->FootPrint.Format = PXF_UNKNOWN;
+				cpDraw->FootPrint.X = 0;
+				cpDraw->FootPrint.Y = 0;
+				cpDraw->FootPrint.Z = 0;
+				cpDraw->FootPrint.Width = copyDesc.Size;
+				cpDraw->FootPrint.Height = 1;
+				cpDraw->FootPrint.Depth = 1;
+				cpDraw->FootPrint.RowPitch = copyDesc.RowPitch;
+				cpDraw->FootPrint.TotalSize = copyDesc.RowPitch * 1;
+
+				cmd.GetCmdList()->PushGpuDraw(cpDraw);
+				cmd.GetCmdList()->FlushDraws(true);
 			}
 			device->GetCmdQueue()->Flush(EQueueType::QU_Transfer);
 			copyVB->FetchGpuData(0, &buffData);

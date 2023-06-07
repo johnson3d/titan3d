@@ -1,4 +1,5 @@
-﻿using System;
+﻿using MathNet.Numerics.Statistics.Mcmc;
+using System;
 using System.Collections.Generic;
 using System.Text;
 
@@ -619,7 +620,9 @@ namespace EngineNS.Bricks.Particle
             CurrentQueue.UpdateComputeDrawcall(UEngine.Instance.GfxDevice.RenderContext, this);
 
             var cmdlist = particleSystem.BasePass.DrawCmdList;
-            CurrentQueue.mParticleUpdateDrawcall.Commit(cmdlist);
+
+            cmdlist.PushGpuDraw(CurrentQueue.mParticleUpdateDrawcall);
+            //CurrentQueue.mParticleUpdateDrawcall.Commit(cmdlist);
             //CurrentQueue.mParticleSetupDrawcall.mCoreObject.BuildPass(cmdlist);
         }
         public unsafe void Flush2GPU(NxRHI.ICommandList cmd)

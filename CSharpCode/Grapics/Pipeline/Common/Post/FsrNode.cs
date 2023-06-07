@@ -241,10 +241,13 @@ namespace EngineNS.Graphics.Pipeline.Common.Post
             cmd.BeginCommand();
             UpSampleShadingEnv.SetDrawcallDispatch(policy, UpSampleDrawcall, dispatchX,
                             dispatchY, 1, false);
-            UpSampleDrawcall.Commit(cmd);
+            //UpSampleDrawcall.Commit(cmd);
+            cmd.PushGpuDraw(UpSampleDrawcall);
             RCASShading.SetDrawcallDispatch(policy, RCASDrawcall, dispatchX,
                             dispatchY, 1, false);
-            RCASDrawcall.Commit(cmd);
+            //RCASDrawcall.Commit(cmd);
+            cmd.PushGpuDraw(RCASDrawcall);
+            cmd.FlushDraws();
             cmd.EndCommand();
             UEngine.Instance.GfxDevice.RenderCmdQueue.QueueCmdlist(cmd);
         }

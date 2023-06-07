@@ -9,6 +9,10 @@ NS_BEGIN
 
 namespace NxRHI
 {
+	ICmdRecorder::~ICmdRecorder()
+	{
+		ResetGpuDraws();
+	}
 	IGpuResource* ICmdRecorder::FindGpuResourceByTagName(const char* name)
 	{
 		for (auto i : mDrawcallArray)
@@ -74,14 +78,14 @@ namespace NxRHI
 	{
 		for (auto i : mDrawcallArray)
 		{
-			i->Commit(cmdlist);
+			i->Commit(cmdlist, false);
 			if (bRefBuffer == false)
 				continue;
 			i->ForeachGpuResource([this](EShaderBindType type, IGpuResource* resource)
 				{
 					switch (type)
 					{
-						/*case EShaderBindType::SBT_SRV:
+						case EShaderBindType::SBT_SRV:
 							if (resource->TagName == "InstantSRV")
 							{
 								int xxx = 0;
@@ -93,7 +97,7 @@ namespace NxRHI
 							break;
 						case EShaderBindType::SBT_CBuffer:
 							mRefBuffers.push_back(((ICbView*)resource)->Buffer);
-							break;*/
+							break;
 						default:
 							break;
 					}
@@ -118,6 +122,15 @@ namespace NxRHI
 			ASSERT(false);
 			return;
 		}
+	}
+	void ICommandList::PushGpuDraw(IGpuDraw* draw)
+	{
+		if (mCmdRecorder == nullptr)
+		{
+			ASSERT(false);
+			return;
+		}
+		mCmdRecorder->PushGpuDraw(draw);
 	}
 	void ICommandList::InheritPass(ICommandList* cmdlist)
 	{

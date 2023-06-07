@@ -98,8 +98,10 @@ namespace EngineNS.Graphics.Pipeline.Common
                 mCopyDrawcall.BindSrc(srcPin.Buffer);
                 mCopyDrawcall.BindDest(tarPin.Buffer);
 
-                mCopyDrawcall.Commit(cmdlist);
+                //mCopyDrawcall.Commit(cmdlist);
+                cmdlist.PushGpuDraw(mCopyDrawcall);
             }
+            cmdlist.FlushDraws();
             cmdlist.EndCommand();
             UEngine.Instance.GfxDevice.RenderCmdQueue.QueueCmdlist(cmdlist);
         }

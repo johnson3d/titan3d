@@ -8,7 +8,7 @@ namespace NxRHI
 	class DX11GraphicDraw : public IGraphicDraw
 	{
 	public:
-		virtual void Commit(ICommandList* cmdlist) override;
+		virtual void Commit(ICommandList* cmdlist, bool bRefResource) override;
 	};
 }
 

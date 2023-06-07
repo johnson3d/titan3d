@@ -28,11 +28,12 @@ namespace NxRHI
 		mDeviceRef.FromObject(pDevice);
 
 		mEvent = MakeWeakRef(new DX12Event(Name.c_str()));
-		ExpectValue = desc.InitValue;
+		
 		if (S_OK != pDevice->mDevice->CreateFence(desc.InitValue, (D3D12_FENCE_FLAGS)desc.Type, __uuidof(ID3D12Fence), (void**)&mFence))
 		{
 			return false;
 		}
+		ExpectValue = desc.InitValue;
 		SetDebugName(name);
 		return true;
 	}

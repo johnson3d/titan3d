@@ -291,8 +291,11 @@ namespace EngineNS.Bricks.VXGI
             }
             
             var cmd = BasePass.DrawCmdList;
-            SetupVxDebuggerDrawcall.Commit(cmd);
-            CollectVxDebuggerDrawcall.Commit(cmd);
+            //SetupVxDebuggerDrawcall.Commit(cmd);
+            //CollectVxDebuggerDrawcall.Commit(cmd);
+
+            cmd.PushGpuDraw(SetupVxDebuggerDrawcall);
+            cmd.PushGpuDraw(CollectVxDebuggerDrawcall);
 
             if (VxDebugMesh != null && world.Root.FindFirstChild("Debug_VoxelDebugMeshNode") == null)
             {

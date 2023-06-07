@@ -265,13 +265,15 @@ namespace EngineNS.EGui
                             }
                             else
                             {
-                                rhiData.Drawcall.mCoreObject.Commit(drawCmd);
+                                rhiData.Drawcall.mCoreObject.Commit(drawCmd, true);
+                                //drawCmd.PushGpuDraw(rhiData.Drawcall.mCoreObject.NativeSuper);
                             }
                         }
                         idx_offset += (int)cmd_list.IdxBufferSize;
                         vtx_offset += cmd_list.VtxBufferSize;
                     }
 
+                    //drawCmd.FlushDraws(true);
                     drawCmd.EndPass();
                 }
 

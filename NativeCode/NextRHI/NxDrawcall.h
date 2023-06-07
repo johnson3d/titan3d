@@ -24,7 +24,7 @@ namespace NxRHI
 	{
 	public:
 		ENGINE_RTTI(IGpuDraw);
-		virtual void Commit(ICommandList * cmdlist) = 0;
+		virtual void Commit(ICommandList * cmdlist, bool bRefResource) = 0;
 		virtual UINT GetPrimitiveNum() = 0;
 
 		typedef bool FOnVisit(EShaderBindType type, IGpuResource* resource);
@@ -46,7 +46,7 @@ namespace NxRHI
 		bool BindResource(VNameString name, IGpuResource* resource);
 		void BindResource(const FEffectBinder* binder, IGpuResource * resource);
 		IGpuResource* FindGpuResource(VNameString name);
-		virtual void Commit(ICommandList * cmdlist) override;
+		virtual void Commit(ICommandList * cmdlist, bool bRefResource) override;
 		void BindShaderEffect(IGpuDevice* device, IGraphicsEffect * effect);
 		void BindPipeline(IGpuDevice * device, IGpuPipeline * pipe);
 		IGraphicsEffect* GetGraphicsEffect();
@@ -117,7 +117,7 @@ namespace NxRHI
 		{
 			NumOfInstance--;
 		}
-		virtual void Commit(ICommandList * cmdlist) override;
+		virtual void Commit(ICommandList * cmdlist, bool bRefResource) override;
 		void SetComputeEffect(IComputeEffect * effect) {
 			mEffect = effect;
 		}
@@ -183,7 +183,7 @@ namespace NxRHI
 		{
 			NumOfInstance--;
 		}
-		virtual void Commit(ICommandList * cmdlist) override;
+		virtual void Commit(ICommandList * cmdlist, bool bRefResource) override;
 		void BindBufferSrc(IBuffer* res);
 		void BindBufferDest(IBuffer* res);
 		void BindTextureSrc(ITexture* res);

@@ -124,7 +124,7 @@ namespace NxRHI
 		IndirectDrawOffsetForArgs = offset;
 		OnBindResource(nullptr, buffer);
 	}
-	void IGraphicDraw::Commit(ICommandList* cmdlist)
+	void IGraphicDraw::Commit(ICommandList* cmdlist, bool bRefResource)
 	{
 		if (Mesh == nullptr || ShaderEffect == nullptr)
 			return;
@@ -250,7 +250,7 @@ namespace NxRHI
 		return nullptr;
 	}
 
-	void IComputeDraw::Commit(ICommandList* cmdlist)
+	void IComputeDraw::Commit(ICommandList* cmdlist, bool bRefResource)
 	{
 		if (mEffect == nullptr)
 			return;
@@ -331,45 +331,60 @@ namespace NxRHI
 	{
 		mDest = res;
 	}
-	void ICopyDraw::Commit(ICommandList* cmdlist)
+	void ICopyDraw::Commit(ICommandList* cmdlist, bool bRefResource)
 	{
+		cmdlist->GetCmdRecorder()->mRefBuffers.push_back(mDest);
+		cmdlist->GetCmdRecorder()->mRefBuffers.push_back(mSrc);
+
+		/*auto saveDst = mDest->GpuState;
+		auto saveSrc = mSrc->GpuState;
+		mDest->TransitionTo(cmdlist, EGpuResourceState::GRS_CopyDst);
+		mSrc->TransitionTo(cmdlist, EGpuResourceState::GRS_CopySrc);*/
+
 		switch (Mode)
 		{
-		case EngineNS::NxRHI::CDM_Buffer2Buffer:
-			cmdlist->CopyBufferRegion(mDest.UnsafeConvertTo<IBuffer>(), DstX, mSrc.UnsafeConvertTo<IBuffer>(), FootPrint.X, FootPrint.Width);
-			break;
-		case EngineNS::NxRHI::CDM_Texture2Texture:
+			case EngineNS::NxRHI::CDM_Buffer2Buffer:
 			{
-				if (FootPrint.Width == 0 && FootPrint.Height == 0 && FootPrint.Depth == 0)
-				{
-					cmdlist->CopyTextureRegion(mDest.UnsafeConvertTo<ITexture>(), SrcSubResource, 0,
-						0, 0, mSrc.UnsafeConvertTo<ITexture>(), DestSubResource, nullptr);
-				}
-				else
-				{
-					FSubresourceBox box;
-					box.SetDefault();
-					box.Left = FootPrint.X;
-					box.Top = FootPrint.Y;
-					box.Front = FootPrint.Z;
-					box.Right = box.Left + FootPrint.Width;
-					box.Bottom = box.Top + FootPrint.Height;
-					box.Back = box.Front + FootPrint.Depth;
-					cmdlist->CopyTextureRegion(mDest.UnsafeConvertTo<ITexture>(), SrcSubResource, DstX,
-						DstY, DstZ, mSrc.UnsafeConvertTo<ITexture>(), DestSubResource, &box);
-				}
+				cmdlist->CopyBufferRegion(mDest.UnsafeConvertTo<IBuffer>(), DstX, mSrc.UnsafeConvertTo<IBuffer>(), FootPrint.X, FootPrint.Width);
 			}
 			break;
-		case EngineNS::NxRHI::CDM_Buffer2Texture:
-			ASSERT(false);
-			break;
-		case EngineNS::NxRHI::CDM_Texture2Buffer:
-			ASSERT(false);
-			break;
-		default:
-			ASSERT(false);
-			break;
+			case EngineNS::NxRHI::CDM_Texture2Texture:
+				{
+					if (FootPrint.Width == 0 && FootPrint.Height == 0 && FootPrint.Depth == 0)
+					{
+						cmdlist->CopyTextureRegion(mDest.UnsafeConvertTo<ITexture>(), DestSubResource, 0,
+							0, 0, mSrc.UnsafeConvertTo<ITexture>(), SrcSubResource, nullptr);
+					}
+					else
+					{
+						FSubresourceBox box;
+						box.SetDefault();
+						box.Left = FootPrint.X;
+						box.Top = FootPrint.Y;
+						box.Front = FootPrint.Z;
+						box.Right = box.Left + FootPrint.Width;
+						box.Bottom = box.Top + FootPrint.Height;
+						box.Back = box.Front + FootPrint.Depth;
+						cmdlist->CopyTextureRegion(mDest.UnsafeConvertTo<ITexture>(), DestSubResource, DstX,
+							DstY, DstZ, mSrc.UnsafeConvertTo<ITexture>(), SrcSubResource, &box);
+					}
+				}
+				break;
+			case EngineNS::NxRHI::CDM_Buffer2Texture:
+				cmdlist->CopyBufferToTexture(mDest.UnsafeConvertTo<ITexture>(), DestSubResource, 
+					mSrc.UnsafeConvertTo<IBuffer>(), &FootPrint);
+				break;
+			case EngineNS::NxRHI::CDM_Texture2Buffer:
+				cmdlist->CopyTextureToBuffer(mDest.UnsafeConvertTo<IBuffer>(), &FootPrint,
+					mSrc.UnsafeConvertTo<ITexture>(), SrcSubResource);
+				break;
+			default:
+				ASSERT(false);
+				break;
 		}
+
+		/*mDest->TransitionTo(cmdlist, saveDst);
+		mSrc->TransitionTo(cmdlist, saveSrc);*/
 	}
 }
 

@@ -1,4 +1,5 @@
-﻿using System;
+﻿using EngineNS.NxRHI;
+using System;
 using System.Collections.Generic;
 using System.Text;
 
@@ -35,6 +36,7 @@ namespace EngineNS.Editor
 
             UEngine.Instance.GfxDevice.RenderCmdQueue.QueueCmd((NxRHI.ICommandList im_cmd, ref NxRHI.URenderCmdQueue.FRCmdInfo info) =>
             {
+                var cpDraw = UEngine.Instance.GfxDevice.RenderContext.CreateCopyDraw();
                 var dstTex = texture as NxRHI.UTexture;
                 var dstBf = texture as NxRHI.UBuffer;
                 if (dstTex != null)
@@ -47,11 +49,24 @@ namespace EngineNS.Editor
                     //box.Front = 0;
                     //box.Back = 1;
                     //im_cmd.CopyTextureRegion(dstTex.mCoreObject, 0, 0, 0, 0, tex, 0, in box);// (NxRHI.FSubresourceBox*)IntPtr.Zero.ToPointer());
-                    im_cmd.CopyTextureRegion(dstTex.mCoreObject, 0, 0, 0, 0, tex, 0, (NxRHI.FSubresourceBox*)IntPtr.Zero.ToPointer());
+
+                    //im_cmd.CopyTextureRegion(dstTex.mCoreObject, 0, 0, 0, 0, tex, 0, (NxRHI.FSubresourceBox*)IntPtr.Zero.ToPointer());
+                    cpDraw.mCoreObject.Mode = ECopyDrawMode.CDM_Texture2Texture;
+                    cpDraw.BindTextureDest(dstTex);
+                    cpDraw.mCoreObject.BindTextureSrc(tex);
+                    im_cmd.PushGpuDraw(cpDraw.mCoreObject.NativeSuper);
+                    im_cmd.FlushDraws(true);
                 }
                 else if (dstBf != null)
                 {
-                    im_cmd.CopyTextureToBuffer(dstBf.mCoreObject, in CopyBufferFootPrint, tex, 0);
+                    //im_cmd.CopyTextureToBuffer(dstBf.mCoreObject, in CopyBufferFootPrint, tex, 0);
+
+                    cpDraw.mCoreObject.Mode = ECopyDrawMode.CDM_Texture2Buffer;
+                    cpDraw.BindBufferDest(dstBf);
+                    cpDraw.mCoreObject.BindTextureSrc(tex);
+                    cpDraw.mCoreObject.FootPrint = CopyBufferFootPrint;
+                    im_cmd.PushGpuDraw(cpDraw.mCoreObject.NativeSuper);
+                    im_cmd.FlushDraws(true);
                 }
                 UEngine.Instance.GfxDevice.RenderContext.GpuQueue.IncreaseSignal(fence);
             }, "Copy Snap Texture");

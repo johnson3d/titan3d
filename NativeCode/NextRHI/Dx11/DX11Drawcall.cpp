@@ -13,7 +13,7 @@ NS_BEGIN
 
 namespace NxRHI
 {
-	void DX11GraphicDraw::Commit(ICommandList* cmdlist)
+	void DX11GraphicDraw::Commit(ICommandList* cmdlist, bool bRefResource)
 	{
 		AUTO_SAMP("NxRHI.GraphicDraw.Commit");
 		if (Mesh == nullptr || ShaderEffect == nullptr)

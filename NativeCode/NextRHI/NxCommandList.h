@@ -80,9 +80,10 @@ namespace NxRHI
 		ICmdRecorder : public VIUnknown
 	{
 	public:
+		~ICmdRecorder();
 		std::vector<AutoRef<IGpuDraw>>			mDrawcallArray;
-		std::vector<AutoRef<IGpuBufferData>>	mRefBuffers;
-		UINT								mPrimitiveNum = 0;
+		std::vector<AutoRef<IGpuResource>>		mRefBuffers;
+		UINT									mPrimitiveNum = 0;
 	public:
 		void PushGpuDraw(IGpuDraw * draw);
 		void ResetGpuDraws();
@@ -149,7 +150,7 @@ namespace NxRHI
 			return mCmdRecorder;
 		}
 		//TR_FUNCTION(SV_SuppressGC = true)
-		//void PushGpuDraw(IGpuDraw * draw);
+		void PushGpuDraw(IGpuDraw * draw);
 		/*void ResetGpuDraws()
 		{
 			ASSERT(mCmdRecorder != nullptr);

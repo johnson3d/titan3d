@@ -328,8 +328,10 @@ namespace EngineNS.Bricks.VXGI
                                     SetupVoxelGroupAllocatorDrawcall.BindUav(srvIdx, attachBuffer.Uav);
                                 }
 
-                                SetupVoxelGroupAllocatorDrawcall.Commit(cmd);
+                                //SetupVoxelGroupAllocatorDrawcall.Commit(cmd);
+                                cmd.PushGpuDraw(SetupVoxelGroupAllocatorDrawcall);
 
+                                cmd.FlushDraws();
                                 cmd.EndCommand();
                             }
                             mCurStep = EStep.InjectVoxels;
@@ -357,7 +359,8 @@ namespace EngineNS.Bricks.VXGI
                                         MathHelper.Roundup(VxEraseGroupSize.X, Dispatch_SetupDimArray3.X),
                                         MathHelper.Roundup(VxEraseGroupSize.Y, Dispatch_SetupDimArray3.Y),
                                         MathHelper.Roundup(VxEraseGroupSize.Z, Dispatch_SetupDimArray3.Z));
-                                    EraseVoxelGroupDrawcall.Commit(cmd);
+                                    //EraseVoxelGroupDrawcall.Commit(cmd);
+                                    cmd.PushGpuDraw(EraseVoxelGroupDrawcall);
                                     VxEraseGroupSize = Vector3ui.Zero;
                                 }
                                 #endregion
@@ -384,12 +387,14 @@ namespace EngineNS.Bricks.VXGI
                                         MathHelper.Roundup(DiffuseRTWidth, Dispatch_SetupDimArray2.X),
                                         MathHelper.Roundup(DiffuseRTHeight, Dispatch_SetupDimArray2.Y),
                                         1);
-                                    InjectVoxelsDrawcall.Commit(cmd);
+                                    //InjectVoxelsDrawcall.Commit(cmd);
+                                    cmd.PushGpuDraw(InjectVoxelsDrawcall);
                                 }
                                 #endregion
 
                                 TickVxDebugger(world);
 
+                                cmd.FlushDraws();
                                 cmd.EndCommand();
                             }
                         }

@@ -318,15 +318,27 @@ namespace EngineNS.Graphics.Pipeline.Common
             cmdlist_post.BeginCommand();
             fixed(NxRHI.FSubResourceFootPrint* pFootprint = &CopyBufferFootPrint)
             {
+                var cpDraw = UEngine.Instance.GfxDevice.RenderContext.CreateCopyDraw();
                 var dstTex = readTexture as NxRHI.UTexture;
                 var dstBf = readTexture as NxRHI.UBuffer;
                 if (dstTex != null)
                 {
-                    cmdlist_post.CopyTextureRegion(dstTex.mCoreObject, 0, 0, 0, 0, attachBuffer.Srv.mCoreObject.GetBufferAsTexture(), 0, (NxRHI.FSubresourceBox*)IntPtr.Zero.ToPointer());
+                    //cmdlist_post.CopyTextureRegion(dstTex.mCoreObject, 0, 0, 0, 0, attachBuffer.Srv.mCoreObject.GetBufferAsTexture(), 0, (NxRHI.FSubresourceBox*)IntPtr.Zero.ToPointer());
+                    cpDraw.mCoreObject.Mode = NxRHI.ECopyDrawMode.CDM_Texture2Texture;
+                    cpDraw.BindTextureDest(dstTex);
+                    cpDraw.mCoreObject.BindTextureSrc(attachBuffer.Srv.mCoreObject.GetBufferAsTexture());
+                    cmdlist_post.PushGpuDraw(cpDraw.mCoreObject.NativeSuper);
+                    cmdlist_post.FlushDraws(true);
                 }
                 else if (dstBf != null)
                 {
-                    cmdlist_post.CopyTextureToBuffer(dstBf.mCoreObject, pFootprint, attachBuffer.Srv.mCoreObject.GetBufferAsTexture(), 0);
+                    //cmdlist_post.CopyTextureToBuffer(dstBf.mCoreObject, pFootprint, attachBuffer.Srv.mCoreObject.GetBufferAsTexture(), 0);
+                    cpDraw.mCoreObject.Mode = NxRHI.ECopyDrawMode.CDM_Texture2Buffer;
+                    cpDraw.BindBufferDest(dstBf);
+                    cpDraw.mCoreObject.BindTextureSrc(attachBuffer.Srv.mCoreObject.GetBufferAsTexture());
+                    cpDraw.mCoreObject.FootPrint = CopyBufferFootPrint;
+                    cmdlist_post.PushGpuDraw(cpDraw.mCoreObject.NativeSuper);
+                    cmdlist_post.FlushDraws(true);
                 }
             }
             cmdlist_post.EndCommand();

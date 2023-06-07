@@ -214,7 +214,8 @@ namespace EngineNS.Graphics.Pipeline.Common
                         var depth = this.GetAttachBuffer(DepthPinIn);
                         SetupTileDataDrawcall.BindSrv(srvIdx, depth.Srv);
                     }
-                    SetupTileDataDrawcall.Commit(cmd);
+                    //SetupTileDataDrawcall.Commit(cmd);
+                    cmd.PushGpuDraw(SetupTileDataDrawcall);
                 }
                 #endregion
 
@@ -227,13 +228,15 @@ namespace EngineNS.Graphics.Pipeline.Common
                         if (attachBuffer.Srv != null)
                         {
                             PushLightToTileDataDrawcall.BindSrv(srvIdx, attachBuffer.Srv);
-                            PushLightToTileDataDrawcall.Commit(cmd);
+                            //PushLightToTileDataDrawcall.Commit(cmd);
+                            cmd.PushGpuDraw(PushLightToTileDataDrawcall);
                         }
                     }
 
                 }
                 #endregion
 
+                cmd.FlushDraws();
                 cmd.EndCommand();
                 UEngine.Instance.GfxDevice.RenderCmdQueue.QueueCmdlist(cmd);
             }   

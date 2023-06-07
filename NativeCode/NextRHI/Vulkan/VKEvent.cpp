@@ -63,8 +63,7 @@ namespace NxRHI
 		timelineCreateInfo.sType = VK_STRUCTURE_TYPE_SEMAPHORE_TYPE_CREATE_INFO;
 		timelineCreateInfo.semaphoreType = VkSemaphoreType::VK_SEMAPHORE_TYPE_TIMELINE;
 		timelineCreateInfo.initialValue = desc.InitValue;
-		ExpectValue = desc.InitValue;
-
+		
 		info.pNext = &timelineCreateInfo;
 
 		if (vkCreateSemaphore(pDevice->mDevice, &info, pDevice->GetVkAllocCallBacks(), &mSemaphore) != VK_SUCCESS)
@@ -72,6 +71,7 @@ namespace NxRHI
 			return false;
 		}
 
+		ExpectValue = desc.InitValue;
 		SetDebugName(name);
 		return true;
 	}
