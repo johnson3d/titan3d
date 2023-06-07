@@ -156,6 +156,11 @@ namespace EngineNS.NxRHI
         public static int NumOfInstance = 0;
         public static int NumOfGCHandle = 0;
 
+        public void SetDebugName(string name)
+        {
+            mCoreObject.NativeSuper.SetDebugName(name);
+        }
+
         public class ImportAttribute : IO.IAssetCreateAttribute
         {
             bool bPopOpen = false;

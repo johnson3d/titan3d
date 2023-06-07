@@ -98,6 +98,10 @@ namespace EngineNS.NxRHI
             mCoreObject = ptr;
             mCoreObject.NativeSuper.NativeSuper.AddRef();
         }
+        public void SetDebugName(string name)
+        {
+            mCoreObject.SetDebugName(name);
+        }
         public IGpuBufferData GetGpuBufferDataPointer()
         {
             return mCoreObject.NativeSuper;
@@ -129,10 +133,6 @@ namespace EngineNS.NxRHI
         public void TransitionTo(UCommandList cmd, EGpuResourceState state)
         {
             mCoreObject.NativeSuper.TransitionTo(cmd.mCoreObject, state);
-        }
-        public void SetDebugName(string name)
-        {
-            mCoreObject.SetDebugName(name);
         }
         public EGpuResourceState GpuState
         {

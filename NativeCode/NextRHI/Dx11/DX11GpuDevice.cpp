@@ -100,6 +100,11 @@ namespace NxRHI
 		Safe_Release(mDevice5);
 		Safe_Release(mDevice);
 	}
+	void DX11GpuDevice::TryFinalizeDevice(IGpuSystem* pGpuSystem)
+	{
+		mIsTryFinalize = true;
+		mIsFinalized = false;
+	}
 	ICmdQueue* DX11GpuDevice::GetCmdQueue()
 	{
 		return mCmdQueue;
@@ -449,7 +454,18 @@ namespace NxRHI
 	void DX11GpuDevice::TickPostEvents()
 	{
 		IGpuDevice::TickPostEvents();
-		
+		if (mIsTryFinalize)
+		{
+			mFrameFence->WaitToExpect();
+			mCmdQueue->Flush(EQueueType::QU_ALL);
+			bool post = mTickingPostEvents.size() == 0 && mPostEvents.size() == 0;
+
+			if (post)
+			{
+				mCmdQueue->ClearIdleCmdlists();
+				mIsFinalized = true;
+			}
+		}
 	}
 
 	DX11CmdQueue::DX11CmdQueue()

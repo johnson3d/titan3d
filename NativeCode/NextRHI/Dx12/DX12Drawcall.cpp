@@ -71,6 +71,10 @@ namespace NxRHI
 			ASSERT(mCbvSrvUavHeap != nullptr);
 			if (binder->VSBinder != nullptr)
 			{
+				if (binder->Name == "cbPerGrassType")
+				{
+					int xxx = 0;
+				}
 				/*device->mDevice->CopyDescriptorsSimple(1, mSrvTable->GetCpuAddress(binder->VSBinder->DescriptorIndex),
 					device->mNullCBV_SRV_UAV->GetCpuAddress(0), D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);*/
 				device->mDevice->CopyDescriptorsSimple(1, mCbvSrvUavHeap->GetCpuAddress(binder->VSBinder->DescriptorIndex),
@@ -147,8 +151,6 @@ namespace NxRHI
 			mSamplerHeap = device->mDescriptorSetAllocator->AllocDescriptorSet(device, effect->mSamplerNumber, D3D12_DESCRIPTOR_HEAP_TYPE_SAMPLER);
 		}
 
-		BindDescriptors(device, dx12Cmd, effect);
-
 		auto multiDrawIndex = this->ShaderEffect.UnsafeConvertTo<DX12GraphicsEffect>()->mVSMutiDrawRootIndex;
 		if (multiDrawIndex != -1)
 		{
@@ -172,8 +174,10 @@ namespace NxRHI
 				BindResourceToDescriptSets(device, i.first, i.second);
 			}
 		}
+
+		BindDescriptors(device, dx12Cmd, effect);
 	}
-	void DX12GraphicDraw::Commit(ICommandList* cmdlist)
+	void DX12GraphicDraw::Commit(ICommandList* cmdlist, bool bRefResource)
 	{
 		if (Mesh == nullptr || ShaderEffect == nullptr)
 			return;
@@ -225,18 +229,30 @@ namespace NxRHI
 				{
 					IGpuResource* t = i.second;
 					effect->BindCBV(cmdlist, i.first, (ICbView*)t);
+					if (bRefResource)
+					{
+						cmdlist->GetCmdRecorder()->mRefBuffers.push_back(t);
+					}
 				}
 				break;
 				case SBT_SRV:
 				{
 					IGpuResource* t = i.second;
 					effect->BindSrv(cmdlist, i.first, (ISrView*)t);
+					if (bRefResource)
+					{
+						cmdlist->GetCmdRecorder()->mRefBuffers.push_back(t);
+					}
 				}
 				break;
 				case SBT_UAV:
 				{
 					IGpuResource* t = i.second;
 					effect->BindUav(cmdlist, i.first, (IUaView*)t);
+					if (bRefResource)
+					{
+						cmdlist->GetCmdRecorder()->mRefBuffers.push_back(t);
+					}
 				}
 				break;
 				case SBT_Sampler:
@@ -403,7 +419,7 @@ namespace NxRHI
 			}
 		}
 	}
-	void DX12ComputeDraw::Commit(ICommandList* cmdlist)
+	void DX12ComputeDraw::Commit(ICommandList* cmdlist, bool bRefResource)
 	{
 		if (mEffect == nullptr)
 			return;
@@ -425,12 +441,20 @@ namespace NxRHI
 				{
 					IGpuResource* t = i.second;
 					cmdlist->SetCBV(EShaderType::SDT_ComputeShader, i.first, (ICbView*)t);
+					if (bRefResource)
+					{
+						cmdlist->GetCmdRecorder()->mRefBuffers.push_back(t);
+					}
 				}
 				break;
 				case SBT_SRV:
 				{
 					IGpuResource* t = i.second;
 					cmdlist->SetSrv(EShaderType::SDT_ComputeShader, i.first, (ISrView*)t);
+					if (bRefResource)
+					{
+						cmdlist->GetCmdRecorder()->mRefBuffers.push_back(t);
+					}
 				}
 				break;
 				case SBT_UAV:

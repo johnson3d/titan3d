@@ -16,6 +16,7 @@ namespace NxRHI
 			QU_Default = 1,
 			QU_Compute = (1 << 1),
 			QU_Transfer = (1 << 2),
+			QU_ALL = 0xFFFFFFFF,
 	};
 	enum TR_ENUM(SV_EnumNoFlags = true)
 		EColorSpace {

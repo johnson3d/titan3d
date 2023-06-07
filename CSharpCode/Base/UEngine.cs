@@ -69,6 +69,8 @@ namespace EngineNS
         [Rtti.Meta]
         public bool HasDebugLayer { get; set; } = false;
         [Rtti.Meta]
+        public bool IsGpuBaseValidation { get; set; } = false;
+        [Rtti.Meta]
         public bool IsDebugShader { get; set; } = false;
         [Rtti.Meta]
         public bool IsGpuDump { get; set; } = true;//if true, engine will disable debuglayer&renderdoc
@@ -319,7 +321,6 @@ namespace EngineNS
         public void FinalCleanup()
         {
             GfxDevice.RenderCmdQueue.Reset();
-            base.CleanupModules();
             TickableManager.Cleanup();
             StopSystemThreads();
 
@@ -332,6 +333,7 @@ namespace EngineNS
             RootFormManager.ClearRootForms();
 
             TtObjectPoolManager.Instance.Cleanup();
+            base.CleanupModules();
             mInstance = null;
         }
     }

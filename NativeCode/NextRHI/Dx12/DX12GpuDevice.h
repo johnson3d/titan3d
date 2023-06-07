@@ -21,7 +21,7 @@ namespace NxRHI
 	public:
 		AutoRef<IDXGIFactory>					mDXGIFactory;
 		std::vector<AutoRef<IDXGIAdapter>>		mGIAdapters;
-		AutoRef<ID3D12Debug>					mDebugLayer;
+		AutoRef<ID3D12Debug1>					mDebugLayer;
 	};
 
 	class DX12GpuDevice : public IGpuDevice
@@ -30,6 +30,7 @@ namespace NxRHI
 		DX12GpuDevice();
 		~DX12GpuDevice();
 		virtual bool InitDevice(IGpuSystem* pGpuSystem, const FGpuDeviceDesc* desc) override;
+		virtual void TryFinalizeDevice(IGpuSystem* pGpuSystem) override;
 		virtual IBuffer* CreateBuffer(const FBufferDesc* desc) override;
 		virtual ITexture* CreateTexture(const FTextureDesc* desc) override;
 		virtual ICbView* CreateCBV(IBuffer* pBuffer, const FCbvDesc* desc) override;
@@ -70,6 +71,8 @@ namespace NxRHI
 	public:
 		TWeakRefHandle<DX12GpuSystem>	mGpuSystem;
 		AutoRef<ID3D12Device>			mDevice;
+		AutoRef<ID3D12DebugDevice>		mDebugDevice;
+		AutoRef<ID3D12DebugDevice1>		mDebugDevice1;
 		D3D_FEATURE_LEVEL               mFeatureLevel;
 		
 		AutoRef<ID3D12InfoQueue>		mDebugInfoQueue;

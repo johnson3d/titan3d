@@ -67,6 +67,7 @@ namespace NxRHI
 			return (DX12GpuDevice*)mDevice.GetPtr();
 		}
 		AutoRef<ID3D12GraphicsCommandList>	mContext;
+		AutoRef<ID3D12DebugCommandList1>	mDebugCommandList1;
 		
 		//AutoRef<ID3D12CommandSignature>	mCurrentIndirectDrawIndexSig;
 		//AutoRef<ID3D12CommandSignature>	mCurrentIndirectDispatchSig;

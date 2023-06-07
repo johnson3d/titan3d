@@ -128,6 +128,15 @@ namespace EngineNS.Graphics.Pipeline
             HitproxyManager.Cleanup();
             SlateRenderer?.Cleanup();
             SlateRenderer = null;
+
+            RenderContext.mCoreObject.TryFinalizeDevice(RenderSystem.mCoreObject);
+            while (RenderContext.mCoreObject.IsFinalized() == false)
+            {
+                AttachBufferManager.Tick();
+                var testTime = Support.Time.GetTickCount();
+                UEngine.Instance.EventPoster.TickPostTickSyncEvents(testTime);
+                RenderContext.TickPostEvents();
+            }
             RenderContext?.Dispose();
             RenderContext = null;
             RenderSystem?.Dispose();
@@ -159,6 +168,7 @@ namespace EngineNS.Graphics.Pipeline
                 if (useRenderDoc)
                     gpuDesc.UseRenderDoc = 1;
                 gpuDesc.CreateDebugLayer = bDebugLayer ? 1 : 0;
+                gpuDesc.GpuBaseValidation = engine.Config.IsGpuBaseValidation ? 1 : 0;
                 gpuDesc.WindowHandle = window.ToPointer();
                 var renderDoc = engine.FileManager.GetRoot(IO.TtFileManager.ERootDir.EngineSource);
                 renderDoc += "3rd/native/renderdoc/bin/renderdoc.dll";

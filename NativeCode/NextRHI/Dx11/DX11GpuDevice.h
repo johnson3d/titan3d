@@ -27,6 +27,7 @@ namespace NxRHI
 		DX11GpuDevice();
 		~DX11GpuDevice();
 		virtual bool InitDevice(IGpuSystem* pGpuSystem, const FGpuDeviceDesc* desc) override;
+		virtual void TryFinalizeDevice(IGpuSystem* pGpuSystem) override;
 		virtual IBuffer* CreateBuffer(const FBufferDesc* desc) override;
 		virtual ITexture* CreateTexture(const FTextureDesc* desc) override;
 		virtual ITexture* CreateTexture(void* pSharedObject) override;

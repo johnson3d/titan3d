@@ -151,10 +151,10 @@ namespace NxRHI
 		virtual void SetFingerPrint(UINT fp) {
 			
 		}
-		void SetTagName(const char* name) {
+		virtual void SetDebugName(const char* name) {
 			TagName = name;
 		}
-		const char* GetTagName() const {
+		const char* GetDebugName() const {
 			return TagName.c_str();
 		}
 

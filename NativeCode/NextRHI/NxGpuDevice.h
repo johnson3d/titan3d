@@ -74,6 +74,7 @@ namespace NxRHI
 	{
 		vBOOL		UseRenderDoc = TRUE;
 		vBOOL		CreateDebugLayer = FALSE;
+		vBOOL		GpuBaseValidation = FALSE;
 		void*		WindowHandle = nullptr;
 		VNameString	RenderDocPath;
 	};
@@ -92,6 +93,7 @@ namespace NxRHI
 		}
 	public:
 		ERhiType		Type = ERhiType::RHI_D3D11;
+		FGpuSystemDesc	Desc{};
 	};
 	struct TR_CLASS(SV_LayoutStruct = 8)
 		FGpuDeviceDesc
@@ -178,10 +180,20 @@ namespace NxRHI
 	class TR_CLASS()
 		IGpuDevice : public IWeakReference
 	{
+	protected:
+		bool mIsTryFinalize = false;
+		bool mIsFinalized = false;
 	public:
 		ENGINE_RTTI(IGpuDevice);
 		IGpuDevice();
 		virtual bool InitDevice(IGpuSystem * pGpuSystem, const FGpuDeviceDesc * desc) = 0;
+		virtual void TryFinalizeDevice(IGpuSystem * pGpuSystem) {
+			mIsTryFinalize = true;
+			mIsFinalized = true;
+		}
+		bool IsFinalized() const{
+			return mIsFinalized;
+		}
 		virtual IBuffer* CreateBuffer(const FBufferDesc * desc) = 0;
 		virtual ITexture* CreateTexture(const FTextureDesc * desc) = 0;
 		virtual ITexture* CreateTexture(void* pSharedObject) { return nullptr; }

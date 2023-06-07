@@ -131,11 +131,11 @@ namespace EngineNS.Bricks.Terrain.Grass
             public bool IsDirty { get; private set; } = true;
             public void Dispose()
             {
-                InstantSRV?.Dispose();
-                InstantSRV = null;
-
                 InstantBuffer?.Dispose();
                 InstantBuffer = null;
+
+                InstantSRV?.Dispose();
+                InstantSRV = null;
 
                 InstData = null;
             }
@@ -145,7 +145,7 @@ namespace EngineNS.Bricks.Terrain.Grass
                     return;
 
                 var oldData = InstData;
-                //Cleanup();
+                Dispose();
                 mdf.mMaxNumber = nSize;
                 InstData = new FVSGrassData[mdf.mMaxNumber];
 
@@ -177,8 +177,8 @@ namespace EngineNS.Bricks.Terrain.Grass
                 srvDesc.Buffer.NumElements = mdf.mMaxNumber;
                 srvDesc.Buffer.StructureByteStride = bfDesc.StructureStride;
                 InstantSRV = UEngine.Instance.GfxDevice.RenderContext.CreateSRV(InstantBuffer, in srvDesc);
-                InstantSRV.mCoreObject.NativeSuper.SetTagName("InstantSRV");
-                InstantSRV.mCoreObject.Buffer.NativeSuper.SetTagName("InstantSRV");
+                InstantSRV.SetDebugName("InstantSRV");
+                InstantSRV.SetDebugName("InstantSRV");
             }
             public uint PushInstance(UGrassModifier mdf, uint data, float height)
             {

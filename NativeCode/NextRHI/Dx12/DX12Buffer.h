@@ -23,7 +23,6 @@ namespace NxRHI
 		virtual void UpdateGpuData(UINT subRes, void* pData, const FSubResourceFootPrint* footPrint) override;
 		virtual void TransitionTo(ICommandList* cmd, EGpuResourceState state) override;
 		virtual void SetDebugName(const char* name) override;
-
 		D3D12_GPU_VIRTUAL_ADDRESS GetGPUVirtualAddress()
 		{
 			return mGpuMemory->GetGPUVirtualAddress();

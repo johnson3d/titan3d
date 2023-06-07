@@ -43,12 +43,15 @@ namespace NxRHI
 
 	bool DX12GpuSystem::InitGpuSystem(ERhiType type, const FGpuSystemDesc* desc)
 	{
+		Desc = *desc;
 		//SafeCreateDXGIFactory(mDXGIFactory.GetAddressOf(), 0);
 		UINT dxgiFlags = 0;
 		if (desc->CreateDebugLayer && D3D12GetDebugInterface(IID_PPV_ARGS(mDebugLayer.GetAddressOf())) == S_OK)
 		{
 			mDebugLayer->EnableDebugLayer();
-			//mDebugLayer->SetEnableGPUBasedValidation(TRUE);
+			mDebugLayer->SetEnableGPUBasedValidation(desc->GpuBaseValidation);
+			//https://shikihuiku.github.io/post/cedec2020_prescriptions_for_deviceremoval/
+			
 			//debugLayer->SetGPUBasedValidationFlags(D3D12_GPU_BASED_VALIDATION_FLAGS_NONE);
 			dxgiFlags |= DXGI_CREATE_FACTORY_DEBUG;
 		}
@@ -103,10 +106,16 @@ namespace NxRHI
 	DX12GpuDevice::~DX12GpuDevice()
 	{
 		mCmdQueue->ClearIdleCmdlists();
-		mCmdAllocatorManager = nullptr;
 		mCmdQueue = nullptr;
+		mCmdAllocatorManager = nullptr;
+		
 		//Safe_Release(mDevice);
 		//Safe_Release(mDXGIFactory);
+	}
+	void DX12GpuDevice::TryFinalizeDevice(IGpuSystem* pGpuSystem) 
+	{
+		mIsTryFinalize = true;
+		mIsFinalized = false;
 	}
 	ICmdQueue* DX12GpuDevice::GetCmdQueue()
 	{
@@ -167,12 +176,32 @@ namespace NxRHI
 		auto hr = D3D12CreateDevice(pIAdapter, D3D_FEATURE_LEVEL_12_1, IID_PPV_ARGS(mDevice.GetAddressOf()));
 		if (FAILED(hr))
 			return false;
+
+		if (pGpuSystem->Desc.CreateDebugLayer && pGpuSystem->Desc.GpuBaseValidation)
+		{
+			mDevice->QueryInterface(IID_PPV_ARGS(mDebugDevice1.GetAddressOf()));
+			if (mDebugDevice1 != nullptr)
+			{
+				D3D12_DEBUG_DEVICE_GPU_BASED_VALIDATION_SETTINGS settings{};
+				settings.MaxMessagesPerCommandList = 256;
+				settings.DefaultShaderPatchMode = D3D12_GPU_BASED_VALIDATION_SHADER_PATCH_MODE_GUARDED_VALIDATION;
+				settings.PipelineStateCreateFlags = D3D12_GPU_BASED_VALIDATION_PIPELINE_STATE_CREATE_FLAG_FRONT_LOAD_CREATE_GUARDED_VALIDATION_SHADERS;
+				mDebugDevice1->SetDebugParameter(D3D12_DEBUG_DEVICE_PARAMETER_GPU_BASED_VALIDATION_SETTINGS,
+					&settings, sizeof(settings));
+			}
+		}
+		//mDebugDevice->SetFeatureMask( );
+		//D3D12_GPU_BASED_VALIDATION_PIPELINE_STATE_CREATE_FLAGS
+		/*D3D12_DEBUG_DEVICE_GPU_BASED_VALIDATION_SETTINGS gpuValidationSettings{};
+		mDebugDevice1->SetDebugParameter(D3D12_DEBUG_DEVICE_PARAMETER_TYPE::D3D12_DEBUG_DEVICE_PARAMETER_GPU_BASED_VALIDATION_SETTINGS,
+			&gpuValidationSettings);*/
 #if defined(HasModule_GpuDump)
 		if (desc->GpuDump && desc->IsNVIDIA())
 		{
 			GpuDump::NvAftermath::DeviceCreated(NxRHI::RHI_D3D12, this);
 		}
 #endif
+
 		/*ID3D12Device* tmp;
 		hr = D3D12CreateDevice(pIAdapter, D3D_FEATURE_LEVEL_12_1, IID_PPV_ARGS(&tmp));*/
 
@@ -219,19 +248,24 @@ namespace NxRHI
 			mDebugInfoQueue->SetBreakOnID(D3D12_MESSAGE_ID_DEVICE_REMOVAL_PROCESS_AT_FAULT, TRUE);
 			mDebugInfoQueue->SetBreakOnID(D3D12_MESSAGE_ID_UNMAP_RANGE_NOT_EMPTY, TRUE);
 			mDebugInfoQueue->SetBreakOnID(D3D12_MESSAGE_ID_EXECUTECOMMANDLISTS_OPENCOMMANDLIST, TRUE);
+			//mDebugInfoQueue->SetBreakOnID(D3D12_MESSAGE_ID_GPU_BASED_VALIDATION_DESCRIPTOR_UNINITIALIZED, TRUE);
 			//mDebugInfoQueue->SetBreakOnID(D3D12_MESSAGE_ID_CREATESHADER_INVALIDBYTECODE, TRUE);
 			//mDebugInfoQueue->SetBreakOnID(D3D12_MESSAGE_ID_CREATE_COMMANDLIST12, TRUE);
 			//mDebugInfoQueue->SetBreakOnID(D3D12_MESSAGE_ID_DESTROY_COMMANDLIST12, TRUE);
 			//mDebugInfoQueue->SetBreakOnID(D3D12_MESSAGE_ID_DESTROY_HEAP, TRUE);
 			//mDebugInfoQueue->SetBreakOnID(D3D12_MESSAGE_ID_DESTROY_COMMANDALLOCATOR, TRUE);
 			//mDebugInfoQueue->SetBreakOnID(D3D12_MESSAGE_ID_DESTROY_MONITOREDFENCE, TRUE);
-
+			//mDebugInfoQueue->SetBreakOnID(D3D12_MESSAGE_ID_GPU_BASED_VALIDATION_INCOMPATIBLE_RESOURCE_STATE, TRUE);
 			D3D12_INFO_QUEUE_FILTER filter{};
 			D3D12_MESSAGE_ID denyIds[]{
 				D3D12_MESSAGE_ID_CLEARRENDERTARGETVIEW_MISMATCHINGCLEARVALUE,
 				D3D12_MESSAGE_ID_DRAW_EMPTY_SCISSOR_RECTANGLE,
 				D3D12_MESSAGE_ID_CREATE_COMMANDLIST12,
 				D3D12_MESSAGE_ID_DESTROY_COMMANDLIST12,
+				D3D12_MESSAGE_ID_CREATE_RESOURCE,
+				D3D12_MESSAGE_ID_DESTROY_RESOURCE,
+				D3D12_MESSAGE_ID_GPU_BASED_VALIDATION_INCOMPATIBLE_RESOURCE_STATE,
+
 			};
 			filter.DenyList.NumIDs = _countof(denyIds);
 			filter.DenyList.pIDList = denyIds;
@@ -640,6 +674,22 @@ namespace NxRHI
 			mCmdQueue->TryRecycle();
 		mCmdAllocatorManager->TickRecycle();
 		IGpuDevice::TickPostEvents();
+
+		if (mIsTryFinalize)
+		{
+			mFrameFence->WaitToExpect();
+			mCmdQueue->Flush(EQueueType::QU_ALL);
+			mCmdAllocatorManager->Finalize();
+			bool cmdRecycle = mCmdQueue->mWaitRecycleCmdlists.size() == 0;
+			bool allocatorRecycle = mCmdAllocatorManager->Recycles.size() == 0;
+			bool post = mTickingPostEvents.size() == 0 && mPostEvents.size() == 0;
+
+			if (cmdRecycle && allocatorRecycle && post)
+			{
+				mCmdQueue->ClearIdleCmdlists();
+				mIsFinalized = true;
+			}
+		}
 	}
 	std::string GetOpStr(D3D12_AUTO_BREADCRUMB_OP op)
 	{

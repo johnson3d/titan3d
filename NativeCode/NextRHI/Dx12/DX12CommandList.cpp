@@ -25,6 +25,15 @@ namespace NxRHI
 	{
 		if (GetDX12Device() == nullptr)
 			return;
+
+		auto cmdRecorder = GetDX12CmdRecorder();
+		if (cmdRecorder != nullptr)
+		{
+			ASSERT(cmdRecorder->mDrawcallArray.size()==0);
+			cmdRecorder->mAllocator->Reset();
+			cmdRecorder->ResetGpuDraws();
+			GetDX12Device()->mCmdAllocatorManager->UnsafeDirectFree(cmdRecorder);
+		}
 	}
 	bool DX12CommandList::Init(DX12GpuDevice* device)
 	{
@@ -36,6 +45,19 @@ namespace NxRHI
 		hr = device->mDevice->CreateCommandList(0, D3D12_COMMAND_LIST_TYPE_DIRECT, tmp, nullptr, IID_PPV_ARGS(mContext.GetAddressOf()));
 		if (FAILED(hr))
 			return false;
+
+		auto pGpuSystem = device->mGpuSystem.GetPtr();
+		if (pGpuSystem->Desc.CreateDebugLayer && pGpuSystem->Desc.GpuBaseValidation)
+		{
+			mContext->QueryInterface(IID_PPV_ARGS(mDebugCommandList1.GetAddressOf()));
+			if (mDebugCommandList1 != nullptr)
+			{
+				D3D12_DEBUG_COMMAND_LIST_GPU_BASED_VALIDATION_SETTINGS settings{};
+				settings.ShaderPatchMode = D3D12_GPU_BASED_VALIDATION_SHADER_PATCH_MODE_GUARDED_VALIDATION;
+				mDebugCommandList1->SetDebugParameter(D3D12_DEBUG_COMMAND_LIST_PARAMETER_TYPE::D3D12_DEBUG_COMMAND_LIST_PARAMETER_GPU_BASED_VALIDATION_SETTINGS,
+					&settings, sizeof(settings));
+			}
+		}
 
 		FFenceDesc desc;
 		desc.InitValue = 0;
@@ -68,7 +90,6 @@ namespace NxRHI
 		//ASSERT(hr == S_OK);
 		hr = mContext->Reset(GetDX12CmdRecorder()->mAllocator, nullptr);
 		ASSERT(hr == S_OK);
-
 		mIsRecording = true;
 		return mCmdRecorder;
 	}
@@ -81,6 +102,10 @@ namespace NxRHI
 		}
 		//mContext->Close();
 		mIsRecording = false;
+		mCommitFence->SetDebugName((mDebugName + ".Commit").c_str());
+
+		std::wstring n = StringHelper::strtowstr(mDebugName);
+		mContext->SetName(n.c_str());
 	}
 	bool DX12CommandList::BeginPass(IFrameBuffers* fb, const FRenderPassClears* passClears, const char* name)
 	{
@@ -88,6 +113,7 @@ namespace NxRHI
 		mDebugName = name;
 		BeginEvent(name);
 		mCurrentFrameBuffers = fb;
+		GetCmdRecorder()->mRefBuffers.push_back(fb);
 		
 		for (UINT i = 0; i < fb->mRenderPass->Desc.NumOfMRT; i++)
 		{
@@ -504,7 +530,7 @@ namespace NxRHI
 		case EngineNS::NxRHI::GRS_Uav:
 			return D3D12_RESOURCE_STATES::D3D12_RESOURCE_STATE_UNORDERED_ACCESS;
 		case EngineNS::NxRHI::GRS_UavIndirect:
-			return D3D12_RESOURCE_STATES::D3D12_RESOURCE_STATE_INDIRECT_ARGUMENT;
+			return D3D12_RESOURCE_STATES::D3D12_RESOURCE_STATE_INDIRECT_ARGUMENT;// D3D12_RESOURCE_STATES::D3D12_RESOURCE_STATE_UNORDERED_ACCESS;//D3D12_RESOURCE_STATES::D3D12_RESOURCE_STATE_INDIRECT_ARGUMENT | 
 		case EngineNS::NxRHI::GRS_RenderTarget:
 			return D3D12_RESOURCE_STATES::D3D12_RESOURCE_STATE_RENDER_TARGET;
 		case EngineNS::NxRHI::GRS_DepthStencil:
@@ -863,7 +889,7 @@ namespace NxRHI
 		resDesc.Flags = D3D12_RESOURCE_FLAG_NONE;
 		resState = D3D12_RESOURCE_STATE_COPY_DEST;
 		
-		mResultBuffer = DX12GpuDefaultMemAllocator::Alloc(device, &resDesc, &properties, resState);
+		mResultBuffer = DX12GpuDefaultMemAllocator::Alloc(device, &resDesc, &properties, resState, L"GpuScopeResult");
 
 		/*FFenceDesc fcDesc{};
 		mFence = MakeWeakRef(device->CreateFence(&fcDesc, "DX12GpuScope"));*/
