@@ -242,9 +242,9 @@ namespace EngineNS.Graphics.Pipeline
             yVec.Normalize();
             zVec.Normalize();
 
-            var v2X = xVec.GetXY();
-            var v2Y = yVec.GetXY();
-            var v2Z = zVec.GetXY();
+            var v2X = xVec.XY;
+            var v2Y = yVec.XY;
+            var v2Z = zVec.XY;
 
             v2X *= 60;
             v2Y *= 60;

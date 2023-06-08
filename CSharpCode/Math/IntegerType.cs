@@ -52,6 +52,12 @@ namespace EngineNS
         public bool X;
         public bool Y;
         public bool Z;
+        public Bool3(bool x, bool y, bool z)
+        {
+            X = x;
+            Y = y;
+            Z = z;
+        }
         public bool All()
         {
             return X && Y && Z;

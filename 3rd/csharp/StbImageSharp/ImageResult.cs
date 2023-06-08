@@ -11,7 +11,7 @@ namespace StbImageSharp
 #else
 	internal
 #endif
-	class ImageResult
+    partial class ImageResult
 	{
 		public int Width { get; set; }
 		public int Height { get; set; }

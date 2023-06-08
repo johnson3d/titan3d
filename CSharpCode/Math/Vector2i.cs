@@ -90,9 +90,9 @@ namespace EngineNS
         {
             return $"{X},{Y}";
         }
-        public Vector2 GetXY()
+        public static explicit operator Vector2(Vector2i v)
         {
-            return new Vector2(X, Y);
+            return new Vector2((float)v.X, (float)v.Y);
         }
         public static Vector2i FromString(string text)
         {
@@ -453,21 +453,6 @@ namespace EngineNS
             vector.X = (value1.X + (amount1 * (value2.X - value1.X))) + (amount2 * (value3.X - value1.X));
             vector.Y = (value1.Y + (amount1 * (value2.Y - value1.Y))) + (amount2 * (value3.Y - value1.Y));
             return vector;
-        }
-        /// <summary>
-        /// 计算质心坐标
-        /// </summary>
-        /// <param name="value1">三维坐标点</param>
-        /// <param name="value2">三维坐标点</param>
-        /// <param name="value3">三维坐标点</param>
-        /// <param name="amount1">参数</param>
-        /// <param name="amount2">参数</param>
-        /// <param name="result">计算结果</param>
-        [Rtti.Meta]
-        public static void Barycentric(in Vector2i value1, in Vector2i value2, in Vector2i value3, int amount1, int amount2, out Vector2i result)
-        {
-            result.X = (value1.X + (amount1 * (value2.X - value1.X))) + (amount2 * (value3.X - value1.X));
-            result.Y = (value1.Y + (amount1 * (value2.Y - value1.Y))) + (amount2 * (value3.Y - value1.Y));
         }
         /// <summary>
         /// 载体计算
