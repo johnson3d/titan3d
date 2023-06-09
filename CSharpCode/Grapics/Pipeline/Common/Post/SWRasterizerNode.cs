@@ -66,6 +66,9 @@ namespace EngineNS.Graphics.Pipeline.Common.Post
         public NxRHI.UBuffer TrianglesBuffer;
         public NxRHI.USrView TrianglesView;
 
+        int NANITE_SUBPIXEL_SAMPLES = 256;
+        
+
         struct Triangle
         {
             public Vector3 pos0;
@@ -92,8 +95,12 @@ namespace EngineNS.Graphics.Pipeline.Common.Post
                 bfDesc.Size = 2 * (uint)sizeof(Triangle);
                 bfDesc.StructureStride = (uint)sizeof(Triangle);
                 var initData = new Triangle[2];
-                initData[0] = new Triangle(new Vector3(50, 50, 0), new Vector3(50, 100, 0), new Vector3(80, 50, 0));
-                initData[1] = new Triangle(new Vector3(100, 50, 0), new Vector3(100, 100, 0), new Vector3(150, 50, 0));
+                initData[0] = new Triangle(new Vector3(50 * NANITE_SUBPIXEL_SAMPLES, 50 * NANITE_SUBPIXEL_SAMPLES, 0), 
+                                           new Vector3(50 * NANITE_SUBPIXEL_SAMPLES, 100 * NANITE_SUBPIXEL_SAMPLES, 0), 
+                                           new Vector3(80 * NANITE_SUBPIXEL_SAMPLES, 50 * NANITE_SUBPIXEL_SAMPLES, 0));
+                initData[1] = new Triangle(new Vector3(100 * NANITE_SUBPIXEL_SAMPLES, 50 * NANITE_SUBPIXEL_SAMPLES, 0), 
+                                           new Vector3(100 * NANITE_SUBPIXEL_SAMPLES, 100 * NANITE_SUBPIXEL_SAMPLES, 0), 
+                                           new Vector3(150 * NANITE_SUBPIXEL_SAMPLES, 50 * NANITE_SUBPIXEL_SAMPLES, 0));
 
                 fixed (Triangle* pAddr = &initData[0])
                 {
