@@ -167,7 +167,10 @@ public:
 	/// Get the normal
 	v3dxVector3 getNormal() const;
 
-
+	inline float getMax() const
+	{
+		return std::max(std::max(x, y), z);
+	}
 
 	/** Returns a vector at a point half way between this and the passed
 	in vector.

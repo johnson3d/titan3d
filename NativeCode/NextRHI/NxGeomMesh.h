@@ -4,6 +4,10 @@
 #include "NxShader.h"
 #include "NxRHIDefine.h"
 
+#include "Nanite/DisjointSet.h"
+#include "Nanite/GraphPartitioner.h"
+#include "Nanite/Cluster.h"
+
 #include "../Base/timekeys/TimeKeys.h"
 #include "../Math/v3dxVector2.h"
 #include "../Math/v3dxVector3.h"
@@ -215,6 +219,9 @@ namespace NxRHI
 	private:
 		AutoRef<IVbView> LoadVB(IGpuDevice* device, XndAttribute * pAttr, UINT stride, TimeKeys & tkeys, UINT & resSize, EVertexStreamType stream);
 		void SaveVB(IGpuDevice* device, XndAttribute * pAttr, IVbView* vb, TimeKeys & tkeys, UINT stride);
+
+		template<typename IndexType>
+		void RasterizeTriangles(std::vector<v3dxVector3>& vb, std::vector<IndexType>& ib, std::vector<FCluster>& clusters);
 	protected:
 		std::string				mName;
 		AutoRef<FGeomMesh>		mGeometryMesh;

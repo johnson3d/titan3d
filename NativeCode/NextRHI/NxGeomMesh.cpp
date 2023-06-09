@@ -316,6 +316,8 @@ namespace NxRHI
 
 	void FMeshPrimitives::Save2Xnd(IGpuDevice* device, XndNode* pNode)
 	{
+        IBlobObject vbBuffer, ibBuffer;
+
 		XndAttribute* pAttr = pNode->GetOrAddAttribute("HeadAttrib", 0, 0);
 		pAttr->BeginWrite();
 		{
@@ -331,6 +333,21 @@ namespace NxRHI
 			mDesc.UnUsed = 0;
 			mDesc.GeoTabeNumber = 0;
 			pAttr->Write(mDesc);
+
+            AutoRef<NxRHI::IBuffer> copyVB;
+            {
+                FTransientCmd cmd(device, NxRHI::QU_Transfer);
+                auto copyDesc = pos_vb->Buffer->Desc;
+                copyDesc.Usage = USAGE_STAGING;
+                copyDesc.CpuAccess = ECpuAccess::CAS_READ;
+                copyDesc.MiscFlags = (EResourceMiscFlag)0;
+                copyDesc.RowPitch = copyDesc.Size;
+                copyDesc.DepthPitch = copyDesc.Size;
+                copyVB = MakeWeakRef(device->CreateBuffer(&copyDesc));
+                cmd.GetCmdList()->CopyBufferRegion(copyVB, 0, pos_vb->Buffer, 0, copyDesc.Size);
+            }
+            device->GetCmdQueue()->Flush(EQueueType::QU_Transfer);
+            copyVB->FetchGpuData(0, &vbBuffer);
 		}
 
 		pAttr->Write(mAABB);
@@ -387,7 +404,6 @@ namespace NxRHI
 				pAttr->Write(bFormatIndex32);
 			}
 
-			IBlobObject buffData;
 			AutoRef<NxRHI::IBuffer> copyVB;
 			{
 				FTransientCmd cmd(device, NxRHI::QU_Transfer);
@@ -401,12 +417,98 @@ namespace NxRHI
 				cmd.GetCmdList()->CopyBufferRegion(copyVB, 0, ib->Buffer, 0, copyDesc.Size);
 			}
 			device->GetCmdQueue()->Flush(EQueueType::QU_Transfer);
-			copyVB->FetchGpuData(0, &buffData);
-			pAttr->Write((BYTE*)buffData.GetData() + sizeof(UINT) * 2, desc.Size);
+			copyVB->FetchGpuData(0, &ibBuffer);
+			pAttr->Write((BYTE*)ibBuffer.GetData() + sizeof(UINT) * 2, desc.Size);
 			pAttr->EndWrite();
 		}
+#if 0
+		// cluster
+		std::vector<FCluster> clusters;
+
+		std::vector<v3dxVector3> verts;
+		verts.resize(mDesc.VertexNumber);
+		memcpy((BYTE*)&verts[0], (BYTE*)vbBuffer.GetData() + sizeof(UINT) * 2, mDesc.VertexNumber*sizeof(v3dxVector3));
+
+		if (!mGeometryMesh->IsIndex32)
+		{
+            std::vector<WORD> indexes;
+            indexes.resize(ib->Buffer->Desc.Size / sizeof(WORD));
+            memcpy((BYTE*)&indexes[0], (BYTE*)ibBuffer.GetData() + sizeof(UINT) * 2, ib->Buffer->Desc.Size);
+
+            RasterizeTriangles<WORD>(verts, indexes, clusters);
+		}
+#endif
 	}
 
+	template<typename IndexType>
+	void FMeshPrimitives::RasterizeTriangles(std::vector<v3dxVector3>& Verts, std::vector<IndexType>& Indexes, std::vector<FCluster>& clusters)
+	{
+		clusters.clear();
+
+        UINT32 NumTriangles = Indexes.size() / 3;
+
+        FAdjacency Adjacency(Indexes.size());
+        FEdgeHash EdgeHash(Indexes.size());
+
+        auto GetPosition = [&Verts, &Indexes](UINT32 EdgeIndex)
+        {
+            return Verts[Indexes[EdgeIndex]];
+        };
+
+        for (int EdgeIndex = 0; EdgeIndex < Indexes.size(); EdgeIndex++)
+        {
+            EdgeHash.Add_Concurrent(EdgeIndex, GetPosition);
+        };
+
+        for (int EdgeIndex = 0; EdgeIndex < Indexes.size(); EdgeIndex++)
+        {
+            INT32 AdjIndex = -1;
+            INT32 AdjCount = 0;
+            EdgeHash.ForAllMatching(EdgeIndex, false, GetPosition,
+                [&](INT32 EdgeIndex, INT32 OtherEdgeIndex)
+                {
+                    AdjIndex = OtherEdgeIndex;
+                    AdjCount++;
+                });
+
+            if (AdjCount > 1)
+                AdjIndex = -2;
+
+            Adjacency.Direct[EdgeIndex] = AdjIndex;
+        }
+
+        FDisjointSet DisjointSet(NumTriangles);
+
+        for (UINT32 EdgeIndex = 0, Num = Indexes.size(); EdgeIndex < Num; EdgeIndex++)
+        {
+            if (Adjacency.Direct[EdgeIndex] == -2)
+            {
+                // EdgeHash is built in parallel, so we need to sort before use to ensure determinism.
+                // This path is only executed in the rare event that an edge is shared by more than two triangles,
+                // so performance impact should be negligible in practice.
+                std::vector<INT32> Edges;
+                EdgeHash.ForAllMatching(EdgeIndex, false, GetPosition,
+                    [&](INT32 EdgeIndex0, INT32 EdgeIndex1)
+                    {
+                        Edges.push_back(EdgeIndex1);
+                    });
+                //Edges.Sort();
+				std::sort(Edges.begin(), Edges.end());
+
+                for (int i = 0; i < Edges.size(); ++i)
+                {
+                    Adjacency.Link(EdgeIndex, Edges[i]);
+                }
+            }
+
+            Adjacency.ForAll(EdgeIndex,
+                [&](INT32 EdgeIndex0, INT32 EdgeIndex1)
+                {
+                    if (EdgeIndex0 > EdgeIndex1)
+                        DisjointSet.UnionSequential(EdgeIndex0 / 3, EdgeIndex1 / 3);
+                });
+        }
+	}
 	bool FMeshPrimitives::LoadXnd(IGpuDevice* device, const char* name, XndHolder* xnd, bool isLoad)
 	{
 		if (xnd == nullptr)

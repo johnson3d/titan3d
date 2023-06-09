@@ -182,8 +182,8 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <ModuleDefinitionFile>Core.Window.def</ModuleDefinitionFile>
       <EnableUAC>false</EnableUAC>
-      <AdditionalLibraryDirectories>../3rd/native/pthread/lib/x64;../3rd/native/crunch/lib/x64/debug;../3rd/native/NVAftermath/lib/x64;..\3rd\native\FBXSDK\2019.2\lib\x64\release;../3rd/native/HPSocket/Windows/lib;../3rd/native/Vulkan/Lib;../3rd/native/renderdoc/Lib;..\3rd\native\PhysX-4.1\physx\Lib\windows\debug;../3rd/native/ShaderConductor/Lib/Release;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>libfbxsdk.lib;renderdoc.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>../3rd/native/pthread/lib/x64;../3rd/native/crunch/lib/x64/debug;../3rd/native/NVAftermath/lib/x64;..\3rd\native\FBXSDK\2019.2\lib\x64\release;../3rd/native/HPSocket/Windows/lib;../3rd/native/Vulkan/Lib;../3rd/native/renderdoc/Lib;..\3rd\native\PhysX-4.1\physx\Lib\windows\debug;../3rd/native/ShaderConductor/Lib/Release;../3rd/native/metis/5.1.0/libmetis/Release;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>libfbxsdk.lib;renderdoc.lib;metis.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PreBuildEvent>
       <Command>$(SolutionDir)CallTHT.bat</Command>
@@ -242,8 +242,8 @@
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableUAC>false</EnableUAC>
-      <AdditionalLibraryDirectories>../3rd/native/pthread/lib/x64;../3rd/native/crunch/lib/x64/release;../3rd/native/NVAftermath/lib/x64;../3rd/native/eigen;..\3rd\native\FBXSDK\2019.2\lib\x64\release;../3rd/native/HPSocket/Windows/lib;../3rd/native/Vulkan/Lib;../3rd/native/renderdoc/Lib;../3rd/native/eigen-3.4.0;..\3rd\native\PhysX-4.1\physx\Lib\windows\release;../3rd/native/ShaderConductor/Lib/Release;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>libfbxsdk.lib;renderdoc.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>../3rd/native/pthread/lib/x64;../3rd/native/crunch/lib/x64/release;../3rd/native/NVAftermath/lib/x64;../3rd/native/eigen;..\3rd\native\FBXSDK\2019.2\lib\x64\release;../3rd/native/HPSocket/Windows/lib;../3rd/native/Vulkan/Lib;../3rd/native/renderdoc/Lib;../3rd/native/eigen-3.4.0;..\3rd\native\PhysX-4.1\physx\Lib\windows\release;../3rd/native/ShaderConductor/Lib/Release;../3rd/native/metis/5.1.0/libmetis/Release;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>libfbxsdk.lib;renderdoc.lib;metis.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PreBuildEvent>
       <Command>$(SolutionDir)CallTHT.bat</Command>
