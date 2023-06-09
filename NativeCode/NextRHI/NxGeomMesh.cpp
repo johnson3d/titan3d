@@ -473,9 +473,15 @@ namespace NxRHI
         FAdjacency Adjacency(Indexes.size());
         FEdgeHash EdgeHash(Indexes.size());
 
-        auto GetPosition = [&Verts, &Indexes](UINT32 EdgeIndex)
+        auto GetPosition = [&Verts, &Indexes](UINT32 EdgeIndex, v3dxVector3& result)
         {
-            return Verts[Indexes[EdgeIndex]];
+			// TODO: check index range
+			if (Verts.size() > Indexes[EdgeIndex])
+			{
+				result = Verts[Indexes[EdgeIndex]];
+				return true;
+			}
+			return false;
         };
 
         for (int EdgeIndex = 0; EdgeIndex < Indexes.size(); EdgeIndex++)

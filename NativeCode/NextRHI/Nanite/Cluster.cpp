@@ -265,9 +265,14 @@ FAdjacency FCluster::BuildAdjacency() const
 		Adjacency.Direct[ EdgeIndex ] = -1;
 
 		EdgeHash.ForAllMatching( EdgeIndex, true,
-			[ this ]( INT32 CornerIndex )
+			[ this ]( INT32 CornerIndex, v3dxVector3& result)
 			{
-				return GetPosition( Indexes[ CornerIndex ] );
+				if (Verts.size() > Indexes[CornerIndex])
+				{
+					result = GetPosition(Indexes[CornerIndex]);
+					return true;
+				}
+				return false;
 			},
 			[&]( INT32 EdgeIndex, INT32 OtherEdgeIndex )
 			{

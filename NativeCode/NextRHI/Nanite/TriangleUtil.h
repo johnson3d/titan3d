@@ -63,6 +63,8 @@ static constexpr FORCEINLINE T Max3(const T A, const T B, const T C)
 {
     return std::max(std::max(A, B), C);
 }
+
+// 0, 1, 2 => 1, 2, 0
 __forceinline UINT32 Cycle3( UINT32 Value )
 {
 	UINT32 ValueMod3 = Value % 3;
@@ -190,8 +192,15 @@ public:
 	template< typename FGetPosition >
 	void Add_Concurrent( INT32 EdgeIndex, FGetPosition&& GetPosition )
 	{
-		const v3dxVector3& Position0 = GetPosition( EdgeIndex );
-		const v3dxVector3& Position1 = GetPosition( Cycle3( EdgeIndex ) );
+		v3dxVector3 Position0;
+		bool isValid = GetPosition(EdgeIndex, Position0);
+		if (!isValid)
+			return;
+
+		v3dxVector3 Position1;
+		isValid = GetPosition(Cycle3(EdgeIndex), Position1);
+		if (!isValid)
+			return;
 				
 		UINT32 Hash0 = HashPosition( Position0 );
 		UINT32 Hash1 = HashPosition( Position1 );
@@ -203,8 +212,15 @@ public:
 	template< typename FGetPosition, typename FuncType >
 	void ForAllMatching( INT32 EdgeIndex, bool bAdd, FGetPosition&& GetPosition, FuncType&& Function )
 	{
-		const v3dxVector3& Position0 = GetPosition( EdgeIndex );
-		const v3dxVector3& Position1 = GetPosition( Cycle3( EdgeIndex ) );
+		v3dxVector3 Position0;
+		bool isValid = GetPosition(EdgeIndex, Position0);
+		if (!isValid)
+			return;
+
+		v3dxVector3 Position1;
+		isValid = GetPosition(Cycle3(EdgeIndex), Position1);
+		if (!isValid)
+			return;
 				
 		UINT32 Hash0 = HashPosition( Position0 );
 		UINT32 Hash1 = HashPosition( Position1 );
@@ -212,8 +228,12 @@ public:
 		
 		for( UINT32 OtherEdgeIndex = HashTable.First( Hash ); HashTable.IsValid( OtherEdgeIndex ); OtherEdgeIndex = HashTable.Next( OtherEdgeIndex ) )
 		{
-			if( Position0 == GetPosition( Cycle3( OtherEdgeIndex ) ) &&
-				Position1 == GetPosition( OtherEdgeIndex ) )
+			v3dxVector3 temp0;
+			v3dxVector3 temp1;
+			if (!GetPosition(Cycle3(OtherEdgeIndex), temp0) || !GetPosition(OtherEdgeIndex, temp1))
+				continue;
+
+			if( Position0 == temp0 && Position1 == temp1)
 			{
 				// Found matching edge.
 				Function( EdgeIndex, OtherEdgeIndex );
