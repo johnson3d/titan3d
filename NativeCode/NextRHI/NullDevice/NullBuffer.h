@@ -21,7 +21,7 @@ namespace NxRHI
 		virtual void Unmap(UINT index) override;
 		virtual void UpdateGpuData(UINT subRes, void* pData, const FSubResourceFootPrint* footPrint) override;
 	public:
-		
+		std::vector<BYTE>		mBuffer;
 	};
 
 	class NullTexture : public ITexture

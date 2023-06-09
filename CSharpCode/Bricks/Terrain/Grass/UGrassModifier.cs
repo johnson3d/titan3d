@@ -15,9 +15,11 @@ namespace EngineNS.Bricks.Terrain.Grass
         // position(12b*2), rot(4b), scale(4b)
         public UInt32 Data;
         public float TerrainHeight;
+        public int GrassDataPad0;
+        public int GrassDataPad1;
     }
 
-    public class UGrassModifier
+    public class UGrassModifier : IDisposable
     {
         public CDLOD.UTerrainGrassManager.UGrassType GrassType;
         uint mCurNumber = 0;
@@ -28,7 +30,7 @@ namespace EngineNS.Bricks.Terrain.Grass
         }
         uint mMaxNumber = 0;
         public uint MaxNumber => mMaxNumber;
-        public class UInstantVBs
+        public class UInstantVBs : IDisposable
         {
             public UInt32[] mData = null;
             public float[] mHeight = null;
@@ -37,7 +39,7 @@ namespace EngineNS.Bricks.Terrain.Grass
             public NxRHI.UVbView mHeightVB;
 
             public NxRHI.UVertexArray mAttachVBs = new NxRHI.UVertexArray();
-            public void Cleanup()
+            public void Dispose()
             {
                 mDataVB?.Dispose();
                 mDataVB = null;
@@ -50,7 +52,7 @@ namespace EngineNS.Bricks.Terrain.Grass
 
                 var oldData = mData;
                 var oldHeight = mHeight;
-                Cleanup();
+                Dispose();
                 mdf.mMaxNumber = nSize * 2;
                 mData = new UInt32[mdf.mMaxNumber];
                 mHeight = new float[mdf.mMaxNumber];
@@ -80,7 +82,7 @@ namespace EngineNS.Bricks.Terrain.Grass
                 desc.m_Stride = (UInt32)sizeof(float);
                 mHeightVB = rc.CreateVBV(null, in desc);
             }
-            public unsafe void Flush2VB(NxRHI.ICommandList cmd, UGrassModifier mdf)
+            public unsafe void Flush2VB(UGrassModifier mdf)
             {
                 if (mdf.mCurNumber == 0)
                     return;
@@ -121,19 +123,19 @@ namespace EngineNS.Bricks.Terrain.Grass
             }
         }
         public UInstantVBs InstantVBs;
-        public class UInstantSSBO
+        public class UInstantSSBO : IDisposable
         {
             public FVSGrassData[] InstData;
             public NxRHI.UBuffer InstantBuffer;
             public NxRHI.USrView InstantSRV;
             public bool IsDirty { get; private set; } = true;
-            public void Cleanup()
+            public void Dispose()
             {
-                InstantSRV?.Dispose();
-                InstantSRV = null;
-
                 InstantBuffer?.Dispose();
                 InstantBuffer = null;
+
+                InstantSRV?.Dispose();
+                InstantSRV = null;
 
                 InstData = null;
             }
@@ -143,7 +145,7 @@ namespace EngineNS.Bricks.Terrain.Grass
                     return;
 
                 var oldData = InstData;
-                Cleanup();
+                Dispose();
                 mdf.mMaxNumber = nSize;
                 InstData = new FVSGrassData[mdf.mMaxNumber];
 
@@ -175,6 +177,8 @@ namespace EngineNS.Bricks.Terrain.Grass
                 srvDesc.Buffer.NumElements = mdf.mMaxNumber;
                 srvDesc.Buffer.StructureByteStride = bfDesc.StructureStride;
                 InstantSRV = UEngine.Instance.GfxDevice.RenderContext.CreateSRV(InstantBuffer, in srvDesc);
+                InstantSRV.SetDebugName("InstantSRV");
+                InstantSRV.SetDebugName("InstantSRV");
             }
             public uint PushInstance(UGrassModifier mdf, uint data, float height)
             {
@@ -209,10 +213,10 @@ namespace EngineNS.Bricks.Terrain.Grass
 
                 IsDirty = true;
             }
-            public unsafe void Flush2VB(NxRHI.ICommandList cmd, UGrassModifier mdf)
+            public unsafe uint Flush2VB(UGrassModifier mdf)
             {
                 if (mdf.mCurNumber == 0)
-                    return;
+                    return 0;
 
                 if(IsDirty)
                 {
@@ -223,31 +227,40 @@ namespace EngineNS.Bricks.Terrain.Grass
                     }
                     IsDirty = false;
                 }
+                return mdf.mCurNumber;
             }
         }
         public UInstantSSBO InstantSSBO;
 
         ~UGrassModifier()
         {
-            Cleanup();
+            Dispose();
         }
 
-        public void Cleanup()
+        public void Dispose()
         {
-            InstantVBs?.Cleanup();
+            InstantVBs?.Dispose();
             InstantVBs = null;
 
-            InstantSSBO?.Cleanup();
+            InstantSSBO?.Dispose();
             InstantSSBO = null;
         }
 
         public void SetMode(bool bSSBO = true)
         {
-            Cleanup();
+            Dispose();
             if (bSSBO)
                 InstantSSBO = new UInstantSSBO();
             else
                 InstantVBs = new UInstantVBs();
+
+            if (GrassTemp == null)
+            {
+                GrassTemp = new Graphics.Pipeline.Common.UGpuDataArray<FVSGrassData>();
+                GrassTemp.Initialize(false);
+                GrassTemp.PushData(new FVSGrassData());
+                GrassTemp.Flush2GPU();
+            }
         }
         public void SureBuffers(uint nSize)
         {
@@ -271,12 +284,13 @@ namespace EngineNS.Bricks.Terrain.Grass
             else if(InstantVBs != null)
                 InstantVBs.SetInstance(index, data, height);
         }
-        public unsafe void Flush2VB(NxRHI.ICommandList cmd)
+        public unsafe uint Flush2VB()
         {
             if (InstantSSBO != null)
-                InstantSSBO.Flush2VB(cmd, this);
+                return InstantSSBO.Flush2VB(this);
             else if (InstantVBs != null)
-                InstantVBs.Flush2VB(cmd, this);
+                InstantVBs.Flush2VB(this);
+            return 0;
         }
         private void SureCBuffer(NxRHI.IGraphicsEffect shaderProg)
         {
@@ -288,6 +302,7 @@ namespace EngineNS.Bricks.Terrain.Grass
                     GrassType.GrassCBuffer = UEngine.Instance.GfxDevice.RenderContext.CreateCBV(coreBinder.CBPerGrassType.Binder.mCoreObject);
             }
         }
+        public static Graphics.Pipeline.Common.UGpuDataArray<FVSGrassData> GrassTemp = null;
         public class UMdfShaderBinder : Graphics.Pipeline.UCoreShaderBinder.UShaderResourceIndexer
         {
             public void Init(NxRHI.UShaderEffect effect)
@@ -315,8 +330,6 @@ namespace EngineNS.Bricks.Terrain.Grass
 
             SureCBuffer(drawcall.mCoreObject.GetGraphicsEffect());
 
-            drawcall.mCoreObject.DrawInstance = (ushort)this.CurNumber;
-
             var effectBinder = drawcall.Effect.mBindIndexer as UMdfShaderBinder;
             if (effectBinder == null)
             {
@@ -327,7 +340,10 @@ namespace EngineNS.Bricks.Terrain.Grass
 
             //var index = drawcall.FindBinder("HeightMapTexture");
             if (effectBinder.HeightMapTexture != null)
-                drawcall.BindSRV(effectBinder.HeightMapTexture.mCoreObject, pat.Level.HeightMapSRV);
+            {
+                drawcall.BindSRV(effectBinder.HeightMapTexture, pat.Level.HeightMapSRV);
+                //drawcall.BindSRV(effectBinder.HeightMapTexture, UEngine.Instance.GfxDevice.TextureManager.DefaultTexture);
+            }
             //index = drawcall.FindBinder("Samp_HeightMapTexture");
             if (effectBinder.Samp_HeightMapTexture != null)
                 drawcall.BindSampler(effectBinder.Samp_HeightMapTexture.mCoreObject, policy.ClampState);
@@ -351,9 +367,28 @@ namespace EngineNS.Bricks.Terrain.Grass
 
                 pat.PatchCBuffer.SetValue(coreBinder.CBPerTerrainPatch.TexUVOffset, in pat.TexUVOffset);
 
+                pat.PatchCBuffer.FlushDirty();
                 drawcall.BindCBuffer(effectBinder.cbPerPatch.mCoreObject, pat.PatchCBuffer);
             }
 
+            uint instCount = 0;
+            if (InstantSSBO != null)
+            {
+                //var binder = drawcall.FindBinder("VSGrassDataArray");
+                if (effectBinder.VSGrassDataArray != null)
+                {
+                    instCount = this.Flush2VB();
+                    drawcall.BindSRV(effectBinder.VSGrassDataArray, InstantSSBO.InstantSRV);
+                    //drawcall.BindSRV(effectBinder.VSGrassDataArray, GrassTemp.DataSRV); 
+                }
+            }
+            else if (InstantVBs != null)
+            {
+                drawcall.BindAttachVertexArray(InstantVBs.mAttachVBs);
+            }
+
+            //System.Diagnostics.Debug.Assert(this.CurNumber == instCount);
+            drawcall.mCoreObject.DrawInstance = (ushort)instCount;
             //index = drawcall.FindBinder("cbPerGrassType");
             if (effectBinder.cbPerGrassType != null)
             {
@@ -361,24 +396,12 @@ namespace EngineNS.Bricks.Terrain.Grass
                 GrassType.GrassCBuffer.SetValue(coreBinder.CBPerGrassType.MinScale, GrassType.GrassDesc.MinScale);
                 GrassType.GrassCBuffer.SetValue(coreBinder.CBPerGrassType.MaxScale, GrassType.GrassDesc.MaxScale);
                 GrassType.GrassCBuffer.SetValue(coreBinder.CBPerGrassType.HeightMapMinHeight, in pat.Level.HeightMapMinHeight);
+                //GrassType.GrassCBuffer.SetValue(coreBinder.CBPerGrassType.HeightMapMinHeight, (int)1);
                 GrassType.GrassCBuffer.SetValue(coreBinder.CBPerGrassType.PatchIdxX, pat.IndexX);
                 GrassType.GrassCBuffer.SetValue(coreBinder.CBPerGrassType.PatchIdxZ, pat.IndexZ);
-                drawcall.BindCBuffer(effectBinder.cbPerGrassType.mCoreObject, GrassType.GrassCBuffer);
-            }
-
-            if(InstantSSBO != null)
-            {
-                //var binder = drawcall.FindBinder("VSGrassDataArray");
-                if (effectBinder.VSGrassDataArray != null)
-                {
-                    var cmd = UEngine.Instance.GfxDevice.RenderContext.GpuQueue.FramePostCmdList.mCoreObject;
-                    this.Flush2VB(cmd);
-                    drawcall.BindSRV(effectBinder.VSGrassDataArray.mCoreObject, InstantSSBO.InstantSRV);
-                }
-            }
-            else if(InstantVBs != null)
-            {
-                drawcall.BindAttachVertexArray(InstantVBs.mAttachVBs);
+                GrassType.GrassCBuffer.SetValue(coreBinder.CBPerGrassType.MaxGrassInstanceNum, instCount);
+                GrassType.GrassCBuffer.FlushDirty();
+                drawcall.BindCBuffer(effectBinder.cbPerGrassType, GrassType.GrassCBuffer);
             }
         }
     }
@@ -400,6 +423,8 @@ namespace EngineNS.Graphics.Pipeline
             public NxRHI.FShaderVarDesc PatchIdxX;
             [NxRHI.UShader.UShaderVar(VarType = typeof(float))]
             public NxRHI.FShaderVarDesc PatchIdxZ;
+            [NxRHI.UShader.UShaderVar(VarType = typeof(int))]
+            public NxRHI.FShaderVarDesc MaxGrassInstanceNum;
         }
         public readonly UCBufferPerGrassTypeIndexer CBPerGrassType = new UCBufferPerGrassTypeIndexer();
     }

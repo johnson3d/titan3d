@@ -409,7 +409,8 @@ namespace EngineNS.Rtti
                     }
                     else
                         ParameterType = Rtti.UTypeDesc.TypeOf(info.ParameterType);
-                    DefaultValue = info.DefaultValue;
+                    if (info.DefaultValue is System.DBNull == false)
+                        DefaultValue = info.DefaultValue;
                 }
                 public bool IsOut
                 {

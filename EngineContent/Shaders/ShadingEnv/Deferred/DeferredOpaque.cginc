@@ -22,8 +22,13 @@ PS_INPUT VS_Main(VS_INPUT input1)
 	Default_VSInput2PSInput(output, input);
 
 #if defined(VS_NO_WorldTransform)
+#if USE_PS_PointLightIndices == 1
 	output.PointLightIndices = PointLightIndices;
+#endif
+
+#if USE_PS_SpecialData == 1
 	output.SpecialData.x = PointLightNum;
+#endif
 #endif
 
 	MTL_OUTPUT mtl = (MTL_OUTPUT)0;
@@ -41,10 +46,22 @@ PS_INPUT VS_Main(VS_INPUT input1)
 	output.vPosition.xyz += mtl.mVertexOffset;
 
 	float4 wp4 = mul(float4(output.vPosition.xyz, 1), WorldMatrix);
+#if USE_PS_WorldPos == 1
 	output.vWorldPos = wp4.xyz;
+#endif
+
+#if USE_PS_Normal == 1
 	output.vNormal = normalize(mul(float4(output.vNormal.xyz, 0), WorldMatrix).xyz);
+#endif
+
+#if USE_PS_Tangent == 1
 	output.vTangent.xyz = normalize(mul(float4(output.vTangent.xyz, 0), WorldMatrix).xyz);
 #endif
+
+#else
+	float4 wp4 = float4(output.vPosition.xyz, 1);
+#endif
+
 	float3 preWorldPos = mul(float4(output.vPosition.xyz, 1), PreWorldMatrix).xyz;
 	float4 prePos = mul(float4(preWorldPos, 1), GetPreFrameViewPrjMtx(true));
 	//float4 noJitterPos = mul(float4(output.vWorldPos, 1), GetViewPrjMtx(false));
@@ -57,12 +74,19 @@ PS_INPUT VS_Main(VS_INPUT input1)
 	//float2 currentScreenPos = (output.vPosition.xy / output.vPosition.w) * 0.5 + 0.5;
 	//output.psCustomUV0.xy = currentScreenPos - previousScreenPos;
 
+#if USE_PS_Custom1 == 1
 	output.psCustomUV1 = prePos;
+#endif
+
+#if USE_PS_Custom2 == 1
 	output.psCustomUV2 = output.vPosition;
+#endif
 	//output.psCustomUV3 = noJitterPos;
 	//output.psCustomUV0.xy = float2(output.vPosition.xy / output.vPosition.w) * float2(0.5f, -0.5f) + float2(0.5f, 0.5f);
 	//output.psCustomUV0.z = float(output.vPosition.z / output.vPosition.w);
+#if USE_PS_Custom0 == 1
 	output.psCustomUV0.w = output.vPosition.w;
+#endif
 
 	return output;
 }

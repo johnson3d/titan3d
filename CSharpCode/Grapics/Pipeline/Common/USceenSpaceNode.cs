@@ -102,8 +102,8 @@ namespace EngineNS.Graphics.Pipeline.Common
         public unsafe void ClearGBuffer(URenderPolicy policy)
         {
             var cmdlist = BasePass.DrawCmdList;
-            if(cmdlist.BeginCommand())
             {
+                cmdlist.BeginCommand();
                 var passClears = new NxRHI.FRenderPassClears();
                 passClears.SetDefault();
                 passClears.SetClearColor(0, new Color4f(0, 0, 0, 0));
@@ -125,9 +125,9 @@ namespace EngineNS.Graphics.Pipeline.Common
             using (new Profiler.TimeScopeHelper(ScopeTick))
             {
                 var cmdlist = BasePass.DrawCmdList;
+                var recorder = cmdlist.BeginCommand();
                 if (ScreenMesh != null)
                 {
-                    cmdlist.ResetGpuDraws();
                     for (int j = 0; j < ScreenMesh.Atoms.Count; j++)
                     {
                         var drawcall = ScreenMesh.GetDrawCall(GBuffers, j, ScreenDrawPolicy, Graphics.Pipeline.URenderPolicy.EShadingType.BasePass, this);
@@ -136,10 +136,9 @@ namespace EngineNS.Graphics.Pipeline.Common
                         drawcall.TagObject = this;
                         drawcall.BindCBuffer(drawcall.Effect.BindIndexer.cbPerViewport, GBuffers.PerViewportCBuffer);
                         drawcall.BindCBuffer(drawcall.Effect.BindIndexer.cbPerCamera, policy.DefaultCamera.PerCameraCBuffer);
-                        cmdlist.PushGpuDraw(drawcall.mCoreObject);
+                        recorder.PushGpuDraw(drawcall);
                     }
                 }
-                if (cmdlist.BeginCommand())
                 {
                     cmdlist.SetViewport(in GBuffers.Viewport);
                     var passClears = new NxRHI.FRenderPassClears();
@@ -149,8 +148,8 @@ namespace EngineNS.Graphics.Pipeline.Common
                     cmdlist.BeginPass(GBuffers.FrameBuffers, in passClears, DebugName);
                     cmdlist.FlushDraws();
                     cmdlist.EndPass();
-                    cmdlist.EndCommand();
                 }
+                cmdlist.EndCommand();
                 UEngine.Instance.GfxDevice.RenderCmdQueue.QueueCmdlist(cmdlist);
             }   
         }

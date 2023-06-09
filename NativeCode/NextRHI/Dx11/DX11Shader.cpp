@@ -2,6 +2,10 @@
 #include "DX11GpuDevice.h"
 #include "../NxRHIDefine.h"
 
+#if defined(HasModule_GpuDump)
+#include "../../Bricks/GpuDump/NvAftermath.h"
+#endif
+
 #define new VNEW
 
 NS_BEGIN
@@ -182,32 +186,35 @@ namespace NxRHI
 		if (Desc->Dxbc.size() == 0)
 			return false;
 
+#if defined(HasModule_GpuDump)
+		GpuDump::NvAftermath::RegByteCode(desc->DebugName.c_str(), &Desc->Dxbc[0], (UINT)Desc->Dxbc.size());
+#endif
 		//Reflect(desc);
 		Reflector = desc->DxbcReflector;
 
 		switch (desc->Type)
 		{
-		case SDT_ComputeShader:
-		{
-			auto hr = device->mDevice->CreateComputeShader(&desc->Dxbc[0], desc->Dxbc.size(), NULL, &mComputeShader);
-			if (FAILED(hr))
-				return false;
-		}
-		break;
-		case SDT_VertexShader:
-		{
-			auto hr = device->mDevice->CreateVertexShader(&desc->Dxbc[0], desc->Dxbc.size(), NULL, &mVertexShader);
-			if (FAILED(hr))
-				return false;
-		}
-		break;
-		case SDT_PixelShader:
-		{
-			auto hr = device->mDevice->CreatePixelShader(&desc->Dxbc[0], desc->Dxbc.size(), NULL, &mPixelShader);
-			if (FAILED(hr))
-				return false;
-		}
-		break;
+			case SDT_ComputeShader:
+			{
+				auto hr = device->mDevice->CreateComputeShader(&desc->Dxbc[0], desc->Dxbc.size(), NULL, &mComputeShader);
+				if (FAILED(hr))
+					return false;
+			}
+			break;
+			case SDT_VertexShader:
+			{
+				auto hr = device->mDevice->CreateVertexShader(&desc->Dxbc[0], desc->Dxbc.size(), NULL, &mVertexShader);
+				if (FAILED(hr))
+					return false;
+			}
+			break;
+			case SDT_PixelShader:
+			{
+				auto hr = device->mDevice->CreatePixelShader(&desc->Dxbc[0], desc->Dxbc.size(), NULL, &mPixelShader);
+				if (FAILED(hr))
+					return false;
+			}
+			break;
 		}
 		return true;
 	}

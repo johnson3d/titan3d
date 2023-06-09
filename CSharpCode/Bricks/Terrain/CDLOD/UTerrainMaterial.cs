@@ -199,7 +199,6 @@ namespace EngineNS.Bricks.Terrain.CDLOD
 
             if (MaterialIdArray.Count == 0)
                 return false;
-            var cmd = UEngine.Instance.GfxDevice.RenderContext.GpuQueue.FramePostCmdList.mCoreObject;
             var dftLayer = MaterialIdArray[0];
             {
                 var txDesc = NxRHI.USrView.LoadPictureDesc(dftLayer.TexDiffuse);

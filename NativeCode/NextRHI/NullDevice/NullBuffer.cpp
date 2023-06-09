@@ -20,17 +20,30 @@ namespace NxRHI
 	{
 		Desc = *desc;
 	
+		mBuffer.resize(desc->Size);
+		if (desc->InitData != nullptr)
+			memcpy(&mBuffer[0], desc->InitData, desc->Size);
 		return true;
 	}
 
 	void NullBuffer::UpdateGpuData(UINT subRes, void* pData, const FSubResourceFootPrint* footPrint)
 	{
-		
+		auto pTar = &mBuffer[0];
+		auto pSrc = (BYTE*)pData;
+		memcpy(pTar, pSrc, footPrint->TotalSize);
+		/*for (int i = 0; i < footPrint->Height; i++)
+		{
+			memcpy(pTar, pSrc, footPrint->TotalSize);
+			pTar += Desc.RowPitch;
+		}*/
 	}
 
 	bool NullBuffer::Map(UINT index, FMappedSubResource* res, bool forRead)
 	{
-		return false;
+		res->RowPitch = Desc.RowPitch;
+		res->DepthPitch = Desc.DepthPitch;
+		res->pData = &mBuffer[0];
+		return true;
 	}
 
 	void NullBuffer::Unmap(UINT index)
@@ -81,14 +94,48 @@ namespace NxRHI
 	bool NullVbView::Init(NullGpuDevice* device, IBuffer* pBuffer, const FVbvDesc* desc)
 	{
 		Desc = *desc;
-		Buffer = pBuffer;
+		Desc.InitData = nullptr;
+		if (pBuffer == nullptr)
+		{
+			FBufferDesc bfDesc{};
+			bfDesc.SetDefault();
+			bfDesc.Size = desc->Size;
+			bfDesc.StructureStride = desc->Stride;
+			bfDesc.InitData = desc->InitData;
+			bfDesc.Type = EBufferType::BFT_Vertex;
+			bfDesc.Usage = desc->Usage;
+			bfDesc.CpuAccess = desc->CpuAccess;
+			Buffer = MakeWeakRef(device->CreateBuffer(&bfDesc));
+			ASSERT(Buffer != nullptr);
+		}
+		else
+		{
+			Buffer = pBuffer;
+		}
 		return true;
 	}
 
 	bool NullIbView::Init(NullGpuDevice* device, IBuffer* pBuffer, const FIbvDesc* desc)
 	{
 		Desc = *desc;
-		Buffer = pBuffer;
+		Desc.InitData = nullptr;
+		if (pBuffer == nullptr)
+		{
+			FBufferDesc bfDesc{};
+			bfDesc.SetDefault();
+			bfDesc.Size = desc->Size;
+			bfDesc.StructureStride = desc->Stride;
+			bfDesc.InitData = desc->InitData;
+			bfDesc.Type = EBufferType::BFT_Index;
+			bfDesc.Usage = desc->Usage;
+			bfDesc.CpuAccess = desc->CpuAccess;
+			Buffer = MakeWeakRef(device->CreateBuffer(&bfDesc));
+			ASSERT(Buffer != nullptr);
+		}
+		else
+		{
+			Buffer = pBuffer;
+		}
 		return true;
 	}
 

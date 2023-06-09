@@ -134,7 +134,7 @@ namespace EngineNS.Graphics.Pipeline.Common
         public NxRHI.UCbView HZBCullInstanceCBuffer;
         public NxRHI.UCbView HZBCullClusterCBuffer;
 
-        public UDrawBuffers BasePass = new UDrawBuffers();
+        //public UDrawBuffers BasePass = new UDrawBuffers();
 
         public int NumThreadsPerGroup = 64;
 
@@ -284,9 +284,9 @@ namespace EngineNS.Graphics.Pipeline.Common
             }
 
 
-            GpuInstances.Flush2GPU(cmd.mCoreObject);
+            GpuInstances.Flush2GPU();
 
-            CullInstancesBuffer.Flush2GPU(cmd.mCoreObject);
+            CullInstancesBuffer.Flush2GPU();
         }
 
         private unsafe void Cull(NxRHI.UGpuDevice rc)
@@ -318,7 +318,8 @@ namespace EngineNS.Graphics.Pipeline.Common
                 Cull_CullGpuIndexsDrawcall.BindUav("VisibilityGpuActorsBuffer", VisibilityGpuActorsBuffer.DataUAV);
                 Cull_CullGpuIndexsDrawcall.BindSrv("NumberGpuActors", NumberGpuActorsBuffer.DataSRV);
 
-                Cull_CullGpuIndexsDrawcall.Commit(cmd);
+                //Cull_CullGpuIndexsDrawcall.Commit(cmd);
+                cmd.PushGpuDraw(Cull_CullGpuIndexsDrawcall);
             }
 
             {
@@ -334,7 +335,8 @@ namespace EngineNS.Graphics.Pipeline.Common
                 Cull_SetupCullClusterArgsDrawcall.BindUav("CullClusterIndirectArgs", CullClusterIndirectArgs.DataUAV);
                 Cull_SetupCullClusterArgsDrawcall.BindSrv("NumberVisibilityGpuActorBuffer", NumberVisibilityGpuActorBuffer.DataSRV);
 
-                Cull_SetupCullClusterArgsDrawcall.Commit(cmd);
+                //Cull_SetupCullClusterArgsDrawcall.Commit(cmd);
+                cmd.PushGpuDraw(Cull_SetupCullClusterArgsDrawcall);
 
             }
 
@@ -356,7 +358,8 @@ namespace EngineNS.Graphics.Pipeline.Common
                 Cull_CullClusterDrawcall.BindUav("VisibleClusterMeshData", VisibleClusterMeshData.DataUAV);
                 Cull_CullClusterDrawcall.BindUav("NumnerVisibleClusterMeshData", NumnerVisibleClusterMeshData.DataUAV);
 
-                Cull_CullClusterDrawcall.Commit(cmd);
+                //Cull_CullClusterDrawcall.Commit(cmd);
+                cmd.PushGpuDraw(Cull_CullClusterDrawcall);
             }
 
             {
@@ -372,11 +375,15 @@ namespace EngineNS.Graphics.Pipeline.Common
                 Cull_SetupDrawClusterArgsDrawcall.BindSrv("NumnerVisibleClusterMeshData", NumnerVisibleClusterMeshData.DataSRV);
                 Cull_SetupDrawClusterArgsDrawcall.BindUav("DrawClusterIndirectArgs", SetupDrawClusterIndirectArgs.DataUAV);
 
-                Cull_SetupDrawClusterArgsDrawcall.Commit(cmd);
+                //Cull_SetupDrawClusterArgsDrawcall.Commit(cmd);
+                cmd.PushGpuDraw(Cull_SetupDrawClusterArgsDrawcall);
             }
             //Cull_CullGpuIndexsDrawcall.
-            
+
             //defines.mCoreObject.AddDefine("BufferHeadSize", $"{UGpuParticleResources.BufferHeadSize * 4}");
+
+            //awzklyq!
+            cmd.FlushDraws();
         }
     }
 }

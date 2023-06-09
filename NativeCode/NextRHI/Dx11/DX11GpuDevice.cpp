@@ -9,6 +9,10 @@
 #include "DX11Drawcall.h"
 #include "../NxEffect.h"
 
+#if defined(HasModule_GpuDump)
+#include "../../Bricks/GpuDump/NvAftermath.h"
+#endif
+
 #define new VNEW
 
 NS_BEGIN
@@ -69,6 +73,7 @@ namespace NxRHI
 		DXGI_ADAPTER_DESC dxdesc{};
 		mGIAdapters[index]->GetDesc(&dxdesc);
 		desc->RhiType = ERhiType::RHI_D3D11;
+		desc->VendorId = dxdesc.VendorId;
 		desc->AdapterId = index;
 		desc->DedicatedVideoMemory = dxdesc.DedicatedVideoMemory;
 		auto text = StringHelper::wstrtostr(dxdesc.Description);
@@ -94,6 +99,11 @@ namespace NxRHI
 		Safe_Release(mDefinedAnnotation);
 		Safe_Release(mDevice5);
 		Safe_Release(mDevice);
+	}
+	void DX11GpuDevice::TryFinalizeDevice(IGpuSystem* pGpuSystem)
+	{
+		mIsTryFinalize = true;
+		mIsFinalized = false;
 	}
 	ICmdQueue* DX11GpuDevice::GetCmdQueue()
 	{
@@ -139,12 +149,23 @@ namespace NxRHI
 			D3D_FEATURE_LEVEL_10_0,
 		};
 		UINT numFeatureLevels = ARRAYSIZE(featureLevels);
-
+#if defined(HasModule_GpuDump)
+		if (desc->GpuDump && desc->IsNVIDIA())
+		{
+			GpuDump::NvAftermath::InitDump(NxRHI::RHI_D3D11);
+		}
+#endif
 		auto hr = D3D11CreateDevice(NULL, D3D_DRIVER_TYPE_HARDWARE, NULL/*(HMODULE)desc->AppHandle*/, createDeviceFlags,
 			featureLevels, numFeatureLevels, D3D11_SDK_VERSION, &mDevice, &mFeatureLevel, &pImmContext);
 		if (FAILED(hr))
 			return false;
 
+#if defined(HasModule_GpuDump)
+		if (desc->GpuDump && desc->IsNVIDIA())
+		{
+			GpuDump::NvAftermath::DeviceCreated(NxRHI::RHI_D3D11, this);
+		}
+#endif
 		/*UINT required = D3D11_FORMAT_SUPPORT_RENDER_TARGET | D3D11_FORMAT_SUPPORT_DISPLAY;
 		for (DXGI_FORMAT i = DXGI_FORMAT::DXGI_FORMAT_UNKNOWN; i < DXGI_FORMAT::DXGI_FORMAT_B4G4R4A4_UNORM; i++)
 		{
@@ -186,12 +207,12 @@ namespace NxRHI
 		mCaps.IsSupoortBufferToTexture = false;
 		mCaps.IsSupportSSBO_VS = true;
 		
-		mGpuResourceAlignment.CBufferAlignment = 256;
+		/*mGpuResourceAlignment.CBufferAlignment = 256;
 		mGpuResourceAlignment.TexturePitchAlignment = 256;
 		mGpuResourceAlignment.TextureAlignment = 512;
 		mGpuResourceAlignment.MsaaAlignment = 4194304;
 		mGpuResourceAlignment.RawSrvUavAlignment = 16;
-		mGpuResourceAlignment.UavCounterAlignment = 4096;
+		mGpuResourceAlignment.UavCounterAlignment = 4096;*/
 
 		return true;
 	}
@@ -433,7 +454,18 @@ namespace NxRHI
 	void DX11GpuDevice::TickPostEvents()
 	{
 		IGpuDevice::TickPostEvents();
-		
+		if (mIsTryFinalize)
+		{
+			mFrameFence->WaitToExpect();
+			mCmdQueue->Flush(EQueueType::QU_ALL);
+			bool post = mTickingPostEvents.size() == 0 && mPostEvents.size() == 0;
+
+			if (post)
+			{
+				mCmdQueue->ClearIdleCmdlists();
+				mIsFinalized = true;
+			}
+		}
 	}
 
 	DX11CmdQueue::DX11CmdQueue()
@@ -494,11 +526,12 @@ namespace NxRHI
 		mIdleCmdlist.push(cmd);
 		return;
 	}
-	void DX11CmdQueue::Flush(EQueueType type)
+	UINT64 DX11CmdQueue::Flush(EQueueType type)
 	{
 		if (type == EQueueType::QU_Unknown)
-			return;
+			return 0;
 		mHardwareContext->mContext->Flush();
+		return 0;
 	}
 }
 

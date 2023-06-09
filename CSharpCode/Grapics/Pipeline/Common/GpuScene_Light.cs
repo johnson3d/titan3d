@@ -55,7 +55,7 @@ namespace EngineNS.Graphics.Pipeline.Common
                     light.ColorAndIntensity = new Vector4(lightData.Color.X, lightData.Color.Y, lightData.Color.Z, lightData.Intensity);
                     pointLight.IndexInGpuScene = PointLights.PushData(light);
                 }
-                PointLights.Flush2GPU(cmd.mCoreObject);
+                PointLights.Flush2GPU();
             }
         }
     }

@@ -90,10 +90,29 @@ namespace EngineNS
         {
             return $"{X},{Y},{Z}";
         }
-        public Vector2 GetXY()
+        #region swizzle
+        public Vector2i XY
         {
-            return new Vector2(X, Y);
+            get
+            {
+                return new Vector2i(X, Y);
+            }
         }
+        public Vector2i XZ
+        {
+            get
+            {
+                return new Vector2i(X, Z);
+            }
+        }
+        public Vector2i YZ
+        {
+            get
+            {
+                return new Vector2i(X, Z);
+            }
+        }
+        #endregion
         public static Vector3i FromString(string text)
         {
             try
@@ -480,22 +499,6 @@ namespace EngineNS
             vector.Y = (value1.Y + (amount1 * (value2.Y - value1.Y))) + (amount2 * (value3.Y - value1.Y));
             vector.Z = (value1.Z + (amount1 * (value2.Z - value1.Z))) + (amount2 * (value3.Z - value1.Z));
             return vector;
-        }
-        /// <summary>
-        /// 计算质心坐标
-        /// </summary>
-        /// <param name="value1">三维坐标点</param>
-        /// <param name="value2">三维坐标点</param>
-        /// <param name="value3">三维坐标点</param>
-        /// <param name="amount1">参数</param>
-        /// <param name="amount2">参数</param>
-        /// <param name="result">计算结果</param>
-        [Rtti.Meta]
-        public static void Barycentric(in Vector3i value1, in Vector3i value2, in Vector3i value3, int amount1, int amount2, out Vector3i result)
-        {
-            result.X = (value1.X + (amount1 * (value2.X - value1.X))) + (amount2 * (value3.X - value1.X));
-            result.Y = (value1.Y + (amount1 * (value2.Y - value1.Y))) + (amount2 * (value3.Y - value1.Y));
-            result.Z = (value1.Z + (amount1 * (value2.Z - value1.Z))) + (amount2 * (value3.Z - value1.Z));
         }
         /// <summary>
         /// 载体计算

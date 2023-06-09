@@ -10,6 +10,7 @@ cbuffer cbPerGrassType DX_AUTOBIND
 	float HeightMapMinHeight;
 	float PatchIdxX;
 	float PatchIdxZ;
+	int MaxGrassInstanceNum;
 };
 
 struct VSGrassData
@@ -19,13 +20,18 @@ struct VSGrassData
 	//float4 GrassQuat;
 	uint Data;
 	float TerrainHeight;
+	int GrassDataPad0;
+	int GrassDataPad1;
 };
 
 #if HW_VS_STRUCTUREBUFFER == 1
 StructuredBuffer<VSGrassData> VSGrassDataArray DX_AUTOBIND;
 VSGrassData GetGrassInstanceData(VS_MODIFIER input)
 {
-	VSGrassData result = VSGrassDataArray[input.vInstanceId];
+	VSGrassData result = VSGrassDataArray[min(input.vInstanceId, MaxGrassInstanceNum)];//(VSGrassData)0;//
+	//VSGrassData result = VSGrassDataArray[min(input.vInstanceId, 0)];
+	//VSGrassData result = (VSGrassData)0;
+	//result = VSGrassDataArray[0];
 	//result.InstanceId = input.vInstanceId;
 	return result;
 }
@@ -89,18 +95,29 @@ void DoGrassModifierVS(inout PS_INPUT vsOut, inout VS_MODIFIER vert)
 #else
 	float3 Pos = vertPos + instPos;
 #endif
+	//Pos = vertPos + instPos;
+	//Pos = vertPos + instPos;
+	//float3 ttt = (float3)0;
+	//ttt.y = HeightMapTexture.SampleLevel(Samp_HeightMapTexture, float2(0,0), 0).r;
+	////ttt.y += HeightMapMinHeight;
+	//Pos = ttt;
 
 	//float2 posUV = float2(instData.GrassPosition.x / PatchSize, instData.GrassPosition.z / PatchSize);
 	//float3 posInTerrain = GetPosition(posUV);
 	//posInTerrain.y += HeightMapMinHeight;
 	//float3 Pos = posInTerrain + InstancingRotateVec(vert.vPosition.xyz * instData.GrassScale, instData.GrassQuat);
+#if USE_PS_WorldPos == 1
+	vsOut.vWorldPos = Pos.xyz;
+#endif
 
 	vert.vPosition.xyz = Pos;
 	//vert.vNormal.xyz = InstancingRotateVec(vert.vNormal.xyz, instData.GrassQuat);
 	vert.vNormal.xyz = InstancingRotateVec(vert.vNormal.xyz, instRot);
 
 	vsOut.vPosition.xyz = Pos;
+#if USE_PS_Normal == 1
 	vsOut.vNormal = vert.vNormal;
+#endif
 }
 
 //#define MDFQUEUE_FUNCTION

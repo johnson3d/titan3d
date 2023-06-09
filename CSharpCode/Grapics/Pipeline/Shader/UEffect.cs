@@ -510,7 +510,7 @@ namespace EngineNS.Graphics.Pipeline.Shader
             var hashStr = shaderName.Address;
             hashStr += entry;
             if (shadingEnv != null)
-                hashStr += shadingEnv.CurrentPermutationId;
+                hashStr += shadingEnv.ToString();
             if (defines != null)
                 hashStr += defines.mCoreObject.NativeSuper.GetHash64().ToString();
             var hash = Hash160.CreateHash160(hashStr);

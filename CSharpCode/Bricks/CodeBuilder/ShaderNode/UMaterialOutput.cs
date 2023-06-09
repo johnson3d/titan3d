@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using EngineNS.Bricks.NodeGraph;
+using NPOI.POIFS.Crypt.Dsig;
 
 namespace EngineNS.Bricks.CodeBuilder.ShaderNode
 {
@@ -99,110 +100,35 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode
 
             return true;
         }
-
-        //[Obsolete]
-        //public override IExpression GetExpr(UMaterialGraph funGraph, ICodeGen cGen, PinOut oPin, bool bTakeResult)
-        //{
-        //    Function.Name = "DO_PS_MATERIAL_IMPL";
-        //    Function.ReturnType = typeof(void).FullName;
-        //    Function.Arguments.Clear();
-        //    Function.Arguments.Add(new DefineFunctionParam() { DefType = "in PS_INPUT", VarName = "input" });
-        //    Function.Arguments.Add(new DefineFunctionParam() { DefType = "inout MTL_OUTPUT", VarName = "mtl" });
-        //    Function.LocalVars.Clear();
-        //    UniformVars.Clear();
-        //    Function.Body.Lines.Clear();
-        //    if (Albedo.HasLinker())
-        //    {
-        //        var linker = funGraph.FindInLinkerSingle(Albedo);
-        //        var exprNode = linker.OutNode as IBaseNode;
-        //        var expr = exprNode.GetExpr(funGraph, cGen, linker.OutPin, false) as OpExpress;
-        //        var assignOp = new AssignOp();
-        //        var setExpr = new HardCodeOp();
-        //        setExpr.Code = "mtl.mAlbedo";
-        //        assignOp.Left = setExpr;
-        //        assignOp.Right = expr;
-        //        Function.Body.PushExpr(assignOp);
-        //    }
-        //    if (Emissive.HasLinker())
-        //    {
-        //        var linker = funGraph.FindInLinkerSingle(Emissive);
-        //        var exprNode = linker.OutNode as IBaseNode;
-        //        var expr = exprNode.GetExpr(funGraph, cGen, linker.OutPin, false) as OpExpress;
-        //        var assignOp = new AssignOp();
-        //        var setExpr = new HardCodeOp();
-        //        setExpr.Code = "mtl.mEmissive";
-        //        assignOp.Left = setExpr;
-        //        assignOp.Right = expr;
-        //        Function.Body.PushExpr(assignOp);
-        //    }
-        //    if (Normal.HasLinker())
-        //    {
-        //        var linker = funGraph.FindInLinkerSingle(Normal);
-        //        var exprNode = linker.OutNode as IBaseNode;
-        //        var expr = exprNode.GetExpr(funGraph, cGen, linker.OutPin, false) as OpExpress;
-        //        var assignOp = new AssignOp();
-        //        var setExpr = new HardCodeOp();
-        //        setExpr.Code = "mtl.mNormal";
-        //        assignOp.Left = setExpr;
-        //        assignOp.Right = expr;
-        //        Function.Body.PushExpr(assignOp);
-        //    }
-        //    if (Metallic.HasLinker())
-        //    {
-        //        var linker = funGraph.FindInLinkerSingle(Metallic);
-        //        var exprNode = linker.OutNode as IBaseNode;
-        //        var expr = exprNode.GetExpr(funGraph, cGen, linker.OutPin, false) as OpExpress;
-        //        var assignOp = new AssignOp();
-        //        var setExpr = new HardCodeOp();
-        //        setExpr.Code = "mtl.mMetallic";
-        //        assignOp.Left = setExpr;
-        //        assignOp.Right = expr;
-        //        Function.Body.PushExpr(assignOp);
-        //    }
-        //    if (Rough.HasLinker())
-        //    {
-        //        var linker = funGraph.FindInLinkerSingle(Rough);
-        //        var exprNode = linker.OutNode as IBaseNode;
-        //        var expr = exprNode.GetExpr(funGraph, cGen, linker.OutPin, false) as OpExpress;
-        //        var assignOp = new AssignOp();
-        //        var setExpr = new HardCodeOp();
-        //        setExpr.Code = "mtl.mRough";
-        //        assignOp.Left = setExpr;
-        //        assignOp.Right = expr;
-        //        Function.Body.PushExpr(assignOp);
-        //    }
-        //    if (Alpha.HasLinker())
-        //    {
-        //        var linker = funGraph.FindInLinkerSingle(Alpha);
-        //        var exprNode = linker.OutNode as IBaseNode;
-        //        var expr = exprNode.GetExpr(funGraph, cGen, linker.OutPin, false) as OpExpress;
-        //        var assignOp = new AssignOp();
-        //        var setExpr = new HardCodeOp();
-        //        setExpr.Code = "mtl.mAlpha";
-        //        assignOp.Left = setExpr;
-        //        assignOp.Right = expr;
-        //        Function.Body.PushExpr(assignOp);
-        //    }
-        //    if (AlphaTest.HasLinker())
-        //    {
-        //        var linker = funGraph.FindInLinkerSingle(AlphaTest);
-        //        var exprNode = linker.OutNode as IBaseNode;
-        //        var expr = exprNode.GetExpr(funGraph, cGen, linker.OutPin, false) as OpExpress;
-        //        var assignOp = new AssignOp();
-        //        var setExpr = new HardCodeOp();
-        //        setExpr.Code = "mtl.mAlphaTest";
-        //        assignOp.Left = setExpr;
-        //        assignOp.Right = expr;
-        //        Function.Body.PushExpr(assignOp);
-        //    }
-
-        //    return Function;
-        //}
-
-        //[Obsolete]
-        //public DefineFunction Function { get; } = new DefineFunction();
-        //[Obsolete]
-        //public List<DefineVar> UniformVars { get; } = new List<DefineVar>();
+        public List<Graphics.Pipeline.Shader.EPixelShaderInput> GetPSNeedInputs()
+        {
+            var result = new List<Graphics.Pipeline.Shader.EPixelShaderInput>();
+            foreach (var i in this.ParentGraph.Nodes)
+            {
+                if (i.GetType() == typeof(Bricks.CodeBuilder.ShaderNode.Control.SampleLevel2DNode) ||
+                    i.GetType() == typeof(Bricks.CodeBuilder.ShaderNode.Control.Sample2DNode) ||
+                    i.GetType() == typeof(Bricks.CodeBuilder.ShaderNode.Control.SampleArrayLevel2DNode) ||
+                    i.GetType() == typeof(Bricks.CodeBuilder.ShaderNode.Control.SampleArray2DNode))
+                {
+                    if (result.Contains(Graphics.Pipeline.Shader.EPixelShaderInput.PST_UV) == false)
+                        result.Add(Graphics.Pipeline.Shader.EPixelShaderInput.PST_UV);
+                }
+                else
+                {
+                    if (i.Name.StartsWith("input."))
+                    {
+                        var name = i.Name.Substring("input.".Length);
+                        var t = Graphics.Pipeline.Shader.UMaterial.PSInput.NameToInput(name);
+                        if (t != Graphics.Pipeline.Shader.EPixelShaderInput.PST_Number)
+                        {
+                            if (result.Contains(t) == false)
+                                result.Add(t);
+                        }
+                    }
+                }
+            }
+            return result;
+        }
 
         public UMethodDeclaration PSFunction { get; } = new UMethodDeclaration();
         public UMethodDeclaration VSFunction { get; } = new UMethodDeclaration();

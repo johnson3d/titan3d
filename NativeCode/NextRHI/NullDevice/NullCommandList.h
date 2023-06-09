@@ -13,7 +13,7 @@ namespace NxRHI
 		NullCommandList();
 		~NullCommandList();
 		bool Init(NullGpuDevice* device);
-		virtual bool BeginCommand() override;
+		virtual ICmdRecorder* BeginCommand() override;
 		virtual void EndCommand() override;
 		virtual bool IsRecording() const override {
 			return false;

@@ -158,15 +158,20 @@ namespace EngineNS.Bricks.GpuDriven
                 var vb = result.VBs.mCoreObject.GetVB(i.Key);
                 i.Value.mCoreObject.BindBufferDest(vb.Buffer);
 
-                i.Value.mCoreObject.Commit(cmdlist.mCoreObject);
+                cmdlist.PushGpuDraw(i.Value);
+                //i.Value.mCoreObject.Commit(cmdlist.mCoreObject);
             }
 
             foreach (var i in cpIbDrawcalls)
             {
                 var ib = result.IB.mCoreObject;
                 i.mCoreObject.BindBufferDest(ib.Buffer);
-                i.mCoreObject.Commit(cmdlist.mCoreObject);
+                cmdlist.PushGpuDraw(i);
+                //i.mCoreObject.Commit(cmdlist.mCoreObject);
             }
+
+            //notice:PushGpuDraw replace drawcall.Commit, user need cmdlist.FlushDraws at EndPass
+            //cmdlist.FlushDraws();
 
             return result;
         }

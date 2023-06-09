@@ -3,6 +3,7 @@
 #include "DX12GpuDevice.h"
 #include "DX12Event.h"
 #include "DX12Effect.h"
+#include "DX12Drawcall.h"
 
 #define new VNEW
 
@@ -39,18 +40,28 @@ namespace NxRHI
 	{
 		
 	}
-
+	//bool gTest = true;
 	DX12Buffer::~DX12Buffer()
 	{
 		auto device = mDeviceRef.GetPtr();
 		if (device == nullptr)
 			return;
 
-		device->DelayDestroy(mGpuMemory);
+		if (TagName == "InstantSRV")
+		{
+			/*if (gTest)
+				mGpuMemory->AddRef();*/
+			mGpuMemory->FreeMemory();
+			mGpuMemory = nullptr;
+			return;
+		}
+		
+		//device->DelayDestroy(mGpuMemory);
+		mGpuMemory->FreeMemory();
 		mGpuMemory = nullptr;
 	}
 
-	AutoRef<ID3D12Resource> CreateUploadBuffer(DX12GpuDevice* device, void* pData, UINT64 totalSize, UINT size)
+	AutoRef<DX12Buffer> CreateUploadBuffer(DX12GpuDevice* device, void* pData, UINT64 totalSize, UINT size)
 	{
 		D3D12_HEAP_PROPERTIES properties{};
 		properties.Type = D3D12_HEAP_TYPE_UPLOAD;
@@ -74,19 +85,22 @@ namespace NxRHI
 		resDesc.SampleDesc.Quality = 0;
 		resDesc.Layout = D3D12_TEXTURE_LAYOUT_ROW_MAJOR;
 
-		AutoRef<ID3D12Resource> uploadBuffer;
-		auto hr = device->mDevice->CreateCommittedResource(&properties, D3D12_HEAP_FLAG_NONE, &resDesc,
-			D3D12_RESOURCE_STATE_GENERIC_READ, NULL, IID_PPV_ARGS(uploadBuffer.GetAddressOf()));
-		ASSERT(hr == S_OK);
-		BYTE* mapped = NULL;
-		D3D12_RANGE range = { 0, size };
-		hr = uploadBuffer->Map(0, nullptr, (void**)&mapped);
-		if (hr == S_OK)
+		AutoRef<DX12Buffer> uploadBuffer = MakeWeakRef(new DX12Buffer());
+		uploadBuffer->mDeviceRef.FromObject(device);
+		uploadBuffer->Desc.Usage = USAGE_STAGING;
+		uploadBuffer->Desc.CpuAccess = (ECpuAccess)(CAS_READ | CAS_WRITE);
+		uploadBuffer->Desc.RowPitch = (UINT)totalSize;
+		uploadBuffer->Desc.Size = size;
+		uploadBuffer->mGpuMemory = DX12GpuDefaultMemAllocator::Alloc(device, &resDesc, &properties, D3D12_RESOURCE_STATE_GENERIC_READ, L"Buffer:Upload");
+		uploadBuffer->GpuState = GRS_CopySrc;
+		FMappedSubResource mapped;
+		
+		if (uploadBuffer->Map(0, &mapped, false))
 		{
-			BYTE* pCopyTar = mapped;
+			BYTE* pCopyTar = (BYTE*)mapped.pData;
 			BYTE* pCopySrc = (BYTE*)pData;
 			memcpy(pCopyTar, pCopySrc, size);
-			uploadBuffer->Unmap(0, &range);
+			uploadBuffer->Unmap(0);
 		}
 
 		return uploadBuffer;
@@ -207,7 +221,8 @@ namespace NxRHI
 		}
 		if (mGpuMemory == nullptr)
 		{
-			mGpuMemory = DX12GpuDefaultMemAllocator::Alloc(device, &resDesc, &properties, resState);
+			mGpuMemory = DX12GpuDefaultMemAllocator::Alloc(device, &resDesc, &properties, resState, L"Buffer");
+			//mGpuMemory->GetDX12GpuHeap()-> mGpuResource->SetName(L"Memory:Pooled");
 		}
 
 		/*if (allocator != nullptr)
@@ -252,17 +267,27 @@ namespace NxRHI
 				auto bf = CreateUploadBuffer(device, desc.InitData, totalSize, Desc.Size);
 
 				{
-					FTransientCmd tsCmd(device, QU_Transfer);
-					auto cmd = (DX12CommandList*)tsCmd.GetCmdList();
-					auto saved = this->GpuState;
-					this->TransitionTo(cmd, EGpuResourceState::GRS_CopyDst);
-					//cmd->mContext->CopyBufferRegion(mGpuResource, footPrint.Offset, bf, 0, footPrint.Footprint.Width);
-					auto pTarGpuResource = ((DX12GpuHeap*)mGpuMemory->GpuHeap)->mGpuResource;
-					cmd->mContext->CopyBufferRegion(pTarGpuResource, mGpuMemory->Offset, bf, 0, Desc.Size);
-					this->TransitionTo(cmd, saved);
-				}
+					AutoRef<ICopyDraw> cpDraw = MakeWeakRef(device->CreateCopyDraw());
+					cpDraw->BindBufferDest(this);
+					cpDraw->BindBufferSrc(bf);
+					cpDraw->Mode = ECopyDrawMode::CDM_Buffer2Buffer;
+					cpDraw->FootPrint.Format = DX12FormatToFormat(footPrint.Footprint.Format);
+					cpDraw->FootPrint.X = 0;
+					cpDraw->FootPrint.Y = 0;
+					cpDraw->FootPrint.Z = 0;
+					cpDraw->FootPrint.Width = footPrint.Footprint.Width;
+					cpDraw->FootPrint.Height = footPrint.Footprint.Height;
+					cpDraw->FootPrint.Depth = footPrint.Footprint.Depth;
+					cpDraw->FootPrint.RowPitch = footPrint.Footprint.RowPitch;
+					cpDraw->FootPrint.TotalSize = footPrint.Footprint.RowPitch * footPrint.Footprint.Height;
 
-				device->DelayDestroy(bf);
+					{
+						FTransientCmd tsCmd(device, QU_Transfer, "BufferInit");
+						auto cmd = (DX12CommandList*)tsCmd.GetCmdList();
+						cmd->PushGpuDraw(cpDraw);
+						cmd->FlushDraws(true);
+					}
+				}
 			}
 		}
 		return true;
@@ -356,16 +381,27 @@ namespace NxRHI
 			auto bf = CreateUploadBuffer(device, pData, totalSize, pFootPrint->RowPitch);//.Size);
 
 			{
-				FTransientCmd tsCmd(device, QU_Transfer);
-				auto cmd = (DX12CommandList*)tsCmd.GetCmdList();
-				auto saved = this->GpuState;
-				this->TransitionTo(cmd, EGpuResourceState::GRS_CopyDst);
-				auto pTarGpuResource = ((DX12GpuHeap*)mGpuMemory->GpuHeap)->mGpuResource;
-				cmd->mContext->CopyBufferRegion(pTarGpuResource, mGpuMemory->Offset, bf, 0, pFootPrint->RowPitch);
-				this->TransitionTo(cmd, saved);
-			}
+				AutoRef<ICopyDraw> cpDraw = MakeWeakRef(device->CreateCopyDraw());
+				cpDraw->BindBufferDest(this);
+				cpDraw->BindBufferSrc(bf);
+				cpDraw->Mode = ECopyDrawMode::CDM_Buffer2Buffer;
+				cpDraw->FootPrint.Format = DX12FormatToFormat(footPrint.Footprint.Format);
+				cpDraw->FootPrint.X = 0;
+				cpDraw->FootPrint.Y = 0;
+				cpDraw->FootPrint.Z = 0;
+				cpDraw->FootPrint.Width = footPrint.Footprint.Width;
+				cpDraw->FootPrint.Height = footPrint.Footprint.Height;
+				cpDraw->FootPrint.Depth = footPrint.Footprint.Depth;
+				cpDraw->FootPrint.RowPitch = footPrint.Footprint.RowPitch;
+				cpDraw->FootPrint.TotalSize = footPrint.Footprint.RowPitch * footPrint.Footprint.Height;
 
-			device->DelayDestroy(bf);
+				{
+					FTransientCmd tsCmd(device, QU_Transfer, "BufferUpdate");
+					auto cmd = (DX12CommandList*)tsCmd.GetCmdList();
+					cmd->PushGpuDraw(cpDraw);
+					cmd->FlushDraws(true);
+				}
+			}
 			/*device->PushPostEvent([fence, bf, tarValue](IGpuDevice* pDevice, UINT64 frameCount)->bool
 				{
 					if (fence->GetCompletedValue() >= tarValue)
@@ -390,7 +426,6 @@ namespace NxRHI
 	{
 		if (Desc.Usage == EGpuUsage::USAGE_DEFAULT)
 		{
-			ASSERT(false);
 			return false;
 		}
 		else
@@ -422,6 +457,7 @@ namespace NxRHI
 
 	void DX12Buffer::SetDebugName(const char* name)
 	{
+		TagName = name;
 		auto pTarGpuResource = ((DX12GpuHeap*)mGpuMemory->GpuHeap)->mGpuResource;
 		std::wstring n = StringHelper::strtowstr(name);
 		pTarGpuResource->SetName(n.c_str());
@@ -433,10 +469,14 @@ namespace NxRHI
 
 	DX12Texture::~DX12Texture()
 	{
+		if (TagName == "HeightMapSRV")
+		{
+			//auto num = mGpuResource->AddRef();
+		}
 		auto device = mDeviceRef.GetPtr();
 		if (device == nullptr)
 			return;
-		device->DelayDestroy(mGpuResource);
+		//device->DelayDestroy(mGpuResource);
 		mGpuResource = nullptr;
 	}
 	D3D12_RESOURCE_FLAGS BufferTypeToDXBindFlags(EBufferType type)
@@ -456,7 +496,7 @@ namespace NxRHI
 		}
 		return flags;
 	}
-	AutoRef<ID3D12Resource> CreateUploadResource(DX12GpuDevice* device, UINT rowPitch, UINT64 uploadSize, UINT64 rowSize, UINT numOfRows, EPixelFormat format, FMappedSubResource* mappedResource)
+	AutoRef<DX12Buffer> CreateUploadResource(DX12GpuDevice* device, UINT rowPitch, UINT64 uploadSize, UINT64 rowSize, UINT numOfRows, EPixelFormat format, FMappedSubResource* mappedResource)
 	{
 		D3D12_HEAP_PROPERTIES properties{};
 		properties.Type = D3D12_HEAP_TYPE_UPLOAD;
@@ -480,25 +520,31 @@ namespace NxRHI
 		resDesc.SampleDesc.Quality = 0;
 		resDesc.Layout = D3D12_TEXTURE_LAYOUT_ROW_MAJOR;
 		resDesc.Alignment = D3D12_DEFAULT_RESOURCE_PLACEMENT_ALIGNMENT;
+		
+		AutoRef<DX12Buffer> uploadBuffer = MakeWeakRef(new DX12Buffer());
+		uploadBuffer->mDeviceRef.FromObject(device);
+		uploadBuffer->Desc.Usage = USAGE_STAGING;
+		uploadBuffer->Desc.CpuAccess = (ECpuAccess)(CAS_READ | CAS_WRITE);
+		uploadBuffer->Desc.RowPitch = (UINT)rowPitch;
+		uploadBuffer->Desc.Size = (UINT)uploadSize;
+		uploadBuffer->mGpuMemory = DX12GpuDefaultMemAllocator::Alloc(device, &resDesc, &properties, D3D12_RESOURCE_STATE_GENERIC_READ, L"Texture:Upload");
+		uploadBuffer->GpuState = GRS_CopySrc;
 
-		AutoRef<ID3D12Resource> uploadBuffer;
-		auto hr = device->mDevice->CreateCommittedResource(&properties, D3D12_HEAP_FLAG_NONE, &resDesc,
-			D3D12_RESOURCE_STATE_GENERIC_READ, NULL, IID_PPV_ARGS(uploadBuffer.GetAddressOf()));
-		ASSERT(hr == S_OK);
-		BYTE* mapped = NULL;
-		D3D12_RANGE range = { 0, uploadSize };
-		hr = uploadBuffer->Map(0, nullptr, (void**)&mapped);
-		if (hr == S_OK)
+		if (uploadBuffer != nullptr)
 		{
-			BYTE* pCopyTar = mapped;
-			BYTE* pCopySrc = (BYTE*)mappedResource->pData;
-			for (UINT y = 0; y < numOfRows; y++)
+			FMappedSubResource mapped{};
+			if (uploadBuffer->Map(0, &mapped, false))
 			{
-				memcpy(pCopyTar, pCopySrc, rowSize);
-				pCopyTar += rowPitch;
-				pCopySrc += mappedResource->RowPitch;
+				BYTE* pCopyTar = (BYTE*)mapped.pData;
+				BYTE* pCopySrc = (BYTE*)mappedResource->pData;
+				for (UINT y = 0; y < numOfRows; y++)
+				{
+					memcpy(pCopyTar, pCopySrc, rowSize);
+					pCopyTar += rowPitch;
+					pCopySrc += mappedResource->RowPitch;
+				}
+				uploadBuffer->Unmap(0);
 			}
-			uploadBuffer->Unmap(0, &range);
 		}
 
 		return uploadBuffer;
@@ -583,6 +629,7 @@ namespace NxRHI
 		{
 			resState |= D3D12_RESOURCE_STATES::D3D12_RESOURCE_STATE_COPY_DEST;
 		}*/
+		auto completed = device->mFrameFence->GetCompletedValue();
 		if (desc.BindFlags & EBufferType::BFT_DSV)
 		{
 			/*switch (desc.Format)
@@ -614,24 +661,36 @@ namespace NxRHI
 			{
 				data.Format = DXGI_FORMAT::DXGI_FORMAT_D16_UNORM;
 			}*/
+			
 			auto hr = device->mDevice->CreateCommittedResource(&properties, D3D12_HEAP_FLAG_NONE, &resDesc, resState, &data, IID_PPV_ARGS(mGpuResource.GetAddressOf()));
 			if (FAILED(hr))
+			{
+				if (hr == DXGI_ERROR_DEVICE_REMOVED)
+				{
+					device->OnDeviceRemoved();
+				}
 				return false;
+			}	
 		}
 		else
 		{
 			auto hr = device->mDevice->CreateCommittedResource(&properties, D3D12_HEAP_FLAG_NONE, &resDesc, resState, nullptr, IID_PPV_ARGS(mGpuResource.GetAddressOf()));
 			if (FAILED(hr))
+			{
+				if (hr == DXGI_ERROR_DEVICE_REMOVED)
+				{
+					device->OnDeviceRemoved();
+				}
 				return false;
+			}
 		}
 		//mGpuResource->SetName(L"Texture");
 		
 		if (desc.InitData != nullptr)
 		{
-			std::vector<AutoRef<ID3D12Resource>> mipBuffers;
-			std::vector<D3D12_TEXTURE_COPY_LOCATION> srcLocations;
-			//for (UINT i = 0; i < desc.ArraySize; i++)
-
+			FTransientCmd tsCmd(device, QU_Transfer, "TextureInit");
+			auto cmd = (DX12CommandList*)tsCmd.GetCmdList();
+			
 			//((FTextureDesc*)&desc)->MipLevels = 1;
 			for (UINT i = 0; i < desc.ArraySize; i++)
 			{
@@ -646,16 +705,21 @@ namespace NxRHI
 					device->mDevice->GetCopyableFootprints(&resDesc, j, 1, 0, &footPrint, &numX, &rowSize, &totalSize);
 
 					auto bf = CreateUploadResource(device, footPrint.Footprint.RowPitch, totalSize, rowSize, numX, Desc.Format, &desc.InitData[j]);
-					mipBuffers.push_back(bf);
-
-					D3D12_TEXTURE_COPY_LOCATION srcLocation = {};
-					srcLocation.SubresourceIndex = 0;
-					srcLocation.pResource = bf;
-					srcLocation.Type = D3D12_TEXTURE_COPY_TYPE_PLACED_FOOTPRINT;
-					srcLocation.PlacedFootprint = footPrint;
-					srcLocation.PlacedFootprint.Footprint.Format = FormatToDX12Format(this->Desc.Format);
-
-					srcLocations.push_back(srcLocation);
+					AutoRef<ICopyDraw> cpDraw = device->CreateCopyDraw();
+					cpDraw->BindTextureDest(this);
+					cpDraw->BindBufferSrc(bf);
+					cpDraw->Mode = ECopyDrawMode::CDM_Buffer2Texture;
+					cpDraw->DestSubResource = j;
+					cpDraw->FootPrint.Format = DX12FormatToFormat(footPrint.Footprint.Format);
+					cpDraw->FootPrint.X = 0;
+					cpDraw->FootPrint.Y = 0;
+					cpDraw->FootPrint.Z = 0;
+					cpDraw->FootPrint.Width = footPrint.Footprint.Width;
+					cpDraw->FootPrint.Height = footPrint.Footprint.Height;
+					cpDraw->FootPrint.Depth = footPrint.Footprint.Depth;
+					cpDraw->FootPrint.RowPitch = footPrint.Footprint.RowPitch;
+					cpDraw->FootPrint.TotalSize = footPrint.Footprint.RowPitch * footPrint.Footprint.Height;
+					cmd->PushGpuDraw(cpDraw);
 
 					w = w / 2;
 					h = h / 2;
@@ -666,35 +730,13 @@ namespace NxRHI
 				}
 			}
 
-			D3D12_TEXTURE_COPY_LOCATION dstLocation = {};
-			dstLocation.pResource = this->mGpuResource;
-			dstLocation.Type = D3D12_TEXTURE_COPY_TYPE_SUBRESOURCE_INDEX;
-			dstLocation.SubresourceIndex = 0;
-
-			{
-				FTransientCmd tsCmd(device, QU_Transfer);
-				auto cmd = (DX12CommandList*)tsCmd.GetCmdList();
-				//auto saved = this->GpuState;
-				this->TransitionTo(cmd, EGpuResourceState::GRS_CopyDst);
-				for (UINT i = 0; i < desc.ArraySize; i++)
-				{
-					for (UINT k = 0; k < desc.MipLevels; k++)
-					{
-						UINT j = i * Desc.MipLevels + k;
-						dstLocation.SubresourceIndex = j;
-						cmd->mContext->CopyTextureRegion(&dstLocation, 0, 0, 0, &srcLocations[j], NULL);
-					}
-				}
-
-				this->TransitionTo(cmd, EGpuResourceState::GRS_Undefine);
-			}
-
-			device->DelayDestroy(mipBuffers);
+			cmd->FlushDraws(true);
 		}
 		else
 		{
-			FTransientCmd tsCmd(device, QU_Default);
+			FTransientCmd tsCmd(device, QU_Transfer, "TextureTransition");
 			auto cmd = (DX12CommandList*)tsCmd.GetCmdList();
+			cmd->GetCmdRecorder()->mRefBuffers.push_back(this);
 			this->TransitionTo(cmd, EGpuResourceState::GRS_GenericRead);
 		}
 			
@@ -833,41 +875,31 @@ namespace NxRHI
 
 			device->mDevice->GetCopyableFootprints(&resDesc, subRes, 1, 0, &footPrint, &numX, &rowSize, &totalSize);
 			
+			FTransientCmd tsCmd(device, QU_Transfer, "TextureCopy");
+			auto cmd = (DX12CommandList*)tsCmd.GetCmdList();
+
 			FMappedSubResource initData{};
 			initData.pData = pData;
 			initData.RowPitch = pFootPrint->RowPitch;
 			initData.DepthPitch = pFootPrint->TotalSize;
 			auto bf = CreateUploadResource(device, footPrint.Footprint.RowPitch, totalSize, rowSize, numX, Desc.Format, &initData);
-			D3D12_TEXTURE_COPY_LOCATION srcLocation = {};
-			srcLocation.pResource = bf;
-			srcLocation.Type = D3D12_TEXTURE_COPY_TYPE_PLACED_FOOTPRINT;
-			srcLocation.PlacedFootprint = footPrint;
-			srcLocation.PlacedFootprint.Footprint.Format = FormatToDX12Format(this->Desc.Format);
-
-			D3D12_TEXTURE_COPY_LOCATION dstLocation = {};
-			dstLocation.pResource = this->mGpuResource;
-			dstLocation.Type = D3D12_TEXTURE_COPY_TYPE_SUBRESOURCE_INDEX;
-			dstLocation.SubresourceIndex = subRes;
-
-			{
-				FTransientCmd tsCmd(device, QU_Transfer);
-				auto cmd = (DX12CommandList*)tsCmd.GetCmdList();
-				auto saved = this->GpuState;
-				this->TransitionTo(cmd, EGpuResourceState::GRS_CopyDst);
-				cmd->mContext->CopyTextureRegion(&dstLocation, 0, 0, 0, &srcLocation, NULL);
-				this->TransitionTo(cmd, saved);
-			}
-
-			device->DelayDestroy(bf);
-			/*device->PushPostEvent([fence, bf, tarValue](IGpuDevice* pDevice)->bool
-				{
-					if (fence->GetCompletedValue() >= tarValue)
-					{
-						pDevice->DelayDestroy(bf);
-						return true;
-					}
-					return false;
-				});*/
+			
+			AutoRef<ICopyDraw> cpDraw = device->CreateCopyDraw();
+			cpDraw->BindTextureDest(this);
+			cpDraw->BindBufferSrc(bf);
+			cpDraw->DestSubResource = subRes;
+			cpDraw->Mode = ECopyDrawMode::CDM_Buffer2Texture;
+			cpDraw->FootPrint.Format = DX12FormatToFormat(footPrint.Footprint.Format);
+			cpDraw->FootPrint.X = 0;
+			cpDraw->FootPrint.Y = 0;
+			cpDraw->FootPrint.Z = 0;
+			cpDraw->FootPrint.Width = footPrint.Footprint.Width;
+			cpDraw->FootPrint.Height = footPrint.Footprint.Height;
+			cpDraw->FootPrint.Depth = footPrint.Footprint.Depth;
+			cpDraw->FootPrint.RowPitch = footPrint.Footprint.RowPitch;
+			cpDraw->FootPrint.TotalSize = footPrint.Footprint.RowPitch * footPrint.Footprint.Height;
+			cmd->PushGpuDraw(cpDraw);
+			cmd->FlushDraws(true);
 		}
 		else //if (Desc.Usage == EGpuUsage::USAGE_DYNAMIC || Desc.Usage == EGpuUsage::USAGE_STAGING)
 		{
@@ -967,6 +999,7 @@ namespace NxRHI
 
 			Buffer = MakeWeakRef(device->CreateBuffer(&bfDesc));
 			ASSERT(Buffer != nullptr);
+			Buffer->SetDebugName("CBV");
 		}
 		else
 		{
@@ -999,6 +1032,7 @@ namespace NxRHI
 			bfDesc.CpuAccess = desc->CpuAccess;
 			Buffer = MakeWeakRef(device->CreateBuffer(&bfDesc));
 			ASSERT(Buffer != nullptr);
+			Buffer->SetDebugName("VBV");
 		}
 		else
 		{
@@ -1023,6 +1057,7 @@ namespace NxRHI
 			bfDesc.CpuAccess = desc->CpuAccess;
 			Buffer = MakeWeakRef(device->CreateBuffer(&bfDesc));
 			ASSERT(Buffer != nullptr);
+			Buffer->SetDebugName("IBV");
 		}
 		else
 		{
@@ -1188,6 +1223,8 @@ namespace NxRHI
 	}
 	bool DX12SrView::UpdateBuffer(IGpuDevice* device, IGpuBufferData* pBuffer)
 	{
+		/*if (Buffer != nullptr)
+			Buffer->AddRef();*/
 		Buffer = pBuffer;
 		mFingerPrint++;
 		D3D12_SHADER_RESOURCE_VIEW_DESC d3dDesc{};

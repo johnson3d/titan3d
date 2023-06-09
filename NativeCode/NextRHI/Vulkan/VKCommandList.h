@@ -70,9 +70,9 @@ namespace NxRHI
 		VKCommandList();
 		~VKCommandList();
 		bool Init(VKGpuDevice* device);
-		virtual bool BeginCommand() override;
+		virtual ICmdRecorder* BeginCommand() override;
 		virtual void EndCommand() override;
-		bool BeginCommand(VkCommandBufferUsageFlagBits flags);
+		ICmdRecorder* BeginCommand(VkCommandBufferUsageFlagBits flags);
 		void EndCommand(bool bRecycle);
 		virtual bool IsRecording() const override {
 			return mIsRecording;

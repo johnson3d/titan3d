@@ -16,6 +16,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)ImageInfo.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)ImageProcessor.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)ImageResult.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)ImageResultExt.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)ImageResultFloat.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)MemoryStats.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)StbImage.cs" />

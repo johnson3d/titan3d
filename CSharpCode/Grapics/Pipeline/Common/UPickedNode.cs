@@ -105,7 +105,7 @@ namespace EngineNS.Graphics.Pipeline.Common
             using (new Profiler.TimeScopeHelper(ScopeTick))
             {
                 var cmdlist = BasePass.DrawCmdList;
-                cmdlist.ResetGpuDraws();
+                cmdlist.BeginCommand();
 
                 mPickedMeshes.Clear();
                 foreach (var i in PickedManager.PickedProxies)
@@ -127,12 +127,11 @@ namespace EngineNS.Graphics.Pipeline.Common
                             if (policy.DefaultCamera.PerCameraCBuffer != null)
                                 drawcall.BindCBuffer(drawcall.Effect.BindIndexer.cbPerCamera, policy.DefaultCamera.PerCameraCBuffer);
 
-                            cmdlist.PushGpuDraw(drawcall.mCoreObject);
+                            cmdlist.PushGpuDraw(drawcall);
                         }
                     }
                 }
 
-                if (cmdlist.BeginCommand())
                 {
                     cmdlist.SetViewport(in PickedBuffer.Viewport);
                     var passClears = new NxRHI.FRenderPassClears();
@@ -142,8 +141,8 @@ namespace EngineNS.Graphics.Pipeline.Common
                     cmdlist.BeginPass(PickedBuffer.FrameBuffers, in passClears, "Picked");
                     cmdlist.FlushDraws();
                     cmdlist.EndPass();
-                    cmdlist.EndCommand();
                 }
+                cmdlist.EndCommand();
                 UEngine.Instance.GfxDevice.RenderCmdQueue.QueueCmdlist(cmdlist);
             }   
         }

@@ -31,7 +31,7 @@ namespace EngineNS.GamePlay.Scene
             var rc = UEngine.Instance.GfxDevice.RenderContext;
             var material = await UEngine.Instance.GfxDevice.MaterialManager.GetMaterial(RName.GetRName("material/gridline.material", RName.ERNameType.Engine));
             var materialInstance = Graphics.Pipeline.Shader.UMaterialInstance.CreateMaterialInstance(material);
-            materialInstance.RenderLayer = Graphics.Pipeline.ERenderLayer.RL_Translucent;
+            materialInstance.RenderLayer = Graphics.Pipeline.ERenderLayer.RL_PostTranslucent;
             unsafe
             {
                 var rsState = materialInstance.Rasterizer;

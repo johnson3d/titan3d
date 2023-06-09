@@ -49,6 +49,7 @@ public:
 		}
 		return;
 	}
+
 	virtual void DeleteThis();
 
 	virtual const FRttiStruct* GetRtti() const;

@@ -90,9 +90,9 @@ namespace EngineNS
         {
             return $"{X},{Y}";
         }
-        public Vector2 GetXY()
+        public static explicit operator Vector2(Vector2i v)
         {
-            return new Vector2(X, Y);
+            return new Vector2((float)v.X, (float)v.Y);
         }
         public static Vector2i FromString(string text)
         {
@@ -454,20 +454,26 @@ namespace EngineNS
             vector.Y = (value1.Y + (amount1 * (value2.Y - value1.Y))) + (amount2 * (value3.Y - value1.Y));
             return vector;
         }
-        /// <summary>
-        /// 计算质心坐标
-        /// </summary>
-        /// <param name="value1">三维坐标点</param>
-        /// <param name="value2">三维坐标点</param>
-        /// <param name="value3">三维坐标点</param>
-        /// <param name="amount1">参数</param>
-        /// <param name="amount2">参数</param>
-        /// <param name="result">计算结果</param>
-        [Rtti.Meta]
-        public static void Barycentric(in Vector2i value1, in Vector2i value2, in Vector2i value3, int amount1, int amount2, out Vector2i result)
-        {
-            result.X = (value1.X + (amount1 * (value2.X - value1.X))) + (amount2 * (value3.X - value1.X));
-            result.Y = (value1.Y + (amount1 * (value2.Y - value1.Y))) + (amount2 * (value3.Y - value1.Y));
+        public static Vector2 Barycentric(in Vector2i A, in Vector2i B, in Vector2i C, in Vector2i P)
+        {//https://blog.csdn.net/qq_38065509/article/details/105446756
+            Vector2 uv;
+            var yA_B = A.Y - B.Y;
+            var xB_A = B.X - A.X;
+            var ax_x_by = A.X * B.Y;
+            var bx_x_ay = B.X * A.Y;
+            var d1 = ax_x_by - bx_x_ay;
+            //C
+            uv.X = (float)(yA_B * P.X + xB_A * P.Y + d1) / (float)(yA_B * C.X + xB_A * C.Y + d1);
+
+            var yA_C = A.Y - C.Y;
+            var xC_A = C.X - A.X;
+            var ax_x_cy = A.X * C.Y;
+            var cx_x_ay = C.X * A.Y;
+            var d2 = ax_x_cy - cx_x_ay;
+            //B
+            uv.Y = (float)(yA_C * P.X + xC_A * P.Y + d2) / (float)(yA_C * B.X + xC_A * B.Y + d2);
+
+            return uv;
         }
         /// <summary>
         /// 载体计算

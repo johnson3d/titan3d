@@ -5,6 +5,29 @@ using System.Text;
 
 namespace EngineNS.Graphics.Pipeline.Shader
 {
+    [Rtti.Meta]
+    public enum EPixelShaderInput
+    {
+        PST_Position,
+        PST_Normal,
+        PST_Color,
+        PST_UV,
+        PST_WorldPos,
+        PST_Tangent,
+        PST_LightMap,
+        PST_Custom0,
+        PST_Custom1,
+        PST_Custom2,
+        PST_Custom3,
+        PST_Custom4,
+        PST_PointLightIndices,
+        PST_F4_1,
+        PST_F4_2,
+        PST_F4_3,
+        PST_SpecialData,
+
+        PST_Number,
+    }
     public enum EPermutation_Bool : int
     {
         FalseValue = 0,
@@ -225,6 +248,29 @@ namespace EngineNS.Graphics.Pipeline.Shader
         : UShadingEnv
     {
         public abstract NxRHI.EVertexStreamType[] GetNeedStreams();
+        //public abstract EPixelShaderInput[] GetPSNeedInputs();
+        public virtual EPixelShaderInput[] GetPSNeedInputs()
+        {
+            return new EPixelShaderInput[] {
+                EPixelShaderInput.PST_Position,
+                EPixelShaderInput.PST_Normal,
+                EPixelShaderInput.PST_Color,
+                EPixelShaderInput.PST_UV,
+                EPixelShaderInput.PST_WorldPos,
+                EPixelShaderInput.PST_Tangent,
+                EPixelShaderInput.PST_LightMap,
+                EPixelShaderInput.PST_Custom0,
+                EPixelShaderInput.PST_Custom1,
+                EPixelShaderInput.PST_Custom2,
+                EPixelShaderInput.PST_Custom3,
+                EPixelShaderInput.PST_Custom4,
+                EPixelShaderInput.PST_PointLightIndices,
+                EPixelShaderInput.PST_F4_1,
+                EPixelShaderInput.PST_F4_2,
+                EPixelShaderInput.PST_F4_3,
+                EPixelShaderInput.PST_SpecialData,
+            };
+        }
         public virtual void OnBuildDrawCall(URenderPolicy policy, NxRHI.UGraphicDraw drawcall) { }
         public virtual void OnDrawCall(Pipeline.URenderPolicy.EShadingType shadingType, NxRHI.UGraphicDraw drawcall, URenderPolicy policy, Mesh.UMesh mesh)
         {
@@ -237,6 +283,10 @@ namespace EngineNS.Graphics.Pipeline.Shader
         public string MainName { get; set; }
         private NxRHI.UComputeEffect CurrentEffect;
         public abstract Vector3ui DispatchArg { get; }
+        public override string ToString()
+        {
+            return base.ToString() + $"[{DispatchArg.ToString()}]";
+        }
         public NxRHI.UComputeEffect GetEffect()
         {
             if (CurrentEffect == null || CurrentEffect.PermutationId != this.CurrentPermutationId)
@@ -245,7 +295,11 @@ namespace EngineNS.Graphics.Pipeline.Shader
             }
             return CurrentEffect;
         }
-        protected abstract NxRHI.UComputeEffect OnCreateEffect();
+        protected virtual NxRHI.UComputeEffect OnCreateEffect()
+        {
+            return UEngine.Instance.GfxDevice.EffectManager.GetComputeEffect(CodeName,
+                MainName, NxRHI.EShaderType.SDT_ComputeShader, this, null, null);
+        }
         public virtual void OnDrawCall(NxRHI.UComputeDraw drawcall, URenderPolicy policy)
         {
 
@@ -283,6 +337,12 @@ namespace EngineNS.Graphics.Pipeline.Shader
         public override NxRHI.EVertexStreamType[] GetNeedStreams()
         {
             return new NxRHI.EVertexStreamType[] { NxRHI.EVertexStreamType.VST_Position, };
+        }
+        public override EPixelShaderInput[] GetPSNeedInputs()
+        {
+            return new EPixelShaderInput[] {
+                    EPixelShaderInput.PST_Position,
+                };
         }
     }
     public class UShadingEnvManager : UModule<UEngine>

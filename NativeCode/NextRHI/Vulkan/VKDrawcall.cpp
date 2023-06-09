@@ -250,7 +250,7 @@ namespace NxRHI
 			BindResourceToDescriptSets(device, mDescriptorSetVS, mDescriptorSetPS, i.first, i.second);
 		}
 	}
-	void VKGraphicDraw::Commit(ICommandList* cmdlist)
+	void VKGraphicDraw::Commit(ICommandList* cmdlist, bool bRefResource)
 	{
 		//IGraphicDraw::Commit(cmdlist);
 
@@ -482,7 +482,7 @@ namespace NxRHI
 		}
 		mDescriptorSetCS = cs;
 	}
-	void VKComputeDraw::Commit(ICommandList* cmdlist)
+	void VKComputeDraw::Commit(ICommandList* cmdlist, bool bRefResource)
 	{
 		if (mEffect == nullptr)
 			return;

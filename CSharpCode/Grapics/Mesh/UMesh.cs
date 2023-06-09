@@ -21,6 +21,8 @@ namespace EngineNS.Graphics.Mesh
                 }
                 Atoms = null;
             }
+            MdfQueue?.Dispose();
+            MdfQueue = null;
             CoreSDK.DisposeObject(ref mPerMeshCBuffer);
         }
         public GamePlay.Scene.UNode HostNode { get; set; }
@@ -597,7 +599,7 @@ namespace EngineNS.Graphics.Mesh
         }
         public void UpdateCameraOffset(GamePlay.UWorld world)
         {
-            if (PerMeshCBuffer == null)
+            if (PerMeshCBuffer == null || world == null)
                 return;
             var tm = PerMeshCBuffer.GetMatrix(UEngine.Instance.GfxDevice.CoreShaderBinder.CBPerMesh.WorldMatrix);
             var realPos = WorldLocation - world.CameraOffset;

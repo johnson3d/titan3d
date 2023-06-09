@@ -46,10 +46,21 @@ PS_INPUT VS_Main(VS_INPUT input1)
 	output.vPosition.xyz += mtl.mVertexOffset;
 
 	float4 wp4 = mul(float4(output.vPosition.xyz, 1), WorldMatrix);
+#if USE_PS_WorldPos == 1
 	output.vWorldPos = wp4.xyz;
+#endif
+
+#if USE_PS_Normal == 1
 	output.vNormal = normalize(mul(float4(output.vNormal.xyz, 0), WorldMatrix).xyz);
+#endif
+
+#if USE_PS_Tangent == 1
 	output.vTangent.xyz = normalize(mul(float4(output.vTangent.xyz, 0), WorldMatrix).xyz);
 #endif
+#else
+	float4 wp4 = float4(output.vPosition.xyz, 1);
+#endif
+
 	output.vPosition = mul(wp4, GetViewPrjMtx(true));
 
 	return output;

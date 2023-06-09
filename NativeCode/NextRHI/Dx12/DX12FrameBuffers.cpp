@@ -206,7 +206,7 @@ namespace NxRHI
 		if (hr != S_OK)
 		{
 			VFX_LTRACE(ELTT_Graphics, "SwapChain::Present");
-			hr = ((DX12GpuDevice*)device)->mDevice->GetDeviceRemovedReason();
+			((DX12GpuDevice*)device)->OnDeviceRemoved();
 		}
 		
 		if (mView3 != nullptr)

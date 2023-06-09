@@ -226,7 +226,6 @@ class TR_CLASS()
 	IResourceBase : public VIUnknown
 {
 public:
-	virtual void SetDebugName(const char* name) {}
 	virtual FResourceState* GetResourceState() {
 		return nullptr;
 	}

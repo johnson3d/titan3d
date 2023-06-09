@@ -74,6 +74,7 @@ namespace NxRHI
 	{
 		vBOOL		UseRenderDoc = TRUE;
 		vBOOL		CreateDebugLayer = FALSE;
+		vBOOL		GpuBaseValidation = FALSE;
 		void*		WindowHandle = nullptr;
 		VNameString	RenderDocPath;
 	};
@@ -92,6 +93,7 @@ namespace NxRHI
 		}
 	public:
 		ERhiType		Type = ERhiType::RHI_D3D11;
+		FGpuSystemDesc	Desc{};
 	};
 	struct TR_CLASS(SV_LayoutStruct = 8)
 		FGpuDeviceDesc
@@ -100,14 +102,25 @@ namespace NxRHI
 		{
 			RhiType = ERhiType::RHI_D3D11;
 			memset(Name, 0, sizeof(Name));
+			VendorId = 0;
 			AdapterId = 0;
 			DeviceHandle = nullptr;
 			DeviceContextHandle = nullptr;
 			CreateDebugLayer = true;
 			GpuDump = true;
 		}
+		bool IsNVIDIA() const{
+			return 0x10DE == VendorId;
+		}
+		bool IsIntel() const {
+			return 0x8086 == VendorId;
+		}
+		bool IsAMD() const {
+			return 0x1002 == VendorId;
+		}
 		ERhiType	RhiType = ERhiType::RHI_D3D11;
 		char	Name[256]{};
+		int		VendorId;
 		int		AdapterId = 0;
 		UINT64	DedicatedVideoMemory = 0;
 		void*	DeviceHandle = nullptr;
@@ -151,6 +164,10 @@ namespace NxRHI
 		UINT MsaaAlignment = 1;
 		UINT RawSrvUavAlignment = 1;
 		UINT UavCounterAlignment = 1;
+		UINT RoundupTexturePitch(UINT x) const
+		{
+			return TexturePitchAlignment * ((x + (TexturePitchAlignment - 1)) / TexturePitchAlignment);
+		}
 	};
 	template<class _DestroyType>
 	struct AuxGpuResourceDestroyer
@@ -163,10 +180,20 @@ namespace NxRHI
 	class TR_CLASS()
 		IGpuDevice : public IWeakReference
 	{
+	protected:
+		bool mIsTryFinalize = false;
+		bool mIsFinalized = false;
 	public:
 		ENGINE_RTTI(IGpuDevice);
 		IGpuDevice();
 		virtual bool InitDevice(IGpuSystem * pGpuSystem, const FGpuDeviceDesc * desc) = 0;
+		virtual void TryFinalizeDevice(IGpuSystem * pGpuSystem) {
+			mIsTryFinalize = true;
+			mIsFinalized = true;
+		}
+		bool IsFinalized() const{
+			return mIsFinalized;
+		}
 		virtual IBuffer* CreateBuffer(const FBufferDesc * desc) = 0;
 		virtual ITexture* CreateTexture(const FTextureDesc * desc) = 0;
 		virtual ITexture* CreateTexture(void* pSharedObject) { return nullptr; }
@@ -221,6 +248,7 @@ namespace NxRHI
 		
 		AutoRef<FGpuPipelineManager>	mPipelineManager;
 		AutoRef<IFence>					mFrameFence;
+		bool				EnableImmExecute = false;
 	public:
 		typedef bool (FGpuPostEvent)(IGpuDevice* device, UINT64 completed);
 		std::vector<std::function<FGpuPostEvent>>	mPostEvents;
@@ -235,7 +263,7 @@ namespace NxRHI
 			mPostEvents.push_back(evt);
 		}
 		template<class _DestroyType>
-		void DelayDestroy(_DestroyType obj, UINT delayFrame = 3)
+		void DelayDestroy(_DestroyType obj, UINT delayFrame = 4)
 		{
 			auto targetValue = mFrameFence->GetExpectValue() + delayFrame;
 			this->PushPostEvent([targetValue, obj](IGpuDevice* pDevice, UINT64 completed)->bool
@@ -265,7 +293,7 @@ namespace NxRHI
 		virtual void ExecuteCommandList(UINT NumOfExe, ICommandList** Cmdlist, UINT NumOfWait, ICommandList** ppWaitCmdlists, EQueueType type) = 0;
 		virtual ICommandList* GetIdleCmdlist() = 0;
 		virtual void ReleaseIdleCmdlist(ICommandList* cmd) = 0;
-		virtual void Flush(EQueueType type) = 0;
+		virtual UINT64 Flush(EQueueType type) = 0;
 		
 		inline ICommandList* GetFramePostCmdList() {
 			return mFramePost;

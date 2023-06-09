@@ -90,11 +90,13 @@
     <None Include="$(MSBuildThisFileDirectory)ShadingEnv\Deferred\DeferredCommon.cginc" />
     <None Include="$(MSBuildThisFileDirectory)ShadingEnv\Deferred\DeferredDirLighting.cginc" />
     <None Include="$(MSBuildThisFileDirectory)ShadingEnv\Deferred\DeferredOpaque.cginc" />
-    <None Include="$(MSBuildThisFileDirectory)ShadingEnv\Deferred\DeferredTranslucent.cginc" />
     <None Include="$(MSBuildThisFileDirectory)ShadingEnv\DrawViewportShading.cginc" />
     <None Include="$(MSBuildThisFileDirectory)ShadingEnv\DummyShading.cginc" />
     <None Include="$(MSBuildThisFileDirectory)ShadingEnv\ExpHeightFog.cginc" />
     <None Include="$(MSBuildThisFileDirectory)ShadingEnv\FogShading.cginc" />
+    <None Include="$(MSBuildThisFileDirectory)ShadingEnv\Forword\ForwordBasePassPS.cginc" />
+    <None Include="$(MSBuildThisFileDirectory)ShadingEnv\Forword\ForwordOpaque.cginc" />
+    <None Include="$(MSBuildThisFileDirectory)ShadingEnv\Forword\ForwordTranslucent.cginc" />
     <None Include="$(MSBuildThisFileDirectory)ShadingEnv\Mobile\heightmap.cginc" />
     <None Include="$(MSBuildThisFileDirectory)ShadingEnv\Mobile\MobileBasePassPS.cginc" />
     <None Include="$(MSBuildThisFileDirectory)ShadingEnv\Mobile\MobileCopyEditor.cginc" />

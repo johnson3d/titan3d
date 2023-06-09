@@ -2,7 +2,7 @@
 using EngineNS.NxRHI;
 using System;
 using System.Collections.Generic;
-using System.Text;
+using EngineNS.Graphics.Pipeline.Shader;
 
 namespace EngineNS.Graphics.Mesh
 {
@@ -98,6 +98,12 @@ namespace EngineNS.Graphics.Mesh
                 NxRHI.EVertexStreamType.VST_InstQuat,
                 NxRHI.EVertexStreamType.VST_InstScale,
                 NxRHI.EVertexStreamType.VST_F4_1};
+        }
+        public override EPixelShaderInput[] GetPSNeedInputs()
+        {
+            return new EPixelShaderInput[] {
+                EPixelShaderInput.PST_SpecialData,
+            };
         }
         protected override string GetBaseBuilder(Bricks.CodeBuilder.Backends.UHLSLCodeGenerator codeBuilder)
         {

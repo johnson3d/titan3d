@@ -359,7 +359,8 @@ namespace EngineNS.Bricks.Procedure
                 rsvDesc.Format = EPixelFormat.PXF_R8G8B8A8_UNORM;
                 rsvDesc.Texture2D.MipLevels = desc.MipLevels;
                 var result = UEngine.Instance.GfxDevice.RenderContext.CreateSRV(texture, in rsvDesc);
-                result.PicDesc = new NxRHI.USrView.UPicDesc();
+                if (result != null)
+                    result.PicDesc = new NxRHI.USrView.UPicDesc();
                 return result;
             }
         }

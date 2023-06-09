@@ -156,6 +156,11 @@ namespace EngineNS.NxRHI
         public static int NumOfInstance = 0;
         public static int NumOfGCHandle = 0;
 
+        public void SetDebugName(string name)
+        {
+            mCoreObject.NativeSuper.SetDebugName(name);
+        }
+
         public class ImportAttribute : IO.IAssetCreateAttribute
         {
             bool bPopOpen = false;
@@ -569,6 +574,14 @@ namespace EngineNS.NxRHI
                 }
                 else
                 {
+                    //var desc = this.mCoreObject.Desc;
+                    //desc.Texture2D.MipLevels = tex2d.mCoreObject.Desc.MipLevels;
+                    //var srv = rc.mCoreObject.CreateSRV(tex2d.mCoreObject.NativeSuper, in desc);
+                    //var fp = this.mCoreObject.NativeSuper.GetFingerPrint();
+                    //this.Core_Release();
+                    //this.mCoreObject = srv;
+                    //this.mCoreObject.NativeSuper.SetFingerPrint(fp + 1);
+                    //return true;
                     return this.mCoreObject.UpdateBuffer(rc.mCoreObject, tex2d.mCoreObject.NativeSuper);
                 }
             }

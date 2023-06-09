@@ -1,6 +1,8 @@
 #include "DX12PreHead.h"
 #include "DX12Event.h"
 #include "DX12GpuDevice.h"
+#include "DX12CommandList.h"
+#include "DX12Drawcall.h"
 
 #define new VNEW
 
@@ -17,15 +19,15 @@ namespace NxRHI
 	/// </summary>
 	//const int NumHeapDescriptor = 2;//cbv,srv,uav:(vs,ps)|sampler(vs,ps)
 	
-	AutoRef<ID3D12CommandAllocator> DX12CommandAllocatorManager::Alloc(ID3D12Device* device)
+	AutoRef<DX12CmdRecorder> DX12CommandAllocatorManager::Alloc(ID3D12Device* device)
 	{
 		VAutoVSLLock lk(mLocker);
 		if (CmdAllocators.size() == 0)
 		{
 			for (int i = 0; i < 10; i++)
 			{
-				AutoRef<ID3D12CommandAllocator> tmp;
-				auto hr = device->CreateCommandAllocator(D3D12_COMMAND_LIST_TYPE_DIRECT, IID_PPV_ARGS(tmp.GetAddressOf()));
+				AutoRef<DX12CmdRecorder> tmp = MakeWeakRef(new DX12CmdRecorder());
+				auto hr = device->CreateCommandAllocator(D3D12_COMMAND_LIST_TYPE_DIRECT, IID_PPV_ARGS(tmp->mAllocator.GetAddressOf()));
 				ASSERT(hr == S_OK);
 
 				CmdAllocators.push(tmp);
@@ -35,8 +37,9 @@ namespace NxRHI
 		CmdAllocators.pop();
 		return result;
 	}
-	void DX12CommandAllocatorManager::Free(const AutoRef<ID3D12CommandAllocator>& allocator, UINT64 waitValue, AutoRef<IFence>& fence) 
+	void DX12CommandAllocatorManager::Free(const AutoRef<DX12CmdRecorder>& allocator, UINT64 waitValue, AutoRef<IFence>& fence)
 	{
+		ASSERT(waitValue > 0);
 		VAutoVSLLock lk(mLocker);
 		FWaitRecycle tmp;
 		tmp.Allocator = allocator;
@@ -44,13 +47,25 @@ namespace NxRHI
 		tmp.Fence = fence;
 		Recycles.push_back(tmp);
 	}
+	void DX12CommandAllocatorManager::UnsafeDirectFree(const AutoRef<DX12CmdRecorder>& allocator)
+	{
+		VAutoVSLLock lk(mLocker);
+		CmdAllocators.push(allocator);
+	}
 	void DX12CommandAllocatorManager::TickRecycle()
 	{
 		VAutoVSLLock lk(mLocker);
 		for (auto i = Recycles.begin(); i != Recycles.end(); )
 		{
-			if (i->Fence->GetCompletedValue() >= i->WaitValue)
+			auto value = i->Fence->GetCompletedValue();
+			auto waitValue = i->WaitValue;
+			ASSERT(waitValue > 0);
+			//fuck off: d12 or driver reference the resource but didn't AddRef
+			if (value > waitValue)
 			{
+				i->Allocator->mAllocator->Reset();
+				i->Allocator->ResetGpuDraws();
+				
 				CmdAllocators.push(i->Allocator);
 				i = Recycles.erase(i);
 			}
@@ -60,7 +75,29 @@ namespace NxRHI
 			}
 		}
 	}
+	void DX12CommandAllocatorManager::Finalize()
+	{
+		VAutoVSLLock lk(mLocker);
+		for (auto i = Recycles.begin(); i != Recycles.end(); )
+		{
+			auto value = i->Fence->GetCompletedValue();
+			auto waitValue = i->WaitValue;
+			ASSERT(waitValue > 0);
+			//fuck off: d12 or driver reference the resource but didn't AddRef
+			if (value >= waitValue)
+			{
+				i->Allocator->mAllocator->Reset();
+				i->Allocator->ResetGpuDraws();
 
+				CmdAllocators.push(i->Allocator);
+				i = Recycles.erase(i);
+			}
+			else
+			{
+				i++;
+			}
+		}
+	}
 	FDX12DefaultGpuMemory::~FDX12DefaultGpuMemory()
 	{
 		Safe_Release(GpuHeap);
@@ -69,13 +106,19 @@ namespace NxRHI
 	{
 		
 	}
-	AutoRef<FGpuMemory> DX12GpuDefaultMemAllocator::Alloc(IGpuDevice* device, const D3D12_RESOURCE_DESC* resDesc, const D3D12_HEAP_PROPERTIES* heapDesc, D3D12_RESOURCE_STATES resState)
+	AutoRef<FGpuMemory> DX12GpuDefaultMemAllocator::Alloc(IGpuDevice* device, const D3D12_RESOURCE_DESC* resDesc, const D3D12_HEAP_PROPERTIES* heapDesc, D3D12_RESOURCE_STATES resState, const wchar_t* debugName)
 	{
 		auto result = MakeWeakRef(new FDX12DefaultGpuMemory());
 		result->GpuHeap = new DX12GpuHeap();
 		result->Offset = 0;
-		((DX12GpuDevice*)device)->mDevice->CreateCommittedResource(heapDesc, D3D12_HEAP_FLAG_NONE,
+		auto hr = ((DX12GpuDevice*)device)->mDevice->CreateCommittedResource(heapDesc, D3D12_HEAP_FLAG_NONE,
 			resDesc, resState, nullptr, IID_PPV_ARGS(result->GetDX12GpuHeap()->mGpuResource.GetAddressOf()));
+		if (hr == DXGI_ERROR_DEVICE_REMOVED)
+		{
+			((DX12GpuDevice*)device)->OnDeviceRemoved();
+		}
+
+		result->GetDX12GpuHeap()->mGpuResource->SetName(debugName);
 		return result;
 	}
 	AutoRef<FGpuMemory> DX12GpuDefaultMemAllocator::Alloc(IGpuDevice* device, UINT64 size)
@@ -105,6 +148,8 @@ namespace NxRHI
 
 		((DX12GpuDevice*)device)->mDevice->CreateCommittedResource(&mHeapProperties, D3D12_HEAP_FLAG_NONE,
 			&mResDesc, mResState, nullptr, IID_PPV_ARGS(result->mGpuResource.GetAddressOf()));
+
+		result->mGpuResource->SetName(L"Memory:Pooled");
 		return result;
 	}
 
@@ -115,6 +160,7 @@ namespace NxRHI
 		ASSERT(pManager);
 		D3D12_GPU_DESCRIPTOR_HANDLE result = RealObject->GetGPUDescriptorHandleForHeapStart();
 		result.ptr += this->OffsetInPage + pManager->mDescriptorStride * index;
+		ASSERT(result.ptr != 0);
 		return result;
 	}
 	D3D12_CPU_DESCRIPTOR_HANDLE	DX12DescriptorSetPagedObject::GetCpuAddress(int index)
@@ -136,6 +182,7 @@ namespace NxRHI
 		if (hr != S_OK)
 		{
 			hr = device->mDevice->GetDeviceRemovedReason();
+			device->OnDeviceRemoved();
 			ASSERT(false);
 			result->Release();
 			return nullptr;

@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<Root Type="EngineNS.Graphics.Mesh.CMeshPrimitivesAMeta@EngineCore">
+<Root Type="EngineNS.Graphics.Mesh.UMeshPrimitivesAMeta@EngineCore">
   <AssetId Type="System.Guid@Unknown" Value="59c6a06b-59ae-48e3-a509-dbabfe1900f9" />
   <Description Type="System.String@Unknown" Value="This is a EngineNS.Graphics.Mesh.CMeshPrimitives&#xA;" />
   <Icon Type="EngineNS.EGui.UUvAnim@EngineCore">
@@ -12,5 +12,5 @@
     <UVSize Type="EngineNS.Vector2@EngineCore" Value="1,1" />
   </Icon>
   <RefAssetRNames Type="System.Collections.Generic.List&lt;EngineNS.RName@EngineCore,&gt;@Unknown" Count="0" />
-  <TypeStr Type="System.String@Unknown" Value="EngineNS.Graphics.Mesh.CMeshPrimitives@EngineCore" />
+  <TypeStr Type="System.String@Unknown" Value="EngineNS.Graphics.Mesh.UMeshPrimitives@EngineCore" />
 </Root>

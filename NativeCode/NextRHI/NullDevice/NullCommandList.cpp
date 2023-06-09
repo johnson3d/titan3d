@@ -26,9 +26,9 @@ namespace NxRHI
 	{
 		return true;
 	}
-	bool NullCommandList::BeginCommand()
+	ICmdRecorder* NullCommandList::BeginCommand()
 	{
-		return true;
+		return nullptr;
 	}
 	void NullCommandList::EndCommand()
 	{

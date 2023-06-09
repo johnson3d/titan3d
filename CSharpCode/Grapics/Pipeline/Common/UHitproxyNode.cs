@@ -263,7 +263,7 @@ namespace EngineNS.Graphics.Pipeline.Common
 
             using (new Profiler.TimeScopeHelper(ScopeTick))
             {
-                HitproxyPass.ClearMeshDrawPassArray();
+                HitproxyPass.PrepareForDraw();
                 foreach (var i in policy.VisibleMeshes)
                 {
                     if (i.Atoms == null)
@@ -284,15 +284,22 @@ namespace EngineNS.Graphics.Pipeline.Common
                         }
                     }
                 }
-
+                
                 {
                     //draw mesh first
-                    var passClears = new NxRHI.FRenderPassClears();
-                    passClears.SetDefault();
-                    passClears.SetClearColor(0, new Color4f(0, 0, 0, 0));
+                    var passClears = stackalloc NxRHI.FRenderPassClears[(int)ERenderLayer.RL_Num];
+                    for (int i = 0; i < (int)ERenderLayer.RL_Num; i++)
+                    {
+                        passClears[i].SetDefault();
+                        passClears[i].SetClearColor(0, new Color4f(0, 0, 0, 0));
+                        passClears[i].ClearFlags = 0;
+                    }
+                    passClears[(int)ERenderLayer.RL_Background].ClearFlags = NxRHI.ERenderPassClearFlags.CLEAR_ALL;
+                    passClears[(int)ERenderLayer.RL_Gizmos].ClearFlags = NxRHI.ERenderPassClearFlags.CLEAR_DEPTH;
+
                     GHitproxyBuffers.BuildFrameBuffers(policy);
                     GGizmosBuffers.BuildFrameBuffers(policy);
-                    HitproxyPass.BuildRenderPass(policy, in GHitproxyBuffers.Viewport, in passClears, GHitproxyBuffers, GGizmosBuffers, "Hitproxy:");
+                    HitproxyPass.BuildRenderPass(policy, in GHitproxyBuffers.Viewport, passClears, (int)ERenderLayer.RL_Num, GHitproxyBuffers, GGizmosBuffers, "Hitproxy:");
                 }
             }   
 
@@ -311,15 +318,27 @@ namespace EngineNS.Graphics.Pipeline.Common
             cmdlist_post.BeginCommand();
             fixed(NxRHI.FSubResourceFootPrint* pFootprint = &CopyBufferFootPrint)
             {
+                var cpDraw = UEngine.Instance.GfxDevice.RenderContext.CreateCopyDraw();
                 var dstTex = readTexture as NxRHI.UTexture;
                 var dstBf = readTexture as NxRHI.UBuffer;
                 if (dstTex != null)
                 {
-                    cmdlist_post.CopyTextureRegion(dstTex.mCoreObject, 0, 0, 0, 0, attachBuffer.Srv.mCoreObject.GetBufferAsTexture(), 0, (NxRHI.FSubresourceBox*)IntPtr.Zero.ToPointer());
+                    //cmdlist_post.CopyTextureRegion(dstTex.mCoreObject, 0, 0, 0, 0, attachBuffer.Srv.mCoreObject.GetBufferAsTexture(), 0, (NxRHI.FSubresourceBox*)IntPtr.Zero.ToPointer());
+                    cpDraw.mCoreObject.Mode = NxRHI.ECopyDrawMode.CDM_Texture2Texture;
+                    cpDraw.BindTextureDest(dstTex);
+                    cpDraw.mCoreObject.BindTextureSrc(attachBuffer.Srv.mCoreObject.GetBufferAsTexture());
+                    cmdlist_post.PushGpuDraw(cpDraw.mCoreObject.NativeSuper);
+                    cmdlist_post.FlushDraws(true);
                 }
                 else if (dstBf != null)
                 {
-                    cmdlist_post.CopyTextureToBuffer(dstBf.mCoreObject, pFootprint, attachBuffer.Srv.mCoreObject.GetBufferAsTexture(), 0);
+                    //cmdlist_post.CopyTextureToBuffer(dstBf.mCoreObject, pFootprint, attachBuffer.Srv.mCoreObject.GetBufferAsTexture(), 0);
+                    cpDraw.mCoreObject.Mode = NxRHI.ECopyDrawMode.CDM_Texture2Buffer;
+                    cpDraw.BindBufferDest(dstBf);
+                    cpDraw.mCoreObject.BindTextureSrc(attachBuffer.Srv.mCoreObject.GetBufferAsTexture());
+                    cpDraw.mCoreObject.FootPrint = CopyBufferFootPrint;
+                    cmdlist_post.PushGpuDraw(cpDraw.mCoreObject.NativeSuper);
+                    cmdlist_post.FlushDraws(true);
                 }
             }
             cmdlist_post.EndCommand();

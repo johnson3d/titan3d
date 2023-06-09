@@ -37,6 +37,7 @@ namespace EngineNS.Bricks.Particle
         public override unsafe void EndTickLogic(GamePlay.UWorld world, Graphics.Pipeline.URenderPolicy policy, bool bClear)
         {
             var cmd = BasePass.DrawCmdList;
+            cmd.FlushDraws();
             cmd.EndEvent();
             cmd.EndCommand();
             UEngine.Instance.GfxDevice.RenderCmdQueue.QueueCmdlist(cmd);

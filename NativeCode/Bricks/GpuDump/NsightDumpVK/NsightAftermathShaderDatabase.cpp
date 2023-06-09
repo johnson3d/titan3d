@@ -21,7 +21,7 @@
 //  DEALINGS IN THE SOFTWARE.
 //
 //*********************************************************
-
+#include "../../../Base/IUnknown.h"
 #include <fstream>
 #include <iomanip>
 #define VULKAN_HPP_NO_TO_STRING
@@ -60,10 +60,11 @@ void VKShaderDatabase::AddShaderBinary(const char* name, std::vector<uint8_t>& d
     else
     {
         const D3D12_SHADER_BYTECODE shader{ data.data(), data.size() };
-		AFTERMATH_CHECK_ERROR(GFSDK_Aftermath_GetShaderHash(
+        GFSDK_Aftermath_Result _result = GFSDK_Aftermath_GetShaderHash(
 			GFSDK_Aftermath_Version_API,
 			&shader,
-			&shaderHash));
+			&shaderHash);
+        ASSERT(_result == GFSDK_Aftermath_Result::GFSDK_Aftermath_Result_Success);
     }
 	// Store the data for shader mapping when decoding GPU crash dumps.
 	// cf. FindShaderBinary()
@@ -93,14 +94,22 @@ void VKShaderDatabase::AddShaderBinaryWithDebugInfo(const char* name, std::vecto
     {
         const D3D12_SHADER_BYTECODE shader{ data.data(), uint32_t(data.size()) };
         GFSDK_Aftermath_ShaderDebugName debugName{};
-        AFTERMATH_CHECK_ERROR(GFSDK_Aftermath_GetShaderDebugName(
+        GFSDK_Aftermath_Result _result = GFSDK_Aftermath_GetShaderDebugName(
             GFSDK_Aftermath_Version_API,
             &shader,
-            &debugName));
-		strncpy_s(debugName.name, name, sizeof(debugName.name) - 1);
+            &debugName);
+        
 		// Store the data for shader instruction address mapping when decoding GPU crash dumps.
-	    // cf. FindShaderBinaryWithDebugData()
-        m_shaderBinariesWithDebugInfo[debugName] = data;
+		// cf. FindShaderBinaryWithDebugData()
+        if (_result != GFSDK_Aftermath_Result::GFSDK_Aftermath_Result_Success)
+        {
+            strncpy_s(debugName.name, name, sizeof(debugName.name) - 1);
+            m_shaderBinariesWithDebugInfo[debugName] = data;
+        }
+        else
+        {
+            m_shaderBinariesWithDebugInfo[debugName] = data;
+        }
     }
 }
 
@@ -178,6 +187,7 @@ void VKShaderDatabase::AddShaderBinaryWithDebugInfo(const char* strippedShaderFi
     m_shaderBinariesWithDebugInfo[debugName].swap(data);
 }
 
+std::string TestCurrentShader;
 // Find a shader binary by shader hash.
 bool VKShaderDatabase::FindShaderBinary(const GFSDK_Aftermath_ShaderBinaryHash& shaderHash, std::vector<uint8_t>& shader, std::string& debugName) const
 {
@@ -185,12 +195,13 @@ bool VKShaderDatabase::FindShaderBinary(const GFSDK_Aftermath_ShaderBinaryHash& 
     auto i_shader = m_shaderBinaries.find(shaderHash);
     if (i_shader == m_shaderBinaries.end())
     {
-        // Nothing found.
+        // Nothing found.   
         return false;
     }
 
     shader = i_shader->second.ByteCode;
     debugName = i_shader->second.DebugName;
+    TestCurrentShader = i_shader->second.DebugName;
     return true;
 }
 
@@ -202,6 +213,9 @@ bool VKShaderDatabase::FindShaderBinaryWithDebugData(const GFSDK_Aftermath_Shade
     if (i_shader == m_shaderBinariesWithDebugInfo.end())
     {
         // Nothing found.
+        GFSDK_Aftermath_ShaderDebugName debugName{};
+        strncpy_s(debugName.name, TestCurrentShader.c_str(), sizeof(debugName.name) - 1);
+        i_shader = m_shaderBinariesWithDebugInfo.find(debugName);
         return false;
     }
 

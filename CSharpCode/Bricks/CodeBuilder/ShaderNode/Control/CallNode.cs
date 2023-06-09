@@ -411,7 +411,7 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Control
                 {
                     VariableType = new UTypeReference(type),
                     VariableName = paramName,
-                    InitValue = (type.IsPrimitive && arg.DefaultValue != null) ? new UPrimitiveExpression(type, arg.DefaultValue) : new UDefaultValueExpression(type),
+                    InitValue = (type.IsPrimitive && arg.DefaultValue != null && arg.DefaultValue.GetType()!=typeof(System.DBNull)) ? new UPrimitiveExpression(type, arg.DefaultValue) : new UDefaultValueExpression(type),
                 };
                 data.MethodDec.AddLocalVar(varDec);
             }

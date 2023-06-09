@@ -15,7 +15,7 @@ namespace NxRHI
 		virtual void OnGpuDrawStateUpdated() override;
 		virtual void OnBindResource(const FEffectBinder* binder, IGpuResource* resource) override;
 
-		virtual void Commit(ICommandList* cmdlist) override;
+		virtual void Commit(ICommandList* cmdlist, bool bRefResource) override;
 
 		void RebuildDescriptorSets();
 		static void BindResourceToDescriptSets(VKGpuDevice* device, AutoRef<VKDescriptorSetPagedObject>& dsSetVS,
@@ -33,7 +33,7 @@ namespace NxRHI
 	{
 	public:
 		virtual void OnBindResource(const FShaderBinder* binder, IGpuResource* resource) override;
-		virtual void Commit(ICommandList* cmdlist) override;
+		virtual void Commit(ICommandList* cmdlist, bool bRefResource) override;
 
 		void RebuildDescriptorSets();
 	public:

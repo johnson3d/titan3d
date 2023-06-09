@@ -27,6 +27,7 @@ namespace NxRHI
 		DX11GpuDevice();
 		~DX11GpuDevice();
 		virtual bool InitDevice(IGpuSystem* pGpuSystem, const FGpuDeviceDesc* desc) override;
+		virtual void TryFinalizeDevice(IGpuSystem* pGpuSystem) override;
 		virtual IBuffer* CreateBuffer(const FBufferDesc* desc) override;
 		virtual ITexture* CreateTexture(const FTextureDesc* desc) override;
 		virtual ITexture* CreateTexture(void* pSharedObject) override;
@@ -81,7 +82,7 @@ namespace NxRHI
 		virtual void ExecuteCommandList(UINT NumOfExe, ICommandList** Cmdlist, UINT NumOfWait, ICommandList** ppWaitCmdlists, EQueueType type) override;
 		virtual ICommandList* GetIdleCmdlist() override;
 		virtual void ReleaseIdleCmdlist(ICommandList* cmd) override;
-		virtual void Flush(EQueueType type) override;
+		virtual UINT64 Flush(EQueueType type) override;
 	public:
 		DX11CmdQueue();
 		~DX11CmdQueue();

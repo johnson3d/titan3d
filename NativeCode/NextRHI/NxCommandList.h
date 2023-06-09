@@ -77,11 +77,27 @@ namespace NxRHI
 	};
 
 	class TR_CLASS()
+		ICmdRecorder : public VIUnknown
+	{
+	public:
+		~ICmdRecorder();
+		std::vector<AutoRef<IGpuDraw>>			mDrawcallArray;
+		std::vector<AutoRef<IGpuResource>>		mRefBuffers;
+		UINT									mPrimitiveNum = 0;
+	public:
+		void PushGpuDraw(IGpuDraw * draw);
+		void ResetGpuDraws();
+		void FlushDraws(ICommandList* cmdlist, bool bRefBuffer);
+		IGpuResource* FindGpuResourceByTagName(const char* name);
+		int CountGpuResourceByTagName(const char* name);
+	};
+
+	class TR_CLASS()
 		ICommandList : public IWeakReference
 	{
 	public:
 		ENGINE_RTTI(ICommandList);
-		virtual bool BeginCommand() = 0;
+		virtual ICmdRecorder* BeginCommand() = 0;
 		virtual void EndCommand() = 0;
 		virtual bool IsRecording() const = 0;
 		virtual void SetShader(IShader* shader) = 0;
@@ -130,10 +146,21 @@ namespace NxRHI
 		virtual void BeginEvent(const char* info) = 0;
 		virtual void EndEvent() = 0;
 
+		ICmdRecorder* GetCmdRecorder() {
+			return mCmdRecorder;
+		}
 		//TR_FUNCTION(SV_SuppressGC = true)
 		void PushGpuDraw(IGpuDraw * draw);
-		void FlushDraws();
-		void ResetGpuDraws();
+		/*void ResetGpuDraws()
+		{
+			ASSERT(mCmdRecorder != nullptr);
+			mCmdRecorder->ResetGpuDraws();
+		}*/
+		void FlushDraws(bool bRefBuffer)
+		{
+			ASSERT(mCmdRecorder != nullptr);
+			mCmdRecorder->FlushDraws(this, bRefBuffer);
+		}
 
 		void SetDebugName(const char* name) {
 			mDebugName = name;
@@ -148,7 +175,9 @@ namespace NxRHI
 			mPipelineDesc = pipeline;
 		}
 		UINT GetDrawcallNumber() const{
-			return (UINT)mDrawcallArray.size();
+			if (mCmdRecorder == nullptr)
+				return 0;
+			return (UINT)mCmdRecorder->mDrawcallArray.size();
 		}
 		UINT GetPrimitiveNumber() const {
 			return mPrimitiveNum;
@@ -161,7 +190,7 @@ namespace NxRHI
 		}
 	public:
 		TWeakRefHandle<IGpuDevice>			mDevice;
-		std::vector<AutoRef<IGpuDraw>>		mDrawcallArray;
+		AutoRef<ICmdRecorder>				mCmdRecorder;
 		std::string							mDebugName;
 		UINT								mPrimitiveNum = 0;
 		
@@ -191,14 +220,16 @@ namespace NxRHI
 		ICommandList* mCmdList = nullptr;
 		EQueueType mType = EQueueType::QU_Default;
 	public:
-		FTransientCmd(IGpuDevice* device, EQueueType type = EQueueType::QU_Default)
+		FTransientCmd(IGpuDevice* device, EQueueType type = EQueueType::QU_Default, const char* debugName = "transient")
 		{
 			mDevice = device;
 			mCmdList = mDevice->GetCmdQueue()->GetIdleCmdlist();
 			mCmdList->BeginCommand();
+			mCmdList->BeginEvent(debugName);
 		}
 		~FTransientCmd()
 		{
+			mCmdList->EndEvent();
 			mCmdList->EndCommand();
 			mDevice->GetCmdQueue()->ExecuteCommandListSingle(mCmdList, mType);
 			mDevice->GetCmdQueue()->ReleaseIdleCmdlist(mCmdList);

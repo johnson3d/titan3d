@@ -64,7 +64,8 @@ namespace EngineNS.Graphics.Pipeline.Common
                 if (mCopyDrawcall == null)
                     return;
                 var cmdlist = BasePass.DrawCmdList;
-                if (cmdlist.BeginCommand())
+                cmdlist.BeginCommand();
+
                 {
                     var srcPin = GetAttachBuffer(SrcPinIn);
                     var tarPin = GetAttachBuffer(DestPinOut);
@@ -97,10 +98,10 @@ namespace EngineNS.Graphics.Pipeline.Common
                     //    mCopyDrawcall.SetCopyTexture2D(srcPin.Buffer.mCoreObject, 0, 0, 0, tarPin.Buffer.mCoreObject, 0, 0, 0, SrcPinIn.Attachement.Width, SrcPinIn.Attachement.Height);
                     //}
 
-                    mCopyDrawcall.Commit(cmdlist);
-
-                    cmdlist.EndCommand();
+                    cmdlist.PushGpuDraw(mCopyDrawcall);
                 }
+                cmdlist.FlushDraws();
+                cmdlist.EndCommand();
                 UEngine.Instance.GfxDevice.RenderCmdQueue.QueueCmdlist(cmdlist);
             }   
         }
@@ -170,7 +171,7 @@ namespace EngineNS.Graphics.Pipeline.Common
                 if (mCopyDrawcall == null)
                     return;
                 var cmdlist = BasePass.DrawCmdList;
-                if (cmdlist.BeginCommand())
+                cmdlist.BeginCommand();
                 {
                     var srcPin = GetAttachBuffer(SrcPinIn);
 
@@ -196,10 +197,11 @@ namespace EngineNS.Graphics.Pipeline.Common
                     //var fp = new NxRHI.FSubResourceFootPrint();
                     //fp.SetDefault();
                     //mCopyDrawcall.mCoreObject.FootPrint = fp;
-                    mCopyDrawcall.Commit(cmdlist);
-
-                    cmdlist.EndCommand();
+                    
+                    cmdlist.PushGpuDraw(mCopyDrawcall);
                 }
+                cmdlist.FlushDraws();
+                cmdlist.EndCommand();
                 UEngine.Instance.GfxDevice.RenderCmdQueue.QueueCmdlist(cmdlist);
             }
         }

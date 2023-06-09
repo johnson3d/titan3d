@@ -152,6 +152,14 @@ namespace NxRHI
 	{
 		if (mFrameFence != nullptr)
 		{
+			GetCmdQueue()->IncreaseSignal(mFrameFence, EQueueType::QU_Default);
+			auto completed = mFrameFence->GetCompletedValue();
+			auto expect = mFrameFence->GetExpectValue();
+			if (expect - completed > 3)
+			{
+				mFrameFence->Wait(expect - 3);
+			}
+
 			{
 				VAutoVSLLock lk(mPostEventLocker);
 				mTickingPostEvents.insert(mTickingPostEvents.begin(), mPostEvents.begin(), mPostEvents.end());
@@ -166,12 +174,8 @@ namespace NxRHI
 				mWaitFlushBuffers.clear();
 			}
 
-			auto expect = mFrameFence->GetExpectValue();
-			if (expect > 3)
-			{
-				mFrameFence->Wait(expect - 3);
-			}
-			auto completed = mFrameFence->GetCompletedValue();
+			completed = mFrameFence->GetCompletedValue();
+			ASSERT(completed <= mFrameFence->GetExpectValue());
 			for (size_t i = 0; i < mTickingPostEvents.size(); i++)
 			{
 				if (mTickingPostEvents[i](this, completed))
@@ -180,13 +184,16 @@ namespace NxRHI
 					i--;
 				}
 			}
-			ASSERT(completed <= mFrameFence->GetExpectValue());
-			GetCmdQueue()->IncreaseSignal(mFrameFence, EQueueType::QU_Default);
 		}
 
-		GetCmdQueue()->mFramePost->EndCommand();
-		GetCmdQueue()->ExecuteCommandListSingle(GetCmdQueue()->mFramePost, QU_Default);
-		GetCmdQueue()->mFramePost->BeginCommand();
+		if (GetCmdQueue() != nullptr)
+		{
+			auto cmd = GetCmdQueue()->mFramePost;
+			cmd->EndCommand();
+			if (cmd->GetCmdRecorder()->mDrawcallArray.size() > 0)
+				GetCmdQueue()->ExecuteCommandListSingle(cmd, QU_Default);
+			cmd->BeginCommand();
+		}
 	}
 }
 

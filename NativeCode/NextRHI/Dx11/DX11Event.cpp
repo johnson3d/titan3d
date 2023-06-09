@@ -54,17 +54,23 @@ namespace NxRHI
 		VAutoVSLLock locker(dx11Queue->mImmCmdListLocker);
 		dx11Queue->mHardwareContext->mContext4->Signal(mFence, value);
 	}
-	bool DX11Fence::Wait(UINT64 value, UINT timeOut)
+	UINT64 DX11Fence::Wait(UINT64 value, UINT timeOut)
 	{
 		/*while (mFence->GetCompletedValue() < value)
 		{
 
 		}*/
-		if (mFence->GetCompletedValue() < value)
+		auto completed = mFence->GetCompletedValue();
+		while (completed < value)
 		{
+			if (completed == 0xffffffffffffffff)
+			{
+				//mDeviceRef.GetPtr()->OnDeviceRemoved();
+			}
 			mEvent->Wait(timeOut);
+			completed = mFence->GetCompletedValue();
 		}
-		return true;
+		return completed;
 	}
 }
 

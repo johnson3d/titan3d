@@ -5,12 +5,29 @@ using static EngineNS.NxRHI.URenderCmdQueue;
 
 namespace EngineNS.NxRHI
 {
+    partial struct ICmdRecorder
+    {
+        public void PushGpuDraw(UGraphicDraw draw)
+        {
+            PushGpuDraw(draw.mCoreObject.NativeSuper);
+        }
+        public void PushGpuDraw(UComputeDraw draw)
+        {
+            PushGpuDraw(draw.mCoreObject.NativeSuper);
+        }
+        public void PushGpuDraw(UCopyDraw draw)
+        {
+            PushGpuDraw(draw.mCoreObject.NativeSuper);
+        }
+    }
+    public class UCmdRecorder : AuxPtrType<NxRHI.ICmdRecorder>
+    {
+
+    }
     public class UCommandList : AuxPtrType<NxRHI.ICommandList>
     {
         public override void Dispose()
         {
-            if (mCoreObject.IsValidPointer)
-                mCoreObject.ResetGpuDraws();
             base.Dispose();
         }
         public string DebugName
@@ -25,7 +42,7 @@ namespace EngineNS.NxRHI
         {
             mCoreObject.EndEvent();
         }
-        public bool BeginCommand()
+        public ICmdRecorder BeginCommand()
         {
             return mCoreObject.BeginCommand();
         }
@@ -150,42 +167,43 @@ namespace EngineNS.NxRHI
         {
             using (new Profiler.TimeScopeHelper(ScopeTick))
             {
-                mCoreObject.FlushDraws();
+                bool bRefBuffers = UEngine.Instance.GfxDevice.RenderContext.RhiType != ERhiType.RHI_D3D11;
+                mCoreObject.FlushDraws(bRefBuffers);
             }   
         }
-        public void ResetGpuDraws()
-        {
-            mCoreObject.ResetGpuDraws();
-        }
-        public void PushGpuDraw(IGpuDraw draw)
-        {
-            mCoreObject.PushGpuDraw(draw);
-        }
-        public void PushGpuDraw(IGraphicDraw draw)
-        {
-            mCoreObject.PushGpuDraw(draw.NativeSuper);
-        }
-        public void PushGpuDraw(IComputeDraw draw)
-        {
-            mCoreObject.PushGpuDraw(draw.NativeSuper);
-        }
-        public void PushGpuDraw(ICopyDraw draw)
-        {
-            mCoreObject.PushGpuDraw(draw.NativeSuper);
-        }
+        //public void ResetGpuDraws()
+        //{
+        //    mCoreObject.ResetGpuDraws();
+        //}
+        //public void PushGpuDraw(IGpuDraw draw)
+        //{
+        //    mCoreObject.PushGpuDraw(draw);
+        //}
+        //public void PushGpuDraw(IGraphicDraw draw)
+        //{
+        //    mCoreObject.PushGpuDraw(draw.NativeSuper);
+        //}
+        //public void PushGpuDraw(IComputeDraw draw)
+        //{
+        //    mCoreObject.PushGpuDraw(draw.NativeSuper);
+        //}
+        //public void PushGpuDraw(ICopyDraw draw)
+        //{
+        //    mCoreObject.PushGpuDraw(draw.NativeSuper);
+        //}
         //[ThreadStatic]
         //private static Profiler.TimeScope ScopePushGpuDraw = Profiler.TimeScopeManager.GetTimeScope(typeof(UCommandList), nameof(PushGpuDraw));
         public void PushGpuDraw(UGraphicDraw draw)
         {
-            PushGpuDraw(draw.mCoreObject);
+            mCoreObject.GetCmdRecorder().PushGpuDraw(draw);
         }
         public void PushGpuDraw(UComputeDraw draw)
         {
-            PushGpuDraw(draw.mCoreObject);
+            mCoreObject.GetCmdRecorder().PushGpuDraw(draw);
         }
         public void PushGpuDraw(UCopyDraw draw)
         {
-            PushGpuDraw(draw.mCoreObject);
+            mCoreObject.GetCmdRecorder().PushGpuDraw(draw);
         }
         #endregion
     }

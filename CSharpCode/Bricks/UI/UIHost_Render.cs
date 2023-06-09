@@ -128,16 +128,16 @@ namespace EngineNS.UI
                     {
                         mtl = await UEngine.Instance.GfxDevice.MaterialInstanceManager.CreateMaterialInstance(RName.GetRName(name));
                     }
-
-                    mtl.RenderLayer = Graphics.Pipeline.ERenderLayer.RL_Translucent;
-                    var raster = mtl.Rasterizer;
-                    raster.CullMode = NxRHI.ECullMode.CMD_NONE;
-                    mtl.Rasterizer = raster;
-                    var dsState = mtl.DepthStencil;
-                    dsState.DepthWriteMask = NxRHI.EDepthWriteMask.DSWM_ZERO;
-                    mtl.DepthStencil = dsState;
                 }
                 materials[i] = mtl;
+
+                mtl.RenderLayer = Graphics.Pipeline.ERenderLayer.RL_PostTranslucent;
+                var raster = mtl.Rasterizer;
+                raster.CullMode = NxRHI.ECullMode.CMD_NONE;
+                mtl.Rasterizer = raster;
+                var dsState = mtl.DepthStencil;
+                dsState.DepthWriteMask = NxRHI.EDepthWriteMask.DSWM_ZERO;
+                mtl.DepthStencil = dsState;
             }
             if(mDrawMesh == null)
             {

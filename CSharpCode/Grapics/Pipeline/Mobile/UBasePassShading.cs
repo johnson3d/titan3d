@@ -164,6 +164,8 @@ namespace EngineNS.Graphics.Pipeline.Mobile
         public Common.URenderGraphPin ColorPinOut = Common.URenderGraphPin.CreateOutput("Color", true, EPixelFormat.PXF_R16G16B16A16_FLOAT);
         public Common.URenderGraphPin DepthPinOut = Common.URenderGraphPin.CreateOutput("Depth", true, EPixelFormat.PXF_D24_UNORM_S8_UINT);
         public Common.URenderGraphPin GizmosDepthPinOut = Common.URenderGraphPin.CreateOutput("GizmosDepth", true, EPixelFormat.PXF_D16_UNORM);
+
+        public UGraphicsBuffers GGizmosBuffers { get; protected set; } = new UGraphicsBuffers();
         public UMobileOpaqueNode()
         {
             Name = "MobileOpaqueNode";
@@ -272,7 +274,7 @@ namespace EngineNS.Graphics.Pipeline.Mobile
                 var mobilePolicy = policy;
                 GBuffers?.SetViewportCBuffer(world, policy);
 
-                LayerBasePass.ClearMeshDrawPassArray();
+                LayerBasePass.PrepareForDraw();
                 LayerBasePass.SetViewport(in GBuffers.Viewport);
 
                 foreach (var i in policy.VisibleMeshes)
@@ -321,6 +323,8 @@ namespace EngineNS.Graphics.Pipeline.Mobile
         public Graphics.Pipeline.Common.URenderGraphPin DepthPinInOut = Graphics.Pipeline.Common.URenderGraphPin.CreateInputOutput("Depth");
 
         public Graphics.Pipeline.Common.URenderGraphPin GizmosDepthPinOut = Graphics.Pipeline.Common.URenderGraphPin.CreateOutput("GizmosDepth", true, EPixelFormat.PXF_D16_UNORM);
+
+        public UGraphicsBuffers GGizmosBuffers { get; protected set; } = new UGraphicsBuffers();
         public UMobileTranslucentNode()
         {
             Name = "UMobileTranslucentNode";
@@ -434,7 +438,7 @@ namespace EngineNS.Graphics.Pipeline.Mobile
                 var mobilePolicy = policy as UMobileFSPolicy;
                 GBuffers?.SetViewportCBuffer(world, policy);
 
-                LayerBasePass.ClearMeshDrawPassArray();
+                LayerBasePass.PrepareForDraw();
                 LayerBasePass.SetViewport(in GBuffers.Viewport);
 
                 foreach (var i in policy.VisibleMeshes)
@@ -461,6 +465,17 @@ namespace EngineNS.Graphics.Pipeline.Mobile
                 passClears.SetDefault();
                 passClears.SetClearColor(0, new Color4f(1, 0, 0, 0));
                 LayerBasePass.BuildTranslucentRenderPass(policy, in passClears, GBuffers, GGizmosBuffers);
+
+                //var passClears = stackalloc NxRHI.FRenderPassClears[(int)ERenderLayer.RL_Num];
+                //for (int i = 0; i < (int)ERenderLayer.RL_Num; i++)
+                //{
+                //    passClears[i].SetDefault();
+                //    passClears[i].SetClearColor(0, new Color4f(0, 0, 0, 0));
+                //    passClears[i].ClearFlags = 0;
+                //}
+                //passClears[(int)ERenderLayer.RL_Background].ClearFlags = NxRHI.ERenderPassClearFlags.CLEAR_ALL;
+                //passClears[(int)ERenderLayer.RL_Gizmos].ClearFlags = NxRHI.ERenderPassClearFlags.CLEAR_DEPTH;
+                //LayerBasePass.BuildRenderPass(policy, in GBuffers.Viewport, passClears, (int)ERenderLayer.RL_Num, GBuffers, GGizmosBuffers, "Forward:");
             }   
         }
         public override void TickSync(URenderPolicy policy)

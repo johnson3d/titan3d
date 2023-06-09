@@ -109,7 +109,8 @@ namespace EngineNS.Graphics.Pipeline.Common
                         var attachment = this.GetAttachBuffer(GpuScenePinInOut);
                         SetupAvgBrightnessDrawcall.BindUav(srvIdx, attachment.Uav);
                     }
-                    SetupAvgBrightnessDrawcall.Commit(cmd);
+                    //SetupAvgBrightnessDrawcall.Commit(cmd);
+                    cmd.PushGpuDraw(SetupAvgBrightnessDrawcall);
                 }
                 #endregion
 
@@ -135,11 +136,13 @@ namespace EngineNS.Graphics.Pipeline.Common
                             MathHelper.Roundup(targetWidth, Dispatch_SetupDimArray2.X),
                             MathHelper.Roundup(targetHeight, Dispatch_SetupDimArray2.Y),
                             1);
-                        CountAvgBrightnessDrawcall.Commit(cmd);
+                        //CountAvgBrightnessDrawcall.Commit(cmd);
+                        cmd.PushGpuDraw(CountAvgBrightnessDrawcall);
                     }
                 }
                 #endregion
 
+                cmd.FlushDraws();
                 cmd.EndCommand();
                 UEngine.Instance.GfxDevice.RenderCmdQueue.QueueCmdlist(cmd);
             }   

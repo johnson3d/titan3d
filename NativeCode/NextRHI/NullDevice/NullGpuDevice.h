@@ -64,7 +64,7 @@ namespace NxRHI
 		virtual void ExecuteCommandList(UINT NumOfExe, ICommandList** Cmdlist, UINT NumOfWait, ICommandList** ppWaitCmdlists, EQueueType type) override;
 		virtual ICommandList* GetIdleCmdlist() override;
 		virtual void ReleaseIdleCmdlist(ICommandList* cmd) override;
-		virtual void Flush(EQueueType type) override;
+		virtual UINT64 Flush(EQueueType type) override;
 	public:
 		NullCmdQueue();
 		~NullCmdQueue();

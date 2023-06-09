@@ -23,7 +23,6 @@ namespace NxRHI
 		virtual void UpdateGpuData(UINT subRes, void* pData, const FSubResourceFootPrint* footPrint) override;
 		virtual void TransitionTo(ICommandList* cmd, EGpuResourceState state) override;
 		virtual void SetDebugName(const char* name) override;
-
 		D3D12_GPU_VIRTUAL_ADDRESS GetGPUVirtualAddress()
 		{
 			return mGpuMemory->GetGPUVirtualAddress();
@@ -93,10 +92,14 @@ namespace NxRHI
 		virtual UINT GetFingerPrint() const override {
 			return mFingerPrint;
 		}
+		virtual void SetFingerPrint(UINT fp) {
+			mFingerPrint = fp;
+		}
 	public:
 		TWeakRefHandle<DX12GpuDevice> mDeviceRef;
 		AutoRef<DX12DescriptorSetPagedObject> mView;
 		UINT						mFingerPrint = 0;
+		
 	};
 
 	class DX12UaView : public IUaView

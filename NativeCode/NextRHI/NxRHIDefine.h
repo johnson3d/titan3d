@@ -16,6 +16,7 @@ namespace NxRHI
 			QU_Default = 1,
 			QU_Compute = (1 << 1),
 			QU_Transfer = (1 << 2),
+			QU_ALL = 0xFFFFFFFF,
 	};
 	enum TR_ENUM(SV_EnumNoFlags = true)
 		EColorSpace {
@@ -361,9 +362,11 @@ namespace NxRHI
 		UINT64 Offset = -1;
 		//UINT64 Size = 0;
 
-		UINT64 GetGPUVirtualAddress()
+		inline UINT64 GetGPUVirtualAddress()
 		{
-			return GpuHeap->GetGPUVirtualAddress() + Offset;
+			auto result = GpuHeap->GetGPUVirtualAddress() + Offset;
+			ASSERT(result != 0);
+			return result;
 		}
 
 		virtual void FreeMemory() = 0;

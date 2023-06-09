@@ -137,6 +137,8 @@ namespace EngineNS
         {
             CmdName = "GpuSetBreakOn";
             CmdHelp = "GpuSetBreakOn Id=(int) Op=(true:false)";
+            //CREATE_HEAP 566 
+            //DESTROY_HEAP 592
         }
         public override void Execute(string argsText)
         {

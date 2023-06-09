@@ -202,7 +202,7 @@ namespace EngineNS.EGui
 
             var drawCmd = rhiData.CmdList.mCoreObject;
             presentWindow.BeginFrame();
-            if (drawCmd.BeginCommand())
+            drawCmd.BeginCommand();
             {
                 var passClears = new NxRHI.FRenderPassClears();
                 passClears.SetDefault();
@@ -265,13 +265,15 @@ namespace EngineNS.EGui
                             }
                             else
                             {
-                                rhiData.Drawcall.mCoreObject.Commit(drawCmd);
+                                rhiData.Drawcall.mCoreObject.Commit(drawCmd, true);
+                                //drawCmd.PushGpuDraw(rhiData.Drawcall.mCoreObject.NativeSuper);
                             }
                         }
                         idx_offset += (int)cmd_list.IdxBufferSize;
                         vtx_offset += cmd_list.VtxBufferSize;
                     }
 
+                    //drawCmd.FlushDraws(true);
                     drawCmd.EndPass();
                 }
 
@@ -283,8 +285,8 @@ namespace EngineNS.EGui
                 fullRect.m_MaxY = (int)fwSize.X;
                 drawCmd.SetScissor(in fullRect);
                 swapChain.EndFrameBuffers(drawCmd);
-                drawCmd.EndCommand();
             }
+            drawCmd.EndCommand();
             presentWindow.EndFrame();
             rc.GpuQueue.ExecuteCommandList(drawCmd);
             //drawCmd.Commit(rc.mCoreObject);

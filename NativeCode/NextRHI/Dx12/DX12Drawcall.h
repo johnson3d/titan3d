@@ -15,7 +15,7 @@ namespace NxRHI
 	public:
 		DX12GraphicDraw();
 		~DX12GraphicDraw();
-		virtual void Commit(ICommandList* cmdlist) override;
+		virtual void Commit(ICommandList* cmdlist, bool bRefResource) override;
 
 		virtual void OnGpuDrawStateUpdated() override;
 		virtual void OnBindResource(const FEffectBinder* binder, IGpuResource* resource) override;
@@ -38,7 +38,7 @@ namespace NxRHI
 		DX12ComputeDraw();
 		~DX12ComputeDraw();
 		virtual void OnBindResource(const FShaderBinder* binder, IGpuResource* resource) override;
-		virtual void Commit(ICommandList* cmdlist) override;
+		virtual void Commit(ICommandList* cmdlist, bool bRefResource) override;
 
 		void RebuildDescriptorSets(DX12GpuDevice* device, DX12CommandList* dx12Cmd);
 	private:

@@ -63,6 +63,8 @@ namespace EngineNS.Graphics.Pipeline
         RL_Translucent,
         RL_Sky,
         //for editor to use;this layer should always be the last layer to send to renderer;
+        RL_PostOpaque,
+        RL_PostTranslucent,
         RL_Gizmos,
         RL_TranslucentGizmos,
 
@@ -85,11 +87,11 @@ namespace EngineNS.Graphics.Pipeline
             PostCmds = new UDrawBuffers();
             PostCmds.Initialize(rc, $"{debugName}:Post");
         }
-        public void ClearMeshDrawPassArray()
+        public void PrepareForDraw()
         {
             for (ERenderLayer i = ERenderLayer.RL_Begin; i < ERenderLayer.RL_Num; i++)
             {
-                PassBuffers[(int)i].DrawCmdList.mCoreObject.ResetGpuDraws();
+                PassBuffers[(int)i].DrawCmdList.BeginCommand();
             }
         }
         public unsafe void SetViewport(in NxRHI.FViewPort vp)
@@ -162,111 +164,35 @@ namespace EngineNS.Graphics.Pipeline
                 }
             }
         }
-        public unsafe void BuildRenderPass(URenderPolicy policy, in NxRHI.FViewPort viewport, in NxRHI.FRenderPassClears passClear, UGraphicsBuffers frameBuffers, UGraphicsBuffers gizmosFrameBuffers, string debugName)
+        public unsafe void BuildRenderPass(URenderPolicy policy, in NxRHI.FViewPort viewport, NxRHI.FRenderPassClears* pLayerClear, int numOfClears, UGraphicsBuffers frameBuffers, UGraphicsBuffers gizmosFrameBuffers, string debugName)
         {
-            PassBuffers[(int)ERenderLayer.RL_Background].DrawcallNumber = PassBuffers[(int)ERenderLayer.RL_Background].DrawCmdList.DrawcallNumber;
-            PassBuffers[(int)ERenderLayer.RL_Opaque].DrawcallNumber = PassBuffers[(int)ERenderLayer.RL_Opaque].DrawCmdList.DrawcallNumber;
-            PassBuffers[(int)ERenderLayer.RL_Translucent].DrawcallNumber = PassBuffers[(int)ERenderLayer.RL_Translucent].DrawCmdList.DrawcallNumber;
-            PassBuffers[(int)ERenderLayer.RL_Sky].DrawcallNumber = PassBuffers[(int)ERenderLayer.RL_Sky].DrawCmdList.DrawcallNumber;
-            PassBuffers[(int)ERenderLayer.RL_Gizmos].DrawcallNumber = PassBuffers[(int)ERenderLayer.RL_Gizmos].DrawCmdList.DrawcallNumber;
-            PassBuffers[(int)ERenderLayer.RL_TranslucentGizmos].DrawcallNumber = PassBuffers[(int)ERenderLayer.RL_TranslucentGizmos].DrawCmdList.DrawcallNumber;
-
+            for (ERenderLayer i = ERenderLayer.RL_Begin; i< ERenderLayer.RL_Num; i++)
             {
-                var cmdlist = PassBuffers[(int)ERenderLayer.RL_Background].DrawCmdList;
+                var index = (int)i;
+                var cmdlist = PassBuffers[index].DrawCmdList;
+                PassBuffers[index].DrawcallNumber = cmdlist.DrawcallNumber;
+                var bClear = pLayerClear[index].ClearFlags != 0;
+                if (bClear == false && PassBuffers[index].DrawcallNumber == 0)
+                {
+                    cmdlist.EndCommand();
+                    continue;
+                }
 
-                cmdlist.BeginCommand();
                 cmdlist.SetViewport(in viewport);
                 //frameBuffers.BuildFrameBuffers(policy);
-                cmdlist.BeginPass(frameBuffers.FrameBuffers, in passClear, debugName + ERenderLayer.RL_Background.ToString());
+                if (i == ERenderLayer.RL_Gizmos || i == ERenderLayer.RL_TranslucentGizmos)
+                {
+                    cmdlist.BeginPass(gizmosFrameBuffers.FrameBuffers, pLayerClear[index], debugName + i.ToString());
+                }
+                else
+                {
+                    cmdlist.BeginPass(frameBuffers.FrameBuffers, pLayerClear[index], debugName + i.ToString());
+                }
                 cmdlist.FlushDraws();
                 cmdlist.EndPass();
                 cmdlist.EndCommand();
 
                 UEngine.Instance.GfxDevice.RenderCmdQueue.QueueCmdlist(cmdlist);
-            }
-            {
-                var cmdlist = PassBuffers[(int)ERenderLayer.RL_Opaque].DrawCmdList;
-
-                cmdlist.BeginCommand();
-                cmdlist.SetViewport(in viewport);
-                //frameBuffers.BuildFrameBuffers(policy);
-                cmdlist.BeginPass(frameBuffers.FrameBuffers, in passClear, debugName + ERenderLayer.RL_Opaque.ToString());
-                cmdlist.FlushDraws();
-                cmdlist.EndPass();
-                cmdlist.EndCommand();
-
-                UEngine.Instance.GfxDevice.RenderCmdQueue.QueueCmdlist(cmdlist);
-            }
-
-            {
-                if (PassBuffers[(int)ERenderLayer.RL_Translucent].DrawcallNumber > 0)
-                {
-                    var cmdlist = PassBuffers[(int)ERenderLayer.RL_Translucent].DrawCmdList;
-
-                    cmdlist.BeginCommand();
-                    cmdlist.SetViewport(in viewport);
-                    //frameBuffers.BuildFrameBuffers(policy);
-                    var noClear = new NxRHI.FRenderPassClears();
-                    noClear.ClearFlags = 0;
-                    cmdlist.BeginPass(frameBuffers.FrameBuffers, in noClear, debugName + ERenderLayer.RL_Translucent.ToString());
-                    cmdlist.FlushDraws();
-                    cmdlist.EndPass();
-                    cmdlist.EndCommand();
-                    UEngine.Instance.GfxDevice.RenderCmdQueue.QueueCmdlist(cmdlist);
-                }   
-            }
-
-            {
-                if (PassBuffers[(int)ERenderLayer.RL_Sky].DrawcallNumber > 0)
-                {
-                    var cmdlist = PassBuffers[(int)ERenderLayer.RL_Sky].DrawCmdList;
-
-                    cmdlist.BeginCommand();
-                    cmdlist.SetViewport(in viewport);
-                    //frameBuffers.BuildFrameBuffers(policy);
-                    var noClear = new NxRHI.FRenderPassClears();
-                    noClear.ClearFlags = 0;
-                    cmdlist.BeginPass(frameBuffers.FrameBuffers, in noClear, debugName + ERenderLayer.RL_Sky.ToString());
-                    cmdlist.FlushDraws();
-                    cmdlist.EndPass();
-                    cmdlist.EndCommand();
-                    UEngine.Instance.GfxDevice.RenderCmdQueue.QueueCmdlist(cmdlist);
-                }
-            }
-            
-            {
-                if (PassBuffers[(int)ERenderLayer.RL_Gizmos].DrawcallNumber > 0 || 
-                    PassBuffers[(int)ERenderLayer.RL_TranslucentGizmos].DrawcallNumber > 0)
-                {
-                    var cmdlist = PassBuffers[(int)ERenderLayer.RL_Gizmos].DrawCmdList;
-
-                    cmdlist.BeginCommand();
-                    cmdlist.SetViewport(in viewport);
-                    //gizmosFrameBuffers.BuildFrameBuffers(policy);
-                    cmdlist.BeginPass(gizmosFrameBuffers.FrameBuffers, in passClear, debugName + ERenderLayer.RL_Gizmos.ToString());
-                    cmdlist.FlushDraws();
-                    cmdlist.EndPass();
-                    cmdlist.EndCommand();
-                    UEngine.Instance.GfxDevice.RenderCmdQueue.QueueCmdlist(cmdlist);
-                }   
-            }
-
-            {
-                if (PassBuffers[(int)ERenderLayer.RL_TranslucentGizmos].DrawcallNumber > 0)
-                {
-                    var cmdlist = PassBuffers[(int)ERenderLayer.RL_TranslucentGizmos].DrawCmdList;
-
-                    cmdlist.BeginCommand();
-                    cmdlist.SetViewport(in viewport);
-                    //gizmosFrameBuffers.BuildFrameBuffers(policy);
-                    var noClear = new NxRHI.FRenderPassClears();
-                    noClear.ClearFlags = 0;
-                    cmdlist.BeginPass(gizmosFrameBuffers.FrameBuffers, in noClear, debugName + ERenderLayer.RL_TranslucentGizmos.ToString());
-                    cmdlist.FlushDraws();
-                    cmdlist.EndPass();
-                    cmdlist.EndCommand();
-                    UEngine.Instance.GfxDevice.RenderCmdQueue.QueueCmdlist(cmdlist);
-                }
             }
         }
         public void SwapBuffer()

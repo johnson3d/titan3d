@@ -40,11 +40,11 @@ namespace EngineNS.NxRHI
         }
         public void Commit(ICommandList cmdlist)
         {
-            mCoreObject.NativeSuper.Commit(cmdlist);
+            mCoreObject.NativeSuper.Commit(cmdlist, false);
         }
         public void Commit(UCommandList cmdlist)
         {
-            mCoreObject.NativeSuper.Commit(cmdlist.mCoreObject);
+            mCoreObject.NativeSuper.Commit(cmdlist.mCoreObject, false);
         }
         public FEffectBinder FindBinder(string name)
         {
@@ -80,6 +80,12 @@ namespace EngineNS.NxRHI
             if (binder.IsValidPointer == false)
                 return;
             mCoreObject.BindResource(binder, srv.mCoreObject.NativeSuper);
+        }
+        public void BindSRV(NxRHI.UEffectBinder binder, USrView srv)
+        {
+            if (binder == null)
+                return;
+            mCoreObject.BindResource(binder.mCoreObject, srv.mCoreObject.NativeSuper);
         }
         public bool BindUAV(VNameString name, UUaView uav)
         {
@@ -130,11 +136,11 @@ namespace EngineNS.NxRHI
         }
         public void Commit(ICommandList cmdlist)
         {
-            mCoreObject.NativeSuper.Commit(cmdlist);
+            mCoreObject.NativeSuper.Commit(cmdlist, false);
         }
         public void Commit(UCommandList cmdlist)
         {
-            mCoreObject.NativeSuper.Commit(cmdlist.mCoreObject);
+            mCoreObject.NativeSuper.Commit(cmdlist.mCoreObject, false);
         }
         public void SetComputeEffect(UComputeEffect effect)
         {
@@ -203,11 +209,11 @@ namespace EngineNS.NxRHI
         }
         public void Commit(ICommandList cmdlist)
         {
-            mCoreObject.NativeSuper.Commit(cmdlist);
+            mCoreObject.NativeSuper.Commit(cmdlist, false);
         }
         public void Commit(UCommandList cmdlist)
         {
-            mCoreObject.NativeSuper.Commit(cmdlist.mCoreObject);
+            mCoreObject.NativeSuper.Commit(cmdlist.mCoreObject, false);
         }
         public ECopyDrawMode Mode
         {

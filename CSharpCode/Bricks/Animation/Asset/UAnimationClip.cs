@@ -258,6 +258,7 @@ namespace EngineNS.Animation.Asset
                     if (xnd != null)
                     {
                         var clip = UAnimationClip.LoadXnd(this, xnd);
+                        clip.SaveAssetTo(name);
                         if (clip == null)
                             return null;
 
