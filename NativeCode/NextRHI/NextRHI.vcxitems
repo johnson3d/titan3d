@@ -14,12 +14,6 @@
     <ProjectCapability Include="SourceItemsFromImports" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="$(MSBuildThisFileDirectory)Nanite\Cluster.cpp" />
-    <ClCompile Include="$(MSBuildThisFileDirectory)Nanite\DisjointSet.cpp" />
-    <ClCompile Include="$(MSBuildThisFileDirectory)Nanite\GraphPartitioner.cpp" />
-    <ClCompile Include="$(MSBuildThisFileDirectory)Nanite\HashTable.cpp" />
-    <ClCompile Include="$(MSBuildThisFileDirectory)Nanite\NxNaniteMesh.cpp" />
-    <ClCompile Include="$(MSBuildThisFileDirectory)Nanite\TriangleUtil.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)NxBuffer.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)NxCommandList.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)NxDrawcall.cpp" />
@@ -34,12 +28,6 @@
     <ClCompile Include="$(MSBuildThisFileDirectory)NxRHIDefine.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="$(MSBuildThisFileDirectory)Nanite\Cluster.h" />
-    <ClInclude Include="$(MSBuildThisFileDirectory)Nanite\DisjointSet.h" />
-    <ClInclude Include="$(MSBuildThisFileDirectory)Nanite\GraphPartitioner.h" />
-    <ClInclude Include="$(MSBuildThisFileDirectory)Nanite\HashTable.h" />
-    <ClInclude Include="$(MSBuildThisFileDirectory)Nanite\NxNaniteMesh.h" />
-    <ClInclude Include="$(MSBuildThisFileDirectory)Nanite\TriangleUtil.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)NxBuffer.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)NxCommandList.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)NxDrawcall.h" />
