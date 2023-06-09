@@ -425,12 +425,6 @@ namespace EngineNS
             vector.Z = (value1.Z + (amount1 * (value2.Z - value1.Z))) + (amount2 * (value3.Z - value1.Z));
             return vector;
         }
-        public static void Barycentric(in DVector3 value1, in DVector3 value2, in DVector3 value3, double amount1, double amount2, out DVector3 result)
-        {
-            result.X = (value1.X + (amount1 * (value2.X - value1.X))) + (amount2 * (value3.X - value1.X));
-            result.Y = (value1.Y + (amount1 * (value2.Y - value1.Y))) + (amount2 * (value3.Y - value1.Y));
-            result.Z = (value1.Z + (amount1 * (value2.Z - value1.Z))) + (amount2 * (value3.Z - value1.Z));
-        }
         public static DVector3 Clamp(in DVector3 value, in DVector3 min, in DVector3 max)
         {
             var x = value.X;

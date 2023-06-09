@@ -113,10 +113,29 @@ namespace EngineNS
             //    Y.ToString(System.Globalization.CultureInfo.CurrentCulture), 
             //    Z.ToString(System.Globalization.CultureInfo.CurrentCulture));
         }
-        public Vector2 GetXY()
+        #region swizzle
+        public Vector2 XY
         {
-            return new Vector2(X, Y);
+            get
+            {
+                return new Vector2(X, Y);
+            }
         }
+        public Vector2 XZ
+        {
+            get
+            {
+                return new Vector2(X, Z);
+            }
+        }
+        public Vector2 YZ
+        {
+            get
+            {
+                return new Vector2(X, Z);
+            }
+        }
+        #endregion
         public static Vector3 FromString(string text)
         {
             try
@@ -552,22 +571,6 @@ namespace EngineNS
 		    vector.Y = (value1.Y + (amount1 * (value2.Y - value1.Y))) + (amount2 * (value3.Y - value1.Y));
 		    vector.Z = (value1.Z + (amount1 * (value2.Z - value1.Z))) + (amount2 * (value3.Z - value1.Z));
 		    return vector;
-	    }
-        /// <summary>
-        /// 计算质心坐标
-        /// </summary>
-        /// <param name="value1">三维坐标点</param>
-        /// <param name="value2">三维坐标点</param>
-        /// <param name="value3">三维坐标点</param>
-        /// <param name="amount1">参数</param>
-        /// <param name="amount2">参数</param>
-        /// <param name="result">计算结果</param>
-        [Rtti.Meta]
-        public static void Barycentric(in Vector3 value1, in Vector3 value2, in Vector3 value3, float amount1, float amount2, out Vector3 result)
-	    {
-            result.X = (value1.X + (amount1 * (value2.X - value1.X))) + (amount2 * (value3.X - value1.X));
-            result.Y = (value1.Y + (amount1 * (value2.Y - value1.Y))) + (amount2 * (value3.Y - value1.Y));
-            result.Z = (value1.Z + (amount1 * (value2.Z - value1.Z))) + (amount2 * (value3.Z - value1.Z));
 	    }
         /// <summary>
         /// CatmullRom插值计算

@@ -438,27 +438,12 @@ namespace EngineNS
         /// <param name="amount2">参数</param>
         /// <returns>返回对象的质心坐标</returns>
         [Rtti.Meta]
-        public static DVector2 Barycentric( DVector2 value1, DVector2 value2, DVector2 value3, double amount1, double amount2 )
+        public static DVector2 Barycentric(in DVector2 value1, in DVector2 value2, in DVector2 value3, double amount1, double amount2 )
 	    {
 		    DVector2 vector;
 		    vector.X = (value1.X + (amount1 * (value2.X - value1.X))) + (amount2 * (value3.X - value1.X));
 		    vector.Y = (value1.Y + (amount1 * (value2.Y - value1.Y))) + (amount2 * (value3.Y - value1.Y));
 		    return vector;
-	    }
-        /// <summary>
-        /// 求对象的质心
-        /// </summary>
-        /// <param name="value1">二维向量对象</param>
-        /// <param name="value2">二维向量对象</param>
-        /// <param name="value3">二维向量对象</param>
-        /// <param name="amount1">参数</param>
-        /// <param name="amount2">参数</param>
-        /// <param name="result">对象的质心坐标</param>
-        [Rtti.Meta]
-        public static void Barycentric( ref DVector2 value1, ref DVector2 value2, ref DVector2 value3, double amount1, double amount2, out DVector2 result )
-	    {
-            result.X = (value1.X + (amount1 * (value2.X - value1.X))) + (amount2 * (value3.X - value1.X));
-            result.Y = (value1.Y + (amount1 * (value2.Y - value1.Y))) + (amount2 * (value3.Y - value1.Y));
 	    }
         /// <summary>
         /// 插值计算

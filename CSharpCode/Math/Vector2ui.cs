@@ -418,21 +418,6 @@ namespace EngineNS
             return vector;
         }
         /// <summary>
-        /// 计算质心坐标
-        /// </summary>
-        /// <param name="value1">三维坐标点</param>
-        /// <param name="value2">三维坐标点</param>
-        /// <param name="value3">三维坐标点</param>
-        /// <param name="amount1">参数</param>
-        /// <param name="amount2">参数</param>
-        /// <param name="result">计算结果</param>
-        [Rtti.Meta]
-        public static void Barycentric(in Vector2ui value1, in Vector2ui value2, in Vector2ui value3, uint amount1, uint amount2, out Vector2ui result)
-        {
-            result.X = (value1.X + (amount1 * (value2.X - value1.X))) + (amount2 * (value3.X - value1.X));
-            result.Y = (value1.Y + (amount1 * (value2.Y - value1.Y))) + (amount2 * (value3.Y - value1.Y));
-        }
-        /// <summary>
         /// 载体计算
         /// </summary>
         /// <param name="value">三维坐标点</param>

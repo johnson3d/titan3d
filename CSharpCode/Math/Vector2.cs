@@ -425,28 +425,34 @@ namespace EngineNS
         /// <param name="amount2">参数</param>
         /// <returns>返回对象的质心坐标</returns>
         [Rtti.Meta]
-        public static Vector2 Barycentric( Vector2 value1, Vector2 value2, Vector2 value3, float amount1, float amount2 )
+        public static Vector2 Barycentric(in Vector2 value1, in Vector2 value2, in Vector2 value3, float amount1, float amount2 )
 	    {
 		    Vector2 vector;
 		    vector.X = (value1.X + (amount1 * (value2.X - value1.X))) + (amount2 * (value3.X - value1.X));
 		    vector.Y = (value1.Y + (amount1 * (value2.Y - value1.Y))) + (amount2 * (value3.Y - value1.Y));
 		    return vector;
 	    }
-        /// <summary>
-        /// 求对象的质心
-        /// </summary>
-        /// <param name="value1">二维向量对象</param>
-        /// <param name="value2">二维向量对象</param>
-        /// <param name="value3">二维向量对象</param>
-        /// <param name="amount1">参数</param>
-        /// <param name="amount2">参数</param>
-        /// <param name="result">对象的质心坐标</param>
-        [Rtti.Meta]
-        public static void Barycentric( ref Vector2 value1, ref Vector2 value2, ref Vector2 value3, float amount1, float amount2, out Vector2 result )
-	    {
-            result.X = (value1.X + (amount1 * (value2.X - value1.X))) + (amount2 * (value3.X - value1.X));
-            result.Y = (value1.Y + (amount1 * (value2.Y - value1.Y))) + (amount2 * (value3.Y - value1.Y));
-	    }
+        public static Vector2 Barycentric(in Vector2 A, in Vector2 B, in Vector2 C, in Vector2 P)
+        {//https://blog.csdn.net/qq_38065509/article/details/105446756
+            Vector2 uv;
+            var yA_B = A.Y - B.Y;
+            var xB_A = B.X - A.X;
+            var ax_x_by = A.X * B.Y;
+            var bx_x_ay = B.X * A.Y;
+            var d1 = ax_x_by - bx_x_ay;
+            //C
+            uv.X = (yA_B * P.X + xB_A * P.Y + d1) / (yA_B * C.X + xB_A * C.Y + d1);
+
+            var yA_C = A.Y - C.Y;
+            var xC_A = C.X - A.X;
+            var ax_x_cy = A.X * C.Y;
+            var cx_x_ay = C.X * A.Y;
+            var d2 = ax_x_cy - cx_x_ay;
+            //B
+            uv.Y = (yA_C * P.X + xC_A * P.Y + d2) / (yA_C * B.X + xC_A * B.Y + d2);
+            
+            return uv;
+        }
         /// <summary>
         /// 插值计算
         /// </summary>
@@ -1072,6 +1078,13 @@ namespace EngineNS
             result.Y = left.Y + right.Y;
             return result;
 	    }
+        public static Vector2 operator +(in Vector2 left, float right)
+        {
+            Vector2 result;
+            result.X = left.X + right;
+            result.Y = left.Y + right;
+            return result;
+        }
         /// <summary>
         /// 重载"-"号运算符
         /// </summary>
