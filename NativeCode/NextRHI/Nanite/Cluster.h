@@ -46,12 +46,12 @@ public:
 	FCluster(
 		const std::vector< v3dxVector3 >& InVerts,
 		const std::vector< UINT32 >& InIndexes,
-		const std::vector < INT32 >& InMaterialIndexes,
-		UINT32 InNumTexCoords, bool bInHasColors, bool bInPreserveArea,
+		//const std::vector < INT32 >& InMaterialIndexes,
+		//UINT32 InNumTexCoords, bool bInHasColors, bool bInPreserveArea,
 		UINT32 TriBegin, UINT32 TriEnd, const FGraphPartitioner& Partitioner, const FAdjacency& Adjacency );
 
-	FCluster( FCluster& SrcCluster, UINT32 TriBegin, UINT32 TriEnd, const FGraphPartitioner& Partitioner, const FAdjacency& Adjacency );
-	FCluster(const std::vector<FCluster*> & MergeList );
+    FCluster( FCluster& SrcCluster, UINT32 TriBegin, UINT32 TriEnd, const FGraphPartitioner& Partitioner, const FAdjacency& Adjacency );
+    FCluster(const std::vector<FCluster*> & MergeList );
 
 	float		Simplify( UINT32 TargetNumTris, float TargetError = 0.0f, UINT32 LimitNumTris = 0, bool bForNaniteFallback = false );
 	FAdjacency	BuildAdjacency() const;
@@ -87,7 +87,7 @@ public:
 	bool		bPreserveArea = false;
 
 	std::vector< float >		Verts;
-	std::vector< UINT32 >	Indexes;
+	std::vector< UINT32 >	Indexes; // TODO: WORD replaced UINT32
 	std::vector< INT32 >		MaterialIndexes;
 	std::vector< INT8 >		ExternalEdges;
 	UINT32				NumExternalEdges;
@@ -122,7 +122,8 @@ public:
 
 FORCEINLINE UINT32 FCluster::GetVertSize() const
 {
-	return 6 + ( bHasColors ? 4 : 0 ) + NumTexCoords * 2;
+	//return 6 + ( bHasColors ? 4 : 0 ) + NumTexCoords * 2; // 3 pos, 3 normal
+	return 3;
 }
 
 FORCEINLINE v3dxVector3& FCluster::GetPosition( UINT32 VertIndex )

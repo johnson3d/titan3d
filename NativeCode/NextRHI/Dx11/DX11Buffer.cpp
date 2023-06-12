@@ -155,7 +155,7 @@ namespace NxRHI
 		auto ret = mMappingCmdList->mContext->Map(mBuffer, index, flags, 0, (D3D11_MAPPED_SUBRESOURCE*)res);
 		res->RowPitch = Desc.RowPitch;
 		res->DepthPitch = Desc.DepthPitch;
-		ASSERT(ret == S_OK);
+		//ASSERT(ret == S_OK);
 		return ret == S_OK;
 	}
 

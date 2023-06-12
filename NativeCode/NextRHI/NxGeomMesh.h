@@ -220,8 +220,8 @@ namespace NxRHI
 		AutoRef<IVbView> LoadVB(IGpuDevice* device, XndAttribute * pAttr, UINT stride, TimeKeys & tkeys, UINT & resSize, EVertexStreamType stream);
 		void SaveVB(IGpuDevice* device, XndAttribute * pAttr, IVbView* vb, TimeKeys & tkeys, UINT stride);
 
-		template<typename IndexType>
-		void RasterizeTriangles(std::vector<v3dxVector3>& vb, std::vector<IndexType>& ib, std::vector<FCluster>& clusters);
+		//template<typename IndexType>
+		void RasterizeTriangles(std::vector<v3dxVector3>& vb, std::vector<UINT32>& ib, std::vector<FCluster>& clusters);
 	protected:
 		std::string				mName;
 		AutoRef<FGeomMesh>		mGeometryMesh;

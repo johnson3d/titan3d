@@ -25,8 +25,8 @@ void CorrectAttributesColor( float* Attributes )
 FCluster::FCluster(
 	const std::vector< v3dxVector3 >& InVerts,
 	const std::vector< UINT32 >& InIndexes,
-	const std::vector< INT32 >& InMaterialIndexes,
-	UINT32 InNumTexCoords, bool bInHasColors, bool bInPreserveArea,
+	//const std::vector< INT32 >& InMaterialIndexes,
+	//UINT32 InNumTexCoords, bool bInHasColors, bool bInPreserveArea,
 	UINT32 TriBegin, UINT32 TriEnd, const FGraphPartitioner& Partitioner, const FAdjacency& Adjacency )
 {
 	//GUID = (uint64(TriBegin) << 32) | TriEnd;
@@ -34,17 +34,17 @@ FCluster::FCluster(
 	NumTris = TriEnd - TriBegin;
 	//ensure(NumTriangles <= FCluster::ClusterSize);
 	
-	bHasColors = bInHasColors;
-	bPreserveArea = bInPreserveArea;
-	NumTexCoords = InNumTexCoords;
+    //bHasColors = bInHasColors;
+    //bPreserveArea = bInPreserveArea;
+    //NumTexCoords = InNumTexCoords;
 
-	Verts.resize( NumTris * GetVertSize() );
-	Indexes.resize( 3 * NumTris );
-	MaterialIndexes.resize( NumTris );
-	ExternalEdges.resize( 3 * NumTris );
+	Verts.reserve( NumTris * GetVertSize() );
+	Indexes.reserve( 3 * NumTris );
+	MaterialIndexes.reserve( NumTris );
+	ExternalEdges.reserve( 3 * NumTris );
 	NumExternalEdges = 0;
 
-	ASSERT(InMaterialIndexes.size() * 3 == InIndexes.size());
+	//ASSERT(InMaterialIndexes.size() * 3 == InIndexes.size());
 
 	std::map< UINT32, UINT32 > OldToNewIndex;
 	//OldToNewIndex.reserve( NumTris );
@@ -105,7 +105,7 @@ FCluster::FCluster(
 			NumExternalEdges += AdjCount != 0 ? 1 : 0;
 		}
 
-		MaterialIndexes.push_back( InMaterialIndexes[ TriIndex ] );
+		//MaterialIndexes.push_back( InMaterialIndexes[ TriIndex ] );
 	}
 
 	SanitizeVertexData();
@@ -136,10 +136,10 @@ FCluster::FCluster( FCluster& SrcCluster, UINT32 TriBegin, UINT32 TriEnd, const 
 	
 	NumTris = TriEnd - TriBegin;
 
-	Verts.resize( NumTris * GetVertSize() );
-	Indexes.resize( 3 * NumTris );
-	MaterialIndexes.resize( NumTris );
-	ExternalEdges.resize( 3 * NumTris );
+	Verts.reserve( NumTris * GetVertSize() );
+	Indexes.reserve( 3 * NumTris );
+	MaterialIndexes.reserve( NumTris );
+	ExternalEdges.reserve( 3 * NumTris );
 	NumExternalEdges = 0;
 
 	std::map< UINT32, UINT32 > OldToNewIndex;
@@ -219,13 +219,20 @@ void FCluster::Split( FGraphPartitioner& Partitioner, const FAdjacency& Adjacenc
 			} );
 	}
 
-	auto GetCenter = [ this ]( UINT32 TriIndex )
+	auto GetCenter = [ this ]( UINT32 TriIndex, v3dxVector3& Center)
 	{
-		v3dxVector3 Center;
+        if (Indexes[TriIndex * 3 + 0] >= Verts.size() ||
+            Indexes[TriIndex * 3 + 1] >= Verts.size() ||
+            Indexes[TriIndex * 3 + 2] >= Verts.size())
+        {
+            return false;
+        }
+
 		Center  = GetPosition( Indexes[ TriIndex * 3 + 0 ] );
 		Center += GetPosition( Indexes[ TriIndex * 3 + 1 ] );
 		Center += GetPosition( Indexes[ TriIndex * 3 + 2 ] );
-		return Center * (1.0f / 3.0f);
+		Center *= (1.0f / 3.0f);
+		return true;
 	};
 
 	Partitioner.BuildLocalityLinks( DisjointSet, Bounds, MaterialIndexes, GetCenter );

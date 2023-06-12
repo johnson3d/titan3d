@@ -444,7 +444,7 @@ namespace NxRHI
 			pAttr->Write((BYTE*)ibBuffer.GetData() + sizeof(UINT) * 2, desc.Size);
 			pAttr->EndWrite();
 		}
-#if 0
+#if 1
 		// cluster
 		std::vector<FCluster> clusters;
 
@@ -454,18 +454,51 @@ namespace NxRHI
 
 		if (!mGeometryMesh->IsIndex32)
 		{
-            std::vector<WORD> indexes;
-            indexes.resize(ib->Buffer->Desc.Size / sizeof(WORD));
-            memcpy((BYTE*)&indexes[0], (BYTE*)ibBuffer.GetData() + sizeof(UINT) * 2, ib->Buffer->Desc.Size);
+            std::vector<WORD> indexData;
+            indexData.resize(ib->Buffer->Desc.Size / sizeof(WORD));
+            memcpy((BYTE*)&indexData[0], (BYTE*)ibBuffer.GetData() + sizeof(UINT) * 2, ib->Buffer->Desc.Size);
 
-            RasterizeTriangles<WORD>(verts, indexes, clusters);
+			// TODO: deal with WORD/int32
+			std::vector<UINT32> indexes;
+			for (int i = 0; i < indexData.size(); ++i)
+			{
+				// TODO: check ib range
+				if (indexData[i] > verts.size())
+					break;
+
+				indexes.push_back(indexData[i]);
+			}			
+            RasterizeTriangles(verts, indexes, clusters);
+
+			if (clusters.size() > 0)
+			{
+                pAttr = pNode->GetOrAddAttribute("Cluster", 0, 0);
+                pAttr->BeginWrite();
+
+				pAttr->Write(clusters.size());
+				for (int i = 0; i < clusters.size(); ++i)
+				{
+
+				}
+
+                pAttr->EndWrite();
+			}
 		}
 #endif
 	}
 
-	template<typename IndexType>
-	void FMeshPrimitives::RasterizeTriangles(std::vector<v3dxVector3>& Verts, std::vector<IndexType>& Indexes, std::vector<FCluster>& clusters)
+	//template<typename IndexType>
+	void FMeshPrimitives::RasterizeTriangles(std::vector<v3dxVector3>& Verts, std::vector<UINT32>& Indexes, std::vector<FCluster>& clusters)
 	{
+		// calculate bouding box
+		v3dxBox3 MeshBounds;
+		for (int i = 0; i < Verts.size(); ++i)
+		{
+			MeshBounds += Verts[i];
+			
+			// TODO: check vertex color
+		}
+
 		clusters.clear();
 
         UINT32 NumTriangles = Indexes.size() / 3;
@@ -537,6 +570,65 @@ namespace NxRHI
                         DisjointSet.UnionSequential(EdgeIndex0 / 3, EdgeIndex1 / 3);
                 });
         }
+
+		// patition mesh
+        FGraphPartitioner Partitioner(NumTriangles);
+        {
+            auto GetCenter = [&Verts, &Indexes](UINT32 TriIndex, v3dxVector3& Center)
+            {
+				if (Indexes[TriIndex * 3 + 0] >= Verts.size() ||
+					Indexes[TriIndex * 3 + 1] >= Verts.size() ||
+					Indexes[TriIndex * 3 + 2] >= Verts.size())
+				{
+					return false;
+				}
+                Center = Verts[Indexes[TriIndex * 3 + 0]];
+                Center += Verts[Indexes[TriIndex * 3 + 1]];
+                Center += Verts[Indexes[TriIndex * 3 + 2]];
+                Center *= (1.0f / 3.0f);
+
+				return true;
+            };
+			// TODO: material group
+			std::vector<INT32> MaterialIndexes;
+			MaterialIndexes.clear();
+
+            Partitioner.BuildLocalityLinks(DisjointSet, MeshBounds, MaterialIndexes, GetCenter);
+
+            auto Graph = Partitioner.NewGraph(NumTriangles * 3);
+
+            for (UINT32 i = 0; i < NumTriangles; i++)
+            {
+                Graph->AdjacencyOffset[i] = Graph->Adjacency.size();
+
+                UINT32 TriIndex = Partitioner.Indexes[i];
+
+                for (int k = 0; k < 3; k++)
+                {
+                    Adjacency.ForAll(3 * TriIndex + k,
+                        [&Partitioner, Graph](INT32 EdgeIndex, INT32 AdjIndex)
+                        {
+                            Partitioner.AddAdjacency(Graph, AdjIndex / 3, 4 * 65);
+                        });
+                }
+
+                Partitioner.AddLocalityLinks(Graph, TriIndex, 1);
+            }
+            Graph->AdjacencyOffset[NumTriangles] = Graph->Adjacency.size();
+
+			bool bSingleThreaded = NumTriangles < 5000;
+
+            Partitioner.PartitionStrict(Graph, FCluster::ClusterSize - 4, FCluster::ClusterSize, !bSingleThreaded);
+            ASSERT(Partitioner.Ranges.size() > 0);
+        }
+
+		// build cluster
+		clusters.resize(Partitioner.Ranges.size());
+		for (int i = 0; i < Partitioner.Ranges.size(); ++i)
+		{
+			auto& Range = Partitioner.Ranges[i];
+			clusters[i] = FCluster(Verts, Indexes, Range.Begin, Range.End, Partitioner, Adjacency);
+		}
 	}
 	bool FMeshPrimitives::LoadXnd(IGpuDevice* device, const char* name, XndHolder* xnd, bool isLoad)
 	{
