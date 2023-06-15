@@ -92,6 +92,8 @@ namespace CppWeaving.Cpp2CS
             foreach (var i in Decl.Bases)
             {
                 var parent = i.Referenced as ClangSharp.CXXRecordDecl;
+                if (parent == null)
+                    continue;
                 var basekls = UTypeManager.Instance.FindClass(parent.TypeForDecl.Handle);
                 if (basekls != null)
                     BaseTypes.Add(basekls);

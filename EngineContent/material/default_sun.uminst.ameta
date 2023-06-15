@@ -12,7 +12,7 @@
   </Icon>
   <RefAssetRNames Type="System.Collections.Generic.List&lt;EngineNS.RName@EngineCore,&gt;@Unknown" Count="2">
     <e_0 Value="Engine,material/dft_unlit.material,186277e8-1070-4c99-ae81-1ac1d1ea7624" />
-    <e_1 Value="Engine,texture/default_vignette.srv,fe7095ff-a073-4f22-b740-b793c67d9c23" />
+    <e_1 Value="Game,utest/texture/light_point2.srv,034b1179-a647-4e3c-91b2-700e92d61983" />
   </RefAssetRNames>
   <TypeStr Type="System.String@Unknown" Value="EngineNS.Graphics.Pipeline.Shader.UMaterialInstance@EngineCore" />
 </Root>
