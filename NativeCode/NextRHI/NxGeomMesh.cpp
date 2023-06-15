@@ -390,7 +390,7 @@ namespace NxRHI
 
 			IBlobObject buffData;
 			AutoRef<NxRHI::IBuffer> copyVB;
-			if (false == ib->Buffer->FetchGpuData(0, &ibBuffer))
+			if (false == ib->Buffer->FetchGpuData(0, &buffData))
 			{
 				{
 					FTransientCmd cmd(device, NxRHI::QU_Transfer);
@@ -421,10 +421,10 @@ namespace NxRHI
 					cmd.GetCmdList()->FlushDraws(true);
 					
 				}
+				device->GetCmdQueue()->Flush(EQueueType::QU_Transfer);
+				copyVB->FetchGpuData(0, &buffData);
 			}
 
-			device->GetCmdQueue()->Flush(EQueueType::QU_Transfer);
-			copyVB->FetchGpuData(0, &buffData);
 			pAttr->Write((BYTE*)buffData.GetData() + sizeof(UINT) * 2, desc.Size);
 			pAttr->EndWrite();
 		}
