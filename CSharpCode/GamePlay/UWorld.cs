@@ -79,7 +79,33 @@ namespace EngineNS.GamePlay
         {
             get => mRoot;
         }
-        public UDirectionLight DirectionLight { get; set; } = new UDirectionLight();
+        internal List<Scene.TtSunNode> mSuns = new List<Scene.TtSunNode>();
+        public Scene.TtSunNode GetSun(int index = 0)
+        {
+            if (index < 0 || index >= mSuns.Count)
+                return null;
+            return mSuns[index];
+        }
+        TtDirectionLight mDirectionLight;
+        public TtDirectionLight DirectionLight 
+        {
+            get
+            {
+                var result = GetSun();
+                if (result != null)
+                {
+                    return result.DirectionLight;
+                }
+                else
+                {
+                    if (mDirectionLight == null)
+                    {
+                        mDirectionLight = new TtDirectionLight();
+                    }
+                    return mDirectionLight;
+                }
+            } 
+        }
         #region Culling
         public class UVisParameter
         {

@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using static Org.BouncyCastle.Math.EC.ECCurve;
+using System.Runtime.InteropServices;
 
 namespace EngineNS.Rtti
 {

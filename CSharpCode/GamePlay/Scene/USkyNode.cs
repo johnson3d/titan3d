@@ -62,6 +62,10 @@ namespace EngineNS.GamePlay.Scene
                 data = skyData;
                 SunMaterial = await UEngine.Instance.GfxDevice.MaterialInstanceManager.GetMaterialInstance(skyData.SunMaterialName);
             }
+            else
+            {
+                SunMaterial = await UEngine.Instance.GfxDevice.MaterialInstanceManager.GetMaterialInstance(skyData.SunMaterialName);
+            }
             await base.InitializeNode(world, data, bvType, placementType);
             var rect = Graphics.Mesh.UMeshDataProvider.MakeRect2D(-0.5f, -0.5f, 1, 1, 0);
             var rectMesh = rect.ToMesh();

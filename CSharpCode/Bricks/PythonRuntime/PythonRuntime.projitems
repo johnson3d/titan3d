@@ -3,15 +3,15 @@
   <PropertyGroup>
     <MSBuildAllProjects Condition="'$(MSBuildVersion)' == '' Or '$(MSBuildVersion)' &lt; '16.0'">$(MSBuildAllProjects);$(MSBuildThisFileFullPath)</MSBuildAllProjects>
     <HasSharedItems>true</HasSharedItems>
-    <SharedGUID>0bf2a284-4a10-49b3-a4b0-048df20c0a4d</SharedGUID>
+    <SharedGUID>bcee2d5c-1d75-4c4c-b081-4fbc3d9dbda7</SharedGUID>
   </PropertyGroup>
   <PropertyGroup Label="Configuration">
-    <Import_RootNamespace>EngineNS.Bricks.GpuDriven</Import_RootNamespace>
+    <Import_RootNamespace>EngineNS.Bricks.PythonRuntime</Import_RootNamespace>
   </PropertyGroup>
   <ItemGroup>
-    <Compile Include="$(MSBuildThisFileDirectory)Cluster.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)SurfaceAreaHeuristic.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)SWRasterizer.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)VisibilityCulling.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)PyModule.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)PyTuple.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)PyTypeDefine.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)PyValue.cs" />
   </ItemGroup>
 </Project>

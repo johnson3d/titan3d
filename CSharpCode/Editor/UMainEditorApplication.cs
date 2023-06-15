@@ -9,6 +9,7 @@ using System.Xml.Linq;
 using NPOI.SS.Formula.Functions;
 using EngineNS.UI.Editor;
 using EngineNS.Macross;
+using System.Runtime.InteropServices;
 //using SDL2;
 
 namespace EngineNS.Editor
@@ -92,6 +93,12 @@ namespace EngineNS.Editor
 
             return true;
         }
+#if PWindow
+        [DllImport("kernel32.dll")]
+        static extern IntPtr GetConsoleWindow();
+        [DllImport("user32.dll")]
+        static extern bool ShowWindow(IntPtr hWnd, int nCmdShow);
+#endif
         public void InitMainMenu()
         {
             mMenuItems = new List<EGui.UIProxy.MenuItemProxy>()
@@ -183,6 +190,18 @@ namespace EngineNS.Editor
                                     IRenderDocTool.GetInstance().SetActiveWindow(this.NativeWindow.HWindow.ToPointer());
                                     UEngine.Instance.GfxDevice.RenderCmdQueue.CaptureRenderDocFrame = true;
                                 }
+                            },
+                        },
+                        new EGui.UIProxy.MenuItemProxy()
+                        {
+                            MenuName = "ShowConsole",
+                            Action = (EGui.UIProxy.MenuItemProxy item, Support.UAnyPointer data)=>
+                            {
+                                item.Selected = !item.Selected;
+#if PWindow
+                                var handle = GetConsoleWindow();
+                                ShowWindow(handle, item.Selected ? 1 : 0);
+#endif
                             },
                         },
                     },
@@ -769,17 +788,6 @@ namespace EngineNS.Editor
 
             gridNode.ViewportSlate = vpSlate;
 
-            var dirLightNode = new GamePlay.Scene.UDirLightNode();
-            await dirLightNode.InitializeNode(world, new GamePlay.Scene.UDirLightNode.UDirLightNodeData(), GamePlay.Scene.EBoundVolumeType.Box, typeof(GamePlay.UPlacement));
-            dirLightNode.NodeData.Name = $"DirLight";
-            dirLightNode.Parent = root;
-
-            dirLightNode.Placement.Scale = new Vector3(10, 10, 10);
-
-            //dirLightNode.Placement.Quat = Quaternion.RotationYawPitchRoll((float)Math.PI * 0.25f, (float)Math.PI * 0.25f, 0);
-            var toVec = new Vector3(-1, -1, -1);
-            toVec.Normalize();
-            dirLightNode.Placement.Quat = Quaternion.RotationFrowTwoVector(in Vector3.UnitZ, in toVec);
         }
 
         public static async System.Threading.Tasks.Task TestCreateCharacter(GamePlay.UWorld world, GamePlay.Scene.UNode root, bool hideTerrain = false)

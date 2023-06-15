@@ -24,10 +24,10 @@ namespace EngineNS.Bricks.GpuDriven
         public UInt32 padding; //TODO
     }
 
-    public struct TtClusterInfo
+    [System.Runtime.InteropServices.StructLayout(System.Runtime.InteropServices.LayoutKind.Sequential, Pack = 16)]
+    public struct FClusterInfo
     {
-        public Vector3 LocalBoundsMin;
-        public Vector3 LocalBoundsMax;
+        public BoundingBox AABB;
     }
 
     public struct TtVisibleInstance
@@ -52,16 +52,48 @@ namespace EngineNS.Bricks.GpuDriven
         public int VertexCount;
         public int IndexStart;
         public int IndexCount;
+
+        public FClusterInfo Desc;
     }
     public class TtClusteredMesh
     {
+        public bool InitFromMesh(Graphics.Mesh.UMeshPrimitives mesh)
+        {
+            //1.mesh get vb,ib
+            //2.split to clusters
+            
+            return false;
+        }
+        public void SaveClusteredMesh(RName meshName)
+        {
+            var file = meshName.Address + ".clustermesh";
+            var xnd = new IO.TtXndHolder("Cluster", 0, 0);
+            for (NxRHI.EVertexStreamType i = 0; i < NxRHI.EVertexStreamType.VST_Number; i++)
+            {
+                var vb = VBs.mCoreObject.GetVB(i);
+                if (vb.IsValidPointer)
+                {
+                    var data = new Support.UBlobObject();
+                    vb.Buffer.FetchGpuData(0, data.mCoreObject);
+                }
+            }
+            // save vbs, ib...
+            xnd.SaveXnd(file);
+        }
+        public static TtClusteredMesh LoadClusteredMesh(RName meshName)
+        {
+            var file = meshName.Address + ".clustermesh";
+            var xnd = IO.TtXndHolder.LoadXnd(file);
+            var result = new TtClusteredMesh();
+            // load vbs, ib...
+            return result;
+        }
         public NxRHI.UVertexArray VBs;
         public NxRHI.UIbView IB;
         public int NumVertices;
         public int NumIndices;
-        public Vector3[] Positions;
         public List<TtCluster> Clusters = new List<TtCluster>();
-        public TtClusterInfo ClustersInfo = new TtClusterInfo();
+        public BoundingBox AABB = new BoundingBox();
         public static unsafe TtClusteredMesh Merge(List<TtClusteredMesh> meshes, NxRHI.UCommandList cmdlist)
         {
             var rc = UEngine.Instance.GfxDevice.RenderContext;
@@ -114,16 +146,6 @@ namespace EngineNS.Bricks.GpuDriven
                 }
                 TotalVertices += mesh.NumVertices;
                 TotalIndices += mesh.NumIndices;
-
-                {
-                    BoundingBox box = new BoundingBox();
-                    foreach (var pos in mesh.Positions)
-                    {
-                        box.Merge(pos);
-                    }
-                    mesh.ClustersInfo.LocalBoundsMin = box.Minimum;
-                    mesh.ClustersInfo.LocalBoundsMax = box.Maximum;
-                }
             }
             
             result.VBs = new NxRHI.UVertexArray();

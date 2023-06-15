@@ -187,6 +187,10 @@ namespace EngineNS.Graphics.Pipeline.Common
             }
             return null;
         }
+        public UAttachBuffer ImportAttachment(Common.URenderGraphPin pin)
+        {
+            return RenderGraph.AttachmentCache.ImportAttachment(pin);
+        }
         public UAttachBuffer FindAttachBuffer(URenderGraphPin pin)
         {
             return RenderGraph.AttachmentCache.FindAttachement(pin.Attachement.AttachmentName);

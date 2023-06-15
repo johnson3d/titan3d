@@ -4,7 +4,9 @@ using System.Text;
 
 namespace EngineNS.GamePlay
 {
-    public class UDirectionLight : IO.BaseSerializer
+    [Rtti.Meta(NameAlias = new string[] { "EngineNS.GamePlay.UDirectionLight@EngineCore" })]
+    public class TtDirectionLight
+        : IO.BaseSerializer
     {
         public Vector3 mDirection;
         public float mSunLightLeak = 0.05f;
@@ -49,7 +51,7 @@ namespace EngineNS.GamePlay
                 mGroundLightColor = value;
             }
         }
-        public UDirectionLight()
+        public TtDirectionLight()
         {
             mDirection = new Vector3(1, -1, 1);
             mDirection.Normalize();
