@@ -373,6 +373,8 @@ Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "AstcDecoder", "3rd\csharp\A
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "GameBuilder", "Module\GameBuilder\GameBuilder.csproj", "{B250DCC4-B510-47BB-9CF4-19CDDE36EFEE}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Quark", "NativeCode\Bricks\Quark\Quark.vcxitems", "{D21C4A2F-7C4B-4A5C-BD49-D538D741821D}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -687,6 +689,7 @@ Global
 		{015286DF-5ED8-4FA9-9B45-0E73ED25D3A7} = {F63E0682-61A8-4FB5-8DFD-EF759DFBD88F}
 		{0B0E118D-0C89-4304-8494-B24AAB147A2E} = {1BEAD919-8866-4753-B5EE-64ACC9CC2E5B}
 		{B250DCC4-B510-47BB-9CF4-19CDDE36EFEE} = {F63E0682-61A8-4FB5-8DFD-EF759DFBD88F}
+		{D21C4A2F-7C4B-4A5C-BD49-D538D741821D} = {041F2057-6090-446E-8CEF-D524C973477F}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {F7EC7EF6-F92D-464A-93A0-66C2A8E15609}
@@ -936,6 +939,7 @@ Global
 		NativeCode\Bricks\Particle\Particle.vcxitems*{ad0e23e3-eca5-4e52-b69d-bb6e669c48c6}*SharedItemsImports = 4
 		NativeCode\Bricks\PhysicsCore\PhysicsCore.vcxitems*{ad0e23e3-eca5-4e52-b69d-bb6e669c48c6}*SharedItemsImports = 4
 		NativeCode\Bricks\PythonRuntime\PythonRuntime.vcxitems*{ad0e23e3-eca5-4e52-b69d-bb6e669c48c6}*SharedItemsImports = 4
+		NativeCode\Bricks\Quark\Quark.vcxitems*{ad0e23e3-eca5-4e52-b69d-bb6e669c48c6}*SharedItemsImports = 4
 		NativeCode\Bricks\RecastBuilder\RecastBuilder.vcxitems*{ad0e23e3-eca5-4e52-b69d-bb6e669c48c6}*SharedItemsImports = 4
 		NativeCode\Bricks\RecastRuntime\RecastRuntime.vcxitems*{ad0e23e3-eca5-4e52-b69d-bb6e669c48c6}*SharedItemsImports = 4
 		NativeCode\Bricks\RenderDoc\RenderDoc.vcxitems*{ad0e23e3-eca5-4e52-b69d-bb6e669c48c6}*SharedItemsImports = 4
@@ -978,6 +982,7 @@ Global
 		CSharpCode\Bricks\Particle\Particle.projitems*{d15c508d-f0bb-4843-8b50-38728b79bba9}*SharedItemsImports = 13
 		Plugins\GameItems\GameItems\GameItem.projitems*{d1c6e222-34d1-4ada-a3f8-be3e09dc437d}*SharedItemsImports = 5
 		Plugins\GameTasks\GameTasks\GameTasks.projitems*{d1f3863b-480a-44b6-be6f-5775e9458c8a}*SharedItemsImports = 5
+		NativeCode\Bricks\Quark\Quark.vcxitems*{d21c4a2f-7c4b-4a5c-bd49-d538d741821d}*SharedItemsImports = 9
 		CSharpCode\Bricks\DataSet\DataSet.projitems*{d52d7fe3-c34d-4337-9b82-e917f8d29b4c}*SharedItemsImports = 13
 		CSharpCode\NxRHI\NxRHI.projitems*{d97f536c-7fe8-49bb-b9cb-4ba6ea85488c}*SharedItemsImports = 13
 		NativeCode\Graphics\Mesh\Mesh.vcxitems*{da3d7904-6611-4c03-ac80-f251d8a68ecd}*SharedItemsImports = 9
