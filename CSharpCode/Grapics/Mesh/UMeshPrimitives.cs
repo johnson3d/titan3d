@@ -32,6 +32,9 @@ namespace EngineNS.Graphics.Mesh
         {
             return Color.LightYellow;
         }
+
+        [Rtti.Meta]
+        public bool IsClustered { get; set; } = false;
     }
 
     [Rtti.Meta]
@@ -111,6 +114,12 @@ namespace EngineNS.Graphics.Mesh
         public void UpdateAMetaReferences(IO.IAssetMeta ameta)
         {
             ameta.RefAssetRNames.Clear();
+
+            var meshMeta = ameta as UMeshPrimitivesAMeta;
+            if (meshMeta != null && meshMeta.IsClustered)
+            {
+                ameta.RefAssetRNames.Add(RName.GetRName(AssetName.Name + ".clustermesh", AssetName.RNameType));
+            }
         }
         public void SaveAssetTo(RName name)
         {
@@ -141,6 +150,7 @@ namespace EngineNS.Graphics.Mesh
             set;
         }
         #endregion
+
         [Rtti.Meta]
         public Animation.SkeletonAnimation.Skeleton.USkinSkeleton PartialSkeleton
         {

@@ -198,4 +198,72 @@ namespace EngineNS.Bricks.GpuDriven
             return result;
         }
     }
+
+    public class TtClusteredMeshManager
+    {
+        public Dictionary<RName, TtClusteredMesh> ClusteredMeshes { get; } = new Dictionary<RName, TtClusteredMesh>();
+        public async System.Threading.Tasks.Task Initialize()
+        {
+            return;
+        }
+        public async Thread.Async.TtTask<TtClusteredMesh> GetClusteredMesh(RName name)
+        {
+            TtClusteredMesh result;
+            if (ClusteredMeshes.TryGetValue(name, out result))
+                return result;
+
+            if (IO.TtFileManager.FileExists(name.Address + ".clustermesh") == false)
+            {
+                return null;
+            }
+
+            result = await UEngine.Instance.EventPoster.Post((state) =>
+            {
+                return TtClusteredMesh.LoadClusteredMesh(name);
+            }, Thread.Async.EAsyncTarget.AsyncIO);
+
+            if (result != null)
+            {
+                ClusteredMeshes[name] = result;
+                return result;
+            }
+
+            return null;
+        }
+    }
+}
+
+namespace EngineNS.Graphics.Mesh
+{
+    public partial class UMeshPrimitives
+    {
+        Bricks.GpuDriven.TtClusteredMesh mClusteredMesh;
+        public async Thread.Async.TtTask<Bricks.GpuDriven.TtClusteredMesh> GetClusteredMesh()
+        {
+            if (mClusteredMesh == null)
+            {
+                var meshMeta = GetAMeta() as UMeshPrimitivesAMeta;
+                if (meshMeta == null || meshMeta.IsClustered == false)
+                    return null;
+                mClusteredMesh = await UEngine.Instance.GfxDevice.ClusteredMeshManager.GetClusteredMesh(AssetName);
+            }
+            return mClusteredMesh;
+        }
+        public Bricks.GpuDriven.TtClusteredMesh BuildClusteredMesh()
+        {
+            var result = new Bricks.GpuDriven.TtClusteredMesh();
+            result.InitFromMesh(this);
+            result.SaveClusteredMesh(this.AssetName);
+            
+            return result;
+        }
+    }
+}
+
+namespace EngineNS.Graphics.Pipeline
+{
+    public partial class UGfxDevice
+    {
+        public Bricks.GpuDriven.TtClusteredMeshManager ClusteredMeshManager { get; } = new Bricks.GpuDriven.TtClusteredMeshManager();
+    }
 }

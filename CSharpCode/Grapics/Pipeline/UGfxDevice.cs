@@ -71,6 +71,7 @@ namespace EngineNS.Graphics.Pipeline
             engine.TickableManager.AddTickable(TextureManager);
 
             await this.MeshPrimitiveManager.Initialize();
+            await this.ClusteredMeshManager.Initialize();
 
             engine.TickableManager.AddTickable(RenderCmdQueue);
             return true;

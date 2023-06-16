@@ -183,6 +183,15 @@ namespace EngineNS.Editor.Forms
             {
                 
             }
+            ImGuiAPI.SameLine(0, -1);
+            if (EGui.UIProxy.CustomButton.ToolButton("BuildCluster", in btSize))
+            {
+                var meshMeta = Mesh.GetAMeta() as EngineNS.Graphics.Mesh.UMeshPrimitivesAMeta;
+                meshMeta.IsClustered = true;
+                meshMeta.AddReferenceAsset(RName.GetRName(Mesh.AssetName + ".clusteremesh", Mesh.AssetName.RNameType));
+                meshMeta.SaveAMeta();
+                Mesh.BuildClusteredMesh();
+            }
         }
         bool mLeftShow = true;
         protected unsafe void DrawLeft()
