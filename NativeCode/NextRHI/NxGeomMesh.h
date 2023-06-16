@@ -4,9 +4,9 @@
 #include "NxShader.h"
 #include "NxRHIDefine.h"
 
-#include "Nanite/DisjointSet.h"
-#include "Nanite/GraphPartitioner.h"
-#include "Nanite/Cluster.h"
+#include "Quark/DisjointSet.h"
+#include "Quark/GraphPartitioner.h"
+#include "Quark/Cluster.h"
 
 #include "../Base/timekeys/TimeKeys.h"
 #include "../Math/v3dxVector2.h"
