@@ -375,6 +375,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "GameBuilder", "Module\GameB
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Quark", "NativeCode\Bricks\Quark\Quark.vcxitems", "{D21C4A2F-7C4B-4A5C-BD49-D538D741821D}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "PythonRuntime", "NativeCode\Bricks\PythonRuntime\PythonRuntime.vcxitems", "{E0F6A79A-007A-4F5D-8C93-07C753A1CA67}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -690,6 +692,7 @@ Global
 		{0B0E118D-0C89-4304-8494-B24AAB147A2E} = {1BEAD919-8866-4753-B5EE-64ACC9CC2E5B}
 		{B250DCC4-B510-47BB-9CF4-19CDDE36EFEE} = {F63E0682-61A8-4FB5-8DFD-EF759DFBD88F}
 		{D21C4A2F-7C4B-4A5C-BD49-D538D741821D} = {041F2057-6090-446E-8CEF-D524C973477F}
+		{E0F6A79A-007A-4F5D-8C93-07C753A1CA67} = {041F2057-6090-446E-8CEF-D524C973477F}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {F7EC7EF6-F92D-464A-93A0-66C2A8E15609}

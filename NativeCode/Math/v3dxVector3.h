@@ -80,7 +80,10 @@ public:
 		y = rkVector.y;
 		z = rkVector.z;
 	}
-
+	inline float getMax() const
+	{
+		return std::max(std::max(x, y), z);
+	}
 	v3dxVector3 operator+ () const;
 	v3dxVector3 operator- () const;
 	void operator= ( const v3dxVector3 &vect );

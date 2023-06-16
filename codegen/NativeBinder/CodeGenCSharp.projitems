@@ -374,6 +374,13 @@
     <Compile Include="$(MSBuildThisFileDirectory)EngineNS/NxRHI/ITexture_910209287.cpp2cs.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)EngineNS/NxRHI/IUaView_910209287.cpp2cs.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)EngineNS/NxRHI/IVbView_910209287.cpp2cs.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)EngineNS/PythonWrapper/FPyClassWrapper_1093809840.cpp2cs.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)EngineNS/PythonWrapper/FPyMethodDefine_1093809840.cpp2cs.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)EngineNS/PythonWrapper/FPyModule_1093809840.cpp2cs.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)EngineNS/PythonWrapper/FPyPropertyDefine_1093809840.cpp2cs.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)EngineNS/PythonWrapper/FPyTuple_1093809840.cpp2cs.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)EngineNS/PythonWrapper/FPyTypeDefine_1093809840.cpp2cs.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)EngineNS/PythonWrapper/FPyUtility_1093809840.cpp2cs.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)EngineNS/TextureCompress/CrunchWrap_4143738103.cpp2cs.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)EngineNS/TextureCompress/DDCOLORKEY_4143738103.cpp2cs.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)EngineNS/TextureCompress/DDPIXELFORMAT_4143738103.cpp2cs.cs" />
