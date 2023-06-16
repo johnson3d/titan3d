@@ -5,7 +5,7 @@ using System.Text;
 
 namespace EngineNS.Graphics.Pipeline.Common
 {
-    public class UGpuDataArray<T> : IDisposable where T : unmanaged
+    public class TtCpu2GpuBuffer<T> : IDisposable where T : unmanaged
     {
         public Support.UNativeArray<T> DataArray;
         private uint GpuCapacity = 0;
@@ -21,11 +21,11 @@ namespace EngineNS.Graphics.Pipeline.Common
             DataArray = Support.UNativeArray<T>.CreateInstance();
             return true;
         }
-        public UGpuDataArray()
+        public TtCpu2GpuBuffer()
         {
 
         }
-        ~UGpuDataArray()
+        ~TtCpu2GpuBuffer()
         {
             Dispose();
         }
@@ -119,12 +119,55 @@ namespace EngineNS.Graphics.Pipeline.Common
             }
             else
             {
-                if (IsGpuWrite == false)
-                {
-                    if (DataArray.Count > 0)
-                        GpuBuffer.UpdateGpuData(0, DataArray.UnsafeGetElementAddress(0), (uint)(sizeof(T) * DataArray.Count));
-                }
+                if (DataArray.Count > 0)
+                    GpuBuffer.UpdateGpuData(0, DataArray.UnsafeGetElementAddress(0), (uint)(sizeof(T) * DataArray.Count));
             }
+        }
+    }
+    public class TtGpuBuffer<T> : IDisposable where T : unmanaged
+    {
+        public NxRHI.UBuffer GpuBuffer;
+        public NxRHI.UUaView DataUAV;
+        public NxRHI.USrView DataSRV;
+
+        ~TtGpuBuffer()
+        {
+            Dispose();
+        }
+        public void Dispose()
+        {
+            CoreSDK.DisposeObject(ref DataUAV);
+            CoreSDK.DisposeObject(ref DataSRV);
+            CoreSDK.DisposeObject(ref GpuBuffer);
+        }
+        public unsafe void SetSize(uint Count, void* pInitData)
+        {
+            Dispose();
+
+            var bfDesc = new NxRHI.FBufferDesc();
+            bfDesc.SetDefault(false);
+            bfDesc.Size = (uint)sizeof(T) * Count;
+            bfDesc.StructureStride = (uint)sizeof(T);
+            bfDesc.InitData = pInitData;
+            bfDesc.Type = NxRHI.EBufferType.BFT_UAV;
+            if (typeof(T) == typeof(uint) || typeof(T) == typeof(int) || typeof(T) == typeof(float))
+            {
+                bfDesc.MiscFlags = NxRHI.EResourceMiscFlag.RM_BUFFER_ALLOW_RAW_VIEWS;
+            }
+
+            GpuBuffer = UEngine.Instance.GfxDevice.RenderContext.CreateBuffer(in bfDesc);
+
+            var uavDesc = new NxRHI.FUavDesc();
+            uavDesc.SetBuffer(0);
+            uavDesc.Buffer.NumElements = (uint)Count;
+            uavDesc.Buffer.StructureByteStride = bfDesc.StructureStride;
+            DataUAV = UEngine.Instance.GfxDevice.RenderContext.CreateUAV(GpuBuffer, in uavDesc);
+
+            var srvDesc = new NxRHI.FSrvDesc();
+            srvDesc.SetBuffer(0);
+            srvDesc.Buffer.NumElements = (uint)Count;
+            srvDesc.Buffer.StructureByteStride = bfDesc.StructureStride;
+            DataSRV = UEngine.Instance.GfxDevice.RenderContext.CreateSRV(GpuBuffer, in srvDesc);
         }
     }
     public partial class UGpuSceneNode : Graphics.Pipeline.Common.URenderGraphNode
@@ -257,53 +300,6 @@ namespace EngineNS.Graphics.Pipeline.Common
             }
         }
         #endregion
-
-        public class TtGpuBuffer<T> : IDisposable where T : unmanaged
-        {
-            public NxRHI.UBuffer GpuBuffer;
-            public NxRHI.UUaView DataUAV;
-            public NxRHI.USrView DataSRV;
-
-            ~TtGpuBuffer()
-            {
-                Dispose();
-            }
-            public void Dispose()
-            {
-                CoreSDK.DisposeObject(ref DataUAV);
-                CoreSDK.DisposeObject(ref DataSRV);
-                CoreSDK.DisposeObject(ref GpuBuffer);
-            }
-            public unsafe void SetSize(uint Count, void* pInitData)
-            {
-                Dispose();
-
-                var bfDesc = new NxRHI.FBufferDesc();
-                bfDesc.SetDefault(false);
-                bfDesc.Size = (uint)sizeof(T) * Count;
-                bfDesc.StructureStride = (uint)sizeof(T);
-                bfDesc.InitData = pInitData;
-                bfDesc.Type = NxRHI.EBufferType.BFT_UAV;
-                if (typeof(T) == typeof(uint) || typeof(T) == typeof(int) || typeof(T) == typeof(float))
-                {
-                    bfDesc.MiscFlags = NxRHI.EResourceMiscFlag.RM_BUFFER_ALLOW_RAW_VIEWS;
-                }
-                
-                GpuBuffer = UEngine.Instance.GfxDevice.RenderContext.CreateBuffer(in bfDesc);
-
-                var uavDesc = new NxRHI.FUavDesc();
-                uavDesc.SetBuffer(0);
-                uavDesc.Buffer.NumElements = (uint)Count;
-                uavDesc.Buffer.StructureByteStride = bfDesc.StructureStride;
-                DataUAV = UEngine.Instance.GfxDevice.RenderContext.CreateUAV(GpuBuffer, in uavDesc);
-
-                var srvDesc = new NxRHI.FSrvDesc();
-                srvDesc.SetBuffer(0);
-                srvDesc.Buffer.NumElements = (uint)Count;
-                srvDesc.Buffer.StructureByteStride = bfDesc.StructureStride;
-                DataSRV = UEngine.Instance.GfxDevice.RenderContext.CreateSRV(GpuBuffer, in srvDesc);
-            }
-        }
 
         public struct TtClusteDrawArgs
         {

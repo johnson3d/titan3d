@@ -41,6 +41,7 @@
 #define HasModule_EtcLib
 #define HasModule_GpuDump
 #define HasModule_ImageDecoder
+#define HasModule_PythonRuntime
 
 #include <WinSock2.h>
 #include <mswsock.h>

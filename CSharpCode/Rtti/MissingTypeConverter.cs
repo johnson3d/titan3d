@@ -90,7 +90,8 @@ namespace EngineNS.Rtti
             MissingTypeConverter result;
             if (MissingTypes.TryGetValue(typeStr, out result))
                 return result.ConvertType;
-            return null;
+
+            return Rtti.UTypeDescManager.Instance.FindNameAlias(typeStr);
         }
 
         #region TmpClass

@@ -12,7 +12,7 @@ namespace EngineNS.Graphics.Pipeline.Common
             public Vector4 PositionAndRadius;
             public Vector4 ColorAndIntensity;
         }
-        public UGpuDataArray<FPointLight> PointLights = new UGpuDataArray<FPointLight>();
+        public TtCpu2GpuBuffer<FPointLight> PointLights = new TtCpu2GpuBuffer<FPointLight>();
         public void Initialize_Light(URenderPolicy policy, string debugName)
         {
             PointLights.Initialize(false);

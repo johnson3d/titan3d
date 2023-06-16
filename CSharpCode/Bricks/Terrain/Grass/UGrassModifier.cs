@@ -256,7 +256,7 @@ namespace EngineNS.Bricks.Terrain.Grass
 
             if (GrassTemp == null)
             {
-                GrassTemp = new Graphics.Pipeline.Common.UGpuDataArray<FVSGrassData>();
+                GrassTemp = new Graphics.Pipeline.Common.TtCpu2GpuBuffer<FVSGrassData>();
                 GrassTemp.Initialize(false);
                 GrassTemp.PushData(new FVSGrassData());
                 GrassTemp.Flush2GPU();
@@ -302,7 +302,7 @@ namespace EngineNS.Bricks.Terrain.Grass
                     GrassType.GrassCBuffer = UEngine.Instance.GfxDevice.RenderContext.CreateCBV(coreBinder.CBPerGrassType.Binder.mCoreObject);
             }
         }
-        public static Graphics.Pipeline.Common.UGpuDataArray<FVSGrassData> GrassTemp = null;
+        public static Graphics.Pipeline.Common.TtCpu2GpuBuffer<FVSGrassData> GrassTemp = null;
         public class UMdfShaderBinder : Graphics.Pipeline.UCoreShaderBinder.UShaderResourceIndexer
         {
             public void Init(NxRHI.UShaderEffect effect)

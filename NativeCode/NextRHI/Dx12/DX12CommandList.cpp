@@ -88,6 +88,9 @@ namespace NxRHI
 		////mCmdRecorder->ResetGpuDraws();
 		//hr = GetDX12CmdRecorder()->mAllocator->Reset();
 		//ASSERT(hr == S_OK);
+		//hr = mContext->Reset(GetDX12CmdRecorder()->mAllocator, nullptr);
+		//ASSERT(hr == S_OK);
+		mContext->Close();
 		hr = mContext->Reset(GetDX12CmdRecorder()->mAllocator, nullptr);
 		ASSERT(hr == S_OK);
 		mIsRecording = true;

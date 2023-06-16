@@ -138,6 +138,8 @@ namespace NxRHI
 		D3D11_MAP flags = D3D11_MAP_READ;
 		if (forRead)
 		{
+			if (this->Desc.Usage == USAGE_DEFAULT)
+				return false;
 			mMappingCmdList = ((DX11CmdQueue*)device->GetCmdQueue())->mHardwareContext;
 			//cmd->Flush();
 			flags = D3D11_MAP_READ;

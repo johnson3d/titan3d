@@ -326,7 +326,7 @@
       <Position Type="EngineNS.Vector2@EngineCore" Value="1689.5,1105.1001" />
       <GraphNode Type="EngineNS.Graphics.Pipeline.Common.Post.TtSunShaftDepthThresholeNode@EngineCore">
         <DepthThreshole Type="System.Single@Unknown" Value="1" />
-        <LumThreshold Type="System.Single@Unknown" Value="5" />
+        <LumThreshold Type="System.Single@Unknown" Value="1" />
         <MaxBlurRadius Type="System.Single@Unknown" Value="1" />
         <OutputScaleFactor Type="System.Single@Unknown" Value="0.3" />
       </GraphNode>

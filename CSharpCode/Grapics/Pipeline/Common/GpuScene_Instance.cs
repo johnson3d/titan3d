@@ -15,7 +15,7 @@ namespace EngineNS.Graphics.Pipeline.Common
         {
             public Matrix WorldMatrix;
         }
-        public UGpuDataArray<FActorInstance> GpuInstances = new UGpuDataArray<FActorInstance>();
+        public TtCpu2GpuBuffer<FActorInstance> GpuInstances = new TtCpu2GpuBuffer<FActorInstance>();
 
         public struct HZBCullData
         {
@@ -86,8 +86,8 @@ namespace EngineNS.Graphics.Pipeline.Common
             public uint ClusterCount;
         }
 
-        public UGpuDataArray<TtCullInstanceData> CullInstancesBuffer = new UGpuDataArray<TtCullInstanceData>();
-        public UGpuDataArray<TtCullClusterData> CullClustersBuffer = new UGpuDataArray<TtCullClusterData>();
+        public TtCpu2GpuBuffer<TtCullInstanceData> CullInstancesBuffer = new TtCpu2GpuBuffer<TtCullInstanceData>();
+        public TtCpu2GpuBuffer<TtCullClusterData> CullClustersBuffer = new TtCpu2GpuBuffer<TtCullClusterData>();
 
         //cs: cull Object to cluster PVS
         public TtGpuBuffer<TtCullInstanceData> ClusterPVSBuffer = new TtGpuBuffer<TtCullInstanceData>();
@@ -222,8 +222,8 @@ namespace EngineNS.Graphics.Pipeline.Common
                 {
                     var ClusteredMesh = i.ClusteredMeshs[j];
                     TtCullClusterData CullClusterData;
-                    CullClusterData.BoundCenter = (ClusteredMesh.ClustersInfo.LocalBoundsMin + ClusteredMesh.ClustersInfo.LocalBoundsMax) * 0.5f;
-                    CullClusterData.BoundExtent = ClusteredMesh.ClustersInfo.LocalBoundsMax - ClusteredMesh.ClustersInfo.LocalBoundsMin;
+                    CullClusterData.BoundCenter = (ClusteredMesh.AABB.Minimum + ClusteredMesh.AABB.Maximum) * 0.5f;
+                    CullClusterData.BoundExtent = ClusteredMesh.AABB.Maximum - ClusteredMesh.AABB.Minimum;
                     CullClusterData.WorldMatrix = data.WorldMatrix;
 
                     CalculateClusterID = (uint)CullClustersBuffer.DataArray.Count;

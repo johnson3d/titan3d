@@ -484,9 +484,6 @@
     <FxCompile Include="$(MSBuildThisFileDirectory)Inc\BaseStructure\Box3.cginc">
       <Filter>Inc\BaseStructure</Filter>
     </FxCompile>
-    <FxCompile Include="$(MSBuildThisFileDirectory)ShadingEnv\Post\SWRasterizer.compute">
-      <Filter>ShadingEnv\Post</Filter>
-    </FxCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="$(MSBuildThisFileDirectory)ShadingEnv\Post\FSR1\ffx_a.h">

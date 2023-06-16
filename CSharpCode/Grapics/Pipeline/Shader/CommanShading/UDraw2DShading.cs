@@ -1,4 +1,6 @@
-﻿using System;
+﻿using EngineNS.Graphics.Mesh;
+using EngineNS.NxRHI;
+using System;
 using System.Collections.Generic;
 using System.Text;
 
@@ -63,6 +65,10 @@ namespace EngineNS.Graphics.Pipeline.Shader.CommanShading
         public unsafe override void OnBuildDrawCall(URenderPolicy policy, NxRHI.UGraphicDraw drawcall)
         {
             
+        }
+        public override void OnDrawCall(URenderPolicy.EShadingType shadingType, UGraphicDraw drawcall, URenderPolicy policy, UMesh mesh)
+        {
+            base.OnDrawCall(shadingType, drawcall, policy, mesh);
         }
     }
 }
