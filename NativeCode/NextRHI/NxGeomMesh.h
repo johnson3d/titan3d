@@ -4,9 +4,9 @@
 #include "NxShader.h"
 #include "NxRHIDefine.h"
 
-#include "Quark/DisjointSet.h"
-#include "Quark/GraphPartitioner.h"
-#include "Quark/Cluster.h"
+//#include "Quark/DisjointSet.h"
+//#include "Quark/GraphPartitioner.h"
+//#include "Quark/Cluster.h"
 
 #include "../Base/timekeys/TimeKeys.h"
 #include "../Math/v3dxVector2.h"
@@ -221,7 +221,7 @@ namespace NxRHI
 		void SaveVB(IGpuDevice* device, XndAttribute * pAttr, IVbView* vb, TimeKeys & tkeys, UINT stride);
 
 		//template<typename IndexType>
-		void RasterizeTriangles(std::vector<v3dxVector3>& vb, std::vector<UINT32>& ib, std::vector<FCluster>& clusters);
+		//void RasterizeTriangles(std::vector<v3dxVector3>& vb, std::vector<UINT32>& ib, std::vector<FCluster>& clusters);
 	protected:
 		std::string				mName;
 		AutoRef<FGeomMesh>		mGeometryMesh;

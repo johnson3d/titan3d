@@ -444,7 +444,7 @@ namespace NxRHI
 			pAttr->Write((BYTE*)ibBuffer.GetData() + sizeof(UINT) * 2, desc.Size);
 			pAttr->EndWrite();
 		}
-#if 1
+#if 0
 		// cluster
 		std::vector<FCluster> clusters;
 
@@ -488,6 +488,7 @@ namespace NxRHI
 	}
 
 	//template<typename IndexType>
+#if 0
 	void FMeshPrimitives::RasterizeTriangles(std::vector<v3dxVector3>& Verts, std::vector<UINT32>& Indexes, std::vector<FCluster>& clusters)
 	{
 		// calculate bouding box
@@ -630,6 +631,8 @@ namespace NxRHI
 			clusters[i] = FCluster(Verts, Indexes, Range.Begin, Range.End, Partitioner, Adjacency);
 		}
 	}
+#endif
+
 	bool FMeshPrimitives::LoadXnd(IGpuDevice* device, const char* name, XndHolder* xnd, bool isLoad)
 	{
 		if (xnd == nullptr)

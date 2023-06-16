@@ -991,6 +991,7 @@ Global
 		NativeCode\Graphics\Mesh\Mesh.vcxitems*{da3d7904-6611-4c03-ac80-f251d8a68ecd}*SharedItemsImports = 9
 		CSharpCode\GamePlay\GamePlay.projitems*{df4345b3-0c74-43e1-890c-190395767fce}*SharedItemsImports = 13
 		3rd\csharp\StbImageSharp\StbImageSharp.projitems*{e0ad6c9d-2af8-43e8-bbb5-8bd96fe1dee2}*SharedItemsImports = 13
+		NativeCode\Bricks\PythonRuntime\PythonRuntime.vcxitems*{e0f6a79a-007a-4f5d-8c93-07c753a1ca67}*SharedItemsImports = 9
 		codegen\Rpc\Engine\EngineRPC.projitems*{e25af610-5ad0-4646-b7ee-0fbbab8dfd5d}*SharedItemsImports = 13
 		NativeCode\Bricks\RenderDoc\RenderDoc.vcxitems*{e35e90df-5548-4c48-87fd-d9efec2d50eb}*SharedItemsImports = 9
 		Plugins\GameServer\Gate\GateServer\GateServer.projitems*{e51c14de-46de-43a5-8ccf-c274f65acd90}*SharedItemsImports = 13
