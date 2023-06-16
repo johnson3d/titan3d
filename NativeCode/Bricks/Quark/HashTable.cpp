@@ -1,6 +1,8 @@
 
 #include "HashTable.h"
 
+NS_BEGIN
+
 UINT32 FHashTable::EmptyHash[1] = { ~0u };
 //namespace Nanite
 //{
@@ -191,4 +193,5 @@ inline void FHashTable::Remove(UINT32 Key, UINT32 Index)
         }
     }
 }
-//} // namespace Nanite
+
+NS_END

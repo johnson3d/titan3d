@@ -2,8 +2,9 @@
 #pragma once
 
 #include "DisjointSet.h"
-#include "../Math/v3dxBox3.h"
+#include "../../Math/v3dxBox3.h"
 
+NS_BEGIN
 
 template< typename ValueType, typename CountType, class SortKeyClass >
 void RadixSort32(ValueType* Dst, ValueType* Src, CountType Num, SortKeyClass SortKey)
@@ -351,3 +352,5 @@ private:
 	typedef std::vector<UINT32> LinkValues;
 	std::map< UINT32, LinkValues >	LocalityLinks;
 };
+
+NS_END

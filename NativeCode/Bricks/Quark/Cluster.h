@@ -1,14 +1,15 @@
 
 #pragma once
 
+#include "../../Base/IUnknown.h"
+
 #include "TriangleUtil.h"
-#include "../Math/v3dxSphere.h"
-#include "../Math/v3dxBox3.h"
+#include "../../Math/v3dxSphere.h"
+#include "../../Math/v3dxBox3.h"
+
+NS_BEGIN
 
 class FGraphPartitioner;
-
-//namespace Nanite
-//{
 
 struct FMaterialTriangle
 {
@@ -38,20 +39,22 @@ struct FMaterialTriangle
 //	friend FArchive& operator<<(FArchive& Ar, FStripDesc& Desc);
 //};
 
-
-class FCluster
+class TR_CLASS()
+    QuarkCluster 
 {
 public:
-	FCluster() {}
-	FCluster(
+    //ENGINE_RTTI(QuarkCluster);
+
+	QuarkCluster() {}
+	QuarkCluster(
 		const std::vector< v3dxVector3 >& InVerts,
 		const std::vector< UINT32 >& InIndexes,
 		//const std::vector < INT32 >& InMaterialIndexes,
 		//UINT32 InNumTexCoords, bool bInHasColors, bool bInPreserveArea,
 		UINT32 TriBegin, UINT32 TriEnd, const FGraphPartitioner& Partitioner, const FAdjacency& Adjacency );
 
-    FCluster( FCluster& SrcCluster, UINT32 TriBegin, UINT32 TriEnd, const FGraphPartitioner& Partitioner, const FAdjacency& Adjacency );
-    FCluster(const std::vector<FCluster*> & MergeList );
+    QuarkCluster( QuarkCluster& SrcCluster, UINT32 TriBegin, UINT32 TriEnd, const FGraphPartitioner& Partitioner, const FAdjacency& Adjacency );
+    QuarkCluster(const std::vector<QuarkCluster*> & MergeList );
 
 	float		Simplify( UINT32 TargetNumTris, float TargetError = 0.0f, UINT32 LimitNumTris = 0, bool bForNaniteFallback = false );
 	FAdjacency	BuildAdjacency() const;
@@ -69,14 +72,14 @@ public:
 // 	FLinearColor&		GetColor( UINT32 VertIndex );
 // 	FVector2f*			GetUVs( UINT32 VertIndex );
 
-	const v3dxVector3&	GetPosition( UINT32 VertIndex ) const;
+	const v3dxVector3& GetPositionConst( UINT32 VertIndex ) const;
 // 	const v3dxVector3&	GetNormal( UINT32 VertIndex ) const;
 // 	const FLinearColor&	GetColor( UINT32 VertIndex ) const;
 // 	const FVector2f*	GetUVs( UINT32 VertIndex ) const;
 
 	void				SanitizeVertexData();
 
-	//friend FArchive& operator<<(FArchive& Ar, FCluster& Cluster);
+	//friend FArchive& operator<<(FArchive& Ar, QuarkCluster& Cluster);
 
 	static const UINT32	ClusterSize = 128;
 
@@ -120,55 +123,64 @@ public:
 // 	std::vector<uint8>	StripIndexData;
 };
 
-FORCEINLINE UINT32 FCluster::GetVertSize() const
+FORCEINLINE UINT32 QuarkCluster::GetVertSize() const
 {
 	//return 6 + ( bHasColors ? 4 : 0 ) + NumTexCoords * 2; // 3 pos, 3 normal
 	return 3;
 }
 
-FORCEINLINE v3dxVector3& FCluster::GetPosition( UINT32 VertIndex )
+FORCEINLINE v3dxVector3& QuarkCluster::GetPosition( UINT32 VertIndex )
 {
 	return *reinterpret_cast< v3dxVector3* >( &Verts[ VertIndex * GetVertSize() ] );
 }
 
-FORCEINLINE const v3dxVector3& FCluster::GetPosition( UINT32 VertIndex ) const
+FORCEINLINE const v3dxVector3& QuarkCluster::GetPositionConst( UINT32 VertIndex ) const
 {
 	return *reinterpret_cast< const v3dxVector3* >( &Verts[ VertIndex * GetVertSize() ] );
 }
 
-// FORCEINLINE float* FCluster::GetAttributes( UINT32 VertIndex )
+// FORCEINLINE float* QuarkCluster::GetAttributes( UINT32 VertIndex )
 // {
 // 	return &Verts[ VertIndex * GetVertSize() + 3 ];
 // }
 // 
-// FORCEINLINE v3dxVector3& FCluster::GetNormal( UINT32 VertIndex )
+// FORCEINLINE v3dxVector3& QuarkCluster::GetNormal( UINT32 VertIndex )
 // {
 // 	return *reinterpret_cast< v3dxVector3* >( &Verts[ VertIndex * GetVertSize() + 3 ] );
 // }
 // 
-// FORCEINLINE const v3dxVector3& FCluster::GetNormal( UINT32 VertIndex ) const
+// FORCEINLINE const v3dxVector3& QuarkCluster::GetNormal( UINT32 VertIndex ) const
 // {
 // 	return *reinterpret_cast< const v3dxVector3* >( &Verts[ VertIndex * GetVertSize() + 3 ] );
 // }
 // 
-// FORCEINLINE FLinearColor& FCluster::GetColor( UINT32 VertIndex )
+// FORCEINLINE FLinearColor& QuarkCluster::GetColor( UINT32 VertIndex )
 // {
 // 	return *reinterpret_cast< FLinearColor* >( &Verts[ VertIndex * GetVertSize() + 6 ] );
 // }
 // 
-// FORCEINLINE const FLinearColor& FCluster::GetColor( UINT32 VertIndex ) const
+// FORCEINLINE const FLinearColor& QuarkCluster::GetColor( UINT32 VertIndex ) const
 // {
 // 	return *reinterpret_cast< const FLinearColor* >( &Verts[ VertIndex * GetVertSize() + 6 ] );
 // }
 // 
-// FORCEINLINE FVector2f* FCluster::GetUVs( UINT32 VertIndex )
+// FORCEINLINE FVector2f* QuarkCluster::GetUVs( UINT32 VertIndex )
 // {
 // 	return reinterpret_cast< FVector2f* >( &Verts[ VertIndex * GetVertSize() + 6 + ( bHasColors ? 4 : 0 ) ] );
 // }
 // 
-// FORCEINLINE const FVector2f* FCluster::GetUVs( UINT32 VertIndex ) const
+// FORCEINLINE const FVector2f* QuarkCluster::GetUVs( UINT32 VertIndex ) const
 // {
 // 	return reinterpret_cast< const FVector2f* >( &Verts[ VertIndex * GetVertSize() + 6 + ( bHasColors ? 4 : 0 ) ] );
 // }
 
-//} // namespace Nanite
+
+class TR_CLASS()
+    ClusterBuilder : public IWeakReference
+{
+public:
+	ClusterBuilder() {}
+};
+
+
+NS_END

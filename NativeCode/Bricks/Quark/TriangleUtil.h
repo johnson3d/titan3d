@@ -1,41 +1,41 @@
 
 #pragma once
-#include "../Base/BaseHead.h"
-#include "../Math/v3dxVector3.h"
+#include "../../Base/BaseHead.h"
+#include "../../Math/v3dxVector3.h"
 #include <vector>
 #include <map>
 
 #include "HashTable.h"
 
-//namespace Nanite
-//{
+
+NS_BEGIN
    
    
-    static __forceinline UINT32 MurmurFinalize32(UINT32 Hash)
+static __forceinline UINT32 MurmurFinalize32(UINT32 Hash)
+{
+    Hash ^= Hash >> 16;
+    Hash *= 0x85ebca6b;
+    Hash ^= Hash >> 13;
+    Hash *= 0xc2b2ae35;
+    Hash ^= Hash >> 16;
+    return Hash;
+}
+static __forceinline UINT32 Murmur32(std::initializer_list< UINT32 > InitList)
+{
+    UINT32 Hash = 0;
+    for (auto Element : InitList)
     {
-        Hash ^= Hash >> 16;
-        Hash *= 0x85ebca6b;
-        Hash ^= Hash >> 13;
-        Hash *= 0xc2b2ae35;
-        Hash ^= Hash >> 16;
-        return Hash;
-    }
-    static __forceinline UINT32 Murmur32(std::initializer_list< UINT32 > InitList)
-    {
-        UINT32 Hash = 0;
-        for (auto Element : InitList)
-        {
-            Element *= 0xcc9e2d51;
-            Element = (Element << 15) | (Element >> (32 - 15));
-            Element *= 0x1b873593;
+        Element *= 0xcc9e2d51;
+        Element = (Element << 15) | (Element >> (32 - 15));
+        Element *= 0x1b873593;
 
-            Hash ^= Element;
-            Hash = (Hash << 13) | (Hash >> (32 - 13));
-            Hash = Hash * 5 + 0xe6546b64;
-        }
-
-        return MurmurFinalize32(Hash);
+        Hash ^= Element;
+        Hash = (Hash << 13) | (Hash >> (32 - 13));
+        Hash = Hash * 5 + 0xe6546b64;
     }
+
+    return MurmurFinalize32(Hash);
+}
 
 __forceinline UINT32 HashPosition( const v3dxVector3& Position )
 {
@@ -312,4 +312,4 @@ struct FAdjacency
 	}
 };
 
-//} // namespace Nanite
+NS_END

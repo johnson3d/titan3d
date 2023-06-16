@@ -1,7 +1,9 @@
 #pragma once
 
 #include <vector>
-#include "../Base/BaseHead.h"
+#include "../../Base/BaseHead.h"
+
+NS_BEGIN
 
 class FDisjointSet
 {
@@ -22,3 +24,5 @@ public:
 private:
 	std::vector< UINT32 >	Parents;
 };
+
+NS_END

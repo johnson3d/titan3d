@@ -72,6 +72,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)VHitResult_2863311530.cpp2cs.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)VNameString_2863311530.cpp2cs.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)EngineNS/BigStackBuffer_2581692454.cpp2cs.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)EngineNS/ClusterBuilder_2581692454.cpp2cs.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)EngineNS/CoreSDK_2581692454.cpp2cs.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)EngineNS/CsDictionaryImpl_2581692454.cpp2cs.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)EngineNS/CsQueue_2581692454.cpp2cs.cs" />
@@ -162,6 +163,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)EngineNS/QNodeBase_2581692454.cpp2cs.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)EngineNS/QNode_2581692454.cpp2cs.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)EngineNS/QTree_2581692454.cpp2cs.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)EngineNS/QuarkCluster_2581692454.cpp2cs.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)EngineNS/RcNavCrowd_2581692454.cpp2cs.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)EngineNS/RcNavMesh_2581692454.cpp2cs.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)EngineNS/RcNavQuery_2581692454.cpp2cs.cs" />

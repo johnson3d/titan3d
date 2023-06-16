@@ -61,13 +61,17 @@ namespace EngineNS.Bricks.GpuDriven
         {
             //1.mesh get vb,ib
             //2.split to clusters
-            
+
+            var count = mesh.mCoreObject.ClusterizeTriangles();
+            var cluster = mesh.mCoreObject.GetCluster(0);
+
             return false;
         }
         public void SaveClusteredMesh(RName meshName)
         {
             var file = meshName.Address + ".clustermesh";
             var xnd = new IO.TtXndHolder("Cluster", 0, 0);
+
             for (NxRHI.EVertexStreamType i = 0; i < NxRHI.EVertexStreamType.VST_Number; i++)
             {
                 var vb = VBs.mCoreObject.GetVB(i);

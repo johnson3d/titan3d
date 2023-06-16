@@ -1,11 +1,12 @@
-// Copyright Epic Games, Inc. All Rights Reserved.
+
 
 #include "HashTable.h"
 #include "Cluster.h"
 #include "GraphPartitioner.h"
 
-//namespace Nanite
-//{
+NS_BEGIN
+
+
 
 void CorrectAttributes( float* Attributes )
 {
@@ -22,7 +23,7 @@ void CorrectAttributesColor( float* Attributes )
 }
 
 
-FCluster::FCluster(
+QuarkCluster::QuarkCluster(
 	const std::vector< v3dxVector3 >& InVerts,
 	const std::vector< UINT32 >& InIndexes,
 	//const std::vector< INT32 >& InMaterialIndexes,
@@ -32,7 +33,7 @@ FCluster::FCluster(
 	//GUID = (uint64(TriBegin) << 32) | TriEnd;
 	
 	NumTris = TriEnd - TriBegin;
-	//ensure(NumTriangles <= FCluster::ClusterSize);
+	//ensure(NumTriangles <= QuarkCluster::ClusterSize);
 	
     //bHasColors = bInHasColors;
     //bPreserveArea = bInPreserveArea;
@@ -125,7 +126,7 @@ FCluster::FCluster(
 }
 
 // Split
-FCluster::FCluster( FCluster& SrcCluster, UINT32 TriBegin, UINT32 TriEnd, const FGraphPartitioner& Partitioner, const FAdjacency& Adjacency )
+QuarkCluster::QuarkCluster( QuarkCluster& SrcCluster, UINT32 TriBegin, UINT32 TriEnd, const FGraphPartitioner& Partitioner, const FAdjacency& Adjacency )
 	: MipLevel( SrcCluster.MipLevel )
 {
 	//GUID = MurmurFinalize64(SrcCluster.GUID) ^ ((uint64(TriBegin) << 32) | TriEnd);
@@ -195,18 +196,18 @@ FCluster::FCluster( FCluster& SrcCluster, UINT32 TriBegin, UINT32 TriEnd, const 
 }
 
 // Merge
-FCluster::FCluster(const std::vector<FCluster*>& MergeList)
+QuarkCluster::QuarkCluster(const std::vector<QuarkCluster*>& MergeList)
 {
 	ASSERT(false);
 }
 
-float FCluster::Simplify( UINT32 TargetNumTris, float TargetError, UINT32 LimitNumTris, bool bForNaniteFallback )
+float QuarkCluster::Simplify( UINT32 TargetNumTris, float TargetError, UINT32 LimitNumTris, bool bForNaniteFallback )
 {
 	ASSERT(false);
 	return 0.0;
 }
 
-void FCluster::Split( FGraphPartitioner& Partitioner, const FAdjacency& Adjacency ) const
+void QuarkCluster::Split( FGraphPartitioner& Partitioner, const FAdjacency& Adjacency ) const
 {
 	FDisjointSet DisjointSet( NumTris );
 	for( INT32 EdgeIndex = 0; EdgeIndex < Indexes.size(); EdgeIndex++ )
@@ -228,9 +229,9 @@ void FCluster::Split( FGraphPartitioner& Partitioner, const FAdjacency& Adjacenc
             return false;
         }
 
-		Center  = GetPosition( Indexes[ TriIndex * 3 + 0 ] );
-		Center += GetPosition( Indexes[ TriIndex * 3 + 1 ] );
-		Center += GetPosition( Indexes[ TriIndex * 3 + 2 ] );
+		Center  = GetPositionConst( Indexes[ TriIndex * 3 + 0 ] );
+		Center += GetPositionConst( Indexes[ TriIndex * 3 + 1 ] );
+		Center += GetPositionConst( Indexes[ TriIndex * 3 + 2 ] );
 		Center *= (1.0f / 3.0f);
 		return true;
 	};
@@ -262,7 +263,7 @@ void FCluster::Split( FGraphPartitioner& Partitioner, const FAdjacency& Adjacenc
 	Partitioner.PartitionStrict( Graph, ClusterSize - 4, ClusterSize, false );
 }
 
-FAdjacency FCluster::BuildAdjacency() const
+FAdjacency QuarkCluster::BuildAdjacency() const
 {
 	FAdjacency Adjacency( INT32(Indexes.size()) );
 	FEdgeHash EdgeHash( INT32(Indexes.size()) );
@@ -276,7 +277,7 @@ FAdjacency FCluster::BuildAdjacency() const
 			{
 				if (Verts.size() > Indexes[CornerIndex])
 				{
-					result = GetPosition(Indexes[CornerIndex]);
+					result = GetPositionConst(Indexes[CornerIndex]);
 					return true;
 				}
 				return false;
@@ -290,7 +291,7 @@ FAdjacency FCluster::BuildAdjacency() const
 	return Adjacency;
 }
 
-UINT32 FCluster::AddVert( const float* Vert, FHashTable& HashTable )
+UINT32 QuarkCluster::AddVert( const float* Vert, FHashTable& HashTable )
 {
 	const UINT32 VertSize = GetVertSize();
 	const v3dxVector3& Position = *reinterpret_cast< const v3dxVector3* >( Vert );
@@ -322,7 +323,7 @@ UINT32 FCluster::AddVert( const float* Vert, FHashTable& HashTable )
 	return NewIndex;
 }
 
-void FCluster::Bound()
+void QuarkCluster::Bound()
 {
 	Bounds = v3dxBox3();
 	SurfaceArea = 0.0f;
@@ -372,7 +373,7 @@ static void SanitizeFloat( float& X, float MinValue, float MaxValue, float Defau
 		X = DefaultValue;
 }
 
-void FCluster::SanitizeVertexData()
+void QuarkCluster::SanitizeVertexData()
 {
 	const float FltThreshold = 1e12f;	// Fairly arbitrary threshold for sensible float values.
 										// Should be large enough for all practical purposes, while still leaving enough headroom
@@ -412,4 +413,4 @@ void FCluster::SanitizeVertexData()
 	}
 }
 
-//} // namespace Nanite
+NS_END

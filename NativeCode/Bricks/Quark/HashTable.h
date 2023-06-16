@@ -1,9 +1,11 @@
 
 #pragma once
-#include "../Base/BaseHead.h"
-#include "../Math/v3dxVector3.h"
+#include "../../Base/BaseHead.h"
+#include "../../Math/v3dxVector3.h"
 #include <vector>
 #include <map>
+
+NS_BEGIN
 
 template <typename T>
 static constexpr __forceinline bool IsPowerOfTwo(T Value)
@@ -65,3 +67,5 @@ protected:
     UINT32* Hash;
     UINT32* NextIndex;
 };
+
+NS_END

@@ -1,6 +1,7 @@
 
 #include "DisjointSet.h"
 
+NS_BEGIN
 
 FDisjointSet::FDisjointSet( const UINT32 Size )
 {
@@ -109,3 +110,5 @@ UINT32 FDisjointSet::Find( UINT32 i )
 
 	return Root;
 }
+
+NS_END

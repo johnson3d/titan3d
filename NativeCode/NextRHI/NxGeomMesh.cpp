@@ -446,7 +446,7 @@ namespace NxRHI
 		}
 #if 0
 		// cluster
-		std::vector<FCluster> clusters;
+		std::vector<QuarkCluster> clusters;
 
 		std::vector<v3dxVector3> verts;
 		verts.resize(mDesc.VertexNumber);
@@ -486,11 +486,22 @@ namespace NxRHI
 		}
 #endif
 	}
-
-	//template<typename IndexType>
-#if 0
-	void FMeshPrimitives::RasterizeTriangles(std::vector<v3dxVector3>& Verts, std::vector<UINT32>& Indexes, std::vector<FCluster>& clusters)
+	QuarkCluster* FMeshPrimitives::GetCluster(UINT32 id)
 	{
+		ASSERT(id < mClusters.size());
+		return &mClusters[id];
+	}
+	int FMeshPrimitives::ClusterizeTriangles()
+	{
+		QuarkCluster cluster;
+		cluster.MipLevel = 111;
+		mClusters.push_back(cluster);
+		
+		return 1;
+#if 0
+		std::vector<v3dxVector3> Verts;
+		std::vector<UINT32> Indexes;
+
 		// calculate bouding box
 		v3dxBox3 MeshBounds;
 		for (int i = 0; i < Verts.size(); ++i)
@@ -619,7 +630,7 @@ namespace NxRHI
 
 			bool bSingleThreaded = NumTriangles < 5000;
 
-            Partitioner.PartitionStrict(Graph, FCluster::ClusterSize - 4, FCluster::ClusterSize, !bSingleThreaded);
+            Partitioner.PartitionStrict(Graph, QuarkCluster::ClusterSize - 4, QuarkCluster::ClusterSize, !bSingleThreaded);
             ASSERT(Partitioner.Ranges.size() > 0);
         }
 
@@ -628,10 +639,11 @@ namespace NxRHI
 		for (int i = 0; i < Partitioner.Ranges.size(); ++i)
 		{
 			auto& Range = Partitioner.Ranges[i];
-			clusters[i] = FCluster(Verts, Indexes, Range.Begin, Range.End, Partitioner, Adjacency);
+			clusters[i] = QuarkCluster(Verts, Indexes, Range.Begin, Range.End, Partitioner, Adjacency);
 		}
-	}
+
 #endif
+	}
 
 	bool FMeshPrimitives::LoadXnd(IGpuDevice* device, const char* name, XndHolder* xnd, bool isLoad)
 	{

@@ -10,6 +10,10 @@
 #include "../Math/v3dxBox3.h"
 #include "../Base/xnd/vfxxnd.h"
 
+#include "../Bricks/Quark/DisjointSet.h"
+#include "../Bricks/Quark/GraphPartitioner.h"
+#include "../Bricks/Quark/Cluster.h"
+
 struct VHitResult;
 
 NS_BEGIN
@@ -212,12 +216,13 @@ namespace NxRHI
 				return nullptr;
 			return mAtomExtData[index];
 		}
+
+		int ClusterizeTriangles();
+		QuarkCluster* GetCluster(UINT32 id);
 	private:
 		AutoRef<IVbView> LoadVB(IGpuDevice* device, XndAttribute * pAttr, UINT stride, TimeKeys & tkeys, UINT & resSize, EVertexStreamType stream);
 		void SaveVB(IGpuDevice* device, XndAttribute * pAttr, IVbView* vb, TimeKeys & tkeys, UINT stride);
 
-		//template<typename IndexType>
-		//void RasterizeTriangles(std::vector<v3dxVector3>& vb, std::vector<UINT32>& ib, std::vector<FCluster>& clusters);
 	protected:
 		std::string				mName;
 		AutoRef<FGeomMesh>		mGeometryMesh;
@@ -229,6 +234,7 @@ namespace NxRHI
 		v3dxBox3				mAABB;
 		TR_MEMBER(SV_NoBind)
 		FResourceState			mResourceState;
+		std::vector<QuarkCluster> mClusters;
 	};
 	
 	struct TR_CLASS(SV_LayoutStruct = 8)

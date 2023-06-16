@@ -3,6 +3,8 @@
 #include <algorithm>
 #include "../../../3rd/native/metis/5.1.0/include/metis.h"
 
+NS_BEGIN
+
 template <class T>
 static constexpr __forceinline T DivideAndRoundUp(T Dividend, T Divisor)
 {
@@ -373,3 +375,5 @@ void FGraphPartitioner::PartitionStrict( FGraphData* Graph, INT32 InMinPartition
 		SortedTo[ Indexes[i] ] = i;
 	}
 }
+
+NS_END
