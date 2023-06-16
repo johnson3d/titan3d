@@ -64,6 +64,7 @@ namespace EngineNS.Bricks.GpuDriven
 
             var count = mesh.mCoreObject.ClusterizeTriangles();
             var cluster = mesh.mCoreObject.GetCluster(0);
+            var t = cluster.EdgeLength;
 
             return false;
         }

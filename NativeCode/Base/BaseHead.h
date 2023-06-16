@@ -42,6 +42,7 @@
 #define HasModule_GpuDump
 #define HasModule_ImageDecoder
 #define HasModule_PythonRuntime
+#define HasModule_Quark
 
 #include <WinSock2.h>
 #include <mswsock.h>
