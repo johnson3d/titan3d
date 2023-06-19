@@ -59,38 +59,33 @@ namespace EngineNS.Bricks.GpuDriven
     {
         public bool InitFromMesh(Graphics.Mesh.UMeshPrimitives mesh)
         {
-            //1.mesh get vb,ib
-            //2.split to clusters
-
-            var count = mesh.mCoreObject.ClusterizeTriangles();
-            var cluster = mesh.mCoreObject.GetCluster(0);
-            var t = cluster.EdgeLength;
-
-            return false;
+            Mesh = mesh;
+            return true;
         }
         public void SaveClusteredMesh(RName meshName)
         {
             var file = meshName.Address + ".clustermesh";
             var xnd = new IO.TtXndHolder("Cluster", 0, 0);
 
-            for (NxRHI.EVertexStreamType i = 0; i < NxRHI.EVertexStreamType.VST_Number; i++)
+            var rc = UEngine.Instance?.GfxDevice.RenderContext;
+            var count = Mesh.mCoreObject.ClusterizeTriangles(rc.mCoreObject);
+            if (count > 0 && Mesh.mCoreObject.SaveClusters(xnd.RootNode.mCoreObject))
             {
-                var vb = VBs.mCoreObject.GetVB(i);
-                if (vb.IsValidPointer)
-                {
-                    var data = new Support.UBlobObject();
-                    vb.Buffer.FetchGpuData(0, data.mCoreObject);
-                }
+                xnd.SaveXnd(file);
             }
-            // save vbs, ib...
-            xnd.SaveXnd(file);
+            else
+            {
+                // error
+            }            
         }
         public static TtClusteredMesh LoadClusteredMesh(RName meshName)
         {
             var file = meshName.Address + ".clustermesh";
             var xnd = IO.TtXndHolder.LoadXnd(file);
             var result = new TtClusteredMesh();
-            // load vbs, ib...
+            // load vbs, ib
+
+
             return result;
         }
         public NxRHI.UVertexArray VBs;
@@ -99,6 +94,8 @@ namespace EngineNS.Bricks.GpuDriven
         public int NumIndices;
         public List<TtCluster> Clusters = new List<TtCluster>();
         public BoundingBox AABB = new BoundingBox();
+
+        private Graphics.Mesh.UMeshPrimitives Mesh;
         public static unsafe TtClusteredMesh Merge(List<TtClusteredMesh> meshes, NxRHI.UCommandList cmdlist)
         {
             var rc = UEngine.Instance.GfxDevice.RenderContext;

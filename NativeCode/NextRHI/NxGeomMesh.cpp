@@ -486,21 +486,117 @@ namespace NxRHI
 		}
 #endif
 	}
-	QuarkCluster* FMeshPrimitives::GetCluster(UINT32 id)
+	bool FMeshPrimitives::SaveClusters(XndNode* pNode)
 	{
-		ASSERT(id < mClusters.size());
-		return &mClusters[id];
+		ASSERT(mClusters.size() >= 0);
+        auto pAttr = pNode->GetOrAddAttribute("Cluster", 0, 0);
+        pAttr->BeginWrite();
+
+		pAttr->Write(mClusters.size());
+
+		for (int i = 0; i < mClusters.size(); ++i)
+		{
+
+		}
+
+		pAttr->EndWrite();
+
+		return true;
 	}
-	int FMeshPrimitives::ClusterizeTriangles()
+	bool FMeshPrimitives::GetMeshBuffer(IGpuDevice* device, std::vector<v3dxVector3>& Verts, std::vector<UINT32>& Indexes)
+    {
+		if (!device)
+			return false;
+
+        IBlobObject vbBuffer, ibBuffer;
+
+		// vb
+        auto pos_vb = mGeometryMesh->GetVertexBuffer(VST_Position);
+
+        AutoRef<NxRHI::IBuffer> copyVB;
+        {
+            FTransientCmd cmd(device, NxRHI::QU_Transfer);
+            auto copyDesc = pos_vb->Buffer->Desc;
+            copyDesc.Usage = USAGE_STAGING;
+            copyDesc.CpuAccess = ECpuAccess::CAS_READ;
+            copyDesc.MiscFlags = (EResourceMiscFlag)0;
+            copyDesc.RowPitch = copyDesc.Size;
+            copyDesc.DepthPitch = copyDesc.Size;
+            copyVB = MakeWeakRef(device->CreateBuffer(&copyDesc));
+            cmd.GetCmdList()->CopyBufferRegion(copyVB, 0, pos_vb->Buffer, 0, copyDesc.Size);
+        }
+        device->GetCmdQueue()->Flush(EQueueType::QU_Transfer);
+        copyVB->FetchGpuData(0, &vbBuffer);
+
+		// ib
+        auto ib = mGeometryMesh->GetIndexBuffer();
+		if (ib)
+		{
+            if (false == ib->Buffer->FetchGpuData(0, &ibBuffer))
+            {
+                FTransientCmd cmd(device, NxRHI::QU_Transfer);
+                auto copyDesc = ib->Buffer->Desc;
+                copyDesc.Usage = USAGE_STAGING;
+                copyDesc.CpuAccess = ECpuAccess::CAS_READ;
+                copyDesc.MiscFlags = (EResourceMiscFlag)0;
+                copyDesc.RowPitch = copyDesc.Size;
+                copyDesc.DepthPitch = copyDesc.Size;
+                copyVB = MakeWeakRef(device->CreateBuffer(&copyDesc));
+                //cmd.GetCmdList()->CopyBufferRegion(copyVB, 0, ib->Buffer, 0, copyDesc.Size);
+
+                AutoRef<ICopyDraw> cpDraw = MakeWeakRef(device->CreateCopyDraw());
+                cpDraw->BindBufferDest(copyVB);
+                cpDraw->BindBufferSrc(ib->Buffer);
+                cpDraw->Mode = ECopyDrawMode::CDM_Buffer2Buffer;
+                cpDraw->FootPrint.Format = PXF_UNKNOWN;
+                cpDraw->FootPrint.X = 0;
+                cpDraw->FootPrint.Y = 0;
+                cpDraw->FootPrint.Z = 0;
+                cpDraw->FootPrint.Width = copyDesc.Size;
+                cpDraw->FootPrint.Height = 1;
+                cpDraw->FootPrint.Depth = 1;
+                cpDraw->FootPrint.RowPitch = copyDesc.RowPitch;
+                cpDraw->FootPrint.TotalSize = copyDesc.RowPitch * 1;
+
+                cmd.GetCmdList()->PushGpuDraw(cpDraw);
+                cmd.GetCmdList()->FlushDraws(true);
+            }
+
+            device->GetCmdQueue()->Flush(EQueueType::QU_Transfer);
+            copyVB->FetchGpuData(0, &ibBuffer);
+		}
+		ASSERT(mDesc.VertexNumber > 0);
+		Verts.resize(mDesc.VertexNumber);
+        memcpy((BYTE*)&Verts[0], (BYTE*)vbBuffer.GetData() + sizeof(UINT) * 2, mDesc.VertexNumber * sizeof(v3dxVector3));
+
+		// TODO: havn't deal with 32-bit ib
+		if (mGeometryMesh->IsIndex32)
+		{
+			return false;
+		}
+
+        std::vector<WORD> indexData;
+        indexData.resize(ib->Buffer->Desc.Size / sizeof(WORD));
+        memcpy((BYTE*)&indexData[0], (BYTE*)ibBuffer.GetData() + sizeof(UINT) * 2, ib->Buffer->Desc.Size);
+
+        // TODO: deal with WORD/int32
+        for (int i = 0; i < indexData.size(); ++i)
+        {
+            // TODO: check ib range
+            if (indexData[i] > Verts.size())
+                break;
+
+			Indexes.push_back(indexData[i]);
+        }
+		return true;
+	}
+	int FMeshPrimitives::ClusterizeTriangles(IGpuDevice* device)
 	{
-		QuarkCluster cluster;
-		cluster.MipLevel = 111;
-		mClusters.push_back(cluster);
-		
-		return 1;
-#if 0
 		std::vector<v3dxVector3> Verts;
 		std::vector<UINT32> Indexes;
+
+		if (!GetMeshBuffer(device, Verts, Indexes))
+			return 0;
 
 		// calculate bouding box
 		v3dxBox3 MeshBounds;
@@ -510,13 +606,12 @@ namespace NxRHI
 			
 			// TODO: check vertex color
 		}
+		mClusters.clear();
 
-		clusters.clear();
+        UINT32 NumTriangles = UINT32(Indexes.size()) / 3;
 
-        UINT32 NumTriangles = Indexes.size() / 3;
-
-        FAdjacency Adjacency(Indexes.size());
-        FEdgeHash EdgeHash(Indexes.size());
+        FAdjacency Adjacency(UINT32(Indexes.size()));
+        FEdgeHash EdgeHash(UINT32(Indexes.size()));
 
         auto GetPosition = [&Verts, &Indexes](UINT32 EdgeIndex, v3dxVector3& result)
         {
@@ -553,7 +648,7 @@ namespace NxRHI
 
         FDisjointSet DisjointSet(NumTriangles);
 
-        for (UINT32 EdgeIndex = 0, Num = Indexes.size(); EdgeIndex < Num; EdgeIndex++)
+        for (UINT32 EdgeIndex = 0, Num = UINT32(Indexes.size()); EdgeIndex < Num; EdgeIndex++)
         {
             if (Adjacency.Direct[EdgeIndex] == -2)
             {
@@ -611,7 +706,7 @@ namespace NxRHI
 
             for (UINT32 i = 0; i < NumTriangles; i++)
             {
-                Graph->AdjacencyOffset[i] = Graph->Adjacency.size();
+                Graph->AdjacencyOffset[i] = INT32(Graph->Adjacency.size());
 
                 UINT32 TriIndex = Partitioner.Indexes[i];
 
@@ -626,7 +721,7 @@ namespace NxRHI
 
                 Partitioner.AddLocalityLinks(Graph, TriIndex, 1);
             }
-            Graph->AdjacencyOffset[NumTriangles] = Graph->Adjacency.size();
+            Graph->AdjacencyOffset[NumTriangles] = INT32(Graph->Adjacency.size());
 
 			bool bSingleThreaded = NumTriangles < 5000;
 
@@ -635,14 +730,13 @@ namespace NxRHI
         }
 
 		// build cluster
-		clusters.resize(Partitioner.Ranges.size());
+		mClusters.resize(Partitioner.Ranges.size());
 		for (int i = 0; i < Partitioner.Ranges.size(); ++i)
 		{
 			auto& Range = Partitioner.Ranges[i];
-			clusters[i] = QuarkCluster(Verts, Indexes, Range.Begin, Range.End, Partitioner, Adjacency);
+			mClusters[i] = QuarkCluster(Verts, Indexes, Range.Begin, Range.End, Partitioner, Adjacency);
 		}
-
-#endif
+		return int(mClusters.size());
 	}
 
 	bool FMeshPrimitives::LoadXnd(IGpuDevice* device, const char* name, XndHolder* xnd, bool isLoad)

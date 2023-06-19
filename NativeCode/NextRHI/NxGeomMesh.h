@@ -217,12 +217,13 @@ namespace NxRHI
 			return mAtomExtData[index];
 		}
 
-		int ClusterizeTriangles();
-		QuarkCluster* GetCluster(UINT32 id);
+		int ClusterizeTriangles(IGpuDevice* device);
+		bool SaveClusters(XndNode* pNode);
 	private:
 		AutoRef<IVbView> LoadVB(IGpuDevice* device, XndAttribute * pAttr, UINT stride, TimeKeys & tkeys, UINT & resSize, EVertexStreamType stream);
 		void SaveVB(IGpuDevice* device, XndAttribute * pAttr, IVbView* vb, TimeKeys & tkeys, UINT stride);
 
+		bool GetMeshBuffer(IGpuDevice* device, std::vector<v3dxVector3>& Verts, std::vector<UINT32>& Indexes);
 	protected:
 		std::string				mName;
 		AutoRef<FGeomMesh>		mGeometryMesh;
