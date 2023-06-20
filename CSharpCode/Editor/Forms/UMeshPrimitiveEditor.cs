@@ -192,6 +192,11 @@ namespace EngineNS.Editor.Forms
                 meshMeta.SaveAMeta();
                 Mesh.BuildClusteredMesh();
             }
+            ImGuiAPI.SameLine(0, -1);
+            if (EGui.UIProxy.CustomButton.ToolButton("LoadCluster", in btSize))
+            {
+                Mesh.LoadClusterMesh();
+            }
         }
         bool mLeftShow = true;
         protected unsafe void DrawLeft()

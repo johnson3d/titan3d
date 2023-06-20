@@ -80,6 +80,7 @@ namespace EngineNS.Bricks.GpuDriven
         }
         public static TtClusteredMesh LoadClusteredMesh(RName meshName, Graphics.Mesh.UMeshPrimitives mesh)
         {
+            return null;
             var file = meshName.Address + ".clustermesh";
             var xnd = IO.TtXndHolder.LoadXnd(file);
             var result = new TtClusteredMesh();
@@ -254,11 +255,17 @@ namespace EngineNS.Graphics.Mesh
         }
         public Bricks.GpuDriven.TtClusteredMesh BuildClusteredMesh()
         {
-            var result = new Bricks.GpuDriven.TtClusteredMesh();
-            result.InitFromMesh(this);
-            result.SaveClusteredMesh(this.AssetName);
+            mClusteredMesh = new Bricks.GpuDriven.TtClusteredMesh();
+            mClusteredMesh.InitFromMesh(this);
+            mClusteredMesh.SaveClusteredMesh(this.AssetName);
             
-            return result;
+            return mClusteredMesh;
+        }
+        public bool LoadClusterMesh()
+        {
+            mClusteredMesh = Bricks.GpuDriven.TtClusteredMesh.LoadClusteredMesh(this.AssetName, this);
+            
+            return mClusteredMesh != null;
         }
     }
 }
