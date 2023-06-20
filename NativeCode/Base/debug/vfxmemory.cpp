@@ -373,11 +373,6 @@ namespace VFX_Memory
 		pcook->cookie.SetDCCC(c_uMalloc0xCC);
 		pcook->cookie.debuginfo = NULL;
 		
-		if (size == 2320)
-		{
-			int xxx = 0;
-		}
-
         static size_t debugSizeMin=0;
         static size_t debugSizeMax=4096;
         if(file == NULL && (size>=debugSizeMin && size<=debugSizeMax) )

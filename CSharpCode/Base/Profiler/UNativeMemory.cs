@@ -86,16 +86,13 @@ namespace EngineNS.Profiler
                 if (oType.IsValidPointer)
                 {
                     changed = (int)type.Count - (int)oType.Count;
-                    Profiler.Log.WriteLine(ELogTag.Info, "NativeMemory", $"[{type.Size}]{type.File}({type.Line}):{changed} = {type.Count} - {oType.Count}");
+                    if (changed != 0)
+                        Profiler.Log.WriteLine(ELogTag.Info, "NativeMemory", $"[{type.Size}]{type.File}({type.Line}):{changed} = {type.Count} - {oType.Count}");
                 }
                 else
                 {
                     changed = type.Count;
                     Profiler.Log.WriteLine(ELogTag.Info, "NativeMemory", $"[{type.Size}]{type.File}({type.Line}):{changed} = {type.Count} - 0");
-                }
-                if (changed > 0)
-                {
-                    int xxx = 0;
                 }
             }
             while (mCoreObject.NextIterate(iter));
