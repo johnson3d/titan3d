@@ -159,8 +159,8 @@ public:
 	std::map<std::string, AutoRef<FNativeMemType>>	mMemTypes;
 public:
 	FNativeMemCapture(){}
-	FNativeMemType* GetOrNewMemType(const char* name, int line);
-	FNativeMemType* FindMemType(const char* name, int line);
+	FNativeMemType* GetOrNewMemType(int size, const char* name, int line);
+	FNativeMemType* FindMemType(int size, const char* name, int line);
 	void CaptureNativeMemoryState();
 	void* NewIterate();
 	void DestroyIterate(void* iter);

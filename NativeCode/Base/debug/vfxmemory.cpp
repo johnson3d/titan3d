@@ -280,7 +280,7 @@ namespace VFX_Memory
 			size_t size = round_up(sizeArray[i] + sizeof(_small_cookie) - sizeof(_small_cookie*)) + sizeof(size_t) * DCCCNUM;
 			for (size_t i = 0; i < __pool_size; ++i)
 			{
-				auto type = capture->GetOrNewMemType(check->file, (int)check->line);
+				auto type = capture->GetOrNewMemType((int)check->size, check->file, (int)check->line);
 				if (type->Size == 0)
 				{
 					type->Size = check->size;
@@ -592,7 +592,7 @@ void FNativeMemCapture::CaptureNativeMemoryState()
 		_large_cookie* p = cur->next;
 		while (p)
 		{
-			auto type = this->GetOrNewMemType(p->cookie.file, (int)p->cookie.line);
+			auto type = this->GetOrNewMemType((int)p->cookie.size, p->cookie.file, (int)p->cookie.line);
 			if (type->Size == 0)
 			{
 				type->Size = p->cookie.size;

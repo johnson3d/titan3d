@@ -272,12 +272,13 @@ struct FMemTypeIter
 	std::map<std::string, AutoRef<FNativeMemType>>::iterator mIterator;
 };
 
-FNativeMemType* FNativeMemCapture::GetOrNewMemType(const char* name, int line) 
+FNativeMemType* FNativeMemCapture::GetOrNewMemType(int size, const char* name, int line)
 {
 	std::string key;
 	if (name != nullptr)
 		key = name;
 	key += line;
+	key += size;
 	auto iter = mMemTypes.find(key);
 	if (iter != mMemTypes.end())
 		return iter->second;
@@ -285,12 +286,13 @@ FNativeMemType* FNativeMemCapture::GetOrNewMemType(const char* name, int line)
 	mMemTypes.insert(std::make_pair(key, tmp));
 	return tmp;
 }
-FNativeMemType* FNativeMemCapture::FindMemType(const char* name, int line) 
+FNativeMemType* FNativeMemCapture::FindMemType(int size, const char* name, int line)
 {
 	std::string key;
-	if (name != nullptr)
+	if (name != nullptr)	
 		key = name;
 	key += line;
+	key += size;
 	auto iter = mMemTypes.find(key);
 	if (iter != mMemTypes.end())
 		return iter->second;

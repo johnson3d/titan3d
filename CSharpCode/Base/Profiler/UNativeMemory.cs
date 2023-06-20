@@ -81,19 +81,21 @@ namespace EngineNS.Profiler
             do
             {
                 var type = mCoreObject.GetMemType(iter);
-                var oType = old.mCoreObject.FindMemType(type.File, type.Line);
+                var oType = old.mCoreObject.FindMemType((int)type.Size, type.File, type.Line);
                 int changed;
                 if (oType.IsValidPointer)
                 {
                     changed = (int)type.Count - (int)oType.Count;
+                    Profiler.Log.WriteLine(ELogTag.Info, "NativeMemory", $"{type.File}({type.Line}):{changed} = {type.Count} - {oType.Count}");
                 }
                 else
                 {
                     changed = type.Count;
+                    Profiler.Log.WriteLine(ELogTag.Info, "NativeMemory", $"{type.File}({type.Line}):{changed} = {type.Count} - 0");
                 }
                 if (changed > 0)
                 {
-                    Profiler.Log.WriteLine(ELogTag.Info, "NativeMemory", $"{type.File}({type.Line}):{changed}");
+                    int xxx = 0;
                 }
             }
             while (mCoreObject.NextIterate(iter));
