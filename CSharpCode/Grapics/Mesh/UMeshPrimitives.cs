@@ -307,6 +307,7 @@ namespace EngineNS.Graphics.Mesh
 
             if (result != null)
             {
+                await result.TryLoadClusteredMesh();
                 Meshes[name] = result;
                 return result;
             }
