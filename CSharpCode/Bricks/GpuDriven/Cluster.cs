@@ -241,9 +241,9 @@ namespace EngineNS.Graphics.Mesh
     {
         Bricks.GpuDriven.TtClusteredMesh mClusteredMesh;
         public Bricks.GpuDriven.TtClusteredMesh ClusteredMesh { get => mClusteredMesh; }
-        public async Thread.Async.TtTask<Bricks.GpuDriven.TtClusteredMesh> TryLoadClusteredMesh()
+        public async Thread.Async.TtTask<Bricks.GpuDriven.TtClusteredMesh> TryLoadClusteredMesh(bool bForce = false)
         {
-            if (mClusteredMesh == null)
+            if (mClusteredMesh == null || bForce)
             {
                 var meshMeta = GetAMeta() as UMeshPrimitivesAMeta;
                 if (meshMeta == null || meshMeta.IsClustered == false)
