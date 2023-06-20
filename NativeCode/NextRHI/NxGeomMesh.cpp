@@ -728,7 +728,7 @@ namespace NxRHI
         auto pAttr = pNode->GetOrAddAttribute("Cluster", 0, 0);
         pAttr->BeginWrite();
 		
-		int clusterCount = mClusters.size();
+		int clusterCount = int(mClusters.size());
         pAttr->Write(clusterCount);
 
         for (int i = 0; i < mClusters.size(); ++i)
@@ -736,7 +736,9 @@ namespace NxRHI
             // vb
             int vertCount = int(mClusters[i].Verts.size());
             pAttr->Write(vertCount);
-            pAttr->Write((BYTE*)&mClusters[i].Verts[0], vertCount * sizeof(float) * mClusters[i].GetVertSize());
+			int vertSize = int(mClusters[i].GetVertSize());
+			pAttr->Write(vertSize);
+            pAttr->Write((BYTE*)&mClusters[i].Verts[0], vertCount * sizeof(float) * vertSize);
             // ib
             int indexCount = int(mClusters[i].Indexes.size());
             pAttr->Write(indexCount);
@@ -745,12 +747,12 @@ namespace NxRHI
 
         pAttr->EndWrite();
 
-        return true;
+        return TRUE;
     }
 	bool FMeshPrimitives::LoadClusters(XndHolder* xnd)
 	{
 		if (xnd == nullptr)
-			return false;
+			return FALSE;
 
 		mClusters.clear();
 
@@ -765,16 +767,25 @@ namespace NxRHI
 			mClusters.resize(clusterCount);
 			for (int i = 0; i < clusterCount; ++i)
 			{
-				int vbCount;
-				pAttr->Read(vbCount);
-				mClusters[i].Verts.resize(vbCount);
-				
+				// vb
+				int vertCount;
+				pAttr->Read(vertCount);
+				mClusters[i].Verts.resize(vertCount);
+				int vertSize;
+				pAttr->Read(vertSize);
+				pAttr->Read((BYTE*)&mClusters[i].Verts[0], vertCount*sizeof(float)*vertSize);
+
+				// ib
+				int indexCount;
+				pAttr->Read(indexCount);
+				mClusters[i].Indexes.resize(indexCount);
+				pAttr->Read((BYTE*)&mClusters[i].Indexes[0], indexCount * sizeof(UINT32));
 			}
 
 			pAttr->EndRead();
 		}
 
-		return true;
+		return TRUE;
 	}
 	bool FMeshPrimitives::LoadXnd(IGpuDevice* device, const char* name, XndHolder* xnd, bool isLoad)
 	{
