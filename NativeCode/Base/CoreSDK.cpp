@@ -274,25 +274,20 @@ struct FMemTypeIter
 
 FNativeMemType* FNativeMemCapture::GetOrNewMemType(int size, const char* name, int line)
 {
-	std::string key;
-	if (name != nullptr)
-		key = name;
-	key += line;
-	key += size;
+	std::string key = VStringA_FormatV("[%d]%s(%d)", size, name, line);
 	auto iter = mMemTypes.find(key);
 	if (iter != mMemTypes.end())
 		return iter->second;
 	auto tmp = MakeWeakRef(new FNativeMemType());
+	tmp->File = name;
+	tmp->Line = line;
+	tmp->Size = size;
 	mMemTypes.insert(std::make_pair(key, tmp));
 	return tmp;
 }
 FNativeMemType* FNativeMemCapture::FindMemType(int size, const char* name, int line)
 {
-	std::string key;
-	if (name != nullptr)	
-		key = name;
-	key += line;
-	key += size;
+	std::string key = VStringA_FormatV("[%d]%s(%d)", size, name, line);
 	auto iter = mMemTypes.find(key);
 	if (iter != mMemTypes.end())
 		return iter->second;
