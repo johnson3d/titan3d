@@ -486,23 +486,7 @@ namespace NxRHI
 		}
 #endif
 	}
-	bool FMeshPrimitives::SaveClusters(XndNode* pNode)
-	{
-		ASSERT(mClusters.size() >= 0);
-        auto pAttr = pNode->GetOrAddAttribute("Cluster", 0, 0);
-        pAttr->BeginWrite();
-
-		pAttr->Write(mClusters.size());
-
-		for (int i = 0; i < mClusters.size(); ++i)
-		{
-
-		}
-
-		pAttr->EndWrite();
-
-		return true;
-	}
+	
 	bool FMeshPrimitives::GetMeshBuffer(IGpuDevice* device, std::vector<v3dxVector3>& Verts, std::vector<UINT32>& Indexes)
     {
 		if (!device)
@@ -738,7 +722,60 @@ namespace NxRHI
 		}
 		return int(mClusters.size());
 	}
+    bool FMeshPrimitives::SaveClusters(XndNode* pNode)
+    {
+        ASSERT(mClusters.size() >= 0);
+        auto pAttr = pNode->GetOrAddAttribute("Cluster", 0, 0);
+        pAttr->BeginWrite();
+		
+		int clusterCount = mClusters.size();
+        pAttr->Write(clusterCount);
 
+        for (int i = 0; i < mClusters.size(); ++i)
+        {
+            // vb
+            int vertCount = int(mClusters[i].Verts.size());
+            pAttr->Write(vertCount);
+            pAttr->Write((BYTE*)&mClusters[i].Verts[0], vertCount * sizeof(float) * mClusters[i].GetVertSize());
+            // ib
+            int indexCount = int(mClusters[i].Indexes.size());
+            pAttr->Write(indexCount);
+            pAttr->Write((BYTE*)&mClusters[i].Indexes[0], indexCount * sizeof(UINT32));
+        }
+
+        pAttr->EndWrite();
+
+        return true;
+    }
+	bool FMeshPrimitives::LoadClusters(XndHolder* xnd)
+	{
+		if (xnd == nullptr)
+			return false;
+
+		mClusters.clear();
+
+		auto pNode = xnd->GetRootNode();
+		XndAttribute* pAttr = pNode->TryGetAttribute("Cluster");
+		if (pAttr)
+		{
+			pAttr->BeginRead();
+			int clusterCount;
+			pAttr->Read(clusterCount);
+
+			mClusters.resize(clusterCount);
+			for (int i = 0; i < clusterCount; ++i)
+			{
+				int vbCount;
+				pAttr->Read(vbCount);
+				mClusters[i].Verts.resize(vbCount);
+				
+			}
+
+			pAttr->EndRead();
+		}
+
+		return true;
+	}
 	bool FMeshPrimitives::LoadXnd(IGpuDevice* device, const char* name, XndHolder* xnd, bool isLoad)
 	{
 		if (xnd == nullptr)

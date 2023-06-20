@@ -240,7 +240,8 @@ namespace EngineNS.Graphics.Mesh
     public partial class UMeshPrimitives
     {
         Bricks.GpuDriven.TtClusteredMesh mClusteredMesh;
-        public async Thread.Async.TtTask<Bricks.GpuDriven.TtClusteredMesh> GetClusteredMesh()
+        public Bricks.GpuDriven.TtClusteredMesh ClusteredMesh { get => mClusteredMesh; }
+        public async Thread.Async.TtTask<Bricks.GpuDriven.TtClusteredMesh> TryLoadClusteredMesh()
         {
             if (mClusteredMesh == null)
             {

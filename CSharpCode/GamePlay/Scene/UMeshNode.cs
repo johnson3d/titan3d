@@ -70,6 +70,7 @@ namespace EngineNS.GamePlay.Scene
                 var mesh = new Graphics.Mesh.UMesh();
                 mesh.Initialize(materialMesh, meshData.MdfQueue, meshData.Atom);
                 this.Mesh = mesh;
+                await materialMesh.Mesh.TryLoadClusteredMesh();
             }
             return true;
         }
