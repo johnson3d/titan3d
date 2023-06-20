@@ -736,9 +736,7 @@ namespace NxRHI
             // vb
             int vertCount = int(mClusters[i].Verts.size());
             pAttr->Write(vertCount);
-			int vertSize = int(mClusters[i].GetVertSize());
-			pAttr->Write(vertSize);
-            pAttr->Write((BYTE*)&mClusters[i].Verts[0], vertCount * sizeof(float) * vertSize);
+            pAttr->Write((BYTE*)&mClusters[i].Verts[0], vertCount * sizeof(float));
             // ib
             int indexCount = int(mClusters[i].Indexes.size());
             pAttr->Write(indexCount);
@@ -771,9 +769,7 @@ namespace NxRHI
 				int vertCount;
 				pAttr->Read(vertCount);
 				mClusters[i].Verts.resize(vertCount);
-				int vertSize;
-				pAttr->Read(vertSize);
-				pAttr->Read((BYTE*)&mClusters[i].Verts[0], vertCount*sizeof(float)*vertSize);
+				pAttr->Read((BYTE*)&mClusters[i].Verts[0], vertCount*sizeof(float));
 
 				// ib
 				int indexCount;
