@@ -80,7 +80,7 @@ namespace EngineNS.Bricks.GpuDriven
         }
         public static TtClusteredMesh LoadClusteredMesh(RName meshName, Graphics.Mesh.UMeshPrimitives mesh)
         {
-            return null;
+            //return null;
             var file = meshName.Address + ".clustermesh";
             var xnd = IO.TtXndHolder.LoadXnd(file);
             var result = new TtClusteredMesh();
