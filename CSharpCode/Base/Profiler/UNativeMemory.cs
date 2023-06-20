@@ -30,8 +30,13 @@ namespace EngineNS.Profiler
         }
         CoreSDK.FDelegate_FOnNativeMemAlloc OnNativeMemAlloc;
         //在做ClrProfiler的时候，不要MarshalString，否则会干扰ObjectAllocate统计!!!!!
+        static int testSize = 1048624;
         private unsafe void OnNativeMemAllocImpl(IntPtr size, sbyte* file, IntPtr line, IntPtr id)
         {
+            if (size.ToInt32() == testSize)
+            {
+                int xxx = 0;
+            }
             //if ((uint)id == 2085)
             //{
             //    return;
@@ -70,14 +75,17 @@ namespace EngineNS.Profiler
         public unsafe void GetIncreaseTypes(TtNativeMemCapture old)
         {
             var iter = mCoreObject.NewIterate();
-            while (mCoreObject.NextIterate(iter))
+            if (iter == IntPtr.Zero.ToPointer())
+                return;
+
+            do
             {
                 var type = mCoreObject.GetMemType(iter);
                 var oType = old.mCoreObject.FindMemType(type.File, type.Line);
                 int changed;
                 if (oType.IsValidPointer)
                 {
-                    changed = type.Count - oType.Count;
+                    changed = (int)type.Count - (int)oType.Count;
                 }
                 else
                 {
@@ -85,9 +93,10 @@ namespace EngineNS.Profiler
                 }
                 if (changed > 0)
                 {
-                    Profiler.Log.WriteLine(ELogTag.Info, "NativeMemory", $"{type.File}({type.Line}):{type.Count}");
+                    Profiler.Log.WriteLine(ELogTag.Info, "NativeMemory", $"{type.File}({type.Line}):{changed}");
                 }
             }
+            while (mCoreObject.NextIterate(iter));
             mCoreObject.DestroyIterate(iter);
         }
     }

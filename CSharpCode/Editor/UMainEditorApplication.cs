@@ -194,6 +194,23 @@ namespace EngineNS.Editor
                         },
                         new EGui.UIProxy.MenuItemProxy()
                         {
+                            MenuName = "CapMem",
+                            Action = (EGui.UIProxy.MenuItemProxy item, Support.UAnyPointer data)=>
+                            {
+                                var save = PrevMemCapture;
+                                PrevMemCapture = new EngineNS.Profiler.TtNativeMemCapture();
+                                PrevMemCapture.CaptureNativeMemoryState();
+                                if (save != null)
+                                    PrevMemCapture.GetIncreaseTypes(save);
+                                    
+                                //UEngine.Instance.EventPoster.RunOn((state)=>
+                                //{
+                                    //return true;
+                                //}, Thread.Async.EAsyncTarget.Main);
+                            },
+                        },
+                        new EGui.UIProxy.MenuItemProxy()
+                        {
                             MenuName = "ShowConsole",
                             Action = (EGui.UIProxy.MenuItemProxy item, Support.UAnyPointer data)=>
                             {
@@ -827,5 +844,7 @@ namespace EngineNS.Editor
             //OnDrawSlate();
         }
         #endregion
+
+        public EngineNS.Profiler.TtNativeMemCapture PrevMemCapture;
     }
 }

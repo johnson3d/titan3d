@@ -149,7 +149,7 @@ struct TR_CLASS()
 	const char* File = nullptr;
 	int Line = 0;
 	UINT64 Size = 0;
-	UINT Count = 0;
+	int Count = 0;
 };
 
 class TR_CLASS()
@@ -159,24 +159,8 @@ public:
 	std::map<std::string, AutoRef<FNativeMemType>>	mMemTypes;
 public:
 	FNativeMemCapture(){}
-	FNativeMemType* GetOrNewMemType(const char* name, int line) {
-		std::string key = name;
-		key += line;
-		auto iter = mMemTypes.find(key);
-		if (iter != mMemTypes.end())
-			return iter->second;
-		auto tmp = MakeWeakRef(new FNativeMemType());
-		mMemTypes.insert(std::make_pair(key, tmp));
-		return tmp;
-	}
-	FNativeMemType* FindMemType(const char* name, int line) {
-		std::string key = name;
-		key += line;
-		auto iter = mMemTypes.find(key);
-		if (iter != mMemTypes.end())
-			return iter->second;
-		return nullptr;
-	}
+	FNativeMemType* GetOrNewMemType(const char* name, int line);
+	FNativeMemType* FindMemType(const char* name, int line);
 	void CaptureNativeMemoryState();
 	void* NewIterate();
 	void DestroyIterate(void* iter);
