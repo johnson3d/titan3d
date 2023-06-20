@@ -50,8 +50,31 @@ namespace EngineNS.Profiler
         }
     }
 
+    public struct FNativeMemState
+    {
+        public string File;
+        public int Line;
+        public UInt64 Size;
+        public UInt32 Count;
+    }
     public class TtNativeMemCapture : AuxPtrType<FNativeMemCapture>
     {
-
+        public TtNativeMemCapture()
+        {
+            mCoreObject = FNativeMemCapture.CreateInstance();
+        }
+        public void CaptureNativeMemoryState()
+        {
+            mCoreObject.CaptureNativeMemoryState();
+        }
+        public unsafe void GetIncreaseTypes()
+        {
+            var iter = mCoreObject.NewIterate();
+            while (mCoreObject.NextIterate(iter))
+            {
+                var type = mCoreObject.GetMemType(iter);
+            }
+            mCoreObject.DestroyIterate(iter);
+        }
     }
 }

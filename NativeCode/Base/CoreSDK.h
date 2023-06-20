@@ -158,6 +158,7 @@ class TR_CLASS()
 public:
 	std::map<std::string, AutoRef<FNativeMemType>>	mMemTypes;
 public:
+	FNativeMemCapture(){}
 	FNativeMemType* GetOrNewMemType(const char* name, int line) {
 		std::string key = name;
 		key += line;
@@ -171,7 +172,7 @@ public:
 	void CaptureNativeMemoryState();
 	void* NewIterate();
 	void DestroyIterate(void* iter);
-	void NextIterate(void* iter);
+	bool NextIterate(void* iter);
 	FNativeMemType* GetMemType(void* iter);
 };
 

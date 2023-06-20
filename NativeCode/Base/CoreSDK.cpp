@@ -285,10 +285,14 @@ void FNativeMemCapture::DestroyIterate(void* iter)
 	delete i;
 }
 
-void FNativeMemCapture::NextIterate(void* iter)
+bool FNativeMemCapture::NextIterate(void* iter)
 {
 	auto i = (FMemTypeIter*)iter;
+	if (i->mIterator == mMemTypes.end())
+		return false;
+	
 	i->mIterator++;
+	return true;
 }
 
 FNativeMemType* FNativeMemCapture::GetMemType(void* iter) 
