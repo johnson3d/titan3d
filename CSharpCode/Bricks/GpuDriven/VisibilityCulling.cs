@@ -222,8 +222,17 @@ namespace EngineNS.Bricks.GpuDriven
         }
         public List<GamePlay.Scene.TtGpuSceneNode> GpuSceneActors = new List<GamePlay.Scene.TtGpuSceneNode>();
         public TtCpu2GpuBuffer<FActorInstance> GpuInstances = new TtCpu2GpuBuffer<FActorInstance>();
-        public void BuildInstances(GamePlay.UWorld world)
+        public void BuildInstances(GamePlay.UWorld world, GamePlay.UWorld.UVisParameter rp)
         {
+            foreach(var i in rp.VisibleNodes)
+            {
+                var meshNode = i as GamePlay.Scene.UMeshNode;
+                if (meshNode != null)
+                    continue;
+
+                var cluster = meshNode.Mesh.MaterialMesh.Mesh.ClusteredMesh;
+            }
+
             foreach (var i in GpuSceneActors)
             {
                 i.GpuSceneIndex = -1;

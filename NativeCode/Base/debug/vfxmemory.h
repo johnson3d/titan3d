@@ -17,6 +17,10 @@
 #include "../BaseHead.h"
 #include "vfxdebug.h"
 
+NS_BEGIN
+class FNativeMemCapture;
+NS_END
+
 namespace	VFX_Memory
 {
 	typedef void(*FOnMemAlloc)(size_t size, const char* file, size_t line, size_t id);
@@ -180,6 +184,7 @@ namespace	VFX_Memory
 		void Construct_small_alloc();
 	public:
 		void Dump(vBOOL dumpUnknown);
+		void Dump(EngineNS::FNativeMemCapture* capture);
 	public:
 		~small_alloc();
 		void destructor();
@@ -218,6 +223,9 @@ namespace	VFX_Memory
 			return *__plarge_alloc; 
 		}
 
+		const _large_cookie* GetHeader() {
+			return &header;
+		}
 		friend class __memory_init;
 	};
 

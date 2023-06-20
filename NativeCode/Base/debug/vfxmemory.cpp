@@ -12,6 +12,8 @@
 #include "vfxmemory.h"
 #include "vfxMemPoolObject.h"
 
+#include "../CoreSDK.h"
+
 #if !defined(PLATFORM_WIN)
 	inline vBOOL IsBadReadPtr(CONST VOID *lp, UINT_PTR ucb)
 	{
@@ -269,6 +271,24 @@ namespace VFX_Memory
 	{
 		for(size_t i = 0; i < poolArray.GetNumber(); ++i)
 			dump_memory(poolArray[i],sizeArray[i], dumpUnknown);
+	}
+	void small_alloc::Dump(EngineNS::FNativeMemCapture* capture)
+	{
+		for (size_t i = 0; i < poolArray.GetNumber(); ++i)
+		{
+			_small_cookie* check = poolArray[i];
+			size_t size = round_up(sizeArray[i] + sizeof(_small_cookie) - sizeof(_small_cookie*)) + sizeof(size_t) * DCCCNUM;
+			for (size_t i = 0; i < __pool_size; ++i)
+			{
+				auto type = capture->GetOrNewMemType(check->file, (int)check->line);
+				if (type->Size == 0)
+				{
+					type->Size = check->size;
+				}
+				type->Count++;
+				check = reinterpret_cast<_small_cookie*>((INT_PTR)check + size);
+			}
+		}
 	}
 	void small_alloc::Check()
 	{
@@ -562,6 +582,31 @@ small_alloc* ConstructSmallAlloc()
 	return result;
 }
 
+NS_BEGIN
+
+void FNativeMemCapture::CaptureNativeMemoryState()
+{
+	{
+		auto cur = large_alloc::getalloc().GetHeader();
+
+		_large_cookie* p = cur->next;
+		while (p)
+		{
+			auto type = this->GetOrNewMemType(p->cookie.file, (int)p->cookie.line);
+			if (type->Size == 0)
+			{
+				type->Size = p->cookie.size;
+			}
+			type->Count++;
+			p = p->next;
+		}
+	}
+	{
+		small_alloc::getalloc().Dump(this);
+	}
+}
+
+NS_END
 
 //void __memory_init::FinalDump()
 //{

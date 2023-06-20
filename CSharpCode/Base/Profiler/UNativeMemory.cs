@@ -49,4 +49,9 @@ namespace EngineNS.Profiler
             //var info = System.Runtime.InteropServices.Marshal.PtrToStringAnsi((IntPtr)debugInfo);
         }
     }
+
+    public class TtNativeMemCapture : AuxPtrType<FNativeMemCapture>
+    {
+
+    }
 }

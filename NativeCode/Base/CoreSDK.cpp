@@ -267,4 +267,34 @@ UINT64 CoreSDK::CompressBound_ZSTD(UINT64 srcSize)
 	return ZSTD_compressBound((size_t)srcSize);
 }
 
+struct FMemTypeIter
+{
+	std::map<std::string, AutoRef<FNativeMemType>>::iterator mIterator;
+};
+
+void* FNativeMemCapture::NewIterate()
+{
+	auto iter = new FMemTypeIter();
+	iter->mIterator = mMemTypes.begin();
+	return iter;
+}
+
+void FNativeMemCapture::DestroyIterate(void* iter)
+{
+	auto i = (FMemTypeIter*)iter;
+	delete i;
+}
+
+void FNativeMemCapture::NextIterate(void* iter)
+{
+	auto i = (FMemTypeIter*)iter;
+	i->mIterator++;
+}
+
+FNativeMemType* FNativeMemCapture::GetMemType(void* iter) 
+{
+	auto i = (FMemTypeIter*)iter;
+	return i->mIterator->second;
+}
+
 NS_END

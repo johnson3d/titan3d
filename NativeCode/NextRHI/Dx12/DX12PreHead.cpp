@@ -61,7 +61,7 @@ namespace NxRHI
 			auto waitValue = i->WaitValue;
 			ASSERT(waitValue > 0);
 			//fuck off: d12 or driver reference the resource but didn't AddRef
-			if (value > waitValue)
+			if (value >= waitValue)
 			{
 				i->Allocator->mAllocator->Reset();
 				i->Allocator->ResetGpuDraws();

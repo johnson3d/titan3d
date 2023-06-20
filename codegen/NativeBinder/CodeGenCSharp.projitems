@@ -92,6 +92,8 @@
     <Compile Include="$(MSBuildThisFileDirectory)EngineNS/FContextTickableManager_2581692454.cpp2cs.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)EngineNS/FCsDictionaryIterator_2581692454.cpp2cs.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)EngineNS/FGlobalConfig_2581692454.cpp2cs.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)EngineNS/FNativeMemCapture_2581692454.cpp2cs.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)EngineNS/FNativeMemType_2581692454.cpp2cs.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)EngineNS/FResourceState_2581692454.cpp2cs.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)EngineNS/FRttiConstructor_2581692454.cpp2cs.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)EngineNS/FRttiMethodBase_2581692454.cpp2cs.cs" />

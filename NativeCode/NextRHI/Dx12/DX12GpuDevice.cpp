@@ -106,6 +106,7 @@ namespace NxRHI
 	DX12GpuDevice::~DX12GpuDevice()
 	{
 		mCmdQueue->ClearIdleCmdlists();
+		mCmdQueue->mFramePost = nullptr;
 		mCmdQueue = nullptr;
 		mCmdAllocatorManager = nullptr;
 		
@@ -1031,7 +1032,7 @@ namespace NxRHI
 	}
 	void DX12CmdQueue::ClearIdleCmdlists()
 	{
-		if (mIdleCmdlist.empty() == false)
+		while(mIdleCmdlist.empty() == false)
 		{
 			mIdleCmdlist.pop();
 		}
