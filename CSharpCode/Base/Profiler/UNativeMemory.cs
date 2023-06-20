@@ -67,12 +67,26 @@ namespace EngineNS.Profiler
         {
             mCoreObject.CaptureNativeMemoryState();
         }
-        public unsafe void GetIncreaseTypes()
+        public unsafe void GetIncreaseTypes(TtNativeMemCapture old)
         {
             var iter = mCoreObject.NewIterate();
             while (mCoreObject.NextIterate(iter))
             {
                 var type = mCoreObject.GetMemType(iter);
+                var oType = old.mCoreObject.FindMemType(type.File, type.Line);
+                int changed;
+                if (oType.IsValidPointer)
+                {
+                    changed = type.Count - oType.Count;
+                }
+                else
+                {
+                    changed = type.Count;
+                }
+                if (changed > 0)
+                {
+                    Profiler.Log.WriteLine(ELogTag.Info, "NativeMemory", $"{type.File}({type.Line}):{type.Count}");
+                }
             }
             mCoreObject.DestroyIterate(iter);
         }

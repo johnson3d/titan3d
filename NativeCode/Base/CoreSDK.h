@@ -169,6 +169,14 @@ public:
 		mMemTypes.insert(std::make_pair(key, tmp));
 		return tmp;
 	}
+	FNativeMemType* FindMemType(const char* name, int line) {
+		std::string key = name;
+		key += line;
+		auto iter = mMemTypes.find(key);
+		if (iter != mMemTypes.end())
+			return iter->second;
+		return nullptr;
+	}
 	void CaptureNativeMemoryState();
 	void* NewIterate();
 	void DestroyIterate(void* iter);
