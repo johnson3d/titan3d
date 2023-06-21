@@ -21,6 +21,10 @@ namespace EngineNS.Graphics.Pipeline.Common
 
         public UAttachmentDesc Attachement = new UAttachmentDesc();
         public UAttachBuffer ImportedBuffer = null;
+        public URenderGraphLinker FindInLinker()
+        {
+            return HostNode.RenderGraph.FindInLinker(this);
+        }
         public static URenderGraphPin CreateInput(string name)
         {
             var result = new URenderGraphPin();
@@ -46,6 +50,15 @@ namespace EngineNS.Graphics.Pipeline.Common
             result.PinType = EPinType.InputOutput;
             result.IsAutoResize = false;
             result.Attachement.Format = EPixelFormat.PXF_UNKNOWN;
+            return result;
+        }
+        public static URenderGraphPin CreateInputOutput(string name, bool isAutoSize, EPixelFormat defaultFormat)
+        {
+            var result = new URenderGraphPin();
+            result.Name = name;
+            result.PinType = EPinType.InputOutput;
+            result.IsAutoResize = isAutoSize;
+            result.Attachement.Format = defaultFormat;
             return result;
         }
     }
@@ -290,6 +303,8 @@ namespace EngineNS.Graphics.Pipeline.Common
             for (int k = 0; k < j.NumOfInput; k++)
             {
                 var t = j.GetInput(k);
+                if (t.FindInLinker() == null)
+                    continue;
                 var buffer = RenderGraph.AttachmentCache.FindAttachement(t.Attachement.AttachmentName);
                 if (buffer != null && buffer.LifeMode == UAttachBuffer.ELifeMode.Transient)
                 {

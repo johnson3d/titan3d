@@ -241,6 +241,20 @@ namespace EngineNS.Bricks.GpuDriven
         public URenderGraphPin VisClutersPinIn = URenderGraphPin.CreateInput("VisClusters");
         public URenderGraphPin QuarkRTPinOut = URenderGraphPin.CreateOutput("QuarkRT", false, EPixelFormat.PXF_R32G32_UINT);
         public URenderGraphPin DepthStencilPinOut = URenderGraphPin.CreateOutput("DepthStencil", false, EPixelFormat.PXF_D24_UNORM_S8_UINT);
+
+        public TtSwRasterizeNode()
+        {
+            Name = "SwRasterizeNode";
+        }
+        public override void InitNodePins()
+        {
+            AddInput(VisClutersPinIn, NxRHI.EBufferType.BFT_SRV);
+
+            AddOutput(QuarkRTPinOut, NxRHI.EBufferType.BFT_RTV | NxRHI.EBufferType.BFT_SRV);
+            AddOutput(DepthStencilPinOut, NxRHI.EBufferType.BFT_DSV | NxRHI.EBufferType.BFT_SRV);
+
+            base.InitNodePins();
+        }
     }
 
     public class TtQuarkResolveShading : Graphics.Pipeline.Shader.UGraphicsShadingEnv

@@ -35,11 +35,17 @@ namespace EngineNS.Graphics.Pipeline.Deferred
     }
     public class UDeferredBasePassNode : Common.UBasePassNode
     {
-        public Common.URenderGraphPin Rt0PinOut = Common.URenderGraphPin.CreateOutput("MRT0", true, EPixelFormat.PXF_R16G16B16A16_FLOAT);//rgb - metallicty
-        public Common.URenderGraphPin Rt1PinOut = Common.URenderGraphPin.CreateOutput("MRT1", true, EPixelFormat.PXF_R10G10B10A2_UNORM);//normal - Flags
-        public Common.URenderGraphPin Rt2PinOut = Common.URenderGraphPin.CreateOutput("MRT2", true, EPixelFormat.PXF_R8G8B8A8_UNORM);//Roughness,Emissive,Specular,unused
-        public Common.URenderGraphPin Rt3PinOut = Common.URenderGraphPin.CreateOutput("MRT3", true, EPixelFormat.PXF_R16G16_UNORM);//EPixelFormat.PXF_R10G10B10A2_UNORM//motionXY
+        //public Common.URenderGraphPin Rt0PinOut = Common.URenderGraphPin.CreateOutput("MRT0", true, EPixelFormat.PXF_R16G16B16A16_FLOAT);//rgb - metallicty
+        //public Common.URenderGraphPin Rt1PinOut = Common.URenderGraphPin.CreateOutput("MRT1", true, EPixelFormat.PXF_R10G10B10A2_UNORM);//normal - Flags
+        //public Common.URenderGraphPin Rt2PinOut = Common.URenderGraphPin.CreateOutput("MRT2", true, EPixelFormat.PXF_R8G8B8A8_UNORM);//Roughness,Emissive,Specular,unused
+        //public Common.URenderGraphPin Rt3PinOut = Common.URenderGraphPin.CreateOutput("MRT3", true, EPixelFormat.PXF_R16G16_UNORM);//EPixelFormat.PXF_R10G10B10A2_UNORM//motionXY
         public Common.URenderGraphPin DepthStencilPinOut = Common.URenderGraphPin.CreateOutput("DepthStencil", true, EPixelFormat.PXF_D24_UNORM_S8_UINT);
+
+        public Common.URenderGraphPin Rt0PinOut = Common.URenderGraphPin.CreateInputOutput("MRT0", true, EPixelFormat.PXF_R16G16B16A16_FLOAT);//rgb - metallicty
+        public Common.URenderGraphPin Rt1PinOut = Common.URenderGraphPin.CreateInputOutput("MRT1", true, EPixelFormat.PXF_R10G10B10A2_UNORM);//normal - Flags
+        public Common.URenderGraphPin Rt2PinOut = Common.URenderGraphPin.CreateInputOutput("MRT2", true, EPixelFormat.PXF_R8G8B8A8_UNORM);//Roughness,Emissive,Specular,unused
+        public Common.URenderGraphPin Rt3PinOut = Common.URenderGraphPin.CreateInputOutput("MRT3", true, EPixelFormat.PXF_R16G16_UNORM);//EPixelFormat.PXF_R10G10B10A2_UNORM//motionXY
+        //public Common.URenderGraphPin DepthStencilPinOut = Common.URenderGraphPin.CreateInputOutput("DepthStencil");
 
         public UDrawBuffers BackgroundPass = new UDrawBuffers();
         public UDeferredBasePassNode()
@@ -48,11 +54,21 @@ namespace EngineNS.Graphics.Pipeline.Deferred
         }
         public override void InitNodePins()
         {
-            AddOutput(Rt0PinOut, NxRHI.EBufferType.BFT_RTV | NxRHI.EBufferType.BFT_SRV);
-            AddOutput(Rt1PinOut, NxRHI.EBufferType.BFT_RTV | NxRHI.EBufferType.BFT_SRV);
-            AddOutput(Rt2PinOut, NxRHI.EBufferType.BFT_RTV | NxRHI.EBufferType.BFT_SRV);
-            AddOutput(Rt3PinOut, NxRHI.EBufferType.BFT_RTV | NxRHI.EBufferType.BFT_SRV);
+            AddInputOutput(Rt0PinOut, NxRHI.EBufferType.BFT_RTV | NxRHI.EBufferType.BFT_SRV);
+            AddInputOutput(Rt1PinOut, NxRHI.EBufferType.BFT_RTV | NxRHI.EBufferType.BFT_SRV);
+            AddInputOutput(Rt2PinOut, NxRHI.EBufferType.BFT_RTV | NxRHI.EBufferType.BFT_SRV);
+            AddInputOutput(Rt3PinOut, NxRHI.EBufferType.BFT_RTV | NxRHI.EBufferType.BFT_SRV);
             AddOutput(DepthStencilPinOut, NxRHI.EBufferType.BFT_DSV | NxRHI.EBufferType.BFT_SRV);
+            Rt0PinOut.IsAutoResize = true;
+            Rt1PinOut.IsAutoResize = true;
+            Rt2PinOut.IsAutoResize = true;
+            Rt3PinOut.IsAutoResize = true;
+
+            Rt0PinOut.IsAllowInputNull = true;
+            Rt1PinOut.IsAllowInputNull = true;
+            Rt2PinOut.IsAllowInputNull = true;
+            Rt3PinOut.IsAllowInputNull = true;
+            //DepthStencilPinOut.IsAllowInputNull = true;
         }
         public override void OnResize(URenderPolicy policy, float x, float y)
         {
@@ -136,6 +152,32 @@ namespace EngineNS.Graphics.Pipeline.Deferred
         }
         public override void BeforeTickLogic(URenderPolicy policy)
         {
+            if (Rt0PinOut.FindInLinker() == null)
+            {
+                Rt0PinOut.Attachement.Format = EPixelFormat.PXF_R16G16B16A16_FLOAT;
+                Rt0PinOut.IsAutoResize = true;
+            }
+            if (Rt1PinOut.FindInLinker() == null)
+            {
+                Rt1PinOut.Attachement.Format = EPixelFormat.PXF_R10G10B10A2_UNORM;
+                Rt1PinOut.IsAutoResize = true;
+            }
+            if (Rt2PinOut.FindInLinker() == null)
+            {
+                Rt2PinOut.Attachement.Format = EPixelFormat.PXF_R8G8B8A8_UNORM;
+                Rt2PinOut.IsAutoResize = true;
+            }
+            if (Rt3PinOut.FindInLinker() == null)
+            {
+                Rt3PinOut.Attachement.Format = EPixelFormat.PXF_R16G16_UNORM;
+                Rt3PinOut.IsAutoResize = true;
+            }
+            //if (DepthStencilPinOut.FindInLinker() == null)
+            //{
+            //    DepthStencilPinOut.Attachement.Format = EPixelFormat.PXF_D24_UNORM_S8_UINT;
+            //    DepthStencilPinOut.IsAutoResize = true;
+            //}
+
             if (policy.DisableHDR)
             {
                 if (Rt0PinOut.Attachement.Format != EPixelFormat.PXF_R8G8B8A8_UNORM)
