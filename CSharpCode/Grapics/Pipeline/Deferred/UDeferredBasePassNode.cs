@@ -4,6 +4,7 @@ using NPOI.HSSF.Record.AutoFilter;
 using System;
 using System.Collections.Generic;
 using EngineNS.Graphics.Pipeline.Shader;
+using System.ComponentModel;
 
 namespace EngineNS.Graphics.Pipeline.Deferred
 {
@@ -39,15 +40,22 @@ namespace EngineNS.Graphics.Pipeline.Deferred
         //public Common.URenderGraphPin Rt1PinOut = Common.URenderGraphPin.CreateOutput("MRT1", true, EPixelFormat.PXF_R10G10B10A2_UNORM);//normal - Flags
         //public Common.URenderGraphPin Rt2PinOut = Common.URenderGraphPin.CreateOutput("MRT2", true, EPixelFormat.PXF_R8G8B8A8_UNORM);//Roughness,Emissive,Specular,unused
         //public Common.URenderGraphPin Rt3PinOut = Common.URenderGraphPin.CreateOutput("MRT3", true, EPixelFormat.PXF_R16G16_UNORM);//EPixelFormat.PXF_R10G10B10A2_UNORM//motionXY
-        public Common.URenderGraphPin DepthStencilPinOut = Common.URenderGraphPin.CreateOutput("DepthStencil", true, EPixelFormat.PXF_D24_UNORM_S8_UINT);
+        //public Common.URenderGraphPin DepthStencilPinOut = Common.URenderGraphPin.CreateOutput("DepthStencil", true, EPixelFormat.PXF_D24_UNORM_S8_UINT);
 
         public Common.URenderGraphPin Rt0PinOut = Common.URenderGraphPin.CreateInputOutput("MRT0", true, EPixelFormat.PXF_R16G16B16A16_FLOAT);//rgb - metallicty
         public Common.URenderGraphPin Rt1PinOut = Common.URenderGraphPin.CreateInputOutput("MRT1", true, EPixelFormat.PXF_R10G10B10A2_UNORM);//normal - Flags
         public Common.URenderGraphPin Rt2PinOut = Common.URenderGraphPin.CreateInputOutput("MRT2", true, EPixelFormat.PXF_R8G8B8A8_UNORM);//Roughness,Emissive,Specular,unused
         public Common.URenderGraphPin Rt3PinOut = Common.URenderGraphPin.CreateInputOutput("MRT3", true, EPixelFormat.PXF_R16G16_UNORM);//EPixelFormat.PXF_R10G10B10A2_UNORM//motionXY
-        //public Common.URenderGraphPin DepthStencilPinOut = Common.URenderGraphPin.CreateInputOutput("DepthStencil");
+        public Common.URenderGraphPin DepthStencilPinOut = Common.URenderGraphPin.CreateInputOutput("DepthStencil", true, EPixelFormat.PXF_D24_UNORM_S8_UINT);
 
         public UDrawBuffers BackgroundPass = new UDrawBuffers();
+        [Category("Option")]
+        [Rtti.Meta]
+        public bool ClearMRT
+        {
+            get;
+            set;
+        } = true;
         public UDeferredBasePassNode()
         {
             Name = "UDeferredBasePassNode";
@@ -58,17 +66,13 @@ namespace EngineNS.Graphics.Pipeline.Deferred
             AddInputOutput(Rt1PinOut, NxRHI.EBufferType.BFT_RTV | NxRHI.EBufferType.BFT_SRV);
             AddInputOutput(Rt2PinOut, NxRHI.EBufferType.BFT_RTV | NxRHI.EBufferType.BFT_SRV);
             AddInputOutput(Rt3PinOut, NxRHI.EBufferType.BFT_RTV | NxRHI.EBufferType.BFT_SRV);
-            AddOutput(DepthStencilPinOut, NxRHI.EBufferType.BFT_DSV | NxRHI.EBufferType.BFT_SRV);
-            Rt0PinOut.IsAutoResize = true;
-            Rt1PinOut.IsAutoResize = true;
-            Rt2PinOut.IsAutoResize = true;
-            Rt3PinOut.IsAutoResize = true;
+            AddInputOutput(DepthStencilPinOut, NxRHI.EBufferType.BFT_DSV | NxRHI.EBufferType.BFT_SRV);
 
             Rt0PinOut.IsAllowInputNull = true;
             Rt1PinOut.IsAllowInputNull = true;
             Rt2PinOut.IsAllowInputNull = true;
             Rt3PinOut.IsAllowInputNull = true;
-            //DepthStencilPinOut.IsAllowInputNull = true;
+            DepthStencilPinOut.IsAllowInputNull = true;
         }
         public override void OnResize(URenderPolicy policy, float x, float y)
         {
@@ -105,23 +109,23 @@ namespace EngineNS.Graphics.Pipeline.Deferred
             PassDesc.NumOfMRT = 4;
             PassDesc.AttachmentMRTs[0].Format = format;
             PassDesc.AttachmentMRTs[0].Samples = 1;
-            PassDesc.AttachmentMRTs[0].LoadAction = NxRHI.EFrameBufferLoadAction.LoadActionClear;
+            PassDesc.AttachmentMRTs[0].LoadAction = ClearMRT ? NxRHI.EFrameBufferLoadAction.LoadActionClear : NxRHI.EFrameBufferLoadAction.LoadActionDontCare;
             PassDesc.AttachmentMRTs[0].StoreAction = NxRHI.EFrameBufferStoreAction.StoreActionStore;
             PassDesc.AttachmentMRTs[1].Format = Rt1PinOut.Attachement.Format;
             PassDesc.AttachmentMRTs[1].Samples = 1;
-            PassDesc.AttachmentMRTs[1].LoadAction = NxRHI.EFrameBufferLoadAction.LoadActionClear;
+            PassDesc.AttachmentMRTs[1].LoadAction = ClearMRT ? NxRHI.EFrameBufferLoadAction.LoadActionClear : NxRHI.EFrameBufferLoadAction.LoadActionDontCare;
             PassDesc.AttachmentMRTs[1].StoreAction = NxRHI.EFrameBufferStoreAction.StoreActionStore;
             PassDesc.AttachmentMRTs[2].Format = Rt2PinOut.Attachement.Format;
             PassDesc.AttachmentMRTs[2].Samples = 1;
-            PassDesc.AttachmentMRTs[2].LoadAction = NxRHI.EFrameBufferLoadAction.LoadActionClear;
+            PassDesc.AttachmentMRTs[2].LoadAction = ClearMRT ? NxRHI.EFrameBufferLoadAction.LoadActionClear : NxRHI.EFrameBufferLoadAction.LoadActionDontCare;
             PassDesc.AttachmentMRTs[2].StoreAction = NxRHI.EFrameBufferStoreAction.StoreActionStore;
             PassDesc.AttachmentMRTs[3].Format = Rt3PinOut.Attachement.Format;
             PassDesc.AttachmentMRTs[3].Samples = 1;
-            PassDesc.AttachmentMRTs[3].LoadAction = NxRHI.EFrameBufferLoadAction.LoadActionClear;
+            PassDesc.AttachmentMRTs[3].LoadAction = ClearMRT ? NxRHI.EFrameBufferLoadAction.LoadActionClear : NxRHI.EFrameBufferLoadAction.LoadActionDontCare;
             PassDesc.AttachmentMRTs[3].StoreAction = NxRHI.EFrameBufferStoreAction.StoreActionStore;
             PassDesc.m_AttachmentDepthStencil.Format = DepthStencilPinOut.Attachement.Format;
             PassDesc.m_AttachmentDepthStencil.Samples = 1;
-            PassDesc.m_AttachmentDepthStencil.LoadAction = NxRHI.EFrameBufferLoadAction.LoadActionClear;
+            PassDesc.m_AttachmentDepthStencil.LoadAction = ClearMRT ? NxRHI.EFrameBufferLoadAction.LoadActionClear : NxRHI.EFrameBufferLoadAction.LoadActionDontCare;
             PassDesc.m_AttachmentDepthStencil.StoreAction = NxRHI.EFrameBufferStoreAction.StoreActionStore;
             PassDesc.m_AttachmentDepthStencil.StencilLoadAction = NxRHI.EFrameBufferLoadAction.LoadActionClear;
             PassDesc.m_AttachmentDepthStencil.StencilStoreAction = NxRHI.EFrameBufferStoreAction.StoreActionStore;
@@ -152,26 +156,6 @@ namespace EngineNS.Graphics.Pipeline.Deferred
         }
         public override void BeforeTickLogic(URenderPolicy policy)
         {
-            if (Rt0PinOut.FindInLinker() == null)
-            {
-                Rt0PinOut.Attachement.Format = EPixelFormat.PXF_R16G16B16A16_FLOAT;
-                Rt0PinOut.IsAutoResize = true;
-            }
-            if (Rt1PinOut.FindInLinker() == null)
-            {
-                Rt1PinOut.Attachement.Format = EPixelFormat.PXF_R10G10B10A2_UNORM;
-                Rt1PinOut.IsAutoResize = true;
-            }
-            if (Rt2PinOut.FindInLinker() == null)
-            {
-                Rt2PinOut.Attachement.Format = EPixelFormat.PXF_R8G8B8A8_UNORM;
-                Rt2PinOut.IsAutoResize = true;
-            }
-            if (Rt3PinOut.FindInLinker() == null)
-            {
-                Rt3PinOut.Attachement.Format = EPixelFormat.PXF_R16G16_UNORM;
-                Rt3PinOut.IsAutoResize = true;
-            }
             //if (DepthStencilPinOut.FindInLinker() == null)
             //{
             //    DepthStencilPinOut.Attachement.Format = EPixelFormat.PXF_D24_UNORM_S8_UINT;
