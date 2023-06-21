@@ -10,6 +10,7 @@ namespace EngineNS.Graphics.Pipeline
         {
             mCoreObject = ICamera.CreateInstance();
         }
+        public GamePlay.UWorld.UVisParameter VisParameter;
         public UGraphicsBuffers.UTargetViewIdentifier TargetViewIdentifier = new UGraphicsBuffers.UTargetViewIdentifier();
         NxRHI.UCbView mPerCameraCBuffer;
         public NxRHI.UCbView PerCameraCBuffer

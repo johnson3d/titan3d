@@ -140,6 +140,7 @@ namespace EngineNS.GamePlay
         private static Profiler.TimeScope ScopeGatherVisibleMeshes = Profiler.TimeScopeManager.GetTimeScope(typeof(UWorld), nameof(GatherVisibleMeshes));
         public virtual void GatherVisibleMeshes(UVisParameter rp)
         {
+            rp.CullCamera.VisParameter = rp;
             using (new Profiler.TimeScopeHelper(ScopeGatherVisibleMeshes))
             {
                 rp.VisibleMeshes.Clear();

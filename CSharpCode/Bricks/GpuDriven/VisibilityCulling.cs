@@ -206,6 +206,8 @@ namespace EngineNS.Bricks.GpuDriven
         }
         public override void TickLogic(UWorld world, URenderPolicy policy, bool bClear)
         {
+            BuildInstances(world, policy.DefaultCamera.VisParameter);
+
             var cmd = BasePass.DrawCmdList;
             cmd.BeginCommand();
 
