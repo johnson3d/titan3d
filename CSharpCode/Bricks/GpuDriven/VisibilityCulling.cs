@@ -103,7 +103,10 @@ namespace EngineNS.Bricks.GpuDriven
 
     public class TtGpuCullNode : URenderGraphNode
     {
+        public URenderGraphPin HzbPinIn = URenderGraphPin.CreateInput("Hzb");
+
         public URenderGraphPin VisActorsPinOut = URenderGraphPin.CreateOutput("VisActors", false, EPixelFormat.PXF_UNKNOWN);
+        public URenderGraphPin VisClutersPinOut = URenderGraphPin.CreateOutput("VisClusters", false, EPixelFormat.PXF_UNKNOWN);
         public struct FActorInstance
         {
             public Matrix WorldMatrix;

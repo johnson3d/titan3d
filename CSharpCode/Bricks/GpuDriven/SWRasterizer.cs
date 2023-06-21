@@ -1,9 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Text;
+using EngineNS.Graphics.Pipeline;
+using EngineNS.Graphics.Pipeline.Common;
+using EngineNS.GamePlay;
 
 namespace EngineNS.Bricks.GpuDriven
 {
+    #region CPU Raster
     public struct FRasterTriangle_Rect
     {
         public Vector2i A;
@@ -206,6 +209,94 @@ namespace EngineNS.Bricks.GpuDriven
                 startX += slope1;
                 endX += slope2;
             }
+        }
+    }
+    #endregion
+
+    public class TtSwRasterizeShading : Graphics.Pipeline.Shader.UComputeShadingEnv
+    {
+        public override Vector3ui DispatchArg
+        {
+            get => new Vector3ui(64, 1, 1);
+        }
+        public TtSwRasterizeShading()
+        {
+            CodeName = RName.GetRName("Shaders/Bricks/GpuDriven/SWRasterizer.compute", RName.ERNameType.Engine);
+            MainName = "CS_RasterClusterMain";
+
+            this.UpdatePermutation();
+        }
+        protected override void EnvShadingDefines(in FPermutationId id, NxRHI.UShaderDefinitions defines)
+        {
+            base.EnvShadingDefines(in id, defines);
+        }
+        public override void OnDrawCall(NxRHI.UComputeDraw drawcall, Graphics.Pipeline.URenderPolicy policy)
+        {
+            var node = drawcall.TagObject as TtSwRasterizeNode;
+        }
+    }
+
+    public class TtSwRasterizeNode : URenderGraphNode
+    {
+        public URenderGraphPin VisClutersPinIn = URenderGraphPin.CreateInput("VisClusters");
+        public URenderGraphPin QuarkRTPinOut = URenderGraphPin.CreateOutput("QuarkRT", false, EPixelFormat.PXF_R32G32_UINT);
+        public URenderGraphPin DepthStencilPinOut = URenderGraphPin.CreateOutput("DepthStencil", false, EPixelFormat.PXF_D24_UNORM_S8_UINT);
+    }
+
+    public class TtQuarkResolveShading : Graphics.Pipeline.Shader.UGraphicsShadingEnv
+    {
+        public TtQuarkResolveShading()
+        {
+            CodeName = RName.GetRName("Shaders/Bricks/GpuDriven/QuarkResolve.cginc", RName.ERNameType.Engine);
+
+            this.UpdatePermutation();
+        }
+        public override NxRHI.EVertexStreamType[] GetNeedStreams()
+        {
+            return new NxRHI.EVertexStreamType[] { NxRHI.EVertexStreamType.VST_Position,
+                NxRHI.EVertexStreamType.VST_UV,};
+        }
+        protected override void EnvShadingDefines(in FPermutationId id, NxRHI.UShaderDefinitions defines)
+        {
+            
+        }
+        public override void OnDrawCall(URenderPolicy.EShadingType shadingType, NxRHI.UGraphicDraw drawcall, URenderPolicy policy, Graphics.Mesh.UMesh mesh)
+        {
+            var node = drawcall.TagObject as TtQuarkResolveNode;
+            
+
+            base.OnDrawCall(shadingType, drawcall, policy, mesh);
+        }
+    }
+    public class TtQuarkResolveNode : USceenSpaceNode
+    {
+        public URenderGraphPin QuarkRTPinIn = URenderGraphPin.CreateInput("QuarkRT");
+        public URenderGraphPin DepthStencilPinIn = URenderGraphPin.CreateInput("DepthStencil");
+        public URenderGraphPin Rt0PinOut = URenderGraphPin.CreateOutput("MRT0", true, EPixelFormat.PXF_R16G16B16A16_FLOAT);//rgb - metallicty
+        public URenderGraphPin Rt1PinOut = URenderGraphPin.CreateOutput("MRT1", true, EPixelFormat.PXF_R10G10B10A2_UNORM);//normal - Flags
+        public URenderGraphPin Rt2PinOut = URenderGraphPin.CreateOutput("MRT2", true, EPixelFormat.PXF_R8G8B8A8_UNORM);//Roughness,Emissive,Specular,unused
+        public URenderGraphPin Rt3PinOut = URenderGraphPin.CreateOutput("MRT3", true, EPixelFormat.PXF_R16G16_UNORM);//EPixelFormat.PXF_R10G10B10A2_UNORM//motionXY
+
+        public TtQuarkResolveNode()
+        {
+            Name = "QuarkResolveNode";
+
+        }
+        public override void InitNodePins()
+        {
+            AddInput(QuarkRTPinIn, NxRHI.EBufferType.BFT_SRV);
+
+            AddOutput(Rt0PinOut, NxRHI.EBufferType.BFT_RTV | NxRHI.EBufferType.BFT_SRV);
+            AddOutput(Rt1PinOut, NxRHI.EBufferType.BFT_RTV | NxRHI.EBufferType.BFT_SRV);
+            AddOutput(Rt2PinOut, NxRHI.EBufferType.BFT_RTV | NxRHI.EBufferType.BFT_SRV);
+            AddOutput(Rt3PinOut, NxRHI.EBufferType.BFT_RTV | NxRHI.EBufferType.BFT_SRV);
+
+            base.InitNodePins();
+        }
+        public override async System.Threading.Tasks.Task Initialize(URenderPolicy policy, string debugName)
+        {
+            await base.Initialize(policy, debugName);
+            ScreenDrawPolicy.mBasePassShading = UEngine.Instance.ShadingEnvManager.GetShadingEnv<TtQuarkResolveShading>();
         }
     }
 }

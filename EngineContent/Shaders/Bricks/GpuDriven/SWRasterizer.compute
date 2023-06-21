@@ -1,0 +1,240 @@
+#ifndef __SWRasterizer_SHADING_H__
+#define __SWRasterizer_SHADING_H__
+
+#include "../../Inc/VertexLayout.cginc"
+#include "../../Inc/Math.cginc"
+
+#define NANITE_SUBPIXEL_BITS								8
+#define NANITE_SUBPIXEL_SAMPLES								(1 << NANITE_SUBPIXEL_BITS)
+#define NANITE_SUBPIXEL_MASK								(NANITE_SUBPIXEL_SAMPLES - 1)
+
+struct FRaster
+{
+	int4	ViewRect;
+};
+
+struct FRasterTri
+{
+	int2	MinPixel;
+	int2	MaxPixel;
+
+	float2	Edge01;
+	float2	Edge12;
+	float2	Edge20;
+
+	float	C0;
+	float	C1;
+	float	C2;
+
+	float3	DepthPlane;
+
+	bool	bIsValid;
+};
+
+struct Triangle
+{
+	float3 pos[3];
+};
+
+StructuredBuffer<Triangle> InputTriangles;
+RWTexture2D<float4> OutputColor;
+
+FRasterTri SetupTriangle(float3 Verts[3]) //FRaster Raster, 
+{
+	FRasterTri Tri;
+	Tri.bIsValid = true;
+	//Tri.InterpData = InterpData;
+
+	float3 v01 = Verts[1] - Verts[0];
+	float3 v02 = Verts[2] - Verts[0];
+
+	float DetXY = v01.x * v02.y - v01.y * v02.x;
+	const bool bBackFace = (DetXY >= 0.0f);
+
+//#if !NANITE_TWO_SIDED
+//	Tri.bIsValid = !bBackFace;
+//#endif
+
+	float InvDet = rcp(DetXY);
+	float2 GradZ;
+	GradZ.x = (v01.z * v02.y - v01.y * v02.z) * InvDet;
+	GradZ.y = (v01.x * v02.z - v01.z * v02.x) * InvDet;
+
+	// 16.8 fixed point
+	float2 Vert0 = Verts[0].xy;
+	float2 Vert1 = Verts[1].xy;
+	float2 Vert2 = Verts[2].xy;
+
+	// Bounding rect
+	const float2 MinSubpixel = min3(Vert0, Vert1, Vert2);
+	const float2 MaxSubpixel = max3(Vert0, Vert1, Vert2);
+
+#if 0
+	bool2 bMissCenter = (MinSubpixel & NANITE_SUBPIXEL_MASK > (NANITE_SUBPIXEL_SAMPLES / 2)) &&
+		(MaxSubpixel - (MinSubpixel & ~NANITE_SUBPIXEL_MASK) + (NANITE_SUBPIXEL_SAMPLES / 2)) < NANITE_SUBPIXEL_MASK;
+	if (any(bMissCenter))
+		Tri.bIsValid = false;
+#endif
+
+	// Round to nearest pixel
+	Tri.MinPixel = (int2)floor((MinSubpixel + (NANITE_SUBPIXEL_SAMPLES / 2) - 1) * (1.0 / NANITE_SUBPIXEL_SAMPLES));
+	Tri.MaxPixel = (int2)floor((MaxSubpixel - (NANITE_SUBPIXEL_SAMPLES / 2) - 1) * (1.0 / NANITE_SUBPIXEL_SAMPLES));	// inclusive!
+
+	// Clip to viewport
+	Tri.MinPixel = max(Tri.MinPixel, int2(0, 0));//Raster.ViewRect.xy
+	Tri.MaxPixel = min(Tri.MaxPixel, int2(1023, 1023));//Raster.ViewRect.zw - 1
+
+	// Force 1 pixel
+	//MaxPixel = max( MaxPixel, MinPixel );
+
+	// Limit the rasterizer bounds to a sensible max.
+	Tri.MaxPixel = min(Tri.MaxPixel, Tri.MinPixel + 63);
+
+	// Cull when no pixels covered
+	if (any(Tri.MinPixel > Tri.MaxPixel))
+		Tri.bIsValid = false;
+
+	// 4.8 fixed point
+	Tri.Edge01 = -v01.xy;
+	Tri.Edge12 = Vert1 - Vert2;
+	Tri.Edge20 = v02.xy;
+
+//#if NANITE_TWO_SIDED
+//	BRANCH
+//		if (bBackFace)
+//		{
+//			// Swap winding order to support two sided materials
+//			Tri.Edge01 *= -1.0f;
+//			Tri.Edge12 *= -1.0f;
+//			Tri.Edge20 *= -1.0f;
+//		}
+//#endif
+
+	// Rebase off MinPixel with half pixel offset
+	// 4.8 fixed point
+	// Max triangle size = 127x127 pixels
+	const float2 BaseSubpixel = (float2)Tri.MinPixel * NANITE_SUBPIXEL_SAMPLES + (NANITE_SUBPIXEL_SAMPLES / 2);
+	Vert0 -= BaseSubpixel;
+	Vert1 -= BaseSubpixel;
+	Vert2 -= BaseSubpixel;
+
+	// Half-edge constants
+	// 8.16 fixed point
+	Tri.C0 = Tri.Edge12.y * Vert1.x - Tri.Edge12.x * Vert1.y;
+	Tri.C1 = Tri.Edge20.y * Vert2.x - Tri.Edge20.x * Vert2.y;
+	Tri.C2 = Tri.Edge01.y * Vert0.x - Tri.Edge01.x * Vert0.y;
+
+	// Correct for fill convention
+	// Top left rule for CCW
+#if 1
+	Tri.C0 -= saturate(Tri.Edge12.y + saturate(1.0f - Tri.Edge12.x));
+	Tri.C1 -= saturate(Tri.Edge20.y + saturate(1.0f - Tri.Edge20.x));
+	Tri.C2 -= saturate(Tri.Edge01.y + saturate(1.0f - Tri.Edge01.x));
+#else
+	Tri.C0 -= (Tri.Edge12.y < 0 || (Tri.Edge12.y == 0 && Tri.Edge12.x > 0)) ? 0 : 1;
+	Tri.C1 -= (Tri.Edge20.y < 0 || (Tri.Edge20.y == 0 && Tri.Edge20.x > 0)) ? 0 : 1;
+	Tri.C2 -= (Tri.Edge01.y < 0 || (Tri.Edge01.y == 0 && Tri.Edge01.x > 0)) ? 0 : 1;
+#endif
+
+	float Z0 = Verts[0].z - (GradZ.x * Vert0.x + GradZ.y * Vert0.y);
+	GradZ *= NANITE_SUBPIXEL_SAMPLES;
+
+	Tri.DepthPlane = float3(GradZ, Z0);
+
+#if 0
+	// Step in pixel increments
+	// 8.16 fixed point
+	Tri.Edge01 *= NANITE_SUBPIXEL_SAMPLES;
+	Tri.Edge12 *= NANITE_SUBPIXEL_SAMPLES;
+	Tri.Edge20 *= NANITE_SUBPIXEL_SAMPLES;
+#else
+	// Scale C0/C1/C2 down by SubpixelSamples instead of scaling Edge01/Edge12/Edge20 up. Lossless because SubpixelSamples is a power of two.
+	Tri.C0 *= (1.0f / NANITE_SUBPIXEL_SAMPLES);
+	Tri.C1 *= (1.0f / NANITE_SUBPIXEL_SAMPLES);
+	Tri.C2 *= (1.0f / NANITE_SUBPIXEL_SAMPLES);
+#endif
+
+	return Tri;
+}
+
+
+void RasterizeTri_Scanline_Inner(FRasterTri Tri) //FRaster Raster, uint PixelValue, const bool bSinglePage
+{
+	float CY0 = Tri.C0;
+	float CY1 = Tri.C1;
+	float CY2 = Tri.C2;
+	float ZY = Tri.DepthPlane.z;
+
+	float3 Edge012 = { Tri.Edge12.y, Tri.Edge20.y, Tri.Edge01.y };
+	bool3 bOpenEdge = Edge012 < 0;
+	float3 InvEdge012 = Edge012 == 0 ? 1e8 : rcp(Edge012);
+
+	int y = Tri.MinPixel.y;
+	while (true)
+	{
+		//float CX0 = CY0 - Edge12.y * (x - MinPixel.x);
+		// Edge12.y * (x - MinPixel.x) <= CY0;
+
+		/*
+		if( Edge12.y > 0 )
+			x <= CY0 / Edge12.y + MinPixel.x;	// Closing edge
+		else
+			x >= CY0 / Edge12.y + MinPixel.x;	// Opening edge
+		*/
+
+		// No longer fixed point
+		float3 CrossX = float3(CY0, CY1, CY2) * InvEdge012;
+
+		float3 MinX = bOpenEdge ? CrossX : 0;
+		float3 MaxX = bOpenEdge ? Tri.MaxPixel.x - Tri.MinPixel.x : CrossX;
+
+		float x0 = ceil(max3(MinX.x, MinX.y, MinX.z));
+		float x1 = min3(MaxX.x, MaxX.y, MaxX.z);
+		float CX0 = CY0 - x0 * Tri.Edge12.y;
+		float CX1 = CY1 - x0 * Tri.Edge20.y;
+		float CX2 = CY2 - x0 * Tri.Edge01.y;
+		float ZX = ZY + Tri.DepthPlane.x * x0;
+
+		x0 += Tri.MinPixel.x;
+		x1 += Tri.MinPixel.x;
+		for (float x = x0; x <= x1; x++)
+		{
+			//WritePixelSW(PixelValue, uint2(x, y), ZX, float3(CX0, CX1, CX2), Raster, Tri, bSinglePage);
+			OutputColor[uint2(x, y)] = float4(1, 0, 0, 1);
+
+			CX0 -= Tri.Edge12.y;
+			CX1 -= Tri.Edge20.y;
+			CX2 -= Tri.Edge01.y;
+			ZX += Tri.DepthPlane.x;
+		}
+
+		if (y >= Tri.MaxPixel.y)
+			break;
+
+		CY0 += Tri.Edge12.x;
+		CY1 += Tri.Edge20.x;
+		CY2 += Tri.Edge01.x;
+		ZY += Tri.DepthPlane.y;
+		y++;
+	}
+}
+
+[numthreads(16, 1, 1)]
+void CS_Main(uint3 LocalThreadId : SV_GroupThreadID, uint3 GroupId : SV_GroupID, uint3 DTid : SV_DispatchThreadID)
+{
+	if (DTid.x < 2)
+	{
+		Triangle tri = InputTriangles[DTid.x];
+
+		FRasterTri rasterTri = SetupTriangle(tri.pos);
+		if (rasterTri.bIsValid)
+			RasterizeTri_Scanline_Inner(rasterTri);
+	}
+    //if (DTid.x > 50 && DTid.x < 100 && DTid.y > 50 && DTid.y < 100)
+    //{
+    //    OutputColor[DTid.xy] = float4(1, 0, 0, 1);
+    //    //InterlockedMax(OutputColor[DTid.xy], float4(0, 1, 0, 1));
+    //}
+}
+
+#endif

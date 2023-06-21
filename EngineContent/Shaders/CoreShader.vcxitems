@@ -14,6 +14,7 @@
     <ProjectCapability Include="SourceItemsFromImports" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="$(MSBuildThisFileDirectory)Bricks\GpuDriven\FRaster.cginc" />
     <None Include="$(MSBuildThisFileDirectory)Bricks\Particle\NebulaParticle.cginc" />
     <None Include="$(MSBuildThisFileDirectory)Bricks\Particle\ParticleCommon.cginc" />
     <None Include="$(MSBuildThisFileDirectory)Bricks\SoftRaster\FRaster.cginc" />
@@ -135,6 +136,7 @@
     <None Include="$(MSBuildThisFileDirectory)UFOMobileTranslucentNPR.shadingenv" />
   </ItemGroup>
   <ItemGroup>
+    <FxCompile Include="$(MSBuildThisFileDirectory)Bricks\GpuDriven\SWRasterizer.compute" />
     <FxCompile Include="$(MSBuildThisFileDirectory)Bricks\Particle\Effectors.compute" />
     <FxCompile Include="$(MSBuildThisFileDirectory)Bricks\Particle\EmitShape.compute" />
     <FxCompile Include="$(MSBuildThisFileDirectory)Bricks\Particle\Particle.compute" />

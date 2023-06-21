@@ -79,6 +79,9 @@
     <Filter Include="ShadingEnv\Forword">
       <UniqueIdentifier>{7935f9c4-0d4d-421f-9991-c89d1d049e29}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Bricks\GpuDriven">
+      <UniqueIdentifier>{4ff4b2c2-01da-44a4-8e85-80ef6784432f}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <None Include="$(MSBuildThisFileDirectory)Material\TestMaterial.mtl">
@@ -428,6 +431,9 @@
     <None Include="$(MSBuildThisFileDirectory)ShadingEnv\Forword\ForwordTranslucent.cginc">
       <Filter>ShadingEnv\Forword</Filter>
     </None>
+    <None Include="$(MSBuildThisFileDirectory)Bricks\GpuDriven\FRaster.cginc">
+      <Filter>Bricks\GpuDriven</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="$(MSBuildThisFileDirectory)Compute\calcrate.compute">
@@ -483,6 +489,9 @@
     </FxCompile>
     <FxCompile Include="$(MSBuildThisFileDirectory)Inc\BaseStructure\Box3.cginc">
       <Filter>Inc\BaseStructure</Filter>
+    </FxCompile>
+    <FxCompile Include="$(MSBuildThisFileDirectory)Bricks\GpuDriven\SWRasterizer.compute">
+      <Filter>Bricks\GpuDriven</Filter>
     </FxCompile>
   </ItemGroup>
   <ItemGroup>
