@@ -39,6 +39,7 @@ struct FMaterialTriangle
 //	friend FArchive& operator<<(FArchive& Ar, FStripDesc& Desc);
 //};
 
+
 class TR_CLASS()
     QuarkCluster 
 {
@@ -121,6 +122,12 @@ public:
 // 
 // 	FStripDesc		StripDesc;
 // 	std::vector<uint8>	StripIndexData;
+
+	// export members
+    int VertexStart;
+    int VertexCount;
+    int IndexStart;
+    int IndexCount;
 };
 
 FORCEINLINE UINT32 QuarkCluster::GetVertSize() const

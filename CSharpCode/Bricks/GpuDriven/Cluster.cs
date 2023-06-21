@@ -1,4 +1,5 @@
-﻿using NPOI.SS.Formula.Functions;
+﻿using Microsoft.VisualBasic;
+using NPOI.SS.Formula.Functions;
 using System;
 using System.Collections.Generic;
 using System.Numerics;
@@ -80,17 +81,34 @@ namespace EngineNS.Bricks.GpuDriven
         }
         public static TtClusteredMesh LoadClusteredMesh(RName meshName, Graphics.Mesh.UMeshPrimitives mesh)
         {
-            //return null;
             var file = meshName.Address + ".clustermesh";
             var xnd = IO.TtXndHolder.LoadXnd(file);
             var result = new TtClusteredMesh();
-            // load vbs, ib
-            mesh.mCoreObject.LoadClusters(xnd.mCoreObject);
+
+            // load vb, ib
+            var rc = UEngine.Instance?.GfxDevice.RenderContext;
+            int count = mesh.mCoreObject.LoadClusters(xnd.mCoreObject, rc.mCoreObject);
+            for (int i = 0; i < count; i++)
+            {
+                TtCluster cluster = new TtCluster();
+                var info = mesh.mCoreObject.GetCluster(i);
+                cluster.VertexStart = info.VertexStart;
+                cluster.VertexCount = info.VertexCount;
+                cluster.IndexStart = info.IndexStart;
+                cluster.IndexCount = info.IndexCount;
+
+                result.Clusters.Add(cluster);
+            }
+            result.ClusterVertexArray = new NxRHI.UVertexArray();
+            result.ClusterVertexArray.mCoreObject = mesh.mCoreObject.GetClusterVertexArray();
+            result.ClusterIndexView = new NxRHI.UIbView();
+            result.ClusterIndexView.mCoreObject = mesh.mCoreObject.GetClusterIndexView();
 
             return result;
         }
-        public NxRHI.UVertexArray VBs;
-        public NxRHI.UIbView IB;
+       
+        public NxRHI.UVertexArray ClusterVertexArray;
+        public NxRHI.UIbView ClusterIndexView;
         public int NumVertices;
         public int NumIndices;
         public List<TtCluster> Clusters = new List<TtCluster>();
@@ -102,6 +120,7 @@ namespace EngineNS.Bricks.GpuDriven
             var rc = UEngine.Instance.GfxDevice.RenderContext;
 
             var result = new TtClusteredMesh();
+
             uint Streams = 0;
             int TotalVertices = 0;
             int TotalIndices = 0;
@@ -112,7 +131,7 @@ namespace EngineNS.Bricks.GpuDriven
             {
                 for (NxRHI.EVertexStreamType i = 0; i < NxRHI.EVertexStreamType.VST_Number; i++)
                 {
-                    var vb = mesh.VBs.mCoreObject.GetVB(i);
+                    var vb = mesh.ClusterVertexArray.mCoreObject.GetVB(i);
                     if (vb.IsValidPointer)
                     {
                         Streams |= (1u << (int)i);
@@ -134,7 +153,7 @@ namespace EngineNS.Bricks.GpuDriven
                 {
                     var drawcall = rc.CreateCopyDraw();
                     drawcall.mCoreObject.Mode = NxRHI.ECopyDrawMode.CDM_Buffer2Buffer;
-                    drawcall.mCoreObject.BindBufferSrc(mesh.IB.mCoreObject.Buffer);
+                    drawcall.mCoreObject.BindBufferSrc(mesh.ClusterIndexView.mCoreObject.Buffer);
                     drawcall.mCoreObject.DstX = (uint)TotalIndices * sizeof(uint);
                     footPrint.SetDefault();
                     footPrint.Width = (uint)mesh.NumIndices * sizeof(uint);
@@ -151,7 +170,7 @@ namespace EngineNS.Bricks.GpuDriven
                 TotalIndices += mesh.NumIndices;
             }
             
-            result.VBs = new NxRHI.UVertexArray();
+            result.ClusterVertexArray = new NxRHI.UVertexArray();
             for (NxRHI.EVertexStreamType i = 0; i < NxRHI.EVertexStreamType.VST_Number; i++)
             {
                 if ((Streams & (1u << (int)i)) != 0)
@@ -163,7 +182,7 @@ namespace EngineNS.Bricks.GpuDriven
                     var vbvDesc = new NxRHI.FVbvDesc();
                     vbvDesc.SetDefault();
                     var vb = rc.CreateVBV(buffer, in vbvDesc);
-                    result.VBs.mCoreObject.BindVB(i, vb.mCoreObject);
+                    result.ClusterVertexArray.mCoreObject.BindVB(i, vb.mCoreObject);
                 }
             }
             {
@@ -172,7 +191,7 @@ namespace EngineNS.Bricks.GpuDriven
                 var buffer = rc.CreateBuffer(in bfDesc);
                 var ibvDesc = new NxRHI.FIbvDesc();
                 ibvDesc.SetDefault();
-                result.IB = rc.CreateIBV(buffer, ibvDesc);
+                result.ClusterIndexView = rc.CreateIBV(buffer, ibvDesc);
             }
 
             result.NumVertices = TotalVertices;
@@ -180,7 +199,7 @@ namespace EngineNS.Bricks.GpuDriven
 
             foreach (var i in cpVbDrawcalls)
             {
-                var vb = result.VBs.mCoreObject.GetVB(i.Key);
+                var vb = result.ClusterVertexArray.mCoreObject.GetVB(i.Key);
                 i.Value.mCoreObject.BindBufferDest(vb.Buffer);
 
                 cmdlist.PushGpuDraw(i.Value);
@@ -189,7 +208,7 @@ namespace EngineNS.Bricks.GpuDriven
 
             foreach (var i in cpIbDrawcalls)
             {
-                var ib = result.IB.mCoreObject;
+                var ib = result.ClusterIndexView.mCoreObject;
                 i.mCoreObject.BindBufferDest(ib.Buffer);
                 cmdlist.PushGpuDraw(i);
                 //i.mCoreObject.Commit(cmdlist.mCoreObject);
@@ -197,7 +216,6 @@ namespace EngineNS.Bricks.GpuDriven
 
             //notice:PushGpuDraw replace drawcall.Commit, user need cmdlist.FlushDraws at EndPass
             //cmdlist.FlushDraws();
-
             return result;
         }
     }

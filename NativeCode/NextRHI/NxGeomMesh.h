@@ -216,10 +216,19 @@ namespace NxRHI
 				return nullptr;
 			return mAtomExtData[index];
 		}
-
+		// cluster interfaces
 		int ClusterizeTriangles(IGpuDevice* device);
 		bool SaveClusters(XndNode* pNode);
-		bool LoadClusters(XndHolder* xnd);
+		int LoadClusters(XndHolder* xnd, IGpuDevice* device);
+		QuarkCluster* GetCluster(int index);
+		FVertexArray* GetClusterVertexArray()
+		{
+			return mClustersVertexArray;
+		}
+		IIbView* GetClusterIndexView()
+		{
+			return mClustersIndexView;
+		}
 	private:
 		AutoRef<IVbView> LoadVB(IGpuDevice* device, XndAttribute * pAttr, UINT stride, TimeKeys & tkeys, UINT & resSize, EVertexStreamType stream);
 		void SaveVB(IGpuDevice* device, XndAttribute * pAttr, IVbView* vb, TimeKeys & tkeys, UINT stride);
@@ -236,7 +245,14 @@ namespace NxRHI
 		v3dxBox3				mAABB;
 		TR_MEMBER(SV_NoBind)
 		FResourceState			mResourceState;
+
+		// cluster relative
 		std::vector<QuarkCluster> mClusters;
+		std::vector<v3dxVector3> mClustersVB;
+		std::vector<UINT32> mClustersIB;
+
+        AutoRef<FVertexArray>		mClustersVertexArray;
+        AutoRef<IIbView>			mClustersIndexView;
 	};
 	
 	struct TR_CLASS(SV_LayoutStruct = 8)

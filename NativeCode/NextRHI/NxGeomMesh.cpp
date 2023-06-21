@@ -288,6 +288,10 @@ namespace NxRHI
 
 		if (mGeometryMesh != nullptr)
 			mGeometryMesh->Reset(bClearBuffer);
+
+		mClustersIndexView = nullptr;
+        if (mClustersVertexArray != nullptr)
+			mClustersVertexArray->Reset();
 	}
 
 	bool FMeshPrimitives::Init(IGpuDevice* device, const char* name, UINT atom)
@@ -747,15 +751,17 @@ namespace NxRHI
 
         return TRUE;
     }
-	bool FMeshPrimitives::LoadClusters(XndHolder* xnd)
+	int FMeshPrimitives::LoadClusters(XndHolder* xnd, IGpuDevice* device)
 	{
 		if (xnd == nullptr)
-			return FALSE;
+			return 0;
 
 		mClusters.clear();
 
 		auto pNode = xnd->GetRootNode();
 		XndAttribute* pAttr = pNode->TryGetAttribute("Cluster");
+		int vbCount, ibCount;
+		vbCount = ibCount = 0;
 		if (pAttr)
 		{
 			pAttr->BeginRead();
@@ -768,12 +774,14 @@ namespace NxRHI
 				// vb
 				int vertCount;
 				pAttr->Read(vertCount);
+				vbCount += vertCount / 3;
 				mClusters[i].Verts.resize(vertCount);
 				pAttr->Read((BYTE*)&mClusters[i].Verts[0], vertCount*sizeof(float));
 
 				// ib
 				int indexCount;
 				pAttr->Read(indexCount);
+				ibCount += indexCount;
 				mClusters[i].Indexes.resize(indexCount);
 				pAttr->Read((BYTE*)&mClusters[i].Indexes[0], indexCount * sizeof(UINT32));
 			}
@@ -781,7 +789,54 @@ namespace NxRHI
 			pAttr->EndRead();
 		}
 
-		return TRUE;
+		// post process vb, ib info
+		if (vbCount > 0 && ibCount > 0)
+		{
+            int vbOffset, ibOffset;
+            vbOffset = ibOffset = 0;
+
+            mClustersVB.resize(vbCount);
+            mClustersIB.resize(ibCount);
+
+            for (int i = 0; i < mClusters.size(); ++i)
+            {
+                // vb, ib offset info
+                mClusters[i].VertexStart = vbOffset;
+                mClusters[i].VertexCount = int(mClusters[i].Verts.size()) / 3;
+                mClusters[i].IndexStart = ibOffset;
+                mClusters[i].IndexCount = int(mClusters[i].Indexes.size());
+
+                memcpy((BYTE*)&mClustersVB[vbOffset], (BYTE*)&mClusters[i].Verts[0], int(mClusters[i].Verts.size()) * sizeof(float));
+                memcpy((BYTE*)&mClustersIB[ibOffset], (BYTE*)&mClusters[i].Indexes[0], int(mClusters[i].Indexes.size()) * sizeof(UINT32));
+
+                vbOffset += mClusters[i].VertexCount;
+                ibOffset += mClusters[i].IndexCount;
+            }
+
+			// vb view
+			mClustersVertexArray = MakeWeakRef(new FVertexArray());
+            FVbvDesc vbvDesc{};
+            vbvDesc.Stride = sizeof(v3dxVector3);
+            vbvDesc.Size = vbvDesc.Stride * vbCount;
+			vbvDesc.InitData = (BYTE*)&mClustersVB[0];
+			auto vb = MakeWeakRef(device->CreateVBV(nullptr, &vbvDesc));
+			mClustersVertexArray->BindVB(EVertexStreamType::VST_Position, vb);
+
+			// ib view
+            FIbvDesc ibvDesc{};
+            ibvDesc.Stride = sizeof(UINT32);
+            ibvDesc.Size = ibCount * ibvDesc.Stride;
+
+            ibvDesc.InitData = (BYTE*)&mClustersIB[0];
+			mClustersIndexView = MakeWeakRef(device->CreateIBV(nullptr, &ibvDesc));
+		}
+		
+		return int(mClusters.size());
+	}
+	QuarkCluster* FMeshPrimitives::GetCluster(int index)
+	{
+		ASSERT(index < int(mClusters.size()));
+		return &mClusters[index];
 	}
 	bool FMeshPrimitives::LoadXnd(IGpuDevice* device, const char* name, XndHolder* xnd, bool isLoad)
 	{
