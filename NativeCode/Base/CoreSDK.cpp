@@ -272,8 +272,32 @@ struct FMemTypeIter
 	std::map<std::string, AutoRef<FNativeMemType>>::iterator mIterator;
 };
 
+FNativeMemType* FNativeMemCapture::GetOrNewMemType(int size, const char* name, int line)
+{
+	std::string key = VStringA_FormatV("[%d]%s(%d)", size, name, line);
+	auto iter = mMemTypes.find(key);
+	if (iter != mMemTypes.end())
+		return iter->second;
+	auto tmp = MakeWeakRef(new FNativeMemType());
+	tmp->File = name;
+	tmp->Line = line;
+	tmp->Size = size;
+	mMemTypes.insert(std::make_pair(key, tmp));
+	return tmp;
+}
+FNativeMemType* FNativeMemCapture::FindMemType(int size, const char* name, int line)
+{
+	std::string key = VStringA_FormatV("[%d]%s(%d)", size, name, line);
+	auto iter = mMemTypes.find(key);
+	if (iter != mMemTypes.end())
+		return iter->second;
+	return nullptr;
+}
+
 void* FNativeMemCapture::NewIterate()
 {
+	if (mMemTypes.empty())
+		return nullptr;
 	auto iter = new FMemTypeIter();
 	iter->mIterator = mMemTypes.begin();
 	return iter;
@@ -285,14 +309,21 @@ void FNativeMemCapture::DestroyIterate(void* iter)
 	delete i;
 }
 
-void FNativeMemCapture::NextIterate(void* iter)
+bool FNativeMemCapture::NextIterate(void* iter)
 {
+	if (iter == nullptr)
+		return false;
 	auto i = (FMemTypeIter*)iter;
 	i->mIterator++;
+	if (i->mIterator == mMemTypes.end())
+		return false;
+	return true;
 }
 
 FNativeMemType* FNativeMemCapture::GetMemType(void* iter) 
 {
+	if (iter == nullptr)
+		return nullptr;
 	auto i = (FMemTypeIter*)iter;
 	return i->mIterator->second;
 }

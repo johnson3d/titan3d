@@ -280,11 +280,12 @@ namespace VFX_Memory
 			size_t size = round_up(sizeArray[i] + sizeof(_small_cookie) - sizeof(_small_cookie*)) + sizeof(size_t) * DCCCNUM;
 			for (size_t i = 0; i < __pool_size; ++i)
 			{
-				auto type = capture->GetOrNewMemType(check->file, (int)check->line);
-				if (type->Size == 0)
+				auto type = capture->GetOrNewMemType((int)check->size, check->file, (int)check->line);
+				ASSERT(type->Size == check->size);
+				/*if (type->Size == 0)
 				{
 					type->Size = check->size;
-				}
+				}*/
 				type->Count++;
 				check = reinterpret_cast<_small_cookie*>((INT_PTR)check + size);
 			}
@@ -350,7 +351,7 @@ namespace VFX_Memory
 	}
 
 	void * large_alloc::alloc(size_t size,const char * file,size_t line)
-	{
+	{	
 		size = round_up(size);
 		void* _allocAddress = __alloc(size + sizeof(_large_cookie) + sizeof(size_t),file,line);
 		if(_allocAddress==NULL)
@@ -371,7 +372,7 @@ namespace VFX_Memory
 		pcook->cookie.id = g_alloc_times++;
 		pcook->cookie.SetDCCC(c_uMalloc0xCC);
 		pcook->cookie.debuginfo = NULL;
-
+		
         static size_t debugSizeMin=0;
         static size_t debugSizeMax=4096;
         if(file == NULL && (size>=debugSizeMin && size<=debugSizeMax) )
@@ -592,11 +593,12 @@ void FNativeMemCapture::CaptureNativeMemoryState()
 		_large_cookie* p = cur->next;
 		while (p)
 		{
-			auto type = this->GetOrNewMemType(p->cookie.file, (int)p->cookie.line);
-			if (type->Size == 0)
+			auto type = this->GetOrNewMemType((int)p->cookie.size, p->cookie.file, (int)p->cookie.line);
+			ASSERT(type->Size == p->cookie.size);
+			/*if (type->Size == 0)
 			{
 				type->Size = p->cookie.size;
-			}
+			}*/
 			type->Count++;
 			p = p->next;
 		}
