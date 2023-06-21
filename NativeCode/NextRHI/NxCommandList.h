@@ -84,6 +84,7 @@ namespace NxRHI
 		std::vector<AutoRef<IGpuDraw>>			mDrawcallArray;
 		std::vector<AutoRef<IGpuResource>>		mRefBuffers;
 		UINT									mPrimitiveNum = 0;
+		TWeakRefHandle<ICommandList>			mCmdList;
 	public:
 		void PushGpuDraw(IGpuDraw * draw);
 		void ResetGpuDraws();

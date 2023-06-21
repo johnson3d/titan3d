@@ -66,16 +66,12 @@ namespace NxRHI
 	}
 	void ICmdRecorder::ResetGpuDraws()
 	{
-		/*auto count = CountGpuResourceByTagName("InstantSRV");
-		if (count > 0)
-		{
-			int xxx = 0;
-		}*/
 		mDrawcallArray.clear();
 		mRefBuffers.clear();
 	}
 	void ICmdRecorder::FlushDraws(ICommandList* cmdlist, bool bRefBuffer)
 	{
+		mCmdList.FromObject(cmdlist);
 		for (auto i : mDrawcallArray)
 		{
 			i->Commit(cmdlist, false);

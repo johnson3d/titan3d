@@ -65,7 +65,13 @@ namespace NxRHI
 			{
 				i->Allocator->mAllocator->Reset();
 				i->Allocator->ResetGpuDraws();
-				
+				auto cmdlist = (DX12CommandList*)i->Allocator->mCmdList.GetPtr();
+				if (cmdlist != nullptr && cmdlist->mCmdRecorder == nullptr)
+				{
+					cmdlist->mContext->Reset(i->Allocator->mAllocator, nullptr);
+					cmdlist->mContext->Close();
+				}
+				i->Allocator->mCmdList.FromObject(nullptr);
 				CmdAllocators.push(i->Allocator);
 				i = Recycles.erase(i);
 			}
