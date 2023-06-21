@@ -84,6 +84,7 @@ namespace NxRHI
 		{
 			ASSERT(mCmdRecorder->mDrawcallArray.size() == 0);
 		}
+		GetDX12CmdRecorder()->mAllocator->Reset();
 		//ASSERT(mCmdRecorder->mDrawcallArray.size() == 0);
 		////mCmdRecorder->ResetGpuDraws();
 		//hr = GetDX12CmdRecorder()->mAllocator->Reset();
