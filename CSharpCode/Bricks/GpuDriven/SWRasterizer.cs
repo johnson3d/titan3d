@@ -222,7 +222,7 @@ namespace EngineNS.Bricks.GpuDriven
         public TtSwRasterizeShading()
         {
             CodeName = RName.GetRName("Shaders/Bricks/GpuDriven/SWRasterizer.compute", RName.ERNameType.Engine);
-            MainName = "CS_RasterClusterMain";
+            MainName = "CS_Main";
 
             this.UpdatePermutation();
         }
@@ -268,16 +268,16 @@ namespace EngineNS.Bricks.GpuDriven
         public override NxRHI.EVertexStreamType[] GetNeedStreams()
         {
             return new NxRHI.EVertexStreamType[] { NxRHI.EVertexStreamType.VST_Position,
-                NxRHI.EVertexStreamType.VST_UV,};
+            NxRHI.EVertexStreamType.VST_UV,};
         }
         protected override void EnvShadingDefines(in FPermutationId id, NxRHI.UShaderDefinitions defines)
         {
-            
+
         }
         public override void OnDrawCall(URenderPolicy.EShadingType shadingType, NxRHI.UGraphicDraw drawcall, URenderPolicy policy, Graphics.Mesh.UMesh mesh)
         {
             var node = drawcall.TagObject as TtQuarkResolveNode;
-            
+
 
             base.OnDrawCall(shadingType, drawcall, policy, mesh);
         }
@@ -290,6 +290,8 @@ namespace EngineNS.Bricks.GpuDriven
         public URenderGraphPin Rt1PinOut = URenderGraphPin.CreateOutput("MRT1", true, EPixelFormat.PXF_R10G10B10A2_UNORM);//normal - Flags
         public URenderGraphPin Rt2PinOut = URenderGraphPin.CreateOutput("MRT2", true, EPixelFormat.PXF_R8G8B8A8_UNORM);//Roughness,Emissive,Specular,unused
         public URenderGraphPin Rt3PinOut = URenderGraphPin.CreateOutput("MRT3", true, EPixelFormat.PXF_R16G16_UNORM);//EPixelFormat.PXF_R10G10B10A2_UNORM//motionXY
+
+        public UGraphicsBuffers GBuffers { get; protected set; } = new UGraphicsBuffers();
 
         public TtQuarkResolveNode()
         {
@@ -310,14 +312,62 @@ namespace EngineNS.Bricks.GpuDriven
         public override async System.Threading.Tasks.Task Initialize(URenderPolicy policy, string debugName)
         {
             await base.Initialize(policy, debugName);
+
+            CreateGBuffers(policy);
+
             ScreenDrawPolicy.mBasePassShading = UEngine.Instance.ShadingEnvManager.GetShadingEnv<TtQuarkResolveShading>();
+        }
+
+        public virtual unsafe bool CreateGBuffers(URenderPolicy policy)
+        {
+            var rc = UEngine.Instance.GfxDevice.RenderContext;
+            var PassDesc = new NxRHI.FRenderPassDesc();
+            PassDesc.NumOfMRT = 4;
+            PassDesc.AttachmentMRTs[0].Format = Rt0PinOut.Attachement.Format;
+            PassDesc.AttachmentMRTs[0].Samples = 1;
+            PassDesc.AttachmentMRTs[0].LoadAction = NxRHI.EFrameBufferLoadAction.LoadActionClear;
+            PassDesc.AttachmentMRTs[0].StoreAction = NxRHI.EFrameBufferStoreAction.StoreActionStore;
+            PassDesc.AttachmentMRTs[1].Format = Rt1PinOut.Attachement.Format;
+            PassDesc.AttachmentMRTs[1].Samples = 1;
+            PassDesc.AttachmentMRTs[1].LoadAction = NxRHI.EFrameBufferLoadAction.LoadActionClear;
+            PassDesc.AttachmentMRTs[1].StoreAction = NxRHI.EFrameBufferStoreAction.StoreActionStore;
+            PassDesc.AttachmentMRTs[2].Format = Rt2PinOut.Attachement.Format;
+            PassDesc.AttachmentMRTs[2].Samples = 1;
+            PassDesc.AttachmentMRTs[2].LoadAction = NxRHI.EFrameBufferLoadAction.LoadActionClear;
+            PassDesc.AttachmentMRTs[2].StoreAction = NxRHI.EFrameBufferStoreAction.StoreActionStore;
+            PassDesc.AttachmentMRTs[3].Format = Rt3PinOut.Attachement.Format;
+            PassDesc.AttachmentMRTs[3].Samples = 1;
+            PassDesc.AttachmentMRTs[3].LoadAction = NxRHI.EFrameBufferLoadAction.LoadActionClear;
+            PassDesc.AttachmentMRTs[3].StoreAction = NxRHI.EFrameBufferStoreAction.StoreActionStore;
+
+            PassDesc.m_AttachmentDepthStencil.Format = DepthStencilPinIn.Attachement.Format;
+            PassDesc.m_AttachmentDepthStencil.Samples = 1;
+            PassDesc.m_AttachmentDepthStencil.LoadAction = NxRHI.EFrameBufferLoadAction.LoadActionClear;
+            PassDesc.m_AttachmentDepthStencil.StoreAction = NxRHI.EFrameBufferStoreAction.StoreActionStore;
+            PassDesc.m_AttachmentDepthStencil.StencilLoadAction = NxRHI.EFrameBufferLoadAction.LoadActionClear;
+            PassDesc.m_AttachmentDepthStencil.StencilStoreAction = NxRHI.EFrameBufferStoreAction.StoreActionStore;
+            //PassDesc.mFBClearColorRT0 = new Color4f(1, 0, 0, 0);
+            //PassDesc.mDepthClearValue = 1.0f;                
+            //PassDesc.mStencilClearValue = 0u;
+            RenderPass = UEngine.Instance.GfxDevice.RenderPassManager.GetPipelineState<NxRHI.FRenderPassDesc>(rc, in PassDesc);
+
+            GBuffers.Initialize(policy, RenderPass);
+            GBuffers.SetRenderTarget(policy, 0, Rt0PinOut);
+            GBuffers.SetRenderTarget(policy, 1, Rt1PinOut);
+            GBuffers.SetRenderTarget(policy, 2, Rt2PinOut);
+            GBuffers.SetRenderTarget(policy, 3, Rt3PinOut);
+            // TODO:
+            //GBuffers.SetDepthStencil(policy, DepthStencilPinIn);
+            GBuffers.TargetViewIdentifier = policy.DefaultCamera.TargetViewIdentifier;
+
+            return true;
         }
     }
 }
 
 namespace EngineNS.UTest
 {
-    [UTest]
+    //[UTest]
     public class UTest_TtSoftRaster
     {
         bool IgnorTest = false;

@@ -206,13 +206,13 @@ namespace EngineNS.Bricks.GpuDriven
         }
         public override void TickLogic(UWorld world, URenderPolicy policy, bool bClear)
         {
+#if false
             BuildInstances(world, policy.DefaultCamera.VisParameter);
 
             var cmd = BasePass.DrawCmdList;
             cmd.BeginCommand();
 
-            GpuSceneCullInstanceShading.SetDrawcallDispatch(policy, GpuSceneCullInstanceDrawcall, (uint)GpuSceneActors.Count,
-                            1, 1, true);
+            GpuSceneCullInstanceShading.SetDrawcallDispatch(policy, GpuSceneCullInstanceDrawcall, (uint)GpuSceneActors.Count, 1, 1, true);
             cmd.PushGpuDraw(GpuSceneCullInstanceDrawcall);
 
             GpuSceneCullClusterSetupShading.SetDrawcallDispatch(policy, GpuSceneCullClusterSetupDrawcall, 1, 1, 1, true);
@@ -224,20 +224,22 @@ namespace EngineNS.Bricks.GpuDriven
             cmd.FlushDraws();
             cmd.EndCommand();
             UEngine.Instance.GfxDevice.RenderCmdQueue.QueueCmdlist(cmd);
+#endif
         }
         public List<GamePlay.Scene.TtGpuSceneNode> GpuSceneActors = new List<GamePlay.Scene.TtGpuSceneNode>();
         public TtCpu2GpuBuffer<FActorInstance> GpuInstances = new TtCpu2GpuBuffer<FActorInstance>();
         public void BuildInstances(GamePlay.UWorld world, GamePlay.UWorld.UVisParameter rp)
         {
+
+#if false
             foreach(var i in rp.VisibleNodes)
             {
                 var meshNode = i as GamePlay.Scene.UMeshNode;
-                if (meshNode != null)
+                if (meshNode == null)
                     continue;
 
                 var cluster = meshNode.Mesh.MaterialMesh.Mesh.ClusteredMesh;
             }
-
             foreach (var i in GpuSceneActors)
             {
                 i.GpuSceneIndex = -1;
@@ -292,6 +294,7 @@ namespace EngineNS.Bricks.GpuDriven
                 CullInstancesBuffer.PushData(CullInstanceData);
             }
             //ActorInstances.SetSize(GpuSceneActors.Count);
+#endif
         }
     }
 }

@@ -195,6 +195,9 @@ namespace EngineNS.Graphics.Pipeline.Shader
 
             var result = new UEffect();
             var shadingCode = Editor.ShaderCompiler.UShaderCodeManager.Instance.GetShaderCode(shading.CodeName);
+            if (shadingCode == null)
+                return null;
+
             result.Desc.CodeHash = shadingCode.CodeHash;
             result.Desc.MaterialHash = material.GetHash();
             result.Desc.MdfQueueHash = mdf.GetHash();

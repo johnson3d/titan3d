@@ -15,6 +15,7 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="$(MSBuildThisFileDirectory)Bricks\GpuDriven\FRaster.cginc" />
+    <None Include="$(MSBuildThisFileDirectory)Bricks\GpuDriven\QuarkResolve.cginc" />
     <None Include="$(MSBuildThisFileDirectory)Bricks\Particle\NebulaParticle.cginc" />
     <None Include="$(MSBuildThisFileDirectory)Bricks\Particle\ParticleCommon.cginc" />
     <None Include="$(MSBuildThisFileDirectory)Bricks\SoftRaster\FRaster.cginc" />
