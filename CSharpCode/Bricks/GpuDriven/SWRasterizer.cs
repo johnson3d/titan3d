@@ -285,13 +285,14 @@ namespace EngineNS.Bricks.GpuDriven
     public class TtQuarkResolveNode : USceenSpaceNode
     {
         public URenderGraphPin QuarkRTPinIn = URenderGraphPin.CreateInput("QuarkRT");
-        public URenderGraphPin DepthStencilPinIn = URenderGraphPin.CreateInput("DepthStencil");
+
+        // TODO: for test
+        public URenderGraphPin DepthStencilPinIn = URenderGraphPin.CreateOutput("DepthStencil", true, EPixelFormat.PXF_D24_UNORM_S8_UINT);
+
         public URenderGraphPin Rt0PinOut = URenderGraphPin.CreateOutput("MRT0", true, EPixelFormat.PXF_R16G16B16A16_FLOAT);//rgb - metallicty
         public URenderGraphPin Rt1PinOut = URenderGraphPin.CreateOutput("MRT1", true, EPixelFormat.PXF_R10G10B10A2_UNORM);//normal - Flags
         public URenderGraphPin Rt2PinOut = URenderGraphPin.CreateOutput("MRT2", true, EPixelFormat.PXF_R8G8B8A8_UNORM);//Roughness,Emissive,Specular,unused
         public URenderGraphPin Rt3PinOut = URenderGraphPin.CreateOutput("MRT3", true, EPixelFormat.PXF_R16G16_UNORM);//EPixelFormat.PXF_R10G10B10A2_UNORM//motionXY
-
-        public UGraphicsBuffers GBuffers { get; protected set; } = new UGraphicsBuffers();
 
         public TtQuarkResolveNode()
         {
@@ -306,19 +307,20 @@ namespace EngineNS.Bricks.GpuDriven
             AddOutput(Rt1PinOut, NxRHI.EBufferType.BFT_RTV | NxRHI.EBufferType.BFT_SRV);
             AddOutput(Rt2PinOut, NxRHI.EBufferType.BFT_RTV | NxRHI.EBufferType.BFT_SRV);
             AddOutput(Rt3PinOut, NxRHI.EBufferType.BFT_RTV | NxRHI.EBufferType.BFT_SRV);
+            AddOutput(DepthStencilPinIn, NxRHI.EBufferType.BFT_DSV | NxRHI.EBufferType.BFT_SRV);
 
-            base.InitNodePins();
+            //base.InitNodePins();
         }
         public override async System.Threading.Tasks.Task Initialize(URenderPolicy policy, string debugName)
         {
             await base.Initialize(policy, debugName);
 
-            CreateGBuffers(policy);
+            CreateGBuffers(policy, DepthStencilPinIn.Attachement.Format);
 
             ScreenDrawPolicy.mBasePassShading = UEngine.Instance.ShadingEnvManager.GetShadingEnv<TtQuarkResolveShading>();
         }
 
-        public virtual unsafe bool CreateGBuffers(URenderPolicy policy)
+        public override unsafe UGraphicsBuffers CreateGBuffers(URenderPolicy policy, EPixelFormat format)
         {
             var rc = UEngine.Instance.GfxDevice.RenderContext;
             var PassDesc = new NxRHI.FRenderPassDesc();
@@ -356,11 +358,10 @@ namespace EngineNS.Bricks.GpuDriven
             GBuffers.SetRenderTarget(policy, 1, Rt1PinOut);
             GBuffers.SetRenderTarget(policy, 2, Rt2PinOut);
             GBuffers.SetRenderTarget(policy, 3, Rt3PinOut);
-            // TODO:
-            //GBuffers.SetDepthStencil(policy, DepthStencilPinIn);
+            GBuffers.SetDepthStencil(policy, DepthStencilPinIn);
             GBuffers.TargetViewIdentifier = policy.DefaultCamera.TargetViewIdentifier;
 
-            return true;
+            return GBuffers;
         }
     }
 }
