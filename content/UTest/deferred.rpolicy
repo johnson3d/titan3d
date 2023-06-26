@@ -10,7 +10,7 @@
       <NodeId Type="System.Guid@Unknown" Value="4c9d280e-524e-4f0c-8edd-94af227c4175" />
       <Position Type="EngineNS.Vector2@EngineCore" Value="42.941757,77.16409" />
       <GraphNode Type="EngineNS.Graphics.Pipeline.Deferred.UDeferredBasePassNode@EngineCore">
-        <ClearMRT Type="System.Boolean@Unknown" Value="True" />
+        <ClearMRT Type="System.Boolean@Unknown" Value="False" />
       </GraphNode>
       <InputEditableValues Type="System.Collections.Generic.List&lt;EngineNS.Bricks.NodeGraph.UNodeBase.UInputEditableValueInfo@EngineCore,&gt;@Unknown" Count="0" />
     </e_0>

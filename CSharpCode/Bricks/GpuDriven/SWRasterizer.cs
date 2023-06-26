@@ -327,7 +327,7 @@ namespace EngineNS.Bricks.GpuDriven
             PassDesc.NumOfMRT = 4;
             PassDesc.AttachmentMRTs[0].Format = Rt0PinOut.Attachement.Format;
             PassDesc.AttachmentMRTs[0].Samples = 1;
-            PassDesc.AttachmentMRTs[0].LoadAction = NxRHI.EFrameBufferLoadAction.LoadActionDontCare;//LoadActionDontCare
+            PassDesc.AttachmentMRTs[0].LoadAction = NxRHI.EFrameBufferLoadAction.LoadActionClear;//LoadActionDontCare
             PassDesc.AttachmentMRTs[0].StoreAction = NxRHI.EFrameBufferStoreAction.StoreActionStore;
             PassDesc.AttachmentMRTs[1].Format = Rt1PinOut.Attachement.Format;
             PassDesc.AttachmentMRTs[1].Samples = 1;
@@ -344,7 +344,7 @@ namespace EngineNS.Bricks.GpuDriven
 
             PassDesc.m_AttachmentDepthStencil.Format = DepthStencilPinIn.Attachement.Format;
             PassDesc.m_AttachmentDepthStencil.Samples = 1;
-            PassDesc.m_AttachmentDepthStencil.LoadAction = NxRHI.EFrameBufferLoadAction.LoadActionDontCare;
+            PassDesc.m_AttachmentDepthStencil.LoadAction = NxRHI.EFrameBufferLoadAction.LoadActionClear;
             PassDesc.m_AttachmentDepthStencil.StoreAction = NxRHI.EFrameBufferStoreAction.StoreActionStore;
             PassDesc.m_AttachmentDepthStencil.StencilLoadAction = NxRHI.EFrameBufferLoadAction.LoadActionDontCare;
             PassDesc.m_AttachmentDepthStencil.StencilStoreAction = NxRHI.EFrameBufferStoreAction.StoreActionStore;
@@ -365,7 +365,6 @@ namespace EngineNS.Bricks.GpuDriven
         }
     }
 }
-
 namespace EngineNS.UTest
 {
     //[UTest]
