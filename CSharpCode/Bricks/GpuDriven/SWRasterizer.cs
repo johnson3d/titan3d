@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using EngineNS.Graphics.Pipeline;
 using EngineNS.Graphics.Pipeline.Common;
 using EngineNS.GamePlay;
+using System.Threading.Tasks;
 
 namespace EngineNS.Bricks.GpuDriven
 {
@@ -233,27 +234,127 @@ namespace EngineNS.Bricks.GpuDriven
         public override void OnDrawCall(NxRHI.UComputeDraw drawcall, Graphics.Pipeline.URenderPolicy policy)
         {
             var node = drawcall.TagObject as TtSwRasterizeNode;
+            if (node == null)
+            {
+                var pipelinePolicy = policy;
+                node = pipelinePolicy.FindFirstNode<TtSwRasterizeNode>();
+            }
+            {
+                var index = drawcall.FindBinder(EngineNS.NxRHI.EShaderBindType.SBT_SRV, "InputTriangles");
+                drawcall.BindSrv(index, node.TrianglesView);
+            }
+            {
+                var index = drawcall.FindBinder(EngineNS.NxRHI.EShaderBindType.SBT_UAV, "OutputColor");
+                if (index.IsValidPointer)
+                {
+                    var attachBuffer = node.GetAttachBuffer(node.QuarkRTPinOut);
+                    drawcall.BindUav(index, attachBuffer.Uav);
+                }
+            }
         }
     }
 
     public class TtSwRasterizeNode : URenderGraphNode
     {
         public URenderGraphPin VisClutersPinIn = URenderGraphPin.CreateInput("VisClusters");
-        public URenderGraphPin QuarkRTPinOut = URenderGraphPin.CreateOutput("QuarkRT", false, EPixelFormat.PXF_R32G32_UINT);
+        public URenderGraphPin QuarkRTPinOut = URenderGraphPin.CreateOutput("QuarkRT", false, EPixelFormat.PXF_R8G8B8A8_UNORM);//PXF_R32G32_UINT
         public URenderGraphPin DepthStencilPinOut = URenderGraphPin.CreateOutput("DepthStencil", false, EPixelFormat.PXF_D24_UNORM_S8_UINT);
 
+        // TODO: debug data
+        public NxRHI.UBuffer TrianglesBuffer;
+        public NxRHI.USrView TrianglesView;
+
+        public TtSwRasterizeShading SWRasterizer;
+        private NxRHI.UComputeDraw SWRasterizerDrawcall;
+
+        int NANITE_SUBPIXEL_SAMPLES = 256;
+        struct Triangle
+        {
+            public Vector3 pos0;
+            public Vector3 pos1;
+            public Vector3 pos2;
+
+            public Triangle(Vector3 p0, Vector3 p1, Vector3 p2)
+            {
+                pos0 = p0;
+                pos1 = p1;
+                pos2 = p2;
+            }
+        }
         public TtSwRasterizeNode()
         {
             Name = "SwRasterizeNode";
+            unsafe
+            {
+                var rc = UEngine.Instance.GfxDevice.RenderContext;
+                var bfDesc = new NxRHI.FBufferDesc();
+
+                bfDesc.SetDefault(false);
+                bfDesc.Type = NxRHI.EBufferType.BFT_SRV;
+                bfDesc.Size = 2 * (uint)sizeof(Triangle);
+                bfDesc.StructureStride = (uint)sizeof(Triangle);
+                var initData = new Triangle[2];
+                initData[0] = new Triangle(new Vector3(50 * NANITE_SUBPIXEL_SAMPLES, 50 * NANITE_SUBPIXEL_SAMPLES, 0),
+                                           new Vector3(50 * NANITE_SUBPIXEL_SAMPLES, 100 * NANITE_SUBPIXEL_SAMPLES, 0),
+                                           new Vector3(80 * NANITE_SUBPIXEL_SAMPLES, 50 * NANITE_SUBPIXEL_SAMPLES, 0));
+                initData[1] = new Triangle(new Vector3(100 * NANITE_SUBPIXEL_SAMPLES, 50 * NANITE_SUBPIXEL_SAMPLES, 0),
+                                           new Vector3(100 * NANITE_SUBPIXEL_SAMPLES, 100 * NANITE_SUBPIXEL_SAMPLES, 0),
+                                           new Vector3(150 * NANITE_SUBPIXEL_SAMPLES, 50 * NANITE_SUBPIXEL_SAMPLES, 0));
+
+                fixed (Triangle* pAddr = &initData[0])
+                {
+                    bfDesc.InitData = pAddr;
+                    TrianglesBuffer = rc.CreateBuffer(in bfDesc);
+                }
+
+                var srvDesc = new NxRHI.FSrvDesc();
+                srvDesc.SetBuffer(0);
+                srvDesc.Buffer.FirstElement = 0;
+                srvDesc.Buffer.NumElements = 2;
+                srvDesc.Buffer.StructureByteStride = (uint)sizeof(Triangle);
+                TrianglesView = rc.CreateSRV(TrianglesBuffer, in srvDesc);
+            }
+        }
+        public override void Dispose()
+        {
+            CoreSDK.DisposeObject(ref SWRasterizerDrawcall);
+            base.Dispose();
         }
         public override void InitNodePins()
         {
             AddInput(VisClutersPinIn, NxRHI.EBufferType.BFT_SRV);
 
-            AddOutput(QuarkRTPinOut, NxRHI.EBufferType.BFT_RTV | NxRHI.EBufferType.BFT_SRV);
+            // TODO: buffer size
+            QuarkRTPinOut.Attachement.Width = QuarkRTPinOut.Attachement.Height = 1024;
+            AddOutput(QuarkRTPinOut, NxRHI.EBufferType.BFT_UAV | NxRHI.EBufferType.BFT_SRV);
+
             AddOutput(DepthStencilPinOut, NxRHI.EBufferType.BFT_DSV | NxRHI.EBufferType.BFT_SRV);
 
             base.InitNodePins();
+        }
+        public override async Task Initialize(URenderPolicy policy, string debugName)
+        {
+            await base.Initialize(policy, debugName);
+            var rc = UEngine.Instance.GfxDevice.RenderContext;
+            BasePass.Initialize(rc, debugName);
+
+            CoreSDK.DisposeObject(ref SWRasterizerDrawcall);
+            SWRasterizerDrawcall = rc.CreateComputeDraw();
+            SWRasterizer = UEngine.Instance.ShadingEnvManager.GetShadingEnv<TtSwRasterizeShading>();
+        }
+        public override void TickLogic(UWorld world, URenderPolicy policy, bool bClear)
+        {
+            const uint threadGroupWorkRegionDim = 16;
+            var dispatchX = MathHelper.Roundup(2, threadGroupWorkRegionDim);
+            uint dispatchY = 1;// MathHelper.Roundup(ColorOutput.Attachement.Height, threadGroupWorkRegionDim);
+
+            var cmd = BasePass.DrawCmdList;
+            cmd.BeginCommand();
+            SWRasterizer.SetDrawcallDispatch(policy, SWRasterizerDrawcall, dispatchX, dispatchY, 1, false);
+            SWRasterizerDrawcall.Commit(cmd);
+
+            cmd.EndCommand();
+            UEngine.Instance.GfxDevice.RenderCmdQueue.QueueCmdlist(cmd);
         }
     }
 
@@ -278,6 +379,15 @@ namespace EngineNS.Bricks.GpuDriven
         {
             var node = drawcall.TagObject as TtQuarkResolveNode;
 
+            var index = drawcall.FindBinder("QuarkTexture");
+            if (index.IsValidPointer)
+            {
+                var attachBuffer = node.GetAttachBuffer(node.QuarkRTPinIn);
+                drawcall.BindSRV(index, attachBuffer.Srv);
+            }
+            index = drawcall.FindBinder("Samp_QuarkTexture");
+            if (index.IsValidPointer)
+                drawcall.BindSampler(index, UEngine.Instance.GfxDevice.SamplerStateManager.LinearClampState);
 
             base.OnDrawCall(shadingType, drawcall, policy, mesh);
         }

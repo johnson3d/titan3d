@@ -25,15 +25,18 @@ struct PS_OUTPUT
     float4 RT3 : SV_Target3;
 };
 
+Texture2D		QuarkTexture;
+SamplerState	Samp_QuarkTexture;
+
 PS_OUTPUT PS_Main(PS_INPUT input)
 {
     PS_OUTPUT output = (PS_OUTPUT)0;
 
-    float4 color = float4(0, 0, 0, 1);
     float2 uv = input.vUV;
+    float4 color = float4(QuarkTexture.SampleLevel(Samp_QuarkTexture, uv.xy, 0).xyz, 1);//float4(0, 0, 0, 1);
     
-    if (uv.x < 0.2 && uv.y < 0.2)
-        color = float4(1, 0, 0, 1);
+    // if (uv.x < 0.2 && uv.y < 0.2)
+    //    color = float4(1, 0, 0, 1);
     
     output.RT0 = color;
 
