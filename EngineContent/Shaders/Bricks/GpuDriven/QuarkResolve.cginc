@@ -32,7 +32,10 @@ PS_OUTPUT PS_Main(PS_INPUT input)
     float4 color = float4(0, 0, 0, 1);
     float2 uv = input.vUV;
     
-    //output.RT0 = color;
+    if (uv.x < 0.2 && uv.y < 0.2)
+        color = float4(1, 0, 0, 1);
+    
+    output.RT0 = color;
 
     return output;
 }

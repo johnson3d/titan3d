@@ -90,7 +90,7 @@ namespace EngineNS.Graphics.Pipeline.Deferred
         
         public UDeferredOpaque mOpaqueShading;
         public NxRHI.URenderPass RenderPass;
-        private bool NeedCreateGBuffer; // indicate whether create GBuffer. when link sw-raster-resolve node, we don't need create GBuffer;
+        public bool NeedCreateGBuffer; // indicate whether create GBuffer. when link sw-raster-resolve node, we don't need create GBuffer;
         public override async System.Threading.Tasks.Task Initialize(URenderPolicy policy, string debugName)
         {
             await Thread.TtAsyncDummyClass.DummyFunc();
@@ -248,14 +248,17 @@ namespace EngineNS.Graphics.Pipeline.Deferred
                 var bgCmdlist = BackgroundPass.DrawCmdList;
                 var cmdlist = BasePass.DrawCmdList;
                 var passClears = new NxRHI.FRenderPassClears();
-                passClears.SetDefault();
-                passClears.SetClearColor(0, new Color4f(1, 0, 0, 0));
-                passClears.SetClearColor(1, new Color4f(1, 0, 0, 0));
-                passClears.SetClearColor(2, new Color4f(1, 0, 0, 0));
-                if (Rt3PinOut.Attachement.Format == EPixelFormat.PXF_R16G16_FLOAT)
-                    passClears.SetClearColor(3, new Color4f(0, 0, 0, 0));
-                else
-                    passClears.SetClearColor(3, new Color4f(0, 0.5f, 0.5f, 0));
+                if (NeedCreateGBuffer)
+                {
+                    passClears.SetDefault();
+                    passClears.SetClearColor(0, new Color4f(1, 0, 0, 0));
+                    passClears.SetClearColor(1, new Color4f(1, 0, 0, 0));
+                    passClears.SetClearColor(2, new Color4f(1, 0, 0, 0));
+                    if (Rt3PinOut.Attachement.Format == EPixelFormat.PXF_R16G16_FLOAT)
+                        passClears.SetClearColor(3, new Color4f(0, 0, 0, 0));
+                    else
+                        passClears.SetClearColor(3, new Color4f(0, 0.5f, 0.5f, 0));
+                }
 
                 GBuffers.BuildFrameBuffers(policy);
 
