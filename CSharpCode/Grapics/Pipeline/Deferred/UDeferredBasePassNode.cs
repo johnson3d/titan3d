@@ -90,7 +90,7 @@ namespace EngineNS.Graphics.Pipeline.Deferred
         
         public UDeferredOpaque mOpaqueShading;
         public NxRHI.URenderPass RenderPass;
-        private bool NeedCreateGBuffer; // indicate whether create GBuffer. when link sw-raster-resolve node, we don't need create GBuffer;
+
         public override async System.Threading.Tasks.Task Initialize(URenderPolicy policy, string debugName)
         {
             await Thread.TtAsyncDummyClass.DummyFunc();
@@ -99,23 +99,8 @@ namespace EngineNS.Graphics.Pipeline.Deferred
             BasePass.Initialize(rc, debugName + ".BasePass");
             BackgroundPass.Initialize(rc, debugName + ".Background");
 
-            NeedCreateGBuffer = MaxLeafDistance == 0;
-
-            if (!NeedCreateGBuffer)
-            {
-                // TODO:
-                var node = policy.FindFirstNode<EngineNS.Bricks.GpuDriven.TtQuarkResolveNode>();
-                if (node != null)
-                {
-                    GBuffers = node.GBuffers;
-                }
-            }
-            else
-            {
-                CreateGBuffers(policy, Rt0PinOut.Attachement.Format);
-            }
+            CreateGBuffers(policy, Rt0PinOut.Attachement.Format);
             
-
             mOpaqueShading = UEngine.Instance.ShadingEnvManager.GetShadingEnv<UDeferredOpaque>();
         }
         public virtual unsafe UGraphicsBuffers CreateGBuffers(URenderPolicy policy, EPixelFormat format)
