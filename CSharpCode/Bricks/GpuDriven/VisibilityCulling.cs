@@ -28,7 +28,7 @@ namespace EngineNS.Bricks.GpuDriven
         }
         public override void OnDrawCall(NxRHI.UComputeDraw drawcall, Graphics.Pipeline.URenderPolicy policy)
         {
-            var node = drawcall.TagObject as TtGpuCullNode;
+            var node = drawcall.TagObject as TtCullInstanceNode;
 
             drawcall.BindUav("InstanceSceneData", node.CullInstancesBuffer.DataUAV);
             drawcall.BindUav("NumberVisibilityGpuActorBuffer", node.NumberVisibilityGpuActorBuffer.DataUAV);
@@ -67,7 +67,7 @@ namespace EngineNS.Bricks.GpuDriven
         }
         public override void OnDrawCall(NxRHI.UComputeDraw drawcall, Graphics.Pipeline.URenderPolicy policy)
         {
-            var node = drawcall.TagObject as TtGpuCullNode;
+            var node = drawcall.TagObject as TtCullInstanceNode;
 
             drawcall.BindSrv("NumnerVisibleClusterMeshData", node.NumnerVisibleClusterMeshData.DataSRV);
             drawcall.BindUav("DrawClusterIndirectArgs", node.SetupDrawClusterIndirectArgs.DataUAV);
@@ -93,7 +93,7 @@ namespace EngineNS.Bricks.GpuDriven
         }
         public override void OnDrawCall(NxRHI.UComputeDraw drawcall, Graphics.Pipeline.URenderPolicy policy)
         {
-            var node = drawcall.TagObject as TtGpuCullNode;
+            var node = drawcall.TagObject as TtCullInstanceNode;
 
             drawcall.BindSrv("NumberVisibilityGpuActorBuffer", node.NumberVisibilityGpuActorBuffer.DataSRV);
             drawcall.BindUav("VisibleClusterMeshData", node.VisibleClusterMeshData.DataUAV);
@@ -101,7 +101,7 @@ namespace EngineNS.Bricks.GpuDriven
         }
     }
 
-    public class TtGpuCullNode : URenderGraphNode
+    public class TtCullInstanceNode : URenderGraphNode
     {
         public URenderGraphPin HzbPinIn = URenderGraphPin.CreateInput("Hzb");
 
@@ -169,7 +169,7 @@ namespace EngineNS.Bricks.GpuDriven
         public TtGpuSceneCullClusterShading GpuSceneCullClusterShading;
         private NxRHI.UComputeDraw TtGpuSceneCullClusterDrawcall;
 
-        public TtGpuCullNode()
+        public TtCullInstanceNode()
         {
             Name = "GpuCullInstanceNode";
         }
