@@ -236,12 +236,20 @@ namespace EngineNS.Bricks.GpuDriven
             var node = drawcall.TagObject as TtSwRasterizeNode;
             if (node == null)
             {
-                var pipelinePolicy = policy;
-                node = pipelinePolicy.FindFirstNode<TtSwRasterizeNode>();
+                node = policy.FindFirstNode<TtSwRasterizeNode>();
             }
             {
+
                 var index = drawcall.FindBinder(EngineNS.NxRHI.EShaderBindType.SBT_SRV, "InputTriangles");
+#if false
                 drawcall.BindSrv(index, node.TrianglesView);
+#else
+                var cullNode = policy.FindFirstNode<TtCullInstanceNode>();
+                if (cullNode != null)
+                {               
+                    drawcall.BindSrv(index, cullNode.VisibleTriangles.DataSRV);
+                }
+#endif
             }
             {
                 var index = drawcall.FindBinder(EngineNS.NxRHI.EShaderBindType.SBT_UAV, "OutputColor");
@@ -256,7 +264,7 @@ namespace EngineNS.Bricks.GpuDriven
 
     public class TtSwRasterizeNode : URenderGraphNode
     {
-        public URenderGraphPin VisClutersPinIn = URenderGraphPin.CreateInput("VisClusters");
+        public URenderGraphPin VisibleClustersPinIn = URenderGraphPin.CreateInput("VisibleClusters");
         public URenderGraphPin QuarkRTPinOut = URenderGraphPin.CreateOutput("QuarkRT", false, EPixelFormat.PXF_R8G8B8A8_UNORM);//PXF_R32G32_UINT
         public URenderGraphPin DepthStencilPinOut = URenderGraphPin.CreateOutput("DepthStencil", false, EPixelFormat.PXF_D24_UNORM_S8_UINT);
 
@@ -322,7 +330,7 @@ namespace EngineNS.Bricks.GpuDriven
         }
         public override void InitNodePins()
         {
-            AddInput(VisClutersPinIn, NxRHI.EBufferType.BFT_SRV);
+            AddInput(VisibleClustersPinIn, NxRHI.EBufferType.BFT_SRV);
 
             // TODO: buffer size
             QuarkRTPinOut.Attachement.Width = QuarkRTPinOut.Attachement.Height = 1024;

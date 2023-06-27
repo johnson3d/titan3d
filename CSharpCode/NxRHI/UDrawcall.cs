@@ -152,7 +152,8 @@ namespace EngineNS.NxRHI
         }
         public void BindIndirectDispatchArgsBuffer(UBuffer buffer)
         {
-            mCoreObject.BindIndirectDispatchArgsBuffer(buffer.mCoreObject);
+            if (buffer != null)
+                mCoreObject.BindIndirectDispatchArgsBuffer(buffer.mCoreObject);
         }
         public FShaderBinder FindBinder(EShaderBindType type, string name)
         {

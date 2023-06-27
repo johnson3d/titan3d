@@ -140,7 +140,7 @@ namespace EngineNS.Graphics.Pipeline.Common
             CoreSDK.DisposeObject(ref DataSRV);
             CoreSDK.DisposeObject(ref GpuBuffer);
         }
-        public unsafe void SetSize(uint Count, void* pInitData)
+        public unsafe void SetSize(uint Count, void* pInitData, NxRHI.EBufferType bufferType = NxRHI.EBufferType.BFT_UAV)
         {
             Dispose();
 
@@ -149,7 +149,7 @@ namespace EngineNS.Graphics.Pipeline.Common
             bfDesc.Size = (uint)sizeof(T) * Count;
             bfDesc.StructureStride = (uint)sizeof(T);
             bfDesc.InitData = pInitData;
-            bfDesc.Type = NxRHI.EBufferType.BFT_UAV;
+            bfDesc.Type = bufferType;
             if (typeof(T) == typeof(uint) || typeof(T) == typeof(int) || typeof(T) == typeof(float))
             {
                 bfDesc.MiscFlags = NxRHI.EResourceMiscFlag.RM_BUFFER_ALLOW_RAW_VIEWS;
