@@ -221,8 +221,8 @@ namespace EngineNS.Bricks.GpuDriven
         {
             base.BeforeTickLogic(policy);
 
-            //var visActors = ImportAttachment(VisibleClutersPinOut);
-            //visActors.Uav = VisibilityGpuActorsBuffer.DataUAV;
+            var visibleClusters = ImportAttachment(VisibleClutersPinOut);
+            visibleClusters.Srv = VisibleTriangles.DataSRV;
         }
         public override void TickLogic(UWorld world, URenderPolicy policy, bool bClear)
         {

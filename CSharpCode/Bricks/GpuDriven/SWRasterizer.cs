@@ -244,10 +244,10 @@ namespace EngineNS.Bricks.GpuDriven
 #if false
                 drawcall.BindSrv(index, node.TrianglesView);
 #else
-                var cullNode = policy.FindFirstNode<TtCullInstanceNode>();
-                if (cullNode != null)
-                {               
-                    drawcall.BindSrv(index, cullNode.VisibleTriangles.DataSRV);
+                if (index.IsValidPointer)
+                {
+                    var attachBuffer = node.GetAttachBuffer(node.VisibleClustersPinIn);
+                    drawcall.BindSrv(index, attachBuffer.Srv);
                 }
 #endif
             }
