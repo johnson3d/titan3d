@@ -264,7 +264,11 @@ namespace EngineNS.Bricks.GpuDriven
 
     public class TtSwRasterizeNode : URenderGraphNode
     {
+        public URenderGraphPin VerticesPinIn = URenderGraphPin.CreateInput("Vertices");
+        public URenderGraphPin IndicesPinIn = URenderGraphPin.CreateInput("Indices");
+        public URenderGraphPin ClustersPinIn = URenderGraphPin.CreateInput("Clusters");
         public URenderGraphPin VisibleClustersPinIn = URenderGraphPin.CreateInput("VisibleClusters");
+
         public URenderGraphPin QuarkRTPinOut = URenderGraphPin.CreateOutput("QuarkRT", false, EPixelFormat.PXF_R8G8B8A8_UNORM);//PXF_R32G32_UINT
         public URenderGraphPin DepthStencilPinOut = URenderGraphPin.CreateOutput("DepthStencil", false, EPixelFormat.PXF_D24_UNORM_S8_UINT);
 
@@ -330,12 +334,18 @@ namespace EngineNS.Bricks.GpuDriven
         }
         public override void InitNodePins()
         {
+            AddInput(VerticesPinIn, NxRHI.EBufferType.BFT_SRV);
+            AddInput(IndicesPinIn, NxRHI.EBufferType.BFT_SRV);
+            AddInput(ClustersPinIn, NxRHI.EBufferType.BFT_SRV);
             AddInput(VisibleClustersPinIn, NxRHI.EBufferType.BFT_SRV);
+
+            VerticesPinIn.IsAllowInputNull = true;
+            IndicesPinIn.IsAllowInputNull = true;
+            ClustersPinIn.IsAllowInputNull = true;
 
             // TODO: buffer size
             QuarkRTPinOut.Attachement.Width = QuarkRTPinOut.Attachement.Height = 1024;
             AddOutput(QuarkRTPinOut, NxRHI.EBufferType.BFT_UAV | NxRHI.EBufferType.BFT_SRV);
-
             AddOutput(DepthStencilPinOut, NxRHI.EBufferType.BFT_DSV | NxRHI.EBufferType.BFT_SRV);
 
             base.InitNodePins();

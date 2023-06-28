@@ -1,6 +1,7 @@
 ﻿using NPOI.SS.Formula.Functions;
 using System;
 using System.Collections.Generic;
+using System.Runtime.CompilerServices;
 using System.Text;
 
 namespace EngineNS.Graphics.Pipeline.Common
@@ -65,6 +66,13 @@ namespace EngineNS.Graphics.Pipeline.Common
             Dirty = true;
             DataArray[index] = data;
         }
+        public unsafe void UpdateData(int offset, void* pData, int size)
+        {
+            Dirty = true;
+            var p = (byte*)DataArray.UnsafeAddressAt(0).ToPointer();
+            p += offset;
+            CoreSDK.MemoryCopy(p, pData, (uint)size);
+        }
         public void Clear()
         {
             Dirty = true;
@@ -89,7 +97,7 @@ namespace EngineNS.Graphics.Pipeline.Common
                 if (IsGpuWrite)
                 {
                     bfDesc.Type = NxRHI.EBufferType.BFT_UAV;
-                    bfDesc.Usage = NxRHI.EGpuUsage.USAGE_DYNAMIC;
+                    bfDesc.Usage = NxRHI.EGpuUsage.USAGE_DEFAULT;
                 }
                 else
                 {

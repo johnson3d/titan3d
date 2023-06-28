@@ -2,7 +2,7 @@
 #define __SWRasterizer_SHADING_H__
 
 #include "../../Inc/VertexLayout.cginc"
-#include "../../Inc/Math.cginc"
+#include "FRaster.cginc"
 
 #define NANITE_SUBPIXEL_BITS								8
 #define NANITE_SUBPIXEL_SAMPLES								(1 << NANITE_SUBPIXEL_BITS)

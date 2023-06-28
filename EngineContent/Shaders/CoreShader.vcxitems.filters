@@ -437,6 +437,9 @@
     <None Include="$(MSBuildThisFileDirectory)Bricks\GpuDriven\QuarkResolve.cginc">
       <Filter>Bricks\GpuDriven</Filter>
     </None>
+    <None Include="$(MSBuildThisFileDirectory)Bricks\GpuDriven\ClusterCulling.cginc">
+      <Filter>Bricks\GpuDriven</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="$(MSBuildThisFileDirectory)Compute\calcrate.compute">

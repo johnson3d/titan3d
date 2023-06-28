@@ -58,6 +58,8 @@ namespace NxRHI
 		virtual void CopyBufferToTexture(ITexture* target, UINT subRes, IBuffer* src, const FSubResourceFootPrint* footprint) override;
 		virtual void CopyTextureToBuffer(IBuffer* target, const FSubResourceFootPrint* footprint, ITexture* src, UINT subRes) override;
 
+		virtual void WriteBufferUINT32(UINT Count, FBufferWriter* BufferWriters) override;
+
 		virtual void BeginEvent(const char* info) override;
 		virtual void EndEvent() override;
 	public:
@@ -67,6 +69,7 @@ namespace NxRHI
 			return (DX12GpuDevice*)mDevice.GetPtr();
 		}
 		AutoRef<ID3D12GraphicsCommandList>	mContext;
+		AutoRef<ID3D12GraphicsCommandList2> mContext2;
 		AutoRef<ID3D12DebugCommandList1>	mDebugCommandList1;
 		
 		//AutoRef<ID3D12CommandSignature>	mCurrentIndirectDrawIndexSig;

@@ -121,6 +121,8 @@ struct WeakRefHandle
 template<class T>
 class TWeakRefHandle
 {
+
+	//todo: atomic
 	WeakRefHandle*	Handle;
 public:
 	TWeakRefHandle()

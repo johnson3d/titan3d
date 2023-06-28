@@ -177,6 +177,7 @@
     <ClCompile Include="$(MSBuildThisFileDirectory)EngineNS/NxRHI/FBufferDesc_910209287.cpp2cs.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)EngineNS/NxRHI/FBufferRTV_910209287.cpp2cs.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)EngineNS/NxRHI/FBufferUAV_910209287.cpp2cs.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)EngineNS/NxRHI/FBufferWriter_910209287.cpp2cs.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)EngineNS/NxRHI/FBuffer_SRV_910209287.cpp2cs.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)EngineNS/NxRHI/FCbvDesc_910209287.cpp2cs.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)EngineNS/NxRHI/FDepthStencilDesc_910209287.cpp2cs.cpp" />
