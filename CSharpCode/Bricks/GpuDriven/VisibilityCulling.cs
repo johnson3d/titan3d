@@ -199,22 +199,14 @@ namespace EngineNS.Bricks.GpuDriven
             var rc = UEngine.Instance.GfxDevice.RenderContext;
             BasePass.Initialize(rc, debugName);
 
-            //CoreSDK.DisposeObject(ref GpuSceneCullInstanceDrawcall);
-            //GpuSceneCullInstanceDrawcall = rc.CreateComputeDraw();
-            //GpuSceneCullInstanceShading = UEngine.Instance.ShadingEnvManager.GetShadingEnv<TtGpuSceneCullInstanceShading>();
-
-            //CoreSDK.DisposeObject(ref GpuSceneCullClusterSetupDrawcall);
-            //GpuSceneCullClusterSetupDrawcall = rc.CreateComputeDraw();
-            //GpuSceneCullClusterSetupShading = UEngine.Instance.ShadingEnvManager.GetShadingEnv<TtGpuSceneCullClusterSetupShading>();
-
             CoreSDK.DisposeObject(ref TtGpuSceneCullClusterDrawcall);
             TtGpuSceneCullClusterDrawcall = rc.CreateComputeDraw();
             GpuSceneCullClusterShading = UEngine.Instance.ShadingEnvManager.GetShadingEnv<TtGpuSceneCullClusterShading>();
 
             unsafe
             {
-                // TODO: uav size
-                VisibleTriangles.SetSize(50, null, NxRHI.EBufferType.BFT_UAV | NxRHI.EBufferType.BFT_SRV);
+                // TODO: max < 128 triangles per cluster
+                VisibleTriangles.SetSize(128, null, NxRHI.EBufferType.BFT_UAV | NxRHI.EBufferType.BFT_SRV);
             }            
         }
         public override void BeforeTickLogic(URenderPolicy policy)
