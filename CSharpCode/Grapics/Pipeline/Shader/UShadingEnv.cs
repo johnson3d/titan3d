@@ -326,7 +326,7 @@ namespace EngineNS.Graphics.Pipeline.Shader
             drawcall.TagObject = policy;
             drawcall.SetComputeEffect(GetEffect());
             drawcall.BindIndirectDispatchArgsBuffer(indirectBuffer);
-            
+
             this.OnDrawCall(drawcall, policy);
         }
         protected override void EnvShadingDefines(in FPermutationId id, UShaderDefinitions defines)

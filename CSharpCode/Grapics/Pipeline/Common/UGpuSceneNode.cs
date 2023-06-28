@@ -97,7 +97,7 @@ namespace EngineNS.Graphics.Pipeline.Common
                 if (IsGpuWrite)
                 {
                     bfDesc.Type = NxRHI.EBufferType.BFT_UAV;
-                    bfDesc.Usage = NxRHI.EGpuUsage.USAGE_DYNAMIC;
+                    bfDesc.Usage = NxRHI.EGpuUsage.USAGE_DEFAULT;
                 }
                 else
                 {

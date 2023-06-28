@@ -110,9 +110,6 @@ namespace EngineNS.Bricks.GpuDriven
 
     public class TtCullInstanceNode : URenderGraphNode
     {
-        //public URenderGraphPin HzbPinIn = URenderGraphPin.CreateInput("Hzb");
-        public URenderGraphPin VisibleClutersPinOut = URenderGraphPin.CreateOutput("VisibleClusters", false, EPixelFormat.PXF_UNKNOWN);
-
         //public struct FActorInstance
         //{
         //    public Matrix WorldMatrix;
@@ -178,6 +175,10 @@ namespace EngineNS.Bricks.GpuDriven
             public Vector3 pos1;
             public Vector3 pos2;
         }
+
+        //public URenderGraphPin HzbPinIn = URenderGraphPin.CreateInput("Hzb");
+        public URenderGraphPin VisibleClutersPinOut = URenderGraphPin.CreateOutput("VisibleClusters", false, EPixelFormat.PXF_UNKNOWN);
+
         public TtGpuSceneCullClusterShading GpuSceneCullClusterShading;
         private NxRHI.UComputeDraw TtGpuSceneCullClusterDrawcall;
 
@@ -221,8 +222,8 @@ namespace EngineNS.Bricks.GpuDriven
         {
             base.BeforeTickLogic(policy);
 
-            //var visActors = ImportAttachment(VisibleClutersPinOut);
-            //visActors.Uav = VisibilityGpuActorsBuffer.DataUAV;
+            var visibleClusters = ImportAttachment(VisibleClutersPinOut);
+            visibleClusters.Srv = VisibleTriangles.DataSRV;
         }
         public override void TickLogic(UWorld world, URenderPolicy policy, bool bClear)
         {
@@ -231,13 +232,6 @@ namespace EngineNS.Bricks.GpuDriven
             var cmd = BasePass.DrawCmdList;
             cmd.BeginCommand();
 
-            //GpuSceneCullInstanceShading.SetDrawcallDispatch(policy, GpuSceneCullInstanceDrawcall, (uint)GpuSceneActors.Count, 1, 1, true);
-            //cmd.PushGpuDraw(GpuSceneCullInstanceDrawcall);
-
-            //GpuSceneCullClusterSetupShading.SetDrawcallDispatch(policy, GpuSceneCullClusterSetupDrawcall, 1, 1, 1, true);
-            //cmd.PushGpuDraw(GpuSceneCullClusterSetupDrawcall);
-
-            // TODO: dispatch x/y/z
             GpuSceneCullClusterShading.SetDrawcallIndirectDispatch(policy, TtGpuSceneCullClusterDrawcall, null);
             cmd.PushGpuDraw(TtGpuSceneCullClusterDrawcall);
 
@@ -337,10 +331,9 @@ namespace EngineNS.Bricks.GpuDriven
         {
             var node = drawcall.TagObject as TtCullClusterNode;
 
-            //drawcall.BindSrv("NumberVisibilityGpuActorBuffer", node.NumberVisibilityGpuActorBuffer.DataSRV);
-            //drawcall.BindUav("VisibleClusterMeshData", node.VisibleClusterMeshData.DataUAV);
-            //drawcall.BindUav("NumnerVisibleClusterMeshData", node.NumnerVisibleClusterMeshData.DataUAV);
-
+            drawcall.BindSrv("ClusterBuffer", node.Clusters.DataSRV);
+            drawcall.BindSrv("SrcClusterBuffer", node.Clusters.DataSRV);
+            drawcall.BindUav("VisClusterBuffer", node.Clusters.DataUAV);
         }
     }
     public class TtCullClusterNode : URenderGraphNode
@@ -419,6 +412,7 @@ namespace EngineNS.Bricks.GpuDriven
 
             unsafe
             {
+                VisClusters.Initialize(true);
                 VisClusters.SetSize(sizeof(int) * 100 + sizeof(int));
                 var visClst = stackalloc int[100 + 1];
                 visClst[0] = 0;
@@ -428,6 +422,7 @@ namespace EngineNS.Bricks.GpuDriven
         }
         private unsafe void InitBuffers()
         {
+            Vertices.Initialize(false);
             Vertices.SetSize(sizeof(FQuarkVertex) * 3 / sizeof(float));
             var verts = stackalloc FQuarkVertex[3];
             verts[0].Position = new Vector3(50, 50, 0);
@@ -436,6 +431,7 @@ namespace EngineNS.Bricks.GpuDriven
             Vertices.UpdateData(0, verts, sizeof(FQuarkVertex) * 3);
             Vertices.Flush2GPU();
 
+            Indices.Initialize(false);
             Indices.SetSize(sizeof(uint) * 3);
             var idx = stackalloc uint[3];
             idx[0] = 0;
@@ -444,6 +440,7 @@ namespace EngineNS.Bricks.GpuDriven
             Indices.UpdateData(0, idx, sizeof(uint) * 3);
             Indices.Flush2GPU();
 
+            Clusters.Initialize(false);
             Clusters.SetSize(sizeof(FClusterData) * 1);
             var clst = stackalloc FClusterData[1];
             clst[0].WorldMatrix = Matrix.Identity;
@@ -452,6 +449,7 @@ namespace EngineNS.Bricks.GpuDriven
             Clusters.UpdateData(0, clst, sizeof(FClusterData) * 1);
             Clusters.Flush2GPU();
 
+            SrcClusters.Initialize(false);
             SrcClusters.SetSize(sizeof(int) * 1 + sizeof(int));
             var srcClst = stackalloc int[1 + 1];
             srcClst[0] = 1;
@@ -501,7 +499,9 @@ namespace EngineNS.Bricks.GpuDriven
             //cmd.PushGpuDraw(GpuSceneCullClusterSetupDrawcall);
 
             // TODO: dispatch x/y/z
-            GpuSceneCullClusterShading.SetDrawcallIndirectDispatch(policy, TtGpuSceneCullClusterDrawcall, null);
+            //GpuSceneCullClusterShading.SetDrawcallIndirectDispatch(policy, TtGpuSceneCullClusterDrawcall, null);
+            GpuSceneCullClusterShading.SetDrawcallDispatch(policy, TtGpuSceneCullClusterDrawcall, 1, 1, 1, true);
+
             cmd.PushGpuDraw(TtGpuSceneCullClusterDrawcall);
 
             cmd.FlushDraws();
@@ -514,14 +514,14 @@ namespace EngineNS.Bricks.GpuDriven
 
         public void BuildInstances(GamePlay.UWorld world, GamePlay.UWorld.UVisParameter rp)
         {
-            //foreach(var i in rp.VisibleNodes)
-            //{
-            //    var meshNode = i as GamePlay.Scene.UMeshNode;
-            //    if (meshNode == null)
-            //        continue;
+            foreach (var i in rp.VisibleNodes)
+            {
+                var meshNode = i as GamePlay.Scene.UMeshNode;
+                if (meshNode == null)
+                    continue;
 
-            //    var cluster = meshNode.Mesh.MaterialMesh.Mesh.ClusteredMesh;
-            //}
+                var cluster = meshNode.Mesh.MaterialMesh.Mesh.ClusteredMesh;
+            }
             //foreach (var i in GpuSceneActors)
             //{
             //    i.GpuSceneIndex = -1;

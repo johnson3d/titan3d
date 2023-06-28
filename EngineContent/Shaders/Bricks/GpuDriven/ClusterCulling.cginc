@@ -16,8 +16,10 @@ RWStructuredBuffer<int> VisClusterBuffer;
 
 bool IsVisible(int clusterIdx)
 {
-    //1.frustum culling
-    //2.hzb culling
+    //trasform ClusterBuffer[clusterIdx].BoundCenter to WorldCordinate
+    
+    //1.frustum culling aabb
+    //2.hzb culling aabb
     
     return true;
 }
