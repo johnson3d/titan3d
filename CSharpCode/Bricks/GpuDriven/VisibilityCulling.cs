@@ -109,9 +109,6 @@ namespace EngineNS.Bricks.GpuDriven
 
     public class TtCullInstanceNode : URenderGraphNode
     {
-        //public URenderGraphPin HzbPinIn = URenderGraphPin.CreateInput("Hzb");
-        public URenderGraphPin VisibleClutersPinOut = URenderGraphPin.CreateOutput("VisibleClusters", false, EPixelFormat.PXF_UNKNOWN);
-
         //public struct FActorInstance
         //{
         //    public Matrix WorldMatrix;
@@ -177,6 +174,10 @@ namespace EngineNS.Bricks.GpuDriven
             public Vector3 pos1;
             public Vector3 pos2;
         }
+
+        //public URenderGraphPin HzbPinIn = URenderGraphPin.CreateInput("Hzb");
+        public URenderGraphPin VisibleClutersPinOut = URenderGraphPin.CreateOutput("VisibleClusters", false, EPixelFormat.PXF_UNKNOWN);
+
         public TtGpuSceneCullClusterShading GpuSceneCullClusterShading;
         private NxRHI.UComputeDraw TtGpuSceneCullClusterDrawcall;
 
@@ -230,14 +231,9 @@ namespace EngineNS.Bricks.GpuDriven
             var cmd = BasePass.DrawCmdList;
             cmd.BeginCommand();
 
-            //GpuSceneCullInstanceShading.SetDrawcallDispatch(policy, GpuSceneCullInstanceDrawcall, (uint)GpuSceneActors.Count, 1, 1, true);
-            //cmd.PushGpuDraw(GpuSceneCullInstanceDrawcall);
-
-            //GpuSceneCullClusterSetupShading.SetDrawcallDispatch(policy, GpuSceneCullClusterSetupDrawcall, 1, 1, 1, true);
-            //cmd.PushGpuDraw(GpuSceneCullClusterSetupDrawcall);
-
+            GpuSceneCullClusterShading.SetDrawcallIndirectDispatch(policy, TtGpuSceneCullClusterDrawcall, null);
             // TODO: dispatch x/y/z
-            GpuSceneCullClusterShading.SetDrawcallIndirectDispatch(policy, TtGpuSceneCullClusterDrawcall, 1, 1, 1, null);
+            TtGpuSceneCullClusterDrawcall.SetDispatch(1, 1, 1);
             cmd.PushGpuDraw(TtGpuSceneCullClusterDrawcall);
 
             cmd.FlushDraws();
@@ -250,14 +246,14 @@ namespace EngineNS.Bricks.GpuDriven
 
         public void BuildInstances(GamePlay.UWorld world, GamePlay.UWorld.UVisParameter rp)
         {
-            //foreach(var i in rp.VisibleNodes)
-            //{
-            //    var meshNode = i as GamePlay.Scene.UMeshNode;
-            //    if (meshNode == null)
-            //        continue;
+            foreach (var i in rp.VisibleNodes)
+            {
+                var meshNode = i as GamePlay.Scene.UMeshNode;
+                if (meshNode == null)
+                    continue;
 
-            //    var cluster = meshNode.Mesh.MaterialMesh.Mesh.ClusteredMesh;
-            //}
+                var cluster = meshNode.Mesh.MaterialMesh.Mesh.ClusteredMesh;
+            }
             //foreach (var i in GpuSceneActors)
             //{
             //    i.GpuSceneIndex = -1;
