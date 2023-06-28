@@ -334,18 +334,12 @@ namespace EngineNS.Bricks.GpuDriven
         public URenderGraphPin VerticesPinIn = URenderGraphPin.CreateInputOutput("Vertices", false, EPixelFormat.PXF_UNKNOWN);
         public URenderGraphPin IndicesPinIn = URenderGraphPin.CreateInputOutput("Indices", false, EPixelFormat.PXF_UNKNOWN);
         public URenderGraphPin ClustersPinIn = URenderGraphPin.CreateInputOutput("Clusters", false, EPixelFormat.PXF_UNKNOWN);
-        public URenderGraphPin SrcClustersPinIn = URenderGraphPin.CreateInputOutput("SrcClusters", false, EPixelFormat.PXF_UNKNOWN);
         public URenderGraphPin VisibleClutersPinOut = URenderGraphPin.CreateOutput("VisibleClusters", false, EPixelFormat.PXF_UNKNOWN);
 
         public TtGpuSceneCullClusterShading GpuSceneCullClusterShading;
         private NxRHI.UComputeDraw TtGpuSceneCullClusterDrawcall;
 
-        public struct FQuarkVertex
-        {
-            public Vector3 Position;
-            public Vector3 Normal;
-            public Vector2 UV;
-        }
+        
         public TtCpu2GpuBuffer<float> Vertices = new TtCpu2GpuBuffer<float>();
         public TtCpu2GpuBuffer<uint> Indices = new TtCpu2GpuBuffer<uint>();
         [System.Runtime.InteropServices.StructLayout(System.Runtime.InteropServices.LayoutKind.Sequential, Pack = 16)]
@@ -371,14 +365,12 @@ namespace EngineNS.Bricks.GpuDriven
             AddInputOutput(VerticesPinIn, NxRHI.EBufferType.BFT_UAV | NxRHI.EBufferType.BFT_SRV);
             AddInputOutput(IndicesPinIn, NxRHI.EBufferType.BFT_UAV | NxRHI.EBufferType.BFT_SRV);
             AddInputOutput(ClustersPinIn, NxRHI.EBufferType.BFT_UAV | NxRHI.EBufferType.BFT_SRV);
-            AddInputOutput(SrcClustersPinIn, NxRHI.EBufferType.BFT_UAV | NxRHI.EBufferType.BFT_SRV);
             AddOutput(VisibleClutersPinOut, NxRHI.EBufferType.BFT_UAV | NxRHI.EBufferType.BFT_SRV);
 
             HzbPinIn.IsAllowInputNull = true;
             VerticesPinIn.IsAllowInputNull = true;
             IndicesPinIn.IsAllowInputNull = true;
             ClustersPinIn.IsAllowInputNull = true;
-            SrcClustersPinIn.IsAllowInputNull = true;
 
             base.InitNodePins();
         }
@@ -387,14 +379,6 @@ namespace EngineNS.Bricks.GpuDriven
             await base.Initialize(policy, debugName);
             var rc = UEngine.Instance.GfxDevice.RenderContext;
             BasePass.Initialize(rc, debugName);
-
-            //CoreSDK.DisposeObject(ref GpuSceneCullInstanceDrawcall);
-            //GpuSceneCullInstanceDrawcall = rc.CreateComputeDraw();
-            //GpuSceneCullInstanceShading = UEngine.Instance.ShadingEnvManager.GetShadingEnv<TtGpuSceneCullInstanceShading>();
-
-            //CoreSDK.DisposeObject(ref GpuSceneCullClusterSetupDrawcall);
-            //GpuSceneCullClusterSetupDrawcall = rc.CreateComputeDraw();
-            //GpuSceneCullClusterSetupShading = UEngine.Instance.ShadingEnvManager.GetShadingEnv<TtGpuSceneCullClusterSetupShading>();
 
             CoreSDK.DisposeObject(ref TtGpuSceneCullClusterDrawcall);
             TtGpuSceneCullClusterDrawcall = rc.CreateComputeDraw();
@@ -476,11 +460,6 @@ namespace EngineNS.Bricks.GpuDriven
                 attachment = ImportAttachment(ClustersPinIn);
                 attachment.Srv = Clusters.DataSRV;
             }
-            if (SrcClustersPinIn.FindInLinker() == null)
-            {
-                attachment = ImportAttachment(SrcClustersPinIn);
-                attachment.Srv = SrcClusters.DataSRV;
-            }
         }
         public override void TickLogic(UWorld world, URenderPolicy policy, bool bClear)
         {
@@ -489,14 +468,7 @@ namespace EngineNS.Bricks.GpuDriven
             var cmd = BasePass.DrawCmdList;
             cmd.BeginCommand();
 
-            //GpuSceneCullInstanceShading.SetDrawcallDispatch(policy, GpuSceneCullInstanceDrawcall, (uint)GpuSceneActors.Count, 1, 1, true);
-            //cmd.PushGpuDraw(GpuSceneCullInstanceDrawcall);
-
-            //GpuSceneCullClusterSetupShading.SetDrawcallDispatch(policy, GpuSceneCullClusterSetupDrawcall, 1, 1, 1, true);
-            //cmd.PushGpuDraw(GpuSceneCullClusterSetupDrawcall);
-
             // TODO: dispatch x/y/z
-            //GpuSceneCullClusterShading.SetDrawcallIndirectDispatch(policy, TtGpuSceneCullClusterDrawcall, null);
             GpuSceneCullClusterShading.SetDrawcallDispatch(policy, TtGpuSceneCullClusterDrawcall, 1, 1, 1, true);
 
             cmd.PushGpuDraw(TtGpuSceneCullClusterDrawcall);

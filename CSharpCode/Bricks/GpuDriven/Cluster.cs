@@ -55,7 +55,13 @@ namespace EngineNS.Bricks.GpuDriven
         public int IndexCount;
 
         public FClusterInfo Desc;
-    }
+    };
+    public struct FQuarkVertex
+    {
+        public Vector3 Position;
+        public Vector3 Normal;
+        public Vector2 UV;
+    };
     public class TtClusteredMesh
     {
         public bool InitFromMesh(Graphics.Mesh.UMeshPrimitives mesh)
@@ -99,11 +105,27 @@ namespace EngineNS.Bricks.GpuDriven
 
                 result.Clusters.Add(cluster);
             }
-            result.ClusterVertexArray = new NxRHI.UVertexArray();
-            result.ClusterVertexArray.mCoreObject = mesh.mCoreObject.GetClusterVertexArray();
-            result.ClusterIndexView = new NxRHI.UIbView();
-            result.ClusterIndexView.mCoreObject = mesh.mCoreObject.GetClusterIndexView();
 
+            var vbCount = mesh.mCoreObject.GetClustersVBCount();
+            var ibCount = mesh.mCoreObject.GetClustersIBCount();            
+            unsafe
+            {
+                result.Vertices = new Vector3[vbCount];
+                EngineNS.Vector3* vb = mesh.mCoreObject.GetClustersVB();
+                
+                fixed (Vector3* dest = &result.Vertices[0])
+                {
+                    CoreSDK.MemoryCopy(dest, vb, vbCount * (uint)sizeof(Vector3));
+                }
+
+                result.Indices = new uint[ibCount];
+                uint* ib = mesh.mCoreObject.GetClustersIB();
+                fixed (uint* dest = &result.Indices[0])
+                {
+                    CoreSDK.MemoryCopy(dest, ib, vbCount * (uint)sizeof(uint));
+                }
+            }
+            
             return result;
         }
        
@@ -111,8 +133,11 @@ namespace EngineNS.Bricks.GpuDriven
         public NxRHI.UIbView ClusterIndexView;
         public int NumVertices;
         public int NumIndices;
-        public List<TtCluster> Clusters = new List<TtCluster>();
         public BoundingBox AABB = new BoundingBox();
+
+        public List<TtCluster> Clusters = new List<TtCluster>();
+        public Vector3[] Vertices = null;
+        public uint[] Indices = null;
 
         private Graphics.Mesh.UMeshPrimitives Mesh;
         public static unsafe TtClusteredMesh Merge(List<TtClusteredMesh> meshes, NxRHI.UCommandList cmdlist)

@@ -221,13 +221,22 @@ namespace NxRHI
 		bool SaveClusters(XndNode* pNode);
 		int LoadClusters(XndHolder* xnd, IGpuDevice* device);
 		QuarkCluster* GetCluster(int index);
-		FVertexArray* GetClusterVertexArray()
+		
+		v3dxVector3* GetClustersVB()
 		{
-			return mClustersVertexArray;
+			return &mClustersVB[0];
 		}
-		IIbView* GetClusterIndexView()
+		UINT32* GetClustersIB()
 		{
-			return mClustersIndexView;
+			return &mClustersIB[0];
+		}
+		UINT32 GetClustersVBCount()
+		{
+			return (UINT32)mClustersVB.size();
+		}
+		UINT32 GetClustersIBCount()
+		{
+			return (UINT32)mClustersIB.size();
 		}
 	private:
 		AutoRef<IVbView> LoadVB(IGpuDevice* device, XndAttribute * pAttr, UINT stride, TimeKeys & tkeys, UINT & resSize, EVertexStreamType stream);
