@@ -31,7 +31,7 @@ void CS_ClusterCullingMain(uint DispatchThreadId : SV_DispatchThreadID, uint3 Lo
     }
     int index = 0;
     InterlockedAdd(VisClusterBuffer[0], 1, index);
-    //VisClusterBuffer&DispatchThreadId [0] is the count of array
+    //VisClusterBuffer&SrcClusterBuffer [0] is the count of array
     VisClusterBuffer[1 + index] = SrcClusterBuffer[1 + DispatchThreadId.x];
 }
 
