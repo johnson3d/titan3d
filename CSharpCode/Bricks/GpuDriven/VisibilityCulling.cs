@@ -356,10 +356,13 @@ namespace EngineNS.Bricks.GpuDriven
         }
         public TtCpu2GpuBuffer<float> Vertices = new TtCpu2GpuBuffer<float>();
         public TtCpu2GpuBuffer<uint> Indices = new TtCpu2GpuBuffer<uint>();
+        [System.Runtime.InteropServices.StructLayout(System.Runtime.InteropServices.LayoutKind.Sequential, Pack = 16)]
         public struct FClusterData
         {
             public Vector3 BoundCenter;
+            public int FaceStart;
             public Vector3 BoundExtent;
+            public int FaceEnd;
             public Matrix WorldMatrix;
         }
         public TtCpu2GpuBuffer<FClusterData> Clusters = new TtCpu2GpuBuffer<FClusterData>();
@@ -446,6 +449,8 @@ namespace EngineNS.Bricks.GpuDriven
             clst[0].WorldMatrix = Matrix.Identity;
             clst[0].BoundCenter = Vector3.Zero;
             clst[0].BoundExtent = Vector3.One;
+            clst[0].FaceStart = 0;
+            clst[0].FaceEnd = 0;
             Clusters.UpdateData(0, clst, sizeof(FClusterData) * 1);
             Clusters.Flush2GPU();
 

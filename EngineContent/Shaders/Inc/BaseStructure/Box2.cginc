@@ -44,7 +44,7 @@ struct TtBox2
                 return float2(Minimum.x, Minimum.y);
             }
             default:
-                return float2(0, 0, 0);
+                return float2(0, 0);
         }
     }
 
@@ -160,7 +160,7 @@ struct TtBox2i
             return int2(Minimum.x, Minimum.y);
         }
         default:
-            return int2(0, 0, 0);
+            return int2(0, 0);
         }
     }
 

@@ -1,16 +1,8 @@
 #ifndef	_SOFT_RASTER_FRASTER_H_
 #define _SOFT_RASTER_FRASTER_H_
 
-#include "../../Inc/BaseStructure/Box2.cginc"
+#include "FRaster.cginc"
 
-struct FClusterData
-{
-    float3 BoundCenter;
-    float3 BoundExtent;          
-    Matrix WorldMatrix;
-};
-
-StructuredBuffer<FClusterData> ClusterBuffer;
 StructuredBuffer<int> SrcClusterBuffer;
 RWStructuredBuffer<int> VisClusterBuffer;
 
