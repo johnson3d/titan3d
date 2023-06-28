@@ -264,6 +264,10 @@ namespace EngineNS.Bricks.GpuDriven
 
     public class TtSwRasterizeNode : URenderGraphNode
     {
+        public URenderGraphPin VerticesPinIn = URenderGraphPin.CreateInput("Vertices");
+        public URenderGraphPin IndicesPinIn = URenderGraphPin.CreateInput("Indices");
+        public URenderGraphPin ClustersPinIn = URenderGraphPin.CreateInput("Clusters");
+
         public URenderGraphPin VisibleClustersPinIn = URenderGraphPin.CreateInput("VisibleClusters");
         public URenderGraphPin QuarkRTPinOut = URenderGraphPin.CreateOutput("QuarkRT", false, EPixelFormat.PXF_R8G8B8A8_UNORM);//PXF_R32G32_UINT
         public URenderGraphPin DepthStencilPinOut = URenderGraphPin.CreateOutput("DepthStencil", false, EPixelFormat.PXF_D24_UNORM_S8_UINT);

@@ -321,14 +321,12 @@ namespace EngineNS.Graphics.Pipeline.Shader
 
             this.OnDrawCall(drawcall, policy);
         }
-        public void SetDrawcallIndirectDispatch(URenderPolicy policy, NxRHI.UComputeDraw drawcall, uint x, uint y, uint z, NxRHI.UBuffer indirectBuffer)
+        public void SetDrawcallIndirectDispatch(URenderPolicy policy, NxRHI.UComputeDraw drawcall, NxRHI.UBuffer indirectBuffer)
         {
             drawcall.TagObject = policy;
             drawcall.SetComputeEffect(GetEffect());
             drawcall.BindIndirectDispatchArgsBuffer(indirectBuffer);
-            // TODO: round?
-            drawcall.SetDispatch(x, y, z);
-
+            
             this.OnDrawCall(drawcall, policy);
         }
         protected override void EnvShadingDefines(in FPermutationId id, UShaderDefinitions defines)

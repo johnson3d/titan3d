@@ -46,6 +46,8 @@ namespace NxRHI
 		if (FAILED(hr))
 			return false;
 
+		mContext->QueryInterface(IID_PPV_ARGS(mContext2.GetAddressOf()));
+
 		auto pGpuSystem = device->mGpuSystem.GetPtr();
 		if (pGpuSystem->Desc.CreateDebugLayer && pGpuSystem->Desc.GpuBaseValidation)
 		{
@@ -785,10 +787,25 @@ namespace NxRHI
 		box.bottom = box.top + footprint->Height;
 		box.back = box.front + footprint->Depth;
 		mContext->CopyTextureRegion(&dst, footprint->X, footprint->Y, footprint->Z, &src, &box);
-
+		
 		target->TransitionTo(this, tarSave);
 		source->TransitionTo(this, srcSave);
 
+	}
+
+	void DX12CommandList::WriteBufferUINT32(UINT Count, FBufferWriter* BufferWriters)
+	{
+		if (mContext2 == nullptr)
+			return;
+		auto writers = (D3D12_WRITEBUFFERIMMEDIATE_PARAMETER*)alloca(sizeof(D3D12_WRITEBUFFERIMMEDIATE_PARAMETER) * Count);
+		auto modes = (D3D12_WRITEBUFFERIMMEDIATE_MODE*)alloca(sizeof(D3D12_WRITEBUFFERIMMEDIATE_MODE) * Count);
+		for (UINT i = 0; i < Count; i++)
+		{
+			writers[i].Dest = ((DX12Buffer*)BufferWriters[i].Buffer)->GetGPUVirtualAddress() + BufferWriters[i].Offset;
+			writers[i].Value = BufferWriters[i].Value;
+			modes[i] = D3D12_WRITEBUFFERIMMEDIATE_MODE::D3D12_WRITEBUFFERIMMEDIATE_MODE_DEFAULT;
+		}
+		mContext2->WriteBufferImmediate(Count, writers, modes);
 	}
 	
 	void DX12CommandList::Commit(DX12CmdQueue* cmdQueue, EQueueType type)

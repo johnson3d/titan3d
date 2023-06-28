@@ -44,6 +44,14 @@ namespace NxRHI
 		UINT Z;
 	};
 
+	struct TR_CLASS(SV_LayoutStruct = 8)
+		FBufferWriter
+	{
+		IBuffer* Buffer;
+		UINT Offset;
+		UINT Value;
+	};
+
 	enum TR_ENUM()
 		EPipelineStage 
 	{
@@ -143,6 +151,8 @@ namespace NxRHI
 		virtual void CopyTextureRegion(ITexture* target, UINT tarSubRes, UINT DstX, UINT DstY, UINT DstZ, ITexture* src, UINT srcSubRes, const FSubresourceBox* box) = 0;
 		virtual void CopyBufferToTexture(ITexture* target, UINT subRes, IBuffer* src, const FSubResourceFootPrint* footprint) = 0;
 		virtual void CopyTextureToBuffer(IBuffer* target, const FSubResourceFootPrint* footprint, ITexture* src, UINT subRes) = 0;
+
+		virtual void WriteBufferUINT32(UINT Count, FBufferWriter* BufferWriters) { ASSERT(false); }
 
 		virtual void BeginEvent(const char* info) = 0;
 		virtual void EndEvent() = 0;
