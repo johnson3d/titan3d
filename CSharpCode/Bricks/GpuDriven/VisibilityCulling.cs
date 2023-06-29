@@ -339,7 +339,6 @@ namespace EngineNS.Bricks.GpuDriven
         public TtGpuSceneCullClusterShading GpuSceneCullClusterShading;
         private NxRHI.UComputeDraw TtGpuSceneCullClusterDrawcall;
 
-        
         public TtCpu2GpuBuffer<float> Vertices = new TtCpu2GpuBuffer<float>();
         public TtCpu2GpuBuffer<uint> Indices = new TtCpu2GpuBuffer<uint>();
         [System.Runtime.InteropServices.StructLayout(System.Runtime.InteropServices.LayoutKind.Sequential, Pack = 16)]

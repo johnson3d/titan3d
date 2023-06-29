@@ -4,9 +4,9 @@
 #include "../../Inc/VertexLayout.cginc"
 #include "FRaster.cginc"
 
-#define NANITE_SUBPIXEL_BITS								8
-#define NANITE_SUBPIXEL_SAMPLES								(1 << NANITE_SUBPIXEL_BITS)
-#define NANITE_SUBPIXEL_MASK								(NANITE_SUBPIXEL_SAMPLES - 1)
+#define QUARK_SUBPIXEL_BITS								8
+#define QUARK_SUBPIXEL_SAMPLES							(1 << QUARK_SUBPIXEL_BITS)
+#define QUARK_SUBPIXEL_MASK								(QUARK_SUBPIXEL_SAMPLES - 1)
 
 struct FRaster
 {
@@ -32,10 +32,11 @@ struct FRasterTri
 };
 
 StructuredBuffer<int> VisibleClusterBuffer;
-RWTexture2D<float4> OutputColor;
+RWTexture2D<float4> OutputQuarkTexture;
 
 struct FShadingStruct
 {
+    float2 QuarkRTSizeFactor;
     int MaxVisClusterIndex;
     int MaxClusterIndex;
 };
@@ -43,6 +44,16 @@ struct FShadingStruct
 cbuffer cbShadingEnv DX_AUTOBIND
 {
     FShadingStruct ShadingStruct;
+}
+
+struct FQuarkPixel
+{
+	
+};
+
+void WriteQuarkPixel(uint2 uv, FQuarkPixel pixel)
+{
+    OutputQuarkTexture[uv] = float4(1, 0, 0, 1);
 }
 
 FRasterTri SetupTriangle(float3 Verts[3]) //FRaster Raster, 
@@ -76,15 +87,15 @@ FRasterTri SetupTriangle(float3 Verts[3]) //FRaster Raster,
 	const float2 MaxSubpixel = max3(Vert0, Vert1, Vert2);
 
 #if 0
-	bool2 bMissCenter = (MinSubpixel & NANITE_SUBPIXEL_MASK > (NANITE_SUBPIXEL_SAMPLES / 2)) &&
-		(MaxSubpixel - (MinSubpixel & ~NANITE_SUBPIXEL_MASK) + (NANITE_SUBPIXEL_SAMPLES / 2)) < NANITE_SUBPIXEL_MASK;
+	bool2 bMissCenter = (MinSubpixel & QUARK_SUBPIXEL_MASK > (QUARK_SUBPIXEL_SAMPLES / 2)) &&
+		(MaxSubpixel - (MinSubpixel & ~QUARK_SUBPIXEL_MASK) + (QUARK_SUBPIXEL_SAMPLES / 2)) < QUARK_SUBPIXEL_MASK;
 	if (any(bMissCenter))
 		Tri.bIsValid = false;
 #endif
 
 	// Round to nearest pixel
-	Tri.MinPixel = (int2)floor((MinSubpixel + (NANITE_SUBPIXEL_SAMPLES / 2) - 1) * (1.0 / NANITE_SUBPIXEL_SAMPLES));
-	Tri.MaxPixel = (int2)floor((MaxSubpixel - (NANITE_SUBPIXEL_SAMPLES / 2) - 1) * (1.0 / NANITE_SUBPIXEL_SAMPLES));	// inclusive!
+	Tri.MinPixel = (int2)floor((MinSubpixel + (QUARK_SUBPIXEL_SAMPLES / 2) - 1) * (1.0 / QUARK_SUBPIXEL_SAMPLES));
+	Tri.MaxPixel = (int2)floor((MaxSubpixel - (QUARK_SUBPIXEL_SAMPLES / 2) - 1) * (1.0 / QUARK_SUBPIXEL_SAMPLES));	// inclusive!
 
 	// Clip to viewport
 	Tri.MinPixel = max(Tri.MinPixel, int2(0, 0));//Raster.ViewRect.xy
@@ -119,7 +130,7 @@ FRasterTri SetupTriangle(float3 Verts[3]) //FRaster Raster,
 	// Rebase off MinPixel with half pixel offset
 	// 4.8 fixed point
 	// Max triangle size = 127x127 pixels
-	const float2 BaseSubpixel = (float2)Tri.MinPixel * NANITE_SUBPIXEL_SAMPLES + (NANITE_SUBPIXEL_SAMPLES / 2);
+	const float2 BaseSubpixel = (float2)Tri.MinPixel * QUARK_SUBPIXEL_SAMPLES + (QUARK_SUBPIXEL_SAMPLES / 2);
 	Vert0 -= BaseSubpixel;
 	Vert1 -= BaseSubpixel;
 	Vert2 -= BaseSubpixel;
@@ -143,21 +154,21 @@ FRasterTri SetupTriangle(float3 Verts[3]) //FRaster Raster,
 #endif
 
 	float Z0 = Verts[0].z - (GradZ.x * Vert0.x + GradZ.y * Vert0.y);
-	GradZ *= NANITE_SUBPIXEL_SAMPLES;
+	GradZ *= QUARK_SUBPIXEL_SAMPLES;
 
 	Tri.DepthPlane = float3(GradZ, Z0);
 
 #if 0
 	// Step in pixel increments
 	// 8.16 fixed point
-	Tri.Edge01 *= NANITE_SUBPIXEL_SAMPLES;
-	Tri.Edge12 *= NANITE_SUBPIXEL_SAMPLES;
-	Tri.Edge20 *= NANITE_SUBPIXEL_SAMPLES;
+	Tri.Edge01 *= QUARK_SUBPIXEL_SAMPLES;
+	Tri.Edge12 *= QUARK_SUBPIXEL_SAMPLES;
+	Tri.Edge20 *= QUARK_SUBPIXEL_SAMPLES;
 #else
 	// Scale C0/C1/C2 down by SubpixelSamples instead of scaling Edge01/Edge12/Edge20 up. Lossless because SubpixelSamples is a power of two.
-	Tri.C0 *= (1.0f / NANITE_SUBPIXEL_SAMPLES);
-	Tri.C1 *= (1.0f / NANITE_SUBPIXEL_SAMPLES);
-	Tri.C2 *= (1.0f / NANITE_SUBPIXEL_SAMPLES);
+	Tri.C0 *= (1.0f / QUARK_SUBPIXEL_SAMPLES);
+	Tri.C1 *= (1.0f / QUARK_SUBPIXEL_SAMPLES);
+	Tri.C2 *= (1.0f / QUARK_SUBPIXEL_SAMPLES);
 #endif
 
 	return Tri;
@@ -205,7 +216,8 @@ void RasterizeTri_Scanline_Inner(FRasterTri Tri) //FRaster Raster, uint PixelVal
 		for (float x = x0; x <= x1; x++)
 		{
 			//WritePixelSW(PixelValue, uint2(x, y), ZX, float3(CX0, CX1, CX2), Raster, Tri, bSinglePage);
-			OutputColor[uint2(x, y)] = float4(1, 0, 0, 1);
+			FQuarkPixel pixel = (FQuarkPixel) 0;
+            WriteQuarkPixel(uint2(x, y), pixel);
 
 			CX0 -= Tri.Edge12.y;
 			CX1 -= Tri.Edge20.y;
@@ -224,7 +236,7 @@ void RasterizeTri_Scanline_Inner(FRasterTri Tri) //FRaster Raster, uint PixelVal
 	}
 }
 
-[numthreads(1, 1, 1)]
+[numthreads(DispatchX, DispatchY, DispatchZ)]
 void CS_Main(uint3 LocalThreadId : SV_GroupThreadID, uint3 GroupId : SV_GroupID, uint3 DTid : SV_DispatchThreadID)
 {
     int clusterIdx = VisibleClusterBuffer[DTid.x % ShadingStruct.MaxVisClusterIndex] % ShadingStruct.MaxClusterIndex;
@@ -236,18 +248,16 @@ void CS_Main(uint3 LocalThreadId : SV_GroupThreadID, uint3 GroupId : SV_GroupID,
         pos[0] = mul(float4(tri.Vertices[0].Position, 1), cluster.WorldMatrix).xyz;
         pos[1] = mul(float4(tri.Vertices[1].Position, 1), cluster.WorldMatrix).xyz;
         pos[2] = mul(float4(tri.Vertices[2].Position, 1), cluster.WorldMatrix).xyz;
+		
+        pos[0].xy *= ShadingStruct.QuarkRTSizeFactor;
+        pos[1].xy *= ShadingStruct.QuarkRTSizeFactor;
+        pos[2].xy *= ShadingStruct.QuarkRTSizeFactor;
         //do raster
 		
         FRasterTri rasterTri = SetupTriangle(pos);
         if (rasterTri.bIsValid)
             RasterizeTri_Scanline_Inner(rasterTri);
     }
-	
-    //if (DTid.x > 50 && DTid.x < 100 && DTid.y > 50 && DTid.y < 100)
-    //{
-    //    OutputColor[DTid.xy] = float4(1, 0, 0, 1);
-    //    //InterlockedMax(OutputColor[DTid.xy], float4(0, 1, 0, 1));
-    //}
 }
 
 #endif

@@ -244,7 +244,7 @@ namespace EngineNS.Bricks.GpuDriven
             drawcall.BindSrv("ClusterBuffer", node.GetAttachBuffer(node.ClustersPinIn).Srv);
             drawcall.BindSrv("VisibleClusterBuffer", node.GetAttachBuffer(node.VisibleClustersPinIn).Srv);
             
-            drawcall.BindUav("OutputColor", node.GetAttachBuffer(node.QuarkRTPinOut).Uav);
+            drawcall.BindUav("OutputQuarkTexture", node.GetAttachBuffer(node.QuarkRTPinOut).Uav);
         }
     }
 
@@ -266,6 +266,7 @@ namespace EngineNS.Bricks.GpuDriven
                 MaxVisClusterIndex = 1;
                 MaxClusterIndex = 1;
             }
+            public Vector2 QuarkRTSizeFactor;
             public int MaxVisClusterIndex;
             public int MaxClusterIndex;
         };
@@ -275,20 +276,7 @@ namespace EngineNS.Bricks.GpuDriven
         public TtSwRasterizeShading SWRasterizer;
         private NxRHI.UComputeDraw SWRasterizerDrawcall;
 
-        int NANITE_SUBPIXEL_SAMPLES = 256;
-        struct Triangle
-        {
-            public Vector3 pos0;
-            public Vector3 pos1;
-            public Vector3 pos2;
-
-            public Triangle(Vector3 p0, Vector3 p1, Vector3 p2)
-            {
-                pos0 = p0;
-                pos1 = p1;
-                pos2 = p2;
-            }
-        }
+        int QUARK_SUBPIXEL_SAMPLES = 256;
         public TtSwRasterizeNode()
         {
             Name = "SwRasterizeNode";
@@ -316,6 +304,12 @@ namespace EngineNS.Bricks.GpuDriven
 
             base.InitNodePins();
         }
+        public override void OnResize(URenderPolicy policy, float x, float y)
+        {
+            base.OnResize(policy, x, y);
+            mShadingStruct.QuarkRTSizeFactor.X = x * QUARK_SUBPIXEL_SAMPLES;
+            mShadingStruct.QuarkRTSizeFactor.Y = y * QUARK_SUBPIXEL_SAMPLES;
+        }
         public override async Task Initialize(URenderPolicy policy, string debugName)
         {
             await base.Initialize(policy, debugName);
@@ -333,13 +327,10 @@ namespace EngineNS.Bricks.GpuDriven
             {
                 CBShadingEnv.SetValue("ShadingStruct", in mShadingStruct);
             }
-            const uint threadGroupWorkRegionDim = 16;
-            var dispatchX = MathHelper.Roundup(2, threadGroupWorkRegionDim);
-            uint dispatchY = 1;// MathHelper.Roundup(ColorOutput.Attachement.Height, threadGroupWorkRegionDim);
-
+            
             var cmd = BasePass.DrawCmdList;
             cmd.BeginCommand();
-            SWRasterizer.SetDrawcallDispatch(policy, SWRasterizerDrawcall, dispatchX, dispatchY, 1, false);
+            SWRasterizer.SetDrawcallDispatch(policy, SWRasterizerDrawcall, 1, 1, 1, false);
             SWRasterizerDrawcall.Commit(cmd);
 
             cmd.EndCommand();
