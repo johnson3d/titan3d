@@ -579,6 +579,36 @@ namespace NxRHI
 		box.back = box.front + footprint->Depth;
 		mContext->CopySubresourceRegion((ID3D11Resource*)copyTexture->GetHWBuffer(), subRes, 0, 0, 0, (ID3D11Resource*)source->GetHWBuffer(), subRes, &box);*/
 	}
+
+	void DX11CommandList::WriteBufferUINT32(UINT Count, FBufferWriter* BufferWriters)
+	{
+		if (Count == 0)
+			return;
+		FBufferDesc bfDesc{};
+		bfDesc.SetDefault();
+		bfDesc.Usage = EGpuUsage::USAGE_STAGING;
+		bfDesc.CpuAccess = ECpuAccess::CAS_WRITE;
+		bfDesc.Type = EBufferType::BFT_NONE;
+		bfDesc.Size = Count * sizeof(UINT);
+		bfDesc.RowPitch = bfDesc.Size;
+		bfDesc.DepthPitch = bfDesc.Size;
+		auto copyBuffer = MakeWeakRef(GetDX11Device()->CreateBuffer(&bfDesc));
+		FMappedSubResource mapped{};
+		if (copyBuffer->Map(0, &mapped, false))
+		{
+			auto ptr = (UINT*)mapped.pData;
+			for (UINT i = 0; i < Count; i++)
+			{
+				ptr[i] = BufferWriters[i].Value;
+			}
+			copyBuffer->Unmap(0);
+		}
+		for (UINT i = 0; i < Count; i++)
+		{
+			CopyBufferRegion(BufferWriters[i].Buffer, BufferWriters[i].Offset, copyBuffer, i * sizeof(UINT), sizeof(UINT));
+		}
+	}
+
 	void DX11CommandList::Commit(ID3D11DeviceContext* imContex)
 	{
 		if (GetDX11CmdRecorder() == nullptr)

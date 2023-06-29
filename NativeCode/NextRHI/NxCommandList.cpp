@@ -1,6 +1,8 @@
 #include "NxCommandList.h"
 #include "NxDrawcall.h"
 #include "NxFrameBuffers.h"
+#include "NxBuffer.h"
+#include "NxGpuDevice.h"
 #include "../../Base/vfxsampcounter.h"
 
 #define new VNEW
@@ -131,6 +133,34 @@ namespace NxRHI
 	void ICommandList::InheritPass(ICommandList* cmdlist)
 	{
 		mCurrentFrameBuffers = cmdlist->mCurrentFrameBuffers;
+	}
+	void ICommandList::WriteBufferUINT32(UINT Count, FBufferWriter* BufferWriters)
+	{
+		if (Count == 0)
+			return;
+		FBufferDesc bfDesc{};
+		bfDesc.SetDefault();
+		bfDesc.Usage = EGpuUsage::USAGE_STAGING;
+		bfDesc.CpuAccess = ECpuAccess::CAS_WRITE;
+		bfDesc.Type = EBufferType::BFT_NONE;
+		bfDesc.Size = Count * sizeof(UINT);
+		bfDesc.RowPitch = bfDesc.Size;
+		bfDesc.DepthPitch = bfDesc.Size;
+		auto copyBuffer = MakeWeakRef(GetGpuDevice()->CreateBuffer(&bfDesc));
+		FMappedSubResource mapped{};
+		if (copyBuffer->Map(0, &mapped, false))
+		{
+			auto ptr = (UINT*)mapped.pData;
+			for (UINT i = 0; i < Count; i++)
+			{
+				ptr[i] = BufferWriters[i].Value;
+			}
+			copyBuffer->Unmap(0);
+		}
+		for (UINT i = 0; i < Count; i++)
+		{
+			CopyBufferRegion(BufferWriters[i].Buffer, BufferWriters[i].Offset, copyBuffer, i * sizeof(UINT), sizeof(UINT));
+		}
 	}
 }
 

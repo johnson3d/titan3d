@@ -151,6 +151,10 @@ namespace EngineNS.NxRHI
         {
             mCoreObject.CopyTextureRegion(target.mCoreObject, tarSubRes, 0, 0, 0, src.mCoreObject, srcSubRes, (NxRHI.FSubresourceBox*)IntPtr.Zero.ToPointer());
         }
+        public unsafe void WriteBufferUINT32(uint Count, EngineNS.NxRHI.FBufferWriter* BufferWriters)
+        {
+            mCoreObject.WriteBufferUINT32(Count, BufferWriters);
+        }
         #endregion
 
         #region PushDrawcall

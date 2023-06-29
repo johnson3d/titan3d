@@ -152,7 +152,7 @@ namespace NxRHI
 		virtual void CopyBufferToTexture(ITexture* target, UINT subRes, IBuffer* src, const FSubResourceFootPrint* footprint) = 0;
 		virtual void CopyTextureToBuffer(IBuffer* target, const FSubResourceFootPrint* footprint, ITexture* src, UINT subRes) = 0;
 
-		virtual void WriteBufferUINT32(UINT Count, FBufferWriter* BufferWriters) { ASSERT(false); }
+		virtual void WriteBufferUINT32(UINT Count, FBufferWriter* BufferWriters);
 
 		virtual void BeginEvent(const char* info) = 0;
 		virtual void EndEvent() = 0;
