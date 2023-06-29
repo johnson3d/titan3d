@@ -32,6 +32,7 @@ struct FRasterTri
 };
 
 StructuredBuffer<int> VisibleClusterBuffer;
+RWStructuredBuffer<int> IndirectArgBuffer;
 RWTexture2D<float4> OutputQuarkTexture;
 
 struct FShadingStruct
@@ -39,6 +40,8 @@ struct FShadingStruct
     float2 QuarkRTSizeFactor;
     int MaxVisClusterIndex;
     int MaxClusterIndex;
+	
+    uint3 DispatchArg;
 };
 
 cbuffer cbShadingEnv DX_AUTOBIND
@@ -234,6 +237,14 @@ void RasterizeTri_Scanline_Inner(FRasterTri Tri) //FRaster Raster, uint PixelVal
 		ZY += Tri.DepthPlane.y;
 		y++;
 	}
+}
+
+[numthreads(DispatchX, DispatchY, DispatchZ)]
+void CS_DispatchArgMain(uint3 LocalThreadId : SV_GroupThreadID, uint3 GroupId : SV_GroupID, uint3 DTid : SV_DispatchThreadID)
+{
+    IndirectArgBuffer[0] = (VisibleClusterBuffer[0] + (ShadingStruct.DispatchArg.x - 1)) / ShadingStruct.DispatchArg.x;
+    IndirectArgBuffer[1] = 1;
+    IndirectArgBuffer[2] = 1;
 }
 
 [numthreads(DispatchX, DispatchY, DispatchZ)]

@@ -99,7 +99,6 @@ namespace EngineNS.Bricks.GpuDriven
             drawcall.BindSrv("ClusterBuffer", node.Clusters.DataSRV);
             drawcall.BindSrv("SrcClusterBuffer", node.SrcClusters.DataSRV);
             drawcall.BindUav("VisClusterBuffer", node.VisClusters.DataUAV);
-            drawcall.BindUav("IndirectArgBuffer", node.IndirectArgBuffer.DataUAV);
         }
     }
     public class TtCullClusterNode : URenderGraphNode
@@ -109,8 +108,7 @@ namespace EngineNS.Bricks.GpuDriven
         public URenderGraphPin IndicesPinIn = URenderGraphPin.CreateInputOutput("Indices", false, EPixelFormat.PXF_UNKNOWN);
         public URenderGraphPin ClustersPinIn = URenderGraphPin.CreateInputOutput("Clusters", false, EPixelFormat.PXF_UNKNOWN);
         public URenderGraphPin VisibleClutersPinOut = URenderGraphPin.CreateOutput("VisibleClusters", false, EPixelFormat.PXF_UNKNOWN);
-        public URenderGraphPin ClusterIndirectArgPinOut = URenderGraphPin.CreateOutput("ClusterIndirectArg", false, EPixelFormat.PXF_UNKNOWN);
-
+        
         public TtCullClusterShading CullClusterShading;
         private NxRHI.UComputeDraw CullClusterShadingDrawcall;
 
@@ -128,8 +126,7 @@ namespace EngineNS.Bricks.GpuDriven
         public TtCpu2GpuBuffer<FClusterData> Clusters = new TtCpu2GpuBuffer<FClusterData>();
         public TtCpu2GpuBuffer<int> SrcClusters = new TtCpu2GpuBuffer<int>();
         public TtCpu2GpuBuffer<int> VisClusters = new TtCpu2GpuBuffer<int>();
-        public TtGpuBuffer<int> IndirectArgBuffer = new TtGpuBuffer<int>();
-
+        
         public TtCullClusterNode()
         {
             Name = "CullClusterNode";
@@ -142,7 +139,6 @@ namespace EngineNS.Bricks.GpuDriven
             AddInputOutput(ClustersPinIn, NxRHI.EBufferType.BFT_UAV | NxRHI.EBufferType.BFT_SRV);
 
             AddOutput(VisibleClutersPinOut, NxRHI.EBufferType.BFT_UAV | NxRHI.EBufferType.BFT_SRV);
-            AddOutput(ClusterIndirectArgPinOut, NxRHI.EBufferType.BFT_UAV | NxRHI.EBufferType.BFT_SRV);
 
             HzbPinIn.IsAllowInputNull = true;
             VerticesPinIn.IsAllowInputNull = true;
@@ -174,12 +170,6 @@ namespace EngineNS.Bricks.GpuDriven
                 visClst[0] = 0;
                 VisClusters.UpdateData(0, visClst, sizeof(int) * 100 + sizeof(int));
                 VisClusters.Flush2GPU();
-
-                var dispatchArg = stackalloc int[3];
-                dispatchArg[0] = 1;
-                dispatchArg[1] = 1;
-                dispatchArg[2] = 1;
-                IndirectArgBuffer.SetSize(3, dispatchArg, NxRHI.EBufferType.BFT_UAV | NxRHI.EBufferType.BFT_SRV);
             }
         }
         private unsafe void InitBuffers()
@@ -228,10 +218,6 @@ namespace EngineNS.Bricks.GpuDriven
             var attachment = ImportAttachment(VisibleClutersPinOut);
             attachment.Uav = VisClusters.DataUAV;
             attachment.Srv = VisClusters.DataSRV;
-
-            attachment = ImportAttachment(ClusterIndirectArgPinOut);
-            attachment.Uav = IndirectArgBuffer.DataUAV;
-            attachment.Srv = IndirectArgBuffer.DataSRV;
 
             if (VerticesPinIn.FindInLinker() == null)
             {

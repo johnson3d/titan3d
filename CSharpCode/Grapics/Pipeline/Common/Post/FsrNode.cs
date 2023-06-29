@@ -95,10 +95,6 @@ namespace EngineNS.Graphics.Pipeline.Common.Post
 
             this.UpdatePermutation();
         }
-        public override string ToString()
-        {
-            return base.ToString() + "[RCAS]";
-        }
         protected override void EnvShadingDefines(in FPermutationId id, UShaderDefinitions defines)
         {
             base.EnvShadingDefines(in id, defines);

@@ -285,7 +285,7 @@ namespace EngineNS.Graphics.Pipeline.Shader
         public abstract Vector3ui DispatchArg { get; }
         public override string ToString()
         {
-            return base.ToString() + $"[{DispatchArg.ToString()}]";
+            return base.ToString() + $"[{MainName}:{DispatchArg.ToString()}]";
         }
         public NxRHI.UComputeEffect GetEffect()
         {

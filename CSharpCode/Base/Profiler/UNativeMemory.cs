@@ -33,10 +33,6 @@ namespace EngineNS.Profiler
         static int testSize = 1048624;
         private unsafe void OnNativeMemAllocImpl(IntPtr size, sbyte* file, IntPtr line, IntPtr id)
         {
-            if (size.ToInt32() == testSize)
-            {
-                int xxx = 0;
-            }
             //if ((uint)id == 2085)
             //{
             //    return;

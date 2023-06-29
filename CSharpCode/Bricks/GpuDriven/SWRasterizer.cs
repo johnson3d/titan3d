@@ -214,6 +214,33 @@ namespace EngineNS.Bricks.GpuDriven
     }
     #endregion
 
+    public class TtSwRasterizeDispatchArgShading : Graphics.Pipeline.Shader.UComputeShadingEnv
+    {
+        public override Vector3ui DispatchArg
+        {
+            get => new Vector3ui(1, 1, 1);
+        }
+        public TtSwRasterizeDispatchArgShading()
+        {
+            CodeName = RName.GetRName("Shaders/Bricks/GpuDriven/SWRasterizer.compute", RName.ERNameType.Engine);
+            MainName = "CS_DispatchArgMain";
+
+            this.UpdatePermutation();
+        }
+        protected override void EnvShadingDefines(in FPermutationId id, NxRHI.UShaderDefinitions defines)
+        {
+            base.EnvShadingDefines(in id, defines);
+        }
+        public override void OnDrawCall(NxRHI.UComputeDraw drawcall, Graphics.Pipeline.URenderPolicy policy)
+        {
+            var node = drawcall.TagObject as TtSwRasterizeNode;
+
+            drawcall.BindSrv("VisibleClusterBuffer", node.GetAttachBuffer(node.VisibleClustersPinIn).Srv);
+
+            drawcall.BindUav("IndirectArgBuffer", node.IndirectArgBuffer.DataUAV);
+        }
+    }
+
     public class TtSwRasterizeShading : Graphics.Pipeline.Shader.UComputeShadingEnv
     {
         public override Vector3ui DispatchArg
@@ -265,13 +292,19 @@ namespace EngineNS.Bricks.GpuDriven
             {
                 MaxVisClusterIndex = 1;
                 MaxClusterIndex = 1;
+                DispatchArg = Vector3ui.One;
             }
             public Vector2 QuarkRTSizeFactor;
             public int MaxVisClusterIndex;
             public int MaxClusterIndex;
+            public Vector3ui DispatchArg;
         };
         FShadingStruct mShadingStruct = new FShadingStruct();
         public NxRHI.UCbView CBShadingEnv;
+
+        public TtGpuBuffer<int> IndirectArgBuffer = new TtGpuBuffer<int>();
+        public TtSwRasterizeDispatchArgShading DispatchArgShading;
+        private NxRHI.UComputeDraw DispatchArgShadingDrawcall;
 
         public TtSwRasterizeShading SWRasterizer;
         private NxRHI.UComputeDraw SWRasterizerDrawcall;
@@ -320,6 +353,20 @@ namespace EngineNS.Bricks.GpuDriven
             CoreSDK.DisposeObject(ref SWRasterizerDrawcall);
             SWRasterizerDrawcall = rc.CreateComputeDraw();
             SWRasterizer = UEngine.Instance.ShadingEnvManager.GetShadingEnv<TtSwRasterizeShading>();
+
+            CoreSDK.DisposeObject(ref DispatchArgShadingDrawcall);
+            DispatchArgShadingDrawcall = rc.CreateComputeDraw();
+            DispatchArgShading = UEngine.Instance.ShadingEnvManager.GetShadingEnv<TtSwRasterizeDispatchArgShading>();
+
+            mShadingStruct.DispatchArg = SWRasterizer.DispatchArg;
+            unsafe
+            {
+                var dispatchArg = stackalloc int[3];
+                dispatchArg[0] = 1;
+                dispatchArg[1] = 1;
+                dispatchArg[2] = 1;
+                IndirectArgBuffer.SetSize(3, dispatchArg, NxRHI.EBufferType.BFT_UAV | NxRHI.EBufferType.BFT_SRV);
+            }
         }
         public override void TickLogic(UWorld world, URenderPolicy policy, bool bClear)
         {
@@ -330,6 +377,10 @@ namespace EngineNS.Bricks.GpuDriven
             
             var cmd = BasePass.DrawCmdList;
             cmd.BeginCommand();
+
+            DispatchArgShading.SetDrawcallDispatch(this, policy, DispatchArgShadingDrawcall, 1, 1, 1, true);
+            DispatchArgShadingDrawcall.Commit(cmd);
+
             SWRasterizer.SetDrawcallDispatch(this, policy, SWRasterizerDrawcall, 1, 1, 1, false);
             SWRasterizerDrawcall.Commit(cmd);
 

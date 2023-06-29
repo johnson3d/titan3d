@@ -21,7 +21,7 @@ struct FClusterData
     int FaceStart;
     float3 BoundExtent;
     int FaceEnd;
-    Matrix WorldMatrix; 
+    matrix WorldMatrix;
 };
 
 StructuredBuffer<float> VertexBuffer;
