@@ -165,17 +165,23 @@ namespace EngineNS.Graphics.Pipeline.Common
 
             GpuBuffer = UEngine.Instance.GfxDevice.RenderContext.CreateBuffer(in bfDesc);
 
-            var uavDesc = new NxRHI.FUavDesc();
-            uavDesc.SetBuffer(0);
-            uavDesc.Buffer.NumElements = (uint)Count;
-            uavDesc.Buffer.StructureByteStride = bfDesc.StructureStride;
-            DataUAV = UEngine.Instance.GfxDevice.RenderContext.CreateUAV(GpuBuffer, in uavDesc);
+            if ((bufferType & NxRHI.EBufferType.BFT_UAV) != 0)
+            {
+                var uavDesc = new NxRHI.FUavDesc();
+                uavDesc.SetBuffer(0);
+                uavDesc.Buffer.NumElements = (uint)Count;
+                uavDesc.Buffer.StructureByteStride = bfDesc.StructureStride;
+                DataUAV = UEngine.Instance.GfxDevice.RenderContext.CreateUAV(GpuBuffer, in uavDesc);
+            }
 
-            var srvDesc = new NxRHI.FSrvDesc();
-            srvDesc.SetBuffer(0);
-            srvDesc.Buffer.NumElements = (uint)Count;
-            srvDesc.Buffer.StructureByteStride = bfDesc.StructureStride;
-            DataSRV = UEngine.Instance.GfxDevice.RenderContext.CreateSRV(GpuBuffer, in srvDesc);
+            if ((bufferType & NxRHI.EBufferType.BFT_SRV) != 0)
+            {
+                var srvDesc = new NxRHI.FSrvDesc();
+                srvDesc.SetBuffer(0);
+                srvDesc.Buffer.NumElements = (uint)Count;
+                srvDesc.Buffer.StructureByteStride = bfDesc.StructureStride;
+                DataSRV = UEngine.Instance.GfxDevice.RenderContext.CreateSRV(GpuBuffer, in srvDesc);
+            }   
         }
     }
     public partial class UGpuSceneNode : Graphics.Pipeline.Common.URenderGraphNode

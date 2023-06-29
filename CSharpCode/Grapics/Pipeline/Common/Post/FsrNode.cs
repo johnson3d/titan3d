@@ -108,11 +108,6 @@ namespace EngineNS.Graphics.Pipeline.Common.Post
         public override void OnDrawCall(NxRHI.UComputeDraw drawcall, URenderPolicy policy)
         {
             var aaNode = drawcall.TagObject as TtFsrNode;
-            if (aaNode == null)
-            {
-                var pipelinePolicy = policy;
-                aaNode = pipelinePolicy.FindFirstNode<TtFsrNode>();
-            }
 
             var index = drawcall.FindBinder(EShaderBindType.SBT_SRV, "ColorBuffer");
             if (index.IsValidPointer)
@@ -239,11 +234,11 @@ namespace EngineNS.Graphics.Pipeline.Common.Post
 
             var cmd = BasePass.DrawCmdList;
             cmd.BeginCommand();
-            UpSampleShadingEnv.SetDrawcallDispatch(policy, UpSampleDrawcall, dispatchX,
+            UpSampleShadingEnv.SetDrawcallDispatch(this, policy, UpSampleDrawcall, dispatchX,
                             dispatchY, 1, false);
             //UpSampleDrawcall.Commit(cmd);
             cmd.PushGpuDraw(UpSampleDrawcall);
-            RCASShading.SetDrawcallDispatch(policy, RCASDrawcall, dispatchX,
+            RCASShading.SetDrawcallDispatch(this, policy, RCASDrawcall, dispatchX,
                             dispatchY, 1, false);
             //RCASDrawcall.Commit(cmd);
             cmd.PushGpuDraw(RCASDrawcall);

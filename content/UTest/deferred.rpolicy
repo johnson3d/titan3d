@@ -2,7 +2,7 @@
 <Root Type="EngineNS.Bricks.RenderPolicyEditor.UPolicyGraph@EngineCore">
   <AssetName Type="EngineNS.RName@EngineCore" Value="Game,utest/deferred.rpolicy,6bec2549-4d63-4af4-90eb-ec4cda04da9b" />
   <GraphName Type="System.String@Unknown" Value="NodeGraph" />
-  <Nodes Type="System.Collections.Generic.List&lt;EngineNS.Bricks.NodeGraph.UNodeBase@EngineCore,&gt;@Unknown" Count="38">
+  <Nodes Type="System.Collections.Generic.List&lt;EngineNS.Bricks.NodeGraph.UNodeBase@EngineCore,&gt;@Unknown" Count="37">
     <e_0 Type="EngineNS.Bricks.RenderPolicyEditor.UPolicyNode@EngineCore">
       <GraphNodeTypeString Type="System.String@Unknown" Value="EngineNS.Graphics.Pipeline.Deferred.UDeferredBasePassNode@EngineCore" />
       <Label Type="System.String@Unknown" Value="BasePassNode" />
@@ -394,15 +394,6 @@
       <InputEditableValues Type="System.Collections.Generic.List&lt;EngineNS.Bricks.NodeGraph.UNodeBase.UInputEditableValueInfo@EngineCore,&gt;@Unknown" Count="0" />
     </e_35>
     <e_36 Type="EngineNS.Bricks.RenderPolicyEditor.UPolicyNode@EngineCore">
-      <GraphNodeTypeString Type="System.String@Unknown" Value="EngineNS.Bricks.GpuDriven.TtCullInstanceNode@EngineCore" />
-      <Label Type="System.String@Unknown" Value="GpuCullInstanceNode" />
-      <Name Type="System.String@Unknown" Value="GpuCullInstanceNode" />
-      <NodeId Type="System.Guid@Unknown" Value="970bcc7c-4f22-473d-bf5c-93cbe726a3d2" />
-      <Position Type="EngineNS.Vector2@EngineCore" Value="-1022.8,184.7" />
-      <GraphNode Type="EngineNS.Bricks.GpuDriven.TtCullInstanceNode@EngineCore" />
-      <InputEditableValues Type="System.Collections.Generic.List&lt;EngineNS.Bricks.NodeGraph.UNodeBase.UInputEditableValueInfo@EngineCore,&gt;@Unknown" Count="0" />
-    </e_36>
-    <e_37 Type="EngineNS.Bricks.RenderPolicyEditor.UPolicyNode@EngineCore">
       <GraphNodeTypeString Type="System.String@Unknown" Value="EngineNS.Bricks.GpuDriven.TtCullClusterNode@EngineCore" />
       <Label Type="System.String@Unknown" Value="CullClusterNode" />
       <Name Type="System.String@Unknown" Value="CullClusterNode" />
@@ -410,7 +401,7 @@
       <Position Type="EngineNS.Vector2@EngineCore" Value="-1025,296.00003" />
       <GraphNode Type="EngineNS.Bricks.GpuDriven.TtCullClusterNode@EngineCore" />
       <InputEditableValues Type="System.Collections.Generic.List&lt;EngineNS.Bricks.NodeGraph.UNodeBase.UInputEditableValueInfo@EngineCore,&gt;@Unknown" Count="0" />
-    </e_37>
+    </e_36>
   </Nodes>
   <PolicyClassName Type="System.String@Unknown" Value="EngineNS.Graphics.Pipeline.UDeferredPolicyBase@EngineCore" />
   <Linkers Type="System.Collections.Generic.List&lt;EngineNS.Bricks.NodeGraph.UPinLinker@EngineCore,&gt;@Unknown" Count="66">

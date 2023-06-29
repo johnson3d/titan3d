@@ -330,7 +330,7 @@ namespace EngineNS.Bricks.GpuDriven
             
             var cmd = BasePass.DrawCmdList;
             cmd.BeginCommand();
-            SWRasterizer.SetDrawcallDispatch(policy, SWRasterizerDrawcall, 1, 1, 1, false);
+            SWRasterizer.SetDrawcallDispatch(this, policy, SWRasterizerDrawcall, 1, 1, 1, false);
             SWRasterizerDrawcall.Commit(cmd);
 
             cmd.EndCommand();

@@ -304,9 +304,9 @@ namespace EngineNS.Graphics.Pipeline.Shader
         {
 
         }
-        public void SetDrawcallDispatch(URenderPolicy policy, NxRHI.UComputeDraw drawcall, uint x, uint y, uint z, bool bRoundupXYZ)
+        public void SetDrawcallDispatch(object tagObject, URenderPolicy policy, NxRHI.UComputeDraw drawcall, uint x, uint y, uint z, bool bRoundupXYZ)
         {
-            drawcall.TagObject = policy;
+            drawcall.TagObject = tagObject;
             drawcall.SetComputeEffect(GetEffect());
             if (bRoundupXYZ)
             {
@@ -321,9 +321,9 @@ namespace EngineNS.Graphics.Pipeline.Shader
 
             this.OnDrawCall(drawcall, policy);
         }
-        public void SetDrawcallIndirectDispatch(URenderPolicy policy, NxRHI.UComputeDraw drawcall, NxRHI.UBuffer indirectBuffer)
+        public void SetDrawcallIndirectDispatch(object tagObject, URenderPolicy policy, NxRHI.UComputeDraw drawcall, NxRHI.UBuffer indirectBuffer)
         {
-            drawcall.TagObject = policy;
+            drawcall.TagObject = tagObject;
             drawcall.SetComputeEffect(GetEffect());
             drawcall.BindIndirectDispatchArgsBuffer(indirectBuffer);
 

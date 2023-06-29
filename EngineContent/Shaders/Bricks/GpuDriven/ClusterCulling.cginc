@@ -5,6 +5,7 @@
 
 StructuredBuffer<int> SrcClusterBuffer;
 RWStructuredBuffer<int> VisClusterBuffer;
+RWStructuredBuffer<int> IndirectArgBuffer;
 
 bool IsVisible(int clusterIdx)
 {

@@ -796,16 +796,27 @@ namespace NxRHI
 	void DX12CommandList::WriteBufferUINT32(UINT Count, FBufferWriter* BufferWriters)
 	{
 		if (mContext2 == nullptr)
+		{
+			ICommandList::WriteBufferUINT32(Count, BufferWriters);
 			return;
+		}
 		auto writers = (D3D12_WRITEBUFFERIMMEDIATE_PARAMETER*)alloca(sizeof(D3D12_WRITEBUFFERIMMEDIATE_PARAMETER) * Count);
 		auto modes = (D3D12_WRITEBUFFERIMMEDIATE_MODE*)alloca(sizeof(D3D12_WRITEBUFFERIMMEDIATE_MODE) * Count);
+		auto saveStates = (EGpuResourceState*)alloca(sizeof(EGpuResourceState) * Count);
+		
 		for (UINT i = 0; i < Count; i++)
 		{
+			saveStates[i] = BufferWriters[i].Buffer->GetGpuResourceState();
+			BufferWriters[i].Buffer->TransitionTo(this, EGpuResourceState::GRS_CopyDst);
 			writers[i].Dest = ((DX12Buffer*)BufferWriters[i].Buffer)->GetGPUVirtualAddress() + BufferWriters[i].Offset;
 			writers[i].Value = BufferWriters[i].Value;
 			modes[i] = D3D12_WRITEBUFFERIMMEDIATE_MODE::D3D12_WRITEBUFFERIMMEDIATE_MODE_DEFAULT;
 		}
 		mContext2->WriteBufferImmediate(Count, writers, modes);
+		for (UINT i = 0; i < Count; i++)
+		{
+			BufferWriters[i].Buffer->TransitionTo(this, saveStates[i]);
+		}
 	}
 	
 	void DX12CommandList::Commit(DX12CmdQueue* cmdQueue, EQueueType type)
