@@ -238,6 +238,16 @@ namespace EngineNS.Bricks.GpuDriven
             drawcall.BindSrv("VisibleClusterBuffer", node.GetAttachBuffer(node.VisibleClustersPinIn).Srv);
 
             drawcall.BindUav("IndirectArgBuffer", node.IndirectArgBuffer.DataUAV);
+
+            var index = drawcall.FindBinder(NxRHI.EShaderBindType.SBT_CBuffer, "cbShadingEnv");
+            if (index.IsValidPointer)
+            {
+                if (node.CBShadingEnv == null)
+                {
+                    node.CBShadingEnv = UEngine.Instance.GfxDevice.RenderContext.CreateCBV(index);
+                }
+                drawcall.BindCBuffer(index, node.CBShadingEnv);
+            }
         }
     }
 
@@ -272,6 +282,16 @@ namespace EngineNS.Bricks.GpuDriven
             drawcall.BindSrv("VisibleClusterBuffer", node.GetAttachBuffer(node.VisibleClustersPinIn).Srv);
             
             drawcall.BindUav("OutputQuarkTexture", node.GetAttachBuffer(node.QuarkRTPinOut).Uav);
+
+            var index = drawcall.FindBinder(NxRHI.EShaderBindType.SBT_CBuffer, "cbShadingEnv");
+            if (index.IsValidPointer)
+            {
+                if (node.CBShadingEnv == null)
+                {
+                    node.CBShadingEnv = UEngine.Instance.GfxDevice.RenderContext.CreateCBV(index);
+                }
+                drawcall.BindCBuffer(index, node.CBShadingEnv);
+            }
         }
     }
 
