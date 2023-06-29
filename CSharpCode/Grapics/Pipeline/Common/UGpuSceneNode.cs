@@ -94,21 +94,21 @@ namespace EngineNS.Graphics.Pipeline.Common
                 bfDesc.Size = (uint)sizeof(T) * GpuCapacity;
                 bfDesc.StructureStride = (uint)sizeof(T);
                 bfDesc.InitData = DataArray.UnsafeGetElementAddress(0);
+                bfDesc.Type = NxRHI.EBufferType.BFT_SRV;
                 if (IsGpuWrite)
                 {
-                    bfDesc.Type = NxRHI.EBufferType.BFT_UAV;
+                    bfDesc.Type |= NxRHI.EBufferType.BFT_UAV;
                     bfDesc.Usage = NxRHI.EGpuUsage.USAGE_DEFAULT;
                 }
                 else
                 {
-                    bfDesc.Type = NxRHI.EBufferType.BFT_SRV;
                     bfDesc.CpuAccess = NxRHI.ECpuAccess.CAS_WRITE;
                     bfDesc.Usage = NxRHI.EGpuUsage.USAGE_DYNAMIC;
                 }
                 GpuBuffer = UEngine.Instance.GfxDevice.RenderContext.CreateBuffer(in bfDesc);
                 System.Diagnostics.Debug.Assert(GpuBuffer != null);
 
-                if (IsGpuWrite)
+                if ((bfDesc.Type & NxRHI.EBufferType.BFT_UAV) != 0)
                 {
                     var uavDesc = new NxRHI.FUavDesc();
                     uavDesc.SetBuffer(0);
@@ -116,7 +116,7 @@ namespace EngineNS.Graphics.Pipeline.Common
                     uavDesc.Buffer.StructureByteStride = bfDesc.StructureStride;
                     DataUAV = UEngine.Instance.GfxDevice.RenderContext.CreateUAV(GpuBuffer, in uavDesc);
                 }
-                else
+                if ((bfDesc.Type & NxRHI.EBufferType.BFT_SRV) != 0)
                 {
                     var srvDesc = new NxRHI.FSrvDesc();
                     srvDesc.SetBuffer(0);

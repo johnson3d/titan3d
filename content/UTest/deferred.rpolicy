@@ -413,7 +413,7 @@
     </e_37>
   </Nodes>
   <PolicyClassName Type="System.String@Unknown" Value="EngineNS.Graphics.Pipeline.UDeferredPolicyBase@EngineCore" />
-  <Linkers Type="System.Collections.Generic.List&lt;EngineNS.Bricks.NodeGraph.UPinLinker@EngineCore,&gt;@Unknown" Count="65">
+  <Linkers Type="System.Collections.Generic.List&lt;EngineNS.Bricks.NodeGraph.UPinLinker@EngineCore,&gt;@Unknown" Count="66">
     <e_0 Type="EngineNS.Bricks.NodeGraph.UPinLinker@EngineCore">
       <SaveData Type="EngineNS.Bricks.NodeGraph.UPinLinker.TSaveData@EngineCore">
         <InNodeId Type="System.Guid@Unknown" Value="14fa3edc-067d-4614-8120-302e42977e5e" />
@@ -934,5 +934,13 @@
         <OutPinName Type="System.String@Unknown" Value="Clusters" />
       </SaveData>
     </e_64>
+    <e_65 Type="EngineNS.Bricks.NodeGraph.UPinLinker@EngineCore">
+      <SaveData Type="EngineNS.Bricks.NodeGraph.UPinLinker.TSaveData@EngineCore">
+        <InNodeId Type="System.Guid@Unknown" Value="b5ec4ad0-6ed9-4b84-9266-456767d95997" />
+        <InPinName Type="System.String@Unknown" Value="VisibleClusters" />
+        <OutNodeId Type="System.Guid@Unknown" Value="cca0ed0a-75c9-4be8-acff-c94eae63aee3" />
+        <OutPinName Type="System.String@Unknown" Value="VisibleClusters" />
+      </SaveData>
+    </e_65>
   </Linkers>
 </Root>

@@ -31,13 +31,19 @@ struct FRasterTri
 	bool	bIsValid;
 };
 
-struct Triangle
+StructuredBuffer<int> VisibleClusterBuffer;
+RWTexture2D<float4> OutputColor;
+
+struct FShadingStruct
 {
-	float3 pos[3];
+    int MaxVisClusterIndex;
+    int MaxClusterIndex;
 };
 
-StructuredBuffer<Triangle> InputTriangles;
-RWTexture2D<float4> OutputColor;
+cbuffer cbShadingEnv DX_AUTOBIND
+{
+    FShadingStruct ShadingStruct;
+}
 
 FRasterTri SetupTriangle(float3 Verts[3]) //FRaster Raster, 
 {
@@ -157,7 +163,6 @@ FRasterTri SetupTriangle(float3 Verts[3]) //FRaster Raster,
 	return Tri;
 }
 
-
 void RasterizeTri_Scanline_Inner(FRasterTri Tri) //FRaster Raster, uint PixelValue, const bool bSinglePage
 {
 	float CY0 = Tri.C0;
@@ -219,17 +224,25 @@ void RasterizeTri_Scanline_Inner(FRasterTri Tri) //FRaster Raster, uint PixelVal
 	}
 }
 
-[numthreads(16, 1, 1)]
+[numthreads(1, 1, 1)]
 void CS_Main(uint3 LocalThreadId : SV_GroupThreadID, uint3 GroupId : SV_GroupID, uint3 DTid : SV_DispatchThreadID)
 {
-	if (DTid.x < 2)
-	{
-		Triangle tri = InputTriangles[DTid.x];
-
-		FRasterTri rasterTri = SetupTriangle(tri.pos);
-		if (rasterTri.bIsValid)
-			RasterizeTri_Scanline_Inner(rasterTri);
-	}
+    int clusterIdx = VisibleClusterBuffer[DTid.x % ShadingStruct.MaxVisClusterIndex] % ShadingStruct.MaxClusterIndex;
+    FClusterData cluster = ClusterBuffer[clusterIdx];
+    for (int i = cluster.FaceStart; i <= cluster.FaceEnd; i++)
+    {
+        float3 pos[3];
+        FQuarkTriangle tri = GetQuarkTriangle(i);
+        pos[0] = mul(float4(tri.Vertices[0].Position, 1), cluster.WorldMatrix).xyz;
+        pos[1] = mul(float4(tri.Vertices[1].Position, 1), cluster.WorldMatrix).xyz;
+        pos[2] = mul(float4(tri.Vertices[2].Position, 1), cluster.WorldMatrix).xyz;
+        //do raster
+		
+        FRasterTri rasterTri = SetupTriangle(pos);
+        if (rasterTri.bIsValid)
+            RasterizeTri_Scanline_Inner(rasterTri);
+    }
+	
     //if (DTid.x > 50 && DTid.x < 100 && DTid.y > 50 && DTid.y < 100)
     //{
     //    OutputColor[DTid.xy] = float4(1, 0, 0, 1);

@@ -444,6 +444,7 @@ namespace EngineNS.Bricks.GpuDriven
 
             var attachment = ImportAttachment(VisibleClutersPinOut);
             attachment.Uav = VisClusters.DataUAV;
+            attachment.Srv = VisClusters.DataSRV;
 
             if (VerticesPinIn.FindInLinker() == null)
             {
@@ -461,13 +462,18 @@ namespace EngineNS.Bricks.GpuDriven
                 attachment.Srv = Clusters.DataSRV;
             }
         }
-        public override void TickLogic(UWorld world, URenderPolicy policy, bool bClear)
+        public unsafe override void TickLogic(UWorld world, URenderPolicy policy, bool bClear)
         {
             BuildInstances(world, policy.DefaultCamera.VisParameter);
 
             var cmd = BasePass.DrawCmdList;
             cmd.BeginCommand();
 
+            NxRHI.FBufferWriter bfWriter = new NxRHI.FBufferWriter();
+            bfWriter.Buffer = VisClusters.GpuBuffer.mCoreObject;
+            bfWriter.Offset = 0;
+            bfWriter.Value = 0;
+            cmd.WriteBufferUINT32(1, &bfWriter);
             // TODO: dispatch x/y/z
             GpuSceneCullClusterShading.SetDrawcallDispatch(policy, TtGpuSceneCullClusterDrawcall, 1, 1, 1, true);
 
