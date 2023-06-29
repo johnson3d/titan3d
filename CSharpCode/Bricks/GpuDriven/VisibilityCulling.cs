@@ -165,7 +165,7 @@ namespace EngineNS.Bricks.GpuDriven
             unsafe
             {
                 VisClusters.Initialize(true);
-                VisClusters.SetSize(sizeof(int) * 100 + sizeof(int));
+                VisClusters.SetSize(100 + 1);
                 var visClst = stackalloc int[100 + 1];
                 visClst[0] = 0;
                 VisClusters.UpdateData(0, visClst, sizeof(int) * 100 + sizeof(int));
@@ -184,7 +184,7 @@ namespace EngineNS.Bricks.GpuDriven
             Vertices.Flush2GPU();
 
             Indices.Initialize(false);
-            Indices.SetSize(sizeof(uint) * 3);
+            Indices.SetSize(3);
             var idx = stackalloc uint[3];
             idx[0] = 0;
             idx[1] = 1;
@@ -204,7 +204,7 @@ namespace EngineNS.Bricks.GpuDriven
             Clusters.Flush2GPU();
 
             SrcClusters.Initialize(false);
-            SrcClusters.SetSize(sizeof(int) * 1 + sizeof(int));
+            SrcClusters.SetSize(1 + 1);
             var srcClst = stackalloc int[1 + 1];
             srcClst[0] = 1;
             srcClst[0 + 1] = 0;
@@ -241,7 +241,7 @@ namespace EngineNS.Bricks.GpuDriven
 
             var cmd = BasePass.DrawCmdList;
             cmd.BeginCommand();
-
+            
             NxRHI.FBufferWriter bfWriter = new NxRHI.FBufferWriter();
             bfWriter.Buffer = VisClusters.GpuBuffer.mCoreObject;
             bfWriter.Offset = 0;
@@ -249,11 +249,14 @@ namespace EngineNS.Bricks.GpuDriven
             cmd.WriteBufferUINT32(1, &bfWriter);
             // TODO: dispatch x/y/z
             CullClusterShading.SetDrawcallDispatch(this, policy, CullClusterShadingDrawcall, 1, 1, 1, true);
-            
             cmd.PushGpuDraw(CullClusterShadingDrawcall);
 
+            cmd.BeginEvent(Name);
             cmd.FlushDraws();
+            cmd.EndEvent();
+
             cmd.EndCommand();
+            
             UEngine.Instance.GfxDevice.RenderCmdQueue.QueueCmdlist(cmd);
         }
 

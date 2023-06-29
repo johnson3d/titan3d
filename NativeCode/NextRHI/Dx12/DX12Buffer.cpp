@@ -246,8 +246,7 @@ namespace NxRHI
 			if (properties.Type == D3D12_HEAP_TYPE_UPLOAD)
 			{
 				FMappedSubResource mapped{};
-				auto hr = this->Map(0, &mapped, false);
-				if (hr == S_OK)
+				if (this->Map(0, &mapped, false))
 				{
 					BYTE* pCopyTar = (BYTE*)mapped.pData;
 					BYTE* pCopySrc = (BYTE*)desc.InitData;

@@ -31,8 +31,8 @@ struct FRasterTri
 	bool	bIsValid;
 };
 
-StructuredBuffer<int> VisibleClusterBuffer;
-RWStructuredBuffer<int> IndirectArgBuffer;
+ByteAddressBuffer VisibleClusterBuffer;
+RWByteAddressBuffer IndirectArgBuffer;
 RWTexture2D<float4> OutputQuarkTexture;
 
 struct FShadingStruct
@@ -242,15 +242,15 @@ void RasterizeTri_Scanline_Inner(FRasterTri Tri) //FRaster Raster, uint PixelVal
 [numthreads(DispatchX, DispatchY, DispatchZ)]
 void CS_DispatchArgMain(uint3 LocalThreadId : SV_GroupThreadID, uint3 GroupId : SV_GroupID, uint3 DTid : SV_DispatchThreadID)
 {
-    IndirectArgBuffer[0] = (VisibleClusterBuffer[0] + (ShadingStruct.DispatchArg.x - 1)) / ShadingStruct.DispatchArg.x;
-    IndirectArgBuffer[1] = 1;
-    IndirectArgBuffer[2] = 1;
+    IndirectArgBuffer.Store(0, (VisibleClusterBuffer.Load(0) + (ShadingStruct.DispatchArg.x - 1)) / ShadingStruct.DispatchArg.x);
+    IndirectArgBuffer.Store(4, 1);
+    IndirectArgBuffer.Store(8, 1);
 }
 
 [numthreads(DispatchX, DispatchY, DispatchZ)]
 void CS_Main(uint3 LocalThreadId : SV_GroupThreadID, uint3 GroupId : SV_GroupID, uint3 DTid : SV_DispatchThreadID)
 {
-    int clusterIdx = VisibleClusterBuffer[DTid.x % ShadingStruct.MaxVisClusterIndex] % ShadingStruct.MaxClusterIndex;
+    int clusterIdx = VisibleClusterBuffer.Load((DTid.x % ShadingStruct.MaxVisClusterIndex) * 4) % ShadingStruct.MaxClusterIndex;
     FClusterData cluster = ClusterBuffer[clusterIdx];
     for (int i = cluster.FaceStart; i <= cluster.FaceEnd; i++)
     {

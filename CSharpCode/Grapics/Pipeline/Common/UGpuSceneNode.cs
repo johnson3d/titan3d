@@ -83,6 +83,11 @@ namespace EngineNS.Graphics.Pipeline.Common
             if (Dirty == false)
                 return;
             Dirty = false;
+            bool isRaw = false;
+            if (typeof(T) == typeof(int) || typeof(T) == typeof(uint) || typeof(T) == typeof(float))
+            {
+                isRaw = true;
+            }
             if (DataArray.Count >= GpuCapacity)
             {
                 GpuBuffer?.Dispose();
@@ -91,6 +96,10 @@ namespace EngineNS.Graphics.Pipeline.Common
 
                 var bfDesc = new NxRHI.FBufferDesc();
                 bfDesc.SetDefault(false);
+                if (isRaw)
+                {
+                    bfDesc.MiscFlags = NxRHI.EResourceMiscFlag.RM_BUFFER_ALLOW_RAW_VIEWS;
+                }
                 bfDesc.Size = (uint)sizeof(T) * GpuCapacity;
                 bfDesc.StructureStride = (uint)sizeof(T);
                 bfDesc.InitData = DataArray.UnsafeGetElementAddress(0);
@@ -112,6 +121,10 @@ namespace EngineNS.Graphics.Pipeline.Common
                 {
                     var uavDesc = new NxRHI.FUavDesc();
                     uavDesc.SetBuffer(0);
+                    if (isRaw)
+                    {
+                        uavDesc.Format = EPixelFormat.PXF_R32_TYPELESS;
+                    }
                     uavDesc.Buffer.NumElements = (uint)GpuCapacity;
                     uavDesc.Buffer.StructureByteStride = bfDesc.StructureStride;
                     DataUAV = UEngine.Instance.GfxDevice.RenderContext.CreateUAV(GpuBuffer, in uavDesc);
@@ -120,6 +133,10 @@ namespace EngineNS.Graphics.Pipeline.Common
                 {
                     var srvDesc = new NxRHI.FSrvDesc();
                     srvDesc.SetBuffer(0);
+                    if (isRaw)
+                    {
+                        srvDesc.Format = EPixelFormat.PXF_R32_TYPELESS;
+                    }
                     srvDesc.Buffer.NumElements = (uint)GpuCapacity;
                     srvDesc.Buffer.StructureByteStride = bfDesc.StructureStride;
                     DataSRV = UEngine.Instance.GfxDevice.RenderContext.CreateSRV(GpuBuffer, in srvDesc);

@@ -399,10 +399,14 @@ namespace EngineNS.Bricks.GpuDriven
             cmd.BeginCommand();
 
             DispatchArgShading.SetDrawcallDispatch(this, policy, DispatchArgShadingDrawcall, 1, 1, 1, true);
-            DispatchArgShadingDrawcall.Commit(cmd);
+            cmd.PushGpuDraw(DispatchArgShadingDrawcall);
 
             SWRasterizer.SetDrawcallDispatch(this, policy, SWRasterizerDrawcall, 1, 1, 1, false);
-            SWRasterizerDrawcall.Commit(cmd);
+            cmd.PushGpuDraw(SWRasterizerDrawcall);
+
+            cmd.BeginEvent(Name);
+            cmd.FlushDraws();
+            cmd.EndEvent();
 
             cmd.EndCommand();
             UEngine.Instance.GfxDevice.RenderCmdQueue.QueueCmdlist(cmd);

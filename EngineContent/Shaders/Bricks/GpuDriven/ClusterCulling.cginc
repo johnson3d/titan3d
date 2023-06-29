@@ -3,8 +3,8 @@
 
 #include "FRaster.cginc"
 
-StructuredBuffer<int> SrcClusterBuffer;
-RWStructuredBuffer<int> VisClusterBuffer;
+ByteAddressBuffer SrcClusterBuffer;
+RWByteAddressBuffer VisClusterBuffer;
 
 bool IsVisible(int clusterIdx)
 {
@@ -30,9 +30,9 @@ void CS_ClusterCullingMain(uint DispatchThreadId : SV_DispatchThreadID, uint3 Lo
         return;
     }
     int index = 0;
-    InterlockedAdd(VisClusterBuffer[0], 1, index);
+    VisClusterBuffer.InterlockedAdd(0, 1, index);
     //VisClusterBuffer&SrcClusterBuffer [0] is the count of array
-    VisClusterBuffer[1 + index] = SrcClusterBuffer[1 + DispatchThreadId.x];
+    VisClusterBuffer.Store((1 + index) * 4, SrcClusterBuffer.Load((1 + DispatchThreadId.x) * 4));
 }
 
 #endif//_SOFT_RASTER_FRASTER_H_
