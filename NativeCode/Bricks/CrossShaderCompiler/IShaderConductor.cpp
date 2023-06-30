@@ -112,7 +112,7 @@ IShaderConductor* IShaderConductor::GetInstance()
 //}
 
 bool IShaderConductor::CompileShader(NxRHI::FShaderCompiler* compiler, NxRHI::FShaderDesc* desc, const char* shader, const char* entry, NxRHI::EShaderType type, const char* sm,
-			const NxRHI::IShaderDefinitions* defines, bool bDebugShader, NxRHI::EShaderLanguage sl, bool debugShader, const char* extHlslVersion)
+			const NxRHI::IShaderDefinitions* defines, bool bDebugShader, NxRHI::EShaderLanguage sl, bool debugShader, const char* extHlslVersion, const char* dxcArgs)
 {
 	if (sl == NxRHI::EShaderLanguage::SL_DXBC)
 	{
@@ -190,7 +190,7 @@ bool IShaderConductor::CompileShader(NxRHI::FShaderCompiler* compiler, NxRHI::FS
 		sl == NxRHI::EShaderLanguage::SL_GLSL ||
 		sl == NxRHI::EShaderLanguage::SL_METAL)
 	{
-		CompileHLSL(compiler, desc, shader, entry, type, sm, defines, sl, debugShader, extHlslVersion);
+		CompileHLSL(compiler, desc, shader, entry, type, sm, defines, sl, debugShader, extHlslVersion, dxcArgs);
 	}
 
 	if (sl == NxRHI::EShaderLanguage::SL_SPIRV)
@@ -201,7 +201,7 @@ bool IShaderConductor::CompileShader(NxRHI::FShaderCompiler* compiler, NxRHI::FS
 }
 
 bool IShaderConductor::CompileHLSL(NxRHI::FShaderCompiler* compiler, NxRHI::FShaderDesc* desc, const char* hlsl, const char* entry, NxRHI::EShaderType type, std::string sm,
-	const NxRHI::IShaderDefinitions* defines, NxRHI::EShaderLanguage sl, bool debugShader, const char* extHlslVersion)
+	const NxRHI::IShaderDefinitions* defines, NxRHI::EShaderLanguage sl, bool debugShader, const char* extHlslVersion, const char* dxcArgs)
 {
 #if defined(PLATFORM_WIN)
 	auto ar = compiler->GetShaderCodeStream(hlsl);
@@ -244,10 +244,11 @@ bool IShaderConductor::CompileHLSL(NxRHI::FShaderCompiler* compiler, NxRHI::FSha
 		}
 	}
 
-	ShaderConductor::Compiler::SourceDesc src;
+	ShaderConductor::Compiler::SourceDesc src{};
 	src.source = codeText.c_str();
 	src.entryPoint = entry;
 	src.hlslExtVersion = extHlslVersion;
+	src.dxcArgString = dxcArgs;
 	src.stage = stage;
 	src.fileName = hlsl;
 	src.loadIncludeCallback = [=](const char* includeName)->ShaderConductor::Blob

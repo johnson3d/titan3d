@@ -463,7 +463,7 @@ namespace NxRHI
 			return nullptr;
 		return GetShaderCodeStreamPtr(name);
 	}
-	bool FShaderCompiler::CompileShader(FShaderDesc* desc, const char* shader, const char* entry, EShaderType type, const char* sm, const IShaderDefinitions* defines, EShaderLanguage sl, bool bDebugShader, const char* extHlslVersion)
+	bool FShaderCompiler::CompileShader(FShaderDesc* desc, const char* shader, const char* entry, EShaderType type, const char* sm, const IShaderDefinitions* defines, EShaderLanguage sl, bool bDebugShader, const char* extHlslVersion, const char* dxcArgs)
 	{
 		if (sl == EShaderLanguage::SL_DXBC)
 		{
@@ -477,7 +477,7 @@ namespace NxRHI
 		if (sl == EShaderLanguage::SL_DXIL)
 		{
 #if defined(HasModule_Dx12)
-			return DX12Shader::CompileShader(this, desc, shader, entry, type, sm, defines, sl, bDebugShader, extHlslVersion);
+			return DX12Shader::CompileShader(this, desc, shader, entry, type, sm, defines, sl, bDebugShader, extHlslVersion, dxcArgs);
 #else
 			ASSERT(false);
 			return false;
@@ -486,7 +486,7 @@ namespace NxRHI
 		if (sl == EShaderLanguage::SL_SPIRV)
 		{
 #if defined(HasModule_Vulkan)
-			return VKShader::CompileShader(this, desc, shader, entry, type, sm, defines, sl, bDebugShader, extHlslVersion);
+			return VKShader::CompileShader(this, desc, shader, entry, type, sm, defines, sl, bDebugShader, extHlslVersion, dxcArgs);
 #else
 			ASSERT(false);
 			return false;

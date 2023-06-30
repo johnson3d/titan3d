@@ -213,10 +213,10 @@ namespace NxRHI
 		pOutRanges->push_back(binding);
 	}
 
-	bool VKShader::CompileShader(FShaderCompiler* compiler, FShaderDesc* desc, const char* shader, const char* entry, EShaderType type, const char* sm, const IShaderDefinitions* defines, EShaderLanguage sl, bool bDebugShader, const char* extHlslVersion)
+	bool VKShader::CompileShader(FShaderCompiler* compiler, FShaderDesc* desc, const char* shader, const char* entry, EShaderType type, const char* sm, const IShaderDefinitions* defines, EShaderLanguage sl, bool bDebugShader, const char* extHlslVersion, const char* dxcArgs)
 	{
 		desc->FunctionName = entry;
-		return IShaderConductor::GetInstance()->CompileShader(compiler, desc, shader, entry, type, sm, defines, bDebugShader, sl, bDebugShader, extHlslVersion);
+		return IShaderConductor::GetInstance()->CompileShader(compiler, desc, shader, entry, type, sm, defines, bDebugShader, sl, bDebugShader, extHlslVersion, dxcArgs);
 	}
 
 	VKShader::VKShader()

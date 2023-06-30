@@ -167,13 +167,13 @@ namespace NxRHI
 		return true;
 	}
 
-	bool DX12Shader::CompileShader(FShaderCompiler* compiler, FShaderDesc* desc, const char* shader, const char* entry, EShaderType type, const char* sm, const IShaderDefinitions* defines, EShaderLanguage sl, bool bDebugShader, const char* extHlslVersion)
+	bool DX12Shader::CompileShader(FShaderCompiler* compiler, FShaderDesc* desc, const char* shader, const char* entry, EShaderType type, const char* sm, const IShaderDefinitions* defines, EShaderLanguage sl, bool bDebugShader, const char* extHlslVersion, const char* dxcArgs)
 	{
 		desc->FunctionName = entry;
 		if (extHlslVersion == nullptr)
 			return DX12Shader_CompileShader2(compiler, desc, shader, entry, type, "5_0", defines, sl, bDebugShader);
 		else
-			return IShaderConductor::GetInstance()->CompileShader(compiler, desc, shader, entry, type, sm, defines, bDebugShader, sl, bDebugShader, extHlslVersion);
+			return IShaderConductor::GetInstance()->CompileShader(compiler, desc, shader, entry, type, sm, defines, bDebugShader, sl, bDebugShader, extHlslVersion, dxcArgs);
 	}
 	
 	DX12Shader::DX12Shader()

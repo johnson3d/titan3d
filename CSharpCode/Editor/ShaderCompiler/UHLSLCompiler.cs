@@ -394,7 +394,7 @@ namespace EngineNS.Editor.ShaderCompiler
                     {
                         compile_sm = "5_0";
                     }
-                    var ok = mShaderCompiler.CompileShader(desc, shader, entry, type, compile_sm, defPtr, NxRHI.EShaderLanguage.SL_DXBC, bDebugShader, extHlslVersion);
+                    var ok = mShaderCompiler.CompileShader(desc, shader, entry, type, compile_sm, defPtr, NxRHI.EShaderLanguage.SL_DXBC, bDebugShader, extHlslVersion, null);
                     if (ok == false)
                         return null;
                 }
@@ -410,7 +410,7 @@ namespace EngineNS.Editor.ShaderCompiler
                     {
                         compile_sm = "6_5";
                     }
-                    var ok = mShaderCompiler.CompileShader(desc, shader, entry, type, compile_sm, defPtr, NxRHI.EShaderLanguage.SL_DXIL, bDebugShader, extHlslVersion);
+                    var ok = mShaderCompiler.CompileShader(desc, shader, entry, type, compile_sm, defPtr, NxRHI.EShaderLanguage.SL_DXIL, bDebugShader, extHlslVersion, null);
                     if (ok == false)
                         return null;
                 }
@@ -426,7 +426,7 @@ namespace EngineNS.Editor.ShaderCompiler
                     {
                         compile_sm = "6_5";
                     }
-                    var ok = mShaderCompiler.CompileShader(desc, shader, entry, type, compile_sm, defPtr, NxRHI.EShaderLanguage.SL_DXBC, bDebugShader, extHlslVersion);
+                    var ok = mShaderCompiler.CompileShader(desc, shader, entry, type, compile_sm, defPtr, NxRHI.EShaderLanguage.SL_DXBC, bDebugShader, extHlslVersion, null);
                     if (ok == false)
                         return null;
                 }
@@ -442,7 +442,8 @@ namespace EngineNS.Editor.ShaderCompiler
                     {
                         compile_sm = "6_5";
                     }
-                    var ok = mShaderCompiler.CompileShader(desc, shader, entry, type, compile_sm, defPtr, NxRHI.EShaderLanguage.SL_DXBC, bDebugShader, extHlslVersion);
+                    var ok = mShaderCompiler.CompileShader(desc, shader, entry, type, compile_sm, defPtr, NxRHI.EShaderLanguage.SL_DXBC, bDebugShader, 
+                        extHlslVersion, null);
                     if (ok == false)
                         return null;
                 }
@@ -459,7 +460,8 @@ namespace EngineNS.Editor.ShaderCompiler
                     {
                         compile_sm = "6_5";
                     }
-                    var ok = mShaderCompiler.CompileShader(desc, shader, entry, type, compile_sm, defPtr, NxRHI.EShaderLanguage.SL_SPIRV, bDebugShader, extHlslVersion);
+                    var ok = mShaderCompiler.CompileShader(desc, shader, entry, type, compile_sm, defPtr, NxRHI.EShaderLanguage.SL_SPIRV, bDebugShader, 
+                        extHlslVersion, "-fspv-extension=SPV_KHR_shader_draw_parameters");
                     if (ok == false)
                         return null;
                 }

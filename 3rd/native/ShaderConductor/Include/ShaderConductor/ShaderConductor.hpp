@@ -426,6 +426,7 @@ namespace ShaderConductor
             const char* entryPoint;
             //modify by johnson
             const char* hlslExtVersion;
+            const char* dxcArgString;
             //end modify
             ShaderStage stage;
             const MacroDefine* defines;

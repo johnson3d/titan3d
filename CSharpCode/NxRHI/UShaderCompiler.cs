@@ -106,9 +106,9 @@ namespace EngineNS.NxRHI
             mCoreObject.SetCallback(fn);
         }
         
-        public bool CompileShader(UShaderDesc shaderDesc, string shader, string entry, EShaderType type, string sm, UShaderDefinitions defines, EShaderLanguage sl, bool bDebugShader, string extHlslVersion)
+        public bool CompileShader(UShaderDesc shaderDesc, string shader, string entry, EShaderType type, string sm, UShaderDefinitions defines, EShaderLanguage sl, bool bDebugShader, string extHlslVersion, string dxcArgs)
         {
-            return mCoreObject.CompileShader(shaderDesc.mCoreObject, shader, entry, type, sm, defines.mCoreObject, sl, bDebugShader, extHlslVersion);
+            return mCoreObject.CompileShader(shaderDesc.mCoreObject, shader, entry, type, sm, defines.mCoreObject, sl, bDebugShader, extHlslVersion, dxcArgs);
         }
     }
 }

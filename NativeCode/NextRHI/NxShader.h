@@ -258,7 +258,7 @@ namespace NxRHI
 			GetShaderCodeStreamPtr = fn;
 		}
 		FShaderCode* GetShaderCodeStream(const char* name);
-		bool CompileShader(FShaderDesc* desc, const char* shader, const char* entry, EShaderType type, const char* sm, const IShaderDefinitions* defines, EShaderLanguage sl, bool bDebugShader, const char* extHlslVersion);
+		bool CompileShader(FShaderDesc* desc, const char* shader, const char* entry, EShaderType type, const char* sm, const IShaderDefinitions* defines, EShaderLanguage sl, bool bDebugShader, const char* extHlslVersion, const char* dxcArgs);
 	};
 }
 
