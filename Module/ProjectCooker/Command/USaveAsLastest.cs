@@ -36,6 +36,11 @@ namespace ProjectCooker.Command
                                 await ProcUMesh();
                             }
                             break;
+                        case Type_MeshPrimitive:
+                            {
+                                await ProcMeshPrimitive();
+                            }
+                            break;
                         case Type_Material:
                             {
                                 await ProcMaterial();
@@ -49,6 +54,11 @@ namespace ProjectCooker.Command
                         case Type_Scene:
                             {
                                 await ProcScene();
+                            }
+                            break;
+                        case Type_AnimClip:
+                            {
+                                await ProcAnimClip();
                             }
                             break;
                         default:
@@ -106,6 +116,50 @@ namespace ProjectCooker.Command
                 var rp = EngineNS.IO.TtFileManager.GetRelativePath(root, i);
                 var rn = EngineNS.RName.GetRName(rp, EngineNS.RName.ERNameType.Engine);
                 var asset = await EngineNS.UEngine.Instance.GfxDevice.MaterialMeshManager.GetMaterialMesh(rn);
+                asset.SaveAssetTo(rn);
+            }
+        }
+        async System.Threading.Tasks.Task ProcMeshPrimitive()
+        {
+            var root = EngineNS.UEngine.Instance.FileManager.GetRoot(EngineNS.IO.TtFileManager.ERootDir.Game);
+            var files = EngineNS.IO.TtFileManager.GetFiles(root, "*" + EngineNS.Graphics.Mesh.UMeshPrimitives.AssetExt, true);
+            foreach (var i in files)
+            {
+                var rp = EngineNS.IO.TtFileManager.GetRelativePath(root, i);
+                var rn = EngineNS.RName.GetRName(rp, EngineNS.RName.ERNameType.Game);
+                var asset = await EngineNS.UEngine.Instance.GfxDevice.MeshPrimitiveManager.GetMeshPrimitive(rn);
+                asset.SaveAssetTo(rn);
+            }
+
+            root = EngineNS.UEngine.Instance.FileManager.GetRoot(EngineNS.IO.TtFileManager.ERootDir.Engine);
+            files = EngineNS.IO.TtFileManager.GetFiles(root, "*" + EngineNS.Graphics.Mesh.UMeshPrimitives.AssetExt, true);
+            foreach (var i in files)
+            {
+                var rp = EngineNS.IO.TtFileManager.GetRelativePath(root, i);
+                var rn = EngineNS.RName.GetRName(rp, EngineNS.RName.ERNameType.Engine);
+                var asset = await EngineNS.UEngine.Instance.GfxDevice.MeshPrimitiveManager.GetMeshPrimitive(rn);
+                asset.SaveAssetTo(rn);
+            }
+        }
+        async System.Threading.Tasks.Task ProcAnimClip()
+        {
+            var root = EngineNS.UEngine.Instance.FileManager.GetRoot(EngineNS.IO.TtFileManager.ERootDir.Game);
+            var files = EngineNS.IO.TtFileManager.GetFiles(root, "*" + EngineNS.Animation.Asset.UAnimationClip.AssetExt, true);
+            foreach (var i in files)
+            {
+                var rp = EngineNS.IO.TtFileManager.GetRelativePath(root, i);
+                var rn = EngineNS.RName.GetRName(rp, EngineNS.RName.ERNameType.Game);
+                var asset = await EngineNS.UEngine.Instance.AnimationModule.AnimationClipManager.GetAnimationClip(rn);
+                asset.SaveAssetTo(rn);
+            }
+
+            root = EngineNS.UEngine.Instance.FileManager.GetRoot(EngineNS.IO.TtFileManager.ERootDir.Engine);
+            files = EngineNS.IO.TtFileManager.GetFiles(root, "*" + EngineNS.Animation.Asset.UAnimationClip.AssetExt, true);
+            foreach (var i in files)
+            {
+                var rp = EngineNS.IO.TtFileManager.GetRelativePath(root, i);
+                var rn = EngineNS.RName.GetRName(rp, EngineNS.RName.ERNameType.Engine);
+                var asset = await EngineNS.UEngine.Instance.AnimationModule.AnimationClipManager.GetAnimationClip(rn);
                 asset.SaveAssetTo(rn);
             }
         }
