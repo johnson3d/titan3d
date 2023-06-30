@@ -101,7 +101,7 @@ struct VS_INPUT
 	VK_LOCATION(17) uint vInstanceId : SV_InstanceID;
 
 #if RHI_TYPE == RHI_VK
-	[[vk::builtin("DrawIndex")]] uint vMultiDrawId;
+	[[vk::builtin("DrawIndex")]] uint vMultiDrawId : DRAWIDX;
 #endif
 };
 
