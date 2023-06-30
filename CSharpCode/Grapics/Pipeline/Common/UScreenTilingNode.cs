@@ -163,12 +163,12 @@ namespace EngineNS.Graphics.Pipeline.Common
             desc.StructureStride = (uint)sizeof(FTileData);
             TileBuffer = rc.CreateBuffer(in desc);
             var uavDesc = new NxRHI.FUavDesc();
-            uavDesc.SetBuffer(0);
+            uavDesc.SetBuffer(false);
             uavDesc.Buffer.NumElements = (uint)TileX * TileY;
             uavDesc.Buffer.StructureByteStride = desc.StructureStride;
             TileUAV = rc.CreateUAV(TileBuffer, in uavDesc);
             var srvDesc = new NxRHI.FSrvDesc();
-            srvDesc.SetBuffer(0);
+            srvDesc.SetBuffer(false);
             srvDesc.Buffer.NumElements = (uint)TileX * TileY;
             srvDesc.Buffer.StructureByteStride = (uint)sizeof(FTileData);
             TileSRV = rc.CreateSRV(TileBuffer, in srvDesc);

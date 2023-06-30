@@ -173,7 +173,7 @@ namespace EngineNS.Bricks.Terrain.Grass
                 }
 
                 var srvDesc = new NxRHI.FSrvDesc();
-                srvDesc.SetBuffer(0);
+                srvDesc.SetBuffer(false);
                 srvDesc.Buffer.NumElements = mdf.mMaxNumber;
                 srvDesc.Buffer.StructureByteStride = bfDesc.StructureStride;
                 InstantSRV = UEngine.Instance.GfxDevice.RenderContext.CreateSRV(InstantBuffer, in srvDesc);

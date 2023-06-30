@@ -696,15 +696,24 @@ namespace NxRHI
 			Format = PXF_R8G8B8A8_UNORM;
 			Texture2DArray.MipLevels = 0;
 		}
-		void SetBuffer(DWORD flags)
+		void SetBuffer(bool isRaw)
 		{
 			memset(this, 0, sizeof(FSrvDesc));
 			Type = ST_BufferSRV;
-			Format = PXF_UNKNOWN;
 			Buffer.FirstElement = 0;
 			Buffer.NumElements = 0;
 			Buffer.StructureByteStride = 0;
-			Buffer.Flags = flags;
+
+			if (isRaw)
+			{
+				Format = EPixelFormat::PXF_R32_TYPELESS;
+				Buffer.Flags = 1;
+			}
+			else
+			{
+				Format = EPixelFormat::PXF_UNKNOWN;
+				Buffer.Flags = 0;
+			}
 		}
 		ESrvType Type;
 		EPixelFormat Format;
@@ -813,20 +822,21 @@ namespace NxRHI
 	struct TR_CLASS(SV_LayoutStruct = 8)
 		FUavDesc
 	{
-		void SetBuffer(UINT flags)
+		void SetBuffer(bool isRaw)
 		{
 			memset(this, 0, sizeof(FUavDesc));
 			ViewDimension = EDimensionUAV::UAV_DIMENSION_BUFFER;
 			Buffer.FirstElement = 0;
 			Buffer.StructureByteStride = 0;
-			Buffer.Flags = flags;//UAV_FLAG_RAW
-			if (flags == 1)
+			if (isRaw)
 			{
 				Format = EPixelFormat::PXF_R32_TYPELESS;
+				Buffer.Flags = 1;
 			}
 			else
 			{
 				Format = EPixelFormat::PXF_UNKNOWN;
+				Buffer.Flags = 0;
 			}
 		}
 		void SetTexture2D()

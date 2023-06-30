@@ -122,7 +122,7 @@ namespace EngineNS.Bricks.VXGI
             }
             VoxelPool = rc.CreateBuffer(in desc);
             var uavDesc = new FUavDesc();
-            uavDesc.SetBuffer(0);
+            uavDesc.SetBuffer(false);
             uavDesc.Format = EPixelFormat.PXF_UNKNOWN;
             uavDesc.Buffer.NumElements = (uint)(VxGroupPoolSize);
             uavDesc.Buffer.StructureByteStride = desc.StructureStride;

@@ -201,7 +201,7 @@ namespace EngineNS.Bricks.VXGI
             desc.StructureStride = (uint)sizeof(FVoxelDebugger);
             VoxelGroupDebugger = rc.CreateBuffer(in desc);
             var uavDesc = new NxRHI.FUavDesc();
-            uavDesc.SetBuffer(0);
+            uavDesc.SetBuffer(false);
             uavDesc.Buffer.NumElements = (uint)VxGroupPoolSize;
             uavDesc.Buffer.StructureByteStride = desc.StructureStride;
             UavVoxelGroupDebugger = rc.CreateUAV(VoxelGroupDebugger, in uavDesc);
@@ -213,7 +213,7 @@ namespace EngineNS.Bricks.VXGI
             UavVoxelDebugger = rc.CreateUAV(VoxelDebugger, in uavDesc);
 
             var srvDesc = new NxRHI.FSrvDesc();
-            srvDesc.SetBuffer(0);
+            srvDesc.SetBuffer(false);
             srvDesc.Buffer.NumElements = uavDesc.Buffer.NumElements;
             srvDesc.Buffer.StructureByteStride = desc.StructureStride;
             SrvVoxelDebugger = rc.CreateSRV(VoxelDebugger, in srvDesc);
@@ -225,7 +225,7 @@ namespace EngineNS.Bricks.VXGI
             VxIndirectDebugDraws = rc.CreateBuffer(in desc);
             desc.MiscFlags = NxRHI.EResourceMiscFlag.RM_BUFFER_STRUCTURED;
 
-            uavDesc.SetBuffer(1);
+            uavDesc.SetBuffer(true);
             uavDesc.Format = EPixelFormat.PXF_R32_TYPELESS;
             uavDesc.Buffer.NumElements = 2 * 5;
             uavDesc.Buffer.StructureByteStride = desc.StructureStride;

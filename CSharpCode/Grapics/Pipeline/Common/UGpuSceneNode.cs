@@ -95,11 +95,7 @@ namespace EngineNS.Graphics.Pipeline.Common
                 GpuCapacity = (uint)DataArray.Count + GpuCapacity / 2 + 1;
 
                 var bfDesc = new NxRHI.FBufferDesc();
-                bfDesc.SetDefault(false);
-                if (isRaw)
-                {
-                    bfDesc.MiscFlags = NxRHI.EResourceMiscFlag.RM_BUFFER_ALLOW_RAW_VIEWS;
-                }
+                bfDesc.SetDefault(isRaw);
                 bfDesc.Size = (uint)sizeof(T) * GpuCapacity;
                 bfDesc.StructureStride = (uint)sizeof(T);
                 bfDesc.InitData = DataArray.UnsafeGetElementAddress(0);
@@ -120,11 +116,7 @@ namespace EngineNS.Graphics.Pipeline.Common
                 if ((bfDesc.Type & NxRHI.EBufferType.BFT_UAV) != 0)
                 {
                     var uavDesc = new NxRHI.FUavDesc();
-                    uavDesc.SetBuffer(0);
-                    if (isRaw)
-                    {
-                        uavDesc.Format = EPixelFormat.PXF_R32_TYPELESS;
-                    }
+                    uavDesc.SetBuffer(isRaw);
                     uavDesc.Buffer.NumElements = (uint)GpuCapacity;
                     uavDesc.Buffer.StructureByteStride = bfDesc.StructureStride;
                     DataUAV = UEngine.Instance.GfxDevice.RenderContext.CreateUAV(GpuBuffer, in uavDesc);
@@ -132,11 +124,7 @@ namespace EngineNS.Graphics.Pipeline.Common
                 if ((bfDesc.Type & NxRHI.EBufferType.BFT_SRV) != 0)
                 {
                     var srvDesc = new NxRHI.FSrvDesc();
-                    srvDesc.SetBuffer(0);
-                    if (isRaw)
-                    {
-                        srvDesc.Format = EPixelFormat.PXF_R32_TYPELESS;
-                    }
+                    srvDesc.SetBuffer(isRaw);
                     srvDesc.Buffer.NumElements = (uint)GpuCapacity;
                     srvDesc.Buffer.StructureByteStride = bfDesc.StructureStride;
                     DataSRV = UEngine.Instance.GfxDevice.RenderContext.CreateSRV(GpuBuffer, in srvDesc);
@@ -169,23 +157,25 @@ namespace EngineNS.Graphics.Pipeline.Common
         {
             Dispose();
 
+            bool isRaw = false;
+            if (typeof(T) == typeof(uint) || typeof(T) == typeof(int) || typeof(T) == typeof(float))
+            {
+                isRaw = true;
+            }
+
             var bfDesc = new NxRHI.FBufferDesc();
-            bfDesc.SetDefault(false);
+            bfDesc.SetDefault(isRaw);
             bfDesc.Size = (uint)sizeof(T) * Count;
             bfDesc.StructureStride = (uint)sizeof(T);
             bfDesc.InitData = pInitData;
             bfDesc.Type = bufferType;
-            if (typeof(T) == typeof(uint) || typeof(T) == typeof(int) || typeof(T) == typeof(float))
-            {
-                bfDesc.MiscFlags = NxRHI.EResourceMiscFlag.RM_BUFFER_ALLOW_RAW_VIEWS;
-            }
-
+            
             GpuBuffer = UEngine.Instance.GfxDevice.RenderContext.CreateBuffer(in bfDesc);
 
             if ((bufferType & NxRHI.EBufferType.BFT_UAV) != 0)
             {
                 var uavDesc = new NxRHI.FUavDesc();
-                uavDesc.SetBuffer(0);
+                uavDesc.SetBuffer(isRaw);
                 uavDesc.Buffer.NumElements = (uint)Count;
                 uavDesc.Buffer.StructureByteStride = bfDesc.StructureStride;
                 DataUAV = UEngine.Instance.GfxDevice.RenderContext.CreateUAV(GpuBuffer, in uavDesc);
@@ -194,7 +184,7 @@ namespace EngineNS.Graphics.Pipeline.Common
             if ((bufferType & NxRHI.EBufferType.BFT_SRV) != 0)
             {
                 var srvDesc = new NxRHI.FSrvDesc();
-                srvDesc.SetBuffer(0);
+                srvDesc.SetBuffer(isRaw);
                 srvDesc.Buffer.NumElements = (uint)Count;
                 srvDesc.Buffer.StructureByteStride = bfDesc.StructureStride;
                 DataSRV = UEngine.Instance.GfxDevice.RenderContext.CreateSRV(GpuBuffer, in srvDesc);
@@ -365,13 +355,13 @@ namespace EngineNS.Graphics.Pipeline.Common
             }
             GpuSceneDescBuffer = rc.CreateBuffer(in desc);
             var uavDesc = new NxRHI.FUavDesc();
-            uavDesc.SetBuffer(0);
+            uavDesc.SetBuffer(false);
             uavDesc.Buffer.NumElements = (uint)1;
             uavDesc.Buffer.StructureByteStride = desc.StructureStride;
             GpuSceneDescUAV = rc.CreateUAV(GpuSceneDescBuffer, in uavDesc);
 
             var srvDesc = new NxRHI.FSrvDesc();
-            srvDesc.SetBuffer(0);
+            srvDesc.SetBuffer(false);
             srvDesc.Buffer.NumElements = (uint)1;
             unsafe
             {

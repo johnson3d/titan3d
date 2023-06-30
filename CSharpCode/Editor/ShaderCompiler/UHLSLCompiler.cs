@@ -448,6 +448,7 @@ namespace EngineNS.Editor.ShaderCompiler
                 }
                 if (cfg.CookSPIRV)
                 {
+                    //extHlslVersion = "2021";
                     defPtr.AddDefine("RHI_TYPE", "RHI_VK");
                     if (extHlslVersion != null)
                     {

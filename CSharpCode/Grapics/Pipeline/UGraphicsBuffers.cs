@@ -245,7 +245,7 @@ namespace EngineNS.Graphics.Pipeline
                 if ((types & NxRHI.EBufferType.BFT_SRV) != 0)
                 {
                     var viewDesc = new NxRHI.FSrvDesc();
-                    viewDesc.SetBuffer(0);
+                    viewDesc.SetBuffer(false);
                     viewDesc.Type = NxRHI.ESrvType.ST_BufferSRV;
                     viewDesc.Format = BufferDesc.Format;
                     //viewDesc.Buffer.FirstElement = 1;
@@ -256,7 +256,7 @@ namespace EngineNS.Graphics.Pipeline
                 if ((types & NxRHI.EBufferType.BFT_UAV) != 0)
                 {
                     var viewDesc = new NxRHI.FUavDesc();
-                    viewDesc.SetBuffer(0);
+                    viewDesc.SetBuffer(false);
                     viewDesc.Format = BufferDesc.Format;
                     viewDesc.Buffer.FirstElement = 0;
                     viewDesc.Buffer.NumElements = BufferDesc.Height;

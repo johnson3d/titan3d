@@ -128,7 +128,7 @@ namespace EngineNS.Bricks.Particle
                 }
 
                 var srvDesc = new NxRHI.FSrvDesc();
-                srvDesc.SetBuffer(0);
+                srvDesc.SetBuffer(false);
                 srvDesc.Buffer.FirstElement = 0;
                 srvDesc.Buffer.NumElements = ShaderRandomPoolSize;// (uint)sizeof(Vector4);
                 srvDesc.Buffer.StructureByteStride = (uint)sizeof(Vector4);

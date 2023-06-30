@@ -109,14 +109,14 @@ namespace EngineNS.Bricks.Particle
             }
 
             var uavDesc = new NxRHI.FUavDesc();
-            uavDesc.SetBuffer(0);
+            uavDesc.SetBuffer(false);
             uavDesc.Buffer.FirstElement = 0;
             uavDesc.Buffer.NumElements = emitter.MaxParticle;
             uavDesc.Buffer.StructureByteStride = bfDesc.StructureStride;
             ParticlesUav = rc.CreateUAV(ParticlesBuffer, in uavDesc);
 
             var srvDesc = new NxRHI.FSrvDesc();
-            srvDesc.SetBuffer(0);
+            srvDesc.SetBuffer(false);
             srvDesc.Buffer.NumElements = emitter.MaxParticle;
             srvDesc.Buffer.StructureByteStride = bfDesc.StructureStride;
             ParticlesSrv = rc.CreateSRV(ParticlesBuffer, in srvDesc);
@@ -158,7 +158,7 @@ namespace EngineNS.Bricks.Particle
                 bfDesc.InitData = IntPtr.Zero.ToPointer();
                 TempReturnParticlesBuffer = rc.CreateBuffer(in bfDesc);
 
-                uavDesc.SetBuffer(1); 
+                uavDesc.SetBuffer(true); 
                 uavDesc.Format = EPixelFormat.PXF_R32_TYPELESS;
                 uavDesc.Buffer.FirstElement = 0;
                 uavDesc.Buffer.NumElements = emitter.MaxParticle + BufferHeadSize;
@@ -176,7 +176,7 @@ namespace EngineNS.Bricks.Particle
                 CurAlivesBuffer = rc.CreateBuffer(in bfDesc);
                 BackendAlivesBuffer = rc.CreateBuffer(in bfDesc);
 
-                uavDesc.SetBuffer(1);
+                uavDesc.SetBuffer(true);
                 uavDesc.Format = EPixelFormat.PXF_R32_TYPELESS;
                 //uavDesc.Buffer.Flags = (UInt32)EUAVBufferFlag.UAV_FLAG_RAW;
                 uavDesc.Buffer.FirstElement = 0;
@@ -188,7 +188,7 @@ namespace EngineNS.Bricks.Particle
                 //srvDesc.Buffer.FirstElement = 0;
                 //srvDesc.Buffer.ElementWidth = (uint)sizeof(float);
                 //srvDesc.Buffer.NumElements = emitter.MaxParticle + BufferHeadSize;
-                srvDesc.SetBuffer(1);
+                srvDesc.SetBuffer(true);
                 srvDesc.Format = EPixelFormat.PXF_R32_TYPELESS;
                 srvDesc.Buffer.NumElements = emitter.MaxParticle + BufferHeadSize;
                 srvDesc.Buffer.StructureByteStride = bfDesc.StructureStride;
@@ -220,7 +220,7 @@ namespace EngineNS.Bricks.Particle
                 bfDesc.InitData = IntPtr.Zero.ToPointer();
                 DrawArgBuffer = rc.CreateBuffer(in bfDesc);
 
-                uavDesc.SetBuffer(1);
+                uavDesc.SetBuffer(true);
                 uavDesc.Format = EPixelFormat.PXF_R32_TYPELESS;
                 //uavDesc.Buffer.Flags = (UInt32)EUAVBufferFlag.UAV_FLAG_RAW;
                 uavDesc.Buffer.FirstElement = 0;
