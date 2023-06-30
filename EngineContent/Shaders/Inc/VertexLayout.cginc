@@ -287,6 +287,8 @@ struct VSInstantData
 
 VSInstantData GetInstanceData(VS_MODIFIER input);
 
+#define FIX_NAN_NORMAL 1
+
 void Default_VSInput2PSInput(inout PS_INPUT output, VS_MODIFIER input)
 {
 #if USE_VS_Position == 1
@@ -295,8 +297,14 @@ void Default_VSInput2PSInput(inout PS_INPUT output, VS_MODIFIER input)
 
 #if USE_VS_Normal == 1 && USE_PS_Normal == 1
     output.vNormal = input.vNormal;
+#if FIX_NAN_NORMAL == 1
+	if (all(output.vNormal == 0))
+    {
+        output.vNormal = float3(1, 1, 1);
+    }
 #endif
-
+#endif
+    
 #if USE_VS_Tangent == 1 && USE_PS_Tangent == 1
 	output.vTangent = input.vTangent;
 #endif
