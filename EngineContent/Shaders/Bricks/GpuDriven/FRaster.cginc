@@ -18,10 +18,10 @@ struct FQuarkTriangle
 struct FClusterData
 {
     float3 BoundCenter;
-    int FaceStart;
+    int VertStart;
     float3 BoundExtent;
-    int FaceEnd;
-    matrix WorldMatrix;
+    int VertEnd;
+    matrix WVPMatrix;
 };
 
 ByteAddressBuffer VertexBuffer;
@@ -61,12 +61,12 @@ FQuarkTriangle GetQuarkTriangle(int faceId)
 void ForEachClusterTest(int clusterId)
 {
     FClusterData cluster = ClusterBuffer[ clusterId];
-    for (int i = cluster.FaceStart; i <= cluster.FaceEnd; i++)
+    for (int i = cluster.VertStart; i <= cluster.VertEnd; i++)
     {
         FQuarkTriangle tri = GetQuarkTriangle(i);
-        tri.Vertices[0].Position = mul(float4(tri.Vertices[0].Position, 1), cluster.WorldMatrix).xyz;
-        tri.Vertices[1].Position = mul(float4(tri.Vertices[1].Position, 1), cluster.WorldMatrix).xyz;
-        tri.Vertices[2].Position = mul(float4(tri.Vertices[2].Position, 1), cluster.WorldMatrix).xyz;
+        tri.Vertices[0].Position = mul(float4(tri.Vertices[0].Position, 1), cluster.WVPMatrix).xyz;
+        tri.Vertices[1].Position = mul(float4(tri.Vertices[1].Position, 1), cluster.WVPMatrix).xyz;
+        tri.Vertices[2].Position = mul(float4(tri.Vertices[2].Position, 1), cluster.WVPMatrix).xyz;
         //do raster
     }
 }
