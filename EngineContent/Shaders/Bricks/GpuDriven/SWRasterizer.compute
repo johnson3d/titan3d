@@ -252,13 +252,13 @@ void CS_Main(uint3 LocalThreadId : SV_GroupThreadID, uint3 GroupId : SV_GroupID,
 {
     int clusterIdx = VisibleClusterBuffer.Load((DTid.x % ShadingStruct.MaxVisClusterIndex) * 4) % ShadingStruct.MaxClusterIndex;
     FClusterData cluster = ClusterBuffer[clusterIdx];
-    for (int i = cluster.FaceStart; i <= cluster.FaceEnd; i++)
+    for (int i = cluster.VertStart; i <= cluster.VertEnd; i++)
     {
         float3 pos[3];
         FQuarkTriangle tri = GetQuarkTriangle(i);
-        pos[0] = mul(float4(tri.Vertices[0].Position, 1), cluster.WorldMatrix).xyz;
-        pos[1] = mul(float4(tri.Vertices[1].Position, 1), cluster.WorldMatrix).xyz;
-        pos[2] = mul(float4(tri.Vertices[2].Position, 1), cluster.WorldMatrix).xyz;
+        pos[0] = mul(float4(tri.Vertices[0].Position, 1), cluster.WVPMatrix).xyz;
+        pos[1] = mul(float4(tri.Vertices[1].Position, 1), cluster.WVPMatrix).xyz;
+        pos[2] = mul(float4(tri.Vertices[2].Position, 1), cluster.WVPMatrix).xyz;
 		
         pos[0].xy *= ShadingStruct.QuarkRTSizeFactor;
         pos[1].xy *= ShadingStruct.QuarkRTSizeFactor;

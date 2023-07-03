@@ -10,71 +10,6 @@ namespace EngineNS.Bricks.GpuDriven
 {
     //nanite: https://zhuanlan.zhihu.com/p/382687738
 
-    //public class TtGpuSceneCullInstanceShading : Graphics.Pipeline.Shader.UComputeShadingEnv
-    //{
-    //    public override Vector3ui DispatchArg
-    //    {
-    //        get => new Vector3ui(64, 1, 1);
-    //    }
-    //    public TtGpuSceneCullInstanceShading()
-    //    {
-    //        CodeName = RName.GetRName("Shaders/Occlusion/GpuSceneCullInstance.cginc", RName.ERNameType.Engine);
-    //        MainName = "GpuSceneCullInstance";
-
-    //        this.UpdatePermutation();
-    //    }
-    //    protected override void EnvShadingDefines(in FPermutationId id, NxRHI.UShaderDefinitions defines)
-    //    {
-    //        base.EnvShadingDefines(in id, defines);
-    //    }
-    //    public override void OnDrawCall(NxRHI.UComputeDraw drawcall, Graphics.Pipeline.URenderPolicy policy)
-    //    {
-    //        var node = drawcall.TagObject as TtCullInstanceNode;
-
-    //        drawcall.BindUav("InstanceSceneData", node.CullInstancesBuffer.DataUAV);
-    //        drawcall.BindUav("NumberVisibilityGpuActorBuffer", node.NumberVisibilityGpuActorBuffer.DataUAV);
-    //        drawcall.BindUav("VisibilityGpuActorsBuffer", node.VisibilityGpuActorsBuffer.DataUAV);
-    //        drawcall.BindSrv("NumberGpuActors", node.NumberGpuActorsBuffer.DataSRV);
-    //        drawcall.BindCBuffer("cbPerPatchHZBCullData", null);
-
-    //        var index = drawcall.FindBinder(NxRHI.EShaderBindType.SBT_CBuffer, "cbPerPatchHZBCullData");
-    //        if (index.IsValidPointer)
-    //        {
-    //            if (node.HZBCullInstanceCBuffer == null)
-    //            {
-    //                node.HZBCullInstanceCBuffer = UEngine.Instance.GfxDevice.RenderContext.CreateCBV(index);
-    //            }
-    //            drawcall.BindCBuffer(index, node.HZBCullInstanceCBuffer);
-    //        }
-    //    }
-    //}
-
-    //public class TtGpuSceneCullClusterSetupShading : Graphics.Pipeline.Shader.UComputeShadingEnv
-    //{
-    //    public override Vector3ui DispatchArg
-    //    {
-    //        get => new Vector3ui(1, 1, 1);
-    //    }
-    //    public TtGpuSceneCullClusterSetupShading()
-    //    {
-    //        CodeName = RName.GetRName("Shaders/Occlusion/SetupDrawClusterArgs.cginc", RName.ERNameType.Engine);
-    //        MainName = "SetupDrawClusterArgsCS";
-
-    //        this.UpdatePermutation();
-    //    }
-    //    protected override void EnvShadingDefines(in FPermutationId id, NxRHI.UShaderDefinitions defines)
-    //    {
-    //        base.EnvShadingDefines(in id, defines);
-    //    }
-    //    public override void OnDrawCall(NxRHI.UComputeDraw drawcall, Graphics.Pipeline.URenderPolicy policy)
-    //    {
-    //        var node = drawcall.TagObject as TtCullInstanceNode;
-
-    //        drawcall.BindSrv("NumnerVisibleClusterMeshData", node.NumnerVisibleClusterMeshData.DataSRV);
-    //        drawcall.BindUav("DrawClusterIndirectArgs", node.SetupDrawClusterIndirectArgs.DataUAV);
-    //    }
-    //}
-
     public class TtCullClusterShading : Graphics.Pipeline.Shader.UComputeShadingEnv
     {
         public override Vector3ui DispatchArg
@@ -97,7 +32,6 @@ namespace EngineNS.Bricks.GpuDriven
             var node = drawcall.TagObject as TtCullClusterNode;
 
             drawcall.BindSrv("ClusterBuffer", node.Clusters.DataSRV);
-            drawcall.BindSrv("SrcClusterBuffer", node.SrcClusters.DataSRV);
             drawcall.BindUav("VisClusterBuffer", node.VisClusters.DataUAV);
         }
     }
@@ -118,15 +52,17 @@ namespace EngineNS.Bricks.GpuDriven
         public struct FClusterData
         {
             public Vector3 BoundCenter;
-            public int FaceStart;
+            public int VertStart;
             public Vector3 BoundExtent;
-            public int FaceEnd;
-            public Matrix WorldMatrix;
+            public int VertEnd;
+            public Matrix WVPMatrix;
         }
         public TtCpu2GpuBuffer<FClusterData> Clusters = new TtCpu2GpuBuffer<FClusterData>();
-        public TtCpu2GpuBuffer<int> SrcClusters = new TtCpu2GpuBuffer<int>();
         public TtCpu2GpuBuffer<int> VisClusters = new TtCpu2GpuBuffer<int>();
-        
+
+        // TODO: can't repeat InitBuffer, world logic still have problems
+        public bool bInitBuffer = false;
+
         public TtCullClusterNode()
         {
             Name = "CullClusterNode";
@@ -157,11 +93,6 @@ namespace EngineNS.Bricks.GpuDriven
             CullClusterShadingDrawcall = rc.CreateComputeDraw();
             CullClusterShading = UEngine.Instance.ShadingEnvManager.GetShadingEnv<TtCullClusterShading>();
 
-            if (true)
-            {
-                InitBuffers();
-            }
-
             unsafe
             {
                 VisClusters.Initialize(true);
@@ -172,48 +103,52 @@ namespace EngineNS.Bricks.GpuDriven
                 VisClusters.Flush2GPU();
             }
         }
-        private unsafe void InitBuffers()
+        private unsafe void InitBuffers(Vector3[] vb, uint[] ib, List<FClusterData> clusters, EngineNS.Graphics.Pipeline.UCamera camera)
         {
+            if (bInitBuffer)
+                return;
+
+            // TODO:
+            bInitBuffer = true;
+
             Vertices.Initialize(false);
-            Vertices.SetSize(sizeof(FQuarkVertex) * 3 / sizeof(float));
-            var verts = stackalloc FQuarkVertex[3];
-            verts[0].Position = new Vector3(50, 50, 0);
-            verts[1].Position = new Vector3(150, 50, 0);
-            verts[2].Position = new Vector3(50, 150, 0);
-            Vertices.UpdateData(0, verts, sizeof(FQuarkVertex) * 3);
+            Vertices.SetSize(sizeof(FQuarkVertex) * vb.Length / sizeof(float));
+            fixed (Vector3* p = &vb[0])
+            {
+                Vertices.UpdateData(0, p, sizeof(FQuarkVertex) * vb.Length);
+            }                
             Vertices.Flush2GPU();
 
             Indices.Initialize(false);
-            Indices.SetSize(3);
-            var idx = stackalloc uint[3];
-            idx[0] = 0;
-            idx[1] = 1;
-            idx[2] = 2;
-            Indices.UpdateData(0, idx, sizeof(uint) * 3);
+            Indices.SetSize(ib.Length);
+            fixed (uint* p = &ib[0])
+            {
+                Indices.UpdateData(0, p, sizeof(uint) * ib.Length);
+            }
             Indices.Flush2GPU();
 
             Clusters.Initialize(false);
-            Clusters.SetSize(sizeof(FClusterData) * 1);
-            var clst = stackalloc FClusterData[1];
-            clst[0].WorldMatrix = Matrix.Identity;
-            clst[0].BoundCenter = Vector3.Zero;
-            clst[0].BoundExtent = Vector3.One;
-            clst[0].FaceStart = 0;
-            clst[0].FaceEnd = 0;
-            Clusters.UpdateData(0, clst, sizeof(FClusterData) * 1);
-            Clusters.Flush2GPU();
+            Clusters.SetSize(sizeof(FClusterData) * clusters.Count);
+            var clst = stackalloc FClusterData[clusters.Count];
 
-            SrcClusters.Initialize(false);
-            SrcClusters.SetSize(1 + 1);
-            var srcClst = stackalloc int[1 + 1];
-            srcClst[0] = 1;
-            srcClst[0 + 1] = 0;
-            SrcClusters.UpdateData(0, srcClst, sizeof(int) * 1 + sizeof(int));
-            SrcClusters.Flush2GPU();
-        }
-        public override void BeforeTickLogic(URenderPolicy policy)
-        {
-            base.BeforeTickLogic(policy);
+            Vector3 cameraPos = camera.GetLocalPosition();
+            Matrix worldMatrix = Matrix.Identity;
+            worldMatrix.M41 = cameraPos.X;
+            worldMatrix.M42 = cameraPos.Y;
+            worldMatrix.M43 = cameraPos.Z;
+
+            for (int i = 0; i < clusters.Count; i++)
+            {
+                clst[i].WVPMatrix = worldMatrix * camera.GetViewProjection();
+                clst[i].VertStart = clusters[i].VertStart;
+                clst[i].VertEnd = clusters[i].VertEnd;
+                // TODO:
+                clst[i].BoundCenter = Vector3.Zero;
+                clst[i].BoundExtent = Vector3.One;
+            }
+            
+            Clusters.UpdateData(0, clst, sizeof(FClusterData) * clusters.Count);
+            Clusters.Flush2GPU();
 
             var attachment = ImportAttachment(VisibleClutersPinOut);
             attachment.Uav = VisClusters.DataUAV;
@@ -235,6 +170,10 @@ namespace EngineNS.Bricks.GpuDriven
                 attachment.Srv = Clusters.DataSRV;
             }
         }
+        public override void BeforeTickLogic(URenderPolicy policy)
+        {
+            base.BeforeTickLogic(policy);            
+        }
         public unsafe override void TickLogic(UWorld world, URenderPolicy policy, bool bClear)
         {
             BuildInstances(world, policy.DefaultCamera.VisParameter);
@@ -247,6 +186,7 @@ namespace EngineNS.Bricks.GpuDriven
             bfWriter.Offset = 0;
             bfWriter.Value = 0;
             cmd.WriteBufferUINT32(1, &bfWriter);
+
             // TODO: dispatch x/y/z
             CullClusterShading.SetDrawcallDispatch(this, policy, CullClusterShadingDrawcall, 1, 1, 1, true);
             cmd.PushGpuDraw(CullClusterShadingDrawcall);
@@ -260,73 +200,35 @@ namespace EngineNS.Bricks.GpuDriven
             UEngine.Instance.GfxDevice.RenderCmdQueue.QueueCmdlist(cmd);
         }
 
-        //public List<GamePlay.Scene.TtGpuSceneNode> GpuSceneActors = new List<GamePlay.Scene.TtGpuSceneNode>();
-        //public TtCpu2GpuBuffer<FActorInstance> GpuInstances = new TtCpu2GpuBuffer<FActorInstance>();
-
         public void BuildInstances(GamePlay.UWorld world, GamePlay.UWorld.UVisParameter rp)
         {
+            List<FClusterData> clusters = new List<FClusterData>();
+            List<Vector3> position = new List<Vector3>();
+            List<uint> ib = new List<uint>();
+
             foreach (var i in rp.VisibleNodes)
             {
                 var meshNode = i as GamePlay.Scene.UMeshNode;
                 if (meshNode == null)
                     continue;
 
-                var cluster = meshNode.Mesh.MaterialMesh.Mesh.ClusteredMesh;
+                var clusterMesh = meshNode.Mesh.MaterialMesh.Mesh.ClusteredMesh;
+                if (clusterMesh == null)
+                    continue;
+
+                for (int clusterId = 0; clusterId < clusterMesh.Clusters.Count; clusterId++)
+                {
+                    var cluster = new FClusterData();
+                    cluster.VertStart = clusterMesh.Clusters[clusterId].VertexStart;
+                    cluster.VertEnd = clusterMesh.Clusters[clusterId].VertexCount;
+                    clusters.Add(cluster);                    
+                }
+
+                position.AddRange(new List<Vector3>(clusterMesh.Vertices));
+                ib.AddRange(new List<uint>(clusterMesh.Indices));
             }
-            //foreach (var i in GpuSceneActors)
-            //{
-            //    i.GpuSceneIndex = -1;
-            //}
-            //GpuSceneActors.Clear();
-            //world.Root.DFS_VisitNodeTree(static (GamePlay.Scene.UNode node, object arg) =>
-            //{
-            //    var actor = node as GamePlay.Scene.TtGpuSceneNode;
-            //    if (actor == null)
-            //        return false;
-            //    var This = arg as UGpuSceneNode;
-            //    This.GpuSceneActors.Add(actor);
 
-            //    return false;
-            //}, this);
-
-            //CullInstancesBuffer.SetSize(GpuSceneActors.Count);
-            //uint CalculateClusterID = 0;
-            //foreach (var i in GpuSceneActors)
-            //{
-            //    FActorInstance data;
-            //    data.WorldMatrix = i.Placement.AbsTransform.ToMatrixWithScale(in world.mCameraOffset);
-            //    i.GpuSceneIndex = GpuInstances.PushData(data);
-
-            //    TtCullInstanceData CullInstanceData;
-            //    CullInstanceData.BoundCenter = i.BoundVolume.LocalAABB.GetCenter();
-            //    CullInstanceData.BoundExtent = i.BoundVolume.LocalAABB.GetSize();
-
-            //    CullInstanceData.WorldMatrix = data.WorldMatrix;
-            //    CullInstanceData.GpuSceneIndex = (uint)i.GpuSceneIndex;
-            //    CullInstanceData.ClusterCount = i.ClusteredMeshs.Count;
-
-
-            //    uint StartClusterID = CalculateClusterID;
-            //    //foreach (var ClusteredMesh in i.ClusteredMeshs)
-            //    for (int j = 0; j < i.ClusteredMeshs.Count; j++)
-            //    {
-            //        var ClusteredMesh = i.ClusteredMeshs[j];
-            //        TtCullClusterData CullClusterData;
-            //        CullClusterData.BoundCenter = (ClusteredMesh.AABB.Minimum + ClusteredMesh.AABB.Maximum) * 0.5f;
-            //        CullClusterData.BoundExtent = ClusteredMesh.AABB.Maximum - ClusteredMesh.AABB.Minimum;
-            //        CullClusterData.WorldMatrix = data.WorldMatrix;
-
-            //        CalculateClusterID = (uint)CullClustersBuffer.DataArray.Count;
-            //        CullClusterData.ClusterID = CalculateClusterID;
-            //        CullClustersBuffer.PushData(CullClusterData);
-            //    }
-
-            //    CullInstanceData.ChildrenStart = StartClusterID;
-            //    CullInstanceData.ChildrenEnd = CalculateClusterID;
-
-            //    CullInstancesBuffer.PushData(CullInstanceData);
-            //}
-            ////ActorInstances.SetSize(GpuSceneActors.Count);
+            InitBuffers(position.ToArray(), ib.ToArray(), clusters, rp.CullCamera);
         }
     }
 }
