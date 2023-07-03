@@ -32,6 +32,7 @@ namespace EngineNS.Graphics.Pipeline.Common
         }
         public void Dispose()
         {
+            GpuCapacity = 0;
             DataArray.Clear();
             DataArray.Dispose();
             if (GpuBuffer != null)

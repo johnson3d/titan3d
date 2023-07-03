@@ -276,7 +276,8 @@ namespace EngineNS.Bricks.GpuDriven
                 node = policy.FindFirstNode<TtSwRasterizeNode>();
             }
 
-            drawcall.BindSrv("VertexBuffer", node.GetAttachBuffer(node.VerticesPinIn).Srv);
+            var attachment = node.GetAttachBuffer(node.VerticesPinIn);
+            drawcall.BindSrv("VertexBuffer", attachment.Srv);
             drawcall.BindSrv("IndexBuffer", node.GetAttachBuffer(node.IndicesPinIn).Srv);
             drawcall.BindSrv("ClusterBuffer", node.GetAttachBuffer(node.ClustersPinIn).Srv);
             drawcall.BindSrv("VisibleClusterBuffer", node.GetAttachBuffer(node.VisibleClustersPinIn).Srv);
