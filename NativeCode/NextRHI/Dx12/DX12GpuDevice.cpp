@@ -449,7 +449,12 @@ namespace NxRHI
 		mDevice->CheckFeatureSupport(D3D12_FEATURE::D3D12_FEATURE_D3D12_OPTIONS4, &op4, sizeof(op4));
 		if (op4.Native16BitShaderOpsSupported == false)
 		{
-			VFX_LTRACE(ELTT_Warning, "Native16BitShaderOpsSupported = false");
+			VFX_LTRACE(ELTT_Warning, "Native16BitShaderOpsSupported = false\r\n");
+		}
+		{
+			D3D12_FEATURE_DATA_GPU_VIRTUAL_ADDRESS_SUPPORT feature{};
+			mDevice->CheckFeatureSupport(D3D12_FEATURE::D3D12_FEATURE_GPU_VIRTUAL_ADDRESS_SUPPORT, &feature, sizeof(feature));
+			VFX_LTRACE(ELTT_Warning, "MaxGPUVirtualAddressBitsPerResource = %d\r\n", feature.MaxGPUVirtualAddressBitsPerResource);
 		}
 		//ASSERT(op4.Native16BitShaderOpsSupported);
 	}
