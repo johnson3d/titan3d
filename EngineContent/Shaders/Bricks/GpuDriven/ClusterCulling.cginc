@@ -40,6 +40,6 @@ void CS_ClusterCullingMain(uint DispatchThreadId : SV_DispatchThreadID, uint3 Lo
     VisClusterBuffer.InterlockedAdd(0, 1, index);
     //VisClusterBuffer&SrcClusterBuffer [0] is the count of array
     VisClusterBuffer.Store((1 + index) * 4, SrcClusterBuffer.Load((1 + DispatchThreadId.x) * 4));
-    }
+}
 
 #endif//_SOFT_RASTER_FRASTER_H_
