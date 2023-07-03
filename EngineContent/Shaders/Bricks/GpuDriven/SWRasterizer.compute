@@ -242,9 +242,14 @@ void RasterizeTri_Scanline_Inner(FRasterTri Tri) //FRaster Raster, uint PixelVal
 [numthreads(DispatchX, DispatchY, DispatchZ)]
 void CS_DispatchArgMain(uint3 LocalThreadId : SV_GroupThreadID, uint3 GroupId : SV_GroupID, uint3 DTid : SV_DispatchThreadID)
 {
-    IndirectArgBuffer.Store(0, (VisibleClusterBuffer.Load(0) + (ShadingStruct.DispatchArg.x - 1)) / ShadingStruct.DispatchArg.x);
-    IndirectArgBuffer.Store(4, 1);
+    IndirectArgBuffer.Store(0, 0);
+    uint count = VisibleClusterBuffer.Load(0);
+    uint alignment = max(ShadingStruct.DispatchArg.x, 1);
+    count = (count + alignment - 1) / alignment;
+    //IndirectArgBuffer.Store(4, (VisibleClusterBuffer.Load(0) + (ShadingStruct.DispatchArg.x - 1)) / ShadingStruct.DispatchArg.x);
+    IndirectArgBuffer.Store(4, count);
     IndirectArgBuffer.Store(8, 1);
+    IndirectArgBuffer.Store(12, 1);
 }
 
 [numthreads(DispatchX, DispatchY, DispatchZ)]
