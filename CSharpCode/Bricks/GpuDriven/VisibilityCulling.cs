@@ -223,8 +223,10 @@ namespace EngineNS.Bricks.GpuDriven
                 position.AddRange(new List<Vector3>(clusterMesh.Vertices));
                 ib.AddRange(new List<uint>(clusterMesh.Indices));
             }
-
-            UpdateBuffers(position.ToArray(), ib.ToArray(), clusters, rp.CullCamera);
+            if (position.Count > 0 && ib.Count > 0)
+            {
+                UpdateBuffers(position.ToArray(), ib.ToArray(), clusters, rp.CullCamera);
+            }
         }
     }
 }
