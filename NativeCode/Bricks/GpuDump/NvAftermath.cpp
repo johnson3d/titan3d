@@ -31,9 +31,16 @@ namespace GpuDump
 	{
 
 	}*/
+
+	static NxRHI::ERhiType NvAftermath_RHIType = NxRHI::ERhiType::RHI_VirtualDevice;
+	NxRHI::ERhiType NvAftermath::GetAfterMathRhiType()
+	{
+		return NvAftermath_RHIType;
+	}
 	
 	void NvAftermath::InitDump(NxRHI::ERhiType type)
 	{
+		NvAftermath_RHIType = type;
 		VKShaderDatabase::IsSpirV = false;
 		GFSDK_Aftermath_GpuCrashDumpWatchedApiFlags apiType{};
 		switch (type)
