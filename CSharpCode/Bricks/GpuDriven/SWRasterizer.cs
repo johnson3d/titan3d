@@ -277,6 +277,8 @@ namespace EngineNS.Bricks.GpuDriven
             }
 
             var attachment = node.GetAttachBuffer(node.VerticesPinIn);
+            if (attachment.Srv == null)
+                return;
             drawcall.BindSrv("VertexBuffer", attachment.Srv);
             drawcall.BindSrv("IndexBuffer", node.GetAttachBuffer(node.IndicesPinIn).Srv);
             drawcall.BindSrv("ClusterBuffer", node.GetAttachBuffer(node.ClustersPinIn).Srv);

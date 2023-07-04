@@ -126,11 +126,10 @@ namespace EngineNS.Bricks.GpuDriven
             Clusters.SetSize(sizeof(FClusterData) * clusters.Count);
             var clst = stackalloc FClusterData[clusters.Count];
 
-            Vector3 cameraPos = camera.GetLocalPosition();
-            Matrix worldMatrix = Matrix.Identity;
-            worldMatrix.M41 = cameraPos.X;
-            worldMatrix.M42 = cameraPos.Y;
-            worldMatrix.M43 = cameraPos.Z;
+//             Matrix worldMatrix = Matrix.Identity;
+//             worldMatrix.M41 = modelPos.X;
+//             worldMatrix.M42 = modelPos.Y;
+//             worldMatrix.M43 = modelPos.Z;
 
             for (int i = 0; i < clusters.Count; i++)
             {

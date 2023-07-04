@@ -192,7 +192,7 @@ namespace EngineNS.Graphics.Pipeline.Deferred
             {
                 BasePass.DrawCmdList.BeginCommand();
                 BackgroundPass.DrawCmdList.BeginCommand();
-#if false
+#if true
                 using (new Profiler.TimeScopeHelper(ScopePushGpuDraw))
                 {
                     //BasePass.DrawCmdList.SetViewport(GBuffers.ViewPort.mCoreObject);
