@@ -12,6 +12,7 @@ namespace GpuDump
 		NvAftermath : public IWeakReference
 	{
 	public:
+		static NxRHI::ERhiType GetAfterMathRhiType();
 		static void InitDump(NxRHI::ERhiType type);
 		static void DeviceCreated(NxRHI::ERhiType type, NxRHI::IGpuDevice * device);
 		static void RegByteCode(const char* name, void* pCode, UINT size);

@@ -29,6 +29,11 @@
 #define VULKAN_HPP_NO_TO_STRING
 #include "NsightAftermathGpuCrashTracker.h"
 
+#include "../NvAftermath.h"
+#ifdef HasModule_Dx12
+#include "../../NextRHI/Dx12/DX12PreHead.h"
+#endif
+
 //*********************************************************
 // GpuCrashTracker implementation
 //*********************************************************
@@ -81,6 +86,31 @@ void VKGpuCrashTracker::OnCrashDump(const void* pGpuCrashDump, const uint32_t gp
 {
     // Make sure only one thread at a time...
     std::lock_guard<std::mutex> lock(m_mutex);
+
+    GFSDK_Aftermath_PageFaultInformation FaultInformation;
+    auto Result = GFSDK_Aftermath_GetPageFaultInformation(&FaultInformation);
+    if (Result == GFSDK_Aftermath_Result_Success)
+    {
+        VFX_LTRACE(ELTT_Graphics, ("[Aftermath] Faulting address: 0x%016llx\r\n"), FaultInformation.faultingGpuVA);
+        VFX_LTRACE(ELTT_Graphics, ("[Aftermath] Faulting resource dims: %d x %d x %d\r\n"), FaultInformation.resourceDesc.width, FaultInformation.resourceDesc.height, FaultInformation.resourceDesc.depth);
+        VFX_LTRACE(ELTT_Graphics, ("[Aftermath] Faulting result size: %llu bytes\r\n"), FaultInformation.resourceDesc.size);
+        VFX_LTRACE(ELTT_Graphics, ("[Aftermath] Faulting resource mips: %d\r\n"), FaultInformation.resourceDesc.mipLevels);
+
+#if defined(HasModule_Dx12) || defined(HasModule_Dx11)
+        if (EngineNS::GpuDump::NvAftermath::GetAfterMathRhiType() == EngineNS::NxRHI::ERhiType::RHI_D3D12||
+            EngineNS::GpuDump::NvAftermath::GetAfterMathRhiType() == EngineNS::NxRHI::ERhiType::RHI_D3D11)
+        {
+            auto ResourceFormat = (DXGI_FORMAT)FaultInformation.resourceDesc.format;
+            auto fmt = EngineNS::NxRHI::DX12FormatToFormat(ResourceFormat);
+            VFX_LTRACE(ELTT_Graphics, ("[Aftermath] Faulting resource format: %s (0x%x)"), GetPixelFormatString(fmt), (UINT)ResourceFormat);
+        }
+#elif defined(HasModule_Vulkan)
+        if (EngineNS::GpuDump::NvAftermath::GetAfterMathRhiType() == EngineNS::NxRHI::ERhiType::RHI_VK)
+        {
+            auto ResourceFormat = (VK_FORMAT)FaultInformation.resourceDesc.format;
+        }
+#endif
+    }
 
     VFX_LTRACE(ELTT_Graphics, "Gpu crash dump:begin\r\n");
     // Write to file for later in-depth analysis with Nsight Graphics.
