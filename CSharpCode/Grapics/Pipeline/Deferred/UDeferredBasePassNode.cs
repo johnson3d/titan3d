@@ -192,7 +192,7 @@ namespace EngineNS.Graphics.Pipeline.Deferred
             {
                 BasePass.DrawCmdList.BeginCommand();
                 BackgroundPass.DrawCmdList.BeginCommand();
-
+#if false
                 using (new Profiler.TimeScopeHelper(ScopePushGpuDraw))
                 {
                     //BasePass.DrawCmdList.SetViewport(GBuffers.ViewPort.mCoreObject);
@@ -229,7 +229,7 @@ namespace EngineNS.Graphics.Pipeline.Deferred
                         }
                     }
                 }
-
+#endif
                 var bgCmdlist = BackgroundPass.DrawCmdList;
                 var cmdlist = BasePass.DrawCmdList;
                 var passClears = new NxRHI.FRenderPassClears();

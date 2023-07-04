@@ -53,9 +53,9 @@ namespace EngineNS.Bricks.GpuDriven
         public struct FClusterData
         {
             public Vector3 BoundCenter;
-            public int VertStart;
+            public int IndexStart;
             public Vector3 BoundExtent;
-            public int VertEnd;
+            public int IndexEnd;
             public Matrix WVPMatrix;
         }
         public TtCpu2GpuBuffer<FClusterData> Clusters = new TtCpu2GpuBuffer<FClusterData>();
@@ -134,9 +134,9 @@ namespace EngineNS.Bricks.GpuDriven
 
             for (int i = 0; i < clusters.Count; i++)
             {
-                clst[i].WVPMatrix = worldMatrix * camera.GetViewProjection();
-                clst[i].VertStart = clusters[i].VertStart;
-                clst[i].VertEnd = clusters[i].VertEnd;
+                clst[i].WVPMatrix = camera.GetToViewPortMatrix();
+                clst[i].IndexStart = clusters[i].IndexStart;
+                clst[i].IndexEnd = clusters[i].IndexEnd;
                 // TODO:
                 clst[i].BoundCenter = Vector3.Zero;
                 clst[i].BoundExtent = Vector3.One;
@@ -214,8 +214,9 @@ namespace EngineNS.Bricks.GpuDriven
                 for (int clusterId = 0; clusterId < clusterMesh.Clusters.Count; clusterId++)
                 {
                     var cluster = new FClusterData();
-                    cluster.VertStart = clusterMesh.Clusters[clusterId].VertexStart;
-                    cluster.VertEnd = clusterMesh.Clusters[clusterId].VertexCount;
+                    // NOTE: 
+                    cluster.IndexStart = clusterMesh.Clusters[clusterId].IndexStart;
+                    cluster.IndexEnd = clusterMesh.Clusters[clusterId].IndexCount;
                     clusters.Add(cluster);                    
                 }
 

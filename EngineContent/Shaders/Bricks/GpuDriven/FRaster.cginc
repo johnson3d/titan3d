@@ -18,9 +18,9 @@ struct FQuarkTriangle
 struct FClusterData
 {
     float3 BoundCenter;
-    int VertStart;
+    int IndexStart;
     float3 BoundExtent;
-    int VertEnd;
+    int IndexEnd;
     matrix WVPMatrix;
 };
 
@@ -31,8 +31,11 @@ StructuredBuffer<FClusterData> ClusterBuffer;
 FQuarkVertex GetQuarkVertex(int index)
 {
     FQuarkVertex vert;
+    
+    // TODO:
     const int Stride = 3 + 3 + 2;
     int curIndex = Stride * index;
+
     vert.Position.x = asfloat(VertexBuffer.Load((curIndex++) * 4));
     vert.Position.y = asfloat(VertexBuffer.Load((curIndex++) * 4));
     vert.Position.z = asfloat(VertexBuffer.Load((curIndex++) * 4));
@@ -47,27 +50,15 @@ FQuarkVertex GetQuarkVertex(int index)
     return vert;
 }
 
-FQuarkTriangle GetQuarkTriangle(int faceId)
+FQuarkTriangle GetQuarkTriangle(int id0, int id1, int id2)
 {
     FQuarkTriangle tri;
-    int curIndex = 3 * faceId;
-    tri.Vertices[0] = GetQuarkVertex(IndexBuffer.Load((curIndex++) * 4));
-    tri.Vertices[1] = GetQuarkVertex(IndexBuffer.Load((curIndex++) * 4));
-    tri.Vertices[2] = GetQuarkVertex(IndexBuffer.Load((curIndex++) * 4));
+
+    tri.Vertices[0] = GetQuarkVertex(IndexBuffer.Load(id0 * 4));
+    tri.Vertices[1] = GetQuarkVertex(IndexBuffer.Load(id1 * 4));
+    tri.Vertices[2] = GetQuarkVertex(IndexBuffer.Load(id2 * 4));
     
     return tri;
 }
 
-void ForEachClusterTest(int clusterId)
-{
-    FClusterData cluster = ClusterBuffer[ clusterId];
-    for (int i = cluster.VertStart; i <= cluster.VertEnd; i++)
-    {
-        FQuarkTriangle tri = GetQuarkTriangle(i);
-        tri.Vertices[0].Position = mul(float4(tri.Vertices[0].Position, 1), cluster.WVPMatrix).xyz;
-        tri.Vertices[1].Position = mul(float4(tri.Vertices[1].Position, 1), cluster.WVPMatrix).xyz;
-        tri.Vertices[2].Position = mul(float4(tri.Vertices[2].Position, 1), cluster.WVPMatrix).xyz;
-        //do raster
-    }
-}
 #endif//_SOFT_RASTER_FRASTER_H_

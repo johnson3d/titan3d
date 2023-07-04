@@ -3,7 +3,17 @@
 
 #include "FRaster.cginc"
 
-ByteAddressBuffer SrcClusterBuffer;
+// TODO: ??
+struct FClusterData
+{
+    float3 BoundCenter;
+    int IndexStart;
+    float3 BoundExtent;
+    int IndexEnd;
+    matrix WVPMatrix;
+};
+
+StructuredBuffer<FClusterData> ClusterBuffer;
 RWByteAddressBuffer VisClusterBuffer;
 
 bool IsVisible(int clusterIdx)
@@ -16,18 +26,18 @@ bool IsVisible(int clusterIdx)
     return true;
 }
 
-groupshared uint MaxSrcCount;
+//groupshared uint MaxSrcCount;
 
 [numthreads(DispatchX, DispatchY, DispatchZ)]
 void CS_ClusterCullingMain(uint DispatchThreadId : SV_DispatchThreadID, uint3 LocalThreadId : SV_GroupThreadID, uint3 GroupId : SV_GroupID)
 {
-    if (LocalThreadId.x == 0)
-    {
-        MaxSrcCount = SrcClusterBuffer.Load(0);
-    }
-    GroupMemoryBarrierWithGroupSync();
+    //if (LocalThreadId.x == 0)
+    //{
+    //    MaxSrcCount = ClusterBuffer.Load(0);
+    //}
+    //GroupMemoryBarrierWithGroupSync();
     
-    if (DispatchThreadId.x >= MaxSrcCount)
+    if (DispatchThreadId.x >= 1)
     {
         return;
     }
@@ -36,10 +46,12 @@ void CS_ClusterCullingMain(uint DispatchThreadId : SV_DispatchThreadID, uint3 Lo
     {
         return;
     }
+    // TODO:
     int index = 0;
     VisClusterBuffer.InterlockedAdd(0, 1, index);
-    //VisClusterBuffer&SrcClusterBuffer [0] is the count of array
-    VisClusterBuffer.Store((1 + index) * 4, SrcClusterBuffer.Load((1 + DispatchThreadId.x) * 4));
+    //VisClusterBuffer&ClusterBuffer [0] is the count of array
+    //VisClusterBuffer.Store((1 + index) * 4, ClusterBuffer.Load((1 + DispatchThreadId.x) * 4));
+    VisClusterBuffer.Store(4, 1);
 }
 
 #endif//_SOFT_RASTER_FRASTER_H_

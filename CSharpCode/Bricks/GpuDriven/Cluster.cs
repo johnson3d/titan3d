@@ -122,7 +122,7 @@ namespace EngineNS.Bricks.GpuDriven
                 uint* ib = mesh.mCoreObject.GetClustersIB();
                 fixed (uint* dest = &result.Indices[0])
                 {
-                    CoreSDK.MemoryCopy(dest, ib, vbCount * (uint)sizeof(uint));
+                    CoreSDK.MemoryCopy(dest, ib, ibCount * (uint)sizeof(uint));
                 }
             }
             
