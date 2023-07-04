@@ -236,9 +236,10 @@ Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "GameTasks", "Plugins\GameTa
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "GameItems.Android", "Plugins\GameItems\GameItems.Android\GameItems.Android.csproj", "{D1C6E222-34D1-4ADA-A3F8-BE3E09DC437D}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "解决方案项", "解决方案项", "{9DD1EA3E-A1BD-43B5-9F2A-B1AA3DD5F01A}"
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Documents", "Documents", "{9DD1EA3E-A1BD-43B5-9F2A-B1AA3DD5F01A}"
 	ProjectSection(SolutionItems) = preProject
 		CodeLib.md = CodeLib.md
+		Documents\Index.md = Documents\Index.md
 		Readme.md = Readme.md
 	EndProjectSection
 EndProject
