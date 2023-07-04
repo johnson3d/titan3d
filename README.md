@@ -7,6 +7,7 @@
 1. 编译Core.Window工程（C++）
 2. 编译Engine.Window工程（C#）
 3. 编译MainEditor工程（C#）
+4. 第一次编译引擎如果失败，报告缺失一些生成代码，请单独调试运行CppWeavingTools和CSharpCodeTools两个工程一次 
 ## Windows编译Android APK
 1. 编译Core.Android工程（C++）
 2. 编译Engine.Android程（C#）
@@ -14,7 +15,7 @@
 1. 设置MainEditor为当前项目
 2. 调试命令行参数为config=\$(SolutionDir)content\EngineConfig.cfg use_renderdoc=false
 3. 调试工作目录为$(SolutionDir)binaries\
-4. Run/Debug
+4. Run/Debug [编辑器使用文档](Documents\Index.md)。
 # 开发者注意事项
 1. 不要提交大文件(20M以上)，避免lfs使用
 2. [常用代码](:/3404bc5266aa4459a6e2be96b56ac5bf)

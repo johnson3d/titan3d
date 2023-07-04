@@ -70,7 +70,7 @@ binaries\Plugins\Debug\net6.0
 ```
 Plugins目录下CopyPlugins.bat在修改*.plugin后目前需要手工执行，刷新到插件目录
 ## 3.Native Bricks开发
-1.目前需要在Base/BaseHead.h里面根据平台添加类似 #define HasModule_NextRHI 
+1.目前需要在Base/BaseHead.h里面根据平台添加类似 **#define HasModule_NextRHI** 
 2.这个用来确保生成胶水代码参与编译构建，否则会发生C#调用C++找不到函数
 ## 4.RPC函数
 1.为函数添加URpcMethod属性
