@@ -6,6 +6,7 @@ using EngineNS.Graphics.Pipeline;
 using EngineNS.GamePlay;
 using NPOI.HSSF.Record.AutoFilter;
 using System.Diagnostics;
+using NPOI.SS.Formula.Functions;
 
 namespace EngineNS.Bricks.GpuDriven
 {
@@ -116,7 +117,14 @@ namespace EngineNS.Bricks.GpuDriven
             {
                 Vertices.Initialize(false);
                 Vertices.SetSize(sizeof(FQuarkVertex) * vb.Length / sizeof(float));
-                fixed (Vector3* p = &vb[0])
+                FQuarkVertex[] quarkVB = new FQuarkVertex[vb.Length];
+                for (int i = 0; i < vb.Length; i++)
+                {
+                    quarkVB[i].Position = vb[i];
+                    quarkVB[i].Normal = Vector3.Up;
+                    quarkVB[i].UV = Vector2.Zero;
+                }
+                fixed (FQuarkVertex* p = &quarkVB[0])
                 {
                     Vertices.UpdateData(0, p, sizeof(FQuarkVertex) * vb.Length);
                 }
@@ -250,9 +258,10 @@ namespace EngineNS.Bricks.GpuDriven
                     cluster.IndexEnd = clusterMesh.Clusters[clusterId].IndexCount;
                     clusters.Add(cluster);                    
                 }
-
-                position.AddRange(new List<Vector3>(clusterMesh.Vertices));
-                ib.AddRange(new List<uint>(clusterMesh.Indices));
+                if (clusterMesh.Vertices != null)
+                    position.AddRange(new List<Vector3>(clusterMesh.Vertices));
+                if (clusterMesh.Indices != null)
+                    ib.AddRange(new List<uint>(clusterMesh.Indices));
             }
             // debug
             //var view2ScreenMat = rp.CullCamera.GetToViewPortMatrix();

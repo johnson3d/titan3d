@@ -585,7 +585,7 @@ namespace NxRHI
 
 		if (!GetMeshBuffer(device, Verts, Indexes))
 			return 0;
-
+#if false
 		// calculate bouding box
 		v3dxBox3 MeshBounds;
 		for (int i = 0; i < Verts.size(); ++i)
@@ -725,6 +725,21 @@ namespace NxRHI
 			mClusters[i] = QuarkCluster(Verts, Indexes, Range.Begin, Range.End, Partitioner, Adjacency);
 		}
 		return int(mClusters.size());
+#else
+		// export all vb, ib 
+		QuarkCluster cluster;	
+		cluster.Verts.resize(Verts.size() * 3);
+		cluster.Indexes.resize(Indexes.size());
+		memcpy(&cluster.Verts[0], &Verts[0], Verts.size() * sizeof(v3dxVector3));
+		memcpy(&cluster.Indexes[0], &Indexes[0], Indexes.size() * sizeof(UINT32));
+
+		cluster.VertexStart = 0;
+		cluster.VertexCount = Verts.size();
+		cluster.IndexStart = 0;
+		cluster.IndexCount = Indexes.size();
+
+		mClusters.push_back(cluster);
+#endif
 	}
     bool FMeshPrimitives::SaveClusters(XndNode* pNode)
     {

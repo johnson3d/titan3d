@@ -361,8 +361,8 @@ namespace EngineNS.Bricks.GpuDriven
         public override void OnResize(URenderPolicy policy, float x, float y)
         {
             base.OnResize(policy, x, y);
-            mShadingStruct.QuarkRTSizeFactor.X = x * QUARK_SUBPIXEL_SAMPLES;
-            mShadingStruct.QuarkRTSizeFactor.Y = y * QUARK_SUBPIXEL_SAMPLES;
+            mShadingStruct.QuarkRTSizeFactor.X = x;
+            mShadingStruct.QuarkRTSizeFactor.Y = y;
         }
         public override async Task Initialize(URenderPolicy policy, string debugName)
         {

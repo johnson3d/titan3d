@@ -257,7 +257,7 @@ void CS_DispatchArgMain(uint3 LocalThreadId : SV_GroupThreadID, uint3 GroupId : 
 void CS_Main(uint3 LocalThreadId : SV_GroupThreadID, uint3 GroupId : SV_GroupID, uint3 DTid : SV_DispatchThreadID)
 {
 	// TODO: group id used
-#if false
+#if 1
 	if (DTid.x < 1)
 	{
 		int clusterIdx = 0;//VisibleClusterBuffer.Load((DTid.x % ShadingStruct.MaxVisClusterIndex) * 4) % ShadingStruct.MaxClusterIndex;
@@ -278,9 +278,9 @@ void CS_Main(uint3 LocalThreadId : SV_GroupThreadID, uint3 GroupId : SV_GroupID,
 			pos[2] = wvpPosition[2].xyz / wvpPosition[2].w;
 
 			// muliply QUARK_SUBPIXEL_SAMPLES outside
-			pos[0].xy *= ShadingStruct.QuarkRTSizeFactor;
-			pos[1].xy *= ShadingStruct.QuarkRTSizeFactor;
-			pos[2].xy *= ShadingStruct.QuarkRTSizeFactor;
+			pos[0].xy *= QUARK_SUBPIXEL_SAMPLES;
+			pos[1].xy *= QUARK_SUBPIXEL_SAMPLES;
+			pos[2].xy *= QUARK_SUBPIXEL_SAMPLES;
 
 			//do raster
 			FRasterTri rasterTri = SetupTriangle(pos);
