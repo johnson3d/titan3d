@@ -140,9 +140,9 @@ namespace EngineNS.Graphics.Pipeline.Common
 
         public void Initialize_Instance(URenderPolicy policy, string debugName)
         {
-            GpuInstances.Initialize(false);
-            CullInstancesBuffer.Initialize(true);
-            CullClustersBuffer.Initialize(true);
+            GpuInstances.Initialize(EBufferType.BFT_SRV);
+            CullInstancesBuffer.Initialize(EBufferType.BFT_SRV | EBufferType.BFT_UAV);
+            CullClustersBuffer.Initialize(EBufferType.BFT_SRV | EBufferType.BFT_UAV);
 
 
             //After BuildInstances function..
@@ -293,14 +293,14 @@ namespace EngineNS.Graphics.Pipeline.Common
         {
             var cmd = BasePass.DrawCmdList;
             {
-                VisibilityGpuActorsBuffer.SetSize((uint)CullInstancesBuffer.DataArray.Count, null);
-                NeedCullClusterMesBuffer.SetSize((uint)CullClustersBuffer.DataArray.Count, null);
+                VisibilityGpuActorsBuffer.SetSize((uint)CullInstancesBuffer.DataArray.Count, null, NxRHI.EBufferType.BFT_SRV | NxRHI.EBufferType.BFT_UAV);
+                NeedCullClusterMesBuffer.SetSize((uint)CullClustersBuffer.DataArray.Count, null, NxRHI.EBufferType.BFT_SRV | NxRHI.EBufferType.BFT_UAV);
 
                 uint NumberVisibilityGpuIndex = 0;
-                NumberVisibilityGpuActorBuffer.SetSize((uint)1, &NumberVisibilityGpuIndex);
+                NumberVisibilityGpuActorBuffer.SetSize((uint)1, &NumberVisibilityGpuIndex, NxRHI.EBufferType.BFT_SRV | NxRHI.EBufferType.BFT_UAV);
 
                 uint NumberGpuActors = (uint)CullInstancesBuffer.DataArray.Count;
-                NumberGpuActorsBuffer.SetSize(1u, &NumberGpuActors);
+                NumberGpuActorsBuffer.SetSize(1u, &NumberGpuActors, NxRHI.EBufferType.BFT_SRV | NxRHI.EBufferType.BFT_UAV);
 
                 if (Cull_CullGpuIndexsDrawcall == null)
                 {
@@ -324,7 +324,7 @@ namespace EngineNS.Graphics.Pipeline.Common
 
             {
                 uint InitCullClusterIndirectArgs = 0u;
-                CullClusterIndirectArgs.SetSize(3u, &InitCullClusterIndirectArgs);
+                CullClusterIndirectArgs.SetSize(3u, &InitCullClusterIndirectArgs, NxRHI.EBufferType.BFT_SRV | NxRHI.EBufferType.BFT_UAV);
 
                 if (Cull_SetupCullClusterArgsDrawcall == null)
                 {
@@ -341,10 +341,10 @@ namespace EngineNS.Graphics.Pipeline.Common
             }
 
             {
-                VisibleClusterMeshData.SetSize((uint)CullClustersBuffer.DataArray.Count, null);
+                VisibleClusterMeshData.SetSize((uint)CullClustersBuffer.DataArray.Count, null, NxRHI.EBufferType.BFT_SRV | NxRHI.EBufferType.BFT_UAV);
                 TtNumnerVisibleClusterMeshData InitNumnerVisibleClusterMeshData;
                 InitNumnerVisibleClusterMeshData.ClusterCount = 0;
-                NumnerVisibleClusterMeshData.SetSize(1u, &InitNumnerVisibleClusterMeshData);
+                NumnerVisibleClusterMeshData.SetSize(1u, &InitNumnerVisibleClusterMeshData, NxRHI.EBufferType.BFT_SRV | NxRHI.EBufferType.BFT_UAV);
 
                 //uint InitSetupDrawClusterIndirectArgs = 0;
                 if (Cull_CullClusterDrawcall == null)
@@ -364,7 +364,7 @@ namespace EngineNS.Graphics.Pipeline.Common
 
             {
                 uint InitSetupDrawClusterIndirectArgs = 0u;
-                SetupDrawClusterIndirectArgs.SetSize(3u, &InitSetupDrawClusterIndirectArgs);
+                SetupDrawClusterIndirectArgs.SetSize(3u, &InitSetupDrawClusterIndirectArgs, NxRHI.EBufferType.BFT_SRV | NxRHI.EBufferType.BFT_UAV | EBufferType.BFT_IndirectArgs);
 
                 if (Cull_SetupDrawClusterArgsDrawcall == null)
                 {

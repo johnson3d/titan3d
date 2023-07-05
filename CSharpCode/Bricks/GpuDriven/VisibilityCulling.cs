@@ -102,7 +102,7 @@ namespace EngineNS.Bricks.GpuDriven
 
             unsafe
             {
-                VisClusters.Initialize(true);
+                VisClusters.Initialize(NxRHI.EBufferType.BFT_SRV | NxRHI.EBufferType.BFT_UAV);
                 VisClusters.SetSize(100 + 1);
                 var visClst = stackalloc int[100 + 1];
                 visClst[0] = 0;
@@ -115,7 +115,7 @@ namespace EngineNS.Bricks.GpuDriven
             // TODO: update once?
             if (vb.Length >0)
             {
-                Vertices.Initialize(false);
+                Vertices.Initialize(NxRHI.EBufferType.BFT_SRV);
                 Vertices.SetSize(sizeof(FQuarkVertex) * vb.Length / sizeof(float));
                 FQuarkVertex[] quarkVB = new FQuarkVertex[vb.Length];
                 for (int i = 0; i < vb.Length; i++)
@@ -133,7 +133,7 @@ namespace EngineNS.Bricks.GpuDriven
             
             if (ib.Length > 0)
             {
-                Indices.Initialize(false);
+                Indices.Initialize(NxRHI.EBufferType.BFT_SRV);
                 Indices.SetSize(ib.Length);
                 fixed (uint* p = &ib[0])
                 {
@@ -144,7 +144,7 @@ namespace EngineNS.Bricks.GpuDriven
             
             if (clusters.Count > 0)
             {
-                Clusters.Initialize(false);
+                Clusters.Initialize(NxRHI.EBufferType.BFT_SRV);
                 Clusters.SetSize(sizeof(FClusterData) * clusters.Count);
                 var clst = stackalloc FClusterData[clusters.Count];
 
@@ -170,7 +170,7 @@ namespace EngineNS.Bricks.GpuDriven
             }
 
             {
-                SrcClusters.Initialize(false);
+                SrcClusters.Initialize(NxRHI.EBufferType.BFT_SRV);
                 SrcClusters.SetSize(sizeof(int) * 1 + sizeof(int));
                 var src = stackalloc int[2];
                 src[0] = 1;

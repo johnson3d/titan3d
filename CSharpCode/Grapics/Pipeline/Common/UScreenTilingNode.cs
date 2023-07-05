@@ -157,7 +157,7 @@ namespace EngineNS.Graphics.Pipeline.Common
             var rc = UEngine.Instance.GfxDevice.RenderContext;
 
             var desc = new NxRHI.FBufferDesc();
-            desc.SetDefault(false);
+            desc.SetDefault(false, NxRHI.EBufferType.BFT_UAV | NxRHI.EBufferType.BFT_SRV);
             desc.Type = NxRHI.EBufferType.BFT_SRV | NxRHI.EBufferType.BFT_UAV;
             desc.Size = TileX * TileY * (uint)sizeof(FTileData);
             desc.StructureStride = (uint)sizeof(FTileData);

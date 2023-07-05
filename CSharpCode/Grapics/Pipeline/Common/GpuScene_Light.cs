@@ -15,7 +15,7 @@ namespace EngineNS.Graphics.Pipeline.Common
         public TtCpu2GpuBuffer<FPointLight> PointLights = new TtCpu2GpuBuffer<FPointLight>();
         public void Initialize_Light(URenderPolicy policy, string debugName)
         {
-            PointLights.Initialize(false);
+            PointLights.Initialize(NxRHI.EBufferType.BFT_SRV);
         }
 
         private void Dispose_Light()

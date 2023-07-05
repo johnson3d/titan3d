@@ -387,7 +387,7 @@ namespace EngineNS.Bricks.GpuDriven
                 idArg.X = 1;
                 idArg.Y = 1;
                 idArg.Z = 1;
-                IndirectArgBuffer.SetSize(size + 1, &idArg, NxRHI.EBufferType.BFT_UAV | NxRHI.EBufferType.BFT_SRV);
+                IndirectArgBuffer.SetSize(size + 1, &idArg, NxRHI.EBufferType.BFT_UAV | NxRHI.EBufferType.BFT_SRV | NxRHI.EBufferType.BFT_IndirectArgs);
             }
         }
         public override void TickLogic(UWorld world, URenderPolicy policy, bool bClear)
@@ -403,8 +403,8 @@ namespace EngineNS.Bricks.GpuDriven
             DispatchArgShading.SetDrawcallDispatch(this, policy, DispatchArgShadingDrawcall, 1, 1, 1, true);
             cmd.PushGpuDraw(DispatchArgShadingDrawcall);
 
-            SWRasterizer.SetDrawcallDispatch(this, policy, SWRasterizerDrawcall, 1, 1, 1, false);
-            //SWRasterizer.SetDrawcallIndirectDispatch(this, policy, SWRasterizerDrawcall, IndirectArgBuffer.GpuBuffer);
+            //SWRasterizer.SetDrawcallDispatch(this, policy, SWRasterizerDrawcall, 1, 1, 1, false);
+            SWRasterizer.SetDrawcallIndirectDispatch(this, policy, SWRasterizerDrawcall, IndirectArgBuffer.GpuBuffer);
             cmd.PushGpuDraw(SWRasterizerDrawcall);
 
             cmd.BeginEvent(Name);

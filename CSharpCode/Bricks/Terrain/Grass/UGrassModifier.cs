@@ -150,7 +150,7 @@ namespace EngineNS.Bricks.Terrain.Grass
                 InstData = new FVSGrassData[mdf.mMaxNumber];
 
                 var bfDesc = new NxRHI.FBufferDesc();
-                bfDesc.SetDefault(false);
+                bfDesc.SetDefault(false, NxRHI.EBufferType.BFT_SRV);
                 bfDesc.Type = NxRHI.EBufferType.BFT_SRV;
                 bfDesc.CpuAccess = NxRHI.ECpuAccess.CAS_WRITE;
                 bfDesc.Usage = NxRHI.EGpuUsage.USAGE_DYNAMIC;
@@ -257,7 +257,7 @@ namespace EngineNS.Bricks.Terrain.Grass
             if (GrassTemp == null)
             {
                 GrassTemp = new Graphics.Pipeline.Common.TtCpu2GpuBuffer<FVSGrassData>();
-                GrassTemp.Initialize(false);
+                GrassTemp.Initialize(NxRHI.EBufferType.BFT_SRV);
                 GrassTemp.PushData(new FVSGrassData());
                 GrassTemp.Flush2GPU();
             }

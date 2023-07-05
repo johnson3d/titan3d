@@ -231,7 +231,7 @@ namespace EngineNS.Graphics.Mesh.Modifier
                 InstData = new FVSInstantData[mdf.mMaxNumber];
 
                 var bfDesc = new NxRHI.FBufferDesc();
-                bfDesc.SetDefault(false);
+                bfDesc.SetDefault(false, NxRHI.EBufferType.BFT_SRV);
                 bfDesc.Type = NxRHI.EBufferType.BFT_SRV;// | NxRHI.EBufferType.BFT_UAV;
                 bfDesc.CpuAccess = NxRHI.ECpuAccess.CAS_WRITE;
                 bfDesc.Usage = NxRHI.EGpuUsage.USAGE_DYNAMIC;
