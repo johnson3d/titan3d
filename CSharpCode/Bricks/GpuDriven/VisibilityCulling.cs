@@ -33,16 +33,19 @@ namespace EngineNS.Bricks.GpuDriven
             var node = drawcall.TagObject as TtCullClusterNode;
 
             drawcall.BindSrv("ClusterBuffer", node.Clusters.DataSRV);
+            drawcall.BindSrv("SrcClusterBuffer", node.SrcClusters.DataSRV);
             drawcall.BindUav("VisClusterBuffer", node.VisClusters.DataUAV);
         }
     }
     public class TtCullClusterNode : URenderGraphNode
     {
         public URenderGraphPin HzbPinIn = URenderGraphPin.CreateInput("Hzb");
+        public URenderGraphPin SrcClustersPin = URenderGraphPin.CreateInput("SrcClusters");
 
-        public URenderGraphPin VerticesPinOut = URenderGraphPin.CreateOutput("Vertices", false, EPixelFormat.PXF_UNKNOWN);
-        public URenderGraphPin IndicesPinOut = URenderGraphPin.CreateOutput("Indices", false, EPixelFormat.PXF_UNKNOWN);
-        public URenderGraphPin ClustersPinOut = URenderGraphPin.CreateOutput("Clusters", false, EPixelFormat.PXF_UNKNOWN);
+        public URenderGraphPin VerticesPinOut = URenderGraphPin.CreateInputOutput("Vertices", false, EPixelFormat.PXF_UNKNOWN);
+        public URenderGraphPin IndicesPinOut = URenderGraphPin.CreateInputOutput("Indices", false, EPixelFormat.PXF_UNKNOWN);
+        public URenderGraphPin ClustersPinOut = URenderGraphPin.CreateInputOutput("Clusters", false, EPixelFormat.PXF_UNKNOWN);
+        
         public URenderGraphPin VisibleClutersPinOut = URenderGraphPin.CreateOutput("VisibleClusters", false, EPixelFormat.PXF_UNKNOWN);
         
         public TtCullClusterShading CullClusterShading;
@@ -60,7 +63,8 @@ namespace EngineNS.Bricks.GpuDriven
             public Matrix WVPMatrix;
         }
         public TtCpu2GpuBuffer<FClusterData> Clusters = new TtCpu2GpuBuffer<FClusterData>();
-        public TtCpu2GpuBuffer<int> VisClusters = new TtCpu2GpuBuffer<int>();
+        public TtCpu2GpuBuffer<uint> SrcClusters = new TtCpu2GpuBuffer<uint>();
+        public TtCpu2GpuBuffer<uint> VisClusters = new TtCpu2GpuBuffer<uint>();
 
         public TtCullClusterNode()
         {
@@ -69,17 +73,19 @@ namespace EngineNS.Bricks.GpuDriven
         public override void InitNodePins()
         {
             AddInput(HzbPinIn, NxRHI.EBufferType.BFT_SRV);
+            AddInput(SrcClustersPin, NxRHI.EBufferType.BFT_UAV | NxRHI.EBufferType.BFT_SRV);
 
-            AddOutput(VerticesPinOut, NxRHI.EBufferType.BFT_UAV | NxRHI.EBufferType.BFT_SRV);
-            AddOutput(IndicesPinOut, NxRHI.EBufferType.BFT_UAV | NxRHI.EBufferType.BFT_SRV);
-            AddOutput(ClustersPinOut, NxRHI.EBufferType.BFT_UAV | NxRHI.EBufferType.BFT_SRV);
-
+            AddInputOutput(VerticesPinOut, NxRHI.EBufferType.BFT_UAV | NxRHI.EBufferType.BFT_SRV);
+            AddInputOutput(IndicesPinOut, NxRHI.EBufferType.BFT_UAV | NxRHI.EBufferType.BFT_SRV);
+            AddInputOutput(ClustersPinOut, NxRHI.EBufferType.BFT_UAV | NxRHI.EBufferType.BFT_SRV);
+            
             AddOutput(VisibleClutersPinOut, NxRHI.EBufferType.BFT_UAV | NxRHI.EBufferType.BFT_SRV);
 
             HzbPinIn.IsAllowInputNull = true;
             VerticesPinOut.IsAllowInputNull = true;
             IndicesPinOut.IsAllowInputNull = true;
             ClustersPinOut.IsAllowInputNull = true;
+            SrcClustersPin.IsAllowInputNull = true;
 
             base.InitNodePins();
         }
@@ -154,7 +160,16 @@ namespace EngineNS.Bricks.GpuDriven
                 Clusters.UpdateData(0, clst, sizeof(FClusterData) * clusters.Count);
                 Clusters.Flush2GPU();
             }
-           
+
+            {
+                SrcClusters.Initialize(false);
+                SrcClusters.SetSize(sizeof(int) * 1 + sizeof(int));
+                var src = stackalloc int[2];
+                src[0] = 1;
+                src[1] = 0;
+                SrcClusters.UpdateData(0, src, sizeof(int) * 1 + sizeof(int));
+                SrcClusters.Flush2GPU();
+            }
 
             {
                 var attachment = ImportAttachment(VerticesPinOut);
@@ -167,6 +182,11 @@ namespace EngineNS.Bricks.GpuDriven
             {
                 var attachment = ImportAttachment(ClustersPinOut);
                 attachment.Srv = Clusters.DataSRV;
+            }
+
+            {
+                var attachment = ImportAttachment(SrcClustersPin);
+                attachment.Srv = SrcClusters.DataSRV;
             }
         }
         public override void BeforeTickLogic(URenderPolicy policy)

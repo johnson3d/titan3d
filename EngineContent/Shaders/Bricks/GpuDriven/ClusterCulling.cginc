@@ -14,9 +14,10 @@ struct FClusterData
 };
 
 StructuredBuffer<FClusterData> ClusterBuffer;
+RWByteAddressBuffer SrcClusterBuffer;
 RWByteAddressBuffer VisClusterBuffer;
 
-bool IsVisible(int clusterIdx)
+bool IsVisible(uint clusterIdx)
 {
     //trasform ClusterBuffer[clusterIdx].BoundCenter to WorldCordinate
     
@@ -26,23 +27,24 @@ bool IsVisible(int clusterIdx)
     return true;
 }
 
-//groupshared uint MaxSrcCount;
+groupshared uint MaxSrcCount;
 
 [numthreads(DispatchX, DispatchY, DispatchZ)]
 void CS_ClusterCullingMain(uint DispatchThreadId : SV_DispatchThreadID, uint3 LocalThreadId : SV_GroupThreadID, uint3 GroupId : SV_GroupID)
 {
-    //if (LocalThreadId.x == 0)
-    //{
-    //    MaxSrcCount = ClusterBuffer.Load(0);
-    //}
-    //GroupMemoryBarrierWithGroupSync();
+    if (LocalThreadId.x == 0)
+    {
+        MaxSrcCount = SrcClusterBuffer.Load(0);
+    }
+    GroupMemoryBarrierWithGroupSync();
     
     if (DispatchThreadId.x >= 1)
     {
         return;
     }
     
-    if (IsVisible(DispatchThreadId.x) == false)
+    uint clusterId = SrcClusterBuffer.Load((1 + DispatchThreadId.x) * 4);
+    if (IsVisible(clusterId) == false)
     {
         return;
     }
@@ -50,8 +52,8 @@ void CS_ClusterCullingMain(uint DispatchThreadId : SV_DispatchThreadID, uint3 Lo
     int index = 0;
     VisClusterBuffer.InterlockedAdd(0, 1, index);
     //VisClusterBuffer&ClusterBuffer [0] is the count of array
-    //VisClusterBuffer.Store((1 + index) * 4, ClusterBuffer.Load((1 + DispatchThreadId.x) * 4));
-    VisClusterBuffer.Store(4, 1);
+    VisClusterBuffer.Store((1 + index) * 4, clusterId);
+    //VisClusterBuffer.Store(4, 1);
 }
 
 #endif//_SOFT_RASTER_FRASTER_H_
