@@ -17,7 +17,7 @@ StructuredBuffer<FClusterData> ClusterBuffer;
 RWByteAddressBuffer SrcClusterBuffer;
 RWByteAddressBuffer VisClusterBuffer;
 
-bool IsVisible(int clusterIdx)
+bool IsVisible(uint clusterIdx)
 {
     //trasform ClusterBuffer[clusterIdx].BoundCenter to WorldCordinate
     
@@ -43,7 +43,8 @@ void CS_ClusterCullingMain(uint DispatchThreadId : SV_DispatchThreadID, uint3 Lo
         return;
     }
     
-    if (IsVisible(DispatchThreadId.x) == false)
+    uint clusterId = SrcClusterBuffer.Load((1 + DispatchThreadId.x) * 4);
+    if (IsVisible(clusterId) == false)
     {
         return;
     }
@@ -51,7 +52,7 @@ void CS_ClusterCullingMain(uint DispatchThreadId : SV_DispatchThreadID, uint3 Lo
     int index = 0;
     VisClusterBuffer.InterlockedAdd(0, 1, index);
     //VisClusterBuffer&ClusterBuffer [0] is the count of array
-    VisClusterBuffer.Store((1 + index) * 4, SrcClusterBuffer.Load((1 + DispatchThreadId.x) * 4));
+    VisClusterBuffer.Store((1 + index) * 4, clusterId);
     //VisClusterBuffer.Store(4, 1);
 }
 

@@ -63,8 +63,8 @@ namespace EngineNS.Bricks.GpuDriven
             public Matrix WVPMatrix;
         }
         public TtCpu2GpuBuffer<FClusterData> Clusters = new TtCpu2GpuBuffer<FClusterData>();
-        public TtCpu2GpuBuffer<int> SrcClusters = new TtCpu2GpuBuffer<int>();
-        public TtCpu2GpuBuffer<int> VisClusters = new TtCpu2GpuBuffer<int>();
+        public TtCpu2GpuBuffer<uint> SrcClusters = new TtCpu2GpuBuffer<uint>();
+        public TtCpu2GpuBuffer<uint> VisClusters = new TtCpu2GpuBuffer<uint>();
 
         public TtCullClusterNode()
         {
