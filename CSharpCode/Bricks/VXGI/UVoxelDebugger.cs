@@ -195,7 +195,7 @@ namespace EngineNS.Bricks.VXGI
             var rc = UEngine.Instance.GfxDevice.RenderContext;
 
             var desc = new NxRHI.FBufferDesc();
-            desc.SetDefault(false);
+            desc.SetDefault(false, NxRHI.EBufferType.BFT_SRV | NxRHI.EBufferType.BFT_UAV);
             desc.Type = NxRHI.EBufferType.BFT_SRV | NxRHI.EBufferType.BFT_UAV;// | NxRHI.EBufferType.TBuffer;
             desc.Size = VxGroupPoolSize * (uint)sizeof(FVoxelDebugger);
             desc.StructureStride = (uint)sizeof(FVoxelDebugger);

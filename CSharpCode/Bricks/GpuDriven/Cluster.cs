@@ -201,7 +201,7 @@ namespace EngineNS.Bricks.GpuDriven
                 if ((Streams & (1u << (int)i)) != 0)
                 {
                     var bfDesc = new NxRHI.FBufferDesc();
-                    bfDesc.SetDefault(false);
+                    bfDesc.SetDefault(false, NxRHI.EBufferType.BFT_Vertex);
                     var buffer = rc.CreateBuffer(in bfDesc);
 
                     var vbvDesc = new NxRHI.FVbvDesc();
@@ -212,7 +212,7 @@ namespace EngineNS.Bricks.GpuDriven
             }
             {
                 var bfDesc = new NxRHI.FBufferDesc();
-                bfDesc.SetDefault(false);
+                bfDesc.SetDefault(false, NxRHI.EBufferType.BFT_Index);
                 var buffer = rc.CreateBuffer(in bfDesc);
                 var ibvDesc = new NxRHI.FIbvDesc();
                 ibvDesc.SetDefault();

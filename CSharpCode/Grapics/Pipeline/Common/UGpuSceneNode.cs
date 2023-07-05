@@ -11,13 +11,13 @@ namespace EngineNS.Graphics.Pipeline.Common
         public Support.UNativeArray<T> DataArray;
         private uint GpuCapacity = 0;
         public NxRHI.UBuffer GpuBuffer;
-        public bool IsGpuWrite { get; private set; } = false;
+        public NxRHI.EBufferType BufferTypes { get; private set; } = NxRHI.EBufferType.BFT_SRV;
         public NxRHI.UUaView DataUAV;
         public NxRHI.USrView DataSRV;
         private bool Dirty = false;
-        public bool Initialize(bool gpuWrite)
+        public bool Initialize(NxRHI.EBufferType types)
         {
-            IsGpuWrite = gpuWrite;
+            BufferTypes = types;
             Dispose();
             DataArray = Support.UNativeArray<T>.CreateInstance();
             return true;
@@ -96,12 +96,12 @@ namespace EngineNS.Graphics.Pipeline.Common
                 GpuCapacity = (uint)DataArray.Count + GpuCapacity / 2 + 1;
 
                 var bfDesc = new NxRHI.FBufferDesc();
-                bfDesc.SetDefault(isRaw);
+                bfDesc.SetDefault(isRaw, BufferTypes);
                 bfDesc.Size = (uint)sizeof(T) * GpuCapacity;
                 bfDesc.StructureStride = (uint)sizeof(T);
                 bfDesc.InitData = DataArray.UnsafeGetElementAddress(0);
                 bfDesc.Type = NxRHI.EBufferType.BFT_SRV;
-                if (IsGpuWrite)
+                if ((BufferTypes & NxRHI.EBufferType.BFT_UAV) != 0)
                 {
                     bfDesc.Type |= NxRHI.EBufferType.BFT_UAV;
                     bfDesc.Usage = NxRHI.EGpuUsage.USAGE_DEFAULT;
@@ -154,7 +154,7 @@ namespace EngineNS.Graphics.Pipeline.Common
             CoreSDK.DisposeObject(ref DataSRV);
             CoreSDK.DisposeObject(ref GpuBuffer);
         }
-        public unsafe void SetSize(uint Count, void* pInitData, NxRHI.EBufferType bufferType = NxRHI.EBufferType.BFT_UAV)
+        public unsafe void SetSize(uint Count, void* pInitData, NxRHI.EBufferType bufferType)
         {
             Dispose();
 
@@ -165,7 +165,7 @@ namespace EngineNS.Graphics.Pipeline.Common
             }
 
             var bfDesc = new NxRHI.FBufferDesc();
-            bfDesc.SetDefault(isRaw);
+            bfDesc.SetDefault(isRaw, bufferType);
             bfDesc.Size = (uint)sizeof(T) * Count;
             bfDesc.StructureStride = (uint)sizeof(T);
             bfDesc.InitData = pInitData;
@@ -347,7 +347,7 @@ namespace EngineNS.Graphics.Pipeline.Common
             BasePass.Initialize(rc, debugName + ".BasePass");
 
             var desc = new NxRHI.FBufferDesc();
-            desc.SetDefault(false);
+            desc.SetDefault(false, NxRHI.EBufferType.BFT_UAV | NxRHI.EBufferType.BFT_SRV);
             desc.Type = NxRHI.EBufferType.BFT_UAV | NxRHI.EBufferType.BFT_SRV;
             unsafe
             {

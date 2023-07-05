@@ -111,7 +111,7 @@ namespace EngineNS.Bricks.Particle
             {
                 var bfDesc = new NxRHI.FBufferDesc();
 
-                bfDesc.SetDefault(false);
+                bfDesc.SetDefault(false, NxRHI.EBufferType.BFT_UAV | NxRHI.EBufferType.BFT_SRV);
                 bfDesc.Type = NxRHI.EBufferType.BFT_UAV | NxRHI.EBufferType.BFT_SRV;
                 //bfDesc.MiscFlags = (UInt32)(EResourceMiscFlag.BUFFER_ALLOW_RAW_VIEWS);
                 bfDesc.Size = (uint)sizeof(Vector4) * ShaderRandomPoolSize;

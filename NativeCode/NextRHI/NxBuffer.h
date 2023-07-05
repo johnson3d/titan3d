@@ -83,15 +83,21 @@ namespace NxRHI
 	struct TR_CLASS(SV_LayoutStruct = 8)
 		FBufferDesc
 	{
-		void SetDefault(bool isRaw = false)
+		void SetDefault(bool isRaw = false, EBufferType types = BFT_CBuffer)
 		{
-			Type = BFT_CBuffer;
+			Type = types;
+			
 			Usage = USAGE_DEFAULT;
 			CpuAccess = (ECpuAccess)0;
 			if (isRaw)
 				MiscFlags = EResourceMiscFlag::RM_BUFFER_ALLOW_RAW_VIEWS; 
 			else
 				MiscFlags = (EResourceMiscFlag)0;
+			if (Type & EBufferType::BFT_IndirectArgs)
+			{
+				ASSERT(isRaw);
+				MiscFlags = (EResourceMiscFlag)(MiscFlags | EResourceMiscFlag::RM_DRAWINDIRECT_ARGS);
+			}
 			StructureStride = 0;
 			Size = 0;
 			RowPitch = 0;

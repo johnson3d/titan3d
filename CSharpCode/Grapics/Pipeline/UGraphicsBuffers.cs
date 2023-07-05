@@ -214,33 +214,33 @@ namespace EngineNS.Graphics.Pipeline
             else
             {
                 var desc = new NxRHI.FBufferDesc();
-                desc.SetDefault(false);
+                desc.SetDefault(false, types);
                 desc.Size = BufferDesc.Width * BufferDesc.Height;
                 desc.StructureStride = BufferDesc.Width;
-                if ((types & NxRHI.EBufferType.BFT_Vertex) != 0)
-                {
-                    desc.Type |= NxRHI.EBufferType.BFT_Vertex;
-                }
-                if ((types & NxRHI.EBufferType.BFT_Index) != 0)
-                {
-                    desc.Type |= NxRHI.EBufferType.BFT_Index;
-                }
-                if ((types & NxRHI.EBufferType.BFT_IndirectArgs) != 0)
-                {
-                    desc.Type |= NxRHI.EBufferType.BFT_IndirectArgs;
-                }
-                if ((types & NxRHI.EBufferType.BFT_CBuffer) != 0)
-                {
-                    desc.Type |= NxRHI.EBufferType.BFT_CBuffer;
-                }
-                if ((types & NxRHI.EBufferType.BFT_SRV) != 0)
-                {
-                    desc.Type |= NxRHI.EBufferType.BFT_SRV;
-                }
-                if ((types & NxRHI.EBufferType.BFT_UAV) != 0)
-                {
-                    desc.Type |= NxRHI.EBufferType.BFT_UAV;
-                }
+                //if ((types & NxRHI.EBufferType.BFT_Vertex) != 0)
+                //{
+                //    desc.Type |= NxRHI.EBufferType.BFT_Vertex;
+                //}
+                //if ((types & NxRHI.EBufferType.BFT_Index) != 0)
+                //{
+                //    desc.Type |= NxRHI.EBufferType.BFT_Index;
+                //}
+                //if ((types & NxRHI.EBufferType.BFT_IndirectArgs) != 0)
+                //{
+                //    desc.Type |= NxRHI.EBufferType.BFT_IndirectArgs;
+                //}
+                //if ((types & NxRHI.EBufferType.BFT_CBuffer) != 0)
+                //{
+                //    desc.Type |= NxRHI.EBufferType.BFT_CBuffer;
+                //}
+                //if ((types & NxRHI.EBufferType.BFT_SRV) != 0)
+                //{
+                //    desc.Type |= NxRHI.EBufferType.BFT_SRV;
+                //}
+                //if ((types & NxRHI.EBufferType.BFT_UAV) != 0)
+                //{
+                //    desc.Type |= NxRHI.EBufferType.BFT_UAV;
+                //}
                 Buffer = rc.CreateBuffer(in desc);
                 if ((types & NxRHI.EBufferType.BFT_SRV) != 0)
                 {

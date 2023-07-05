@@ -300,14 +300,17 @@ void CS_Main(uint3 LocalThreadId : SV_GroupThreadID, uint3 GroupId : SV_GroupID,
 	//FRasterTri rasterTri = SetupTriangle(pos);
 	//if (rasterTri.bIsValid)
 	//	RasterizeTri_Scanline_Inner(rasterTri);
+	
+    if (any(DTid != 0))
+        return;
 
-	for (int x = 0; x < 100; x++)
-	{
-		for (int y = 0; y < 100; y++)
-		{
-			OutputQuarkTexture[uint2(x, y)] = float4(1, 0, 0, 1);
-		}
-	}
+    for (int x = 0; x < 100; x++)
+    {
+        for (int y = 0; y < 100; y++)
+        {
+            OutputQuarkTexture[uint2(x, y)] = float4(1, 0, 0, 1);
+        }
+    }
 }
 
 #endif

@@ -93,7 +93,7 @@ namespace EngineNS.Bricks.Particle
         {
             var rc = UEngine.Instance.GfxDevice.RenderContext;
             var bfDesc = new NxRHI.FBufferDesc();
-            bfDesc.SetDefault(false);
+            bfDesc.SetDefault(false, NxRHI.EBufferType.BFT_SRV | NxRHI.EBufferType.BFT_UAV);
             bfDesc.Type = NxRHI.EBufferType.BFT_UAV | NxRHI.EBufferType.BFT_SRV;
             bfDesc.StructureStride = (uint)sizeof(FParticle);
             bfDesc.Size = (uint)sizeof(FParticle) * emitter.MaxParticle;
@@ -222,7 +222,6 @@ namespace EngineNS.Bricks.Particle
 
                 uavDesc.SetBuffer(true);
                 uavDesc.Format = EPixelFormat.PXF_R32_TYPELESS;
-                //uavDesc.Buffer.Flags = (UInt32)EUAVBufferFlag.UAV_FLAG_RAW;
                 uavDesc.Buffer.FirstElement = 0;
                 uavDesc.Buffer.NumElements = (uint)(sizeof(NxRHI.FIndirectDispatchArgument) / sizeof(int)) * NumOfArgument;
                 uavDesc.Buffer.StructureByteStride = bfDesc.StructureStride;

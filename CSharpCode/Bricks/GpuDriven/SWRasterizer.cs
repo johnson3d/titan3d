@@ -389,7 +389,7 @@ namespace EngineNS.Bricks.GpuDriven
                 idArg.X = 1;
                 idArg.Y = 1;
                 idArg.Z = 1;
-                IndirectArgBuffer.SetSize(size + 1, &idArg, NxRHI.EBufferType.BFT_UAV | NxRHI.EBufferType.BFT_SRV);
+                IndirectArgBuffer.SetSize(size + 1, &idArg, NxRHI.EBufferType.BFT_UAV | NxRHI.EBufferType.BFT_SRV | NxRHI.EBufferType.BFT_IndirectArgs);
             }
         }
         public override void TickLogic(UWorld world, URenderPolicy policy, bool bClear)
