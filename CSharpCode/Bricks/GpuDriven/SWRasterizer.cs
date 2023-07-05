@@ -305,7 +305,7 @@ namespace EngineNS.Bricks.GpuDriven
         public URenderGraphPin ClustersPinIn = URenderGraphPin.CreateInput("Clusters");
         public URenderGraphPin VisibleClustersPinIn = URenderGraphPin.CreateInput("VisibleClusters");
 
-        public URenderGraphPin QuarkRTPinOut = URenderGraphPin.CreateOutput("QuarkRT", false, EPixelFormat.PXF_R8G8B8A8_UNORM);//PXF_R32G32_UINT
+        public URenderGraphPin QuarkRTPinOut = URenderGraphPin.CreateOutput("QuarkRT", true, EPixelFormat.PXF_R8G8B8A8_UNORM);//PXF_R32G32_UINT
         public URenderGraphPin DepthStencilPinOut = URenderGraphPin.CreateOutput("DepthStencil", false, EPixelFormat.PXF_D24_UNORM_S8_UINT);
 
         [System.Runtime.InteropServices.StructLayout(System.Runtime.InteropServices.LayoutKind.Sequential, Pack = 16)]
@@ -353,8 +353,6 @@ namespace EngineNS.Bricks.GpuDriven
             IndicesPinIn.IsAllowInputNull = true;
             ClustersPinIn.IsAllowInputNull = true;
 
-            // TODO: buffer size
-            QuarkRTPinOut.Attachement.Width = QuarkRTPinOut.Attachement.Height = 1024;
             AddOutput(QuarkRTPinOut, NxRHI.EBufferType.BFT_UAV | NxRHI.EBufferType.BFT_SRV);
             AddOutput(DepthStencilPinOut, NxRHI.EBufferType.BFT_DSV | NxRHI.EBufferType.BFT_SRV);
 
@@ -405,8 +403,8 @@ namespace EngineNS.Bricks.GpuDriven
             DispatchArgShading.SetDrawcallDispatch(this, policy, DispatchArgShadingDrawcall, 1, 1, 1, true);
             cmd.PushGpuDraw(DispatchArgShadingDrawcall);
 
-            //SWRasterizer.SetDrawcallDispatch(this, policy, SWRasterizerDrawcall, 1, 1, 1, false);
-            SWRasterizer.SetDrawcallIndirectDispatch(this, policy, SWRasterizerDrawcall, IndirectArgBuffer.GpuBuffer);
+            SWRasterizer.SetDrawcallDispatch(this, policy, SWRasterizerDrawcall, 1, 1, 1, false);
+            //SWRasterizer.SetDrawcallIndirectDispatch(this, policy, SWRasterizerDrawcall, IndirectArgBuffer.GpuBuffer);
             cmd.PushGpuDraw(SWRasterizerDrawcall);
 
             cmd.BeginEvent(Name);
