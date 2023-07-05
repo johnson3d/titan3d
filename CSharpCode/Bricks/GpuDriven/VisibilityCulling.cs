@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using EngineNS.Graphics.Pipeline;
 using EngineNS.GamePlay;
 using NPOI.HSSF.Record.AutoFilter;
+using System.Diagnostics;
 
 namespace EngineNS.Bricks.GpuDriven
 {
@@ -105,44 +106,55 @@ namespace EngineNS.Bricks.GpuDriven
         private unsafe void UpdateBuffers(Vector3[] vb, uint[] ib, List<FClusterData> clusters, EngineNS.Graphics.Pipeline.UCamera camera)
         {
             // TODO: update once?
-
-            Vertices.Initialize(false);
-            Vertices.SetSize(sizeof(FQuarkVertex) * vb.Length / sizeof(float));
-            fixed (Vector3* p = &vb[0])
+            if (vb.Length >0)
             {
-                Vertices.UpdateData(0, p, sizeof(FQuarkVertex) * vb.Length);
-            }                
-            Vertices.Flush2GPU();
-
-            Indices.Initialize(false);
-            Indices.SetSize(ib.Length);
-            fixed (uint* p = &ib[0])
-            {
-                Indices.UpdateData(0, p, sizeof(uint) * ib.Length);
-            }
-            Indices.Flush2GPU();
-
-            Clusters.Initialize(false);
-            Clusters.SetSize(sizeof(FClusterData) * clusters.Count);
-            var clst = stackalloc FClusterData[clusters.Count];
-
-//             Matrix worldMatrix = Matrix.Identity;
-//             worldMatrix.M41 = modelPos.X;
-//             worldMatrix.M42 = modelPos.Y;
-//             worldMatrix.M43 = modelPos.Z;
-
-            for (int i = 0; i < clusters.Count; i++)
-            {
-                clst[i].WVPMatrix = camera.GetToViewPortMatrix();
-                clst[i].IndexStart = clusters[i].IndexStart;
-                clst[i].IndexEnd = clusters[i].IndexEnd;
-                // TODO:
-                clst[i].BoundCenter = Vector3.Zero;
-                clst[i].BoundExtent = Vector3.One;
+                Vertices.Initialize(false);
+                Vertices.SetSize(sizeof(FQuarkVertex) * vb.Length / sizeof(float));
+                fixed (Vector3* p = &vb[0])
+                {
+                    Vertices.UpdateData(0, p, sizeof(FQuarkVertex) * vb.Length);
+                }
+                Vertices.Flush2GPU();
             }
             
-            Clusters.UpdateData(0, clst, sizeof(FClusterData) * clusters.Count);
-            Clusters.Flush2GPU();
+            if (ib.Length > 0)
+            {
+                Indices.Initialize(false);
+                Indices.SetSize(ib.Length);
+                fixed (uint* p = &ib[0])
+                {
+                    Indices.UpdateData(0, p, sizeof(uint) * ib.Length);
+                }
+                Indices.Flush2GPU();
+            }
+            
+            if (clusters.Count > 0)
+            {
+                Clusters.Initialize(false);
+                Clusters.SetSize(sizeof(FClusterData) * clusters.Count);
+                var clst = stackalloc FClusterData[clusters.Count];
+
+                //Matrix worldMatrix = Matrix.Identity;
+                //worldMatrix.M41 = modelPos.X;
+                //worldMatrix.M42 = modelPos.Y;
+                //worldMatrix.M43 = modelPos.Z;
+
+                for (int i = 0; i < clusters.Count; i++)
+                {
+                    clst[i].WVPMatrix = camera.GetToViewPortMatrix();
+                    clst[i].WVPMatrix.Transpose();
+
+                    clst[i].IndexStart = clusters[i].IndexStart;
+                    clst[i].IndexEnd = clusters[i].IndexEnd;
+                    // TODO:
+                    clst[i].BoundCenter = Vector3.Zero;
+                    clst[i].BoundExtent = Vector3.One;
+                }
+
+                Clusters.UpdateData(0, clst, sizeof(FClusterData) * clusters.Count);
+                Clusters.Flush2GPU();
+            }
+           
 
             {
                 var attachment = ImportAttachment(VerticesPinOut);
@@ -222,10 +234,19 @@ namespace EngineNS.Bricks.GpuDriven
                 position.AddRange(new List<Vector3>(clusterMesh.Vertices));
                 ib.AddRange(new List<uint>(clusterMesh.Indices));
             }
-            if (position.Count > 0 && ib.Count > 0)
-            {
-                UpdateBuffers(position.ToArray(), ib.ToArray(), clusters, rp.CullCamera);
-            }
+            // debug
+            //var view2ScreenMat = rp.CullCamera.GetToViewPortMatrix();
+            //for (int i = 0; i < position.Count; i++)
+            //{
+            //    var sreenPos = Vector3.TransformCoordinate(position[i], view2ScreenMat);
+            //    Debug.WriteLine(sreenPos.ToString());
+            //}
+
+            // debug
+            //position.Clear();
+            //ib.Clear();
+            //clusters.Clear();
+            UpdateBuffers(position.ToArray(), ib.ToArray(), clusters, rp.CullCamera);
         }
     }
 }
