@@ -253,61 +253,139 @@ void CS_DispatchArgMain(uint3 LocalThreadId : SV_GroupThreadID, uint3 GroupId : 
     IndirectArgBuffer.Store(12, 1);
 }
 
+void TestRasterize(float2 A, float2 B, float2 C)
+{
+	float2 Size = ShadingStruct.QuarkRTSizeFactor;
+
+	float2 Min;
+	Min.x = max(min(min(A.x, B.x), C.x), 0);
+	Min.y = max(min(min(A.y, B.y), C.y), 0);
+
+	float2 Max;
+	Max.x = min(max(max(A.x, B.x), C.x), Size.x);
+	Max.y = min(max(max(A.y, B.y), C.y), Size.y);
+
+	float yA_B = A.y -B.y;
+	float xB_A = B.x - A.x;
+	float ax_x_by = A.x *B.y;
+	float bx_x_ay = B.x * A.y;
+	float d1 = ax_x_by - bx_x_ay;
+
+	float yA_C = A.y - C.y;
+	float xC_A = C.x - A.x;
+	float ax_x_cy = A.x * C.y;
+	float cx_x_ay = C.x * A.y;
+	float d2 = ax_x_cy - cx_x_ay;
+
+	for (int y = Min.y; y <= Max.y; y++)
+	{
+		for (int x = Min.x; x <= Max.x; x++)
+		{
+			float2 P = float2(x, y);
+			//var uv = Vector2i.Barycentric(in A, in B, in C, in P);
+			//var PP = A * (1.0f - uv.X - uv.Y) + C * uv.X + B * uv.Y;
+			//assert(PP == P);
+
+			float sigma = (float)(yA_B * P.x + xB_A * P.y + d1) / (float)(yA_B * C.x + xB_A * C.y + d1);
+			float gamma = (float)(yA_C * P.x + xC_A * P.y + d2) / (float)(yA_C * B.x + xC_A *B.y + d2);
+
+			if (sigma < 0 || gamma < 0 || sigma + gamma > 1)
+			{
+				continue;
+			}
+			//draw pixel
+			OutputQuarkTexture[uint2(x, y)] = float4(1, 0, 0, 1);
+		}
+	}
+}
+
 [numthreads(DispatchX, DispatchY, DispatchZ)]
 void CS_Main(uint3 LocalThreadId : SV_GroupThreadID, uint3 GroupId : SV_GroupID, uint3 DTid : SV_DispatchThreadID)
 {
 	// TODO: group id used
 #if 1
-	if (DTid.x < 1)
+	//if (DTid.x < 1)
+	//{
+	//	int clusterIdx = 0;//VisibleClusterBuffer.Load((DTid.x % ShadingStruct.MaxVisClusterIndex) * 4) % ShadingStruct.MaxClusterIndex;
+	//	FClusterData cluster = ClusterBuffer[clusterIdx];
+	//	for (int i = cluster.IndexStart; i <= cluster.IndexEnd; i += 3)
+	//	{
+	//		float4 wvpPosition[3];
+	//		FQuarkTriangle tri = GetQuarkTriangle(i, i + 1, i + 2);
+
+	//		wvpPosition[0] = mul(float4(tri.Vertices[0].Position, 1), cluster.WVPMatrix);
+	//		wvpPosition[1] = mul(float4(tri.Vertices[1].Position, 1), cluster.WVPMatrix);
+	//		wvpPosition[2] = mul(float4(tri.Vertices[2].Position, 1), cluster.WVPMatrix);
+
+	//		float3 pos[3];
+
+	//		pos[0] = wvpPosition[0].xyz / wvpPosition[0].w;
+	//		pos[1] = wvpPosition[1].xyz / wvpPosition[1].w;
+	//		pos[2] = wvpPosition[2].xyz / wvpPosition[2].w;
+
+	//		// muliply QUARK_SUBPIXEL_SAMPLES outside
+	//		pos[0].xy *= QUARK_SUBPIXEL_SAMPLES;
+	//		pos[1].xy *= QUARK_SUBPIXEL_SAMPLES;
+	//		pos[2].xy *= QUARK_SUBPIXEL_SAMPLES;
+
+	//		//do raster
+	//		FRasterTri rasterTri = SetupTriangle(pos);
+	//		if (rasterTri.bIsValid)
+	//			RasterizeTri_Scanline_Inner(rasterTri);
+	//	}
+	//}
+	FClusterData cluster = ClusterBuffer[0];
+	int i = DTid.x * 3;
+	if (i+2 < cluster.IndexEnd)
 	{
-		int clusterIdx = 0;//VisibleClusterBuffer.Load((DTid.x % ShadingStruct.MaxVisClusterIndex) * 4) % ShadingStruct.MaxClusterIndex;
-		FClusterData cluster = ClusterBuffer[clusterIdx];
-		for (int i = cluster.IndexStart; i <= cluster.IndexEnd; i += 3)
-		{
-			float4 wvpPosition[3];
-			FQuarkTriangle tri = GetQuarkTriangle(i, i + 1, i + 2);
+		float4 wvpPosition[3];
+		FQuarkTriangle tri = GetQuarkTriangle(i, i + 1, i + 2);
 
-			wvpPosition[0] = mul(float4(tri.Vertices[0].Position, 1), cluster.WVPMatrix);
-			wvpPosition[1] = mul(float4(tri.Vertices[1].Position, 1), cluster.WVPMatrix);
-			wvpPosition[2] = mul(float4(tri.Vertices[2].Position, 1), cluster.WVPMatrix);
+		wvpPosition[0] = mul(float4(tri.Vertices[0].Position, 1), cluster.WVPMatrix);
+		wvpPosition[1] = mul(float4(tri.Vertices[1].Position, 1), cluster.WVPMatrix);
+		wvpPosition[2] = mul(float4(tri.Vertices[2].Position, 1), cluster.WVPMatrix);
 
-			float3 pos[3];
+		float3 pos[3];
 
-			pos[0] = wvpPosition[0].xyz / wvpPosition[0].w;
-			pos[1] = wvpPosition[1].xyz / wvpPosition[1].w;
-			pos[2] = wvpPosition[2].xyz / wvpPosition[2].w;
+		pos[0] = wvpPosition[0].xyz / wvpPosition[0].w;
+		pos[1] = wvpPosition[1].xyz / wvpPosition[1].w;
+		pos[2] = wvpPosition[2].xyz / wvpPosition[2].w;
 
-			// muliply QUARK_SUBPIXEL_SAMPLES outside
-			pos[0].xy *= QUARK_SUBPIXEL_SAMPLES;
-			pos[1].xy *= QUARK_SUBPIXEL_SAMPLES;
-			pos[2].xy *= QUARK_SUBPIXEL_SAMPLES;
+		//// muliply QUARK_SUBPIXEL_SAMPLES outside
+		//pos[0].xy *= QUARK_SUBPIXEL_SAMPLES;
+		//pos[1].xy *= QUARK_SUBPIXEL_SAMPLES;
+		//pos[2].xy *= QUARK_SUBPIXEL_SAMPLES;
 
-			//do raster
-			FRasterTri rasterTri = SetupTriangle(pos);
-			if (rasterTri.bIsValid)
-				RasterizeTri_Scanline_Inner(rasterTri);
-		}
+		////do raster
+		//FRasterTri rasterTri = SetupTriangle(pos);
+		//if (rasterTri.bIsValid)
+		//	RasterizeTri_Scanline_Inner(rasterTri);
+
+		TestRasterize(pos[0].xy, pos[1].xy, pos[2].xy);
 	}
 #else
 	if (DTid.x < 1)
 	{
 		float3 pos[3];
-		pos[0] = float3(50 * QUARK_SUBPIXEL_SAMPLES, 50 * QUARK_SUBPIXEL_SAMPLES, 0);
-		pos[1] = float3(50 * QUARK_SUBPIXEL_SAMPLES, 100 * QUARK_SUBPIXEL_SAMPLES, 0);
-		pos[2] = float3(80 * QUARK_SUBPIXEL_SAMPLES, 50 * QUARK_SUBPIXEL_SAMPLES, 0);
+		/*pos[0] = float3(372 * QUARK_SUBPIXEL_SAMPLES, 757 * QUARK_SUBPIXEL_SAMPLES, 0);
+		pos[1] = float3(1278 * QUARK_SUBPIXEL_SAMPLES, 1077 * QUARK_SUBPIXEL_SAMPLES, 0);
+		pos[2] = float3(958 * QUARK_SUBPIXEL_SAMPLES, 757 * QUARK_SUBPIXEL_SAMPLES, 0);*/
+
+		//pos[0] = float3(0 * QUARK_SUBPIXEL_SAMPLES, 5 * QUARK_SUBPIXEL_SAMPLES, 0);
+		//pos[1] = float3(1200 * QUARK_SUBPIXEL_SAMPLES, 800 * QUARK_SUBPIXEL_SAMPLES, 0);
+		//pos[2] = float3(1200 * QUARK_SUBPIXEL_SAMPLES, 5 * QUARK_SUBPIXEL_SAMPLES, 0);
+
+		////do raster
+		//FRasterTri rasterTri = SetupTriangle(pos);
+		//if (rasterTri.bIsValid)
+		//	RasterizeTri_Scanline_Inner(rasterTri);
+
+		pos[0] = float3(0 , 5, 0);
+		pos[1] = float3(1200, 800, 0);
+		pos[2] = float3(1200, 5, 0);
 
 		//do raster
-		FRasterTri rasterTri = SetupTriangle(pos);
-		if (rasterTri.bIsValid)
-			RasterizeTri_Scanline_Inner(rasterTri);
-
-		//for (int x = 0; x < 100; x++)
-		//{
-		//	for (int y = 0; y < 100; y++)
-		//	{
-		//		OutputQuarkTexture[uint2(x, y)] = float4(1, 0, 0, 1);
-		//	}
-		//}
+		TestRasterize(pos[0].xy, pos[1].xy, pos[2].xy);
 	}
 #endif
 }

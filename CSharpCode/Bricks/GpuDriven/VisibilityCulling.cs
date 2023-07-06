@@ -121,7 +121,8 @@ namespace EngineNS.Bricks.GpuDriven
                 for (int i = 0; i < vb.Length; i++)
                 {
                     quarkVB[i].Position = vb[i];
-                    quarkVB[i].Normal = Vector3.Up;
+                    // TODO:
+                    quarkVB[i].Normal = Vector3.Zero;
                     quarkVB[i].UV = Vector2.Zero;
                 }
                 fixed (FQuarkVertex* p = &quarkVB[0])
@@ -264,12 +265,12 @@ namespace EngineNS.Bricks.GpuDriven
                     ib.AddRange(new List<uint>(clusterMesh.Indices));
             }
             // debug
-            //var view2ScreenMat = rp.CullCamera.GetToViewPortMatrix();
-            //for (int i = 0; i < position.Count; i++)
-            //{
-            //    var sreenPos = Vector3.TransformCoordinate(position[i], view2ScreenMat);
-            //    Debug.WriteLine(sreenPos.ToString());
-            //}
+//             var view2ScreenMat = rp.CullCamera.GetToViewPortMatrix();
+//             for (int i = 0; i < position.Count; i++)
+//             {
+//                 var sreenPos = Vector3.TransformCoordinate(position[i], view2ScreenMat);
+//                 Debug.WriteLine(sreenPos.ToString());
+//             }
 
             // debug
             //position.Clear();

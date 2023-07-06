@@ -535,7 +535,7 @@ namespace EngineNS.Bricks.GpuDriven
 }
 namespace EngineNS.UTest
 {
-    //[UTest]
+    [UTest]
     public class UTest_TtSoftRaster
     {
         bool IgnorTest = false;
@@ -545,9 +545,9 @@ namespace EngineNS.UTest
             if (IgnorTest)
                 return;
 
-            var A = new Vector2i(100, 500);
-            var B = new Vector2i(150, 100);
-            var C = new Vector2i(700, 600);
+            var A = new Vector2i(50, 700);
+            var B = new Vector2i(1000, 1000);
+            var C = new Vector2i(700, 50);
             {
                 var image = StbImageSharp.ImageResult.CreateImage(1024, 1024, StbImageSharp.ColorComponents.RedGreenBlueAlpha);
                 image.Clear(Color.Black);
