@@ -318,8 +318,8 @@ namespace EngineNS.Bricks.GpuDriven
                 DispatchArg = Vector3ui.One;
             }
             public Vector2 QuarkRTSizeFactor;
-            public int MaxVisClusterIndex;
-            public int MaxClusterIndex;
+            public uint MaxVisClusterIndex;
+            public uint MaxClusterIndex;
             public Vector3ui DispatchArg;
         };
         FShadingStruct mShadingStruct = new FShadingStruct();
@@ -390,8 +390,17 @@ namespace EngineNS.Bricks.GpuDriven
                 IndirectArgBuffer.SetSize(size + 1, &idArg, NxRHI.EBufferType.BFT_UAV | NxRHI.EBufferType.BFT_SRV | NxRHI.EBufferType.BFT_IndirectArgs);
             }
         }
-        public override void TickLogic(UWorld world, URenderPolicy policy, bool bClear)
+        public unsafe override void TickLogic(UWorld world, URenderPolicy policy, bool bClear)
         {
+            var attachment = GetAttachBuffer(ClustersPinIn);
+            if (attachment.Srv != null)
+            {
+                mShadingStruct.MaxClusterIndex = attachment.Srv.mCoreObject.Desc.Buffer.ElementWidth / (uint)sizeof(TtCullClusterNode.FClusterData);
+            }
+            else
+            {
+                mShadingStruct.MaxClusterIndex = 0;
+            }
             if (CBShadingEnv != null)
             {
                 CBShadingEnv.SetValue("ShadingStruct", in mShadingStruct);

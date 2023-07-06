@@ -38,8 +38,8 @@ RWTexture2D<float4> OutputQuarkTexture;
 struct FShadingStruct
 {
     float2 QuarkRTSizeFactor;
-    int MaxVisClusterIndex;
-    int MaxClusterIndex;
+    uint MaxVisClusterIndex;
+    uint MaxClusterIndex;
 	
     uint3 DispatchArg;
 };
@@ -307,6 +307,8 @@ void CS_Main(uint3 LocalThreadId : SV_GroupThreadID, uint3 GroupId : SV_GroupID,
 	//if (DTid.x < 1)
 	//{
 	//	int clusterIdx = 0;//VisibleClusterBuffer.Load((DTid.x % ShadingStruct.MaxVisClusterIndex) * 4) % ShadingStruct.MaxClusterIndex;
+	//	if (clusterIdx >= ShadingStruct.MaxClusterIndex)
+	//		return;
 	//	FClusterData cluster = ClusterBuffer[clusterIdx];
 	//	for (int i = cluster.IndexStart; i <= cluster.IndexEnd; i += 3)
 	//	{
@@ -334,6 +336,7 @@ void CS_Main(uint3 LocalThreadId : SV_GroupThreadID, uint3 GroupId : SV_GroupID,
 	//			RasterizeTri_Scanline_Inner(rasterTri);
 	//	}
 	//}
+
 	FClusterData cluster = ClusterBuffer[0];
 	int i = DTid.x * 3;
 	if (i+2 < cluster.IndexEnd)

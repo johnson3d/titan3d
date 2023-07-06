@@ -347,9 +347,15 @@ namespace NxRHI
 			if (effect->mRootParameters[i].IsValidRoot())
 			{
 				if (effect->mRootParameters[i].IsSamplers)
+				{
+					ASSERT(mSamplerHeap);
 					dx12Cmd->mContext->SetComputeRootDescriptorTable(effect->mRootParameters[i].RootIndex, mSamplerHeap->GetGpuAddress(effect->mRootParameters[i].HeapStartIndex));
+				}
 				else
+				{
+					ASSERT(mCbvSrvUavHeap);
 					dx12Cmd->mContext->SetComputeRootDescriptorTable(effect->mRootParameters[i].RootIndex, mCbvSrvUavHeap->GetGpuAddress(effect->mRootParameters[i].HeapStartIndex));
+				}
 			}
 		}
 	}
@@ -385,12 +391,14 @@ namespace NxRHI
 			if (mCbvSrvUavHeap != nullptr)
 				device->DelayDestroy(mCbvSrvUavHeap);
 			mCbvSrvUavHeap = device->mDescriptorSetAllocator->AllocDescriptorSet(device, effect->mCbvSrvUavNumber, D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
+			ASSERT(mCbvSrvUavHeap);
 		}
 		if (effect->mSamplerNumber > 0)
 		{
 			if (mSamplerHeap != nullptr)
 				device->DelayDestroy(mSamplerHeap);
 			mSamplerHeap = device->mDescriptorSetAllocator->AllocDescriptorSet(device, effect->mSamplerNumber, D3D12_DESCRIPTOR_HEAP_TYPE_SAMPLER);
+			ASSERT(mSamplerHeap);
 		}
 
 		BindDescriptors(device, dx12Cmd, effect);

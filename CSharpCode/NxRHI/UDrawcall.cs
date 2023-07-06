@@ -61,12 +61,16 @@ namespace EngineNS.NxRHI
         }
         public void BindCBuffer(FEffectBinder binder, UCbView buffer)
         {
+            if (buffer == null)
+                return;
             if (binder.IsValidPointer == false)
                 return;
             mCoreObject.BindResource(binder, buffer.mCoreObject.NativeSuper);
         }
         public void BindCBuffer(UEffectBinder binder, UCbView buffer)
         {
+            if (buffer == null)
+                return;
             if (binder == null)
                 return;
             mCoreObject.BindResource(binder.mCoreObject, buffer.mCoreObject.NativeSuper);
@@ -93,16 +97,22 @@ namespace EngineNS.NxRHI
         }
         public void BindUAV(FEffectBinder binder, UUaView uav)
         {
+            if (uav == null)
+                return;
             if (binder.IsValidPointer == false)
                 return;
             mCoreObject.BindResource(binder, uav.mCoreObject.NativeSuper);
         }
         public bool BindSampler(VNameString name, USampler sampler)
         {
+            if (sampler == null)
+                return false;
             return mCoreObject.BindResource(name, sampler.mCoreObject.NativeSuper);
         }
         public void BindSampler(FEffectBinder binder, USampler sampler)
         {
+            if (sampler == null)
+                return;
             if (binder.IsValidPointer == false)
                 return;
             mCoreObject.BindResource(binder, sampler.mCoreObject.NativeSuper);
@@ -152,6 +162,8 @@ namespace EngineNS.NxRHI
         }
         public void BindIndirectDispatchArgsBuffer(UBuffer buffer)
         {
+            if (buffer == null)
+                return;
             if (buffer != null)
                 mCoreObject.BindIndirectDispatchArgsBuffer(buffer.mCoreObject);
         }
@@ -161,6 +173,8 @@ namespace EngineNS.NxRHI
         }
         public void BindCBuffer(FShaderBinder binder, UCbView resource)
         {
+            if (resource == null)
+                return;
             mCoreObject.BindResource(binder, resource.mCoreObject.NativeSuper);
         }
         public void BindCBuffer(string name, UCbView resource)
@@ -171,6 +185,8 @@ namespace EngineNS.NxRHI
         }
         public void BindSrv(FShaderBinder binder, USrView resource)
         {
+            if (resource == null)
+                return;
             mCoreObject.BindResource(binder, resource.mCoreObject.NativeSuper);
         }
         public void BindSrv(string name, USrView resource)
@@ -181,6 +197,8 @@ namespace EngineNS.NxRHI
         }
         public void BindUav(FShaderBinder binder, UUaView resource)
         {
+            if (resource == null)
+                return;
             mCoreObject.BindResource(binder, resource.mCoreObject.NativeSuper);
         }
         public void BindUav(string name, UUaView resource)
@@ -191,6 +209,8 @@ namespace EngineNS.NxRHI
         }
         public void BindSampler(FShaderBinder binder, USampler resource)
         {
+            if (resource == null)
+                return;
             mCoreObject.BindResource(binder, resource.mCoreObject.NativeSuper);
         }
         public void BindSampler(string name, USampler resource)

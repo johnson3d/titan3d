@@ -174,7 +174,7 @@ namespace EngineNS.Bricks.GpuDriven
                 SrcClusters.Initialize(NxRHI.EBufferType.BFT_SRV);
                 SrcClusters.SetSize(sizeof(int) * 1 + sizeof(int));
                 var src = stackalloc int[2];
-                src[0] = 1;
+                src[0] = clusters.Count > 0 ? 1 : 0;
                 src[1] = 0;
                 SrcClusters.UpdateData(0, src, sizeof(int) * 1 + sizeof(int));
                 SrcClusters.Flush2GPU();
