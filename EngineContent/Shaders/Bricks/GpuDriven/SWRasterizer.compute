@@ -38,8 +38,8 @@ RWTexture2D<float4> OutputQuarkTexture;
 struct FShadingStruct
 {
     float2 QuarkRTSizeFactor;
-    int MaxVisClusterIndex;
-    int MaxClusterIndex;
+    uint MaxVisClusterIndex;
+    uint MaxClusterIndex;
 	
     uint3 DispatchArg;
 };
