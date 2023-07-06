@@ -261,6 +261,8 @@ void CS_Main(uint3 LocalThreadId : SV_GroupThreadID, uint3 GroupId : SV_GroupID,
 	if (DTid.x < 1)
 	{
 		int clusterIdx = 0;//VisibleClusterBuffer.Load((DTid.x % ShadingStruct.MaxVisClusterIndex) * 4) % ShadingStruct.MaxClusterIndex;
+        if (clusterIdx >= ShadingStruct.MaxClusterIndex)
+            return;
 		FClusterData cluster = ClusterBuffer[clusterIdx];
 		for (int i = cluster.IndexStart; i <= cluster.IndexEnd; i += 3)
 		{

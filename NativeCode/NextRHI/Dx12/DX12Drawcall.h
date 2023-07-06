@@ -49,7 +49,7 @@ namespace NxRHI
 		bool									IsDirty = false;
 		AutoRef<DX12DescriptorSetPagedObject>	mCbvSrvUavHeap = nullptr;
 		AutoRef<DX12DescriptorSetPagedObject>	mSamplerHeap = nullptr;		
-		UINT									FingerPrient = 0;
+		UINT									FingerPrient = 0xffffffff;
 	};
 }
 

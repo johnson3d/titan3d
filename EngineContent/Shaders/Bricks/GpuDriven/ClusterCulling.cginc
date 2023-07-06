@@ -38,7 +38,7 @@ void CS_ClusterCullingMain(uint DispatchThreadId : SV_DispatchThreadID, uint3 Lo
     }
     GroupMemoryBarrierWithGroupSync();
     
-    if (DispatchThreadId.x >= 1)
+    if (DispatchThreadId.x >= MaxSrcCount)
     {
         return;
     }
