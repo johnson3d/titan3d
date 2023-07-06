@@ -14,7 +14,7 @@ struct FClusterData
 };
 
 StructuredBuffer<FClusterData> ClusterBuffer;
-RWByteAddressBuffer SrcClusterBuffer;
+ByteAddressBuffer SrcClusterBuffer;
 RWByteAddressBuffer VisClusterBuffer;
 
 bool IsVisible(uint clusterIdx)

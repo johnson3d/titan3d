@@ -354,7 +354,6 @@ void CS_Main(uint3 LocalThreadId : SV_GroupThreadID, uint3 GroupId : SV_GroupID,
 		pos[1] = wvpPosition[1].xyz / wvpPosition[1].w;
 		pos[2] = wvpPosition[2].xyz / wvpPosition[2].w;
 
-		//// muliply QUARK_SUBPIXEL_SAMPLES outside
 		//pos[0].xy *= QUARK_SUBPIXEL_SAMPLES;
 		//pos[1].xy *= QUARK_SUBPIXEL_SAMPLES;
 		//pos[2].xy *= QUARK_SUBPIXEL_SAMPLES;

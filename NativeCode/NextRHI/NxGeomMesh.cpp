@@ -585,7 +585,7 @@ namespace NxRHI
 
 		if (!GetMeshBuffer(device, Verts, Indexes))
 			return 0;
-#if false
+#if true
 		// calculate bouding box
 		v3dxBox3 MeshBounds;
 		for (int i = 0; i < Verts.size(); ++i)
