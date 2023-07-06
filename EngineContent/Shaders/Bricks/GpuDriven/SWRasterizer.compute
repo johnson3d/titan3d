@@ -253,6 +253,22 @@ void CS_DispatchArgMain(uint3 LocalThreadId : SV_GroupThreadID, uint3 GroupId : 
     IndirectArgBuffer.Store(12, 1);
 }
 
+[numthreads(DispatchX, DispatchY, DispatchZ)]
+void CS_SetUp(uint3 LocalThreadId : SV_GroupThreadID, uint3 GroupId : SV_GroupID, uint3 DTid : SV_DispatchThreadID)
+{
+	float2 size = ShadingStruct.QuarkRTSizeFactor;
+	if (DTid.x < 1)
+	{
+		for (int x = 0; x < size.x; x++)
+		{
+			for (int y = 0; y < size.y; y++)
+			{
+				OutputQuarkTexture[int2(x, y)] = float4(0, 0, 0, 0);
+			}
+		}
+	}
+}
+
 void TestRasterize(float2 A, float2 B, float2 C)
 {
 	float2 Size = ShadingStruct.QuarkRTSizeFactor;

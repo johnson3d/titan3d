@@ -251,6 +251,41 @@ namespace EngineNS.Bricks.GpuDriven
         }
     }
 
+    public class TtSwRasterizeSetUpShading : Graphics.Pipeline.Shader.UComputeShadingEnv
+    {
+        public override Vector3ui DispatchArg
+        {
+            get => new Vector3ui(1, 1, 1);
+        }
+        public TtSwRasterizeSetUpShading()
+        {
+            CodeName = RName.GetRName("Shaders/Bricks/GpuDriven/SWRasterizer.compute", RName.ERNameType.Engine);
+            MainName = "CS_SetUp";
+
+            this.UpdatePermutation();
+        }
+        protected override void EnvShadingDefines(in FPermutationId id, NxRHI.UShaderDefinitions defines)
+        {
+            base.EnvShadingDefines(in id, defines);
+        }
+        public override void OnDrawCall(NxRHI.UComputeDraw drawcall, Graphics.Pipeline.URenderPolicy policy)
+        {
+            var node = drawcall.TagObject as TtSwRasterizeNode;
+
+            drawcall.BindUav("OutputQuarkTexture", node.GetAttachBuffer(node.QuarkRTPinOut).Uav);
+
+            var index = drawcall.FindBinder(NxRHI.EShaderBindType.SBT_CBuffer, "cbShadingEnv");
+            if (index.IsValidPointer)
+            {
+                if (node.CBShadingEnv == null)
+                {
+                    node.CBShadingEnv = UEngine.Instance.GfxDevice.RenderContext.CreateCBV(index);
+                }
+                drawcall.BindCBuffer(index, node.CBShadingEnv);
+            }
+        }
+    }
+
     public class TtSwRasterizeShading : Graphics.Pipeline.Shader.UComputeShadingEnv
     {
         public override Vector3ui DispatchArg
@@ -329,6 +364,9 @@ namespace EngineNS.Bricks.GpuDriven
         public TtSwRasterizeDispatchArgShading DispatchArgShading;
         private NxRHI.UComputeDraw DispatchArgShadingDrawcall;
 
+        public TtSwRasterizeSetUpShading SetUpRasterizeShading;
+        private NxRHI.UComputeDraw SetUpRasterizeDrawcall;
+
         public TtSwRasterizeShading SWRasterizer;
         private NxRHI.UComputeDraw SWRasterizerDrawcall;
 
@@ -379,6 +417,10 @@ namespace EngineNS.Bricks.GpuDriven
             DispatchArgShadingDrawcall = rc.CreateComputeDraw();
             DispatchArgShading = UEngine.Instance.ShadingEnvManager.GetShadingEnv<TtSwRasterizeDispatchArgShading>();
 
+            CoreSDK.DisposeObject(ref SetUpRasterizeDrawcall);
+            SetUpRasterizeDrawcall = rc.CreateComputeDraw();
+            SetUpRasterizeShading = UEngine.Instance.ShadingEnvManager.GetShadingEnv<TtSwRasterizeSetUpShading>();
+
             mShadingStruct.DispatchArg = SWRasterizer.DispatchArg;
             unsafe
             {
@@ -409,9 +451,15 @@ namespace EngineNS.Bricks.GpuDriven
             var cmd = BasePass.DrawCmdList;
             cmd.BeginCommand();
 
+            // get total dispatch param
             DispatchArgShading.SetDrawcallDispatch(this, policy, DispatchArgShadingDrawcall, 1, 1, 1, true);
             cmd.PushGpuDraw(DispatchArgShadingDrawcall);
 
+            // setup rasterizer
+            SetUpRasterizeShading.SetDrawcallDispatch(this, policy, SetUpRasterizeDrawcall, 1, 1, 1, true);
+            cmd.PushGpuDraw(SetUpRasterizeDrawcall);
+
+            // do rasterization
             //SWRasterizer.SetDrawcallDispatch(this, policy, SWRasterizerDrawcall, 1, 1, 1, false);
             SWRasterizer.SetDrawcallIndirectDispatch(this, policy, SWRasterizerDrawcall, IndirectArgBuffer.GpuBuffer);
             cmd.PushGpuDraw(SWRasterizerDrawcall);
@@ -508,22 +556,22 @@ namespace EngineNS.Bricks.GpuDriven
             PassDesc.AttachmentMRTs[0].StoreAction = NxRHI.EFrameBufferStoreAction.StoreActionStore;
             PassDesc.AttachmentMRTs[1].Format = Rt1PinOut.Attachement.Format;
             PassDesc.AttachmentMRTs[1].Samples = 1;
-            PassDesc.AttachmentMRTs[1].LoadAction = NxRHI.EFrameBufferLoadAction.LoadActionDontCare;
+            PassDesc.AttachmentMRTs[1].LoadAction = NxRHI.EFrameBufferLoadAction.LoadActionClear;
             PassDesc.AttachmentMRTs[1].StoreAction = NxRHI.EFrameBufferStoreAction.StoreActionStore;
             PassDesc.AttachmentMRTs[2].Format = Rt2PinOut.Attachement.Format;
             PassDesc.AttachmentMRTs[2].Samples = 1;
-            PassDesc.AttachmentMRTs[2].LoadAction = NxRHI.EFrameBufferLoadAction.LoadActionDontCare;
+            PassDesc.AttachmentMRTs[2].LoadAction = NxRHI.EFrameBufferLoadAction.LoadActionClear;
             PassDesc.AttachmentMRTs[2].StoreAction = NxRHI.EFrameBufferStoreAction.StoreActionStore;
             PassDesc.AttachmentMRTs[3].Format = Rt3PinOut.Attachement.Format;
             PassDesc.AttachmentMRTs[3].Samples = 1;
-            PassDesc.AttachmentMRTs[3].LoadAction = NxRHI.EFrameBufferLoadAction.LoadActionDontCare;
+            PassDesc.AttachmentMRTs[3].LoadAction = NxRHI.EFrameBufferLoadAction.LoadActionClear;
             PassDesc.AttachmentMRTs[3].StoreAction = NxRHI.EFrameBufferStoreAction.StoreActionStore;
 
             PassDesc.m_AttachmentDepthStencil.Format = DepthStencilPinIn.Attachement.Format;
             PassDesc.m_AttachmentDepthStencil.Samples = 1;
             PassDesc.m_AttachmentDepthStencil.LoadAction = NxRHI.EFrameBufferLoadAction.LoadActionClear;
             PassDesc.m_AttachmentDepthStencil.StoreAction = NxRHI.EFrameBufferStoreAction.StoreActionStore;
-            PassDesc.m_AttachmentDepthStencil.StencilLoadAction = NxRHI.EFrameBufferLoadAction.LoadActionDontCare;
+            PassDesc.m_AttachmentDepthStencil.StencilLoadAction = NxRHI.EFrameBufferLoadAction.LoadActionClear;
             PassDesc.m_AttachmentDepthStencil.StencilStoreAction = NxRHI.EFrameBufferStoreAction.StoreActionStore;
             //PassDesc.mFBClearColorRT0 = new Color4f(1, 0, 0, 0);
             //PassDesc.mDepthClearValue = 1.0f;                
