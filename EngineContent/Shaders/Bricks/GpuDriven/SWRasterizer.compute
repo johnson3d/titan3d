@@ -314,39 +314,6 @@ void CS_RasterizeClusters(uint3 LocalThreadId : SV_GroupThreadID, uint3 GroupId 
 {
 	// TODO: group id used
 #if 1
-	//if (DTid.x < 1)
-	//{
-	//	int clusterIdx = 0;//VisibleClusterBuffer.Load((DTid.x % ShadingStruct.MaxVisClusterIndex) * 4) % ShadingStruct.MaxClusterIndex;
-	//	if (clusterIdx >= ShadingStruct.MaxClusterIndex)
-	//		return;
-	//	FClusterData cluster = ClusterBuffer[clusterIdx];
-	//	for (int i = cluster.IndexStart; i <= cluster.IndexEnd; i += 3)
-	//	{
-	//		float4 wvpPosition[3];
-	//		FQuarkTriangle tri = GetQuarkTriangle(i, i + 1, i + 2);
-
-	//		wvpPosition[0] = mul(float4(tri.Vertices[0].Position, 1), cluster.WVPMatrix);
-	//		wvpPosition[1] = mul(float4(tri.Vertices[1].Position, 1), cluster.WVPMatrix);
-	//		wvpPosition[2] = mul(float4(tri.Vertices[2].Position, 1), cluster.WVPMatrix);
-
-	//		float3 pos[3];
-
-	//		pos[0] = wvpPosition[0].xyz / wvpPosition[0].w;
-	//		pos[1] = wvpPosition[1].xyz / wvpPosition[1].w;
-	//		pos[2] = wvpPosition[2].xyz / wvpPosition[2].w;
-
-	//		// muliply QUARK_SUBPIXEL_SAMPLES outside
-	//		pos[0].xy *= QUARK_SUBPIXEL_SAMPLES;
-	//		pos[1].xy *= QUARK_SUBPIXEL_SAMPLES;
-	//		pos[2].xy *= QUARK_SUBPIXEL_SAMPLES;
-
-	//		//do raster
-	//		FRasterTri rasterTri = SetupTriangle(pos);
-	//		if (rasterTri.bIsValid)
-	//			RasterizeTri_Scanline_Inner(rasterTri);
-	//	}
-	//}
-
 	FClusterData cluster = ClusterBuffer[0];
 	int i = DTid.x * 3;
 	if (i+2 < cluster.IndexEnd)

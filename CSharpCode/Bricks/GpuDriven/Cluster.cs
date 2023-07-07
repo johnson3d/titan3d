@@ -54,7 +54,7 @@ namespace EngineNS.Bricks.GpuDriven
         public int IndexStart;
         public int IndexCount;
 
-        public FClusterInfo Desc;
+        public BoundingBox AABB;
     };
     public struct FQuarkVertex
     {
@@ -97,11 +97,12 @@ namespace EngineNS.Bricks.GpuDriven
             for (int i = 0; i < count; i++)
             {
                 TtCluster cluster = new TtCluster();
-                var info = mesh.mCoreObject.GetCluster(i);
-                cluster.VertexStart = info.VertexStart;
-                cluster.VertexCount = info.VertexCount;
-                cluster.IndexStart = info.IndexStart;
-                cluster.IndexCount = info.IndexCount;
+                var cppCluster = mesh.mCoreObject.GetCluster(i);
+                cluster.VertexStart = cppCluster.VertexStart;
+                cluster.VertexCount = cppCluster.VertexCount;
+                cluster.IndexStart = cppCluster.IndexStart;
+                cluster.IndexCount = cppCluster.IndexCount;
+                cluster.AABB = cppCluster.Bounds;
 
                 result.Clusters.Add(cluster);
             }

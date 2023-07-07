@@ -57,9 +57,9 @@ namespace EngineNS.Bricks.GpuDriven
         [System.Runtime.InteropServices.StructLayout(System.Runtime.InteropServices.LayoutKind.Sequential, Pack = 16)]
         public struct FClusterData
         {
-            public Vector3 BoundCenter;
+            public Vector3 BoundMin;
             public int IndexStart;
-            public Vector3 BoundExtent;
+            public Vector3 BoundMax;
             public int IndexEnd;
             public Matrix WVPMatrix;
         }
@@ -162,8 +162,8 @@ namespace EngineNS.Bricks.GpuDriven
                     clst[i].IndexStart = clusters[i].IndexStart;
                     clst[i].IndexEnd = clusters[i].IndexEnd;
                     // TODO:
-                    clst[i].BoundCenter = Vector3.Zero;
-                    clst[i].BoundExtent = Vector3.One;
+                    clst[i].BoundMin = clusters[i].BoundMin;
+                    clst[i].BoundMax = clusters[i].BoundMax;
                 }
 
                 Clusters.UpdateData(0, clst, sizeof(FClusterData) * clusters.Count);
@@ -253,11 +253,14 @@ namespace EngineNS.Bricks.GpuDriven
 
                 for (int clusterId = 0; clusterId < clusterMesh.Clusters.Count; clusterId++)
                 {
-                    var cluster = new FClusterData();
+                    var clusterData = new FClusterData();
                     // NOTE: 
-                    cluster.IndexStart = clusterMesh.Clusters[clusterId].IndexStart;
-                    cluster.IndexEnd = clusterMesh.Clusters[clusterId].IndexCount;
-                    clusters.Add(cluster);                    
+                    var cluster = clusterMesh.Clusters[clusterId];
+                    clusterData.IndexStart = cluster.IndexStart;
+                    clusterData.IndexEnd = cluster.IndexCount;
+                    clusterData.BoundMin = cluster.AABB.Minimum;
+                    clusterData.BoundMax = cluster.AABB.Maximum;
+                    clusters.Add(clusterData);                    
                 }
                 if (clusterMesh.Vertices != null)
                     position.AddRange(new List<Vector3>(clusterMesh.Vertices));

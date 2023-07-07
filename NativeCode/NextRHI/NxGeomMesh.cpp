@@ -760,6 +760,8 @@ namespace NxRHI
             int indexCount = int(mClusters[i].Indexes.size());
             pAttr->Write(indexCount);
             pAttr->Write((BYTE*)&mClusters[i].Indexes[0], indexCount * sizeof(UINT32));
+			// bounding box
+			pAttr->Write((BYTE*)&mClusters[i].Bounds, sizeof(v3dxBox3));
         }
 
         pAttr->EndWrite();
@@ -799,6 +801,9 @@ namespace NxRHI
 				ibCount += indexCount;
 				mClusters[i].Indexes.resize(indexCount);
 				pAttr->Read((BYTE*)&mClusters[i].Indexes[0], indexCount * sizeof(UINT32));
+
+				// bounding box				
+                pAttr->Read((BYTE*)&mClusters[i].Bounds, sizeof(v3dxBox3));
 			}
 
 			pAttr->EndRead();

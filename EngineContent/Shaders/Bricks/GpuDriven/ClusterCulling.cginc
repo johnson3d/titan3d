@@ -6,9 +6,9 @@
 // TODO: ??
 struct FClusterData
 {
-    float3 BoundCenter;
+    float3 BoundMin;
     int IndexStart;
-    float3 BoundExtent;
+    float3 BoundMax;
     int IndexEnd;
     matrix WVPMatrix;
 };
