@@ -241,7 +241,7 @@ void RasterizeTri_Scanline_Inner(FRasterTri Tri) //FRaster Raster, uint PixelVal
 }
 
 [numthreads(DispatchX, DispatchY, DispatchZ)]
-void CS_DispatchArgMain(uint3 LocalThreadId : SV_GroupThreadID, uint3 GroupId : SV_GroupID, uint3 DTid : SV_DispatchThreadID)
+void CS_GetClustersCount(uint3 LocalThreadId : SV_GroupThreadID, uint3 GroupId : SV_GroupID, uint3 DTid : SV_DispatchThreadID)
 {
     IndirectArgBuffer.Store(0, 0);
     uint count = VisibleClusterBuffer.Load(0);
@@ -254,7 +254,7 @@ void CS_DispatchArgMain(uint3 LocalThreadId : SV_GroupThreadID, uint3 GroupId : 
 }
 
 [numthreads(DispatchX, DispatchY, DispatchZ)]
-void CS_SetUp(uint3 LocalThreadId : SV_GroupThreadID, uint3 GroupId : SV_GroupID, uint3 DTid : SV_DispatchThreadID)
+void CS_SetUpRasterizer(uint3 LocalThreadId : SV_GroupThreadID, uint3 GroupId : SV_GroupID, uint3 DTid : SV_DispatchThreadID)
 {
 	float2 size = ShadingStruct.QuarkRTSizeFactor;
 	
@@ -318,7 +318,7 @@ void TestRasterize(float2 A, float2 B, float2 C)
 }
 
 [numthreads(DispatchX, DispatchY, DispatchZ)]
-void CS_Main(uint3 LocalThreadId : SV_GroupThreadID, uint3 GroupId : SV_GroupID, uint3 DTid : SV_DispatchThreadID)
+void CS_RasterizeClusters(uint3 LocalThreadId : SV_GroupThreadID, uint3 GroupId : SV_GroupID, uint3 DTid : SV_DispatchThreadID)
 {
 	// TODO: group id used
 #if 1

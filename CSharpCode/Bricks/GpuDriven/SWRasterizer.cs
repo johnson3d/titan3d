@@ -223,7 +223,7 @@ namespace EngineNS.Bricks.GpuDriven
         public TtSwRasterizeDispatchArgShading()
         {
             CodeName = RName.GetRName("Shaders/Bricks/GpuDriven/SWRasterizer.compute", RName.ERNameType.Engine);
-            MainName = "CS_DispatchArgMain";
+            MainName = "CS_GetClustersCount";
 
             this.UpdatePermutation();
         }
@@ -260,7 +260,7 @@ namespace EngineNS.Bricks.GpuDriven
         public TtSwRasterizeSetUpShading()
         {
             CodeName = RName.GetRName("Shaders/Bricks/GpuDriven/SWRasterizer.compute", RName.ERNameType.Engine);
-            MainName = "CS_SetUp";
+            MainName = "CS_SetUpRasterizer";
 
             this.UpdatePermutation();
         }
@@ -295,7 +295,7 @@ namespace EngineNS.Bricks.GpuDriven
         public TtSwRasterizeShading()
         {
             CodeName = RName.GetRName("Shaders/Bricks/GpuDriven/SWRasterizer.compute", RName.ERNameType.Engine);
-            MainName = "CS_Main";
+            MainName = "CS_RasterizeClusters";
 
             this.UpdatePermutation();
         }
