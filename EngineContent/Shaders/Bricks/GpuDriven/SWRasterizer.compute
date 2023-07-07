@@ -257,14 +257,16 @@ void CS_DispatchArgMain(uint3 LocalThreadId : SV_GroupThreadID, uint3 GroupId : 
 void CS_SetUp(uint3 LocalThreadId : SV_GroupThreadID, uint3 GroupId : SV_GroupID, uint3 DTid : SV_DispatchThreadID)
 {
 	float2 size = ShadingStruct.QuarkRTSizeFactor;
-	if (DTid.x < 1)
+	
+	int2 uv = DTid.xy * int2(DispatchX, DispatchY);
+	for (int x = uv.x; x < uv.x + DispatchX; x++)
 	{
-		for (int x = 0; x < size.x; x++)
+		for (int y = uv.y; y < uv.y + DispatchY; y++)
 		{
-			for (int y = 0; y < size.y; y++)
-			{
-				OutputQuarkTexture[int2(x, y)] = float4(0, 0, 0, 0);
-			}
+			uv.x = min(size.x, uv.x);
+			uv.y = min(size.y, uv.y);
+			
+			OutputQuarkTexture[int2(x, y)] = float4(0, 0, 0, 0);
 		}
 	}
 }

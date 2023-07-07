@@ -255,7 +255,7 @@ namespace EngineNS.Bricks.GpuDriven
     {
         public override Vector3ui DispatchArg
         {
-            get => new Vector3ui(1, 1, 1);
+            get => new Vector3ui(8, 8, 1);
         }
         public TtSwRasterizeSetUpShading()
         {
@@ -456,7 +456,9 @@ namespace EngineNS.Bricks.GpuDriven
             cmd.PushGpuDraw(DispatchArgShadingDrawcall);
 
             // setup rasterizer
-            SetUpRasterizeShading.SetDrawcallDispatch(this, policy, SetUpRasterizeDrawcall, 1, 1, 1, true);
+            var dispatchX = MathHelper.Roundup((uint)mShadingStruct.QuarkRTSizeFactor.X, SetUpRasterizeShading.DispatchArg.X);
+            var dispatchY = MathHelper.Roundup((uint)mShadingStruct.QuarkRTSizeFactor.Y, SetUpRasterizeShading.DispatchArg.Y);
+            SetUpRasterizeShading.SetDrawcallDispatch(this, policy, SetUpRasterizeDrawcall, dispatchX, dispatchY, 1, true);
             cmd.PushGpuDraw(SetUpRasterizeDrawcall);
 
             // do rasterization
