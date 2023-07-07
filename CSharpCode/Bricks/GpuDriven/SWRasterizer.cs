@@ -456,9 +456,7 @@ namespace EngineNS.Bricks.GpuDriven
             cmd.PushGpuDraw(DispatchArgShadingDrawcall);
 
             // setup rasterizer
-            var dispatchX = MathHelper.Roundup((uint)mShadingStruct.QuarkRTSizeFactor.X, SetUpRasterizeShading.DispatchArg.X);
-            var dispatchY = MathHelper.Roundup((uint)mShadingStruct.QuarkRTSizeFactor.Y, SetUpRasterizeShading.DispatchArg.Y);
-            SetUpRasterizeShading.SetDrawcallDispatch(this, policy, SetUpRasterizeDrawcall, dispatchX, dispatchY, 1, true);
+            SetUpRasterizeShading.SetDrawcallDispatch(this, policy, SetUpRasterizeDrawcall, (uint)mShadingStruct.QuarkRTSizeFactor.X, (uint)mShadingStruct.QuarkRTSizeFactor.Y, 1, true);
             cmd.PushGpuDraw(SetUpRasterizeDrawcall);
 
             // do rasterization

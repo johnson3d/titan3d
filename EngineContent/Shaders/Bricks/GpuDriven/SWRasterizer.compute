@@ -257,18 +257,10 @@ void CS_GetClustersCount(uint3 LocalThreadId : SV_GroupThreadID, uint3 GroupId :
 void CS_SetUpRasterizer(uint3 LocalThreadId : SV_GroupThreadID, uint3 GroupId : SV_GroupID, uint3 DTid : SV_DispatchThreadID)
 {
 	float2 size = ShadingStruct.QuarkRTSizeFactor;
-	
-	int2 uv = DTid.xy * int2(DispatchX, DispatchY);
-	for (int x = uv.x; x < uv.x + DispatchX; x++)
-	{
-		for (int y = uv.y; y < uv.y + DispatchY; y++)
-		{
-			uv.x = min(size.x, uv.x);
-			uv.y = min(size.y, uv.y);
-			
-			OutputQuarkTexture[int2(x, y)] = float4(0, 0, 0, 0);
-		}
-	}
+	int2 uv = DTid.xy;
+	uv.x = min(size.x, uv.x);
+	uv.y = min(size.y, uv.y);
+	OutputQuarkTexture[uv] = float4(0, 0, 0, 0);
 }
 
 void TestRasterize(float2 A, float2 B, float2 C)
