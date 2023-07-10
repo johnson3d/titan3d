@@ -304,7 +304,9 @@ void TestRasterize(float2 A, float2 B, float2 C)
 				continue;
 			}
 			//draw pixel
-			OutputQuarkTexture[uint2(x, y)] = float4(1, 0, 0, 1);
+            FQuarkPixel pixel = (FQuarkPixel) 0;
+            WriteQuarkPixel(uint2(x, y), pixel);
+			//OutputQuarkTexture[uint2(x, y)] = float4(1, 0, 0, 1);
 		}
 	}
 }
