@@ -242,11 +242,11 @@ namespace EngineNS.Bricks.GpuDriven
             var index = drawcall.FindBinder(NxRHI.EShaderBindType.SBT_CBuffer, "cbShadingEnv");
             if (index.IsValidPointer)
             {
-                if (node.CBShadingEnv == null)
+                if (node.CBShadingStruct == null)
                 {
-                    node.CBShadingEnv = UEngine.Instance.GfxDevice.RenderContext.CreateCBV(index);
+                    node.CBShadingStruct = UEngine.Instance.GfxDevice.RenderContext.CreateCBV(index);
                 }
-                drawcall.BindCBuffer(index, node.CBShadingEnv);
+                drawcall.BindCBuffer(index, node.CBShadingStruct);
             }
         }
     }
@@ -277,11 +277,11 @@ namespace EngineNS.Bricks.GpuDriven
             var index = drawcall.FindBinder(NxRHI.EShaderBindType.SBT_CBuffer, "cbShadingEnv");
             if (index.IsValidPointer)
             {
-                if (node.CBShadingEnv == null)
+                if (node.CBShadingStruct == null)
                 {
-                    node.CBShadingEnv = UEngine.Instance.GfxDevice.RenderContext.CreateCBV(index);
+                    node.CBShadingStruct = UEngine.Instance.GfxDevice.RenderContext.CreateCBV(index);
                 }
-                drawcall.BindCBuffer(index, node.CBShadingEnv);
+                drawcall.BindCBuffer(index, node.CBShadingStruct);
             }
         }
     }
@@ -324,11 +324,11 @@ namespace EngineNS.Bricks.GpuDriven
             var index = drawcall.FindBinder(NxRHI.EShaderBindType.SBT_CBuffer, "cbShadingEnv");
             if (index.IsValidPointer)
             {
-                if (node.CBShadingEnv == null)
+                if (node.CBShadingStruct == null)
                 {
-                    node.CBShadingEnv = UEngine.Instance.GfxDevice.RenderContext.CreateCBV(index);
+                    node.CBShadingStruct = UEngine.Instance.GfxDevice.RenderContext.CreateCBV(index);
                 }
-                drawcall.BindCBuffer(index, node.CBShadingEnv);
+                drawcall.BindCBuffer(index, node.CBShadingStruct);
             }
         }
     }
@@ -358,7 +358,7 @@ namespace EngineNS.Bricks.GpuDriven
             public Vector3ui DispatchArg;
         };
         FShadingStruct mShadingStruct = new FShadingStruct();
-        public NxRHI.UCbView CBShadingEnv;
+        public NxRHI.UCbView CBShadingStruct;
 
         public TtGpuBuffer<int> IndirectArgBuffer = new TtGpuBuffer<int>();
         public TtSwRasterizeDispatchArgShading DispatchArgShading;
@@ -443,9 +443,9 @@ namespace EngineNS.Bricks.GpuDriven
             {
                 mShadingStruct.MaxClusterIndex = 0;
             }
-            if (CBShadingEnv != null)
+            if (CBShadingStruct != null)
             {
-                CBShadingEnv.SetValue("ShadingStruct", in mShadingStruct);
+                CBShadingStruct.SetValue("ShadingStruct", in mShadingStruct);
             }
             
             var cmd = BasePass.DrawCmdList;

@@ -1,6 +1,7 @@
 #ifndef	_CLUSTER_CULLING_H_
 #define _CLUSTER_CULLING_H_
 
+#include "../../Inc/VertexLayout.cginc"
 #include "FRaster.cginc"
 
 struct FrustumCullData
@@ -26,8 +27,12 @@ bool BoxCullFrustum(int clusterId)
 {
     FClusterData clusterData = ClusterBuffer[clusterId];
 
+    float3 center = (clusterData.BoundMin + clusterData.BoundMax) / 2;
+    float3 extent = (clusterData.BoundMax - clusterData.BoundMin) / 2;
+
     float3 minPos = clusterData.BoundMin;
     float3 maxPos = clusterData.BoundMax;
+    
     float outOfRange = dot(GpuDrivenFrustumMinPoint > maxPos, 1) + dot(GpuDrivenFrustumMaxPoint < minPos, 1);
     if (outOfRange > 0.5)
         return true;
@@ -36,7 +41,7 @@ bool BoxCullFrustum(int clusterId)
     {
         float4 plane = GpuDrivenCameraPlanes[i];
         float3 absNormal = abs(plane.xyz);
-        if ((dot(position, plane.xyz) - dot(absNormal, extent)) > -plane.w)
+        if ((dot(center, plane.xyz) - dot(absNormal, extent)) > -plane.w)
         {
             return true;
         }

@@ -36,6 +36,16 @@ namespace EngineNS.Bricks.GpuDriven
             drawcall.BindSrv("ClusterBuffer", node.Clusters.DataSRV);
             drawcall.BindSrv("SrcClusterBuffer", node.SrcClusters.DataSRV);
             drawcall.BindUav("VisClusterBuffer", node.VisClusters.DataUAV);
+
+            var index = drawcall.FindBinder(NxRHI.EShaderBindType.SBT_CBuffer, "cbCameraFrustum");
+            if (index.IsValidPointer)
+            {
+                if (node.CBCameraFrustum == null)
+                {
+                    node.CBCameraFrustum = UEngine.Instance.GfxDevice.RenderContext.CreateCBV(index);
+                }
+                drawcall.BindCBuffer(index, node.CBCameraFrustum);
+            }
         }
     }
     public class TtCullClusterNode : URenderGraphNode
@@ -67,18 +77,19 @@ namespace EngineNS.Bricks.GpuDriven
         public TtCpu2GpuBuffer<uint> SrcClusters = new TtCpu2GpuBuffer<uint>();
         public TtCpu2GpuBuffer<uint> VisClusters = new TtCpu2GpuBuffer<uint>();
 
-        public struct FFrustumCullingParams
+        [System.Runtime.InteropServices.StructLayout(System.Runtime.InteropServices.LayoutKind.Sequential, Pack = 16)]
+        public unsafe struct FFrustumCullingParams
         {
             public FFrustumCullingParams()
             {
-                GpuDrivenFrustumMinPoint = Vector3.Zero;
-                GpuDrivenFrustumMaxPoint = Vector3.One;
+                FrustumMinPoint = Vector3.Zero;
+                FrustumMaxPoint = Vector3.One;
             }
-            Vector4[] GpuDrivenCameraPlanes = new Vector4[6];
-            Vector3 GpuDrivenFrustumMinPoint;
-            Vector3 GpuDrivenFrustumMaxPoint;
+            public fixed float CameraPlanes[24];
+            public Vector3 FrustumMinPoint;
+            public Vector3 FrustumMaxPoint;
         };
-        FFrustumCullingParams mFrustumCullingData = new FFrustumCullingParams();
+        public FFrustumCullingParams mFrustumCullingData = new FFrustumCullingParams();
         public NxRHI.UCbView CBCameraFrustum;
 
         public TtCullClusterNode()
@@ -270,7 +281,23 @@ namespace EngineNS.Bricks.GpuDriven
             if (camera == null)
                 return;
 
-            
+            var frustum = camera.GetFrustum();
+            for (int i = 0; i < 6; i++)
+            {
+                var plane = frustum.GetPlane(i);
+                unsafe
+                {
+                    mFrustumCullingData.CameraPlanes[i * 4 + 0] = plane.X;
+                    mFrustumCullingData.CameraPlanes[i * 4 + 1] = plane.Y;
+                    mFrustumCullingData.CameraPlanes[i * 4 + 2] = plane.Z;
+                    mFrustumCullingData.CameraPlanes[i * 4 + 3] = plane.W;
+                }
+            }
+            BoundingBox frustumAABB = new BoundingBox();
+            frustum.GetAABB(ref frustumAABB);
+
+            mFrustumCullingData.FrustumMinPoint = frustumAABB.Minimum;
+            mFrustumCullingData.FrustumMaxPoint = frustumAABB.Maximum;
         }
         public void PrepareCullClusterInfos(GamePlay.UWorld world, GamePlay.UWorld.UVisParameter rp)
         {

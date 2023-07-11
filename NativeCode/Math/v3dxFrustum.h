@@ -19,6 +19,7 @@
 #include "v3dxPlane3.h"
 #include "v3dxOBB.h"
 #include "v3dxSphere.h"
+#include "v3dxVector4.h"
 
 #pragma pack(push,4)
 
@@ -148,6 +149,10 @@ public:
 	}
 	const v3dxPlane3& GetFarPlane() const{
 		return m_aPlane[ENUM_FRUSTUMPL_FAR];
+	}
+	v3dxVector4 GetPlane(int plane)
+	{
+		return v3dxVector4(m_aPlane[plane].A(), m_aPlane[plane].B(), m_aPlane[plane].C(), m_aPlane[plane].D());
 	}
 	const v3dxPlane3& GetPlane(ENUM_FRUSTUM_PLANE plane) {
 		return m_aPlane[plane];
