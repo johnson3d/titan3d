@@ -12,13 +12,17 @@ struct FrustumCullData
     bool IsVisible;
 };
 
-cbuffer cbCameraFrustum DX_AUTOBIND
+struct FrustumParams
 {
     float4 GpuDrivenCameraPlanes[6];
 
     float3 GpuDrivenFrustumMinPoint;
     float3 GpuDrivenFrustumMaxPoint;
-}
+};
+cbuffer cbCameraFrustum DX_AUTOBIND
+{
+    FrustumParams FrustumInfo;
+};
 
 ByteAddressBuffer SrcClusterBuffer;
 RWByteAddressBuffer VisClusterBuffer;
@@ -33,13 +37,13 @@ bool BoxCullFrustum(int clusterId)
     float3 minPos = clusterData.BoundMin;
     float3 maxPos = clusterData.BoundMax;
     
-    float outOfRange = dot(GpuDrivenFrustumMinPoint > maxPos, 1) + dot(GpuDrivenFrustumMaxPoint < minPos, 1);
+    float outOfRange = dot(FrustumInfo.GpuDrivenFrustumMinPoint > maxPos, 1) + dot(FrustumInfo.GpuDrivenFrustumMaxPoint < minPos, 1);
     if (outOfRange > 0.5)
         return true;
 
     for (uint i = 0; i < 6; ++i)
     {
-        float4 plane = GpuDrivenCameraPlanes[i];
+        float4 plane = FrustumInfo.GpuDrivenCameraPlanes[i];
         float3 absNormal = abs(plane.xyz);
         if ((dot(center, plane.xyz) - dot(absNormal, extent)) > -plane.w)
         {
@@ -61,7 +65,7 @@ bool IsVisible(uint clusterId)
         return HZBCulling(clusterId);
     }
     
-    return true;
+    return false;
 }
 
 groupshared uint MaxSrcCount;
@@ -81,7 +85,7 @@ void CS_ClusterCullingMain(uint DispatchThreadId : SV_DispatchThreadID, uint3 Lo
     }
     
     uint clusterId = SrcClusterBuffer.Load((1 + DispatchThreadId.x) * 4);
-    if (IsVisible(clusterId) == false)
+    if (!IsVisible(clusterId))
     {
         return;
     }

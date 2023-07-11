@@ -240,7 +240,7 @@ namespace EngineNS.Bricks.GpuDriven
 
             if (CBCameraFrustum != null)
             {
-                CBCameraFrustum.SetValue("cbCameraFrustum", in mFrustumCullingData);
+                CBCameraFrustum.SetValue("FrustumInfo", in mFrustumCullingData);
             }
 
             var cmd = BasePass.DrawCmdList;

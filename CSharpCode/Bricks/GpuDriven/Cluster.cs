@@ -25,12 +25,6 @@ namespace EngineNS.Bricks.GpuDriven
         public UInt32 padding; //TODO
     }
 
-    [System.Runtime.InteropServices.StructLayout(System.Runtime.InteropServices.LayoutKind.Sequential, Pack = 16)]
-    public struct FClusterInfo
-    {
-        public BoundingBox AABB;
-    }
-
     public struct TtVisibleInstance
     {
         public uint NumVisibleInstance;
