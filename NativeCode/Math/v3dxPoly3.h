@@ -247,7 +247,7 @@ inline v3dxVector3 v3dxPoly3::getCenter () const
 	v3dxBox3 bbox;
 	bbox.InitializeBox(vertices[0]);
 	for (i = 1 ; i < num_vertices ; i++)
-		bbox.OptimalVertex(vertices[i]);
+		bbox.MergeVertex(vertices[i]);
 	return bbox.GetCenter ();
 }
 
