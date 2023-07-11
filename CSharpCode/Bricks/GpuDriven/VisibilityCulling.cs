@@ -67,6 +67,20 @@ namespace EngineNS.Bricks.GpuDriven
         public TtCpu2GpuBuffer<uint> SrcClusters = new TtCpu2GpuBuffer<uint>();
         public TtCpu2GpuBuffer<uint> VisClusters = new TtCpu2GpuBuffer<uint>();
 
+        public struct FFrustumCullingParams
+        {
+            public FFrustumCullingParams()
+            {
+                GpuDrivenFrustumMinPoint = Vector3.Zero;
+                GpuDrivenFrustumMaxPoint = Vector3.One;
+            }
+            Vector4[] GpuDrivenCameraPlanes = new Vector4[6];
+            Vector3 GpuDrivenFrustumMinPoint;
+            Vector3 GpuDrivenFrustumMaxPoint;
+        };
+        FFrustumCullingParams mFrustumCullingData = new FFrustumCullingParams();
+        public NxRHI.UCbView CBCameraFrustum;
+
         public TtCullClusterNode()
         {
             Name = "CullClusterNode";
@@ -211,7 +225,12 @@ namespace EngineNS.Bricks.GpuDriven
         }
         public unsafe override void TickLogic(UWorld world, URenderPolicy policy, bool bClear)
         {
-            BuildInstances(world, policy.DefaultCamera.VisParameter);
+            PrepareCullClusterInfos(world, policy.DefaultCamera.VisParameter);
+
+            if (CBCameraFrustum != null)
+            {
+                CBCameraFrustum.SetValue("cbCameraFrustum", in mFrustumCullingData);
+            }
 
             var cmd = BasePass.DrawCmdList;
             cmd.BeginCommand();
@@ -235,7 +254,25 @@ namespace EngineNS.Bricks.GpuDriven
             UEngine.Instance.GfxDevice.RenderCmdQueue.QueueCmdlist(cmd);
         }
 
-        public void BuildInstances(GamePlay.UWorld world, GamePlay.UWorld.UVisParameter rp)
+        public Vector4 TransformViewProj(in Vector3 coord, in Matrix transform)
+        {
+            Vector4 vector;
+
+            vector.X = (((coord.X * transform.M11) + (coord.Y * transform.M21)) + (coord.Z * transform.M31)) + transform.M41;
+            vector.Y = (((coord.X * transform.M12) + (coord.Y * transform.M22)) + (coord.Z * transform.M32)) + transform.M42;
+            vector.Z = (((coord.X * transform.M13) + (coord.Y * transform.M23)) + (coord.Z * transform.M33)) + transform.M43;
+            vector.W = ((((coord.X * transform.M14) + (coord.Y * transform.M24)) + (coord.Z * transform.M34)) + transform.M44);
+
+            return vector;
+        }
+        public void UpdateCameraInfo(EngineNS.Graphics.Pipeline.UCamera camera)
+        {
+            if (camera == null)
+                return;
+
+            
+        }
+        public void PrepareCullClusterInfos(GamePlay.UWorld world, GamePlay.UWorld.UVisParameter rp)
         {
             List<FClusterData> clusters = new List<FClusterData>();
             List<Vector3> position = new List<Vector3>();
@@ -268,18 +305,35 @@ namespace EngineNS.Bricks.GpuDriven
                     ib.AddRange(new List<uint>(clusterMesh.Indices));
             }
             // debug
-//             var view2ScreenMat = rp.CullCamera.GetToViewPortMatrix();
-//             for (int i = 0; i < position.Count; i++)
-//             {
-//                 var sreenPos = Vector3.TransformCoordinate(position[i], view2ScreenMat);
-//                 Debug.WriteLine(sreenPos.ToString());
-//             }
+            //var view2ScreenMat = rp.CullCamera.GetToViewPortMatrix();
+            //for (int i = 0; i < position.Count; i++)
+            //{
+            //    var sreenPos = Vector3.TransformCoordinate(position[i], view2ScreenMat);
+            //    Debug.WriteLine(sreenPos.ToString());
+            //}
 
+            //var viewProjMat = rp.CullCamera.GetViewProjection();
+            //for (int i = 0; i < position.Count; i++)
+            //{
+            //    var sreenPos = TransformViewProj(position[i], viewProjMat);
+            //    Debug.WriteLine(sreenPos.ToString());
+            //}
+            //Debug.WriteLine("===============================");
+
+            //var view2ScreenMat = rp.CullCamera.GetViewProjection();
+            //for (int i = 0; i < position.Count; i++)
+            //{
+            //    var sreenPos = Vector3.TransformCoordinate(position[i], view2ScreenMat);
+            //    Debug.WriteLine(sreenPos.ToString());
+            //}
+            //
             // debug
             //position.Clear();
             //ib.Clear();
             //clusters.Clear();
+
             UpdateBuffers(position.ToArray(), ib.ToArray(), clusters, rp.CullCamera);
+            UpdateCameraInfo(rp.CullCamera);
         }
     }
 }

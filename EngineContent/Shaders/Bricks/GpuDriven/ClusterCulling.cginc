@@ -1,28 +1,60 @@
-#ifndef	_SOFT_RASTER_FRASTER_H_
-#define _SOFT_RASTER_FRASTER_H_
+#ifndef	_CLUSTER_CULLING_H_
+#define _CLUSTER_CULLING_H_
 
 #include "FRaster.cginc"
 
-// TODO: ??
-struct FClusterData
+struct FrustumCullData
 {
-    float3 BoundMin;
-    int IndexStart;
-    float3 BoundMax;
-    int IndexEnd;
-    matrix WVPMatrix;
+    float3	RectMin;
+    float3	RectMax;
+
+    bool IsVisible;
 };
 
-StructuredBuffer<FClusterData> ClusterBuffer;
+cbuffer cbCameraFrustum DX_AUTOBIND
+{
+    float4 GpuDrivenCameraPlanes[6];
+
+    float3 GpuDrivenFrustumMinPoint;
+    float3 GpuDrivenFrustumMaxPoint;
+}
+
 ByteAddressBuffer SrcClusterBuffer;
 RWByteAddressBuffer VisClusterBuffer;
 
-bool IsVisible(uint clusterIdx)
+bool BoxCullFrustum(int clusterId)
 {
-    //trasform ClusterBuffer[clusterIdx].BoundCenter to WorldCordinate
+    FClusterData clusterData = ClusterBuffer[clusterId];
+
+    float3 minPos = clusterData.BoundMin;
+    float3 maxPos = clusterData.BoundMax;
+    float outOfRange = dot(GpuDrivenFrustumMinPoint > maxPos, 1) + dot(GpuDrivenFrustumMaxPoint < minPos, 1);
+    if (outOfRange > 0.5)
+        return true;
+
+    for (uint i = 0; i < 6; ++i)
+    {
+        float4 plane = GpuDrivenCameraPlanes[i];
+        float3 absNormal = abs(plane.xyz);
+        if ((dot(position, plane.xyz) - dot(absNormal, extent)) > -plane.w)
+        {
+            return true;
+        }
+    }
+    return false;
+}
+bool HZBCulling(int clusterId)
+{
+    return true;
+}
+bool IsVisible(uint clusterId)
+{
+    bool isFrustumCull = BoxCullFrustum(clusterId);
     
-    //1.frustum culling aabb
-    //2.hzb culling aabb
+    if (!isFrustumCull)
+    {
+        return HZBCulling(clusterId);
+    }
     
     return true;
 }
@@ -56,4 +88,4 @@ void CS_ClusterCullingMain(uint DispatchThreadId : SV_DispatchThreadID, uint3 Lo
     //VisClusterBuffer.Store(4, 1);
 }
 
-#endif//_SOFT_RASTER_FRASTER_H_
+#endif//_CLUSTER_CULLING_H_
