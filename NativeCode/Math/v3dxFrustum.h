@@ -176,6 +176,14 @@ public:
 		result.normalize();
 		return result;
 	}
+	inline void GetAABB(v3dxBox3* pOutAABB)
+	{
+		pOutAABB->InitializeBox();
+		for (int i = 0; i < 8; i++)
+		{
+			pOutAABB->MergeVertex(m_vecFrustum[i]);
+		}
+	}
 public:
 	TR_MEMBER(SV_ReturnConverter = v3dVector3_t)
 	v3dxVector3				m_vTipPt;

@@ -591,9 +591,9 @@ extern "C"
 		v3dxBox3 TriBox;
 		if( !pTriBox )
 		{
-			TriBox.OptimalVertex( *pvA );
-			TriBox.OptimalVertex( *pvB );
-			TriBox.OptimalVertex( *pvC );
+			TriBox.MergeVertex( *pvA );
+			TriBox.MergeVertex( *pvB );
+			TriBox.MergeVertex( *pvC );
 			pTriBox = &TriBox;
 		}
 
@@ -601,8 +601,8 @@ extern "C"
 		if (!pLineBox) {
 			v3dxVector3 vTo = *pvFrom + *pvLength;
 
-			LineBox.OptimalVertex( *pvFrom);
-			LineBox.OptimalVertex( vTo );
+			LineBox.MergeVertex( *pvFrom);
+			LineBox.MergeVertex( vTo );
 			pLineBox = &LineBox;
 		}
 
@@ -709,9 +709,9 @@ extern "C"
 		v3dxBox3 TriBox;
 		if( !pTriBox )
 		{
-			TriBox.OptimalVertex( *pvA );
-			TriBox.OptimalVertex( *pvB );
-			TriBox.OptimalVertex( *pvC );
+			TriBox.MergeVertex( *pvA );
+			TriBox.MergeVertex( *pvB );
+			TriBox.MergeVertex( *pvC );
 			pTriBox = &TriBox;
 		}
 
@@ -719,8 +719,8 @@ extern "C"
 		if (!pLineBox) {
 			v3dxVector3 vTo = *pvFrom + *pvLength;
 
-			LineBox.OptimalVertex( *pvFrom);
-			LineBox.OptimalVertex( vTo );
+			LineBox.MergeVertex( *pvFrom);
+			LineBox.MergeVertex( vTo );
 			pLineBox = &LineBox;
 		}
 

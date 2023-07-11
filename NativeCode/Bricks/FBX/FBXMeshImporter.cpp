@@ -805,7 +805,7 @@ namespace AssetImportAndExport
 				v3dxBox3 aabb;
 				for (int i = 0; i < renderVertexCount; i++)
 				{
-					aabb.OptimalVertex(posStream[i]);
+					aabb.MergeVertex(posStream[i]);
 				}
 				mMeshPrimitives->SetAABB(aabb);
 			}

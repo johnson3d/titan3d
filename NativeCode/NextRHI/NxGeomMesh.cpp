@@ -972,7 +972,7 @@ namespace NxRHI
 			v3dxVector3* pPosition = (v3dxVector3*)data;
 			for (UINT i = 0; i < uVert; i++)
 			{
-				mAABB.OptimalVertex(pPosition[i]);
+				mAABB.MergeVertex(pPosition[i]);
 			}
 		}
 
@@ -1242,13 +1242,13 @@ namespace NxRHI
 			mesh->mAABB.InitializeBox();
 			for (UINT i = 0; i < VertexNumber; i++)
 			{
-				mesh->mAABB.OptimalVertex(pPos[i]);
+				mesh->mAABB.MergeVertex(pPos[i]);
 			}
 		}
 		else
 		{
 			mesh->mAABB.InitializeBox();
-			mesh->mAABB.OptimalVertex(v3dxVector3::ZERO);
+			mesh->mAABB.MergeVertex(v3dxVector3::ZERO);
 		}
 		mesh->mDesc.AtomNumber = (UINT)mAtoms.size();
 		mesh->mDesc.VertexNumber = VertexNumber;
