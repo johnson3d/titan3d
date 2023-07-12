@@ -21,23 +21,23 @@ namespace EngineNS.Graphics.Pipeline.Common
         {
             
         }
-        public override string Name
-        {
-            get
-            {
-                return $"Find_{ProxyNodeName}:{ProxyPinName}";
-            }
-            set
-            {
+        //public override string Name
+        //{
+        //    get
+        //    {
+        //        return $"Find_{ProxyNodeName}:{ProxyPinName}";
+        //    }
+        //    set
+        //    {
 
-            }
-        }
+        //    }
+        //}
         public override void InitNodePins()
         {
             ResultPinOut.LifeMode = UAttachBuffer.ELifeMode.Imported;
             AddOutput(ResultPinOut, NxRHI.EBufferType.BFT_SRV | NxRHI.EBufferType.BFT_UAV);
         }
-        public unsafe override void FrameBuild(Graphics.Pipeline.URenderPolicy policy)
+        public override void BeforeTickLogic(URenderPolicy policy)
         {
             var node = RenderGraph.FindNode(ProxyNodeName);
             if (node == null)
