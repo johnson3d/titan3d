@@ -4,7 +4,7 @@
 #include "../../Inc/VertexLayout.cginc"
 #include "FRaster.cginc"
 
-struct FrustumCullData
+struct HZBCullData
 {
     float3	RectMin;
     float3	RectMax;
@@ -52,8 +52,20 @@ bool BoxCullFrustum(int clusterId)
     }
     return false;
 }
+
+HZBCullData GetScreenRect(int clusterId)
+{
+    HZBCullData hzbData;
+
+
+    return hzbData;
+}
+
 bool HZBCulling(int clusterId)
 {
+    HZBCullData hzbData = GetScreenRect(clusterId);
+
+
     return true;
 }
 bool IsVisible(uint clusterId)
