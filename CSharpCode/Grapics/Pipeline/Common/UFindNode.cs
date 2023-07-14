@@ -6,7 +6,7 @@ namespace EngineNS.Graphics.Pipeline.Common
 {
     public class UFindNode : URenderGraphNode
     {
-        public Common.URenderGraphPin ResultPinOut = Common.URenderGraphPin.CreateOutput("Result", false, EPixelFormat.PXF_A8_UNORM);
+        public Common.URenderGraphPin ResultPinOut = Common.URenderGraphPin.CreateOutput("Result", false, EPixelFormat.PXF_UNKNOWN);
         [Rtti.Meta]
         public string ProxyNodeName
         {

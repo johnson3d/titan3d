@@ -4,6 +4,7 @@ using EngineNS.Graphics.Pipeline;
 using EngineNS.Graphics.Pipeline.Common;
 using EngineNS.GamePlay;
 using System.Threading.Tasks;
+using System.Diagnostics;
 
 namespace EngineNS.Bricks.GpuDriven
 {
@@ -597,10 +598,60 @@ namespace EngineNS.UTest
     {
         bool IgnorTest = false;
 
+        int MipLevelForRect(ref Vector4 RectPixels, int DesiredFootprintPixels)
+        {
+            var MaxPixelOffset = DesiredFootprintPixels - 1;
+            var MipOffset = (int)Math.Log2((double)DesiredFootprintPixels) - 1;
+
+            // Calculate lowest mip level that allows us to cover footprint of the desired size in pixels.
+            // Start by calculating separate x and y mip level requirements.
+            // 2 pixels of mip k cover 2^(k+1) pixels of mip 0. To cover at least n pixels of mip 0 by two pixels of mip k we need k to be at least k = ceil( log2( n ) ) - 1.
+            // For integer n>1: ceil( log2( n ) ) = floor( log2( n - 1 ) ) + 1.
+            // So k = floor( log2( n - 1 )
+            // For integer n>1: floor( log2( n ) ) = firstbithigh( n )
+            // So k = firstbithigh( n - 1 )
+            // As RectPixels min/max are both inclusive their difference is one less than number of pixels (n - 1), so applying firstbithigh to this difference gives the minimum required mip.
+            // NOTE: firstbithigh is a FULL rate instruction on GCN while log2 is QUARTER rate instruction.
+            Vector2 MipLevelXY = new Vector2((float)Math.Ceiling(Math.Log2(RectPixels.Z - RectPixels.X)), (float)Math.Ceiling(Math.Log2(RectPixels.W - RectPixels.Y)));
+
+            // Mip level needs to be big enough to cover both x and y requirements. Go one extra level down for 4x4 sampling.
+            // firstbithigh(0) = -1, so clamping with 0 here also handles the n=1 case where mip 0 footprint is just 1 pixel wide/tall.
+            int MipLevel = Math.Max(Math.Max((int)MipLevelXY.X, (int)MipLevelXY.Y) - MipOffset, 0);
+
+            // MipLevel now contains the minimum MipLevel that can cover a number of pixels equal to the size of the rectangle footprint, but the HZB footprint alignments are quantized to powers of two.
+            // The quantization can translate down the start of the represented range by up to 2^k-1 pixels, which can decrease the number of usable pixels down to 2^(k+1) - 2^k-1.
+            // Depending on the alignment of the rectangle this might require us to pick one level higher to cover all rectangle footprint pixels.
+            // Note that testing one level higher is always enough as this guarantees 2^(k+2) - 2^k usable pixels after alignment, which is more than the 2^(k+1) required pixels.
+
+            // Transform coordinates down to coordinates of selected mip level and if they are not within reach increase level by one.
+            //MipLevel += any((RectPixels.zw >> MipLevel) - (RectPixels.xy >> MipLevel) > MaxPixelOffset) ? 1 : 0;
+            RectPixels.X = ((int)RectPixels.X) >> MipLevel;
+            RectPixels.Y = ((int)RectPixels.Y) >> MipLevel;
+            RectPixels.Z = ((int)RectPixels.Z) >> MipLevel;
+            RectPixels.W = ((int)RectPixels.W) >> MipLevel;
+            if (RectPixels.Z - RectPixels.X > MaxPixelOffset ||
+                RectPixels.W - RectPixels.Y > MaxPixelOffset)
+                MipLevel += 1;
+
+            return MipLevel;
+        }
+
+
         public void UnitTestEntrance()
         {
             if (IgnorTest)
                 return;
+
+            // test mip level
+            var RectA = new Vector4(50, 50, 53, 52);
+            var RectB = new Vector4(50, 50, 80, 80);
+            {
+                var mip = MipLevelForRect(ref RectA, 4);
+                Debug.WriteLine($"MipLevel = {mip};");
+
+                mip = MipLevelForRect(ref RectB, 4);
+                Debug.WriteLine($"MipLevel = {mip};");
+            }
 
             var A = new Vector2i(50, 700);
             var B = new Vector2i(1000, 1000);

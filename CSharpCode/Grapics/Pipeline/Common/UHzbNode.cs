@@ -43,7 +43,7 @@ namespace EngineNS.Graphics.Pipeline.Common
 
             var rc = UEngine.Instance.GfxDevice.RenderContext;
 
-            BasePass.Initialize(rc, debugName + ".BasePass" + ".BasePass");
+            BasePass.Initialize(rc, debugName);
 
             var defines = new NxRHI.UShaderDefinitions();
             defines.mCoreObject.AddDefine("DispatchX", $"{Dispatch_SetupDimArray2.X}");

@@ -36,7 +36,7 @@ namespace EngineNS.Bricks.GpuDriven
             drawcall.BindSrv("ClusterBuffer", node.Clusters.DataSRV);
             drawcall.BindSrv("SrcClusterBuffer", node.SrcClusters.DataSRV);
             drawcall.BindUav("VisClusterBuffer", node.VisClusters.DataUAV);
-
+            
             var index = drawcall.FindBinder(NxRHI.EShaderBindType.SBT_CBuffer, "cbCameraFrustum");
             if (index.IsValidPointer)
             {
@@ -46,6 +46,17 @@ namespace EngineNS.Bricks.GpuDriven
                 }
                 drawcall.BindCBuffer(index, node.CBCameraFrustum);
             }
+
+            index = drawcall.FindBinder(NxRHI.EShaderBindType.SBT_SRV, "HZBTexture");
+            if (index.IsValidPointer)
+            {
+                var attachBuffer = node.GetAttachBuffer(node.HzbPinIn);
+                drawcall.BindSrv(index, attachBuffer.Srv);
+            }
+            index = drawcall.FindBinder(NxRHI.EShaderBindType.SBT_Sampler, "Samp_HZBTexture");
+            if (index.IsValidPointer)
+                drawcall.BindSampler(index, UEngine.Instance.GfxDevice.SamplerStateManager.LinearClampState);
+
         }
     }
     public class TtCullClusterNode : URenderGraphNode
