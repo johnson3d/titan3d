@@ -684,7 +684,8 @@ namespace NxRHI
 			}
 		}
 		//mGpuResource->SetName(L"Texture");
-		
+		//SetDebugName("Texture");
+
 		if (desc.InitData != nullptr)
 		{
 			FTransientCmd tsCmd(device, QU_Transfer, "TextureInit");
@@ -945,6 +946,11 @@ namespace NxRHI
 	{
 		std::wstring n = StringHelper::strtowstr(name);
 		mGpuResource->SetName(n.c_str());
+
+		if (mDeviceRef.GetPtr()->Desc.GpuDump)
+		{
+			DX12ResourceDebugMapper::Get()->SetDebugMapper(mGpuResource, name);
+		}
 	}
 
 	DX12CbView::DX12CbView()

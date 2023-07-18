@@ -4,6 +4,7 @@
 #include "DX12CommandList.h"
 #include "DX12Drawcall.h"
 
+#include "../../3rd/native/NVAftermath/include/GFSDK_Aftermath.h"
 #define new VNEW
 
 #pragma comment(lib,"DXGI.lib")
@@ -328,6 +329,29 @@ namespace NxRHI
 		}
 
 		return allocator->Alloc<DX12DescriptorSetPagedObject>();
+	}
+
+	void DX12ResourceDebugMapper::SetDebugMapper(ID3D12Resource* res, const char* name)
+	{
+		AutoRef<DX12ResourceDebugInfo> tmp;
+		auto iter = mMapper.find(res);
+		if (iter == mMapper.end())
+		{
+			tmp = MakeWeakRef(new DX12ResourceDebugInfo());
+			mMapper.insert(std::make_pair(res, tmp));
+		}
+		else
+		{
+			tmp = iter->second;
+		}
+		tmp->Name = name;
+		GFSDK_Aftermath_ResourceHandle afh{};
+		GFSDK_Aftermath_DX12_RegisterResource(res, &afh);
+	}
+	DX12ResourceDebugMapper* DX12ResourceDebugMapper::Get()
+	{
+		static DX12ResourceDebugMapper obj;
+		return &obj;
 	}
 }
 

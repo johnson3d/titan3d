@@ -616,6 +616,32 @@ namespace NxRHI
 		AutoRef<DX12DescriptorSetPagedObject> AllocDescriptorSet(DX12GpuDevice* pDevice, UINT numOfDescriptor, D3D12_DESCRIPTOR_HEAP_TYPE type);
 	};
 	///-----------------------------------------------------------
+
+	class DX12ResourceDebugMapper
+	{
+	public:
+		struct DX12ResourceDebugInfo : public VIUnknown
+		{
+			std::string Name;
+		};
+		std::map<ID3D12Resource*, AutoRef<DX12ResourceDebugInfo>>	mMapper;
+
+	public:
+		static DX12ResourceDebugMapper* Get();
+		void SetDebugMapper(ID3D12Resource* res, const char* name);
+
+		DX12ResourceDebugInfo* FindDebugInfo(ID3D12Resource* res) {
+			auto iter = mMapper.find(res);
+			if (iter == mMapper.end())
+			{
+				return nullptr;
+			}
+			else
+			{
+				return iter->second;
+			}
+		}
+	};
 }
 
 NS_END

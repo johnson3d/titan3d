@@ -70,12 +70,12 @@ namespace NxRHI
 		auto completed = mFence->GetCompletedValue();
 		while (completed < value)
 		{
-			if (completed == 0xffffffffffffffff)
-			{
-				mDeviceRef.GetPtr()->OnDeviceRemoved();
-			}
 			mEvent->Wait(timeOut);
 			completed = mFence->GetCompletedValue();
+		}
+		if (completed == 0xffffffffffffffff)
+		{
+			mDeviceRef.GetPtr()->OnDeviceRemoved();
 		}
 		return completed;
 	}

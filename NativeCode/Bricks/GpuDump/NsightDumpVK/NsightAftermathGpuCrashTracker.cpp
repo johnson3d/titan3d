@@ -68,8 +68,9 @@ void VKGpuCrashTracker::Initialize(GFSDK_Aftermath_GpuCrashDumpWatchedApiFlags a
     // in memory. If the flag is set, ShaderDebugInfoCallback will be called only
     // in the event of a crash, right before GpuCrashDumpCallback. If the flag is not set,
     // ShaderDebugInfoCallback will be called for every shader that is compiled.
+    GFSDK_Aftermath_Version ver = GFSDK_Aftermath_Version_API;
     GFSDK_Aftermath_Result _result = GFSDK_Aftermath_EnableGpuCrashDumps(
-        GFSDK_Aftermath_Version_API,
+        ver,
         api,
         GFSDK_Aftermath_GpuCrashDumpFeatureFlags_DeferDebugInfoCallbacks, // Let the Nsight Aftermath library cache shader debug information.
         GpuCrashDumpCallback,                                             // Register callback for GPU crash dumps.
@@ -91,18 +92,37 @@ void VKGpuCrashTracker::OnCrashDump(const void* pGpuCrashDump, const uint32_t gp
     auto Result = GFSDK_Aftermath_GetPageFaultInformation(&FaultInformation);
     if (Result == GFSDK_Aftermath_Result_Success)
     {
-        VFX_LTRACE(ELTT_Graphics, ("[Aftermath] Faulting address: 0x%016llx\r\n"), FaultInformation.faultingGpuVA);
-        VFX_LTRACE(ELTT_Graphics, ("[Aftermath] Faulting resource dims: %d x %d x %d\r\n"), FaultInformation.resourceDesc.width, FaultInformation.resourceDesc.height, FaultInformation.resourceDesc.depth);
-        VFX_LTRACE(ELTT_Graphics, ("[Aftermath] Faulting result size: %llu bytes\r\n"), FaultInformation.resourceDesc.size);
-        VFX_LTRACE(ELTT_Graphics, ("[Aftermath] Faulting resource mips: %d\r\n"), FaultInformation.resourceDesc.mipLevels);
+        VFX_LTRACE(ELTT_Graphics, ("NVAftermath Fault address: 0x%016llx\r\n"), FaultInformation.faultingGpuVA);
+        VFX_LTRACE(ELTT_Graphics, ("NVAftermath Fault resource dims: %d x %d x %d\r\n"), FaultInformation.resourceDesc.width, FaultInformation.resourceDesc.height, FaultInformation.resourceDesc.depth);
+        VFX_LTRACE(ELTT_Graphics, ("NVAftermath Fault result size: %llu bytes\r\n"), FaultInformation.resourceDesc.size);
+        VFX_LTRACE(ELTT_Graphics, ("NVAftermath Fault resource mips: %d\r\n"), FaultInformation.resourceDesc.mipLevels);
 
 #if defined(HasModule_Dx12) || defined(HasModule_Dx11)
         if (EngineNS::GpuDump::NvAftermath::GetAfterMathRhiType() == EngineNS::NxRHI::ERhiType::RHI_D3D12||
             EngineNS::GpuDump::NvAftermath::GetAfterMathRhiType() == EngineNS::NxRHI::ERhiType::RHI_D3D11)
         {
+            if (EngineNS::GpuDump::NvAftermath::GetAfterMathRhiType() == EngineNS::NxRHI::ERhiType::RHI_D3D12)
+            {
+				auto pdxResource = (ID3D12Resource*)FaultInformation.resourceDesc.pAppResource;
+                /*wchar_t name[128] = {};
+				UINT size = sizeof(name);
+				pdxResource->GetPrivateData(WKPDID_D3DDebugObjectNameW, &size, name);
+                auto nameStr = StringHelper::wstrtostr(name);
+                VFX_LTRACE(ELTT_Graphics, ("NVAftermath Fault Name: %s"), nameStr.c_str());*/
+                auto pInfo = EngineNS::NxRHI::DX12ResourceDebugMapper::Get()->FindDebugInfo(pdxResource);
+                if (pInfo != nullptr)
+                {
+                    VFX_LTRACE(ELTT_Graphics, ("NVAftermath Fault Name: %s"), pInfo->Name.c_str());
+                }
+                else
+                {
+                    VFX_LTRACE(ELTT_Graphics, ("NVAftermath Fault Name: None"));
+                }
+            }
+
             auto ResourceFormat = (DXGI_FORMAT)FaultInformation.resourceDesc.format;
             auto fmt = EngineNS::NxRHI::DX12FormatToFormat(ResourceFormat);
-            VFX_LTRACE(ELTT_Graphics, ("[Aftermath] Faulting resource format: %s (0x%x)"), GetPixelFormatString(fmt), (UINT)ResourceFormat);
+            VFX_LTRACE(ELTT_Graphics, ("NVAftermath Fault resource format: %s (0x%x)"), GetPixelFormatString(fmt), (UINT)ResourceFormat);
         }
 #elif defined(HasModule_Vulkan)
         if (EngineNS::GpuDump::NvAftermath::GetAfterMathRhiType() == EngineNS::NxRHI::ERhiType::RHI_VK)
