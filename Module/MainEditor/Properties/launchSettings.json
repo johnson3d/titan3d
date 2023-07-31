@@ -2,7 +2,7 @@
   "profiles": {
     "MainEditor": {
       "commandName": "Project",
-      "commandLineArgs": "config=$(SolutionDir)content\\EngineConfigForDX12.cfg use_renderdoc=true",
+      "commandLineArgs": "config=$(SolutionDir)content\\EngineConfig.cfg use_renderdoc=true",
       "workingDirectory": "$(SolutionDir)binaries",
       "environmentVariables": {
         "CORECLR_PROFILER_PATH_64": "$(SolutionDir)binaries\\Core.Window.dll",
