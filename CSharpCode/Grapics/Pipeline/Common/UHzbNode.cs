@@ -83,8 +83,8 @@ namespace EngineNS.Graphics.Pipeline.Common
                 }
             }
             MipsDrawcalls = new NxRHI.UComputeDraw[HzbMipsUAVs.Length - 1];
-            uint width = MaxSRVWidth / 2;
-            uint height = MaxSRVHeight / 2;
+            uint width = MaxSRVWidth;
+            uint height = MaxSRVHeight;
             for (int i = 1; i < HzbMipsUAVs.Length; i++)
             {
                 if (width > 1)
