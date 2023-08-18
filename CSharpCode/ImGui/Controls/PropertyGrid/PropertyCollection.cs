@@ -1161,8 +1161,9 @@ namespace EngineNS.EGui.Controls.PropertyGrid
                             }
                         }
 
+                        tempProperties.Cleanup();
                         PropertyDescCollectionPool.ReleaseObject(tempProperties);
-                        tempProperties.ReleaseObject(null);
+                        //tempProperties.ReleaseObject(null);
 
                         var fls = objType.GetFields(getFieldsFlag);
                         var tempFields = PropertyDescCollectionPool.QueryObjectSync();
