@@ -12,14 +12,6 @@ NS_BEGIN
 namespace NxRHI
 {
 	template<>
-	struct AuxGpuResourceDestroyer<AutoRef<FGpuMemory>>
-	{
-		static void Destroy(AutoRef<FGpuMemory> obj, IGpuDevice* device1)
-		{
-			obj->FreeMemory();
-		}
-	};
-	template<>
 	struct AuxGpuResourceDestroyer<AutoRef<ID3D12Resource>>
 	{
 		static void Destroy(AutoRef<ID3D12Resource> obj, IGpuDevice* device1)
@@ -43,25 +35,23 @@ namespace NxRHI
 	//bool gTest = true;
 	DX12Buffer::~DX12Buffer()
 	{
-		auto device = mDeviceRef.GetPtr();
+		/*auto device = mDeviceRef.GetPtr();
 		if (device == nullptr)
-			return;
+			return;*/
+		//auto pdxResource = (ID3D12Resource*)mGpuMemory->GetHWBuffer();
+		//wchar_t name[128] = {};
+		//UINT size = sizeof(name);
+		//pdxResource->GetPrivateData(WKPDID_D3DDebugObjectNameW, &size, name);
+		//if (wcscmp(name, L"GrassInst") == 0)
+		//{
+		//	//ASSERT(false);
+		//	ASSERT(CmdRefCount == 0);
+		//}
 
-		if (TagName == "InstantSRV")
-		{
-			/*if (gTest)
-				mGpuMemory->AddRef();*/
-			mGpuMemory->FreeMemory();
-			mGpuMemory = nullptr;
-			return;
-		}
-		
-		//device->DelayDestroy(mGpuMemory);
-		mGpuMemory->FreeMemory();
 		mGpuMemory = nullptr;
 	}
 
-	AutoRef<DX12Buffer> CreateUploadBuffer(DX12GpuDevice* device, void* pData, UINT64 totalSize, UINT size)
+	AutoRef<DX12Buffer> CreateUploadBuffer(DX12GpuDevice* device, void* pData, UINT64 totalSize, UINT size, const char* name)
 	{
 		D3D12_HEAP_PROPERTIES properties{};
 		properties.Type = D3D12_HEAP_TYPE_UPLOAD;
@@ -91,7 +81,7 @@ namespace NxRHI
 		uploadBuffer->Desc.CpuAccess = (ECpuAccess)(CAS_READ | CAS_WRITE);
 		uploadBuffer->Desc.RowPitch = (UINT)totalSize;
 		uploadBuffer->Desc.Size = size;
-		uploadBuffer->mGpuMemory = DX12GpuDefaultMemAllocator::Alloc(device, &resDesc, &properties, D3D12_RESOURCE_STATE_GENERIC_READ, L"Buffer:Upload");
+		uploadBuffer->mGpuMemory = MakeWeakRef(DX12DefaultGpuMemAllocator::AllocGpuMem(device, &resDesc, &properties, D3D12_RESOURCE_STATE_GENERIC_READ, name));
 		uploadBuffer->GpuState = GRS_CopySrc;
 		FMappedSubResource mapped;
 		
@@ -159,7 +149,7 @@ namespace NxRHI
 
 			auto allocInfo = device->mDevice->GetResourceAllocationInfo(0, 1, &resDesc);
 			//allocator = device->mCBufferMemAllocator;
-			mGpuMemory = device->mCBufferMemAllocator->Alloc(device, desc.Size);
+			mGpuMemory = MakeWeakRef(device->mCBufferMemAllocator->AllocGpuMem(device, desc.Size, "CBuffer"));
 		}
 		if (desc.Type & EBufferType::BFT_RTV)
 		{
@@ -221,25 +211,9 @@ namespace NxRHI
 		}
 		if (mGpuMemory == nullptr)
 		{
-			mGpuMemory = DX12GpuDefaultMemAllocator::Alloc(device, &resDesc, &properties, resState, L"Buffer");
+			mGpuMemory = MakeWeakRef(DX12DefaultGpuMemAllocator::AllocGpuMem(device, &resDesc, &properties, resState, "Buffer"));
 			//mGpuMemory->GetDX12GpuHeap()-> mGpuResource->SetName(L"Memory:Pooled");
 		}
-
-		/*if (allocator != nullptr)
-		{
-			mGpuMemory = allocator->Alloc(device, resDesc.Width);
-			auto hr = device->mDevice->CreatePlacedResource(mGpuMemory->GpuHeap.UnsafeConvertTo<DX12GpuHeap>()->mDxHeap, mGpuMemory->Offset, &resDesc, resState, nullptr, IID_PPV_ARGS(mGpuResource.GetAddressOf()));
-			if (FAILED(hr))
-				return false;
-		}
-		else
-		{
-			//D3D12_CLEAR_VALUE data{};
-			auto hr = device->mDevice->CreateCommittedResource(&properties, D3D12_HEAP_FLAG_NONE, &resDesc, resState, nullptr, IID_PPV_ARGS(mGpuResource.GetAddressOf()));
-			if (FAILED(hr))
-				return false;
-		}*/
-		//mGpuResource->SetName(L"Buffer");
 		
 		if (desc.InitData != nullptr)
 		{
@@ -263,7 +237,7 @@ namespace NxRHI
 				UINT64 rowSize = 0, totalSize = 0;
 				device->mDevice->GetCopyableFootprints(&resDesc, 0, 1, 0, &footPrint, &numX, &rowSize, &totalSize);
 
-				auto bf = CreateUploadBuffer(device, desc.InitData, totalSize, Desc.Size);
+				auto bf = CreateUploadBuffer(device, desc.InitData, totalSize, Desc.Size, "UploadBuffer");
 
 				{
 					AutoRef<ICopyDraw> cpDraw = MakeWeakRef(device->CreateCopyDraw());
@@ -284,11 +258,17 @@ namespace NxRHI
 						FTransientCmd tsCmd(device, QU_Transfer, "BufferInit");
 						auto cmd = (DX12CommandList*)tsCmd.GetCmdList();
 						cmd->PushGpuDraw(cpDraw);
-						cmd->FlushDraws(true);
+
+						//device->mPostCmdRecorder->PushGpuDraw(cpDraw);
 					}
 				}
 			}
 		}
+
+		/*if (desc.Size == 128)
+		{
+			SetDebugName("128");
+		}*/
 		return true;
 	}
 
@@ -330,7 +310,7 @@ namespace NxRHI
 		GpuState = state;
 	}
 
-	void DX12Buffer::UpdateGpuData(UINT subRes, void* pData, const FSubResourceFootPrint* pFootPrint)
+	void DX12Buffer::UpdateGpuData(ICommandList* cmd, UINT subRes, void* pData, const FSubResourceFootPrint* pFootPrint)
 	{
 		if (Desc.Usage == EGpuUsage::USAGE_DEFAULT)
 		{
@@ -377,7 +357,7 @@ namespace NxRHI
 			UINT64 rowSize = 0, totalSize = 0;
 			device->mDevice->GetCopyableFootprints(&resDesc, 0, 1, 0, &footPrint, &numX, &rowSize, &totalSize);
 
-			auto bf = CreateUploadBuffer(device, pData, totalSize, pFootPrint->RowPitch);//.Size);
+			auto bf = CreateUploadBuffer(device, pData, totalSize, pFootPrint->RowPitch, "Upload Buffer 2");//.Size);
 
 			{
 				AutoRef<ICopyDraw> cpDraw = MakeWeakRef(device->CreateCopyDraw());
@@ -394,22 +374,8 @@ namespace NxRHI
 				cpDraw->FootPrint.RowPitch = footPrint.Footprint.RowPitch;
 				cpDraw->FootPrint.TotalSize = footPrint.Footprint.RowPitch * footPrint.Footprint.Height;
 
-				{
-					FTransientCmd tsCmd(device, QU_Transfer, "BufferUpdate");
-					auto cmd = (DX12CommandList*)tsCmd.GetCmdList();
-					cmd->PushGpuDraw(cpDraw);
-					cmd->FlushDraws(true);
-				}
+				cmd->PushGpuDraw(cpDraw);
 			}
-			/*device->PushPostEvent([fence, bf, tarValue](IGpuDevice* pDevice, UINT64 frameCount)->bool
-				{
-					if (fence->GetCompletedValue() >= tarValue)
-					{
-						pDevice->DelayDestroy(bf);
-						return true;
-					}
-					return false;
-				});*/
 		}
 		else
 		{
@@ -430,9 +396,9 @@ namespace NxRHI
 		else
 		{
 			D3D12_RANGE range{};
-			range.Begin = mGpuMemory->Offset;
+			range.Begin = mGpuMemory->GpuMem->Offset;
 			range.End = range.Begin + Desc.Size;
-			auto pTarGpuResource = ((DX12GpuHeap*)mGpuMemory->GpuHeap)->mGpuResource;
+			auto pTarGpuResource = ((DX12GpuHeap*)mGpuMemory->GpuMem->GpuHeap)->mGpuResource;
 			void* pData = nullptr;
 			if (pTarGpuResource->Map(0, &range, &pData) != S_OK)
 				return false;
@@ -447,19 +413,24 @@ namespace NxRHI
 	void DX12Buffer::Unmap(UINT index)
 	{
 		D3D12_RANGE range{};
-		range.Begin = mGpuMemory->Offset;
+		range.Begin = mGpuMemory->GpuMem->Offset;
 		range.End = range.Begin + Desc.Size;
 		ASSERT(range.End >= range.Begin);
-		auto pTarGpuResource = ((DX12GpuHeap*)mGpuMemory->GpuHeap)->mGpuResource;
+		auto pTarGpuResource = ((DX12GpuHeap*)mGpuMemory->GpuMem->GpuHeap)->mGpuResource;
 		pTarGpuResource->Unmap(index, nullptr);
 	}
 
 	void DX12Buffer::SetDebugName(const char* name)
 	{
-		TagName = name;
-		auto pTarGpuResource = ((DX12GpuHeap*)mGpuMemory->GpuHeap)->mGpuResource;
+		//TagName = name;
+		auto pTarGpuResource = ((DX12GpuHeap*)mGpuMemory->GpuMem->GpuHeap)->mGpuResource;
 		std::wstring n = StringHelper::strtowstr(name);
 		pTarGpuResource->SetName(n.c_str());
+
+		if (mDeviceRef.GetPtr()->Desc.GpuDump)
+		{
+			DX12ResourceDebugMapper::Get()->SetDebugMapper(pTarGpuResource, name);
+		}
 	}
 	
 	DX12Texture::DX12Texture()
@@ -468,14 +439,9 @@ namespace NxRHI
 
 	DX12Texture::~DX12Texture()
 	{
-		if (TagName == "HeightMapSRV")
-		{
-			//auto num = mGpuResource->AddRef();
-		}
 		auto device = mDeviceRef.GetPtr();
 		if (device == nullptr)
 			return;
-		//device->DelayDestroy(mGpuResource);
 		mGpuResource = nullptr;
 	}
 	D3D12_RESOURCE_FLAGS BufferTypeToDXBindFlags(EBufferType type)
@@ -495,7 +461,7 @@ namespace NxRHI
 		}
 		return flags;
 	}
-	AutoRef<DX12Buffer> CreateUploadResource(DX12GpuDevice* device, UINT rowPitch, UINT64 uploadSize, UINT64 rowSize, UINT numOfRows, EPixelFormat format, FMappedSubResource* mappedResource)
+	AutoRef<DX12Buffer> CreateUploadResource(DX12GpuDevice* device, UINT rowPitch, UINT64 uploadSize, UINT64 rowSize, UINT numOfRows, EPixelFormat format, FMappedSubResource* mappedResource, const char* name)
 	{
 		D3D12_HEAP_PROPERTIES properties{};
 		properties.Type = D3D12_HEAP_TYPE_UPLOAD;
@@ -526,7 +492,7 @@ namespace NxRHI
 		uploadBuffer->Desc.CpuAccess = (ECpuAccess)(CAS_READ | CAS_WRITE);
 		uploadBuffer->Desc.RowPitch = (UINT)rowPitch;
 		uploadBuffer->Desc.Size = (UINT)uploadSize;
-		uploadBuffer->mGpuMemory = DX12GpuDefaultMemAllocator::Alloc(device, &resDesc, &properties, D3D12_RESOURCE_STATE_GENERIC_READ, L"Texture:Upload");
+		uploadBuffer->mGpuMemory = MakeWeakRef(DX12DefaultGpuMemAllocator::AllocGpuMem(device, &resDesc, &properties, D3D12_RESOURCE_STATE_GENERIC_READ, name));
 		uploadBuffer->GpuState = GRS_CopySrc;
 
 		if (uploadBuffer != nullptr)
@@ -553,8 +519,8 @@ namespace NxRHI
 		Desc = desc;
 		mDeviceRef.FromObject(device);
 		
-		D3D12_RESOURCE_STATES resState = D3D12_RESOURCE_STATES::D3D12_RESOURCE_STATE_COMMON;
-		GpuState = EGpuResourceState::GRS_Undefine;
+		D3D12_RESOURCE_STATES resState = D3D12_RESOURCE_STATES::D3D12_RESOURCE_STATE_GENERIC_READ;
+		GpuState = EGpuResourceState::GRS_GenericRead;
 		D3D12_HEAP_PROPERTIES properties{};
 		properties.Type = D3D12_HEAP_TYPE_DEFAULT;
 		D3D12_RESOURCE_DESC resDesc{};
@@ -683,14 +649,12 @@ namespace NxRHI
 				return false;
 			}
 		}
-		//mGpuResource->SetName(L"Texture");
-		
+		SetDebugName("Texture");
+
 		if (desc.InitData != nullptr)
 		{
 			FTransientCmd tsCmd(device, QU_Transfer, "TextureInit");
 			auto cmd = (DX12CommandList*)tsCmd.GetCmdList();
-			
-			//((FTextureDesc*)&desc)->MipLevels = 1;
 			for (UINT i = 0; i < desc.ArraySize; i++)
 			{
 				UINT w = Desc.Width;
@@ -703,9 +667,9 @@ namespace NxRHI
 					UINT64 rowSize, totalSize;
 					device->mDevice->GetCopyableFootprints(&resDesc, j, 1, 0, &footPrint, &numX, &rowSize, &totalSize);
 
-					auto bf = CreateUploadResource(device, footPrint.Footprint.RowPitch, totalSize, rowSize, numX, Desc.Format, &desc.InitData[j]);
-					AutoRef<ICopyDraw> cpDraw = device->CreateCopyDraw();
-					cpDraw->BindTextureDest(this);
+					auto bf = CreateUploadResource(device, footPrint.Footprint.RowPitch, totalSize, rowSize, numX, Desc.Format, &desc.InitData[j], "Upload Texture");
+					AutoRef<ICopyDraw> cpDraw = MakeWeakRef(device->CreateCopyDraw());
+					cpDraw->BindTextureDest(this); 
 					cpDraw->BindBufferSrc(bf);
 					cpDraw->Mode = ECopyDrawMode::CDM_Buffer2Texture;
 					cpDraw->DestSubResource = j;
@@ -718,6 +682,7 @@ namespace NxRHI
 					cpDraw->FootPrint.Depth = footPrint.Footprint.Depth;
 					cpDraw->FootPrint.RowPitch = footPrint.Footprint.RowPitch;
 					cpDraw->FootPrint.TotalSize = footPrint.Footprint.RowPitch * footPrint.Footprint.Height;
+					//device->mPostCmdRecorder->PushGpuDraw(cpDraw);
 					cmd->PushGpuDraw(cpDraw);
 
 					w = w / 2;
@@ -728,15 +693,13 @@ namespace NxRHI
 						h = 1;
 				}
 			}
-
-			cmd->FlushDraws(true);
 		}
 		else
 		{
-			FTransientCmd tsCmd(device, QU_Transfer, "TextureTransition");
-			auto cmd = (DX12CommandList*)tsCmd.GetCmdList();
-			cmd->GetCmdRecorder()->mRefBuffers.push_back(this);
-			this->TransitionTo(cmd, EGpuResourceState::GRS_GenericRead);
+			//FTransientCmd tsCmd(device, QU_Transfer, "TextureTransition");
+			//auto cmd = (DX12CommandList*)tsCmd.GetCmdList();
+			////cmd->GetCmdRecorder()->UseResource(this);
+			//this->TransitionTo(cmd, EGpuResourceState::GRS_GenericRead);
 		}
 			
 		return true;
@@ -822,7 +785,7 @@ namespace NxRHI
 		mGpuResource->Unmap(subRes, nullptr);
 	}
 
-	void DX12Texture::UpdateGpuData(UINT subRes, void* pData, const FSubResourceFootPrint* pFootPrint)
+	void DX12Texture::UpdateGpuData(ICommandList* cmd, UINT subRes, void* pData, const FSubResourceFootPrint* pFootPrint)
 	{
 		//UINT subRes = mipIndex + Desc.MipLevels * arrayIndex;
 		if (Desc.Usage == EGpuUsage::USAGE_DEFAULT)
@@ -874,16 +837,13 @@ namespace NxRHI
 
 			device->mDevice->GetCopyableFootprints(&resDesc, subRes, 1, 0, &footPrint, &numX, &rowSize, &totalSize);
 			
-			FTransientCmd tsCmd(device, QU_Transfer, "TextureCopy");
-			auto cmd = (DX12CommandList*)tsCmd.GetCmdList();
-
 			FMappedSubResource initData{};
 			initData.pData = pData;
 			initData.RowPitch = pFootPrint->RowPitch;
 			initData.DepthPitch = pFootPrint->TotalSize;
-			auto bf = CreateUploadResource(device, footPrint.Footprint.RowPitch, totalSize, rowSize, numX, Desc.Format, &initData);
+			auto bf = CreateUploadResource(device, footPrint.Footprint.RowPitch, totalSize, rowSize, numX, Desc.Format, &initData, "Upload Texture 2");
 			
-			AutoRef<ICopyDraw> cpDraw = device->CreateCopyDraw();
+			AutoRef<ICopyDraw> cpDraw = MakeWeakRef(device->CreateCopyDraw());
 			cpDraw->BindTextureDest(this);
 			cpDraw->BindBufferSrc(bf);
 			cpDraw->DestSubResource = subRes;
@@ -897,8 +857,8 @@ namespace NxRHI
 			cpDraw->FootPrint.Depth = footPrint.Footprint.Depth;
 			cpDraw->FootPrint.RowPitch = footPrint.Footprint.RowPitch;
 			cpDraw->FootPrint.TotalSize = footPrint.Footprint.RowPitch * footPrint.Footprint.Height;
+
 			cmd->PushGpuDraw(cpDraw);
-			cmd->FlushDraws(true);
 		}
 		else //if (Desc.Usage == EGpuUsage::USAGE_DYNAMIC || Desc.Usage == EGpuUsage::USAGE_STAGING)
 		{
@@ -915,6 +875,7 @@ namespace NxRHI
 
 	void DX12Texture::TransitionTo(ICommandList* cmd, EGpuResourceState state)
 	{
+		cmd->GetCmdRecorder()->UseResource(this);
 		/*if (state != 0)
 		{
 			if ((state & GpuState) == state)
@@ -945,6 +906,11 @@ namespace NxRHI
 	{
 		std::wstring n = StringHelper::strtowstr(name);
 		mGpuResource->SetName(n.c_str());
+
+		if (mDeviceRef.GetPtr()->Desc.GpuDump)
+		{
+			DX12ResourceDebugMapper::Get()->SetDebugMapper(mGpuResource, name);
+		}
 	}
 
 	DX12CbView::DX12CbView()
@@ -953,11 +919,8 @@ namespace NxRHI
 	}
 	DX12CbView::~DX12CbView()
 	{
-		auto device = mDeviceRef.GetPtr();
-		if (device == nullptr)
-			return;
-		device->DelayDestroy(mView); 
 		mView = nullptr;
+		Buffer = nullptr;
 	}
 	D3D12_GPU_VIRTUAL_ADDRESS DX12CbView::GetBufferVirtualAddress()
 	{
@@ -1005,7 +968,7 @@ namespace NxRHI
 			Buffer = pBuffer;
 		}
 		
-		mView = device->mCbvSrvUavAllocator->Alloc<DX12DescriptorSetPagedObject>();
+		mView = MakeWeakRef(device->mCbvSrvUavAllocator->AllocDX12Heap());
 
 		D3D12_CONSTANT_BUFFER_VIEW_DESC d3dDesc{};
 		d3dDesc.BufferLocation = Buffer.UnsafeConvertTo<DX12Buffer>()->GetGPUVirtualAddress();
@@ -1074,7 +1037,6 @@ namespace NxRHI
 		auto device = mDeviceRef.GetPtr();
 		if (device == nullptr)
 			return;
-		device->DelayDestroy(mView);
 		mView = nullptr;
 	}
 
@@ -1199,7 +1161,7 @@ namespace NxRHI
 		mDeviceRef.FromObject(device);
 		Desc = desc;
 		Buffer = pBuffer;
-		mView = device->mCbvSrvUavAllocator->Alloc<DX12DescriptorSetPagedObject>();
+		mView = MakeWeakRef(device->mCbvSrvUavAllocator->AllocDX12Heap());
 		//
 		D3D12_SHADER_RESOURCE_VIEW_DESC d3dDesc{};
 		SrvDesc2DX(&d3dDesc, &desc);
@@ -1217,6 +1179,7 @@ namespace NxRHI
 		}
 		auto pD3DRes = (ID3D12Resource*)pBuffer->GetHWBuffer();
 		device->mDevice->CreateShaderResourceView(pD3DRes, &d3dDesc, mView->GetCpuAddress(0));
+		mView->Heap->RefResources[0] = Buffer;
 		
 		return true;
 	}
@@ -1236,8 +1199,12 @@ namespace NxRHI
 		}
 		SrvDesc2DX(&d3dDesc, &Desc);
 
+		mView = MakeWeakRef(((DX12GpuDevice*)device)->mCbvSrvUavAllocator->AllocDX12Heap());
+
 		auto pD3DRes = (ID3D12Resource*)pBuffer->GetHWBuffer();
 		((DX12GpuDevice*)device)->mDevice->CreateShaderResourceView(pD3DRes, &d3dDesc, mView->GetCpuAddress(0));
+
+		mView->Heap->RefResources[0] = Buffer;
 		return true;
 	}
 
@@ -1251,7 +1218,7 @@ namespace NxRHI
 		auto device = mDeviceRef.GetPtr();
 		if (device == nullptr)
 			return;
-		device->DelayDestroy(mView);
+		mView = nullptr;
 	}
 
 	static void UavDesc2DX(IGpuResource* pBuffer, D3D12_UNORDERED_ACCESS_VIEW_DESC* tar, const FUavDesc* src)
@@ -1321,7 +1288,7 @@ namespace NxRHI
 		mDeviceRef.FromObject(device);
 		Desc = desc;
 		Buffer = pBuffer;
-		mView = device->mCbvSrvUavAllocator->Alloc<DX12DescriptorSetPagedObject>();
+		mView = MakeWeakRef(device->mCbvSrvUavAllocator->AllocDX12Heap());
 
 		D3D12_UNORDERED_ACCESS_VIEW_DESC tmp{};
 		UavDesc2DX(pBuffer, &tmp, &desc);
@@ -1349,7 +1316,7 @@ namespace NxRHI
 		auto device = mDeviceRef.GetPtr();
 		if (device == nullptr)
 			return;
-		device->DelayDestroy(mView);
+		mView = nullptr;
 	}
 
 	void RtvDesc2DX(D3D12_RENDER_TARGET_VIEW_DESC* tar, const FRtvDesc* src)
@@ -1431,7 +1398,7 @@ namespace NxRHI
 		if (desc != nullptr)
 			Desc = *desc;
 		GpuResource = pBuffer;
-		mView = device->mRtvAllocator->Alloc<DX12DescriptorSetPagedObject>();
+		mView = MakeWeakRef(device->mRtvAllocator->AllocDX12Heap());
 
 		if (desc == nullptr)
 		{
@@ -1457,7 +1424,7 @@ namespace NxRHI
 		auto device = mDeviceRef.GetPtr();
 		if (device == nullptr)
 			return;
-		device->DelayDestroy(mView);
+		mView = nullptr;
 	}
 
 	bool DX12DepthStencilView::Init(DX12GpuDevice* device, ITexture* pBuffer, const FDsvDesc& desc)
@@ -1466,7 +1433,7 @@ namespace NxRHI
 		Desc = desc;
 		auto dxPixelFormat = FormatToDX12Format(desc.Format);
 		GpuResource = pBuffer;
-		mView = device->mDsvAllocator->Alloc<DX12DescriptorSetPagedObject>();
+		mView = MakeWeakRef(device->mDsvAllocator->AllocDX12Heap());
 		
 		D3D12_DEPTH_STENCIL_VIEW_DESC	DSVDesc;
 		memset(&DSVDesc, 0, sizeof(DSVDesc));

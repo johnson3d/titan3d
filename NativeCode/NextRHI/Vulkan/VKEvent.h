@@ -50,7 +50,7 @@ namespace NxRHI
 		virtual UINT64 GetCompletedValue() override;
 		virtual void CpuSignal(UINT64 value) override;
 		virtual void Signal(ICmdQueue* queue, UINT64 value, EQueueType type) override;
-		virtual UINT64 Wait(UINT64 value, UINT timeOut = INFINITE) override;
+		virtual bool Wait(UINT64 value, UINT timeOut = INFINITE) override;
 		virtual void SetDebugName(const char* name) override;
 
 		virtual bool IsBinary() const{
@@ -72,7 +72,7 @@ namespace NxRHI
 		virtual UINT64 GetCompletedValue() override {
 			return 0;
 		}
-		virtual UINT64 Wait(UINT64 value, UINT timeOut = INFINITE) override;
+		virtual bool Wait(UINT64 value, UINT timeOut = INFINITE) override;
 	};
 	class VKGpuToHostFence : public VIUnknown
 	{

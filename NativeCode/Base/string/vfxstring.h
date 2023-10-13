@@ -219,5 +219,74 @@ inline bool operator>=(const VNameString& lh, const char* rh)
 	//return strcmp(lh.GetString(), rh) >= 0;
 }
 
+///==================================================
+class FCodeWriter
+{
+public:
+	int NumOfTab = 0;
+	std::string ClassCode = "";
+public:
+	inline int GetTabNum()
+	{
+		return NumOfTab;
+	}
+	inline void PushTab()
+	{
+		NumOfTab++;
+	}
+	inline void PopTab()
+	{
+		NumOfTab--;
+	}
+	inline void PushBrackets()
+	{
+		AddLine("{");
+		NumOfTab++;
+	}
+	inline void PopBrackets(bool semicolon = false)
+	{
+		NumOfTab--;
+		if (semicolon)
+			AddLine("};");
+		else
+			AddLine("}");
+	}
+	enum ELineMode
+	{
+		TabKeep,
+		TabPush,
+		TabPop,
+	};
+	inline void AddLine(const char* code, ELineMode mode = ELineMode::TabKeep)
+	{
+		std::string result = "";
+		for (int i = 0; i < NumOfTab; i++)
+		{
+			result += '\t';
+		}
+		result += code;
+		result += '\n';
+
+		ClassCode += result;
+	}
+	inline void AppendCode(const char* code, bool bTab, bool bNewLine)
+	{
+		std::string result = "";
+		if (bTab)
+		{
+			for (int i = 0; i < NumOfTab; i++)
+			{
+				result += '\t';
+			}
+		}
+		result += code;
+		if (bNewLine)
+		{
+			result += "\n";
+		}
+
+		ClassCode += result;
+	}
+};
 
 #endif // end __VFX_STRING_H__

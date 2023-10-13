@@ -11,13 +11,13 @@ ENGINE_RTTI_IMPL(EngineNS::Canvas::FTFontManager)
 
 namespace Canvas
 {
-	FTWord* FTFont::GetWord(int x, int y, UINT c, Canvas::FCanvasVertex vert[4]) const
+	FTWord* FTFont::GetWord(int x, int y, UINT c, UInt16 transformIndex, Canvas::FCanvasVertex vert[4]) const
 	{
 		auto pThis = (FTFont*)this;
 		auto pWord = pThis->GetWord(c);
 
 		//todo: fill vert[4] ...
-		pWord->FillCanvasVertices(x, y, pWord->Brush, (void*)vert);
+		pWord->FillCanvasVertices(x, y, transformIndex, pWord->Brush, (void*)vert);
 
 		return pWord;
 	}
@@ -630,7 +630,7 @@ namespace Canvas
 		if (Dirty)
 		{
 			Dirty = false;
-			NxRHI::FTransientCmd tsCmd(device, NxRHI::QU_Transfer);
+			NxRHI::FTransientCmd tsCmd(device, NxRHI::QU_Transfer, "Font.Update");
 			auto cmd = tsCmd.GetCmdList();
 			for (auto& i : mWords)
 			{

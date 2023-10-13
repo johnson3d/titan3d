@@ -241,11 +241,11 @@ namespace NxRHI
 		const char* GetSourceCode() const;
 	};
 	TR_CALLBACK(SV_CallConvention = System.Runtime.InteropServices.CallingConvention.Cdecl, SV_NameSpace = EngineNS)
-	typedef FShaderCode* (*FnGetShaderCodeStream)(TR_META(SV_NoStringConverter) const char* name);
+	typedef NxRHI::FShaderCode* (*FnGetShaderCodeStream)(TR_META(SV_NoStringConverter) const char* name);
 	class TR_CLASS()
 		FShaderCompiler : public IWeakReference
 	{
-		typedef FShaderCode* (*FnGetShaderCodeStream)(TR_META(SV_NoStringConverter) const char* name);
+		typedef NxRHI::FShaderCode* (*FnGetShaderCodeStream)(TR_META(SV_NoStringConverter) const char* name);
 		FnGetShaderCodeStream			GetShaderCodeStreamPtr;
 	public:
 		ENGINE_RTTI(FShaderCompiler);

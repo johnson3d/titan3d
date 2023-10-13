@@ -14,6 +14,8 @@ namespace Canvas
 		static void SafeNormalize(const v3dxVector2& In, v3dxVector2& Out, float& Length);
 		static v3dxVector2 Normalize(const v3dxVector2& In);
 		static v3dxVector2 Lerp(const v3dxVector2& A, const v3dxVector2& B, float Alpha);
+		static v3dxVector2 CubicInterp(const v3dxVector2& P0, const v3dxVector2& P1, const v3dxVector2& P2, const v3dxVector2& P3, float Alpha);
+		static v3dxVector2 CubicInterpDeriv(const v3dxVector2& P0, const v3dxVector2& P1, const v3dxVector2& P2, const v3dxVector2& P3, float Alpha);
 		static float DotProduct(const v3dxVector2& V0, const v3dxVector2& V1);
 		static float CrossProduct(const v3dxVector2& V0, const v3dxVector2& V1);
 		static v3dxVector2 GetRight(const v3dxVector2& V);
@@ -29,9 +31,9 @@ namespace Canvas
 		// It is supposed to be non self-intersect.
 		// https://en.wikipedia.org/wiki/Sutherland¨CHodgman_algorithm
 		static void SutherlandHodgmanClip(const FRectanglef& Rect,
-			const void* InVerts, UINT NumVerts,
+			const v3dxVector2* InVerts, UINT NumVerts,
 			std::vector<v3dxVector2>& OutVerts,
-			const void* InUVs = nullptr,
+			const v3dxVector2* InUVs = nullptr,
 			std::vector<v3dxVector2>* OutUVs = nullptr);
 	};
 

@@ -52,7 +52,6 @@ namespace NxRHI
 	}
 	void DX12Fence::Signal(ICmdQueue* queue, UINT64 value, EQueueType type)
 	{
-		mFence->SetEventOnCompletion(value, mEvent->mHandle);
 		auto dx12Queue = ((DX12CmdQueue*)queue);
 		VAutoVSLLock locker(dx12Queue->mQueueLocker);
 		auto hr = dx12Queue->mCmdQueue->Signal(mFence, value);
@@ -61,23 +60,29 @@ namespace NxRHI
 			mDeviceRef.GetPtr()->OnDeviceRemoved();
 		}
 	}
-	UINT64 DX12Fence::Wait(UINT64 value, UINT timeOut)
+	bool DX12Fence::Wait(UINT64 value, UINT timeOut)
 	{
 		/*while (mFence->GetCompletedValue() < value)
 		{
 
 		}*/
 		auto completed = mFence->GetCompletedValue();
-		while (completed < value)
+		if (completed >= value)
 		{
-			if (completed == 0xffffffffffffffff)
-			{
-				mDeviceRef.GetPtr()->OnDeviceRemoved();
-			}
+			return true;
+		}
+		mFence->SetEventOnCompletion(value, mEvent->mHandle);
+		while (completed < value)
+		{	
 			mEvent->Wait(timeOut);
 			completed = mFence->GetCompletedValue();
 		}
-		return completed;
+		if (completed == 0xffffffffffffffff)
+		{
+			mDeviceRef.GetPtr()->OnDeviceRemoved();
+			return false;
+		}
+		return true;
 	}
 	void DX12Fence::SetDebugName(const char* name)
 	{

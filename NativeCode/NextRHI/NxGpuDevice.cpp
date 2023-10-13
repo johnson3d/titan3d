@@ -143,38 +143,45 @@ namespace NxRHI
 		auto result = new ICopyDraw();
 		return result;
 	}
-	void IGpuDevice::PushWaitFlushBuffer(IBuffer* buffer)
+	FVertexArray* IGpuDevice::CreateVertexArray()
 	{
-		VAutoVSLLock lk(mWaitFlushLocker);
-		mWaitFlushBuffers.push_back(buffer);
+		return new FVertexArray();
+	}
+	FGeomMesh* IGpuDevice::CreateGeomMesh()
+	{
+		auto result = new FGeomMesh();
+		result->VertexArray = MakeWeakRef(CreateVertexArray());
+		return result;
+	}
+	void IGpuDevice::WaitFrameFence(int beforeFrame)
+	{
+		auto completed = mFrameFence->GetCompletedValue();
+		auto expect = mFrameFence->GetExpectValue();
+		if (expect - completed > beforeFrame)
+		{
+			mFrameFence->Wait(expect - beforeFrame);
+		}
 	}
 	void IGpuDevice::TickPostEvents()
 	{
 		if (mFrameFence != nullptr)
 		{
 			GetCmdQueue()->IncreaseSignal(mFrameFence, EQueueType::QU_Default);
-			auto completed = mFrameFence->GetCompletedValue();
+			//WaitFrameFence(3);
+			/*auto completed = mFrameFence->GetCompletedValue();
 			auto expect = mFrameFence->GetExpectValue();
 			if (expect - completed > 3)
 			{
 				mFrameFence->Wait(expect - 3);
-			}
+			}*/
 
 			{
 				VAutoVSLLock lk(mPostEventLocker);
 				mTickingPostEvents.insert(mTickingPostEvents.begin(), mPostEvents.begin(), mPostEvents.end());
 				mPostEvents.clear();
 			}
-			{
-				VAutoVSLLock lk(mWaitFlushLocker);
-				for (auto& i : mWaitFlushBuffers)
-				{
-					i->FlushDirty();
-				}
-				mWaitFlushBuffers.clear();
-			}
 
-			completed = mFrameFence->GetCompletedValue();
+			auto completed = mFrameFence->GetCompletedValue();
 			ASSERT(completed <= mFrameFence->GetExpectValue());
 			for (size_t i = 0; i < mTickingPostEvents.size(); i++)
 			{
@@ -184,15 +191,6 @@ namespace NxRHI
 					i--;
 				}
 			}
-		}
-
-		if (GetCmdQueue() != nullptr)
-		{
-			auto cmd = GetCmdQueue()->mFramePost;
-			cmd->EndCommand();
-			if (cmd->GetCmdRecorder()->mDrawcallArray.size() > 0)
-				GetCmdQueue()->ExecuteCommandListSingle(cmd, QU_Default);
-			cmd->BeginCommand();
 		}
 	}
 }

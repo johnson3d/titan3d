@@ -1,7 +1,9 @@
 #pragma once
 
-#include "../NxGpuDevice.h"
 #include "../NxRHIDefine.h"
+#include "../NxGpuDevice.h"
+#include "../NxBuffer.h"
+
 #include "../../Base/allocator/PagedAllocator.h"
 
 #pragma warning(push)
@@ -194,9 +196,9 @@ namespace NxRHI
 		case PXF_BC5_TYPELESS:
 			return DXGI_FORMAT_BC5_TYPELESS;
 		case PXF_BC5_UNORM:
-			return DXGI_FORMAT_BC4_UNORM;
+			return DXGI_FORMAT_BC5_UNORM;
 		case PXF_BC5_SNORM:
-			return DXGI_FORMAT_BC4_SNORM;
+			return DXGI_FORMAT_BC5_SNORM;
 		case PXF_BC6H_TYPELESS:
 			return DXGI_FORMAT_BC6H_TYPELESS;
 		case PXF_BC6H_UF16:
@@ -511,6 +513,7 @@ namespace NxRHI
 		virtual void* GetHWBuffer() override {
 			return mGpuResource;
 		}
+		void SetDebugName(const char* name);
 	};
 	struct FDX12DefaultGpuMemory : public FGpuMemory
 	{
@@ -521,19 +524,25 @@ namespace NxRHI
 		virtual void FreeMemory();
 	};
 
-	class DX12GpuDefaultMemAllocator : public IGpuMemAllocator
+	class DX12DefaultGpuMemAllocator : public IGpuMemAllocator
 	{
 	public:
 		D3D12_RESOURCE_DESC			mResDesc{};
 		D3D12_HEAP_PROPERTIES		mHeapProperties{};
 		D3D12_RESOURCE_STATES		mResState = D3D12_RESOURCE_STATES::D3D12_RESOURCE_STATE_GENERIC_READ;
 
-		static AutoRef<FGpuMemory> Alloc(IGpuDevice* device, const D3D12_RESOURCE_DESC* resDesc, const D3D12_HEAP_PROPERTIES* heapDesc, D3D12_RESOURCE_STATES resState, const wchar_t* debugName);
-		virtual AutoRef<FGpuMemory> Alloc(IGpuDevice* device, UINT64 size);
+		static AutoRef<FGpuMemory> Alloc(IGpuDevice* device, const D3D12_RESOURCE_DESC* resDesc, const D3D12_HEAP_PROPERTIES* heapDesc, D3D12_RESOURCE_STATES resState, const char* debugName);
+		virtual AutoRef<FGpuMemory> Alloc(IGpuDevice* device, UINT64 size, const char* name);
 		virtual void Free(FGpuMemory* memory);
+
+		static FGpuMemHolder* AllocGpuMem(IGpuDevice* device, const D3D12_RESOURCE_DESC* resDesc, const D3D12_HEAP_PROPERTIES* heapDesc, D3D12_RESOURCE_STATES resState, const char* debugName) {
+			auto result = new FGpuMemHolder();
+			result->GpuMem = Alloc(device, resDesc, heapDesc, resState, debugName);
+			return result;
+		}
 	};
 
-	class DX12GpuPooledMemAllocator : public IGpuPooledMemAllocator
+	class DX12PagedGpuMemAllocator : public IPagedGpuMemAllocator
 	{
 	public:
 		D3D12_RESOURCE_DESC			mResDesc{};
@@ -542,34 +551,60 @@ namespace NxRHI
 		virtual UINT GetBatchCount(UINT64 size) {
 			return (UINT)(mResDesc.Width / size);
 		}
-		virtual IGpuHeap* CreateGpuHeap(IGpuDevice* device, UINT64 size, UINT count) override;
+		virtual IGpuHeap* CreateGpuHeap(IGpuDevice* device, UINT64 size, UINT count, const char* name) override;
 	};
 
 	///-----------------------------------------------------------
 	///DX12DescriptorSetPagedObject
-	struct DX12DescriptorSetPagedObject : public MemAlloc::FPagedObject<AutoRef<ID3D12DescriptorHeap>>
+	struct DX12PagedHeap : public MemAlloc::FPagedObject<AutoRef<ID3D12DescriptorHeap>>
 	{
 		//DX12ShaderEffect*		ShaderEffect = nullptr;
 		D3D12_GPU_DESCRIPTOR_HANDLE	GetGpuAddress(int index = 0);
 		D3D12_CPU_DESCRIPTOR_HANDLE	GetCpuAddress(int index);
+		void BindToHeap(DX12GpuDevice* device, DX12PagedHeap* dest, UINT destIndex, UINT srcIndex, D3D12_DESCRIPTOR_HEAP_TYPE HeapType);
+		//D3D12_DESCRIPTOR_HEAP_TYPE	HeapType = D3D12_DESCRIPTOR_HEAP_TYPE::D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV;
 		SIZE_T						OffsetInPage = 0;
+
+		std::vector<AutoRef<IGpuResource>>	RefResources;
 	};
-	template<>
-	struct AuxGpuResourceDestroyer<AutoRef<DX12DescriptorSetPagedObject>>
+	struct DX12HeapHolder : public IGpuResource
 	{
-		static void Destroy(AutoRef<DX12DescriptorSetPagedObject> obj, IGpuDevice* device1)
+		AutoRef<DX12PagedHeap>	Heap;
+		~DX12HeapHolder()
 		{
-			obj->Free();
+			if (Heap != nullptr)
+			{
+				Heap->Free();
+				for (auto& i : Heap->RefResources)
+				{
+					i = nullptr;
+				}
+
+				Heap = nullptr;
+			}
+		}
+		D3D12_GPU_DESCRIPTOR_HANDLE	GetGpuAddress(int index = 0)
+		{
+			return Heap->GetGpuAddress(index);
+		}
+		D3D12_CPU_DESCRIPTOR_HANDLE	GetCpuAddress(int index)
+		{
+			return Heap->GetCpuAddress(index);
+		}
+		void BindToHeap(DX12GpuDevice* device, DX12PagedHeap* dest, UINT destIndex, UINT srcIndex, D3D12_DESCRIPTOR_HEAP_TYPE HeapType)
+		{
+			return Heap->BindToHeap(device, dest, destIndex, srcIndex, HeapType);
 		}
 	};
-	struct DX12DescriptorSetCreator
+
+	struct DX12HeapCreator
 	{
 		struct DX12DescriptorSetPage : public MemAlloc::FPage<AutoRef<ID3D12DescriptorHeap>>
 		{
 			AutoRef<ID3D12DescriptorHeap>		mGpuHeap;
 		};
 
-		DX12DescriptorSetCreator()
+		DX12HeapCreator()
 		{
 			
 		}
@@ -604,18 +639,51 @@ namespace NxRHI
 		void OnFree(AllocatorType* pAllocator, PagedObjectType* obj);
 		void FinalCleanup(MemAlloc::FPage<ObjectType>* page);
 	};
-	struct DX12DescriptorSetAllocator : public MemAlloc::FPagedObjectAllocator<DX12DescriptorSetCreator::ObjectType, DX12DescriptorSetCreator>
+
+	struct DX12HeapAllocator : public MemAlloc::FPagedObjectAllocator<DX12HeapCreator::ObjectType, DX12HeapCreator>
 	{
 		UINT			mDescriptorStride = 0;
-	};
-
-	class DX12DescriptorAllocatorManager : public IWeakReference
+		DX12HeapHolder* AllocDX12Heap()
+		{
+			auto result = new DX12HeapHolder();
+			result->Heap = this->Alloc<DX12PagedHeap>();
+			return result;
+		}
+	};	
+	
+	class DX12HeapAllocatorManager : public IWeakReference
 	{
-		std::map<UINT64, AutoRef<DX12DescriptorSetAllocator>>		mAllocators;
+		std::map<UINT64, AutoRef<DX12HeapAllocator>>		mAllocators;
 	public:
-		AutoRef<DX12DescriptorSetPagedObject> AllocDescriptorSet(DX12GpuDevice* pDevice, UINT numOfDescriptor, D3D12_DESCRIPTOR_HEAP_TYPE type);
+		DX12HeapHolder* AllocDX12Heap(DX12GpuDevice* pDevice, UINT numOfDescriptor, D3D12_DESCRIPTOR_HEAP_TYPE type);
 	};
 	///-----------------------------------------------------------
+
+	class DX12ResourceDebugMapper
+	{
+	public:
+		struct DX12ResourceDebugInfo : public VIUnknown
+		{
+			std::string Name;
+		};
+		std::map<ID3D12Resource*, AutoRef<DX12ResourceDebugInfo>>	mMapper;
+		VSLLock									mLocker;
+	public:
+		static DX12ResourceDebugMapper* Get();
+		void SetDebugMapper(ID3D12Resource* res, const char* name);
+
+		DX12ResourceDebugInfo* FindDebugInfo(ID3D12Resource* res) {
+			auto iter = mMapper.find(res);
+			if (iter == mMapper.end())
+			{
+				return nullptr;
+			}
+			else
+			{
+				return iter->second;
+			}
+		}
+	};
 }
 
 NS_END

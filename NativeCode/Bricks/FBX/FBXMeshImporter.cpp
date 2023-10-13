@@ -579,8 +579,9 @@ namespace AssetImportAndExport
 			BYTE* skinIndexsStream = new BYTE[4 * renderVertexCount];
 			float* skinWeightsStream = new float[4 * renderVertexCount];
 
+			auto device = rc;
 			mMeshPrimitives = new NxRHI::FMeshPrimitives();
-			mMeshPrimitives->Init(rc, meshDesc->Name.GetString().c_str(), meshDesc->RenderAtom);
+			mMeshPrimitives->Init(device, meshDesc->Name.GetString().c_str(), meshDesc->RenderAtom);
 
 			if (meshDesc->HaveSkin)
 			{
@@ -780,23 +781,24 @@ namespace AssetImportAndExport
 			}
 			//set stream
 			{
-
-				mMeshPrimitives->SetGeomtryMeshStream(rc, NxRHI::EVertexStreamType::VST_Position, posStream, (UINT)((UINT)sizeof(v3dxVector3) * renderVertexCount), sizeof(v3dxVector3), NxRHI::ECpuAccess::CAS_DEFAULT);
+				NxRHI::FTransientCmd tsCmd(rc, NxRHI::EQueueType::QU_Transfer, "MeshImporter");
+				auto Cmd = tsCmd.GetCmdList();
+				mMeshPrimitives->SetGeomtryMeshStream(Cmd, NxRHI::EVertexStreamType::VST_Position, posStream, (UINT)((UINT)sizeof(v3dxVector3) * renderVertexCount), sizeof(v3dxVector3), NxRHI::ECpuAccess::CAS_DEFAULT);
 				if (hasVertexColor)
-					mMeshPrimitives->SetGeomtryMeshStream(rc, NxRHI::EVertexStreamType::VST_Color, vertexColorStream, (UINT)((UINT)sizeof(DWORD) * renderVertexCount), sizeof(DWORD), NxRHI::ECpuAccess::CAS_DEFAULT);
-				mMeshPrimitives->SetGeomtryMeshStream(rc, NxRHI::EVertexStreamType::VST_Normal, normalStream, (UINT)((UINT)sizeof(v3dxVector3) * renderVertexCount), sizeof(v3dxVector3), NxRHI::ECpuAccess::CAS_DEFAULT);
-				mMeshPrimitives->SetGeomtryMeshStream(rc, NxRHI::EVertexStreamType::VST_UV, uvStream, (UINT)((UINT)sizeof(v3dxVector2) * renderVertexCount), sizeof(v3dxVector2), NxRHI::ECpuAccess::CAS_DEFAULT);
-				mMeshPrimitives->SetGeomtryMeshStream(rc, NxRHI::EVertexStreamType::VST_LightMap, lightMapStream, (UINT)((UINT)sizeof(v3dVector4_t) * renderVertexCount), sizeof(v3dVector4_t), NxRHI::ECpuAccess::CAS_DEFAULT);
-				mMeshPrimitives->SetGeomtryMeshStream(rc, NxRHI::EVertexStreamType::VST_Tangent, tangentStream, (UINT)((UINT)sizeof(v3dVector4_t) * renderVertexCount), sizeof(v3dVector4_t), NxRHI::ECpuAccess::CAS_DEFAULT);
+					mMeshPrimitives->SetGeomtryMeshStream(Cmd, NxRHI::EVertexStreamType::VST_Color, vertexColorStream, (UINT)((UINT)sizeof(DWORD) * renderVertexCount), sizeof(DWORD), NxRHI::ECpuAccess::CAS_DEFAULT);
+				mMeshPrimitives->SetGeomtryMeshStream(Cmd, NxRHI::EVertexStreamType::VST_Normal, normalStream, (UINT)((UINT)sizeof(v3dxVector3) * renderVertexCount), sizeof(v3dxVector3), NxRHI::ECpuAccess::CAS_DEFAULT);
+				mMeshPrimitives->SetGeomtryMeshStream(Cmd, NxRHI::EVertexStreamType::VST_UV, uvStream, (UINT)((UINT)sizeof(v3dxVector2) * renderVertexCount), sizeof(v3dxVector2), NxRHI::ECpuAccess::CAS_DEFAULT);
+				mMeshPrimitives->SetGeomtryMeshStream(Cmd, NxRHI::EVertexStreamType::VST_LightMap, lightMapStream, (UINT)((UINT)sizeof(v3dVector4_t) * renderVertexCount), sizeof(v3dVector4_t), NxRHI::ECpuAccess::CAS_DEFAULT);
+				mMeshPrimitives->SetGeomtryMeshStream(Cmd, NxRHI::EVertexStreamType::VST_Tangent, tangentStream, (UINT)((UINT)sizeof(v3dVector4_t) * renderVertexCount), sizeof(v3dVector4_t), NxRHI::ECpuAccess::CAS_DEFAULT);
 				if (isIndex32)
-					mMeshPrimitives->SetGeomtryMeshIndex(rc, renderIndex32, polyVertexCount * sizeof(UINT), isIndex32, NxRHI::ECpuAccess::CAS_DEFAULT);
+					mMeshPrimitives->SetGeomtryMeshIndex(Cmd, renderIndex32, polyVertexCount * sizeof(UINT), isIndex32, NxRHI::ECpuAccess::CAS_DEFAULT);
 				else
-					mMeshPrimitives->SetGeomtryMeshIndex(rc, renderIndex16, polyVertexCount * sizeof(UINT), isIndex32, NxRHI::ECpuAccess::CAS_DEFAULT);
+					mMeshPrimitives->SetGeomtryMeshIndex(Cmd, renderIndex16, polyVertexCount * sizeof(UINT), isIndex32, NxRHI::ECpuAccess::CAS_DEFAULT);
 				
 				if (meshDesc->HaveSkin)
 				{
-					mMeshPrimitives->SetGeomtryMeshStream(rc, NxRHI::EVertexStreamType::VST_SkinIndex, skinIndexsStream, 4 * renderVertexCount * sizeof(BYTE), 4 * sizeof(BYTE), NxRHI::ECpuAccess::CAS_DEFAULT);
-					mMeshPrimitives->SetGeomtryMeshStream(rc, NxRHI::EVertexStreamType::VST_SkinWeight, skinWeightsStream, 4 * renderVertexCount * sizeof(float), 4 * sizeof(float), NxRHI::ECpuAccess::CAS_DEFAULT);
+					mMeshPrimitives->SetGeomtryMeshStream(Cmd, NxRHI::EVertexStreamType::VST_SkinIndex, skinIndexsStream, 4 * renderVertexCount * sizeof(BYTE), 4 * sizeof(BYTE), NxRHI::ECpuAccess::CAS_DEFAULT);
+					mMeshPrimitives->SetGeomtryMeshStream(Cmd, NxRHI::EVertexStreamType::VST_SkinWeight, skinWeightsStream, 4 * renderVertexCount * sizeof(float), 4 * sizeof(float), NxRHI::ECpuAccess::CAS_DEFAULT);
 				}
 			}
 
@@ -805,7 +807,7 @@ namespace AssetImportAndExport
 				v3dxBox3 aabb;
 				for (int i = 0; i < renderVertexCount; i++)
 				{
-					aabb.OptimalVertex(posStream[i]);
+					aabb.MergeVertex(posStream[i]);
 				}
 				mMeshPrimitives->SetAABB(aabb);
 			}
@@ -1390,7 +1392,7 @@ namespace AssetImportAndExport
 										MeshVertex& vertex = pAssetVertexs[vertexCount];
 										if (uvIndex == 0)
 											vertex.UV = UV;
-										else
+										else if (uvIndex == 1)
 											vertex.UV2 = UV;
 										vertexCount++;
 									}
@@ -1412,7 +1414,7 @@ namespace AssetImportAndExport
 										MeshVertex& vertex = pAssetVertexs[vertexCount];
 										if (uvIndex == 0)
 											vertex.UV = UV;
-										else
+										else if (uvIndex == 1)
 											vertex.UV2 = UV;
 										vertexCount++;
 									}

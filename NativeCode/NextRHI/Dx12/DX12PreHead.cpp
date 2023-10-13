@@ -4,6 +4,7 @@
 #include "DX12CommandList.h"
 #include "DX12Drawcall.h"
 
+#include "../../3rd/native/NVAftermath/include/GFSDK_Aftermath.h"
 #define new VNEW
 
 #pragma comment(lib,"DXGI.lib")
@@ -34,6 +35,8 @@ namespace NxRHI
 			}
 		}
 		auto result = CmdAllocators.front();
+		ASSERT(result->GetDrawcallNumber() == 0);
+		result->ResetGpuDraws();
 		CmdAllocators.pop();
 		return result;
 	}
@@ -41,6 +44,13 @@ namespace NxRHI
 	{
 		ASSERT(waitValue > 0);
 		VAutoVSLLock lk(mLocker);
+		ASSERT(allocator != nullptr);
+		if (allocator->GetDrawcallNumber() == 0)
+		{
+			allocator->ResetGpuDraws();
+			CmdAllocators.push(allocator);
+			return;
+		}
 		FWaitRecycle tmp;
 		tmp.Allocator = allocator;
 		tmp.WaitValue = waitValue;
@@ -49,6 +59,7 @@ namespace NxRHI
 	}
 	void DX12CommandAllocatorManager::UnsafeDirectFree(const AutoRef<DX12CmdRecorder>& allocator)
 	{
+		ASSERT(allocator != nullptr);
 		VAutoVSLLock lk(mLocker);
 		CmdAllocators.push(allocator);
 	}
@@ -63,15 +74,16 @@ namespace NxRHI
 			//fuck off: d12 or driver reference the resource but didn't AddRef
 			if (value > waitValue)
 			{
-				i->Allocator->mAllocator->Reset();
+				//i->Allocator->mAllocator->Reset();
+				ASSERT(i->Allocator->GetDrawcallNumber() != 0);
 				i->Allocator->ResetGpuDraws();
-				auto cmdlist = (DX12CommandList*)i->Allocator->mCmdList.GetPtr();
+				/*auto cmdlist = i->Allocator->mCmdList.GetCastPtr<DX12CommandList>();
 				if (cmdlist != nullptr && cmdlist->mCmdRecorder == nullptr)
 				{
 					cmdlist->mContext->Reset(i->Allocator->mAllocator, nullptr);
 					cmdlist->mContext->Close();
 				}
-				i->Allocator->mCmdList.FromObject(nullptr);
+				i->Allocator->mCmdList.FromObject(nullptr);*/
 				CmdAllocators.push(i->Allocator);
 				i = Recycles.erase(i);
 			}
@@ -103,6 +115,15 @@ namespace NxRHI
 				i++;
 			}
 		}
+		//ASSERT(Recycles.size() == 0);
+		CmdAllocators = std::queue<AutoRef<DX12CmdRecorder>>();
+	}
+
+	void DX12GpuHeap::SetDebugName(const char* name)
+	{
+		std::wstring n = StringHelper::strtowstr(name);
+		mGpuResource->SetName(n.c_str());
+		DX12ResourceDebugMapper::Get()->SetDebugMapper(mGpuResource, name);
 	}
 	FDX12DefaultGpuMemory::~FDX12DefaultGpuMemory()
 	{
@@ -112,7 +133,7 @@ namespace NxRHI
 	{
 		
 	}
-	AutoRef<FGpuMemory> DX12GpuDefaultMemAllocator::Alloc(IGpuDevice* device, const D3D12_RESOURCE_DESC* resDesc, const D3D12_HEAP_PROPERTIES* heapDesc, D3D12_RESOURCE_STATES resState, const wchar_t* debugName)
+	AutoRef<FGpuMemory> DX12DefaultGpuMemAllocator::Alloc(IGpuDevice* device, const D3D12_RESOURCE_DESC* resDesc, const D3D12_HEAP_PROPERTIES* heapDesc, D3D12_RESOURCE_STATES resState, const char* name)
 	{
 		auto result = MakeWeakRef(new FDX12DefaultGpuMemory());
 		result->GpuHeap = new DX12GpuHeap();
@@ -124,10 +145,18 @@ namespace NxRHI
 			((DX12GpuDevice*)device)->OnDeviceRemoved();
 		}
 
-		result->GetDX12GpuHeap()->mGpuResource->SetName(debugName);
+		if (name != nullptr)
+		{
+			std::wstring n = StringHelper::strtowstr(name);
+			result->GetDX12GpuHeap()->mGpuResource->SetName(n.c_str());
+		}
+		if (device->Desc.GpuDump)
+		{
+			DX12ResourceDebugMapper::Get()->SetDebugMapper(result->GetDX12GpuHeap()->mGpuResource, name);
+		}
 		return result;
 	}
-	AutoRef<FGpuMemory> DX12GpuDefaultMemAllocator::Alloc(IGpuDevice* device, UINT64 size)
+	AutoRef<FGpuMemory> DX12DefaultGpuMemAllocator::Alloc(IGpuDevice* device, UINT64 size, const char* name)
 	{
 		auto result = MakeWeakRef(new FDX12DefaultGpuMemory());
 		result->GpuHeap = new DX12GpuHeap();
@@ -136,17 +165,27 @@ namespace NxRHI
 		resDesc.Width = size;
 		((DX12GpuDevice*)device)->mDevice->CreateCommittedResource(&mHeapProperties, D3D12_HEAP_FLAG_NONE,
 			&resDesc, mResState, nullptr, IID_PPV_ARGS(result->GetDX12GpuHeap()->mGpuResource.GetAddressOf()));
+
+		if (name != nullptr)
+		{
+			std::wstring n = StringHelper::strtowstr(name);
+			result->GetDX12GpuHeap()->mGpuResource->SetName(n.c_str());
+		}
+		if (device->Desc.GpuDump)
+		{
+			DX12ResourceDebugMapper::Get()->SetDebugMapper(result->GetDX12GpuHeap()->mGpuResource, name);
+		}
 		return result;
 	}
 	
-	void DX12GpuDefaultMemAllocator::Free(FGpuMemory* memory)
+	void DX12DefaultGpuMemAllocator::Free(FGpuMemory* memory)
 	{
 		memory->GpuHeap->Release();
 		memory->GpuHeap = nullptr;
 		memory->Offset = -1;
 	}
 	
-	IGpuHeap* DX12GpuPooledMemAllocator::CreateGpuHeap(IGpuDevice* device, UINT64 size, UINT count)
+	IGpuHeap* DX12PagedGpuMemAllocator::CreateGpuHeap(IGpuDevice* device, UINT64 size, UINT count, const char* name)
 	{
 		auto result = new DX12GpuHeap();
 		
@@ -155,33 +194,48 @@ namespace NxRHI
 		((DX12GpuDevice*)device)->mDevice->CreateCommittedResource(&mHeapProperties, D3D12_HEAP_FLAG_NONE,
 			&mResDesc, mResState, nullptr, IID_PPV_ARGS(result->mGpuResource.GetAddressOf()));
 
-		result->mGpuResource->SetName(L"Memory:Pooled");
+		if (name != nullptr)
+		{
+			std::wstring n = StringHelper::strtowstr(name);
+			result->mGpuResource->SetName(n.c_str());
+		}
+		if (device->Desc.GpuDump)
+		{
+			DX12ResourceDebugMapper::Get()->SetDebugMapper(result->mGpuResource, name);
+		}
+
 		return result;
 	}
 
 	/// DX12DescriptorSetPagedObject-----------------------------------------------------------
-	D3D12_GPU_DESCRIPTOR_HANDLE	DX12DescriptorSetPagedObject::GetGpuAddress(int index)
+	void DX12PagedHeap::BindToHeap(DX12GpuDevice* device, DX12PagedHeap* dest, UINT destIndex, UINT srcIndex, D3D12_DESCRIPTOR_HEAP_TYPE HeapType)
 	{
-		auto pManager = (DX12DescriptorSetAllocator*)GetAllocator();
+		dest->RefResources[destIndex] = this->RefResources[srcIndex];
+		device->mDevice->CopyDescriptorsSimple(1, dest->GetCpuAddress(destIndex),
+			this->GetCpuAddress(srcIndex), HeapType);
+	}
+	D3D12_GPU_DESCRIPTOR_HANDLE	DX12PagedHeap::GetGpuAddress(int index)
+	{
+		auto pManager = (DX12HeapAllocator*)GetAllocator();
 		ASSERT(pManager);
 		D3D12_GPU_DESCRIPTOR_HANDLE result = RealObject->GetGPUDescriptorHandleForHeapStart();
 		result.ptr += this->OffsetInPage + pManager->mDescriptorStride * index;
 		ASSERT(result.ptr != 0);
 		return result;
 	}
-	D3D12_CPU_DESCRIPTOR_HANDLE	DX12DescriptorSetPagedObject::GetCpuAddress(int index)
+	D3D12_CPU_DESCRIPTOR_HANDLE	DX12PagedHeap::GetCpuAddress(int index)
 	{
-		auto pManager = (DX12DescriptorSetAllocator*)GetAllocator();
+		auto pManager = (DX12HeapAllocator*)GetAllocator();
 		if (pManager == nullptr)
 			return D3D12_CPU_DESCRIPTOR_HANDLE{};
 		D3D12_CPU_DESCRIPTOR_HANDLE result = RealObject->GetCPUDescriptorHandleForHeapStart();
 		result.ptr += this->OffsetInPage + pManager->mDescriptorStride * index;
 		return result;
 	}
-	DX12DescriptorSetCreator::PageType* DX12DescriptorSetCreator::CreatePage(UINT pageSize)
+	DX12HeapCreator::PageType* DX12HeapCreator::CreatePage(UINT pageSize)
 	{
 		auto device = mDeviceRef.GetPtr();
-		auto result = new DX12DescriptorSetCreator::PageType();
+		auto result = new DX12HeapCreator::PageType();
 		auto desc = mDesc;
 		desc.NumDescriptors = mDesc.NumDescriptors * pageSize;
 		auto hr = device->mDevice->CreateDescriptorHeap(&desc, IID_ID3D12DescriptorHeap, (void**)result->mGpuHeap.GetAddressOf());
@@ -195,15 +249,16 @@ namespace NxRHI
 		}
 		return result;
 	}
-	DX12DescriptorSetCreator::PagedObjectType* DX12DescriptorSetCreator::CreatePagedObject(
-		DX12DescriptorSetCreator::PageType* page, UINT index)
+	DX12HeapCreator::PagedObjectType* DX12HeapCreator::CreatePagedObject(
+		DX12HeapCreator::PageType* page, UINT index)
 	{
 		//auto device = mDeviceRef.GetPtr();
-		auto pAllocator = (DX12DescriptorSetAllocator*)page->Allocator.GetPtr();
+		auto pAllocator = page->Allocator.GetCastPtr<DX12HeapAllocator>();
 
-		auto result = new DX12DescriptorSetPagedObject();
+		auto result = new DX12PagedHeap();
 		result->OffsetInPage = pAllocator->mDescriptorStride * mDesc.NumDescriptors * index;
 		result->RealObject = page->mGpuHeap;
+		result->RefResources.resize(this->mDesc.NumDescriptors);
 		/*auto hr = device->mDevice->CreateDescriptorHeap(&mDesc, IID_ID3D12DescriptorHeap, (void**)result->RealObject.GetAddressOf());
 		if (hr != S_OK)
 		{
@@ -240,71 +295,56 @@ namespace NxRHI
 
 		return result;
 	}
-	void DX12DescriptorSetCreator::OnAlloc(DX12DescriptorSetCreator::AllocatorType* pAllocator,
-		DX12DescriptorSetCreator::PagedObjectType* obj)
+	void DX12HeapCreator::OnAlloc(DX12HeapCreator::AllocatorType* pAllocator,
+		DX12HeapCreator::PagedObjectType* obj)
 	{
 		//auto name = DebugName + L"_" + std::to_wstring(SerialId++);
 		//obj->RealObject->SetName(name.c_str());
 	}
-	void DX12DescriptorSetCreator::OnFree(DX12DescriptorSetCreator::AllocatorType* pAllocator,
-		DX12DescriptorSetCreator::PagedObjectType* obj)
+	void DX12HeapCreator::OnFree(DX12HeapCreator::AllocatorType* pAllocator,
+		DX12HeapCreator::PagedObjectType* obj)
 	{
-		if (IsDescriptorSet == false)
-			return;
+		/*if (IsDescriptorSet == false)
+			return;*/
 		//obj->RealObject->SetName(DebugName.c_str());
 		
-		auto device = mDeviceRef.GetPtr();
+		/*auto device = mDeviceRef.GetPtr();
 		if (device == nullptr)
 			return;
 
-		auto pDescriptorObj = (DX12DescriptorSetPagedObject*)obj;
-		AutoRef<DX12DescriptorSetPagedObject> nullDescriptor;
-		switch (HeapType)
-		{
-			case D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV:
-				nullDescriptor = device->mNullCBV_SRV_UAV;
-				break;
-			case D3D12_DESCRIPTOR_HEAP_TYPE_SAMPLER:
-				nullDescriptor = device->mNullSampler;
-				break;
-			case D3D12_DESCRIPTOR_HEAP_TYPE_RTV:
-				nullDescriptor = device->mNullRTV;
-				break;
-			case D3D12_DESCRIPTOR_HEAP_TYPE_DSV:
-				nullDescriptor = device->mNullDSV;
-				break;
-			default:
-				break;
-		}
-		if (nullDescriptor == nullptr)
-			return;
-		if (pDescriptorObj == nullDescriptor)
-			return;
+		auto pDescriptorObj = (DX12PagedHeap*)obj;
 		
-		for (int i = 0; i < (int)mDesc.NumDescriptors; i++)
+		for (UINT i = 0; i < mDesc.NumDescriptors; i++)
 		{
-			/*auto dst = pDescriptorObj->GetCpuAddress(i);
-			auto src = nullDescriptor->GetCpuAddress(0);
-			device->mDevice->CopyDescriptorsSimple(1, dst, src, HeapType);*/
-		}
+			AutoRef<DX12PagedHeap> nullDescriptor;
+			
+			if (pDescriptorObj->RefResources[i] != nullptr)
+				nullDescriptor = (DX12PagedHeap*)pDescriptorObj->RefResources[i]->GetNull();
+			if (nullDescriptor == nullptr)
+				continue;
+			if (pDescriptorObj == nullDescriptor)
+				continue;
+
+			nullDescriptor->BindToHeap(device, pDescriptorObj, i, 0, HeapType);
+		}*/
 	}
-	void DX12DescriptorSetCreator::FinalCleanup(MemAlloc::FPage<ObjectType>* page)
+	void DX12HeapCreator::FinalCleanup(MemAlloc::FPage<ObjectType>* page)
 	{
 		auto device = mDeviceRef.GetPtr();
 		if (device == nullptr)
 			return;
 		auto pPage = (DX12DescriptorSetPage*)page;
 	}
-	AutoRef<DX12DescriptorSetPagedObject> DX12DescriptorAllocatorManager::AllocDescriptorSet(DX12GpuDevice* pDevice,
+	DX12HeapHolder* DX12HeapAllocatorManager::AllocDX12Heap(DX12GpuDevice* pDevice,
 		UINT numOfDescriptor, D3D12_DESCRIPTOR_HEAP_TYPE type)
 	{
 		UINT64 key = (((UINT64)type) << 32) | numOfDescriptor;
-		AutoRef<DX12DescriptorSetAllocator> allocator;
+		AutoRef<DX12HeapAllocator> allocator;
 		auto iter = mAllocators.find(key);
 		if (iter == mAllocators.end())
 		{
-			allocator = MakeWeakRef(new DX12DescriptorSetAllocator());
-			allocator->Creator.Type = DX12DescriptorSetCreator::EDescriptorType::Graphics;
+			allocator = MakeWeakRef(new DX12HeapAllocator());
+			allocator->Creator.Type = DX12HeapCreator::EDescriptorType::Graphics;
 			allocator->Creator.IsDescriptorSet = true;
 			allocator->Creator.DebugName = L"DescriptorSet";
 			allocator->Creator.mDesc.Type = type;
@@ -327,7 +367,37 @@ namespace NxRHI
 			allocator = iter->second;
 		}
 
-		return allocator->Alloc<DX12DescriptorSetPagedObject>();
+		return allocator->AllocDX12Heap();
+
+		/*auto result = new DX12HeapHolder();
+		result->Heap = allocator->Alloc<DX12PagedDescriptorHeap>();
+		return result;*/
+	}
+
+	void DX12ResourceDebugMapper::SetDebugMapper(ID3D12Resource* res, const char* name)
+	{
+		VAutoVSLLock lk(mLocker);
+		AutoRef<DX12ResourceDebugInfo> tmp;
+		auto iter = mMapper.find(res);
+		if (iter == mMapper.end())
+		{
+			tmp = MakeWeakRef(new DX12ResourceDebugInfo());
+			mMapper.insert(std::make_pair(res, tmp));
+
+			GFSDK_Aftermath_ResourceHandle afh{};
+			GFSDK_Aftermath_DX12_RegisterResource(res, &afh);
+		}
+		else
+		{
+			tmp = iter->second;
+		}
+		
+		tmp->Name = name;
+	}
+	DX12ResourceDebugMapper* DX12ResourceDebugMapper::Get()
+	{
+		static DX12ResourceDebugMapper obj;
+		return &obj;
 	}
 }
 

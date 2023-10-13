@@ -141,17 +141,33 @@ public:
 	}
 	bool IsValid()
 	{
-		if (Handle == nullptr)
-			return false;
-		if (Handle->mPtrAddress == nullptr)
-			return false;
-		return true;
+		return Handle ? (Handle->mPtrAddress ? true : false) : false;
 	}
-	T* GetPtr() const
+	/*AutoRef<T> GetPtr() const
 	{
 		if (Handle == nullptr)
 			return nullptr;
-		return (T*)Handle->mPtrAddress;
+		return AutoRef<T>((T*)Handle->mPtrAddress);
+	}*/
+	T* GetPtr() const
+	{
+		return (T*)(Handle ? Handle->mPtrAddress : nullptr);
+	}
+	/*template<typename TS>
+	AutoRef<TS> GetCastPtr() const
+	{
+		if (Handle == nullptr)
+			return nullptr;
+		return AutoRef<TS>((TS*)Handle->mPtrAddress);
+	}*/
+	template<typename TS>
+	TS* GetCastPtr() const
+	{
+		return (TS*)GetPtr();
+	}
+	T* GetNakedPtr() const
+	{
+		return (T*)GetPtr();
 	}
 };
 

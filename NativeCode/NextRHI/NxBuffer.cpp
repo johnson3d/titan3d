@@ -7,6 +7,15 @@
 
 NS_BEGIN
 
+template <>
+struct FTypeAssignment<NxRHI::ISrView>
+{
+	static void Assign(NxRHI::ISrView& left, const NxRHI::ISrView& right)
+	{
+		ASSERT(false);
+	}
+};
+
 ENGINE_RTTI_IMPL(ISrView);
 StructBegin(ISrView, EngineNS::NxRHI)
 StructEnd(EngineNS::NxRHI::ISrView, VIUnknown)
@@ -24,14 +33,6 @@ namespace NxRHI
 		/*if (Buffer != nullptr)
 			Buffer->Release();*/
 		IGpuResource::Release();
-	}
-	void IBuffer::PushFlushDirty(IGpuDevice* pDevice)
-	{
-		if (DirtyState == EDirtyState::NotDirty || DirtyState == EDirtyState::WaitFlush)
-			return;
-		DirtyState = EDirtyState::WaitFlush;
-
-		pDevice->PushWaitFlushBuffer(this);
 	}
 	/*bool IBuffer::FetchGpuData(ICommandList* cmd, UINT index, IBlobObject* blob)
 	{

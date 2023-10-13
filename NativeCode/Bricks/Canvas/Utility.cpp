@@ -29,6 +29,22 @@ namespace Canvas
 		return (1.f - Alpha) * A + Alpha * B;
 	}
 
+	v3dxVector2 FPathUtility::CubicInterp(const v3dxVector2& P0, const v3dxVector2& P1, const v3dxVector2& P2, const v3dxVector2& P3, float Alpha)
+	{
+		const float& t = Alpha;
+		const float t2 = t * t;
+		const float _t = 1.f - t;
+		const float _t2 = _t * _t;
+		return _t2 * _t * P0 + 3.f * _t2 * t * P1 + 3.f * _t * t2 * P2 + t2 * t * P3;
+	}
+
+	v3dxVector2 FPathUtility::CubicInterpDeriv(const v3dxVector2& P0, const v3dxVector2& P1, const v3dxVector2& P2, const v3dxVector2& P3, float Alpha)
+	{
+		const float& t = Alpha;
+		const float _t = 1.f - t;
+		return 3.f * _t * _t * (P1 - P0) + 6.f * _t * t * (P2 - P1) + 3.f * t * t * (P3 - P2);
+	}
+
 	float FPathUtility::DotProduct(const v3dxVector2& V0, const v3dxVector2& V1)
 	{
 		return V0.x * V1.x + V0.y * V1.y;
@@ -104,6 +120,7 @@ namespace Canvas
 			return;
 		if (bConvex || NumVerts == 3)
 		{
+			OutInds.reserve(OutInds.size() + NumVerts * 3);
 			for (UINT i = 2; i < NumVerts; i++)
 			{
 				OutInds.push_back(IndOffset);
@@ -113,6 +130,7 @@ namespace Canvas
 		}
 		else
 		{
+			OutInds.reserve(OutInds.size() + NumVerts * 3);
 			const v3dxVector2* Vertices = (v3dxVector2*)InVerts;
 			std::vector<UINT> Candidate;
 			for (UINT i = 0; i < NumVerts; i++)
@@ -166,9 +184,9 @@ namespace Canvas
 	}
 
 	void FPathUtility::SutherlandHodgmanClip(const FRectanglef& Rect,
-		const void* InVerts, UINT NumVerts, 
+		const v3dxVector2* InVerts, UINT NumVerts,
 		std::vector<v3dxVector2>& OutVerts,
-		const void* InUVs, 
+		const v3dxVector2* InUVs,
 		std::vector<v3dxVector2>* OutUVs)
 	{
 		if (NumVerts <= 0 || !Rect.IsValid())
@@ -182,12 +200,12 @@ namespace Canvas
 		{
 			OutVerts.reserve(OutVerts.size() + NumVerts);
 			for(UINT i = 0; i < NumVerts; i++)
-				OutVerts.push_back(((v3dxVector2*)InVerts)[i]);
+				OutVerts.push_back(InVerts[i]);
 			if (bHasUV)
 			{
 				(*OutUVs).reserve((*OutUVs).size() + NumVerts);
 				for (UINT i = 0; i < NumVerts; i++)
-					(*OutUVs).push_back(((v3dxVector2*)InUVs)[i]);
+					(*OutUVs).push_back(InUVs[i]);
 			}
 			return;
 		}

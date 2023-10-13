@@ -32,7 +32,7 @@ namespace NxRHI
 				break;
 			}
 			ASSERT(refRTV->GetHWBuffer() != nullptr);
-			auto dxRtv = (DX12DescriptorSetPagedObject*)refRTV->GetHWBuffer();
+			auto dxRtv = (DX12PagedHeap*)refRTV->GetHWBuffer();
 			mDX11RTVArray[RTVIdx] = dxRtv->GetCpuAddress(0);
 		}
 	}
@@ -66,11 +66,11 @@ namespace NxRHI
 	{
 		Desc = desc;
 		Desc.BufferCount = 3;
-		
+	
 		FFenceDesc fcdesc{};
 		fcdesc.InitValue = 0;
-		PresentFence = MakeWeakRef(device->CreateFence(&fcdesc, "SwapChain Fence"));
-		CurrentFenceTargetValue = 0;
+		FramePresentFence = MakeWeakRef(device->CreateFence(&fcdesc, VStringA_FormatV("SwapChain Frame Fence").c_str()));
+
 		return Create(device, Desc.Width, Desc.Height);
 	}
 	bool DX12SwapChain::Resize(IGpuDevice* device, UINT w, UINT h)
@@ -106,7 +106,7 @@ namespace NxRHI
 			{
 				ASSERT(false);
 			}
-			BackBuffers[i].CreateRtvAndSrv(device);
+			BackBuffers[i].CreateRtvAndSrv(device, i);
 		}
 
 		if (mView3 != nullptr)
@@ -169,9 +169,14 @@ namespace NxRHI
 			{
 				ASSERT(false);
 			}
-			BackBuffers[i].CreateRtvAndSrv(device);
+			BackBuffers[i].CreateRtvAndSrv(device, i);
 		}
-		CurrentBackBuffer = 0;
+		
+		if (mView3 != nullptr)
+			CurrentBackBuffer = mView3->GetCurrentBackBufferIndex();
+		else
+			CurrentBackBuffer = (CurrentBackBuffer + 1) % (UINT)BackBuffers.size();
+
 		return true;
 	}
 	ITexture* DX12SwapChain::GetBackBuffer(UINT index)
@@ -189,34 +194,29 @@ namespace NxRHI
 	}
 	void DX12SwapChain::BeginFrame()
 	{
-		if (PresentFence != nullptr)
+		/*if (FramePresentFence != nullptr)
 		{
-			//PresentFence->Wait(CurrentFenceTargetValue);
-			PresentFence->WaitToExpect();
-		}
+			FramePresentFence->WaitToExpect();
+		}*/
+
+		if (mView3 != nullptr)
+			CurrentBackBuffer = mView3->GetCurrentBackBufferIndex();
+		else
+			CurrentBackBuffer = (CurrentBackBuffer + 1) % (UINT)BackBuffers.size();
+		FramePresentFence->Wait(BackBuffers[CurrentBackBuffer].FenceValue);
 	}
 	void DX12SwapChain::Present(IGpuDevice* device, UINT SyncInterval, UINT Flags)
 	{
-		/*auto pTexture = (DX12Texture*)GetBackBuffer(GetCurrentBackBuffer());
-		
-		mCommandList->ResourceBarrier(1, &CD3DX12_RESOURCE_BARRIER::Transition(CurrentBackBuffer(),
-			D3D12_RESOURCE_STATE_PRESENT, D3D12_RESOURCE_STATE_RENDER_TARGET));*/
-
 		auto hr = mView->Present(SyncInterval, Flags);
 		if (hr != S_OK)
 		{
 			VFX_LTRACE(ELTT_Graphics, "SwapChain::Present");
 			((DX12GpuDevice*)device)->OnDeviceRemoved();
 		}
-		
-		if (mView3 != nullptr)
-			CurrentBackBuffer = mView3->GetCurrentBackBufferIndex();
-		else
-			CurrentBackBuffer = (CurrentBackBuffer + 1) % (UINT)BackBuffers.size();
-		
-		device->GetCmdQueue()->IncreaseSignal(PresentFence, EQueueType::QU_Default);
+		device->GetCmdQueue()->IncreaseSignal(FramePresentFence, EQueueType::QU_Default);
+		BackBuffers[CurrentBackBuffer].FenceValue = FramePresentFence->GetExpectValue();
 	}
-	void DX12SwapChain::FBackBuffer::CreateRtvAndSrv(IGpuDevice* device)
+	void DX12SwapChain::FBackBuffer::CreateRtvAndSrv(IGpuDevice* device, UINT index)
 	{
 		FRtvDesc rtvDesc{};
 		rtvDesc.SetTexture2D();

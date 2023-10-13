@@ -307,6 +307,71 @@ inline unsigned int GetPixelByteWidth(EPixelFormat fmt)
 	}
 }
 
+inline unsigned int GetPixelChannelCount(EPixelFormat fmt)
+{
+	switch (fmt)
+	{
+	case PXF_A8_UNORM:
+	case PXF_R8_UNORM:
+	case PXF_R16_FLOAT:
+	case PXF_R16_UINT:
+	case PXF_R16_SINT:
+	case PXF_R16_UNORM:
+	case PXF_R16_SNORM:
+	case PXF_R32_UINT:
+	case PXF_R32_SINT:
+	case PXF_R32_FLOAT:
+	case PXF_D32_FLOAT:
+	case PXF_D16_UNORM:
+		return 1;
+	case PXF_R16G16_UINT:
+	case PXF_R16G16_SINT:
+	case PXF_R16G16_FLOAT:
+	case PXF_R16G16_UNORM:
+	case PXF_R16G16_SNORM:
+	case PXF_R32G32_UINT:
+	case PXF_R32G32_SINT:
+	case PXF_R32G32_FLOAT:
+	case PXF_D24_UNORM_S8_UINT:
+	case PXF_D32_FLOAT_S8X24_UINT:
+		return 2;
+	case PXF_R32G32B32_UINT:
+	case PXF_R32G32B32_SINT:
+	case PXF_R32G32B32_FLOAT:
+		return 3;
+	case PXF_R8G8B8A8_SINT:
+	case PXF_R8G8B8A8_UINT:
+	case PXF_R8G8B8A8_UNORM:
+	case PXF_R8G8B8A8_SNORM:
+	case PXF_R8G8B8A8_TYPELESS:
+	case PXF_R8G8B8A8_UNORM_SRGB:
+	case PXF_B8G8R8A8_UNORM:
+	case PXF_B8G8R8A8_TYPELESS:
+	case PXF_B8G8R8A8_UNORM_SRGB:
+	case PXF_R16G16B16A16_UINT:
+	case PXF_R16G16B16A16_SINT:
+	case PXF_R16G16B16A16_FLOAT:
+	case PXF_R16G16B16A16_UNORM:
+	case PXF_R16G16B16A16_SNORM:
+	case PXF_R32G32B32A32_UINT:
+	case PXF_R32G32B32A32_SINT:
+	case PXF_R32G32B32A32_FLOAT:
+	case PXF_B10G10R10A2_TYPELESS:
+	case PXF_R10G10B10A2_SINT:
+	case PXF_R10G10B10A2_UINT:
+	case PXF_R10G10B10A2_SNORM:
+	case PXF_R10G10B10A2_UNORM:
+	case PXF_R10G10B10A2_TYPELESS:
+	case PXF_B10G10R10A2_SINT:
+	case PXF_B10G10R10A2_UINT:
+	case PXF_B10G10R10A2_SNORM:
+	case PXF_B10G10R10A2_UNORM:
+		return 4;
+	default:
+		return 0;
+	}
+}
+
 inline const char* GetPixelFormatString(EPixelFormat fmt)
 {
 	switch (fmt)
@@ -651,6 +716,7 @@ inline const char* GetPixelFormatString(EPixelFormat fmt)
 		return "PXF_UNKNOWN";
 	}
 }
+
 template <typename T>
 class FSpan
 {

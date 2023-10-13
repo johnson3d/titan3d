@@ -29,6 +29,7 @@
     <ClCompile Include="$(MSBuildThisFileDirectory)v3dxTransform.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)v3dxDBox3.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)v3dxVector4.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)v3dxThickness.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="$(MSBuildThisFileDirectory)v3dxBezier.h" />
@@ -83,6 +84,7 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)v3dxVector4.inl.h">
       <Filter>inl</Filter>
     </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)v3dxThickness.h" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="inl">

@@ -126,6 +126,8 @@ namespace NxRHI
 	}
 	void IGraphicDraw::Commit(ICommandList* cmdlist, bool bRefResource)
 	{
+		auto device = cmdlist->GetGpuDevice();
+		device->CheckDeviceThread();
 		if (Mesh == nullptr || ShaderEffect == nullptr)
 			return;
 
@@ -252,6 +254,8 @@ namespace NxRHI
 
 	void IComputeDraw::Commit(ICommandList* cmdlist, bool bRefResource)
 	{
+		auto device = cmdlist->GetGpuDevice();
+		device->CheckDeviceThread();
 		if (mEffect == nullptr)
 			return;
 
@@ -333,14 +337,17 @@ namespace NxRHI
 	}
 	void ICopyDraw::Commit(ICommandList* cmdlist, bool bRefResource)
 	{
-		cmdlist->GetCmdRecorder()->mRefBuffers.push_back(mDest);
-		cmdlist->GetCmdRecorder()->mRefBuffers.push_back(mSrc);
+		auto device = cmdlist->GetGpuDevice();
+		device->CheckDeviceThread();
+		/*cmdlist->GetCmdRecorder()->UseResource(mDest);
+		cmdlist->GetCmdRecorder()->UseResource(mSrc);*/
 
 		/*auto saveDst = mDest->GpuState;
 		auto saveSrc = mSrc->GpuState;
 		mDest->TransitionTo(cmdlist, EGpuResourceState::GRS_CopyDst);
 		mSrc->TransitionTo(cmdlist, EGpuResourceState::GRS_CopySrc);*/
 
+		cmdlist->BeginEvent("CopyDraw");
 		switch (Mode)
 		{
 			case EngineNS::NxRHI::CDM_Buffer2Buffer:
@@ -382,6 +389,7 @@ namespace NxRHI
 				ASSERT(false);
 				break;
 		}
+		cmdlist->EndEvent();
 
 		/*mDest->TransitionTo(cmdlist, saveDst);
 		mSrc->TransitionTo(cmdlist, saveSrc);*/

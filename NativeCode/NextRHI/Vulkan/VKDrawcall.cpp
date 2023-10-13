@@ -257,7 +257,7 @@ namespace NxRHI
 		if (Mesh == nullptr || ShaderEffect == nullptr)
 			return;
 
-		auto device = (VKGpuDevice*)cmdlist->mDevice.GetPtr();
+		auto device = cmdlist->mDevice.GetCastPtr<VKGpuDevice>();
 
 		UpdateGpuDrawState(cmdlist->GetGpuDevice(), cmdlist, cmdlist->mCurrentFrameBuffers->mRenderPass);
 		cmdlist->SetGraphicsPipeline(GpuDrawState);

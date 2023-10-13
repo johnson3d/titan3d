@@ -1,6 +1,7 @@
 #pragma once
 #include "../Base/IUnknown.h"
 #include "../Base/thread/vfxcritical.h"
+#include "../Base/thread/vfxthread.h"
 #include "NxEvent.h"
 #include "NxRHIDefine.h"
 
@@ -58,6 +59,8 @@ namespace NxRHI
 	class IComputeEffect;
 	class IGpuBufferData;
 	class IGpuScope;
+	class FVertexArray;
+	class FGeomMesh;
 
 	enum TR_ENUM(SV_EnumNoFlags)
 		ERhiType
@@ -224,6 +227,8 @@ namespace NxRHI
 		virtual IComputeDraw* CreateComputeDraw();
 		virtual ICopyDraw* CreateCopyDraw();
 
+		virtual FVertexArray* CreateVertexArray();
+		virtual FGeomMesh* CreateGeomMesh();
 		virtual IGpuScope* CreateGpuScope() = 0;
 		inline const FGpuResourceAlignment* GetGpuResourceAlignment() const{
 			return &mGpuResourceAlignment;
@@ -248,15 +253,21 @@ namespace NxRHI
 		
 		AutoRef<FGpuPipelineManager>	mPipelineManager;
 		AutoRef<IFence>					mFrameFence;
+		
 		bool				EnableImmExecute = false;
+		void*				mDeviceThreadId = nullptr;
+		bool				IsSyncStage = false;
+		inline void CheckDeviceThread()
+		{
+#if DEBUG
+			ASSERT(IsSyncStage || mDeviceThreadId == vfxThread::GetCurrentThreadId());
+#endif
+		}
 	public:
 		typedef bool (FGpuPostEvent)(IGpuDevice* device, UINT64 completed);
 		std::vector<std::function<FGpuPostEvent>>	mPostEvents;
 		std::vector<std::function<FGpuPostEvent>>	mTickingPostEvents;
-		std::vector<AutoRef<IBuffer>>				mWaitFlushBuffers;
-		void PushWaitFlushBuffer(IBuffer* buffer);
 		VSLLock mPostEventLocker;
-		VSLLock mWaitFlushLocker;
 		void PushPostEvent(const std::function<FGpuPostEvent>& evt)
 		{
 			VAutoVSLLock lk(mPostEventLocker);
@@ -277,6 +288,7 @@ namespace NxRHI
 				});
 		}
 		virtual void TickPostEvents();
+		void WaitFrameFence(int beforeFrame = 3);
 	};
 	class TR_CLASS()
 		ICmdQueue : public IWeakReference
@@ -295,17 +307,13 @@ namespace NxRHI
 		virtual void ReleaseIdleCmdlist(ICommandList* cmd) = 0;
 		virtual UINT64 Flush(EQueueType type) = 0;
 		
-		inline ICommandList* GetFramePostCmdList() {
-			return mFramePost;
-		}
 		inline UINT64 IncreaseSignal(IFence* fence, EQueueType type)
 		{
 			return fence->IncreaseExpect(this, 1, type);
 		}
 	public:
 		VCritical						mGraphicsQueueLocker;
-		AutoRef<ICommandList>			mFramePost;
-
+		
 		UINT64							mDefaultQueueFrequence = 0;
 		UINT64							mComputeQueueFrequence = 0;
 		UINT64							mTransferQueueFrequence = 0;

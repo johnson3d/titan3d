@@ -13,6 +13,7 @@ namespace NxRHI
 	{
 	public:
 		AutoRef<ID3D12CommandAllocator>		mAllocator;
+		virtual void ResetGpuDraws() override;
 	};
 	class DX12CommandList : public ICommandList
 	{
@@ -25,6 +26,7 @@ namespace NxRHI
 		virtual bool IsRecording() const override {
 			return mIsRecording;
 		}
+		virtual void SetDebugName(const char* name) override;
 		virtual void SetShader(IShader* shader) override;
 		virtual void SetCBV(EShaderType type, const FShaderBinder* binder, ICbView* buffer) override;
 		virtual void SetSrv(EShaderType type, const FShaderBinder* binder, ISrView* view) override;
@@ -66,7 +68,7 @@ namespace NxRHI
 		void Commit(DX12CmdQueue* cmdQueue, EQueueType type);
 		inline DX12GpuDevice* GetDX12Device()
 		{
-			return (DX12GpuDevice*)mDevice.GetPtr();
+			return (DX12GpuDevice*)mDevice.GetNakedPtr();
 		}
 		AutoRef<ID3D12GraphicsCommandList>	mContext;
 		AutoRef<ID3D12GraphicsCommandList2> mContext2;
@@ -108,7 +110,7 @@ namespace NxRHI
 		TWeakRefHandle<DX12GpuDevice>	mDeviceRef;
 		std::string					mName;
 		AutoRef<ID3D12QueryHeap>	mQueryHeap;
-		AutoRef<FGpuMemory>			mResultBuffer;
+		AutoRef<FGpuMemHolder>	mResultBuffer;
 		//AutoRef<IFence>				mFence;
 	};
 }

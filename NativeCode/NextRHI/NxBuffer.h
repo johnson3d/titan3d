@@ -134,39 +134,6 @@ namespace NxRHI
 			GRS_Present,
 	};
 
-	class TR_CLASS()
-		IGpuResource : public IResourceBase
-	{
-	public:
-		ENGINE_RTTI(IGpuResource);
-		virtual long AddRef() override
-		{
-			return IResourceBase::AddRef();
-		}
-
-		virtual void Release() override
-		{
-			IResourceBase::Release();
-		}
-		virtual void* GetHWBuffer() {
-			return nullptr;
-		}
-		virtual UINT GetFingerPrint() const{
-			return 0;
-		}
-		virtual void SetFingerPrint(UINT fp) {
-			
-		}
-		virtual void SetDebugName(const char* name) {
-			TagName = name;
-		}
-		const char* GetDebugName() const {
-			return TagName.c_str();
-		}
-
-	public:
-		std::string		TagName;
-	};
 	struct TR_CLASS(SV_LayoutStruct = 8)
 		FMappedSubResource
 	{
@@ -231,10 +198,10 @@ namespace NxRHI
 			GpuState = state;
 		}
 		virtual bool FetchGpuData(UINT subRes, IBlobObject* blob) = 0;
-		virtual void UpdateGpuData(UINT subRes, void* pData, const FSubResourceFootPrint* footPrint) {
+		virtual void UpdateGpuData(ICommandList* cmd, UINT subRes, void* pData, const FSubResourceFootPrint* footPrint) {
 
 		}
-		void UpdateGpuDataSimple(UINT offset, void* pData, UINT size, UINT subRes = 0) {
+		void UpdateGpuDataSimple(ICommandList* cmd, UINT offset, void* pData, UINT size, UINT subRes = 0) {
 			FSubResourceFootPrint fp{};
 			fp.SetDefault();
 			fp.Format = EPixelFormat::PXF_A8_UNORM;
@@ -244,7 +211,7 @@ namespace NxRHI
 			fp.X = offset;
 			fp.RowPitch = size;
 			fp.TotalSize = size;
-			UpdateGpuData(subRes, pData, &fp);
+			UpdateGpuData(cmd, subRes, pData, &fp);
 		}
 		virtual bool Map(UINT index, FMappedSubResource* res, bool forRead) = 0;
 		virtual void Unmap(UINT index) = 0;
@@ -258,12 +225,12 @@ namespace NxRHI
 		ENGINE_RTTI(IBuffer);
 		virtual bool Map(UINT index, FMappedSubResource * res, bool forRead) override = 0;
 		virtual void Unmap(UINT index) override = 0;
-		void Flush2Device(void* pBuffer, UINT Size)
+		void Flush2Device(ICommandList* cmd, void* pBuffer, UINT Size)
 		{
-			UpdateGpuDataSimple(0, pBuffer, Size, 0);
+			UpdateGpuDataSimple(cmd, 0, pBuffer, Size, 0);
 		}
 		//virtual bool FetchGpuData(UINT subRes, IBlobObject * blob) override;
-		virtual void UpdateGpuData(UINT subRes, void* pData, const FSubResourceFootPrint * footPrint) override = 0;
+		virtual void UpdateGpuData(ICommandList* cmd, UINT subRes, void* pData, const FSubResourceFootPrint * footPrint) override = 0;
 		virtual void SetDebugName(const char* name) override {}
 		virtual bool FetchGpuData(UINT index, IBlobObject* blob) override
 		{
@@ -328,17 +295,16 @@ namespace NxRHI
 			DirtyState = EDirtyState::Dirty;
 			return &MapBuffer[binder.Offset];
 		}
-		void FlushDirty(bool clear = false)
+		void FlushDirty(ICommandList* cmd, bool clear = false)
 		{
 			if (DirtyState == EDirtyState::NotDirty)
 				return;
 			DirtyState = EDirtyState::NotDirty;
 			if (MapBuffer.size() > 0)
-				Flush2Device(&MapBuffer[0], (UINT)MapBuffer.size());
+				Flush2Device(cmd, &MapBuffer[0], (UINT)MapBuffer.size());
 			if (clear)
 				MapBuffer.clear();
 		}
-		void PushFlushDirty(IGpuDevice* pDevice);
 		enum EDirtyState : char
 		{
 			Dirty = 0,
@@ -511,9 +477,9 @@ namespace NxRHI
 		{
 			return Buffer->GetVarPtrToWrite(binder, size);
 		}
-		void FlushDirty(bool clear = false)
+		void FlushDirty(ICommandList* cmd, bool clear = false)
 		{
-			Buffer->FlushDirty(clear);
+			Buffer->FlushDirty(cmd, clear);
 		}
 	public:
 		AutoRef<FShaderBinder>	ShaderBinder;
@@ -541,9 +507,9 @@ namespace NxRHI
 		IVbView : public IGpuResource
 	{
 	public:
-		void UpdateGpuData(UINT offset, void* pData, UINT size)
+		void UpdateGpuData(ICommandList* cmd, UINT offset, void* pData, UINT size)
 		{
-			Buffer->UpdateGpuDataSimple(offset, pData, size, 0);
+			Buffer->UpdateGpuDataSimple(cmd, offset, pData, size, 0);
 		}
 	public:
 		FVbvDesc			Desc{};
@@ -572,9 +538,9 @@ namespace NxRHI
 		IIbView : public IGpuResource
 	{
 	public:
-		void UpdateGpuData(UINT offset, void* pData, UINT size)
+		void UpdateGpuData(ICommandList* cmd, UINT offset, void* pData, UINT size)
 		{
-			Buffer->UpdateGpuDataSimple(offset, pData, size, 0);
+			Buffer->UpdateGpuDataSimple(cmd, offset, pData, size, 0);
 		}
 	public:
 		FIbvDesc			Desc{};

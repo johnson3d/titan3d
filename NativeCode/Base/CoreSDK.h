@@ -34,6 +34,13 @@ typedef void (*FOnShaderTranslated)(EngineNS::NxRHI::FShaderDesc* shaderDesc);
 TR_CALLBACK(SV_CallConvention = System.Runtime.InteropServices.CallingConvention.Cdecl)
 typedef void (* FAssertEvent)(const void* str, const void* file, int line);
 
+namespace NxRHI
+{
+	class IGpuDevice;
+}
+TR_CALLBACK(SV_CallConvention = System.Runtime.InteropServices.CallingConvention.Cdecl)
+typedef void (*FOnGpuDeviceRemoved)(NxRHI::IGpuDevice* device);
+
 class TR_CLASS(SV_LayoutStruct = 8)
 	CoreSDK
 {
@@ -73,6 +80,11 @@ public:
 	static void SetMemFreeCallBack(FOnNativeMemFree cb);
 	static void SetMemLeakCallBack(FOnNativeMemLeak cb);
 	static void SetMemDebugInfo(void* memory, const char* info);
+
+	static FOnGpuDeviceRemoved OnGpuDeviceRemoved;
+	static void SetOnGpuDeviceRemovedCallBack(FOnGpuDeviceRemoved fn) {
+		OnGpuDeviceRemoved = fn;
+	}
 
 	static FCreateManagedObject CreateManagedObject;
 	static void SetCreateManagedObjectFunction(FCreateManagedObject fn) {

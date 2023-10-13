@@ -12,13 +12,13 @@ namespace Canvas
 		FTFont : public IWeakReference
 	{
 	public:
-		FTWord* GetWord(int x, int y, UINT c, Canvas::FCanvasVertex vert[4]) const;
+		FTWord* GetWord(int x, int y, UINT c, UInt16 transformIndex, Canvas::FCanvasVertex vert[4]) const;
 		v3dxVector2 GetTextSize(const WCHAR * text) const
 		{
 			v3dxVector2 result(0, 0);
 			for (const WCHAR* c = text; c[0] != '\0'; c++)
 			{
-				auto word = GetWord(0, 0, c[0], nullptr);
+				auto word = GetWord(0, 0, c[0], 0, nullptr);
 				result.x += word->Advance.x;
 				if (word->TexY + word->PixelHeight > result.y)
 					result.y = (float)(word->TexY + word->PixelHeight);

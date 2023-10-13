@@ -13,8 +13,7 @@ namespace NxRHI
 	{
 		std::lock_guard<std::mutex> lck(mLocker);
 		ExpectValue += num;
-		auto completed = this->GetCompletedValue();
-		ASSERT(completed <= ExpectValue);
+		ASSERT(this->GetCompletedValue() < ExpectValue);
 		Signal(queue, ExpectValue, type);
 
 		return ExpectValue;

@@ -40,6 +40,7 @@ namespace Canvas
 		Cmd_Close,
 			Cmd_MoveTo,
 			Cmd_LineTo,
+			Cmd_CubicTo,
 			Cmd_SCCWArcTo,
 			Cmd_SCWArcTo,
 			Cmd_LCCWArcTo,
@@ -66,7 +67,7 @@ namespace Canvas
 
 	namespace Path
 	{
-		const UINT GPathCmdCoord[Cmd_Number] = {0, 2, 2, 3, 3, 3, 3};
+		const UINT GPathCmdCoord[Cmd_Number] = {0, 2, 2, 6, 5, 5, 5, 5 };
 
 		class TR_CLASS()
 			FPathStyle : public VIUnknown
@@ -151,11 +152,14 @@ namespace Canvas
 
 			void MoveTo(const v3dxVector2& P);
 			void LineTo(const v3dxVector2& P);
+			void CubicTo(const v3dxVector2& C0, const v3dxVector2& C1, const v3dxVector2& P1);
 			void ArcTo(const v3dxVector2& P, float Radius, bool IsCCW = true, bool IsSmall = true);
+			void EllipseTo(const v3dxVector2& P, float Rh, float Rv, float Rot, bool IsCCW = true, bool IsSmall = true);
 			void Close();
 
 			void PushRect(const v3dxVector2& Min, const v3dxVector2& Max, float Round /* Round corner radius */);
 			void PushCircle(const v3dxVector2& Center, float Radius);
+			void PushEllipse(const v3dxVector2& Center, float Rh, float Rv, float Rot);
 
 		private:
 			void Clear();
@@ -194,7 +198,9 @@ namespace Canvas
 
 		private:
 			bool LineToInternal(const v3dxVector2& P0, const v3dxVector2& P1, float& Distance, FPathGroup& Group);
+			bool CubicToInternal(const v3dxVector2& P0, const v3dxVector2& P1, const v3dxVector2& P2, const v3dxVector2& P3, float& Distance, FPathGroup& Group);
 			bool ArcToInternal(const v3dxVector2& P0, const v3dxVector2& P1, float R, bool IsCCW, bool IsSmall, float& Distance, FPathGroup& Group);
+			bool EllipseToInternal(const v3dxVector2& P0, const v3dxVector2& P1, float Rh, float Rv, float Rot, bool IsCCW, bool IsSmall, float& Distance, FPathGroup& Group);
 			
 			void MiterJointInternal(const FPathPoint& P0, const FPathPoint& P1);
 			void RoundJointInternal(const FPathPoint& P0, const FPathPoint& P1);

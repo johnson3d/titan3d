@@ -63,6 +63,20 @@ struct v3dVector4_t
 			float				b;
 			float				a;
 		};
+		struct
+		{
+			float				left;
+			float				top;
+			float				right;
+			float				bottom;
+		};
+		struct
+		{
+			float				topleft;
+			float				topright;
+			float				bottomright;
+			float				bottomleft;
+		};
 	};	
 };
 

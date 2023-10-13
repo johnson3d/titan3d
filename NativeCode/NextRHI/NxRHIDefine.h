@@ -155,6 +155,19 @@ namespace NxRHI
 		BYTE			BitNumBlue = 8;
 		BYTE			BitNumAlpha = 8;
 		UINT			Unused = 0;
+
+		TR_FUNCTION()
+		unsigned int PixelByteWidth()
+		{
+			return GetPixelByteWidth(Format);
+		}
+
+		TR_FUNCTION()
+		unsigned int PixelChannelCount()
+		{
+			return GetPixelChannelCount(Format);
+		}
+		
 	};
 	enum TR_ENUM(SV_EnumNoFlags = true)
 		EVertexStreamType : UINT32
@@ -348,9 +361,53 @@ namespace NxRHI
 		UINT Back;
 	};
 
+	class TR_CLASS()
+		IGpuResource : public IResourceBase
+	{
+	public:
+		ENGINE_RTTI(IGpuResource);
+		~IGpuResource();
+		virtual long AddRef() override
+		{
+			return IResourceBase::AddRef();
+		}
+
+		virtual void Release() override
+		{
+			IResourceBase::Release();
+		}
+		virtual void* GetHWBuffer() {
+			return nullptr;
+		}
+		virtual UINT GetFingerPrint() const {
+			return 0;
+		}
+		virtual void SetFingerPrint(UINT fp) {
+
+		}
+		virtual void SetDebugName(const char* name) {
+			//TagName = name;
+		}
+		const char* GetDebugName() const {
+			return "";
+			//return TagName.c_str();
+		}
+		inline int UnsafeGetCmdRefCount() const {
+			return CmdRefCount;
+		}
+		inline void AddCmdRefCount() {
+			CmdRefCount++;
+		}
+		inline void ReleaseCmdRefCount() {
+			CmdRefCount--;
+		}
+	public:
+		std::atomic<int>			CmdRefCount;
+	};
+
 	class IGpuDevice;
 	struct FGpuHeapSizedPool;
-	struct IGpuPooledMemAllocator;
+	struct IPagedGpuMemAllocator;
 	struct IGpuHeap : public VIUnknown
 	{
 		virtual UINT64 GetGPUVirtualAddress() = 0;
@@ -374,9 +431,28 @@ namespace NxRHI
 			return GpuHeap->GetHWBuffer();
 		}
 	};
+	struct FGpuMemHolder : public IGpuResource
+	{
+		AutoRef<FGpuMemory>	GpuMem;
+		~FGpuMemHolder()
+		{
+			if (GpuMem != nullptr)
+			{
+				GpuMem->FreeMemory();
+				GpuMem = nullptr;
+			}
+		}
+		inline UINT64 GetGPUVirtualAddress()
+		{
+			return GpuMem->GetGPUVirtualAddress();
+		}
+		inline void* GetHWBuffer() {
+			return GpuMem->GetHWBuffer();
+		}
+	};
 	struct IGpuMemAllocator : public IWeakReference
 	{
-		virtual AutoRef<FGpuMemory> Alloc(IGpuDevice* device, UINT64 size) = 0;
+		virtual AutoRef<FGpuMemory> Alloc(IGpuDevice* device, UINT64 size, const char* name) = 0;
 		virtual void Free(FGpuMemory* memory) = 0;
 	};
 	struct FPooledGpuMemory : public FGpuMemory
@@ -388,26 +464,33 @@ namespace NxRHI
 	struct FGpuHeapSizedPool : public IWeakReference
 	{//pool for different size;
 		~FGpuHeapSizedPool();
-		TWeakRefHandle<IGpuPooledMemAllocator> HostAllocator;
+		TWeakRefHandle<IPagedGpuMemAllocator> HostAllocator;
 		UINT64 ChunkSize;
 		FPooledGpuMemory* FreePoint = nullptr;
-		FGpuMemory* Alloc(IGpuDevice* device, IGpuPooledMemAllocator* allocator, UINT64 size);
+		FGpuMemory* Alloc(IGpuDevice* device, IPagedGpuMemAllocator* allocator, UINT64 size, const char* name);
 		void Free(FGpuMemory* memory);
 	};
-	struct IGpuPooledMemAllocator : public IGpuMemAllocator
+	struct IPagedGpuMemAllocator : public IGpuMemAllocator
 	{
 		VSLLock				mLocker;
 		std::map<UINT64, AutoRef<FGpuHeapSizedPool>>	Pools;
 		std::vector<AutoRef<IGpuHeap>>	mGpuHeaps;
 	public:
-		~IGpuPooledMemAllocator();
-		virtual AutoRef<FGpuMemory> Alloc(IGpuDevice* device, UINT64 size) override;
+		~IPagedGpuMemAllocator();
+		virtual AutoRef<FGpuMemory> Alloc(IGpuDevice* device, UINT64 size, const char* name) override;
 		virtual void Free(FGpuMemory* memory) override;
+
+		inline FGpuMemHolder* AllocGpuMem(IGpuDevice* device, UINT64 size, const char* name)
+		{
+			auto result = new FGpuMemHolder();
+			result->GpuMem = Alloc(device, size, name);
+			return result;
+		}
 
 		virtual UINT GetBatchCount(UINT64 size) {
 			return 64;
 		}
-		virtual IGpuHeap* CreateGpuHeap(IGpuDevice* device, UINT64 size, UINT count) = 0;
+		virtual IGpuHeap* CreateGpuHeap(IGpuDevice* device, UINT64 size, UINT count, const char* name) = 0;
 	};
 
 	struct FAddressRange
@@ -419,7 +502,7 @@ namespace NxRHI
 		}
 	};
 	struct FLinearGpuHeapPool;
-	struct IGpuLinearMemAllocator;
+	struct ILinearGpuMemAllocator;
 	struct FLinearGpuMemory : public FGpuMemory
 	{
 		TWeakRefHandle<FLinearGpuHeapPool> HostPool;
@@ -429,24 +512,24 @@ namespace NxRHI
 	struct FLinearGpuHeapPool : public IWeakReference
 	{
 		~FLinearGpuHeapPool();
-		TWeakRefHandle<IGpuLinearMemAllocator> HostAllocator;
+		TWeakRefHandle<ILinearGpuMemAllocator> HostAllocator;
 		std::vector<FAddressRange>	FreeRanges;
 		AutoRef<IGpuHeap>			GpuHeap;
 		UINT64						MaxSize = 0;
 		FLinearGpuMemory* Alloc(IGpuDevice* device, UINT64 size);
 		void Free(FLinearGpuMemory* memory);
 	};
-	struct IGpuLinearMemAllocator : public IGpuMemAllocator
+	struct ILinearGpuMemAllocator : public IGpuMemAllocator
 	{
 		VSLLock				mLocker;
 		std::vector<AutoRef<FLinearGpuHeapPool>>		Pools;
 		UINT64				PoolSize = 1024 * 1204 * 8;//8 mbytes per block;
 	public:
-		~IGpuLinearMemAllocator();
-		virtual AutoRef<FGpuMemory> Alloc(IGpuDevice* device, UINT64 size) override;
+		~ILinearGpuMemAllocator();
+		virtual AutoRef<FGpuMemory> Alloc(IGpuDevice* device, UINT64 size, const char* name) override;
 		virtual void Free(FGpuMemory* memory) override;
 
-		virtual IGpuHeap* CreateGpuHeap(IGpuDevice* device, UINT64 size) {
+		virtual IGpuHeap* CreateGpuHeap(IGpuDevice* device, UINT64 size, const char* name) {
 			return nullptr;
 		}
 

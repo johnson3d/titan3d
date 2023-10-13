@@ -7,6 +7,11 @@ NS_BEGIN
 
 namespace NxRHI
 {
+	IGpuResource::~IGpuResource()
+	{
+		ASSERT(CmdRefCount == 0);
+	}
+
 	void FSubresourceBox::SetWhole(ITexture* texture)
 	{
 		Left = 0;
@@ -32,13 +37,13 @@ namespace NxRHI
 			}
 		}
 	}
-	IGpuPooledMemAllocator::~IGpuPooledMemAllocator()
+	IPagedGpuMemAllocator::~IPagedGpuMemAllocator()
 	{
 		VAutoVSLLock lk(mLocker);
 		Pools.clear();
 		mGpuHeaps.clear();
 	}
-	AutoRef<FGpuMemory> IGpuPooledMemAllocator::Alloc(IGpuDevice* device, UINT64 size)
+	AutoRef<FGpuMemory> IPagedGpuMemAllocator::Alloc(IGpuDevice* device, UINT64 size, const char* name)
 	{
 		VAutoVSLLock lk(mLocker);
 
@@ -55,9 +60,9 @@ namespace NxRHI
 		{
 			pool = iter->second;
 		}
-		return MakeWeakRef(pool->Alloc(device, this, size));
+		return MakeWeakRef(pool->Alloc(device, this, size, name));
 	}
-	void IGpuPooledMemAllocator::Free(FGpuMemory* memory)
+	void IPagedGpuMemAllocator::Free(FGpuMemory* memory)
 	{
 		VAutoVSLLock lk(mLocker);
 		auto pool = ((FPooledGpuMemory*)memory)->HostPool.GetPtr();
@@ -74,13 +79,13 @@ namespace NxRHI
 			save->Release();
 		}
 	}
-	FGpuMemory* FGpuHeapSizedPool::Alloc(IGpuDevice* device, IGpuPooledMemAllocator* allocator, UINT64 size)
+	FGpuMemory* FGpuHeapSizedPool::Alloc(IGpuDevice* device, IPagedGpuMemAllocator* allocator, UINT64 size, const char* name)
 	{
 		ASSERT(ChunkSize == size);
 		UINT BatchCount = allocator->GetBatchCount(ChunkSize);
 		if (FreePoint == nullptr)
 		{
-			auto heap = MakeWeakRef(allocator->CreateGpuHeap(device, ChunkSize, BatchCount));
+			auto heap = MakeWeakRef(allocator->CreateGpuHeap(device, ChunkSize, BatchCount, name));
 			allocator->mGpuHeaps.push_back(heap);
 			FPooledGpuMemory* first = nullptr;
 			FPooledGpuMemory* cur = nullptr;
@@ -221,11 +226,11 @@ namespace NxRHI
 			FreeRanges.push_back(memory->AddressRange);
 		}
 	}
-	IGpuLinearMemAllocator::~IGpuLinearMemAllocator()
+	ILinearGpuMemAllocator::~ILinearGpuMemAllocator()
 	{
 		Pools.clear();
 	}
-	AutoRef<FGpuMemory> IGpuLinearMemAllocator::Alloc(IGpuDevice* device, UINT64 size)
+	AutoRef<FGpuMemory> ILinearGpuMemAllocator::Alloc(IGpuDevice* device, UINT64 size, const char* name)
 	{
 		VAutoVSLLock lk(mLocker);
 
@@ -239,7 +244,7 @@ namespace NxRHI
 		}
 		auto pool = MakeWeakRef(new FLinearGpuHeapPool());
 		pool->HostAllocator.FromObject(this);
-		pool->GpuHeap = MakeWeakRef(this->CreateGpuHeap(device, PoolSize));
+		pool->GpuHeap = MakeWeakRef(this->CreateGpuHeap(device, PoolSize, name));
 		FAddressRange range;
 		range.Begin = 0;
 		range.End = PoolSize;
@@ -247,7 +252,7 @@ namespace NxRHI
 		Pools.push_back(pool);
 		return MakeWeakRef(pool->Alloc(device, size));
 	}
-	void IGpuLinearMemAllocator::Free(FGpuMemory* memory)
+	void ILinearGpuMemAllocator::Free(FGpuMemory* memory)
 	{
 		VAutoVSLLock lk(mLocker);
 		auto pLinearMem = (FLinearGpuMemory*)memory;
@@ -259,9 +264,9 @@ namespace NxRHI
 		pLinearMem->GpuHeap = nullptr;
 	}
 
-	void IGpuLinearMemAllocator::TestAlloc()
+	void ILinearGpuMemAllocator::TestAlloc()
 	{
-		IGpuLinearMemAllocator allocator{};
+		ILinearGpuMemAllocator allocator{};
 		int AllocTimes = 100;
 		int MaxSize = 256;
 		int ReAllocTimes = 20;
@@ -270,7 +275,7 @@ namespace NxRHI
 		for (int i = 0; i < AllocTimes; i++)
 		{
 			auto size = rand() % MaxSize;
-			alives.push_back(allocator.Alloc(nullptr, size));
+			alives.push_back(allocator.Alloc(nullptr, size, nullptr));
 		}
 		while(true)
 		{
@@ -284,7 +289,7 @@ namespace NxRHI
 			for (int i = 0; i < ReAllocTimes; i++)
 			{
 				auto size = rand() % MaxSize;
-				alives.push_back(allocator.Alloc(nullptr, size));
+				alives.push_back(allocator.Alloc(nullptr, size, nullptr));
 			}
 
 			auto poolNum = (UINT)allocator.Pools.size();
@@ -301,7 +306,7 @@ namespace NxRHI
 	{
 		IGpuLinearMemAllocator_Test()
 		{
-			IGpuLinearMemAllocator::TestAlloc();
+			ILinearGpuMemAllocator::TestAlloc();
 		}
 	};// dummyObj;
 }

@@ -17,22 +17,30 @@ NS_BEGIN
 
 namespace NxRHI
 {
+	void DX12CmdRecorder::ResetGpuDraws()
+	{
+		mAllocator->Reset();
+		//mCmdList.FromObject(nullptr);
+		ICmdRecorder::ResetGpuDraws();
+	}
 	DX12CommandList::DX12CommandList()
 	{
 		
 	}
 	DX12CommandList::~DX12CommandList()
 	{
-		if (GetDX12Device() == nullptr)
-			return;
-
 		auto cmdRecorder = GetDX12CmdRecorder();
 		if (cmdRecorder != nullptr)
 		{
 			ASSERT(cmdRecorder->mDrawcallArray.size()==0);
 			//cmdRecorder->mAllocator->Reset();
 			cmdRecorder->ResetGpuDraws();
-			GetDX12Device()->mCmdAllocatorManager->UnsafeDirectFree(cmdRecorder);
+			/*if (GetDX12Device() != nullptr)
+			{
+				auto mgr = GetDX12Device()->mCmdAllocatorManager;
+				if (mgr != nullptr)
+					mgr->UnsafeDirectFree(cmdRecorder);
+			}*/
 		}
 	}
 	bool DX12CommandList::Init(DX12GpuDevice* device)
@@ -66,7 +74,16 @@ namespace NxRHI
 		mCommitFence = MakeWeakRef(device->CreateFence(&desc, "Dx12Cmdlist Commit fence"));
 		mContext->Close();
 		mIsRecording = false;
+
+		SetDebugName("Default");
 		return true;
+	}
+	void DX12CommandList::SetDebugName(const char* name) 
+	{
+		mDebugName = name;
+
+		std::wstring n = StringHelper::strtowstr(mDebugName);
+		mContext->SetName(n.c_str());
 	}
 	ICmdRecorder* DX12CommandList::BeginCommand()
 	{
@@ -84,18 +101,17 @@ namespace NxRHI
 		}
 		else
 		{
-			ASSERT(mCmdRecorder->mDrawcallArray.size() == 0);
+			mCmdRecorder->ResetGpuDraws();
 		}
 		
-		ASSERT(mCmdRecorder->mDrawcallArray.size() == 0);
-		////mCmdRecorder->ResetGpuDraws();
-		GetDX12CmdRecorder()->mAllocator->Reset();
-		//hr = mContext->Reset(GetDX12CmdRecorder()->mAllocator, nullptr);
-		//ASSERT(hr == S_OK);
-		//mContext->Close();
+		ASSERT(mCmdRecorder->GetDrawcallNumber() == 0);
 		hr = mContext->Reset(GetDX12CmdRecorder()->mAllocator, nullptr);
 		ASSERT(hr == S_OK);
 		mIsRecording = true;
+
+		std::wstring n = StringHelper::strtowstr(mDebugName);
+		mContext->SetName(n.c_str());
+
 		return mCmdRecorder;
 	}
 	void DX12CommandList::EndCommand()
@@ -112,13 +128,69 @@ namespace NxRHI
 		std::wstring n = StringHelper::strtowstr(mDebugName);
 		mContext->SetName(n.c_str());
 	}
+	void DX12CommandList::Commit(DX12CmdQueue* cmdQueue, EQueueType type)
+	{
+		ASSERT(mIsRecording == false);
+		if (GetDX12CmdRecorder() == nullptr)
+			return;
+		//BeginEvent(mDebugName.c_str());
+		auto device = mDevice.GetCastPtr<DX12GpuDevice>();
+		//device->EnableImmExecute = true;
+		if (device->EnableImmExecute)
+		{
+			/*device->mDeviceRemovedCallback = [this]()
+			{
+				auto testSrv = GetCmdRecorder()->FindGpuResourceByTagName("HeightMapSRV");
+				auto count = GetCmdRecorder()->CountGpuResourceByTagName("HeightMapSRV");
+				auto& buffers = GetCmdRecorder()->mRefBuffers;
+				for (auto i : buffers)
+				{
+					if (i->TagName == "HeightMapSRV")
+					{
+						auto num = i.UnsafeConvertTo<DX12Texture>()->mGpuResource->AddRef();
+						if (num < 2)
+						{
+							ASSERT(false);
+						}
+					}
+					else if (i->TagName == "InstantSRV")
+					{
+						auto num = i.UnsafeConvertTo<DX12Buffer>()->mGpuMemory->AddRef();
+						if (num < 2)
+						{
+							ASSERT(false);
+						}
+					}
+				}
+			};*/
+			cmdQueue->Flush(type);//copy to
+		}
+
+		if (GetCmdRecorder()->GetDrawcallNumber() > 0)
+		{
+			//todo: select d3d12queue
+			cmdQueue->mCmdQueue->ExecuteCommandLists(1, (ID3D12CommandList**)&mContext);
+		}
+
+		//EndEvent();
+		if (device->EnableImmExecute)
+		{
+			cmdQueue->Flush(type);
+			device->mDeviceRemovedCallback = nullptr;
+		}
+
+		auto targetValue = cmdQueue->IncreaseSignal(mCommitFence, type);
+		GetDX12Device()->mCmdAllocatorManager->Free(GetDX12CmdRecorder(), targetValue, mCommitFence);
+
+		mCmdRecorder = nullptr;
+	}
 	bool DX12CommandList::BeginPass(IFrameBuffers* fb, const FRenderPassClears* passClears, const char* name)
 	{
 		ASSERT(mIsRecording);
 		mDebugName = name;
 		BeginEvent(name);
 		mCurrentFrameBuffers = fb;
-		GetCmdRecorder()->mRefBuffers.push_back(fb);
+		GetCmdRecorder()->UseResource(fb);
 		
 		for (UINT i = 0; i < fb->mRenderPass->Desc.NumOfMRT; i++)
 		{
@@ -293,7 +365,7 @@ namespace NxRHI
 		ASSERT(mIsRecording);
 		if (buffer == nullptr)
 			return;
-		buffer->Buffer->PushFlushDirty(mDevice.GetPtr());
+		buffer->FlushDirty(this);
 		//mContext->SetGraphicsRootConstantBufferView(binder->DescriptorIndex, ((DX12Buffer*)buffer)->mGpuResource->GetGPUVirtualAddress());
 
 #ifndef DESCRIPTOR_IN_DRAWCALL
@@ -321,9 +393,9 @@ namespace NxRHI
 		if (type == EShaderType::SDT_PixelShader)
 			view->Buffer->TransitionTo(this, (EGpuResourceState)(EGpuResourceState::GRS_SrvPS));
 		else if (type == EShaderType::SDT_VertexShader)
-			view->Buffer->TransitionTo(this, (EGpuResourceState)(EGpuResourceState::GRS_SrvNonPS));
+			view->Buffer->TransitionTo(this, (EGpuResourceState)(EGpuResourceState::GRS_GenericRead));
 		else
-			view->Buffer->TransitionTo(this, (EGpuResourceState)(EGpuResourceState::GRS_SrvNonPS));
+			view->Buffer->TransitionTo(this, (EGpuResourceState)(EGpuResourceState::GRS_GenericRead));
 #ifndef DESCRIPTOR_IN_DRAWCALL
 		auto handle = ((DX12SrView*)view)->mView;
 		auto device = GetDX12Device()->mDevice;
@@ -376,6 +448,7 @@ namespace NxRHI
 	}
 	void DX12CommandList::SetVertexBuffer(UINT slot, IVbView* buffer, UINT32 Offset, UINT Stride)
 	{
+		ASSERT(false);
 		ASSERT(mIsRecording);
 		D3D12_VERTEX_BUFFER_VIEW tmp{};
 		tmp.StrideInBytes = Stride;
@@ -390,6 +463,7 @@ namespace NxRHI
 	void DX12CommandList::SetIndexBuffer(IIbView* buffer, bool IsBit32)
 	{
 		ASSERT(mIsRecording);
+		GetCmdRecorder()->UseResource(buffer);
 		D3D12_INDEX_BUFFER_VIEW tmp{};
 		if (IsBit32)
 		{
@@ -457,7 +531,7 @@ namespace NxRHI
 	void DX12CommandList::IndirectDrawIndexed(EPrimitiveType topology, IBuffer* indirectArg, UINT indirectArgOffset, IBuffer* countBuffer)
 	{
 		ASSERT(mIsRecording);
-		auto device = (DX12GpuDevice*)mDevice.GetPtr();
+		auto device = mDevice.GetCastPtr<DX12GpuDevice>();
 		if (mCurrentCmdSig == nullptr)
 			return;
 
@@ -466,12 +540,12 @@ namespace NxRHI
 		UINT dpCount = 0;
 		mContext->IASetPrimitiveTopology(PrimitiveTypeToDX12(topology, 0, &dpCount));
 		auto dx12Buffer = (DX12Buffer*)indirectArg;
-		auto offset = (UINT)dx12Buffer->mGpuMemory->Offset + indirectArgOffset;
+		auto offset = (UINT)dx12Buffer->mGpuMemory->GpuMem->Offset + indirectArgOffset;
 
 		if (countBuffer != nullptr)
 		{
 			auto dx12CountBuffer = (DX12Buffer*)countBuffer;
-			auto countBufferOffset = (UINT)dx12CountBuffer->mGpuMemory->Offset;
+			auto countBufferOffset = (UINT)dx12CountBuffer->mGpuMemory->GpuMem->Offset;
 
 			mContext->ExecuteIndirect(mCurrentCmdSig, 1024, (ID3D12Resource*)dx12Buffer->GetHWBuffer(), offset,
 				(ID3D12Resource*)dx12CountBuffer->GetHWBuffer(), countBufferOffset);
@@ -492,13 +566,13 @@ namespace NxRHI
 		ASSERT(mIsRecording);
 		//mContext->ExecuteIndirect()
 		//mContext->DispatchIndirect(((DX12Buffer*)indirectArg)->mBuffer, indirectArgOffset);
-		auto device = (DX12GpuDevice*)mDevice.GetPtr();
+		auto device = mDevice.GetCastPtr<DX12GpuDevice>();
 		if (mCurrentCmdSig == nullptr)
 			return;
 		indirectArgOffset += mCurrentIndirectOffset;
 
 		auto dx12Buffer = (DX12Buffer*)indirectArg;
-		auto offset = (UINT)dx12Buffer->mGpuMemory->Offset + indirectArgOffset;
+		auto offset = (UINT)dx12Buffer->mGpuMemory->GpuMem->Offset + indirectArgOffset;
 		auto saved = dx12Buffer->GetGpuResourceState();
 		dx12Buffer->TransitionTo(this, EGpuResourceState::GRS_UavIndirect);
 		mContext->ExecuteIndirect(mCurrentCmdSig, 1, (ID3D12Resource*)dx12Buffer->GetHWBuffer(), offset, nullptr, 0);
@@ -625,6 +699,13 @@ namespace NxRHI
 		tmp.Transition.pResource = pTarGpuResource;
 		tmp.Transition.StateBefore = GpuStateToDX12(srcAccess);
 		tmp.Transition.StateAfter = GpuStateToDX12(dstAccess);
+		//if (D3D12_RESOURCE_STATE_UNORDERED_ACCESS == tmp.Transition.StateBefore && D3D12_RESOURCE_STATE_INDIRECT_ARGUMENT == tmp.Transition.StateAfter)
+		{
+			if (this->mDebugName == "PostCmdList")
+			{
+				int xx = 0;
+			}
+		}
 		if (tmp.Transition.StateBefore == tmp.Transition.StateAfter)
 		{
 			if (dstAccess == GRS_Uav)
@@ -759,6 +840,9 @@ namespace NxRHI
 
 		target->TransitionTo(this, tarSave);
 		source->TransitionTo(this, srcSave);
+
+		//make a gpu crash
+		//((ID3D12Resource*)((DX12Buffer*)source)->mGpuMemory->GpuHeap->GetHWBuffer())->Release();
 	}
 	void DX12CommandList::CopyTextureToBuffer(IBuffer* target, const FSubResourceFootPrint* footprint, ITexture* source, UINT subRes)
 	{
@@ -819,58 +903,6 @@ namespace NxRHI
 		}
 	}
 	
-	void DX12CommandList::Commit(DX12CmdQueue* cmdQueue, EQueueType type)
-	{
-		ASSERT(mIsRecording == false);
-		if (GetDX12CmdRecorder() == nullptr)
-			return;
-		//BeginEvent(mDebugName.c_str());
-		auto device = (DX12GpuDevice*)mDevice.GetPtr();
-		if (device->EnableImmExecute)
-		{
-			device->mDeviceRemovedCallback = [this]()
-			{
-				auto testSrv = GetCmdRecorder()->FindGpuResourceByTagName("HeightMapSRV");
-				auto count = GetCmdRecorder()->CountGpuResourceByTagName("HeightMapSRV");
-				auto& buffers = GetCmdRecorder()->mRefBuffers;
-				for (auto i : buffers)
-				{
-					if (i->TagName == "HeightMapSRV")
-					{
-						auto num = i.UnsafeConvertTo<DX12Texture>()->mGpuResource->AddRef();
-						if (num < 2)
-						{
-							ASSERT(false);
-						}
-					}
-					else if (i->TagName == "InstantSRV")
-					{
-						auto num = i.UnsafeConvertTo<DX12Buffer>()->mGpuMemory->AddRef();
-						if (num < 2)
-						{
-							ASSERT(false);
-						}
-					}
-				}
-			};
-			cmdQueue->Flush(type);//copy to
-		}
-		
-		//todo: select d3d12queue
-		cmdQueue->mCmdQueue->ExecuteCommandLists(1, (ID3D12CommandList**)&mContext);
-		
-		//EndEvent();
-		if (device->EnableImmExecute)
-		{
-			cmdQueue->Flush(type);
-			device->mDeviceRemovedCallback = nullptr;
-		}
-
-		auto targetValue = cmdQueue->IncreaseSignal(mCommitFence, type);
-		GetDX12Device()->mCmdAllocatorManager->Free(GetDX12CmdRecorder(), targetValue, mCommitFence);
-		
-		mCmdRecorder = nullptr;
-	}
 	template<>
 	struct AuxGpuResourceDestroyer<AutoRef<FGpuMemory>>
 	{
@@ -885,7 +917,6 @@ namespace NxRHI
 		if (device == nullptr)
 			return;
 
-		device->DelayDestroy(mResultBuffer);
 		mResultBuffer = nullptr;
 	}
 	bool DX12GpuScope::Init(DX12GpuDevice* device)
@@ -920,7 +951,7 @@ namespace NxRHI
 		resDesc.Flags = D3D12_RESOURCE_FLAG_NONE;
 		resState = D3D12_RESOURCE_STATE_COPY_DEST;
 		
-		mResultBuffer = DX12GpuDefaultMemAllocator::Alloc(device, &resDesc, &properties, resState, L"GpuScopeResult");
+		mResultBuffer = MakeWeakRef(DX12DefaultGpuMemAllocator::AllocGpuMem(device, &resDesc, &properties, resState, "GpuScopeResult"));
 
 		/*FFenceDesc fcDesc{};
 		mFence = MakeWeakRef(device->CreateFence(&fcDesc, "DX12GpuScope"));*/
@@ -933,9 +964,9 @@ namespace NxRHI
 	}
 	UINT64 DX12GpuScope::GetDeltaTime()
 	{
-		auto pTarGpuResource = ((DX12GpuHeap*)mResultBuffer->GpuHeap)->mGpuResource;
+		auto pTarGpuResource = ((DX12GpuHeap*)mResultBuffer->GpuMem->GpuHeap)->mGpuResource;
 		D3D12_RANGE range{};
-		range.Begin = mResultBuffer->Offset;
+		range.Begin = mResultBuffer->GpuMem->Offset;
 		range.End = range.Begin + 2 * sizeof(UINT64);
 		BYTE* pData = nullptr;
 		if (pTarGpuResource->Map(0, &range, (void**)&pData) != S_OK)
@@ -957,7 +988,8 @@ namespace NxRHI
 		auto cmd = (DX12CommandList*)cmdlist;
 		cmd->mContext->EndQuery(mQueryHeap, D3D12_QUERY_TYPE_TIMESTAMP, 1);
 
-		auto pTarGpuResource = ((DX12GpuHeap*)mResultBuffer->GpuHeap)->mGpuResource;
+		cmd->GetCmdRecorder()->UseResource(mResultBuffer);
+		auto pTarGpuResource = ((DX12GpuHeap*)mResultBuffer->GpuMem->GpuHeap)->mGpuResource;
 		cmd->mContext->ResolveQueryData(mQueryHeap, D3D12_QUERY_TYPE_TIMESTAMP, 0, 2, pTarGpuResource, 0);
 		
 		/*D3D12_RESOURCE_BARRIER tmp{};

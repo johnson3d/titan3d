@@ -74,6 +74,7 @@ FCreateManagedObject CoreSDK::CreateManagedObject = nullptr;
 FFreeManagedObjectGCHandle CoreSDK::FreeManagedObjectGCHandle = nullptr;
 FGetManagedObjectFromGCHandle CoreSDK::GetManagedObjectFromGCHandle = nullptr;
 FOnShaderTranslated CoreSDK::OnShaderTranslated = nullptr;
+FOnGpuDeviceRemoved CoreSDK::OnGpuDeviceRemoved = nullptr;
 
 int CoreSDK::GetPixelFormatByteWidth(EPixelFormat fmt)
 {

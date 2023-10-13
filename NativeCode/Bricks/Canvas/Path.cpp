@@ -125,7 +125,7 @@ namespace Canvas
 		void FPath::PushCmd(EPathCmdType CmdType, const void* Args, UINT Count)
 		{
 			CmdList.push_back(CmdType);
-			ASSERT(Count >= GPathCmdCoord[CmdType]);
+			ASSERT(Count == GPathCmdCoord[CmdType]);
 			for (UINT i = 0; i < GPathCmdCoord[CmdType]; i++)
 				Params.push_back(((float*)Args)[i]);
 		}
@@ -228,7 +228,23 @@ namespace Canvas
 			Params.push_back(P.y);
 		}
 
+		void FPath::CubicTo(const v3dxVector2& C0, const v3dxVector2& C1, const v3dxVector2& P1)
+		{
+			CmdList.push_back(Cmd_CubicTo);
+			Params.push_back(C0.x);
+			Params.push_back(C0.y);
+			Params.push_back(C1.x);
+			Params.push_back(C1.y);
+			Params.push_back(P1.x);
+			Params.push_back(P1.y);
+		}
+
 		void FPath::ArcTo(const v3dxVector2& P, float Radius, bool IsCCW, bool IsSmall)
+		{
+			EllipseTo(P, Radius, Radius, 0, IsCCW, IsSmall);
+		}
+
+		void FPath::EllipseTo(const v3dxVector2& P, float Rh, float Rv, float Rot, bool IsCCW, bool IsSmall)
 		{
 			if (!IsSmall && IsCCW)
 				CmdList.push_back(Cmd_LCCWArcTo);
@@ -240,7 +256,9 @@ namespace Canvas
 				CmdList.push_back(Cmd_LCWArcTo);
 			Params.push_back(P.x);
 			Params.push_back(P.y);
-			Params.push_back(Radius);
+			Params.push_back(Rh);
+			Params.push_back(Rv);
+			Params.push_back(Rot);
 		}
 
 		void FPath::Close()
@@ -278,10 +296,19 @@ namespace Canvas
 
 		void FPath::PushCircle(const v3dxVector2& Center, float Radius)
 		{
-			v3dxVector2 Start = Center + v3dxVector2(Radius, 0);
-			MoveTo(Start);
-			ArcTo(Center - v3dxVector2(Radius, 0), Radius);
-			ArcTo(Start, Radius);
+			v3dxVector2 ToStart(Radius, 0);
+			MoveTo(Center + ToStart);
+			ArcTo(Center - ToStart, Radius);
+			ArcTo(Center + ToStart, Radius);
+			Close();
+		}
+
+		void FPath::PushEllipse(const v3dxVector2& Center, float Rh, float Rv, float Rot)
+		{
+			v3dxVector2 ToStart(Rh * std::cos(Rot), Rh * std::sin(Rot));
+			MoveTo(Center + ToStart);
+			EllipseTo(Center - ToStart, Rh, Rv, Rot);
+			EllipseTo(Center + ToStart, Rh, Rv, Rot);
 			Close();
 		}
 		
@@ -353,6 +380,21 @@ namespace Canvas
 					Prev = End;
 
 				} break;
+				case Cmd_CubicTo:
+				{
+					float x1 = *Iter++;
+					float y1 = *Iter++;
+					float x2 = *Iter++;
+					float y2 = *Iter++;
+					float x3 = *Iter++;
+					float y3 = *Iter++;
+					v3dxVector2 P1 = v3dxVector2(x1, y1);
+					v3dxVector2 P2 = v3dxVector2(x2, y2);
+					v3dxVector2 P3 = v3dxVector2(x3, y3);
+					CubicToInternal(Prev, P1, P2, P3, Distance, CurGroup);
+					Prev = P3;
+
+				} break;
 				case Cmd_SCCWArcTo:
 				case Cmd_SCWArcTo:
 				case Cmd_LCCWArcTo:
@@ -360,11 +402,16 @@ namespace Canvas
 				{
 					float x = *Iter++;
 					float y = *Iter++;
-					float r = *Iter++;
+					float rh = *Iter++;
+					float rv = *Iter++;
+					float rot = *Iter++;
 					bool IsCCW = Cmd == Cmd_SCCWArcTo || Cmd == Cmd_LCCWArcTo;
 					bool IsSmall = Cmd == Cmd_SCCWArcTo || Cmd == Cmd_SCWArcTo;
 					v3dxVector2 End = v3dxVector2(x, y);
-					ArcToInternal(Prev, End, r, IsCCW, IsSmall, Distance, CurGroup);
+					if (rh == rv)
+						ArcToInternal(Prev, End, rh, IsCCW, IsSmall, Distance, CurGroup);
+					else
+						EllipseToInternal(Prev, End, rh, rv, rot, IsCCW, IsSmall, Distance, CurGroup);
 					Prev = End;
 
 				} break;
@@ -395,6 +442,7 @@ namespace Canvas
 					continue;
 
 				FPathPoly Poly;
+				Poly.Vertices.reserve(Group.End - Group.Begin);
 				for (UINT i = Group.Begin; i < Group.End; i++)
 					Poly.Vertices.push_back(Points[i].Position);
 				Polygons.push_back(std::move(Poly));
@@ -604,6 +652,7 @@ namespace Canvas
 				NumVerts++;
 
 			Poly.Vertices.resize(2 * NumVerts);
+			Poly.Indices.reserve(6 * NumVerts);
 			for (UINT i = 0, j = 2 * NumVerts - 1; i < NumVerts; i++, j--)
 			{
 				const FPathPoint& Point = *(Begin + i);
@@ -684,6 +733,43 @@ namespace Canvas
 			return true;
 		}
 
+		bool FPath::CubicToInternal(const v3dxVector2& P0, const v3dxVector2& P1, const v3dxVector2& P2, const v3dxVector2& P3, float& Distance, FPathGroup& Group)
+		{
+			static constexpr UINT Subdivision = 100;
+			static constexpr float Delta = 1.f / (float)Subdivision;
+
+			const bool bGroupBegin = Group.Begin == Points.size();
+			Points.reserve(Points.size() + Subdivision + 1);
+			v3dxVector2 Dir0 = FPathUtility::Normalize(P1 - P0);
+			if (bGroupBegin)
+				Points.push_back(FPathPoint(P0, Dir0, Distance, Point_Start));
+			else
+			{
+				Points[Group.End - 1].Flag = Point_Joint;
+				Points.push_back(FPathPoint(P0, Dir0, Distance, Point_Joint));
+			}
+
+			v3dxVector2 PrevPos = P0;
+			for (UINT i = 1; i < Subdivision; i++)
+			{
+				float Alpha = Delta * i;
+				v3dxVector2 Pos = FPathUtility::CubicInterp(P0, P1, P2, P3, Alpha);
+				v3dxVector2 Tan = FPathUtility::CubicInterpDeriv(P0, P1, P2, P3, Alpha);
+				v3dxVector2 Dir = FPathUtility::Normalize(Tan);
+
+				Distance += FPathUtility::GetDistance(Pos, PrevPos);
+				Points.push_back(FPathPoint(Pos, Dir, Distance, Point_None));
+				PrevPos = Pos;
+			}
+			Distance += FPathUtility::GetDistance(P3, PrevPos);
+			v3dxVector2 Dir1 = FPathUtility::Normalize(P3 - P2);
+			Points.push_back(FPathPoint(P3, Dir1, Distance, Point_End));
+
+			Group.End = (UINT)Points.size();
+
+			return true;
+		}
+
 		bool FPath::ArcToInternal(const v3dxVector2& P0, const v3dxVector2& P1, float R, bool IsCCW, bool IsSmall, float& Distance, FPathGroup& Group)
 		{
 			v3dxVector2 N01;
@@ -707,15 +793,15 @@ namespace Canvas
 				Forward1 = -Forward1;
 			}
 
+#if FAST_ARC
 			if (Group.Begin == Points.size())
-				Points.push_back(FPathPoint( P0, Forward0, Distance, Point_Start ));
+				Points.push_back(FPathPoint(P0, Forward0, Distance, Point_Start));
 			else
 			{
 				Points[Group.End - 1].Flag = Point_Joint;
-				Points.push_back(FPathPoint( P0, Forward0, Distance, Point_Joint ));
+				Points.push_back(FPathPoint(P0, Forward0, Distance, Point_Joint));
 			}
 
-#if FAST_ARC
 			float Arc0, Arc1;
 			UINT Index0 = GArcLUT.GetLUTIndex(Radial0, IsCCW, Arc0);
 			UINT Index1 = GArcLUT.GetLUTIndex(Radial1, IsCCW, Arc1);
@@ -760,8 +846,19 @@ namespace Canvas
 				? (Rad0 < Rad1 ? Rad1 - Rad0 : FPathUtility::TWO_PI + Rad1 - Rad0)
 				: (Rad0 > Rad1 ? Rad1 - Rad0 : -FPathUtility::TWO_PI + Rad1 - Rad0);
 			const float AbsDelta = std::abs(Delta);
-			const UINT NumSub = (const UINT)std::ceil(AbsDelta / FArcLUT::DELTA);
+			const UINT NumSub = (UINT)std::ceil(AbsDelta / FArcLUT::DELTA);
 			const float Sub = Delta / NumSub;
+
+			const bool bGroupBegin = Group.Begin == Points.size();
+			Points.reserve(Points.size() + NumSub + 1);
+			if (bGroupBegin)
+				Points.push_back(FPathPoint(P0, Forward0, Distance, Point_Start));
+			else
+			{
+				Points[Group.End - 1].Flag = Point_Joint;
+				Points.push_back(FPathPoint(P0, Forward0, Distance, Point_Joint));
+			}
+
 			for (UINT i = 1; i < NumSub; i++)
 			{
 				float Rad = Rad0 + Sub * i;
@@ -776,6 +873,160 @@ namespace Canvas
 			Points.push_back(FPathPoint(P1, Forward1, Distance, Point_End));
 #endif
 			Group.End = (UINT)Points.size();
+
+			return true;
+		}
+
+		/* Given: Points (x0, y0) and (x1, y1)
+			* Return: TRUE if a solution exists, FALSE otherwise
+			* Circle centers are written to (cx0, cy0) and (cx1, cy1)
+			* (See OpenVG Spec Apendix A)
+			*/
+		static bool findUnitCircles(float x0, float y0, float x1, float y1,
+			float* cx0, float* cy0, float* cx1, float* cy1)
+		{
+			/* Compute differences and averages */
+			float dx = x0 - x1;
+			float dy = y0 - y1;
+			float xm = (x0 + x1) / 2;
+			float ym = (y0 + y1) / 2;
+			float dsq, disc, s, sdx, sdy;
+			/* Solve for intersecting unit circles */
+			dsq = dx * dx + dy * dy;
+			if (dsq == 0.0)
+				return false; /* Points are coincident */
+			disc = 1.0f / dsq - 1.0f / 4.0f;
+			if (disc < 0.0f)
+				return false; /* Points are too far apart */
+			s = sqrt(disc);
+			sdx = s * dx; sdy = s * dy;
+			*cx0 = xm + sdy;
+			*cy0 = ym - sdx;
+			*cx1 = xm - sdy;
+			*cy1 = ym + sdx;
+			return true;
+		}
+
+		/* Given: Ellipse parameters rh, rv, rot (in degrees),
+			* endpoints (x0, y0) and (x1, y1)
+			* Return: TRUE if a solution exists, FALSE otherwise
+			* Ellipse centers are written to (cx0, cy0) and (cx1, cy1)
+			* (See OpenVG Spec Apendix A)
+			*/
+		static bool findEllipses(float rh, float rv, float rot,
+			float x0, float y0, float x1, float y1,
+			float* cx0, float* cy0, float* cx1, float* cy1)
+		{
+			float COS, SIN, x0p, y0p, x1p, y1p, pcx0, pcy0, pcx1, pcy1;
+			/* Pre?\compute rotation matrix entries */
+			COS = cos(rot); SIN = sin(rot);
+			/* Transform (x0, y0) and (x1, y1) into unit space */
+			/* using (inverse) rotate, followed by (inverse) scale */
+			x0p = (x0 * COS + y0 * SIN) / rh;
+			y0p = (-x0 * SIN + y0 * COS) / rv;
+			x1p = (x1 * COS + y1 * SIN) / rh;
+			y1p = (-x1 * SIN + y1 * COS) / rv;
+			if (!findUnitCircles(x0p, y0p, x1p, y1p,
+				&pcx0, &pcy0, &pcx1, &pcy1)) {
+				return false;
+			}
+			/* Transform back to original coordinate space */
+			/* using (forward) scale followed by (forward) rotate */
+			pcx0 *= rh; pcy0 *= rv;
+			pcx1 *= rh; pcy1 *= rv;
+			*cx0 = pcx0 * COS - pcy0 * SIN;
+			*cy0 = pcx0 * SIN + pcy0 * COS;
+			*cx1 = pcx1 * COS - pcy1 * SIN;
+			*cy1 = pcx1 * SIN + pcy1 * COS;
+			return true;
+		}
+
+		bool FPath::EllipseToInternal(const v3dxVector2& P0, const v3dxVector2& P1, float Rh, float Rv, float Rot, bool IsCCW, bool IsSmall, float& Distance, FPathGroup& Group)
+		{
+			v3dxVector2 C0, C1;
+			if (Rh < 1e-6f || Rv < 1e-6f ||
+				!findEllipses(Rh, Rv, Rot, P0.x, P0.y, P1.x, P1.y, 
+				&C0.x, &C0.y, &C1.x, &C1.y))
+			{
+				return LineToInternal(P0, P1, Distance, Group);
+			}
+			v3dxVector2 Center = IsCCW == IsSmall ? C0 : C1;
+			v3dxVector2 L0 = P0 - Center;
+			v3dxVector2 L1 = P1 - Center;
+			float tmp;
+			FPathUtility::SafeNormalize(L0, L0, tmp);
+			FPathUtility::SafeNormalize(L1, L1, tmp);
+			float Rad0 = std::atan2f(L0.y, L0.x);
+			float Rad1 = std::atan2f(L1.y, L1.x);
+			if (IsCCW)
+			{
+				if (Rad1 < Rad0)
+					Rad1 += FPathUtility::TWO_PI;
+			}
+			else
+			{
+				if (Rad1 > Rad0)
+					Rad1 -= FPathUtility::TWO_PI;
+			}
+			const float Delta = Rad1 - Rad0;
+			const float AbsDelta = std::abs(Delta);
+			const UINT NumSub = (UINT)std::ceil(AbsDelta / FArcLUT::DELTA);
+			const float Sub = Delta / NumSub;
+			const float CosRot = std::cos(Rot);
+			const float SinRot = std::sin(Rot);
+
+			const bool bGroupBegin = Group.Begin == Points.size();
+			const UINT StartInd = (UINT)Points.size();
+
+			Points.reserve(Points.size() + NumSub + 1);
+			v3dxVector2 Prev = P0;
+			for (UINT i = 0; i <= NumSub; i++)
+			{
+				float Rad = (Rad0 - Rot) + Sub * i;
+				const float CosRad = std::cos(Rad);
+				const float SinRad = std::sin(Rad);
+
+				v3dxVector2 P;
+				if (i == 0)
+					P = P0;
+				else if (i == NumSub)
+					P = P1;
+				else
+					P = v3dxVector2(
+						Center.x + Rh * CosRad * CosRot - Rv * SinRad * SinRot,
+						Center.y + Rh * CosRad * SinRot + Rv * SinRad * CosRot
+					);
+				
+				v3dxVector2 Radial(CosRad / Rh, SinRad / Rv);
+				Radial = v3dxVector2(
+					Radial.x * CosRot - Radial.y * SinRot,
+					Radial.x * SinRot + Radial.y * CosRot
+				);
+				v3dxVector2 Forward = -FPathUtility::GetRight(FPathUtility::Normalize(Radial));
+				if (!IsCCW)
+					Forward = -Forward;
+
+				if (i != 0)
+				{
+					Distance += FPathUtility::GetDistance(P, Prev);
+					Prev = P;
+				}
+				Points.push_back(FPathPoint(P, Forward, Distance, Point_None));
+			}
+
+			if (bGroupBegin)
+			{
+				Points[Group.Begin].Flag = Point_Start;
+			}
+			else
+			{
+				Points[StartInd].Flag = Point_Joint;
+				Points[Group.End - 1].Flag = Point_Joint;
+			}
+
+			Group.End = (UINT)Points.size();
+			Points[Group.End - 1].Flag = Point_End;
+
 			return true;
 		}
 
@@ -799,10 +1050,9 @@ namespace Canvas
 			v3dxVector2 ClimaxDir = FPathUtility::Normalize(Right0 + Right1);
 
 			FPathPoly Poly;
-			Poly.Vertices.reserve(Poly.Vertices.size() + 4);
+			Poly.Vertices.reserve(4);
 			if (CrossValue > 0)
 			{
-				Poly.UVs.reserve(Poly.UVs.size() + 4);
 				Poly.Vertices.push_back(Pos0);
 				Poly.Vertices.push_back(Pos0 + Right0 * HalfWidth);
 				Poly.Vertices.push_back(Pos0 + ClimaxDir * HalfWidth / CosHalf);
@@ -818,7 +1068,7 @@ namespace Canvas
 
 			if (Style->UvAlongPath)
 			{
-				Poly.UVs.reserve(Poly.UVs.size() + 4);
+				Poly.UVs.reserve(4);
 				auto UvOutline = v3dxVector2(P0.Distance, CrossValue > 0 ? Style->PathWidth : 0);
 				Poly.UVs.push_back(v3dxVector2(P0.Distance, HalfWidth));
 				Poly.UVs.push_back(UvOutline);
@@ -826,7 +1076,7 @@ namespace Canvas
 				Poly.UVs.push_back(UvOutline);
 			}
 
-			Poly.Indices.reserve(Poly.Indices.size() + 6);
+			Poly.Indices.reserve(6);
 			Poly.Indices.push_back(0);
 			Poly.Indices.push_back(1);
 			Poly.Indices.push_back(2);
@@ -855,11 +1105,11 @@ namespace Canvas
 			}
 
 			FPathPoly Poly;
-			Poly.Vertices.push_back(Pos0);
-			Poly.Vertices.push_back(Pos0 + Radial0 * HalfWidth);
 #if FAST_ARC
 			UINT Index0 = GArcLUT.GetLUTIndex(Radial0);
 			UINT Index1 = GArcLUT.GetLUTIndex(Radial1);
+			Poly.Vertices.push_back(Pos0);
+			Poly.Vertices.push_back(Pos0 + Radial0 * HalfWidth);
 			if (Index0 != Index1)
 			{
 				UINT LastInd = Index0;
@@ -872,24 +1122,30 @@ namespace Canvas
 					Poly.Vertices.push_back(Pos0 + GArcLUT.LUT[NextInd] * HalfWidth);
 				}
 			}
+			Poly.Vertices.push_back(Pos0 + Radial1 * HalfWidth);
 #else
 			const float Rad0 = std::atan2(Radial0.y, Radial0.x);
 			const float Rad1 = std::atan2(Radial1.y, Radial1.x);
 			const float Delta = IsCCW
 				? (Rad0 < Rad1 ? Rad1 - Rad0 : FPathUtility::TWO_PI + Rad1 - Rad0)
 				: (Rad0 > Rad1 ? Rad1 - Rad0 : -FPathUtility::TWO_PI + Rad1 - Rad0);
-			const UINT NumSub = (const UINT)std::ceil(std::abs(Delta) / FArcLUT::DELTA);
+			const UINT NumSub = (UINT)std::ceil(std::abs(Delta) / FArcLUT::DELTA);
 			const float Sub = Delta / NumSub;
+
+			Poly.Vertices.reserve(NumSub + 2);
+			Poly.Vertices.push_back(Pos0);
+			Poly.Vertices.push_back(Pos0 + Radial0 * HalfWidth);
 			for (UINT i = 1; i < NumSub; i++)
 			{
 				float Rad = Rad0 + Sub * i;
 				v3dxVector2 Radial = v3dxVector2(std::cos(Rad), std::sin(Rad));
 				Poly.Vertices.push_back(Pos0 + Radial * HalfWidth);
 			}
-#endif
 			Poly.Vertices.push_back(Pos0 + Radial1 * HalfWidth);
+#endif
 
 			const UINT NumVerts = Poly.GetSize();
+			Poly.Indices.reserve(NumVerts * 3);
 			for (UINT i = 2; i < NumVerts; i++)
 			{
 				Poly.Indices.push_back(0);
@@ -899,7 +1155,7 @@ namespace Canvas
 
 			if (Style->UvAlongPath)
 			{
-				const UINT NumVerts = Poly.GetSize();
+				Poly.UVs.reserve(NumVerts);
 				Poly.UVs.push_back(v3dxVector2(P0.Distance, HalfWidth));
 				v3dxVector2 OutlineUV(P0.Distance, IsCCW ? Style->PathWidth : 0.f);
 				for (UINT i = 1; i < NumVerts; i++)
@@ -920,6 +1176,7 @@ namespace Canvas
 				return;
 
 			FPathPoly Poly;
+			Poly.Vertices.reserve(3);
 			if (CrossValue > 0)
 			{
 				Poly.Vertices.push_back(Pos0);
@@ -935,12 +1192,14 @@ namespace Canvas
 
 			if (Style->UvAlongPath)
 			{
+				Poly.UVs.reserve(3);
 				v3dxVector2 UvOutline = v3dxVector2(P0.Distance, CrossValue > 0 ? Style->PathWidth : 0);
 				Poly.UVs.push_back(v3dxVector2(P0.Distance, HalfWidth));
 				Poly.UVs.push_back(UvOutline);
 				Poly.UVs.push_back(UvOutline);
 			}
 
+			Poly.Indices.reserve(3);
 			Poly.Indices.push_back(0);
 			Poly.Indices.push_back(1);
 			Poly.Indices.push_back(2);
@@ -967,6 +1226,11 @@ namespace Canvas
 			{
 			case Point_Single:
 			{
+				Poly.Vertices.reserve(FArcLUT::NUM_FASTLUT);
+				if (UvAlongPath)
+				{
+					Poly.UVs.reserve(FArcLUT::NUM_FASTLUT);
+				}
 				for (UINT i = 0; i < FArcLUT::NUM_FASTLUT; i++)
 				{
 					v3dxVector2 Extent = GArcLUT.LUT[i] * HalfWidth;
@@ -983,13 +1247,16 @@ namespace Canvas
 			{
 				if (P0.Flag == Point_Start)
 					Right = -Right;
+#if FAST_ARC
 				v3dxVector2 Extent = Right * HalfWidth;
+				Poly.Vertices.reserve(FArcLUT::NUM_FASTLUT / 2 + 2);
 				Poly.Vertices.push_back(Position + Extent);
 				if (UvAlongPath)
 				{
+					Poly.UVs.reserve(FArcLUT::NUM_FASTLUT / 2 + 2);
 					Poly.UVs.push_back(GetUV(Extent));
 				}
-#if FAST_ARC
+
 				UINT Index = GArcLUT.GetLUTIndex(Right, true);
 				for (UINT i = 0; i < FArcLUT::NUM_FASTLUT / 2; i++)
 				{
@@ -1003,8 +1270,17 @@ namespace Canvas
 				}
 #else
 				const float sRad = std::atan2(Right.y, Right.x);
-				const UINT NumSub = (const UINT)std::ceil(FPathUtility::PI / FArcLUT::DELTA);
+				const UINT NumSub = (UINT)std::ceil(FPathUtility::PI / FArcLUT::DELTA);
 				const float Sub = FPathUtility::PI / NumSub;
+
+				v3dxVector2 Extent = Right * HalfWidth;
+				Poly.Vertices.reserve(NumSub + 1);
+				Poly.Vertices.push_back(Position + Extent);
+				if (UvAlongPath)
+				{
+					Poly.UVs.reserve(NumSub + 1);
+					Poly.UVs.push_back(GetUV(Extent));
+				}
 				for (UINT i = 1; i < NumSub; i++)
 				{
 					float Rad = sRad + Sub * i;
@@ -1038,6 +1314,12 @@ namespace Canvas
 			v3dxVector2 Right = FPathUtility::GetRight(P0.Forward);
 
 			FPathPoly Poly;
+			Poly.Vertices.reserve(4);
+			if (Style->UvAlongPath)
+			{
+				Poly.UVs.reserve(4);
+			}
+
 			switch (P0.Flag)
 			{
 			case Point_Single:

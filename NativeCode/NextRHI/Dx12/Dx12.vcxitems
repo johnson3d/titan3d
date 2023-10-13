@@ -20,6 +20,7 @@
     <ClCompile Include="$(MSBuildThisFileDirectory)DX12Effect.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)DX12Event.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)DX12FrameBuffers.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)DX12GeomMesh.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)DX12GpuDevice.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)DX12GpuState.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)DX12InputAssembly.cpp" />
@@ -33,6 +34,7 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)DX12Effect.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)DX12Event.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)DX12FrameBuffers.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)DX12GeomMesh.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)DX12GpuDevice.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)DX12GpuState.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)DX12InputAssembly.h" />

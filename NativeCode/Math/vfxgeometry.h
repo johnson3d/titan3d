@@ -20,6 +20,7 @@
 #include "v3dxRect.h"
 #include "v3dxSize.h"
 #include "v3dxFrustum.h"
+#include "v3dxThickness.h"
 
 #include "../Base/CoreRtti.h"
 

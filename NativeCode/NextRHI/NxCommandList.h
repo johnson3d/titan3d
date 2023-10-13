@@ -91,14 +91,21 @@ namespace NxRHI
 		~ICmdRecorder();
 		std::vector<AutoRef<IGpuDraw>>			mDrawcallArray;
 		std::vector<AutoRef<IGpuResource>>		mRefBuffers;
+		UINT									mDirectDrawNum = 0;
 		UINT									mPrimitiveNum = 0;
-		TWeakRefHandle<ICommandList>			mCmdList;
+
+		VSLLock									mLocker;
 	public:
+		inline size_t GetDrawcallNumber() const {
+			return mDrawcallArray.size() + mDirectDrawNum;
+		}
+		inline void UseResource(IGpuResource* res) {
+			res->AddCmdRefCount();
+			mRefBuffers.push_back(res);
+		}
 		void PushGpuDraw(IGpuDraw * draw);
-		void ResetGpuDraws();
-		void FlushDraws(ICommandList* cmdlist, bool bRefBuffer);
-		IGpuResource* FindGpuResourceByTagName(const char* name);
-		int CountGpuResourceByTagName(const char* name);
+		virtual void ResetGpuDraws();
+		void FlushDraws(ICommandList* cmdlist);
 	};
 
 	class TR_CLASS()
@@ -160,20 +167,32 @@ namespace NxRHI
 		ICmdRecorder* GetCmdRecorder() {
 			return mCmdRecorder;
 		}
-		//TR_FUNCTION(SV_SuppressGC = true)
-		void PushGpuDraw(IGpuDraw * draw);
+		bool PushGpuDrawImpl(IGpuDraw * draw, bool bCheck);
+		bool PushGpuDraw(IGpuDraw* draw)
+		{
+			return PushGpuDrawImpl(draw, true);
+		}
+		void PushGpuDrawUntilSuccessed(IGpuDraw* draw)
+		{
+			while (PushGpuDrawImpl(draw, false) == false)
+			{
+
+			}
+		}
+		void DirectGpuDraw(IGpuDraw* draw);
 		/*void ResetGpuDraws()
 		{
 			ASSERT(mCmdRecorder != nullptr);
 			mCmdRecorder->ResetGpuDraws();
 		}*/
-		void FlushDraws(bool bRefBuffer)
+		void FlushDraws()
 		{
-			ASSERT(mCmdRecorder != nullptr);
-			mCmdRecorder->FlushDraws(this, bRefBuffer);
+			if (mCmdRecorder != nullptr)
+				mCmdRecorder->FlushDraws(this);
 		}
+		void AppendDraws(ICmdRecorder* pCmdRecorder);
 
-		void SetDebugName(const char* name) {
+		virtual void SetDebugName(const char* name) {
 			mDebugName = name;
 		}
 		const char* GetDebugName() const{
@@ -194,7 +213,7 @@ namespace NxRHI
 			return mPrimitiveNum;
 		}
 		IGpuDevice* GetGpuDevice() {
-			return mDevice.GetPtr();
+			return mDevice.GetNakedPtr();
 		}
 		IFence* GetCommitFence() {
 			return mCommitFence;
@@ -209,7 +228,6 @@ namespace NxRHI
 		AutoRef<IFrameBuffers>				mCurrentFrameBuffers;
 
 		AutoRef<IFence>						mCommitFence;
-		//VSLLock								mLocker;
 	};
 
 	class TR_CLASS()
@@ -231,15 +249,17 @@ namespace NxRHI
 		ICommandList* mCmdList = nullptr;
 		EQueueType mType = EQueueType::QU_Default;
 	public:
-		FTransientCmd(IGpuDevice* device, EQueueType type = EQueueType::QU_Default, const char* debugName = "transient")
+		FTransientCmd(IGpuDevice* device, EQueueType type, const char* debugName)
 		{
 			mDevice = device;
 			mCmdList = mDevice->GetCmdQueue()->GetIdleCmdlist();
+			mCmdList->SetDebugName(debugName);
 			mCmdList->BeginCommand();
 			mCmdList->BeginEvent(debugName);
 		}
 		~FTransientCmd()
 		{
+			mCmdList->FlushDraws();
 			mCmdList->EndEvent();
 			mCmdList->EndCommand();
 			mDevice->GetCmdQueue()->ExecuteCommandListSingle(mCmdList, mType);

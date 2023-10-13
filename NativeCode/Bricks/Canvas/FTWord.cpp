@@ -4,6 +4,7 @@
 #include "../../NextRHI/NxCommandList.h"
 #include "../../Base/sdf/sdf_8ssedt.h"
 #include "../Canvas/FCanvas.h"
+#include "FDrawCmdList.h"
 
 #define new VNEW
 
@@ -31,7 +32,7 @@ namespace Canvas
 		return true;
 	}
 
-	void FTWord::FillCanvasVertices(int x, int y, ITextBrush* texture, void* vert)
+	void FTWord::FillCanvasVertices(int x, int y, UInt16 transformIndex, ITextBrush* texture, void* vert)
 	{
 		Canvas::FCanvasVertex* quatVerts = (Canvas::FCanvasVertex*)vert;
 		x += PixelX;
@@ -45,12 +46,13 @@ namespace Canvas
 		auto texSizeX = (float)texture->TextureSizeX;
 		auto texSizeY = (float)texture->TextureSizeY;
 
-		struct FTmpVertex
-		{
-			v3dxVector3 Pos;
-			v3dxVector2 UV;
-			DWORD Color;
-		};
+		//struct FTmpVertex
+		//{
+		//	v3dxVector3 Pos;
+		//	v3dxVector2 UV;
+		//	DWORD Color;
+		//	DWORD Index;
+		//};
 
 		v3dxVector3 pos;
 		quatVerts[Canvas::RCN_X0_Y0].Pos.z = 0;
@@ -59,6 +61,7 @@ namespace Canvas
 		quatVerts[Canvas::RCN_X0_Y0].UV.x = (su + osLeft) / texSizeX;//u
 		quatVerts[Canvas::RCN_X0_Y0].UV.y = (sv) / texSizeY;//v
 		quatVerts[Canvas::RCN_X0_Y0].Color.MakeValue(0xff, 0xff, 0xff, 0xff, 1);
+		FCanvasDrawCmdList::TransformIndexToColor(&transformIndex, quatVerts[Canvas::RCN_X0_Y0].Index);
 
 		quatVerts[Canvas::RCN_X1_Y0].Pos.z = 0;
 		quatVerts[Canvas::RCN_X1_Y0].Pos.x = (float)x + PixelWidth - osRight;
@@ -66,6 +69,7 @@ namespace Canvas
 		quatVerts[Canvas::RCN_X1_Y0].UV.x = (su + PixelWidth - osRight) / texSizeX;//u
 		quatVerts[Canvas::RCN_X1_Y0].UV.y = (sv) / texSizeY;//v
 		quatVerts[Canvas::RCN_X1_Y0].Color.MakeValue(0xff, 0xff, 0xff, 0xff, 1);
+		FCanvasDrawCmdList::TransformIndexToColor(&transformIndex, quatVerts[Canvas::RCN_X1_Y0].Index);
 
 		quatVerts[Canvas::RCN_X1_Y1].Pos.z = 0;
 		quatVerts[Canvas::RCN_X1_Y1].Pos.x = (float)x + PixelWidth - osRight;
@@ -73,6 +77,7 @@ namespace Canvas
 		quatVerts[Canvas::RCN_X1_Y1].UV.x = (su + PixelWidth - osRight) / texSizeX;//u
 		quatVerts[Canvas::RCN_X1_Y1].UV.y = (sv + PixelHeight) / texSizeY;//v
 		quatVerts[Canvas::RCN_X1_Y1].Color.MakeValue(0xff, 0xff, 0xff, 0xff, 1);
+		FCanvasDrawCmdList::TransformIndexToColor(&transformIndex, quatVerts[Canvas::RCN_X1_Y1].Index);
 
 		quatVerts[Canvas::RCN_X0_Y1].Pos.z = 0;
 		quatVerts[Canvas::RCN_X0_Y1].Pos.x = (float)x + osLeft;
@@ -80,9 +85,10 @@ namespace Canvas
 		quatVerts[Canvas::RCN_X0_Y1].UV.x = (su + osLeft) / texSizeX;//u
 		quatVerts[Canvas::RCN_X0_Y1].UV.y = (sv + PixelHeight) / texSizeY;//v
 		quatVerts[Canvas::RCN_X0_Y1].Color.MakeValue(0xff, 0xff, 0xff, 0xff, 1);
+		FCanvasDrawCmdList::TransformIndexToColor(&transformIndex, quatVerts[Canvas::RCN_X0_Y1].Index);
 	}
 
-	void FTWord::BuildMesh(int x, int y, ITextBrush* texture, NxRHI::FMeshDataProvider* mesh)
+	void FTWord::BuildMesh(int x, int y, UInt16 transformIndex, ITextBrush* texture, NxRHI::FMeshDataProvider* mesh)
 	{
 		x += PixelX;
 		y += (PixelY);
@@ -95,45 +101,50 @@ namespace Canvas
 		auto texSizeX = (float)texture->TextureSizeX;
 		auto texSizeY = (float)texture->TextureSizeY;
 
-		struct FTmpVertex
-		{
-			v3dxVector3 Pos;
-			v3dxVector2 UV;
-			DWORD Color;
-		};
+		//struct FTmpVertex
+		//{
+		//	v3dxVector3 Pos;
+		//	v3dxVector2 UV;
+		//	DWORD Color;
+		//	DWORD Index;
+		//};
 
-		FTmpVertex verts[4];
+		Canvas::FCanvasVertex verts[4];
 		v3dxVector3 pos;
 		verts[0].Pos.z = 0;
 		verts[0].Pos.x = (float)x + osLeft;
 		verts[0].Pos.y = (float)x + osLeft;
 		verts[0].UV.x = (su + osLeft) / texSizeX;//u
 		verts[0].UV.y = (sv) / texSizeY;//v
-		verts[0].Color = 0xffffffff;
+		verts[0].Color = FColor::White;// 0xffffffff;
+		FCanvasDrawCmdList::TransformIndexToColor(&transformIndex, verts[0].Index);
 
 		verts[1].Pos.z = 0;
 		verts[1].Pos.x = (float)x + PixelWidth - osRight;
 		verts[1].Pos.y = (float)y;
 		verts[1].UV.x = (su + PixelWidth - osRight) / texSizeX;//u
 		verts[1].UV.y = (sv) / texSizeY;//v
-		verts[1].Color = 0xffffffff;
+		verts[1].Color = FColor::White;//0xffffffff;
+		FCanvasDrawCmdList::TransformIndexToColor(&transformIndex, verts[1].Index);
 
 		verts[2].Pos.z = 0;
 		verts[2].Pos.x = (float)x + PixelWidth - osRight;
 		verts[2].Pos.y = (float)y + PixelHeight;
 		verts[2].UV.x = (su + PixelWidth - osRight) / texSizeX;//u
 		verts[2].UV.y = (sv + PixelHeight) / texSizeY;//v
-		verts[2].Color = 0xffffffff;
+		verts[2].Color = FColor::White;//0xffffffff;
+		FCanvasDrawCmdList::TransformIndexToColor(&transformIndex, verts[2].Index);
 
-		verts[2].Pos.z = 0;
-		verts[2].Pos.x = (float)x + osLeft;
-		verts[2].Pos.y = (float)y + PixelHeight;
-		verts[2].UV.x = (su + osLeft) / texSizeX;//u
-		verts[2].UV.y = (sv + PixelHeight) / texSizeY;//v
-		verts[2].Color = 0xffffffff;
+		verts[3].Pos.z = 0;
+		verts[3].Pos.x = (float)x + osLeft;
+		verts[3].Pos.y = (float)y + PixelHeight;
+		verts[3].UV.x = (su + osLeft) / texSizeX;//u
+		verts[3].UV.y = (sv + PixelHeight) / texSizeY;//v
+		verts[3].Color = FColor::White;//0xffffffff;
+		FCanvasDrawCmdList::TransformIndexToColor(&transformIndex, verts[3].Index);
 
 		auto start = mesh->GetVertexNumber();
-		mesh->AddVertex_Pos_UV_Color(verts, 4);
+		mesh->AddVertex_Pos_UV_Color_Index(verts, 4);
 
 		UINT a, b, c;
 		a = start;
@@ -531,7 +542,7 @@ namespace Canvas
 	}
 	FTPagedWordCreator::PagedObjectType* FTPagedWordCreator::CreatePagedObject(PageType* page, UINT index)
 	{
-		auto pAllocator = (FTPagedWordAllocator*)page->Allocator.GetPtr();
+		auto pAllocator = page->Allocator.GetCastPtr<FTPagedWordAllocator>();
 
 		auto result = new FTPagedWord();
 		auto pWord = MakeWeakRef(new FTWord());

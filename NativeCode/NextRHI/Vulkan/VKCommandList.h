@@ -118,7 +118,7 @@ namespace NxRHI
 		void UseCurrentScissors();
 		inline VKGpuDevice* GetVKDevice()
 		{
-			return (VKGpuDevice*)mDevice.GetPtr();
+			return (VKGpuDevice*)mDevice.GetNakedPtr();
 		}
 		AutoRef<VKCommandBufferPagedObject>			mCommandBuffer;
 		

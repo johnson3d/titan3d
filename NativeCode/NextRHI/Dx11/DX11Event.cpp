@@ -49,28 +49,26 @@ namespace NxRHI
 	}
 	void DX11Fence::Signal(ICmdQueue* queue, UINT64 value, EQueueType type)
 	{
-		mFence->SetEventOnCompletion(value, mEvent->mHandle);
 		auto dx11Queue =((DX11CmdQueue*)queue);
 		VAutoVSLLock locker(dx11Queue->mImmCmdListLocker);
 		dx11Queue->mHardwareContext->mContext4->Signal(mFence, value);
 	}
-	UINT64 DX11Fence::Wait(UINT64 value, UINT timeOut)
+	bool DX11Fence::Wait(UINT64 value, UINT timeOut)
 	{
 		/*while (mFence->GetCompletedValue() < value)
 		{
 
 		}*/
 		auto completed = mFence->GetCompletedValue();
+		if (completed >= value)
+			return true;
 		while (completed < value)
 		{
-			if (completed == 0xffffffffffffffff)
-			{
-				//mDeviceRef.GetPtr()->OnDeviceRemoved();
-			}
+			mFence->SetEventOnCompletion(value, mEvent->mHandle);
 			mEvent->Wait(timeOut);
 			completed = mFence->GetCompletedValue();
 		}
-		return completed;
+		return true;
 	}
 }
 

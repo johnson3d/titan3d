@@ -6,10 +6,17 @@ NS_BEGIN
 
 namespace NxRHI
 {
+	class ICmdRecorder;
+	class DX12CbView;
+	class DX12SrView;
+	class DX12UaView;
+	class DX12Sampler;
+	class DX12RenderTargetView;
+	class DX12DepthStencilView;
 	class DX12CommandList;
 	class DX12CmdQueue;
-	struct DX12DescriptorSetPagedObject;
-	struct DX12DescriptorSetAllocator;
+	struct DX12PagedHeap;
+	struct DX12HeapAllocator;
 	
 	class DX12GpuSystem : public IGpuSystem
 	{
@@ -59,6 +66,7 @@ namespace NxRHI
 		virtual IGraphicDraw* CreateGraphicDraw() override;
 		virtual IComputeDraw* CreateComputeDraw() override;
 		virtual IGpuScope* CreateGpuScope() override;
+		virtual FVertexArray* CreateVertexArray() override;
 
 		virtual void SetBreakOnID(int id, bool open) override;
 		virtual void TickPostEvents() override;
@@ -81,24 +89,29 @@ namespace NxRHI
 		AutoRef<DX12CmdQueue>			mCmdQueue;
 		
 		AutoRef<DX12CommandAllocatorManager>	mCmdAllocatorManager;
-		AutoRef<DX12GpuPooledMemAllocator>		mCBufferMemAllocator;
-		AutoRef<DX12GpuDefaultMemAllocator>		mDefaultBufferMemAllocator;
-		AutoRef<DX12GpuDefaultMemAllocator>		mUploadBufferMemAllocator;
-		AutoRef<DX12GpuDefaultMemAllocator>		mUavBufferMemAllocator;
+		AutoRef<DX12PagedGpuMemAllocator>		mCBufferMemAllocator;
+		AutoRef<DX12DefaultGpuMemAllocator>		mDefaultBufferMemAllocator;
+		AutoRef<DX12DefaultGpuMemAllocator>		mUploadBufferMemAllocator;
+		AutoRef<DX12DefaultGpuMemAllocator>		mUavBufferMemAllocator;
 
 		AutoRef<ID3D12CommandSignature>		CmdSigForIndirectDrawIndex;
 		AutoRef<ID3D12CommandSignature>		CmdSigForIndirectDispatch;
 
-		AutoRef<DX12DescriptorSetAllocator>	mRtvAllocator;
-		AutoRef<DX12DescriptorSetAllocator>	mDsvAllocator;
-		AutoRef<DX12DescriptorSetAllocator>	mSamplerAllocator;
-		AutoRef<DX12DescriptorSetAllocator>	mCbvSrvUavAllocator;
-		AutoRef<DX12DescriptorAllocatorManager>	mDescriptorSetAllocator;
+		AutoRef<DX12HeapAllocator>	mRtvAllocator;
+		AutoRef<DX12HeapAllocator>	mDsvAllocator;
+		AutoRef<DX12HeapAllocator>	mSamplerAllocator;
+		AutoRef<DX12HeapAllocator>	mCbvSrvUavAllocator;
+		AutoRef<DX12HeapAllocatorManager>	mDescriptorSetAllocator;
 
-		AutoRef<DX12DescriptorSetPagedObject>	mNullCBV_SRV_UAV;
-		AutoRef<DX12DescriptorSetPagedObject>	mNullSampler;
-		AutoRef<DX12DescriptorSetPagedObject>	mNullRTV;
-		AutoRef<DX12DescriptorSetPagedObject>	mNullDSV;
+		AutoRef<DX12CbView>	mNullCBV;
+		AutoRef<DX12SrView>	mNullSRV;
+		AutoRef<DX12UaView>	mNullUAV;
+		AutoRef<DX12Sampler>	mNullSampler;
+		AutoRef<DX12RenderTargetView>	mNullRTV;
+		AutoRef<DX12DepthStencilView>	mNullDSV;
+
+		AutoRef<DX12CommandList>			mPostCmdList;
+		AutoRef<ICmdRecorder>				mPostCmdRecorder;
 	};
 
 	class DX12CmdQueue : public ICmdQueue

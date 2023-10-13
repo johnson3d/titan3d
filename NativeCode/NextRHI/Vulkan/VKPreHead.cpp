@@ -36,7 +36,7 @@ namespace NxRHI
 		
 	}
 	
-	AutoRef<FGpuMemory> VKGpuDefaultMemAllocator::Alloc(IGpuDevice* device1, UINT typeIndex, UINT64 size)
+	AutoRef<FGpuMemory> VKGpuDefaultMemAllocator::Alloc(IGpuDevice* device1, UINT typeIndex, UINT64 size, const char* name)
 	{
 		auto result = MakeWeakRef(new FVKDefaultGpuMemory());
 		result->Offset = 0;
@@ -60,9 +60,9 @@ namespace NxRHI
 		return result;
 	}
 
-	AutoRef<FGpuMemory> VKGpuDefaultMemAllocator::Alloc(IGpuDevice* device1, UINT64 size)
+	AutoRef<FGpuMemory> VKGpuDefaultMemAllocator::Alloc(IGpuDevice* device1, UINT64 size, const char* name)
 	{
-		return Alloc(device1, mMemTypeIndex, size);
+		return Alloc(device1, mMemTypeIndex, size, name);
 	}
 	
 	void VKGpuDefaultMemAllocator::Free(FGpuMemory* memory)
@@ -72,7 +72,7 @@ namespace NxRHI
 		memory->Offset = -1;
 	}
 	
-	IGpuHeap* VKGpuPooledMemAllocator::CreateGpuHeap(IGpuDevice* device1, UINT64 size, UINT count)
+	IGpuHeap* VKGpuPooledMemAllocator::CreateGpuHeap(IGpuDevice* device1, UINT64 size, UINT count, const char* name)
 	{
 		auto device = (VKGpuDevice*)device1;
 		auto result = new VKGpuHeap();
@@ -92,7 +92,7 @@ namespace NxRHI
 		return result;
 	}
 
-	IGpuHeap* VKGpuLinearMemAllocator::CreateGpuHeap(IGpuDevice* device1, UINT64 size)
+	IGpuHeap* VKGpuLinearMemAllocator::CreateGpuHeap(IGpuDevice* device1, UINT64 size, const char* name)
 	{
 		auto device = (VKGpuDevice*)device1;
 		auto result = new VKGpuHeap();

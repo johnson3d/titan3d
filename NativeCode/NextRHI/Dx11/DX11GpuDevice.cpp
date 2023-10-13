@@ -8,6 +8,7 @@
 #include "DX11FrameBuffers.h"
 #include "DX11Drawcall.h"
 #include "../NxEffect.h"
+#include "../../Base/thread/vfxthread.h"
 
 #if defined(HasModule_GpuDump)
 #include "../../Bricks/GpuDump/NvAftermath.h"
@@ -94,6 +95,7 @@ namespace NxRHI
 	}
 	DX11GpuDevice::~DX11GpuDevice()
 	{
+		mPostCmdList = nullptr;
 		mCmdQueue->ClearIdleCmdlists();
 		mCmdQueue = nullptr;
 		Safe_Release(mDefinedAnnotation);
@@ -120,6 +122,7 @@ namespace NxRHI
 
 	bool DX11GpuDevice::InitDevice(IGpuSystem* pGpuSystem, const FGpuDeviceDesc* desc)
 	{
+		mDeviceThreadId = vfxThread::GetCurrentThreadId();
 		Desc = *desc;
 
 		mDXGIFactory = ((DX11GpuSystem*)pGpuSystem)->mDXGIFactory;
@@ -181,8 +184,12 @@ namespace NxRHI
 		mDevice->QueryInterface(IID_ID3D11InfoQueue, (void**)mDebugInfoQueue.GetAddressOf());
 		if (mDebugInfoQueue != nullptr)
 		{
+			mDebugInfoQueue->SetBreakOnID(D3D11_MESSAGE_ID_CORRUPTED_PARAMETER1, TRUE);
+			mDebugInfoQueue->SetBreakOnID(D3D11_MESSAGE_ID_DEVICE_UNORDEREDACCESSVIEW_RETURN_TYPE_MISMATCH, TRUE);
+			mDebugInfoQueue->SetBreakOnID(D3D11_MESSAGE_ID_COPYSUBRESOURCEREGION_INVALIDSOURCE, TRUE); 
 			mDebugInfoQueue->SetBreakOnID(D3D11_MESSAGE_ID_DEVICE_CSSETUNORDEREDACCESSVIEWS_HAZARD, TRUE);
 			mDebugInfoQueue->SetBreakOnID(D3D11_MESSAGE_ID_DEVICE_DRAW_SAMPLER_MISMATCH, TRUE);
+			mDebugInfoQueue->SetBreakOnID(D3D11_MESSAGE_ID_CORRUPTED_MULTITHREADING, TRUE);
 		}
 		mCaps.NumOfSwapchainFormats = 6;
 		mCaps.SwapchainFormats[0] = EPixelFormat::PXF_R8G8B8A8_UNORM;
@@ -213,6 +220,9 @@ namespace NxRHI
 		mGpuResourceAlignment.MsaaAlignment = 4194304;
 		mGpuResourceAlignment.RawSrvUavAlignment = 16;
 		mGpuResourceAlignment.UavCounterAlignment = 4096;*/
+
+		mPostCmdList = MakeWeakRef((DX11CommandList*)this->CreateCommandList());
+		mPostCmdList->BeginCommand();
 
 		return true;
 	}
@@ -453,6 +463,14 @@ namespace NxRHI
 
 	void DX11GpuDevice::TickPostEvents()
 	{
+		IsSyncStage = true;
+		if (mPostCmdList != nullptr)
+		{
+			mPostCmdList->FlushDraws();
+			mPostCmdList->EndCommand();
+			GetCmdQueue()->ExecuteCommandListSingle(mPostCmdList, EQueueType::QU_Default);
+			mPostCmdList->BeginCommand();
+		}
 		IGpuDevice::TickPostEvents();
 		if (mIsTryFinalize)
 		{
@@ -466,6 +484,7 @@ namespace NxRHI
 				mIsFinalized = true;
 			}
 		}
+		IsSyncStage = false;
 	}
 
 	DX11CmdQueue::DX11CmdQueue()
@@ -491,8 +510,6 @@ namespace NxRHI
 	void DX11CmdQueue::Init(DX11GpuDevice* device)
 	{
 		mDefaultQueueFrequence = 1;
-		mFramePost = MakeWeakRef(device->CreateCommandList());
-		mFramePost->BeginCommand();
 	}
 	void DX11CmdQueue::ExecuteCommandList(UINT NumOfExe, ICommandList** Cmdlist, UINT NumOfWait, ICommandList** ppWaitCmdlists, EQueueType type)
 	{

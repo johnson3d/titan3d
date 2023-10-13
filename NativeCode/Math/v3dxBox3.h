@@ -187,13 +187,13 @@ public:
 	inline void InitializeBox (v3dxVector3 p){
 		InitializeBox(p.x,p.y,p.z);
 	}
-	inline void OptimalVertex (float x, float y, float z){
+	inline void MergeVertex (float x, float y, float z){
 		if (x < minbox.x) minbox.x = x; if (x > maxbox.x) maxbox.x = x;
 		if (y < minbox.y) minbox.y = y; if (y > maxbox.y) maxbox.y = y;
 		if (z < minbox.z) minbox.z = z; if (z > maxbox.z) maxbox.z = z;
 	}
-	inline void OptimalVertex (const v3dxVector3& v){ 
-		OptimalVertex(v.x,v.y,v.z); 
+	inline void MergeVertex (const v3dxVector3& v){ 
+		MergeVertex(v.x,v.y,v.z); 
 	}
 	inline void Inflate (const v3dxVector3& v){ // added by Jones
 		minbox -= v; maxbox += v;

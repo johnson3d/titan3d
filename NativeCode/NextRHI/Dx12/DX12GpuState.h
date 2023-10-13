@@ -7,7 +7,7 @@ NS_BEGIN
 namespace NxRHI
 {
 	class DX12GpuDevice;
-	struct DX12DescriptorSetPagedObject;
+	struct DX12PagedHeap;
 
 	class DX12Sampler : public ISampler
 	{
@@ -20,7 +20,7 @@ namespace NxRHI
 		bool Init(DX12GpuDevice* device, const FSamplerDesc& desc);
 	public:
 		TWeakRefHandle<DX12GpuDevice>			mDeviceRef;
-		AutoRef<DX12DescriptorSetPagedObject>	mView;
+		AutoRef<DX12PagedHeap>	mView;
 	};
 
 	class DX12GpuPipeline : public IGpuPipeline

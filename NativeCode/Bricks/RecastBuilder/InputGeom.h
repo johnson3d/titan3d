@@ -9,7 +9,7 @@
 NS_BEGIN
 
 static const int MAX_CONVEXVOL_PTS = 12;
-struct ConvexVolume
+struct TR_CLASS() ConvexVolume
 {
 	float verts[MAX_CONVEXVOL_PTS*3];
 	float hmin, hmax;

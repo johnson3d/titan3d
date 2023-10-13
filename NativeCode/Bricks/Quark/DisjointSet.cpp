@@ -24,7 +24,7 @@ void FDisjointSet::Reset()
 
 void FDisjointSet::AddDefaulted( UINT32 Num )
 {
-	UINT32 Start = Parents.size();
+	UINT32 Start = (UINT32)Parents.size();
 	Parents.resize(Num + Start);
 
 	for( UINT32 i = Start; i < Start + Num; i++ )

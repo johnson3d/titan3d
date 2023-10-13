@@ -10,6 +10,8 @@ namespace NxRHI
 	{
 	public:
 		AutoRef<ID3D11CommandList> mCmdList;
+
+		virtual void ResetGpuDraws() override;
 	};
 	class DX11GpuDevice;
 	class DX11CommandList : public ICommandList
@@ -65,7 +67,7 @@ namespace NxRHI
 		void Commit(ID3D11DeviceContext* imContex);
 		inline DX11GpuDevice* GetDX11Device()
 		{
-			return (DX11GpuDevice*)mDevice.GetPtr();
+			return (DX11GpuDevice*)mDevice.GetNakedPtr();
 		}
 		ID3D11DeviceContext* mContext;
 		ID3D11DeviceContext4* mContext4;

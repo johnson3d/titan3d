@@ -129,10 +129,6 @@ namespace NxRHI
 		NxRHI::GetVertexStreamInfo(type, stride, element, (EShaderVarType*)varType);
 	}
 
-	FVertexArray::FVertexArray()
-	{
-
-	}
 	void FVertexArray::BindVB(EVertexStreamType stream, IVbView* buffer)
 	{
 		VertexBuffers[stream] = buffer;
@@ -150,10 +146,10 @@ namespace NxRHI
 			cmdlist->SetVertexBuffer(i, VertexBuffers[i], 0, VertexBuffers[i]->Desc.Stride);
 		}
 	}
-	FGeomMesh::FGeomMesh()
+	/*FGeomMesh::FGeomMesh()
 	{
 		VertexArray = MakeWeakRef(new FVertexArray());
-	}
+	}*/
 	void FGeomMesh::Reset(bool bClearBuffer)
 	{
 		if (bClearBuffer)
@@ -298,7 +294,7 @@ namespace NxRHI
 	{
 		mName = name;
 
-		mGeometryMesh = MakeWeakRef(new FGeomMesh());
+		mGeometryMesh = MakeWeakRef(device->CreateGeomMesh());
 		mGeometryMesh->Atoms.resize(atom);
 		mDesc.AtomNumber = atom;
 
@@ -341,7 +337,7 @@ namespace NxRHI
 
             AutoRef<NxRHI::IBuffer> copyVB;
             {
-                FTransientCmd cmd(device, NxRHI::QU_Transfer);
+                FTransientCmd cmd(device, NxRHI::QU_Transfer, "Mesh.ReadVB");
                 auto copyDesc = pos_vb->Buffer->Desc;
                 copyDesc.Usage = USAGE_STAGING;
                 copyDesc.CpuAccess = ECpuAccess::CAS_READ;
@@ -413,7 +409,7 @@ namespace NxRHI
 			if (false == ib->Buffer->FetchGpuData(0, &ibBuffer))
 			{
 				{
-					FTransientCmd cmd(device, NxRHI::QU_Transfer);
+					FTransientCmd cmd(device, NxRHI::QU_Transfer, "Mesh.ReadIB");
 					auto copyDesc = ib->Buffer->Desc;
 					copyDesc.Usage = USAGE_STAGING;
 					copyDesc.CpuAccess = ECpuAccess::CAS_READ;
@@ -438,8 +434,6 @@ namespace NxRHI
 					cpDraw->FootPrint.TotalSize = copyDesc.RowPitch * 1;
 
 					cmd.GetCmdList()->PushGpuDraw(cpDraw);
-					cmd.GetCmdList()->FlushDraws(true);
-					
 				}
 			}
 
@@ -503,7 +497,7 @@ namespace NxRHI
 
         AutoRef<NxRHI::IBuffer> copyVB;
         {
-            FTransientCmd cmd(device, NxRHI::QU_Transfer);
+            FTransientCmd cmd(device, NxRHI::QU_Transfer, "Mesh.ReadVB");
             auto copyDesc = pos_vb->Buffer->Desc;
             copyDesc.Usage = USAGE_STAGING;
             copyDesc.CpuAccess = ECpuAccess::CAS_READ;
@@ -522,7 +516,7 @@ namespace NxRHI
 		{
             if (false == ib->Buffer->FetchGpuData(0, &ibBuffer))
             {
-                FTransientCmd cmd(device, NxRHI::QU_Transfer);
+                FTransientCmd cmd(device, NxRHI::QU_Transfer, "Mesh.ReadIB");
                 auto copyDesc = ib->Buffer->Desc;
                 copyDesc.Usage = USAGE_STAGING;
                 copyDesc.CpuAccess = ECpuAccess::CAS_READ;
@@ -547,7 +541,6 @@ namespace NxRHI
                 cpDraw->FootPrint.TotalSize = copyDesc.RowPitch * 1;
 
                 cmd.GetCmdList()->PushGpuDraw(cpDraw);
-                cmd.GetCmdList()->FlushDraws(true);
             }
 
             device->GetCmdQueue()->Flush(EQueueType::QU_Transfer);
@@ -585,7 +578,7 @@ namespace NxRHI
 
 		if (!GetMeshBuffer(device, Verts, Indexes))
 			return 0;
-
+#if true
 		// calculate bouding box
 		v3dxBox3 MeshBounds;
 		for (int i = 0; i < Verts.size(); ++i)
@@ -725,6 +718,21 @@ namespace NxRHI
 			mClusters[i] = QuarkCluster(Verts, Indexes, Range.Begin, Range.End, Partitioner, Adjacency);
 		}
 		return int(mClusters.size());
+#else
+		// export all vb, ib 
+		QuarkCluster cluster;	
+		cluster.Verts.resize(Verts.size() * 3);
+		cluster.Indexes.resize(Indexes.size());
+		memcpy(&cluster.Verts[0], &Verts[0], Verts.size() * sizeof(v3dxVector3));
+		memcpy(&cluster.Indexes[0], &Indexes[0], Indexes.size() * sizeof(UINT32));
+
+		cluster.VertexStart = 0;
+		cluster.VertexCount = Verts.size();
+		cluster.IndexStart = 0;
+		cluster.IndexCount = Indexes.size();
+
+		mClusters.push_back(cluster);
+#endif
 	}
     bool FMeshPrimitives::SaveClusters(XndNode* pNode)
     {
@@ -745,6 +753,8 @@ namespace NxRHI
             int indexCount = int(mClusters[i].Indexes.size());
             pAttr->Write(indexCount);
             pAttr->Write((BYTE*)&mClusters[i].Indexes[0], indexCount * sizeof(UINT32));
+			// bounding box
+			pAttr->Write((BYTE*)&mClusters[i].Bounds, sizeof(v3dxBox3));
         }
 
         pAttr->EndWrite();
@@ -784,6 +794,9 @@ namespace NxRHI
 				ibCount += indexCount;
 				mClusters[i].Indexes.resize(indexCount);
 				pAttr->Read((BYTE*)&mClusters[i].Indexes[0], indexCount * sizeof(UINT32));
+
+				// bounding box				
+                pAttr->Read((BYTE*)&mClusters[i].Bounds, sizeof(v3dxBox3));
 			}
 
 			pAttr->EndRead();
@@ -846,7 +859,7 @@ namespace NxRHI
 		mName = name;
 		auto pNode = xnd->GetRootNode();
 		
-		mGeometryMesh = MakeWeakRef(new FGeomMesh());
+		mGeometryMesh = MakeWeakRef(device->CreateGeomMesh());
 
 		XndAttribute* pAttr = pNode->TryGetAttribute("HeadAttrib");
 		if (pAttr)
@@ -952,7 +965,7 @@ namespace NxRHI
 			v3dxVector3* pPosition = (v3dxVector3*)data;
 			for (UINT i = 0; i < uVert; i++)
 			{
-				mAABB.OptimalVertex(pPosition[i]);
+				mAABB.MergeVertex(pPosition[i]);
 			}
 		}
 
@@ -971,7 +984,7 @@ namespace NxRHI
 		if (false == vb->Buffer->FetchGpuData(0, &buffData))
 		{
 			{
-				FTransientCmd cmd(device, NxRHI::QU_Transfer);
+				FTransientCmd cmd(device, NxRHI::QU_Transfer, "Mesh.ReadVB");
 				auto copyDesc = vb->Buffer->Desc;
 				copyDesc.Usage = USAGE_STAGING;
 				copyDesc.CpuAccess = ECpuAccess::CAS_READ;
@@ -996,7 +1009,6 @@ namespace NxRHI
 				cpDraw->FootPrint.TotalSize = copyDesc.RowPitch * 1;
 
 				cmd.GetCmdList()->PushGpuDraw(cpDraw);
-				cmd.GetCmdList()->FlushDraws(true);
 			}
 			device->GetCmdQueue()->Flush(EQueueType::QU_Transfer);
 			copyVB->FetchGpuData(0, &buffData);
@@ -1116,15 +1128,16 @@ namespace NxRHI
 		mGeometryMesh->SetAtomDesc(index, lod, desc);
 	}
 
-	bool FMeshPrimitives::SetGeomtryMeshStream(IGpuDevice* device, EVertexStreamType stream, void* data, UINT size, UINT stride, ECpuAccess cpuAccess)
+	bool FMeshPrimitives::SetGeomtryMeshStream(ICommandList* cmd, EVertexStreamType stream, void* data, UINT size, UINT stride, ECpuAccess cpuAccess)
 	{
+		
 		IVbView* ovb = nullptr;
 		if (mGeometryMesh != nullptr &&
 			(ovb = mGeometryMesh->VertexArray->VertexBuffers[stream]) != nullptr &&
 			ovb->Desc.Stride == stride &&
 			ovb->Desc.Size >= size)
 		{
-			ovb->UpdateGpuData(0, data, size);
+			ovb->UpdateGpuData(cmd, 0, data, size);
 			return true;
 		}
 
@@ -1132,14 +1145,14 @@ namespace NxRHI
 		vbvDesc.Stride = stride;
 		vbvDesc.Size = size;
 		vbvDesc.InitData = data;
-		auto vb = MakeWeakRef(device->CreateVBV(nullptr, &vbvDesc));
+		auto vb = MakeWeakRef(cmd->mDevice.GetPtr()->CreateVBV(nullptr, &vbvDesc));
 		if (vb == nullptr)
 			return false;
 		mGeometryMesh->VertexArray->BindVB(stream, vb);
 		return true;
 	}
 
-	bool FMeshPrimitives::SetGeomtryMeshIndex(IGpuDevice* device, void* data, UINT size, bool isBit32, ECpuAccess cpuAccess)
+	bool FMeshPrimitives::SetGeomtryMeshIndex(ICommandList* cmd, void* data, UINT size, bool isBit32, ECpuAccess cpuAccess)
 	{
 		IIbView* oib = nullptr;
 		if (mGeometryMesh != nullptr &&
@@ -1147,7 +1160,7 @@ namespace NxRHI
 			oib->Desc.Stride == (isBit32 ? sizeof(UINT) : sizeof(USHORT)) &&
 			oib->Desc.Size >= size)
 		{
-			oib->UpdateGpuData(0, data, size);
+			oib->UpdateGpuData(cmd, 0, data, size);
 			return true;
 		}
 
@@ -1155,7 +1168,7 @@ namespace NxRHI
 		ibvDesc.Stride = isBit32 ? sizeof(UINT) : sizeof(USHORT);
 		ibvDesc.Size = size;
 		ibvDesc.InitData = data;
-		auto ib = MakeWeakRef(device->CreateIBV(nullptr, &ibvDesc));
+		auto ib = MakeWeakRef(cmd->mDevice.GetPtr()->CreateIBV(nullptr, &ibvDesc));
 		if (ib == nullptr)
 			return false;
 
@@ -1192,7 +1205,7 @@ namespace NxRHI
 		return nullptr;
 	}
 
-	bool FMeshDataProvider::ToMesh(IGpuDevice* device, FMeshPrimitives* mesh)
+	bool FMeshDataProvider::ToMesh(ICommandList* cmd, FMeshPrimitives* mesh)
 	{		
 		mesh->Reset(false);
 		UINT resSize = 0;
@@ -1206,13 +1219,13 @@ namespace NxRHI
 				continue;
 
 			resSize += mVertexBuffers[i]->GetSize();
-			mesh->SetGeomtryMeshStream(device, (EVertexStreamType)i,
+			mesh->SetGeomtryMeshStream(cmd, (EVertexStreamType)i,
 				mVertexBuffers[i]->GetData(),
 				mVertexBuffers[i]->GetSize(),
 				GetStreamTypeInfo((EVertexStreamType)i).Stride, ECpuAccess::CAS_DEFAULT);
 		}
 		if (IndexBuffer->GetSize() > 0)
-			mesh->SetGeomtryMeshIndex(device, IndexBuffer->GetData(), IndexBuffer->GetSize(), IsIndex32, ECpuAccess::CAS_DEFAULT);
+			mesh->SetGeomtryMeshIndex(cmd, IndexBuffer->GetData(), IndexBuffer->GetSize(), IsIndex32, ECpuAccess::CAS_DEFAULT);
 		//mesh->mGeometryMesh->BindInputLayout();
 		
 		mesh->mGeometryMesh->Atoms = mAtoms;
@@ -1222,13 +1235,13 @@ namespace NxRHI
 			mesh->mAABB.InitializeBox();
 			for (UINT i = 0; i < VertexNumber; i++)
 			{
-				mesh->mAABB.OptimalVertex(pPos[i]);
+				mesh->mAABB.MergeVertex(pPos[i]);
 			}
 		}
 		else
 		{
 			mesh->mAABB.InitializeBox();
-			mesh->mAABB.OptimalVertex(v3dxVector3::ZERO);
+			mesh->mAABB.MergeVertex(v3dxVector3::ZERO);
 		}
 		mesh->mDesc.AtomNumber = (UINT)mAtoms.size();
 		mesh->mDesc.VertexNumber = VertexNumber;
@@ -1855,19 +1868,21 @@ namespace NxRHI
 			AddVertex(pVertex[i]);
 		}
 	}
-	bool FMeshDataProvider::AddVertex_Pos_UV_Color(const void* pVertex, UINT num, bool bInvertY, float CanvasHeight)
+	bool FMeshDataProvider::AddVertex_Pos_UV_Color_Index(const void* pVertex, UINT num, bool bInvertY, float CanvasHeight)
 	{
 		struct FTmpVertex
 		{
 			v3dxVector3 Pos;
 			v3dxVector2 UV;
 			DWORD Color;
+			DWORD Index;
 		};
 		auto verts = (FTmpVertex*)pVertex;
 
 		size_t posOffset = 0;
 		size_t uvOffset = 0;
 		size_t colorOffset = 0;
+		size_t indexOffset = 0;
 
 		this->VertexNumber += num;
 
@@ -1901,6 +1916,16 @@ namespace NxRHI
 		{
 			return false;
 		}
+		auto indexVB = mVertexBuffers[VST_SkinIndex];
+		if (indexVB != nullptr)
+		{
+			indexOffset = indexVB->GetSize();
+			indexVB->PushData(nullptr, sizeof(DWORD) * num);
+		}
+		else
+		{
+			return false;
+		}
 		if (bInvertY)
 		{
 			for (UINT i = 0; i < num; i++)
@@ -1913,6 +1938,8 @@ namespace NxRHI
 				uvOffset += sizeof(v3dxVector2);
 				colorVB->SetValueToOffset((UINT)colorOffset, verts[i].Color);
 				colorOffset += sizeof(DWORD);
+				indexVB->SetValueToOffset((UINT)indexOffset, verts[i].Index);
+				indexOffset += sizeof(DWORD);
 			}
 		}
 		else
@@ -1925,6 +1952,8 @@ namespace NxRHI
 				uvOffset += sizeof(v3dxVector2);
 				colorVB->SetValueToOffset((UINT)colorOffset, verts[i].Color);
 				colorOffset += sizeof(DWORD);
+				indexVB->SetValueToOffset((UINT)indexOffset, verts[i].Index);
+				indexOffset += sizeof(DWORD);
 			}
 		}
 		

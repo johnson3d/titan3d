@@ -73,9 +73,8 @@ namespace NxRHI
 		FVertexArray : public VIUnknown
 	{
 	public:
-		FVertexArray();
-		void Commit(ICommandList * cmdlist);
-		void BindVB(EVertexStreamType stream, IVbView* buffer);
+		virtual void Commit(ICommandList * cmdlist);
+		virtual void BindVB(EVertexStreamType stream, IVbView* buffer);
 		IVbView* GetVB(EVertexStreamType stream)
 		{
 			return VertexBuffers[stream];
@@ -95,7 +94,6 @@ namespace NxRHI
 		FGeomMesh : public VIUnknown
 	{
 	public:
-		FGeomMesh();
 		void Reset(bool bClearBuffer);
 		void Commit(ICommandList * cmdlist);
 		UINT GetAtomNum() {
@@ -193,8 +191,8 @@ namespace NxRHI
 			mGeometryMesh->PushAtomDesc(index, desc);
 		}
 
-		bool SetGeomtryMeshStream(IGpuDevice* device, EVertexStreamType stream, void* data, UINT size, UINT stride, ECpuAccess cpuAccess);
-		bool SetGeomtryMeshIndex(IGpuDevice* device, void* data, UINT size, bool isBit32, ECpuAccess cpuAccess);
+		bool SetGeomtryMeshStream(ICommandList* cmd, EVertexStreamType stream, void* data, UINT size, UINT stride, ECpuAccess cpuAccess);
+		bool SetGeomtryMeshIndex(ICommandList* cmd, void* data, UINT size, bool isBit32, ECpuAccess cpuAccess);
 		void SetAABB(v3dxBox3 & aabb)
 		{
 			mAABB = aabb;
@@ -339,7 +337,7 @@ namespace NxRHI
 		UINT AddVertex(const FMeshVertex& vertex);
 		void AddVertex(const FMeshVertex* pVertex, UINT num);
 		
-		bool AddVertex_Pos_UV_Color(const void* pVertex, UINT num, bool bInvertY = false, float CanvasHeight = 0);
+		bool AddVertex_Pos_UV_Color_Index(const void* pVertex, UINT num, bool bInvertY = false, float CanvasHeight = 0);
 
 		void ResizeVertexBuffers(UINT size);
 
@@ -350,7 +348,7 @@ namespace NxRHI
 
 		vBOOL AddLine(UINT a, UINT b);
 
-		bool ToMesh(IGpuDevice* device, FMeshPrimitives * mesh);
+		bool ToMesh(ICommandList* cmd, FMeshPrimitives * mesh);
 		FInputLayoutDesc* GetInputLayoutDesc();
 	private:
 		void LoadVB(XndAttribute * pAttr, UINT stride, EVertexStreamType stream);

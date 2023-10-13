@@ -6,6 +6,9 @@
 
 NS_BEGIN
 
+#define SMALLRADLINE 5
+#define GETUVFROMPOS(pos) v3dxVector2(pos.x / size.x * uvRect.Width + uvRect.X, pos.y / size.y * uvRect.Height + uvRect.Y)
+
 namespace Canvas
 {
 	ICanvasBrush* FDrawCmd::GetBrush()
@@ -16,7 +19,7 @@ namespace Canvas
 	{
 		auto pDefaultBrush = MakeWeakRef(new ICanvasBrush());
 		pDefaultBrush->Rect = FRectanglef(0, 0, 1, 1);
-		pDefaultBrush->Name = VNameString("DefaultBrush");
+		pDefaultBrush->Name = VNameString("@MatInst:DefaultBrush");
 		mBrushes.push(pDefaultBrush);
 		// todo: default font
 		// mFonts.push()
@@ -44,6 +47,19 @@ namespace Canvas
 		mDrawCmds.push_back(tmp);
 		mCurrentDrawCmd = tmp;
 		return tmp;
+	}
+	void FCanvasDrawCmdList::TransformIndexToColor(const UInt16* index, FColor& color)
+	{
+		if (index == nullptr)
+		{
+			color.r = 0;
+			color.a = 0;
+		}
+		else
+		{
+			color.r = (*index) >> 8;
+			color.a = (*index) & 0xFF;
+		}
 	}
 	void FCanvasDrawCmdList::PushClip(const FRectanglef& rect)
 	{
@@ -116,6 +132,27 @@ namespace Canvas
 		return &mMatrixes.top();
 	}
 
+	void FCanvasDrawCmdList::PushTransformIndex(const UInt16* index)
+	{
+		if (index == nullptr)
+			return;
+		mTransformIndexes.push(*index);
+	}
+	void FCanvasDrawCmdList::PopTransformIndex()
+	{
+		mTransformIndexes.pop();
+	}
+	const UInt16* FCanvasDrawCmdList::GetCurrentTransformIndex() const
+	{
+		if (mTransformIndexes.empty())
+			return nullptr;
+		return &mTransformIndexes.top();
+	}
+	void FCanvasDrawCmdList::ClearTransformIndex()
+	{
+		std::stack<UInt16>().swap(mTransformIndexes);
+	}
+
 	void FCanvasDrawCmdList::PushPathStyle(Path::FPathStyle* PathStyle)
 	{
 		if (PathStyle == nullptr)
@@ -137,6 +174,7 @@ namespace Canvas
 		{
 			charCount = std::min((int)wcslen(text), charCount);
 		}
+		auto transIndex = GetCurrentTransformIndex();
 		const auto& clip = GetCurrentClipRect();
 		FCanvasVertex vert[4];
 		ICanvasBrush* prevBrush = nullptr;
@@ -149,7 +187,7 @@ namespace Canvas
 		for (int i = 0; i < charCount; i++)
 		{
 			auto c = text[i];
-			auto word = font->GetWord(0, 0, c, vert);
+			auto word = font->GetWord(0, 0, c, *transIndex, vert);
 			ASSERT(word != nullptr);
 			if (word == nullptr)
 				continue;
@@ -199,6 +237,11 @@ namespace Canvas
 				vert[Canvas::RCN_X1_Y0].Pos.setValue(rect.Get_X1_Y0());
 				vert[Canvas::RCN_X0_Y1].Pos.setValue(rect.Get_X0_Y1());
 				vert[Canvas::RCN_X1_Y1].Pos.setValue(rect.Get_X1_Y1());
+
+				TransformIndexToColor(transIndex, vert[Canvas::RCN_X0_Y0].Index);
+				TransformIndexToColor(transIndex, vert[Canvas::RCN_X1_Y0].Index);
+				TransformIndexToColor(transIndex, vert[Canvas::RCN_X0_Y1].Index);
+				TransformIndexToColor(transIndex, vert[Canvas::RCN_X1_Y1].Index);
 				
 				pCmd->PushQuad(vert);
 			}
@@ -214,6 +257,7 @@ namespace Canvas
 		if (clip.ClipLine(s, e, &start, &end) == false)
 			return;
 
+
 		auto brush = GetCurrentBrush();
 		auto& uv = brush->Rect;
 
@@ -226,6 +270,7 @@ namespace Canvas
 
 		auto pCmd = GetTopBrushDrawCmd();
 		auto matrix =  GetCurrentMatrix();
+		auto index = GetCurrentTransformIndex();
 
 		FColor rgba = color;
 		FCanvasVertex vert[4];
@@ -236,6 +281,7 @@ namespace Canvas
 			v3dxVec3TransformCoord(&v1.Pos, &v1.Pos, matrix);
 		v1.Color = rgba;
 		v1.UV = uv.Get_X0_Y0();
+		TransformIndexToColor(index, v1.Index);
 
 		pos = start + ext;
 		auto& v2 = vert[RCN_X0_Y1];
@@ -244,6 +290,7 @@ namespace Canvas
 			v3dxVec3TransformCoord(&v2.Pos, &v2.Pos, matrix);
 		v2.Color = rgba;
 		v2.UV = uv.Get_X0_Y1();
+		TransformIndexToColor(index, v2.Index);
 
 		pos = end + ext;
 		auto& v3 = vert[RCN_X1_Y1];
@@ -252,6 +299,7 @@ namespace Canvas
 			v3dxVec3TransformCoord(&v3.Pos, &v3.Pos, matrix);
 		v3.Color = rgba;
 		v3.UV = uv.Get_X1_Y1();
+		TransformIndexToColor(index, v3.Index);
 
 		pos = end - ext;
 		auto& v4 = vert[RCN_X1_Y0];
@@ -260,6 +308,7 @@ namespace Canvas
 			v3dxVec3TransformCoord(&v4.Pos, &v4.Pos, matrix);
 		v4.Color = rgba;
 		v4.UV = uv.Get_X1_Y0();
+		TransformIndexToColor(index, v4.Index);
 
 		//todo: Clip quad with rect
 		if (pOutCmd)
@@ -295,6 +344,7 @@ namespace Canvas
 	{
 		const auto& clip = GetCurrentClipRect();
 		auto matrix = GetCurrentMatrix();
+		auto index = GetCurrentTransformIndex();
 
 		FColor rgba = color;
 		FCanvasVertex vert[4];
@@ -304,6 +354,7 @@ namespace Canvas
 			v3dxVec3TransformCoord(&v1.Pos, &v1.Pos, matrix);
 		v1.Color = rgba;
 		v1.UV = image->Rect.Get_X0_Y0();
+		TransformIndexToColor(index, v1.Index);
 
 		auto& v2 = (vert[RCN_X0_Y1]);
 		v2.Pos.setValue(x, y + h, 0);
@@ -311,6 +362,7 @@ namespace Canvas
 			v3dxVec3TransformCoord(&v2.Pos, &v2.Pos, matrix);
 		v2.Color = rgba;
 		v2.UV = image->Rect.Get_X0_Y1();
+		TransformIndexToColor(index, v2.Index);
 
 		auto& v3 = (vert[RCN_X1_Y1]);
 		v3.Pos.setValue(x + w, y + h, 0);
@@ -318,6 +370,7 @@ namespace Canvas
 			v3dxVec3TransformCoord(&v3.Pos, &v3.Pos, matrix);
 		v3.Color = rgba;
 		v3.UV = image->Rect.Get_X1_Y1();
+		TransformIndexToColor(index, v3.Index);
 
 		auto& v4 = (vert[RCN_X1_Y0]);
 		v4.Pos.setValue(x + w, y, 0);
@@ -325,6 +378,7 @@ namespace Canvas
 			v3dxVec3TransformCoord(&v4.Pos, &v4.Pos, matrix);
 		v4.Color = rgba;
 		v4.UV = image->Rect.Get_X1_Y0();
+		TransformIndexToColor(index, v4.Index);
 
 		FRectanglef imgRect(x, y, w, h);
 		if (clip.IsContain(imgRect))
@@ -375,6 +429,11 @@ namespace Canvas
 			vert[Canvas::RCN_X0_Y1].Pos.setValue(rect.Get_X0_Y1());
 			vert[Canvas::RCN_X1_Y1].Pos.setValue(rect.Get_X1_Y1());
 
+			TransformIndexToColor(index, vert[Canvas::RCN_X0_Y0].Index);
+			TransformIndexToColor(index, vert[Canvas::RCN_X1_Y0].Index);
+			TransformIndexToColor(index, vert[Canvas::RCN_X0_Y1].Index);
+			TransformIndexToColor(index, vert[Canvas::RCN_X1_Y1].Index);
+
 			if (pOutCmd)
 			{
 				pOutCmd->DrawCmd = pCmd;
@@ -393,7 +452,7 @@ namespace Canvas
 
 	void FCanvasDrawCmdList::AddRectFill(const v3dxVector2& s, const v3dxVector2& e, const FColor& color, FSubDrawCmd* pOutCmd)
 	{
-		const auto& clip = GetCurrentClipRect();
+		/*const auto& clip = GetCurrentClipRect();
 
 		v3dxVector2 start, end;
 		//Need clip TODO..
@@ -456,21 +515,359 @@ namespace Canvas
 		else
 		{
 			pCmd->PushQuad(vert);
+		}*/
+		v3dxVector4 cornerRadius(0);
+		AddRectFill(s, e, cornerRadius, color, pOutCmd);
+	}
+	static void CalculateCornerVertices(int sliceCount, float radiusStart, float radius, const v3dxVector2& cornerCenter, int vectorStartIdx, std::vector<v3dxVector2>& vectices)
+	{
+		const float delta = (sliceCount > 0) ? Math::HALF_PI / sliceCount : 0.0f;
+		for (int i = 0; i <= sliceCount; i++)
+		{
+			auto rad = delta * i + radiusStart;
+			auto cosVal = std::cos(rad) * radius;
+			auto sinVal = std::sin(rad) * radius;
+			vectices[vectorStartIdx + i].setValue(cornerCenter.x + cosVal, cornerCenter.y - sinVal);
+		}
+
+	}
+	void FCanvasDrawCmdList::AddRectFill(const FRectanglef& rect, const v3dxVector4& cornerRadius, const FColor& color, FSubDrawCmd* pOutCmd)
+	{
+		AddRectFill(v3dxVector2(rect.X, rect.Y), v3dxVector2(rect.GetRight(), rect.GetBottom()), cornerRadius, color, pOutCmd);
+	}
+	void FCanvasDrawCmdList::AddRectFill(const v3dxVector2& s, const v3dxVector2& e, const v3dxVector4& cornerRadius, const FColor& color, FSubDrawCmd* pOutCmd)
+	{
+		const auto& clip = GetCurrentClipRect();
+		v3dxVector2 min = v3dxVector2(std::min(s.x, e.x), std::min(s.y, e.y));
+		v3dxVector2 max = v3dxVector2(std::max(s.x, e.x), std::max(s.y, e.y));
+		v3dxVector2 size = max - min;
+
+		if (clip.IsValid() && ((clip.X > max.x) || (clip.Y > max.y) || (clip.GetRight() < min.x) || (clip.GetBottom() < min.y)))
+			return;
+
+		int topLeftCornerSliceCount = cornerRadius.topleft != 0 ? (int)Math::Ceil(Math::HALF_PI / (std::asinf(SMALLRADLINE / cornerRadius.topleft) * 2)) : 0;
+		int topRightCornerSliceCount = cornerRadius.topright != 0 ? (int)Math::Ceil(Math::HALF_PI / (std::asinf(SMALLRADLINE / cornerRadius.topright) * 2)) : 0;
+		int bottomRightCornerSliceCount = cornerRadius.bottomright != 0 ? (int)Math::Ceil(Math::HALF_PI / (std::asinf(SMALLRADLINE / cornerRadius.bottomright) * 2)) : 0;
+		int bottomLeftCornerSliceCount = cornerRadius.bottomleft != 0 ? (int)Math::Ceil(Math::HALF_PI / (std::asinf(SMALLRADLINE / cornerRadius.bottomleft) * 2)) : 0;
+
+		std::vector<v3dxVector2> tempVertices;
+		tempVertices.resize(topLeftCornerSliceCount + topRightCornerSliceCount + bottomRightCornerSliceCount + bottomLeftCornerSliceCount + 4);
+		int tempVerticesStartIdx = 0;
+		v3dxVector2 bottomLeftCenter(min.x + cornerRadius.bottomleft, max.y - cornerRadius.bottomleft);
+		CalculateCornerVertices(bottomLeftCornerSliceCount, Math::V3_PI, cornerRadius.bottomleft, bottomLeftCenter, tempVerticesStartIdx, tempVertices);
+		tempVerticesStartIdx += bottomLeftCornerSliceCount + 1;
+		v3dxVector2 bottomRightCenter(max.x - cornerRadius.bottomright, max.y - cornerRadius.bottomright);
+		CalculateCornerVertices(bottomRightCornerSliceCount, Math::HALF_PI * 3, cornerRadius.bottomright, bottomRightCenter, tempVerticesStartIdx, tempVertices);
+		tempVerticesStartIdx += bottomRightCornerSliceCount + 1;
+		v3dxVector2 topRightCenter(max.x - cornerRadius.topright, min.y + cornerRadius.topright);
+		CalculateCornerVertices(topRightCornerSliceCount, 0, cornerRadius.topright, topRightCenter, tempVerticesStartIdx, tempVertices);
+		tempVerticesStartIdx += topRightCornerSliceCount + 1;
+		v3dxVector2 topLeftCenter(min.x + cornerRadius.topleft, min.y + cornerRadius.topleft);
+		CalculateCornerVertices(topLeftCornerSliceCount, Math::HALF_PI, cornerRadius.topleft, topLeftCenter, tempVerticesStartIdx, tempVertices);
+
+		std::vector<v3dxVector2> newVerts;
+		std::vector<UINT> newInds;
+		if (clip.IsValid())
+		{
+			FPathUtility::SutherlandHodgmanClip(clip, tempVertices.data(), (UINT)tempVertices.size(), newVerts);
+		}
+		else
+		{
+			newVerts = tempVertices;
+		}
+		FPathUtility::Triangulate(newVerts.data(), (UINT)newVerts.size(), newInds);
+
+		auto brush = GetCurrentBrush();
+		auto pCmd = GetTopBrushDrawCmd();
+		auto matrix = GetCurrentMatrix();
+		auto index = GetCurrentTransformIndex();
+		const auto& uvRect = brush->Rect;
+		auto& vertices = pCmd->mVertices;
+		auto& indices = pCmd->mIndices;
+
+		UINT vst = (UINT)vertices.size();
+		vertices.resize(vst + newVerts.size());
+		for (UINT i = 0; i < newVerts.size(); i++)
+		{
+			auto& vt = vertices[vst + i];
+			vt.Pos.setValue(newVerts[i].x, newVerts[i].y, 0.0f);
+			vt.Color = color;
+			vt.UV = GETUVFROMPOS(vt.Pos);
+			TransformIndexToColor(index, vt.Index);
+		}
+		UINT ist = (UINT)indices.size();
+		indices.resize(ist + newInds.size());
+		for (UINT i = 0; i < newInds.size(); i++)
+		{
+			indices[ist + i] = vst + newInds[i];
 		}
 	}
 
 	void FCanvasDrawCmdList::AddRectLine(const v3dxVector2& s, const v3dxVector2& e, float width, const FColor& color, FSubDrawCmd* pOutCmd)
 	{
-		v3dxVector2 start, end;
-		//Need clip TODO..
-		start = s;
-		end = e;
+		v3dxThickness thickness(width);
+		v3dxVector4 cornerRadius(0);
+		AddRectLine(s, e, thickness, cornerRadius, color, pOutCmd);
+	}
+	void FCanvasDrawCmdList::AddRectLine(const FRectanglef& rect, const v3dxThickness& thickness, const v3dxVector4& cornerRadius, const FColor& color, FSubDrawCmd* pOutCmd)
+	{
+		AddRectLine(v3dxVector2(rect.X, rect.Y), v3dxVector2(rect.X + rect.Width, rect.Y + rect.Height), thickness, cornerRadius, color, pOutCmd);
+	}
+	static void CalculateCorner(
+		int sliceCount,
+		float radiusStart,
+		byte cornerType,
+		const FRectanglef& clip,
+		const v3dxVector2& min,
+		const v3dxVector2& max,
+		const v3dxVector2& size,
+		std::vector<FCanvasVertex>& vertices,
+		std::vector<UINT>& indices,
+		const EngineNS::FRectanglef& uvRect, 
+		const v3dxThickness& thickness,
+		const v3dxVector4& cornerRadius,
+		const FColor& color,
+		const UInt16* transformIndex)
+	{
+		float cRadius = 0;
+		v3dxVector2 cornerInCenter;
+		v3dxVector2 cornerOutCenter;
+		auto verticesCount = 4 + sliceCount * 2;
+		std::vector<v3dxVector2> tempVertices;
+		tempVertices.resize(verticesCount);
 
-		float halfwidth = width * 0.5f;
-		AddLine(v3dxVector2(start.x - halfwidth, start.y), v3dxVector2(end.x + halfwidth, start.y), width, color, pOutCmd);
-		AddLine(v3dxVector2(end.x, start.y), end, width, color, pOutCmd);
-		AddLine(v3dxVector2(end.x + halfwidth, end.y), v3dxVector2(start.x - halfwidth, end.y), width, color, pOutCmd);
-		AddLine(v3dxVector2(start.x, end.y), start, width, color, pOutCmd);
+		switch (cornerType)
+		{
+		case 0: // bottom left
+			cRadius = cornerRadius.bottomleft;
+			cornerInCenter.setValue(min.x + cRadius + thickness.left, max.y - cRadius - thickness.bottom);
+			cornerOutCenter.setValue(min.x + cRadius, max.y - cRadius);
+			tempVertices[0].setValue(min.x, max.y - thickness.bottom - cRadius);
+			tempVertices[sliceCount + 2].setValue(min.x + thickness.left + cRadius, max.y);
+			break;
+		case 1: // bottom right
+			cRadius = cornerRadius.bottomright;
+			cornerInCenter.setValue(max.x - cRadius - thickness.right, max.y - cRadius - thickness.bottom);
+			cornerOutCenter.setValue(max.x - cRadius, max.y - cRadius);
+			tempVertices[0].setValue(max.x - thickness.right - cRadius, max.y);
+			tempVertices[sliceCount + 2].setValue(max.x, max.y - thickness.bottom - cRadius);
+			break;
+		case 2:	// top right
+			cRadius = cornerRadius.topright;
+			cornerInCenter.setValue(max.x - cRadius - thickness.right, min.y + cRadius + thickness.top);
+			cornerOutCenter.setValue(max.x - cRadius, min.y + cRadius);
+			tempVertices[0].setValue(max.x, min.y + thickness.top + cRadius);
+			tempVertices[sliceCount + 2].setValue(max.x - thickness.right - cRadius, min.y);
+			break;
+		case 3:	// top left
+			cRadius = cornerRadius.topleft;
+			cornerInCenter.setValue(min.x + cRadius + thickness.left, min.y + cRadius + thickness.top);
+			cornerOutCenter.setValue(min.x + cRadius, min.y + cRadius);
+			tempVertices[0].setValue(min.x + thickness.left + cRadius, min.y);
+			tempVertices[sliceCount + 2].setValue(min.x, min.y + thickness.top + cRadius);
+			break;
+		}
+
+		auto vs = 1;
+		const float delta = (sliceCount > 0) ? Math::HALF_PI / sliceCount : 0.0f;
+		for (int i = 0; i <= sliceCount; i++)
+		{
+			auto radIn = delta * i + radiusStart;
+			auto cosVal = std::cos(radIn) * cRadius;
+			auto sinVal = std::sin(radIn) * cRadius;
+			tempVertices[vs].setValue(cornerInCenter.x + cosVal, cornerInCenter.y - sinVal);
+			tempVertices[verticesCount - vs].setValue(cornerOutCenter.x + cosVal, cornerOutCenter.y  - sinVal);
+			vs++;
+		}
+		std::vector<UINT> tempInds;
+		tempInds.resize((2 + sliceCount * 2) * 3);
+		tempInds[0] = 0;
+		tempInds[1] = 1;
+		tempInds[2] = verticesCount - 1;
+		auto tvs = 1;
+		auto tis = 3;
+		for (int i = 0; i < sliceCount; i++)
+		{
+			tempInds[tis + 0] = tvs;
+			tempInds[tis + 1] = tvs + 1;
+			tempInds[tis + 2] = verticesCount - (tvs + 1);
+			tempInds[tis + 3] = tvs;
+			tempInds[tis + 4] = verticesCount - (tvs + 1);
+			tempInds[tis + 5] = verticesCount - (tvs);
+			tvs++;
+			tis += 6;
+		}
+		tempInds[tis] = sliceCount + 1;
+		tempInds[tis + 1] = sliceCount + 2;
+		tempInds[tis + 2] = sliceCount + 3;
+
+		std::vector<v3dxVector2> newVerts;
+		std::vector<UINT> newInds;
+		auto rect = FPathUtility::CalcBounds(tempVertices.data(), (UINT)tempVertices.size());
+		if (clip.IsValid() && clip.IsOverlap(rect))
+		{
+			auto triNum = tempInds.size() / 3;
+			std::vector<v3dxVector2> calTriVec;
+			calTriVec.resize(3);
+			for (size_t i = 0; i < triNum; i++)
+			{
+				calTriVec[0] = tempVertices[tempInds[i * 3]];
+				calTriVec[1] = tempVertices[tempInds[i * 3 + 1]];
+				calTriVec[2] = tempVertices[tempInds[i * 3 + 2]];
+				const UINT startIdx = (UINT)newVerts.size();
+				FPathUtility::SutherlandHodgmanClip(clip, calTriVec.data(), 3, newVerts);
+				FPathUtility::Triangulate(newVerts.data() + startIdx, (UINT)(newVerts.size() - startIdx), newInds, startIdx);
+			}
+		}
+		else
+		{
+			newVerts = tempVertices;
+			newInds = tempInds;
+		}
+		UINT vst = (UINT)vertices.size();
+		vertices.resize(vst + newVerts.size());
+		for (UINT i = 0; i < newVerts.size(); i++)
+		{
+			auto& vt = vertices[vst + i];
+			vt.Pos.setValue(newVerts[i].x, newVerts[i].y, 0.0f);
+			vt.Color = color;
+			vt.UV = GETUVFROMPOS(vt.Pos);
+			FCanvasDrawCmdList::TransformIndexToColor(transformIndex, vt.Index);
+		}
+		UINT ist = (UINT)indices.size();
+		indices.resize(ist + newInds.size());
+		for (UINT i = 0; i < newInds.size(); i++)
+		{
+			indices[ist + i] = vst + newInds[i];
+		}	
+	}
+	static void CalculateRect(
+		const FRectanglef& rect, 
+		const FRectanglef& clip, 
+		const v3dxVector2& size, 
+		const EngineNS::FRectanglef& uvRect, 
+		FDrawCmd* pCmd, 
+		const FColor& color,
+		const UInt16* transformIndex)
+	{
+		FRectanglef clippedRect = rect;
+		if (clip.IsValid())
+		{
+			if (clip.IsOverlap(rect))
+				clippedRect = FRectanglef::And(clip, rect);
+			else
+				return;
+		}
+		FCanvasVertex p[4];
+		p[0].Pos.setValue(clippedRect.X, clippedRect.Y, 0.0f);
+		p[0].Color = color;
+		p[0].UV = GETUVFROMPOS(p[0].Pos);
+		FCanvasDrawCmdList::TransformIndexToColor(transformIndex, p[0].Index);
+		p[1].Pos.setValue(clippedRect.GetRight(), clippedRect.Y, 0.0f);
+		p[1].Color = color;
+		p[1].UV = GETUVFROMPOS(p[1].Pos);
+		FCanvasDrawCmdList::TransformIndexToColor(transformIndex, p[1].Index);
+		p[2].Pos.setValue(clippedRect.X, clippedRect.GetBottom(), 0.0f);
+		p[2].Color = color;
+		p[2].UV = GETUVFROMPOS(p[2].Pos);
+		FCanvasDrawCmdList::TransformIndexToColor(transformIndex, p[2].Index);
+		p[3].Pos.setValue(clippedRect.GetRight(), clippedRect.GetBottom(), 0.0f);
+		p[3].Color = color;
+		p[3].UV = GETUVFROMPOS(p[3].Pos);
+		FCanvasDrawCmdList::TransformIndexToColor(transformIndex, p[3].Index);
+		pCmd->PushQuad(p);
+	}
+	void FCanvasDrawCmdList::AddRectLine(const v3dxVector2& s, const v3dxVector2& e, const v3dxThickness& thickness, const v3dxVector4& cornerRadius, const FColor& color, FSubDrawCmd* pOutCmd)
+	{
+		const auto& clip = GetCurrentClipRect();
+		v3dxVector2 min = v3dxVector2(std::min(s.x, e.x), std::min(s.y, e.y));
+		v3dxVector2 max = v3dxVector2(std::max(s.x, e.x), std::max(s.y, e.y));
+		v3dxVector2 size = max - min;
+
+		if (clip.IsValid() && ((clip.X > max.x) || (clip.Y > max.y) || (clip.GetRight() < min.x) || (clip.GetBottom() < min.y)))
+			return;
+
+		int topLeftCornerSliceCount = cornerRadius.topleft != 0 ? (int)Math::Ceil(Math::HALF_PI / (std::asinf(SMALLRADLINE / cornerRadius.topleft) * 2)) : 0;
+		int topRightCornerSliceCount = cornerRadius.topright != 0 ? (int)Math::Ceil(Math::HALF_PI / (std::asinf(SMALLRADLINE / cornerRadius.topright) * 2)) : 0;
+		int bottomRightCornerSliceCount = cornerRadius.bottomright != 0 ? (int)Math::Ceil(Math::HALF_PI / (std::asinf(SMALLRADLINE / cornerRadius.bottomright) * 2)) : 0;
+		int bottomLeftCornerSliceCount = cornerRadius.bottomleft != 0 ? (int)Math::Ceil(Math::HALF_PI / (std::asinf(SMALLRADLINE / cornerRadius.bottomleft) * 2)) : 0;
+
+		auto brush = GetCurrentBrush();
+		auto pCmd = GetTopBrushDrawCmd();
+		auto matrix = GetCurrentMatrix();
+		auto index = GetCurrentTransformIndex();
+		const auto& uvRect = brush->Rect;
+		auto& vertices = pCmd->mVertices;
+		auto& indices = pCmd->mIndices;
+		auto vtStart = (UINT)vertices.size();
+		auto idxStart = (UINT)indices.size();
+
+		// 示例：实际顶点顺序略有差异
+		//        /p26 ----------- p24 \
+		//    p28   |                |   p22
+		//    /    p27 ----------- p25     \
+		//  p30   p29                p23    p20
+		//  /    p31                  p21     \  
+		// p0 - p1                     p19 - p18 
+		// |    |                       |     |
+		// |    |                       |     |
+		// |    |                       |     |
+		// p2 - p3                     p17 - p16
+		//  \    p5                   p15    /
+		//  p4     p7                p13    p14
+		//    \     p9 ---------- p11      / 
+		//     p6    |              |   p12
+		//        \ p8 ---------- p10 /  
+
+		// left
+		FRectanglef tileRect = FRectanglef(min.x, min.y + thickness.top + cornerRadius.topleft, thickness.left, size.y - thickness.top - cornerRadius.topleft - thickness.bottom - cornerRadius.bottomleft);
+		CalculateRect(tileRect, clip, size, uvRect, pCmd, color, index);
+
+		// bottom-left
+		CalculateCorner(bottomLeftCornerSliceCount, Math::V3_PI, 0, clip,
+			min, max, size, vertices, indices, uvRect,
+			thickness, cornerRadius, color, index);
+		
+		// bottom
+		tileRect = FRectanglef(min.x + thickness.left + cornerRadius.bottomleft, max.y - thickness.bottom,
+			size.x - thickness.left - thickness.right - cornerRadius.bottomleft - cornerRadius.bottomright,
+			thickness.bottom);
+		CalculateRect(tileRect, clip, size, uvRect, pCmd, color, index);
+
+		// bottom right
+		CalculateCorner(bottomRightCornerSliceCount, Math::HALF_PI * 3, 1, clip,
+			min, max, size, vertices, indices, uvRect,
+			thickness, cornerRadius, color, index);
+
+		// right
+		tileRect = FRectanglef(max.x - thickness.right, min.y + thickness.top + cornerRadius.topright, thickness.right,
+			size.y - thickness.top - thickness.bottom - cornerRadius.topright - cornerRadius.bottomright);
+		CalculateRect(tileRect, clip, size, uvRect, pCmd, color, index);
+
+		// top right
+		CalculateCorner(topRightCornerSliceCount, 0, 2, clip,
+			min, max, size, vertices, indices, uvRect,
+			thickness, cornerRadius, color, index);
+
+		// top
+		tileRect = FRectanglef(min.x + thickness.left + cornerRadius.topleft, min.y,
+			size.x - thickness.left - thickness.right - cornerRadius.topleft - cornerRadius.topright,
+			thickness.top);
+		CalculateRect(tileRect, clip, size, uvRect, pCmd, color, index);
+
+		// top left
+		CalculateCorner(topLeftCornerSliceCount, Math::HALF_PI, 3, clip,
+			min, max, size, vertices, indices, uvRect,
+			thickness, cornerRadius, color, index);
+
+		if (pOutCmd)
+		{
+			pOutCmd->DrawCmd = pCmd;
+			pOutCmd->VertexStart = vtStart;
+			pOutCmd->IndexStart = idxStart;
+			pOutCmd->Count = (UINT)pCmd->mVertices.size() - pOutCmd->VertexStart;
+			pOutCmd->IndexCount = (UINT)pCmd->mIndices.size() - pOutCmd->IndexStart;
+		}
 	}
 
 	void FCanvasDrawCmdList::Reset()
@@ -487,7 +884,7 @@ namespace Canvas
 
 		auto pDefaultBrush = MakeWeakRef(new ICanvasBrush());
 		pDefaultBrush->Rect = FRectanglef(0, 0, 1, 1);
-		pDefaultBrush->Name = VNameString("DefaultBrush");
+		pDefaultBrush->Name = VNameString("@MatInst:DefaultBrush");
 		mBrushes.push(pDefaultBrush);
 	}
 
@@ -510,7 +907,7 @@ namespace Canvas
 			UINT numOfVert = (UINT)j->mVertices.size();
 			if (numOfVert > 0)
 			{
-				mesh->AddVertex_Pos_UV_Color(&j->mVertices[0], numOfVert, InvertY, ClientRect.Height);
+				mesh->AddVertex_Pos_UV_Color_Index(&j->mVertices[0], numOfVert, InvertY, ClientRect.Height);
 				VertexNumber += numOfVert;
 			}
 

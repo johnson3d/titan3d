@@ -8,7 +8,9 @@
 #include "DX12FrameBuffers.h"
 #include "DX12Effect.h"
 #include "DX12Drawcall.h"
+#include "DX12GeomMesh.h"
 #include "../NxEffect.h"
+#include "../../Base/thread/vfxthread.h"
 #include <dxgi1_3.h>
 
 #if defined(HasModule_GpuDump)
@@ -105,11 +107,18 @@ namespace NxRHI
 	}
 	DX12GpuDevice::~DX12GpuDevice()
 	{
-		mCmdQueue->ClearIdleCmdlists();
-		mCmdQueue->mFramePost = nullptr;
-		mCmdQueue = nullptr;
-		mCmdAllocatorManager = nullptr;
+		mPostCmdRecorder = nullptr;
+		mPostCmdList = nullptr;
+
+		ASSERT(mCmdQueue != nullptr);
+		if (mCmdQueue != nullptr)
+		{
+			mCmdQueue->ClearIdleCmdlists();
+			mCmdQueue = nullptr;
+			mCmdAllocatorManager = nullptr;
+		}
 		
+		//mDevice = nullptr;;
 		//Safe_Release(mDevice);
 		//Safe_Release(mDXGIFactory);
 	}
@@ -132,6 +141,7 @@ namespace NxRHI
 	}
 	bool DX12GpuDevice::InitDevice(IGpuSystem* pGpuSystem, const FGpuDeviceDesc* desc)
 	{
+		mDeviceThreadId = vfxThread::GetCurrentThreadId();
 		Desc = *desc;
 		mGpuSystem.FromObject(pGpuSystem);
 
@@ -274,7 +284,7 @@ namespace NxRHI
 		}
 
 		mCmdAllocatorManager = MakeWeakRef(new DX12CommandAllocatorManager());
-		mDescriptorSetAllocator = MakeWeakRef(new DX12DescriptorAllocatorManager());
+		mDescriptorSetAllocator = MakeWeakRef(new DX12HeapAllocatorManager());
 
 		D3D12_COMMAND_QUEUE_DESC queueDesc{};
 		queueDesc.Type = D3D12_COMMAND_LIST_TYPE_DIRECT;
@@ -283,6 +293,7 @@ namespace NxRHI
 		mDevice->CreateCommandQueue(&queueDesc, IID_PPV_ARGS(mCmdQueue->mCmdQueue.GetAddressOf()));
 
 		mCmdQueue->Init(this);
+		mCmdQueue->mCmdQueue->SetName(L"DefaultQueue");
 		
 		QueryDevice();
 
@@ -329,7 +340,7 @@ namespace NxRHI
 		mCaps.IsSupoortBufferToTexture = true;
 		mCaps.IsSupportSSBO_VS = true;
 
-		mDefaultBufferMemAllocator = MakeWeakRef(new DX12GpuDefaultMemAllocator());
+		mDefaultBufferMemAllocator = MakeWeakRef(new DX12DefaultGpuMemAllocator());
 		mDefaultBufferMemAllocator->mHeapProperties.Type = D3D12_HEAP_TYPE_DEFAULT;
 		mDefaultBufferMemAllocator->mHeapProperties.CPUPageProperty = D3D12_CPU_PAGE_PROPERTY::D3D12_CPU_PAGE_PROPERTY_UNKNOWN;
 		mDefaultBufferMemAllocator->mHeapProperties.MemoryPoolPreference = D3D12_MEMORY_POOL::D3D12_MEMORY_POOL_UNKNOWN;
@@ -346,7 +357,7 @@ namespace NxRHI
 		mDefaultBufferMemAllocator->mResDesc.Flags = D3D12_RESOURCE_FLAGS::D3D12_RESOURCE_FLAG_NONE;
 		mDefaultBufferMemAllocator->mResState = D3D12_RESOURCE_STATES::D3D12_RESOURCE_STATE_COMMON;
 
-		mUploadBufferMemAllocator = MakeWeakRef(new DX12GpuDefaultMemAllocator());
+		mUploadBufferMemAllocator = MakeWeakRef(new DX12DefaultGpuMemAllocator());
 		mUploadBufferMemAllocator->mHeapProperties.Type = D3D12_HEAP_TYPE_UPLOAD;
 		mUploadBufferMemAllocator->mHeapProperties.CPUPageProperty = D3D12_CPU_PAGE_PROPERTY::D3D12_CPU_PAGE_PROPERTY_UNKNOWN;
 		mUploadBufferMemAllocator->mHeapProperties.MemoryPoolPreference = D3D12_MEMORY_POOL::D3D12_MEMORY_POOL_UNKNOWN;
@@ -363,7 +374,7 @@ namespace NxRHI
 		mUploadBufferMemAllocator->mResDesc.Flags = D3D12_RESOURCE_FLAGS::D3D12_RESOURCE_FLAG_NONE;
 		mUploadBufferMemAllocator->mResState = D3D12_RESOURCE_STATES::D3D12_RESOURCE_STATE_GENERIC_READ;
 
-		mUavBufferMemAllocator = MakeWeakRef(new DX12GpuDefaultMemAllocator());
+		mUavBufferMemAllocator = MakeWeakRef(new DX12DefaultGpuMemAllocator());
 		mUavBufferMemAllocator->mHeapProperties.Type = D3D12_HEAP_TYPE_UPLOAD;
 		mUavBufferMemAllocator->mHeapProperties.CPUPageProperty = D3D12_CPU_PAGE_PROPERTY::D3D12_CPU_PAGE_PROPERTY_UNKNOWN;
 		mUavBufferMemAllocator->mHeapProperties.MemoryPoolPreference = D3D12_MEMORY_POOL::D3D12_MEMORY_POOL_UNKNOWN;
@@ -380,7 +391,7 @@ namespace NxRHI
 		mUavBufferMemAllocator->mResDesc.Flags = D3D12_RESOURCE_FLAGS::D3D12_RESOURCE_FLAG_ALLOW_UNORDERED_ACCESS;
 		mUavBufferMemAllocator->mResState = D3D12_RESOURCE_STATES::D3D12_RESOURCE_STATE_GENERIC_READ;
 
-		mCBufferMemAllocator = MakeWeakRef(new DX12GpuPooledMemAllocator());
+		mCBufferMemAllocator = MakeWeakRef(new DX12PagedGpuMemAllocator());
 		mCBufferMemAllocator->mHeapProperties.Type = D3D12_HEAP_TYPE_UPLOAD;
 		mCBufferMemAllocator->mHeapProperties.CPUPageProperty = D3D12_CPU_PAGE_PROPERTY::D3D12_CPU_PAGE_PROPERTY_UNKNOWN;
 		mCBufferMemAllocator->mHeapProperties.MemoryPoolPreference = D3D12_MEMORY_POOL::D3D12_MEMORY_POOL_UNKNOWN;
@@ -397,7 +408,7 @@ namespace NxRHI
 		mCBufferMemAllocator->mResDesc.Flags = D3D12_RESOURCE_FLAGS::D3D12_RESOURCE_FLAG_NONE;
 		mCBufferMemAllocator->mResState = D3D12_RESOURCE_STATES::D3D12_RESOURCE_STATE_GENERIC_READ;
 
-		auto tRtv = new DX12DescriptorSetAllocator();
+		auto tRtv = new DX12HeapAllocator();
 		mRtvAllocator = MakeWeakRef(tRtv);
 		{
 			mRtvAllocator->Creator.mDesc.Type = D3D12_DESCRIPTOR_HEAP_TYPE::D3D12_DESCRIPTOR_HEAP_TYPE_RTV;
@@ -406,7 +417,7 @@ namespace NxRHI
 			mRtvAllocator->Creator.mDeviceRef.FromObject(this);
 			mRtvAllocator->mDescriptorStride = mDevice->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE::D3D12_DESCRIPTOR_HEAP_TYPE_RTV);
 		}
-		auto tDsv = new DX12DescriptorSetAllocator();
+		auto tDsv = new DX12HeapAllocator();
 		mDsvAllocator = MakeWeakRef(tDsv);
 		{
 			mDsvAllocator->Creator.mDesc.Type = D3D12_DESCRIPTOR_HEAP_TYPE::D3D12_DESCRIPTOR_HEAP_TYPE_DSV;
@@ -415,7 +426,7 @@ namespace NxRHI
 			mDsvAllocator->Creator.mDeviceRef.FromObject(this);
 			mDsvAllocator->mDescriptorStride = mDevice->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE::D3D12_DESCRIPTOR_HEAP_TYPE_DSV);
 		}
-		auto tSampler = new DX12DescriptorSetAllocator();
+		auto tSampler = new DX12HeapAllocator();
 		mSamplerAllocator = MakeWeakRef(tSampler);
 		{
 			mSamplerAllocator->Creator.DebugName = L"Sampler";
@@ -425,7 +436,7 @@ namespace NxRHI
 			mSamplerAllocator->Creator.mDeviceRef.FromObject(this);
 			mSamplerAllocator->mDescriptorStride = mDevice->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE::D3D12_DESCRIPTOR_HEAP_TYPE_SAMPLER);
 		}
-		auto tSrv = new DX12DescriptorSetAllocator();
+		auto tSrv = new DX12HeapAllocator();
 		mCbvSrvUavAllocator = MakeWeakRef(tSrv);
 		{
 			mCbvSrvUavAllocator->Creator.DebugName = L"CSU";
@@ -435,10 +446,43 @@ namespace NxRHI
 			mCbvSrvUavAllocator->Creator.mDeviceRef.FromObject(this);
 			mCbvSrvUavAllocator->mDescriptorStride = mDevice->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE::D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
 		}
-		mNullCBV_SRV_UAV = mCbvSrvUavAllocator->Alloc<DX12DescriptorSetPagedObject>();
-		mNullSampler = mSamplerAllocator->Alloc<DX12DescriptorSetPagedObject>();
-		mNullRTV = mRtvAllocator->Alloc<DX12DescriptorSetPagedObject>();
-		mNullDSV = mDsvAllocator->Alloc<DX12DescriptorSetPagedObject>();
+		{
+			FCbvDesc desc{};
+			desc.BufferSize = 1;
+			desc.ShaderBinder = nullptr;
+			mNullCBV = MakeWeakRef((DX12CbView*)this->CreateCBV(nullptr, &desc));
+		}
+		FBufferDesc bfDesc{};
+		bfDesc.SetDefault(true, (EBufferType)(EBufferType::BFT_SRV | EBufferType::BFT_UAV));
+		bfDesc.Size = sizeof(float);
+		bfDesc.StructureStride = sizeof(float);
+		auto nullBuffer = MakeWeakRef(this->CreateBuffer(&bfDesc));
+		{	
+			FSrvDesc desc{};
+			desc.SetBuffer(true);
+			desc.Buffer.NumElements = 1;
+			desc.Buffer.StructureByteStride = sizeof(float);
+			mNullSRV = MakeWeakRef((DX12SrView*)this->CreateSRV(nullBuffer, &desc));
+		}
+		{
+			FUavDesc desc{};
+			desc.SetBuffer(true);
+			desc.Buffer.NumElements = 1;
+			desc.Buffer.StructureByteStride = sizeof(float);
+			mNullUAV = MakeWeakRef((DX12UaView*)this->CreateUAV(nullBuffer, &desc));
+		}
+		{
+			FSamplerDesc desc{};
+			desc.SetDefault();
+			mNullSampler = MakeWeakRef((DX12Sampler*)this->CreateSampler(&desc));
+		}
+		//mNullRTV = mRtvAllocator->Alloc<DX12PagedHeap>();
+		//mNullDSV = mDsvAllocator->Alloc<DX12PagedHeap>();
+
+		mPostCmdList = MakeWeakRef((DX12CommandList*)this->CreateCommandList());
+		mPostCmdList->SetDebugName("PostCmdList");
+		mPostCmdRecorder = MakeWeakRef(new ICmdRecorder());
+
 		return true;
 	}
 	void DX12GpuDevice::QueryDevice()
@@ -674,11 +718,29 @@ namespace NxRHI
 		}
 		return result;
 	}
+	FVertexArray* DX12GpuDevice::CreateVertexArray()
+	{
+		return new DX12VertexArray();
+	}
 	void DX12GpuDevice::TickPostEvents()
 	{
+		IsSyncStage = true;
+		if (mPostCmdList != nullptr)
+		{
+			mPostCmdList->BeginCommand();
+			mPostCmdList->AppendDraws(mPostCmdRecorder);
+			mPostCmdList->FlushDraws();
+			mPostCmdList->EndCommand();
+			GetCmdQueue()->ExecuteCommandListSingle(mPostCmdList, EQueueType::QU_Default);
+			mPostCmdRecorder->ResetGpuDraws();
+		}
+		
+		//GetCmdQueue()->Flush(EQueueType::QU_ALL);
+
 		if (mCmdQueue != nullptr)
 			mCmdQueue->TryRecycle();
 		mCmdAllocatorManager->TickRecycle();
+
 		IGpuDevice::TickPostEvents();
 
 		if (mIsTryFinalize)
@@ -696,6 +758,7 @@ namespace NxRHI
 				mIsFinalized = true;
 			}
 		}
+		IsSyncStage = false;
 	}
 	std::string GetOpStr(D3D12_AUTO_BREADCRUMB_OP op)
 	{
@@ -846,173 +909,179 @@ namespace NxRHI
 			mDeviceRemovedCallback();
 		}
 		
-		auto hr = mDevice->GetDeviceRemovedReason();
-		if (mDredSettings != nullptr)
+		if (CoreSDK::OnGpuDeviceRemoved != nullptr)
 		{
-			AutoRef<ID3D12DeviceRemovedExtendedData> pDred;
-			mDevice->QueryInterface(IID_PPV_ARGS(pDred.GetAddressOf()));
-
-			D3D12_DRED_AUTO_BREADCRUMBS_OUTPUT DredAutoBreadcrumbsOutput;
-			D3D12_DRED_PAGE_FAULT_OUTPUT DredPageFaultOutput;
-			pDred->GetAutoBreadcrumbsOutput(&DredAutoBreadcrumbsOutput);
-			pDred->GetPageFaultAllocationOutput(&DredPageFaultOutput);
-
-			{
-				auto curNode = DredAutoBreadcrumbsOutput.pHeadAutoBreadcrumbNode;
-				while (curNode != nullptr)
-				{
-					std::string n;
-					if (curNode->pCommandListDebugNameA != nullptr)
-						n = curNode->pCommandListDebugNameA;
-					else if (curNode->pCommandListDebugNameW != nullptr)
-						n = StringHelper::wstrtostr(curNode->pCommandListDebugNameW);
-					/*if (n.length() == 0)
-					{
-						wchar_t name[128] = {};
-						UINT size = sizeof(name);
-						if (S_OK == curNode->pCommandList->GetPrivateData(WKPDID_D3DDebugObjectNameW, &size, name))
-						{
-							n = StringHelper::wstrtostr(name);
-						}
-					}*/
-					if (n.length() != 0)
-						VFX_LTRACE(ELTT_Graphics, "Dred Begin HistoryCmdList {%s}\r\n", n.c_str());
-					curNode->pLastBreadcrumbValue;
-					for (UINT i = 0; i < curNode->BreadcrumbCount; i++)
-					{
-						D3D12_AUTO_BREADCRUMB_OP op = curNode->pCommandHistory[i];
-						std::string opStr = GetOpStr(op);
-						VFX_LTRACE(ELTT_Graphics, "Dred HistoryOp {%s}\r\n", opStr.c_str());
-					}
-
-					if (curNode->pLastBreadcrumbValue != nullptr)
-					{
-						auto lastOp = curNode->pCommandHistory[*curNode->pLastBreadcrumbValue];
-						VFX_LTRACE(ELTT_Graphics, "Dred {%s} LastOp = %s[%d]\r\n", n.c_str(), GetOpStr(lastOp).c_str(), *curNode->pLastBreadcrumbValue);
-					}
-					
-
-					if (n.length() != 0)
-						VFX_LTRACE(ELTT_Graphics, "Dred End HistoryCmdList {%s}\r\n", n.c_str());
-
-					curNode = curNode->pNext;
-				}
-			}
-			{
-				auto curNode = DredPageFaultOutput.pHeadRecentFreedAllocationNode;
-				while (curNode != nullptr)
-				{
-					std::string n;
-					if (curNode->ObjectNameA != nullptr)
-						n = curNode->ObjectNameA;
-					else if (curNode->ObjectNameW != nullptr)
-						n = StringHelper::wstrtostr(curNode->ObjectNameW);
-					auto atype = curNode->AllocationType;
-					std::string opStr;
-					switch (atype)
-					{
-					case D3D12_DRED_ALLOCATION_TYPE_COMMAND_QUEUE:
-						opStr = "COMMAND_QUEUE";
-						break;
-					case D3D12_DRED_ALLOCATION_TYPE_COMMAND_ALLOCATOR:
-						opStr = "COMMAND_ALLOCATOR";
-						break;
-					case D3D12_DRED_ALLOCATION_TYPE_PIPELINE_STATE:
-						opStr = "PIPELINE_STATE";
-						break;
-					case D3D12_DRED_ALLOCATION_TYPE_COMMAND_LIST:
-						opStr = "COMMAND_LIST";
-						break;
-					case D3D12_DRED_ALLOCATION_TYPE_FENCE:
-						opStr = "FENCE";
-						break;
-					case D3D12_DRED_ALLOCATION_TYPE_DESCRIPTOR_HEAP:
-						opStr = "DESCRIPTOR_HEAP";
-						break;
-					case D3D12_DRED_ALLOCATION_TYPE_HEAP:
-						opStr = "HEAP";
-						break;
-					case D3D12_DRED_ALLOCATION_TYPE_QUERY_HEAP:
-						opStr = "QUERY_HEAP";
-						break;
-					case D3D12_DRED_ALLOCATION_TYPE_COMMAND_SIGNATURE:
-						opStr = "COMMAND_SIGNATURE";
-						break;
-					case D3D12_DRED_ALLOCATION_TYPE_PIPELINE_LIBRARY:
-						opStr = "PIPELINE_LIBRARY";
-						break;
-					case D3D12_DRED_ALLOCATION_TYPE_VIDEO_DECODER:
-						opStr = "VIDEO_DECODER";
-						break;
-					case D3D12_DRED_ALLOCATION_TYPE_VIDEO_PROCESSOR:
-						opStr = "VIDEO_PROCESSOR";
-						break;
-					case D3D12_DRED_ALLOCATION_TYPE_RESOURCE:
-						opStr = "RESOURCE";
-						break;
-					case D3D12_DRED_ALLOCATION_TYPE_PASS:
-						opStr = "PASS";
-						break;
-					case D3D12_DRED_ALLOCATION_TYPE_CRYPTOSESSION:
-						opStr = "CRYPTOSESSION";
-						break;
-					case D3D12_DRED_ALLOCATION_TYPE_CRYPTOSESSIONPOLICY:
-						opStr = "CRYPTOSESSIONPOLICY";
-						break;
-					case D3D12_DRED_ALLOCATION_TYPE_PROTECTEDRESOURCESESSION:
-						opStr = "PROTECTEDRESOURCESESSION";
-						break;
-					case D3D12_DRED_ALLOCATION_TYPE_VIDEO_DECODER_HEAP:
-						opStr = "VIDEO_DECODER_HEAP";
-						break;
-					case D3D12_DRED_ALLOCATION_TYPE_COMMAND_POOL:
-						opStr = "COMMAND_POOL";
-						break;
-					case D3D12_DRED_ALLOCATION_TYPE_COMMAND_RECORDER:
-						opStr = "COMMAND_RECORDER";
-						break;
-					case D3D12_DRED_ALLOCATION_TYPE_STATE_OBJECT:
-						opStr = "STATE_OBJECT";
-						break;
-					case D3D12_DRED_ALLOCATION_TYPE_METACOMMAND:
-						opStr = "METACOMMAND";
-						break;
-					case D3D12_DRED_ALLOCATION_TYPE_SCHEDULINGGROUP:
-						opStr = "SCHEDULINGGROUP";
-						break;
-					case D3D12_DRED_ALLOCATION_TYPE_VIDEO_MOTION_ESTIMATOR:
-						opStr = "VIDEO_MOTION_ESTIMATOR";
-						break;
-					case D3D12_DRED_ALLOCATION_TYPE_VIDEO_MOTION_VECTOR_HEAP:
-						opStr = "VIDEO_MOTION_VECTOR_HEAP";
-						break;
-					case D3D12_DRED_ALLOCATION_TYPE_VIDEO_EXTENSION_COMMAND:
-						opStr = "VIDEO_EXTENSION_COMMAND";
-						break;
-					case D3D12_DRED_ALLOCATION_TYPE_INVALID:
-						opStr = "INVALID";
-						break;
-					default:
-						break;
-					}
-					VFX_LTRACE(ELTT_Graphics, "Dred RecentFree {%s} = %s\r\n", n.c_str(), opStr.c_str());
-					curNode = curNode->pNext;
-				}
-			}
-			{
-				auto curNode = DredPageFaultOutput.pHeadExistingAllocationNode;
-				while (curNode != nullptr)
-				{
-					std::string n;
-					if (curNode->ObjectNameA != nullptr)
-						n = curNode->ObjectNameA;
-					else if (curNode->ObjectNameW != nullptr)
-						n = StringHelper::wstrtostr(curNode->ObjectNameW);
-					VFX_LTRACE(ELTT_Graphics, "Dred Existing {%s}\r\n", n.c_str());
-					curNode = curNode->pNext;
-				}
-			}
+			CoreSDK::OnGpuDeviceRemoved(this);
+			//GpuDump::NvAftermath::OnDredDump(this);
 		}
+		
+		//auto hr = mDevice->GetDeviceRemovedReason();
+		//if (mDredSettings != nullptr)
+		//{
+		//	AutoRef<ID3D12DeviceRemovedExtendedData> pDred;
+		//	mDevice->QueryInterface(IID_PPV_ARGS(pDred.GetAddressOf()));
+
+		//	D3D12_DRED_AUTO_BREADCRUMBS_OUTPUT DredAutoBreadcrumbsOutput;
+		//	D3D12_DRED_PAGE_FAULT_OUTPUT DredPageFaultOutput;
+		//	pDred->GetAutoBreadcrumbsOutput(&DredAutoBreadcrumbsOutput);
+		//	pDred->GetPageFaultAllocationOutput(&DredPageFaultOutput);
+
+		//	{
+		//		auto curNode = DredAutoBreadcrumbsOutput.pHeadAutoBreadcrumbNode;
+		//		while (curNode != nullptr)
+		//		{
+		//			std::string n;
+		//			if (curNode->pCommandListDebugNameA != nullptr)
+		//				n = curNode->pCommandListDebugNameA;
+		//			else if (curNode->pCommandListDebugNameW != nullptr)
+		//				n = StringHelper::wstrtostr(curNode->pCommandListDebugNameW);
+		//			/*if (n.length() == 0)
+		//			{
+		//				wchar_t name[128] = {};
+		//				UINT size = sizeof(name);
+		//				if (S_OK == curNode->pCommandList->GetPrivateData(WKPDID_D3DDebugObjectNameW, &size, name))
+		//				{
+		//					n = StringHelper::wstrtostr(name);
+		//				}
+		//			}*/
+		//			if (n.length() != 0)
+		//				VFX_LTRACE(ELTT_Graphics, "Dred Begin HistoryCmdList {%s}\r\n", n.c_str());
+		//			curNode->pLastBreadcrumbValue;
+		//			for (UINT i = 0; i < curNode->BreadcrumbCount; i++)
+		//			{
+		//				D3D12_AUTO_BREADCRUMB_OP op = curNode->pCommandHistory[i];
+		//				std::string opStr = GetOpStr(op);
+		//				VFX_LTRACE(ELTT_Graphics, "Dred HistoryOp {%s}\r\n", opStr.c_str());
+		//			}
+
+		//			if (curNode->pLastBreadcrumbValue != nullptr)
+		//			{
+		//				auto lastOp = curNode->pCommandHistory[*curNode->pLastBreadcrumbValue];
+		//				VFX_LTRACE(ELTT_Graphics, "Dred {%s} LastOp = %s[%d]\r\n", n.c_str(), GetOpStr(lastOp).c_str(), *curNode->pLastBreadcrumbValue);
+		//			}
+		//			
+
+		//			if (n.length() != 0)
+		//				VFX_LTRACE(ELTT_Graphics, "Dred End HistoryCmdList {%s}\r\n", n.c_str());
+
+		//			curNode = curNode->pNext;
+		//		}
+		//	}
+		//	{
+		//		auto curNode = DredPageFaultOutput.pHeadRecentFreedAllocationNode;
+		//		while (curNode != nullptr)
+		//		{
+		//			std::string n;
+		//			if (curNode->ObjectNameA != nullptr)
+		//				n = curNode->ObjectNameA;
+		//			else if (curNode->ObjectNameW != nullptr)
+		//				n = StringHelper::wstrtostr(curNode->ObjectNameW);
+		//			auto atype = curNode->AllocationType;
+		//			std::string opStr;
+		//			switch (atype)
+		//			{
+		//			case D3D12_DRED_ALLOCATION_TYPE_COMMAND_QUEUE:
+		//				opStr = "COMMAND_QUEUE";
+		//				break;
+		//			case D3D12_DRED_ALLOCATION_TYPE_COMMAND_ALLOCATOR:
+		//				opStr = "COMMAND_ALLOCATOR";
+		//				break;
+		//			case D3D12_DRED_ALLOCATION_TYPE_PIPELINE_STATE:
+		//				opStr = "PIPELINE_STATE";
+		//				break;
+		//			case D3D12_DRED_ALLOCATION_TYPE_COMMAND_LIST:
+		//				opStr = "COMMAND_LIST";
+		//				break;
+		//			case D3D12_DRED_ALLOCATION_TYPE_FENCE:
+		//				opStr = "FENCE";
+		//				break;
+		//			case D3D12_DRED_ALLOCATION_TYPE_DESCRIPTOR_HEAP:
+		//				opStr = "DESCRIPTOR_HEAP";
+		//				break;
+		//			case D3D12_DRED_ALLOCATION_TYPE_HEAP:
+		//				opStr = "HEAP";
+		//				break;
+		//			case D3D12_DRED_ALLOCATION_TYPE_QUERY_HEAP:
+		//				opStr = "QUERY_HEAP";
+		//				break;
+		//			case D3D12_DRED_ALLOCATION_TYPE_COMMAND_SIGNATURE:
+		//				opStr = "COMMAND_SIGNATURE";
+		//				break;
+		//			case D3D12_DRED_ALLOCATION_TYPE_PIPELINE_LIBRARY:
+		//				opStr = "PIPELINE_LIBRARY";
+		//				break;
+		//			case D3D12_DRED_ALLOCATION_TYPE_VIDEO_DECODER:
+		//				opStr = "VIDEO_DECODER";
+		//				break;
+		//			case D3D12_DRED_ALLOCATION_TYPE_VIDEO_PROCESSOR:
+		//				opStr = "VIDEO_PROCESSOR";
+		//				break;
+		//			case D3D12_DRED_ALLOCATION_TYPE_RESOURCE:
+		//				opStr = "RESOURCE";
+		//				break;
+		//			case D3D12_DRED_ALLOCATION_TYPE_PASS:
+		//				opStr = "PASS";
+		//				break;
+		//			case D3D12_DRED_ALLOCATION_TYPE_CRYPTOSESSION:
+		//				opStr = "CRYPTOSESSION";
+		//				break;
+		//			case D3D12_DRED_ALLOCATION_TYPE_CRYPTOSESSIONPOLICY:
+		//				opStr = "CRYPTOSESSIONPOLICY";
+		//				break;
+		//			case D3D12_DRED_ALLOCATION_TYPE_PROTECTEDRESOURCESESSION:
+		//				opStr = "PROTECTEDRESOURCESESSION";
+		//				break;
+		//			case D3D12_DRED_ALLOCATION_TYPE_VIDEO_DECODER_HEAP:
+		//				opStr = "VIDEO_DECODER_HEAP";
+		//				break;
+		//			case D3D12_DRED_ALLOCATION_TYPE_COMMAND_POOL:
+		//				opStr = "COMMAND_POOL";
+		//				break;
+		//			case D3D12_DRED_ALLOCATION_TYPE_COMMAND_RECORDER:
+		//				opStr = "COMMAND_RECORDER";
+		//				break;
+		//			case D3D12_DRED_ALLOCATION_TYPE_STATE_OBJECT:
+		//				opStr = "STATE_OBJECT";
+		//				break;
+		//			case D3D12_DRED_ALLOCATION_TYPE_METACOMMAND:
+		//				opStr = "METACOMMAND";
+		//				break;
+		//			case D3D12_DRED_ALLOCATION_TYPE_SCHEDULINGGROUP:
+		//				opStr = "SCHEDULINGGROUP";
+		//				break;
+		//			case D3D12_DRED_ALLOCATION_TYPE_VIDEO_MOTION_ESTIMATOR:
+		//				opStr = "VIDEO_MOTION_ESTIMATOR";
+		//				break;
+		//			case D3D12_DRED_ALLOCATION_TYPE_VIDEO_MOTION_VECTOR_HEAP:
+		//				opStr = "VIDEO_MOTION_VECTOR_HEAP";
+		//				break;
+		//			case D3D12_DRED_ALLOCATION_TYPE_VIDEO_EXTENSION_COMMAND:
+		//				opStr = "VIDEO_EXTENSION_COMMAND";
+		//				break;
+		//			case D3D12_DRED_ALLOCATION_TYPE_INVALID:
+		//				opStr = "INVALID";
+		//				break;
+		//			default:
+		//				break;
+		//			}
+		//			VFX_LTRACE(ELTT_Graphics, "Dred RecentFree {%s} = %s\r\n", n.c_str(), opStr.c_str());
+		//			curNode = curNode->pNext;
+		//		}
+		//	}
+		//	{
+		//		auto curNode = DredPageFaultOutput.pHeadExistingAllocationNode;
+		//		while (curNode != nullptr)
+		//		{
+		//			std::string n;
+		//			if (curNode->ObjectNameA != nullptr)
+		//				n = curNode->ObjectNameA;
+		//			else if (curNode->ObjectNameW != nullptr)
+		//				n = StringHelper::wstrtostr(curNode->ObjectNameW);
+		//			VFX_LTRACE(ELTT_Graphics, "Dred Existing {%s}\r\n", n.c_str());
+		//			curNode = curNode->pNext;
+		//		}
+		//	}
+		//}
 	}
 	/// <summary>
 	/// 
@@ -1027,9 +1096,6 @@ namespace NxRHI
 	}
 	void DX12CmdQueue::Init(DX12GpuDevice* device)
 	{
-		mFramePost = MakeWeakRef(device->CreateCommandList());
-		mFramePost->BeginCommand();
-
 		FFenceDesc fcDesc{};
 		mFlushFence = MakeWeakRef(device->CreateFence(&fcDesc, "CmdQueue Flush"));;
 
@@ -1065,6 +1131,9 @@ namespace NxRHI
 			auto fenceValue = cur.CmdList->GetCommitFence()->GetCompletedValue();
 			if (fenceValue >= cur.WaitFenceValue)
 			{
+				auto pRecorder = mWaitRecycleCmdlists[i].CmdList->GetCmdRecorder();
+				if (pRecorder != nullptr)
+					pRecorder->ResetGpuDraws();
 				mIdleCmdlist.push(mWaitRecycleCmdlists[i].CmdList);
 				mWaitRecycleCmdlists.erase(mWaitRecycleCmdlists.begin() + i);
 				i--;

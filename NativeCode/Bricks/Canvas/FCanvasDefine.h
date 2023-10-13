@@ -3,6 +3,7 @@
 #include "../../Math/v3dxVector4.h"
 #include "../../Math/v3dxVector3.h"
 #include "../../Math/v3dxVector2.h"
+#include "../../Math/v3dxColor4.h"
 #include "../../NextRHI/NxFrameBuffers.h"
 #include "../../NextRHI/NxGeomMesh.h"
 #include "../../NextRHI/NxGeomMesh.h"
@@ -37,19 +38,19 @@ namespace Canvas
 		{
 			struct
 			{
-				BYTE Red;
-				BYTE Green;
 				BYTE Blue;
+				BYTE Green;
+				BYTE Red;
 				BYTE Alpha : 6;
 				BYTE ShadingMode : 2;//0:normal 1:SDF
 			};
 			DWORD Value;
 		};
 		FColorAndFlags operator =(const FColor& rgba) {
-			Red = rgba.R;
-			Green = rgba.G;
-			Blue = rgba.B;
-			Alpha = rgba.A * 63 / 255;
+			Red = rgba.r;
+			Green = rgba.g;
+			Blue = rgba.b;
+			Alpha = rgba.a * 63 / 255;
 			return *this;
 		}
 		FColorAndFlags()
@@ -79,6 +80,7 @@ namespace Canvas
 		v3dxVector3		Pos{};
 		v3dxVector2		UV{};
 		FColorAndFlags	Color{};
+		FColor			Index = FColor::Zero;
 	};
 }
 NS_END

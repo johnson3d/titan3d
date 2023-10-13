@@ -957,12 +957,12 @@ namespace NxRHI
 	{
 	public:
 		UINT							mMemTypeIndex = -1;
-		AutoRef<FGpuMemory> Alloc(IGpuDevice* device, UINT typeIndex, UINT64 size);
-		virtual AutoRef<FGpuMemory> Alloc(IGpuDevice* device, UINT64 size);
+		AutoRef<FGpuMemory> Alloc(IGpuDevice* device, UINT typeIndex, UINT64 size, const char* name);
+		virtual AutoRef<FGpuMemory> Alloc(IGpuDevice* device, UINT64 size, const char* name);
 		virtual void Free(FGpuMemory* memory);
 	};
 
-	class VKGpuPooledMemAllocator : public IGpuPooledMemAllocator
+	class VKGpuPooledMemAllocator : public IPagedGpuMemAllocator
 	{
 	public:
 		UINT64							mBatchPoolSize = 64 * 1024 * 1024;
@@ -970,12 +970,12 @@ namespace NxRHI
 		virtual UINT GetBatchCount(UINT64 size) override {
 			return (UINT)(mBatchPoolSize / size);
 		}
-		virtual IGpuHeap* CreateGpuHeap(IGpuDevice* device, UINT64 size, UINT count) override;
+		virtual IGpuHeap* CreateGpuHeap(IGpuDevice* device, UINT64 size, UINT count, const char* name) override;
 	};
-	class VKGpuLinearMemAllocator : public IGpuLinearMemAllocator
+	class VKGpuLinearMemAllocator : public ILinearGpuMemAllocator
 	{
 	public:
-		virtual IGpuHeap* CreateGpuHeap(IGpuDevice* device, UINT64 size) override;
+		virtual IGpuHeap* CreateGpuHeap(IGpuDevice* device, UINT64 size, const char* name) override;
 	public:
 		UINT							mAlignment = 1;
 		UINT							mMemTypeIndex = -1;

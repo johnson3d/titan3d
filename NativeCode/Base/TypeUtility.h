@@ -160,8 +160,9 @@ void Safe_Release(T*& p)
 {
 	if (p == NULL)
 		return;
-	p->Release();
+	auto save = p;
 	p = nullptr;
+	save->Release();
 }
 
 template<class T>
@@ -181,15 +182,15 @@ public:
 	}
 	AutoRef(T* ptr)
 	{
+		if (ptr != nullptr)
+			ptr->AddRef();
 		Ptr = ptr;
-		if (Ptr != nullptr)
-			Ptr->AddRef();
 	}
 	AutoRef(const AutoRef<T>& rh)
 	{
+		if (rh.Ptr != nullptr)
+			rh.Ptr->AddRef();
 		Ptr = rh.Ptr;
-		if (Ptr != nullptr)
-			Ptr->AddRef();
 	}
 	~AutoRef()
 	{
@@ -213,10 +214,11 @@ public:
 	}
 	AutoRef<T>& operator = (const AutoRef<T>& rh)
 	{
+		if (rh.Ptr != nullptr)
+			rh.Ptr->AddRef();
 		Safe_Release(Ptr);
 		Ptr = rh.Ptr;
-		if (Ptr != nullptr)
-			Ptr->AddRef();
+
 		return *this;
 	}
 	/*AutoRef<T>& operator = (T* rh)
@@ -248,36 +250,57 @@ public:
 	{
 		return Ptr;
 	}*/
-	template<class ConverType>
-	ConverType* UnsafeConvertTo() const
+	template<class ConvertType>
+	inline ConvertType* UnsafeConvertTo() const
 	{
-#if PLATFORM_WIN
-		return dynamic_cast<ConverType*>(Ptr);
-#else
-		return (ConverType*)(Ptr);
-#endif
+		if constexpr (std::is_base_of<ConvertType, T>::value ||
+			std::is_same<T, ConvertType>::value || std::is_same<void, ConvertType>::value)
+		{
+			return static_cast<ConvertType*>((T*)Ptr);
+		}
+		else if constexpr (std::is_base_of<T, ConvertType>::value)
+		{
+			return dynamic_cast<ConvertType*>((T*)Ptr);
+		}
+		else
+		{
+			static_assert(std::is_same<ConvertType, T>::value);
+			return (ConvertType*)(nullptr);
+		}
 	}
-	template<class ConverType>
-	inline AutoRef<ConverType> As()  const {
-		AutoRef<ConverType> result;
-		result.StrongRef(UnsafeConvertTo<ConverType>());
+	template<class ConvertType>
+	inline AutoRef<ConvertType> As()  const {
+		AutoRef<ConvertType> result;
+		result.StrongRef(UnsafeConvertTo<ConvertType>());
 		return result;
 	}
-	template<class ConverType>
-	operator AutoRef<ConverType>() const
+	template<class ConvertType>
+	operator AutoRef<ConvertType>&()
 	{
-		AutoRef<ConverType> result;
+		if constexpr (std::is_base_of<ConvertType, T>::value ||
+			std::is_same<T, ConvertType>::value)
+		{
+			return *((AutoRef<ConvertType>*)this);
+		}
+		else
+		{
+			static AutoRef<ConvertType> result;
+			result.StrongRef(Ptr);
+			return result;
+		}
+		/*AutoRef<ConvertType> result;
 		result.StrongRef(Ptr);
-		return result;
+		return result;*/
+		//return *this;
 	}
 	operator T* () const
 	{
-		return Ptr;
+		return (T*)Ptr;
 	}
 	template <class _ParentType>
 	operator _ParentType* () const
 	{
-		return Ptr;
+		return UnsafeConvertTo<_ParentType>();
 	}
 	T* GetPtr() {
 		return Ptr;

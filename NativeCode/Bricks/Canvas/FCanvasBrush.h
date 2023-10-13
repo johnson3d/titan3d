@@ -176,6 +176,8 @@ namespace Canvas
 		FRectanglef					Rect{};//[0-1]
 		AutoRef<NxRHI::ISrView>		SrView;
 		VNameString					Name;
+		FColor						Color;
+		bool						IsDirty;
 		void SetUV(const v3dxVector2 & uv0, const v3dxVector2 & uv1)
 		{
 			Rect.X = uv0.x;
@@ -203,6 +205,20 @@ namespace Canvas
 			if (SrView == nullptr && other->SrView == nullptr)
 				return this == other;
 			return (SrView == other->SrView);
+		}
+		FColor GetColor() const {
+			return Color;
+		}
+		void SetColor(FColor color)
+		{
+			Color = color;
+			IsDirty = true;
+		}
+		bool GetIsDirty() const {
+			return IsDirty;
+		}
+		void SetIsDirty(bool isDirty) {
+			IsDirty = isDirty;
 		}
 	};
 }

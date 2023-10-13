@@ -38,9 +38,9 @@ namespace NxRHI
 	{
 
 	}
-	UINT64 NullFence::Wait(UINT64 value, UINT timeOut)
+	bool NullFence::Wait(UINT64 value, UINT timeOut)
 	{
-		return 0;
+		return false;
 	}
 }
 

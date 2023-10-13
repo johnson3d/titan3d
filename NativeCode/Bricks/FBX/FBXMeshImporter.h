@@ -140,7 +140,7 @@ namespace AssetImportAndExport
 					}
 					return nullptr;
 				};
-				EFBXImportResult Process(NxRHI::IGpuDevice* rc);
+				EFBXImportResult Process(NxRHI::IGpuDevice* cmd);
 				//v3dxMatrix4 ComputeTotalMatrix(FbxNode* Node, FbxScene* scene);
 				void RecursionCalculateBone(FbxNode* boneNode, FBXSkeletonDesc* skeleton);
 			protected:

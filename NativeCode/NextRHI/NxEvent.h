@@ -38,7 +38,7 @@ namespace NxRHI
 		FFenceDesc
 	{
 		EFenceType Type = EFenceType::NONE;
-		UINT64 InitValue = 1;
+		UINT64 InitValue = 0;
 	};
 	class TR_CLASS()
 		IFence : public IWeakReference
@@ -47,12 +47,12 @@ namespace NxRHI
 		ENGINE_RTTI(IFence);
 		IFence();
 		virtual UINT64 GetCompletedValue() = 0;
-		virtual UINT64 Wait(UINT64 value, UINT timeOut = INFINITE) = 0;
+		virtual bool Wait(UINT64 value, UINT timeOut = INFINITE) = 0;
 		const char* GetName() const {
 			return Name.c_str();
 		}
 		virtual void SetDebugName(const char* name) {}
-		inline UINT64 WaitToExpect(UINT timeOut = INFINITE) {
+		inline bool WaitToExpect(UINT timeOut = INFINITE) {
 			return Wait(ExpectValue, timeOut);
 		}
 		UINT64 IncreaseExpect(ICmdQueue* queue, UINT64 num, EQueueType type);

@@ -15,92 +15,35 @@ namespace NxRHI
 	{
 		ResetGpuDraws();
 	}
-	IGpuResource* ICmdRecorder::FindGpuResourceByTagName(const char* name)
-	{
-		for (auto i : mDrawcallArray)
-		{
-			IGpuResource* findRes = nullptr;
-			i->ForeachGpuResource([&findRes, name](EShaderBindType type, IGpuResource* resource)
-				{
-					if (resource->TagName == name)
-					{
-						findRes = resource;
-						return false;
-					}
-					return true;
-				});
-
-			if (findRes != nullptr)
-				return findRes;
-		}
-		return nullptr;
-	}
-	int ICmdRecorder::CountGpuResourceByTagName(const char* name)
-	{
-		int count = 0;
-		for (auto i : mRefBuffers)
-		{
-			if (i->TagName == name)
-			{
-				auto p = (IUnknown*)i->GetHWBuffer();
-				auto ref = p->AddRef();
-				count++;
-			}
-		}
-		/*for (auto i : mDrawcallArray)
-		{
-			IGpuResource* findRes = nullptr;
-			i->ForeachGpuResource([&count, name](EShaderBindType type, IGpuResource* resource)
-				{
-					if (resource->TagName == name)
-					{
-						count++;
-					}
-					return true;
-				});
-		}*/
-		return count;
-	}
+	
 	void ICmdRecorder::PushGpuDraw(IGpuDraw* draw)
 	{
+		ASSERT(draw != nullptr);
+		VAutoVSLLock lk(mLocker);
 		mDrawcallArray.push_back(draw);
 		mPrimitiveNum += draw->GetPrimitiveNum();
 	}
 	void ICmdRecorder::ResetGpuDraws()
 	{
+		VAutoVSLLock lk(mLocker);
 		mDrawcallArray.clear();
+		for (auto& i : mRefBuffers)
+		{
+			i->ReleaseCmdRefCount();
+		}
 		mRefBuffers.clear();
+		mDirectDrawNum = 0;
+		mPrimitiveNum = 0;
+		//mCmdList.FromObject(nullptr);
 	}
-	void ICmdRecorder::FlushDraws(ICommandList* cmdlist, bool bRefBuffer)
+	void ICmdRecorder::FlushDraws(ICommandList* cmdlist)
 	{
-		mCmdList.FromObject(cmdlist);
+		//mCmdList.FromObject(cmdlist);
+		//AUTO_SAMP("NxRHI.ICmdRecorder.FlushDraws");
+		VAutoVSLLock lk(mLocker);
 		for (auto i : mDrawcallArray)
 		{
 			i->Commit(cmdlist, false);
-			if (bRefBuffer == false)
-				continue;
-			i->ForeachGpuResource([this](EShaderBindType type, IGpuResource* resource)
-				{
-					switch (type)
-					{
-						case EShaderBindType::SBT_SRV:
-							if (resource->TagName == "InstantSRV")
-							{
-								int xxx = 0;
-							}
-							mRefBuffers.push_back(((ISrView*)resource)->Buffer);
-							break;
-						case EShaderBindType::SBT_UAV:
-							mRefBuffers.push_back(((IUaView*)resource)->Buffer);
-							break;
-						case EShaderBindType::SBT_CBuffer:
-							mRefBuffers.push_back(((ICbView*)resource)->Buffer);
-							break;
-						default:
-							break;
-					}
-					return true;
-				});
 		}
 	}
 	ICmdRecorder* ICommandList::BeginCommand()
@@ -121,14 +64,31 @@ namespace NxRHI
 			return;
 		}
 	}
-	void ICommandList::PushGpuDraw(IGpuDraw* draw)
+	bool ICommandList::PushGpuDrawImpl(IGpuDraw* draw, bool bCheck)
+	{
+		auto pCmdRecorder = mCmdRecorder;
+		if (pCmdRecorder == nullptr || IsRecording() == false)
+		{
+			ASSERT(bCheck == false);
+			return false;
+		}
+		ASSERT(mCmdRecorder != nullptr);
+		pCmdRecorder->PushGpuDraw(draw);
+		return true;
+	}
+	void ICommandList::AppendDraws(ICmdRecorder* pCmdRecorder)
+	{
+		mCmdRecorder->mDrawcallArray.insert(mCmdRecorder->mDrawcallArray.end(), pCmdRecorder->mDrawcallArray.begin(), pCmdRecorder->mDrawcallArray.end());
+	}
+	void ICommandList::DirectGpuDraw(IGpuDraw* draw)
 	{
 		if (mCmdRecorder == nullptr)
 		{
 			ASSERT(false);
 			return;
 		}
-		mCmdRecorder->PushGpuDraw(draw);
+		mCmdRecorder->mDirectDrawNum++;
+		draw->Commit(this, false);
 	}
 	void ICommandList::InheritPass(ICommandList* cmdlist)
 	{

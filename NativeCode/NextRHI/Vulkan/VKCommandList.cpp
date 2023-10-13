@@ -474,7 +474,7 @@ namespace NxRHI
 
 		if (buffer == nullptr)
 		{
-			auto device = (VKGpuDevice*)mDevice.GetPtr();
+			auto device = (VKGpuDevice*)mDevice.GetNakedPtr();
 			vkCmdBindVertexBuffers(mCommandBuffer->RealObject, slot, 1, &device->mNullVB->mBuffer, &vkOffset);
 			return;
 		}

@@ -9,6 +9,7 @@
 #include "VKEffect.h"
 #include "VKDrawcall.h"
 #include "../NxEffect.h"
+#include "../../Base/thread/vfxthread.h"
 
 #if defined(HasModule_GpuDump)
 #include "../../Bricks/GpuDump/NvAftermath.h"
@@ -316,6 +317,7 @@ namespace NxRHI
 	}
 	bool VKGpuDevice::InitDevice(IGpuSystem* pGpuSystem, const FGpuDeviceDesc* desc)
 	{
+		mDeviceThreadId = vfxThread::GetCurrentThreadId();
 		auto pVkGpuSys = (VKGpuSystem*)pGpuSystem;
 
 		Desc = *desc;
@@ -924,12 +926,14 @@ namespace NxRHI
 	}
 	void VKGpuDevice::TickPostEvents()
 	{
+		IsSyncStage = true;
 		IGpuDevice::TickPostEvents();
 		/*auto delta = (UINT)(aspect - completed);
 		if (delta > 1)
 		{
 			VFX_LTRACE(ELTT_Graphics, "Aspect - Completed = %d\r\n", delta);
 		}*/
+		IsSyncStage = false;
 	}
 
 	VKCmdQueue::VKCmdQueue()
@@ -952,9 +956,6 @@ namespace NxRHI
 	}
 	void VKCmdQueue::Init(VKGpuDevice* device)
 	{
-		mFramePost = MakeWeakRef(device->CreateCommandList());
-		mFramePost->BeginCommand();
-
 		FFenceDesc fcDesc{};
 		mFlushFence = MakeWeakRef(device->CreateFence(&fcDesc, "CmdQueue Fence"));
 		

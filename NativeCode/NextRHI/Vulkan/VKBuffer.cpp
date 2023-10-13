@@ -110,7 +110,7 @@ namespace NxRHI
 
 		auto typeIndex = device->FindMemoryType(memRequires.memoryTypeBits, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
 
-		result->mGpuMemory = device->mDefaultBufferAllocator->Alloc(device, typeIndex, memRequires.size);
+		result->mGpuMemory = device->mDefaultBufferAllocator->Alloc(device, typeIndex, memRequires.size, "UploadBuffer");
 		vkBindBufferMemory(device->mDevice, result->mBuffer, (VkDeviceMemory)result->mGpuMemory->GetHWBuffer(), result->mGpuMemory->Offset);
 
 		FMappedSubResource subRes{};
@@ -230,7 +230,7 @@ namespace NxRHI
 		auto memSize = memRequirements.size;//((memRequirements.size + memRequirements.alignment - 1) / memRequirements.alignment) * memRequirements.alignment;
 		[[maybe_unused]] auto memoryTypeIndex = device->FindMemoryType(memRequirements.memoryTypeBits, memFlags);
 		//ASSERT(device->mCBufferAllocator->mMemTypeIndex == memoryTypeIndex);
-		mGpuMemory = allocator->Alloc(device, memSize);
+		mGpuMemory = allocator->Alloc(device, memSize, "Buffer");
 
 		vkBindBufferMemory(device->mDevice, mBuffer, (VkDeviceMemory)mGpuMemory->GetHWBuffer(), mGpuMemory->Offset);
 
@@ -310,8 +310,10 @@ namespace NxRHI
 		GpuState = state;
 	}
 
-	void VKBuffer::UpdateGpuData(UINT subRes, void* pData, const FSubResourceFootPrint* footPrint)
+	void VKBuffer::UpdateGpuData(ICommandList* cmd, UINT subRes, void* pData, const FSubResourceFootPrint* footPrint)
 	{
+		//todo CopyDrawcall
+		ASSERT(false);
 		if (Desc.Usage == EGpuUsage::USAGE_DEFAULT)
 		{
 			auto copyDesc = this->Desc;
@@ -323,9 +325,7 @@ namespace NxRHI
 			auto device = mDeviceRef.GetPtr();
 			auto bf = MakeWeakRef(device->CreateBuffer(&copyDesc));
 
-			FTransientCmd cmd(device, EQueueType::QU_Transfer);
-			cmd.GetCmdList()->CopyBufferRegion(this, footPrint->GetOffset(), bf, 0, footPrint->TotalSize);
-			device->DelayDestroy(bf);
+			cmd->CopyBufferRegion(this, footPrint->GetOffset(), bf, 0, footPrint->TotalSize);
 		}
 		else
 		{
@@ -570,7 +570,7 @@ namespace NxRHI
 
 		auto memSize = ((memRequirements.size + memRequirements.alignment - 1) / memRequirements.alignment) * memRequirements.alignment;
 		auto typeIndex = device->FindMemoryType(memRequirements.memoryTypeBits, memFlags);
-		mGpuMemory = device->mDefaultBufferAllocator->Alloc(device, typeIndex, memSize);
+		mGpuMemory = device->mDefaultBufferAllocator->Alloc(device, typeIndex, memSize, "Texture");
 		if (mGpuMemory == nullptr)
 		{
 			return false;
@@ -649,7 +649,8 @@ namespace NxRHI
 						if (depth == 0)
 							depth = 1;
 
-						FTransientCmd cmd(device);						
+						//todo: CopyDraw
+						FTransientCmd cmd(device, EQueueType::QU_Transfer, "Buffer.Update");
 						this->TransitionTo(cmd.GetCmdList(), EGpuResourceState::GRS_CopyDst);
 						VkBuffer srcBuffer = bf[i]->mBuffer;
 						vkCmdCopyBufferToImage(((VKCommandList*)cmd.GetCmdList())->mCommandBuffer->RealObject, srcBuffer, mImage, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, 1, &region);
@@ -662,7 +663,7 @@ namespace NxRHI
 		{
 			if (GpuState == EGpuResourceState::GRS_Undefine)
 			{
-				FTransientCmd tsCmd(device);
+				FTransientCmd tsCmd(device, EQueueType::QU_Transfer, "Buffer.Update");
 				auto cmd = (VKCommandList*)tsCmd.GetCmdList();
 				if (Desc.BindFlags & EBufferType::BFT_SRV)
 				{
@@ -771,8 +772,9 @@ namespace NxRHI
 
 		vkUnmapMemory(device->mDevice, (VkDeviceMemory)mGpuMemory->GetHWBuffer());
 	}
-	void VKTexture::UpdateGpuData(UINT subRes, void* pData, const FSubResourceFootPrint* footPrint)
+	void VKTexture::UpdateGpuData(ICommandList* cmd, UINT subRes, void* pData, const FSubResourceFootPrint* footPrint)
 	{
+		ASSERT(false);
 		////UINT subRes = mipIndex + Desc.MipLevels * arrayIndex;
 		//auto refCmdList = (VKCommandList*)cmd;
 		////refCmdList->mContext->UpdateSubresource(mTexture1D, subRes, (D3D11_BOX*)box, pData, rowPitch, depthPitch);

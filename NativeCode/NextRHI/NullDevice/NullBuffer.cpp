@@ -26,7 +26,7 @@ namespace NxRHI
 		return true;
 	}
 
-	void NullBuffer::UpdateGpuData(UINT subRes, void* pData, const FSubResourceFootPrint* footPrint)
+	void NullBuffer::UpdateGpuData(ICommandList* cmd, UINT subRes, void* pData, const FSubResourceFootPrint* footPrint)
 	{
 		auto pTar = &mBuffer[0];
 		auto pSrc = (BYTE*)pData;
@@ -75,7 +75,7 @@ namespace NxRHI
 	{
 		
 	}
-	void NullTexture::UpdateGpuData(UINT subRes, void* pData, const FSubResourceFootPrint* footPrint)
+	void NullTexture::UpdateGpuData(ICommandList* cmd, UINT subRes, void* pData, const FSubResourceFootPrint* footPrint)
 	{
 		
 	}

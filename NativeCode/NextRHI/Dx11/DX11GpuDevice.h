@@ -73,6 +73,8 @@ namespace NxRHI
 		ID3DUserDefinedAnnotation*		mDefinedAnnotation = nullptr;
 
 		AutoRef<DX11CmdQueue>			mCmdQueue;
+
+		AutoRef<DX11CommandList>		mPostCmdList;
 	};
 
 	class DX11CmdQueue : public ICmdQueue

@@ -46,14 +46,14 @@ namespace NxRHI
 	};
 
 	class TR_CLASS()
-		IGpuEffect : public VIUnknown
+		IGpuEffect : public IGpuResource
 	{
 	public:
 		std::string		mDebugName;
 		const char* GetDebugName() {
 			return mDebugName.c_str();
 		}
-		void SetDebugName(const char* n) {
+		virtual void SetDebugName(const char* n) override{
 			mDebugName = n;
 		}
 	};

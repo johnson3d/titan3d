@@ -450,6 +450,15 @@ struct AuxVectorEnumatorProperty : public FEnumatorProperty
 	}
 };
 
+template <typename _T>
+struct FTypeAssignment
+{
+	static void Assign(_T& left, const _T& right)
+	{
+		left = right;
+	}
+};
+
 struct TR_CLASS()
 	FRttiStruct : public FRttiMetaInfo
 {
@@ -484,7 +493,8 @@ struct TR_CLASS()
 		IsEnum = AuxRttiEnum<Type>::IsEnum;
 		Assignment = [](void* pTar, const void* pSrc)
 		{
-			*(Type*)pTar = *(Type*)pSrc;
+			//*(Type*)pTar = *(Type*)pSrc;
+			FTypeAssignment<Type>::Assign(*(Type*)pTar, *(Type*)pSrc);
 		};
 	}
 	template<class ThisType, class... ArgTypes>

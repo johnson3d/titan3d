@@ -42,18 +42,20 @@ namespace NxRHI
 
 		bool Create(IGpuDevice* device, UINT w, UINT h);
 	public:
+		TWeakRefHandle<DX12GpuDevice>	mDeviceRef;
 		IDXGISwapChain* mView = nullptr;
 		AutoRef<IDXGISwapChain3> mView3 = nullptr;
 		struct FBackBuffer
 		{
 			AutoRef<ITexture>	Texture;
 			AutoRef<IRenderTargetView>	Rtv;
-			void CreateRtvAndSrv(IGpuDevice* device);
+			UINT64				FenceValue = 0;
+			void CreateRtvAndSrv(IGpuDevice* device, UINT index);
 		};
 		std::vector<FBackBuffer>		BackBuffers;
 		UINT							CurrentBackBuffer = 0;
-		AutoRef<IFence>					PresentFence;
-		UINT64							CurrentFenceTargetValue = 0;
+
+		AutoRef<IFence>			FramePresentFence;
 	};
 }
 

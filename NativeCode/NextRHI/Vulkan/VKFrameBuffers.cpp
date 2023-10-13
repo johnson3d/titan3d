@@ -549,7 +549,7 @@ namespace NxRHI
 			vkGetSwapchainImagesKHR(((VKGpuDevice*)device)->mDevice, mSwapChain, &Desc.BufferCount, swapChainImages.data());
 		}
 
-		FTransientCmd tsCmd(device, QU_Default);
+		FTransientCmd tsCmd(device, QU_Default, "Transition");
 		auto cmd = tsCmd.GetCmdList();
 		for (UINT i = 0; i < Desc.BufferCount; i++)
 		{
@@ -654,7 +654,7 @@ namespace NxRHI
 			vkGetSwapchainImagesKHR(((VKGpuDevice*)device)->mDevice, mSwapChain, &Desc.BufferCount, swapChainImages.data());
 		}
 
-		FTransientCmd tsCmd(device, QU_Default);
+		FTransientCmd tsCmd(device, QU_Default, "transition");
 		auto cmd = tsCmd.GetCmdList();
 		for (UINT i = 0; i < Desc.BufferCount; i++)
 		{

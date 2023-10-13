@@ -15,6 +15,11 @@ NS_BEGIN
 
 namespace NxRHI
 {
+	void DX11CmdRecorder::ResetGpuDraws()
+	{
+		ICmdRecorder::ResetGpuDraws();
+		mCmdList = nullptr;
+	}
 	DX11CommandList::DX11CommandList()
 	{
 		mContext = nullptr;
@@ -53,7 +58,6 @@ namespace NxRHI
 			mCmdRecorder = MakeWeakRef(new DX11CmdRecorder());
 		}
 		mCmdRecorder->ResetGpuDraws();
-		GetDX11CmdRecorder()->mCmdList = nullptr;
 		mPrimitiveNum = 0;
 		return mCmdRecorder;
 	}
@@ -63,6 +67,17 @@ namespace NxRHI
 
 		mContext->FinishCommandList(0, GetDX11CmdRecorder()->mCmdList.GetAddressOf());
 		mIsRecording = false;
+	}
+	void DX11CommandList::Commit(ID3D11DeviceContext* imContex)
+	{
+		if (GetDX11CmdRecorder() == nullptr/* || GetDX11CmdRecorder()->GetDrawcallNumber() == 0*/)
+		{
+			return;
+		}
+		BeginEvent(mDebugName.c_str());
+		imContex->ExecuteCommandList(GetDX11CmdRecorder()->mCmdList, 0);
+		GetDX11CmdRecorder()->ResetGpuDraws();
+		EndEvent();
 	}
 	bool DX11CommandList::BeginPass(IFrameBuffers* fb, const FRenderPassClears* passClears, const char* name)
 	{
@@ -186,7 +201,7 @@ namespace NxRHI
 	{
 		//ASSERT(binder->Space == type);
 		//buffer->FlushDirty();
-		buffer->Buffer->PushFlushDirty(mDevice.GetPtr());
+		buffer->Buffer->FlushDirty(this);
 
 		switch (type)
 		{
@@ -473,7 +488,7 @@ namespace NxRHI
 			box.Right = footprint->X + footprint->Width;
 			box.Bottom = footprint->Y + footprint->Height;
 			box.Back = footprint->Z + footprint->Depth;
-			target->UpdateGpuData(subRes, lockBuffer.pData, footprint);
+			target->UpdateGpuData(this, subRes, lockBuffer.pData, footprint);
 			/*if (target->Map(cmd, subRes, &lockTexture, false))
 			{
 				for (UINT z = 0; z < footprint->Depth; z++)
@@ -592,8 +607,15 @@ namespace NxRHI
 		bfDesc.Size = Count * sizeof(UINT);
 		bfDesc.RowPitch = bfDesc.Size;
 		bfDesc.DepthPitch = bfDesc.Size;
+		auto ptr = (UINT*)alloca(sizeof(UINT) * Count); 
+		for (UINT i = 0; i < Count; i++)
+		{
+			ptr[i] = BufferWriters[i].Value;
+		}
+
+		bfDesc.InitData = ptr;
 		auto copyBuffer = MakeWeakRef(GetDX11Device()->CreateBuffer(&bfDesc));
-		FMappedSubResource mapped{};
+		/*FMappedSubResource mapped{};
 		if (copyBuffer->Map(0, &mapped, false))
 		{
 			auto ptr = (UINT*)mapped.pData;
@@ -602,24 +624,11 @@ namespace NxRHI
 				ptr[i] = BufferWriters[i].Value;
 			}
 			copyBuffer->Unmap(0);
-		}
+		}*/
 		for (UINT i = 0; i < Count; i++)
 		{
 			CopyBufferRegion(BufferWriters[i].Buffer, BufferWriters[i].Offset, copyBuffer, i * sizeof(UINT), sizeof(UINT));
 		}
-	}
-
-	void DX11CommandList::Commit(ID3D11DeviceContext* imContex)
-	{
-		if (GetDX11CmdRecorder() == nullptr)
-		{
-			return;
-		}
-		BeginEvent(mDebugName.c_str());
-		imContex->ExecuteCommandList(GetDX11CmdRecorder()->mCmdList, 0);
-		GetDX11CmdRecorder()->mCmdList = nullptr;
-		GetDX11CmdRecorder()->ResetGpuDraws();
-		EndEvent();
 	}
 
 	//////////////////////////////////////////////////////////////////////////

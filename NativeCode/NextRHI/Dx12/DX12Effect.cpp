@@ -80,9 +80,7 @@ namespace NxRHI
 		if (device == nullptr)
 			return;
 
-		device->DelayDestroy(mSignature);
 		mSignature = nullptr;
-		device->DelayDestroy(mCmdSignature);
 		mCmdSignature = nullptr;
 	}
 	void DX12GraphicsEffect::BuildState(IGpuDevice* device1)
@@ -408,9 +406,7 @@ namespace NxRHI
 		if (device == nullptr)
 			return;
 
-		device->DelayDestroy(mSignature);
 		mSignature = nullptr;
-		device->DelayDestroy(mCmdSignature);
 		mCmdSignature = nullptr;
 	}
 	void DX12ComputeEffect::BuildState(IGpuDevice* device1)
@@ -515,7 +511,8 @@ namespace NxRHI
 
 		D3D12_ROOT_SIGNATURE_DESC sigDesc{};
 		sigDesc.NumParameters = (UINT)dxRootParameters.size();
-		sigDesc.pParameters = &dxRootParameters[0];
+		if (sigDesc.NumParameters > 0)
+			sigDesc.pParameters = &dxRootParameters[0];
 		sigDesc.NumStaticSamplers = 0;
 		sigDesc.pStaticSamplers = nullptr;
 		sigDesc.Flags = D3D12_ROOT_SIGNATURE_FLAG_ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT;

@@ -60,20 +60,12 @@ namespace NxRHI
 	}
 	DX12Sampler::~DX12Sampler()
 	{
-		auto device = mDeviceRef.GetPtr();
-		if (device == nullptr)
-			return;
-
-		if (mView != nullptr)
-		{
-			device->DelayDestroy(mView);
-			mView = nullptr;
-		}
+		mView = nullptr;
 	}
 	bool DX12Sampler::Init(DX12GpuDevice* device, const FSamplerDesc& desc)
 	{
 		Desc = desc;
-		mView = device->mSamplerAllocator->Alloc<DX12DescriptorSetPagedObject>();
+		mView = device->mSamplerAllocator->Alloc<DX12PagedHeap>();
 		mDeviceRef.FromObject(device);
 
 		D3D12_SAMPLER_DESC				mDxDesc;

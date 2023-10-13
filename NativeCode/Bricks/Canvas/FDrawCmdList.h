@@ -2,6 +2,7 @@
 #include "FCanvasDefine.h"
 #include "Path.h"
 #include "FCanvasBrush.h"
+#include "../../Math/v3dxThickness.h"
 
 NS_BEGIN
 
@@ -144,6 +145,11 @@ namespace Canvas
 		void PopMatrix();
 		const v3dxMatrix4* GetCurrentMatrix() const;
 
+		void PushTransformIndex(const UInt16* index);
+		void PopTransformIndex();
+		const UInt16* GetCurrentTransformIndex() const;
+		void ClearTransformIndex();
+
 		void PushPathStyle(Canvas::Path::FPathStyle* PathStyle);
 		void PopPathStyle();
 		AutoRef<Path::FPathStyle> GetCurrentPathStyle() const
@@ -153,12 +159,18 @@ namespace Canvas
 		
 		void Reset();
 
+		static void TransformIndexToColor(const UInt16* index, FColor& color);
+
 		void AddText(const WCHAR * text, int charCount, float x, float y, const FColor & color, IBlobObject* pOutCmds = nullptr);
 		void AddLine(const v3dxVector2 & start, const v3dxVector2 & end, float width, const FColor & color, FSubDrawCmd* pOutCmd = nullptr);
 		void AddLineStrips(const v3dxVector2 * pPoints, UINT num, float width, const FColor & color, bool loop, FSubDrawCmd* pOutCmd = nullptr);
 		void AddImage(ICanvasBrush * image, float x, float y, float w, float h, const FColor & color, FSubDrawCmd* pOutCmd = nullptr);
 		void AddRectLine(const v3dxVector2 & s, const v3dxVector2 & e, float width, const FColor & color, FSubDrawCmd* pOutCmd = nullptr);
+		void AddRectLine(const v3dxVector2 & s, const v3dxVector2 & e, const v3dxThickness & thickness, const v3dxVector4& cornerRadius, const FColor & color, FSubDrawCmd* pOutCmd = nullptr);
+		void AddRectLine(const FRectanglef& rect, const v3dxThickness& thickness, const v3dxVector4& cornerRadius, const FColor& color, FSubDrawCmd* pOutCmd = nullptr);
 		void AddRectFill(const v3dxVector2 & s, const v3dxVector2 & e, const FColor & color, FSubDrawCmd* pOutCmd = nullptr);
+		void AddRectFill(const v3dxVector2 & s, const v3dxVector2 & e, const v3dxVector4& cornerRadius, const FColor & color, FSubDrawCmd* pOutCmd = nullptr);
+		void AddRectFill(const FRectanglef& rect, const v3dxVector4& cornerRadius, const FColor & color, FSubDrawCmd* pOutCmd = nullptr);
 	protected:
 		FDrawCmd* GetOrNewDrawCmd(ICanvasBrush* brush);
 	public:
@@ -171,10 +183,11 @@ namespace Canvas
 		int									mStopCmdIndex = 0;
 
 		// push pop stack
-		std::stack<AutoRef<FTFont>>			mFonts;
-		std::stack<v3dxMatrix4>				mMatrixes;
-		std::stack<AutoRef<ICanvasBrush>>	mBrushes;
-		std::stack<AutoRef<Path::FPathStyle>> mPathStyles;
+		std::stack<AutoRef<FTFont>>				mFonts;
+		std::stack<v3dxMatrix4>					mMatrixes;
+		std::stack<AutoRef<ICanvasBrush>>		mBrushes;
+		std::stack<AutoRef<Path::FPathStyle>>	mPathStyles;
+		std::stack<UInt16>				mTransformIndexes;
 	};
 
 	class TR_CLASS()
@@ -192,6 +205,8 @@ namespace Canvas
 
 			Foregroud = MakeWeakRef(new FCanvasDrawCmdList());
 			Foregroud->Batch = this;
+
+			//Transforms.resize(50);
 		}
 		FCanvasDrawCmdList* GetBackgroud()
 		{
@@ -210,6 +225,8 @@ namespace Canvas
 			Backgroud->Reset();
 			Middleground->Reset();
 			Foregroud->Reset();
+			//Transforms.clear();
+			//Transforms.resize(50);
 		}
 		void SetClientClip(float w, float h)
 		{
@@ -231,11 +248,44 @@ namespace Canvas
 			ClientRect.X = x;
 			ClientRect.Y = y;
 		}
+
+		//void SetTransformMatrix(UInt16 index, const v3dxMatrix4* matrix)
+		//{
+		//	if (Transforms.size() <= index)
+		//	{
+		//		Transforms.resize(index + 10);
+		//	}
+		//	Transforms[index] = *matrix;
+		//}
+		//void GetTransformMatrix(UInt16 index, v3dxMatrix4* matrix)
+		//{
+		//	auto size = Transforms.size();
+		//	if (size <= index)
+		//	{
+		//		if (size > 0)
+		//		{
+		//			*matrix = Transforms[0];
+		//		}
+		//		else
+		//		{
+		//			matrix->identity();
+		//		}
+		//	}
+		//	else
+		//	{
+		//		*matrix = Transforms[index];
+		//	}
+		//}
+		//size_t GetTransformMatrixCount()
+		//{
+		//	return Transforms.size();
+		//}
 	protected:
 		FRectanglef					ClientRect{};
 		AutoRef<FCanvasDrawCmdList>		Backgroud;
 		AutoRef<FCanvasDrawCmdList>		Middleground;
 		AutoRef<FCanvasDrawCmdList>		Foregroud;
+		//std::vector<v3dxMatrix4>		Transforms;
 	};
 }
 

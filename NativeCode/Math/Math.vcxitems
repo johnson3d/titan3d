@@ -38,6 +38,7 @@
     <ClCompile Include="$(MSBuildThisFileDirectory)v3dxSize.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)v3dxSphere.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)v3dxSpline.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)v3dxThickness.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)v3dxTransform.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)v3dxVector2.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)v3dxVector3.cpp" />
@@ -73,6 +74,7 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)v3dxSize.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)v3dxSphere.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)v3dxSpline.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)v3dxThickness.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)v3dxTransform.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)v3dxVector2.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)v3dxVector2.inl.h" />

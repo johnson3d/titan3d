@@ -29,9 +29,6 @@
 class v3dxColor4;
 
 struct  FColor {
-	enum {
-		B, G, R, A
-	};
 	union {
 		struct {
 			unsigned char b, g, r, a;

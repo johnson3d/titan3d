@@ -29,7 +29,7 @@ namespace Canvas
 		ITextBrush()
 		{
 			FontSize = 0;
-			Name = VNameString("Text");
+			Name = VNameString("@Text:");
 		}
 		void Init(int sizeX, int sizeY, int fontSize);
 		int							TextureSizeX = 0;
@@ -78,8 +78,8 @@ namespace Canvas
 			return &Pixels[0];
 		}
 		void FillVertices(int x, int y, ITextBrush * texture, FTVertex verts[6], bool flipV);
-		void FillCanvasVertices(int x, int y, ITextBrush * texture, void* quatVerts);
-		void BuildMesh(int x, int y, ITextBrush * texture, NxRHI::FMeshDataProvider * mesh);
+		void FillCanvasVertices(int x, int y, UInt16 transformIndex, ITextBrush * texture, void* quatVerts);
+		void BuildMesh(int x, int y, UInt16 transformIndex, ITextBrush * texture, NxRHI::FMeshDataProvider * mesh);
 
 		FTWord* BuildAsSDF(int fontSize, int w, int h);
 		FTWord* BuildAsSDFFast(int fontSize, int w, int h, BYTE PixelColored, BYTE spread);
