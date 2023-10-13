@@ -1,5 +1,7 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Runtime.InteropServices;
 using System.Text;
 using EngineNS;
@@ -347,7 +349,59 @@ namespace EngineNS.EGui.Controls.PropertyGrid
         public bool UseProvider = true;
         static readonly ImGuiTableFlags_ mTabFlags = ImGuiTableFlags_.ImGuiTableFlags_BordersInner | ImGuiTableFlags_.ImGuiTableFlags_Resizable;// | ImGuiTableFlags_.ImGuiTableFlags_SizingFixedFit;
         public Rtti.UTypeDesc HideInheritDeclareType = null;
-        Dictionary<object, Dictionary<string, CustomPropertyDescriptorCollection>> mDrawTargetDic = new Dictionary<object, Dictionary<string, CustomPropertyDescriptorCollection>>();
+        struct TargetKey
+        {
+            object mTarget;
+            public object Target
+            {
+                get => mTarget;
+            }
+            int mHashCode;
+            public TargetKey(object target)
+            {
+                mTarget = target;
+                mHashCode = 0;
+                if (mTarget != null)
+                {
+                    var enumerableInterface = mTarget.GetType().GetInterface(typeof(IEnumerable).FullName, false);
+                    if(enumerableInterface != null)
+                    {
+                        var typeStr = CollectionTypeString(mTarget);
+                        mHashCode = typeStr.GetHashCode();
+                    }
+                    else
+                        mHashCode = mTarget.GetHashCode();
+                }
+            }
+            public override int GetHashCode()
+            {
+                return mHashCode;
+            }
+            public override bool Equals([NotNullWhen(true)] object obj)
+            {
+                return mHashCode == ((TargetKey)obj).mHashCode;
+            }
+            static string CollectionTypeString(object target)
+            {
+                string retString = "";
+                var targetType = target.GetType();
+                var enumerableInterface = targetType.GetInterface(typeof(IEnumerable).FullName, false);
+                if (enumerableInterface != null)
+                {
+                    retString += targetType.FullName;
+                    foreach (var obj in (IEnumerable)target)
+                    {
+                        retString += CollectionTypeString(obj);
+                    }
+                }
+                else
+                    retString = targetType.FullName + target?.GetHashCode();
+
+                return retString;
+            }
+        }
+        Dictionary<TargetKey, Dictionary<string, CustomPropertyDescriptorCollection>> mDrawTargetDic = new Dictionary<TargetKey, Dictionary<string, CustomPropertyDescriptorCollection>>();
+        
         private unsafe bool OnDraw(object target, out object targetNewValue, bool isSubPropertyGrid = false)
         {
             string[] CategoryExcludeFilters = null;
@@ -369,10 +423,11 @@ namespace EngineNS.EGui.Controls.PropertyGrid
             //var flags = ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_NoTreePushOnOpen;
             bool useCategory = true;
             Dictionary<string, CustomPropertyDescriptorCollection> propertiesDic;
-            if(!mDrawTargetDic.TryGetValue(target, out propertiesDic) || PropertyCollection.PropertyCollectionIsDirty(target))
+            var key = new TargetKey(target);
+            if(!mDrawTargetDic.TryGetValue(key, out propertiesDic) || PropertyCollection.PropertyCollectionIsDirty(target))
             {
                 propertiesDic = PropertyCollection.CollectionProperties(target, useCategory, target.GetType().IsValueType);
-                mDrawTargetDic[target] = propertiesDic;
+                mDrawTargetDic[key] = propertiesDic;
             }
             ImGuiAPI.PushStyleColor(ImGuiCol_.ImGuiCol_TableBorderLight, EGui.UIProxy.StyleConfig.Instance.PGCellBorderInnerColor);
             ImGuiAPI.PushStyleVar(ImGuiStyleVar_.ImGuiStyleVar_CellPadding, in EGui.UIProxy.StyleConfig.Instance.PGCellPadding);
@@ -395,10 +450,12 @@ namespace EngineNS.EGui.Controls.PropertyGrid
                     if (find)
                         continue;
                 }
-                string categoryName = proDicValue.Key ?? "Other";
+                if (proDicValue.Key == string.Empty)
+                    useCategory = false;
                 bool showCollection = true;
                 if (useCategory)
                 {
+                    string categoryName = proDicValue.Key ?? "Other";
                     ImGuiAPI.PushStyleColor(ImGuiCol_.ImGuiCol_Header, EGui.UIProxy.StyleConfig.Instance.PGCategoryBG);
                     ImGuiAPI.PushStyleColor(ImGuiCol_.ImGuiCol_HeaderActive, EGui.UIProxy.StyleConfig.Instance.PGCategoryBG);
                     ImGuiAPI.PushStyleColor(ImGuiCol_.ImGuiCol_HeaderHovered, EGui.UIProxy.StyleConfig.Instance.PGCategoryBG);
@@ -701,7 +758,7 @@ namespace EngineNS.EGui.Controls.PropertyGrid
 
             if(retValue)
             {
-                mDrawTargetDic.Remove(target);
+                mDrawTargetDic.Remove(key);
             }
             return retValue;
         }

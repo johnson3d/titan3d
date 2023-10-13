@@ -173,25 +173,96 @@ namespace EngineNS.UI.Canvas
                 mCoreObject.PushCmd(EngineNS.Canvas.EPathCmdType.Cmd_LineTo, (float*)pPos, 2);
             }
         }
-        public unsafe void SCCWArcTo(in Vector2 pos, float radius)
+        //if radius < half diameter(p1-p0) then radius = half diameter
+        public unsafe void S_CCW_ArcTo(in Vector2 pos, float radius)
         {
-            Vector3 arg = new Vector3(pos.X, pos.Y, radius);
-            mCoreObject.PushCmd(EngineNS.Canvas.EPathCmdType.Cmd_SCCWArcTo, (float*)&arg, 3);
+            var arg = stackalloc float[5];
+            arg[0] = pos.X;
+            arg[1] = pos.Y;
+            arg[2] = radius;
+            arg[3] = radius;
+            arg[4] = 0;
+            mCoreObject.PushCmd(EngineNS.Canvas.EPathCmdType.Cmd_SCCWArcTo, (float*)arg, 5);
         }
-        public unsafe void SCWArcTo(in Vector2 pos, float radius)
+        public unsafe void S_CW_ArcTo(in Vector2 pos, float radius)
         {
-            Vector3 arg = new Vector3(pos.X, pos.Y, radius);
-            mCoreObject.PushCmd(EngineNS.Canvas.EPathCmdType.Cmd_SCWArcTo, (float*)&arg, 3);
+            var arg = stackalloc float[5];
+            arg[0] = pos.X;
+            arg[1] = pos.Y;
+            arg[2] = radius;
+            arg[3] = radius;
+            arg[4] = 0;
+            mCoreObject.PushCmd(EngineNS.Canvas.EPathCmdType.Cmd_SCWArcTo, (float*)arg, 5);
         }
-        public unsafe void LCCWArcTo(in Vector2 pos, float radius)
+        public unsafe void L_CCW_ArcTo(in Vector2 pos, float radius)
         {
-            Vector3 arg = new Vector3(pos.X, pos.Y, radius);
-            mCoreObject.PushCmd(EngineNS.Canvas.EPathCmdType.Cmd_LCCWArcTo, (float*)&arg, 3);
+            var arg = stackalloc float[5];
+            arg[0] = pos.X;
+            arg[1] = pos.Y;
+            arg[2] = radius;
+            arg[3] = radius;
+            arg[4] = 0;
+            mCoreObject.PushCmd(EngineNS.Canvas.EPathCmdType.Cmd_LCCWArcTo, (float*)arg, 5);
         }
-        public unsafe void LCWArcTo(in Vector2 pos, float radius)
+        public unsafe void L_CW_ArcTo(in Vector2 pos, float radius)
         {
-            Vector3 arg = new Vector3(pos.X, pos.Y, radius);
-            mCoreObject.PushCmd(EngineNS.Canvas.EPathCmdType.Cmd_LCWArcTo, (float*)&arg, 3);
+            var arg = stackalloc float[5];
+            arg[0] = pos.X;
+            arg[1] = pos.Y;
+            arg[2] = radius;
+            arg[3] = radius;
+            arg[4] = 0;
+            mCoreObject.PushCmd(EngineNS.Canvas.EPathCmdType.Cmd_LCWArcTo, (float*)arg, 5);
+        }
+
+        public unsafe void S_CCW_EllipseTo(in Vector2 pos, float radiusH, float radiusV, float rotation)
+        {
+            var arg = stackalloc float[5];
+            arg[0] = pos.X;
+            arg[1] = pos.Y;
+            arg[2] = radiusH;
+            arg[3] = radiusV;
+            arg[4] = rotation;
+            mCoreObject.PushCmd(EngineNS.Canvas.EPathCmdType.Cmd_SCCWArcTo, (float*)arg, 5);
+        }
+        public unsafe void S_CW_EllipseTo(in Vector2 pos, float radiusH, float radiusV, float rotation)
+        {
+            var arg = stackalloc float[5];
+            arg[0] = pos.X;
+            arg[1] = pos.Y;
+            arg[2] = radiusH;
+            arg[3] = radiusV;
+            arg[4] = rotation;
+            mCoreObject.PushCmd(EngineNS.Canvas.EPathCmdType.Cmd_SCWArcTo, (float*)arg, 5);
+        }
+        public unsafe void L_CCW_EllipseTo(in Vector2 pos, float radiusH, float radiusV, float rotation)
+        {
+            var arg = stackalloc float[5];
+            arg[0] = pos.X;
+            arg[1] = pos.Y;
+            arg[2] = radiusH;
+            arg[3] = radiusV;
+            arg[4] = rotation;
+            mCoreObject.PushCmd(EngineNS.Canvas.EPathCmdType.Cmd_LCCWArcTo, (float*)arg, 5);
+        }
+        public unsafe void L_CW_EllipseTo(in Vector2 pos, float radiusH, float radiusV, float rotation)
+        {
+            var arg = stackalloc float[5];
+            arg[0] = pos.X;
+            arg[1] = pos.Y;
+            arg[2] = radiusH;
+            arg[3] = radiusV;
+            arg[4] = rotation;
+            mCoreObject.PushCmd(EngineNS.Canvas.EPathCmdType.Cmd_LCWArcTo, (float*)arg, 5);
+        }
+
+        public unsafe void CubicTo(in Vector2 c0, in Vector2 c1, in Vector2 p1)
+        {
+            var arg = stackalloc Vector2[3];
+            arg[0] = c0;
+            arg[1] = c1;
+            arg[2] = p1;
+            mCoreObject.PushCmd(EngineNS.Canvas.EPathCmdType.Cmd_CubicTo, (float*)arg, 6);
         }
         public void Close()
         {

@@ -1,12 +1,11 @@
 ﻿using EngineNS.Bricks.CodeBuilder;
 using EngineNS.Bricks.StateMachine.TimedSM;
-using EngineNS.DesignMacross.Description;
-using EngineNS.DesignMacross.Outline;
+using EngineNS.DesignMacross.Base.Description;
+using EngineNS.DesignMacross.Base.Outline;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.Text;
-using System.Xml.Linq;
+using System.Reflection;
 
 namespace EngineNS.DesignMacross.TimedStateMachine
 {
@@ -16,6 +15,8 @@ namespace EngineNS.DesignMacross.TimedStateMachine
     {
         public Guid Id { get; set; } = Guid.NewGuid();
         public string Name { get; set; } = "TimeStateMachine";
+        [Rtti.Meta]
+        public Vector2 Location { get; set; }
         public string VariableName { get => TtDescriptionUtil.VariableNamePrefix + Name; }
         public string ClassName { get => TtDescriptionUtil.ClassNamePrefix + Name; }
         public EVisisMode VisitMode { get; set; } = EVisisMode.Public;
@@ -136,5 +137,17 @@ namespace EngineNS.DesignMacross.TimedStateMachine
             return methodDeclaration;
         }
         #endregion
+
+        #region ISerializer
+        public void OnPreRead(object tagObject, object hostObject, bool fromXml)
+        {
+
+        }
+
+        public void OnPropertyRead(object tagObject, PropertyInfo prop, bool fromXml)
+        {
+
+        }
+        #endregion ISerializer
     }
 }

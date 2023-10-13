@@ -40,9 +40,9 @@ namespace EngineNS.Bricks.VXGI
             SourceCode = new NxRHI.UShaderCode();
             SourceCode.TextCode = sourceCode;
         }
-        public unsafe override void OnDrawCall(Graphics.Pipeline.URenderPolicy.EShadingType shadingType, NxRHI.UGraphicDraw drawcall, Graphics.Pipeline.URenderPolicy policy, Graphics.Mesh.UMesh mesh, int atom)
+        public unsafe override void OnDrawCall(NxRHI.ICommandList cmd, Graphics.Pipeline.URenderPolicy.EShadingType shadingType, NxRHI.UGraphicDraw drawcall, Graphics.Pipeline.URenderPolicy policy, Graphics.Mesh.UMesh mesh, int atom)
         {
-            base.OnDrawCall(shadingType, drawcall, policy, mesh, atom);
+            base.OnDrawCall(cmd, shadingType, drawcall, policy, mesh, atom);
 
             var vxNode = this.MdfDatas as UVoxelsNode;
             if (vxNode == null)

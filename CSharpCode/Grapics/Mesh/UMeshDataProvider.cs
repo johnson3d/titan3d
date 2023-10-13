@@ -1,4 +1,5 @@
-﻿using System;
+﻿using EngineNS.NxRHI;
+using System;
 using System.Collections.Generic;
 using System.Numerics;
 using System.Text;
@@ -41,8 +42,12 @@ namespace EngineNS.Graphics.Mesh
                 var rc = UEngine.Instance.GfxDevice.RenderContext;
                 var result = new UMeshPrimitives();
                 result.Init("", 1);
-                
-                mCoreObject.ToMesh(rc.mCoreObject, result.mCoreObject);
+
+                using (var cmd = new FTransientCmd(EQueueType.QU_Default, "ToMesh"))
+                {
+                    mCoreObject.ToMesh(cmd.CmdList, result.mCoreObject);
+                }
+
                 result.AssetName = AssetName;
                 return result;
             }
@@ -53,7 +58,10 @@ namespace EngineNS.Graphics.Mesh
             {
                 var rc = UEngine.Instance.GfxDevice.RenderContext;
 
-                mCoreObject.ToMesh(rc.mCoreObject, mesh.mCoreObject);
+                using (var cmd = new FTransientCmd(EQueueType.QU_Default, "ToMesh"))
+                {
+                    mCoreObject.ToMesh(cmd.CmdList, mesh.mCoreObject);
+                }   
             }
         }
         public RName AssetName { get; set; }

@@ -1,27 +1,28 @@
 ﻿using EngineNS.Bricks.CodeBuilder;
 using EngineNS.Bricks.NodeGraph;
-using EngineNS.DesignMacross.Editor.DeclarationPanel;
 using EngineNS.DesignMacross.Editor;
-using EngineNS.DesignMacross.Graph;
+using EngineNS.DesignMacross.Base.Graph;
 using Org.BouncyCastle.Crypto.Agreement;
 using SixLabors.Fonts;
 using System;
 using System.Collections.Generic;
 using System.Text;
-using EngineNS.DesignMacross.Graph.Elements;
-using EngineNS.DesignMacross.Graph;
+using EngineNS.DesignMacross.Base.Graph.Elements;
 using NPOI.POIFS.Properties;
-using EngineNS.DesignMacross.Outline;
-using EngineNS.DesignMacross.Render;
-using EngineNS.DesignMacross.Description;
+using EngineNS.DesignMacross.Base.Outline;
+using EngineNS.DesignMacross.Base.Render;
+using EngineNS.DesignMacross.Base.Description;
 using System.Reflection;
 using EngineNS.Rtti;
+using EngineNS.DesignMacross.TimedStateMachine.StatesHub;
+using System.Net.Mail;
 
 namespace EngineNS.DesignMacross.TimedStateMachine
 {
-    [ImGuiElementRender(typeof(TtGraphElement_TimedStateRender))]
+    [ImGuiElementRender(typeof(TtGraphElementRender_TimedState))]
     public class TtGraphElement_TimedState : IGraphElement, IContextMeunable, IDraggable, ILayoutable, IStateTransitionAcceptable, IStateTransitionInitial
     {
+        public Guid Id { get; set; } = Guid.Empty;
         public string Name { get => Description.Name; set => Description.Name = value; }
         public float Duration { get; set; } = 3.0f;
         public IGraphElement Parent { get; set; }
@@ -37,7 +38,28 @@ namespace EngineNS.DesignMacross.TimedStateMachine
                 mDescription = value;
                 TimedStateClassDescription.Transitions.CollectionChanged -= Transitions_CollectionChanged;
                 TimedStateClassDescription.Transitions.CollectionChanged += Transitions_CollectionChanged;
+                TimedStateClassDescription.Attachments.CollectionChanged -= Attachments_CollectionChanged;
+                TimedStateClassDescription.Attachments.CollectionChanged += Attachments_CollectionChanged;
             }
+        }
+
+        private void Attachments_CollectionChanged(object sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
+        {
+            //TODO: Attachments_CollectionChanged
+            switch (e.Action)
+            {
+                case System.Collections.Specialized.NotifyCollectionChangedAction.Add:
+                    break;
+                case System.Collections.Specialized.NotifyCollectionChangedAction.Remove:
+                    break;
+                case System.Collections.Specialized.NotifyCollectionChangedAction.Replace:
+                    break;
+                case System.Collections.Specialized.NotifyCollectionChangedAction.Move:
+                    break;
+                case System.Collections.Specialized.NotifyCollectionChangedAction.Reset:
+                    break;
+            }
+            Construct();
         }
 
         private void Transitions_CollectionChanged(object sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
@@ -60,12 +82,11 @@ namespace EngineNS.DesignMacross.TimedStateMachine
         }
 
         public TtTimedStateClassDescription TimedStateClassDescription { get => Description as TtTimedStateClassDescription; }
-        public Vector2 Location { get; set; }
+        public Vector2 Location { get => Description.Location; set => Description.Location = value; }
         public Vector2 AbsLocation { get => TtGraphMisc.CalculateAbsLocation(this); }
-        public SizeF Size { get; set; } = new SizeF(100, 80);
         public float Rounding { get; set; } = 15;
         public Color4f NameColor { get; set; } = new Color4f(0.0f, 0.0f, 0.0f);
-        public Color4f BackgroundColor { get; set; } = new Color4f(4f/255, 118f / 255, 208f / 255);
+        public Color4f BackgroundColor { get; set; } = new Color4f(111f/255, 168f / 255, 219f / 255);
         public Color4f BorderColor { get; set; } = new Color4f(0.5f, 0.6f, 0.6f, 0.6f);
         public float BorderThickness { get; set; } = 4;
 
@@ -73,9 +94,11 @@ namespace EngineNS.DesignMacross.TimedStateMachine
         public TtGraphElement_TextBlock NameTextBlock = new TtGraphElement_TextBlock();
         public TtGraphElement_TextBlock DurationTextBlock = new TtGraphElement_TextBlock();
         public TtGraphElement_StackPanel StateDescStackPanel = new TtGraphElement_StackPanel();
+        public TtGraphElement_StackPanel AttachmentsStackPanel = new TtGraphElement_StackPanel();
         public TtGraphElement_StackPanel TransitionsStackPanel = new TtGraphElement_StackPanel();
         public TtGraphElement_TimedState(IDescription description)
         {
+            Id = description.Id;
             Description = description;
             NameTextBlock.Content = Name;
             NameTextBlock.VerticalAlign = EVerticalAlignment.Center;
@@ -86,22 +109,44 @@ namespace EngineNS.DesignMacross.TimedStateMachine
 
             StateDescStackPanel.AddElement(NameTextBlock);
             StateDescStackPanel.AddElement(DurationTextBlock);
-            StateDescStackPanel.Margin = new FMargin(8, 5, 5, 0);
+
+            StateDescStackPanel.Parent = ElementContainer;
+            StateDescStackPanel.Margin = new FMargin(8, 8, 5, 0);
+            ElementContainer.AddElement(StateDescStackPanel);
+
+            AttachmentsStackPanel.Parent = ElementContainer;
+            AttachmentsStackPanel.Margin = new FMargin(8, 8, 5, 0);
+            ElementContainer.AddElement(AttachmentsStackPanel);
+
             TransitionsStackPanel.Parent = ElementContainer;
             TransitionsStackPanel.Margin = new FMargin(0, 0, 5, 5);
-            ElementContainer.AddElement(StateDescStackPanel);
             ElementContainer.AddElement(TransitionsStackPanel);
+
             ElementContainer.Parent = this;
         }
         public void Construct()
         {
+            AttachmentsStackPanel.Clear();
+            foreach(var attachment in TimedStateClassDescription.Attachments)
+            {
+                var graphElementAttribute = GraphElementAttribute.GetAttributeWithSpecificClassType<IGraphElement_TimedStateAttachment>(attachment.GetType());
+                if (graphElementAttribute != null)
+                {
+                    var instance = UTypeDescManager.CreateInstance(graphElementAttribute.ClassType, new object[] { attachment }) as IGraphElement_TimedStateAttachment;
+                    instance.Parent = this;
+                    instance.Description = attachment;
+                    instance.Construct();
+                    AttachmentsStackPanel.AddElement(instance);
+                }
+            }
+
             TransitionsStackPanel.Clear();
             foreach (var transition in TimedStateClassDescription.Transitions)
             {
-                var graphElementAttribute = transition.GetType().GetCustomAttribute<GraphElementAttribute>();
+                var graphElementAttribute = GraphElementAttribute.GetAttributeWithSpecificClassType<TtGraphElement_TimedStateTransition>(transition.GetType());
                 if (graphElementAttribute != null)
                 {
-                    var instance = UTypeDescManager.CreateInstance(graphElementAttribute.ClassType) as TtGraphElement_TimedStateTransition;
+                    var instance = UTypeDescManager.CreateInstance(graphElementAttribute.ClassType, new object[] { transition }) as TtGraphElement_TimedStateTransition;
                     IGraphElement GetElementByDesc(IDescription description)
                     {
                         if (Parent is TtGraph_TimedStatesHub parent)
@@ -115,11 +160,11 @@ namespace EngineNS.DesignMacross.TimedStateMachine
                         }
                         return null;
                     }
+                    instance.Parent = this;
                     instance.From = GetElementByDesc(transition.From);
                     instance.To = GetElementByDesc(transition.To);
                     instance.Description = transition;
                     instance.Construct();
-                    instance.Parent = this;
                     TransitionsStackPanel.AddElement(instance);
                 }
             }
@@ -127,17 +172,15 @@ namespace EngineNS.DesignMacross.TimedStateMachine
         #region ISelectable
         public bool HitCheck(Vector2 pos)
         {
-            Rect rect = new Rect(Location, Size);
+            Rect rect = new Rect(AbsLocation, Size);
             //冗余一点
             Rect mouseRect = new Rect(pos - Vector2.One, new SizeF(1.0f, 1.0f));
             return rect.IntersectsWith(mouseRect);
         }
-
         public void OnSelected()
         {
 
         }
-
         public void OnUnSelected()
         {
 
@@ -155,7 +198,6 @@ namespace EngineNS.DesignMacross.TimedStateMachine
         #endregion IDraggable
         #region IContextMeunable
         public TtPopupMenu PopupMenu { get; set; } = new TtPopupMenu("TimedStateNodeContextMenu");
-        public FMargin Margin { get; set; } = FMargin.Default;
 
 
         public void UpdateContextMenu(ref FGraphElementRenderingContext context)
@@ -181,15 +223,71 @@ namespace EngineNS.DesignMacross.TimedStateMachine
                     {
                         var transitionDesc = new TtTimedStateTransitionClassDescription() { From = this.Description, To = element.Description };
                         cmdHistory.CreateAndExtuteCommand("Transition From" + this.Name + " To " + element.Name,
-                            () => { TimedStateClassDescription.Transitions.Add(transitionDesc); },
-                            () => { TimedStateClassDescription.Transitions.Remove(transitionDesc); }
+                            (data) => { TimedStateClassDescription.Transitions.Add(transitionDesc); },
+                            (data) => { TimedStateClassDescription.Transitions.Remove(transitionDesc); }
                             );
                     });
                 }
+                var hubTransitionItem = parentMenu.AddMenuItem("TransitionTo", null, null);
+                foreach (IGraphElement element in elementsInParent)
+                {
+                    if (element == this)
+                        continue;
+                    if (element is TtGraphElement_TimedStatesHubBridge timedStatesHubBridge)
+                    {
+                        transitionItem.AddMenuItem(element.Name, null, (UMenuItem item, object sender) =>
+                        {
+                            var transitionDesc = new TtTimedStateTransitionClassDescription() { From = this.Description, To = timedStatesHubBridge.Description };
+                            cmdHistory.CreateAndExtuteCommand("Transition From" + this.Name + " To " + timedStatesHubBridge.Name,
+                                (data) => { TimedStateClassDescription.Transitions.Add(transitionDesc); timedStatesHubBridge.TimedStatesHubClassDescription.Transitions_EndToThis.Add(transitionDesc); },
+                                (data) => { TimedStateClassDescription.Transitions.Remove(transitionDesc); timedStatesHubBridge.TimedStatesHubClassDescription.Transitions_EndToThis.Remove(transitionDesc); }
+                                );
+                        });
+                    }
+                }
             }
 
+            var types = TypeHelper.CollectTypesByAttribute<TimedStateAttachmentContextMenuAttribute>();
+            foreach(var type in types)
+            {
+                if (type.AttributeInstance != null)
+                {
+                    TtMenuUtil.ConstructMenuItem(PopupMenu.Menu, type.TypeDesc, type.AttributeInstance.MenuPaths, type.AttributeInstance.FilterStrings,
+                         (UMenuItem item, object sender) =>
+                         {
+                             var popMenu = sender as TtPopupMenu;
+                             if (Rtti.UTypeDescManager.CreateInstance(type.TypeDesc) is ITimedStateAttachmentClassDescription attachment)
+                             {
+                                 attachment.Name = GetValidAttachmenName(attachment.Name);
+                                 TimedStateClassDescription.Attachments.Add(attachment);
+                             }
+                         });
 
+                }
+            }
 
+        }
+        public string GetValidAttachmenName(string name)
+        {
+            int index = 0;
+            var newName = name;
+            var nameCheckValid = (string newName) =>
+            {
+                foreach (var attachment in TimedStateClassDescription.Attachments)
+                {
+                    if (attachment.Name == newName)
+                    {
+                        return false;
+                    }
+                }
+                return true;
+            };
+            while (!nameCheckValid(newName))
+            {
+                index++;
+                newName = name + "_" + index;
+            }
+            return newName;
         }
         public void OpenContextMeun()
         {
@@ -200,7 +298,12 @@ namespace EngineNS.DesignMacross.TimedStateMachine
         {
             PopupMenu.Draw(ref context);
         }
+        #endregion IContextMeunable
+
         private Dictionary<ILayoutable, SizeF> ChildrenMeasuringSize = new Dictionary<ILayoutable, SizeF>();
+        #region ILayoutable
+        public SizeF Size { get; set; } = new SizeF(150, 80);
+        public FMargin Margin { get; set; } = FMargin.Default;
         public SizeF Measuring(SizeF availableSize)
         {
             var childrenDesiredSize = ElementContainer.Measuring(availableSize);
@@ -217,7 +320,7 @@ namespace EngineNS.DesignMacross.TimedStateMachine
             ElementContainer.Arranging(new Rect(Vector2.Zero, finalRect.Size));
             return finalRect.Size;
         }
-
+        #endregion ILayoutable
         public Vector2 GetTransitionLinkPosition(ELineDirection lineDirection)
         {
             if (lineDirection == ELineDirection.East)
@@ -227,11 +330,10 @@ namespace EngineNS.DesignMacross.TimedStateMachine
             return AbsLocation;
         }
 
-        #endregion IContextMeunable
+
     }
-    public class TtGraphElement_TimedStateRender : IGraphElementRender
+    public class TtGraphElementRender_TimedState : IGraphElementRender
     {
-        public IGraphElement Element { get; set; } = null;
         public void Draw(IRenderableElement renderableElement, ref FGraphElementRenderingContext context)
         {
             var stateElement = renderableElement as TtGraphElement_TimedState;
@@ -245,6 +347,23 @@ namespace EngineNS.DesignMacross.TimedStateMachine
             var roundCornerFlags = ImDrawFlags_.ImDrawFlags_RoundCornersBottomRight | ImDrawFlags_.ImDrawFlags_RoundCornersTopLeft;
             cmdlist.AddRect(nodeStart, nodeEnd, ImGuiAPI.ColorConvertFloat4ToU32(stateElement.BorderColor), stateElement.Rounding, roundCornerFlags, stateElement.BorderThickness * 2);
             cmdlist.AddRectFilled(nodeStart, nodeEnd, ImGuiAPI.ColorConvertFloat4ToU32(stateElement.BackgroundColor), stateElement.Rounding, roundCornerFlags);
+
+            if (stateElement is IContextMeunable meunablenode)
+            {
+                if (ImGuiAPI.IsMouseClicked(ImGuiMouseButton_.ImGuiMouseButton_Right, false)
+                    && context.ViewPort.IsInViewPort(ImGuiAPI.GetMousePos()))
+                {
+                    var pos = context.ViewPortInverseTransform(ImGuiAPI.GetMousePos());
+                    if (stateElement.HitCheck(pos))
+                    {
+                        ImGuiAPI.CloseCurrentPopup();
+                        meunablenode.UpdateContextMenu(ref context);
+                        meunablenode.OpenContextMeun();
+                    }
+                }
+                meunablenode.DrawContextMenu(ref context);
+            }
+
             var elementContainerRender = TtElementRenderDevice.CreateGraphElementRender(stateElement.ElementContainer);
             elementContainerRender.Draw(stateElement.ElementContainer, ref context);
             for(int i = stateElement.TransitionsStackPanel.Children.Count - 1; i >=0; i--)
@@ -265,21 +384,7 @@ namespace EngineNS.DesignMacross.TimedStateMachine
                 }
             }
 
-            if (stateElement is IContextMeunable meunablenode)
-            {
-                if (ImGuiAPI.IsMouseClicked(ImGuiMouseButton_.ImGuiMouseButton_Right, false)
-                    && context.ViewPort.IsInViewPort(ImGuiAPI.GetMousePos()))
-                {
-                    var pos = context.ViewPortInverseTransform(ImGuiAPI.GetMousePos());
-                    if (stateElement.HitCheck(pos))
-                    {
-                        ImGuiAPI.CloseCurrentPopup();
-                        meunablenode.UpdateContextMenu(ref context);
-                        meunablenode.OpenContextMeun();
-                    }
-                }
-                meunablenode.DrawContextMenu(ref context);
-            }
+           
         }
     }
 }

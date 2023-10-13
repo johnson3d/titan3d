@@ -64,7 +64,7 @@ namespace EngineNS.Graphics.Pipeline.Shader
 
         public delegate void FOnDrawCall(Pipeline.URenderPolicy.EShadingType shadingType, NxRHI.UGraphicDraw drawcall, URenderPolicy policy, Mesh.UMesh mesh, int atom);
         public FOnDrawCall OnDrawCallCallback = null;
-        public virtual void OnDrawCall(Pipeline.URenderPolicy.EShadingType shadingType, NxRHI.UGraphicDraw drawcall, URenderPolicy policy, Mesh.UMesh mesh, int atom)
+        public virtual void OnDrawCall(NxRHI.ICommandList cmd, Pipeline.URenderPolicy.EShadingType shadingType, NxRHI.UGraphicDraw drawcall, URenderPolicy policy, Mesh.UMesh mesh, int atom)
         {
             if (OnDrawCallCallback != null)
                 OnDrawCallCallback(shadingType, drawcall, policy, mesh, atom);

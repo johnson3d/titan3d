@@ -43,7 +43,7 @@ namespace EngineNS.Graphics.Pipeline.Common
 
             var rc = UEngine.Instance.GfxDevice.RenderContext;
 
-            BasePass.Initialize(rc, debugName + ".BasePass" + ".BasePass");
+            BasePass.Initialize(rc, debugName);
 
             var defines = new NxRHI.UShaderDefinitions();
             defines.mCoreObject.AddDefine("DispatchX", $"{Dispatch_SetupDimArray2.X}");
@@ -83,8 +83,8 @@ namespace EngineNS.Graphics.Pipeline.Common
                 }
             }
             MipsDrawcalls = new NxRHI.UComputeDraw[HzbMipsUAVs.Length - 1];
-            uint width = MaxSRVWidth / 2;
-            uint height = MaxSRVHeight / 2;
+            uint width = MaxSRVWidth;
+            uint height = MaxSRVHeight;
             for (int i = 1; i < HzbMipsUAVs.Length; i++)
             {
                 if (width > 1)
@@ -180,7 +180,7 @@ namespace EngineNS.Graphics.Pipeline.Common
             var srvDesc = new NxRHI.FSrvDesc();
             srvDesc.SetTexture2D();
             srvDesc.Type = NxRHI.ESrvType.ST_Texture2D;
-            srvDesc.Format = EPixelFormat.PXF_R16G16_UNORM;
+            srvDesc.Format = EPixelFormat.PXF_R16G16_FLOAT;
             srvDesc.Texture2D.MipLevels = dsTexDesc.MipLevels;
             HzbSRV?.Dispose();
             HzbSRV = rc.CreateSRV(HzbTexture, in srvDesc);
@@ -189,7 +189,7 @@ namespace EngineNS.Graphics.Pipeline.Common
             {
                 var uavDesc = new NxRHI.FUavDesc();
                 uavDesc.SetTexture2D();
-                uavDesc.Format = EPixelFormat.PXF_R16G16_UNORM;
+                uavDesc.Format = EPixelFormat.PXF_R16G16_FLOAT;
                 uavDesc.Texture2D.MipSlice = (uint)i;
                 HzbMipsUAVs[i] = rc.CreateUAV(HzbTexture, in uavDesc);
             }

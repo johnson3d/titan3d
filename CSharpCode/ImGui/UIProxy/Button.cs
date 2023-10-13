@@ -159,5 +159,39 @@ namespace EngineNS.EGui.UIProxy
 
             return pressed;
         }
+        public unsafe static bool ToggleButton(string label, in Vector2 size_arg, ref bool toggle, string idStr = null)
+        {
+            var rectStart = ImGuiAPI.GetCursorScreenPos();
+            var label_size = ImGuiAPI.CalcTextSize(label, false, 0);
+            uint id;
+            if (string.IsNullOrEmpty(idStr))
+                id = ImGuiAPI.GetID("#Button" + label);
+            else
+                id = ImGuiAPI.GetID(idStr);
+            var style = ImGuiAPI.GetStyle();
+            Vector2 size = size_arg;
+            size = ImGuiAPI.CalcItemSize(ref size, label_size.X + style->FramePadding.X * 2.0f, label_size.Y + style->FramePadding.Y * 2.0f);
+            var rectEnd = rectStart + size;
+
+            ImGuiAPI.ItemSize(in size, style->FramePadding.Y);
+            if (!ImGuiAPI.ItemAdd(in rectStart, in rectEnd, id, 0))
+                return false;
+
+            bool hovered = false, held = false;
+            var pressed = ImGuiAPI.ButtonBehavior(in rectStart, in rectEnd, id, ref hovered, ref held, ImGuiButtonFlags_.ImGuiButtonFlags_MouseButtonLeft);
+            if(pressed)
+                toggle = !toggle;
+            var color = StyleConfig.Instance.ToolButtonTextColor;
+            if (toggle)
+                color = StyleConfig.Instance.ToolButtonTextColor_Press;
+            else if (hovered)
+                color = StyleConfig.Instance.ToolButtonTextColor_Hover;
+
+            var drawList = ImGuiAPI.GetWindowDrawList();
+            var pos = rectStart + (size - label_size) * 0.5f;
+            drawList.AddText(in pos, color, label, null);
+
+            return pressed;
+        }
     }
 }

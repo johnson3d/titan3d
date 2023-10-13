@@ -1,5 +1,6 @@
 ﻿using EngineNS.EGui.Controls.PropertyGrid;
 using EngineNS.Rtti;
+using EngineNS.UI.Trigger;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using NPOI.SS.Formula.Functions;
 using System;
@@ -26,8 +27,8 @@ namespace EngineNS.UI.Bind
             get => mBindValueA;
             set
             {
+                OnValueChange(value, mBindValueA);  
                 mBindValueA = value;
-                OnValueChange(value);  
             }
         }
         static TtBindableProperty BindValueAProperty = UEngine.Instance.UIBindManager.Register<int, BindA>("BindValueA", -1);
@@ -66,8 +67,8 @@ namespace EngineNS.UI.Bind
             get => mBindValueB;
             set
             {
+                OnValueChange(value, mBindValueB);
                 mBindValueB = value;
-                OnValueChange(value);
             }
         }
 
@@ -82,8 +83,8 @@ namespace EngineNS.UI.Bind
             get => mBindValueC;
             set
             {
+                OnValueChange(value, mBindValueC);
                 mBindValueC = value;
-                OnValueChange(value);
             }
         }
 
@@ -94,8 +95,8 @@ namespace EngineNS.UI.Bind
             get => mBindValueC2;
             set
             {
+                OnValueChange(value, mBindValueC2);
                 mBindValueC2 = value;
-                OnValueChange(value);
             }
         }
     }
@@ -121,11 +122,19 @@ namespace EngineNS.UI.Bind
             dynamic valueDouble = (double)valueInt;
             return valueDouble;
         }
+        public double ConvertTo<TTag, TSrc>(TtBindingExpressionBase bindingExp, int value)
+        {
+            return (double)value;
+        }
         public override TSrc ConvertFrom<TTag, TSrc>(TtBindingExpressionBase bindingExp, TTag value)
         {
             dynamic valueDouble = value;
             dynamic valueInt = (int)valueDouble;
             return valueInt;
+        }
+        public int ConvertFrom(TtBindingExpressionBase bindingExp, double value)
+        {
+            return (int)value;
         }
     }
     public static class BindTestClass
@@ -265,27 +274,32 @@ namespace EngineNS.UI.Bind
         public BindPropertyDisplayNameAttribute DisplayNameAtt;
 
         [Flags]
-        enum EFlags : UInt16
+        internal enum EFlags : UInt64
         {
-
-            UpdateDefault = 1 << 0,
-            UpdateOnPropertyChanged = 1 << 1,
-            UpdateOnLostFocus = 1 << 2,
-            UpdateExplicitly = 1 << 3,
+            GlobalIndexMask = 0xFFFF,
+            UpdateDefault = 1 << 16,
+            UpdateOnPropertyChanged = 1 << 17,
+            UpdateOnLostFocus = 1 << 18,
+            UpdateExplicitly = 1 << 19,
             UpdateMask = UpdateDefault | UpdateOnPropertyChanged | UpdateOnLostFocus | UpdateExplicitly,
 
-            ModeDefault = 1 << 4,
-            ModeOneTime = 1 << 5,
-            ModeOneWay = 1 << 6,
-            ModeOneWayToSource = 1 << 7,
+            ModeDefault = 1 << 20,
+            ModeOneTime = 1 << 21,
+            ModeOneWay = 1 << 22,
+            ModeOneWayToSource = 1 << 23,
             ModeTwoWay = ModeOneWay | ModeOneWayToSource,
             ModeMask = ModeDefault | ModeOneTime | ModeTwoWay,
 
-            IsReadonly =    1 << 8,
-            AutoGen =       1 << 9,
-            CallSetProperty =   1 << 10,
+            IsReadonly          = 1 << 24,
+            AutoGen             = 1 << 25,
+            CallSetProperty     = 1 << 26,
+            AttachedProperty  = 1 << 27,
         }
         EFlags mFlags;
+        public UInt16 GlobalIndex
+        {
+            get => (UInt16)(mFlags & EFlags.GlobalIndexMask);
+        }
         public bool IsReadonly
         {
             get => (mFlags & EFlags.IsReadonly) != 0;
@@ -317,6 +331,17 @@ namespace EngineNS.UI.Bind
                     mFlags |= EFlags.CallSetProperty;
                 else
                     mFlags &= ~EFlags.CallSetProperty;
+            }
+        }
+        public bool IsAttachedProperty
+        {
+            get => (mFlags & EFlags.AttachedProperty) != 0;
+            internal set
+            {
+                if (value)
+                    mFlags |= EFlags.AttachedProperty;
+                else
+                    mFlags &= ~EFlags.AttachedProperty;
             }
         }
         public EUpdateSourceTrigger UpdateSourceTrigger
@@ -422,18 +447,31 @@ namespace EngineNS.UI.Bind
 
         protected TtBindableProperty()
         {
+            mFlags = (EFlags)TtBindManager.GetBindablePropertyUniqueGlobalIndex();
         }
-        public virtual void CallOnValueChanged<T>(IBindableObject obj, TtBindableProperty property, in T value) { }
+        public void CallOnValueChanged<T>(IBindableObject obj, TtBindableProperty property, in T value) 
+        {
+            var bp = this as TtBindableProperty<T>;
+            if (bp != null)
+                bp.OnValueChanged(obj, property, value);
+        }
+
+        public override int GetHashCode()
+        {
+            return GlobalIndex;
+        }
+        public override bool Equals(object obj)
+        {
+            var pro = obj as TtBindableProperty;
+            if (pro == null)
+                return false;
+            return (this.GlobalIndex == pro.GlobalIndex);
+        }
     }
     public class TtBindableProperty<TProperty> : TtBindableProperty
     {
         public TProperty DefaultValue;
         public Action<IBindableObject, TtBindableProperty, TProperty> OnValueChanged;
-        public override void CallOnValueChanged<T>(IBindableObject obj, TtBindableProperty property, in T value)
-        {
-            dynamic val = value;
-            OnValueChanged?.Invoke(obj, property, val);
-        }
     }
     public interface IBindableObject
     {
@@ -443,18 +481,34 @@ namespace EngineNS.UI.Bind
         public void SetValue<T>(in T value, [CallerMemberName] string? propertyName = null);
         public void SetValue<T>(in T value, TtBindableProperty bp);
         public void SetBindExpression(TtBindableProperty bp, TtBindingExpressionBase expr);
-        public void OnValueChange<T>(T value, [CallerMemberName] string? propertyName = null);
+        public void OnValueChange<T>(in T value, in T oldValue, [CallerMemberName] string? propertyName = null);
         public TtBindingExpressionBase CreateBindingExpression<TProperty>(string propertyName, TtBindingBase binding, TtBindingExpressionBase parent);
         public void ClearBindExpression(TtBindableProperty bp);
         public void RemoveAttachedProperties(Type propertiesHostType);
         public void RemoveAttachedProperty(TtBindableProperty property);
         public void SetAttachedProperties(IBindableObject target);
+        public TtBindableProperty FindBindableProperty(string propertyName);
 #nullable disable
     }
     public class TtBindableObject : IBindableObject, IPropertyCustomization
     {
-        Dictionary<TtBindableProperty, TtBindablePropertyValueBase> mBindExprDic = new Dictionary<TtBindableProperty, TtBindablePropertyValueBase>();
+        protected Dictionary<TtBindableProperty, TtBindablePropertyValueBase> mBindExprDic = new Dictionary<TtBindableProperty, TtBindablePropertyValueBase>();
+        protected TtTriggerCollection mTriggers = new TtTriggerCollection();
+        [Browsable(false)]
+        public TtTriggerCollection Triggers => mTriggers;
 
+        public virtual TtBindableProperty FindBindableProperty(string propertyName)
+        {
+            lock(mBindExprDic)
+            {
+                foreach(var key in mBindExprDic.Keys)
+                {
+                    if (key.Name == propertyName)
+                        return key;
+                }
+            }
+            return UEngine.Instance.UIBindManager.FindBindableProperty(propertyName, UTypeDesc.TypeOf(GetType())); 
+        }
         //public TtBindingExpressionBase SetBinding(TtBindableProperty bp, TtBindingBase binding)
         //{
         //    return TtBindingOperations.SetBinding(this, bp, binding);
@@ -485,13 +539,22 @@ namespace EngineNS.UI.Bind
             TtBindablePropertyValueBase bpVal = null;
             lock (mBindExprDic)
             {
-                if(!mBindExprDic.TryGetValue(bp, out bpVal))
+                if(bp.IsAttachedProperty && !mBindExprDic.TryGetValue(bp, out bpVal))
                 {
                     bpVal = new TtAttachedValue<IBindableObject, T>(this);
                     mBindExprDic[bp] = bpVal;
                 }
             }
-            bpVal.SetValue<T>(this, bp, in value);
+            if (bpVal == null)
+                return;
+            if(mTriggers.HasTrigger(bp))
+            {
+                var oldVal = bpVal.GetValue<T>(bp);
+                bpVal.SetValue<T>(this, bp, in value);
+                mTriggers.InvokeTriggers(this, bp, oldVal, value);
+            }
+            else
+                bpVal.SetValue<T>(this, bp, in value);
         }
 #nullable enable
         public virtual T GetValue<T>([CallerMemberName] string? propertyName = null)
@@ -513,21 +576,32 @@ namespace EngineNS.UI.Bind
             return bpVal.GetValue<T>(bp);            
         }
 #nullable enable
-        public virtual void OnValueChange<T>(T value, [CallerMemberName] string? propertyName = null)
+        public virtual void OnValueChange<T>(in T value, in T oldValue, [CallerMemberName] string? propertyName = null)
 #nullable disable
         {
-            var bp = UEngine.Instance.UIBindManager.FindBindableProperty(propertyName, UTypeDesc.TypeOf(GetType()));
+            var bp = FindBindableProperty(propertyName);
             if (bp == null)
                 return;
             TtBindablePropertyValueBase bpVal = null;
             lock (mBindExprDic)
             {
-                if (!mBindExprDic.TryGetValue(bp, out bpVal))
-                    return;
+                mBindExprDic.TryGetValue(bp, out bpVal);
             }
             if (bpVal == null)
-                return;
-            bpVal.SetValue<T>(this, bp, value);
+            {
+                mTriggers.InvokeTriggers(this, bp, oldValue, value);
+            }
+            else
+            {
+                if (mTriggers.HasTrigger(bp))
+                {
+                    var oldVal = bpVal.GetValue<T>(bp);
+                    bpVal.SetValue<T>(this, bp, in value);
+                    mTriggers.InvokeTriggers(this, bp, oldVal, value);
+                }
+                else
+                    bpVal.SetValue<T>(this, bp, in value);
+            }
         }
         public virtual TtBindingExpressionBase CreateBindingExpression<TProperty>(string propertyName, TtBindingBase binding, TtBindingExpressionBase parent)
         {

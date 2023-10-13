@@ -151,8 +151,8 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode
             }
 
             //EngineNS.EGui.Controls.NodeGraph.PinLinker
-            var graphStr = Material.GraphXMLString.Replace("EngineNS.EGui.Controls.NodeGraph.PinLinker", "EngineNS.Bricks.NodeGraph.UPinLinker");
-            var xml = IO.TtFileManager.LoadXmlFromString(graphStr);            
+            //var graphStr = Material.GraphXMLString?.Replace("EngineNS.EGui.Controls.NodeGraph.PinLinker", "EngineNS.Bricks.NodeGraph.UPinLinker");
+            var xml = IO.TtFileManager.LoadXmlFromString(Material.GraphXMLString);            
             
             if (xml != null)
             {
@@ -273,7 +273,7 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode
                 }
                 LeftWidth = ImGuiAPI.GetColumnWidth(0);
                 var min = ImGuiAPI.GetWindowContentRegionMin();
-                var max = ImGuiAPI.GetWindowContentRegionMin();
+                var max = ImGuiAPI.GetWindowContentRegionMax();
 
                 DrawLeft(ref min, ref max);
                 ImGuiAPI.NextColumn();
@@ -295,7 +295,7 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode
                 {
                     PreviewViewport.DockId = PreviewDockId;
                     PreviewViewport.DockCond = ImGuiCond_.ImGuiCond_Always;
-                    PreviewViewport.VieportType = Graphics.Pipeline.UViewportSlate.EVieportType.Window;
+                    PreviewViewport.ViewportType = Graphics.Pipeline.UViewportSlate.EViewportType.Window;
                     PreviewViewport.OnDraw();
                 }
             }
@@ -458,6 +458,7 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode
             gen.GenCodes(MaterialOutput.PSFunction, ref code, ref genData);
 
             Material.HLSLCode = code;
+            Material.VSNeedStreams = MaterialOutput.GetVSNeedStreams();
             Material.PSNeedInputs = MaterialOutput.GetPSNeedInputs();
 
             Material.UpdateShaderCode(false);

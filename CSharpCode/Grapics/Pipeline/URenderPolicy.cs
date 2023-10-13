@@ -9,8 +9,18 @@ using System.Text;
 namespace EngineNS.Graphics.Pipeline
 {
     [EGui.Controls.PropertyGrid.PGCategoryFilters(ExcludeFilters = new string[] { "Misc" })]
-    public class URenderPolicy : Common.URenderGraph
+    public class URenderPolicy : Common.URenderGraph, IO.ISerializer
     {
+        #region ISerializer
+        public void OnPreRead(object tagObject, object hostObject, bool fromXml)
+        {
+
+        }
+        public void OnPropertyRead(object tagObject, System.Reflection.PropertyInfo prop, bool fromXml)
+        {
+
+        }
+        #endregion
         public URenderPolicy()
         {
             NodeList.Host = this;
@@ -125,6 +135,7 @@ namespace EngineNS.Graphics.Pipeline
         #region Turn On/Off
         protected bool mDisableShadow;
         [Category("Option")]
+        [Rtti.Meta]
         public virtual bool DisableShadow
         {
             get => mDisableShadow;
@@ -132,6 +143,7 @@ namespace EngineNS.Graphics.Pipeline
         }
         protected bool mDisableAO;
         [Category("Option")]
+        [Rtti.Meta]
         public virtual bool DisableAO
         {
             get => mDisableAO;
@@ -142,6 +154,7 @@ namespace EngineNS.Graphics.Pipeline
         }
         protected bool mDisablePointLight;
         [Category("Option")]
+        [Rtti.Meta]
         public virtual bool DisablePointLight
         {
             get => mDisableAO;
@@ -152,6 +165,7 @@ namespace EngineNS.Graphics.Pipeline
         }
         protected bool mDisableHDR;
         [Category("Option")]
+        [Rtti.Meta]
         public virtual bool DisableHDR
         {
             get => mDisableHDR;
@@ -169,6 +183,7 @@ namespace EngineNS.Graphics.Pipeline
             TypeCount,
         }
         [Category("Option")]
+        [Rtti.Meta]
         public virtual ETypeAA TypeAA { get; set; } = ETypeAA.Taa;
 
         public enum ETypeFog
@@ -178,6 +193,7 @@ namespace EngineNS.Graphics.Pipeline
             TypeCount,
         }
         [Category("Option")]
+        [Rtti.Meta]
         public virtual ETypeFog TypeFog { get; set; } = ETypeFog.None;
         #endregion
         public Common.UPickedProxiableManager PickedProxiableManager { get; protected set; } = new Common.UPickedProxiableManager();
@@ -233,9 +249,9 @@ namespace EngineNS.Graphics.Pipeline
             }
             return null;
         }
-        public virtual void OnDrawCall(Pipeline.URenderPolicy.EShadingType shadingType, NxRHI.UGraphicDraw drawcall, Mesh.UMesh mesh, int atom)
+        public virtual void OnDrawCall(NxRHI.ICommandList cmd, Pipeline.URenderPolicy.EShadingType shadingType, NxRHI.UGraphicDraw drawcall, Mesh.UMesh mesh, int atom)
         {
-            mesh.MdfQueue.OnDrawCall(shadingType, drawcall, this, mesh, atom);
+            mesh.MdfQueue.OnDrawCall(cmd, shadingType, drawcall, this, mesh, atom);
         }
         public virtual async System.Threading.Tasks.Task Initialize(UCamera camera)
         {
@@ -343,6 +359,7 @@ namespace EngineNS.Graphics.Pipeline
     {
         #region Feature On/Off
         [Category("Option")]
+        [Rtti.Meta]
         public override bool DisableShadow
         {
             get => mDisableShadow;
@@ -355,6 +372,7 @@ namespace EngineNS.Graphics.Pipeline
             }
         }
         [Category("Option")]
+        [Rtti.Meta]
         public override bool DisablePointLight
         {
             get
@@ -370,6 +388,7 @@ namespace EngineNS.Graphics.Pipeline
             }
         }
         [Category("Option")]
+        [Rtti.Meta]
         public override bool DisableHDR
         {
             get
@@ -385,6 +404,7 @@ namespace EngineNS.Graphics.Pipeline
             }
         }
         [Category("Option")]
+        [Rtti.Meta]
         public override ETypeAA TypeAA 
         {
             get => base.TypeAA;
@@ -470,6 +490,9 @@ namespace EngineNS.Graphics.Pipeline
     }
     public class UForwordPolicyBase : URenderPolicy
     {
+        #region Feature On/Off
+        [Category("Option")]
+        [Rtti.Meta]
         public override bool DisableAO
         {
             get => mDisableAO;
@@ -483,6 +506,8 @@ namespace EngineNS.Graphics.Pipeline
                 }
             }
         }
+        [Category("Option")]
+        [Rtti.Meta]
         public override bool DisableHDR
         {
             get
@@ -492,10 +517,15 @@ namespace EngineNS.Graphics.Pipeline
             set
             {
                 mDisableHDR = value;
-                var shading = FindFirstNode<Mobile.UFinalCopyNode>().ScreenDrawPolicy.mBasePassShading as Mobile.UFinalCopyShading;
+                var node = FindFirstNode<Mobile.UFinalCopyNode>();
+                if (node == null)
+                    return;
+                var shading = node.ScreenDrawPolicy.mBasePassShading as Mobile.UFinalCopyShading;
                 shading?.SetDisableHDR(value);
             }
         }
+        #endregion
+
         Mobile.UMobileOpaqueNode mBasePassNode;
         Mobile.UMobileOpaqueNode BasePassNode
         {

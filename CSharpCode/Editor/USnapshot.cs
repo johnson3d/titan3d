@@ -55,7 +55,7 @@ namespace EngineNS.Editor
                     cpDraw.BindTextureDest(dstTex);
                     cpDraw.mCoreObject.BindTextureSrc(tex);
                     im_cmd.PushGpuDraw(cpDraw.mCoreObject.NativeSuper);
-                    im_cmd.FlushDraws(true);
+                    im_cmd.FlushDraws();
                 }
                 else if (dstBf != null)
                 {
@@ -66,7 +66,7 @@ namespace EngineNS.Editor
                     cpDraw.mCoreObject.BindTextureSrc(tex);
                     cpDraw.mCoreObject.FootPrint = CopyBufferFootPrint;
                     im_cmd.PushGpuDraw(cpDraw.mCoreObject.NativeSuper);
-                    im_cmd.FlushDraws(true);
+                    im_cmd.FlushDraws();
                 }
                 UEngine.Instance.GfxDevice.RenderContext.GpuQueue.IncreaseSignal(fence);
             }, "Copy Snap Texture");

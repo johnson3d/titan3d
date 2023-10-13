@@ -271,7 +271,7 @@ namespace EngineNS.GamePlay.Scene
         UMemberTickables mMemberTickables = new UMemberTickables();
         public override bool OnTickLogic(GamePlay.UWorld world, Graphics.Pipeline.URenderPolicy policy)
         {
-            mMemberTickables.TickLogic(this, UEngine.Instance.ElapseTickCount);
+            mMemberTickables.TickLogic(this, UEngine.Instance.ElapseTickCountMS);
             return true;
         }
         public override unsafe bool IsTreeContain(DVector3* localStart, DVector3* dir, DBoundingBox* pBox)

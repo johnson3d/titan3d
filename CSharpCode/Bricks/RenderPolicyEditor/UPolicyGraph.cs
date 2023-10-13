@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.ComponentModel;
 using EngineNS.Bricks.NodeGraph;
+using EngineNS.EGui.Controls.PropertyGrid;
 
 namespace EngineNS.Bricks.RenderPolicyEditor
 {
@@ -157,17 +158,34 @@ namespace EngineNS.Bricks.RenderPolicyEditor
     {
         public UPolicyGraph()
         {
-            PolicyClassName = Rtti.UTypeDesc.TypeStr(typeof(Graphics.Pipeline.UDeferredPolicyBase));
+            PolicyType = Rtti.UTypeDesc.TypeOf(typeof(Graphics.Pipeline.UDeferredPolicyBase));
             UpdateCanvasMenus();
             UpdateNodeMenus();
             UpdatePinMenus();
         }
+        Graphics.Pipeline.URenderPolicy mRenderPolicy;
         [Rtti.Meta]
-        public string PolicyClassName
+        public Graphics.Pipeline.URenderPolicy RenderPolicy
         {
-            get;
-            set;
+            get => mRenderPolicy;
+            set
+            {
+                mRenderPolicy = value;
+            }
         }
+        Rtti.UTypeDesc mPolicyType;
+        [Rtti.Meta]
+        [PGTypeEditor(typeof(Graphics.Pipeline.URenderPolicy))]
+        public Rtti.UTypeDesc PolicyType
+        {
+            get => mPolicyType;
+            set
+            {
+                mPolicyType = value;
+                mRenderPolicy = Rtti.UTypeDescManager.CreateInstance(mPolicyType, null) as Graphics.Pipeline.URenderPolicy;
+            }
+        }
+        
         public UPolicyEditor PolicyEditor;
         List<Rtti.UTypeDesc> mGraphNodeTypes = null;
         public List<Rtti.UTypeDesc> GraphNodeTypes

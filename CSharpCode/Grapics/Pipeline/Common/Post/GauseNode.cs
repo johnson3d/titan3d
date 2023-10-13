@@ -19,7 +19,7 @@ namespace EngineNS.Graphics.Pipeline.Common.Post
             return new NxRHI.EVertexStreamType[] { NxRHI.EVertexStreamType.VST_Position,
                 NxRHI.EVertexStreamType.VST_UV,};
         }
-        public override void OnDrawCall(URenderPolicy.EShadingType shadingType, NxRHI.UGraphicDraw drawcall, URenderPolicy policy, Graphics.Mesh.UMesh mesh)
+        public override void OnDrawCall(NxRHI.ICommandList cmd, URenderPolicy.EShadingType shadingType, NxRHI.UGraphicDraw drawcall, URenderPolicy policy, Graphics.Mesh.UMesh mesh)
         {
             var aaNode = drawcall.TagObject as TtGaussNode;
             if (aaNode == null)
@@ -48,7 +48,7 @@ namespace EngineNS.Graphics.Pipeline.Common.Post
                 drawcall.BindCBuffer(index, aaNode.CBShadingEnv);
             }
 
-            base.OnDrawCall(shadingType, drawcall, policy, mesh);
+            base.OnDrawCall(cmd, shadingType, drawcall, policy, mesh);
         }
     }
     public class TtGaussNode : USceenSpaceNode
@@ -159,7 +159,7 @@ namespace EngineNS.Graphics.Pipeline.Common.Post
             return new NxRHI.EVertexStreamType[] { NxRHI.EVertexStreamType.VST_Position,
                 NxRHI.EVertexStreamType.VST_UV,};
         }
-        public override void OnDrawCall(URenderPolicy.EShadingType shadingType, NxRHI.UGraphicDraw drawcall, URenderPolicy policy, Graphics.Mesh.UMesh mesh)
+        public override void OnDrawCall(NxRHI.ICommandList cmd, URenderPolicy.EShadingType shadingType, NxRHI.UGraphicDraw drawcall, URenderPolicy policy, Graphics.Mesh.UMesh mesh)
         {
             var aaNode = drawcall.TagObject as TtGaussAdditiveNode;
             if (aaNode == null)
@@ -198,7 +198,7 @@ namespace EngineNS.Graphics.Pipeline.Common.Post
                 drawcall.BindCBuffer(index, aaNode.CBShadingEnv);
             }
 
-            base.OnDrawCall(shadingType, drawcall, policy, mesh);
+            base.OnDrawCall(cmd, shadingType, drawcall, policy, mesh);
         }
     }
     public class TtGaussAdditiveNode : USceenSpaceNode

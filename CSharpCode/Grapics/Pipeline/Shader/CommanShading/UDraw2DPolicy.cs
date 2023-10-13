@@ -16,9 +16,9 @@ namespace EngineNS.Graphics.Pipeline.Shader.CommanShading
             }
             return null;
         }
-        public override void OnDrawCall(Pipeline.URenderPolicy.EShadingType shadingType, NxRHI.UGraphicDraw drawcall, Mesh.UMesh mesh, int atom)
+        public override void OnDrawCall(NxRHI.ICommandList cmd, Pipeline.URenderPolicy.EShadingType shadingType, NxRHI.UGraphicDraw drawcall, Mesh.UMesh mesh, int atom)
         {
-            mBasePassShading.OnDrawCall(shadingType, drawcall, this, mesh);
+            mBasePassShading.OnDrawCall(cmd, shadingType, drawcall, this, mesh);
         }
     }
 }

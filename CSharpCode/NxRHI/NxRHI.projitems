@@ -14,6 +14,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)UDrawcall.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)UFrameBuffers.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)UGeomMesh.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)USamplerDesc.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)UShaderEffect.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)UEvent.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)UGpuDevice.cs" />

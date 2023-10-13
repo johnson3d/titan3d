@@ -79,7 +79,21 @@ namespace EngineNS.Graphics.Pipeline.Common
             Dirty = true;
             DataArray.Clear();
         }
-        public unsafe void Flush2GPU()
+        public unsafe void Flush2GPU(NxRHI.UCommandList cmd)
+        {
+            if (cmd == null)
+            {
+                using (var tsCmd = new NxRHI.FTransientCmd(NxRHI.EQueueType.QU_Default, "TtCpu2GpuBuffer.Flush"))
+                {
+                    Flush2GPU(tsCmd.CmdList);
+                }   
+            }
+            else
+            {
+                Flush2GPU(cmd.mCoreObject);
+            }
+        }
+        public unsafe void Flush2GPU(NxRHI.ICommandList cmd)
         {
             if (Dirty == false)
                 return;
@@ -134,7 +148,7 @@ namespace EngineNS.Graphics.Pipeline.Common
             else
             {
                 if (DataArray.Count > 0)
-                    GpuBuffer.UpdateGpuData(0, DataArray.UnsafeGetElementAddress(0), (uint)(sizeof(T) * DataArray.Count));
+                    GpuBuffer.UpdateGpuData(cmd, 0, DataArray.UnsafeGetElementAddress(0), (uint)(sizeof(T) * DataArray.Count));
             }
         }
     }

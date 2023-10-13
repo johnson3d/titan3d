@@ -15,8 +15,15 @@ namespace EngineNS
         {
             if (obj.GetType() == typeof(Vector4))
                 return (Vector4)obj;
-            if (obj.GetType() == typeof(Color4f))
+            else if (obj.GetType() == typeof(Color4f))
                 return (Color4f)obj;
+            else if(obj.GetType() == typeof(Color))
+            {
+                return new Vector4(((Color)obj).R / 255.0f,
+                                   ((Color)obj).G / 255.0f,
+                                   ((Color)obj).B / 255.0f,
+                                   ((Color)obj).A / 255.0f);
+            }
             else
             {
                 System.Diagnostics.Debug.Assert(false);
@@ -285,6 +292,22 @@ namespace EngineNS
         /// </summary>
         [Rtti.Meta]
         public float W;
+
+        public float Left => X;
+        public float Top => Y;
+        public float Right => Z;
+        public float Bottom => W;
+
+        public float TopLeft => X;
+        public float TopRight => Y;
+        public float BottomRight => Z;
+        public float BottomLeft => W;
+
+        public float R => X;
+        public float G => Y;
+        public float B => Z;
+        public float A => W;
+
         #endregion
         /// <summary>
         /// 按索引获取对象的值

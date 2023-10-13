@@ -22,6 +22,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)Color4f.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Converter.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Convex.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)ConvexVolume.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)DBoundingBox.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)DBoundingSphere.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Design\BoundingBoxConverter.cs" />

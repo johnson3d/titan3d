@@ -192,7 +192,10 @@ namespace EngineNS.Bricks.Terrain.CDLOD
             if (hmNode != null)
             {
                 TerrainMaterialIdManager = hmNode.MaterialIdManager;
-                TerrainMaterialIdManager.BuildSRV();
+                using (var tsCmd = new NxRHI.FTransientCmd(NxRHI.EQueueType.QU_Default, "TerrainBuildSRV"))
+                {
+                    TerrainMaterialIdManager.BuildSRV(tsCmd.CmdList);
+                }
                 await hmNode.SureMaterialResources();
             }
 

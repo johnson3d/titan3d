@@ -438,7 +438,7 @@ namespace EngineNS.Profiler
     public class TtProfilerModule : UModule<UEngine>
     {
         public NxRHI.TtGpuTimeScopeManager GpuTimeScopeManager { get; } = new NxRHI.TtGpuTimeScopeManager();
-        public override unsafe void Tick(UEngine host)
+        public override unsafe void TickModule(UEngine host)
         {
             GpuTimeScopeManager.UpdateSync();
         }

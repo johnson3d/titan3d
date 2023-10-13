@@ -38,7 +38,7 @@ namespace EngineNS.Bricks.Terrain.Grass
             public NxRHI.UVbView mDataVB;
             public NxRHI.UVbView mHeightVB;
 
-            public NxRHI.UVertexArray mAttachVBs = new NxRHI.UVertexArray();
+            public NxRHI.UVertexArray mAttachVBs = null;
             public void Dispose()
             {
                 mDataVB?.Dispose();
@@ -73,6 +73,9 @@ namespace EngineNS.Bricks.Terrain.Grass
                 }
 
                 var rc = UEngine.Instance.GfxDevice.RenderContext;
+
+                if (mAttachVBs == null)
+                    mAttachVBs = rc.CreateVertexArray();
                 var desc = new NxRHI.FVbvDesc();
                 desc.m_Size = (UInt32)(sizeof(UInt32) * mdf.mMaxNumber);
                 desc.m_Stride = (UInt32)sizeof(UInt32);
@@ -82,7 +85,7 @@ namespace EngineNS.Bricks.Terrain.Grass
                 desc.m_Stride = (UInt32)sizeof(float);
                 mHeightVB = rc.CreateVBV(null, in desc);
             }
-            public unsafe void Flush2VB(UGrassModifier mdf)
+            public unsafe void Flush2VB(NxRHI.ICommandList cmd, UGrassModifier mdf)
             {
                 if (mdf.mCurNumber == 0)
                     return;
@@ -91,12 +94,12 @@ namespace EngineNS.Bricks.Terrain.Grass
                 fixed(UInt32* p = &mData[0])
                 {
                     var dataSize = (UInt32)sizeof(UInt32) * mdf.mCurNumber;
-                    mDataVB.UpdateGpuData(0, p, dataSize);
+                    mDataVB.UpdateGpuData(cmd, 0, p, dataSize);
                 }
                 fixed(float* p = &mHeight[0])
                 {
                     var dataSize = (UInt32)sizeof(float) * mdf.mCurNumber;
-                    mHeightVB.UpdateGpuData(0, p, dataSize);
+                    mHeightVB.UpdateGpuData(cmd, 0, p, dataSize);
                 }
 
                 mAttachVBs.BindVB(NxRHI.EVertexStreamType.VST_Color, mDataVB);
@@ -131,11 +134,8 @@ namespace EngineNS.Bricks.Terrain.Grass
             public bool IsDirty { get; private set; } = true;
             public void Dispose()
             {
-                InstantBuffer?.Dispose();
-                InstantBuffer = null;
-
-                InstantSRV?.Dispose();
-                InstantSRV = null;
+                CoreSDK.DisposeObject(ref InstantBuffer);
+                CoreSDK.DisposeObject(ref InstantSRV);
 
                 InstData = null;
             }
@@ -171,14 +171,15 @@ namespace EngineNS.Bricks.Terrain.Grass
                 {
                     InstantBuffer = UEngine.Instance.GfxDevice.RenderContext.CreateBuffer(in bfDesc);
                 }
-
+                InstantBuffer.SetDebugName("GrassInst");
+                
                 var srvDesc = new NxRHI.FSrvDesc();
                 srvDesc.SetBuffer(false);
                 srvDesc.Buffer.NumElements = mdf.mMaxNumber;
                 srvDesc.Buffer.StructureByteStride = bfDesc.StructureStride;
                 InstantSRV = UEngine.Instance.GfxDevice.RenderContext.CreateSRV(InstantBuffer, in srvDesc);
                 InstantSRV.SetDebugName("InstantSRV");
-                InstantSRV.SetDebugName("InstantSRV");
+
             }
             public uint PushInstance(UGrassModifier mdf, uint data, float height)
             {
@@ -213,7 +214,7 @@ namespace EngineNS.Bricks.Terrain.Grass
 
                 IsDirty = true;
             }
-            public unsafe uint Flush2VB(UGrassModifier mdf)
+            public unsafe uint Flush2VB(NxRHI.ICommandList cmd, UGrassModifier mdf)
             {
                 if (mdf.mCurNumber == 0)
                     return 0;
@@ -223,7 +224,7 @@ namespace EngineNS.Bricks.Terrain.Grass
                     var rc = UEngine.Instance.GfxDevice.RenderContext;
                     fixed(FVSGrassData* pTar = &InstData[0])
                     {
-                        InstantBuffer.UpdateGpuData(0, pTar, mdf.mCurNumber * (uint)sizeof(FVSGrassData));
+                        InstantBuffer.UpdateGpuData(cmd, 0, pTar, mdf.mCurNumber * (uint)sizeof(FVSGrassData));
                     }
                     IsDirty = false;
                 }
@@ -253,14 +254,6 @@ namespace EngineNS.Bricks.Terrain.Grass
                 InstantSSBO = new UInstantSSBO();
             else
                 InstantVBs = new UInstantVBs();
-
-            if (GrassTemp == null)
-            {
-                GrassTemp = new Graphics.Pipeline.Common.TtCpu2GpuBuffer<FVSGrassData>();
-                GrassTemp.Initialize(NxRHI.EBufferType.BFT_SRV);
-                GrassTemp.PushData(new FVSGrassData());
-                GrassTemp.Flush2GPU();
-            }
         }
         public void SureBuffers(uint nSize)
         {
@@ -284,12 +277,12 @@ namespace EngineNS.Bricks.Terrain.Grass
             else if(InstantVBs != null)
                 InstantVBs.SetInstance(index, data, height);
         }
-        public unsafe uint Flush2VB()
+        public unsafe uint Flush2VB(NxRHI.ICommandList cmd)
         {
             if (InstantSSBO != null)
-                return InstantSSBO.Flush2VB(this);
+                return InstantSSBO.Flush2VB(cmd, this);
             else if (InstantVBs != null)
-                InstantVBs.Flush2VB(this);
+                InstantVBs.Flush2VB(cmd, this);
             return 0;
         }
         private void SureCBuffer(NxRHI.IGraphicsEffect shaderProg)
@@ -302,7 +295,6 @@ namespace EngineNS.Bricks.Terrain.Grass
                     GrassType.GrassCBuffer = UEngine.Instance.GfxDevice.RenderContext.CreateCBV(coreBinder.CBPerGrassType.Binder.mCoreObject);
             }
         }
-        public static Graphics.Pipeline.Common.TtCpu2GpuBuffer<FVSGrassData> GrassTemp = null;
         public class UMdfShaderBinder : Graphics.Pipeline.UCoreShaderBinder.UShaderResourceIndexer
         {
             public void Init(NxRHI.UShaderEffect effect)
@@ -322,7 +314,7 @@ namespace EngineNS.Bricks.Terrain.Grass
             public NxRHI.UEffectBinder cbPerGrassType;
             public NxRHI.UEffectBinder VSGrassDataArray;
         }
-        public unsafe void OnDrawCall(Graphics.Pipeline.URenderPolicy.EShadingType shadingType, NxRHI.UGraphicDraw drawcall, Graphics.Pipeline.URenderPolicy policy, Graphics.Mesh.UMesh mesh)
+        public unsafe void OnDrawCall(NxRHI.ICommandList cmd, Graphics.Pipeline.URenderPolicy.EShadingType shadingType, NxRHI.UGraphicDraw drawcall, Graphics.Pipeline.URenderPolicy policy, Graphics.Mesh.UMesh mesh)
         {
             var pat = GrassType.Patch;
             if ((pat.Level.Level.Node.TerrainCBuffer == null) || (pat.PatchCBuffer == null))
@@ -367,7 +359,6 @@ namespace EngineNS.Bricks.Terrain.Grass
 
                 pat.PatchCBuffer.SetValue(coreBinder.CBPerTerrainPatch.TexUVOffset, in pat.TexUVOffset);
 
-                pat.PatchCBuffer.FlushDirty();
                 drawcall.BindCBuffer(effectBinder.cbPerPatch.mCoreObject, pat.PatchCBuffer);
             }
 
@@ -377,7 +368,7 @@ namespace EngineNS.Bricks.Terrain.Grass
                 //var binder = drawcall.FindBinder("VSGrassDataArray");
                 if (effectBinder.VSGrassDataArray != null)
                 {
-                    instCount = this.Flush2VB();
+                    instCount = this.Flush2VB(cmd);
                     drawcall.BindSRV(effectBinder.VSGrassDataArray, InstantSSBO.InstantSRV);
                     //drawcall.BindSRV(effectBinder.VSGrassDataArray, GrassTemp.DataSRV); 
                 }
@@ -400,7 +391,6 @@ namespace EngineNS.Bricks.Terrain.Grass
                 GrassType.GrassCBuffer.SetValue(coreBinder.CBPerGrassType.PatchIdxX, pat.IndexX);
                 GrassType.GrassCBuffer.SetValue(coreBinder.CBPerGrassType.PatchIdxZ, pat.IndexZ);
                 GrassType.GrassCBuffer.SetValue(coreBinder.CBPerGrassType.MaxGrassInstanceNum, instCount);
-                GrassType.GrassCBuffer.FlushDirty();
                 drawcall.BindCBuffer(effectBinder.cbPerGrassType, GrassType.GrassCBuffer);
             }
         }

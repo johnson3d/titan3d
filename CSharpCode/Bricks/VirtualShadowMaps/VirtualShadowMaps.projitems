@@ -9,6 +9,10 @@
     <Import_RootNamespace>EngineNS.Bricks.VirtualShadowMaps</Import_RootNamespace>
   </PropertyGroup>
   <ItemGroup>
-    <Compile Include="$(MSBuildThisFileDirectory)VirtualShadowMapArray.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)TTVirtualShadowMapCacheEntry.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)TTVirtualShadowMapArray.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)VirtualShadowMapArrayCacheManager.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)VirtualShadowMapClipmap.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)VirtualShadowMapPerLightCacheEntry.cs" />
   </ItemGroup>
 </Project>

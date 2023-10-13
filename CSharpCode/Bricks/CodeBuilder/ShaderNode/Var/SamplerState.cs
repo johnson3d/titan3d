@@ -38,6 +38,7 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Var
             return VarType;
         }
         NxRHI.FSamplerDesc mDesc;
+        [Rtti.Meta]
         public NxRHI.FSamplerDesc Desc { get => mDesc; set => mDesc = value; }
         //public override IExpression GetExpr(UMaterialGraph funGraph, ICodeGen cGen, PinOut oPin, bool bTakeResult)
         //{

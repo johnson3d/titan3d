@@ -3,6 +3,7 @@ using BCnEncoder.Shared;
 using EngienNS.Bricks.ImageDecoder;
 using EngineNS.Bricks.CodeBuilder.MacrossNode;
 using EngineNS.IO;
+using Jither.OpenEXR;
 using Microsoft.Toolkit.HighPerformance;
 using NPOI.OpenXmlFormats.Vml;
 using NPOI.SS.Formula.Functions;
@@ -40,6 +41,7 @@ namespace EngineNS.NxRHI
             return await UEngine.Instance.GfxDevice.TextureManager.GetTexture(GetAssetName());
         }
         Thread.Async.TtTask<USrView>? SnapTask;
+        Thread.Async.TtTask<EngineNS.Graphics.Pipeline.Shader.UEffect>? EffectTask;
         public override bool CanRefAssetType(IO.IAssetMeta ameta)
         {
             //纹理不会引用别的资产
@@ -71,9 +73,12 @@ namespace EngineNS.NxRHI
         {
             if (SnapTask != null)
             {
+                CoreSDK.DisposeObject(ref CmdParameters);
                 SnapTask = null;
             }
         }
+        bool mShowA = false;
+        EngineNS.Editor.Forms.TtTextureViewerCmdParams CmdParameters = null;
         public unsafe override void OnDrawSnapshot(in ImDrawList cmdlist, ref Vector2 start, ref Vector2 end)
         {
             if (SnapTask == null)
@@ -81,20 +86,67 @@ namespace EngineNS.NxRHI
                 var rc = UEngine.Instance.GfxDevice.RenderContext;
                 SnapTask = UEngine.Instance.GfxDevice.TextureManager.GetTexture(this.GetAssetName(), 1);
                 //cmdlist.AddText(in start, 0xFFFFFFFF, "texture", null);
+
+                EffectTask = UEngine.Instance.GfxDevice.EffectManager.GetEffect(
+                    UEngine.Instance.ShadingEnvManager.GetShadingEnv<EngineNS.Editor.Forms.USlateTextureViewerShading>(),
+                    UEngine.Instance.GfxDevice.MaterialManager.ScreenMaterial, new Graphics.Mesh.UMdfStaticMesh());
+
                 return;
             }
-            else if (SnapTask.Value.IsCompleted == false)
+            else if (SnapTask.Value.IsCompleted == false || EffectTask.Value.IsCompleted == false)
             {
                 cmdlist.AddText(in start, 0xFFFFFFFF, "loading...", null);
                 return;
             }
             unsafe
             {
+                if(CmdParameters==null && SnapTask.Value.Result!=null && EffectTask.Value.Result!=null)
+                {
+                    var rc = UEngine.Instance.GfxDevice.RenderContext;
+                    var SlateEffect = EffectTask.Value.Result;
+
+                    var iptDesc = new NxRHI.UInputLayoutDesc();
+                    unsafe
+                    {
+                        iptDesc.mCoreObject.AddElement("POSITION", 0, EPixelFormat.PXF_R32G32_FLOAT, 0, 0, 0, 0);
+                        iptDesc.mCoreObject.AddElement("TEXCOORD", 0, EPixelFormat.PXF_R32G32_FLOAT, 0, (uint)sizeof(Vector2), 0, 0);
+                        iptDesc.mCoreObject.AddElement("COLOR", 0, EPixelFormat.PXF_R8G8B8A8_UNORM, 0, (uint)sizeof(Vector2) * 2, 0, 0);
+                        //iptDesc.SetShaderDesc(SlateEffect.GraphicsEffect);
+                    }
+                    iptDesc.mCoreObject.SetShaderDesc(SlateEffect.DescVS.mCoreObject);
+                    var InputLayout = rc.CreateInputLayout(iptDesc); //UEngine.Instance.GfxDevice.InputLayoutManager.GetPipelineState(rc, iptDesc);
+                    SlateEffect.ShaderEffect.mCoreObject.BindInputLayout(InputLayout.mCoreObject);
+
+                    var cmdParams = EGui.TtImDrawCmdParameters.CreateInstance<EngineNS.Editor.Forms.TtTextureViewerCmdParams>();
+                    var cbBinder = SlateEffect.ShaderEffect.FindBinder("ProjectionMatrixBuffer");
+                    cmdParams.CBuffer = rc.CreateCBV(cbBinder);
+                    cmdParams.Drawcall.BindShaderEffect(SlateEffect);
+                    cmdParams.Drawcall.BindCBuffer(cbBinder.mCoreObject, cmdParams.CBuffer);
+                    cmdParams.Drawcall.BindSRV(VNameString.FromString("FontTexture"), SnapTask.Value.Result);
+                    cmdParams.Drawcall.BindSampler(VNameString.FromString("Samp_FontTexture"), UEngine.Instance.GfxDevice.SamplerStateManager.PointState);
+
+                    cmdParams.IsNormalMap = 0;
+                    if (SnapTask.Value.Result.PicDesc.Format == EPixelFormat.PXF_BC5_UNORM || SnapTask.Value.Result.PicDesc.Format == EPixelFormat.PXF_BC5_TYPELESS || SnapTask.Value.Result.PicDesc.Format == EPixelFormat.PXF_BC5_SNORM)
+                        cmdParams.IsNormalMap = 1;
+
+                    CmdParameters = cmdParams;
+                }
+
                 var uv0 = new Vector2(0, 0);
                 var uv1 = new Vector2(1, 1);
-
                 if (SnapTask.Value.Result != null)
-                    cmdlist.AddImage(SnapTask.Value.Result.GetTextureHandle().ToPointer(), in start, in end, in uv0, in uv1, 0xFFFFFFFF);
+                {
+                    cmdlist.AddImage(CmdParameters.GetHandle(), in start, in end, in uv0, in uv1, 0xFFFFFFFF);
+                }
+
+                // support preview A channel
+                //var textPos = end - new Vector2(32, 32);
+                //cmdlist.AddText(textPos, mShowA ? 0xFFFFFFFF : 0x00FF00FF, "A", null);
+                //if (ImGuiAPI.IsMouseClicked(ImGuiMouseButton_.ImGuiMouseButton_Left, false) && ImGuiAPI.IsMouseHoveringRect(textPos, end, true))
+                //{
+                //    CmdParameters.ColorMask.W = mShowA ? 1 : 0;
+                //    mShowA = !mShowA;
+                //}
             }
             //cmdlist.AddText(in start, 0xFFFFFFFF, "texture", null);
         }
@@ -142,6 +194,8 @@ namespace EngineNS.NxRHI
                 get => Desc.StripOriginSource != 0 ? true : false;
                 set => Desc.StripOriginSource = value ? 1 : 0;
             }
+            bool mIsNormal;
+            public bool IsNormal { get => mIsNormal; set => mIsNormal=value; }
             public List<Vector3i> MipSizes { get; } = new List<Vector3i>();
         }
         public EPixelFormat SrvFormat
@@ -161,6 +215,194 @@ namespace EngineNS.NxRHI
             mCoreObject.NativeSuper.SetDebugName(name);
         }
 
+        public class NormalmapChecker
+        {
+            // These values are the threshold values for the average vector's
+            // length to be considered within limits as a normal map normal
+            const float NormalMapMinLengthConfidenceThreshold = 0.55f;
+            const float NormalMapMaxLengthConfidenceThreshold = 1.1f;
+
+            // This value is the threshold value for the average vector to be considered
+            // to be going in the correct direction.
+            const float NormalMapDeviationThreshold = 0.8f;
+
+            // Samples from the texture will be taken in blocks of this size^2
+            const int SampleTileEdgeLength = 4;
+
+            // We sample up to this many tiles in each axis. Sampling more tiles
+            // will likely be more accurate, but will take longer.
+            const int MaxTilesPerAxis = 16;
+
+            // This is used in the comparison with "mid-gray"
+            const float ColorComponentNearlyZeroThreshold = (2.0f / 255.0f);
+
+            // This is used when comparing alpha to zero to avoid picking up sprites
+            const float AlphaComponentNearlyZeroThreshold = (1.0f / 255.0f);
+
+            // These values are chosen to make the threshold colors (from uint8 textures)
+            // discard the top most and bottom most two values, i.e. 0, 1, 254 and 255 on
+            // the assumption that these are likely invalid values for a general normal map
+            const float ColorComponentMinVectorThreshold = (2.0f / 255.0f) * 2.0f - 1.0f;
+            const float ColorComponentMaxVectorThreshold = (253.0f / 255.0f) * 2.0f - 1.0f;
+
+            // This is the threshold delta length for a vector to be considered as a unit vector
+            const float NormalVectorUnitLengthDeltaThreshold = 0.45f;
+
+            // Rejected to taken sample ratio threshold.
+            const float RejectedToTakenRatioThreshold = 0.33f;
+
+            void EvaluateSubBlock(StbImageSharp.ImageResult image, int Left, int Top, int Width, int Height)
+            {
+                for (int Y = Top; Y != (Top + Height); Y++)
+                {
+                    for (int X = Left; X != (Left + Width); X++)
+                    {
+                        var ColorSample = image.GetPixel(X, Y).ToColor4Float();
+
+                        // Nearly black or transparent pixels don't contribute to the calculation
+                        if ((ColorSample.Alpha - AlphaComponentNearlyZeroThreshold) < MathHelper.Epsilon || 
+                            ColorSample.IsAlmostBlack())
+                        {
+                            continue;
+                        }
+
+                        // Scale and bias, if required, to get a signed vector
+                        float Vx = ColorSample.Red * 2.0f - 1.0f;
+                        float Vy = ColorSample.Green * 2.0f - 1.0f;
+                        float Vz = ColorSample.Blue * 2.0f - 1.0f;
+
+                        float Length = MathHelper.Sqrt(Vx * Vx + Vy * Vy + Vz * Vz);
+                        if (Length < ColorComponentNearlyZeroThreshold)
+                        {
+                            // mid-grey pixels representing (0,0,0) are also not considered as they may be used to denote unused areas
+                            continue;
+                        }
+
+                        // If the vector is sufficiently different in length from a unit vector, consider it invalid.
+                        if (MathHelper.Abs(Length - 1.0f) > NormalVectorUnitLengthDeltaThreshold)
+                        {
+                            NumSamplesRejected++;
+                            continue;
+                        }
+
+                        // If the vector is pointing backwards then it is an invalid sample, so consider it invalid
+                        if (Vz < 0.0f)
+                        {
+                            NumSamplesRejected++;
+                            continue;
+                        }
+
+                        AverageColor = AverageColor + ColorSample;
+                        NumSamplesTaken++;
+                    }
+                }
+            }
+
+            /**
+             * DoesTextureLookLikelyToBeANormalMap
+             *
+             * Makes a best guess as to whether a texture represents a normal map or not.
+             * Will not be 100% accurate, but aims to be as good as it can without usage
+             * information or relying on naming conventions.
+             *
+             * The heuristic takes samples in small blocks across the texture (if the texture
+             * is large enough). The assumption is that if the texture represents a normal map
+             * then the average direction of the resulting vector should be somewhere near {0,0,1}.
+             * It samples in a number of blocks spread out to decrease the chance of hitting a
+             * single unused/blank area of texture, which could happen depending on uv layout.
+             *
+             * Any pixels that are black, mid-gray or have a red or green value resulting in X or Y
+             * being -1 or +1 are ignored on the grounds that they are invalid values. Artists
+             * sometimes fill the unused areas of normal maps with color being the {0,0,1} vector,
+             * but that cannot be relied on - those areas are often black or gray instead.
+             *
+             * If the heuristic manages to sample enough valid pixels, the threshold being based
+             * on the total number of samples it will be looking at, then it takes the average
+             * vector of all the sampled pixels and checks to see if the length and direction are
+             * within a specific tolerance. See the namespace at the top of the file for tolerance
+             * value specifications. If the vector satisfies those tolerances then the texture is
+             * considered to be a normal map.
+             */
+            public bool DoesTextureLookLikelyToBeANormalMap(StbImageSharp.ImageResult image)
+            {
+                int TextureSizeX = image.Width;
+                int TextureSizeY = image.Height;
+
+                // Calculate the number of tiles in each axis, but limit the number
+                // we interact with to a maximum of 16 tiles (4x4)
+                int NumTilesX = Math.Min(TextureSizeX / SampleTileEdgeLength, MaxTilesPerAxis);
+                int NumTilesY = Math.Min(TextureSizeY / SampleTileEdgeLength, MaxTilesPerAxis);
+
+                //if (!Sampler.SetSourceTexture(Texture))
+                //{
+                //    return false;
+                //}
+
+                if ((NumTilesX > 0) &&
+                    (NumTilesY > 0))
+                {
+                    // If texture is large enough then take samples spread out across the image
+                    NumSamplesThreshold = (NumTilesX * NumTilesY) * 4; // on average 4 samples per tile need to be valid...
+
+                    for (int TileY = 0; TileY < NumTilesY; TileY++)
+                    {
+                        int Top = (TextureSizeY / NumTilesY) * TileY;
+
+                        for (int TileX = 0; TileX < NumTilesX; TileX++)
+                        {
+                            int Left = (TextureSizeX / NumTilesX) * TileX;
+
+                            EvaluateSubBlock(image, Left, Top, SampleTileEdgeLength, SampleTileEdgeLength);
+                        }
+                    }
+                }
+                else
+                {
+                    NumSamplesThreshold = (TextureSizeX * TextureSizeY) / 4;
+
+                    // Texture is small enough to sample all texels
+                    EvaluateSubBlock(image, 0, 0, TextureSizeX, TextureSizeY);
+                }
+
+                // if we managed to take a reasonable number of samples then we can evaluate the result
+                if (NumSamplesTaken >= NumSamplesThreshold)
+                {
+                    float RejectedToTakenRatio = (float)(NumSamplesRejected) / (float)(NumSamplesTaken);
+                    if (RejectedToTakenRatio >= RejectedToTakenRatioThreshold)
+                    {
+                        // Too many invalid samples, probably not a normal map
+                        return false;
+                    }
+
+                    AverageColor = AverageColor * (1.0f/(float)NumSamplesTaken);
+
+                    // See if the resulting vector lies anywhere near the {0,0,1} vector
+                    float Vx = AverageColor.Red * 2.0f - 1.0f;
+                    float Vy = AverageColor.Green * 2.0f - 1.0f;
+                    float Vz = AverageColor.Blue * 2.0f - 1.0f;
+
+                    float Magnitude = MathHelper.Sqrt(Vx * Vx + Vy * Vy + Vz * Vz);
+
+                    // The normalized value of the Z component tells us how close to {0,0,1} the average vector is
+                    float NormalizedZ = Vz / Magnitude;
+
+                    // if the average vector is longer than or equal to the min length, shorter than the max length
+                    // and the normalized Z value means that the vector is close enough to {0,0,1} then we consider
+                    // this a normal map
+                    return ((Magnitude >= NormalMapMinLengthConfidenceThreshold) &&
+                            (Magnitude < NormalMapMaxLengthConfidenceThreshold) &&
+                            (NormalizedZ >= NormalMapDeviationThreshold));
+                }
+
+                // Not enough samples, don't trust the result at all
+                return false;
+            }
+
+            int NumSamplesTaken;
+            int NumSamplesRejected;
+            int NumSamplesThreshold;
+            Color4f AverageColor;
+        }
         public class ImportAttribute : IO.IAssetCreateAttribute
         {
             bool bPopOpen = false;
@@ -204,7 +446,7 @@ namespace EngineNS.NxRHI
                                 string filePath = mFileDialog.GetCurrentPath();
                                 using (var stream = System.IO.File.OpenRead(mSourceFile))
                                 {
-                                    var image = StbImageSharp.ImageResult.FromStream(stream, StbImageSharp.ColorComponents.RedGreenBlueAlpha);
+                                    var image = StbImageSharp.ImageResult.FromStream(stream, StbImageSharp.ColorComponents.Default);
                                     if (image != null)
                                     {
                                         mDesc.Width = image.Width;
@@ -251,7 +493,7 @@ namespace EngineNS.NxRHI
                     {
                         buffer.SetTextUtf8(mName);
                         ImGuiAPI.InputText("##in_rname", buffer.GetBuffer(), (uint)buffer.GetSize(), ImGuiInputTextFlags_.ImGuiInputTextFlags_None, null, (void*)0);
-                        var name = buffer.AsText();
+                        var name = buffer.AsTextUtf8();
                         if (mName != name)
                         {
                             mName = name;
@@ -295,46 +537,11 @@ namespace EngineNS.NxRHI
                     if (stream == null)
                         return false;
 
-                    #region test hdr
                     var extName = IO.TtFileManager.GetExtName(mSourceFile);
-                    if(extName == ".exr")
-                    {
-                        UImageDecoder imgDecoder = new UImageDecoder(mSourceFile);
-                        imgDecoder.mInner.CheckFileExtention(mSourceFile, false);
-                        var imageBuffer = new XImageBuffer();
-                        imgDecoder.mInner.LoadImageX(imageBuffer, mSourceFile);
-                        //imageBuffer.Create(imageBuffer,)
-                        //imgDecoder.mInner.CheckFileContent(stream.get)
-                    }
-                    else if (extName == ".hdr")
-                    {
-                        //var imageHdr2 = StbImageSharp.ImageResultFloat.FromStream(stream, StbImageSharp.ColorComponents.RedGreenBlue);
-                        //if (imageHdr2 == null)
-                        //    return false;
-
-                        //ColorRgbFloat[] colorData = new ColorRgbFloat[imageHdr2.Width * imageHdr2.Height];
-                        //var fromData = imageHdr2.Data.AsSpan();
-                        //var toData = colorData.AsSpan();
-                        //MemoryMarshal.Cast<float, ColorRgbFloat>(fromData).CopyTo(toData);
-                        //var inputMemory = colorData.AsMemory().AsMemory2D(imageHdr2.Height, imageHdr2.Width);
-
-                        //BcEncoder encoder = new BcEncoder();
-                        //encoder.OutputOptions.GenerateMipMaps = true;
-                        //encoder.OutputOptions.Quality = CompressionQuality.Balanced;
-                        //encoder.OutputOptions.Format = CompressionFormat.Bc6U;
-                        //encoder.OutputOptions.FileFormat = OutputFileFormat.Dds; //Change to Dds for a dds file.
-                        //var ddsFile = encoder.EncodeToDdsHdr(inputMemory);
-                        //var fs = new System.IO.FileStream("f:\\renwind_bc6.dds", System.IO.FileMode.OpenOrCreate);
-                        //ddsFile.Write(fs);
-                    }
-                    #endregion
-
                     var rn = RName.GetRName(mDir.Name + mName + USrView.AssetExt, mDir.RNameType);
-
                     var xnd = new IO.TtXndHolder("USrView", 0, 0);
 
-
-                    if (extName == ".hdr")
+                    if (extName.ToLower() == ".hdr")
                     {
                         var imageFloat = StbImageSharp.ImageResultFloat.FromStream(stream, StbImageSharp.ColorComponents.RedGreenBlueAlpha);
                         if (imageFloat == null)
@@ -342,11 +549,23 @@ namespace EngineNS.NxRHI
 
                         USrView.SaveTexture(rn, xnd.RootNode.mCoreObject, imageFloat, mDesc);
                     }
+                    else if (extName.ToLower() == ".exr")
+                    {
+                        var file = new Jither.OpenEXR.EXRFile(stream);
+                        if (file.Parts.Count == 0)
+                            return false;
+
+                        USrView.SaveTexture(rn, xnd.RootNode.mCoreObject, file, mDesc);
+                    }
                     else
                     {
-                        var image = StbImageSharp.ImageResult.FromStream(stream, StbImageSharp.ColorComponents.RedGreenBlueAlpha);
+                        ImageResult image = null;
+                        image = StbImageSharp.ImageResult.FromStream(stream, StbImageSharp.ColorComponents.Default);
                         if (image == null)
                             return false;
+
+                        NormalmapChecker normalChecker = new NormalmapChecker();
+                        mDesc.IsNormal = normalChecker.DoesTextureLookLikelyToBeANormalMap(image);
 
                         USrView.SaveTexture(rn, xnd.RootNode.mCoreObject, image, mDesc);
                     }
@@ -380,6 +599,30 @@ namespace EngineNS.NxRHI
 
                     return SaveSrv(image, rn, desc);
                 }
+            }
+
+            public static bool SaveSrv(Jither.OpenEXR.EXRFile file, RName rn, UPicDesc desc)
+            {
+                var part = file.Parts[0];
+                System.Diagnostics.Debug.Assert(part.DataReader != null);
+
+                desc.Width = part.DisplayWindow.Width;
+                desc.Height = part.DisplayWindow.Height;
+
+                var xnd = new IO.TtXndHolder("USrView", 0, 0);
+                USrView.SaveTexture(rn, xnd.RootNode.mCoreObject, file, desc);
+                xnd.SaveXnd(rn.Address);
+
+                var ameta = new USrViewAMeta();
+                ameta.SetAssetName(rn);
+                ameta.AssetId = Guid.NewGuid();
+                ameta.TypeStr = Rtti.UTypeDescManager.Instance.GetTypeStringFromType(typeof(USrView));
+                ameta.Description = $"This is a {typeof(USrView).FullName}\n";
+                ameta.SaveAMeta();
+
+                UEngine.Instance.AssetMetaManager.RegAsset(ameta);
+
+                return true;
             }
 
             public static bool SaveSrv(StbImageSharp.ImageResultFloat image, RName rn, UPicDesc desc)
@@ -469,7 +712,7 @@ namespace EngineNS.NxRHI
             {
                 case EngienNS.Bricks.ImageDecoder.UImageType.PNG:
                     {
-                        var image = LoadOriginImage(this.AssetName);
+                        var image = LoadOriginPng(this.AssetName);
                         if (image == null)
                         {
                             Profiler.Log.WriteLine(Profiler.ELogTag.Warning, "Assets", $"SaveAssetTo failed: LoadOriginImage({AssetName}) = null");
@@ -481,8 +724,20 @@ namespace EngineNS.NxRHI
                 case EngienNS.Bricks.ImageDecoder.UImageType.HDR:
                     {
                         StbImageSharp.ImageResultFloat imageFloat = new StbImageSharp.ImageResultFloat();
-                        LoadOriginImage(AssetName, ref imageFloat);
+                        LoadOriginHdr(AssetName, ref imageFloat);
                         ImportAttribute.SaveSrv(imageFloat, name, this.PicDesc);
+                    }
+                    break;
+                case EngienNS.Bricks.ImageDecoder.UImageType.EXR:
+                    {
+                        System.IO.Stream outStream = null;
+                        var file = LoadOriginExr(AssetName, ref outStream);
+                        if(file == null)
+                        {
+                            Profiler.Log.WriteLine(Profiler.ELogTag.Warning, "Assets", $"SaveAssetTo failed: LoadOriginImage({AssetName}) = null");
+                            return;
+                        }
+                        ImportAttribute.SaveSrv(file, name, this.PicDesc);
                     }
                     break;
             }
@@ -598,6 +853,8 @@ namespace EngineNS.NxRHI
                         return UImageType.PNG;
                     else if (System.IO.File.Exists(name.Address + ".hdr") == true)
                         return UImageType.HDR;
+                    else if (System.IO.File.Exists(name.Address + ".exr") == true)
+                        return UImageType.EXR;
                 }
                 var attr = xnd.RootNode.TryGetAttribute("Png");
                 if(attr.IsValidPointer)
@@ -605,11 +862,48 @@ namespace EngineNS.NxRHI
                 attr = xnd.RootNode.TryGetAttribute("Hdr");
                 if (attr.IsValidPointer)
                     return UImageType.HDR;
+                attr = xnd.RootNode.TryGetAttribute("Exr");
+                if (attr.IsValidPointer)
+                    return UImageType.EXR;
             }
             return UImageType.PNG;
         }
 
-        public static void LoadOriginImage(RName name, ref StbImageSharp.ImageResultFloat outImage)
+        public static Jither.OpenEXR.EXRFile LoadOriginExr(RName name, ref System.IO.Stream outStream)
+        {
+            using (var xnd = IO.TtXndHolder.LoadXnd(name.Address))
+            {
+                if (xnd == null)
+                {
+                    var sourceFile = name.Address + ".exr";
+                    outStream = System.IO.File.OpenRead(sourceFile);
+                    {
+                        if (outStream == null)
+                            return null;
+                        return new Jither.OpenEXR.EXRFile(outStream);
+                    }
+                }
+                var attr = xnd.RootNode.TryGetAttribute("Exr");
+                if (attr.IsValidPointer)
+                {
+                    byte[] rawData;
+                    using (var ar = attr.GetReader(null))
+                    {
+                        ar.ReadNoSize(out rawData, (int)attr.GetReaderLength());
+                    }
+
+                    outStream = new System.IO.MemoryStream(rawData);
+                    {
+                        var file = new Jither.OpenEXR.EXRFile(outStream);
+                        return file;
+                    }
+                }
+            }
+            return null;
+        }
+
+
+        public static void LoadOriginHdr(RName name, ref StbImageSharp.ImageResultFloat outImage)
         {
             using (var xnd = IO.TtXndHolder.LoadXnd(name.Address))
             {
@@ -641,7 +935,7 @@ namespace EngineNS.NxRHI
             }
         }
 
-        public static StbImageSharp.ImageResult LoadOriginImage(RName name)
+        public static StbImageSharp.ImageResult LoadOriginPng(RName name)
         {
             using (var xnd = IO.TtXndHolder.LoadXnd(name.Address))
             {
@@ -728,6 +1022,99 @@ namespace EngineNS.NxRHI
             while (true);
             return mipLevel;
         }
+        public static unsafe void SaveTexture(RName assetName, XndNode node, Jither.OpenEXR.EXRFile file, UPicDesc desc)
+        {
+            var part = file.Parts[0];
+            System.Diagnostics.Debug.Assert(part.DataReader != null);
+            byte[] pixelData = new byte[part.DataReader.GetTotalByteCount()];
+            string[] channelNames = new[] { "R", "G", "B", "A" };
+            if (part.Channels.Count == 3)
+                channelNames = new[] { "R", "G", "B" };
+            part.DataReader.ReadInterleaved(pixelData, channelNames);
+
+            desc.Width = part.DisplayWindow.Width;
+            desc.Height = part.DisplayWindow.Height;
+
+            if (desc.StripOriginSource && assetName != null)
+            {
+                using (var memStream = new System.IO.FileStream(assetName.Address + ".exr", System.IO.FileMode.OpenOrCreate))
+                {
+                    file.Write(memStream);
+                    part.DataWriter.WriteInterleaved(pixelData, channelNames);
+                }
+            }
+            else
+            {
+                using (var memStream = new System.IO.MemoryStream())
+                {
+                    file.Write(memStream);
+                    part.DataWriter.WriteInterleaved(pixelData, channelNames);
+
+                    var rawData = memStream.ToArray();
+                    var rawAttr = node.GetOrAddAttribute("Exr", 0, 0);
+                    using (var ar = rawAttr.GetWriter((ulong)memStream.Position))
+                    {
+                        ar.WriteNoSize(rawData, (int)memStream.Position);
+                    }
+                }
+            }
+
+            // TODO: suport compress exr
+            desc.DontCompress = true;
+            if (desc.Width % 4 != 0 || desc.Height % 4 != 0)
+            {
+                desc.DontCompress = true;
+            }
+            int mipLevel = 0;
+            desc.MipSizes.Clear();
+            if (desc.DontCompress == false)
+            {
+                if (UEngine.Instance.Config.CompressDxt)
+                {
+                    desc.CompressFormat = ETextureCompressFormat.TCF_BC6;
+                }
+                else if (UEngine.Instance.Config.CompressAstc)
+                {
+                    System.Diagnostics.Debug.Assert(false);
+                    desc.CompressFormat = ETextureCompressFormat.TCF_Astc_4x4_Float;
+                }
+                else
+                {
+                    System.Diagnostics.Debug.Assert(false);
+                    desc.CompressFormat = ETextureCompressFormat.TCF_None;
+                }
+            }
+            else
+            {
+                desc.CompressFormat = ETextureCompressFormat.TCF_None;
+            }
+
+            switch (desc.CompressFormat)
+            {
+                case ETextureCompressFormat.TCF_None:
+                    {
+                        var hdrMipsNode = node.GetOrAddNode("ExrMips", 0, 0);
+                        mipLevel = SaveExrMips(hdrMipsNode, file, desc);
+                    }
+                    break;
+            }
+
+            {
+                desc.Desc.MipLevel = mipLevel;
+                desc.Desc.dwStructureSize = (uint)sizeof(FPictureDesc);
+                var attr = node.GetOrAddAttribute("Desc", 0, 0);
+                using (var ar = attr.GetWriter((ulong)sizeof(FPictureDesc)))
+                {
+                    ar.Write(desc.Desc);
+                    ar.Write(desc.MipSizes.Count);
+                    for (int i = 0; i < desc.MipSizes.Count; i++)
+                    {
+                        ar.Write(desc.MipSizes[i]);
+                    }
+                }
+            }
+        }
+        
         public static unsafe void SaveTexture(RName assetName, XndNode node, StbImageSharp.ImageResultFloat image, UPicDesc desc)
         {
             var writeComp = UStbImageUtility.ConvertColorComponent(image.Comp);
@@ -916,7 +1303,11 @@ namespace EngineNS.NxRHI
             {
                 if (UEngine.Instance.Config.CompressDxt)
                 {
-                    if (desc.BitNumAlpha == 8 || desc.BitNumAlpha == 4)
+                    if(desc.IsNormal)
+                    {
+                        desc.CompressFormat = ETextureCompressFormat.TCF_BC5;
+                    }
+                    else if (desc.BitNumAlpha == 8 || desc.BitNumAlpha == 4)
                     {
                         desc.CompressFormat = ETextureCompressFormat.TCF_Dxt3;
                     }
@@ -1057,6 +1448,150 @@ namespace EngineNS.NxRHI
                 }
             }
         }
+        public static int SaveExrMips(XndNode pngMipsNode, Jither.OpenEXR.EXRFile file, UPicDesc desc)
+        {
+            int mipLevel = 0;
+            var part = file.Parts[0];
+            System.Diagnostics.Debug.Assert(part.DataReader != null);
+            int height = part.DisplayWindow.Height;
+            int width = part.DisplayWindow.Width;
+            System.Diagnostics.Debug.Assert(part.Channels.Count > 0);
+            switch( part.Channels[0].Type )
+            {
+                case Jither.OpenEXR.EXRDataType.Float:
+                    if (part.Channels.Count == 1)
+                        desc.Format = EPixelFormat.PXF_R32_FLOAT;
+                    else if (part.Channels.Count == 3)
+                        desc.Format = EPixelFormat.PXF_R32G32B32_FLOAT;
+                    else if (part.Channels.Count == 4)
+                        desc.Format = EPixelFormat.PXF_R32G32B32A32_FLOAT;
+                    break;
+                case Jither.OpenEXR.EXRDataType.Half:
+                    if (part.Channels.Count == 1)
+                        desc.Format = EPixelFormat.PXF_R16_FLOAT;
+                    else if (part.Channels.Count == 3)
+                        desc.Format = EPixelFormat.PXF_R16G16B16A16_FLOAT;
+                    else if (part.Channels.Count == 4)
+                        desc.Format = EPixelFormat.PXF_R16G16B16A16_FLOAT;
+                    break;
+                default:
+                    System.Diagnostics.Debug.Assert(false);
+                    break;
+            }
+
+            desc.MipLevel = 1;
+            if(part.TilingInformation!=null)
+            {
+                switch (part.TilingInformation.LevelMode)
+                {
+                    case Jither.OpenEXR.LevelMode.One:
+                    case Jither.OpenEXR.LevelMode.RipMap:
+                        desc.MipLevel = 1;
+                        break;
+                    case Jither.OpenEXR.LevelMode.MipMap:
+                        desc.MipLevel = part.TilingInformation.Levels.Count;
+                        break;
+                }
+            }
+            do
+            {
+                var attr = pngMipsNode.GetOrAddAttribute($"ExrMip{mipLevel}", 0, 0);
+                var dataSize = part.DataReader.GetTotalByteCount();
+                byte[] pixelData = new byte[dataSize];
+                int destChannelCount = part.Channels.Count;
+
+                if (part.Channels.Count == 3 && part.Channels[0].Type == Jither.OpenEXR.EXRDataType.Half)
+                {
+                    destChannelCount = 4;
+                    part.DataReader.ReadInterleaved(pixelData, new[] { "R", "G", "B" });
+                    var pixelCount = width * height;
+                    var pixelBytes = part.Channels[0].Type.GetBytesPerPixel();
+                    byte[] destPixelData = new byte[pixelCount * 4 * pixelBytes];
+                    System.Half halfOne = (System.Half)1.0;
+                    byte[] halfByteArray = BitConverter.GetBytes(halfOne);
+                    for (int i = 0; i < pixelCount; ++i)
+                    {
+                        Array.Copy(pixelData, i * 3 * pixelBytes, destPixelData, i * 4 * pixelBytes, 3 * pixelBytes);
+                        Array.Copy(halfByteArray, 0, destPixelData, (i * 4 + 3) * pixelBytes, 2);
+                    }
+                    using (var ar = attr.GetWriter((ulong)destPixelData.Length))
+                    {
+                        ar.WriteNoSize(destPixelData, (int)(destPixelData.Length));
+                    }
+
+                    #region exrtest
+                    if(false)
+                    {
+                        System.Half[] halfPixelData = new System.Half[width * height * 4];
+                        for (int i = 0; i < width * height; ++i)
+                        {
+                            int startIndex = i * 4;
+                            halfPixelData[4 * i + 0] = BitConverter.ToHalf(destPixelData, startIndex * 2);
+                            halfPixelData[4 * i + 1] = BitConverter.ToHalf(destPixelData, (startIndex + 1) * 2);
+                            halfPixelData[4 * i + 2] = BitConverter.ToHalf(destPixelData, (startIndex + 2) * 2);
+                            halfPixelData[4 * i + 3] = BitConverter.ToHalf(destPixelData, (startIndex + 3) * 2);
+                        }
+
+                        float[] floatPixelData = new float[width * height * 4];
+                        for (int i = 0; i < halfPixelData.Length; ++i)
+                        {
+                            floatPixelData[i] = (float)halfPixelData[i];
+                        }
+                    }
+                    #endregion
+                }
+                else
+                {
+                    part.DataReader.ReadInterleaved(pixelData, new[] { "R", "G", "B", "A" });
+                    using (var ar = attr.GetWriter((ulong)dataSize))
+                    {
+                        ar.WriteNoSize(pixelData, (int)dataSize);
+                    }
+
+                    #region exrtest
+                    if (false)
+                    {
+                        System.Half[] halfPixelData = new System.Half[width * height * 4];
+                        for (int i = 0; i < width * height; ++i)
+                        {
+                            int startIndex = i * 4;
+                            halfPixelData[4 * i + 0] = BitConverter.ToHalf(pixelData, startIndex * 2);
+                            halfPixelData[4 * i + 1] = BitConverter.ToHalf(pixelData, (startIndex + 1) * 2);
+                            halfPixelData[4 * i + 2] = BitConverter.ToHalf(pixelData, (startIndex + 2) * 2);
+                            halfPixelData[4 * i + 3] = BitConverter.ToHalf(pixelData, (startIndex + 3) * 2);
+                        }
+
+                        float[] floatPixelData = new float[width * height * 4];
+                        for (int i = 0; i < halfPixelData.Length; ++i)
+                        {
+                            floatPixelData[i] = (float)halfPixelData[i];
+                        }
+                    }
+                    #endregion
+                }
+
+                desc.MipSizes.Add(new Vector3i() { X = width, Y = height, Z = width * destChannelCount * part.Channels[0].Type.GetBytesPerPixel() });
+                height = height / 2;
+                width = width / 2;
+                if ((height == 0 && width == 0))
+                {
+                    break;
+                }
+                mipLevel++;
+                if (height == 0)
+                    height = 1;
+                if (width == 0)
+                    width = 1;
+                // TODO: get exr mips data
+                //curImage = StbImageSharp.ImageProcessor.GetBoxDownSampler(curImage, width, height);
+                if (desc.MipLevel > 0 && mipLevel == desc.MipLevel)
+                    break;
+            }
+            while (true);
+
+            return mipLevel;
+        }
+
         public static int SaveHdrMips(XndNode pngMipsNode, StbImageSharp.ImageResultFloat curImage, UPicDesc desc)
         {
             int mipLevel = 0;
@@ -1263,7 +1798,7 @@ namespace EngineNS.NxRHI
 
             BcEncoder encoder = new BcEncoder();
             encoder.OutputOptions.GenerateMipMaps = true;
-            encoder.OutputOptions.Quality = CompressionQuality.BestQuality;
+            encoder.OutputOptions.Quality = CompressionQuality.Balanced;
             encoder.OutputOptions.Format = CompressionFormat.Bc6U;
             encoder.OutputOptions.FileFormat = OutputFileFormat.Dds;
 
@@ -1349,6 +1884,10 @@ namespace EngineNS.NxRHI
                         descPixelFormat = EPixelFormat.PXF_BC3_UNORM;
                     encoder.OutputOptions.Format = CompressionFormat.Bc3;
                     break;
+                case ETextureCompressFormat.TCF_BC5:
+                        descPixelFormat = EPixelFormat.PXF_BC5_UNORM;
+                    encoder.OutputOptions.Format = CompressionFormat.Bc5;
+                    break;
                 case ETextureCompressFormat.TCF_Etc2_RGB8:
                     if (desc.sRGB)
                         descPixelFormat = EPixelFormat.PXF_ETC2_SRGB8;
@@ -1395,8 +1934,8 @@ namespace EngineNS.NxRHI
 
             encoder.OutputOptions.FileFormat = IsKtx ? OutputFileFormat.Ktx : OutputFileFormat.Dds;
             encoder.OutputOptions.GenerateMipMaps = true;
-            encoder.OutputOptions.Quality = CompressionQuality.BestQuality;
-            encoder.OutputOptions.Format = CompressionFormat.Bc2;
+            encoder.OutputOptions.Quality = CompressionQuality.Balanced;
+            //encoder.OutputOptions.Format = CompressionFormat.Bc2;
 
             PixelFormat pixelFormat = PixelFormat.Rgba32;
             switch (curImage.Comp)
@@ -1660,13 +2199,56 @@ namespace EngineNS.NxRHI
                 case ETextureCompressFormat.TCF_None:
                     {
                         var pngNode = node.TryGetChildNode("PngMips");
-                        if(pngNode.IsValidPointer)
+                        if (pngNode.IsValidPointer)
                             return LoadPngTexture2DMipLevel(node.mCoreObject, desc, level);
                         else
                         {
                             var hdrNode = node.TryGetChildNode("HdrMips");
                             if (hdrNode.IsValidPointer)
                                 return LoadHdrTexture2DMipLevel(node.mCoreObject, desc, level);
+                            else
+                            {
+                                var exrNode = node.TryGetChildNode("ExrMips");
+                                if (exrNode.IsValidPointer)
+                                    return LoadExrTexture2DMipLevel(node.mCoreObject, desc, level);
+                            }
+                        }
+                        return null;
+                    }
+                case ETextureCompressFormat.TCF_Dxt1:
+                case ETextureCompressFormat.TCF_Dxt1a:
+                case ETextureCompressFormat.TCF_Dxt3:
+                case ETextureCompressFormat.TCF_Dxt5:
+                case ETextureCompressFormat.TCF_BC5:
+                case ETextureCompressFormat.TCF_BC6:
+                case ETextureCompressFormat.TCF_BC6_FLOAT:
+                    {
+                        return LoadDxtTexture2DMipLevel(node.mCoreObject, desc, level);
+                    }
+                default:
+                    return null;
+            }
+        }
+        public static unsafe UTexture LoadTexture2DMipLevel(IO.TtXndNode node, UPicDesc desc, int level, int channelR, int channelG, int channelB, int channelA)
+        {
+            switch (desc.CompressFormat)
+            {
+                case ETextureCompressFormat.TCF_None:
+                    {
+                        var pngNode = node.TryGetChildNode("PngMips");
+                        if (pngNode.IsValidPointer)
+                            return LoadPngTexture2DMipLevel(node.mCoreObject, desc, level);
+                        else
+                        {
+                            var hdrNode = node.TryGetChildNode("HdrMips");
+                            if (hdrNode.IsValidPointer)
+                                return LoadHdrTexture2DMipLevel(node.mCoreObject, desc, level);
+                            else
+                            {
+                                var exrNode = node.TryGetChildNode("ExrMips");
+                                if (exrNode.IsValidPointer)
+                                    return LoadExrTexture2DMipLevel(node.mCoreObject, desc, level, channelR, channelG, channelB, channelA);
+                            }
                         }
                         return null;
                     }
@@ -1684,6 +2266,202 @@ namespace EngineNS.NxRHI
             }
         }
         #region Load Mips
+        private static unsafe UTexture LoadExrTexture2DMipLevel(XndNode node, UPicDesc desc, int mipLevel)
+        {
+            if (mipLevel == 0)
+                return null;
+            var rc = UEngine.Instance.GfxDevice.RenderContext;
+
+            var exrNode = node.TryGetChildNode("ExrMips");
+            if (exrNode.NativePointer == IntPtr.Zero)
+                return null;
+
+            var handles = stackalloc System.Runtime.InteropServices.GCHandle[mipLevel];
+            try
+            {
+                var pInitData = stackalloc FMappedSubResource[mipLevel];
+
+
+                for (uint i = 0; i < mipLevel; i++)
+                {
+                    var realLevel = desc.MipLevel - mipLevel + i;
+                    var ptr = exrNode.TryGetAttribute($"ExrMip{realLevel}");
+                    if (ptr.NativePointer == IntPtr.Zero)
+                        return null;
+                    var mipAttr = ptr;
+                    byte[] data;
+                    using (var ar = mipAttr.GetReader(null))
+                    {
+                        ar.ReadNoSize(out data, (int)mipAttr.GetReaderLength());
+                    }
+
+                    handles[i] = System.Runtime.InteropServices.GCHandle.Alloc(data, System.Runtime.InteropServices.GCHandleType.Pinned);
+                    pInitData[i].m_pData = System.Runtime.InteropServices.Marshal.UnsafeAddrOfPinnedArrayElement(data, 0).ToPointer();
+                    pInitData[i].m_RowPitch = (uint)desc.MipSizes[(int)i].Z;
+                    pInitData[i].m_DepthPitch = pInitData[i].m_RowPitch * (uint)desc.MipSizes[(int)i].Y;
+                }
+
+                var texDesc = new FTextureDesc();
+                texDesc.SetDefault();
+                texDesc.Width = (uint)desc.MipSizes[desc.MipLevel - mipLevel].X;
+                texDesc.Height = (uint)desc.MipSizes[desc.MipLevel - mipLevel].Y;
+                texDesc.MipLevels = (uint)mipLevel;
+                texDesc.InitData = pInitData;
+                texDesc.Format = desc.Format;
+
+                var result = rc.CreateTexture(in texDesc);
+                if (result == null)
+                    return null;
+                return result;
+            }
+            finally
+            {
+                for (uint i = 0; i < mipLevel; i++)
+                {
+                    if (handles[i].IsAllocated)
+                        handles[i].Free();
+                }
+            }
+        }
+        private static unsafe UTexture LoadExrTexture2DMipLevel(XndNode node, UPicDesc desc, int mipLevel, int channelR, int channelG, int channelB, int channelA)
+        {
+            if (mipLevel == 0)
+                return null;
+            var rc = UEngine.Instance.GfxDevice.RenderContext;
+
+            var exrNode = node.TryGetChildNode("ExrMips");
+            if (exrNode.NativePointer == IntPtr.Zero)
+                return null;
+
+            var handles = stackalloc System.Runtime.InteropServices.GCHandle[mipLevel];
+            try
+            {
+                var pInitData = stackalloc FMappedSubResource[mipLevel];
+
+
+                for (uint i = 0; i < mipLevel; i++)
+                {
+                    var realLevel = desc.MipLevel - mipLevel + i;
+                    var ptr = exrNode.TryGetAttribute($"ExrMip{realLevel}");
+                    if (ptr.NativePointer == IntPtr.Zero)
+                        return null;
+                    var mipAttr = ptr;
+                    byte[] data;
+                    using (var ar = mipAttr.GetReader(null))
+                    {
+                        ar.ReadNoSize(out data, (int)mipAttr.GetReaderLength());
+                    }
+
+                    channelR = channelR == 0 ? 0 : 1;
+                    channelG = channelG == 0 ? 0 : 1;
+                    channelB = channelB == 0 ? 0 : 1;
+                    channelA = channelA == 0 ? 0 : 1;
+                    var channelCount = desc.Desc.PixelChannelCount();
+                    var byteWidth = desc.Desc.PixelByteWidth();
+                    int extractChannelCount = channelR + channelG + channelB + channelA;
+                    if(channelCount == 3)
+                    {
+                        extractChannelCount = channelR + channelG + channelB;
+                        channelA = 0;
+                    }
+                    else if (channelCount == 2)
+                    {
+                        extractChannelCount = channelR + channelG;
+                        channelB = channelA = 0;
+                    }
+                    else if (channelCount == 1)
+                    {
+                        extractChannelCount = channelR;
+                        channelG = channelB = channelA = 0;
+                    }
+                    if (channelCount > 1 && extractChannelCount > 0)
+                    {
+                        int pixelCount = desc.MipSizes[(int)i].X * desc.MipSizes[(int)i].Y;
+                        var channelByteWidth = byteWidth / channelCount;
+
+                        byte[] channelData = new byte[byteWidth * pixelCount];
+
+                        for( int j = 0; j < pixelCount; ++j )
+                        {
+                            if(extractChannelCount==1)
+                            {
+                                int iCopyIndex = 0;
+                                if (channelG != 0)
+                                    iCopyIndex = 1;
+                                if (channelB != 0)
+                                    iCopyIndex = 2;
+                                if (channelA != 0)
+                                    iCopyIndex = 3;
+
+                                for( int k = 0; k < channelCount; ++k )
+                                {
+                                    if (k == 3)
+                                    {
+                                        System.Half oneHalf = (System.Half)1.0f;
+                                        var oneBytes = BitConverter.GetBytes(oneHalf);
+                                        Array.Copy(oneBytes, 0, channelData, j * byteWidth + k * channelByteWidth, channelByteWidth);
+                                    }
+                                    else
+                                        Array.Copy(data, j * byteWidth + iCopyIndex * channelByteWidth, channelData, j * byteWidth + k * channelByteWidth, channelByteWidth);                                    
+                                }
+
+                            }
+                            else
+                            {
+                                if (channelR != 0)
+                                    Array.Copy(data, j * byteWidth, channelData, j * byteWidth, channelByteWidth);
+                                if (channelG != 0 && channelCount > 1)
+                                    Array.Copy(data, j * byteWidth + channelByteWidth, channelData, j * byteWidth + channelByteWidth, channelByteWidth);
+                                if (channelB != 0 && channelCount > 2)
+                                    Array.Copy(data, j * byteWidth + 2*channelByteWidth, channelData, j * byteWidth + 2*channelByteWidth, channelByteWidth);
+                                if (channelA != 0 && channelCount > 3)
+                                    Array.Copy(data, j * byteWidth + 3*channelByteWidth, channelData, j * byteWidth + 3*channelByteWidth, channelByteWidth);
+                                else
+                                {
+                                    System.Half oneHalf = (System.Half)1.0f;
+                                    var oneBytes = BitConverter.GetBytes(oneHalf);
+                                    Array.Copy(oneBytes, 0, channelData, j * byteWidth + 3 * channelByteWidth, channelByteWidth);
+                                }
+                            }
+                        }
+
+                        handles[i] = System.Runtime.InteropServices.GCHandle.Alloc(channelData, System.Runtime.InteropServices.GCHandleType.Pinned);
+                        pInitData[i].m_pData = System.Runtime.InteropServices.Marshal.UnsafeAddrOfPinnedArrayElement(channelData, 0).ToPointer();
+                        pInitData[i].m_RowPitch = (uint)desc.MipSizes[(int)i].Z;
+                        pInitData[i].m_DepthPitch = pInitData[i].m_RowPitch * (uint)desc.MipSizes[(int)i].Y;
+
+                    }
+                    else
+                    {
+                        handles[i] = System.Runtime.InteropServices.GCHandle.Alloc(data, System.Runtime.InteropServices.GCHandleType.Pinned);
+                        pInitData[i].m_pData = System.Runtime.InteropServices.Marshal.UnsafeAddrOfPinnedArrayElement(data, 0).ToPointer();
+                        pInitData[i].m_RowPitch = (uint)desc.MipSizes[(int)i].Z;
+                        pInitData[i].m_DepthPitch = pInitData[i].m_RowPitch * (uint)desc.MipSizes[(int)i].Y;
+                    }
+                }
+
+                var texDesc = new FTextureDesc();
+                texDesc.SetDefault();
+                texDesc.Width = (uint)desc.MipSizes[desc.MipLevel - mipLevel].X;
+                texDesc.Height = (uint)desc.MipSizes[desc.MipLevel - mipLevel].Y;
+                texDesc.MipLevels = (uint)mipLevel;
+                texDesc.InitData = pInitData;
+                texDesc.Format = desc.Format;
+
+                var result = rc.CreateTexture(in texDesc);
+                if (result == null)
+                    return null;
+                return result;
+            }
+            finally
+            {
+                for (uint i = 0; i < mipLevel; i++)
+                {
+                    if (handles[i].IsAllocated)
+                        handles[i].Free();
+                }
+            }
+        }
         private static unsafe UTexture LoadHdrTexture2DMipLevel(XndNode node, UPicDesc desc, int mipLevel)
         {
             if (mipLevel == 0)
@@ -1893,7 +2671,7 @@ namespace EngineNS.NxRHI
             }
         }
         #endregion
-        public static unsafe void SaveOriginPng(RName rn)
+        public static unsafe void SaveOriginImage(RName rn)
         {
             if (System.IO.File.Exists(rn.Address) == false)
                 return;
@@ -1903,7 +2681,7 @@ namespace EngineNS.NxRHI
             {
                 case EngienNS.Bricks.ImageDecoder.UImageType.PNG:
                     {
-                        var image = LoadOriginImage(rn);
+                        var image = LoadOriginPng(rn);
                         if (image == null)
                         {
                             return;
@@ -1918,7 +2696,7 @@ namespace EngineNS.NxRHI
                 case EngienNS.Bricks.ImageDecoder.UImageType.HDR:
                     {
                         StbImageSharp.ImageResultFloat imageFloat = new StbImageSharp.ImageResultFloat();
-                        LoadOriginImage(rn, ref imageFloat);
+                        LoadOriginHdr(rn, ref imageFloat);
                         using (var memStream = new System.IO.FileStream(rn.Address + ".hdr", System.IO.FileMode.OpenOrCreate))
                         {
                             var writer = new StbImageWriteSharp.ImageWriter();
@@ -1926,6 +2704,25 @@ namespace EngineNS.NxRHI
                             {
                                 writer.WriteHdr(fptr, imageFloat.Width, imageFloat.Height, StbImageWriteSharp.ColorComponents.RedGreenBlueAlpha, memStream);
                             }
+                        }
+                    }
+                    break;
+                case EngienNS.Bricks.ImageDecoder.UImageType.EXR:
+                    {
+                        System.IO.Stream outStream = null;
+                        var file = LoadOriginExr(rn, ref outStream);
+                        if(file!=null)
+                        {
+                            var part = file.Parts[0];
+
+                            byte[] pixelData = new byte[part.DataReader.GetTotalByteCount()];
+                            string[] channelNames = new[] { "R", "G", "B", "A" };
+                            if (part.Channels.Count == 3)
+                                channelNames = new[] { "R", "G", "B" };
+
+                            part.DataReader.ReadInterleaved(pixelData, channelNames);
+                            file.Write(rn.Address + ".exr");
+                            part.DataWriter.WriteInterleaved(pixelData, new[] { "R", "G", "B", "A" });
                         }
                     }
                     break;
@@ -1951,7 +2748,49 @@ namespace EngineNS.NxRHI
             if (tex2d == null)
             {
                 if (UEngine.Instance.PlayMode == EPlayMode.Editor)
-                    SaveOriginPng(rn);
+                    SaveOriginImage(rn);
+                return null;
+            }
+
+            tex2d.SetDebugName(rn.Name);
+
+            var rc = UEngine.Instance.GfxDevice.RenderContext;
+            var srvDesc = new FSrvDesc();
+            srvDesc.SetTexture2D();
+            srvDesc.Type = ESrvType.ST_Texture2D;
+            srvDesc.Format = tex2d.mCoreObject.Desc.Format;
+            srvDesc.Texture2D.MipLevels = (uint)mipLevel;
+            
+            var result = rc.CreateSRV(tex2d, in srvDesc);
+            result.PicDesc = desc;
+            result.LevelOfDetail = mipLevel;
+            result.TargetLOD = mipLevel;
+            result.AssetName = rn;
+
+            result.SetDebugName(rn.Name);
+            return result;
+        }
+        public static async System.Threading.Tasks.Task<USrView> LoadSrvMipmap(RName rn, int mipLevel, int channelR, int channelG, int channelB, int channelA)
+        {
+            UPicDesc desc = null;
+            var tex2d = await UEngine.Instance.EventPoster.Post((state) =>
+            {
+                var xnd = IO.TtXndHolder.LoadXnd(rn.Address);
+                if (xnd == null)
+                    return null;
+
+                desc = LoadPictureDesc(xnd.RootNode);
+
+                if (mipLevel == -1 || mipLevel > desc.MipLevel)
+                    mipLevel = desc.MipLevel;
+
+                return LoadTexture2DMipLevel(xnd.RootNode, desc, mipLevel, channelR, channelG, channelB, channelA);
+            }, Thread.Async.EAsyncTarget.AsyncIO);
+
+            if (tex2d == null)
+            {
+                if (UEngine.Instance.PlayMode == EPlayMode.Editor)
+                    SaveOriginImage(rn);
                 return null;
             }
 
@@ -1961,7 +2800,7 @@ namespace EngineNS.NxRHI
             srvDesc.Type = ESrvType.ST_Texture2D;
             srvDesc.Format = tex2d.mCoreObject.Desc.Format;
             srvDesc.Texture2D.MipLevels = (uint)mipLevel;
-            
+
             var result = rc.CreateSRV(tex2d, in srvDesc);
             result.PicDesc = desc;
             result.LevelOfDetail = mipLevel;
@@ -2061,6 +2900,7 @@ namespace EngineNS.NxRHI
 
                     var rc = UEngine.Instance.GfxDevice.RenderContext;
                     var texture2d = rc.CreateTexture(in texDesc);
+                    texture2d.SetDebugName(file);
 
                     var srvDesc = new FSrvDesc();
                     srvDesc.SetTexture2D();

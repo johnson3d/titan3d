@@ -2,6 +2,7 @@
 using EngineNS.EGui;
 using EngineNS.UI.Controls;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Security.Cryptography.Xml;
@@ -14,6 +15,12 @@ namespace EngineNS.UI
     {
         TtUIConfig mConfig = new TtUIConfig();
         public TtUIConfig Config => mConfig;
+
+        public TtUIManager()
+        {
+            UIManagerConstruct_Msg();
+            InitSystemDefaultTemplates();
+        }
 
         public struct UIKeyName
         {
@@ -72,7 +79,7 @@ namespace EngineNS.UI
                 }
             }
         }
-        public bool RemoveUIFromDic(RName name, string keyName)
+        public bool RemoveUI(RName name, string keyName)
         {
             lock (mUserUIs)
             {
@@ -85,7 +92,7 @@ namespace EngineNS.UI
                 return false;
             }
         }
-        public void RemoveUIFromDic(RName name)
+        public void RemoveUI(RName name)
         {
             List<UIKeyName> keys = new List<UIKeyName>(mUserUIs.Count);
             lock (mUserUIs)
@@ -109,15 +116,66 @@ namespace EngineNS.UI
                 }
             }
         }
-        public TtUIHost GetFirstPointAtHost(in Point2f pt)
+        public TtUIHost GetFirstIntersectHost(in Ray ray)
         {
-            for(int i=mUserUIList.Count - 1; i >=0; i--)
+            float minDistance = float.MaxValue;
+            TtUIHost intersectHost = null;
+            for(int i=mUserUIList.Count - 1; i>=0; i--)
             {
                 var ui = mUserUIList[i];
-                if (ui.IsPointIn(in pt))
-                    return ui;
+                float distance;
+                if(Ray.Intersects(ray, ui.BoundingBox, out distance))
+                {
+                    if(ui.Has3DElement)
+                    {
+                        var end = ray.Position + ray.Direction * 100.0f;
+                        VHitResult result = new VHitResult();
+                        if(ui.OnLineCheckTriangle(ray.Position, end, ref result))
+                        {
+                            distance = (result.Position - ray.Position).LengthSquared();
+                            if(distance < minDistance)
+                            {
+                                minDistance = distance;
+                                intersectHost = ui;
+                            }
+                        }
+                    }
+                    else
+                    {
+                        if(distance < minDistance)
+                        {
+                            minDistance = distance;
+                            intersectHost = ui;
+                        }
+                    }
+                }
             }
-            return null;
+
+            return intersectHost;
+        }
+
+        List<TtUIElement> mTickUIElements = new List<TtUIElement>();
+        public void RegisterTickElement(TtUIElement element)
+        {
+            if (mTickUIElements.IndexOf(element) == -1)
+                mTickUIElements.Add(element);
+        }
+        public void UnregisterTickElement(TtUIElement element)
+        {
+            mTickUIElements.Remove(element);
+        }
+        public override void TickLogic(UEngine host)
+        {
+            for(int i=mUserUIList.Count - 1; i>=0; i--)
+            {
+                _ = mUserUIList[i].BuildMesh();
+            }
+
+            var elapsedSecond = UEngine.Instance.ElapsedSecond;
+            for (int i=mTickUIElements.Count - 1; i >= 0; i--)
+            {
+                mTickUIElements[i].Tick(elapsedSecond);
+            }
         }
     }
 }

@@ -6,6 +6,7 @@ using EngineNS.Graphics.Pipeline;
 using EngineNS.GamePlay;
 using NPOI.HSSF.Record.AutoFilter;
 using System.Diagnostics;
+using NPOI.SS.Formula.Functions;
 
 namespace EngineNS.Bricks.GpuDriven
 {
@@ -35,6 +36,27 @@ namespace EngineNS.Bricks.GpuDriven
             drawcall.BindSrv("ClusterBuffer", node.Clusters.DataSRV);
             drawcall.BindSrv("SrcClusterBuffer", node.SrcClusters.DataSRV);
             drawcall.BindUav("VisClusterBuffer", node.VisClusters.DataUAV);
+            
+            var index = drawcall.FindBinder(NxRHI.EShaderBindType.SBT_CBuffer, "cbCameraFrustum");
+            if (index.IsValidPointer)
+            {
+                if (node.CBCameraFrustum == null)
+                {
+                    node.CBCameraFrustum = UEngine.Instance.GfxDevice.RenderContext.CreateCBV(index);
+                }
+                drawcall.BindCBuffer(index, node.CBCameraFrustum);
+            }
+
+            index = drawcall.FindBinder(NxRHI.EShaderBindType.SBT_SRV, "HZBTexture");
+            if (index.IsValidPointer)
+            {
+                var attachBuffer = node.GetAttachBuffer(node.HzbPinIn);
+                drawcall.BindSrv(index, attachBuffer.Srv);
+            }
+            index = drawcall.FindBinder(NxRHI.EShaderBindType.SBT_Sampler, "Samp_HZBTexture");
+            if (index.IsValidPointer)
+                drawcall.BindSampler(index, UEngine.Instance.GfxDevice.SamplerStateManager.LinearClampState);
+
         }
     }
     public class TtCullClusterNode : URenderGraphNode
@@ -56,15 +78,30 @@ namespace EngineNS.Bricks.GpuDriven
         [System.Runtime.InteropServices.StructLayout(System.Runtime.InteropServices.LayoutKind.Sequential, Pack = 16)]
         public struct FClusterData
         {
-            public Vector3 BoundCenter;
+            public Vector3 BoundMin;
             public int IndexStart;
-            public Vector3 BoundExtent;
+            public Vector3 BoundMax;
             public int IndexEnd;
             public Matrix WVPMatrix;
         }
         public TtCpu2GpuBuffer<FClusterData> Clusters = new TtCpu2GpuBuffer<FClusterData>();
         public TtCpu2GpuBuffer<uint> SrcClusters = new TtCpu2GpuBuffer<uint>();
         public TtCpu2GpuBuffer<uint> VisClusters = new TtCpu2GpuBuffer<uint>();
+
+        [System.Runtime.InteropServices.StructLayout(System.Runtime.InteropServices.LayoutKind.Sequential, Pack = 16)]
+        public unsafe struct FFrustumCullingParams
+        {
+            public FFrustumCullingParams()
+            {
+                FrustumMinPoint = Vector3.Zero;
+                FrustumMaxPoint = Vector3.One;
+            }
+            public fixed float CameraPlanes[24];
+            public Vector3 FrustumMinPoint;
+            public Vector3 FrustumMaxPoint;
+        };
+        public FFrustumCullingParams mFrustumCullingData = new FFrustumCullingParams();
+        public NxRHI.UCbView CBCameraFrustum;
 
         public TtCullClusterNode()
         {
@@ -99,6 +136,10 @@ namespace EngineNS.Bricks.GpuDriven
             CullClusterShadingDrawcall = rc.CreateComputeDraw();
             CullClusterShading = UEngine.Instance.ShadingEnvManager.GetShadingEnv<TtCullClusterShading>();
 
+            Vertices.Initialize(NxRHI.EBufferType.BFT_SRV);
+            Indices.Initialize(NxRHI.EBufferType.BFT_SRV);
+            Clusters.Initialize(NxRHI.EBufferType.BFT_SRV);
+            SrcClusters.Initialize(NxRHI.EBufferType.BFT_SRV);
             unsafe
             {
                 VisClusters.Initialize(NxRHI.EBufferType.BFT_SRV | NxRHI.EBufferType.BFT_UAV);
@@ -106,37 +147,48 @@ namespace EngineNS.Bricks.GpuDriven
                 var visClst = stackalloc int[100 + 1];
                 visClst[0] = 0;
                 VisClusters.UpdateData(0, visClst, sizeof(int) * 100 + sizeof(int));
-                VisClusters.Flush2GPU();
+                using (var tsCmd = new NxRHI.FTransientCmd(NxRHI.EQueueType.QU_Default, "VisClusters.Flush"))
+                {
+                    VisClusters.Flush2GPU(tsCmd.CmdList);
+                }
             }
         }
-        private unsafe void UpdateBuffers(Vector3[] vb, uint[] ib, List<FClusterData> clusters, EngineNS.Graphics.Pipeline.UCamera camera)
+        private unsafe void UpdateBuffers(NxRHI.ICommandList cmd, Vector3[] vb, uint[] ib, List<FClusterData> clusters, EngineNS.Graphics.Pipeline.UCamera camera)
         {
             // TODO: update once?
             if (vb.Length >0)
             {
-                Vertices.Initialize(NxRHI.EBufferType.BFT_SRV);
+                //Vertices.Initialize(NxRHI.EBufferType.BFT_SRV);
                 Vertices.SetSize(sizeof(FQuarkVertex) * vb.Length / sizeof(float));
-                fixed (Vector3* p = &vb[0])
+                FQuarkVertex[] quarkVB = new FQuarkVertex[vb.Length];
+                for (int i = 0; i < vb.Length; i++)
+                {
+                    quarkVB[i].Position = vb[i];
+                    // TODO:
+                    quarkVB[i].Normal = Vector3.Zero;
+                    quarkVB[i].UV = Vector2.Zero;
+                }
+                fixed (FQuarkVertex* p = &quarkVB[0])
                 {
                     Vertices.UpdateData(0, p, sizeof(FQuarkVertex) * vb.Length);
                 }
-                Vertices.Flush2GPU();
+                Vertices.Flush2GPU(cmd);
             }
             
             if (ib.Length > 0)
             {
-                Indices.Initialize(NxRHI.EBufferType.BFT_SRV);
+                //Indices.Initialize(NxRHI.EBufferType.BFT_SRV);
                 Indices.SetSize(ib.Length);
                 fixed (uint* p = &ib[0])
                 {
                     Indices.UpdateData(0, p, sizeof(uint) * ib.Length);
                 }
-                Indices.Flush2GPU();
+                Indices.Flush2GPU(cmd);
             }
             
             if (clusters.Count > 0)
             {
-                Clusters.Initialize(NxRHI.EBufferType.BFT_SRV);
+                //Clusters.Initialize(NxRHI.EBufferType.BFT_SRV);
                 Clusters.SetSize(sizeof(FClusterData) * clusters.Count);
                 var clst = stackalloc FClusterData[clusters.Count];
 
@@ -153,22 +205,22 @@ namespace EngineNS.Bricks.GpuDriven
                     clst[i].IndexStart = clusters[i].IndexStart;
                     clst[i].IndexEnd = clusters[i].IndexEnd;
                     // TODO:
-                    clst[i].BoundCenter = Vector3.Zero;
-                    clst[i].BoundExtent = Vector3.One;
+                    clst[i].BoundMin = clusters[i].BoundMin;
+                    clst[i].BoundMax = clusters[i].BoundMax;
                 }
 
                 Clusters.UpdateData(0, clst, sizeof(FClusterData) * clusters.Count);
-                Clusters.Flush2GPU();
+                Clusters.Flush2GPU(cmd);
             }
 
             {
-                SrcClusters.Initialize(NxRHI.EBufferType.BFT_SRV);
+                //SrcClusters.Initialize(NxRHI.EBufferType.BFT_SRV);
                 SrcClusters.SetSize(sizeof(int) * 1 + sizeof(int));
                 var src = stackalloc int[2];
-                src[0] = 1;
+                src[0] = clusters.Count > 0 ? 1 : 0;
                 src[1] = 0;
                 SrcClusters.UpdateData(0, src, sizeof(int) * 1 + sizeof(int));
-                SrcClusters.Flush2GPU();
+                SrcClusters.Flush2GPU(cmd);
             }
 
             {
@@ -202,11 +254,15 @@ namespace EngineNS.Bricks.GpuDriven
         }
         public unsafe override void TickLogic(UWorld world, URenderPolicy policy, bool bClear)
         {
-            BuildInstances(world, policy.DefaultCamera.VisParameter);
+            if (CBCameraFrustum != null)
+            {
+                CBCameraFrustum.SetValue("FrustumInfo", in mFrustumCullingData);
+            }
 
             var cmd = BasePass.DrawCmdList;
             cmd.BeginCommand();
-            
+            PrepareCullClusterInfos(cmd.mCoreObject, world, policy.DefaultCamera.VisParameter);
+
             NxRHI.FBufferWriter bfWriter = new NxRHI.FBufferWriter();
             bfWriter.Buffer = VisClusters.GpuBuffer.mCoreObject;
             bfWriter.Offset = 0;
@@ -226,7 +282,41 @@ namespace EngineNS.Bricks.GpuDriven
             UEngine.Instance.GfxDevice.RenderCmdQueue.QueueCmdlist(cmd);
         }
 
-        public void BuildInstances(GamePlay.UWorld world, GamePlay.UWorld.UVisParameter rp)
+        public Vector4 TransformViewProj(in Vector3 coord, in Matrix transform)
+        {
+            Vector4 vector;
+
+            vector.X = (((coord.X * transform.M11) + (coord.Y * transform.M21)) + (coord.Z * transform.M31)) + transform.M41;
+            vector.Y = (((coord.X * transform.M12) + (coord.Y * transform.M22)) + (coord.Z * transform.M32)) + transform.M42;
+            vector.Z = (((coord.X * transform.M13) + (coord.Y * transform.M23)) + (coord.Z * transform.M33)) + transform.M43;
+            vector.W = ((((coord.X * transform.M14) + (coord.Y * transform.M24)) + (coord.Z * transform.M34)) + transform.M44);
+
+            return vector;
+        }
+        public void UpdateCameraInfo(EngineNS.Graphics.Pipeline.UCamera camera)
+        {
+            if (camera == null)
+                return;
+
+            var frustum = camera.GetFrustum();
+            for (int i = 0; i < 6; i++)
+            {
+                var plane = frustum.GetPlane(i);
+                unsafe
+                {
+                    mFrustumCullingData.CameraPlanes[i * 4 + 0] = plane.X;
+                    mFrustumCullingData.CameraPlanes[i * 4 + 1] = plane.Y;
+                    mFrustumCullingData.CameraPlanes[i * 4 + 2] = plane.Z;
+                    mFrustumCullingData.CameraPlanes[i * 4 + 3] = plane.W;
+                }
+            }
+            BoundingBox frustumAABB = new BoundingBox();
+            frustum.GetAABB(ref frustumAABB);
+
+            mFrustumCullingData.FrustumMinPoint = frustumAABB.Minimum;
+            mFrustumCullingData.FrustumMaxPoint = frustumAABB.Maximum;
+        }
+        public void PrepareCullClusterInfos(NxRHI.ICommandList cmd, GamePlay.UWorld world, GamePlay.UWorld.UVisParameter rp)
         {
             List<FClusterData> clusters = new List<FClusterData>();
             List<Vector3> position = new List<Vector3>();
@@ -244,15 +334,19 @@ namespace EngineNS.Bricks.GpuDriven
 
                 for (int clusterId = 0; clusterId < clusterMesh.Clusters.Count; clusterId++)
                 {
-                    var cluster = new FClusterData();
+                    var clusterData = new FClusterData();
                     // NOTE: 
-                    cluster.IndexStart = clusterMesh.Clusters[clusterId].IndexStart;
-                    cluster.IndexEnd = clusterMesh.Clusters[clusterId].IndexCount;
-                    clusters.Add(cluster);                    
+                    var cluster = clusterMesh.Clusters[clusterId];
+                    clusterData.IndexStart = cluster.IndexStart;
+                    clusterData.IndexEnd = cluster.IndexCount;
+                    clusterData.BoundMin = cluster.AABB.Minimum;
+                    clusterData.BoundMax = cluster.AABB.Maximum;
+                    clusters.Add(clusterData);                    
                 }
-
-                position.AddRange(new List<Vector3>(clusterMesh.Vertices));
-                ib.AddRange(new List<uint>(clusterMesh.Indices));
+                if (clusterMesh.Vertices != null)
+                    position.AddRange(new List<Vector3>(clusterMesh.Vertices));
+                if (clusterMesh.Indices != null)
+                    ib.AddRange(new List<uint>(clusterMesh.Indices));
             }
             // debug
             //var view2ScreenMat = rp.CullCamera.GetToViewPortMatrix();
@@ -262,11 +356,28 @@ namespace EngineNS.Bricks.GpuDriven
             //    Debug.WriteLine(sreenPos.ToString());
             //}
 
+            //var viewProjMat = rp.CullCamera.GetViewProjection();
+            //for (int i = 0; i < position.Count; i++)
+            //{
+            //    var sreenPos = TransformViewProj(position[i], viewProjMat);
+            //    Debug.WriteLine(sreenPos.ToString());
+            //}
+            //Debug.WriteLine("===============================");
+
+            //var view2ScreenMat = rp.CullCamera.GetViewProjection();
+            //for (int i = 0; i < position.Count; i++)
+            //{
+            //    var sreenPos = Vector3.TransformCoordinate(position[i], view2ScreenMat);
+            //    Debug.WriteLine(sreenPos.ToString());
+            //}
+            //
             // debug
             //position.Clear();
             //ib.Clear();
             //clusters.Clear();
-            UpdateBuffers(position.ToArray(), ib.ToArray(), clusters, rp.CullCamera);
+
+            UpdateBuffers(cmd, position.ToArray(), ib.ToArray(), clusters, rp.CullCamera);
+            UpdateCameraInfo(rp.CullCamera);
         }
     }
 }

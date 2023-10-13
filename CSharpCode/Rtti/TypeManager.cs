@@ -369,6 +369,12 @@ namespace EngineNS.Rtti
         {
             return SystemType.IsSubclassOf(type);
         }
+        public bool IsParentClass(Type type)
+        {
+            if (type == null)
+                return false;
+            return type.IsSubclassOf(SystemType);
+        }
         public bool HasInterface(string name)
         {
             return (SystemType.GetInterface(name) != null);

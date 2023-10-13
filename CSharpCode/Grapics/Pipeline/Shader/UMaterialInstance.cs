@@ -437,6 +437,9 @@ namespace EngineNS.Graphics.Pipeline.Shader
             await GetMaterialInstance(RName.GetRName("axis/axis_face.uminst", RName.ERNameType.Engine));
 
             mWireColorMateria = await CreateMaterialInstance(RName.GetRName("material/whitecolor.uminst", RName.ERNameType.Engine));// engine.Config.DefaultMaterialInstance);
+            if (mWireColorMateria == null)
+                return false;
+
             var rast = mWireColorMateria.Rasterizer;
             rast.FillMode = NxRHI.EFillMode.FMD_WIREFRAME;
             rast.CullMode = NxRHI.ECullMode.CMD_NONE;

@@ -239,12 +239,12 @@ namespace EngineNS.Animation.Animatable
             bInitialized = true;
             return base.Initialize(host);
         }
-        public override void Tick(UEngine host)
+        public override void TickModule(UEngine host)
         {
             if (!bInitialized)
                 return;
 
-            base.Tick(host);
+            base.TickModule(host);
 
             ////test
             //AnimatedInstanceHierarchy.InstanceHierarchyNode node = new AnimatedInstanceHierarchy.InstanceHierarchyNode();

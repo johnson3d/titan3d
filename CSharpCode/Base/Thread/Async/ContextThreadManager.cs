@@ -45,6 +45,7 @@ namespace EngineNS.Thread.Async
     {
         public bool IsAlloc { get; set; } = false;
         public EAsyncTaskState TaskState = EAsyncTaskState.Ready;
+        internal System.Threading.AutoResetEvent CompletedEvent = null;
         internal Action ContinueAction;
         public TtAsyncTaskToken TaskToken = null;
         public override string ToString()
@@ -64,6 +65,7 @@ namespace EngineNS.Thread.Async
         {
             ContinueAction = null;
             TaskState = EAsyncTaskState.Ready;
+            CompletedEvent = null;
 
             AsyncType = EAsyncType.Normal;            
             ContinueThread = null;
@@ -114,6 +116,11 @@ namespace EngineNS.Thread.Async
 #else
                 DoContinueAction();
 #endif
+            }
+            else
+            {
+                TaskState = EAsyncTaskState.Completed;
+                CompletedEvent?.Set();
             }
         }
     }
@@ -463,13 +470,14 @@ namespace EngineNS.Thread.Async
         }
 
         #region post event
-        public void RunOn<T>(FPostEvent<T> evt, EAsyncTarget target = EAsyncTarget.AsyncIO, object userArgs = null)
+        public FTaskAwaiter<T> RunOn<T>(FPostEvent<T> evt, EAsyncTarget target = EAsyncTarget.AsyncIO, object userArgs = null, System.Threading.AutoResetEvent completedEvent = null)
         {
             var eh = TtAsyncTaskState<T>.CreateInstance();
             eh.PostAction = evt;
             eh.ContinueThread = null;
             eh.AsyncType = EAsyncType.ParallelTasks;
             eh.UserArguments = userArgs;
+            eh.CompletedEvent = completedEvent;
 
             if (target == EAsyncTarget.TPools)
             {
@@ -487,6 +495,7 @@ namespace EngineNS.Thread.Async
                     ctx.EnqueuePriority(eh);
                 }
             }
+            return new FTaskAwaiter<T>(eh);
         }
         public void RunOnUntilFinish<T>(FPostEventCondition<T> evt, EAsyncTarget target = EAsyncTarget.AsyncIO, object userArgs = null)
         {

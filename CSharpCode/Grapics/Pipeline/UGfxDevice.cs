@@ -73,34 +73,44 @@ namespace EngineNS.Graphics.Pipeline
             await this.MeshPrimitiveManager.Initialize();
             await this.ClusteredMeshManager.Initialize();
 
-            engine.TickableManager.AddTickable(RenderCmdQueue);
             return true;
         }
-        public override void Tick(UEngine engine)
+        public override void TickModule(UEngine engine)
         {
             var binder = CoreShaderBinder;
             if (PerFrameCBuffer != null)
             {
-                var timeOfSecend = (float)engine.CurrentTickCount * 0.001f;
+                var tm = engine.CurrentTick24BitMS;
+                var timeOfSecend = (float)tm * 0.001f;
                 PerFrameCBuffer.SetValue(binder.CBPerFrame.Time, in timeOfSecend);
-                var fracTime = (float)(engine.CurrentTickCount % 1000) * 0.001f;
+                var fracTime = (float)(tm % 1000) * 0.001f;
                 PerFrameCBuffer.SetValue(binder.CBPerFrame.TimeFracSecond, in fracTime);
                 var timeSin = (float)Math.Sin(fracTime * Math.PI * 2);
                 PerFrameCBuffer.SetValue(binder.CBPerFrame.TimeSin, in timeSin);
                 var timeCos = (float)Math.Cos(fracTime * Math.PI * 2);
                 PerFrameCBuffer.SetValue(binder.CBPerFrame.TimeCos, in timeCos);
 
-                float elapsed = (float)engine.ElapseTickCount / 1000.0f;
+                float elapsed = (float)engine.ElapseTickCountMS / 1000.0f;
                 PerFrameCBuffer.SetValue(binder.CBPerFrame.ElapsedTime, in elapsed);
             }
         }
-        public void TickSync()
+        public override void TickLogic(UEngine host)
+        {
+            RenderCmdQueue.TickLogic(host.ElapsedSecond);
+        }
+        public override void TickRender(UEngine host)
+        {
+            RenderCmdQueue.TickRender(host.ElapsedSecond);
+        }
+        public void TickSync(UEngine host)
         {
             var testTime = Support.Time.GetTickCount();
             UEngine.Instance.EventPoster.TickPostTickSyncEvents(testTime);
             UEngine.Instance.GfxDevice.RenderContext.TickPostEvents();
 
             AttachBufferManager.Tick();
+
+            RenderCmdQueue.TickSync(host.ElapsedSecond);
         }
         public override void EndFrame(UEngine engine)
         {
@@ -109,8 +119,6 @@ namespace EngineNS.Graphics.Pipeline
         public override void Cleanup(UEngine engine)
         {
             UEngine.Instance.EventPoster.TickPostTickSyncEvents(long.MaxValue);
-
-            engine.TickableManager.RemoveTickable(RenderCmdQueue);
 
             AttachBufferManager?.Dispose();
             TextureManager?.Cleanup();
@@ -127,8 +135,13 @@ namespace EngineNS.Graphics.Pipeline
             EffectManager.Cleanup();
 
             HitproxyManager.Cleanup();
+            
             SlateRenderer?.Cleanup();
             SlateRenderer = null;
+            SlateApplication?.Cleanup();
+            SlateApplication = null;
+
+            Editor.ShaderCompiler.UShaderCodeManager.Instance.Cleanup();
 
             RenderContext.mCoreObject.TryFinalizeDevice(RenderSystem.mCoreObject);
             while (RenderContext.mCoreObject.IsFinalized() == false)
@@ -136,16 +149,13 @@ namespace EngineNS.Graphics.Pipeline
                 AttachBufferManager.Tick();
                 var testTime = Support.Time.GetTickCount();
                 UEngine.Instance.EventPoster.TickPostTickSyncEvents(testTime);
+                RenderContext.GpuQueue.Flush(NxRHI.EQueueType.QU_ALL);
                 RenderContext.TickPostEvents();
             }
             RenderContext?.Dispose();
             RenderContext = null;
             RenderSystem?.Dispose();
             RenderSystem = null;
-            SlateApplication?.Cleanup();
-            SlateApplication = null;
-
-            Editor.ShaderCompiler.UShaderCodeManager.Instance.Cleanup();
 #if PWindow
             SDL.SDL_Quit();
 #endif

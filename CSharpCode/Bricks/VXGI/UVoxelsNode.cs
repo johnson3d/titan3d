@@ -309,8 +309,6 @@ namespace EngineNS.Bricks.VXGI
                         var VxDebugger_IndexCountPerInstance = meshAtomDesc->NumPrimitives * 3;
                         CBuffer.SetValue(idx, in VxDebugger_IndexCountPerInstance);
                     }
-
-                    CBuffer.FlushDirty(false);
                 }
                 switch (mCurStep)
                 {

@@ -58,9 +58,9 @@ namespace EngineNS.Graphics.Mesh
             SourceCode.TextCode = codeString;
             return codeString;
         }
-        public override void OnDrawCall(Pipeline.URenderPolicy.EShadingType shadingType, NxRHI.UGraphicDraw drawcall, Pipeline.URenderPolicy policy, Mesh.UMesh mesh, int atom)
+        public override void OnDrawCall(NxRHI.ICommandList cmd, Pipeline.URenderPolicy.EShadingType shadingType, NxRHI.UGraphicDraw drawcall, Pipeline.URenderPolicy policy, Mesh.UMesh mesh, int atom)
         {
-            base.OnDrawCall(shadingType, drawcall, policy, mesh, atom);
+            base.OnDrawCall(cmd, shadingType, drawcall, policy, mesh, atom);
             unsafe
             {
                 var bones = mesh.MaterialMesh.Mesh.PartialSkeleton.GetLimb<Animation.SkeletonAnimation.Skeleton.Limb.UBone>();

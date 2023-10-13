@@ -1,8 +1,10 @@
 ﻿using EngineNS;
+using EngineNS.Bricks.CodeBuilder;
 using EngineNS.GamePlay.Scene;
 using EngineNS.Rtti;
 using EngineNS.UI.Canvas;
 using EngineNS.UI.Controls;
+using EngineNS.UI.Controls.Containers;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -26,7 +28,7 @@ namespace EngineNS.UI.Editor
         public EngineNS.Editor.UPreviewViewport PreviewViewport = new EngineNS.Editor.UPreviewViewport();
 
         public TtUIHost mUIHost = new TtUIHost();
-        public UMeshNode mUINode;
+        public TtUINode mUINode;
         public void Dispose()
         {
             CoreSDK.DisposeObject(ref UIAsset);
@@ -38,17 +40,27 @@ namespace EngineNS.UI.Editor
         {
             await DetailsGrid.Initialize();
 
+            mUIHost.Name = "UIEditorHost";
             mUIHost.WindowSize = new SizeF(1920, 1080);
 
             // test /////////////////////////
-            var element = new TtImage(); // new TtUIElement();
+            //var element = new TtImage(); // new TtUIElement();
+            var button = new TtButton();
             var canvas = new UI.Controls.Containers.TtCanvasControl();
-            canvas.AddChild(element);
-            UI.Controls.Containers.TtCanvasControl.SetAnchorRectX(element, 50);
-            //UI.Controls.Containers.TtCanvasControl.SetAnchorRectZ(element, 1920);
-            //UI.Controls.Containers.TtCanvasControl.SetAnchorRectW(element, 1080);
-            DetailsGrid.Target = element;
-            mUIHost.AddChild(canvas);
+            var img = new TtImage();
+            img.UIBrush.UVAnimAsset = RName.GetRName("ui/button_hover.uvanim", RName.ERNameType.Engine);
+            button.Children.Add(img);
+            ////canvas.AddChild(element);
+            ////DetailsGrid.Target = element;
+
+            canvas.Children.Add(button);
+            //UI.Controls.Containers.TtCanvasControl.SetAnchorRectX(button, 50);
+            //UI.Controls.Containers.TtCanvasControl.SetAnchorRectZ(button, 1920);
+            //UI.Controls.Containers.TtCanvasControl.SetAnchorRectW(button, 1080);
+            UI.Controls.Containers.TtCanvasControl.SetAnchorRectZ(button, 100);
+            UI.Controls.Containers.TtCanvasControl.SetAnchorRectW(button, 50);
+            DetailsGrid.Target = button;
+            mUIHost.Children.Add(canvas);
             /////////////////////////////////
 
             return true;
@@ -62,14 +74,17 @@ namespace EngineNS.UI.Editor
             (viewport as EngineNS.Editor.UPreviewViewport).CameraController.ControlCamera(viewport.RenderPolicy.DefaultCamera);
 
             var scene = PreviewViewport.World.Root.GetNearestParentScene();
-            mUINode = await scene.NewNode(PreviewViewport.World, typeof(UMeshNode), new GamePlay.Scene.UMeshNode.UMeshNodeData(),
-                EBoundVolumeType.Box, typeof(GamePlay.UPlacement)) as UMeshNode;
+            mUINode = await scene.NewNode(PreviewViewport.World, typeof(TtUINode), new TtUINode.TtUINodeData(),
+                EBoundVolumeType.Box, typeof(GamePlay.UPlacement)) as TtUINode;
             mUINode.NodeData.Name = "UI";
             mUINode.Parent = PreviewViewport.World.Root;
             mUINode.Placement.SetTransform(DVector3.Zero, Vector3.One, Quaternion.Identity);
-            mUINode.HitproxyType = Graphics.Pipeline.UHitProxy.EHitproxyType.Root;
+            mUINode.HitproxyType = Graphics.Pipeline.UHitProxy.EHitproxyType.None;
             mUINode.IsAcceptShadow = false;
             mUINode.IsCastShadow = false;
+            mUIHost.SceneNode = mUINode;
+
+            mUIHost.RenderCamera = PreviewViewport.RenderPolicy.DefaultCamera;
 
             //var meshNode = await GamePlay.Scene.UMeshNode.AddMeshNode(viewport.World, viewport.World.Root, new GamePlay.Scene.UMeshNode.UMeshNodeData(),
             //            typeof(GamePlay.UPlacement), UIAsset.Mesh,
@@ -120,10 +135,11 @@ namespace EngineNS.UI.Editor
         }
         public Vector2 WindowPos;
         public Vector2 WindowSize = new Vector2(800, 600);
+        public Vector2 WindowContentRegionMin, WindowContentRegionMax;
         public EGui.Controls.PropertyGrid.PropertyGrid DetailsGrid = new EGui.Controls.PropertyGrid.PropertyGrid();
         public unsafe void OnDraw()
         {
-            if (Visible == false || UIAsset == null || UIAsset.Mesh == null)
+            if (Visible == false || UIAsset == null)
                 return;
 
             var pivot = new Vector2(0);
@@ -140,7 +156,11 @@ namespace EngineNS.UI.Editor
                 }
                 WindowPos = ImGuiAPI.GetWindowPos();
                 WindowSize = ImGuiAPI.GetWindowSize();
-                
+                WindowContentRegionMin = ImGuiAPI.GetWindowContentRegionMin();
+                WindowContentRegionMax = ImGuiAPI.GetWindowContentRegionMax();
+
+                DrawToolBar();
+
                 ImGuiAPI.Separator();
             }
             ResetDockspace();
@@ -151,6 +171,7 @@ namespace EngineNS.UI.Editor
             DrawDetails();
             DrawHierachy();
         }
+        bool mIsSimulateMode = false;
         protected unsafe void DrawToolBar()
         {
             var btSize = Vector2.Zero;
@@ -175,6 +196,19 @@ namespace EngineNS.UI.Editor
             if (EGui.UIProxy.CustomButton.ToolButton("Redo", in btSize))
             {
 
+            }
+            ImGuiAPI.SameLine(0, -1);
+            if(EGui.UIProxy.CustomButton.ToggleButton("Simulate", in btSize, ref mIsSimulateMode))
+            {
+                PreviewViewport.FreezCameraControl = mIsSimulateMode;
+                if (mIsSimulateMode)
+                {
+                    UEngine.Instance.UIManager.AddUI(AssetName, "UIEditorSimulate", mUIHost);
+                }
+                else
+                {
+                    UEngine.Instance.UIManager.RemoveUI(AssetName, "UIEditorSimulate");
+                }
             }
         }
 
@@ -276,8 +310,36 @@ namespace EngineNS.UI.Editor
         {
             if (EGui.UIProxy.DockProxy.BeginPanel(mDockKeyClass, "Designer", ref mDesignerShow, ImGuiWindowFlags_.ImGuiWindowFlags_None))
             {
-                PreviewViewport.VieportType = Graphics.Pipeline.UViewportSlate.EVieportType.ChildWindow;
+                var pos = ImGuiAPI.GetWindowPos();
+                var size = ImGuiAPI.GetWindowSize();
+                var min = ImGuiAPI.GetWindowContentRegionMin();
+                var max = ImGuiAPI.GetWindowContentRegionMax();
+
+                var start = pos + min;
+                var end = start + (max - min);
+
+                //var drawList = ImGuiAPI.GetForegroundDrawList();
+                //drawList.AddRect(start, end, 0xff0000ff, 0, ImDrawFlags_.ImDrawFlags_None, 3.0f);
+                //drawList.AddRect(pos, pos + size, 0xffff00ff, 0, ImDrawFlags_.ImDrawFlags_None, 1.0f);
+                var mouseStart = start - WindowPos;
+                var mouseEnd = end - WindowPos;
+                mUIHost.WindowRectangle.X = mouseStart.X;
+                mUIHost.WindowRectangle.Y = mouseStart.Y;
+                mUIHost.WindowRectangle.Width = (end.X - start.X);
+                mUIHost.WindowRectangle.Height = (end.Y - start.Y);
+
+                //PreviewViewport.WindowSize = ImGuiAPI.GetWindowSize();
+                PreviewViewport.ViewportType = Graphics.Pipeline.UViewportSlate.EViewportType.ChildWindow;
                 PreviewViewport.OnDraw();
+
+                // debug ///////////////////
+                var drawList = ImGuiAPI.GetForegroundDrawList();
+                drawList.AddText(pos + new Vector2(0, 50), 0xffffffff, 
+                    $"x:{UEngine.Instance.UIManager.DebugMousePt.X}\r\n" +
+                    $"y:{UEngine.Instance.UIManager.DebugMousePt.Y}\r\n" +
+                    $"px:{UEngine.Instance.UIManager.DebugHitPt.X}\r\n" +
+                    $"py:{UEngine.Instance.UIManager.DebugHitPt.Y}", null);
+                ////////////////////////////
             }
             EGui.UIProxy.DockProxy.EndPanel();
         }
@@ -292,13 +354,100 @@ namespace EngineNS.UI.Editor
             EGui.UIProxy.DockProxy.EndPanel();
         }
         bool mHierachyShow = true;
+        bool mShowTemplateControls = false;
         protected unsafe void DrawHierachy()
         {
             var sz = new Vector2(-1);
             if (EGui.UIProxy.DockProxy.BeginPanel(mDockKeyClass, "Hierachy", ref mHierachyShow, ImGuiWindowFlags_.ImGuiWindowFlags_None))
             {
+                EGui.UIProxy.CheckBox.DrawCheckBox("Show Template Controls", ref mShowTemplateControls);
+                
+                ImGuiAPI.PushStyleColor(ImGuiCol_.ImGuiCol_Header, EGui.UIProxy.StyleConfig.Instance.TVHeader);
+                ImGuiAPI.PushStyleColor(ImGuiCol_.ImGuiCol_HeaderActive, EGui.UIProxy.StyleConfig.Instance.TVHeaderActive);
+                ImGuiAPI.PushStyleColor(ImGuiCol_.ImGuiCol_HeaderHovered, EGui.UIProxy.StyleConfig.Instance.TVHeaderHovered);
+                DrawUIElementInHierachy(mUIHost, 0);
+                ImGuiAPI.PopStyleColor(3);
             }
             EGui.UIProxy.DockProxy.EndPanel();
+        }
+        void DrawUIElementInHierachy(TtUIElement element, int idx)
+        {
+            var flags = ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_SpanFullWidth;
+            var name = "[" + element.GetType().Name + "] " + element.Name + "##" + idx++;
+            if (mSelectedElements.Contains(element))
+                flags |= ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_Selected;
+            var container = element as TtContainer;
+            if(container != null)
+            {
+                if(mShowTemplateControls)
+                {
+                    var count = VisualTreeHelper.GetChildrenCount(container);
+                    if(count == 0)
+                        flags |= ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_Leaf;
+                    var treeNodeResult = ImGuiAPI.TreeNodeEx(name, flags);
+                    if(ImGuiAPI.IsItemClicked(ImGuiMouseButton_.ImGuiMouseButton_Left))
+                    {
+                        ProcessSelectElement(element, UEngine.Instance.InputSystem.IsCtrlKeyDown());
+                    }
+                    if(treeNodeResult)
+                    {
+                        for(int i=0; i<count; i++)
+                        {
+                            var child = VisualTreeHelper.GetChild(container, i);
+                            DrawUIElementInHierachy(child, idx);
+                        }
+                        ImGuiAPI.TreePop();
+                    }
+                }
+                else
+                {
+                    if(container.Children.Count == 0)
+                        flags |= ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_Leaf;
+                    var treeNodeResult = ImGuiAPI.TreeNodeEx(name, flags);
+                    if(ImGuiAPI.IsItemClicked(ImGuiMouseButton_.ImGuiMouseButton_Left))
+                    {
+                        ProcessSelectElement(element, UEngine.Instance.InputSystem.IsCtrlKeyDown());
+                    }
+                    if(treeNodeResult)
+                    {
+                        for (int i=0; i< container.Children.Count; i++)
+                        {
+                            DrawUIElementInHierachy(container.Children[i], idx);
+                        }
+                        ImGuiAPI.TreePop();
+                    }
+                }
+            }
+            else
+            {
+                flags |= ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_Leaf;
+                if(ImGuiAPI.TreeNodeEx(name, flags))
+                {
+                    if(ImGuiAPI.IsItemClicked(ImGuiMouseButton_.ImGuiMouseButton_Left))
+                    {
+                        ProcessSelectElement(element, UEngine.Instance.InputSystem.IsCtrlKeyDown());
+                    }
+                    ImGuiAPI.TreePop();
+                }
+            }
+        }
+
+        List<TtUIElement> mSelectedElements = new List<TtUIElement>();
+        void ProcessSelectElement(TtUIElement element, bool multi)
+        {
+            if(multi)
+            {
+                if (mSelectedElements.Contains(element))
+                    mSelectedElements.Remove(element);
+                else
+                    mSelectedElements.Add(element);
+            }
+            else
+            {
+                mSelectedElements.Clear();
+                mSelectedElements.Add(element);
+            }
+            DetailsGrid.Target = mSelectedElements;
         }
 
         #region IAssetEditor
@@ -310,7 +459,6 @@ namespace EngineNS.UI.Editor
         }
         public void OnEvent(in Bricks.Input.Event e)
         {
-            //throw new NotImplementedException();
         }
         public async System.Threading.Tasks.Task<bool> OpenEditor(EngineNS.Editor.UMainEditorApplication mainEditor, RName name, object arg)
         {
@@ -337,12 +485,12 @@ namespace EngineNS.UI.Editor
 
         async Thread.Async.TtTask BuildMesh()
         {
-            if(mUIHost.MeshDirty)
+            if (mUIHost.MeshDirty)
             {
                 var mesh = await mUIHost.BuildMesh();
                 UIAsset.Mesh = mesh;
-                mUINode.Mesh = mesh;
             }
+            //mUINode.Mesh = UIAsset.Mesh;
         }
 
         #region Tickable
@@ -362,7 +510,15 @@ namespace EngineNS.UI.Editor
                 CollectionUIControls();
                 IsUIControlsDirty = false;
             }
-            _ = BuildMesh();
+            if(mIsSimulateMode)
+            {
+                if (UIAsset.Mesh != mUIHost.DrawMesh)
+                    UIAsset.Mesh = mUIHost.DrawMesh;
+            }
+            else
+            {
+                _ = BuildMesh();
+            }
         }
         public void TickRender(float ellapse)
         {

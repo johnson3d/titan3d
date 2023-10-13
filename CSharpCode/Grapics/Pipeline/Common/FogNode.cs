@@ -33,9 +33,9 @@ namespace EngineNS.Graphics.Pipeline.Common
             get;
             set;
         }
-        public unsafe override void OnDrawCall(Pipeline.URenderPolicy.EShadingType shadingType, NxRHI.UGraphicDraw drawcall, URenderPolicy policy, Mesh.UMesh mesh)
+        public unsafe override void OnDrawCall(NxRHI.ICommandList cmd, Pipeline.URenderPolicy.EShadingType shadingType, NxRHI.UGraphicDraw drawcall, URenderPolicy policy, Mesh.UMesh mesh)
         {
-            base.OnDrawCall(shadingType, drawcall, policy, mesh);
+            base.OnDrawCall(cmd, shadingType, drawcall, policy, mesh);
 
             var pipelinPolicy = policy.TagObject as URenderPolicy;
 
@@ -126,7 +126,6 @@ namespace EngineNS.Graphics.Pipeline.Common
                     TickSyncEHF(policy);
                     break;
             }
-            CBShadingEnv?.FlushDirty(false);
         }
     }
 }

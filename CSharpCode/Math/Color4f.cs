@@ -139,11 +139,17 @@ namespace EngineNS
 		    Green = ( ( argb >> 8 ) & 255 ) / 255.0f;
 		    Blue = ( argb & 255 ) / 255.0f;
 	    }
-        /// <summary>
-        /// 颜色转换
-        /// </summary>
-        /// <returns>返回转换后的颜色</returns>
-	    public Color ToColor()
+
+        public bool IsAlmostBlack()
+	    {
+		    return Red*Red < MathHelper.Epsilon && Green*Green < MathHelper.Epsilon && Red*Red < MathHelper.Epsilon;
+	    }
+
+    /// <summary>
+    /// 颜色转换
+    /// </summary>
+    /// <returns>返回转换后的颜色</returns>
+    public Color ToColor()
 	    {
 		    return Color.FromArgb( (int)(Alpha * 255), (int)(Red * 255), (int)(Green * 255), (int)(Blue * 255) );
 	    }

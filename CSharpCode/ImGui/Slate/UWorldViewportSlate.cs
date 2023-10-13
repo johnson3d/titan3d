@@ -182,7 +182,7 @@ namespace EngineNS.EGui.Slate
         }
         protected virtual void TickOnFocus()
         {
-            float step = (UEngine.Instance.ElapseTickCount * 0.001f) * CameraMoveSpeed;
+            float step = (UEngine.Instance.ElapseTickCountMS * 0.001f) * CameraMoveSpeed;
             var keyboards = UEngine.Instance.InputSystem;
             if (keyboards.IsKeyDown(Bricks.Input.Keycode.KEY_w))
             {

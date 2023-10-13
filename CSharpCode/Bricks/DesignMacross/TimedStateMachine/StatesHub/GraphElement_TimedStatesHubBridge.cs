@@ -1,11 +1,11 @@
-﻿using EngineNS.DesignMacross.Description;
-using EngineNS.DesignMacross.Graph.Elements;
-using EngineNS.DesignMacross.Graph;
+﻿using EngineNS.DesignMacross.Base.Description;
+using EngineNS.DesignMacross.Base.Graph.Elements;
+using EngineNS.DesignMacross.Base.Graph;
 using System;
 using System.Collections.Generic;
 using System.Reflection;
 using System.Text;
-using EngineNS.DesignMacross.Render;
+using EngineNS.DesignMacross.Base.Render;
 using EngineNS.Rtti;
 using EngineNS.Bricks.NodeGraph;
 
@@ -14,6 +14,7 @@ namespace EngineNS.DesignMacross.TimedStateMachine.StatesHub
     [ImGuiElementRender(typeof(TtGraphElement_TimedStatesHubBridgeRender))]
     public class TtGraphElement_TimedStatesHubBridge : IGraphElement, IContextMeunable, IDraggable, ILayoutable, IStateTransitionAcceptable
     {
+        public Guid Id { get; set; } = Guid.Empty;
         public string Name { get => Description.Name; set => Description.Name = value; }
 
         public IGraphElement Parent { get; set; }
@@ -57,12 +58,12 @@ namespace EngineNS.DesignMacross.TimedStateMachine.StatesHub
         }
         public TtTimedStatesHubBridgeClassDescription StatesHubBridgeClassDescription { get => Description as TtTimedStatesHubBridgeClassDescription; }
         public TtTimedStatesHubClassDescription TimedStatesHubClassDescription { get => StatesHubBridgeClassDescription.TimedStatesHubClassDescription; }
-        public Vector2 Location { get; set; } = new Vector2(10, 100);
+        public Vector2 Location { get => Description.Location; set => Description.Location = value; }
         public Vector2 AbsLocation { get => TtGraphMisc.CalculateAbsLocation(this); }
         public SizeF Size { get; set; } = new SizeF(100, 80);
         public float Rounding { get; set; } = 5;
         public Color4f NameColor { get; set; } = new Color4f(0.0f, 0.0f, 0.0f);
-        public Color4f BackgroundColor { get; set; } = new Color4f(13f / 255, 152f / 255, 186f / 255);
+        public Color4f BackgroundColor { get; set; } = new Color4f(158 / 255, 194f / 255, 229f / 255);
         public Color4f BorderColor { get; set; } = new Color4f(0.5f, 0.6f, 0.6f, 0.6f);
         public float BorderThickness { get; set; } = 4;
 
@@ -72,6 +73,7 @@ namespace EngineNS.DesignMacross.TimedStateMachine.StatesHub
         public TtGraphElement_StackPanel TransitionsStackPanel = new TtGraphElement_StackPanel();
         public TtGraphElement_TimedStatesHubBridge(IDescription description)
         {
+            Id = description.Id;
             Description = description;
             NameTextBlock.Content = Name;
             NameTextBlock.VerticalAlign = EVerticalAlignment.Center;
@@ -87,39 +89,11 @@ namespace EngineNS.DesignMacross.TimedStateMachine.StatesHub
         }
         public void Construct()
         {
-            TransitionsStackPanel.Clear();
-            foreach (var transition in TimedStatesHubClassDescription.Transitions_EndToThis)
-            {
-                var graphElementAttribute = transition.GetType().GetCustomAttribute<GraphElementAttribute>();
-                if (graphElementAttribute != null)
-                {
-                    var instance = UTypeDescManager.CreateInstance(graphElementAttribute.ClassType) as TtGraphElement_TimedStateTransition;
-                    IGraphElement GetElementByDesc(IDescription description)
-                    {
-                        if (Parent is TtGraph_TimedStatesHub parent)
-                        {
-                            var elementsInParent = parent.Elements;
-                            foreach (var element in elementsInParent)
-                            {
-                                if (element.Description == description)
-                                    return element;
-                            }
-                        }
-                        return null;
-                    }
-                    instance.From = GetElementByDesc(transition.From);
-                    instance.To = GetElementByDesc(transition.To);
-                    instance.Description = transition;
-                    instance.Construct();
-                    instance.Parent = this;
-                    TransitionsStackPanel.AddElement(instance);
-                }
-            }
         }
         #region ISelectable
         public bool HitCheck(Vector2 pos)
         {
-            Rect rect = new Rect(Location, Size);
+            Rect rect = new Rect(AbsLocation, Size);
             //冗余一点
             Rect mouseRect = new Rect(pos - Vector2.One, new SizeF(1.0f, 1.0f));
             return rect.IntersectsWith(mouseRect);
@@ -168,15 +142,18 @@ namespace EngineNS.DesignMacross.TimedStateMachine.StatesHub
                 {
                     if (element == this || !(element is TtGraphElement_TimedState))
                         continue;
-
-                    transitionItem.AddMenuItem(element.Name, null, (UMenuItem item, object sender) =>
+                    if (element is TtGraphElement_TimedState timedStateElement)
                     {
-                        var transitionDesc = new TtTimedStateTransitionClassDescription() { From = element.Description, To = this.Description };
-                        cmdHistory.CreateAndExtuteCommand("Transition From" + this.Name + " To " + element.Name,
-                            () => { TimedStatesHubClassDescription.Transitions_EndToThis.Add(transitionDesc); },
-                            () => { TimedStatesHubClassDescription.Transitions_EndToThis.Remove(transitionDesc); }
-                            );
-                    });
+                        transitionItem.AddMenuItem(element.Name, null, (UMenuItem item, object sender) =>
+                        {
+                            var elementDesc = timedStateElement.TimedStateClassDescription;
+                            var transitionDesc = new TtTimedStateTransitionClassDescription() { From = timedStateElement.TimedStateClassDescription, To = this.Description };
+                            cmdHistory.CreateAndExtuteCommand("Transition From" + element.Name + " To " + this.Name,
+                                (data) => { timedStateElement.TimedStateClassDescription.Transitions.Add(transitionDesc); TimedStatesHubClassDescription.Transitions_EndToThis.Add(transitionDesc); },
+                                (data) => { timedStateElement.TimedStateClassDescription.Transitions.Remove(transitionDesc); TimedStatesHubClassDescription.Transitions_EndToThis.Remove(transitionDesc); }
+                                );
+                        });
+                    }
                 }
             }
 

@@ -176,7 +176,7 @@ namespace EngineNS
                         ITickable cur;
                         if (TickableManager.Tickables[i].TryGetTarget(out cur))
                         {
-                            cur.TickRender(ElapseTickCount);
+                            cur.TickRender(ElapseTickCountMS);
                         }
                         else
                         {
@@ -207,7 +207,7 @@ namespace EngineNS
                         ITickable cur;
                         if (TickableManager.Tickables[i].TryGetTarget(out cur))
                         {
-                            cur.TickLogic(ElapseTickCount);
+                            cur.TickLogic(ElapseTickCountMS);
                         }
                         else
                         {
@@ -237,7 +237,7 @@ namespace EngineNS
                         ITickable cur;
                         if (TickableManager.Tickables[i].TryGetTarget(out cur))
                         {
-                            cur.TickBeginFrame(ElapseTickCount);
+                            cur.TickBeginFrame(ElapseTickCountMS);
                         }
                         else
                         {
@@ -284,7 +284,7 @@ namespace EngineNS
                         ITickable cur;
                         if (TickableManager.Tickables[i].TryGetTarget(out cur))
                         {
-                            cur.TickSync(ElapseTickCount);
+                            cur.TickSync(ElapseTickCountMS);
                         }
                         else
                         {
@@ -319,7 +319,7 @@ namespace EngineNS
             {
                 Profiler.Log.WriteException(ex);
             }
-            GfxDevice?.TickSync();
+            GfxDevice?.TickSync(this);
         }
 
         public static async System.Threading.Tasks.Task RunCoroutine<T>(IAsyncEnumerable<T> enumerable)

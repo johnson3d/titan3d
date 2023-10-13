@@ -45,6 +45,7 @@ namespace EngineNS.Support
             unsafe
             {
                 mCoreObject = CsValueList.CreateInstance(sizeof(T));
+                CoreSDK.SetMemDebugInfo(mCoreObject.CppPointer, typeof(T).FullName);
             }
         }
         public static UNativeArray<T> CreateInstance()

@@ -1,25 +1,15 @@
-﻿using EngineNS.Bricks.CodeBuilder.MacrossNode;
-using EngineNS.Bricks.CodeBuilder;
-using EngineNS.Bricks.NodeGraph;
-using EngineNS.Bricks.RenderPolicyEditor;
-using System;
+﻿using EngineNS.Bricks.CodeBuilder;
 using System.Collections.Generic;
-using System.Text;
-using System.Text.RegularExpressions;
 using System.Threading.Tasks;
-using System.Threading;
-using System.Drawing;
-using System.Reflection;
-using EngineNS.Rtti;
-using EngineNS.DesignMacross.Description;
+using EngineNS.DesignMacross.Design;
 
 namespace EngineNS.DesignMacross.Editor
 {
     public class TtDesignMacrossEditor : IO.ISerializer, EngineNS.Editor.IAssetEditor, IRootForm
     {
         public TtClassDescription ClassDescription { get; set; } = new TtClassDescription();
-        public TtDeclarationEditPanel DeclarationEditPanel { get; set; } = new TtDeclarationEditPanel();
-        public TtDefinitionGraphPanel DefinitionGraphPanel { get; set; } = new TtDefinitionGraphPanel();
+        public TtOutlineEditPanel DeclarationEditPanel { get; set; } = new TtOutlineEditPanel();
+        public TtGraphEditPanel DefinitionGraphPanel { get; set; } = new TtGraphEditPanel();
         TtCommandHistory CommandHistory { get; set; } = new TtCommandHistory();
 
         public TtDesignMacrossEditor()
@@ -57,8 +47,8 @@ namespace EngineNS.DesignMacross.Editor
 
             
             FDesignMacrossEditorRenderingContext rendingContext = new FDesignMacrossEditorRenderingContext();
-            rendingContext.EditorInteroperation.DeclarationEditPanel = DeclarationEditPanel;
-            rendingContext.EditorInteroperation.DefinitionGraphEditPanel = DefinitionGraphPanel;
+            rendingContext.EditorInteroperation.OutlineEditPanel = DeclarationEditPanel;
+            rendingContext.EditorInteroperation.GraphEditPanel = DefinitionGraphPanel;
             rendingContext.CommandHistory = CommandHistory;
 
             bool mClassViewShow = true;
@@ -82,6 +72,32 @@ namespace EngineNS.DesignMacross.Editor
             }
             EGui.UIProxy.DockProxy.EndPanel();
         }
+
+        #region Save Load
+        void SaveMacross(RName rn)
+        {
+            var ameta = UEngine.Instance.AssetMetaManager.GetAssetMeta(AssetName);
+            if (ameta != null)
+            {
+                var tmp = new UDesignMacross();
+                tmp.AssetName = rn;
+                tmp.UpdateAMetaReferences(ameta);
+                ameta.SaveAMeta();
+            }
+
+            var xml = new System.Xml.XmlDocument();
+            var xmlRoot = xml.CreateElement($"Root", xml.NamespaceURI);
+            xml.AppendChild(xmlRoot);
+            IO.SerializerHelper.WriteObjectMetaFields(xml, xmlRoot, ClassDescription);
+            var xmlText = IO.TtFileManager.GetXmlText(xml);
+            IO.TtFileManager.WriteAllText($"{rn.Address}/class_description.dat", xmlText);
+
+        }
+        void LoadMacross(RName rn)
+        {
+
+        }
+        #endregion Save Load
 
         #region CodeGen
         public string GenerateCode()
@@ -121,7 +137,7 @@ namespace EngineNS.DesignMacross.Editor
             if (EGui.UIProxy.ToolbarIconButtonProxy.DrawButton(in drawList,
                 ref mToolBtnDatas[toolBarItemIdx].IsMouseDown, ref mToolBtnDatas[toolBarItemIdx].IsMouseHover, null, "Save"))
             {
-                //SaveClassGraph(AssetName);
+                SaveMacross(AssetName);
                 //GenerateCode();
                 //CompileCode();
             }

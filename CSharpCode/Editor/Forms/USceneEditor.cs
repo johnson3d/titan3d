@@ -501,7 +501,7 @@ namespace EngineNS.Editor.Forms
         {
             if (EGui.UIProxy.DockProxy.BeginPanel(mDockKeyClass, "Preview", ref mRightShow, ImGuiWindowFlags_.ImGuiWindowFlags_None))
             {
-                PreviewViewport.VieportType = Graphics.Pipeline.UViewportSlate.EVieportType.ChildWindow;
+                PreviewViewport.ViewportType = Graphics.Pipeline.UViewportSlate.EViewportType.ChildWindow;
                 PreviewViewport.OnDraw();
             }
             EGui.UIProxy.DockProxy.EndPanel();

@@ -78,6 +78,10 @@ namespace EngineNS.Bricks.NodeGraph
         {
             public UNodeBase Node;
             public Vector2 MoveOffset;
+            public override int GetHashCode()
+            {
+                return Node.GetHashCode();
+            }
             [Browsable(false)]
             public bool IsPropertyVisibleDirty { get; set; } = false;
 
@@ -1587,15 +1591,12 @@ namespace EngineNS.Bricks.NodeGraph
                         var tempStr = menuString.Remove(idx, idxEnd - idx + 1);
                         tempStr = tempStr.Insert(idx, subStr);
                         tempStr = Nodes[i].Name.Replace(tempStr, "");
-                        try
+
+                        UInt32 id;
+                        if(UInt32.TryParse(tempStr, out id))
                         {
-                            var id = System.Convert.ToUInt32(tempStr);
                             if (id > CurSerialId)
                                 CurSerialId = id;
-                        }
-                        catch (System.Exception)
-                        {
-
                         }
                     }
                 }

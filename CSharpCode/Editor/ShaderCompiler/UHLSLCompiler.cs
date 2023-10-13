@@ -304,6 +304,16 @@ namespace EngineNS.Editor.ShaderCompiler
                 if (mtl != null && mtl.Defines != null)
                 {
                     defPtr.MergeDefinitions(mtl.Defines);
+                    // TODO: add material VS Input ?
+                    var vsStreams = mtl.GetVSNeedStreams();
+                    if (vsStreams != null)
+                    {
+                        foreach (var i in vsStreams)
+                        {
+                            defPtr.AddDefine(GetVertexStreamDefine(i), "1");
+                        }
+                    }
+
                     var psInputs = mtl.GetPSNeedInputs();
                     if (psInputs != null)
                     {

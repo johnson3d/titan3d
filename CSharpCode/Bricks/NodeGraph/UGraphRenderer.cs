@@ -64,6 +64,7 @@ namespace EngineNS.Bricks.NodeGraph
             }
         }
         protected Vector2 GraphSize;
+        public bool DrawInherit = true;
         public void OnDraw()
         {
             if (mGraph == null)
@@ -82,21 +83,24 @@ namespace EngineNS.Bricks.NodeGraph
                 }
                 ImGuiAPI.SameLine(0, -1);
             }
-            for (int i = 0; i < mGraphInherit.Count; i++)
+            if(DrawInherit)
             {
-                if (i != 0)
+                for (int i = 0; i < mGraphInherit.Count; i++)
                 {
-                    ImGuiAPI.SameLine(0, -1);
-                }
-                if (ImGuiAPI.Button(mGraphInherit[i].GraphName))
-                {
-                    //mGraph.ChangeGraph(mGraphInherit[i]);
-                    SetGraph(mGraphInherit[i]);
-                }
-                if (i < mGraphInherit.Count - 1)
-                {
-                    ImGuiAPI.SameLine(0, -1);
-                    ImGuiAPI.Text("/");
+                    if (i != 0)
+                    {
+                        ImGuiAPI.SameLine(0, -1);
+                    }
+                    if (ImGuiAPI.Button(mGraphInherit[i].GraphName))
+                    {
+                        //mGraph.ChangeGraph(mGraphInherit[i]);
+                        SetGraph(mGraphInherit[i]);
+                    }
+                    if (i < mGraphInherit.Count - 1)
+                    {
+                        ImGuiAPI.SameLine(0, -1);
+                        ImGuiAPI.Text("/");
+                    }
                 }
             }
             if (ImGuiAPI.BeginChild("Graph", in Vector2.Zero, false, ImGuiWindowFlags_.ImGuiWindowFlags_NoMove | ImGuiWindowFlags_.ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_.ImGuiWindowFlags_NoScrollWithMouse))
@@ -114,24 +118,26 @@ namespace EngineNS.Bricks.NodeGraph
                 DrawOffset.SetValue(winPos.X + vpMin.X, winPos.Y + vpMin.Y);
                 var pt = ImGuiAPI.GetMousePos();
                 var delta = pt - DrawOffset;
-                var screenPt = mGraph.ToScreenPos(delta.X, delta.Y);
+                // ProcessKeyboard/ProcessMouse may be change mGraph, so store graph to make sure operation the same graph
+                var tempGraph = mGraph;
+                var screenPt = tempGraph.ToScreenPos(delta.X, delta.Y);
                 if (delta.X >= 0 && delta.X <= sz.X && delta.Y >= 0 && delta.Y <= sz.Y)
                 {
-                    ProcessKeyboard(in screenPt);
-                    ProcessMouse(in screenPt, in sz);
+                    ProcessKeyboard(in screenPt, tempGraph);
+                    ProcessMouse(in screenPt, in sz, tempGraph);
                 }
 
                 var cmd = ImGuiAPI.GetWindowDrawList();
-                if (mGraph.PhysicalSizeVP.X != sz.X || mGraph.PhysicalSizeVP.Y != sz.Y)
+                if (tempGraph.PhysicalSizeVP.X != sz.X || tempGraph.PhysicalSizeVP.Y != sz.Y)
                 {
-                    mGraph.SetPhysicalSizeVP(sz.X, sz.Y);
+                    tempGraph.SetPhysicalSizeVP(sz.X, sz.Y);
                 }
 
 
                 // draw grid
                 var styles = UNodeGraphStyles.DefaultStyles;
                 cmd.AddRectFilled(DrawOffset, DrawOffset + sz, styles.GridBackgroundColor, 0, ImDrawFlags_.ImDrawFlags_None);
-                var step = styles.GridStep / mGraph.ScaleVP;
+                var step = styles.GridStep / tempGraph.ScaleVP;
                 var hCount = (int)(sz.X / step);
                 var vCount = (int)(sz.Y / step);
                 var gridStart = CanvasToDraw(new Vector2(0, 0));// - DrawOffset;
@@ -151,36 +157,36 @@ namespace EngineNS.Bricks.NodeGraph
                         (i % 8 == 0) ? styles.GridSplitLineColor : styles.GridNormalLineColor, 1.0f);
                 }
 
-                for (int i = 0; i < mGraph.Linkers.Count;)
+                for (int i = 0; i < tempGraph.Linkers.Count;)
                 {
-                    var cur = mGraph.Linkers[i];
+                    var cur = tempGraph.Linkers[i];
                     if (cur.InPin == null || cur.OutPin == null || cur.InPin.HostNode == null || cur.OutPin.HostNode == null)
                     {
-                        mGraph.Linkers.RemoveAt(i);
+                        tempGraph.Linkers.RemoveAt(i);
                         break;
                     }
                     DrawLinker(cmd, cur);
                     i++;
                 }
 
-                foreach (var i in mGraph.Nodes)
+                foreach (var i in tempGraph.Nodes)
                 {
-                    if (mGraph.IsInViewport(i))
+                    if (tempGraph.IsInViewport(i))
                     {
                         DrawNode(cmd, i);
                     }
                 }
 
-                if (mGraph.LinkingOp.StartPin != null)
+                if (tempGraph.LinkingOp.StartPin != null)
                 {
                     var mPos = ImGuiAPI.GetMousePos();
                 }
 
                 // draw mouse drag rect
-                if (mGraph.MultiSelectionMode)
+                if (tempGraph.MultiSelectionMode)
                 {
-                    var min = mGraph.CanvasToViewport(Vector2.Minimize(mGraph.PressPosition, mGraph.DragPosition)) + DrawOffset;
-                    var max = mGraph.CanvasToViewport(Vector2.Maximize(mGraph.PressPosition, mGraph.DragPosition)) + DrawOffset;
+                    var min = tempGraph.CanvasToViewport(Vector2.Minimize(tempGraph.PressPosition, tempGraph.DragPosition)) + DrawOffset;
+                    var max = tempGraph.CanvasToViewport(Vector2.Maximize(tempGraph.PressPosition, tempGraph.DragPosition)) + DrawOffset;
                     var size = max - min;
                     if (size.X > MathHelper.Epsilon || size.Y > MathHelper.Epsilon)
                     {
@@ -188,54 +194,54 @@ namespace EngineNS.Bricks.NodeGraph
                     }
                 }
 
-                mGraph.OnDrawAfter(this, styles, cmd);
+                tempGraph.OnDrawAfter(this, styles, cmd);
                 DrawPopMenu();
             }
             ImGuiAPI.EndChild();
         }
 
-        void ProcessKeyboard(in Vector2 screenPt)
+        void ProcessKeyboard(in Vector2 screenPt, UNodeGraph graph)
         {
             if (ImGuiAPI.IsWindowFocused(ImGuiFocusedFlags_.ImGuiFocusedFlags_ChildWindows | ImGuiFocusedFlags_.ImGuiFocusedFlags_RootWindow) == false)
                 return;
 
             if (UEngine.Instance.InputSystem.IsKeyPressed(Input.Keycode.KEY_DELETE))
             {
-                foreach(var node in mGraph.SelectedNodes)
+                foreach(var node in graph.SelectedNodes)
                 {
-                    mGraph.RemoveNode(node.Node);
+                    graph.RemoveNode(node.Node);
                 }
-                mGraph.ClearSelected();
+                graph.ClearSelected();
             }
             if (UEngine.Instance.InputSystem.IsKeyPressed(Input.Keycode.KEY_TAB))
             {
-                mGraph.PopMenuPosition = mGraph.ViewportRateToCanvas(screenPt);
-                mGraph.CurMenuType = UNodeGraph.EGraphMenu.Canvas;
+                graph.PopMenuPosition = graph.ViewportRateToCanvas(screenPt);
+                graph.CurMenuType = UNodeGraph.EGraphMenu.Canvas;
             }
-            if(mGraph.IsKeydown(UNodeGraph.EKey.Ctl))
+            if(graph.IsKeydown(UNodeGraph.EKey.Ctl))
             {
                 if (UEngine.Instance.InputSystem.IsKeyPressed(Input.Keycode.KEY_c))
                 {
-                    mGraph.Copy();
+                    graph.Copy();
                 }
                 if(UEngine.Instance.InputSystem.IsKeyPressed(Input.Keycode.KEY_v))
                 {
-                    mGraph.Paste(screenPt);
+                    graph.Paste(screenPt);
                 }
             }
         }
 
-        unsafe void ProcessMouse(in Vector2 screenPt, in Vector2 rectSize)
+        unsafe void ProcessMouse(in Vector2 screenPt, in Vector2 rectSize, UNodeGraph graph)
         {
             //if (ImGuiAPI.IsWindowFocused(ImGuiFocusedFlags_.ImGuiFocusedFlags_ChildWindows | ImGuiFocusedFlags_.ImGuiFocusedFlags_RootWindow) == false)
             //    return;
-            if (mGraph.CurMenuType != UNodeGraph.EGraphMenu.None)
+            if (graph.CurMenuType != UNodeGraph.EGraphMenu.None)
                 return;
             if (ImGuiAPI.IsWindowHovered(ImGuiHoveredFlags_.ImGuiHoveredFlags_ChildWindows))
             {
-                mGraph.Zoom(screenPt, ImGuiAPI.GetIO().MouseWheel);
+                graph.Zoom(screenPt, ImGuiAPI.GetIO().MouseWheel);
             }
-            mGraph.PressDrag(in screenPt);
+            graph.PressDrag(in screenPt);
 
             var clickPos = Vector2.Zero;
             if (ImGuiAPI.IsMouseDown(ImGuiMouseButton_.ImGuiMouseButton_Left) || ImGuiAPI.IsMouseReleased(ImGuiMouseButton_.ImGuiMouseButton_Left))
@@ -247,63 +253,63 @@ namespace EngineNS.Bricks.NodeGraph
             var delta = clickPos - DrawOffset;
             if (delta.X >= 0 && delta.X <= rectSize.X && delta.Y >= 0 && delta.Y <= rectSize.Y)
             {
-                if (mGraph.ButtonPress[(int)UNodeGraph.EMouseButton.Middle] == false)
+                if (graph.ButtonPress[(int)UNodeGraph.EMouseButton.Middle] == false)
                 {
                     if (ImGuiAPI.IsMouseDown(ImGuiMouseButton_.ImGuiMouseButton_Middle))
                     {
-                        mGraph.MiddlePress(in screenPt);
+                        graph.MiddlePress(in screenPt);
                     }
                 }
                 else
                 {
                     if (!ImGuiAPI.IsMouseDown(ImGuiMouseButton_.ImGuiMouseButton_Middle))
                     {
-                        mGraph.MiddleRelease(in screenPt);
+                        graph.MiddleRelease(in screenPt);
                     }
                 }
                 if (ImGuiAPI.IsMouseDoubleClicked(ImGuiMouseButton_.ImGuiMouseButton_Middle))
                 {
-                    mGraph.MiddleDoubleClicked(in screenPt);
+                    graph.MiddleDoubleClicked(in screenPt);
                 }
 
-                if (mGraph.ButtonPress[(int)UNodeGraph.EMouseButton.Left] == false)
+                if (graph.ButtonPress[(int)UNodeGraph.EMouseButton.Left] == false)
                 {
                     if (ImGuiAPI.IsMouseDown(ImGuiMouseButton_.ImGuiMouseButton_Left))
                     {
-                        mGraph.LeftPress(in screenPt);
+                        graph.LeftPress(in screenPt);
                     }
                 }
                 else
                 {
                     if (!ImGuiAPI.IsMouseDown(ImGuiMouseButton_.ImGuiMouseButton_Left))
                     {
-                        mGraph.LeftRelease(in screenPt);
+                        graph.LeftRelease(in screenPt);
                     }
                 }
                 if (ImGuiAPI.IsMouseDoubleClicked(ImGuiMouseButton_.ImGuiMouseButton_Left))
                 {
-                    mGraph.LeftRelease(in screenPt);
-                    mGraph.LeftDoubleClicked(in screenPt);
+                    graph.LeftRelease(in screenPt);
+                    graph.LeftDoubleClicked(in screenPt);
                 }
 
-                if (mGraph.ButtonPress[(int)UNodeGraph.EMouseButton.Right] == false)
+                if (graph.ButtonPress[(int)UNodeGraph.EMouseButton.Right] == false)
                 {
                     if (ImGuiAPI.IsMouseDown(ImGuiMouseButton_.ImGuiMouseButton_Right))
                     {
-                        mGraph.RightPress(in screenPt);
+                        graph.RightPress(in screenPt);
                     }
                 }
                 else
                 {
                     if (!ImGuiAPI.IsMouseDown(ImGuiMouseButton_.ImGuiMouseButton_Right))
                     {
-                        mGraph.RightRelease(in screenPt);
+                        graph.RightRelease(in screenPt);
                     }
                 }
                 if (ImGuiAPI.IsMouseDoubleClicked(ImGuiMouseButton_.ImGuiMouseButton_Right))
                 {
-                    mGraph.RightRelease(in screenPt);
-                    mGraph.RightDoubleClicked(screenPt);
+                    graph.RightRelease(in screenPt);
+                    graph.RightDoubleClicked(screenPt);
                 }
             }
         }

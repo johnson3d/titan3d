@@ -68,9 +68,9 @@ namespace EngineNS.Graphics.Pipeline.Mobile
             }
             return null;
         }
-        public override void OnDrawCall(Pipeline.URenderPolicy.EShadingType shadingType, NxRHI.UGraphicDraw drawcall, Mesh.UMesh mesh, int atom)
+        public override void OnDrawCall(NxRHI.ICommandList cmd, Pipeline.URenderPolicy.EShadingType shadingType, NxRHI.UGraphicDraw drawcall, Mesh.UMesh mesh, int atom)
         {
-            base.OnDrawCall(shadingType, drawcall, mesh, atom);
+            base.OnDrawCall(cmd, shadingType, drawcall, mesh, atom);
             if (shadingType == EShadingType.BasePass)
             {
                 switch (mesh.Atoms[atom].Material.RenderLayer)
@@ -79,7 +79,7 @@ namespace EngineNS.Graphics.Pipeline.Mobile
                         //BasePassNode.mTranslucentShading.OnDrawCall(shadingType, drawcall, this, mesh);
                         return;
                     default:
-                        BasePassNode.mOpaqueShading.OnDrawCall(shadingType, drawcall, this, mesh);
+                        BasePassNode.mOpaqueShading.OnDrawCall(cmd, shadingType, drawcall, this, mesh);
                         return;
                 }
             }

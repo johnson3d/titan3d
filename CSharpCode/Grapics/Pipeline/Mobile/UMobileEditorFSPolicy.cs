@@ -236,19 +236,19 @@ namespace EngineNS.Graphics.Pipeline.Mobile
             return null;
         }
         //渲染DrawCall的时候调用，如果产生了对应的ShadingType的Drawcall，则会callback到这里设置一些这个shading的特殊参数
-        public override void OnDrawCall(Pipeline.URenderPolicy.EShadingType shadingType, NxRHI.UGraphicDraw drawcall, Mesh.UMesh mesh, int atom)
+        public override void OnDrawCall(NxRHI.ICommandList cmd, Pipeline.URenderPolicy.EShadingType shadingType, NxRHI.UGraphicDraw drawcall, Mesh.UMesh mesh, int atom)
         {
-            mesh.MdfQueue.OnDrawCall(shadingType, drawcall, this, mesh, atom);
+            mesh.MdfQueue.OnDrawCall(cmd, shadingType, drawcall, this, mesh, atom);
             //drawcall.Effect.ShadingEnv
             if (shadingType == EShadingType.BasePass)
             {
                 switch (mesh.Atoms[atom].Material.RenderLayer)
                 {
                     case ERenderLayer.RL_Translucent:
-                        TranslucentNode.mTranslucentShading.OnDrawCall(shadingType, drawcall, this, mesh);
+                        TranslucentNode.mTranslucentShading.OnDrawCall(cmd, shadingType, drawcall, this, mesh);
                         return;
                     default:
-                        BasePassNode.mOpaqueShading.OnDrawCall(shadingType, drawcall, this, mesh);
+                        BasePassNode.mOpaqueShading.OnDrawCall(cmd, shadingType, drawcall, this, mesh);
                         return;
                 }
             }

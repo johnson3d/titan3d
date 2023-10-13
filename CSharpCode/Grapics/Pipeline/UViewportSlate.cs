@@ -76,13 +76,13 @@ namespace EngineNS.Graphics.Pipeline
 
         protected Graphics.Pipeline.UPresentWindow mPresentWindow;
         public Graphics.Pipeline.UPresentWindow PresentWindow { get => mPresentWindow; }
-        public enum EVieportType
+        public enum EViewportType
         {
             Window,
             WindowWithClose,            
             ChildWindow,
         }
-        public EVieportType VieportType { get; set; } = EVieportType.Window;
+        public EViewportType ViewportType { get; set; } = EViewportType.Window;
         public ImGuiCond_ DockCond { get; set; } = ImGuiCond_.ImGuiCond_FirstUseEver;
         public bool IsViewportSlateFocused { get; private set; }
         public virtual void OnDrawViewportUI(in Vector2 startDrawPos) { }
@@ -97,19 +97,19 @@ namespace EngineNS.Graphics.Pipeline
             //ImGuiAPI.SetNextWindowSize(ref sz, ImGuiCond_.ImGuiCond_FirstUseEver);
             IsDrawing = false;
             bool bShow = false;
-            switch(VieportType)
+            switch(ViewportType)
             {
-                case EVieportType.Window:
+                case EViewportType.Window:
                     //bShow = ImGuiAPI.Begin(Title, ref mVisible, ImGuiWindowFlags_.ImGuiWindowFlags_NoBackground | ImGuiWindowFlags_.ImGuiWindowFlags_NoSavedSettings);
                     {
                         bool vis = true;
                         bShow = ImGuiAPI.Begin(Title, ref vis, ImGuiWindowFlags_.ImGuiWindowFlags_NoBackground | ImGuiWindowFlags_.ImGuiWindowFlags_NoSavedSettings);
                     }
                     break;
-                case EVieportType.WindowWithClose:
+                case EViewportType.WindowWithClose:
                     bShow = ImGuiAPI.Begin(Title, (bool*)0, ImGuiWindowFlags_.ImGuiWindowFlags_NoBackground | ImGuiWindowFlags_.ImGuiWindowFlags_NoSavedSettings);
                     break;
-                case EVieportType.ChildWindow:
+                case EViewportType.ChildWindow:
                     //if(sz == Vector2.Zero)
                     //    sz = ImGuiAPI.GetWindowSize();
                     bShow = ImGuiAPI.BeginChild(Title, in sz, false, ImGuiWindowFlags_.ImGuiWindowFlags_NoBackground | 
@@ -195,13 +195,13 @@ namespace EngineNS.Graphics.Pipeline
                 mPresentWindow?.UnregEventProcessor(this);
                 mPresentWindow = null;
             }
-            switch (VieportType)
+            switch (ViewportType)
             {
-                case EVieportType.Window:
-                case EVieportType.WindowWithClose:
+                case EViewportType.Window:
+                case EViewportType.WindowWithClose:
                     ImGuiAPI.End();
                     break;
-                case EVieportType.ChildWindow:
+                case EViewportType.ChildWindow:
                     ImGuiAPI.EndChild();
                     break;
             }

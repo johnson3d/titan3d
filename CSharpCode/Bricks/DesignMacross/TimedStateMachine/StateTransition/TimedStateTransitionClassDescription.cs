@@ -1,19 +1,37 @@
 ﻿using EngineNS.Bricks.CodeBuilder;
-using EngineNS.Bricks.StateMachine.TimedSM;
-using EngineNS.DesignMacross.Description;
-using EngineNS.DesignMacross.Graph;
+using EngineNS.DesignMacross.Base.Description;
+using EngineNS.DesignMacross.Base.Graph;
+using EngineNS.DesignMacross.TimedStateMachine.StateTransition;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.Text;
+using System.Reflection;
 
 namespace EngineNS.DesignMacross.TimedStateMachine
 {
+    [Graph(typeof(TtGraph_TimedStateTransition))]
     [GraphElement(typeof(TtGraphElement_TimedStateTransition))]
     public class TtTimedStateTransitionClassDescription : IDesignableVariableDescription
     {
         public Guid Id { get; set; } = Guid.NewGuid();
-        public string Name { get; set; }
+        string mName = null;
+        public string Name
+        { 
+            get
+            {
+                if (!string.IsNullOrEmpty(mName))
+                    return mName;
+                if(From != null && To != null)
+                    return "transiton_from_" + From.Name + "_to_" + To.Name;
+                return null;
+            }
+            set
+            {
+                mName = value;
+            }
+        }
+        [Rtti.Meta]
+        public Vector2 Location { get; set; }
         public string VariableName { get => TtDescriptionUtil.VariableNamePrefix + Name; }
         public string ClassName { get => TtDescriptionUtil.ClassNamePrefix + Name; }
         public EVisisMode VisitMode { get; set; } = EVisisMode.Public;
@@ -39,5 +57,17 @@ namespace EngineNS.DesignMacross.TimedStateMachine
         {
             return TtDescriptionUtil.BuildDefaultPartForVariableDeclaration(this);
         }
+
+        #region ISerializer
+        public void OnPreRead(object tagObject, object hostObject, bool fromXml)
+        {
+
+        }
+
+        public void OnPropertyRead(object tagObject, PropertyInfo prop, bool fromXml)
+        {
+
+        }
+        #endregion ISerializer
     }
 }

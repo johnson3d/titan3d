@@ -9,11 +9,11 @@ namespace EngineNS.Editor
 {
     public partial class UPIEModule : UModule<UEngine>
     {
-        public override void Tick(UEngine engine)
+        public override void TickModule(UEngine engine)
         {
             if (engine.GameInstance == null)
                 return;
-            engine.GameInstance.Tick(engine.ElapseTickCount);
+            engine.GameInstance.Tick(engine.ElapseTickCountMS);
         }
         public override void Cleanup(UEngine engine)
         {

@@ -43,7 +43,7 @@ namespace EngineNS.Graphics.Mesh.Modifier
             public NxRHI.UVbView mRotateVB;
             public NxRHI.UVbView mF41VB;
 
-            public NxRHI.UVertexArray mAttachVBs = new NxRHI.UVertexArray();
+            public NxRHI.UVertexArray mAttachVBs = null;
             public void Cleanup()
             {
                 mPosVB?.Dispose();
@@ -110,6 +110,10 @@ namespace EngineNS.Graphics.Mesh.Modifier
 
 
                 var rc = UEngine.Instance.GfxDevice.RenderContext;
+
+                if (mAttachVBs == null)
+                    mAttachVBs = rc.CreateVertexArray();
+
                 var desc = new NxRHI.FVbvDesc();
                 //desc.CpuAccess = NxRHI.ECpuAccess.CAS_WRITE;
                 desc.m_Size = (UInt32)(sizeof(Vector3) * mdf.mMaxNumber);
@@ -129,7 +133,7 @@ namespace EngineNS.Graphics.Mesh.Modifier
                 mF41VB = rc.CreateVBV(null, in desc);
             }
 
-            public unsafe void Flush2VB(UInstanceModifier mdf)
+            public unsafe void Flush2VB(NxRHI.ICommandList cmd, UInstanceModifier mdf)
             {
                 if (mdf.mCurNumber == 0)
                     return;
@@ -138,22 +142,22 @@ namespace EngineNS.Graphics.Mesh.Modifier
                 fixed (Vector3* p = &mPosData[0])
                 {
                     var dataSize = (UInt32)sizeof(Vector3) * mdf.mCurNumber;
-                    mPosVB.UpdateGpuData(0, p, dataSize);
+                    mPosVB.UpdateGpuData(cmd, 0, p, dataSize);
                 }
                 fixed (Vector4* p = &mScaleData[0])
                 {
                     var dataSize = (UInt32)sizeof(Vector4) * mdf.mCurNumber;
-                    mScaleVB.UpdateGpuData(0, p, dataSize);
+                    mScaleVB.UpdateGpuData(cmd, 0, p, dataSize);
                 }
                 fixed (Quaternion* p = &mRotateData[0])
                 {
                     var dataSize = (UInt32)sizeof(Quaternion) * mdf.mCurNumber;
-                    mRotateVB.UpdateGpuData(0, p, dataSize);
+                    mRotateVB.UpdateGpuData(cmd, 0, p, dataSize);
                 }
                 fixed (Vector4ui* p = &mF41Data[0])
                 {
                     var dataSize = (UInt32)sizeof(Vector4ui) * mdf.mCurNumber;
-                    mF41VB.UpdateGpuData(0, p, dataSize);
+                    mF41VB.UpdateGpuData(cmd, 0, p, dataSize);
                 }
 
                 mAttachVBs.BindVB(NxRHI.EVertexStreamType.VST_InstPos, mPosVB);
@@ -298,7 +302,7 @@ namespace EngineNS.Graphics.Mesh.Modifier
 
                 IsDirty = true;
             }
-            public unsafe void Flush2VB(UInstanceModifier mdf)
+            public unsafe void Flush2VB(NxRHI.ICommandList cmd, UInstanceModifier mdf)
             {
                 if (mdf.mCurNumber == 0)
                     return;
@@ -308,7 +312,7 @@ namespace EngineNS.Graphics.Mesh.Modifier
                     var rc = UEngine.Instance.GfxDevice.RenderContext;
                     fixed (FVSInstantData* pTar = &InstData[0])
                     {
-                        InstantBuffer.UpdateGpuData(0,  pTar, mdf.mCurNumber * (uint)sizeof(FVSInstantData));
+                        InstantBuffer.UpdateGpuData(cmd, 0,  pTar, mdf.mCurNumber * (uint)sizeof(FVSInstantData));
                     }
                     IsDirty = false;
                 }
@@ -379,18 +383,18 @@ namespace EngineNS.Graphics.Mesh.Modifier
             }
         }
 
-        public unsafe void Flush2VB()
+        public unsafe void Flush2VB(NxRHI.ICommandList cmd)
         {
             if (InstantSSBO != null)
             {
-                InstantSSBO.Flush2VB(this);
+                InstantSSBO.Flush2VB(cmd, this);
             }
             else if (InstantVBs != null)
             {
-                InstantVBs.Flush2VB(this);
+                InstantVBs.Flush2VB(cmd, this);
             }
         }
-        public unsafe void OnDrawCall(Pipeline.URenderPolicy.EShadingType shadingType, NxRHI.UGraphicDraw drawcall, Pipeline.URenderPolicy policy, UMesh mesh)
+        public unsafe void OnDrawCall(NxRHI.ICommandList cmd, Pipeline.URenderPolicy.EShadingType shadingType, NxRHI.UGraphicDraw drawcall, Pipeline.URenderPolicy policy, UMesh mesh)
         {
             drawcall.mCoreObject.DrawInstance = (ushort)this.CurNumber;
             if (InstantSSBO != null)
@@ -398,7 +402,7 @@ namespace EngineNS.Graphics.Mesh.Modifier
                 var binder = drawcall.FindBinder("VSInstantDataArray");
                 if (binder.IsValidPointer == false)
                     return;
-                this.Flush2VB();
+                this.Flush2VB(cmd);
                 drawcall.BindSRV(binder, InstantSSBO.InstantSRV);
             }
             else if (InstantVBs != null)

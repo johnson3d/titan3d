@@ -87,11 +87,25 @@ namespace EngineNS.Graphics.Pipeline
             PostCmds = new UDrawBuffers();
             PostCmds.Initialize(rc, $"{debugName}:Post");
         }
-        public void PrepareForDraw()
+        public void BeginCommands()
         {
             for (ERenderLayer i = ERenderLayer.RL_Begin; i < ERenderLayer.RL_Num; i++)
             {
                 PassBuffers[(int)i].DrawCmdList.BeginCommand();
+            }
+        }
+        public void EndCommands()
+        {
+            for (ERenderLayer i = ERenderLayer.RL_Begin; i < ERenderLayer.RL_Num; i++)
+            {
+                PassBuffers[(int)i].DrawCmdList.EndCommand();
+            }
+        }
+        public void ExecuteCommands()
+        {
+            for (ERenderLayer i = ERenderLayer.RL_Begin; i < ERenderLayer.RL_Num; i++)
+            {
+                UEngine.Instance.GfxDevice.RenderCmdQueue.QueueCmdlist(PassBuffers[(int)i].DrawCmdList);
             }
         }
         public unsafe void SetViewport(in NxRHI.FViewPort vp)
@@ -174,25 +188,23 @@ namespace EngineNS.Graphics.Pipeline
                 var bClear = pLayerClear[index].ClearFlags != 0;
                 if (bClear == false && PassBuffers[index].DrawcallNumber == 0)
                 {
-                    cmdlist.EndCommand();
                     continue;
                 }
 
                 cmdlist.SetViewport(in viewport);
                 //frameBuffers.BuildFrameBuffers(policy);
+                NxRHI.UFrameBuffers fb = null;
                 if (i == ERenderLayer.RL_Gizmos || i == ERenderLayer.RL_TranslucentGizmos)
                 {
-                    cmdlist.BeginPass(gizmosFrameBuffers.FrameBuffers, pLayerClear[index], debugName + i.ToString());
+                    fb = gizmosFrameBuffers.FrameBuffers;
                 }
                 else
                 {
-                    cmdlist.BeginPass(frameBuffers.FrameBuffers, pLayerClear[index], debugName + i.ToString());
+                    fb = frameBuffers.FrameBuffers;
                 }
+                cmdlist.BeginPass(fb, pLayerClear[index], debugName + i.ToString());
                 cmdlist.FlushDraws();
                 cmdlist.EndPass();
-                cmdlist.EndCommand();
-
-                UEngine.Instance.GfxDevice.RenderCmdQueue.QueueCmdlist(cmdlist);
             }
         }
         public void SwapBuffer()
@@ -209,6 +221,10 @@ namespace EngineNS.Graphics.Pipeline
             {
                 PassBuffers[(int)layer].DrawCmdList.PushGpuDraw(drawcall);
             }
+        }
+        public NxRHI.UCommandList GetCmdList(ERenderLayer layer)
+        {
+            return PassBuffers[(int)layer].DrawCmdList;
         }
     }
 

@@ -24,7 +24,7 @@ namespace EngineNS
                     return;
                 if (buffer.GetSize() + 16 < len)
                 {
-                    buffer.Resize(buffer.GetSize() + 16);
+                    buffer.Resize(buffer.GetSize() + len);
                 }
 
                 var utf8Buffer = new Span<byte>(buffer.GetBuffer(), len);
@@ -42,7 +42,7 @@ namespace EngineNS
                     return;
                 if (buffer.GetSize() + 16 < len)
                 {
-                    buffer.Resize(buffer.GetSize() + 16);
+                    buffer.Resize(buffer.GetSize() + len);
                 }
 
                 var utf8Buffer = new Span<byte>(buffer.GetBuffer(), len);
@@ -59,7 +59,7 @@ namespace EngineNS
                     return;
                 if (buffer.GetSize() + 16 < len)
                 {
-                    buffer.Resize(buffer.GetSize() + 16);
+                    buffer.Resize(buffer.GetSize() + len);
                 }
                 fixed(char* p = srcStr)
                 {
@@ -76,7 +76,7 @@ namespace EngineNS
                     return;
                 if (buffer.GetSize() + 16 < len)
                 {
-                    buffer.Resize(buffer.GetSize() + 16);
+                    buffer.Resize(buffer.GetSize() + len);
                 }
 
                 var utf8Buffer = new Span<byte>(buffer.GetBuffer(), len);
@@ -115,10 +115,22 @@ namespace EngineNS
     }
     public unsafe partial struct BigStackBuffer : IDisposable
     {
-        public string AsText()
+        public string AsTextAnsi()
         {
             return System.Runtime.InteropServices.Marshal.PtrToStringAnsi((IntPtr)GetBuffer());
         }
+        public string AsTextUtf8()
+        {
+            return System.Runtime.InteropServices.Marshal.PtrToStringUTF8((IntPtr)GetBuffer());
+        }
+        public string AsTextUtf16()
+        {
+            return System.Runtime.InteropServices.Marshal.PtrToStringUni((IntPtr)GetBuffer());
+        }
+        //public string AsTextUtf32()
+        //{
+        //    return System.Runtime.InteropServices.Marshal.PtrToStringUni((IntPtr)GetBuffer());
+        //}
         public void SetTextAnsi(string txt)
         {
             CoreSDK.CopyString2Ansi(this, txt);
@@ -131,10 +143,10 @@ namespace EngineNS
         {
             CoreSDK.CopyString2Utf16(this, txt);
         }
-        public void SetTextUtf32(string txt)
-        {
-            CoreSDK.CopyString2Utf32(this, txt);
-        }
+        //public void SetTextUtf32(string txt)
+        //{
+        //    CoreSDK.CopyString2Utf32(this, txt);
+        //}
     }
 
     public class TtGlobalConfigVar
@@ -293,6 +305,10 @@ public unsafe partial struct VNameString
     {
         var nameStr = (VNameString)obj;
         return this == nameStr;
+    }
+    public bool StartWith(string name)
+    {
+        return c_str().StartsWith(name);
     }
 }
 

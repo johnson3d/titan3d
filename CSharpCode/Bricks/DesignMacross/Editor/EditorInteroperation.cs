@@ -6,7 +6,7 @@ namespace EngineNS.DesignMacross.Editor
 {
     public class TtEditorInteroperation
     {
-        public TtDeclarationEditPanel DeclarationEditPanel { get; set; } = null;
-        public TtDefinitionGraphPanel DefinitionGraphEditPanel { get; set; } = null;
+        public TtOutlineEditPanel OutlineEditPanel { get; set; } = null;
+        public TtGraphEditPanel GraphEditPanel { get; set; } = null;
     }
 }

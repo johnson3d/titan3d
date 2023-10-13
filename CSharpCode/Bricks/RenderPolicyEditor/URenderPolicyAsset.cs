@@ -122,7 +122,10 @@ namespace EngineNS.Bricks.RenderPolicyEditor
         public UPolicyGraph PolicyGraph { get; } = new UPolicyGraph();
         public Graphics.Pipeline.URenderPolicy CreateRenderPolicy()
         {
-            var policy = Rtti.UTypeDescManager.CreateInstance(Rtti.UTypeDesc.TypeOf(PolicyGraph.PolicyClassName)) as Graphics.Pipeline.URenderPolicy; // new Graphics.Pipeline.URenderPolicy();
+            var typeDesc = PolicyGraph.PolicyType;
+            var policy = Rtti.UTypeDescManager.CreateInstance(typeDesc) as Graphics.Pipeline.URenderPolicy; // new Graphics.Pipeline.URenderPolicy();
+            var meta = Rtti.UClassMetaManager.Instance.GetMeta(typeDesc);
+            meta.CopyObjectMetaField(policy, this.PolicyGraph.RenderPolicy);
             foreach (UPolicyNode i in PolicyGraph.Nodes)
             {
                 if (false == policy.RegRenderNode(i.Name, i.GraphNode))

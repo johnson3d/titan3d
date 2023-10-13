@@ -93,7 +93,7 @@ namespace EngineNS
         /// <param name="barycentricV">质心的V坐标</param>
         /// <returns>如果相交返回true，否则返回false</returns>
         [Rtti.Meta]
-        public static bool Intersects(in Ray ray, Vector3 vertex1, Vector3 vertex2, Vector3 vertex3, out float distance, out float barycentricU, out float barycentricV)
+        public static bool Intersects(in Ray ray, in Vector3 vertex1, in Vector3 vertex2, in Vector3 vertex3, out float distance, out float barycentricU, out float barycentricV)
 	    {
             unsafe
             {
@@ -104,9 +104,12 @@ namespace EngineNS
                         fixed(float* pinnedV = &barycentricV)
                         {
                             fixed (Ray* pinnedRay = &ray)
+                            fixed (Vector3* pvertex1 = &vertex1)
+                            fixed (Vector3* pvertex2 = &vertex2)
+                            fixed (Vector3* pvertex3 = &vertex3)
                             {
-                                if (IDllImportApi.v3dxIntersectTri(&vertex1,
-                                &vertex2, &vertex3,
+                                if (IDllImportApi.v3dxIntersectTri(pvertex1,
+                                pvertex2, pvertex3,
                                 &pinnedRay->Position, &pinnedRay->Direction,
                                 pinnedU, pinnedV, pinnedDist) != 0)
                                     return true;

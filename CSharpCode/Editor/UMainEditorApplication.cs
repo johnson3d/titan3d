@@ -417,7 +417,7 @@ namespace EngineNS.Editor
                     //    ImGuiAPI.SetColumnWidth(0, wsz.X * 0.15f);
                     //}
                     //var min = ImGuiAPI.GetWindowContentRegionMin();
-                    //var max = ImGuiAPI.GetWindowContentRegionMin();
+                    //var max = ImGuiAPI.GetWindowContentRegionMax();
 
                     //DrawLeft(ref min, ref max);
                     //LeftWidth = ImGuiAPI.GetColumnWidth(0);

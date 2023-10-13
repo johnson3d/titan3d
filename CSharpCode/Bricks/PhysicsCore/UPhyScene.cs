@@ -1,4 +1,5 @@
 ﻿using EngineNS.Bricks.Terrain.CDLOD;
+using EngineNS.GamePlay.Scene;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -19,6 +20,8 @@ namespace EngineNS.Bricks.PhysicsCore
             mCoreObject = self;
         }
         public bool IsPxFetchingPose { get; protected set; }
+        private static Profiler.TimeScope ScopeTickSimulate = Profiler.TimeScopeManager.GetTimeScope(typeof(UPhyScene), "Tick.Simulate");
+        private static Profiler.TimeScope ScopeTickUpdateActor = Profiler.TimeScopeManager.GetTimeScope(typeof(UPhyScene), "Tick.UpdateActor");
         public unsafe void Tick(float elapsedSecond)
         {
             var elapse = elapsedSecond;
@@ -31,43 +34,50 @@ namespace EngineNS.Bricks.PhysicsCore
             const float StepTime = 1 / 20.0f;
             int count = (int)(elapse / StepTime);
             float fm = elapse % StepTime;
-            for (int i = 0; i < count; i++)
+            using (new Profiler.TimeScopeHelper(ScopeTickSimulate))
             {
-                mCoreObject.Simulate(StepTime, scratchMemBlock, scratchMemBlockSize, true);
-                mCoreObject.FetchResults(false, &errorState);
-            }
-            if (fm > 0)
-            {
-                mCoreObject.Simulate(fm, scratchMemBlock, scratchMemBlockSize, true);
-                mCoreObject.FetchResults(false, &errorState);
-            }
-            uint activeActorCount = 0;
-            try
-            {
-                mCoreObject.LockRead();
-                IsPxFetchingPose = true;
-                var actors = mCoreObject.UpdateActorTransforms(ref activeActorCount);
-                for (uint i = 0; i < activeActorCount; ++i)
+                for (int i = 0; i < count; i++)
                 {
-                    var actor = mCoreObject.GetActor(actors, i);
-                    if (actor.IsValidPointer)
-                    {
-                        actor.UpdateTransform();
+                    mCoreObject.Simulate(StepTime, scratchMemBlock, scratchMemBlockSize, true);
+                    mCoreObject.FetchResults(false, &errorState);
+                }
+                if (fm > 0)
+                {
+                    mCoreObject.Simulate(fm, scratchMemBlock, scratchMemBlockSize, true);
+                    mCoreObject.FetchResults(false, &errorState);
+                }
+            }
 
-                        var csActor = UPhyActor.GetActor(actor);
-                        if (csActor != null && csActor.TagNode != null)
+            using (new Profiler.TimeScopeHelper(ScopeTickUpdateActor))
+            {
+                uint activeActorCount = 0;
+                try
+                {
+                    mCoreObject.LockRead();
+                    IsPxFetchingPose = true;
+                    var actors = mCoreObject.UpdateActorTransforms(ref activeActorCount);
+                    for (uint i = 0; i < activeActorCount; ++i)
+                    {
+                        var actor = mCoreObject.GetActor(actors, i);
+                        if (actor.IsValidPointer)
                         {
-                            csActor.TagNode.Placement.Position = csActor.mCoreObject.mPosition.AsDVector();
-                            csActor.TagNode.Placement.Quat = csActor.mCoreObject.mRotation;
+                            actor.UpdateTransform();
+
+                            var csActor = UPhyActor.GetActor(actor);
+                            if (csActor != null && csActor.TagNode != null)
+                            {
+                                csActor.TagNode.Placement.Position = csActor.mCoreObject.mPosition.AsDVector();
+                                csActor.TagNode.Placement.Quat = csActor.mCoreObject.mRotation;
+                            }
                         }
                     }
                 }
-            }
-            finally
-            {
-                IsPxFetchingPose = false;
-                mCoreObject.UnlockRead();
-            }
+                finally
+                {
+                    IsPxFetchingPose = false;
+                    mCoreObject.UnlockRead();
+                }
+            }   
         }
         public UPhyController CreateBoxController(in PhyBoxControllerDesc desc)
         {
@@ -119,6 +129,7 @@ namespace EngineNS.Bricks.PhysicsCore
             desc.mCoreObject.SetGravity(in gravity);
             //desc.mCoreObject.SetOnTrigger()
             mPxScene = pc.CreateScene(desc);
+
             return true;
         }
         public void Cleanup(object host)
@@ -128,12 +139,29 @@ namespace EngineNS.Bricks.PhysicsCore
         }
         [ThreadStatic]
         private static Profiler.TimeScope ScopeTick = Profiler.TimeScopeManager.GetTimeScope(typeof(UPhySceneMember), nameof(TickLogic));
+        System.Threading.AutoResetEvent PxSceneTickEndEvent = new System.Threading.AutoResetEvent(false);
         public void TickLogic(object host, float ellapse)
+        {
+            TickPxScene(ellapse);
+            //var task = UEngine.Instance.EventPoster.RunOn((state) =>
+            //{
+            //    TickPxScene(ellapse);
+            //    return true;
+            //}, Thread.Async.EAsyncTarget.TPools, null, PxSceneTickEndEvent);
+            //PxSceneTickEndEvent?.WaitOne();
+
+            //var hostNode = host as UNode;
+            //hostNode.GetWorld().RegAfterTickAction(() =>
+            //{
+            //    PxSceneTickEndEvent?.WaitOne();
+            //});
+        }
+        private void TickPxScene(float ellapse)
         {
             using (new Profiler.TimeScopeHelper(ScopeTick))
             {
                 PxScene?.Tick(ellapse * 0.001f);
-            }   
+            }
         }
         public void TickRender(object host, float ellapse)
         {

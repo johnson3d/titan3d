@@ -73,6 +73,25 @@ namespace EngineNS.Graphics.Pipeline.Shader
             public Vector4 vF4_2;
             public Vector4 vF4_3;
             public uint vInstanceId;
+            public static EngineNS.NxRHI.EVertexStreamType NameToInputStream(string name)
+            {
+                switch (name)
+                {
+                    case "vPosition":
+                        return EngineNS.NxRHI.EVertexStreamType.VST_Position;
+                    case "vNormal":
+                        return EngineNS.NxRHI.EVertexStreamType.VST_Normal;
+                    case "vColor":
+                        return EngineNS.NxRHI.EVertexStreamType.VST_Color;
+                    case "vUV":
+                        return EngineNS.NxRHI.EVertexStreamType.VST_UV;
+                    case "vTangent":
+                        return EngineNS.NxRHI.EVertexStreamType.VST_Tangent;
+                    case "vLightMap":
+                        return EngineNS.NxRHI.EVertexStreamType.VST_LightMap;
+                }
+                return EngineNS.NxRHI.EVertexStreamType.VST_Number;
+            }
         }
         public class PSInput
         {
@@ -318,6 +337,26 @@ namespace EngineNS.Graphics.Pipeline.Shader
             }
             return null;
         }
+        [Flags]
+        public enum InnerFlags : UInt32
+        {
+            None = 0,
+            Is64bitVColorAlpha = 1 << 0,
+        }
+        [Rtti.Meta, Browsable(false)]
+        public InnerFlags Flags { get; set; }
+        [Category("Option")]
+        public bool Is64bitVColorAlpha
+        { 
+            get => (Flags & InnerFlags.Is64bitVColorAlpha) != 0;
+            set
+            {
+                if (value)
+                    Flags |= InnerFlags.Is64bitVColorAlpha;
+                else
+                    Flags &= ~InnerFlags.Is64bitVColorAlpha;
+            }
+        }
         public enum ELightingMode
         {
             Stand,
@@ -421,6 +460,11 @@ namespace EngineNS.Graphics.Pipeline.Shader
             codeBuilder.AddLine("#undef DO_PS_MATERIAL", ref sourceCode);
             codeBuilder.AddLine("#define DO_PS_MATERIAL DO_PS_MATERIAL_IMPL", ref sourceCode);
 
+            if (Is64bitVColorAlpha)
+                codeBuilder.AddLine("#define MTL_ID_64BITVCOLORALPHA 1", ref sourceCode);
+            else
+                codeBuilder.AddLine("#define MTL_ID_64BITVCOLORALPHA 0", ref sourceCode);
+
             switch (LightingMode)
             {
                 case ELightingMode.Unlight:
@@ -481,6 +525,21 @@ namespace EngineNS.Graphics.Pipeline.Shader
         [EGui.Controls.PropertyGrid.PGCustomValueEditor(HideInPG = true)]
         public NxRHI.UShaderDefinitions Defines { get; } = new NxRHI.UShaderDefinitions();
 
+        public EngineNS.NxRHI.EVertexStreamType[] GetVSNeedStreams()
+        {
+            if(VSNeedStreams == null)
+            {
+                return new EngineNS.NxRHI.EVertexStreamType[] {
+                    EngineNS.NxRHI.EVertexStreamType.VST_Position,
+                    EngineNS.NxRHI.EVertexStreamType.VST_Normal,
+                    EngineNS.NxRHI.EVertexStreamType.VST_UV,
+                };
+            }
+            else
+            {
+                return VSNeedStreams.ToArray();
+            }
+        }
         public EPixelShaderInput[] GetPSNeedInputs()
         {
             if (PSNeedInputs == null)
@@ -534,6 +593,12 @@ namespace EngineNS.Graphics.Pipeline.Shader
         }
         [Rtti.Meta(Flags = Rtti.MetaAttribute.EMetaFlags.DiscardWhenCooked)]
         public List<string> IncludeFiles { get; set; } = new List<string>();
+        [Rtti.Meta()]
+        public List<EngineNS.NxRHI.EVertexStreamType> VSNeedStreams
+        {
+            get;
+            set;
+        } = null;        
         [Rtti.Meta()]
         public List<Graphics.Pipeline.Shader.EPixelShaderInput> PSNeedInputs 
         { 
@@ -607,14 +672,16 @@ namespace EngineNS.Graphics.Pipeline.Shader
             var srv = UsedRSView[index].SrvObject as NxRHI.USrView;
             if (srv != null)
                 return srv;
-            return await UEngine.Instance.GfxDevice.TextureManager.GetTexture(UsedRSView[index].Value);
+            UsedRSView[index].SrvObject = await UEngine.Instance.GfxDevice.TextureManager.GetTexture(UsedRSView[index].Value);
+            return UsedRSView[index].SrvObject as NxRHI.USrView;
         }
         public NxRHI.USrView TryGetSRV(int index)
         {
             var srv = UsedRSView[index].SrvObject as NxRHI.USrView;
             if (srv != null)
                 return srv;
-            return UEngine.Instance.GfxDevice.TextureManager.TryGetTexture(UsedRSView[index].Value);
+            UsedRSView[index].SrvObject = UEngine.Instance.GfxDevice.TextureManager.TryGetTexture(UsedRSView[index].Value);
+            return UsedRSView[index].SrvObject as NxRHI.USrView;
         }
         #endregion
         #region Sampler
@@ -655,7 +722,9 @@ namespace EngineNS.Graphics.Pipeline.Shader
         protected List<NameSamplerStateDescPair> mUsedSamplerStates = new List<NameSamplerStateDescPair>();
         [Rtti.Meta]
         [Category("Variable")]
-        public List<NameSamplerStateDescPair> UsedSamplerStates { get => mUsedSamplerStates; }
+        public List<NameSamplerStateDescPair> UsedSamplerStates { 
+            get => mUsedSamplerStates; 
+            set => mUsedSamplerStates = value; }
         public int NumOfSampler
         {
             get
@@ -953,6 +1022,13 @@ namespace EngineNS.Graphics.Pipeline.Shader
     {
         public void Cleanup()
         {
+            foreach(var i in Materials)
+            {
+                foreach(var j in i.Value.UsedRSView)
+                {
+                    j.SrvObject = null;
+                }
+            }
             Materials.Clear();
         }
         public async Thread.Async.TtTask Initialize(UGfxDevice device)

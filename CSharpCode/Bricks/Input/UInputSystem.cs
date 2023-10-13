@@ -72,6 +72,7 @@ namespace EngineNS.Bricks.Input
                 Keyboards.CopyTo(OldKeyboards, 0);
                 mKeyboardStateDirty = false;
             }
+            Mouse.MouseKeyStateDirtyProcess();
 
             Input.Event evt = new Event();
             while (this.PullEvent(ref evt))
@@ -98,8 +99,9 @@ namespace EngineNS.Bricks.Input
                         break;
                 }
 
-                engine.EventProcessorManager.TickEvent(in evt);
+                Mouse.UpdateMouseState(evt);
                 UpdateKeyboardState(evt);
+                engine.EventProcessorManager.TickEvent(in evt);
                 if (EventTriggerDic.ContainsKey(evt.Type))
                 {
                     if (EventTriggerDic.TryGetValue(evt.Type, out var trigger))
@@ -146,6 +148,18 @@ namespace EngineNS.Bricks.Input
                 Keyboards[key] = false;
                 mKeyboardStateDirty = true;
             }
+        }
+        public bool IsCtrlKeyDown()
+        {
+            return Keyboards[(int)Scancode.SCANCODE_LCTRL] || Keyboards[(int)Scancode.SCANCODE_RCTRL];
+        }
+        public bool IsAltKeyDown()
+        {
+            return Keyboards[(int)Scancode.SCANCODE_LALT] || Keyboards[(int)Scancode.SCANCODE_RALT];
+        }
+        public bool IsShiftKeyDown()
+        {
+            return Keyboards[(int)Scancode.SCANCODE_LSHIFT] || Keyboards[(int)Scancode.SCANCODE_RSHIFT];
         }
         public bool IsKeyDown(Keycode key)
         {

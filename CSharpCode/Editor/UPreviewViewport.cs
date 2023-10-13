@@ -91,7 +91,7 @@ namespace EngineNS.Editor
         public RName PreviewAsset { get; set; } = null;
         public override void OnDrawViewportUI(in Vector2 startDrawPos) 
         {
-            if (PreviewAsset != null && ImGuiAPI.Button("S"))
+            if (PreviewAsset != null && EGui.UIProxy.CustomButton.ToolButton("S", in Vector2.Zero))
             {
                 Editor.USnapshot.Save(PreviewAsset, UEngine.Instance.AssetMetaManager.GetAssetMeta(PreviewAsset), RenderPolicy.GetFinalShowRSV());
             }
@@ -109,13 +109,15 @@ namespace EngineNS.Editor
         Vector2 mPreMousePt;
         public float CameraMoveSpeed { get; set; } = 1.0f;
         public float CameraMouseWheelSpeed { get; set; } = 1.0f;
+        public bool FreezCameraControl = false;
         public unsafe override bool OnEvent(in Bricks.Input.Event e)
         {
             if (this.IsFocused == false)
             {
                 return true;
             }
-
+            if (FreezCameraControl)
+                return true;
             var keyboards = UEngine.Instance.InputSystem;
             if (e.Type == Bricks.Input.EventType.MOUSEMOTION)
             {
@@ -168,7 +170,7 @@ namespace EngineNS.Editor
         #endregion
         protected virtual void TickOnFocus()
         {
-            float step = (UEngine.Instance.ElapseTickCount * 0.001f) * CameraMoveSpeed;
+            float step = (UEngine.Instance.ElapseTickCountMS * 0.001f) * CameraMoveSpeed;
             var keyboards = UEngine.Instance.InputSystem;
             if (keyboards.IsKeyDown(Bricks.Input.Keycode.KEY_w))
             {

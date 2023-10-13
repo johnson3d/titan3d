@@ -1,8 +1,8 @@
 ﻿using EngineNS.Bricks.CodeBuilder;
-using EngineNS.DesignMacross.Description;
+using EngineNS.DesignMacross.Base.Description;
 using EngineNS.DesignMacross.Editor;
-using EngineNS.DesignMacross.Outline;
-using EngineNS.DesignMacross.Render;
+using EngineNS.DesignMacross.Base.Outline;
+using EngineNS.DesignMacross.Base.Render;
 using System;
 using System.Collections.Generic;
 using System.Text;

@@ -184,7 +184,7 @@ namespace EngineNS
         }
         public virtual void Cleanup()
         {
-            mDrawData.Cleanup();
+            mDrawData.Dispose();
 
             FreeMouseCursors();
 
@@ -262,7 +262,7 @@ namespace EngineNS
                 return;
             ImGuiAPI.SetCurrentContext(mImGuiContext.ToPointer());
 
-            Update((UEngine.Instance.ElapseTickCount) * 0.001f);
+            Update((UEngine.Instance.ElapseTickCountMS) * 0.001f);
 
             using (new Profiler.TimeScopeHelper(ScopeOnDrawUI))
             {

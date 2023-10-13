@@ -283,6 +283,10 @@ namespace EngineNS.Editor.Forms
                                         if (j.Parent != "null")
                                         {
                                             ImGuiAPI.TextColored(in clr, j.Parent);
+                                            if (ImGuiAPI.IsItemHovered(ImGuiHoveredFlags_.ImGuiHoveredFlags_None))
+                                            {
+                                                ImGuiAPI.SetTooltip(j.Parent);
+                                            }
                                             var min = ImGuiAPI.GetItemRectMin();
                                             var max = ImGuiAPI.GetItemRectMax();
                                             min.Y = max.Y;

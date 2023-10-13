@@ -258,7 +258,7 @@ namespace EngineNS.Support
         {
             if (obj == null)
                 return null;
-            if (obj.GetType() == type)
+            if (obj.GetType() == type || obj.GetType().IsSubclassOf(type))
             {
                 return obj;
             }

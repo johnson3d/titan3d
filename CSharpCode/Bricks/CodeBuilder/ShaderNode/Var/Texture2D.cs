@@ -12,7 +12,6 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Var
         public PinOut OutTex { get; set; } = new PinOut();
         [Rtti.Meta]
         [RName.PGRName(FilterExts = NxRHI.USrView.AssetExt)]
-        [System.ComponentModel.Browsable(false)]
         public RName AssetName
         {
             get

@@ -272,7 +272,7 @@ namespace EngineNS.Editor.Forms
         {
             if (EGui.UIProxy.DockProxy.BeginPanel(mDockKeyClass, "PreView", ref mPropertyShow, ImGuiWindowFlags_.ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_.ImGuiWindowFlags_NoScrollWithMouse))
             {
-                PreviewViewport.VieportType = UViewportSlate.EVieportType.ChildWindow;            
+                PreviewViewport.ViewportType = UViewportSlate.EViewportType.ChildWindow;            
                 PreviewViewport.OnDraw();
             }
             EGui.UIProxy.DockProxy.EndPanel();

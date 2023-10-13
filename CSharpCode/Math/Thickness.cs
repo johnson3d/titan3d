@@ -7,8 +7,75 @@ namespace EngineNS
     //     values describe the CSUtility.Support.Thickness.Left, CSUtility.Support.Thickness.Top,
     //     CSUtility.Support.Thickness.Right, and CSUtility.Support.Thickness.Bottom sides
     //     of the rectangle, respectively.
+    [ThicknessEditorAttribute]
+    [System.Runtime.InteropServices.StructLayout(System.Runtime.InteropServices.LayoutKind.Sequential, Pack = 4)]
     public struct Thickness : IEquatable<Thickness>
     {
+        public class ThicknessEditorAttribute : EGui.Controls.PropertyGrid.PGCustomValueEditorAttribute
+        {
+            public override unsafe bool OnDraw(in EditorInfo info, out object newValue)
+            {
+                bool retValue = false;
+                newValue = info.Value;
+                var index = ImGuiAPI.TableGetColumnIndex();
+                var width = ImGuiAPI.GetColumnWidth(index);
+
+                var multiValue = info.Value as EGui.Controls.PropertyGrid.PropertyMultiValue;
+                if(multiValue != null && multiValue.HasDifferentValue())
+                {
+                    if(multiValue.DrawThickness(in info, width) && !info.Readonly)
+                    {
+                        newValue = multiValue;
+                        retValue = true;
+                    }
+                    else
+                    {
+                        ImGuiAPI.Text(multiValue.MultiValueString);
+                    }
+                }
+                else
+                {
+                    var titleWidth = 10;
+                    width = width * 0.5f - titleWidth;
+                    float speed = 0.1f;
+                    var format = "%.6f";
+                    var minValue = float.MinValue;
+                    var maxValue = float.MaxValue;
+                    var v = (Thickness)info.Value;
+                    ImGuiAPI.SetNextItemWidth(titleWidth);
+                    ImGuiAPI.Text("L");
+                    ImGuiAPI.SameLine(0, -1);
+                    ImGuiAPI.SetNextItemWidth(width);
+                    var changed = ImGuiAPI.DragScalar2("##L", ImGuiDataType_.ImGuiDataType_Float, (float*)&v.mLeft, speed, &minValue, &maxValue, format, ImGuiSliderFlags_.ImGuiSliderFlags_None);
+                    ImGuiAPI.SameLine(0, -1);
+                    ImGuiAPI.SetNextItemWidth(titleWidth);
+                    ImGuiAPI.Text("R");
+                    ImGuiAPI.SameLine(0, -1);
+                    ImGuiAPI.SetNextItemWidth(width);
+                    changed = changed || ImGuiAPI.DragScalar2("##R", ImGuiDataType_.ImGuiDataType_Float, (float*)&v.mRight, speed, &minValue, &maxValue, format, ImGuiSliderFlags_.ImGuiSliderFlags_None);
+                    ImGuiAPI.SetNextItemWidth(titleWidth);
+                    ImGuiAPI.AlignTextToFramePadding();
+                    ImGuiAPI.Text("T");
+                    ImGuiAPI.SameLine(0, -1);
+                    ImGuiAPI.SetNextItemWidth(width);
+                    changed = changed || ImGuiAPI.DragScalar2("##T", ImGuiDataType_.ImGuiDataType_Float, (float*)&v.mTop, speed, &minValue, &maxValue, format, ImGuiSliderFlags_.ImGuiSliderFlags_None);
+                    ImGuiAPI.SameLine(0, -1);
+                    ImGuiAPI.SetNextItemWidth(titleWidth);
+                    ImGuiAPI.Text("B");
+                    ImGuiAPI.SameLine(0, -1);
+                    ImGuiAPI.SetNextItemWidth(width);
+                    changed = changed || ImGuiAPI.DragScalar2("##B", ImGuiDataType_.ImGuiDataType_Float, (float*)&v.mBottom, speed, &minValue, &maxValue, format, ImGuiSliderFlags_.ImGuiSliderFlags_None);
+                    if (changed && !info.Readonly)
+                    {
+                        newValue = v;
+                        retValue = true;
+                    }
+                }
+
+                return retValue;
+            }
+        }
+
         [Rtti.Meta]
         public static Thickness Empty = new Thickness(0);
         //
@@ -92,20 +159,6 @@ namespace EngineNS
             return ((t1.Left == t2.Left) && (t1.Top == t2.Top) && (t1.Right == t2.Right) && (t1.Bottom == t2.Bottom));
         }
 
-        // Summary:
-        //     Gets or sets the width, in pixels, of the lower side of the bounding rectangle.
-        //
-        // Returns:
-        //     A System.Double that represents the width, in pixels, of the lower side of
-        //     the bounding rectangle for this instance of CSUtility.Support.Thickness. A pixel
-        //     is equal to 1/96 of an inch. The default is 0.
-        float mBottom;
-        [Rtti.Meta]
-        public float Bottom
-        {
-            get { return mBottom; }
-            set { mBottom = value; }
-        }
         //
         // Summary:
         //     Gets or sets the width, in pixels, of the left side of the bounding rectangle.
@@ -150,6 +203,20 @@ namespace EngineNS
         {
             get { return mTop; }
             set { mTop = value; }
+        }
+        // Summary:
+        //     Gets or sets the width, in pixels, of the lower side of the bounding rectangle.
+        //
+        // Returns:
+        //     A System.Double that represents the width, in pixels, of the lower side of
+        //     the bounding rectangle for this instance of CSUtility.Support.Thickness. A pixel
+        //     is equal to 1/96 of an inch. The default is 0.
+        float mBottom;
+        [Rtti.Meta]
+        public float Bottom
+        {
+            get { return mBottom; }
+            set { mBottom = value; }
         }
 
         // Summary:
@@ -204,6 +271,14 @@ namespace EngineNS
         public override string ToString()
         {
             return Left + "," + Top + "," + Right + "," + Bottom;
+        }
+
+        public bool IsEmpty()
+        {
+            return (Math.Abs(Left) < MathHelper.Epsilon) &&
+                   (Math.Abs(Right) < MathHelper.Epsilon) &&
+                   (Math.Abs(Top) < MathHelper.Epsilon) &&
+                   (Math.Abs(Bottom) < MathHelper.Epsilon);
         }
     }
 }

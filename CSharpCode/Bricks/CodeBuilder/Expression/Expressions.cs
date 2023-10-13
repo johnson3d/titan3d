@@ -720,11 +720,14 @@ namespace EngineNS.Bricks.CodeBuilder
         public string GetKeyword()
         {
             var keyword = ((ReturnValue != null) ? ReturnValue.VariableType.TypeFullName : "") + " " + MethodName + "(";
-            for(int i=0; i<Arguments.Count; i++)
+            if(Arguments != null)
             {
-                keyword += //Arguments[i].OperationType.ToString() + " " +
-                          //(Arguments[i].IsParamArray ? "param " : "") +
-                          Arguments[i].VariableType.TypeFullName + ",";
+                for(int i=0; i<Arguments.Count; i++)
+                {
+                    keyword += //Arguments[i].OperationType.ToString() + " " +
+                              //(Arguments[i].IsParamArray ? "param " : "") +
+                              Arguments[i].VariableType.TypeFullName + ",";
+                }
             }
             keyword = keyword.TrimEnd(',') + ")";
             return keyword;
@@ -1473,6 +1476,11 @@ namespace EngineNS.Bricks.CodeBuilder
             Type = Rtti.UTypeDesc.TypeOf(typeof(Vector4i));
             mValueStr = val.ToString();
         }
+        public UPrimitiveExpression(Matrix val)
+        {
+            Type = Rtti.UTypeDesc.TypeOf(typeof(Matrix));
+            mValueStr = val.ToString();
+        }
         public UPrimitiveExpression(Rtti.UTypeDesc type, object value)
         {
             Type = type;
@@ -1530,9 +1538,9 @@ namespace EngineNS.Bricks.CodeBuilder
                 return System.Convert.ToDouble(ValueStr);
             else if (Type.IsEqual(typeof(string)))
                 return ValueStr;
-            else if(Type.IsEqual(typeof(bool)))
+            else if (Type.IsEqual(typeof(bool)))
                 return System.Convert.ToBoolean(ValueStr);
-            else if(Type.IsEqual(typeof(Vector2)))
+            else if (Type.IsEqual(typeof(Vector2)))
                 return Vector2.FromString(ValueStr);
             else if (Type.IsEqual(typeof(Vector3)))
                 return Vector3.FromString(ValueStr);
@@ -1544,7 +1552,9 @@ namespace EngineNS.Bricks.CodeBuilder
                 return Vector3i.FromString(ValueStr);
             else if (Type.IsEqual(typeof(Vector4i)))
                 return Vector4i.FromString(ValueStr);
-            else if(Type.IsEqual(typeof(RName)))
+            else if (Type.IsEqual(typeof(Matrix)))
+                return Matrix.FromString(ValueStr);
+            else if (Type.IsEqual(typeof(RName)))
             {
                 var idxStart = ValueStr.IndexOf('(');
                 var idxEnd = ValueStr.IndexOf(')');
@@ -1556,7 +1566,7 @@ namespace EngineNS.Bricks.CodeBuilder
                     return RName.GetRName(name, (EngineNS.RName.ERNameType)System.Enum.Parse(typeof(EngineNS.RName.ERNameType), rnameType));
                 }
             }
-            else if(Type.IsEqual(typeof(System.Type)))
+            else if (Type.IsEqual(typeof(System.Type)))
             {
                 var idxStart = ValueStr.IndexOf('(');
                 var idxEnd = ValueStr.IndexOf(')');

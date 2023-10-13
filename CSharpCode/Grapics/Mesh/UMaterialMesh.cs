@@ -262,9 +262,9 @@ namespace EngineNS.Graphics.Mesh
                 else
                 {
                     ImGuiAPI.Text(info.Type.ToString());
-                    var lst = info.Value as Pipeline.Shader.UMaterial[];
+                    var lst = info.Value as List<Pipeline.Shader.UMaterial>;
                     if(lst != null)
-                        Expandable = lst.Length > 0;
+                        Expandable = lst.Count > 0;
                     if (info.Expand)
                     {
                         if (OnArray(info, lst))
@@ -276,7 +276,7 @@ namespace EngineNS.Graphics.Mesh
 
                 return valueChanged;
             }
-            private bool OnArray(EditorInfo info, Pipeline.Shader.UMaterial[] materials)
+            private bool OnArray(EditorInfo info, List<Pipeline.Shader.UMaterial> materials)
             {
                 if (materials == null)
                     return false;
@@ -301,7 +301,7 @@ namespace EngineNS.Graphics.Mesh
                 }
                 var umesh = info.ObjectInstance as UMaterialMesh;
                 ImGuiTreeNodeFlags_ flags = ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_None;
-                for (int i = 0; i < materials.Length; i++)
+                for (int i = 0; i < materials.Count; i++)
                 {
                     ImGuiAPI.TableNextRow(in rowData);
 

@@ -87,9 +87,9 @@ namespace EngineNS.Graphics.Pipeline.Mobile
         public unsafe override void OnBuildDrawCall(URenderPolicy policy, NxRHI.UGraphicDraw drawcall)
         {
         }
-        public unsafe override void OnDrawCall(Pipeline.URenderPolicy.EShadingType shadingType, NxRHI.UGraphicDraw drawcall, URenderPolicy policy, Mesh.UMesh mesh)
+        public unsafe override void OnDrawCall(NxRHI.ICommandList cmd, Pipeline.URenderPolicy.EShadingType shadingType, NxRHI.UGraphicDraw drawcall, URenderPolicy policy, Mesh.UMesh mesh)
         {
-            base.OnDrawCall(shadingType, drawcall, policy, mesh);
+            base.OnDrawCall(cmd, shadingType, drawcall, policy, mesh);
 
             var Manager = policy.TagObject as URenderPolicy;
 

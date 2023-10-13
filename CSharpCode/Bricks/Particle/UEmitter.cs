@@ -630,11 +630,11 @@ namespace EngineNS.Bricks.Particle
                 return;
             if (mGpuResources.ParticlesBuffer != null)
             {
-                mGpuResources.ParticlesBuffer.UpdateGpuData(16, mCoreObject.GetParticleAddress(), MaxParticle * (uint)sizeof(FParticle));
+                mGpuResources.ParticlesBuffer.UpdateGpuData(cmd, 16, mCoreObject.GetParticleAddress(), MaxParticle * (uint)sizeof(FParticle));
             }
             if (mGpuResources.CurAlivesBuffer != null)
             {
-                mGpuResources.CurAlivesBuffer.UpdateGpuData(16, mCoreObject.GetCurrentAliveAddress(), MaxParticle * (uint)sizeof(uint));//mCoreObject.GetLiveNumber()
+                mGpuResources.CurAlivesBuffer.UpdateGpuData(cmd, 16, mCoreObject.GetCurrentAliveAddress(), MaxParticle * (uint)sizeof(uint));//mCoreObject.GetLiveNumber()
             }
         }
         public void SetCBuffer(NxRHI.UCbView CBuffer)

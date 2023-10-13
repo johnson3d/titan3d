@@ -66,9 +66,5 @@ namespace EngineNS.Graphics.Pipeline.Shader.CommanShading
         {
             
         }
-        public override void OnDrawCall(URenderPolicy.EShadingType shadingType, UGraphicDraw drawcall, URenderPolicy policy, UMesh mesh)
-        {
-            base.OnDrawCall(shadingType, drawcall, policy, mesh);
-        }
     }
 }

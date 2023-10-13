@@ -119,7 +119,7 @@ namespace EngineNS.Graphics.Pipeline.Common
 
                     for (int j = 0; j < mesh.Atoms.Count; j++)
                     {
-                        var drawcall = mesh.GetDrawCall(PickedBuffer, j, policy, Graphics.Pipeline.URenderPolicy.EShadingType.Picked, this);
+                        var drawcall = mesh.GetDrawCall(cmdlist.mCoreObject, PickedBuffer, j, policy, Graphics.Pipeline.URenderPolicy.EShadingType.Picked, this);
                         if (drawcall != null)
                         {
                             if (PickedBuffer.PerViewportCBuffer != null)

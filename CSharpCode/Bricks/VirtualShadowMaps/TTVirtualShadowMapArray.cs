@@ -6,8 +6,6 @@ using System.Collections.Generic;
 using System.Numerics;
 using System.Text;
 
-using EngineNS.Bricks.VirtualShadowMaps;
-
 namespace EngineNS.Bricks.VirtualShadowMaps
 {
     public struct TtVirtualShadowMapHZBMetadata
@@ -45,7 +43,7 @@ namespace EngineNS.Bricks.VirtualShadowMaps
         public Int32 ID;
         public bool bIsSinglePageSM;
 
-        public TtVirtualShadowMapCacheEntry[] VirtualShadowMapCacheEntry; //TODO..
+        //public TTVirtualShadowMapCacheManager.TtVirtualShadowMapCacheEntry[] VirtualShadowMapCacheEntry; //TODO..
 
         public TtVirtualShadowMap()
         {

@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Formats.Asn1;
 using System.Runtime.CompilerServices;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using static EngineNS.UI.Bind.TtBindableProperty;
 
@@ -30,6 +31,15 @@ namespace EngineNS.UI.Bind
             return await base.Initialize(host);
         }
 
+        private static int mBindablePropertyGlobalIndexCount = 0;
+        internal static int GetBindablePropertyUniqueGlobalIndex()
+        {
+            if(mBindablePropertyGlobalIndexCount >= (int)TtBindableProperty.EFlags.GlobalIndexMask)
+            {
+                throw new InvalidOperationException("Too many bindable properties");
+            }
+            return Interlocked.Increment(ref mBindablePropertyGlobalIndexCount);
+        }
         private static Dictionary<TtBindableProperty.NameKey, TtBindableProperty> mBindableProperties = new Dictionary<TtBindableProperty.NameKey, TtBindableProperty>();
         public TtBindableProperty FindBindableProperty(string name, Rtti.UTypeDesc hostType)
         {
@@ -136,6 +146,7 @@ namespace EngineNS.UI.Bind
             //var classType = typeof(TClass);
             //var key = new NameKey(name, Rtti.UTypeDesc.TypeOf(classType));
             var pro = Register<TProperty, TClass>(name, category, defaultValue, valueChangedCallback, valueEditor, displayNameAtt);
+            pro.IsAttachedProperty = true;
             return pro;
         }
     }

@@ -265,7 +265,7 @@ namespace EngineNS.Bricks.Procedure
                 //}
                 //LeftWidth = ImGuiAPI.GetColumnWidth(0);
                 //var min = ImGuiAPI.GetWindowContentRegionMin();
-                //var max = ImGuiAPI.GetWindowContentRegionMin();
+                //var max = ImGuiAPI.GetWindowContentRegionMax();
 
                 //DrawLeft(ref min, ref max);
                 //ImGuiAPI.NextColumn();
@@ -334,7 +334,7 @@ namespace EngineNS.Bricks.Procedure
                 {
                     var winWidth = ImGuiAPI.GetWindowWidth();
                     PreviewViewport.WindowSize = new Vector2(winWidth, winWidth);
-                    PreviewViewport.VieportType = Graphics.Pipeline.UViewportSlate.EVieportType.ChildWindow;
+                    PreviewViewport.ViewportType = Graphics.Pipeline.UViewportSlate.EViewportType.ChildWindow;
                     PreviewViewport.OnDraw();
                     if (EGui.UIProxy.CollapsingHeaderProxy.CollapsingHeader("Camera", ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_DefaultOpen))
                     {

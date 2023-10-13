@@ -69,7 +69,13 @@ namespace EngineNS.IO
 
             bool retValue = false;
             var visible = true;
-            ImGuiAPI.SetNextWindowSize(new Vector2(200, 500), ImGuiCond_.ImGuiCond_FirstUseEver);
+
+            float windowWidth = 200;
+            float windowHeight = 500;
+            //float posX = (ImGuiAPI.GetIO().DisplaySize.X - windowWidth) * 0.5f;
+            //float posY = (ImGuiAPI.GetIO().DisplaySize.Y - windowHeight) * 0.5f;
+            ImGuiAPI.SetNextWindowPos(new Vector2(0, 0), ImGuiCond_.ImGuiCond_FirstUseEver, new Vector2(0, 0));
+            ImGuiAPI.SetNextWindowSize(new Vector2(windowWidth, windowHeight), ImGuiCond_.ImGuiCond_FirstUseEver);
             if (ImGuiAPI.BeginPopupModal($"New {TypeSlt.BaseType.Name}", &visible, ImGuiWindowFlags_.ImGuiWindowFlags_None))
             {
                 ImGuiAPI.Text($"New {TypeSlt.BaseType.Name}");
@@ -346,6 +352,11 @@ namespace EngineNS.IO
                     var rn = RName.GetRName(mAssetName.Name + ".ameta", mAssetName.RNameType);
                     var task = mainEditor.AssetEditorManager.OpenEditor(mainEditor, typeof(Editor.Forms.UAssetReferViewer), rn, this);
                 }
+                if (EGui.UIProxy.MenuItemProxy.MenuItem("CopyRName", null, false, null, in drawList, in menuData, ref mRefGraphMenuState))
+                {
+                    ImGuiAPI.SetClipboardText(RName.GetRName(mAssetName.Name + ".ameta", mAssetName.RNameType).ToString());
+                }
+                ImGuiAPI.Separator();
                 if (EGui.UIProxy.MenuItemProxy.MenuItem("Delete", null, false, null, in drawList, in menuData, ref mDeleteMenuState))
                 {
                     try
@@ -613,7 +624,7 @@ namespace EngineNS.IO
         public long LastestCheckTime = 0;
         public void EditorCheckShowIconTimeout()
         {
-            var tickCount = UEngine.Instance.CurrentTickCount;
+            var tickCount = UEngine.Instance.CurrentTickCountUS;
             if(tickCount - LastestCheckTime > 15*1000 * 1000)
             {
                 LastestCheckTime = tickCount;

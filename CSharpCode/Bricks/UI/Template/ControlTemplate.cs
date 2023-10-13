@@ -20,15 +20,12 @@ namespace EngineNS.UI.Template
             }
         }
 
-        Dictionary<TtBindableProperty, TtBindablePropertyValueBase> mTemplateProperties = new Dictionary<TtBindableProperty, TtBindablePropertyValueBase>();
-        TtContainer mTemplateRoot;
-
         protected override void CheckTemplateParentValid(TtUIElement templateParent)
         {
             if (templateParent == null)
                 throw new ArgumentNullException("templateParent");
 
-            if (mTargetType != null || !mTargetType.IsInstanceOfType(templateParent))
+            if (mTargetType != null && !mTargetType.IsInstanceOfType(templateParent))
                 throw new ArgumentException($"Target type({mTargetType.FullName}) is mismatch with templateParent type{templateParent.GetType().FullName}");
 
             if (templateParent.TemplateInternal != this)

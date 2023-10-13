@@ -641,6 +641,12 @@ namespace EngineNS
         {
             get => V_PI;
         }
+
+        [Rtti.Meta]
+        public static float Invc2PI
+        {
+            get => (1.0f / TWO_PI);
+        }
         // Degrees-to-radians conversion constant (RO).
         public const float V_Deg2Rad = V_PI / 180.0f;
         [Rtti.Meta]
@@ -951,6 +957,79 @@ namespace EngineNS
         {
             return (Dividend + Divisor - 1) / Divisor;
         }
+
+        // Encode for normal map.
+        [Rtti.Meta]
+        public static Vector2 SphericalEncode(Vector3 v3)
+        {
+            Vector2 v = new Vector2();
+            v.X = Atan2(v3.Y, v3.X) * Invc2PI;
+            v.Y = v3.Z;
+
+            v.X = v.X * 0.5f + 0.5f;
+            v.Y = v.Y * 0.5f + 0.5f;
+            return v;
+        }
+
+        [Rtti.Meta]
+        public static Vector3 SphericalDecode(Vector2 v)
+        {
+            Vector2 ang = new Vector2(v.X * 2.0f - 1.0f, v.Y * 2.0f - 1.0f);
+
+            Vector2 scth = new Vector2(0.0f, 0.0f);
+
+            float r = ang.X * TWO_PI;
+            float d2 = 1.0f - ang.Y * ang.Y;
+
+            scth.X = Cos(r);
+            scth.Y = Sin(r);
+
+            Vector2 schpi = new Vector2(Sqrt(1.0f - ang.Y * ang.Y), ang.Y);
+
+            Vector3 v3 = new Vector3(scth.X * schpi.X, scth.Y * schpi.X, schpi.Y);
+
+            return v3;
+        }
+
+        [Rtti.Meta]
+        public static Vector2 OctEncode(Vector3 v3)
+        {
+            float dxyz = Abs(v3.X) + Abs(v3.Y) + Abs(v3.X);
+            v3.X = v3.X / dxyz;
+            v3.Y = v3.Y / dxyz;
+            v3.Z = v3.Z / dxyz;
+
+            Vector2 n = new Vector2(v3.X, v3.Y);
+
+            if (v3.Z < 0)
+            {
+                float nx = n.X;
+                float ny = n.Y;
+
+                n.X = (1.0f - Abs(nx)) * (nx >= 0.0f ? 1.0f : - 1.0f );
+                n.Y = (1.0f - Abs(ny)) * (ny >= 0.0f ? 1.0f : - 1.0f );
+            }
+
+            n.X = n.X * 0.5f + 0.5f;
+            n.Y = n.Y * 0.5f + 0.5f;
+            return n;
+        }
+
+        [Rtti.Meta]
+        public static Vector3 OctDecode(Vector2 v)
+        {
+            v.X = v.X * 2.0f - 1.0f;
+            v.Y = v.Y * 2.0f - 1.0f;
+
+            Vector3 n = new Vector3(v.X, v.Y, 1.0f - Abs(v.X) - Abs(v.Y));
+            float t = Clamp<float>(-n.Z, 0.0f, 1.0f);
+            n.X = n.X + (n.X > 0.0f ? -t : t);
+            n.Y = n.Y + (n.Y > 0.0f ? -t : t);
+            n.Normalize();
+            return n;
+        }
+
+
         #region SDK
         public const string ModuleNC = CoreSDK.CoreModule;
         [System.Runtime.InteropServices.DllImport(ModuleNC, CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]

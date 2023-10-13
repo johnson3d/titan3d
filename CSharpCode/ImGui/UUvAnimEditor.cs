@@ -40,10 +40,10 @@ namespace EngineNS.EGui
                 return false;
 
             UvAnimPropGrid.Target = UvAnim;
-            if (UvAnim.mTexture != null)
+            if (UvAnim.Texture != null)
             {
-                ImageSize.X = UvAnim.mTexture.PicDesc.Width;
-                ImageSize.Y = UvAnim.mTexture.PicDesc.Height;
+                ImageSize.X = UvAnim.Texture.PicDesc.Width;
+                ImageSize.Y = UvAnim.Texture.PicDesc.Height;
             }
             return true;
         }
@@ -233,9 +233,9 @@ namespace EngineNS.EGui
 
                 min1 = min1 + winPt;
                 max1 = max1 + winPt;
-                if (UvAnim.mTexture != null)
+                if (UvAnim.Texture != null)
                 {
-                    drawlist.AddImage(UvAnim.mTexture.GetTextureHandle().ToPointer(), in min1, in max1, in uv1, in uv2, 0xFFFFFFFF);
+                    drawlist.AddImage(UvAnim.Texture.GetTextureHandle().ToPointer(), in min1, in max1, in uv1, in uv2, 0xFFFFFFFF);
                     if (IsSelectingRect)
                     {
                         var sb = SelectBegin * ScaleFactor + min1;

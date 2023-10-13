@@ -128,18 +128,18 @@ namespace EngineNS.Animation.SkeletonAnimation.Runtime.Control
         //    //var bone = mBoneChain[currentBoneIndex];
         //    //var parB = OutPose.FindBonePose(bone.ReferenceBone.BoneDesc.ParentHash);
         //    //if (parB != null)
-        //    //    GfxBoneTransform::Transform(&bone->AbsTransform, &bone->Transform, &parB->AbsTransform);
+        //    //    GfxBoneTransform::Transform(&bone->AbsRenderTransform, &bone->Transform, &parB->AbsRenderTransform);
         //    //else
-        //    //    bone->AbsTransform = bone->Transform;
+        //    //    bone->AbsRenderTransform = bone->Transform;
         //    ////中间骨
         //    //for (int i = currentBoneIndex; i > 0; --i)
         //    //{
         //    //    var parentBone = mBoneChain[i];
         //    //    var bone = mBoneChain[i - 1];
-        //    //    GfxBoneTransform::Transform(&bone->AbsTransform, &bone->Transform, &parentBone->AbsTransform);
+        //    //    GfxBoneTransform::Transform(&bone->AbsRenderTransform, &bone->Transform, &parentBone->AbsRenderTransform);
         //    //}
         //    ////endEffecter骨
-        //    //GfxBoneTransform::Transform(&mEndEffecterBone->AbsTransform, &mEndEffecterBone->Transform, &mBoneChain[0]->AbsTransform);
+        //    //GfxBoneTransform::Transform(&mEndEffecterBone->AbsRenderTransform, &mEndEffecterBone->Transform, &mBoneChain[0]->AbsRenderTransform);
         //}
 
         //public override void Update()

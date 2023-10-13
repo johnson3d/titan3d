@@ -80,7 +80,7 @@ namespace EngineNS.NxRHI
         unsafe void Umap(uint subRes);
         void TransitionTo(ICommandList cmd, EGpuResourceState state);
         void TransitionTo(UCommandList cmd, EGpuResourceState state);
-        unsafe void UpdateGpuData(uint subRes, void* pData, EngineNS.NxRHI.FSubResourceFootPrint* footPrint);
+        unsafe void UpdateGpuData(NxRHI.ICommandList cmd, uint subRes, void* pData, EngineNS.NxRHI.FSubResourceFootPrint* footPrint);
         void SetDebugName(string name);
         EGpuResourceState GpuState
         {
@@ -114,17 +114,17 @@ namespace EngineNS.NxRHI
         {
             mCoreObject.Unmap(subRes);
         }
-        public void FlushDirty(bool clear = false)
+        public void FlushDirty(NxRHI.ICommandList cmd, bool clear = false)
         {
-            mCoreObject.FlushDirty(clear);
+            mCoreObject.FlushDirty(cmd, clear);
         }
-        public unsafe void UpdateGpuData(uint subRes, void* pData, EngineNS.NxRHI.FSubResourceFootPrint* footPrint)
+        public unsafe void UpdateGpuData(NxRHI.ICommandList cmd, uint subRes, void* pData, EngineNS.NxRHI.FSubResourceFootPrint* footPrint)
         {
-            mCoreObject.NativeSuper.UpdateGpuData(subRes, pData, footPrint);
+            mCoreObject.NativeSuper.UpdateGpuData(cmd, subRes, pData, footPrint);
         }
-        public unsafe void UpdateGpuData(uint offset, void* pData, uint size, uint subRes = 0)
+        public unsafe void UpdateGpuData(NxRHI.ICommandList cmd, uint offset, void* pData, uint size, uint subRes = 0)
         {
-            mCoreObject.NativeSuper.UpdateGpuDataSimple(offset, pData, size, subRes);
+            mCoreObject.NativeSuper.UpdateGpuDataSimple(cmd, offset, pData, size, subRes);
         }
         public void TransitionTo(ICommandList cmd, EGpuResourceState state)
         {
@@ -167,13 +167,13 @@ namespace EngineNS.NxRHI
         {
             mCoreObject.Unmap(subRes);
         }
-        public unsafe void UpdateGpuData(uint subRes, void* pData, EngineNS.NxRHI.FSubResourceFootPrint* footPrint)
+        public unsafe void UpdateGpuData(NxRHI.ICommandList cmd, uint subRes, void* pData, EngineNS.NxRHI.FSubResourceFootPrint* footPrint)
         {
-            mCoreObject.NativeSuper.UpdateGpuData(subRes, pData, footPrint);
+            mCoreObject.NativeSuper.UpdateGpuData(cmd, subRes, pData, footPrint);
         }
-        public unsafe void UpdateGpuData(uint offset, void* pData, uint size, uint subRes = 0)
+        public unsafe void UpdateGpuData(NxRHI.ICommandList cmd, uint offset, void* pData, uint size, uint subRes = 0)
         {
-            mCoreObject.NativeSuper.UpdateGpuDataSimple(offset, pData, size, subRes);
+            mCoreObject.NativeSuper.UpdateGpuDataSimple(cmd, offset, pData, size, subRes);
         }
         public void TransitionTo(ICommandList cmd, EGpuResourceState state)
         {
@@ -217,9 +217,9 @@ namespace EngineNS.NxRHI
         {
 
         }
-        public void FlushDirty(bool clear = false)
+        public void FlushDirty(NxRHI.ICommandList cmd, bool clear = false)
         {
-            mCoreObject.FlushDirty(clear);
+            mCoreObject.FlushDirty(cmd, clear);
         }
         public FShaderBinder ShaderBinder
         {
@@ -294,16 +294,16 @@ namespace EngineNS.NxRHI
     }
     public class UVbView : AuxPtrType<NxRHI.IVbView>
     {
-        public unsafe void UpdateGpuData(uint offset, void* pData, uint size)
+        public unsafe void UpdateGpuData(NxRHI.ICommandList cmd, uint offset, void* pData, uint size)
         {
-            mCoreObject.UpdateGpuData(offset, pData, size);
+            mCoreObject.UpdateGpuData(cmd, offset, pData, size);
         }
     }
     public class UIbView : AuxPtrType<NxRHI.IIbView>
     {
-        public unsafe void UpdateGpuData(uint offset, void* pData, uint size)
+        public unsafe void UpdateGpuData(NxRHI.ICommandList cmd, uint offset, void* pData, uint size)
         {
-            mCoreObject.UpdateGpuData(offset, pData, size);
+            mCoreObject.UpdateGpuData(cmd, offset, pData, size);
         }
     }
     public class UUaView : AuxPtrType<NxRHI.IUaView>

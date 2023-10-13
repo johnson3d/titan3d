@@ -1,19 +1,20 @@
-﻿using EngineNS.DesignMacross.Description;
-using EngineNS.DesignMacross.Graph.Elements;
-using EngineNS.DesignMacross.Graph;
+﻿using EngineNS.DesignMacross.Base.Description;
+using EngineNS.DesignMacross.Base.Graph.Elements;
+using EngineNS.DesignMacross.Base.Graph;
 using System;
 using System.Collections.Generic;
 using System.Reflection;
 using System.Text;
 using EngineNS.Rtti;
 using EngineNS.Bricks.NodeGraph;
-using EngineNS.DesignMacross.Render;
+using EngineNS.DesignMacross.Base.Render;
 
 namespace EngineNS.DesignMacross.TimedStateMachine.StatesHub
 {
     [ImGuiElementRender(typeof(TtGraphElement_TimedStatesHubEntryRender))]
     public class TtGraphElement_TimedStatesHubEntry : IGraphElement, IContextMeunable, IDraggable, ILayoutable, IStateTransitionInitial
     {
+        public Guid Id { get; set; } = Guid.Empty;
         public string Name { get => "Entry"; set { } }
 
         public IGraphElement Parent { get; set; }
@@ -52,12 +53,12 @@ namespace EngineNS.DesignMacross.TimedStateMachine.StatesHub
         }
 
         public TtTimedStatesHubClassDescription TimedStatesHubClassDescription { get => Description as TtTimedStatesHubClassDescription; }
-        public Vector2 Location { get; set; } = new Vector2(10, 100);
+        public Vector2 Location { get => Description.Location; set => Description.Location = value; }
         public Vector2 AbsLocation { get => TtGraphMisc.CalculateAbsLocation(this); }
         public SizeF Size { get; set; } = new SizeF(100, 80);
         public float Rounding { get; set; } = 15;
         public Color4f NameColor { get; set; } = new Color4f(0.0f, 0.0f, 0.0f);
-        public Color4f BackgroundColor { get; set; } = new Color4f(137f/255, 207f/255, 240f/255);
+        public Color4f BackgroundColor { get; set; } = new Color4f(188f/255, 212f/255, 240f/255);
         public Color4f BorderColor { get; set; } = new Color4f(0.5f, 0.6f, 0.6f, 0.6f);
         public float BorderThickness { get; set; } = 4;
 
@@ -67,6 +68,7 @@ namespace EngineNS.DesignMacross.TimedStateMachine.StatesHub
         public TtGraphElement_StackPanel TransitionsStackPanel = new TtGraphElement_StackPanel();
         public TtGraphElement_TimedStatesHubEntry(IDescription description)
         {
+            Id = description.Id;
             Description = description;
             NameTextBlock.Content = Name;
             NameTextBlock.VerticalAlign = EVerticalAlignment.Center;
@@ -85,7 +87,7 @@ namespace EngineNS.DesignMacross.TimedStateMachine.StatesHub
             TransitionsStackPanel.Clear();
             foreach (var transition in TimedStatesHubClassDescription.Transitions_StartFromThis)
             {
-                var graphElementAttribute = transition.GetType().GetCustomAttribute<GraphElementAttribute>();
+                var graphElementAttribute = GraphElementAttribute.GetAttributeWithSpecificClassType<TtGraphElement_TimedStateTransition>(transition.GetType());
                 if (graphElementAttribute != null)
                 {
                     var instance = UTypeDescManager.CreateInstance(graphElementAttribute.ClassType) as TtGraphElement_TimedStateTransition;
@@ -114,7 +116,7 @@ namespace EngineNS.DesignMacross.TimedStateMachine.StatesHub
         #region ISelectable
         public bool HitCheck(Vector2 pos)
         {
-            Rect rect = new Rect(Location, Size);
+            Rect rect = new Rect(AbsLocation, Size);
             //冗余一点
             Rect mouseRect = new Rect(pos - Vector2.One, new SizeF(1.0f, 1.0f));
             return rect.IntersectsWith(mouseRect);
@@ -168,8 +170,8 @@ namespace EngineNS.DesignMacross.TimedStateMachine.StatesHub
                     {
                         var transitionDesc = new TtTimedStateTransitionClassDescription() { From = this.Description, To = element.Description };
                         cmdHistory.CreateAndExtuteCommand("Transition From" + this.Name + " To " + element.Name,
-                            () => { TimedStatesHubClassDescription.Transitions_StartFromThis.Add(transitionDesc); },
-                            () => { TimedStatesHubClassDescription.Transitions_StartFromThis.Remove(transitionDesc); }
+                            (data) => { TimedStatesHubClassDescription.Transitions_StartFromThis.Add(transitionDesc); },
+                            (data) => { TimedStatesHubClassDescription.Transitions_StartFromThis.Remove(transitionDesc); }
                             );
                     });
                 }

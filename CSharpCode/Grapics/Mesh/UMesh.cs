@@ -301,7 +301,7 @@ namespace EngineNS.Graphics.Mesh
             }
             [ThreadStatic]
             private static Profiler.TimeScope ScopeOnDrawCall = Profiler.TimeScopeManager.GetTimeScope(typeof(UAtom), "OnDrawCall");
-            public unsafe virtual NxRHI.UGraphicDraw GetDrawCall(Pipeline.UGraphicsBuffers targetView, UMesh mesh, int atom, Pipeline.URenderPolicy policy,
+            public unsafe virtual NxRHI.UGraphicDraw GetDrawCall(NxRHI.ICommandList cmd, Pipeline.UGraphicsBuffers targetView, UMesh mesh, int atom, Pipeline.URenderPolicy policy,
                 Pipeline.URenderPolicy.EShadingType shadingType, Pipeline.Common.URenderGraphNode node)
             {
                 if (Material == null)
@@ -390,7 +390,7 @@ namespace EngineNS.Graphics.Mesh
 
                 using (new Profiler.TimeScopeHelper(ScopeOnDrawCall))
                 {
-                    policy.OnDrawCall(shadingType, result, mesh, atom);
+                    policy.OnDrawCall(cmd, shadingType, result, mesh, atom);
                 }
                 return result;
             }
@@ -586,7 +586,7 @@ namespace EngineNS.Graphics.Mesh
         //渲染原子Id
         //渲染策略policy
         //本次渲染的Shading模式
-        public NxRHI.UGraphicDraw GetDrawCall(Pipeline.UGraphicsBuffers targetView, int atom, Pipeline.URenderPolicy policy, 
+        public NxRHI.UGraphicDraw GetDrawCall(NxRHI.ICommandList cmd, Pipeline.UGraphicsBuffers targetView, int atom, Pipeline.URenderPolicy policy, 
             Pipeline.URenderPolicy.EShadingType shadingType, Pipeline.Common.URenderGraphNode node)
         {
             if (atom >= Atoms.Count)
@@ -595,7 +595,7 @@ namespace EngineNS.Graphics.Mesh
             if (this.MaterialMesh.Mesh.mCoreObject.IsValidPointer == false)
                 return null;
 
-            return Atoms[atom].GetDrawCall(targetView, this, atom, policy, shadingType, node);
+            return Atoms[atom].GetDrawCall(cmd, targetView, this, atom, policy, shadingType, node);
         }
         public void UpdateCameraOffset(GamePlay.UWorld world)
         {

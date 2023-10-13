@@ -26,9 +26,9 @@ namespace EngineNS.Bricks.Particle
             Emitter = (mdf as UParticleMdfQueue<FParticle, FParticleSystem>).Emitter;
         }
         public UEmitter<FParticle, FParticleSystem> Emitter;
-        public override unsafe void OnDrawCall(URenderPolicy.EShadingType shadingType, NxRHI.UGraphicDraw drawcall, URenderPolicy policy, UMesh mesh, int atom)
+        public override unsafe void OnDrawCall(NxRHI.ICommandList cmd, URenderPolicy.EShadingType shadingType, NxRHI.UGraphicDraw drawcall, URenderPolicy policy, UMesh mesh, int atom)
         {
-            base.OnDrawCall(shadingType, drawcall, policy, mesh, atom);
+            base.OnDrawCall(cmd, shadingType, drawcall, policy, mesh, atom);
 
             if (Emitter != null)
             {

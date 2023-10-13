@@ -69,7 +69,7 @@ namespace EngineNS.Graphics.Mesh
                     {
                         case "FBX":
                             {
-                                PGAsset.Target = null;
+                                //PGAsset.Target = null;
                                 var sz = new Vector2(-1, 0);
                                 if (ImGuiAPI.Button("Select FBX", in sz))
                                 {

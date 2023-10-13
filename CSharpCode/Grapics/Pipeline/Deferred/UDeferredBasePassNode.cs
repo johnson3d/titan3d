@@ -208,22 +208,24 @@ namespace EngineNS.Graphics.Pipeline.Deferred
                             var layer = i.Atoms[j].Material.RenderLayer;
                             if (layer == ERenderLayer.RL_Background)
                             {
-                                var drawcall = i.GetDrawCall(GBuffers, j, policy, URenderPolicy.EShadingType.BasePass, this);
+                                var cmd = BackgroundPass.DrawCmdList;
+                                var drawcall = i.GetDrawCall(cmd.mCoreObject, GBuffers, j, policy, URenderPolicy.EShadingType.BasePass, this);
                                 if (drawcall != null)
                                 {
                                     drawcall.BindGBuffer(policy.DefaultCamera, GBuffers);
 
-                                    BackgroundPass.DrawCmdList.PushGpuDraw(drawcall);
+                                    cmd.PushGpuDraw(drawcall);
                                 }
                             }
                             else if (layer == ERenderLayer.RL_Opaque)
                             {
-                                var drawcall = i.GetDrawCall(GBuffers, j, policy, URenderPolicy.EShadingType.BasePass, this);
+                                var cmd = BasePass.DrawCmdList;
+                                var drawcall = i.GetDrawCall(cmd.mCoreObject, GBuffers, j, policy, URenderPolicy.EShadingType.BasePass, this);
                                 if (drawcall != null)
                                 {
                                     drawcall.BindGBuffer(policy.DefaultCamera, GBuffers);
 
-                                    BasePass.DrawCmdList.PushGpuDraw(drawcall);
+                                    cmd.PushGpuDraw(drawcall);
                                 }
                             }
                         }

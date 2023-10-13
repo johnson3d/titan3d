@@ -58,13 +58,13 @@ namespace EngineNS.Bricks.Terrain.Grass
         }
         [ThreadStatic]
         private static Profiler.TimeScope ScopeOnDrawCall = Profiler.TimeScopeManager.GetTimeScope(typeof(UMdfGrassStaticMesh), nameof(OnDrawCall));
-        public override void OnDrawCall(Graphics.Pipeline.URenderPolicy.EShadingType shadingType, NxRHI.UGraphicDraw drawcall, Graphics.Pipeline.URenderPolicy policy, Graphics.Mesh.UMesh mesh, int atom)
+        public override void OnDrawCall(NxRHI.ICommandList cmd, Graphics.Pipeline.URenderPolicy.EShadingType shadingType, NxRHI.UGraphicDraw drawcall, Graphics.Pipeline.URenderPolicy policy, Graphics.Mesh.UMesh mesh, int atom)
         {
             using (new Profiler.TimeScopeHelper(ScopeOnDrawCall))
             {
-                mGrassModifier?.OnDrawCall(shadingType, drawcall, policy, mesh);
+                mGrassModifier?.OnDrawCall(cmd, shadingType, drawcall, policy, mesh);
             }
-            base.OnDrawCall(shadingType, drawcall, policy, mesh, atom);
+            base.OnDrawCall(cmd, shadingType, drawcall, policy, mesh, atom);
         }
     }
 

@@ -8,6 +8,7 @@ using Org.BouncyCastle.Asn1.X509;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Runtime.Intrinsics.Arm;
 using System.Text;
@@ -413,10 +414,106 @@ namespace EngineNS.UI.Bind
     public class TtBinding : TtBindingBase
     {
     }
+    public abstract class ValueStoreBase 
+    {
+        public void SetValue<T>(in T value)
+        {
+            var vs = this as ValueStore<T>;
+            if(vs != null)
+                vs.Value = value;
+        }
+        public T GetValue<T>()
+        {
+            var vs = this as ValueStore<T>;
+            if (vs != null)
+                return vs.Value;
+            return default(T);
+        }
+        public abstract void CopyFrom(ValueStoreBase source);
+        public bool IsValueEqual<T>(in T source)
+        {
+            var vs = this as ValueStore<T>;
+            if (vs == null)
+                return false;
+            return EqualityComparer<T>.Default.Equals(vs.Value, source);
+        }
+        public abstract bool IsValueEqual(in ValueStoreBase source);
+    }
+    public class ValueStore<T> : ValueStoreBase
+    {
+        public T Value;
+        public ValueStore() { }
+        public ValueStore(in T val)
+        {
+            Value = val;
+        }
+
+        public override void CopyFrom(ValueStoreBase source)
+        {
+            var vs = source as ValueStore<T>;
+            if (vs == null)
+                return;
+            Value = vs.Value;
+        }
+
+        public override bool IsValueEqual(in ValueStoreBase source)
+        {
+            var vs = source as ValueStore<T>;
+            if (vs == null)
+                return false;
+            return EqualityComparer<T>.Default.Equals(Value, vs.Value);
+        }
+    }
+    public class TtDefaultValueExpression : TtBindingExpressionBase
+    {
+        ValueStoreBase mFinalValue = null;
+        public TtDefaultValueExpression(in ValueStoreBase val)
+            : base(null, null)
+        {
+            mFinalValue = val;
+        }
+        public TtDefaultValueExpression(TtBindingBase binding, TtBindingExpressionBase parent)
+            : base(binding, parent)
+        {
+
+        }
+        public override T GetValue<T>(TtBindableProperty bp)
+        {
+            return mFinalValue.GetValue<T>();
+        }
+
+        public override void SetValue<T>(TtBindableProperty bp, T value)
+        {
+            mFinalValue.SetValue(value);
+        }
+
+        public override void SetValueStore<T>(T value)
+        {
+            mFinalValue.SetValue(value);
+        }
+
+        public override void UpdateSource()
+        {
+        }
+    }
     public class TtBindingExpression<TProp> : TtBindingExpressionBase
     {
-        protected TProp mValueStore;
-        protected TProp mFinalValue;
+        ValueStoreBase mValueStore;
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        protected ValueStoreBase GetValueStore<T>()
+        {
+            if (mValueStore == null)
+                mValueStore = new ValueStore<T>();
+            return mValueStore;
+        }
+        ValueStoreBase mFinalValue;
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        protected ValueStoreBase GetFinalValue<T>()
+        {
+            if(mFinalValue == null)
+                mFinalValue = new ValueStore<T>();
+            return mFinalValue;
+        }
         public IBindableObject TargetObject;
         public TtBindableProperty<TProp> TargetProperty;
         protected UInt32 mSetValueTime = 0;
@@ -429,12 +526,11 @@ namespace EngineNS.UI.Bind
         public TtBindingExpression(TtBindingBase binding, TProp val, TtBindingExpressionBase parent)
             : base(binding, parent)
         {
-            mValueStore = val;
+            GetValueStore<TProp>().SetValue(val);
         }
         public override void SetValueStore<T>(T value)
         {
-            dynamic tempValue = value;
-            mValueStore = tempValue;
+            GetValueStore<T>().SetValue(value);
         }
         public unsafe override void SetValue<T>(TtBindableProperty bp, T value)
         {
@@ -456,29 +552,28 @@ namespace EngineNS.UI.Bind
                         {
                             if (!binding.Convert.CanConvertTo<TProp, T>())
                                 return;
-                            dynamic tempValue = binding.Convert.ConvertTo<TProp, T>(this, value);
-                            if (mValueStore == tempValue)
+                            var tempValue = binding.Convert.ConvertTo<TProp, T>(this, value);
+                            if (GetValueStore<TProp>().IsValueEqual(tempValue))
                                 return;
-                            mValueStore = tempValue;
+                            GetValueStore<TProp>().SetValue(tempValue);
                         }
                         else if (binding.SourceExp == this)
                         {
                             if (!binding.Convert.CanConvertFrom<T, TProp>())
                                 return;
-                            dynamic tempValue = binding.Convert.ConvertFrom<T, TProp>(this, value);
-                            if (mValueStore == tempValue)
+                            var tempValue = binding.Convert.ConvertFrom<T, TProp>(this, value);
+                            if (GetValueStore<TProp>().IsValueEqual(tempValue))
                                 return;
-                            mValueStore = tempValue;
+                            GetValueStore<TProp>().SetValue(tempValue);
                         }
                         else
                             return;
                     }
                     else
                     {
-                        dynamic tempVal = value;
-                        if (mValueStore == tempVal) 
+                        if (GetValueStore<T>().IsValueEqual(value)) 
                             return;
-                        mValueStore = tempVal;
+                        GetValueStore<T>().SetValue(value);
                     }
 
                     if(binding.TargetExp == this)
@@ -504,28 +599,27 @@ namespace EngineNS.UI.Bind
         }
         public override T GetValue<T>(TtBindableProperty bp)
         {
-            dynamic retVal = mFinalValue;
-            return (T)retVal;
+            return GetFinalValue<T>().GetValue<T>();
         }
         public override void UpdateSource()
         {
             if ((Mode == EBindingMode.OneTime) && (mSetValueTime > 0))
                 return;
             mSetValueTime++;
-            mFinalValue = mValueStore;
+            GetFinalValue<TProp>().CopyFrom(mValueStore);
             if(mParentExp != null)
             {
                 mParentExp.UpdateSource();
             }
             else
             {
-                TargetProperty.OnValueChanged?.Invoke(TargetObject, TargetProperty, mFinalValue);
+                TargetProperty.OnValueChanged?.Invoke(TargetObject, TargetProperty, GetFinalValue<TProp>().GetValue<TProp>());
                 if (TargetProperty.IsCallSetProperty)
                 {
                     var proInfo = TargetObject.GetType().GetProperty(TargetProperty.Name);
                     if(proInfo != null)
                     {
-                        proInfo.SetValue(TargetObject, mValueStore);
+                        proInfo.SetValue(TargetObject, GetValueStore<TProp>().GetValue<TProp>());
                     }
                 }
             }
@@ -540,6 +634,8 @@ namespace EngineNS.UI.Bind
             AttachedValue,
             ExpressionValue,
             TemplateSimple,
+            TemplateBinding,
+            PropertyTrigger,
         }
         public EType Type
         {
@@ -552,7 +648,7 @@ namespace EngineNS.UI.Bind
     public class TtAttachedValue<TClass, TVal> : TtBindablePropertyValueBase
          where TClass : IBindableObject
     {
-        public TVal Value;
+        public ValueStoreBase Value;
         public TClass PropertyHostObject;
         public TtAttachedValue(TClass hostObj)
         {
@@ -561,14 +657,18 @@ namespace EngineNS.UI.Bind
         }
         public override void SetValue<T>(IBindableObject obj, TtBindableProperty bp, in T value)
         {
-            dynamic val = value;
-            Value = val;
+            if (Value == null)
+                Value = new ValueStore<T>(value);
+            else
+                Value.SetValue(value);
             bp.CallOnValueChanged(obj, bp, value);
         }
         public override T GetValue<T>(TtBindableProperty bp)
         {
-            dynamic val = Value;
-            return val;
+            var vs = Value as ValueStore<T>;
+            if (vs != null)
+                return vs.Value;
+            return default(T);
         }
     }
     public class TtExpressionValues : TtBindablePropertyValueBase
@@ -593,20 +693,6 @@ namespace EngineNS.UI.Bind
             return default(T);
         }
     }
-    public class TtTemplateSimpleValue<TVal> : TtBindablePropertyValueBase
-    {
-        public TVal Value;
-        public override void SetValue<T>(IBindableObject obj, TtBindableProperty bp, in T value)
-        {
-            dynamic val = value;
-            Value = val;
-        }
-        public override T GetValue<T>(TtBindableProperty bp)
-        {
-            dynamic val = Value;
-            return val;
-        }
-    }
 
     public static class TtBindingOperations
     {
@@ -625,10 +711,10 @@ namespace EngineNS.UI.Bind
             if (source == null)
                 throw new ArgumentNullException("source");
 
-            var targetProp = UEngine.Instance.UIBindManager.FindBindableProperty(targetPath, UTypeDesc.TypeOf(target.GetType()));
+            var targetProp = target.FindBindableProperty(targetPath);
             if (targetProp == null)
                 return null;
-            var sourceProp = UEngine.Instance.UIBindManager.FindBindableProperty(sourcePath, UTypeDesc.TypeOf(source.GetType()));
+            var sourceProp = source.FindBindableProperty(sourcePath);
             if (sourceProp == null)
                 return null;
             TtBindingExpressionBase tagExpr = null;
@@ -694,6 +780,47 @@ namespace EngineNS.UI.Bind
         public static void ClearBinding(IBindableObject target, TtBindableProperty bp)
         {
             target.ClearBindExpression(bp);
+        }
+
+        public static void DefaultGetBindProperties(IBindableObject obj, Dictionary<TtBindableProperty, TtBindablePropertyValueBase> bindExprDic, ref EGui.Controls.PropertyGrid.CustomPropertyDescriptorCollection collection)
+        {
+            // attached properties
+            foreach (var bindData in bindExprDic)
+            {
+                if (bindData.Value.Type == EngineNS.UI.Bind.TtBindablePropertyValueBase.EType.AttachedValue)
+                {
+                    var proDesc = EngineNS.EGui.Controls.PropertyGrid.PropertyCollection.PropertyDescPool.QueryObjectSync();
+                    proDesc.Name = bindData.Key.Name;
+                    if (bindData.Key.DisplayNameAtt != null)
+                        proDesc.DisplayName = bindData.Key.DisplayNameAtt.GetDisplayName(obj);
+                    proDesc.PropertyType = bindData.Key.PropertyType;
+                    proDesc.Category = bindData.Key.Category;
+                    proDesc.CustomValueEditor = bindData.Key.CustomValueEditor;
+                    collection.Add(proDesc);
+                }
+            }
+        }
+        public static object DefaultGetBindPropertyValue(Dictionary<TtBindableProperty, TtBindablePropertyValueBase> bindExprDic, string propertyName)
+        {
+            foreach (var bindData in bindExprDic)
+            {
+                if (bindData.Key.Name == propertyName)
+                {
+                    return bindData.Value.GetValue<object>(bindData.Key);
+                }
+            }
+            return null;
+        }
+        public static void DefaultSetBindPropertyValue(IBindableObject obj, Dictionary<TtBindableProperty, TtBindablePropertyValueBase> bindExprDic, string propertyName, object value)
+        {
+            foreach (var bindData in bindExprDic)
+            {
+                if (bindData.Key.Name == propertyName)
+                {
+                    bindData.Value.SetValue<object>(obj, bindData.Key, in value);
+                    break;
+                }
+            }
         }
     }
 }

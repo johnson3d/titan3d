@@ -520,7 +520,7 @@ namespace EngineNS.EGui.Controls
                         ItemSelectedAction?.Invoke(ameta);
                     }
                 }
-                ameta.ShowIconTime = UEngine.Instance.CurrentTickCount;
+                ameta.ShowIconTime = UEngine.Instance.CurrentTickCountUS;
                 ameta.OnDraw(in cmdlist, in sz, this);
             }
             ImGuiAPI.PopID();

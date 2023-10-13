@@ -51,6 +51,12 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Control
             return new Vector4();
         }
         [Rtti.Meta]
+        [TtHLSLProvider(Name = "TextureSize")]
+        public static Vector2 TextureSize(Var.Texture2D texture)
+        {
+            return Vector2.Zero;
+        }
+        [Rtti.Meta]
         [TtHLSLProvider(Name = "GetTerrainDiffuse")]
         public static Vector3 GetTerrainDiffuse(Vector2 uv, Graphics.Pipeline.Shader.UMaterial.PSInput input)
         {
@@ -63,11 +69,43 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Control
             return Vector3.Zero;
         }
         [Rtti.Meta]
+        [TtHLSLProvider(Name = "Frac")]
+        public static void Frac(float x, out float ret)
+        {
+            ret = 0;
+        }
+        [Rtti.Meta]
+        [TtHLSLProvider(Name = "Pow")]
+        public static void Pow(float v1, float v2, out float ret)
+        {
+            ret = 0;
+        }
+        [Rtti.Meta]
         [TtHLSLProvider(Name = "Clamp")]
         public static void Clamp(float x, float min, float max, out float ret)
         {
             ret = 0;
         }
+        [Rtti.Meta]
+        [TtHLSLProvider(Name = "Sin")]
+        public static void Sin(float x, out float sin)
+        {
+            sin = (float)Math.Sin(x);
+        }
+        [Rtti.Meta]
+        [TtHLSLProvider(Name = "Cos")]
+        public static void Cos(float x, out float cos)
+        {
+            cos = (float)Math.Cos(x);
+        }
+        [Rtti.Meta]
+        [TtHLSLProvider(Name = "SinRemapped")]
+        public static float SinRemapped(float SinPhase, float v1, float v2)
+        {
+            v1 = 0;
+            return 0.0f;
+        }
+
         [Rtti.Meta]
         [TtHLSLProvider(Name = "SinCos")]
         public static void SinCos(float x, out float sin, out float cos)
@@ -75,6 +113,14 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Control
             sin = (float)Math.Sin(x);
             cos = (float)Math.Cos(x);
         }
+
+        [Rtti.Meta]
+        [TtHLSLProvider(Name = "Ceil")]
+        public static void Ceil(float x, out float ret)
+        {
+            ret = 0;
+        }
+
         [Rtti.Meta]
         [TtHLSLProvider(Name = "Max")]
         public static void Max(float v1, float v2, out float ret)
@@ -208,6 +254,12 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Control
             */
         }
         [Rtti.Meta]
+        [TtHLSLProvider(Name = "TransformToWorldPos")]
+        public static void TransformToWorldPos(Vector3 localPos, out Vector3 worldPos)
+        {
+            worldPos = Vector3.Zero;
+        }
+        [Rtti.Meta]
         [TtHLSLProvider(Name = "Distortion")]
         public static void Distortion(Vector4 localPos, Vector4 localNorm, Vector4 viewPos, Vector4 projPos, Vector3 localCameraPos, float strength, float transparency, float distortionOffset, out Vector2 distortionUV, out float distortionAlpha)
         {
@@ -303,7 +355,7 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Control
         //    var max_u = new Vector2(max.X);
         //    var t1 = Vector2.Lerp(in min_u, in max_u, in u);
         //    var t2 = Vector2.Lerp(in min_v, in max_v, in v);
-            
+
         //    var slt = new Vector2[4]
         //        {
         //            new Vector2(t1.X, t2.X),
@@ -313,8 +365,92 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Control
         //        };
         //    outUV = slt[(int)uv.X];
         //}
-    }
 
+        [Rtti.Meta]
+        [TtHLSLProvider(Name = "Cross3D")]
+        public static void Cross3D(Vector3 v1, Vector3 v2, out Vector3 ret)
+        {
+            ret = Vector3.Zero;
+        }
+
+        [Rtti.Meta]
+        [TtHLSLProvider(Name = "SphereMask")]
+        public static float SphereMask(Vector3 A, Vector3 B, float Radius, float Hardness)
+        {
+            Radius = 2.0f;
+            return 0.0f;
+        }
+
+        [Rtti.Meta]
+        [TtHLSLProvider(Name = "RotateAboutAxis")]
+        public static void RotateAboutAxis(Vector3 rotationAxis, float rotationAngle, Vector3 pivotPos, Vector3 localPos, out Vector3 localOffset)
+        {
+            localOffset = Vector3.Zero;
+        }
+
+        [Rtti.Meta]
+        [TtHLSLProvider(Name = "Pivot_DecodePosition")]
+        [ContextMenu("Pivot_DecodePosition", "Pivot\\DecodePosition", UMaterialGraph.MaterialEditorKeyword)]
+        public static void Pivot_DecodePosition(Vector3 rgb, out Vector3 localPos)
+        {
+            localPos = Vector3.Zero;
+        }
+        [Rtti.Meta]
+        [TtHLSLProvider(Name = "Pivot_DecodeAxisVector")]
+        [ContextMenu("Pivot_DecodeAxisVector", "Pivot\\DecodeAxisVector", UMaterialGraph.MaterialEditorKeyword)]
+        public static void Pivot_DecodeAxisVector(Vector3 rgb, out Vector3 localAxis)
+        {
+            localAxis = Vector3.UnitY;
+        }
+
+        [Rtti.Meta]
+        [TtHLSLProvider(Name = "Pivot_UnpackIntAsFloat")]
+        [ContextMenu("Pivot_UnpackIntAsFloat", "Pivot\\UnpackIntAsFloat", UMaterialGraph.MaterialEditorKeyword)]
+        public static float Pivot_UnpackIntAsFloat(float N)
+        {
+            return 0;
+        }
+
+        [Rtti.Meta]
+        [TtHLSLProvider(Name = "Pivot_GetPivotIndex")]
+        [ContextMenu("Pivot_GetPivotIndex", "Pivot\\GetPivotIndex", UMaterialGraph.MaterialEditorKeyword)]
+        public static void Pivot_GetPivotIndex(Vector2 uv, Vector2 texSize, out float index)
+        {
+            index = 0;
+        }
+
+        [Rtti.Meta]
+        [TtHLSLProvider(Name = "Pivot_GetParentPivotData")]
+        [ContextMenu("Pivot_GetParentPivotData", "Pivot\\GetParentPivotData", UMaterialGraph.MaterialEditorKeyword)]
+        public static void Pivot_GetParentPivotData(float parentIdx, Vector2 texSize, float currentIdx, out Vector2 parentUV, out float isChild)
+        {
+            parentUV = Vector2.Zero;
+            isChild = 0;
+        }
+
+        [Rtti.Meta]
+        [TtHLSLProvider(Name = "Pivot_GetHierarchyData")]
+        [ContextMenu("Pivot_GetHierarchyData", "Pivot\\GetHierarchyData", UMaterialGraph.MaterialEditorKeyword)]
+        public static void Pivot_GetHierarchyData(float pivotDepth, Vector2 pivot1UV, Vector2 pivot2UV, Vector2 pivot3UV, Vector2 pivot4UV, out Vector2 rootUV, out Vector2 mainBranchUV, out Vector2 smallBranchUV, out Vector2 leaveUV, out float mainBranchMask, out float smallBranchMask, out float leaveMask)
+        {
+            rootUV = mainBranchUV = smallBranchUV = leaveUV = Vector2.Zero;
+            mainBranchMask = smallBranchMask = leaveMask = 0.0f;
+        }
+
+        [Rtti.Meta]
+        [TtHLSLProvider(Name = "Pivot_WindAnimation")]
+        [ContextMenu("Pivot_WindAnimation", "Pivot\\WindAnimation", UMaterialGraph.MaterialEditorKeyword)]
+        public static void Pivot_WindAnimation(Vector3 prePos,
+            Var.Texture2D posTex, Var.Texture2D xTex, Var.SamplerState samp, Vector2 uv,
+            float mask, Var.Texture2D windTex, float scale, float speedX, Vector3 windAxisX, float speedY, Vector3 windAxisY,
+            Vector3 localPos, float rot, float rotOffset, float parentRot,
+            float axisScale, float axisSpeedScale,
+            out Vector3 localVertexOffset, out float rotationAngle)
+        {
+            localVertexOffset = Vector3.Zero;
+            rotationAngle = 0.0f;
+        }
+    }
     public partial class TtHLSLMethodManager
     {
         public Dictionary<string, Rtti.UClassMeta.MethodMeta> Methods { get; } = new Dictionary<string, Rtti.UClassMeta.MethodMeta>();
@@ -370,6 +506,7 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Control
         }
         ~SampleLevel2DNode()
         {
+            CoreSDK.DisposeObject(ref CmdParameters);
         }
         //public override void OnMaterialEditorGenCode(UMaterial Material)
         //{
@@ -420,25 +557,65 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Control
                 System.Action exec = async () =>
                 {
                     TextureSRV = await UEngine.Instance.GfxDevice.TextureManager.GetTexture(value);
+
+                    mSlateEffect = await UEngine.Instance.GfxDevice.EffectManager.GetEffect(
+                        UEngine.Instance.ShadingEnvManager.GetShadingEnv<EngineNS.Editor.Forms.USlateTextureViewerShading>(),
+                        UEngine.Instance.GfxDevice.MaterialManager.ScreenMaterial, new Graphics.Mesh.UMdfStaticMesh());
                 };
                 exec();
             }
         }
+        UEffect mSlateEffect;
+        EngineNS.Editor.Forms.TtTextureViewerCmdParams CmdParameters = null;
         NxRHI.FSamplerDesc mSampler;
         [Rtti.Meta]
-        public NxRHI.FSamplerDesc Sampler { get => mSampler; set => mSampler = value; }
+        public NxRHI.FSamplerDesc Sampler { 
+            get => mSampler; 
+            set => mSampler = value; }
         private NxRHI.USrView TextureSRV;
         public unsafe override void OnPreviewDraw(in Vector2 prevStart, in Vector2 prevEnd, ImDrawList cmdlist)
         {
-            if (TextureSRV == null)
+            if (TextureSRV == null || mSlateEffect == null)
                 return;
 
-            var uv0 = new Vector2(0, 0);
-            var uv1 = new Vector2(1, 1);
             unsafe
             {
-                cmdlist.AddImage(TextureSRV.GetTextureHandle().ToPointer(), in prevStart, in prevEnd, in uv0, in uv1, 0xFFFFFFFF);
+                if (CmdParameters == null)
+                {
+                    var rc = UEngine.Instance.GfxDevice.RenderContext;
+
+                    var iptDesc = new NxRHI.UInputLayoutDesc();
+                    unsafe
+                    {
+                        iptDesc.mCoreObject.AddElement("POSITION", 0, EPixelFormat.PXF_R32G32_FLOAT, 0, 0, 0, 0);
+                        iptDesc.mCoreObject.AddElement("TEXCOORD", 0, EPixelFormat.PXF_R32G32_FLOAT, 0, (uint)sizeof(Vector2), 0, 0);
+                        iptDesc.mCoreObject.AddElement("COLOR", 0, EPixelFormat.PXF_R8G8B8A8_UNORM, 0, (uint)sizeof(Vector2) * 2, 0, 0);
+                        //iptDesc.SetShaderDesc(SlateEffect.GraphicsEffect);
+                    }
+                    iptDesc.mCoreObject.SetShaderDesc(mSlateEffect.DescVS.mCoreObject);
+                    var InputLayout = rc.CreateInputLayout(iptDesc); //UEngine.Instance.GfxDevice.InputLayoutManager.GetPipelineState(rc, iptDesc);
+                    mSlateEffect.ShaderEffect.mCoreObject.BindInputLayout(InputLayout.mCoreObject);
+
+                    var cmdParams = EGui.TtImDrawCmdParameters.CreateInstance<EngineNS.Editor.Forms.TtTextureViewerCmdParams>();
+                    var cbBinder = mSlateEffect.ShaderEffect.FindBinder("ProjectionMatrixBuffer");
+                    cmdParams.CBuffer = rc.CreateCBV(cbBinder);
+                    cmdParams.Drawcall.BindShaderEffect(mSlateEffect);
+                    cmdParams.Drawcall.BindCBuffer(cbBinder.mCoreObject, cmdParams.CBuffer);
+                    cmdParams.Drawcall.BindSRV(VNameString.FromString("FontTexture"), TextureSRV);
+                    cmdParams.Drawcall.BindSampler(VNameString.FromString("Samp_FontTexture"), UEngine.Instance.GfxDevice.SamplerStateManager.PointState);
+
+                    cmdParams.IsNormalMap = 0;
+                    if (TextureSRV.PicDesc.Format == EPixelFormat.PXF_BC5_UNORM || TextureSRV.PicDesc.Format == EPixelFormat.PXF_BC5_TYPELESS || TextureSRV.PicDesc.Format == EPixelFormat.PXF_BC5_SNORM)
+                        cmdParams.IsNormalMap = 1;
+
+                    CmdParameters = cmdParams;
+                }
+
+                var uv0 = new Vector2(0, 0);
+                var uv1 = new Vector2(1, 1);
+                cmdlist.AddImage(CmdParameters.GetHandle(), in prevStart, in prevEnd, in uv0, in uv1, 0xFFFFFFFF);
             }
+
         }
         //protected override OpExpress OnNoneLinkedParameter(UMaterialGraph funGraph, ICodeGen cGen, int i)
         //{
@@ -540,6 +717,7 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Control
         }
         ~Sample2DNode()
         {
+            CoreSDK.DisposeObject(ref CmdParameters);
         }
         //public override void OnMaterialEditorGenCode(UMaterial Material)
         //{
@@ -590,24 +768,71 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Control
                 System.Action exec = async () =>
                 {
                     TextureSRV = await UEngine.Instance.GfxDevice.TextureManager.GetTexture(value);
+
+                    mSlateEffect = await UEngine.Instance.GfxDevice.EffectManager.GetEffect(
+                        UEngine.Instance.ShadingEnvManager.GetShadingEnv<EngineNS.Editor.Forms.USlateTextureViewerShading>(),
+                        UEngine.Instance.GfxDevice.MaterialManager.ScreenMaterial, new Graphics.Mesh.UMdfStaticMesh());
+
                 };
                 exec();
             }
         }
+        UEffect mSlateEffect;
+        EngineNS.Editor.Forms.TtTextureViewerCmdParams CmdParameters = null;
         NxRHI.FSamplerDesc mSampler;
         [Rtti.Meta]
         public NxRHI.FSamplerDesc Sampler { get => mSampler; set => mSampler = value; }
         private NxRHI.USrView TextureSRV;
         public unsafe override void OnPreviewDraw(in Vector2 prevStart, in Vector2 prevEnd, ImDrawList cmdlist)
         {
-            if (TextureSRV == null)
+            if (TextureSRV == null || mSlateEffect == null)
                 return;
 
-            var uv0 = new Vector2(0, 0);
-            var uv1 = new Vector2(1, 1);
             unsafe
             {
-                cmdlist.AddImage(TextureSRV.GetTextureHandle().ToPointer(), in prevStart, in prevEnd, in uv0, in uv1, 0xFFFFFFFF);
+                if (CmdParameters == null)
+                {
+                    var rc = UEngine.Instance.GfxDevice.RenderContext;
+
+                    var iptDesc = new NxRHI.UInputLayoutDesc();
+                    unsafe
+                    {
+                        iptDesc.mCoreObject.AddElement("POSITION", 0, EPixelFormat.PXF_R32G32_FLOAT, 0, 0, 0, 0);
+                        iptDesc.mCoreObject.AddElement("TEXCOORD", 0, EPixelFormat.PXF_R32G32_FLOAT, 0, (uint)sizeof(Vector2), 0, 0);
+                        iptDesc.mCoreObject.AddElement("COLOR", 0, EPixelFormat.PXF_R8G8B8A8_UNORM, 0, (uint)sizeof(Vector2) * 2, 0, 0);
+                        //iptDesc.SetShaderDesc(SlateEffect.GraphicsEffect);
+                    }
+                    iptDesc.mCoreObject.SetShaderDesc(mSlateEffect.DescVS.mCoreObject);
+                    var InputLayout = rc.CreateInputLayout(iptDesc); //UEngine.Instance.GfxDevice.InputLayoutManager.GetPipelineState(rc, iptDesc);
+                    mSlateEffect.ShaderEffect.mCoreObject.BindInputLayout(InputLayout.mCoreObject);
+
+                    var cmdParams = EGui.TtImDrawCmdParameters.CreateInstance<EngineNS.Editor.Forms.TtTextureViewerCmdParams>();
+                    var cbBinder = mSlateEffect.ShaderEffect.FindBinder("ProjectionMatrixBuffer");
+                    cmdParams.CBuffer = rc.CreateCBV(cbBinder);
+                    cmdParams.Drawcall.BindShaderEffect(mSlateEffect);
+                    cmdParams.Drawcall.BindCBuffer(cbBinder.mCoreObject, cmdParams.CBuffer);
+                    cmdParams.Drawcall.BindSRV(VNameString.FromString("FontTexture"), TextureSRV);
+                    cmdParams.Drawcall.BindSampler(VNameString.FromString("Samp_FontTexture"), UEngine.Instance.GfxDevice.SamplerStateManager.PointState);
+
+                    cmdParams.IsNormalMap = 0;
+                    if (TextureSRV.PicDesc.Format == EPixelFormat.PXF_BC5_UNORM || TextureSRV.PicDesc.Format == EPixelFormat.PXF_BC5_TYPELESS || TextureSRV.PicDesc.Format == EPixelFormat.PXF_BC5_SNORM)
+                        cmdParams.IsNormalMap = 1;
+
+                    CmdParameters = cmdParams;
+                }
+
+                var uv0 = new Vector2(0, 0);
+                var uv1 = new Vector2(1, 1);
+                cmdlist.AddImage(CmdParameters.GetHandle(), in prevStart, in prevEnd, in uv0, in uv1, 0xFFFFFFFF);
+
+                // support preview A channel
+                //var textPos = end - new Vector2(32, 32);
+                //cmdlist.AddText(textPos, mShowA ? 0xFFFFFFFF : 0x00FF00FF, "A", null);
+                //if (ImGuiAPI.IsMouseClicked(ImGuiMouseButton_.ImGuiMouseButton_Left, false) && ImGuiAPI.IsMouseHoveringRect(textPos, end, true))
+                //{
+                //    CmdParameters.ColorMask.W = mShowA ? 1 : 0;
+                //    mShowA = !mShowA;
+                //}
             }
         }
         //protected override OpExpress OnNoneLinkedParameter(UMaterialGraph funGraph, ICodeGen cGen, int i)

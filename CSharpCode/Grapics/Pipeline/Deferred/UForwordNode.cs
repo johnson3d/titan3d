@@ -195,7 +195,7 @@ namespace EngineNS.Graphics.Pipeline.Deferred
 
                 GBuffers?.SetViewportCBuffer(world, policy);
                 
-                LayerBasePass.PrepareForDraw();
+                LayerBasePass.BeginCommands();
 
                 foreach (var i in policy.VisibleMeshes)
                 {
@@ -209,13 +209,14 @@ namespace EngineNS.Graphics.Pipeline.Deferred
                         var layer = i.Atoms[j].Material.RenderLayer;
                         if (layer == ERenderLayer.RL_Translucent || layer == ERenderLayer.RL_Sky)
                         {
-                            var drawcall = i.GetDrawCall(GBuffers, j, policy, URenderPolicy.EShadingType.BasePass, this);
+                            var cmdlist = LayerBasePass.GetCmdList(layer);
+                            var drawcall = i.GetDrawCall(cmdlist.mCoreObject, GBuffers, j, policy, URenderPolicy.EShadingType.BasePass, this);
                             if (drawcall != null)
                             {
                                 drawcall.BindGBuffer(policy.DefaultCamera, GBuffers);
                                 //GGizmosBuffers.PerViewportCBuffer = GBuffers.PerViewportCBuffer;
 
-                                LayerBasePass.PushDrawCall(layer, drawcall);
+                                cmdlist.PushGpuDraw(drawcall);
                             }
                         }
                     }
@@ -231,6 +232,9 @@ namespace EngineNS.Graphics.Pipeline.Deferred
 
                 GBuffers.BuildFrameBuffers(policy);
                 LayerBasePass.BuildRenderPass(policy, in GBuffers.Viewport, passClears, (int)ERenderLayer.RL_Num, GBuffers, GBuffers, "Forword:");
+
+                LayerBasePass.EndCommands();
+                LayerBasePass.ExecuteCommands();
             }   
         }
         public override void TickSync(URenderPolicy policy)
@@ -397,7 +401,7 @@ namespace EngineNS.Graphics.Pipeline.Deferred
 
                 GBuffers?.SetViewportCBuffer(world, policy);
 
-                LayerBasePass.PrepareForDraw();
+                LayerBasePass.BeginCommands();
 
                 foreach (var i in policy.VisibleMeshes)
                 {
@@ -412,13 +416,14 @@ namespace EngineNS.Graphics.Pipeline.Deferred
                         if (layer == ERenderLayer.RL_PostOpaque || layer == ERenderLayer.RL_PostTranslucent
                             || layer == ERenderLayer.RL_TranslucentGizmos || layer == ERenderLayer.RL_Gizmos)
                         {
-                            var drawcall = i.GetDrawCall(GBuffers, j, policy, URenderPolicy.EShadingType.BasePass, this);
+                            var cmdlist = LayerBasePass.GetCmdList(layer);
+                            var drawcall = i.GetDrawCall(cmdlist.mCoreObject, GBuffers, j, policy, URenderPolicy.EShadingType.BasePass, this);
                             if (drawcall != null)
                             {
                                 drawcall.BindGBuffer(policy.DefaultCamera, GBuffers);
                                 //GGizmosBuffers.PerViewportCBuffer = GBuffers.PerViewportCBuffer;
 
-                                LayerBasePass.PushDrawCall(layer, drawcall);
+                                cmdlist.PushGpuDraw(drawcall);
                             }
                         }
                     }
@@ -436,6 +441,9 @@ namespace EngineNS.Graphics.Pipeline.Deferred
                 WithDepthGBuffers.BuildFrameBuffers(policy);
                 GBuffers.BuildFrameBuffers(policy);
                 LayerBasePass.BuildRenderPass(policy, in GBuffers.Viewport, passClears, (int)ERenderLayer.RL_Num, WithDepthGBuffers, GBuffers, "Gizmos:");
+                
+                LayerBasePass.EndCommands();
+                LayerBasePass.ExecuteCommands();
             }
         }
         public override void TickSync(URenderPolicy policy)

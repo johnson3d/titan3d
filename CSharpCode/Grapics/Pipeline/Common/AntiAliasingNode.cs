@@ -129,10 +129,11 @@ namespace EngineNS.Graphics.Pipeline.Common
                 if (index.IsValidPointer)
                     drawcall.BindSampler(index, UEngine.Instance.GfxDevice.SamplerStateManager.PointState);
             }
+
         }
-        public unsafe override void OnDrawCall(Pipeline.URenderPolicy.EShadingType shadingType, NxRHI.UGraphicDraw drawcall, URenderPolicy policy, Mesh.UMesh mesh)
+        public unsafe override void OnDrawCall(NxRHI.ICommandList cmd, Pipeline.URenderPolicy.EShadingType shadingType, NxRHI.UGraphicDraw drawcall, URenderPolicy policy, Mesh.UMesh mesh)
         {
-            base.OnDrawCall(shadingType, drawcall, policy, mesh);
+            base.OnDrawCall(cmd, shadingType, drawcall, policy, mesh);
 
             var pipelinPolicy = policy.TagObject as URenderPolicy;
 
@@ -150,6 +151,14 @@ namespace EngineNS.Graphics.Pipeline.Common
         public Common.URenderGraphPin DepthPinIn = Common.URenderGraphPin.CreateInput("Depth");
         public Common.URenderGraphPin PreDepthPinIn = Common.URenderGraphPin.CreateInput("PreDepth");
         public Common.URenderGraphPin MotionVectorPinIn = Common.URenderGraphPin.CreateInput("MotionVector");
+
+        public NxRHI.UCopyDraw mCopyColorDrawcall;
+        public NxRHI.UCopyDraw mCopyDepthDrawcall;
+        public UDrawBuffers CopyPass = new UDrawBuffers();
+
+        public UAttachBuffer[] ResultBuffer = new UAttachBuffer[2];
+        public UAttachBuffer PreColor { get => ResultBuffer[0]; }
+        public UAttachBuffer PreDepth { get => ResultBuffer[1]; }
         public TtAntiAliasingNode()
         {
             Name = "TaaNode";
@@ -169,7 +178,15 @@ namespace EngineNS.Graphics.Pipeline.Common
         public override async System.Threading.Tasks.Task Initialize(URenderPolicy policy, string debugName)
         {
             await base.Initialize(policy, debugName);
+
+            var rc = UEngine.Instance.GfxDevice.RenderContext;
+
             ScreenDrawPolicy.mBasePassShading = UEngine.Instance.ShadingEnvManager.GetShadingEnv<TtAntiAliasingShading>();
+
+            mCopyColorDrawcall = UEngine.Instance.GfxDevice.RenderContext.CreateCopyDraw();
+            mCopyDepthDrawcall = UEngine.Instance.GfxDevice.RenderContext.CreateCopyDraw();
+
+            CopyPass.Initialize(rc, debugName + ".CopyPrev");
         }
 
         public NxRHI.UCbView CBShadingEnv;
@@ -215,7 +232,6 @@ namespace EngineNS.Graphics.Pipeline.Common
                 //else
                 //    TaaBlendAlpha = 1.0f;
                 CBShadingEnv.SetValue("TaaBlendAlpha", TaaBlendAlpha);
-                CBShadingEnv.FlushDirty(false);
             }
 
             CurrentOffsetIndex++;
@@ -229,7 +245,14 @@ namespace EngineNS.Graphics.Pipeline.Common
             {
                 policy.DefaultCamera.JitterOffset = new Vector2(0.5f, 0.5f);
             }
+            CopyPass.SwapBuffer();
         }
+
+        public override void FrameBuild(URenderPolicy policy)
+        {
+            base.FrameBuild(policy);
+        }
+
         public override void BeforeTickLogic(URenderPolicy policy)
         {
             if (policy.TypeAA == URenderPolicy.ETypeAA.None)
@@ -246,14 +269,88 @@ namespace EngineNS.Graphics.Pipeline.Common
                     ResultPinOut.Attachement.Format = buffer.BufferDesc.Format;
                 }
             }
+            if (policy.TypeAA == URenderPolicy.ETypeAA.Taa)
+            {
+                if ((PreColor == null || PreDepth == null) || (PreColor.BufferDesc.Format != ResultPinOut.Attachement.Format
+                 || PreColor.BufferDesc.Width != ResultPinOut.Attachement.Width
+                 || PreColor.BufferDesc.Height != ResultPinOut.Attachement.Height))
+                {
+                    CoreSDK.DisposeObject(ref ResultBuffer[0]);
+                    CoreSDK.DisposeObject(ref ResultBuffer[1]);
+                    ResultBuffer[0] = new UAttachBuffer();
+                    ResultBuffer[1] = new UAttachBuffer();
+                    ResultBuffer[0].BufferDesc = ResultPinOut.Attachement.BufferDesc;
+                    ResultBuffer[0].CreateBufferViews(in ResultBuffer[0].BufferDesc);
+
+                    ResultBuffer[1].BufferDesc = ResultPinOut.Attachement.BufferDesc;
+                    ResultBuffer[1].CreateBufferViews(in ResultBuffer[0].BufferDesc);
+                }
+            }
         }
         public override void TickLogic(UWorld world, URenderPolicy policy, bool bClear)
         {
-            if (policy.TypeAA == URenderPolicy.ETypeAA.None)
+            switch (policy.TypeAA)
             {
-                return;
+                case URenderPolicy.ETypeAA.None:
+                    break;
+                case URenderPolicy.ETypeAA.Taa:
+                    PreColorPinIn.ImportedBuffer = PreColor;
+                    base.TickLogic(world, policy, bClear);
+                    TickCopyLogic();
+                    break;
+                case URenderPolicy.ETypeAA.Fsaa:
+                    base.TickLogic(world, policy, bClear);
+                    break;
             }
-            base.TickLogic(world, policy, bClear);
+        }
+
+        public void CopyAttachBuff(Common.URenderGraphPin SrcPin, UAttachBuffer DesAttachBuffer, NxRHI.UCopyDraw CopyDrawcall, NxRHI.UCommandList DrawCommandList)
+        {
+            var srcPin = GetAttachBuffer(SrcPin);
+
+            if (srcPin.Buffer.GetType() == typeof(NxRHI.UBuffer) && DesAttachBuffer.Buffer.GetType() == typeof(NxRHI.UBuffer))
+            {
+                CopyDrawcall.Mode = NxRHI.ECopyDrawMode.CDM_Buffer2Buffer;
+            }
+            else if (srcPin.Buffer.GetType() == typeof(NxRHI.UTexture) && DesAttachBuffer.Buffer.GetType() == typeof(NxRHI.UTexture))
+            {
+                CopyDrawcall.Mode = NxRHI.ECopyDrawMode.CDM_Texture2Texture;
+            }
+            else if (srcPin.Buffer.GetType() == typeof(NxRHI.UTexture) && DesAttachBuffer.Buffer.GetType() == typeof(NxRHI.UBuffer))
+            {
+                CopyDrawcall.Mode = NxRHI.ECopyDrawMode.CDM_Texture2Buffer;
+            }
+            else if (srcPin.Buffer.GetType() == typeof(NxRHI.UTexture) && DesAttachBuffer.Buffer.GetType() == typeof(NxRHI.UBuffer))
+            {
+                CopyDrawcall.Mode = NxRHI.ECopyDrawMode.CDM_Buffer2Texture;
+            }
+            CopyDrawcall.BindSrc(srcPin.Buffer);
+            CopyDrawcall.BindDest(DesAttachBuffer.Buffer);
+
+            DrawCommandList.PushGpuDraw(CopyDrawcall);
+            //var fp = new NxRHI.FSubResourceFootPrint();
+            //fp.SetDefault();
+            //mCopyDrawcall.mCoreObject.FootPrint = fp;
+        }
+
+        [ThreadStatic]
+        private static Profiler.TimeScope ScopeTick = Profiler.TimeScopeManager.GetTimeScope(typeof(TtAntiAliasingNode), nameof(TickCopyLogic));
+        public unsafe void TickCopyLogic()
+        {
+            using (new Profiler.TimeScopeHelper(ScopeTick))
+            {
+                if (mCopyColorDrawcall == null || mCopyDepthDrawcall == null)
+                    return;
+
+                var cmdlist = CopyPass.DrawCmdList;
+                cmdlist.BeginCommand();
+                {
+                    CopyAttachBuff(ResultPinOut, PreColor, mCopyColorDrawcall, cmdlist);
+                }
+                cmdlist.FlushDraws();
+                cmdlist.EndCommand();
+                UEngine.Instance.GfxDevice.RenderCmdQueue.QueueCmdlist(cmdlist);
+            }
         }
         public override void TickSync(URenderPolicy policy)
         {

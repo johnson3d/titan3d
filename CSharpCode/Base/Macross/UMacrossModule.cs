@@ -210,7 +210,7 @@ namespace EngineNS.Macross
                 StartUpdateIndex = 0;
             }
         }
-        public override void Tick(UEngine host)
+        public override void TickModule(UEngine host)
         {
             UpdateRefercences(1000, false);
         }

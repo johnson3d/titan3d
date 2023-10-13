@@ -125,6 +125,18 @@ namespace EngineNS
         /// </summary>
         [Rtti.Meta]
         public float Y;
+
+        public float Width
+        {
+            get => X;
+            set => X = value;
+        }
+        public float Height
+        {
+            get => Y;
+            set => Y = value;
+        }
+
         /// <summary>
         /// 带参构造函数
         /// </summary>

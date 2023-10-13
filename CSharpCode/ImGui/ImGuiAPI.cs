@@ -65,12 +65,11 @@ namespace EngineNS
                 else
                 {
                     // user_data to gchandle
-                    System.Runtime.InteropServices.GCHandle handle = System.Runtime.InteropServices.GCHandle.FromIntPtr(IntPtr.Zero);
                     changed = InputText(label, buffer.GetBuffer(), (uint)buffer.GetSize(), flags, callback, IntPtr.Zero.ToPointer());
                 }
                 if (changed)
                 {
-                    text = buffer.AsText();
+                    text = buffer.AsTextUtf8();
                     return true;
                 }
                 return false;

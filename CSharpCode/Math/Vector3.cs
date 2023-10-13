@@ -32,6 +32,12 @@ namespace EngineNS
             Y = clr.Green;
             Z = clr.Blue;
         }
+        public Vector3(in DVector3 vec)
+        {
+            X = (float)vec.X;
+            Y = (float)vec.Y;
+            Z = (float)vec.Z;
+        }
         public class TypeConverterAttribute : Support.TypeConverterAttributeBase
         {
             public override bool ConvertFromString(ref object obj, string text)

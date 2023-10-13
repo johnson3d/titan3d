@@ -93,8 +93,8 @@ namespace EngineNS.UI.Canvas
                     path.BeginPath();
                     path.MoveTo(new Vector2(150.0f, 150.0f));
                     path.LineTo(new Vector2(250.0f, 300.0f));
-                    path.SCCWArcTo(new Vector2(150.0f, 300.0f), 1.0f);
-                    path.LCCWArcTo(new Vector2(150.0f, 150.0f), 1.0f);
+                    path.S_CCW_ArcTo(new Vector2(150.0f, 300.0f), 1.0f);
+                    path.L_CCW_ArcTo(new Vector2(150.0f, 150.0f), 1.0f);
                     path.EndPath(TestCanvasDrawBatch.Middleground);
                     TestCanvasDrawBatch.Middleground.PopPathStyle();
 
@@ -116,7 +116,7 @@ namespace EngineNS.UI.Canvas
                 EngineNS.Canvas.FDrawCmd cmd = new FDrawCmd();
                 cmd.NativePointer = MeshProvider.GetAtomExtData((uint)i).NativePointer;
                 var brush = cmd.GetBrush();
-                if (brush.Name == VNameString.FromString("Text"))
+                if (brush.Name.StartWith("@Text:"))
                 {
                     mtl = await UEngine.Instance.GfxDevice.MaterialInstanceManager.CreateMaterialInstance(RName.GetRName("material/font_sdf_0.uminst", RName.ERNameType.Engine));
                     var clr = mtl.FindVar("FontColor");
@@ -156,7 +156,7 @@ namespace EngineNS.UI.Canvas
                 EngineNS.Canvas.FDrawCmd cmd = new EngineNS.Canvas.FDrawCmd();
                 cmd.NativePointer = mesh.MaterialMesh.Mesh.mCoreObject.GetAtomExtData((uint)atom).NativePointer;
                 var brush = cmd.GetBrush();
-                if (brush.Name == VNameString.FromString("Text"))
+                if (brush.Name.StartWith("@Text:"))
                 {
                     var srv = cmd.GetBrush().GetSrv();
                     if (srv.IsValidPointer)
@@ -201,6 +201,17 @@ namespace EngineNS.UI.Canvas
                 mCoreObject.Name = VNameString.FromString(value);
             }
         }
+        public Color Color
+        {
+            get => mCoreObject.Color;
+            set => mCoreObject.SetColor(value);
+        }
+
+        public bool IsDirty
+        {
+            get => mCoreObject.IsDirty;
+        }
+
         public void SetSrv(NxRHI.USrView texture)
         {
             if (texture == null)

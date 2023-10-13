@@ -1,11 +1,8 @@
-﻿using EngineNS.DesignMacross.Graph;
-using EngineNS.DesignMacross.Graph;
-using System;
+﻿using EngineNS.DesignMacross.Base.Graph;
 using System.Collections.Generic;
-using System.Text;
-using EngineNS.DesignMacross.Editor.DeclarationPanel;
-using EngineNS.DesignMacross.Render;
-using EngineNS.DesignMacross.Description;
+using EngineNS.DesignMacross.Base.Render;
+using EngineNS.DesignMacross.Base.Description;
+using System;
 
 namespace EngineNS.DesignMacross.TimedStateMachine
 {
@@ -30,7 +27,7 @@ namespace EngineNS.DesignMacross.TimedStateMachine
     }
     public class ManhattanConnectionRouter
     {
-        static float Threshold = 10;
+        //static float Threshold = 10;
         public static List<(Vector2 Start, Vector2 End)> GetLines(Vector2 startPosition, ELineDirection startDirection,Vector2 endPosition, ELineDirection endDirection, List<Rect> collisioins)
         {
             List<(Vector2 Start, Vector2 End)> lines = new List<(Vector2 Start, Vector2 End)>();
@@ -83,12 +80,13 @@ namespace EngineNS.DesignMacross.TimedStateMachine
     [ImGuiElementRender(typeof(TtGraphElement_TimedStateTransitionRender))]
     public class TtGraphElement_TimedStateTransition : IGraphElement, IContextMeunable, IDraggable, ILayoutable
     {
+        public Guid Id { get; set; } = Guid.Empty;
         public TtTimeDurationSlilder TimeDurationSlilder { get; set; }
         public IGraphElement From { get; set; } = null;
         public IGraphElement To { get; set; } = null;
 
         public string Name { get; set; }
-        public Vector2 Location { get; set; } = Vector2.Zero;
+        public Vector2 Location { get => Description.Location; set => Description.Location = value; }
 
         public Vector2 AbsLocation { get => TtGraphMisc.CalculateAbsLocation(this); }
 
@@ -101,6 +99,7 @@ namespace EngineNS.DesignMacross.TimedStateMachine
         public TtPopupMenu PopupMenu { get; set; } = null;
         public TtGraphElement_TimedStateTransition(IDescription description)
         {
+            Id = description.Id;
             Description = description;
         }
         public void Construct()
@@ -108,7 +107,7 @@ namespace EngineNS.DesignMacross.TimedStateMachine
         }
         public bool CanDrag()
         {
-            return true;
+            return false;
         }
         public void OnDragging(Vector2 delta)
         {
@@ -150,7 +149,14 @@ namespace EngineNS.DesignMacross.TimedStateMachine
 
         public void UpdateContextMenu(ref FGraphElementRenderingContext context)
         {
-          
+            //PopupMenu.StringId = Name + "_ContextMenu";
+            //PopupMenu.Reset();
+            //var parentMenu = PopupMenu.Menu;
+            //var editorInteroperation = context.EditorInteroperation;
+            //parentMenu.AddMenuItem("Open Transition Graph", null, (Bricks.NodeGraph.UMenuItem item, object sender) =>
+            //{
+            //    editorInteroperation.GraphEditPanel.ActiveGraphNavigatedPanel.OpenSubGraph(Description);
+            //});
         }
     }
 
@@ -167,7 +173,12 @@ namespace EngineNS.DesignMacross.TimedStateMachine
             var clolr = new Color4f(233f / 255, 234 / 255f, 236f / 255);
             cmdlist.AddRectFilled(nodeStart, nodeEnd, ImGuiAPI.ColorConvertFloat4ToU32(clolr), transitionElement.TimeDurationBarRounding, transitionElement.TimeDurationBarRoundCorner);
 
-            if(transitionElement.From is IStateTransitionInitial initiable && transitionElement.To is IStateTransitionAcceptable acceptable)
+            if(ImGuiAPI.IsMouseDoubleClickedInRectInCurrentWindow(nodeStart, nodeEnd, ImGuiMouseButton_.ImGuiMouseButton_Left, true))
+            {
+                context.EditorInteroperation.GraphEditPanel.ActiveGraphNavigatedPanel.OpenSubGraph(transitionElement.Description);
+            }
+
+            if (transitionElement.From is IStateTransitionInitial initiable && transitionElement.To is IStateTransitionAcceptable acceptable)
             {
                 var lines = ManhattanConnectionRouter.GetLines((transitionElement.AbsLocation * 2 + new Vector2(size.Width, 10)) / 2, ELineDirection.South, acceptable.GetTransitionLinkPosition(ELineDirection.East), ELineDirection.East, null);
                 foreach(var line in lines)

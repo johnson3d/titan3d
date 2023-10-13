@@ -812,7 +812,7 @@ namespace EngineNS.Bricks.Procedure.Node
             result.DispatchPixels((result, x, y, z) =>
             {
                 ref var pos = ref xyzSrc.GetPixel<Vector3>(x, y, z);
-                //var rPos = mTransform.TransformPosition(in pos)
+                //var rPos = mRenderTransform.TransformPosition(in pos)
                 var rPos = Vector3.TransformCoordinate(in pos, in matrix);
                 result.SetPixel<Vector3>(x, y, z, in rPos);
             }, true);
@@ -824,7 +824,7 @@ namespace EngineNS.Bricks.Procedure.Node
             //        for (int k = 0; k < result.Width; k++)
             //        {
             //            ref var pos = ref xyzSrc.GetPixel<Vector3>(k, j, i);
-            //            //var rPos = mTransform.TransformPosition(in pos)
+            //            //var rPos = mRenderTransform.TransformPosition(in pos)
             //            var rPos = Vector3.TransformCoordinate(in pos, in matrix);
             //            result.SetPixel<Vector3>(k, j, i, in rPos);
             //        }

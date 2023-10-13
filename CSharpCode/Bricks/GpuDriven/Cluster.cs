@@ -25,12 +25,6 @@ namespace EngineNS.Bricks.GpuDriven
         public UInt32 padding; //TODO
     }
 
-    [System.Runtime.InteropServices.StructLayout(System.Runtime.InteropServices.LayoutKind.Sequential, Pack = 16)]
-    public struct FClusterInfo
-    {
-        public BoundingBox AABB;
-    }
-
     public struct TtVisibleInstance
     {
         public uint NumVisibleInstance;
@@ -54,7 +48,7 @@ namespace EngineNS.Bricks.GpuDriven
         public int IndexStart;
         public int IndexCount;
 
-        public FClusterInfo Desc;
+        public BoundingBox AABB;
     };
     public struct FQuarkVertex
     {
@@ -97,11 +91,12 @@ namespace EngineNS.Bricks.GpuDriven
             for (int i = 0; i < count; i++)
             {
                 TtCluster cluster = new TtCluster();
-                var info = mesh.mCoreObject.GetCluster(i);
-                cluster.VertexStart = info.VertexStart;
-                cluster.VertexCount = info.VertexCount;
-                cluster.IndexStart = info.IndexStart;
-                cluster.IndexCount = info.IndexCount;
+                var cppCluster = mesh.mCoreObject.GetCluster(i);
+                cluster.VertexStart = cppCluster.VertexStart;
+                cluster.VertexCount = cppCluster.VertexCount;
+                cluster.IndexStart = cppCluster.IndexStart;
+                cluster.IndexCount = cppCluster.IndexCount;
+                cluster.AABB = cppCluster.Bounds;
 
                 result.Clusters.Add(cluster);
             }
@@ -195,7 +190,7 @@ namespace EngineNS.Bricks.GpuDriven
                 TotalIndices += mesh.NumIndices;
             }
             
-            result.ClusterVertexArray = new NxRHI.UVertexArray();
+            result.ClusterVertexArray = rc.CreateVertexArray();
             for (NxRHI.EVertexStreamType i = 0; i < NxRHI.EVertexStreamType.VST_Number; i++)
             {
                 if ((Streams & (1u << (int)i)) != 0)

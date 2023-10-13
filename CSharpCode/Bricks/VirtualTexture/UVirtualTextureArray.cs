@@ -94,7 +94,7 @@ namespace EngineNS.Bricks.VirtualTexture
                     fp.RowPitch = (uint)(mipDatas[i].Width * sizeof(uint));
                     fp.TotalSize = (uint)(mipDatas[i].Width * mipDatas[i].Height * pixelByte);
 
-                    Tex2DArray.UpdateGpuData((uint)i, pSrcData, &fp);
+                    Tex2DArray.UpdateGpuData(cmd.mCoreObject, (uint)i, pSrcData, &fp);
                 }
             }
             return Textures[index];

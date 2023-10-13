@@ -8,97 +8,189 @@ using System.Text;
 
 namespace EngineNS.UI.Controls
 {
+    public class MarginEditorAttribute : EGui.Controls.PropertyGrid.PGCustomValueEditorAttribute
+    {
+        public unsafe override bool OnDraw(in EditorInfo info, out object newValue)
+        {
+            this.Expandable = true;
+            bool retValue = false;
+            newValue = info.Value;
+            var index = ImGuiAPI.TableGetColumnIndex();
+            var width = ImGuiAPI.GetColumnWidth(index);
+            ImGuiAPI.SetNextItemWidth(width - EGui.UIProxy.StyleConfig.Instance.PGCellPadding.X);
+            var minValue = float.MinValue;
+            var maxValue = float.MaxValue;
+            var multiValue = info.Value as EGui.Controls.PropertyGrid.PropertyMultiValue;
+            if (multiValue != null && multiValue.HasDifferentValue())
+            {
+                ImGuiAPI.Text(multiValue.MultiValueString);
+                if (multiValue.DrawVector<Vector4>(in info, "Left", "Top", "Right", "Bottom") && !info.Readonly)
+                {
+                    newValue = multiValue;
+                    retValue = true;
+                }
+            }
+            else
+            {
+                var v = (Vector4)info.Value;
+                float speed = 0.1f;
+                var format = "%.6f";
+                if (info.HostProperty != null)
+                {
+                    var vR = info.HostProperty.GetAttribute<EGui.Controls.PropertyGrid.PGValueRange>();
+                    if (vR != null)
+                    {
+                        minValue = (float)vR.Min;
+                        maxValue = (float)vR.Max;
+                    }
+                    var vStep = info.HostProperty.GetAttribute<EGui.Controls.PropertyGrid.PGValueChangeStep>();
+                    if (vStep != null)
+                    {
+                        speed = vStep.Step;
+                    }
+                    var vFormat = info.HostProperty.GetAttribute<EGui.Controls.PropertyGrid.PGValueFormat>();
+                    if (vFormat != null)
+                        format = vFormat.Format;
+                }
+                var changed = ImGuiAPI.DragScalarN2(TName.FromString2("##", info.Name).ToString(), ImGuiDataType_.ImGuiDataType_Float, (float*)&v, 4, speed, &minValue, &maxValue, format, ImGuiSliderFlags_.ImGuiSliderFlags_None);
+                if (changed && !info.Readonly)//(v != saved)
+                {
+                    newValue = v;
+                    retValue = true;
+                }
+                if (Vector4.Vector4EditorAttribute.OnDrawVectorValue<Vector4>(in info, ref v, ref v, "Left", "Top", "Right", "Bottom") && !info.Readonly)
+                {
+                    newValue = v;
+                    retValue = true;
+                }
+            }
+            return retValue;
+        }
+    }
+    public class CornerRadiusEditorAttribute : EGui.Controls.PropertyGrid.PGCustomValueEditorAttribute
+    {
+        public unsafe override bool OnDraw(in EditorInfo info, out object newValue)
+        {
+            this.Expandable = true;
+            bool retValue = false;
+            newValue = info.Value;
+            var index = ImGuiAPI.TableGetColumnIndex();
+            var width = ImGuiAPI.GetColumnWidth(index);
+            ImGuiAPI.SetNextItemWidth(width - EGui.UIProxy.StyleConfig.Instance.PGCellPadding.X);
+            var minValue = float.MinValue;
+            var maxValue = float.MaxValue;
+            var multiValue = info.Value as EGui.Controls.PropertyGrid.PropertyMultiValue;
+            if (multiValue != null && multiValue.HasDifferentValue())
+            {
+                ImGuiAPI.Text(multiValue.MultiValueString);
+                if (multiValue.DrawVector<Vector4>(in info, "TopLeft", "TopRight", "BottomRight", "BottomLeft") && !info.Readonly)
+                {
+                    newValue = multiValue;
+                    retValue = true;
+                }
+            }
+            else
+            {
+                var v = (Vector4)info.Value;
+                float speed = 0.1f;
+                var format = "%.6f";
+                if (info.HostProperty != null)
+                {
+                    var vR = info.HostProperty.GetAttribute<EGui.Controls.PropertyGrid.PGValueRange>();
+                    if (vR != null)
+                    {
+                        minValue = (float)vR.Min;
+                        maxValue = (float)vR.Max;
+                    }
+                    var vStep = info.HostProperty.GetAttribute<EGui.Controls.PropertyGrid.PGValueChangeStep>();
+                    if (vStep != null)
+                    {
+                        speed = vStep.Step;
+                    }
+                    var vFormat = info.HostProperty.GetAttribute<EGui.Controls.PropertyGrid.PGValueFormat>();
+                    if (vFormat != null)
+                        format = vFormat.Format;
+                }
+                var changed = ImGuiAPI.DragScalarN2(TName.FromString2("##", info.Name).ToString(), ImGuiDataType_.ImGuiDataType_Float, (float*)&v, 4, speed, &minValue, &maxValue, format, ImGuiSliderFlags_.ImGuiSliderFlags_None);
+                if (changed && !info.Readonly)//(v != saved)
+                {
+                    newValue = v;
+                    retValue = true;
+                }
+                if (Vector4.Vector4EditorAttribute.OnDrawVectorValue<Vector4>(in info, ref v, ref v, "TopLeft", "TopRight", "BottomRight", "BottomLeft") && !info.Readonly)
+                {
+                    newValue = v;
+                    retValue = true;
+                }
+            }
+            return retValue;
+        }
+    }
+
     public partial class TtUIElement
     {
-        [Flags]
-        internal enum eLayoutFlags : uint
-        {
-            None = 0,
-            MeasureDirty = 1 << 0,
-            ArrangeDirty = 1 << 1,
-            MeasureInProgress = 1 << 2,
-            ArrangeInProgress = 1 << 3,
-            NeverMeasured = 1 << 4,
-            NeverArranged = 1 << 5,
-            MeasureDuringArrange = 1 << 6,
-            IsLayoutIslandRoot = 1 << 7,
-            UseRounding = 1 << 8,           // aligns to pixel boundaries
-            BypassLayoutPolicies = 1 << 9,
-        }
-        private eLayoutFlags mLayoutFlags;
-        internal bool ReadFlag(eLayoutFlags flag)
-        {
-            return (mLayoutFlags & flag) != 0;
-        }
-        internal void WriteFlag(eLayoutFlags flag, bool value)
-        {
-            if (value)
-                mLayoutFlags |= flag;
-            else
-                mLayoutFlags &= ~flag;
-        }
         [Browsable(false)]
         internal bool IsLayoutIslandRoot
         {
-            get { return ReadFlag(eLayoutFlags.IsLayoutIslandRoot); }
-            set { WriteFlag(eLayoutFlags.IsLayoutIslandRoot, value); }
+            get { return ReadFlag(ECoreFlags.IsLayoutIslandRoot); }
+            set { WriteFlag(ECoreFlags.IsLayoutIslandRoot, value); }
         }
         [Browsable(false)]
         internal bool MeasureDirty
         {
-            get { return ReadFlag(eLayoutFlags.MeasureDirty); }
-            set { WriteFlag(eLayoutFlags.MeasureDirty, value); }
+            get { return ReadFlag(ECoreFlags.MeasureDirty); }
+            set { WriteFlag(ECoreFlags.MeasureDirty, value); }
         }
         [Browsable(false)]
         internal bool ArrangeDirty
         {
-            get { return ReadFlag(eLayoutFlags.ArrangeDirty); }
-            set { WriteFlag(eLayoutFlags.ArrangeDirty, value); }
+            get { return ReadFlag(ECoreFlags.ArrangeDirty); }
+            set { WriteFlag(ECoreFlags.ArrangeDirty, value); }
         }
         [Browsable(false)]
         internal bool MeasureInProgress
         {
-            get { return ReadFlag(eLayoutFlags.MeasureInProgress); }
-            set { WriteFlag(eLayoutFlags.MeasureInProgress, value); }
+            get { return ReadFlag(ECoreFlags.MeasureInProgress); }
+            set { WriteFlag(ECoreFlags.MeasureInProgress, value); }
         }
         [Browsable(false)]
         internal bool ArrangeInProgress
         {
-            get { return ReadFlag(eLayoutFlags.ArrangeInProgress); }
-            set { WriteFlag(eLayoutFlags.ArrangeInProgress, value); }
+            get { return ReadFlag(ECoreFlags.ArrangeInProgress); }
+            set { WriteFlag(ECoreFlags.ArrangeInProgress, value); }
         }
         [Browsable(false)]
         internal bool NeverMeasured
         {
-            get { return ReadFlag(eLayoutFlags.NeverMeasured); }
-            set { WriteFlag(eLayoutFlags.NeverMeasured, value); }
+            get { return ReadFlag(ECoreFlags.NeverMeasured); }
+            set { WriteFlag(ECoreFlags.NeverMeasured, value); }
         }
         [Browsable(false)]
         internal bool NeverArranged
         {
-            get { return ReadFlag(eLayoutFlags.NeverArranged); }
-            set { WriteFlag(eLayoutFlags.NeverArranged, value); }
+            get { return ReadFlag(ECoreFlags.NeverArranged); }
+            set { WriteFlag(ECoreFlags.NeverArranged, value); }
         }
         [Browsable(false)]
         internal bool MeasureDuringArrange
         {
-            get { return ReadFlag(eLayoutFlags.MeasureDuringArrange); }
-            set { WriteFlag(eLayoutFlags.MeasureDuringArrange, value); }
+            get { return ReadFlag(ECoreFlags.MeasureDuringArrange); }
+            set { WriteFlag(ECoreFlags.MeasureDuringArrange, value); }
         }
         [BindProperty(DefaultValue = false)]
         public bool UseRounding
         {
-            get { return ReadFlag(eLayoutFlags.UseRounding); }
-            set 
-            { 
-                WriteFlag(eLayoutFlags.UseRounding, value);
-                OnValueChange(value);
+            get { return ReadFlag(ECoreFlags.UseRounding); }
+            set
+            {
+                OnValueChange(value, UseRounding);
+                WriteFlag(ECoreFlags.UseRounding, value);
             }
         }
         protected bool BypassLayoutPolicies
         {
-            get => ReadFlag(eLayoutFlags.BypassLayoutPolicies);
-            set => WriteFlag(eLayoutFlags.BypassLayoutPolicies, value);
+            get => ReadFlag(ECoreFlags.BypassLayoutPolicies);
+            set => WriteFlag(ECoreFlags.BypassLayoutPolicies, value);
         }
         [Browsable(false)]
         public bool IsArrangeValid { get => !ArrangeDirty; }
@@ -117,100 +209,43 @@ namespace EngineNS.UI.Controls
             set;
         } = 0;
 
-        public class MarginEditorAttribute : EGui.Controls.PropertyGrid.PGCustomValueEditorAttribute
-        {
-            public unsafe override bool OnDraw(in EditorInfo info, out object newValue)
-            {
-                this.Expandable = true;
-                bool retValue = false;
-                newValue = info.Value;
-                var index = ImGuiAPI.TableGetColumnIndex();
-                var width = ImGuiAPI.GetColumnWidth(index);
-                ImGuiAPI.SetNextItemWidth(width - EGui.UIProxy.StyleConfig.Instance.PGCellPadding.X);
-                var minValue = float.MinValue;
-                var maxValue = float.MaxValue;
-                var multiValue = info.Value as EGui.Controls.PropertyGrid.PropertyMultiValue;
-                if (multiValue != null && multiValue.HasDifferentValue())
-                {
-                    ImGuiAPI.Text(multiValue.MultiValueString);
-                    if (multiValue.DrawVector<Vector4>(in info, "Left", "Top", "Right", "Bottom") && !info.Readonly)
-                    {
-                        newValue = multiValue;
-                        retValue = true;
-                    }
-                }
-                else
-                {
-                    var v = (Vector4)info.Value;
-                    float speed = 0.1f;
-                    var format = "%.6f";
-                    if (info.HostProperty != null)
-                    {
-                        var vR = info.HostProperty.GetAttribute<EGui.Controls.PropertyGrid.PGValueRange>();
-                        if (vR != null)
-                        {
-                            minValue = (float)vR.Min;
-                            maxValue = (float)vR.Max;
-                        }
-                        var vStep = info.HostProperty.GetAttribute<EGui.Controls.PropertyGrid.PGValueChangeStep>();
-                        if (vStep != null)
-                        {
-                            speed = vStep.Step;
-                        }
-                        var vFormat = info.HostProperty.GetAttribute<EGui.Controls.PropertyGrid.PGValueFormat>();
-                        if (vFormat != null)
-                            format = vFormat.Format;
-                    }
-                    var changed = ImGuiAPI.DragScalarN2(TName.FromString2("##", info.Name).ToString(), ImGuiDataType_.ImGuiDataType_Float, (float*)&v, 4, speed, &minValue, &maxValue, format, ImGuiSliderFlags_.ImGuiSliderFlags_None);
-                    if (changed && !info.Readonly)//(v != saved)
-                    {
-                        newValue = v;
-                        retValue = true;
-                    }
-                    if(Vector4.Vector4EditorAttribute.OnDrawVectorValue<Vector4>(in info, ref v, ref v, "Left", "Top", "Right", "Bottom") && !info.Readonly)
-                    {
-                        newValue = v;
-                        retValue = true;
-                    }
-                }
-                return retValue;
-            }
-        }
-
-        Vector4 mMargin = Vector4.Zero;
-        [BindProperty, MarginEditor, Category("Layout")]
-        public Vector4 Margin
+        Thickness mMargin = Thickness.Empty;
+        [Rtti.Meta]
+        [BindProperty, Category("Layout")]
+        public Thickness Margin
         {
             get => mMargin;
             set
             {
+                OnValueChange(value, mMargin);
                 mMargin = value;
-                OnValueChange(value);
                 UpdateLayout();
             }
         }
 
         float mMinWidth = 0.0f;
+        [Rtti.Meta]
         [BindProperty, Category("Layout")]
         public float MinWidth
         {
             get => mMinWidth;
             set
             {
+                OnValueChange(value, mMinWidth);
                 mMinWidth = value;
-                OnValueChange(value);
                 UpdateLayout();
             }
         }
         float mMinHeight = 0.0f;
+        [Rtti.Meta]
         [BindProperty, Category("Layout")]
         public float MinHeight
         {
             get => mMinHeight;
             set
             {
+                OnValueChange(value, mMinHeight);
                 mMinHeight = value;
-                OnValueChange(value);
                 UpdateLayout();
             }
         }
@@ -221,8 +256,8 @@ namespace EngineNS.UI.Controls
             get => mMaxWidth;
             set
             {
+                OnValueChange(value, mMaxWidth);
                 mMaxWidth = value;
-                OnValueChange(value);
                 UpdateLayout();
             }
         }
@@ -233,27 +268,28 @@ namespace EngineNS.UI.Controls
             get => mMaxHeight;
             set
             {
+                OnValueChange(value, mMaxHeight);
                 mMaxHeight = value;
-                OnValueChange(value);
                 UpdateLayout();
             }
         }
 
         public virtual void UpdateLayout()
         {
-            if (Parent == null)
+            var parent = VisualTreeHelper.GetParent(this);
+            if (parent == null)
                 return;
 
             InvalidateMeasure();
         }
         public TtUIElement GetUIParentWithinLayoutIsland()
         {
-            var uiParent = this.Parent;
+            var uiParent = VisualTreeHelper.GetParent(this);
             if (uiParent != null && uiParent.IsLayoutIslandRoot)
                 return null;
             return uiParent;
         }
-        protected void InvalidateMeasure()
+        public void InvalidateMeasure()
         {
             UEngine.Instance.EventPoster.RunOn(static (state) =>
             {
@@ -267,14 +303,15 @@ namespace EngineNS.UI.Controls
                 return true;
             }, Thread.Async.EAsyncTarget.Logic, this);
         }
-        protected void InvalidateArrange()
+        public void InvalidateArrange()
         {
             UEngine.Instance.EventPoster.RunOn(static (state) =>
             {
                 var This = (TtUIElement)state.UserArguments;
                 if (!This.ArrangeDirty && !This.ArrangeInProgress)
                 {
-                    if (This.Parent == null || !This.Parent.ArrangeDirty)
+                    var parent = VisualTreeHelper.GetParent(This);
+                    if (parent == null || !parent.ArrangeDirty)
                     {
                         System.Diagnostics.Debug.Assert(This.ArrangeRequest == null, "can't be clean and still have MeasureRequest");
                         UEngine.Instance.UILayoutManager.ArrangeQueue.Add(This);
@@ -393,7 +430,7 @@ namespace EngineNS.UI.Controls
                 mDesiredSize = desiredSize;
                 if (!MeasureDuringArrange && !mPrevDesiredSize.Equals(in desiredSize))
                 {
-                    var p = this.Parent;
+                    var p = VisualTreeHelper.GetParent(this);
                     if (p != null && !p.MeasureInProgress)
                         p.OnChildDesiredSizeChanged(this);
                 }
@@ -409,17 +446,17 @@ namespace EngineNS.UI.Controls
         {
             var frameworkAvailableSize = new EngineNS.SizeF(Math.Max(availableSize.Width, 0), Math.Max(availableSize.Height, 0));
             float dpiScale = 1.0f;
-            if(RootUIHost != null)
+            if (RootUIHost != null)
                 dpiScale = RootUIHost.DPIScale;
             ApplyTemplate();
-            
-            if(BypassLayoutPolicies)
+
+            if (BypassLayoutPolicies)
                 return MeasureOverride(in frameworkAvailableSize);
             else
             {
                 var margin = Margin;
-                var marginWidth = margin.X + margin.Z;
-                var marginHeight = margin.Y + margin.W;
+                var marginWidth = margin.Left + margin.Right;
+                var marginHeight = margin.Top + margin.Bottom;
                 var finaleSize = new SizeF(
                     Math.Max(availableSize.Width - marginWidth, 0.0f),
                     Math.Max(availableSize.Height - marginHeight, 0.0f));
@@ -429,7 +466,7 @@ namespace EngineNS.UI.Controls
                 var maxHeight = Math.Max(MaxHeight, finaleSize.Height);
                 finaleSize.Width = Math.Max(minWidth, Math.Min(finaleSize.Width, maxWidth));
                 finaleSize.Height = Math.Max(minHeight, Math.Min(finaleSize.Height, maxHeight));
-                if(UseRounding)
+                if (UseRounding)
                 {
                     finaleSize.Width = RoundValue(finaleSize.Width, dpiScale);
                     finaleSize.Height = RoundValue(finaleSize.Height, dpiScale);
@@ -510,10 +547,10 @@ namespace EngineNS.UI.Controls
                     if (ArrangeRequest != null)
                         EngineNS.UEngine.Instance.UILayoutManager.ArrangeQueue.Remove(this);
 
-                    if(firstArrange && IsRenderable())
+                    if (firstArrange && IsRenderable())
                     {
                         // render update
-                        RootUIHost.MeshDirty = true;
+                        MeshDirty = true;
                     }
                 }
             }
@@ -523,13 +560,44 @@ namespace EngineNS.UI.Controls
             }
             finally
             {
-                RootUIHost.MeshDirty = true;
+                MeshDirty = true;
             }
         }
         protected virtual void ArrangeCore(in EngineNS.RectangleF finalRect)
         {
-            DesignRect = finalRect;
-            ArrangeOverride(in finalRect);
+            if (BypassLayoutPolicies)
+            {
+                DesignRect = finalRect;
+                ArrangeOverride(in finalRect);
+            }
+            else
+            {
+                float dpiScale = 1.0f;
+                if (RootUIHost != null)
+                    dpiScale = RootUIHost.DPIScale;
+
+                var margin = Margin;
+                var marginWidth = margin.Left + margin.Right;
+                var marginHeight = margin.Top + margin.Bottom;
+                var minWidth = Math.Min(MinWidth, finalRect.Width);
+                var minHeight = Math.Min(MinHeight, finalRect.Height);
+                var maxWidth = Math.Max(MaxWidth, finalRect.Width);
+                var maxHeight = Math.Max(MaxHeight, finalRect.Height);
+                RectangleF final = RectangleF.Empty;
+                final.Width = Math.Max(minWidth, Math.Min(finalRect.Width, maxWidth));
+                final.Height = Math.Max(minHeight, Math.Min(finalRect.Height, maxHeight));
+                final.X = finalRect.Left + margin.Left;
+                final.Y = finalRect.Top + margin.Top;
+                if (UseRounding)
+                {
+                    final.X = RoundValue(final.X, dpiScale);
+                    final.Y = RoundValue(final.Y, dpiScale);
+                    final.Width = RoundValue(final.Width, dpiScale);
+                    final.Height = RoundValue(final.Height, dpiScale);
+                }
+                DesignRect = final;
+                ArrangeOverride(in final);
+            }
 
             if (mClipRectDirty)
             {

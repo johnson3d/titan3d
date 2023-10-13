@@ -4,6 +4,7 @@ using System.ComponentModel;
 using System.Text;
 using System.Threading.Tasks;
 using EngineNS;
+using Org.BouncyCastle.Asn1.X509.Qualified;
 
 namespace EngineNS.EGui.Controls.PropertyGrid
 {
@@ -28,6 +29,11 @@ namespace EngineNS.EGui.Controls.PropertyGrid
             get; 
             set; 
         }
+    }
+    [AttributeUsage(AttributeTargets.Class | AttributeTargets.Struct, AllowMultiple = false)]
+    public class PGNoCategoryAttribute : Attribute
+    {
+
     }
     public class PGCustomValueEditorAttribute : Attribute
     {
@@ -390,7 +396,10 @@ namespace EngineNS.EGui.Controls.PropertyGrid
             var endPos = startPos + EGui.UIProxy.StyleConfig.Instance.PGColorBoxSize;
             var multiValue = info.Value as PropertyMultiValue;
             if (multiValue != null && multiValue.HasDifferentValue())
+            {
+                // todo: multi color
                 drawList.AddRectFilledMultiColor(in startPos, in endPos, 0xFF0000FF, 0xFF00FF00, 0xFFFF0000, 0xFFFFFFFF);
+            }
             else
             {
                 var drawCol = Color4f.ToAbgr(Vector4.FromObject(info.Value));
@@ -427,7 +436,11 @@ namespace EngineNS.EGui.Controls.PropertyGrid
                     misc_flags | ImGuiColorEditFlags_.ImGuiColorEditFlags_NoSidePreview | ImGuiColorEditFlags_.ImGuiColorEditFlags_NoSmallPreview, (float*)0);
                 if (v != saved)
                 {
-                    newValue = v;
+                    if(info.Type.IsEqual(typeof(Color)))
+                        newValue = Color.FromArgb((int)(v.A * 255), (int)(v.R * 255), (int)(v.G * 255), (int)(v.B * 255));
+                    else
+                        newValue = v;
+
                     valueChanged = true;
                 }
                 ImGuiAPI.EndPopup();

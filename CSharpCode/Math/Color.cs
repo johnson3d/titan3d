@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics.CodeAnalysis;
 
 namespace EngineNS
 {
@@ -857,6 +858,28 @@ namespace EngineNS
             }
         }
 
+        public static bool operator == (in Color val1, in Color val2)
+        {
+            return (val1.Value.R == val2.Value.R) &&
+                   (val1.Value.G == val2.Value.G) &&
+                   (val1.Value.B == val2.Value.B) &&
+                   (val1.Value.A == val2.Value.A);
+        }
+        public static bool operator != (in Color val1, in Color val2)
+        {
+            return !((val1.Value.R == val2.Value.R) &&
+                     (val1.Value.G == val2.Value.G) &&
+                     (val1.Value.B == val2.Value.B) &&
+                     (val1.Value.A == val2.Value.A));
+        }
+        public override bool Equals([NotNullWhen(true)] object obj)
+        {
+            return this == (Color)obj;
+        }
+        public override int GetHashCode()
+        {
+            return base.GetHashCode();
+        }
         #region 颜色
 
         public static Color AliceBlue

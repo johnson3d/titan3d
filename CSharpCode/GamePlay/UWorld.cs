@@ -1,4 +1,5 @@
 ﻿using EngineNS.EGui.Slate;
+using EngineNS.GamePlay.Scene;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -291,10 +292,22 @@ namespace EngineNS.GamePlay
 
                 if (Pause)
                     return;
+                
                 Root.TickLogic(this, policy);
 
-                mMemberTickables.TickLogic(this, UEngine.Instance.ElapseTickCount);
+                mMemberTickables.TickLogic(this, UEngine.Instance.ElapseTickCountMS);
+
+                foreach (var i in mAfterTicks)
+                {
+                    i();
+                }
+                mAfterTicks.Clear();
             }
+        }
+        private List<System.Action> mAfterTicks = new List<System.Action>();
+        public void RegAfterTickAction(System.Action action)
+        {
+            mAfterTicks.Add(action);
         }
         #endregion
     }

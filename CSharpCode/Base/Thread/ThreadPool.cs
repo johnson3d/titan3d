@@ -74,6 +74,8 @@ namespace EngineNS.Thread
                         Profiler.Log.WriteException(ex);
                         e.ExceptionInfo = ex;
                     }
+                    e.TaskState = Async.EAsyncTaskState.Completed;
+                    e.CompletedEvent?.Set();
                     e.Dispose();
                 }
             }

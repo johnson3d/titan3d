@@ -284,9 +284,9 @@ namespace EngineNS.Graphics.Pipeline.Common
             }
 
 
-            GpuInstances.Flush2GPU();
+            GpuInstances.Flush2GPU(cmd.mCoreObject);
 
-            CullInstancesBuffer.Flush2GPU();
+            CullInstancesBuffer.Flush2GPU(cmd.mCoreObject);
         }
 
         private unsafe void Cull(NxRHI.UGpuDevice rc)

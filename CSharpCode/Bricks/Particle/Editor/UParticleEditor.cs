@@ -82,7 +82,7 @@ namespace EngineNS.Bricks.Particle.Editor
                 }
                 LeftWidth = ImGuiAPI.GetColumnWidth(0);
                 var min = ImGuiAPI.GetWindowContentRegionMin();
-                var max = ImGuiAPI.GetWindowContentRegionMin();
+                var max = ImGuiAPI.GetWindowContentRegionMax();
 
                 DrawLeft(ref min, ref max);
                 ImGuiAPI.NextColumn();
@@ -104,7 +104,7 @@ namespace EngineNS.Bricks.Particle.Editor
                 {
                     PreviewViewport.DockId = PreviewDockId;
                     PreviewViewport.DockCond = ImGuiCond_.ImGuiCond_Always;
-                    PreviewViewport.VieportType = Graphics.Pipeline.UViewportSlate.EVieportType.Window;
+                    PreviewViewport.ViewportType = Graphics.Pipeline.UViewportSlate.EViewportType.Window;
                     PreviewViewport.OnDraw();
                 }
             }

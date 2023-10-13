@@ -171,8 +171,7 @@ namespace EngineNS.NxRHI
         {
             using (new Profiler.TimeScopeHelper(ScopeTick))
             {
-                bool bRefBuffers = UEngine.Instance.GfxDevice.RenderContext.RhiType != ERhiType.RHI_D3D11;
-                mCoreObject.FlushDraws(bRefBuffers);
+                mCoreObject.FlushDraws();
             }   
         }
         //public void ResetGpuDraws()

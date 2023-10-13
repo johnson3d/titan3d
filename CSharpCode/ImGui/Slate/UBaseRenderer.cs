@@ -1,4 +1,6 @@
-﻿using System;
+﻿using EngineNS.Support;
+using NPOI.SS.Util;
+using System;
 using System.Collections.Generic;
 using System.Text;
 
@@ -148,31 +150,56 @@ namespace EngineNS.EGui.Slate
 
             //io.Fonts.ClearTexData();
 
-            var io = ImGuiAPI.GetIO();
-            //CreateFontTexture(UEngine.Instance.FileManager.GetRoot(IO.TtFileManager.ERootDir.Engine) + "fonts/simli.ttf", 15.0f, (ImFontConfig*)0, io.Fonts.GetGlyphRangesDefault());
-            CreateFontTexture(UEngine.Instance.FileManager.GetRoot(IO.TtFileManager.ERootDir.Engine) + "fonts/Roboto-Regular.ttf", 15.0f, (ImFontConfig*)0, io.Fonts.GetGlyphRangesDefault());
+            using (var ranges = UNativeArray<ushort>.CreateInstance())
+            {
+                // Basic Latin + Latin Supplement
+                ranges.Add(0x0020);
+                ranges.Add(0x00FF);
+                // General Punctuation
+                ranges.Add(0x2000);
+                ranges.Add(0x206F);
+                // CJK Symbols and Punctuations, Hiragana, Katakana
+                ranges.Add(0x3000);
+                ranges.Add(0x30FF);
+                // Katakana Phonetic Extensions
+                ranges.Add(0x31F0);
+                ranges.Add(0x31FF);
+                // Half-width characters
+                ranges.Add(0xFF00);
+                ranges.Add(0xFFEF);
+                // CJK Ideograms
+                switch (UEngine.Instance.Config.EditorLanguage)
+                {
+                    case "Chinese":
+                        {
+                            ranges.Add(0x4e00);
+                            ranges.Add(0x9FAF);
+                        }
+                        break;
+                }
+                //push end
+                ranges.Add(0);
 
-            //ImFontConfig fontConfig = new ImFontConfig();
-            //fontConfig.UnsafeCallConstructor();
-            //fontConfig.MergeMode = true;
-            //CreateFontTexture(UEngine.Instance.FileManager.GetRoot(IO.FileManager.ERootDir.Engine) + "fonts/Roboto-Bold.ttf", 13.0f, &fontConfig, io.Fonts.GetGlyphRangesDefault());
-            //CreateFontTexture(UEngine.Instance.FileManager.GetRoot(IO.FileManager.ERootDir.Engine) + "fonts/Roboto-Regular.ttf", 13.0f, &fontConfig, io.Fonts.GetGlyphRangesDefault());
-            CreateFontTexture(UEngine.Instance.FileManager.GetRoot(IO.TtFileManager.ERootDir.Engine) + "fonts/Roboto-Bold.ttf", 13.0f, (ImFontConfig*)0, io.Fonts.GetGlyphRangesDefault());
-            CreateFontTexture(UEngine.Instance.FileManager.GetRoot(IO.TtFileManager.ERootDir.Engine) + "fonts/Roboto-Regular.ttf", 13.0f, (ImFontConfig*)0, io.Fonts.GetGlyphRangesDefault());
-            
-            //ImFontConfig fontConfig = new ImFontConfig();
-            //fontConfig.UnsafeCallConstructor();
-            //fontConfig.MergeMode = true;
-            ushort* iconRange = stackalloc ushort[3];
-            iconRange[0] = 0xe005;
-            iconRange[1] = 0xf8ff;
-            iconRange[2] = 0;
-            //CreateFontTexture(UEngine.Instance.FileManager.GetRoot(IO.FileManager.ERootDir.Engine) + "fonts/fa-solid-900.ttf", 15.0f, &fontConfig, iconRange);
-            CreateFontTexture(UEngine.Instance.FileManager.GetRoot(IO.TtFileManager.ERootDir.Engine) + "fonts/fa-solid-900.ttf", 15.0f, (ImFontConfig*)0, iconRange);
-            //fontConfig.UnsafeCallDestructor();
+                var io = ImGuiAPI.GetIO();
+                var FontName = UEngine.Instance.Config.EditorFont.Address;
+                //CreateFontTexture(UEngine.Instance.FileManager.GetRoot(IO.TtFileManager.ERootDir.Engine) + "fonts/NotoSansSC-Regular.otf", 15.0f, (ImFontConfig*)0, io.Fonts.GetGlyphRangesDefault());
+                var ftName = CreateFontTexture(FontName, 15.0f, (ImFontConfig*)0, ranges.UnsafeGetElementAddress(0));
+
+                ftName = CreateFontTexture(UEngine.Instance.FileManager.GetRoot(IO.TtFileManager.ERootDir.Engine) + "fonts/Roboto-Bold.ttf", 13.0f, (ImFontConfig*)0, io.Fonts.GetGlyphRangesDefault());
+                //ftName = CreateFontTexture(FontName, 13.0f, (ImFontConfig*)0, ranges.UnsafeGetElementAddress(0));
+
+                ftName = CreateFontTexture(FontName, 13.0f, (ImFontConfig*)0, ranges.UnsafeGetElementAddress(0));
+
+                ushort* iconRange = stackalloc ushort[3];
+                iconRange[0] = 0xe005;
+                iconRange[1] = 0xf8ff;
+                iconRange[2] = 0;
+                //CreateFontTexture(UEngine.Instance.FileManager.GetRoot(IO.FileManager.ERootDir.Engine) + "fonts/fa-solid-900.ttf", 15.0f, &fontConfig, iconRange);
+                ftName = CreateFontTexture(UEngine.Instance.FileManager.GetRoot(IO.TtFileManager.ERootDir.Engine) + "fonts/fa-solid-900.ttf", 15.0f, (ImFontConfig*)0, iconRange);
+            }
         }
 
-        unsafe void CreateFontTexture(string absFontFile, float size_pixels, ImFontConfig* fontConfig, ushort* glyph_ranges)
+        unsafe enFont CreateFontTexture(string absFontFile, float size_pixels, ImFontConfig* fontConfig, ushort* glyph_ranges)
         {
             var fontData = new FontDatas();
 
@@ -209,6 +236,7 @@ namespace EngineNS.EGui.Slate
             io.Fonts.ClearTexData();
 
             mFontDataList.Add(fontData);
+            return (enFont)(mFontDataList.Count - 1);
         }
 
         public unsafe void PushFont(int fontIdx)

@@ -851,6 +851,95 @@ namespace EngineNS.EGui.Controls.PropertyGrid
             }
             return retValue;
         }
+        unsafe bool DrawThicknessParam(int dimIdx, string dimName, float titleWidth, float editWidth)
+        {
+            bool retValue = false;
+            bool valuesDifferent = false;
+            float firstValue = 0;
+            Span<float> valueArray = stackalloc float[Values.Count];
+            for (int i = 0; i < Values.Count; i++)
+            {
+                var v = (Thickness)Values[i];
+                valueArray[i] = ((float*)&v)[dimIdx];
+                if (i == 0)
+                    firstValue = valueArray[i];
+                else if (firstValue != valueArray[i])
+                    valuesDifferent = true;
+            }
+            if (valuesDifferent)
+            {
+#pragma warning disable CA2014
+                Span<byte> textBuffer = stackalloc byte[8];
+#pragma warning restore CA2014
+                var strPtr = System.Runtime.InteropServices.Marshal.StringToHGlobalAnsi(mMultiValueString);
+                var len = (uint)mMultiValueString.Length;
+                fixed (byte* pBuffer = &textBuffer[0])
+                {
+                    ImGuiAPI.SetNextItemWidth(titleWidth);
+                    ImGuiAPI.AlignTextToFramePadding();
+                    ImGuiAPI.Text(dimName);
+                    ImGuiAPI.SameLine(0, -1);
+                    ImGuiAPI.SetNextItemWidth(editWidth);
+                    CoreSDK.SDK_StrCpy(pBuffer, strPtr.ToPointer(), len);
+                    var changed = ImGuiAPI.InputText("##" + dimName, pBuffer, len, ImGuiInputTextFlags_.ImGuiInputTextFlags_None, null, (void*)0);
+                    if (changed)
+                    {
+                        var newValueStr = System.Runtime.InteropServices.Marshal.PtrToStringAnsi((IntPtr)pBuffer);
+                        try
+                        {
+                            var v = System.Convert.ToSingle(newValueStr);
+                            for (int i = 0; i < Values.Count; i++)
+                            {
+                                var tempVal = (Thickness)Values[i];
+                                ((float*)&tempVal)[dimIdx] = v;
+                                Values[i] = tempVal;
+                            }
+                            retValue = true;
+                        }
+                        catch (System.Exception)
+                        {
+                            retValue = false;
+                        }
+                    }
+                }
+                System.Runtime.InteropServices.Marshal.FreeHGlobal(strPtr);
+            }
+            else
+            {
+                var minValue = float.MinValue;
+                var maxValue = float.MaxValue;
+                var v = valueArray[0];
+                ImGuiAPI.SetNextItemWidth(titleWidth);
+                ImGuiAPI.AlignTextToFramePadding();
+                ImGuiAPI.Text(dimName);
+                ImGuiAPI.SameLine(0, -1);
+                ImGuiAPI.SetNextItemWidth(editWidth);
+                var changed = ImGuiAPI.DragScalar2("##" + dimName, ImGuiDataType_.ImGuiDataType_Float, &v, 0.1f, &minValue, &maxValue, "%0.6f", ImGuiSliderFlags_.ImGuiSliderFlags_None);
+                if (changed)
+                {
+                    for (int i = 0; i < Values.Count; i++)
+                    {
+                        var tempVal = (Thickness)Values[i];
+                        ((float*)&tempVal)[dimIdx] = v;
+                        Values[i] = tempVal;
+                    }
+                    retValue = true;
+                }
+            }
+            return retValue;
+        }
+        public unsafe bool DrawThickness(in PGCustomValueEditorAttribute.EditorInfo info, float width)
+        {
+            var titleWidth = 10;
+            width = width * 0.5f - titleWidth;
+            var changed = DrawThicknessParam(0, "L", titleWidth, width);
+            ImGuiAPI.SameLine(0, -1);
+            changed = changed || DrawThicknessParam(1, "R", titleWidth, width);
+            changed = changed || DrawThicknessParam(2, "T", titleWidth, width);
+            ImGuiAPI.SameLine(0, -1);
+            changed = changed || DrawThicknessParam(3, "B", titleWidth, width);
+            return changed;
+        }
     }
 
     public class CustomPropertyDescriptorCollection : IPooledObject, IObjectPoolBase
@@ -1108,8 +1197,8 @@ namespace EngineNS.EGui.Controls.PropertyGrid
             var getFieldsFlag = System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.NonPublic;
             if(instance != null)
             {
-                var enumrableInterface = instance.GetType().GetInterface(typeof(IEnumerable).FullName, false);
-                if(enumrableInterface != null)
+                var enumerableInterface = instance.GetType().GetInterface(typeof(IEnumerable).FullName, false);
+                if(enumerableInterface != null)
                 {
                     // 多个对象
                     foreach (var objIns in (IEnumerable)instance)
@@ -1118,6 +1207,9 @@ namespace EngineNS.EGui.Controls.PropertyGrid
                             continue;
 
                         var objType = objIns.GetType();
+                        var att = objType.GetCustomAttribute(typeof(PGNoCategoryAttribute));
+                        if (att != null)
+                            withCategoryGroup = false;
                         var objTypeDesc = Rtti.UTypeDesc.TypeOf(objType);
                         PropertyDescriptorCollection pros;
                         var tc = TypeDescriptor.GetConverter(objIns);
@@ -1161,8 +1253,9 @@ namespace EngineNS.EGui.Controls.PropertyGrid
                             }
                         }
 
+                        tempProperties.Cleanup();
                         PropertyDescCollectionPool.ReleaseObject(tempProperties);
-                        tempProperties.ReleaseObject(null);
+                        //tempProperties.ReleaseObject(null);
 
                         var fls = objType.GetFields(getFieldsFlag);
                         var tempFields = PropertyDescCollectionPool.QueryObjectSync();
@@ -1194,6 +1287,9 @@ namespace EngineNS.EGui.Controls.PropertyGrid
                 {
                     // 单个对象
                     var insType = instance.GetType();
+                    var att = insType.GetCustomAttribute(typeof(PGNoCategoryAttribute));
+                    if (att != null)
+                        withCategoryGroup = false;
                     var insTypeDesc = Rtti.UTypeDesc.TypeOf(insType);
                     PropertyDescriptorCollection pros;
                     var tc = TypeDescriptor.GetConverter(instance);
@@ -1251,7 +1347,10 @@ namespace EngineNS.EGui.Controls.PropertyGrid
             }
             else
             {
-                categoryGroups[string.Empty] = properties;
+                var categoryPropertyCollection = new CustomPropertyDescriptorCollection();
+                for (int i = 0; i < properties.Count; i++)
+                    categoryPropertyCollection.Add(properties[i]);
+                categoryGroups[string.Empty] = categoryPropertyCollection;
             }
 
             properties.ReleaseObject();

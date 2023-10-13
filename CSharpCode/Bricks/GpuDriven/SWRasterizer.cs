@@ -4,6 +4,7 @@ using EngineNS.Graphics.Pipeline;
 using EngineNS.Graphics.Pipeline.Common;
 using EngineNS.GamePlay;
 using System.Threading.Tasks;
+using System.Diagnostics;
 
 namespace EngineNS.Bricks.GpuDriven
 {
@@ -223,7 +224,7 @@ namespace EngineNS.Bricks.GpuDriven
         public TtSwRasterizeDispatchArgShading()
         {
             CodeName = RName.GetRName("Shaders/Bricks/GpuDriven/SWRasterizer.compute", RName.ERNameType.Engine);
-            MainName = "CS_DispatchArgMain";
+            MainName = "CS_GetClustersCount";
 
             this.UpdatePermutation();
         }
@@ -242,11 +243,46 @@ namespace EngineNS.Bricks.GpuDriven
             var index = drawcall.FindBinder(NxRHI.EShaderBindType.SBT_CBuffer, "cbShadingEnv");
             if (index.IsValidPointer)
             {
-                if (node.CBShadingEnv == null)
+                if (node.CBShadingStruct == null)
                 {
-                    node.CBShadingEnv = UEngine.Instance.GfxDevice.RenderContext.CreateCBV(index);
+                    node.CBShadingStruct = UEngine.Instance.GfxDevice.RenderContext.CreateCBV(index);
                 }
-                drawcall.BindCBuffer(index, node.CBShadingEnv);
+                drawcall.BindCBuffer(index, node.CBShadingStruct);
+            }
+        }
+    }
+
+    public class TtSwRasterizeSetUpShading : Graphics.Pipeline.Shader.UComputeShadingEnv
+    {
+        public override Vector3ui DispatchArg
+        {
+            get => new Vector3ui(8, 8, 1);
+        }
+        public TtSwRasterizeSetUpShading()
+        {
+            CodeName = RName.GetRName("Shaders/Bricks/GpuDriven/SWRasterizer.compute", RName.ERNameType.Engine);
+            MainName = "CS_SetUpRasterizer";
+
+            this.UpdatePermutation();
+        }
+        protected override void EnvShadingDefines(in FPermutationId id, NxRHI.UShaderDefinitions defines)
+        {
+            base.EnvShadingDefines(in id, defines);
+        }
+        public override void OnDrawCall(NxRHI.UComputeDraw drawcall, Graphics.Pipeline.URenderPolicy policy)
+        {
+            var node = drawcall.TagObject as TtSwRasterizeNode;
+
+            drawcall.BindUav("OutputQuarkTexture", node.GetAttachBuffer(node.QuarkRTPinOut).Uav);
+
+            var index = drawcall.FindBinder(NxRHI.EShaderBindType.SBT_CBuffer, "cbShadingEnv");
+            if (index.IsValidPointer)
+            {
+                if (node.CBShadingStruct == null)
+                {
+                    node.CBShadingStruct = UEngine.Instance.GfxDevice.RenderContext.CreateCBV(index);
+                }
+                drawcall.BindCBuffer(index, node.CBShadingStruct);
             }
         }
     }
@@ -260,7 +296,7 @@ namespace EngineNS.Bricks.GpuDriven
         public TtSwRasterizeShading()
         {
             CodeName = RName.GetRName("Shaders/Bricks/GpuDriven/SWRasterizer.compute", RName.ERNameType.Engine);
-            MainName = "CS_Main";
+            MainName = "CS_RasterizeClusters";
 
             this.UpdatePermutation();
         }
@@ -289,11 +325,11 @@ namespace EngineNS.Bricks.GpuDriven
             var index = drawcall.FindBinder(NxRHI.EShaderBindType.SBT_CBuffer, "cbShadingEnv");
             if (index.IsValidPointer)
             {
-                if (node.CBShadingEnv == null)
+                if (node.CBShadingStruct == null)
                 {
-                    node.CBShadingEnv = UEngine.Instance.GfxDevice.RenderContext.CreateCBV(index);
+                    node.CBShadingStruct = UEngine.Instance.GfxDevice.RenderContext.CreateCBV(index);
                 }
-                drawcall.BindCBuffer(index, node.CBShadingEnv);
+                drawcall.BindCBuffer(index, node.CBShadingStruct);
             }
         }
     }
@@ -318,16 +354,19 @@ namespace EngineNS.Bricks.GpuDriven
                 DispatchArg = Vector3ui.One;
             }
             public Vector2 QuarkRTSizeFactor;
-            public int MaxVisClusterIndex;
-            public int MaxClusterIndex;
+            public uint MaxVisClusterIndex;
+            public uint MaxClusterIndex;
             public Vector3ui DispatchArg;
         };
         FShadingStruct mShadingStruct = new FShadingStruct();
-        public NxRHI.UCbView CBShadingEnv;
+        public NxRHI.UCbView CBShadingStruct;
 
         public TtGpuBuffer<int> IndirectArgBuffer = new TtGpuBuffer<int>();
         public TtSwRasterizeDispatchArgShading DispatchArgShading;
         private NxRHI.UComputeDraw DispatchArgShadingDrawcall;
+
+        public TtSwRasterizeSetUpShading SetUpRasterizeShading;
+        private NxRHI.UComputeDraw SetUpRasterizeDrawcall;
 
         public TtSwRasterizeShading SWRasterizer;
         private NxRHI.UComputeDraw SWRasterizerDrawcall;
@@ -361,8 +400,8 @@ namespace EngineNS.Bricks.GpuDriven
         public override void OnResize(URenderPolicy policy, float x, float y)
         {
             base.OnResize(policy, x, y);
-            mShadingStruct.QuarkRTSizeFactor.X = x * QUARK_SUBPIXEL_SAMPLES;
-            mShadingStruct.QuarkRTSizeFactor.Y = y * QUARK_SUBPIXEL_SAMPLES;
+            mShadingStruct.QuarkRTSizeFactor.X = x;
+            mShadingStruct.QuarkRTSizeFactor.Y = y;
         }
         public override async Task Initialize(URenderPolicy policy, string debugName)
         {
@@ -379,6 +418,10 @@ namespace EngineNS.Bricks.GpuDriven
             DispatchArgShadingDrawcall = rc.CreateComputeDraw();
             DispatchArgShading = UEngine.Instance.ShadingEnvManager.GetShadingEnv<TtSwRasterizeDispatchArgShading>();
 
+            CoreSDK.DisposeObject(ref SetUpRasterizeDrawcall);
+            SetUpRasterizeDrawcall = rc.CreateComputeDraw();
+            SetUpRasterizeShading = UEngine.Instance.ShadingEnvManager.GetShadingEnv<TtSwRasterizeSetUpShading>();
+
             mShadingStruct.DispatchArg = SWRasterizer.DispatchArg;
             unsafe
             {
@@ -390,19 +433,34 @@ namespace EngineNS.Bricks.GpuDriven
                 IndirectArgBuffer.SetSize(size + 1, &idArg, NxRHI.EBufferType.BFT_UAV | NxRHI.EBufferType.BFT_SRV | NxRHI.EBufferType.BFT_IndirectArgs);
             }
         }
-        public override void TickLogic(UWorld world, URenderPolicy policy, bool bClear)
+        public unsafe override void TickLogic(UWorld world, URenderPolicy policy, bool bClear)
         {
-            if (CBShadingEnv != null)
+            var attachment = GetAttachBuffer(ClustersPinIn);
+            if (attachment.Srv != null)
             {
-                CBShadingEnv.SetValue("ShadingStruct", in mShadingStruct);
+                mShadingStruct.MaxClusterIndex = attachment.Srv.mCoreObject.Desc.Buffer.ElementWidth / (uint)sizeof(TtCullClusterNode.FClusterData);
+            }
+            else
+            {
+                mShadingStruct.MaxClusterIndex = 0;
+            }
+            if (CBShadingStruct != null)
+            {
+                CBShadingStruct.SetValue("ShadingStruct", in mShadingStruct);
             }
             
             var cmd = BasePass.DrawCmdList;
             cmd.BeginCommand();
 
+            // get total dispatch param
             DispatchArgShading.SetDrawcallDispatch(this, policy, DispatchArgShadingDrawcall, 1, 1, 1, true);
             cmd.PushGpuDraw(DispatchArgShadingDrawcall);
 
+            // setup rasterizer
+            SetUpRasterizeShading.SetDrawcallDispatch(this, policy, SetUpRasterizeDrawcall, (uint)mShadingStruct.QuarkRTSizeFactor.X, (uint)mShadingStruct.QuarkRTSizeFactor.Y, 1, true);
+            cmd.PushGpuDraw(SetUpRasterizeDrawcall);
+
+            // do rasterization
             //SWRasterizer.SetDrawcallDispatch(this, policy, SWRasterizerDrawcall, 1, 1, 1, false);
             SWRasterizer.SetDrawcallIndirectDispatch(this, policy, SWRasterizerDrawcall, IndirectArgBuffer.GpuBuffer);
             cmd.PushGpuDraw(SWRasterizerDrawcall);
@@ -433,7 +491,7 @@ namespace EngineNS.Bricks.GpuDriven
         {
 
         }
-        public override void OnDrawCall(URenderPolicy.EShadingType shadingType, NxRHI.UGraphicDraw drawcall, URenderPolicy policy, Graphics.Mesh.UMesh mesh)
+        public override void OnDrawCall(NxRHI.ICommandList cmd, URenderPolicy.EShadingType shadingType, NxRHI.UGraphicDraw drawcall, URenderPolicy policy, Graphics.Mesh.UMesh mesh)
         {
             var node = drawcall.TagObject as TtQuarkResolveNode;
 
@@ -447,7 +505,7 @@ namespace EngineNS.Bricks.GpuDriven
             if (index.IsValidPointer)
                 drawcall.BindSampler(index, UEngine.Instance.GfxDevice.SamplerStateManager.LinearClampState);
 
-            base.OnDrawCall(shadingType, drawcall, policy, mesh);
+            base.OnDrawCall(cmd, shadingType, drawcall, policy, mesh);
         }
     }
     public class TtQuarkResolveNode : USceenSpaceNode
@@ -499,22 +557,22 @@ namespace EngineNS.Bricks.GpuDriven
             PassDesc.AttachmentMRTs[0].StoreAction = NxRHI.EFrameBufferStoreAction.StoreActionStore;
             PassDesc.AttachmentMRTs[1].Format = Rt1PinOut.Attachement.Format;
             PassDesc.AttachmentMRTs[1].Samples = 1;
-            PassDesc.AttachmentMRTs[1].LoadAction = NxRHI.EFrameBufferLoadAction.LoadActionDontCare;
+            PassDesc.AttachmentMRTs[1].LoadAction = NxRHI.EFrameBufferLoadAction.LoadActionClear;
             PassDesc.AttachmentMRTs[1].StoreAction = NxRHI.EFrameBufferStoreAction.StoreActionStore;
             PassDesc.AttachmentMRTs[2].Format = Rt2PinOut.Attachement.Format;
             PassDesc.AttachmentMRTs[2].Samples = 1;
-            PassDesc.AttachmentMRTs[2].LoadAction = NxRHI.EFrameBufferLoadAction.LoadActionDontCare;
+            PassDesc.AttachmentMRTs[2].LoadAction = NxRHI.EFrameBufferLoadAction.LoadActionClear;
             PassDesc.AttachmentMRTs[2].StoreAction = NxRHI.EFrameBufferStoreAction.StoreActionStore;
             PassDesc.AttachmentMRTs[3].Format = Rt3PinOut.Attachement.Format;
             PassDesc.AttachmentMRTs[3].Samples = 1;
-            PassDesc.AttachmentMRTs[3].LoadAction = NxRHI.EFrameBufferLoadAction.LoadActionDontCare;
+            PassDesc.AttachmentMRTs[3].LoadAction = NxRHI.EFrameBufferLoadAction.LoadActionClear;
             PassDesc.AttachmentMRTs[3].StoreAction = NxRHI.EFrameBufferStoreAction.StoreActionStore;
 
             PassDesc.m_AttachmentDepthStencil.Format = DepthStencilPinIn.Attachement.Format;
             PassDesc.m_AttachmentDepthStencil.Samples = 1;
             PassDesc.m_AttachmentDepthStencil.LoadAction = NxRHI.EFrameBufferLoadAction.LoadActionClear;
             PassDesc.m_AttachmentDepthStencil.StoreAction = NxRHI.EFrameBufferStoreAction.StoreActionStore;
-            PassDesc.m_AttachmentDepthStencil.StencilLoadAction = NxRHI.EFrameBufferLoadAction.LoadActionDontCare;
+            PassDesc.m_AttachmentDepthStencil.StencilLoadAction = NxRHI.EFrameBufferLoadAction.LoadActionClear;
             PassDesc.m_AttachmentDepthStencil.StencilStoreAction = NxRHI.EFrameBufferStoreAction.StoreActionStore;
             //PassDesc.mFBClearColorRT0 = new Color4f(1, 0, 0, 0);
             //PassDesc.mDepthClearValue = 1.0f;                
@@ -535,19 +593,69 @@ namespace EngineNS.Bricks.GpuDriven
 }
 namespace EngineNS.UTest
 {
-    //[UTest]
+    [UTest]
     public class UTest_TtSoftRaster
     {
         bool IgnorTest = false;
+
+        int MipLevelForRect(ref Vector4 RectPixels, int DesiredFootprintPixels)
+        {
+            var MaxPixelOffset = DesiredFootprintPixels - 1;
+            var MipOffset = (int)Math.Log2((double)DesiredFootprintPixels) - 1;
+
+            // Calculate lowest mip level that allows us to cover footprint of the desired size in pixels.
+            // Start by calculating separate x and y mip level requirements.
+            // 2 pixels of mip k cover 2^(k+1) pixels of mip 0. To cover at least n pixels of mip 0 by two pixels of mip k we need k to be at least k = ceil( log2( n ) ) - 1.
+            // For integer n>1: ceil( log2( n ) ) = floor( log2( n - 1 ) ) + 1.
+            // So k = floor( log2( n - 1 )
+            // For integer n>1: floor( log2( n ) ) = firstbithigh( n )
+            // So k = firstbithigh( n - 1 )
+            // As RectPixels min/max are both inclusive their difference is one less than number of pixels (n - 1), so applying firstbithigh to this difference gives the minimum required mip.
+            // NOTE: firstbithigh is a FULL rate instruction on GCN while log2 is QUARTER rate instruction.
+            Vector2 MipLevelXY = new Vector2((float)Math.Ceiling(Math.Log2(RectPixels.Z - RectPixels.X)), (float)Math.Ceiling(Math.Log2(RectPixels.W - RectPixels.Y)));
+
+            // Mip level needs to be big enough to cover both x and y requirements. Go one extra level down for 4x4 sampling.
+            // firstbithigh(0) = -1, so clamping with 0 here also handles the n=1 case where mip 0 footprint is just 1 pixel wide/tall.
+            int MipLevel = Math.Max(Math.Max((int)MipLevelXY.X, (int)MipLevelXY.Y) - MipOffset, 0);
+
+            // MipLevel now contains the minimum MipLevel that can cover a number of pixels equal to the size of the rectangle footprint, but the HZB footprint alignments are quantized to powers of two.
+            // The quantization can translate down the start of the represented range by up to 2^k-1 pixels, which can decrease the number of usable pixels down to 2^(k+1) - 2^k-1.
+            // Depending on the alignment of the rectangle this might require us to pick one level higher to cover all rectangle footprint pixels.
+            // Note that testing one level higher is always enough as this guarantees 2^(k+2) - 2^k usable pixels after alignment, which is more than the 2^(k+1) required pixels.
+
+            // Transform coordinates down to coordinates of selected mip level and if they are not within reach increase level by one.
+            //MipLevel += any((RectPixels.zw >> MipLevel) - (RectPixels.xy >> MipLevel) > MaxPixelOffset) ? 1 : 0;
+            RectPixels.X = ((int)RectPixels.X) >> MipLevel;
+            RectPixels.Y = ((int)RectPixels.Y) >> MipLevel;
+            RectPixels.Z = ((int)RectPixels.Z) >> MipLevel;
+            RectPixels.W = ((int)RectPixels.W) >> MipLevel;
+            if (RectPixels.Z - RectPixels.X > MaxPixelOffset ||
+                RectPixels.W - RectPixels.Y > MaxPixelOffset)
+                MipLevel += 1;
+
+            return MipLevel;
+        }
+
 
         public void UnitTestEntrance()
         {
             if (IgnorTest)
                 return;
 
-            var A = new Vector2i(100, 500);
-            var B = new Vector2i(150, 100);
-            var C = new Vector2i(700, 600);
+            // test mip level
+            var RectA = new Vector4(50, 50, 53, 52);
+            var RectB = new Vector4(50, 50, 80, 80);
+            {
+                var mip = MipLevelForRect(ref RectA, 4);
+                Debug.WriteLine($"MipLevel = {mip};");
+
+                mip = MipLevelForRect(ref RectB, 4);
+                Debug.WriteLine($"MipLevel = {mip};");
+            }
+
+            var A = new Vector2i(50, 700);
+            var B = new Vector2i(1000, 1000);
+            var C = new Vector2i(700, 50);
             {
                 var image = StbImageSharp.ImageResult.CreateImage(1024, 1024, StbImageSharp.ColorComponents.RedGreenBlueAlpha);
                 image.Clear(Color.Black);

@@ -125,18 +125,18 @@ namespace EngineNS.Graphics.Pipeline.Common
             using (new Profiler.TimeScopeHelper(ScopeTick))
             {
                 var cmdlist = BasePass.DrawCmdList;
-                var recorder = cmdlist.BeginCommand();
+                cmdlist.BeginCommand();
                 if (ScreenMesh != null)
                 {
                     for (int j = 0; j < ScreenMesh.Atoms.Count; j++)
                     {
-                        var drawcall = ScreenMesh.GetDrawCall(GBuffers, j, ScreenDrawPolicy, Graphics.Pipeline.URenderPolicy.EShadingType.BasePass, this);
+                        var drawcall = ScreenMesh.GetDrawCall(cmdlist.mCoreObject, GBuffers, j, ScreenDrawPolicy, Graphics.Pipeline.URenderPolicy.EShadingType.BasePass, this);
                         if (drawcall == null)
                             continue;
                         drawcall.TagObject = this;
                         drawcall.BindCBuffer(drawcall.Effect.BindIndexer.cbPerViewport, GBuffers.PerViewportCBuffer);
                         drawcall.BindCBuffer(drawcall.Effect.BindIndexer.cbPerCamera, policy.DefaultCamera.PerCameraCBuffer);
-                        recorder.PushGpuDraw(drawcall);
+                        cmdlist.PushGpuDraw(drawcall);
                     }
                 }
                 {

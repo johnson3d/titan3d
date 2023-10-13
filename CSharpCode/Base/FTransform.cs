@@ -1,10 +1,12 @@
-﻿using System;
+﻿using EngineNS.EGui.Controls.PropertyGrid;
+using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Text;
 
 namespace EngineNS
 {
-    [TypeConverter]
+    [TypeConverter, PGNoCategory]
     public struct FTransform
     {
         public static FTransform IdentityForRef = FTransform.CreateTransform(in DVector3.Zero, in Vector3.One, in Quaternion.Identity);
@@ -71,6 +73,7 @@ namespace EngineNS
             tmp.mQuat = quat;
             return tmp;
         }
+        [Browsable(false)]
         public bool HasScale
         {
             get
@@ -78,6 +81,7 @@ namespace EngineNS
                 return Vector3.Equals(in mScale, in Vector3.One).All() == false;
             }
         }
+        [Browsable(false)]
         public bool IsIdentity
         {
             get

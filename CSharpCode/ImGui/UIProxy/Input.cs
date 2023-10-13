@@ -20,7 +20,7 @@ namespace EngineNS.EGui.UIProxy
                 else
                     ImGuiAPI.InputText("", buffer.GetBuffer(), (uint)buffer.GetSize(), flags, callback, (void*)0);
                 ImGuiAPI.PopID();
-                text = buffer.AsText();
+                text = buffer.AsTextUtf8();
             }
         }
     }

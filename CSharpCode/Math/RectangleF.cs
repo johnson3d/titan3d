@@ -116,6 +116,13 @@ namespace EngineNS
 
             return false;
         }
+        public bool Contains(in Vector2 pt)
+        {
+            if ((pt.X >= Left) && (pt.Y >= Top) && (pt.X < Right) && (pt.Y < Bottom))
+                return true;
+
+            return false;
+        }
         [Rtti.Meta]
         public bool Contains(Point2f pt)
         {

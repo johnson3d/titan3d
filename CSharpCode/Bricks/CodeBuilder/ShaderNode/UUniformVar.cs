@@ -10,6 +10,18 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode
         public Rtti.UTypeDesc VarType;
         [EGui.Controls.PropertyGrid.PGCustomValueEditor(HideInPG = true)]
         public PinOut Out { get; set; } = new PinOut();
+        [EGui.Controls.PropertyGrid.PGCustomValueEditor(HideInPG = true)]
+        public PinOut OutXY { get; set; } = new PinOut();
+        [EGui.Controls.PropertyGrid.PGCustomValueEditor(HideInPG = true)]
+        public PinOut OutXYZ { get; set; } = new PinOut();
+        [EGui.Controls.PropertyGrid.PGCustomValueEditor(HideInPG = true)]
+        public PinOut OutX { get; set; } = new PinOut();
+        [EGui.Controls.PropertyGrid.PGCustomValueEditor(HideInPG = true)]
+        public PinOut OutY { get; set; } = new PinOut();
+        [EGui.Controls.PropertyGrid.PGCustomValueEditor(HideInPG = true)]
+        public PinOut OutZ { get; set; } = new PinOut();
+        [EGui.Controls.PropertyGrid.PGCustomValueEditor(HideInPG = true)]
+        public PinOut OutW { get; set; } = new PinOut();
         public UUniformVar()
         {
             VarType = Rtti.UTypeDescGetter<float>.TypeDesc;
@@ -24,9 +36,45 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode
             Out.Name = "v";
             Out.LinkDesc = UShaderEditorStyles.Instance.NewInOutPinDesc();
             this.AddPinOut(Out);
+
+            OutXY.Name = "xy";
+            OutXY.LinkDesc = UShaderEditorStyles.Instance.NewInOutPinDesc();
+            this.AddPinOut(OutXY);
+
+            OutXYZ.Name = "xyz";
+            OutXYZ.LinkDesc = UShaderEditorStyles.Instance.NewInOutPinDesc();
+            this.AddPinOut(OutXYZ);
+            OutX.Name = "x";
+            OutX.LinkDesc = UShaderEditorStyles.Instance.NewInOutPinDesc();
+            this.AddPinOut(OutX);
+            OutY.Name = "y";
+            OutY.LinkDesc = UShaderEditorStyles.Instance.NewInOutPinDesc();
+            this.AddPinOut(OutY);
+            OutZ.Name = "z";
+            OutZ.LinkDesc = UShaderEditorStyles.Instance.NewInOutPinDesc();
+            this.AddPinOut(OutZ);
+            OutW.Name = "w";
+            OutW.LinkDesc = UShaderEditorStyles.Instance.NewInOutPinDesc();
+            this.AddPinOut(OutW);
         }
         public override Rtti.UTypeDesc GetOutPinType(PinOut pin)
         {
+            if(pin == OutXY)
+            {
+                return Rtti.UTypeDesc.TypeOf(typeof(EngineNS.Vector2));
+            }
+            else if (pin == OutXYZ)
+            {
+                return Rtti.UTypeDesc.TypeOf(typeof(EngineNS.Vector3));
+            }
+            else if((pin == OutX) ||
+                    (pin == OutY) ||
+                    (pin == OutZ) ||
+                    (pin == OutW))
+            {
+                return Rtti.UTypeDesc.TypeOf(typeof(float));
+            }
+            
             return VarType;
         }
         public override void OnMouseStayPin(NodePin stayPin)
@@ -89,6 +137,30 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode
 
         public override UExpressionBase GetExpression(NodePin pin, ref BuildCodeStatementsData data)
         {
+            if(pin == OutXY)
+            {
+                return new UVariableReferenceExpression("xy", new UVariableReferenceExpression(Name));
+            }
+            else if (pin == OutXYZ)
+            {
+                return new UVariableReferenceExpression("xyz", new UVariableReferenceExpression(Name));
+            }
+            else if (pin == OutX)
+            {
+                return new UVariableReferenceExpression("x", new UVariableReferenceExpression(Name));
+            }
+            else if (pin == OutY)
+            {
+                return new UVariableReferenceExpression("y", new UVariableReferenceExpression(Name));
+            }
+            else if (pin == OutZ)
+            {
+                return new UVariableReferenceExpression("z", new UVariableReferenceExpression(Name));
+            }
+            else if (pin == OutW)
+            {
+                return new UVariableReferenceExpression("w", new UVariableReferenceExpression(Name));
+            }
             return new UVariableReferenceExpression(Name);
         }
     }

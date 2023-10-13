@@ -196,7 +196,6 @@ namespace EngineNS.EGui
         [Rtti.Meta]
         public Vector2 Size { get; set; } = new Vector2(50, 50);
         RName mTextureName;
-        public NxRHI.USrView mTexture;
         [Rtti.Meta]
         [RName.PGRName(FilterExts = NxRHI.USrView.AssetExt)]
         public RName TextureName 
@@ -206,17 +205,26 @@ namespace EngineNS.EGui
             {
                 mTextureName = value;
                 if (value == null)
-                    mTexture = null;
+                    mTextureTask = null;
                 else
                 {
-                    Action action = async ()=>
-                    {
-                        mTexture = await UEngine.Instance.GfxDevice.TextureManager.GetTexture(value);
-                    };
-                    action();
+                    mTextureTask = UEngine.Instance.GfxDevice.TextureManager.GetTexture(value);
                 }
             }
         }
+        Thread.Async.TtTask<NxRHI.USrView>? mTextureTask;
+        public NxRHI.USrView Texture
+        {
+            get
+            {
+                if (mTextureTask == null)
+                    return null;
+                if (mTextureTask.Value.IsCompleted == false)
+                    return null;
+                return mTextureTask.Value.Result;
+            }
+        }
+
         [Rtti.Meta]
         public List<Vector4> FrameUVs { get; set; } = new List<Vector4>();
         public void GetUV(int frame, out Vector2 min, out Vector2 max)
@@ -241,16 +249,26 @@ namespace EngineNS.EGui
         public UInt32 Color { get; set; } = 0xFFFFFFFF;
         [Rtti.Meta]
         public float Duration { get; set; } = 1000.0f;
+        public bool IsReadyToDraw()
+        {
+            if (mTextureTask == null)
+                return true;
+            else if (mTextureTask.Value.IsCompleted == false)
+                return false;
+            return true;
+        }
         public void OnDraw(ImDrawList cmdlist, in Vector2 rectMin, in Vector2 rectMax, int frame)
         {
-            if (mTexture != null)
+            if (!IsReadyToDraw())
+                return;
+            if (mTextureTask != null)
             {
                 Vector2 uvMin;
                 Vector2 uvMax;
                 this.GetUV(frame, out uvMin, out uvMax);
                 unsafe
                 {
-                    cmdlist.AddImage(mTexture.GetTextureHandle().ToPointer(), in rectMin, in rectMax, in uvMin, in uvMax, Color);
+                    cmdlist.AddImage(mTextureTask.Value.Result.GetTextureHandle().ToPointer(), in rectMin, in rectMax, in uvMin, in uvMax, Color);
                 }
             }
             else
@@ -267,7 +285,7 @@ namespace EngineNS.EGui
             UVAnims.Clear();
         }
         public Dictionary<RName, UUvAnim> UVAnims { get; } = new Dictionary<RName, UUvAnim>();
-        public async System.Threading.Tasks.Task<UUvAnim> GetUVAnim(RName rn)
+        public async Thread.Async.TtTask<UUvAnim> GetUVAnim(RName rn)
         {
             if (rn == null)
                 return null;

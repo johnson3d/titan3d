@@ -22,9 +22,15 @@
     <Compile Include="$(MSBuildThisFileDirectory)Canvas\CanvasDrawCmdList.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Canvas\Path.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Common.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Controls\Button.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Controls\CheckBox.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Controls\Containers\Border.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Controls\Containers\Canvas.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Controls\Containers\Container.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Controls\ContentPresenter.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Controls\Image.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Controls\Text.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Controls\ToggleButton.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Controls\UIControl.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Controls\UIElement.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Controls\UIElement_Bind.cs" />
@@ -32,12 +38,18 @@
     <Compile Include="$(MSBuildThisFileDirectory)Controls\UIElement_Msg.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Controls\UIElement_Render.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Controls\UIElement_Template.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Controls\UIElement_Trigger.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Editor\TtUIEditor.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Event\RoutedEvent.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Layout\LayoutQueue.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Layout\UILayoutManager.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Template\Assist.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Template\BaseTemplates.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Template\ControlTemplate.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Template\UITemplate.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Template\VisualTreeHelper.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Trigger\Trigger.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Trigger\TriggerAction.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)UIAsset.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)UIConfig.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)UIHost.cs" />
@@ -45,6 +57,10 @@
     <Compile Include="$(MSBuildThisFileDirectory)UIHost_Render.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)UIManager.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)UIManager_Msg.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)UIManager_Template.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)UIManager_Trigger.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)UIMeshModifier.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)UINode.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)UIRender.cs" />
   </ItemGroup>
 </Project>

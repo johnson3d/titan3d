@@ -338,7 +338,7 @@ namespace EngineNS.EGui
             {
                 //PresentWindow?.Cleanup();
                 PresentWindow = null;
-                DrawData?.Cleanup();
+                DrawData?.Dispose();
                 DrawData = null;
             }
         }

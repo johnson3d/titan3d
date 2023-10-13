@@ -233,7 +233,7 @@ namespace EngineNS.Bricks.Network.RPC
 			}
 			return true;
 		}
-        public unsafe override void Tick(UEngine host)
+        public unsafe override void TickModule(UEngine host)
         {
             NetPackageManager.Tick();
 			var now = Support.Time.GetTickCount();

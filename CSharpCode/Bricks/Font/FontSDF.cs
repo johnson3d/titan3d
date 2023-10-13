@@ -125,7 +125,7 @@ namespace EngineNS.Bricks.Font
                     {
                         buffer.SetTextUtf8(mName);
                         ImGuiAPI.InputText("##in_rname", buffer.GetBuffer(), (uint)buffer.GetSize(), ImGuiInputTextFlags_.ImGuiInputTextFlags_None, null, (void*)0);
-                        var name = buffer.AsText();
+                        var name = buffer.AsTextUtf8();
                         if (mName != name)
                         {
                             mName = name;
@@ -410,6 +410,9 @@ namespace EngineNS.Bricks.Font
 
     public class TtFontManager : AuxPtrType<Canvas.FTFontManager>
     {
+        public const string FontSDFAssetExt = ".fontsdf";
+        public const string FontAssetExt = ".font";
+
         public TtFontManager()
         {
             mCoreObject = Canvas.FTFontManager.CreateInstance();
@@ -473,10 +476,10 @@ namespace EngineNS.Bricks.Font
             //}
             return base.PostInitialize(host);
         }
-        public override void Tick(UEngine host)
+        public override void TickModule(UEngine host)
         {
             FontManager.Tick(host);
-            base.Tick(host);
+            base.TickModule(host);
         }
         public override void Cleanup(UEngine host)
         {

@@ -226,6 +226,7 @@ namespace EngineNS.Bricks.Input
         BUTTON_RIGHT = 3u,
         BUTTON_X1 = 4u,
         BUTTON_X2 = 5u,
+        NUM_BUTTONS = 5,
     }
 
     public struct MouseButtonEvent

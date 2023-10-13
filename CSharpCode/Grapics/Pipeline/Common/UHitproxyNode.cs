@@ -263,7 +263,7 @@ namespace EngineNS.Graphics.Pipeline.Common
 
             using (new Profiler.TimeScopeHelper(ScopeTick))
             {
-                HitproxyPass.PrepareForDraw();
+                HitproxyPass.BeginCommands();
                 foreach (var i in policy.VisibleMeshes)
                 {
                     if (i.Atoms == null)
@@ -273,13 +273,14 @@ namespace EngineNS.Graphics.Pipeline.Common
                     {
                         for (int j = 0; j < i.Atoms.Count; j++)
                         {
-                            var hpDrawcall = i.GetDrawCall(GHitproxyBuffers, j, policy, URenderPolicy.EShadingType.HitproxyPass, this);
+                            var layer = i.Atoms[j].Material.RenderLayer;
+                            var cmd = HitproxyPass.GetCmdList(layer);
+                            var hpDrawcall = i.GetDrawCall(cmd.mCoreObject, GHitproxyBuffers, j, policy, URenderPolicy.EShadingType.HitproxyPass, this);
                             if (hpDrawcall != null)
                             {
                                 hpDrawcall.BindGBuffer(policy.DefaultCamera, GHitproxyBuffers);
 
-                                var layer = i.Atoms[j].Material.RenderLayer;
-                                HitproxyPass.PushDrawCall(layer, hpDrawcall);
+                                cmd.PushGpuDraw(hpDrawcall);
                             }
                         }
                     }
@@ -300,6 +301,9 @@ namespace EngineNS.Graphics.Pipeline.Common
                     GHitproxyBuffers.BuildFrameBuffers(policy);
                     GGizmosBuffers.BuildFrameBuffers(policy);
                     HitproxyPass.BuildRenderPass(policy, in GHitproxyBuffers.Viewport, passClears, (int)ERenderLayer.RL_Num, GHitproxyBuffers, GGizmosBuffers, "Hitproxy:");
+
+                    HitproxyPass.EndCommands();
+                    HitproxyPass.ExecuteCommands();
                 }
             }   
 
@@ -328,7 +332,7 @@ namespace EngineNS.Graphics.Pipeline.Common
                     cpDraw.BindTextureDest(dstTex);
                     cpDraw.mCoreObject.BindTextureSrc(attachBuffer.Srv.mCoreObject.GetBufferAsTexture());
                     cmdlist_post.PushGpuDraw(cpDraw.mCoreObject.NativeSuper);
-                    cmdlist_post.FlushDraws(true);
+                    cmdlist_post.FlushDraws();
                 }
                 else if (dstBf != null)
                 {
@@ -338,7 +342,7 @@ namespace EngineNS.Graphics.Pipeline.Common
                     cpDraw.mCoreObject.BindTextureSrc(attachBuffer.Srv.mCoreObject.GetBufferAsTexture());
                     cpDraw.mCoreObject.FootPrint = CopyBufferFootPrint;
                     cmdlist_post.PushGpuDraw(cpDraw.mCoreObject.NativeSuper);
-                    cmdlist_post.FlushDraws(true);
+                    cmdlist_post.FlushDraws();
                 }
             }
             cmdlist_post.EndCommand();

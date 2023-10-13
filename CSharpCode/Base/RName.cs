@@ -221,11 +221,11 @@ namespace EngineNS
         {
             if (nameStr == null)
                 return null;
-            var segs = nameStr.Split(',');
+            var segs = nameStr.Split(':');
             if (segs.Length < 2)
                 return null;
-            var rnType = (RName.ERNameType)Support.TConvert.ToEnumValue(typeof(RName.ERNameType), segs[0]);
-            return RNameManager.Instance.GetRName(segs[1], rnType);
+            var rnType = (RName.ERNameType)Support.TConvert.ToEnumValue(typeof(RName.ERNameType), segs[1]);
+            return RNameManager.Instance.GetRName(segs[0], rnType);
         }
         public override string ToString()
         {

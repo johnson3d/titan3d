@@ -9,6 +9,17 @@ using Mono.CompilerServices.SymbolWriter;
 
 namespace EngineNS.Bricks.CodeBuilder.MacrossNode
 {
+    public interface IMacrossMethodHolder : IGraphEditor
+    {
+        public MemberVar DraggingMember { get; set; }
+        public bool IsDraggingMember { get; set; }
+        public UClassDeclaration DefClass { get; }
+        public UCSharpCodeGenerator CSCodeGen { get; }
+        public List<UMacrossMethodGraph> Methods { get; }
+        public EGui.Controls.PropertyGrid.PropertyGrid PGMember { get; set; }
+        public void RemoveMethod(UMacrossMethodGraph method);
+        public void SetConfigUnionNode(NodeGraph.IUnionNode node);
+    }
     public partial class UMethodStartNode : UNodeBase, IAfterExecNode
     {
         public PinOut AfterExec { get; set; } = new PinOut();
@@ -732,7 +743,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
             }
             return null;
         }
-        public static UMacrossMethodGraph NewGraph(UMacrossEditor kls, UMethodDeclaration method = null)
+        public static UMacrossMethodGraph NewGraph(IMacrossMethodHolder kls, UMethodDeclaration method = null)
         {
             var result = new UMacrossMethodGraph();
             result.MacrossEditor = kls;
@@ -818,9 +829,9 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
         //}
         //private UMethodStartNode StartNode;
         [Browsable(false)]
-        public UMacrossEditor MacrossEditor
+        public IMacrossMethodHolder MacrossEditor
         {
-            get => (UMacrossEditor)Editor;
+            get => (IMacrossMethodHolder)Editor;
             private set
             {
                 Editor = value;
@@ -1347,7 +1358,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
             if (mousePt.X > winSize.X || mousePt.Y > winSize.Y)
                 return;
 
-            if (MacrossEditor.IsDraggingMember && MacrossEditor.DraggingMember != null)
+            if (MacrossEditor != null && MacrossEditor.IsDraggingMember && MacrossEditor.DraggingMember != null)
             {
                 MacrossEditor.DraggingMember.ParentGraph = this;
                 var screenPt = this.ToScreenPos(mousePt.X, mousePt.Y);

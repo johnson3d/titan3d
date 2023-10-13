@@ -10,7 +10,34 @@ using EngineNS.DesignMacross.Editor;
 
 namespace EngineNS.DesignMacross
 {
+    public class ObservableCollection<T> : System.Collections.ObjectModel.ObservableCollection<T>
+    {
 
+    }
+    public class TypeHelper
+    {
+        public static List<(T AttributeInstance, UTypeDesc TypeDesc)> CollectTypesByAttribute<T>() where T : Attribute
+        {
+            List<(T, UTypeDesc)> temp = new List<(T, UTypeDesc)>();
+            foreach (var service in Rtti.UTypeDescManager.Instance.Services.Values)
+            {
+                foreach (var type in service.Types.Values)
+                {
+                    if (type.IsValueType)
+                        continue;
+                    if (type.IsSealed)
+                        continue;
+
+                    var att = type.GetCustomAttribute<T>(false);
+                    if (att != null)
+                    {
+                        temp.Add((att, type));
+                    }
+                }
+            }
+            return temp;
+        }
+    }
     public static class TtDesignMacrossUtil
     {
         public static void ListRangeRemove<T>(List<T> list, List<T> removeList)

@@ -127,10 +127,10 @@ namespace EngineNS.Graphics.Mesh
 
             return codeString;
         }
-        public override void OnDrawCall(URenderPolicy.EShadingType shadingType, NxRHI.UGraphicDraw drawcall, URenderPolicy policy, UMesh mesh, int atom)
+        public override void OnDrawCall(NxRHI.ICommandList cmd, URenderPolicy.EShadingType shadingType, NxRHI.UGraphicDraw drawcall, URenderPolicy policy, UMesh mesh, int atom)
         {
-            base.OnDrawCall(shadingType, drawcall, policy, mesh, atom);
-            mInstanceModifier?.OnDrawCall(shadingType, drawcall, policy, mesh);
+            base.OnDrawCall(cmd, shadingType, drawcall, policy, mesh, atom);
+            mInstanceModifier?.OnDrawCall(cmd, shadingType, drawcall, policy, mesh);
         }
     }
 

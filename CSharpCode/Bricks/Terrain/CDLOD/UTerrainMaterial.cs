@@ -193,7 +193,7 @@ namespace EngineNS.Bricks.Terrain.CDLOD
             NormalTextureArray?.Dispose();
             NormalTextureArray = null;
         }
-        public bool BuildSRV()
+        public bool BuildSRV(NxRHI.ICommandList cmd)
         {
             Cleanup();
 
@@ -249,7 +249,7 @@ namespace EngineNS.Bricks.Terrain.CDLOD
                             fp.Depth = 1;
                             fp.RowPitch = (uint)txDesc.MipSizes[j].Z;
                             fp.TotalSize = fp.RowPitch * fp.Height;
-                            DiffuseTextureArray.UpdateGpuData(subRes, mipDatas[j].mCoreObject.GetData(), &fp);
+                            DiffuseTextureArray.UpdateGpuData(cmd, subRes, mipDatas[j].mCoreObject.GetData(), &fp);
                         }
                     }
                 }
@@ -306,7 +306,7 @@ namespace EngineNS.Bricks.Terrain.CDLOD
                             fp.Depth = 1;
                             fp.RowPitch = (uint)txDesc.MipSizes[j].Z;
                             fp.TotalSize = fp.RowPitch * fp.Height;
-                            NormalTextureArray.UpdateGpuData(subRes, mipDatas[j].mCoreObject.GetData(), &fp);
+                            NormalTextureArray.UpdateGpuData(cmd, subRes, mipDatas[j].mCoreObject.GetData(), &fp);
                         }
                     }
                 }

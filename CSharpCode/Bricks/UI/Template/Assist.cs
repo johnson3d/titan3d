@@ -14,14 +14,4 @@ namespace EngineNS.UI.Template
         TemplateBinding,
         Resource
     }
-    internal interface ITemplateValue
-    {
-
-    }
-    internal struct TemplateValue<T> : ITemplateValue
-    {
-        public enTemplateValueType Type;
-        public Bind.TtBindableProperty Property;
-        public T Value;
-    }
 }

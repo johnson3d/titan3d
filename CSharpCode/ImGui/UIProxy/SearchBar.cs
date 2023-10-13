@@ -56,11 +56,11 @@ namespace EngineNS.EGui.UIProxy
                 ImGuiAPI.PushStyleColor(ImGuiCol_.ImGuiCol_Border, EGui.UIProxy.StyleConfig.Instance.PGSearchBoxFocusBorderColor);
 
             ImGuiAPI.SetNextItemWidth(width);
-            using (var buffer = BigStackBuffer.CreateInstance(64))
-            {
-                buffer.SetTextUtf8("Ch:中");
-                ImGuiAPI.TextAsPointer((sbyte*)buffer.GetBuffer());
-            }
+            //using (var buffer = BigStackBuffer.CreateInstance(64))
+            //{
+            //    buffer.SetTextUtf8("Ch:中");
+            //    ImGuiAPI.TextAsPointer((sbyte*)buffer.GetBuffer());
+            //}
             retValue = ImGuiAPI.InputText(TName.FromString2("##", "PropertyGridFilterString").ToString(), ref searchText);
 
             var itemMin = ImGuiAPI.GetItemRectMin();

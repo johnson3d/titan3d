@@ -1,4 +1,5 @@
-﻿using EngineNS.Support;
+﻿using EngineNS.Bricks.NodeGraph;
+using EngineNS.Support;
 using NPOI.SS.Formula.Functions;
 using System;
 using System.Collections.Generic;
@@ -65,6 +66,14 @@ namespace EngineNS.UI.Canvas
         {
             mCoreObject.PopClip();
         }
+        public void PushTransformIndex(in UInt16 index)
+        {
+            mCoreObject.PushTransformIndex(index);
+        }
+        public void PopTransformIndex()
+        {
+            mCoreObject.PopTransformIndex();
+        }
         public void AddLine(in EngineNS.Vector2 start, in EngineNS.Vector2 end, float width, in EngineNS.Color color, ref EngineNS.Canvas.FSubDrawCmd outCmd)
         {
             mCoreObject.AddLine(in start, in end, width, in color, ref outCmd);
@@ -78,6 +87,22 @@ namespace EngineNS.UI.Canvas
         public void AddImage(EngineNS.Canvas.ICanvasBrush image, float x, float y, float w, float h, in EngineNS.Color color, ref EngineNS.Canvas.FSubDrawCmd outCmd)
         {
             mCoreObject.AddImage(image, x, y, w, h, in color, ref outCmd);
+        }
+        public void AddRectFill(in RectangleF rect, in Vector4 cornerRadius, in EngineNS.Color color, ref EngineNS.Canvas.FSubDrawCmd outCmd)
+        {
+            mCoreObject.AddRectFill(rect, cornerRadius, color, ref outCmd);
+        }
+        public void AddRectFill(in EngineNS.Vector2 start, in EngineNS.Vector2 end, in Vector4 cornerRadius, in EngineNS.Color color, ref EngineNS.Canvas.FSubDrawCmd outCmd)
+        {
+            mCoreObject.AddRectFill(start, end, cornerRadius, color, ref outCmd);
+        }
+        public void AddRect(in RectangleF rect, in Thickness thickness, in Vector4 cornerRadius, in EngineNS.Color color, ref EngineNS.Canvas.FSubDrawCmd outCmd)
+        {
+            mCoreObject.AddRectLine(rect, thickness, cornerRadius, color, ref outCmd);
+        }
+        public void AddRect(in EngineNS.Vector2 start, in EngineNS.Vector2 end, in Thickness thickness, in Vector4 cornerRadius, in EngineNS.Color color, ref EngineNS.Canvas.FSubDrawCmd outCmd)
+        {
+            mCoreObject.AddRectLine(start, end, thickness, cornerRadius, color, ref outCmd);
         }
         public void AddRect(in EngineNS.Vector2 start, in EngineNS.Vector2 end, float width, in EngineNS.Color color,  CanvasDrawRectType DrawRectType, ref EngineNS.Canvas.FSubDrawCmd outCmd)
         {

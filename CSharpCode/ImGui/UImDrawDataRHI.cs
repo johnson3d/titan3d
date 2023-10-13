@@ -1,10 +1,70 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Runtime.CompilerServices;
 using System.Text;
 
 namespace EngineNS.EGui
 {
-    public class UImDrawDataRHI
+    public class TtImDrawCmdParameters : IDisposable
+    {
+        public unsafe static T CreateInstance<T>() where T : TtImDrawCmdParameters, new()
+        {
+            var result = new T();
+            result.NativeHandle = System.Runtime.InteropServices.GCHandle.Alloc(result);
+
+            var rc = UEngine.Instance.GfxDevice.RenderContext;
+            result.Drawcall = rc.CreateGraphicDraw();
+            {
+                var pipeDesc = new NxRHI.FGpuPipelineDesc();
+                pipeDesc.SetDefault();
+
+                ref var rstDesc = ref pipeDesc.m_Rasterizer;
+                rstDesc.ScissorEnable = 1;
+                rstDesc.FillMode = NxRHI.EFillMode.FMD_SOLID;
+                rstDesc.CullMode = NxRHI.ECullMode.CMD_NONE;
+
+                ref var dssDesc = ref pipeDesc.m_DepthStencil;
+                dssDesc.DepthEnable = 0;
+                dssDesc.DepthWriteMask = NxRHI.EDepthWriteMask.DSWM_ZERO;
+                dssDesc.DepthFunc = NxRHI.EComparisionMode.CMP_ALWAYS;
+
+                ref var bldDesc = ref pipeDesc.m_Blend;
+                var pRenderTarget = bldDesc.RenderTarget;
+                pRenderTarget[0].SetDefault();
+                pRenderTarget[0].SrcBlendAlpha = NxRHI.EBlend.BLD_INV_SRC_ALPHA;
+                pRenderTarget[0].DestBlendAlpha = NxRHI.EBlend.BLD_ONE;
+                pRenderTarget[0].BlendEnable = 1;
+                var pipeline = UEngine.Instance.GfxDevice.PipelineManager.GetPipelineState(UEngine.Instance.GfxDevice.RenderContext, in pipeDesc);
+                result.Drawcall.BindPipeline(pipeline);
+
+                //Pipeline.mCoreObject.GetGpuProgram().BindInputLayout(renderer.InputLayout.mCoreObject);
+            }
+
+            return result;
+        }
+        public static unsafe TtImDrawCmdParameters FromNativeHandle(void* ptr)
+        {
+            var handle = System.Runtime.InteropServices.GCHandle.FromIntPtr((IntPtr)ptr);
+            return handle.Target as TtImDrawCmdParameters;
+        }
+        public virtual void Dispose()
+        {
+            CoreSDK.DisposeObject(ref Drawcall);
+            NativeHandle.Free();
+        }
+        public NxRHI.UGraphicDraw Drawcall;
+        private System.Runtime.InteropServices.GCHandle NativeHandle;
+        public unsafe void* GetHandle()
+        {
+            return System.Runtime.InteropServices.GCHandle.ToIntPtr(NativeHandle).ToPointer();
+        }
+        public virtual void OnDraw(in Matrix mvp)
+        {
+
+        }
+    }
+
+    public class UImDrawDataRHI : IDisposable
     {
         public NxRHI.UCommandList CmdList;
         public NxRHI.UEffectBinder FontTextureBindInfo;
@@ -27,7 +87,7 @@ namespace EngineNS.EGui
 
             var renderer = UEngine.Instance.GfxDevice.SlateRenderer;
 
-            GeomMesh = new NxRHI.UGeomMesh();
+            GeomMesh = rc.CreateGeomMesh();
             GeomMesh.SetAtomNum(1);
             PrimitiveMesh = new Graphics.Mesh.UMeshPrimitives();
             PrimitiveMesh.mCoreObject.Init(rc.mCoreObject, GeomMesh.mCoreObject, new BoundingBox());
@@ -71,27 +131,24 @@ namespace EngineNS.EGui
                 pRenderTarget[0].DestBlendAlpha = NxRHI.EBlend.BLD_ONE;
                 pRenderTarget[0].BlendEnable = 1;
                 var pipeline = UEngine.Instance.GfxDevice.PipelineManager.GetPipelineState(UEngine.Instance.GfxDevice.RenderContext, in pipeDesc);
+                var count = pipeline.UnsafeRefCount;
                 Drawcall.BindPipeline(pipeline);
 
                 //Pipeline.mCoreObject.GetGpuProgram().BindInputLayout(renderer.InputLayout.mCoreObject);
             }
             return true;
         }
-        public void Cleanup()
+        public void Dispose()
         {
-            FontCBuffer?.Dispose();
-            FontCBuffer = null;
-
-            CmdList?.Dispose();
-            CmdList = null;
             DataVB.Dispose();
             DataIB.Dispose();
-            VertexBuffer?.Dispose();
-            VertexBuffer = null;
-            IndexBuffer?.Dispose();
-            IndexBuffer = null;
-            GeomMesh?.Dispose();
-            GeomMesh = null;
+
+            CoreSDK.DisposeObject(ref FontCBuffer);
+            CoreSDK.DisposeObject(ref Drawcall);
+            CoreSDK.DisposeObject(ref CmdList);
+            CoreSDK.DisposeObject(ref VertexBuffer);
+            CoreSDK.DisposeObject(ref IndexBuffer);
+            CoreSDK.DisposeObject(ref GeomMesh);
         }
 
         [ThreadStatic]
@@ -108,6 +165,7 @@ namespace EngineNS.EGui
         private unsafe static void RenderImDrawDataImpl(ref ImDrawData draw_data, Graphics.Pipeline.UPresentWindow presentWindow, UImDrawDataRHI rhiData)
         {
             var rc = UEngine.Instance.GfxDevice.RenderContext;
+            var drawCmd = rhiData.CmdList.mCoreObject;
             uint vertexOffsetInVertices = 0;
             uint indexOffsetInElements = 0;
 
@@ -172,10 +230,10 @@ namespace EngineNS.EGui
                     indexOffsetInElements += (uint)cmd_list.IdxBufferSize;
                 }
 
-                rhiData.VertexBuffer.UpdateGpuData(0,
+                rhiData.VertexBuffer.UpdateGpuData(drawCmd, 0,
                     rhiData.DataVB.UnsafeAddressAt(0).ToPointer(), (uint)(vertexOffsetInVertices * sizeof(ImDrawVert)));
 
-                rhiData.IndexBuffer.UpdateGpuData(0,
+                rhiData.IndexBuffer.UpdateGpuData(drawCmd, 0,
                     rhiData.DataIB.UnsafeAddressAt(0).ToPointer(), (uint)(indexOffsetInElements * sizeof(ushort)));
 
                 rhiData.GeomMesh.mCoreObject.GetVertexArray().BindVB(NxRHI.EVertexStreamType.VST_Position, rhiData.VertexBuffer.mCoreObject);
@@ -200,7 +258,6 @@ namespace EngineNS.EGui
             var fb_scale = io.DisplayFramebufferScale;
             draw_data.ScaleClipRects(in fb_scale);
 
-            var drawCmd = rhiData.CmdList.mCoreObject;
             presentWindow.BeginFrame();
             drawCmd.BeginCommand();
             {
@@ -220,6 +277,7 @@ namespace EngineNS.EGui
                     Vector2 clip_off = draw_data.DisplayPos;
                     for (int n = 0; n < draw_data.CmdListsCount; n++)
                     {
+                        NxRHI.UGraphicDraw drawcall = null;
                         var cmd_list = new ImDrawList(draw_data.CmdLists[n]);
                         for (int cmd_i = 0; cmd_i < cmd_list.CmdBufferSize; cmd_i++)
                         {
@@ -233,10 +291,21 @@ namespace EngineNS.EGui
                                 var handle = System.Runtime.InteropServices.GCHandle.FromIntPtr((IntPtr)pcmd->TextureId);
                                 if (handle.IsAllocated)
                                 {
+                                    drawcall = rhiData.Drawcall;
                                     var rsv = handle.Target as NxRHI.USrView;
                                     if (rsv != null)
                                     {
-                                        rhiData.Drawcall.BindSRV(rhiData.FontTextureBindInfo.mCoreObject, rsv);
+                                        drawcall.BindSRV(rhiData.FontTextureBindInfo.mCoreObject, rsv);
+                                    }
+                                    else
+                                    {
+                                        var parameters = handle.Target as TtImDrawCmdParameters;
+                                        if (parameters != null)
+                                        {
+                                            drawcall = parameters.Drawcall;
+                                            drawcall.BindGeomMesh(rhiData.GeomMesh);
+                                            parameters.OnDraw(in mvp);
+                                        }
                                     }
                                 }
                             }
@@ -265,8 +334,8 @@ namespace EngineNS.EGui
                             }
                             else
                             {
-                                rhiData.Drawcall.mCoreObject.Commit(drawCmd, true);
-                                //drawCmd.PushGpuDraw(rhiData.Drawcall.mCoreObject.NativeSuper);
+                                //drawcall?.mCoreObject.Commit(drawCmd, true);
+                                drawCmd.DirectGpuDraw(drawcall.mCoreObject.NativeSuper);
                             }
                         }
                         idx_offset += (int)cmd_list.IdxBufferSize;

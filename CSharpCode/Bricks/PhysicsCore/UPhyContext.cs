@@ -175,7 +175,7 @@ namespace EngineNS.Bricks.PhysicsCore
                 return false;
             return true;
         }
-        public override void Tick(UEngine host)
+        public override void TickModule(UEngine host)
         {
 
         }

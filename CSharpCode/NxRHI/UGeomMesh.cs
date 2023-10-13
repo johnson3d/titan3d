@@ -6,9 +6,9 @@ namespace EngineNS.NxRHI
 {
     public class UVertexArray : AuxPtrType<NxRHI.FVertexArray>
     {
-        public UVertexArray()
+        public UVertexArray(NxRHI.FVertexArray ptr)
         {
-            mCoreObject = FVertexArray.CreateInstance();
+            mCoreObject = ptr;
         }
         public void BindVB(EVertexStreamType stream, UVbView buffer)
         {
@@ -17,9 +17,9 @@ namespace EngineNS.NxRHI
     }    
     public class UGeomMesh : AuxPtrType<NxRHI.FGeomMesh>
     {
-        public UGeomMesh()
+        public UGeomMesh(NxRHI.FGeomMesh ptr)
         {
-            mCoreObject = FGeomMesh.CreateInstance();
+            mCoreObject = ptr;
         }
         public void SetAtomNum(uint num)
         {

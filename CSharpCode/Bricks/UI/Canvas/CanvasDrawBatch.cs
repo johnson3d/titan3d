@@ -1,4 +1,5 @@
-﻿using System;
+﻿using EngineNS.UI.Controls;
+using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Text;
@@ -11,6 +12,8 @@ namespace EngineNS.UI.Canvas
         public TtCanvasDrawCmdList Backgroud { get; set; }
         public TtCanvasDrawCmdList Middleground { get; set; }
         public TtCanvasDrawCmdList Foregroud { get; set; }
+
+        public List<TtUIElement> UIElements = new List<TtUIElement>();
 
         public TtCanvasDrawBatch()
         {
@@ -39,9 +42,15 @@ namespace EngineNS.UI.Canvas
             mCoreObject.SetPosition(x, y);
         }
 
+        //public void SetTransformMatrix(UInt16 index, in Matrix matrix)
+        //{
+        //    mCoreObject.SetTransformMatrix(index, in matrix);
+        //}
+
         public void Reset()
         {
             mCoreObject.Reset();
         }
+
     }
 }

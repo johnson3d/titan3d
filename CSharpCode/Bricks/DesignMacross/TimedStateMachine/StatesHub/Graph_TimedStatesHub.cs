@@ -1,20 +1,18 @@
 ﻿using EngineNS.Bricks.CodeBuilder;
 using EngineNS.Bricks.NodeGraph;
-using EngineNS.DesignMacross.Editor.DeclarationPanel;
 using EngineNS.DesignMacross.Editor;
-using EngineNS.DesignMacross.Graph;
+using EngineNS.DesignMacross.Base.Graph;
 using System;
 using System.Collections.Generic;
 using System.Text;
-using EngineNS.DesignMacross.Graph.Elements;
-using EngineNS.DesignMacross.Graph;
-using EngineNS.DesignMacross.Outline;
+using EngineNS.DesignMacross.Base.Graph.Elements;
+using EngineNS.DesignMacross.Base.Outline;
 using System.Collections;
 using System.Reflection;
 using EngineNS.Rtti;
 using System.Linq;
-using EngineNS.DesignMacross.Render;
-using EngineNS.DesignMacross.Description;
+using EngineNS.DesignMacross.Base.Render;
+using EngineNS.DesignMacross.Base.Description;
 using EngineNS.DesignMacross.TimedStateMachine.StatesHub;
 
 namespace EngineNS.DesignMacross.TimedStateMachine
@@ -44,7 +42,7 @@ namespace EngineNS.DesignMacross.TimedStateMachine
         public TtGraphElement_TimedStatesHubEntry EntryElement { get; set; } = null;
         public TtTimedStatesHubClassDescription TimedStatesHubClassDescription { get => Description as TtTimedStatesHubClassDescription; }
         public Dictionary<IDescription, IGraphElement> GraphElementDic { get; set; } = new Dictionary<IDescription, IGraphElement>();
-        public TtGraph_TimedStatesHub(IDescription description)
+        public TtGraph_TimedStatesHub(IDescription description) :base(description)
         {
             Description = description;
             EntryElement = new TtGraphElement_TimedStatesHubEntry(description);
@@ -60,7 +58,8 @@ namespace EngineNS.DesignMacross.TimedStateMachine
             {
                 foreach (var state in statesHubClassDescription.States)
                 {
-                    var graphElementAttribute = state.GetType().GetCustomAttribute<GraphElementAttribute>();
+                    var graphElementAttribute = GraphElementAttribute.GetAttributeWithSpecificClassType<IGraphElement>(state.GetType());
+                    //var graphElementAttribute = state.GetType().GetCustomAttribute<GraphElementAttribute>();
                     if (graphElementAttribute != null)
                     {
                         if (GraphElementDic.ContainsKey(state))
@@ -69,7 +68,7 @@ namespace EngineNS.DesignMacross.TimedStateMachine
                         }
                         else
                         {
-                            var instance = UTypeDescManager.CreateInstance(graphElementAttribute.ClassType) as IGraphElement;
+                            var instance = UTypeDescManager.CreateInstance(graphElementAttribute.ClassType, new object[] { state }) as IGraphElement;
                             instance.Description = state;
                             instance.Construct();
                             instance.Parent = this;
@@ -80,7 +79,8 @@ namespace EngineNS.DesignMacross.TimedStateMachine
                 }
                 foreach (var hubBridge in statesHubClassDescription.StatesHubBridges)
                 {
-                    var graphElementAttribute = hubBridge.GetType().GetCustomAttribute<GraphElementAttribute>();
+                    var graphElementAttribute = GraphElementAttribute.GetAttributeWithSpecificClassType<IGraphElement>(hubBridge.GetType());
+                    //var graphElementAttribute = hubBridge.GetType().GetCustomAttribute<GraphElementAttribute>();
                     if (graphElementAttribute != null)
                     {
                         if (GraphElementDic.ContainsKey(hubBridge))
@@ -166,13 +166,13 @@ namespace EngineNS.DesignMacross.TimedStateMachine
                                  if (Rtti.UTypeDescManager.CreateInstance(typeDesc) is TtTimedStateClassDescription state)
                                  {
                                      state.Name = GetValidNodeName(state.Name);
-                                     var graphElementAttribute = state.GetType().GetCustomAttribute<GraphElementAttribute>();
+                                     var graphElementAttribute = GraphElementAttribute.GetAttributeWithSpecificClassType<IGraphElement>(state.GetType());
                                      if (graphElementAttribute != null)
                                      {
                                          IGraphElement node = null;
                                          node = UTypeDescManager.CreateInstance(graphElementAttribute.ClassType, new object[] { state }) as IGraphElement;
                                          node.Parent = this;
-                                         node.Location = popMenu.PopedPosition;
+                                         state.Location = popMenu.PopedPosition;
                                          GraphElementDic.Add(state, node);
                                      }
                                      TimedStatesHubClassDescription.States.Add(state);
@@ -199,12 +199,12 @@ namespace EngineNS.DesignMacross.TimedStateMachine
                                  var hubBridge = new TtTimedStatesHubBridgeClassDescription
                                  {
                                      TimedStatesHubClassDescription = TimedStatesHubClassDescription,
-                                     Name = hub.Name + "_HubBridge"
+                                     Name = hub.Name + "_HubBridge",
+                                     Location = popMenu.PopedPosition
                                  };
                                  IGraphElement node = new TtGraphElement_TimedStatesHubBridge(hubBridge)
                                  {
                                      Parent = this,
-                                     Location = popMenu.PopedPosition
                                  };
                                  GraphElementDic.Add(hubBridge, node);
                                  TimedStatesHubClassDescription.StatesHubBridges.Add(hubBridge);
@@ -237,12 +237,8 @@ namespace EngineNS.DesignMacross.TimedStateMachine
             var timedStatesHubGraph = renderableElement as TtGraph_TimedStatesHub;
             if (timedStatesHubGraph == null)
                 return;
-            if (ImGuiAPI.Button("This"))
-            {
-                //navigation
-            }
 
-            if (ImGuiAPI.BeginChild("Graph", in Vector2.Zero, false, ImGuiWindowFlags_.ImGuiWindowFlags_NoMove | ImGuiWindowFlags_.ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_.ImGuiWindowFlags_NoScrollWithMouse))
+            if (ImGuiAPI.BeginChild(timedStatesHubGraph.Name + "_Graph", in Vector2.Zero, false, ImGuiWindowFlags_.ImGuiWindowFlags_NoMove | ImGuiWindowFlags_.ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_.ImGuiWindowFlags_NoScrollWithMouse))
             {
                 var cmd = ImGuiAPI.GetWindowDrawList();
 
@@ -263,6 +259,7 @@ namespace EngineNS.DesignMacross.TimedStateMachine
                 elementRenderingContext.Camera = context.Camera;
                 elementRenderingContext.ViewPort = context.ViewPort;
                 elementRenderingContext.CommandHistory = timedStatesHubGraph.CommandHistory;
+                elementRenderingContext.EditorInteroperation = context.EditorInteroperation;
 
                 TtGraphElement_GridLine grid = new TtGraphElement_GridLine();
                 grid.Size = new SizeF(sz.X, sz.Y);

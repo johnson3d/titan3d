@@ -67,7 +67,7 @@ namespace EngineNS
             {
                 if (i.IsModuleRun(UEngine.Instance.PlayMode) == false)
                     continue;
-                i.Tick(host);
+                i.TickModule(host);
             }
         }
         protected void TickLogicModules()
@@ -148,7 +148,7 @@ namespace EngineNS
             await Thread.TtAsyncDummyClass.DummyFunc();
             return true;
         }
-        public virtual void Tick(THost host)
+        public virtual void TickModule(THost host)
         {
 
         }

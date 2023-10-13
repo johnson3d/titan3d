@@ -106,18 +106,24 @@ namespace EngineNS.UI.Layout
                         var measureSize = currentElement.PreviousAvailableSize;
                         if (currentElement.NeverMeasured)
                         {
-                            if (currentElement.Parent == null)
+                            var parent = VisualTreeHelper.GetParent(currentElement);
+                            if (parent == null)
                             {
                                 measureSize.Width = float.PositiveInfinity;
                                 measureSize.Height = float.PositiveInfinity;
                             }
                             else
                             {
-                                measureSize.Width = currentElement.Parent.DesignRect.Width;
-                                measureSize.Height = currentElement.Parent.DesignRect.Height;
+                                measureSize.Width = parent.DesignRect.Width;
+                                measureSize.Height = parent.DesignRect.Height;
                             }
                         }
 
+                        // debug /////////////////////////////////
+#if DEBUG_UI
+                        Profiler.Log.WriteLine(Profiler.ELogTag.Info, "UI", $"Measure element:{currentElement?.Name}({currentElement?.GetType().FullName})");
+#endif
+                        //////////////////////////////////////////
                         currentElement.Measure(in measureSize);
                     }
 
@@ -144,6 +150,11 @@ namespace EngineNS.UI.Layout
                         }
 
                         currentElement = ArrangeQueue.GetTopMost();
+                        // debug /////////////////////////////////
+#if DEBUG_UI
+                        Profiler.Log.WriteLine(Profiler.ELogTag.Info, "UI", $"Arrange element:{currentElement?.Name}({currentElement?.GetType().FullName})");
+#endif
+                        //////////////////////////////////////////
                         if (currentElement == null)
                             break;
 
@@ -171,7 +182,8 @@ namespace EngineNS.UI.Layout
         EngineNS.RectangleF GetProperArrangeRect(UI.Controls.TtUIElement uiElement)
         {
             var arrangeRect = uiElement.PreviousArrangeRect;
-            if (uiElement.Parent == null)
+            var parent = VisualTreeHelper.GetParent(uiElement);
+            if (parent == null)
             {
                 arrangeRect.X = arrangeRect.Y = 0;
                 if (float.IsPositiveInfinity(uiElement.PreviousAvailableSize.Width))
@@ -181,7 +193,7 @@ namespace EngineNS.UI.Layout
             }
             else if (uiElement.NeverArranged)
             {
-                var dr = uiElement.Parent.DesignRect;
+                var dr = parent.DesignRect;
                 arrangeRect.X = dr.Left;
                 arrangeRect.Y = dr.Top;
                 arrangeRect.Width = dr.Width;
@@ -205,7 +217,7 @@ namespace EngineNS.UI.Layout
         {
             while (true)
             {
-                var p = ui.Parent;
+                var p = VisualTreeHelper.GetParent(ui);
                 if (p == null)
                     break;
                 ui = p;

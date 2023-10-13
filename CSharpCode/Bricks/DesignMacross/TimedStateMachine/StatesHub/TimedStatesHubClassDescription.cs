@@ -1,21 +1,22 @@
 ﻿using EngineNS.Bricks.CodeBuilder;
-using EngineNS.Bricks.StateMachine.TimedSM;
-using EngineNS.DesignMacross.Description;
-using EngineNS.DesignMacross.Graph;
-using EngineNS.DesignMacross.Outline;
+using EngineNS.DesignMacross.Base.Description;
+using EngineNS.DesignMacross.Base.Graph;
+using EngineNS.DesignMacross.Base.Outline;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.Text;
+using System.Reflection;
 
 namespace EngineNS.DesignMacross.TimedStateMachine
 {
     [OutlineElement(typeof(TtOutlineElement_TimedStatesHubGraph))]
-    [GraphElement(typeof(TtGraph_TimedStatesHub))]
+    [Graph(typeof(TtGraph_TimedStatesHub))]
     public class TtTimedStatesHubClassDescription : IDesignableVariableDescription
     {
         public Guid Id { get; set; } = Guid.NewGuid();
         public string Name { get; set; } = "TimedStatesHub";
+        [Rtti.Meta]
+        public Vector2 Location { get; set; }
         public string VariableName { get => TtDescriptionUtil.VariableNamePrefix + Name; }
         public string ClassName { get => TtDescriptionUtil.ClassNamePrefix + Name; }
 
@@ -61,5 +62,17 @@ namespace EngineNS.DesignMacross.TimedStateMachine
             classDeclarationsBuilded.Add(thisClassDeclaration);
             return classDeclarationsBuilded;
         }
+
+        #region ISerializer
+        public void OnPreRead(object tagObject, object hostObject, bool fromXml)
+        {
+
+        }
+
+        public void OnPropertyRead(object tagObject, PropertyInfo prop, bool fromXml)
+        {
+
+        }
+        #endregion ISerializer
     }
 }

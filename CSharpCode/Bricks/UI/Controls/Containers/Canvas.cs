@@ -16,7 +16,7 @@ namespace EngineNS.UI.Controls.Containers
             var ui = element as TtUIElement;
             if(ui != null)
             {
-                var canvas = ui.Parent as TtCanvasControl;
+                var canvas = VisualTreeHelper.GetParent(ui) as TtCanvasControl;
                 canvas?.InvalidateArrange();
             }
         }
@@ -27,7 +27,7 @@ namespace EngineNS.UI.Controls.Containers
             var ui = element as TtUIElement;
             if (ui != null)
             {
-                var canvas = ui.Parent as TtCanvasControl;
+                var canvas = VisualTreeHelper.GetParent(ui) as TtCanvasControl;
                 canvas?.InvalidateArrange();
             }
         }
@@ -51,7 +51,7 @@ namespace EngineNS.UI.Controls.Containers
             var ui = element as TtUIElement;
             if (ui != null)
             {
-                var canvas = ui.Parent as TtCanvasControl;
+                var canvas = VisualTreeHelper.GetParent(ui) as TtCanvasControl;
                 canvas?.InvalidateArrange();
             }
         }
@@ -75,7 +75,7 @@ namespace EngineNS.UI.Controls.Containers
             var ui = element as TtUIElement;
             if (ui != null)
             {
-                var canvas = ui.Parent as TtCanvasControl;
+                var canvas = VisualTreeHelper.GetParent(ui) as TtCanvasControl;
                 canvas?.InvalidateArrange();
             }
         }
@@ -98,7 +98,7 @@ namespace EngineNS.UI.Controls.Containers
             var ui = element as TtUIElement;
             if (ui != null)
             {
-                var canvas = ui.Parent as TtCanvasControl;
+                var canvas = VisualTreeHelper.GetParent(ui) as TtCanvasControl;
                 canvas?.InvalidateArrange();
             }
         }
@@ -121,7 +121,7 @@ namespace EngineNS.UI.Controls.Containers
             var ui = element as TtUIElement;
             if (ui != null)
             {
-                var canvas = ui.Parent as TtCanvasControl;
+                var canvas = VisualTreeHelper.GetParent(ui) as TtCanvasControl;
                 canvas?.InvalidateArrange();
             }
         }
@@ -132,16 +132,17 @@ namespace EngineNS.UI.Controls.Containers
             var ui = element as TtUIElement;
             if (ui != null)
             {
-                var canvas = ui.Parent as TtCanvasControl;
+                var canvas = VisualTreeHelper.GetParent(ui) as TtCanvasControl;
                 canvas?.InvalidateArrange();
             }
         }
 
         protected override SizeF MeasureOverride(in SizeF availableSize)
         {
-            for(int i=0; i<mChildren.Count; i++)
+            var count = VisualTreeHelper.GetChildrenCount(this);
+            for(int i=0; i<count; i++)
             {
-                var childUI = mChildren[i];
+                var childUI = VisualTreeHelper.GetChild(this, i);
                 var anchorMin = TtCanvasControl.GetAnchorMin(childUI);
                 var anchorMax = TtCanvasControl.GetAnchorMax(childUI);
                 var anchorRectX = TtCanvasControl.GetAnchorRectX(childUI);
@@ -171,9 +172,10 @@ namespace EngineNS.UI.Controls.Containers
         }
         protected override void ArrangeOverride(in RectangleF arrangeSize)
         {
-            for(int i=0; i<mChildren.Count; i++)
+            var count = VisualTreeHelper.GetChildrenCount(this);
+            for (int i=0; i<count; i++)
             {
-                var childUI = mChildren[i];
+                var childUI = VisualTreeHelper.GetChild(this, i);
                 var anchorMin = TtCanvasControl.GetAnchorMin(childUI);
                 var anchorMax = TtCanvasControl.GetAnchorMax(childUI);
                 var anchorRectX = TtCanvasControl.GetAnchorRectX(childUI);

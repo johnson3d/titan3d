@@ -1,7 +1,7 @@
 ﻿using EngineNS.Bricks.CodeBuilder;
-using EngineNS.DesignMacross.Description;
-using EngineNS.DesignMacross.Outline;
-using EngineNS.DesignMacross.Render;
+using EngineNS.DesignMacross.Base.Description;
+using EngineNS.DesignMacross.Base.Outline;
+using EngineNS.DesignMacross.Base.Render;
 using EngineNS.Rtti;
 using System;
 using System.Collections;
@@ -58,7 +58,7 @@ namespace EngineNS.DesignMacross.TimedStateMachine
         {
             TtOutlineElement_TimedStatesHubGraph hubGraph = renderableElement as TtOutlineElement_TimedStatesHubGraph; ;
             Vector2 buttonSize = new Vector2(16, 16);
-            float buttonOffset = 16;
+            //float buttonOffset = 16;
             var sz = new Vector2(-1, 0);
             var regionSize = ImGuiAPI.GetContentRegionAvail();
 
@@ -81,7 +81,7 @@ namespace EngineNS.DesignMacross.TimedStateMachine
             {
                 if (designVarTreeNodeDoubleClicked)
                 {
-                    context.EditorInteroperation.DefinitionGraphEditPanel.EditDefinitionGraph(hubGraph.Description);
+                    context.EditorInteroperation.GraphEditPanel.EditGraph(hubGraph.Description);
                 }
                 else if (designVarTreeNodeIsItemClicked)
                 {
@@ -208,8 +208,8 @@ namespace EngineNS.DesignMacross.TimedStateMachine
                     hubDesc.Name = $"{hubVarName}_{num}";
                     hubDesc.StateMachineClassDescription = hubsList.StateMachineClassDescription;
                     context.CommandHistory.CreateAndExtuteCommand("AddStateHub",
-                        () => { hubsList.HubDescriptions.Add(hubDesc); },
-                        () => { hubsList.HubDescriptions.Remove(hubDesc); });
+                        (data) => { hubsList.HubDescriptions.Add(hubDesc); },
+                        (data) => { hubsList.HubDescriptions.Remove(hubDesc); });
 
                 }
                 ImGuiAPI.EndPopup();

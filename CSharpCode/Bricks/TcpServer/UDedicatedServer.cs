@@ -16,7 +16,7 @@ namespace EngineNS.Bricks.TcpServer
         {
 
         }
-        public override void Tick(UEngine engine)
+        public override void TickModule(UEngine engine)
         {
             mServer?.Tick();
         }

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using EngineNS.Bricks.NodeGraph;
 using NPOI.POIFS.Crypt.Dsig;
 
@@ -99,6 +100,38 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode
             }
 
             return true;
+        }
+
+        public List<EngineNS.NxRHI.EVertexStreamType> GetVSNeedStreams()
+        {
+            var result = new List<EngineNS.NxRHI.EVertexStreamType>();
+
+            foreach (var i in this.ParentGraph.Nodes)
+            {
+                if (i.GetType() == typeof(Bricks.CodeBuilder.ShaderNode.Control.SampleLevel2DNode) ||
+                    i.GetType() == typeof(Bricks.CodeBuilder.ShaderNode.Control.Sample2DNode) ||
+                    i.GetType() == typeof(Bricks.CodeBuilder.ShaderNode.Control.SampleArrayLevel2DNode) ||
+                    i.GetType() == typeof(Bricks.CodeBuilder.ShaderNode.Control.SampleArray2DNode))
+                {
+                    if (result.Contains(EngineNS.NxRHI.EVertexStreamType.VST_UV) == false)
+                        result.Add(EngineNS.NxRHI.EVertexStreamType.VST_UV);
+                }
+                else
+                {
+                    if (i.Name.StartsWith("input."))
+                    {
+                        var name = i.Name.Substring("input.".Length);
+                        var t = Graphics.Pipeline.Shader.UMaterial.VSInput.NameToInputStream(name);
+                        if (t != EngineNS.NxRHI.EVertexStreamType.VST_Number)
+                        {
+                            if (result.Contains(t) == false)
+                                result.Add(t);
+                        }
+                    }
+                }
+            }
+
+            return result;
         }
         public List<Graphics.Pipeline.Shader.EPixelShaderInput> GetPSNeedInputs()
         {

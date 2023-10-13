@@ -289,6 +289,35 @@ namespace EngineNS
                 M43.ToString(System.Globalization.CultureInfo.CurrentCulture),
                 M44.ToString(System.Globalization.CultureInfo.CurrentCulture));
         }
+        static float ParseValue(string key, string matrixStr)
+        {
+            var startIdx = matrixStr.IndexOf(key + ":") + key.Length + 1;
+            var endIdx = matrixStr.IndexOf(" ", startIdx);
+            float retVal;
+            float.TryParse(matrixStr.Substring(startIdx, endIdx - startIdx), out retVal);
+            return retVal;
+        }
+        public static Matrix FromString(string str)
+        {
+            var mat = new Matrix();
+            mat.M11 = ParseValue("M11", str);
+            mat.M13 = ParseValue("M12", str);
+            mat.M13 = ParseValue("M13", str);
+            mat.M14 = ParseValue("M14", str);
+            mat.M21 = ParseValue("M21", str);
+            mat.M23 = ParseValue("M22", str);
+            mat.M23 = ParseValue("M23", str);
+            mat.M24 = ParseValue("M24", str);
+            mat.M31 = ParseValue("M31", str);
+            mat.M33 = ParseValue("M32", str);
+            mat.M33 = ParseValue("M33", str);
+            mat.M34 = ParseValue("M34", str);
+            mat.M41 = ParseValue("M41", str);
+            mat.M43 = ParseValue("M42", str);
+            mat.M43 = ParseValue("M43", str);
+            mat.M44 = ParseValue("M44", str);
+            return mat;
+        }
         /// <summary>
         /// 获取对象的哈希值
         /// </summary>

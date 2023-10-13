@@ -37,7 +37,7 @@ namespace EngineNS.NxRHI
         public int GetAdapterScore(in EngineNS.NxRHI.FGpuDeviceDesc desc)
         {
             var memMB = (uint)desc.DedicatedVideoMemory / (1024 * 1024);
-            if (desc.Name.Contains("NVIDIA"))
+            if (desc.GetName().Contains("NVIDIA"))
             {
                 memMB += 100;
             }
@@ -386,6 +386,22 @@ namespace EngineNS.NxRHI
                 return null;
             return result;
         }
+        public UVertexArray CreateVertexArray()
+        {
+            var ptr = mCoreObject.CreateVertexArray();
+            if (ptr.IsValidPointer == false)
+                return null;
+            var result = new UVertexArray(ptr);
+            return result;
+        }
+        public UGeomMesh CreateGeomMesh()
+        {
+            var ptr = mCoreObject.CreateGeomMesh();
+            if (ptr.IsValidPointer == false)
+                return null;
+            var result = new UGeomMesh(ptr);
+            return result;
+        }
         public UFence CreateFence(in FFenceDesc desc, string name)
         {
             var result = new UFence();
@@ -456,7 +472,7 @@ namespace EngineNS.NxRHI
         ICommandList mCmdList;
         EQueueType mType;
         public ICommandList CmdList { get => mCmdList; }
-        public FTransientCmd(EQueueType type)
+        public FTransientCmd(EQueueType type, string debugName)
         {
             mType = type;
             mCmdList = UEngine.Instance.GfxDevice.RenderContext.GpuQueue.GetIdleCmdlist();
@@ -464,6 +480,7 @@ namespace EngineNS.NxRHI
         }
         public void Dispose()
         {
+            mCmdList.FlushDraws();
             mCmdList.EndCommand();
             UEngine.Instance.GfxDevice.RenderContext.GpuQueue.ExecuteCommandList(mCmdList, mType);
             UEngine.Instance.GfxDevice.RenderContext.GpuQueue.ReleaseIdleCmdlist(mCmdList);
@@ -471,7 +488,7 @@ namespace EngineNS.NxRHI
     }
 
 
-    public class URenderCmdQueue : ITickable
+    public class URenderCmdQueue
     {
         public int GetTickOrder()
         {
@@ -502,8 +519,6 @@ namespace EngineNS.NxRHI
         }
         public UQueueStat[] QueueStats = new UQueueStat[2];
         public readonly Queue<FRCmdInfo>[] RenderCmds = new Queue<FRCmdInfo>[2];
-        public readonly Queue<FRCmdInfo>[] RenderPreCmds = new Queue<FRCmdInfo>[2];
-        public readonly Queue<FRCmdInfo>[] RenderPostCmds = new Queue<FRCmdInfo>[2];
         public URenderCmdQueue()
         {
             QueueStats[0] = new UQueueStat();
@@ -511,37 +526,20 @@ namespace EngineNS.NxRHI
 
             RenderCmds[0] = new Queue<FRCmdInfo>();
             RenderCmds[1] = new Queue<FRCmdInfo>();
-
-            RenderPreCmds[0] = new Queue<FRCmdInfo>();
-            RenderPreCmds[1] = new Queue<FRCmdInfo>();
-
-            RenderPostCmds[0] = new Queue<FRCmdInfo>();
-            RenderPostCmds[1] = new Queue<FRCmdInfo>();
         }
         public void Reset()
         {
-            //RenderCmds[0]?.Clear();
-            //RenderCmds[1]?.Clear();
-            //RenderPreCmds[0]?.Clear();
-            //RenderPreCmds[1]?.Clear();
-            //RenderPostCmds[0]?.Clear();
-            //RenderPostCmds[1]?.Clear();
-            //UEngine.Instance.GfxDevice.RenderContext.CmdQueue.Flush();
-            //RenderCmds[0]?.Clear();
-            //RenderCmds[1]?.Clear();
-            //RenderPreCmds[0]?.Clear();
-            //RenderPreCmds[1]?.Clear();
-            //RenderPostCmds[0]?.Clear();
-            //RenderPostCmds[1]?.Clear();
+            lock(RenderCmds)
+            {
+                TickRender(0);
+                TickSync(0);
+                TickRender(0);
+                TickSync(0);
 
-            TickRender(0);
-            TickSync(0);
-            TickRender(0);
-            TickSync(0);
-
-            UEngine.Instance.GfxDevice.RenderContext.GpuQueue.Flush();
-            var count = RenderCmds[0].Count + RenderCmds[1].Count + RenderPreCmds[0].Count + RenderPreCmds[1].Count + RenderPostCmds[0].Count + RenderPostCmds[0].Count;
-            System.Diagnostics.Debug.Assert(count == 0);
+                UEngine.Instance.GfxDevice.RenderContext.GpuQueue.Flush();
+                var count = RenderCmds[0].Count + RenderCmds[1].Count;
+                System.Diagnostics.Debug.Assert(count == 0);
+            }
         }
         public void QueueCmd(FRenderCmd cmd, string name, object tag = null)
         {
@@ -554,31 +552,15 @@ namespace EngineNS.NxRHI
                 RenderCmds[0].Enqueue(info);
             }
         }
-        public void QueuePreCmd(FRenderCmd cmd, string name, object tag = null)
-        {
-            lock (RenderPreCmds)
-            {
-                var info = new FRCmdInfo();
-                info.Name = name;
-                info.Cmd = cmd;
-                info.Tag = tag;
-                RenderPreCmds[0].Enqueue(info);
-            }
-        }
-        public void QueuePostCmd(FRenderCmd cmd, string name, object tag = null)
-        {
-            lock (RenderPostCmds)
-            {
-                var info = new FRCmdInfo();
-                info.Name = name;
-                info.Cmd = cmd;
-                info.Tag = tag;
-                RenderPostCmds[0].Enqueue(info);
-            }
-        }
+        
         public void QueueCmdlist(UCommandList cmd, string name = null)
         {
             System.Diagnostics.Debug.Assert(cmd.mCoreObject.IsRecording() == false);
+            if (UEngine.Instance.Config.MultiRenderMode == EMultiRenderMode.None)
+            {
+                UEngine.Instance.GfxDevice.RenderContext.GpuQueue.ExecuteCommandList(cmd);
+                return;
+            }
             lock (RenderCmds)
             {
                 var info = new FRCmdInfo();
@@ -606,16 +588,64 @@ namespace EngineNS.NxRHI
 
             using (new Profiler.TimeScopeHelper(ScopeRenderTick))
             {
-                using (var cmd = new FTransientCmd(EQueueType.QU_Default))
+                using (var cmd = new FTransientCmd(EQueueType.QU_Default, "TickRender"))
                 {
-                    TickAways(cmd.CmdList);
+                    TickRenderImpl(cmd.CmdList);
                 }
-                /*var cmd = UEngine.Instance.GfxDevice.RenderContext.GpuQueue.GetIdleCmdlist();
-                cmd.BeginCommand();
-                TickAways(cmd);
-                cmd.EndCommand();
-                cmdQueue.ExecuteCommandList(cmd, EQueueType.QU_Default);
-                cmdQueue.ReleaseIdleCmdlist(cmd);*/
+            }
+        }
+        private void TickRenderImpl(ICommandList ImCmdlist)
+        {
+            Queue<FRCmdInfo> curCmds;
+            if (UEngine.Instance.Config.MultiRenderMode == EMultiRenderMode.Queue)
+            {
+                curCmds = RenderCmds[0];
+                while (true)
+                {
+                    if (curCmds.Count > 0)
+                    {
+                        try
+                        {
+                            FRCmdInfo cmd;
+                            lock (RenderCmds)
+                            {
+                                cmd = curCmds.Peek();
+                                curCmds.Dequeue();
+                            }
+                            cmd.Cmd(ImCmdlist, ref cmd);
+                            if(cmd.Name == "#TickLogicEnd#")
+                            {
+                                System.Diagnostics.Debug.Assert(curCmds.Count == 0);
+                                break;
+                            }
+                        }
+                        catch (Exception ex)
+                        {
+                            Profiler.Log.WriteException(ex);
+                        }
+                    }
+                }
+            }
+            else if (UEngine.Instance.Config.MultiRenderMode == EMultiRenderMode.QueueNextFrame)
+            {
+                curCmds = RenderCmds[1];
+                while (curCmds.Count > 0)
+                {
+                    try
+                    {
+                        FRCmdInfo cmd;
+                        lock (RenderCmds)
+                        {
+                            cmd = curCmds.Peek();
+                            curCmds.Dequeue();
+                        }
+                        cmd.Cmd(ImCmdlist, ref cmd);
+                    }
+                    catch (Exception ex)
+                    {
+                        Profiler.Log.WriteException(ex);
+                    }
+                }
             }
         }
         public void TickBeginFrame(float ellapse)
@@ -629,33 +659,10 @@ namespace EngineNS.NxRHI
             using (new Profiler.TimeScopeHelper(ScopeRenderTick))
             {
                 var cmdQueue = UEngine.Instance.GfxDevice.RenderContext.GpuQueue;
-                //var cmd = UEngine.Instance.GfxDevice.RenderContext.GpuQueue.FramePostCmdList;
-                //if (cmd != null)
-                //{
-                //    cmd.EndCommand();
-                //    cmdQueue.mCoreObject.ExecuteCommandListSingle(cmd.mCoreObject, EQueueType.QU_Default);
-                //}
 
                 Swap(ref RenderCmds[0], ref RenderCmds[1]);
-                Swap(ref RenderPreCmds[0], ref RenderPreCmds[1]);
-                Swap(ref RenderPostCmds[0], ref RenderPostCmds[1]);
                 Swap(ref QueueStats[0], ref QueueStats[1]);
                 QueueStats[0].Reset();
-                //{
-                //    var save = RenderCmds[0];
-                //    RenderCmds[0] = RenderCmds[1];
-                //    RenderCmds[1] = save;
-                //}
-                //{
-                //    var save = RenderPreCmds[0];
-                //    RenderPreCmds[0] = RenderPreCmds[1];
-                //    RenderPreCmds[1] = save;
-                //}
-                //{
-                //    var save = RenderPostCmds[0];
-                //    RenderPostCmds[0] = RenderPostCmds[1];
-                //    RenderPostCmds[1] = save;
-                //}
             }
         }
         public void Swap<T>(ref T l, ref T r)
@@ -664,66 +671,6 @@ namespace EngineNS.NxRHI
             l = r;
             r = save;
         }
-        public void TickAways(ICommandList ImCmdlist)
-        {
-            var curCmds = RenderPreCmds[1];
-            while (curCmds.Count > 0)
-            {
-                try
-                {
-                    FRCmdInfo cmd;
-                    lock (RenderPreCmds)
-                    {
-                        cmd = curCmds.Peek();
-                        curCmds.Dequeue();
-                    }
-                    cmd.Cmd(ImCmdlist, ref cmd);
-                }
-                catch (Exception ex)
-                {
-                    Profiler.Log.WriteException(ex);
-                }
-            }
-
-            curCmds = RenderCmds[1];
-            while (curCmds.Count > 0)
-            {
-                try
-                {
-                    FRCmdInfo cmd;
-                    lock (RenderCmds)
-                    {
-                        cmd = curCmds.Peek();
-                        curCmds.Dequeue();
-                    }
-                    cmd.Cmd(ImCmdlist, ref cmd);
-                }
-                catch (Exception ex)
-                {
-                    Profiler.Log.WriteException(ex);
-                }
-            }
-
-            curCmds = RenderPostCmds[1];
-            while (curCmds.Count > 0)
-            {
-                try
-                {
-                    FRCmdInfo cmd;
-                    lock (RenderPostCmds)
-                    {
-                        cmd = curCmds.Peek();
-                        curCmds.Dequeue();
-                    }
-                    cmd.Cmd(ImCmdlist, ref cmd);
-                }
-                catch (Exception ex)
-                {
-                    Profiler.Log.WriteException(ex);
-                }
-            }
-        }
-
         public bool CaptureRenderDocFrame = false;
         public bool BeginFrameCapture()
         {

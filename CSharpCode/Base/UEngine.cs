@@ -31,9 +31,17 @@ namespace EngineNS
         Cook,
         Server,
     }
+    public enum EMultiRenderMode
+    {
+        None,
+        Queue,
+        QueueNextFrame,
+    }
     [Rtti.Meta]
     public partial class UEngineConfig
     {
+        [Rtti.Meta]
+        public EMultiRenderMode MultiRenderMode { get; set; } = EMultiRenderMode.QueueNextFrame;
         [Rtti.Meta]
         public bool UseRenderDoc { get; set; } = false;
         public string ConfigName;
@@ -109,6 +117,13 @@ namespace EngineNS
         public Bricks.Network.RPC.EAuthority DefaultAuthority { get; set; } = Bricks.Network.RPC.EAuthority.Server;
         [Rtti.Meta]
         public List<TtGlobalConfig> GlobalConfigs { get; set; } = new List<TtGlobalConfig>();
+        [Rtti.Meta]
+        public RName EditorFont { get; set; }
+        public string EditorLanguage { get; set; } = "English";
+        public UEngineConfig()
+        {
+            EditorFont = RName.GetRName("fonts/Roboto-Regular.ttf", RName.ERNameType.Engine);
+        }
     }
     public partial class URuntimeConfig
     {
@@ -120,8 +135,8 @@ namespace EngineNS
         public static UEngine Instance { get => mInstance; }
         public EPlayMode PlayMode { get; set; } = EPlayMode.Editor;
         [Rtti.Meta]
-        public UEngineConfig Config { get; set; } = new UEngineConfig();
-        public URuntimeConfig RuntimeConfig { get; } = new URuntimeConfig();
+        public UEngineConfig Config { get; set; }
+        public URuntimeConfig RuntimeConfig { get; set; }
         public IO.TtFileManager FileManager
         {
             get;
@@ -131,14 +146,22 @@ namespace EngineNS
         {
             get;
         } = new UTickableManager();
-        public UEventProcessorManager EventProcessorManager 
-        { 
+        public UEventProcessorManager EventProcessorManager
+        {
             get;
         } = new UEventProcessorManager();
 
         public ulong CurrentTickFrame { get; set; } = 0;
-        public long CurrentTickCount { get; set; }
-        public float ElapseTickCount { get; set; }  // 毫秒
+        public long EngineStartTickCountUS { get; set; }
+        public long CurrentTickCountUS { get; set; }
+        public uint CurrentTick24BitMS
+        {
+            get
+            {
+                return ((uint)(CurrentTickCountUS / 1000)) % 0x00ffffff;
+            }
+        }
+        public float ElapseTickCountMS { get; set; }  // 毫秒
         public int FrameCount { get; set; }
         public float TickCountSecond { get; set; }
         public float ElapsedSecond { get; set; }
@@ -154,15 +177,33 @@ namespace EngineNS
         {
             System.Threading.Thread.CurrentThread.Name = "Main";
             mInstance = engine;
+            engine.Config = new UEngineConfig();
+            engine.RuntimeConfig = new URuntimeConfig();
+
             return await mInstance.PreInitEngine(cfgFile);
         }
-        static unsafe void NativeAssertEvent(void* arg0, void* arg1, int arg2)
+        #region callback
+        private static unsafe void NativeAssertEvent(void* arg0, void* arg1, int arg2)
         {
             System.Diagnostics.Debug.Assert(false);
         }
-        static unsafe CoreSDK.FDelegate_FAssertEvent OnNativeAssertEvent = NativeAssertEvent;
+        private static unsafe CoreSDK.FDelegate_FAssertEvent OnNativeAssertEvent = NativeAssertEvent;
+        private static bool IsDredDump = false;
+        private static void NativeOnGpuDeviceRemoved(EngineNS.NxRHI.IGpuDevice arg0)
+        {
+            if (IsDredDump)
+                return;
+            IsDredDump = true;
+            var tmpDir = $"{System.DateTime.Now.Year}_{System.DateTime.Now.Month}_{System.DateTime.Now.Day}_{System.DateTime.Now.Hour}_{System.DateTime.Now.Minute}_{System.DateTime.Now.Second}";
+            var tmpFile = UEngine.Instance.FileManager.GetRoot(IO.TtFileManager.ERootDir.Cache) + "dred/" + tmpDir + "/";
+            IO.TtFileManager.SureDirectory(tmpFile);
+            GpuDump.NvAftermath.OnDredDump(arg0, tmpFile);
+        }
+        private static CoreSDK.FDelegate_FOnGpuDeviceRemoved OnGpuDeviceRemoved = NativeOnGpuDeviceRemoved;
+        #endregion
         public async System.Threading.Tasks.Task<bool> PreInitEngine(string cfgFile)
         {
+            EngineStartTickCountUS = Support.Time.HighPrecision_GetTickCount();
             RttiStructManager.GetInstance().BuildRtti();
 
             CoreSDK.SetAssertEvent(OnNativeAssertEvent);
@@ -227,6 +268,9 @@ namespace EngineNS
                 }
             }
             Config.ConfigName = "Titan3D  [" + IO.TtFileManager.GetPureName(cfgFile) + "]";
+
+            CoreSDK.SetOnGpuDeviceRemovedCallBack(OnGpuDeviceRemoved);
+            
             //Config.UseRenderDoc = useRenderDoc;
             foreach(var i in Config.GlobalConfigs)
             {
@@ -270,8 +314,9 @@ namespace EngineNS
             using(new Profiler.TimeScopeHelper(Scope_Tick))
             {
                 var t1 = Support.Time.HighPrecision_GetTickCount();
-                ElapseTickCount = (t1 - CurrentTickCount) * 0.001f;
-                CurrentTickCount = t1;
+                var newTickCount = t1 - EngineStartTickCountUS;
+                ElapseTickCountMS = (newTickCount - CurrentTickCountUS) * 0.001f;
+                CurrentTickCountUS = newTickCount;
                 CurrentTickFrame++;
                 CoreSDK.UpdateEngineFrame(CurrentTickFrame);
                 InputSystem.BeforeTick();
@@ -307,8 +352,8 @@ namespace EngineNS
                     System.Threading.Thread.Sleep(idleTime);
                 }
 
-                TickCountSecond = ((float)CurrentTickCount) * 0.001f;
-                ElapsedSecond = ((float)ElapseTickCount) * 0.001f;
+                TickCountSecond = ((float)CurrentTickCountUS) * 0.001f;
+                ElapsedSecond = ((float)ElapseTickCountMS) * 0.001f;
 
                 FrameCount++;
                 return true;

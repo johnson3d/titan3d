@@ -21,6 +21,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)TimedSM\TimedStateAttachment.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)TimedSM\TimedStateMachine.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)TimedSM\TimedState.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)TimedSM\TimedStateScriptAttachment.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)TimedSM\TimedStatesHub.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)TimedSM\TimedStateTransition.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)SampleSM\StateAttachment.cs" />

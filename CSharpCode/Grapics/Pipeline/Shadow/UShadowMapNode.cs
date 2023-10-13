@@ -456,7 +456,7 @@ namespace EngineNS.Graphics.Pipeline.Shadow
 
                             for (int j = 0; j < i.Atoms.Count; j++)
                             {
-                                var drawcall = i.GetDrawCall(GBuffersArray[CsmIdx], j, policy, URenderPolicy.EShadingType.DepthPass, this);
+                                var drawcall = i.GetDrawCall(cmdlist.mCoreObject, GBuffersArray[CsmIdx], j, policy, URenderPolicy.EShadingType.DepthPass, this);
 
                                 if (drawcall != null)
                                 {
