@@ -9,6 +9,13 @@ float4 SampleLevel2D(Texture2D tex, SamplerState samp, float2 uv, float level, o
 	return clr;
 }
 
+float2 TextureSize(Texture2D tex)
+{
+	float2 texSize;
+	tex.GetDimensions(texSize.x, texSize.y);
+	return texSize;
+}
+
 float4 Sample2D(Texture2D tex, SamplerState samp, float2 uv, out float3 outRgb)
 {
 	float4 clr = tex.Sample(samp, uv);
@@ -86,9 +93,9 @@ void ATan2( half x, half y, out half ret )
 	ret = (half)atan2(x, y);
 }
 
-void Ceil( half x, out half ret )
+void Ceil( float x, out float ret )
 {
-	ret = (half)ceil(x);
+	ret = (float)ceil(x);
 }
 
 void Cos( half x, out half ret )
@@ -100,6 +107,7 @@ void Sin( half x, out half ret )
 {
 	ret = (half)sin(x);
 }
+
 
 void Tan( half x, out half ret )
 {
@@ -156,14 +164,14 @@ void Floor( half x, out half ret )
 	ret = (half)floor(x);
 }
 
-void Frac( half x, out half ret )
+void Frac( float x, out float ret )
 {
-	ret = (half)frac(x);
+	ret = (float)frac(x);
 }
 
-void Pow( half v1, half v2, out half ret )
+void Pow( float v1, float v2, out float ret )
 {
-	ret = (half)pow(v1,v2);
+	ret = (float)pow(v1,v2);
 }
 
 void Lerp( half v1, half v2, half s , out half ret )
@@ -241,6 +249,11 @@ void ScreenPos( float4 projPos, out float2 screenPos )
 
   screenPos.x += 1.0f* gViewportSizeAndRcp.z*0.5f;
   screenPos.y += 1.0f* gViewportSizeAndRcp.w*0.5f;
+}
+
+void TransformToWorldPos(float3 localPos, out float3 worldPos)
+{
+	worldPos = mul(float4(localPos, 1), WorldMatrix).xyz;
 }
 
 void Distortion( float4 localPos, float4 localNorm, float4 viewPos, float4 projPos, float3 localCameraPos, float strength, float transparency, float distortionOffset, out  float2 distortionUV, out float distortionAlpha) 
@@ -856,6 +869,208 @@ void UInt4_To_Color4(uint4 src, out half4 tar)
 	tar[1] = (half)src[1] / 255.0h;
 	tar[2] = (half)src[2] / 255.0h;
 	tar[3] = (half)src[3] / 255.0h;
+}
+
+void RotateAboutAxis(float3 rotationAxis, float rotationAngle, float3 pivotPos, float3 localPos, out float3 localOffset)
+{
+	// Project localPos onto the rotation axis and find the closest point on the axis to localPos
+	float3 ClosestPointOnAxis = pivotPos + rotationAxis * dot(rotationAxis, localPos - pivotPos);
+
+	// Construct orthogonal axes in the plane of the rotation
+	float3 UAxis = localPos - ClosestPointOnAxis;
+	float3 VAxis = cross(rotationAxis.xyz, UAxis);
+	float CosAngle;
+	float SinAngle;
+	sincos(rotationAngle, SinAngle, CosAngle);
+	// Rotate using the orthogonal axes
+	float3 R = UAxis * CosAngle + VAxis * SinAngle;
+	// Reconstruct the rotated world space position
+	float3 RotatedPosition = ClosestPointOnAxis + R;
+	// Convert from position to a position offset
+	localOffset = RotatedPosition - localPos;
+}
+
+float SinRemapped(float SinPhase, float v1, float v2)
+{
+	return lerp(v1, v2, (SinPhase+1.0f)*0.5f);
+}
+
+float Length(float3 A, float3 B)
+{
+	float3 sub = A - B;
+	return length(sub);
+}
+
+float SphereMask(float3 A, float3 B, float Radius, float Hardness)
+{
+	float distance = Length(A, B);
+	float invRadius = 1.0f / max(0.00001f, Radius);
+
+	float normalizeDistance = distance * invRadius;
+
+	float softness = 1 - Hardness;
+	float invHardness = 1.0f / max(0.00001f, softness);
+
+	float negNormalizeDistance = 1 - normalizeDistance;
+	float maskUnclamped = negNormalizeDistance * invHardness;
+
+	return saturate(maskUnclamped);
+}
+
+void LerpMultiple2(float2 v1, float2 v2, float2 v3, float2 v4, float scalar, out float2 lerp3, out float2 lerp4)
+{
+	float a1 = clamp(scalar * 2, 0, 1);
+	float a2 = clamp(scalar * 2 - 1, 0, 1);
+	lerp3 = lerp(lerp(v1, v2, a1), v3, a2);
+
+	a1 = clamp(scalar * 3, 0, 1);
+	a2 = clamp(scalar * 3 - 1, 0, 1);
+	float a3 = clamp(scalar * 3 - 2, 0, 1);
+	lerp4 = lerp(lerp(lerp(v1, v2, a1), v3, a2), v4, a3);
+}
+
+
+void Pivot_DecodePosition(float3 rgb, out float3 localPos)
+{
+	localPos = float3(rgb.x, rgb.z, -rgb.y) * (float3)0.01f;
+}
+
+void Pivot_DecodeAxisVector(float3 rgb, out float3 localAxis)
+{
+	// trans to (-1, 1)
+	rgb = (rgb - 0.5f) * (float3)2.0f;
+	// swap y z
+	rgb = float3(rgb.x, rgb.z, -rgb.y);
+
+	localAxis = normalize(rgb);
+}
+
+float Pivot_DecodeAxisExtent(float v)
+{
+	return clamp(v * 20.48f, 0.01f, 0.08f);
+}
+
+float Pivot_UnpackIntAsFloat(float N)
+{
+	uint uRes32 = asuint(N);
+
+	const uint sign2 = ((uRes32 >> 16) & 0x8000);
+	const uint exp2 = ((((const int)((uRes32 >> 23) & 0xff)) - 127 + 15) << 10);
+	const uint mant2 = ((uRes32 >> 13) & 0x3ff);
+	const uint bits = (sign2 | exp2 | mant2);
+	const uint result = bits - 1024;
+	return float(result);
+}
+
+void Pivot_GetPivotIndex(float2 uv, float2 texSize, out float index)
+{
+	float2 pos = floor(uv*texSize);
+	index = pos.y* texSize.x + pos.x;
+}
+
+void Pivot_GetParentPivotData(float parentIdx, float2 texSize, float currentIdx, out float2 parentUV, out float isChild)
+{
+	float2 pos;
+	pos.x = fmod(parentIdx, texSize.x);
+	pos.y = floor(parentIdx / texSize.x);
+	pos = pos + (float2)0.5f;
+	parentUV = pos / texSize;
+
+	if (abs(parentIdx - currentIdx) < 0.00001f)
+		isChild = 0.0f;
+	else
+		isChild = 1.0f;
+}
+
+void Pivot_GetHierarchyData(float pivotDepth, float2 pivot1UV, float2 pivot2UV, float2 pivot3UV, float2 pivot4UV, out float2 rootUV, out float2 mainBranchUV, out float2 smallBranchUV, out float2 leaveUV, out float mainBranchMask, out float smallBranchMask, out float leaveMask)
+{
+	float2 temp;
+	LerpMultiple2(pivot1UV, pivot2UV, pivot3UV, pivot4UV, pivotDepth / 3.0f, temp, rootUV);
+	LerpMultiple2(pivot1UV, pivot2UV, pivot3UV, (float2)0.0f, saturate((pivotDepth - 1.0f) / 2.0f), mainBranchUV, temp);
+	smallBranchUV = lerp(pivot1UV, pivot2UV, saturate((pivotDepth - 2.0f)));
+	leaveUV = pivot1UV;
+
+	mainBranchMask = saturate(pivotDepth);
+	smallBranchMask = saturate(pivotDepth - 1);
+	leaveMask = saturate(pivotDepth - 2);
+}
+
+void Pivot_WindAnimation(
+	float3 prePos,
+	Texture2D posTex, Texture2D xTex, SamplerState samp, float2 uv,
+	float mask, Texture2D windTex, float scale, float speedX, float3 windAxisX, float speedY, float3 windAxisY,
+	float3 localPos, float rot, float rotOffset, float parentRot,
+	float axisScale, float axisSpeedScale,
+	out float3 localVertexOffset, out float rotationAngle
+)
+{
+	//speedX = 0.00025f; 
+	speedY = 0.001f;
+	//rot = 0.0f;
+	//rotOffset = 0.0f;
+	parentRot = 0.0f;
+	scale = 1.0f;
+	axisScale = 0.25f;
+	//axisSpeedScale = 1.0f;
+	rotationAngle = 0.0f;
+	float3 pivotPos;
+	float2 parentUV;
+	float4 clr1 = posTex.SampleLevel(samp, uv, 0);
+	Pivot_DecodePosition(clr1.xyz, pivotPos);
+	//float parentIndex = Pivot_UnpackIntAsFloat(clr1.w);
+	//float temp;
+	//Pivot_GetParentPivotData(parentIndex, TextureSize(posTex), 0.0f, parentUV, temp);
+
+	float4 clr2 = xTex.SampleLevel(samp, uv, 0);
+	float3 xAxis;
+	Pivot_DecodeAxisVector(clr2.xyz, xAxis);
+	float xExtent = Pivot_DecodeAxisExtent(clr2.w);
+
+	float timeperSecond = Time;
+
+	// rotation axis
+	float3 localWindAxisX = mul(float4(windAxisX, 0.0h), WorldMatrixInverse);
+	float3 localWindAxisY = mul(float4(windAxisY, 0.0h), WorldMatrixInverse);
+	localWindAxisX = localWindAxisY = float3(1.0f, 0.0f, 0.0f);
+	float3 localWindAxisZ = float3(1.0f, 0.0f, 1.0f);
+	float2 windSpeed = float2(speedX, speedY);
+	float3 pivotExtent = pivotPos + xAxis * xExtent;
+	float2 pivotExtentWindSpace = float2(dot(localWindAxisZ, pivotExtent), dot(localWindAxisX, pivotExtent));
+	float2 windUV1 = frac(windSpeed * Time + pivotExtentWindSpace / scale);
+	float2 windUV2 = frac((windSpeed * Time + pivotExtentWindSpace / scale) / axisSpeedScale);
+	// todo: need swap y, z ?
+	float3 windTurbulenceVector = (windTex.SampleLevel(samp, windUV2, 0).rgb - 0.5f) * axisScale;
+	// swap y z
+	windTurbulenceVector.rgb = float3(windTurbulenceVector.x, windTurbulenceVector.z, -windTurbulenceVector.y);
+
+	float3 rotationAxis = normalize(windTurbulenceVector + cross(xAxis, pow(dot(localWindAxisX, xAxis), 5.0f) * float3(0, -0.2f, 0) + localWindAxisX));
+
+	// rotation angle
+	float outputRotationMask = saturate(dot((localPos - pivotPos), xAxis) / xExtent);
+	float windGustMagnitude = windTex.SampleLevel(samp, windUV1, 0).a;
+	// todo: use rotation axis mask
+	rotationAngle = (parentRot + (windGustMagnitude+rotOffset)*rot)* outputRotationMask;
+	//rotationAngle = rotationAngle * 0.1f;
+
+	// rotation position & normal
+	float3 localOffset;
+	float3 currPos = prePos + localPos;
+	RotateAboutAxis(rotationAxis, rotationAngle, pivotPos, currPos, localOffset);
+	//localVertexOffset = currPos + localOffset * mask;
+	localVertexOffset = localOffset * mask;
+}
+
+void Pivot_WindAnimationHierarchy(
+	float2 uv1,
+	float3 prePos,
+	Texture2D posTex, Texture2D xTex, SamplerState samp, float2 uv,
+	float mask, Texture2D windTex, float scale, float speedX, float3 windAxisX, float speedY, float3 windAxisY,
+	float3 localPos, float rot, float rotOffset, float parentRot,
+	float axisScale, float axisSpeedScale,
+	out float3 localVertexOffset, out float rotationAngle
+)
+{
+	Pivot_WindAnimation(prePos,posTex, xTex, samp, uv,mask, windTex, scale, speedX, windAxisX, speedY, windAxisY,localPos, rot, rotOffset, parentRot,axisScale, axisSpeedScale,localVertexOffset, rotationAngle);
 }
 
 //void GetGridUV(float2 uv, float4 lightmapUV, float2 min, float2 max, out float2 outUV)

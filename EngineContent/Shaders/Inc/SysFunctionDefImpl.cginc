@@ -1,3 +1,71 @@
+
+VS_MODIFIER VS_INPUT_TO_VS_MODIFIER(VS_INPUT input)
+{
+	VS_MODIFIER result = (VS_MODIFIER)0;
+#if USE_VS_Position == 1
+	result.vPosition = input.vPosition;
+#endif
+#if USE_VS_Normal == 1
+	result.vNormal = input.vNormal;
+#endif
+#if USE_VS_Tangent == 1
+	result.vTangent = input.vTangent;
+#endif
+#if USE_VS_Color == 1
+#if MTL_ID_64BITVCOLORALPHA == 1
+	result.vColor.rgb = input.vColor.rgb;
+	result.vColor.a = input.vColor.a * 255 / 63;
+#else
+	result.vColor = input.vColor;
+#endif
+#endif
+#if USE_VS_UV == 1
+	result.vUV = input.vUV;
+#endif
+#if USE_VS_LightMap == 1
+	result.vLightMap = input.vLightMap;
+#endif
+#if USE_VS_SkinIndex == 1
+	result.vSkinIndex = input.vSkinIndex;
+#endif
+#if USE_VS_SkinWeight == 1
+	result.vSkinWeight = input.vSkinWeight;
+#endif
+#if USE_VS_TerrainIndex == 1
+	result.vTerrainIndex = input.vTerrainIndex;
+#endif
+#if USE_VS_TerrainGradient == 1
+	result.vTerrainGradient = input.vTerrainGradient;
+#endif
+#if USE_VS_InstPos == 1
+	result.vInstPos = input.vInstPos;
+#endif
+#if USE_VS_InstQuat == 1
+	result.vInstQuat = input.vInstQuat;
+#endif
+#if USE_VS_InstScale == 1
+	result.vInstScale = input.vInstScale;
+#endif
+#if USE_VS_F4_1 == 1
+	result.vF4_1 = input.vF4_1;
+#endif
+#if USE_VS_F4_2 == 1
+	result.vF4_2 = input.vF4_2;
+#endif
+#if USE_VS_F4_3 == 1
+	result.vF4_3 = input.vF4_3;
+#endif
+	result.vVertexID = input.vVertexID;
+	result.vInstanceId = input.vInstanceId;
+#if RHI_TYPE == RHI_VK
+	result.vMultiDrawId = input.vMultiDrawId;
+#elif RHI_TYPE == RHI_DX12
+	result.vMultiDrawId = MultiDrawId;
+#endif
+
+	return result;
+}
+
 #if !defined(Def_GetTerrainDiffuse)
 float3 GetTerrainDiffuse(float2 uv, PS_INPUT input)
 {

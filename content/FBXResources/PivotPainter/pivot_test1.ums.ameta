@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Root Type="EngineNS.Graphics.Mesh.UMaterialMeshAMeta@EngineCore">
+  <AssetId Type="System.Guid@Unknown" Value="c84abf08-ae6f-4b7e-9ea0-6a29341d4ebf" />
+  <Description Type="System.String@Unknown" Value="This is a EngineNS.Graphics.Mesh.UMaterialMesh&#xA;Hahah" />
+  <Icon Type="EngineNS.EGui.UUvAnim@EngineCore">
+    <Color Type="System.UInt32@Unknown" Value="4294967295" />
+    <Duration Type="System.Single@Unknown" Value="1000" />
+    <FrameUVs Type="System.Collections.Generic.List&lt;EngineNS.Vector4@EngineCore,&gt;@Unknown" Count="1">
+      <e_0 Value="0,0,1,1" />
+    </FrameUVs>
+    <Size Type="EngineNS.Vector2@EngineCore" Value="50,50" />
+  </Icon>
+  <RefAssetRNames Type="System.Collections.Generic.List&lt;EngineNS.RName@EngineCore,&gt;@Unknown" Count="2">
+    <e_0 Value="Game,fbxresources/pivotpainter/simplepivotpainterexample.vms,a9243b8d-bfdd-428a-bc7f-0242dc24a9f8" />
+    <e_1 Value="Game,fbxresources/pivotpainter/pivot_wind.material,7b1ac790-2989-4f38-8a9d-a721be8ee90f" />
+  </RefAssetRNames>
+  <TypeStr Type="System.String@Unknown" Value="EngineNS.Graphics.Mesh.UMaterialMesh@EngineCore" />
+</Root>

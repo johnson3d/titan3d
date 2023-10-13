@@ -440,6 +440,12 @@
     <None Include="$(MSBuildThisFileDirectory)Bricks\GpuDriven\ClusterCulling.cginc">
       <Filter>Bricks\GpuDriven</Filter>
     </None>
+    <None Include="$(MSBuildThisFileDirectory)slate\Slate_TextureViewer.cginc">
+      <Filter>Slate</Filter>
+    </None>
+    <None Include="$(MSBuildThisFileDirectory)Modifier\UIModifier.cginc">
+      <Filter>Modifier</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="$(MSBuildThisFileDirectory)Compute\calcrate.compute">

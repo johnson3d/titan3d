@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Root Type="EngineNS.Graphics.Pipeline.Shader.UMaterialAMeta@EngineCore">
+  <AssetId Type="System.Guid@Unknown" Value="3f1ec76a-5e2d-4c69-9291-1d3bb4121a19" />
+  <Description Type="System.String@Unknown" Value="This is a EngineNS.Graphics.Pipeline.Shader.UMaterial&#xA;Hahah" />
+  <Icon Type="EngineNS.EGui.UUvAnim@EngineCore">
+    <Color Type="System.UInt32@Unknown" Value="4294967295" />
+    <Duration Type="System.Single@Unknown" Value="1000" />
+    <FrameUVs Type="System.Collections.Generic.List&lt;EngineNS.Vector4@EngineCore,&gt;@Unknown" Count="1">
+      <e_0 Value="0,0,1,1" />
+    </FrameUVs>
+    <Size Type="EngineNS.Vector2@EngineCore" Value="50,50" />
+  </Icon>
+  <RefAssetRNames Type="System.Collections.Generic.List&lt;EngineNS.RName@EngineCore,&gt;@Unknown" Count="4">
+    <e_0 Value="Game,fbxresources/pivotpainter/hilltree_01_atlas_tex.srv,34f1d120-080a-4db7-91ea-46fdfa343820" />
+    <e_1 Value="Game,fbxresources/pivotpainter/hilltree_p2_rgb_pivotpos_a_parentindexint_uv_2.srv,5b150c42-7736-439f-83bb-39f10418ceb1" />
+    <e_2 Value="Game,fbxresources/pivotpainter/ht_p2_xvec_xexdiv2048r2048_uv_2.srv,66ecf7d0-b1ea-46bd-8619-46518307c225" />
+    <e_3 Value="Game,fbxresources/pivotpainter/windturblencevectorandgustmagnitude.srv,c941dc73-76ac-493d-9e51-f493f7dc57ba" />
+  </RefAssetRNames>
+  <TypeStr Type="System.String@Unknown" Value="EngineNS.Graphics.Pipeline.Shader.UMaterial@EngineCore" />
+</Root>

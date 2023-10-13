@@ -88,6 +88,21 @@ PS_INPUT VS_Main(VS_INPUT input1)
 	return output;
 }
 
+half GetRoughness(half InRoughness, float3 WorldNormal)
+{
+	half Roughness = InRoughness;
+
+#if 1 // Speculaer AA
+	float roughness2 = Roughness * Roughness;
+	float3 dndu = ddx(WorldNormal), dndv = ddy(WorldNormal);
+	float variance = 0.2 * (dot(dndu, dndu) + dot(dndv, dndv));
+	float kernelRoughness2 = min(2.0 * variance, 0.18);
+	float filteredRoughness2 = saturate(roughness2 + kernelRoughness2);
+	Roughness = sqrt(filteredRoughness2);
+#endif
+	return Roughness;
+}
+
 struct PS_OUTPUT
 {
 	float4 RT0 : SV_Target0;
@@ -123,7 +138,7 @@ PS_OUTPUT PS_Main(PS_INPUT input)
 	half3 N = GBuffer.WorldNormal;
 	half Metallic = (half)GBuffer.Metallicity;
 	half Smoothness = (half)GBuffer.Roughness;
-	half Roughness = 1.0h - Smoothness;	
+	half Roughness = GetRoughness(1.0h - Smoothness, GBuffer.WorldNormal);
 	half AOs = 0;
 	half AoOffsetEncoded = 0.0h;
 

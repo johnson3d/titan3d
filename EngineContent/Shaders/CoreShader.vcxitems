@@ -77,6 +77,7 @@
     <None Include="$(MSBuildThisFileDirectory)MobileTranslucent.shadingenv" />
     <None Include="$(MSBuildThisFileDirectory)Modifier\GridUVModifier.cginc" />
     <None Include="$(MSBuildThisFileDirectory)Modifier\InstancingModifier.cginc" />
+    <None Include="$(MSBuildThisFileDirectory)Modifier\UIModifier.cginc" />
     <None Include="$(MSBuildThisFileDirectory)Occlusion\GpuSceneCullCluster.cginc" />
     <None Include="$(MSBuildThisFileDirectory)Occlusion\GpuSceneCullInstance.cginc" />
     <None Include="$(MSBuildThisFileDirectory)Occlusion\GpuSceneSetupCullCluster.cginc" />
@@ -124,6 +125,7 @@
     <None Include="$(MSBuildThisFileDirectory)ShadingEnv\Sys\SSM.cginc" />
     <None Include="$(MSBuildThisFileDirectory)ShadingEnv\TemporalAA.cginc" />
     <None Include="$(MSBuildThisFileDirectory)slate\SlateGUI.cginc" />
+    <None Include="$(MSBuildThisFileDirectory)slate\Slate_TextureViewer.cginc" />
     <None Include="$(MSBuildThisFileDirectory)Snapshot.shadingenv" />
     <None Include="$(MSBuildThisFileDirectory)SSM.shadingenv" />
     <None Include="$(MSBuildThisFileDirectory)MobileSunShaftBlur.shadingenv" />

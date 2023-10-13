@@ -3,6 +3,7 @@
 
 #define Pi  3.14159265h
 #define PI 3.1415926535897932f
+#define Invc2PI 1.0 / (PI * 2.0)
 #define ECCd 1.0h //Pi/Pi
 #define AO_M 255.0h
 #define MAX_POINT_LIGHT_PER_OBJ 4
@@ -354,6 +355,81 @@ float Lanczos2(float x)
 
 	//float denominator = 
 	return numerator1 * B2 * B2;
+}
+
+//https://www.jeremyong.com/graphics/2023/09/05/f32-interlocked-min-max-hlsl/
+float2 SphericalEncode(float3 v3)
+{
+	float2 v;
+    //float PI;
+	v.x = atan2(v3.y, v3.x) * Invc2PI;
+	v.y = v3.z;
+
+	v.x = v.x * 0.5 + 0.5;
+	v.y = v.y * 0.5 + 0.5;
+	return v;
+}
+
+float3 SphericalDecode(float2 v)
+{
+	float2 ang = float2(v.x * 2.0 - 1.0, v.x * 2.0 - 1.0);
+
+	float2 scth;
+
+	float r = ang.x * PI * 2.0;
+	float d2 = 1.0 - ang.y * ang.y;
+
+	scth.x = cos(r);
+	scth.y = sin(r);
+
+	float2 schpi = float2(sqrt(1.0 - ang.y * ang.y), ang.y);
+
+	float3 v3 = float3(scth.x * schpi.x, scth.y * schpi.x, schpi.y);
+
+	return v3;
+}
+
+float2 OctEncode(float3 v3)
+{
+	float dxyz = abs(v3.x) + abs(v3.y) + abs(v3.z);
+	v3 = v3 / dxyz;
+
+	float2 n = float2(v3.x, v3.y);
+
+	if (v3.z < 0)
+	{
+		float nx = n.x;
+		float ny = n.y;
+
+		n.x = (1.0 - abs(nx)) * (nx >= 0.0 ? 1.0 : -1.0);
+		n.y = (1.0 - abs(ny)) * (ny >= 0.0 ? 1.0 : -1.0);
+	}
+
+	n.x = n.x * 0.5 + 0.5;
+	n.y = n.y * 0.5 + 0.5;
+	return n;
+}
+
+float3 OctDecode(float2 v)
+{
+	v = v * 2.0 - 1.0;
+
+	float3 n = float3(v.x, v.y, 1.0 - abs(v.x) - abs(v.y));
+	float t = clamp(-n.z, 0.0, 1.0);
+	n.x = n.x + (n.x > 0.0 ? -t : t);
+	n.y = n.y + (n.y > 0.0 ? -t : t);
+	
+	return normalize(n);
+}
+
+//Approximation TaylorExpansion
+float Sqrt_TaylorExpansion(float x)
+{
+	//Taylor 4.0
+	// return 2.0 + (x - 4.0) / 2.0
+	
+	//Taylor 1.0
+    return 1.0 + (x - 1.0) / 2.0;
 }
 
 #endif

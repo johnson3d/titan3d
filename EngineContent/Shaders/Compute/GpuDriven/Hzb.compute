@@ -14,7 +14,7 @@ void CS_Setup(uint3 id : SV_DispatchThreadID,
 {
 	uint2 texSize;
 	DstBuffer.GetDimensions(texSize.x, texSize.y);
-	if (any(id.xy > texSize))
+	if (any(id.xy >= texSize))
 		return;
 
 	float d1 = DepthBuffer[id.xy * 2].r;
@@ -35,7 +35,7 @@ void CS_DownSample(uint3 id : SV_DispatchThreadID,
 {
 	uint2 texSize;
 	DstBuffer.GetDimensions(texSize.x, texSize.y);
-	if (any(id.xy > texSize))
+	if (any(id.xy >= texSize))
 		return;
 
 	float d1 = SrcBuffer[id.xy * 2].r;
