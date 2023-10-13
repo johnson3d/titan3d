@@ -1,0 +1,79 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <MSBuildAllProjects Condition="'$(MSBuildVersion)' == '' Or '$(MSBuildVersion)' &lt; '16.0'">$(MSBuildAllProjects);$(MSBuildThisFileFullPath)</MSBuildAllProjects>
+    <HasSharedItems>true</HasSharedItems>
+    <SharedGUID>b1766c5b-0a9b-442e-a42d-39ae93b6fdf2</SharedGUID>
+  </PropertyGroup>
+  <PropertyGroup Label="Configuration">
+    <Import_RootNamespace>JitherOpenEXR</Import_RootNamespace>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="$(MSBuildThisFileDirectory)Attributes\AttributeNames.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Attributes\Box2f.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Attributes\Box2i.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Attributes\Chromaticities.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Attributes\KeyCode.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Attributes\M33f.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Attributes\M44f.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Attributes\Preview.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Attributes\Rational.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Attributes\TileDesc.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Attributes\TimeCode.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Attributes\UnknownValue.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Attributes\V2f.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Attributes\V2i.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Attributes\V3f.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Attributes\V3i.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Channel.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)ChannelList.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)ChunkInfo.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Compression\CompressionResult.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Compression\Compressor.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Compression\HuffmanCoding.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Compression\MinHeap.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Compression\NullCompressor.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Compression\PixelDataInfo.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Compression\PizCompressor.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Compression\RLECompressor.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Compression\SubStream.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Compression\UnsupportedCompressor.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Compression\Wavelet.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Compression\ZipCompressor.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Compression\ZipSCompressor.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Converters\PixelConverter.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Converters\PixelInterleaveConverter.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Drawing\Bounds.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Drawing\Dimensions.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)EnvironmentMap.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)EXRAttribute.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)EXRCompression.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)EXRDataType.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)EXRException.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)EXRFile.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)EXRHeader.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)EXRImageFormat.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)EXRPart.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)EXRPartDataHandler.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)EXRPartDataHandlerList.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)EXRPartDataReader.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)EXRPartDataReaderList.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)EXRPartDataWriter.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)EXRPartDataWriterList.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)EXRReader.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)EXRVersion.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)EXRVersionFlags.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)EXRWriter.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Helpers\MathHelpers.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)LevelMode.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)LineOrder.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)OffsetTable.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)PartType.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)PerceptualTreatment.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)RoundingMode.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)ScanlineChunkInfo.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)TileChunkInfo.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)TilingInformation.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)TilingLevel.cs" />
+  </ItemGroup>
+</Project>
