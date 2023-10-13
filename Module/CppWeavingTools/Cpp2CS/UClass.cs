@@ -102,6 +102,10 @@ namespace CppWeaving.Cpp2CS
             var fields = Decl.Fields;
             foreach (var i in fields)
             {
+                if (i.Name == UTypeManager.DebugFieldName)
+                {
+                    UTypeManager.DoDebugAction();
+                }
                 UDelegate func;
                 if (IsIgnoreField(i, out func))
                     continue;
@@ -137,9 +141,9 @@ namespace CppWeaving.Cpp2CS
                     tmp.NumOfTypePointer = UTypeManager.GetPointerNumOfType(type.Handle, out tmp.IsReference);
                     tmp.Size = (int)type.Handle.SizeOf;
                     tmp.CxxName = type.AsString;
-                    if(i.Type is ClangSharp.TemplateSpecializationType)
+                    if(i.Type.Desugar is ClangSharp.TemplateSpecializationType)
                     {
-                        var templateType = i.Type as ClangSharp.TemplateSpecializationType;
+                        var templateType = i.Type.Desugar as ClangSharp.TemplateSpecializationType;
                         switch(templateType.TemplateName.AsTemplateDecl.Name)
                         {
                             case "AutoRef":
@@ -150,7 +154,7 @@ namespace CppWeaving.Cpp2CS
                         }
                     }
                     tmp.Name = i.Name;
-                    tmp.IsTypeDef = type.Kind == ClangSharp.Interop.CXTypeKind.CXType_Typedef;
+                    tmp.IsTypeDef = type.Desugar.Kind == ClangSharp.Interop.CXTypeKind.CXType_Typedef;
                     tmp.PropertyType = UTypeManager.Instance.FindType(type.Handle);
                     tmp.NumOfElement = (int)type.Handle.NumElements;
                 }
@@ -174,6 +178,10 @@ namespace CppWeaving.Cpp2CS
             var methods = Decl.Methods;
             foreach (var i in methods)
             {
+                if (i.Name == UTypeManager.DebugFunctionName)
+                {
+                    UTypeManager.DoDebugAction();
+                }
                 if (IsIgnoreFunction(i, Decl))
                     continue;
 
@@ -209,7 +217,7 @@ namespace CppWeaving.Cpp2CS
                     arg.MarshalType = UTypeManager.GetMeta(j.Attrs, UProjectSettings.SV_Marshal);
                     arg.MarshalTypeCS = UTypeManager.GetMeta(j.Attrs, UProjectSettings.SV_MarshalCS);
                     arg.NumOfElement = (int)j.Type.Handle.ArraySize;
-                    arg.IsTypeDef = j.Type.Kind == ClangSharp.Interop.CXTypeKind.CXType_Typedef;
+                    arg.IsTypeDef = j.Type.Desugar.Kind == ClangSharp.Interop.CXTypeKind.CXType_Typedef;
 
                     if (arg.IsDelegate)
                     {
@@ -252,6 +260,7 @@ namespace CppWeaving.Cpp2CS
                     else
                     {
                         ret.CxxName = i.ReturnType.AsString;
+                        ret.CxxName = UTypeManager.GetFullName(i.ReturnType.Handle);
                     }
                     tmp.ReturnType = ret;
                     tmp.UpdateFunctionHash(i);
@@ -305,7 +314,7 @@ namespace CppWeaving.Cpp2CS
                             arg.MarshalType = UTypeManager.GetMeta(j.Attrs, UProjectSettings.SV_Marshal);
                             arg.MarshalTypeCS = UTypeManager.GetMeta(j.Attrs, UProjectSettings.SV_MarshalCS);
                             arg.NumOfElement = (int)j.Type.Handle.ArraySize;
-                            arg.IsTypeDef = j.Type.Kind == ClangSharp.Interop.CXTypeKind.CXType_Typedef;
+                            arg.IsTypeDef = j.Type.Desugar.Kind == ClangSharp.Interop.CXTypeKind.CXType_Typedef;
 
                             if (arg.IsDelegate)
                             {
@@ -381,9 +390,9 @@ namespace CppWeaving.Cpp2CS
                     return false;
                 }
             }
-            else if(decl.Type is ClangSharp.TemplateSpecializationType)
+            else if(decl.Type.Desugar is ClangSharp.TemplateSpecializationType)
             {
-                var templateType = decl.Type as ClangSharp.TemplateSpecializationType;
+                var templateType = decl.Type.Desugar as ClangSharp.TemplateSpecializationType;
                 switch(templateType.TemplateName.AsTemplateDecl.Name)
                 {
                     case "AutoRef":

@@ -90,7 +90,7 @@ namespace CppWeaving.Cpp2CS
 			RegClass("unsigned long", new USystemTypeStruct() { CppName = "unsigned int", CSName = "uint", RetPodName = "unsigned long" });
 			RegClass("unsigned long long", new USystemTypeStruct() { CppName = "unsigned long long", CSName = "ulong", RetPodName = "unsigned long long" });
 			RegClass("float", new USystemTypeStruct() { CppName = "float", CSName = "float", RetPodName = "float" });
-			RegClass("double", new USystemTypeStruct() { CppName = "float", CSName = "double", RetPodName = "double" });
+			RegClass("double", new USystemTypeStruct() { CppName = "double", CSName = "double", RetPodName = "double" });
 
 			RegClass("Hash64", new USystemTypeStruct() { CppName = "Hash64", CSName = "EngineNS.Hash64", RetPodName = "Hash64_t" });
 			RegClass("v3dxVector2", new USystemTypeStruct() { CppName = "v3dxVector2", CSName = "EngineNS.Vector2", RetPodName = "v3dVector2_t" });
@@ -111,6 +111,7 @@ namespace CppWeaving.Cpp2CS
 
 			RegClass("EngineNS.FRectanglef", new USystemTypeStruct() { CppName = "EngineNS::FRectanglef", CSName = "EngineNS.RectangleF", RetPodName = "EngineNS::FRectanglef" });
 			RegClass("EngineNS.FRect", new USystemTypeStruct() { CppName = "EngineNS::FRect", CSName = "EngineNS.RectangleF", RetPodName = "EngineNS::FRect" });
+			RegClass("v3dxThickness", new USystemTypeStruct() { CppName = "v3dxThickness", CSName = "EngineNS.Thickness", RetPodName = "v3dVector4_t" });
 
 			mTypeDefs["ImGuiDir"] = "ImGuiDir_";
             mTypeDefs["ImGuiInputTextFlags"] = "ImGuiInputTextFlags_";

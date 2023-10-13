@@ -147,7 +147,7 @@ namespace CppWeaving.Cpp2CS
                     {
                         if (i.HasMeta(UProjectSettings.SV_NoStringConverter) == false)
                         {
-                            if (retTypeStr == "sbyte*")
+                            if (i.ReturnType.NumOfElement <= 0 && retTypeStr == "sbyte*")
                             {
                                 retTypeStr = "string";
                                 marshalReturn = $"EngineNS.Rtti.UNativeCoreProvider.MarshalPtrAnsi";
@@ -296,6 +296,10 @@ namespace CppWeaving.Cpp2CS
         {
             foreach (var i in mClass.Properties)
             {
+                if (i.Name == UTypeManager.DebugFieldName)
+                {
+                    UTypeManager.DoDebugAction();
+                }
                 if (i.Access != EAccess.Public && mClass.IsExpProtected == false)
                     continue;
                 var retType = i.GetCsTypeName();
@@ -323,7 +327,7 @@ namespace CppWeaving.Cpp2CS
                     {
                         if (i.HasMeta(UProjectSettings.SV_NoStringConverter) == false)
                         {
-                            if (retType == "sbyte*")
+                            if (i.NumOfElement <= 0 && retType == "sbyte*")
                             {
                                 retType = "string";
                                 marshalReturn = $"EngineNS.Rtti.UNativeCoreProvider.MarshalPtrAnsi";
@@ -335,6 +339,10 @@ namespace CppWeaving.Cpp2CS
                             if (dypeDef != null)
                                 retType = dypeDef;
                         }
+                        //if (i.NumOfElement >= 0)
+                        //{
+                        //    retType += "*";
+                        //}
                         AddLine($"{GetAccessDefine(i.Access)} {retType} {i.Name}");
                     }
                 }
@@ -396,6 +404,10 @@ namespace CppWeaving.Cpp2CS
             AddLine($"//Fields");
             foreach (var i in mClass.Properties)
             {
+                if (i.Name == UTypeManager.DebugFieldName)
+                {
+                    UTypeManager.DoDebugAction();
+                }
                 if (i.Access != EAccess.Public && mClass.IsExpProtected == false)
                     continue;
 
@@ -421,7 +433,7 @@ namespace CppWeaving.Cpp2CS
                 {
                     if (i.HasMeta(UProjectSettings.SV_NoStringConverter) == false)
                     {
-                        if (retType == "sbyte*")
+                        if (i.NumOfElement <= 0 && retType == "sbyte*")
                         {
                             retType = "string";
                         }
@@ -436,6 +448,11 @@ namespace CppWeaving.Cpp2CS
         {
             foreach (var i in mClass.Functions)
             {
+                if (i.Name == UTypeManager.DebugFunctionName)
+                {
+                    UTypeManager.DoDebugAction();
+                }
+                
                 if (i.Access != EAccess.Public && mClass.IsExpProtected == false)
                     continue;
                 string marshalReturn = null;
@@ -453,7 +470,7 @@ namespace CppWeaving.Cpp2CS
                 {
                     if (i.HasMeta(UProjectSettings.SV_NoStringConverter) == false)
                     {
-                        if (retTypeStr == "sbyte*")
+                        if (i.ReturnType.NumOfElement <= 0 && retTypeStr == "sbyte*")
                         {
                             retTypeStr = "string";
                             marshalReturn = $"EngineNS.Rtti.UNativeCoreProvider.MarshalPtrAnsi";

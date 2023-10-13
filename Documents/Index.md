@@ -24,6 +24,12 @@
 右键空白处可以新建资产
 
 ![新建资产](picture/new_assets.png)
+
+- 带3D预览的编辑器操作
+- - **移动**:ASWD或者按住鼠标中键盘移动
+- - **绕观察点旋转**:按住Alt键和鼠标左键拖动
+- - **摄像机自身旋转**:鼠标右键拖动
+- 内置编辑器
 - - **TextureEditor**
 - - **MeshEditor**
 - - **MaterialEditor**

@@ -1,6 +1,8 @@
-﻿using System;
+﻿using ClangSharp.Interop;
+using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.ConstrainedExecution;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -118,6 +120,11 @@ namespace CppWeaving.Cpp2CS
                     tmp.Decl = t;
                     tmp.MetaInfos.Clear();
                     UTypeManager.BuildMetaData(decl.Attrs, tmp.MetaInfos);
+
+                    if (tmp.Name == UTypeManager.DebugDelegateName)
+                    {
+                        UTypeManager.DoDebugAction();
+                    }
                     DelegateTypes.Add(fullname, tmp);
                 }
             }
@@ -317,7 +324,7 @@ namespace CppWeaving.Cpp2CS
             {
                 return null;
             }
-            var fullname = GetFullName(t);
+            var fullname = GetFullName(nakedType);
 
             UEnum kls;
             if (EnumTypes.TryGetValue(fullname, out kls))
@@ -338,6 +345,13 @@ namespace CppWeaving.Cpp2CS
                 return kls;
             return null;
         }
+        public static string DebugFieldName = "AttachmentMRTs";
+        public static string DebugDelegateName = null;
+        public static string DebugFunctionName = null;
+        public static void DoDebugAction()
+        {
+            int xx = 0;
+        }
         public static string GetFullName(ClangSharp.Interop.CXType decl)
         {
             var fullname = /*GetNamespace(decl.Typ) + "." + */decl.ToString();
@@ -347,25 +361,41 @@ namespace CppWeaving.Cpp2CS
         public static ClangSharp.Interop.CXType GetNakedType(ClangSharp.Interop.CXType type)
         {
             var cur = type.Desugar;
-            while (cur.kind == ClangSharp.Interop.CXTypeKind.CXType_Pointer || cur.kind == ClangSharp.Interop.CXTypeKind.CXType_LValueReference)
-            {
-                cur = cur.PointeeType;
-            }
+            cur = GetPointeeType(cur);
             if (cur.ToString() == "size_t")
             {//size_t是特殊的，相当于指针位宽，有变化
                 return cur;
             }
             else
             {
-                while (cur.kind == ClangSharp.Interop.CXTypeKind.CXType_Typedef || cur.kind == ClangSharp.Interop.CXTypeKind.CXType_Elaborated)
-                {
-                    cur = cur.Desugar;
-                }
+                cur = GetDesugarType(cur);
             }
-            cur = cur.Desugar;
+            cur = GetPointeeType(cur);
+
+            if (cur.kind != ClangSharp.Interop.CXTypeKind.CXType_Enum)
+                cur = cur.Desugar;
+            if (cur.ToString().Contains("(*)"))
+                return cur.PointeeType;
             if (cur.NumElements > 0)
             {
-                return cur.ElementType;
+                return GetNakedType(cur.ElementType);
+            }
+            return cur;
+        }
+        public static ClangSharp.Interop.CXType GetPointeeType(ClangSharp.Interop.CXType cur)
+        {
+            while (cur.kind == ClangSharp.Interop.CXTypeKind.CXType_Pointer || cur.kind == ClangSharp.Interop.CXTypeKind.CXType_LValueReference)
+            {
+                cur = cur.PointeeType;
+            }
+            return cur;
+        }
+        public static ClangSharp.Interop.CXType GetDesugarType(ClangSharp.Interop.CXType type)
+        {
+            var cur = type.Desugar;
+            while (cur.kind == ClangSharp.Interop.CXTypeKind.CXType_Typedef || cur.kind == ClangSharp.Interop.CXTypeKind.CXType_Elaborated)
+            {
+                cur = cur.Desugar;
             }
             return cur;
         }
@@ -373,15 +403,15 @@ namespace CppWeaving.Cpp2CS
         {
             IsReference = false;
 
-            if (type.kind == ClangSharp.Interop.CXTypeKind.CXType_ConstantArray)
+            type = GetDesugarType(type);
+            if (type.NumElements >= 0)
             {
-                return 1;
+                type = type.ElementType;
             }
-
-            while (type.kind == ClangSharp.Interop.CXTypeKind.CXType_Typedef)
-            {
-                type = type.CanonicalType;
-            }
+            //if (type.kind == ClangSharp.Interop.CXTypeKind.CXType_ConstantArray)
+            //{
+            //    return 1;
+            //}
             int result = 0;
             var cur = type;
             while (cur.kind == ClangSharp.Interop.CXTypeKind.CXType_Pointer || cur.kind == ClangSharp.Interop.CXTypeKind.CXType_LValueReference)

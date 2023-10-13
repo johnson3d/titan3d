@@ -73,6 +73,10 @@ namespace CppWeaving.Cpp2CS
         {
             foreach (var i in mClass.Properties)
             {
+                if (i.Name == UTypeManager.DebugFieldName)
+                {
+                    UTypeManager.DoDebugAction();
+                }
                 if (i.Access != EAccess.Public && mClass.IsExpProtected == false)
                     continue;
 
@@ -161,6 +165,10 @@ namespace CppWeaving.Cpp2CS
         {
             foreach (var i in mClass.Properties)
             {
+                if (i.Name == UTypeManager.DebugFieldName)
+                {
+                    UTypeManager.DoDebugAction();
+                }
                 if (i.Access != EAccess.Public && mClass.IsExpProtected == false)
                     continue;
                 string retType = i.GetCppTypeName();
@@ -168,11 +176,13 @@ namespace CppWeaving.Cpp2CS
                 {
                     retType = "void*";
                 }
-                else if (i.IsStructType && i.NumOfTypePointer == 0)
+                else if (i.IsStructType && i.NumOfElement <= 0 && i.NumOfTypePointer == 0)
                 {
                     var structType = i.PropertyType as UStruct;
                     if (structType.ReturnPodName() != null)
+                    {
                         retType = structType.ReturnPodName();
+                    }
                     else
                         retType = $"{i.PropertyType.FullName.Replace(".", "_")}_PodType";
                 }
@@ -231,6 +241,11 @@ namespace CppWeaving.Cpp2CS
                 if(i.ReturnType.IsReference)
                 {
                     ptrTypeStr = retTypeStr.Substring(0, retTypeStr.Length - 1) + "*";
+                }
+
+                if (i.Name == UTypeManager.DebugFunctionName)
+                {
+                    UTypeManager.DoDebugAction();
                 }
                 if (i.Parameters.Count > 0)
                     AddLine($"static inline {ptrTypeStr} {i.Name}({selfArg} {i.GetParameterDefineCpp()})");

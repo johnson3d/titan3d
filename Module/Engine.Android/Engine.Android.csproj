@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>net6.0</TargetFramework>
+    <TargetFramework>net7.0</TargetFramework>
     <OutputType>Library</OutputType>
   </PropertyGroup>
 
@@ -94,6 +94,7 @@
   <Import Project="..\..\CSharpCode\Bricks\ImageDecoder\ImageDecoder.projitems" Label="Shared" />
   <Import Project="..\..\CSharpCode\Bricks\GpuDriven\GpuDriven.projitems" Label="Shared" />
   <Import Project="..\..\CSharpCode\Bricks\Font\Font.projitems" Label="Shared" />
+  <Import Project="..\..\3rd\csharp\JitherOpenEXR\JitherOpenEXR.projitems" Label="Shared" />
 
   <ItemGroup>
     <PackageReference Include="BCnEncoder.Net" Version="2.1.0" />
@@ -117,6 +118,7 @@
   
   <ItemGroup>
     <ProjectReference Include="..\CompilingGenerator\CompilingGenerator.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
+    <ProjectReference Include="..\CppWeavingTools\CppWeavingTools.csproj" />
   </ItemGroup>
 
 </Project>

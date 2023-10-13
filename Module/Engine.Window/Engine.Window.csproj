@@ -1,17 +1,18 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>net6.0</TargetFramework>
+    <TargetFramework>net7.0</TargetFramework>
     <OutputType>Library</OutputType>
+    <ImplicitUsings>enable</ImplicitUsings>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
     <OutputPath>..\..\binaries\</OutputPath>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <PlatformTarget>AnyCPU</PlatformTarget>
-    <DefineConstants>TRACE;PWindow;TitanEngine_AutoGen</DefineConstants>
+    <DefineConstants>$(DefineConstants);TRACE;PWindow;TitanEngine_AutoGen;DEBUG_UI</DefineConstants>
     <SkipPostSharp>True</SkipPostSharp>
-    <NoWarn>1701;1702;1998</NoWarn>
+    <NoWarn>1701;1702;1998;8632</NoWarn>
     <DebugType>portable</DebugType>
     <Optimize>False</Optimize>
   </PropertyGroup>
@@ -20,8 +21,8 @@
     <OutputPath>..\..\binaries\</OutputPath>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <PlatformTarget>AnyCPU</PlatformTarget>
-    <DefineConstants>TRACE;PWindow;TitanEngine_AutoGen</DefineConstants>
-    <NoWarn>1701;1702;1998</NoWarn>
+    <DefineConstants>$(DefineConstants);TRACE;PWindow;TitanEngine_AutoGen;DEBUG_UI</DefineConstants>
+    <NoWarn>1701;1702;1998;8632</NoWarn>
     <DebugType>portable</DebugType>
   </PropertyGroup>
 
@@ -98,7 +99,8 @@
   <Import Project="..\..\CSharpCode\Bricks\Font\Font.projitems" Label="Shared" />
   <Import Project="..\..\3rd\csharp\AstcDecoder\AstcDecoder.projitems" Label="Shared" />
   <Import Project="..\..\CSharpCode\Bricks\PythonRuntime\PythonRuntime.projitems" Label="Shared" />
-
+  <Import Project="..\..\3rd\csharp\JitherOpenEXR\JitherOpenEXR.projitems" Label="Shared" />
+  <Import Project="..\..\CSharpCode\Bricks\VirtualShadowMaps\VirtualShadowMaps.projitems" Label="Shared" />
   <ItemGroup>
     <PackageReference Include="BCnEncoder.Net" Version="2.1.0" />
     <PackageReference Include="Microsoft.CodeAnalysis.CSharp.Workspaces" Version="4.0.0-3.final" />

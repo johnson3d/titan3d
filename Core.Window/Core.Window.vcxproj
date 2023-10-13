@@ -178,18 +178,22 @@
       <AdditionalIncludeDirectories>..\3rd\native\PhysX-4.1\physx\include;..\3rd\native\PhysX-4.1\PxShared\include;..\3rd\native\Vulkan\Include;..\3rd\native\eigen-3.4.0;..\3rd\native\FBXSDK\2019.2\include;..\3rd\native\FreeType\include;..\3rd\native\Recast\Detour\include;..\3rd\native\Recast\DetourCrowd\include;..\3rd\native\Recast\DetourTileCache\include;..\3rd\native\Recast\DebugUtils\include;..\3rd\native\Recast\Recast\include;..\3rd\native\pthread\include;..\3rd\native\atlmfc\include;$(WindowsSDK_IncludePath)$(WindowsSDK_IncludePath);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
       <OpenMPSupport>true</OpenMPSupport>
+      <BrowseInformation>false</BrowseInformation>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <ModuleDefinitionFile>Core.Window.def</ModuleDefinitionFile>
       <EnableUAC>false</EnableUAC>
-      <AdditionalLibraryDirectories>../3rd/native/Python3/Win64/libs;../3rd/native/pthread/lib/x64;../3rd/native/crunch/lib/x64/debug;../3rd/native/NVAftermath/lib/x64;..\3rd\native\FBXSDK\2019.2\lib\x64\release;../3rd/native/HPSocket/Windows/lib;../3rd/native/Vulkan/Lib;../3rd/native/renderdoc/Lib;..\3rd\native\PhysX-4.1\physx\Lib\windows\debug;../3rd/native/ShaderConductor/Lib/Release;..\3rd\native\metis\5.1.0\libmetis\Debug;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>../3rd/native/Python3/Win64/libs;../3rd/native/pthread/lib/x64;../3rd/native/NVAftermath/lib/x64;../3rd/native/crunch/lib/$(Configuration);../3rd/native/atlmfc/lib/x64;..\3rd\native\FBXSDK\2019.2\lib\x64\release;../3rd/native/HPSocket/Windows/lib;../3rd/native/Vulkan/Lib;../3rd/native/renderdoc/Lib;..\3rd\native\PhysX-4.1\physx\Lib\windows\debug;../3rd/native/ShaderConductor/Lib/Release;..\3rd\native\metis\5.1.0\libmetis\Debug;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <AdditionalDependencies>libfbxsdk.lib;renderdoc.lib;metis.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PreBuildEvent>
       <Command>$(SolutionDir)CallTHT.bat</Command>
     </PreBuildEvent>
+    <Bscmake>
+      <PreserveSbr>true</PreserveSbr>
+    </Bscmake>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <ClCompile>
@@ -233,7 +237,7 @@
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
       <LanguageStandard>stdcpp20</LanguageStandard>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
-      <AdditionalIncludeDirectories>..\3rd\native\PhysX-4.1\physx\include;..\3rd\native\PhysX-4.1\PxShared\include;..\3rd\native\Vulkan\Include;..\3rd\native\eigen-3.4.0;..\3rd\native\FBXSDK\2019.2\include;..\3rd\native\FreeType\include;..\3rd\native\Recast\Detour\include;..\3rd\native\Recast\DetourCrowd\include;..\3rd\native\Recast\DetourTileCache\include;..\3rd\native\Recast\DebugUtils\include;..\3rd\native\Recast\Recast\include;..\3rd\native\pthread\include;$(WindowsSDK_IncludePath);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\3rd\native\PhysX-4.1\physx\include;..\3rd\native\PhysX-4.1\PxShared\include;..\3rd\native\Vulkan\Include;..\3rd\native\eigen-3.4.0;..\3rd\native\FBXSDK\2019.2\include;..\3rd\native\FreeType\include;..\3rd\native\Recast\Detour\include;..\3rd\native\Recast\DetourCrowd\include;..\3rd\native\Recast\DetourTileCache\include;..\3rd\native\Recast\DebugUtils\include;..\3rd\native\Recast\Recast\include;..\3rd\native\atlmfc\include;..\3rd\native\pthread\include;$(WindowsSDK_IncludePath);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
       <OpenMPSupport>true</OpenMPSupport>
     </ClCompile>
@@ -244,7 +248,7 @@
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableUAC>false</EnableUAC>
-      <AdditionalLibraryDirectories>../3rd/native/Python3/Win64/libs;../3rd/native/pthread/lib/x64;../3rd/native/crunch/lib/x64/release;../3rd/native/NVAftermath/lib/x64;../3rd/native/eigen;..\3rd\native\FBXSDK\2019.2\lib\x64\release;../3rd/native/HPSocket/Windows/lib;../3rd/native/Vulkan/Lib;../3rd/native/renderdoc/Lib;../3rd/native/eigen-3.4.0;..\3rd\native\PhysX-4.1\physx\Lib\windows\release;../3rd/native/ShaderConductor/Lib/Release;..\3rd\native\metis\5.1.0\libmetis\Release;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>../3rd/native/Python3/Win64/libs;../3rd/native/pthread/lib/x64;../3rd/native/NVAftermath/lib/x64;../3rd/native/crunch/lib/$(Configuration);../3rd/native/atlmfc/lib/x64;../3rd/native/eigen;..\3rd\native\FBXSDK\2019.2\lib\x64\release;../3rd/native/HPSocket/Windows/lib;../3rd/native/Vulkan/Lib;../3rd/native/renderdoc/Lib;../3rd/native/eigen-3.4.0;..\3rd\native\PhysX-4.1\physx\Lib\windows\release;../3rd/native/ShaderConductor/Lib/Release;..\3rd\native\metis\5.1.0\libmetis\Release;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <AdditionalDependencies>libfbxsdk.lib;renderdoc.lib;metis.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PreBuildEvent>
@@ -270,6 +274,11 @@
   </ItemGroup>
   <ItemGroup>
     <Natvis Include="Titan.natvis" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\3rd\native\crunch\crnlib\crnlib.2008.vcxproj">
+      <Project>{cf2e70e8-7133-4d96-92c7-68bb406c0664}</Project>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

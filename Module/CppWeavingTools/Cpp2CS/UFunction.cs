@@ -44,7 +44,8 @@ namespace CppWeaving.Cpp2CS
 				var argType = j.GetCppTypeName();
 				if (j.IsDelegate)
 				{
-					result += $"{argType}";//$"{j.PropertyType.ToCppName()}";
+					argType = j.CxxName;
+                    result += $"{argType}";//$"{j.PropertyType.ToCppName()}";
 				}
 				else
 				{
@@ -144,7 +145,7 @@ namespace CppWeaving.Cpp2CS
 					{						
 						if (j.HasMeta(UProjectSettings.SV_NoStringConverter) == false)
 						{
-							if (argType == "sbyte*")
+							if (j.NumOfElement <= 0 && argType == "sbyte*")
 							{
 								argType = "string";
 							}
@@ -234,7 +235,7 @@ namespace CppWeaving.Cpp2CS
                 }
                 if (j.HasMeta(UProjectSettings.SV_NoStringConverter) == false)
                 {
-                    if (argType == "sbyte*")
+                    if (j.NumOfElement <= 0 && argType == "sbyte*")
                     {
                         argType = "string";
                     }

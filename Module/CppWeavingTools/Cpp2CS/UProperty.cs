@@ -36,17 +36,38 @@ namespace CppWeaving.Cpp2CS
         public string CxxName;
 		public string GetCppTypeName()
         {
-			if (NumOfElement <= 0)
+			//if (NumOfElement <= 0)
+			//{
+			//	if (CxxName != null)
+			//		return CxxName;
+			//}
+			var result = IsConst ? "const " : "";
+            result = result + PropertyType.ToCppName() + GetSuffix();
+			if (IsReference)
 			{
-				if (CxxName != null)
-					return CxxName;
+				return result.Substring(0, result.Length - 1) + '&';
 			}
-            return PropertyType.ToCppName() + GetSuffix();
+			else if (NumOfElement > 0)
+            {
+                return result + $"*";
+            }
+			else
+            {   
+				return result;
+			}
 		}
 		public string GetCsTypeName()
 		{
-			return PropertyType.ToCsName() + GetSuffix();
-		}
+            var result = PropertyType.ToCsName() + GetSuffix();
+            if (NumOfElement > 0)
+            {
+                return result + $"*";
+            }
+            else
+            {
+                return result;
+            }
+        }
 		public string GetSuffixWithReference()
         {
             if (NumOfElement <= 0)
@@ -73,15 +94,25 @@ namespace CppWeaving.Cpp2CS
         }
 		public string GetSuffix()
 		{
-			if (NumOfElement <= 0) {
-				var result = "";
-                for (int i = 0; i < NumOfTypePointer; i++)
-                {
-                    result += "*";
-                }
-                return result;
-			}
-			return "*";
+            var result = "";
+            for (int i = 0; i < NumOfTypePointer; i++)
+            {
+                result += "*";
+            }
+            return result;
+   //         if (NumOfElement <= 0) 
+			//{
+			//	var result = "";
+   //             for (int i = 0; i < NumOfTypePointer; i++)
+   //             {
+   //                 result += "*";
+   //             }
+   //             return result;
+			//}
+			//else
+			//{
+			//	return "";
+			//}
 		}
 	}
 	class UField : UProperty
