@@ -40,7 +40,7 @@ void ICamera::Cleanup()
 	
 }
 
-void ICamera::UpdateConstBufferData(EngineNS::NxRHI::IGpuDevice* device, EngineNS::NxRHI::ICbView* buffer)
+void ICamera::UpdateConstBufferData(EngineNS::NxRHI::IGpuDevice* device, EngineNS::NxRHI::ICbView* buffer, bool bFlush, EngineNS::NxRHI::FCbvUpdater* pUpdater)
 {
 	VAutoVSLLock lk(mLocker);
 	auto pBinder = buffer->GetShaderBinder();
@@ -49,51 +49,51 @@ void ICamera::UpdateConstBufferData(EngineNS::NxRHI::IGpuDevice* device, EngineN
 	if (pBinder != nullptr)
 	{
 		auto pos = mLogicData->GetLocalPosition();
-		buffer->SetValue(pBinder->FindField("CameraPosition"), pos);
+		buffer->SetValue(pBinder->FindField("CameraPosition"), pos, bFlush, pUpdater);
 		auto lookat = mLogicData->GetLocalLookAt();
-		buffer->SetValue(pBinder->FindField("CameraLookAt"), lookat);
-		buffer->SetValue(pBinder->FindField("CameraDirection"), mLogicData->mDirection);
-		buffer->SetValue(pBinder->FindField("CameraRight"), mLogicData->mRight);
-		buffer->SetValue(pBinder->FindField("CameraUp"), mLogicData->mUp);
+		buffer->SetValue(pBinder->FindField("CameraLookAt"), lookat, bFlush, pUpdater);
+		buffer->SetValue(pBinder->FindField("CameraDirection"), mLogicData->mDirection, bFlush, pUpdater);
+		buffer->SetValue(pBinder->FindField("CameraRight"), mLogicData->mRight, bFlush, pUpdater);
+		buffer->SetValue(pBinder->FindField("CameraUp"), mLogicData->mUp, bFlush, pUpdater);
 		
-		buffer->SetMatrix(pBinder->FindField("CameraViewMatrix"), mLogicData->mViewMatrix);
-		buffer->SetMatrix(pBinder->FindField("CameraViewInverse"), mLogicData->mViewInverse);
+		buffer->SetMatrix(pBinder->FindField("CameraViewMatrix"), mLogicData->mViewMatrix, true, bFlush, pUpdater);
+		buffer->SetMatrix(pBinder->FindField("CameraViewInverse"), mLogicData->mViewInverse, true, bFlush, pUpdater);
 		
-		buffer->SetMatrix(pBinder->FindField("PrjMtx"), mLogicData->mProjectionMatrix);
-		buffer->SetMatrix(pBinder->FindField("PrjInvMtx"), mLogicData->mProjectionInverse);
-		buffer->SetMatrix(pBinder->FindField("ViewPrjMtx"), mLogicData->mViewProjection);
-		buffer->SetMatrix(pBinder->FindField("ViewPrjInvMtx"), mLogicData->mViewProjectionInverse);
+		buffer->SetMatrix(pBinder->FindField("PrjMtx"), mLogicData->mProjectionMatrix, true, bFlush, pUpdater);
+		buffer->SetMatrix(pBinder->FindField("PrjInvMtx"), mLogicData->mProjectionInverse, true, bFlush, pUpdater);
+		buffer->SetMatrix(pBinder->FindField("ViewPrjMtx"), mLogicData->mViewProjection, true, bFlush, pUpdater);
+		buffer->SetMatrix(pBinder->FindField("ViewPrjInvMtx"), mLogicData->mViewProjectionInverse, true, bFlush, pUpdater);
 
 		{
 			const NxRHI::FShaderVarDesc* fld = pBinder->FindField("CornerRays");
-			buffer->SetValue(fld, ENUM_FRUSTUMCN_0, mFrustum.GetCornerRay(ENUM_FRUSTUMCN_0));
-			buffer->SetValue(fld, ENUM_FRUSTUMCN_1, mFrustum.GetCornerRay(ENUM_FRUSTUMCN_1));
-			buffer->SetValue(fld, ENUM_FRUSTUMCN_2, mFrustum.GetCornerRay(ENUM_FRUSTUMCN_2));
-			buffer->SetValue(fld, ENUM_FRUSTUMCN_3, mFrustum.GetCornerRay(ENUM_FRUSTUMCN_3));
+			buffer->SetValue(fld, ENUM_FRUSTUMCN_0, mFrustum.GetCornerRay(ENUM_FRUSTUMCN_0), bFlush, pUpdater);
+			buffer->SetValue(fld, ENUM_FRUSTUMCN_1, mFrustum.GetCornerRay(ENUM_FRUSTUMCN_1), bFlush, pUpdater);
+			buffer->SetValue(fld, ENUM_FRUSTUMCN_2, mFrustum.GetCornerRay(ENUM_FRUSTUMCN_2), bFlush, pUpdater);
+			buffer->SetValue(fld, ENUM_FRUSTUMCN_3, mFrustum.GetCornerRay(ENUM_FRUSTUMCN_3), bFlush, pUpdater);
 		}
 		{
 			const NxRHI::FShaderVarDesc* fld = pBinder->FindField("ClipPlanes");
-			buffer->SetValue(fld, ENUM_FRUSTUMPL_TOP, mFrustum.GetPlane(ENUM_FRUSTUMPL_TOP));
-			buffer->SetValue(fld, ENUM_FRUSTUMPL_RIGHT, mFrustum.GetPlane(ENUM_FRUSTUMPL_RIGHT));
-			buffer->SetValue(fld, ENUM_FRUSTUMPL_BOTTOM, mFrustum.GetPlane(ENUM_FRUSTUMPL_BOTTOM));
-			buffer->SetValue(fld, ENUM_FRUSTUMPL_LEFT, mFrustum.GetPlane(ENUM_FRUSTUMPL_LEFT));
-			buffer->SetValue(fld, ENUM_FRUSTUMPL_NEAR, mFrustum.GetPlane(ENUM_FRUSTUMPL_NEAR));
-			buffer->SetValue(fld, ENUM_FRUSTUMPL_FAR, mFrustum.GetPlane(ENUM_FRUSTUMPL_FAR));
+			buffer->SetValue(fld, ENUM_FRUSTUMPL_TOP, mFrustum.GetPlane(ENUM_FRUSTUMPL_TOP), bFlush, pUpdater);
+			buffer->SetValue(fld, ENUM_FRUSTUMPL_RIGHT, mFrustum.GetPlane(ENUM_FRUSTUMPL_RIGHT), bFlush, pUpdater);
+			buffer->SetValue(fld, ENUM_FRUSTUMPL_BOTTOM, mFrustum.GetPlane(ENUM_FRUSTUMPL_BOTTOM), bFlush, pUpdater);
+			buffer->SetValue(fld, ENUM_FRUSTUMPL_LEFT, mFrustum.GetPlane(ENUM_FRUSTUMPL_LEFT), bFlush, pUpdater);
+			buffer->SetValue(fld, ENUM_FRUSTUMPL_NEAR, mFrustum.GetPlane(ENUM_FRUSTUMPL_NEAR), bFlush, pUpdater);
+			buffer->SetValue(fld, ENUM_FRUSTUMPL_FAR, mFrustum.GetPlane(ENUM_FRUSTUMPL_FAR), bFlush, pUpdater);
 		}
 
 		//ASSERT(mLogicData->mJitterViewProjection.m11 == mLogicData->mViewProjection.m11);
-		buffer->SetMatrix(pBinder->FindField("JitterPrjMtx"), mLogicData->mJitterProjectionMatrix);
-		buffer->SetMatrix(pBinder->FindField("JitterPrjInvMtx"), mLogicData->mJitterProjectionInverse);
-		buffer->SetMatrix(pBinder->FindField("JitterViewPrjMtx"), mLogicData->mJitterViewProjection);
-		buffer->SetMatrix(pBinder->FindField("JitterViewPrjInvMtx"), mLogicData->mJitterViewProjectionInverse);
+		buffer->SetMatrix(pBinder->FindField("JitterPrjMtx"), mLogicData->mJitterProjectionMatrix, true, bFlush, pUpdater);
+		buffer->SetMatrix(pBinder->FindField("JitterPrjInvMtx"), mLogicData->mJitterProjectionInverse, true, bFlush, pUpdater);
+		buffer->SetMatrix(pBinder->FindField("JitterViewPrjMtx"), mLogicData->mJitterViewProjection, true, bFlush, pUpdater);
+		buffer->SetMatrix(pBinder->FindField("JitterViewPrjInvMtx"), mLogicData->mJitterViewProjectionInverse, true, bFlush, pUpdater);
 		
-		buffer->SetValue(pBinder->FindField("JitterOffset"), GetJitterUV());
+		buffer->SetValue(pBinder->FindField("JitterOffset"), GetJitterUV(), bFlush, pUpdater);
 		
-		buffer->SetValue(pBinder->FindField("gZNear"), mZNear);
-		buffer->SetValue(pBinder->FindField("gZFar"), mZFar);
+		buffer->SetValue(pBinder->FindField("gZNear"), mZNear, bFlush, pUpdater);
+		buffer->SetValue(pBinder->FindField("gZFar"), mZFar, bFlush, pUpdater);
 
 		auto cameraOffset = GetMatrixStartPosition().ToSingleVector();
-		buffer->SetValue(pBinder->FindField("CameraOffset"), cameraOffset);
+		buffer->SetValue(pBinder->FindField("CameraOffset"), cameraOffset, bFlush, pUpdater);
 	}
 }
 

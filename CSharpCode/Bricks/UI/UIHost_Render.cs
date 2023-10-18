@@ -24,13 +24,34 @@ namespace EngineNS.UI
         Graphics.Mesh.UMeshPrimitives mMesh = null;
         Canvas.TtCanvasDrawBatch mDrawBatch = null;
         public Graphics.Pipeline.UCamera RenderCamera;
+        public bool BoundingBoxDirty = true;
+        struct AABBQueryData
+        {
+            public BoundingBox AABB;
+        }
+        AABBQueryData mBoundingBoxData = new AABBQueryData();
+        bool CheckBoundingBox(TtUIElement element, ref AABBQueryData data)
+        {
+            if (!element.Is3D)
+                return false;
+            element.MergeAABB(ref data.AABB);
+            return false;
+        }
         public BoundingBox BoundingBox
         {
             get
             {
-                if (mMesh != null)
-                    return mMesh.mCoreObject.mAABB;
-                return BoundingBox.Empty;
+                if(BoundingBoxDirty)
+                {
+                    mBoundingBoxData.AABB = BoundingBox.Empty;
+                    if (mMesh != null)
+                        mBoundingBoxData.AABB = mMesh.mCoreObject.mAABB;
+
+                    QueryElements(CheckBoundingBox, ref mBoundingBoxData);
+                    BoundingBoxDirty = false;
+                }
+
+                return mBoundingBoxData.AABB;
             }
         }
         List<TtUIElement> mUIElementWithTransforms;
@@ -59,6 +80,7 @@ namespace EngineNS.UI
                 }
             }
             public Matrix Matrix;
+            public Matrix InvMatrix;
             public UInt16 ParentTransformIdx;
 
             public void UpdateMatrix(bool bForce = false)
@@ -88,6 +110,7 @@ namespace EngineNS.UI
                         Matrix = invTransMat * scaleMat * rotMat * transMat * parentData.Matrix;
                     }
 
+                    InvMatrix = Matrix.Invert(in Matrix);
                     ELement.RenderTransformDirty = false;
                 }
             }
@@ -274,6 +297,7 @@ namespace EngineNS.UI
                 mDrawMesh.UpdateMesh(mMesh, materials);
             }
 
+            BoundingBoxDirty = true;
             return mDrawMesh;
         }
 

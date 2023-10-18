@@ -48,6 +48,7 @@ namespace NxRHI
 		{
 			AUTO_SAMP("NxRHI.GraphicDraw.Commit.UpdateDrawState");
 			UpdateGpuDrawState(cmdlist->GetGpuDevice(), cmdlist, cmdlist->mCurrentFrameBuffers->mRenderPass);
+			cmdlist->SetGraphicsPipeline(GpuDrawState);
 		}
 		/*if (GpuDrawState == nullptr)
 		{
@@ -55,8 +56,7 @@ namespace NxRHI
 			if (GpuDrawState == nullptr)
 				return;
 		}*/
-		cmdlist->SetGraphicsPipeline(GpuDrawState);
-
+		
 		auto effect = GetGraphicsEffect();
 
 		{

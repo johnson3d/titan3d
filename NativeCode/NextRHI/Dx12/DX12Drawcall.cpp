@@ -7,6 +7,7 @@
 #include "DX12GeomMesh.h"
 #include "../NxGeomMesh.h"
 #include "../NxEffect.h"
+#include "../../Base/vfxsampcounter.h"
 
 #define new VNEW
 
@@ -228,6 +229,7 @@ namespace NxRHI
 	}
 	void DX12GraphicDraw::Commit(ICommandList* cmdlist, bool bRefResource)
 	{
+		AUTO_SAMP("NxRHI.GraphicDraw.Commit");
 		if (Mesh == nullptr || ShaderEffect == nullptr)
 			return;
 
@@ -235,94 +237,87 @@ namespace NxRHI
 		device->CheckDeviceThread();
 		auto dx12Cmd = (DX12CommandList*)cmdlist;
 		
-		DX12VertexArray* VAs[2] = { Mesh->VertexArray , AttachVB };
-		DX12VertexArray::Commit(dx12Cmd, 2, VAs);
-		
-		dx12Cmd->SetIndexBuffer(Mesh->IndexBuffer, Mesh->IsIndex32);
-
-		UpdateGpuDrawState(device, cmdlist, cmdlist->mCurrentFrameBuffers->mRenderPass);
-		/*if (GpuDrawState == nullptr)
 		{
-			UpdateGpuDrawState(cmdlist->mDevice, cmdlist, );
-			if (GpuDrawState == nullptr)
-				return;
-		}*/
-		cmdlist->SetGraphicsPipeline(GpuDrawState);
+			AUTO_SAMP("NxRHI.GraphicDraw.Commit.Geom");
+			DX12VertexArray* VAs[2] = { Mesh->VertexArray , AttachVB };
+			DX12VertexArray::Commit(dx12Cmd, 2, VAs);
+
+			dx12Cmd->SetIndexBuffer(Mesh->IndexBuffer, Mesh->IsIndex32);
+		}
+		{
+			AUTO_SAMP("NxRHI.GraphicDraw.Commit.UpdateDrawState");
+			UpdateGpuDrawState(device, cmdlist, cmdlist->mCurrentFrameBuffers->mRenderPass);
+			cmdlist->SetGraphicsPipeline(GpuDrawState);
+		}
 		
 		auto effect = (DX12GraphicsEffect*)GetGraphicsEffect();
 		
-		//effect->Commit(cmdlist, this);
 		{
+			AUTO_SAMP("NxRHI.GraphicDraw.Commit.BindResouces");
 			BindDescriptorHeaps(device, dx12Cmd);
-		}
 		
-		for (auto& i : BindResources)
-		{
-			switch (i.first->BindType)
+			for (auto& i : BindResources)
 			{
-				case SBT_CBuffer:
+				switch (i.first->BindType)
 				{
-					IGpuResource* t = i.second;
-					effect->BindCBV(cmdlist, i.first, (ICbView*)t);
-					/*if (bRefResource)
+					case SBT_CBuffer:
 					{
-						cmdlist->GetCmdRecorder()->UseResource(t);
-					}*/
-				}
-				break;
-				case SBT_SRV:
-				{
-					//auto t = i.second.UnsafeConvertTo<ISrView>();
-					auto t = (DX12SrView*)i.second;
-					effect->BindSrv(cmdlist, i.first, t);
-					//cmdlist->GetCmdRecorder()->UseResource(t->Buffer);
-					/*if (bRefResource)
-					{
-						cmdlist->GetCmdRecorder()->UseResource(t);
-					}*/
-				}
-				break;
-				case SBT_UAV:
-				{
-					IGpuResource* t = i.second;
-					effect->BindUav(cmdlist, i.first, (IUaView*)t);
-					/*if (bRefResource)
-					{
-						cmdlist->GetCmdRecorder()->UseResource(t);
-					}*/
-				}
-				break;
-				case SBT_Sampler:
-				{
-					IGpuResource* t = i.second;
-					effect->BindSampler(cmdlist, i.first, (ISampler*)t);
-				}
-				break;
-				default:
+						IGpuResource* t = i.second;
+						effect->BindCBV(cmdlist, i.first, (ICbView*)t);
+					}
 					break;
+					case SBT_SRV:
+					{
+						auto t = (DX12SrView*)i.second;
+						effect->BindSrv(cmdlist, i.first, t);
+						//cmdlist->GetCmdRecorder()->UseResource(t->Buffer);
+						/*if (bRefResource)
+						{
+							cmdlist->GetCmdRecorder()->UseResource(t);
+						}*/
+					}
+					break;
+					case SBT_UAV:
+					{
+						IGpuResource* t = i.second;
+						effect->BindUav(cmdlist, i.first, (IUaView*)t);
+					}
+					break;
+					case SBT_Sampler:
+					{
+						IGpuResource* t = i.second;
+						effect->BindSampler(cmdlist, i.first, (ISampler*)t);
+					}
+					break;
+					default:
+						break;
+				}
 			}
 		}
-
-		auto pDrawDesc = Mesh->GetAtomDesc(MeshAtom, MeshLOD);
-		ASSERT(pDrawDesc);
-		if (IndirectDrawArgsBuffer)
+		
 		{
-			auto effect = this->ShaderEffect.UnsafeConvertTo<DX12GraphicsEffect>();
-			dx12Cmd->mCurrentCmdSig = effect->GetIndirectDrawIndexCmdSig(device, dx12Cmd);
-			dx12Cmd->mCurrentIndirectOffset = effect->mIndirectOffset;
-			cmdlist->IndirectDrawIndexed(pDrawDesc->PrimitiveType, IndirectDrawArgsBuffer, IndirectDrawOffsetForArgs);
-			dx12Cmd->mCurrentCmdSig = nullptr;
-			dx12Cmd->mCurrentIndirectOffset = 0;
-		}
-		else
-		{
-			if (pDrawDesc->IsIndexDraw())
+			AUTO_SAMP("NxRHI.GraphicDraw.Commit.Draw");
+			auto pDrawDesc = Mesh->GetAtomDesc(MeshAtom, MeshLOD);
+			ASSERT(pDrawDesc);
+			if (IndirectDrawArgsBuffer)
 			{
-				cmdlist->DrawIndexed(pDrawDesc->PrimitiveType, pDrawDesc->BaseVertexIndex, pDrawDesc->StartIndex, pDrawDesc->NumPrimitives, DrawInstance);
+				auto effect = this->ShaderEffect.UnsafeConvertTo<DX12GraphicsEffect>();
+				dx12Cmd->mCurrentCmdSig = effect->GetIndirectDrawIndexCmdSig(device, dx12Cmd);
+				dx12Cmd->mCurrentIndirectOffset = effect->mIndirectOffset;
+				cmdlist->IndirectDrawIndexed(pDrawDesc->PrimitiveType, IndirectDrawArgsBuffer, IndirectDrawOffsetForArgs);
+				dx12Cmd->mCurrentCmdSig = nullptr;
+				dx12Cmd->mCurrentIndirectOffset = 0;
 			}
 			else
 			{
-				cmdlist->Draw(pDrawDesc->PrimitiveType, pDrawDesc->BaseVertexIndex, pDrawDesc->NumPrimitives, DrawInstance);
+				if (pDrawDesc->IsIndexDraw())
+				{
+					cmdlist->DrawIndexed(pDrawDesc->PrimitiveType, pDrawDesc->BaseVertexIndex, pDrawDesc->StartIndex, pDrawDesc->NumPrimitives, DrawInstance);
+				}
+				else
+				{
+					cmdlist->Draw(pDrawDesc->PrimitiveType, pDrawDesc->BaseVertexIndex, pDrawDesc->NumPrimitives, DrawInstance);
+				}
 			}
 		}
 	}

@@ -100,6 +100,7 @@ namespace EngineNS.UI
                     *absTrans = data.Matrix;
                     absTrans++;
                 }
+                PerUIMeshCBuffer.mCoreObject.FlushWrite(true, UEngine.Instance.GfxDevice.CbvUpdater.mCoreObject);
 
                 var brush = cmd.GetBrush();
                 if (brush.Name.StartWith("@Text:"))
@@ -130,7 +131,7 @@ namespace EngineNS.UI
                                 if (fld.IsValidPointer)
                                 {
                                     var color = brush.Color.ToColor4Float();
-                                    cbuffer.SetValue(fld, &color, sizeof(Color4f));
+                                    cbuffer.SetValue(fld, &color, sizeof(Color4f), true, UEngine.Instance.GfxDevice.CbvUpdater.mCoreObject);
                                     brush.IsDirty = false;
                                 }
                                 //var fld = cbuffer->ShaderBinder.FindField("UIMatrix");

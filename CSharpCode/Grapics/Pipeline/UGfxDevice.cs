@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using EngineNS.NxRHI;
 
 #if PWindow
 using SDL2;
@@ -111,6 +112,7 @@ namespace EngineNS.Graphics.Pipeline
             AttachBufferManager.Tick();
 
             RenderCmdQueue.TickSync(host.ElapsedSecond);
+            CbvUpdater.TickSync();
         }
         public override void EndFrame(UEngine engine)
         {
@@ -261,6 +263,10 @@ namespace EngineNS.Graphics.Pipeline
         {
             get;
         } = new TtAttachBufferManager();
+        public UCbView.TrCbcUpdater CbvUpdater
+        {
+            get;
+        } = new UCbView.TrCbcUpdater();
         #endregion
 
         #region GraphicsData

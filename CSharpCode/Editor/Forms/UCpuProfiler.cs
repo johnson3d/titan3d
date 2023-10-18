@@ -245,6 +245,10 @@ namespace EngineNS.Editor.Forms
 
                                         ImGuiAPI.TableSetColumnIndex(0);
                                         ImGuiAPI.Text(j.ShowName);
+                                        if (ImGuiAPI.IsItemHovered(ImGuiHoveredFlags_.ImGuiHoveredFlags_None))
+                                        {
+                                            ImGuiAPI.SetTooltip(j.ShowName);
+                                        }
                                         if (ImGuiAPI.IsItemClicked(ImGuiMouseButton_.ImGuiMouseButton_Left))
                                         {
                                             CurrentName = j.ShowName;

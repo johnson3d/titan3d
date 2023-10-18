@@ -564,7 +564,7 @@ namespace EngineNS.UI.Controls.Containers
             mBackground = new TtBrush();
             mBackground.HostElement = this;
         }
-        // pt位置相对于host
+        // pt位置相对于linecheck到的element
         public override TtUIElement GetPointAtElement(in Vector2 pt, bool onlyClipped = true)
         {
             // todo: inv transform
@@ -575,6 +575,8 @@ namespace EngineNS.UI.Controls.Containers
                 for (int i = mChildren.Count - 1; i >= 0; i--)
                 {
                     var child = mChildren[i];
+                    if (child.Is3D)
+                        continue;
                     if (!child.DesignRect.Contains(in pt))
                         continue;
 
@@ -595,7 +597,8 @@ namespace EngineNS.UI.Controls.Containers
                 for (int i = mChildren.Count - 1; i >= 0; i--)
                 {
                     var child = mChildren[i];
-
+                    if (child.Is3D)
+                        continue;
                     var container = child as TtContainer;
                     if (container != null)
                     {
@@ -668,17 +671,15 @@ namespace EngineNS.UI.Controls.Containers
             }
         }
 
-        public override bool Query3DElements<T>(Delegate_QueryProcess<T> queryAction, ref T queryData)
+        public override bool QueryElements<T>(Delegate_QueryProcess<T> queryAction, ref T queryData)
         {
             for(int i=0; i<mChildren.Count; i++)
             {
-                if (mChildren[i].Query3DElements(queryAction, ref queryData))
+                if (mChildren[i].QueryElements(queryAction, ref queryData))
                     return true;
             }
 
-            if (Is3D)
-                return (queryAction?.Invoke(this, ref queryData) == true);
-            return false;
+            return base.QueryElements(queryAction, ref queryData);
         }
 
         public override bool IsReadyToDraw()

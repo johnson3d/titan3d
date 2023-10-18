@@ -198,8 +198,11 @@ namespace NxRHI
 			GpuState = state;
 		}
 		virtual bool FetchGpuData(UINT subRes, IBlobObject* blob) = 0;
+		virtual void UpdateGpuData(UINT subRes, void* pData, const FSubResourceFootPrint* footPrint) {
+			ASSERT(false);
+		}
 		virtual void UpdateGpuData(ICommandList* cmd, UINT subRes, void* pData, const FSubResourceFootPrint* footPrint) {
-
+			ASSERT(false);
 		}
 		void UpdateGpuDataSimple(ICommandList* cmd, UINT offset, void* pData, UINT size, UINT subRes = 0) {
 			FSubResourceFootPrint fp{};
@@ -212,6 +215,18 @@ namespace NxRHI
 			fp.RowPitch = size;
 			fp.TotalSize = size;
 			UpdateGpuData(cmd, subRes, pData, &fp);
+		}
+		void UpdateGpuDataSimple(UINT offset, void* pData, UINT size, UINT subRes = 0) {
+			FSubResourceFootPrint fp{};
+			fp.SetDefault();
+			fp.Format = EPixelFormat::PXF_A8_UNORM;
+			fp.Width = size;
+			fp.Height = 1;
+			fp.Depth = 1;
+			fp.X = offset;
+			fp.RowPitch = size;
+			fp.TotalSize = size;
+			UpdateGpuData(subRes, pData, &fp);
 		}
 		virtual bool Map(UINT index, FMappedSubResource* res, bool forRead) = 0;
 		virtual void Unmap(UINT index) = 0;
@@ -228,6 +243,10 @@ namespace NxRHI
 		void Flush2Device(ICommandList* cmd, void* pBuffer, UINT Size)
 		{
 			UpdateGpuDataSimple(cmd, 0, pBuffer, Size, 0);
+		}
+		void Flush2Device(void* pBuffer, UINT Size)
+		{
+			UpdateGpuDataSimple(0, pBuffer, Size, 0);
 		}
 		//virtual bool FetchGpuData(UINT subRes, IBlobObject * blob) override;
 		virtual void UpdateGpuData(ICommandList* cmd, UINT subRes, void* pData, const FSubResourceFootPrint * footPrint) override = 0;
@@ -255,7 +274,7 @@ namespace NxRHI
 		{
 			SetValue(*binder, v);
 		}
-		void SetValue(const FShaderVarDesc& binder, const void* pData, int size)
+		bool SetValue(const FShaderVarDesc& binder, const void* pData, int size)
 		{
 			if (MapBuffer.size() < Desc.Size)
 			{
@@ -263,12 +282,13 @@ namespace NxRHI
 			}
 			if (memcmp(&MapBuffer[binder.Offset], pData, size) == 0)
 			{
-				return;
+				return false;
 			}
 			memcpy(&MapBuffer[binder.Offset], pData, size);
 			DirtyState = EDirtyState::Dirty;
+			return true;
 		}
-		void SetArrrayValue(const FShaderVarDesc& binder, int index, const void* pData, int size)
+		bool SetArrrayValue(const FShaderVarDesc& binder, int index, const void* pData, int size)
 		{
 			auto stride = (binder.Size / binder.Elements);
 			ASSERT((UINT)size <= stride);
@@ -279,10 +299,11 @@ namespace NxRHI
 			auto offset = binder.Offset + stride * (UINT)index;
 			if (memcmp(&MapBuffer[binder.Offset], pData, size) == 0)
 			{
-				return;
+				return false;
 			}
 			memcpy(&MapBuffer[offset], pData, size);
 			DirtyState = EDirtyState::Dirty;
+			return true;
 		}
 		void* GetVarPtrToWrite(const FShaderVarDesc& binder, UINT size)
 		{
@@ -302,6 +323,16 @@ namespace NxRHI
 			DirtyState = EDirtyState::NotDirty;
 			if (MapBuffer.size() > 0)
 				Flush2Device(cmd, &MapBuffer[0], (UINT)MapBuffer.size());
+			if (clear)
+				MapBuffer.clear();
+		}
+		void FlushDirty(bool clear = false)
+		{
+			if (DirtyState == EDirtyState::NotDirty)
+				return;
+			DirtyState = EDirtyState::NotDirty;
+			if (MapBuffer.size() > 0)
+				Flush2Device(&MapBuffer[0], (UINT)MapBuffer.size());
 			if (clear)
 				MapBuffer.clear();
 		}
@@ -426,6 +457,22 @@ namespace NxRHI
 		FShaderBinder*	ShaderBinder;
 		UINT			BufferSize = 0;
 	};
+
+	class ICbView;
+	class TR_CLASS()
+		FCbvUpdater : public VIUnknown
+	{
+		std::vector<AutoRef<ICbView>> mCBVs;
+		VSLLock			mLocker;
+	public:
+		FCbvUpdater() {}
+		inline void PushCbv(ICbView* cbv)
+		{
+			VAutoVSLLock lk(mLocker);
+			mCBVs.push_back(cbv);
+		}
+		void UpdateCBVs();
+	};
 	class TR_CLASS()
 		ICbView : public IGpuResource
 	{
@@ -438,50 +485,83 @@ namespace NxRHI
 			return ShaderBinder;
 		}
 		template<class _T>
-		void SetValue(const FShaderVarDesc& binder, const _T& v)
+		void SetValue(const FShaderVarDesc& binder, const _T& v, bool bFlush, FCbvUpdater* pUpdater)
 		{
-			Buffer->SetValue(binder, &v, sizeof(_T));
+			SetValue(binder, &v, sizeof(_T), bFlush, pUpdater);
 		}
 		template<class _T>
-		void SetValue(const FShaderVarDesc* binder, const _T& v)
+		void SetValue(const FShaderVarDesc* binder, const _T& v, bool bFlush, FCbvUpdater* pUpdater)
 		{
-			Buffer->SetValue(*binder, v);
+			SetValue(*binder, v, bFlush, pUpdater);
 		}
 		template<class _T>
-		void SetValue(const FShaderVarDesc* binder, int index, const _T& v)
+		void SetValue(const FShaderVarDesc* binder, int index, const _T& v, bool bFlush, FCbvUpdater* pUpdater)
 		{
-			Buffer->SetArrrayValue(*binder, index, &v, sizeof(v));
+			SetArrrayValue(*binder, index, &v, sizeof(v), bFlush, pUpdater);
 		}
-		void SetMatrix(const FShaderVarDesc* binder, const v3dxMatrix4& v, bool bTranspose = true)
+		void SetMatrix(const FShaderVarDesc* binder, const v3dxMatrix4& v, bool bTranspose, bool bFlush, FCbvUpdater* pUpdater)
 		{
 			if (bTranspose)
 			{
 				v3dxMatrix4 tempM;
 				v3dxTransposeMatrix4(&tempM, &v);
-				Buffer->SetValue(*binder, tempM);
+				SetValue(*binder, tempM, bFlush, pUpdater);
 			}
 			else
 			{
-				Buffer->SetValue(*binder, v);
+				SetValue(*binder, v, bFlush, pUpdater);
 			}
 		}
-		void SetValue(const FShaderVarDesc& binder, const void* pData, int size)
+		bool SetValue(const FShaderVarDesc& binder, const void* pData, int size, bool bFlush, FCbvUpdater* pUpdater)
 		{
-			Buffer->SetValue(binder, pData, size);
+			if (Buffer->SetValue(binder, pData, size))
+			{
+				FlushWrite(bFlush, pUpdater);
+				
+				return true;
+			}
+			return false;
 		}
-		void SetArrrayValue(const FShaderVarDesc& binder, int index, const void* pData, int size)
+		bool SetArrrayValue(const FShaderVarDesc& binder, int index, const void* pData, int size, bool bFlush, FCbvUpdater* pUpdater)
 		{
-			Buffer->SetArrrayValue(binder, index, pData, size);
+			if (Buffer->SetArrrayValue(binder, index, pData, size))
+			{
+				FlushWrite(bFlush, pUpdater);
+			}
+			return false;
 		}
 		void* GetVarPtrToWrite(const FShaderVarDesc& binder, UINT size)
 		{
 			return Buffer->GetVarPtrToWrite(binder, size);
 		}
+		void FlushWrite(bool bFlush, FCbvUpdater* pUpdater)
+		{
+			if (bFlush)
+			{
+				if (pUpdater != nullptr)
+				{
+					if (Updater == nullptr)
+					{
+						Updater = pUpdater;
+						Updater->PushCbv(this);
+					}
+				}
+				else
+				{
+					this->FlushDirty(false);
+				}
+			}
+		}
 		void FlushDirty(ICommandList* cmd, bool clear = false)
 		{
 			Buffer->FlushDirty(cmd, clear);
 		}
+		void FlushDirty(bool clear = false)
+		{
+			Buffer->FlushDirty(clear);
+		}
 	public:
+		FCbvUpdater*		Updater = nullptr;
 		AutoRef<FShaderBinder>	ShaderBinder;
 		AutoRef<IBuffer>	Buffer;
 	};
@@ -510,6 +590,10 @@ namespace NxRHI
 		void UpdateGpuData(ICommandList* cmd, UINT offset, void* pData, UINT size)
 		{
 			Buffer->UpdateGpuDataSimple(cmd, offset, pData, size, 0);
+		}
+		void UpdateGpuData(UINT offset, void* pData, UINT size)
+		{
+			Buffer->UpdateGpuDataSimple(offset, pData, size, 0);
 		}
 	public:
 		FVbvDesc			Desc{};
@@ -541,6 +625,10 @@ namespace NxRHI
 		void UpdateGpuData(ICommandList* cmd, UINT offset, void* pData, UINT size)
 		{
 			Buffer->UpdateGpuDataSimple(cmd, offset, pData, size, 0);
+		}
+		void UpdateGpuData(UINT offset, void* pData, UINT size)
+		{
+			Buffer->UpdateGpuDataSimple(offset, pData, size, 0);
 		}
 	public:
 		FIbvDesc			Desc{};

@@ -126,6 +126,14 @@ namespace EngineNS.NxRHI
         {
             mCoreObject.NativeSuper.UpdateGpuDataSimple(cmd, offset, pData, size, subRes);
         }
+        public unsafe void UpdateGpuData(uint subRes, void* pData, EngineNS.NxRHI.FSubResourceFootPrint* footPrint)
+        {
+            mCoreObject.NativeSuper.UpdateGpuData(subRes, pData, footPrint);
+        }
+        public unsafe void UpdateGpuData(uint offset, void* pData, uint size, uint subRes = 0)
+        {
+            mCoreObject.NativeSuper.UpdateGpuDataSimple(offset, pData, size, subRes);
+        }
         public void TransitionTo(ICommandList cmd, EGpuResourceState state)
         {
             mCoreObject.NativeSuper.TransitionTo(cmd, state);
@@ -215,11 +223,15 @@ namespace EngineNS.NxRHI
     {
         public void SetDebugName(string name)
         {
-
+            mCoreObject.NativeSuper.SetDebugName(name);
         }
         public void FlushDirty(NxRHI.ICommandList cmd, bool clear = false)
         {
             mCoreObject.FlushDirty(cmd, clear);
+        }
+        public void FlushDirty(bool clear = false)
+        {
+            mCoreObject.FlushDirty(clear);
         }
         public FShaderBinder ShaderBinder
         {
@@ -228,40 +240,62 @@ namespace EngineNS.NxRHI
                 return mCoreObject.GetShaderBinder();
             }
         }
-        public void SetValue<T>(FShaderVarDesc binder, in T v) where T : unmanaged
+        public enum EUpdateMode
+        {
+            FrameEnd = 0,
+            Immediately,
+        }
+        public void SetValue<T>(FShaderVarDesc binder, in T v, bool bFlush = true, EUpdateMode mode = EUpdateMode.FrameEnd) where T : unmanaged
         {
             unsafe
             {
                 fixed (T* p = &v)
                 {
-                    mCoreObject.SetValue(binder, p, sizeof(T));
+                    switch (mode)
+                    {
+                        case EUpdateMode.FrameEnd:
+                            mCoreObject.SetValue(binder, p, sizeof(T), bFlush, UEngine.Instance.GfxDevice.CbvUpdater.mCoreObject);
+                            break;
+                        case EUpdateMode.Immediately:
+                            mCoreObject.SetValue(binder, p, sizeof(T), bFlush, new FCbvUpdater());
+                            break;
+                    }
                 }
             }
         }
-        public void SetValue<T>(FShaderVarDesc binder, int elemIndex, in T v) where T : unmanaged
+        public void SetValue<T>(FShaderVarDesc binder, int elemIndex, in T v, bool bFlush = true, EUpdateMode mode = EUpdateMode.FrameEnd) where T : unmanaged
         {
             unsafe
             {
                 fixed (T* p = &v)
                 {
-                    mCoreObject.SetArrrayValue(binder, elemIndex, p, sizeof(T));
+                    switch (mode)
+                    {
+                        case EUpdateMode.FrameEnd:
+                            mCoreObject.SetArrrayValue(binder, elemIndex, p, sizeof(T), bFlush, UEngine.Instance.GfxDevice.CbvUpdater.mCoreObject);
+                            break;
+                        case EUpdateMode.Immediately:
+                            mCoreObject.SetArrrayValue(binder, elemIndex, p, sizeof(T), bFlush, new FCbvUpdater());
+                            break;
+                    }
                 }
             }
         }
-        public bool SetValue<T>(string name, in T v) where T : unmanaged
+        public bool SetValue<T>(string name, in T v, bool bFlush = true, EUpdateMode mode = EUpdateMode.FrameEnd) where T : unmanaged
         {
             if (ShaderBinder.IsValidPointer == false)
                 return false;
             var binder = ShaderBinder.FindField(name);
             if (binder.IsValidPointer == false)
                 return false;
-            SetValue<T>(binder, v);
+            SetValue<T>(binder, v, bFlush, mode);
             return true;
         }
         public unsafe ref T GetValue<T>(FShaderVarDesc binder) where T : unmanaged
         {
             return ref *(T*)mCoreObject.GetVarPtrToWrite(binder, (uint)sizeof(T));
         }
+
         public unsafe ref T GetValue<T>(FShaderVarDesc binder, int elem) where T : unmanaged
         {
             return ref *((T*)mCoreObject.GetVarPtrToWrite(binder, (uint)sizeof(T)) + elem);
@@ -291,6 +325,18 @@ namespace EngineNS.NxRHI
                 return tm;
             }
         }
+
+        public class TrCbcUpdater : AuxPtrType<FCbvUpdater>
+        {
+            public TrCbcUpdater()
+            {
+                mCoreObject = FCbvUpdater.CreateInstance();
+            }
+            public void TickSync()
+            {
+                mCoreObject.UpdateCBVs();
+            }
+        }
     }
     public class UVbView : AuxPtrType<NxRHI.IVbView>
     {
@@ -298,12 +344,20 @@ namespace EngineNS.NxRHI
         {
             mCoreObject.UpdateGpuData(cmd, offset, pData, size);
         }
+        public unsafe void UpdateGpuData(uint offset, void* pData, uint size)
+        {
+            mCoreObject.UpdateGpuData(offset, pData, size);
+        }
     }
     public class UIbView : AuxPtrType<NxRHI.IIbView>
     {
         public unsafe void UpdateGpuData(NxRHI.ICommandList cmd, uint offset, void* pData, uint size)
         {
             mCoreObject.UpdateGpuData(cmd, offset, pData, size);
+        }
+        public unsafe void UpdateGpuData(uint offset, void* pData, uint size)
+        {
+            mCoreObject.UpdateGpuData(offset, pData, size);
         }
     }
     public class UUaView : AuxPtrType<NxRHI.IUaView>

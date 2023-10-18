@@ -161,6 +161,8 @@ namespace EngineNS.EGui
             }
         }
         [ThreadStatic]
+        private static Profiler.TimeScope ScopeUpdateBuffer = Profiler.TimeScopeManager.GetTimeScope(typeof(UImDrawDataRHI), "RenderImDrawData.UpdateBuffer");
+        [ThreadStatic]
         private static Profiler.TimeScope ScopeDrawPass = Profiler.TimeScopeManager.GetTimeScope(typeof(UImDrawDataRHI), "RenderImDrawData.DrawPass");
         private unsafe static void RenderImDrawDataImpl(ref ImDrawData draw_data, Graphics.Pipeline.UPresentWindow presentWindow, UImDrawDataRHI rhiData)
         {
@@ -199,13 +201,6 @@ namespace EngineNS.EGui
             if (rhiData.IndexBuffer == null || totalIBSize > rhiData.IndexBuffer.mCoreObject.Desc.Size)
             {
                 rhiData.IndexBuffer?.Dispose();
-                //var ibDesc = new NxRHI.FBufferDesc();
-                //ibDesc.SetDefault();
-                //ibDesc.Type = NxRHI.EBufferType.BFT_Index;
-                //ibDesc.Usage = NxRHI.EGpuUsage.USAGE_DYNAMIC;
-                //ibDesc.CpuAccess = NxRHI.ECpuAccess.CAS_WRITE;
-                //ibDesc.Size = (uint)(totalIBSize * 1.5f);
-                //ibDesc.StructureStride = (uint)sizeof(ushort);
                 var ibDesc = new NxRHI.FIbvDesc();
                 ibDesc.m_Size = (uint)(totalIBSize * 1.5f);
                 ibDesc.m_Stride = (uint)sizeof(ushort);
@@ -215,7 +210,7 @@ namespace EngineNS.EGui
                 rhiData.GeomMesh.mCoreObject.BindIndexBuffer(rhiData.IndexBuffer.mCoreObject);
             }
 
-            using (new Profiler.TimeScopeHelper(ScopeDrawPass))
+            using (new Profiler.TimeScopeHelper(ScopeUpdateBuffer))
             {
                 rhiData.DataVB.Clear(false);
                 rhiData.DataIB.Clear(false);
@@ -230,135 +225,138 @@ namespace EngineNS.EGui
                     indexOffsetInElements += (uint)cmd_list.IdxBufferSize;
                 }
 
-                rhiData.VertexBuffer.UpdateGpuData(drawCmd, 0,
+                rhiData.VertexBuffer.UpdateGpuData(0,
                     rhiData.DataVB.UnsafeAddressAt(0).ToPointer(), (uint)(vertexOffsetInVertices * sizeof(ImDrawVert)));
 
-                rhiData.IndexBuffer.UpdateGpuData(drawCmd, 0,
+                rhiData.IndexBuffer.UpdateGpuData(0,
                     rhiData.DataIB.UnsafeAddressAt(0).ToPointer(), (uint)(indexOffsetInElements * sizeof(ushort)));
 
                 rhiData.GeomMesh.mCoreObject.GetVertexArray().BindVB(NxRHI.EVertexStreamType.VST_Position, rhiData.VertexBuffer.mCoreObject);
                 rhiData.GeomMesh.mCoreObject.BindIndexBuffer(rhiData.IndexBuffer.mCoreObject);
             }
 
-            // Setup orthographic projection matrix into our constant buffer
-            var io = ImGuiAPI.GetIO();
-            float L = draw_data.DisplayPos.X;
-            float R = draw_data.DisplayPos.X + draw_data.DisplaySize.X;
-            float T = draw_data.DisplayPos.Y;
-            float B = draw_data.DisplayPos.Y + draw_data.DisplaySize.Y;
-            var mvp = Matrix.CreateOrthographicOffCenter(L,
-                R,
-                B,
-                T,
-                -1.0f,
-                1.0f);
-
-            rhiData.FontCBuffer.SetValue("ProjectionMatrix", in mvp);
-
-            var fb_scale = io.DisplayFramebufferScale;
-            draw_data.ScaleClipRects(in fb_scale);
-
             presentWindow.BeginFrame();
-            drawCmd.BeginCommand();
+
+            using (new Profiler.TimeScopeHelper(ScopeDrawPass))
             {
-                var passClears = new NxRHI.FRenderPassClears();
-                passClears.SetDefault();
-                passClears.SetClearColor(0, new Color4f(1, 0, 0, 0));
+                // Setup orthographic projection matrix into our constant buffer
+                var io = ImGuiAPI.GetIO();
+                float L = draw_data.DisplayPos.X;
+                float R = draw_data.DisplayPos.X + draw_data.DisplaySize.X;
+                float T = draw_data.DisplayPos.Y;
+                float B = draw_data.DisplayPos.Y + draw_data.DisplaySize.Y;
+                var mvp = Matrix.CreateOrthographicOffCenter(L,
+                    R,
+                    B,
+                    T,
+                    -1.0f,
+                    1.0f);
 
-                var swapChain = presentWindow.SwapChain;
-                if (drawCmd.BeginPass(swapChain.BeginFrameBuffers(drawCmd).mCoreObject, in passClears, "ImGui"))
+                rhiData.FontCBuffer.SetValue("ProjectionMatrix", in mvp);
+
+                var fb_scale = io.DisplayFramebufferScale;
+                draw_data.ScaleClipRects(in fb_scale);
+
+                drawCmd.BeginCommand();
                 {
-                    if (swapChain.Viewport.Width != 0 && swapChain.Viewport.Height != 0)
-                        drawCmd.SetViewport(swapChain.Viewport);
+                    var passClears = new NxRHI.FRenderPassClears();
+                    passClears.SetDefault();
+                    passClears.SetClearColor(0, new Color4f(1, 0, 0, 0));
 
-                    // Render command lists
-                    int vtx_offset = 0;
-                    int idx_offset = 0;
-                    Vector2 clip_off = draw_data.DisplayPos;
-                    for (int n = 0; n < draw_data.CmdListsCount; n++)
+                    var swapChain = presentWindow.SwapChain;
+                    if (drawCmd.BeginPass(swapChain.BeginFrameBuffers(drawCmd).mCoreObject, in passClears, "ImGui"))
                     {
-                        NxRHI.UGraphicDraw drawcall = null;
-                        var cmd_list = new ImDrawList(draw_data.CmdLists[n]);
-                        for (int cmd_i = 0; cmd_i < cmd_list.CmdBufferSize; cmd_i++)
+                        if (swapChain.Viewport.Width != 0 && swapChain.Viewport.Height != 0)
+                            drawCmd.SetViewport(swapChain.Viewport);
+
+                        // Render command lists
+                        int vtx_offset = 0;
+                        int idx_offset = 0;
+                        Vector2 clip_off = draw_data.DisplayPos;
+                        for (int n = 0; n < draw_data.CmdListsCount; n++)
                         {
-                            ImDrawCmd* pcmd = &cmd_list.CmdBufferData[cmd_i];
-                            if (pcmd->UserCallback != null)
+                            NxRHI.UGraphicDraw drawcall = null;
+                            var cmd_list = new ImDrawList(draw_data.CmdLists[n]);
+                            for (int cmd_i = 0; cmd_i < cmd_list.CmdBufferSize; cmd_i++)
                             {
-                                throw new NotImplementedException();
-                            }
-                            else
-                            {
-                                var handle = System.Runtime.InteropServices.GCHandle.FromIntPtr((IntPtr)pcmd->TextureId);
-                                if (handle.IsAllocated)
+                                ImDrawCmd* pcmd = &cmd_list.CmdBufferData[cmd_i];
+                                if (pcmd->UserCallback != null)
                                 {
-                                    drawcall = rhiData.Drawcall;
-                                    var rsv = handle.Target as NxRHI.USrView;
-                                    if (rsv != null)
+                                    throw new NotImplementedException();
+                                }
+                                else
+                                {
+                                    var handle = System.Runtime.InteropServices.GCHandle.FromIntPtr((IntPtr)pcmd->TextureId);
+                                    if (handle.IsAllocated)
                                     {
-                                        drawcall.BindSRV(rhiData.FontTextureBindInfo.mCoreObject, rsv);
-                                    }
-                                    else
-                                    {
-                                        var parameters = handle.Target as TtImDrawCmdParameters;
-                                        if (parameters != null)
+                                        drawcall = rhiData.Drawcall;
+                                        var rsv = handle.Target as NxRHI.USrView;
+                                        if (rsv != null)
                                         {
-                                            drawcall = parameters.Drawcall;
-                                            drawcall.BindGeomMesh(rhiData.GeomMesh);
-                                            parameters.OnDraw(in mvp);
+                                            drawcall.BindSRV(rhiData.FontTextureBindInfo.mCoreObject, rsv);
+                                        }
+                                        else
+                                        {
+                                            var parameters = handle.Target as TtImDrawCmdParameters;
+                                            if (parameters != null)
+                                            {
+                                                drawcall = parameters.Drawcall;
+                                                drawcall.BindGeomMesh(rhiData.GeomMesh);
+                                                parameters.OnDraw(in mvp);
+                                            }
                                         }
                                     }
                                 }
-                            }
 
-                            var ScissorRect = new NxRHI.FScissorRect();
-                            ScissorRect.m_MinX = (int)(pcmd->ClipRect.X - clip_off.X);
-                            ScissorRect.m_MinY = (int)(pcmd->ClipRect.Y - clip_off.Y);
-                            ScissorRect.m_MaxX = (int)(pcmd->ClipRect.Z - clip_off.X);
-                            ScissorRect.m_MaxY = (int)(pcmd->ClipRect.W - clip_off.Y);
-                            //rhiData.ScissorRect.SetSCRect(0,
-                            //    (int)(pcmd->ClipRect.X - clip_off.X),
-                            //    (int)(pcmd->ClipRect.Y - clip_off.Y),
-                            //    (int)(pcmd->ClipRect.Z - clip_off.X),
-                            //    (int)(pcmd->ClipRect.W - clip_off.Y));
-                            drawCmd.SetScissor(in ScissorRect);
+                                var ScissorRect = new NxRHI.FScissorRect();
+                                ScissorRect.m_MinX = (int)(pcmd->ClipRect.X - clip_off.X);
+                                ScissorRect.m_MinY = (int)(pcmd->ClipRect.Y - clip_off.Y);
+                                ScissorRect.m_MaxX = (int)(pcmd->ClipRect.Z - clip_off.X);
+                                ScissorRect.m_MaxY = (int)(pcmd->ClipRect.W - clip_off.Y);
+                                //rhiData.ScissorRect.SetSCRect(0,
+                                //    (int)(pcmd->ClipRect.X - clip_off.X),
+                                //    (int)(pcmd->ClipRect.Y - clip_off.Y),
+                                //    (int)(pcmd->ClipRect.Z - clip_off.X),
+                                //    (int)(pcmd->ClipRect.W - clip_off.Y));
+                                drawCmd.SetScissor(in ScissorRect);
 
-                            var dpDesc = new NxRHI.FMeshAtomDesc();
-                            dpDesc.SetDefault();
-                            dpDesc.m_BaseVertexIndex = (uint)(vtx_offset + pcmd->VtxOffset);
-                            dpDesc.m_StartIndex = (uint)(idx_offset + pcmd->IdxOffset);
-                            dpDesc.m_NumPrimitives = pcmd->ElemCount / 3;
-                            rhiData.PrimitiveMesh.mCoreObject.SetAtom(0, 0, in dpDesc);
-                            if (ScissorRect.m_MinX >= ScissorRect.m_MaxX || ScissorRect.m_MinY >= ScissorRect.m_MaxY)
-                            {
+                                var dpDesc = new NxRHI.FMeshAtomDesc();
+                                dpDesc.SetDefault();
+                                dpDesc.m_BaseVertexIndex = (uint)(vtx_offset + pcmd->VtxOffset);
+                                dpDesc.m_StartIndex = (uint)(idx_offset + pcmd->IdxOffset);
+                                dpDesc.m_NumPrimitives = pcmd->ElemCount / 3;
+                                rhiData.PrimitiveMesh.mCoreObject.SetAtom(0, 0, in dpDesc);
+                                if (ScissorRect.m_MinX >= ScissorRect.m_MaxX || ScissorRect.m_MinY >= ScissorRect.m_MaxY)
+                                {
 
+                                }
+                                else
+                                {
+                                    drawCmd.DirectGpuDraw(drawcall.mCoreObject.NativeSuper);
+                                }
                             }
-                            else
-                            {
-                                //drawcall?.mCoreObject.Commit(drawCmd, true);
-                                drawCmd.DirectGpuDraw(drawcall.mCoreObject.NativeSuper);
-                            }
+                            idx_offset += (int)cmd_list.IdxBufferSize;
+                            vtx_offset += cmd_list.VtxBufferSize;
                         }
-                        idx_offset += (int)cmd_list.IdxBufferSize;
-                        vtx_offset += cmd_list.VtxBufferSize;
+
+                        drawCmd.EndPass();
                     }
 
-                    //drawCmd.FlushDraws(true);
-                    drawCmd.EndPass();
+                    NxRHI.FScissorRect fullRect;
+                    var fwSize = presentWindow.GetWindowSize();
+                    fullRect.m_MinX = 0;
+                    fullRect.m_MinY = 0;
+                    fullRect.m_MaxX = (int)fwSize.X;
+                    fullRect.m_MaxY = (int)fwSize.X;
+                    drawCmd.SetScissor(in fullRect);
+                    swapChain.EndFrameBuffers(drawCmd);
                 }
+                drawCmd.EndCommand();
 
-                NxRHI.FScissorRect fullRect;
-                var fwSize = presentWindow.GetWindowSize();
-                fullRect.m_MinX = 0;
-                fullRect.m_MinY = 0;
-                fullRect.m_MaxX = (int)fwSize.X;
-                fullRect.m_MaxY = (int)fwSize.X;
-                drawCmd.SetScissor(in fullRect);
-                swapChain.EndFrameBuffers(drawCmd);
+                rc.GpuQueue.ExecuteCommandList(drawCmd);
             }
-            drawCmd.EndCommand();
+            
             presentWindow.EndFrame();
-            rc.GpuQueue.ExecuteCommandList(drawCmd);
-            //drawCmd.Commit(rc.mCoreObject);
         }
     }
 }

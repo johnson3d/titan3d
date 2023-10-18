@@ -923,7 +923,7 @@ namespace EngineNS
         /// <param name="transform">转换矩阵</param>
         /// <returns>返回转换后的向量</returns>
         [Rtti.Meta]
-        public static Vector2 TransformCoordinate( Vector2 coord, Matrix transform )
+        public static Vector2 TransformCoordinate( Vector2 coord, in Matrix transform )
 	    {
             Vector4 vector;
 

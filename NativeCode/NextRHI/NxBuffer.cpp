@@ -231,6 +231,17 @@ namespace NxRHI
 	{
 		return Buffer.As<IBuffer>();
 	}
+
+	void FCbvUpdater::UpdateCBVs()
+	{
+		VAutoVSLLock lk(mLocker);
+		for (auto& i : mCBVs)
+		{
+			i->FlushDirty(false);
+			i->Updater = nullptr;
+		}
+		mCBVs.clear();
+	}
 }
 
 NS_END

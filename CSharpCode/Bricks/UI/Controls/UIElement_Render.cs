@@ -69,7 +69,10 @@ namespace EngineNS.UI.Controls
             set
             {
                 mRenderTransform = value;
+                Is3D = !mRenderTransform.IsIdentity;
                 RenderTransformDirty = true;
+                if(RootUIHost != null)
+                    RootUIHost.BoundingBoxDirty = true;
                 if (CanTransformDirtyMesh())
                 {
                     MeshDirty = true;

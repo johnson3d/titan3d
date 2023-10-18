@@ -94,6 +94,8 @@ namespace EngineNS.UI
 
         bool RayIntersect3DElements(TtUIElement element, ref RayIntersectData data)
         {
+            if (!element.Is3D)
+                return false;
             if(element.RayIntersect(ref data))
             {
                 data.IntersectedElement = element;
@@ -119,7 +121,7 @@ namespace EngineNS.UI
             if (!Ray.Intersects(in ray, BoundingBox, out data.Distance))
                 return false;
 
-            if(Query3DElements(RayIntersect3DElements, ref data))
+            if(QueryElements(RayIntersect3DElements, ref data))
             {
                 return true;
             }
@@ -149,6 +151,7 @@ namespace EngineNS.UI
             var delta = vp.WindowPos - vp.ViewportPos;
             data.Start = RenderCamera.GetLocalPosition();
             Vector3 dir = Vector3.Zero;
+            //var mousePt = new Vector2(178, 209) + delta;
             RenderCamera.GetPickRay(ref dir, mousePt.X - delta.X, mousePt.Y - delta.Y, vp.ClientSize.Width, vp.ClientSize.Height);
             if (dir == Vector3.Zero)
                 return null;
@@ -159,8 +162,10 @@ namespace EngineNS.UI
             if (!Ray.Intersects(in ray, BoundingBox, out data.Distance))
                 return null;
 
-            if(Query3DElements(RayIntersect3DElements, ref data))
-                return data.IntersectedElement;
+            if(QueryElements(RayIntersect3DElements, ref data))
+            {
+                return data.IntersectedElement.GetPointAtElement(in data.IntersectPos, onlyClipped);
+            }
             if (!RayIntersect(ref data))
                 return null;
             return base.GetPointAtElement(in data.IntersectPos, onlyClipped);

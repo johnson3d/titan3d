@@ -111,6 +111,7 @@ namespace EngineNS.Graphics.Mesh
                     absQuat++;
                 }
 
+                PerSkinMeshCBuffer.mCoreObject.FlushWrite(true, UEngine.Instance.GfxDevice.CbvUpdater.mCoreObject);
             }
         }
         public override Rtti.UTypeDesc GetPermutation(List<string> features)

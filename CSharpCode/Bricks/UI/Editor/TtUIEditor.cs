@@ -338,7 +338,8 @@ namespace EngineNS.UI.Editor
                     $"x:{UEngine.Instance.UIManager.DebugMousePt.X}\r\n" +
                     $"y:{UEngine.Instance.UIManager.DebugMousePt.Y}\r\n" +
                     $"px:{UEngine.Instance.UIManager.DebugHitPt.X}\r\n" +
-                    $"py:{UEngine.Instance.UIManager.DebugHitPt.Y}", null);
+                    $"py:{UEngine.Instance.UIManager.DebugHitPt.Y}\r\n" +
+                    $"el:{UEngine.Instance.UIManager.DebugPointatElement}", null);
                 ////////////////////////////
             }
             EGui.UIProxy.DockProxy.EndPanel();

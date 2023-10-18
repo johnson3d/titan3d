@@ -365,7 +365,7 @@ namespace NxRHI
 		ASSERT(mIsRecording);
 		if (buffer == nullptr)
 			return;
-		buffer->FlushDirty(this);
+		//buffer->FlushDirty(this);
 		//mContext->SetGraphicsRootConstantBufferView(binder->DescriptorIndex, ((DX12Buffer*)buffer)->mGpuResource->GetGPUVirtualAddress());
 
 #ifndef DESCRIPTOR_IN_DRAWCALL

@@ -21,6 +21,7 @@ namespace NxRHI
 		virtual bool Map(UINT index, FMappedSubResource* res, bool forRead) override;
 		virtual void Unmap(UINT index) override;
 		virtual void UpdateGpuData(ICommandList* cmd, UINT subRes, void* pData, const FSubResourceFootPrint* footPrint) override;
+		virtual void UpdateGpuData(UINT subRes, void* pData, const FSubResourceFootPrint* footPrint) override;
 		virtual void TransitionTo(ICommandList* cmd, EGpuResourceState state) override;
 		virtual void SetDebugName(const char* name) override;
 		D3D12_GPU_VIRTUAL_ADDRESS GetGPUVirtualAddress()
@@ -44,6 +45,7 @@ namespace NxRHI
 		virtual bool Map(UINT subRes, FMappedSubResource* res, bool forRead) override;
 		virtual void Unmap(UINT subRes) override;
 		virtual void UpdateGpuData(ICommandList* cmd, UINT subRes, void* pData, const FSubResourceFootPrint* footPrint) override;
+		virtual void UpdateGpuData(UINT subRes, void* pData, const FSubResourceFootPrint* footPrint) override;
 		virtual void TransitionTo(ICommandList* cmd, EGpuResourceState state) override;
 		virtual void SetDebugName(const char* name) override;
 		virtual IGpuBufferData* CreateBufferData(IGpuDevice* device, UINT mipIndex, ECpuAccess cpuAccess, FSubResourceFootPrint* outFootPrint) override;

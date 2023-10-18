@@ -399,7 +399,7 @@ namespace NxRHI
 	void VKCommandList::SetCBV(EShaderType type, const FShaderBinder* binder, ICbView* buffer)
 	{
 		ASSERT(mIsRecording);
-		buffer->FlushDirty(this);
+		//buffer->FlushDirty(this);
 		
 		//buffer->Buffer->TransitionTo(this, EGpuResourceState::GRS_GenericRead);
 		//auto handle = ((VKCbView*)buffer)->mView;

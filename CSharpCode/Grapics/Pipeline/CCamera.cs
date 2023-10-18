@@ -264,7 +264,7 @@ namespace EngineNS.Graphics.Pipeline
             }
             PerCameraCBuffer.SetMatrix(UEngine.Instance.GfxDevice.CoreShaderBinder.CBPerCamera.PreFrameViewPrjMtx, PreFrameViewProjectionMatrix.Value);
             PerCameraCBuffer.SetMatrix(UEngine.Instance.GfxDevice.CoreShaderBinder.CBPerCamera.JitterPreFrameViewPrjMtx, JitterPreFrameViewProjectionMatrix.Value);
-            mCoreObject.UpdateConstBufferData(rc.mCoreObject, PerCameraCBuffer.mCoreObject);
+            mCoreObject.UpdateConstBufferData(rc.mCoreObject, PerCameraCBuffer.mCoreObject, true, UEngine.Instance.GfxDevice.CbvUpdater.mCoreObject);
             PreFrameViewProjectionMatrix = GetViewProjection();
             JitterPreFrameViewProjectionMatrix = GetJitterViewProjection();
         }

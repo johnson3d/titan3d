@@ -130,6 +130,7 @@ namespace EngineNS.UI
         ///////////////////////////////////////////
         public Vector2 DebugMousePt;
         public Vector2 DebugHitPt;
+        public string DebugPointatElement;
         ///////////////////////////////////////////
         TtUIElement CheckHoveredElement(in Bricks.Input.Event e)
         {
@@ -194,6 +195,13 @@ namespace EngineNS.UI
                     }
                 }
             }
+
+            // debug //////////////////
+            if (newStay != null)
+                UEngine.Instance.UIManager.DebugPointatElement = newStay.Name + "(" + newStay.GetType().Name + ")";
+            else
+                UEngine.Instance.UIManager.DebugPointatElement = "";
+            ///////////////////////////
 
             System.Diagnostics.Debug.Assert(index < mHoveredElements.Length);
             var hoveredUIElement = mHoveredElements[index];

@@ -312,16 +312,14 @@ namespace EngineNS.UI.Controls
         }
 
         public delegate bool Delegate_QueryProcess<T>(TtUIElement element, ref T data);
-        public virtual bool Query3DElements<T>(Delegate_QueryProcess<T> queryAction, ref T queryData)
+        public virtual bool QueryElements<T>(Delegate_QueryProcess<T> queryAction, ref T queryData)
         {
-            if (Is3D)
-                return (queryAction?.Invoke(this, ref queryData) == true);
-            return false;
+            return (queryAction?.Invoke(this, ref queryData) == true);
         }
 
         public void TransformVertex3(in Vector3 inVec, out Vector3 outVec)
         {
-            outVec = AbsRenderTransform.TransformVector3(inVec);
+            outVec = Vector3.TransformCoordinate(in inVec, in RootUIHost.TransformedElements[mTransformIndex].Matrix);
         }
 
         public struct RayIntersectData
@@ -343,19 +341,25 @@ namespace EngineNS.UI.Controls
             // 0 ---- 1
             // |      |
             // 2 ---- 3
-            var v0 = new Vector3(mDesignRect.Left, mDesignRect.Top, 0.0f);
+            var top = (this == RootUIHost)? mCurFinalRect.Top : (RootUIHost.WindowSize.Height - mCurFinalRect.Top);
+            var bottom = (this == RootUIHost)? mCurFinalRect.Bottom : (RootUIHost.WindowSize.Height - mCurFinalRect.Bottom);
+            var v0 = new Vector3(mCurFinalRect.Left, top, 0.0f);
             TransformVertex3(in v0, out v0);
-            var v1 = new Vector3(mDesignRect.Right, mDesignRect.Top, 0.0f);
+            var v1 = new Vector3(mCurFinalRect.Right, top, 0.0f);
             TransformVertex3(in v1, out v1);
-            var v2 = new Vector3(mDesignRect.Left, mDesignRect.Bottom, 0.0f);
+            var v2 = new Vector3(mCurFinalRect.Left, bottom, 0.0f);
             TransformVertex3(in v2, out v2);
-            var v3 = new Vector3(mDesignRect.Right, mDesignRect.Bottom, 0.0f);
+            var v3 = new Vector3(mCurFinalRect.Right, bottom, 0.0f);
             TransformVertex3(in v3, out v3);
             float distance, barycentricU, barycentricV;
             if (Ray.Intersects(in ray, v0, v1, v2, out distance, out barycentricU, out barycentricV))
             {
                 data.IntersectPos.X = v0.X + barycentricU * (v1.X - v0.X) + (1 - barycentricV) * (v2.X - v0.X);
                 data.IntersectPos.Y = v0.Y + barycentricU * (v1.Y - v0.Y) + (1 - barycentricV) * (v2.Y - v0.Y);
+                data.IntersectPos = Vector2.TransformCoordinate(data.IntersectPos,
+                    in RootUIHost.TransformedElements[mTransformIndex].InvMatrix);
+                if(this != RootUIHost)
+                    data.IntersectPos.Y = RootUIHost.WindowSize.Height - data.IntersectPos.Y;
                 data.Distance = distance;
                 UEngine.Instance.UIManager.DebugHitPt = data.IntersectPos;
                 return true;
@@ -364,11 +368,34 @@ namespace EngineNS.UI.Controls
             {
                 data.IntersectPos.X = v3.X + barycentricU * (v2.X - v3.X) + (1 - barycentricV) * (v1.X - v3.X);
                 data.IntersectPos.Y = v3.Y + barycentricU * (v2.Y - v3.Y) + (1 - barycentricV) * (v1.Y - v3.Y);
+                data.IntersectPos = Vector2.TransformCoordinate(data.IntersectPos,
+                    in RootUIHost.TransformedElements[mTransformIndex].InvMatrix);
+                if(this != RootUIHost)
+                    data.IntersectPos.Y = RootUIHost.WindowSize.Height - data.IntersectPos.Y;
                 data.Distance = distance;
                 UEngine.Instance.UIManager.DebugHitPt = data.IntersectPos;
                 return true;
             }
             return false;
+        }
+
+        public virtual void MergeAABB(ref BoundingBox aabb)
+        {
+            var top = RootUIHost.WindowSize.Height - mCurFinalRect.Top;
+            var bottom = RootUIHost.WindowSize.Height - mCurFinalRect.Bottom;
+            var v0 = new Vector3(mCurFinalRect.Left, top, 0.0f);
+            TransformVertex3(in v0, out v0);
+            var v1 = new Vector3(mCurFinalRect.Right, top, 0.0f);
+            TransformVertex3(in v1, out v1);
+            var v2 = new Vector3(mCurFinalRect.Left, bottom, 0.0f);
+            TransformVertex3(in v2, out v2);
+            var v3 = new Vector3(mCurFinalRect.Right, bottom, 0.0f);
+            TransformVertex3(in v3, out v3);
+
+            aabb.Merge(v0);
+            aabb.Merge(v1);
+            aabb.Merge(v2);
+            aabb.Merge(v3);
         }
 
         public virtual void Tick(float elapsedSecond)

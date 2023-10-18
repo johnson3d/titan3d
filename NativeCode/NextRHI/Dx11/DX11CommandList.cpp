@@ -76,7 +76,6 @@ namespace NxRHI
 		}
 		BeginEvent(mDebugName.c_str());
 		imContex->ExecuteCommandList(GetDX11CmdRecorder()->mCmdList, 0);
-		GetDX11CmdRecorder()->ResetGpuDraws();
 		EndEvent();
 	}
 	bool DX11CommandList::BeginPass(IFrameBuffers* fb, const FRenderPassClears* passClears, const char* name)
@@ -201,7 +200,7 @@ namespace NxRHI
 	{
 		//ASSERT(binder->Space == type);
 		//buffer->FlushDirty();
-		buffer->Buffer->FlushDirty(this);
+		//buffer->Buffer->FlushDirty(this);
 
 		switch (type)
 		{

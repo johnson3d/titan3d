@@ -260,31 +260,25 @@ namespace EngineNS
         {
             if (mImGuiContext == IntPtr.Zero)
                 return;
-            ImGuiAPI.SetCurrentContext(mImGuiContext.ToPointer());
-
-            Update((UEngine.Instance.ElapseTickCountMS) * 0.001f);
 
             using (new Profiler.TimeScopeHelper(ScopeOnDrawUI))
             {
+                ImGuiAPI.SetCurrentContext(mImGuiContext.ToPointer());
+
+                Update((UEngine.Instance.ElapseTickCountMS) * 0.001f);
                 OnDrawUI();
             }
 
             UEngine.Instance.InputSystem.ClearFilesDrop();
+            ImGuiAPI.Render();
 
+            using (new Profiler.TimeScopeHelper(ScopeImGuiRender))
             {
-                using (new Profiler.TimeScopeHelper(ScopeImGuiRender))
+                if (UEngine.Instance.Config.SupportMultWindows == false)
                 {
-                    ImGuiAPI.Render();
-                }
-
-                unsafe
-                {
-                    if (UEngine.Instance.Config.SupportMultWindows == false)
-                    {
-                        var draw_data = ImGuiAPI.GetDrawData();
-                        EGui.UImDrawDataRHI.RenderImDrawData(ref *draw_data, NativeWindow, mDrawData);
-                        NativeWindow.SwapChain.Present(0, 0);
-                    }
+                    var draw_data = ImGuiAPI.GetDrawData();
+                    EGui.UImDrawDataRHI.RenderImDrawData(ref *draw_data, NativeWindow, mDrawData);
+                    NativeWindow.SwapChain.Present(0, 0);
                 }
 
                 // Update and Render additional Platform Windows
