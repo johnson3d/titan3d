@@ -77,8 +77,9 @@ namespace NxRHI
 					break;
 					case SBT_SRV:
 					{
-						IGpuResource* t = i.second;
+						auto t = (ISrView*)i.second;
 						effect->BindSrv(cmdlist, i.first, (ISrView*)t);
+						cmdlist->mCmdRecorder->UseResource(t->Buffer);
 					}
 					break;
 					case SBT_UAV:

@@ -302,7 +302,7 @@ namespace EngineNS.Graphics.Mesh.Modifier
 
                 IsDirty = true;
             }
-            public unsafe void Flush2VB(NxRHI.ICommandList cmd, UInstanceModifier mdf)
+            public unsafe void FlushGpuBuffer(NxRHI.ICommandList cmd, UInstanceModifier mdf)
             {
                 if (mdf.mCurNumber == 0)
                     return;
@@ -383,11 +383,11 @@ namespace EngineNS.Graphics.Mesh.Modifier
             }
         }
 
-        public unsafe void Flush2VB(NxRHI.ICommandList cmd)
+        public unsafe void FlushGpuBuffer(NxRHI.ICommandList cmd)
         {
             if (InstantSSBO != null)
             {
-                InstantSSBO.Flush2VB(cmd, this);
+                InstantSSBO.FlushGpuBuffer(cmd, this);
             }
             else if (InstantVBs != null)
             {
@@ -402,7 +402,7 @@ namespace EngineNS.Graphics.Mesh.Modifier
                 var binder = drawcall.FindBinder("VSInstantDataArray");
                 if (binder.IsValidPointer == false)
                     return;
-                this.Flush2VB(cmd);
+                this.FlushGpuBuffer(cmd);
                 drawcall.BindSRV(binder, InstantSSBO.InstantSRV);
             }
             else if (InstantVBs != null)

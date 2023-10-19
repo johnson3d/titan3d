@@ -63,6 +63,7 @@ namespace NxRHI
 		virtual void WriteBufferUINT32(UINT Count, FBufferWriter* BufferWriters) override;
 
 		virtual void BeginEvent(const char* info) override;
+		void BeginEvent(std::wstring& info);
 		virtual void EndEvent() override;
 	public:
 		void Commit(DX12CmdQueue* cmdQueue, EQueueType type);
@@ -79,6 +80,7 @@ namespace NxRHI
 		UINT								mCurrentIndirectOffset = 0;
 		AutoRef<ID3D12CommandSignature>		mCurrentCmdSig;
 
+		std::wstring				mDebugNameW;
 		bool						mIsRecording = false;
 	private:
 		DX12CmdRecorder* GetDX12CmdRecorder()

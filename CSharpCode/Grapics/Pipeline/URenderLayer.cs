@@ -209,7 +209,7 @@ namespace EngineNS.Graphics.Pipeline
         }
         public void SwapBuffer()
         {
-            for (ERenderLayer i = ERenderLayer.RL_Opaque; i < ERenderLayer.RL_Num; i++)
+            for (ERenderLayer i = ERenderLayer.RL_Begin; i < ERenderLayer.RL_Num; i++)
             {
                 PassBuffers[(int)i].SwapBuffer();
             }

@@ -56,6 +56,7 @@ namespace VFX_Memory
 using namespace VFX_Memory;
 
 extern "C"  void VFX_API vfxMemory_DumpMemoryState(LPCSTR name, vBOOL dumpUnknown);
+extern "C"  void VFX_API vfxMemory_StartWatcher();
 void exit_fn1(void)
 {
 	vfxMemory_DumpMemoryState("AppExit: Finalizer__memory_init", TRUE);
@@ -71,6 +72,7 @@ __memory_init::__memory_init()
 		small_alloc::__psmall_alloc = ConstructSmallAlloc();
 		large_alloc::__plarge_alloc = ConstructLargeAlloc();
 		VMem::MemPoolManager::GetInstance();
+		//vfxMemory_StartWatcher();
 	}
 }
 
@@ -611,7 +613,7 @@ void operator delete  (void*, void*, const char* file, int line) VGLIBCXX_USE_NO
 	}
 	void* operator new(size_t size) VGLIBCXX_THROW(std::bad_alloc)
 	{
-		return Inner_Alloc(size, __FILE__, __LINE__);
+		return Inner_Alloc(size, nullptr, __LINE__);
 	}
 	void* operator new[](size_t size, const char* file, int line) VGLIBCXX_THROW(std::bad_alloc)
 	{
@@ -619,7 +621,7 @@ void operator delete  (void*, void*, const char* file, int line) VGLIBCXX_USE_NO
 	}
 	void* operator new[](size_t size) VGLIBCXX_THROW(std::bad_alloc)
 	{
-		return Inner_Alloc(size, __FILE__, __LINE__);
+		return Inner_Alloc(size, nullptr, __LINE__);
 	}
 	void operator delete(void* p, const char* file, int line) VGLIBCXX_USE_NOEXCEPT
 	{

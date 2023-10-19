@@ -82,8 +82,10 @@ namespace NxRHI
 	{
 		mDebugName = name;
 
-		std::wstring n = StringHelper::strtowstr(mDebugName);
-		mContext->SetName(n.c_str());
+		mDebugNameW = StringHelper::strtowstr(mDebugName);
+		mContext->SetName(mDebugNameW.c_str());
+
+		mCommitFence->SetDebugName((mDebugName + ".Commit").c_str());
 	}
 	ICmdRecorder* DX12CommandList::BeginCommand()
 	{
@@ -109,67 +111,45 @@ namespace NxRHI
 		ASSERT(hr == S_OK);
 		mIsRecording = true;
 
-		std::wstring n = StringHelper::strtowstr(mDebugName);
-		mContext->SetName(n.c_str());
+		this->BeginEvent(mDebugName.c_str());
 
 		return mCmdRecorder;
 	}
 	void DX12CommandList::EndCommand()
 	{
+		this->EndEvent();
 		ICommandList::EndCommand();
 		if (mIsRecording)
 		{
 			mContext->Close();
 		}
-		//mContext->Close();
 		mIsRecording = false;
-		mCommitFence->SetDebugName((mDebugName + ".Commit").c_str());
-
-		std::wstring n = StringHelper::strtowstr(mDebugName);
-		mContext->SetName(n.c_str());
 	}
 	void DX12CommandList::Commit(DX12CmdQueue* cmdQueue, EQueueType type)
 	{
 		ASSERT(mIsRecording == false);
 		if (GetDX12CmdRecorder() == nullptr)
 			return;
-		//BeginEvent(mDebugName.c_str());
 		auto device = mDevice.GetCastPtr<DX12GpuDevice>();
 		//device->EnableImmExecute = true;
 		if (device->EnableImmExecute)
 		{
-			/*device->mDeviceRemovedCallback = [this]()
-			{
-				auto testSrv = GetCmdRecorder()->FindGpuResourceByTagName("HeightMapSRV");
-				auto count = GetCmdRecorder()->CountGpuResourceByTagName("HeightMapSRV");
-				auto& buffers = GetCmdRecorder()->mRefBuffers;
-				for (auto i : buffers)
-				{
-					if (i->TagName == "HeightMapSRV")
-					{
-						auto num = i.UnsafeConvertTo<DX12Texture>()->mGpuResource->AddRef();
-						if (num < 2)
-						{
-							ASSERT(false);
-						}
-					}
-					else if (i->TagName == "InstantSRV")
-					{
-						auto num = i.UnsafeConvertTo<DX12Buffer>()->mGpuMemory->AddRef();
-						if (num < 2)
-						{
-							ASSERT(false);
-						}
-					}
-				}
-			};*/
 			cmdQueue->Flush(type);//copy to
 		}
 
 		if (GetCmdRecorder()->GetDrawcallNumber() > 0)
 		{
 			//todo: select d3d12queue
+			//auto n = StringHelper::strtowstr(mDebugName.c_str());
+			//PIXBeginEvent(cmdQueue->mCmdQueue.GetPtr(), 0, n.c_str());
 			cmdQueue->mCmdQueue->ExecuteCommandLists(1, (ID3D12CommandList**)&mContext);
+			//PIXEndEvent(cmdQueue->mCmdQueue.GetPtr());
+		}
+		else
+		{
+			PIXBeginEvent(cmdQueue->mCmdQueue.GetPtr(), 0, mDebugNameW.c_str());
+			//cmdQueue->mCmdQueue->ExecuteCommandLists(1, (ID3D12CommandList**)&mContext);
+			PIXEndEvent(cmdQueue->mCmdQueue.GetPtr());
 		}
 
 		//EndEvent();
@@ -187,10 +167,11 @@ namespace NxRHI
 	bool DX12CommandList::BeginPass(IFrameBuffers* fb, const FRenderPassClears* passClears, const char* name)
 	{
 		ASSERT(mIsRecording);
-		mDebugName = name;
-		BeginEvent(name);
+		//mDebugName = name;
+		BeginEvent((mDebugName + ":" + name).c_str());
 		mCurrentFrameBuffers = fb;
 		GetCmdRecorder()->UseResource(fb);
+		GetCmdRecorder()->mDirectDrawNum++;
 		
 		for (UINT i = 0; i < fb->mRenderPass->Desc.NumOfMRT; i++)
 		{
@@ -294,16 +275,6 @@ namespace NxRHI
 
 		return true;
 	}
-	void DX12CommandList::SetViewport(UINT Num, const FViewPort* pViewports)
-	{
-		ASSERT(mIsRecording);
-		mContext->RSSetViewports(Num, (const D3D12_VIEWPORT*)pViewports);
-	}
-	void DX12CommandList::SetScissor(UINT Num, const FScissorRect* pScissor)
-	{
-		ASSERT(mIsRecording);
-		mContext->RSSetScissorRects(Num, (const D3D12_RECT*)pScissor);
-	}
 	void DX12CommandList::EndPass()
 	{
 		ASSERT(mCurrentFrameBuffers != nullptr);
@@ -329,19 +300,37 @@ namespace NxRHI
 		EndEvent();
 		ASSERT(mIsRecording);
 	}
+
+	void DX12CommandList::BeginEvent(std::wstring& info)
+	{
+		PIXBeginEvent(mContext.GetPtr(), 0, info.c_str());
+		GetCmdRecorder()->mDirectDrawNum++;
+	}
 	void DX12CommandList::BeginEvent(const char* info)
 	{
 		//ASSERT(mIsRecording);
 		//mContext->BeginEvent(1, info, strlen(info));
-		PIXBeginEvent(mContext.GetPtr(), 0, info);
 		auto n = StringHelper::strtowstr(info);
+		PIXBeginEvent(mContext.GetPtr(), 0, n.c_str());
 		mContext->SetName(n.c_str());
+		GetCmdRecorder()->mDirectDrawNum++;
 	}
 	void DX12CommandList::EndEvent()
 	{
 		//ASSERT(mIsRecording);
 		//mContext->EndEvent();
 		PIXEndEvent(mContext.GetPtr());
+	}
+
+	void DX12CommandList::SetViewport(UINT Num, const FViewPort* pViewports)
+	{
+		ASSERT(mIsRecording);
+		mContext->RSSetViewports(Num, (const D3D12_VIEWPORT*)pViewports);
+	}
+	void DX12CommandList::SetScissor(UINT Num, const FScissorRect* pScissor)
+	{
+		ASSERT(mIsRecording);
+		mContext->RSSetScissorRects(Num, (const D3D12_RECT*)pScissor);
 	}
 	void DX12CommandList::SetShader(IShader* shader)
 	{

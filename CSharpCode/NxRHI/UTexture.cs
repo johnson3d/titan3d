@@ -258,6 +258,8 @@ namespace EngineNS.NxRHI
                     for (int X = Left; X != (Left + Width); X++)
                     {
                         var ColorSample = image.GetPixel(X, Y).ToColor4Float();
+                        if (image.Comp == ColorComponents.RedGreenBlue || image.Comp == ColorComponents.Grey)
+                            ColorSample.Alpha = 1.0f;
 
                         // Nearly black or transparent pixels don't contribute to the calculation
                         if ((ColorSample.Alpha - AlphaComponentNearlyZeroThreshold) < MathHelper.Epsilon || 
@@ -964,7 +966,7 @@ namespace EngineNS.NxRHI
 
                     using (var memStream = new System.IO.MemoryStream(pngData))
                     {
-                        var image = StbImageSharp.ImageResult.FromStream(memStream, StbImageSharp.ColorComponents.RedGreenBlueAlpha);
+                        var image = StbImageSharp.ImageResult.FromStream(memStream, StbImageSharp.ColorComponents.Default);
                         return image;
                     }
                 }
@@ -1253,6 +1255,21 @@ namespace EngineNS.NxRHI
                 }
             }
         }
+        public static StbImageWriteSharp.ColorComponents GetImageWriteFormat(StbImageSharp.ImageResult image)
+        {
+            switch(image.Comp)
+            {
+                case ColorComponents.RedGreenBlue:
+                    return StbImageWriteSharp.ColorComponents.RedGreenBlue;
+                case ColorComponents.RedGreenBlueAlpha:
+                    return StbImageWriteSharp.ColorComponents.RedGreenBlueAlpha;
+                case ColorComponents.GreyAlpha:
+                    return StbImageWriteSharp.ColorComponents.GreyAlpha;
+                case ColorComponents.Grey:
+                    return StbImageWriteSharp.ColorComponents.Grey;
+            }
+            return StbImageWriteSharp.ColorComponents.RedGreenBlue;
+        }
         public static unsafe void SaveTexture(RName assetName, XndNode node, StbImageSharp.ImageResult image, UPicDesc desc)
         {
             desc.Height = image.Height;
@@ -1262,7 +1279,7 @@ namespace EngineNS.NxRHI
                 using (var memStream = new System.IO.FileStream(assetName.Address + ".png", System.IO.FileMode.OpenOrCreate))
                 {
                     var writer = new StbImageWriteSharp.ImageWriter();
-                    writer.WritePng(image.Data, image.Width, image.Height, StbImageWriteSharp.ColorComponents.RedGreenBlueAlpha, memStream);
+                    writer.WritePng(image.Data, image.Width, image.Height, GetImageWriteFormat(image), memStream);
                 }
             }
             else
@@ -1270,7 +1287,10 @@ namespace EngineNS.NxRHI
                 using (var memStream = new System.IO.MemoryStream(image.Data.Length))
                 {
                     var writer = new StbImageWriteSharp.ImageWriter();
-                    writer.WritePng(image.Data, image.Width, image.Height, StbImageWriteSharp.ColorComponents.RedGreenBlueAlpha, memStream);
+
+
+
+                    writer.WritePng(image.Data, image.Width, image.Height, GetImageWriteFormat(image), memStream);
                     var pngData = memStream.ToArray();
 
                     var size = (uint)memStream.Length;
@@ -1298,6 +1318,8 @@ namespace EngineNS.NxRHI
             }
             int mipLevel = 0;
             var curImage = image;
+            if (image.Comp == ColorComponents.RedGreenBlue || image.Comp == ColorComponents.Grey)
+                desc.BitNumAlpha = 0;
             desc.MipSizes.Clear();
             if (desc.DontCompress == false)
             {
@@ -1664,8 +1686,7 @@ namespace EngineNS.NxRHI
                 using (var memStream = new System.IO.MemoryStream(curImage.Data.Length))
                 {
                     var writer = new StbImageWriteSharp.ImageWriter();
-                    writer.WritePng(curImage.Data, curImage.Width, curImage.Height, StbImageWriteSharp.ColorComponents.RedGreenBlueAlpha, memStream);
-                    //writer.WriteJpg(curImage.Data, curImage.Width, curImage.Height, StbImageWriteSharp.ColorComponents.RedGreenBlueAlpha, memStream, 100);
+                    writer.WritePng(curImage.Data, curImage.Width, curImage.Height, GetImageWriteFormat(curImage), memStream);
                     var pngData = memStream.ToArray();
                     var attr = pngMipsNode.GetOrAddAttribute($"PngMip{mipLevel}", 0, 0);
                     using (var ar = attr.GetWriter((ulong)memStream.Position))
@@ -1743,41 +1764,6 @@ namespace EngineNS.NxRHI
                 }
             }
             return desc.MipLevel;
-            //int mipLevel = 0;
-            //int height = curImage.Height;
-            //int width = curImage.Width;
-            //do
-            //{
-            //    using (var memStream = new System.IO.MemoryStream(curImage.Data.Length))
-            //    {
-            //        var writer = new StbImageWriteSharp.ImageWriter();
-            //        writer.WritePng(curImage.Data, curImage.Width, curImage.Height, StbImageWriteSharp.ColorComponents.RedGreenBlueAlpha, memStream);
-            //        //writer.WriteJpg(curImage.Data, curImage.Width, curImage.Height, StbImageWriteSharp.ColorComponents.RedGreenBlueAlpha, memStream, 100);
-            //        var pngData = memStream.ToArray();
-            //        var attr = pngMipsNode.GetOrAddAttribute($"PngMip{mipLevel}", 0, 0);
-            //        var ar = attr.GetWriter((ulong)memStream.Position);
-            //        ar.WriteNoSize(pngData, (int)memStream.Position);
-            //        attr.ReleaseWriter(ref ar);
-            //    }
-            //    desc.MipSizes.Add(new Int32_2() { X = width, Y = height });
-            //    height = height / 2;
-            //    width = width / 2;
-            //    if ((height == 0 && width == 0))
-            //    {
-            //        break;
-            //    }
-            //    mipLevel++;
-            //    if (height == 0)
-            //        height = 1;
-            //    if (width == 0)
-            //        width = 1;
-            //    curImage = StbImageSharp.ImageProcessor.GetBoxDownSampler(curImage, width, height);
-            //    if (desc.MipLevel > 0 && mipLevel == desc.MipLevel)
-            //        break;
-            //}
-            //while (true);
-
-            //return mipLevel;
         }
         public unsafe static int SaveDxtMips_BcEncoder(XndNode mipsNode, StbImageSharp.ImageResultFloat curImage, UPicDesc desc)
         {

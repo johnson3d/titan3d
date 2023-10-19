@@ -241,14 +241,20 @@ namespace VFX_Memory
 				if (GOnMemLeakCallBack)
 					GOnMemLeakCallBack(check->data, check->size, check->file, check->line, check->id, check->debuginfo);
 
-				__MemoryTrace("%s(%d) : Memory leak! There have %d bytes memory had not be delete. Alloc ID : %d Info : %s\n"
-					, check->file, (int)check->line, (int)check->size, (int)check->id, check->debuginfo);
-
-				if (dumpUnknown)
+				if (check->file != nullptr)
 				{
-					__MemoryTrace("Unkown position : Memory leak! There have %d bytes memory had not be delete. Alloc ID : %d\n"
-						, (int)check->size, (int)check->id);
+					__MemoryTrace("%s(%d) : Memory leak! There have %d bytes memory had not be delete. Alloc ID : %d Info : %s\n"
+						, check->file, (int)check->line, (int)check->size, (int)check->id, check->debuginfo);
 				}
+				else
+				{
+					if (dumpUnknown)
+					{
+						__MemoryTrace("Unkown position : Memory leak! There have %d bytes memory had not be delete. Alloc ID : %d\n"
+							, (int)check->size, (int)check->id);
+					}
+				}
+				
 				//if (check->line!=0)// && IsBadReadPtr(check->file,4) == 0)
 				//{
 				//	__MemoryTrace("%s(%d) : Memory leak! There have %d bytes memory had not be delete. Alloc ID : %d Info : %s\n"
@@ -456,7 +462,7 @@ namespace VFX_Memory
 			{
 				GOnMemLeakCallBack(p->cookie.data, p->cookie.size, p->cookie.file, p->cookie.line, p->cookie.id, p->cookie.debuginfo);
 			}
-			if (p->cookie.line!=0)
+			if (p->cookie.file != nullptr)
 			{	
 				__MemoryTrace(vT("%s(%d) : Memory leak! There have %d bytes(%d K) memory had not be delete. Alloc ID : %d Info : %s\n")
 					, p->cookie.file, (int)p->cookie.line, (int)p->cookie.size, (int)(p->cookie.size + 1023) / 1024, (int)p->cookie.id, p->cookie.debuginfo);
