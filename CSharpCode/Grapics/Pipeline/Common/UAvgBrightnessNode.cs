@@ -43,13 +43,13 @@ namespace EngineNS.Graphics.Pipeline.Common
             defines.mCoreObject.AddDefine("DispatchX", $"{Dispatch_SetupDimArray2.X}");
             defines.mCoreObject.AddDefine("DispatchY", $"{Dispatch_SetupDimArray2.Y}");
             defines.mCoreObject.AddDefine("DispatchZ", $"{Dispatch_SetupDimArray2.Z}");
-            CountAvgBrightness = UEngine.Instance.GfxDevice.EffectManager.GetComputeEffect(RName.GetRName("Shaders/Compute/ScreenSpace/AvgBrightness.compute", RName.ERNameType.Engine),
+            CountAvgBrightness = await UEngine.Instance.GfxDevice.EffectManager.GetComputeEffect(RName.GetRName("Shaders/Compute/ScreenSpace/AvgBrightness.compute", RName.ERNameType.Engine),
                 "CS_CountAvgBrightness", NxRHI.EShaderType.SDT_ComputeShader, null, defines, null);
 
             defines.mCoreObject.AddDefine("DispatchX", $"{Dispatch_SetupDimArray2.X}");
             defines.mCoreObject.AddDefine("DispatchY", $"{Dispatch_SetupDimArray2.Y}");
             defines.mCoreObject.AddDefine("DispatchZ", $"{Dispatch_SetupDimArray2.Z}");
-            SetupAvgBrightness = UEngine.Instance.GfxDevice.EffectManager.GetComputeEffect(RName.GetRName("Shaders/Compute/ScreenSpace/AvgBrightness.compute", RName.ERNameType.Engine),
+            SetupAvgBrightness = await UEngine.Instance.GfxDevice.EffectManager.GetComputeEffect(RName.GetRName("Shaders/Compute/ScreenSpace/AvgBrightness.compute", RName.ERNameType.Engine),
                 "CS_SetupAvgBrightness", NxRHI.EShaderType.SDT_ComputeShader, null, defines, null);
 
             ResetComputeDrawcall(policy);

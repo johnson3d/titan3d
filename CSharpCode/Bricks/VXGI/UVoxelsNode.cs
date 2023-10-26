@@ -140,19 +140,19 @@ namespace EngineNS.Bricks.VXGI
             defines.mCoreObject.AddDefine("DispatchX", $"{Dispatch_SetupDimArray1.X}");
             defines.mCoreObject.AddDefine("DispatchY", $"1");
             defines.mCoreObject.AddDefine("DispatchZ", $"1");
-            SetupVoxelGroupAllocator = UEngine.Instance.GfxDevice.EffectManager.GetComputeEffect(RName.GetRName("Shaders/Bricks/VXGI/VoxelAllocator.compute", RName.ERNameType.Engine),
+            SetupVoxelGroupAllocator = await UEngine.Instance.GfxDevice.EffectManager.GetComputeEffect(RName.GetRName("Shaders/Bricks/VXGI/VoxelAllocator.compute", RName.ERNameType.Engine),
                 "CS_SetupVoxelGroupAllocator", NxRHI.EShaderType.SDT_ComputeShader, null, defines, null);
 
             defines.mCoreObject.AddDefine("DispatchX", $"{Dispatch_SetupDimArray2.X}");
             defines.mCoreObject.AddDefine("DispatchY", $"{Dispatch_SetupDimArray2.Y}");
             defines.mCoreObject.AddDefine("DispatchZ", $"1");
-            InjectVoxels = UEngine.Instance.GfxDevice.EffectManager.GetComputeEffect(RName.GetRName("Shaders/Bricks/VXGI/VoxelInject.compute", RName.ERNameType.Engine),
+            InjectVoxels = await UEngine.Instance.GfxDevice.EffectManager.GetComputeEffect(RName.GetRName("Shaders/Bricks/VXGI/VoxelInject.compute", RName.ERNameType.Engine),
                 "CS_InjectVoxels", NxRHI.EShaderType.SDT_ComputeShader, null, defines, null);
 
             defines.mCoreObject.AddDefine("DispatchX", $"{Dispatch_SetupDimArray3.X}");
             defines.mCoreObject.AddDefine("DispatchY", $"{Dispatch_SetupDimArray3.Y}");
             defines.mCoreObject.AddDefine("DispatchZ", $"{Dispatch_SetupDimArray3.Z}");
-            EraseVoxelGroup = UEngine.Instance.GfxDevice.EffectManager.GetComputeEffect(RName.GetRName("Shaders/Bricks/VXGI/VoxelInject.compute", RName.ERNameType.Engine),
+            EraseVoxelGroup = await UEngine.Instance.GfxDevice.EffectManager.GetComputeEffect(RName.GetRName("Shaders/Bricks/VXGI/VoxelInject.compute", RName.ERNameType.Engine),
                 "CS_EraseVoxelGroup", NxRHI.EShaderType.SDT_ComputeShader, null, defines, null);
 
             var cbIndex = InjectVoxels.FindBinder(VNameString.FromString("cbGBufferDesc"));
@@ -165,7 +165,7 @@ namespace EngineNS.Bricks.VXGI
                 //var rast = material.Rasterizer;
                 //rast.FillMode = EFillMode.FMD_WIREFRAME;
                 //material.Rasterizer = rast;
-                InitVxDebugger(material);
+                await InitVxDebugger(material);
             }
 
             BasePass.Initialize(rc, debugName + ".BasePass");

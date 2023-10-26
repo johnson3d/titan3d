@@ -5,58 +5,20 @@ using System.Text;
 
 namespace EngineNS.Graphics.Mesh
 {
-    public class UMdfSkinMesh : Graphics.Pipeline.Shader.UMdfQueue
+    public class UMdfSkinMesh : Graphics.Pipeline.Shader.TtMdfQueue1<Mesh.Modifier.CSkinModifier>
     {
-        public Mesh.Modifier.CSkinModifier SkinModifier { get; set; }
-        public NxRHI.UCbView PerSkinMeshCBuffer { get; set; }
-        public UMdfSkinMesh()
-        {
-            SkinModifier = new Mesh.Modifier.CSkinModifier();
-            unsafe
+        public Mesh.Modifier.CSkinModifier SkinModifier 
+        { 
+            get
             {
-                mCoreObject.PushModifier(SkinModifier.mCoreObject.NativeSuper);
+                return this.Modifiers[0] as Mesh.Modifier.CSkinModifier;
             }
-
-            UpdateShaderCode();
         }
-        public override NxRHI.EVertexStreamType[] GetNeedStreams()
-        {
-            return new NxRHI.EVertexStreamType[] { NxRHI.EVertexStreamType.VST_Position,
-                NxRHI.EVertexStreamType.VST_Normal,
-                NxRHI.EVertexStreamType.VST_SkinIndex,
-                NxRHI.EVertexStreamType.VST_SkinWeight};
-        }
-        public override void CopyFrom(UMdfQueue mdf)
+        public NxRHI.UCbView PerSkinMeshCBuffer { get; set; }
+        public override void CopyFrom(TtMdfQueueBase mdf)
         {
             base.CopyFrom(mdf);
-            mCoreObject.ClearModifiers();
-            SkinModifier = (mdf as UMdfSkinMesh).SkinModifier;
             PerSkinMeshCBuffer = (mdf as UMdfSkinMesh).PerSkinMeshCBuffer;
-            unsafe
-            {
-                mCoreObject.PushModifier(SkinModifier.mCoreObject.NativeSuper);
-            }
-        }
-        protected override string GetBaseBuilder(Bricks.CodeBuilder.Backends.UHLSLCodeGenerator codeBuilder)
-        {
-            var codeString = "";
-            var mdfSourceName = RName.GetRName("shaders/modifier/SkinModifier.cginc", RName.ERNameType.Engine);
-            codeBuilder.AddLine($"#include \"{mdfSourceName.Address}\"", ref codeString);
-            codeBuilder.AddLine("void MdfQueueDoModifiers(inout PS_INPUT output, VS_MODIFIER input)", ref codeString);
-            codeBuilder.PushSegment(ref codeString);
-            {
-                codeBuilder.AddLine("DoSkinModifierVS(output, input);", ref codeString);
-            }
-            codeBuilder.PopSegment(ref codeString);
-
-            codeBuilder.AddLine("#define MDFQUEUE_FUNCTION", ref codeString);
-
-            var code = Editor.ShaderCompiler.UShaderCodeManager.Instance.GetShaderCodeProvider(mdfSourceName);
-            codeBuilder.AddLine($"//Hash for {mdfSourceName}:{UniHash32.APHash(code.SourceCode.TextCode)}", ref codeString);
-
-            SourceCode = new NxRHI.UShaderCode();
-            SourceCode.TextCode = codeString;
-            return codeString;
         }
         public override void OnDrawCall(NxRHI.ICommandList cmd, Pipeline.URenderPolicy.EShadingType shadingType, NxRHI.UGraphicDraw drawcall, Pipeline.URenderPolicy policy, Mesh.UMesh mesh, int atom)
         {
@@ -113,37 +75,6 @@ namespace EngineNS.Graphics.Mesh
 
                 PerSkinMeshCBuffer.mCoreObject.FlushWrite(true, UEngine.Instance.GfxDevice.CbvUpdater.mCoreObject);
             }
-        }
-        public override Rtti.UTypeDesc GetPermutation(List<string> features)
-        {
-            if (features.Contains("UMdf_NoShadow"))
-            {
-                return Rtti.UTypeDescGetter<UMdfSkinMeshPermutation<Graphics.Pipeline.Shader.UMdf_NoShadow>>.TypeDesc;
-            }
-            else
-            {
-                return Rtti.UTypeDescGetter<UMdfSkinMeshPermutation<Graphics.Pipeline.Shader.UMdf_Shadow>>.TypeDesc;
-            }
-        }
-    }
-
-    public class UMdfSkinMeshPermutation<PermutationType> : UMdfSkinMesh
-    {
-        protected override void UpdateShaderCode()
-        {
-            var codeBuilder = new Bricks.CodeBuilder.Backends.UHLSLCodeGenerator();
-            var codeString = GetBaseBuilder(codeBuilder);
-
-            if (typeof(PermutationType).Name == "UMdf_NoShadow")
-            {
-                codeBuilder.AddLine("#define DISABLE_SHADOW_MDFQUEUE 1", ref codeString);
-            }
-            else if (typeof(PermutationType).Name == "UMdf_Shadow")
-            {
-
-            }
-
-            SourceCode.TextCode = codeString;
         }
     }
 }

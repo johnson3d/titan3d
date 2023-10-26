@@ -134,9 +134,10 @@ namespace EngineNS.GamePlay.Scene
                 materials1[0] = UEngine.Instance.GfxDevice.MaterialInstanceManager.FindMaterialInstance(RName.GetRName("material/whitecolor.uminst", RName.ERNameType.Engine));
                 var mesh2 = new Graphics.Mesh.UMesh();
                 var ok1 = mesh2.Initialize(cookedMesh, materials1,
-                    Rtti.UTypeDescGetter<Graphics.Mesh.UMdfStaticMeshPermutation<Graphics.Pipeline.Shader.UMdf_NoShadow>>.TypeDesc);
+                    Rtti.UTypeDescGetter<Graphics.Mesh.UMdfStaticMesh>.TypeDesc);
                 if (ok1)
                 {
+                    mesh2.IsAcceptShadow = false;
                     mesh2.IsUnlit = true;
                     mDebugSplineMesh = mesh2;
 
@@ -165,7 +166,7 @@ namespace EngineNS.GamePlay.Scene
                 materials1[0] = UEngine.Instance.GfxDevice.MaterialInstanceManager.FindMaterialInstance(RName.GetRName("material/redcolor.uminst", RName.ERNameType.Engine));
                 var mesh2 = new Graphics.Mesh.UMesh();
                 var ok1 = mesh2.Initialize(cookedMesh, materials1,
-                    Rtti.UTypeDescGetter<Graphics.Mesh.UMdfInstanceStaticMeshPermutation<Graphics.Pipeline.Shader.UMdf_NoShadow>>.TypeDesc);
+                    Rtti.UTypeDescGetter<Graphics.Mesh.UMdfInstanceStaticMesh>.TypeDesc);
                 if (ok1)
                 {
                     mesh2.IsUnlit = true;

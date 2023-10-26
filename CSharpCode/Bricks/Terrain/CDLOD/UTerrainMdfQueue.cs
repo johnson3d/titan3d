@@ -6,7 +6,37 @@ using System.Text;
 
 namespace EngineNS.Bricks.Terrain.CDLOD
 {
-    public class UTerrainMdfQueue : Graphics.Pipeline.Shader.UMdfQueue
+    public class TtTerrainModifier : Graphics.Pipeline.Shader.IMeshModifier
+    {
+        public void Dispose()
+        {
+
+        }
+        public string ModifierNameVS { get => "DoTerrainModifierVS"; }
+        public string ModifierNamePS { get => null; }
+        public RName SourceName
+        {
+            get
+            {
+                return RName.GetRName("shaders/Bricks/Terrain/TerrainCDLOD.cginc", RName.ERNameType.Engine);
+            }
+        }
+        public NxRHI.EVertexStreamType[] GetNeedStreams()
+        {
+            return new NxRHI.EVertexStreamType[] { NxRHI.EVertexStreamType.VST_Position,
+                NxRHI.EVertexStreamType.VST_Normal,
+                NxRHI.EVertexStreamType.VST_UV,};
+        }
+        public Graphics.Pipeline.Shader.EPixelShaderInput[] GetPSNeedInputs()
+        {
+            return new EPixelShaderInput[] {
+                EPixelShaderInput.PST_Normal,
+                EPixelShaderInput.PST_UV,
+                EPixelShaderInput.PST_LightMap,
+            };
+        }
+    }
+    public class UTerrainMdfQueue : Graphics.Pipeline.Shader.TtMdfQueue1<TtTerrainModifier>
     {
         public UPatch Patch
         {
@@ -17,25 +47,7 @@ namespace EngineNS.Bricks.Terrain.CDLOD
         }
         public int Dimension = 64;
         public bool IsWater = false;
-        public UTerrainMdfQueue()
-        {
-            UpdateShaderCode();
-        }
-        public override NxRHI.EVertexStreamType[] GetNeedStreams()
-        {
-            return new NxRHI.EVertexStreamType[] { NxRHI.EVertexStreamType.VST_Position,
-                NxRHI.EVertexStreamType.VST_Normal,
-                NxRHI.EVertexStreamType.VST_UV,};
-        }
-        public override EPixelShaderInput[] GetPSNeedInputs()
-        {
-            return new EPixelShaderInput[] {
-                EPixelShaderInput.PST_Normal,
-                EPixelShaderInput.PST_UV,
-                EPixelShaderInput.PST_LightMap,
-            };
-        }
-        public override void CopyFrom(UMdfQueue mdf)
+        public override void CopyFrom(TtMdfQueueBase mdf)
         {
             base.CopyFrom(mdf);
             Dimension = (mdf as UTerrainMdfQueue).Dimension;
@@ -46,20 +58,6 @@ namespace EngineNS.Bricks.Terrain.CDLOD
             string CodeString = IO.TtFileManager.ReadAllText(RName.GetRName("shaders/Bricks/Terrain/TerrainCDLOD.cginc", RName.ERNameType.Engine).Address);
             mMdfQueueHash = Hash160.CreateHash160(CodeString);
             return mMdfQueueHash;
-        }
-        protected override void UpdateShaderCode()
-        {
-            var codeBuilder = new Bricks.CodeBuilder.Backends.UHLSLCodeGenerator();
-            string sourceCode = "";
-            //var codeBuilder = new Bricks.CodeBuilder.HLSL.UHLSLGen();
-
-            codeBuilder.AddLine("#ifndef _UTerrainMdfQueue_CDLOD_INC_", ref sourceCode);
-            codeBuilder.AddLine("#define _UTerrainMdfQueue_CDLOD_INC_", ref sourceCode);
-            codeBuilder.AddLine($"#include \"{RName.GetRName("shaders/Bricks/Terrain/TerrainCDLOD.cginc", RName.ERNameType.Engine).Address}\"", ref sourceCode);
-
-            codeBuilder.AddLine("#endif", ref sourceCode);
-            SourceCode = new NxRHI.UShaderCode();
-            SourceCode.TextCode = sourceCode;
         }
         public class UMdfShaderBinder : Graphics.Pipeline.UCoreShaderBinder.UShaderResourceIndexer
         {
@@ -216,45 +214,6 @@ namespace EngineNS.Bricks.Terrain.CDLOD
                 coreBinder.CBPerTerrain.UpdateFieldVar(shaderProg, "cbPerTerrain");
                 pat.Level.Level.Node.TerrainCBuffer = UEngine.Instance.GfxDevice.RenderContext.CreateCBV(coreBinder.CBPerTerrain.Binder.mCoreObject);
             }
-        }
-        public override Rtti.UTypeDesc GetPermutation(List<string> features)
-        {
-            if (features.Contains("UMdf_NoShadow"))
-            {
-                return Rtti.UTypeDescGetter<UTerrainMdfQueuePermutation<Graphics.Pipeline.Shader.UMdf_NoShadow>>.TypeDesc;
-            }
-            else
-            {
-                return Rtti.UTypeDescGetter<UTerrainMdfQueuePermutation<Graphics.Pipeline.Shader.UMdf_Shadow>>.TypeDesc;
-            }
-        }
-    }
-
-    public class UTerrainMdfQueuePermutation<PermutationType> : UTerrainMdfQueue
-    {
-        protected override void UpdateShaderCode()
-        {
-            var codeBuilder = new Bricks.CodeBuilder.Backends.UHLSLCodeGenerator();
-            string sourceCode = "";
-            //var codeBuilder = new Bricks.CodeBuilder.HLSL.UHLSLGen();
-
-            codeBuilder.AddLine("#ifndef _UTerrainMdfQueue_CDLOD_INC_", ref sourceCode);
-            codeBuilder.AddLine("#define _UTerrainMdfQueue_CDLOD_INC_", ref sourceCode);
-            codeBuilder.AddLine($"#include \"{RName.GetRName("shaders/Bricks/Terrain/TerrainCDLOD.cginc", RName.ERNameType.Engine).Address}\"", ref sourceCode);
-
-            codeBuilder.AddLine("#endif", ref sourceCode);
-
-            if (typeof(PermutationType).Name == "UMdf_NoShadow")
-            {
-                codeBuilder.AddLine("#define DISABLE_SHADOW_MDFQUEUE 1", ref sourceCode);
-            }
-            else if (typeof(PermutationType).Name == "UMdf_Shadow")
-            {
-                
-            }
-
-            SourceCode = new NxRHI.UShaderCode();
-            SourceCode.TextCode = sourceCode;
         }
     }
 }

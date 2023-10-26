@@ -121,7 +121,7 @@ namespace EngineNS
     {
 
         public Editor.UPIEModule PIEModule { get; } = new Editor.UPIEModule();
-        public const string DotNetVersion = "net6.0";
+        public const string DotNetVersion = "net7.0";
         public virtual async System.Threading.Tasks.Task<bool> StartPlayInEditor(USlateApplication application, RName main)
         {
             if (this.GameInstance != null)

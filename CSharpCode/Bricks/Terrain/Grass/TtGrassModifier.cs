@@ -19,8 +19,12 @@ namespace EngineNS.Bricks.Terrain.Grass
         public int GrassDataPad1;
     }
 
-    public class UGrassModifier : Graphics.Pipeline.Shader.IMeshModifier
+    public class TtGrassModifier : Graphics.Pipeline.Shader.IMeshModifier
     {
+        public TtGrassModifier()
+        {
+            SetMode(true);
+        }
         public void Dispose()
         {
             InstantVBs?.Dispose();
@@ -76,7 +80,7 @@ namespace EngineNS.Bricks.Terrain.Grass
                 mDataVB = null;
                 mData = null;
             }
-            public unsafe void SureBuffers(UGrassModifier mdf, uint nSize)
+            public unsafe void SureBuffers(TtGrassModifier mdf, uint nSize)
             {
                 if (mdf.mMaxNumber > nSize)
                     return;
@@ -116,7 +120,7 @@ namespace EngineNS.Bricks.Terrain.Grass
                 desc.m_Stride = (UInt32)sizeof(float);
                 mHeightVB = rc.CreateVBV(null, in desc);
             }
-            public unsafe void Flush2VB(NxRHI.ICommandList cmd, UGrassModifier mdf)
+            public unsafe void Flush2VB(NxRHI.ICommandList cmd, TtGrassModifier mdf)
             {
                 if (mdf.mCurNumber == 0)
                     return;
@@ -136,7 +140,7 @@ namespace EngineNS.Bricks.Terrain.Grass
                 mAttachVBs.BindVB(NxRHI.EVertexStreamType.VST_Color, mDataVB);
                 //mAttachVBs.BindVB(NxRHI.EVertexStreamType.VST_TerrainGradient)
             }
-            public uint PushInstance(UGrassModifier mdf, UInt32 data, float height)
+            public uint PushInstance(TtGrassModifier mdf, UInt32 data, float height)
             {
                 var rc = UEngine.Instance.GfxDevice.RenderContext;
                 SureBuffers(mdf, mdf.mCurNumber + 1);
@@ -170,7 +174,7 @@ namespace EngineNS.Bricks.Terrain.Grass
 
                 InstData = null;
             }
-            public unsafe void SureBuffers(UGrassModifier mdf, uint nSize)
+            public unsafe void SureBuffers(TtGrassModifier mdf, uint nSize)
             {
                 if (mdf.mMaxNumber >= nSize)
                     return;
@@ -212,7 +216,7 @@ namespace EngineNS.Bricks.Terrain.Grass
                 InstantSRV.SetDebugName("InstantSRV");
 
             }
-            public uint PushInstance(UGrassModifier mdf, uint data, float height)
+            public uint PushInstance(TtGrassModifier mdf, uint data, float height)
             {
                 //uint growSize = 1;
                 //if(mdf.mMaxNumber > 10)
@@ -245,7 +249,7 @@ namespace EngineNS.Bricks.Terrain.Grass
 
                 IsDirty = true;
             }
-            public unsafe uint Flush2VB(NxRHI.ICommandList cmd, UGrassModifier mdf)
+            public unsafe uint Flush2VB(NxRHI.ICommandList cmd, TtGrassModifier mdf)
             {
                 if (mdf.mCurNumber == 0)
                     return 0;
@@ -264,7 +268,7 @@ namespace EngineNS.Bricks.Terrain.Grass
         }
         public UInstantSSBO InstantSSBO;
 
-        ~UGrassModifier()
+        ~TtGrassModifier()
         {
             Dispose();
         }

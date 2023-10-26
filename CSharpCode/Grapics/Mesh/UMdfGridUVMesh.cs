@@ -4,7 +4,34 @@ using EngineNS.Graphics.Pipeline.Shader;
 
 namespace EngineNS.Graphics.Mesh
 {
-    public class UMdfGridUVMesh : Graphics.Pipeline.Shader.UMdfQueue
+    public class TtGridUVModifier : Graphics.Pipeline.Shader.IMeshModifier
+    {
+        public void Dispose()
+        {
+
+        }
+        public string ModifierNameVS { get => "DoGridUVModifierVS"; }
+        public string ModifierNamePS { get => null; }
+        public RName SourceName
+        {
+            get
+            {
+                return RName.GetRName("shaders/modifier/GridUVModifier.cginc", RName.ERNameType.Engine);
+            }
+        }
+        public NxRHI.EVertexStreamType[] GetNeedStreams()
+        {
+            return new NxRHI.EVertexStreamType[] { NxRHI.EVertexStreamType.VST_Position,
+                NxRHI.EVertexStreamType.VST_UV,
+                NxRHI.EVertexStreamType.VST_LightMap};
+        }
+        public Graphics.Pipeline.Shader.EPixelShaderInput[] GetPSNeedInputs()
+        {
+            return null;
+        }
+    }
+
+    public class UMdfGridUVMesh : Graphics.Pipeline.Shader.TtMdfQueue1<TtGridUVModifier>
     {
         public NxRHI.UCbView PerGridUVMeshCBuffer { get; set; }
         public void SetUVMinAndMax(in Vector2 min, in Vector2 max)
@@ -14,41 +41,10 @@ namespace EngineNS.Graphics.Mesh
             PerGridUVMeshCBuffer.SetValue("UVMin", in min);
             PerGridUVMeshCBuffer.SetValue("UVMax", in max);
         }
-        public UMdfGridUVMesh()
-        {
-            UpdateShaderCode();
-        }
-        public override NxRHI.EVertexStreamType[] GetNeedStreams()
-        {
-            return new NxRHI.EVertexStreamType[] { NxRHI.EVertexStreamType.VST_Position,
-                NxRHI.EVertexStreamType.VST_UV,
-                NxRHI.EVertexStreamType.VST_LightMap};
-        }
-        public override void CopyFrom(UMdfQueue mdf)
+        public override void CopyFrom(TtMdfQueueBase mdf)
         {
             base.CopyFrom(mdf);
             PerGridUVMeshCBuffer = (mdf as UMdfGridUVMesh).PerGridUVMeshCBuffer;
-        }
-        protected override string GetBaseBuilder(Bricks.CodeBuilder.Backends.UHLSLCodeGenerator codeBuilder)
-        {
-            var codeString = "";
-            var mdfSourceName = RName.GetRName("shaders/modifier/GridUVModifier.cginc", RName.ERNameType.Engine);
-            codeBuilder.AddLine($"#include \"{mdfSourceName.Address}\"", ref codeString);
-            codeBuilder.AddLine("void MdfQueueDoModifiers(inout PS_INPUT output, VS_MODIFIER input)", ref codeString);
-            codeBuilder.PushSegment(ref codeString);
-            {
-                codeBuilder.AddLine("DoGridUVModifierVS(output, input);", ref codeString);
-            }
-            codeBuilder.PopSegment(ref codeString);
-
-            codeBuilder.AddLine("#define MDFQUEUE_FUNCTION", ref codeString);
-
-            var code = Editor.ShaderCompiler.UShaderCodeManager.Instance.GetShaderCodeProvider(mdfSourceName);
-            codeBuilder.AddLine($"//Hash for {mdfSourceName}:{UniHash32.APHash(code.SourceCode.TextCode)}", ref codeString);
-
-            SourceCode = new NxRHI.UShaderCode();
-            SourceCode.TextCode = codeString;
-            return codeString;
         }
         public override void OnDrawCall(NxRHI.ICommandList cmd, Pipeline.URenderPolicy.EShadingType shadingType, NxRHI.UGraphicDraw drawcall, Pipeline.URenderPolicy policy, Mesh.UMesh mesh, int atom)
         {
@@ -66,13 +62,6 @@ namespace EngineNS.Graphics.Mesh
                 }
                 drawcall.BindCBuffer(binder, PerGridUVMeshCBuffer);
             }
-        }
-        protected override void UpdateShaderCode()
-        {
-            var codeBuilder = new Bricks.CodeBuilder.Backends.UHLSLCodeGenerator();
-            var codeString = GetBaseBuilder(codeBuilder);
-
-            SourceCode.TextCode = codeString;
         }
     }
 }

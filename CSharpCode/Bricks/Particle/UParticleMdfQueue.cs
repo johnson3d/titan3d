@@ -6,21 +6,38 @@ using System.Text;
 
 namespace EngineNS.Bricks.Particle
 {
-    public class UParticleMdfQueue<FParticle, FParticleSystem> : Graphics.Pipeline.Shader.UMdfQueue 
-        where FParticle : unmanaged
-        where FParticleSystem : unmanaged
+    public class TtParticleModifier : Graphics.Pipeline.Shader.IMeshModifier
     {
-        public UParticleMdfQueue()
+        public void Dispose()
         {
-            UpdateShaderCode();
+
         }
-        public override NxRHI.EVertexStreamType[] GetNeedStreams()
+        public string ModifierNameVS { get => "DoNebulaModifierVS"; }
+        public string ModifierNamePS { get => null; }
+        public RName SourceName
+        {
+            get
+            {
+                return RName.GetRName("shaders/Bricks/Particle/NebulaParticle.cginc", RName.ERNameType.Engine);
+            }
+        }
+        public NxRHI.EVertexStreamType[] GetNeedStreams()
         {
             return new NxRHI.EVertexStreamType[] { NxRHI.EVertexStreamType.VST_Position,
                 NxRHI.EVertexStreamType.VST_Normal,
                 NxRHI.EVertexStreamType.VST_UV,};
         }
-        public override void CopyFrom(Graphics.Pipeline.Shader.UMdfQueue mdf)
+        public Graphics.Pipeline.Shader.EPixelShaderInput[] GetPSNeedInputs()
+        {
+            return null;
+        }
+    }
+
+    public class UParticleMdfQueue<FParticle, FParticleSystem> : Graphics.Pipeline.Shader.TtMdfQueue1<TtParticleModifier>
+        where FParticle : unmanaged
+        where FParticleSystem : unmanaged
+    {
+        public override void CopyFrom(Graphics.Pipeline.Shader.TtMdfQueueBase mdf)
         {
             base.CopyFrom(mdf);
             Emitter = (mdf as UParticleMdfQueue<FParticle, FParticleSystem>).Emitter;
@@ -65,20 +82,6 @@ namespace EngineNS.Bricks.Particle
             string CodeString = IO.TtFileManager.ReadAllText(RName.GetRName("shaders/Bricks/Particle/NebulaParticle.cginc", RName.ERNameType.Engine).Address);
             mMdfQueueHash = Hash160.CreateHash160(CodeString);
             return mMdfQueueHash;
-        }
-        protected override void UpdateShaderCode()
-        {
-            var codeBuilder = new Bricks.CodeBuilder.Backends.UHLSLCodeGenerator();
-            string sourceCode = "";
-            //var codeBuilder = new Bricks.CodeBuilder.HLSL.UHLSLGen();
-
-            codeBuilder.AddLine("#ifndef _UParticlMdfQueue_Nebula_INC_", ref sourceCode);
-            codeBuilder.AddLine("#define _UParticlMdfQueue_Nebula_INC_", ref sourceCode);
-            codeBuilder.AddLine($"#include \"{RName.GetRName("shaders/Bricks/Particle/NebulaParticle.cginc", RName.ERNameType.Engine).Address}\"", ref sourceCode);
-
-            codeBuilder.AddLine("#endif", ref sourceCode);
-            SourceCode = new NxRHI.UShaderCode();
-            SourceCode.TextCode = sourceCode;
         }
     }
 }

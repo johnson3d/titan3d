@@ -138,7 +138,7 @@ namespace EngineNS.Graphics.Pipeline.Common
 
         public int NumThreadsPerGroup = 64;
 
-        public void Initialize_Instance(URenderPolicy policy, string debugName)
+        public async Thread.Async.TtTask<bool> Initialize_Instance(URenderPolicy policy, string debugName)
         {
             GpuInstances.Initialize(EBufferType.BFT_SRV);
             CullInstancesBuffer.Initialize(EBufferType.BFT_SRV | EBufferType.BFT_UAV);
@@ -151,7 +151,7 @@ namespace EngineNS.Graphics.Pipeline.Common
             defines.mCoreObject.AddDefine("DispatchY", $"1");
             defines.mCoreObject.AddDefine("DispatchZ", $"1");
 
-            Cull_CullGpuIndexs = UEngine.Instance.GfxDevice.EffectManager.GetComputeEffect(RName.GetRName("Shaders/Occlusion/GpuSceneCullInstance.cginc", RName.ERNameType.Engine),
+            Cull_CullGpuIndexs = await UEngine.Instance.GfxDevice.EffectManager.GetComputeEffect(RName.GetRName("Shaders/Occlusion/GpuSceneCullInstance.cginc", RName.ERNameType.Engine),
                 "GpuSceneCullInstance", NxRHI.EShaderType.SDT_ComputeShader, null, defines, null);
 
             cbPerHZBCullData_CullInstance = Cull_CullGpuIndexs.FindBinder("cbPerPatchHZBCullData");
@@ -160,26 +160,28 @@ namespace EngineNS.Graphics.Pipeline.Common
             defines.mCoreObject.AddDefine("DispatchY", $"1");
             defines.mCoreObject.AddDefine("DispatchZ", $"1");
             //defines.mCoreObject.AddDefine("NumThreadsPerGroup", $"{NumThreadsPerGroup}"); 
-            Cull_SetupCullClusterArgs = UEngine.Instance.GfxDevice.EffectManager.GetComputeEffect(RName.GetRName("Shaders/Occlusion/GpuSceneSetupCullCluster.cginc", RName.ERNameType.Engine),
+            Cull_SetupCullClusterArgs = await UEngine.Instance.GfxDevice.EffectManager.GetComputeEffect(RName.GetRName("Shaders/Occlusion/GpuSceneSetupCullCluster.cginc", RName.ERNameType.Engine),
                 "SetupCullClusterArgsCS", NxRHI.EShaderType.SDT_ComputeShader, null, defines, null);
 
             defines.mCoreObject.AddDefine("DispatchX", $"1");
             defines.mCoreObject.AddDefine("DispatchY", $"1");
             defines.mCoreObject.AddDefine("DispatchZ", $"1");
             //defines.mCoreObject.AddDefine("NumThreadsPerGroup", $"{NumThreadsPerGroup}"); 
-            Cull_CullCluster = UEngine.Instance.GfxDevice.EffectManager.GetComputeEffect(RName.GetRName("Shaders/Occlusion/GpuSceneCullCluster.cginc", RName.ERNameType.Engine),
+            Cull_CullCluster = await UEngine.Instance.GfxDevice.EffectManager.GetComputeEffect(RName.GetRName("Shaders/Occlusion/GpuSceneCullCluster.cginc", RName.ERNameType.Engine),
                 "GpuSceneCullCluster", NxRHI.EShaderType.SDT_ComputeShader, null, defines, null);
 
             defines.mCoreObject.AddDefine("DispatchX", $"1");
             defines.mCoreObject.AddDefine("DispatchY", $"1");
             defines.mCoreObject.AddDefine("DispatchZ", $"1");
-            Cull_SetupDrawClusterArgsBuffer = UEngine.Instance.GfxDevice.EffectManager.GetComputeEffect(RName.GetRName("Shaders/Occlusion/SetupDrawClusterArgs.cginc", RName.ERNameType.Engine),
+            Cull_SetupDrawClusterArgsBuffer = await UEngine.Instance.GfxDevice.EffectManager.GetComputeEffect(RName.GetRName("Shaders/Occlusion/SetupDrawClusterArgs.cginc", RName.ERNameType.Engine),
                 "SetupDrawClusterArgsCS", NxRHI.EShaderType.SDT_ComputeShader, null, defines, null);
 
             //cbPerHZBCullData_CullCluster = Cull_CullCluster.FindBinder("cbPerPatchHZBCullData");
             //HZBCullClusterCBuffer = UEngine.Instance.GfxDevice.RenderContext.CreateCBV(HZBCullClusterData.Binder.mCoreObject);
 
             //drawcall.BindCBuffer(effectBinder.cbPerPatch.mCoreObject, pat.PatchCBuffer);
+
+            return true;
         }
         public void BuildInstances(GamePlay.UWorld world)
         {

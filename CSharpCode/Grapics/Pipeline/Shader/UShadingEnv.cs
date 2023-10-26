@@ -196,7 +196,7 @@ namespace EngineNS.Graphics.Pipeline.Shader
 
             return result;
         }
-        public void UpdatePermutation()
+        public virtual void UpdatePermutation()
         {
             mCurrentPermutationId.Reset();
             foreach (var i in PermutationValues)
@@ -204,7 +204,7 @@ namespace EngineNS.Graphics.Pipeline.Shader
                 mCurrentPermutationId = FPermutationId.BitOrValue(mCurrentPermutationId, in i.Value);
             }
         }
-        public virtual bool IsValidPermutation(UMdfQueue mdfQueue, UMaterial mtl)
+        public virtual bool IsValidPermutation(TtMdfQueueBase mdfQueue, UMaterial mtl)
         {
             return true;
         }
@@ -287,18 +287,18 @@ namespace EngineNS.Graphics.Pipeline.Shader
         {
             return base.ToString() + $"[{MainName}:{DispatchArg.ToString()}]";
         }
-        public NxRHI.UComputeEffect GetEffect()
+        public override void UpdatePermutation()
         {
-            if (CurrentEffect == null || CurrentEffect.PermutationId != this.CurrentPermutationId)
-            {
-                CurrentEffect = OnCreateEffect();
-            }
-            return CurrentEffect;
+            base.UpdatePermutation();
+            var nu = OnCreateEffect();
         }
-        protected virtual NxRHI.UComputeEffect OnCreateEffect()
+        protected async Thread.Async.TtTask<bool> OnCreateEffect()
         {
-            return UEngine.Instance.GfxDevice.EffectManager.GetComputeEffect(CodeName,
+            CurrentEffect = await UEngine.Instance.GfxDevice.EffectManager.GetComputeEffect(CodeName,
                 MainName, NxRHI.EShaderType.SDT_ComputeShader, this, null, null);
+            System.Diagnostics.Debug.Assert(this.mCurrentPermutationId == CurrentEffect.PermutationId);
+
+            return true;
         }
         public virtual void OnDrawCall(NxRHI.UComputeDraw drawcall, URenderPolicy policy)
         {
@@ -307,7 +307,8 @@ namespace EngineNS.Graphics.Pipeline.Shader
         public void SetDrawcallDispatch(object tagObject, URenderPolicy policy, NxRHI.UComputeDraw drawcall, uint x, uint y, uint z, bool bRoundupXYZ)
         {
             drawcall.TagObject = tagObject;
-            drawcall.SetComputeEffect(GetEffect());
+            
+            drawcall.SetComputeEffect(CurrentEffect);
             if (bRoundupXYZ)
             {
                 drawcall.SetDispatch(MathHelper.Roundup(x, DispatchArg.X),
@@ -324,7 +325,7 @@ namespace EngineNS.Graphics.Pipeline.Shader
         public void SetDrawcallIndirectDispatch(object tagObject, URenderPolicy policy, NxRHI.UComputeDraw drawcall, NxRHI.UBuffer indirectBuffer)
         {
             drawcall.TagObject = tagObject;
-            drawcall.SetComputeEffect(GetEffect());
+            drawcall.SetComputeEffect(CurrentEffect);
             drawcall.BindIndirectDispatchArgsBuffer(indirectBuffer);
 
             this.OnDrawCall(drawcall, policy);

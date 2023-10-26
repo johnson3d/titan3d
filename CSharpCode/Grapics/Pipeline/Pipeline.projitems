@@ -31,6 +31,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)Common\UHitproxyNode.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Common\UHzbNode.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Common\UImageAssetNode.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Common\UINode.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Common\UPickedProxiableManager.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Common\UPickBlurNode.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Common\UPickedNode.cs" />
@@ -43,6 +44,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)Deferred\UDeferredPolicy.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Deferred\UForwordNode.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Mobile\UFinalCopyNode.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Shader\MdfQueue.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Shadow\UCascadedShadowMap.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Shadow\UExponentialShadowNode.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Shadow\UShadowMapNode.cs" />
@@ -57,7 +59,6 @@
     <Compile Include="$(MSBuildThisFileDirectory)Shader\UEffect.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Shader\UMaterial.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Shader\UMaterialInstance.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Shader\UMdfQueue.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Shader\UShadingEnv.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)UGfxDevice.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)URenderPolicy.cs" />

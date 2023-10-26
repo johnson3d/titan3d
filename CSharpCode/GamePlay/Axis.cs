@@ -232,7 +232,8 @@ namespace EngineNS.GamePlay
                 }
                 var mesh = new Graphics.Mesh.UMesh();
                 var ok = await mesh.Initialize(meshName, materials,
-                    Rtti.UTypeDescGetter<Graphics.Mesh.UMdfStaticMeshPermutation<Graphics.Pipeline.Shader.UMdf_NoShadow>>.TypeDesc);
+                    Rtti.UTypeDescGetter<Graphics.Mesh.UMdfStaticMesh>.TypeDesc);
+                mesh.IsAcceptShadow = false;
                 return ok ? mesh : null;
             }
             public async System.Threading.Tasks.Task Initialize(enAxisType type, GamePlay.UWorld world)
@@ -920,9 +921,10 @@ namespace EngineNS.GamePlay
             var rotArrowAssetMat = await UEngine.Instance.GfxDevice.MaterialInstanceManager.GetMaterialInstance(mAxisMaterial_Focus_d);
             var rotArrowAssetMesh = new Graphics.Mesh.UMesh();
             var ok = await rotArrowAssetMesh.Initialize(mAxisMeshMoveX, new Graphics.Pipeline.Shader.UMaterial[] { rotArrowAssetMat },
-                Rtti.UTypeDescGetter<Graphics.Mesh.UMdfStaticMeshPermutation<Graphics.Pipeline.Shader.UMdf_NoShadow>>.TypeDesc);
+                Rtti.UTypeDescGetter<Graphics.Mesh.UMdfStaticMesh>.TypeDesc);
             if(ok)
             {
+                rotArrowAssetMesh.IsAcceptShadow = false;
                 var meshNodeData = new GamePlay.Scene.UMeshNode.UMeshNodeData();
                 meshNodeData.MeshName = mAxisMeshMoveX;
                 meshNodeData.Name = "RotArrowAsset";
@@ -932,7 +934,6 @@ namespace EngineNS.GamePlay
                 mRotArrowAssetNode.HitproxyType = Graphics.Pipeline.UHitProxy.EHitproxyType.Root;
                 mRotArrowAssetNode.IsCastShadow = false;
             }
-
             //await InitializeDebugAssit();
 
             mInitialized = true;
@@ -954,9 +955,10 @@ namespace EngineNS.GamePlay
             var ok = mesh.Initialize(
                 planeMesh,
                 new Graphics.Pipeline.Shader.UMaterial[] { planeMaterial },
-                Rtti.UTypeDescGetter<Graphics.Mesh.UMdfStaticMeshPermutation<Graphics.Pipeline.Shader.UMdf_NoShadow>>.TypeDesc);
+                Rtti.UTypeDescGetter<Graphics.Mesh.UMdfStaticMesh>.TypeDesc);
             if(ok)
             {
+                mesh.IsAcceptShadow = false;
                 mPlaneNode = await Scene.UMeshNode.AddMeshNode(
                     mHostWorld,
                     mHostWorld.Root,
@@ -977,9 +979,10 @@ namespace EngineNS.GamePlay
             var pointMesh = point.ToMesh();
             var pointMaterial = await UEngine.Instance.GfxDevice.MaterialInstanceManager.GetMaterialInstance(mAxisMaterial_Center);
             ok = mesh.Initialize(pointMesh, new Graphics.Pipeline.Shader.UMaterial[] { pointMaterial },
-                Rtti.UTypeDescGetter<Graphics.Mesh.UMdfStaticMeshPermutation<Graphics.Pipeline.Shader.UMdf_NoShadow>>.TypeDesc);
+                Rtti.UTypeDescGetter<Graphics.Mesh.UMdfStaticMesh>.TypeDesc);
             if(ok)
             {
+                mesh.IsAcceptShadow = false;
                 mPointNode = await Scene.UMeshNode.AddMeshNode(
                     mHostWorld,
                     mHostWorld.Root,

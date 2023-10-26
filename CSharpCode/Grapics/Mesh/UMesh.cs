@@ -41,7 +41,7 @@ namespace EngineNS.Graphics.Mesh
             }
         }
         public UMaterialMesh MaterialMesh { get; private set; }
-        public Pipeline.Shader.UMdfQueue MdfQueue { get; private set; }
+        public Pipeline.Shader.TtMdfQueueBase MdfQueue { get; private set; }
         NxRHI.UCbView mPerMeshCBuffer;
         protected System.Action OnAfterCBufferCreated;
 
@@ -410,7 +410,7 @@ namespace EngineNS.Graphics.Mesh
         }
         internal bool SetMdfQueueType(Rtti.UTypeDesc mdfQueueType)
         {
-            var mdf = Rtti.UTypeDescManager.CreateInstance(mdfQueueType) as Pipeline.Shader.UMdfQueue;
+            var mdf = Rtti.UTypeDescManager.CreateInstance(mdfQueueType) as Pipeline.Shader.TtMdfQueueBase;
             if (mdf == null)
                 return false;
 
@@ -431,7 +431,7 @@ namespace EngineNS.Graphics.Mesh
                 return false;
             MaterialMesh = materialMesh;
 
-            MdfQueue = Rtti.UTypeDescManager.CreateInstance(mdfQueueType) as Pipeline.Shader.UMdfQueue;
+            MdfQueue = Rtti.UTypeDescManager.CreateInstance(mdfQueueType) as Pipeline.Shader.TtMdfQueueBase;
             if (MdfQueue == null)
                 return false;
 
@@ -454,7 +454,7 @@ namespace EngineNS.Graphics.Mesh
             if (MaterialMesh == null)
                 return false;
 
-            MdfQueue = Rtti.UTypeDescManager.CreateInstance(mdfQueueType) as Pipeline.Shader.UMdfQueue;
+            MdfQueue = Rtti.UTypeDescManager.CreateInstance(mdfQueueType) as Pipeline.Shader.TtMdfQueueBase;
             if (MdfQueue == null)
                 return false;
 
@@ -486,7 +486,7 @@ namespace EngineNS.Graphics.Mesh
                 MaterialMesh.Materials[i] = materials[i];
             }
 
-            MdfQueue = Rtti.UTypeDescManager.CreateInstance(mdfQueueType) as Pipeline.Shader.UMdfQueue;
+            MdfQueue = Rtti.UTypeDescManager.CreateInstance(mdfQueueType) as Pipeline.Shader.TtMdfQueueBase;
             if (MdfQueue == null)
                 return false;
 
@@ -526,7 +526,7 @@ namespace EngineNS.Graphics.Mesh
             //    Atoms[i].Material = MaterialMesh.Materials[i];
             //}
 
-            MdfQueue = Rtti.UTypeDescManager.CreateInstance(mdfQueueType) as Pipeline.Shader.UMdfQueue;
+            MdfQueue = Rtti.UTypeDescManager.CreateInstance(mdfQueueType) as Pipeline.Shader.TtMdfQueueBase;
             if (MdfQueue == null)
                 return false;
             return true; 

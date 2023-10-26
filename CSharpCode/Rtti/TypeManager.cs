@@ -537,7 +537,7 @@ namespace EngineNS.Rtti
                 return result;
             return null;
         }
-        public bool GetInheritTypes(UTypeDesc baseType, ref List<UTypeDesc> types)
+        public bool GetInheritTypes(UTypeDesc baseType, List<UTypeDesc> types)
         {
             bool finded = false;
             foreach(var service in Services.Values)

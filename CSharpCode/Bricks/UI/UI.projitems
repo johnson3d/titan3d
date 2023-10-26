@@ -39,6 +39,8 @@
     <Compile Include="$(MSBuildThisFileDirectory)Controls\UIElement_Render.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Controls\UIElement_Template.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Controls\UIElement_Trigger.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Editor\EditorDecorator.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Editor\EditorUIHost.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Editor\TtUIEditor.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Event\RoutedEvent.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Layout\LayoutQueue.cs" />

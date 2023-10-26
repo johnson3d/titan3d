@@ -53,7 +53,7 @@ namespace EngineNS.Graphics.Pipeline.Mobile
             get;
             set;
         }
-        public override bool IsValidPermutation(UMdfQueue mdfQueue, Shader.UMaterial mtl)
+        public override bool IsValidPermutation(TtMdfQueueBase mdfQueue, Shader.UMaterial mtl)
         {
             if (mtl.LightingMode != Shader.UMaterial.ELightingMode.Stand)
             {

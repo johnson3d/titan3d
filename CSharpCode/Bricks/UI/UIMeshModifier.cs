@@ -28,15 +28,22 @@ namespace EngineNS.Graphics.Mesh
 
 namespace EngineNS.UI
 {
-    public class TtMdfUIMesh : Graphics.Pipeline.Shader.UMdfQueue
+    public class TtUIModifier : Graphics.Pipeline.Shader.IMeshModifier
     {
-        public TtUIHost UIHost;
-        public NxRHI.UCbView PerUIMeshCBuffer { get; set; }
-        public TtMdfUIMesh()
+        public void Dispose()
         {
-            UpdateShaderCode();
+
         }
-        public override EVertexStreamType[] GetNeedStreams()
+        public string ModifierNameVS { get => "DoUIModifierVS"; }
+        public string ModifierNamePS { get => null; }
+        public RName SourceName
+        {
+            get
+            {
+                return RName.GetRName("shaders/modifier/UIModifier.cginc", RName.ERNameType.Engine);
+            }
+        }
+        public NxRHI.EVertexStreamType[] GetNeedStreams()
         {
             return new EVertexStreamType[]
             {
@@ -45,30 +52,19 @@ namespace EngineNS.UI
                 EVertexStreamType.VST_SkinIndex,
             };
         }
-        public override void CopyFrom(UMdfQueue mdf)
+        public Graphics.Pipeline.Shader.EPixelShaderInput[] GetPSNeedInputs()
+        {
+            return null;
+        }
+    }
+    public class TtMdfUIMesh : Graphics.Pipeline.Shader.TtMdfQueue1<TtUIModifier>
+    {
+        public TtUIHost UIHost;
+        public NxRHI.UCbView PerUIMeshCBuffer { get; set; }
+        public override void CopyFrom(TtMdfQueueBase mdf)
         {
             base.CopyFrom(mdf);
             PerUIMeshCBuffer = (mdf as TtMdfUIMesh).PerUIMeshCBuffer;
-        }
-        protected override string GetBaseBuilder(UHLSLCodeGenerator codeBuilder)
-        {
-            var codeString = "";
-            var mdfSourceName = RName.GetRName("shaders/modifier/UIModifier.cginc", RName.ERNameType.Engine);
-            codeBuilder.AddLine($"#include \"{mdfSourceName.Address}\"", ref codeString);
-            codeBuilder.AddLine("void MdfQueueDoModifiers(inout PS_INPUT output, VS_MODIFIER input)", ref codeString);
-            codeBuilder.PushSegment(ref codeString);
-            {
-                codeBuilder.AddLine("DoUIModifierVS(output, input);", ref codeString);
-            }
-            codeBuilder.PopSegment(ref codeString);
-            codeBuilder.AddLine("#define MDFQUEUE_FUNCTION", ref codeString);
-
-            var code = EngineNS.Editor.ShaderCompiler.UShaderCodeManager.Instance.GetShaderCodeProvider(mdfSourceName);
-            codeBuilder.AddLine($"//Hash for {mdfSourceName}:{UniHash32.APHash(code.SourceCode.TextCode)}", ref codeString);
-
-            SourceCode = new NxRHI.UShaderCode();
-            SourceCode.TextCode = codeString;
-            return codeString;
         }
         public override void OnDrawCall(NxRHI.ICommandList cmdlist, URenderPolicy.EShadingType shadingType, UGraphicDraw drawcall, URenderPolicy policy, UMesh mesh, int atom)
         {
@@ -141,37 +137,6 @@ namespace EngineNS.UI
                     }
                 }
             }
-        }
-        public override Rtti.UTypeDesc GetPermutation(List<string> features)
-        {
-            if (features.Contains("UMdf_NoShadow"))
-            {
-                return Rtti.UTypeDescGetter<TtMdfUIMeshPermutation<Graphics.Pipeline.Shader.UMdf_NoShadow>>.TypeDesc;
-            }
-            else
-            {
-                return Rtti.UTypeDescGetter<TtMdfUIMeshPermutation<Graphics.Pipeline.Shader.UMdf_Shadow>>.TypeDesc;
-            }
-        }
-    }
-
-    public class TtMdfUIMeshPermutation<PermutationType> : TtMdfUIMesh
-    {
-        protected override void UpdateShaderCode()
-        {
-            var codeBuilder = new Bricks.CodeBuilder.Backends.UHLSLCodeGenerator();
-            var codeString = GetBaseBuilder(codeBuilder);
-
-            if (typeof(PermutationType).Name == "UMdf_NoShadow")
-            {
-                codeBuilder.AddLine("#define DISABLE_SHADOW_MDFQUEUE 1", ref codeString);
-            }
-            else if (typeof(PermutationType).Name == "UMdf_Shadow")
-            {
-
-            }
-
-            SourceCode.TextCode = codeString;
         }
     }
 }

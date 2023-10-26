@@ -19,8 +19,38 @@ namespace EngineNS.Graphics.Mesh.Modifier
         public Vector4ui PointLightIndices;
     };
 
-    public class UInstanceModifier
+    public class UInstanceModifier : Pipeline.Shader.IMeshModifier
     {
+        public void Dispose()
+        {
+
+        }
+        public string ModifierNameVS { get => "DoInstancingModifierVS"; }
+        public string ModifierNamePS { get => null; }
+        public RName SourceName
+        {
+            get
+            {
+                return RName.GetRName("shaders/modifier/InstancingModifier.cginc", RName.ERNameType.Engine);
+            }
+        }
+        public NxRHI.EVertexStreamType[] GetNeedStreams()
+        {
+            return new NxRHI.EVertexStreamType[] {
+                NxRHI.EVertexStreamType.VST_Position,
+                NxRHI.EVertexStreamType.VST_Normal,
+                NxRHI.EVertexStreamType.VST_InstPos,
+                NxRHI.EVertexStreamType.VST_InstQuat,
+                NxRHI.EVertexStreamType.VST_InstScale,
+                NxRHI.EVertexStreamType.VST_F4_1};
+        }
+        public Graphics.Pipeline.Shader.EPixelShaderInput[] GetPSNeedInputs()
+        {
+            return new Graphics.Pipeline.Shader.EPixelShaderInput[] {
+                Graphics.Pipeline.Shader.EPixelShaderInput.PST_SpecialData,
+            };
+        }
+
         uint mCurNumber = 0;
         public uint CurNumber
         {

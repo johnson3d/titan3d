@@ -97,7 +97,7 @@ namespace EngineNS.Bricks.UI.Controls
 
         public override bool IsReadyToDraw()
         {
-            return base.IsReadyToDraw();
+            return true;
         }
         public override void Draw(TtCanvas canvas, TtCanvasDrawBatch batch)
         {
@@ -109,9 +109,11 @@ namespace EngineNS.Bricks.UI.Controls
                 mFontAsset = UEngine.Instance.FontModule.FontManager.GetFontSDF(mFont, mFontSize, 1024, 1024);
             }
 
+            batch.Middleground.PushTransformIndex(TransformIndex);
             batch.Middleground.PushFont(mFontAsset);
             batch.Middleground.AddText(mText, mCurFinalRect.Left, mCurFinalRect.Top, Color4f.FromABGR(Color.LightPink));
             batch.Middleground.PopFont();
+            batch.Middleground.PopTransformIndex();
         }
 
         protected override SizeF MeasureOverride(in SizeF availableSize)

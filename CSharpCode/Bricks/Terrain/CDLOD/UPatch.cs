@@ -88,7 +88,7 @@ namespace EngineNS.Bricks.Terrain.CDLOD
             //    //srv.Value = RName.GetRName("");
             //}
 
-            var mdfType = Rtti.UTypeDesc.TypeOf(typeof(UTerrainMdfQueuePermutation<Graphics.Pipeline.Shader.UMdf_NoShadow>));
+            var mdfType = Rtti.UTypeDesc.TypeOf(typeof(UTerrainMdfQueue));
             var tMaterials = new Graphics.Pipeline.Shader.UMaterial[1];
             tMaterials[0] = terrain.Material;
 
@@ -169,21 +169,24 @@ namespace EngineNS.Bricks.Terrain.CDLOD
         }
         public void SetAcceptShadow(bool value)
         {
-            List<string> features = new List<string>();
-            if (value == false)
-            {
-                features.Add("NoShadow");
-            }
             for (int i = 0; i < TerrainMesh.Length; i++)
             {
                 var mMesh = TerrainMesh[i];
                 if (mMesh == null)
                     return;
 
-                var saved = mMesh.MdfQueue.MdfDatas;
-                var mdfQueueType = mMesh.MdfQueue.GetPermutation(features);
-                mMesh.SetMdfQueueType(mdfQueueType);
-                mMesh.MdfQueue.MdfDatas = saved;
+                //var saved = mMesh.MdfQueue.MdfDatas;
+                //Rtti.UTypeDesc mdfQueueType;
+                //if (value)
+                //{
+                //    mdfQueueType = mMesh.MdfQueue.MdfPermutations.ReplacePermutation<Graphics.Pipeline.Shader.UMdf_NoShadow, Graphics.Pipeline.Shader.UMdf_Shadow>();
+                //}
+                //else
+                //{
+                //    mdfQueueType = mMesh.MdfQueue.MdfPermutations.ReplacePermutation<Graphics.Pipeline.Shader.UMdf_Shadow, Graphics.Pipeline.Shader.UMdf_NoShadow>();
+                //}
+                //mMesh.SetMdfQueueType(mdfQueueType);
+                //mMesh.MdfQueue.MdfDatas = saved;
 
                 //int ObjectFlags_2Bit = 0;
                 //if (value)

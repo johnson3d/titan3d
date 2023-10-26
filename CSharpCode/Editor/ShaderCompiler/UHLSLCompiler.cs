@@ -127,7 +127,7 @@ namespace EngineNS.Editor.ShaderCompiler
             }
             else if (file.EndsWith("/MdfQueue"))
             {
-                var mdf = Rtti.UTypeDescManager.CreateInstance(MdfQueueType) as Graphics.Pipeline.Shader.UMdfQueue;
+                var mdf = Rtti.UTypeDescManager.CreateInstance(MdfQueueType) as Graphics.Pipeline.Shader.TtMdfQueueBase;
                 if (mdf != null)
                 {
                     return mdf.SourceCode.mCoreObject;
@@ -345,7 +345,7 @@ namespace EngineNS.Editor.ShaderCompiler
                         }
                     }
                     {
-                        var mdfObj = Rtti.UTypeDescManager.CreateInstance(MdfQueueType) as Graphics.Pipeline.Shader.UMdfQueue;
+                        var mdfObj = Rtti.UTypeDescManager.CreateInstance(MdfQueueType) as Graphics.Pipeline.Shader.TtMdfQueueBase;
                         if (mdfObj != null)
                         {
                             var mdfNeeds = mdfObj.GetNeedStreams();

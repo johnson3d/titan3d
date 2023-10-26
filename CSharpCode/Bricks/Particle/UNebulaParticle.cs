@@ -102,7 +102,7 @@ namespace EngineNS.Bricks.Particle
             //UEngine.Instance.GfxDevice.RenderCmdQueue.QueueCmdlist(cmdlist);
         }
 
-        public UNebulaParticle CloneNebula()
+        public async Thread.Async.TtTask<UNebulaParticle> CloneNebula()
         {
             var result = new UNebulaParticle();
             result.AssetName = AssetName;
@@ -110,7 +110,7 @@ namespace EngineNS.Bricks.Particle
             {
                 result.Emitter.Add(i.Key, i.Value.CloneEmitter());
             }
-            UEngine.Instance.NebulaTemplateManager.UpdateShaders(result);
+            await UEngine.Instance.NebulaTemplateManager.UpdateShaders(result);
             return result;
             //return this;
         }

@@ -70,8 +70,9 @@ namespace EngineNS.Bricks.Terrain.CDLOD
                 {
                     DebugHitproxyMesh = new Graphics.Mesh.UMesh();
                     DebugHitproxyMesh.Initialize(PlantType.MaterialMesh,
-                        Rtti.UTypeDescGetter<Graphics.Mesh.UMdfStaticMeshPermutation<Graphics.Pipeline.Shader.UMdf_NoShadow>>.TypeDesc);
+                        Rtti.UTypeDescGetter<Graphics.Mesh.UMdfStaticMesh>.TypeDesc);
                     DebugHitproxyMesh.SetWorldTransform(Placement.TransformData, PlantType.Terrain.GetWorld(), false);
+                    DebugHitproxyMesh.IsAcceptShadow = false;
                 }
                 meshes.Add(DebugHitproxyMesh);
             }
@@ -97,7 +98,7 @@ namespace EngineNS.Bricks.Terrain.CDLOD
                 MaterialMesh = await UEngine.Instance.GfxDevice.MaterialMeshManager.GetMaterialMesh(desc.MeshName);
                 Mesh = new Graphics.Mesh.UMesh();
                 Mesh.Initialize(MaterialMesh, 
-                    Rtti.UTypeDescGetter<Graphics.Mesh.UMdfInstanceStaticMeshPermutation<Graphics.Pipeline.Shader.UMdf_NoShadow>>.TypeDesc);
+                    Rtti.UTypeDescGetter<Graphics.Mesh.UMdfInstanceStaticMesh>.TypeDesc);
 
                 Mesh.IsCastShadow = true;
                 InstanceMdf = Mesh.MdfQueue as Graphics.Mesh.UMdfInstanceStaticMesh;

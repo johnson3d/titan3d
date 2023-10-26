@@ -29,7 +29,7 @@ namespace EngineNS.GamePlay.Scene
             [ReadOnly(true)]
             public string AtomType { get; set; } = Rtti.UTypeDesc.TypeStr(typeof(Graphics.Mesh.UMesh.UAtom));
 
-            [EGui.Controls.PropertyGrid.PGTypeEditor(typeof(Graphics.Pipeline.Shader.UMdfQueue))]
+            [EGui.Controls.PropertyGrid.PGTypeEditor(typeof(Graphics.Pipeline.Shader.TtMdfQueueBase))]
             public Rtti.UTypeDesc MdfQueue
             {
                 get
@@ -118,16 +118,18 @@ namespace EngineNS.GamePlay.Scene
                 if (mMesh == null)
                     return;
 
-                List<string> features = new List<string>();
-                if (value == false)
-                {
-                    features.Add("NoShadow");
-                }
-
-                var saved = mMesh.MdfQueue.MdfDatas;
-                var mdfQueueType = mMesh.MdfQueue.GetPermutation(features);
-                mMesh.SetMdfQueueType(mdfQueueType);
-                mMesh.MdfQueue.MdfDatas = saved;
+                //var saved = mMesh.MdfQueue.MdfDatas;
+                //Rtti.UTypeDesc mdfQueueType;
+                //if (value)
+                //{
+                //    mdfQueueType = mMesh.MdfQueue.MdfPermutations.ReplacePermutation<Graphics.Pipeline.Shader.UMdf_NoShadow, Graphics.Pipeline.Shader.UMdf_Shadow>();
+                //}
+                //else
+                //{
+                //    mdfQueueType = mMesh.MdfQueue.MdfPermutations.ReplacePermutation<Graphics.Pipeline.Shader.UMdf_Shadow, Graphics.Pipeline.Shader.UMdf_NoShadow>();
+                //}
+                //mMesh.SetMdfQueueType(mdfQueueType);
+                //mMesh.MdfQueue.MdfDatas = saved;
 
                 //int ObjectFlags_2Bit = 0;
                 //if (value)
@@ -278,14 +280,8 @@ namespace EngineNS.GamePlay.Scene
                 //    colorVar.SetValue(new Vector4(1, 0, 1, 1));
                 //}
                 var mesh = new Graphics.Mesh.UMesh();
-                if (this.IsAcceptShadow)
-                {
-                    mesh.Initialize(cookedMesh, materials1, Rtti.UTypeDescGetter<Graphics.Mesh.UMdfStaticMeshPermutation<Graphics.Pipeline.Shader.UMdf_Shadow>>.TypeDesc);
-                }
-                else
-                {
-                    mesh.Initialize(cookedMesh, materials1, Rtti.UTypeDescGetter<Graphics.Mesh.UMdfStaticMeshPermutation<Graphics.Pipeline.Shader.UMdf_NoShadow>>.TypeDesc);
-                }
+                mesh.Initialize(cookedMesh, materials1, Rtti.UTypeDescGetter<Graphics.Mesh.UMdfStaticMesh>.TypeDesc);
+                mesh.IsAcceptShadow = this.IsAcceptShadow;
                 Mesh = mesh;
                 return;
             }

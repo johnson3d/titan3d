@@ -1,5 +1,6 @@
 ﻿using EngineNS;
 using EngineNS.Bricks.CodeBuilder;
+using EngineNS.Bricks.UI.Controls;
 using EngineNS.GamePlay.Scene;
 using EngineNS.Rtti;
 using EngineNS.UI.Canvas;
@@ -13,7 +14,7 @@ using System.Threading.Tasks;
 
 namespace EngineNS.UI.Editor
 {
-    public class TtUIEditor : EngineNS.Editor.IAssetEditor, IRootForm, ITickable
+    public partial class TtUIEditor : EngineNS.Editor.IAssetEditor, IRootForm, ITickable
     {
         public int GetTickOrder()
         {
@@ -27,7 +28,7 @@ namespace EngineNS.UI.Editor
         public ImGuiCond_ DockCond { get; set; } = ImGuiCond_.ImGuiCond_FirstUseEver;        
         public EngineNS.Editor.UPreviewViewport PreviewViewport = new EngineNS.Editor.UPreviewViewport();
 
-        public TtUIHost mUIHost = new TtUIHost();
+        public EditorUIHost mUIHost = new EditorUIHost();
         public TtUINode mUINode;
         public void Dispose()
         {
@@ -47,9 +48,14 @@ namespace EngineNS.UI.Editor
             //var element = new TtImage(); // new TtUIElement();
             var button = new TtButton();
             var canvas = new UI.Controls.Containers.TtCanvasControl();
-            var img = new TtImage();
-            img.UIBrush.UVAnimAsset = RName.GetRName("ui/button_hover.uvanim", RName.ERNameType.Engine);
-            button.Children.Add(img);
+            //var img = new TtImage();
+            //img.UIBrush.UVAnimAsset = RName.GetRName("ui/button_hover.uvanim", RName.ERNameType.Engine);
+            //button.Children.Add(img);
+
+            var txt = new TtText();
+            txt.Text = "abc";
+            button.Children.Add(txt);
+
             ////canvas.AddChild(element);
             ////DetailsGrid.Target = element;
 

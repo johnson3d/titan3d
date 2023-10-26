@@ -218,21 +218,12 @@ namespace EngineNS.Bricks.Terrain.CDLOD
                 GrassDesc = desc;
                 MaterialMesh = await UEngine.Instance.GfxDevice.MaterialMeshManager.GetMaterialMesh(desc.MeshName);
                 Mesh = new Graphics.Mesh.UMesh();
-                if(desc.NoShadow)
-                {
-                    if (desc.FollowHeight)
-                        Mesh.Initialize(MaterialMesh, Rtti.UTypeDescGetter<Grass.UMdfGrassStaticMeshPermutation<Graphics.Pipeline.Shader.UMdf_NoShadow, Grass.UMdf_Grass_VertexFollowHeight>>.TypeDesc);
-                    else
-                        Mesh.Initialize(MaterialMesh, Rtti.UTypeDescGetter<Grass.UMdfGrassStaticMeshPermutation<Graphics.Pipeline.Shader.UMdf_NoShadow, Grass.UMdf_Grass_VertexNotFollowHeight>>.TypeDesc);
-                }
+                if (desc.FollowHeight)
+                    Mesh.Initialize(MaterialMesh, Rtti.UTypeDescGetter<Grass.UMdfGrassStaticMeshPermutation<Grass.UMdf_Grass_VertexFollowHeight>>.TypeDesc);
                 else
-                {
-                    if (desc.FollowHeight)
-                        Mesh.Initialize(MaterialMesh, Rtti.UTypeDescGetter<Grass.UMdfGrassStaticMeshPermutation<Graphics.Pipeline.Shader.UMdf_Shadow, Grass.UMdf_Grass_VertexFollowHeight>>.TypeDesc);
-                    else
-                        Mesh.Initialize(MaterialMesh, Rtti.UTypeDescGetter<Grass.UMdfGrassStaticMeshPermutation<Graphics.Pipeline.Shader.UMdf_Shadow, Grass.UMdf_Grass_VertexNotFollowHeight>>.TypeDesc);
-                }
+                    Mesh.Initialize(MaterialMesh, Rtti.UTypeDescGetter<Grass.UMdfGrassStaticMeshPermutation<Grass.UMdf_Grass_VertexNotFollowHeight>>.TypeDesc);
 
+                Mesh.IsAcceptShadow = !desc.NoShadow;
                 Mesh.IsCastShadow = true;
                 InstanceMdf = Mesh.MdfQueue as Grass.UMdfGrassStaticMesh;
                 InstanceMdf.GrassModifier.GrassType = this;
@@ -258,21 +249,12 @@ namespace EngineNS.Bricks.Terrain.CDLOD
                     return;
                 }
                 Mesh = new Graphics.Mesh.UMesh();
-                if (desc.NoShadow)
-                {
-                    if (desc.FollowHeight)
-                        Mesh.Initialize(MaterialMesh, Rtti.UTypeDescGetter<Grass.UMdfGrassStaticMeshPermutation<Graphics.Pipeline.Shader.UMdf_NoShadow, Grass.UMdf_Grass_VertexFollowHeight>>.TypeDesc);
-                    else
-                        Mesh.Initialize(MaterialMesh, Rtti.UTypeDescGetter<Grass.UMdfGrassStaticMeshPermutation<Graphics.Pipeline.Shader.UMdf_NoShadow, Grass.UMdf_Grass_VertexNotFollowHeight>>.TypeDesc);
-                }
+                if (desc.FollowHeight)
+                    Mesh.Initialize(MaterialMesh, Rtti.UTypeDescGetter<Grass.UMdfGrassStaticMeshPermutation<Grass.UMdf_Grass_VertexFollowHeight>>.TypeDesc);
                 else
-                {
-                    if (desc.FollowHeight)
-                        Mesh.Initialize(MaterialMesh, Rtti.UTypeDescGetter<Grass.UMdfGrassStaticMeshPermutation<Graphics.Pipeline.Shader.UMdf_Shadow, Grass.UMdf_Grass_VertexFollowHeight>>.TypeDesc);
-                    else
-                        Mesh.Initialize(MaterialMesh, Rtti.UTypeDescGetter<Grass.UMdfGrassStaticMeshPermutation<Graphics.Pipeline.Shader.UMdf_Shadow, Grass.UMdf_Grass_VertexNotFollowHeight>>.TypeDesc);
-                }
-
+                    Mesh.Initialize(MaterialMesh, Rtti.UTypeDescGetter<Grass.UMdfGrassStaticMeshPermutation<Grass.UMdf_Grass_VertexNotFollowHeight>>.TypeDesc);
+                
+                Mesh.IsAcceptShadow = !desc.NoShadow;
                 Mesh.IsCastShadow = true;
                 InstanceMdf = Mesh.MdfQueue as Grass.UMdfGrassStaticMesh;
                 InstanceMdf.GrassModifier.GrassType = this;
