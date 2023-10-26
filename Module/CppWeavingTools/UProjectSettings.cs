@@ -17,6 +17,8 @@ namespace CppWeaving
 		public static string ModuleNC;
         public string CppOutputDir;
         public string CsOutputDir;
+        public string ExtInclude;
+
         public const string VReturnValueMarshal = "EngineNS::VReturnValueMarshal";
 		public const string VGetTypeDefault = "EngineNS::VGetTypeDefault";
 		public static string GlueExporter = "VFX_API";

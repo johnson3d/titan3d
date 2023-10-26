@@ -20,6 +20,16 @@ namespace CppWeaving
             UProjectSettings.ModuleNC = FindArgument(args, "ModuleNC=");
             settings.CppOutputDir = FindArgument(args, "CppOut=");
             settings.CsOutputDir = FindArgument(args, "CsOut=");
+            settings.ExtInclude = FindArgument(args, "ExtInclude=");
+            //settings.ExtInclude = "C:\\Program Files (x86)\\Windows Kits\\10\\Include\\10.0.22000.0\\um;C:\\Program Files (x86)\\Windows Kits\\10\\Include\\10.0.22000.0\\shared;C:\\Program Files (x86)\\Windows Kits\\10\\Include\\10.0.22000.0\\winrt;C:\\Program Files (x86)\\Windows Kits\\10\\Include\\10.0.22000.0\\cppwinrt;C:\\Program Files (x86)\\Windows Kits\\NETFXSDK\\4.8\\Include\\um;E:\\titanengine\\binaries\\";
+            if (settings.ExtInclude != null)
+            {
+                var segs = settings.ExtInclude.Split(';');
+                foreach(var i in segs)
+                {
+                    settings.Includes.Add(i.Replace("\\", "/"));
+                }
+            }
 
             HppCollector.Instance.Reset();
             HppCollector.Instance.Collect(vcxproj, @"'$(Configuration)|$(Platform)'=='Debug|x64'");
