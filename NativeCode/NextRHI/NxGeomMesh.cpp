@@ -1801,6 +1801,65 @@ namespace NxRHI
 		return VertexNumber++;
 	}
 
+	UINT FMeshDataProvider::AddVertex(const v3dxVector3* pos, const v3dxVector3* nor, const v3dxVector3* tangent, const v3dxVector2* uv, DWORD color)
+	{
+		auto cur = mVertexBuffers[VST_Position];
+		if (cur != nullptr && pos != nullptr)
+		{
+			cur->PushData(pos, sizeof(v3dxVector3));
+		}
+		cur = mVertexBuffers[VST_Normal];
+		if (cur != nullptr && nor != nullptr)
+		{
+			cur->PushData(nor, sizeof(v3dxVector3));
+		}
+		cur = mVertexBuffers[VST_Tangent];
+		if (cur != nullptr)
+		{
+			cur->PushData(tangent, sizeof(v3dxQuaternion));
+		}
+		cur = mVertexBuffers[VST_Color];
+		if (cur != nullptr)
+		{
+			cur->PushData(&color, sizeof(DWORD));
+		}
+		cur = mVertexBuffers[VST_UV];
+		if (cur != nullptr && uv != nullptr)
+		{
+			cur->PushData(uv, sizeof(v3dxVector2));
+		}
+		cur = mVertexBuffers[VST_LightMap];
+		if (cur != nullptr)
+		{
+			cur->PushData(&v3dxVector3::ZERO, sizeof(v3dxVector2));
+		}
+		cur = mVertexBuffers[VST_SkinIndex];
+		if (cur != nullptr)
+		{
+			DWORD value = 0;
+			cur->PushData(&value, sizeof(DWORD));
+		}
+		cur = mVertexBuffers[VST_SkinWeight];
+		if (cur != nullptr)
+		{
+			cur->PushData(&v3dxQuaternion::ZERO, sizeof(v3dxQuaternion));
+		}
+		cur = mVertexBuffers[VST_TerrainIndex];
+		if (cur != nullptr)
+		{
+			DWORD value = 0;
+			cur->PushData(&value, sizeof(DWORD));
+		}
+		cur = mVertexBuffers[VST_TerrainGradient];
+		if (cur != nullptr)
+		{
+			DWORD value = 0;
+			cur->PushData(&value, sizeof(DWORD));
+		}
+
+		return VertexNumber++;
+	}
+
 	UINT FMeshDataProvider::AddVertex(const v3dxVector3* pos, const v3dxVector3* nor, const v3dxVector2* uv, const v3dxQuaternion* lighmapUV, DWORD color)
 	{
 		auto cur = mVertexBuffers[VST_Position];
