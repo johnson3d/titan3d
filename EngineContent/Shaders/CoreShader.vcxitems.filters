@@ -446,6 +446,9 @@
     <None Include="$(MSBuildThisFileDirectory)Modifier\UIModifier.cginc">
       <Filter>Modifier</Filter>
     </None>
+    <None Include="$(MSBuildThisFileDirectory)ShadingEnv\2DUI.cginc">
+      <Filter>ShadingEnv</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="$(MSBuildThisFileDirectory)Compute\calcrate.compute">

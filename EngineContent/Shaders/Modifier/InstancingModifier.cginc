@@ -33,8 +33,8 @@ void DoInstancingModifierVS(inout PS_INPUT vsOut, inout VS_MODIFIER vert)
 	vert.vNormal.xyz = InstancingRotateVec(vert.vNormal.xyz, instData.Quat);
 
 	vsOut.vPosition.xyz = Pos;
-	vsOut.vNormal = vert.vNormal;
-	vsOut.SpecialData.x = instData.HitProxyId;
+    vsOut.SetNormal(vert.vNormal);
+    vsOut.SetSpecialDataX(instData.HitProxyId);
 
 	//vsOut.vWorldPos = Pos;
 	

@@ -132,7 +132,6 @@ PS_OUTPUT PS_Main(PS_INPUT input)
 	bool NoPixel = (all(GBuffer.WorldNormal) == 0);
 	
 	half3 Albedo = sRGB2Linear((half3)GBuffer.MtlColorRaw);
-	half3 Emissive = Albedo * GBuffer.Emissive;
 	half AbsSpecular = GBuffer.Specular;
 
 	half3 N = GBuffer.WorldNormal;
@@ -261,7 +260,7 @@ PS_OUTPUT PS_Main(PS_INPUT input)
 	half FinalShadowValue = min(1.0h, ShadowValue + DirLightLeak);
 	AOs = min((NoL + FinalShadowValue) * 0.25h + AOs, 1.0h);
 
-	half AoOffset = CalcLuminanceYCbCr((EnvSpec + Emissive) * 10.0h);
+	half AoOffset = CalcLuminanceYCbCr((EnvSpec) * 10.0h);
 	AoOffsetEncoded = 0.9999h - min(0.9999h, FinalShadowValue * 0.5h + AoOffset);
 
 	/////=======
@@ -287,8 +286,6 @@ PS_OUTPUT PS_Main(PS_INPUT input)
 		}
 	}
 #endif
-
-	BaseShading += Emissive;
 
 	half2 PickedData = (half2)GPickedTex.Sample(Samp_GPickedTex, uv.xy).rg;
 	half PickedContrast = 1.0h;

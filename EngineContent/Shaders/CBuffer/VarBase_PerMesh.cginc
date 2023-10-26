@@ -18,10 +18,20 @@ VK_BIND(5) cbuffer cbPerMesh DX_BIND_B(5)
 	float4 PointLightIndices;
 	int PointLightNum;
 
-	int ObjectFLags_2Bit;
+    int ObjectFLags_2Bit;
 
 	//float4 PointLightPos_RadiusInv[4];
 	//float4 PointLightColor_Intensity[4];
+	
+	bool IsAcceptShadow()
+	{
+		return (ObjectFLags_2Bit & 1) != 0;
+	}
+
+	bool IsUnlit()
+	{
+		return (ObjectFLags_2Bit & (2)) != 0;
+	}
 };
 
 #endif

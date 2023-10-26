@@ -18,18 +18,6 @@ void DoNebulaModifierVS(inout PS_INPUT vsOut, inout VS_MODIFIER vert)
 	vsOut.vPosition.xyz = Pos;
 }
 
-void MdfQueueDoModifiers(inout PS_INPUT output, VS_MODIFIER input)
-{
-	DoNebulaModifierVS(output, input);
-}
-
-void MdfQueueDoModifiersPS(inout MTL_OUTPUT output, PS_INPUT input)
-{
-	
-}
-
-#define MDFQUEUE_FUNCTION
-
 //#define MDFQUEUE_FUNCTION_PS
 
 //PS_INPUT VS_Main( uint verteID : SV_VertexID )

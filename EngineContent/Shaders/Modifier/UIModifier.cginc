@@ -21,7 +21,8 @@ uint GetTransformIndex(uint4 index)
 
 void DoUIModifierVS(inout PS_INPUT vsOut, inout VS_MODIFIER vert)
 {
-	vsOut.vPosition.xyz = TransVec(vert.vPosition, AbsTransform[GetTransformIndex(vert.vSkinIndex)]);
+	float3 tempPos = TransVec(vert.vPosition, AbsTransform[GetTransformIndex(vert.vSkinIndex)]);
+	vsOut.vPosition.xyz = tempPos;// mul(float4(tempPos.x, tempPos.y, tempPos.z, 1.0), ViewPrjMtx).xyz;
 
 #if USE_PS_Normal == 1
 	//vsOut.vNormal.xyz = transform_quat((half3)vert.vNormal.xyz, (half4)AbsControlQuat[vert.vSkinIndex[0]]);

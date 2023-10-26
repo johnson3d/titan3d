@@ -169,19 +169,6 @@ void DoTerrainModifierVS(inout PS_INPUT vsOut, inout VS_MODIFIER vert)
 	vsOut.SpecialData.w = v0_1;*/
 }
 
-void MdfQueueDoModifiers(inout PS_INPUT output, VS_MODIFIER input)
-{
-	DoTerrainModifierVS(output, input);
-}
-
-void MdfQueueDoModifiersPS(inout MTL_OUTPUT output, PS_INPUT input)
-{
-	output.mNormal = NormalMapTexture.SampleLevel(Samp_NormalMapTexture, input.vNormal.xy, 0).xyz;
-	output.mNormal = normalize(output.mNormal * 2.0f - float3(1.0f, 1.0f, 1.0f));
-	//output.mNormal.xyz = float3(0,1,0);
-}
-
-#define MDFQUEUE_FUNCTION
 #define VS_NO_WorldTransform
 
 //#define MDFQUEUE_FUNCTION_PS

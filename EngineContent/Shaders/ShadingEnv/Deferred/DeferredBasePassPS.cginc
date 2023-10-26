@@ -24,9 +24,9 @@ PS_OUTPUT PS_MobileBasePass(PS_INPUT input)
 		DO_PS_MATERIAL(input, mtl);
 
 #ifdef MDFQUEUE_FUNCTION_PS
-		MdfQueueDoModifiersPS(mtl, input);
+		MdfQueueDoModifiersPS(input, mtl);
 #endif
-	}
+    }
 
 	GBufferData GBuffer = (GBufferData)0;
 
@@ -37,11 +37,10 @@ PS_OUTPUT PS_MobileBasePass(PS_INPUT input)
 #endif // AlphaTest
 
 	//half3 Albedo = sRGB2Linear((half3)mtl.mAlbedo);
-	GBuffer.MtlColorRaw = (half3)mtl.mAlbedo;
+	GBuffer.MtlColorRaw = (half3)mtl.mAlbedo + mtl.mEmissive;
 	GBuffer.Metallicity = (half)mtl.mMetallic;
 	GBuffer.Roughness = (half)mtl.mRough;
 	GBuffer.WorldNormal = (half3)normalize(mtl.mNormal);
-	GBuffer.Emissive = (half)saturate(CalcLuminance((half3)mtl.mEmissive));
 	GBuffer.Specular = (half)mtl.mAbsSpecular;
 	GBuffer.ObjectFlags_2Bit = ObjectFLags_2Bit;
 	//GBuffer.MotionVector.xy = input.psCustomUV0.xy;

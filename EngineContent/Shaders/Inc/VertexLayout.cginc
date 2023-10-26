@@ -208,6 +208,46 @@ struct PS_INPUT
 #if USE_PS_SpecialData == 1
 	VK_LOCATION(16) nointerpolation uint4 SpecialData : TEXCOORD13;
 #endif
+	
+    void SetNormal(float3 v)
+    {
+#if USE_PS_Normal == 1
+        vNormal = v;
+#endif
+    }
+    float3 GetNormal()
+    {
+#if USE_PS_Normal == 1
+        return vNormal;
+#else
+        return float3(1, 0, 0);
+#endif
+    }
+	
+    void SetSpecialData(uint4 v)
+    {
+#if USE_PS_SpecialData == 1
+	SpecialData = v;
+#endif		
+    }
+    void SetSpecialDataX(uint v)
+    {
+#if USE_PS_SpecialData == 1
+	SpecialData.x = v;
+#endif		
+    }
+    void SetSpecialDataXY(uint2 v)
+    {
+#if USE_PS_SpecialData == 1
+	SpecialData.xy = v;
+#endif		
+    }
+    void SetSpecialDataXYZ(uint3 v)
+    {
+#if USE_PS_SpecialData == 1
+	SpecialData.xyz = v;
+#endif		
+    }
 };
 
 struct VSInstantData
@@ -307,9 +347,7 @@ struct MTL_OUTPUT
 MTL_OUTPUT Default_PSInput2Material(PS_INPUT input)
 {
 	MTL_OUTPUT mtl = (MTL_OUTPUT)0;
-#if USE_PS_Normal == 1
-	mtl.mNormal = input.vNormal;
-#endif
+    mtl.mNormal = input.GetNormal();
 	mtl.mAbsSpecular = 0.0h;
 	//mtl.mEmissive = float3(0,0,0);
 	//mtl.mSubAlbedo = half3(0.3h, 0.3h, 0.3h);
