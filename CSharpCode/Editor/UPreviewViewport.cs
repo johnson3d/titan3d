@@ -110,12 +110,17 @@ namespace EngineNS.Editor
         public float CameraMoveSpeed { get; set; } = 1.0f;
         public float CameraMouseWheelSpeed { get; set; } = 1.0f;
         public bool FreezCameraControl = false;
+        public delegate void Delegate_OnEvent(in Bricks.Input.Event e);
+        public Delegate_OnEvent OnEventAction;
         public unsafe override bool OnEvent(in Bricks.Input.Event e)
         {
             if (this.IsFocused == false)
             {
                 return true;
             }
+
+            OnEventAction?.Invoke(in e);
+
             if (FreezCameraControl)
                 return true;
             var keyboards = UEngine.Instance.InputSystem;

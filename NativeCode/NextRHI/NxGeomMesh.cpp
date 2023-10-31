@@ -335,7 +335,7 @@ namespace NxRHI
 			mDesc.GeoTabeNumber = 0;
 			pAttr->Write(mDesc);
 
-            AutoRef<NxRHI::IBuffer> copyVB;
+            /*AutoRef<NxRHI::IBuffer> copyVB;
             {
                 FTransientCmd cmd(device, NxRHI::QU_Transfer, "Mesh.ReadVB");
                 auto copyDesc = pos_vb->Buffer->Desc;
@@ -348,7 +348,7 @@ namespace NxRHI
                 cmd.GetCmdList()->CopyBufferRegion(copyVB, 0, pos_vb->Buffer, 0, copyDesc.Size);
             }
             device->GetCmdQueue()->Flush(EQueueType::QU_Transfer);
-            copyVB->FetchGpuData(0, &vbBuffer);
+            copyVB->FetchGpuData(0, &vbBuffer);*/
 		}
 
 		pAttr->Write(mAABB);
@@ -435,10 +435,10 @@ namespace NxRHI
 
 					cmd.GetCmdList()->PushGpuDraw(cpDraw);
 				}
+				device->GetCmdQueue()->Flush(EQueueType::QU_Transfer);
+				copyVB->FetchGpuData(0, &ibBuffer);
 			}
-
-			device->GetCmdQueue()->Flush(EQueueType::QU_Transfer);
-			copyVB->FetchGpuData(0, &ibBuffer);
+			
 			pAttr->Write((BYTE*)ibBuffer.GetData() + sizeof(UINT) * 2, desc.Size);
 			pAttr->EndWrite();
 		}
@@ -1130,8 +1130,7 @@ namespace NxRHI
 
 	bool FMeshPrimitives::SetGeomtryMeshStream(ICommandList* cmd, EVertexStreamType stream, void* data, UINT size, UINT stride, ECpuAccess cpuAccess)
 	{
-		if (cmd == nullptr)
-			return false;
+		
 		IVbView* ovb = nullptr;
 		if (mGeometryMesh != nullptr &&
 			(ovb = mGeometryMesh->VertexArray->VertexBuffers[stream]) != nullptr &&
@@ -1155,8 +1154,6 @@ namespace NxRHI
 
 	bool FMeshPrimitives::SetGeomtryMeshIndex(ICommandList* cmd, void* data, UINT size, bool isBit32, ECpuAccess cpuAccess)
 	{
-		if (cmd == nullptr)
-			return false;
 		IIbView* oib = nullptr;
 		if (mGeometryMesh != nullptr &&
 			(oib = mGeometryMesh->IndexBuffer) != nullptr &&

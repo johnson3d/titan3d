@@ -2,6 +2,7 @@
 using EngineNS.GamePlay.Scene;
 using EngineNS.Graphics.Pipeline;
 using EngineNS.IO;
+using EngineNS.Thread.Async;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -116,6 +117,20 @@ namespace EngineNS.UI
         public UViewportSlate GetViewport()
         {
             return GetWorld()?.CurViewport;
+        }
+
+        public static async TtTask<TtUINode> AddUINode(GamePlay.UWorld world, UNode parent, UNodeData data, Type placementType, TtUIHost uiHost, DVector3 pos, Vector3 scale, Quaternion quat)
+        {
+            var scene = parent.GetNearestParentScene();
+            var uiNode = await scene.NewNode(world, typeof(TtUINode), data, EBoundVolumeType.Box, placementType) as TtUINode;
+            if (uiHost.AssetName != null)
+                uiNode.NodeData.Name = uiHost.AssetName.Name;
+            else
+                uiNode.NodeData.Name = uiNode.SceneId.ToString();
+            uiNode.UIHost = uiHost;
+            uiNode.Parent = parent;
+            uiNode.Placement.SetTransform(in pos, in scale, in quat);
+            return uiNode;
         }
     }
 }

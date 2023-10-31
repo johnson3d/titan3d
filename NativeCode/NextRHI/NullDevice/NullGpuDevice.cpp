@@ -33,6 +33,8 @@ namespace NxRHI
 	}
 	bool NullGpuDevice::InitDevice(IGpuSystem* pGpuSystem, const FGpuDeviceDesc* desc)
 	{
+		mCmdQueue = MakeWeakRef(new NullCmdQueue());
+		mCmdQueue->mDevice = this;
 		return true;
 	}
 	void NullGpuDevice::QueryDevice()
@@ -244,7 +246,11 @@ namespace NxRHI
 	}
 	void NullCmdQueue::ClearIdleCmdlists()
 	{
-		
+		while (mIdleCmdlist.empty() == false)
+		{
+			mIdleCmdlist.front()->Release();
+			mIdleCmdlist.pop();
+		}
 	}
 	void NullCmdQueue::ExecuteCommandList(UINT NumOfExe, ICommandList** Cmdlist, UINT NumOfWait, ICommandList** ppWaitCmdlists, EQueueType type)
 	{
@@ -252,11 +258,20 @@ namespace NxRHI
 	}
 	ICommandList* NullCmdQueue::GetIdleCmdlist()
 	{
-		return nullptr;
+		VAutoVSLLock locker(mImmCmdListLocker);
+		if (mIdleCmdlist.empty())
+		{
+			mIdleCmdlist.push(mDevice->CreateCommandList());
+		}
+		auto result = mIdleCmdlist.front();
+		mIdleCmdlist.pop();
+		return result;
 	}
 	void NullCmdQueue::ReleaseIdleCmdlist(ICommandList* cmd)
 	{
-		
+		VAutoVSLLock locker(mImmCmdListLocker);
+		mIdleCmdlist.push(cmd);
+		return;
 	}
 	UINT64 NullCmdQueue::Flush(EQueueType type)
 	{

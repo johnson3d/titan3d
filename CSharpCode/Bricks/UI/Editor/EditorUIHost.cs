@@ -10,6 +10,12 @@ namespace EngineNS.UI.Editor
     {
         TtPath mEdgePath;
         TtPathStyle mEdgePathStyle = new TtPathStyle();
+        TtCanvasBrush mDrawBrush = new TtCanvasBrush()
+        {
+            Name = "@MatInst:ui/uimat_inst_default.uminst:Engine",
+            Color = Color.White,
+        };
+        public TtCanvasBrush DrawBrush => mDrawBrush;
 
         protected override void CustomBuildMesh()
         {
@@ -23,6 +29,8 @@ namespace EngineNS.UI.Editor
             mEdgePathStyle.FillArea = false;
             mEdgePathStyle.StrokeMode = EngineNS.Canvas.EPathStrokeMode.Stroke_Dash;
             canvasBackground.PushPathStyle(mEdgePathStyle);
+            canvasBackground.PushTransformIndex(mTransformIndex);
+            canvasBackground.PushBrush(mDrawBrush);
             mEdgePath.BeginPath();
             var start = new Vector2(mDesignRect.Left, mDesignRect.Top);
             mEdgePath.MoveTo(in start);
@@ -38,6 +46,8 @@ namespace EngineNS.UI.Editor
             //mEdgePath.L_CCW_ArcTo(new Vector2(150.0f, 150.0f), 1.0f);
 
             mEdgePath.EndPath(canvasBackground);
+            canvasBackground.PopBrush();
+            canvasBackground.PopTransformIndex();
             canvasBackground.PopPathStyle();
         }
     }

@@ -12,7 +12,7 @@
   </Icon>
   <IsClustered Type="System.Boolean@Unknown" Value="True" />
   <RefAssetRNames Type="System.Collections.Generic.List&lt;EngineNS.RName@EngineCore,&gt;@Unknown" Count="1">
-    <e_0 Value="Game,utest/mesh/capsule1.vms:game.clusteremesh,00000000-0000-0000-0000-000000000000" />
+    <e_0 Value="Game,utest/mesh/capsule1.vms.clustermesh,00000000-0000-0000-0000-000000000000" />
   </RefAssetRNames>
   <TypeStr Type="System.String@Unknown" Value="EngineNS.Graphics.Mesh.UMeshPrimitives@EngineCore" />
 </Root>

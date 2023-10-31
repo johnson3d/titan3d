@@ -501,7 +501,7 @@ namespace NxRHI
 	}
 	void DX11CmdQueue::ClearIdleCmdlists()
 	{
-		if (mIdleCmdlist.empty() == false)
+		while (mIdleCmdlist.empty() == false)
 		{
 			mIdleCmdlist.front()->Release();
 			mIdleCmdlist.pop();

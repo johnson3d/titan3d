@@ -77,17 +77,46 @@ namespace EngineNS.UI
                     UpdateMatrix(true);
                 }
             }
-            public Matrix Matrix;
-            public Matrix InvMatrix;
+            Matrix mMatrix;
+            public ref Matrix Matrix
+            {
+                get
+                {
+                    UpdateMatrix();
+                    return ref mMatrix;
+                }
+            }
+
+            Matrix mInvMatrix;
+            public ref Matrix InvMatrix
+            {
+                get
+                {
+                    UpdateMatrix();
+                    return ref mInvMatrix;
+                }
+            }
             public UInt16 ParentTransformIdx;
 
+            public void SetMatrix(in Matrix mat)
+            {
+                mMatrix = mat;
+                mInvMatrix = Matrix.Invert(in mMatrix);
+            }
             public void UpdateMatrix(bool bForce = false)
             {
                 if (ELement.RenderTransformDirty || bForce)
                 {
                     if(ELement is TtUIHost)
                     {
-                        Matrix = ELement.AbsRenderTransform.ToMatrixWithScale(ELement.RootUIHost.SceneNode.GetWorld().CameraOffset);
+                        if((ELement.RootUIHost != null) &&
+                           (ELement.RootUIHost.SceneNode != null) &&
+                           (ELement.RootUIHost.SceneNode.GetWorld() != null))
+                        {
+                            mMatrix = ELement.AbsRenderTransform.ToMatrixWithScale(ELement.RootUIHost.SceneNode.GetWorld().CameraOffset);
+                            mInvMatrix = Matrix.Invert(in mMatrix);
+                            ELement.RenderTransformDirty = false;
+                        }
                     }
                     else
                     {
@@ -105,11 +134,10 @@ namespace EngineNS.UI
                         var transMat = Matrix.Translate(pos.X, pos.Y, pos.Z);
                         var scaleMat = Matrix.Scaling(absTrans.Scale);
                         var rotMat = Matrix.RotationQuaternion(absTrans.Quat);
-                        Matrix = invTransMat * scaleMat * rotMat * transMat * parentData.Matrix;
+                        mMatrix = invTransMat * scaleMat * rotMat * transMat * parentData.Matrix;
+                        mInvMatrix = Matrix.Invert(in mMatrix);
+                        ELement.RenderTransformDirty = false;
                     }
-
-                    InvMatrix = Matrix.Invert(in Matrix);
-                    ELement.RenderTransformDirty = false;
                 }
             }
         }
@@ -186,8 +214,6 @@ namespace EngineNS.UI
 
             //var subCmd = new EngineNS.Canvas.FSubDrawCmd();
 
-            CustomBuildMesh();
-
             //var canvasBackground = mCanvas.Background;
             //var canvasForeground = mCanvas.Foregroud;
             //var assistBatch = new Canvas.TtCanvasDrawBatch();
@@ -204,6 +230,7 @@ namespace EngineNS.UI
                 mDrawBatch = new Canvas.TtCanvasDrawBatch();
 
             UpdateTransformIndex(0);
+            CustomBuildMesh();
 
             mDrawBatch.Reset();
             var clip = DesignClipRect;

@@ -196,13 +196,6 @@ namespace EngineNS.UI
                 }
             }
 
-            // debug //////////////////
-            if (newStay != null)
-                UEngine.Instance.UIManager.DebugPointatElement = newStay.Name + "(" + newStay.GetType().Name + ")";
-            else
-                UEngine.Instance.UIManager.DebugPointatElement = "";
-            ///////////////////////////
-
             System.Diagnostics.Debug.Assert(index < mHoveredElements.Length);
             var hoveredUIElement = mHoveredElements[index];
             if(newStay != hoveredUIElement)

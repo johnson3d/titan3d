@@ -24,6 +24,7 @@ namespace NxRHI
 	}
 	bool NullCommandList::Init(NullGpuDevice* device)
 	{
+		mDevice.FromObject(device);
 		return true;
 	}
 	ICmdRecorder* NullCommandList::BeginCommand()
@@ -140,7 +141,9 @@ namespace NxRHI
 	}*/
 	void NullCommandList::CopyBufferRegion(IBuffer* target, UINT64 DstOffset, IBuffer* src, UINT64 SrcOffset, UINT64 Size)
 	{
-
+		auto t = (NullBuffer*)target;
+		auto s = (NullBuffer*)src;
+		memcpy(&t->mBuffer[DstOffset], &s->mBuffer[SrcOffset], Size);
 	}
 	void NullCommandList::CopyTextureRegion(ITexture* target, UINT tarSubRes, UINT DstX, UINT DstY, UINT DstZ, ITexture* src, UINT srcSubRes, const FSubresourceBox* box)
 	{

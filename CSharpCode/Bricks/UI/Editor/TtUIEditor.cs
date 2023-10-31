@@ -478,6 +478,9 @@ namespace EngineNS.UI.Editor
             PreviewViewport.Title = $"UI:{name}";
             PreviewViewport.OnInitialize = Initialize_PreviewMaterialInstance;
             await PreviewViewport.Initialize(UEngine.Instance.GfxDevice.SlateApplication, UEngine.Instance.Config.MainRPolicyName, 0, 1);
+            PreviewViewport.OnEventAction = OnPreviewViewportEvent;
+
+            await InitializeDecorators();
 
             //DetailsGrid.Target = UIAsset;
             UEngine.Instance.TickableManager.AddTickable(this);
@@ -489,6 +492,30 @@ namespace EngineNS.UI.Editor
             Dispose();
         }
         #endregion
+
+        void OnPreviewViewportEvent(in Bricks.Input.Event e)
+        {
+            switch(e.Type)
+            {
+                case Bricks.Input.EventType.MOUSEMOTION:
+                    if(!mIsSimulateMode)
+                    {
+                        var pt = new Vector2(e.MouseButton.X, e.MouseButton.Y);
+                        var data = new TtUIElement.RayIntersectData();
+                        var element = mUIHost.GetPointAtElement(in pt);
+                        if(mCurrentPointAtElement != element)
+                        {
+                            SetCurrentPointAtElement(element);
+                        }
+                    }
+                    break;
+                case Bricks.Input.EventType.MOUSEBUTTONDOWN:
+                    {
+                        SelectElement(mCurrentPointAtElement);
+                    }
+                    break;
+            }
+        }
 
         async Thread.Async.TtTask BuildMesh()
         {
@@ -525,6 +552,7 @@ namespace EngineNS.UI.Editor
             else
             {
                 _ = BuildMesh();
+                _ = UpdateDecorator();
             }
         }
         public void TickRender(float ellapse)

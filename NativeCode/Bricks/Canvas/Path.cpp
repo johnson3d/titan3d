@@ -144,6 +144,7 @@ namespace Canvas
 
 			const auto Matrix = DrawCmdList->GetCurrentMatrix();
 			const auto Brush = DrawCmdList->GetCurrentBrush();
+			const auto transformIdx = DrawCmdList->GetCurrentTransformIndex();
 			Style = DrawCmdList->GetCurrentPathStyle();
 			if (Style == nullptr)
 				Style = MakeWeakRef(new FPathStyle);
@@ -191,6 +192,7 @@ namespace Canvas
 					vCanvas.UV = UvAlongPath && bHasUV ?
 						RemapUV(PathBds, BrushRect, Tiling, Poly.UVs[i]) :
 						RemapUV(Bounds, BrushRect, Tiling, Position);
+					FCanvasDrawCmdList::TransformIndexToColor(transformIdx, vCanvas.Index);
 					pCmd->mVertices.push_back(vCanvas);
 				}
 				for (UINT i = 0; i < NumInds; i++)

@@ -139,6 +139,7 @@ namespace MainEditor
                 ostrm.Close();
             }
 
+            CoreSDK.DumpNativeMemoryState("MainExit:", 0);
             //Open for MemoryProfiler
             //CoreSDK.MessageDialog("ExitApp");
         }
