@@ -12,7 +12,7 @@
     <Size Type="EngineNS.Vector2@EngineCore" Value="50,50" />
   </Icon>
   <RefAssetRNames Type="System.Collections.Generic.List&lt;EngineNS.RName@EngineCore,&gt;@Unknown" Count="2">
-    <e_0 Value="Engine,mesh/sphere001.vms,00000000-0000-0000-0000-000000000000" />
+    <e_0 Value="Engine,mesh/sphere001.vms,59c6a06b-59ae-48e3-a509-dbabfe1900f9" />
     <e_1 Value="Game,utest/material/skymaterial.uminst,3d439390-8efb-4119-b031-6191a714f3f8" />
   </RefAssetRNames>
   <TypeStr Type="System.String@Unknown" Value="EngineNS.Graphics.Mesh.UMaterialMesh@EngineCore" />

@@ -1130,7 +1130,8 @@ namespace NxRHI
 
 	bool FMeshPrimitives::SetGeomtryMeshStream(ICommandList* cmd, EVertexStreamType stream, void* data, UINT size, UINT stride, ECpuAccess cpuAccess)
 	{
-		
+		if (cmd == nullptr)
+			return false;
 		IVbView* ovb = nullptr;
 		if (mGeometryMesh != nullptr &&
 			(ovb = mGeometryMesh->VertexArray->VertexBuffers[stream]) != nullptr &&
@@ -1154,6 +1155,8 @@ namespace NxRHI
 
 	bool FMeshPrimitives::SetGeomtryMeshIndex(ICommandList* cmd, void* data, UINT size, bool isBit32, ECpuAccess cpuAccess)
 	{
+		if (cmd == nullptr)
+			return false;
 		IIbView* oib = nullptr;
 		if (mGeometryMesh != nullptr &&
 			(oib = mGeometryMesh->IndexBuffer) != nullptr &&
