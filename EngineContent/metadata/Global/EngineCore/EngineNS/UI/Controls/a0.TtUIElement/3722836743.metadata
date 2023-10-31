@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Hash_3722836743 Type="EngineNS.UI.Controls.TtUIElement@EngineCore">
+  <IsFocusable Type="System.Boolean@Unknown" Order="0" />
+  <Margin Type="EngineNS.Thickness@EngineCore" Order="0" />
+  <MinHeight Type="System.Single@Unknown" Order="0" />
+  <MinWidth Type="System.Single@Unknown" Order="0" />
+</Hash_3722836743>

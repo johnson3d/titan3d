@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Hash_1076310514 Type="EngineNS.DesignMacross.Design.TtDesignableVariableDescription@EngineCore">
+  <Comment Type="EngineNS.Bricks.CodeBuilder.UCommentStatement@EngineCore" Order="0" />
+  <DesignedClassDescription Type="EngineNS.DesignMacross.Base.Description.IClassDescription@EngineCore" Order="0" />
+  <InitValue Type="EngineNS.Bricks.CodeBuilder.UExpressionBase@EngineCore" Order="0" />
+  <Location Type="EngineNS.Vector2@EngineCore" Order="0" />
+  <VariableType Type="EngineNS.Bricks.CodeBuilder.UTypeReference@EngineCore" Order="0" />
+  <VisitMode Type="EngineNS.Bricks.CodeBuilder.EVisisMode@EngineCore" Order="0" />
+</Hash_1076310514>

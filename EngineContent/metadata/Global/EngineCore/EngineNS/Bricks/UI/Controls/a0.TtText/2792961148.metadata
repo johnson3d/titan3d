@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Hash_2792961148 Type="EngineNS.Bricks.UI.Controls.TtText@EngineCore">
+  <Font Type="EngineNS.RName@EngineCore" Order="0" />
+  <FontSize Type="System.Int32@Unknown" Order="0" />
+  <IsFocusable Type="System.Boolean@Unknown" Order="0" />
+  <Margin Type="EngineNS.Thickness@EngineCore" Order="0" />
+  <MinHeight Type="System.Single@Unknown" Order="0" />
+  <MinWidth Type="System.Single@Unknown" Order="0" />
+  <Text Type="System.String@Unknown" Order="0" />
+  <TextTrimming Type="EngineNS.Bricks.UI.Controls.TtText.ETextTrimming@EngineCore" Order="0" />
+  <TextWrapping Type="EngineNS.Bricks.UI.Controls.TtText.ETextWrapping@EngineCore" Order="0" />
+</Hash_2792961148>
