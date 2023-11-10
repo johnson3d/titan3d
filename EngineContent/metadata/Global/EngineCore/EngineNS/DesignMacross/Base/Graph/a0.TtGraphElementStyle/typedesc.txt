@@ -1,0 +1,1 @@
+EngineNS.DesignMacross.Base.Graph.TtGraphElementStyle@EngineCore
