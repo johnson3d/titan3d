@@ -40,7 +40,7 @@ namespace EngineNS
                 public RName NewValue;
             }
             [System.ThreadStatic]
-            DrawData mDrawData = new DrawData();
+            static DrawData mDrawData = new DrawData();
 
             public float MaxWidth = -1;
             public float MinWidth = -1;

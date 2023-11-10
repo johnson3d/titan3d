@@ -12,30 +12,34 @@ namespace EngineNS.DesignMacross.Base.Graph
     {
         public TtCommandHistory CommandHistory { get; set; }
         public TtEditorInteroperation EditorInteroperation { get; set; }
-        public TtGraphViewPort ViewPort { get; set; }
+        public TtGraphViewport ViewPort { get; set; }
         public TtGraphCamera Camera { get; set; }
+        public TtGraphElementStyleCollection GraphElementStyleManager { get; set; }
+        public Dictionary<Guid, IGraphElement> DescriptionsElement { get; set; }
         public Vector2 ViewPortTransform(Vector2 pos)
         {
-            return ViewPort.ViewPortTransform(Camera.Location, pos);
+            return ViewPort.ViewportTransform(Camera.Location, pos);
         }
         public Vector2 ViewPortInverseTransform(Vector2 pos)
         {
-            return ViewPort.ViewPortInverseTransform(Camera.Location, pos);
+            return ViewPort.ViewportInverseTransform(Camera.Location, pos);
         }
     }
     public struct FGraphElementRenderingContext
     {
         public TtCommandHistory CommandHistory { get; set; }
         public TtEditorInteroperation EditorInteroperation { get; set; }
-        public TtGraphViewPort ViewPort { get; set; }
+        public TtGraphViewport ViewPort { get; set; }
         public TtGraphCamera Camera { get; set; }
+        public TtGraphElementStyleCollection GraphElementStyleManager { get; set; }
+        public Dictionary<Guid, IGraphElement> DescriptionsElement { get; set; }
         public Vector2 ViewPortTransform(Vector2 pos)
         {
-            return ViewPort.ViewPortTransform(Camera.Location, pos);
+            return ViewPort.ViewportTransform(Camera.Location, pos);
         }
         public Vector2 ViewPortInverseTransform(Vector2 pos)
         {
-            return ViewPort.ViewPortInverseTransform(Camera.Location, pos);
+            return ViewPort.ViewportInverseTransform(Camera.Location, pos);
         }
         public float ViewPortScale(float value)
         {

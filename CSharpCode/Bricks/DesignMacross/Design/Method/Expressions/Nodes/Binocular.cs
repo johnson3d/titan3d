@@ -11,10 +11,14 @@ namespace EngineNS.DesignMacross.Nodes
 {
     public class TtGraphElement_Binocular : TtGraphElement_NodeBase
     {
+        public TtGraphElement_Binocular(IDescription description, IGraphElementStyle style) : base(description, style)
+        {
+        }
     }
 
     public class TtBinocularDescription : IDescription
     {
+        public IDescription Parent { get; set; }
         public Guid Id { get; set; }
         public string Name { get; set; }
         [Rtti.Meta]

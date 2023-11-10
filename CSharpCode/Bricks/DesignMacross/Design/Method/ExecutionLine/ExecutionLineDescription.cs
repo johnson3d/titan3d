@@ -10,6 +10,7 @@ namespace EngineNS.DesignMacross.Design
     [GraphElement(typeof(TtGraphElement_ExecutionPin))]
     public class TtExecutionPinDescription : IDescription
     {
+        public IDescription Parent { get; set; }
         public Guid Id { get; set; } = Guid.NewGuid();
         public string Name { get; set; } = "ExecPin";
         [Rtti.Meta]
@@ -29,6 +30,7 @@ namespace EngineNS.DesignMacross.Design
     [GraphElement(typeof(TtGraphElement_ExecutionLine))]
     public class TtExecutionLineDescription : IDescription
     {
+        public IDescription Parent { get; set; }
         public Guid Id { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
         public string Name { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
         [Rtti.Meta]

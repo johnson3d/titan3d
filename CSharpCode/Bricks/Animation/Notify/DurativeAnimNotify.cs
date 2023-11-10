@@ -57,7 +57,7 @@ namespace EngineNS.Animation.Notify
 
         }
 
-        bool bIsTriggeed = false;
+        internal bool bIsTriggeed = false;
         bool IsTriggerStart(long beforeTime, long afterTime)
         {
             if(beforeTime <= mBeginTriggerTime && afterTime >= mEndTriggerTime)

@@ -214,14 +214,15 @@ namespace EngineNS.Graphics.Pipeline.Common
         }
         public bool MoveAttachment(Common.URenderGraphPin pinFrom, Common.URenderGraphPin pinTo)
         {
-            UAttachBuffer attachment;
-            if (RenderGraph.AttachmentCache.CachedAttachments.TryGetValue(pinFrom.Attachement.AttachmentName, out attachment))
-            {
-                RenderGraph.AttachmentCache.CachedAttachments.Remove(pinFrom.Attachement.AttachmentName);
-                RenderGraph.AttachmentCache.CachedAttachments.Add(pinTo.Attachement.AttachmentName, attachment);
-                return true;
-            }
-            return false;
+            return RenderGraph.AttachmentCache.MoveAttachement(pinFrom.Attachement.AttachmentName, pinTo.Attachement.AttachmentName);
+            //UAttachBuffer attachment;
+            //if (RenderGraph.AttachmentCache.CachedAttachments.TryGetValue(pinFrom.Attachement.AttachmentName, out attachment))
+            //{
+            //    RenderGraph.AttachmentCache.CachedAttachments.Remove(pinFrom.Attachement.AttachmentName);
+            //    RenderGraph.AttachmentCache.CachedAttachments.Add(pinTo.Attachement.AttachmentName, attachment);
+            //    return true;
+            //}
+            //return false;
         }
 
         public virtual async System.Threading.Tasks.Task Initialize(URenderPolicy policy, string debugName)
@@ -378,6 +379,7 @@ namespace EngineNS.Graphics.Pipeline.Common
             UAttachBuffer result;
             if (CachedAttachments.TryGetValue(name, out result))
             {
+                //System.Diagnostics.Debug.Assert(result.BufferDesc.IsMatchSize(in desc.BufferDesc));
                 return result;
             }
             else
@@ -398,6 +400,17 @@ namespace EngineNS.Graphics.Pipeline.Common
             result.LifeMode = UAttachBuffer.ELifeMode.Imported;
             CachedAttachments.Add(pin.Attachement.AttachmentName, result);
             return result;
+        }
+        public bool MoveAttachement(in FHashText from, in FHashText to)
+        {
+            UAttachBuffer attachment;
+            if (CachedAttachments.TryGetValue(from, out attachment))
+            {
+                CachedAttachments.Remove(from);
+                CachedAttachments.Add(to, attachment);
+                return true;
+            }
+            return false;
         }
         public void RemoveAttachement(in FHashText name)
         {

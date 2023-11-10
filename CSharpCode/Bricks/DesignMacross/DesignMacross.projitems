@@ -9,15 +9,19 @@
     <Import_RootNamespace>EngineNS.DesignMacross</Import_RootNamespace>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="$(MSBuildThisFileDirectory)Base\Graph\GraphElement.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Base\Graph\GraphViewport.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Base\Graph\GraphCamera.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Design\Method\Expressions\Nodes\Binocular.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)CommandHistory.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Base\Description\DescriptionUtil.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Base\Description\DescriptionASTBuildUtil.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Design\DesignableVariable\DesignableVariableDescription.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Base\Description\IDescription.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Design\DesignableVariable\OutlineElement_DesignableVariable.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Design\Method\DelegateEvent\GraphElement_DelegateEvent.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Design\Method\ExecutionLine\GraphElement_ExecutionLine.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Design\Method\Expressions\Nodes\NodeBase.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Design\Variable\OutlineElement_Variable.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Editor\Graph\NavigableGraphsPanel.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Design\Method\DataLine\DataLineDescription.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Design\Method\DelegateEvent\DelegateEventDescription.cs" />
@@ -32,9 +36,10 @@
     <Compile Include="$(MSBuildThisFileDirectory)TimedStateMachine\StateAttachment\Scrpit\Graph_TimedStateScriptAttachment.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)TimedStateMachine\StateAttachment\Scrpit\TimedStateScriptAttachmentClassDescription.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)TimedStateMachine\StateMachineContextMenuAttribute.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)TimedStateMachine\StatesHub\GraphElement_TimedStatesHubBridge.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)TimedStateMachine\StatesHub\GraphElement_TimedStatesHubEntry.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)TimedStateMachine\StatesHub\TimedStatesHubBridgeClassDescription.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)TimedStateMachine\CompoundState\GraphElement_TimedCompoundStateHub.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)TimedStateMachine\CompoundState\GraphElement_TimedCompoundStateEntry.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)TimedStateMachine\CompoundState\TimedCompoundStateEntryClassDescription.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)TimedStateMachine\CompoundState\TimedCompoundStateHubClassDescription.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Design\Variable\VariableDescription.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)DesignableMacrossAttribute.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Design\Class\ClassDescription.cs" />
@@ -43,9 +48,9 @@
     <Compile Include="$(MSBuildThisFileDirectory)Editor\Detials\DetialsEditPanel.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Base\Graph\GraphMisc.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Base\Graph\DesignGraphUtil.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Base\Graph\Elements\GraphElement_GridLine.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Base\Graph\Elements\GraphElement_StackPanel.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Base\Graph\Elements\GraphElement_TextBlock.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Editor\Graph\Elements\GraphElement_GridLine.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Editor\Graph\Elements\GraphElement_StackPanel.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Editor\Graph\Elements\GraphElement_TextBlock.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Base\Graph\IGraph.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Base\Outline\IOutlineRender.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Base\Render\ElementRenderDevice.cs" />
@@ -56,11 +61,11 @@
     <Compile Include="$(MSBuildThisFileDirectory)Base\Graph\IGraphRender.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Base\Outline\Outline.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Base\Outline\IOutline.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)TimedStateMachine\StatesHub\OutlineElement_TimedStatesHubGraph.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)TimedStateMachine\StatesHub\TimedStatesHubClassDescription.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)TimedStateMachine\CompoundState\OutlineElement_TimedCompoundStateGraph.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)TimedStateMachine\CompoundState\TimedCompoundStateClassDescription.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)TimedStateMachine\StateTransition\Graph_TimedStateTransition.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)TimedStateMachine\StateTransition\TimedStateTransitionClassDescription.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)TimedStateMachine\State\GraphElement_TimedState.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)TimedStateMachine\SubState\GraphElement_TimedSubState.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Editor\Outline\OutlineEditPanel.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)DesignMacross.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Editor\DesignMacrossEditor.cs" />
@@ -68,15 +73,14 @@
     <Compile Include="$(MSBuildThisFileDirectory)TimedStateMachine\StateMachine\OutlineElement_TimedStateMachine.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Editor\Graph\GraphEditPanel.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)TimedStateMachine\StateTransition\GraphElement_TimedStateTransition.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)TimedStateMachine\StatesHub\Graph_TimedStatesHub.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)TimedStateMachine\CompoundState\Graph_TimedCompoundState.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)TimedStateMachine\StateMachine\TimedStateMachineClassDescription.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)TimedStateMachine\State\OutlineElement_TimedState.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)TimedStateMachine\State\TimedStateClassDescription.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)TimedStateMachine\SubState\OutlineElement_TimedSubState.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)TimedStateMachine\SubState\TimedSubStateClassDescription.cs" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="$(MSBuildThisFileDirectory)Design\Method\DataLine\" />
     <Folder Include="$(MSBuildThisFileDirectory)Design\Method\Expressions\" />
-    <Folder Include="$(MSBuildThisFileDirectory)Design\Variable\" />
     <Folder Include="$(MSBuildThisFileDirectory)Design\Class\" />
     <Folder Include="$(MSBuildThisFileDirectory)TimedStateMachine\StateAttachment\AnimBlendTree\" />
   </ItemGroup>

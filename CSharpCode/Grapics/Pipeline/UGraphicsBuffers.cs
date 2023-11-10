@@ -14,6 +14,10 @@ namespace EngineNS.Graphics.Pipeline
         {
             return (Format == desc.Format) && (Width == desc.Width) && (Height == desc.Height);
         }
+        public bool IsMatchSize(in FAttachBufferDesc desc)
+        {
+            return (Width == desc.Width) && (Height == desc.Height);
+        }
         public override string ToString()
         {
             return $"{Format}({Width},{Height})";

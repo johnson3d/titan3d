@@ -78,85 +78,52 @@ namespace EngineNS.DesignMacross.TimedStateMachine
     }
 
     [ImGuiElementRender(typeof(TtGraphElement_TimedStateTransitionRender))]
-    public class TtGraphElement_TimedStateTransition : IGraphElement, IContextMeunable, IDraggable, ILayoutable
+    public class TtGraphElement_TimedStateTransition : TtDescriptionGraphElement
     {
-        public Guid Id { get; set; } = Guid.Empty;
+        public TtTimedStateTransitionClassDescription TimedStateTransition { get => Description as TtTimedStateTransitionClassDescription; }
         public TtTimeDurationSlilder TimeDurationSlilder { get; set; }
         public IGraphElement From { get; set; } = null;
         public IGraphElement To { get; set; } = null;
 
-        public string Name { get; set; }
-        public Vector2 Location { get => Description.Location; set => Description.Location = value; }
-
-        public Vector2 AbsLocation { get => TtGraphMisc.CalculateAbsLocation(this); }
-
-        public IGraphElement Parent { get; set; } = null;
-        public IDescription Description { get; set; } = null;
-        public FMargin Margin { get; set; } = FMargin.Default;
-        public SizeF Size { get; set; } = SizeF.Empty;
         public ImDrawFlags_ TimeDurationBarRoundCorner = ImDrawFlags_.ImDrawFlags_Closed;
         public float TimeDurationBarRounding = 10;
-        public TtPopupMenu PopupMenu { get; set; } = null;
-        public TtGraphElement_TimedStateTransition(IDescription description)
+        public TtGraphElement_TimedStateTransition(IDescription description, IGraphElementStyle style) : base(description, style)
         {
-            Id = description.Id;
-            Description = description;
-        }
-        public void Construct()
-        {
-        }
-        public bool CanDrag()
-        {
-            return false;
-        }
-        public void OnDragging(Vector2 delta)
-        {
-
-        }
-        public void DrawContextMenu(ref FGraphElementRenderingContext context)
-        {
-           
+            Size = SizeF.Empty;
         }
 
-        public bool HitCheck(Vector2 pos)
-        {
-            return true;
-        }
 
-        public SizeF Measuring(SizeF availableSize)
+        public override SizeF Measuring(SizeF availableSize)
         {
             return new SizeF(availableSize.Width, 10);
         }
-        public SizeF Arranging(Rect finalRect)
+        public override SizeF Arranging(Rect finalRect)
         {
             Location = finalRect.Location;
             return new SizeF();
         }
 
-        public void OnSelected()
+        public override void ConstructContextMenu(ref FGraphElementRenderingContext context, TtPopupMenu PopupMenu)
         {
-           
-        }
-
-        public void OnUnSelected()
-        {
-           
-        }
-
-        public void OpenContextMeun()
-        {
-        }
-
-        public void UpdateContextMenu(ref FGraphElementRenderingContext context)
-        {
-            //PopupMenu.StringId = Name + "_ContextMenu";
-            //PopupMenu.Reset();
+            PopupMenu.Reset();
             //var parentMenu = PopupMenu.Menu;
             //var editorInteroperation = context.EditorInteroperation;
             //parentMenu.AddMenuItem("Open Transition Graph", null, (Bricks.NodeGraph.UMenuItem item, object sender) =>
             //{
             //    editorInteroperation.GraphEditPanel.ActiveGraphNavigatedPanel.OpenSubGraph(Description);
             //});
+        }
+
+        public override void ConstructElements(ref FGraphElementRenderingContext context)
+        {
+            From = context.DescriptionsElement[TimedStateTransition.FromId];
+            To = context.DescriptionsElement[TimedStateTransition.ToId];
+            base.ConstructElements(ref context);
+        }
+
+        public override bool HitCheck(Vector2 pos)
+        {
+            return false;
         }
     }
 
@@ -165,6 +132,7 @@ namespace EngineNS.DesignMacross.TimedStateMachine
         public void Draw(IRenderableElement renderableElement, ref FGraphElementRenderingContext context)
         {
             TtGraphElement_TimedStateTransition transitionElement = renderableElement as TtGraphElement_TimedStateTransition;
+            transitionElement.ConstructElements(ref context);
             var cmdlist = ImGuiAPI.GetWindowDrawList();
             var size = transitionElement.From.Size;
             var nodeStart = context.ViewPortTransform(transitionElement.AbsLocation);

@@ -2,11 +2,14 @@
 using System.Collections.Generic;
 using System.Text;
 
+#pragma warning disable CS0067
+
 namespace EngineNS.Bricks.StateMachine.TimedSM
 {
     public delegate void EventOnEnter();
-    public class TtTimedStateScriptAttachment<T> : IAttachment<T>
+    public class TtTimedStateScriptAttachment<S, T> : IAttachment<S, T>
     {
+        public S CenterData { get; set; }
         public event EventOnEnter OnEnter;
         public string Name { get; set; }
 
@@ -35,7 +38,12 @@ namespace EngineNS.Bricks.StateMachine.TimedSM
         {
         }
     }
-    public class TtTimedStateScriptAttachment: TtTimedStateScriptAttachment<FStateMachineContext>
+    public class TtTimedStateScriptAttachment<S> : TtTimedStateScriptAttachment<S, TtStateMachineContext>
+    {
+
+    }
+
+    public class TtTimedStateScriptAttachment: TtTimedStateScriptAttachment<TtDefaultCenterData, TtStateMachineContext>
     {
 
     }

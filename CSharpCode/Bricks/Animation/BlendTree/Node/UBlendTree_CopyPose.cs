@@ -22,7 +22,7 @@ namespace EngineNS.Animation.BlendTree.Node
     }
     public class UBlendTree_CopyPose<T> : UBlendTree<T> where T : IRuntimePose
     {
-        UCopyPoseCommandDesc Desc;
+        protected UCopyPoseCommandDesc Desc = null;
         public IBlendTree<T> FromNode { get; set; }
 
         UCopyPoseCommand<T> mAnimationCommand = null;

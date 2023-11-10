@@ -64,15 +64,16 @@ namespace EngineNS.Bricks.StateMachine.TimedSM
         }
     }
 
-    public class TtTimedStateMachine<T> : IStateMachine<T>
+    public class TtTimedStateMachine<S, T> : IStateMachine<S, T>
     {
+        public S CenterData { get; set; }
         public string Name { get; set; }
-        public IState<T> PreState { get; set; } = null;
-        public ITransition<T> PreTransition { get; set; } = null;
-        public IState<T> CurrentState { get; set; }
-        public ITransition<T> CurrentTransition { get; set; } = null;
-        public IState<T> PostState { get; set; }
-        public ITransition<T> PostTransition { get; set; } = null;
+        public IState<S, T> PreState { get; set; } = null;
+        public ITransition<S, T> PreTransition { get; set; } = null;
+        public IState<S, T> CurrentState { get; set; }
+        public ITransition<S, T> CurrentTransition { get; set; } = null;
+        public IState<S, T> PostState { get; set; }
+        public ITransition<S, T> PostTransition { get; set; } = null;
         public bool EnableTick { get; set; } = true;
         public EStateChangeMode StateChangeMode { get; set; } = EStateChangeMode.NextFrame;
         public TtTimedSMClock Clock { get; set; } = new TtTimedSMClock();
@@ -103,7 +104,7 @@ namespace EngineNS.Bricks.StateMachine.TimedSM
             Update(elapseSecond, context);
         }
 
-        public void SetDefaultState(IState<T> state)
+        public void SetDefaultState(IState<S, T> state)
         {
             CurrentState = state;
         }
@@ -118,13 +119,13 @@ namespace EngineNS.Bricks.StateMachine.TimedSM
                 return;
             CurrentState.Tick(elapseSecond, context);
 
-            if(CurrentState.TryCheckTransitions(out var transitions))
+            if(CurrentState.TryCheckTransitions(in context, out var transitions))
             {
                 foreach (var transition in transitions)
                 {
-                    if(transition.To is IStatesHub<T> hub)
+                    if(transition.To is ICompoundStates<S, T> hub)
                     {
-                        if(hub.TryCheckTransitions(out var hubTransitions))
+                        if(hub.TryCheckTransitions(in context, out var hubTransitions))
                         {
                             TransitionTo(hubTransitions[0]);
                             break;
@@ -144,13 +145,13 @@ namespace EngineNS.Bricks.StateMachine.TimedSM
                 CurrentState.Tick(elapseSecond, context);
             }
         }
-        public virtual void TransitionTo(IState<T> state, ITransition<T> transition)
+        public virtual void TransitionTo(IState<S, T> state, ITransition<S, T> transition)
         {
             System.Diagnostics.Debug.Assert(state == transition.To);
             PostState = state;
             PostTransition = transition;
         }
-        public virtual void TransitionTo(ITransition<T> transition)
+        public virtual void TransitionTo(ITransition<S, T> transition)
         {
             PostState = transition.To;
             PostTransition = transition;
@@ -180,15 +181,18 @@ namespace EngineNS.Bricks.StateMachine.TimedSM
         }
     }
 
-    public struct FStateMachineContext
+    public class TtStateMachineContext
     {
        
     }
+    public class TtDefaultCenterData { }
+    public class TtTimedStateMachine<S> : TtTimedStateMachine<S, TtStateMachineContext>
+    {
 
-    public class TtTimedStateMachine: TtTimedStateMachine<FStateMachineContext>
+    }
+    public class TtTimedStateMachine : TtTimedStateMachine<TtDefaultCenterData, TtStateMachineContext>
     {
 
     }
 
-   
 }

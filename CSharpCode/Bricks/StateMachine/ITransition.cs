@@ -4,11 +4,12 @@ using System.Text;
 
 namespace EngineNS.Bricks.StateMachine
 {
-    public interface ITransition<T>
+    public interface ITransition<S, T>
     {
-        public IState<T> From { get; set; }
-        public IState<T> To { get; set; }
+        public S CenterData { get; set; }
+        public IState<S, T> From { get; set; }
+        public IState<S, T> To { get; set; }
         public void OnTransition();
-        public bool Check();
+        public bool Check(in T context);
     }
 }

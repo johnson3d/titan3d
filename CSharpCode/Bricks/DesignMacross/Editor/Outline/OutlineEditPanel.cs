@@ -12,7 +12,6 @@ namespace EngineNS.DesignMacross.Editor
         public void Initialize()
         {
             Outline.Description = ClassDesc;
-            Outline.Construct();
         }
         public void Draw(FDesignMacrossEditorRenderingContext context)
         {

@@ -54,7 +54,7 @@ namespace EngineNS.Graphics.Pipeline.Shadow
         public NxRHI.UGpuPipeline DepthRaster;
 
         private UInt32 mResolutionX = 1024; //3072
-        private UInt32 mResolutionY = 1024; //4096;
+        protected UInt32 mResolutionY = 1024; //4096;
         private UInt32 mBorderSize = 2;//4;
         private UInt32 mInnerResolutionX = 1024 - 2 * 2; //5120; //4096 - 4 * 2;
         private UInt32 mInnerResolutionY = 1024 - 2 * 2; //5120; //4096 - 4 * 2;

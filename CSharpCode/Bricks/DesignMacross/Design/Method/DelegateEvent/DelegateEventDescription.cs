@@ -9,6 +9,7 @@ namespace EngineNS.DesignMacross.Design
     [GraphElement(typeof(TtGraphElement_DelegateEvent))]
     public class TtDelegateEventDescription : IDescription
     {
+        public IDescription Parent { get; set; }
         public TtExecutionPinDescription OutExecutionPin = new TtExecutionPinDescription();
         public List<TtDataPinDescription> DataPins { get; set; } = new();
         public List<TtExecutionLineDescription> ExecutionLines { get; set; } = new();

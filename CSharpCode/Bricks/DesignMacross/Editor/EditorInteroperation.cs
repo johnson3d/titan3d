@@ -8,5 +8,6 @@ namespace EngineNS.DesignMacross.Editor
     {
         public TtOutlineEditPanel OutlineEditPanel { get; set; } = null;
         public TtGraphEditPanel GraphEditPanel { get; set; } = null;
+        public EGui.Controls.PropertyGrid.PropertyGrid PGMember = null;
     }
 }

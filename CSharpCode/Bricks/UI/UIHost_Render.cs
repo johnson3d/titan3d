@@ -54,7 +54,7 @@ namespace EngineNS.UI
                 return mBoundingBoxData.AABB;
             }
         }
-        List<TtUIElement> mUIElementWithTransforms;
+        protected List<TtUIElement> mUIElementWithTransforms = null;
 
         [Browsable(false)]
         public override bool MeshDirty

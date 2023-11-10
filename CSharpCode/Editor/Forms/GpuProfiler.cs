@@ -98,7 +98,7 @@ namespace EngineNS.Editor.Forms
             }
             EGui.UIProxy.DockProxy.EndMainForm();
         }
-        bool mMenuShow = false;
+        protected bool mMenuShow = false;
         private unsafe void PopItemMenu(string watchingThread, Profiler.URpcProfiler.RpcProfilerData.ScopeInfo scope, string column)
         {
             

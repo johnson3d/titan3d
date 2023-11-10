@@ -17,7 +17,7 @@ namespace EngineNS.GamePlay.StateMachine
         {
 
         }
-        public override void Tick(float elapseSecond, in T context)
+        public override void Tick(float elapseSecond, in TtStateMachineContext context)
         {
             //LogicalState.Tick(elapseSecond, context);
             //AnimationState.Tick(elapseSecond, context);

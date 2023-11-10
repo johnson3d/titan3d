@@ -1,6 +1,7 @@
 ﻿using EngineNS.Bricks.CodeBuilder;
 using EngineNS.Bricks.CodeBuilder.MacrossNode;
 using EngineNS.Bricks.NodeGraph;
+using EngineNS.DesignMacross.Base.Graph;
 using EngineNS.Rtti;
 using NPOI.SS.Formula.Functions;
 using System;
@@ -93,12 +94,12 @@ namespace EngineNS.DesignMacross.Editor
         }
     }
 
-
-    //UI无关的Context
     public struct FDesignMacrossEditorRenderingContext
     {
-        public TtCommandHistory CommandHistory { get;set; } = new TtCommandHistory();
-        public TtEditorInteroperation EditorInteroperation { get; set; } = new TtEditorInteroperation();    
+        public TtCommandHistory CommandHistory { get; set; } = null;
+        public TtEditorInteroperation EditorInteroperation { get; set; } = new TtEditorInteroperation();
+        public TtGraphElementStyleCollection GraphElementStyleManager { get; set; } = null;
+        public Dictionary<Guid, IGraphElement> DescriptionsElement { get; set; } = null;
         public FDesignMacrossEditorRenderingContext()
         {
 

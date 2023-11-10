@@ -4,15 +4,16 @@ using System.Text;
 
 namespace EngineNS.Bricks.StateMachine.SampleSM
 {
-    public class TtStateMachine<T> : IStateMachine<T>
+    public class TtStateMachine<S, T> : IStateMachine<S, T>
     {
+        public S CenterData { get; set; }
         public string Name { get; set; }
-        public IState<T> PreState { get; set; } = null;
-        public ITransition<T> PreTransition { get; set; } = null;
-        public IState<T> CurrentState { get; set; }
-        public ITransition<T> CurrentTransition { get; set; } = null;
-        public IState<T> PostState { get; set; }
-        public ITransition<T> PostTransition { get; set; } = null;
+        public IState<S, T> PreState { get; set; } = null;
+        public ITransition<S, T> PreTransition { get; set; } = null;
+        public IState<S, T> CurrentState { get; set; }
+        public ITransition<S, T> CurrentTransition { get; set; } = null;
+        public IState<S, T> PostState { get; set; }
+        public ITransition<S, T> PostTransition { get; set; } = null;
         public bool EnableTick { get; set; } = true;
         public EStateChangeMode StateChangeMode { get; set; } = EStateChangeMode.NextFrame;
         public TtStateMachine()
@@ -42,7 +43,7 @@ namespace EngineNS.Bricks.StateMachine.SampleSM
             Update(elapseSecond, context);
         }
 
-        public void SetDefaultState(IState<T> state)
+        public void SetDefaultState(IState<S, T> state)
         {
             CurrentState = state;
         }
@@ -64,13 +65,13 @@ namespace EngineNS.Bricks.StateMachine.SampleSM
                 CurrentState.Tick(elapseSecond, context);
             }
         }
-        public virtual void TransitionTo(IState<T> state , ITransition<T> transition)
+        public virtual void TransitionTo(IState<S, T> state , ITransition<S, T> transition)
         {
             System.Diagnostics.Debug.Assert(state == transition.To);
             PostState = state;
             PostTransition = transition;
         }
-        public virtual void TransitionTo(ITransition<T> transition)
+        public virtual void TransitionTo(ITransition<S, T> transition)
         {
             PostState = transition.To;
             PostTransition = transition;

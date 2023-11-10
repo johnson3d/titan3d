@@ -6,7 +6,7 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace EngineNS.DesignMacross.Base.Graph.Elements
+namespace EngineNS.DesignMacross.Editor
 {
     public enum EOrientation
     {
@@ -23,15 +23,8 @@ namespace EngineNS.DesignMacross.Base.Graph.Elements
 
     }
     [ImGuiElementRender(typeof(TtGraphElementRender_StackPanel))]
-    public class TtGraphElement_StackPanel : IGraphElement, ILayoutable
+    public class TtGraphElement_StackPanel : TtWidgetGraphElement, ILayoutable
     {
-        public Guid Id { get; set; } = Guid.Empty;
-        public string Name { get; set; } = "StackPanel";
-        public Vector2 Location { get; set; } = Vector2.Zero;
-        public Vector2 AbsLocation { get => TtGraphMisc.CalculateAbsLocation(this); }
-        public SizeF Size { get; set; } = new SizeF(200, 100);
-        public IGraphElement Parent { get; set; } = null;
-        public IDescription Description { get; set; } = null;
         public EOrientation Orientation { get; set; } = EOrientation.Vertical;
         public Color4f BackgroundColor { get; set; } = new Color4f(0, 0, 0);
         public List<IGraphElement> Children { get; set; } = new List<IGraphElement>();
@@ -56,31 +49,36 @@ namespace EngineNS.DesignMacross.Base.Graph.Elements
             Children.Clear();
         }
 
-        public TtGraphElement_StackPanel()
+        public override bool CanDrag()
+        {
+            return false;
+        }
+
+        public override bool HitCheck(Vector2 pos)
+        {
+            return false;
+        }
+
+        public override void OnDragging(Vector2 delta)
         {
 
         }
-        public void Construct()
+
+
+        public override void OnSelected(ref FGraphElementRenderingContext context)
         {
-        }
-        public bool HitCheck(Vector2 pos)
-        {
-            throw new NotImplementedException();
+            
         }
 
-        public void OnSelected()
+        public override void OnUnSelected()
         {
-            throw new NotImplementedException();
-        }
-
-        public void OnUnSelected()
-        {
-            throw new NotImplementedException();
+            
         }
 
         private Dictionary<ILayoutable, SizeF> ChildrenMeasuringSize = new Dictionary<ILayoutable, SizeF>();
         public SizeF Measuring(SizeF availableSize)
         {
+            ChildrenMeasuringSize.Clear();
             var childrenDesiredSize = new SizeF();
             foreach (var element in Children)
             {

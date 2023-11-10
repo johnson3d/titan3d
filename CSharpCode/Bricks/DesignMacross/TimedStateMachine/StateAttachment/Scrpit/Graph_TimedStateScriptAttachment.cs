@@ -1,6 +1,6 @@
 ﻿using EngineNS.DesignMacross.Base.Description;
 using EngineNS.DesignMacross.Base.Graph;
-using EngineNS.DesignMacross.Base.Graph.Elements;
+using EngineNS.DesignMacross.Editor;
 using EngineNS.DesignMacross.Base.Render;
 using EngineNS.DesignMacross.Design;
 using EngineNS.Rtti;
@@ -22,37 +22,32 @@ namespace EngineNS.DesignMacross.TimedStateMachine.StateAttachment.Scrpit
         }
         #region IContextMeunable
 
-        public TtPopupMenu PopupMenu { get; set; } = new TtPopupMenu("TimedStateScriptAttachmentGraphContextMenu");
-        public void DrawContextMenu(ref FGraphElementRenderingContext context)
+        public override void ConstructContextMenu(ref FGraphElementRenderingContext context, TtPopupMenu PopupMenu)
         {
-            PopupMenu.Draw(ref context);
-        }
-
-        public void OpenContextMeun()
-        {
-            PopupMenu.OpenPopup();
-        }
-
-        public void UpdateContextMenu(ref FGraphElementRenderingContext context)
-        {
-            
+            PopupMenu.Reset();
         }
         #endregion IContextMeunable
-        public override void Construct()
+        public void Construct()
         {
-            Elements.Clear();
-            {
-                var graphElementAttribute = GraphElementAttribute.GetAttributeWithSpecificClassType<IGraphElement>(ScriptAttachmentClassDescription.OnBeginDesc.GetType());
-                var instance = UTypeDescManager.CreateInstance(graphElementAttribute.ClassType, new object[] { ScriptAttachmentClassDescription.OnBeginDesc }) as IGraphElement;
-                instance.Parent = this;
-                instance.Description = ScriptAttachmentClassDescription.OnBeginDesc;
-                instance.Construct();
-                Elements.Add(instance);
-            }
+            //Elements.Clear();
+            //{
+            //    var graphElementAttribute = GraphElementAttribute.GetAttributeWithSpecificClassType<IGraphElement>(ScriptAttachmentClassDescription.OnBeginDesc.GetType());
+            //    var instance = UTypeDescManager.CreateInstance(graphElementAttribute.ClassType, new object[] { ScriptAttachmentClassDescription.OnBeginDesc }) as IGraphElement;
+            //    instance.Parent = this;
+            //    instance.Description = ScriptAttachmentClassDescription.OnBeginDesc;
+            //    instance.Construct();
+            //    Elements.Add(instance);
+            //}
+        }
+
+        public override void ConstructElements(ref FGraphRenderingContext context)
+        {
+            
         }
     }
     public class TtGraph_TimedStateScriptAttachmentRender : IGraphRender
     {
+        TtPopupMenu PopupMenu { get; set; } = new TtPopupMenu("Graph_TimedStateScriptAttachmentRender");
         public void Draw(IRenderableElement renderableElement, ref FGraphRenderingContext context)
         {
             var graph = renderableElement as TtGraph_TimedStateScriptAttachment;
@@ -90,18 +85,20 @@ namespace EngineNS.DesignMacross.TimedStateMachine.StateAttachment.Scrpit
 
                 if (graph is IContextMeunable meunableGraph)
                 {
+                    meunableGraph.SetContextMenuableId(PopupMenu);
                     if (ImGuiAPI.IsMouseClicked(ImGuiMouseButton_.ImGuiMouseButton_Right, false)
-                        && context.ViewPort.IsInViewPort(ImGuiAPI.GetMousePos()))
+                        && context.ViewPort.IsInViewport(ImGuiAPI.GetMousePos()))
                     {
                         var pos = context.ViewPortInverseTransform(ImGuiAPI.GetMousePos());
                         if (graph.HitCheck(pos))
                         {
                             ImGuiAPI.CloseCurrentPopup();
-                            meunableGraph.UpdateContextMenu(ref elementRenderingContext);
-                            meunableGraph.OpenContextMeun();
+                            meunableGraph.ConstructContextMenu(ref elementRenderingContext, PopupMenu);
+                            PopupMenu.OpenPopup();
                         }
                     }
-                    meunableGraph.DrawContextMenu(ref elementRenderingContext);
+
+                    PopupMenu.Draw(ref elementRenderingContext);
                 }
 
                 foreach (var element in graph.Elements)
@@ -117,7 +114,7 @@ namespace EngineNS.DesignMacross.TimedStateMachine.StateAttachment.Scrpit
                         elementRender.Draw(element, ref elementRenderingContext);
                     }
                 }
-                TtMouseEventProcesser.Instance.Processing(graph, context);
+                TtMouseEventProcesser.Instance.Processing(graph, ref elementRenderingContext);
             }
             ImGuiAPI.EndChild();
         }

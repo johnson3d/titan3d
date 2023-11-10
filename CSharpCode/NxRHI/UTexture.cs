@@ -77,7 +77,7 @@ namespace EngineNS.NxRHI
                 SnapTask = null;
             }
         }
-        bool mShowA = false;
+        protected bool mShowA = false;
         EngineNS.Editor.Forms.TtTextureViewerCmdParams CmdParameters = null;
         public unsafe override void OnDrawSnapshot(in ImDrawList cmdlist, ref Vector2 start, ref Vector2 end)
         {
@@ -1542,7 +1542,8 @@ namespace EngineNS.NxRHI
                     }
 
                     #region exrtest
-                    if(false)
+                    bool bExrtest = false;
+                    if (bExrtest)
                     {
                         System.Half[] halfPixelData = new System.Half[width * height * 4];
                         for (int i = 0; i < width * height; ++i)
@@ -1571,7 +1572,8 @@ namespace EngineNS.NxRHI
                     }
 
                     #region exrtest
-                    if (false)
+                    bool bExrtest = false;
+                    if (bExrtest)
                     {
                         System.Half[] halfPixelData = new System.Half[width * height * 4];
                         for (int i = 0; i < width * height; ++i)

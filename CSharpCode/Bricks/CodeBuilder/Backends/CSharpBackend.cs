@@ -52,9 +52,24 @@ namespace EngineNS.Bricks.CodeBuilder
                 var varDec = obj as UVariableDeclaration;
                 GenCommentCodes(varDec.Comment, ref data, ref sourceCode);
                 string codeStr = "";
-                if(((varDec.VisitMode == EVisisMode.Local) || (varDec.VisitMode == EVisisMode.Private)) && IsClassMember)
+                if(IsClassMember)
                 {
-                    codeStr += "private ";
+                    switch(varDec.VisitMode)
+                    {
+                        case EVisisMode.Local:
+                        case EVisisMode.Private:
+                            codeStr += "private ";
+                            break;
+                        case EVisisMode.Public:
+                            codeStr += "public ";
+                            break;
+                        case EVisisMode.Protected:
+                            codeStr += "protected ";
+                            break;
+                        case EVisisMode.Internal:
+                            codeStr += "internal ";
+                            break;
+                    }
                 }
                 codeStr += data.CodeGen.GetTypeString(varDec.VariableType) + " " + varDec.VariableName;
                 if(IsProperty)

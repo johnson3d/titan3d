@@ -5,35 +5,36 @@ using System.Text;
 
 namespace EngineNS.Bricks.StateMachine.SampleSM
 {
-    public class TtState<T> : IState<T>
+    public class TtState<S, T> : IState<S, T>
     {
+        public S CenterData { get; set; }
         public string Name { get; set; } = "State";
-        protected TtStateMachine<T> mStateMachine = null;
-        protected List<ITransition<T>> mTransitions = new List<ITransition<T>>();
-        public List<ITransition<T>> Transitions
+        protected TtStateMachine<S, T> mStateMachine = null;
+        protected List<ITransition<S, T>> mTransitions = new List<ITransition<S, T>>();
+        public List<ITransition<S, T>> Transitions
         {
             get => mTransitions;
         }
-        public bool AddTransition(ITransition<T> transition)
+        public bool AddTransition(ITransition<S, T> transition)
         {
             if (mTransitions.Contains(transition))
                 return false;
             mTransitions.Add(transition);
             return true;
         }
-        public bool RemoveTransition(ITransition<T> transition)
+        public bool RemoveTransition(ITransition<S, T> transition)
         {
             if (!mTransitions.Contains(transition))
                 return false;
             mTransitions.Remove(transition);
             return true;
         }
-        protected List<IAttachmentRule<T>> mAttachments = new List<IAttachmentRule<T>>();
-        public List<IAttachmentRule<T>> Attachments
+        protected List<IAttachmentRule<S, T>> mAttachments = new List<IAttachmentRule<S, T>>();
+        public List<IAttachmentRule<S, T>> Attachments
         {
             get => mAttachments;
         }
-        public bool AddAttachment(IAttachmentRule<T> attachment)
+        public bool AddAttachment(IAttachmentRule<S, T> attachment)
         {
             if (mAttachments.Contains(attachment))
                 return false;
@@ -41,22 +42,22 @@ namespace EngineNS.Bricks.StateMachine.SampleSM
             return true;
         }
 
-        public bool RemoveAttachment(IAttachmentRule<T> attachment)
+        public bool RemoveAttachment(IAttachmentRule<S, T> attachment)
         {
             if (!mAttachments.Contains(attachment))
                 return false;
             mAttachments.Remove(attachment);
             return true;
         }
-        public TtState(TtStateMachine<T> stateMachine, string name = "State")
+        public TtState(TtStateMachine<S, T> stateMachine, string name = "State")
         {
             mStateMachine = stateMachine;
             Name = name;
         }
         public bool IsInitialized = false;
-        public virtual void Initialize()
+        public virtual bool Initialize()
         {
-
+            return false;
         }
       
         public virtual void Enter()
@@ -94,7 +95,7 @@ namespace EngineNS.Bricks.StateMachine.SampleSM
             }
             for (int i = 0; i < mTransitions.Count; ++i)
             {
-                if (mTransitions[i].Check())
+                if (mTransitions[i].Check(in context))
                 {
                     mStateMachine.TransitionTo(mTransitions[i]);
                     break;
@@ -119,7 +120,7 @@ namespace EngineNS.Bricks.StateMachine.SampleSM
 
         }
 
-        public bool TryCheckTransitions(out List<ITransition<T>> transitions)
+        public bool TryCheckTransitions(in T context, out List<ITransition<S, T>> transitions)
         {
             throw new NotImplementedException();
         }

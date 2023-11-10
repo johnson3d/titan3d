@@ -11,6 +11,7 @@
   <ItemGroup>
     <Compile Include="$(MSBuildThisFileDirectory)Algorithm\DelaunayTriangle.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Algorithm\FastPoissonDisk.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Algorithm\RamerDouglasPeucker.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Algorithm\Voronoi.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Bezier.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Bezier\BezierCalculate.cs" />
@@ -58,6 +59,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)PlatformDefine.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Point.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Point2f.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)PSBR.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Quaternion.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Ray.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Rect.cs" />

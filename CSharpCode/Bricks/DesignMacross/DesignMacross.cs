@@ -10,10 +10,6 @@ using EngineNS.DesignMacross.Editor;
 
 namespace EngineNS.DesignMacross
 {
-    public class ObservableCollection<T> : System.Collections.ObjectModel.ObservableCollection<T>
-    {
-
-    }
     public class TypeHelper
     {
         public static List<(T AttributeInstance, UTypeDesc TypeDesc)> CollectTypesByAttribute<T>() where T : Attribute

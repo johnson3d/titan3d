@@ -149,16 +149,16 @@ namespace EngineNS.Bricks.Procedure.Node
                                     for (int j = 0; j < image.Width; j++)
                                     {
                                         var rgbValue = new Vector3();
-                                        float v = (float)p[LineSize * i + j * PixelSize] / 256.0f;
+                                        float v = (float)p[LineSize * i + j * PixelSize] / 255.0f;
                                         rgbValue.X = v;
                                         red.SetPixel(j, i, v);
 
-                                        v = (float)p[LineSize * i + j * PixelSize + 1] / 256.0f;
+                                        v = (float)p[LineSize * i + j * PixelSize + 1] / 255.0f;
                                         rgbValue.Y = v;
                                         green.SetPixel(j, i, v);
 
-                                        v = (float)p[LineSize * i + j * PixelSize + 2] / 256.0f;
-                                        rgbValue.Y = v;
+                                        v = (float)p[LineSize * i + j * PixelSize + 2] / 255.0f;
+                                        rgbValue.Z = v;
                                         blue.SetPixel(j, i, v);
 
                                         rgb.SetPixel<Vector3>(j, i, in rgbValue);

@@ -1238,7 +1238,7 @@ namespace EngineNS.Bricks.Procedure
                     {
                         for (int k = 0; k < Width; k++)
                         {
-                            var t = ((float)image.Data[Width * i * 4 + j * 4 + 1]) / 256.0f;
+                            var t = ((float)image.Data[Width * i * 4 + j * 4 + 1]) / 255.0f;
                             SetSuperPixel(k, j, i, (*(T*)&t));
                         }
                     }

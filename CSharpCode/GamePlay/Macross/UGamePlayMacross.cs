@@ -12,6 +12,7 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 using System.Threading.Tasks;
+using EngineNS.Bricks.StateMachine.TimedSM;
 
 namespace EngineNS.GamePlay.GamePlayMacross
 {
@@ -99,7 +100,7 @@ namespace EngineNS.GamePlay.GamePlayMacross
             var animMesh = parent as UMeshNode;
             var data = GetNodeData<UGamePlayMacrossNodeData>();
             var mcrs = data.McGamePlay;
-            var task = mcrs.Get().ConstructAnimGraph(animMesh);
+            var task = mcrs.Get()?.ConstructAnimGraph(animMesh);
         }
         //public static async System.Threading.Tasks.Task<UGamePlayMacrossNode> AddGamePlayMacrossNodeNode(GamePlay.UWorld world, UNode parent, UNodeData data, EBoundVolumeType bvType, Type placementType)
         //{
@@ -142,7 +143,8 @@ namespace EngineNS.GamePlay.GamePlayMacross
 
         public virtual void TickLogic(float elapseSecnod)
         {
-            mGamePlayStateMachine.Tick(elapseSecnod, this);
+            TtStateMachineContext context = new TtStateMachineContext();
+            mGamePlayStateMachine.Tick(elapseSecnod, context);
 
         }
         public virtual void TickAnimation(float elapseSecnod)

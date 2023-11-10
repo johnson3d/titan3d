@@ -2,16 +2,27 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using EngineNS.DesignMacross.Design;
+using NPOI.SS.Formula.Functions;
+using System;
+using EngineNS.DesignMacross.Base.Graph;
+using EngineNS.DesignMacross.Base.Description;
+using System.Text.RegularExpressions;
+using System.Text;
+using System.Diagnostics;
 
 namespace EngineNS.DesignMacross.Editor
 {
     public class TtDesignMacrossEditor : IO.ISerializer, EngineNS.Editor.IAssetEditor, IRootForm
     {
-        public TtClassDescription ClassDescription { get; set; } = new TtClassDescription();
+        private TtClassDescription mClassDescription = new TtClassDescription();
+        public TtClassDescription ClassDescription { get => mClassDescription; set => mClassDescription = value; }
         public TtOutlineEditPanel DeclarationEditPanel { get; set; } = new TtOutlineEditPanel();
         public TtGraphEditPanel DefinitionGraphPanel { get; set; } = new TtGraphEditPanel();
         TtCommandHistory CommandHistory { get; set; } = new TtCommandHistory();
 
+        TtGraphElementStyleCollection GraphElementCollection = new TtGraphElementStyleCollection();
+
+        public Dictionary<Guid, IGraphElement> DescriptionsElement { get; set; } = new Dictionary<Guid, IGraphElement>();
         public TtDesignMacrossEditor()
         {
 
@@ -19,6 +30,15 @@ namespace EngineNS.DesignMacross.Editor
         public EGui.Controls.PropertyGrid.PropertyGrid PGMember = new EGui.Controls.PropertyGrid.PropertyGrid();
         public async Task<bool> Initialize()
         {
+            ClassDescription.Name = AssetName.PureName;
+            var nsName = IO.TtFileManager.GetBaseDirectory(AssetName.Name).TrimEnd('/').Replace("/", ".");
+            if (Regex.IsMatch(nsName, "[A-Za-z0-9_]"))
+                ClassDescription.Namespace = new UNamespaceDeclaration("NS_" + nsName);
+            else
+            {
+                ClassDescription.Namespace = new UNamespaceDeclaration("NS_" + ((UInt32)nsName.GetHashCode()).ToString());
+                Profiler.Log.WriteLine(Profiler.ELogTag.Warning, "Macross", $"Get namespace failed, {AssetName.Name} has invalid char!");
+            }
             DeclarationEditPanel.ClassDesc = ClassDescription;
             DeclarationEditPanel.Initialize();
             InitializeMainMenu();
@@ -45,12 +65,14 @@ namespace EngineNS.DesignMacross.Editor
             //draw menu
             //draw toolbar
 
-            
+            DescriptionsElement.Clear();
             FDesignMacrossEditorRenderingContext rendingContext = new FDesignMacrossEditorRenderingContext();
             rendingContext.EditorInteroperation.OutlineEditPanel = DeclarationEditPanel;
             rendingContext.EditorInteroperation.GraphEditPanel = DefinitionGraphPanel;
+            rendingContext.EditorInteroperation.PGMember = PGMember;
             rendingContext.CommandHistory = CommandHistory;
-
+            rendingContext.GraphElementStyleManager = GraphElementCollection;
+            rendingContext.DescriptionsElement = DescriptionsElement;
             bool mClassViewShow = true;
             if (EGui.UIProxy.DockProxy.BeginPanel(mDockKeyClass, "ClassView", ref mClassViewShow, ImGuiWindowFlags_.ImGuiWindowFlags_None))
             {
@@ -71,10 +93,53 @@ namespace EngineNS.DesignMacross.Editor
                 PGMember.OnDraw(true, false, false);
             }
             EGui.UIProxy.DockProxy.EndPanel();
+
+            if (UEngine.Instance.InputSystem.IsKeyPressed(EngineNS.Bricks.Input.Keycode.KEY_z))
+            {
+                if (bIsZKeyDown)
+                {
+                    bIsZKeyHasDown = true;
+                }
+                bIsZKeyDown = true;
+            }
+            else
+            {
+                bIsZKeyDown = false;
+                bIsZKeyHasDown = false;
+            }
+
+            if (UEngine.Instance.InputSystem.IsKeyPressed(EngineNS.Bricks.Input.Keycode.KEY_y))
+            {
+                if (bIsYKeyDown)
+                {
+                    bIsYKeyHasDown = true;
+                }
+                bIsYKeyDown = true;
+            }
+            else
+            {
+                bIsYKeyDown = false;
+                bIsYKeyHasDown = false;
+            }
+
+            if (bIsZKeyDown && !bIsZKeyHasDown && UEngine.Instance.InputSystem.IsCtrlKeyDown())
+            {
+                CommandHistory.Undo();
+            }
+
+            if (UEngine.Instance.InputSystem.IsCtrlKeyDown() && bIsYKeyDown && !bIsYKeyHasDown)
+            {
+                CommandHistory.Redo();
+            }
         }
 
+        bool bIsZKeyHasDown = false;
+        bool bIsZKeyDown = false;
+        bool bIsYKeyHasDown = false;
+        bool bIsYKeyDown = false;
+
         #region Save Load
-        void SaveMacross(RName rn)
+        void SaveClassDescription(RName rn)
         {
             var ameta = UEngine.Instance.AssetMetaManager.GetAssetMeta(AssetName);
             if (ameta != null)
@@ -93,25 +158,79 @@ namespace EngineNS.DesignMacross.Editor
             IO.TtFileManager.WriteAllText($"{rn.Address}/class_description.dat", xmlText);
 
         }
-        void LoadMacross(RName rn)
+        void SaveElements(RName rn)
         {
-
+            var xml = new System.Xml.XmlDocument();
+            var xmlRoot = xml.CreateElement($"Root", xml.NamespaceURI);
+            xml.AppendChild(xmlRoot);
+            IO.SerializerHelper.WriteObjectMetaFields(xml, xmlRoot, GraphElementCollection);
+            var xmlText = IO.TtFileManager.GetXmlText(xml);
+            IO.TtFileManager.WriteAllText($"{rn.Address}/GraphElementStyles.dat", xmlText);
+        }
+        void LoadClassDescription(RName rn)
+        {
+            var xml = IO.TtFileManager.LoadXml($"{rn.Address}/class_description.dat");
+            if (xml == null)
+                return;
+            object pClassDescription = mClassDescription;
+            IO.SerializerHelper.ReadObjectMetaFields(mClassDescription, xml.LastChild as System.Xml.XmlElement, ref pClassDescription, null);
+        }
+        void LoadElements(RName rn)
+        {
+            var xml = IO.TtFileManager.LoadXml($"{rn.Address}/GraphElementStyles.dat");
+            if (xml == null)
+                return;
+            object pGraphElementCollection = GraphElementCollection;
+            IO.SerializerHelper.ReadObjectMetaFields(GraphElementCollection, xml.LastChild as System.Xml.XmlElement, ref pGraphElementCollection, null);
         }
         #endregion Save Load
 
         #region CodeGen
+        List<UClassDeclaration> ClassDeclarationsForGenerateCompileCode = new List<UClassDeclaration>();
         public string GenerateCode()
         {
-            List<UClassDeclaration> classDeclarations = ClassDescription.BuildClassDeclarations();
+            ClassDeclarationsForGenerateCompileCode.Clear();
+            FClassBuildContext classBuildContext = new FClassBuildContext();
+            classBuildContext.MainClassDescription = ClassDescription;
+            ClassDeclarationsForGenerateCompileCode = ClassDescription.BuildClassDeclarations(ref classBuildContext);
 
             var codeGenerator = new UCSharpCodeGenerator();
             string code = "";
-            foreach (var classDeclaration in classDeclarations)
+            foreach (var classDeclaration in ClassDeclarationsForGenerateCompileCode)
             {
                 codeGenerator.GenerateClassCode(classDeclaration, AssetName, ref code);
             }
+            var fileName = AssetName.Address + "/" + ClassDescription.ClassName + ".cs";
+            using (var sr = new System.IO.StreamWriter(fileName, false, Encoding.UTF8))
+            {
+                sr.Write(code);
+            }
+            EngineNS.UEngine.Instance.MacrossManager.GenerateProjects();
             return code;
-            
+        }
+        public void CompileCode()
+        {
+            UEngine.Instance.MacrossManager.ClearGameProjectTemplateBuildFiles();
+            var assemblyFile = UEngine.Instance.FileManager.GetRoot(IO.TtFileManager.ERootDir.EngineSource) + UEngine.Instance.EditorInstance.Config.GameAssembly;
+            if (UEngine.Instance.MacrossModule.CompileCode(assemblyFile))
+            {
+                UEngine.Instance.MacrossModule.ReloadAssembly(assemblyFile);
+                foreach (var classDeclaration in ClassDeclarationsForGenerateCompileCode)
+                {
+                    var typeDesc = classDeclaration.TryGetTypeDesc();
+                    var meta = Rtti.UClassMetaManager.Instance.GetMeta(typeDesc);
+                    meta.BuildMethods();
+                    meta.BuildFields();
+                    var version = meta.BuildCurrentVersion();
+                    version.SaveVersion();
+                    meta.SaveClass();
+                }
+
+            }
+            else
+            {
+                Debug.Assert(false);
+            }
         }
         #endregion CodeGen
 
@@ -137,9 +256,10 @@ namespace EngineNS.DesignMacross.Editor
             if (EGui.UIProxy.ToolbarIconButtonProxy.DrawButton(in drawList,
                 ref mToolBtnDatas[toolBarItemIdx].IsMouseDown, ref mToolBtnDatas[toolBarItemIdx].IsMouseHover, null, "Save"))
             {
-                SaveMacross(AssetName);
-                //GenerateCode();
-                //CompileCode();
+                SaveClassDescription(AssetName);
+                SaveElements(AssetName);
+                GenerateCode();
+                CompileCode();
             }
             toolBarItemIdx++;
             EGui.UIProxy.ToolbarSeparator.DrawSeparator(in drawList, in Support.UAnyPointer.Default);
@@ -147,7 +267,7 @@ namespace EngineNS.DesignMacross.Editor
                 ref mToolBtnDatas[toolBarItemIdx].IsMouseDown, ref mToolBtnDatas[toolBarItemIdx].IsMouseHover, null, "GenCode", false, -1, 0, spacing))
             {
                 GenerateCode();
-                //CompileCode();
+                CompileCode();
             }
             toolBarItemIdx++;
             EGui.UIProxy.ToolbarSeparator.DrawSeparator(in drawList, in Support.UAnyPointer.Default);
@@ -241,9 +361,9 @@ namespace EngineNS.DesignMacross.Editor
         }
         public async Task<bool> OpenEditor(EngineNS.Editor.UMainEditorApplication mainEditor, RName name, object arg)
         {
-            //LoadClassGraph(AssetName);
-            //LoadClassGraph(RName.GetRName("UTest/class_graph.xml"));
-            await Thread.TtAsyncDummyClass.DummyFunc();
+            LoadClassDescription(AssetName);
+            LoadElements(AssetName);
+            await Initialize();
             return true;
         }
 
@@ -283,9 +403,10 @@ namespace EngineNS.DesignMacross.Editor
                             MenuName = "Save",
                             Action = (item, data)=>
                             {
-                                //SaveClassGraph(AssetName);
-                                //GenerateCode();
-                                //CompileCode();
+                                SaveClassDescription(AssetName);
+                                SaveElements(AssetName);
+                                GenerateCode();
+                                CompileCode();
                             },
                         },
                     },
@@ -303,7 +424,7 @@ namespace EngineNS.DesignMacross.Editor
 
                 ImGuiAPI.EndMenuBar();
             }
-        } 
+        }
         #endregion
     }
 }

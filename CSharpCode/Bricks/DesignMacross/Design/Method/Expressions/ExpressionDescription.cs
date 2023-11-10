@@ -10,6 +10,7 @@ namespace EngineNS.DesignMacross.Design
 {
     public class TtClassReferenceExpressionDescription : IClassDescription
     {
+        public IDescription Parent { get; set; }
         public TtDataPinDescription DataPin;
 
         public string ClassName => throw new NotImplementedException();
@@ -18,13 +19,16 @@ namespace EngineNS.DesignMacross.Design
         public UNamespaceDeclaration Namespace { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
         public bool IsStruct { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
         public List<string> SupperClassNames { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
-        public ObservableCollection<IVariableDescription> Variables { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
-        public ObservableCollection<IMethodDescription> Methods { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
+        public List<IVariableDescription> Variables { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
+        public List<IMethodDescription> Methods { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
         public Guid Id { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
         public string Name { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
         [Rtti.Meta]
         public Vector2 Location { get; set; }
-        public List<UClassDeclaration> BuildClassDeclarations()
+        List<IVariableDescription> IClassDescription.Variables { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
+        List<IMethodDescription> IClassDescription.Methods { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
+
+        public List<UClassDeclaration> BuildClassDeclarations(ref FClassBuildContext classBuildContext)
         {
             throw new NotImplementedException();
         }

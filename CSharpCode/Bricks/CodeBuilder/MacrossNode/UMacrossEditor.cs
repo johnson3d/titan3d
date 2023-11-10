@@ -83,6 +83,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
                         DefClass.AddMethod(f);
 
                         var func = UMacrossMethodGraph.NewGraph(this, f);
+                        func.AssetName = this.AssetName;
                         Methods.Add(func);
                         menuItem.Visible = false;
                     };
@@ -197,7 +198,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
                             //    continue;
                             DefClass.AddMethod(funcGraph.MethodDatas[methodIdx].MethodDec);
                         }
-
+                        funcGraph.AssetName = this.AssetName;
                         Methods.Add(funcGraph);
                     }
                     catch (System.Exception e)

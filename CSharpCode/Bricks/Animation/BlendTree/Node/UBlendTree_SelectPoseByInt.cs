@@ -42,7 +42,7 @@ namespace EngineNS.Animation.BlendTree.Node
         }
         public Func<int> EvaluateSelectedFunc { get; set; } = null;
         float mBlendTime = 0.1f;
-        float Alpha = 0.0f;
+        internal float Alpha = 0.0f;
         public float BlendTime
         {
             get

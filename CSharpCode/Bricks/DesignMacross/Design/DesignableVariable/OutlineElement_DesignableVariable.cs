@@ -10,6 +10,8 @@ using System.Collections.ObjectModel;
 using System.Collections.Specialized;
 using System.Reflection;
 using System.Text;
+using System.Collections;
+using System.Diagnostics;
 
 namespace EngineNS.DesignMacross.Design
 {
@@ -43,37 +45,10 @@ namespace EngineNS.DesignMacross.Design
         }
     }
     [ImGuiElementRender(typeof(TtOutlineElementsListRender_DesignableVariables))]
-    public class TtOutlineElementsList_DesignableVariables : IOutlineElementsList
+    public class TtOutlineElementsList_DesignableVariables : TtOutlineElement_List
     {
-        public string Name { get; set; }
-        public IDescription Description { get; set; } = null;
-        public INotifyCollectionChanged NotifiableDescriptions { get; set; }
-        public ObservableCollection<IDesignableVariableDescription> Descriptions { get => NotifiableDescriptions as ObservableCollection<IDesignableVariableDescription>; }
+        public List<IDesignableVariableDescription> Descriptions { get => DescriptionsList as List<IDesignableVariableDescription>; }
         public List<IOutlineElement> Children { get; set; } = new List<IOutlineElement>();
-
-        public void Construct()
-        {
-            Children.Clear();
-
-            System.Diagnostics.Debug.Assert(Descriptions != null);
-
-            foreach (var description in Descriptions)
-            {
-                var outlinerElementAttribute = description.GetType().GetCustomAttribute<OutlineElementAttribute>();
-                if (outlinerElementAttribute != null)
-                {
-                    var instance = UTypeDescManager.CreateInstance(outlinerElementAttribute.ClassType) as IOutlineElement;
-                    instance.Description = description;
-                    instance.Construct();
-                    Children.Add(instance);
-                }
-                var outlinerElementTreeAttribute = description.GetType().GetCustomAttribute<OutlineElementsListAttribute>();
-                if (outlinerElementTreeAttribute != null)
-                {
-                    System.Diagnostics.Debug.Assert(false);
-                }
-            }
-        }
     }
 
     public class TtOutlineElementsListRender_DesignableVariables : IOutlineElementsListRender
@@ -117,7 +92,6 @@ namespace EngineNS.DesignMacross.Design
                         {
                             description.Name = name;
                             elementsList.Descriptions.Add(description);
-                            elementsList.Construct();
                         }
                     }
                 }
@@ -129,7 +103,8 @@ namespace EngineNS.DesignMacross.Design
                 var elementContext = new FOutlineElementRenderingContext();
                 elementContext.CommandHistory = context.CommandHistory;
                 elementContext.EditorInteroperation = context.EditorInteroperation;
-                foreach (var element in elementsList.Children)
+                var elements = elementsList.ConstructListElements();
+                foreach (var element in elements)
                 {
                     var render = TtElementRenderDevice.CreateOutlineElementRender(element);
                     render.Draw(element, ref elementContext);

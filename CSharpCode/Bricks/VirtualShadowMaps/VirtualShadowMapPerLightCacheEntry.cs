@@ -11,7 +11,7 @@ namespace EngineNS.Bricks.VirtualShadowMaps
     {
         public Int32 InstanceSceneDataOffset;
         public Int32 NumInstanceSceneDataEntries;
-        bool bInvalidateStaticPage;
+        public bool bInvalidateStaticPage;
     };
 
     public class TtVirtualShadowMapPerLightCacheEntry

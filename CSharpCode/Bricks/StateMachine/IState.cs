@@ -4,10 +4,11 @@ using System.Text;
 
 namespace EngineNS.Bricks.StateMachine
 {
-    public interface IState<T>
+    public interface IState<S,T>
     {
+        public S CenterData { get; set; }
         string Name { get; set; }
-        void Initialize();
+        bool Initialize();
         void Enter();
         void Exit();
         /// <summary>
@@ -20,11 +21,11 @@ namespace EngineNS.Bricks.StateMachine
         /// </summary>
         /// <param name="elapseSecond"></param>
         void Update(float elapseSecond, in T context);
-        bool TryCheckTransitions(out List<ITransition<T>> transitions);
+        bool TryCheckTransitions(in T context, out List<ITransition<S, T>> transitions);
         bool ShouldUpdate();
-        bool AddTransition(ITransition<T> transition);
-        bool RemoveTransition(ITransition<T> transition);
-        bool AddAttachment(IAttachmentRule<T> attachment);
-        bool RemoveAttachment(IAttachmentRule<T> attachment);
+        bool AddTransition(ITransition<S, T> transition);
+        bool RemoveTransition(ITransition<S, T> transition);
+        bool AddAttachment(IAttachmentRule<S, T> attachment);
+        bool RemoveAttachment(IAttachmentRule<S, T> attachment);
     }
 }

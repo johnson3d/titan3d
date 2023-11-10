@@ -12,53 +12,28 @@ namespace EngineNS.DesignMacross.Design
     {
     }
     [ImGuiElementRender(typeof(TtGraphElementRender_ExecutionPin))]
-    public class TtGraphElement_ExecutionPin : IGraphElement, ILayoutable
+    public class TtGraphElement_ExecutionPin : TtDescriptionGraphElement
     {
-        public Guid Id { get; set; } = Guid.Empty;
-        public string Name { get => Description.Name; set => Description.Name = value; }
-        public Vector2 Location { get => Description.Location; set => Description.Location = value; }
-
-        public Vector2 AbsLocation => TtGraphMisc.CalculateAbsLocation(this);
-
-        public SizeF Size { get; set; } = new SizeF(15, 15);
-        public IGraphElement Parent { get; set; } = null;
-        public IDescription Description { get; set; } = null;
-        public FMargin Margin { get; set; } = new FMargin(5, 8, 0, 5);
-        public TtGraphElement_ExecutionPin(IDescription description)
+        public override FMargin Margin { get; set; } = new FMargin(5, 8, 0, 5);
+        public TtGraphElement_ExecutionPin(IDescription description, IGraphElementStyle style) : base(description, style)
         {
-            Id = description.Id;
-            Description = description;
+
         }
-        public SizeF Arranging(Rect finalRect)
+        public override SizeF Arranging(Rect finalRect)
         {
             var hLocation = finalRect.Width - Size.Width;
             Location = new Vector2(hLocation + finalRect.X, Location.Y);
             return finalRect.Size;
         }
 
-        public void Construct()
-        {
-            
-        }
-
-        public bool HitCheck(Vector2 pos)
-        {
-            throw new NotImplementedException();
-        }
-
-        public SizeF Measuring(SizeF availableSize)
+        public override SizeF Measuring(SizeF availableSize)
         {
             return new SizeF(Size.Width + Margin.Left + Margin.Right, Size.Height + Margin.Top + Margin.Bottom);
         }
 
-        public void OnSelected()
+        public override void ConstructElements(ref FGraphElementRenderingContext context)
         {
-            throw new NotImplementedException();
-        }
-
-        public void OnUnSelected()
-        {
-            throw new NotImplementedException();
+            
         }
     }
     public class TtGraphElementRender_ExecutionLine

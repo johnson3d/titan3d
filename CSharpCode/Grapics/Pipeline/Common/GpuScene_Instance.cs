@@ -19,10 +19,10 @@ namespace EngineNS.Graphics.Pipeline.Common
 
         public struct HZBCullData
         {
-            Matrix PrevTranslatedWorldToClip;
-            Matrix PrevPreViewTranslation;
-            Matrix WorldToClip;
-            Vector4i HZBTestViewRect;
+            public Matrix PrevTranslatedWorldToClip;
+            public Matrix PrevPreViewTranslation;
+            public Matrix WorldToClip;
+            public Vector4i HZBTestViewRect;
         }
 
         public class UCBufferHZBCullData : NxRHI.UShader.UShaderVarIndexer

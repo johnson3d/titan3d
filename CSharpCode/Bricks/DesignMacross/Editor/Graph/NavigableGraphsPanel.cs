@@ -32,7 +32,6 @@ namespace EngineNS.DesignMacross.Editor.GraphPanel
             {
                 var graphAttribute = GraphAttribute.GetAttributeWithSpecificClassType<IGraph>(description.GetType());
                 var graph = UTypeDescManager.CreateInstance(graphAttribute.ClassType, new object[] { description }) as IGraph;
-                graph.Construct();
                 SubGraphs.Add(description, graph);
                 Navigation.Push(graph);
             }
@@ -69,16 +68,19 @@ namespace EngineNS.DesignMacross.Editor.GraphPanel
             var graphContext = new FGraphRenderingContext();
             graphContext.CommandHistory = context.CommandHistory;
             graphContext.EditorInteroperation = context.EditorInteroperation;
-            var currentRenderGraph = navigableGraphsPanel.Navigation.Peek();
-            var graphRender = TtElementRenderDevice.CreateGraphRender(currentRenderGraph);
+            graphContext.GraphElementStyleManager = context.GraphElementStyleManager;
+            graphContext.DescriptionsElement = context.DescriptionsElement;
+            var currentRenderingGraph = navigableGraphsPanel.Navigation.Peek();
+            currentRenderingGraph.ConstructElements(ref graphContext);
+            var graphRender = TtElementRenderDevice.CreateGraphRender(currentRenderingGraph);
             if (graphRender != null)
             {
-                if (currentRenderGraph is ILayoutable layoutable)
+                if (currentRenderingGraph is ILayoutable layoutable)
                 {
                     var desireSize = layoutable.Measuring(new SizeF());
                     layoutable.Arranging(new Rect(Vector2.Zero, desireSize));
                 }
-                graphRender.Draw(currentRenderGraph, ref graphContext);
+                graphRender.Draw(currentRenderingGraph, ref graphContext);
             }
         }
     }

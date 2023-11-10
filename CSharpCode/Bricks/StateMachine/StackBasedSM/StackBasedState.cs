@@ -4,27 +4,28 @@ using System.Text;
 
 namespace EngineNS.Bricks.StateMachine.StackBasedSM
 {
-    public class TtStackBasedState<T> : IState<T>
+    public class TtStackBasedState<S, T> : IState<S, T>
     {
-        public TtStackBasedState(TtStackBasedStateMachine<T> stateMachine, string name = "State") 
+        public S CenterData { get; set; }
+        public TtStackBasedState(TtStackBasedStateMachine<S, T> stateMachine, string name = "State") 
         {
         }
         public string Name { get; set; }
 
-        public bool AddAttachment(IAttachmentRule<T> attachment)
+        public bool AddAttachment(IAttachmentRule<S, T> attachment)
         {
             return true;
         }
-        public bool RemoveAttachment(IAttachmentRule<T> attachment)
+        public bool RemoveAttachment(IAttachmentRule<S, T> attachment)
         {
             return false;
         }
         
-        public bool AddTransition(ITransition<T> transition)
+        public bool AddTransition(ITransition<S, T> transition)
         {
             return false;
         }
-        public bool RemoveTransition(ITransition<T> transition)
+        public bool RemoveTransition(ITransition<S, T> transition)
         {
             return false;
         }
@@ -37,8 +38,9 @@ namespace EngineNS.Bricks.StateMachine.StackBasedSM
         {
         }
 
-        public void Initialize()
+        public bool Initialize()
         {
+            return false;
         }   
 
         public bool ShouldUpdate()
@@ -54,7 +56,7 @@ namespace EngineNS.Bricks.StateMachine.StackBasedSM
         {
         }
 
-        public bool TryCheckTransitions(out List<ITransition<T>> transitions)
+        public bool TryCheckTransitions(in T context, out List<ITransition<S, T>> transitions)
         {
             throw new NotImplementedException();
         }

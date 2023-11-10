@@ -31,7 +31,7 @@ namespace EngineNS.UI.Controls
             }
         }
         internal virtual Template.TtUITemplate TemplateInternal => Template;
-        internal TtUIElement mTemplateParent;
+        internal TtUIElement mTemplateParent = null;
         [Browsable(false)]
         public TtUIElement TemplateParent => mTemplateParent;
         internal int TemplateChildIndex

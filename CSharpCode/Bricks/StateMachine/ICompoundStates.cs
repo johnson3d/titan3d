@@ -4,7 +4,7 @@ using System.Text;
 
 namespace EngineNS.Bricks.StateMachine
 {
-    public interface IStatesHub<T> : IState<T>
+    public interface ICompoundStates<S, T> : IState<S, T>
     {
 
     }

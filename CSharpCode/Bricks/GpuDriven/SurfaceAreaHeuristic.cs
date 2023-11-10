@@ -167,7 +167,7 @@ namespace EngineNS.Bricks.GpuDriven
 
         public static List<List<int>> GenerateBatches(BoundingBox[] aabbs, int targetSize, int splitGranularity)
         {
-            Vector<int> indices;
+            //Vector<int> indices;
 
             List<List<int>> result = new List<List<int>>();
             generateBatchesRecursive(aabbs, targetSize, splitGranularity, 0, aabbs.Length, result);

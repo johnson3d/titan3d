@@ -913,7 +913,7 @@ namespace EngineNS.EGui.Controls.PropertyGrid
             public bool ValueChanged;
         }
         [System.ThreadStatic]
-        DrawData mDrawData = new DrawData();
+        static DrawData mDrawData = new DrawData();
         protected override async Task<bool> Initialize_Override()
         {
             mComboBox = new UIProxy.ComboBox()

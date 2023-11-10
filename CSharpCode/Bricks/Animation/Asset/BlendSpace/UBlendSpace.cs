@@ -4,6 +4,8 @@ using System.Collections.Generic;
 using System.Text;
 using System.Threading.Tasks;
 
+#pragma warning disable CS0067
+
 namespace EngineNS.Animation.Asset.BlendSpace
 {
     public delegate void AxisNameChange(string newName);

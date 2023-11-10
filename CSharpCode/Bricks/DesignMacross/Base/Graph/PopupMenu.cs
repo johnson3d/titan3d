@@ -16,6 +16,7 @@ namespace EngineNS.DesignMacross.Base.Graph
         public UMenuItem Menu = new UMenuItem();
         TtPopupMenuRender PopupMenuRender = new TtPopupMenuRender();
         public Vector2 PopedPosition { get; set; } = Vector2.Zero;
+        public bool bHasSearchBox { get; set; } = false;
         public TtPopupMenu(string id)
         {
             StringId = id;
@@ -63,19 +64,27 @@ namespace EngineNS.DesignMacross.Base.Graph
 
                     var width = ImGuiAPI.GetWindowContentRegionWidth();//ImGuiAPI.GetWindowWidth();
                     var drawList = ImGuiAPI.GetWindowDrawList();
-
-                    EGui.UIProxy.SearchBarProxy.OnDraw(ref mCanvasMenuFilterFocused, in drawList, "search item", ref CanvasMenuFilterStr, width);
-                    Vector2 wsize = new Vector2(200, 400);
-                    var id = ImGuiAPI.GetID(popupMenu.StringId);
-                    if (ImGuiAPI.BeginChild(id, wsize, false,
-                        ImGuiWindowFlags_.ImGuiWindowFlags_NoTitleBar |
-                        ImGuiWindowFlags_.ImGuiWindowFlags_NoSavedSettings))
+                    if(popupMenu.bHasSearchBox)
+                    {
+                        EGui.UIProxy.SearchBarProxy.OnDraw(ref mCanvasMenuFilterFocused, in drawList, "search item", ref CanvasMenuFilterStr, width);
+                        Vector2 wsize = new Vector2(200, 400);
+                        var id = ImGuiAPI.GetID(popupMenu.StringId);
+                        if (ImGuiAPI.BeginChild(id, wsize, false,
+                            ImGuiWindowFlags_.ImGuiWindowFlags_NoTitleBar |
+                            ImGuiWindowFlags_.ImGuiWindowFlags_NoSavedSettings))
+                        {
+                            var cmdList = ImGuiAPI.GetWindowDrawList();
+                            for (var childIdx = 0; childIdx < popupMenu.Menu.SubMenuItems.Count; childIdx++)
+                                DrawMenu(popupMenu, popupMenu.Menu.SubMenuItems[childIdx], CanvasMenuFilterStr.ToLower(), cmdList);
+                        }
+                        ImGuiAPI.EndChild();
+                    }
+                    else
                     {
                         var cmdList = ImGuiAPI.GetWindowDrawList();
                         for (var childIdx = 0; childIdx < popupMenu.Menu.SubMenuItems.Count; childIdx++)
                             DrawMenu(popupMenu, popupMenu.Menu.SubMenuItems[childIdx], CanvasMenuFilterStr.ToLower(), cmdList);
                     }
-                    ImGuiAPI.EndChild();
                 }
                 ImGuiAPI.EndPopup();
             }
@@ -180,6 +189,7 @@ namespace EngineNS.DesignMacross.Base.Graph
             }
         }
     }
+
 
     public class TtMenuUtil
     {

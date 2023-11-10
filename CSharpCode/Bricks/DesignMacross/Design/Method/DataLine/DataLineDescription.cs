@@ -8,6 +8,7 @@ namespace EngineNS.DesignMacross.Design
 {
     public class TtDataPinDescription : IDescription
     {
+        public IDescription Parent { get; set; }
         public Guid Id { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
         public string Name { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
         [Rtti.Meta]
@@ -26,6 +27,7 @@ namespace EngineNS.DesignMacross.Design
     }
     public class TtDataLineDescription : IDescription
     {
+        public IDescription Parent { get; set; }
         public Guid Id { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
         public string Name { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
         [Rtti.Meta]

@@ -5,64 +5,57 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
 using System.Text;
 
 namespace EngineNS.DesignMacross.Base.Outline
-
 {
-
     [ImGuiElementRender(typeof(TtOutlineRender))]
     public class TtOutline : IOutline
     {
         public string Name { get; set; }
         public List<IOutlineElement> Children { get; set; } = new List<IOutlineElement>();
         public IDescription Description { get; set; } = null;
+        public IOutlineElement Parent { get; set; } = null;
 
-        public void Construct()
+        public List<IOutlineElement> ConstructElements()
         {
+            var childrenElements = new List<IOutlineElement>();
             foreach (var property in Description.GetType().GetProperties())
             {
-                var outlinerElementAttribute = property.GetCustomAttribute<OutlineElementAttribute>();
-                if (outlinerElementAttribute != null)
+                var singleAttribute = property.GetCustomAttribute<OutlineElement_LeafAttribute>();
+                if (singleAttribute != null)
                 {
-                    var instance = UTypeDescManager.CreateInstance(outlinerElementAttribute.ClassType) as IOutlineElement;
+                    var instance = TtOutlineElementsPoolManager.Instance.Get(singleAttribute.ClassType) as IOutlineElement_Leaf;
                     var desc = property.GetValue(Description) as IDescription;
                     instance.Description = desc;
-                    instance.Construct();
-                    Children.Add(instance);
+                    instance.Parent = this;
+                    childrenElements.Add(instance);
                 }
-                var outlinerElementTreeAttribute = property.GetCustomAttribute<OutlineElementsListAttribute>();
-                if (outlinerElementTreeAttribute != null)
+                var listAttribute = property.GetCustomAttribute<OutlineElement_ListAttribute>();
+                if (listAttribute != null)
                 {
-                    var instance = UTypeDescManager.CreateInstance(outlinerElementTreeAttribute.ClassType) as IOutlineElementsList;
+                    var instance = TtOutlineElementsPoolManager.Instance.Get(listAttribute.ClassType) as IOutlineElement_List;
+                    instance.IsHideTitle = listAttribute.IsHideTitle;
                     var list = property.GetValue(Description) as IList;
-                    var listType = list.GetType();
-                    if(listType.IsGenericType && listType.GenericTypeArguments[0] == typeof(IDesignableVariableDescription))
-                    {
-                        var descList = list.Cast<IDesignableVariableDescription>() as ObservableCollection<IDesignableVariableDescription>;
-                        instance.NotifiableDescriptions = descList;
-                    }
-                    else if (listType.IsGenericType && listType.GenericTypeArguments[0] == typeof(IVariableDescription))
-                    {
-                        var descList = list.Cast<IVariableDescription>() as ObservableCollection<IVariableDescription>;
-                        instance.NotifiableDescriptions = descList;
-                    }
-                    else if(listType.IsGenericType && listType.GenericTypeArguments[0] == typeof(IDesignableVariableDescription))
-                    {
-                        var descList = list.Cast<IMethodDescription>() as ObservableCollection<IMethodDescription>;
-                        instance.NotifiableDescriptions = descList;
-                    }
-                    else
-                    {
-                        var descList = list.Cast<IDescription>() as ObservableCollection<IDescription>;
-                        instance.NotifiableDescriptions = descList;
-                    }
-                    instance.Construct();
-                    Children.Add(instance);
+                    Debug.Assert(list != null);
+                    instance.DescriptionsList = list;
+                    instance.Parent = this;
+                    childrenElements.Add(instance);
+                }
+                var branchAttribute = property.GetCustomAttribute<OutlineElement_BranchAttribute>();
+                if (branchAttribute != null)
+                {
+                    var instance = TtOutlineElementsPoolManager.Instance.Get(branchAttribute.ClassType) as IOutlineElement_Branch;
+                    var desc = property.GetValue(Description) as IDescription;
+                    instance.Description = desc;
+                    instance.Parent = this;
+                    childrenElements.Add(instance);
                 }
             }
+            return childrenElements;
         }
     }
 
@@ -70,15 +63,16 @@ namespace EngineNS.DesignMacross.Base.Outline
     {
         public void Draw(IRenderableElement renderableElement, ref FOutlineRenderingContext context)
         {
-            var outline = renderableElement as IOutline;
+            var outline = renderableElement as TtOutline;
             var elementContext = new FOutlineElementRenderingContext();
             elementContext.CommandHistory = context.CommandHistory;
             elementContext.EditorInteroperation = context.EditorInteroperation;
-            foreach (var element in outline.Children)
+            var elements = outline.ConstructElements();
+            foreach (var element in elements)
             {
                 var elementRender = TtElementRenderDevice.CreateOutlineElementRender(element);
                 elementRender.Draw(element, ref elementContext);
             }
-        }
+        }       
     }
 }

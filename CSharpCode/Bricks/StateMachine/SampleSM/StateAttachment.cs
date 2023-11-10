@@ -5,8 +5,9 @@ using System.Text;
 
 namespace EngineNS.Bricks.StateMachine.SampleSM
 {
-    public class TtStateAttachment<T> : IAttachment<T>
+    public class TtStateAttachment<S, T> : IAttachment<S, T>
     {
+        public S CenterData { get; set; }
         public string Name { get; set; } = "Attachment";
 
         public bool CheckCondition()

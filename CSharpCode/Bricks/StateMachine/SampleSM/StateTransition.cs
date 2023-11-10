@@ -4,11 +4,12 @@ using System.Text;
 
 namespace EngineNS.Bricks.StateMachine.SampleSM
 {
-    public class TtStateTransition<T> : ITransition<T>
+    public class TtStateTransition<S, T> : ITransition<S, T>
     {
-        public IState<T> From { get; set; } = null;
-        public IState<T> To { get; set; } = null;
+        public S CenterData { get; set; }
+        public IState<S, T> From { get; set; } = null;
+        public IState<S, T> To { get; set; } = null;
         public virtual void OnTransition() { }
-        public virtual bool Check() { return true; }
+        public virtual bool Check(in T context) { return true; }
     }
 }

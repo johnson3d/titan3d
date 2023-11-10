@@ -1,8 +1,9 @@
 ﻿using EngineNS.DesignMacross.Base.Description;
+using EngineNS.DesignMacross.Base.Graph;
 using EngineNS.DesignMacross.Base.Render;
 using System;
 
-namespace EngineNS.DesignMacross.Base.Graph.Elements
+namespace EngineNS.DesignMacross.Editor
 {
     public struct FDesignTextBlockRenderingContext
     {
@@ -32,53 +33,51 @@ namespace EngineNS.DesignMacross.Base.Graph.Elements
     }
 
     [ImGuiElementRender(typeof(TtGraphElementRender_TextBlock))]
-    public class TtGraphElement_TextBlock : IGraphElement, ILayoutable
+    public class TtGraphElement_TextBlock : TtWidgetGraphElement, ILayoutable
     {
-        public Guid Id { get; set; } = Guid.Empty;
         public string Content { get; set; } = string.Empty;
-        public string Name { get; set; } = "Textblock";
-        public Vector2 Location { get; set; } = Vector2.Zero;
-        public Vector2 AbsLocation { get => TtGraphMisc.CalculateAbsLocation(this); }
-
-        public IGraphElement Parent { get; set; } = null;
-        public IDescription Description { get; set; } = null;
         public EHorizontalAlignment HorizontalAlign { get; set; } = EHorizontalAlignment.Left;
         public EVerticalAlignment VerticalAlign { get; set; } = EVerticalAlignment.Top;
         public float FontScale { get; set; } = 1;
         public Color4f TextColor { get; set; } = new Color4f(0, 0, 0);
         public Color4f BackgroundColor { get; set; } = new Color4f(0, 0, 0, 0);
 
-
-        public TtGraphElement_TextBlock()
-        {
-        }
-        public TtGraphElement_TextBlock(string content, EVerticalAlignment verticalAlignment = EVerticalAlignment.Top, EHorizontalAlignment horizontalAlignment = EHorizontalAlignment.Left)
+        public TtGraphElement_TextBlock(string content = "TExtBlock", EVerticalAlignment verticalAlignment = EVerticalAlignment.Top, EHorizontalAlignment horizontalAlignment = EHorizontalAlignment.Left)
         {
             Content = content;
             VerticalAlign = verticalAlignment;
             HorizontalAlign = horizontalAlignment;
         }
-        public void Construct()
+
+        public override bool CanDrag()
         {
-        }
-        public bool HitCheck(Vector2 pos)
-        {
-            throw new NotImplementedException();
+            return false;
         }
 
-        public void OnSelected()
+        public override bool HitCheck(Vector2 pos)
         {
-            throw new NotImplementedException();
+            return false;
         }
 
-        public void OnUnSelected()
+        public override void OnDragging(Vector2 delta)
         {
-            throw new NotImplementedException();
+
+        }
+
+
+        public override void OnSelected(ref FGraphElementRenderingContext context)
+        {
+            
+        }
+
+        public override void OnUnSelected()
+        {
+            
         }   
 
         #region ILayoutable
         public FMargin Margin { get; set; } = FMargin.Default;
-        public SizeF Size
+        public override SizeF Size
         {
             get
             {
@@ -89,7 +88,7 @@ namespace EngineNS.DesignMacross.Base.Graph.Elements
                 var size = ImGuiAPI.CalcTextSize(Content, false, 0);
                 font.Scale = oldScale;
                 ImGuiAPI.PopFont();
-
+                base.Size = new SizeF(size.X, size.Y);
                 return new SizeF(size.X, size.Y);
             }
             set

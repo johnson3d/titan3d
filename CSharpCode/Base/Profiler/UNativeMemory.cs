@@ -30,7 +30,7 @@ namespace EngineNS.Profiler
         }
         CoreSDK.FDelegate_FOnNativeMemAlloc OnNativeMemAlloc;
         //在做ClrProfiler的时候，不要MarshalString，否则会干扰ObjectAllocate统计!!!!!
-        static int testSize = 1048624;
+        //static int testSize = 1048624;
         private unsafe void OnNativeMemAllocImpl(IntPtr size, sbyte* file, IntPtr line, IntPtr id)
         {
             if ((uint)id == 5210 && size == 464)

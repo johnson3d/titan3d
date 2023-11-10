@@ -1,4 +1,5 @@
 ﻿using EngineNS.Bricks.CodeBuilder;
+using EngineNS.DesignMacross.Base.Description;
 using EngineNS.DesignMacross.Base.Graph;
 using EngineNS.DesignMacross.Design;
 using EngineNS.DesignMacross.TimedStateMachine.StateAttachment.Scrpit;
@@ -12,6 +13,7 @@ namespace EngineNS.DesignMacross.TimedStateMachine.StateAttachment
     [GraphElement(typeof(TtGraphElement_TimedStateScriptAttachment))]
     public class TtTimedStateScriptAttachmentClassDescription : ITimedStateAttachmentClassDescription
     {
+        public IDescription Parent { get; set; }
         public Guid Id { get; set; } = Guid.NewGuid();
         public string Name { get; set; } = "Script";
         [Rtti.Meta]

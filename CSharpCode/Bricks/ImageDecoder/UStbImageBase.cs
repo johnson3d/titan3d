@@ -25,7 +25,7 @@ namespace EngienNS.Bricks.ImageDecoder
                     return StbImageWriteSharp.ColorComponents.RedGreenBlueAlpha;
             }
 
-            return StbImageWriteSharp.ColorComponents.RedGreenBlueAlpha;
+            //return StbImageWriteSharp.ColorComponents.RedGreenBlueAlpha;
         }
     }
 }

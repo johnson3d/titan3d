@@ -10,7 +10,9 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="$(MSBuildThisFileDirectory)IAttachmentRule.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)IStatesHub.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)ICompoundStates.cs" />
+    <Compile Include="..\..\CSharpCode\Bricks\StateMachine\ICompoundStates.cs" />
+    <Compile Include="..\..\CSharpCode\Bricks\StateMachine\ITtTimedCompoundState.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)IState.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)IAttachment.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)IStateMachine.cs" />
@@ -22,7 +24,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)TimedSM\TimedStateMachine.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)TimedSM\TimedState.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)TimedSM\TimedStateScriptAttachment.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)TimedSM\TimedStatesHub.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)TimedSM\TimedCompoundState.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)TimedSM\TimedStateTransition.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)SampleSM\StateAttachment.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)SampleSM\StateMachine.cs" />

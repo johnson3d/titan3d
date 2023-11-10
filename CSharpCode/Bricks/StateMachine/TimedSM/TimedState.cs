@@ -5,35 +5,37 @@ using System.Text;
 
 namespace EngineNS.Bricks.StateMachine.TimedSM
 {
-    public partial class TtTimedState<T> : IState<T>
+    public partial class TtTimedState<S, T> : IState<S, T>
     {
+        public S CenterData { get; set; }
         public string Name { get; set; } = "TimedState";
-        protected TtTimedStateMachine<T> mStateMachine = null;
-        protected List<ITransition<T>> mTransitions = new List<ITransition<T>>();
-        public List<ITransition<T>> Transitions
+        protected TtTimedStateMachine<S, T> mStateMachine = null;
+        public TtTimedStateMachine<S, T> StateMachine { get => mStateMachine; set => mStateMachine = value; }
+        protected List<ITransition<S, T>> mTransitions = new List<ITransition<S, T>>();
+        public List<ITransition<S, T>> Transitions
         {
             get => mTransitions;
         }
-        public bool AddTransition(ITransition<T> transition)
+        public bool AddTransition(ITransition<S, T> transition)
         {
             if (mTransitions.Contains(transition))
                 return false;
             mTransitions.Add(transition);
             return true;
         }
-        public bool RemoveTransition(ITransition<T> transition)
+        public bool RemoveTransition(ITransition<S, T> transition)
         {
             if (!mTransitions.Contains(transition))
                 return false;
             mTransitions.Remove(transition);
             return true;
         }
-        protected List<IAttachmentRule<T>> mAttachments = new List<IAttachmentRule<T>>();
-        public List<IAttachmentRule<T>> Attachments
+        protected List<IAttachmentRule<S, T>> mAttachments = new List<IAttachmentRule<S, T>>();
+        public List<IAttachmentRule<S, T>> Attachments
         {
             get => mAttachments;
         }
-        public bool AddAttachment(IAttachmentRule<T> attachment)
+        public bool AddAttachment(IAttachmentRule<S, T> attachment)
         {
             if (mAttachments.Contains(attachment))
                 return false;
@@ -41,7 +43,7 @@ namespace EngineNS.Bricks.StateMachine.TimedSM
             return true;
         }
 
-        public bool RemoveAttachment(IAttachmentRule<T> attachment)
+        public bool RemoveAttachment(IAttachmentRule<S, T> attachment)
         {
             if (!mAttachments.Contains(attachment))
                 return false;
@@ -60,18 +62,20 @@ namespace EngineNS.Bricks.StateMachine.TimedSM
         {
             get
             {
-                return (mStateMachine as TtTimedStateMachine<T>).Clock.TimeInSecond;
+                return (mStateMachine as TtTimedStateMachine<S, T>).Clock.TimeInSecond;
             }
         }
-        public TtTimedState(TtTimedStateMachine<T> stateMachine,string name = "TimedState")
+        public TtTimedState(string name = "TimedState")
         {
-         
-
+        }
+        public TtTimedState(TtTimedStateMachine<S, T> stateMachine,string name = "TimedState")
+        {
+            mStateMachine = stateMachine;
         }
         public bool IsInitialized = false;
-        public virtual void Initialize()
+        public virtual bool Initialize()
         {
-
+            return false;
         }
         public virtual void Enter()
         {
@@ -108,12 +112,12 @@ namespace EngineNS.Bricks.StateMachine.TimedSM
                 }
             }
         }
-        public bool TryCheckTransitions(out List<ITransition<T>> transitions)
+        public bool TryCheckTransitions(in T context, out List<ITransition<S, T>> transitions)
         {
-            transitions = new List<ITransition<T>>();
+            transitions = new List<ITransition<S, T>>();
             for (int i = 0; i < mTransitions.Count; ++i)
             {
-                if (mTransitions[i].Check())
+                if (mTransitions[i].Check(in context))
                 {
                     transitions.Add(mTransitions[i]);
                 }
@@ -140,9 +144,21 @@ namespace EngineNS.Bricks.StateMachine.TimedSM
         }
     }
 
-    public class TtTimedState : TtTimedState<FStateMachineContext>
+    public class TtTimedState<S> : TtTimedState<S, TtStateMachineContext>
     {
-        public TtTimedState(TtTimedStateMachine<FStateMachineContext> stateMachine, string name = "TimedState") : base(stateMachine, name)
+        public TtTimedState(string name = "TimedState") : base(name)
+        {
+        }
+        public TtTimedState(TtTimedStateMachine<S, TtStateMachineContext> stateMachine, string name = "TimedState") : base(stateMachine, name)
+        {
+        }
+    }
+    public class TtTimedState : TtTimedState<TtDefaultCenterData, TtStateMachineContext>
+    {
+        public TtTimedState(string name = "TimedState") : base(name)
+        {
+        }
+        public TtTimedState(TtTimedStateMachine<TtDefaultCenterData, TtStateMachineContext> stateMachine, string name = "TimedState") : base(stateMachine, name)
         {
         }
     }

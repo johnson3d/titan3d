@@ -86,68 +86,35 @@ namespace EngineNS.DesignMacross.Nodes
 
     }
 
-    public class TtGraphElement_NodeBase : IGraphElement, IDraggable, ILayoutable, IErrorable
+    public class TtGraphElement_NodeBase : TtDescriptionGraphElement, IErrorable
     {
-        public Guid Id { get; set; } = Guid.Empty;
-        string mName = "NoName";
-        public virtual string Name 
-        { 
-            get => mName; 
-            set
-            {
-                if (mName == "NoName")
-                    Label = value;
-                mName = value;
-            }
-        }
         public virtual string Label { get; set; } = "NoName";
-        public Vector2 Location { get; set; }
-        public Vector2 AbsLocation { get; }
-        public IGraphElement Parent { get; set; }
-        public IDescription Description { get; set; }
-        public SizeF Size { get; set; }
         public float TitleHeight { get; set; }
         public uint TitleColor { get; set; }
         public bool HasError { get; set; }
-        public FMargin Margin { get; set; } = FMargin.Default;
 
         public bool Selected = false;
-        public bool CanDrag()
+
+        public TtGraphElement_NodeBase(IDescription description, IGraphElementStyle style) : base(description, style)
         {
-            throw new NotImplementedException();
         }
 
-        public void Construct()
-        {
-
-        }
-
-        public bool HitCheck(Vector2 pos)
-        {
-            return false;
-        }
-
-        public void OnDragging(Vector2 delta)
-        {
-            throw new NotImplementedException();
-        }
-
-        public void OnSelected()
+        public override void OnSelected(ref FGraphElementRenderingContext context)
         {
             Selected = true;
         }
 
-        public void OnUnSelected()
+        public override void OnUnSelected()
         {
             Selected = false;
         }
 
-        public SizeF Measuring(SizeF availableSize)
+        public override SizeF Measuring(SizeF availableSize)
         {
             return new SizeF(Size.Width + Margin.Left + Margin.Right, Size.Height + Margin.Top + Margin.Bottom);
         }
 
-        public SizeF Arranging(Rect finalRect)
+        public override SizeF Arranging(Rect finalRect)
         {
             return finalRect.Size;
         }

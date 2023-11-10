@@ -4,68 +4,74 @@ using System.Text;
 
 namespace EngineNS.Bricks.StateMachine.TimedSM
 {
-    public class TtTimedStateTransition<T> : ITransition<T>
+    public class TtTimedStateTransition<S, T> : ITransition<S, T>
     {
+        public S CenterData { get; set; }
         public bool TransitionOnFinish = false;
         public long Start { get; set; } = 0;
         public long Duration { get; set; } = 0;
-        public IState<T> From { get; set; }
-        public IState<T> To { get; set; }
+        public IState<S, T> From { get; set; }
+        public IState<S, T> To { get; set; }
 
-        public bool Check()
+        public bool Check(in T context)
         {
-            if (!(From is TtTimedState<T>))
+            if (!(From is TtTimedState<S, T>))
             {
-                return CheckCondition();
+                return CheckCondition(context);
             }
             else
             {
-                var from = From as TtTimedState<T>;
+                var from = From as TtTimedState<S, T>;
                 if (TransitionOnFinish)
                 {
                     if (from.WrapMode == ETimedSM_ClockWrapMode.Clamp)
                     {
                         if (from.StateTime == from.StateTimeDuration)
                         {
-                            return CheckCondition();
+                            return CheckCondition(context);
                         }
                     }
                 }
                 else
                 {
                     if (Duration == 0)
-                        return CheckCondition();
+                        return CheckCondition(context);
                     if (from.StateTime >= Start && from.StateTime <= Start + Duration)
                     {
-                        return CheckCondition();
+                        return CheckCondition(context);
                     }
                 }
                 return false;
             }
         }
-        public virtual bool CheckCondition()
+        public virtual bool CheckCondition(in T context)
         {
             return true;
         }
 
         public void OnTransition()
         {
-           ;
+           
         }
     }
-    public class UTimedStateTransitionFunction<T> : TtTimedStateTransition<T>
+    //public class UTimedStateTransitionFunction<T> : TtTimedStateTransition<T>
+    //{
+    //    public override bool CheckCondition(in T context)
+    //    {
+    //        if (TransitionFunction == null)
+    //            return false;
+    //        return TransitionFunction.Invoke();
+    //    }
+
+    //    public Func<bool> TransitionFunction { get; set; }
+    //}
+
+    public class TtTimedStateTransition<S> : TtTimedStateTransition<S, TtStateMachineContext>
     {
-        public override bool CheckCondition()
-        {
-            if (TransitionFunction == null)
-                return false;
-            return TransitionFunction.Invoke();
-        }
 
-        public Func<bool> TransitionFunction { get; set; }
     }
 
-    public class TtTimedStateTransition : TtTimedStateTransition<FStateMachineContext>
+    public class TtTimedStateTransition: TtTimedStateTransition<TtDefaultCenterData, TtStateMachineContext>
     {
 
     }

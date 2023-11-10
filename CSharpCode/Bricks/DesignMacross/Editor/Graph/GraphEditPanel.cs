@@ -34,7 +34,6 @@ namespace EngineNS.DesignMacross.Editor
             {
                 var graphAttribute = GraphAttribute.GetAttributeWithSpecificClassType<IGraph>(description.GetType());
                 var graph = UTypeDescManager.CreateInstance(graphAttribute.ClassType, new object[] { description }) as IGraph;
-                graph.Construct();
                 var navigableGraphsPanel = new TtNavigableGraphsPanel(graph);
                 OpenedNavigableGraphsPanels.Add(description, navigableGraphsPanel);
                 ActiveGraphNavigatedPanel = navigableGraphsPanel;
@@ -51,7 +50,7 @@ namespace EngineNS.DesignMacross.Editor
     {
         public void Draw(TtGraphEditPanel graphEditPanel, FDesignMacrossEditorRenderingContext context)
         {
-            Macross.UMacrossBreak mBreakerStore = null;
+            //Macross.UMacrossBreak mBreakerStore = null;
             var vMin = ImGuiAPI.GetWindowContentRegionMin();
             var vMax = ImGuiAPI.GetWindowContentRegionMax();
             IDescription PanelKeyWillBeRemoved = null;
@@ -89,6 +88,8 @@ namespace EngineNS.DesignMacross.Editor
                         var graphContext = new FGraphRenderingContext();
                         graphContext.CommandHistory = context.CommandHistory;
                         graphContext.EditorInteroperation = context.EditorInteroperation;
+                        graphContext.GraphElementStyleManager = context.GraphElementStyleManager;
+                        graphContext.DescriptionsElement = context.DescriptionsElement;
                         var render = new TtNavigableGraphsPanelRender();
                         render.Draw(ui.Value, context);
                         ImGuiAPI.EndTabItem();

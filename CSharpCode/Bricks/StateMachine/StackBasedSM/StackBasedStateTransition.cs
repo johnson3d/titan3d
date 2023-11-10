@@ -4,12 +4,13 @@ using System.Text;
 
 namespace EngineNS.Bricks.StateMachine.StackBasedSM
 {
-    public class TtStackBasedStateTransition<T> : ITransition<T>
+    public class TtStackBasedStateTransition<S, T> : ITransition<S, T>
     {
-        public IState<T> From { get; set; }
-        public IState<T> To { get; set; }  
+        public S CenterData { get; set; }
+        public IState<S, T> From { get; set; }
+        public IState<S, T> To { get; set; }  
 
-        public bool Check()
+        public bool Check(in T context)
         {
             return false;
         }

@@ -37,11 +37,20 @@ namespace EngineNS.DesignMacross.TimedStateMachine.StateTransition
         }
     }
 
+    public class TtDesignMacrossMethodGraph : UMacrossMethodGraph
+    {
+        public override void UpdateCanvasMenus()
+        {
+            base.UpdateCanvasMenus();
+
+        }
+    }
+
 
     [ImGuiElementRender(typeof(TtGraph_TimedStateTransitionRender))]
     public class TtGraph_TimedStateTransition : TtGraph, IContextMeunable
     {
-        IMethodDescription mTransitionMethod;
+        public TtTimedStateTransitionClassDescription TimedStateTransitionClass { get => Description as TtTimedStateTransitionClassDescription; }
         UMacrossMethodGraph mGraph;
         public UMacrossMethodGraph Graph => mGraph;
 
@@ -50,45 +59,21 @@ namespace EngineNS.DesignMacross.TimedStateMachine.StateTransition
         public TtGraph_TimedStateTransition(IDescription description) : base(description)
         {
             var desc = description as TtTimedStateTransitionClassDescription;
-            var methodName = desc.Name + "_func";
-            mTransitionMethod = new TtMethodDescription()
-            {
-                Name = methodName,
-                MethodName = methodName,
-                ReturnValue = new UVariableDeclaration()
-                {
-                    VariableType = new UTypeReference(typeof(bool)),
-                    InitValue = new UDefaultValueExpression(typeof(bool))
-                }
-            };
-            mTransitionMethod.ReturnValue.VariableName = "ret_" + mTransitionMethod.Id.ToString().GetHashCode();
-
-            desc.Methods.Add(mTransitionMethod);
 
             mMacrossHolder = new TtTransitionMacrossHolder();
-            mGraph = UMacrossMethodGraph.NewGraph(mMacrossHolder, mTransitionMethod.BuildMethodDeclaration());
+            FClassBuildContext classBuildContext = new();
+            mGraph = UMacrossMethodGraph.NewGraph(mMacrossHolder, desc.OverrideCheckConditionMethodDescription.BuildMethodDeclaration(ref classBuildContext));
             mGraph.GraphName = description.Name;
         }
 
-        public TtPopupMenu PopupMenu { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
-
-        public void DrawContextMenu(ref FGraphElementRenderingContext context)
+        public override void ConstructContextMenu(ref FGraphElementRenderingContext context, TtPopupMenu PopupMenu)
         {
-            throw new NotImplementedException();
+            PopupMenu.Reset();
         }
 
-        public void OpenContextMeun()
+        public override void ConstructElements(ref FGraphRenderingContext context)
         {
-
-        }
-
-        public void UpdateContextMenu(ref FGraphElementRenderingContext context)
-        {
-
-        }
-
-        public override void Construct()
-        {
+            
         }
     }
     public class TtGraph_TimedStateTransitionRender : IGraphRender

@@ -1126,9 +1126,9 @@ namespace EngineNS.GamePlay
             }
         }
 
-        bool mCtrlKeyIsDown = false;
-        bool mShiftKeyIsDown = false;
-        bool mAltKeyIsDown = false;
+        protected bool mCtrlKeyIsDown = false;
+        protected bool mShiftKeyIsDown = false;
+        protected bool mAltKeyIsDown = false;
         public void OnEvent(Graphics.Pipeline.UViewportSlate viewport, in Bricks.Input.Event e)
         {
             if (mAxisMeshDatas == null)

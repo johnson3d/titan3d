@@ -6,41 +6,38 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace EngineNS.DesignMacross.Base.Graph.Elements
+namespace EngineNS.DesignMacross.Editor
 {
     [ImGuiElementRender(typeof(TtGraphElementRender_GridLine))]
-    public class TtGraphElement_GridLine : IGraphElement
+    public class TtGraphElement_GridLine : TtWidgetGraphElement
     {
-        public Guid Id { get; set; } = Guid.Empty;
-        public string Name { get; set; } = string.Empty;
-        public Vector2 Location { get; set; }
-        public Vector2 AbsLocation { get => TtGraphMisc.CalculateAbsLocation(this); }
-        public SizeF Size { get; set; }
-        public IGraphElement Parent { get; set; } = null;
-        public IDescription Description { get; set; } = null;
         public bool IsInfinitiSize = true;
 
-        public TtGraphElement_GridLine()
-        {
-        }
-
-        public bool HitCheck(Vector2 pos)
+        public override bool CanDrag()
         {
             return false;
         }
 
-        public void OnSelected()
+        public override bool HitCheck(Vector2 pos)
+        {
+            return false;
+        }
+
+        public override void OnDragging(Vector2 delta)
         {
 
         }
 
-        public void OnUnSelected()
+        public override void OnSelected(ref FGraphElementRenderingContext context)
         {
 
         }
-        public void Construct()
-        { 
+
+        public override void OnUnSelected()
+        {
+
         }
+
     }
     public class TtGraphElementRender_GridLine : IGraphElementRender
     {
@@ -63,16 +60,16 @@ namespace EngineNS.DesignMacross.Base.Graph.Elements
                 for (int i = startX; i < hCount + startX; i++)
                 {
                     cmd.AddLine(
-                        context.ViewPort.ViewPortTransform(context.Camera.Location, new Vector2(i * step, cameraRect.Top)),
-                        context.ViewPort.ViewPortTransform(context.Camera.Location, new Vector2(i * step, cameraRect.Bottom)),
+                        context.ViewPort.ViewportTransform(context.Camera.Location, new Vector2(i * step, cameraRect.Top)),
+                        context.ViewPort.ViewportTransform(context.Camera.Location, new Vector2(i * step, cameraRect.Bottom)),
                         (i % 8 == 0) ? styles.GridSplitLineColor : styles.GridNormalLineColor, 1.0f);
                 }
                 var startY = (int)Math.Ceiling(offSet.Y);
                 for (int i = startY; i < vCount + startY; i++)
                 {
                     cmd.AddLine(
-                        context.ViewPort.ViewPortTransform(context.Camera.Location, new Vector2(cameraRect.Left, i * step)),
-                        context.ViewPort.ViewPortTransform(context.Camera.Location, new Vector2(cameraRect.Right, i * step)),
+                        context.ViewPort.ViewportTransform(context.Camera.Location, new Vector2(cameraRect.Left, i * step)),
+                        context.ViewPort.ViewportTransform(context.Camera.Location, new Vector2(cameraRect.Right, i * step)),
                         (i % 8 == 0) ? styles.GridSplitLineColor : styles.GridNormalLineColor, 1.0f);
                 }
             }
@@ -81,15 +78,15 @@ namespace EngineNS.DesignMacross.Base.Graph.Elements
                 for (int i = 0; i < hCount; i++)
                 {
                     cmd.AddLine(
-                        context.ViewPort.ViewPortTransform(context.Camera.Location, new Vector2(gridLine.Location.X + i * step, cameraRect.Top)),
-                        context.ViewPort.ViewPortTransform(context.Camera.Location, new Vector2(gridLine.Location.X + i * step, cameraRect.Bottom)),
+                        context.ViewPort.ViewportTransform(context.Camera.Location, new Vector2(gridLine.Location.X + i * step, cameraRect.Top)),
+                        context.ViewPort.ViewportTransform(context.Camera.Location, new Vector2(gridLine.Location.X + i * step, cameraRect.Bottom)),
                         (i % 8 == 0) ? styles.GridSplitLineColor : styles.GridNormalLineColor, 1.0f);
                 }
                 for (int i = 0; i < vCount; i++)
                 {
                     cmd.AddLine(
-                        context.ViewPort.ViewPortTransform(context.Camera.Location, new Vector2(cameraRect.Left, gridLine.Location.Y + i * step)),
-                        context.ViewPort.ViewPortTransform(context.Camera.Location, new Vector2(cameraRect.Right, gridLine.Location.Y + i * step)),
+                        context.ViewPort.ViewportTransform(context.Camera.Location, new Vector2(cameraRect.Left, gridLine.Location.Y + i * step)),
+                        context.ViewPort.ViewportTransform(context.Camera.Location, new Vector2(cameraRect.Right, gridLine.Location.Y + i * step)),
                         (i % 8 == 0) ? styles.GridSplitLineColor : styles.GridNormalLineColor, 1.0f);
                 }
             }

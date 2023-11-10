@@ -17,9 +17,4 @@ namespace EngineNS.DesignMacross.TimedStateMachine
     {
 
     }
-
-    public interface IGraphElement_TimedStateAttachment : IGraphElement, ILayoutable
-    {
-        
-    }
 }

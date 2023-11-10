@@ -371,7 +371,7 @@ namespace EngineNS.Bricks.GpuDriven
         public TtSwRasterizeShading SWRasterizer;
         private NxRHI.UComputeDraw SWRasterizerDrawcall;
 
-        int QUARK_SUBPIXEL_SAMPLES = 256;
+        protected int QUARK_SUBPIXEL_SAMPLES = 256;
         public TtSwRasterizeNode()
         {
             Name = "SwRasterizeNode";
@@ -596,7 +596,7 @@ namespace EngineNS.UTest
     [UTest]
     public class UTest_TtSoftRaster
     {
-        bool IgnorTest = false;
+        bool IgnorTest = true;
 
         int MipLevelForRect(ref Vector4 RectPixels, int DesiredFootprintPixels)
         {

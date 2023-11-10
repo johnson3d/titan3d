@@ -4,8 +4,9 @@ using System.Text;
 
 namespace EngineNS.Bricks.StateMachine.TimedSM
 {
-    public class TtTimedStateAttachment<T> : IAttachment<T>
+    public class TtTimedStateAttachment<S, T> : IAttachment<S, T>
     {
+        public S CenterData { get; set; }
         public string Name { get; set; }
 
         public void Enter()
@@ -33,8 +34,9 @@ namespace EngineNS.Bricks.StateMachine.TimedSM
         {
         }
     }
-    public class TtTimedStateAttachmentQueue<T> : IAttachment<T>
+    public class TtTimedStateAttachmentQueue<S, T> : IAttachment<S, T>
     {
+        public S CenterData { get; set; }
         public string Name { get; set; }
 
         public void Enter()
@@ -64,12 +66,22 @@ namespace EngineNS.Bricks.StateMachine.TimedSM
 
     }
 
-    public class TtTimedStateAttachment : TtTimedStateAttachment<FStateMachineContext>
+    public class TtTimedStateAttachment<S> : TtTimedStateAttachment<S, TtStateMachineContext>
     {
 
     }
 
-    public class TtTimedStateAttachmentQueue : TtTimedStateAttachmentQueue<FStateMachineContext>
+    public class TtTimedStateAttachmentQueue<S> : TtTimedStateAttachmentQueue<S, TtStateMachineContext>
+    {
+
+    }
+
+    public class TtTimedStateAttachment : TtTimedStateAttachment<TtDefaultCenterData, TtStateMachineContext>
+    {
+
+    }
+
+    public class TtTimedStateAttachmentQueue : TtTimedStateAttachmentQueue<TtDefaultCenterData, TtStateMachineContext>
     {
 
     }

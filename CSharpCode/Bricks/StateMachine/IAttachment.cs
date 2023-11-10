@@ -4,8 +4,9 @@ using System.Text;
 
 namespace EngineNS.Bricks.StateMachine
 {
-    public interface IAttachment<T>
+    public interface IAttachment<S, T>
     {
+        public S CenterData { get; set; }
         string Name { get; set; }
         void Initialize();
         void Enter();

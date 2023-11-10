@@ -13,19 +13,19 @@ namespace EngineNS.DesignMacross
         public string Name { get; set; }
 
         public void UndoOperation();
-        public void RedoOperation();
+        public void DoOperation();
     }
     public class TtOperationCommand : IOperationCommand
     {
         public TtOperationCommand(string commandName, 
-            IOperationCommandData redoData, 
-            Action<IOperationCommandData> redoAction, 
+            IOperationCommandData doData, 
+            Action<IOperationCommandData> doAction, 
             IOperationCommandData undoData, 
             Action<IOperationCommandData> undoAction)
         {
             mName = commandName;
-            mDoData = redoData;
-            mDoAction = redoAction;
+            mDoData = doData;
+            mDoAction = doAction;
             mUndoData = undoData;
             mUndoAction = undoAction;
         }
@@ -49,7 +49,7 @@ namespace EngineNS.DesignMacross
         {
             Undo(UndoData);
         }
-        public void RedoOperation()
+        public void DoOperation()
         {
             Do(DoData);
         }
@@ -73,30 +73,30 @@ namespace EngineNS.DesignMacross
                 return;
 
             var command = DoStack.Pop();
-            command.RedoOperation();
+            command.DoOperation();
             UndoStack.Push(command);
         }
         public void CreateAndExtuteCommand(string commandName,Action<IOperationCommandData> doAction, Action<IOperationCommandData> undoAction)
         {
             var command = new TtOperationCommand(commandName, null, doAction, null, undoAction);
-            DoStack.Push(command);
-            command.RedoOperation();
+            command.DoOperation();
+            UndoStack.Push(command);
         }
         public void CreateAndExtuteCommand(string commandName, IOperationCommandData doData, Action<IOperationCommandData> doAction, IOperationCommandData undoData, Action<IOperationCommandData> undoAction)
         {
             var command = new TtOperationCommand(commandName, doData, doAction, undoData, undoAction);
-            DoStack.Push(command);
-            command.RedoOperation();
+            command.DoOperation();
+            UndoStack.Push(command);
         }
         public void CreateCommand(string commandName, Action<IOperationCommandData> doAction, Action<IOperationCommandData> undoAction)
         {
             var command = new TtOperationCommand(commandName, null, doAction, null, undoAction);
-            DoStack.Push(command);
+            UndoStack.Push(command);
         }
         public void CreateCommand(string commandName, IOperationCommandData doData, Action<IOperationCommandData> doAction, IOperationCommandData undoData, Action<IOperationCommandData> undoAction)
         {
             var command = new TtOperationCommand(commandName, doData, doAction, undoData, undoAction);
-            DoStack.Push(command);
+            UndoStack.Push(command);
         }
     }
 }

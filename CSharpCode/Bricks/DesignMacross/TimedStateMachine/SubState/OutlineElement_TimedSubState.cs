@@ -6,36 +6,30 @@ using EngineNS.DesignMacross.Base.Render;
 using System;
 using System.Collections.Generic;
 using System.Text;
+using EngineNS.DesignMacross.TimedStateMachine.CompoundState;
 
 namespace EngineNS.DesignMacross.TimedStateMachine
 {
-    [ImGuiElementRender(typeof(TtOutlineElementRender_TimedState))]
-    public class TtOutlineElement_TimedState : IDesignableVariableOutlineElement
+    [ImGuiElementRender(typeof(TtOutlineElementRender_TimedSubState))]
+    public class TtOutlineElement_TimedSubState : TtOutlineElement_Leaf
     {
-        public TtOutlineElement_TimedStatesHubGraph StatesHub { get; set; }
-        public string Name { get => VariableDeclaration.VariableName; set => VariableDeclaration.VariableName = value; }
-        public UVariableDeclaration VariableDeclaration { get; set; }
-        public List<IOutlineElement> Children { get; set; } = new List<IOutlineElement>();
-        public IDescription Description { get; set; } = null;
+        public TtOutlineElement_TimedCompoundStateGraph CompoundStateGraph { get; set; }
 
-        public void Construct()
-        {
-            throw new NotImplementedException();
-        }
+
     }
-    public class TtOutlineElementRender_TimedState : IOutlineElementRender
+    public class TtOutlineElementRender_TimedSubState : IOutlineElementRender
     {
         public void Draw(IRenderableElement renderableElement, ref FOutlineElementRenderingContext context)
         {
-            TtOutlineElement_TimedState state = renderableElement as  TtOutlineElement_TimedState;
+            TtOutlineElement_TimedSubState state = renderableElement as  TtOutlineElement_TimedSubState;
             ImGuiTreeNodeFlags_ flags = ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_NoTreePushOnOpen | ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_Bullet | ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_SpanFullWidth;// | ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_AllowItemOverlap;
             Vector2 buttonSize = new Vector2(16, 16);
             var regionSize = ImGuiAPI.GetContentRegionAvail();
 
-            var designVarTreeNodeIsOpen = ImGuiAPI.TreeNodeEx(state.Name, flags);
+            var treeNodeIsOpen = ImGuiAPI.TreeNodeEx(state.Name, flags);
             ImGuiAPI.SameLine(0, EGui.UIProxy.StyleConfig.Instance.ItemSpacing.X);
-            var designVarTreeNodeDoubleClicked = ImGuiAPI.IsItemDoubleClicked(ImGuiMouseButton_.ImGuiMouseButton_Left);
-            var designVarTreeNodeIsItemClicked = ImGuiAPI.IsItemClicked(ImGuiMouseButton_.ImGuiMouseButton_Left);
+            var treeNodeDoubleClicked = ImGuiAPI.IsItemDoubleClicked(ImGuiMouseButton_.ImGuiMouseButton_Left);
+            var treeNodeIsItemClicked = ImGuiAPI.IsItemClicked(ImGuiMouseButton_.ImGuiMouseButton_Left);
             ImGuiAPI.SameLine(regionSize.X - buttonSize.X, -1.0f);
             var keyName = $"Delete DesignableVariable {state.Name}?";
             if (EGui.UIProxy.CustomButton.ToolButton("x", in buttonSize, 0xFF0000FF, "DesignVar_X_" + state.Name))
@@ -48,13 +42,13 @@ namespace EngineNS.DesignMacross.TimedStateMachine
             {
                 bIsRemoved = true;
             }, null);
-            if (designVarTreeNodeIsOpen)
+            if (treeNodeIsOpen)
             {
-                if (designVarTreeNodeDoubleClicked)
+                if (treeNodeDoubleClicked)
                 {
                     //context.DefinitionGraphEditPanel.EditDefinitionGraph(variable);
                 }
-                else if (designVarTreeNodeIsItemClicked)
+                else if (treeNodeIsItemClicked)
                 {
                     //PGMember.Target = method;
                 }
