@@ -4,6 +4,7 @@
   <Description Type="System.String@Unknown" Value="This is a EngineNS.Bricks.Procedure.UPgcAsset&#xA;Hahah" />
   <Icon Type="EngineNS.EGui.UUvAnim@EngineCore">
     <Color Type="System.UInt32@Unknown" Value="4294967295" />
+    <Duration Type="System.Single@Unknown" Value="1000" />
     <FrameUVs Type="System.Collections.Generic.List&lt;EngineNS.Vector4@EngineCore,&gt;@Unknown" Count="11">
       <e_0 Value="0,0,1,1" />
       <e_1 Value="0,0,1,1" />
@@ -22,13 +23,13 @@
   <RefAssetRNames Type="System.Collections.Generic.List&lt;EngineNS.RName@EngineCore,&gt;@Unknown" Count="9">
     <e_0 Value="Game,utest/pgc/terrain_bz_height.macross,ba13d1ec-8f3a-48b7-9f86-031cc04d5742" />
     <e_1 Value="Game,utest/pgc/terraingen.macross,318c3ff6-c3c8-4e00-bb54-c3c2abaa73a2" />
-    <e_2 Value="Game,utest/texture/ground_04_n.srv,58caafa4-d323-47ad-a36d-3c0eac7d0397" />
-    <e_3 Value="Game,utest/texture/ground_04.srv,92048bc1-bdc1-4cb1-87aa-05a0499abab4" />
-    <e_4 Value="Game,utest/texture/ground6_nmp.srv,d005108e-4752-4aad-bb02-dcf0d8a8eb14" />
-    <e_5 Value="Game,utest/texture/ground6.srv,e4a4a66c-b97a-4113-b16a-c45e9d72fcfd" />
-    <e_6 Value="Game,utest/texture/ground8_nmp.srv,a70b5d9b-9473-463b-b82e-f1b3e9660bc9" />
-    <e_7 Value="Game,utest/texture/ground8.srv,2ea1a338-2ae4-4c7a-a4d2-672fe6909556" />
-    <e_8 Value="Engine,uestyle/graph/regularnode_color_spill.srv,00000000-0000-0000-0000-000000000000" />
+    <e_2 Value="Game,utest/texture/ground_04_n.srv,5dd02f78-48fa-4a60-a493-dba2adda11c1" />
+    <e_3 Value="Game,utest/texture/ground_04.srv,cc988da2-f1c5-4240-a3ec-78bc46536197" />
+    <e_4 Value="Game,utest/texture/ground6_nmp.srv,21738ef9-7f8d-41fa-8297-78502837377b" />
+    <e_5 Value="Game,utest/texture/ground6.srv,3125efdc-5049-4bf7-a1dc-31130e26ff1e" />
+    <e_6 Value="Game,utest/texture/ground8_nmp.srv,4eedbc20-2934-4718-9736-b4467d9b7cab" />
+    <e_7 Value="Game,utest/texture/ground8.srv,414040a2-11a8-4b59-9516-90e39ed0c3c7" />
+    <e_8 Value="Engine,uestyle/graph/regularnode_color_spill.srv,1e394184-d69b-4622-ad58-f4ceadeab7e0" />
   </RefAssetRNames>
   <TypeStr Type="System.String@Unknown" Value="EngineNS.Bricks.Procedure.UPgcAsset@EngineCore" />
 </Root>
