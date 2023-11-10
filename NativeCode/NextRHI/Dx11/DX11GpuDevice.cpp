@@ -503,7 +503,6 @@ namespace NxRHI
 	{
 		while (mIdleCmdlist.empty() == false)
 		{
-			mIdleCmdlist.front()->Release();
 			mIdleCmdlist.pop();
 		}
 	}
@@ -531,9 +530,10 @@ namespace NxRHI
 		VAutoVSLLock locker(mImmCmdListLocker);
 		if (mIdleCmdlist.empty())
 		{
-			mIdleCmdlist.push(mDevice->CreateCommandList());
+			mIdleCmdlist.push(MakeWeakRef(mDevice->CreateCommandList()));
 		}
 		auto result = mIdleCmdlist.front();
+		result->AddRef();
 		mIdleCmdlist.pop();
 		return result;
 	}
@@ -541,6 +541,7 @@ namespace NxRHI
 	{
 		VAutoVSLLock locker(mImmCmdListLocker);
 		mIdleCmdlist.push(cmd);
+		cmd->Release();
 		return;
 	}
 	UINT64 DX11CmdQueue::Flush(EQueueType type)

@@ -71,7 +71,7 @@ namespace NxRHI
 		void ClearIdleCmdlists();
 		NullGpuDevice*					mDevice = nullptr;
 		VCritical						mImmCmdListLocker;
-		std::queue<ICommandList*>		mIdleCmdlist;
+		std::queue<AutoRef<ICommandList>>	mIdleCmdlist;
 	};
 }
 

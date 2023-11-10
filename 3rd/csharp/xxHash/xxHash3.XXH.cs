@@ -4,6 +4,8 @@ using System.Runtime.CompilerServices;
 using System.Runtime.Intrinsics;
 using System.Runtime.Intrinsics.X86;
 
+#pragma warning disable CS0414
+
 namespace Standart.Hash.xxHash
 {
     public static partial class xxHash3

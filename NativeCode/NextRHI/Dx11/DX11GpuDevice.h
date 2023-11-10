@@ -92,7 +92,7 @@ namespace NxRHI
 		DX11GpuDevice*					mDevice = nullptr;
 		VCritical						mImmCmdListLocker;
 		AutoRef<DX11CommandList>		mHardwareContext;
-		std::queue<ICommandList*>		mIdleCmdlist;
+		std::queue<AutoRef<ICommandList>>		mIdleCmdlist;
 	};
 }
 

@@ -7,7 +7,8 @@
 1. 编译Core.Window工程（C++）
 2. 编译Engine.Window工程（C#）
 3. 编译MainEditor工程（C#）
-4. **第一次编译引擎如果失败，报告缺失一些生成代码，请单独调试运行CppWeavingTools和CSharpCodeTools两个工程一次** 
+4. **因为github的LFS限制，可能需要运行一下Setup.bat做一些运行环境配置**
+5. **第一次编译引擎如果失败，报告缺失一些生成代码，请单独调试运行CppWeavingTools和CSharpCodeTools两个工程一次** 
 ## Windows编译Android APK
 1. 编译Core.Android工程（C++）
 2. 编译Engine.Android程（C#）

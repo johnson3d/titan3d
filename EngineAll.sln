@@ -83,7 +83,6 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Module", "Module", "{F63E0682-61A8-4FB5-8DFD-EF759DFBD88F}"
 	ProjectSection(SolutionItems) = preProject
 		CS_Engine.bat = CS_Engine.bat
-		Module\OpenAIAssist\OpenAIAssist.csproj = Module\OpenAIAssist\OpenAIAssist.csproj
 	EndProjectSection
 EndProject
 Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "Procedure", "CSharpCode\Bricks\Procedure\Procedure.shproj", "{10AEE1EB-9CE5-4B81-9973-960D39A80141}"
