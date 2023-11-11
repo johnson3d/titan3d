@@ -453,12 +453,12 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Control
     }
     public partial class TtHLSLMethodManager
     {
-        public Dictionary<string, Rtti.UClassMeta.MethodMeta> Methods { get; } = new Dictionary<string, Rtti.UClassMeta.MethodMeta>();
+        public Dictionary<string, Rtti.UClassMeta.TtMethodMeta> Methods { get; } = new Dictionary<string, Rtti.UClassMeta.TtMethodMeta>();
         public void SureMethods()
         {
             if (Methods.Count > 0)
                 return;
-            foreach (var i in Rtti.UClassMetaManager.Instance.Metas)
+            foreach (var i in Rtti.TtClassMetaManager.Instance.Metas)
             {
                 var hlslAttr = i.Value.ClassType.GetCustomAttribute<TtHLSLProviderAttribute>(false);
                 if (hlslAttr == null)
@@ -473,7 +473,7 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Control
                 }
             }
         }
-        public Rtti.UClassMeta.MethodMeta GetMethod(string fun)
+        public Rtti.UClassMeta.TtMethodMeta GetMethod(string fun)
         {
             SureMethods();
             if(Methods.TryGetValue(fun, out var result))
@@ -482,7 +482,7 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Control
             }
             return null;
         }
-        public Rtti.UClassMeta.MethodMeta GetMethodByDeclString(string declStr)
+        public Rtti.UClassMeta.TtMethodMeta GetMethodByDeclString(string declStr)
         {
             SureMethods();
             declStr = Rtti.UClassMeta.RemoveDeclstringDllVersion(declStr);

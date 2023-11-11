@@ -56,13 +56,16 @@ namespace EngineNS.Graphics.Pipeline.Common
             DownSample = await UEngine.Instance.GfxDevice.EffectManager.GetComputeEffect(RName.GetRName("Shaders/Compute/GpuDriven/Hzb.compute", RName.ERNameType.Engine),
                 "CS_DownSample", NxRHI.EShaderType.SDT_ComputeShader, null, defines, null);
 
-            SetupDrawcall = rc.CreateComputeDraw();
             //ResetComputeDrawcall(policy);
         }
         private unsafe void ResetComputeDrawcall(URenderPolicy policy)
         {
             if (Setup == null)
                 return;
+
+            if (SetupDrawcall == null)
+                SetupDrawcall = UEngine.Instance.GfxDevice.RenderContext.CreateComputeDraw();
+
             SetupDrawcall.SetComputeEffect(Setup);
             SetupDrawcall.SetDispatch(MaxSRVWidth / Dispatch_SetupDimArray2.X, MaxSRVHeight / Dispatch_SetupDimArray2.Y, 1);
 
@@ -200,6 +203,8 @@ namespace EngineNS.Graphics.Pipeline.Common
         private static Profiler.TimeScope ScopeTick = Profiler.TimeScopeManager.GetTimeScope(typeof(UHzbNode), nameof(TickLogic));
         public override unsafe void TickLogic(GamePlay.UWorld world, Graphics.Pipeline.URenderPolicy policy, bool bClear)
         {
+            if (SetupDrawcall == null)
+                return;
             using (new Profiler.TimeScopeHelper(ScopeTick))
             {
                 if (Setup == null)

@@ -53,6 +53,18 @@ namespace EngineNS.Graphics.Pipeline.Shader
         public NxRHI.UShaderDesc DescPS { get; private set; }
         public UShadingEnv ShadingEnv { get; internal set; }
 
+        internal UEffect UnsafeCloneForEditor()
+        {
+            var result = new UEffect();
+            result.ShaderEffect = ShaderEffect;
+            result.DescVS = DescVS;
+            result.DescPS = DescPS;
+            result.ShadingEnv = ShadingEnv;
+            var meta = Rtti.TtClassMetaManager.Instance.GetMeta(Rtti.UTypeDescGetter<UEffectDesc>.TypeDesc);
+            meta.CopyObjectMetaField(result.Desc, Desc);
+            return result;
+        }
+
         public unsafe void SaveTo(Hash160 hash)
         {
             var path = UEngine.Instance.FileManager.GetPath(IO.TtFileManager.ERootDir.Cache, IO.TtFileManager.ESystemDir.Effect);
@@ -292,6 +304,9 @@ namespace EngineNS.Graphics.Pipeline.Shader
             if (mdf == null)
                 return false;
 
+            this.Desc.MaterialHash = material.GetHash();
+            this.Desc.MdfQueueHash = mdf.GetHash();
+
             var descVS = await UEngine.Instance.EventPoster.Post((state) =>
             {
                 var compilier = new Editor.ShaderCompiler.UHLSLCompiler();
@@ -313,9 +328,7 @@ namespace EngineNS.Graphics.Pipeline.Shader
 
             this.DescVS = descVS;
             this.DescPS = descPS;
-            this.Desc.MaterialHash = material.GetHash();
-            this.Desc.MdfQueueHash = mdf.GetHash();
-
+            
             var VertexShader = rc.CreateShader(DescVS);
             if (VertexShader == null)
                 return false;
@@ -422,14 +435,60 @@ namespace EngineNS.Graphics.Pipeline.Shader
             //return Hash160.CreateHash160($"{shading},{material.AssetName},{mdf},{caps}");
             return Hash160.CreateHash160($"{shading},{material.AssetName},{mdf}");
         }
+        public Dictionary<Hash160, UEffect> MaterialEditingEffects { get; } = new Dictionary<Hash160, UEffect>();
         public async Thread.Async.TtTask<UEffect> GetEffect(UShadingEnv shading, UMaterial material, TtMdfQueueBase mdf)
         {
             UEffect result = null;
+            Hash160 hash = new Hash160();
             if (material.IsEditingMaterial)
             {
-                result = await UEffect.CreateEffect(shading, shading.mCurrentPermutationId, material, mdf);
+                hash = GetShaderHash(shading, material, mdf);
+                if (MaterialEditingEffects.TryGetValue(hash, out result))
+                {
+                    if (result.Desc.MaterialHash != material.MaterialHash)
+                    {
+                        await result.RefreshEffect(material);
+                    }
+                    return result;
+                }
+            }
+            result = await GetEffectImpl(shading, material, mdf);
+            if (material.IsEditingMaterial)
+            {
+                UEffect nr = null;
+                if (MaterialEditingEffects.TryGetValue(hash, out nr))
+                {
+                    return nr;
+                }
+                result = result.UnsafeCloneForEditor();
+                MaterialEditingEffects.Add(hash, result);
                 return result;
             }
+            return result;
+        }
+        public void RemoveEditingMaterial(RName material)
+        {
+            var rmv = new List<Hash160>();
+            foreach (var i in MaterialEditingEffects)
+            {
+                if (i.Value.Desc.MaterialName == material)
+                {
+                    rmv.Add(i.Key);
+                }
+            }
+            foreach (var i in rmv)
+            {
+                MaterialEditingEffects.Remove(i);
+            }
+        }
+        private async Thread.Async.TtTask<UEffect> GetEffectImpl(UShadingEnv shading, UMaterial material, TtMdfQueueBase mdf)
+        {
+            UEffect result = null;
+            //if (material.IsEditingMaterial)
+            //{
+            //    result = await UEffect.CreateEffect(shading, shading.mCurrentPermutationId, material, mdf);
+            //    return result;
+            //}
 
             var hash = GetShaderHash(shading, material, mdf);
             result = TryGetEffect(hash);
@@ -474,11 +533,14 @@ namespace EngineNS.Graphics.Pipeline.Shader
                 if (result != null)
                 {
                     result.Desc.PermutationId = shading.mCurrentPermutationId;
-                    await UEngine.Instance.EventPoster.Post((state) =>
+                    if (material.IsEditingMaterial == false)
                     {
-                        result.SaveTo(hash);
-                        return true;
-                    }, Thread.Async.EAsyncTarget.AsyncIO);
+                        await UEngine.Instance.EventPoster.Post((state) =>
+                        {
+                            result.SaveTo(hash);
+                            return true;
+                        }, Thread.Async.EAsyncTarget.AsyncIO);
+                    }   
 
                     if (Effects.ContainsKey(hash) == false)
                     {

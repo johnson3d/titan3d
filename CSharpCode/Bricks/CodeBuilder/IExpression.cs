@@ -127,7 +127,7 @@ namespace EngineNS.Bricks.CodeBuilder
             if (desc == null)
                 return null;
 
-            return Rtti.UClassMetaManager.Instance.GetMeta(desc);
+            return Rtti.TtClassMetaManager.Instance.GetMeta(desc);
         }
         public string GetFullName()
         {

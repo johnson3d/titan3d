@@ -98,7 +98,7 @@ namespace EngineNS.IO
             ar.Read(out ObjDataSize);
             savePos += ObjDataSize;
 
-            var meta = Rtti.UClassMetaManager.Instance.GetMeta(typeHash);
+            var meta = Rtti.TtClassMetaManager.Instance.GetMeta(typeHash);
             if (meta == null)
             {
                 throw new Exception($"Meta Type lost:{typeHash}");
@@ -120,7 +120,7 @@ namespace EngineNS.IO
                 return;
             }
             var typeStr = Rtti.UTypeDescManager.Instance.GetTypeStringFromType(obj.GetType());
-            var meta = Rtti.UClassMetaManager.Instance.GetMeta(typeStr);
+            var meta = Rtti.TtClassMetaManager.Instance.GetMeta(typeStr);
             Write(ar, obj, meta.CurrentVersion);
         }
         public static bool Read(IReader ar, ISerializer obj, Rtti.UMetaVersion metaVersion = null)
@@ -213,7 +213,7 @@ namespace EngineNS.IO
             var typeStr = Rtti.UTypeDescManager.Instance.GetTypeStringFromType(obj.GetType());
             if (metaVersion == null)
             {
-                var meta = Rtti.UClassMetaManager.Instance.GetMeta(typeStr);
+                var meta = Rtti.TtClassMetaManager.Instance.GetMeta(typeStr);
                 if(meta!=null)
                 {
                     metaVersion = meta.CurrentVersion;
@@ -432,7 +432,7 @@ namespace EngineNS.IO
             else
             {
                 var typeStr = Rtti.UTypeDescManager.Instance.GetTypeStringFromType(t);
-                var meta = Rtti.UClassMetaManager.Instance.GetMeta(typeStr);
+                var meta = Rtti.TtClassMetaManager.Instance.GetMeta(typeStr);
             }
         }
         //public static bool DoIsNull = true;
@@ -513,7 +513,7 @@ namespace EngineNS.IO
                 ar.Read(out ObjDataSize);
                 savePos += ObjDataSize;
 
-                var meta = Rtti.UClassMetaManager.Instance.GetMeta(typeHash);
+                var meta = Rtti.TtClassMetaManager.Instance.GetMeta(typeHash);
                 Rtti.UMetaVersion metaVersion;
                 if (meta != null && (metaVersion = meta.GetMetaVersion(versionHash)) != null)
                 {
@@ -731,7 +731,7 @@ namespace EngineNS.IO
             else
             {
                 var typeStr = Rtti.UTypeDescManager.Instance.GetTypeStringFromType(t);
-                var meta = Rtti.UClassMetaManager.Instance.GetMeta(typeStr);
+                var meta = Rtti.TtClassMetaManager.Instance.GetMeta(typeStr);
             }
             return null;
         }
@@ -739,7 +739,7 @@ namespace EngineNS.IO
         public static bool WriteObjectMetaFields(System.Xml.XmlDocument xml, System.Xml.XmlElement node, object obj)
         {
             var typeStr = Rtti.UTypeDescManager.Instance.GetTypeStringFromType(obj.GetType());
-            var meta = Rtti.UClassMetaManager.Instance.GetMeta(typeStr);
+            var meta = Rtti.TtClassMetaManager.Instance.GetMeta(typeStr);
 
             if (meta.MetaAttribute == null && obj.GetType().GetInterface(nameof(IO.ISerializer)) == null)
             {

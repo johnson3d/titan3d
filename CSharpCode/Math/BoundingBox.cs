@@ -16,12 +16,10 @@ namespace EngineNS
         /// <summary>
         /// 最小顶点
         /// </summary>
-        [Rtti.Meta]
         public Vector3 Minimum;
         /// <summary>
         /// 最大顶点
         /// </summary>
-        [Rtti.Meta]
         public Vector3 Maximum;
         public BoundingBox(float minX, float minY, float minZ, float maxX, float maxY, float maxZ)
         {

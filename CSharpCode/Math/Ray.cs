@@ -14,12 +14,10 @@ namespace EngineNS
         /// <summary>
         /// 对象位置
         /// </summary>
-        [Rtti.Meta]
         public Vector3 Position;
         /// <summary>
         /// 对象的方向
         /// </summary>
-        [Rtti.Meta]
         public Vector3 Direction;
         /// <summary>
         /// 带参构造函数

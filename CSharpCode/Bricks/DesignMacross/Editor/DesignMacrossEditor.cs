@@ -218,7 +218,7 @@ namespace EngineNS.DesignMacross.Editor
                 foreach (var classDeclaration in ClassDeclarationsForGenerateCompileCode)
                 {
                     var typeDesc = classDeclaration.TryGetTypeDesc();
-                    var meta = Rtti.UClassMetaManager.Instance.GetMeta(typeDesc);
+                    var meta = Rtti.TtClassMetaManager.Instance.GetMeta(typeDesc);
                     meta.BuildMethods();
                     meta.BuildFields();
                     var version = meta.BuildCurrentVersion();

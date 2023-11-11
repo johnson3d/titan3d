@@ -15,12 +15,10 @@ namespace EngineNS
         /// <summary>
         /// 平面法向量
         /// </summary>
-        [Rtti.Meta]
         public DVector3 Normal;
         /// <summary>
         /// 偏移值D
         /// </summary>
-        [Rtti.Meta]
         public double D;
 
         public double A { get => Normal.X; }

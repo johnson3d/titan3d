@@ -832,7 +832,7 @@ namespace EngineNS.Bricks.NodeGraph
 
             var id = target.NodeId;
             var type = Rtti.UTypeDesc.TypeOf(this.GetType());
-            var meta = Rtti.UClassMetaManager.Instance.GetMeta(type);
+            var meta = Rtti.TtClassMetaManager.Instance.GetMeta(type);
             meta.CopyObjectMetaField(target, this);
             if(!withId)
                 target.NodeId = id;

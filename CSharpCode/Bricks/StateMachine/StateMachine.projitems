@@ -11,8 +11,7 @@
   <ItemGroup>
     <Compile Include="$(MSBuildThisFileDirectory)IAttachmentRule.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)ICompoundStates.cs" />
-    <Compile Include="..\..\CSharpCode\Bricks\StateMachine\ICompoundStates.cs" />
-    <Compile Include="..\..\CSharpCode\Bricks\StateMachine\ITtTimedCompoundState.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)ITtTimedCompoundState.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)IState.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)IAttachment.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)IStateMachine.cs" />

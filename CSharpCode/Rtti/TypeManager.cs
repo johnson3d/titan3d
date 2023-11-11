@@ -69,7 +69,7 @@ namespace EngineNS.Rtti
 
             Rtti.UTypeDescManager.Instance.OnTypeChangedInvoke();
 
-            EngineNS.Rtti.UClassMetaManager.Instance.LoadMetas(moduleName);
+            EngineNS.Rtti.TtClassMetaManager.Instance.LoadMetas(moduleName);
         }
         public static void GetChangedLists(List<Type> removed, List<Type> changed, List<Type> added, System.Reflection.Assembly newAssembly, System.Reflection.Assembly oldAssembly)
         {
@@ -143,7 +143,7 @@ namespace EngineNS.Rtti
             {
                 manager.Types.Remove(j);
 
-                var meta = Rtti.UClassMetaManager.Instance.GetMeta(j, false);
+                var meta = Rtti.TtClassMetaManager.Instance.GetMeta(j, false);
                 if (meta != null)
                 {
                     meta.CheckMetaField();
@@ -395,6 +395,12 @@ namespace EngineNS.Rtti
         public System.Reflection.MethodInfo? GetMethod(string name)
         {
             return SystemType.GetMethod(name);
+        }
+        public System.Reflection.MethodInfo? GetMethod(string name, System.Type[] types)
+        {
+            if (types == null)
+                return SystemType.GetMethod(name);
+            return SystemType.GetMethod(name, types);
         }
         public Attribute? GetCustomAttribute(Type type, bool inherit)
         {
@@ -750,7 +756,7 @@ namespace EngineNS.Rtti
                     return t;
                 }
             }
-            return UMissingTypeManager.Instance.GetConvertType(typeStr);
+            return Rtti.UTypeDescManager.Instance.FindNameAlias(typeStr);
         }
         public UTypeDesc GetTypeDescFromFullName(string fullName)
         {
@@ -769,13 +775,7 @@ namespace EngineNS.Rtti
         public System.Type GetTypeFromString(string typeStr)
         {
             var typeDesc = GetTypeDescFromString(typeStr);
-            if (typeDesc != null)
-                return typeDesc.SystemType;
-
-            var cvtType = UMissingTypeManager.Instance.GetConvertType(typeStr);
-            if (cvtType == null)
-                return null;
-            return cvtType.SystemType;
+            return (typeDesc != null) ? typeDesc.SystemType : null;
         }
         public bool RegAssembly(System.Reflection.Assembly asm, out ServiceManager manager, out UAssemblyDesc outDesc)
         {
@@ -846,7 +846,7 @@ namespace EngineNS.Rtti
                         {
                             s.Types.Remove(j);
 
-                            var meta = Rtti.UClassMetaManager.Instance.GetMeta(j, false);
+                            var meta = Rtti.TtClassMetaManager.Instance.GetMeta(j, false);
                             if (meta != null)
                             {
                                 meta.CheckMetaField();
@@ -881,7 +881,7 @@ namespace EngineNS.Rtti
                     {
                         mgr.Types.Remove(j);
 
-                        var meta = Rtti.UClassMetaManager.Instance.GetMeta(j, false);
+                        var meta = Rtti.TtClassMetaManager.Instance.GetMeta(j, false);
                         if (meta != null)
                         {
                             meta.CheckMetaField();

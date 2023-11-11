@@ -47,7 +47,7 @@ namespace EngineNS.Editor
             var typeDesc = Rtti.UTypeDesc.TypeOf(typeStr);
             if (typeDesc == null)
                 return false;
-            var meta = Rtti.UClassMetaManager.Instance.GetMeta(typeDesc);
+            var meta = Rtti.TtClassMetaManager.Instance.GetMeta(typeDesc);
             if (meta == null)
                 return false;
 

@@ -78,10 +78,10 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
             }
             set
             {
-                SrcType = Rtti.UClassMetaManager.Instance.GetMeta(value.SrcType);
+                SrcType = Rtti.TtClassMetaManager.Instance.GetMeta(value.SrcType);
                 if (SrcType == null)
-                    SrcType = Rtti.UClassMetaManager.Instance.GetMetaFromFullName(typeof(object).FullName); 
-                TarType = Rtti.UClassMetaManager.Instance.GetMeta(value.TarType);
+                    SrcType = Rtti.TtClassMetaManager.Instance.GetMetaFromFullName(typeof(object).FullName); 
+                TarType = Rtti.TtClassMetaManager.Instance.GetMeta(value.TarType);
                 if (TarType == null)
                     TarType = SrcType;
                 //var typeSlt = ToType.EditValue as UTypeSelectorEValue;

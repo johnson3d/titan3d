@@ -9,11 +9,8 @@ namespace EngineNS.Bricks.CodeBuilder
     [Rtti.Meta]
     public partial class UMacrossConfig
     {
-        [Rtti.Meta]
         public string TargetFramework;
-        [Rtti.Meta]
         public List<string> GameReferenceAssemblies = new List<string>();
-        [Rtti.Meta]
         public List<CodeCompiler.ProjectConfig> GenProjects = new List<CodeCompiler.ProjectConfig>();
     }
 

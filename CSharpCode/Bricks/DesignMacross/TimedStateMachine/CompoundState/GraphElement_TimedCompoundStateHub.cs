@@ -116,34 +116,32 @@ namespace EngineNS.DesignMacross.TimedStateMachine.CompoundState
                            }
                        });
                });
-            if (Parent is TtGraph_TimedCompoundState parent)
-            {
-                var elementsInParent = parent.Elements;
+            //if (Parent is TtGraph_TimedCompoundState parent)
+            //{
+            //    var elementsInParent = parent.Elements;
 
-                if (elementsInParent != null)
-                {
-                    var transitionItem = parentMenu.AddMenuItem("TransitionTo", null, null);
-                    foreach (IGraphElement element in elementsInParent)
-                    {
-                        if (element == this || !(element is TtGraphElement_TimedSubState))
-                            continue;
-                        if (element is TtGraphElement_TimedSubState timedStateElement)
-                        {
-                            transitionItem.AddMenuItem(element.Name, null, (UMenuItem item, object sender) =>
-                            {
-                                var elementDesc = timedStateElement.TimedSubStateClassDescription;
-                                var transitionDesc = new TtTimedStateTransitionClassDescription() { FromId = timedStateElement.TimedSubStateClassDescription.Id, ToId = this.Description.Id };
-                                cmdHistory.CreateAndExtuteCommand("Transition From" + element.Name + " To " + this.Name,
-                                    (data) => { timedStateElement.TimedSubStateClassDescription.AddTransition(transitionDesc);},
-                                    (data) => { timedStateElement.TimedSubStateClassDescription.RemoveTransition(transitionDesc);}
-                                    );
-                            });
-                        }
-                    }
-                }
-            }
-
-
+            //    if (elementsInParent != null)
+            //    {
+            //        var transitionItem = parentMenu.AddMenuItem("TransitionTo", null, null);
+            //        foreach (IGraphElement element in elementsInParent)
+            //        {
+            //            if (element == this || !(element is TtGraphElement_TimedSubState))
+            //                continue;
+            //            if (element is TtGraphElement_TimedSubState timedStateElement)
+            //            {
+            //                transitionItem.AddMenuItem(element.Name, null, (UMenuItem item, object sender) =>
+            //                {
+            //                    var elementDesc = timedStateElement.TimedSubStateClassDescription;
+            //                    var transitionDesc = new TtTimedStateTransitionClassDescription() { FromId = timedStateElement.TimedSubStateClassDescription.Id, ToId = this.Description.Id };
+            //                    cmdHistory.CreateAndExtuteCommand("Transition From" + element.Name + " To " + this.Name,
+            //                        (data) => { timedStateElement.TimedSubStateClassDescription.AddTransition(transitionDesc);},
+            //                        (data) => { timedStateElement.TimedSubStateClassDescription.RemoveTransition(transitionDesc);}
+            //                        );
+            //                });
+            //            }
+            //        }
+            //    }
+            //}
         }
         #endregion IContextMeunable
 

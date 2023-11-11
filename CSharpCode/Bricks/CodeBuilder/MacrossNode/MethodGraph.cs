@@ -248,7 +248,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
         public UMethodStartNode StartNode;
         [Rtti.Meta]
         public UMethodDeclaration MethodDec { get; set; }
-        public Rtti.UClassMeta.MethodMeta Method;
+        public Rtti.UClassMeta.TtMethodMeta Method;
         [Rtti.Meta]
         public bool IsDelegate { get; set; } = false;
 
@@ -832,7 +832,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
         public IMacrossMethodHolder MacrossEditor
         {
             get => (IMacrossMethodHolder)Editor;
-            private set
+            protected set
             {
                 Editor = value;
             }
@@ -973,7 +973,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
                 Datas.AddMenuItem("TypeConverter", null,
                     (UMenuItem item, object sender) =>
                     {
-                        var type = Rtti.UClassMetaManager.Instance.GetMeta(Rtti.UTypeDesc.TypeStr(typeof(object)));
+                        var type = Rtti.TtClassMetaManager.Instance.GetMeta(Rtti.UTypeDesc.TypeStr(typeof(object)));
                         var node = TypeConverterVar.NewTypeConverterVar(type, type);
                         node.Name = $"lAnyVar_{GenSerialId()}";
                         node.UserData = MacrossEditor;
@@ -998,7 +998,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
             var selfMenu = CanvasMenus.AddMenuItem("Self", null, null);
             for (int i = 0; i < MacrossEditor.DefClass.SupperClassNames.Count; i++)
             {
-                var classMeta = Rtti.UClassMetaManager.Instance.GetMetaFromFullName(MacrossEditor.DefClass.SupperClassNames[i]);
+                var classMeta = Rtti.TtClassMetaManager.Instance.GetMetaFromFullName(MacrossEditor.DefClass.SupperClassNames[i]);
                 if (classMeta == null)
                     continue;
 
@@ -1007,7 +1007,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
 
             var selfNode = CanvasMenus.AddMenuItem("Self", null, null);
             {
-                var selfMeta = Rtti.UClassMetaManager.Instance.GetMetaFromFullName(MacrossEditor.DefClass.GetFullName());
+                var selfMeta = Rtti.TtClassMetaManager.Instance.GetMetaFromFullName(MacrossEditor.DefClass.GetFullName());
                 if (selfMeta != null)
                 {
                     UpdateMenuWithClassMeta(selfMeta, selfMenu);
@@ -1165,7 +1165,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
             {
                 var field = classMeta.Fields[fieldIdx];
                 string[] menuPath = null;
-                var fieldInfo = field.Field;
+                var fieldInfo = field.GetFieldInfo();
                 string filterStr = fieldInfo.Name;
                 var atts = fieldInfo.GetCustomAttributes(typeof(ContextMenuAttribute), false);
                 if (atts.Length > 0)
@@ -1284,7 +1284,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
             var type = PopMenuPressObject as Rtti.UTypeDesc;
             if (type == null)
                 return;
-            var classMeta = Rtti.UClassMetaManager.Instance.GetMetaFromFullName(type.FullName);
+            var classMeta = Rtti.TtClassMetaManager.Instance.GetMetaFromFullName(type.FullName);
             if (classMeta != null)
             {
                 UpdateMenuWithClassMeta(classMeta, ObjectMenus);
@@ -1405,7 +1405,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
                     var type = nodeExpr.GetOutPinType(oPin);
                     if (type != null)
                     {
-                        KlassSelector.KlsMeta = Rtti.UClassMetaManager.Instance.GetMeta(type.TypeString);
+                        KlassSelector.KlsMeta = Rtti.TtClassMetaManager.Instance.GetMeta(type.TypeString);
 
                         PopKlassSelector = true;
                         LinkingOp.IsBlocking = true;
@@ -1437,7 +1437,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
                             var type = oNode.GetOutPinType(oPin);
                             if (type != null)
                             {
-                                var srcType = Rtti.UClassMetaManager.Instance.GetMeta(Rtti.UTypeDesc.TypeStr(type));
+                                var srcType = Rtti.TtClassMetaManager.Instance.GetMeta(Rtti.UTypeDesc.TypeStr(type));
                                 if (srcType != null)
                                 {
                                     var node = TypeConverterVar.NewTypeConverterVar(srcType, KlassSelector.mSltSubClass);

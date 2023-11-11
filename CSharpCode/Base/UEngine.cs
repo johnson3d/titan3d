@@ -214,8 +214,7 @@ namespace EngineNS
             EngineNS.Rtti.UTypeDescManager.Instance.InitTypes();
             var t2 = Support.Time.HighPrecision_GetTickCount();
 
-            Rtti.UMissingTypeManager.Instance.Initialize();
-            EngineNS.Rtti.UClassMetaManager.Instance.LoadMetas();
+            EngineNS.Rtti.TtClassMetaManager.Instance.LoadMetas();
             var t3 = Support.Time.HighPrecision_GetTickCount();
             
             EngineNS.Profiler.Log.InitLogger();

@@ -255,23 +255,19 @@ namespace EngineNS
         /// <summary>
         /// X的坐标
         /// </summary>
-        [Rtti.Meta]
         public uint X;
         /// <summary>
         /// Y的坐标
         /// </summary>
 
-        [Rtti.Meta]
         public uint Y;
         /// <summary>
         /// Z的坐标
         /// </summary>
-        [Rtti.Meta]
         public uint Z;
         /// <summary>
         /// W的值
         /// </summary>
-        [Rtti.Meta]
         public uint W;
         #endregion
         /// <summary>
@@ -331,18 +327,12 @@ namespace EngineNS
         /// <summary>
         /// 只读属性，0向量
         /// </summary>
-        [Rtti.Meta]
         public readonly static Vector4ui Zero = new Vector4ui(0, 0, 0, 0);
-        [Rtti.Meta]
         public readonly static Vector4ui UnitX = new Vector4ui(1, 0, 0, 0);
 
-        [Rtti.Meta]
         public readonly static Vector4ui UnitY = new Vector4ui(0, 1, 0, 0);
-        [Rtti.Meta]
         public readonly static Vector4ui UnitZ = new Vector4ui(0, 0, 1, 0);
-        [Rtti.Meta]
         public readonly static Vector4ui UnitW = new Vector4ui(0, 0, 0, 1);
-        [Rtti.Meta]
         public readonly static Vector4ui One = new Vector4ui(1, 1, 1, 1);
         public readonly static Vector4ui MaxValue = new Vector4ui(uint.MaxValue, uint.MaxValue, uint.MaxValue, uint.MaxValue);
         public readonly static Vector4ui MinValue = new Vector4ui(uint.MinValue, uint.MinValue, uint.MinValue, uint.MinValue);

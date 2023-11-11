@@ -14,11 +14,8 @@ namespace EngineNS.CodeCompiler
             DefaultEditor,
             Custom,
         }
-        [Rtti.Meta]
         public enProjectType ProjectType;
-        [Rtti.Meta]
         public Guid ProjectGuid;
-        [Rtti.Meta]
         public string ProjectFile;
         public string AbsProjectFile
         {
@@ -27,11 +24,8 @@ namespace EngineNS.CodeCompiler
                 return IO.TtFileManager.GetBaseDirectory(UEngine.Instance.FileManager.GetRoot(IO.TtFileManager.ERootDir.EngineSource) + UEngine.Instance.EditorInstance.Config.GameProject) + ProjectFile;
             }
         }
-        [Rtti.Meta]
         public System.Version MinVSVersion;
-        [Rtti.Meta]
         public List<string> ReferenceProjects;
-        [Rtti.Meta]
         public List<string> CodeFiles;
     }
 

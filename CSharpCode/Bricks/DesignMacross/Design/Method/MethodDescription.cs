@@ -1,5 +1,6 @@
 ﻿using EngineNS.Bricks.CodeBuilder;
 using EngineNS.DesignMacross.Base.Description;
+using EngineNS.DesignMacross.Base.Graph;
 using EngineNS.DesignMacross.Base.Outline;
 using System;
 using System.Collections.Generic;
@@ -9,6 +10,7 @@ using System.Text;
 
 namespace EngineNS.DesignMacross.Design
 {
+    [Graph(typeof(TtGraph_Method))]
     [OutlineElement_Leaf(typeof(TtOutlineElement_Method))]
     public class TtMethodDescription : IMethodDescription
     {

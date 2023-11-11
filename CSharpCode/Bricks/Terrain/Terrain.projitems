@@ -18,7 +18,6 @@
     <Compile Include="$(MSBuildThisFileDirectory)CDLOD\UTerrainNode.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)CDLOD\UTerrainPlant.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Grass\TtGrassModifier.cs" />
-    <Compile Include="..\..\CSharpCode\Bricks\Terrain\Grass\TtGrassModifier.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Grass\UMdfGrassStaticMesh.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)UQTree.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)CDLOD\UTerrainGrass.cs" />

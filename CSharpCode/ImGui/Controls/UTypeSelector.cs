@@ -62,7 +62,7 @@ namespace EngineNS.EGui.Controls
                             bool excNoMeta = (FilterMode & EFilterMode.ExcludeNoMeta) == EFilterMode.ExcludeNoMeta;
                             if (excNoMeta)
                             {
-                                if (Rtti.UClassMetaManager.Instance.Metas.ContainsKey(j.Key) == false)
+                                if (Rtti.TtClassMetaManager.Instance.Metas.ContainsKey(j.Key) == false)
                                     continue;
                             }
 

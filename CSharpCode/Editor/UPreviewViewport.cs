@@ -85,7 +85,7 @@ namespace EngineNS.Editor
             var vpSize = this.ClientSize;
             if (bSizeChanged)
             {
-                RenderPolicy?.OnResize(vpSize.X, vpSize.Y);                
+                RenderPolicy?.OnResize(vpSize.X, vpSize.Y);
             }
         }
         public RName PreviewAsset { get; set; } = null;

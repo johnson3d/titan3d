@@ -40,7 +40,6 @@
     <Compile Include="$(MSBuildThisFileDirectory)SkeletonAnimation\RuntimePose\Control\IK\UFABRIK.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)SkeletonAnimation\RuntimePose\Control\IK\UTwoBoneIK.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)SkeletonAnimation\Skeleton\USceneSkeleton.cs" />
-    <Compile Include="..\..\CSharpCode\Bricks\Animation\Asset\BlendSpace\UBlendSpace.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Asset\BlendSpace\UBlendSpace1D.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Asset\BlendSpace\UBlendSpace2D.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Asset\BlendSpace\BlendSpaceGrid.cs" />

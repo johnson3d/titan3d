@@ -470,7 +470,7 @@ namespace EngineNS.Bricks.CodeBuilder
                 return EMethodArgumentAttribute.Ref;
             return EMethodArgumentAttribute.Default;
         }
-        public static EMethodArgumentAttribute GetOperationType(Rtti.UClassMeta.MethodMeta.ParamMeta info)
+        public static EMethodArgumentAttribute GetOperationType(Rtti.UClassMeta.TtMethodMeta.TtParamMeta info)
         {
             if (info.IsIn)
                 return EMethodArgumentAttribute.In;
@@ -487,7 +487,7 @@ namespace EngineNS.Bricks.CodeBuilder
                 return true;
             return false;
         }
-        public static bool GetIsParamArray(Rtti.UClassMeta.MethodMeta.ParamMeta info)
+        public static bool GetIsParamArray(Rtti.UClassMeta.TtMethodMeta.TtParamMeta info)
         {
             return info.IsParamArray;
         }
@@ -508,7 +508,7 @@ namespace EngineNS.Bricks.CodeBuilder
                 retVal.Meta = attrs[0] as Rtti.MetaParameterAttribute;
             return retVal;
         }
-        public static UMethodArgumentDeclaration GetParam(Rtti.UClassMeta.MethodMeta.ParamMeta info)
+        public static UMethodArgumentDeclaration GetParam(Rtti.UClassMeta.TtMethodMeta.TtParamMeta info)
         {
             var retVal = new UMethodArgumentDeclaration()
             {
@@ -746,7 +746,7 @@ namespace EngineNS.Bricks.CodeBuilder
             retStr = retStr.TrimEnd(',') + ")";
             return retStr;
         }
-        public static string GetKeyword(Rtti.UClassMeta.MethodMeta method)
+        public static string GetKeyword(Rtti.UClassMeta.TtMethodMeta method)
         {
             var retStr = method.MethodName + "(";
             var parameters = method.Parameters;
@@ -792,7 +792,7 @@ namespace EngineNS.Bricks.CodeBuilder
             }
             return retVal;
         }
-        public static UMethodDeclaration GetMethodDeclaration(Rtti.UClassMeta.MethodMeta method)
+        public static UMethodDeclaration GetMethodDeclaration(Rtti.UClassMeta.TtMethodMeta method)
         {
             var retVal = new UMethodDeclaration();
             retVal.IsOverride = true;
@@ -1104,7 +1104,6 @@ namespace EngineNS.Bricks.CodeBuilder
 
     public class UMethodInvokeArgumentExpression : UExpressionBase, IO.ISerializer
     {
-        [Rtti.Meta]
         public UExpressionBase Expression;// { get; set; }
         [Rtti.Meta]
         public EMethodArgumentAttribute OperationType { get; set; } = EMethodArgumentAttribute.Default;

@@ -10,11 +10,8 @@ namespace EngineNS.Bricks.Terrain.CDLOD
     [BufferTypeOperator(typeof(FGrassTransformDataOperator))]
     public struct FGrassTransformData
     {
-        [Rtti.Meta]
         public FTransform Transform;
-        [Rtti.Meta]
         public int MaterialIdx;
-        [Rtti.Meta]
         public int GrassIdx;
 
         public void Reset()

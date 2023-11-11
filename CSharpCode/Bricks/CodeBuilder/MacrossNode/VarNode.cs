@@ -358,7 +358,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
     }
     public partial class ClassPropertyVar : VarNode, UEditableValue.IValueEditNotify, IBeforeExecNode, IAfterExecNode, EGui.Controls.PropertyGrid.IPropertyCustomization
     {
-        public static ClassPropertyVar NewClassProperty(Rtti.UClassMeta.PropertyMeta meta, bool isGet)
+        public static ClassPropertyVar NewClassProperty(Rtti.UClassMeta.TtPropertyMeta meta, bool isGet)
         {
             var result = new ClassPropertyVar();
             result.Initialize(meta, isGet);
@@ -384,7 +384,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
                 var segs = value.Split('#');
                 if (segs.Length != 2)
                     return;
-                var kls = Rtti.UClassMetaManager.Instance.GetMeta(segs[0]);
+                var kls = Rtti.TtClassMetaManager.Instance.GetMeta(segs[0]);
                 if(kls != null)
                 {
                     var pro = kls.CurrentVersion.GetProperty(segs[1]);
@@ -400,17 +400,17 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
                 var segs = mClassPropertyMeta.Split('#');
                 if (segs.Length != 2)
                     return null;
-                return Rtti.UClassMetaManager.Instance.GetMeta(segs[0]);
+                return Rtti.TtClassMetaManager.Instance.GetMeta(segs[0]);
             }
         }
-        public Rtti.UClassMeta.PropertyMeta ClassProperty
+        public Rtti.UClassMeta.TtPropertyMeta ClassProperty
         {
             get
             {
                 var segs = mClassPropertyMeta.Split('#');
                 if (segs.Length != 2)
                     return null;
-                var kls = Rtti.UClassMetaManager.Instance.GetMeta(segs[0]);
+                var kls = Rtti.TtClassMetaManager.Instance.GetMeta(segs[0]);
                 if (kls != null)
                     return kls.CurrentVersion.GetProperty(segs[1]);
                 return null;
@@ -454,7 +454,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
             BeforeExec.LinkDesc = MacrossStyles.Instance.NewExecPinDesc();
             AfterExec.LinkDesc = MacrossStyles.Instance.NewExecPinDesc();
         }
-        private void Initialize(Rtti.UClassMeta.PropertyMeta pro, bool isGet)
+        private void Initialize(Rtti.UClassMeta.TtPropertyMeta pro, bool isGet)
         {
             if(string.IsNullOrEmpty(mClassPropertyMeta))
             {
@@ -653,7 +653,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
 
     public partial class ClassFieldVar : VarNode, UEditableValue.IValueEditNotify, IBeforeExecNode, IAfterExecNode, IPropertyCustomization
     {   
-        public static ClassFieldVar NewClassMemberVar(Rtti.UClassMeta.FieldMeta meta, bool isGet)
+        public static ClassFieldVar NewClassMemberVar(Rtti.UClassMeta.TtFieldMeta meta, bool isGet)
         {
             var result = new ClassFieldVar();
             result.Initialize(meta, isGet);
@@ -668,18 +668,18 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
                 var segs = mClassFieldMeta.Split('#');
                 if (segs.Length != 2)
                     return null;
-                return Rtti.UClassMetaManager.Instance.GetMeta(segs[0]);
+                return Rtti.TtClassMetaManager.Instance.GetMeta(segs[0]);
             }
         }
 
-        public Rtti.UClassMeta.FieldMeta ClassField
+        public Rtti.UClassMeta.TtFieldMeta ClassField
         {
             get
             {
                 var segs = mClassFieldMeta.Split('#');
                 if (segs.Length != 2)
                     return null;
-                var kls = Rtti.UClassMetaManager.Instance.GetMeta(segs[0]);
+                var kls = Rtti.TtClassMetaManager.Instance.GetMeta(segs[0]);
                 if (kls != null)
                     return kls.GetField(segs[1]);
                 return null;
@@ -703,7 +703,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
                 var segs = value.Split('#');
                 if (segs.Length != 2)
                     return;
-                var kls = Rtti.UClassMetaManager.Instance.GetMeta(segs[0]);
+                var kls = Rtti.TtClassMetaManager.Instance.GetMeta(segs[0]);
                 if(kls != null)
                 {
                     var mem = kls.GetField(segs[1]);
@@ -750,14 +750,14 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
             BeforeExec.LinkDesc = MacrossStyles.Instance.NewExecPinDesc();
             AfterExec.LinkDesc = MacrossStyles.Instance.NewExecPinDesc();
         }
-        private void Initialize(Rtti.UClassMeta.FieldMeta m, bool isGet)
+        private void Initialize(Rtti.UClassMeta.TtFieldMeta m, bool isGet)
         {
             if (string.IsNullOrEmpty(mClassFieldMeta))
-                mClassFieldMeta = Rtti.UTypeDesc.TypeStr(m.Field.DeclaringType) + "#" + m.Field.Name;
+                mClassFieldMeta = m.DeclaringType.TypeString + "#" + m.FieldName;
             mIsGet = isGet;
-            Name = (isGet ? "Get " : "Set ") + m.Field.Name;
+            Name = (isGet ? "Get " : "Set ") + m.FieldName;
 
-            if(!m.Field.IsStatic)
+            if(!m.GetFieldInfo().IsStatic)
             {
                 Self = new PinIn()
                 {
@@ -766,7 +766,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
                 AddPinIn(Self);
             }
 
-            VarType = Rtti.UTypeDesc.TypeOf(m.Field.FieldType);
+            VarType = m.FieldType;
             if (isGet)
             {
                 GetPin = new PinOut();
@@ -779,7 +779,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
 
                 SetPin = new PinIn()
                 {
-                    EditValue = UEditableValue.CreateEditableValue(this, m.Field.FieldType, SetPin),
+                    EditValue = UEditableValue.CreateEditableValue(this, m.FieldType, SetPin),
                 };
                 AddPinIn(SetPin);
 
@@ -863,7 +863,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
             }
             else if (stayPin == SetPin || stayPin == GetPin)
             {
-                EGui.Controls.CtrlUtility.DrawHelper(ClassField.Field.FieldType.FullName);
+                EGui.Controls.CtrlUtility.DrawHelper(ClassField.FieldType.FullName);
             }
         }
 
@@ -912,7 +912,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
             assignSt.To = new UVariableReferenceExpression()
             {
                 Host = GetHostExpression(ref data),
-                VariableName = ClassField.Field.Name,
+                VariableName = ClassField.FieldName,
                 IsProperty = false,
             };
             data.CurrentStatements.Add(assignSt);
@@ -930,7 +930,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
             return new UVariableReferenceExpression()
             {
                 Host = GetHostExpression(ref data),
-                VariableName = ClassField.Field.Name,
+                VariableName = ClassField.FieldName,
                 IsProperty = false,
             };
         }
@@ -942,11 +942,11 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
 
         public override Rtti.UTypeDesc GetInPinType(PinIn pin)
         {
-            return Rtti.UTypeDesc.TypeOf(ClassField.Field.FieldType);
+            return ClassField.FieldType;
         }
         public override Rtti.UTypeDesc GetOutPinType(PinOut pin)
         {
-            return Rtti.UTypeDesc.TypeOf(ClassField.Field.FieldType);
+            return ClassField.FieldType;
         }
 
         [Browsable(false)]

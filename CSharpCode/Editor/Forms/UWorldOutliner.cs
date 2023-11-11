@@ -207,7 +207,7 @@ namespace EngineNS.Editor.Forms
         {
             mAddNodeMenus = new Bricks.NodeGraph.UMenuItem();
             var typeDesc = Rtti.UTypeDescGetter<GamePlay.Scene.UNode>.TypeDesc;
-            var meta = Rtti.UClassMetaManager.Instance.GetMeta(typeDesc);
+            var meta = Rtti.TtClassMetaManager.Instance.GetMeta(typeDesc);
             var subClasses = meta.SubClasses;
             foreach (var i in subClasses)
             {

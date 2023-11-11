@@ -104,22 +104,18 @@ namespace EngineNS
         /// <summary>
         /// X值
         /// </summary>
-        [Rtti.Meta]
         public float X;
         /// <summary>
         /// Y值
         /// </summary>
-        [Rtti.Meta]
         public float Y;
         /// <summary>
         /// Z值
         /// </summary>
-        [Rtti.Meta]
         public float Z;
         /// <summary>
         /// W值
         /// </summary>
-        [Rtti.Meta]
         public float W;
         #endregion
 

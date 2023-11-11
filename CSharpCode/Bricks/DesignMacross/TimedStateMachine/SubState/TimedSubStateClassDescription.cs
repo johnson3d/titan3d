@@ -10,7 +10,7 @@ using System.Reflection;
 
 namespace EngineNS.DesignMacross.TimedStateMachine
 {
-    [StateMachineContextMenu("State", "StateMachine\\State", UMacross.MacrossEditorKeyword)]
+    [StateMachineContextMenu("State", "StateMachine\\State", UDesignMacross.MacrossEditorKeyword)]
     [OutlineElement_Leaf(typeof(TtOutlineElement_TimedSubState))]
     [GraphElement(typeof(TtGraphElement_TimedSubState))]
     public class TtTimedSubStateClassDescription : TtDesignableVariableDescription

@@ -274,23 +274,19 @@ namespace EngineNS
         /// <summary>
         /// X的坐标
         /// </summary>
-        [Rtti.Meta]
         public float X;
         /// <summary>
         /// Y的坐标
         /// </summary>
 
-        [Rtti.Meta]
         public float Y;
         /// <summary>
         /// Z的坐标
         /// </summary>
-        [Rtti.Meta]
         public float Z;
         /// <summary>
         /// W的值
         /// </summary>
-        [Rtti.Meta]
         public float W;
 
         public float Left => X;
@@ -376,18 +372,12 @@ namespace EngineNS
         /// <summary>
         /// 只读属性，0向量
         /// </summary>
-        [Rtti.Meta]
         public readonly static Vector4 Zero = new Vector4(0, 0, 0, 0);
-        [Rtti.Meta]
         public readonly static Vector4 UnitX = new Vector4(1, 0, 0, 0);
         
-        [Rtti.Meta]
         public readonly static Vector4 UnitY = new Vector4(0, 1, 0, 0);
-        [Rtti.Meta]
         public readonly static Vector4 UnitZ = new Vector4(0, 0, 1, 0);
-        [Rtti.Meta]
         public readonly static Vector4 UnitW = new Vector4(0, 0, 0, 1);
-        [Rtti.Meta]
         public readonly static Vector4 One = new Vector4(1, 1, 1, 1);
         public readonly static Vector4 MaxValue = new Vector4(float.MaxValue, float.MaxValue, float.MaxValue, float.MaxValue);
         public readonly static Vector4 MinValue = new Vector4(float.MinValue, float.MinValue, float.MinValue, float.MinValue);

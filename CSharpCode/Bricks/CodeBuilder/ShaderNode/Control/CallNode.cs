@@ -22,7 +22,7 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Control
         //public List<PinIn> Arguments = new List<PinIn>();
         //public List<PinOut> OutArguments = new List<PinOut>();
         public List<PinData> Arguments = new List<PinData>();
-        public Rtti.UClassMeta.MethodMeta Method;
+        public Rtti.UClassMeta.TtMethodMeta Method;
         [Rtti.Meta]
         public string MethodDeclString
         {
@@ -46,7 +46,7 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Control
                 this.Initialize(Method);
             }
         }
-        public static CallNode NewMethodNode(Rtti.UClassMeta.MethodMeta m)
+        public static CallNode NewMethodNode(Rtti.UClassMeta.TtMethodMeta m)
         {
             CallNode result = null;
             if (m.MethodName == "Sample2D")
@@ -66,7 +66,7 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Control
             TitleColor = UShaderEditorStyles.Instance.FunctionTitleColor;
             BackColor = UShaderEditorStyles.Instance.FunctionBGColor;
         }
-        internal void Initialize(Rtti.UClassMeta.MethodMeta m)
+        internal void Initialize(Rtti.UClassMeta.TtMethodMeta m)
         {
             Method = m;
             Name = m.MethodName;
@@ -179,7 +179,7 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Control
             //    }
             //}
         }
-        public Rtti.UClassMeta.MethodMeta.ParamMeta GetInPinParamMeta(PinIn pin)
+        public Rtti.UClassMeta.TtMethodMeta.TtParamMeta GetInPinParamMeta(PinIn pin)
         {
             for (int i = 0; i < Arguments.Count; i++)
             {

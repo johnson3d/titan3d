@@ -35,7 +35,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
         {
             for(int i=0; i<DefClass.SupperClassNames.Count; i++)
             {
-                var superClass = Rtti.UClassMetaManager.Instance.GetMetaFromFullName(DefClass.SupperClassNames[i]);
+                var superClass = Rtti.TtClassMetaManager.Instance.GetMetaFromFullName(DefClass.SupperClassNames[i]);
                 //var superClass = Rtti.UTypeDescManager.Instance.GetTypeDescFromFullName(DefClass.SupperClassNames[i]);
                 if (superClass == null)
                     continue;
@@ -359,7 +359,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
             {
                 UEngine.Instance.MacrossModule.ReloadAssembly(assemblyFile);
                 var typeDesc = DefClass.TryGetTypeDesc();
-                var meta = Rtti.UClassMetaManager.Instance.GetMeta(typeDesc);
+                var meta = Rtti.TtClassMetaManager.Instance.GetMeta(typeDesc);
                 meta.BuildMethods();
                 meta.BuildFields();
                 var version = meta.BuildCurrentVersion();

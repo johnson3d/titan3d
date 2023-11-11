@@ -293,7 +293,7 @@ namespace EngineNS.IO
             this.Read(out ObjDataSize);
             savePos += ObjDataSize;
 
-            var meta = Rtti.UClassMetaManager.Instance.GetMeta(typeHash);
+            var meta = Rtti.TtClassMetaManager.Instance.GetMeta(typeHash);
             if (meta == null)
             {
                 Profiler.Log.WriteLine(Profiler.ELogTag.Error, "IO", $"Meta Type lost:{typeHash}");
@@ -334,7 +334,7 @@ namespace EngineNS.IO
 
             var savePos = IO.SerializerHelper.GetSkipOffset(this);
 
-            var meta = Rtti.UClassMetaManager.Instance.GetMeta(typeHash);
+            var meta = Rtti.TtClassMetaManager.Instance.GetMeta(typeHash);
             if (meta == null)
             {
                 Profiler.Log.WriteLine(Profiler.ELogTag.Error, "IO", $"Meta Type lost:{typeHash}");

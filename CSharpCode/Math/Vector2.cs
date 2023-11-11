@@ -118,12 +118,10 @@ namespace EngineNS
         /// <summary>
         /// X的值
         /// </summary>
-        [Rtti.Meta]
         public float X;
         /// <summary>
         /// Y的值
         /// </summary>
-        [Rtti.Meta]
         public float Y;
 
         public float Width

@@ -60,14 +60,14 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
         }
         public List<PinData> Arguments = new List<PinData>();
 
-        private Rtti.UClassMeta.MethodMeta Method
+        private Rtti.UClassMeta.TtMethodMeta Method
         {
             get
             {
                 var segs = mMethodMeta.Split('#');
                 if (segs.Length != 2)
                     return null;
-                var kls = Rtti.UClassMetaManager.Instance.GetMeta(segs[0]);
+                var kls = Rtti.TtClassMetaManager.Instance.GetMeta(segs[0]);
                 if (kls != null)
                 {
                     return kls.GetMethod(segs[1]);
@@ -82,7 +82,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
                 var segs = mMethodMeta.Split('#');
                 if (segs.Length != 2)
                     return null;
-                return Rtti.UClassMetaManager.Instance.GetMeta(segs[0]);
+                return Rtti.TtClassMetaManager.Instance.GetMeta(segs[0]);
             }
         }
         public UMethodDeclaration MethodDesc;
@@ -115,12 +115,12 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
                 }
             }
         }
-        Rtti.UClassMeta.MethodMeta GetMethodMeta(string metaStr)
+        Rtti.UClassMeta.TtMethodMeta GetMethodMeta(string metaStr)
         {
             var segs = metaStr.Split('#');
             if (segs.Length != 2)
                 return null;
-            var kls = Rtti.UClassMetaManager.Instance.GetMeta(segs[0]);
+            var kls = Rtti.TtClassMetaManager.Instance.GetMeta(segs[0]);
             if (kls != null)
             {
                 var mtd = kls.GetMethod(segs[1]);
@@ -245,7 +245,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
                 OnPositionChanged();
             }
         }
-        public static MethodNode NewMethodNode(Rtti.UClassMeta.MethodMeta m)
+        public static MethodNode NewMethodNode(Rtti.UClassMeta.TtMethodMeta m)
         {
             var result = new MethodNode();
             result.Initialize(m);
@@ -419,7 +419,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
             }
         }
 
-        private void Initialize(Rtti.UClassMeta.MethodMeta m)
+        private void Initialize(Rtti.UClassMeta.TtMethodMeta m)
         {
             //Method = m;
             if (string.IsNullOrEmpty(mMethodMeta))
@@ -537,7 +537,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
                                 var rnameEV = ev as URNameEValue;
                                 if (rnameEV != null)
                                 {
-                                    var attrs = i.GetParamInfo().GetCustomAttributes(typeof(RName.PGRNameAttribute), false);
+                                    var attrs = i.GetCustomAttributes(typeof(RName.PGRNameAttribute), false);
                                     if (attrs.Length > 0)
                                     {
                                         var rnAttr = attrs[0] as RName.PGRNameAttribute;
@@ -1503,7 +1503,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
             }
             return null;
         }
-        public Rtti.UClassMeta.MethodMeta.ParamMeta GetInPinParamMeta(PinIn pin)
+        public Rtti.UClassMeta.TtMethodMeta.TtParamMeta GetInPinParamMeta(PinIn pin)
         {
             for (int i = 0; i < Arguments.Count; i++)
             {
@@ -1610,9 +1610,9 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
             public uint SubClassColor = 0xFF5340FF;
         }
         public MethodSelectorStyle Styles = MethodSelectorStyle.Instance;
-        public Rtti.UClassMeta.MethodMeta mSltMethod;
-        public Rtti.UClassMeta.FieldMeta mSltField;
-        public Rtti.UClassMeta.PropertyMeta mSltMember;
+        public Rtti.UClassMeta.TtMethodMeta mSltMethod;
+        public Rtti.UClassMeta.TtFieldMeta mSltField;
+        public Rtti.UClassMeta.TtPropertyMeta mSltMember;
         public unsafe void OnDraw(Vector2 pos)
         {
             var pivot = new Vector2(0, 0);
@@ -1635,7 +1635,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
             //buffer.DestroyMe();
             ImGuiAPI.Separator();
 
-            DrawNSTree(filterText, Rtti.UClassMetaManager.Instance.TreeManager.RootNS);
+            DrawNSTree(filterText, Rtti.TtClassMetaManager.Instance.TreeManager.RootNS);
         }
         public unsafe void DrawNSTree(string filterText, Rtti.UNameSpace ns)
         {
@@ -1677,10 +1677,10 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
                         }                        
                         foreach (var j in i.Fields)
                         {
-                            if (bTestFilter && j.Field.Name.Contains(filterText) == false)
+                            if (bTestFilter && j.FieldName.Contains(filterText) == false)
                                 continue;
                             ImGuiAPI.PushStyleColor(ImGuiCol_.ImGuiCol_Text, Styles.FieldColor);
-                            ImGuiAPI.TreeNodeEx(j.Field.Name, flags);
+                            ImGuiAPI.TreeNodeEx(j.FieldName, flags);
                             if (ImGuiAPI.IsItemClicked(ImGuiMouseButton_.ImGuiMouseButton_Left))
                             {
                                 mSltField = j;
@@ -1714,9 +1714,9 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
     public class MacrossSelector
     {
         public Rtti.UClassMeta KlsMeta;
-        public Rtti.UClassMeta.MethodMeta mSltMethod;
-        public Rtti.UClassMeta.FieldMeta mSltField;
-        public Rtti.UClassMeta.PropertyMeta mSltMember;
+        public Rtti.UClassMeta.TtMethodMeta mSltMethod;
+        public Rtti.UClassMeta.TtFieldMeta mSltField;
+        public Rtti.UClassMeta.TtPropertyMeta mSltMember;
         public Rtti.UClassMeta mSltSubClass;
         public unsafe void OnDraw(Vector2 pos)
         {
@@ -1773,7 +1773,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
                     foreach (var j in KlsMeta.Fields)
                     {
                         ImGuiAPI.PushStyleColor(ImGuiCol_.ImGuiCol_Text, Styles.FieldColor);
-                        ImGuiAPI.TreeNodeEx(j.Field.Name, flags);
+                        ImGuiAPI.TreeNodeEx(j.FieldName, flags);
                         if (ImGuiAPI.IsItemClicked(ImGuiMouseButton_.ImGuiMouseButton_Left))
                         {
                             mSltField = j;

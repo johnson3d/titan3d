@@ -56,7 +56,7 @@ namespace EngineNS.GamePlay.Scene
             if (skyData == null)
             {
                 skyData = new TtSkyNodeData();
-                var meta = Rtti.UClassMetaManager.Instance.GetMeta(Rtti.UTypeDescGetter<TtSkyNodeData>.TypeDesc);
+                var meta = Rtti.TtClassMetaManager.Instance.GetMeta(Rtti.UTypeDescGetter<TtSkyNodeData>.TypeDesc);
                 meta.CopyObjectMetaField(skyData, data);
                 skyData.SunMaterialName = RName.GetRName("material/default_sun.uminst", RName.ERNameType.Engine);
                 data = skyData;

@@ -21,6 +21,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)Design\Method\DelegateEvent\GraphElement_DelegateEvent.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Design\Method\ExecutionLine\GraphElement_ExecutionLine.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Design\Method\Expressions\Nodes\NodeBase.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Design\Method\Graph_Method.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Design\Variable\OutlineElement_Variable.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Editor\Graph\NavigableGraphsPanel.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Design\Method\DataLine\DataLineDescription.cs" />

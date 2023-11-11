@@ -748,7 +748,7 @@ namespace EngineNS.GamePlay.Scene
         public async System.Threading.Tasks.Task<UNode> CloneNode(UWorld world)
         {
             var data = Rtti.UTypeDescManager.CreateInstance(this.NodeData.GetType()) as UNodeData;
-            var meta = Rtti.UClassMetaManager.Instance.GetMeta(Rtti.UTypeDesc.TypeOf(this.NodeData.GetType()));
+            var meta = Rtti.TtClassMetaManager.Instance.GetMeta(Rtti.UTypeDesc.TypeOf(this.NodeData.GetType()));
             meta.CopyObjectMetaField(data, NodeData);
             var node = Rtti.UTypeDescManager.CreateInstance(this.GetType()) as UNode;
             EBoundVolumeType bvType = EBoundVolumeType.None;

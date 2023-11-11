@@ -12,37 +12,30 @@ using System.Text;
 
 namespace EngineNS.DesignMacross.TimedStateMachine.StateTransition
 {
-    public class TtTransitionMacrossHolder : IMacrossMethodHolder
-    {
-        public MemberVar DraggingMember { get; set; }
-        public bool IsDraggingMember { get; set; }
 
-        UClassDeclaration mDefClass = new UClassDeclaration();
-        public UClassDeclaration DefClass => mDefClass;
-        UCSharpCodeGenerator mCSCodeGen = new UCSharpCodeGenerator();
-        public UCSharpCodeGenerator CSCodeGen => mCSCodeGen;
-        List<UMacrossMethodGraph> mMethods = new List<UMacrossMethodGraph>();
-        public List<UMacrossMethodGraph> Methods => mMethods;
-
-        public PropertyGrid PGMember { get; set; }
-
-        public void RemoveMethod(UMacrossMethodGraph method)
-        {
-
-        }
-
-        public void SetConfigUnionNode(IUnionNode node)
-        {
-
-        }
-    }
-
-    public class TtDesignMacrossMethodGraph : UMacrossMethodGraph
+    public class TtTimedStateTransitionMethodGraph : UMacrossMethodGraph
     {
         public override void UpdateCanvasMenus()
         {
             base.UpdateCanvasMenus();
 
+        }
+        public static TtTimedStateTransitionMethodGraph CreateGraph(IMacrossMethodHolder kls, UMethodDeclaration method = null)
+        {
+            var result = new TtTimedStateTransitionMethodGraph();
+            result.MacrossEditor = kls;
+            result.Initialize();
+            //result.FunctionName = funName;
+            //if (result.Function == null)
+            //    return null;
+            if (method != null)
+            {
+                var methodData = MethodData.CreateFromMethod(result, method);
+                result.MethodDatas.Add(methodData);
+                result.AddNode(methodData.StartNode);
+                result.GraphName = method.MethodName;
+            }
+            return result;
         }
     }
 
@@ -62,7 +55,7 @@ namespace EngineNS.DesignMacross.TimedStateMachine.StateTransition
 
             mMacrossHolder = new TtTransitionMacrossHolder();
             FClassBuildContext classBuildContext = new();
-            mGraph = UMacrossMethodGraph.NewGraph(mMacrossHolder, desc.OverrideCheckConditionMethodDescription.BuildMethodDeclaration(ref classBuildContext));
+            mGraph = TtTimedStateTransitionMethodGraph.CreateGraph(mMacrossHolder, desc.OverrideCheckConditionMethodDescription.BuildMethodDeclaration(ref classBuildContext));
             mGraph.GraphName = description.Name;
         }
 

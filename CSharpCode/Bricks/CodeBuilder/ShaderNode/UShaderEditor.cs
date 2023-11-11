@@ -184,7 +184,7 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode
             PreviewViewport.Title = $"MaterialPreview:{AssetName}";
             PreviewViewport.OnInitialize = Initialize_PreviewMaterial;
             await PreviewViewport.Initialize(UEngine.Instance.GfxDevice.SlateApplication, UEngine.Instance.Config.MainRPolicyName, 0, 1);
-
+            
             await PreviewPropGrid.Initialize();
             PreviewPropGrid.PGName = $"PGMaterialPreview:{AssetName}";
             PreviewPropGrid.Target = PreviewViewport;
@@ -196,6 +196,7 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode
         }
         public void OnCloseEditor()
         {
+            UEngine.Instance.GfxDevice.EffectManager.RemoveEditingMaterial(AssetName);
             UEngine.Instance.TickableManager.RemoveTickable(this);
             Dispose();
         }
@@ -245,7 +246,6 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode
             if (Visible == false)
                 return;
 
-            bool drawing = true;
             var pivot = new Vector2(0);
             ImGuiAPI.SetNextWindowSize(in WindowSize, ImGuiCond_.ImGuiCond_FirstUseEver);
             ImGuiAPI.SetNextWindowDockID(DockId, DockCond);
@@ -285,20 +285,9 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode
             }
             else
             {
-                drawing = false;
+                
             }
             EGui.UIProxy.DockProxy.EndMainForm();
-
-            if (drawing)
-            {
-                if (PreviewDockId != 0)
-                {
-                    PreviewViewport.DockId = PreviewDockId;
-                    PreviewViewport.DockCond = ImGuiCond_.ImGuiCond_Always;
-                    PreviewViewport.ViewportType = Graphics.Pipeline.UViewportSlate.EViewportType.Window;
-                    PreviewViewport.OnDraw();
-                }
-            }
         }
         protected void DrawToolBar()
         {
@@ -320,12 +309,13 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode
                 IO.SerializerHelper.WriteObjectMetaFields(xml, xmlRoot, this);
                 var xmlText = IO.TtFileManager.GetXmlText(xml);
                 Material.GraphXMLString = xmlText;
-                Material.UpdateShaderCode(false);
-                Material.HLSLCode = code;// GenHLSLCode();
-                Material.SerialId++;
+                //if (code == Material.HLSLCode)
+                //    return;
+                //Material.UpdateShaderCode(false);
+                //Material.HLSLCode = code;// GenHLSLCode();
+                //Material.SerialId++;
             }
         }
-        uint PreviewDockId = 0;
         private async System.Threading.Tasks.Task Save()
         {
             var xml = new System.Xml.XmlDocument();
@@ -334,10 +324,11 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode
             IO.SerializerHelper.WriteObjectMetaFields(xml, xmlRoot, this);
             var xmlText = IO.TtFileManager.GetXmlText(xml);
             Material.GraphXMLString = xmlText;
-            Material.UpdateShaderCode(false);
-            Material.HLSLCode = GenHLSLCode();
+            GenHLSLCode();
+            //Material.UpdateShaderCode(false);
+            //Material.HLSLCode = GenHLSLCode();
             Material.SaveAssetTo(Material.AssetName);
-            Material.SerialId++;
+            //Material.SerialId++;
 
             //Editor.USnapshot.Save(Material.AssetName, Material.GetAMeta(), PreviewViewport.RenderPolicy.GetFinalShowRSV(), UEngine.Instance.GfxDevice.RenderContext.mCoreObject.GetImmCommandList());
 
@@ -348,28 +339,17 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode
         }
         protected unsafe void DrawLeft(ref Vector2 min, ref Vector2 max)
         {
-            if (PreviewDockId == 0)
-                PreviewDockId = ImGuiAPI.GetID($"{AssetName}");
-
             var size = new Vector2(-1, -1);
             if (ImGuiAPI.BeginChild("LeftWindow", in size, false, ImGuiWindowFlags_.ImGuiWindowFlags_None))
             {
-                if (ImGuiAPI.CollapsingHeader("Preview", ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_None))
+                size.Y = ImGuiAPI.GetWindowWidth();
+                if (ImGuiAPI.BeginChild("PreviewWindow", in size, false, ImGuiWindowFlags_.ImGuiWindowFlags_None))
                 {
-                    ImGuiDockNodeFlags_ dockspace_flags = ImGuiDockNodeFlags_.ImGuiDockNodeFlags_None;
-                    var winClass = new ImGuiWindowClass();
-                    winClass.UnsafeCallConstructor();
-                    var sz = ImGuiAPI.GetWindowSize();
-                    sz.Y = sz.X;
-                    ImGuiAPI.DockSpace(PreviewDockId, in sz, dockspace_flags, in winClass);
-                    winClass.UnsafeCallDestructor();
-                    this.PreviewViewport.Visible = true;
+                    PreviewViewport.ViewportType = Graphics.Pipeline.UViewportSlate.EViewportType.ChildWindow;
+                    PreviewViewport.OnDraw();
                 }
-                else
-                {
-                    this.PreviewViewport.Visible = false;
-                }
-                    
+                ImGuiAPI.EndChild();
+
                 if (ImGuiAPI.CollapsingHeader("NodeProperty", ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_None))
                 {
                     if(GraphRenderer.Graph != null && GraphRenderer.Graph.SelectedNodesDirty)
@@ -457,13 +437,14 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode
             };
             gen.GenCodes(MaterialOutput.PSFunction, ref code, ref genData);
 
+            if (Material.HLSLCode != code)
+                Material.SerialId++;
+
             Material.HLSLCode = code;
             Material.VSNeedStreams = MaterialOutput.GetVSNeedStreams();
             Material.PSNeedInputs = MaterialOutput.GetPSNeedInputs();
 
             Material.UpdateShaderCode(false);
-            Material.SerialId++;
-
             return code;
         }
         //[Obsolete]

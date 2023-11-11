@@ -64,7 +64,7 @@ namespace EngineNS.Macross
             var newObj = module.NewInnerObject<T>(Name);
             if (mInnerObject != null)
             {
-                var meta = Rtti.UClassMetaManager.Instance.GetMeta(Rtti.UTypeDescGetter<T>.TypeDesc);
+                var meta = Rtti.TtClassMetaManager.Instance.GetMeta(Rtti.UTypeDescGetter<T>.TypeDesc);
                 meta?.CopyObjectMetaField(newObj, mInnerObject);
             }
             InnerObject = newObj;
@@ -99,6 +99,7 @@ namespace EngineNS.Macross
                 }
                 var hostAlcWeakRef = UEngine.Instance.MacrossModule.mAssembly;
 
+                Rtti.TtClassMetaManager.Instance.ResetSystemRef();
                 UEngine.Instance.MacrossModule.ReloadAssembly_Impl(assemblyPath);
 
                 if (hostAlcWeakRef != null)

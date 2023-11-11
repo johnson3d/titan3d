@@ -8,7 +8,7 @@ using System.Reflection;
 
 namespace EngineNS.DesignMacross.TimedStateMachine.StateAttachment
 {
-    [TimedStateAttachmentContextMenu("AnimPlay", "Attachment\\AnimPlay", UMacross.MacrossEditorKeyword)]
+    [TimedStateAttachmentContextMenu("AnimPlay", "Attachment\\AnimPlay", UDesignMacross.MacrossEditorKeyword)]
     [GraphElement(typeof(TtGraphElement_TimedStateAnimPlayAttachment))]
     public class TtTimedStateAnimPlayAttachmentClassDescription : ITimedStateAttachmentClassDescription
     {

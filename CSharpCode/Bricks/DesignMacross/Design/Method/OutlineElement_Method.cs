@@ -44,7 +44,7 @@ namespace EngineNS.DesignMacross.Design
             {
                 if (treeNodeDoubleClicked)
                 {
-                    //context.DefinitionGraphEditPanel.EditDefinitionGraph(variable);
+                    context.EditorInteroperation.GraphEditPanel.EditGraph(outlineElement_Method.Description);
                 }
                 else if (treeNodeIsItemClicked)
                 {
@@ -111,6 +111,7 @@ namespace EngineNS.DesignMacross.Design
                     description)
                 {
                     description.Name = name;
+                    description.Parent = (elementsList.Parent as TtOutline).Description;
                     elementsList.Descriptions.Add(description);
                 }
             }

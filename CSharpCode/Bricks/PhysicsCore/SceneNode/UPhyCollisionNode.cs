@@ -77,7 +77,6 @@ namespace EngineNS.Bricks.PhysicsCore.SceneNode
     {
         public class UPhySphereCollisionNodeData : UPhySingleShapeCollisionNodeData
         {
-            [Rtti.Meta]
             public float Radius = 1.0f;
         }
         public UPhySphereCollisionNodeData CollisionNodeData
@@ -115,7 +114,6 @@ namespace EngineNS.Bricks.PhysicsCore.SceneNode
     {
         public class UPhyBoxCollisionNodeData : UPhySingleShapeCollisionNodeData
         {
-            [Rtti.Meta]
             public Vector3 HalfExtent = Vector3.One;
         }
         public UPhyBoxCollisionNodeData CollisionNodeData
@@ -153,7 +151,6 @@ namespace EngineNS.Bricks.PhysicsCore.SceneNode
     {
         public class UPhySphereCollisionNodeData : UPhySingleShapeCollisionNodeData
         {
-            [Rtti.Meta]
             public Vector3 HalfExtent = Vector3.One * 0.5f;
         }
     }
@@ -162,9 +159,7 @@ namespace EngineNS.Bricks.PhysicsCore.SceneNode
     {
         public class UPhyCapsuleCollisionNodeData : UPhySingleShapeCollisionNodeData
         {
-            [Rtti.Meta]
             public float Radius = 1.0f;
-            [Rtti.Meta]
             public float HalfHeight = 0.5f;
         }
     }
@@ -173,7 +168,6 @@ namespace EngineNS.Bricks.PhysicsCore.SceneNode
     {
         public class UPhyConvexCollisionNodeData : UPhySingleShapeCollisionNodeData
         {
-            [Rtti.Meta]
             public RName ConvexSource;
         }
     }
@@ -181,7 +175,6 @@ namespace EngineNS.Bricks.PhysicsCore.SceneNode
     {
         public class UPhyTriMeshCollisionNodeData : UPhySingleShapeCollisionNodeData
         {
-            [Rtti.Meta]
             public RName TriMeshSource;
         }
     }

@@ -25,7 +25,6 @@ namespace EngineNS
         {
             get { return mEmpty; }
         }
-        [Rtti.Meta]
         static SizeF sInfinity = new SizeF(float.PositiveInfinity, float.PositiveInfinity);
         public static SizeF Infinity => sInfinity;
 

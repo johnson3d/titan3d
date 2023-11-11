@@ -76,7 +76,6 @@ namespace EngineNS
             }
         }
 
-        [Rtti.Meta]
         public static Thickness Empty = new Thickness(0);
         //
         // Summary:

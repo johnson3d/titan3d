@@ -9,13 +9,9 @@ namespace EngineNS.Bricks.Procedure
     [BufferTypeOperator(typeof(FPgcSpawnSceneNodeDescOperator))]
     public struct PgcSpawnSceneNodeDesc
     {
-        [Rtti.Meta]
         public DVector3 Location;
-        [Rtti.Meta]
         public Quaternion Rotation;
-        [Rtti.Meta]
         public Vector3 Scale;
-        [Rtti.Meta]
         public int TypeId;
     }
 

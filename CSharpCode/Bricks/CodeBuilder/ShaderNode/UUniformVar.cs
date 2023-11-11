@@ -6,7 +6,6 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode
 {
     public partial class UUniformVar : UNodeBase
     {
-        [Rtti.Meta]
         public Rtti.UTypeDesc VarType;
         [EGui.Controls.PropertyGrid.PGCustomValueEditor(HideInPG = true)]
         public PinOut Out { get; set; } = new PinOut();

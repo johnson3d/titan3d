@@ -122,12 +122,10 @@ namespace EngineNS
         /// <summary>
         /// X的值
         /// </summary>
-        [Rtti.Meta]
         public double X;
         /// <summary>
         /// Y的值
         /// </summary>
-        [Rtti.Meta]
         public double Y;
         /// <summary>
         /// 带参构造函数
