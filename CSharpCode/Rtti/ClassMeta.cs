@@ -761,10 +761,10 @@ namespace EngineNS.Rtti
                     return;
                 }
                 mHostType = metaVersion.HostClass.ClassType;
-                mFieldType = propType;
+                mFieldType = UTypeDesc.TypeOf(info.PropertyType);// propType;
 
                 System.Diagnostics.Debug.Assert(info.DeclaringType == metaVersion.HostClass.ClassType.SystemType || metaVersion.HostClass.ClassType.SystemType.IsSubclassOf(info.DeclaringType));
-                System.Diagnostics.Debug.Assert(info.PropertyType == propType.SystemType);
+                //System.Diagnostics.Debug.Assert(info.PropertyType == propType.SystemType);
                 System.Diagnostics.Debug.Assert(info.Name == name);
                 
                 var attrs = info.GetCustomAttributes(typeof(MetaAttribute), true);
