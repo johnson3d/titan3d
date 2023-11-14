@@ -3,9 +3,9 @@
     [EngineNS.Macross.UMacross]
     public partial class test_game01 : EngineNS.GamePlay.UMacrossGame
     {
-        EngineNS.Macross.UMacrossBreak breaker_FinalViewportSlate_1573568709 = new EngineNS.Macross.UMacrossBreak("breaker_FinalViewportSlate_1573568709");
-        EngineNS.Macross.UMacrossBreak breaker_InitViewportSlate_2533298875 = new EngineNS.Macross.UMacrossBreak("breaker_InitViewportSlate_2533298875");
-        EngineNS.Macross.UMacrossBreak breaker_LoadScene_3770860681 = new EngineNS.Macross.UMacrossBreak("breaker_LoadScene_3770860681");
+        public EngineNS.Macross.UMacrossBreak breaker_FinalViewportSlate_1573568709 = new EngineNS.Macross.UMacrossBreak("breaker_FinalViewportSlate_1573568709");
+        public EngineNS.Macross.UMacrossBreak breaker_InitViewportSlate_2533298875 = new EngineNS.Macross.UMacrossBreak("breaker_InitViewportSlate_2533298875");
+        public EngineNS.Macross.UMacrossBreak breaker_LoadScene_3770860681 = new EngineNS.Macross.UMacrossBreak("breaker_LoadScene_3770860681");
         EngineNS.Macross.UMacrossStackFrame mFrame_BeginDestroy = new EngineNS.Macross.UMacrossStackFrame(EngineNS.RName.GetRName("utest/test_game01.macross", EngineNS.RName.ERNameType.Game));
         [EngineNS.Rtti.Meta]
         public override void BeginDestroy(EngineNS.GamePlay.UGameInstance host)

@@ -44,8 +44,25 @@ namespace EngineNS.DesignMacross.Design
 
         public bool IsAsync { get; set; } = false;
 
-        public UMethodDeclaration BuildMethodDeclaration(ref FClassBuildContext classBuildContext)
+        [Rtti.Meta]
+        public TtDesignMacrossMethodGraph MethodGraph
+        { 
+            get; 
+            set; 
+        } = null;
+        public virtual UMethodDeclaration BuildMethodDeclaration(ref FClassBuildContext classBuildContext)
         {
+            if(MethodGraph != null)
+            {
+                if (MethodGraph.MacrossEditor == null)
+                {
+                    var macrossHolder = new TtTransitionMacrossHolder();
+                    macrossHolder.DefClass = classBuildContext.ClassDeclaration;
+                    MethodGraph.SetMacrossEditor(macrossHolder);
+                }
+                MethodGraph?.BuildExpression(classBuildContext.ClassDeclaration);
+                return MethodGraph.MethodDatas[0].MethodDec;
+            }
             return TtDescriptionASTBuildUtil.BuildDefaultPartForMethodDeclaration(this, ref classBuildContext);
         }
 
@@ -69,8 +86,5 @@ namespace EngineNS.DesignMacross.Design
         #endregion ISerializer
     }
 
-    public class TtOverrideMethodDescription : TtMethodDescription
-    {
-        public override string MethodName { get => Name;}
-    }
+
 }

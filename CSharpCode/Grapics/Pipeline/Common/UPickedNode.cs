@@ -104,10 +104,15 @@ namespace EngineNS.Graphics.Pipeline.Common
         {
             using (new Profiler.TimeScopeHelper(ScopeTick))
             {
+                mPickedMeshes.Clear();
+                policy.SetOptionData("PickedManager", PickedManager);
+                if (PickedManager.PickedProxies.Count == 0)
+                {
+                    return;
+                }
                 var cmdlist = BasePass.DrawCmdList;
                 cmdlist.BeginCommand();
 
-                mPickedMeshes.Clear();
                 foreach (var i in PickedManager.PickedProxies)
                 {
                     i.GetHitProxyDrawMesh(mPickedMeshes);

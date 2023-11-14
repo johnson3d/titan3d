@@ -169,16 +169,6 @@ namespace EngineNS.Graphics.Pipeline.Deferred
             index = drawcall.FindBinder("Samp_GVignette");
             if (index.IsValidPointer)
                 drawcall.BindSampler(index, UEngine.Instance.GfxDevice.SamplerStateManager.DefaultState);
-
-            index = drawcall.FindBinder("GPickedTex");
-            if (index.IsValidPointer)
-            {
-                var attachBuffer = dirLightingNode.GetAttachBuffer(dirLightingNode.PickPinIn);
-                drawcall.BindSRV(index, attachBuffer.Srv);
-            }
-            index = drawcall.FindBinder("Samp_GPickedTex");
-            if (index.IsValidPointer)
-                drawcall.BindSampler(index, UEngine.Instance.GfxDevice.SamplerStateManager.DefaultState);
             #endregion
 
             #region MultiLights
@@ -241,7 +231,6 @@ namespace EngineNS.Graphics.Pipeline.Deferred
         public Common.URenderGraphPin ShadowMapPinIn = Common.URenderGraphPin.CreateInput("ShadowMap");
         public Common.URenderGraphPin EnvMapPinIn = Common.URenderGraphPin.CreateInput("EnvMap");
         public Common.URenderGraphPin VignettePinIn = Common.URenderGraphPin.CreateInput("Vignette");
-        public Common.URenderGraphPin PickPinIn = Common.URenderGraphPin.CreateInput("Pick");
         public Common.URenderGraphPin TileScreenPinIn = Common.URenderGraphPin.CreateInput("TileScreen");
         public Common.URenderGraphPin GpuScenePinIn = Common.URenderGraphPin.CreateInput("GpuScene");
         public Common.URenderGraphPin PointLightsPinIn = Common.URenderGraphPin.CreateInput("PointLights");
@@ -261,7 +250,6 @@ namespace EngineNS.Graphics.Pipeline.Deferred
             AddInput(ShadowMapPinIn, NxRHI.EBufferType.BFT_SRV);
             AddInput(EnvMapPinIn, NxRHI.EBufferType.BFT_SRV);
             AddInput(VignettePinIn, NxRHI.EBufferType.BFT_SRV);
-            AddInput(PickPinIn, NxRHI.EBufferType.BFT_SRV);
             AddInput(TileScreenPinIn, NxRHI.EBufferType.BFT_SRV);
             AddInput(PointLightsPinIn, NxRHI.EBufferType.BFT_SRV);
             AddInput(GpuScenePinIn, NxRHI.EBufferType.BFT_SRV | NxRHI.EBufferType.BFT_UAV);

@@ -27,11 +27,30 @@ namespace CSharpCodeTools
         }
         static void Main(string[] args)
         {
+            string DefNewLine = "\r\n";
+            switch (System.Environment.OSVersion.Platform)
+            {
+                case PlatformID.Xbox:
+                case PlatformID.Win32NT:
+                case PlatformID.Win32Windows:
+                case PlatformID.Win32S:
+                    DefNewLine = "\r\n";
+                    break;
+                case PlatformID.Unix:
+                    DefNewLine = "\n";
+                    break;
+                case PlatformID.MacOSX:
+                    DefNewLine = "\r";
+                    break;
+                case PlatformID.Other:
+                    DefNewLine = "\n";
+                    break;
+            }
             var file = args[0].Replace('\\', '/');
             var idx = file.LastIndexOf('/');
             var dir = file.Substring(0, idx);
             var cfg = System.IO.File.ReadAllText(file);
-            var segs = cfg.Split("\r\n");
+            var segs = cfg.Split(DefNewLine);
 
             bool workRpc = true;
             bool workAutoSync = true;

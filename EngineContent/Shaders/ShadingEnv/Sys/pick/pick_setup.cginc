@@ -41,7 +41,8 @@ PS_INPUT VS_Main(VS_INPUT input1)
 	output.vPosition.xyz += mtl.mVertexOffset;
 #endif
 
-	output.vPosition = mul(float4(output.vWorldPos, 1), GetViewPrjMtx(true));
+    float4 wp4 = mul(float4(output.vPosition.xyz, 1), WorldMatrix);
+    output.vPosition = mul(wp4, GetViewPrjMtx(true));
 
 	//output.psCustomUV0.xy = float2(output.vPosition.xy / output.vPosition.w) * float2(0.5f, -0.5f) + float2(0.5f, 0.5f);
 	//output.psCustomUV0.z = float(output.vPosition.z / output.vPosition.w);

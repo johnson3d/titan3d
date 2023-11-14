@@ -1,4 +1,5 @@
-﻿using System;
+﻿using EngineNS.GamePlay;
+using System;
 using System.Collections.Generic;
 using System.Text;
 
@@ -34,9 +35,7 @@ namespace EngineNS.Graphics.Pipeline.Common
         {
             base.OnDrawCall(cmd, shadingType, drawcall, policy, mesh);
 
-            var Manager = policy.TagObject as URenderPolicy;
-
-            var pickBlurNode = Manager.FindFirstNode<Common.UPickBlurNode>();
+            var pickBlurNode = drawcall.TagObject as Common.UPickBlurNode;
 
             var index = drawcall.FindBinder("SourceTexture");
             if (index.IsValidPointer)
@@ -91,6 +90,13 @@ namespace EngineNS.Graphics.Pipeline.Common
             ResultPinOut.Attachement.Height = (uint)(y * scaleFactor);
 
             base.OnResize(policy, x * scaleFactor, y * scaleFactor);
+        }
+        public override void TickLogic(UWorld world, URenderPolicy policy, bool bClear)
+        {
+            var PickedManager = policy.GetOptionData("PickedManager") as UPickedProxiableManager;
+            if (PickedManager != null && PickedManager.PickedProxies.Count == 0)
+                return;
+            base.TickLogic(world, policy, bClear);
         }
     }
 }

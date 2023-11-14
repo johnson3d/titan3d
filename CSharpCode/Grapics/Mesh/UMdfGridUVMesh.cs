@@ -27,7 +27,9 @@ namespace EngineNS.Graphics.Mesh
         }
         public Graphics.Pipeline.Shader.EPixelShaderInput[] GetPSNeedInputs()
         {
-            return null;
+            return new Graphics.Pipeline.Shader.EPixelShaderInput[] {
+                Graphics.Pipeline.Shader.EPixelShaderInput.PST_UV
+            };
         }
     }
 

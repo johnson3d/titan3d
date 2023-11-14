@@ -61,7 +61,7 @@ namespace EngineNS.DesignMacross.Design
             return TtDescriptionASTBuildUtil.BuildDefaultPartForVariableDeclaration(this, ref classBuildContext);
         }
         #region ISerializer
-        public void OnPreRead(object tagObject, object hostObject, bool fromXml)
+        public virtual void OnPreRead(object tagObject, object hostObject, bool fromXml)
         {
             if (hostObject is IDescription parentDescription)
             {

@@ -12,9 +12,9 @@ namespace EngineNS.DesignMacross.Base.Description
     {
         public static bool bGenerateDebugable = false;
         public static string ClassNamePrefix => "DMC_";
-        public static string VariableNamePrefix => "Var_";
-        public static string MethodNamePrefix => "Method_";
-        public static string MethodLocalVarNamePrefix => "LocalVar_";
+        public static string VariableNamePrefix => "";
+        public static string MethodNamePrefix => "";
+        public static string MethodLocalVarNamePrefix => "";
         public static string GenerateClassName(IClassDescription classDescription)
         {
             if(bGenerateDebugable)
@@ -34,7 +34,7 @@ namespace EngineNS.DesignMacross.Base.Description
             }
             else
             {
-                return VariableNamePrefix + variableDescription.Name + "_" + (uint)variableDescription.Id.GetHashCode();
+                return VariableNamePrefix + variableDescription.Name;// + "_" + (uint)variableDescription.Id.GetHashCode();
             }
         }
         public static string GenerateMethodName(IMethodDescription  methodDescription)
@@ -45,7 +45,7 @@ namespace EngineNS.DesignMacross.Base.Description
             }
             else
             {
-                return MethodNamePrefix + methodDescription.Name + "_" + (uint)methodDescription.Id.GetHashCode();
+                return MethodNamePrefix + methodDescription.Name;// + "_" + (uint)methodDescription.Id.GetHashCode();
             }
         }
         public static string GenerateMethodLocalVarName(IVariableDescription variableDescription)
@@ -56,7 +56,7 @@ namespace EngineNS.DesignMacross.Base.Description
             }
             else
             {
-                return MethodLocalVarNamePrefix + variableDescription.Name + "_" + (uint)variableDescription.Id.GetHashCode();
+                return MethodLocalVarNamePrefix + variableDescription.Name;// + "_" + (uint)variableDescription.Id.GetHashCode();
             }
         }
         static string GetDescriptionCascadeName(IDescription description)
@@ -81,11 +81,11 @@ namespace EngineNS.DesignMacross.Base.Description
                 var varDeclaration = BuildDefaultPartForVariableDeclaration(variableDesc, ref classBuildContext);
                 declaration.Properties.Add(varDeclaration);
             }
-            foreach (var methodDesc in description.Methods)
-            {
-                var methodDeclaration = BuildDefaultPartForMethodDeclaration(methodDesc, ref classBuildContext);
-                declaration.Methods.Add(methodDeclaration);
-            }
+            //foreach (var methodDesc in description.Methods)
+            //{
+            //    var methodDeclaration = BuildDefaultPartForMethodDeclaration(methodDesc, ref classBuildContext);
+            //    declaration.Methods.Add(methodDeclaration);
+            //}
             return declaration;
         }
         public static UMethodDeclaration BuildDefaultPartForMethodDeclaration(IMethodDescription description, ref FClassBuildContext classBuildContext)

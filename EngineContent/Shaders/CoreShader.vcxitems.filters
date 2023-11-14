@@ -449,6 +449,9 @@
     <None Include="$(MSBuildThisFileDirectory)ShadingEnv\2DUI.cginc">
       <Filter>ShadingEnv</Filter>
     </None>
+    <None Include="$(MSBuildThisFileDirectory)ShadingEnv\Sys\pick\pick_hollow_blend.cginc">
+      <Filter>ShadingEnv\Sys\pick</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="$(MSBuildThisFileDirectory)Compute\calcrate.compute">

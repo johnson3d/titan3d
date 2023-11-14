@@ -10,26 +10,11 @@ namespace EngineNS.DesignMacross.TimedStateMachine.StateAttachment
 {
     [TimedStateAttachmentContextMenu("AnimPlay", "Attachment\\AnimPlay", UDesignMacross.MacrossEditorKeyword)]
     [GraphElement(typeof(TtGraphElement_TimedStateAnimPlayAttachment))]
-    public class TtTimedStateAnimPlayAttachmentClassDescription : ITimedStateAttachmentClassDescription
+    public class TtTimedStateAnimPlayAttachmentClassDescription : TtTimedStateAttachmentClassDescription
     {
-        public IDescription Parent { get; set; }
-        public Guid Id { get; set; } = Guid.NewGuid();
-        public string Name { get; set; } = "AnimPlay";
-        [Rtti.Meta]
-        public Vector2 Location { get; set; }
+        public override string Name { get; set; } = "AnimPlay";
         [Rtti.Meta]
         public RName AnimationClip;
 
-        #region ISerializer
-        public void OnPreRead(object tagObject, object hostObject, bool fromXml)
-        {
-
-        }
-
-        public void OnPropertyRead(object tagObject, PropertyInfo prop, bool fromXml)
-        {
-
-        }
-        #endregion ISerializer
     }
 }

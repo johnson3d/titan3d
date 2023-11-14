@@ -25,14 +25,14 @@ namespace EngineNS.Bricks.NodeGraph
         {
             get
             {
-                return InPin.HostNode;
+                return InPin?.HostNode;
             }
         }
         public UNodeBase OutNode
         {
             get
             {
-                return OutPin.HostNode;
+                return OutPin?.HostNode;
             }
         }
 

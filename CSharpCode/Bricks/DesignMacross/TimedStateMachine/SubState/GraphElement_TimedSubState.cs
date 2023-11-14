@@ -9,7 +9,7 @@ using System.Collections.Generic;
 namespace EngineNS.DesignMacross.TimedStateMachine
 {
     [ImGuiElementRender(typeof(TtGraphElementRender_TimedSubState))]
-    public class TtGraphElement_TimedSubState : TtDescriptionGraphElement, IStateTransitionAcceptable, IStateTransitionInitial
+    public class TtGraphElement_TimedSubState : TtDescriptionGraphElement, IStateTransitionAcceptable, IStateTransitionInitial, IEnumChild
     {
         public TtTimedSubStateClassDescription TimedSubStateClassDescription { get => Description as TtTimedSubStateClassDescription; }
         TtTimedCompoundStateClassDescription ParentTimedCompoundStateClassDescription { get => Description.Parent as TtTimedCompoundStateClassDescription; }
@@ -169,7 +169,7 @@ namespace EngineNS.DesignMacross.TimedStateMachine
                          (UMenuItem item, object sender) =>
                          {
                              var popMenu = sender as TtPopupMenu;
-                             if (Rtti.UTypeDescManager.CreateInstance(type.TypeDesc) is ITimedStateAttachmentClassDescription attachment)
+                             if (Rtti.UTypeDescManager.CreateInstance(type.TypeDesc) is TtTimedStateAttachmentClassDescription attachment)
                              {
                                  attachment.Name = GetValidAttachmenName(attachment.Name);
                                  TimedSubStateClassDescription.AddAttachment(attachment);
@@ -271,6 +271,18 @@ namespace EngineNS.DesignMacross.TimedStateMachine
             base.ConstructElements(ref context);
         }
 
+        public List<IGraphElement> EnumerateChild<T>() where T : class
+        {
+            List<IGraphElement> list = new List<IGraphElement>();
+            foreach (var element in ChildrenDescriptionGraphElements)
+            {
+                if (element is T)
+                {
+                    list.Add(element);
+                }
+            }
+            return list;
+        }
     }
     public class TtGraphElementRender_TimedSubState : IGraphElementRender
     {

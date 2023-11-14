@@ -45,6 +45,8 @@ namespace EngineNS.Editor.Forms
         {
             return this;
         }
+        public float PlaneScale = 5.0f;
+        EngineNS.GamePlay.Scene.UMeshNode PlaneMeshNode;
         EngineNS.GamePlay.Scene.UMeshNode mCurrentMeshNode;
         EngineNS.GamePlay.Scene.UMeshNode mArrowMeshNode;
         float mCurrentMeshRadius = 1.0f;
@@ -88,6 +90,26 @@ namespace EngineNS.Editor.Forms
             sphere.Center = aabb.GetCenter();
             sphere.Radius = mCurrentMeshRadius;
             policy.DefaultCamera.AutoZoom(ref sphere);
+
+            {
+                var meshCenter = aabb.GetCenter();
+                var meshSize = aabb.GetSize() * PlaneScale;
+                meshSize.Y = aabb.GetSize().Y * 0.05f;
+                var boxStart = meshCenter - meshSize * 0.5f;
+                boxStart.Y -= aabb.GetSize().Y * 0.5f;
+                var box = Graphics.Mesh.UMeshDataProvider.MakeBox(boxStart.X, boxStart.Y, boxStart.Z, meshSize.X, meshSize.Y, meshSize.Z).ToMesh();
+
+                var PlaneMesh = new Graphics.Mesh.UMesh();
+                var tMaterials = new Graphics.Pipeline.Shader.UMaterial[1];
+                tMaterials[0] = await UEngine.Instance.GfxDevice.MaterialInstanceManager.GetMaterialInstance(RName.GetRName("material/whitecolor.uminst", RName.ERNameType.Engine));
+                PlaneMesh.Initialize(box, tMaterials,
+                    Rtti.UTypeDescGetter<Graphics.Mesh.UMdfStaticMesh>.TypeDesc);
+                PlaneMeshNode = await GamePlay.Scene.UMeshNode.AddMeshNode(viewport.World, viewport.World.Root, new GamePlay.Scene.UMeshNode.UMeshNodeData(), typeof(GamePlay.UPlacement), PlaneMesh, DVector3.Zero, Vector3.One, Quaternion.Identity);
+                PlaneMeshNode.HitproxyType = Graphics.Pipeline.UHitProxy.EHitproxyType.None;
+                PlaneMeshNode.NodeData.Name = "Plane";
+                PlaneMeshNode.IsAcceptShadow = true;
+                PlaneMeshNode.IsCastShadow = false;
+            }
 
             var gridNode = await GamePlay.Scene.UGridNode.AddGridNode(viewport.World, viewport.World.Root);
             gridNode.ViewportSlate = this.PreviewViewport;

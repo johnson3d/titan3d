@@ -34,7 +34,6 @@ namespace EngineNS.DesignMacross.TimedStateMachine
         [Rtti.Meta]
         public Guid ToId { get; set; }
         private IDescription mFrom = null;
-
         public IDescription From
         {
             get
@@ -61,9 +60,7 @@ namespace EngineNS.DesignMacross.TimedStateMachine
                 return mFrom;
             }
         }
-
         private IDescription mTo = null;
-
         public IDescription To
         {
             get
@@ -89,13 +86,14 @@ namespace EngineNS.DesignMacross.TimedStateMachine
             }
         }
 
-
-        public TtOverrideMethodDescription OverrideCheckConditionMethodDescription = null;
+        [Rtti.Meta]
+        public TtMethodDescription OverrideCheckConditionMethodDescription { get; set; } = null;
         public TtTimedStateTransitionClassDescription() 
         {
-            OverrideCheckConditionMethodDescription = new TtOverrideMethodDescription()
+            OverrideCheckConditionMethodDescription = new TtMethodDescription()
             {
                 Name = "CheckCondition",
+                Parent = this,
                 ReturnValue = new UVariableDeclaration()
                 {
                     VariableType = new UTypeReference(typeof(bool)),
@@ -112,8 +110,12 @@ namespace EngineNS.DesignMacross.TimedStateMachine
             SupperClassNames.Clear();
             SupperClassNames.Add($"EngineNS.Bricks.StateMachine.TimedSM.TtTimedStateTransition<{classBuildContext.MainClassDescription.ClassName}>");
             UClassDeclaration thisClassDeclaration = TtDescriptionASTBuildUtil.BuildDefaultPartForClassDeclaration(this, ref classBuildContext);
-
-            thisClassDeclaration.AddMethod(BuildOverrideCheckConditionMethod(ref classBuildContext));
+            FClassBuildContext transitionClassBuildContext = new FClassBuildContext()
+            {
+                MainClassDescription = classBuildContext.MainClassDescription,
+                ClassDeclaration = thisClassDeclaration,
+            };
+            thisClassDeclaration.AddMethod(BuildOverrideCheckConditionMethod(ref transitionClassBuildContext));
             return new List<UClassDeclaration>() {  thisClassDeclaration };
         }
 
@@ -129,5 +131,10 @@ namespace EngineNS.DesignMacross.TimedStateMachine
         }
 
         #endregion
+
+        public override void OnPreRead(object tagObject, object hostObject, bool fromXml)
+        {
+            base.OnPreRead(tagObject, hostObject, fromXml);
+        }
     }
 }

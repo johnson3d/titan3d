@@ -49,7 +49,12 @@ namespace EngineNS.DesignMacross.Design
         {
             List<UClassDeclaration> classDeclarationsBuilded = new();
             UClassDeclaration thisClassDeclaration = TtDescriptionASTBuildUtil.BuildDefaultPartForClassDeclaration(this, ref classBuildContext);
-
+            classBuildContext.ClassDeclaration = thisClassDeclaration;
+            foreach (var methodDesc in Methods)
+            {
+                var methodDeclaration = methodDesc.BuildMethodDeclaration(ref classBuildContext);
+                thisClassDeclaration.Methods.Add(methodDeclaration);
+            }
             foreach (var designVarDesc in DesignableVariables)
             {
                 classDeclarationsBuilded.AddRange(designVarDesc.BuildClassDeclarations(ref classBuildContext));

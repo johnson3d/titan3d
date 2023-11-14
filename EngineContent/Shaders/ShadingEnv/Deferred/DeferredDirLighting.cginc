@@ -46,9 +46,6 @@ SamplerState Samp_gEnvMap DX_AUTOBIND;
 Texture2D GVignette DX_AUTOBIND;
 SamplerState Samp_GVignette DX_AUTOBIND;
 
-Texture2D GPickedTex DX_AUTOBIND;
-SamplerState Samp_GPickedTex DX_AUTOBIND;
-
 StructuredBuffer<FTileData> TilingBuffer DX_AUTOBIND;
 
 float GetDepth(float2 uv)
@@ -286,20 +283,8 @@ PS_OUTPUT PS_Main(PS_INPUT input)
 		}
 	}
 #endif
-
-	half2 PickedData = (half2)GPickedTex.Sample(Samp_GPickedTex, uv.xy).rg;
-	half PickedContrast = 1.0h;
-	half3 PickedEdgeColor = 0.0h;
-	half linearDepth = (half)(PerPixelViewerDistance / gZFar);
-	if (PickedData.g - linearDepth > 0.0h)
-	{
-		PickedEdgeColor = half3(1.0h, 0.0h, 0.0h) * PickedContrast;
-	}
-	else
-	{
-		PickedEdgeColor = half3(0.0h, 1.0h, 0.0h) * PickedContrast;
-	}
-	half3 Color = lerp(BaseShading.rgb, PickedEdgeColor, PickedData.r);
+	
+    half3 Color = BaseShading.rgb;
 
 	output.RT0.rgb = Linear2sRGB(Color);
 	//output.RT0.rgb = Linear2sRGB(GBuffer.MtlColorRaw);

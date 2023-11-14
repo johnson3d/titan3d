@@ -1,6 +1,8 @@
 ﻿using EngineNS.Graphics.Pipeline.Common;
 using EngineNS.Thread;
 using Microsoft.CodeAnalysis.Host.Mef;
+using NPOI.SS.Formula.Functions;
+using NPOI.Util;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -129,7 +131,8 @@ namespace EngineNS.Graphics.Pipeline
                     i.Value.UpdateConstBufferData(UEngine.Instance.GfxDevice.RenderContext);
                 }
                 base.TickSync();
-            }   
+            }
+            PolicyOptionData.Clear();
         }
 
         #region Turn On/Off
@@ -195,6 +198,20 @@ namespace EngineNS.Graphics.Pipeline
         [Category("Option")]
         [Rtti.Meta]
         public virtual ETypeFog TypeFog { get; set; } = ETypeFog.None;
+
+        public Dictionary<string, object> PolicyOptionData { get; } = new Dictionary<string, object>();
+        public void SetOptionData(string name, object data)
+        {
+            PolicyOptionData[name] = data;
+        }
+        public object GetOptionData(string name)
+        {
+            if (PolicyOptionData.TryGetValue(name, out object result))
+            {
+                return result;
+            }
+            return null;
+        }
         #endregion
         public Common.UPickedProxiableManager PickedProxiableManager { get; protected set; } = new Common.UPickedProxiableManager();
         public List<Mesh.UMesh> VisibleMeshes = new List<Mesh.UMesh>();

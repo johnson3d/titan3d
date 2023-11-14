@@ -120,6 +120,7 @@
     <None Include="$(MSBuildThisFileDirectory)ShadingEnv\Sys\pick\HitProxy.cginc" />
     <None Include="$(MSBuildThisFileDirectory)ShadingEnv\Sys\pick\pick_blur.cginc" />
     <None Include="$(MSBuildThisFileDirectory)ShadingEnv\Sys\pick\pick_hollow.cginc" />
+    <None Include="$(MSBuildThisFileDirectory)ShadingEnv\Sys\pick\pick_hollow_blend.cginc" />
     <None Include="$(MSBuildThisFileDirectory)ShadingEnv\Sys\pick\pick_setup.cginc" />
     <None Include="$(MSBuildThisFileDirectory)ShadingEnv\Sys\rect2d.shadingenv" />
     <None Include="$(MSBuildThisFileDirectory)ShadingEnv\Sys\screenspace\hdr.cginc" />

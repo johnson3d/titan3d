@@ -136,6 +136,8 @@ namespace EngineNS.Bricks.RenderPolicyEditor
             }
             foreach (var i in PolicyGraph.Linkers)
             {
+                if (i.InNode == null || i.OutNode == null)
+                    continue;
                 var inNode = policy.FindNode(i.InNode.Name);
                 if (inNode == null)
                     continue;

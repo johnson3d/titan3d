@@ -55,6 +55,7 @@ namespace EngineNS.Graphics.Pipeline.Deferred
                 EPixelShaderInput.PST_Normal,
                 EPixelShaderInput.PST_UV,
                 EPixelShaderInput.PST_Color,
+                EPixelShaderInput.PST_Custom0,
                 EPixelShaderInput.PST_Custom1,
                 EPixelShaderInput.PST_Custom2,
             };

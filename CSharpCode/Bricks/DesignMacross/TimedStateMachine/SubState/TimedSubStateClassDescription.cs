@@ -28,7 +28,7 @@ namespace EngineNS.DesignMacross.TimedStateMachine
         [DrawInGraph]
         [Browsable(false)]
         [Rtti.Meta]
-        public List<ITimedStateAttachmentClassDescription> Attachments { get; set; } = new List<ITimedStateAttachmentClassDescription>();
+        public List<TtTimedStateAttachmentClassDescription> Attachments { get; set; } = new List<TtTimedStateAttachmentClassDescription>();
         public bool AddTransition(TtTimedStateTransitionClassDescription transition)
         {
             Transitions.Add(transition);
@@ -41,13 +41,13 @@ namespace EngineNS.DesignMacross.TimedStateMachine
             transition.Parent = null;
             return true;
         }
-        public bool AddAttachment(ITimedStateAttachmentClassDescription attachment)
+        public bool AddAttachment(TtTimedStateAttachmentClassDescription attachment)
         {
             Attachments.Add(attachment); 
             attachment.Parent = this;
             return true;   
         }
-        public bool RemoveAttachment(ITimedStateAttachmentClassDescription attachment)
+        public bool RemoveAttachment(TtTimedStateAttachmentClassDescription attachment)
         {
             Attachments.Remove(attachment);
             attachment.Parent = null;
@@ -64,6 +64,11 @@ namespace EngineNS.DesignMacross.TimedStateMachine
             {
                 classDeclarationsBuilded.AddRange(transition.BuildClassDeclarations(ref classBuildContext));
                 thisClassDeclaration.Properties.Add(transition.BuildVariableDeclaration(ref classBuildContext));
+            }
+            foreach (var attachment in Attachments)
+            {
+                classDeclarationsBuilded.AddRange(attachment.BuildClassDeclarations(ref classBuildContext));
+                thisClassDeclaration.Properties.Add(attachment.BuildVariableDeclaration(ref classBuildContext));
             }
             classDeclarationsBuilded.Add(thisClassDeclaration);
             return classDeclarationsBuilded;

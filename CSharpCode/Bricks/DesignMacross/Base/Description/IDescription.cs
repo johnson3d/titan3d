@@ -9,6 +9,7 @@ namespace EngineNS.DesignMacross.Base.Description
     public struct FClassBuildContext
     {
         public IClassDescription MainClassDescription { get; set; } 
+        public UClassDeclaration ClassDeclaration { get; set; }
     }
     public interface IDescription  : IO.ISerializer
     {
