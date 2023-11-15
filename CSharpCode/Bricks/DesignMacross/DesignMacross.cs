@@ -7,6 +7,9 @@ using System.Text;
 using EngineNS.EGui.Controls;
 using EngineNS.Rtti;
 using EngineNS.DesignMacross.Editor;
+using EngineNS.DesignMacross.Design;
+using EngineNS.DesignMacross.Base.Description;
+using System.Text.RegularExpressions;
 
 namespace EngineNS.DesignMacross
 {
@@ -55,6 +58,7 @@ namespace EngineNS.DesignMacross
     public class TtDesignMacrossBase
     {
         public void Initialize() { }
+        public void Tick(float elapseSecond) { }
     }
     public partial class TtDesignMacrossAMeta : IO.IAssetMeta
     {
@@ -104,7 +108,7 @@ namespace EngineNS.DesignMacross
     [DesignMacrossCreate]
     [IO.AssetCreateMenu(MenuName = "DesignMacross")]
     [EngineNS.Editor.UAssetEditor(EditorType = typeof(DesignMacross.Editor.TtDesignMacrossEditor))]
-    public partial class UDesignMacross : IO.IAsset
+    public partial class UDesignMacross : IO.BaseSerializer, IO.IAsset
     {
         public const string AssetExt = ".designmacross";
         public const string MacrossEditorKeyword = "DesignMacross";
@@ -214,7 +218,7 @@ namespace EngineNS.DesignMacross
                         var rn = RName.GetRName(mDir.Name + mName + ExtName, mDir.RNameType);
                         if (IO.TtFileManager.FileExists(rn.Address) == false && string.IsNullOrWhiteSpace(mName) == false)
                         {
-                            ((UDesignMacross)mAsset).mSelectedType = mSelectedType;
+                            ((UDesignMacross)mAsset).DesignMacrossBaseClass = mSelectedType;
                             if (DoImportAsset())
                             {
                                 ImGuiAPI.CloseCurrentPopup();
@@ -235,7 +239,10 @@ namespace EngineNS.DesignMacross
                 return retValue;
             }
         }
+        [Rtti.Meta]
         public RName AssetName { get; set; }
+        [Rtti.Meta]
+        public TtClassDescription DesignedClassDescription { get; set; } = new TtClassDescription();
 
         public IAssetMeta CreateAMeta()
         {
@@ -248,35 +255,61 @@ namespace EngineNS.DesignMacross
         {
             return UEngine.Instance.AssetMetaManager.GetAssetMeta(AssetName);
         }
-
-        UTypeDesc mSelectedType = null;
-        public TtDesignMacrossEditor DesignMacrossEditor = null;
+        [Rtti.Meta]
+        public UTypeDesc DesignMacrossBaseClass { get; set; } = null;
         public void SaveAssetTo(RName name)
         {
-            //var ameta = GetAMeta();
-            //if (ameta != null)
-            //{
-            //    UpdateAMetaReferences(ameta);
-            //    ameta.SaveAMeta();
-            //}
+            var ameta = GetAMeta();
+            if (ameta != null)
+            {
+                UpdateAMetaReferences(ameta);
+                ameta.SaveAMeta();
+            }
             IO.TtFileManager.CreateDirectory(name.Address);
 
-            if (DesignMacrossEditor == null)
-                DesignMacrossEditor = new TtDesignMacrossEditor();
-            DesignMacrossEditor.AssetName = name;
-            DesignMacrossEditor.ClassDescription.Name = name.PureName;
-            DesignMacrossEditor.ClassDescription.Namespace = new UNamespaceDeclaration(IO.TtFileManager.GetParentPathName(name.Name).TrimEnd('/').Replace('/', '.'));
-            //if (mSelectedType != null)
-            //    DesignMacrossEditor.DefClass.SupperClassNames.Add(mSelectedType.FullName);
-            //DesignMacrossEditor.SaveClassGraph(name);
+            DesignedClassDescription.SupperClassNames.Add(DesignMacrossBaseClass.FullName);
+            DesignedClassDescription.Name = name.PureName;
+            var nsName = IO.TtFileManager.GetBaseDirectory(name.Name).TrimEnd('/').Replace("/", ".");
+            if (Regex.IsMatch(nsName, "[A-Za-z0-9_]"))
+                DesignedClassDescription.Namespace = new UNamespaceDeclaration("NS_" + nsName);
+            else
+            {
+                DesignedClassDescription.Namespace = new UNamespaceDeclaration("NS_" + ((UInt32)nsName.GetHashCode()).ToString());
+                Profiler.Log.WriteLine(Profiler.ELogTag.Warning, "Macross", $"Get namespace failed, {name.Name} has invalid char!");
+            }
+            Save(name);
+        }
+        public void Save(RName rn)
+        {
+            var ameta = GetAMeta();
+            if (ameta != null)
+            {
+                UpdateAMetaReferences(ameta);
+                ameta.SaveAMeta();
+            }
+
+            var xml = new System.Xml.XmlDocument();
+            var xmlRoot = xml.CreateElement($"Root", xml.NamespaceURI);
+            xml.AppendChild(xmlRoot);
+            IO.SerializerHelper.WriteObjectMetaFields(xml, xmlRoot, this);
+            var xmlText = IO.TtFileManager.GetXmlText(xml);
+            IO.TtFileManager.WriteAllText($"{rn.Address}/DesignMacrossDescription.dat", xmlText);
+        }
+        public void Load(RName rn) 
+        {
+            var xml = IO.TtFileManager.LoadXml($"{rn.Address}/DesignMacrossDescription.dat");
+            if (xml == null)
+                return;
+            object pDesignMacross = this;
+            IO.SerializerHelper.ReadObjectMetaFields(pDesignMacross, xml.LastChild as System.Xml.XmlElement, ref pDesignMacross, null);
         }
 
         public void UpdateAMetaReferences(IAssetMeta ameta)
         {
             ameta.RefAssetRNames.Clear();
             var macrossMeta = (ameta as TtDesignMacrossAMeta);
-            if (macrossMeta != null && mSelectedType != null)
-                macrossMeta.BaseTypeStr = mSelectedType.TypeString;
+            if (macrossMeta != null && DesignMacrossBaseClass != null)
+                macrossMeta.BaseTypeStr = DesignMacrossBaseClass.TypeString;
 
             var graph = new TtDesignMacrossEditor();
             //graph.LoadClassGraph(this.AssetName);

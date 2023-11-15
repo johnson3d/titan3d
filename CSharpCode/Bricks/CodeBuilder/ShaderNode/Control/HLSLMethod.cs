@@ -57,6 +57,12 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Control
             return Vector2.Zero;
         }
         [Rtti.Meta]
+        [TtHLSLProvider(Name = "UnpackNormal")]
+        public static void UnpackNormal(Vector3 packedNormal, out Vector3 normal)
+        {
+            normal = packedNormal * 2.0f - Vector3.One;
+        }
+        [Rtti.Meta]
         [TtHLSLProvider(Name = "GetTerrainDiffuse")]
         public static Vector3 GetTerrainDiffuse(Vector2 uv, Graphics.Pipeline.Shader.UMaterial.PSInput input)
         {

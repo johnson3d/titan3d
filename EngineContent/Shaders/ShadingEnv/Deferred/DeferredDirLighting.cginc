@@ -143,7 +143,7 @@ PS_OUTPUT PS_Main(PS_INPUT input)
 	float3 WorldPos = GetWorldPositionFromDepthValue(uv, rtDepth).xyz;//GetWorldPosition(input.vPosition, rtDepth);//
 	half3 L = -(half3)normalize(gDirLightDirection_Leak.xyz);
 	half3 V = (half3)normalize(CameraPosition - WorldPos);
-	half3 Cdir = (half3)gDirLightColor_Intensity.rgb;
+    half3 Cdir = (half3)gDirLightColor_Intensity.rgb;
 	half  Idir = (half)gDirLightColor_Intensity.w;
 	half Ienv_light = Idir * 0.2h;
 	half3 Csky = (half3)mSkyLightColor;
@@ -228,7 +228,7 @@ PS_OUTPUT PS_Main(PS_INPUT input)
 	half NoH = max(dot(N, H), 0.0h);
 	half LoH = max(dot(L, H), 0.0h);
 	half NoV = max(dot(N, V), 0.0h);
-
+    
 	//sky light;
 	//half SkyAtten = 1.0h - NoL;
 	half SkyAtten = min(1.0h, 2.0h - NoL - ShadowValue);

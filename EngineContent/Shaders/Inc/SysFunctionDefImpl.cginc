@@ -66,6 +66,23 @@ VS_MODIFIER VS_INPUT_TO_VS_MODIFIER(VS_INPUT input)
 	return result;
 }
 
+half3 MTL_OUTPUT::GetFinalNormal(PS_INPUT input)
+{
+#if MTL_NORMAL_MODE==MTL_NORMALNONE
+    return half3(0, 0, 0);
+#elif MTL_NORMAL_MODE==MTL_NORMALMAP
+	half3 worldNorm = normalize(mNormal);
+#if USE_PS_Normal == 1 && USE_PS_Tangent == 1
+    NormalMap((half3)mNormal, (half4) input.vTangent, (half3) input.vNormal, worldNorm);
+#endif
+    return worldNorm;
+#elif MTL_NORMAL_MODE==MTL_NORMAL	
+	return (half3) normalize(mNormal);
+#else
+	return (half3) normalize(mNormal);
+#endif
+}
+
 #if !defined(Def_GetTerrainDiffuse)
 float3 GetTerrainDiffuse(float2 uv, PS_INPUT input)
 {

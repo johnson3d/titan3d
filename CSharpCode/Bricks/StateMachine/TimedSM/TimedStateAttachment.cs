@@ -28,9 +28,13 @@ namespace EngineNS.Bricks.StateMachine.TimedSM
 
         public void Tick(float elapseSecond, in T context)
         {
+            if (ShouldUpdate())
+            {
+                Update(elapseSecond, context);
+            }
         }
 
-        public void Update(float elapseSecond, in T context)
+        public virtual void Update(float elapseSecond, in T context)
         {
         }
     }

@@ -320,6 +320,10 @@ void Default_VSInput2PSInput(inout PS_INPUT output, VS_MODIFIER input)
 #endif
 }
 
+#define MTL_NORMAL 1
+#define MTL_NORMALMAP 2
+#define MTL_NORMALNONE 3
+
 struct MTL_OUTPUT
 {
 	float3 mAlbedo;
@@ -342,6 +346,8 @@ struct MTL_OUTPUT
 	float3 mShadowColor;
 	float   mDeepShadow;
 	float3 mMoodColor;
+	
+    half3 GetFinalNormal(PS_INPUT input);
 };
 
 MTL_OUTPUT Default_PSInput2Material(PS_INPUT input)

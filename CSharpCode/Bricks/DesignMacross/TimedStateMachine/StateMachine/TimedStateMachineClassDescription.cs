@@ -92,7 +92,10 @@ namespace EngineNS.DesignMacross.TimedStateMachine
                 initializeMethodInvoke.MethodName = "Initialize";
                 methodDeclaration.MethodBody.Sequence.Add(initializeMethodInvoke);
             }
-                
+            UAssignOperatorStatement returnValueAssign = new UAssignOperatorStatement();
+            returnValueAssign.To = new UVariableReferenceExpression("result");
+            returnValueAssign.From = new UPrimitiveExpression(true);
+            methodDeclaration.MethodBody.Sequence.Add(returnValueAssign);
             return methodDeclaration;
         }
         #endregion

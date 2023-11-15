@@ -105,7 +105,7 @@ namespace EngineNS.DesignMacross.TimedStateMachine.CompoundState
                 VariableName = "result"
             };
 
-            new UReturnStatement();
+           
 
             bool bIsSetInitialActiveState = false;
             foreach (var state in States)
@@ -224,6 +224,10 @@ namespace EngineNS.DesignMacross.TimedStateMachine.CompoundState
                     methodDeclaration.MethodBody.Sequence.Add(stateAddTransionMethodInvoke);
                 }
             }
+            UAssignOperatorStatement returnValueAssign = new UAssignOperatorStatement();
+            returnValueAssign.To = new UVariableReferenceExpression("result");
+            returnValueAssign.From = new UPrimitiveExpression(true);
+            methodDeclaration.MethodBody.Sequence.Add(returnValueAssign);
             return methodDeclaration;
         }
         #endregion

@@ -20,7 +20,7 @@ namespace EngineNS.DesignMacross.Design
         [Rtti.Meta]
         public Guid Id { get; set; } = Guid.NewGuid();
         [Rtti.Meta]
-        public string Name { get; set; } = "Class";
+        public string Name { get; set; } = "ClassDescription";
         [Rtti.Meta]
         public Vector2 Location { get; set; }
         public string ClassName { get => Name; }

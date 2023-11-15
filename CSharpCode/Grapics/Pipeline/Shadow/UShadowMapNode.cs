@@ -65,10 +65,9 @@ namespace EngineNS.Graphics.Pipeline.Shadow
         //private Vector3 mDirLightCameraLookAtPos = new Vector3(0.0f, 0.0f, 0.0f);
         public Vector3 mDirLightDirection = new Vector3(0.0f, -1.5f, 1.0f);
 
-        public float mShadowDistance = 250.0f;
+        public float mShadowDistance = 1200.0f;
         private float mShadowCameraOffset = 100.0f;
         public UInt32 mCsmNum = 4;
-        public float[] mCsmDistanceArray = new float[4];
         public float[] mSumDistanceFarArray = new float[4];
         public Vector4 mSumDistanceFarVec = new Vector4();
 
@@ -247,15 +246,10 @@ namespace EngineNS.Graphics.Pipeline.Shadow
                 mUVAdjustedMtxArray[UVAdjustIdx].M42 = (float)mBorderSize / (float)mWholeReslutionY;
             }
 
-            mCsmDistanceArray[0] = 0.04f;
-            mCsmDistanceArray[1] = 0.17f;
-            mCsmDistanceArray[2] = 0.32f;
-            mCsmDistanceArray[3] = 0.47f;
-
-            mSumDistanceFarArray[0] = mShadowDistance * mCsmDistanceArray[0];
-            mSumDistanceFarArray[1] = mShadowDistance * mCsmDistanceArray[1] + mSumDistanceFarArray[0];
-            mSumDistanceFarArray[2] = mShadowDistance * mCsmDistanceArray[2] + mSumDistanceFarArray[0] + mSumDistanceFarArray[1];
-            mSumDistanceFarArray[3] = mShadowDistance * mCsmDistanceArray[3] + mSumDistanceFarArray[0] + mSumDistanceFarArray[1] + mSumDistanceFarArray[2];
+            mSumDistanceFarArray[0] = (float)Math.Pow(mShadowDistance, 0.25f);// 
+            mSumDistanceFarArray[1] = (float)Math.Pow(mShadowDistance, 0.5f);//
+            mSumDistanceFarArray[2] = (float)Math.Pow(mShadowDistance, 0.75f);//
+            mSumDistanceFarArray[3] = mShadowDistance;//
 
             mSumDistanceFarVec.X = mSumDistanceFarArray[0];
             mSumDistanceFarVec.Y = mSumDistanceFarArray[1];

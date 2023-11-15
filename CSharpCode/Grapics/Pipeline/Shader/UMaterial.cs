@@ -373,6 +373,39 @@ namespace EngineNS.Graphics.Pipeline.Shader
             get;
             set;
         } = ELightingMode.Stand;
+        public enum ENormalMode
+        {
+            Normal,
+            NormalMap,
+            NormalNone,
+        }
+        ENormalMode mNormalMode = ENormalMode.Normal;
+        [Rtti.Meta]
+        [Category("Option")]
+        public ENormalMode NormalMode
+        {
+            get => mNormalMode;
+            set
+            {
+                mNormalMode = value;
+                if (mNormalMode == ENormalMode.NormalMap)
+                {
+                    if (VSNeedStreams == null)
+                        VSNeedStreams = new List<NxRHI.EVertexStreamType>();
+                    if (VSNeedStreams.Contains(NxRHI.EVertexStreamType.VST_Normal) == false)
+                        VSNeedStreams.Add(NxRHI.EVertexStreamType.VST_Normal);
+                    if (VSNeedStreams.Contains(NxRHI.EVertexStreamType.VST_Tangent) == false)
+                        VSNeedStreams.Add(NxRHI.EVertexStreamType.VST_Tangent);
+
+                    if (PSNeedInputs == null)
+                        PSNeedInputs = new List<EPixelShaderInput>();
+                    if (PSNeedInputs.Contains(Graphics.Pipeline.Shader.EPixelShaderInput.PST_Normal) == false)
+                        PSNeedInputs.Add(Graphics.Pipeline.Shader.EPixelShaderInput.PST_Normal);
+                    if (PSNeedInputs.Contains(Graphics.Pipeline.Shader.EPixelShaderInput.PST_Tangent) == false)
+                        PSNeedInputs.Add(Graphics.Pipeline.Shader.EPixelShaderInput.PST_Tangent);
+                }
+            }
+        }
         protected ERenderLayer mRenderLayer = ERenderLayer.RL_Opaque;
         [Rtti.Meta]
         [Category("Option")]
@@ -483,6 +516,20 @@ namespace EngineNS.Graphics.Pipeline.Shader
                     codeBuilder.AddLine("#define MTL_ID_EYE", ref sourceCode);
                     break;
             }
+            switch (NormalMode)
+            {
+                case ENormalMode.Normal:
+                    codeBuilder.AddLine("#define MTL_NORMAL_MODE MTL_NORMAL", ref sourceCode);
+                    break;
+                case ENormalMode.NormalMap:
+                    codeBuilder.AddLine("#define MTL_NORMAL_MODE MTL_NORMALMAP", ref sourceCode);
+                    break;
+                case ENormalMode.NormalNone:
+                default:
+                    codeBuilder.AddLine("#define MTL_NORMAL_MODE MTL_NORMALNONE", ref sourceCode);
+                    break;
+            }
+
 
             if (AlphaTest)
             {
@@ -498,7 +545,11 @@ namespace EngineNS.Graphics.Pipeline.Shader
             }
 
             codeBuilder.AddLine("#endif//_Material_H_", ref sourceCode);
-            SourceCode.TextCode = sourceCode;
+            if (SourceCode.TextCode.ToString() != sourceCode)
+            {
+                this.SerialId++;
+                SourceCode.TextCode = sourceCode;
+            }
 
             string uniformVarsCode = "";
             foreach (var i in this.UsedUniformVars)
@@ -512,7 +563,12 @@ namespace EngineNS.Graphics.Pipeline.Shader
                     uniformVarsCode += $"{i.VarType} {i.Name};";
                 }
             }
-            DefineCode.TextCode = uniformVarsCode;
+
+            if (DefineCode.TextCode != uniformVarsCode)
+            {
+                this.SerialId++;
+                DefineCode.TextCode = uniformVarsCode;
+            }
 
             mPerMaterialCBuffer = null;
 

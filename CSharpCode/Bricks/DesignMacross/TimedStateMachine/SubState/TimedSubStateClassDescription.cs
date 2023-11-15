@@ -70,6 +70,7 @@ namespace EngineNS.DesignMacross.TimedStateMachine
                 classDeclarationsBuilded.AddRange(attachment.BuildClassDeclarations(ref classBuildContext));
                 thisClassDeclaration.Properties.Add(attachment.BuildVariableDeclaration(ref classBuildContext));
             }
+            thisClassDeclaration.AddMethod(BuildOverrideInitializeMethod());
             classDeclarationsBuilded.Add(thisClassDeclaration);
             return classDeclarationsBuilded;
         }
@@ -78,5 +79,35 @@ namespace EngineNS.DesignMacross.TimedStateMachine
         {
             return TtDescriptionASTBuildUtil.BuildDefaultPartForVariableDeclaration(this, ref classBuildContext);
         }
+
+        #region Internal AST Build
+        private UMethodDeclaration BuildOverrideInitializeMethod()
+        {
+            UMethodDeclaration methodDeclaration = new UMethodDeclaration();
+            methodDeclaration.IsOverride = true;
+            methodDeclaration.MethodName = "Initialize";
+            methodDeclaration.ReturnValue = new UVariableDeclaration()
+            {
+                VariableType = new UTypeReference(typeof(bool)),
+                InitValue = new UDefaultValueExpression(typeof(bool)),
+                VariableName = "result"
+            };
+
+            foreach(var attachment in Attachments)
+            {
+                var stateAddAttachMentMethodInvoke = new UMethodInvokeStatement();
+                stateAddAttachMentMethodInvoke.Host = new USelfReferenceExpression();
+                stateAddAttachMentMethodInvoke.MethodName = "AddAttachment";
+                stateAddAttachMentMethodInvoke.Arguments.Add(new UMethodInvokeArgumentExpression { Expression = new UVariableReferenceExpression(attachment.VariableName) });
+                methodDeclaration.MethodBody.Sequence.Add(stateAddAttachMentMethodInvoke);
+            }
+
+            UAssignOperatorStatement returnValueAssign = new UAssignOperatorStatement();
+            returnValueAssign.To = new UVariableReferenceExpression("result");
+            returnValueAssign.From = new UPrimitiveExpression(true);
+            methodDeclaration.MethodBody.Sequence.Add(returnValueAssign);
+            return methodDeclaration;
+        }
+        #endregion
     }
 }

@@ -24,10 +24,14 @@ namespace EngineNS.DesignMacross.TimedStateMachine.StateAttachment
         {
             TickMethodDescription = new TtMethodDescription()
             {
-                Name = "Tick",
+                Name = "Update",
                 Parent = this,
+                IsOverride = true
             };
-            TickMethodDescription.Arguments.Add(new UMethodArgumentDeclaration { OperationType = EMethodArgumentAttribute.In, VariableType = new UTypeReference(UTypeDesc.TypeOf<TtStateMachineContext>()), VariableName = "context" });
+            var elapseSecondMethodArgument = new UMethodArgumentDeclaration { VariableName = "elapseSecond", VariableType = new UTypeReference(typeof(float)) };
+            var contextMethodArgument = new UMethodArgumentDeclaration { OperationType = EMethodArgumentAttribute.In, VariableType = new UTypeReference(UTypeDesc.TypeOf<TtStateMachineContext>()), VariableName = "context" };
+            TickMethodDescription.Arguments.Add(elapseSecondMethodArgument);
+            TickMethodDescription.Arguments.Add(contextMethodArgument);
         }
 
         public override List<UClassDeclaration> BuildClassDeclarations(ref FClassBuildContext classBuildContext)

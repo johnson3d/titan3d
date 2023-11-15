@@ -11,12 +11,16 @@ namespace EngineNS.DesignMacross.Editor
         public TtOutline Outline { get; set; } = new TtOutline();
         public void Initialize()
         {
-            Outline.Description = ClassDesc;
+            mRender = new TtOutlinePanelRender();
         }
+        TtOutlinePanelRender mRender = null;
         public void Draw(FDesignMacrossEditorRenderingContext context)
         {
-            TtOutlinePanelRender render = new TtOutlinePanelRender();
-            render.Draw(this, context);
+            if(Outline.Description == null)
+            {
+                Outline.Description = ClassDesc;
+            }
+            mRender.Draw(this, context);
         }
        
     }

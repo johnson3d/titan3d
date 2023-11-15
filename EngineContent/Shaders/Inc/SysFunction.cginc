@@ -565,6 +565,10 @@ void VecMulMatrix(half4 vec, half4x4 mat, out half4 outVector)
 
 void NormalMap(half3 Nt, half4 Tw, half3 Nw, out half3 UnpackedNormal)
 {
+    Nt.xy = Nt.xy * 2.0h - 1.0h;
+    Nt.z = sqrt(saturate(1.0h - dot(Nt.xy, Nt.xy)));
+    Nt.xyz = Nt.xzy;
+    
 	half3 Bw = half3(0.0h, 0.0h, 0.0h);
 	if (Tw.w > 0.0h)
 	{
@@ -574,12 +578,12 @@ void NormalMap(half3 Nt, half4 Tw, half3 Nw, out half3 UnpackedNormal)
 	{
 		Bw = cross(Tw.xyz, Nw);
 	}
-	half3x3 TBN = half3x3(Tw.xyz, Bw, Nw);
-
-	Nt.xy = Nt.xy * 2.0h - 1.0h;
-	Nt.z = sqrt(saturate(1.0h - dot(Nt.xy, Nt.xy)));
+	
+	//half3x3 TBN = half3x3(Tw.xyz, Bw, Nw);
+    half3x3 TBN = half3x3(Tw.xyz, Nw, Bw);
 	
 	UnpackedNormal = mul(Nt, TBN);
+    //UnpackedNormal.xyz = UnpackedNormal.xzy;
 }
 
 void BlingSpec(half4 flo4 , half intensity , half powIn , half4 worldNorm , half4 worldPos , half3 LP ,  out half BlingSpec)

@@ -14,8 +14,9 @@ namespace EngineNS.DesignMacross.Editor
 {
     public class TtDesignMacrossEditor : IO.ISerializer, EngineNS.Editor.IAssetEditor, IRootForm
     {
-        private TtClassDescription mClassDescription = new TtClassDescription();
-        public TtClassDescription ClassDescription { get => mClassDescription; set => mClassDescription = value; }
+        private UDesignMacross mDesignMacross = null;
+        //private TtClassDescription mClassDescription = new TtClassDescription();
+        //public TtClassDescription ClassDescription { get => mClassDescription; set => mClassDescription = value; }
         public TtOutlineEditPanel DeclarationEditPanel { get; set; } = new TtOutlineEditPanel();
         public TtGraphEditPanel DefinitionGraphPanel { get; set; } = new TtGraphEditPanel();
         TtCommandHistory CommandHistory { get; set; } = new TtCommandHistory();
@@ -30,16 +31,6 @@ namespace EngineNS.DesignMacross.Editor
         public EGui.Controls.PropertyGrid.PropertyGrid PGMember = new EGui.Controls.PropertyGrid.PropertyGrid();
         public async Task<bool> Initialize()
         {
-            ClassDescription.Name = AssetName.PureName;
-            var nsName = IO.TtFileManager.GetBaseDirectory(AssetName.Name).TrimEnd('/').Replace("/", ".");
-            if (Regex.IsMatch(nsName, "[A-Za-z0-9_]"))
-                ClassDescription.Namespace = new UNamespaceDeclaration("NS_" + nsName);
-            else
-            {
-                ClassDescription.Namespace = new UNamespaceDeclaration("NS_" + ((UInt32)nsName.GetHashCode()).ToString());
-                Profiler.Log.WriteLine(Profiler.ELogTag.Warning, "Macross", $"Get namespace failed, {AssetName.Name} has invalid char!");
-            }
-            DeclarationEditPanel.ClassDesc = ClassDescription;
             DeclarationEditPanel.Initialize();
             InitializeMainMenu();
             await PGMember.Initialize();
@@ -139,25 +130,7 @@ namespace EngineNS.DesignMacross.Editor
         bool bIsYKeyDown = false;
 
         #region Save Load
-        void SaveClassDescription(RName rn)
-        {
-            var ameta = UEngine.Instance.AssetMetaManager.GetAssetMeta(AssetName);
-            if (ameta != null)
-            {
-                var tmp = new UDesignMacross();
-                tmp.AssetName = rn;
-                tmp.UpdateAMetaReferences(ameta);
-                ameta.SaveAMeta();
-            }
 
-            var xml = new System.Xml.XmlDocument();
-            var xmlRoot = xml.CreateElement($"Root", xml.NamespaceURI);
-            xml.AppendChild(xmlRoot);
-            IO.SerializerHelper.WriteObjectMetaFields(xml, xmlRoot, ClassDescription);
-            var xmlText = IO.TtFileManager.GetXmlText(xml);
-            IO.TtFileManager.WriteAllText($"{rn.Address}/class_description.dat", xmlText);
-
-        }
         void SaveElements(RName rn)
         {
             var xml = new System.Xml.XmlDocument();
@@ -167,14 +140,7 @@ namespace EngineNS.DesignMacross.Editor
             var xmlText = IO.TtFileManager.GetXmlText(xml);
             IO.TtFileManager.WriteAllText($"{rn.Address}/GraphElementStyles.dat", xmlText);
         }
-        void LoadClassDescription(RName rn)
-        {
-            var xml = IO.TtFileManager.LoadXml($"{rn.Address}/class_description.dat");
-            if (xml == null)
-                return;
-            object pClassDescription = mClassDescription;
-            IO.SerializerHelper.ReadObjectMetaFields(mClassDescription, xml.LastChild as System.Xml.XmlElement, ref pClassDescription, null);
-        }
+
         void LoadElements(RName rn)
         {
             var xml = IO.TtFileManager.LoadXml($"{rn.Address}/GraphElementStyles.dat");
@@ -191,8 +157,8 @@ namespace EngineNS.DesignMacross.Editor
         {
             ClassDeclarationsForGenerateCompileCode.Clear();
             FClassBuildContext classBuildContext = new FClassBuildContext();
-            classBuildContext.MainClassDescription = ClassDescription;
-            ClassDeclarationsForGenerateCompileCode = ClassDescription.BuildClassDeclarations(ref classBuildContext);
+            classBuildContext.MainClassDescription = mDesignMacross.DesignedClassDescription;
+            ClassDeclarationsForGenerateCompileCode = mDesignMacross.DesignedClassDescription.BuildClassDeclarations(ref classBuildContext);
 
             var codeGenerator = new UCSharpCodeGenerator();
             string code = "";
@@ -200,7 +166,7 @@ namespace EngineNS.DesignMacross.Editor
             {
                 codeGenerator.GenerateClassCode(classDeclaration, AssetName, ref code);
             }
-            var fileName = AssetName.Address + "/" + ClassDescription.ClassName + ".cs";
+            var fileName = AssetName.Address + "/" + mDesignMacross.DesignedClassDescription.ClassName + ".cs";
             using (var sr = new System.IO.StreamWriter(fileName, false, Encoding.UTF8))
             {
                 sr.Write(code);
@@ -256,7 +222,7 @@ namespace EngineNS.DesignMacross.Editor
             if (EGui.UIProxy.ToolbarIconButtonProxy.DrawButton(in drawList,
                 ref mToolBtnDatas[toolBarItemIdx].IsMouseDown, ref mToolBtnDatas[toolBarItemIdx].IsMouseHover, null, "Save"))
             {
-                SaveClassDescription(AssetName);
+                mDesignMacross.Save(AssetName);
                 SaveElements(AssetName);
                 GenerateCode();
                 CompileCode();
@@ -361,9 +327,10 @@ namespace EngineNS.DesignMacross.Editor
         }
         public async Task<bool> OpenEditor(EngineNS.Editor.UMainEditorApplication mainEditor, RName name, object arg)
         {
-            LoadClassDescription(AssetName);
+            mDesignMacross = new UDesignMacross();
+            mDesignMacross.Load(AssetName);
+            //LoadClassDescription(AssetName);
             LoadElements(AssetName);
-            await Initialize();
             return true;
         }
 
@@ -403,7 +370,7 @@ namespace EngineNS.DesignMacross.Editor
                             MenuName = "Save",
                             Action = (item, data)=>
                             {
-                                SaveClassDescription(AssetName);
+                                mDesignMacross.Save(AssetName);
                                 SaveElements(AssetName);
                                 GenerateCode();
                                 CompileCode();

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using EngineNS.Bricks.NodeGraph;
 
 namespace EngineNS.Bricks.CodeBuilder.ShaderNode
@@ -437,12 +438,22 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode
             };
             gen.GenCodes(MaterialOutput.PSFunction, ref code, ref genData);
 
-            if (Material.HLSLCode != code)
-                Material.SerialId++;
-
             Material.HLSLCode = code;
             Material.VSNeedStreams = MaterialOutput.GetVSNeedStreams();
             Material.PSNeedInputs = MaterialOutput.GetPSNeedInputs();
+
+            if(Material.NormalMode == Graphics.Pipeline.Shader.UMaterial.ENormalMode.NormalMap)
+            {
+                if (Material.VSNeedStreams.Contains(NxRHI.EVertexStreamType.VST_Normal) == false)
+                    Material.VSNeedStreams.Add(NxRHI.EVertexStreamType.VST_Normal);
+                if (Material.VSNeedStreams.Contains(NxRHI.EVertexStreamType.VST_Tangent) == false)
+                    Material.VSNeedStreams.Add(NxRHI.EVertexStreamType.VST_Tangent);
+
+                if (Material.PSNeedInputs.Contains(Graphics.Pipeline.Shader.EPixelShaderInput.PST_Normal) == false)
+                    Material.PSNeedInputs.Add(Graphics.Pipeline.Shader.EPixelShaderInput.PST_Normal);
+                if (Material.PSNeedInputs.Contains(Graphics.Pipeline.Shader.EPixelShaderInput.PST_Tangent) == false)
+                    Material.PSNeedInputs.Add(Graphics.Pipeline.Shader.EPixelShaderInput.PST_Tangent);
+            }
 
             Material.UpdateShaderCode(false);
             return code;
