@@ -45,7 +45,7 @@ PS_OUTPUT PS_Main(PS_INPUT input)
 {
 	PS_OUTPUT output = (PS_OUTPUT)0;
 
-	float result = (float)PickedID + (float)gZFar + (float)gViewportSizeAndRcp.x + Time + HdrMiddleGrey + DepthBiasPerSceneMesh + PreWorldMatrix[0];
+    float result = (float) PickedID + (float) gZFar + (float) gViewportSizeAndRcp.x + Time + HdrMiddleGrey + MaterialRenderFlags + PreWorldMatrix[0];
 	output.RT0 = float4(result, result, result, result);
 
 	return output;

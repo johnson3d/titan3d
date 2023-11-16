@@ -235,7 +235,7 @@ namespace EngineNS.Graphics.Mesh
                                 if (Material.PerMaterialCBuffer == null)
                                 {
                                     if (Material.CreateCBuffer(effect))
-                                        Material.UpdateUniformVars(Material.PerMaterialCBuffer, Material.PerMaterialCBuffer.ShaderBinder);
+                                        Material.UpdateCBufferVars(Material.PerMaterialCBuffer, Material.PerMaterialCBuffer.ShaderBinder);
                                 }
                                 if (Material.PerMaterialCBuffer != null)
                                 {   

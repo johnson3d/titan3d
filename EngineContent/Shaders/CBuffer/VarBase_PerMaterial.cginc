@@ -6,7 +6,7 @@ VK_BIND(2) cbuffer cbPerMaterial DX_BIND_B(2)
 {
 	// ShaderParamAnalyse Start
 	float3 PerInst_Noused0;
-	float DepthBiasPerSceneMesh; //this will be useful when editor is easy to use;
+    uint MaterialRenderFlags;
 
 	// ShaderParamAnalyse End
 

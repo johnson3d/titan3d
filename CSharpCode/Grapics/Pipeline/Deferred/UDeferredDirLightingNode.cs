@@ -188,6 +188,11 @@ namespace EngineNS.Graphics.Pipeline.Deferred
             }
             #endregion
 
+            index = drawcall.FindBinder("cbPerCamera");
+            if (index.IsValidPointer)
+            {
+                drawcall.BindCBuffer(index, policy.DefaultCamera.PerCameraCBuffer);
+            }
         }
         public void SetDisableShadow(bool value)
         {

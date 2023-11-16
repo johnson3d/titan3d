@@ -258,11 +258,11 @@ namespace EngineNS
 
             try
             {
-                using (new Profiler.TimeScopeHelper(ScopeDrawSlateWindow))
-                {
-                    DrawSlateWindow();
-                    UEngine.Instance.GfxDevice.SlateApplication?.OnDrawSlate();
-                }
+                //using (new Profiler.TimeScopeHelper(ScopeDrawSlateWindow))
+                //{
+                //    DrawSlateWindow();
+                //    UEngine.Instance.GfxDevice.SlateApplication?.OnDrawSlate();
+                //}
                 if (this.PlayMode != EPlayMode.Game)
                 {
                     UEngine.Instance.AssetMetaManager.EditorCheckShowIconTimeout();

@@ -210,15 +210,15 @@ namespace EngineNS.EGui.Slate
         {
             using (new Profiler.TimeScopeHelper(ScopeTick))
             {
-                using (new Profiler.TimeScopeHelper(ScopeRPolicyTick))
-                {
-                    RenderPolicy?.BeginTickLogic(World);
-                }   
-
-                World.TickLogic(this.RenderPolicy, ellapse);
-
                 if (IsDrawing)
                 {
+                    using (new Profiler.TimeScopeHelper(ScopeRPolicyTick))
+                    {
+                        RenderPolicy?.BeginTickLogic(World);
+                    }
+
+                    World.TickLogic(this.RenderPolicy, ellapse);
+
                     if (this.IsFocused)
                     {
                         TickOnFocus();
@@ -238,18 +238,19 @@ namespace EngineNS.EGui.Slate
                     using (new Profiler.TimeScopeHelper(ScopeRPolicyTick))
                     {
                         RenderPolicy?.TickLogic(World);
-                    }   
-                }
-                using (new Profiler.TimeScopeHelper(ScopeRPolicyTick))
-                {
-                    RenderPolicy?.EndTickLogic(World);
+                    }
+
+                    using (new Profiler.TimeScopeHelper(ScopeRPolicyTick))
+                    {
+                        RenderPolicy?.EndTickLogic(World);
+                    }
+
+                    IsDrawing = false;
                 }
             }   
         }
         public void TickSync(float ellapse)
         {
-            if (IsDrawing == false)
-                return;
             RenderPolicy?.TickSync();
         }
         #region Debug Assist

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
 using EngineNS.Bricks.NodeGraph;
 using NPOI.POIFS.Crypt.Dsig;
@@ -56,24 +57,30 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode
             VertexOffset.Name = "VertexOffset ";
             VertexOffset.LinkDesc = UShaderEditorStyles.Instance.NewInOutPinDesc();
             this.AddPinIn(VertexOffset);
+
+            AO.Name = "AO";
+            AO.LinkDesc = UShaderEditorStyles.Instance.NewInOutPinDesc();
+            this.AddPinIn(AO); 
         }
-        [EGui.Controls.PropertyGrid.PGCustomValueEditor(HideInPG = true)]
+        [Browsable(false)]
         public PinIn Albedo { get; set; } = new PinIn();
 
-        [EGui.Controls.PropertyGrid.PGCustomValueEditor(HideInPG = true)]
+        [Browsable(false)]
         public PinIn Emissive { get; set; } = new PinIn();
-        [EGui.Controls.PropertyGrid.PGCustomValueEditor(HideInPG = true)]
+        [Browsable(false)]
         public PinIn Normal { get; set; } = new PinIn();
-        [EGui.Controls.PropertyGrid.PGCustomValueEditor(HideInPG = true)]
+        [Browsable(false)]
         public PinIn Metallic { get; set; } = new PinIn();
-        [EGui.Controls.PropertyGrid.PGCustomValueEditor(HideInPG = true)]
+        [Browsable(false)]
         public PinIn Rough { get; set; } = new PinIn();
-        [EGui.Controls.PropertyGrid.PGCustomValueEditor(HideInPG = true)]
+        [Browsable(false)]
         public PinIn Alpha { get; set; } = new PinIn();
-        [EGui.Controls.PropertyGrid.PGCustomValueEditor(HideInPG = true)]
+        [Browsable(false)]
         public PinIn AlphaTest { get; set; } = new PinIn();
-        [EGui.Controls.PropertyGrid.PGCustomValueEditor(HideInPG = true)]
+        [Browsable(false)]
         public PinIn VertexOffset { get; set; } = new PinIn();
+        [Browsable(false)]
+        public PinIn AO { get; set; } = new PinIn();
         public override bool CanLinkFrom(PinIn iPin, UNodeBase OutNode, PinOut oPin)
         {
             if (base.CanLinkFrom(iPin, OutNode, oPin) == false)
@@ -92,6 +99,7 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode
             }
             else if (iPin == Metallic ||
                 iPin == Rough ||
+                iPin == AO ||
                 iPin == Alpha ||
                 iPin == AlphaTest)
             {
@@ -258,6 +266,20 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode
                 {
                     From = exp,
                     To = new UVariableReferenceExpression("mRough", new UVariableReferenceExpression("mtl")),
+                };
+                PSFunction.MethodBody.Sequence.Add(assign);
+            }
+            if (AO.HasLinker())
+            {
+                var linker = graph.FindInLinkerSingle(AO);
+                var pinNode = graph.GetOppositePinNode(AO);
+                var opPin = graph.GetOppositePin(AO);
+                pinNode.BuildStatements(opPin, ref data);
+                var exp = graph.GetOppositePinExpression(AO, ref data);
+                var assign = new UAssignOperatorStatement()
+                {
+                    From = exp,
+                    To = new UVariableReferenceExpression("mAO", new UVariableReferenceExpression("mtl")),
                 };
                 PSFunction.MethodBody.Sequence.Add(assign);
             }

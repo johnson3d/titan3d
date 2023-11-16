@@ -25,9 +25,41 @@ namespace EngineNS.Editor.Forms
         public Graphics.Mesh.UMeshPrimitives Mesh;
         public Editor.UPreviewViewport PreviewViewport = new Editor.UPreviewViewport();
         public EGui.Controls.PropertyGrid.PropertyGrid MeshPropGrid = new EGui.Controls.PropertyGrid.PropertyGrid();
-
+        public EGui.Controls.PropertyGrid.PropertyGrid EditorPropGrid = new EGui.Controls.PropertyGrid.PropertyGrid();
+        EngineNS.GamePlay.Scene.UMeshNode mCurrentMeshNode;
         public float PlaneScale = 5.0f;
         EngineNS.GamePlay.Scene.UMeshNode PlaneMeshNode;
+        public bool IsCastShadow
+        {
+            get
+            {
+                if (mCurrentMeshNode == null)
+                    return false;
+                return mCurrentMeshNode.IsCastShadow;
+            }
+            set
+            {
+                if (mCurrentMeshNode == null)
+                    return;
+                mCurrentMeshNode.IsCastShadow = value;
+            }
+        }
+        public bool IsAcceptShadow
+        {
+            get
+            {
+                if (mCurrentMeshNode == null)
+                    return false;
+                return mCurrentMeshNode.IsAcceptShadow;
+            }
+            set
+            {
+                if (mCurrentMeshNode == null)
+                    return;
+                mCurrentMeshNode.IsAcceptShadow = value;
+            }
+        }
+
         ~UMeshPrimitiveEditor()
         {
             Dispose();
@@ -37,10 +69,12 @@ namespace EngineNS.Editor.Forms
             Mesh = null;
             CoreSDK.DisposeObject(ref PreviewViewport);
             MeshPropGrid.Target = null;
+            EditorPropGrid.Target = null;
         }
         public async System.Threading.Tasks.Task<bool> Initialize()
         {
             await MeshPropGrid.Initialize();
+            await EditorPropGrid.Initialize();
             return true;
         }
         public IRootForm GetRootForm()
@@ -68,8 +102,10 @@ namespace EngineNS.Editor.Forms
                         DVector3.Zero, Vector3.One, Quaternion.Identity);
             meshNode.HitproxyType = Graphics.Pipeline.UHitProxy.EHitproxyType.Root;
             meshNode.NodeData.Name = "PreviewObject";
-            meshNode.IsAcceptShadow = false;
+            meshNode.IsAcceptShadow = true;
             meshNode.IsCastShadow = true;
+
+            mCurrentMeshNode = meshNode;
 
             var aabb = mesh.MaterialMesh.Mesh.mCoreObject.mAABB;
             float radius = aabb.GetMaxSide();
@@ -118,6 +154,7 @@ namespace EngineNS.Editor.Forms
             await PreviewViewport.Initialize(UEngine.Instance.GfxDevice.SlateApplication, UEngine.Instance.Config.MainRPolicyName, 0, 1);
 
             MeshPropGrid.Target = Mesh;
+            EditorPropGrid.Target = this;
             UEngine.Instance.TickableManager.AddTickable(this);
             return true;
         }
@@ -230,6 +267,10 @@ namespace EngineNS.Editor.Forms
                 if (ImGuiAPI.CollapsingHeader("MeshProperty", ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_None))
                 {
                     MeshPropGrid.OnDraw(true, false, false);
+                }
+                if (ImGuiAPI.CollapsingHeader("EditorProperty", ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_None))
+                {
+                    EditorPropGrid.OnDraw(true, false, false);
                 }
             }
             EGui.UIProxy.DockProxy.EndPanel();

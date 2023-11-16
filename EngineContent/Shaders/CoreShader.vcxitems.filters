@@ -123,9 +123,6 @@
     <None Include="$(MSBuildThisFileDirectory)CBuffer\VarBase_PerViewport.cginc">
       <Filter>CBuffer</Filter>
     </None>
-    <None Include="$(MSBuildThisFileDirectory)Inc\CommonDeferredShadingFunc.cginc">
-      <Filter>Inc</Filter>
-    </None>
     <None Include="$(MSBuildThisFileDirectory)Inc\CommonLightFunc.cginc">
       <Filter>Inc</Filter>
     </None>
@@ -452,6 +449,7 @@
     <None Include="$(MSBuildThisFileDirectory)ShadingEnv\Sys\pick\pick_hollow_blend.cginc">
       <Filter>ShadingEnv\Sys\pick</Filter>
     </None>
+    <None Include="$(MSBuildThisFileDirectory)Inc\SystemEnumDefine.cginc" />
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="$(MSBuildThisFileDirectory)Compute\calcrate.compute">

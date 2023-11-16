@@ -205,12 +205,13 @@ namespace EngineNS.Editor
         {
             if (Initialized == false)
                 return;
-            RenderPolicy?.BeginTickLogic(World);
-
-            World.TickLogic(this.RenderPolicy, ellapse);
-
+            
             if (IsDrawing)
             {
+                RenderPolicy?.BeginTickLogic(World);
+
+                World.TickLogic(this.RenderPolicy, ellapse);
+
                 if (this.IsFocused)
                 {
                     TickOnFocus();
@@ -223,9 +224,11 @@ namespace EngineNS.Editor
                 World.GatherVisibleMeshes(mVisParameter);
 
                 RenderPolicy?.TickLogic(World);
-            }
 
-            RenderPolicy?.EndTickLogic(World);
+                RenderPolicy?.EndTickLogic(World);
+
+                IsDrawing = false;
+            }
         }
         public void TickRender(float ellapse)
         {

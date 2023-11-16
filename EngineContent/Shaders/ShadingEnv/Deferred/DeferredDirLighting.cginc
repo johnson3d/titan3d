@@ -10,6 +10,7 @@
 #include "../../Inc/SysFunction.cginc"
 #include "../../Inc/PostEffectCommon.cginc"
 #include "../../Inc/GpuSceneCommon.cginc"
+#include "DeferredCommon.cginc"
 
 #include "MdfQueue"
 
@@ -17,7 +18,6 @@
 #define FXAA_QUALITY__PRESET		10
 #define FXAA_HLSL_4 1
 
-#include "DeferredCommon.cginc"
 #include "../../Inc/FXAAMobile.cginc"
 
 #include "../../Inc/SysFunctionDefImpl.cginc"
@@ -135,7 +135,7 @@ PS_OUTPUT PS_Main(PS_INPUT input)
 	half Metallic = (half)GBuffer.Metallicity;
 	half Smoothness = (half)GBuffer.Roughness;
 	half Roughness = GetRoughness(1.0h - Smoothness, GBuffer.WorldNormal);
-	half AOs = 0;
+    half AOs = GBuffer.AO;
 	half AoOffsetEncoded = 0.0h;
 
 	half3 BaseShading = half3(0.0h, 0.0h, 0.0h);
@@ -249,24 +249,32 @@ PS_OUTPUT PS_Main(PS_INPUT input)
 	//sphere env mapping;
 	half3 VrN = 2.0h * NoV * N - V;
 	half3 EnvMapUV = CalcSphereMapUV(VrN, Roughness, (half)gEnvMapMaxMipLevel);
-	half3 EnvSpecLightColor = (half3)gEnvMap.SampleLevel(Samp_gEnvMap, EnvMapUV.xy, EnvMapUV.z).rgb;
+    half3 EnvSpecLightColor = 0;
+    if (GBuffer.IsDisableEnvColor() == false)
+    {
+        EnvSpecLightColor = (half3) gEnvMap.SampleLevel(Samp_gEnvMap, EnvMapUV.xy, EnvMapUV.z).rgb;
+    }
+    else
+    {
+        EnvSpecLightColor = 0;
+    }
 	half Ihdr = max(0.6h, CalcLuminanceYCbCr(EnvSpecLightColor));
 	Ihdr = exp2((Ihdr - 0.6h) * 7.5h);
 	half3 EnvSpec = (half3)EnvBRDFMobile(EnvSpecLightColor, OptSpecShading, Roughness, NoV) * Ihdr;
 
 	half FinalShadowValue = min(1.0h, ShadowValue + DirLightLeak);
-	AOs = min((NoL + FinalShadowValue) * 0.25h + AOs, 1.0h);
+	//AOs = min((NoL + FinalShadowValue) * 0.25h + AOs, 1.0h);
 
 	half AoOffset = CalcLuminanceYCbCr((EnvSpec) * 10.0h);
 	AoOffsetEncoded = 0.9999h - min(0.9999h, FinalShadowValue * 0.5h + AoOffset);
 
 	/////=======
-	AOs = 1.0h;
+	//AOs = 1.0h;
 	AoOffsetEncoded = 0.0h;
 	/////=======
 
 	BaseShading = DirLightDiffuseShading * FinalShadowValue + DirLightSpecShading * ShadowValue + SkyShading;
-	BaseShading = BaseShading * AOs + EnvSpec * min(ShadowValue + 0.85h, 1.0h);
+    BaseShading = BaseShading * (1.0h - AOs) + EnvSpec * min(ShadowValue + 0.85h, 1.0h);
 	
 #if ENV_DISABLE_POINTLIGHTS == 0
 	if (NoPixel == false)

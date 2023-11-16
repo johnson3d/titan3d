@@ -24,6 +24,37 @@ namespace EngineNS.Editor.Forms
         public URenderPolicy RenderPolicy { get => PreviewViewport.RenderPolicy; }
         public EGui.Controls.PropertyGrid.PropertyGrid MeshPropGrid = new EGui.Controls.PropertyGrid.PropertyGrid();
         public EGui.Controls.PropertyGrid.PropertyGrid EditorPropGrid = new EGui.Controls.PropertyGrid.PropertyGrid();
+
+        public bool IsCastShadow
+        {
+            get
+            {
+                if (mCurrentMeshNode == null)
+                    return false;
+                return mCurrentMeshNode.IsCastShadow;
+            }
+            set
+            {
+                if (mCurrentMeshNode == null)
+                    return;
+                mCurrentMeshNode.IsCastShadow = value;
+            }
+        }
+        public bool IsAcceptShadow
+        {
+            get
+            {
+                if (mCurrentMeshNode == null)
+                    return false;
+                return mCurrentMeshNode.IsAcceptShadow;
+            }
+            set
+            {
+                if (mCurrentMeshNode == null)
+                    return;
+                mCurrentMeshNode.IsAcceptShadow = value;
+            }
+        }
         ~UMeshEditor()
         {
             Dispose();
@@ -67,7 +98,7 @@ namespace EngineNS.Editor.Forms
                 var meshNode = await GamePlay.Scene.UMeshNode.AddMeshNode(viewport.World, viewport.World.Root, new GamePlay.Scene.UMeshNode.UMeshNodeData(), typeof(GamePlay.UPlacement), mesh, DVector3.Zero, Vector3.One, Quaternion.Identity);
                 meshNode.HitproxyType = Graphics.Pipeline.UHitProxy.EHitproxyType.Root;
                 meshNode.NodeData.Name = "PreviewObject";
-                meshNode.IsAcceptShadow = false;
+                meshNode.IsAcceptShadow = true;
                 meshNode.IsCastShadow = true;
                 mCurrentMeshNode = meshNode;
             }

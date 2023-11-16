@@ -213,7 +213,7 @@ namespace EngineNS.Graphics.Pipeline.Shader
             {
                 mSerialId = value;
                 if (PerMaterialCBuffer != null)
-                    this.UpdateUniformVars(PerMaterialCBuffer, PerMaterialCBuffer.ShaderBinder);
+                    this.UpdateCBufferVars(PerMaterialCBuffer, PerMaterialCBuffer.ShaderBinder);
             }
         }
         public class MaterialImportAttribute : IO.CommonCreateAttribute
@@ -345,8 +345,10 @@ namespace EngineNS.Graphics.Pipeline.Shader
         }
         [Rtti.Meta, Browsable(false)]
         public InnerFlags Flags { get; set; }
+
+        #region Render Option
         [Category("Option")]
-        public bool Is64bitVColorAlpha
+        public virtual bool Is64bitVColorAlpha
         { 
             get => (Flags & InnerFlags.Is64bitVColorAlpha) != 0;
             set
@@ -368,7 +370,7 @@ namespace EngineNS.Graphics.Pipeline.Shader
         }
         [Rtti.Meta]
         [Category("Option")]
-        public ELightingMode LightingMode
+        public virtual ELightingMode LightingMode
         {
             get;
             set;
@@ -382,7 +384,7 @@ namespace EngineNS.Graphics.Pipeline.Shader
         ENormalMode mNormalMode = ENormalMode.Normal;
         [Rtti.Meta]
         [Category("Option")]
-        public ENormalMode NormalMode
+        public virtual ENormalMode NormalMode
         {
             get => mNormalMode;
             set
@@ -409,7 +411,7 @@ namespace EngineNS.Graphics.Pipeline.Shader
         protected ERenderLayer mRenderLayer = ERenderLayer.RL_Opaque;
         [Rtti.Meta]
         [Category("Option")]
-        public ERenderLayer RenderLayer
+        public virtual ERenderLayer RenderLayer
         {
             get => mRenderLayer;
             set
@@ -420,11 +422,38 @@ namespace EngineNS.Graphics.Pipeline.Shader
         }
         [Rtti.Meta]
         [Category("Option")]
-        public bool AlphaTest
+        public virtual bool AlphaTest
         {
             get;
             set;
         } = true;
+
+        [Flags]
+        public enum ERenderFlags
+        {
+            None = 0,
+            DisableEnvColor = 1,
+        }
+        private ERenderFlags mRenderFlags = ERenderFlags.None;
+        public virtual ERenderFlags RenderFlags { get => mRenderFlags; }
+        [Rtti.Meta]
+        [Category("Option")]
+        public virtual bool DisableEnvColor
+        {
+            get
+            {
+                return (mRenderFlags & ERenderFlags.DisableEnvColor) != 0;
+            }
+            set
+            {
+                if (value)
+                    mRenderFlags |= ERenderFlags.DisableEnvColor;
+                else
+                    mRenderFlags &= (~ERenderFlags.DisableEnvColor);
+            }
+        }
+        #endregion
+
         [Rtti.Meta]
         public List<string> UserDefines { get; set; } = new List<string>();
         internal virtual void UpdateShaderCode(bool EmptyMaterial)
@@ -497,6 +526,8 @@ namespace EngineNS.Graphics.Pipeline.Shader
                 codeBuilder.AddLine("#define MTL_ID_64BITVCOLORALPHA 1", ref sourceCode);
             else
                 codeBuilder.AddLine("#define MTL_ID_64BITVCOLORALPHA 0", ref sourceCode);
+
+            codeBuilder.AddLine($"#define MTL_RENDERFLAGS {(uint)mRenderFlags}", ref sourceCode);
 
             switch (LightingMode)
             {
@@ -625,6 +656,7 @@ namespace EngineNS.Graphics.Pipeline.Shader
                 return PSNeedInputs.ToArray();
             }
         }
+
         #region Data
 
         #region Code&Graph
@@ -923,12 +955,7 @@ namespace EngineNS.Graphics.Pipeline.Shader
                 return null;
             return UsedUniformVars[index]?.Name;
         }
-        public void UpdateUniformVars()
-        {
-            if (PerMaterialCBuffer != null)
-                this.UpdateUniformVars(PerMaterialCBuffer, PerMaterialCBuffer.ShaderBinder);
-        }
-        internal unsafe virtual void UpdateUniformVars(NxRHI.UCbView cBuffer, NxRHI.FShaderBinder binder)
+        internal unsafe virtual void UpdateCBufferVars(NxRHI.UCbView cBuffer, NxRHI.FShaderBinder binder)
         {
             foreach (var i in UsedUniformVars)
             {
@@ -1000,6 +1027,11 @@ namespace EngineNS.Graphics.Pipeline.Shader
                     default:
                         break;
                 }
+            }
+            var index = binder.FindField("MaterialRenderFlags");
+            if (index.IsValidPointer)
+            {
+                cBuffer.SetValue(index, (uint)RenderFlags);
             }
         }
         #endregion

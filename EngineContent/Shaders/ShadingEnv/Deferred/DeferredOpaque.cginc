@@ -8,7 +8,8 @@
 #include "../../Inc/FogCommon.cginc"
 #include "../../Inc/MixUtility.cginc"
 #include "../../Inc/SysFunction.cginc"
- 
+#include "DeferredCommon.cginc"
+
 #include "Material"
 #include "MdfQueue"
 

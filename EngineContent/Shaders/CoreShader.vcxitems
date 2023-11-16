@@ -40,7 +40,6 @@
     <None Include="$(MSBuildThisFileDirectory)HitProxy.shadingenv" />
     <None Include="$(MSBuildThisFileDirectory)HitProxyAxis.shadingenv" />
     <None Include="$(MSBuildThisFileDirectory)Inc\BaseStructure\Box2.cginc" />
-    <None Include="$(MSBuildThisFileDirectory)Inc\CommonDeferredShadingFunc.cginc" />
     <None Include="$(MSBuildThisFileDirectory)Inc\FogCommon.cginc" />
     <None Include="$(MSBuildThisFileDirectory)Inc\CommonLightFunc.cginc" />
     <None Include="$(MSBuildThisFileDirectory)Inc\FXAAMobile.cginc" />
@@ -58,6 +57,7 @@
     <None Include="$(MSBuildThisFileDirectory)Inc\ShadowCommon.cginc" />
     <None Include="$(MSBuildThisFileDirectory)Inc\SysFunction.cginc" />
     <None Include="$(MSBuildThisFileDirectory)Inc\SysFunctionDefImpl.cginc" />
+    <None Include="$(MSBuildThisFileDirectory)Inc\SystemEnumDefine.cginc" />
     <None Include="$(MSBuildThisFileDirectory)Inc\VertexLayout.cginc" />
     <None Include="$(MSBuildThisFileDirectory)Material\TestMaterial.mtl" />
     <None Include="$(MSBuildThisFileDirectory)MobileAoBlurH.shadingenv" />

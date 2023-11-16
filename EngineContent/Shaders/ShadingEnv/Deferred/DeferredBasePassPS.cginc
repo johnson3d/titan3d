@@ -1,8 +1,6 @@
 #ifndef _DeferredBasePassPS_H_
 #define _DeferredBasePassPS_H_
 
-#include "DeferredCommon.cginc"
-
 struct PS_OUTPUT
 {
 	float4 RT0 : SV_Target0;//R8G8B8A8:abedo.rgb - metallicty
@@ -43,6 +41,7 @@ PS_OUTPUT PS_MobileBasePass(PS_INPUT input)
     GBuffer.WorldNormal = mtl.GetFinalNormal(input);
 	GBuffer.Specular = (half)mtl.mAbsSpecular;
 	GBuffer.ObjectFlags_2Bit = ObjectFLags_2Bit;
+    GBuffer.RenderFlags_10Bit = MaterialRenderFlags;
 	//GBuffer.MotionVector.xy = input.psCustomUV0.xy;
 	
 	float2 previousScreenPos = (input.psCustomUV1.xy / input.psCustomUV1.w) * 0.5 + 0.5;
@@ -59,7 +58,12 @@ PS_OUTPUT PS_MobileBasePass(PS_INPUT input)
 	//	GBuffer.MtlColorRaw = half3(1,0,0);
 	//}
 
-	GBuffer.EncodeGBuffer(output.RT0, output.RT1, output.RT2, output.RT3);
+#if (MTL_RENDERFLAGS & 1) == 1
+	
+#endif
+	
+    GBuffer.EncodeGBuffer(output.RT0, output.RT1, output.RT2, output.RT3);
+	
 	return output;
 }
 

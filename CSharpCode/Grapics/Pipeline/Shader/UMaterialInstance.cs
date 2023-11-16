@@ -384,6 +384,61 @@ namespace EngineNS.Graphics.Pipeline.Shader
                     ParentMaterialSerialId = value.SerialId;
             }
         }
+
+        #region override for Material settings
+        public override ERenderFlags RenderFlags { get => mParentMaterial.RenderFlags; }
+        public override bool DisableEnvColor
+        {
+            get
+            {
+                return mParentMaterial.DisableEnvColor;
+            }
+            set
+            {
+                
+            }
+        }
+        public override ENormalMode NormalMode
+        {
+            get => mParentMaterial.NormalMode;
+            set
+            {
+                
+            }
+        }
+        public override ELightingMode LightingMode
+        {
+            get => mParentMaterial.LightingMode;
+            set
+            {
+
+            }
+        }
+        public override bool Is64bitVColorAlpha
+        {
+            get => mParentMaterial.Is64bitVColorAlpha;
+            set
+            {
+
+            }
+        }
+
+        public override ERenderLayer RenderLayer
+        {
+            get => mParentMaterial.RenderLayer;
+            set
+            {
+                
+            }
+        }
+        public override bool AlphaTest
+        {
+            get => mParentMaterial.AlphaTest;
+            set
+            {
+
+            }
+        }
         [Browsable(false)]
         public override Hash160 MaterialHash
         {
@@ -394,6 +449,7 @@ namespace EngineNS.Graphics.Pipeline.Shader
                 return ParentMaterial.MaterialHash;
             }
         }
+        
         internal uint ParentMaterialSerialId;
         [Browsable(false)]
         public override uint SerialId
@@ -403,6 +459,8 @@ namespace EngineNS.Graphics.Pipeline.Shader
                 if (ParentMaterial != null && ParentMaterialSerialId != ParentMaterial.SerialId)
                 {
                     ParentMaterialSerialId = ParentMaterial.SerialId;
+                    if (PerMaterialCBuffer != null)
+                        this.UpdateCBufferVars(PerMaterialCBuffer, PerMaterialCBuffer.ShaderBinder);
                     mSerialId++;
                     if (this.AssetName != null)
                         this.SaveAssetTo(this.AssetName);
@@ -413,9 +471,10 @@ namespace EngineNS.Graphics.Pipeline.Shader
             {
                 mSerialId = value;
                 if (PerMaterialCBuffer != null)
-                    this.UpdateUniformVars(PerMaterialCBuffer, PerMaterialCBuffer.ShaderBinder);
+                    this.UpdateCBufferVars(PerMaterialCBuffer, PerMaterialCBuffer.ShaderBinder);
             }
         }
+        #endregion
     }
     public class UMaterialInstanceManager
     {
