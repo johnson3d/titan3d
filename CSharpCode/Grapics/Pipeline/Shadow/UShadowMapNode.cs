@@ -56,8 +56,8 @@ namespace EngineNS.Graphics.Pipeline.Shadow
         private UInt32 mResolutionX = 1024; //3072
         protected UInt32 mResolutionY = 1024; //4096;
         private UInt32 mBorderSize = 2;//4;
-        private UInt32 mInnerResolutionX = 1024 - 2 * 2; //5120; //4096 - 4 * 2;
-        private UInt32 mInnerResolutionY = 1024 - 2 * 2; //5120; //4096 - 4 * 2;
+        private UInt32 mInnerResolutionX = 1024- 2 * 2; //5120; //4096 - 4 * 2;
+        private UInt32 mInnerResolutionY = 1024- 2 * 2; //5120; //4096 - 4 * 2;
         private UInt32 mWholeReslutionX = 1024 * 4;
         private UInt32 mWholeReslutionY = 1024;
 
@@ -141,7 +141,7 @@ namespace EngineNS.Graphics.Pipeline.Shadow
                 GBuffersArray[0].SetDepthStencil(policy, DepthPinOut);
 
                 GBuffersArray[0].TargetViewIdentifier = new UGraphicsBuffers.UTargetViewIdentifier();
-                GBuffersArray[0].SetSize(mInnerResolutionY, mInnerResolutionY);
+                GBuffersArray[0].SetSize(mResolutionX, mResolutionY);
 
                 var PassDescTwo = new NxRHI.FRenderPassDesc();
                 unsafe
@@ -173,7 +173,7 @@ namespace EngineNS.Graphics.Pipeline.Shadow
                     GBuffersArray[CamIdx].SetDepthStencil(policy, DepthPinOut);
 
                     GBuffersArray[CamIdx].TargetViewIdentifier = new UGraphicsBuffers.UTargetViewIdentifier();
-                    GBuffersArray[CamIdx].SetSize(mInnerResolutionY, mInnerResolutionY);
+                    GBuffersArray[CamIdx].SetSize(mResolutionX, mResolutionY);
                 }
             }
 
@@ -246,9 +246,14 @@ namespace EngineNS.Graphics.Pipeline.Shadow
                 mUVAdjustedMtxArray[UVAdjustIdx].M42 = (float)mBorderSize / (float)mWholeReslutionY;
             }
 
-            mSumDistanceFarArray[0] = (float)Math.Pow(mShadowDistance, 0.25f);// 
-            mSumDistanceFarArray[1] = (float)Math.Pow(mShadowDistance, 0.5f);//
-            mSumDistanceFarArray[2] = (float)Math.Pow(mShadowDistance, 0.75f);//
+
+            float r = 0.9f;
+            float f = mShadowDistance;
+            float n = 1.0f;
+
+            mSumDistanceFarArray[0] = r * n * (float)Math.Pow(f/ n, 0.25f) + (1.0f - r) * (n + 0.25f * (f - n));// (float)Math.Pow(mShadowDistance, 0.25f);// 
+            mSumDistanceFarArray[1] = r * n * (float)Math.Pow(f / n, 0.5f) + (1.0f - r) * (n + 0.5f * (f - n));// (float)Math.Pow(mShadowDistance, 0.5f);//
+            mSumDistanceFarArray[2] = r * n * (float)Math.Pow(f / n, 0.75f) + (1.0f - r) * (n + 0.75f * (f - n));// (float)Math.Pow(mShadowDistance, 0.75f);//
             mSumDistanceFarArray[3] = mShadowDistance;//
 
             mSumDistanceFarVec.X = mSumDistanceFarArray[0];
@@ -392,7 +397,7 @@ namespace EngineNS.Graphics.Pipeline.Shadow
 
                     //if (!AABB.IsEmpty())
                     //{
-                    //    shadowCamera.DoOrthoProjectionForShadow(Math.Min(AABB.Maximum.X - AABB.Minimum.X, FrustumSphereDiameter), Math.Min(AABB.Maximum.Y - AABB.Minimum.Y, FrustumSphereDiameter), Math.Max(AABB.Minimum.Z, ShadowCameraZNear), Math.Min(AABB.Maximum.Z, ShadowCameraZFar), TexelOffsetNdcX, TexelOffsetNdcY);
+                    //    shadowCamera.DoOrthoProjectionForShadow(Math.Min(AABB.Maximum.X - AABB.Minimum.X, FrustumSphereDiameter), Math.Min(AABB.Maximum.Z - AABB.Minimum.Z, FrustumSphereDiameter), ShadowCameraZNear, ShadowCameraZFar, TexelOffsetNdcX, TexelOffsetNdcY);
                     //}
                     //else
                     {

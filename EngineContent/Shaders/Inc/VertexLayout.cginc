@@ -347,7 +347,7 @@ struct MTL_OUTPUT
 	float   mDeepShadow;
 	float3 mMoodColor;
 	
-    half3 GetFinalNormal(PS_INPUT input);
+    half3 GetWorldNormal(PS_INPUT input);
 };
 
 MTL_OUTPUT Default_PSInput2Material(PS_INPUT input)

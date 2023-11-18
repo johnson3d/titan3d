@@ -66,7 +66,7 @@ VS_MODIFIER VS_INPUT_TO_VS_MODIFIER(VS_INPUT input)
 	return result;
 }
 
-half3 MTL_OUTPUT::GetFinalNormal(PS_INPUT input)
+half3 MTL_OUTPUT::GetWorldNormal(PS_INPUT input)
 {
 #if MTL_NORMAL_MODE==MTL_NORMALNONE
     return half3(0, 0, 0);

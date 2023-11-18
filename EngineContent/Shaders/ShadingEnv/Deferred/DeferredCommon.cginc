@@ -83,16 +83,16 @@ struct GBufferData
 
 		if (any(rt1.xyz) != 0)
         {
-			#if GBUFFER_NORMAL_VIEWSPACE == 1
+		#if GBUFFER_NORMAL_VIEWSPACE == 1
             float3 vn;
             vn.xy = rt1.xy * 2.0f - 1.0f;
             vn.z = -sqrt(saturate(1.0f - dot(vn.xy, vn.xy)));
             WorldNormal.xyz = mul(float4(vn.xyz, 0), CameraViewInverse).xyz;
             RenderFlags_10Bit = (int) (rt1.z * 1024.0h); //asint(rt1.z); //
-			#else
+		#else
             WorldNormal.xyz = DecodeNormalXYZ(rt1.xyz);
 			RenderFlags_10Bit = 0£»
-#endif
+		#endif
         }
 		Roughness = rt2.w;
         ObjectFlags_2Bit = (int) (rt1.w * 4.0h); //asint(rt1.w); //

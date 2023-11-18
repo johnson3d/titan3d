@@ -38,7 +38,7 @@ PS_OUTPUT PS_MobileBasePass(PS_INPUT input)
 	GBuffer.MtlColorRaw = (half3)mtl.mAlbedo + mtl.mEmissive;
 	GBuffer.Metallicity = (half)mtl.mMetallic;
 	GBuffer.Roughness = (half)mtl.mRough;
-    GBuffer.WorldNormal = mtl.GetFinalNormal(input);
+    GBuffer.WorldNormal = mtl.GetWorldNormal(input);
 	GBuffer.Specular = (half)mtl.mAbsSpecular;
 	GBuffer.ObjectFlags_2Bit = ObjectFLags_2Bit;
     GBuffer.RenderFlags_10Bit = MaterialRenderFlags;

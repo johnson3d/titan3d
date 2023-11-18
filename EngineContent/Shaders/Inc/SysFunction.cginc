@@ -236,9 +236,11 @@ void UnpackNormal( half3 packedNormal, out half3 normal )
 {
 	//normal = packedNormal.xyz * 2 - 1;
 	
-    normal.xy = packedNormal.xy;
+    normal.xy = packedNormal.xy * 2 - 1;
     normal.z = sqrt(saturate(1.0f - dot(normal.xy, normal.xy)));
-    normal = packedNormal.xyz * 2 - 1;
+    normal.xyz = normal.xzy;
+	
+    //normal.xyz = packedNormal.xyz;
 	
 	//normal = half3( temp.x, temp.z, temp.y );
 }

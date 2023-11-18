@@ -10,4 +10,10 @@
 			</ArrayItems>-->
 		</Expand>
 	</Type>
+	<Type Name="NxMath::NxFixed64&lt;*&gt;">
+		<DisplayString> {{ Double = {(double)mValue / (double)Scalar} }}</DisplayString>
+		<!--<Expand>
+			<Item Name="FracBitWidth">{Scalar}</Item>
+		</Expand>-->
+	</Type>
 </AutoVisualizer>

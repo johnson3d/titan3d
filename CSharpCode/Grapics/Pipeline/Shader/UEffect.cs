@@ -533,7 +533,7 @@ namespace EngineNS.Graphics.Pipeline.Shader
                 if (result != null)
                 {
                     result.Desc.PermutationId = shading.mCurrentPermutationId;
-                    if (material.IsEditingMaterial == false)
+                    //if (material.IsEditingMaterial == false)
                     {
                         await UEngine.Instance.EventPoster.Post((state) =>
                         {
