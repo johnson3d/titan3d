@@ -2,6 +2,11 @@
 #include <math.h>
 #include <atomic>
 #include <algorithm>
+#include <assert.h>
+
+#ifndef ASSERT
+#define ASSERT(t) assert(t)
+#endif
 
 namespace NxMath
 {
@@ -88,6 +93,7 @@ namespace NxMath
 		using ThisType = NxFixed64<_FracBit>;
 		ValueType mValue = 0;
 
+		static ThisType Zero;
 		static const ThisType GetEpsilon()
 		{
 			return NxFixed64<_FracBit>(0.000001f);
@@ -135,11 +141,11 @@ namespace NxMath
 		}
 		NxFixed64(int value)
 		{
-			mValue = ((ValueType)value) * Scalar;
+			mValue = (ValueType)((double)value * (double)Scalar);
 		}
 		NxFixed64(unsigned int value)
 		{
-			mValue = ((ValueType)value) * Scalar;
+			mValue = (ValueType)((double)value * (double)Scalar);
 		}
 		bool IsNegative() const {
 			return (mValue & SignedMask) != 0;
@@ -181,7 +187,7 @@ namespace NxMath
 			auto fp = lh.GetFraction() + rh.GetFraction();
 			auto ip = lh.GetInteger() + rh.GetInteger() + (fp > FractionMask) ? 1 : 0;
 			return (fp.mValue | (ip.mValue & FractionMask) );*/
-			return lh.mValue - rh.mValue;
+			return lh.mValue + rh.mValue;
 		}
 		inline static NxFixed64 Sub(const NxFixed64& lh, const NxFixed64& rh)
 		{
@@ -189,11 +195,12 @@ namespace NxMath
 		}
 		inline static NxFixed64 Mul(const NxFixed64& lh, const NxFixed64& rh)
 		{
-			return lh.mValue * rh.mValue;
+			return (lh.mValue * rh.mValue) >> FracBit;
 		}
 		inline static NxFixed64 Div(const NxFixed64& lh, const NxFixed64& rh)
 		{
-			return lh.mValue / rh.mValue;
+			ASSERT(rh.mValue != 0);
+			return (lh.mValue << FracBit) / rh.mValue;
 		}
 
 		inline static int Compare(const NxFixed64& lh, const NxFixed64& rh)
@@ -206,10 +213,71 @@ namespace NxMath
 			return 0;
 		}
 
-		inline static ThisType Sqrt(const ThisType& v)
+		inline friend ThisType operator +(const ThisType& lh, const ThisType& rh)
 		{
-			//return sqrtf(v.mValue);
-			return NxFixed64();
+			return Add(lh, rh);
+		}
+		inline friend ThisType operator -(const ThisType& lh, const ThisType& rh)
+		{
+			return Sub(lh, rh);
+		}
+		inline friend ThisType operator *(const ThisType& lh, const ThisType& rh)
+		{
+			return Mul(lh, rh);
+		}
+		inline friend ThisType operator /(const ThisType& lh, const ThisType& rh)
+		{
+			return Div(lh, rh);
+		}
+		inline friend const bool operator == (const ThisType& lh, const ThisType& rh)
+		{
+			return Compare(lh.mValue, rh.mValue) == 0;
+		}
+		inline friend const bool operator != (const ThisType& lh, const ThisType& rh)
+		{
+			return Compare(lh.mValue, rh.mValue) != 0;
+		}
+		inline friend const bool operator > (const ThisType& lh, const ThisType& rh)
+		{
+			return Compare(lh.mValue, rh.mValue) > 0;
+		}
+		inline friend const bool operator >= (const ThisType& lh, const ThisType& rh)
+		{
+			return Compare(lh.mValue, rh.mValue) >= 0;
+		}
+		inline friend const bool operator < (const ThisType& lh, const ThisType& rh)
+		{
+			return Compare(lh.mValue, rh.mValue) < 0;
+		}
+		inline friend const bool operator <= (const ThisType& lh, const ThisType& rh)
+		{
+			return Compare(lh.mValue, rh.mValue) <= 0;
+		}
+
+		inline static ThisType Sqrt(const ThisType& c)
+		{
+			//Å£¶Ùµü´ú¼ÆËãf(x) = x * x -c = 0;
+			//f(x)' = 2 * x
+			//x1 = (x0 + c/x0)/2
+			if (c < 0)
+			{
+				ASSERT(false);
+				return Zero;
+			}
+			ThisType result(c);
+			
+			ThisType epsilon = GetEpsilon();
+			while (true)
+			{
+				auto fv = result * result - c;//Sub(Mul(result, result), c);
+				if (fv < epsilon)
+				{
+					return result;
+				}
+				result = (result + c / result) / 2.0f; //Div(Add(result, Div(c, result)), 2);
+			}
+			
+			return result;
 		}
 		inline static ThisType Abs(const ThisType& v)
 		{
@@ -217,6 +285,8 @@ namespace NxMath
 		}
 	};
 
+	template<unsigned int _FracBit>
+	NxFixed64<_FracBit> NxFixed64<_FracBit>::Zero = NxFixed64<_FracBit>(0);
 #pragma pack(pop)
 
 	template<typename T>
