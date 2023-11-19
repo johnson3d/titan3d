@@ -18,9 +18,20 @@ namespace NxMath
 		using ThisType = NxFloat;
 		ValueType mValue = 0;
 
-		static const NxFloat GetEpsilon()
+		static const ThisType GetZero()
 		{
-			return NxFloat(0.000001f);
+			static NxFloat v(0.0f);
+			return v;
+		}
+		static const ThisType GetPi()
+		{
+			static NxFloat v(3.14159f);
+			return v;
+		}
+		static const ThisType GetEpsilon()
+		{
+			static NxFloat v(0.000001f);
+			return v;
 		}
 
 		NxFloat()
@@ -74,6 +85,11 @@ namespace NxMath
 			return 0;
 		}
 
+		inline ThisType operator-() const
+		{
+			return -mValue;
+		}
+
 		inline static ThisType Sqrt(const ThisType& v)
 		{
 			return sqrtf(v.mValue);
@@ -81,6 +97,14 @@ namespace NxMath
 		inline static ThisType Abs(const ThisType& v)
 		{
 			return abs(v.mValue);
+		}
+		inline static ThisType Sin(const ThisType& v)
+		{
+			return sinf(v.mValue);
+		}
+		inline static ThisType Cos(const ThisType& v)
+		{
+			return cosf(v.mValue);
 		}
 	};
 	
@@ -93,10 +117,20 @@ namespace NxMath
 		using ThisType = NxFixed64<_FracBit>;
 		ValueType mValue = 0;
 
-		static ThisType Zero;
+		static const ThisType GetZero()
+		{
+			static NxFixed64<_FracBit> v(0.0f);
+			return v;
+		}
+		static const ThisType GetPi()
+		{
+			static NxFixed64<_FracBit> v(3.14159f);
+			return v;
+		}
 		static const ThisType GetEpsilon()
 		{
-			return NxFixed64<_FracBit>(0.000001f);
+			static NxFixed64<_FracBit> v(0.000001f);
+			return v;
 		}
 		
 		template<int Count>
@@ -125,6 +159,11 @@ namespace NxMath
 		NxFixed64()
 		{
 		}
+		NxFixed64(const ThisType& value)
+			: mValue(value.mValue)
+		{
+
+		}
 		NxFixed64(ValueType value)
 			: mValue(value)
 		{
@@ -132,11 +171,6 @@ namespace NxMath
 		}
 		NxFixed64(float value)
 		{
-			/*SetNegative(value < 0);
-			value = (value > 0) ? value : -value;
-			SetIntegerBits((int)value);
-			float fp = (value - (int)value);
-			SetIntegerBits((unsigned int)(fp * (float)FractionMask));*/
 			mValue = (ValueType)((double)value * (double)Scalar);
 		}
 		NxFixed64(int value)
@@ -213,6 +247,11 @@ namespace NxMath
 			return 0;
 		}
 
+		inline ThisType operator-() const 
+		{
+			return -mValue;
+		}
+
 		inline friend ThisType operator +(const ThisType& lh, const ThisType& rh)
 		{
 			return Add(lh, rh);
@@ -262,19 +301,20 @@ namespace NxMath
 			if (c < 0)
 			{
 				ASSERT(false);
-				return Zero;
+				return GetZero();
 			}
 			ThisType result(c);
 			
 			ThisType epsilon = GetEpsilon();
+			const ThisType c_two(2.0f);
 			while (true)
 			{
-				auto fv = result * result - c;//Sub(Mul(result, result), c);
+				auto fv = Abs(result * result - c);//Sub(Mul(result, result), c);
 				if (fv < epsilon)
 				{
 					return result;
 				}
-				result = (result + c / result) / 2.0f; //Div(Add(result, Div(c, result)), 2);
+				result = (result + c / result) / c_two; //Div(Add(result, Div(c, result)), 2);
 			}
 			
 			return result;
@@ -283,10 +323,51 @@ namespace NxMath
 		{
 			return (v.mValue > 0) ? v.mValue : -v.mValue;
 		}
-	};
+		inline static ThisType Sin(const ThisType& x)
+		{
+			//泰勒展开
+			//sin(x) = x - (x^3 / 3!) + (x^5 / 5!) - (x^7 / 7!) + ...
+			ThisType result(0.0f);
+			ThisType term(x);
+			ThisType sign(1.0f);
 
-	template<unsigned int _FracBit>
-	NxFixed64<_FracBit> NxFixed64<_FracBit>::Zero = NxFixed64<_FracBit>(0);
+			const int IterateTimes = 1000;
+			auto epsilon = GetEpsilon();
+			for (int i = 1; i <= IterateTimes; i += 2)
+			{
+				result = result + sign * term;
+				
+				term = term * ((x * x) / ThisType(i * (i + 1)));
+				if (term < epsilon)
+					break;
+				sign = -sign;
+			}
+
+			return result;
+		}
+		inline static ThisType Cos(const ThisType& x)
+		{
+			//泰勒展开
+			//cosx = 1 - (x^2) / 2!+ (x^4) / 4!- (x^6) / 6! + ...
+			ThisType result(0.0f);
+			ThisType term(1.0f);
+			ThisType sign(1.0f);
+
+			const int IterateTimes = 1000;
+			auto epsilon = GetEpsilon();
+			for (int i = 1; i <= IterateTimes; i += 2)
+			{
+				result = result + sign * term;
+
+				term = term * ((x * x) / ThisType(i * (i + 1)));
+				if (term < epsilon)
+					break;
+				sign = -sign;
+			}
+
+			return result;
+		}
+	};
 #pragma pack(pop)
 
 	template<typename T>
@@ -299,6 +380,7 @@ namespace NxMath
 		using RealType = T;
 		using ValueType = T::ValueType;
 
+		static NxReal Pi;
 		inline static const NxReal GetEpsilon()
 		{
 			return Epsilon;
@@ -312,6 +394,10 @@ namespace NxMath
 			: mValue(value)
 		{
 
+		}
+		inline NxReal operator-() const
+		{
+			return -mValue;
 		}
 		#pragma region operator =
 		inline NxReal& operator = (float rh)
@@ -596,7 +682,7 @@ namespace NxMath
 		}
 		#pragma endregion
 
-		#pragma region 
+		#pragma region Math Function
 		inline static NxReal Sqrt(const NxReal& v)
 		{
 			return T::Sqrt(v.mValue);
@@ -605,9 +691,19 @@ namespace NxMath
 		{
 			return T::Abs(v.mValue);
 		}
+		inline static NxReal Sin(const NxReal& v)
+		{
+			return T::Sin(v.mValue);
+		}
+		inline static NxReal Cos(const NxReal& v)
+		{
+			return T::Cos(v.mValue);
+		}
 		#pragma endregion
 	};
 
 	template<typename T>
 	NxReal<T> NxReal<T>::Epsilon = NxReal<T>(T::GetEpsilon());
+	template<typename T>
+	NxReal<T> NxReal<T>::Pi = NxReal<T>(T::Pi);
 }

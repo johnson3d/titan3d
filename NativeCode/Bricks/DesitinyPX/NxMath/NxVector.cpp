@@ -13,7 +13,10 @@ namespace NxMath
 		void Test1()
 		{
 			NxVector2<Type> v2(Type(1), Type(2));
-			auto t = Type(1)* Type(1);
+			auto t = Type(0.1f) * Type(0.1f);
+			auto t2 = Type::Sqrt(t);
+			auto t3 = Type::Sin(t2);
+			auto t4 = Type::Cos(t2);
 			auto len = v2.Length();
 			len = v2.Normalize();
 			len = NxVector2<Type>::Dot(v2, v2);
