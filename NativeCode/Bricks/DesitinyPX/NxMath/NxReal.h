@@ -5,10 +5,18 @@
 
 namespace NxMath
 {
+#pragma pack(push, 4)
 	struct NxFloat
 	{
+	public:
 		using ValueType = float;
+		using ThisType = NxFloat;
 		ValueType mValue = 0;
+
+		static const NxFloat GetEpsilon()
+		{
+			return NxFloat(0.000001f);
+		}
 
 		NxFloat()
 		{
@@ -60,13 +68,30 @@ namespace NxMath
 				return -1;
 			return 0;
 		}
+
+		inline static ThisType Sqrt(const ThisType& v)
+		{
+			return sqrtf(v.mValue);
+		}
+		inline static ThisType Abs(const ThisType& v)
+		{
+			return abs(v.mValue);
+		}
 	};
-	template<unsigned int _FracBit = 32>
+	
+	template<unsigned int _FracBit = 24>
 	struct NxFixed64
 	{
+	public:
 		using ValueType = long long;
 		using ConstValueType = unsigned long long;
+		using ThisType = NxFixed64<_FracBit>;
 		ValueType mValue = 0;
+
+		static const ThisType GetEpsilon()
+		{
+			return NxFixed64<_FracBit>(0.000001f);
+		}
 		
 		template<int Count>
 		struct SetBitMask
@@ -173,15 +198,41 @@ namespace NxMath
 
 		inline static int Compare(const NxFixed64& lh, const NxFixed64& rh)
 		{
-			return lh.mValue - rh.mValue;
+			auto cmp = lh.mValue - rh.mValue;
+			if (cmp > 0)
+				return 1;
+			else if (cmp < 0)
+				return -1;
+			return 0;
+		}
+
+		inline static ThisType Sqrt(const ThisType& v)
+		{
+			//return sqrtf(v.mValue);
+			return NxFixed64();
+		}
+		inline static ThisType Abs(const ThisType& v)
+		{
+			return (v.mValue > 0) ? v.mValue : -v.mValue;
 		}
 	};
+
+#pragma pack(pop)
+
 	template<typename T>
 	struct NxReal
 	{
+	private:
+		static NxReal Epsilon;
+	public:
 		T mValue;
 		using RealType = T;
 		using ValueType = T::ValueType;
+
+		inline static const NxReal GetEpsilon()
+		{
+			return Epsilon;
+		}
 
 		NxReal()
 		{
@@ -377,86 +428,116 @@ namespace NxMath
 		#pragma region operator ==
 		inline friend const bool operator == (float lh, const NxReal& rh)
 		{
-			return T::Compare(lh, rh) == 0;
+			return T::Compare(lh, rh.mValue) == 0;
 		}
 		inline friend const bool operator == (const NxReal& lh, float rh)
 		{
-			return T::Compare(lh, rh) == 0;
+			return T::Compare(lh.mValue, rh) == 0;
+		}
+		inline friend const bool operator == (const NxReal& lh, int rh)
+		{
+			return T::Compare(lh.mValue, rh) == 0;
+		}
+		inline friend const bool operator == (int lh, const NxReal& rh)
+		{
+			return T::Compare(lh, rh.mValue) == 0;
+		}
+		inline friend const bool operator == (const NxReal& lh, unsigned int rh)
+		{
+			return T::Compare(lh.mValue, rh) == 0;
+		}
+		inline friend const bool operator == (unsigned int lh, const NxReal& rh)
+		{
+			return T::Compare(lh, rh.mValue) == 0;
 		}
 		inline friend const bool operator == (const NxReal& lh, const NxReal& rh)
 		{
-			return T::Compare(lh, rh) == 0;
+			return T::Compare(lh.mValue, rh.mValue) == 0;
 		}
 		#pragma endregion
 		#pragma region operator !=
 		inline friend const bool operator != (float lh, const NxReal& rh)
 		{
-			return T::Compare(lh, rh) != 0;
+			return T::Compare(lh, rh.mValue) != 0;
 		}
 		inline friend const bool operator != (const NxReal& lh, float rh)
 		{
-			return T::Compare(lh, rh) != 0;
+			return T::Compare(lh.mValue, rh) != 0;
 		}
 		inline friend const bool operator != (const NxReal& lh, const NxReal& rh)
 		{
-			return T::Compare(lh, rh) != 0;
+			return T::Compare(lh.mValue, rh.mValue) != 0;
 		}
 		#pragma endregion
 		#pragma region operator >
 		inline friend const bool operator > (float lh, const NxReal& rh)
 		{
-			return T::Compare(lh, rh) > 0;
+			return T::Compare(lh, rh.mValue) > 0;
 		}
 		inline friend const bool operator > (const NxReal& lh, float rh)
 		{
-			return T::Compare(lh, rh) > 0;
+			return T::Compare(lh.mValue, rh) > 0;
 		}
 		inline friend const bool operator > (const NxReal& lh, const NxReal& rh)
 		{
-			return T::Compare(lh, rh) > 0;
+			return T::Compare(lh.mValue, rh.mValue) > 0;
 		}
 		#pragma endregion
 		#pragma region operator >=
 		inline friend const bool operator >= (float lh, const NxReal& rh)
 		{
-			return T::Compare(lh, rh) >= 0;
+			return T::Compare(lh, rh.mValue) >= 0;
 		}
 		inline friend const bool operator >= (const NxReal& lh, float rh)
 		{
-			return T::Compare(lh, rh) >= 0;
+			return T::Compare(lh.mValue, rh) >= 0;
 		}
 		inline friend const bool operator >= (const NxReal& lh, const NxReal& rh)
 		{
-			return T::Compare(lh, rh) >= 0;
+			return T::Compare(lh.mValue, rh.mValue) >= 0;
 		}
 		#pragma endregion
 		#pragma region operator <
 		inline friend const bool operator < (float lh, const NxReal& rh)
 		{
-			return T::Compare(lh, rh) < 0;
+			return T::Compare(lh, rh.mValue) < 0;
 		}
 		inline friend const bool operator < (const NxReal& lh, float rh)
 		{
-			return T::Compare(lh, rh) < 0;
+			return T::Compare(lh.mValue, rh) < 0;
 		}
 		inline friend const bool operator < (const NxReal& lh, const NxReal& rh)
 		{
-			return T::Compare(lh, rh) < 0;
+			return T::Compare(lh.mValue, rh.mValue) < 0;
 		}
 		#pragma endregion
 		#pragma region operator <=
 		inline friend const bool operator <= (float lh, const NxReal & rh)
 		{
-			return T::Compare(lh, rh) <= 0;
+			return T::Compare(lh, rh.mValue) <= 0;
 		}
 		inline friend const bool operator <= (const NxReal& lh, float rh)
 		{
-			return T::Compare(lh, rh) <= 0;
+			return T::Compare(lh.mValue, rh) <= 0;
 		}
 		inline friend const bool operator <= (const NxReal& lh, const NxReal& rh)
 		{
-			return T::Compare(lh, rh) <= 0;
+			return T::Compare(lh.mValue, rh.mValue) <= 0;
+		}
+		#pragma endregion
+
+		#pragma region 
+		inline static NxReal Sqrt(const NxReal& v)
+		{
+			return T::Sqrt(v.mValue);
+		}
+		inline static NxReal Abs(const NxReal& v)
+		{
+			return T::Abs(v.mValue);
 		}
 		#pragma endregion
 	};
+
+	template<typename T>
+	NxReal<T> NxReal<T>::Epsilon = NxReal<T>(T::GetEpsilon());
 }

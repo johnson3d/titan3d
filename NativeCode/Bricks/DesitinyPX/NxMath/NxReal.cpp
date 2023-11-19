@@ -38,5 +38,5 @@ namespace NxMath
 		}
 	};
 
-	TestMath GTestMath;
+	static TestMath GTestMath;
 }
