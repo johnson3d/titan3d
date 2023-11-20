@@ -10,10 +10,22 @@
 			</ArrayItems>-->
 		</Expand>
 	</Type>
+	<Type Name="NxMath::NxFloat">
+		<DisplayString> {{ {mValue} }}</DisplayString>
+	</Type>	
 	<Type Name="NxMath::NxFixed64&lt;*&gt;">
-		<DisplayString> {{ Double = {(double)mValue / (double)Scalar} }}</DisplayString>
-		<!--<Expand>
-			<Item Name="FracBitWidth">{Scalar}</Item>
-		</Expand>-->
+		<DisplayString> {{ {(double)mValue / (double)Scalar} }}</DisplayString>
+	</Type>
+	<!--<Type Name="NxMath::NxReal&lt;NxMath::NxFixed64&lt;*&gt;&gt;">
+		<DisplayString> {{ {(double)mValue.mValue / (double)mValue.Scalar} }}</DisplayString>
+	</Type>-->
+	<Type Name="NxMath::NxVector2&lt;*&gt;">
+		<DisplayString> {{ {(float)((double)X.mValue.mValue / (double)X.mValue.Scalar)},{(float)((double)Y.mValue.mValue / (double)Y.mValue.Scalar)} }}</DisplayString>
+	</Type>
+	<Type Name="NxMath::NxVector3&lt;*&gt;">
+		<DisplayString> {{ {(float)((double)X.mValue.mValue / (double)X.mValue.Scalar)},{(float)((double)Y.mValue.mValue / (double)Y.mValue.Scalar)},{(float)((double)Z.mValue.mValue / (double)Z.mValue.Scalar)} }}</DisplayString>
+	</Type>
+	<Type Name="NxMath::NxVector4&lt;*&gt;">
+		<DisplayString> {{ {(float)((double)X.mValue.mValue / (double)X.mValue.Scalar)},{(float)((double)Y.mValue.mValue / (double)Y.mValue.Scalar)},{(float)((double)Z.mValue.mValue / (double)Z.mValue.Scalar)},{(float)((double)W.mValue.mValue / (double)W.mValue.Scalar)} }}</DisplayString>
 	</Type>
 </AutoVisualizer>

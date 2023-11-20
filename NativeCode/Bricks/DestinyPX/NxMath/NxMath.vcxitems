@@ -15,12 +15,15 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="$(MSBuildThisFileDirectory)NxMatrix.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)NxQuat.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)NxReal.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)NxVector.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="$(MSBuildThisFileDirectory)NxMatrix.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)NxQuat.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)NxReal.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)NxUtility.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)NxVector.h" />
   </ItemGroup>
 </Project>

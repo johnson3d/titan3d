@@ -61,6 +61,15 @@ namespace NxMath
 		{
 			
 		}
+
+		inline Type& operator[](int index) 
+		{
+			return ((Type*)this)[index];
+		}
+		inline const Type& operator[](int index) const
+		{
+			return ((Type*)this)[index];
+		}
 		inline Type LengthSquared()
 		{
 			return (X * X) + (Y * Y);
@@ -78,6 +87,44 @@ namespace NxMath
 			X *= num;
 			Y *= num;
 			return length;
+		}
+		inline static bool Normalize(const VectorType& vIn, VectorType& vOut)
+		{
+			auto length = vIn.Length();
+			if (length == 0)
+				return false;
+			Type num = Type::GetOne() / length;
+			vOut.X = vIn.X * num;
+			vOut.Y = vIn.Y * num;
+			return true;
+		}
+		inline friend VectorType operator +(const VectorType& lh, Type rh)
+		{
+			VectorType result;
+			result.X = lh.X + rh;
+			result.Y = lh.Y + rh;
+			return result;
+		}
+		inline friend VectorType operator -(const VectorType& lh, Type rh)
+		{
+			VectorType result;
+			result.X = lh.X - rh;
+			result.Y = lh.Y - rh;
+			return result;
+		}
+		inline friend VectorType operator *(const VectorType& lh, Type rh)
+		{
+			VectorType result;
+			result.X = lh.X * rh;
+			result.Y = lh.Y * rh;
+			return result;
+		}
+		inline friend VectorType operator /(const VectorType& lh, Type rh)
+		{
+			VectorType result;
+			result.X = lh.X / rh;
+			result.Y = lh.Y / rh;
+			return result;
 		}
 		inline friend VectorType operator +(const VectorType& lh, VectorType rh)
 		{
@@ -150,6 +197,14 @@ namespace NxMath
 		{
 
 		}
+		inline Type& operator[](int index)
+		{
+			return ((Type*)this)[index];
+		}
+		inline const Type& operator[](int index) const
+		{
+			return ((Type*)this)[index];
+		}
 		inline Type LengthSquared()
 		{
 			return (X * X) + (Y * Y) + (Z * Z);
@@ -168,6 +223,49 @@ namespace NxMath
 			Y *= num;
 			Z *= num;
 			return length;
+		}
+		inline static bool Normalize(const VectorType& vIn, VectorType& vOut)
+		{
+			auto length = vIn.Length();
+			if (length == 0)
+				return false;
+			Type num = Type::GetOne() / length;
+			vOut.X = vIn.X * num;
+			vOut.Y = vIn.Y * num;
+			vOut.Z = vIn.Z * num;
+			return true;
+		}
+		inline friend VectorType operator +(const VectorType& lh, Type rh)
+		{
+			VectorType result;
+			result.X = lh.X + rh;
+			result.Y = lh.Y + rh;
+			result.Z = lh.Z + rh;
+			return result;
+		}
+		inline friend VectorType operator -(const VectorType& lh, Type rh)
+		{
+			VectorType result;
+			result.X = lh.X - rh;
+			result.Y = lh.Y - rh;
+			result.Z = lh.Z - rh;
+			return result;
+		}
+		inline friend VectorType operator *(const VectorType& lh, Type rh)
+		{
+			VectorType result;
+			result.X = lh.X * rh;
+			result.Y = lh.Y * rh;
+			result.Z = lh.Z * rh;
+			return result;
+		}
+		inline friend VectorType operator /(const VectorType& lh, Type rh)
+		{
+			VectorType result;
+			result.X = lh.X / rh;
+			result.Y = lh.Y / rh;
+			result.Z = lh.Z / rh;
+			return result;
 		}
 		inline friend VectorType operator +(const VectorType& lh, VectorType rh)
 		{
@@ -268,6 +366,14 @@ namespace NxMath
 		{
 
 		}
+		inline Type& operator[](int index)
+		{
+			return ((Type*)this)[index];
+		}
+		inline const Type& operator[](int index) const
+		{
+			return ((Type*)this)[index];
+		}
 		inline Type LengthSquared()
 		{
 			return (X * X) + (Y * Y) + (Z * Z) + (W * W);
@@ -287,6 +393,54 @@ namespace NxMath
 			Z *= num;
 			W *= num;
 			return length;
+		}
+		inline static bool Normalize(const VectorType& vIn, VectorType& vOut)
+		{
+			auto length = vIn.Length();
+			if (length == 0)
+				return false;
+			Type num = Type::GetOne() / length;
+			vOut.X = vIn.X * num;
+			vOut.Y = vIn.Y * num;
+			vOut.Z = vIn.Z * num;
+			vOut.W = vIn.W * num;
+			return true;
+		}
+		inline friend VectorType operator +(const VectorType& lh, Type rh)
+		{
+			VectorType result;
+			result.X = lh.X + rh;
+			result.Y = lh.Y + rh;
+			result.Z = lh.Z + rh;
+			result.W = lh.W + rh;
+			return result;
+		}
+		inline friend VectorType operator -(const VectorType& lh, Type rh)
+		{
+			VectorType result;
+			result.X = lh.X - rh;
+			result.Y = lh.Y - rh;
+			result.Z = lh.Z - rh;
+			result.W = lh.W - rh;
+			return result;
+		}
+		inline friend VectorType operator *(const VectorType& lh, Type rh)
+		{
+			VectorType result;
+			result.X = lh.X * rh;
+			result.Y = lh.Y * rh;
+			result.Z = lh.Z * rh;
+			result.W = lh.W * rh;
+			return result;
+		}
+		inline friend VectorType operator /(const VectorType& lh, Type rh)
+		{
+			VectorType result;
+			result.X = lh.X / rh;
+			result.Y = lh.Y / rh;
+			result.Z = lh.Z / rh;
+			result.W = lh.W / rh;
+			return result;
 		}
 		inline friend VectorType operator +(const VectorType& lh, VectorType rh)
 		{
