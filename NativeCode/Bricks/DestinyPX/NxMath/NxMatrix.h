@@ -302,9 +302,70 @@ namespace NxMath
 		{
 			return Rows[index];
 		}
+		inline Type GetDeterminant()
+		{
+			Type temp1 = (Rows[2][2] * Rows[3][3]) - (Rows[2][3] * Rows[3][2]);
+			Type temp2 = (Rows[2][1] * Rows[3][3]) - (Rows[2][3] * Rows[3][1]);
+			Type temp3 = (Rows[2][1] * Rows[3][2]) - (Rows[2][2] * Rows[3][1]);
+			Type temp4 = (Rows[2][0] * Rows[3][3]) - (Rows[2][3] * Rows[3][0]);
+			Type temp5 = (Rows[2][0] * Rows[3][2]) - (Rows[2][2] * Rows[3][0]);
+			Type temp6 = (Rows[2][0] * Rows[3][1]) - (Rows[2][1] * Rows[3][0]);
+
+			return ((((Rows[0][0] * (((Rows[1][1] * temp1) - (Rows[1][2] * temp2)) + (Rows[1][3] * temp3))) - (Rows[0][1] * (((Rows[1][0] * temp1) -
+				(Rows[1][2] * temp4)) + (Rows[1][3] * temp5)))) + (Rows[0][2] * (((Rows[1][0] * temp2) - (Rows[1][1] * temp4)) + (Rows[1][3] * temp6)))) -
+				(Rows[0][3] * (((Rows[1][0] * temp3) - (Rows[1][1] * temp5)) + (Rows[1][2] * temp6))));
+		}
+		inline void SetTrans(Vector3 v)
+		{
+			Rows[3][0] = v.X;
+			Rows[3][1] = v.Y;
+			Rows[3][2] = v.Z;
+		}
+		inline void NoRotation()
+		{
+			auto temp = GetScale();
+			Rows[0][0] = temp.X;
+			Rows[0][1] = 0;
+			Rows[0][2] = 0;
+			Rows[1][0] = 0;
+			Rows[1][1] = temp.Y;
+			Rows[1][2] = 0;
+			Rows[2][0] = 0;
+			Rows[2][1] = 0;
+			Rows[2][2] = temp.Z;
+		}
+		inline void NoScale()
+		{
+			auto temp = GetScale;
+			Rows[0][0] /= temp.X;
+			Rows[0][1] /= temp.X;
+			Rows[0][2] /= temp.X;
+			Rows[1][0] /= temp.Y;
+			Rows[1][1] /= temp.Y;
+			Rows[1][2] /= temp.Y;
+			Rows[2][0] /= temp.Z;
+			Rows[2][1] /= temp.Z;
+			Rows[2][2] /= temp.Z;
+		}
 		inline VectorType GetColume(int index) const
 		{
 			return VectorType(Rows[0][index], Rows[1][index], Rows[2][index], Rows[3][index]);
+		}
+		inline Vector3 GetTranslate() const
+		{
+			return Vector3(Rows[3][0], Rows[3][1], Rows[3][2]);
+		}
+		inline Vector3 GetScale() const
+		{
+			Vector3 vScale;
+			vScale.X = Type::Sqrt(Rows[0][0] * Rows[0][0] + Rows[0][1] * Rows[0][1] + Rows[0][2] * Rows[0][3]);
+			vScale.Y = Type::Sqrt(Rows[1][0] * Rows[1][0] + Rows[1][1] * Rows[1][1] + Rows[1][2] * Rows[1][2]);
+			vScale.Z = Type::Sqrt(Rows[2][0] * Rows[2][0] + Rows[2][1] * Rows[2][1] + Rows[2][2] * Rows[2][2]);
+			return vScale;
+		}
+		inline Quat GetRotation()
+		{
+			return ToQuat(*this);
 		}
 		static inline constexpr ThisType MakeIdentity()
 		{
@@ -649,13 +710,18 @@ namespace NxMath
 			return result;
 		}
 
-		inline static ThisType Transformation(const Vector3* pScaling, const Quat* pRotation, const Vector3* pTranslation)
+		inline static void ComposeMatrix(const Vector3* pScaling, const Quat* pRotation, const Vector3* pTranslation, ThisType* pResult)
 		{
-			ThisType result = MakeIdentity();
+			ThisType& result = *pResult;// MakeIdentity();
+			//result = MakeIdentity();
 
 			if (pRotation != nullptr)
 			{
 				result = FromQuat(*pRotation);
+			}
+			else
+			{
+				result = MakeIdentity();
 			}
 
 			if (pScaling != nullptr)
@@ -679,6 +745,39 @@ namespace NxMath
 				result[3][2] = pTranslation->Z;
 			}
 			return result;
+		}
+		inline static void DecomposeMatrix(Vector3* pOutScale, Quat* pOutRotation, Vector3* pOutTranslation, const ThisType* pM)
+		{
+			auto saveMT = *pM;
+			if (pOutTranslation != nullptr)
+			{
+				*pOutTranslation = saveMT.GetTranslate();
+				saveMT[3][0] = 0;
+				saveMT[3][1] = 0;
+				saveMT[3][2] = 0;
+			}
+			
+			if (pOutScale != nullptr)
+			{
+				*pOutScale = saveMT.GetScale();
+			}
+
+			if (pOutRotation != nullptr)
+			{
+				saveMT.m[0][0] /= pOutScale->X;
+				saveMT.m[0][1] /= pOutScale->X;
+				saveMT.m[0][2] /= pOutScale->X;
+
+				saveMT.m[1][0] /= pOutScale->Y;
+				saveMT.m[1][1] /= pOutScale->Y;
+				saveMT.m[1][2] /= pOutScale->Y;
+
+				saveMT.m[2][0] /= pOutScale->Z;
+				saveMT.m[2][1] /= pOutScale->Z;
+				saveMT.m[2][2] /= pOutScale->Z;
+
+				*pOutRotation = ToQuat(saveMT);
+			}
 		}
 		#pragma endregion
 	};
