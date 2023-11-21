@@ -194,6 +194,8 @@ namespace EngineNS.NxRHI
                 get => Desc.StripOriginSource != 0 ? true : false;
                 set => Desc.StripOriginSource = value ? 1 : 0;
             }
+            bool mAutoCheckNormal = true;
+            public bool AutoCheckNormal { get => mAutoCheckNormal; set => mAutoCheckNormal = value; }
             bool mIsNormal;
             public bool IsNormal { get => mIsNormal; set => mIsNormal=value; }
             public List<Vector3i> MipSizes { get; } = new List<Vector3i>();
@@ -566,8 +568,11 @@ namespace EngineNS.NxRHI
                         if (image == null)
                             return false;
 
-                        NormalmapChecker normalChecker = new NormalmapChecker();
-                        mDesc.IsNormal = normalChecker.DoesTextureLookLikelyToBeANormalMap(image);
+                        if(mDesc.AutoCheckNormal == true)
+                        {
+                            NormalmapChecker normalChecker = new NormalmapChecker();
+                            mDesc.IsNormal = normalChecker.DoesTextureLookLikelyToBeANormalMap(image);
+                        }
 
                         USrView.SaveTexture(rn, xnd.RootNode.mCoreObject, image, mDesc);
                     }

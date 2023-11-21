@@ -100,6 +100,34 @@ namespace NxMath
 		{
 			return fmodf(v1.mValue, v2.mValue);
 		}
+		inline static ThisType Log(ThisType x)
+		{
+			return logf(x.mValue);
+		}
+		inline static ThisType Log10(ThisType x)
+		{
+			return log10f(x.mValue);
+		}
+		inline static ThisType Pow(const ThisType& XV, int Y)
+		{
+			auto X = XV.mValue;
+			unsigned int N;
+			if (Y >= 0)
+				N = Y;
+			else
+				N = -Y;
+			for (auto Z = float(1); ; X *= X)
+			{
+				if ((N & 1) != 0)
+					Z *= X;
+				if ((N >>= 1) == 0)
+					return (Y < 0 ? float(1) / Z : Z);
+			}
+		}
+		inline static ThisType Pow(const ThisType& v1, const ThisType& v2)
+		{
+			return powf(v1.mValue, v2.mValue);
+		}
 		inline static ThisType Sqrt(const ThisType& v)
 		{
 			return sqrtf(v.mValue);
@@ -116,6 +144,18 @@ namespace NxMath
 		{
 			return cosf(v.mValue);
 		}
+		inline static ThisType ASin(const ThisType& v)
+		{
+			return asinf(v.mValue);
+		}
+		inline static ThisType ACos(const ThisType& v)
+		{
+			return acosf(v.mValue);
+		}
+		inline static ThisType ATan(const ThisType& x)
+		{
+			return atanf(x.mValue);
+		}
 	};
 	
 	template<unsigned int _FracBit = 24>
@@ -128,6 +168,7 @@ namespace NxMath
 		using ThisType = NxFixed64<_FracBit>;
 		ValueType mValue = 0;
 
+		#pragma region constexpr var
 		static constexpr const ThisType GetZero()
 		{
 			return ThisType(0);
@@ -152,6 +193,15 @@ namespace NxMath
 		{
 			return ThisType((ValueType)(0.000001f * (double)Scalar));
 		}
+		static constexpr const ThisType GetLn10()
+		{
+			return ThisType((ValueType)(2.3025850929940456840179914547 * (double)Scalar));
+		}
+		static constexpr const ThisType GetLnr()
+		{
+			return ThisType((ValueType)(0.2002433314278771112016301167 * (double)Scalar));
+		}
+		#pragma endregion
 		
 		template<int Count>
 		struct SetBitMask
@@ -187,6 +237,12 @@ namespace NxMath
 		{
 			return NxFixed64(value);
 		}
+		static inline constexpr NxFixed64 CreateFromDouble(double value)
+		{
+			NxFixed64 result;
+			result.mValue = (NxFixed64::ValueType)(value * (double)Scalar);
+			return result;
+		}
 		NxFixed64()
 		{
 		}
@@ -212,6 +268,7 @@ namespace NxMath
 			lh.mValue = rh.mValue;
 			return lh;
 		}
+		#pragma region operator
 		template<unsigned int OtherFracBit>
 		inline NxFixed64& operator =(const NxFixed64<OtherFracBit>& value)
 		{
@@ -267,7 +324,7 @@ namespace NxMath
 
 		inline operator int() const 
 		{
-			return (int)(mValue >> FracBit);
+			return mValue >= 0 ? (int)(mValue >> FracBit) : -(int)((-mValue) >> FracBit);
 		}
 		inline ThisType operator-() const 
 		{
@@ -277,7 +334,23 @@ namespace NxMath
 		{
 			return Add(lh, rh);
 		}
+		inline friend ThisType operator +(float lh, const ThisType& rh)
+		{
+			return Add(lh, rh);
+		}
+		inline friend ThisType operator +(const ThisType& lh, float rh)
+		{
+			return Add(lh, rh);
+		}
 		inline friend ThisType operator -(const ThisType& lh, const ThisType& rh)
+		{
+			return Sub(lh, rh);
+		}
+		inline friend ThisType operator -(float lh, const ThisType& rh)
+		{
+			return Sub(lh, rh);
+		}
+		inline friend ThisType operator -(const ThisType& lh, float rh)
 		{
 			return Sub(lh, rh);
 		}
@@ -285,7 +358,23 @@ namespace NxMath
 		{
 			return Mul(lh, rh);
 		}
+		inline friend ThisType operator *(float lh, const ThisType& rh)
+		{
+			return Mul(lh, rh);
+		}
+		inline friend ThisType operator *(const ThisType& lh, float rh)
+		{
+			return Mul(lh, rh);
+		}
 		inline friend ThisType operator /(const ThisType& lh, const ThisType& rh)
+		{
+			return Div(lh, rh);
+		}
+		inline friend ThisType operator /(float lh, const ThisType& rh)
+		{
+			return Div(lh, rh);
+		}
+		inline friend ThisType operator /(const ThisType& lh, float rh)
 		{
 			return Div(lh, rh);
 		}
@@ -293,30 +382,200 @@ namespace NxMath
 		{
 			return Compare(lh.mValue, rh.mValue) == 0;
 		}
+		inline friend const bool operator == (float lh, const ThisType& rh)
+		{
+			return Compare(lh, rh.mValue) == 0;
+		}
+		inline friend const bool operator == (const ThisType& lh, float rh)
+		{
+			return Compare(lh.mValue, rh) == 0;
+		}
 		inline friend const bool operator != (const ThisType& lh, const ThisType& rh)
 		{
 			return Compare(lh.mValue, rh.mValue) != 0;
+		}
+		inline friend const bool operator != (float lh, const ThisType& rh)
+		{
+			return Compare(lh, rh.mValue) != 0;
+		}
+		inline friend const bool operator != (const ThisType& lh, float rh)
+		{
+			return Compare(lh.mValue, rh) != 0;
 		}
 		inline friend const bool operator > (const ThisType& lh, const ThisType& rh)
 		{
 			return Compare(lh.mValue, rh.mValue) > 0;
 		}
+		inline friend const bool operator > (float lh, const ThisType& rh)
+		{
+			return Compare(lh, rh.mValue) > 0;
+		}
+		inline friend const bool operator > (const ThisType& lh, float rh)
+		{
+			return Compare(lh.mValue, rh) > 0;
+		}
 		inline friend const bool operator >= (const ThisType& lh, const ThisType& rh)
 		{
 			return Compare(lh.mValue, rh.mValue) >= 0;
+		}
+		inline friend const bool operator >= (float lh, const ThisType& rh)
+		{
+			return Compare(lh, rh.mValue) >= 0;
+		}
+		inline friend const bool operator >= (const ThisType& lh, float rh)
+		{
+			return Compare(lh.mValue, rh) >= 0;
 		}
 		inline friend const bool operator < (const ThisType& lh, const ThisType& rh)
 		{
 			return Compare(lh.mValue, rh.mValue) < 0;
 		}
+		inline friend const bool operator < (float lh, const ThisType& rh)
+		{
+			return Compare(lh, rh.mValue) < 0;
+		}
+		inline friend const bool operator < (const ThisType& lh, float rh)
+		{
+			return Compare(lh.mValue, rh) < 0;
+		}
 		inline friend const bool operator <= (const ThisType& lh, const ThisType& rh)
 		{
-			return Compare(lh.mValue, rh.mValue) <= 0;
+			return Compare(lh, rh.mValue) <= 0;
 		}
-
+		inline friend const bool operator <= (float lh, const ThisType& rh)
+		{
+			return Compare(lh, rh.mValue) <= 0;
+		}
+		inline friend const bool operator <= (const ThisType& lh, float rh)
+		{
+			return Compare(lh.mValue, rh) <= 0;
+		}
+		#pragma endregion
 		inline static ThisType Mod(const ThisType& v1, const ThisType& v2)
 		{
 			return v1.mValue % v2.mValue;
+		}		
+		//inline static ThisType Log(const ThisType& x)
+		//{
+		//	//泰勒展开
+		//	//ln(x+1) = x - x^2/2 + x^3/3 - x^4/4 + ... + (-1)^(n-1) * x^n/n + ...
+		//	ThisType term = x - 1.0f;  // 第一个项
+		//	const auto step = term;
+		//	ThisType result = term;    // 累计求和
+		//	ThisType sign(1.0f);
+		//	const int IterateTimes = 100;
+		//	const auto epsilon = GetEpsilon();
+		//	for (int i = 1; i <= IterateTimes; i++)
+		//	{
+		//		result = result  + sign * (term / ThisType(i)); // 累加到求和结果中
+		//		term = term * step;  // 计算下一个项
+		//		/*if (Abs(term) < epsilon)
+		//			break;*/
+		//		
+		//		sign = -sign;
+		//	}
+		//	return result;
+		//}
+		static ThisType Log(ThisType x)
+		{
+			//https://blog.csdn.net/jiao1197018093/article/details/50365299
+			if (x <= 0.0f)
+			{
+				ASSERT(false);
+				return 0;
+			}
+			float K = 0, L = 0;
+			for (; x > 1.0f; K = K+1)
+			{
+				x = x / 10.0f;
+			}
+			for (; x <= 0.1f; K = K - 1)
+			{
+				x = x * 10.0f;
+			}
+			for (; x < 0.9047f; L = L - 1)
+			{
+				x = x * 1.2217f;
+			}
+			ThisType p1 = K * GetLn10();
+			p1 = p1 + L * GetLnr();
+			return p1 + Logarithm((x - 1.0f) / (x + 1.0f));
+		}
+		static ThisType Log10(ThisType x)
+		{
+			return Log(x) / GetLn10();
+		}
+
+		inline static ThisType ExpFast(unsigned int x)
+		{
+			x = 1.0f + x / 256.0f;
+			for (int i = 0; i < 8; i++)
+			{
+				x = x * x;
+			}
+			return x;
+		}
+		//慎用Exp函数
+		//在20位小数的情况，千万不要超过30次方，否则会溢出
+		//此外，大于10次方后，负指数容易导致(1 / ef)精度丢失严重
+		inline static ThisType Exp(ThisType x) 
+		{
+			//https://blog.51cto.com/lifj07/162952
+			int i, k, m, t;
+			int xm = (int)x;
+			ThisType sum;
+			ThisType e;
+			ThisType ef;
+			ThisType z;
+			ThisType sub = x - ((float)xm);
+			m = 1;
+			e = 1.0f;
+			ef = 1.0f;
+			t = 10;
+			z = 1.0f;
+			sum = 1.0f;
+			if (xm < 0.0f)
+			{
+				xm = (-xm);
+				for (k = 0; k < xm; k++) 
+				{ 
+					ef = ef * 2.718281f;
+				}
+				e = e / ef;
+			}
+			else 
+			{ 
+				for (k = 0; k < xm; k++) 
+				{ 
+					e = e * 2.718281f; 
+				}
+			}
+			for (i = 1; i < t; i++) 
+			{
+				m = m * i;
+				z = z * sub;
+				sum = sum + z / ((float)m);
+			}
+			return sum * e;
+		}
+		inline static ThisType Pow(const ThisType& X, int Y)
+		{
+			unsigned int N;
+			if (Y >= 0)
+				N = Y;
+			else
+				N = -Y;
+			for (auto Z = ThisType(1); ; X *= X)
+			{
+				if ((N & 1) != 0)
+					Z *= X;
+				if ((N >>= 1) == 0)
+					return (Y < 0 ? ThisType(1) / Z : Z);
+			}
+		}
+		inline static ThisType Pow(const ThisType& v1, const ThisType& v2)
+		{
+			
 		}
 		inline static ThisType Sqrt(const ThisType& c)
 		{
@@ -348,6 +607,7 @@ namespace NxMath
 		{
 			return (v.mValue > 0) ? v.mValue : -v.mValue;
 		}
+		
 		inline static ThisType Sin(const ThisType& v)
 		{
 			const auto TwoPi = GetTwoPi();
@@ -367,29 +627,7 @@ namespace NxMath
 				return -Sin_Phase1(xx - Pi);
 			else
 				return -Sin_Phase1(TwoPi - xx);
-		}
-		inline static ThisType Sin_Phase1(const ThisType& x)
-		{
-			//泰勒展开
-			//sin(x) = x - (x^3 / 3!) + (x^5 / 5!) - (x^7 / 7!) + ...
-			ThisType result(0.0f);
-			ThisType term(x);
-			ThisType sign(1.0f);
-
-			const int IterateTimes = 1000;
-			const auto epsilon = GetEpsilon();
-			for (int i = 1; i <= IterateTimes; i += 2)
-			{
-				result = result + sign * term;
-				
-				term = term * ((x * x) / ThisType(i * (i + 1)));
-				if (term < epsilon)
-					break;
-				sign = -sign;
-			}
-
-			return result;
-		}
+		}		
 		inline static ThisType Cos(const ThisType& v)
 		{
 			const auto TwoPi = GetTwoPi();
@@ -409,6 +647,148 @@ namespace NxMath
 				return -Cos_Phase1(xx - Pi);
 			else
 				return Cos_Phase1(TwoPi - xx);
+		}
+		inline static ThisType ASin(const ThisType& x)
+		{
+			//http://www.360doc.com/content/13/0905/15/13249435_312408763.shtml
+			if (x < 0.0f)
+			{
+				return -ASin(x);
+			}
+			else if (x < 1.0f)
+			{
+				return ATan(x / Sqrt(1 - x * 2.0f));
+			}
+			else
+			{
+				return GetHalfPi();
+			}
+		}
+		inline static ThisType ACos(const ThisType& x)
+		{
+			if (x == -1.0f)
+			{
+				return GetPi();
+			}
+			else if (x < 0.0f)
+			{
+				return GetPi() - ATan(Sqrt(1 - x * x) / (-x));
+			}
+			else if (x == 0.0f)
+			{
+				return GetHalfPi();
+			}
+			else if (x < 1.0f)
+			{
+				return ATan(Sqrt(1 - x * x) / x);
+			}
+			else
+			{
+				return 0;
+			}
+		}
+		inline static ThisType ATan(const ThisType& x)
+		{
+			//atan(0.5) = 0.46364760900080609
+			//atan(0.75) = 0.64350110879328437
+			//atan(1.5) = 0.98279372324732905
+			//atan(4) = 1.3258176636680326
+			static const auto atan_050 = CreateFromDouble(0.46364760900080609);
+			static const auto atan_075 = CreateFromDouble(0.64350110879328437);
+			static const auto atan_150 = CreateFromDouble(0.98279372324732905);
+			static const auto atan_400 = CreateFromDouble(1.3258176636680326);
+			if (x < 0.f)
+			{
+				return -ATan(-x);
+			}
+			else if (x < 0.25f)
+			{
+				return ATan_Base(x);
+			}
+			else if (x < 0.75f)
+			{
+				return atan_050 + ATan((x - 0.5f) / (1.0f + x * 0.5f));
+			}
+			else if (x < 1.0f)
+			{
+				return atan_075 + ATan((x - 0.75f) / (1.0f + x * 0.75f));
+			}
+			else if (x < 2.0f)
+			{
+				return atan_150 + ATan((x - 1.5f) / (1.0f + x * 1.5f));
+			}
+			else
+			{
+				return atan_400 + ATan((x - 4.0f) / (1.0f + x * 4.0f));
+			}
+		}
+
+	private:
+		static ThisType Logarithm(ThisType y)
+		{
+			// y in ( -0.05-，0.05+ ), return ln((1+y)/(1-y))
+			ThisType v = 1.0f;
+			ThisType y2 = y * y;
+			ThisType t = y2;
+			ThisType z = t / 3.0f;
+			for (auto i = 3; z != 0.0f; z = (t = t * y2) / ((float)(i += 2)))
+			{
+				v = v + z;
+			}
+			return v * y * 2.0f;
+		}
+		inline static ThisType ATan_Base(const ThisType& x)
+		{
+			//泰勒展开
+			//atan(x) = x - x^3/3 + x^5/5 - x^7/7 + x^9/9......(-1)^(n+1)*x^(2n+1)/(2n+1)......
+			//atan(x) = atan(y) + atan((x-y)/(1+x*y))
+			//误差 0.25^IterateTimes / (IterateTimes+1)
+			ThisType result(0.0f);
+			ThisType term1(x);
+			ThisType term2(1);
+			ThisType term(x);
+			ThisType sign(1.0f);
+
+			//todo:感觉这里的sign还不如用一个bool来处理效率高吧
+			//一个是重载*的64Bit乘法+右移
+			//一个是分支跳转
+			const int IterateTimes = 100;
+			const auto epsilon = GetEpsilon();
+			for (int i = 0; i <= IterateTimes; i += 2)
+			{
+				result = result + sign * term;
+
+				term1 = term1 * x * x;
+				term2 = term2 + 2.0f;
+				term = term1 / term2;
+				if (term < epsilon)
+					break;
+				sign = -sign;
+			}
+
+			return result;
+		}
+		inline static ThisType Sin_Phase1(const ThisType& x)
+		{
+			//泰勒展开
+			//sin(x) = x - (x^3 / 3!) + (x^5 / 5!) - (x^7 / 7!) + ...
+			ThisType result(0.0f);
+			ThisType term(x);
+			ThisType sign(1.0f);
+
+			const int IterateTimes = 1000;
+			const auto epsilon = GetEpsilon();
+			for (int i = 1; i <= IterateTimes; i += 2)
+			{
+				result = result + sign * term;
+
+				term = term * ((x * x) / ThisType(i * (i + 1)));
+				if (term < epsilon)
+					break;
+				sign = -sign;
+			}
+
+			return result;
 		}
 		inline static ThisType Cos_Phase1(const ThisType& x)
 		{
@@ -771,6 +1151,26 @@ namespace NxMath
 		{
 			return T::Mod(v1.mValue, v2.mValue);
 		}
+		inline static NxReal Log(const NxReal& x)
+		{
+			return T::Log(x.mValue);
+		}
+		inline static NxReal Log10(const NxReal& x)
+		{
+			return T::Log10(x.mValue);
+		}
+		inline static NxReal Exp(const NxReal& x)
+		{
+			return T::Exp(x.mValue);
+		}
+		inline static NxReal Pow(const NxReal& x, int y)
+		{
+			return T::Pow(x.mValue, y);
+		}
+		inline static NxReal Pow(const NxReal& v1, const NxReal& v2)
+		{
+			return T::Pow(v1.mValue, v2.mValue);
+		}
 		inline static NxReal Sqrt(const NxReal& v)
 		{
 			return T::Sqrt(v.mValue);
@@ -786,6 +1186,18 @@ namespace NxMath
 		inline static NxReal Cos(const NxReal& v)
 		{
 			return T::Cos(v.mValue);
+		}
+		inline static NxReal ASin(const NxReal& v)
+		{
+			return T::ASin(v.mValue);
+		}
+		inline static NxReal ACos(const NxReal& v)
+		{
+			return T::ACos(v.mValue);
+		}
+		inline static NxReal ATan(const NxReal& v)
+		{
+			return T::ATan(v.mValue);
 		}
 		#pragma endregion
 	};

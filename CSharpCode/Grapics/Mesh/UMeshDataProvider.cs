@@ -132,6 +132,7 @@ namespace EngineNS.Graphics.Mesh
             }
 
             var vNor = stackalloc Vector3[24];
+            var vTangent = stackalloc Vector3[24];
             //创建Normal
             {
                 var vFront = new Vector3(0, 0, -1);
@@ -146,6 +147,12 @@ namespace EngineNS.Graphics.Mesh
                 vNor[12] = vRight; vNor[13] = vRight; vNor[14] = vRight; vNor[15] = vRight;
                 vNor[16] = vTop; vNor[17] = vTop; vNor[18] = vTop; vNor[19] = vTop;
                 vNor[20] = vBottom; vNor[21] = vBottom; vNor[22] = vBottom; vNor[23] = vBottom;
+                vTangent[0] = vRight; vTangent[1] = vRight; vTangent[2] = vRight; vTangent[3] = vRight;
+                vTangent[4] = vLeft; vTangent[5] = vLeft; vTangent[6] = vLeft; vTangent[7] = vLeft;
+                vTangent[8] = vFront; vTangent[9] = vFront; vTangent[10] = vFront; vTangent[11] = vFront;
+                vTangent[12] = vBack; vTangent[13] = vBack; vTangent[14] = vBack; vTangent[15] = vBack;
+                vTangent[16] = vRight; vTangent[17] = vRight; vTangent[18] = vRight; vTangent[19] = vRight;
+                vTangent[20] = vLeft; vTangent[21] = vLeft; vTangent[22] = vLeft; vTangent[23] = vLeft;
             }
 
             var vUV = stackalloc Vector2[24];
@@ -210,7 +217,7 @@ namespace EngineNS.Graphics.Mesh
 
             for (int i = 0; i < 24; i++)
             {
-                builder.AddVertex(&pPos[i], &vNor[i], &vUV[i], color);
+                builder.AddVertex(&pPos[i], &vNor[i], &vTangent[i], &vUV[i], color);
             }
 
             for (int i = 0; i < dpDesc.NumPrimitives; i++)
