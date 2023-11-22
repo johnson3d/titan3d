@@ -884,6 +884,14 @@ namespace liulilittle
 
 namespace NxMath
 {
+    using NxInt16 = std::int16_t;
+    using NxUInt16 = std::uint16_t;
+    using NxInt32 = std::int32_t;
+    using NxUInt32 = std::uint32_t;
+    using NxInt64 = std::int64_t;
+    using NxUInt64 = std::uint64_t;
+    using NxInt128 = liulilittle::Int128;
+
 	template <typename T>
 	struct ElementType { using ResulType = T; };
 	template<typename T, size_t N>
@@ -897,5 +905,48 @@ namespace NxMath
 			return sizeof(array) / sizeof(ElementType<T>::ResulType);
 		}
 	};
+
+    template<typename ValueType, int Count>
+    struct SetBitMask
+    {
+        static const ValueType ResultValue = ((SetBitMask<ValueType, Count - 1>::ResultValue << 1) | 1);
+    };
+    template<typename ValueType>
+    struct SetBitMask<ValueType, 0>
+    {
+        static const ValueType ResultValue = 0;
+    };
+
+    template <typename SignedType>
+    struct UnsignedType
+    {
+        using ResultType = SignedType;
+    };
+    template <>
+    struct UnsignedType<NxInt16>
+    {
+        using ResultType = NxUInt16;
+    };
+    template <>
+    struct UnsignedType<NxInt32>
+    {
+        using ResultType = NxUInt32;
+    };
+    template <>
+    struct UnsignedType<NxInt64>
+    {
+        using ResultType = NxUInt64;
+    };
+
+    template<double _Value, typename _ValueType, unsigned int _FracBit>
+    struct NxConstValue
+    {
+        using UnsignedValueType = UnsignedType<_ValueType>::ResultType;
+        static const UnsignedValueType FractionMask = SetBitMask<_ValueType, _FracBit>::ResultValue;
+        static const UnsignedValueType Scalar = FractionMask + 1;
+        static const _ValueType ResultValue = (_ValueType)(_Value * (double)Scalar);
+    };
 }
 
+//后续通过工具生成代码，不同的ValueType, FracBit产生不同的整形立即数
+#include "NxFixedConstValue.inl"

@@ -7,36 +7,6 @@
 
 namespace NxMath
 {
-	using NxInt16 = std::int16_t;
-	using NxUInt16 = std::uint16_t;
-	using NxInt32 = std::int32_t;
-	using NxUInt32 = std::uint32_t;
-	using NxInt64 = std::int64_t;
-	using NxUInt64 = std::uint64_t;
-	using NxInt128 = liulilittle::Int128;
-
-	template <typename SignedType>
-	struct UnsignedType
-	{
-		using ResultType = SignedType;
-	};
-	template <>
-	struct UnsignedType<NxInt16>
-	{
-		using ResultType = NxUInt16;
-	};
-	template <>
-	struct UnsignedType<NxInt32>
-	{
-		using ResultType = NxUInt32;
-	};
-	template <>
-	struct UnsignedType<NxInt64>
-	{
-		using ResultType = NxUInt64;
-	};
-
-
 #pragma pack(push, 4)
 	struct NxFloat32
 	{
@@ -208,6 +178,15 @@ namespace NxMath
 		using ValueType = _ValueType;
 		using UnsignedValueType = UnsignedType<ValueType>::ResultType;
 		using ThisType = NxFixed<_FracBit, _ValueType>;
+		
+		static const unsigned int BitWidth = sizeof(ValueType) * 8;
+		static const unsigned int FracBit = _FracBit;
+		static const unsigned int IntBit = BitWidth - FracBit - 1;
+		static const UnsignedValueType SignedMask = ~(SetBitMask<ValueType, BitWidth - 1>::ResultValue);
+		static const UnsignedValueType FractionMask = SetBitMask<ValueType, FracBit>::ResultValue;
+		static const UnsignedValueType IntegerMask = (~FractionMask) & (~SignedMask);
+		static const UnsignedValueType Scalar = FractionMask + 1;
+
 		ValueType mValue = 0;
 
 		#pragma region constexpr var
@@ -217,56 +196,45 @@ namespace NxMath
 		}
 		static constexpr const ThisType Zero()
 		{
-			return ThisType(0);
+			return NxConstValue<0.0, ValueType, FracBit>::ResultValue;
+			//return ThisType(0);
 		}
 		static constexpr const ThisType One()
 		{
-			return ThisType((ValueType)Scalar * 1);
+			return NxConstValue<1.0, ValueType, FracBit>::ResultValue;
+			//return ThisType((ValueType)Scalar * 1);
 		}
 		static constexpr const ThisType Pi()
 		{
-			return ThisType((ValueType)(3.14159 * (double)Scalar));
+			return NxConstValue<3.14159, ValueType, FracBit>::ResultValue;
+			//return ThisType((ValueType)(3.14159 * (double)Scalar));
 		}
 		static constexpr const ThisType HalfPi()
 		{
-			return ThisType((ValueType)((3.14159 * 0.5) * (double)Scalar));
+			return NxConstValue<3.14159 * 0.5, ValueType, FracBit>::ResultValue;
+			//return ThisType((ValueType)((3.14159 * 0.5) * (double)Scalar));
 		}
 		static constexpr const ThisType TwoPi()
 		{
-			return ThisType((ValueType)((3.14159 * 2.0) * (double)Scalar));
+			return NxConstValue<3.14159 * 2.0, ValueType, FracBit>::ResultValue;
+			//return ThisType((ValueType)((3.14159 * 2.0) * (double)Scalar));
 		}
 		static constexpr const ThisType Epsilon()
 		{
-			return ThisType((ValueType)(0.000001f * (double)Scalar));
+			return NxConstValue<0.000001, ValueType, FracBit>::ResultValue;
+			//return ThisType((ValueType)(0.000001 * (double)Scalar));
 		}
 		static constexpr const ThisType Ln10()
 		{
-			return ThisType((ValueType)(2.3025850929940456840179914547 * (double)Scalar));
+			return NxConstValue<2.3025850929940456840179914547, ValueType, FracBit>::ResultValue;
+			//return ThisType((ValueType)(2.3025850929940456840179914547 * (double)Scalar));
 		}
 		static constexpr const ThisType Lnr()
 		{
-			return ThisType((ValueType)(0.2002433314278771112016301167 * (double)Scalar));
+			return NxConstValue<0.2002433314278771112016301167, ValueType, FracBit>::ResultValue;
+			//return ThisType((ValueType)(0.2002433314278771112016301167 * (double)Scalar));
 		}
 		#pragma endregion
-		
-		template<int Count>
-		struct SetBitMask
-		{
-			static const ValueType ResultValue = ((SetBitMask<Count - 1>::ResultValue << 1) | 1);
-		};
-		template<>
-		struct SetBitMask<0>
-		{
-			static const ValueType ResultValue = 0;
-		};
-
-		static const unsigned int BitWidth = 64;
-		static const unsigned int FracBit = _FracBit;
-		static const unsigned int IntBit = BitWidth - FracBit - 1;
-		static const UnsignedValueType SignedMask = ~(SetBitMask<BitWidth - 1>::ResultValue);
-		static const UnsignedValueType FractionMask = SetBitMask<FracBit>::ResultValue;
-		static const UnsignedValueType IntegerMask = (~FractionMask) & (~SignedMask);
-		static const UnsignedValueType Scalar = FractionMask + 1;
 		
 		inline double AsDouble() const
 		{

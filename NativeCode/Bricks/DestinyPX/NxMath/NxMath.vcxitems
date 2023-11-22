@@ -28,4 +28,7 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)NxUtility.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)NxVector.h" />
   </ItemGroup>
+  <ItemGroup>
+    <None Include="$(MSBuildThisFileDirectory)NxFixedConstValue.inl" />
+  </ItemGroup>
 </Project>
