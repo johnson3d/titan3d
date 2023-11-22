@@ -7,78 +7,112 @@
 
 namespace NxMath
 {
+	using NxInt16 = std::int16_t;
+	using NxUInt16 = std::uint16_t;
+	using NxInt32 = std::int32_t;
+	using NxUInt32 = std::uint32_t;
+	using NxInt64 = std::int64_t;
+	using NxUInt64 = std::uint64_t;
+	using NxInt128 = liulilittle::Int128;
+
+	template <typename SignedType>
+	struct UnsignedType
+	{
+		using ResultType = SignedType;
+	};
+	template <>
+	struct UnsignedType<NxInt16>
+	{
+		using ResultType = NxUInt16;
+	};
+	template <>
+	struct UnsignedType<NxInt32>
+	{
+		using ResultType = NxUInt32;
+	};
+	template <>
+	struct UnsignedType<NxInt64>
+	{
+		using ResultType = NxUInt64;
+	};
+
+
 #pragma pack(push, 4)
-	struct NxFloat
+	struct NxFloat32
 	{
 	public:
 		using ValueType = float;
-		using ThisType = NxFloat;
+		using ThisType = NxFloat32;
 		ValueType mValue = 0;
 
-		static constexpr const ValueType GetZero()
+		static constexpr const ValueType NaN()
+		{
+			return std::numeric_limits<float>::quiet_NaN();
+		}
+		static constexpr const ValueType Zero()
 		{
 			return 0.0f;
 		}
-		static constexpr const ValueType GetOne()
+		static constexpr const ValueType One()
 		{
 			return 1.0f;
 		}
-		static constexpr const ValueType GetPi()
+		static constexpr const ValueType Pi()
 		{
 			return 3.14159f;
 		}
-		static constexpr const ValueType GetEpsilon()
+		static constexpr const ValueType Epsilon()
 		{
 			return 0.000001f;
 		}
 
 	public:
-		static inline NxFloat CreateFrom(ValueType value)
+		static inline NxFloat32 CreateFrom(ValueType value)
 		{
-			return NxFloat(value);
+			return NxFloat32(value);
 		}
-		NxFloat(ValueType value)
+		NxFloat32(ValueType value)
 			: mValue(value)
 		{
 
 		}
-		NxFloat()
+		NxFloat32()
 		{
 
 		}
-		NxFloat(int value)
+		NxFloat32(int value)
 			: mValue((float)value)
 		{
 
 		}
-		NxFloat(unsigned int value)
+		NxFloat32(unsigned int value)
 			: mValue((float)value)
 		{
 
 		}
-		inline static NxFloat& Assign(NxFloat& lh, const NxFloat& rh)
+		inline static NxFloat32& Assign(NxFloat32& lh, const NxFloat32& rh)
 		{
 			lh.mValue = rh.mValue;
 			return lh;
 		}
-		inline static NxFloat Add(const NxFloat& lh, const NxFloat& rh)
+		inline static NxFloat32 Add(const NxFloat32& lh, const NxFloat32& rh)
 		{
 			return lh.mValue + rh.mValue;
 		}
-		inline static NxFloat Sub(const NxFloat& lh, const NxFloat& rh)
+		inline static NxFloat32 Sub(const NxFloat32& lh, const NxFloat32& rh)
 		{
 			return lh.mValue - rh.mValue;
 		}
-		inline static NxFloat Mul(const NxFloat& lh, const NxFloat& rh)
+		inline static NxFloat32 Mul(const NxFloat32& lh, const NxFloat32& rh)
 		{
 			return lh.mValue * rh.mValue;
 		}
-		inline static NxFloat Div(const NxFloat& lh, const NxFloat& rh)
+		inline static NxFloat32 Div(const NxFloat32& lh, const NxFloat32& rh)
 		{
 			return lh.mValue / rh.mValue;
 		}
 
-		inline static int Compare(const NxFloat& lh, const NxFloat& rh)
+		inline static int Compare(const NxFloat32& lh, const NxFloat32& rh)
 		{
 			auto cmp = lh.mValue - rh.mValue;
 			if (cmp > 0)
@@ -86,6 +120,10 @@ namespace NxMath
 			else if (cmp < 0)
 				return -1;
 			return 0;
+		}
+		inline static bool EpsilonEqual(const ThisType& lh, const ThisType& rh, const ThisType& epsilon)
+		{
+			return abs(lh.mValue - rh.mValue) < epsilon.mValue;
 		}
 
 		inline operator int() const
@@ -156,48 +194,56 @@ namespace NxMath
 		{
 			return atanf(x.mValue);
 		}
+		inline static ThisType ATan2(const ThisType& Y, const ThisType& X)
+		{
+			return atan2f(Y.mValue, X.mValue);
+		}
 	};
 	
-	template<unsigned int _FracBit = 24>
-	struct NxFixed64
+	template<unsigned int _FracBit = 24, typename _ValueType = NxInt64>
+	struct NxFixed
 	{
 		//todo: check overflow
 	public:
-		using ValueType = long long;
-		using ConstValueType = unsigned long long;
-		using ThisType = NxFixed64<_FracBit>;
+		using ValueType = _ValueType;
+		using UnsignedValueType = UnsignedType<ValueType>::ResultType;
+		using ThisType = NxFixed<_FracBit, _ValueType>;
 		ValueType mValue = 0;
 
 		#pragma region constexpr var
-		static constexpr const ThisType GetZero()
+		static constexpr const ValueType NaN()
+		{
+			return ThisType(~ValueType(0));
+		}
+		static constexpr const ThisType Zero()
 		{
 			return ThisType(0);
 		}
-		static constexpr const ThisType GetOne()
+		static constexpr const ThisType One()
 		{
 			return ThisType((ValueType)Scalar * 1);
 		}
-		static constexpr const ThisType GetPi()
+		static constexpr const ThisType Pi()
 		{
 			return ThisType((ValueType)(3.14159 * (double)Scalar));
 		}
-		static constexpr const ThisType GetHalfPi()
+		static constexpr const ThisType HalfPi()
 		{
 			return ThisType((ValueType)((3.14159 * 0.5) * (double)Scalar));
 		}
-		static constexpr const ThisType GetTwoPi()
+		static constexpr const ThisType TwoPi()
 		{
 			return ThisType((ValueType)((3.14159 * 2.0) * (double)Scalar));
 		}
-		static constexpr const ThisType GetEpsilon()
+		static constexpr const ThisType Epsilon()
 		{
 			return ThisType((ValueType)(0.000001f * (double)Scalar));
 		}
-		static constexpr const ThisType GetLn10()
+		static constexpr const ThisType Ln10()
 		{
 			return ThisType((ValueType)(2.3025850929940456840179914547 * (double)Scalar));
 		}
-		static constexpr const ThisType GetLnr()
+		static constexpr const ThisType Lnr()
 		{
 			return ThisType((ValueType)(0.2002433314278771112016301167 * (double)Scalar));
 		}
@@ -217,102 +263,103 @@ namespace NxMath
 		static const unsigned int BitWidth = 64;
 		static const unsigned int FracBit = _FracBit;
 		static const unsigned int IntBit = BitWidth - FracBit - 1;
-		static const ConstValueType SignedMask = ~(SetBitMask<BitWidth - 1>::ResultValue);
-		static const ConstValueType FractionMask = SetBitMask<FracBit>::ResultValue;
-		static const ConstValueType IntegerMask = (~FractionMask) & (~SignedMask);
-		static const ConstValueType Scalar = FractionMask + 1;
+		static const UnsignedValueType SignedMask = ~(SetBitMask<BitWidth - 1>::ResultValue);
+		static const UnsignedValueType FractionMask = SetBitMask<FracBit>::ResultValue;
+		static const UnsignedValueType IntegerMask = (~FractionMask) & (~SignedMask);
+		static const UnsignedValueType Scalar = FractionMask + 1;
 		
 		inline double AsDouble() const
 		{
 			return (double)mValue / (double)Scalar;
 		}
-	private:
-		NxFixed64(ValueType value)
+	protected:
+		NxFixed(ValueType value)
 			: mValue(value)
 		{
 
 		}
 	public:
-		static inline NxFixed64 CreateFrom(ValueType value)
+		static inline ThisType CreateFrom(ValueType value)
 		{
-			return NxFixed64(value);
+			return ThisType(value);
 		}
-		static inline constexpr NxFixed64 CreateFromDouble(double value)
+		static inline constexpr ThisType CreateFromDouble(double value)
 		{
-			NxFixed64 result;
-			result.mValue = (NxFixed64::ValueType)(value * (double)Scalar);
+			ThisType result;
+			result.mValue = (ThisType::ValueType)(value * (double)Scalar);
 			return result;
 		}
-		NxFixed64()
+		NxFixed()
 		{
 		}
-		NxFixed64(const ThisType& value)
+		NxFixed(const ThisType& value)
 			: mValue(value.mValue)
 		{
 
 		}
-		NxFixed64(float value)
+		NxFixed(float value)
 		{
 			mValue = (ValueType)((double)value * (double)Scalar);
 		}
-		NxFixed64(int value)
+		NxFixed(int value)
 		{
 			mValue = (ValueType)((ValueType)value * Scalar);
 		}
-		NxFixed64(unsigned int value)
+		NxFixed(unsigned int value)
 		{
 			mValue = (ValueType)((ValueType)value * Scalar);
 		}
-		inline static NxFixed64& Assign(NxFixed64& lh, const NxFixed64& rh)
+		inline static ThisType& Assign(ThisType& lh, const ThisType& rh)
 		{
 			lh.mValue = rh.mValue;
 			return lh;
 		}
+
 		#pragma region operator
 		template<unsigned int OtherFracBit>
-		inline NxFixed64& operator =(const NxFixed64<OtherFracBit>& value)
+		inline ThisType& operator =(const NxFixed<OtherFracBit, ValueType>& value)
 		{
 			static_assert(OtherFracBit <= FracBit);
-			if constexpr (NxFixed64<OtherFracBit>::FracBit < ThisType::FracBit)
+			if constexpr (NxFixed<OtherFracBit, ValueType>::FracBit < ThisType::FracBit)
 			{
-				mValue = value.mValue << (ThisType::FracBit - NxFixed64<OtherFracBit>::FracBit);
+				mValue = value.mValue << (ThisType::FracBit - NxFixed<OtherFracBit, ValueType>::FracBit);
 			}
-			else if constexpr (NxFixed64<OtherFracBit>::FracBit == ThisType::FracBit)
+			else if constexpr (NxFixed<OtherFracBit, ValueType>::FracBit == ThisType::FracBit)
 			{
 				mValue = value.mValue;
 			}
 			else
 			{
-				mValue = value.mValue >> (NxFixed64<OtherFracBit>::FracBit - ThisType::FracBit);
+				mValue = value.mValue >> (NxFixed<OtherFracBit, ValueType>::FracBit - ThisType::FracBit);
 			}
 			return *this;
 		}
 		template<unsigned int OtherFracBit>
-		inline void SetByHighPrecision(const NxFixed64<OtherFracBit>& value)
+		inline void SetByHighPrecision(const NxFixed<OtherFracBit, ValueType>& value)
 		{
 			static_assert(OtherFracBit > FracBit);
-			mValue = value.mValue >> (NxFixed64<OtherFracBit>::FracBit - ThisType::FracBit);
+			mValue = value.mValue >> (NxFixed<OtherFracBit, ValueType>::FracBit - ThisType::FracBit);
 		}
 
-		inline static NxFixed64 Add(const NxFixed64& lh, const NxFixed64& rh)
+		inline static ThisType Add(const ThisType& lh, const ThisType& rh)
 		{
 			return lh.mValue + rh.mValue;
 		}
-		inline static NxFixed64 Sub(const NxFixed64& lh, const NxFixed64& rh)
+		inline static ThisType Sub(const ThisType& lh, const ThisType& rh)
 		{
 			return lh.mValue - rh.mValue;
 		}
-		inline static NxFixed64 Mul(const NxFixed64& lh, const NxFixed64& rh)
+		inline static ThisType Mul(const ThisType& lh, const ThisType& rh)
 		{
 			return (lh.mValue * rh.mValue) >> FracBit;
 		}
-		inline static NxFixed64 Div(const NxFixed64& lh, const NxFixed64& rh)
+		inline static ThisType Div(const ThisType& lh, const ThisType& rh)
 		{
 			ASSERT(rh.mValue != 0);
 			return (lh.mValue << FracBit) / rh.mValue;
 		}
 
-		inline static int Compare(const NxFixed64& lh, const NxFixed64& rh)
+		inline static int Compare(const ThisType& lh, const ThisType& rh)
 		{
 			auto cmp = lh.mValue - rh.mValue;
 			if (cmp > 0)
@@ -320,6 +367,11 @@ namespace NxMath
 			else if (cmp < 0)
 				return -1;
 			return 0;
+		}
+
+		inline static bool EpsilonEqual(const ThisType& lh, const ThisType& rh, const ThisType& epsilon)
+		{
+			return Abs(lh - rh) < epsilon;
 		}
 
 		inline operator int() const 
@@ -497,13 +549,13 @@ namespace NxMath
 			{
 				x = x * 1.2217f;
 			}
-			ThisType p1 = K * GetLn10();
-			p1 = p1 + L * GetLnr();
+			ThisType p1 = K * Ln10();
+			p1 = p1 + L * Lnr();
 			return p1 + Logarithm((x - 1.0f) / (x + 1.0f));
 		}
 		static ThisType Log10(ThisType x)
 		{
-			return Log(x) / GetLn10();
+			return Log(x) / Ln10();
 		}
 
 		inline static ThisType ExpFast(unsigned int x)
@@ -575,7 +627,7 @@ namespace NxMath
 		}
 		inline static ThisType Pow(const ThisType& v1, const ThisType& v2)
 		{
-			
+			return Exp(v2 * Log(v1));
 		}
 		inline static ThisType Sqrt(const ThisType& c)
 		{
@@ -585,11 +637,11 @@ namespace NxMath
 			if (c < ThisType(0))
 			{
 				ASSERT(false);
-				return GetZero();
+				return Zero();
 			}
 			ThisType result(c);
 			
-			const auto epsilon = GetEpsilon();
+			const auto epsilon = Epsilon();
 			const ThisType c_two(2.0f);
 			while (true)
 			{
@@ -610,43 +662,37 @@ namespace NxMath
 		
 		inline static ThisType Sin(const ThisType& v)
 		{
-			const auto TwoPi = GetTwoPi();
-			const auto HalfPi = GetHalfPi();
-			const auto Pi = GetPi();
-			auto xx = Mod(v, TwoPi);
+			auto xx = Mod(v, TwoPi());
 			if (xx < ThisType(0))
 			{
-				xx = xx + TwoPi;
+				xx = xx + TwoPi();
 			}
 			
-			if (xx < HalfPi)
+			if (xx < HalfPi())
 				return Sin_Phase1(xx);
-			else if (xx < Pi)
-				return Sin_Phase1(Pi - xx);
-			else if (xx < Pi + HalfPi)
-				return -Sin_Phase1(xx - Pi);
+			else if (xx < Pi())
+				return Sin_Phase1(Pi() - xx);
+			else if (xx < Pi() + HalfPi())
+				return -Sin_Phase1(xx - Pi());
 			else
-				return -Sin_Phase1(TwoPi - xx);
+				return -Sin_Phase1(TwoPi() - xx);
 		}		
 		inline static ThisType Cos(const ThisType& v)
 		{
-			const auto TwoPi = GetTwoPi();
-			const auto HalfPi = GetHalfPi();
-			const auto Pi = GetPi();
-			auto xx = Mod(v, TwoPi);
+			auto xx = Mod(v, TwoPi());
 			if (xx < ThisType(0))
 			{
-				xx = xx + TwoPi;
+				xx = xx + TwoPi();
 			}
 
-			if (xx < HalfPi)
+			if (xx < HalfPi())
 				return Cos_Phase1(xx);
-			else if (xx < Pi)
-				return -Cos_Phase1(Pi - xx);
-			else if (xx < Pi + HalfPi)
-				return -Cos_Phase1(xx - Pi);
+			else if (xx < Pi())
+				return -Cos_Phase1(Pi() - xx);
+			else if (xx < Pi() + HalfPi())
+				return -Cos_Phase1(xx - Pi());
 			else
-				return Cos_Phase1(TwoPi - xx);
+				return Cos_Phase1(TwoPi() - xx);
 		}
 		inline static ThisType ASin(const ThisType& x)
 		{
@@ -661,22 +707,22 @@ namespace NxMath
 			}
 			else
 			{
-				return GetHalfPi();
+				return HalfPi();
 			}
 		}
 		inline static ThisType ACos(const ThisType& x)
 		{
 			if (x == -1.0f)
 			{
-				return GetPi();
+				return Pi();
 			}
 			else if (x < 0.0f)
 			{
-				return GetPi() - ATan(Sqrt(1 - x * x) / (-x));
+				return Pi() - ATan(Sqrt(1 - x * x) / (-x));
 			}
 			else if (x == 0.0f)
 			{
-				return GetHalfPi();
+				return HalfPi();
 			}
 			else if (x < 1.0f)
 			{
@@ -722,7 +768,28 @@ namespace NxMath
 				return atan_400 + ATan((x - 4.0f) / (1.0f + x * 4.0f));
 			}
 		}
-
+		inline static ThisType ATan2(const ThisType& y, const ThisType& x)
+		{
+			if (x > 0) {
+				return Atan(y / x);
+			}
+			else if (y >= 0 && x < 0) {
+				return Atan(y / x) + Pi();
+			}
+			else if (y < 0 && x < 0) {
+				return Atan(y / x) - Pi();
+			}
+			else if (y > 0 && x == 0) {
+				return Pi() / 2;
+			}
+			else if (y < 0 && x == 0) {
+				return -Pi() / 2;
+			}
+			else {
+				// x == 0, y == 0, not defined
+				return NaN();
+			}
+		}
 	private:
 		static ThisType Logarithm(ThisType y)
 		{
@@ -753,7 +820,7 @@ namespace NxMath
 			//一个是重载*的64Bit乘法+右移
 			//一个是分支跳转
 			const int IterateTimes = 100;
-			const auto epsilon = GetEpsilon();
+			const auto epsilon = Epsilon();
 			for (int i = 0; i <= IterateTimes; i += 2)
 			{
 				result = result + sign * term;
@@ -777,7 +844,7 @@ namespace NxMath
 			ThisType sign(1.0f);
 
 			const int IterateTimes = 1000;
-			const auto epsilon = GetEpsilon();
+			const auto epsilon = Epsilon();
 			for (int i = 1; i <= IterateTimes; i += 2)
 			{
 				result = result + sign * term;
@@ -799,7 +866,7 @@ namespace NxMath
 			ThisType sign(1.0f);
 
 			const int IterateTimes = 1000;
-			const auto epsilon = GetEpsilon();
+			const auto epsilon = Epsilon();
 			for (int i = 1; i <= IterateTimes; i += 2)
 			{
 				result = result + sign * term;
@@ -813,6 +880,15 @@ namespace NxMath
 			return result;
 		}
 	};
+
+	template<unsigned int _FracBit = 8>
+	using NxFixed16 = NxFixed<_FracBit, NxInt16>;
+	template<unsigned int _FracBit = 16>
+	using NxFixed32 = NxFixed<_FracBit, NxInt32>;
+	template<unsigned int _FracBit = 24>
+	using NxFixed64 = NxFixed<_FracBit, NxInt64>;
+	template<unsigned int _FracBit = 48>
+	using NxFixed128 = NxFixed<_FracBit, NxInt128>;
 #pragma pack(pop)
 
 	template<typename T>
@@ -823,21 +899,21 @@ namespace NxMath
 		using RealType = T;
 		using ValueType = T::ValueType;
 
-		static constexpr NxReal GetZero() 
+		static constexpr NxReal Zero() 
 		{
-			return NxReal(T::GetZero());
+			return NxReal(T::Zero());
 		}
-		static constexpr NxReal GetOne()
+		static constexpr NxReal One()
 		{
-			return NxReal(T::GetOne());
+			return NxReal(T::One());
 		}
-		static constexpr NxReal GetEpsilon()
+		static constexpr NxReal Epsilon()
 		{
-			return NxReal(T::GetEpsilon());
+			return NxReal(T::Epsilon());
 		}
-		static constexpr NxReal GetPi()
+		static constexpr NxReal Pi()
 		{
-			return NxReal(T::GetPi());
+			return NxReal(T::Pi());
 		}
 
 		NxReal()
@@ -849,6 +925,7 @@ namespace NxMath
 		{
 			
 		}
+
 		inline operator int() const
 		{
 			return mValue.operator int();
@@ -1147,6 +1224,10 @@ namespace NxMath
 		#pragma endregion
 
 		#pragma region Math Function
+		inline static bool EpsilonEqual(const NxReal& lh, const NxReal& rh, const NxReal& epsilon)
+		{
+			return T::EpsilonEqual(lh.mValue, rh.mValue, epsilon.mValue);
+		}
 		inline static NxReal Mod(const NxReal& v1, const NxReal& v2)
 		{
 			return T::Mod(v1.mValue, v2.mValue);
@@ -1198,6 +1279,11 @@ namespace NxMath
 		inline static NxReal ATan(const NxReal& v)
 		{
 			return T::ATan(v.mValue);
+		}
+
+		inline static NxReal FloatSelect(const NxReal& Comparand, const NxReal& ValueGEZero, const NxReal& ValueLTZero)
+		{
+			return Comparand >= 0.0f ? ValueGEZero : ValueLTZero;
 		}
 		#pragma endregion
 	};

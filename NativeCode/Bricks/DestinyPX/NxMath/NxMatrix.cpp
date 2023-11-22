@@ -6,7 +6,7 @@ namespace NxMath
 	{
 		MatrixVector()
 		{
-			Test1<NxReal<NxFloat>>();
+			Test1<NxReal<NxFloat32>>();
 			Test1<NxReal<NxFixed64<24>>>();
 		}
 		template<typename Type>
@@ -24,7 +24,7 @@ namespace NxMath
 
 			using Matrix4x4 = NxMatrix4x4<Type>;
 			auto m4x4_a = Matrix4x4::RotationX(Type(0.2f));
-			m4x4_a = m4x4_a + Type::GetZero();
+			m4x4_a = m4x4_a + Type::Zero();
 		}
 	};
 

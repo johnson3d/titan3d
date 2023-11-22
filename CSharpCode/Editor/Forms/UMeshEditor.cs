@@ -299,6 +299,14 @@ namespace EngineNS.Editor.Forms
         [EGui.Controls.PropertyGrid.PGValueRange(-3.1416f, 3.1416f)]
         [EGui.Controls.PropertyGrid.PGValueChangeStep(3.1416f / 100.0f)]
         public float Roll { get; set; } = -0.552922f;
+        [Category("Light")]
+        public GamePlay.TtDirectionLight DirLight
+        {
+            get
+            {
+                return PreviewViewport.World.DirectionLight;
+            }
+        }
         public void TickRender(float ellapse)
         {
             PreviewViewport.TickRender(ellapse);

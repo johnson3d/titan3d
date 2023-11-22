@@ -2,8 +2,8 @@
 
 namespace NxMath
 {
-	static_assert(sizeof(NxFloat)==sizeof(float));
-	static_assert(sizeof(NxFixed64<>) == sizeof(long long));
+	static_assert(sizeof(NxFloat32)==sizeof(float));
+	static_assert(sizeof(NxFixed<>) == sizeof(NxFixed<>::ValueType));
 
 	struct TestMath
 	{
@@ -41,11 +41,12 @@ namespace NxMath
 			auto at075 = atan(0.75);
 			auto at150 = atan(1.5);
 			auto at400 = atan(4);*/
+			//auto sz = sizeof(NxFixed128<>);
 			
 			for (float i =0.01f; i < 100.0f; i += 0.1f)
 			{
 				auto t1 = log(i);
-				auto t2 = NxFixed64<24>::Log(i);
+				auto t2 = NxFixed<24>::Log(i);
 				auto delta = abs(t1 - t2.AsDouble());
 				if (delta > 0.0001f)
 				{
@@ -56,7 +57,7 @@ namespace NxMath
 			for (float i = -5.01f; i < 5.0f; i += 0.1f)
 			{
 				auto t1 = expf(i);
-				auto t2 = NxFixed64<24>::Exp(i);
+				auto t2 = NxFixed<24>::Exp(i);
 				auto t3 = myexp(i);
 				auto delta = abs(t1 / t2.AsDouble() - 1.0);
 				if (delta > 0.001f)
@@ -68,7 +69,7 @@ namespace NxMath
 			for (float i = 0; i < 8; i += 0.1f)
 			{
 				auto t1 = atan(i);
-				auto t2 = NxFixed64<24>::ATan(i);
+				auto t2 = NxFixed<24>::ATan(i);
 				auto delta = abs(t1 - t2.AsDouble());
 				if (delta > 0.001f)
 				{
@@ -77,8 +78,8 @@ namespace NxMath
 			}
 			
 
-			Test1<NxFloat>();
-			Test1<NxFixed64<24>>();
+			Test1<NxFloat32>();
+			Test1<NxFixed<24>>();
 			Test2();
 		}
 		template<typename Type>
@@ -105,14 +106,14 @@ namespace NxMath
 		}
 		void Test2()
 		{
-			typedef NxReal<NxFixed64<24>> RealF24;
+			typedef NxReal<NxFixed<24>> RealF24;
 			{
 				auto SignedMask = RealF24::RealType::SignedMask;
 				auto FractionMask = RealF24::RealType::FractionMask;
 				auto IntegerMask = RealF24::RealType::IntegerMask;
 			}
 
-			typedef NxReal<NxFixed64<32>> RealF32;
+			typedef NxReal<NxFixed<32>> RealF32;
 			{
 				auto SignedMask = RealF32::RealType::SignedMask;
 				auto FractionMask = RealF32::RealType::FractionMask;

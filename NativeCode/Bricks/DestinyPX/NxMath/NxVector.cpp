@@ -6,7 +6,7 @@ namespace NxMath
 	{
 		TestVector()
 		{
-			Test1<NxReal<NxFloat>>();
+			Test1<NxReal<NxFloat32>>();
 			Test1<NxReal<NxFixed64<24>>>();
 			Test2();
 		}

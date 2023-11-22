@@ -51,6 +51,16 @@ namespace EngineNS.GamePlay
                 mGroundLightColor = value;
             }
         }
+        [Rtti.Meta]
+        public float SunLightIntensity
+        {
+            get => mSunLightIntensity;
+            set
+            {
+                mSunLightIntensity = value;
+            }
+        }
+
         public TtDirectionLight()
         {
             mDirection = new Vector3(1, -1, 1);
