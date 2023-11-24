@@ -241,10 +241,10 @@ namespace NxMath
 			//Transform using QST is following
 			//QST(P) = Q*S*P*-Q + T where Q = quaternion, S = scale, T = translation
 
-			auto Transform = NxVector4<Type>(NxQuat<Type>.RotateVector3(Quat, V.XYZ() * Scale), 0.0f);
-			if (V.W == 1.0f)
+			auto Transform = NxVector4<Type>(NxQuat<Type>.RotateVector3(Quat, V.XYZ() * Scale), Type::Zero());
+			if (V.W == Type::One())
 			{
-				Transform += NxVector4<Type>(Position, 1.0f);
+				Transform += NxVector4<Type>(Position, Type::One());
 			}
 
 			return Transform;
@@ -294,29 +294,29 @@ namespace NxMath
 			Vector3 SafeReciprocalScale;
 			if (Type::Abs(InScale.X) <= Tolerance)
 			{
-				SafeReciprocalScale.X = 0.0f;
+				SafeReciprocalScale.X = Type::Zero();
 			}
 			else
 			{
-				SafeReciprocalScale.X = 1 / InScale.X;
+				SafeReciprocalScale.X = Type::One() / InScale.X;
 			}
 
 			if (Type::Abs(InScale.Y) <= Tolerance)
 			{
-				SafeReciprocalScale.Y = 0.0f;
+				SafeReciprocalScale.Y = Type::Zero();
 			}
 			else
 			{
-				SafeReciprocalScale.Y = 1 / InScale.Y;
+				SafeReciprocalScale.Y = Type::One() / InScale.Y;
 			}
 
 			if (Type::Abs(InScale.Z) <= Tolerance)
 			{
-				SafeReciprocalScale.Z = 0.0f;
+				SafeReciprocalScale.Z = Type::Zero();
 			}
 			else
 			{
-				SafeReciprocalScale.Z = 1 / InScale.Z;
+				SafeReciprocalScale.Z = Type::One() / InScale.Z;
 			}
 
 			return SafeReciprocalScale;

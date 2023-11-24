@@ -27,6 +27,15 @@ namespace NxMath
 		{
 			return 1.0f;
 		}
+		static constexpr const ValueType F_0_5()
+		{
+			return 0.5f;
+		}
+		static constexpr const ValueType F_2_0()
+		{
+			return 2.0f;
+		}
+		
 		static constexpr const ValueType Pi()
 		{
 			return 3.14159f;
@@ -35,7 +44,10 @@ namespace NxMath
 		{
 			return 0.000001f;
 		}
-
+		static constexpr const ValueType EpsilonLow()
+		{
+			return 0.01f;
+		}
 	public:
 		static inline NxFloat32 CreateFrom(ValueType value)
 		{
@@ -190,7 +202,7 @@ namespace NxMath
 		ValueType mValue = 0;
 
 		#pragma region constexpr var
-		static constexpr const ValueType NaN()
+		static constexpr const ThisType NaN()
 		{
 			return ThisType(~ValueType(0));
 		}
@@ -203,6 +215,14 @@ namespace NxMath
 		{
 			return NxConstValue<1.0, ValueType, FracBit>::ResultValue;
 			//return ThisType((ValueType)Scalar * 1);
+		}
+		static constexpr const ValueType F_0_5()
+		{
+			return NxConstValue<0.5, ValueType, FracBit>::ResultValue;
+		}
+		static constexpr const ValueType F_2_0()
+		{
+			return NxConstValue<2.0, ValueType, FracBit>::ResultValue; 
 		}
 		static constexpr const ThisType Pi()
 		{
@@ -223,6 +243,10 @@ namespace NxMath
 		{
 			return NxConstValue<0.000001, ValueType, FracBit>::ResultValue;
 			//return ThisType((ValueType)(0.000001 * (double)Scalar));
+		}
+		static constexpr const ThisType EpsilonLow()
+		{
+			return NxConstValue<0.01, ValueType, FracBit>::ResultValue;
 		}
 		static constexpr const ThisType Ln10()
 		{
@@ -875,9 +899,25 @@ namespace NxMath
 		{
 			return NxReal(T::One());
 		}
+		static constexpr NxReal MinusOne()
+		{
+			return NxReal(-T::One());
+		}
+		static constexpr const ValueType F_0_5()
+		{
+			return NxReal(T::F_0_5());
+		}
+		static constexpr const ValueType F_2_0()
+		{
+			return NxReal(T::F_2_0());
+		}
 		static constexpr NxReal Epsilon()
 		{
 			return NxReal(T::Epsilon());
+		}
+		static constexpr NxReal EpsilonLow()
+		{
+			return NxReal(T::EpsilonLow());
 		}
 		static constexpr NxReal Pi()
 		{
@@ -1251,7 +1291,7 @@ namespace NxMath
 
 		inline static NxReal FloatSelect(const NxReal& Comparand, const NxReal& ValueGEZero, const NxReal& ValueLTZero)
 		{
-			return Comparand >= 0.0f ? ValueGEZero : ValueLTZero;
+			return Comparand >= Zero() ? ValueGEZero : ValueLTZero;
 		}
 		#pragma endregion
 	};

@@ -1,0 +1,33 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup Label="Globals">
+    <MSBuildAllProjects Condition="'$(MSBuildVersion)' == '' Or '$(MSBuildVersion)' &lt; '16.0'">$(MSBuildAllProjects);$(MSBuildThisFileFullPath)</MSBuildAllProjects>
+    <HasSharedItems>true</HasSharedItems>
+    <ItemsProjectGuid>{3f713005-d69f-4477-a9db-83e9b13a27f8}</ItemsProjectGuid>
+  </PropertyGroup>
+  <ItemDefinitionGroup>
+    <ClCompile>
+      <AdditionalIncludeDirectories>%(AdditionalIncludeDirectories);$(MSBuildThisFileDirectory)</AdditionalIncludeDirectories>
+    </ClCompile>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <ProjectCapability Include="SourceItemsFromImports" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="$(MSBuildThisFileDirectory)NxActor.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)NxDevice.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)NxJoint.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)NxMaterial.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)NxPreHead.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)NxScene.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)NxShape.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="$(MSBuildThisFileDirectory)NxActor.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)NxDevice.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)NxJoint.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)NxMaterial.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)NxScene.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)NxShape.cpp" />
+  </ItemGroup>
+</Project>

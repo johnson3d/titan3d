@@ -1,0 +1,80 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <ClCompile Include="$(MSBuildThisFileDirectory)NxMatrix.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)NxQuat.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)NxReal.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)NxTransform.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)NxVector.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)Shape\NxAABB.cpp">
+      <Filter>Shape</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)Shape\NxOBB.cpp">
+      <Filter>Shape</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)Shape\NxSphere.cpp">
+      <Filter>Shape</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)Shape\NxCapsule.cpp">
+      <Filter>Shape</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)Shape\NxCone.cpp">
+      <Filter>Shape</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)Shape\NxConvoxMesh.cpp">
+      <Filter>Shape</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)Shape\NxCylinder.cpp">
+      <Filter>Shape</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)Shape\NxPlane.cpp">
+      <Filter>Shape</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)Shape\NxTriangleMesh.cpp">
+      <Filter>Shape</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="$(MSBuildThisFileDirectory)NxMatrix.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)NxQuat.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)NxReal.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)NxTransform.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)NxUtility.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)NxVector.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)Shape\NxAABB.h">
+      <Filter>Shape</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)Shape\NxOBB.h">
+      <Filter>Shape</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)Shape\NxSphere.h">
+      <Filter>Shape</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)Shape\NxCapsule.h">
+      <Filter>Shape</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)Shape\NxCone.h">
+      <Filter>Shape</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)Shape\NxConvoxMesh.h">
+      <Filter>Shape</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)Shape\NxCylinder.h">
+      <Filter>Shape</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)Shape\NxPlane.h">
+      <Filter>Shape</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)Shape\NxTriangleMesh.h">
+      <Filter>Shape</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="$(MSBuildThisFileDirectory)NxFixedConstValue.inl" />
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="Shape">
+      <UniqueIdentifier>{378289ea-cb64-4067-b426-96f0e9c444eb}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+</Project>

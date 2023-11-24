@@ -19,6 +19,15 @@
     <ClCompile Include="$(MSBuildThisFileDirectory)NxReal.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)NxTransform.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)NxVector.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)Shape\NxAABB.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)Shape\NxCapsule.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)Shape\NxCone.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)Shape\NxConvoxMesh.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)Shape\NxCylinder.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)Shape\NxOBB.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)Shape\NxPlane.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)Shape\NxSphere.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)Shape\NxTriangleMesh.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="$(MSBuildThisFileDirectory)NxMatrix.h" />
@@ -27,6 +36,15 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)NxTransform.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)NxUtility.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)NxVector.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)Shape\NxAABB.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)Shape\NxCapsule.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)Shape\NxCone.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)Shape\NxConvoxMesh.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)Shape\NxCylinder.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)Shape\NxOBB.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)Shape\NxPlane.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)Shape\NxSphere.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)Shape\NxTriangleMesh.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="$(MSBuildThisFileDirectory)NxFixedConstValue.inl" />

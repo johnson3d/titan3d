@@ -63,11 +63,19 @@ namespace NxMath
 		}
 		inline static constexpr ThisType Zero()
 		{
-			return ThisType(Type(0.0f), Type(0.0f));
+			return ThisType(Type::Zero(), Type::Zero());
 		}
 		inline static constexpr ThisType One()
 		{
-			return ThisType(Type(1.0f), Type(1.0f));
+			return ThisType(Type::One(), Type::One());
+		}
+		inline static constexpr ThisType UnitX()
+		{
+			return ThisType(Type::One(), Type::Zero());
+		}
+		inline static constexpr ThisType UnitY()
+		{
+			return ThisType(Type::Zero(), Type::One());
 		}
 		inline Type& operator[](int index)
 		{
@@ -79,18 +87,18 @@ namespace NxMath
 		}
 		inline bool IsNormalized() const
 		{
-			return (Type::Abs(1.0f - LengthSquared()) < 0.01f);
+			return (Type::Abs(Type::One() - LengthSquared()) < Type::EpsilonLow());
 		}
 		inline bool HasNagative() const
 		{
-			if (X < 0.0f || Y < 0.0f)
+			if (X < Type::Zero() || Y < Type::Zero())
 				return true;
 			return false;
 		}
 		inline NxVector2<Type> GetSignVector() const
 		{
-			return NxVector3<Type>(Type::FloatSelect(X, Type(1.0f), Type(-1.0f)),
-				Type::FloatSelect(Y, Type(1.0f), Type(-1.0f)));
+			return NxVector3<Type>(Type::FloatSelect(X, Type::One(), Type::MinusOne()),
+				Type::FloatSelect(Y, Type::One(), Type::MinusOne()));
 		}
 		inline Type LengthSquared() const
 		{
@@ -103,9 +111,9 @@ namespace NxMath
 		inline Type Normalize()
 		{
 			auto length = Length();
-			if (length == 0)
-				return Type(0);
-			Type num = Type(1) / length;
+			if (length == Type::Zero())
+				return Type::Zero();
+			Type num = Type::One() / length;
 			X *= num;
 			Y *= num;
 			return length;
@@ -113,7 +121,7 @@ namespace NxMath
 		inline static bool Normalize(const ThisType& vIn, ThisType& vOut)
 		{
 			auto length = vIn.Length();
-			if (length == 0)
+			if (length == Type::Zero())
 				return false;
 			Type num = Type::GetOne() / length;
 			vOut.X = vIn.X * num;
@@ -221,15 +229,35 @@ namespace NxMath
 		}
 		inline static constexpr ThisType Zero()
 		{
-			return ThisType(Type(0.0f), Type(0.0f), Type(0.0f));
+			return ThisType(Type::Zero(), Type::Zero(), Type::Zero());
 		}
 		inline static constexpr ThisType One()
 		{
-			return ThisType(Type(1.0f), Type(1.0f), Type(1.0f));
+			return ThisType(Type::One(), Type::One(), Type::One());
+		}
+		inline static constexpr ThisType UnitX()
+		{
+			return ThisType(Type::One(), Type::Zero(), Type::Zero());
+		}
+		inline static constexpr ThisType UnitY()
+		{
+			return ThisType(Type::Zero(), Type::One(), Type::Zero());
+		}
+		inline static constexpr ThisType UnitZ()
+		{
+			return ThisType(Type::Zero(), Type::Zero(), Type::One());
 		}
 		inline NxVector2<Type> XY() 
 		{
 			return NxVector2<Type>(X, Y);
+		}
+		inline NxVector2<Type> XZ()
+		{
+			return NxVector2<Type>(X, Z);
+		}
+		inline NxVector2<Type> YZ()
+		{
+			return NxVector2<Type>(Y, Z);
 		}
 		inline Type& operator[](int index)
 		{
@@ -241,19 +269,19 @@ namespace NxMath
 		}
 		inline bool IsNormalized() const
 		{
-			return (Type::Abs(1.0f - LengthSquared()) < 0.01f);
+			return (Type::Abs(Type::One() - LengthSquared()) < Type::EpsilonLow());
 		}
 		inline bool HasNagative() const
 		{
-			if (X < 0.0f || Y < 0.0f || Z < 0.0f)
+			if (X < Type::Zero() || Y < Type::Zero() || Z < Type::Zero())
 				return true;
 			return false;
 		}
 		inline NxVector3<Type> GetSignVector() const
 		{
-			return NxVector3<Type>(Type::FloatSelect(X, Type(1.0f), Type(-1.0f)),
-				Type::FloatSelect(Y, Type(1.0f), Type(-1.0f)),
-				Type::FloatSelect(Z, Type(1.0f), Type(-1.0f)));
+			return NxVector3<Type>(Type::FloatSelect(X, Type::One(), Type::MinusOne()),
+				Type::FloatSelect(Y, Type::One(), Type::MinusOne()),
+				Type::FloatSelect(Z, Type::One(), Type::MinusOne()));
 		}
 		inline Type LengthSquared() const
 		{
@@ -266,9 +294,9 @@ namespace NxMath
 		inline Type Normalize()
 		{
 			auto length = Length();
-			if (length == 0)
-				return Type(0);
-			Type num = Type(1) / length;
+			if (length == Type::Zero())
+				return Type::Zero();
+			Type num = Type::One() / length;
 			X *= num;
 			Y *= num;
 			Z *= num;
@@ -418,11 +446,27 @@ namespace NxMath
 		}
 		inline static constexpr ThisType Zero()
 		{
-			return ThisType(Type(0.0f), Type(0.0f), Type(0.0f), Type(0.0f));
+			return ThisType(Type::Zero(), Type::Zero(), Type::Zero(), Type::Zero());
 		}
 		inline static constexpr ThisType One()
 		{
-			return ThisType(Type(1.0f), Type(1.0f), Type(1.0f), Type(1.0f));
+			return ThisType(Type::One(), Type::One(), Type::One(), Type::One());
+		}
+		inline static constexpr ThisType UnitX()
+		{
+			return ThisType(Type::One(), Type::Zero(), Type::Zero(), Type::Zero());
+		}
+		inline static constexpr ThisType UnitY()
+		{
+			return ThisType(Type::Zero(), Type::One(), Type::Zero(), Type::Zero());
+		}
+		inline static constexpr ThisType UnitZ()
+		{
+			return ThisType(Type::Zero(), Type::Zero(), Type::One(), Type::Zero());
+		}
+		inline static constexpr ThisType UnitW()
+		{
+			return ThisType(Type::Zero(), Type::Zero(), Type::Zero(), Type::One());
 		}
 		NxVector3<Type> XYZ() {
 			return NxVector3<Type>(X, Y, Z);
@@ -440,20 +484,20 @@ namespace NxMath
 		}
 		inline bool IsNormalized() const
 		{
-			return (Type::Abs(Type(1.0f) - LengthSquared()) < Type(0.01f));
+			return (Type::Abs(Type::One() - LengthSquared()) < Type::EpsilonLow());
 		}
 		inline bool HasNagative() const
 		{
-			if (X < Type(0.0f) || Y < Type(0.0f) || Z < Type(0.0f) || W < Type(0.0f))
+			if (X < Type::Zero() || Y < Type::Zero() || Z < Type::Zero() || W < Type::Zero())
 				return true;
 			return false;
 		}
 		inline NxVector4<Type> GetSignVector() const
 		{
-			return NxVector3<Type>(Type::FloatSelect(X, Type(1.0f), Type(-1.0f)),
-				Type::FloatSelect(Y, Type(1.0f), Type(-1.0f)),
-				Type::FloatSelect(Z, Type(1.0f), Type(-1.0f)),
-				Type::FloatSelect(W, Type(1.0f), Type(-1.0f)));
+			return NxVector3<Type>(Type::FloatSelect(X, Type::One(), Type::MinusOne()),
+				Type::FloatSelect(Y, Type::One(), Type::MinusOne()),
+				Type::FloatSelect(Z, Type::One(), Type::MinusOne()),
+				Type::FloatSelect(W, Type::One(), Type::MinusOne()));
 		}
 		inline Type LengthSquared() const
 		{
@@ -466,9 +510,9 @@ namespace NxMath
 		inline Type Normalize()
 		{
 			auto length = Length();
-			if (length == 0)
-				return Type(0);
-			Type num = Type(1) / length;
+			if (length == Type::Zero())
+				return Type::Zero();
+			Type num = Type::One() / length;
 			X *= num;
 			Y *= num;
 			Z *= num;
@@ -478,7 +522,7 @@ namespace NxMath
 		inline static bool Normalize(const ThisType& vIn, ThisType& vOut)
 		{
 			auto length = vIn.Length();
-			if (length == 0)
+			if (length == Type::Zero())
 				return false;
 			Type num = Type::GetOne() / length;
 			vOut.X = vIn.X * num;

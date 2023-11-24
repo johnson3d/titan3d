@@ -413,10 +413,10 @@ namespace NxMath
 		{
 			ThisType result
 			{
-				VectorType(1, 0, 0, 0),
-				VectorType(0, 1, 0, 0),
-				VectorType(0, 0, 1, 0),
-				VectorType(0, 0, 0, 1)
+				VectorType::UnitX,
+				VectorType::UnitY,
+				VectorType::UnitZ,
+				VectorType::UnitW
 			};
 			return result;
 		}

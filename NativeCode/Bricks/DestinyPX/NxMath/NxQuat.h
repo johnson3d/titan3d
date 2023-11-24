@@ -21,12 +21,12 @@ namespace NxMath
 		}
 		static constexpr NxQuat Identity()
 		{
-			return NxQuat(Type(0.0f), Type(0.0f), Type(0.0f), Type(1.0f));
+			return NxQuat(Type::Zero(), Type::Zero(), Type::Zero(), Type::One());
 		}
 
 		friend static NxQuat operator *(const NxQuat& pq1, const NxQuat& pq2)
 		{
-			return Multiply2(pq1, pq2);
+			return Multiply(pq1, pq2);
 		}
 		friend static Vector3 operator *(const NxQuat& rotation, const Vector3& point)
 		{
@@ -53,7 +53,7 @@ namespace NxMath
 				return Identity();
 			}
 
-			auto half = angle * 0.5f;
+			auto half = angle * Type::F_0_5();
 			auto sin = Type::Sin(half);
 			auto cos = Type::Cos(half);
 
@@ -83,22 +83,13 @@ namespace NxMath
 
 			return quaternion;
 		}
-		inline static NxQuat Multiply2(const NxQuat& pq1, const NxQuat& pq2)
-		{
-			NxQuat quaternion;
-			quaternion.X = pq2.W * pq1.X + pq2.X * pq1.W + pq2.Y * pq1.Z - pq2.Z * pq1.Y;
-			quaternion.Y = pq2.W * pq1.Y - pq2.X * pq1.Z + pq2.Y * pq1.W + pq2.Z * pq1.X;
-			quaternion.Z = pq2.W * pq1.Z + pq2.X * pq1.Y - pq2.Y * pq1.X + pq2.Z * pq1.W;
-			quaternion.W = pq2.W * pq1.W - pq2.X * pq1.X - pq2.Y * pq1.Y - pq2.Z * pq1.Z;
-			return quaternion;
-		}
 		inline static NxQuat Lerp(const NxQuat& left, const NxQuat& right, Type amount)
 		{
 			NxQuat result;
-			auto inverse = 1.0f - amount;
+			auto inverse = Type::One() - amount;
 			auto dot = (left.X * right.X) + (left.Y * right.Y) + (left.Z * right.Z) + (left.W * right.W);
 
-			if (dot >= 0.0f)
+			if (dot >= Type::Zero())
 			{
 				result.X = (inverse * left.X) + (amount * right.X);
 				result.Y = (inverse * left.Y) + (amount * right.Y);
@@ -113,7 +104,7 @@ namespace NxMath
 				result.W = (inverse * left.W) - (amount * right.W);
 			}
 
-			float invLength = 1.0f / result.Length();
+			float invLength = Type::One() / result.Length();
 
 			result.X *= invLength;
 			result.Y *= invLength;
@@ -131,23 +122,23 @@ namespace NxMath
 			auto dot = (q1.X * q2.X) + (q1.Y * q2.Y) + (q1.Z * q2.Z) + (q1.W * q2.W);
 			bool flag = false;
 
-			if (dot < 0.0f)
+			if (dot < Type::Zero())
 			{
 				flag = true;
 				dot = -dot;
 			}
 
-			if (dot > 0.999999f)
+			if (dot > (Type::One() - Type::Epsilon()))//0.999999f
 			{
-				inverse = 1.0f - t;
+				inverse = Type::One() - t;
 				opposite = flag ? -t : t;
 			}
 			else
 			{
 				auto acos = Type::Acos(dot);
-				auto invSin = (1.0f / Type::Sin(acos));
+				auto invSin = (Type::One() / Type::Sin(acos));
 
-				inverse = Type::Sin((1.0f - t) * acos) * invSin;
+				inverse = Type::Sin((Type::One() - t) * acos) * invSin;
 				opposite = flag ? ((-Type::Sin(t * acos)) * invSin) : (Type::Sin(t * acos) * invSin);
 			}
 
@@ -182,22 +173,22 @@ namespace NxMath
 
 		inline void GetAxisAngel(Vector3& axis, Type& angle) const
 		{
-			angle = 2.0f * Type::ACos(W);
+			angle = Type::F_2_0() * Type::ACos(W);
 			if (Type::EpsilonEqual(angle, Type::GetZero(), Type::GetEpsilon()))
 			{
-				axis = Type(1.0f, 0.0f, 0.0f);
+				axis = Vector3::UnitX();
 				return;
 			}
-			auto div = 1.0f / Type::Sqrt(1.0f - Type::Sqr(W));
+			auto div = Type::One() / Type::Sqrt(Type::One() - Type::Sqr(W));
 			axis = Type(X * div, Y * div, Z * div);
 		}
 		inline void GetYawPitchRoll(Type& Yaw, Type& Pitch, Type& Roll) const
 		{
-			Yaw = Type::Atan2(2.0f * (W * Y + Z * X), 1.0f - 2.0f * (X * X + Y * Y));
-			auto value = 2.0f * (W * X - Y * Z);
-			value = ((value) > (1.0f) ? (1.0f) : ((value) < (-1.0f) ? (-1.0f) : value));
+			Yaw = Type::Atan2(Type::F_2_0() * (W * Y + Z * X), Type::One() - Type::F_2_0() * (X * X + Y * Y));
+			auto value = Type::F_2_0() * (W * X - Y * Z);
+			value = ((value) > (Type::One()) ? (Type::One()) : ((value) < (Type::MinusOne()) ? (Type::MinusOne()) : value));
 			Pitch = Type::Asin(value);
-			Roll = Type::Atan2(2.0f * (W * Z + X * Y), 1.0f - 2.0f * (Z * Z + X * X));
+			Roll = Type::Atan2(Type::F_2_0() * (W * Z + X * Y), Type::One() - Type::F_2_0() * (Z * Z + X * X));
 		}
 		inline Vector3 ToEuler() const
 		{
@@ -212,13 +203,13 @@ namespace NxMath
 			auto roll = euler.Z;
 			NxQuat result;
 
-			auto halfRoll = roll * 0.5f;
+			auto halfRoll = roll * Type::F_0_5();
 			auto sinRoll = Type::Sin(halfRoll);
 			auto cosRoll = Type::Cos(halfRoll);
-			auto halfPitch = pitch * 0.5f;
+			auto halfPitch = pitch * Type::F_0_5();
 			auto sinPitch = Type::Sin(halfPitch);
 			auto cosPitch = Type::Cos(halfPitch);
-			auto halfYaw = yaw * 0.5f;
+			auto halfYaw = yaw * Type::F_0_5();
 			auto sinYaw = Type::Sin(halfYaw);
 			auto cosYaw = Type::Cos(halfYaw);
 
@@ -232,7 +223,7 @@ namespace NxMath
 		inline NxQuat Invert() const
 		{
 			NxQuat Result;
-			auto lengthSq = 1.0f / ((X * X) + (Y * Y) + (Z * Z) + (W * W));
+			auto lengthSq = Type::One() / ((X * X) + (Y * Y) + (Z * Z) + (W * W));
 			Result.X = -X * lengthSq;
 			Result.Y = -Y * lengthSq;
 			Result.Z = -Z * lengthSq;
