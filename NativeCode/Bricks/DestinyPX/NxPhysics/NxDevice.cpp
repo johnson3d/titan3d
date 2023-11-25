@@ -1,6 +1,10 @@
 #include "NxDevice.h"
 #include "NxScene.h"
+#include "NxShape.h"
 #include "NxActor.h"
+#include "NxJoint.h"
+
+NS_BEGIN
 
 namespace NxPhysics
 {
@@ -13,3 +17,5 @@ namespace NxPhysics
 		return new NxRigidBody();
 	}
 }
+
+NS_END

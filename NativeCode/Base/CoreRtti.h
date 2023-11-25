@@ -65,9 +65,9 @@ public:
 	}
 };
 
-#define ENGINE_RTTI(name) virtual const FRttiStruct* GetRtti() const override\
+#define ENGINE_RTTI(name) virtual const EngineNS::FRttiStruct* GetRtti() const override\
 	{ \
-		return AuxRttiStruct<name>::GetClassObject(); \
+		return EngineNS::AuxRttiStruct<name>::GetClassObject(); \
 	}\
 	TR_DECL(name)
 
@@ -718,8 +718,8 @@ struct TR_CLASS()
 template<typename Type>
 struct AuxRttiStruct
 {
-	static FRttiStruct		Instance;
-	static FRttiStruct* GetClassObject() {
+	static EngineNS::FRttiStruct		Instance;
+	static EngineNS::FRttiStruct* GetClassObject() {
 		return &Instance;
 	}
 };
@@ -1486,7 +1486,7 @@ struct AuxRttiBuilder<CombineFullName(ns, Type)> : public AuxRttiBuilderBase\
 		pRtti->Init();\
 	}\
 };\
-AuxRttiBuilder<Type> AuxRttiBuilder<Type>::Instance;
+EngineNS::AuxRttiBuilder<Type> EngineNS::AuxRttiBuilder<Type>::Instance;
 
 template<typename T>
 void FRttiProperty::SetValue(void* pThis, const T& v) const

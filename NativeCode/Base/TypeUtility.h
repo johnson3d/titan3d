@@ -34,7 +34,7 @@
 #endif
 
 #define TR_DECL(type) friend struct type##_Visitor;\
-						friend struct AuxRttiBuilder<type>;
+						friend struct EngineNS::AuxRttiBuilder<type>;
 
 NS_BEGIN
 

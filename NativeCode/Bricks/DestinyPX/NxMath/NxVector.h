@@ -156,6 +156,30 @@ namespace NxMath
 			result.Y = lh.Y / rh;
 			return result;
 		}
+		inline ThisType& operator +=(const Type& rh)
+		{
+			X = X + rh;
+			Y = Y + rh;
+			return *this;
+		}
+		inline ThisType& operator -=(const Type& rh)
+		{
+			X = X - rh;
+			Y = Y - rh;
+			return *this;
+		}
+		inline ThisType& operator *=(const Type& rh)
+		{
+			X = X * rh;
+			Y = Y * rh;
+			return *this;
+		}
+		inline ThisType& operator /=(const Type& rh)
+		{
+			X = X / rh;
+			Y = Y / rh;
+			return *this;
+		}
 		inline friend ThisType operator +(const ThisType& lh, ThisType rh)
 		{
 			ThisType result;
@@ -183,6 +207,30 @@ namespace NxMath
 			result.X = lh.X / rh.X;
 			result.Y = lh.Y / rh.Y;
 			return result;
+		}
+		inline ThisType& operator +=(const ThisType& rh)
+		{
+			X = X + rh.X;
+			Y = Y + rh.Y;
+			return *this;
+		}
+		inline ThisType& operator -=(const ThisType& rh)
+		{
+			X = X - rh.X;
+			Y = Y - rh.Y;
+			return *this;
+		}
+		inline ThisType& operator *=(const ThisType& rh)
+		{
+			X = X * rh.X;
+			Y = Y * rh.Y;
+			return *this;
+		}
+		inline ThisType& operator /=(const ThisType& rh)
+		{
+			X = X / rh.X;
+			Y = Y / rh.Y;
+			return *this;
 		}
 
 		static ThisType Minimize(const ThisType& left, const ThisType& right)
@@ -345,6 +393,34 @@ namespace NxMath
 			result.Z = lh.Z / rh;
 			return result;
 		}
+		inline ThisType& operator +=(const Type& rh)
+		{
+			X = X + rh;
+			Y = Y + rh;
+			Z = Z + rh;
+			return *this;
+		}
+		inline ThisType& operator -=(const Type& rh)
+		{
+			X = X - rh;
+			Y = Y - rh;
+			Z = Z - rh;
+			return *this;
+		}
+		inline ThisType& operator *=(const Type& rh)
+		{
+			X = X * rh;
+			Y = Y * rh;
+			Z = Z * rh;
+			return *this;
+		}
+		inline ThisType& operator /=(const Type& rh)
+		{
+			X = X / rh;
+			Y = Y / rh;
+			Z = Z / rh;
+			return *this;
+		}
 		inline friend ThisType operator +(const ThisType& lh, ThisType rh)
 		{
 			ThisType result;
@@ -376,6 +452,34 @@ namespace NxMath
 			result.Y = lh.Y / rh.Y;
 			result.Z = lh.Z / rh.Z;
 			return result;
+		}
+		inline ThisType& operator +=(const ThisType& rh)
+		{
+			X = X + rh.X;
+			Y = Y + rh.Y;
+			Z = Z + rh.Z;
+			return *this;
+		}
+		inline ThisType& operator -=(const ThisType& rh)
+		{
+			X = X - rh.X;
+			Y = Y - rh.Y;
+			Z = Z - rh.Z;
+			return *this;
+		}
+		inline ThisType& operator *=(const ThisType& rh)
+		{
+			X = X * rh.X;
+			Y = Y * rh.Y;
+			Z = Z * rh.Z;
+			return *this;
+		}
+		inline ThisType& operator /=(const ThisType& rh)
+		{
+			X = X / rh.X;
+			Y = Y / rh.Y;
+			Z = Z / rh.Z;
+			return *this;
 		}
 
 		static ThisType Minimize(const ThisType& left, const ThisType& right)
@@ -567,6 +671,38 @@ namespace NxMath
 			result.W = lh.W / rh;
 			return result;
 		}
+		inline ThisType& operator +=(const Type& rh)
+		{
+			X = X + rh;
+			Y = Y + rh;
+			Z = Z + rh;
+			W = W + rh;
+			return *this;
+		}
+		inline ThisType& operator -=(const Type& rh)
+		{
+			X = X - rh;
+			Y = Y - rh;
+			Z = Z - rh;
+			W = W - rh;
+			return *this;
+		}
+		inline ThisType& operator *=(const Type& rh)
+		{
+			X = X * rh;
+			Y = Y * rh;
+			Z = Z * rh;
+			W = W * rh;
+			return *this;
+		}
+		inline ThisType& operator /=(const Type& rh)
+		{
+			X = X / rh;
+			Y = Y / rh;
+			Z = Z / rh;
+			W = W / rh;
+			return *this;
+		}
 		inline friend ThisType operator +(const ThisType& lh, ThisType rh)
 		{
 			ThisType result;
@@ -602,6 +738,37 @@ namespace NxMath
 			result.Z = lh.Z / rh.Z;
 			result.W = lh.W / rh.W;
 			return result;
+		}
+		inline ThisType& operator +=(const ThisType& rh)
+		{
+			X = X + rh.X;
+			Y = Y + rh.Y;
+			Z = Z + rh.Z;
+			W = W + rh.W;
+			return *this;
+		}
+		inline ThisType& operator -=(const ThisType& rh)
+		{
+			X = X - rh.X;
+			Y = Y - rh.Y;
+			Z = Z - rh.Z;
+			return *this;
+		}
+		inline ThisType& operator *=(const ThisType& rh)
+		{
+			X = X * rh.X;
+			Y = Y * rh.Y;
+			Z = Z * rh.Z;
+			W = W * rh.W;
+			return *this;
+		}
+		inline ThisType& operator /=(const ThisType& rh)
+		{
+			X = X / rh.X;
+			Y = Y / rh.Y;
+			Z = Z / rh.Z;
+			W = W / rh.W;
+			return *this;
 		}
 
 		static ThisType Minimize(const ThisType& left, const ThisType& right)

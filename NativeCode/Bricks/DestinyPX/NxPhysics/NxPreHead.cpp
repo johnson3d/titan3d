@@ -1,14 +1,12 @@
-#pragma once
 #include "NxPreHead.h"
 
 NS_BEGIN
 
+ENGINE_RTTI_IMPL(NxEntity);
+
 namespace NxPhysics
 {
-	class NxMaterial
-	{
-	};
+
 }
 
 NS_END
-

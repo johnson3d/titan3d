@@ -1,5 +1,7 @@
 #include "NxPreHead.h"
 
+NS_BEGIN
+
 namespace NxPhysics
 {
 	class NxDevice
@@ -10,3 +12,4 @@ namespace NxPhysics
 	};
 }
 
+NS_END
