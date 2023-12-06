@@ -57,7 +57,7 @@ PS_OUTPUT PS_MobileBasePass(PS_INPUT input)
 	}
 #else
 	{
-		half3 N = normalize((half3)mtl.mNormal);
+        half3 N = normalize((half3)mtl.GetWorldNormal(input));
 		half Metallic = (half)mtl.mMetallic;
 		half Smoothness = (half)mtl.mRough;
 		half Roughness = 1.0h - Smoothness;

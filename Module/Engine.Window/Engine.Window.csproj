@@ -10,7 +10,7 @@
     <OutputPath>..\..\binaries\</OutputPath>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <PlatformTarget>AnyCPU</PlatformTarget>
-    <DefineConstants>$(DefineConstants);TRACE;PWindow;TitanEngine_AutoGen;DEBUG_UI</DefineConstants>
+    <DefineConstants>$(DefineConstants);TRACE;PWindow;TitanEngine_AutoGen</DefineConstants>
     <SkipPostSharp>True</SkipPostSharp>
     <NoWarn>1701;1702;1998;8632</NoWarn>
     <DebugType>portable</DebugType>
@@ -21,7 +21,7 @@
     <OutputPath>..\..\binaries\</OutputPath>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <PlatformTarget>AnyCPU</PlatformTarget>
-    <DefineConstants>$(DefineConstants);TRACE;PWindow;TitanEngine_AutoGen;DEBUG_UI</DefineConstants>
+    <DefineConstants>$(DefineConstants);TRACE;PWindow;TitanEngine_AutoGen</DefineConstants>
     <NoWarn>1701;1702;1998;8632</NoWarn>
     <DebugType>portable</DebugType>
   </PropertyGroup>
@@ -101,6 +101,8 @@
   <Import Project="..\..\CSharpCode\Bricks\PythonRuntime\PythonRuntime.projitems" Label="Shared" />
   <Import Project="..\..\3rd\csharp\JitherOpenEXR\JitherOpenEXR.projitems" Label="Shared" />
   <Import Project="..\..\CSharpCode\Bricks\VirtualShadowMaps\VirtualShadowMaps.projitems" Label="Shared" />
+  <Import Project="..\..\CSharpCode\Bricks\DestinyPX\NxMath\NxMath.projitems" Label="Shared" />
+  <Import Project="..\..\CSharpCode\Bricks\DestinyPX\NxPhysics\NxPhysics.projitems" Label="Shared" />
   <ItemGroup>
     <PackageReference Include="BCnEncoder.Net" Version="2.1.0" />
     <PackageReference Include="Microsoft.CodeAnalysis.CSharp.Workspaces" Version="4.0.0-3.final" />

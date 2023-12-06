@@ -107,14 +107,14 @@ PS_OUTPUT PS_Main(PS_INPUT input)
 #else
 		//lighting for translucent
 		half3 diffColor, specColor;
-		GetDirLightingColor(diffColor, specColor, input.vWorldPos, mtl, 1.0h);
+		GetDirLightingColor(diffColor, specColor, input, mtl, 1.0h);
 		half3 skyColor = GetSkyColor(Albedo, mtl, 1.0h);
 		BaseShading = Linear2sRGB(diffColor + specColor + skyColor);
 		//BaseShading = (half3)mtl.mAlbedo;
 #endif
 
 		BaseShading += Emissive;
-
+		
 		//BaseShading.b = (half)floor(BaseShading.b * AO_M);
 		output.RT0.rgb = BaseShading;
 		output.RT0.a = Alpha;

@@ -2,10 +2,11 @@
 #define __COMMON_LIGHTING_H__
 
 void GetDirLightingColor(out half3 OutDirLightDiffuseShading, out half3 OutDirLightSpecShading,
-	half3 WorldPos, MTL_OUTPUT mtl, float ShadowValue)
+	PS_INPUT input, MTL_OUTPUT mtl, float ShadowValue)
 {
+    half3 WorldPos = input.vWorldPos;
 	half3 Albedo = sRGB2Linear((half3)mtl.mAlbedo);
-	half3 N = normalize((half3)mtl.mNormal);
+    half3 N = normalize((half3)mtl.GetWorldNormal(input));
 	half Metallic = (half)mtl.mMetallic;
 	half Smoothness = (half)mtl.mRough;
 	half Roughness = 1.0h - Smoothness;

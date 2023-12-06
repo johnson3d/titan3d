@@ -345,9 +345,9 @@ namespace CppWeaving.Cpp2CS
                 return kls;
             return null;
         }
-        public static string DebugFieldName = "AttachmentMRTs";
+        public static string DebugFieldName = null;//"AttachmentMRTs";
         public static string DebugDelegateName = null;
-        public static string DebugFunctionName = null;
+        public static string DebugFunctionName = "GetGlyphRangesDefault";
         public static void DoDebugAction()
         {
             int xx = 0;
@@ -360,41 +360,77 @@ namespace CppWeaving.Cpp2CS
         }
         public static ClangSharp.Interop.CXType GetNakedType(ClangSharp.Interop.CXType type)
         {
-            var cur = type.Desugar;
-            cur = GetPointeeType(cur);
-            if (cur.ToString() == "size_t")
-            {//size_t是特殊的，相当于指针位宽，有变化
-                return cur;
-            }
-            else
+            //var cur = type.Desugar;
+            //去除指针
+            var cur = type;
+            while(true)
             {
-                cur = GetDesugarType(cur);
+                if (USysClassManager.Instance.FindClass(cur.ToString()) != null)
+                {
+                    return cur;
+                }
+                if (cur.kind == CXTypeKind.CXType_Pointer || cur.kind == ClangSharp.Interop.CXTypeKind.CXType_LValueReference)
+                {
+                    //去除指针
+                    cur = cur.PointeeType;
+                }
+                else if (cur.kind == ClangSharp.Interop.CXTypeKind.CXType_Typedef || cur.kind == ClangSharp.Interop.CXTypeKind.CXType_Elaborated)
+                {
+                    //去除typdef using
+                    cur = cur.Desugar;
+                }
+                else if (cur.kind == CXTypeKind.CXType_FunctionProto)
+                {
+                    cur = cur.Desugar;
+                    break;
+                }
+                else if (cur.NumElements > 0)
+                {
+                    //数组处理
+                    cur = cur.ElementType;
+                }
+                else if (cur.ToString().StartsWith("const "))
+                {
+                    cur = cur.Desugar;
+                }
+                else
+                {
+                    break;
+                }
             }
-            cur = GetPointeeType(cur);
-
-            if (cur.kind != ClangSharp.Interop.CXTypeKind.CXType_Enum)
-                cur = cur.Desugar;
+            
             if (cur.ToString().Contains("(*)"))
                 return cur.PointeeType;
-            if (cur.NumElements > 0)
-            {
-                return GetNakedType(cur.ElementType);
-            }
+
             return cur;
         }
         public static ClangSharp.Interop.CXType GetPointeeType(ClangSharp.Interop.CXType cur)
         {
             while (cur.kind == ClangSharp.Interop.CXTypeKind.CXType_Pointer || cur.kind == ClangSharp.Interop.CXTypeKind.CXType_LValueReference)
             {
+                if (USysClassManager.Instance.FindClass(cur.ToString()) != null)
+                {
+                    return cur;
+                }
                 cur = cur.PointeeType;
             }
             return cur;
         }
         public static ClangSharp.Interop.CXType GetDesugarType(ClangSharp.Interop.CXType type)
         {
-            var cur = type.Desugar;
-            while (cur.kind == ClangSharp.Interop.CXTypeKind.CXType_Typedef || cur.kind == ClangSharp.Interop.CXTypeKind.CXType_Elaborated)
+            //var cur = type.Desugar;
+            var cur = type;
+            while (cur.kind == ClangSharp.Interop.CXTypeKind.CXType_Typedef 
+                || cur.kind == ClangSharp.Interop.CXTypeKind.CXType_Elaborated)
             {
+                if (USysClassManager.Instance.FindClass(cur.ToString()) != null)
+                {
+                    return cur;
+                }
+                else if(cur.kind == CXTypeKind.CXType_FunctionProto)
+                {
+                    return cur;
+                }
                 cur = cur.Desugar;
             }
             return cur;

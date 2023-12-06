@@ -200,6 +200,8 @@ namespace CompilingGenerator
             switch(propertyNameHash)
             {{";
 
+            string getPropertyValueSwitch = "";
+
             var source = $@"
 using System;
 using System.Collections.Generic;
@@ -212,6 +214,8 @@ namespace {namespaceName}
             var bindExprDicName = $"mBindExprDic";
             var triggerDicName = "mPropertyTriggers_";
             var setAttachedPropertiesStr = "";
+            var getAttachedPropertyValueStr = "";
+            var setAttachedPropertyValueStr = "";
             if (!baseHasBindObjectInterface)
             {
                 source += @$"
@@ -315,6 +319,10 @@ namespace {namespaceName}
                         getValueWithPropertyNameSwitch += $@"
                 case {Standart.Hash.xxHash.xxHash64.ComputeHash(propName)}: //{propName}
                     return GetValue<T>({bindPropName});";
+
+                        getPropertyValueSwitch += $@"
+                case {Standart.Hash.xxHash.xxHash64.ComputeHash(propName)}: //{propName}
+                    return GetValue<{propTypeDisplayName}>({bindPropName});";
 
                         bindImpSource += $@"
     public class {bindingExprImpName} : EngineNS.UI.Bind.TtBindingExpression<{propTypeDisplayName}>
@@ -444,7 +452,18 @@ namespace {namespaceName}
                         if (valCategoryOpt.Value != null)
                             categoryVal = valCategoryOpt.Value.ToString();
                         setAttachedPropertiesStr += $@"
-            target.SetValue<{propTypeDisplayName}>({defValStr}, {bindPropName});";
+            target.AddAttachedProperty<{propTypeDisplayName}>({bindPropName}, this, {defValStr});";
+                        getAttachedPropertyValueStr += $@"
+                case {Standart.Hash.xxHash.xxHash64.ComputeHash(nameVal)}: //{nameVal}
+                    return value.GetValue<{propTypeDisplayName}>();";
+                        setAttachedPropertyValueStr += $@"
+                case {Standart.Hash.xxHash.xxHash64.ComputeHash(nameVal)}: //{nameVal}
+                    {{
+                        var tagVal = ({propTypeDisplayName})value;
+                        valueStore.SetValue<{propTypeDisplayName}>(tagVal);
+                        bp.CallOnValueChanged(obj, bp, tagVal);
+                    }}
+                    break;";
                         var valEditorAttOpt = methodSymbol.GetAttributes().SingleOrDefault(ad =>
                         {
                             var cls = ad.AttributeClass;
@@ -562,8 +581,8 @@ namespace {namespaceName}
                 {{
                     if (bp.IsAttachedProperty)
                     {{
-                        bpVal = new EngineNS.UI.Bind.TtAttachedValue<{className}, T>(this);
-                        {bindExprDicName}[bp] = bpVal;
+                        //bpVal = new EngineNS.UI.Bind.TtAttachedValue<EngineNS.UI.Bind.IBindableObject, T>(bpHost);
+                        //{bindExprDicName}[bp] = bpVal;
                     }}
                     else
                     {{
@@ -800,6 +819,61 @@ namespace {namespaceName}
                 source += $@"
         }}";
             }
+            if(!classSymbol.MemberNames.Any(name => "AddAttachedProperty" == name))
+            {
+                source += $@"
+        public{(baseHasBindObjectInterface? " override" : " virtual")} void AddAttachedProperty<T>(EngineNS.UI.Bind.TtBindableProperty property, EngineNS.UI.Bind.IBindableObject bpHost, in T defaultValue)
+        {{
+            var bpVal = new EngineNS.UI.Bind.TtAttachedValue<EngineNS.UI.Bind.IBindableObject, T>(bpHost);
+            mBindExprDic[property] = bpVal;
+            if(mPropertyTriggers_.HasTrigger(property))
+            {{
+                var oldVal = bpVal.GetValue<T>(property);
+                bpVal.SetValue<T>(this, property, in defaultValue);
+                mPropertyTriggers_.InvokeTriggers(this, property, oldVal, defaultValue);
+            }}
+            else
+                bpVal.SetValue<T>(this, property, in defaultValue);
+        }}";
+            }
+
+            if(!classSymbol.MemberNames.Any(name => "GetAttachedPropertyValue" == name))
+            {
+                source += $@"
+        public{(baseHasBindObjectInterface ? " override" : " virtual")} object GetAttachedPropertyValue(EngineNS.UI.Bind.TtBindableProperty bp, EngineNS.UI.Bind.ValueStoreBase value)
+        {{";
+                if(!string.IsNullOrEmpty(getAttachedPropertyValueStr))
+                {
+                    source += $@"    
+            var propertyNameHash = Standart.Hash.xxHash.xxHash64.ComputeHash(bp.Name);
+            switch(propertyNameHash)
+            {{
+            {getAttachedPropertyValueStr}
+            }}";
+                }
+                source += $@"
+            {(baseHasBindObjectInterface?"return base.GetAttachedPropertyValue(bp, value);":"return null; ")}            
+        }}";
+            }
+            if(!classSymbol.MemberNames.Any(name => "SetAttachedPropertyValue" == name))
+            {
+                source += $@"
+        public{(baseHasBindObjectInterface ? " override" : " virtual")} void SetAttachedPropertyValue(EngineNS.UI.Bind.IBindableObject obj, EngineNS.UI.Bind.TtBindableProperty bp, EngineNS.UI.Bind.ValueStoreBase valueStore, object value)
+        {{";
+                if(!string.IsNullOrEmpty(setAttachedPropertyValueStr))
+                {
+                    source += $@"    
+            var propertyNameHash = Standart.Hash.xxHash.xxHash64.ComputeHash(bp.Name);
+            switch(propertyNameHash)
+            {{
+            {setAttachedPropertyValueStr}
+            }}";
+                }
+                source += $@"
+            {(baseHasBindObjectInterface? "base.SetAttachedPropertyValue(obj, bp, valueStore, value);" : "")}            
+        }}";
+            }
+
             if (!classSymbol.MemberNames.Any(name => "IsPropertyVisibleDirty" == name))
             {
                 source += $@"
@@ -840,23 +914,49 @@ namespace {namespaceName}
                 source += $@"
         public{(baseHasBindObjectInterface ? " override" : " virtual")} object GetPropertyValue(string propertyName)
         {{
-            var pro = this.GetType().GetProperty(propertyName);
-            if (pro != null)
-                return pro.GetValue(this);
-
-            foreach(var bindData in {bindExprDicName})
+            if(string.IsNullOrEmpty(propertyName))
+                return null;
+            var propertyNameHash = Standart.Hash.xxHash.xxHash64.ComputeHash(propertyName);";
+                if(!string.IsNullOrEmpty(getPropertyValueSwitch))
+                {
+                    source += $@"
+            switch(propertyNameHash)
             {{
-                if(bindData.Key.Name == propertyName)
+    {getPropertyValueSwitch}
+            }}";
+                }
+                source += $@"
+            var bp = GetBindableProperty(propertyNameHash, propertyName);
+            if(bp != null)
+            {{
+                EngineNS.UI.Bind.TtBindablePropertyValueBase bpVal = null;
+                lock (mBindExprDic)
+                if (mBindExprDic.TryGetValue(bp, out bpVal))
                 {{
-                    return bindData.Value.GetValue<object>(bindData.Key);
+                    return bpVal.GetValue<object>(bp);
                 }}
             }}
+            else
+            {{
+                var pro = this.GetType().GetProperty(propertyName);
+                if (pro != null)
+                    return pro.GetValue(this);
+            }}
+
+            //foreach(var bindData in {bindExprDicName})
+            //{{
+            //    if(bindData.Key.Name == propertyName)
+            //    {{
+            //        return bindData.Value.GetValue<object>(bindData.Key);
+            //    }}
+            //}}
 
             return null;
         }}";
             }
             if (!classSymbol.MemberNames.Any(name => "SetPropertyValue" == name))
             {
+                // todo: 这里可以生成代码来设置属性，不需要通过反射，另外可以生成泛型的 SetPropertyValue(string propertyName, T value) 来对应设置不同类型的属性，减少GC
                 source += $@"
         public {(baseHasBindObjectInterface ? "override" : "virtual")} void SetPropertyValue(string propertyName, object value)
         {{

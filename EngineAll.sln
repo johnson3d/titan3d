@@ -384,6 +384,18 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "crnlib", "3rd\native\crunch
 EndProject
 Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "VirtualShadowMaps", "CSharpCode\Bricks\VirtualShadowMaps\VirtualShadowMaps.shproj", "{91C46B9C-A9C1-4AB1-9C41-E493041E9244}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "DestinyPX", "DestinyPX", "{C19EBE97-9B79-4972-A7A0-B1F1A0C44B62}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "NxMath", "NativeCode\Bricks\DestinyPX\NxMath\NxMath.vcxitems", "{66D1BB78-D377-4B8B-964A-B12F946205E6}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "NxPhysics", "NativeCode\Bricks\DestinyPX\NxPhysics\NxPhysics.vcxitems", "{3F713005-D69F-4477-A9DB-83E9B13A27F8}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "DestinyPX", "DestinyPX", "{BD7ED910-C8AD-4273-A759-9465CF41F3D1}"
+EndProject
+Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "NxMath", "CSharpCode\Bricks\DestinyPX\NxMath\NxMath.shproj", "{55E6CAE1-0F10-4840-BA9F-81FFA2008361}"
+EndProject
+Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "NxPhysics", "CSharpCode\Bricks\DestinyPX\NxPhysics\NxPhysics.shproj", "{8D584D87-62A1-41DE-AF08-4E4527FE106E}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -1020,6 +1032,12 @@ Global
 		{B1766C5B-0A9B-442E-A42D-39AE93B6FDF2} = {1BEAD919-8866-4753-B5EE-64ACC9CC2E5B}
 		{CF2E70E8-7133-4D96-92C7-68BB406C0664} = {4A69F69C-6D09-4798-838A-BCE0C8C785F9}
 		{91C46B9C-A9C1-4AB1-9C41-E493041E9244} = {B28E2174-4783-47F9-98B2-3C589DE43B04}
+		{C19EBE97-9B79-4972-A7A0-B1F1A0C44B62} = {041F2057-6090-446E-8CEF-D524C973477F}
+		{66D1BB78-D377-4B8B-964A-B12F946205E6} = {C19EBE97-9B79-4972-A7A0-B1F1A0C44B62}
+		{3F713005-D69F-4477-A9DB-83E9B13A27F8} = {C19EBE97-9B79-4972-A7A0-B1F1A0C44B62}
+		{BD7ED910-C8AD-4273-A759-9465CF41F3D1} = {B28E2174-4783-47F9-98B2-3C589DE43B04}
+		{55E6CAE1-0F10-4840-BA9F-81FFA2008361} = {BD7ED910-C8AD-4273-A759-9465CF41F3D1}
+		{8D584D87-62A1-41DE-AF08-4E4527FE106E} = {BD7ED910-C8AD-4273-A759-9465CF41F3D1}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {F7EC7EF6-F92D-464A-93A0-66C2A8E15609}
@@ -1058,6 +1076,8 @@ Global
 		CSharpCode\Bricks\CSScripting\CSScripting.projitems*{0d4fc498-20f3-445f-8f8a-43cbe8891938}*SharedItemsImports = 5
 		CSharpCode\Bricks\DataSet\DataSet.projitems*{0d4fc498-20f3-445f-8f8a-43cbe8891938}*SharedItemsImports = 5
 		CSharpCode\Bricks\DesignMacross\DesignMacross.projitems*{0d4fc498-20f3-445f-8f8a-43cbe8891938}*SharedItemsImports = 5
+		CSharpCode\Bricks\DestinyPX\NxMath\NxMath.projitems*{0d4fc498-20f3-445f-8f8a-43cbe8891938}*SharedItemsImports = 5
+		CSharpCode\Bricks\DestinyPX\NxPhysics\NxPhysics.projitems*{0d4fc498-20f3-445f-8f8a-43cbe8891938}*SharedItemsImports = 5
 		CSharpCode\Bricks\FarShadow\FarShadow.projitems*{0d4fc498-20f3-445f-8f8a-43cbe8891938}*SharedItemsImports = 5
 		CSharpCode\Bricks\FBX\FBX.projitems*{0d4fc498-20f3-445f-8f8a-43cbe8891938}*SharedItemsImports = 5
 		CSharpCode\Bricks\Font\Font.projitems*{0d4fc498-20f3-445f-8f8a-43cbe8891938}*SharedItemsImports = 5
@@ -1163,6 +1183,7 @@ Global
 		Plugins\GameServer\CSCommon\CSCommon.projitems*{38a2ea12-f310-4e0f-b20d-2ec1db9a3c39}*SharedItemsImports = 13
 		CSharpCode\Bricks\AssemblyLoader\AssemblyLoader.projitems*{3c885b44-0233-4b59-9e6d-3f5bd2ad67dc}*SharedItemsImports = 13
 		CSharpCode\Bricks\WindowSDL\WindowSDL.projitems*{3da775bf-8df6-4000-9458-5975dc3377a2}*SharedItemsImports = 13
+		NativeCode\Bricks\DestinyPX\NxPhysics\NxPhysics.vcxitems*{3f713005-d69f-4477-a9db-83e9b13a27f8}*SharedItemsImports = 9
 		CSharpCode\Bricks\NodeGraph\NodeGraph.projitems*{406055cd-ecc3-4aef-a7f2-b2ff5f8ea54c}*SharedItemsImports = 13
 		NativeCode\Bricks\ImageDecoder\ImageDecoder.vcxitems*{414404d4-3771-482c-9f20-4b962de071b0}*SharedItemsImports = 9
 		NativeCode\Bricks\RecastBuilder\RecastBuilder.vcxitems*{4355e073-1750-445b-81c4-80d9566ea60c}*SharedItemsImports = 9
@@ -1175,11 +1196,13 @@ Global
 		NativeCode\Bricks\TextConverter\TextConverter.vcxitems*{516d1f12-ce55-4f94-913a-8d4d82ddfedb}*SharedItemsImports = 9
 		NativeCode\Platform\Android\Android.vcxitems*{5325aab3-27c6-4b3b-bc33-4a7c1e1272e2}*SharedItemsImports = 9
 		3rd\native\MeshOptimizer\MeshOptimizer.vcxitems*{538bd5cb-f288-41e8-bdb6-a8c2e72c630d}*SharedItemsImports = 9
+		CSharpCode\Bricks\DestinyPX\NxMath\NxMath.projitems*{55e6cae1-0f10-4840-ba9f-81ffa2008361}*SharedItemsImports = 13
 		NativeCode\NextRHI\Dx12\Dx12.vcxitems*{5755f6e4-767b-41d9-99c3-a9b574f1c9a6}*SharedItemsImports = 9
 		CSharpCode\Bricks\CSScripting\CSScripting.projitems*{575605b6-98e4-4c83-a845-88061a67ad6b}*SharedItemsImports = 13
 		CSharpCode\Bricks\ProjectGen\ProjectGen.projitems*{587b8268-f3bc-4ed2-8913-6c95115780ed}*SharedItemsImports = 13
 		Plugins\GameServer\Root\RootServer\RootServer.projitems*{5a2456d3-51f6-46ed-8eff-4c16f500f6b5}*SharedItemsImports = 13
 		NativeCode\Bricks\TcpServer\TcpServer.vcxitems*{5b10575b-b34e-4644-8a58-e6ca5b3dbe3f}*SharedItemsImports = 9
+		NativeCode\Bricks\DestinyPX\NxMath\NxMath.vcxitems*{66d1bb78-d377-4b8b-964a-b12f946205e6}*SharedItemsImports = 9
 		CSharpCode\Platform\Android\Android.projitems*{696256cb-8710-4790-805b-1f2424bf19cd}*SharedItemsImports = 13
 		CSharpCode\Bricks\Collision\Collision.projitems*{6d4b708f-a316-44e4-8a92-e4fae48c9a70}*SharedItemsImports = 13
 		CSharpCode\Bricks\Plugins\Plugins.projitems*{6d8c1a1c-c33f-4034-80c4-4cf08530b3d5}*SharedItemsImports = 13
@@ -1193,6 +1216,7 @@ Global
 		Plugins\GameServer\Login\LoginServer\LoginServer.projitems*{7f28becc-80b5-41e7-bff7-e10a9f5de596}*SharedItemsImports = 5
 		NativeCode\Math\Math.vcxitems*{7f39f73c-1410-498f-a711-6a13209642e4}*SharedItemsImports = 9
 		NativeCode\Bricks\PhysicsCore\PhysicsCore.vcxitems*{7fdc9cd7-e523-4067-b5ea-0ae6c697a858}*SharedItemsImports = 9
+		CSharpCode\Bricks\DestinyPX\NxPhysics\NxPhysics.projitems*{8d584d87-62a1-41de-af08-4e4527fe106e}*SharedItemsImports = 13
 		3rd\native\FreeType\FreeType.vcxitems*{8de1fcd5-27c3-4af6-8fc3-3590240a7a5f}*SharedItemsImports = 4
 		3rd\native\iconv\iconv.vcxitems*{8de1fcd5-27c3-4af6-8fc3-3590240a7a5f}*SharedItemsImports = 4
 		3rd\native\Image.Shared\Image.Shared.vcxitems*{8de1fcd5-27c3-4af6-8fc3-3590240a7a5f}*SharedItemsImports = 4
@@ -1265,7 +1289,8 @@ Global
 		NativeCode\Bricks\Animation\Animation.vcxitems*{ad0e23e3-eca5-4e52-b69d-bb6e669c48c6}*SharedItemsImports = 4
 		NativeCode\Bricks\Canvas\Canvas.vcxitems*{ad0e23e3-eca5-4e52-b69d-bb6e669c48c6}*SharedItemsImports = 4
 		NativeCode\Bricks\CrossShaderCompiler\CrossShaderCompiler.vcxitems*{ad0e23e3-eca5-4e52-b69d-bb6e669c48c6}*SharedItemsImports = 4
-		NativeCode\Bricks\DesitinyPX\NxMath\NxMath.vcxitems*{ad0e23e3-eca5-4e52-b69d-bb6e669c48c6}*SharedItemsImports = 4
+		NativeCode\Bricks\DestinyPX\NxMath\NxMath.vcxitems*{ad0e23e3-eca5-4e52-b69d-bb6e669c48c6}*SharedItemsImports = 4
+		NativeCode\Bricks\DestinyPX\NxPhysics\NxPhysics.vcxitems*{ad0e23e3-eca5-4e52-b69d-bb6e669c48c6}*SharedItemsImports = 4
 		NativeCode\Bricks\FBX\FBX.vcxitems*{ad0e23e3-eca5-4e52-b69d-bb6e669c48c6}*SharedItemsImports = 4
 		NativeCode\Bricks\GpuDump\GpuDump.vcxitems*{ad0e23e3-eca5-4e52-b69d-bb6e669c48c6}*SharedItemsImports = 4
 		NativeCode\Bricks\ImageDecoder\ImageDecoder.vcxitems*{ad0e23e3-eca5-4e52-b69d-bb6e669c48c6}*SharedItemsImports = 4

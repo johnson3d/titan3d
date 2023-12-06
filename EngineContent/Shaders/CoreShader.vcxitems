@@ -88,7 +88,6 @@
     <None Include="$(MSBuildThisFileDirectory)PickedHollow.shadingenv" />
     <None Include="$(MSBuildThisFileDirectory)PickedSetUp.shadingenv" />
     <None Include="$(MSBuildThisFileDirectory)SceneCapture.shadingenv" />
-    <None Include="$(MSBuildThisFileDirectory)ShadingEnv\2DUI.cginc" />
     <None Include="$(MSBuildThisFileDirectory)ShadingEnv\AAShading.cginc" />
     <None Include="$(MSBuildThisFileDirectory)ShadingEnv\CommonLighting.cginc" />
     <None Include="$(MSBuildThisFileDirectory)ShadingEnv\Deferred\DeferredBasePassPS.cginc" />
@@ -115,6 +114,7 @@
     <None Include="$(MSBuildThisFileDirectory)ShadingEnv\Post\SunShaft\DepthThresholeShading.cginc" />
     <None Include="$(MSBuildThisFileDirectory)ShadingEnv\Post\SunShaft\RadialBlurShading.cginc" />
     <None Include="$(MSBuildThisFileDirectory)ShadingEnv\Post\SunShaft\SunShaftCommon.cginc" />
+    <None Include="$(MSBuildThisFileDirectory)ShadingEnv\ScreenSpaceUI.cginc" />
     <None Include="$(MSBuildThisFileDirectory)ShadingEnv\Sys\copy2d.shadingenv" />
     <None Include="$(MSBuildThisFileDirectory)ShadingEnv\Sys\NoPixelShader.shadingenv" />
     <None Include="$(MSBuildThisFileDirectory)ShadingEnv\Sys\pick\HitProxy.cginc" />

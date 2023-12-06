@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Microsoft.VisualBasic;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -113,7 +114,12 @@ namespace CppWeaving.Cpp2CS
 			RegClass("EngineNS.FRect", new USystemTypeStruct() { CppName = "EngineNS::FRect", CSName = "EngineNS.RectangleF", RetPodName = "EngineNS::FRect" });
 			RegClass("v3dxThickness", new USystemTypeStruct() { CppName = "v3dxThickness", CSName = "EngineNS.Thickness", RetPodName = "v3dVector4_t" });
 
-			mTypeDefs["ImGuiDir"] = "ImGuiDir_";
+            RegClass("EngineNS.NxPhysics.NxReal", new USystemTypeStruct() { CppName = "EngineNS::NxPhysics::NxReal", CSName = "EngineNS.NxPhysics.NxReal", RetPodName = "EngineNS::NxPhysics::NxReal_t" });
+            RegClass("EngineNS.NxPhysics.NxVector3", new USystemTypeStruct() { CppName = "EngineNS::NxPhysics::PxVector3", CSName = "EngineNS.NxPhysics.PxVector3", RetPodName = "EngineNS::NxPhysics::PxVector3_t" });
+            RegClass("EngineNS.NxPhysics.NxQuat", new USystemTypeStruct() { CppName = "EngineNS::NxPhysics::PxQuat", CSName = "EngineNS.NxPhysics.PxQuat", RetPodName = "EngineNS::NxPhysics::PxQaut_t" });
+            RegClass("EngineNS.NxPhysics.NxPQ", new USystemTypeStruct() { CppName = "EngineNS::NxPhysics::PxPQ", CSName = "EngineNS.NxPhysics.PxPQ", RetPodName = "EngineNS::NxPhysics::PxPQ_t" });
+
+            mTypeDefs["ImGuiDir"] = "ImGuiDir_";
             mTypeDefs["ImGuiInputTextFlags"] = "ImGuiInputTextFlags_";
             mTypeDefs["ImGuiKey"] = "ImGuiKey_";
             mTypeDefs["ImDrawCornerFlags"] = "ImDrawCornerFlags_";
@@ -135,7 +141,8 @@ namespace CppWeaving.Cpp2CS
 		}
 		public UClass FindClass(string fullname)
 		{
-			UClass result;
+            fullname = fullname.Replace("::", ".");
+            UClass result;
 			if (mTypes.TryGetValue(fullname, out result))
 				return result;
 			return null;

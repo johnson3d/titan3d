@@ -22,7 +22,7 @@ namespace ProjectCooker.Command
             await EngineNS.Thread.TtAsyncDummyClass.DummyFunc();
             var path = FindArgument(args, "Serializer_Path=");
 
-            var metas = EngineNS.Rtti.UClassMetaManager.Instance.Metas;
+            var metas = EngineNS.Rtti.TtClassMetaManager.Instance.Metas;
             foreach (var i in metas)
             {
                 USerializerCode codeWriter = new USerializerCode();

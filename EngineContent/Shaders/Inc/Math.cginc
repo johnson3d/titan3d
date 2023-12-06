@@ -15,9 +15,9 @@
 #define FLT_EPSILON 0.00005f
 #define FLT_EPSILON2 0.01f
 
-const int ContainmentType_Disjoint = 0;
-const int ContainmentType_Contains = 1;
-const int ContainmentType_Intersects = 2;
+#define ContainmentType_Disjoint 0
+#define ContainmentType_Contains 1
+#define ContainmentType_Intersects 2
 
 //mem align pow n
 #define ROUNDUP(x,n) ((x+(n-1))&(~(n-1)))
