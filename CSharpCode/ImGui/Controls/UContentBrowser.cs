@@ -810,7 +810,7 @@ namespace EngineNS.EGui.Controls
                         {
                             var pos = ImGuiAPI.GetWindowPos();
                             var size = ImGuiAPI.GetWindowSize();
-                            var mousePos = new Vector2(UEngine.Instance.InputSystem.Mouse.MouseX, UEngine.Instance.InputSystem.Mouse.MouseY);
+                            var mousePos = new Vector2(UEngine.Instance.InputSystem.Mouse.GlobalMouseX, UEngine.Instance.InputSystem.Mouse.GlobalMouseY);
                             if(mousePos.X >= pos.X && mousePos.X <= (pos.X + size.X) &&
                                mousePos.Y >= pos.Y && mousePos.Y <= (pos.Y + size.Y))
                             {

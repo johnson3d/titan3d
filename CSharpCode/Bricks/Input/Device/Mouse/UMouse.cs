@@ -20,8 +20,10 @@ namespace EngineNS.Bricks.Input.Device.Mouse
         }
         partial void OnSetShowCursor();
 
-        public int MouseX;
-        public int MouseY;
+        public int GlobalMouseX;
+        public int GlobalMouseY;
+        public int EventMouseX;
+        public int EventMouseY;
         byte mOldMouseButtons = 0;
         byte mMouseButtons = 0;
 
@@ -52,24 +54,24 @@ namespace EngineNS.Bricks.Input.Device.Mouse
         {
             if (evt.Type == EventType.MOUSEBUTTONDOWN)
             {
-                //MouseX = evt.MouseButton.X;
-                //MouseY = evt.MouseButton.Y;
+                EventMouseX = evt.MouseButton.X;
+                EventMouseY = evt.MouseButton.Y;
                 mOldMouseButtons = mMouseButtons;
                 mMouseButtons |= (byte)(1 << evt.MouseButton.Button);
                 mMouseKeyStateDirty = true;
             }
             else if (evt.Type == EventType.MOUSEBUTTONUP)
             {
-                //MouseX = evt.MouseButton.X;
-                //MouseY = evt.MouseButton.Y;
+                EventMouseX = evt.MouseButton.X;
+                EventMouseY = evt.MouseButton.Y;
                 mOldMouseButtons = mMouseButtons;
                 mMouseButtons &= (byte)(~(1 << evt.MouseButton.Button));
                 mMouseKeyStateDirty = true;
             }
             else if (evt.Type == EventType.MOUSEMOTION)
             {
-                //MouseX = evt.MouseMotion.X;
-                //MouseY = evt.MouseMotion.X;
+                EventMouseX = evt.MouseMotion.X;
+                EventMouseY = evt.MouseMotion.Y;
             }
         }
         public bool IsMouseButtonDown(EMouseButton button)

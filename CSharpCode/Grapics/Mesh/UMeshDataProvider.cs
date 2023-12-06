@@ -16,6 +16,10 @@ namespace EngineNS.Graphics.Mesh
         {
             mCoreObject = self;
         }
+        public bool InitFrom(UMeshPrimitives mesh)
+        {
+            return mCoreObject.InitFromMesh(UEngine.Instance.GfxDevice.RenderContext.mCoreObject, mesh.mCoreObject);
+        }
         public bool IsIndex32
         {
             get

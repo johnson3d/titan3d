@@ -1,13 +1,17 @@
 ﻿using EngineNS;
 using EngineNS.Bricks.CodeBuilder;
+using EngineNS.Bricks.Input;
 using EngineNS.Bricks.UI.Controls;
 using EngineNS.GamePlay.Scene;
 using EngineNS.Rtti;
 using EngineNS.UI.Canvas;
 using EngineNS.UI.Controls;
 using EngineNS.UI.Controls.Containers;
+using Microsoft.VisualBasic;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
+using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -44,7 +48,7 @@ namespace EngineNS.UI.Editor
             mUIHost.Name = "UIEditorHost";
             mUIHost.WindowSize = new SizeF(1920, 1080);
 
-            // test /////////////////////////
+            /*/ test /////////////////////////
             //var element = new TtImage(); // new TtUIElement();
             var button = new TtButton();
             var canvas = new UI.Controls.Containers.TtCanvasControl();
@@ -61,13 +65,13 @@ namespace EngineNS.UI.Editor
 
             canvas.Children.Add(button);
             //UI.Controls.Containers.TtCanvasControl.SetAnchorRectX(button, 50);
-            //UI.Controls.Containers.TtCanvasControl.SetAnchorRectZ(button, 1920);
-            //UI.Controls.Containers.TtCanvasControl.SetAnchorRectW(button, 1080);
+            //UI.Controls.Containers.TtCanvasControl.SetAnchorRectZ(button, 1016);
+            //UI.Controls.Containers.TtCanvasControl.SetAnchorRectW(button, 793);
             UI.Controls.Containers.TtCanvasControl.SetAnchorRectZ(button, 100);
             UI.Controls.Containers.TtCanvasControl.SetAnchorRectW(button, 50);
             DetailsGrid.Target = button;
             mUIHost.Children.Add(canvas);
-            /////////////////////////////////
+            ////////////////////////////////*/
 
             return true;
         }
@@ -139,6 +143,7 @@ namespace EngineNS.UI.Editor
             ImGuiAPI.DockBuilderDockWindow(EGui.UIProxy.DockProxy.GetDockWindowName("Details", mDockKeyClass), detailsId);
             ImGuiAPI.DockBuilderFinish(id);
         }
+        public ImGuiMouseCursor_ mMouseCursor;
         public Vector2 WindowPos;
         public Vector2 WindowSize = new Vector2(800, 600);
         public Vector2 WindowContentRegionMin, WindowContentRegionMax;
@@ -176,6 +181,8 @@ namespace EngineNS.UI.Editor
             DrawDesigner();
             DrawDetails();
             DrawHierachy();
+
+            ImGuiAPI.SetMouseCursor(mMouseCursor);
         }
         bool mIsSimulateMode = false;
         protected unsafe void DrawToolBar()
@@ -183,6 +190,7 @@ namespace EngineNS.UI.Editor
             var btSize = Vector2.Zero;
             if (EGui.UIProxy.CustomButton.ToolButton("Save", in btSize))
             {
+                UEngine.Instance.UIManager.Save(AssetName, mUIHost.Children[0]);
                 //Mesh.SaveAssetTo(Mesh.AssetName);
                 //var unused = UEngine.Instance.GfxDevice.MaterialInstanceManager.ReloadMaterialInstance(Mesh.AssetName);
 
@@ -296,12 +304,31 @@ namespace EngineNS.UI.Editor
             }
             EGui.UIProxy.DockProxy.EndPanel();
         }
-        void DrawControlItemData(ControlItemData itemData)
+        protected struct ControlDragData
+        {
+            public string TypeName;
+        }
+
+        unsafe void DrawControlItemData(ControlItemData itemData)
         {
             var flags = ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_SpanFullWidth;
             if (itemData.Children.Count == 0)
                 flags |= ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_Leaf;
             var treeNodeResult = ImGuiAPI.TreeNodeEx(itemData.Name, flags);
+            if(itemData.UIControlType != null)
+            {
+                if(ImGuiAPI.BeginDragDropSource(ImGuiDragDropFlags_.ImGuiDragDropFlags_None))
+                {
+                    var data = new ControlDragData()
+                    {
+                        TypeName = UTypeDescManager.Instance.GetTypeStringFromType(itemData.UIControlType),
+                    };
+                    var handle = GCHandle.Alloc(data);
+                    ImGuiAPI.SetDragDropPayload("UIControlDragDrop", GCHandle.ToIntPtr(handle).ToPointer(), (uint)Marshal.SizeOf<ControlDragData>(), ImGuiCond_.ImGuiCond_None);
+                    ImGuiAPI.Text(itemData.Name);
+                    ImGuiAPI.EndDragDropSource();
+                }
+            }
             if(treeNodeResult)
             {
                 for(int i=0; i<itemData.Children.Count; i++)
@@ -347,6 +374,54 @@ namespace EngineNS.UI.Editor
                     $"py:{UEngine.Instance.UIManager.DebugHitPt.Y}\r\n" +
                     $"el:{UEngine.Instance.UIManager.DebugPointatElement}", null);
                 ////////////////////////////
+                UEngine.Instance.UIManager.DebugHitPt = new Vector2(UEngine.Instance.InputSystem.Mouse.EventMouseX, UEngine.Instance.InputSystem.Mouse.EventMouseY);
+                if (ImGuiAPI.BeginDragDropTarget())
+                {
+                    var payload = ImGuiAPI.AcceptDragDropPayload("UIControlDragDrop", ImGuiDragDropFlags_.ImGuiDragDropFlags_None);
+                    if(payload != null)
+                    {
+                        var handle = GCHandle.FromIntPtr((IntPtr)(payload->Data));
+                        var data = (ControlDragData)handle.Target;
+                        var uiControl = UTypeDescManager.CreateInstance(UTypeDesc.TypeOf(data.TypeName)) as TtUIElement;
+                        
+                        //var curPos = ImGuiAPI.GetMousePos() - pos;
+                        var curPos = new Vector2(UEngine.Instance.InputSystem.Mouse.EventMouseX, UEngine.Instance.InputSystem.Mouse.EventMouseY);
+
+                        var element = mUIHost.GetPointAtElement(in curPos);
+                        TtContainer container = mUIHost;
+                        if(element != null)
+                        {
+                            container = element as TtContainer;
+                            if (container == null)
+                                container = element.Parent;
+                        }
+
+                        if (container.CanAddChild(uiControl))
+                        {
+                            container.Children.Add(uiControl);
+                            Vector2 offset;
+                            container.GetElementPointAtPos(in curPos, out offset);
+                            container.ProcessNewAddChild(uiControl, offset, new Vector2(100, 50));
+                        }
+                        else
+                            ShowMessage($"{container.Name} can't add child");
+
+                        //handle.Free();
+                    }
+                }
+
+                for(int i = mMessages.Count - 1; i >= 0; i--)
+                {
+                    mMessages[i].Tick(UEngine.Instance.ElapsedSecond);
+                    if(mMessages[i].ShowTimeSecond <= 0)
+                    {
+                        mMessages.RemoveAt(i);
+                    }
+                    else
+                    {
+                        drawList.AddText(pos + new Vector2(0, 50), 0xffffffff, mMessages[i].Message, null);
+                    }
+                }
             }
             EGui.UIProxy.DockProxy.EndPanel();
         }
@@ -377,6 +452,27 @@ namespace EngineNS.UI.Editor
             }
             EGui.UIProxy.DockProxy.EndPanel();
         }
+        void DrawHierachyContextMenu(TtUIElement element, string name)
+        {
+            if(ImGuiAPI.BeginPopupContextWindow("##ContextMenu_" + name, ImGuiPopupFlags_.ImGuiPopupFlags_MouseButtonRight))
+            {
+                var drawList = ImGuiAPI.GetWindowDrawList();
+                if (!mSelectedElements.Contains(element))
+                    ProcessSelectElement(element, UEngine.Instance.InputSystem.IsCtrlKeyDown());
+                Support.UAnyPointer menuData = new Support.UAnyPointer();
+                if (EGui.UIProxy.MenuItemProxy.MenuItem("Delete##" + name, null, false, null, drawList, menuData, ref element.HierachyContextMenuState))
+                {
+                    for(int i=0; i<mSelectedElements.Count; i++)
+                    {
+                        if (mSelectedElements[i] == mUIHost)
+                            continue;
+                        mSelectedElements[i].Parent.Children.Remove(mSelectedElements[i]);
+                    }
+                    ProcessSelectElement(null, false);
+                }
+                ImGuiAPI.EndPopup();
+            }
+        }
         void DrawUIElementInHierachy(TtUIElement element, int idx)
         {
             var flags = ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_SpanFullWidth;
@@ -396,7 +492,8 @@ namespace EngineNS.UI.Editor
                     {
                         ProcessSelectElement(element, UEngine.Instance.InputSystem.IsCtrlKeyDown());
                     }
-                    if(treeNodeResult)
+                    DrawHierachyContextMenu(element, name);
+                    if (treeNodeResult)
                     {
                         for(int i=0; i<count; i++)
                         {
@@ -415,7 +512,8 @@ namespace EngineNS.UI.Editor
                     {
                         ProcessSelectElement(element, UEngine.Instance.InputSystem.IsCtrlKeyDown());
                     }
-                    if(treeNodeResult)
+                    DrawHierachyContextMenu(element, name);
+                    if (treeNodeResult)
                     {
                         for (int i=0; i< container.Children.Count; i++)
                         {
@@ -430,7 +528,8 @@ namespace EngineNS.UI.Editor
                 flags |= ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_Leaf;
                 if(ImGuiAPI.TreeNodeEx(name, flags))
                 {
-                    if(ImGuiAPI.IsItemClicked(ImGuiMouseButton_.ImGuiMouseButton_Left))
+                    DrawHierachyContextMenu(element, name);
+                    if (ImGuiAPI.IsItemClicked(ImGuiMouseButton_.ImGuiMouseButton_Left))
                     {
                         ProcessSelectElement(element, UEngine.Instance.InputSystem.IsCtrlKeyDown());
                     }
@@ -440,21 +539,30 @@ namespace EngineNS.UI.Editor
         }
 
         List<TtUIElement> mSelectedElements = new List<TtUIElement>();
+        public List<TtUIElement> SelectedElements => mSelectedElements;
         void ProcessSelectElement(TtUIElement element, bool multi)
         {
-            if(multi)
+            if(element == null)
             {
-                if (mSelectedElements.Contains(element))
-                    mSelectedElements.Remove(element);
-                else
-                    mSelectedElements.Add(element);
+                mSelectedElements.Clear();
             }
             else
             {
-                mSelectedElements.Clear();
-                mSelectedElements.Add(element);
+                if(multi)
+                {
+                    if (mSelectedElements.Contains(element))
+                        mSelectedElements.Remove(element);
+                    else
+                        mSelectedElements.Add(element);
+                }
+                else
+                {
+                    mSelectedElements.Clear();
+                    mSelectedElements.Add(element);
+                }
             }
             DetailsGrid.Target = mSelectedElements;
+            _ = ProcessSelectElementDecorator();
         }
 
         #region IAssetEditor
@@ -470,6 +578,7 @@ namespace EngineNS.UI.Editor
         public async System.Threading.Tasks.Task<bool> OpenEditor(EngineNS.Editor.UMainEditorApplication mainEditor, RName name, object arg)
         {
             AssetName = name;
+            mUIHost.Children.Add(UEngine.Instance.UIManager.Load(AssetName));
             UIAsset = new TtUIAsset();
             UIAsset.AssetName = name;
             //UIAsset.Mesh = await UI.Canvas.TtCanvas.TestCreate();
@@ -495,6 +604,8 @@ namespace EngineNS.UI.Editor
 
         void OnPreviewViewportEvent(in Bricks.Input.Event e)
         {
+            DecoratorEventProcess(in e);
+
             switch(e.Type)
             {
                 case Bricks.Input.EventType.MOUSEMOTION:
@@ -503,7 +614,7 @@ namespace EngineNS.UI.Editor
                         var pt = new Vector2(e.MouseButton.X, e.MouseButton.Y);
                         var data = new TtUIElement.RayIntersectData();
                         var element = mUIHost.GetPointAtElement(in pt);
-                        if(mCurrentPointAtElement != element)
+                        if(mCurrentPointAtElement != element && (CurrentDecorator == null || !CurrentDecorator.IsInDecoratorOperation()))
                         {
                             SetCurrentPointAtElement(element);
                         }
@@ -511,7 +622,16 @@ namespace EngineNS.UI.Editor
                     break;
                 case Bricks.Input.EventType.MOUSEBUTTONDOWN:
                     {
-                        SelectElement(mCurrentPointAtElement);
+                        var delta = PreviewViewport.WindowPos - PreviewViewport.ViewportPos;
+                        var mousePt = new Vector2(e.MouseButton.X - delta.X, e.MouseButton.Y - delta.Y);
+                        if(mousePt.X >= PreviewViewport.ClientMin.X && 
+                           mousePt.X <= PreviewViewport.ClientMax.X &&
+                           mousePt.Y >= PreviewViewport.ClientMin.Y &&
+                           mousePt.Y <= PreviewViewport.ClientMax.Y &&
+                           (CurrentDecorator == null || !CurrentDecorator.IsInDecoratorOperation()))
+                        {
+                            ProcessSelectElement(mCurrentPointAtElement, UEngine.Instance.InputSystem.IsCtrlKeyDown());
+                        }
                     }
                     break;
             }
@@ -551,8 +671,8 @@ namespace EngineNS.UI.Editor
             }
             else
             {
-                _ = BuildMesh();
                 _ = UpdateDecorator();
+                _ = BuildMesh();
             }
         }
         public void TickRender(float ellapse)
@@ -568,5 +688,26 @@ namespace EngineNS.UI.Editor
             PreviewViewport.TickSync(ellapse);
         }
         #endregion
+
+        struct MessageData
+        {
+            public string Message;
+            public float ShowTimeSecond;
+
+            public void Tick(float elapsedTime)
+            {
+                ShowTimeSecond -= elapsedTime;
+            }
+        }
+        List<MessageData> mMessages = new List<MessageData>();
+        void ShowMessage(string message, float showTimeInSecond = 2.0f)
+        {
+            var data = new MessageData()
+            {
+                Message = message,
+                ShowTimeSecond = showTimeInSecond,
+            };
+            mMessages.Add(data);
+        }
     }
 }

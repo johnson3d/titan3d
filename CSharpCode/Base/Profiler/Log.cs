@@ -28,11 +28,16 @@ namespace EngineNS.Profiler
         }
         public delegate void Delegate_OnReportLog(ELogTag tag, string category, string memberName, string sourceFilePath, int sourceLineNumber, string info);
         public static event Delegate_OnReportLog OnReportLog;
+        public static bool IsWriteVSOutput = true;
+        public static bool IsWriteConsole = true;
         public static void OnReportLog_WriteConsole(ELogTag tag, string category, string memberName, string sourceFilePath, int sourceLineNumber, string info)
         {
-            info = $"{sourceFilePath}({sourceLineNumber},0):{info}";
-            System.Diagnostics.Trace.WriteLine(info);
-            System.Console.WriteLine(info);
+            if (IsWriteVSOutput || IsWriteVSOutput)
+                info = $"{sourceFilePath}({sourceLineNumber},0):{info}";
+            if (IsWriteVSOutput)
+                System.Diagnostics.Trace.WriteLine(info);
+            if (IsWriteConsole)
+                System.Console.WriteLine(info);
         }
         private static CoreSDK.FDelegate_FWriteLogString NativeLogger = NativeWriteLogString;
 #if PMacIOS

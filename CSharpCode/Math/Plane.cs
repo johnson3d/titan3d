@@ -1,4 +1,5 @@
-﻿using System;
+﻿using EngineNS.GamePlay.Camera;
+using System;
 
 using System.Globalization;
 
@@ -585,5 +586,34 @@ namespace EngineNS
             return !left.Equals(right);
 		    //return !Equals( left, right );
 	    }
+
+        public static unsafe bool PickPlanePos(
+            in Vector3 pickRay,
+            in Vector3 cameraLocalPosition,
+            in DVector3 matrixStartPosition,
+            int x, int y, in DVector3 planePos, 
+            in EngineNS.Vector3 planeNormal, 
+            out DVector3 resultPos)
+        {
+            resultPos = DVector3.Zero;
+            var localPlanePos = planePos - matrixStartPosition;
+            var plane = new Plane();
+            plane.Normal = planeNormal;
+            plane.D = (float)-DVector3.Dot(localPlanePos, planeNormal);
+            var end = cameraLocalPosition + pickRay * 10000;
+            unsafe
+            {
+                fixed(Vector3* clpPtr = &cameraLocalPosition)
+                //(Plane* pPlane = &plane)
+                {
+                    Vector3 hitPos;
+                    if ((IntPtr)IDllImportApi.v3dxPlaneIntersectLine(&hitPos, &plane, clpPtr, &end) == IntPtr.Zero)
+                        return false;
+                    resultPos = hitPos.AsDVector() + matrixStartPosition;
+                }
+            }
+
+            return true;
+        }
     }
 }

@@ -383,9 +383,9 @@ namespace EngineNS.IO
         }
         public virtual void OnShowIconTimout(int time)
         {
-            if (Task != null && Task.Result != null)
+            if (Task != null && Task.IsCompleted)
             {
-                Task.Result.mTextureRSV?.Dispose();
+                Task.Result?.mTextureRSV?.Dispose();
                 Task = null;
             }
         }

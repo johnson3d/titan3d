@@ -236,20 +236,24 @@ namespace EngineNS
         /// </summary>
         /// <param name="value">二维向量对象</param>
         /// <returns>如果两个对象相同返回true，否则返回false</returns>
-	    public bool Equals( Vector2 value )
+	    public bool Equals(Vector2 value )
 	    {
-		    return ( X == value.X && Y == value.Y );
-	    }
+            bool reX = (Math.Abs(X - value.X) < MathHelper.Epsilon);
+            bool reY = (Math.Abs(Y - value.Y) < MathHelper.Epsilon);
+            return (reX && reY);
+        }
         /// <summary>
         /// 判断两个对象是否相同
         /// </summary>
         /// <param name="value1">二维向量对象</param>
         /// <param name="value2">二维向量对象</param>
         /// <returns>如果两个对象相同返回true，否则返回false</returns>
-	    public static bool Equals( ref Vector2 value1, ref Vector2 value2 )
+	    public static bool Equals( ref Vector2 value1, ref Vector2 value2, float epsilon = MathHelper.Epsilon)
 	    {
-		    return ( value1.X == value2.X && value1.Y == value2.Y );
-	    }
+            bool reX = (Math.Abs(value1.X - value2.X) < MathHelper.Epsilon);
+            bool reY = (Math.Abs(value1.Y - value2.Y) < MathHelper.Epsilon);
+            return (reX && reY);
+        }
         #endregion
         /// <summary>
         /// 向量的长度

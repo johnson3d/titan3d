@@ -383,6 +383,8 @@ namespace EngineNS.EGui.Controls.PropertyGrid
             }
             static string CollectionTypeString(object target)
             {
+                if (target == null)
+                    return "";
                 string retString = "";
                 var targetType = target.GetType();
                 var enumerableInterface = targetType.GetInterface(typeof(IEnumerable).FullName, false);

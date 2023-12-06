@@ -15,6 +15,17 @@ namespace EngineNS.UI
     {
         TtUIConfig mConfig = new TtUIConfig();
         public TtUIConfig Config => mConfig;
+        SizeF mScreenSize;
+        public SizeF ScreenSize
+        {
+            get => mScreenSize;
+            set
+            {
+                mScreenSize = value;
+                if (mScreenSpaceUIHost != null)
+                    mScreenSpaceUIHost.WindowSize = value;
+            }
+        }
 
         public TtUIManager()
         {
@@ -54,6 +65,20 @@ namespace EngineNS.UI
                 public int GetHashCode(UIKeyName obj)
                 {
                     return obj.GetHashCode();
+                }
+            }
+        }
+
+        TtUIHost mScreenSpaceUIHost;
+        public TtUIHost ScreenSpaceUIHost
+        {
+            get => mScreenSpaceUIHost;
+            set
+            {
+                mScreenSpaceUIHost = value;
+                if(mScreenSpaceUIHost != null)
+                {
+                    mScreenSpaceUIHost.WindowSize = ScreenSize;
                 }
             }
         }
@@ -175,6 +200,51 @@ namespace EngineNS.UI
             for (int i=mTickUIElements.Count - 1; i >= 0; i--)
             {
                 mTickUIElements[i].Tick(elapsedSecond);
+            }
+        }
+
+        public void Save(RName name, TtUIElement element)
+        {
+            if (element == null)
+                return;
+            var typeStr = Rtti.UTypeDescManager.Instance.GetTypeStringFromType(element.GetType());
+            using (var xnd = new IO.TtXndHolder(typeStr, 0, 0))
+            {
+                using (var attr = xnd.NewAttribute("UI", 0, 0))
+                {
+                    using (var ar = attr.GetWriter(512))
+                    {
+                        ar.Write(element);
+                    }
+                    xnd.RootNode.AddAttribute(attr);
+                }
+                xnd.SaveXnd(name.Address);
+            }
+        }
+        public TtUIElement Load(RName name)
+        {
+            using (var xnd = IO.TtXndHolder.LoadXnd(name.Address))
+            {
+                if (xnd == null)
+                    return null;
+
+                var attr = xnd.RootNode.TryGetAttribute("UI");
+                if (attr.NativePointer == IntPtr.Zero)
+                    return null;
+
+                using(var ar = attr.GetReader(null))
+                {
+                    TtUIElement element = null;
+                    try
+                    {
+                        ar.ReadObject(out element);
+                    }
+                    catch(Exception ex)
+                    {
+                        Profiler.Log.WriteException(ex);
+                    }
+                    return element;
+                }
             }
         }
     }

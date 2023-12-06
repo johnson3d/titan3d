@@ -14,6 +14,27 @@ namespace EngineNS.UI
 {
     public partial class TtUIHost
     {
+        [Rtti.Meta]
+        public bool IsScreenSpace
+        {
+            get { return ReadFlag(ECoreFlags.IsScreenSpace); }
+            set 
+            { 
+                WriteFlag(ECoreFlags.IsScreenSpace, value);
+                if(value)
+                {
+                    if (UEngine.Instance.UIManager.ScreenSpaceUIHost != null)
+                        UEngine.Instance.UIManager.ScreenSpaceUIHost.IsScreenSpace = false;
+                    UEngine.Instance.UIManager.ScreenSpaceUIHost = this;
+                }
+                else
+                {
+                    UEngine.Instance.UIManager.ScreenSpaceUIHost = null;
+                }
+                MeshDirty = true;
+            }
+        }
+
         public void OnDispose()
         {
             CoreSDK.DisposeObject(ref mDrawMesh);
@@ -54,7 +75,7 @@ namespace EngineNS.UI
                 return mBoundingBoxData.AABB;
             }
         }
-        protected List<TtUIElement> mUIElementWithTransforms = null;
+        List<TtUIElement> mUIElementWithTransforms;
 
         [Browsable(false)]
         public override bool MeshDirty
@@ -109,13 +130,35 @@ namespace EngineNS.UI
                 {
                     if(ELement is TtUIHost)
                     {
-                        if((ELement.RootUIHost != null) &&
-                           (ELement.RootUIHost.SceneNode != null) &&
-                           (ELement.RootUIHost.SceneNode.GetWorld() != null))
+                        var uiHost = ELement as TtUIHost;
+                        if(uiHost.IsScreenSpace)
                         {
-                            mMatrix = ELement.AbsRenderTransform.ToMatrixWithScale(ELement.RootUIHost.SceneNode.GetWorld().CameraOffset);
+                            var camera = uiHost.RenderCamera;
+                            float width, height;
+                            if(camera.IsOrtho)
+                            {
+                                width = camera.Width;
+                                height = camera.Height;
+                            }
+                            else
+                            {
+                                height = (float)(2 * camera.ZNear * Math.Tan(camera.Fov * 0.5f));
+                                width = camera.Aspect * height;
+                            }
+                            var scale = (float)(height / uiHost.WindowSize.Height);
+                            mMatrix = Matrix.Scaling(scale) * Matrix.Translate(-width * 0.5f, -height * 0.5f, camera.ZNear);
                             mInvMatrix = Matrix.Invert(in mMatrix);
-                            ELement.RenderTransformDirty = false;
+                            uiHost.RenderTransformDirty = false;
+                        }
+                        else
+                        {
+                            if((uiHost.SceneNode != null) &&
+                               (uiHost.SceneNode.GetWorld() != null))
+                            {
+                                mMatrix = uiHost.AbsRenderTransform.ToMatrixWithScale(uiHost.SceneNode.GetWorld().CameraOffset);
+                                mInvMatrix = Matrix.Invert(in mMatrix);
+                                uiHost.RenderTransformDirty = false;
+                            }
                         }
                     }
                     else
@@ -181,7 +224,7 @@ namespace EngineNS.UI
             return mTransformIndex;
         }
 
-        protected virtual void CustomBuildMesh()
+        protected virtual void CustomBuildMesh(Canvas.TtCanvasDrawBatch batch)
         {
 
         }
@@ -230,9 +273,10 @@ namespace EngineNS.UI
                 mDrawBatch = new Canvas.TtCanvasDrawBatch();
 
             UpdateTransformIndex(0);
-            CustomBuildMesh();
 
             mDrawBatch.Reset();
+            CustomBuildMesh(mDrawBatch);
+
             var clip = DesignClipRect;
             mDrawBatch.SetPosition(clip.Left, clip.Top);
             mDrawBatch.SetClientClip(clip.Width, clip.Height);
@@ -283,7 +327,7 @@ namespace EngineNS.UI
 
                 materials[i] = mtl;
 
-                mtl.RenderLayer = Graphics.Pipeline.ERenderLayer.RL_PostTranslucent;
+                //mtl.RenderLayer = Graphics.Pipeline.ERenderLayer.RL_PostTranslucent;
                 var raster = mtl.Rasterizer;
                 raster.CullMode = NxRHI.ECullMode.CMD_NONE;
                 mtl.Rasterizer = raster;
@@ -323,19 +367,28 @@ namespace EngineNS.UI
         protected uint mCameralOffsetSerialId = 0;
         public void GatherVisibleMeshes(UWorld.UVisParameter param)
         {
+            if (IsScreenSpace)
+                return;
             if (mDrawMesh == null)
                 return;
 
-            if(param.World.CameralOffsetSerialId != mCameralOffsetSerialId)
-            {
-                mCameralOffsetSerialId = param.World.CameralOffsetSerialId;
-                mDrawMesh.UpdateCameraOffset(param.World);
-            }
+            UpdateCameraOffset(param.World);
 
             param.VisibleMeshes.Add(mDrawMesh);
             if(param.VisibleNodes != null && SceneNode != null)
             {
                 param.VisibleNodes.Add(SceneNode);
+            }
+        }
+
+        public void UpdateCameraOffset(UWorld world)
+        {
+            if (world == null)
+                return;
+            if(world.CameralOffsetSerialId != mCameralOffsetSerialId)
+            {
+                mCameralOffsetSerialId = world.CameralOffsetSerialId;
+                mDrawMesh.UpdateCameraOffset(world);
             }
         }
 

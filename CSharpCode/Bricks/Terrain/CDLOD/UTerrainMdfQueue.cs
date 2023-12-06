@@ -38,11 +38,11 @@ namespace EngineNS.Bricks.Terrain.CDLOD
     }
     public class UTerrainMdfQueue : Graphics.Pipeline.Shader.TtMdfQueue1<TtTerrainModifier>
     {
-        public UPatch Patch
+        public TtPatch Patch
         {
             get
             {
-                return this.MdfDatas as UPatch;
+                return this.MdfDatas as TtPatch;
             }
         }
         public int Dimension = 64;

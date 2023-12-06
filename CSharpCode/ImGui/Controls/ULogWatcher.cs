@@ -28,6 +28,7 @@ namespace EngineNS.EGui.Controls
         public uint DockId { get; set; }
         public ImGuiWindowClass DockKeyClass { get; }
         public ImGuiCond_ DockCond { get; set; } = ImGuiCond_.ImGuiCond_FirstUseEver;
+        public bool mIsReportLog = true;
         public unsafe void OnDraw()
         {
             if (Visible == false)
@@ -40,6 +41,8 @@ namespace EngineNS.EGui.Controls
                 DockId = ImGuiAPI.GetWindowDockID();
 
                 #region Filters
+                EngineNS.EGui.UIProxy.CheckBox.DrawCheckBox("Log", ref mIsReportLog);
+                ImGuiAPI.SameLine(0, -1);
                 if (ImGuiAPI.Button("Clear"))
                 {
                     mLogInfos.Clear();
@@ -137,24 +140,8 @@ namespace EngineNS.EGui.Controls
 
                 if (ImGuiAPI.BeginChild("LogContent", in Vector2.MinusOne, true, ImGuiWindowFlags_.ImGuiWindowFlags_None))
                 {
-                    lock (mNewLogs)
-                    {
-                        foreach (var i in mNewLogs)
-                        {
-                            mLogInfos.Enqueue(i);
-                        }
-                        mNewLogs.Clear();
-                        int total = mNewLogs.Count + mLogInfos.Count;
-                        if (total > MaxLogs)
-                        {
-                            total = total - MaxLogs;
-                            while (total >= 0 && mLogInfos.Count > 0)
-                            {
-                                mLogInfos.Dequeue();
-                            }
-                        }
-                    }
-
+                    UpdateNewLogs();
+                    
                     if (ImGuiAPI.BeginTable("Logs", 5, ImGuiTableFlags_.ImGuiTableFlags_Resizable, in Vector2.Zero, 0.0f))
                     {
                         ImGuiAPI.TableNextRow(ImGuiTableRowFlags_.ImGuiTableRowFlags_Headers, 0);
@@ -249,8 +236,31 @@ namespace EngineNS.EGui.Controls
             }
             CategoryFilters = CategoryFilterText.Split(',');
         }
+        private void UpdateNewLogs()
+        {
+            lock (mNewLogs)
+            {
+                foreach (var i in mNewLogs)
+                {
+                    mLogInfos.Enqueue(i);
+                }
+                mNewLogs.Clear();
+
+                int total = mNewLogs.Count + mLogInfos.Count;
+                if (total > MaxLogs)
+                {
+                    total = total - MaxLogs;
+                    while (total >= 0 && mLogInfos.Count > 0)
+                    {
+                        mLogInfos.Dequeue();
+                    }
+                }
+            }
+        }
         public void OnReportLog(Profiler.ELogTag tag, string category, string memberName, string sourceFilePath, int sourceLineNumber, string info)
         {
+            if (mIsReportLog == false)
+                return;
             lock (mNewLogs)
             {
                 FLogInfo tmp;
@@ -262,6 +272,10 @@ namespace EngineNS.EGui.Controls
                 tmp.LogText = info;
 
                 mNewLogs.Add(tmp);
+            }
+            if (mNewLogs.Count >= 20)
+            {
+                UpdateNewLogs();
             }
         }
     }

@@ -21,6 +21,8 @@ namespace EngineNS.Bricks.Terrain.CDLOD
         public int MipLevels { get; set; } = 6;
         public Graphics.Mesh.UMeshPrimitives[] GridMipLevels;
 
+        public TtLayerManager LayerManager { get; } = new TtLayerManager();
+
         public async System.Threading.Tasks.Task<bool> Initialize(int mipLevel)
         {
             MipLevels = mipLevel;

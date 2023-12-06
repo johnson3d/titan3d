@@ -115,7 +115,7 @@ namespace EngineNS.UI
                     processValue = height;
                     break;
             }
-            var retValue = BezierCalculate.ValueOnBezier(BezierPoints, processValue).Y;
+            var retValue = BezierCalculate.ValueOnBezier(BezierPoints, processValue, true).Y;
             tagDesignSize = new SizeF(width, height);
             if (useWidth)
             {

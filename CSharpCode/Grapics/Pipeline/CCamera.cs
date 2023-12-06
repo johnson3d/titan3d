@@ -37,6 +37,13 @@ namespace EngineNS.Graphics.Pipeline
             }
             mCoreObject.LookAtLH(eye.AsDVector(), sphere.Center.AsDVector(), in up);
         }
+        public float GetScaleWithFixSizeInScreen(in DVector3 position, float screenSize)
+        {
+            Vector3 dir = new Vector3(position - mCoreObject.GetPosition());
+            var distance = Vector3.Dot(in dir, mCoreObject.GetDirection());
+            var sizeInScreen = 0.5f * MathF.Tan(0.5f * mCoreObject.mFov) * distance;
+            return sizeInScreen * screenSize / 400;
+        }
         public void SetZRange(float zNear = 0.3f, float zFar = 1000.0f)
         {
             mCoreObject.PerspectiveFovLH(mCoreObject.mFov, mCoreObject.mWidth, mCoreObject.mHeight, zNear, zFar);

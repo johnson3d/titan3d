@@ -4,13 +4,74 @@ using System.Text;
 
 namespace EngineNS.Bricks.Terrain.CDLOD
 {
-    public class UPatch : IDisposable
+    public class TtPatchLayers
+    {
+        public class TtPatchLayer
+        {
+            public string Name { get; set; }
+            public float[,] WeightData = null;
+        }
+        public List<TtPatchLayer> Layers = new List<TtPatchLayer>();
+        internal int CurrentLayer = -1;
+        public void SetLayerData(TtLayerManager mgr, int x, int z, float data)
+        {
+            if (CurrentLayer < 0 || Layers[CurrentLayer].Name != mgr.CurrentLayerName)
+            {
+                CurrentLayer = GetLayer(mgr.CurrentLayerName);
+                if (CurrentLayer < 0)
+                {
+                    CurrentLayer = AddLayer(mgr.CurrentLayerName);
+                }
+            }
+            Layers[CurrentLayer].WeightData[z, x] = data;
+        }
+        public float GetLayerData(TtLayerManager mgr, int x, int z)
+        {
+            if (CurrentLayer < 0 || Layers[CurrentLayer].Name != mgr.CurrentLayerName)
+            {
+                CurrentLayer = GetLayer(mgr.CurrentLayerName);
+            }
+            if (CurrentLayer < 0)
+                return float.NaN;
+            return Layers[CurrentLayer].WeightData[z, x];
+        }
+        public int GetLayer(string name)
+        {
+            for (int i = 0; i < Layers.Count; i++)
+            {
+                if (Layers[i].Name == name)
+                    return i;
+            }
+            return -1;
+        }
+        public int AddLayer(string name)
+        {
+            for (int i = 0; i < Layers.Count; i++)
+            {
+                if (Layers[i].Name == name)
+                    return i;
+            }
+            Layers.Add(new TtPatchLayer());
+            return Layers.Count - 1;
+        }
+    }
+
+    public class TtLayerManager : IO.BaseSerializer
+    {
+        public string CurrentLayerName { get; set; } = null;
+        [Rtti.Meta]
+        public List<string> LayerNames { get; set; } = new List<string>();
+    }
+
+    public class TtPatch : IDisposable
     {
         public int IndexX;
         public int IndexZ;
         public int XInLevel;
         public int ZInLevel;
         public DBoundingBox AABB;
+
+        public TtPatchLayers Layers = new TtPatchLayers();
 
         public UTerrainLevelData Level;
         public Graphics.Mesh.UMesh[] TerrainMesh;
@@ -33,7 +94,7 @@ namespace EngineNS.Bricks.Terrain.CDLOD
                 mCurrentLOD = value;
             }
         }
-        ~UPatch()
+        ~TtPatch()
         {
             Dispose();
         }

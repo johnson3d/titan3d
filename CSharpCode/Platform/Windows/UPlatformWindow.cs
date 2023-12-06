@@ -351,8 +351,8 @@ namespace EngineNS
                     // SDL 2.0.4 and later has SDL_GetGlobalMouseState() and SDL_CaptureMouse()
                     int mouse_x_global, mouse_y_global;
                     SDL.SDL_GetGlobalMouseState(out mouse_x_global, out mouse_y_global);
-                    UEngine.Instance.InputSystem.Mouse.MouseX = mouse_x_global;
-                    UEngine.Instance.InputSystem.Mouse.MouseY = mouse_y_global;
+                    UEngine.Instance.InputSystem.Mouse.GlobalMouseX = mouse_x_global;
+                    UEngine.Instance.InputSystem.Mouse.GlobalMouseY = mouse_y_global;
 
                     if ((io.ConfigFlags & ImGuiConfigFlags_.ImGuiConfigFlags_ViewportsEnable) != 0)
                     {

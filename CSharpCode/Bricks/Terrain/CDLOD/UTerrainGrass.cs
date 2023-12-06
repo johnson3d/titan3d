@@ -197,7 +197,7 @@ namespace EngineNS.Bricks.Terrain.CDLOD
                 CoreSDK.DisposeObject(ref Mesh);
                 CoreSDK.DisposeObject(ref GrassCBuffer);
             }
-            public UPatch Patch;
+            public TtPatch Patch;
             public UTerrainGrass GrassDesc { get; set; }
             public List<UGrassInstance> ObjInstances { get; } = new List<UGrassInstance>();
             public Graphics.Mesh.UMaterialMesh MaterialMesh;
@@ -209,7 +209,7 @@ namespace EngineNS.Bricks.Terrain.CDLOD
             public byte[] WeightMap;
             public bool CreateFinished = false;
 
-            public async System.Threading.Tasks.Task Create(UPatch patch, DVector3 patchOffset, UTerrainGrass desc)
+            public async System.Threading.Tasks.Task Create(TtPatch patch, DVector3 patchOffset, UTerrainGrass desc)
             {
                 Patch = patch;
                 GrassDesc = desc;
@@ -233,7 +233,7 @@ namespace EngineNS.Bricks.Terrain.CDLOD
 
                 CreateFinished = true;
             }
-            public async System.Threading.Tasks.Task Create(UPatch patch, DVector3 patchOffset, byte[] weights, int weightStride, UTerrainGrass desc)
+            public async System.Threading.Tasks.Task Create(TtPatch patch, DVector3 patchOffset, byte[] weights, int weightStride, UTerrainGrass desc)
             {
                 Patch = patch;
                 GrassDesc = desc;
@@ -279,16 +279,16 @@ namespace EngineNS.Bricks.Terrain.CDLOD
         }
         public Dictionary<UTerrainGrass, UGrassType> GrassTypes = new Dictionary<UTerrainGrass, UGrassType>();
         public uint CameralOffsetSerialId = 0;
-        UPatch mHostPatch;
+        TtPatch mHostPatch;
         int mCurrentPatchLOD;
 
-        public UTerrainGrassManager(UPatch patch)
+        public UTerrainGrassManager(TtPatch patch)
         {
             mHostPatch = patch;
             mCurrentPatchLOD = mHostPatch.CurrentLOD;
         }
 
-        void PushInstance(UPatch patch, UGrassType type, in DVector3 patchOffset, UTerrainGrass grass, in FTransform trans, int capacity)
+        void PushInstance(TtPatch patch, UGrassType type, in DVector3 patchOffset, UTerrainGrass grass, in FTransform trans, int capacity)
         {
             var patchSize = patch.Level.Level.Node.PatchSize;
             var inst = new UGrassInstance();
@@ -334,7 +334,7 @@ namespace EngineNS.Bricks.Terrain.CDLOD
             public UInt32 Data;
             public float TerrainHeight;
         }
-        void UpdateGrass(UPatch patch, UGrassType type)
+        void UpdateGrass(TtPatch patch, UGrassType type)
         {
             if (type.WeightMap == null || type.WeightStride == 0)
                 return;

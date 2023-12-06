@@ -273,7 +273,7 @@ namespace EngineNS.IO
                 }
             }
         }
-        private static void WriteObject(IWriter ar, Type t, object obj)
+        public static void WriteObject(IWriter ar, Type t, object obj)
         {
             bool isNull = false;
             if (obj == null)

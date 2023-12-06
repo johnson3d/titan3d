@@ -649,7 +649,7 @@ namespace EngineNS.UI.Bind
          where TClass : IBindableObject
     {
         public ValueStoreBase Value;
-        public TClass PropertyHostObject;
+        public dynamic PropertyHostObject;
         public TtAttachedValue(TClass hostObj)
         {
             PropertyHostObject = hostObj;
@@ -660,15 +660,24 @@ namespace EngineNS.UI.Bind
             if (Value == null)
                 Value = new ValueStore<T>(value);
             else
-                Value.SetValue(value);
-            bp.CallOnValueChanged(obj, bp, value);
+            {
+                var vs = Value as ValueStore<T>;
+                if (vs != null)
+                {
+                    vs.Value = value;
+                    bp.CallOnValueChanged(obj, bp, value);
+                }
+                else
+                    PropertyHostObject.SetAttachedPropertyValue(obj, bp, Value, value);
+            }
         }
         public override T GetValue<T>(TtBindableProperty bp)
         {
             var vs = Value as ValueStore<T>;
             if (vs != null)
                 return vs.Value;
-            return default(T);
+            return PropertyHostObject.GetAttachedPropertyValue(bp, Value);
+            //return default(T);
         }
     }
     public class TtExpressionValues : TtBindablePropertyValueBase

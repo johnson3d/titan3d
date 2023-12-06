@@ -1564,30 +1564,16 @@ namespace EngineNS.GamePlay
             }
         }
 
-        Plane mCheckPlane = new Plane();
-        unsafe bool PickPlanePos(Graphics.Pipeline.UViewportSlate viewport, int x, int y, in DVector3 planePos, in EngineNS.Vector3 planeNormal, out DVector3 resultPos)
+        bool PickPlanePos(Graphics.Pipeline.UViewportSlate viewport, int x, int y, in DVector3 planePos, in EngineNS.Vector3 planeNormal, out DVector3 resultPos)
         {
             resultPos = DVector3.Zero;
             EngineNS.Vector3 pickRay = -EngineNS.Vector3.UnitY;
-            var camera = mCameraController.Camera.mCoreObject;
             var pos = viewport.Window2Viewport(new Vector2(x, y));
+            var camera = mCameraController.Camera.mCoreObject;
             var pickResult = camera.GetPickRay(ref pickRay, pos.X, pos.Y, viewport.ClientSize.X, viewport.ClientSize.Y);
             if (pickResult <= 0)
                 return false;
-            var start = camera.GetLocalPosition();
-            var localPlanePos = planePos - camera.GetMatrixStartPosition();
-            mCheckPlane.Normal = planeNormal;
-            mCheckPlane.D = (float)-DVector3.Dot(localPlanePos, planeNormal);
-            var end = start + pickRay * 10000;
-            fixed (Plane* pPlane = &mCheckPlane)
-            {
-                Vector3 hitPos;
-                if ((IntPtr)IDllImportApi.v3dxPlaneIntersectLine(&hitPos, pPlane, &start, &end) == IntPtr.Zero)
-                    return false;
-                resultPos = hitPos.AsDVector() + camera.GetMatrixStartPosition();
-            }
-
-            return true;
+            return Plane.PickPlanePos(pickRay, camera.GetLocalPosition(), camera.GetMatrixStartPosition(), x, y, planePos, planeNormal, out resultPos);
         }
 
         static bool LineInterCircle(in DVector3 ptStart, in DVector3 ptEnd, in DVector3 ptCenter, float Radius2,

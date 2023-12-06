@@ -52,6 +52,7 @@ namespace EngineNS.Graphics.Pipeline.Deferred
         {
             return new EPixelShaderInput[] {
                 EPixelShaderInput.PST_Position,
+                EPixelShaderInput.PST_WorldPos,
                 EPixelShaderInput.PST_Normal,
                 EPixelShaderInput.PST_UV,
                 EPixelShaderInput.PST_Color,

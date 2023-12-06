@@ -56,8 +56,8 @@ namespace EngineNS.Graphics.Pipeline.Shadow
         private UInt32 mResolutionX = 1024; //3072
         protected UInt32 mResolutionY = 1024; //4096;
         private UInt32 mBorderSize = 2;//4;
-        private UInt32 mInnerResolutionX = 1024- 2 * 2; //5120; //4096 - 4 * 2;
-        private UInt32 mInnerResolutionY = 1024- 2 * 2; //5120; //4096 - 4 * 2;
+        private UInt32 mInnerResolutionX = 1024 - 2 * 2; //5120; //4096 - 4 * 2;
+        private UInt32 mInnerResolutionY = 1024 - 2 * 2; //5120; //4096 - 4 * 2;
         private UInt32 mWholeReslutionX = 1024 * 4;
         private UInt32 mWholeReslutionY = 1024;
 
@@ -354,6 +354,7 @@ namespace EngineNS.Graphics.Pipeline.Shadow
                     var ShadowCameraPos = FrustumSphereCenter - mDirLightDirection * ((float)FrustumSphereRadius + mShadowCameraOffset);
 
                     var shadowCamera = mShadowCameraArray[CsmIdx].mCoreObject;
+
                     shadowCamera.LookAtLH(ShadowCameraPos.AsDVector(), FrustumSphereCenter.AsDVector(), in Vector3.UnitY);
                     float FrustumSphereDiameter = (float)FrustumSphereRadius * 2.0f;
                     float ShadowCameraZFar = mShadowCameraOffset + FrustumSphereDiameter;
@@ -371,7 +372,6 @@ namespace EngineNS.Graphics.Pipeline.Shadow
                     mVisParameter.CullType = GamePlay.UWorld.UVisParameter.EVisCull.Shadow;
                     mVisParameter.World = world;
                     mVisParameter.CullCamera = mShadowCameraArray[CsmIdx];
-
 
                     if (mVisParameter.VisibleNodes == null)
                     {
@@ -395,11 +395,43 @@ namespace EngineNS.Graphics.Pipeline.Shadow
                         }
                     }
 
-                    //if (!AABB.IsEmpty())
-                    //{
-                    //    shadowCamera.DoOrthoProjectionForShadow(Math.Min(AABB.Maximum.X - AABB.Minimum.X, FrustumSphereDiameter), Math.Min(AABB.Maximum.Z - AABB.Minimum.Z, FrustumSphereDiameter), ShadowCameraZNear, ShadowCameraZFar, TexelOffsetNdcX, TexelOffsetNdcY);
-                    //}
-                    //else
+                    bool NeedOriShadowPro = true;
+
+                    if (!AABB.IsEmpty())
+                    {
+                        Matrix LookAtLHMat = Matrix.LookAtLH(ShadowCameraPos, FrustumSphereCenter, Vector3.UnitY);
+                        //Matrix LookAtLHMat = Matrix.LookAtLH(-mDirLightDirection, Vector3.Zero, Vector3.UnitY);
+                        Matrix ShadowProj = new Matrix();
+                        Matrix.Transpose(in LookAtLHMat, out ShadowProj);
+                        Vector3[] AABBCorners = AABB.GetCorners();
+                        //Vector3* NewPoints = stackalloc Vector3[8];
+                        Vector3[] NewPoints = new Vector3[8];
+                       
+                        for (int i = 0; i < 8; i++)
+                        {
+                            Vector4 TempPoints = Vector3.Transform(AABBCorners[i], in ShadowProj);
+                            float w = 1.0f;// TempPoints.W == 0.0f ? 1.0f : 1.0f / TempPoints.W;
+                            NewPoints[i].X = TempPoints.X * w;
+                            NewPoints[i].Y = TempPoints.Y * w;
+                            NewPoints[i].Z = TempPoints.Z * w;
+                        }
+
+                        BoundingBox ShadowBound = BoundingBox.FromPoints(NewPoints);
+
+                        if ((ShadowBound.Maximum.X - ShadowBound.Minimum.X) + 10.0f  < FrustumSphereDiameter && (ShadowBound.Maximum.Z - ShadowBound.Minimum.Z)+ 10.0f < FrustumSphereDiameter)
+                        {
+                            //shadowCamera.LookAtLH(-mDirLightDirection.AsDVector(), Vector3.Zero.AsDVector(), in Vector3.UnitY);
+
+                            NeedOriShadowPro = false;
+                            TexelOffsetNdcX = (ShadowBound.Maximum.X + ShadowBound.Minimum.X) / (ShadowBound.Maximum.X - ShadowBound.Minimum.X);
+                            TexelOffsetNdcY = (ShadowBound.Maximum.Z + ShadowBound.Minimum.Z) / (ShadowBound.Maximum.Z - ShadowBound.Minimum.Z);
+                            //shadowCamera.DoOrthoProjectionForShadow(ShadowBound.Maximum.X - ShadowBound.Minimum.X, ShadowBound.Maximum.Z - ShadowBound.Minimum.Z, ShadowCameraZNear, ShadowCameraZFar, TexelOffsetNdcX, TexelOffsetNdcY);
+                            shadowCamera.DoOrthoProjectionForShadow((ShadowBound.Maximum.X - ShadowBound.Minimum.X) +10.0f, (ShadowBound.Maximum.Z - ShadowBound.Minimum.Z) + 10.0f, ShadowCameraZNear, ShadowCameraZFar, TexelOffsetNdcX, TexelOffsetNdcY);
+                        }
+                       
+                    }
+                    
+                    if(NeedOriShadowPro)
                     {
                         shadowCamera.DoOrthoProjectionForShadow(FrustumSphereDiameter, FrustumSphereDiameter, ShadowCameraZNear, ShadowCameraZFar, TexelOffsetNdcX, TexelOffsetNdcY);
                     }

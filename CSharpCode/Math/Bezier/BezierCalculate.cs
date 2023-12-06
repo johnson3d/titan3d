@@ -85,7 +85,7 @@ namespace EngineNS
         }
 
         // xValue范围从bezierPtList起始点到结束点
-        public static EngineNS.Vector2 ValueOnBezier(List<BezierPointBase> bezierPtList, double xValue)
+        public static EngineNS.Vector2 ValueOnBezier(List<BezierPointBase> bezierPtList, double xValue, bool bAlongValue = false)
         {
             int i = 0;
             foreach (var pt in bezierPtList)
@@ -100,7 +100,17 @@ namespace EngineNS
             EngineNS.Vector2 retPt;
 
             if (i == 0 || i >= bezierPtList.Count)
-                return EngineNS.Vector2.Zero;
+            {
+                if(bAlongValue && bezierPtList.Count > 0)
+                {
+                    if (i == 0)
+                        return bezierPtList[0].Position;
+                    else if (i >= bezierPtList.Count)
+                        return bezierPtList[bezierPtList.Count - 1].Position;
+                }
+                else
+                    return EngineNS.Vector2.Zero;
+            }
 
             var pt0 = bezierPtList[i - 1];
             var pt1 = bezierPtList[i];

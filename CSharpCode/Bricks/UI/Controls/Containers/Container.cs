@@ -1,4 +1,5 @@
-﻿using EngineNS.UI.Canvas;
+﻿using EngineNS.IO;
+using EngineNS.UI.Canvas;
 using NPOI.SS.Formula.PTG;
 using System;
 using System.Collections;
@@ -143,9 +144,13 @@ namespace EngineNS.UI.Controls.Containers
             }
             if(element != null)
             {
+                if(element.mVisualParent != null)
+                    element.RemoveAttachedProperties(element.mVisualParent.GetType());
                 element.mParent = mLogicalParent;
                 element.RootUIHost = mVisualParent.RootUIHost;
                 element.mVisualParent = mVisualParent;
+                if(mVisualParent != null)
+                    mVisualParent.SetAttachedProperties(element);
             }
         }
 
@@ -473,11 +478,47 @@ namespace EngineNS.UI.Controls.Containers
         }
     }
 
+
     public abstract partial class TtContainer : TtUIElement
     {
         TtUIElementCollection mChildren;
-        [Browsable(false)]
-        public TtUIElementCollection Children => mChildren;
+        public class ElementCollectionSaverAttribute : IO.UCustomSerializerAttribute
+        {
+            public override void Save(IWriter ar, object host, string propName)
+            {
+                System.Diagnostics.Debug.Assert(propName == "Children");
+                var container = host as TtContainer;
+                var count = container.mChildren.Count;
+                ar.Write(count);
+                for(int i=0; i<count; i++)
+                {
+                    ar.Write(container.mChildren[i]);
+                }
+            }
+            public override object Load(IReader ar, object host, string propName)
+            {
+                System.Diagnostics.Debug.Assert(propName == "Children");
+                var container = host as TtContainer;
+                int count;
+                ar.Read(out count);
+                for(int i=0; i<count; i++)
+                {
+                    IO.ISerializer serial;
+                    ar.Read(out serial, host);
+                    var element = serial as TtUIElement;
+                    container.mChildren.Add(element);
+                    element.SetLoadedAttachedValues();
+                }
+                return null;
+            }
+        }
+        [Browsable(false), ElementCollectionSaver, Rtti.Meta]
+        public TtUIElementCollection Children
+        {
+            get => mChildren;
+            private set { ; }
+        }
+
         [Browsable(false)]
         public bool ChildIsContentsPresenter
         {
@@ -718,6 +759,15 @@ namespace EngineNS.UI.Controls.Containers
                 child?.UpdateTransformIndex(idx);
             }
             return idx;
+        }
+
+        public virtual bool CanAddChild(TtUIElement element)
+        {
+            return true;
+        }
+        public virtual void ProcessNewAddChild(TtUIElement element, in Vector2 offset, in Vector2 size)
+        {
+
         }
     }
 }

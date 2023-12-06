@@ -210,6 +210,7 @@ namespace EngineNS.UI.Canvas
         public bool IsDirty
         {
             get => mCoreObject.IsDirty;
+            set => mCoreObject.IsDirty = value;
         }
 
         public void SetSrv(NxRHI.USrView texture)

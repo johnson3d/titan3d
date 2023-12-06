@@ -487,6 +487,7 @@ namespace EngineNS.UI.Bind
         public void RemoveAttachedProperties(Type propertiesHostType);
         public void RemoveAttachedProperty(TtBindableProperty property);
         public void SetAttachedProperties(IBindableObject target);
+        public void AddAttachedProperty<T>(TtBindableProperty property, IBindableObject bpHost, in T defaultValue);
         public TtBindableProperty FindBindableProperty(string propertyName);
 #nullable disable
     }
@@ -539,11 +540,12 @@ namespace EngineNS.UI.Bind
             TtBindablePropertyValueBase bpVal = null;
             lock (mBindExprDic)
             {
-                if(bp.IsAttachedProperty && !mBindExprDic.TryGetValue(bp, out bpVal))
-                {
-                    bpVal = new TtAttachedValue<IBindableObject, T>(this);
-                    mBindExprDic[bp] = bpVal;
-                }
+                var result = mBindExprDic.TryGetValue(bp, out bpVal);
+                //if (bp.IsAttachedProperty && !result)
+                //{
+                //    bpVal = new TtAttachedValue<IBindableObject, T>(this);
+                //    mBindExprDic[bp] = bpVal;
+                //}
             }
             if (bpVal == null)
                 return;
@@ -639,7 +641,9 @@ namespace EngineNS.UI.Bind
         public virtual void SetAttachedProperties(IBindableObject target)
         {
         }
-
+        public void AddAttachedProperty<T>(TtBindableProperty property, IBindableObject bpHost, in T defaultValue)
+        {
+        }
 
         [Browsable(false)]
         public bool IsPropertyVisibleDirty

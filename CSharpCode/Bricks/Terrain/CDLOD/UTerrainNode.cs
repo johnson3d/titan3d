@@ -329,7 +329,7 @@ namespace EngineNS.Bricks.Terrain.CDLOD
         }
         #endregion
 
-        public void UpdateRangeLOD(List<float> radius, DVector3 eyePos, List<UPatch> patches)
+        public void UpdateRangeLOD(List<float> radius, DVector3 eyePos, List<TtPatch> patches)
         {
             double morphStart = 0;
 
@@ -361,7 +361,7 @@ namespace EngineNS.Bricks.Terrain.CDLOD
 
             UpdateCBuffer();
         }
-        private unsafe double SphereCover(in DBoundingSphere sphere, int level, int maxLevel, List<UPatch> patches)
+        private unsafe double SphereCover(in DBoundingSphere sphere, int level, int maxLevel, List<TtPatch> patches)
         {
             double maxDist = 0;
             DVector3* boxCorner = stackalloc DVector3[8];
@@ -479,8 +479,8 @@ namespace EngineNS.Bricks.Terrain.CDLOD
                 rp.VisibleNodes.Add(this);
             }
         }
-        public List<UPatch> VisiblePatches = new List<UPatch>();
-        public void FrustumCull(GamePlay.UWorld.UVisParameter rp, List<UPatch> patches)
+        public List<TtPatch> VisiblePatches = new List<TtPatch>();
+        public void FrustumCull(GamePlay.UWorld.UVisParameter rp, List<TtPatch> patches)
         {
             patches.Clear();
             foreach (var i in ActiveLevels)

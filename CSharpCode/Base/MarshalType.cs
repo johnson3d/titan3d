@@ -9,10 +9,18 @@ using Org.BouncyCastle.Crypto.Agreement;
 
 public struct Wchar16
 {
+    public Wchar16(UInt16 v)
+    {
+        Value = v;
+    }
     public UInt16 Value;
 }
 public struct Wchar32
 {
+    public Wchar32(UInt32 v)
+    {
+        Value = v;
+    }
     public UInt32 Value;
 }
 

@@ -250,7 +250,9 @@ namespace EngineNS
                             break;
                     }
                 }
-                result[j] = float.Parse(chars.Slice(iStart, chars.Length - iStart));
+                float val = 0;
+                if(float.TryParse(chars.Slice(iStart, chars.Length - iStart), out val))
+                    result[j] = val;
                 return result;
                 //var segs = text.Split(',');
                 //return new Vector4(System.Convert.ToSingle(segs[0]),

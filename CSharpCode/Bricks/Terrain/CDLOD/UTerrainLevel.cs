@@ -53,10 +53,11 @@ namespace EngineNS.Bricks.Terrain.CDLOD
             return Node?.TerrainMaterialIdManager;
         }
     }
+
     public class UTerrainLevelData : IDisposable
     {
         public UTerrainLevel Level;
-        public UPatch[,] TiledPatch;
+        public TtPatch[,] TiledPatch;
         public NxRHI.USrView HeightMapSRV;
         public NxRHI.USrView WaterHMapSRV;
         public NxRHI.USrView NormalMapSRV;
@@ -239,13 +240,13 @@ namespace EngineNS.Bricks.Terrain.CDLOD
         public void UpdateHeightMap(Procedure.UBufferConponent hMap)
         {
             var patchSide = Level.PatchSide;
-            TiledPatch = new UPatch[patchSide, patchSide];
+            TiledPatch = new TtPatch[patchSide, patchSide];
             for (int i = 0; i < patchSide; i++)
             {
                 for (int j = 0; j < patchSide; j++)
                 {
                     if (TiledPatch[i, j] == null)
-                        TiledPatch[i, j] = new UPatch();
+                        TiledPatch[i, j] = new TtPatch();
                     TiledPatch[i, j].Initialize(this, j, i, hMap);
                 }
             }
@@ -756,7 +757,7 @@ namespace EngineNS.Bricks.Terrain.CDLOD
             }
         }
 
-        public void FrustumCull(GamePlay.UWorld.UVisParameter rp, List<UPatch> patches)
+        public void FrustumCull(GamePlay.UWorld.UVisParameter rp, List<TtPatch> patches)
         {
             foreach (var i in TiledPatch)
             {

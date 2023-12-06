@@ -422,6 +422,7 @@ namespace EngineNS.Bricks.NodeGraph
                                     }
                                 }
                             }
+                            //handle.Free();
                        }
                     }
                     ImGuiAPI.NextColumn();

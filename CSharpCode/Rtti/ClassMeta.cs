@@ -339,7 +339,7 @@ namespace EngineNS.Rtti
                 }
             }
             var result = new UMetaVersion(this);
-            var props = type.SystemType.GetProperties();
+            var props = type.SystemType.GetProperties(System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.Static);
             foreach(var i in props)
             {
                 var attrs = i.GetCustomAttributes(typeof(MetaAttribute), true);

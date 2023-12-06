@@ -150,35 +150,35 @@ namespace EngineNS.EGui.Slate
 
             //io.Fonts.ClearTexData();
 
-            using (var ranges = UNativeArray<ushort>.CreateInstance())
+            using (var ranges = UNativeArray<Wchar16>.CreateInstance())
             {
                 // Basic Latin + Latin Supplement
-                ranges.Add(0x0020);
-                ranges.Add(0x00FF);
+                ranges.Add(new Wchar16(0x0020));
+                ranges.Add(new Wchar16(0x00FF));
                 // General Punctuation
-                ranges.Add(0x2000);
-                ranges.Add(0x206F);
+                ranges.Add(new Wchar16(0x2000));
+                ranges.Add(new Wchar16(0x206F));
                 // CJK Symbols and Punctuations, Hiragana, Katakana
-                ranges.Add(0x3000);
-                ranges.Add(0x30FF);
+                ranges.Add(new Wchar16(0x3000));
+                ranges.Add(new Wchar16(0x30FF));
                 // Katakana Phonetic Extensions
-                ranges.Add(0x31F0);
-                ranges.Add(0x31FF);
+                ranges.Add(new Wchar16(0x31F0));
+                ranges.Add(new Wchar16(0x31FF));
                 // Half-width characters
-                ranges.Add(0xFF00);
-                ranges.Add(0xFFEF);
+                ranges.Add(new Wchar16(0xFF00));
+                ranges.Add(new Wchar16(0xFFEF));
                 // CJK Ideograms
                 switch (UEngine.Instance.Config.EditorLanguage)
                 {
                     case "Chinese":
                         {
-                            ranges.Add(0x4e00);
-                            ranges.Add(0x9FAF);
+                            ranges.Add(new Wchar16(0x4e00));
+                            ranges.Add(new Wchar16(0x9FAF));
                         }
                         break;
                 }
                 //push end
-                ranges.Add(0);
+                ranges.Add(new Wchar16(0));
 
                 var io = ImGuiAPI.GetIO();
                 var FontName = UEngine.Instance.Config.EditorFont.Address;
@@ -190,16 +190,16 @@ namespace EngineNS.EGui.Slate
 
                 ftName = CreateFontTexture(FontName, 13.0f, (ImFontConfig*)0, ranges.UnsafeGetElementAddress(0));
 
-                ushort* iconRange = stackalloc ushort[3];
-                iconRange[0] = 0xe005;
-                iconRange[1] = 0xf8ff;
-                iconRange[2] = 0;
+                var iconRange = stackalloc Wchar16[3];
+                iconRange[0] = new Wchar16(0xe005);
+                iconRange[1] = new Wchar16(0xf8ff);
+                iconRange[2] = new Wchar16(0);
                 //CreateFontTexture(UEngine.Instance.FileManager.GetRoot(IO.FileManager.ERootDir.Engine) + "fonts/fa-solid-900.ttf", 15.0f, &fontConfig, iconRange);
                 ftName = CreateFontTexture(UEngine.Instance.FileManager.GetRoot(IO.TtFileManager.ERootDir.Engine) + "fonts/fa-solid-900.ttf", 15.0f, (ImFontConfig*)0, iconRange);
             }
         }
 
-        unsafe enFont CreateFontTexture(string absFontFile, float size_pixels, ImFontConfig* fontConfig, ushort* glyph_ranges)
+        unsafe enFont CreateFontTexture(string absFontFile, float size_pixels, ImFontConfig* fontConfig, Wchar16* glyph_ranges)
         {
             var fontData = new FontDatas();
 

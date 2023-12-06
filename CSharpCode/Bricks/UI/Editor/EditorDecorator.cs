@@ -1,5 +1,8 @@
-﻿using EngineNS.GamePlay.Scene;
+﻿using EngineNS.GamePlay;
+using EngineNS.GamePlay.Scene;
 using EngineNS.Graphics.Mesh;
+using EngineNS.Graphics.Pipeline.Common;
+using EngineNS.Rtti;
 using EngineNS.UI.Canvas;
 using EngineNS.UI.Controls;
 using System;
@@ -8,54 +11,79 @@ using System.Text;
 
 namespace EngineNS.UI.Editor
 {
+    [AttributeUsage(AttributeTargets.Class)]
+    public class EditorDecoratorAttribute : Attribute
+    {
+        public Rtti.UTypeDesc TypeDesc;
+        public EditorDecoratorAttribute(Type decoratorType)
+        {
+            TypeDesc = Rtti.UTypeDesc.TypeOf(decoratorType);
+        }
+    }
+
+    public interface IUIEditorDecorator
+    {
+        bool IsDirty { get; set; }
+        Thread.Async.TtTask Initialize(TtUIEditor editor);
+        Thread.Async.TtTask UpdateDecorator();
+        void ProcessSelectElementDecorator();
+        void DecoratorEventProcess(in Bricks.Input.Event e);
+        bool IsInDecoratorOperation();
+    }
+
     public partial class TtUIEditor
     {
-        UMeshNode[] mOperatorNodes = new UMeshNode[8];
-        TtUINode mSelectedRect;
-        TtUINode mPointAtRect;
+        SelectedDecorator mSelectedDecoratorUIHost;
+        internal TtUINode SelectedRect;
+        internal TtUINode PointAtRect;
+        internal UHitproxyNode HitProxyNode;
+        Dictionary<Rtti.UTypeDesc, IUIEditorDecorator> mDecorators = new Dictionary<UTypeDesc, IUIEditorDecorator>();
+        internal IUIEditorDecorator CurrentDecorator;
 
         async Thread.Async.TtTask InitializeDecorators()
         {
-            var whiteColorMat = await UEngine.Instance.GfxDevice.MaterialInstanceManager.CreateMaterialInstance(RName.GetRName("material/whitecolor.uminst"));
-            var meshProvider = UMeshDataProvider.MakeSphere(10.0f, 8, 8, 0xffffffff);
-            var meshPrim = meshProvider.ToMesh();
-            for(int i=0; i<8; i++)
-            {
-                var mesh = new UMesh();
-                mesh.Initialize(meshPrim, new Graphics.Pipeline.Shader.UMaterial[] { whiteColorMat },
-                    Rtti.UTypeDescGetter<Graphics.Mesh.UMdfStaticMesh>.TypeDesc);
-                mOperatorNodes[i] = await UMeshNode.AddMeshNode(PreviewViewport.World, mUINode,
-                    new GamePlay.Scene.UMeshNode.UMeshNodeData(), typeof(GamePlay.UPlacement),
-                    mesh, DVector3.Zero, Vector3.One, Quaternion.Identity);
-            }
-
-            var selectHost = new EditorUIHost();
-            selectHost.DrawBrush.Color = Color.LightGreen;
-            mSelectedRect = await TtUINode.AddUINode(PreviewViewport.World, mUINode, new UNodeData(),
-                typeof(GamePlay.UPlacement), selectHost, DVector3.Zero, Vector3.One, Quaternion.Identity);
-            mSelectedRect.Parent = null;
+            mSelectedDecoratorUIHost = new SelectedDecorator();
+            mSelectedDecoratorUIHost.DrawBrush.Color = Color.LightGreen;
+            SelectedRect = await TtUINode.AddUINode(PreviewViewport.World, mUINode, new UNodeData(),
+                typeof(GamePlay.UPlacement), mSelectedDecoratorUIHost, DVector3.Zero, Vector3.One, Quaternion.Identity);
+            SelectedRect.Parent = null;
 
             var pointAtHost = new EditorUIHost();
             pointAtHost.DrawBrush.Color = Color.LightBlue;
-            mPointAtRect = await TtUINode.AddUINode(PreviewViewport.World, mUINode, new UNodeData(),
+            PointAtRect = await TtUINode.AddUINode(PreviewViewport.World, mUINode, new UNodeData(),
                 typeof(GamePlay.UPlacement), pointAtHost, DVector3.Zero, Vector3.One, Quaternion.Identity);
-            mPointAtRect.Parent = null;
+            PointAtRect.Parent = null;
+
+            HitProxyNode = PreviewViewport.RenderPolicy.FindFirstNode<Graphics.Pipeline.Common.UHitproxyNode>();
         }
 
         async Thread.Async.TtTask UpdateDecorator()
         {
-            if(mSelectedRect.UIHost.MeshDirty && (mSelectedRect.Parent != null))
+            for(int i=mSelectedElements.Count - 1; i >=0; i--)
             {
-                await mSelectedRect.UIHost.BuildMesh();
+                if (mSelectedElements[i].MeshDirty)
+                {
+                    if(CurrentDecorator != null)
+                        CurrentDecorator.IsDirty = true;
+                    SelectedRect.UIHost.MeshDirty = true;
+                }
             }
-            if(mPointAtRect.UIHost.MeshDirty && (mSelectedRect.Parent != null))
+
+            if(SelectedRect.UIHost.MeshDirty && (SelectedRect.Parent != null))
             {
-                await mPointAtRect.UIHost.BuildMesh();
+                await SelectedRect.UIHost.BuildMesh();
             }
+            if(PointAtRect.UIHost.MeshDirty && (PointAtRect.Parent != null))
+            {
+                await PointAtRect.UIHost.BuildMesh();
+            }
+
+            CurrentDecorator?.UpdateDecorator();
         }
 
         TtUIElement mCurrentPointAtElement;
-        void SetCurrentPointAtElement(TtUIElement element)
+        public TtUIElement CurrentPointAtElement => mCurrentPointAtElement;
+        internal void SetCurrentPointAtElement(TtUIElement element)
         {
             // debug //////////////////
             if (element != null)
@@ -66,34 +94,71 @@ namespace EngineNS.UI.Editor
 
             if (element != null)
             {
-                mPointAtRect.UIHost.SetDesignRect(element.DesignRect);
-                if(mPointAtRect.UIHost.TransformedElements.Count <= 0)
-                    mPointAtRect.UIHost.AddTransformedUIElement(mPointAtRect.UIHost, 0);
-                mPointAtRect.UIHost.TransformedElements[0].SetMatrix(in mUIHost.TransformedElements[element.TransformIndex].Matrix);
+                PointAtRect.UIHost.SetDesignRect(element.DesignRect);
+                if(PointAtRect.UIHost.TransformedElements.Count <= 0)
+                    PointAtRect.UIHost.AddTransformedUIElement(PointAtRect.UIHost, 0);
+                PointAtRect.UIHost.TransformedElements[0].SetMatrix(in mUIHost.TransformedElements[element.TransformIndex].Matrix);
 
-                mPointAtRect.UIHost.MeshDirty = true;
-                mPointAtRect.Parent = mUINode;
+                PointAtRect.UIHost.MeshDirty = true;
+                PointAtRect.Parent = mUINode;
             }
             else
             {
-                mPointAtRect.Parent = null;
+                PointAtRect.Parent = null;
             }
 
             mCurrentPointAtElement = element;
         }
 
-        TtUIElement mSelectedElement;
-        void SelectElement(TtUIElement element)
+        async Thread.Async.TtTask ProcessSelectElementDecorator()
         {
-            mSelectedElement = element;
-            if(element != null)
+            CurrentDecorator = null;
+            if (mSelectedElements.Count > 0)
             {
+                mSelectedDecoratorUIHost.SelectedElements = mSelectedElements;
+                mSelectedDecoratorUIHost.MeshDirty = true;
+                //mSelectedRect.UIHost.SetDesignRect(element.DesignRect);
+                //if (mSelectedRect.UIHost.TransformedElements.Count <= 0)
+                //    mSelectedRect.UIHost.AddTransformedUIElement(mSelectedRect.UIHost, 0);
+                //mSelectedRect.UIHost.TransformedElements[0].SetMatrix(in transMat);
+                SelectedRect.UIHost.MeshDirty = true;
+                SelectedRect.Parent = mUINode;
 
+                UTypeDesc decalType;
+                var parent = VisualTreeHelper.GetParent(mSelectedElements[0]);
+                if(parent != null)
+                {
+                    var atts = parent.GetType().GetCustomAttributes(typeof(EditorDecoratorAttribute), true);
+                    if (atts.Length > 0)
+                    {
+                        decalType = ((EditorDecoratorAttribute)atts[0]).TypeDesc;
+                        if(!mDecorators.TryGetValue(decalType, out CurrentDecorator))
+                        {
+                            CurrentDecorator = UTypeDescManager.CreateInstance(decalType) as IUIEditorDecorator;
+                            await CurrentDecorator.Initialize(this);
+                            mDecorators[decalType] = CurrentDecorator;
+                        }
+                        // when update type, type is not equal
+                        if(CurrentDecorator != null && !decalType.IsEqual(CurrentDecorator.GetType()))
+                        {
+                            CurrentDecorator = UTypeDescManager.CreateInstance(decalType) as IUIEditorDecorator;
+                            await CurrentDecorator.Initialize(this);
+                            mDecorators[decalType] = CurrentDecorator;
+                        }
+                    }
+                }
             }
             else
             {
-
+                SelectedRect.Parent = null;
             }
+
+            CurrentDecorator?.ProcessSelectElementDecorator();
+        }
+
+        void DecoratorEventProcess(in Bricks.Input.Event e)
+        {
+            CurrentDecorator?.DecoratorEventProcess(e);
         }
     }
 }

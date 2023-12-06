@@ -8,6 +8,7 @@ using System.Text;
 namespace EngineNS.UI.Controls.Containers
 {
     [Editor_UIControl("Container.Canvas", "Canvas", "")]
+    [Editor.EditorDecoratorAttribute(typeof(Editor.Decorator_Canvas))]
     public partial class TtCanvasControl : TtContainer
     {
         [Bind.AttachedProperty(Name = "AnchorMin", Category = "Layout(Canvas)")]
@@ -214,6 +215,14 @@ namespace EngineNS.UI.Controls.Containers
                 var childArrangeSize = new RectangleF(posX, posY, width, height);
                 childUI.Arrange(in childArrangeSize);
             }
+        }
+
+        public override void ProcessNewAddChild(TtUIElement element, in Vector2 offset, in Vector2 size)
+        {
+            SetAnchorRectX(element, offset.X);
+            SetAnchorRectY(element, offset.Y);
+            SetAnchorRectZ(element, size.X);
+            SetAnchorRectW(element, size.Y);
         }
     }
 }

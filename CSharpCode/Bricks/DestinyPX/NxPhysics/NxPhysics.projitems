@@ -1,0 +1,19 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <MSBuildAllProjects Condition="'$(MSBuildVersion)' == '' Or '$(MSBuildVersion)' &lt; '16.0'">$(MSBuildAllProjects);$(MSBuildThisFileFullPath)</MSBuildAllProjects>
+    <HasSharedItems>true</HasSharedItems>
+    <SharedGUID>8d584d87-62a1-41de-af08-4e4527fe106e</SharedGUID>
+  </PropertyGroup>
+  <PropertyGroup Label="Configuration">
+    <Import_RootNamespace>EngineNS.NxPhysics</Import_RootNamespace>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="$(MSBuildThisFileDirectory)NxActor.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)NxDevice.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)NxScene.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)NxSceneDebugger.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)NxShape.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)NxUtility.cs" />
+  </ItemGroup>
+</Project>

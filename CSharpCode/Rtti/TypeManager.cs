@@ -690,6 +690,10 @@ namespace EngineNS.Rtti
             return null;
         }
         public Dictionary<string, string> StringMap = new Dictionary<string, string>();
+        public string GetTypeStringFromType(UTypeDesc type, bool tryAdd2Manager = true)
+        {
+            return GetTypeStringFromType(type.SystemType, tryAdd2Manager);
+        }
         public string GetTypeStringFromType(Type type, bool tryAdd2Manager = true)
         {
             var originName = type.ToString();// type.FullName;

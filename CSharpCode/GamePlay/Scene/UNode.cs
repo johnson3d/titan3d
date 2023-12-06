@@ -449,9 +449,9 @@ namespace EngineNS.GamePlay.Scene
             }
             if (!HasStyle(ENodeStyles.ChildrenInvisible))
             {
-                foreach (var i in Children)
+                for(int i=Children.Count - 1; i>=0; i--)
                 {
-                    if (i.DFS_VisitNodeTree(visitor, arg))
+                    if (Children[i].DFS_VisitNodeTree(visitor, arg))
                     {
                         return true;
                     }
