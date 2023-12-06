@@ -16,6 +16,7 @@
   <ItemGroup>
     <ClInclude Include="$(MSBuildThisFileDirectory)NxActor.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)NxConstraint.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)NxCSharp.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)NxDevice.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)NxJoint.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)NxMaterial.h" />
@@ -26,6 +27,7 @@
   <ItemGroup>
     <ClCompile Include="$(MSBuildThisFileDirectory)NxActor.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)NxConstraint.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)NxCSharp.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)NxDevice.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)NxJoint.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)NxMaterial.cpp" />

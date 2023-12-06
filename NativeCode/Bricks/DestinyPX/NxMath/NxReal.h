@@ -15,36 +15,57 @@ namespace NxMath
 		using ThisType = NxFloat32;
 		ValueType mValue = 0;
 
-		static constexpr const ValueType NaN()
+		inline double AsDouble() const
+		{
+			return (double)mValue;
+		}
+		inline float AsSingle() const
+		{
+			return (float)AsDouble();
+		}
+
+#if defined(__clang__)
+		static constexpr const ThisType ByDouble(double _Value)
+		{
+			return (float)_Value;
+		}
+#else
+		template <double _Value>
+		static constexpr const ThisType ByDouble(double V)
+		{
+			return (float)_Value;
+		}
+#endif
+		static constexpr const ThisType NaN()
 		{
 			return std::numeric_limits<float>::quiet_NaN();
 		}
-		static constexpr const ValueType Zero()
+		static constexpr const ThisType Zero()
 		{
 			return 0.0f;
 		}
-		static constexpr const ValueType One()
+		static constexpr const ThisType One()
 		{
 			return 1.0f;
 		}
-		static constexpr const ValueType F_0_5()
+		static constexpr const ThisType F_0_5()
 		{
 			return 0.5f;
 		}
-		static constexpr const ValueType F_2_0()
+		static constexpr const ThisType F_2_0()
 		{
 			return 2.0f;
 		}
 		
-		static constexpr const ValueType Pi()
+		static constexpr const ThisType Pi()
 		{
 			return 3.14159f;
 		}
-		static constexpr const ValueType Epsilon()
+		static constexpr const ThisType Epsilon()
 		{
 			return 0.000001f;
 		}
-		static constexpr const ValueType EpsilonLow()
+		static constexpr const ThisType EpsilonLow()
 		{
 			return 0.01f;
 		}
@@ -53,7 +74,7 @@ namespace NxMath
 		{
 			return NxFloat32(value);
 		}
-		NxFloat32(ValueType value)
+		constexpr NxFloat32(float value)
 			: mValue(value)
 		{
 
@@ -202,60 +223,74 @@ namespace NxMath
 		ValueType mValue = 0;
 
 		#pragma region constexpr var
+		#define	NxRealCValue(_Value) NxCValue(_Value, ValueType, FracBit)
+		
+#if defined(__clang__)
+		static constexpr const ThisType ByDouble(double _Value)
+		{
+			return NxRealCValue(_Value);
+		}
+#else
+		template <double _Value>
+		static constexpr const ThisType ByDouble(double v)
+		{
+			return NxRealCValue(_Value);
+		}
+#endif
 		static constexpr const ThisType NaN()
 		{
 			return ThisType(~ValueType(0));
 		}
 		static constexpr const ThisType Zero()
 		{
-			return NxConstValue<0.0, ValueType, FracBit>::ResultValue;
+			return NxRealCValue(0.0);
 			//return ThisType(0);
 		}
 		static constexpr const ThisType One()
 		{
-			return NxConstValue<1.0, ValueType, FracBit>::ResultValue;
+			return NxRealCValue(1.0);
 			//return ThisType((ValueType)Scalar * 1);
 		}
-		static constexpr const ValueType F_0_5()
+		static constexpr const ThisType F_0_5()
 		{
-			return NxConstValue<0.5, ValueType, FracBit>::ResultValue;
+			return NxRealCValue(0.5);
 		}
-		static constexpr const ValueType F_2_0()
+		static constexpr const ThisType F_2_0()
 		{
-			return NxConstValue<2.0, ValueType, FracBit>::ResultValue; 
+			return NxRealCValue(2.0);
 		}
 		static constexpr const ThisType Pi()
 		{
-			return NxConstValue<3.14159, ValueType, FracBit>::ResultValue;
+			return NxRealCValue(3.14159);
 			//return ThisType((ValueType)(3.14159 * (double)Scalar));
 		}
 		static constexpr const ThisType HalfPi()
 		{
-			return NxConstValue<3.14159 * 0.5, ValueType, FracBit>::ResultValue;
+			return NxRealCValue(3.14159 * 0.5);
 			//return ThisType((ValueType)((3.14159 * 0.5) * (double)Scalar));
 		}
 		static constexpr const ThisType TwoPi()
 		{
-			return NxConstValue<3.14159 * 2.0, ValueType, FracBit>::ResultValue;
+			return NxRealCValue(3.14159 * 2.0);
 			//return ThisType((ValueType)((3.14159 * 2.0) * (double)Scalar));
 		}
 		static constexpr const ThisType Epsilon()
 		{
-			return NxConstValue<0.000001, ValueType, FracBit>::ResultValue;
+			return NxRealCValue(0.000001);
 			//return ThisType((ValueType)(0.000001 * (double)Scalar));
 		}
 		static constexpr const ThisType EpsilonLow()
 		{
-			return NxConstValue<0.01, ValueType, FracBit>::ResultValue;
+			return NxRealCValue(0.01);
 		}
 		static constexpr const ThisType Ln10()
 		{
-			return NxConstValue<2.3025850929940456840179914547, ValueType, FracBit>::ResultValue;
+			return NxRealCValue(2.3025850929940456840179914547);
 			//return ThisType((ValueType)(2.3025850929940456840179914547 * (double)Scalar));
 		}
 		static constexpr const ThisType Lnr()
 		{
-			return NxConstValue<0.2002433314278771112016301167, ValueType, FracBit>::ResultValue;
+			return NxRealCValue(0.2002433314278771112016301167);
 			//return ThisType((ValueType)(0.2002433314278771112016301167 * (double)Scalar));
 		}
 		#pragma endregion
@@ -263,6 +298,10 @@ namespace NxMath
 		inline double AsDouble() const
 		{
 			return (double)mValue / (double)Scalar;
+		}
+		inline float AsSingle() const
+		{
+			return (float)AsDouble();
 		}
 	protected:
 		NxFixed(ValueType value)
@@ -890,41 +929,67 @@ namespace NxMath
 		T mValue;
 		using RealType = T;
 		using ValueType = T::ValueType;
+		using ThisType = NxReal<T>;
 
-		static constexpr NxReal Zero() 
+		inline double AsDouble() const
+		{
+			return mValue.AsDouble();
+		}
+		inline float AsSingle() const
+		{
+			return mValue.AsSingle();
+		}
+#if defined(__clang__)
+		static constexpr const ThisType ByDouble(double v)
+		{
+			return T::ByDouble(v);
+		}
+#else
+		template <double _Value>
+		static constexpr const ThisType ByDouble(double v)
+		{
+			return T::ByDouble<_Value>(v);
+		}
+#endif
+		static constexpr ThisType Zero()
 		{
 			return NxReal(T::Zero());
 		}
-		static constexpr NxReal One()
+		static constexpr ThisType One()
 		{
 			return NxReal(T::One());
 		}
-		static constexpr NxReal MinusOne()
+		static constexpr ThisType MinusOne()
 		{
 			return NxReal(-T::One());
 		}
-		static constexpr const ValueType F_0_5()
+		static constexpr const ThisType F_0_5()
 		{
 			return NxReal(T::F_0_5());
 		}
-		static constexpr const ValueType F_2_0()
+		static constexpr const ThisType F_2_0()
 		{
 			return NxReal(T::F_2_0());
 		}
-		static constexpr NxReal Epsilon()
+		static constexpr ThisType Epsilon()
 		{
 			return NxReal(T::Epsilon());
 		}
-		static constexpr NxReal EpsilonLow()
+		static constexpr ThisType EpsilonLow()
 		{
 			return NxReal(T::EpsilonLow());
 		}
-		static constexpr NxReal Pi()
+		static constexpr ThisType Pi()
 		{
 			return NxReal(T::Pi());
 		}
 
 		NxReal()
+		{
+
+		}
+		NxReal(float value)
+			: mValue(value)
 		{
 
 		}
@@ -942,6 +1007,8 @@ namespace NxMath
 		{
 			return -mValue;
 		}
+
+		#pragma region operator
 		#pragma region operator =
 		inline NxReal& operator = (float rh)
 		{
@@ -1059,75 +1126,75 @@ namespace NxMath
 		}
 		#pragma endregion
 		#pragma region operator +
-		inline friend NxReal operator +(const NxReal& lh, float rh)
+		inline NxReal operator +(float rh) const
 		{
-			return T::Add(lh.mValue, rh);
+			return T::Add(mValue, rh);
 		}
-		inline friend NxReal operator +(const NxReal& lh, int rh)
+		inline NxReal operator +(int rh) const
 		{
-			return T::Add(lh.mValue, rh);
+			return T::Add(mValue, rh);
 		}
-		inline friend NxReal operator +(const NxReal& lh, unsigned int rh)
+		inline NxReal operator +(unsigned int rh) const
 		{
-			return T::Add(lh.mValue, rh);
+			return T::Add(mValue, rh);
 		}
-		inline friend NxReal operator +(const NxReal& lh, const NxReal& rh)
+		inline NxReal operator +(const NxReal& rh) const
 		{
-			return T::Add(lh.mValue, rh.mValue);
+			return T::Add(mValue, rh.mValue);
 		}
 		#pragma endregion
 		#pragma region operator -
-		inline friend NxReal operator -(const NxReal& lh, float rh)
+		inline NxReal operator -(float rh) const
 		{
-			return T::Sub(lh.mValue, rh);
+			return T::Sub(mValue, rh);
 		}
-		inline friend NxReal operator -(const NxReal& lh, int rh)
+		inline NxReal operator -(int rh) const
 		{
-			return T::Sub(lh.mValue, rh);
+			return T::Sub(rh);
 		}
-		inline friend NxReal operator -(const NxReal& lh, unsigned int rh)
+		inline NxReal operator -(unsigned int rh) const
 		{
-			return T::Sub(lh.mValue, rh);
+			return T::Sub(mValue, rh);
 		}
-		inline friend NxReal operator -(const NxReal& lh, const NxReal& rh)
+		inline NxReal operator -(const NxReal& rh) const
 		{
-			return T::Sub(lh.mValue, rh.mValue);
+			return T::Sub(mValue, rh.mValue);
 		}
 		#pragma endregion
 		#pragma region operator *
-		inline friend NxReal operator *(const NxReal& lh, float rh)
+		inline NxReal operator *(float rh) const
 		{
-			return T::Mul(lh.mValue, rh);
+			return T::Mul(mValue, rh);
 		}
-		inline friend NxReal operator *(const NxReal& lh, int rh)
+		inline NxReal operator *(int rh) const
 		{
-			return T::Mul(lh.mValue, rh);
+			return T::Mul(mValue, rh);
 		}
-		inline friend NxReal operator *(const NxReal& lh, unsigned int rh)
+		inline NxReal operator *(unsigned int rh) const
 		{
-			return T::Mul(lh.mValue, rh);
+			return T::Mul(mValue, rh);
 		}
-		inline friend NxReal operator *(const NxReal& lh, const NxReal& rh)
+		inline NxReal operator *(const NxReal& rh) const
 		{
-			return T::Mul(lh.mValue, rh.mValue);
+			return T::Mul(mValue, rh.mValue);
 		}
 		#pragma endregion
 		#pragma region operator /
-		inline friend NxReal operator /(const NxReal& lh, float rh)
+		inline NxReal operator /(float rh) const
 		{
-			return T::Div(lh.mValue, rh);
+			return T::Div(mValue, rh);
 		}
-		inline friend NxReal operator /(const NxReal& lh, int rh)
+		inline NxReal operator /(int rh) const
 		{
-			return T::Div(lh.mValue, rh);
+			return T::Div(mValue, rh);
 		}
-		inline friend NxReal operator /(const NxReal& lh, unsigned int rh)
+		inline NxReal operator /(unsigned int rh) const
 		{
-			return T::Div(lh.mValue, rh);
+			return T::Div(mValue, rh);
 		}
-		inline friend NxReal operator /(const NxReal& lh, const NxReal& rh)
+		inline NxReal operator /(const NxReal& rh) const
 		{
-			return T::Div(lh.mValue, rh.mValue);
+			return T::Div(mValue, rh.mValue);
 		}
 		#pragma endregion
 		#pragma region operator ==
@@ -1230,6 +1297,7 @@ namespace NxMath
 			return T::Compare(lh.mValue, rh.mValue) <= 0;
 		}
 		#pragma endregion
+		#pragma endregion
 
 		#pragma region Math Function
 		inline static bool EpsilonEqual(const NxReal& lh, const NxReal& rh, const NxReal& epsilon)
@@ -1295,4 +1363,10 @@ namespace NxMath
 		}
 		#pragma endregion
 	};
+
+#if defined(__clang__)
+	#define D2Real(v, NxRealType) NxRealType::ByDouble(v)
+#else
+	#define D2Real(v, NxRealType) NxRealType::ByDouble<v>(v)
+#endif
 }

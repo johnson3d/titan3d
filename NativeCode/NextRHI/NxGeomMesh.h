@@ -314,6 +314,7 @@ namespace NxRHI
 		UINT GetVertexNumber() const;
 		UINT GetPrimitiveNumber() const;
 		UINT GetAtomNumber() const;
+		IBlobObject* CreateStream(EVertexStreamType index);
 		IBlobObject* GetStream(EVertexStreamType index);
 		IBlobObject* GetIndices();
 

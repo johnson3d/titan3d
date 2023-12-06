@@ -46,9 +46,9 @@ namespace NxMath
 				auto yy2 = Quat.Y * y2;
 				auto zz2 = Quat.Z * z2;
 
-				OutMatrix[0][0] = (1.0f - (yy2 + zz2)) * Scale.X;
-				OutMatrix[1][1] = (1.0f - (xx2 + zz2)) * Scale.Y;
-				OutMatrix[2][2] = (1.0f - (xx2 + yy2)) * Scale.Z;
+				OutMatrix[0][0] = (Type::One() - (yy2 + zz2)) * Scale.X;
+				OutMatrix[1][1] = (Type::One() - (xx2 + zz2)) * Scale.Y;
+				OutMatrix[2][2] = (Type::One() - (xx2 + yy2)) * Scale.Z;
 			}
 			{
 				auto yz2 = Quat.Y * z2;
@@ -72,10 +72,10 @@ namespace NxMath
 				OutMatrix[0][2] = (xz2 - wy2) * Scale.X;
 			}
 
-			OutMatrix[0][3] = 0.0f;
-			OutMatrix[1][3] = 0.0f;
-			OutMatrix[2][3] = 0.0f;
-			OutMatrix[3][3] = 1.0f;
+			OutMatrix[0][3] = Type::Zero();
+			OutMatrix[1][3] = Type::Zero();
+			OutMatrix[2][3] = Type::Zero();
+			OutMatrix[3][3] = Type::One();
 
 			return OutMatrix;
 		}
@@ -96,9 +96,9 @@ namespace NxMath
 				auto yy2 = Quat.Y * y2;
 				auto zz2 = Quat.Z * z2;
 
-				OutMatrix[0][0] = (1.0f - (yy2 + zz2));
-				OutMatrix[1][1] = (1.0f - (xx2 + zz2));
-				OutMatrix[2][2] = (1.0f - (xx2 + yy2));
+				OutMatrix[0][0] = (Type::One() - (yy2 + zz2));
+				OutMatrix[1][1] = (Type::One() - (xx2 + zz2));
+				OutMatrix[2][2] = (Type::One() - (xx2 + yy2));
 			}
 			{
 				auto yz2 = Quat.Y * z2;
@@ -122,10 +122,10 @@ namespace NxMath
 				OutMatrix[0][2] = (xz2 - wy2);
 			}
 
-			OutMatrix[0][3] = 0.0f;
-			OutMatrix[1][3] = 0.0f;
-			OutMatrix[2][3] = 0.0f;
-			OutMatrix[3][3] = 1.0f;
+			OutMatrix[0][3] = Type::Zero();
+			OutMatrix[1][3] = Type::Zero();
+			OutMatrix[2][3] = Type::Zero();
+			OutMatrix[3][3] = Type::One();
 
 			return OutMatrix;
 		}
@@ -233,9 +233,13 @@ namespace NxMath
 		}
 		inline static void MultiplyUsingMatrixWithScale(ThisType& OutTransform, const ThisType& A, const ThisType& B)
 		{
-			ConstructTransformFromMatrixWithDesiredScale(A.ToMatrixWithScale(), B.ToMatrixWithScale(), A.mScale * B.mScale, OutTransform);
+			ConstructTransformFromMatrixWithDesiredScale(A.ToMatrixWithScale(), B.ToMatrixWithScale(), A.Scale * B.Scale, OutTransform);
 		}
-
+		inline NxVector3<Type> TransformVector3(const NxVector3<Type>& V)
+		{
+			auto Transform = NxQuat<Type>::RotateVector3(Quat, V * Scale);
+			return Transform;
+		}
 		inline NxVector4<Type> TransformVector4(const NxVector4<Type>& V)
 		{
 			//Transform using QST is following
@@ -248,6 +252,10 @@ namespace NxMath
 			}
 
 			return Transform;
+		}
+		inline NxVector3<Type> TransformPosition(const NxVector3<Type>& V)
+		{
+			return NxQuat<Type>::RotateVector3(Quat, V * Scale) + Position;
 		}
 	private:
 		inline static void GetRelativeTransformUsingMatrixWithScale(ThisType& OutTransform, const ThisType& Base, const ThisType& Relative)
@@ -452,7 +460,7 @@ namespace NxMath
 
 			Result.Quat = Other.Quat * Quat.Invert();
 
-			Result.Position = Other.Position - (Result.Quat * Position) * Result.Scale;
+			Result.Position = Other.Position - (Result.Quat * Position);
 
 			return Result;
 		}
@@ -461,14 +469,13 @@ namespace NxMath
 			if (A.Scale.HasNagative() || B.Scale.HasNagative())
 			{
 				// @note, if you have 0 scale with negative, you're going to lose rotation as it can't convert back to quat
-				MultiplyUsingMatrixWithScale(OutTransform, A, B);
+				MultiplyUsingMatrix(OutTransform, A, B);
 			}
 			else
 			{
 				OutTransform.Quat = A.Quat * B.Quat;
 				OutTransform.Quat.Normalize();
-				OutTransform.Scale = A.Scale * B.Scale;
-				OutTransform.Position = B.Quat * (A.Position * B.Scale) + B.Position;
+				OutTransform.Position = B.Quat * (A.Position) + B.Position;
 			}
 			//var mtx1 = A.ToMatrixWithScale();
 			//var mtx2 = B.ToMatrixWithScale();
@@ -477,9 +484,8 @@ namespace NxMath
 		}
 		inline static void MultiplyNoParentScale(ThisType& OutTransform, const ThisType& A, const ThisType& B)
 		{
-			OutTransform.Quat = A.mQuat * B.mQuat;
+			OutTransform.Quat = A.Quat * B.Quat;
 			OutTransform.Quat.Normalize();
-			OutTransform.Scale = A.mScale;
 			OutTransform.Position = B.Quat * (A.Position) + B.Position;
 
 			//var mtx1 = A.ToMatrixWithScale();
@@ -487,11 +493,15 @@ namespace NxMath
 			//var mtx = mtx1 * mtx2;
 			//mtx.Decompose(out OutTransform.mScale, out OutTransform.mQuat, out OutTransform.mPosition);
 		}
-		inline static void MultiplyUsingMatrixWithScale(ThisType& OutTransform, const ThisType& A, const ThisType& B)
+		inline static void MultiplyUsingMatrix(ThisType& OutTransform, const ThisType& A, const ThisType& B)
 		{
-			ConstructTransformFromMatrixWithDesiredScale(A.ToMatrixWithScale(), B.ToMatrixWithScale(), A.mScale * B.mScale, OutTransform);
+			ConstructTransformFromMatrix(A.ToMatrixWithScale(), B.ToMatrixWithScale(), OutTransform);
 		}
-
+		inline NxVector3<Type> TransformVector3(const NxVector3<Type>& V)
+		{
+			auto Transform = NxQuat<Type>::RotateVector3(Quat, V);
+			return Transform;
+		}
 		inline NxVector4<Type> TransformVector4(const NxVector4<Type>& V)
 		{
 			//Transform using QST is following
@@ -505,7 +515,31 @@ namespace NxMath
 
 			return Transform;
 		}
-	private:		
+		inline NxVector3<Type> TransformPosition(const NxVector3<Type>& V)
+		{
+			return NxQuat<Type>::RotateVector3(Quat, V) + Position;
+		}
+	private:	
+		inline static void ConstructTransformFromMatrix(const Matrix& AMatrix, const Matrix& BMatrix, ThisType& OutTransform)
+		{
+			// the goal of using M is to get the correct orientation
+			// but for translation, we still need scale
+			auto M = AMatrix * BMatrix;
+			M.NoScale();
+
+			// @note: if you have negative with 0 scale, this will return rotation that is identity
+			// since matrix loses that axes            
+			auto Rotation = Matrix::ToQuat(M);
+			Rotation.Normalize();
+
+			// set values back to output
+			OutTransform.Quat = Rotation;
+
+			// technically I could calculate this using FTransform but then it does more quat multiplication 
+			// instead of using Scale in matrix multiplication
+			// it's a question of between RemoveScaling vs using FTransform to move translation
+			OutTransform.Position = M.GetTranslate();
+		}
 	};
 }
 

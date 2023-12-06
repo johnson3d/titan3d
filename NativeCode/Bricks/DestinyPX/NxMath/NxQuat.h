@@ -24,11 +24,11 @@ namespace NxMath
 			return NxQuat(Type::Zero(), Type::Zero(), Type::Zero(), Type::One());
 		}
 
-		friend static NxQuat operator *(const NxQuat& pq1, const NxQuat& pq2)
+		inline friend NxQuat operator *(const NxQuat& pq1, const NxQuat& pq2)
 		{
 			return Multiply(pq1, pq2);
 		}
-		friend static Vector3 operator *(const NxQuat& rotation, const Vector3& point)
+		inline friend Vector3 operator *(const NxQuat& rotation, const Vector3& point)
 		{
 			// http://people.csail.mit.edu/bkph/articles/Quaternions.pdf
 			// V' = V + 2w(Q x V) + (2Q x (Q x V))

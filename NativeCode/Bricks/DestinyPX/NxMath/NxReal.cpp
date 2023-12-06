@@ -3,7 +3,9 @@
 namespace NxMath
 {
 	static_assert(sizeof(NxFloat32)==sizeof(float));
+	static_assert(sizeof(NxReal<NxFloat32>) == sizeof(float));
 	static_assert(sizeof(NxFixed<>) == sizeof(NxFixed<>::ValueType));
+	static_assert(sizeof(NxReal<NxFixed<>>) == sizeof(NxFixed<>::ValueType));
 
 	struct TestMath
 	{
@@ -77,7 +79,6 @@ namespace NxMath
 				}
 			}
 			
-
 			Test1<NxFloat32>();
 			Test1<NxFixed<24>>();
 			Test2();

@@ -123,10 +123,17 @@ namespace NxMath
 			auto length = vIn.Length();
 			if (length == Type::Zero())
 				return false;
-			Type num = Type::GetOne() / length;
+			Type num = Type::One() / length;
 			vOut.X = vIn.X * num;
 			vOut.Y = vIn.Y * num;
 			return true;
+		}
+		inline friend ThisType operator -(const ThisType& lh)
+		{
+			ThisType result;
+			result.X = -lh.X;
+			result.Y = -lh.Y;
+			return result;
 		}
 		inline friend ThisType operator +(const ThisType& lh, Type rh)
 		{
@@ -355,11 +362,19 @@ namespace NxMath
 			auto length = vIn.Length();
 			if (length == 0)
 				return false;
-			Type num = Type::GetOne() / length;
+			Type num = Type::One() / length;
 			vOut.X = vIn.X * num;
 			vOut.Y = vIn.Y * num;
 			vOut.Z = vIn.Z * num;
 			return true;
+		}
+		inline friend ThisType operator -(const ThisType & lh)
+		{
+			ThisType result;
+			result.X = -lh.X;
+			result.Y = -lh.Y;
+			result.Z = -lh.Z;
+			return result;
 		}
 		inline friend ThisType operator +(const ThisType& lh, Type rh)
 		{
@@ -628,12 +643,21 @@ namespace NxMath
 			auto length = vIn.Length();
 			if (length == Type::Zero())
 				return false;
-			Type num = Type::GetOne() / length;
+			Type num = Type::One() / length;
 			vOut.X = vIn.X * num;
 			vOut.Y = vIn.Y * num;
 			vOut.Z = vIn.Z * num;
 			vOut.W = vIn.W * num;
 			return true;
+		}
+		inline friend ThisType operator -(const ThisType& lh)
+		{
+			ThisType result;
+			result.X = -lh.X;
+			result.Y = -lh.Y;
+			result.Z = -lh.Z;
+			result.W = -lh.W;
+			return result;
 		}
 		inline friend ThisType operator +(const ThisType& lh, Type rh)
 		{

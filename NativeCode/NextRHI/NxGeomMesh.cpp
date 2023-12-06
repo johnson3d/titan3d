@@ -1263,6 +1263,8 @@ namespace NxRHI
 	bool FMeshDataProvider::InitFromMesh(IGpuDevice* device, FMeshPrimitives* mesh)
 	{
 		Cleanup();
+		
+		StreamTypes = 0;
 		auto geom = mesh->GetGeomtryMesh();
 		auto ib = geom->GetIndexBuffer();
 		if (ib == nullptr)
@@ -1276,18 +1278,52 @@ namespace NxRHI
 			if (vb == nullptr)
 				continue;
 
+			StreamTypes |= (1 << i);
+
 			mVertexBuffers[i] = MakeWeakRef(new IBlobObject());
+
+			AutoRef<NxRHI::IBuffer> copyVB;
+			{
+				FTransientCmd cmd(device, NxRHI::QU_Transfer, "Mesh.ReadVB");
+				auto copyDesc = vb->Buffer->Desc;
+				copyDesc.Usage = USAGE_STAGING;
+				copyDesc.CpuAccess = ECpuAccess::CAS_READ;
+				copyDesc.MiscFlags = (EResourceMiscFlag)0;
+				copyDesc.RowPitch = copyDesc.Size;
+				copyDesc.DepthPitch = copyDesc.Size;
+				copyVB = MakeWeakRef(device->CreateBuffer(&copyDesc));
+				cmd.GetCmdList()->CopyBufferRegion(copyVB, 0, vb->Buffer, 0, copyDesc.Size);
+			}
+			device->GetCmdQueue()->Flush(EQueueType::QU_Transfer);
+			
 			IBlobObject buffData;
-			vb->Buffer->FetchGpuData(0, &buffData);
+			copyVB->FetchGpuData(0, &buffData);
 
 			mVertexBuffers[i]->PushData((BYTE*)buffData.GetData() + sizeof(UINT) * 2, vb->Buffer->Desc.Size);
 		}
 
 		IndexBuffer = MakeWeakRef(new IBlobObject());
-		IBlobObject buffData;
-		ib->Buffer->FetchGpuData(0, &buffData);
-		
-		IndexBuffer->PushData((BYTE*)buffData.GetData() + sizeof(UINT) * 2, ib->Buffer->Desc.Size);
+
+		{
+			AutoRef<NxRHI::IBuffer> copyIB;
+			{
+				FTransientCmd cmd(device, NxRHI::QU_Transfer, "Mesh.ReadVB");
+				auto copyDesc = ib->Buffer->Desc;
+				copyDesc.Usage = USAGE_STAGING;
+				copyDesc.CpuAccess = ECpuAccess::CAS_READ;
+				copyDesc.MiscFlags = (EResourceMiscFlag)0;
+				copyDesc.RowPitch = copyDesc.Size;
+				copyDesc.DepthPitch = copyDesc.Size;
+				copyIB = MakeWeakRef(device->CreateBuffer(&copyDesc));
+				cmd.GetCmdList()->CopyBufferRegion(copyIB, 0, ib->Buffer, 0, copyDesc.Size);
+			}
+			device->GetCmdQueue()->Flush(EQueueType::QU_Transfer);
+
+			IBlobObject buffData;
+			copyIB->FetchGpuData(0, &buffData);
+			IndexBuffer->PushData((BYTE*)buffData.GetData() + sizeof(UINT) * 2, ib->Buffer->Desc.Size);
+		}
+
 		IsIndex32 = mesh->mGeometryMesh->IsIndex32;
 
 		PrimitiveNumber = mesh->mDesc.PolyNumber;
@@ -1495,6 +1531,18 @@ namespace NxRHI
 		return (UINT)mAtoms.size();
 	}
 
+	IBlobObject* FMeshDataProvider::CreateStream(EVertexStreamType index)
+	{
+		if (mVertexBuffers[index] == nullptr)
+		{
+			mVertexBuffers[index] = MakeWeakRef(new IBlobObject());
+			StreamTypes |= (1 << index);
+			UINT stride = 0;
+			GetVertexStreamInfo(index, &stride);
+			mVertexBuffers[index]->ReSize(VertexNumber * stride);
+		}
+		return mVertexBuffers[index];
+	}
 	IBlobObject* FMeshDataProvider::GetStream(EVertexStreamType index)
 	{
 		return mVertexBuffers[index];

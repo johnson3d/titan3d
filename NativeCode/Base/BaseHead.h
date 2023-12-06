@@ -43,6 +43,7 @@
 #define HasModule_ImageDecoder
 #define HasModule_PythonRuntime
 #define HasModule_Quark
+#define HasModule_NxPhysics
 
 #include <WinSock2.h>
 #include <mswsock.h>

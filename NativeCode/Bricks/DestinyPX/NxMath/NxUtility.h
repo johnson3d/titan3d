@@ -938,14 +938,55 @@ namespace NxMath
         using ResultType = NxUInt64;
     };
 
-    template<double _Value, typename _ValueType, unsigned int _FracBit>
-    struct NxConstValue
+#if defined(__clang__)
+    template<typename _ValueType, unsigned int _FracBit>
+    struct NxConstValueByDouble
     {
+        using ThisType = NxConstValueByDouble<_ValueType, _FracBit>;
         using UnsignedValueType = UnsignedType<_ValueType>::ResultType;
         static const UnsignedValueType FractionMask = SetBitMask<_ValueType, _FracBit>::ResultValue;
         static const UnsignedValueType Scalar = FractionMask + 1;
-        static const _ValueType ResultValue = (_ValueType)(_Value * (double)Scalar);
+        static constexpr const _ValueType ResultValue(double v = 0)
+        {
+            return (_ValueType)(v * (double)Scalar);
+        }
     };
+    #define NxCValue(_Value,_ValueType,_FracBit) NxConstValueByDouble<_ValueType,_FracBit>::ResultValue(_Value)
+#else
+    template<double _Value, typename _ValueType, unsigned int _FracBit>
+    struct NxConstValue
+    {
+        using ThisType = NxConstValue<_Value, _ValueType, _FracBit>;
+        using UnsignedValueType = UnsignedType<_ValueType>::ResultType;
+        static const UnsignedValueType FractionMask = SetBitMask<_ValueType, _FracBit>::ResultValue;
+        static const UnsignedValueType Scalar = FractionMask + 1;
+        //static const _ValueType ResultValue = (_ValueType)(_Value * (double)Scalar);
+        static constexpr const _ValueType ResultValue(double v = 0)
+        {
+            PrintCode();
+            return (_ValueType)(_Value * (double)Scalar);
+        }
+
+        inline static void PrintCode()
+        {
+#if _DEBUG
+            static bool IsPrinted = false;
+            if (IsPrinted)
+            {
+                return;
+            }
+            IsPrinted = true;
+
+            std::string output;
+            output += "Value = " + std::to_string(_Value) + ";";
+            output += "FracBit = " + std::to_string(_FracBit) + ";";
+            const auto fixedValue = (_ValueType)(_Value * (double)Scalar);
+            output += "return " + std::to_string(fixedValue);
+#endif
+        }
+    };
+    #define NxCValue(_Value,_ValueType,_FracBit) NxConstValue<_Value,_ValueType,_FracBit>::ResultValue(_Value)
+#endif
 }
 
 //后续通过工具生成代码，不同的ValueType, FracBit产生不同的整形立即数

@@ -483,14 +483,29 @@ namespace NxRHI
 				v->Name = memberName;
 				v->Size = (UINT)varSize;
 
-				UINT varStride = 0;
-				auto ok = spvc_compiler_type_struct_member_array_stride(compiler_glsl, spv_type, idx, &varStride);
-				if (SPVC_SUCCESS == ok)
-					v->Elements = (USHORT)(varSize / varStride);//spvc_type_get_vector_size
-				else
-					v->Elements = 1;
 				auto member_id = spvc_type_get_member_type(spv_type, idx);
 				auto member_type = spvc_compiler_get_type_handle(compiler_glsl, member_id);
+				auto numOfDim = spvc_type_get_num_array_dimensions(member_type);
+				if (numOfDim > 0)
+				{
+					v->Elements = 0;
+					for (UINT j = 0; j < numOfDim; j++)
+					{
+						v->Elements += spvc_type_get_array_dimension(member_type, j);
+					}
+				}
+				else
+				{
+					v->Elements = 1;
+				}
+				
+				//UINT varStride = 0;
+				//auto ok = spvc_compiler_type_struct_member_array_stride(compiler_glsl, spv_type, idx, &varStride);
+				//if (SPVC_SUCCESS == ok)
+				//	v->Elements = (USHORT)(varSize / varStride);//spvc_type_get_vector_size
+				//else
+				//	v->Elements = 1;
+				
 				auto baseType = spvc_type_get_basetype(member_type);
 				auto vectorSize = spvc_type_get_columns(member_type);
 				//ASSERT(v->Elements == vectorSize);

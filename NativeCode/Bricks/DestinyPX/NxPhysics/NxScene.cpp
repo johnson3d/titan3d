@@ -10,17 +10,21 @@ namespace NxPhysics
 	//https://zhuanlan.zhihu.com/p/542193907
 	//https://www.mustenaka.cn/index.php/2023/09/06/pbd-method-learn-01/
 	//https://zhuanlan.zhihu.com/p/542772924?utm_id=0
+	//https://github.com/Jondolf/bevy_xpbd
+	//https://github.com/InteractiveComputerGraphics/PositionBasedDynamics
 
+	bool NxScene::Init(const NxSceneDesc& desc)
+	{
+		mDesc = desc;
+		return true;
+	}
 	bool NxScene::AddActor(NxActor* actor)
 	{
+		if (actor->GetScene() == this)
+			return true;
+		actor->DetachScene();
+		
 		std::lock_guard lk(mLocker);
-		auto prevScene = actor->mScene.GetPtr();
-		if (prevScene == this)
-			return false;
-		if (prevScene != nullptr)
-		{
-			prevScene->RemoveActor(actor);
-		}
 		actor->mScene.FromObject(this);
 		mActors.push_back(actor);
 		return true;
@@ -33,6 +37,7 @@ namespace NxPhysics
 			if (*i == actor)
 			{
 				mActors.erase(i);
+				actor->mScene.FromObject(nullptr);
 				return true;
 			}
 		}
@@ -42,6 +47,7 @@ namespace NxPhysics
 	{
 		std::lock_guard lk(mLocker);
 
+		auto TimeStep = mDesc.TimeStep;
 		auto numOfStep = (int)(elapsedTime / TimeStep);
 		auto step = TimeStep;
 		auto residue = NxReal::Mod(elapsedTime, TimeStep);
@@ -49,6 +55,8 @@ namespace NxPhysics
 		for (int i = 0; i < numOfStep; i++)
 		{
 			step = (i == numOfStep - 1) ? residue : TimeStep;
+			if (step == NxReal::Zero())
+				continue;
 
 			for (auto& i : mActors)
 			{

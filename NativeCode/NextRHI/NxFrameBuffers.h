@@ -83,18 +83,19 @@ namespace NxRHI
 	enum TR_ENUM()
 		ERenderPassClearFlags
 	{
+		CLEAR_NONE = 0,
 		CLEAR_DEPTH = 1,
-			CLEAR_STENCIL = (1 << 1),
-			CLEAR_RT0 = (1 << 2),
-			CLEAR_RT1 = (1 << 3),
-			CLEAR_RT2 = (1 << 4),
-			CLEAR_RT3 = (1 << 5),
-			CLEAR_RT4 = (1 << 6),
-			CLEAR_RT5 = (1 << 7),
-			CLEAR_RT6 = (1 << 8),
-			CLEAR_RT7 = (1 << 9),
+		CLEAR_STENCIL = (1 << 1),
+		CLEAR_RT0 = (1 << 2),
+		CLEAR_RT1 = (1 << 3),
+		CLEAR_RT2 = (1 << 4),
+		CLEAR_RT3 = (1 << 5),
+		CLEAR_RT4 = (1 << 6),
+		CLEAR_RT5 = (1 << 7),
+		CLEAR_RT6 = (1 << 8),
+		CLEAR_RT7 = (1 << 9),
 
-			CLEAR_ALL = 0xffffffff,
+		CLEAR_ALL = 0xffffffff,
 	};
 
 	struct TR_CLASS(SV_LayoutStruct = 8)

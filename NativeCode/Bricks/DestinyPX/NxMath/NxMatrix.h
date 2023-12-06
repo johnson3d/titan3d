@@ -66,7 +66,7 @@ namespace NxMath
 			}
 			return result;
 		}
-		inline friend static ThisType operator +(const ThisType& lh, const Type& rh)
+		inline friend ThisType operator +(const ThisType& lh, const Type& rh)
 		{
 			ThisType result;
 			for (int i = 0; i < NumRow; i++)
@@ -75,7 +75,7 @@ namespace NxMath
 			}
 			return result;
 		}
-		inline friend static ThisType operator -(const ThisType& lh, const Type& rh)
+		inline friend ThisType operator -(const ThisType& lh, const Type& rh)
 		{
 			ThisType result;
 			for (int i = 0; i < NumRow; i++)
@@ -84,7 +84,7 @@ namespace NxMath
 			}
 			return result;
 		}
-		inline friend static ThisType operator *(const ThisType& lh, const Type& rh)
+		inline friend ThisType operator *(const ThisType& lh, const Type& rh)
 		{
 			ThisType result;
 			for (int i = 0; i < NumRow; i++)
@@ -93,7 +93,7 @@ namespace NxMath
 			}
 			return result;
 		}
-		inline friend static ThisType operator /(const ThisType& lh, const Type& rh)
+		inline friend ThisType operator /(const ThisType& lh, const Type& rh)
 		{
 			ThisType result;
 			for (int i = 0; i < NumRow; i++)
@@ -102,7 +102,7 @@ namespace NxMath
 			}
 			return result;
 		}
-		inline friend static ThisType operator +(const ThisType& lh, const ThisType& rh)
+		inline friend ThisType operator +(const ThisType& lh, const ThisType& rh)
 		{
 			ThisType result;
 			for (int i = 0; i < NumRow; i++)
@@ -111,7 +111,7 @@ namespace NxMath
 			}
 			return result;
 		}
-		inline friend static ThisType operator -(const ThisType& lh, const ThisType& rh)
+		inline friend ThisType operator -(const ThisType& lh, const ThisType& rh)
 		{
 			ThisType result;
 			for (int i = 0; i < NumRow; i++)
@@ -120,7 +120,7 @@ namespace NxMath
 			}
 			return result;
 		}
-		inline friend static ThisType operator *(const ThisType& lh, const ThisType& rh)
+		inline friend ThisType operator *(const ThisType& lh, const ThisType& rh)
 		{
 			ThisType result;
 			for (int i = 0; i < NumRow; i++)
@@ -129,7 +129,7 @@ namespace NxMath
 			}
 			return result;
 		}
-		inline friend static ThisType operator /(const ThisType& lh, const ThisType& rh)
+		inline friend ThisType operator /(const ThisType& lh, const ThisType& rh)
 		{
 			ThisType result;
 			for (int i = 0; i < NumRow; i++)
@@ -202,7 +202,7 @@ namespace NxMath
 			}
 			return result;
 		}
-		inline friend static ThisType operator +(const ThisType& lh, const Type& rh)
+		inline friend ThisType operator +(const ThisType& lh, const Type& rh)
 		{
 			ThisType result;
 			for (int i = 0; i < NumRow; i++)
@@ -211,7 +211,7 @@ namespace NxMath
 			}
 			return result;
 		}
-		inline friend static ThisType operator -(const ThisType& lh, const Type& rh)
+		inline friend ThisType operator -(const ThisType& lh, const Type& rh)
 		{
 			ThisType result;
 			for (int i = 0; i < NumRow; i++)
@@ -220,7 +220,7 @@ namespace NxMath
 			}
 			return result;
 		}
-		inline friend static ThisType operator *(const ThisType& lh, const Type& rh)
+		inline friend ThisType operator *(const ThisType& lh, const Type& rh)
 		{
 			ThisType result;
 			for (int i = 0; i < NumRow; i++)
@@ -229,7 +229,7 @@ namespace NxMath
 			}
 			return result;
 		}
-		inline friend static ThisType operator /(const ThisType& lh, const Type& rh)
+		inline friend ThisType operator /(const ThisType& lh, const Type& rh)
 		{
 			ThisType result;
 			for (int i = 0; i < NumRow; i++)
@@ -238,7 +238,7 @@ namespace NxMath
 			}
 			return result;
 		}
-		inline friend static ThisType operator +(const ThisType& lh, const ThisType& rh)
+		inline friend ThisType operator +(const ThisType& lh, const ThisType& rh)
 		{
 			ThisType result;
 			for (int i = 0; i < NumRow; i++)
@@ -247,7 +247,7 @@ namespace NxMath
 			}
 			return result;
 		}
-		inline friend static ThisType operator -(const ThisType& lh, const ThisType& rh)
+		inline friend ThisType operator -(const ThisType& lh, const ThisType& rh)
 		{
 			ThisType result;
 			for (int i = 0; i < NumRow; i++)
@@ -256,7 +256,7 @@ namespace NxMath
 			}
 			return result;
 		}
-		inline friend static ThisType operator *(const ThisType& lh, const ThisType& rh)
+		inline friend ThisType operator *(const ThisType& lh, const ThisType& rh)
 		{
 			ThisType result;
 			for (int i = 0; i < NumRow; i++)
@@ -265,7 +265,7 @@ namespace NxMath
 			}
 			return result;
 		}
-		inline friend static ThisType operator /(const ThisType& lh, const ThisType& rh)
+		inline friend ThisType operator /(const ThisType& lh, const ThisType& rh)
 		{
 			ThisType result;
 			for (int i = 0; i < NumRow; i++)
@@ -456,7 +456,7 @@ namespace NxMath
 			}
 			return result;
 		}
-		inline friend static ThisType operator +(const ThisType& lh, const Type& rh)
+		inline friend ThisType operator +(const ThisType& lh, const Type& rh)
 		{
 			ThisType result;
 			for (int i = 0; i < NumRow; i++)
@@ -465,7 +465,7 @@ namespace NxMath
 			}
 			return result;
 		}
-		inline friend static ThisType operator -(const ThisType& lh, const Type& rh)
+		inline friend ThisType operator -(const ThisType& lh, const Type& rh)
 		{
 			ThisType result;
 			for (int i = 0; i < NumRow; i++)
@@ -474,7 +474,7 @@ namespace NxMath
 			}
 			return result;
 		}
-		inline friend static ThisType operator *(const ThisType& lh, const Type& rh)
+		inline friend ThisType operator *(const ThisType& lh, const Type& rh)
 		{
 			ThisType result;
 			for (int i = 0; i < NumRow; i++)
@@ -483,7 +483,7 @@ namespace NxMath
 			}
 			return result;
 		}
-		inline friend static ThisType operator /(const ThisType& lh, const Type& rh)
+		inline friend ThisType operator /(const ThisType& lh, const Type& rh)
 		{
 			ThisType result;
 			for (int i = 0; i < NumRow; i++)
@@ -492,7 +492,7 @@ namespace NxMath
 			}
 			return result;
 		}
-		inline friend static ThisType operator +(const ThisType& lh, const ThisType& rh)
+		inline friend ThisType operator +(const ThisType& lh, const ThisType& rh)
 		{
 			ThisType result;
 			for (int i = 0; i < NumRow; i++)
@@ -501,7 +501,7 @@ namespace NxMath
 			}
 			return result;
 		}
-		inline friend static ThisType operator -(const ThisType& lh, const ThisType& rh)
+		inline friend ThisType operator -(const ThisType& lh, const ThisType& rh)
 		{
 			ThisType result;
 			for (int i = 0; i < NumRow; i++)
@@ -510,7 +510,7 @@ namespace NxMath
 			}
 			return result;
 		}
-		inline friend static ThisType operator *(const ThisType& lh, const ThisType& rh)
+		inline friend ThisType operator *(const ThisType& lh, const ThisType& rh)
 		{
 			return Multiply(lh, rh);
 			/*ThisType result;
@@ -520,7 +520,7 @@ namespace NxMath
 			}
 			return result;*/
 		}
-		inline friend static ThisType operator /(const ThisType& lh, const ThisType& rh)
+		inline friend ThisType operator /(const ThisType& lh, const ThisType& rh)
 		{
 			ThisType result;
 			for (int i = 0; i < NumRow; i++)
@@ -531,9 +531,9 @@ namespace NxMath
 		}
 		inline static ThisType* InverseMatrix(ThisType* out, const ThisType* mat)
 		{
-#define MAT(m,r,c) (m)[r][c]
-#define SWAP_ROWS_D(a, b) { Type * _tmp = a; (a)=(b); (b)=_tmp; }
-#define RETURN_ZERO \
+#define NX_MAT(m,r,c) (m)[r][c]
+#define NX_SWAP_ROWS_D(a, b) { Type * _tmp = a; (a)=(b); (b)=_tmp; }
+#define NX_RETURN_ZERO \
 { \
 	for( int i = 0; i < 4; ++i )	\
 	{	\
@@ -551,29 +551,29 @@ namespace NxMath
 
 			r0 = wtmp[0], r1 = wtmp[1], r2 = wtmp[2], r3 = wtmp[3];
 
-			r0[0] = MAT(mat->Rows, 0, 0), r0[1] = MAT(mat->Rows, 0, 1),
-			r0[2] = MAT(mat->Rows, 0, 2), r0[3] = MAT(mat->Rows, 0, 3),
+			r0[0] = NX_MAT(mat->Rows, 0, 0), r0[1] = NX_MAT(mat->Rows, 0, 1),
+			r0[2] = NX_MAT(mat->Rows, 0, 2), r0[3] = NX_MAT(mat->Rows, 0, 3),
 			r0[4] = 1.0f, r0[5] = r0[6] = r0[7] = 0.0f,
 
-			r1[0] = MAT(mat->Rows, 1, 0), r1[1] = MAT(mat->Rows, 1, 1),
-			r1[2] = MAT(mat->Rows, 1, 2), r1[3] = MAT(mat->Rows, 1, 3),
+			r1[0] = NX_MAT(mat->Rows, 1, 0), r1[1] = NX_MAT(mat->Rows, 1, 1),
+			r1[2] = NX_MAT(mat->Rows, 1, 2), r1[3] = NX_MAT(mat->Rows, 1, 3),
 			r1[5] = 1.0f, r1[4] = r1[6] = r1[7] = 0.0f,
 
-			r2[0] = MAT(mat->Rows, 2, 0), r2[1] = MAT(mat->Rows, 2, 1),
-			r2[2] = MAT(mat->Rows, 2, 2), r2[3] = MAT(mat->Rows, 2, 3),
+			r2[0] = NX_MAT(mat->Rows, 2, 0), r2[1] = NX_MAT(mat->Rows, 2, 1),
+			r2[2] = NX_MAT(mat->Rows, 2, 2), r2[3] = NX_MAT(mat->Rows, 2, 3),
 			r2[6] = 1.0f, r2[4] = r2[5] = r2[7] = 0.0f,
 
-			r3[0] = MAT(mat->Rows, 3, 0), r3[1] = MAT(mat->Rows, 3, 1),
-			r3[2] = MAT(mat->Rows, 3, 2), r3[3] = MAT(mat->Rows, 3, 3),
+			r3[0] = NX_MAT(mat->Rows, 3, 0), r3[1] = NX_MAT(mat->Rows, 3, 1),
+			r3[2] = NX_MAT(mat->Rows, 3, 2), r3[3] = NX_MAT(mat->Rows, 3, 3),
 			r3[7] = 1.0f, r3[4] = r3[5] = r3[6] = 0.0f;
 
 			/* choose pivot - or die */
-			if (Type::Abs(r3[0]) > Type::Abs(r2[0])) SWAP_ROWS_D(r3, r2);
-			if (Type::Abs(r2[0]) > Type::Abs(r1[0])) SWAP_ROWS_D(r2, r1);
-			if (Type::Abs(r1[0]) > Type::Abs(r0[0])) SWAP_ROWS_D(r1, r0);
+			if (Type::Abs(r3[0]) > Type::Abs(r2[0])) NX_SWAP_ROWS_D(r3, r2);
+			if (Type::Abs(r2[0]) > Type::Abs(r1[0])) NX_SWAP_ROWS_D(r2, r1);
+			if (Type::Abs(r1[0]) > Type::Abs(r0[0])) NX_SWAP_ROWS_D(r1, r0);
 			if (0.0F == r0[0])
 			{
-				RETURN_ZERO
+				NX_RETURN_ZERO
 			}
 
 			/* eliminate first variable     */
@@ -592,11 +592,11 @@ namespace NxMath
 
 			/* choose pivot - or die */
 			if (Type::Abs(r3[1]) > Type::Abs(r2[1])) 
-				SWAP_ROWS_D(r3, r2);
+				NX_SWAP_ROWS_D(r3, r2);
 			if (Type::Abs(r2[1]) > Type::Abs(r1[1])) 
-				SWAP_ROWS_D(r2, r1);
+				NX_SWAP_ROWS_D(r2, r1);
 			if (0.0F == r1[1]) 
-				RETURN_ZERO;
+				NX_RETURN_ZERO;
 
 			/* eliminate second variable */
 			m2 = r2[1] / r1[1]; m3 = r3[1] / r1[1];
@@ -609,9 +609,9 @@ namespace NxMath
 
 			/* choose pivot - or die */
 			if (Type::Abs(r3[2]) > Type::Abs(r2[2])) 
-				SWAP_ROWS_D(r3, r2);
+				NX_SWAP_ROWS_D(r3, r2);
 			if (0.0F == r2[2]) 
-				RETURN_ZERO;
+				NX_RETURN_ZERO;
 
 			/* eliminate third variable */
 			m3 = r3[2] / r2[2];
@@ -621,7 +621,7 @@ namespace NxMath
 
 			/* last check */
 			if (0.0F == r3[3]) 
-				RETURN_ZERO;
+				NX_RETURN_ZERO;
 
 			s = 1.0F / r3[3];             /* now back substitute row 3 */
 			r3[4] *= s; r3[5] *= s; r3[6] *= s; r3[7] *= s;
@@ -650,10 +650,10 @@ namespace NxMath
 			r0[4] = s * (r0[4] - r1[4] * m0), r0[5] = s * (r0[5] - r1[5] * m0),
 				r0[6] = s * (r0[6] - r1[6] * m0), r0[7] = s * (r0[7] - r1[7] * m0);
 
-			MAT(out->Rows, 0, 0) = r0[4]; MAT(out->Rows, 0, 1) = r0[5], MAT(out->Rows, 0, 2) = r0[6]; MAT(out->Rows, 0, 3) = r0[7],
-			MAT(out->Rows, 1, 0) = r1[4]; MAT(out->Rows, 1, 1) = r1[5], MAT(out->Rows, 1, 2) = r1[6]; MAT(out->Rows, 1, 3) = r1[7],
-			MAT(out->Rows, 2, 0) = r2[4]; MAT(out->Rows, 2, 1) = r2[5], MAT(out->Rows, 2, 2) = r2[6]; MAT(out->Rows, 2, 3) = r2[7],
-			MAT(out->Rows, 3, 0) = r3[4]; MAT(out->Rows, 3, 1) = r3[5], MAT(out->Rows, 3, 2) = r3[6]; MAT(out->Rows, 3, 3) = r3[7];
+			NX_MAT(out->Rows, 0, 0) = r0[4]; NX_MAT(out->Rows, 0, 1) = r0[5], NX_MAT(out->Rows, 0, 2) = r0[6]; NX_MAT(out->Rows, 0, 3) = r0[7],
+			NX_MAT(out->Rows, 1, 0) = r1[4]; NX_MAT(out->Rows, 1, 1) = r1[5], NX_MAT(out->Rows, 1, 2) = r1[6]; NX_MAT(out->Rows, 1, 3) = r1[7],
+			NX_MAT(out->Rows, 2, 0) = r2[4]; NX_MAT(out->Rows, 2, 1) = r2[5], NX_MAT(out->Rows, 2, 2) = r2[6]; NX_MAT(out->Rows, 2, 3) = r2[7],
+			NX_MAT(out->Rows, 3, 0) = r3[4]; NX_MAT(out->Rows, 3, 1) = r3[5], NX_MAT(out->Rows, 3, 2) = r3[6]; NX_MAT(out->Rows, 3, 3) = r3[7];
 
 			return out;
 		}
@@ -804,25 +804,25 @@ namespace NxMath
 			Type yw = quaternion.Y * quaternion.W;
 			Type yz = quaternion.Y * quaternion.Z;
 			Type xw = quaternion.X * quaternion.W;
-			result[0][0] = 1.0f - (2.0f * (yy + zz));
-			result[0][1] = 2.0f * (xy + zw);
-			result[0][2] = 2.0f * (zx - yw);
-			result[0][3] = 0.0f;
+			result[0][0] = Type::One() - (Type::F_2_0() * (yy + zz));
+			result[0][1] = Type::F_2_0() * (xy + zw);
+			result[0][2] = Type::F_2_0() * (zx - yw);
+			result[0][3] = Type::Zero();
 
-			result[1][0] = 2.0f * (xy - zw);
-			result[1][1] = 1.0f - (2.0f * (zz + xx));
-			result[1][2] = 2.0f * (yz + xw);
-			result[1][3] = 0.0f;
+			result[1][0] = Type::F_2_0() * (xy - zw);
+			result[1][1] = Type::One() - (Type::F_2_0() * (zz + xx));
+			result[1][2] = Type::F_2_0() * (yz + xw);
+			result[1][3] = Type::Zero();
 
-			result[2][0] = 2.0f * (zx + yw);
-			result[2][1] = 2.0f * (yz - xw);
-			result[2][2] = 1.0f - (2.0f * (yy + xx));
-			result[2][3] = 0.0f;
+			result[2][0] = Type::F_2_0() * (zx + yw);
+			result[2][1] = Type::F_2_0() * (yz - xw);
+			result[2][2] = Type::One() - (Type::F_2_0() * (yy + xx));
+			result[2][3] = Type::Zero();
 
-			result[3][0] = 0.0f;
-			result[3][1] = 0.0f;
-			result[3][2] = 0.0f;
-			result[3][3] = 1.0f;
+			result[3][0] = Type::Zero();
+			result[3][1] = Type::Zero();
+			result[3][2] = Type::Zero();
+			result[3][3] = Type::One();
 
 			return result;
 		}
@@ -831,12 +831,13 @@ namespace NxMath
 			NxQuat<Type> result;
 			auto scale = kRot[0][0] + kRot[1][1] + kRot[2][2];
 
-			if (scale > 0.0f)
+			if (scale > Type::Zero())
 			{
-				auto sqrt = Type::Sqrt(scale + 1.0f);
+				Type sqrt = Type::Sqrt(scale + 1.0f);
+				
+				result.W = sqrt * Type::F_0_5();
 
-				result.W = sqrt * 0.5f;
-				sqrt = 0.5f / sqrt;
+				sqrt = Type::F_0_5() / sqrt;
 
 				result.X = (kRot[1][2] - kRot[2][1]) * sqrt;
 				result.Y = (kRot[2][0] - kRot[0][3]) * sqrt;
@@ -847,10 +848,10 @@ namespace NxMath
 
 			if ((kRot[0][0] >= kRot[1][1]) && (kRot[0][0] >= kRot[2][2]))
 			{
-				auto sqrt = Type::Sqrt(kRot[0][0] - kRot[1][1] - kRot[2][2] + 1.0f);
-				auto half = 0.5f / sqrt;
+				auto sqrt = Type::Sqrt(kRot[0][0] - kRot[1][1] - kRot[2][2] + Type::One());
+				auto half = Type::F_0_5() / sqrt;
 
-				result.X = 0.5f * sqrt;
+				result.X = Type::F_0_5() * sqrt;
 				result.Y = (kRot[0][1] + kRot[1][0]) * half;
 				result.Z = (kRot[0][2] + kRot[2][0]) * half;
 				result.W = (kRot[1][3] - kRot[2][1]) * half;
@@ -860,8 +861,8 @@ namespace NxMath
 
 			if (kRot[1][1] > kRot[2][2])
 			{
-				auto sqrt = Type::Sqrt(kRot[1][1] - kRot[0][0] - kRot[2][2] + 1.0f);
-				auto half = 0.5f / sqrt;
+				auto sqrt = Type::Sqrt(kRot[1][1] - kRot[0][0] - kRot[2][2] + Type::One());
+				auto half = Type::F_0_5() / sqrt;
 
 				result.X = (kRot[1][0] + kRot[0][1]) * half;
 				result.Y = 0.5f * sqrt;
@@ -871,12 +872,12 @@ namespace NxMath
 				return result;
 			}
 
-			auto sqrt = Type::Sqrt(kRot[2][2] - kRot[0][0] - kRot[1][1] + 1.0f);
-			auto half = 0.5f / sqrt;
+			auto sqrt = Type::Sqrt(kRot[2][2] - kRot[0][0] - kRot[1][1] + Type::One());
+			auto half = Type::F_0_5() / sqrt;
 
 			result.X = (kRot[2][0] + kRot[0][2]) * half;
 			result.Y = (kRot[2][1] + kRot[1][2]) * half;
-			result.Z = 0.5f * sqrt;
+			result.Z = Type::F_0_5() * sqrt;
 			result.W = (kRot[0][1] - kRot[1][0]) * half;
 			return result;
 		}
