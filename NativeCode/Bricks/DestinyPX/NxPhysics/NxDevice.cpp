@@ -8,29 +8,28 @@ NS_BEGIN
 
 namespace NxPhysics
 {
-	NxScene* NxDevice::CreateScene(const NxSceneDesc* desc)
+	template<typename T, typename D>
+	T* CreateAndInitObject(const D& desc)
 	{
-		auto result = new NxScene();
-		if (result->Init(*desc) == false)
+		auto result = new T();
+		if (result->Init(desc) == false)
 		{
 			result->Release();
 			return nullptr;
 		}
 		return result;
+	}
+	NxScene* NxDevice::CreateScene(const NxSceneDesc* desc)
+	{
+		return CreateAndInitObject<NxScene>(*desc);
 	}
 	NxRigidBody* NxDevice::CreateRigidBody(const NxRigidBodyDesc* desc)
 	{
-		return new NxRigidBody();
+		return CreateAndInitObject<NxRigidBody>(*desc);
 	}
 	NxSphereShape* NxDevice::CreateSphereShape(const NxSphereShapeDesc* desc)
 	{
-		auto result = new NxSphereShape();
-		if (result->Init(*desc) == false)
-		{
-			result->Release();
-			return nullptr;
-		}
-		return result;
+		return CreateAndInitObject<NxSphereShape>(*desc);
 	}
 
 	void Test()

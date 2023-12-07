@@ -34,24 +34,39 @@ namespace EngineNS.NxPhysics
                 rigidBody.SetVelocity(rigidBody.Velocity + nv);
                 mScene.AddActor(rigidBody);
             }
+            unsafe
+            {
+                var rigidBodyDesc = new NxRigidBodyDesc();
+                var rigidBody = mDevice.CreateRigidBody(in rigidBodyDesc);
+                var sphereShapeDesc = new NxSphereShapeDesc();
+                sphereShapeDesc.Radius = NxReal.ByF32(2.0f);
+                sphereShapeDesc.Density = NxReal.ByF32(2.0f);
+                var sphereShape = mDevice.CreateSphereShape(in sphereShapeDesc);
+                rigidBody.AddShape(sphereShape);
+
+                rigidBody.mCoreObject.GetTransform()->Position = new PxVector3(
+                    NxReal.ByF32(5.0f), NxReal.ByF32(0.0f), NxReal.ByF32(0.0f));
+                mScene.AddActor(rigidBody);
+            }
             this.SetStyle(ENodeStyles.VisibleFollowParent);
             return true;
         }
         public TtScene mScene;
+        public NxReal mSumElapsedTime = NxReal.ByF32(0.0f);
+        public NxReal mStepTime = NxReal.ByF32(0.01f);
         public unsafe override bool OnTickLogic(GamePlay.UWorld world, Graphics.Pipeline.URenderPolicy policy)
         {
-            mScene.Simulate(NxReal.ByF32(0.01f));
+            bool bSteped = false;
+            mSumElapsedTime = mSumElapsedTime + NxReal.ByF32(world.DeltaTimeSecond);
+            while (mSumElapsedTime > mStepTime)
+            {
+                mScene.Simulate(mStepTime);
+                mSumElapsedTime = mSumElapsedTime - mStepTime;
+                bSteped = true;
+            }
 
-            //var num = mScene.mCoreObject.GetNumOfActors();
-            //var ppActors = mScene.mCoreObject.UnsafeGetActorList();
-            //for (uint i = 0; i < num; i++)
-            //{
-            //    var pPQ = ppActors[i]->GetTransform();
-            //    var pos = new Vector3();
-            //    pPQ->GetPosition()->ToVector3f(ref pos);
-            //    var quat = new Quaternion();
-            //    pPQ->GetQuat()->ToQuatf(ref quat);
-            //}
+            if (bSteped == false)
+                return true;
 
             BoundVolume.LocalAABB.InitEmptyBox();
             foreach (var i in mScene.mRigidBodies)

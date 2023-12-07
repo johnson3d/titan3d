@@ -30,6 +30,7 @@ namespace NxPhysics
 			return &mTransform;
 		}
 		virtual NxReal GetVolume() = 0;
+		virtual NxAABB GetAABB() const = 0;
 	};
 	struct TR_CLASS(SV_LayoutStruct = 8)
 		NxSphereShapeDesc
@@ -59,6 +60,10 @@ namespace NxPhysics
 		{
 			auto t = mDesc.Radius* mDesc.Radius* mDesc.Radius;
 			return NxReal::Pi() * t * D2R(0.75);
+		}
+		virtual NxAABB GetAABB() const
+		{
+			return NxAABB(NxVector3::Zero(), mDesc.Radius * NxReal::F_2_0());
 		}
 	};
 }

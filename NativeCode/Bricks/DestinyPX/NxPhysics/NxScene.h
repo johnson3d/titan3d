@@ -52,7 +52,9 @@ namespace NxPhysics
 			mLocker.unlock();
 		}
 	private:
-		
+		using NxActorPair = std::pair<NxAutoRef<NxActor>, NxAutoRef<NxActor>>;
+		void CollectCollisionPairs(std::vector<NxActorPair>& pairs);
+		void ProcessDistancePairs(const std::vector<NxActorPair>& pairs, const NxReal& step);
 	};
 }
 

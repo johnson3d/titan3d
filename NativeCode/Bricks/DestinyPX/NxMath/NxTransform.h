@@ -497,12 +497,12 @@ namespace NxMath
 		{
 			ConstructTransformFromMatrix(A.ToMatrixWithScale(), B.ToMatrixWithScale(), OutTransform);
 		}
-		inline NxVector3<Type> TransformVector3(const NxVector3<Type>& V)
+		inline NxVector3<Type> TransformVector3(const NxVector3<Type>& V) const
 		{
 			auto Transform = NxQuat<Type>::RotateVector3(Quat, V);
 			return Transform;
 		}
-		inline NxVector4<Type> TransformVector4(const NxVector4<Type>& V)
+		inline NxVector4<Type> TransformVector4(const NxVector4<Type>& V) const
 		{
 			//Transform using QST is following
 			//QST(P) = Q*S*P*-Q + T where Q = quaternion, S = scale, T = translation
@@ -515,7 +515,7 @@ namespace NxMath
 
 			return Transform;
 		}
-		inline NxVector3<Type> TransformPosition(const NxVector3<Type>& V)
+		inline NxVector3<Type> TransformPosition(const NxVector3<Type>& V) const
 		{
 			return NxQuat<Type>::RotateVector3(Quat, V) + Position;
 		}

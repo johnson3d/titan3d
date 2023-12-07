@@ -1,6 +1,6 @@
 #include "NxScene.h"
 #include "NxActor.h"
-#include "NxConstraint.h"
+#include "NxJoint.h"
 
 NS_BEGIN
 
@@ -52,6 +52,9 @@ namespace NxPhysics
 		auto step = TimeStep;
 		auto residue = NxReal::Mod(elapsedTime, TimeStep);
 		
+		std::vector<NxActorPair> pairs;
+		CollectCollisionPairs(pairs);
+
 		for (int i = 0; i < numOfStep; i++)
 		{
 			step = (i == numOfStep - 1) ? residue : TimeStep;
@@ -67,18 +70,49 @@ namespace NxPhysics
 				}*/
 			}
 
-			/*for (auto& i : mActors)
-			{
-				i->SolveStep(step);
-			}*/
 			for (auto& i : mConstraints)
 			{
 				i->SolveConstraint(this, step);
 			}
 
+			ProcessDistancePairs(pairs, step);
+
 			for (auto& i : mActors)
 			{
 				i->FixStep(step);
+			}
+		}
+	}
+	void NxScene::CollectCollisionPairs(std::vector<NxActorPair>& pairs)
+	{
+		for (size_t i = 0; i < mActors.size(); i++)
+		{
+			const auto& lh = mActors[i];
+			auto lhAABB = NxAABB::Transform(lh->mAABB, *lh->GetTransform());
+			for (size_t j = i + 1; j < mActors.size(); j++)
+			{
+				const auto& rh = mActors[j];
+				auto rhAABB = NxAABB::Transform(rh->mAABB, *rh->GetTransform());				
+				if (NxAABB::Contains(lhAABB, rhAABB) == NxMath::EContainmentType::Disjoint)
+				{
+					continue;
+				}
+				pairs.push_back(std::make_pair(lh, rh));
+			}
+		}
+	}
+	void NxScene::ProcessDistancePairs(const std::vector<NxActorPair>& pairs, const NxReal& step)
+	{
+		NxDistanceJoint djt;
+		for (const auto& i : pairs)
+		{
+			if (i.first->GetRtti() == GetClassObject<NxRigidBody>() &&
+				i.second->GetRtti() == GetClassObject<NxRigidBody>())
+			{
+				djt.mActorPair = i;
+				djt.mLimitMax = NxReal::Maximum();
+				djt.mLimitMin = NxDistanceJoint::CalcLimitMin((NxRigidBody*)i.first.GetPtr(), (NxRigidBody*)i.second.GetPtr());
+				djt.SolveConstraint(this, step);
 			}
 		}
 	}

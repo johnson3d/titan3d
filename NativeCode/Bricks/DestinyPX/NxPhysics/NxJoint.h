@@ -5,6 +5,7 @@ NS_BEGIN
 
 namespace NxPhysics
 {
+	using NxActorPair = std::pair<NxAutoRef<NxActor>, NxAutoRef<NxActor>>;
 	class NxJoint : public NxConstraint
 	{
 	public:
@@ -14,8 +15,7 @@ namespace NxPhysics
 	{
 	public:
 		ENGINE_RTTI(NxDistanceJoint);
-		NxAutoRef<NxRigidBody> mBody0;
-		NxAutoRef<NxRigidBody> mBody1;
+		NxActorPair mActorPair;
 
 		NxReal mLimitMin;
 		NxReal mLimitMax;
@@ -44,6 +44,8 @@ namespace NxPhysics
 			}
 		}
 		virtual void SolveConstraint(NxScene* scene, const NxReal& time) override;
+
+		static NxReal CalcLimitMin(const NxRigidBody* body0, const NxRigidBody* body1);
 	};
 }
 

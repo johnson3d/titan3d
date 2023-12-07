@@ -18,6 +18,11 @@ namespace NxPhysics
 		mScene.FromObject(nullptr);
 	}
 
+	bool NxRigidBody::Init(const NxRigidBodyDesc& desc)
+	{
+		mDesc = desc;
+		return true;
+	}
 	void NxRigidBody::UpdateCentroid()
 	{
 		mShapeData.Centroid = NxVector3::Zero();
@@ -29,6 +34,8 @@ namespace NxPhysics
 			mShapeData.Mass += i->mShapeData.Mass;
 		}
 		mShapeData.Centroid /= mShapeData.Mass;
+
+		mShapeData.InvMass = NxReal::One() / mShapeData.Mass;
 	}
 	void NxRigidBody::TryStep(const NxReal& time)
 	{

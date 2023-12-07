@@ -12,6 +12,7 @@ namespace NxPhysics
 		mDesc = desc;
 
 		mShapeData.Mass = desc.Density * GetVolume();
+		mShapeData.InvMass = NxReal::One() / mShapeData.Mass;
 		return true;
 	}
 }

@@ -36,6 +36,14 @@ namespace NxMath
 			return (float)_Value;
 		}
 #endif
+		static constexpr ThisType Minimum()
+		{
+			return -FLT_MAX;
+		}
+		static constexpr ThisType Maximum()
+		{
+			return FLT_MAX;
+		}
 		static constexpr const ThisType NaN()
 		{
 			return std::numeric_limits<float>::quiet_NaN();
@@ -237,6 +245,14 @@ namespace NxMath
 			return NxRealCValue(_Value);
 		}
 #endif
+		static constexpr ThisType Minimum()
+		{
+			return ThisType(~ValueType(0));
+		}
+		static constexpr ThisType Maximum()
+		{
+			return ThisType((~ValueType(0)) & (~SignedMask));
+		}
 		static constexpr const ThisType NaN()
 		{
 			return ThisType(~ValueType(0));
@@ -951,6 +967,14 @@ namespace NxMath
 			return T::ByDouble<_Value>(v);
 		}
 #endif
+		static constexpr ThisType Minimum()
+		{
+			return NxReal(T::Minimum());
+		}
+		static constexpr ThisType Maximum()
+		{
+			return NxReal(T::Maximum());
+		}
 		static constexpr ThisType Zero()
 		{
 			return NxReal(T::Zero());

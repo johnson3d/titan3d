@@ -497,7 +497,7 @@ namespace NxMath
 			return *this;
 		}
 
-		static ThisType Minimize(const ThisType& left, const ThisType& right)
+		inline static ThisType Minimize(const ThisType& left, const ThisType& right)
 		{
 			ThisType result;
 			result.X = (left.X < right.X) ? left.X : right.X;
@@ -505,7 +505,7 @@ namespace NxMath
 			result.Z = (left.Z < right.Z) ? left.Z : right.Z;
 			return result;
 		}
-		static ThisType Maximize(const ThisType& left, const ThisType& right)
+		inline static ThisType Maximize(const ThisType& left, const ThisType& right)
 		{
 			ThisType result;
 			result.X = (left.X > right.X) ? left.X : right.X;

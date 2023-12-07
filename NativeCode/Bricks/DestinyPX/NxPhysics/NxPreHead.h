@@ -3,6 +3,7 @@
 #include <mutex>
 #include "../../../Base/IUnknown.h"
 #include "../NxMath/NxTransform.h"
+#include "../NxMath/Shape/NxAABB.h"
 
 #include "../../../Math/v3dxVector3.h"
 #include "../../../Math/v3dxQuaternion.h"
@@ -54,6 +55,7 @@ namespace NxPhysics
 	using NxPQ = NxMath::NxTransformNoScale<NxReal>;
 	using NxQuat = NxMath::NxQuat<NxReal>;
 	using NxVector3 = NxMath::NxVector3<NxReal>;
+	using NxAABB = NxMath::NxAABB<NxReal>;
 	
 	using NxVector3f = v3dxVector3;
 	using NxQuatf = v3dxQuaternion;

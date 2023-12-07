@@ -11,13 +11,19 @@ namespace NxPhysics
 	{
 	public:
 		NxWeakRef<NxScene> mScene;
+		NxAABB mAABB;
 	public:
 		ENGINE_RTTI(NxActor);
 		NxScene* GetScene()
 		{
 			return mScene.GetPtr();
 		}
-		virtual NxPQ* GetTransform() override = 0;
+		const NxAABB* GetAABB() const 
+		{
+			return &mAABB;
+		}
+		virtual NxPQ* GetTryTransform() = 0;
+		virtual NxShapeData* GetShapeData() = 0;
 		virtual void TryStep(const NxReal& time) = 0;
 		virtual void SolveStep(const NxReal& time) = 0;
 		virtual void FixStep(const NxReal& time) = 0;
@@ -34,6 +40,7 @@ namespace NxPhysics
 		NxRigidBody : public NxActor
 	{
 	public:
+		NxRigidBodyDesc mDesc;
 		NxPQ mTransform;
 		NxPQ mTryTransform;
 		NxVector3 mVelocity;
@@ -44,6 +51,7 @@ namespace NxPhysics
 		void UpdateCentroid();
 	public:
 		ENGINE_RTTI(NxRigidBody);
+		bool Init(const NxRigidBodyDesc& desc);
 		TR_FUNCTION(SV_NoBind)
 		virtual const NxPQ* GetTransform() const override 
 		{
@@ -53,7 +61,14 @@ namespace NxPhysics
 		{
 			return &mTransform;
 		}
-
+		virtual NxPQ* GetTryTransform() override
+		{
+			return &mTryTransform;
+		}
+		virtual NxShapeData* GetShapeData() override
+		{
+			return &mShapeData;
+		}
 		const NxVector3& GetVelocity() const
 		{
 			return mVelocity;
@@ -66,11 +81,30 @@ namespace NxPhysics
 		void AddShape(NxShape* shape)
 		{
 			mShapes.push_back(shape);
+			UpdateShapes();
 		}
 
 		virtual void TryStep(const NxReal& time) override;
 		virtual void SolveStep(const NxReal& time) override;
 		virtual void FixStep(const NxReal& time) override;
+	private:
+		void UpdateShapes()
+		{
+			mAABB.MakeEmpty();
+			for (const auto& i : mShapes)
+			{
+				mShapeData.Mass += i->mShapeData.Mass;
+				auto box = i->GetAABB();
+				NxVector3 v[8];
+				box.GetCorners(v);
+				for (int j = 0; j < 8; j++)
+				{
+					auto t = i->GetTransform()->TransformPosition(v[j]);
+					mAABB.Merge(t);
+				}
+			}
+			UpdateCentroid();
+		}
 	};
 }
 
