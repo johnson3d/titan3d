@@ -354,7 +354,8 @@ bool IShaderConductor::CompileHLSL(NxRHI::FShaderCompiler* compiler, NxRHI::FSha
 			{
 				VFX_LTRACE(ELTT_Graphics, "CrossPlatform Shader Warning:%s\r\n", s0.c_str());
 			}
-			/*if (s0 !=				"warning: macro 'MDFQUEUE_FUNCTION' contains embedded newline; text after the newline is ignored\n")
+			/*if (s0 !=
+				"warning: macro 'MDFQUEUE_FUNCTION' contains embedded newline; text after the newline is ignored\n")
 			{
 				
 			}*/

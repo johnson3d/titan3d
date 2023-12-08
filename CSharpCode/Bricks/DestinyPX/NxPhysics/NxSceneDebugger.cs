@@ -18,19 +18,19 @@ namespace EngineNS.NxPhysics
 
             var mDevice = UEngine.Instance.PxSystem.Device;
             var sceneDesc = new NxSceneDesc();
-            sceneDesc.TimeStep = NxReal.ByF32(0.005f);
+            sceneDesc.TimeStep = NxReal.ByF32(0.001f);
             mScene = mDevice.CreateScene(in sceneDesc);
             unsafe
             {
                 var rigidBodyDesc = new NxRigidBodyDesc();
                 var rigidBody = mDevice.CreateRigidBody(in rigidBodyDesc);
                 var sphereShapeDesc = new NxSphereShapeDesc();
-                sphereShapeDesc.Radius = NxReal.ByF32(2.0f);
+                sphereShapeDesc.Radius = NxReal.ByF32(1.0f);
                 sphereShapeDesc.Density = NxReal.ByF32(2.0f);
                 var sphereShape = mDevice.CreateSphereShape(in sphereShapeDesc);
                 rigidBody.AddShape(sphereShape);
 
-                var nv = new PxVector3(NxReal.ByF32(1.0f), NxReal.ByF32(0.0f), NxReal.ByF32(0.0f));
+                var nv = new PxVector3(NxReal.ByF32(10.0f), NxReal.ByF32(0.0f), NxReal.ByF32(0.0f));
                 rigidBody.SetVelocity(rigidBody.Velocity + nv);
                 mScene.AddActor(rigidBody);
             }
@@ -39,8 +39,8 @@ namespace EngineNS.NxPhysics
                 var rigidBodyDesc = new NxRigidBodyDesc();
                 var rigidBody = mDevice.CreateRigidBody(in rigidBodyDesc);
                 var sphereShapeDesc = new NxSphereShapeDesc();
-                sphereShapeDesc.Radius = NxReal.ByF32(2.0f);
-                sphereShapeDesc.Density = NxReal.ByF32(2.0f);
+                sphereShapeDesc.Radius = NxReal.ByF32(1.0f);
+                sphereShapeDesc.Density = NxReal.ByF32(20.0f);
                 var sphereShape = mDevice.CreateSphereShape(in sphereShapeDesc);
                 rigidBody.AddShape(sphereShape);
 

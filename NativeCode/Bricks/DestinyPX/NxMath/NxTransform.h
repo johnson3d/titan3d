@@ -334,7 +334,7 @@ namespace NxMath
 	template <typename Type = NxReal<NxFloat32>>
 	struct NxTransformNoScale
 	{
-		using ThisType = NxTransform<Type>;
+		using ThisType = NxTransformNoScale<Type>;
 		using Matrix = NxMatrix4x4<Type>;
 		using Vector3 = NxVector3<Type>;
 		NxQuat<Type> Quat;
@@ -466,21 +466,9 @@ namespace NxMath
 		}
 		inline static void Multiply(ThisType& OutTransform, const ThisType& A, const ThisType& B)
 		{
-			if (A.Scale.HasNagative() || B.Scale.HasNagative())
-			{
-				// @note, if you have 0 scale with negative, you're going to lose rotation as it can't convert back to quat
-				MultiplyUsingMatrix(OutTransform, A, B);
-			}
-			else
-			{
-				OutTransform.Quat = A.Quat * B.Quat;
-				OutTransform.Quat.Normalize();
-				OutTransform.Position = B.Quat * (A.Position) + B.Position;
-			}
-			//var mtx1 = A.ToMatrixWithScale();
-			//var mtx2 = B.ToMatrixWithScale();
-			//var mtx = mtx1 * mtx2;
-			//mtx.Decompose(out OutTransform.mScale, out OutTransform.mQuat, out OutTransform.mPosition);
+			OutTransform.Quat = A.Quat * B.Quat;
+			OutTransform.Quat.Normalize();
+			OutTransform.Position = B.Quat * (A.Position) + B.Position;
 		}
 		inline static void MultiplyNoParentScale(ThisType& OutTransform, const ThisType& A, const ThisType& B)
 		{

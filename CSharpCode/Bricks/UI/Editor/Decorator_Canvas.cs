@@ -101,6 +101,7 @@ namespace EngineNS.UI.Editor
         UMeshNode[] mOperatorNodes = new UMeshNode[8];
         UMeshNode[] mAnchorNodes = new UMeshNode[EDecoratorType.Anchor_End - EDecoratorType.Anchor_Start];
         List<Vector4> mOriAnchorRects = new List<Vector4>();
+        List<Vector4> mOriAnchorPoints = new List<Vector4>();
 
         TtUIEditor mEditor;
 
@@ -113,7 +114,7 @@ namespace EngineNS.UI.Editor
             var whiteColorMat = await UEngine.Instance.GfxDevice.MaterialInstanceManager.CreateMaterialInstance(RName.GetRName("ui/uidecorator_white.uminst", RName.ERNameType.Engine));
             var meshProvider = UMeshDataProvider.MakeSphere(1.0f, 8, 8, 0xffffffff);
             var meshPrim = meshProvider.ToMesh();
-            for (int i = 0; i < 8; i++)
+            for (int i = (int)EDecoratorType.Size_Left_Top; i <= (int)EDecoratorType.Size_Right_Bottom; i++)
             {
                 var mesh = new UMesh();
                 mesh.Initialize(meshPrim, new Graphics.Pipeline.Shader.UMaterial[] { whiteColorMat },
@@ -175,7 +176,7 @@ namespace EngineNS.UI.Editor
                             var mesh = new UMesh();
                             await mesh.Initialize(RName.GetRName("ui/p_003.vms", RName.ERNameType.Engine), new Graphics.Pipeline.Shader.UMaterial[] { whiteColorMat }, Rtti.UTypeDescGetter<Graphics.Mesh.UMdfStaticMesh>.TypeDesc);
                             mAnchorNodes[idx] = await UMeshNode.AddMeshNode(editor.PreviewViewport.World, editor.mUINode,
-                                new GamePlay.Scene.UMeshNode.UMeshNodeData(), typeof(GamePlay.UPlacement), mesh, DVector3.Zero, Vector3.One, Quaternion.RotationAxis(Vector3.UnitZ, MathF.PI * 0.5f));
+                                new GamePlay.Scene.UMeshNode.UMeshNodeData(), typeof(GamePlay.UPlacement), mesh, DVector3.Zero, Vector3.One, Quaternion.RotationAxis(Vector3.UnitZ, -MathF.PI * 0.5f));
                             mAnchorNodes[idx].Parent = null;
                             mAnchorNodes[idx].HitproxyType = Graphics.Pipeline.UHitProxy.EHitproxyType.Root;
                         }
@@ -215,7 +216,7 @@ namespace EngineNS.UI.Editor
                             var mesh = new UMesh();
                             await mesh.Initialize(RName.GetRName("ui/p_003.vms", RName.ERNameType.Engine), new Graphics.Pipeline.Shader.UMaterial[] { whiteColorMat }, Rtti.UTypeDescGetter<Graphics.Mesh.UMdfStaticMesh>.TypeDesc);
                             mAnchorNodes[idx] = await UMeshNode.AddMeshNode(editor.PreviewViewport.World, editor.mUINode,
-                                new GamePlay.Scene.UMeshNode.UMeshNodeData(), typeof(GamePlay.UPlacement), mesh, DVector3.Zero, Vector3.One, Quaternion.RotationAxis(Vector3.UnitZ, -MathF.PI * 0.5f));
+                                new GamePlay.Scene.UMeshNode.UMeshNodeData(), typeof(GamePlay.UPlacement), mesh, DVector3.Zero, Vector3.One, Quaternion.RotationAxis(Vector3.UnitZ, MathF.PI * 0.5f));
                             mAnchorNodes[idx].Parent = null;
                             mAnchorNodes[idx].HitproxyType = Graphics.Pipeline.UHitProxy.EHitproxyType.Root;
                         }
@@ -235,7 +236,7 @@ namespace EngineNS.UI.Editor
                             var mesh = new UMesh();
                             await mesh.Initialize(RName.GetRName("ui/p_004.vms", RName.ERNameType.Engine), new Graphics.Pipeline.Shader.UMaterial[] { whiteColorMat }, Rtti.UTypeDescGetter<Graphics.Mesh.UMdfStaticMesh>.TypeDesc);
                             mAnchorNodes[idx] = await UMeshNode.AddMeshNode(editor.PreviewViewport.World, editor.mUINode,
-                                new GamePlay.Scene.UMeshNode.UMeshNodeData(), typeof(GamePlay.UPlacement), mesh, DVector3.Zero, Vector3.One, Quaternion.RotationAxis(Vector3.UnitZ, MathF.PI * 0.5f));
+                                new GamePlay.Scene.UMeshNode.UMeshNodeData(), typeof(GamePlay.UPlacement), mesh, DVector3.Zero, Vector3.One, Quaternion.RotationAxis(Vector3.UnitZ, -MathF.PI * 0.5f));
                             mAnchorNodes[idx].Parent = null;
                             mAnchorNodes[idx].HitproxyType = Graphics.Pipeline.UHitProxy.EHitproxyType.Root;
                         }
@@ -255,7 +256,7 @@ namespace EngineNS.UI.Editor
                             var mesh = new UMesh();
                             await mesh.Initialize(RName.GetRName("ui/p_004.vms", RName.ERNameType.Engine), new Graphics.Pipeline.Shader.UMaterial[] { whiteColorMat }, Rtti.UTypeDescGetter<Graphics.Mesh.UMdfStaticMesh>.TypeDesc);
                             mAnchorNodes[idx] = await UMeshNode.AddMeshNode(editor.PreviewViewport.World, editor.mUINode,
-                                new GamePlay.Scene.UMeshNode.UMeshNodeData(), typeof(GamePlay.UPlacement), mesh, DVector3.Zero, Vector3.One, Quaternion.RotationAxis(Vector3.UnitZ, -MathF.PI * 0.5f));
+                                new GamePlay.Scene.UMeshNode.UMeshNodeData(), typeof(GamePlay.UPlacement), mesh, DVector3.Zero, Vector3.One, Quaternion.RotationAxis(Vector3.UnitZ, MathF.PI * 0.5f));
                             mAnchorNodes[idx].Parent = null;
                             mAnchorNodes[idx].HitproxyType = Graphics.Pipeline.UHitProxy.EHitproxyType.Root;
                         }
@@ -275,7 +276,7 @@ namespace EngineNS.UI.Editor
                             var mesh = new UMesh();
                             await mesh.Initialize(RName.GetRName("ui/p_005.vms", RName.ERNameType.Engine), new Graphics.Pipeline.Shader.UMaterial[] { whiteColorMat }, Rtti.UTypeDescGetter<Graphics.Mesh.UMdfStaticMesh>.TypeDesc);
                             mAnchorNodes[idx] = await UMeshNode.AddMeshNode(editor.PreviewViewport.World, editor.mUINode,
-                                new GamePlay.Scene.UMeshNode.UMeshNodeData(), typeof(GamePlay.UPlacement), mesh, DVector3.Zero, Vector3.One, Quaternion.RotationAxis(Vector3.UnitZ, MathF.PI * 0.5f));
+                                new GamePlay.Scene.UMeshNode.UMeshNodeData(), typeof(GamePlay.UPlacement), mesh, DVector3.Zero, Vector3.One, Quaternion.RotationAxis(Vector3.UnitZ, -MathF.PI * 0.5f));
                             mAnchorNodes[idx].Parent = null;
                             mAnchorNodes[idx].HitproxyType = Graphics.Pipeline.UHitProxy.EHitproxyType.Root;
                         }
@@ -295,7 +296,7 @@ namespace EngineNS.UI.Editor
                             var mesh = new UMesh();
                             await mesh.Initialize(RName.GetRName("ui/p_005.vms", RName.ERNameType.Engine), new Graphics.Pipeline.Shader.UMaterial[] { whiteColorMat }, Rtti.UTypeDescGetter<Graphics.Mesh.UMdfStaticMesh>.TypeDesc);
                             mAnchorNodes[idx] = await UMeshNode.AddMeshNode(editor.PreviewViewport.World, editor.mUINode,
-                                new GamePlay.Scene.UMeshNode.UMeshNodeData(), typeof(GamePlay.UPlacement), mesh, DVector3.Zero, Vector3.One, Quaternion.RotationAxis(Vector3.UnitZ, -MathF.PI * 0.5f));
+                                new GamePlay.Scene.UMeshNode.UMeshNodeData(), typeof(GamePlay.UPlacement), mesh, DVector3.Zero, Vector3.One, Quaternion.RotationAxis(Vector3.UnitZ, MathF.PI * 0.5f));
                             mAnchorNodes[idx].Parent = null;
                             mAnchorNodes[idx].HitproxyType = Graphics.Pipeline.UHitProxy.EHitproxyType.Root;
                         }
@@ -342,22 +343,22 @@ namespace EngineNS.UI.Editor
             var rootRect = element.RootUIHost.DesignRect;
             var elementRect = element.DesignRect;
             var transMat = mEditor.mUIHost.TransformedElements[element.TransformIndex].Matrix;
-            mOperatorNodes[0].Parent = mEditor.mUINode;
-            mOperatorNodes[0].Placement.Position = mEditor.mUINode.GetWorld().CameraOffset + Vector3.TransformCoordinate(new Vector3(elementRect.Left, rootRect.Height - elementRect.Top, 0.0f), in transMat);
-            mOperatorNodes[1].Parent = mEditor.mUINode;
-            mOperatorNodes[1].Placement.Position = mEditor.mUINode.GetWorld().CameraOffset + Vector3.TransformCoordinate(new Vector3(elementRect.Left + elementRect.Width * 0.5f, rootRect.Height - elementRect.Top, 0.0f), in transMat);
-            mOperatorNodes[2].Parent = mEditor.mUINode;
-            mOperatorNodes[2].Placement.Position = mEditor.mUINode.GetWorld().CameraOffset + Vector3.TransformCoordinate(new Vector3(elementRect.Right, rootRect.Height - elementRect.Top, 0.0f), in transMat);
-            mOperatorNodes[3].Parent = mEditor.mUINode;
-            mOperatorNodes[3].Placement.Position = mEditor.mUINode.GetWorld().CameraOffset + Vector3.TransformCoordinate(new Vector3(elementRect.Left, rootRect.Height - elementRect.Top - elementRect.Height * 0.5f, 0.0f), in transMat);
-            mOperatorNodes[4].Parent = mEditor.mUINode;
-            mOperatorNodes[4].Placement.Position = mEditor.mUINode.GetWorld().CameraOffset + Vector3.TransformCoordinate(new Vector3(elementRect.Right, rootRect.Height - elementRect.Top - elementRect.Height * 0.5f, 0.0f), in transMat);
-            mOperatorNodes[5].Parent = mEditor.mUINode;
-            mOperatorNodes[5].Placement.Position = mEditor.mUINode.GetWorld().CameraOffset + Vector3.TransformCoordinate(new Vector3(elementRect.Left, rootRect.Height - elementRect.Bottom, 0.0f), in transMat);
-            mOperatorNodes[6].Parent = mEditor.mUINode;
-            mOperatorNodes[6].Placement.Position = mEditor.mUINode.GetWorld().CameraOffset + Vector3.TransformCoordinate(new Vector3(elementRect.Left + elementRect.Width * 0.5f, rootRect.Height - elementRect.Bottom, 0.0f), in transMat);
-            mOperatorNodes[7].Parent = mEditor.mUINode;
-            mOperatorNodes[7].Placement.Position = mEditor.mUINode.GetWorld().CameraOffset + Vector3.TransformCoordinate(new Vector3(elementRect.Right, rootRect.Height - elementRect.Bottom, 0.0f), in transMat);
+            mOperatorNodes[(int)EDecoratorType.Size_Left_Top].Parent = mEditor.mUINode;
+            mOperatorNodes[(int)EDecoratorType.Size_Left_Top].Placement.Position = mEditor.mUINode.GetWorld().CameraOffset + Vector3.TransformCoordinate(new Vector3(elementRect.Left, rootRect.Height - elementRect.Top, 0.0f), in transMat);
+            mOperatorNodes[(int)EDecoratorType.Size_Middle_Top].Parent = mEditor.mUINode;
+            mOperatorNodes[(int)EDecoratorType.Size_Middle_Top].Placement.Position = mEditor.mUINode.GetWorld().CameraOffset + Vector3.TransformCoordinate(new Vector3(elementRect.Left + elementRect.Width * 0.5f, rootRect.Height - elementRect.Top, 0.0f), in transMat);
+            mOperatorNodes[(int)EDecoratorType.Size_Right_Top].Parent = mEditor.mUINode;
+            mOperatorNodes[(int)EDecoratorType.Size_Right_Top].Placement.Position = mEditor.mUINode.GetWorld().CameraOffset + Vector3.TransformCoordinate(new Vector3(elementRect.Right, rootRect.Height - elementRect.Top, 0.0f), in transMat);
+            mOperatorNodes[(int)EDecoratorType.Size_Left_Middle].Parent = mEditor.mUINode;
+            mOperatorNodes[(int)EDecoratorType.Size_Left_Middle].Placement.Position = mEditor.mUINode.GetWorld().CameraOffset + Vector3.TransformCoordinate(new Vector3(elementRect.Left, rootRect.Height - elementRect.Top - elementRect.Height * 0.5f, 0.0f), in transMat);
+            mOperatorNodes[(int)EDecoratorType.Size_Right_Middle].Parent = mEditor.mUINode;
+            mOperatorNodes[(int)EDecoratorType.Size_Right_Middle].Placement.Position = mEditor.mUINode.GetWorld().CameraOffset + Vector3.TransformCoordinate(new Vector3(elementRect.Right, rootRect.Height - elementRect.Top - elementRect.Height * 0.5f, 0.0f), in transMat);
+            mOperatorNodes[(int)EDecoratorType.Size_Left_Bottom].Parent = mEditor.mUINode;
+            mOperatorNodes[(int)EDecoratorType.Size_Left_Bottom].Placement.Position = mEditor.mUINode.GetWorld().CameraOffset + Vector3.TransformCoordinate(new Vector3(elementRect.Left, rootRect.Height - elementRect.Bottom, 0.0f), in transMat);
+            mOperatorNodes[(int)EDecoratorType.Size_Middle_Bottom].Parent = mEditor.mUINode;
+            mOperatorNodes[(int)EDecoratorType.Size_Middle_Bottom].Placement.Position = mEditor.mUINode.GetWorld().CameraOffset + Vector3.TransformCoordinate(new Vector3(elementRect.Left + elementRect.Width * 0.5f, rootRect.Height - elementRect.Bottom, 0.0f), in transMat);
+            mOperatorNodes[(int)EDecoratorType.Size_Right_Bottom].Parent = mEditor.mUINode;
+            mOperatorNodes[(int)EDecoratorType.Size_Right_Bottom].Placement.Position = mEditor.mUINode.GetWorld().CameraOffset + Vector3.TransformCoordinate(new Vector3(elementRect.Right, rootRect.Height - elementRect.Bottom, 0.0f), in transMat);
 
             var anchorMin = TtCanvasControl.GetAnchorMin(element);
             var anchorMax = TtCanvasControl.GetAnchorMax(element);
@@ -374,38 +375,106 @@ namespace EngineNS.UI.Editor
                 var node = mAnchorNodes[(int)(i - EDecoratorType.Anchor_Start)];
                 node.Parent = null;
             }
-            switch(mAnchorType)
+
+            var canvas = VisualTreeHelper.GetParent(element);
+            var canvasTransMat = mEditor.mUIHost.TransformedElements[canvas.TransformIndex].Matrix;
+            var canvasRect = canvas.DesignRect;
+            switch (mAnchorType)
             {
                 case EAnchorType.OnePoint:
                     foreach (var val in Enum.GetValues<EAnchor_OnePoint>())
                     {
                         var node = mAnchorNodes[((sbyte)val - (sbyte)EDecoratorType.Anchor_Start)];
                         node.Parent = mEditor.mUINode;
-                        node.Placement.Position = mEditor.mUINode.GetWorld().CameraOffset + Vector3.TransformCoordinate(new Vector3(elementRect.Left, rootRect.Height - elementRect.Top, 0.0f), in transMat);
+                        node.Placement.Position = mEditor.mUINode.GetWorld().CameraOffset + Vector3.TransformCoordinate(new Vector3(canvasRect.Left + canvasRect.Width * anchorMin.X, rootRect.Height - canvasRect.Top - canvasRect.Height * anchorMin.Y, 0.0f), in canvasTransMat);
                     }
                     break;
                 case EAnchorType.Vertical:
                     foreach(var val in Enum.GetValues<EAnchor_Vertical>())
                     {
-                        var node = mAnchorNodes[((sbyte)val - (sbyte)EDecoratorType.Anchor_Start)];
-                        node.Parent = mEditor.mUINode;
-                        node.Placement.Position = mEditor.mUINode.GetWorld().CameraOffset + Vector3.TransformCoordinate(new Vector3(elementRect.Left, rootRect.Height - elementRect.Top, 0.0f), in transMat);
+                        switch(val)
+                        {
+                            case EAnchor_Vertical.Anchor_VTop:
+                            case EAnchor_Vertical.Anchor_VTopRight:
+                            case EAnchor_Vertical.Anchor_VTopLeft:
+                                {
+                                    var node = mAnchorNodes[((sbyte)val - (sbyte)EDecoratorType.Anchor_Start)];
+                                    node.Parent = mEditor.mUINode;
+                                    node.Placement.Position = mEditor.mUINode.GetWorld().CameraOffset + Vector3.TransformCoordinate(new Vector3(canvasRect.Left + canvasRect.Width * anchorMin.X, rootRect.Height - canvasRect.Top - canvasRect.Height * anchorMin.Y, 0.0f), in canvasTransMat);
+                                }
+                                break;
+                            case EAnchor_Vertical.Anchor_VBottom:
+                            case EAnchor_Vertical.Anchor_VBottomRight:
+                            case EAnchor_Vertical.Anchor_VBottomLeft:
+                                {
+                                    var node = mAnchorNodes[((sbyte)val - (sbyte)EDecoratorType.Anchor_Start)];
+                                    node.Parent = mEditor.mUINode;
+                                    node.Placement.Position = mEditor.mUINode.GetWorld().CameraOffset + Vector3.TransformCoordinate(new Vector3(canvasRect.Left + canvasRect.Width * anchorMax.X, rootRect.Height - canvasRect.Top - canvasRect.Height * anchorMax.Y, 0.0f), in canvasTransMat);
+                                }
+                                break;
+                        }
                     }
                     break;
                 case EAnchorType.Horizontal:
                     foreach (var val in Enum.GetValues<EAnchor_Horizontal>())
                     {
-                        var node = mAnchorNodes[((sbyte)val - (sbyte)EDecoratorType.Anchor_Start)];
-                        node.Parent = mEditor.mUINode;
-                        node.Placement.Position = mEditor.mUINode.GetWorld().CameraOffset + Vector3.TransformCoordinate(new Vector3(elementRect.Left, rootRect.Height - elementRect.Top, 0.0f), in transMat);
+                        switch(val)
+                        {
+                            case EAnchor_Horizontal.Anchor_HLeft:
+                            case EAnchor_Horizontal.Anchor_HTopLeft:
+                            case EAnchor_Horizontal.Anchor_HBottomLeft:
+                                {
+                                    var node = mAnchorNodes[((sbyte)val - (sbyte)EDecoratorType.Anchor_Start)];
+                                    node.Parent = mEditor.mUINode;
+                                    node.Placement.Position = mEditor.mUINode.GetWorld().CameraOffset + Vector3.TransformCoordinate(new Vector3(canvasRect.Left + canvasRect.Width * anchorMin.X, rootRect.Height - canvasRect.Top - canvasRect.Height * anchorMin.Y, 0.0f), in canvasTransMat);
+                                }
+                                break;
+                            case EAnchor_Horizontal.Anchor_HRight:
+                            case EAnchor_Horizontal.Anchor_HTopRight:
+                            case EAnchor_Horizontal.Anchor_HBottomRight:
+                                {
+                                    var node = mAnchorNodes[((sbyte)val - (sbyte)EDecoratorType.Anchor_Start)];
+                                    node.Parent = mEditor.mUINode;
+                                    node.Placement.Position = mEditor.mUINode.GetWorld().CameraOffset + Vector3.TransformCoordinate(new Vector3(canvasRect.Left + canvasRect.Width * anchorMax.X, rootRect.Height - canvasRect.Top - canvasRect.Height * anchorMax.Y, 0.0f), in canvasTransMat);
+                                }
+                                break;
+                        }
                     }
                     break;
                 case EAnchorType.Rect:
                     foreach (var val in Enum.GetValues<EAnchor_Rect>())
                     {
-                        var node = mAnchorNodes[((sbyte)val - (sbyte)EDecoratorType.Anchor_Start)];
-                        node.Parent = mEditor.mUINode;
-                        node.Placement.Position = mEditor.mUINode.GetWorld().CameraOffset + Vector3.TransformCoordinate(new Vector3(elementRect.Left, rootRect.Height - elementRect.Top, 0.0f), in transMat);
+                        switch(val)
+                        {
+                            case EAnchor_Rect.Anchor_RectTopRight:
+                                {
+                                    var node = mAnchorNodes[((sbyte)val - (sbyte)EDecoratorType.Anchor_Start)];
+                                    node.Parent = mEditor.mUINode;
+                                    node.Placement.Position = mEditor.mUINode.GetWorld().CameraOffset + Vector3.TransformCoordinate(new Vector3(canvasRect.Left + canvasRect.Width * anchorMax.X, rootRect.Height - canvasRect.Top - canvasRect.Height * anchorMin.Y, 0.0f), in canvasTransMat);
+                                }
+                                break;
+                            case EAnchor_Rect.Anchor_RectBottomRight:
+                                {
+                                    var node = mAnchorNodes[((sbyte)val - (sbyte)EDecoratorType.Anchor_Start)];
+                                    node.Parent = mEditor.mUINode;
+                                    node.Placement.Position = mEditor.mUINode.GetWorld().CameraOffset + Vector3.TransformCoordinate(new Vector3(canvasRect.Left + canvasRect.Width * anchorMax.X, rootRect.Height - canvasRect.Top - canvasRect.Height * anchorMax.Y, 0.0f), in canvasTransMat);
+                                }
+                                break;
+                            case EAnchor_Rect.Anchor_RectBottomLeft:
+                                {
+                                    var node = mAnchorNodes[((sbyte)val - (sbyte)EDecoratorType.Anchor_Start)];
+                                    node.Parent = mEditor.mUINode;
+                                    node.Placement.Position = mEditor.mUINode.GetWorld().CameraOffset + Vector3.TransformCoordinate(new Vector3(canvasRect.Left + canvasRect.Width * anchorMin.X, rootRect.Height - canvasRect.Top - canvasRect.Height * anchorMax.Y, 0.0f), in canvasTransMat);
+                                }
+                                break;
+                            case EAnchor_Rect.Anchor_RectTopLeft:
+                                {
+                                    var node = mAnchorNodes[((sbyte)val - (sbyte)EDecoratorType.Anchor_Start)];
+                                    node.Parent = mEditor.mUINode;
+                                    node.Placement.Position = mEditor.mUINode.GetWorld().CameraOffset + Vector3.TransformCoordinate(new Vector3(canvasRect.Left + canvasRect.Width * anchorMin.X, rootRect.Height - canvasRect.Top - canvasRect.Height * anchorMin.Y, 0.0f), in canvasTransMat);
+                                }
+                                break;
+                        }
                     }
                     break;
             }
@@ -427,6 +496,28 @@ namespace EngineNS.UI.Editor
             if (mEditor.SelectedElements.Count == 1)
             {
                 UpdateOperatorNodes(mEditor.SelectedElements[0]);
+            }
+            UpdateOriAnchorDatas();
+        }
+
+        void UpdateOriAnchorDatas()
+        {
+            mOriAnchorRects.Clear();
+            for (int i = 0; i < mEditor.SelectedElements.Count; i++)
+            {
+                Vector4 rect;
+                rect.X = TtCanvasControl.GetAnchorRectX(mEditor.SelectedElements[i]);
+                rect.Y = TtCanvasControl.GetAnchorRectY(mEditor.SelectedElements[i]);
+                rect.Z = TtCanvasControl.GetAnchorRectZ(mEditor.SelectedElements[i]);
+                rect.W = TtCanvasControl.GetAnchorRectW(mEditor.SelectedElements[i]);
+                mOriAnchorRects.Add(rect);
+            }
+            mOriAnchorPoints.Clear();
+            for (int i = 0; i < mEditor.SelectedElements.Count; i++)
+            {
+                var min = TtCanvasControl.GetAnchorMin(mEditor.SelectedElements[i]);
+                var max = TtCanvasControl.GetAnchorMax(mEditor.SelectedElements[i]);
+                mOriAnchorPoints.Add(new Vector4(min.X, min.Y, max.X, max.Y));
             }
         }
 
@@ -471,7 +562,17 @@ namespace EngineNS.UI.Editor
                                     else if (mEditor.SelectedElements.Contains(mEditor.CurrentPointAtElement))
                                         mEditor.mMouseCursor = ImGuiMouseCursor_.ImGuiMouseCursor_ResizeAll;
                                     else
+                                    {
                                         mEditor.mMouseCursor = ImGuiMouseCursor_.ImGuiMouseCursor_Arrow;
+                                        for(int i=0; i< mAnchorNodes.Length; i++)
+                                        {
+                                            if(proxy == mAnchorNodes[i])
+                                            {
+                                                // todo: change color
+                                                //mAnchorNodes[i].Mesh.MaterialMesh.
+                                            }
+                                        }
+                                    }
                                 }
                                 break;
                             case EDecoratorType.Size_Left_Top:
@@ -705,6 +806,160 @@ namespace EngineNS.UI.Editor
                                     }
                                 }
                                 break;
+                            case EDecoratorType.Anchor_Center:
+                                {
+                                    if(e.MouseButton.Button == (byte)Bricks.Input.EMouseButton.BUTTON_LEFT)
+                                    {
+                                        DVector3 pickPos;
+                                        PickPlanePos(e.MouseButton.X, e.MouseButton.Y, mPickPlanePos, mPickPlaneNormal, out pickPos);
+                                        var pos = pickPos - mDecoratorMouseDownOffset;
+                                        var offset = pos - mPickPlanePos;
+
+                                        for(int i=0; i<mEditor.SelectedElements.Count; i++)
+                                        {
+                                            var canvas = VisualTreeHelper.GetParent(mEditor.SelectedElements[i]);
+                                            var offsetX = offset.X / canvas.DesignRect.Width;
+                                            var offsetY = offset.Y / canvas.DesignRect.Height;
+                                            var x = MathF.Min(1.0f, MathF.Max(0.0f, (float)(mOriAnchorPoints[i].X + offsetX)));
+                                            var y = MathF.Min(1.0f, MathF.Max(0.0f, (float)(mOriAnchorPoints[i].Y - offsetY)));
+                                            TtCanvasControl.SetAnchorMin(mEditor.SelectedElements[i], new Vector2(x, y));
+                                            TtCanvasControl.SetAnchorMax(mEditor.SelectedElements[i], new Vector2(x, y));
+                                            var realOffsetX = (x - mOriAnchorPoints[i].X) * canvas.DesignRect.Width;
+                                            var realOffsetY = (mOriAnchorPoints[i].Y - y) * canvas.DesignRect.Height;
+                                            TtCanvasControl.SetAnchorRectX(mEditor.SelectedElements[i], (float)(mOriAnchorRects[i].X - realOffsetX));
+                                            TtCanvasControl.SetAnchorRectY(mEditor.SelectedElements[i], (float)(mOriAnchorRects[i].Y + realOffsetY));
+                                        }
+                                    }
+                                }
+                                break;
+                            case EDecoratorType.Anchor_Top:
+                                {
+                                    if(e.MouseButton.Button == (byte)Bricks.Input.EMouseButton.BUTTON_LEFT)
+                                    {
+                                        DVector3 pickPos;
+                                        PickPlanePos(e.MouseButton.X, e.MouseButton.Y, mPickPlanePos, mPickPlaneNormal, out pickPos);
+                                        var pos = pickPos - mDecoratorMouseDownOffset;
+                                        var offset = pos - mPickPlanePos;
+
+                                        for(int i=0; i<mEditor.SelectedElements.Count; i++)
+                                        {
+                                            var element = mEditor.SelectedElements[i];
+                                            var canvas = VisualTreeHelper.GetParent(element);
+                                            var offsetY = offset.Y / canvas.DesignRect.Height;
+                                            var min = TtCanvasControl.GetAnchorMin(element);
+                                            var max = TtCanvasControl.GetAnchorMax(element);
+                                            var y = MathF.Min(max.Y, MathF.Max(0.0f, (float)(mOriAnchorPoints[i].Y - offsetY)));
+                                            TtCanvasControl.SetAnchorMin(element, new Vector2(min.X, y));
+                                            var realOffsetY = (mOriAnchorPoints[i].Y - y) * canvas.DesignRect.Height;
+                                            var height = mOriAnchorRects[i].W;
+                                            if((max.Y - y) > MathHelper.Epsilon)
+                                            {
+                                                height = max.Y - y - mOriAnchorRects[i].Y - mOriAnchorRects[i].W;
+                                            }
+                                            TtCanvasControl.SetAnchorRectY(element, (float)(mOriAnchorRects[i].Y + realOffsetY));
+                                            TtCanvasControl.SetAnchorRectW(element, height);
+                                        }
+                                    }
+                                }
+                                break;
+                            case EDecoratorType.Anchor_TopRight:
+                                {
+                                    if(e.MouseButton.Button == (byte)Bricks.Input.EMouseButton.BUTTON_LEFT)
+                                    {
+                                        DVector3 pickPos;
+                                        PickPlanePos(e.MouseButton.X, e.MouseButton.Y, mPickPlanePos, mPickPlaneNormal, out pickPos);
+                                        var pos = pickPos - mDecoratorMouseDownOffset;
+                                        var offset = pos - mPickPlanePos;
+
+                                        for(int i=0; i<mEditor.SelectedElements.Count; i++)
+                                        {
+                                            var element = mEditor.SelectedElements[i];
+                                            var canvas = VisualTreeHelper.GetParent(element);
+                                            var min = TtCanvasControl.GetAnchorMin(element);
+                                            var max = TtCanvasControl.GetAnchorMax(element);
+
+                                            var offsetX = offset.X / canvas.DesignRect.Width;
+                                            var x = MathF.Max(min.X, MathF.Min(1.0f, (float)(mOriAnchorPoints[i].X + offsetX)));
+                                            TtCanvasControl.SetAnchorMax(element, new Vector2(x, max.Y));
+                                            var realoffSetX = (mOriAnchorPoints[i].X - x) * canvas.DesiredSize.Width;
+                                            var width = mOriAnchorRects[i].Z;
+                                            if((x - min.X) > MathHelper.Epsilon)
+                                            {
+                                                width = x - min.X - mOriAnchorRects[i].X - mOriAnchorRects[i].Z - realoffSetX;
+                                            }
+                                            TtCanvasControl.SetAnchorRectZ(element, width);
+
+                                            var offsetY = offset.Y / canvas.DesignRect.Height;
+                                            var y = MathF.Min(max.Y, MathF.Max(0.0f, (float)(mOriAnchorPoints[i].Y - offsetY)));
+                                            TtCanvasControl.SetAnchorMin(element, new Vector2(min.X, y));
+                                            var realOffsetY = (mOriAnchorPoints[i].Y - y) * canvas.DesignRect.Height;
+                                            var height = mOriAnchorRects[i].W;
+                                            if((max.Y - y) > MathHelper.Epsilon)
+                                            {
+                                                height = max.Y - y - mOriAnchorRects[i].Y - mOriAnchorRects[i].W;
+                                            }
+                                            TtCanvasControl.SetAnchorRectY(element, (float)(mOriAnchorRects[i].Y + realOffsetY));
+                                            TtCanvasControl.SetAnchorRectW(element, height);
+                                        }
+                                    }
+                                }
+                                break;
+                            case EDecoratorType.Anchor_Right:
+                                break;
+                            case EDecoratorType.Anchor_BottomRight:
+                                break;
+                            case EDecoratorType.Anchor_Bottom:
+                                {
+                                    if(e.MouseButton.Button == (byte)Bricks.Input.EMouseButton.BUTTON_LEFT)
+                                    {
+                                        DVector3 pickPos;
+                                        PickPlanePos(e.MouseButton.X, e.MouseButton.Y, mPickPlanePos, mPickPlaneNormal, out pickPos);
+                                        var pos = pickPos - mDecoratorMouseDownOffset;
+                                        var offset = pos - mPickPlanePos;
+
+                                        for(int i=0; i<mEditor.SelectedElements.Count; i++)
+                                        {
+                                            var element = mEditor.SelectedElements[i];
+                                            var canvas = VisualTreeHelper.GetParent(element);
+                                            var offsetY = offset.Y / canvas.DesignRect.Height;
+                                            var min = TtCanvasControl.GetAnchorMin(element);
+                                            var max = TtCanvasControl.GetAnchorMax(element);
+
+                                            var y = MathF.Max(min.Y, MathF.Min(1.0f, (float)(mOriAnchorPoints[i].W - offsetY)));
+                                            TtCanvasControl.SetAnchorMax(element, new Vector2(max.X, y));
+                                            var realOffsetY = (mOriAnchorPoints[i].W - y) * canvas.DesignRect.Height;
+                                            var height = mOriAnchorRects[i].W;
+                                            if ((y - min.Y) > MathHelper.Epsilon)
+                                            {
+                                                height = y - min.Y - mOriAnchorRects[i].Y - mOriAnchorRects[i].W - realOffsetY;
+                                            }
+                                            TtCanvasControl.SetAnchorRectW(element, height);
+                                        }
+                                    }
+                                }
+                                break;
+                            case EDecoratorType.Anchor_BottomLeft:
+                                break;
+                            case EDecoratorType.Anchor_Left:
+                                break;
+                            case EDecoratorType.Anchor_TopLeft:
+                                break;
+                            case EDecoratorType.Anchor_MTop:
+                                break;
+                            case EDecoratorType.Anchor_MRight:
+                                break;
+                            case EDecoratorType.Anchor_MBottom:
+                                break;
+                            case EDecoratorType.Anchor_MLeft:
+                                break;
+                            case EDecoratorType.Anchor_STopRight:
+                                break;
+                            case EDecoratorType.Anchor_SBottomRight:
+                                break;
+                            case EDecoratorType.Anchor_SBottomLeft:
+                                break;
+                            case EDecoratorType.Anchor_STopLeft:
+                                break;
                         }
                     }
                     break;
@@ -717,6 +972,12 @@ namespace EngineNS.UI.Editor
                             var delta = mEditor.PreviewViewport.WindowPos - mEditor.PreviewViewport.ViewportPos;
                             var mousePt = new Vector2(e.MouseButton.X - delta.X, e.MouseButton.Y - delta.Y);
                             var proxy = mEditor.HitProxyNode.GetHitproxy((uint)mousePt.X, (uint)mousePt.Y);
+
+                            for(int i=0; i < mAnchorNodes.Length; i++)
+                            {
+                                if (mAnchorNodes[i] == proxy)
+                                    mCurDecoratorType = (EDecoratorType)(i + (int)EDecoratorType.Anchor_Start);
+                            }
                             for (int i = 0; i < mOperatorNodes.Length; i++)
                             {
                                 if (mOperatorNodes[i] == proxy)
@@ -726,7 +987,13 @@ namespace EngineNS.UI.Editor
                             if (mCurDecoratorType != EDecoratorType.None)
                             {
                                 DVector3 pickPos;
-                                mPickPlanePos = mOperatorNodes[(int)mCurDecoratorType].Placement.Position;
+                                if (mCurDecoratorType >= EDecoratorType.Size_Left_Top && mCurDecoratorType <= EDecoratorType.Size_Right_Bottom)
+                                    mPickPlanePos = mOperatorNodes[(int)(mCurDecoratorType)].Placement.Position;
+                                else if (mCurDecoratorType >= EDecoratorType.Anchor_Start && mCurDecoratorType < EDecoratorType.Anchor_End)
+                                    mPickPlanePos = mAnchorNodes[(int)(mCurDecoratorType - EDecoratorType.Anchor_Start)].Placement.Position;
+                                else
+                                    throw new InvalidOperationException($"No operation with type:{mCurDecoratorType}");
+
                                 mPickPlaneNormal = Vector3.TransformCoordinate(Vector3.UnitZ, mEditor.SelectedRect.UIHost.TransformedElements[0].Matrix);
                                 PickPlanePos(e.MouseButton.X, e.MouseButton.Y, mPickPlanePos, mPickPlaneNormal, out pickPos);
                                 mDecoratorMouseDownOffset = pickPos - mPickPlanePos;
@@ -745,19 +1012,9 @@ namespace EngineNS.UI.Editor
                                 PickPlanePos(e.MouseButton.X, e.MouseButton.Y, mPickPlanePos, mPickPlaneNormal, out pickPos);
                                 mDecoratorMouseDownOffset = pickPos - mPickPlanePos;
 
-                                mOriAnchorRects.Clear();
-                                for (int i=0; i < mEditor.SelectedElements.Count; i++)
-                                {
-                                    Vector4 rect;
-                                    rect.X = TtCanvasControl.GetAnchorRectX(mEditor.SelectedElements[i]);
-                                    rect.Y = TtCanvasControl.GetAnchorRectY(mEditor.SelectedElements[i]);
-                                    rect.Z = TtCanvasControl.GetAnchorRectZ(mEditor.SelectedElements[i]);
-                                    rect.W = TtCanvasControl.GetAnchorRectW(mEditor.SelectedElements[i]);
-                                    mOriAnchorRects.Add(rect);
-                                }
-
                                 mEditor.SetCurrentPointAtElement(null);
                             }
+                            UpdateOriAnchorDatas();
                         }
                     }
                     break;

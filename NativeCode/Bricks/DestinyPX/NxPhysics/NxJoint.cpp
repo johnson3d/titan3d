@@ -29,24 +29,37 @@ namespace NxPhysics
 	}
 	void NxDistanceJoint::SolveConstraint(NxScene* scene, const NxReal& time)
 	{
+		//以下为原理演示，没有任何优化
 		auto& mBody0 = mActorPair.first;
 		auto& mBody1 = mActorPair.second;
-		auto dir = mBody1->GetTryTransform()->Position - mBody0->GetTryTransform()->Position;
-		dir.Normalize();
+
+		NxReal w[2];
+		w[0] = mBody0->GetShapeData()->InvMass;
+		w[1] = mBody1->GetShapeData()->InvMass;
+		//计算需要修正的距离
 		auto delta = FixDistance(mBody0->GetTryTransform()->Position, mBody1->GetTryTransform()->Position, mLimitMin, mLimitMax);
-		auto length = delta.Length();
-		delta = dir * length;
-		auto w0 = mBody0->GetShapeData()->InvMass;
-		auto w1 = mBody1->GetShapeData()->InvMass;
+		auto len = delta.Length();
+		if (len == NxReal::Zero())
+			return;
+		//计算p0和p1的导数（直线约束，直接计算梯度即可）
+		NxVector3 gradients[2];
+		gradients[0] = delta / len;
+		gradients[1] = -gradients[0];
 
-		auto f0 = w0 / (w0 + w1);
-		auto f1 = w1 / (w0 + w1);//1-f0
-		auto m0 = delta * f0;
-		auto m1 = delta * f1;
-		mBody0->GetTryTransform()->Position -= m0;
-		mBody1->GetTryTransform()->Position += m1;
+		//约束函数f(x) = |p0 - p1| - d
+		//在这里，约束c就是休要修正的距离len
+		//这里其实可以优化，因为p0,p1两处的导数模的平方都是1，所以比例系数s = c / (w0 + w1)
+		auto s = NxJoint::CalcLagrange(mRagrange, len, gradients, w, 2, mCompliance, time);
+		mRagrange += s;
+		
+		s = -s;
+		//修正量Dp(i) = -s * W(i) * 导数(i)，CalcCoefficient内部已经取负
+		auto delta_p0 = gradients[0] * (w[0] * s);
+		auto delta_p1 = gradients[1] * (w[1] * s);
 
-		D2R(0.5);
+		//修正位置
+		mBody0->GetTryTransform()->Position += delta_p0;
+		mBody1->GetTryTransform()->Position += delta_p1;
 	}
 }
 

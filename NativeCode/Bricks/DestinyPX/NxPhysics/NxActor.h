@@ -34,7 +34,7 @@ namespace NxPhysics
 	struct TR_CLASS(SV_LayoutStruct = 8)
 		NxRigidBodyDesc
 	{
-
+		NxReal Compliance;
 	};
 	class TR_CLASS()
 		NxRigidBody : public NxActor

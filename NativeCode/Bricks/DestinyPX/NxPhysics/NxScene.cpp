@@ -110,8 +110,12 @@ namespace NxPhysics
 				i.second->GetRtti() == GetClassObject<NxRigidBody>())
 			{
 				djt.mActorPair = i;
+				auto actor0 = (NxRigidBody*)i.first.GetPtr();
+				auto actor1 = (NxRigidBody*)i.second.GetPtr();
+				djt.ResetRagrange();
 				djt.mLimitMax = NxReal::Maximum();
-				djt.mLimitMin = NxDistanceJoint::CalcLimitMin((NxRigidBody*)i.first.GetPtr(), (NxRigidBody*)i.second.GetPtr());
+				djt.mLimitMin = NxDistanceJoint::CalcLimitMin(actor0, actor1);
+				djt.mCompliance = actor0->mDesc.Compliance + actor1->mDesc.Compliance;
 				djt.SolveConstraint(this, step);
 			}
 		}

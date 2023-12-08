@@ -10,6 +10,7 @@ namespace NxPhysics
 		NxReal Mass;
 		NxReal InvMass;
 		NxReal Volume;
+		NxReal Compliance;
 		NxVector3 Centroid;
 	};
 	class TR_CLASS()

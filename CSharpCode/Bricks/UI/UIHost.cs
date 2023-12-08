@@ -165,7 +165,7 @@ namespace EngineNS.UI
                 return null;
             data.Direction = dir;
 
-            UEngine.Instance.UIManager.DebugMousePt = mousePt;// - delta;
+            //UEngine.Instance.UIManager.DebugMousePt = mousePt;// - delta;
             var ray = new Ray(data.Start, data.Direction);
             if (!Ray.Intersects(in ray, BoundingBox, out data.Distance))
                 return null;

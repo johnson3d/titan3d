@@ -15,6 +15,9 @@ namespace NxMath
 			NxTransform<Type> transform, base, relative;
 			transform.ToMatrixWithScale();
 			relative = transform.GetRelativeTransform(base);
+
+			NxTransformNoScale<Type> transform_ns, base_ns, relative_ns;
+			NxTransformNoScale<Type>::Multiply(transform_ns, base_ns, relative_ns);
 			//NxTransform<Type>::GetRelativeTransformUsingMatrixWithScale(transform, base, relative);
 		}
 	};

@@ -59,7 +59,11 @@ namespace EngineNS.UI.Editor
 
         async Thread.Async.TtTask UpdateDecorator()
         {
-            for(int i=mSelectedElements.Count - 1; i >=0; i--)
+            if (!mUIHost.IsReadyToDraw())
+                return;
+            if (mUIHost.TransformedElements.Count <= 0)
+                return;
+            for (int i=mSelectedElements.Count - 1; i >=0; i--)
             {
                 if (mSelectedElements[i].MeshDirty)
                 {
