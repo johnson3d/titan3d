@@ -282,7 +282,7 @@ namespace EngineNS.Bricks.Procedure.Node
             ImGuiAPI.PopID();
         }
         //Graphics.Mesh.UMeshPrimitives TerrainMesh;
-        //Graphics.Mesh.UMesh PreviewMesh = new Graphics.Mesh.UMesh();
+        //Graphics.Mesh.TtMesh PreviewMesh = new Graphics.Mesh.TtMesh();
         Bricks.Terrain.CDLOD.UTerrainNode PreviewTerrainNode;
         public override async System.Threading.Tasks.Task DoPreviewMesh()
         {

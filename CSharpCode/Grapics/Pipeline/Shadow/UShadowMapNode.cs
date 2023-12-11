@@ -227,7 +227,7 @@ namespace EngineNS.Graphics.Pipeline.Shadow
                 mOrtho2UVMtx.M34 = 0.0f;
             }
 
-            mVisParameter.VisibleMeshes = new List<Mesh.UMesh>();
+            mVisParameter.VisibleMeshes = new List<Mesh.TtMesh>();
 
             var dpRastDesc = new NxRHI.FGpuPipelineDesc();
             dpRastDesc.SetDefault();
@@ -482,18 +482,18 @@ namespace EngineNS.Graphics.Pipeline.Shadow
                         {
                             if (i.IsCastShadow == false)
                                 continue;
-                            if (i.Atoms == null)
-                                continue;
-
-                            for (int j = 0; j < i.Atoms.Count; j++)
+                            foreach (var j in i.SubMeshes)
                             {
-                                var drawcall = i.GetDrawCall(cmdlist.mCoreObject, GBuffersArray[CsmIdx], j, policy, URenderPolicy.EShadingType.DepthPass, this);
-
-                                if (drawcall != null)
+                                foreach (var k in j.Atoms)
                                 {
-                                    drawcall.BindGBuffer(mShadowCameraArray[CsmIdx], GBuffersArray[CsmIdx]);
+                                    var drawcall = k.GetDrawCall(cmdlist.mCoreObject, GBuffersArray[CsmIdx], policy, URenderPolicy.EShadingType.DepthPass, this);
 
-                                    cmdlist.PushGpuDraw(drawcall);
+                                    if (drawcall != null)
+                                    {
+                                        drawcall.BindGBuffer(mShadowCameraArray[CsmIdx], GBuffersArray[CsmIdx]);
+
+                                        cmdlist.PushGpuDraw(drawcall);
+                                    }
                                 }
                             }
                         }

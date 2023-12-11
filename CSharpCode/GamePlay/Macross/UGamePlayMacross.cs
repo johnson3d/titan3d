@@ -124,7 +124,7 @@ namespace EngineNS.GamePlay.GamePlayMacross
         public async virtual Task<bool> ConstructAnimGraph(UMeshNode animatedMeshNode)
         {
             //return false;
-            var animatablePose = animatedMeshNode?.Mesh?.MaterialMesh?.Mesh?.PartialSkeleton?.CreatePose() as EngineNS.Animation.SkeletonAnimation.AnimatablePose.UAnimatableSkeletonPose;
+            var animatablePose = animatedMeshNode?.Mesh?.MaterialMesh?.SubMeshes[0].Mesh?.PartialSkeleton?.CreatePose() as EngineNS.Animation.SkeletonAnimation.AnimatablePose.UAnimatableSkeletonPose;
             var skinMDfQueue = animatedMeshNode.Mesh.MdfQueue as EngineNS.Graphics.Mesh.UMdfSkinMesh;
             mMeshSpaceRuntimePose = URuntimePoseUtility.CreateMeshSpaceRuntimePose(animatablePose);
             skinMDfQueue.SkinModifier.RuntimeMeshSpacePose = mMeshSpaceRuntimePose;
@@ -178,7 +178,7 @@ namespace EngineNS.GamePlay.GamePlayMacross
         }
         public async override Task<bool> ConstructAnimGraph(UMeshNode animatedMeshNode)
         {
-            var animatablePose = animatedMeshNode?.Mesh?.MaterialMesh?.Mesh?.PartialSkeleton?.CreatePose() as EngineNS.Animation.SkeletonAnimation.AnimatablePose.UAnimatableSkeletonPose;
+            var animatablePose = animatedMeshNode?.Mesh?.MaterialMesh?.SubMeshes[0].Mesh?.PartialSkeleton?.CreatePose() as EngineNS.Animation.SkeletonAnimation.AnimatablePose.UAnimatableSkeletonPose;
             var skinMDfQueue = animatedMeshNode.Mesh.MdfQueue as EngineNS.Graphics.Mesh.UMdfSkinMesh;
             mMeshSpaceRuntimePose = URuntimePoseUtility.CreateMeshSpaceRuntimePose(animatablePose);
             skinMDfQueue.SkinModifier.RuntimeMeshSpacePose = mMeshSpaceRuntimePose;

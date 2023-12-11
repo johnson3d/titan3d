@@ -90,7 +90,7 @@ namespace EngineNS.Editor.Forms
 
             (viewport as Editor.UPreviewViewport).CameraController.ControlCamera(viewport.RenderPolicy.DefaultCamera);
 
-            var mesh = new Graphics.Mesh.UMesh();
+            var mesh = new Graphics.Mesh.TtMesh();
 
             var ok = mesh.Initialize(Mesh, Rtti.UTypeDescGetter<Graphics.Mesh.UMdfStaticMesh>.TypeDesc);
             if (ok)
@@ -104,7 +104,7 @@ namespace EngineNS.Editor.Forms
             }
 
             var arrowMaterialMesh = await UEngine.Instance.GfxDevice.MaterialMeshManager.GetMaterialMesh(RName.GetRName("mesh/base/arrow.ums", RName.ERNameType.Engine));
-            var arrowMesh = new Graphics.Mesh.UMesh();
+            var arrowMesh = new Graphics.Mesh.TtMesh();
             ok = arrowMesh.Initialize(arrowMaterialMesh, Rtti.UTypeDescGetter<Graphics.Mesh.UMdfStaticMesh>.TypeDesc);
             if (ok)
             {
@@ -115,7 +115,7 @@ namespace EngineNS.Editor.Forms
                 mArrowMeshNode.IsCastShadow = false;
             }
 
-            var aabb = mesh.MaterialMesh.Mesh.mCoreObject.mAABB;
+            var aabb = mesh.MaterialMesh.AABB;
             mCurrentMeshRadius = aabb.GetMaxSide();
             BoundingSphere sphere;
             sphere.Center = aabb.GetCenter();
@@ -130,7 +130,7 @@ namespace EngineNS.Editor.Forms
                 boxStart.Y -= aabb.GetSize().Y * 0.5f;
                 var box = Graphics.Mesh.UMeshDataProvider.MakeBox(boxStart.X, boxStart.Y, boxStart.Z, meshSize.X, meshSize.Y, meshSize.Z).ToMesh();
 
-                var PlaneMesh = new Graphics.Mesh.UMesh();
+                var PlaneMesh = new Graphics.Mesh.TtMesh();
                 var tMaterials = new Graphics.Pipeline.Shader.UMaterial[1];
                 tMaterials[0] = await UEngine.Instance.GfxDevice.MaterialInstanceManager.GetMaterialInstance(RName.GetRName("material/whitecolor.uminst", RName.ERNameType.Engine));
                 PlaneMesh.Initialize(box, tMaterials,

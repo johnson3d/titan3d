@@ -67,7 +67,7 @@ namespace EngineNS.GamePlay.Scene
             if (DebugMesh != null)
                 rp.VisibleMeshes.Add(DebugMesh);
         }
-        public override void GetHitProxyDrawMesh(List<UMesh> meshes)
+        public override void GetHitProxyDrawMesh(List<TtMesh> meshes)
         {
             base.GetHitProxyDrawMesh(meshes);
         }
@@ -78,8 +78,8 @@ namespace EngineNS.GamePlay.Scene
             DirectionLight.Direction = Quaternion.RotateVector3(in Placement.TransformRef.mQuat, in Vector3.UnitX);
         }
 
-        Graphics.Mesh.UMesh mDebugMesh;
-        public Graphics.Mesh.UMesh DebugMesh
+        Graphics.Mesh.TtMesh mDebugMesh;
+        public Graphics.Mesh.TtMesh DebugMesh
         {
             get
             {
@@ -90,7 +90,7 @@ namespace EngineNS.GamePlay.Scene
                         return null;
                     var materials1 = new Graphics.Pipeline.Shader.UMaterialInstance[1];
                     materials1[0] = UEngine.Instance.GfxDevice.MaterialInstanceManager.FindMaterialInstance(RName.GetRName("axis/axis_x_d.uminst", RName.ERNameType.Engine));
-                    var mesh2 = new Graphics.Mesh.UMesh();
+                    var mesh2 = new Graphics.Mesh.TtMesh();
                     var ok1 = mesh2.Initialize(cookedMesh, materials1,
                         Rtti.UTypeDescGetter<Graphics.Mesh.UMdfStaticMesh>.TypeDesc);
                     if (ok1)
@@ -100,7 +100,7 @@ namespace EngineNS.GamePlay.Scene
 
                         mDebugMesh.HostNode = this;
 
-                        BoundVolume.LocalAABB = mDebugMesh.MaterialMesh.Mesh.mCoreObject.mAABB;
+                        BoundVolume.LocalAABB = mDebugMesh.MaterialMesh.AABB;
 
                         this.HitproxyType = Graphics.Pipeline.UHitProxy.EHitproxyType.Root;
 

@@ -40,7 +40,7 @@ namespace EngineNS.UI
         {
 
         }
-        public Graphics.Mesh.UMesh Mesh;
+        public Graphics.Mesh.TtMesh Mesh;
         public void Dispose()
         {
             CoreSDK.DisposeObject(ref Mesh);

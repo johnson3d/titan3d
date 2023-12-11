@@ -95,7 +95,7 @@ namespace EngineNS.Editor.Forms
             {
                 materials[i] = mtl;
             }
-            var mesh = new Graphics.Mesh.UMesh();
+            var mesh = new Graphics.Mesh.TtMesh();
             mesh.Initialize(Mesh, materials, Rtti.UTypeDescGetter<Graphics.Mesh.UMdfStaticMesh>.TypeDesc);
 
             var meshNode = await GamePlay.Scene.UMeshNode.AddMeshNode(viewport.World, viewport.World.Root, new GamePlay.Scene.UMeshNode.UMeshNodeData(), typeof(GamePlay.UPlacement), mesh,
@@ -107,7 +107,7 @@ namespace EngineNS.Editor.Forms
 
             mCurrentMeshNode = meshNode;
 
-            var aabb = mesh.MaterialMesh.Mesh.mCoreObject.mAABB;
+            var aabb = mesh.MaterialMesh.AABB;
             float radius = aabb.GetMaxSide();
             BoundingSphere sphere;
             sphere.Center = aabb.GetCenter();
@@ -122,7 +122,7 @@ namespace EngineNS.Editor.Forms
                 boxStart.Y -= aabb.GetSize().Y * 0.5f;
                 var box = Graphics.Mesh.UMeshDataProvider.MakeBox(boxStart.X, boxStart.Y, boxStart.Z, meshSize.X, meshSize.Y, meshSize.Z).ToMesh();
 
-                var PlaneMesh = new Graphics.Mesh.UMesh();
+                var PlaneMesh = new Graphics.Mesh.TtMesh();
                 var tMaterials = new Graphics.Pipeline.Shader.UMaterial[1];
                 tMaterials[0] = await UEngine.Instance.GfxDevice.MaterialInstanceManager.GetMaterialInstance(RName.GetRName("material/whitecolor.uminst", RName.ERNameType.Engine));
                 PlaneMesh.Initialize(box, tMaterials,

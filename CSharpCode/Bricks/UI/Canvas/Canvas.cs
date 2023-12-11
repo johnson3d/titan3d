@@ -42,7 +42,7 @@ namespace EngineNS.UI.Canvas
         {
             mCoreObject.BuildMesh(mesh.mCoreObject);
         }
-        public static async System.Threading.Tasks.Task<Graphics.Mesh.UMesh> TestCreate()
+        public static async System.Threading.Tasks.Task<Graphics.Mesh.TtMesh> TestCreate()
         {
             var TestCanvas = new EngineNS.UI.Canvas.TtCanvas();
             Graphics.Mesh.UMeshDataProvider MeshProvider = new Graphics.Mesh.UMeshDataProvider();
@@ -148,13 +148,13 @@ namespace EngineNS.UI.Canvas
                 }
                 materials[i] = mtl;
             }
-            var mesh = new Graphics.Mesh.UMesh();
+            var mesh = new Graphics.Mesh.TtMesh();
             var ok = mesh.Initialize(Mesh, materials, Rtti.UTypeDescGetter<Graphics.Mesh.UMdfStaticMesh>.TypeDesc);
             var mdf = mesh.MdfQueue as Graphics.Mesh.UMdfStaticMesh;
-            mdf.OnDrawCallCallback = static (shadingType, drawcall, policy, mesh, atom) =>
+            mdf.OnDrawCallCallback = static (shadingType, drawcall, policy, atom) =>
             {
                 EngineNS.Canvas.FDrawCmd cmd = new EngineNS.Canvas.FDrawCmd();
-                cmd.NativePointer = mesh.MaterialMesh.Mesh.mCoreObject.GetAtomExtData((uint)atom).NativePointer;
+                cmd.NativePointer = atom.GetAtomExtData().NativePointer;
                 var brush = cmd.GetBrush();
                 if (brush.Name.StartWith("@Text:"))
                 {

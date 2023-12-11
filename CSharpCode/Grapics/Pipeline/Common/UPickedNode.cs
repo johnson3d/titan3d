@@ -97,7 +97,7 @@ namespace EngineNS.Graphics.Pipeline.Common
 
             base.Dispose();
         }
-        List<Mesh.UMesh> mPickedMeshes = new List<Mesh.UMesh>();
+        List<Mesh.TtMesh> mPickedMeshes = new List<Mesh.TtMesh>();
         [ThreadStatic]
         private static Profiler.TimeScope ScopeTick = Profiler.TimeScopeManager.GetTimeScope(typeof(UPickedNode), nameof(TickLogic));
         public override unsafe void TickLogic(GamePlay.UWorld world, URenderPolicy policy, bool bClear)
@@ -119,20 +119,20 @@ namespace EngineNS.Graphics.Pipeline.Common
                 }
                 foreach (var mesh in mPickedMeshes)
                 {
-                    if (mesh == null || mesh.Atoms == null)
-                        continue;
-
-                    for (int j = 0; j < mesh.Atoms.Count; j++)
+                    foreach (var i in mesh.SubMeshes)
                     {
-                        var drawcall = mesh.GetDrawCall(cmdlist.mCoreObject, PickedBuffer, j, policy, Graphics.Pipeline.URenderPolicy.EShadingType.Picked, this);
-                        if (drawcall != null)
+                        foreach (var k in i.Atoms)
                         {
-                            if (PickedBuffer.PerViewportCBuffer != null)
-                                drawcall.BindCBuffer(drawcall.Effect.BindIndexer.cbPerViewport, PickedBuffer.PerViewportCBuffer);
-                            if (policy.DefaultCamera.PerCameraCBuffer != null)
-                                drawcall.BindCBuffer(drawcall.Effect.BindIndexer.cbPerCamera, policy.DefaultCamera.PerCameraCBuffer);
+                            var drawcall = k.GetDrawCall(cmdlist.mCoreObject, PickedBuffer, policy, Graphics.Pipeline.URenderPolicy.EShadingType.Picked, this);
+                            if (drawcall != null)
+                            {
+                                if (PickedBuffer.PerViewportCBuffer != null)
+                                    drawcall.BindCBuffer(drawcall.Effect.BindIndexer.cbPerViewport, PickedBuffer.PerViewportCBuffer);
+                                if (policy.DefaultCamera.PerCameraCBuffer != null)
+                                    drawcall.BindCBuffer(drawcall.Effect.BindIndexer.cbPerCamera, policy.DefaultCamera.PerCameraCBuffer);
 
-                            cmdlist.PushGpuDraw(drawcall);
+                                cmdlist.PushGpuDraw(drawcall);
+                            }
                         }
                     }
                 }

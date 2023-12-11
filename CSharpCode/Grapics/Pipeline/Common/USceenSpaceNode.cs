@@ -28,7 +28,7 @@ namespace EngineNS.Graphics.Pipeline.Common
         [Rtti.Meta]
         [Category("Option")]
         public float OutputScaleFactor { get; set; } = 1.0f;
-        public Graphics.Mesh.UMesh ScreenMesh;
+        public Graphics.Mesh.TtMesh ScreenMesh;
         public Shader.CommanShading.UBasePassPolicy ScreenDrawPolicy;
         public UGraphicsBuffers GBuffers { get; protected set; } = new UGraphicsBuffers();
         public NxRHI.URenderPass RenderPass;
@@ -52,7 +52,7 @@ namespace EngineNS.Graphics.Pipeline.Common
             if (materials[0] == null)
                 return;
 
-            var mesh = new Graphics.Mesh.UMesh();
+            var mesh = new Graphics.Mesh.TtMesh();
             var rect = Graphics.Mesh.UMeshDataProvider.MakeRect2D(-1, -1, 2, 2, 0.5F, false);
             var rectMesh = rect.ToMesh();
             var ok = mesh.Initialize(rectMesh, materials, Rtti.UTypeDescGetter<Graphics.Mesh.UMdfStaticMesh>.TypeDesc);
@@ -128,15 +128,18 @@ namespace EngineNS.Graphics.Pipeline.Common
                 cmdlist.BeginCommand();
                 if (ScreenMesh != null)
                 {
-                    for (int j = 0; j < ScreenMesh.Atoms.Count; j++)
+                    foreach(var i in ScreenMesh.SubMeshes)
                     {
-                        var drawcall = ScreenMesh.GetDrawCall(cmdlist.mCoreObject, GBuffers, j, ScreenDrawPolicy, Graphics.Pipeline.URenderPolicy.EShadingType.BasePass, this);
-                        if (drawcall == null)
-                            continue;
-                        drawcall.TagObject = this;
-                        drawcall.BindCBuffer(drawcall.Effect.BindIndexer.cbPerViewport, GBuffers.PerViewportCBuffer);
-                        drawcall.BindCBuffer(drawcall.Effect.BindIndexer.cbPerCamera, policy.DefaultCamera.PerCameraCBuffer);
-                        cmdlist.PushGpuDraw(drawcall);
+                        foreach (var j in i.Atoms)
+                        {
+                            var drawcall = j.GetDrawCall(cmdlist.mCoreObject, GBuffers, ScreenDrawPolicy, Graphics.Pipeline.URenderPolicy.EShadingType.BasePass, this);
+                            if (drawcall == null)
+                                continue;
+                            drawcall.TagObject = this;
+                            drawcall.BindCBuffer(drawcall.Effect.BindIndexer.cbPerViewport, GBuffers.PerViewportCBuffer);
+                            drawcall.BindCBuffer(drawcall.Effect.BindIndexer.cbPerCamera, policy.DefaultCamera.PerCameraCBuffer);
+                            cmdlist.PushGpuDraw(drawcall);
+                        }
                     }
                 }
                 {

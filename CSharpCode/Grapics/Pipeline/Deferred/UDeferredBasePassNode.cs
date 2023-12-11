@@ -146,7 +146,7 @@ namespace EngineNS.Graphics.Pipeline.Deferred
 
             base.Dispose();
         }
-        public override Shader.UGraphicsShadingEnv GetPassShading(Graphics.Pipeline.URenderPolicy.EShadingType type, Mesh.UMesh mesh, int atom)
+        public override Shader.UGraphicsShadingEnv GetPassShading(Graphics.Pipeline.URenderPolicy.EShadingType type, Mesh.TtMesh.TtAtom atom)
         {
             return mOpaqueShading;
         }
@@ -192,34 +192,35 @@ namespace EngineNS.Graphics.Pipeline.Deferred
                     //BasePass.DrawCmdList.SetViewport(GBuffers.ViewPort.mCoreObject);
                     foreach (var i in policy.VisibleMeshes)
                     {
-                        if (i.Atoms == null)
-                            continue;
-
-                        for (int j = 0; j < i.Atoms.Count; j++)
+                        foreach (var j in i.SubMeshes)
                         {
-                            if (i.Atoms[j].Material == null)
-                                continue;
-                            var layer = i.Atoms[j].Material.RenderLayer;
-                            if (layer == ERenderLayer.RL_Background)
+                            foreach (var k in j.Atoms)
                             {
-                                var cmd = BackgroundPass.DrawCmdList;
-                                var drawcall = i.GetDrawCall(cmd.mCoreObject, GBuffers, j, policy, URenderPolicy.EShadingType.BasePass, this);
-                                if (drawcall != null)
-                                {
-                                    drawcall.BindGBuffer(policy.DefaultCamera, GBuffers);
+                                if (k == null || k.Material == null)
+                                    continue;
 
-                                    cmd.PushGpuDraw(drawcall);
+                                var layer = k.Material.RenderLayer;
+                                if (layer == ERenderLayer.RL_Background)
+                                {
+                                    var cmd = BackgroundPass.DrawCmdList;
+                                    var drawcall = k.GetDrawCall(cmd.mCoreObject, GBuffers, policy, URenderPolicy.EShadingType.BasePass, this);
+                                    if (drawcall != null)
+                                    {
+                                        drawcall.BindGBuffer(policy.DefaultCamera, GBuffers);
+
+                                        cmd.PushGpuDraw(drawcall);
+                                    }
                                 }
-                            }
-                            else if (layer == ERenderLayer.RL_Opaque)
-                            {
-                                var cmd = BasePass.DrawCmdList;
-                                var drawcall = i.GetDrawCall(cmd.mCoreObject, GBuffers, j, policy, URenderPolicy.EShadingType.BasePass, this);
-                                if (drawcall != null)
+                                else if (layer == ERenderLayer.RL_Opaque)
                                 {
-                                    drawcall.BindGBuffer(policy.DefaultCamera, GBuffers);
+                                    var cmd = BasePass.DrawCmdList;
+                                    var drawcall = k.GetDrawCall(cmd.mCoreObject, GBuffers, policy, URenderPolicy.EShadingType.BasePass, this);
+                                    if (drawcall != null)
+                                    {
+                                        drawcall.BindGBuffer(policy.DefaultCamera, GBuffers);
 
-                                    cmd.PushGpuDraw(drawcall);
+                                        cmd.PushGpuDraw(drawcall);
+                                    }
                                 }
                             }
                         }
@@ -272,9 +273,6 @@ namespace EngineNS.Graphics.Pipeline.Deferred
 
             foreach (var i in policy.VisibleMeshes)
             {
-                if (i.Atoms == null)
-                    continue;
-
                 var preMatrix = i.PerMeshCBuffer.GetMatrix(UEngine.Instance.GfxDevice.CoreShaderBinder.CBPerMesh.WorldMatrix);
                 i.PerMeshCBuffer.SetMatrix(UEngine.Instance.GfxDevice.CoreShaderBinder.CBPerMesh.PreWorldMatrix, preMatrix);
             }

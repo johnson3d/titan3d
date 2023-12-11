@@ -280,12 +280,12 @@ namespace EngineNS.Graphics.Pipeline.Shader
             OnDrawCallCallback = mdf.OnDrawCallCallback;
         }
         
-        public delegate void FOnDrawCall(Pipeline.URenderPolicy.EShadingType shadingType, NxRHI.UGraphicDraw drawcall, URenderPolicy policy, Mesh.UMesh mesh, int atom);
+        public delegate void FOnDrawCall(Pipeline.URenderPolicy.EShadingType shadingType, NxRHI.UGraphicDraw drawcall, URenderPolicy policy, Mesh.TtMesh.TtAtom atom);
         public FOnDrawCall OnDrawCallCallback = null;
-        public virtual void OnDrawCall(NxRHI.ICommandList cmd, Pipeline.URenderPolicy.EShadingType shadingType, NxRHI.UGraphicDraw drawcall, URenderPolicy policy, Mesh.UMesh mesh, int atom)
+        public virtual void OnDrawCall(NxRHI.ICommandList cmd, Pipeline.URenderPolicy.EShadingType shadingType, NxRHI.UGraphicDraw drawcall, URenderPolicy policy, Mesh.TtMesh.TtAtom atom)
         {
             if (OnDrawCallCallback != null)
-                OnDrawCallCallback(shadingType, drawcall, policy, mesh, atom);
+                OnDrawCallCallback(shadingType, drawcall, policy, atom);
         }
     }
 

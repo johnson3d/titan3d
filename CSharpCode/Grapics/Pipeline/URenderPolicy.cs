@@ -214,10 +214,10 @@ namespace EngineNS.Graphics.Pipeline
         }
         #endregion
         public Common.UPickedProxiableManager PickedProxiableManager { get; protected set; } = new Common.UPickedProxiableManager();
-        public List<Mesh.UMesh> VisibleMeshes = new List<Mesh.UMesh>();
+        public List<Mesh.TtMesh> VisibleMeshes = new List<Mesh.TtMesh>();
         public List<GamePlay.Scene.UNode> VisibleNodes = new List<GamePlay.Scene.UNode>();
 
-        public virtual Shader.UGraphicsShadingEnv GetPassShading(EShadingType type, Mesh.UMesh mesh, int atom, Pipeline.Common.URenderGraphNode node)
+        public virtual Shader.UGraphicsShadingEnv GetPassShading(EShadingType type, Mesh.TtMesh.TtAtom atom, Pipeline.Common.URenderGraphNode node)
         {
             switch (type)
             {
@@ -233,7 +233,7 @@ namespace EngineNS.Graphics.Pipeline
                             var ForwordNode = FindFirstNode<Deferred.UForwordNode>();
                             if (node == ForwordNode)
                             {
-                                switch (mesh.Atoms[atom].Material.RenderLayer)
+                                switch (atom.Material.RenderLayer)
                                 {
                                     case ERenderLayer.RL_Translucent:
                                         return ForwordNode.mTranslucentShading;
@@ -266,9 +266,9 @@ namespace EngineNS.Graphics.Pipeline
             }
             return null;
         }
-        public virtual void OnDrawCall(NxRHI.ICommandList cmd, Pipeline.URenderPolicy.EShadingType shadingType, NxRHI.UGraphicDraw drawcall, Mesh.UMesh mesh, int atom)
+        public virtual void OnDrawCall(NxRHI.ICommandList cmd, Pipeline.URenderPolicy.EShadingType shadingType, NxRHI.UGraphicDraw drawcall, Mesh.TtMesh.TtAtom atom)
         {
-            mesh.MdfQueue.OnDrawCall(cmd, shadingType, drawcall, this, mesh, atom);
+            atom.MdfQueue.OnDrawCall(cmd, shadingType, drawcall, this, atom);
         }
         public virtual async System.Threading.Tasks.Task Initialize(UCamera camera)
         {
@@ -474,15 +474,15 @@ namespace EngineNS.Graphics.Pipeline
                 return mPickedNode;
             }
         }
-        public override Shader.UGraphicsShadingEnv GetPassShading(EShadingType type, Mesh.UMesh mesh, int atom, Pipeline.Common.URenderGraphNode node)
+        public override Shader.UGraphicsShadingEnv GetPassShading(EShadingType type, Mesh.TtMesh.TtAtom atom, Pipeline.Common.URenderGraphNode node)
         {
-            if (mesh.UserShading != null)
-                return mesh.UserShading;
+            if (atom.UserShading != null)
+                return atom.UserShading;
             switch (type)
             {
                 case EShadingType.BasePass:
                     {
-                        return node.GetPassShading(type, mesh, atom);
+                        return node.GetPassShading(type, atom);
                     }
                 case EShadingType.DepthPass:
                     {
@@ -603,7 +603,7 @@ namespace EngineNS.Graphics.Pipeline
                 return mPickedNode;
             }
         }
-        public override Shader.UGraphicsShadingEnv GetPassShading(EShadingType type, Mesh.UMesh mesh, int atom, Pipeline.Common.URenderGraphNode node)
+        public override Shader.UGraphicsShadingEnv GetPassShading(EShadingType type, Mesh.TtMesh.TtAtom atom, Pipeline.Common.URenderGraphNode node)
         {
             switch (type)
             {
@@ -617,7 +617,7 @@ namespace EngineNS.Graphics.Pipeline
                         }
                         else if (node == TranslucentNode)
                         {
-                            switch (mesh.Atoms[atom].Material.RenderLayer)
+                            switch (atom.Material.RenderLayer)
                             {
                                 case ERenderLayer.RL_Translucent:
                                     return TranslucentNode.mTranslucentShading;

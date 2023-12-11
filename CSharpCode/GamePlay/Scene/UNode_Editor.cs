@@ -10,7 +10,7 @@ namespace EngineNS.GamePlay.Scene
         {
             UEngine.Instance?.GfxDevice.HitproxyManager.UnmapProxy(this);
         }
-        public virtual void GetHitProxyDrawMesh(List<Graphics.Mesh.UMesh> meshes)
+        public virtual void GetHitProxyDrawMesh(List<Graphics.Mesh.TtMesh> meshes)
         {
             return;
         }

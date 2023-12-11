@@ -24,7 +24,7 @@ namespace EngineNS.Bricks.Particle.Simple
         {
             var emt = new USimpleEmitter();
             emt.IsGpuDriven = IsGpuDriven;
-            var mesh = new Graphics.Mesh.UMesh();
+            var mesh = new Graphics.Mesh.TtMesh();
             mesh.Initialize(Mesh.MaterialMesh, Rtti.UTypeDescGetter<Simple.USimpleMdfQueue>.TypeDesc); //mesh.MdfQueue
             emt.InitEmitter(UEngine.Instance.GfxDevice.RenderContext, mesh, 1024);
 
@@ -47,7 +47,7 @@ namespace EngineNS.Bricks.Particle.Simple
 
             return emt;
         }
-        public override unsafe void InitEmitter(NxRHI.UGpuDevice rc, Graphics.Mesh.UMesh mesh, uint maxParticle)
+        public override unsafe void InitEmitter(NxRHI.UGpuDevice rc, Graphics.Mesh.TtMesh mesh, uint maxParticle)
         {
             SystemData.BaseData.Flags = 0;
             base.InitEmitter(rc, mesh, maxParticle);

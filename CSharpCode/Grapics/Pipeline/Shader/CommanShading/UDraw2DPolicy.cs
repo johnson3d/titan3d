@@ -7,7 +7,7 @@ namespace EngineNS.Graphics.Pipeline.Shader.CommanShading
     public class UBasePassPolicy : URenderPolicy
     {
         public UGraphicsShadingEnv mBasePassShading;
-        public override Shader.UGraphicsShadingEnv GetPassShading(EShadingType type, Mesh.UMesh mesh, int atom, Pipeline.Common.URenderGraphNode node)
+        public override Shader.UGraphicsShadingEnv GetPassShading(EShadingType type, Mesh.TtMesh.TtAtom atom, Pipeline.Common.URenderGraphNode node)
         {
             switch (type)
             {
@@ -16,10 +16,10 @@ namespace EngineNS.Graphics.Pipeline.Shader.CommanShading
             }
             return null;
         }
-        public override void OnDrawCall(NxRHI.ICommandList cmd, Pipeline.URenderPolicy.EShadingType shadingType, NxRHI.UGraphicDraw drawcall, Mesh.UMesh mesh, int atom)
+        public override void OnDrawCall(NxRHI.ICommandList cmd, Pipeline.URenderPolicy.EShadingType shadingType, NxRHI.UGraphicDraw drawcall, Mesh.TtMesh.TtAtom atom)
         {
-            base.OnDrawCall(cmd, shadingType, drawcall, mesh, atom);
-            mBasePassShading.OnDrawCall(cmd, shadingType, drawcall, this, mesh);
+            base.OnDrawCall(cmd, shadingType, drawcall, atom);
+            mBasePassShading.OnDrawCall(cmd, shadingType, drawcall, this, atom);
         }
     }
 }

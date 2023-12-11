@@ -200,7 +200,7 @@ namespace EngineNS.Graphics.Pipeline.Mobile
             base.Dispose();
         }
         //Build DrawCall的时候调用，如果本渲染策略不提供指定的EShadingType，那么UAtom内的s对应的Drawcall就不会产生出来
-        public override Shader.UGraphicsShadingEnv GetPassShading(EShadingType type, Mesh.UMesh mesh, int atom, Pipeline.Common.URenderGraphNode node)
+        public override Shader.UGraphicsShadingEnv GetPassShading(EShadingType type, Mesh.TtMesh.TtAtom atom, Pipeline.Common.URenderGraphNode node)
         {
             switch (type)
             {
@@ -212,7 +212,7 @@ namespace EngineNS.Graphics.Pipeline.Mobile
                         }
                         else if (node == TranslucentNode)
                         {
-                            switch (mesh.Atoms[atom].Material.RenderLayer)
+                            switch (atom.Material.RenderLayer)
                             {
                                 case ERenderLayer.RL_Translucent:
                                     return TranslucentNode.mTranslucentShading;
@@ -236,19 +236,19 @@ namespace EngineNS.Graphics.Pipeline.Mobile
             return null;
         }
         //渲染DrawCall的时候调用，如果产生了对应的ShadingType的Drawcall，则会callback到这里设置一些这个shading的特殊参数
-        public override void OnDrawCall(NxRHI.ICommandList cmd, Pipeline.URenderPolicy.EShadingType shadingType, NxRHI.UGraphicDraw drawcall, Mesh.UMesh mesh, int atom)
+        public override void OnDrawCall(NxRHI.ICommandList cmd, Pipeline.URenderPolicy.EShadingType shadingType, NxRHI.UGraphicDraw drawcall, Mesh.TtMesh.TtAtom atom)
         {
-            mesh.MdfQueue.OnDrawCall(cmd, shadingType, drawcall, this, mesh, atom);
+            atom.MdfQueue.OnDrawCall(cmd, shadingType, drawcall, this, atom);
             //drawcall.Effect.ShadingEnv
             if (shadingType == EShadingType.BasePass)
             {
-                switch (mesh.Atoms[atom].Material.RenderLayer)
+                switch (atom.Material.RenderLayer)
                 {
                     case ERenderLayer.RL_Translucent:
-                        TranslucentNode.mTranslucentShading.OnDrawCall(cmd, shadingType, drawcall, this, mesh);
+                        TranslucentNode.mTranslucentShading.OnDrawCall(cmd, shadingType, drawcall, this, atom);
                         return;
                     default:
-                        BasePassNode.mOpaqueShading.OnDrawCall(cmd, shadingType, drawcall, this, mesh);
+                        BasePassNode.mOpaqueShading.OnDrawCall(cmd, shadingType, drawcall, this, atom);
                         return;
                 }
             }

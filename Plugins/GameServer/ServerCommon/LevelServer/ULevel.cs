@@ -35,9 +35,9 @@ namespace EngineNS.Plugins.LevelServer
             return true;
         }
         [ThreadStatic]
-        List<CSCommon.ISyncActor> mGhostPlacementChangedActors = new List<CSCommon.ISyncActor>();
+        static List<CSCommon.ISyncActor> mGhostPlacementChangedActors = new List<CSCommon.ISyncActor>();
         [ThreadStatic]
-        List<CSCommon.ISyncActor> mGhostAutoSyncDataChangedActors = new List<CSCommon.ISyncActor>();
+        static List<CSCommon.ISyncActor> mGhostAutoSyncDataChangedActors = new List<CSCommon.ISyncActor>();
         private void TickSyncActors()
         {
             mGhostPlacementChangedActors.Clear();

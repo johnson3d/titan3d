@@ -201,7 +201,7 @@ namespace EngineNS.Bricks.Terrain.CDLOD
             public UTerrainGrass GrassDesc { get; set; }
             public List<UGrassInstance> ObjInstances { get; } = new List<UGrassInstance>();
             public Graphics.Mesh.UMaterialMesh MaterialMesh;
-            public Graphics.Mesh.UMesh Mesh;
+            public Graphics.Mesh.TtMesh Mesh;
             public Grass.UMdfGrassStaticMesh InstanceMdf;
             public NxRHI.UCbView GrassCBuffer;
             public int RandomSeed;
@@ -214,7 +214,7 @@ namespace EngineNS.Bricks.Terrain.CDLOD
                 Patch = patch;
                 GrassDesc = desc;
                 MaterialMesh = await UEngine.Instance.GfxDevice.MaterialMeshManager.GetMaterialMesh(desc.MeshName);
-                Mesh = new Graphics.Mesh.UMesh();
+                Mesh = new Graphics.Mesh.TtMesh();
                 if (desc.FollowHeight)
                     Mesh.Initialize(MaterialMesh, Rtti.UTypeDescGetter<Grass.UMdfGrassStaticMeshPermutation<Grass.UMdf_Grass_VertexFollowHeight>>.TypeDesc);
                 else
@@ -245,7 +245,7 @@ namespace EngineNS.Bricks.Terrain.CDLOD
                     CreateFinished = true;
                     return;
                 }
-                Mesh = new Graphics.Mesh.UMesh();
+                Mesh = new Graphics.Mesh.TtMesh();
                 if (desc.FollowHeight)
                     Mesh.Initialize(MaterialMesh, Rtti.UTypeDescGetter<Grass.UMdfGrassStaticMeshPermutation<Grass.UMdf_Grass_VertexFollowHeight>>.TypeDesc);
                 else

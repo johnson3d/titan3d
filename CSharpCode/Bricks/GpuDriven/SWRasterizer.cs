@@ -491,7 +491,7 @@ namespace EngineNS.Bricks.GpuDriven
         {
 
         }
-        public override void OnDrawCall(NxRHI.ICommandList cmd, URenderPolicy.EShadingType shadingType, NxRHI.UGraphicDraw drawcall, URenderPolicy policy, Graphics.Mesh.UMesh mesh)
+        public override void OnDrawCall(NxRHI.ICommandList cmd, URenderPolicy.EShadingType shadingType, NxRHI.UGraphicDraw drawcall, URenderPolicy policy, Graphics.Mesh.TtMesh.TtAtom atom)
         {
             var node = drawcall.TagObject as TtQuarkResolveNode;
 
@@ -505,7 +505,7 @@ namespace EngineNS.Bricks.GpuDriven
             if (index.IsValidPointer)
                 drawcall.BindSampler(index, UEngine.Instance.GfxDevice.SamplerStateManager.LinearClampState);
 
-            base.OnDrawCall(cmd, shadingType, drawcall, policy, mesh);
+            base.OnDrawCall(cmd, shadingType, drawcall, policy, atom);
         }
     }
     public class TtQuarkResolveNode : USceenSpaceNode

@@ -328,25 +328,30 @@ namespace EngineNS.Bricks.GpuDriven
                 if (meshNode == null)
                     continue;
 
-                var clusterMesh = meshNode.Mesh.MaterialMesh.Mesh.ClusteredMesh;
-                if (clusterMesh == null)
-                    continue;
-
-                for (int clusterId = 0; clusterId < clusterMesh.Clusters.Count; clusterId++)
+                foreach (var j in meshNode.Mesh.MaterialMesh.SubMeshes)
                 {
-                    var clusterData = new FClusterData();
-                    // NOTE: 
-                    var cluster = clusterMesh.Clusters[clusterId];
-                    clusterData.IndexStart = cluster.IndexStart;
-                    clusterData.IndexEnd = cluster.IndexCount;
-                    clusterData.BoundMin = cluster.AABB.Minimum;
-                    clusterData.BoundMax = cluster.AABB.Maximum;
-                    clusters.Add(clusterData);                    
+                    if (j.Mesh == null)
+                        continue;
+                    var clusterMesh = j.Mesh.ClusteredMesh;
+                    if (clusterMesh == null)
+                        continue;
+
+                    for (int clusterId = 0; clusterId < clusterMesh.Clusters.Count; clusterId++)
+                    {
+                        var clusterData = new FClusterData();
+                        // NOTE: 
+                        var cluster = clusterMesh.Clusters[clusterId];
+                        clusterData.IndexStart = cluster.IndexStart;
+                        clusterData.IndexEnd = cluster.IndexCount;
+                        clusterData.BoundMin = cluster.AABB.Minimum;
+                        clusterData.BoundMax = cluster.AABB.Maximum;
+                        clusters.Add(clusterData);
+                    }
+                    if (clusterMesh.Vertices != null)
+                        position.AddRange(new List<Vector3>(clusterMesh.Vertices));
+                    if (clusterMesh.Indices != null)
+                        ib.AddRange(new List<uint>(clusterMesh.Indices));
                 }
-                if (clusterMesh.Vertices != null)
-                    position.AddRange(new List<Vector3>(clusterMesh.Vertices));
-                if (clusterMesh.Indices != null)
-                    ib.AddRange(new List<uint>(clusterMesh.Indices));
             }
             // debug
             //var view2ScreenMat = rp.CullCamera.GetToViewPortMatrix();

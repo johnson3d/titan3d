@@ -304,8 +304,8 @@ namespace EngineNS.Bricks.VXGI
 
                     if (VxDebugMesh != null)
                     {
-                        idx = CBuffer.ShaderBinder.FindField("VxDebugger_IndexCountPerInstance");
-                        var meshAtomDesc = VxDebugMesh.MaterialMesh.Mesh.mCoreObject.GetAtom(0, 0);
+                        idx = CBuffer.ShaderBinder.FindField("VxDebugger_IndexCountPerInstance");                        
+                        var meshAtomDesc = VxDebugMesh.SubMeshes[0].Atoms[0].GetMeshAtomDesc(0);
                         var VxDebugger_IndexCountPerInstance = meshAtomDesc->NumPrimitives * 3;
                         CBuffer.SetValue(idx, in VxDebugger_IndexCountPerInstance);
                     }

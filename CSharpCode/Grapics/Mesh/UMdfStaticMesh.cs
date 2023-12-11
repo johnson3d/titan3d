@@ -26,10 +26,10 @@ namespace EngineNS.Graphics.Mesh
         {
             InstanceModifier.SetMode(bSSBO);
         }
-        public override void OnDrawCall(NxRHI.ICommandList cmd, URenderPolicy.EShadingType shadingType, NxRHI.UGraphicDraw drawcall, URenderPolicy policy, UMesh mesh, int atom)
+        public override void OnDrawCall(NxRHI.ICommandList cmd, URenderPolicy.EShadingType shadingType, NxRHI.UGraphicDraw drawcall, URenderPolicy policy, TtMesh.TtAtom atom)
         {
-            base.OnDrawCall(cmd, shadingType, drawcall, policy, mesh, atom);
-            InstanceModifier?.OnDrawCall(cmd, shadingType, drawcall, policy, mesh);
+            base.OnDrawCall(cmd, shadingType, drawcall, policy, atom);
+            InstanceModifier?.OnDrawCall(cmd, shadingType, drawcall, policy, atom);
         }
     }
 }

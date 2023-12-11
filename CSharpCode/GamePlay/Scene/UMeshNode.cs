@@ -27,7 +27,7 @@ namespace EngineNS.GamePlay.Scene
             public string MdfQueueType { get; set; } = Rtti.UTypeDesc.TypeStr(typeof(Graphics.Mesh.UMdfStaticMesh));
             [Rtti.Meta]
             [ReadOnly(true)]
-            public string AtomType { get; set; } = Rtti.UTypeDesc.TypeStr(typeof(Graphics.Mesh.UMesh.UAtom));
+            public string AtomType { get; set; } = Rtti.UTypeDesc.TypeStr(typeof(Graphics.Mesh.TtMesh.TtAtom));
 
             [EGui.Controls.PropertyGrid.PGTypeEditor(typeof(Graphics.Pipeline.Shader.TtMdfQueueBase))]
             public Rtti.UTypeDesc MdfQueue
@@ -41,7 +41,7 @@ namespace EngineNS.GamePlay.Scene
                     MdfQueueType = Rtti.UTypeDesc.TypeStr(value);
                 }
             }
-            [EGui.Controls.PropertyGrid.PGTypeEditor(typeof(Graphics.Mesh.UMesh.UAtom))]
+            [EGui.Controls.PropertyGrid.PGTypeEditor(typeof(Graphics.Mesh.TtMesh.TtAtom))]
             public Rtti.UTypeDesc Atom
             {
                 get
@@ -67,14 +67,14 @@ namespace EngineNS.GamePlay.Scene
             var materialMesh = await UEngine.Instance.GfxDevice.MaterialMeshManager.GetMaterialMesh(meshData.MeshName);
             if (materialMesh != null)
             {
-                var mesh = new Graphics.Mesh.UMesh();
+                var mesh = new Graphics.Mesh.TtMesh();
                 mesh.Initialize(materialMesh, meshData.MdfQueue, meshData.Atom);
                 this.Mesh = mesh;
                 //await materialMesh.Mesh.TryLoadClusteredMesh();
             }
             return true;
         }
-        public override void GetHitProxyDrawMesh(List<Graphics.Mesh.UMesh> meshes)
+        public override void GetHitProxyDrawMesh(List<Graphics.Mesh.TtMesh> meshes)
         {
             if (mMesh == null)
                 return;
@@ -140,12 +140,12 @@ namespace EngineNS.GamePlay.Scene
                 mMesh.IsAcceptShadow = value;
             }
         }
-        public static async System.Threading.Tasks.Task<UMeshNode> AddMeshNode(GamePlay.UWorld world, UNode parent, UNodeData data, Type placementType, Graphics.Mesh.UMesh mesh, DVector3 pos, Vector3 scale, Quaternion quat)
+        public static async System.Threading.Tasks.Task<UMeshNode> AddMeshNode(GamePlay.UWorld world, UNode parent, UNodeData data, Type placementType, Graphics.Mesh.TtMesh mesh, DVector3 pos, Vector3 scale, Quaternion quat)
         {
             var scene = parent.GetNearestParentScene();
             var meshNode = await scene.NewNode(world, typeof(UMeshNode), data, EBoundVolumeType.Box, placementType) as UMeshNode;
-            if (mesh.MaterialMesh.Mesh.AssetName != null)
-                meshNode.NodeData.Name = mesh.MaterialMesh.Mesh.AssetName.Name;
+            if (mesh.MaterialMesh.AssetName != null)
+                meshNode.NodeData.Name = mesh.MaterialMesh.AssetName.Name;
             else
                 meshNode.NodeData.Name = meshNode.SceneId.ToString();
             meshNode.Mesh = mesh;
@@ -161,7 +161,7 @@ namespace EngineNS.GamePlay.Scene
             var materialMesh = await UEngine.Instance.GfxDevice.MaterialMeshManager.GetMaterialMesh(meshData.MeshName);
             if (materialMesh == null)
                 return null;
-            var mesh = new Graphics.Mesh.UMesh();
+            var mesh = new Graphics.Mesh.TtMesh();
             
             var ok = mesh.Initialize(materialMesh, meshData.MdfQueue, meshData.Atom);
             if (ok == false)
@@ -186,8 +186,8 @@ namespace EngineNS.GamePlay.Scene
         {
             return BoundVolume as UBoxBV;
         }
-        Graphics.Mesh.UMesh mMesh;
-        public Graphics.Mesh.UMesh Mesh 
+        Graphics.Mesh.TtMesh mMesh;
+        public Graphics.Mesh.TtMesh Mesh 
         {
             get 
             {
@@ -204,7 +204,7 @@ namespace EngineNS.GamePlay.Scene
 
                 if (mMesh != null)
                 {
-                    BoundVolume.LocalAABB = mMesh.MaterialMesh.Mesh.mCoreObject.mAABB;
+                    BoundVolume.LocalAABB = mMesh.MaterialMesh.AABB;
                     mMesh.HostNode = this;
                 }
                 else
@@ -215,7 +215,7 @@ namespace EngineNS.GamePlay.Scene
                 {
                     meshData.MeshName = mMesh.MaterialMesh.AssetName;
                     meshData.MdfQueueType = mMesh.MdfQueueType;
-                    meshData.AtomType = Rtti.UTypeDesc.TypeStr(mMesh.Atoms[0].GetType());
+                    meshData.AtomType = Rtti.UTypeDesc.TypeStr(mMesh.SubMeshes[0].Atoms[0].GetType());
                 }
                 UpdateAABB();
                 Parent?.UpdateAABB();
@@ -242,7 +242,7 @@ namespace EngineNS.GamePlay.Scene
                 meshData.MeshName = value;
                 System.Action action = async () =>
                 {
-                    var mesh = new Graphics.Mesh.UMesh();
+                    var mesh = new Graphics.Mesh.TtMesh();
 
                     var materialMesh = await UEngine.Instance.GfxDevice.MaterialMeshManager.GetMaterialMesh(value);
                     var ok = mesh.Initialize(materialMesh, meshData.MdfQueue, meshData.Atom);
@@ -279,7 +279,7 @@ namespace EngineNS.GamePlay.Scene
                 //{
                 //    colorVar.SetValue(new Vector4(1, 0, 1, 1));
                 //}
-                var mesh = new Graphics.Mesh.UMesh();
+                var mesh = new Graphics.Mesh.TtMesh();
                 mesh.Initialize(cookedMesh, materials1, Rtti.UTypeDescGetter<Graphics.Mesh.UMdfStaticMesh>.TypeDesc);
                 mesh.IsAcceptShadow = this.IsAcceptShadow;
                 Mesh = mesh;
@@ -292,7 +292,7 @@ namespace EngineNS.GamePlay.Scene
                     var materialMesh = await UEngine.Instance.GfxDevice.MaterialMeshManager.GetMaterialMesh(meshData.MeshName);
                     if (materialMesh != null)
                     {
-                        var mesh = new Graphics.Mesh.UMesh();
+                        var mesh = new Graphics.Mesh.TtMesh();
                         mesh.Initialize(materialMesh, Rtti.UTypeDesc.TypeOf(meshData.MdfQueueType), Rtti.UTypeDesc.TypeOf(meshData.AtomType));
 
                         Mesh = mesh;

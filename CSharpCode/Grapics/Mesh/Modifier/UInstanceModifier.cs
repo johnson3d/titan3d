@@ -424,7 +424,7 @@ namespace EngineNS.Graphics.Mesh.Modifier
                 InstantVBs.Flush2VB(cmd, this);
             }
         }
-        public unsafe void OnDrawCall(NxRHI.ICommandList cmd, Pipeline.URenderPolicy.EShadingType shadingType, NxRHI.UGraphicDraw drawcall, Pipeline.URenderPolicy policy, UMesh mesh)
+        public unsafe void OnDrawCall(NxRHI.ICommandList cmd, Pipeline.URenderPolicy.EShadingType shadingType, NxRHI.UGraphicDraw drawcall, Pipeline.URenderPolicy policy, TtMesh.TtAtom atom)
         {
             drawcall.mCoreObject.DrawInstance = (ushort)this.CurNumber;
             if (InstantSSBO != null)

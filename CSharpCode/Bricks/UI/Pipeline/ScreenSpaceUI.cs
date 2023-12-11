@@ -103,15 +103,18 @@ namespace EngineNS.Graphics.Pipeline.Common
                 {
                     var host = UEngine.Instance.UIManager.ScreenSpaceUIHost;
                     host.UpdateCameraOffset(world);
-                    for(int i=0; i<host.DrawMesh.Atoms.Count; i++)
+                    foreach (var i in host.DrawMesh.SubMeshes)
                     {
-                        var drawCall = host.DrawMesh.GetDrawCall(cmdlist.mCoreObject, GBuffers, i, ScreenDrawPolicy, Graphics.Pipeline.URenderPolicy.EShadingType.BasePass, this);
-                        if (drawCall == null)
-                            continue;
-                        drawCall.TagObject = this;
-                        drawCall.BindCBuffer(drawCall.Effect.BindIndexer.cbPerViewport, GBuffers.PerViewportCBuffer);
-                        drawCall.BindCBuffer(drawCall.Effect.BindIndexer.cbPerCamera, policy.DefaultCamera.PerCameraCBuffer);
-                        cmdlist.PushGpuDraw(drawCall);
+                        foreach (var j in i.Atoms)
+                        {
+                            var drawCall = j.GetDrawCall(cmdlist.mCoreObject, GBuffers, ScreenDrawPolicy, Graphics.Pipeline.URenderPolicy.EShadingType.BasePass, this);
+                            if (drawCall == null)
+                                continue;
+                            drawCall.TagObject = this;
+                            drawCall.BindCBuffer(drawCall.Effect.BindIndexer.cbPerViewport, GBuffers.PerViewportCBuffer);
+                            drawCall.BindCBuffer(drawCall.Effect.BindIndexer.cbPerCamera, policy.DefaultCamera.PerCameraCBuffer);
+                            cmdlist.PushGpuDraw(drawCall);
+                        }
                     }
                 }
 

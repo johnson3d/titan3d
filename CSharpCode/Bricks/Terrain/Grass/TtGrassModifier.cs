@@ -340,7 +340,7 @@ namespace EngineNS.Bricks.Terrain.Grass
             public NxRHI.UEffectBinder cbPerGrassType;
             public NxRHI.UEffectBinder VSGrassDataArray;
         }
-        public unsafe void OnDrawCall(NxRHI.ICommandList cmd, Graphics.Pipeline.URenderPolicy.EShadingType shadingType, NxRHI.UGraphicDraw drawcall, Graphics.Pipeline.URenderPolicy policy, Graphics.Mesh.UMesh mesh)
+        public unsafe void OnDrawCall(NxRHI.ICommandList cmd, Graphics.Pipeline.URenderPolicy.EShadingType shadingType, NxRHI.UGraphicDraw drawcall, Graphics.Pipeline.URenderPolicy policy, Graphics.Mesh.TtMesh.TtAtom atom)
         {
             var pat = GrassType.Patch;
             if ((pat.Level.Level.Node.TerrainCBuffer == null) || (pat.PatchCBuffer == null))

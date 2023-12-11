@@ -272,7 +272,7 @@ namespace EngineNS.Graphics.Pipeline.Shader
             };
         }
         public virtual void OnBuildDrawCall(URenderPolicy policy, NxRHI.UGraphicDraw drawcall) { }
-        public virtual void OnDrawCall(NxRHI.ICommandList cmd, Pipeline.URenderPolicy.EShadingType shadingType, NxRHI.UGraphicDraw drawcall, URenderPolicy policy, Mesh.UMesh mesh)
+        public virtual void OnDrawCall(NxRHI.ICommandList cmd, Pipeline.URenderPolicy.EShadingType shadingType, NxRHI.UGraphicDraw drawcall, URenderPolicy policy, Mesh.TtMesh.TtAtom atom)
         {
 
         }

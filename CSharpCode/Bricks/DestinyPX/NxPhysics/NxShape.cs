@@ -7,18 +7,18 @@ namespace EngineNS.NxPhysics
     public interface TtShape
     {
         EngineNS.NxPhysics.NxShape NativeShape { get; }
-        Graphics.Mesh.UMesh DebugMesh { get; }
+        Graphics.Mesh.TtMesh DebugMesh { get; }
     }
     public class TtSphereShape : AuxPtrType<EngineNS.NxPhysics.NxSphereShape>, TtShape
     {
-        Graphics.Mesh.UMesh mDebugMesh = null;
-        public Graphics.Mesh.UMesh DebugMesh 
+        Graphics.Mesh.TtMesh mDebugMesh = null;
+        public Graphics.Mesh.TtMesh DebugMesh 
         {
             get
             {
                 if (mDebugMesh == null)
                 {
-                    mDebugMesh = new Graphics.Mesh.UMesh();
+                    mDebugMesh = new Graphics.Mesh.TtMesh();
                     var clr = ((uint)UEngine.Instance.PxSystem.Random.Next()) | 0xff000000;
                     var radius = mCoreObject.mDesc.Radius.AsSingle();
                     var stack = (uint)(radius / UEngine.Instance.PxSystem.DebugTriangleSize);

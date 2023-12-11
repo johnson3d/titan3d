@@ -83,8 +83,8 @@ namespace EngineNS.UI
             get => ReadInternalFlag(eInternalFlags.MeshDirty);
             set => WriteInternalFlag(eInternalFlags.MeshDirty, value);
         }
-        Graphics.Mesh.UMesh mDrawMesh;
-        public Graphics.Mesh.UMesh DrawMesh => mDrawMesh;
+        Graphics.Mesh.TtMesh mDrawMesh;
+        public Graphics.Mesh.TtMesh DrawMesh => mDrawMesh;
 
         internal class TransformedUIElementData
         {
@@ -228,7 +228,7 @@ namespace EngineNS.UI
         {
 
         }
-        public async Thread.Async.TtTask<Graphics.Mesh.UMesh> BuildMesh()
+        public async Thread.Async.TtTask<Graphics.Mesh.TtMesh> BuildMesh()
         {
             if (!MeshDirty)
                 return mDrawMesh;
@@ -337,14 +337,16 @@ namespace EngineNS.UI
             }
             if(mDrawMesh == null)
             {
-                mDrawMesh = new Graphics.Mesh.UMesh();
-                var ok = mDrawMesh.Initialize(mMesh, materials, Rtti.UTypeDescGetter<TtMdfUIMesh>.TypeDesc);
+                mDrawMesh = new Graphics.Mesh.TtMesh();
+                var ok = mDrawMesh.Initialize(mMesh,
+                    materials,
+                    Rtti.UTypeDescGetter<TtMdfUIMesh>.TypeDesc);
                 var mdf = mDrawMesh.MdfQueue as TtMdfUIMesh;
                 mdf.UIHost = this;
             }
             else
             {
-                mDrawMesh.UpdateMesh(mMesh, materials);
+                mDrawMesh.UpdateMesh(0, mMesh, materials);
             }
 
             BoundingBoxDirty = true;

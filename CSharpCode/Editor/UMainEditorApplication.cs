@@ -656,7 +656,7 @@ namespace EngineNS.Editor
                 meshNode.IsCastShadow = true;
 
                 {
-                    var mesh1 = new Graphics.Mesh.UMesh();
+                    var mesh1 = new Graphics.Mesh.TtMesh();
                     await mesh1.Initialize(RName.GetRName("utest/puppet/mesh/puppet.ums"), Rtti.UTypeDesc.TypeOf(typeof(Graphics.Mesh.UMdfSkinMesh)));
                     var meshData1 = new GamePlay.Scene.UMeshNode.UMeshNodeData();
                     var meshNode1 = new GamePlay.Scene.UMeshNode();
@@ -671,7 +671,7 @@ namespace EngineNS.Editor
 
                     (meshNode1.NodeData as GamePlay.Scene.UMeshNode.UMeshNodeData).MeshName = RName.GetRName("utest/puppet/mesh/puppet.ums");
                     (meshNode1.NodeData as GamePlay.Scene.UMeshNode.UMeshNodeData).MdfQueueType = Rtti.UTypeDesc.TypeStr(typeof(Graphics.Mesh.UMdfSkinMesh));
-                    (meshNode1.NodeData as GamePlay.Scene.UMeshNode.UMeshNodeData).AtomType = Rtti.UTypeDesc.TypeStr(typeof(Graphics.Mesh.UMesh.UAtom));
+                    (meshNode1.NodeData as GamePlay.Scene.UMeshNode.UMeshNodeData).AtomType = Rtti.UTypeDesc.TypeStr(typeof(Graphics.Mesh.TtMesh.TtAtom));
 
                     var gameplayMacrossNodeData = new EngineNS.GamePlay.GamePlayMacross.UGamePlayMacrossNode.UGamePlayMacrossNodeData();
                     gameplayMacrossNodeData.MacrossName = RName.GetRName("utest/puppet/testgameplay.macross");
@@ -727,7 +727,7 @@ namespace EngineNS.Editor
             ////var cookedMesh = Graphics.Mesh.UMeshDataProvider.MakeTorus(2.0f, 3.0f, 100, 300, 0xfffffff).ToMesh(); 
             ////var cookedMesh = Graphics.Mesh.UMeshDataProvider.MakeCapsule(1.0f, 4.0f, 100, 100, 100, Graphics.Mesh.UMeshDataProvider.ECapsuleUvProfile.Aspect, 0xfffffff).ToMesh();
             //{
-            //    var mesh2 = new Graphics.Mesh.UMesh();
+            //    var mesh2 = new Graphics.Mesh.TtMesh();
             //    var colorVar = materials1[0].FindVar("clr4_0");
             //    if (colorVar != null)
             //    {

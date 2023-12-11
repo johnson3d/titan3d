@@ -66,7 +66,7 @@ namespace EngineNS.Editor.Forms
             materials[0] = Material;
             if (materials[0] == null)
                 return;
-            var mesh = new Graphics.Mesh.UMesh();
+            var mesh = new Graphics.Mesh.TtMesh();
             var rect = Graphics.Mesh.UMeshDataProvider.MakeBox(-0.5f, -0.5f, -0.5f, 1, 1, 1);
             var rectMesh = rect.ToMesh();
             var ok = mesh.Initialize(rectMesh, materials, Rtti.UTypeDescGetter<Graphics.Mesh.UMdfStaticMesh>.TypeDesc);
@@ -84,7 +84,7 @@ namespace EngineNS.Editor.Forms
 
             //CreateAnother(viewport, rectMesh, materials);
 
-            var aabb = mesh.MaterialMesh.Mesh.mCoreObject.mAABB;
+            var aabb = mesh.MaterialMesh.AABB;
             float radius = aabb.GetMaxSide();
             BoundingSphere sphere;
             sphere.Center = aabb.GetCenter();
@@ -103,7 +103,7 @@ namespace EngineNS.Editor.Forms
         {
             materials[0] = Material.CloneMaterialInstance();
             materials[0].RenderLayer = ERenderLayer.RL_Translucent;
-            var mesh = new Graphics.Mesh.UMesh();
+            var mesh = new Graphics.Mesh.TtMesh();
             var ok = mesh.Initialize(rectMesh, materials, Rtti.UTypeDescGetter<Graphics.Mesh.UMdfStaticMesh>.TypeDesc);
             if (ok)
             {

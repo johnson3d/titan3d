@@ -211,34 +211,40 @@ namespace EngineNS.GamePlay
                     if(mFocused)
                     {
                         for (int i = 0; i < FocusMaterials.Length; i++)
-                            MeshNode.Mesh.MaterialMesh.Materials[i] = FocusMaterials[i];
+                        {
+                            MeshNode.Mesh.MaterialMesh.SubMeshes[0].Materials[i] = FocusMaterials[i];
+                        }
                     }
                     else
                     {
                         for (int i = 0; i < NormalMaterials.Length; i++)
-                            MeshNode.Mesh.MaterialMesh.Materials[i] = NormalMaterials[i];
+                        {
+                            MeshNode.Mesh.MaterialMesh.SubMeshes[0].Materials[i] = NormalMaterials[i];
+                        }
                     }
                 }
             }
 
-            async System.Threading.Tasks.Task<Graphics.Mesh.UMesh> GetAxisMesh(RName meshName, params RName[] materialNames)
+            async System.Threading.Tasks.Task<Graphics.Mesh.TtMesh> GetAxisMesh(RName meshName, params RName[] materialNames)
             {
-                var materials = new Graphics.Pipeline.Shader.UMaterial[materialNames.Length];
+                var materials = new List<Graphics.Pipeline.Shader.UMaterial>(materialNames.Length);
                 for (int i = 0; i < materialNames.Length; i++)
                 {
-                    materials[i] = await UEngine.Instance.GfxDevice.MaterialInstanceManager.GetMaterialInstance(materialNames[i]);
-                    if (materials[i] == null)
+                    var mtl = await UEngine.Instance.GfxDevice.MaterialInstanceManager.GetMaterialInstance(materialNames[i]);
+                    if (mtl == null)
                         return null;
+                    materials.Add(mtl);
                 }
-                var mesh = new Graphics.Mesh.UMesh();
-                var ok = await mesh.Initialize(meshName, materials,
+                var mesh = new Graphics.Mesh.TtMesh();
+                var ok = await mesh.Initialize(new List<RName>() { meshName }, 
+                    new List<List<Graphics.Pipeline.Shader.UMaterial>>() { materials },
                     Rtti.UTypeDescGetter<Graphics.Mesh.UMdfStaticMesh>.TypeDesc);
                 mesh.IsAcceptShadow = false;
                 return ok ? mesh : null;
             }
             public async System.Threading.Tasks.Task Initialize(enAxisType type, GamePlay.UWorld world)
             {
-                Graphics.Mesh.UMesh axisMesh = null;
+                Graphics.Mesh.TtMesh axisMesh = null;
                 var meshNodeData = new GamePlay.Scene.UMeshNode.UMeshNodeData();
                 DVector3 pos = DVector3.Zero;
                 Quaternion rot = Quaternion.Identity;
@@ -919,8 +925,9 @@ namespace EngineNS.GamePlay
             ((GamePlay.UPlacement)mRootNode.Placement).InheritScale = true;
 
             var rotArrowAssetMat = await UEngine.Instance.GfxDevice.MaterialInstanceManager.GetMaterialInstance(mAxisMaterial_Focus_d);
-            var rotArrowAssetMesh = new Graphics.Mesh.UMesh();
-            var ok = await rotArrowAssetMesh.Initialize(mAxisMeshMoveX, new Graphics.Pipeline.Shader.UMaterial[] { rotArrowAssetMat },
+            var rotArrowAssetMesh = new Graphics.Mesh.TtMesh();
+            var ok = await rotArrowAssetMesh.Initialize(mAxisMeshMoveX, 
+                new List<Graphics.Pipeline.Shader.UMaterial>() { rotArrowAssetMat },
                 Rtti.UTypeDescGetter<Graphics.Mesh.UMdfStaticMesh>.TypeDesc);
             if(ok)
             {
@@ -948,7 +955,7 @@ namespace EngineNS.GamePlay
         Scene.UMeshNode mPointNode;
         async System.Threading.Tasks.Task InitializeDebugAssit()
         {
-            var mesh = new Graphics.Mesh.UMesh();
+            var mesh = new Graphics.Mesh.TtMesh();
             var plane = Graphics.Mesh.UMeshDataProvider.MakePlane(1, 1);
             var planeMesh = plane.ToMesh();
             var planeMaterial = await UEngine.Instance.GfxDevice.MaterialInstanceManager.GetMaterialInstance(mAxisMaterial_Focus_d);
@@ -974,7 +981,7 @@ namespace EngineNS.GamePlay
                 mPlaneNode.Parent = mHostWorld.Root;
             }
 
-            mesh = new Graphics.Mesh.UMesh();
+            mesh = new Graphics.Mesh.TtMesh();
             var point = Graphics.Mesh.UMeshDataProvider.MakeBox(-0.05f, -0.05f, -0.05f, 0.1f, 0.1f, 0.1f);
             var pointMesh = point.ToMesh();
             var pointMaterial = await UEngine.Instance.GfxDevice.MaterialInstanceManager.GetMaterialInstance(mAxisMaterial_Center);

@@ -429,7 +429,7 @@ namespace EngineNS.Bricks.Terrain.CDLOD
             }
         }
         private uint CameralOffsetSerialId = 0;
-        public override void GetHitProxyDrawMesh(List<UMesh> meshes)
+        public override void GetHitProxyDrawMesh(List<TtMesh> meshes)
         {
             foreach (var i in ActiveLevels)
             {

@@ -44,7 +44,7 @@ namespace EngineNS.Bricks.Procedure
             graph.GraphEditor.PreviewRoot.ClearChildren();
 
             var vms = Graphics.Mesh.UMeshDataProvider.MakeRect2D(0, 0, 100, 100, 0).ToMesh();
-            var mesh = new Graphics.Mesh.UMesh();
+            var mesh = new Graphics.Mesh.TtMesh();
 
             var materials1 = new Graphics.Pipeline.Shader.UMaterialInstance[1];
             materials1[0] = Graphics.Pipeline.Shader.UMaterialInstance.CreateMaterialInstance(
@@ -68,7 +68,7 @@ namespace EngineNS.Bricks.Procedure
             prevMesh.IsCastShadow = true;
             prevMesh.IsAcceptShadow = true;
 
-            var aabb = mesh.MaterialMesh.Mesh.mCoreObject.mAABB;
+            var aabb = mesh.MaterialMesh.AABB;
             float radius = aabb.GetMaxSide();
             BoundingSphere sphere;
             sphere.Center = aabb.GetCenter();

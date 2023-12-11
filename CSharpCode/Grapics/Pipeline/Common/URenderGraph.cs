@@ -340,7 +340,7 @@ namespace EngineNS.Graphics.Pipeline.Common
             }
         }
 
-        public virtual Shader.UGraphicsShadingEnv GetPassShading(Graphics.Pipeline.URenderPolicy.EShadingType type, Mesh.UMesh mesh, int atom)
+        public virtual Shader.UGraphicsShadingEnv GetPassShading(Graphics.Pipeline.URenderPolicy.EShadingType type, Mesh.TtMesh.TtAtom atom)
         {
             return null;
         }

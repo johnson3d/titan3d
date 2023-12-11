@@ -121,7 +121,7 @@ namespace EngineNS.Bricks.Collision.DDA
                 return MipLayers[MipLayers.Length - 1];
             }
         }
-        public Graphics.Mesh.UMesh VxDebugMesh;
+        public Graphics.Mesh.TtMesh VxDebugMesh;
         public UMeshNode HVXDebugNode;
         public UMeshNode HVXDebugLineNode;
         public UMeshNode HVXDebugHitNode;
@@ -138,7 +138,7 @@ namespace EngineNS.Bricks.Collision.DDA
         public async System.Threading.Tasks.Task CreateDebugMesh(GamePlay.UWorld world)
         {
             var material = await UEngine.Instance.GfxDevice.MaterialInstanceManager.CreateMaterialInstance(RName.GetRName("utest/box_wite.uminst"));
-            VxDebugMesh = new Graphics.Mesh.UMesh();
+            VxDebugMesh = new Graphics.Mesh.TtMesh();
             var rect = Graphics.Mesh.UMeshDataProvider.MakeBox(-0.5f, -0.5f, -0.5f, 1, 1, 1, 0xffff00ff);
             var rectMesh = rect.ToMesh();
             var materials = new Graphics.Pipeline.Shader.UMaterial[1];
@@ -203,7 +203,7 @@ namespace EngineNS.Bricks.Collision.DDA
             {
                 lineTo = from;
 
-                var sphereDebugMesh = new Graphics.Mesh.UMesh();
+                var sphereDebugMesh = new Graphics.Mesh.TtMesh();
                 var sphere = Graphics.Mesh.UMeshDataProvider.MakeSphere(0.3f, 8, 8, 0xFFFFFF00);
                 var sphereMesh = sphere.ToMesh();
                 sphereDebugMesh.Initialize(sphereMesh, materials, Rtti.UTypeDescGetter<Graphics.Mesh.UMdfStaticMesh>.TypeDesc);
@@ -220,7 +220,7 @@ namespace EngineNS.Bricks.Collision.DDA
 
                 HVXDebugHitNode = meshNode1;
             }
-            var lineMesh = new Graphics.Mesh.UMesh();
+            var lineMesh = new Graphics.Mesh.TtMesh();
             var rect = Graphics.Mesh.UMeshDataProvider.MakeLine(in lineFrom, in lineTo, 0xFF50ff80);
             var rectMesh = rect.ToMesh();
             lineMesh.Initialize(rectMesh, materials, Rtti.UTypeDescGetter<Graphics.Mesh.UMdfStaticMesh>.TypeDesc);

@@ -132,7 +132,7 @@ namespace EngineNS.GamePlay
             public EVisCullFilter CullFilters = EVisCullFilter.All;
             public UWorld World;
             public Graphics.Pipeline.UCamera CullCamera;
-            public List<Graphics.Mesh.UMesh> VisibleMeshes = null;// new List<Graphics.Mesh.UMesh>();
+            public List<Graphics.Mesh.TtMesh> VisibleMeshes = null;// new List<Graphics.Mesh.TtMesh>();
             public List<GamePlay.Scene.UNode> VisibleNodes = null;
             public delegate bool FOnVisitNode(Scene.UNode node, UVisParameter arg);
             public FOnVisitNode OnVisitNode = null;
@@ -208,7 +208,7 @@ namespace EngineNS.GamePlay
 
         #region DebugAssist
         
-        public void GatherBoundShapes(List<Graphics.Mesh.UMesh> boundVolumes, Scene.UNode node = null)
+        public void GatherBoundShapes(List<Graphics.Mesh.TtMesh> boundVolumes, Scene.UNode node = null)
         {
             if (node == null)
                 node = Root;
@@ -220,13 +220,13 @@ namespace EngineNS.GamePlay
             if (node.HasStyle(Scene.UNode.ENodeStyles.HideBoundShape))
                 return false;
 
-            var bvs = arg as List<Graphics.Mesh.UMesh>;
+            var bvs = arg as List<Graphics.Mesh.TtMesh>;
 
             ref var aabb = ref node.AABB;
             var size = aabb.GetSize();
             var cookedMesh = Graphics.Mesh.UMeshDataProvider.MakeBoxWireframe((float)aabb.Minimum.X, (float)aabb.Minimum.Y, (float)aabb.Minimum.Z,
                 (float)size.X, (float)size.Y, (float)size.Z).ToMesh();
-            var mesh2 = new Graphics.Mesh.UMesh();
+            var mesh2 = new Graphics.Mesh.TtMesh();
 
             var materials1 = new Graphics.Pipeline.Shader.UMaterialInstance[1];
             materials1[0] = mBoundingDebugMaterial;// UEngine.Instance.GfxDevice.MaterialInstanceManager.FindMaterialInstance(RName.GetRName("utest/box_wite.uminst"));

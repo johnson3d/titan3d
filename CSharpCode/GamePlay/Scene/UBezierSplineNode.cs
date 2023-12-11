@@ -39,16 +39,16 @@ namespace EngineNS.GamePlay.Scene
                 return GetNodeData<UBezierSplineNodeData>()?.Spline;
             }
         }
-        Graphics.Mesh.UMesh mDebugSplineMesh;
-        public Graphics.Mesh.UMesh DebugSplineMesh
+        Graphics.Mesh.TtMesh mDebugSplineMesh;
+        public Graphics.Mesh.TtMesh DebugSplineMesh
         {
             get
             {
                 return mDebugSplineMesh;
             }
         }
-        Graphics.Mesh.UMesh mDebugPointMesh;
-        public Graphics.Mesh.UMesh DebugPointMesh
+        Graphics.Mesh.TtMesh mDebugPointMesh;
+        public Graphics.Mesh.TtMesh DebugPointMesh
         {
             get
             {
@@ -95,7 +95,7 @@ namespace EngineNS.GamePlay.Scene
             {
 
             }
-            public void GetHitProxyDrawMesh(List<Graphics.Mesh.UMesh> meshes)
+            public void GetHitProxyDrawMesh(List<Graphics.Mesh.TtMesh> meshes)
             {
 
             }
@@ -132,7 +132,7 @@ namespace EngineNS.GamePlay.Scene
                     return;
                 var materials1 = new Graphics.Pipeline.Shader.UMaterialInstance[1];
                 materials1[0] = UEngine.Instance.GfxDevice.MaterialInstanceManager.FindMaterialInstance(RName.GetRName("material/whitecolor.uminst", RName.ERNameType.Engine));
-                var mesh2 = new Graphics.Mesh.UMesh();
+                var mesh2 = new Graphics.Mesh.TtMesh();
                 var ok1 = mesh2.Initialize(cookedMesh, materials1,
                     Rtti.UTypeDescGetter<Graphics.Mesh.UMdfStaticMesh>.TypeDesc);
                 if (ok1)
@@ -143,7 +143,7 @@ namespace EngineNS.GamePlay.Scene
 
                     mDebugSplineMesh.HostNode = this;
 
-                    BoundVolume.LocalAABB = mDebugSplineMesh.MaterialMesh.Mesh.mCoreObject.mAABB;
+                    BoundVolume.LocalAABB = mDebugSplineMesh.MaterialMesh.AABB;
                 }
             }
 
@@ -164,7 +164,7 @@ namespace EngineNS.GamePlay.Scene
                     return;
                 var materials1 = new Graphics.Pipeline.Shader.UMaterialInstance[1];
                 materials1[0] = UEngine.Instance.GfxDevice.MaterialInstanceManager.FindMaterialInstance(RName.GetRName("material/redcolor.uminst", RName.ERNameType.Engine));
-                var mesh2 = new Graphics.Mesh.UMesh();
+                var mesh2 = new Graphics.Mesh.TtMesh();
                 var ok1 = mesh2.Initialize(cookedMesh, materials1,
                     Rtti.UTypeDescGetter<Graphics.Mesh.UMdfInstanceStaticMesh>.TypeDesc);
                 if (ok1)
@@ -221,7 +221,7 @@ namespace EngineNS.GamePlay.Scene
             base.OnNodeLoaded(parent);
             UpdateAbsTransform();
         }
-        public override void GetHitProxyDrawMesh(List<Graphics.Mesh.UMesh> meshes)
+        public override void GetHitProxyDrawMesh(List<Graphics.Mesh.TtMesh> meshes)
         {
             if (mDebugSplineMesh == null)
                 return;

@@ -157,7 +157,7 @@ namespace EngineNS.Bricks.Particle
                 Emitter.IsGpuDriven = true;
 
                 var umesh = await UEngine.Instance.GfxDevice.MaterialMeshManager.GetMaterialMesh(RName.GetRName("utest/mesh/unit_sphere.ums"));
-                var mesh = new Graphics.Mesh.UMesh();
+                var mesh = new Graphics.Mesh.TtMesh();
                 mesh.Initialize(umesh, Rtti.UTypeDescGetter<Simple.USimpleMdfQueue>.TypeDesc);
                 Emitter.InitEmitter(UEngine.Instance.GfxDevice.RenderContext, mesh, 1024);
 

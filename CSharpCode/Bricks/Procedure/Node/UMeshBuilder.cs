@@ -62,7 +62,7 @@ namespace EngineNS.Bricks.Procedure.Node
                 System.Action exec = async () =>
                 {
                     Mesh = await UEngine.Instance.GfxDevice.MaterialMeshManager.GetMaterialMesh(value);
-                    await Mesh.Mesh.LoadMeshDataProvider();
+                    await Mesh.GetMeshPrimitives(0).LoadMeshDataProvider();
                 };
                 exec();
             }
@@ -77,7 +77,7 @@ namespace EngineNS.Bricks.Procedure.Node
         {
             if (Mesh == null)
                 return false;
-            var builder = Mesh.Mesh.MeshDataProvider.mCoreObject;
+            var builder = Mesh.GetMeshPrimitives(0).MeshDataProvider.mCoreObject;
             var pPos = (Vector3*)builder.GetStream(NxRHI.EVertexStreamType.VST_Position).GetData();
             var pNor = (Vector3*)builder.GetStream(NxRHI.EVertexStreamType.VST_Normal).GetData();
             var pUV = (Vector2*)builder.GetStream(NxRHI.EVertexStreamType.VST_UV).GetData();
@@ -94,9 +94,9 @@ namespace EngineNS.Bricks.Procedure.Node
             
             var idxBuffer = UBufferConponent.CreateInstance(UBufferCreator.CreateInstance<USuperBuffer<Vector3i, FInt3Operator>>(NunPfTrian, 1, 1));
             
-            if (Mesh.Mesh.MeshDataProvider.mCoreObject.IsIndex32)
+            if (Mesh.GetMeshPrimitives(0).MeshDataProvider.mCoreObject.IsIndex32)
             {
-                var pIndices = (int*)Mesh.Mesh.MeshDataProvider.mCoreObject.GetIndices().GetData();
+                var pIndices = (int*)Mesh.GetMeshPrimitives(0).MeshDataProvider.mCoreObject.GetIndices().GetData();
                 for (int i = 0; i < (int)NunPfTrian; i++)
                 {
                     Vector3i tmp;
@@ -108,7 +108,7 @@ namespace EngineNS.Bricks.Procedure.Node
             }
             else
             {
-                var pIndices = (ushort*)Mesh.Mesh.MeshDataProvider.mCoreObject.GetIndices().GetData();
+                var pIndices = (ushort*)Mesh.GetMeshPrimitives(0).MeshDataProvider.mCoreObject.GetIndices().GetData();
                 for (int i = 0; i < (int)NunPfTrian; i++)
                 {
                     Vector3i tmp;
@@ -269,7 +269,8 @@ namespace EngineNS.Bricks.Procedure.Node
             var rast = matrials[0].Rasterizer;
             rast.FillMode = NxRHI.EFillMode.FMD_WIREFRAME;
             matrials[0].Rasterizer = rast;
-            PreviewMesh.Initialize(meshPrimitve, matrials);
+            PreviewMesh.Initialize(new List<Graphics.Mesh.UMeshPrimitives>() { meshPrimitve },
+                new List<Graphics.Pipeline.Shader.UMaterial[]>() { matrials });
         }
         public unsafe override void OnPreviewDraw(in Vector2 prevStart, in Vector2 prevEnd, ImDrawList cmdlist)
         {
@@ -311,7 +312,7 @@ namespace EngineNS.Bricks.Procedure.Node
             graph.GraphEditor.PreviewRoot.ClearChildren();
             var viewport = graph.GraphEditor.PreviewViewport;
 
-            var mesh = new Graphics.Mesh.UMesh();
+            var mesh = new Graphics.Mesh.TtMesh();
             var ok = mesh.Initialize(PreviewMesh, Rtti.UTypeDescGetter<Graphics.Mesh.UMdfStaticMesh>.TypeDesc);
             if (ok)
             {
@@ -368,7 +369,7 @@ namespace EngineNS.Bricks.Procedure.Node
                 //    matrials[0].Rasterizer = rast;
                 //    PreviewMesh.Initialize(meshPrimitve, matrials);
 
-                //    //PreviewMesh = new Graphics.Mesh.UMesh();
+                //    //PreviewMesh = new Graphics.Mesh.TtMesh();
                 //    //PreviewMesh.Initialize(ShowMesh, Rtti.UTypeDescGetter<Graphics.Mesh.UMdfStaticMesh>.TypeDesc);
                 //    //if (ok)
                 //    //{

@@ -33,7 +33,7 @@ namespace EngineNS.Animation.SceneNode
         public void BindingTo(UMeshNode meshNode)
         {
             System.Diagnostics.Debug.Assert(meshNode != null);
-            var animatablePose = meshNode?.Mesh?.MaterialMesh?.Mesh?.PartialSkeleton?.CreatePose() as SkeletonAnimation.AnimatablePose.UAnimatableSkeletonPose;
+            var animatablePose = meshNode?.Mesh?.MaterialMesh?.SubMeshes[0].Mesh?.PartialSkeleton?.CreatePose() as SkeletonAnimation.AnimatablePose.UAnimatableSkeletonPose;
             var skinMDfQueue = meshNode.Mesh.MdfQueue as Graphics.Mesh.UMdfSkinMesh;
             mAnimatedPose = SkeletonAnimation.Runtime.Pose.URuntimePoseUtility.CreateMeshSpaceRuntimePose(animatablePose);
             skinMDfQueue.SkinModifier.RuntimeMeshSpacePose = mAnimatedPose;

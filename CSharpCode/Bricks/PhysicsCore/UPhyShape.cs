@@ -143,8 +143,8 @@ namespace EngineNS.Bricks.PhysicsCore
             }
             mCoreObject.SetMaterials((PhyMaterial**)pxMtls, Materials.Length);
         }        
-        protected Graphics.Mesh.UMesh mDebugMesh;
-        public virtual Graphics.Mesh.UMesh DebugMesh
+        protected Graphics.Mesh.TtMesh mDebugMesh;
+        public virtual Graphics.Mesh.TtMesh DebugMesh
         {
             get
             {
@@ -195,8 +195,9 @@ namespace EngineNS.Bricks.PhysicsCore
                         var matrials = new Graphics.Pipeline.Shader.UMaterial[1];
                         matrials[0] = UEngine.Instance.GfxDevice.MaterialManager.PxDebugMaterial;
                         var ShowMesh = new Graphics.Mesh.UMaterialMesh();
-                        ShowMesh.Initialize(meshPrimitive, matrials);
-                        mDebugMesh = new Graphics.Mesh.UMesh();
+                        ShowMesh.Initialize(new List<Graphics.Mesh.UMeshPrimitives>() { meshPrimitive },
+                                new List<Graphics.Pipeline.Shader.UMaterial[]>() { matrials });
+                        mDebugMesh = new Graphics.Mesh.TtMesh();
                         mDebugMesh.Initialize(ShowMesh, Rtti.UTypeDescGetter<Graphics.Mesh.UMdfStaticMesh>.TypeDesc);
                     }
                 }
@@ -339,7 +340,7 @@ namespace EngineNS.Bricks.PhysicsCore
         }
         public override BoundingBox GetAABB()
         {
-            BoundingBox result = DebugMesh.MaterialMesh.Mesh.mCoreObject.mAABB;
+            BoundingBox result = DebugMesh.MaterialMesh.AABB;
 
             return BoundingBox.TransformNoScale(result, Transform);
         }

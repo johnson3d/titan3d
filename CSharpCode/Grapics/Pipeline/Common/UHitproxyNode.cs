@@ -266,16 +266,20 @@ namespace EngineNS.Graphics.Pipeline.Common
                 HitproxyPass.BeginCommands();
                 foreach (var i in policy.VisibleMeshes)
                 {
-                    if (i.Atoms == null)
-                        continue;
-
-                    if (i.IsDrawHitproxy)
+                    if (i.IsDrawHitproxy == false)
                     {
-                        for (int j = 0; j < i.Atoms.Count; j++)
+                        continue;
+                    }
+                    foreach (var j in i.SubMeshes)
+                    {
+                        foreach (var k in j.Atoms)
                         {
-                            var layer = i.Atoms[j].Material.RenderLayer;
+                            if (k.Material == null)
+                                continue;
+
+                            var layer = k.Material.RenderLayer;
                             var cmd = HitproxyPass.GetCmdList(layer);
-                            var hpDrawcall = i.GetDrawCall(cmd.mCoreObject, GHitproxyBuffers, j, policy, URenderPolicy.EShadingType.HitproxyPass, this);
+                            var hpDrawcall = k.GetDrawCall(cmd.mCoreObject, GHitproxyBuffers, policy, URenderPolicy.EShadingType.HitproxyPass, this);
                             if (hpDrawcall != null)
                             {
                                 hpDrawcall.BindGBuffer(policy.DefaultCamera, GHitproxyBuffers);

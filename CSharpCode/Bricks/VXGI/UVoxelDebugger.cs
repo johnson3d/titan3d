@@ -30,9 +30,9 @@ namespace EngineNS.Bricks.VXGI
     }
     public class UMdfVoxelDebugMesh : Graphics.Pipeline.Shader.TtMdfQueue1<TtVoxelDebugModifier>
     {
-        public unsafe override void OnDrawCall(NxRHI.ICommandList cmd, Graphics.Pipeline.URenderPolicy.EShadingType shadingType, NxRHI.UGraphicDraw drawcall, Graphics.Pipeline.URenderPolicy policy, Graphics.Mesh.UMesh mesh, int atom)
+        public unsafe override void OnDrawCall(NxRHI.ICommandList cmd, Graphics.Pipeline.URenderPolicy.EShadingType shadingType, NxRHI.UGraphicDraw drawcall, Graphics.Pipeline.URenderPolicy policy, Graphics.Mesh.TtMesh.TtAtom atom)
         {
-            base.OnDrawCall(cmd, shadingType, drawcall, policy, mesh, atom);
+            base.OnDrawCall(cmd, shadingType, drawcall, policy, atom);
 
             var vxNode = this.MdfDatas as UVoxelsNode;
             if (vxNode == null)
@@ -89,7 +89,7 @@ namespace EngineNS.Bricks.VXGI
         private NxRHI.UComputeEffect CollectVxDebugger;
         private NxRHI.UComputeDraw CollectVxDebuggerDrawcall;
 
-        public Graphics.Mesh.UMesh VxDebugMesh;
+        public Graphics.Mesh.TtMesh VxDebugMesh;
         public GamePlay.Scene.UMeshNode VxDebugMeshNode;
 
         private unsafe void ResetComputeDrawcall()
@@ -156,8 +156,8 @@ namespace EngineNS.Bricks.VXGI
 
             if (VxDebugMesh != null)
             {
-                var material = VxDebugMesh.MaterialMesh.Materials[0];
-                VxDebugMesh = new Graphics.Mesh.UMesh();
+                var material = VxDebugMesh.MaterialMesh.SubMeshes[0].Materials[0];
+                VxDebugMesh = new Graphics.Mesh.TtMesh();
                 var rect = Graphics.Mesh.UMeshDataProvider.MakeBox(-0.5f, -0.5f, -0.5f, 1, 1, 1);
                 var rectMesh = rect.ToMesh();
                 var materials = new Graphics.Pipeline.Shader.UMaterial[1];
@@ -245,7 +245,7 @@ namespace EngineNS.Bricks.VXGI
             CollectVxDebugger = await UEngine.Instance.GfxDevice.EffectManager.GetComputeEffect(RName.GetRName("Shaders/Bricks/VXGI/VxVisualDebugger.compute", RName.ERNameType.Engine),
                 "CS_CollectVxDebugger", NxRHI.EShaderType.SDT_ComputeShader, null, defines, null);
 
-            VxDebugMesh = new Graphics.Mesh.UMesh();
+            VxDebugMesh = new Graphics.Mesh.TtMesh();
             var rect = Graphics.Mesh.UMeshDataProvider.MakeBox(-0.5f, -0.5f, -0.5f, 1, 1, 1);
             var rectMesh = rect.ToMesh();
             var materials = new Graphics.Pipeline.Shader.UMaterial[1];

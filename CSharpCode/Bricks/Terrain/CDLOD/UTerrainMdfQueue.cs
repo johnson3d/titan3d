@@ -94,11 +94,11 @@ namespace EngineNS.Bricks.Terrain.CDLOD
         }
         [ThreadStatic]
         private static Profiler.TimeScope ScopeOnDrawCall = Profiler.TimeScopeManager.GetTimeScope(typeof(UTerrainMdfQueue), nameof(OnDrawCall));
-        public unsafe override void OnDrawCall(NxRHI.ICommandList cmd, Graphics.Pipeline.URenderPolicy.EShadingType shadingType, NxRHI.UGraphicDraw drawcall, Graphics.Pipeline.URenderPolicy policy, Graphics.Mesh.UMesh mesh, int atom)
+        public unsafe override void OnDrawCall(NxRHI.ICommandList cmd, Graphics.Pipeline.URenderPolicy.EShadingType shadingType, NxRHI.UGraphicDraw drawcall, Graphics.Pipeline.URenderPolicy policy, Graphics.Mesh.TtMesh.TtAtom atom)
         {
             using (new Profiler.TimeScopeHelper(ScopeOnDrawCall))
             {
-                base.OnDrawCall(cmd, shadingType, drawcall, policy, mesh, atom);
+                base.OnDrawCall(cmd, shadingType, drawcall, policy, atom);
 
                 var effectBinder = drawcall.Effect.mBindIndexer as UMdfShaderBinder;
                 if (effectBinder == null)

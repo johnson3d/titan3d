@@ -66,9 +66,9 @@ namespace EngineNS.UI
             base.CopyFrom(mdf);
             PerUIMeshCBuffer = (mdf as TtMdfUIMesh).PerUIMeshCBuffer;
         }
-        public override void OnDrawCall(NxRHI.ICommandList cmdlist, URenderPolicy.EShadingType shadingType, UGraphicDraw drawcall, URenderPolicy policy, UMesh mesh, int atom)
+        public override void OnDrawCall(NxRHI.ICommandList cmdlist, URenderPolicy.EShadingType shadingType, UGraphicDraw drawcall, URenderPolicy policy, TtMesh.TtAtom atom)
         {
-            base.OnDrawCall(cmdlist, shadingType, drawcall, policy, mesh, atom);
+            base.OnDrawCall(cmdlist, shadingType, drawcall, policy, atom);
             unsafe
             {
                 var shaderBinder = UEngine.Instance.GfxDevice.CoreShaderBinder;
@@ -86,7 +86,7 @@ namespace EngineNS.UI
                 drawcall.BindCBuffer(binder, PerUIMeshCBuffer);
 
                 EngineNS.Canvas.FDrawCmd cmd = new EngineNS.Canvas.FDrawCmd();
-                cmd.NativePointer = mesh.MaterialMesh.Mesh.mCoreObject.GetAtomExtData((uint)atom).NativePointer;
+                cmd.NativePointer = atom.MaterialMesh.SubMeshes[0].Mesh.mCoreObject.GetAtomExtData((uint)atom.AtomIndex).NativePointer;
                 var length = UIHost.TransformedUIElementCount;
                 Matrix* absTrans = (Matrix*)PerUIMeshCBuffer.mCoreObject.GetVarPtrToWrite(shaderBinder.CBPerUIMesh.AbsTransform, (uint)length);
                 for(var i=0; i<length; i++)

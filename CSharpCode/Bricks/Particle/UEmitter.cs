@@ -265,7 +265,7 @@ namespace EngineNS.Bricks.Particle
                 CBuffer = rc.CreateCBV(coreBinder.CBPerParticle.Binder.mCoreObject);
 
                 CBuffer.SetValue(coreBinder.CBPerParticle.ParticleRandomPoolSize, UEngine.Instance.NebulaTemplateManager.ShaderRandomPoolSize);
-                var dpDesc = emitter.Mesh.MaterialMesh.Mesh.mCoreObject.GetAtom(0, 0);
+                var dpDesc = emitter.Mesh.SubMeshes[0].Atoms[0].GetMeshAtomDesc(0);
                 CBuffer.SetValue(coreBinder.CBPerParticle.Draw_IndexCountPerInstance, dpDesc->m_NumPrimitives * 3);
                 CBuffer.SetValue(coreBinder.CBPerParticle.Draw_StartIndexLocation, dpDesc->m_StartIndex);
                 CBuffer.SetValue(coreBinder.CBPerParticle.Draw_BaseVertexLocation, dpDesc->m_BaseVertexIndex);
@@ -389,7 +389,7 @@ namespace EngineNS.Bricks.Particle
     public interface IParticleEmitter : IDisposable
     {
         IParticleEmitter CloneEmitter();
-        void InitEmitter(NxRHI.UGpuDevice rc, Graphics.Mesh.UMesh mesh, uint maxParticle);
+        void InitEmitter(NxRHI.UGpuDevice rc, Graphics.Mesh.TtMesh mesh, uint maxParticle);
         //void Cleanup();
         bool SetCurrentQueue(string name);
         void Update(UParticleGraphNode particleSystem, float elapsed);
@@ -408,7 +408,7 @@ namespace EngineNS.Bricks.Particle
         float RandomSignedUnit();
         int RandomNext();
         Vector3 RandomVector(bool normalized = true);
-        Graphics.Mesh.UMesh Mesh { get; set; }
+        Graphics.Mesh.TtMesh Mesh { get; set; }
 
         void SetCBuffer(NxRHI.UCbView CBuffer);
     }
@@ -447,8 +447,8 @@ namespace EngineNS.Bricks.Particle
         }
         
         public uint MaxParticle { get; set; }
-        Graphics.Mesh.UMesh mMesh;
-        public Graphics.Mesh.UMesh Mesh { get => mMesh; set => mMesh = value; }
+        Graphics.Mesh.TtMesh mMesh;
+        public Graphics.Mesh.TtMesh Mesh { get => mMesh; set => mMesh = value; }
         #region HLSL
         string GetTypeDef(Type type)
         {
@@ -521,7 +521,7 @@ namespace EngineNS.Bricks.Particle
             return "";
         }
         #endregion
-        public virtual unsafe void InitEmitter(NxRHI.UGpuDevice rc, Graphics.Mesh.UMesh mesh, uint maxParticle)
+        public virtual unsafe void InitEmitter(NxRHI.UGpuDevice rc, Graphics.Mesh.TtMesh mesh, uint maxParticle)
         {
             MaxParticle = maxParticle;
             mCoreObject.InitEmitter((uint)sizeof(FParticle), maxParticle);

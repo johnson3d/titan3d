@@ -234,7 +234,7 @@ namespace EngineNS.Bricks.Particle.Editor
             //materials[0] = UEngine.Instance.GfxDevice.MaterialManager.PxDebugMaterial;
             //if (materials[0] == null)
             //    return;
-            //var mesh = new Graphics.Mesh.UMesh();
+            //var mesh = new Graphics.Mesh.TtMesh();
             //var rect = Graphics.Mesh.UMeshDataProvider.MakeBox(-0.5f, -0.5f, -0.5f, 1, 1, 1);
             //var rectMesh = rect.ToMesh();
             //var ok = mesh.Initialize(rectMesh, materials, Rtti.UTypeDescGetter<Graphics.Mesh.UMdfStaticMesh>.TypeDesc);

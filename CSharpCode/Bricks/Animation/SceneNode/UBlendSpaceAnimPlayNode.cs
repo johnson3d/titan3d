@@ -81,7 +81,7 @@ namespace EngineNS.Animation.SceneNode
         {
             System.Diagnostics.Debug.Assert(meshNode != null);
 
-            var pose = meshNode?.Mesh?.MaterialMesh?.Mesh?.PartialSkeleton?.CreatePose() as SkeletonAnimation.AnimatablePose.UAnimatableSkeletonPose;
+            var pose = meshNode?.Mesh?.MaterialMesh?.SubMeshes[0].Mesh?.PartialSkeleton?.CreatePose() as SkeletonAnimation.AnimatablePose.UAnimatableSkeletonPose;
             var skinMDfQueue = meshNode.Mesh.MdfQueue as Graphics.Mesh.UMdfSkinMesh;
 
             skinMDfQueue.SkinModifier.RuntimeMeshSpacePose = SkeletonAnimation.Runtime.Pose.URuntimePoseUtility.CreateMeshSpaceRuntimePose(pose);

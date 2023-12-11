@@ -138,7 +138,7 @@ namespace EngineNS.GamePlay
             var meshData1 = new EngineNS.GamePlay.Scene.UMeshNode.UMeshNodeData();
             meshData1.MeshName = RName.GetRName("utest/puppet/mesh/puppet.ums");
             meshData1.MdfQueueType = EngineNS.Rtti.UTypeDesc.TypeStr(typeof(EngineNS.Graphics.Mesh.UMdfSkinMesh));
-            meshData1.AtomType = EngineNS.Rtti.UTypeDesc.TypeStr(typeof(EngineNS.Graphics.Mesh.UMesh.UAtom));
+            meshData1.AtomType = EngineNS.Rtti.UTypeDesc.TypeStr(typeof(EngineNS.Graphics.Mesh.TtMesh.TtAtom));
             var meshNode1 = new EngineNS.GamePlay.Scene.UMeshNode();
             await meshNode1.InitializeNode(scene.World, meshData1, EngineNS.GamePlay.Scene.EBoundVolumeType.Box, typeof(EngineNS.GamePlay.UPlacement));
             meshNode1.NodeData.Name = "Robot1";

@@ -61,9 +61,10 @@ namespace EngineNS.Bricks.PhysicsCore
             var rast = matrials[0].Rasterizer;
             rast.FillMode = NxRHI.EFillMode.FMD_WIREFRAME;
             matrials[0].Rasterizer = rast;
-            ShowMesh.Initialize(meshPrimitve, matrials);
+            ShowMesh.Initialize(new List<Graphics.Mesh.UMeshPrimitives>() { meshPrimitve },
+                new List<Graphics.Pipeline.Shader.UMaterial[]>() { matrials });
 
-            var mesh = new Graphics.Mesh.UMesh();
+            var mesh = new Graphics.Mesh.TtMesh();
             var ok = mesh.Initialize(ShowMesh, Rtti.UTypeDescGetter<Graphics.Mesh.UMdfStaticMesh>.TypeDesc);
             if (ok)
             {
@@ -74,7 +75,7 @@ namespace EngineNS.Bricks.PhysicsCore
                 meshNode.IsCastShadow = true;
             }
 
-            var aabb = mesh.MaterialMesh.Mesh.mCoreObject.mAABB;
+            var aabb = mesh.MaterialMesh.AABB;
             float radius = aabb.GetMaxSide();
             BoundingSphere sphere;
             sphere.Center = aabb.GetCenter();

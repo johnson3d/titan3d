@@ -38,7 +38,7 @@ namespace EngineNS.Graphics.Pipeline
         UHitProxy HitProxy { get; set; }
         UHitProxy.EHitproxyType HitproxyType { get; set; }
         void OnHitProxyChanged();
-        void GetHitProxyDrawMesh(List<Graphics.Mesh.UMesh> meshes);
+        void GetHitProxyDrawMesh(List<Graphics.Mesh.TtMesh> meshes);
     }
     public class UHitproxyManager
     {

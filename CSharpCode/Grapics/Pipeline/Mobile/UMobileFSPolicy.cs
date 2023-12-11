@@ -59,7 +59,7 @@ namespace EngineNS.Graphics.Pipeline.Mobile
             CoreSDK.DisposeObject(ref BasePassNode);
             base.Dispose();
         }
-        public override Shader.UGraphicsShadingEnv GetPassShading(EShadingType type, Mesh.UMesh mesh, int atom, Pipeline.Common.URenderGraphNode node)
+        public override Shader.UGraphicsShadingEnv GetPassShading(EShadingType type, Mesh.TtMesh.TtAtom atom, Pipeline.Common.URenderGraphNode node)
         {
             switch (type)
             {
@@ -68,18 +68,18 @@ namespace EngineNS.Graphics.Pipeline.Mobile
             }
             return null;
         }
-        public override void OnDrawCall(NxRHI.ICommandList cmd, Pipeline.URenderPolicy.EShadingType shadingType, NxRHI.UGraphicDraw drawcall, Mesh.UMesh mesh, int atom)
+        public override void OnDrawCall(NxRHI.ICommandList cmd, Pipeline.URenderPolicy.EShadingType shadingType, NxRHI.UGraphicDraw drawcall, Mesh.TtMesh.TtAtom atom)
         {
-            base.OnDrawCall(cmd, shadingType, drawcall, mesh, atom);
+            base.OnDrawCall(cmd, shadingType, drawcall, atom);
             if (shadingType == EShadingType.BasePass)
             {
-                switch (mesh.Atoms[atom].Material.RenderLayer)
+                switch (atom.Material.RenderLayer)
                 {
                     case ERenderLayer.RL_Translucent:
                         //BasePassNode.mTranslucentShading.OnDrawCall(shadingType, drawcall, this, mesh);
                         return;
                     default:
-                        BasePassNode.mOpaqueShading.OnDrawCall(cmd, shadingType, drawcall, this, mesh);
+                        BasePassNode.mOpaqueShading.OnDrawCall(cmd, shadingType, drawcall, this, atom);
                         return;
                 }
             }

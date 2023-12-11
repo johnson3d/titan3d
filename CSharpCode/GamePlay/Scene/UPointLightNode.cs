@@ -61,7 +61,7 @@ namespace EngineNS.GamePlay.Scene
         {
             if (mDebugMesh != null)
             {
-                var colorVar = mDebugMesh.MaterialMesh.Materials[0].FindVar("clr4_0");
+                var colorVar = mDebugMesh.MaterialMesh.SubMeshes[0].Materials[0].FindVar("clr4_0");
                 if (colorVar != null)
                 {
                     Vector4 clr4 = new Vector4(GetNodeData<ULightNodeData>().Color, 1);
@@ -69,8 +69,8 @@ namespace EngineNS.GamePlay.Scene
                 }
             }
         }
-        Graphics.Mesh.UMesh mDebugMesh;
-        public Graphics.Mesh.UMesh DebugMesh
+        Graphics.Mesh.TtMesh mDebugMesh;
+        public Graphics.Mesh.TtMesh DebugMesh
         {
             get
             {
@@ -79,7 +79,7 @@ namespace EngineNS.GamePlay.Scene
                     var cookedMesh = UEngine.Instance.GfxDevice.MeshPrimitiveManager.UnitSphere;
                     var materials1 = new Graphics.Pipeline.Shader.UMaterialInstance[1];
                     materials1[0] = UEngine.Instance.GfxDevice.MaterialInstanceManager.WireColorMateria.CloneMaterialInstance();
-                    var mesh2 = new Graphics.Mesh.UMesh();
+                    var mesh2 = new Graphics.Mesh.TtMesh();
                     var ok1 = mesh2.Initialize(cookedMesh, materials1,
                         Rtti.UTypeDescGetter<Graphics.Mesh.UMdfStaticMesh>.TypeDesc);
                     if (ok1)
@@ -89,7 +89,7 @@ namespace EngineNS.GamePlay.Scene
 
                         mDebugMesh.HostNode = this;
 
-                        BoundVolume.LocalAABB = mDebugMesh.MaterialMesh.Mesh.mCoreObject.mAABB;
+                        BoundVolume.LocalAABB = mDebugMesh.MaterialMesh.AABB;
 
                         this.HitproxyType = Graphics.Pipeline.UHitProxy.EHitproxyType.Root;
 
@@ -108,7 +108,7 @@ namespace EngineNS.GamePlay.Scene
             base.OnNodeLoaded(parent);
             UpdateAbsTransform();
         }
-        public override void GetHitProxyDrawMesh(List<Graphics.Mesh.UMesh> meshes)
+        public override void GetHitProxyDrawMesh(List<Graphics.Mesh.TtMesh> meshes)
         {
             meshes.Add(mDebugMesh);
             foreach (var i in Children)

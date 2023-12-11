@@ -163,9 +163,9 @@ namespace EngineNS.Graphics.Pipeline.Deferred
                 GBuffers.SetSize(x, y);
             }
         }
-        public override Shader.UGraphicsShadingEnv GetPassShading(Graphics.Pipeline.URenderPolicy.EShadingType type, Mesh.UMesh mesh, int atom)
+        public override Shader.UGraphicsShadingEnv GetPassShading(Graphics.Pipeline.URenderPolicy.EShadingType type, Mesh.TtMesh.TtAtom atom)
         {
-            switch (mesh.Atoms[atom].Material.RenderLayer)
+            switch (atom.Material.RenderLayer)
             {
                 case ERenderLayer.RL_Translucent:
                 case ERenderLayer.RL_Sky:
@@ -201,24 +201,25 @@ namespace EngineNS.Graphics.Pipeline.Deferred
 
                 foreach (var i in policy.VisibleMeshes)
                 {
-                    if (i.Atoms == null)
-                        continue;
-
-                    for (int j = 0; j < i.Atoms.Count; j++)
+                    foreach (var j in i.SubMeshes)
                     {
-                        if (i.Atoms[j].Material == null)
-                            continue;
-                        var layer = i.Atoms[j].Material.RenderLayer;
-                        if (layer == ERenderLayer.RL_Translucent || layer == ERenderLayer.RL_Sky)
+                        foreach (var k in j.Atoms)
                         {
-                            var cmdlist = LayerBasePass.GetCmdList(layer);
-                            var drawcall = i.GetDrawCall(cmdlist.mCoreObject, GBuffers, j, policy, URenderPolicy.EShadingType.BasePass, this);
-                            if (drawcall != null)
-                            {
-                                drawcall.BindGBuffer(policy.DefaultCamera, GBuffers);
-                                //GGizmosBuffers.PerViewportCBuffer = GBuffers.PerViewportCBuffer;
+                            if (k == null || k.Material == null)
+                                continue;
 
-                                cmdlist.PushGpuDraw(drawcall);
+                            var layer = k.Material.RenderLayer;
+                            if (layer == ERenderLayer.RL_Translucent || layer == ERenderLayer.RL_Sky)
+                            {
+                                var cmdlist = LayerBasePass.GetCmdList(layer);
+                                var drawcall = k.GetDrawCall(cmdlist.mCoreObject, GBuffers, policy, URenderPolicy.EShadingType.BasePass, this);
+                                if (drawcall != null)
+                                {
+                                    drawcall.BindGBuffer(policy.DefaultCamera, GBuffers);
+                                    //GGizmosBuffers.PerViewportCBuffer = GBuffers.PerViewportCBuffer;
+
+                                    cmdlist.PushGpuDraw(drawcall);
+                                }
                             }
                         }
                     }
@@ -369,9 +370,9 @@ namespace EngineNS.Graphics.Pipeline.Deferred
                 WithDepthGBuffers.SetSize(x, y);
             }
         }
-        public override Shader.UGraphicsShadingEnv GetPassShading(Graphics.Pipeline.URenderPolicy.EShadingType type, Mesh.UMesh mesh, int atom)
+        public override Shader.UGraphicsShadingEnv GetPassShading(Graphics.Pipeline.URenderPolicy.EShadingType type, Mesh.TtMesh.TtAtom atom)
         {
-            switch (mesh.Atoms[atom].Material.RenderLayer)
+            switch (atom.Material.RenderLayer)
             {
                 case ERenderLayer.RL_PostTranslucent:
                 case ERenderLayer.RL_TranslucentGizmos:
@@ -407,25 +408,30 @@ namespace EngineNS.Graphics.Pipeline.Deferred
 
                 foreach (var i in policy.VisibleMeshes)
                 {
-                    if (i.Atoms == null)
-                        continue;
-
-                    for (int j = 0; j < i.Atoms.Count; j++)
+                    foreach(var j in i.SubMeshes)
                     {
-                        if (i.Atoms[j].Material == null)
+                        if (j == null)
                             continue;
-                        var layer = i.Atoms[j].Material.RenderLayer;
-                        if (layer == ERenderLayer.RL_PostOpaque || layer == ERenderLayer.RL_PostTranslucent
-                            || layer == ERenderLayer.RL_TranslucentGizmos || layer == ERenderLayer.RL_Gizmos)
+                        foreach (var k in j.Atoms)
                         {
-                            var cmdlist = LayerBasePass.GetCmdList(layer);
-                            var drawcall = i.GetDrawCall(cmdlist.mCoreObject, GBuffers, j, policy, URenderPolicy.EShadingType.BasePass, this);
-                            if (drawcall != null)
-                            {
-                                drawcall.BindGBuffer(policy.DefaultCamera, GBuffers);
-                                //GGizmosBuffers.PerViewportCBuffer = GBuffers.PerViewportCBuffer;
+                            if (k == null)
+                                continue;
 
-                                cmdlist.PushGpuDraw(drawcall);
+                            if (k.Material == null)
+                                continue;
+                            var layer = k.Material.RenderLayer;
+                            if (layer == ERenderLayer.RL_PostOpaque || layer == ERenderLayer.RL_PostTranslucent
+                                || layer == ERenderLayer.RL_TranslucentGizmos || layer == ERenderLayer.RL_Gizmos)
+                            {
+                                var cmdlist = LayerBasePass.GetCmdList(layer);
+                                var drawcall = k.GetDrawCall(cmdlist.mCoreObject, GBuffers, policy, URenderPolicy.EShadingType.BasePass, this);
+                                if (drawcall != null)
+                                {
+                                    drawcall.BindGBuffer(policy.DefaultCamera, GBuffers);
+                                    //GGizmosBuffers.PerViewportCBuffer = GBuffers.PerViewportCBuffer;
+
+                                    cmdlist.PushGpuDraw(drawcall);
+                                }
                             }
                         }
                     }

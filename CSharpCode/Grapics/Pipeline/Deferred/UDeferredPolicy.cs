@@ -116,7 +116,7 @@ namespace EngineNS.Graphics.Pipeline.Deferred
     //            return null;
     //        return attachBuffer.Srv;
     //    }
-    //    public override Shader.UGraphicsShadingEnv GetPassShading(EShadingType type, Mesh.UMesh mesh, int atom, Pipeline.Common.URenderGraphNode node)
+    //    public override Shader.UGraphicsShadingEnv GetPassShading(EShadingType type, Mesh.TtMesh mesh, int atom, Pipeline.Common.URenderGraphNode node)
     //    {
     //        switch (type)
     //        {

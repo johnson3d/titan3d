@@ -62,7 +62,7 @@ namespace EngineNS.GamePlay.Scene
             }
             var mesh = Graphics.Mesh.UMeshDataProvider.MakeGridPlane(rc, Vector2.Zero, Vector2.One, 10).ToMesh();
 
-            var gridMesh = new Graphics.Mesh.UMesh();
+            var gridMesh = new Graphics.Mesh.TtMesh();
             var tMaterials = new Graphics.Pipeline.Shader.UMaterial[1];
             tMaterials[0] = materialInstance;
             var ok = gridMesh.Initialize(mesh, tMaterials,
@@ -164,7 +164,7 @@ namespace EngineNS.GamePlay.Scene
             ameta.AddReferenceAsset(RName.GetRName("material/gridline.material", RName.ERNameType.Engine));
         }
 
-        public override void GetHitProxyDrawMesh(List<Graphics.Mesh.UMesh> meshes)
+        public override void GetHitProxyDrawMesh(List<Graphics.Mesh.TtMesh> meshes)
         {
             base.GetHitProxyDrawMesh(meshes);
         }

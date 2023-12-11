@@ -49,7 +49,7 @@ namespace EngineNS.GamePlay.Scene
             }
         }
 
-        public Graphics.Mesh.UMesh SunMesh = new Graphics.Mesh.UMesh();
+        public Graphics.Mesh.TtMesh SunMesh = new Graphics.Mesh.TtMesh();
         public override async Task<bool> InitializeNode(UWorld world, UNodeData data, EBoundVolumeType bvType, Type placementType)
         {
             var skyData = data as TtSkyNodeData;
