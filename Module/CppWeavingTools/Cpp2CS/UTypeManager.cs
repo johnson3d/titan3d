@@ -347,7 +347,7 @@ namespace CppWeaving.Cpp2CS
         }
         public static string DebugFieldName = null;//"AttachmentMRTs";
         public static string DebugDelegateName = null;
-        public static string DebugFunctionName = "GetGlyphRangesDefault";
+        public static string DebugFunctionName = "Next";
         public static void DoDebugAction()
         {
             int xx = 0;
@@ -374,7 +374,9 @@ namespace CppWeaving.Cpp2CS
                     //去除指针
                     cur = cur.PointeeType;
                 }
-                else if (cur.kind == ClangSharp.Interop.CXTypeKind.CXType_Typedef || cur.kind == ClangSharp.Interop.CXTypeKind.CXType_Elaborated)
+                else if (cur.kind == ClangSharp.Interop.CXTypeKind.CXType_Typedef || 
+                    cur.kind == ClangSharp.Interop.CXTypeKind.CXType_Elaborated ||
+                    cur.kind == ClangSharp.Interop.CXTypeKind.CXType_Unexposed)
                 {
                     //去除typdef using
                     cur = cur.Desugar;

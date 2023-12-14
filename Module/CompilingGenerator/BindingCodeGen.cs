@@ -201,6 +201,7 @@ namespace CompilingGenerator
             {{";
 
             string getPropertyValueSwitch = "";
+            string setPropertyValueSwitch = "";
 
             var source = $@"
 using System;
@@ -322,7 +323,18 @@ namespace {namespaceName}
 
                         getPropertyValueSwitch += $@"
                 case {Standart.Hash.xxHash.xxHash64.ComputeHash(propName)}: //{propName}
-                    return GetValue<{propTypeDisplayName}>({bindPropName});";
+                    value = {propName};//GetValue<{propTypeDisplayName}>({bindPropName});
+                    return true;";
+
+                        if(!propSymbol.IsReadOnly)
+                        {
+                            setPropertyValueSwitch += $@"
+                case {Standart.Hash.xxHash.xxHash64.ComputeHash(propName)}: //{propName}
+                    //SetValue<{propTypeDisplayName}>(({propTypeDisplayName})value, {bindPropName});
+                    {propName} = ({propTypeDisplayName})value;";
+                        }
+                        setPropertyValueSwitch += $@"
+                    return true;";
 
                         bindImpSource += $@"
     public class {bindingExprImpName} : EngineNS.UI.Bind.TtBindingExpression<{propTypeDisplayName}>
@@ -349,9 +361,7 @@ namespace {namespaceName}
                         if(propSymbol.IsReadOnly)
                         {
                             bindImpSource += $@"
-        }}
-    }}
-";
+        }}";
                         }
                         else
                         {
@@ -361,10 +371,14 @@ namespace {namespaceName}
                 TargetProperty?.OnValueChanged?.Invoke(TargetObject, TargetProperty, GetFinalValue<{propTypeDisplayName}>().GetValue<{propTypeDisplayName}>());
                 (({namespaceName}.{className})TargetObject).{propName} = GetValueStore<{propTypeDisplayName}>().GetValue<{propTypeDisplayName}>();
             }}
-        }}
-    }}
-";
+        }}";
                         }
+                        bindImpSource += $@"
+        protected override object GetObjectValue(EngineNS.UI.Bind.TtBindableProperty bp)
+        {{
+            return GetFinalValue<{propTypeDisplayName}>().GetValue<{propTypeDisplayName}>();
+        }}
+    }}";
                     }
                 }
                 else if (symbol is IMethodSymbol)
@@ -909,6 +923,30 @@ namespace {namespaceName}
             }}
         }}";
             }
+            source += $@"
+        protected{(baseHasBindObjectInterface ? " override" : " virtual")} bool _GetPropertyValueWithPropertyHash(ulong propertyNameHash, ref object value)
+        {{";
+            if (!string.IsNullOrEmpty(getPropertyValueSwitch))
+            {
+                source += $@"
+            switch(propertyNameHash)
+            {{
+    {getPropertyValueSwitch}
+            }}";
+            }
+            if(baseHasBindObjectInterface)
+            {
+                source += $@"
+            return base._GetPropertyValueWithPropertyHash(propertyNameHash, ref value);";
+            }
+            else
+            {
+                source += $@"
+            value = null;
+            return false;";
+            }
+            source += $@"
+        }}";
             if (!classSymbol.MemberNames.Any(name => "GetPropertyValue" == name))
             {
                 source += $@"
@@ -916,16 +954,10 @@ namespace {namespaceName}
         {{
             if(string.IsNullOrEmpty(propertyName))
                 return null;
-            var propertyNameHash = Standart.Hash.xxHash.xxHash64.ComputeHash(propertyName);";
-                if(!string.IsNullOrEmpty(getPropertyValueSwitch))
-                {
-                    source += $@"
-            switch(propertyNameHash)
-            {{
-    {getPropertyValueSwitch}
-            }}";
-                }
-                source += $@"
+            object retValue = null;
+            var propertyNameHash = Standart.Hash.xxHash.xxHash64.ComputeHash(propertyName);
+            if(_GetPropertyValueWithPropertyHash(propertyNameHash, ref retValue))
+                return retValue;
             var bp = GetBindableProperty(propertyNameHash, propertyName);
             if(bp != null)
             {{
@@ -954,26 +986,70 @@ namespace {namespaceName}
             return null;
         }}";
             }
+            source += $@"
+        protected{(baseHasBindObjectInterface ? " override" : " virtual")} bool _SetPropertyValueWithPropertyHash(ulong propertyNameHash, object value)
+        {{";
+            if(!string.IsNullOrEmpty(setPropertyValueSwitch))
+            {
+                source += $@"
+            switch(propertyNameHash)
+            {{
+    {setPropertyValueSwitch}
+            }}";
+            }
+            if(baseHasBindObjectInterface)
+            {
+                source += $@"
+            return base._SetPropertyValueWithPropertyHash(propertyNameHash, value);";
+            }
+            else
+            {
+                source += $@"
+            return false;";
+            }
+            source += $@"
+        }}";
             if (!classSymbol.MemberNames.Any(name => "SetPropertyValue" == name))
             {
                 // todo: 这里可以生成代码来设置属性，不需要通过反射，另外可以生成泛型的 SetPropertyValue(string propertyName, T value) 来对应设置不同类型的属性，减少GC
                 source += $@"
         public {(baseHasBindObjectInterface ? "override" : "virtual")} void SetPropertyValue(string propertyName, object value)
         {{
-            var pro = this.GetType().GetProperty(propertyName);
-            if (pro != null)
-                pro.SetValue(this, value);
-            else
+            if(string.IsNullOrEmpty(propertyName))
+                return;
+            var propertyNameHash = Standart.Hash.xxHash.xxHash64.ComputeHash(propertyName);
+            if(_SetPropertyValueWithPropertyHash(propertyNameHash, value))
+                return;
+            var bp = GetBindableProperty(propertyNameHash, propertyName);
+            if(bp != null)
             {{
-                foreach(var bindData in {bindExprDicName})
+                EngineNS.UI.Bind.TtBindablePropertyValueBase bpVal = null;
+                lock (mBindExprDic)
+                if (mBindExprDic.TryGetValue(bp, out bpVal))
                 {{
-                    if(bindData.Key.Name == propertyName)
-                    {{
-                        bindData.Value.SetValue<object>(this, bindData.Key, in value);
-                        break;
-                    }}
+                    bpVal.SetValue<object>(this, bp, value);
                 }}
             }}
+            else
+            {{
+                var pro = this.GetType().GetProperty(propertyName);
+                if (pro != null)
+                    pro.SetValue(this, value);
+            }}
+            //var pro = this.GetType().GetProperty(propertyName);
+            //if (pro != null)
+            //    pro.SetValue(this, value);
+            //else
+            //{{
+            //    foreach(var bindData in {bindExprDicName})
+            //    {{
+            //        if(bindData.Key.Name == propertyName)
+            //        {{
+            //            bindData.Value.SetValue<object>(this, bindData.Key, in value);
+            //            break;
+            //        }}
+            //    }}
+            //}}
         }}
 ";
             }

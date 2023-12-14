@@ -11,8 +11,10 @@
             <InitValue Type="EngineNS.Bricks.CodeBuilder.UPrimitiveExpression@EngineCore">
               <Type Type="EngineNS.Rtti.UTypeDesc@EngineCore" Value="System.DBNull@Unknown" />
             </InitValue>
+            <InitValueVisible Type="System.Boolean@Unknown" Value="True" />
             <IsParamArray Type="System.Boolean@Unknown" Value="False" />
             <OperationType Type="EngineNS.Bricks.CodeBuilder.EMethodArgumentAttribute@EngineCore" Value="Default" />
+            <OperationVisible Type="System.Boolean@Unknown" Value="True" />
             <VariableName Type="System.String@Unknown" Value="host" />
             <VariableType Type="EngineNS.Bricks.CodeBuilder.UTypeReference@EngineCore">
               <IsEnum Type="System.Boolean@Unknown" Value="False" />
@@ -34,8 +36,10 @@
             <InitValue Type="EngineNS.Bricks.CodeBuilder.UPrimitiveExpression@EngineCore">
               <Type Type="EngineNS.Rtti.UTypeDesc@EngineCore" Value="System.DBNull@Unknown" />
             </InitValue>
+            <InitValueVisible Type="System.Boolean@Unknown" Value="True" />
             <IsParamArray Type="System.Boolean@Unknown" Value="False" />
             <OperationType Type="EngineNS.Bricks.CodeBuilder.EMethodArgumentAttribute@EngineCore" Value="Default" />
+            <OperationVisible Type="System.Boolean@Unknown" Value="True" />
             <VariableName Type="System.String@Unknown" Value="host" />
             <VariableType Type="EngineNS.Bricks.CodeBuilder.UTypeReference@EngineCore">
               <IsEnum Type="System.Boolean@Unknown" Value="False" />

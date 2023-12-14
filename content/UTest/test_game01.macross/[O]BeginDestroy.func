@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Root Type="EngineNS.Bricks.CodeBuilder.MacrossNode.UMacrossMethodGraph@EngineCore">
+  <AssetName Type="EngineNS.RName@EngineCore" Value="Game,utest/test_game01.macross,bc3c0fba-c5f7-4c79-ad88-7c09531cb90b" />
   <GraphName Type="System.String@Unknown" Value="NodeGraph" />
   <MethodDatas Type="System.Collections.Generic.List&lt;EngineNS.Bricks.CodeBuilder.MacrossNode.MethodData@EngineCore,&gt;@Unknown" Count="1">
     <e_0 Type="EngineNS.Bricks.CodeBuilder.MacrossNode.MethodData@EngineCore">
@@ -11,8 +12,10 @@
             <InitValue Type="EngineNS.Bricks.CodeBuilder.UPrimitiveExpression@EngineCore">
               <Type Type="EngineNS.Rtti.UTypeDesc@EngineCore" Value="System.DBNull@Unknown" />
             </InitValue>
+            <InitValueVisible Type="System.Boolean@Unknown" Value="True" />
             <IsParamArray Type="System.Boolean@Unknown" Value="False" />
             <OperationType Type="EngineNS.Bricks.CodeBuilder.EMethodArgumentAttribute@EngineCore" Value="Default" />
+            <OperationVisible Type="System.Boolean@Unknown" Value="True" />
             <VariableName Type="System.String@Unknown" Value="host" />
             <VariableType Type="EngineNS.Bricks.CodeBuilder.UTypeReference@EngineCore">
               <IsEnum Type="System.Boolean@Unknown" Value="False" />
@@ -31,6 +34,7 @@
   </MethodDatas>
   <Nodes Type="System.Collections.Generic.List&lt;EngineNS.Bricks.NodeGraph.UNodeBase@EngineCore,&gt;@Unknown" Count="2">
     <e_0 Type="EngineNS.Bricks.CodeBuilder.MacrossNode.UMethodStartNode@EngineCore">
+      <Label Type="System.String@Unknown" Value="BeginDestroy" />
       <MethodDecKeyword Type="System.String@Unknown" Value=" BeginDestroy(EngineNS.GamePlay.UGameInstance)" />
       <Name Type="System.String@Unknown" Value="BeginDestroy" />
       <NodeId Type="System.Guid@Unknown" Value="f3bbff24-cba9-43a3-aab8-50f526be6c3a" />
@@ -39,6 +43,7 @@
     </e_0>
     <e_1 Type="EngineNS.Bricks.CodeBuilder.MacrossNode.MethodNode@EngineCore">
       <InputControlWidth Type="System.Single@Unknown" Value="60" />
+      <Label Type="System.String@Unknown" Value="FinalViewportSlate" />
       <MethodMeta Type="System.String@Unknown" Value="EngineNS.GamePlay.UGameInstance@EngineCore#System.Void FinalViewportSlate()" />
       <Name Type="System.String@Unknown" Value="FinalViewportSlate" />
       <NodeId Type="System.Guid@Unknown" Value="ccad0296-1ff5-41f2-9a4f-5c333c92c9e3" />
