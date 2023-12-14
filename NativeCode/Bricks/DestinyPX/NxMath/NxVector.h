@@ -1,5 +1,6 @@
 #pragma once
 #include "NxReal.h"
+#include "NxRandom.h"
 
 namespace NxMath
 {

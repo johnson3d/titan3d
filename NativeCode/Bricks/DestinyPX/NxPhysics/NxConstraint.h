@@ -1,6 +1,6 @@
 #pragma once
 
-#include "NxPreHead.h"
+#include "NxActor.h"
 
 NS_BEGIN
 

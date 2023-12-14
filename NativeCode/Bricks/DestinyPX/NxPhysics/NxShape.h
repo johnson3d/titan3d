@@ -8,10 +8,9 @@ namespace NxPhysics
 	struct NxShapeData
 	{
 		NxReal Mass;
-		NxReal InvMass;
 		NxReal Volume;
 		NxReal Compliance;
-		NxVector3 Centroid;
+		NxReal StrengthArm;
 	};
 	class TR_CLASS()
 		NxShape : public NxEntity

@@ -16,6 +16,7 @@
   <ItemGroup>
     <ClCompile Include="$(MSBuildThisFileDirectory)NxMatrix.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)NxQuat.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)NxRandom.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)NxReal.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)NxTransform.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)NxVector.cpp" />
@@ -32,6 +33,7 @@
   <ItemGroup>
     <ClInclude Include="$(MSBuildThisFileDirectory)NxMatrix.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)NxQuat.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)NxRandom.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)NxReal.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)NxTransform.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)NxUtility.h" />

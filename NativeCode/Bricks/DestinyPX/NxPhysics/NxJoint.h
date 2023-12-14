@@ -5,7 +5,6 @@ NS_BEGIN
 
 namespace NxPhysics
 {
-	using NxActorPair = std::pair<NxAutoRef<NxActor>, NxAutoRef<NxActor>>;
 	class NxJoint : public NxConstraint
 	{
 	public:
@@ -36,40 +35,48 @@ namespace NxPhysics
 			}
 			
 			auto timed_compliance = compliance / NxReal::Pow(stepTime, 2);
-			return (c - timed_compliance * lagrange) / (dv + timed_compliance);
+			return (-c - timed_compliance * lagrange) / (dv + timed_compliance);
 		}
 	};
-	class NxDistanceJoint : public NxJoint
+	class NxContactConstraint : public NxJoint
 	{
 		NxReal mRagrange = NxReal::Zero();
+		NxVector3 Gradient;
 	public:
-		ENGINE_RTTI(NxDistanceJoint);
-		NxActorPair mActorPair;
+		ENGINE_RTTI(NxContactConstraint);
+		NxRbPair mActorPair;
 
 		NxReal mCompliance = NxReal::Zero();//柔度对应于刚度的倒数，单位是米/牛顿
 		NxReal mLimitMin;
 		NxReal mLimitMax;
+		inline NxReal GetRagrange() const {
+			return mRagrange;
+		}
+		inline NxVector3 GetGradient() const {
+			return Gradient;
+		}
 		virtual void ResetRagrange() override
 		{
 			mRagrange = NxReal::Zero();
+			Gradient = NxVector3::Zero();
 		}
 		inline NxVector3 FixDistance(const NxVector3& p0, const NxVector3& p1, const NxReal& limitMin, const NxReal& limitMax)
 		{
 			auto offset = p1 - p0;
 			auto distance = offset.Length();
-			if (distance <= NxReal::Epsilon())
+			if (NxReal::EpsilonEqual(distance, NxReal::Zero()))
 			{
 				return NxVector3::Zero();
 			}
 			if (distance < limitMin)
 			{
-				auto percent = (distance - limitMin) / distance;
-				auto result = offset * percent;
-				return -result;
+				auto dir = offset / distance;
+				return -(dir * (distance - limitMin));
 			}
 			else if (distance > limitMax)
 			{
-				return -(offset / distance * (distance - limitMax));
+				auto dir = offset / distance;
+				return -(dir * (distance - limitMax));
 			}
 			else
 			{
@@ -77,6 +84,12 @@ namespace NxPhysics
 			}
 		}
 		virtual void SolveConstraint(NxScene* scene, const NxReal& time) override;
+
+		inline NxVector3 GetForce(const NxReal& time)
+		{
+			auto factor = mRagrange / (time * time);
+			return Gradient * factor;
+		}
 
 		static NxReal CalcLimitMin(const NxRigidBody* body0, const NxRigidBody* body1);
 	};

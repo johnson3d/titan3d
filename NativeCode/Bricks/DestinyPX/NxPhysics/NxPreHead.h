@@ -60,6 +60,54 @@ namespace NxPhysics
 	using NxVector3f = v3dxVector3;
 	using NxQuatf = v3dxQuaternion;
 
+	using NxUInt32 = NxMath::NxUInt32;
+	using NxUInt64 = NxMath::NxUInt64;
+
+	template<typename T, typename Base>
+	NxAutoRef<T> As(NxAutoRef<Base>& ptr)
+	{
+		static_assert(std::is_base_of<NxBase, Base>::value);
+		static_assert(std::is_base_of<Base, T>::value);
+		if (ptr->GetRtti()->IsSubClass(GetClassObject<T>()))
+		{
+			return NxAutoRef((T*)ptr.GetPtr());
+		}
+		return nullptr;
+	}
+
+	class TR_CLASS()
+		NxRandom : public NxBase
+	{
+		NxMath::NxRandom<NxReal, 65536> mRandom;
+	public:
+		NxRandom(NxUInt64 seed)
+			: mRandom(seed)
+		{
+		}
+		inline NxUInt64 Next()
+		{
+			return mRandom.Next();
+		}
+		inline NxReal GetUnit()
+		{
+			return mRandom.GetUnit();
+		}
+	};
+	struct TR_CLASS()
+		NxUtility
+	{
+		inline static NxVector3 RandomUnitVector3(NxRandom& rd) 
+		{
+			NxVector3 result;
+			result.X = rd.GetUnit();
+			result.Y = rd.GetUnit();
+			result.Z = rd.GetUnit();
+			result.Normalize();
+			return result;
+		}
+	};
+	
+
 	#define D2R(v) D2Real(v, NxReal)
 
 	class TR_CLASS()

@@ -52,72 +52,101 @@ namespace NxPhysics
 		auto step = TimeStep;
 		auto residue = NxReal::Mod(elapsedTime, TimeStep);
 		
-		std::vector<NxActorPair> pairs;
-		CollectCollisionPairs(pairs);
-
 		for (int i = 0; i < numOfStep; i++)
 		{
 			step = (i == numOfStep - 1) ? residue : TimeStep;
 			if (step == NxReal::Zero())
 				continue;
 
-			for (auto& i : mActors)
-			{
-				i->TryStep(step);
-				/*if (i->GetRtti() == GetClassObject<NxRigidBody>())
-				{
-					auto rbody = ((NxRigidBody*)i);
-				}*/
-			}
+			Forward(step);
 
-			for (auto& i : mConstraints)
-			{
-				i->SolveConstraint(this, step);
-			}
+			SolveJoints(step);
 
-			ProcessDistancePairs(pairs, step);
+			CollectRBContacts();
 
-			for (auto& i : mActors)
-			{
-				i->FixStep(step);
-			}
+			SolveRBContacts(step);
+
+			SolvePosition(step);
+
+			SolveVelocity(step);
 		}
 	}
-	void NxScene::CollectCollisionPairs(std::vector<NxActorPair>& pairs)
+	void NxScene::Forward(const NxReal& step)
 	{
+		for (auto& j : mActors)
+		{
+			j->TryStep(step);
+		}
+	}
+	void NxScene::SolveJoints(const NxReal& step)
+	{
+		for (auto& j : mJoints)
+		{
+			j->SolveConstraint(this, step);
+		}
+	}
+	void NxScene::SolvePosition(const NxReal& step)
+	{
+		for (auto& j : mActors)
+		{
+			j->FixStep(step);
+		}
+	}
+	void NxScene::CollectRBContacts()
+	{
+		mRbContacts.clear();
 		for (size_t i = 0; i < mActors.size(); i++)
 		{
-			const auto& lh = mActors[i];
-			auto lhAABB = NxAABB::Transform(lh->mAABB, *lh->GetTransform());
+			const auto& lh = As<NxRigidBody>(mActors[i]);
+			if (lh == nullptr)
+				continue;
+			auto lhAABB = NxAABB::Transform(lh->mAABB, *lh->GetTryTransform());
 			for (size_t j = i + 1; j < mActors.size(); j++)
 			{
-				const auto& rh = mActors[j];
-				auto rhAABB = NxAABB::Transform(rh->mAABB, *rh->GetTransform());				
+				const auto& rh = As<NxRigidBody>(mActors[j]);
+				if (rh == nullptr)
+					continue;
+				auto rhAABB = NxAABB::Transform(rh->mAABB, *rh->GetTryTransform());				
 				if (NxAABB::Contains(lhAABB, rhAABB) == NxMath::EContainmentType::Disjoint)
 				{
 					continue;
 				}
-				pairs.push_back(std::make_pair(lh, rh));
+				auto contact = MakeShared(new NxContactConstraint());
+				contact->mActorPair = std::make_pair(lh, rh);
+				mRbContacts.push_back(contact);
 			}
 		}
 	}
-	void NxScene::ProcessDistancePairs(const std::vector<NxActorPair>& pairs, const NxReal& step)
+	void NxScene::SolveRBContacts(const NxReal& step)
 	{
-		NxDistanceJoint djt;
-		for (const auto& i : pairs)
+		for (const auto& i : mRbContacts)
 		{
-			if (i.first->GetRtti() == GetClassObject<NxRigidBody>() &&
-				i.second->GetRtti() == GetClassObject<NxRigidBody>())
+			if (i->mActorPair.first->GetRtti() == GetClassObject<NxRigidBody>() &&
+				i->mActorPair.second->GetRtti() == GetClassObject<NxRigidBody>())
 			{
-				djt.mActorPair = i;
-				auto actor0 = (NxRigidBody*)i.first.GetPtr();
-				auto actor1 = (NxRigidBody*)i.second.GetPtr();
-				djt.ResetRagrange();
-				djt.mLimitMax = NxReal::Maximum();
-				djt.mLimitMin = NxDistanceJoint::CalcLimitMin(actor0, actor1);
-				djt.mCompliance = actor0->mDesc.Compliance + actor1->mDesc.Compliance;
-				djt.SolveConstraint(this, step);
+				auto actor0 = (NxRigidBody*)i->mActorPair.first.GetPtr();
+				auto actor1 = (NxRigidBody*)i->mActorPair.second.GetPtr();
+				i->ResetRagrange();
+				i->mLimitMax = NxReal::Maximum();
+				i->mLimitMin = NxContactConstraint::CalcLimitMin(actor0, actor1);
+				i->mCompliance = actor0->mDesc.Compliance + actor1->mDesc.Compliance;
+				i->SolveConstraint(this, step);
 			}
+		}
+	}
+	void NxScene::SolveVelocity(const NxReal& step)
+	{
+		for (const auto& i : mRbContacts)
+		{
+			auto force = i->GetRagrange() * NxReal::F_2_0() / (step);
+			auto acc = force * i->mActorPair.first->mDesc.InvMass;
+
+			auto v = i->GetGradient() * acc;
+			i->mActorPair.first->mVelocity += v;
+
+			acc = force * i->mActorPair.second->mDesc.InvMass;
+			v = i->GetGradient() * acc;
+			i->mActorPair.second->mVelocity -= v;
 		}
 	}
 }

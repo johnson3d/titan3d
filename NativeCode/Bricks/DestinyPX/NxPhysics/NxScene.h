@@ -1,5 +1,6 @@
 #pragma once
-#include "NxPreHead.h"
+#include "NxActor.h"
+#include "NxJoint.h"
 
 NS_BEGIN
 
@@ -17,8 +18,10 @@ namespace NxPhysics
 		NxSceneDesc mDesc;
 		NxPQ Transform;
 		std::vector<NxAutoRef<NxActor>> mActors;
-		std::vector<NxAutoRef<NxConstraint>> mConstraints;
+		std::vector<NxAutoRef<NxJoint>> mJoints;
 		std::mutex mLocker;
+	protected:
+		std::vector<NxAutoRef<NxContactConstraint>> mRbContacts;
 	public:
 		ENGINE_RTTI(NxScene);
 		TR_FUNCTION(SV_NoBind)
@@ -52,9 +55,12 @@ namespace NxPhysics
 			mLocker.unlock();
 		}
 	private:
-		using NxActorPair = std::pair<NxAutoRef<NxActor>, NxAutoRef<NxActor>>;
-		void CollectCollisionPairs(std::vector<NxActorPair>& pairs);
-		void ProcessDistancePairs(const std::vector<NxActorPair>& pairs, const NxReal& step);
+		void Forward(const NxReal& step);
+		void SolvePosition(const NxReal& step);
+		void SolveJoints(const NxReal& step);
+		void CollectRBContacts();
+		void SolveRBContacts(const NxReal& step);
+		void SolveVelocity(const NxReal& step);
 	};
 }
 

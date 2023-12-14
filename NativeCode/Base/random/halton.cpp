@@ -55,6 +55,7 @@ email: lxu@math.fsu.edu, okten@math.fsu.edu
 #include <algorithm>
 #include "halton.h"
 
+MersenneTwister Instance;
 
 halton::halton(bool isMaster)
 {
@@ -65,7 +66,7 @@ halton::halton(bool isMaster)
 	dim = 0;
 	isPermutationReady = false;
 	isBaseInitialized = false;
-	pmt = MersenneTwister::Instance();
+	pmt = &Instance;// MersenneTwister::Instance();
 	ppm = nullptr;
 }
 

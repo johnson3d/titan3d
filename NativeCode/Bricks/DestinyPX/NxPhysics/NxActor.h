@@ -23,7 +23,6 @@ namespace NxPhysics
 			return &mAABB;
 		}
 		virtual NxPQ* GetTryTransform() = 0;
-		virtual NxShapeData* GetShapeData() = 0;
 		virtual void TryStep(const NxReal& time) = 0;
 		virtual void SolveStep(const NxReal& time) = 0;
 		virtual void FixStep(const NxReal& time) = 0;
@@ -34,7 +33,28 @@ namespace NxPhysics
 	struct TR_CLASS(SV_LayoutStruct = 8)
 		NxRigidBodyDesc
 	{
+		NxVector3 Centroid;
+		NxVector3 Inertia;
+		NxVector3 InertiaInverse;
+		
+		NxReal Mass;
+		NxReal InvMass;
 		NxReal Compliance;
+		void SetDefault()
+		{
+			InvMass = -NxReal::One();
+		}
+		void SetMass(const NxReal& mass, const NxVector3& centre)
+		{
+			Mass = mass;
+			InvMass = NxReal::One() / mass;
+			Centroid = centre;
+		}
+		void SetStatic()
+		{
+			Mass = NxReal::Maximum();
+			InvMass = NxReal::Zero();
+		}
 	};
 	class TR_CLASS()
 		NxRigidBody : public NxActor
@@ -43,15 +63,21 @@ namespace NxPhysics
 		NxRigidBodyDesc mDesc;
 		NxPQ mTransform;
 		NxPQ mTryTransform;
+
 		NxVector3 mVelocity;
-		NxShapeData mShapeData;
+		NxVector3 mAngularVelocity;
 
 		std::vector<NxAutoRef<NxShape>> mShapes;
 	protected:
 		void UpdateCentroid();
+		void UpdateRotation();
 	public:
 		ENGINE_RTTI(NxRigidBody);
 		bool Init(const NxRigidBodyDesc& desc);
+		inline bool IsStatic() const
+		{
+			return mDesc.InvMass == NxReal::Zero();
+		}
 		TR_FUNCTION(SV_NoBind)
 		virtual const NxPQ* GetTransform() const override 
 		{
@@ -65,10 +91,6 @@ namespace NxPhysics
 		{
 			return &mTryTransform;
 		}
-		virtual NxShapeData* GetShapeData() override
-		{
-			return &mShapeData;
-		}
 		const NxVector3& GetVelocity() const
 		{
 			return mVelocity;
@@ -77,6 +99,16 @@ namespace NxPhysics
 		{
 			mVelocity = v;
 		}
+		void SetAngularVelocity(const NxVector3& v)
+		{
+			mAngularVelocity = v;
+		}
+		void SetInertia(const NxVector3& v)
+		{
+			mDesc.Inertia = v;
+			mDesc.InertiaInverse = NxVector3::One() / mDesc.Inertia;
+		}
+		
 		void AddForce(const NxVector3& offset, const NxVector3& dir, const NxReal& force);
 		void AddShape(NxShape* shape)
 		{
@@ -93,7 +125,6 @@ namespace NxPhysics
 			mAABB.MakeEmpty();
 			for (const auto& i : mShapes)
 			{
-				mShapeData.Mass += i->mShapeData.Mass;
 				auto box = i->GetAABB();
 				NxVector3 v[8];
 				box.GetCorners(v);
@@ -106,6 +137,8 @@ namespace NxPhysics
 			UpdateCentroid();
 		}
 	};
+
+	using NxRbPair = std::pair<NxAutoRef<NxRigidBody>, NxAutoRef<NxRigidBody>>;
 }
 
 NS_END

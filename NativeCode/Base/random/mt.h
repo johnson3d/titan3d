@@ -71,7 +71,6 @@ email: m-mat @ math.sci.hiroshima-u.ac.jp (remove spaces)
 
 class MersenneTwister {
 public:
-	static MersenneTwister* Instance() { if (_instance == nullptr) _instance = new MersenneTwister(); return _instance; }
 	/* initializes mt[NN] with a seed */
 	void init_genrand64(uint64_t seed);
 
@@ -96,11 +95,12 @@ public:
 
 	/* generates a random number on (0,1)-real-interval */
 	double genrand64_real3(void);
-private:
+
 	MersenneTwister()
 	{
 		init_by_array64(init_64, length_64);
 	}
+private:
 	static uint64_t init_64[4], length_64;
 	static MersenneTwister* _instance;
 };

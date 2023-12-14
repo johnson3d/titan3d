@@ -43,7 +43,7 @@ namespace NxMath
 			return Result;
 		}
 
-		inline static NxQuat RotationAxis(const Vector3& in_axis, const Type& angle)
+		inline static NxQuat SetAxisAngel(const Vector3& in_axis, const Type& angle)
 		{
 			NxQuat result;
 
@@ -168,7 +168,7 @@ namespace NxMath
 			auto axis = Vector3::Cross(from, to);
 			auto dv = Vector3::Dot(from, to);
 			auto angle = Type::ACos(dv);
-			return RotationAxis(axis, angle);
+			return SetAxisAngel(axis, angle);
 		}
 
 		inline void GetAxisAngel(Vector3& axis, Type& angle) const

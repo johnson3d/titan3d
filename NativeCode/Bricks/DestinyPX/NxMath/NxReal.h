@@ -24,6 +24,10 @@ namespace NxMath
 			return (float)AsDouble();
 		}
 
+		static ThisType ByInt(int V)
+		{
+			return (float)V;
+		}
 #if defined(__clang__)
 		static constexpr const ThisType ByDouble(double _Value)
 		{
@@ -233,6 +237,10 @@ namespace NxMath
 		#pragma region constexpr var
 		#define	NxRealCValue(_Value) NxCValue(_Value, ValueType, FracBit)
 		
+		static ThisType ByInt(int V)
+		{
+			return ThisType(V);
+		}
 #if defined(__clang__)
 		static constexpr const ThisType ByDouble(double _Value)
 		{
@@ -955,6 +963,10 @@ namespace NxMath
 		{
 			return mValue.AsSingle();
 		}
+		static ThisType ByInt(int v)
+		{
+			return T::ByInt(v);
+		}
 #if defined(__clang__)
 		static constexpr const ThisType ByDouble(double v)
 		{
@@ -1324,7 +1336,7 @@ namespace NxMath
 		#pragma endregion
 
 		#pragma region Math Function
-		inline static bool EpsilonEqual(const NxReal& lh, const NxReal& rh, const NxReal& epsilon)
+		inline static bool EpsilonEqual(const NxReal& lh, const NxReal& rh, const NxReal& epsilon = NxReal::Epsilon())
 		{
 			return T::EpsilonEqual(lh.mValue, rh.mValue, epsilon.mValue);
 		}
