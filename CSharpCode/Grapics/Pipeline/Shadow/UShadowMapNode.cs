@@ -231,8 +231,8 @@ namespace EngineNS.Graphics.Pipeline.Shadow
 
             var dpRastDesc = new NxRHI.FGpuPipelineDesc();
             dpRastDesc.SetDefault();
-            dpRastDesc.m_Rasterizer.m_DepthBias = 0;
-            dpRastDesc.m_Rasterizer.m_SlopeScaledDepthBias = 1;
+            dpRastDesc.m_Rasterizer.m_DepthBias = 1;
+            dpRastDesc.m_Rasterizer.m_SlopeScaledDepthBias = 2.0f;
             DepthRaster = UEngine.Instance.GfxDevice.PipelineManager.GetPipelineState(UEngine.Instance.GfxDevice.RenderContext, in dpRastDesc);
 
 
@@ -349,7 +349,7 @@ namespace EngineNS.Graphics.Pipeline.Shadow
                     }
                     //FrustumSphereRadius = (float)Math.Ceiling((float)Math.Sqrt(FrustumSphereRadius));
                     float MaxFrustumDiagonal = Vector3.Distance(mSSM_FrustumVtx[3], mSSM_FrustumVtx[4]);
-                    FrustumSphereRadius = Math.Min((float)Math.Sqrt(FrustumSphereRadius), MaxFrustumDiagonal * 0.5f);
+                    FrustumSphereRadius = Math.Max((float)Math.Sqrt(FrustumSphereRadius), MaxFrustumDiagonal * 0.5f);
 
                     var ShadowCameraPos = FrustumSphereCenter - mDirLightDirection * ((float)FrustumSphereRadius + mShadowCameraOffset);
 
@@ -399,8 +399,8 @@ namespace EngineNS.Graphics.Pipeline.Shadow
 
                     if (!AABB.IsEmpty())
                     {
-                        Matrix LookAtLHMat = Matrix.LookAtLH(ShadowCameraPos, FrustumSphereCenter, Vector3.UnitY);
-                        //Matrix LookAtLHMat = Matrix.LookAtLH(-mDirLightDirection, Vector3.Zero, Vector3.UnitY);
+                        //Matrix LookAtLHMat = Matrix.LookAtLH(ShadowCameraPos, FrustumSphereCenter, Vector3.UnitY);
+                        Matrix LookAtLHMat = Matrix.LookAtLH(-mDirLightDirection, Vector3.Zero, Vector3.UnitY);
                         Matrix ShadowProj = new Matrix();
                         Matrix.Transpose(in LookAtLHMat, out ShadowProj);
                         Vector3[] AABBCorners = AABB.GetCorners();
@@ -418,15 +418,18 @@ namespace EngineNS.Graphics.Pipeline.Shadow
 
                         BoundingBox ShadowBound = BoundingBox.FromPoints(NewPoints);
 
-                        if ((ShadowBound.Maximum.X - ShadowBound.Minimum.X) + 10.0f  < FrustumSphereDiameter && (ShadowBound.Maximum.Z - ShadowBound.Minimum.Z)+ 10.0f < FrustumSphereDiameter)
+                        float BoxExt = 1.5f;
+                        if ((ShadowBound.Maximum.X - ShadowBound.Minimum.X) * BoxExt < FrustumSphereDiameter && (ShadowBound.Maximum.Z - ShadowBound.Minimum.Z) * BoxExt < FrustumSphereDiameter)
                         {
-                            //shadowCamera.LookAtLH(-mDirLightDirection.AsDVector(), Vector3.Zero.AsDVector(), in Vector3.UnitY);
+                            shadowCamera.LookAtLH(-mDirLightDirection.AsDVector(), Vector3.Zero.AsDVector(), in Vector3.UnitY);
 
                             NeedOriShadowPro = false;
                             TexelOffsetNdcX = (ShadowBound.Maximum.X + ShadowBound.Minimum.X) / (ShadowBound.Maximum.X - ShadowBound.Minimum.X);
                             TexelOffsetNdcY = (ShadowBound.Maximum.Z + ShadowBound.Minimum.Z) / (ShadowBound.Maximum.Z - ShadowBound.Minimum.Z);
                             //shadowCamera.DoOrthoProjectionForShadow(ShadowBound.Maximum.X - ShadowBound.Minimum.X, ShadowBound.Maximum.Z - ShadowBound.Minimum.Z, ShadowCameraZNear, ShadowCameraZFar, TexelOffsetNdcX, TexelOffsetNdcY);
-                            shadowCamera.DoOrthoProjectionForShadow((ShadowBound.Maximum.X - ShadowBound.Minimum.X) +10.0f, (ShadowBound.Maximum.Z - ShadowBound.Minimum.Z) + 10.0f, ShadowCameraZNear, ShadowCameraZFar, TexelOffsetNdcX, TexelOffsetNdcY);
+                            shadowCamera.DoOrthoProjectionForShadow((ShadowBound.Maximum.X - ShadowBound.Minimum.X) * BoxExt, (ShadowBound.Maximum.Z - ShadowBound.Minimum.Z) * BoxExt, ShadowCameraZNear, ShadowCameraZFar, TexelOffsetNdcX, TexelOffsetNdcY);
+
+                            FrustumSphereDiameter = Math.Max(ShadowBound.Maximum.X - ShadowBound.Minimum.X, ShadowBound.Maximum.Z - ShadowBound.Minimum.Z) + BoxExt;
                         }
                        
                     }
@@ -452,9 +455,9 @@ namespace EngineNS.Graphics.Pipeline.Shadow
 
                     mViewer2ShadowMtxArray[CsmIdx] = UVAdjustedMtx * (mOrtho2UVMtx * ViewProjection);//mShadowCameraArray[CsmIdx].CameraData.ViewProjection * mOrtho2UVMtx * mUVAdjustedMtxArray[CsmIdx];
 
-                    float PerObjCustomDepthBias = 1.0f;
+                    float PerObjCustomDepthBias = 1.5f;
                     float DepthBiasClipSpace = UniformDepthBias / (ShadowCameraZFar - ShadowCameraZNear) * (FrustumSphereDiameter / mInnerResolutionY) * PerObjCustomDepthBias;
-                    //float DepthBiasClipSpace = UniformDepthBias / (ShadowCameraZFar - ShadowCameraZNear);
+                    //float DepthBiasClipSpace = UniformDepthBias / (ShadowCameraZFar - ShadowCameraZNear) * PerObjCustomDepthBias;
 
                     var coreBinder = UEngine.Instance.GfxDevice.CoreShaderBinder;
                     var cBuffer = GBuffersArray[CsmIdx].PerViewportCBuffer;
@@ -466,7 +469,7 @@ namespace EngineNS.Graphics.Pipeline.Shadow
 
                     //mShadowTransitionScale = 1.0f / (DepthBiasClipSpace + 0.00001f);
                     mShadowTransitionScaleArray[CsmIdx] = 1.0f / (DepthBiasClipSpace + 0.00001f);
-
+                    mShadowTransitionScale = mShadowTransitionScaleArray[CsmIdx];
                     float FadeStartDistance = ShadowDistance - ShadowDistance * mFadeStrength;
                     mFadeParam.X = 1.0f / (ShadowDistance - FadeStartDistance + 0.0001f);
                     mFadeParam.Y = -FadeStartDistance * mFadeParam.X;
@@ -545,11 +548,12 @@ namespace EngineNS.Graphics.Pipeline.Shadow
                     UEngine.Instance.GfxDevice.RenderCmdQueue.QueueCmdlist(cmdlist);
                 }
 
-                mShadowTransitionScaleVec.X = mShadowTransitionScaleArray[0];
-                mShadowTransitionScaleVec.Y = mShadowTransitionScaleArray[1];
-                mShadowTransitionScaleVec.Z = mShadowTransitionScaleArray[2];
-                mShadowTransitionScaleVec.W = mShadowTransitionScaleArray[3];
-               
+                //TODO  Global Value...
+                mShadowTransitionScaleVec.X = 1000.0f;// mShadowTransitionScaleArray[0];
+                mShadowTransitionScaleVec.Y = 1000.0f;//mShadowTransitionScaleArray[1];
+                mShadowTransitionScaleVec.Z = 1000.0f;//mShadowTransitionScaleArray[2];
+                mShadowTransitionScaleVec.W = 1000.0f;//mShadowTransitionScaleArray[3];
+
             }   
         }
 

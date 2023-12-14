@@ -3,7 +3,8 @@
   "Path": "CSharpCode/Bricks/UI",
   "FullName": "CSharpCode/Bricks/UI/UI.brick",
   "SharedProjects": [
-    "CSharpCode/GamePlay/GamePlay.brick"
+    "CSharpCode/GamePlay/GamePlay.brick",
+    "CSharpCode/Bricks/CodeBuilder/CodeBuilder.brick"
   ],
   "Nugets": [],
   "DllModules": []

@@ -19,6 +19,10 @@ namespace EngineNS.NxPhysics
         {
             return new NxReal() { mValue = NxMath.NxFloat32.FromFloat(v) };
         }
+        public static NxReal ByI32(int v)
+        {
+            return new NxReal() { mValue = NxMath.NxFloat32.FromFloat((float)v) };
+        }
         public NxReal(in NxMath.NxFloat32 v)
         {
             mValue = v;
@@ -29,6 +33,10 @@ namespace EngineNS.NxPhysics
         public static NxReal ByF32(float v)
         {
             return new NxReal() { mValue = NxMath.NxFixed64.FromFloat(v) };
+        }
+        public static NxReal ByI32(int v)
+        {
+            return new NxReal() { mValue = NxMath.NxFloat32.FromFloat((float)v) };
         }
         public NxReal(in NxMath.NxFixed64 v)
         {
@@ -176,6 +184,7 @@ namespace EngineNS.NxPhysics
             Z = z;
             W = w;
         }
+        public static readonly PxQuat Identity = new PxQuat(NxReal.ByI32(0), NxReal.ByI32(0), NxReal.ByI32(0), NxReal.ByI32(1));
     }
     partial struct PxPQ
     {
@@ -186,6 +195,14 @@ namespace EngineNS.NxPhysics
         public unsafe override string ToString()
         {
             return $"Quat=({Quat});Postion=({Position})";
+        }
+    }
+
+    public class TtRandom : AuxPtrType<EngineNS.NxPhysics.NxRandom>
+    {
+        public TtRandom(UInt64 seed)
+        {
+            mCoreObject = NxRandom.CreateInstance(seed);
         }
     }
 }

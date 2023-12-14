@@ -3,6 +3,7 @@ using EngineNS.GamePlay.Scene;
 using EngineNS.Graphics.Mesh;
 using EngineNS.UI.Controls;
 using EngineNS.UI.Controls.Containers;
+using NPOI.OpenXmlFormats.Dml;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -101,6 +102,7 @@ namespace EngineNS.UI.Editor
         UMeshNode[] mOperatorNodes = new UMeshNode[8];
         UMeshNode[] mAnchorNodes = new UMeshNode[EDecoratorType.Anchor_End - EDecoratorType.Anchor_Start];
         List<Vector4> mOriAnchorRects = new List<Vector4>();
+        List<RectangleF> mOriDesignRects = new List<RectangleF>();
         List<Vector4> mOriAnchorPoints = new List<Vector4>();
 
         TtUIEditor mEditor;
@@ -170,7 +172,7 @@ namespace EngineNS.UI.Editor
                             await mesh.Initialize(RName.GetRName("ui/p_002.vms", RName.ERNameType.Engine), 
                                 new List<Graphics.Pipeline.Shader.UMaterial>() { whiteColorMat }, Rtti.UTypeDescGetter<Graphics.Mesh.UMdfStaticMesh>.TypeDesc);
                             mAnchorNodes[idx] = await UMeshNode.AddMeshNode(editor.PreviewViewport.World, editor.mUINode,
-                                new GamePlay.Scene.UMeshNode.UMeshNodeData(), typeof(GamePlay.UPlacement), mesh, DVector3.Zero, Vector3.One, Quaternion.RotationAxis(Vector3.UnitZ, MathF.PI * 0.5f));
+                                new GamePlay.Scene.UMeshNode.UMeshNodeData(), typeof(GamePlay.UPlacement), mesh, DVector3.Zero, Vector3.One, Quaternion.RotationAxis(Vector3.UnitZ, -MathF.PI * 0.5f));
                             mAnchorNodes[idx].Parent = null;
                             mAnchorNodes[idx].HitproxyType = Graphics.Pipeline.UHitProxy.EHitproxyType.Root;
                         }
@@ -214,7 +216,7 @@ namespace EngineNS.UI.Editor
                             await mesh.Initialize(RName.GetRName("ui/p_002.vms", RName.ERNameType.Engine),
                                 new List<Graphics.Pipeline.Shader.UMaterial> { whiteColorMat }, Rtti.UTypeDescGetter<Graphics.Mesh.UMdfStaticMesh>.TypeDesc);
                             mAnchorNodes[idx] = await UMeshNode.AddMeshNode(editor.PreviewViewport.World, editor.mUINode,
-                                new GamePlay.Scene.UMeshNode.UMeshNodeData(), typeof(GamePlay.UPlacement), mesh, DVector3.Zero, Vector3.One, Quaternion.RotationAxis(Vector3.UnitZ, -MathF.PI * 0.5f));
+                                new GamePlay.Scene.UMeshNode.UMeshNodeData(), typeof(GamePlay.UPlacement), mesh, DVector3.Zero, Vector3.One, Quaternion.RotationAxis(Vector3.UnitZ, MathF.PI * 0.5f));
                             mAnchorNodes[idx].Parent = null;
                             mAnchorNodes[idx].HitproxyType = Graphics.Pipeline.UHitProxy.EHitproxyType.Root;
                         }
@@ -520,6 +522,7 @@ namespace EngineNS.UI.Editor
         void UpdateOriAnchorDatas()
         {
             mOriAnchorRects.Clear();
+            mOriAnchorPoints.Clear();
             for (int i = 0; i < mEditor.SelectedElements.Count; i++)
             {
                 Vector4 rect;
@@ -528,13 +531,10 @@ namespace EngineNS.UI.Editor
                 rect.Z = TtCanvasControl.GetAnchorRectZ(mEditor.SelectedElements[i]);
                 rect.W = TtCanvasControl.GetAnchorRectW(mEditor.SelectedElements[i]);
                 mOriAnchorRects.Add(rect);
-            }
-            mOriAnchorPoints.Clear();
-            for (int i = 0; i < mEditor.SelectedElements.Count; i++)
-            {
                 var min = TtCanvasControl.GetAnchorMin(mEditor.SelectedElements[i]);
                 var max = TtCanvasControl.GetAnchorMax(mEditor.SelectedElements[i]);
                 mOriAnchorPoints.Add(new Vector4(min.X, min.Y, max.X, max.Y));
+                mOriDesignRects.Add(mEditor.SelectedElements[i].DesignRect);
             }
         }
 
@@ -550,6 +550,132 @@ namespace EngineNS.UI.Editor
             return Plane.PickPlanePos(pickRay, camera.GetLocalPosition(), camera.GetMatrixStartPosition(), x, y, planePos, planeNormal, out resultPos);
         }
 
+        float CalculateAnchorLeft(in DVector3 offset, float inWidth, in Vector2 min, in Vector2 max, TtUIElement element, int elementIndex)
+        {
+            var offsetX = offset.X / inWidth;
+            var x = MathF.Min(max.X, MathF.Max(0.0f, (float)(mOriAnchorPoints[elementIndex].X + offsetX)));
+            //TtCanvasControl.SetAnchorMin(element, new Vector2(x, min.Y));
+            var realOffsetX = (x - mOriAnchorPoints[elementIndex].X) * inWidth;
+            float width = 0.0f;
+            switch(mCurDecoratorType)
+            {
+                case EDecoratorType.Anchor_Left:
+                case EDecoratorType.Anchor_TopLeft:
+                case EDecoratorType.Anchor_BottomLeft:
+                    {
+                        width = mOriAnchorRects[elementIndex].Z;
+                        if ((max.X - x) > MathHelper.Epsilon)
+                            width = max.X - x - mOriAnchorRects[elementIndex].X - mOriAnchorRects[elementIndex].Z;
+                    }
+                    break;
+                case EDecoratorType.Anchor_MLeft:
+                case EDecoratorType.Anchor_STopLeft:
+                case EDecoratorType.Anchor_SBottomLeft:
+                    {
+                        width = mOriAnchorRects[elementIndex].Z;
+                        if ((max.X - x) <= MathHelper.Epsilon)
+                            width = mOriDesignRects[elementIndex].Width;
+                    }
+                    break;
+            }
+            TtCanvasControl.SetAnchorRectX(element, (float)(mOriAnchorRects[elementIndex].X - realOffsetX));
+            TtCanvasControl.SetAnchorRectZ(element, width);
+            return x;
+        }
+        float CalculateAnchorRight(in DVector3 offset, float inWidth, in Vector2 min, in Vector2 max, TtUIElement element, int elementIndex)
+        {
+            var offsetX = offset.X / inWidth;
+            var x = MathF.Max(min.X, MathF.Min(1.0f, (float)(mOriAnchorPoints[elementIndex].Z + offsetX)));
+            //TtCanvasControl.SetAnchorMax(element, new Vector2(x, max.Y));
+            var realOffsetX = (x - mOriAnchorPoints[elementIndex].Z) * inWidth;
+            float width = 0.0f;
+            switch(mCurDecoratorType)
+            {
+                case EDecoratorType.Anchor_Right:
+                case EDecoratorType.Anchor_TopRight:
+                case EDecoratorType.Anchor_BottomRight:
+                    {
+                        width = mOriAnchorRects[elementIndex].Z;
+                        if ((x - min.X) > MathHelper.Epsilon)
+                            width = x - min.X - mOriAnchorRects[elementIndex].X - mOriAnchorRects[elementIndex].Z + realOffsetX;
+                    }
+                    break;
+                case EDecoratorType.Anchor_MRight:
+                case EDecoratorType.Anchor_STopRight:
+                case EDecoratorType.Anchor_SBottomRight:
+                    {
+                        width = mOriAnchorRects[elementIndex].Z + realOffsetX;
+                        if ((x - min.X) <= MathHelper.Epsilon)
+                            width = mOriDesignRects[elementIndex].Width;
+                    }
+                    break;
+            }
+            TtCanvasControl.SetAnchorRectZ(element, width);
+            return x;
+        }
+        float CalculateAnchorTop(in DVector3 offset, float inHeight, in Vector2 min, in Vector2 max, TtUIElement element, int elementIndex)
+        {
+            var offsetY = offset.Y / inHeight;
+            var y = MathF.Min(max.Y, MathF.Max(0.0f, (float)(mOriAnchorPoints[elementIndex].Y - offsetY)));
+            //TtCanvasControl.SetAnchorMin(element, new Vector2(min.X, y));
+            var realOffsetY = (mOriAnchorPoints[elementIndex].Y - y) * inHeight;
+            float height = 0.0f;
+            switch(mCurDecoratorType)
+            {
+                case EDecoratorType.Anchor_Top:
+                case EDecoratorType.Anchor_TopRight:
+                case EDecoratorType.Anchor_TopLeft:
+                    {
+                        height = mOriAnchorRects[elementIndex].W;
+                        if ((max.Y - y) > MathHelper.Epsilon)
+                            height = max.Y - y - mOriAnchorRects[elementIndex].Y - mOriAnchorRects[elementIndex].W;
+                    }
+                    break;
+                case EDecoratorType.Anchor_MTop:
+                case EDecoratorType.Anchor_STopRight:
+                case EDecoratorType.Anchor_STopLeft:
+                    {
+                        height = mOriAnchorRects[elementIndex].W;
+                        if ((max.Y - y) <= MathHelper.Epsilon)
+                            height = mOriDesignRects[elementIndex].Height;
+                    }
+                    break;
+            }
+            TtCanvasControl.SetAnchorRectY(element, (float)(mOriAnchorRects[elementIndex].Y + realOffsetY));
+            TtCanvasControl.SetAnchorRectW(element, height);
+            return y;
+        }
+        float CalculateAnchorBottom(in DVector3 offset, float inHeight, in Vector2 min, in Vector2 max, TtUIElement element, int elementIndex)
+        {
+            var offsetY = offset.Y / inHeight;
+            var y = MathF.Max(min.Y, MathF.Min(1.0f, (float)(mOriAnchorPoints[elementIndex].W - offsetY)));
+            var realOffsetY = (mOriAnchorPoints[elementIndex].W - y) * inHeight;
+            float height = 0.0f;
+            switch(mCurDecoratorType)
+            {
+                case EDecoratorType.Anchor_Bottom:
+                case EDecoratorType.Anchor_BottomRight:
+                case EDecoratorType.Anchor_BottomLeft:
+                    {
+                        height = mOriAnchorRects[elementIndex].W;
+                        if ((y - min.Y) > MathHelper.Epsilon)
+                            height = y - min.Y - mOriAnchorRects[elementIndex].Y - mOriAnchorRects[elementIndex].W - realOffsetY;
+                    }
+                    break;
+                case EDecoratorType.Anchor_MBottom:
+                case EDecoratorType.Anchor_SBottomRight:
+                case EDecoratorType.Anchor_SBottomLeft:
+                    {
+                        height = mOriAnchorRects[elementIndex].W - realOffsetY;
+                        if ((y - min.Y) <= MathHelper.Epsilon)
+                            height = mOriDesignRects[elementIndex].Height;
+                    }
+                    break;
+            }
+            TtCanvasControl.SetAnchorRectW(element, height);
+            //TtCanvasControl.SetAnchorMax(element, new Vector2(x, y));
+            return y;
+        }
         public void DecoratorEventProcess(in Bricks.Input.Event e)
         {
             switch (e.Type)
@@ -849,6 +975,7 @@ namespace EngineNS.UI.Editor
                                     }
                                 }
                                 break;
+                            case EDecoratorType.Anchor_MTop:
                             case EDecoratorType.Anchor_Top:
                                 {
                                     if(e.MouseButton.Button == (byte)Bricks.Input.EMouseButton.BUTTON_LEFT)
@@ -862,23 +989,15 @@ namespace EngineNS.UI.Editor
                                         {
                                             var element = mEditor.SelectedElements[i];
                                             var canvas = VisualTreeHelper.GetParent(element);
-                                            var offsetY = offset.Y / canvas.DesignRect.Height;
                                             var min = TtCanvasControl.GetAnchorMin(element);
                                             var max = TtCanvasControl.GetAnchorMax(element);
-                                            var y = MathF.Min(max.Y, MathF.Max(0.0f, (float)(mOriAnchorPoints[i].Y - offsetY)));
+                                            var y = CalculateAnchorTop(offset, canvas.DesignRect.Height, min, max, element, i);
                                             TtCanvasControl.SetAnchorMin(element, new Vector2(min.X, y));
-                                            var realOffsetY = (mOriAnchorPoints[i].Y - y) * canvas.DesignRect.Height;
-                                            var height = mOriAnchorRects[i].W;
-                                            if((max.Y - y) > MathHelper.Epsilon)
-                                            {
-                                                height = max.Y - y - mOriAnchorRects[i].Y - mOriAnchorRects[i].W;
-                                            }
-                                            TtCanvasControl.SetAnchorRectY(element, (float)(mOriAnchorRects[i].Y + realOffsetY));
-                                            TtCanvasControl.SetAnchorRectW(element, height);
                                         }
                                     }
                                 }
                                 break;
+                            case EDecoratorType.Anchor_STopRight:
                             case EDecoratorType.Anchor_TopRight:
                                 {
                                     if(e.MouseButton.Button == (byte)Bricks.Input.EMouseButton.BUTTON_LEFT)
@@ -894,37 +1013,60 @@ namespace EngineNS.UI.Editor
                                             var canvas = VisualTreeHelper.GetParent(element);
                                             var min = TtCanvasControl.GetAnchorMin(element);
                                             var max = TtCanvasControl.GetAnchorMax(element);
-
-                                            var offsetX = offset.X / canvas.DesignRect.Width;
-                                            var x = MathF.Max(min.X, MathF.Min(1.0f, (float)(mOriAnchorPoints[i].X + offsetX)));
-                                            TtCanvasControl.SetAnchorMax(element, new Vector2(x, max.Y));
-                                            var realoffSetX = (mOriAnchorPoints[i].X - x) * canvas.DesiredSize.Width;
-                                            var width = mOriAnchorRects[i].Z;
-                                            if((x - min.X) > MathHelper.Epsilon)
-                                            {
-                                                width = x - min.X - mOriAnchorRects[i].X - mOriAnchorRects[i].Z - realoffSetX;
-                                            }
-                                            TtCanvasControl.SetAnchorRectZ(element, width);
-
-                                            var offsetY = offset.Y / canvas.DesignRect.Height;
-                                            var y = MathF.Min(max.Y, MathF.Max(0.0f, (float)(mOriAnchorPoints[i].Y - offsetY)));
+                                            var y = CalculateAnchorTop(offset, canvas.DesignRect.Height, min, max, element, i);
+                                            var x = CalculateAnchorRight(offset, canvas.DesignRect.Width, min, max, element, i);
                                             TtCanvasControl.SetAnchorMin(element, new Vector2(min.X, y));
-                                            var realOffsetY = (mOriAnchorPoints[i].Y - y) * canvas.DesignRect.Height;
-                                            var height = mOriAnchorRects[i].W;
-                                            if((max.Y - y) > MathHelper.Epsilon)
-                                            {
-                                                height = max.Y - y - mOriAnchorRects[i].Y - mOriAnchorRects[i].W;
-                                            }
-                                            TtCanvasControl.SetAnchorRectY(element, (float)(mOriAnchorRects[i].Y + realOffsetY));
-                                            TtCanvasControl.SetAnchorRectW(element, height);
+                                            TtCanvasControl.SetAnchorMax(element, new Vector2(x, max.Y));
                                         }
                                     }
                                 }
                                 break;
+                            case EDecoratorType.Anchor_MRight:
                             case EDecoratorType.Anchor_Right:
+                                {
+                                    if(e.MouseButton.Button == (byte)Bricks.Input.EMouseButton.BUTTON_LEFT)
+                                    {
+                                        DVector3 pickPos;
+                                        PickPlanePos(e.MouseButton.X, e.MouseButton.Y, mPickPlanePos, mPickPlaneNormal, out pickPos);
+                                        var pos = pickPos - mDecoratorMouseDownOffset;
+                                        var offset = pos - mPickPlanePos;
+
+                                        for(int i=0; i<mEditor.SelectedElements.Count; i++)
+                                        {
+                                            var element = mEditor.SelectedElements[i];
+                                            var canvas = VisualTreeHelper.GetParent(element);
+                                            var min = TtCanvasControl.GetAnchorMin(element);
+                                            var max = TtCanvasControl.GetAnchorMax(element);
+                                            var x = CalculateAnchorRight(offset, canvas.DesignRect.Width, min, max, element, i);
+                                            TtCanvasControl.SetAnchorMax(element, new Vector2(x, max.Y));
+                                        }
+                                    }
+                                }
                                 break;
+                            case EDecoratorType.Anchor_SBottomRight:
                             case EDecoratorType.Anchor_BottomRight:
+                                {
+                                    if(e.MouseButton.Button == (byte)Bricks.Input.EMouseButton.BUTTON_LEFT)
+                                    {
+                                        DVector3 pickPos;
+                                        PickPlanePos(e.MouseButton.X, e.MouseButton.Y, mPickPlanePos, mPickPlaneNormal, out pickPos);
+                                        var pos = pickPos - mDecoratorMouseDownOffset;
+                                        var offset = pos - mPickPlanePos;
+
+                                        for(int i=0; i<mEditor.SelectedElements.Count; i++)
+                                        {
+                                            var element = mEditor.SelectedElements[i];
+                                            var canvas = VisualTreeHelper.GetParent(element);
+                                            var min = TtCanvasControl.GetAnchorMin(element);
+                                            var max = TtCanvasControl.GetAnchorMax(element);
+                                            var x = CalculateAnchorRight(offset, canvas.DesignRect.Width, min, max, element, i);
+                                            var y = CalculateAnchorBottom(offset, canvas.DesignRect.Height, min, max, element, i);
+                                            TtCanvasControl.SetAnchorMax(element, new Vector2(x, y));
+                                        }
+                                    }
+                                }
                                 break;
+                            case EDecoratorType.Anchor_MBottom:
                             case EDecoratorType.Anchor_Bottom:
                                 {
                                     if(e.MouseButton.Button == (byte)Bricks.Input.EMouseButton.BUTTON_LEFT)
@@ -938,44 +1080,82 @@ namespace EngineNS.UI.Editor
                                         {
                                             var element = mEditor.SelectedElements[i];
                                             var canvas = VisualTreeHelper.GetParent(element);
-                                            var offsetY = offset.Y / canvas.DesignRect.Height;
                                             var min = TtCanvasControl.GetAnchorMin(element);
                                             var max = TtCanvasControl.GetAnchorMax(element);
-
-                                            var y = MathF.Max(min.Y, MathF.Min(1.0f, (float)(mOriAnchorPoints[i].W - offsetY)));
+                                            var y = CalculateAnchorBottom(offset, canvas.DesignRect.Height, min, max, element, i);
                                             TtCanvasControl.SetAnchorMax(element, new Vector2(max.X, y));
-                                            var realOffsetY = (mOriAnchorPoints[i].W - y) * canvas.DesignRect.Height;
-                                            var height = mOriAnchorRects[i].W;
-                                            if ((y - min.Y) > MathHelper.Epsilon)
-                                            {
-                                                height = y - min.Y - mOriAnchorRects[i].Y - mOriAnchorRects[i].W - realOffsetY;
-                                            }
-                                            TtCanvasControl.SetAnchorRectW(element, height);
                                         }
                                     }
                                 }
                                 break;
+                            case EDecoratorType.Anchor_SBottomLeft:
                             case EDecoratorType.Anchor_BottomLeft:
-                                break;
-                            case EDecoratorType.Anchor_Left:
-                                break;
-                            case EDecoratorType.Anchor_TopLeft:
-                                break;
-                            case EDecoratorType.Anchor_MTop:
-                                break;
-                            case EDecoratorType.Anchor_MRight:
-                                break;
-                            case EDecoratorType.Anchor_MBottom:
+                                {
+                                    if(e.MouseButton.Button == (byte)Bricks.Input.EMouseButton.BUTTON_LEFT)
+                                    {
+                                        DVector3 pickPos;
+                                        PickPlanePos(e.MouseButton.X, e.MouseButton.Y, mPickPlanePos, mPickPlaneNormal, out pickPos);
+                                        var pos = pickPos - mDecoratorMouseDownOffset;
+                                        var offset = pos - mPickPlanePos;
+
+                                        for(int i=0; i<mEditor.SelectedElements.Count; i++)
+                                        {
+                                            var element = mEditor.SelectedElements[i];
+                                            var canvas = VisualTreeHelper.GetParent(element);
+                                            var min = TtCanvasControl.GetAnchorMin(element);
+                                            var max = TtCanvasControl.GetAnchorMax(element);
+                                            var x = CalculateAnchorLeft(offset, canvas.DesignRect.Width, min, max, element, i);
+                                            var y = CalculateAnchorBottom(offset, canvas.DesignRect.Height, min, max, element, i);
+                                            TtCanvasControl.SetAnchorMin(element, new Vector2(x, min.Y));
+                                            TtCanvasControl.SetAnchorMax(element, new Vector2(max.X, y));
+                                        }
+                                    }
+                                }
                                 break;
                             case EDecoratorType.Anchor_MLeft:
-                                break;
-                            case EDecoratorType.Anchor_STopRight:
-                                break;
-                            case EDecoratorType.Anchor_SBottomRight:
-                                break;
-                            case EDecoratorType.Anchor_SBottomLeft:
+                            case EDecoratorType.Anchor_Left:
+                                {
+                                    if(e.MouseButton.Button == (byte)Bricks.Input.EMouseButton.BUTTON_LEFT)
+                                    {
+                                        DVector3 pickPos;
+                                        PickPlanePos(e.MouseButton.X, e.MouseButton.Y, mPickPlanePos, mPickPlaneNormal, out pickPos);
+                                        var pos = pickPos - mDecoratorMouseDownOffset;
+                                        var offset = pos - mPickPlanePos;
+
+                                        for(int i=0; i<mEditor.SelectedElements.Count; i++)
+                                        {
+                                            var element = mEditor.SelectedElements[i];
+                                            var canvas = VisualTreeHelper.GetParent(element);
+                                            var min = TtCanvasControl.GetAnchorMin(element);
+                                            var max = TtCanvasControl.GetAnchorMax(element);
+                                            var x = CalculateAnchorLeft(offset, canvas.DesignRect.Width, min, max, element, i);
+                                            TtCanvasControl.SetAnchorMin(element, new Vector2(x, min.Y));
+                                        }
+                                    }
+                                }
                                 break;
                             case EDecoratorType.Anchor_STopLeft:
+                            case EDecoratorType.Anchor_TopLeft:
+                                {
+                                    if(e.MouseButton.Button == (byte)Bricks.Input.EMouseButton.BUTTON_LEFT)
+                                    {
+                                        DVector3 pickPos;
+                                        PickPlanePos(e.MouseButton.X, e.MouseButton.Y, mPickPlanePos, mPickPlaneNormal, out pickPos);
+                                        var pos = pickPos - mDecoratorMouseDownOffset;
+                                        var offset = pos - mPickPlanePos;
+
+                                        for(int i=0; i<mEditor.SelectedElements.Count; i++)
+                                        {
+                                            var element = mEditor.SelectedElements[i];
+                                            var canvas = VisualTreeHelper.GetParent(element);
+                                            var min = TtCanvasControl.GetAnchorMin(element);
+                                            var max = TtCanvasControl.GetAnchorMax(element);
+                                            var x = CalculateAnchorLeft(offset, canvas.DesignRect.Width, min, max, element, i);
+                                            var y = CalculateAnchorTop(offset, canvas.DesignRect.Height, min, max, element, i);
+                                            TtCanvasControl.SetAnchorMin(element, new Vector2(x, y));
+                                        }
+                                    }
+                                }
                                 break;
                         }
                     }

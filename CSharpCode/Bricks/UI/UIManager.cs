@@ -218,12 +218,12 @@ namespace EngineNS.UI
                     }
                     xnd.RootNode.AddAttribute(attr);
                 }
-                xnd.SaveXnd(name.Address);
+                xnd.SaveXnd(name.Address + "/" + name.PureName + name.ExtName);
             }
         }
         public TtUIElement Load(RName name)
         {
-            using (var xnd = IO.TtXndHolder.LoadXnd(name.Address))
+            using (var xnd = IO.TtXndHolder.LoadXnd(name.Address + "/" + name.PureName + name.ExtName))
             {
                 if (xnd == null)
                     return null;

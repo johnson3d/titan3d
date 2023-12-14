@@ -547,6 +547,7 @@ namespace EngineNS.UI.Controls
             }
         }
         [Rtti.Meta, AttachedPropertiesSaverAttribute]
+        [Browsable(false)]
         public object AttachedPropertiesSaver
         {
             get => null;

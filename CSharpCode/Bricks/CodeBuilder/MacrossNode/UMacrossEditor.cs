@@ -134,6 +134,9 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
                 tmp.UpdateAMetaReferences(ameta);
                 ameta.SaveAMeta();
             }
+
+            if (!IO.TtFileManager.DirectoryExists(rn.Address))
+                IO.TtFileManager.CreateDirectory(rn.Address);
             
             var xml = new System.Xml.XmlDocument();
             var xmlRoot = xml.CreateElement($"Root", xml.NamespaceURI);
@@ -462,15 +465,21 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
             ImGuiAPI.DockBuilderFinish(id);
         }
 
-        struct STToolButtonData
+        public struct STToolButtonData
         {
             public bool IsMouseDown;
             public bool IsMouseHover;
         }
         STToolButtonData[] mToolBtnDatas = new STToolButtonData[7];
+        public Action<ImDrawList> DrawToolbarAction;
         protected void DrawToolbar()
         {
             var drawList = ImGuiAPI.GetWindowDrawList();
+            if(DrawToolbarAction != null)
+            {
+                DrawToolbarAction.Invoke(drawList);
+                return;
+            }
 
             int toolBarItemIdx = 0;
             var spacing = EGui.UIProxy.StyleConfig.Instance.ToolbarSeparatorThickness + EGui.UIProxy.StyleConfig.Instance.ItemSpacing.X * 2;

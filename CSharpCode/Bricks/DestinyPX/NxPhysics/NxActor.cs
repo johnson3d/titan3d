@@ -64,6 +64,14 @@ namespace EngineNS.NxPhysics
         {
             mCoreObject.SetVelocity(in v);
         }
+        public void SetAngularVelocity(in PxVector3 v)
+        {
+            mCoreObject.SetAngularVelocity(in v);
+        }
+        public void SetInertia(in PxVector3 v)
+        {
+            mCoreObject.SetInertia(in v);
+        }
         public void AddShape(TtSphereShape shape)
         {
             if (Shapes.Contains(shape))

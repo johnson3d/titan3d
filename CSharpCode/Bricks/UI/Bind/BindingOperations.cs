@@ -2,6 +2,7 @@
 //using MathNet.Numerics.Distributions;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Text;
+using NPOI.OpenXmlFormats.Dml;
 using NPOI.SS.Formula.Eval;
 using NPOI.SS.Formula.Functions;
 using Org.BouncyCastle.Asn1.X509;
@@ -599,7 +600,13 @@ namespace EngineNS.UI.Bind
         }
         public override T GetValue<T>(TtBindableProperty bp)
         {
+            if (typeof(T) == typeof(object))
+                return (T)GetObjectValue(bp);
             return GetFinalValue<T>().GetValue<T>();
+        }
+        protected virtual object GetObjectValue(TtBindableProperty bp) 
+        {
+            return null;
         }
         public override void UpdateSource()
         {

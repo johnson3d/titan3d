@@ -286,6 +286,7 @@ namespace EngineNS.UI.Controls
                 WriteFlag(ECoreFlags.IsMouseOver, value);
             }
         }
+        [Browsable(false)]
         public bool IsMouseDirectlyOver
         {
             get => UEngine.Instance.UIManager.IsMouseDirectlyHover(this);
@@ -301,6 +302,7 @@ namespace EngineNS.UI.Controls
                 WriteFlag(ECoreFlags.IsTouchOver, value);
             }
         }
+        [Browsable(false)]
         public bool IsTouchDirectlyOver
         {
             get => UEngine.Instance.UIManager.IsTouchDirectlyHover(this);

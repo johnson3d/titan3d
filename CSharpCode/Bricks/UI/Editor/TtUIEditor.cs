@@ -148,7 +148,27 @@ namespace EngineNS.UI.Editor
         public Vector2 WindowSize = new Vector2(800, 600);
         public Vector2 WindowContentRegionMin, WindowContentRegionMax;
         public EGui.Controls.PropertyGrid.PropertyGrid DetailsGrid = new EGui.Controls.PropertyGrid.PropertyGrid();
+        enum enDrawType : byte
+        {
+            Designer,
+            Macross,
+        }
+        enDrawType mDrawType = enDrawType.Designer;
+
         public unsafe void OnDraw()
+        {
+            switch(mDrawType)
+            {
+                case enDrawType.Macross:
+                    OnDrawMacrossWindow();
+                    break;
+                case enDrawType.Designer:
+                    OnDrawDesignerWindow();
+                    break;
+            }
+        }
+
+        public unsafe void OnDrawDesignerWindow()
         {
             if (Visible == false || UIAsset == null)
                 return;
@@ -185,12 +205,24 @@ namespace EngineNS.UI.Editor
             ImGuiAPI.SetMouseCursor(mMouseCursor);
         }
         bool mIsSimulateMode = false;
+        void Save()
+        {
+            UEngine.Instance.UIManager.Save(AssetName, mUIHost.Children[0]);
+            mMacrossEditor.SaveClassGraph(AssetName);
+            mMacrossEditor.GenerateCode();
+            mMacrossEditor.CompileCode();
+        }
         protected unsafe void DrawToolBar()
         {
             var btSize = Vector2.Zero;
+            if(EGui.UIProxy.CustomButton.ToolButton("Show Graph", in btSize))
+            {
+                mDrawType = enDrawType.Macross;
+            }
+            ImGuiAPI.SameLine(0, -1);
             if (EGui.UIProxy.CustomButton.ToolButton("Save", in btSize))
             {
-                UEngine.Instance.UIManager.Save(AssetName, mUIHost.Children[0]);
+                Save();
                 //Mesh.SaveAssetTo(Mesh.AssetName);
                 //var unused = UEngine.Instance.GfxDevice.MaterialInstanceManager.ReloadMaterialInstance(Mesh.AssetName);
 
@@ -589,6 +621,7 @@ namespace EngineNS.UI.Editor
             await PreviewViewport.Initialize(UEngine.Instance.GfxDevice.SlateApplication, UEngine.Instance.Config.MainRPolicyName, 0, 1);
             PreviewViewport.OnEventAction = OnPreviewViewportEvent;
 
+            InitMacrossEditor();
             await InitializeDecorators();
 
             //DetailsGrid.Target = UIAsset;

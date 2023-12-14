@@ -44,6 +44,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)Editor\EditorDecorator.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Editor\EditorUIHost.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Editor\TtUIEditor.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Editor\TtUIEditor_Macross.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Event\RoutedEvent.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Layout\LayoutQueue.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Layout\UILayoutManager.cs" />
