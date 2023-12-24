@@ -3,6 +3,13 @@
 
 NS_BEGIN
 
+struct FRectanglef_t
+{
+	float X;
+	float Y;
+	float Width;
+	float Height;
+};
 struct FRectanglef
 {
 	float X = 0;

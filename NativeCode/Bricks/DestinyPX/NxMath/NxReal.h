@@ -1405,4 +1405,5 @@ namespace NxMath
 #else
 	#define D2Real(v, NxRealType) NxRealType::ByDouble<v>(v)
 #endif
+	#define I2Real(v, NxRealType) NxRealType::ByInt(v)
 }

@@ -12,6 +12,7 @@ namespace NxPhysics
 		NxScene* CreateScene(const NxSceneDesc* desc);
 		NxRigidBody* CreateRigidBody(const NxRigidBodyDesc* desc);
 		NxSphereShape* CreateSphereShape(const NxSphereShapeDesc* desc);
+		NxBoxShape* CreateBoxShape(const NxBoxShapeDesc* desc);
 	};
 }
 

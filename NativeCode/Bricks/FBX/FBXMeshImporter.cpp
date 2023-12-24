@@ -597,7 +597,7 @@ namespace AssetImportAndExport
 							auto clusterCount = skin->GetClusterCount();
 							for (int clusterIndex = 0; clusterIndex < clusterCount; ++clusterIndex)
 							{
-								bool illegalScale = false;
+								bool unNormalizedScale = false;
 								FbxCluster* cluster = skin->GetCluster(clusterIndex);
 								FbxNode* link = cluster->GetLink();
 								auto boneName = FBXDataConverter::ConvertToStdString(link->GetName());
@@ -609,9 +609,12 @@ namespace AssetImportAndExport
 								auto linkrot = linkTransformMatrix.GetR();
 								auto linktran = linkTransformMatrix.GetT();
 								auto linkscale = linkTransformMatrix.GetS();
-								if (Math::Abs((float)linkscale[0] - 1) > SMALL_EPSILON || Math::Abs((float)linkscale[1] - 1) > SMALL_EPSILON || Math::Abs((float)linkscale[2] - 1) > SMALL_EPSILON)
+								float absLinkScaleX = Math::Abs((float)linkscale[0]);
+								float absLinkScaleY = Math::Abs((float)linkscale[1]);
+								float absLinkScaleZ = Math::Abs((float)linkscale[2]);
+								if (Math::Abs(absLinkScaleX - 1) > SMALL_EPSILON || Math::Abs(absLinkScaleY - 1) > SMALL_EPSILON || Math::Abs(absLinkScaleZ - 1) > SMALL_EPSILON)
 								{
-									illegalScale = true;
+									unNormalizedScale = true;
 								}
 								transformMatrix = cluster->GetTransformMatrix(transformMatrix);
 								auto rot = transformMatrix.GetR();
@@ -619,11 +622,11 @@ namespace AssetImportAndExport
 								auto scale = transformMatrix.GetS();
 								if (Math::Abs((float)scale[0] - 1) > SMALL_EPSILON || Math::Abs((float)scale[1] - 1) > SMALL_EPSILON || Math::Abs((float)scale[2] - 1) > SMALL_EPSILON)
 								{
-									illegalScale = true;
+									unNormalizedScale = true;
 								}
-								if (illegalScale)
+								if (unNormalizedScale)
 								{
-									ASSERT(false);
+									//for now, dont handle this
 								}
 
 								FbxNodeAttribute* attr = link->GetNodeAttribute();

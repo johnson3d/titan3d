@@ -31,7 +31,10 @@ namespace NxPhysics
 	{
 		return CreateAndInitObject<NxSphereShape>(*desc);
 	}
-
+	NxBoxShape* NxDevice::CreateBoxShape(const NxBoxShapeDesc* desc)
+	{
+		return CreateAndInitObject<NxBoxShape>(*desc);
+	}
 	void Test()
 	{
 		auto device = MakeShared(new NxDevice());

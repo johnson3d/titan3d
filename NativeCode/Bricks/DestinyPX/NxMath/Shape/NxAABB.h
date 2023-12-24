@@ -3,15 +3,10 @@
 
 namespace NxMath
 {
-    enum EContainmentType : int
-    {
-        Disjoint,
-        Contains,
-        Intersects
-    };
 	template <typename Type = NxReal<NxFloat32>>
 	struct NxAABB
 	{
+        using RealType = Type;
         using Vector3 = NxVector3<Type>;
 		NxVector3<Type> Minimum;
 		NxVector3<Type> Maximum;
@@ -186,6 +181,25 @@ namespace NxMath
                 box.Minimum = Vector3::Minimize(box1.Minimum, box2.Minimum);
                 box.Maximum = Vector3::Maximize(box1.Maximum, box2.Maximum);
             }
+        }
+        inline Vector3 GetNearestPoint(const Vector3& pos) const
+        {
+            Vector3 result = pos;
+            result.X = result.X > Maximum.X ? Maximum.X : result.X;
+            result.X = result.X < Minimum.X ? Minimum.X : result.X;
+
+            result.Y = result.Y > Maximum.Y ? Maximum.Y : result.Y;
+            result.Y = result.Y < Minimum.Y ? Minimum.Y : result.Y;
+
+            result.Z = result.Z > Maximum.Z ? Maximum.Z : result.Z;
+            result.Z = result.Z < Minimum.Z ? Minimum.Z : result.Z;
+            return result;
+        }
+        inline bool IsOverlap(const Vector3& center, const RealType& radius) const
+        {
+            auto nearest = GetNearestPoint(center);
+            auto dist = Vector3::Distance(center, nearest);
+            return dist <= radius;
         }
         inline static NxAABB<Type> Transform(const NxAABB<Type>& srcBox, const NxTransform<Type>& transform)
         {

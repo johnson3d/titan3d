@@ -82,6 +82,9 @@
     <Filter Include="Bricks\GpuDriven">
       <UniqueIdentifier>{4ff4b2c2-01da-44a4-8e85-80ef6784432f}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Inc\Algorithm">
+      <UniqueIdentifier>{a380c2c2-9579-4a72-909c-2d1ba04de0a1}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <None Include="$(MSBuildThisFileDirectory)Material\TestMaterial.mtl">
@@ -450,6 +453,9 @@
       <Filter>ShadingEnv\Sys\pick</Filter>
     </None>
     <None Include="$(MSBuildThisFileDirectory)Inc\SystemEnumDefine.cginc" />
+    <None Include="$(MSBuildThisFileDirectory)Inc\Algorithm\WaveTask.cginc">
+      <Filter>Inc\Algorithm</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="$(MSBuildThisFileDirectory)Compute\calcrate.compute">

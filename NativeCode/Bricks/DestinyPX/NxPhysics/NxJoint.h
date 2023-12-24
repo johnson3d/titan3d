@@ -41,24 +41,27 @@ namespace NxPhysics
 	class NxContactConstraint : public NxJoint
 	{
 		NxReal mRagrange = NxReal::Zero();
-		NxVector3 Gradient;
 	public:
 		ENGINE_RTTI(NxContactConstraint);
-		NxRbPair mActorPair;
+		NxShapePair mShapePair;
+
+		NxRigidBody* GetRigidBody1() const {
+			return (NxRigidBody*)mShapePair.first->GetActor();
+		}
+		NxRigidBody* GetRigidBody2() const {
+			return (NxRigidBody*)mShapePair.second->GetActor();
+		}
 
 		NxReal mCompliance = NxReal::Zero();//柔度对应于刚度的倒数，单位是米/牛顿
-		NxReal mLimitMin;
-		NxReal mLimitMax;
+		NxVector3 mContactDirection;
+		
 		inline NxReal GetRagrange() const {
 			return mRagrange;
-		}
-		inline NxVector3 GetGradient() const {
-			return Gradient;
 		}
 		virtual void ResetRagrange() override
 		{
 			mRagrange = NxReal::Zero();
-			Gradient = NxVector3::Zero();
+			mContactDirection = NxVector3::Zero();
 		}
 		inline NxVector3 FixDistance(const NxVector3& p0, const NxVector3& p1, const NxReal& limitMin, const NxReal& limitMax)
 		{
@@ -83,15 +86,8 @@ namespace NxPhysics
 				return NxVector3::Zero();
 			}
 		}
+		void BuildConstraint();
 		virtual void SolveConstraint(NxScene* scene, const NxReal& time) override;
-
-		inline NxVector3 GetForce(const NxReal& time)
-		{
-			auto factor = mRagrange / (time * time);
-			return Gradient * factor;
-		}
-
-		static NxReal CalcLimitMin(const NxRigidBody* body0, const NxRigidBody* body1);
 	};
 }
 

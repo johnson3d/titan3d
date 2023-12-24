@@ -28,12 +28,12 @@ PS_INPUT VS_Main(VS_INPUT input1)
 
 	MTL_OUTPUT mtl = (MTL_OUTPUT)0;
 	{
-#ifdef MDFQUEUE_FUNCTION
-		MdfQueueDoModifiers(output, input);
-#endif
-
 #ifdef DO_VS_MATERIAL
 		DO_VS_MATERIAL(output, mtl);
+#endif
+
+#ifdef MDFQUEUE_FUNCTION
+		MdfQueueDoModifiers(output, input);
 #endif
 	}
 

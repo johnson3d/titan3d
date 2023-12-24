@@ -262,6 +262,11 @@ namespace NxMath
 			result.Y = (Type::Abs(value1.Y - value2.Y) < epsilon);
 			return result;
 		}
+		static Type Distance(const ThisType& lh, const ThisType& rh)
+		{
+			auto dir = rh - lh;
+			return dir.Length();
+		}
 		static Type Dot(const ThisType& lh, const ThisType& rh)
 		{
 			return (lh.X * rh.X + lh.Y * rh.Y);
@@ -521,6 +526,11 @@ namespace NxMath
 			result.Y = (Type::Abs(value1.Y - value2.Y) < epsilon);
 			result.Z = (Type::Abs(value1.Z - value2.Z) < epsilon);
 			return result;
+		}
+		static Type Distance(const ThisType& lh, const ThisType& rh)
+		{
+			auto dir = rh - lh;
+			return dir.Length();
 		}
 		static Type Dot(const ThisType& lh, const ThisType& rh)
 		{

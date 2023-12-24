@@ -892,6 +892,13 @@ namespace NxMath
     using NxUInt64 = std::uint64_t;
     using NxInt128 = liulilittle::Int128;
 
+    enum EContainmentType : int
+    {
+        Disjoint,
+        Contains,
+        Intersects
+    };
+
 	template <typename T>
 	struct ElementType { using ResulType = T; };
 	template<typename T, size_t N>

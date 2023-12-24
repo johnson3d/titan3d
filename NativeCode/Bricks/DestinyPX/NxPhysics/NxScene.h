@@ -56,11 +56,11 @@ namespace NxPhysics
 		}
 	private:
 		void Forward(const NxReal& step);
-		void SolvePosition(const NxReal& step);
 		void SolveJoints(const NxReal& step);
 		void CollectRBContacts();
 		void SolveRBContacts(const NxReal& step);
-		void SolveVelocity(const NxReal& step);
+		void UpdatePosition(const NxReal& step);
+		void UpdateVelocity(const NxReal& step);
 	};
 }
 

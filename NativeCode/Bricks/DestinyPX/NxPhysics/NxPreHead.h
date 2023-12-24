@@ -48,6 +48,8 @@ namespace NxPhysics
 	class NxShape;
 	struct NxSphereShapeDesc;
 	class NxSphereShape;
+	struct NxBoxShapeDesc;
+	class NxBoxShape;
 	struct NxSceneDesc;
 	class NxScene;
 	class NxMaterial;
@@ -109,6 +111,7 @@ namespace NxPhysics
 	
 
 	#define D2R(v) D2Real(v, NxReal)
+	#define I2R(v) I2Real(v, NxReal)
 
 	class TR_CLASS()
 		NxEntity : public NxWeakableBase

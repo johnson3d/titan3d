@@ -7,41 +7,29 @@ namespace NxPhysics
 {
 	ENGINE_RTTI_IMPL(NxJoint);
 	ENGINE_RTTI_IMPL(NxContactConstraint);
-	NxReal NxContactConstraint::CalcLimitMin(const NxRigidBody* body0, const NxRigidBody* body1)
+	
+	void NxContactConstraint::BuildConstraint()
 	{
-		if (body0->mShapes.size() == 0 || body1->mShapes.size() == 0)
-		{
-			return NxReal::Zero();
-		}
-		if (body0->mShapes.size() == 1 && body1->mShapes.size() == 1)
-		{
-			const auto& shape0 = body0->mShapes[0];
-			const auto& shape1 = body1->mShapes[0];
-
-			if (shape0->GetRtti() == GetClassObject<NxSphereShape>() &&
-				shape1->GetRtti() == GetClassObject<NxSphereShape>())
-			{
-				return ((NxSphereShape*)shape0.GetPtr())->mDesc.Radius + ((NxSphereShape*)shape1.GetPtr())->mDesc.Radius;
-			}
-		}
-
-		return NxReal::Zero();
+		//mLimitMin = NxContactConstraint::CalcLimitMin(mActorPair.first, mActorPair.second);
+		mCompliance = mShapePair.first->mShapeData.Compliance + mShapePair.second->mShapeData.Compliance;
 	}
 	void NxContactConstraint::SolveConstraint(NxScene* scene, const NxReal& time)
 	{
-		//以下为原理演示，没有任何优化
-		auto& mBody0 = mActorPair.first;
-		auto& mBody1 = mActorPair.second;
-
-		//计算需要修正的距离
-		auto delta = FixDistance(mBody0->GetTryTransform()->Position, mBody1->GetTryTransform()->Position, mLimitMin, mLimitMax);
-		auto len = delta.Length();
-		if (NxReal::EpsilonEqual(len, NxReal::Zero()))
+		NxReal len;
+		NxVector3 dir;
+		//计算需要修正的距离和方向
+		if (NxShape::Contact(mShapePair.first, mShapePair.second, len, dir) == false)
+		{
 			return;
+		}
+		//以下为原理演示，没有任何优化
+		auto mBody0 = (NxRigidBody*)mShapePair.first->GetActor();
+		auto mBody1 = (NxRigidBody*)mShapePair.second->GetActor();
+
 		//计算p0和p1的导数（直线约束，直接计算梯度即可）
 		NxVector3 gradients[2];
-		gradients[0] = delta / len;
-		gradients[1] = -gradients[0];
+		gradients[0] = dir;
+		gradients[1] = -dir;
 		
 		NxReal w[2];
 		w[0] = mBody0->mDesc.InvMass;
@@ -58,10 +46,13 @@ namespace NxPhysics
 		auto delta_p1 = gradients[1] * (w[1] * s);
 
 		//修正位置
-		mBody0->GetTryTransform()->Position += delta_p0;
-		mBody1->GetTryTransform()->Position += delta_p1;
+		mBody0->GetTransform()->Position += delta_p0;
+		mBody1->GetTransform()->Position += delta_p1;
 
-		Gradient = gradients[0];
+		mBody0->OnUpdatedTransform();
+		mBody1->OnUpdatedTransform();
+
+		mContactDirection = gradients[0];
 	}
 }
 
