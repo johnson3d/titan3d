@@ -1,8 +1,10 @@
-﻿using EngineNS.Rtti;
+﻿using EngineNS.EGui.Controls.PropertyGrid;
+using EngineNS.Rtti;
 using EngineNS.UI.Bind;
 using EngineNS.UI.Controls;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Text;
@@ -21,6 +23,68 @@ namespace EngineNS.UI.Event
     //public delegate void TtMouseEventHandler(object sender, TtMouseEventArgs args);
     //public delegate void TtTouchEventHandler(object sender, TtTouchEventArgs args);
     //public delegate void TtDeviceEventHandler(object sender, TtDeviceEventArgs args);
+
+    public class PGRoutedEventHandlerEditorAttribute : PGCustomValueEditorAttribute
+    {
+        EngineNS.EGui.UIProxy.ImageButtonProxy mImageButton;
+        protected override async Task<bool> Initialize_Override()
+        {
+            mImageButton = new EGui.UIProxy.ImageButtonProxy()
+            {
+                ImageFile = RName.GetRName("icons/icons.srv", RName.ERNameType.Engine),
+                Size = new Vector2(0, 0),
+                UVMin = new Vector2(299.0f / 1024, 4.0f / 1024),
+                UVMax = new Vector2(315.0f / 1024, 20.0f / 1024),
+                ImageSize = new Vector2(16, 16),
+                ShowBG = true,
+                ImageColor = 0xFFFFFFFF,
+            };
+            await mImageButton.Initialize();
+            return await base.Initialize_Override();
+        }
+        void ProcessAddMacrossEvent(TtUIElement element, in EditorInfo info)
+        {
+            if (element == null)
+                return;
+
+            var editorUIHost = element.RootUIHost as Editor.EditorUIHost;
+            editorUIHost.HostEditor.AddEventMethod(element, info.HostProperty.Name, info.HostProperty.PropertyType);
+        }
+        public override bool OnDraw(in EditorInfo info, out object newValue)
+        {
+            bool valueChanged = false;
+            newValue = null;
+            var drawList = ImGuiAPI.GetWindowDrawList();
+            var index = ImGuiAPI.TableGetColumnIndex();
+            var width = Math.Min(ImGuiAPI.GetColumnWidth(index) - EGui.UIProxy.StyleConfig.Instance.PGCellPadding.X, 100.0f);
+            mImageButton.Size = new Vector2(width, 0);// ImGuiAPI.GetFrameHeight());
+            ImGuiAPI.PushStyleColor(ImGuiCol_.ImGuiCol_Button, EGui.UIProxy.StyleConfig.Instance.PGCreateButtonBGColor);
+            ImGuiAPI.PushStyleColor(ImGuiCol_.ImGuiCol_ButtonActive, EGui.UIProxy.StyleConfig.Instance.PGCreateButtonBGActiveColor);
+            ImGuiAPI.PushStyleColor(ImGuiCol_.ImGuiCol_ButtonHovered, EGui.UIProxy.StyleConfig.Instance.PGCreateButtonBGHoverColor);
+            if (mImageButton.OnDraw(in drawList, in Support.UAnyPointer.Default))
+            {
+                // crate new event macross method
+                var enumrableInterface = info.ObjectInstance.GetType().GetInterface(typeof(IEnumerable).FullName, false);
+                if(enumrableInterface != null)
+                {
+                    foreach(var ins in (IEnumerable)info.ObjectInstance)
+                    {
+                        var element = ins as TtUIElement;
+                        ProcessAddMacrossEvent(element, info);
+                    }
+                }
+                else
+                {
+                    var element = info.ObjectInstance as TtUIElement;
+                    ProcessAddMacrossEvent(element, info);
+                }
+
+                valueChanged = true;
+            }
+            ImGuiAPI.PopStyleColor(3);
+            return valueChanged;
+        }
+    }
 
     internal struct TtRouteItem
     {
@@ -448,6 +512,34 @@ namespace EngineNS.UI.Event
             }
 
             return null;
+        }
+
+        public static void QueryEvents(UTypeDesc type, Action<UTypeDesc, string, TtRoutedEvent> queryAction, bool includeBaseType = true)
+        {
+            if (queryAction == null)
+                return;
+            if(includeBaseType)
+            {
+                foreach(var e in mEvents)
+                {
+                    if((type == e.Key) || (type.IsSubclassOf(e.Key)))
+                    {
+                        foreach(var d in e.Value)
+                        {
+                            queryAction.Invoke(e.Key, d.Key, d.Value);
+                        }
+                    }
+                }
+            }
+            else
+            {
+                Dictionary<string, TtRoutedEvent> dic;
+                if(mEvents.TryGetValue(type, out dic))
+                {
+                    foreach (var d in dic)
+                        queryAction.Invoke(type, d.Key, d.Value);
+                }
+            }
         }
     }
 }

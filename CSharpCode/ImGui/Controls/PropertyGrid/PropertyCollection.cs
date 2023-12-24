@@ -10,6 +10,7 @@ namespace EngineNS.EGui.Controls.PropertyGrid
     public class CustomPropertyDescriptor : IPooledObject, IObjectPoolBase
     {
         public bool IsAlloc { get; set; } = false;
+        public bool CanCreateNew { get; set; } = true;
         public CustomPropertyDescriptor ParentPropertyDesc;
 
         public object ObjectInstance;   // 包含此属性的对象的值
@@ -155,6 +156,7 @@ namespace EngineNS.EGui.Controls.PropertyGrid
         {
             //Propertys.Add(insType);
             Name = property.Name;
+            CanCreateNew = true;
             mDisplayName = property.DisplayName;
             mPropertyType = Rtti.UTypeDesc.TypeOf(property.PropertyType);
             var atts = new Attribute[property.Attributes.Count];
@@ -187,6 +189,7 @@ namespace EngineNS.EGui.Controls.PropertyGrid
         {
             //Fields.Add(insType);
             Name = field.Name;
+            CanCreateNew = true;
             var disNameAtt = field.GetCustomAttributes(typeof(DisplayNameAttribute), true);
             if (disNameAtt != null && disNameAtt.Length > 0)
                 mDisplayName = ((DisplayNameAttribute)disNameAtt[0]).DisplayName;
@@ -490,6 +493,7 @@ namespace EngineNS.EGui.Controls.PropertyGrid
             //Propertys.Clear();
             //Fields.Clear();
             Name = default;
+            CanCreateNew = true;
             mDisplayName = default;
             mPropertyType = default;
             mIsReadonly = false;
@@ -517,6 +521,7 @@ namespace EngineNS.EGui.Controls.PropertyGrid
             }
             ObjectInstance = proDesc.ObjectInstance;
             Name = proDesc.Name;
+            CanCreateNew = proDesc.CanCreateNew;
             mDisplayName = proDesc.mDisplayName;
             mPropertyType = proDesc.mPropertyType;
             mIsReadonly = proDesc.mIsReadonly;

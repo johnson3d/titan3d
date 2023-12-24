@@ -337,7 +337,7 @@ namespace EngineNS.Graphics.Mesh
                 }
                 else
                 {
-                    System.Diagnostics.Debug.Assert(false);
+                    //System.Diagnostics.Debug.Assert(false);
                 }
             }
             private void CreateMesh(RName name, NxRHI.FMeshPrimitives meshPrimitives, bool hasSkin, AssetImportAndExport.FBX.FBXSkeletonDesc fbxSkeletonDesc)

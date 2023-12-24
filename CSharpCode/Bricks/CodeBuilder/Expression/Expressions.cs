@@ -675,6 +675,16 @@ namespace EngineNS.Bricks.CodeBuilder
         public UVariableDeclaration ReturnValue { get; set; }
         [Rtti.Meta]
         public string MethodName { get; set; } = "Unknow";
+        public Func<UMethodDeclaration, string> GetDisplayNameFunc;
+        public string DisplayName
+        {
+            get
+            {
+                if (GetDisplayNameFunc != null)
+                    return GetDisplayNameFunc.Invoke(this);
+                return MethodName;
+            }
+        }
         [Rtti.Meta]
         public List<UMethodArgumentDeclaration> Arguments { get; set; } = new List<UMethodArgumentDeclaration>();
         [Rtti.Meta]
@@ -988,6 +998,15 @@ namespace EngineNS.Bricks.CodeBuilder
             method.HostClass = null;
             Methods.Remove(method);
         }
+        public UMethodDeclaration FindMethod(string name)
+        {
+            for(int i=0; i<Methods.Count; i++)
+            {
+                if (Methods[i].MethodName == name)
+                    return Methods[i];
+            }
+            return null;
+        }
 
         public UVariableDeclaration FindMember(string name)
         {
@@ -1108,6 +1127,16 @@ namespace EngineNS.Bricks.CodeBuilder
         [Rtti.Meta]
         public EMethodArgumentAttribute OperationType { get; set; } = EMethodArgumentAttribute.Default;
 
+        public UMethodInvokeArgumentExpression()
+        {
+
+        }
+        public UMethodInvokeArgumentExpression(UExpressionBase exp, EMethodArgumentAttribute operation = EMethodArgumentAttribute.Default)
+        {
+            Expression = exp;
+            OperationType = operation;
+        }
+
         public override bool Equals(object obj)
         {
             var iArg = obj as UMethodInvokeArgumentExpression;
@@ -1144,6 +1173,12 @@ namespace EngineNS.Bricks.CodeBuilder
         public bool IsUnsafe { get; set; } = false;
         
         public UMethodInvokeStatement() { }
+        public UMethodInvokeStatement(string methodName, UVariableDeclaration retValue, UExpressionBase host)
+        {
+            MethodName = methodName;
+            Host = host;
+            ReturnValue = retValue;
+        }
         public UMethodInvokeStatement(string methodName, UVariableDeclaration retValue, UExpressionBase host, params UMethodInvokeArgumentExpression[] arguments)
         {
             MethodName = methodName;
@@ -1258,6 +1293,8 @@ namespace EngineNS.Bricks.CodeBuilder
             LessThanOrEqual,
             GreaterThan,
             GreaterThanOrEqual,
+            AddAssignment,
+            SubtractAssignment,
         }
         [Rtti.Meta]
         public EBinaryOperation Operation { get; set; } = EBinaryOperation.Add;
@@ -1717,6 +1754,16 @@ namespace EngineNS.Bricks.CodeBuilder
         [Rtti.Meta]
         public List<UStatementBase> Sequence { get; set; } = new List<UStatementBase>();
 
+        public UExecuteSequenceStatement()
+        {
+
+        }
+        public UExecuteSequenceStatement(params UStatementBase[] statements)
+        {
+            for (int i = 0; i < statements.Length; i++)
+                Sequence.Add(statements[i]);
+        }
+
         public override bool Equals(object obj)
         {
             var val = obj as UExecuteSequenceStatement;
@@ -1742,6 +1789,15 @@ namespace EngineNS.Bricks.CodeBuilder
                 retStr += Sequence[i].ToString() + ",";
             retStr = retStr.TrimEnd(',');
             return retStr;
+        }
+        public UStatementBase FindStatement(UStatementBase statement)
+        {
+            for(int i=0; i<Sequence.Count; i++)
+            {
+                if (Sequence[i].Equals(statement))
+                    return Sequence[i];
+            }
+            return null;
         }
     }
     

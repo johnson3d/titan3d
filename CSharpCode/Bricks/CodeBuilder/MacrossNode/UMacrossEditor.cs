@@ -22,8 +22,13 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
         {
 
         }
+
+        bool mInitialized = false;
         public virtual async System.Threading.Tasks.Task<bool> Initialize()
         {
+            if (mInitialized)
+                return true;
+            mInitialized = true;
             InitializeManMenu();
             await PGMember.Initialize();
             await mUnionNodeConfigRenderer.Initialize();
@@ -433,7 +438,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
             }
         }
 
-        bool mDockInitialized = false;
+        public bool DockInitialized = false;
         protected ImGuiWindowClass mDockKeyClass;
         public ImGuiWindowClass DockKeyClass => mDockKeyClass;
         protected unsafe void ResetDockspace(bool force = false)
@@ -442,13 +447,13 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
             var id = ImGuiAPI.GetID(AssetName.Name + "_Dockspace");
             mDockKeyClass.ClassId = id;
             ImGuiAPI.DockSpace(id, Vector2.Zero, ImGuiDockNodeFlags_.ImGuiDockNodeFlags_None, mDockKeyClass);
-            if (mDockInitialized && !force)
+            if (DockInitialized && !force)
                 return;
             ImGuiAPI.DockBuilderRemoveNode(id);
             ImGuiAPI.DockBuilderAddNode(id, ImGuiDockNodeFlags_.ImGuiDockNodeFlags_None);
             ImGuiAPI.DockBuilderSetNodePos(id, pos);
             ImGuiAPI.DockBuilderSetNodeSize(id, Vector2.One);
-            mDockInitialized = true;
+            DockInitialized = true;
 
             var graphId = id;
             uint leftId = 0;
@@ -535,10 +540,15 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
                 
             EGui.UIProxy.Toolbar.EndToolbar();
         }
+        public IRootForm RootForm = null;
+        public string FormName = null;
         public virtual unsafe void OnDraw()
         {
             //ImGuiAPI.SetNextWindowDockID(DockId, DockCond);
-            if (EGui.UIProxy.DockProxy.BeginMainForm($"Macross:{IO.TtFileManager.GetPureName(AssetName!=null? AssetName.Name :"NoName")}", this, ImGuiWindowFlags_.ImGuiWindowFlags_None| ImGuiWindowFlags_.ImGuiWindowFlags_MenuBar))
+            if (EGui.UIProxy.DockProxy.BeginMainForm(
+                string.IsNullOrEmpty(FormName)? $"Macross:{IO.TtFileManager.GetPureName(AssetName!=null? AssetName.Name :"NoName")}" : FormName,
+                (RootForm != null) ? RootForm : this, 
+                ImGuiWindowFlags_.ImGuiWindowFlags_None| ImGuiWindowFlags_.ImGuiWindowFlags_MenuBar))
             {
                 DrawToolbar();
 
@@ -619,6 +629,18 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
 
             OpenFunctions.Remove(method);
 
+        }
+
+        public void AddMethod(UMethodDeclaration methodDesc)
+        {
+            DefClass.AddMethod(methodDesc);
+
+            var func = UMacrossMethodGraph.NewGraph(this, methodDesc);
+            Methods.Add(func);
+            for (int i = 0; i < OpenFunctions.Count; i++)
+            {
+                OpenFunctions[i].CanvasMenuDirty = true;
+            }
         }
 
         bool mClassViewShow = true;
@@ -735,14 +757,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
                         {
                             MethodName = $"Method_{num}",
                         };
-                        DefClass.AddMethod(f);
-
-                        var func = UMacrossMethodGraph.NewGraph(this, f);
-                        Methods.Add(func);
-                        for(int i=0; i<OpenFunctions.Count; i++)
-                        {
-                            OpenFunctions[i].CanvasMenuDirty = true;
-                        }
+                        AddMethod(f);
                     }
                     if (EGui.UIProxy.MenuItemProxy.BeginMenuItem("Override Method", null, null, in drawList, in menuData, ref mOverrideMenuState))
                     {

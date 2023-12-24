@@ -17,6 +17,12 @@ namespace EngineNS.UI.Editor
             Color = Color.White,
         };
         public TtCanvasBrush DrawBrush => mDrawBrush;
+        TtUIEditor mHostEditor = null;
+        public TtUIEditor HostEditor => mHostEditor;
+        public EditorUIHost(TtUIEditor editor)
+        {
+            mHostEditor = editor;
+        }
 
         protected override void CustomBuildMesh(Canvas.TtCanvasDrawBatch batch)
         {

@@ -607,7 +607,7 @@ namespace EngineNS.EGui.Controls.PropertyGrid
                             //if (propDesc.IsMouseHovered)
                             //    drawList.AddRectFilled(ref mHightlightRowMin, ref mHightlightRowMax, EGui.UIProxy.StyleConfig.Instance.PGItemHoveredColor, 0, ImDrawFlags_.ImDrawFlags_None);
 
-                            if (propertyValue == null && CanNewObject(showTypeDesc))
+                            if (propertyValue == null && propDesc.CanCreateNew && CanNewObject(showTypeDesc))
                             {
                                 object newValue;
                                 var retVal = DrawNameLabel(displayName, flags, ref itemEditorInfo);

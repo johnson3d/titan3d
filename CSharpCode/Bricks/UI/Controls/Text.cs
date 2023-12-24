@@ -7,7 +7,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Text;
 
-namespace EngineNS.Bricks.UI.Controls
+namespace EngineNS.UI.Controls
 {
     public partial class TtText : TtUIElement
     {

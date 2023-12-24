@@ -36,6 +36,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)Controls\UIElement_Bind.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Controls\UIElement_Editor.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Controls\UIElement_Layout.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Controls\UIElement_Macross.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Controls\UIElement_Msg.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Controls\UIElement_Render.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Controls\UIElement_Template.cs" />
@@ -61,6 +62,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)UIHost.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)UIHost_Msg.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)UIHost_Render.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)UIMacross.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)UIManager.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)UIManager_Msg.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)UIManager_Template.cs" />

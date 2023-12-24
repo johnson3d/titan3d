@@ -118,6 +118,19 @@ namespace EngineNS.UI.Controls
             set => WriteInternalFlag(eInternalFlags.HasLogicalChildren, value);
         }
 
+        UInt64 mId = 0;
+        [Rtti.Meta]
+        public UInt64 Id
+        {
+            get
+            {
+                if (mId == 0)
+                    mId = Standart.Hash.xxHash.xxHash64.ComputeHash(Guid.NewGuid().ToByteArray());
+                return mId;
+            }
+            set => mId = value;
+        }
+
         partial void TtUIElementConstructor_Template();
         partial void TtUIElementConstructor_Editor();
         public TtUIElement()
@@ -126,6 +139,8 @@ namespace EngineNS.UI.Controls
             NeverArranged = true;
             TtUIElementConstructor_Template();
             TtUIElementConstructor_Editor();
+
+            
         }
         public TtUIElement(TtContainer parent)
         {
@@ -139,7 +154,7 @@ namespace EngineNS.UI.Controls
         string mName;
         [Bind.BindProperty]
         [Rtti.Meta]
-        public string Name
+        public string Name  // Name需要保证在当前编辑上下文的所有控件中唯一
         {
             get => mName;
             set
@@ -474,7 +489,6 @@ namespace EngineNS.UI.Controls
 
         public virtual void Tick(float elapsedSecond)
         {
-
         }
 
         class AttachedPropertiesSaverAttribute : IO.UCustomSerializerAttribute
@@ -565,6 +579,19 @@ namespace EngineNS.UI.Controls
                 }
             }
             mLoadedAttachedValues.Clear();
+        }
+
+        public virtual TtUIElement FindElement(string name)
+        {
+            if (mName == name)
+                return this;
+            return null;
+        }
+        public virtual TtUIElement FindElement(UInt64 id)
+        {
+            if(mId == id)
+                return this;
+            return null;
         }
     }
 }

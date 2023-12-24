@@ -48,7 +48,7 @@ namespace EngineNS.UI.Editor
                 typeof(GamePlay.UPlacement), mSelectedDecoratorUIHost, DVector3.Zero, Vector3.One, Quaternion.Identity);
             SelectedRect.Parent = null;
 
-            var pointAtHost = new EditorUIHost();
+            var pointAtHost = new EditorUIHost(this);
             pointAtHost.DrawBrush.Color = Color.LightBlue;
             PointAtRect = await TtUINode.AddUINode(PreviewViewport.World, mUINode, new UNodeData(),
                 typeof(GamePlay.UPlacement), pointAtHost, DVector3.Zero, Vector3.One, Quaternion.Identity);

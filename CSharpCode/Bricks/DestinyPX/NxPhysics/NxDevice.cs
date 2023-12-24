@@ -22,6 +22,10 @@ namespace EngineNS.NxPhysics
         {
             return new TtSphereShape(mCoreObject.CreateSphereShape(in desc));
         }
+        public TtBoxShape CreateBoxShape(in EngineNS.NxPhysics.NxBoxShapeDesc desc)
+        {
+            return new TtBoxShape(mCoreObject.CreateBoxShape(in desc));
+        }
     }
 
     public class TtPxSystem : UModule<UEngine>

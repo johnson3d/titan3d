@@ -526,6 +526,12 @@ namespace EngineNS.Bricks.CodeBuilder
                     case UBinaryOperatorExpression.EBinaryOperation.GreaterThanOrEqual:
                         sourceCode += " >= ";
                         break;
+                    case UBinaryOperatorExpression.EBinaryOperation.AddAssignment:
+                        sourceCode += " += ";
+                        break;
+                    case UBinaryOperatorExpression.EBinaryOperation.SubtractAssignment:
+                        sourceCode += " -= ";
+                        break;
                 }
                 var rightGen = data.CodeGen.GetCodeObjectGen(binOpExp.Right.GetType());
                 rightGen.GenCodes(binOpExp.Right, ref sourceCode, ref data);

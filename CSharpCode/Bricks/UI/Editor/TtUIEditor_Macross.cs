@@ -1,5 +1,10 @@
-﻿using System;
+﻿using EngineNS.Bricks.CodeBuilder;
+using EngineNS.Rtti;
+using EngineNS.Thread.Async;
+using EngineNS.UI.Controls;
+using System;
 using System.Collections.Generic;
+using System.Runtime.CompilerServices;
 using System.Text;
 using static EngineNS.Bricks.CodeBuilder.MacrossNode.UMacrossEditor;
 
@@ -7,20 +12,17 @@ namespace EngineNS.UI.Editor
 {
     public partial class TtUIEditor
     {
-        Bricks.CodeBuilder.MacrossNode.UMacrossEditor mMacrossEditor = null;
+        Macross.UMacrossGetter<TtUIMacrossBase> mMacrossGetter;
 
-        void InitMacrossEditor()
+        async System.Threading.Tasks.Task InitMacrossEditor()
         {
-            mMacrossEditor = new Bricks.CodeBuilder.MacrossNode.UMacrossEditor();
-            mMacrossEditor.AssetName = AssetName;
-            mMacrossEditor.DefClass.ClassName = AssetName.PureName;
-            mMacrossEditor.DefClass.Namespace = new Bricks.CodeBuilder.UNamespaceDeclaration(IO.TtFileManager.GetParentPathName(AssetName.Name).TrimEnd('/').Replace('/', '.'));
-            mMacrossEditor.DefClass.SupperClassNames.Add(typeof(Controls.TtUIElement).FullName);
-            mMacrossEditor.SaveClassGraph(AssetName);
-            mMacrossEditor.GenerateCode();
-            mMacrossEditor.CompileCode();
+            await UIAsset.MacrossEditor.Initialize();
+            UIAsset.MacrossEditor.FormName = UIAsset.AssetName.Name;
+            UIAsset.MacrossEditor.RootForm = this;
+            UIAsset.MacrossEditor.LoadClassGraph(AssetName);
+            UIAsset.MacrossEditor.DrawToolbarAction = DrawMacrossToolbar;
 
-            mMacrossEditor.DrawToolbarAction = DrawMacrossToolbar;
+            //mMacrossGetter
         }
         STToolButtonData[] mToolBtnDatas = new STToolButtonData[7];
         void DrawMacrossToolbar(ImDrawList drawList)
@@ -30,10 +32,11 @@ namespace EngineNS.UI.Editor
             EGui.UIProxy.Toolbar.BeginToolbar(in drawList);
 
             if(EGui.UIProxy.ToolbarIconButtonProxy.DrawButton(in drawList,
-                ref mToolBtnDatas[toolBarItemIdx].IsMouseDown, ref mToolBtnDatas[toolBarItemIdx].IsMouseHover, null, "Show Designer"))
+                ref mToolBtnDatas[toolBarItemIdx].IsMouseDown, ref mToolBtnDatas[toolBarItemIdx].IsMouseHover, null, "Show Designer "))
             {
-                mDrawType = enDrawType.Designer;
+                DrawType = enDrawType.Designer;
             }
+            EGui.UIProxy.ToolbarSeparator.DrawSeparator(in drawList, in Support.UAnyPointer.Default);
             toolBarItemIdx++;
             if (EGui.UIProxy.ToolbarIconButtonProxy.DrawButton(in drawList,
                 ref mToolBtnDatas[toolBarItemIdx].IsMouseDown, ref mToolBtnDatas[toolBarItemIdx].IsMouseHover, null, "Save"))
@@ -45,8 +48,8 @@ namespace EngineNS.UI.Editor
             if (EGui.UIProxy.ToolbarIconButtonProxy.DrawButton(in drawList,
                 ref mToolBtnDatas[toolBarItemIdx].IsMouseDown, ref mToolBtnDatas[toolBarItemIdx].IsMouseHover, null, "GenCode", false, -1, 0, spacing))
             {
-                mMacrossEditor.GenerateCode();
-                mMacrossEditor.CompileCode();
+                UIAsset.MacrossEditor.GenerateCode();
+                UIAsset.MacrossEditor.CompileCode();
             }
 
             toolBarItemIdx++;
@@ -64,7 +67,117 @@ namespace EngineNS.UI.Editor
         }
         public void OnDrawMacrossWindow()
         {
-            mMacrossEditor.OnDraw();
+            ImGuiAPI.SetNextWindowDockID(DockId, DockCond);
+            UIAsset.MacrossEditor.OnDraw();
+        }
+        public void AddEventMethod(Controls.TtUIElement element, string name, UTypeDesc eventType)
+        {
+            var elementName = GetValidName(element);
+            if (elementName != element.Name)
+            {
+                element.Name = elementName;
+            }
+            var methodName = element.GetEventMethodName(name);
+            var methodDesc = new UMethodDeclaration();
+            methodDesc.GetDisplayNameFunc = element.GetEventMethodDisplayName;
+            methodDesc.MethodName = methodName;
+            var pams = eventType.GetMethod("Invoke").GetParameters();
+            for(int i=0; i<pams.Length; i++)
+            {
+                methodDesc.Arguments.Add(new UMethodArgumentDeclaration()
+                {
+                    VariableName = pams[i].Name,
+                    VariableType = new UTypeReference(pams[i].ParameterType),
+                });
+            }
+            UIAsset.MacrossEditor.AddMethod(methodDesc);
+
+            var initEvtMethod = UIAsset.MacrossEditor.DefClass.FindMethod("InitializeEvents");
+            if(initEvtMethod == null)
+            {
+                initEvtMethod = new UMethodDeclaration()
+                {
+                    MethodName = "InitializeEvents",
+                    IsOverride = true,
+                };
+                UIAsset.MacrossEditor.DefClass.AddMethod(initEvtMethod);
+            }
+            var varName = $"var_{element.GetType().Name}_{element.Id}";
+            var findElementInvokeStatement = new UMethodInvokeStatement(
+                    "FindElement",
+                    new UVariableDeclaration()
+                    {
+                        VariableName = varName,
+                        VariableType = new UTypeReference(element.GetType()),
+                    },
+                    new UVariableReferenceExpression("HostElement"),
+                    new UMethodInvokeArgumentExpression(new UPrimitiveExpression(element.Id)))
+                    {
+                        ForceCastReturnType = true,
+                    };
+            if(initEvtMethod.MethodBody.FindStatement(findElementInvokeStatement) == null)
+                initEvtMethod.MethodBody.Sequence.Add(findElementInvokeStatement);
+            var ifStatement = new UIfStatement()
+            {
+                Condition = new UBinaryOperatorExpression()
+                {
+                    Left = new UVariableReferenceExpression(varName),
+                    Right = new UNullValueExpression(),
+                    Operation = UBinaryOperatorExpression.EBinaryOperation.NotEquality,
+                },
+                TrueStatement = new UExecuteSequenceStatement(
+                    new UExpressionStatement(
+                        new UBinaryOperatorExpression()
+                        {
+                            Operation = UBinaryOperatorExpression.EBinaryOperation.SubtractAssignment,
+                            Left = new UVariableReferenceExpression()
+                            {
+                                Host = new UVariableReferenceExpression(varName),
+                                VariableName = name,
+                            },
+                            Right = new UVariableReferenceExpression(methodName),
+                        }),
+                    new UExpressionStatement(
+                        new UBinaryOperatorExpression()
+                        {
+                            Operation = UBinaryOperatorExpression.EBinaryOperation.AddAssignment,
+                            Left = new UVariableReferenceExpression()
+                            {
+                                Host = new UVariableReferenceExpression(varName),
+                                VariableName = name,
+                            },
+                            Right = new UVariableReferenceExpression(methodName),
+                        })),
+                };
+            var tagIfStatement = initEvtMethod.MethodBody.FindStatement(ifStatement) as UIfStatement;
+            if (tagIfStatement == null)
+                initEvtMethod.MethodBody.Sequence.Add(ifStatement);
+            else
+            {
+                var seqStatements = tagIfStatement.TrueStatement as UExecuteSequenceStatement;
+                seqStatements.Sequence.Add(new UExpressionStatement(
+                        new UBinaryOperatorExpression()
+                        {
+                            Operation = UBinaryOperatorExpression.EBinaryOperation.SubtractAssignment,
+                            Left = new UVariableReferenceExpression()
+                            {
+                                Host = new UVariableReferenceExpression(varName),
+                                VariableName = name,
+                            },
+                            Right = new UVariableReferenceExpression(methodName),
+                        }));
+                seqStatements.Sequence.Add(new UExpressionStatement(
+                        new UBinaryOperatorExpression()
+                        {
+                            Operation = UBinaryOperatorExpression.EBinaryOperation.AddAssignment,
+                            Left = new UVariableReferenceExpression()
+                            {
+                                Host = new UVariableReferenceExpression(varName),
+                                VariableName = name,
+                            },
+                            Right = new UVariableReferenceExpression(methodName),
+                        }));
+            }
         }
     }
 }

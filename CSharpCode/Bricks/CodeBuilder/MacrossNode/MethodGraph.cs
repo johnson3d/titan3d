@@ -22,6 +22,24 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
     }
     public partial class UMethodStartNode : UNodeBase, IAfterExecNode
     {
+        public override string Label 
+        {
+            get
+            {
+                for(int i=0; i<MethodGraph.MethodDatas.Count; i++)
+                {
+                    if(MethodGraph.MethodDatas[i].StartNode == this)
+                    {
+                        base.Label = MethodGraph.MethodDatas[i].MethodDec.DisplayName;
+                        return base.Label;
+                    }
+                }
+
+                return base.Label;
+            }
+            set => base.Label = value; 
+        }
+
         public PinOut AfterExec { get; set; } = new PinOut();
         string mMethodDecKeyword;
         [Rtti.Meta]
@@ -304,7 +322,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
         }
         public override string ToString()
         {
-            return (MethodDec.IsOverride ? "[O]" : "") + MethodDec.MethodName;
+            return (MethodDec.IsOverride ? "[O]" : "") + MethodDec.DisplayName;
         }
 
         public void OnPreRead(object tagObject, object hostObject, bool fromXml)

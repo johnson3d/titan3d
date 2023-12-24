@@ -77,6 +77,7 @@ namespace EngineNS.EGui.Controls.PropertyGrid
             }
         }
         //public virtual void OnDraw(System.Reflection.PropertyInfo prop, object target, object value, Controls.PropertyGrid.PropertyGrid pg, List<KeyValuePair<object, System.Reflection.PropertyInfo>> callstack)
+        // return value is changed, if the value changed in OnDraw process, then return true, else return false
         public virtual bool OnDraw(in EditorInfo info, out object newValue)
         {
             newValue = default;

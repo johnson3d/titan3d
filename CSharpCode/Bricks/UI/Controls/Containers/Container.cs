@@ -492,7 +492,9 @@ namespace EngineNS.UI.Controls.Containers
                 ar.Write(count);
                 for(int i=0; i<count; i++)
                 {
+                    var offset = SerializerHelper.WriteSkippable(ar);
                     ar.Write(container.mChildren[i]);
+                    SerializerHelper.SureSkippable(ar, offset);
                 }
             }
             public override object Load(IReader ar, object host, string propName)
@@ -503,11 +505,19 @@ namespace EngineNS.UI.Controls.Containers
                 ar.Read(out count);
                 for(int i=0; i<count; i++)
                 {
-                    IO.ISerializer serial;
-                    ar.Read(out serial, host);
-                    var element = serial as TtUIElement;
-                    container.mChildren.Add(element);
-                    element.SetLoadedAttachedValues();
+                    var skipPoint = SerializerHelper.GetSkipOffset(ar);
+                    try
+                    {
+                        IO.ISerializer serial;
+                        ar.Read(out serial, host);
+                        var element = serial as TtUIElement;
+                        container.mChildren.Add(element);
+                        element.SetLoadedAttachedValues();
+                    }
+                    catch(Exception)
+                    {
+                        ar.Seek(skipPoint);
+                    }
                 }
                 return null;
             }
@@ -768,6 +778,37 @@ namespace EngineNS.UI.Controls.Containers
         public virtual void ProcessNewAddChild(TtUIElement element, in Vector2 offset, in Vector2 size)
         {
 
+        }
+
+        public override TtUIElement FindElement(string name)
+        {
+            var retVal = base.FindElement(name);
+            if (retVal != null)
+                return retVal;
+
+            for(int i=0; i<Children.Count; i++)
+            {
+                retVal = Children[i].FindElement(name);
+                if (retVal != null)
+                    return retVal;
+            }
+
+            return null;
+        }
+        public override TtUIElement FindElement(ulong id)
+        {
+            var retVal = base.FindElement(id);
+            if (retVal != null)
+                return retVal;
+
+            for(int i=0; i<Children.Count; i++)
+            {
+                retVal = Children[i].FindElement(id);
+                if (retVal != null)
+                    return retVal;
+            }
+
+            return null;
         }
     }
 }

@@ -4,8 +4,30 @@ using System.Text;
 
 //using EngineNS.Graphics.Canvas;
 
+namespace EngineNS
+{
+    public partial class UEngineConfig
+    {
+        [Rtti.Meta]
+        public Editor.Forms.UMeshPrimitiveEditorConfig MeshPrimitiveEditorConfig
+        {
+            get; set;
+        } = new Editor.Forms.UMeshPrimitiveEditorConfig();
+    }
+}
+
 namespace EngineNS.Editor.Forms
 {
+    public class UMeshPrimitiveEditorConfig : IO.BaseSerializer
+    {
+        public UMeshPrimitiveEditorConfig()
+        {
+            MaterialName = RName.GetRName("material/sysdft.material", RName.ERNameType.Engine);
+            PlaneMaterialName = RName.GetRName("material/whitecolor.uminst", RName.ERNameType.Engine);
+        }
+        public RName MaterialName { get; set; }
+        public RName PlaneMaterialName { get; set; }
+    }
     public class UMeshPrimitiveEditor : Editor.IAssetEditor, ITickable, IRootForm
     {
         public int GetTickOrder()
@@ -89,7 +111,7 @@ namespace EngineNS.Editor.Forms
 
             (viewport as Editor.UPreviewViewport).CameraController.ControlCamera(viewport.RenderPolicy.DefaultCamera);
 
-            var mtl = await UEngine.Instance.GfxDevice.MaterialManager.GetMaterial(UEngine.Instance.Config.DefaultMaterial);
+            var mtl = await UEngine.Instance.GfxDevice.MaterialManager.GetMaterial(UEngine.Instance.Config.MeshPrimitiveEditorConfig.MaterialName);
             var materials = new Graphics.Pipeline.Shader.UMaterial[Mesh.mCoreObject.GetAtomNumber()];
             for (int i = 0; i < materials.Length; i++)
             {
@@ -124,7 +146,7 @@ namespace EngineNS.Editor.Forms
 
                 var PlaneMesh = new Graphics.Mesh.TtMesh();
                 var tMaterials = new Graphics.Pipeline.Shader.UMaterial[1];
-                tMaterials[0] = await UEngine.Instance.GfxDevice.MaterialInstanceManager.GetMaterialInstance(RName.GetRName("material/whitecolor.uminst", RName.ERNameType.Engine));
+                tMaterials[0] = await UEngine.Instance.GfxDevice.MaterialInstanceManager.GetMaterialInstance(UEngine.Instance.Config.MeshPrimitiveEditorConfig.PlaneMaterialName);
                 PlaneMesh.Initialize(box, tMaterials,
                     Rtti.UTypeDescGetter<Graphics.Mesh.UMdfStaticMesh>.TypeDesc);
                 PlaneMeshNode = await GamePlay.Scene.UMeshNode.AddMeshNode(viewport.World, viewport.World.Root, new GamePlay.Scene.UMeshNode.UMeshNodeData(), typeof(GamePlay.UPlacement), PlaneMesh, DVector3.Zero, Vector3.One, Quaternion.Identity);

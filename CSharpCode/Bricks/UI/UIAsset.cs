@@ -1,4 +1,6 @@
-﻿using System;
+﻿using EngineNS.Bricks.CodeBuilder.MacrossNode;
+using EngineNS.UI.Controls.Containers;
+using System;
 using System.Collections.Generic;
 using System.Text;
 
@@ -60,6 +62,20 @@ namespace EngineNS.UI
             ameta.RefAssetRNames.Clear();
 
         }
+        public TtUIHost UIHost = null;
+        UMacrossEditor mMacrossEditor = null;
+        public UMacrossEditor MacrossEditor
+        {
+            get
+            {
+                if (mMacrossEditor == null)
+                {
+                    mMacrossEditor = new UMacrossEditor();
+                    mMacrossEditor.AssetName = AssetName;
+                }
+                return mMacrossEditor;
+            }
+        }
         public void SaveAssetTo(RName name)
         {
             var ameta = this.GetAMeta();
@@ -70,6 +86,24 @@ namespace EngineNS.UI
             }
             UpdateAMetaReferences(ameta);
             ameta.SaveAMeta();
+
+            MacrossEditor.AssetName = name;
+            MacrossEditor.DefClass.ClassName = name.PureName;
+            MacrossEditor.DefClass.Namespace = new Bricks.CodeBuilder.UNamespaceDeclaration(IO.TtFileManager.GetParentPathName(AssetName.Name).TrimEnd('/').Replace('/', '.'));
+            MacrossEditor.DefClass.SupperClassNames.Add(typeof(TtUIMacrossBase).FullName);
+            MacrossEditor.SaveClassGraph(AssetName);
+            MacrossEditor.GenerateCode();
+            MacrossEditor.CompileCode();
+
+            if(UIHost == null)
+            {
+                var canvas = new TtCanvasControl();
+                UEngine.Instance.UIManager.Save(name, canvas);
+            }
+            else
+            {
+                UEngine.Instance.UIManager.Save(name, UIHost.Children[0]);
+            }
         }
         [Rtti.Meta]
         public RName AssetName

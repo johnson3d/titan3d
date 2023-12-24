@@ -1,5 +1,6 @@
 ﻿using EngineNS;
 using EngineNS.EGui;
+using EngineNS.Macross;
 using EngineNS.UI.Controls;
 using System;
 using System.Collections;
@@ -238,6 +239,8 @@ namespace EngineNS.UI
                     try
                     {
                         ar.ReadObject(out element);
+
+                        //UMacrossGetter<TtUIMacrossBase>.NewInstance();
                     }
                     catch(Exception ex)
                     {

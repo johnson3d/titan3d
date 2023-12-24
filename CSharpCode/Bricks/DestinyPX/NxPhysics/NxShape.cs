@@ -42,4 +42,40 @@ namespace EngineNS.NxPhysics
             get => mCoreObject.NativeSuper; 
         }
     }
+    public class TtBoxShape : AuxPtrType<EngineNS.NxPhysics.NxBoxShape>, TtShape
+    {
+        Graphics.Mesh.TtMesh mDebugMesh = null;
+        public unsafe Graphics.Mesh.TtMesh DebugMesh
+        {
+            get
+            {
+                if (mDebugMesh == null)
+                {
+                    mDebugMesh = new Graphics.Mesh.TtMesh();
+                    var clr = ((uint)UEngine.Instance.PxSystem.Random.Next()) | 0xff000000;
+                    Vector3 halfExt = new Vector3();
+                    Vector3 start = -halfExt;
+                    Vector3 size = halfExt * 2.0f;
+                    mCoreObject.mDesc.HalfExtent.ToVector3f(&halfExt);
+                    var geoMesh = Graphics.Mesh.UMeshDataProvider.MakeBox(start.X, start.Y, start.Z,
+                         size.X, size.Y, size.Z, clr).ToMesh();
+                    Graphics.Pipeline.Shader.UMaterial[] materials = new Graphics.Pipeline.Shader.UMaterial[]
+                    {
+                        UEngine.Instance.PxSystem.DebugShapeMaterial,
+                    };
+                    mDebugMesh.Initialize(geoMesh, materials,
+                        Rtti.UTypeDescGetter<Graphics.Mesh.UMdfStaticMesh>.TypeDesc);
+                }
+                return mDebugMesh;
+            }
+        }
+        public TtBoxShape(EngineNS.NxPhysics.NxBoxShape ptr)
+        {
+            mCoreObject = ptr;
+        }
+        public EngineNS.NxPhysics.NxShape NativeShape
+        {
+            get => mCoreObject.NativeSuper;
+        }
+    }
 }

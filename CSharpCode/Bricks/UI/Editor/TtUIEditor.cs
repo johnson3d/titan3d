@@ -8,6 +8,7 @@ using EngineNS.UI.Canvas;
 using EngineNS.UI.Controls;
 using EngineNS.UI.Controls.Containers;
 using Microsoft.VisualBasic;
+using NPOI.SS.Formula.UDF;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -32,7 +33,7 @@ namespace EngineNS.UI.Editor
         public ImGuiCond_ DockCond { get; set; } = ImGuiCond_.ImGuiCond_FirstUseEver;        
         public EngineNS.Editor.UPreviewViewport PreviewViewport = new EngineNS.Editor.UPreviewViewport();
 
-        public EditorUIHost mUIHost = new EditorUIHost();
+        public EditorUIHost mUIHost;
         public TtUINode mUINode;
         public void Dispose()
         {
@@ -45,6 +46,8 @@ namespace EngineNS.UI.Editor
         {
             await DetailsGrid.Initialize();
 
+            if (mUIHost == null)
+                mUIHost = new EditorUIHost(this);
             mUIHost.Name = "UIEditorHost";
             mUIHost.WindowSize = new SizeF(1920, 1080);
 
@@ -154,9 +157,29 @@ namespace EngineNS.UI.Editor
             Macross,
         }
         enDrawType mDrawType = enDrawType.Designer;
+        enDrawType DrawType
+        {
+            get => mDrawType;
+            set
+            {
+                mDrawType = value;
+                switch(mDrawType)
+                {
+                    case enDrawType.Designer:
+                        mDockInitialized = false;
+                        break;
+                    case enDrawType.Macross:
+                        UIAsset.MacrossEditor.DockInitialized = false;
+                        break;
+                }
+            }
+        }
 
         public unsafe void OnDraw()
         {
+            if (Visible == false || UIAsset == null)
+                return;
+
             switch(mDrawType)
             {
                 case enDrawType.Macross:
@@ -170,9 +193,6 @@ namespace EngineNS.UI.Editor
 
         public unsafe void OnDrawDesignerWindow()
         {
-            if (Visible == false || UIAsset == null)
-                return;
-
             var pivot = new Vector2(0);
             ImGuiAPI.SetNextWindowSize(in WindowSize, ImGuiCond_.ImGuiCond_FirstUseEver);
             ImGuiAPI.SetNextWindowDockID(DockId, DockCond);
@@ -208,16 +228,16 @@ namespace EngineNS.UI.Editor
         void Save()
         {
             UEngine.Instance.UIManager.Save(AssetName, mUIHost.Children[0]);
-            mMacrossEditor.SaveClassGraph(AssetName);
-            mMacrossEditor.GenerateCode();
-            mMacrossEditor.CompileCode();
+            UIAsset.MacrossEditor.SaveClassGraph(AssetName);
+            UIAsset.MacrossEditor.GenerateCode();
+            UIAsset.MacrossEditor.CompileCode();
         }
         protected unsafe void DrawToolBar()
         {
             var btSize = Vector2.Zero;
             if(EGui.UIProxy.CustomButton.ToolButton("Show Graph", in btSize))
             {
-                mDrawType = enDrawType.Macross;
+                DrawType = enDrawType.Macross;
             }
             ImGuiAPI.SameLine(0, -1);
             if (EGui.UIProxy.CustomButton.ToolButton("Save", in btSize))
@@ -614,6 +634,7 @@ namespace EngineNS.UI.Editor
             UIAsset = new TtUIAsset();
             UIAsset.AssetName = name;
             //UIAsset.Mesh = await UI.Canvas.TtCanvas.TestCreate();
+            await InitMacrossEditor();
             
             PreviewViewport.PreviewAsset = AssetName;
             PreviewViewport.Title = $"UI:{name}";
@@ -621,7 +642,6 @@ namespace EngineNS.UI.Editor
             await PreviewViewport.Initialize(UEngine.Instance.GfxDevice.SlateApplication, UEngine.Instance.Config.MainRPolicyName, 0, 1);
             PreviewViewport.OnEventAction = OnPreviewViewportEvent;
 
-            InitMacrossEditor();
             await InitializeDecorators();
 
             //DetailsGrid.Target = UIAsset;
@@ -741,6 +761,58 @@ namespace EngineNS.UI.Editor
                 ShowTimeSecond = showTimeInSecond,
             };
             mMessages.Add(data);
+        }
+
+        Support.UBitset mNameIndexBits = new Support.UBitset(512);
+        struct ValidNameData
+        {
+            public Support.UBitset Bits;
+            public TtUIElement Element;
+            public string CheckName;
+            public bool FindEqual;
+        }
+        bool NameIndexBitsSets(TtUIElement element, ref ValidNameData data)
+        {
+            if (element != data.Element && element.Name == data.CheckName)
+                data.FindEqual = true;
+            if(!string.IsNullOrEmpty(element.Name))
+            {
+                var idx = element.Name.LastIndexOf("_");
+                if(idx >= 0)
+                {
+                    UInt32 id;
+                    if (UInt32.TryParse(element.Name.Substring(idx + 1), out id))
+                    {
+                        if(id < data.Bits.BitCount)
+                            data.Bits.SetBit(id);
+                    }
+                }
+            }
+            return false;
+        }
+        string GetValidName(TtUIElement element)
+        {
+            var name = element.Name;
+            if (string.IsNullOrEmpty(name))
+                name = element.GetType().Name;
+            var data = new ValidNameData()
+            {
+                Bits = mNameIndexBits,
+                Element = element,
+                CheckName = name,
+                FindEqual = false,
+            };
+            for (uint i = 0; i < 512; i++)
+                mNameIndexBits.UnsetBit(i);
+            mUIHost.QueryElements(NameIndexBitsSets, ref data);
+            if (!data.FindEqual)
+                return name;
+            for(uint i=0; i<512; i++)
+            {
+                if (!mNameIndexBits.IsSet(i))
+                    return name + "_" + i;
+            }
+            return "";
         }
     }
 }
