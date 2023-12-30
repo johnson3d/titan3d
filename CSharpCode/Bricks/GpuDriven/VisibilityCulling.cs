@@ -260,24 +260,24 @@ namespace EngineNS.Bricks.GpuDriven
             }
 
             var cmd = BasePass.DrawCmdList;
-            cmd.BeginCommand();
-            PrepareCullClusterInfos(cmd.mCoreObject, world, policy.DefaultCamera.VisParameter);
+            using (new NxRHI.TtCmdListScope(cmd))
+            {
+                PrepareCullClusterInfos(cmd.mCoreObject, world, policy.DefaultCamera.VisParameter);
 
-            NxRHI.FBufferWriter bfWriter = new NxRHI.FBufferWriter();
-            bfWriter.Buffer = VisClusters.GpuBuffer.mCoreObject;
-            bfWriter.Offset = 0;
-            bfWriter.Value = 0;
-            cmd.WriteBufferUINT32(1, &bfWriter);
+                NxRHI.FBufferWriter bfWriter = new NxRHI.FBufferWriter();
+                bfWriter.Buffer = VisClusters.GpuBuffer.mCoreObject;
+                bfWriter.Offset = 0;
+                bfWriter.Value = 0;
+                cmd.WriteBufferUINT32(1, &bfWriter);
 
-            // TODO: dispatch x/y/z
-            CullClusterShading.SetDrawcallDispatch(this, policy, CullClusterShadingDrawcall, 1, 1, 1, true);
-            cmd.PushGpuDraw(CullClusterShadingDrawcall);
+                // TODO: dispatch x/y/z
+                CullClusterShading.SetDrawcallDispatch(this, policy, CullClusterShadingDrawcall, 1, 1, 1, true);
+                cmd.PushGpuDraw(CullClusterShadingDrawcall);
 
-            cmd.BeginEvent(Name);
-            cmd.FlushDraws();
-            cmd.EndEvent();
-
-            cmd.EndCommand();
+                cmd.BeginEvent(Name);
+                cmd.FlushDraws();
+                cmd.EndEvent();
+            }
             
             UEngine.Instance.GfxDevice.RenderCmdQueue.QueueCmdlist(cmd);
         }

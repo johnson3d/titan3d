@@ -229,17 +229,18 @@ namespace EngineNS.Graphics.Pipeline.Common.Post
             var dispatchY = MathHelper.Roundup(UpSamplePinOut.Attachement.Height, threadGroupWorkRegionDim);
 
             var cmd = BasePass.DrawCmdList;
-            cmd.BeginCommand();
-            UpSampleShadingEnv.SetDrawcallDispatch(this, policy, UpSampleDrawcall, dispatchX,
+            using (new NxRHI.TtCmdListScope(cmd))
+            {
+                UpSampleShadingEnv.SetDrawcallDispatch(this, policy, UpSampleDrawcall, dispatchX,
                             dispatchY, 1, false);
-            //UpSampleDrawcall.Commit(cmd);
-            cmd.PushGpuDraw(UpSampleDrawcall);
-            RCASShading.SetDrawcallDispatch(this, policy, RCASDrawcall, dispatchX,
-                            dispatchY, 1, false);
-            //RCASDrawcall.Commit(cmd);
-            cmd.PushGpuDraw(RCASDrawcall);
-            cmd.FlushDraws();
-            cmd.EndCommand();
+                //UpSampleDrawcall.Commit(cmd);
+                cmd.PushGpuDraw(UpSampleDrawcall);
+                RCASShading.SetDrawcallDispatch(this, policy, RCASDrawcall, dispatchX,
+                                dispatchY, 1, false);
+                //RCASDrawcall.Commit(cmd);
+                cmd.PushGpuDraw(RCASDrawcall);
+                cmd.FlushDraws();
+            }
             UEngine.Instance.GfxDevice.RenderCmdQueue.QueueCmdlist(cmd);
         }
         private static float ARcpF1(float v)

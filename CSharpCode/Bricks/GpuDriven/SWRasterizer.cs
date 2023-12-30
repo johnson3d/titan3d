@@ -450,26 +450,25 @@ namespace EngineNS.Bricks.GpuDriven
             }
             
             var cmd = BasePass.DrawCmdList;
-            cmd.BeginCommand();
+            using (new NxRHI.TtCmdListScope(cmd))
+            {
+                // get total dispatch param
+                DispatchArgShading.SetDrawcallDispatch(this, policy, DispatchArgShadingDrawcall, 1, 1, 1, true);
+                cmd.PushGpuDraw(DispatchArgShadingDrawcall);
 
-            // get total dispatch param
-            DispatchArgShading.SetDrawcallDispatch(this, policy, DispatchArgShadingDrawcall, 1, 1, 1, true);
-            cmd.PushGpuDraw(DispatchArgShadingDrawcall);
+                // setup rasterizer
+                SetUpRasterizeShading.SetDrawcallDispatch(this, policy, SetUpRasterizeDrawcall, (uint)mShadingStruct.QuarkRTSizeFactor.X, (uint)mShadingStruct.QuarkRTSizeFactor.Y, 1, true);
+                cmd.PushGpuDraw(SetUpRasterizeDrawcall);
 
-            // setup rasterizer
-            SetUpRasterizeShading.SetDrawcallDispatch(this, policy, SetUpRasterizeDrawcall, (uint)mShadingStruct.QuarkRTSizeFactor.X, (uint)mShadingStruct.QuarkRTSizeFactor.Y, 1, true);
-            cmd.PushGpuDraw(SetUpRasterizeDrawcall);
+                // do rasterization
+                //SWRasterizer.SetDrawcallDispatch(this, policy, SWRasterizerDrawcall, 1, 1, 1, false);
+                SWRasterizer.SetDrawcallIndirectDispatch(this, policy, SWRasterizerDrawcall, IndirectArgBuffer.GpuBuffer);
+                cmd.PushGpuDraw(SWRasterizerDrawcall);
 
-            // do rasterization
-            //SWRasterizer.SetDrawcallDispatch(this, policy, SWRasterizerDrawcall, 1, 1, 1, false);
-            SWRasterizer.SetDrawcallIndirectDispatch(this, policy, SWRasterizerDrawcall, IndirectArgBuffer.GpuBuffer);
-            cmd.PushGpuDraw(SWRasterizerDrawcall);
-
-            cmd.BeginEvent(Name);
-            cmd.FlushDraws();
-            cmd.EndEvent();
-
-            cmd.EndCommand();
+                cmd.BeginEvent(Name);
+                cmd.FlushDraws();
+                cmd.EndEvent();
+            }
             UEngine.Instance.GfxDevice.RenderCmdQueue.QueueCmdlist(cmd);
         }
     }

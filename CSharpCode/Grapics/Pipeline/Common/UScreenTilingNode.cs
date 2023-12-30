@@ -186,58 +186,59 @@ namespace EngineNS.Graphics.Pipeline.Common
                 var gpuScene = policy.GetGpuSceneNode();// .FindNode("GpuSceneNode") as Common.UGpuSceneNode;
 
                 var cmd = BasePass.DrawCmdList;
-                cmd.BeginCommand();
-
-                var ConfigCBuffer = policy.GetGpuSceneNode().PerGpuSceneCBuffer;
-                if (ConfigCBuffer != null)
+                using (new NxRHI.TtCmdListScope(cmd))
                 {
-                    var idx = ConfigCBuffer.ShaderBinder.FindField("LightNum");
-                    if (gpuScene != null)
+                    var ConfigCBuffer = policy.GetGpuSceneNode().PerGpuSceneCBuffer;
+                    if (ConfigCBuffer != null)
                     {
-                        var LightNum = gpuScene.PointLights.DataArray.Count;
-                        ConfigCBuffer.SetValue(idx, in LightNum);
-                    }
-                    Vector2ui tile;
-                    tile.X = TileX;
-                    tile.Y = TileY;
-                    idx = ConfigCBuffer.ShaderBinder.FindField("TileNum");
-                    ConfigCBuffer.SetValue(idx, in tile);
-
-                    //ConfigCBuffer.FlushDirty(false);
-                }
-
-                #region Setup
-                {
-                    var srvIdx = SetupTileDataDrawcall.FindBinder(NxRHI.EShaderBindType.SBT_SRV, "DepthBuffer");
-                    if (srvIdx.IsValidPointer)
-                    {
-                        var depth = this.GetAttachBuffer(DepthPinIn);
-                        SetupTileDataDrawcall.BindSrv(srvIdx, depth.Srv);
-                    }
-                    //SetupTileDataDrawcall.Commit(cmd);
-                    cmd.PushGpuDraw(SetupTileDataDrawcall);
-                }
-                #endregion
-
-                #region PushLights
-                {
-                    var srvIdx = PushLightToTileDataDrawcall.FindBinder(NxRHI.EShaderBindType.SBT_SRV, "GpuScene_PointLights");
-                    if (srvIdx.IsValidPointer)
-                    {
-                        var attachBuffer = this.GetAttachBuffer(PointLightsPinIn);
-                        if (attachBuffer.Srv != null)
+                        var idx = ConfigCBuffer.ShaderBinder.FindField("LightNum");
+                        if (gpuScene != null)
                         {
-                            PushLightToTileDataDrawcall.BindSrv(srvIdx, attachBuffer.Srv);
-                            //PushLightToTileDataDrawcall.Commit(cmd);
-                            cmd.PushGpuDraw(PushLightToTileDataDrawcall);
+                            var LightNum = gpuScene.PointLights.DataArray.Count;
+                            ConfigCBuffer.SetValue(idx, in LightNum);
                         }
+                        Vector2ui tile;
+                        tile.X = TileX;
+                        tile.Y = TileY;
+                        idx = ConfigCBuffer.ShaderBinder.FindField("TileNum");
+                        ConfigCBuffer.SetValue(idx, in tile);
+
+                        //ConfigCBuffer.FlushDirty(false);
                     }
 
-                }
-                #endregion
+                    #region Setup
+                    {
+                        var srvIdx = SetupTileDataDrawcall.FindBinder(NxRHI.EShaderBindType.SBT_SRV, "DepthBuffer");
+                        if (srvIdx.IsValidPointer)
+                        {
+                            var depth = this.GetAttachBuffer(DepthPinIn);
+                            SetupTileDataDrawcall.BindSrv(srvIdx, depth.Srv);
+                        }
+                        //SetupTileDataDrawcall.Commit(cmd);
+                        cmd.PushGpuDraw(SetupTileDataDrawcall);
+                    }
+                    #endregion
 
-                cmd.FlushDraws();
-                cmd.EndCommand();
+                    #region PushLights
+                    {
+                        var srvIdx = PushLightToTileDataDrawcall.FindBinder(NxRHI.EShaderBindType.SBT_SRV, "GpuScene_PointLights");
+                        if (srvIdx.IsValidPointer)
+                        {
+                            var attachBuffer = this.GetAttachBuffer(PointLightsPinIn);
+                            if (attachBuffer.Srv != null)
+                            {
+                                PushLightToTileDataDrawcall.BindSrv(srvIdx, attachBuffer.Srv);
+                                //PushLightToTileDataDrawcall.Commit(cmd);
+                                cmd.PushGpuDraw(PushLightToTileDataDrawcall);
+                            }
+                        }
+
+                    }
+                    #endregion
+
+                    cmd.FlushDraws();
+                }
+
                 UEngine.Instance.GfxDevice.RenderCmdQueue.QueueCmdlist(cmd);
             }   
         }

@@ -197,46 +197,46 @@ namespace EngineNS.Graphics.Pipeline.Deferred
 
                 GBuffers?.SetViewportCBuffer(world, policy);
                 
-                LayerBasePass.BeginCommands();
-
-                foreach (var i in policy.VisibleMeshes)
+                using (new TtLayerDrawBuffers.TtLayerDrawBuffersScope(LayerBasePass))
                 {
-                    foreach (var j in i.SubMeshes)
+                    foreach (var i in policy.VisibleMeshes)
                     {
-                        foreach (var k in j.Atoms)
+                        foreach (var j in i.SubMeshes)
                         {
-                            if (k == null || k.Material == null)
-                                continue;
-
-                            var layer = k.Material.RenderLayer;
-                            if (layer == ERenderLayer.RL_Translucent || layer == ERenderLayer.RL_Sky)
+                            foreach (var k in j.Atoms)
                             {
-                                var cmdlist = LayerBasePass.GetCmdList(layer);
-                                var drawcall = k.GetDrawCall(cmdlist.mCoreObject, GBuffers, policy, URenderPolicy.EShadingType.BasePass, this);
-                                if (drawcall != null)
-                                {
-                                    drawcall.BindGBuffer(policy.DefaultCamera, GBuffers);
-                                    //GGizmosBuffers.PerViewportCBuffer = GBuffers.PerViewportCBuffer;
+                                if (k == null || k.Material == null)
+                                    continue;
 
-                                    cmdlist.PushGpuDraw(drawcall);
+                                var layer = k.Material.RenderLayer;
+                                if (layer == ERenderLayer.RL_Translucent || layer == ERenderLayer.RL_Sky)
+                                {
+                                    var cmdlist = LayerBasePass.GetCmdList(layer);
+                                    var drawcall = k.GetDrawCall(cmdlist.mCoreObject, GBuffers, policy, URenderPolicy.EShadingType.BasePass, this);
+                                    if (drawcall != null)
+                                    {
+                                        drawcall.BindGBuffer(policy.DefaultCamera, GBuffers);
+                                        //GGizmosBuffers.PerViewportCBuffer = GBuffers.PerViewportCBuffer;
+
+                                        cmdlist.PushGpuDraw(drawcall);
+                                    }
                                 }
                             }
                         }
                     }
+
+                    var passClears = stackalloc NxRHI.FRenderPassClears[(int)ERenderLayer.RL_Num];
+                    for (int i = 0; i < (int)ERenderLayer.RL_Num; i++)
+                    {
+                        passClears[i].SetDefault();
+                        passClears[i].SetClearColor(0, new Color4f(0, 0, 0, 0));
+                        passClears[i].ClearFlags = 0;
+                    }
+
+                    GBuffers.BuildFrameBuffers(policy);
+                    LayerBasePass.BuildRenderPass(policy, in GBuffers.Viewport, passClears, (int)ERenderLayer.RL_Num, GBuffers, GBuffers, "Forword:");
                 }
 
-                var passClears = stackalloc NxRHI.FRenderPassClears[(int)ERenderLayer.RL_Num];
-                for (int i = 0; i < (int)ERenderLayer.RL_Num; i++)
-                {
-                    passClears[i].SetDefault();
-                    passClears[i].SetClearColor(0, new Color4f(0, 0, 0, 0));
-                    passClears[i].ClearFlags = 0;
-                }
-
-                GBuffers.BuildFrameBuffers(policy);
-                LayerBasePass.BuildRenderPass(policy, in GBuffers.Viewport, passClears, (int)ERenderLayer.RL_Num, GBuffers, GBuffers, "Forword:");
-
-                LayerBasePass.EndCommands();
                 LayerBasePass.ExecuteCommands();
             }   
         }
@@ -404,53 +404,53 @@ namespace EngineNS.Graphics.Pipeline.Deferred
 
                 GBuffers?.SetViewportCBuffer(world, policy);
 
-                LayerBasePass.BeginCommands();
-
-                foreach (var i in policy.VisibleMeshes)
+                using (new TtLayerDrawBuffers.TtLayerDrawBuffersScope(LayerBasePass))
                 {
-                    foreach(var j in i.SubMeshes)
+                    foreach (var i in policy.VisibleMeshes)
                     {
-                        if (j == null)
-                            continue;
-                        foreach (var k in j.Atoms)
+                        foreach (var j in i.SubMeshes)
                         {
-                            if (k == null)
+                            if (j == null)
                                 continue;
-
-                            if (k.Material == null)
-                                continue;
-                            var layer = k.Material.RenderLayer;
-                            if (layer == ERenderLayer.RL_PostOpaque || layer == ERenderLayer.RL_PostTranslucent
-                                || layer == ERenderLayer.RL_TranslucentGizmos || layer == ERenderLayer.RL_Gizmos)
+                            foreach (var k in j.Atoms)
                             {
-                                var cmdlist = LayerBasePass.GetCmdList(layer);
-                                var drawcall = k.GetDrawCall(cmdlist.mCoreObject, GBuffers, policy, URenderPolicy.EShadingType.BasePass, this);
-                                if (drawcall != null)
-                                {
-                                    drawcall.BindGBuffer(policy.DefaultCamera, GBuffers);
-                                    //GGizmosBuffers.PerViewportCBuffer = GBuffers.PerViewportCBuffer;
+                                if (k == null)
+                                    continue;
 
-                                    cmdlist.PushGpuDraw(drawcall);
+                                if (k.Material == null)
+                                    continue;
+                                var layer = k.Material.RenderLayer;
+                                if (layer == ERenderLayer.RL_PostOpaque || layer == ERenderLayer.RL_PostTranslucent
+                                    || layer == ERenderLayer.RL_TranslucentGizmos || layer == ERenderLayer.RL_Gizmos)
+                                {
+                                    var cmdlist = LayerBasePass.GetCmdList(layer);
+                                    var drawcall = k.GetDrawCall(cmdlist.mCoreObject, GBuffers, policy, URenderPolicy.EShadingType.BasePass, this);
+                                    if (drawcall != null)
+                                    {
+                                        drawcall.BindGBuffer(policy.DefaultCamera, GBuffers);
+                                        //GGizmosBuffers.PerViewportCBuffer = GBuffers.PerViewportCBuffer;
+
+                                        cmdlist.PushGpuDraw(drawcall);
+                                    }
                                 }
                             }
                         }
                     }
+
+                    var passClears = stackalloc NxRHI.FRenderPassClears[(int)ERenderLayer.RL_Num];
+                    for (int i = 0; i < (int)ERenderLayer.RL_Num; i++)
+                    {
+                        passClears[i].SetDefault();
+                        passClears[i].SetClearColor(0, new Color4f(0, 0, 0, 0));
+                        passClears[i].ClearFlags = 0;
+                    }
+                    passClears[(int)ERenderLayer.RL_Gizmos].ClearFlags = NxRHI.ERenderPassClearFlags.CLEAR_DEPTH;
+
+                    WithDepthGBuffers.BuildFrameBuffers(policy);
+                    GBuffers.BuildFrameBuffers(policy);
+                    LayerBasePass.BuildRenderPass(policy, in GBuffers.Viewport, passClears, (int)ERenderLayer.RL_Num, WithDepthGBuffers, GBuffers, "Gizmos:");
                 }
 
-                var passClears = stackalloc NxRHI.FRenderPassClears[(int)ERenderLayer.RL_Num];
-                for (int i = 0; i < (int)ERenderLayer.RL_Num; i++)
-                {
-                    passClears[i].SetDefault();
-                    passClears[i].SetClearColor(0, new Color4f(0, 0, 0, 0));
-                    passClears[i].ClearFlags = 0;
-                }
-                passClears[(int)ERenderLayer.RL_Gizmos].ClearFlags = NxRHI.ERenderPassClearFlags.CLEAR_DEPTH;
-
-                WithDepthGBuffers.BuildFrameBuffers(policy);
-                GBuffers.BuildFrameBuffers(policy);
-                LayerBasePass.BuildRenderPass(policy, in GBuffers.Viewport, passClears, (int)ERenderLayer.RL_Num, WithDepthGBuffers, GBuffers, "Gizmos:");
-                
-                LayerBasePass.EndCommands();
                 LayerBasePass.ExecuteCommands();
             }
         }

@@ -97,40 +97,40 @@ namespace EngineNS.Graphics.Pipeline.Common
             using (new Profiler.TimeScopeHelper(ScopeTick))
             {
                 var cmdlist = BasePass.DrawCmdList;
-                cmdlist.BeginCommand();
-
-                if(UEngine.Instance.UIManager.ScreenSpaceUIHost != null)
+                using (new NxRHI.TtCmdListScope(cmdlist))
                 {
-                    var host = UEngine.Instance.UIManager.ScreenSpaceUIHost;
-                    host.UpdateCameraOffset(world);
-                    foreach (var i in host.DrawMesh.SubMeshes)
+                    if (UEngine.Instance.UIManager.ScreenSpaceUIHost != null)
                     {
-                        foreach (var j in i.Atoms)
+                        var host = UEngine.Instance.UIManager.ScreenSpaceUIHost;
+                        host.UpdateCameraOffset(world);
+                        foreach (var i in host.DrawMesh.SubMeshes)
                         {
-                            var drawCall = j.GetDrawCall(cmdlist.mCoreObject, GBuffers, ScreenDrawPolicy, Graphics.Pipeline.URenderPolicy.EShadingType.BasePass, this);
-                            if (drawCall == null)
-                                continue;
-                            drawCall.TagObject = this;
-                            drawCall.BindCBuffer(drawCall.Effect.BindIndexer.cbPerViewport, GBuffers.PerViewportCBuffer);
-                            drawCall.BindCBuffer(drawCall.Effect.BindIndexer.cbPerCamera, policy.DefaultCamera.PerCameraCBuffer);
-                            cmdlist.PushGpuDraw(drawCall);
+                            foreach (var j in i.Atoms)
+                            {
+                                var drawCall = j.GetDrawCall(cmdlist.mCoreObject, GBuffers, ScreenDrawPolicy, Graphics.Pipeline.URenderPolicy.EShadingType.BasePass, this);
+                                if (drawCall == null)
+                                    continue;
+                                drawCall.TagObject = this;
+                                drawCall.BindCBuffer(drawCall.Effect.BindIndexer.cbPerViewport, GBuffers.PerViewportCBuffer);
+                                drawCall.BindCBuffer(drawCall.Effect.BindIndexer.cbPerCamera, policy.DefaultCamera.PerCameraCBuffer);
+                                cmdlist.PushGpuDraw(drawCall);
+                            }
                         }
+                    }
+
+                    {
+                        cmdlist.SetViewport(in GBuffers.Viewport);
+                        var passClears = new NxRHI.FRenderPassClears();
+                        passClears.SetDefault();
+                        passClears.SetClearColor(0, new Color4f(0, 0, 0, 0));
+                        passClears.ClearFlags = ERenderPassClearFlags.CLEAR_NONE;
+                        GBuffers.BuildFrameBuffers(policy);
+                        cmdlist.BeginPass(GBuffers.FrameBuffers, in passClears, DebugName);
+                        cmdlist.FlushDraws();
+                        cmdlist.EndPass();
                     }
                 }
 
-                {
-                    cmdlist.SetViewport(in GBuffers.Viewport);
-                    var passClears = new NxRHI.FRenderPassClears();
-                    passClears.SetDefault();
-                    passClears.SetClearColor(0, new Color4f(0, 0, 0, 0));
-                    passClears.ClearFlags = ERenderPassClearFlags.CLEAR_NONE;
-                    GBuffers.BuildFrameBuffers(policy);
-                    cmdlist.BeginPass(GBuffers.FrameBuffers, in passClears, DebugName);
-                    cmdlist.FlushDraws();
-                    cmdlist.EndPass();
-                }
-
-                cmdlist.EndCommand();
                 UEngine.Instance.GfxDevice.RenderCmdQueue.QueueCmdlist(cmdlist);
             }
         }

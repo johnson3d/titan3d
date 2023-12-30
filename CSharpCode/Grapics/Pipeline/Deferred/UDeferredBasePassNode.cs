@@ -184,86 +184,86 @@ namespace EngineNS.Graphics.Pipeline.Deferred
         {
             using (new Profiler.TimeScopeHelper(ScopeTick))
             {
-                BasePass.DrawCmdList.BeginCommand();
-                BackgroundPass.DrawCmdList.BeginCommand();
-#if true
-                using (new Profiler.TimeScopeHelper(ScopePushGpuDraw))
+                using (new NxRHI.TtCmdListScope(BasePass.DrawCmdList))
+                using (new NxRHI.TtCmdListScope(BackgroundPass.DrawCmdList))
                 {
-                    //BasePass.DrawCmdList.SetViewport(GBuffers.ViewPort.mCoreObject);
-                    foreach (var i in policy.VisibleMeshes)
+#if true
+                    using (new Profiler.TimeScopeHelper(ScopePushGpuDraw))
                     {
-                        foreach (var j in i.SubMeshes)
+                        //BasePass.DrawCmdList.SetViewport(GBuffers.ViewPort.mCoreObject);
+                        foreach (var i in policy.VisibleMeshes)
                         {
-                            foreach (var k in j.Atoms)
+                            foreach (var j in i.SubMeshes)
                             {
-                                if (k == null || k.Material == null)
-                                    continue;
-
-                                var layer = k.Material.RenderLayer;
-                                if (layer == ERenderLayer.RL_Background)
+                                foreach (var k in j.Atoms)
                                 {
-                                    var cmd = BackgroundPass.DrawCmdList;
-                                    var drawcall = k.GetDrawCall(cmd.mCoreObject, GBuffers, policy, URenderPolicy.EShadingType.BasePass, this);
-                                    if (drawcall != null)
-                                    {
-                                        drawcall.BindGBuffer(policy.DefaultCamera, GBuffers);
+                                    if (k == null || k.Material == null)
+                                        continue;
 
-                                        cmd.PushGpuDraw(drawcall);
+                                    var layer = k.Material.RenderLayer;
+                                    if (layer == ERenderLayer.RL_Background)
+                                    {
+                                        var cmd = BackgroundPass.DrawCmdList;
+                                        var drawcall = k.GetDrawCall(cmd.mCoreObject, GBuffers, policy, URenderPolicy.EShadingType.BasePass, this);
+                                        if (drawcall != null)
+                                        {
+                                            drawcall.BindGBuffer(policy.DefaultCamera, GBuffers);
+
+                                            cmd.PushGpuDraw(drawcall);
+                                        }
                                     }
-                                }
-                                else if (layer == ERenderLayer.RL_Opaque)
-                                {
-                                    var cmd = BasePass.DrawCmdList;
-                                    var drawcall = k.GetDrawCall(cmd.mCoreObject, GBuffers, policy, URenderPolicy.EShadingType.BasePass, this);
-                                    if (drawcall != null)
+                                    else if (layer == ERenderLayer.RL_Opaque)
                                     {
-                                        drawcall.BindGBuffer(policy.DefaultCamera, GBuffers);
+                                        var cmd = BasePass.DrawCmdList;
+                                        var drawcall = k.GetDrawCall(cmd.mCoreObject, GBuffers, policy, URenderPolicy.EShadingType.BasePass, this);
+                                        if (drawcall != null)
+                                        {
+                                            drawcall.BindGBuffer(policy.DefaultCamera, GBuffers);
 
-                                        cmd.PushGpuDraw(drawcall);
+                                            cmd.PushGpuDraw(drawcall);
+                                        }
                                     }
                                 }
                             }
                         }
                     }
-                }
 #endif
-                var bgCmdlist = BackgroundPass.DrawCmdList;
-                var cmdlist = BasePass.DrawCmdList;
-                var passClears = new NxRHI.FRenderPassClears();
-                passClears.SetDefault();
-                passClears.SetClearColor(0, new Color4f(1, 0, 0, 0));
-                passClears.SetClearColor(1, new Color4f(1, 0, 0, 0));
-                passClears.SetClearColor(2, new Color4f(1, 0, 0, 0));
-                if (Rt3PinOut.Attachement.Format == EPixelFormat.PXF_R16G16_FLOAT)
-                    passClears.SetClearColor(3, new Color4f(0, 0, 0, 0));
-                else
-                    passClears.SetClearColor(3, new Color4f(0, 0.5f, 0.5f, 0));
+                    var bgCmdlist = BackgroundPass.DrawCmdList;
+                    var cmdlist = BasePass.DrawCmdList;
+                    var passClears = new NxRHI.FRenderPassClears();
+                    passClears.SetDefault();
+                    passClears.SetClearColor(0, new Color4f(1, 0, 0, 0));
+                    passClears.SetClearColor(1, new Color4f(1, 0, 0, 0));
+                    passClears.SetClearColor(2, new Color4f(1, 0, 0, 0));
+                    if (Rt3PinOut.Attachement.Format == EPixelFormat.PXF_R16G16_FLOAT)
+                        passClears.SetClearColor(3, new Color4f(0, 0, 0, 0));
+                    else
+                        passClears.SetClearColor(3, new Color4f(0, 0.5f, 0.5f, 0));
 
-                GBuffers.BuildFrameBuffers(policy);
+                    GBuffers.BuildFrameBuffers(policy);
 
-                {
-                    bgCmdlist.SetViewport(in GBuffers.Viewport);
-                    bgCmdlist.BeginPass(GBuffers.FrameBuffers, in passClears, ERenderLayer.RL_Background.ToString());
-                    
-                    bgCmdlist.FlushDraws();
-                    
-                    bgCmdlist.EndPass();
-                    bgCmdlist.EndCommand();
+                    {
+                        bgCmdlist.SetViewport(in GBuffers.Viewport);
+                        bgCmdlist.BeginPass(GBuffers.FrameBuffers, in passClears, ERenderLayer.RL_Background.ToString());
+
+                        bgCmdlist.FlushDraws();
+
+                        bgCmdlist.EndPass();
+                    }
+
+                    {
+                        cmdlist.SetViewport(in GBuffers.Viewport);
+                        passClears.ClearFlags = (NxRHI.ERenderPassClearFlags)0;
+                        cmdlist.BeginPass(GBuffers.FrameBuffers, in passClears, ERenderLayer.RL_Opaque.ToString());
+
+                        cmdlist.FlushDraws();
+
+                        cmdlist.EndPass();
+                    }
                 }
 
-                {
-                    cmdlist.SetViewport(in GBuffers.Viewport);
-                    passClears.ClearFlags = (NxRHI.ERenderPassClearFlags)0;
-                    cmdlist.BeginPass(GBuffers.FrameBuffers, in passClears, ERenderLayer.RL_Opaque.ToString());
-
-                    cmdlist.FlushDraws();
-                    
-                    cmdlist.EndPass();
-                    cmdlist.EndCommand();
-                }
-
-                UEngine.Instance.GfxDevice.RenderCmdQueue.QueueCmdlist(bgCmdlist, "DSNodeBackground");
-                UEngine.Instance.GfxDevice.RenderCmdQueue.QueueCmdlist(cmdlist, "DSNodeBase");
+                UEngine.Instance.GfxDevice.RenderCmdQueue.QueueCmdlist(BackgroundPass.DrawCmdList, "DSNodeBackground");
+                UEngine.Instance.GfxDevice.RenderCmdQueue.QueueCmdlist(BasePass.DrawCmdList, "DSNodeBase");
             }
         }
         public override void TickSync(URenderPolicy policy)

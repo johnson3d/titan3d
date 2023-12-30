@@ -478,73 +478,75 @@ namespace EngineNS.Graphics.Pipeline.Shadow
                     CSMPass[CsmIdx].SwapBuffer();
 
                     var cmdlist = CSMPass[CsmIdx].DrawCmdList;
-                    cmdlist.BeginCommand();
-                    using (new Profiler.TimeScopeHelper(ScopePushGpuDraw))
+                    using (new NxRHI.TtCmdListScope(cmdlist))
                     {
-                        foreach (var i in mVisParameter.VisibleMeshes)
+                        using (new Profiler.TimeScopeHelper(ScopePushGpuDraw))
                         {
-                            if (i.IsCastShadow == false)
-                                continue;
-                            foreach (var j in i.SubMeshes)
+                            foreach (var i in mVisParameter.VisibleMeshes)
                             {
-                                foreach (var k in j.Atoms)
+                                if (i.IsCastShadow == false)
+                                    continue;
+                                foreach (var j in i.SubMeshes)
                                 {
-                                    var drawcall = k.GetDrawCall(cmdlist.mCoreObject, GBuffersArray[CsmIdx], policy, URenderPolicy.EShadingType.DepthPass, this);
-
-                                    if (drawcall != null)
+                                    foreach (var k in j.Atoms)
                                     {
-                                        drawcall.BindGBuffer(mShadowCameraArray[CsmIdx], GBuffersArray[CsmIdx]);
+                                        var drawcall = k.GetDrawCall(cmdlist.mCoreObject, GBuffersArray[CsmIdx], policy, URenderPolicy.EShadingType.DepthPass, this);
 
-                                        cmdlist.PushGpuDraw(drawcall);
+                                        if (drawcall != null)
+                                        {
+                                            drawcall.BindGBuffer(mShadowCameraArray[CsmIdx], GBuffersArray[CsmIdx]);
+
+                                            cmdlist.PushGpuDraw(drawcall);
+                                        }
                                     }
                                 }
                             }
                         }
+
+                        {
+                            FViewPort Viewport = new FViewPort();
+                            Viewport.MinDepth = GBuffersArray[CsmIdx].Viewport.MinDepth;
+                            Viewport.MaxDepth = GBuffersArray[CsmIdx].Viewport.MaxDepth;
+                            Viewport.TopLeftX = GBuffersArray[CsmIdx].Viewport.TopLeftX + (GBuffersArray[CsmIdx].Viewport.Width * CsmIdx);
+                            Viewport.TopLeftY = GBuffersArray[CsmIdx].Viewport.TopLeftY;
+
+                            Viewport.Width = (GBuffersArray[CsmIdx].Viewport.Width);// GBuffers.Viewport.Width;
+                            Viewport.Height = GBuffersArray[CsmIdx].Viewport.Height;
+
+                            cmdlist.SetViewport(in Viewport);
+
+                            var passClear = new NxRHI.FRenderPassClears();
+                            //if (CsmIdx == 0)
+                            {
+                                passClear.SetDefault();
+                                passClear.SetClearColor(0, new Color4f(1, 0, 0, 0));
+                            }
+
+                            GBuffersArray[CsmIdx].BuildFrameBuffers(policy);
+                            string PassName = "ShadowDepth";
+                            if (CsmIdx == 1)
+                            {
+                                PassName = "ShadowDepth1";
+                            }
+                            else if (CsmIdx == 2)
+                            {
+                                PassName = "ShadowDepth2";
+                            }
+                            else if (CsmIdx == 3)
+                            {
+                                PassName = "ShadowDepth3";
+                            }
+                            cmdlist.BeginPass(GBuffersArray[CsmIdx].FrameBuffers, in passClear, PassName);
+                            //if (bClear)
+                            //    cmdlist.BeginRenderPass(policy, GBuffers, in passClear, "ShadowDepth");
+                            //else
+                            //    cmdlist.BeginRenderPass(policy, GBuffers, "ShadowDepth");
+                            cmdlist.FlushDraws();
+                            cmdlist.EndPass();
+                        }
+
                     }
 
-                    {
-                        FViewPort Viewport = new FViewPort();
-                        Viewport.MinDepth = GBuffersArray[CsmIdx].Viewport.MinDepth;
-                        Viewport.MaxDepth = GBuffersArray[CsmIdx].Viewport.MaxDepth;
-                        Viewport.TopLeftX = GBuffersArray[CsmIdx].Viewport.TopLeftX + (GBuffersArray[CsmIdx].Viewport.Width * CsmIdx);
-                        Viewport.TopLeftY = GBuffersArray[CsmIdx].Viewport.TopLeftY;
-
-                        Viewport.Width = (GBuffersArray[CsmIdx].Viewport.Width);// GBuffers.Viewport.Width;
-                        Viewport.Height = GBuffersArray[CsmIdx].Viewport.Height;
-
-                        cmdlist.SetViewport(in Viewport);
-
-                        var passClear = new NxRHI.FRenderPassClears();
-                        //if (CsmIdx == 0)
-                        {
-                            passClear.SetDefault();
-                            passClear.SetClearColor(0, new Color4f(1, 0, 0, 0));
-                        }
-
-                        GBuffersArray[CsmIdx].BuildFrameBuffers(policy);
-                        string PassName = "ShadowDepth";
-                        if (CsmIdx == 1)
-                        {
-                            PassName = "ShadowDepth1";
-                        }
-                        else if (CsmIdx == 2)
-                        {
-                            PassName = "ShadowDepth2";
-                        }
-                        else if (CsmIdx == 3)
-                        {
-                            PassName = "ShadowDepth3";
-                        }
-                        cmdlist.BeginPass(GBuffersArray[CsmIdx].FrameBuffers, in passClear, PassName);
-                        //if (bClear)
-                        //    cmdlist.BeginRenderPass(policy, GBuffers, in passClear, "ShadowDepth");
-                        //else
-                        //    cmdlist.BeginRenderPass(policy, GBuffers, "ShadowDepth");
-                        cmdlist.FlushDraws();
-                        cmdlist.EndPass();
-                    }
-
-                    cmdlist.EndCommand();
                     UEngine.Instance.GfxDevice.RenderCmdQueue.QueueCmdlist(cmdlist);
                 }
 

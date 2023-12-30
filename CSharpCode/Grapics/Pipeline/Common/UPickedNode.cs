@@ -111,43 +111,44 @@ namespace EngineNS.Graphics.Pipeline.Common
                     return;
                 }
                 var cmdlist = BasePass.DrawCmdList;
-                cmdlist.BeginCommand();
-
-                foreach (var i in PickedManager.PickedProxies)
+                using (new NxRHI.TtCmdListScope(cmdlist))
                 {
-                    i.GetHitProxyDrawMesh(mPickedMeshes);
-                }
-                foreach (var mesh in mPickedMeshes)
-                {
-                    foreach (var i in mesh.SubMeshes)
+                    foreach (var i in PickedManager.PickedProxies)
                     {
-                        foreach (var k in i.Atoms)
+                        i.GetHitProxyDrawMesh(mPickedMeshes);
+                    }
+                    foreach (var mesh in mPickedMeshes)
+                    {
+                        foreach (var i in mesh.SubMeshes)
                         {
-                            var drawcall = k.GetDrawCall(cmdlist.mCoreObject, PickedBuffer, policy, Graphics.Pipeline.URenderPolicy.EShadingType.Picked, this);
-                            if (drawcall != null)
+                            foreach (var k in i.Atoms)
                             {
-                                if (PickedBuffer.PerViewportCBuffer != null)
-                                    drawcall.BindCBuffer(drawcall.Effect.BindIndexer.cbPerViewport, PickedBuffer.PerViewportCBuffer);
-                                if (policy.DefaultCamera.PerCameraCBuffer != null)
-                                    drawcall.BindCBuffer(drawcall.Effect.BindIndexer.cbPerCamera, policy.DefaultCamera.PerCameraCBuffer);
+                                var drawcall = k.GetDrawCall(cmdlist.mCoreObject, PickedBuffer, policy, Graphics.Pipeline.URenderPolicy.EShadingType.Picked, this);
+                                if (drawcall != null)
+                                {
+                                    if (PickedBuffer.PerViewportCBuffer != null)
+                                        drawcall.BindCBuffer(drawcall.Effect.BindIndexer.cbPerViewport, PickedBuffer.PerViewportCBuffer);
+                                    if (policy.DefaultCamera.PerCameraCBuffer != null)
+                                        drawcall.BindCBuffer(drawcall.Effect.BindIndexer.cbPerCamera, policy.DefaultCamera.PerCameraCBuffer);
 
-                                cmdlist.PushGpuDraw(drawcall);
+                                    cmdlist.PushGpuDraw(drawcall);
+                                }
                             }
                         }
                     }
+
+                    {
+                        cmdlist.SetViewport(in PickedBuffer.Viewport);
+                        var passClears = new NxRHI.FRenderPassClears();
+                        passClears.SetDefault();
+                        passClears.SetClearColor(0, new Color4f(1, 0, 1, 0));
+                        PickedBuffer.BuildFrameBuffers(policy);
+                        cmdlist.BeginPass(PickedBuffer.FrameBuffers, in passClears, "Picked");
+                        cmdlist.FlushDraws();
+                        cmdlist.EndPass();
+                    }
                 }
 
-                {
-                    cmdlist.SetViewport(in PickedBuffer.Viewport);
-                    var passClears = new NxRHI.FRenderPassClears();
-                    passClears.SetDefault();
-                    passClears.SetClearColor(0, new Color4f(1, 0, 1, 0));
-                    PickedBuffer.BuildFrameBuffers(policy);
-                    cmdlist.BeginPass(PickedBuffer.FrameBuffers, in passClears, "Picked");
-                    cmdlist.FlushDraws();
-                    cmdlist.EndPass();
-                }
-                cmdlist.EndCommand();
                 UEngine.Instance.GfxDevice.RenderCmdQueue.QueueCmdlist(cmdlist);
             }   
         }

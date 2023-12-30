@@ -343,12 +343,11 @@ namespace EngineNS.Graphics.Pipeline.Common
                     return;
 
                 var cmdlist = CopyPass.DrawCmdList;
-                cmdlist.BeginCommand();
+                using (new NxRHI.TtCmdListScope(cmdlist))
                 {
                     CopyAttachBuff(ResultPinOut, PreColor, mCopyColorDrawcall, cmdlist);
+                    cmdlist.FlushDraws();
                 }
-                cmdlist.FlushDraws();
-                cmdlist.EndCommand();
                 UEngine.Instance.GfxDevice.RenderCmdQueue.QueueCmdlist(cmdlist);
             }
         }

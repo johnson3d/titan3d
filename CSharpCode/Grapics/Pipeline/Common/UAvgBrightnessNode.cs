@@ -99,51 +99,52 @@ namespace EngineNS.Graphics.Pipeline.Common
 
                 var cmd = BasePass.DrawCmdList;
 
-                cmd.BeginCommand();
-
-                #region Setup
+                using (new NxRHI.TtCmdListScope(cmd))
                 {
-                    var srvIdx = SetupAvgBrightnessDrawcall.FindBinder(NxRHI.EShaderBindType.SBT_UAV, "GpuSceneDesc");
-                    if (srvIdx.IsValidPointer)
+                    #region Setup
                     {
-                        var attachment = this.GetAttachBuffer(GpuScenePinInOut);
-                        SetupAvgBrightnessDrawcall.BindUav(srvIdx, attachment.Uav);
-                    }
-                    //SetupAvgBrightnessDrawcall.Commit(cmd);
-                    cmd.PushGpuDraw(SetupAvgBrightnessDrawcall);
-                }
-                #endregion
-
-                #region Count
-                {
-                    if (CountAvgBrightnessDrawcall != null)
-                    {
-                        var attachment = this.GetAttachBuffer(ColorPinIn);
-                        uint targetWidth = (uint)attachment.BufferDesc.Width;
-                        uint targetHeight = (uint)attachment.BufferDesc.Height;
-                        var srvIdx = CountAvgBrightnessDrawcall.FindBinder(NxRHI.EShaderBindType.SBT_SRV, "TargetBuffer");
+                        var srvIdx = SetupAvgBrightnessDrawcall.FindBinder(NxRHI.EShaderBindType.SBT_UAV, "GpuSceneDesc");
                         if (srvIdx.IsValidPointer)
                         {
-                            CountAvgBrightnessDrawcall.BindSrv(srvIdx, attachment.Srv);
+                            var attachment = this.GetAttachBuffer(GpuScenePinInOut);
+                            SetupAvgBrightnessDrawcall.BindUav(srvIdx, attachment.Uav);
                         }
-                        srvIdx = CountAvgBrightnessDrawcall.FindBinder(NxRHI.EShaderBindType.SBT_UAV, "GpuSceneDesc");
-                        if (srvIdx.IsValidPointer)
-                        {
-                            attachment = this.GetAttachBuffer(GpuScenePinInOut);
-                            CountAvgBrightnessDrawcall.BindUav(srvIdx, attachment.Uav);
-                        }
-                        CountAvgBrightnessDrawcall.SetDispatch(
-                            MathHelper.Roundup(targetWidth, Dispatch_SetupDimArray2.X),
-                            MathHelper.Roundup(targetHeight, Dispatch_SetupDimArray2.Y),
-                            1);
-                        //CountAvgBrightnessDrawcall.Commit(cmd);
-                        cmd.PushGpuDraw(CountAvgBrightnessDrawcall);
+                        //SetupAvgBrightnessDrawcall.Commit(cmd);
+                        cmd.PushGpuDraw(SetupAvgBrightnessDrawcall);
                     }
-                }
-                #endregion
+                    #endregion
 
-                cmd.FlushDraws();
-                cmd.EndCommand();
+                    #region Count
+                    {
+                        if (CountAvgBrightnessDrawcall != null)
+                        {
+                            var attachment = this.GetAttachBuffer(ColorPinIn);
+                            uint targetWidth = (uint)attachment.BufferDesc.Width;
+                            uint targetHeight = (uint)attachment.BufferDesc.Height;
+                            var srvIdx = CountAvgBrightnessDrawcall.FindBinder(NxRHI.EShaderBindType.SBT_SRV, "TargetBuffer");
+                            if (srvIdx.IsValidPointer)
+                            {
+                                CountAvgBrightnessDrawcall.BindSrv(srvIdx, attachment.Srv);
+                            }
+                            srvIdx = CountAvgBrightnessDrawcall.FindBinder(NxRHI.EShaderBindType.SBT_UAV, "GpuSceneDesc");
+                            if (srvIdx.IsValidPointer)
+                            {
+                                attachment = this.GetAttachBuffer(GpuScenePinInOut);
+                                CountAvgBrightnessDrawcall.BindUav(srvIdx, attachment.Uav);
+                            }
+                            CountAvgBrightnessDrawcall.SetDispatch(
+                                MathHelper.Roundup(targetWidth, Dispatch_SetupDimArray2.X),
+                                MathHelper.Roundup(targetHeight, Dispatch_SetupDimArray2.Y),
+                                1);
+                            //CountAvgBrightnessDrawcall.Commit(cmd);
+                            cmd.PushGpuDraw(CountAvgBrightnessDrawcall);
+                        }
+                    }
+                    #endregion
+
+                    cmd.FlushDraws();
+                }
+
                 UEngine.Instance.GfxDevice.RenderCmdQueue.QueueCmdlist(cmd);
             }   
         }

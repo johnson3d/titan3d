@@ -73,6 +73,20 @@ namespace EngineNS.Graphics.Pipeline
 
     public class TtLayerDrawBuffers
     {
+        public struct TtLayerDrawBuffersScope : IDisposable
+        {
+            TtLayerDrawBuffers DrawBuffers;
+            public TtLayerDrawBuffersScope(TtLayerDrawBuffers drawBuffers)
+            {
+                DrawBuffers = drawBuffers;
+                DrawBuffers.BeginCommands();
+            }
+            public void Dispose()
+            {
+                DrawBuffers.EndCommands();
+                DrawBuffers = null;
+            }
+        }
         public NxRHI.UGpuPipeline mPipeline;
         public UDrawBuffers[] PassBuffers = new UDrawBuffers[(int)ERenderLayer.RL_Num];
         public UDrawBuffers PostCmds = new UDrawBuffers();

@@ -102,8 +102,8 @@ namespace EngineNS.Graphics.Pipeline.Common
         public unsafe void ClearGBuffer(URenderPolicy policy)
         {
             var cmdlist = BasePass.DrawCmdList;
+            using (new NxRHI.TtCmdListScope(cmdlist))
             {
-                cmdlist.BeginCommand();
                 var passClears = new NxRHI.FRenderPassClears();
                 passClears.SetDefault();
                 passClears.SetClearColor(0, new Color4f(0, 0, 0, 0));
@@ -111,7 +111,6 @@ namespace EngineNS.Graphics.Pipeline.Common
                 cmdlist.BeginPass(GBuffers.FrameBuffers, in passClears, "ClearScreen");
                 cmdlist.FlushDraws();
                 cmdlist.EndPass();
-                cmdlist.EndCommand();
             }
         }
         public override void FrameBuild(Graphics.Pipeline.URenderPolicy policy)
@@ -125,34 +124,35 @@ namespace EngineNS.Graphics.Pipeline.Common
             using (new Profiler.TimeScopeHelper(ScopeTick))
             {
                 var cmdlist = BasePass.DrawCmdList;
-                cmdlist.BeginCommand();
-                if (ScreenMesh != null)
+                using (new NxRHI.TtCmdListScope(cmdlist))
                 {
-                    foreach(var i in ScreenMesh.SubMeshes)
+                    if (ScreenMesh != null)
                     {
-                        foreach (var j in i.Atoms)
+                        foreach (var i in ScreenMesh.SubMeshes)
                         {
-                            var drawcall = j.GetDrawCall(cmdlist.mCoreObject, GBuffers, ScreenDrawPolicy, Graphics.Pipeline.URenderPolicy.EShadingType.BasePass, this);
-                            if (drawcall == null)
-                                continue;
-                            drawcall.TagObject = this;
-                            drawcall.BindCBuffer(drawcall.Effect.BindIndexer.cbPerViewport, GBuffers.PerViewportCBuffer);
-                            drawcall.BindCBuffer(drawcall.Effect.BindIndexer.cbPerCamera, policy.DefaultCamera.PerCameraCBuffer);
-                            cmdlist.PushGpuDraw(drawcall);
+                            foreach (var j in i.Atoms)
+                            {
+                                var drawcall = j.GetDrawCall(cmdlist.mCoreObject, GBuffers, ScreenDrawPolicy, Graphics.Pipeline.URenderPolicy.EShadingType.BasePass, this);
+                                if (drawcall == null)
+                                    continue;
+                                drawcall.TagObject = this;
+                                drawcall.BindCBuffer(drawcall.Effect.BindIndexer.cbPerViewport, GBuffers.PerViewportCBuffer);
+                                drawcall.BindCBuffer(drawcall.Effect.BindIndexer.cbPerCamera, policy.DefaultCamera.PerCameraCBuffer);
+                                cmdlist.PushGpuDraw(drawcall);
+                            }
                         }
                     }
+                    {
+                        cmdlist.SetViewport(in GBuffers.Viewport);
+                        var passClears = new NxRHI.FRenderPassClears();
+                        passClears.SetDefault();
+                        passClears.SetClearColor(0, new Color4f(0, 0, 0, 0));
+                        GBuffers.BuildFrameBuffers(policy);
+                        cmdlist.BeginPass(GBuffers.FrameBuffers, in passClears, DebugName);
+                        cmdlist.FlushDraws();
+                        cmdlist.EndPass();
+                    }
                 }
-                {
-                    cmdlist.SetViewport(in GBuffers.Viewport);
-                    var passClears = new NxRHI.FRenderPassClears();
-                    passClears.SetDefault();
-                    passClears.SetClearColor(0, new Color4f(0, 0, 0, 0));
-                    GBuffers.BuildFrameBuffers(policy);
-                    cmdlist.BeginPass(GBuffers.FrameBuffers, in passClears, DebugName);
-                    cmdlist.FlushDraws();
-                    cmdlist.EndPass();
-                }
-                cmdlist.EndCommand();
                 UEngine.Instance.GfxDevice.RenderCmdQueue.QueueCmdlist(cmdlist);
             }   
         }

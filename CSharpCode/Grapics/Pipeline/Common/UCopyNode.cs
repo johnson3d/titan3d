@@ -64,8 +64,8 @@ namespace EngineNS.Graphics.Pipeline.Common
                 if (mCopyDrawcall == null)
                     return;
                 var cmdlist = BasePass.DrawCmdList;
-                cmdlist.BeginCommand();
-
+                
+                using (new NxRHI.TtCmdListScope(cmdlist))
                 {
                     var srcPin = GetAttachBuffer(SrcPinIn);
                     var tarPin = GetAttachBuffer(DestPinOut);
@@ -99,9 +99,9 @@ namespace EngineNS.Graphics.Pipeline.Common
                     //}
 
                     cmdlist.PushGpuDraw(mCopyDrawcall);
+                    cmdlist.FlushDraws();
                 }
-                cmdlist.FlushDraws();
-                cmdlist.EndCommand();
+                
                 UEngine.Instance.GfxDevice.RenderCmdQueue.QueueCmdlist(cmdlist);
             }   
         }
@@ -171,7 +171,7 @@ namespace EngineNS.Graphics.Pipeline.Common
                 if (mCopyDrawcall == null)
                     return;
                 var cmdlist = BasePass.DrawCmdList;
-                cmdlist.BeginCommand();
+                using (new NxRHI.TtCmdListScope(cmdlist))
                 {
                     var srcPin = GetAttachBuffer(SrcPinIn);
 
@@ -199,9 +199,8 @@ namespace EngineNS.Graphics.Pipeline.Common
                     //mCopyDrawcall.mCoreObject.FootPrint = fp;
                     
                     cmdlist.PushGpuDraw(mCopyDrawcall);
+                    cmdlist.FlushDraws();
                 }
-                cmdlist.FlushDraws();
-                cmdlist.EndCommand();
                 UEngine.Instance.GfxDevice.RenderCmdQueue.QueueCmdlist(cmdlist);
             }
         }

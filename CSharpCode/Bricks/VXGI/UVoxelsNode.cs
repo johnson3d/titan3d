@@ -318,19 +318,20 @@ namespace EngineNS.Bricks.VXGI
                             {
                                 var cmd = BasePass.DrawCmdList;
 
-                                cmd.BeginCommand();
-                                var srvIdx = SetupVoxelGroupAllocatorDrawcall.FindBinder(NxRHI.EShaderBindType.SBT_UAV, "GpuSceneDesc");
-                                if (srvIdx.IsValidPointer)
+                                using (new NxRHI.TtCmdListScope(cmd))
                                 {
-                                    var attachBuffer = GetAttachBuffer(GpuScenePinInOut);
-                                    SetupVoxelGroupAllocatorDrawcall.BindUav(srvIdx, attachBuffer.Uav);
+                                    var srvIdx = SetupVoxelGroupAllocatorDrawcall.FindBinder(NxRHI.EShaderBindType.SBT_UAV, "GpuSceneDesc");
+                                    if (srvIdx.IsValidPointer)
+                                    {
+                                        var attachBuffer = GetAttachBuffer(GpuScenePinInOut);
+                                        SetupVoxelGroupAllocatorDrawcall.BindUav(srvIdx, attachBuffer.Uav);
+                                    }
+
+                                    //SetupVoxelGroupAllocatorDrawcall.Commit(cmd);
+                                    cmd.PushGpuDraw(SetupVoxelGroupAllocatorDrawcall);
+
+                                    cmd.FlushDraws();
                                 }
-
-                                //SetupVoxelGroupAllocatorDrawcall.Commit(cmd);
-                                cmd.PushGpuDraw(SetupVoxelGroupAllocatorDrawcall);
-
-                                cmd.FlushDraws();
-                                cmd.EndCommand();
                             }
                             mCurStep = EStep.InjectVoxels;
                         }
@@ -341,59 +342,59 @@ namespace EngineNS.Bricks.VXGI
                             {
                                 var cmd = BasePass.DrawCmdList;
 
-                                cmd.BeginCommand();
-
-                                #region erase voxelgroups
-                                if (VxEraseGroupSize != Vector3ui.Zero)
+                                using (new NxRHI.TtCmdListScope(cmd))
                                 {
-                                    var srvIdx = EraseVoxelGroupDrawcall.FindBinder(NxRHI.EShaderBindType.SBT_UAV, "GpuSceneDesc");
-                                    if (srvIdx.IsValidPointer)
+                                    #region erase voxelgroups
+                                    if (VxEraseGroupSize != Vector3ui.Zero)
                                     {
-                                        var attachBuffer = GetAttachBuffer(GpuScenePinInOut);
-                                        EraseVoxelGroupDrawcall.BindUav(srvIdx, attachBuffer.Uav);
-                                    }
+                                        var srvIdx = EraseVoxelGroupDrawcall.FindBinder(NxRHI.EShaderBindType.SBT_UAV, "GpuSceneDesc");
+                                        if (srvIdx.IsValidPointer)
+                                        {
+                                            var attachBuffer = GetAttachBuffer(GpuScenePinInOut);
+                                            EraseVoxelGroupDrawcall.BindUav(srvIdx, attachBuffer.Uav);
+                                        }
 
-                                    EraseVoxelGroupDrawcall.SetDispatch(
-                                        MathHelper.Roundup(VxEraseGroupSize.X, Dispatch_SetupDimArray3.X),
-                                        MathHelper.Roundup(VxEraseGroupSize.Y, Dispatch_SetupDimArray3.Y),
-                                        MathHelper.Roundup(VxEraseGroupSize.Z, Dispatch_SetupDimArray3.Z));
-                                    //EraseVoxelGroupDrawcall.Commit(cmd);
-                                    cmd.PushGpuDraw(EraseVoxelGroupDrawcall);
-                                    VxEraseGroupSize = Vector3ui.Zero;
+                                        EraseVoxelGroupDrawcall.SetDispatch(
+                                            MathHelper.Roundup(VxEraseGroupSize.X, Dispatch_SetupDimArray3.X),
+                                            MathHelper.Roundup(VxEraseGroupSize.Y, Dispatch_SetupDimArray3.Y),
+                                            MathHelper.Roundup(VxEraseGroupSize.Z, Dispatch_SetupDimArray3.Z));
+                                        //EraseVoxelGroupDrawcall.Commit(cmd);
+                                        cmd.PushGpuDraw(EraseVoxelGroupDrawcall);
+                                        VxEraseGroupSize = Vector3ui.Zero;
+                                    }
+                                    #endregion
+
+                                    #region inject voxels
+                                    {
+                                        var srvIdx = InjectVoxelsDrawcall.FindBinder(NxRHI.EShaderBindType.SBT_UAV, "GpuSceneDesc");
+                                        if (srvIdx.IsValidPointer)
+                                        {
+                                            InjectVoxelsDrawcall.BindUav(srvIdx, GetAttachBuffer(GpuScenePinInOut).Uav);
+                                        }
+                                        srvIdx = InjectVoxelsDrawcall.FindBinder(NxRHI.EShaderBindType.SBT_SRV, "GBufferAbedo");
+                                        if (srvIdx.IsValidPointer)
+                                        {
+                                            InjectVoxelsDrawcall.BindSrv(srvIdx, GetAttachBuffer(AlbedoPinInOut).Srv);
+                                        }
+                                        srvIdx = InjectVoxelsDrawcall.FindBinder(NxRHI.EShaderBindType.SBT_SRV, "GBufferDepth");
+                                        if (srvIdx.IsValidPointer)
+                                        {
+                                            InjectVoxelsDrawcall.BindSrv(srvIdx, GetAttachBuffer(DepthPinInOut).Srv);
+                                        }
+
+                                        InjectVoxelsDrawcall.SetDispatch(
+                                            MathHelper.Roundup(DiffuseRTWidth, Dispatch_SetupDimArray2.X),
+                                            MathHelper.Roundup(DiffuseRTHeight, Dispatch_SetupDimArray2.Y),
+                                            1);
+                                        //InjectVoxelsDrawcall.Commit(cmd);
+                                        cmd.PushGpuDraw(InjectVoxelsDrawcall);
+                                    }
+                                    #endregion
+
+                                    TickVxDebugger(world);
+
+                                    cmd.FlushDraws();
                                 }
-                                #endregion
-
-                                #region inject voxels
-                                {
-                                    var srvIdx = InjectVoxelsDrawcall.FindBinder(NxRHI.EShaderBindType.SBT_UAV, "GpuSceneDesc");
-                                    if (srvIdx.IsValidPointer)
-                                    {
-                                        InjectVoxelsDrawcall.BindUav(srvIdx, GetAttachBuffer(GpuScenePinInOut).Uav);
-                                    }
-                                    srvIdx = InjectVoxelsDrawcall.FindBinder(NxRHI.EShaderBindType.SBT_SRV, "GBufferAbedo");
-                                    if (srvIdx.IsValidPointer)
-                                    {
-                                        InjectVoxelsDrawcall.BindSrv(srvIdx, GetAttachBuffer(AlbedoPinInOut).Srv);
-                                    }
-                                    srvIdx = InjectVoxelsDrawcall.FindBinder(NxRHI.EShaderBindType.SBT_SRV, "GBufferDepth");
-                                    if (srvIdx.IsValidPointer)
-                                    {
-                                        InjectVoxelsDrawcall.BindSrv(srvIdx, GetAttachBuffer(DepthPinInOut).Srv);
-                                    }
-
-                                    InjectVoxelsDrawcall.SetDispatch(
-                                        MathHelper.Roundup(DiffuseRTWidth, Dispatch_SetupDimArray2.X),
-                                        MathHelper.Roundup(DiffuseRTHeight, Dispatch_SetupDimArray2.Y),
-                                        1);
-                                    //InjectVoxelsDrawcall.Commit(cmd);
-                                    cmd.PushGpuDraw(InjectVoxelsDrawcall);
-                                }
-                                #endregion
-
-                                TickVxDebugger(world);
-
-                                cmd.FlushDraws();
-                                cmd.EndCommand();
                             }
                         }
                         break;

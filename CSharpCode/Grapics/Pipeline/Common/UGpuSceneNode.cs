@@ -410,15 +410,12 @@ namespace EngineNS.Graphics.Pipeline.Common
                     return;
 
                 var cmd = BasePass.DrawCmdList;
-                cmd.BeginCommand();
-
-                TickLogic_Light(world, policy, cmd);
-                TickLogic_Instance(world, policy, cmd);
-
-                //if PerFrameCBuffer dirty :flush
-                //UEngine.Instance.GfxDevice.PerFrameCBuffer.mCoreObject.FlushDirty(false);
-                cmd.EndCommand();
-
+                using (new NxRHI.TtCmdListScope(cmd))
+                {
+                    TickLogic_Light(world, policy, cmd);
+                    TickLogic_Instance(world, policy, cmd);
+                }
+                
                 UEngine.Instance.GfxDevice.RenderCmdQueue.QueueCmdlist(cmd);
             }   
         }

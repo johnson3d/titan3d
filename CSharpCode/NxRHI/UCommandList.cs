@@ -211,6 +211,21 @@ namespace EngineNS.NxRHI
         #endregion
     }
 
+    public struct TtCmdListScope : IDisposable
+    {
+        UCommandList mCmdList;
+        public TtCmdListScope(UCommandList cmdlist)
+        {
+            mCmdList = cmdlist;
+            mCmdList.BeginCommand();
+        }
+        public void Dispose()
+        {
+            mCmdList.EndCommand();
+            mCmdList = null;
+        }
+    }
+
     public class TtGpuScope : AuxPtrType<NxRHI.IGpuScope>
     {
         ulong ScopeFrameValue = 0;
