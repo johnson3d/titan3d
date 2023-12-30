@@ -112,6 +112,7 @@ namespace EngineNS.Graphics.Pipeline.Shader
             public Vector4 vF4_2;
             public Vector4 vF4_3;
             public Vector4ui SpecialData;
+            public uint vInstanceID;
             public static Graphics.Pipeline.Shader.EPixelShaderInput NameToInput(string name)
             {
                 switch(name)
@@ -150,6 +151,8 @@ namespace EngineNS.Graphics.Pipeline.Shader
                         return Graphics.Pipeline.Shader.EPixelShaderInput.PST_F4_3;
                     case "SpecialData":
                         return Graphics.Pipeline.Shader.EPixelShaderInput.PST_SpecialData;
+                    case "vInstanceID":
+                        return Graphics.Pipeline.Shader.EPixelShaderInput.PST_InstanceID;
                 }
                 return Graphics.Pipeline.Shader.EPixelShaderInput.PST_Number;
             }
@@ -649,6 +652,7 @@ namespace EngineNS.Graphics.Pipeline.Shader
                     EPixelShaderInput.PST_F4_2,
                     EPixelShaderInput.PST_F4_3,
                     EPixelShaderInput.PST_SpecialData,
+                    EPixelShaderInput.PST_InstanceID,
                  };
             }
             else

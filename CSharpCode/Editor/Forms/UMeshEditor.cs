@@ -236,9 +236,9 @@ namespace EngineNS.Editor.Forms
                 //USnapshot.Save(Mesh.AssetName, Mesh.GetAMeta(), PreviewViewport.RenderPolicy.GetFinalShowRSV(), UEngine.Instance.GfxDevice.RenderContext.mCoreObject.GetImmCommandList());
             }
             ImGuiAPI.SameLine(0, -1);
-            if (EGui.UIProxy.CustomButton.ToolButton("Reload", in btSize))
+            if (EGui.UIProxy.CustomButton.ToolButton("ApplySubMeshes", in btSize))
             {
-
+                Mesh.SerialId++;
             }
             ImGuiAPI.SameLine(0, -1);
             if (EGui.UIProxy.CustomButton.ToolButton("Undo", in btSize))

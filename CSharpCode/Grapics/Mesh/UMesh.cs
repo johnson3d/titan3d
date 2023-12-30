@@ -148,7 +148,9 @@ namespace EngineNS.Graphics.Mesh
             {
                 if (SubMesh == null)
                     return null;
-                var mtlMesh = SubMesh.Mesh.MaterialMesh;
+                var mtlMesh = MaterialMesh;
+                if (mtlMesh.SubMeshes.Count <= SubMesh.MeshIndex)
+                    return null;
                 return mtlMesh.SubMeshes[SubMesh.MeshIndex].Materials[AtomIndex];
             }            
             public UMaterialMesh MaterialMesh 
@@ -157,7 +159,12 @@ namespace EngineNS.Graphics.Mesh
             }
             public UMeshPrimitives MeshPrimitives
             {
-                get => MaterialMesh.SubMeshes[(int)SubMesh.MeshIndex].Mesh;
+                get
+                {
+                    if (MaterialMesh.SubMeshes.Count <= SubMesh.MeshIndex)
+                        return null;
+                    return MaterialMesh.SubMeshes[(int)SubMesh.MeshIndex].Mesh;
+                }
             }
             public unsafe NxRHI.FMeshAtomDesc* GetMeshAtomDesc(uint lod)
             {

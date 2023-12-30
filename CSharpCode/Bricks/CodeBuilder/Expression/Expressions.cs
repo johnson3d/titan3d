@@ -1166,6 +1166,8 @@ namespace EngineNS.Bricks.CodeBuilder
         [Rtti.Meta]
         public UVariableDeclaration ReturnValue { get; set; }
         [Rtti.Meta]
+        public bool DeclarationReturnValue { get; set; } = false;
+        [Rtti.Meta]
         public bool ForceCastReturnType { get; set; } = false;
         [Rtti.Meta]
         public bool IsAsync { get; set; } = false;
@@ -1302,6 +1304,8 @@ namespace EngineNS.Bricks.CodeBuilder
         public UExpressionBase Left { get; set; }
         [Rtti.Meta]
         public UExpressionBase Right { get; set; }
+        [Rtti.Meta]
+        public bool Cell { get; set; } = true;  // true在生成时增加括号
 
         public override bool Equals(object obj)
         {

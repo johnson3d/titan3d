@@ -59,6 +59,13 @@ namespace EngineNS.UI.Editor
 
             mDrawBrush.IsDirty = true;
         }
+
+        public override bool CanAddChild(Rtti.UTypeDesc childType)
+        {
+            if (Children.Count > 0)
+                return false;
+            return true;
+        }
     }
 
     public partial class SelectedDecorator : TtUIHost
@@ -115,13 +122,6 @@ namespace EngineNS.UI.Editor
             canvas.PopPathStyle();
 
             mDrawBrush.IsDirty = true;
-        }
-
-        public override bool CanAddChild(TtUIElement element)
-        {
-            if (Children.Count > 0)
-                return false;
-            return true;
         }
     }
 }

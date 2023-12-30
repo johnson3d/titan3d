@@ -1,7 +1,9 @@
 ﻿using EngineNS.EGui.Controls.PropertyGrid;
+using EngineNS.EGui.UIProxy;
 using EngineNS.Rtti;
 using EngineNS.UI.Bind;
 using EngineNS.UI.Controls;
+using Microsoft.Build.Framework;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
 using System.Collections;
@@ -42,14 +44,6 @@ namespace EngineNS.UI.Event
             await mImageButton.Initialize();
             return await base.Initialize_Override();
         }
-        void ProcessAddMacrossEvent(TtUIElement element, in EditorInfo info)
-        {
-            if (element == null)
-                return;
-
-            var editorUIHost = element.RootUIHost as Editor.EditorUIHost;
-            editorUIHost.HostEditor.AddEventMethod(element, info.HostProperty.Name, info.HostProperty.PropertyType);
-        }
         public override bool OnDraw(in EditorInfo info, out object newValue)
         {
             bool valueChanged = false;
@@ -57,29 +51,54 @@ namespace EngineNS.UI.Event
             var drawList = ImGuiAPI.GetWindowDrawList();
             var index = ImGuiAPI.TableGetColumnIndex();
             var width = Math.Min(ImGuiAPI.GetColumnWidth(index) - EGui.UIProxy.StyleConfig.Instance.PGCellPadding.X, 100.0f);
-            mImageButton.Size = new Vector2(width, 0);// ImGuiAPI.GetFrameHeight());
+
+            var size = new Vector2(width, 0);// ImGuiAPI.GetFrameHeight());
             ImGuiAPI.PushStyleColor(ImGuiCol_.ImGuiCol_Button, EGui.UIProxy.StyleConfig.Instance.PGCreateButtonBGColor);
             ImGuiAPI.PushStyleColor(ImGuiCol_.ImGuiCol_ButtonActive, EGui.UIProxy.StyleConfig.Instance.PGCreateButtonBGActiveColor);
             ImGuiAPI.PushStyleColor(ImGuiCol_.ImGuiCol_ButtonHovered, EGui.UIProxy.StyleConfig.Instance.PGCreateButtonBGHoverColor);
-            if (mImageButton.OnDraw(in drawList, in Support.UAnyPointer.Default))
+
+            int count = 0;
+            TtUIElement element = null;
+            var enumrableInterface = info.ObjectInstance.GetType().GetInterface(typeof(IEnumerable).FullName, false);
+            if (enumrableInterface != null)
             {
-                // crate new event macross method
-                var enumrableInterface = info.ObjectInstance.GetType().GetInterface(typeof(IEnumerable).FullName, false);
-                if(enumrableInterface != null)
+                foreach (var ins in (IEnumerable)info.ObjectInstance)
                 {
-                    foreach(var ins in (IEnumerable)info.ObjectInstance)
+                    element = ins as TtUIElement;
+                    count++;
+                }
+            }
+            else
+            {
+                element = info.ObjectInstance as TtUIElement;
+            }
+
+            if(count > 1)
+            {
+                ImGuiAPI.Text("Invalid");
+            }
+            else
+            {
+                string methodDisplayName;
+                if(element.HasEventMethod(info.HostProperty.Name, out methodDisplayName))
+                {
+                    if(CustomButton.ToolButton(methodDisplayName, size))
                     {
-                        var element = ins as TtUIElement;
-                        ProcessAddMacrossEvent(element, info);
+                        var editorUIHost = element.RootUIHost as Editor.EditorUIHost;
+                        editorUIHost.HostEditor.JumpToEventMethod(methodDisplayName);
                     }
                 }
                 else
                 {
-                    var element = info.ObjectInstance as TtUIElement;
-                    ProcessAddMacrossEvent(element, info);
+                    mImageButton.Size = size;
+                    if (mImageButton.OnDraw(in drawList, in Support.UAnyPointer.Default))
+                    {
+                        // crate new event macross method
+                        var editorUIHost = element.RootUIHost as Editor.EditorUIHost;
+                        editorUIHost.HostEditor.AddEventMethod(element, info.HostProperty.Name, info.HostProperty.PropertyType);
+                        valueChanged = true;
+                    }
                 }
-
-                valueChanged = true;
             }
             ImGuiAPI.PopStyleColor(3);
             return valueChanged;

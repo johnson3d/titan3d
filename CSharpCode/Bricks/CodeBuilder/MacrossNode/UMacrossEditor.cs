@@ -247,10 +247,13 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
 
             InitializeOverrideMethodList();
         }
+        public Action<UClassDeclaration> BeforeGenerateCode;
         public string GenerateCode()
         {
             try
             {
+                BeforeGenerateCode?.Invoke(DefClass);
+
                 foreach (var i in Methods)
                 {
                     i.BuildExpression(DefClass);
@@ -359,6 +362,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
         //    return false;
         //}
 
+        public Action<UMacrossEditor> AfterCompileCode;
         public void CompileCode()
         {
             UEngine.Instance.MacrossManager.ClearGameProjectTemplateBuildFiles();
@@ -378,6 +382,8 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
                 {
                     Methods[i].CanvasMenuDirty = true;
                 }
+
+                AfterCompileCode?.Invoke(this);
             }
         }
 
@@ -607,8 +613,15 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
             }
         }
 
+        public Func<UMacrossMethodGraph, bool> OnRemoveMethod;
         public void RemoveMethod(UMacrossMethodGraph method)
         {
+            if (OnRemoveMethod != null)
+            {
+                if (!OnRemoveMethod.Invoke(method))
+                    return;
+            }
+
             if (AssetName != null)
             {
                 IO.TtFileManager.DeleteFile($"{AssetName.Address}/{method.Name}.func");
@@ -631,7 +644,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
 
         }
 
-        public void AddMethod(UMethodDeclaration methodDesc)
+        public UMacrossMethodGraph AddMethod(UMethodDeclaration methodDesc)
         {
             DefClass.AddMethod(methodDesc);
 
@@ -641,6 +654,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
             {
                 OpenFunctions[i].CanvasMenuDirty = true;
             }
+            return func;
         }
 
         bool mClassViewShow = true;
@@ -648,7 +662,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
         EGui.UIProxy.MenuItemProxy.MenuState mOverrideMenuState = new EGui.UIProxy.MenuItemProxy.MenuState();
         protected unsafe void DrawClassView()
         {
-            ImGuiTreeNodeFlags_ flags = ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_NoTreePushOnOpen | ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_Bullet | ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_SpanFullWidth;// | ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_AllowItemOverlap;
+            ImGuiTreeNodeFlags_ flags = ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_NoTreePushOnOpen | ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_Bullet | ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_SpanFullWidth | ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_AllowItemOverlap;
             if (EGui.UIProxy.DockProxy.BeginPanel(mDockKeyClass, "ClassView", ref mClassViewShow, ImGuiWindowFlags_.ImGuiWindowFlags_None))
             {
                 Vector2 buttonSize = new Vector2(16, 16);
@@ -778,18 +792,19 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
                         var method = Methods[i];
                         if (method.IsDelegateGraph())
                             continue;
-                        var methodTreeNodeResult = ImGuiAPI.TreeNodeEx(method.Name, flags);
+                        var displayName = method.DisplayName;
+                        var methodTreeNodeResult = ImGuiAPI.TreeNodeEx(displayName, flags);
                         ImGuiAPI.SameLine(0, EGui.UIProxy.StyleConfig.Instance.ItemSpacing.X);
                         var methodTreeNodeDoubleClicked = ImGuiAPI.IsItemDoubleClicked(ImGuiMouseButton_.ImGuiMouseButton_Left);
                         var methodTreeNodeIsItemClicked = ImGuiAPI.IsItemClicked(ImGuiMouseButton_.ImGuiMouseButton_Left);
                         ImGuiAPI.SameLine(regionSize.X - buttonSize.X - buttonOffset, -1.0f);
-                        var keyName = $"Delete func {method.Name}?";
+                        var keyName = $"Delete func {displayName}?";
                         if (EGui.UIProxy.CustomButton.ToolButton("x", in buttonSize, 0xFF0000FF, "func_X_" + i))
                         {
                             EGui.UIProxy.MessageBox.Open(keyName);
                             break;
                         }
-                        EGui.UIProxy.MessageBox.Draw(keyName, $"Are you sure to delete {method.Name}?", EGui.UIProxy.MessageBox.EButtonType.YesNo,
+                        EGui.UIProxy.MessageBox.Draw(keyName, $"Are you sure to delete {displayName}?", EGui.UIProxy.MessageBox.EButtonType.YesNo,
                         () =>
                         {
                             RemoveMethod(method);
@@ -799,14 +814,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
                         {
                             if (methodTreeNodeDoubleClicked)
                             {
-                                mSettingCurrentFuncIndex = OpenFunctions.IndexOf(method);
-                                if (mSettingCurrentFuncIndex < 0)
-                                {
-                                    method.VisibleInClassGraphTables = true;
-                                    method.GraphRenderer.SetGraph(method);
-                                    mSettingCurrentFuncIndex = OpenFunctions.Count;
-                                    OpenFunctions.Add(method);
-                                }
+                                OpenMethodGraph(method);
                             }
                             else if (methodTreeNodeIsItemClicked)
                             {
@@ -820,6 +828,17 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
                 }
             }
             EGui.UIProxy.DockProxy.EndPanel();
+        }
+        public void OpenMethodGraph(UMacrossMethodGraph method)
+        {
+            mSettingCurrentFuncIndex = OpenFunctions.IndexOf(method);
+            if (mSettingCurrentFuncIndex < 0)
+            {
+                method.VisibleInClassGraphTables = true;
+                method.GraphRenderer.SetGraph(method);
+                mSettingCurrentFuncIndex = OpenFunctions.Count;
+                OpenFunctions.Add(method);
+            }
         }
         bool mNodePropertyShow = true;
         protected void DrawPropertyGrid()
@@ -889,7 +908,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
                             flag |= ImGuiTabItemFlags_.ImGuiTabItemFlags_SetSelected;
                             mSettingCurrentFuncIndex = -1;
                         }
-                        if (ImGuiAPI.BeginTabItem(func.Name, ref func.VisibleInClassGraphTables, flag))
+                        if (ImGuiAPI.BeginTabItem(func.DisplayName, ref func.VisibleInClassGraphTables, flag))
                         {
                             DrawFunctionGraph(func, sz);
 
@@ -998,9 +1017,10 @@ namespace EngineNS.Rtti
             foreach (var csFile in csFiles)
             {
                 var relativeFile = EngineNS.IO.TtFileManager.GetValidFileName(csFile).Replace(csFilesPath, "");
+                var name = EngineNS.IO.TtFileManager.GetBaseDirectory(relativeFile, 1).TrimEnd('/').ToLower();
                 var relativePath = EngineNS.IO.TtFileManager.GetBaseDirectory(relativeFile, 2).TrimEnd('/').ToLower();
-                var fileName = EngineNS.IO.TtFileManager.GetPureName(relativeFile).ToLower();
-                var hashCode = Standart.Hash.xxHash.xxHash64.ComputeHash($"{relativePath}/{fileName}.macross:{EngineNS.RName.ERNameType.Game}");
+                var fileName = EngineNS.IO.TtFileManager.GetPureName(relativeFile).ToLower(); 
+                var hashCode = Standart.Hash.xxHash.xxHash64.ComputeHash($"{name}:{EngineNS.RName.ERNameType.Game}");
                 createInstanceCode += $@"
                 case {hashCode}:
                     return new NS_{relativePath.Replace("/", ".")}.{fileName}();";

@@ -203,6 +203,8 @@ namespace EngineNS.Bricks.CodeBuilder.Backends
                 string invokeStr = "";
                 if(methodInvokeExp.ReturnValue != null)
                 {
+                    if (methodInvokeExp.DeclarationReturnValue)
+                        invokeStr += data.CodeGen.GetTypeString(methodInvokeExp.ReturnValue.VariableType) + " ";
                     invokeStr += methodInvokeExp.ReturnValue.VariableName + " = ";
                 }
                 invokeStr += methodInvokeExp.MethodName + "(";
@@ -248,7 +250,8 @@ namespace EngineNS.Bricks.CodeBuilder.Backends
             public void GenCodes(UCodeObject obj, ref string sourceCode, ref UCodeGeneratorData data)
             {
                 var binOpExp = obj as UBinaryOperatorExpression;
-                sourceCode += "(";
+                if (binOpExp.Cell)
+                    sourceCode += "(";
                 var leftGen = data.CodeGen.GetCodeObjectGen(binOpExp.Left.GetType());
                 leftGen.GenCodes(binOpExp.Left, ref sourceCode, ref data);
                 switch(binOpExp.Operation)
@@ -316,7 +319,8 @@ namespace EngineNS.Bricks.CodeBuilder.Backends
                 }
                 var rightGen = data.CodeGen.GetCodeObjectGen(binOpExp.Right.GetType());
                 rightGen.GenCodes(binOpExp.Right, ref sourceCode, ref data);
-                sourceCode += ")";
+                if (binOpExp.Cell)
+                    sourceCode += ")";
             }
         }
 

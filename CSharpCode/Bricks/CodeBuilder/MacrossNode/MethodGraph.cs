@@ -322,7 +322,15 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
         }
         public override string ToString()
         {
-            return (MethodDec.IsOverride ? "[O]" : "") + MethodDec.DisplayName;
+            return (MethodDec.IsOverride ? "[O]" : "") + MethodDec.MethodName;
+        }
+
+        public string DisplayName
+        {
+            get
+            {
+                return (MethodDec.IsOverride ? "[O]" : "") + MethodDec.DisplayName;
+            }
         }
 
         public void OnPreRead(object tagObject, object hostObject, bool fromXml)
@@ -868,6 +876,16 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
                         methodDec.MethodName = value;
                 }
                 GraphName = value;
+            }
+        }
+
+        public string DisplayName
+        {
+            get
+            {
+                if (MethodDatas.Count == 1)
+                    return MethodDatas[0].DisplayName;
+                return GraphName;
             }
         }
 

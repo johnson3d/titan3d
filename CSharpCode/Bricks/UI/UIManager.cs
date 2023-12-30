@@ -240,15 +240,28 @@ namespace EngineNS.UI
                     {
                         ar.ReadObject(out element);
 
-                        //UMacrossGetter<TtUIMacrossBase>.NewInstance();
+                        element.MacrossGetter = UMacrossGetter<TtUIMacrossBase>.NewInstance();
+                        element.MacrossGetter.Name = name;
+                        var mc = element.MacrossGetter.Get();
+                        if(mc != null)
+                        {
+                            mc.HostElement = element;
+                            mc.InitializeEvents();
+                        }
                     }
                     catch(Exception ex)
                     {
                         Profiler.Log.WriteException(ex);
                     }
+
                     return element;
                 }
             }
+        }
+
+        private void Btn_DeviceDown(object sender, TtRoutedEventArgs args)
+        {
+            throw new NotImplementedException();
         }
     }
 }

@@ -285,6 +285,19 @@ namespace EngineNS.Graphics.Mesh
             if (Meshes.TryGetValue(name, out result))
                 return result;
 
+            result = await CreateMeshPrimitive(name);
+
+            if (result != null)
+            {
+                Meshes[name] = result;
+                return result;
+            }
+
+            return null;
+        }
+        public async Thread.Async.TtTask<UMeshPrimitives> CreateMeshPrimitive(RName name)
+        {
+            UMeshPrimitives result;
             result = await UEngine.Instance.EventPoster.Post((state) =>
             {
                 using (var xnd = IO.TtXndHolder.LoadXnd(name.Address))
@@ -308,10 +321,8 @@ namespace EngineNS.Graphics.Mesh
             if (result != null)
             {
                 await result.TryLoadClusteredMesh();
-                Meshes[name] = result;
                 return result;
             }
-
             return null;
         }
         public void UnsafeRenameForCook(RName name, RName newName)

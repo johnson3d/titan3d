@@ -165,7 +165,7 @@ namespace EngineNS.Editor.Forms
             Mesh = arg as Graphics.Mesh.UMeshPrimitives;
             if (Mesh == null)
             {
-                Mesh = await UEngine.Instance.GfxDevice.MeshPrimitiveManager.GetMeshPrimitive(name);
+                Mesh = await UEngine.Instance.GfxDevice.MeshPrimitiveManager.CreateMeshPrimitive(name);
                 if (Mesh == null)
                     return false;
             }

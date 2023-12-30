@@ -117,7 +117,7 @@ namespace EngineNS.EGui.UIProxy
             }
             return false;
         }
-        public static bool DrawButton(in ImDrawList drawList, 
+        public unsafe static bool DrawButton(in ImDrawList drawList, 
                                   ref bool isMouseDown, 
                                   ref bool isMouseHover,
                                   ImageProxy icon,
@@ -177,7 +177,9 @@ namespace EngineNS.EGui.UIProxy
                 color = ImGuiAPI.ColorConvertU32ToFloat4(StyleConfig.Instance.ToolbarButtonTextColor_Hover);
 
             if (!string.IsNullOrEmpty(name))
+            {
                 ImGuiAPI.TextColored(in color, name);
+            }
             if (icon != null)
                 icon.Color = ImGuiAPI.ColorConvertFloat4ToU32(in color);
 

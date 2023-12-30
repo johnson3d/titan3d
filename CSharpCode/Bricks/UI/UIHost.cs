@@ -149,6 +149,8 @@ namespace EngineNS.UI
         }
         public TtUIElement GetPointAtElement(in Vector2 mousePt, ref RayIntersectData data, bool onlyClipped = true)
         {
+            if (this.mSceneNode == null)
+                return null;
             var vp = this.mSceneNode.GetViewport();
             var aabb = this.BoundingBox;
             if (aabb.Minimum.X >= aabb.Maximum.X ||

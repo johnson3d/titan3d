@@ -110,7 +110,7 @@ namespace CppWeaving.Cpp2CS
 			RegClass("ImWchar16", new USystemTypeStruct() { CppName = "ImWchar", CSName = "Wchar16", RetPodName = "ImWchar16" });
 			RegClass("ImWchar32", new USystemTypeStruct() { CppName = "ImWchar", CSName = "Wchar32", RetPodName = "ImWchar32" });
 
-			RegClass("EngineNS.FRectanglef", new USystemTypeStruct() { CppName = "EngineNS::FRectanglef", CSName = "EngineNS.RectangleF", RetPodName = "EngineNS::FRectanglef" });
+			RegClass("EngineNS.FRectanglef", new USystemTypeStruct() { CppName = "EngineNS::FRectanglef", CSName = "EngineNS.RectangleF", RetPodName = "EngineNS::FRectanglef_t" });
 			RegClass("EngineNS.FRect", new USystemTypeStruct() { CppName = "EngineNS::FRect", CSName = "EngineNS.RectangleF", RetPodName = "EngineNS::FRect" });
 			RegClass("v3dxThickness", new USystemTypeStruct() { CppName = "v3dxThickness", CSName = "EngineNS.Thickness", RetPodName = "v3dVector4_t" });
 

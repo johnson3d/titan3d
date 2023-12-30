@@ -423,7 +423,8 @@ namespace EngineNS.Bricks.NodeGraph
                                 }
                             }
                             //handle.Free();
-                       }
+                        }
+                        ImGuiAPI.EndDragDropTarget();
                     }
                     ImGuiAPI.NextColumn();
                     if (ImGuiAPI.BeginChild("Details", in Vector2.Zero, false, ImGuiWindowFlags_.ImGuiWindowFlags_None))

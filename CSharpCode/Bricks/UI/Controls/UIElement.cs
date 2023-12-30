@@ -160,6 +160,7 @@ namespace EngineNS.UI.Controls
             set
             {
                 OnValueChange(value, mName);
+                SetMethodDisplayNamesDirty();
                 mName = value;
             }
         }
@@ -339,6 +340,16 @@ namespace EngineNS.UI.Controls
                 return true;
             else
                 return false;
+        }
+
+        public virtual bool GetOffsetFromElement(TtUIElement element, out Vector2 offset)
+        {
+            Vector2 pos = Vector2.Zero;
+            PositionInParent(ref pos, RootUIHost);
+            Vector2 elementPos = Vector2.Zero;
+            PositionInParent(ref elementPos, RootUIHost);
+            offset = pos - elementPos;
+            return true;
         }
 
         protected RectangleF mDesignRect;

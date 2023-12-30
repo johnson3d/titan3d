@@ -331,10 +331,15 @@ namespace {namespaceName}
                             setPropertyValueSwitch += $@"
                 case {Standart.Hash.xxHash.xxHash64.ComputeHash(propName)}: //{propName}
                     //SetValue<{propTypeDisplayName}>(({propTypeDisplayName})value, {bindPropName});
-                    {propName} = ({propTypeDisplayName})value;";
-                        }
-                        setPropertyValueSwitch += $@"
+                    {propName} = ({propTypeDisplayName})value;
                     return true;";
+                        }
+                        else
+                        {
+                            setPropertyValueSwitch += $@"
+                case {Standart.Hash.xxHash.xxHash64.ComputeHash(propName)}: //{propName}
+                        return true;";
+                        }
 
                         bindImpSource += $@"
     public class {bindingExprImpName} : EngineNS.UI.Bind.TtBindingExpression<{propTypeDisplayName}>
@@ -903,8 +908,9 @@ namespace {namespaceName}
                 source += $@"
         public{(baseHasBindObjectInterface ? " override" : " virtual")} void GetProperties(ref EngineNS.EGui.Controls.PropertyGrid.CustomPropertyDescriptorCollection collection, bool parentIsValueType)
         {{
+            var type = EngineNS.Rtti.UTypeDesc.TypeOf(this.GetType());
             var pros = System.ComponentModel.TypeDescriptor.GetProperties(this);
-            collection.InitValue(this, EngineNS.Rtti.UTypeDesc.TypeOf(this.GetType()), pros, parentIsValueType);
+            collection.InitValue(this, type, pros, parentIsValueType);
 
             // attached properties
             foreach(var bindData in {bindExprDicName})
@@ -921,6 +927,20 @@ namespace {namespaceName}
                     collection.Add(proDesc);
                 }}
             }}
+
+            // events
+            var tempCollection = collection;
+            EngineNS.UI.Event.TtEventManager.QueryEvents(type, 
+                ((curType, name, e)=>
+                {{
+                    var proDesc = EngineNS.EGui.Controls.PropertyGrid.PropertyCollection.PropertyDescPool.QueryObjectSync();
+                    proDesc.Name = name;
+                    proDesc.CanCreateNew = false;
+                    proDesc.PropertyType = EngineNS.Rtti.UTypeDesc.TypeOf(typeof(EngineNS.UI.Event.TtRoutedEventHandler));
+                    proDesc.Category = ""Events"";
+                    proDesc.CustomValueEditor = new EngineNS.UI.Event.PGRoutedEventHandlerEditorAttribute();
+                    tempCollection.Add(proDesc);
+                }}), true);
         }}";
             }
             source += $@"

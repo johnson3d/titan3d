@@ -27,6 +27,7 @@ namespace EngineNS.UI.Editor
         Thread.Async.TtTask Initialize(TtUIEditor editor);
         Thread.Async.TtTask UpdateDecorator();
         void ProcessSelectElementDecorator();
+        void ClearDecorator();
         void DecoratorEventProcess(in Bricks.Input.Event e);
         bool IsInDecoratorOperation();
     }
@@ -90,10 +91,10 @@ namespace EngineNS.UI.Editor
         internal void SetCurrentPointAtElement(TtUIElement element)
         {
             // debug //////////////////
-            if (element != null)
-                UEngine.Instance.UIManager.DebugPointatElement = element.Name + "(" + element.GetType().Name + ")";
-            else
-                UEngine.Instance.UIManager.DebugPointatElement = "";
+            //if (element != null)
+            //    UEngine.Instance.UIManager.DebugPointatElement = element.Name + "(" + element.GetType().Name + ")";
+            //else
+            //    UEngine.Instance.UIManager.DebugPointatElement = "";
             ///////////////////////////
 
             if (element != null)
@@ -116,6 +117,10 @@ namespace EngineNS.UI.Editor
 
         async Thread.Async.TtTask ProcessSelectElementDecorator()
         {
+            if (mSelectedDecoratorUIHost == null)
+                return;
+            if (CurrentDecorator != null)
+                CurrentDecorator.ClearDecorator();
             CurrentDecorator = null;
             if (mSelectedElements.Count > 0)
             {

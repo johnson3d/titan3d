@@ -566,24 +566,7 @@ namespace EngineNS.Graphics.Mesh
             if (Meshes.TryGetValue(name, out result))
                 return result;
 
-            result = await UEngine.Instance.EventPoster.Post((state) =>
-            {
-                using (var xnd = IO.TtXndHolder.LoadXnd(name.Address))
-                {
-                    if (xnd != null)
-                    {
-                        var mesh = UMaterialMesh.LoadXnd(this, xnd.RootNode);
-                        if (mesh == null)
-                            return null;
-
-                        return mesh;
-                    }
-                    else
-                    {
-                        return null;
-                    }
-                }
-            }, Thread.Async.EAsyncTarget.AsyncIO);
+            result = await CreateMaterialMesh(name);
 
             if (result != null)
             {

@@ -89,12 +89,22 @@ namespace EngineNS.EGui.UIProxy
         [Category("Common")]
         [Controls.PropertyGrid.PGShowInPropertyGrid]
         [Controls.PropertyGrid.UByte4ToColor4PickerEditor(IsABGR = true)]
+        public UInt32 TextDisableColor = 0xFF929292;
+
+        [Category("Common")]
+        [Controls.PropertyGrid.PGShowInPropertyGrid]
+        [Controls.PropertyGrid.UByte4ToColor4PickerEditor(IsABGR = true)]
         public UInt32 ItemHightlightHoveredColor = 0xFFFFD26F;
 
         [Category("Common")]
         [Controls.PropertyGrid.PGShowInPropertyGrid]
         [Controls.PropertyGrid.UByte4ToColor4PickerEditor(IsABGR = true)]
         public UInt32 ErrorStringColor = 0xFF0000FF;
+
+        [Category("Common")]
+        [Controls.PropertyGrid.PGShowInPropertyGrid]
+        [Controls.PropertyGrid.UByte4ToColor4PickerEditor(IsABGR = true)]
+        public UInt32 PassStringColor = 0xFF00FF00;
 
         [Category("Common")]
         [Controls.PropertyGrid.PGShowInPropertyGrid]

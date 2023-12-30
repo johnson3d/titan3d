@@ -128,6 +128,8 @@ namespace EngineNS.UI.Controls.Containers
             }
             if(element != null)
             {
+                if(element.mParent != null)
+                    element.mParent.Children.Remove(element);
                 element.mParent = null;
                 element.RootUIHost = null; 
                 element.mVisualParent = null;
@@ -207,7 +209,10 @@ namespace EngineNS.UI.Controls.Containers
                     }
                 }
                 else
+                {
+                    ClearParent(item);
                     mChildrenHolder.Insert(index, item);
+                }
             }
             else
             {
@@ -215,6 +220,7 @@ namespace EngineNS.UI.Controls.Containers
                 {
                     mVisualParent.ChildIsContentsPresenter = true;
                 }
+                ClearParent(item);
                 SetParent(item);
                 mChildren.Insert(index, item);
                 mVisualParent.InvalidateMeasure();
@@ -238,7 +244,10 @@ namespace EngineNS.UI.Controls.Containers
                     }
                 }
                 else
+                {
+                    ClearParent(mChildrenHolder[index]);
                     mChildrenHolder.RemoveAt(index);
+                }
             }
             else
             {
@@ -269,7 +278,10 @@ namespace EngineNS.UI.Controls.Containers
                         returnValue = false;
                 }
                 else
+                {
+                    ClearParent(item);
                     return mChildrenHolder.Remove(item);
+                }
             }
             else
             {
@@ -304,6 +316,8 @@ namespace EngineNS.UI.Controls.Containers
                 }
                 else
                 {
+                    ClearParent(item);
+                    SetParent(item);
                     mChildrenHolder.Add(item);
                 }
             }
@@ -317,6 +331,7 @@ namespace EngineNS.UI.Controls.Containers
                 else
                     mVisualParent.InvalidateMeasure();
 
+                ClearParent(item);
                 SetParent(item);
                 mChildren.Add(item);
             }
@@ -340,7 +355,14 @@ namespace EngineNS.UI.Controls.Containers
                     }
                 }
                 else
+                {
+                    for(int i=mChildrenHolder.Count - 1; i>=0; i--)
+                    {
+                        ClearParent(mChildrenHolder[i]);
+                        mChildrenHolder[i].Cleanup();
+                    }
                     mChildrenHolder.Clear();
+                }
             }
             else
             {
@@ -771,7 +793,7 @@ namespace EngineNS.UI.Controls.Containers
             return idx;
         }
 
-        public virtual bool CanAddChild(TtUIElement element)
+        public virtual bool CanAddChild(Rtti.UTypeDesc childType)
         {
             return true;
         }

@@ -2,6 +2,7 @@
 using EngineNS.Bricks.CodeBuilder;
 using EngineNS.Bricks.Input;
 using EngineNS.Bricks.UI.Controls;
+using EngineNS.EGui.UIProxy;
 using EngineNS.GamePlay.Scene;
 using EngineNS.Rtti;
 using EngineNS.UI.Canvas;
@@ -35,6 +36,7 @@ namespace EngineNS.UI.Editor
 
         public EditorUIHost mUIHost;
         public TtUINode mUINode;
+        Vector2 mNewCreateUISize = new Vector2(100, 50);
         public void Dispose()
         {
             CoreSDK.DisposeObject(ref UIAsset);
@@ -193,6 +195,9 @@ namespace EngineNS.UI.Editor
 
         public unsafe void OnDrawDesignerWindow()
         {
+            //mDragTips = mDragItemName;
+            //mDragState = EDragState.None;
+
             var pivot = new Vector2(0);
             ImGuiAPI.SetNextWindowSize(in WindowSize, ImGuiCond_.ImGuiCond_FirstUseEver);
             ImGuiAPI.SetNextWindowDockID(DockId, DockCond);
@@ -217,10 +222,15 @@ namespace EngineNS.UI.Editor
             ResetDockspace();
             EGui.UIProxy.DockProxy.EndMainForm();
 
-            DrawControls();
             DrawDesigner();
             DrawDetails();
             DrawHierachy();
+            DrawControls();
+            if (!mIsDragDroping)
+            {
+                mDragTips = mDragItemName;
+                mDragState = EDragState.None;
+            }
 
             ImGuiAPI.SetMouseCursor(mMouseCursor);
         }
@@ -235,7 +245,14 @@ namespace EngineNS.UI.Editor
         protected unsafe void DrawToolBar()
         {
             var btSize = Vector2.Zero;
-            if(EGui.UIProxy.CustomButton.ToolButton("Show Graph", in btSize))
+            if(EGui.UIProxy.CustomButton.ToolButton("Show Graph", in btSize,
+                EGui.UIProxy.StyleConfig.Instance.ToolButtonTextColor,
+                EGui.UIProxy.StyleConfig.Instance.ToolButtonTextColor_Press,
+                EGui.UIProxy.StyleConfig.Instance.ToolButtonTextColor_Hover,
+                EGui.UIProxy.StyleConfig.Instance.PGCreateButtonBGColor,
+                EGui.UIProxy.StyleConfig.Instance.PGCreateButtonBGActiveColor,
+                EGui.UIProxy.StyleConfig.Instance.PGCreateButtonBGHoverColor
+                ))
             {
                 DrawType = enDrawType.Macross;
             }
@@ -269,6 +286,18 @@ namespace EngineNS.UI.Editor
                 PreviewViewport.FreezCameraControl = mIsSimulateMode;
                 if (mIsSimulateMode)
                 {
+                    if (mUIHost.Children.Count > 0)
+                    {
+                        if (mUIHost.Children[0].MacrossGetter == null)
+                        {
+                            mUIHost.Children[0].MacrossGetter = Macross.UMacrossGetter<TtUIMacrossBase>.NewInstance();
+                            mUIHost.Children[0].MacrossGetter.Name = AssetName;
+                        }
+                        var mc = mUIHost.Children[0].MacrossGetter.Get();
+                        mc.HostElement = mUIHost.Children[0];
+                        mc.InitializeEvents();
+                    }
+
                     UEngine.Instance.UIManager.AddUI(AssetName, "UIEditorSimulate", mUIHost);
                 }
                 else
@@ -356,11 +385,27 @@ namespace EngineNS.UI.Editor
             }
             EGui.UIProxy.DockProxy.EndPanel();
         }
-        protected struct ControlDragData
+        protected struct ControlCreateDragData
         {
             public string TypeName;
         }
+        protected struct ControlMoveDragData
+        {
+            public TtUIElement[] Elements;
+        }
 
+        string mDragTips;
+        string mDragItemName;
+        bool mIsDragDroping = false;
+        enum EDragState : byte
+        {
+            None,
+            Add,
+            InsertBefore,
+            InsertAfter,
+            Failed,
+        }
+        EDragState mDragState = EDragState.None;
         unsafe void DrawControlItemData(ControlItemData itemData)
         {
             var flags = ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_SpanFullWidth;
@@ -369,15 +414,33 @@ namespace EngineNS.UI.Editor
             var treeNodeResult = ImGuiAPI.TreeNodeEx(itemData.Name, flags);
             if(itemData.UIControlType != null)
             {
-                if(ImGuiAPI.BeginDragDropSource(ImGuiDragDropFlags_.ImGuiDragDropFlags_None))
+                if(ImGuiAPI.BeginDragDropSource(ImGuiDragDropFlags_.ImGuiDragDropFlags_SourceNoDisableHover))
                 {
-                    var data = new ControlDragData()
+                    var data = new ControlCreateDragData()
                     {
                         TypeName = UTypeDescManager.Instance.GetTypeStringFromType(itemData.UIControlType),
                     };
                     var handle = GCHandle.Alloc(data);
-                    ImGuiAPI.SetDragDropPayload("UIControlDragDrop", GCHandle.ToIntPtr(handle).ToPointer(), (uint)Marshal.SizeOf<ControlDragData>(), ImGuiCond_.ImGuiCond_None);
-                    ImGuiAPI.Text(itemData.Name);
+                    ImGuiAPI.SetDragDropPayload("UIControlCreateDragDrop", GCHandle.ToIntPtr(handle).ToPointer(), (uint)Marshal.SizeOf<ControlCreateDragData>(), ImGuiCond_.ImGuiCond_None);
+                    mDragItemName = itemData.Name;
+                    switch (mDragState)
+                    {
+                        case EDragState.Add:
+                            ImGuiAPI.PushStyleColor(ImGuiCol_.ImGuiCol_Text, StyleConfig.Instance.PassStringColor);
+                            break;
+                        case EDragState.Failed:
+                            ImGuiAPI.PushStyleColor(ImGuiCol_.ImGuiCol_Text, StyleConfig.Instance.ErrorStringColor);
+                            break;
+                        case EDragState.InsertAfter:
+                        case EDragState.InsertBefore:
+                            ImGuiAPI.PushStyleColor(ImGuiCol_.ImGuiCol_Text, 0xFF00FFFF);
+                            break;
+                        default:
+                            ImGuiAPI.PushStyleColor(ImGuiCol_.ImGuiCol_Text, StyleConfig.Instance.TextColor);
+                            break;
+                    }
+                    ImGuiAPI.Text(mDragTips);
+                    ImGuiAPI.PopStyleColor(1);
                     ImGuiAPI.EndDragDropSource();
                 }
             }
@@ -389,6 +452,10 @@ namespace EngineNS.UI.Editor
                 }
                 ImGuiAPI.TreePop();
             }
+        }
+        string GetElementShowName(TtUIElement element)
+        {
+            return "[" + element.GetType().Name + "] " + element.Name;
         }
         bool mDesignerShow = true;
         protected unsafe void DrawDesigner()
@@ -427,41 +494,53 @@ namespace EngineNS.UI.Editor
                     $"el:{UEngine.Instance.UIManager.DebugPointatElement}", null);
                 ////////////////////////////
                 UEngine.Instance.UIManager.DebugHitPt = new Vector2(UEngine.Instance.InputSystem.Mouse.EventMouseX, UEngine.Instance.InputSystem.Mouse.EventMouseY);
-                if (ImGuiAPI.BeginDragDropTarget())
+                var dragDropPayload = ImGuiAPI.GetDragDropPayload();
+                if (dragDropPayload != null)
                 {
-                    var payload = ImGuiAPI.AcceptDragDropPayload("UIControlDragDrop", ImGuiDragDropFlags_.ImGuiDragDropFlags_None);
-                    if(payload != null)
+                    var curPos = new Vector2(UEngine.Instance.InputSystem.Mouse.EventMouseX, UEngine.Instance.InputSystem.Mouse.EventMouseY);
+                    var element = mUIHost.GetPointAtElement(in curPos);
+                    if(element != null)
                     {
-                        var handle = GCHandle.FromIntPtr((IntPtr)(payload->Data));
-                        var data = (ControlDragData)handle.Target;
-                        var uiControl = UTypeDescManager.CreateInstance(UTypeDesc.TypeOf(data.TypeName)) as TtUIElement;
-                        
-                        //var curPos = ImGuiAPI.GetMousePos() - pos;
-                        var curPos = new Vector2(UEngine.Instance.InputSystem.Mouse.EventMouseX, UEngine.Instance.InputSystem.Mouse.EventMouseY);
-
-                        var element = mUIHost.GetPointAtElement(in curPos);
-                        TtContainer container = mUIHost;
-                        if(element != null)
+                        var container = element as TtContainer;
+                        if (container == null)
+                            container = element.Parent;
+                        var handle = GCHandle.FromIntPtr((IntPtr)(dragDropPayload->Data));
+                        if(handle.Target is ControlCreateDragData)
                         {
-                            container = element as TtContainer;
-                            if (container == null)
-                                container = element.Parent;
+                            mIsDragDroping = mIsDragDroping || true;
+                            var data = (ControlCreateDragData)handle.Target;
+                            var ctrlType = UTypeDesc.TypeOf(data.TypeName);
+                            var name = GetElementShowName(container);
+                            if (container.CanAddChild(ctrlType))
+                            {
+                                mDragTips = $"Add {mDragItemName} to {name}";
+                                mDragState = EDragState.Add;
+                                if (ImGuiAPI.BeginDragDropTarget())
+                                {
+                                    //var curPos = ImGuiAPI.GetMousePos() - pos;
+                                    DropToCreateUIControl(container, 0, mNewCreateUISize,
+                                        (container) =>
+                                        {
+                                            Vector2 offset;
+                                            container.GetElementPointAtPos(in curPos, out offset);
+                                            return offset;
+                                        });
+                                    ImGuiAPI.EndDragDropTarget();
+                                }
+                            }
+                            else
+                            {
+                                mDragTips = $"{name} can't add {mDragItemName}!";
+                                mDragState = EDragState.Failed;
+                            }
                         }
-
-                        if (container.CanAddChild(uiControl))
-                        {
-                            container.Children.Add(uiControl);
-                            Vector2 offset;
-                            container.GetElementPointAtPos(in curPos, out offset);
-                            container.ProcessNewAddChild(uiControl, offset, new Vector2(100, 50));
-                        }
-                        else
-                            ShowMessage($"{container.Name} can't add child");
-
-                        //handle.Free();
+                        //else
+                        //{
+                        //    mDragTips = mDragItemName;
+                        //    mDragState = EDragState.None;
+                        //}
                     }
                 }
-
                 for(int i = mMessages.Count - 1; i >= 0; i--)
                 {
                     mMessages[i].Tick(UEngine.Instance.ElapsedSecond);
@@ -499,24 +578,36 @@ namespace EngineNS.UI.Editor
                 ImGuiAPI.PushStyleColor(ImGuiCol_.ImGuiCol_Header, EGui.UIProxy.StyleConfig.Instance.TVHeader);
                 ImGuiAPI.PushStyleColor(ImGuiCol_.ImGuiCol_HeaderActive, EGui.UIProxy.StyleConfig.Instance.TVHeaderActive);
                 ImGuiAPI.PushStyleColor(ImGuiCol_.ImGuiCol_HeaderHovered, EGui.UIProxy.StyleConfig.Instance.TVHeaderHovered);
-                DrawUIElementInHierachy(mUIHost, 0);
+                int idx = 0;
+                DrawUIElementInHierachy(mUIHost, ref idx);
                 ImGuiAPI.PopStyleColor(3);
             }
             EGui.UIProxy.DockProxy.EndPanel();
         }
         void DrawHierachyContextMenu(TtUIElement element, string name)
         {
-            if(ImGuiAPI.BeginPopupContextWindow("##ContextMenu_" + name, ImGuiPopupFlags_.ImGuiPopupFlags_MouseButtonRight))
+            if(ImGuiAPI.IsItemClicked(ImGuiMouseButton_.ImGuiMouseButton_Right))
             {
-                var drawList = ImGuiAPI.GetWindowDrawList();
                 if (!mSelectedElements.Contains(element))
                     ProcessSelectElement(element, UEngine.Instance.InputSystem.IsCtrlKeyDown());
+                ImGuiAPI.OpenPopup("##ContextMenu_" + name, ImGuiPopupFlags_.ImGuiPopupFlags_None);
+            }
+            if(ImGuiAPI.BeginPopup("##ContextMenu_" + name, ImGuiWindowFlags_.ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_.ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_.ImGuiWindowFlags_NoSavedSettings))
+            {
+                var drawList = ImGuiAPI.GetWindowDrawList();
                 Support.UAnyPointer menuData = new Support.UAnyPointer();
-                if (EGui.UIProxy.MenuItemProxy.MenuItem("Delete##" + name, null, false, null, drawList, menuData, ref element.HierachyContextMenuState))
+                string menuName = "Delete ";
+                if (mSelectedElements.Count == 1)
+                    menuName += name;
+                else
+                    menuName += $"{mSelectedElements.Count} items";
+                if (EGui.UIProxy.MenuItemProxy.MenuItem(menuName, null, false, null, drawList, menuData, ref element.HierachyContextMenuState))
                 {
                     for(int i=0; i<mSelectedElements.Count; i++)
                     {
                         if (mSelectedElements[i] == mUIHost)
+                            continue;
+                        if (mSelectedElements[i].TemplateParent != null)
                             continue;
                         mSelectedElements[i].Parent.Children.Remove(mSelectedElements[i]);
                     }
@@ -525,67 +616,417 @@ namespace EngineNS.UI.Editor
                 ImGuiAPI.EndPopup();
             }
         }
-        void DrawUIElementInHierachy(TtUIElement element, int idx)
+        unsafe void DropToCreateUIControl(TtUIElement element, sbyte type, in Vector2 size, Func<TtContainer, Vector2> getOffsetFunc)
         {
+            TtContainer parent;
+            switch(type)
+            {
+                case -1:
+                case 1:
+                    parent = element.Parent;
+                    break;
+                default:
+                    parent = element as TtContainer;
+                    break;
+            }
+            if (parent == null)
+                return;
+            var payload = ImGuiAPI.AcceptDragDropPayload("UIControlCreateDragDrop", ImGuiDragDropFlags_.ImGuiDragDropFlags_None);
+            if (payload != null)
+            {
+                var handle = GCHandle.FromIntPtr((IntPtr)(payload->Data));
+                var data = (ControlCreateDragData)handle.Target;
+
+                var ctrlType = UTypeDesc.TypeOf(data.TypeName);
+                if (parent.CanAddChild(ctrlType))
+                {
+                    var uiControl = UTypeDescManager.CreateInstance(ctrlType) as TtUIElement;
+                    uiControl.Name = GetValidName(uiControl);
+                    switch(type)
+                    {
+                        case -1:
+                            {
+                                var idx = parent.Children.IndexOf(element);
+                                parent.Children.Insert(idx, uiControl);
+                            }
+                            break;
+                        case 0:
+                            parent.Children.Add(uiControl);
+                            break;
+                        case 1:
+                            {
+                                var idx = parent.Children.IndexOf(element);
+                                if (idx + 1 >= parent.Children.Count)
+                                    parent.Children.Add(uiControl);
+                                else
+                                    parent.Children.Insert(idx + 1, uiControl);
+                            }
+                            break;
+                    }
+                    Vector2 offset = getOffsetFunc.Invoke(parent);
+                    parent.ProcessNewAddChild(uiControl, offset, size);
+                }
+
+                //handle.Free();
+            }
+        }
+        unsafe bool CheckMoveDropValid(TtUIElement element, out sbyte type)
+        {
+            type = 0;
+            var dragDropPayload = ImGuiAPI.GetDragDropPayload();
+            if (dragDropPayload == null)
+            {
+                //mDragTips = mDragItemName;
+                //mDragState = EDragState.None;
+                return false;
+            }
+            if (!dragDropPayload->IsDataType("UIControlMoveDragDrop"))
+            {
+                //mDragTips = mDragItemName;
+                //mDragState = EDragState.None;
+                return false;
+            }
+            //if (ImGuiAPI.IsItemHovered(ImGuiHoveredFlags_.ImGuiHoveredFlags_AllowWhenBlockedByActiveItem))
+            {
+                var mousePos = ImGuiAPI.GetMousePos();
+                var itemMin = ImGuiAPI.GetItemRectMin();
+                var itemSize = ImGuiAPI.GetItemRectSize();
+                var delta = (mousePos - itemMin).Y / itemSize.Y;
+                if (delta < 0.2)
+                    type = -1;
+                else if (delta > 0.8)
+                    type = 1;
+                var name = GetElementShowName(element);
+                var container = element as TtContainer;
+                if (element.TemplateParent != null)
+                {
+                    mDragTips = $"Can't move {mDragItemName} into template element!";
+                    mDragState = EDragState.Failed;
+                    return false;
+                }
+                var handle = GCHandle.FromIntPtr((IntPtr)(dragDropPayload->Data));
+                var data = (ControlMoveDragData)handle.Target;
+                if(type != 0)
+                    container = element.Parent;
+                bool result = true;
+                if (container != null)
+                {
+                    for (int i = 0; i < data.Elements.Length; i++)
+                    {
+                        if (element == data.Elements[i])
+                        {
+                            result = false;
+                            break;
+                        }
+                        if (data.Elements[i].FindElement(element.Id) != null)
+                        {
+                            result = false;
+                            break;
+                        }
+                        result = result && container.CanAddChild(Rtti.UTypeDesc.TypeOf(data.Elements[i].GetType()));
+                    }
+                }
+                else
+                    result = false;
+                if (result)
+                {
+                    switch(type)
+                    {
+                        case -1:
+                            mDragState = EDragState.InsertBefore;
+                            mDragTips = $"Move {mDragItemName} before {name}";
+                            break;
+                        case 1:
+                            mDragState = EDragState.InsertAfter;
+                            mDragTips = $"Move {mDragItemName} after {name}";
+                            break;
+                        case 0:
+                            mDragState = EDragState.Add;
+                            mDragTips = $"Move {mDragItemName} into {name}";
+                            break;
+                    }
+                    return true;
+                }
+                else
+                {
+                    switch (type)
+                    {
+                        case -1:
+                            mDragTips = $"Can't move {mDragItemName} before {name}";
+                            break;
+                        case 1:
+                            mDragTips = $"Can't move {mDragItemName} after {name}";
+                            break;
+                        case 0:
+                            mDragTips = $"Can't move {mDragItemName} into {name}";
+                            break;
+                    }
+                    mDragState = EDragState.Failed;
+                    return false;
+                } 
+            }
+            //return false;
+        }
+        unsafe bool CheckCreateDropValid(TtUIElement element, out sbyte type)
+        {
+            type = 0;
+            var dragDropPayload = ImGuiAPI.GetDragDropPayload();
+            if (dragDropPayload == null)
+            {
+                //mDragTips = mDragItemName;
+                //mDragState = EDragState.None;
+                return false;
+            }
+            if (!dragDropPayload->IsDataType("UIControlCreateDragDrop"))
+            {
+                //mDragTips = mDragItemName;
+                //mDragState = EDragState.None;
+                return false;
+            }
+            //if (ImGuiAPI.IsItemHovered(ImGuiHoveredFlags_.ImGuiHoveredFlags_AllowWhenBlockedByActiveItem))
+            {
+                var mousePos = ImGuiAPI.GetMousePos();
+                var itemMin = ImGuiAPI.GetItemRectMin();
+                var itemSize = ImGuiAPI.GetItemRectSize();
+                var delta = (mousePos - itemMin).Y / itemSize.Y;
+                if (delta < 0.2)
+                    type = -1;
+                else if (delta > 0.8)
+                    type = 1;
+                var name = GetElementShowName(element);
+                var container = element as TtContainer;
+                if(element.TemplateParent != null)
+                {
+                    mDragTips = $"Can't add {mDragItemName} in template element!";
+                    mDragState = EDragState.Failed;
+                    return false;
+                }
+                var handle = GCHandle.FromIntPtr((IntPtr)(dragDropPayload->Data));
+                var data = (ControlCreateDragData)handle.Target;
+                var ctrlType = UTypeDesc.TypeOf(data.TypeName);
+                if (type != 0)
+                    container = element.Parent;
+                if (container != null && container.CanAddChild(ctrlType))
+                {
+                    switch (type)
+                    {
+                        case -1:
+                            mDragState = EDragState.InsertBefore;
+                            mDragTips = $"Insert {mDragItemName} before {name}";
+                            break;
+                        case 1:
+                            mDragState = EDragState.InsertAfter;
+                            mDragTips = $"Insert {mDragItemName} after {name}";
+                            break;
+                        case 0:
+                            mDragState = EDragState.Add;
+                            mDragTips = $"Add {mDragItemName} to {name}";
+                            break;
+                    }
+                    return true;
+                }
+                else
+                {
+                    switch (type)
+                    {
+                        case -1:
+                            mDragTips = $"Can't insert {mDragItemName} before {name}";
+                            break;
+                        case 1:
+                            mDragTips = $"Can't insert {mDragItemName} after {name}";
+                            break;
+                        case 0:
+                            mDragTips = $"{name} can't add {mDragItemName}!";
+                            break;
+                    }
+                    mDragState = EDragState.Failed;
+                    return false;
+                }
+            }
+        }
+        unsafe void DrawUIElementInHierachy(TtUIElement element, ref int idx)
+        {
+            if(element.TemplateParent != null)
+                ImGuiAPI.PushStyleColor(ImGuiCol_.ImGuiCol_Text, StyleConfig.Instance.TextDisableColor);
+            else
+                ImGuiAPI.PushStyleColor(ImGuiCol_.ImGuiCol_Text, StyleConfig.Instance.TextColor);
+
             var flags = ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_SpanFullWidth;
-            var name = "[" + element.GetType().Name + "] " + element.Name + "##" + idx++;
+            var name = GetElementShowName(element) + "##" + idx++;
             if (mSelectedElements.Contains(element))
                 flags |= ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_Selected;
             var container = element as TtContainer;
+            Vector2 itemMin = Vector2.Zero, itemMax = Vector2.Zero;
+            int childrenCount = 0;
             if(container != null)
             {
                 if(mShowTemplateControls)
                 {
-                    var count = VisualTreeHelper.GetChildrenCount(container);
-                    if(count == 0)
-                        flags |= ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_Leaf;
-                    var treeNodeResult = ImGuiAPI.TreeNodeEx(name, flags);
-                    if(ImGuiAPI.IsItemClicked(ImGuiMouseButton_.ImGuiMouseButton_Left))
-                    {
-                        ProcessSelectElement(element, UEngine.Instance.InputSystem.IsCtrlKeyDown());
-                    }
-                    DrawHierachyContextMenu(element, name);
-                    if (treeNodeResult)
-                    {
-                        for(int i=0; i<count; i++)
-                        {
-                            var child = VisualTreeHelper.GetChild(container, i);
-                            DrawUIElementInHierachy(child, idx);
-                        }
-                        ImGuiAPI.TreePop();
-                    }
+                    childrenCount = VisualTreeHelper.GetChildrenCount(container);
                 }
                 else
                 {
-                    if(container.Children.Count == 0)
-                        flags |= ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_Leaf;
-                    var treeNodeResult = ImGuiAPI.TreeNodeEx(name, flags);
-                    if(ImGuiAPI.IsItemClicked(ImGuiMouseButton_.ImGuiMouseButton_Left))
-                    {
-                        ProcessSelectElement(element, UEngine.Instance.InputSystem.IsCtrlKeyDown());
-                    }
-                    DrawHierachyContextMenu(element, name);
-                    if (treeNodeResult)
-                    {
-                        for (int i=0; i< container.Children.Count; i++)
-                        {
-                            DrawUIElementInHierachy(container.Children[i], idx);
-                        }
-                        ImGuiAPI.TreePop();
-                    }
+                    childrenCount = container.Children.Count;
                 }
             }
-            else
-            {
+
+            if (childrenCount == 0)
                 flags |= ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_Leaf;
-                if(ImGuiAPI.TreeNodeEx(name, flags))
+            var treeNodeResult = ImGuiAPI.TreeNodeEx(name, flags);
+            itemMin = ImGuiAPI.GetItemRectMin();
+            itemMax = ImGuiAPI.GetItemRectMax();
+
+            if (ImGuiAPI.IsItemClicked(ImGuiMouseButton_.ImGuiMouseButton_Left))
+            {
+                ProcessSelectElement(element, UEngine.Instance.InputSystem.IsCtrlKeyDown());
+            }
+            if (ImGuiAPI.BeginDragDropTarget())
+            {
+                mIsDragDroping = mIsDragDroping || true;
+                sbyte dropType = 0;
+                if(CheckCreateDropValid(element, out dropType))
                 {
-                    DrawHierachyContextMenu(element, name);
-                    if (ImGuiAPI.IsItemClicked(ImGuiMouseButton_.ImGuiMouseButton_Left))
+                    DropToCreateUIControl(element, dropType, mNewCreateUISize,
+                        (container) =>
+                        {
+                            return new Vector2(0, 0);
+                        });
+                }
+                DrawInsertLine(dropType, itemMin, itemMax);
+
+                if (CheckMoveDropValid(element, out dropType))
+                {
+                    TtContainer parent;
+                    switch (dropType)
                     {
-                        ProcessSelectElement(element, UEngine.Instance.InputSystem.IsCtrlKeyDown());
+                        case -1:
+                        case 1:
+                            parent = element.Parent;
+                            break;
+                        default:
+                            parent = element as TtContainer;
+                            break;
                     }
-                    ImGuiAPI.TreePop();
+                    if (parent != null)
+                    {
+                        var payload = ImGuiAPI.AcceptDragDropPayload("UIControlMoveDragDrop", ImGuiDragDropFlags_.ImGuiDragDropFlags_None);
+                        if(payload != null)
+                        {
+                            var handle = GCHandle.FromIntPtr((IntPtr)(payload->Data));
+                            var data = (ControlMoveDragData)handle.Target;
+                            for(int i=0; i<data.Elements.Length; i++)
+                            {
+                                switch(dropType)
+                                {
+                                    case -1:
+                                        {
+                                            data.Elements[i].Parent.Children.Remove(data.Elements[i]);
+                                            var childIdx = parent.Children.IndexOf(element);
+                                            parent.Children.Insert(childIdx, data.Elements[i]);
+                                        }
+                                        break;
+                                    case 0:
+                                        parent.Children.Add(data.Elements[i]);
+                                        break;
+                                    case 1:
+                                        {
+                                            data.Elements[i].Parent.Children.Remove(data.Elements[i]);
+                                            var childIdx = parent.Children.IndexOf(element);
+                                            if (childIdx + 1 >= parent.Children.Count)
+                                                parent.Children.Add(data.Elements[i]);
+                                            else
+                                                parent.Children.Insert(childIdx + 1, data.Elements[i]);
+                                        }
+                                        break;
+                                }
+                                // calculate offset
+                                Vector2 offset;
+                                data.Elements[i].GetOffsetFromElement(parent, out offset);
+                                parent.ProcessNewAddChild(data.Elements[i], offset, mNewCreateUISize);
+                            }
+                        }
+                    }
+                }
+                DrawInsertLine(dropType, itemMin, itemMax);
+                ImGuiAPI.EndDragDropTarget();
+            }
+            //else
+            //{
+            //    mDragTips = mDragItemName;
+            //    mDragState = EDragState.None;
+            //}
+            if (ImGuiAPI.BeginDragDropSource(ImGuiDragDropFlags_.ImGuiDragDropFlags_SourceNoDisableHover))
+            {
+                var data = new ControlMoveDragData();
+                data.Elements = new TtUIElement[mSelectedElements.Count];
+                mSelectedElements.CopyTo(data.Elements, 0);
+                var handle = GCHandle.Alloc(data);
+                ImGuiAPI.SetDragDropPayload("UIControlMoveDragDrop", GCHandle.ToIntPtr(handle).ToPointer(), (uint)Marshal.SizeOf<ControlMoveDragData>(), ImGuiCond_.ImGuiCond_None);
+                mDragItemName = (mSelectedElements.Count == 1) ? GetElementShowName(mSelectedElements[0]) : (mSelectedElements.Count + " items");
+                switch (mDragState)
+                {
+                    case EDragState.Add:
+                        ImGuiAPI.PushStyleColor(ImGuiCol_.ImGuiCol_Text, StyleConfig.Instance.PassStringColor);
+                        break;
+                    case EDragState.Failed:
+                        ImGuiAPI.PushStyleColor(ImGuiCol_.ImGuiCol_Text, StyleConfig.Instance.ErrorStringColor);
+                        break;
+                    case EDragState.InsertAfter:
+                    case EDragState.InsertBefore:
+                        ImGuiAPI.PushStyleColor(ImGuiCol_.ImGuiCol_Text, 0xFF00FFFF);
+                        break;
+                    default:
+                        ImGuiAPI.PushStyleColor(ImGuiCol_.ImGuiCol_Text, StyleConfig.Instance.TextColor);
+                        break;
+                }
+                ImGuiAPI.Text(mDragTips);
+                ImGuiAPI.PopStyleColor(1);
+                ImGuiAPI.EndDragDropSource();
+            }
+            DrawHierachyContextMenu(element, name);
+            if (treeNodeResult)
+            {
+                if(container != null)
+                {
+                    if(mShowTemplateControls)
+                    {
+                        for (int i = 0; i < VisualTreeHelper.GetChildrenCount(container); i++)
+                        {
+                            var child = VisualTreeHelper.GetChild(container, i);
+                            DrawUIElementInHierachy(child, ref idx);
+                        }
+                    }
+                    else
+                    {
+                        for (int i = 0; i < container.Children.Count; i++)
+                        {
+                            DrawUIElementInHierachy(container.Children[i], ref idx);
+                        }
+                    }
+                }
+                ImGuiAPI.TreePop();
+            }
+
+            ImGuiAPI.PopStyleColor(1);
+        }
+        void DrawInsertLine(sbyte dropType, in Vector2 itemMin, in Vector2 itemMax)
+        {
+            if(mDragState != EDragState.Failed)
+            {
+                switch(dropType)
+                {
+                    case -1:
+                        {
+                            var drawList = ImGuiAPI.GetWindowDrawList();
+                            drawList.AddLine(itemMin, new Vector2(itemMax.X, itemMin.Y), 0xFF00FFFF, 1.0f);
+                        }
+                        break;
+                    case 1:
+                        {
+                            var drawList = ImGuiAPI.GetWindowDrawList();
+                            drawList.AddLine(new Vector2(itemMin.X, itemMax.Y), new Vector2(itemMax.X, itemMax.Y), 0xFF00FFFF, 1.0f);
+                        }
+                        break;
                 }
             }
         }

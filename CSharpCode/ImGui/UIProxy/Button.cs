@@ -62,7 +62,7 @@ namespace EngineNS.EGui.UIProxy
             var size = ImGuiAPI.CalcItemSize(ref mSize, ImageSize.X + style->FramePadding.X * 2.0f, ImageSize.Y + style->FramePadding.Y * 2.0f);
             var rectEnd = rectStart + size;
 
-            ImGuiAPI.ItemSize(in size, style->FramePadding.Y);
+            ImGuiAPI.ItemSize(in size, 0);
             if (!ImGuiAPI.ItemAdd(in rectStart, in rectEnd, id, 0))
                 return false;
 
@@ -109,7 +109,7 @@ namespace EngineNS.EGui.UIProxy
             size = ImGuiAPI.CalcItemSize(ref size, label_size.X + style->FramePadding.X * 2.0f, label_size.Y + style->FramePadding.Y * 2.0f);
             var rectEnd = rectStart + size;
 
-            ImGuiAPI.ItemSize(in size, style->FramePadding.Y);
+            ImGuiAPI.ItemSize(in size, 0);
             if (!ImGuiAPI.ItemAdd(in rectStart, in rectEnd, id, 0))
                 return false;
 
@@ -141,7 +141,7 @@ namespace EngineNS.EGui.UIProxy
             size = ImGuiAPI.CalcItemSize(ref size, label_size.X + style->FramePadding.X * 2.0f, label_size.Y + style->FramePadding.Y * 2.0f);
             var rectEnd = rectStart + size;
 
-            ImGuiAPI.ItemSize(in size, style->FramePadding.Y);
+            ImGuiAPI.ItemSize(in size, 0);
             if (!ImGuiAPI.ItemAdd(in rectStart, in rectEnd, id, 0))
                 return false;
 
@@ -154,6 +154,57 @@ namespace EngineNS.EGui.UIProxy
                 color = hightLightColor;
 
             var drawList = ImGuiAPI.GetWindowDrawList();
+            var pos = rectStart + (size - label_size) * 0.5f;
+            drawList.AddText(in pos, color, label, null);
+
+            return pressed;
+        }
+        public unsafe static bool ToolButton(
+            string label, 
+            in Vector2 size_arg, 
+            uint textColor,
+            uint textPressedColor,
+            uint textHoveredColor,
+            uint backgroundColor, 
+            uint backgroundPressedColor, 
+            uint backgroundHoveredColor,
+            float backgroundRounding = 5,
+            ImDrawFlags_ backgroundDrawFlags = ImDrawFlags_.ImDrawFlags_None,
+            string idStr = null)
+        {
+            var rectStart = ImGuiAPI.GetCursorScreenPos();
+            var label_size = ImGuiAPI.CalcTextSize(label, false, 0);
+            uint id;
+            if (string.IsNullOrEmpty(idStr))
+                id = ImGuiAPI.GetID("#Button" + label);
+            else
+                id = ImGuiAPI.GetID(idStr);
+            var style = ImGuiAPI.GetStyle();
+            Vector2 size = size_arg;
+            size = ImGuiAPI.CalcItemSize(ref size, label_size.X + style->FramePadding.X * 2.0f, label_size.Y + style->FramePadding.Y * 2.0f);
+            var rectEnd = rectStart + size;
+
+            ImGuiAPI.ItemSize(in size, 0);
+            if (!ImGuiAPI.ItemAdd(in rectStart, in rectEnd, id, 0))
+                return false;
+
+            bool hovered = false, held = false;
+            var pressed = ImGuiAPI.ButtonBehavior(in rectStart, in rectEnd, id, ref hovered, ref held, ImGuiButtonFlags_.ImGuiButtonFlags_MouseButtonLeft);
+            var color = textColor;
+            var bgColor = backgroundColor;
+            if (pressed)
+            {
+                color = textPressedColor;
+                bgColor = backgroundPressedColor;
+            }
+            else if (hovered)
+            {
+                color = textHoveredColor;
+                bgColor = backgroundHoveredColor;
+            }
+
+            var drawList = ImGuiAPI.GetWindowDrawList();
+            drawList.AddRectFilled(rectStart, rectEnd, bgColor, backgroundRounding, backgroundDrawFlags);
             var pos = rectStart + (size - label_size) * 0.5f;
             drawList.AddText(in pos, color, label, null);
 
@@ -173,7 +224,7 @@ namespace EngineNS.EGui.UIProxy
             size = ImGuiAPI.CalcItemSize(ref size, label_size.X + style->FramePadding.X * 2.0f, label_size.Y + style->FramePadding.Y * 2.0f);
             var rectEnd = rectStart + size;
 
-            ImGuiAPI.ItemSize(in size, style->FramePadding.Y);
+            ImGuiAPI.ItemSize(in size, 0);
             if (!ImGuiAPI.ItemAdd(in rectStart, in rectEnd, id, 0))
                 return false;
 

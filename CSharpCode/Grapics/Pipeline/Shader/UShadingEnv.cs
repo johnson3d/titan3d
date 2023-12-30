@@ -25,6 +25,7 @@ namespace EngineNS.Graphics.Pipeline.Shader
         PST_F4_2,
         PST_F4_3,
         PST_SpecialData,
+        PST_InstanceID,
 
         PST_Number,
     }

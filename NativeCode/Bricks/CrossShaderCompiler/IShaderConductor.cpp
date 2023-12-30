@@ -244,11 +244,21 @@ bool IShaderConductor::CompileHLSL(NxRHI::FShaderCompiler* compiler, NxRHI::FSha
 		}
 	}
 
+	std::string finalDxcArgs;
+	if (dxcArgs != nullptr)
+	{
+		finalDxcArgs = dxcArgs;
+		if (finalDxcArgs[finalDxcArgs.size() - 1] != ' ')
+		{
+			finalDxcArgs += ' ';
+		}
+	}
+
 	ShaderConductor::Compiler::SourceDesc src{};
 	src.source = codeText.c_str();
 	src.entryPoint = entry;
 	src.hlslExtVersion = extHlslVersion;
-	src.dxcArgString = dxcArgs;
+	//src.dxcArgString = dxcArgs;
 	src.stage = stage;
 	src.fileName = hlsl;
 	src.loadIncludeCallback = [=](const char* includeName)->ShaderConductor::Blob
@@ -321,19 +331,29 @@ bool IShaderConductor::CompileHLSL(NxRHI::FShaderCompiler* compiler, NxRHI::FSha
 			result.push_back(tmp2);
 			break;
 		case NxRHI::EShaderLanguage::SL_GLSL:
+			if (opt.shaderModel.major_ver >= 6)
+			{
+				finalDxcArgs += "-fspv-target-env=vulkan1.2 ";
+			}
 			tmp.version = essl_version.c_str();
 			tmp.language = ShaderConductor::ShadingLanguage::Essl;
 			dest.push_back(tmp);
 			result.push_back(tmp2);
 			break;
 		case NxRHI::EShaderLanguage::SL_SPIRV:
-			//tmp.version = "6_2";
+			if (opt.shaderModel.major_ver >= 6)
+			{
+				finalDxcArgs += "-fspv-target-env=vulkan1.2 ";
+			}
 			tmp.language = ShaderConductor::ShadingLanguage::SpirV;
 			dest.push_back(tmp);
 			result.push_back(tmp2);
 			break;
 		case NxRHI::EShaderLanguage::SL_METAL:
-			//tmp.version = "6_2";
+			if (opt.shaderModel.major_ver >= 6)
+			{
+				finalDxcArgs += "-fspv-target-env=vulkan1.2 ";
+			}
 			tmp.language = ShaderConductor::ShadingLanguage::Msl_iOS;
 			dest.push_back(tmp);
 			result.push_back(tmp2);
@@ -342,6 +362,7 @@ bool IShaderConductor::CompileHLSL(NxRHI::FShaderCompiler* compiler, NxRHI::FSha
 			break;
 	}
 
+	src.dxcArgString = finalDxcArgs.c_str();
 	ShaderConductor::Compiler::Compile(src, opt, &dest[0], (uint32_t)dest.size(), &result[0]);
 
 	for (size_t i = 0; i < result.size(); i++)

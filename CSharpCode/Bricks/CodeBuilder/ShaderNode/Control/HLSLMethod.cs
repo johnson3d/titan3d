@@ -456,6 +456,30 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Control
             localVertexOffset = Vector3.Zero;
             rotationAngle = 0.0f;
         }
+
+        [Rtti.Meta]
+        [TtHLSLProvider(Name = "Pivot_WindAnimation_Sway")]
+        [ContextMenu("Pivot_WindAnimation_Sway", "Pivot\\WindAnimation_Sway", UMaterialGraph.MaterialEditorKeyword)]
+        public static void Pivot_WindAnimation_Sway( Vector3 windSwayDirection, float windSwayGustFrequency, float windSwayIntensity, Vector3 localPoss, out Vector3 localVertexOffset )
+        {
+            localVertexOffset = Vector3.Zero;
+        }
+
+        [Rtti.Meta]
+        [TtHLSLProvider(Name = "Pivot_WindAnimation_Sway2")]
+        [ContextMenu("Pivot_WindAnimation_Sway2", "Pivot\\WindAnimation_Sway2", UMaterialGraph.MaterialEditorKeyword)]
+        public static void Pivot_WindAnimation_Sway2(Vector3 windSwayDirection, float windSwayGustFrequency, float windSwayIntensity, Vector3 localPos, float time, out Vector3 localVertexOffset)
+        {
+            localVertexOffset = Vector3.Zero;
+        }
+
+        [Rtti.Meta]
+        [TtHLSLProvider(Name = "Pivot_WindAnimation_Rustle")]
+        [ContextMenu("Pivot_WindAnimation_Rustle", "Pivot\\WindAnimation_Rustle", UMaterialGraph.MaterialEditorKeyword)]
+        public static void Pivot_WindAnimation_Rustle(float windSpeed, float windIntensity, Vector3 localPos, float time, out Vector3 localVertexOffset)
+        {
+            localVertexOffset = Vector3.Zero;
+        }
     }
     public partial class TtHLSLMethodManager
     {

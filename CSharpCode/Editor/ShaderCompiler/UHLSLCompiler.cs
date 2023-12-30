@@ -242,6 +242,8 @@ namespace EngineNS.Editor.ShaderCompiler
                     return "USE_PS_F4_3";
                 case Graphics.Pipeline.Shader.EPixelShaderInput.PST_SpecialData:
                     return "USE_PS_SpecialData";
+                case Graphics.Pipeline.Shader.EPixelShaderInput.PST_InstanceID:
+                    return "USE_PS_InstanceID";
             }
             return null;
         }

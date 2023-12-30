@@ -7,7 +7,7 @@ namespace EngineNS.UI
 {
     public class TtUIMacrossBase
     {
-        TtUIElement HostElement;
+        public TtUIElement HostElement;
         public virtual void InitializeEvents()
         {
             TtButton element = HostElement.FindElement("xx") as TtButton;
