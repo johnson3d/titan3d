@@ -4,6 +4,11 @@
 #include "../../Inc/VertexLayout.cginc"
 #include "FRaster.cginc"
 
+#if HLSL_VERSION >= 2021
+#include "../../Inc/Algorithm/WaveTask.cginc"
+#include "../../Inc/Algorithm/Queue.cginc"
+#endif
+
 struct HZBCullData
 {
     float3	RectMin;
@@ -81,7 +86,11 @@ bool IsVisible(uint clusterId)
 }
 
 groupshared uint MaxSrcCount;
-
+ByteAddressBuffer DataBufferTest;
+RWByteAddressBuffer DataBufferTestWrite;
+/**Meta Begin:(CS_ClusterCullingMain)
+HLSL=2021
+Meta End:(CS_ClusterCullingMain)**/
 [numthreads(DispatchX, DispatchY, DispatchZ)]
 void CS_ClusterCullingMain(uint DispatchThreadId : SV_DispatchThreadID, uint3 LocalThreadId : SV_GroupThreadID, uint3 GroupId : SV_GroupID)
 {
@@ -107,6 +116,27 @@ void CS_ClusterCullingMain(uint DispatchThreadId : SV_DispatchThreadID, uint3 Lo
     //VisClusterBuffer&ClusterBuffer [0] is the count of array
     VisClusterBuffer.Store((1 + index) * 4, clusterId);
     //VisClusterBuffer.Store(4, 1);
+    
+    //only test code
+#if HLSL_VERSION >= 2021    
+    TtTestTask task;
+    DoTasks(task, 0, 3);
+    
+    TtQueueReadProxyTest provider;
+    provider.DataBufferWrite = DataBufferTestWrite;
+    
+    TtQueueReadProxy2<TtQueueReadProxyTest> q;
+    q.Init(provider);
+    q.DataBuffer = DataBufferTest;
+    uint a = q.Dequeue1();
+#else
+    //TtQueueReadProxyTest q;
+    //q.Init();
+    //q.DataBuffer = DataBufferTest;
+    //q.DataBufferWrite = DataBufferTestWrite;
+    //uint a = q.Dequeue1();
+#endif
+    
 }
 
 #endif//_CLUSTER_CULLING_H_

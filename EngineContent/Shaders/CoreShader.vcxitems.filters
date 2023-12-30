@@ -456,6 +456,9 @@
     <None Include="$(MSBuildThisFileDirectory)Inc\Algorithm\WaveTask.cginc">
       <Filter>Inc\Algorithm</Filter>
     </None>
+    <None Include="$(MSBuildThisFileDirectory)Inc\Algorithm\Queue.cginc">
+      <Filter>Inc\Algorithm</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="$(MSBuildThisFileDirectory)Compute\calcrate.compute">

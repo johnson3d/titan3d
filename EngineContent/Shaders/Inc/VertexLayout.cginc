@@ -209,6 +209,10 @@ struct PS_INPUT
 	VK_LOCATION(16) nointerpolation uint4 SpecialData : TEXCOORD13;
 #endif
 	
+#if USE_PS_Instance == 1
+	VK_LOCATION(17) uint vInstanceID : TEXCOORD14;
+#endif    
+	
     void SetNormal(float3 v)
     {
 #if USE_PS_Normal == 1
@@ -317,6 +321,10 @@ void Default_VSInput2PSInput(inout PS_INPUT output, VS_MODIFIER input)
 
 #if USE_VS_F4_3 == 1 && USE_PS_F4_3 == 1
 	output.vF4_3 = input.vF4_3;
+#endif
+	
+#if USE_PS_Instance == 1
+	output.vInstanceID = input.vInstanceId;
 #endif
 }
 

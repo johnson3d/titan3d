@@ -39,6 +39,7 @@
     <None Include="$(MSBuildThisFileDirectory)Gizmos.shadingenv" />
     <None Include="$(MSBuildThisFileDirectory)HitProxy.shadingenv" />
     <None Include="$(MSBuildThisFileDirectory)HitProxyAxis.shadingenv" />
+    <None Include="$(MSBuildThisFileDirectory)Inc\Algorithm\Queue.cginc" />
     <None Include="$(MSBuildThisFileDirectory)Inc\Algorithm\WaveTask.cginc" />
     <None Include="$(MSBuildThisFileDirectory)Inc\BaseStructure\Box2.cginc" />
     <None Include="$(MSBuildThisFileDirectory)Inc\FogCommon.cginc" />

@@ -1083,6 +1083,62 @@ void Pivot_WindAnimationHierarchy(
 	Pivot_WindAnimation(prePos,posTex, xTex, samp, uv,mask, windTex, scale, speedX, windAxisX, speedY, windAxisY,localPos, rot, rotOffset, parentRot,axisScale, axisSpeedScale,localVertexOffset, rotationAngle);
 }
 
+void Pivot_WindAnimation_Sway(
+	float3 windSwayDirection, float windSwayGustFrequency, float windSwayIntensity, 
+	float3 localPos, out float3 localVertexOffset
+)
+{
+	float3 pivotPos = float3(0,0,0);
+	// rotation axis
+	float3 rotationAxis = normalize(windSwayDirection);
+	// rotation angle
+	float rotationAngle = (sin(Time * windSwayGustFrequency) + 4.0f)/4.0f * windSwayIntensity;
+
+	// rotation position & normal
+	float3 currPos = localPos;
+	RotateAboutAxis(rotationAxis, rotationAngle, pivotPos, currPos, localVertexOffset);
+}
+
+void Pivot_WindAnimation_Sway2(
+	float3 windSwayDirection, float windSwayGustFrequency, float windSwayIntensity, 
+	float3 localPos, float time, out float3 localVertexOffset
+)
+{
+	float3 pivotPos = float3(0,0,0);
+	// rotation axis
+	float3 rotationAxis = normalize(windSwayDirection);
+	// rotation angle
+	// float rotationAngle = (sin(time * windSwayGustFrequency) + 4.0f)/4.0f * windSwayIntensity;
+	float rotationAngle = (sin(time * windSwayGustFrequency) * 3.14f / 180.0f) * 4.0f * windSwayIntensity;
+
+	// rotation position & normal
+	float3 currPos = localPos;
+	RotateAboutAxis(rotationAxis, rotationAngle, pivotPos, currPos, localVertexOffset);
+}
+
+void Pivot_WindAnimation_Rustle(float windSpeed, float windIntensity, float3 localPos, float time, out float3 localVertexOffset)
+{
+	float3 zAxis = float3(0,0,1);
+	float3 yAxis = float3(0,1,0);
+	float3 rotationAxis =cross(zAxis, yAxis);
+
+	float3 pivotPos = float3(0,-0.1f,0);
+	// rotation angle
+	float windDistance = time * windSpeed * -0.5f;
+	float zWindDistance = zAxis * windDistance;
+	float3 deltaWindOffset = abs(frac(windDistance + localPos / 2.0f + 0.5f) * 2.0f - 1.0f);
+	float3 zDeltaWindOffset = abs(frac(zWindDistance + localPos / 10.0f + 0.5f) * 2.0f - 1.0f);
+	float rotationAngle1 = length((3.0f - deltaWindOffset*2.0f) * deltaWindOffset * deltaWindOffset);
+	float rotationAngle2 = dot(zAxis, (3.0f - zDeltaWindOffset*2.0f) * zDeltaWindOffset * zDeltaWindOffset);
+	float rotationAngle = rotationAngle1 + rotationAngle2;
+
+	// rotation position & normal
+	float3 currPos = localPos;
+	RotateAboutAxis(rotationAxis, rotationAngle, pivotPos, currPos, localVertexOffset);
+	localVertexOffset = localVertexOffset * windIntensity;
+}
+
+
 //void GetGridUV(float2 uv, float4 lightmapUV, float2 min, float2 max, out float2 outUV)
 //{
 //	float2 u = float2(lightmapUV.x, lightmapUV.y);

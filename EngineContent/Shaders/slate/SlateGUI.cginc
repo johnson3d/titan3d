@@ -22,7 +22,7 @@ struct PS_INPUT
 VK_BIND(0) Texture2D FontTexture DX_AUTOBIND;
 VK_BIND(1) sampler Samp_FontTexture DX_AUTOBIND;
 /**Meta Begin:(VS_Main)
-HLSL=none
+HLSL=2021
 Meta End:(VS_Main)**/
 PS_INPUT VS_Main(VS_INPUT input)
 {
@@ -35,7 +35,7 @@ PS_INPUT VS_Main(VS_INPUT input)
 }
 
 /**Meta Begin:(PS_Main)
-HLSL=none
+HLSL=2021
 Meta End:(PS_Main)**/
 float4 PS_Main(PS_INPUT input) : SV_Target
 {
