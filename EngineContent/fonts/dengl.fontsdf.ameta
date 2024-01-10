@@ -1,9 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Root Type="EngineNS.Bricks.Font.TtFontSDFAMeta@EngineCore">
-  <AssetId Type="System.Guid@Unknown" Value="9a3895dd-b419-43eb-a671-291d5fe99293" />
+  <AssetId Type="System.Guid@Unknown" Value="75644621-5452-4b96-ac0a-67b109c61978" />
   <Description Type="System.String@Unknown" Value="This is a EngineNS.Bricks.Font.TtFontSDFAMeta&#xA;" />
   <Icon Type="EngineNS.EGui.UUvAnim@EngineCore">
     <Color Type="System.UInt32@Unknown" Value="4294967295" />
+    <Duration Type="System.Single@Unknown" Value="1000" />
     <FrameUVs Type="System.Collections.Generic.List&lt;EngineNS.Vector4@EngineCore,&gt;@Unknown" Count="1">
       <e_0 Value="0,0,1,1" />
     </FrameUVs>

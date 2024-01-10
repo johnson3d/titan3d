@@ -5,7 +5,7 @@ struct PS_OUTPUT
 {
 	float4 RT0 : SV_Target0;//R8G8B8A8:abedo.rgb - metallicty
 	float4 RT1 : SV_Target1;//R10G10B10A2:normal.xyz - Flags
-	float4 RT2 : SV_Target2;//R8G8B8A8:Roughness,Emissive,Specular,unused
+	float4 RT2 : SV_Target2;//R8G8B8A8:Roughness,Specular,unused
 	float4 RT3 : SV_Target3;//R10G10B10A2:motion.xy,unused,unused
 };
 

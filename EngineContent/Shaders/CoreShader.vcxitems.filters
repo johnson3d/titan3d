@@ -37,9 +37,6 @@
     <Filter Include="Slate">
       <UniqueIdentifier>{d6631b02-db35-4779-9fd1-4990852451ae}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Deprecated">
-      <UniqueIdentifier>{238a4f6f-2f51-46a4-8297-0cd21906895f}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Compute\ScreenSpace">
       <UniqueIdentifier>{ee68111c-9e4c-4a7c-a3bb-0be586fa6485}</UniqueIdentifier>
     </Filter>
@@ -218,105 +215,6 @@
     </None>
     <None Include="$(MSBuildThisFileDirectory)ShadingEnv\Deferred\DeferredOpaque.cginc">
       <Filter>ShadingEnv\Deffered</Filter>
-    </None>
-    <None Include="$(MSBuildThisFileDirectory)Gizmos.shadingenv">
-      <Filter>Deprecated</Filter>
-    </None>
-    <None Include="$(MSBuildThisFileDirectory)HitProxy.shadingenv">
-      <Filter>Deprecated</Filter>
-    </None>
-    <None Include="$(MSBuildThisFileDirectory)HitProxyAxis.shadingenv">
-      <Filter>Deprecated</Filter>
-    </None>
-    <None Include="$(MSBuildThisFileDirectory)MobileAoBlurH.shadingenv">
-      <Filter>Deprecated</Filter>
-    </None>
-    <None Include="$(MSBuildThisFileDirectory)MobileAoBlurV.shadingenv">
-      <Filter>Deprecated</Filter>
-    </None>
-    <None Include="$(MSBuildThisFileDirectory)MobileAoMask.shadingenv">
-      <Filter>Deprecated</Filter>
-    </None>
-    <None Include="$(MSBuildThisFileDirectory)MobileBloomBlurH.shadingenv">
-      <Filter>Deprecated</Filter>
-    </None>
-    <None Include="$(MSBuildThisFileDirectory)MobileBloomBlurV.shadingenv">
-      <Filter>Deprecated</Filter>
-    </None>
-    <None Include="$(MSBuildThisFileDirectory)MobileBloomDS.shadingenv">
-      <Filter>Deprecated</Filter>
-    </None>
-    <None Include="$(MSBuildThisFileDirectory)MobileBloomSetUp.shadingenv">
-      <Filter>Deprecated</Filter>
-    </None>
-    <None Include="$(MSBuildThisFileDirectory)MobileBloomUS.shadingenv">
-      <Filter>Deprecated</Filter>
-    </None>
-    <None Include="$(MSBuildThisFileDirectory)MobileCopy.shadingenv">
-      <Filter>Deprecated</Filter>
-    </None>
-    <None Include="$(MSBuildThisFileDirectory)MobileCopyEditor.shadingenv">
-      <Filter>Deprecated</Filter>
-    </None>
-    <None Include="$(MSBuildThisFileDirectory)MobileCustomTranslucent.shadingenv">
-      <Filter>Deprecated</Filter>
-    </None>
-    <None Include="$(MSBuildThisFileDirectory)MobileCustomTranslucentEditor.shadingenv">
-      <Filter>Deprecated</Filter>
-    </None>
-    <None Include="$(MSBuildThisFileDirectory)MobileOpaqueEditor.shadingenv">
-      <Filter>Deprecated</Filter>
-    </None>
-    <None Include="$(MSBuildThisFileDirectory)MobileSky.shadingenv">
-      <Filter>Deprecated</Filter>
-    </None>
-    <None Include="$(MSBuildThisFileDirectory)MobileSunShaftBlur.shadingenv">
-      <Filter>Deprecated</Filter>
-    </None>
-    <None Include="$(MSBuildThisFileDirectory)MobileSunShaftMask.shadingenv">
-      <Filter>Deprecated</Filter>
-    </None>
-    <None Include="$(MSBuildThisFileDirectory)MobileTranslucent.shadingenv">
-      <Filter>Deprecated</Filter>
-    </None>
-    <None Include="$(MSBuildThisFileDirectory)PickedBlurH.shadingenv">
-      <Filter>Deprecated</Filter>
-    </None>
-    <None Include="$(MSBuildThisFileDirectory)PickedBlurV.shadingenv">
-      <Filter>Deprecated</Filter>
-    </None>
-    <None Include="$(MSBuildThisFileDirectory)PickedHollow.shadingenv">
-      <Filter>Deprecated</Filter>
-    </None>
-    <None Include="$(MSBuildThisFileDirectory)PickedSetUp.shadingenv">
-      <Filter>Deprecated</Filter>
-    </None>
-    <None Include="$(MSBuildThisFileDirectory)SceneCapture.shadingenv">
-      <Filter>Deprecated</Filter>
-    </None>
-    <None Include="$(MSBuildThisFileDirectory)Snapshot.shadingenv">
-      <Filter>Deprecated</Filter>
-    </None>
-    <None Include="$(MSBuildThisFileDirectory)SSM.shadingenv">
-      <Filter>Deprecated</Filter>
-    </None>
-    <None Include="$(MSBuildThisFileDirectory)UFOMobileCopy.shadingenv">
-      <Filter>Deprecated</Filter>
-    </None>
-    <None Include="$(MSBuildThisFileDirectory)UFOMobileOpaque.shadingenv">
-      <Filter>Deprecated</Filter>
-    </None>
-    <None Include="$(MSBuildThisFileDirectory)UFOMobileOpaqueNPR.shadingenv">
-      <Filter>Deprecated</Filter>
-    </None>
-    <None Include="$(MSBuildThisFileDirectory)UFOMobileOutlineNPR.shadingenv">
-      <Filter>Deprecated</Filter>
-    </None>
-    <None Include="$(MSBuildThisFileDirectory)UFOMobileTranslucent.shadingenv">
-      <Filter>Deprecated</Filter>
-    </None>
-    <None Include="$(MSBuildThisFileDirectory)UFOMobileTranslucentNPR.shadingenv">
-      <Filter>Deprecated</Filter>
     </None>
     <None Include="$(MSBuildThisFileDirectory)ShadingEnv\DummyShading.cginc">
       <Filter>ShadingEnv</Filter>

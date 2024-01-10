@@ -36,9 +36,6 @@
     <None Include="$(MSBuildThisFileDirectory)Compute\GpuDriven\VertexShaderVTF.cginc" />
     <None Include="$(MSBuildThisFileDirectory)Font.shadingenv" />
     <None Include="$(MSBuildThisFileDirectory)FSBase.shadingenv" />
-    <None Include="$(MSBuildThisFileDirectory)Gizmos.shadingenv" />
-    <None Include="$(MSBuildThisFileDirectory)HitProxy.shadingenv" />
-    <None Include="$(MSBuildThisFileDirectory)HitProxyAxis.shadingenv" />
     <None Include="$(MSBuildThisFileDirectory)Inc\Algorithm\Queue.cginc" />
     <None Include="$(MSBuildThisFileDirectory)Inc\Algorithm\WaveTask.cginc" />
     <None Include="$(MSBuildThisFileDirectory)Inc\BaseStructure\Box2.cginc" />
@@ -62,21 +59,6 @@
     <None Include="$(MSBuildThisFileDirectory)Inc\SystemEnumDefine.cginc" />
     <None Include="$(MSBuildThisFileDirectory)Inc\VertexLayout.cginc" />
     <None Include="$(MSBuildThisFileDirectory)Material\TestMaterial.mtl" />
-    <None Include="$(MSBuildThisFileDirectory)MobileAoBlurH.shadingenv" />
-    <None Include="$(MSBuildThisFileDirectory)MobileAoBlurV.shadingenv" />
-    <None Include="$(MSBuildThisFileDirectory)MobileAoMask.shadingenv" />
-    <None Include="$(MSBuildThisFileDirectory)MobileBloomBlurH.shadingenv" />
-    <None Include="$(MSBuildThisFileDirectory)MobileBloomBlurV.shadingenv" />
-    <None Include="$(MSBuildThisFileDirectory)MobileBloomDS.shadingenv" />
-    <None Include="$(MSBuildThisFileDirectory)MobileBloomSetUp.shadingenv" />
-    <None Include="$(MSBuildThisFileDirectory)MobileBloomUS.shadingenv" />
-    <None Include="$(MSBuildThisFileDirectory)MobileCopy.shadingenv" />
-    <None Include="$(MSBuildThisFileDirectory)MobileCopyEditor.shadingenv" />
-    <None Include="$(MSBuildThisFileDirectory)MobileCustomTranslucent.shadingenv" />
-    <None Include="$(MSBuildThisFileDirectory)MobileCustomTranslucentEditor.shadingenv" />
-    <None Include="$(MSBuildThisFileDirectory)MobileOpaqueEditor.shadingenv" />
-    <None Include="$(MSBuildThisFileDirectory)MobileSky.shadingenv" />
-    <None Include="$(MSBuildThisFileDirectory)MobileTranslucent.shadingenv" />
     <None Include="$(MSBuildThisFileDirectory)Modifier\GridUVModifier.cginc" />
     <None Include="$(MSBuildThisFileDirectory)Modifier\InstancingModifier.cginc" />
     <None Include="$(MSBuildThisFileDirectory)Modifier\UIModifier.cginc" />
@@ -85,11 +67,6 @@
     <None Include="$(MSBuildThisFileDirectory)Occlusion\GpuSceneSetupCullCluster.cginc" />
     <None Include="$(MSBuildThisFileDirectory)Occlusion\Occlusion.cginc" />
     <None Include="$(MSBuildThisFileDirectory)Occlusion\SetupDrawClusterArgs.cginc" />
-    <None Include="$(MSBuildThisFileDirectory)PickedBlurH.shadingenv" />
-    <None Include="$(MSBuildThisFileDirectory)PickedBlurV.shadingenv" />
-    <None Include="$(MSBuildThisFileDirectory)PickedHollow.shadingenv" />
-    <None Include="$(MSBuildThisFileDirectory)PickedSetUp.shadingenv" />
-    <None Include="$(MSBuildThisFileDirectory)SceneCapture.shadingenv" />
     <None Include="$(MSBuildThisFileDirectory)ShadingEnv\AAShading.cginc" />
     <None Include="$(MSBuildThisFileDirectory)ShadingEnv\CommonLighting.cginc" />
     <None Include="$(MSBuildThisFileDirectory)ShadingEnv\Deferred\DeferredBasePassPS.cginc" />
@@ -130,18 +107,8 @@
     <None Include="$(MSBuildThisFileDirectory)ShadingEnv\TemporalAA.cginc" />
     <None Include="$(MSBuildThisFileDirectory)slate\SlateGUI.cginc" />
     <None Include="$(MSBuildThisFileDirectory)slate\Slate_TextureViewer.cginc" />
-    <None Include="$(MSBuildThisFileDirectory)Snapshot.shadingenv" />
-    <None Include="$(MSBuildThisFileDirectory)SSM.shadingenv" />
-    <None Include="$(MSBuildThisFileDirectory)MobileSunShaftBlur.shadingenv" />
-    <None Include="$(MSBuildThisFileDirectory)MobileSunShaftMask.shadingenv" />
-    <None Include="$(MSBuildThisFileDirectory)UFOMobileCopy.shadingenv" />
-    <None Include="$(MSBuildThisFileDirectory)UFOMobileOpaque.shadingenv" />
     <None Include="$(MSBuildThisFileDirectory)Modifier\ParticleModifier.cginc" />
     <None Include="$(MSBuildThisFileDirectory)Modifier\SkinModifier.cginc" />
-    <None Include="$(MSBuildThisFileDirectory)UFOMobileOpaqueNPR.shadingenv" />
-    <None Include="$(MSBuildThisFileDirectory)UFOMobileOutlineNPR.shadingenv" />
-    <None Include="$(MSBuildThisFileDirectory)UFOMobileTranslucent.shadingenv" />
-    <None Include="$(MSBuildThisFileDirectory)UFOMobileTranslucentNPR.shadingenv" />
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="$(MSBuildThisFileDirectory)Bricks\GpuDriven\SWRasterizer.compute" />

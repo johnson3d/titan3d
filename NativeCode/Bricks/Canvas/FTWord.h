@@ -82,7 +82,7 @@ namespace Canvas
 		void BuildMesh(int x, int y, UInt16 transformIndex, ITextBrush * texture, NxRHI::FMeshDataProvider * mesh);
 
 		FTWord* BuildAsSDF(int fontSize, int w, int h);
-		FTWord* BuildAsSDFFast(int fontSize, int w, int h, BYTE PixelColored, BYTE spread);
+		bool BuildAsSDFFast(FTWord* result, BYTE PixelColored, BYTE spread);
 	};
 
 	struct FTPagedWord : public MemAlloc::FPagedObject<AutoRef<FTWord>>

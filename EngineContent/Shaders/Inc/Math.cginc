@@ -165,7 +165,7 @@ float ClampedPow(float X, float Y)
 
 uint ReverseBits32(uint bits)
 {
-#if ShaderModel >= 5
+#if CP_SM_major >= 5
 	return reversebits(bits);
 #else
 	bits = (bits << 16) | (bits >> 16);

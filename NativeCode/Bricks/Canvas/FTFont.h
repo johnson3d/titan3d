@@ -29,16 +29,19 @@ namespace Canvas
 		FTFont();
 		~FTFont();
 		virtual void Cleanup() override;
-		bool Init(NxRHI::IGpuDevice * rc, FTFontManager * ftMgr, const char* name, int fontSize, int texSizeX, int texSizeY, bool bUseSDF);
+		bool Init(NxRHI::IGpuDevice * rc, FTFontManager * ftMgr, const char* name, int fontSize, int texSizeX, int texSizeY);
+		bool InitForBuildFont(NxRHI::IGpuDevice* rc, FTFontManager* ftMgr, const char* name, int fontSize, 
+			int SdfPixelSize, int SdfSpread, int SdfPixelColored);
+		bool IsNeedSave() const {
+			return NeedSave;
+		}
+		void SaveFontSDF(const char* name);
 		FTWord* GetWord(UINT uniCode);
+		void AddWordForBuild(UINT uniCode);
 		void Update(NxRHI::IGpuDevice * rc, bool bflipV);
 		UINT GetWords(std::vector<FTWord*>&words, const WCHAR * text, UINT numOfChar);
 		UINT GetWords(FTWord * *pWords, UINT count, const WCHAR * text, UINT numOfChar);
-		void MeasureString(const WCHAR * text, int* width, int* height);
-		int CheckPointChar(const WCHAR * text, int x, int y, int* pos = nullptr);
-		int CalculateWrap(const WCHAR * text, int* idxArray, int idxArraySize, int widthLimit, int* height);
-		int CalculateWrapWithWord(const WCHAR * text, int* idxArray, int idxArraySize, int widthLimit, int* height);
-
+		
 		const char* GetName() const {
 			return mName.c_str();
 		}
@@ -52,27 +55,56 @@ namespace Canvas
 		void SetDirty() {
 			Dirty = true;
 		}
-	private:
-		FT_Face LoadFtFace(FT_Library ftlib, const char* font);
-		bool LoadChar(FT_Library ftlib, WCHAR unicode, int outline_type, int outline_thickness, FTWord * word);
-		bool LoadCharSDF(UINT unicode, FTWord * word);
 	protected:
-		bool								Dirty = true;
 		std::string							mName;
-		int									mFontSize;
-		AutoRef<FTPagedWordAllocator>		mFTWordAllocator;
-		std::map<UINT, AutoRef<FTWord>>		mWords;
+		int									mFontSize = 64;
 
-		bool								mUseSDF = true;
+		std::string							mSdfSourceFont;
+		int									mSdfPixelSize = 1024;
+		int									mSdfSpread = 4;
+		int									mSdfPixelColored = 127;
+
+		using FtPagedWord = MemAlloc::FPagedObject<AutoRef<FTWord>>;
+		struct FWordHolder : public VIUnknown
+		{
+			UINT Unicode;
+			UINT64 Offset;
+			AutoRef<FtPagedWord> FtWord;
+			inline bool operator < (FWordHolder& rh) const {
+				return Unicode < rh.Unicode;
+			}
+			inline bool operator == (FWordHolder& rh) const {
+				return Unicode == rh.Unicode;
+			}
+			inline bool operator < (UINT rh) const {
+				return Unicode < rh;
+			}
+			inline bool operator == (UINT rh) const {
+				return Unicode == rh;
+			}
+			FtPagedWord* GetWord(FTFont* font);
+			FtPagedWord* BuildWord(FTFont* font, bool bOnlyBuildFont);
+			static void Load(XndAttribute* attr, FTWord* word, UINT Unicode);
+			static void SaveTo(XndAttribute* attr, FTWord* word, UINT Unicode);
+		};
+		std::vector<AutoRef<FWordHolder>> mWordTable;
+
+		bool								NeedSave = false;
+		bool								Dirty = true;
+		AutoRef<FTPagedWordAllocator>		mFTWordAllocator;
+		
 		AutoRef<XndHolder>					mSdfXnd;
 		AutoRef<XndAttribute>				mWordBitmapAttr;
-		std::vector<std::pair<UINT, UINT64>>	mSdfCodePairs;
 		
 		FT_Face								mFtFace;
 		FT_Byte*							mFtContent;
 		TWeakRefHandle<FTFontManager>		mManager;
-
 		std::shared_ptr<BYTE>				mMemFtData;
+
+		VSLLock mLocker;
+	private:
+		FT_Face LoadFtFace(FT_Library ftlib, const char* font);
+		bool LoadChar(FT_Library ftlib, WCHAR unicode, int fontSize, int outline_type, int outline_thickness, FTWord* word);
 	};
 
 	class TR_CLASS()
@@ -85,7 +117,7 @@ namespace Canvas
 		bool Init();
 		virtual void Cleanup() override;
 
-		FTFont* GetFont(NxRHI::IGpuDevice* device, const char* file, int fontSize, int texSizeX, int texSizeY, bool bUseSDF);
+		FTFont* GetFont(NxRHI::IGpuDevice* device, const char* file, int fontSize, int texSizeX, int texSizeY);
 		void Update(NxRHI::IGpuDevice* device, bool bflipV);
 	public:
 		FT_Library				mFtlib;

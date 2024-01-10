@@ -1083,22 +1083,6 @@ void Pivot_WindAnimationHierarchy(
 	Pivot_WindAnimation(prePos,posTex, xTex, samp, uv,mask, windTex, scale, speedX, windAxisX, speedY, windAxisY,localPos, rot, rotOffset, parentRot,axisScale, axisSpeedScale,localVertexOffset, rotationAngle);
 }
 
-void Pivot_WindAnimation_Sway(
-	float3 windSwayDirection, float windSwayGustFrequency, float windSwayIntensity, 
-	float3 localPos, out float3 localVertexOffset
-)
-{
-	float3 pivotPos = float3(0,0,0);
-	// rotation axis
-	float3 rotationAxis = normalize(windSwayDirection);
-	// rotation angle
-	float rotationAngle = (sin(Time * windSwayGustFrequency) + 4.0f)/4.0f * windSwayIntensity;
-
-	// rotation position & normal
-	float3 currPos = localPos;
-	RotateAboutAxis(rotationAxis, rotationAngle, pivotPos, currPos, localVertexOffset);
-}
-
 void Pivot_WindAnimation_Sway2(
 	float3 windSwayDirection, float windSwayGustFrequency, float windSwayIntensity, 
 	float3 localPos, float time, out float3 localVertexOffset
@@ -1108,12 +1092,34 @@ void Pivot_WindAnimation_Sway2(
 	// rotation axis
 	float3 rotationAxis = normalize(windSwayDirection);
 	// rotation angle
-	// float rotationAngle = (sin(time * windSwayGustFrequency) + 4.0f)/4.0f * windSwayIntensity;
 	float rotationAngle = (sin(time * windSwayGustFrequency) * 3.14f / 180.0f) * 4.0f * windSwayIntensity;
 
 	// rotation position & normal
 	float3 currPos = localPos;
 	RotateAboutAxis(rotationAxis, rotationAngle, pivotPos, currPos, localVertexOffset);
+}
+
+void Pivot_WindAnimation_Sway3(
+	float3 windSwayDirection, float windSwayGustFrequency, float windSwayIntensity, float3 localPos, float time, 
+	float windSwayEffectOffset, float windSwayEffectFalloff, out float3 localVertexOffset
+)
+{
+	float3 pivotPos = float3(0,0,0);
+	// rotation axis
+	float3 rotationAxis = normalize(windSwayDirection);
+	// rotation angle
+	float rotationAngle = (sin(time * windSwayGustFrequency) + 4.0f)/4.0f * windSwayIntensity * 3.14f / 180.0f; 
+
+	// rotation position & normal
+	float3 currPos = localPos;
+	RotateAboutAxis(rotationAxis, rotationAngle, pivotPos, currPos, localVertexOffset);
+
+	// todo, wind effect offset
+	if(windSwayEffectFalloff==0)
+		windSwayEffectFalloff = 0.1f;
+	float objectBoundHeight = localPos.y;
+	float weight = clamp((objectBoundHeight - windSwayEffectOffset)/windSwayEffectFalloff, 0, 1);
+	localVertexOffset = localVertexOffset*weight*weight;
 }
 
 void Pivot_WindAnimation_Rustle(float windSpeed, float windIntensity, float3 localPos, float time, out float3 localVertexOffset)
@@ -1138,6 +1144,18 @@ void Pivot_WindAnimation_Rustle(float windSpeed, float windIntensity, float3 loc
 	localVertexOffset = localVertexOffset * windIntensity;
 }
 
+float Pivot_Gradient(float3 worldPos, float gradientOffset, float gradientFallout)
+{	
+	float3 worldPivotPos = mul(float4(0,0,0,1),WorldMatrix).xyz;
+	float posHeight = worldPos.y - worldPivotPos.y;
+	return saturate((worldPos.y - gradientOffset)/gradientFallout);
+}
+
+float3 Pivot_LeafNormal(bool frontFace, float3 normal)
+{
+	float faceSign = frontFace?1:-1;
+	return lerp(-normal, normal, faceSign);
+}
 
 //void GetGridUV(float2 uv, float4 lightmapUV, float2 min, float2 max, out float2 outUV)
 //{

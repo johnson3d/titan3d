@@ -60,18 +60,21 @@ namespace EngineNS.Plugins.SourceGit
             processStartInfo.FileName = @"git.exe";
             processStartInfo.Arguments = $"add {file}";
 
+            System.Diagnostics.Process? result = null;
             try
             {
-                var result = System.Diagnostics.Process.Start(processStartInfo);
+                result = System.Diagnostics.Process.Start(processStartInfo);
+                var hr = new Bricks.SourceControl.USourceOpResult(0);
+                if (result != null && result.StandardOutput != null)
+                {
+                    hr.Info = result.StandardOutput.ReadToEnd();
+                }
+                return hr;
             }
-            catch(Exception)
+            catch (Exception)
             {
                 return new Bricks.SourceControl.USourceOpResult(-2);
             }
-
-            //var hr = result.ExitCode;
-            //result.Close();
-            return new Bricks.SourceControl.USourceOpResult(0);
         }
         public override Bricks.SourceControl.USourceOpResult AddDirectory(string dir)
         {
@@ -79,7 +82,31 @@ namespace EngineNS.Plugins.SourceGit
         }
         public override Bricks.SourceControl.USourceOpResult RemoveFile(string file, bool delLocal = true)
         {
-            return new Bricks.SourceControl.USourceOpResult(0);
+            if (IO.TtFileManager.FileExists(file) == false)
+                return new Bricks.SourceControl.USourceOpResult(-1);
+
+            ProcessStartInfo processStartInfo = new ProcessStartInfo();
+            processStartInfo.FileName = @"git.exe";
+            processStartInfo.Arguments = $"rm {file}";
+
+            System.Diagnostics.Process? result = null;
+            try
+            {
+                result = System.Diagnostics.Process.Start(processStartInfo);
+                var hr = new Bricks.SourceControl.USourceOpResult(0);
+                if (result != null && result.StandardOutput != null)
+                {
+                    hr.Info = result.StandardOutput.ReadToEnd();
+                }
+
+                if (delLocal)
+                    System.IO.File.Delete(file);
+                return hr;
+            }
+            catch (Exception)
+            {
+                return new Bricks.SourceControl.USourceOpResult(-2);
+            }
         }
     }
 }

@@ -117,6 +117,7 @@ namespace NxRHI
 	}
 	bool DX12SwapChain::Create(IGpuDevice* device1, UINT w, UINT h)
 	{
+		mDeviceRef.FromObject(device1);
 		Desc.Width = w;
 		Desc.Height = h;
 		if (BackBuffers.size() != Desc.BufferCount)
@@ -189,7 +190,7 @@ namespace NxRHI
 	}
 	UINT DX12SwapChain::GetCurrentBackBuffer()
 	{
-		CurrentBackBuffer = CurrentBackBuffer % BackBuffers.size();
+		//CurrentBackBuffer = CurrentBackBuffer % BackBuffers.size();
 		return CurrentBackBuffer;
 	}
 	void DX12SwapChain::BeginFrame()
@@ -200,21 +201,26 @@ namespace NxRHI
 		}*/
 
 		if (mView3 != nullptr)
+		{
 			CurrentBackBuffer = mView3->GetCurrentBackBufferIndex();
+		}
 		else
 			CurrentBackBuffer = (CurrentBackBuffer + 1) % (UINT)BackBuffers.size();
-		FramePresentFence->Wait(BackBuffers[CurrentBackBuffer].FenceValue);
 	}
 	void DX12SwapChain::Present(IGpuDevice* device, UINT SyncInterval, UINT Flags)
 	{
+		//temp code for sync
+		//device->GetCmdQueue()->Flush(EQueueType::QU_ALL);
+		device->GetCmdQueue()->IncreaseSignal(FramePresentFence, EQueueType::QU_Default);
+		BackBuffers[CurrentBackBuffer].FenceValue = FramePresentFence->GetExpectValue();
+
+		FramePresentFence->Wait(BackBuffers[CurrentBackBuffer].FenceValue);
 		auto hr = mView->Present(SyncInterval, Flags);
 		if (hr != S_OK)
 		{
 			VFX_LTRACE(ELTT_Graphics, "SwapChain::Present");
 			((DX12GpuDevice*)device)->OnDeviceRemoved();
 		}
-		device->GetCmdQueue()->IncreaseSignal(FramePresentFence, EQueueType::QU_Default);
-		BackBuffers[CurrentBackBuffer].FenceValue = FramePresentFence->GetExpectValue();
 	}
 	void DX12SwapChain::FBackBuffer::CreateRtvAndSrv(IGpuDevice* device, UINT index)
 	{

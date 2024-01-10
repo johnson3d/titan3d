@@ -455,7 +455,7 @@
     <TypeAA Type="EngineNS.Graphics.Pipeline.URenderPolicy.ETypeAA@EngineCore" Value="Fsaa" />
     <TypeFog Type="EngineNS.Graphics.Pipeline.URenderPolicy.ETypeFog@EngineCore" Value="None" />
   </RenderPolicy>
-  <Linkers Type="System.Collections.Generic.List&lt;EngineNS.Bricks.NodeGraph.UPinLinker@EngineCore,&gt;@Unknown" Count="72">
+  <Linkers Type="System.Collections.Generic.List&lt;EngineNS.Bricks.NodeGraph.UPinLinker@EngineCore,&gt;@Unknown" Count="73">
     <e_0 Type="EngineNS.Bricks.NodeGraph.UPinLinker@EngineCore">
       <SaveData Type="EngineNS.Bricks.NodeGraph.UPinLinker.TSaveData@EngineCore">
         <InNodeId Type="System.Guid@Unknown" Value="14fa3edc-067d-4614-8120-302e42977e5e" />
@@ -1032,5 +1032,13 @@
         <OutPinName Type="System.String@Unknown" Value="Depth" />
       </SaveData>
     </e_71>
+    <e_72 Type="EngineNS.Bricks.NodeGraph.UPinLinker@EngineCore">
+      <SaveData Type="EngineNS.Bricks.NodeGraph.UPinLinker.TSaveData@EngineCore">
+        <InNodeId Type="System.Guid@Unknown" Value="2d931ff4-e1a3-4e4d-9e6c-1f3f4989ef6e" />
+        <InPinName Type="System.String@Unknown" Value="Depth" />
+        <OutNodeId Type="System.Guid@Unknown" Value="1123f32e-2333-455b-9308-451e1ba426d8" />
+        <OutPinName Type="System.String@Unknown" Value="Depth" />
+      </SaveData>
+    </e_72>
   </Linkers>
 </Root>

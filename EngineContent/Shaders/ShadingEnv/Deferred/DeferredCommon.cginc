@@ -9,7 +9,7 @@ struct GBufferData
 {
 	half3	MtlColorRaw;
 	half	Metallicity;
-	half	Emissive;
+	// half	Emissive;
 	half	Specular;	
     half	AO;
 	half3	WorldNormal;
@@ -68,7 +68,8 @@ struct GBufferData
         rt1.w = ((half) ObjectFlags_2Bit) / 3.0h; //asfloat(ObjectFlags_2Bit); //
 
 		rt2.w = Roughness;
-		rt2.r = Emissive;
+		rt2.r = 0;
+		// rt2.r = Emissive;
 		rt2.g = Specular;
 		rt2.b = AO;
 
@@ -91,13 +92,13 @@ struct GBufferData
             RenderFlags_10Bit = (int) (rt1.z * 1024.0h); //asint(rt1.z); //
 		#else
             WorldNormal.xyz = DecodeNormalXYZ(rt1.xyz);
-			RenderFlags_10Bit = 0£»
+			RenderFlags_10Bit = 0ï¿½ï¿½
 		#endif
         }
 		Roughness = rt2.w;
         ObjectFlags_2Bit = (int) (rt1.w * 4.0h); //asint(rt1.w); //
 
-		Emissive = rt2.r;
+		// Emissive = rt2.r;
 		Specular = rt2.g;
         AO = rt2.b;
 

@@ -212,7 +212,29 @@ struct PS_INPUT
 #if USE_PS_Instance == 1
 	VK_LOCATION(17) uint vInstanceID : TEXCOORD14;
 #endif    
-	
+
+#if ShaderStage == ShaderStage_PS
+	bool bIsFrontFace : SV_IsFrontFace;
+	#if CP_SM_major > 5
+		uint vPrimitiveId : SV_PrimitiveID;
+	#endif
+#endif
+    bool GetIsFrontFace()
+    {
+#if ShaderStage == ShaderStage_PS		
+		return bIsFrontFace;
+#else
+        return false;
+#endif
+    }
+    uint GetPrimitiveId()
+    {
+#if ShaderStage == ShaderStage_PS && CP_SM_major > 5
+		return vPrimitiveId;
+#else
+        return (uint) (-1);
+#endif
+    }
     void SetNormal(float3 v)
     {
 #if USE_PS_Normal == 1
@@ -327,10 +349,6 @@ void Default_VSInput2PSInput(inout PS_INPUT output, VS_MODIFIER input)
 	output.vInstanceID = input.vInstanceId;
 #endif
 }
-
-#define MTL_NORMAL 1
-#define MTL_NORMALMAP 2
-#define MTL_NORMALNONE 3
 
 struct MTL_OUTPUT
 {

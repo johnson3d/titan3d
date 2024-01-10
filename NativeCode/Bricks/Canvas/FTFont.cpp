@@ -15,6 +15,11 @@ namespace Canvas
 	{
 		auto pThis = (FTFont*)this;
 		auto pWord = pThis->GetWord(c);
+		if (pWord == nullptr)
+		{
+			ASSERT(false);
+			return nullptr;
+		}
 
 		//todo: fill vert[4] ...
 		pWord->FillCanvasVertices(x, y, transformIndex, pWord->Brush, (void*)vert);
@@ -34,22 +39,55 @@ namespace Canvas
 
 	void FTFont::Cleanup()
 	{
-		mWords.clear();
+		mWordTable.clear();
 	}
 
-	bool FTFont::Init(NxRHI::IGpuDevice* rc, FTFontManager* ftMgr, const char* name, int fontSize, int texSizeX, int texSizeY, bool bUseSDF)
+	bool FTFont::InitForBuildFont(NxRHI::IGpuDevice* rc, FTFontManager* ftMgr, const char* name, int fontSize, 
+		int SdfPixelSize, int SdfSpread, int SdfPixelColored)
 	{
-		mUseSDF = bUseSDF;
+		mManager.FromObject(ftMgr);
+		//mName = name;
+		mFontSize = fontSize;
+		mSdfPixelSize = SdfPixelSize;
+		mSdfSpread = SdfSpread;
+		mSdfPixelColored = SdfPixelColored;
+		
+		mSdfSourceFont = name;
+		auto pos = mSdfSourceFont.find_last_of('/');
+		if (pos != std::string::npos)
+		{
+			mSdfSourceFont = mSdfSourceFont.substr(pos + 1);
+		}
+		LoadFtFace(ftMgr->mFtlib, name);
+
+		mFTWordAllocator = MakeWeakRef(new FTPagedWordAllocator());
+		mFTWordAllocator->Creator.Initialize(rc, SdfPixelSize, SdfPixelSize, SdfPixelSize);
+		return true;
+	}
+
+	bool FTFont::Init(NxRHI::IGpuDevice* rc, FTFontManager* ftMgr, const char* name, int fontSize, int texSizeX, int texSizeY)
+	{
 		mManager.FromObject(ftMgr);
 		mName = name;
 		mFontSize = fontSize;
 		mFTWordAllocator = MakeWeakRef(new FTPagedWordAllocator());
-		
-		if (mUseSDF)
+		mFTWordAllocator->Creator.Initialize(rc, mFontSize, texSizeX, texSizeY);
+
 		{
 			mSdfXnd = MakeWeakRef(new XndHolder());
 			mSdfXnd->LoadXnd(name);
-			auto attr = mSdfXnd->GetRootNode()->TryGetAttribute("UniCode");
+			auto attr = mSdfXnd->GetRootNode()->TryGetAttribute("SdfDesc");
+			if (attr != nullptr)
+			{
+				attr->BeginRead();
+				attr->Read(mSdfSourceFont);
+				attr->Read(mFontSize);
+				attr->Read(mSdfPixelSize);
+				attr->Read(mSdfSpread);
+				attr->Read(mSdfPixelColored);
+				attr->EndRead();
+			}
+			attr = mSdfXnd->GetRootNode()->TryGetAttribute("UniCode");
 			if (attr == nullptr)
 			{
 				return false;
@@ -64,28 +102,125 @@ namespace Canvas
 				attr->Read(mFontSize);
 				int count;
 				attr->Read(count);
-				mSdfCodePairs.clear();
+
+				mWordTable.resize(count);
 				for (int i = 0; i < count; i++)
 				{
-					UINT unicode;
-					attr->Read(unicode);
-					UINT64 offset;
-					attr->Read(offset);
-					mSdfCodePairs.push_back(std::make_pair(unicode, offset));
+					mWordTable[i] = MakeWeakRef(new FWordHolder());
+					attr->Read(mWordTable[i]->Unicode);
+					attr->Read(mWordTable[i]->Offset);
 				}
 				attr->EndRead();
 			}
-			//LoadFtFace(ftMgr->mFtlib, "F:/TitanEngine/enginecontent/fonts/Roboto-Regular.ttf");
-		}
-		else
-		{
-			LoadFtFace(ftMgr->mFtlib, name);
 		}
 		
-		mFTWordAllocator->Creator.Initialize(rc, mFontSize, texSizeX, texSizeY);
+		auto fdPos = mName.find_last_of('/');
+		if (fdPos != std::string::npos)
+		{
+			auto ftf = mName.substr(0, fdPos + 1);
+			ftf += mSdfSourceFont;
+			LoadFtFace(ftMgr->mFtlib, ftf.c_str());
+		}
+
+		NeedSave = false;
 		return true;
 	}
+	void FTFont::SaveFontSDF(const char* name)
+	{
+		auto xnd = MakeWeakRef(new XndHolder());
+		auto root = MakeWeakRef(xnd->NewNode("FontSDF", 0, 0));
+		xnd->SetRootNode(root);
 
+		auto attr = MakeWeakRef(xnd->NewAttribute("SdfDesc", 0, 0));
+		xnd->GetRootNode()->AddAttribute(attr);
+		if (attr != nullptr)
+		{
+			attr->BeginWrite();
+			attr->Write(mSdfSourceFont);
+			attr->Write(mFontSize);
+			attr->Write(mSdfPixelSize);
+			attr->Write(mSdfSpread);
+			attr->Write(mSdfPixelColored);
+			attr->EndWrite();
+		}
+		attr = MakeWeakRef(xnd->NewAttribute("UniCode", 0, 0));
+		auto attrWords = MakeWeakRef(xnd->NewAttribute("Words", 0, 0));
+		xnd->GetRootNode()->AddAttribute(attr);
+		xnd->GetRootNode()->AddAttribute(attrWords);
+		if (attr != nullptr)
+		{
+			attr->BeginWrite();
+			attrWords->BeginWrite();
+			attr->Write(mFontSize);
+			attr->Write((int)mWordTable.size());
+			for (auto& i : mWordTable)
+			{
+				attr->Write(i->Unicode);
+				attr->Write(attrWords->GetWriterPosition());
+				if (i->FtWord != nullptr)
+				{
+					i->SaveTo(attrWords, i->FtWord->RealObject, i->Unicode);
+				}
+				else
+				{
+					auto FtWord = MakeWeakRef(new FTWord());
+					mWordBitmapAttr->BeginRead();
+					mWordBitmapAttr->ReaderSeek(i->Offset);
+					FWordHolder::Load(mWordBitmapAttr, FtWord, i->Unicode);
+					mWordBitmapAttr->EndRead();
+
+					i->SaveTo(attrWords, FtWord, i->Unicode);
+				}
+			}
+			attrWords->EndWrite();
+			attr->EndWrite();
+		}
+
+		if (mSdfXnd != nullptr)
+			mSdfXnd->TryReleaseHolder();
+		xnd->SaveXnd(name);
+		xnd->TryReleaseHolder();
+
+		NeedSave = false;
+		if (mName == name)
+		{
+			ResetWords();
+			
+			mSdfXnd = MakeWeakRef(new XndHolder());
+			mSdfXnd->LoadXnd(name);
+			auto attr = mSdfXnd->GetRootNode()->TryGetAttribute("SdfDesc");
+			if (attr != nullptr)
+			{
+				attr->BeginRead();
+				attr->Read(mSdfSourceFont);
+				attr->Read(mFontSize);
+				attr->Read(mSdfPixelSize);
+				attr->Read(mSdfSpread);
+				attr->Read(mSdfPixelColored);
+				attr->EndRead();
+			}
+			attr = mSdfXnd->GetRootNode()->TryGetAttribute("UniCode");
+			{
+				mWordBitmapAttr = mSdfXnd->GetRootNode()->TryGetAttribute("Words");
+				if (mWordBitmapAttr == nullptr)
+					return;
+
+				attr->BeginRead();
+				attr->Read(mFontSize);
+				int count;
+				attr->Read(count);
+
+				mWordTable.resize(count);
+				for (int i = 0; i < count; i++)
+				{
+					mWordTable[i] = MakeWeakRef(new FWordHolder());
+					attr->Read(mWordTable[i]->Unicode);
+					attr->Read(mWordTable[i]->Offset);
+				}
+				attr->EndRead();
+			}
+		}
+	}
 	FT_Face FTFont::LoadFtFace(FT_Library ftlib, const char* font)
 	{
 		FT_Error err = FALSE;
@@ -159,61 +294,16 @@ namespace Canvas
 		return FT_Get_Char_Index(mFtFace, uniCode);
 	}
 
-	bool FTFont::LoadCharSDF(UINT unicode, FTWord* word)
+	bool FTFont::LoadChar(FT_Library ftlib, WCHAR unicode, int fontSize, int outline_type, int outline_thickness, FTWord* word)
 	{
-		auto it = std::lower_bound(
-			mSdfCodePairs.begin(),
-			mSdfCodePairs.end(),
-			unicode,
-			[](const std::pair<UINT, UINT64>& l, const UINT& r)
-			{
-				return l.first < r;
-			});
-		if (it == mSdfCodePairs.end())
-		{
-			return false;
-		}
-		if ((*it).first == unicode)
-		{
-			mWordBitmapAttr->BeginRead();
-			mWordBitmapAttr->ReaderSeek((*it).second);
-			UINT unicode = 0;
-			mWordBitmapAttr->Read(unicode);
-			mWordBitmapAttr->Read(word->PixelX);
-			mWordBitmapAttr->Read(word->PixelY);
-			mWordBitmapAttr->Read(word->PixelWidth);
-			mWordBitmapAttr->Read(word->PixelHeight);
-			mWordBitmapAttr->Read(word->Advance);
-			mWordBitmapAttr->Read(word->SdfScale);
-			word->Pixels.resize(word->PixelWidth * word->PixelHeight);
-			if (word->Pixels.size() > 0)
-			{
-				UINT wSize = 0;
-				mWordBitmapAttr->Read(wSize);
-				auto pZstd = new BYTE[wSize];
-				mWordBitmapAttr->Read(pZstd, wSize);
-				auto dsize = (UINT)CoreSDK::Decompress_ZSTD(&word->Pixels[0], word->Pixels.size(), pZstd, wSize);
-				ASSERT(dsize == word->Pixels.size());
-				delete[] pZstd;
-			}
-
-			mWordBitmapAttr->EndRead();
-			return true;
-		}
-		else
-		{
-			return false;
-		}
-	}
-	bool FTFont::LoadChar(FT_Library ftlib, WCHAR unicode, int outline_type, int outline_thickness, FTWord* word)
-	{
+		word->FontSize = fontSize;
 		if (mFtFace == NULL)
 		{
 			VFX_LTRACE(ELTT_Graphics, "LoadFtFace %s failed\r\n", mName.c_str());
 			return false;
 		}
 
-		FT_Error err = FT_Set_Pixel_Sizes(mFtFace, 0, mFontSize);//FT_Set_Char_Size(face, 0, font_size * 64, 0, 0);
+		FT_Error err = FT_Set_Pixel_Sizes(mFtFace, 0, fontSize);//FT_Set_Char_Size(face, 0, font_size * 64, 0, 0);
 		if (err)
 		{
 			VFX_LTRACE(ELTT_Graphics, "FT_Set_Char_Size %s failed\r\n", mName.c_str());
@@ -291,17 +381,7 @@ namespace Canvas
 		//word->PixelY = 0;
 		word->Advance.x = (float)ft_bitmap_glyph->root.advance.x / 65536.0f;
 		word->Advance.y = (float)ft_bitmap_glyph->root.advance.y / 65536.0f;
-		//word->AdvanceX = word->PixelX + word->PixelWidth;//mFontSize;//
-		/*if (word->AdvanceX == 0)
-			word->AdvanceX = mFontSize / 2;*/
-
-			//if (word->PixelWidth > mFontSize || word->PixelHeight > mFontSize)
-			//{
-			//	ASSERT(false);
-			//	//FT_Stroker_Done(stroker);
-			//	return false;
-			//}
-
+		
 		pitch = ft_bitmap.pitch;
 		src_line = ft_bitmap.buffer;
 
@@ -361,191 +441,6 @@ namespace Canvas
 		return true;
 	}
 
-	void FTFont::MeasureString(const WCHAR* text, int* width, int* height)
-	{
-		int x = 0;
-		*width = 0;
-		*height = mFontSize;
-		auto len = wcslen(text);
-		for (size_t i = 0; i < len; i++)
-		{
-			//if (text[i] == '\n')
-			//{
-			//	if (i != len - 1)
-			//		*height += mFontSize;
-			//	x = 0;
-			//	continue;
-			//}
-			auto pWord = GetWord(text[i]);
-			x += (int)pWord->Advance.x;
-			auto wordHeight = mFontSize - pWord->PixelY + pWord->PixelHeight;
-			if (*height < wordHeight)
-				*height = wordHeight;
-			if (x > *width)
-				*width = x;
-		}
-	}
-
-	int FTFont::CheckPointChar(const WCHAR* text, int x, int y, int* pos)
-	{
-		int width = 0;
-		auto len = wcslen(text);
-		for (size_t i = 0; i < len; i++)
-		{
-			auto pWord = GetWord(text[i]);
-			width += (int)pWord->Advance.x;
-			if (x < width)
-			{
-				if (pos != nullptr)
-				{
-					*pos = width - (int)pWord->Advance.x;
-				}
-				return (int)i;
-			}
-		}
-		return -1;
-	}
-
-	int FTFont::CalculateWrap(const WCHAR* text, int* idxArray, int idxArraySize, int widthLimit, int* height)
-	{
-		int retLineCount = 1;
-		auto len = wcslen(text);
-		int curArrayIdx = 0;
-		int currentLineWidth = 0;
-		*height = 0;
-		int lineMaxHeight = mFontSize;
-		for (size_t i = 0; i < len; i++)
-		{
-			if (text[i] == '\n')
-			{
-				if (i != len - 1)
-				{
-					*height += mFontSize;
-					(idxArray)[curArrayIdx] = (int)i;
-					retLineCount++;
-					curArrayIdx++;
-					if (curArrayIdx == idxArraySize)
-						return retLineCount;
-				}
-				currentLineWidth = 0;
-				continue;
-			}
-
-			auto pWord = GetWord(text[i]);
-			currentLineWidth += (int)pWord->Advance.x;
-			if (currentLineWidth >= widthLimit)
-			{
-				if (currentLineWidth == pWord->Advance.x)
-				{
-					continue;
-				}
-				*height += lineMaxHeight;// mFontSize;
-				(idxArray)[curArrayIdx] = (int)i;
-				retLineCount++;
-				curArrayIdx++;
-				if (curArrayIdx == idxArraySize)
-					return retLineCount;
-				currentLineWidth = (int)pWord->Advance.x;
-				lineMaxHeight = mFontSize;
-			}
-			int wordHeight = mFontSize - pWord->PixelY + pWord->PixelHeight;
-			if (lineMaxHeight < wordHeight)
-				lineMaxHeight = wordHeight;
-		}
-		*height += lineMaxHeight;
-		return retLineCount;
-	}
-	int FTFont::CalculateWrapWithWord(const WCHAR* text, int* idxArray, int idxArraySize, int widthLimit, int* height)
-	{
-		int retLineCount = 1;
-		auto len = wcslen(text);
-		int curArrayIdx = 0;
-		int currentLineWidth = 0;
-		*height = 0;
-		int lineMaxHeight = mFontSize;
-		int lastWrapPos = -1;
-		for (size_t i = 0; i < len; )
-		{
-			if (text[i] == '\n')
-			{
-				if (i != len - 1)
-				{
-					*height += mFontSize;
-					(idxArray)[curArrayIdx] = (int)i;
-					retLineCount++;
-					curArrayIdx++;
-					if (curArrayIdx == idxArraySize)
-						return retLineCount;
-				}
-				currentLineWidth = 0;
-				i++;
-				continue;
-			}
-
-			auto pWord = GetWord(text[i]);
-			if (((pWord->UniCode >= 65 && pWord->UniCode <= 90) ||
-				(pWord->UniCode >= 97 && pWord->UniCode <= 122)))
-			{
-			}
-			else
-				lastWrapPos = (int)i;
-			currentLineWidth += (int)pWord->Advance.x;
-			if (currentLineWidth >= widthLimit)
-			{
-				if (currentLineWidth == (int)pWord->Advance.x)
-				{
-					i++;
-				}
-				else if (!((pWord->UniCode >= 65 && pWord->UniCode <= 90) ||
-					(pWord->UniCode >= 97 && pWord->UniCode <= 122)))
-				{
-					*height += lineMaxHeight;
-					(idxArray)[curArrayIdx] = (int)i;
-					retLineCount++;
-					curArrayIdx++;
-					if (curArrayIdx == idxArraySize)
-						return retLineCount;
-					currentLineWidth = (int)pWord->Advance.x;
-					lineMaxHeight = mFontSize;
-					lastWrapPos = -1;
-					i++;
-					continue;
-				}
-				else if (lastWrapPos != -1)
-				{
-					*height += lineMaxHeight;
-					(idxArray)[curArrayIdx] = lastWrapPos + 1;
-					retLineCount++;
-					curArrayIdx++;
-					if (curArrayIdx == idxArraySize)
-						return retLineCount;
-
-					auto tempWord = GetWord(text[lastWrapPos + 1]);
-					currentLineWidth = (int)tempWord->Advance.x;
-					lineMaxHeight = mFontSize;
-					i = lastWrapPos + 1;
-					lastWrapPos = -1;
-					continue;
-				}
-				else
-					i++;
-			}
-			else
-			{
-				i++;
-			}
-			if (lastWrapPos == -1)
-			{
-				int wordHeight = mFontSize - pWord->PixelY + pWord->PixelHeight;
-				if (lineMaxHeight < wordHeight)
-					lineMaxHeight = wordHeight;
-			}
-
-		}
-		*height += lineMaxHeight;
-		return retLineCount;
-	}
-
 	UINT FTFont::GetWords(std::vector<FTWord*>& words, const WCHAR* text, UINT numOfChar)
 	{
 		if (numOfChar == 0)
@@ -582,47 +477,174 @@ namespace Canvas
 		}
 		return numOfChar;
 	}
-
-	FTWord* FTFont::GetWord(UINT code)
+	void FTFont::FWordHolder::SaveTo(XndAttribute* attr, FTWord* word, UINT Unicode)
 	{
-		auto i = mWords.find(code);
-		if (i != mWords.end())
+		attr->Write(Unicode);
+		attr->Write(word->PixelX);
+		attr->Write(word->PixelY);
+		attr->Write(word->PixelWidth);
+		attr->Write(word->PixelHeight);
+		attr->Write(word->Advance);
+		attr->Write(word->SdfScale);
+
+		//auto dsize = (UINT)CoreSDK::Compress_ZSTD(nullptr, 0, &word->Pixels[0], word->Pixels.size(), 1);
+		std::vector<BYTE>	Pixels;
+		Pixels.resize(CoreSDK::CompressBound_ZSTD(word->Pixels.size()));
+		auto dsize = (UINT)CoreSDK::Compress_ZSTD(&Pixels[0], Pixels.size(), &word->Pixels[0], word->Pixels.size(), 1);
+		attr->Write(dsize);
+		attr->Write(&Pixels[0], dsize);
+	}
+	void FTFont::FWordHolder::Load(XndAttribute* attr, FTWord* word, UINT Unicode)
+	{
+		UINT code;
+		attr->Read(code);
+		ASSERT(code == Unicode);
+		attr->Read(word->PixelX);
+		attr->Read(word->PixelY);
+		attr->Read(word->PixelWidth);
+		attr->Read(word->PixelHeight);
+		attr->Read(word->Advance);
+		attr->Read(word->SdfScale);
+
+		word->Pixels.resize(word->PixelWidth * word->PixelHeight);
+		if (word->Pixels.size() > 0)
 		{
-			i->second->HitCount++;
-			return i->second;
+			UINT wSize = 0;
+			attr->Read(wSize);
+			auto pZstd = new BYTE[wSize];
+			attr->Read(pZstd, wSize);
+			auto dsize = (UINT)CoreSDK::Decompress_ZSTD(&word->Pixels[0], word->Pixels.size(), pZstd, wSize);
+			ASSERT(dsize == word->Pixels.size());
+			delete[] pZstd;
 		}
-
-		auto word = mFTWordAllocator->Alloc();
-		mWords.insert(std::make_pair(code, word->RealObject));
-
-		word->RealObject->HitCount = 1;
-		word->RealObject->UniCode = code;
-		auto mgr = mManager.GetPtr();
-		if (mUseSDF)
+	}
+	FTFont::FtPagedWord* FTFont::FWordHolder::GetWord(FTFont* font)
+	{
+		if (FtWord != nullptr)
 		{
-			if (LoadCharSDF(code, word->RealObject) == false)
-				return nullptr;
+			FtWord->RealObject->HitCount++;
 		}
 		else
 		{
-			if (LoadChar(mgr->mFtlib, code, 1, 0, word->RealObject) == false)
-				return nullptr;
-		}
-		
-		word->RealObject->Brush->PutWord(word->RealObject);
-		word->RealObject->Font = this;
-		word->RealObject->SetDirty();
+			FtWord = font->mFTWordAllocator->Alloc();
+			FtWord->RealObject->HitCount = 1;
+			FtWord->RealObject->UniCode = Unicode;
 
-		return word->RealObject;
+			auto mWordBitmapAttr = font->mWordBitmapAttr;
+			mWordBitmapAttr->BeginRead();
+			mWordBitmapAttr->ReaderSeek(Offset);
+			Load(mWordBitmapAttr, FtWord->RealObject, Unicode);
+			mWordBitmapAttr->EndRead();
+
+			FtWord->RealObject->Brush->PutWord(FtWord->RealObject);
+			FtWord->RealObject->Font = font;
+			FtWord->RealObject->SetDirty();
+		}
+
+		return FtWord;
+	}
+
+	FTFont::FtPagedWord* FTFont::FWordHolder::BuildWord(FTFont* font, bool bOnlyBuildFont)
+	{
+		auto word = font->mFTWordAllocator->Alloc();
+		word->RealObject->HitCount = 1;
+		word->RealObject->UniCode = Unicode;
+		word->RealObject->FontSize = font->mFontSize;
+		word->RealObject->Font = font;
+		auto mgr = font->mManager.GetPtr();
+		auto srcWord = MakeWeakRef(new FTWord());
+		srcWord->UniCode = Unicode;
+		if (font->LoadChar(mgr->mFtlib, Unicode, font->mSdfPixelSize, 1, 0, srcWord) == false)
+		{
+			return nullptr;
+		}
+		srcWord->BuildAsSDFFast(word->RealObject, font->mSdfPixelColored, font->mSdfSpread);
+		FtWord = word;
+
+		if (bOnlyBuildFont != true)
+		{
+			FtWord->RealObject->Brush->PutWord(FtWord->RealObject);
+			FtWord->RealObject->SetDirty();
+		}
+		return FtWord;
+	}
+
+	void FTFont::AddWordForBuild(UINT code)
+	{
+		auto mgr = mManager.GetPtr();
+
+		auto wh = MakeWeakRef(new FWordHolder());
+		wh->Unicode = code;
+		wh->Offset = 0;
+		auto result = wh->BuildWord(this, true);
+		if (result != nullptr)
+		{
+			VAutoVSLLock lk(mLocker);
+
+			auto it = std::lower_bound(
+				mWordTable.begin(),
+				mWordTable.end(),
+				code,
+				[](const AutoRef<FWordHolder>& l, const UINT& r)
+				{
+					return l->Unicode < r;
+				});
+			if (it != mWordTable.end())
+			{
+				auto& wordHolder = (*it);
+				if (wordHolder->Unicode == code)
+				{
+					if (wordHolder->FtWord != nullptr)
+						return;
+				}
+			}
+			mWordTable.insert(it, wh);
+		}
+	}
+
+	FTWord* FTFont::GetWord(UINT code)
+	{
+		auto mgr = mManager.GetPtr();
+		
+		auto it = std::lower_bound(
+			mWordTable.begin(),
+			mWordTable.end(),
+			code,
+			[](const AutoRef<FWordHolder>& l, const UINT& r)
+			{
+				return l->Unicode < r;
+			});
+		if (it != mWordTable.end())
+		{
+			auto& wordHolder = (*it);
+			if (wordHolder->Unicode == code)
+			{
+				return wordHolder->GetWord(this)->RealObject;
+			}
+		}
+		auto wh = MakeWeakRef(new FWordHolder());
+		wh->Unicode = code;
+		wh->Offset = 0;
+		auto result = wh->BuildWord(this, false);
+		if (result != nullptr)
+		{
+			mWordTable.insert(it, wh);
+			NeedSave = true;
+		}
+		return result->RealObject;
 	}
 
 	void FTFont::ResetWords()
 	{
-		for (auto& i : mWords)
+		for (auto& i : mWordTable)
 		{
-			
+			if (i->FtWord != nullptr)
+			{
+				mFTWordAllocator->Free(i->FtWord);
+				i->FtWord = nullptr;
+			}
 		}
-		mWords.clear();
+		mWordTable.clear();
 	}
 
 	void FTFont::Update(NxRHI::IGpuDevice* device, bool bflipV)
@@ -632,9 +654,10 @@ namespace Canvas
 			Dirty = false;
 			NxRHI::FTransientCmd tsCmd(device, NxRHI::QU_Transfer, "Font.Update");
 			auto cmd = tsCmd.GetCmdList();
-			for (auto& i : mWords)
+			for (auto& i : mWordTable)
 			{
-				i.second->Flush2Texture(device, cmd);
+				if (i->FtWord != nullptr)
+					i->FtWord->RealObject->Flush2Texture(device, cmd);
 			}
 		}
 		//remove cold words
@@ -674,7 +697,7 @@ namespace Canvas
 		Cleanup();
 	}
 
-	FTFont* FTFontManager::GetFont(NxRHI::IGpuDevice* device, const char* file, int fontSize, int texSizeX, int texSizeY, bool bUseSDF)
+	FTFont* FTFontManager::GetFont(NxRHI::IGpuDevice* device, const char* file, int fontSize, int texSizeX, int texSizeY)
 	{
 		if (fontSize > texSizeX || fontSize > texSizeY)
 		{
@@ -693,7 +716,7 @@ namespace Canvas
 		auto font = MakeWeakRef(new FTFont());
 		mFonts.insert(std::make_pair(key, font));
 
-		font->Init(device, this, file, fontSize, texSizeX, texSizeY, bUseSDF);
+		font->Init(device, this, file, fontSize, texSizeX, texSizeY);
 		//font->AddRef();
 		return font;
 	}

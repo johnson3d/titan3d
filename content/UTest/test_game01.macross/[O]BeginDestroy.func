@@ -34,7 +34,6 @@
   </MethodDatas>
   <Nodes Type="System.Collections.Generic.List&lt;EngineNS.Bricks.NodeGraph.UNodeBase@EngineCore,&gt;@Unknown" Count="2">
     <e_0 Type="EngineNS.Bricks.CodeBuilder.MacrossNode.UMethodStartNode@EngineCore">
-      <Label Type="System.String@Unknown" Value="BeginDestroy" />
       <MethodDecKeyword Type="System.String@Unknown" Value=" BeginDestroy(EngineNS.GamePlay.UGameInstance)" />
       <Name Type="System.String@Unknown" Value="BeginDestroy" />
       <NodeId Type="System.Guid@Unknown" Value="f3bbff24-cba9-43a3-aab8-50f526be6c3a" />

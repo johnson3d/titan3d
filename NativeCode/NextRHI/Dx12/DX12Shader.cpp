@@ -171,9 +171,16 @@ namespace NxRHI
 	{
 		desc->FunctionName = entry;
 		if (extHlslVersion == nullptr)
+		{
+			//temp for renderdoc debug
+			((IShaderDefinitions*)defines)->AddDefine("CP_SM_major", "5");
+			((IShaderDefinitions*)defines)->AddDefine("CP_SM_minor", "0");
 			return DX12Shader_CompileShader2(compiler, desc, shader, entry, type, "5_0", defines, sl, bDebugShader);
+		}
 		else
+		{
 			return IShaderConductor::GetInstance()->CompileShader(compiler, desc, shader, entry, type, sm, defines, bDebugShader, sl, bDebugShader, extHlslVersion, dxcArgs);
+		}
 	}
 	
 	DX12Shader::DX12Shader()

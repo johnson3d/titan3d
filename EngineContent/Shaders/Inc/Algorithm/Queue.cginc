@@ -1,187 +1,122 @@
 #ifndef _ALGORITHM_QUEUE_H_
 #define _ALGORITHM_QUEUE_H_
 
-struct TtQueue
+template<typename TPosProvider>
+struct TtQueueWriter
 {
     RWByteAddressBuffer DataBuffer;
-    int HeadSize;
-    int WriteOffset;
-    int ReadOffset;
+    int Offset;
     uint BufferCapacity;
-    void Init()
+    TPosProvider Provider;
+    void Init(TPosProvider posProvider, RWByteAddressBuffer buffer, int offset, int capacity)
     {
-        HeadSize = 2;
-        WriteOffset = 0;
-        ReadOffset = 1;
-        BufferCapacity = 0;
+        Provider = posProvider;
+        DataBuffer = buffer;
+        Offset = offset;
+        BufferCapacity = capacity;
+    }
+    
+    bool GetWritePos(out int pos, int num)
+    {
+        return Provider.GetWritePos(pos, num);
     }
     
     bool Enqueue(uint data)
     {
         int pos = 0;
-        DataBuffer.InterlockedAdd(WriteOffset, 1, pos);
+        GetWritePos(pos, 1);
         if (pos >= BufferCapacity)
-        {
             return false;
-        }
-        DataBuffer.Store((HeadSize + pos) * 4, data);
+        DataBuffer.Store((Offset + pos) * 4, data);
         return true;
     }
     bool Enqueue(uint2 data)
     {
         int pos = 0;
-        DataBuffer.InterlockedAdd(WriteOffset, 2, pos);
+        GetWritePos(pos, 2);
         if (pos >= BufferCapacity)
-        {
             return false;
-        }
-        DataBuffer.Store2((HeadSize + pos) * 4, data);
+        DataBuffer.Store2((Offset + pos) * 4, data);
         return true;
     }
     bool Enqueue(uint3 data)
     {
         int pos = 0;
-        DataBuffer.InterlockedAdd(WriteOffset, 3, pos);
+        GetWritePos(pos, 3);
         if (pos >= BufferCapacity)
-        {
             return false;
-        }
-        DataBuffer.Store3((HeadSize + pos) * 4, data);
+        DataBuffer.Store3((Offset + pos) * 4, data);
         return true;
     }
     bool Enqueue(uint4 data)
     {
         int pos = 0;
-        DataBuffer.InterlockedAdd(WriteOffset, 4, pos);
+        GetWritePos(pos, 4);
         if (pos >= BufferCapacity)
-        {
             return false;
-        }
-        DataBuffer.Store4((HeadSize + pos) * 4, data);
+        DataBuffer.Store4((Offset + pos) * 4, data);
         return true;
     }
-    bool Dequeue(inout uint data)
+};
+
+struct TtQueueWriterTest
+{
+    RWByteAddressBuffer DataBufferWrite;
+    int MaxSize;
+    void GetWritePos(out int pos, int num)
     {
-        int readPos = 0;
-        DataBuffer.InterlockedAdd(ReadOffset, 1, readPos);
-        int writePos = 0;
-        DataBuffer.InterlockedAdd(WriteOffset, 1, writePos);
-        if (readPos < writePos)
-        {
-            data = DataBuffer.Load((HeadSize + readPos) * 4);
-            return true;
-        }
-        return false;
+        DataBufferWrite.InterlockedAdd(0, num, pos);
+    }
+};
+
+template<typename TPosProvider, typename ByteAddressBufferType>
+struct TtQueueReader
+{
+    TPosProvider PosProvider;
+    ByteAddressBufferType DataBuffer;
+    int Offset;
+    void Init(TPosProvider provider, ByteAddressBufferType buffer)
+    {
+        DataBuffer = buffer;
+        PosProvider = provider;
+        Offset = PosProvider.GetReadOffset();
     }
     uint Dequeue1()
     {
         int readPos = 0;
-        DataBuffer.InterlockedAdd(ReadOffset, 1, readPos);
-        return DataBuffer.Load((HeadSize + readPos) * 4);
+        PosProvider.GetReadPos(1, readPos);
+        return DataBuffer.Load(Offset * 4);
     }
     uint2 Dequeue2()
     {
         int readPos = 0;
-        DataBuffer.InterlockedAdd(ReadOffset, 2, readPos);
-        return DataBuffer.Load2((HeadSize + readPos) * 4);
+        PosProvider.GetReadPos(2, readPos);
+        return DataBuffer.Load2((Offset + readPos) * 4);
     }
     uint3 Dequeue3()
     {
         int readPos = 0;
-        DataBuffer.InterlockedAdd(ReadOffset, 3, readPos);
-        return DataBuffer.Load3((HeadSize + readPos) * 4);
+        PosProvider.GetReadPos(3, readPos);
+        return DataBuffer.Load3((Offset + readPos) * 4);
     }
     uint4 Dequeue4()
     {
         int readPos = 0;
-        DataBuffer.InterlockedAdd(ReadOffset, 4, readPos);
-        return DataBuffer.Load4((HeadSize + readPos) * 4);
+        PosProvider.GetReadPos(4, readPos);
+        return DataBuffer.Load4((Offset + readPos) * 4);
     }
 };
 
-interface IQueueReadProxy
-{
-    void GetReadPos(int count, out int readPos);
-};
-
-struct TtQueueReadProxy : IQueueReadProxy
-{
-    ByteAddressBuffer DataBuffer;
-    int HeadSize;
-    void Init()
-    {
-        HeadSize = 2;
-    }
-    void GetReadPos(int count, out int readPos);
-    uint Dequeue1()
-    {
-        int readPos = 0;
-        GetReadPos(1, readPos);
-        return DataBuffer.Load((HeadSize + readPos) * 4);
-    }
-    uint2 Dequeue2()
-    {
-        int readPos = 0;
-        GetReadPos(2, readPos);
-        return DataBuffer.Load2((HeadSize + readPos) * 4);
-    }
-    uint3 Dequeue3()
-    {
-        int readPos = 0;
-        GetReadPos(3, readPos);
-        return DataBuffer.Load3((HeadSize + readPos) * 4);
-    }
-    uint4 Dequeue4()
-    {
-        int readPos = 0;
-        GetReadPos(4, readPos);
-        return DataBuffer.Load4((HeadSize + readPos) * 4);
-    }
-};
-
-struct TtQueueReadProxyTest// : TtQueueReadProxy
+struct TtQueueReaderTest
 {
     RWByteAddressBuffer DataBufferWrite;
     void GetReadPos(int count, out int readPos)
     {
         DataBufferWrite.InterlockedAdd(0, count, readPos);
     }
-};
-
-template<typename TPosProvider>
-struct TtQueueReadProxy2
-{
-    TPosProvider PosProvider;
-    ByteAddressBuffer DataBuffer;
-    int HeadSize;
-    void Init(TPosProvider provider)
+    int GetReadOffset()
     {
-        PosProvider = provider;
-        HeadSize = 2;
-    }
-    uint Dequeue1()
-    {
-        int readPos = 0;
-        PosProvider.GetReadPos(1, readPos);
-        return DataBuffer.Load((HeadSize + readPos) * 4);
-    }
-    uint2 Dequeue2()
-    {
-        int readPos = 0;
-        PosProvider.GetReadPos(2, readPos);
-        return DataBuffer.Load2((HeadSize + readPos) * 4);
-    }
-    uint3 Dequeue3()
-    {
-        int readPos = 0;
-        PosProvider.GetReadPos(3, readPos);
-        return DataBuffer.Load3((HeadSize + readPos) * 4);
-    }
-    uint4 Dequeue4()
-    {
-        int readPos = 0;
-        PosProvider.GetReadPos(4, readPos);
-        return DataBuffer.Load4((HeadSize + readPos) * 4);
+        return 2;
     }
 };
 

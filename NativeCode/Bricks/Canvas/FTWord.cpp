@@ -257,6 +257,9 @@ namespace Canvas
 			return;
 		Dirty = false;
 
+		if (PixelHeight == 0 || PixelWidth == 0)
+			return;
+
 		NxRHI::FBufferDesc bfDesc{};
 		bfDesc.SetDefault();
 		bfDesc.Usage = NxRHI::USAGE_STAGING;
@@ -429,7 +432,7 @@ namespace Canvas
 		return result;
 	}
 
-	FTWord* FTWord::BuildAsSDFFast(int fontSize, int w, int h, BYTE PixelColored, BYTE spread)
+	bool FTWord::BuildAsSDFFast(FTWord* result, BYTE PixelColored, BYTE spread)
 	{
 		float maxDist = (float)sqrt((float)PixelWidth * PixelWidth + (float)PixelHeight * PixelHeight);
 		SdfGrid grid1;
@@ -460,8 +463,6 @@ namespace Canvas
 		grid1.UpdateDistanceValues(range1.x, range1.y);
 		grid2.UpdateDistanceValues(range2.x, range2.y);
 
-		FTWord* result = new FTWord();
-		result->FontSize = fontSize;
 		result->SdfScale = (float)result->FontSize / (float)FontSize;
 		result->UniCode = UniCode;
 		result->PixelX = PixelX * result->FontSize / FontSize;
@@ -469,8 +470,8 @@ namespace Canvas
 		result->Advance = Advance * (float)result->FontSize / (float)FontSize;
 		result->PixelWidth = PixelWidth * result->FontSize / FontSize;
 		result->PixelHeight = PixelHeight * result->FontSize / FontSize;
-		w = result->PixelWidth;
-		h = result->PixelHeight;
+		int w = result->PixelWidth;
+		int h = result->PixelHeight;
 		result->Pixels.resize(w * h);
 		//range1.x = 0;
 		//range1.y = 128;//size = 64

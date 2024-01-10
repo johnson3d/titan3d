@@ -122,19 +122,14 @@ void CS_ClusterCullingMain(uint DispatchThreadId : SV_DispatchThreadID, uint3 Lo
     TtTestTask task;
     DoTasks(task, 0, 3);
     
-    TtQueueReadProxyTest provider;
+    TtQueueReaderTest provider;
     provider.DataBufferWrite = DataBufferTestWrite;
     
-    TtQueueReadProxy2<TtQueueReadProxyTest> q;
-    q.Init(provider);
-    q.DataBuffer = DataBufferTest;
+    TtQueueReader<TtQueueReaderTest,ByteAddressBuffer> q;
+    q.Init(provider, DataBufferTest);
     uint a = q.Dequeue1();
 #else
-    //TtQueueReadProxyTest q;
-    //q.Init();
-    //q.DataBuffer = DataBufferTest;
-    //q.DataBufferWrite = DataBufferTestWrite;
-    //uint a = q.Dequeue1();
+    
 #endif
     
 }

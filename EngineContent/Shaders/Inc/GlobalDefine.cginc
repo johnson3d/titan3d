@@ -1,19 +1,23 @@
 #ifndef	_GobalDefine_shadderinc_
 #define _GobalDefine_shadderinc_
 
-#ifndef ShaderModel
-#define ShaderModel 5
-#endif
 
+//RHI_TYPE
 #define RHI_DX11 1
 #define RHI_DX12 2
 #define RHI_GL 3
 #define RHI_MTL 4
 #define RHI_VK 5
 
-//#define VSStage 0
-//#define PSStage 1
-//#define CSStage 2
+//ShaderStage
+#define ShaderStage_VS 0
+#define ShaderStage_PS 1
+#define ShaderStage_CS 2
+
+//MTL_NORMAL_MODE
+#define MTL_NORMAL 1
+#define MTL_NORMALMAP 2
+#define MTL_NORMALNONE 3
 
 #define Combine3(a,b,c) a##b##c
 #define Combine2(a,b) Combine3(a,b,)

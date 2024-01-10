@@ -111,7 +111,6 @@
     <PackageReference Include="NPOI" Version="2.6.0" />
     <PackageReference Include="ppy.SDL2-CS" Version="1.0.82" />
     <PackageReference Include="RIPEMD160" Version="1.0.1" />
-    <PackageReference Include="SkiaSharp" Version="2.88.0-preview.61" />
     <PackageReference Include="System.CodeDom" Version="5.0.0" />
     <PackageReference Include="System.Runtime.Loader" Version="4.3.0" />
   </ItemGroup>
