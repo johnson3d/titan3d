@@ -9,6 +9,7 @@ namespace EngineNS.UI.Editor
 {
     public partial class EditorUIHost : TtUIHost
     {
+        public float PathWidth = 10;
         TtPath mEdgePath;
         TtPathStyle mEdgePathStyle = new TtPathStyle();
         TtCanvasBrush mDrawBrush = new TtCanvasBrush()
@@ -32,7 +33,7 @@ namespace EngineNS.UI.Editor
             {
                 mEdgePath = new TtPath();
             }
-            mEdgePathStyle.PathWidth = 10;
+            mEdgePathStyle.PathWidth = PathWidth;
             mEdgePathStyle.FillArea = false;
             mEdgePathStyle.StrokeMode = EngineNS.Canvas.EPathStrokeMode.Stroke_Dash;
             canvas.PushPathStyle(mEdgePathStyle);
@@ -89,7 +90,7 @@ namespace EngineNS.UI.Editor
             {
                 mEdgePath = new TtPath();
             }
-            mEdgePathStyle.PathWidth = 10;
+            mEdgePathStyle.PathWidth = 2;
             mEdgePathStyle.FillArea = false;
             mEdgePathStyle.StrokeMode = EngineNS.Canvas.EPathStrokeMode.Stroke_Dash;
             canvas.PushPathStyle(mEdgePathStyle);

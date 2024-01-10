@@ -148,7 +148,12 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode
                     {
                         var node = new UUniformVar();
                         node.VarType = Rtti.UTypeDesc.TypeOf(i.FieldType);
-                        node.Name = "input." + i.Name;
+                        if(i.Name == "bIsFrontFace")
+                        {
+                            node.Name = "input.GetIsFrontFace()";
+                        }
+                        else
+                            node.Name = "input." + i.Name;
                         node.UserData = this;
                         node.Position = PopMenuPosition;
                         SetDefaultActionForNode(node);

@@ -301,81 +301,36 @@ namespace EngineNS.Bricks.Font
         }
         public static unsafe void SaveFont(RName name, TtFontManager manager, string fontName, TtFontDesc desc)
         {
+            fontName = IO.TtFileManager.GetRegularPath(fontName).ToLower();
             TtFontCharFilter filter = desc.CharFilters;
             var font = new TtFontSDF();
-            font.mCoreObject.Init(UEngine.Instance.GfxDevice.RenderContext.mCoreObject,
-                manager.mCoreObject, fontName, desc.OriginPixelSize, desc.OriginPixelSize, desc.OriginPixelSize, false);
+            font.mCoreObject.InitForBuildFont(UEngine.Instance.GfxDevice.RenderContext.mCoreObject,
+                manager.mCoreObject, fontName, desc.FontSize,
+                desc.OriginPixelSize, desc.Spread, desc.PixelColored);
 
-            var xnd = new IO.TtXndHolder(fontName, 0, (uint)desc.FontSize);
-            var wordPairs = new List<KeyValuePair<uint, ulong>>();
-            using (var attrWords = xnd.NewAttribute("Words", 0, 0))
-            {
-                attrWords.BeginWrite(0);
-                for (uint unicode = filter.CharBegin; unicode < filter.CharEnd; unicode++)
-                {
-                    if (font.mCoreObject.GetCharIndex(unicode) == 0)
-                        continue;
-                    if (filter.IsInclude(unicode) == false && filter.IsExclude(unicode))
-                        continue;
-                    var word = font.mCoreObject.GetWord(unicode);
-                    if (word.IsValidPointer == false)
-                        continue;
-                    var sdfWord = word.BuildAsSDFFast(desc.FontSize, desc.FontSize, desc.FontSize, desc.PixelColored, desc.Spread);
+            //内存扛不住。。。
+            //var num = filter.CharEnd - filter.CharBegin;
+            //var smp = UEngine.Instance.EventPoster.ParrallelFor((int)num, (index) =>
+            //{
+            //    uint unicode = (uint)index + filter.CharBegin;
 
-                    var offset = attrWords.GetWriterPosition();
-                    wordPairs.Add(new KeyValuePair<uint, ulong>(unicode, offset));
-                    attrWords.Write(sdfWord.UniCode);
-                    attrWords.Write(sdfWord.PixelX);
-                    attrWords.Write(sdfWord.PixelY);
-                    attrWords.Write(sdfWord.PixelWidth);
-                    attrWords.Write(sdfWord.PixelHeight);
-                    attrWords.Write(sdfWord.Advance);
-                    attrWords.Write(sdfWord.SdfScale);
-                    var size = (uint)(sdfWord.PixelWidth * sdfWord.PixelHeight);
-                    if (size > 0)
-                    {
-                        var len = CoreSDK.CompressBound_ZSTD(size) + 5;
-                        using(var d = BigStackBuffer.CreateInstance((int)len))
-                        {
-                            var wSize = (uint)CoreSDK.Compress_ZSTD(d.GetBuffer(), len, sdfWord.GetBufferPtr(), size, 1);
-                            attrWords.Write(wSize);
-                            attrWords.Write(d.GetBuffer(), wSize);
-                        }
-                    }
-                    //attrWords.Write(sdfWord.GetBufferPtr(), size);
+            //    if (font.mCoreObject.GetCharIndex(unicode) == 0)
+            //        return;
+            //    if (filter.IsInclude(unicode) == false && filter.IsExclude(unicode))
+            //        return;
+            //    font.mCoreObject.AddWordForBuild(unicode);
+            //});
+            //smp?.Wait(int.MaxValue);
 
-                    sdfWord.NativeSuper.Release();
-                    font.mCoreObject.ResetWords();
-                }
-                attrWords.EndWrite();
-                xnd.RootNode.AddAttribute(attrWords);
-            }
-            using (var attrWords = xnd.NewAttribute("UniCode", 0, 0))
+            for (uint unicode = filter.CharBegin; unicode < filter.CharEnd; unicode++)
             {
-                wordPairs.Sort((x, y) =>
-                {
-                    return x.Key.CompareTo(y.Key);
-                });
-                attrWords.BeginWrite((ulong)(wordPairs.Count * 12));
-                attrWords.Write(desc.FontSize);
-                attrWords.Write(wordPairs.Count);
-                foreach (var i in wordPairs)
-                {
-                    attrWords.Write(i.Key);
-                    attrWords.Write(i.Value);
-                }
-                attrWords.EndWrite();
-                xnd.RootNode.AddAttribute(attrWords);
+                if (font.mCoreObject.GetCharIndex(unicode) == 0)
+                    continue;
+                if (filter.IsInclude(unicode) == false && filter.IsExclude(unicode))
+                    continue;
+                font.mCoreObject.AddWordForBuild(unicode);
             }
-            using (var attrDesc = xnd.NewAttribute("ImportDesc", 0, 0))
-            {
-                using (var ar = attrDesc.GetWriter(512))
-                {
-                    ar.Write(desc);
-                }
-                xnd.RootNode.AddAttribute(attrDesc);
-            }
-            xnd.SaveXnd(name.Address);
+            font.mCoreObject.SaveFontSDF(name.Address);
         }
 
         public unsafe uint GetWords(EngineNS.Canvas.FTWord** pWords, uint count, wchar_t* text, uint numOfChar)
@@ -424,29 +379,12 @@ namespace EngineNS.Bricks.Font
         }
         public TtFontSDF GetFontSDF(RName font, int fontSize, int texSizeX, int texSizeY)
         {
-            var result = new TtFontSDF(mCoreObject.GetFont(UEngine.Instance.GfxDevice.RenderContext.mCoreObject, font.Address, fontSize, texSizeX, texSizeY, true));
+            var result = new TtFontSDF(mCoreObject.GetFont(UEngine.Instance.GfxDevice.RenderContext.mCoreObject, font.Address, fontSize, texSizeX, texSizeY));
             return result;
         }
         public void Tick(UEngine host)
         {
             mCoreObject.Update(host.GfxDevice.RenderContext.mCoreObject, false);
-        }
-        public static unsafe void Test()
-        {
-            var font = new TtFontSDF();
-            font.mCoreObject.Init(UEngine.Instance.GfxDevice.RenderContext.mCoreObject,
-                UEngine.Instance.FontModule.FontManager.mCoreObject, "F:/TitanEngine/enginecontent/fonts/Roboto-Regular.ttf", 32, 32, 32, false);
-            uint index = 0;
-            uint unicode = font.mCoreObject.GetFirstUnicode(ref index);
-            string t = "中";
-            while (index != 0)
-            {
-                if(unicode == t[0])
-                {
-                    break;
-                }
-                unicode = font.mCoreObject.GetNextUnicode(unicode, ref index);
-            }
         }
     }
 

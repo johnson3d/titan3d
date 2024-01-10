@@ -11,7 +11,7 @@ using System.Threading.Tasks;
 
 namespace EngineNS.UI.Controls.Containers
 {
-    public class TtUIElementCollection : IList<TtUIElement>
+    public partial class TtUIElementCollection : IList<TtUIElement>
     {
         internal List<TtUIElement> mChildren = new List<TtUIElement>();
 
@@ -295,7 +295,7 @@ namespace EngineNS.UI.Controls.Containers
             }
             return returnValue;
         }
-
+        [Rtti.Meta]
         public void Add(TtUIElement item)
         {
             //if (!UEngine.Instance.EventPoster.IsThread(Thread.Async.EAsyncTarget.Logic))

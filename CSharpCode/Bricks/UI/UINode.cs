@@ -114,11 +114,6 @@ namespace EngineNS.UI
             if(UIName != null)
                 ameta.AddReferenceAsset(UIName);
         }
-        public UViewportSlate GetViewport()
-        {
-            return GetWorld()?.CurViewport;
-        }
-
         public static async TtTask<TtUINode> AddUINode(GamePlay.UWorld world, UNode parent, UNodeData data, Type placementType, TtUIHost uiHost, DVector3 pos, Vector3 scale, Quaternion quat)
         {
             var scene = parent.GetNearestParentScene();

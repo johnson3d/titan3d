@@ -535,6 +535,9 @@ namespace EngineNS.Bricks.CodeBuilder
                     case UBinaryOperatorExpression.EBinaryOperation.SubtractAssignment:
                         sourceCode += " -= ";
                         break;
+                    case UBinaryOperatorExpression.EBinaryOperation.Is:
+                        sourceCode += " is ";
+                        break;
                 }
                 var rightGen = data.CodeGen.GetCodeObjectGen(binOpExp.Right.GetType());
                 rightGen.GenCodes(binOpExp.Right, ref sourceCode, ref data);
@@ -749,6 +752,15 @@ namespace EngineNS.Bricks.CodeBuilder
             }
         }
 
+        class TtTypeOfExpressionCodeGen : ICodeObjectGen
+        {
+            public void GenCodes(UCodeObject obj, ref string sourceCode, ref UCodeGeneratorData data)
+            {
+                var ex = obj as TtTypeOfExpression;
+                sourceCode += "typeof(" + data.CodeGen.GetTypeString(ex.Variable) + ")";
+            }
+        }
+
         class UExecuteSequenceStatementCodeGen : ICodeObjectGen
         {
             public void GenCodes(UCodeObject obj, ref string sourceCode, ref UCodeGeneratorData data)
@@ -955,6 +967,7 @@ namespace EngineNS.Bricks.CodeBuilder
         UCreateObjectExpressionCodeGen mCreateObjectExpressionCodeGen = new UCreateObjectExpressionCodeGen();
         UDefaultValueExpressionCodeGen mDefaultValueExpressionCodeGen = new UDefaultValueExpressionCodeGen();
         UNullValueExpressionCodeGen mNullValueExpressionCodeGen = new UNullValueExpressionCodeGen();
+        TtTypeOfExpressionCodeGen mTypeOfExpressionCodeGen = new TtTypeOfExpressionCodeGen();
         UExecuteSequenceStatementCodeGen mExecuteSequenceStatementCodeGen = new UExecuteSequenceStatementCodeGen();
         UReturnStatementCodeGen mReturnStatementCodeGen = new UReturnStatementCodeGen();
         UIfStatementCodeGen mIfStatementCodeGen = new UIfStatementCodeGen();
@@ -1007,6 +1020,8 @@ namespace EngineNS.Bricks.CodeBuilder
                 return mDefaultValueExpressionCodeGen;
             else if (type.IsEqual(typeof(UNullValueExpression)))
                 return mNullValueExpressionCodeGen;
+            else if (type.IsEqual(typeof(TtTypeOfExpression)))
+                return mTypeOfExpressionCodeGen;
             else if (type.IsEqual(typeof(UExecuteSequenceStatement)))
                 return mExecuteSequenceStatementCodeGen;
             else if (type.IsEqual(typeof(UReturnStatement)))

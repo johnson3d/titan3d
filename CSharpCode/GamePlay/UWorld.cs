@@ -39,10 +39,8 @@ namespace EngineNS.GamePlay
 
             mMemberTickables.CleanupMembers(this);
         }
-        public Graphics.Pipeline.UViewportSlate CurViewport { get; set; }
         public UWorld(Graphics.Pipeline.UViewportSlate viewport)
         {
-            CurViewport = viewport;
             mMemberTickables.CollectMembers(this);
 
             mOnVisitNode_GatherVisibleMeshesAll = this.OnVisitNode_GatherVisibleMeshesAll;

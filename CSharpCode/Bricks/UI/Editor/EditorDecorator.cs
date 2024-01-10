@@ -49,8 +49,9 @@ namespace EngineNS.UI.Editor
                 typeof(GamePlay.UPlacement), mSelectedDecoratorUIHost, DVector3.Zero, Vector3.One, Quaternion.Identity);
             SelectedRect.Parent = null;
 
-            var pointAtHost = new EditorUIHost(this);
+            var pointAtHost = new EditorUIHost();
             pointAtHost.DrawBrush.Color = Color.LightBlue;
+            pointAtHost.PathWidth = 4.5f;
             PointAtRect = await TtUINode.AddUINode(PreviewViewport.World, mUINode, new UNodeData(),
                 typeof(GamePlay.UPlacement), pointAtHost, DVector3.Zero, Vector3.One, Quaternion.Identity);
             PointAtRect.Parent = null;
@@ -76,11 +77,13 @@ namespace EngineNS.UI.Editor
 
             if(SelectedRect.UIHost.MeshDirty && (SelectedRect.Parent != null))
             {
-                await SelectedRect.UIHost.BuildMesh();
+                var mesh = await SelectedRect.UIHost.BuildMesh();
+                SelectedRect.AABB = new DBoundingBox(mesh.MaterialMesh.AABB);
             }
             if(PointAtRect.UIHost.MeshDirty && (PointAtRect.Parent != null))
             {
-                await PointAtRect.UIHost.BuildMesh();
+                var mesh = await PointAtRect.UIHost.BuildMesh();
+                PointAtRect.AABB = new DBoundingBox(mesh.MaterialMesh.AABB);
             }
 
             CurrentDecorator?.UpdateDecorator();

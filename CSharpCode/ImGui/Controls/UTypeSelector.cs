@@ -113,6 +113,10 @@ namespace EngineNS.EGui.Controls
                 return mShowTypes;
             }
         }
+        public void AddShowType(Rtti.UTypeDesc type)
+        {
+            mShowTypes.Add(type);
+        }
         string mFilterText = "";
         unsafe int ImGuiInputTextCallback(ImGuiInputTextCallbackData* data)
         {

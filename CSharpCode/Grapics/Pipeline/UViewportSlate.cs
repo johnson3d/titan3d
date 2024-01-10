@@ -269,7 +269,8 @@ namespace EngineNS.Graphics.Pipeline
         }
         protected virtual void OnClientChanged(bool bSizeChanged)
         {
-
+            if (mDefaultHUD != null)
+                mDefaultHUD.WindowSize = new SizeF(this.ClientSize.X, this.ClientSize.Y);
         }
         public void ProcessHitproxySelected(float mouseX, float mouseY)
         {
@@ -326,13 +327,63 @@ namespace EngineNS.Graphics.Pipeline
         [Rtti.Meta]
         public virtual async System.Threading.Tasks.Task Initialize(USlateApplication application, RName policyName, float zMin, float zMax)
         {
-            var policy = Bricks.RenderPolicyEditor.URenderPolicyAsset.LoadAsset(policyName).CreateRenderPolicy();
+            var policy = Bricks.RenderPolicyEditor.URenderPolicyAsset.LoadAsset(policyName).CreateRenderPolicy(this);
             if (OnInitialize != null)
             {
                 await OnInitialize(this, application, policy, zMin, zMax);
             }
             await this.World.InitWorld();
             SetCameraOffset(in DVector3.Zero);
+
+            mDefaultHUD.RenderCamera = this.RenderPolicy.DefaultCamera;
+            mHUDStack.Push(mDefaultHUD);
+
+            IsInlitialized = true;
+        }
+
+        #region HUD
+        protected UI.TtUIHost mDefaultHUD = new UI.TtUIHost();
+        [Rtti.Meta(Flags = Rtti.MetaAttribute.EMetaFlags.MacrossReadOnly | Rtti.MetaAttribute.EMetaFlags.Unserializable)]
+        public UI.TtUIHost DefaultHUD
+        {
+            get => mDefaultHUD;
+        }
+        protected Stack<UI.TtUIHost> mHUDStack = new Stack<UI.TtUIHost>();
+        public void PushHUD(UI.TtUIHost hud)
+        {
+            hud.WriteFlag(UI.Controls.TtUIElement.ECoreFlags.IsScreenSpace, true);
+            hud.ViewportSlate = this;
+            mHUDStack.Push(hud);
+        }
+        public void PopHUD()
+        {
+            var hud = mHUDStack.Peek();
+            hud.WriteFlag(UI.Controls.TtUIElement.ECoreFlags.IsScreenSpace, false);
+            hud.ViewportSlate = null;
+            mHUDStack.Pop();
+        }
+        [Rtti.Meta(Flags = Rtti.MetaAttribute.EMetaFlags.MacrossReadOnly | Rtti.MetaAttribute.EMetaFlags.Unserializable)]
+        public UI.TtUIHost HUD
+        {
+            get
+            {
+                if (mHUDStack == null || mHUDStack.Count == 0)
+                    return null;
+                return mHUDStack.Peek();
+            } 
+        }
+        #endregion
+
+        public bool IsInlitialized { get; set; } = false;
+        public virtual unsafe void TickLogic(float ellapse)
+        {
+            if (IsInlitialized == false)
+                return;
+
+            foreach (var i in mHUDStack)
+            {
+                _ = i.BuildMesh();
+            }
         }
     }
     public class UViewportSlateManager

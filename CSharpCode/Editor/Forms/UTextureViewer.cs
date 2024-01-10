@@ -66,6 +66,8 @@ namespace EngineNS.Editor.Forms
         {
             return this;
         }
+        public float LoadingPercent { get; set; } = 1.0f;
+        public string ProgressText { get; set; } = "Loading";
         public async System.Threading.Tasks.Task<bool> OpenEditor(UMainEditorApplication mainEditor, RName name, object arg)
         {
             AssetName = name;

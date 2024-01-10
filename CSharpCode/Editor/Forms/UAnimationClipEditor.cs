@@ -156,7 +156,8 @@ namespace EngineNS.Editor.Forms
         {
             //throw new NotImplementedException();
         }
-
+        public float LoadingPercent { get; set; } = 1.0f;
+        public string ProgressText { get; set; } = "Loading";
         public async Task<bool> OpenEditor(UMainEditorApplication mainEditor, RName name, object arg)
         {
             AssetName = name;

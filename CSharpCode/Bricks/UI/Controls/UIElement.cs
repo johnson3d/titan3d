@@ -311,7 +311,7 @@ namespace EngineNS.UI.Controls
         {
             var p3d = Get3DParent();
             Vector3 dir = Vector3.Zero;
-            var vp = RootUIHost.SceneNode.GetViewport();
+            var vp = RootUIHost.ViewportSlate;
             var delta = vp.WindowPos - vp.ViewportPos;
             RootUIHost.RenderCamera.GetPickRay(ref dir, mousePt.X - delta.X, mousePt.Y - delta.Y, vp.ClientSize.Width, vp.ClientSize.Height);
             if(dir == Vector3.Zero)

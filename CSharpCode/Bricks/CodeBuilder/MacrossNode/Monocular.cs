@@ -130,7 +130,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
         {
             base.OnLoadLinker(linker);
         }
-        public override void OnMouseStayPin(NodePin stayPin)
+        public override void OnMouseStayPin(NodePin stayPin, UNodeGraph graph)
         {
             if (stayPin == Left)
             {

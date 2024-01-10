@@ -341,7 +341,7 @@ namespace EngineNS.Editor.Forms
             //    return;
             //appliction.mMainInspector.PropertyGrid.Target = provider;
             //appliction.WorldViewportSlate.OnHitproxySelected((GamePlay.Scene.UNode)provider);
-            provider?.GetWorld()?.CurViewport?.OnHitproxySelected((GamePlay.Scene.UNode)provider);
+            WorldViewportState.OnHitproxySelected((GamePlay.Scene.UNode)provider);
         }
     }
 }

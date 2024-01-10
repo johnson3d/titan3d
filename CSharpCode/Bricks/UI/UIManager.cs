@@ -16,18 +16,6 @@ namespace EngineNS.UI
     {
         TtUIConfig mConfig = new TtUIConfig();
         public TtUIConfig Config => mConfig;
-        SizeF mScreenSize;
-        public SizeF ScreenSize
-        {
-            get => mScreenSize;
-            set
-            {
-                mScreenSize = value;
-                if (mScreenSpaceUIHost != null)
-                    mScreenSpaceUIHost.WindowSize = value;
-            }
-        }
-
         public TtUIManager()
         {
             UIManagerConstruct_Msg();
@@ -66,20 +54,6 @@ namespace EngineNS.UI
                 public int GetHashCode(UIKeyName obj)
                 {
                     return obj.GetHashCode();
-                }
-            }
-        }
-
-        TtUIHost mScreenSpaceUIHost;
-        public TtUIHost ScreenSpaceUIHost
-        {
-            get => mScreenSpaceUIHost;
-            set
-            {
-                mScreenSpaceUIHost = value;
-                if(mScreenSpaceUIHost != null)
-                {
-                    mScreenSpaceUIHost.WindowSize = ScreenSize;
                 }
             }
         }
@@ -222,7 +196,10 @@ namespace EngineNS.UI
                 xnd.SaveXnd(name.Address + "/" + name.PureName + name.ExtName);
             }
         }
-        public TtUIElement Load(RName name)
+        [Rtti.Meta]
+        public TtUIElement Load(
+            [RName.PGRName(FilterExts = TtUIAsset.AssetExt)]
+            RName name)
         {
             using (var xnd = IO.TtXndHolder.LoadXnd(name.Address + "/" + name.PureName + name.ExtName))
             {
@@ -271,7 +248,8 @@ namespace EngineNS
     public partial class UEngine
     {
         UI.TtUIManager mUIManager;
-        internal UI.TtUIManager UIManager 
+        [Rtti.Meta]
+        public UI.TtUIManager UIManager 
         { 
             get
             {

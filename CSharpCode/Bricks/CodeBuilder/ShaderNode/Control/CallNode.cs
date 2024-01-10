@@ -114,7 +114,7 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Control
                 Arguments.Add(pinData);
             }
         }
-        public override void OnMouseStayPin(NodePin pin)
+        public override void OnMouseStayPin(NodePin pin, UNodeGraph graph)
         {
             if (pin == Result)
             {

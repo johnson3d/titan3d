@@ -14,6 +14,7 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Runtime.InteropServices;
+using System.Security.Permissions;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -52,6 +53,7 @@ namespace EngineNS.UI.Editor
                 mUIHost = new EditorUIHost(this);
             mUIHost.Name = "UIEditorHost";
             mUIHost.WindowSize = new SizeF(1920, 1080);
+            mUIHost.ViewportSlate = PreviewViewport;
 
             /*/ test /////////////////////////
             //var element = new TtImage(); // new TtUIElement();
@@ -1068,6 +1070,55 @@ namespace EngineNS.UI.Editor
         public void OnEvent(in Bricks.Input.Event e)
         {
         }
+
+        void DrawViewportUIAction(in Vector2 startDrawPos)
+        {
+            if (AssetName != null)
+            {
+                if (EGui.UIProxy.CustomButton.ToolButton("S", in Vector2.Zero))
+                    EngineNS.Editor.USnapshot.Save(AssetName, UEngine.Instance.AssetMetaManager.GetAssetMeta(AssetName), PreviewViewport.RenderPolicy.GetFinalShowRSV());
+                ImGuiAPI.SameLine(0, -1);
+            }
+            if (EGui.UIProxy.CustomButton.ToolButton("Reset Camera", in Vector2.Zero))
+            {
+                BoundingSphere sphere;
+                sphere.Center = new Vector3(mUIHost.WindowSize.Width * 0.5f, mUIHost.WindowSize.Height * 0.5f, 0);
+                sphere.Radius = Math.Max(mUIHost.WindowSize.Width, mUIHost.WindowSize.Height);
+                mUIHost.RenderCamera.LookAtLH(-DVector3.UnitZ, DVector3.Zero, Vector3.UnitY);
+                mUIHost.RenderCamera.AutoZoom(ref sphere);
+            }
+            ImGuiAPI.SameLine(0, -1);
+            if(EGui.UIProxy.CustomButton.ToolButton("Focus", in Vector2.Zero))
+            {
+                Vector2 rectMin = Vector2.MaxValue;
+                Vector2 rectMax = Vector2.MinValue;
+                for(int i=0; i<mSelectedElements.Count; i++)
+                {
+                    Vector2 offset;
+                    var designRect = mSelectedElements[i].DesignRect;
+                    mSelectedElements[i].GetOffsetFromElement(mUIHost, out offset);
+                    var min = new Vector2(designRect.Left, designRect.Top) + offset;
+                    if (min.X < rectMin.X)
+                        rectMin.X = min.X;
+                    if (min.Y < rectMin.Y)
+                        rectMin.Y = min.Y;
+                    var max = new Vector2(designRect.Right, designRect.Bottom) + offset;
+                    if(max.X > rectMax.X)
+                        rectMax.X = max.X;
+                    if (max.Y > rectMax.Y)
+                        rectMax.Y = max.Y;
+                }
+                var size = rectMax - rectMin;
+                rectMax.Y = mUIHost.WindowSize.Height - rectMax.Y;
+                rectMin.Y = mUIHost.WindowSize.Height - rectMin.Y;
+                BoundingSphere sphere;
+                sphere.Center = new Vector3((rectMin.X + rectMax.X) * 0.5f, (rectMin.Y + rectMax.Y) * 0.5f, 0.0f);
+                sphere.Radius = ((size.X > size.Y) ? size.X : size.Y);
+                mUIHost.RenderCamera.AutoZoom(ref sphere);
+            }
+        }
+        public float LoadingPercent { get; set; } = 1.0f;
+        public string ProgressText { get; set; } = "Loading";
         public async System.Threading.Tasks.Task<bool> OpenEditor(EngineNS.Editor.UMainEditorApplication mainEditor, RName name, object arg)
         {
             AssetName = name;
@@ -1076,7 +1127,8 @@ namespace EngineNS.UI.Editor
             UIAsset.AssetName = name;
             //UIAsset.Mesh = await UI.Canvas.TtCanvas.TestCreate();
             await InitMacrossEditor();
-            
+
+            PreviewViewport.OnDrawViewportUIAction = DrawViewportUIAction;
             PreviewViewport.PreviewAsset = AssetName;
             PreviewViewport.Title = $"UI:{name}";
             PreviewViewport.OnInitialize = Initialize_PreviewMaterialInstance;

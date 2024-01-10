@@ -113,7 +113,7 @@ namespace EngineNS.Bricks.Procedure
 
         }
         #region GUI
-        public override void OnMouseStayPin(NodePin stayPin)
+        public override void OnMouseStayPin(NodePin stayPin, UNodeGraph graph)
         {
             var creator = stayPin.Tag as UBufferCreator;
             if (creator != null)

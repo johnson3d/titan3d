@@ -691,7 +691,7 @@ namespace EngineNS.NxRHI
             {
                 return null;
             }
-            System.Diagnostics.Debug.Assert(IRenderDocTool.GetInstance().IsFrameCapturing());
+            //System.Diagnostics.Debug.Assert(IRenderDocTool.GetInstance().IsFrameCapturing());
             CaptureRenderDocFrame = false;
             IRenderDocTool.GetInstance().EndFrameCapture();
 

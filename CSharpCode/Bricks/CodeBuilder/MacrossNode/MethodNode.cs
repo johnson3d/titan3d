@@ -695,7 +695,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
                 }
             }
         }
-        public override void OnMouseStayPin(NodePin pin)
+        public override void OnMouseStayPin(NodePin pin, UNodeGraph graph)
         {
             if (pin == Self)
             {
@@ -711,7 +711,14 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
                     var cvtType = Result.Tag as Rtti.UTypeDesc;
                     if (cvtType != null)
                     {
-                        typeString = cvtType.FullName;
+                        if(Method.IsAsync())
+                        {
+                            if (cvtType.GetGenericArguments().Length == 1)
+                                cvtType = Rtti.UTypeDesc.TypeOf(cvtType.GetGenericArguments()[0]);
+                            typeString = cvtType.FullName;
+                        }
+                        else
+                            typeString = cvtType.FullName;
                     }
                     EGui.Controls.CtrlUtility.DrawHelper($"{valueString}({typeString})");
                 }
@@ -1059,7 +1066,8 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
                 exp = lambdaExp;
                 if (delegateMethod.ReturnType != typeof(void) && delegateMethod.ReturnType != typeof(System.Threading.Tasks.Task))
                 {
-                    if (delegateMethod.ReturnType.IsSubclassOf(typeof(System.Threading.Tasks.Task)))
+                    if (delegateMethod.ReturnType.IsSubclassOf(typeof(System.Threading.Tasks.Task)) ||
+                        delegateMethod.ReturnType.IsSubclassOf(typeof(Thread.Async.TtTask)))
                     {
                         lambdaExp.ReturnType = new UTypeReference(delegateMethod.ReturnType.GetGenericArguments()[0]);
                         lambdaExp.IsAsync = true;
@@ -1067,7 +1075,8 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
                     else
                         lambdaExp.ReturnType = new UTypeReference(delegateMethod.ReturnType);
                 }
-                else if (delegateMethod.ReturnType == typeof(System.Threading.Tasks.Task))
+                else if ((delegateMethod.ReturnType == typeof(System.Threading.Tasks.Task)) ||
+                         (delegateMethod.ReturnType == typeof(Thread.Async.TtTask)))
                         lambdaExp.IsAsync = true;
 
                 var delegateMethodParams = delegateMethod.GetParameters();
@@ -1529,7 +1538,12 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
                 {
                     var cvtType = Result.Tag as Rtti.UTypeDesc;
                     if (cvtType != null)
-                        return cvtType;
+                    {
+                        if (method.IsAsync() && cvtType.GetGenericArguments().Length == 1)
+                            return Rtti.UTypeDesc.TypeOf(cvtType.GetGenericArguments()[0]);
+                        else
+                            return cvtType;
+                    }
                 }
                 return method.ReturnType;
             }
@@ -1661,7 +1675,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
                     ImGuiAPI.PopStyleColor(1);
                     if (bShow)
                     {
-                        foreach(var j in i.CurrentVersion.Propertys)
+                        foreach(var j in i.Properties)
                         {
                             if (bTestFilter && j.PropertyName.Contains(filterText) == false)
                                 continue;
@@ -1749,7 +1763,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
             {
                 if (KlsMeta != null)
                 {
-                    foreach (var j in KlsMeta.CurrentVersion.Propertys)
+                    foreach (var j in KlsMeta.Properties)
                     {
                         ImGuiAPI.PushStyleColor(ImGuiCol_.ImGuiCol_Text, Styles.MemberColor);
                         ImGuiAPI.TreeNodeEx(j.PropertyName, flags);

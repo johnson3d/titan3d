@@ -49,9 +49,11 @@ namespace EngineNS.EGui.Slate
             var rpAsset = Bricks.RenderPolicyEditor.URenderPolicyAsset.LoadAsset(policyName);
             if (rpAsset != null)
             {
-                policy = rpAsset.CreateRenderPolicy();
+                policy = rpAsset.CreateRenderPolicy(this);
             }
             await InitializeImpl(application, policy, zMin, zMax);
+
+            IsInlitialized = true;
         }
         private async System.Threading.Tasks.Task InitializeImpl(USlateApplication application, Graphics.Pipeline.URenderPolicy policy, float zMin, float zMax)
         {
@@ -69,6 +71,9 @@ namespace EngineNS.EGui.Slate
 
             await this.World.InitWorld();
             SetCameraOffset(in DVector3.Zero);
+
+            mDefaultHUD.RenderCamera = this.RenderPolicy.DefaultCamera;
+            this.PushHUD(mDefaultHUD);
             //SetCameraOffset(new DVector3(-300, 0, 0));
 
             mAxis = new GamePlay.UAxis();
@@ -206,8 +211,9 @@ namespace EngineNS.EGui.Slate
         private static Profiler.TimeScope ScopeTick = Profiler.TimeScopeManager.GetTimeScope(typeof(UWorldViewportSlate), nameof(TickLogic));
         [ThreadStatic]
         private static Profiler.TimeScope ScopeRPolicyTick = Profiler.TimeScopeManager.GetTimeScope(typeof(UWorldViewportSlate), "TickRPolicy");
-        public unsafe void TickLogic(float ellapse)
+        public override unsafe void TickLogic(float ellapse)
         {
+            base.TickLogic(ellapse);
             using (new Profiler.TimeScopeHelper(ScopeTick))
             {
                 if (IsDrawing)

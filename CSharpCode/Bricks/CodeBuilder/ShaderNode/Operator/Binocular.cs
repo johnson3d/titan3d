@@ -129,7 +129,7 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Operator
             : base(op, name)
         {
         }
-        public override void OnMouseStayPin(NodePin stayPin)
+        public override void OnMouseStayPin(NodePin stayPin, UNodeGraph graph)
         {
             if (LeftType != null)
                 EGui.Controls.CtrlUtility.DrawHelper(LeftType.FullName);

@@ -401,6 +401,8 @@ namespace EngineNS.Editor.ShaderCompiler
                 if (cfg.CookDXBC)
                 {
                     defPtr.AddDefine("RHI_TYPE", "RHI_DX11");
+                    defPtr.AddDefine("CP_SM_major", "5");
+                    defPtr.AddDefine("CP_SM_minor", "0");
                     var compile_sm = sm;
                     if (sm == null)
                     {
@@ -413,6 +415,8 @@ namespace EngineNS.Editor.ShaderCompiler
                 if (cfg.CookDXIL)
                 {
                     defPtr.AddDefine("RHI_TYPE", "RHI_DX12");
+                    defPtr.AddDefine("CP_SM_major", "6");
+                    defPtr.AddDefine("CP_SM_minor", "5");
                     if (extHlslVersion != null)
                     {
                         defPtr.AddDefine("HLSL_VERSION", extHlslVersion);
@@ -429,6 +433,8 @@ namespace EngineNS.Editor.ShaderCompiler
                 if (cfg.CookGLSL)
                 {
                     defPtr.AddDefine("RHI_TYPE", "RHI_GL");
+                    defPtr.AddDefine("CP_SM_major", "6");
+                    defPtr.AddDefine("CP_SM_minor", "5");
                     if (extHlslVersion != null)
                     {
                         defPtr.AddDefine("HLSL_VERSION", extHlslVersion);
@@ -445,6 +451,8 @@ namespace EngineNS.Editor.ShaderCompiler
                 if (cfg.CookMETAL)
                 {
                     defPtr.AddDefine("RHI_TYPE", "RHI_MTL");
+                    defPtr.AddDefine("CP_SM_major", "6");
+                    defPtr.AddDefine("CP_SM_minor", "5");
                     if (extHlslVersion != null)
                     {
                         defPtr.AddDefine("HLSL_VERSION", extHlslVersion);
@@ -463,6 +471,8 @@ namespace EngineNS.Editor.ShaderCompiler
                 {
                     //extHlslVersion = "2021";
                     defPtr.AddDefine("RHI_TYPE", "RHI_VK");
+                    defPtr.AddDefine("CP_SM_major", "6");
+                    defPtr.AddDefine("CP_SM_minor", "5");
                     if (extHlslVersion != null)
                     {
                         defPtr.AddDefine("HLSL_VERSION", extHlslVersion);

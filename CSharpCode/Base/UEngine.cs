@@ -129,9 +129,11 @@ namespace EngineNS
     {
         public bool VS_StructureBuffer { get; set; } = false;
     }
+    [Rtti.Meta]
     public partial class UEngine : UModuleHost<UEngine>
     {
         private static UEngine mInstance;
+        [Rtti.Meta(Flags = Rtti.MetaAttribute.EMetaFlags.Unserializable | Rtti.MetaAttribute.EMetaFlags.MacrossReadOnly)]
         public static UEngine Instance { get => mInstance; }
         public EPlayMode PlayMode { get; set; } = EPlayMode.Editor;
         [Rtti.Meta]

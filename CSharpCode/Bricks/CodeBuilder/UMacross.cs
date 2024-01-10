@@ -205,7 +205,7 @@ namespace EngineNS.Bricks.CodeBuilder
                         var rn = RName.GetRName(mDir.Name + mName + ExtName, mDir.RNameType);
                         if(IO.TtFileManager.FileExists(rn.Address) == false && string.IsNullOrWhiteSpace(mName) == false)
                         {
-                            ((UMacross)mAsset).mSelectedType = mSelectedType;
+                            ((UMacross)mAsset).SelectedType = mSelectedType;
                             if (DoImportAsset())
                             {
                                 ImGuiAPI.CloseCurrentPopup();
@@ -249,8 +249,8 @@ namespace EngineNS.Bricks.CodeBuilder
         {
             ameta.RefAssetRNames.Clear();
             var macrossMeta = (ameta as UMacrossAMeta);
-            if (macrossMeta != null && mSelectedType != null)
-                macrossMeta.BaseTypeStr = mSelectedType.TypeString;
+            if (macrossMeta != null && SelectedType != null)
+                macrossMeta.BaseTypeStr = SelectedType.TypeString;
 
             var graph = new MacrossNode.UMacrossEditor();
             graph.LoadClassGraph(this.AssetName);
@@ -275,16 +275,16 @@ namespace EngineNS.Bricks.CodeBuilder
             }
         }
 
-        UTypeDesc mSelectedType = null;
+        public UTypeDesc SelectedType = null;
         public MacrossNode.UMacrossEditor MacrossEditor = null;
         public void SaveAssetTo(RName name)
         {
-            //var ameta = GetAMeta();
-            //if (ameta != null)
-            //{
-            //    UpdateAMetaReferences(ameta);
-            //    ameta.SaveAMeta();
-            //}
+            var ameta = GetAMeta();
+            if (ameta != null)
+            {
+                UpdateAMetaReferences(ameta);
+                ameta.SaveAMeta();
+            }
             IO.TtFileManager.CreateDirectory(name.Address);
 
             if (MacrossEditor == null)
@@ -292,8 +292,8 @@ namespace EngineNS.Bricks.CodeBuilder
             MacrossEditor.AssetName = name;
             MacrossEditor.DefClass.ClassName = name.PureName;
             MacrossEditor.DefClass.Namespace = new UNamespaceDeclaration(IO.TtFileManager.GetParentPathName(name.Name).TrimEnd('/').Replace('/', '.'));
-            if (mSelectedType != null)
-                MacrossEditor.DefClass.SupperClassNames.Add(mSelectedType.FullName);
+            if (SelectedType != null)
+                MacrossEditor.DefClass.SupperClassNames.Add(SelectedType.FullName);
             MacrossEditor.SaveClassGraph(name);
             MacrossEditor.GenerateCode();
             MacrossEditor.CompileCode();

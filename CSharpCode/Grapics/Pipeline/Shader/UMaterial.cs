@@ -113,6 +113,7 @@ namespace EngineNS.Graphics.Pipeline.Shader
             public Vector4 vF4_3;
             public Vector4ui SpecialData;
             public uint vInstanceID;
+            public bool bIsFrontFace;
             public static Graphics.Pipeline.Shader.EPixelShaderInput NameToInput(string name)
             {
                 switch(name)

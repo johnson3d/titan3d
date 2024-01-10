@@ -1,4 +1,5 @@
-﻿using System;
+﻿using EngineNS.Graphics.Pipeline;
+using System;
 using System.Collections.Generic;
 using System.Text;
 
@@ -120,12 +121,13 @@ namespace EngineNS.Bricks.RenderPolicyEditor
         }
         [Rtti.Meta]
         public UPolicyGraph PolicyGraph { get; } = new UPolicyGraph();
-        public Graphics.Pipeline.URenderPolicy CreateRenderPolicy()
+        public Graphics.Pipeline.URenderPolicy CreateRenderPolicy(UViewportSlate viewport)
         {
             var typeDesc = PolicyGraph.PolicyType;
             var policy = Rtti.UTypeDescManager.CreateInstance(typeDesc) as Graphics.Pipeline.URenderPolicy; // new Graphics.Pipeline.URenderPolicy();
             var meta = Rtti.TtClassMetaManager.Instance.GetMeta(typeDesc);
             meta.CopyObjectMetaField(policy, this.PolicyGraph.RenderPolicy);
+            policy.ViewportSlate = viewport;
             foreach (UPolicyNode i in PolicyGraph.Nodes)
             {
                 if (false == policy.RegRenderNode(i.Name, i.GraphNode))

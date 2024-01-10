@@ -115,12 +115,18 @@ namespace EngineNS.Editor.Forms
                 meshNode.IsCastShadow = true;
             }
         }
+        public float LoadingPercent { get; set; } = 1.0f;
+        public string ProgressText { get; set; } = "Loading";
         public async Task<bool> OpenEditor(UMainEditorApplication mainEditor, RName name, object arg)
         {
+            LoadingPercent = 0;
+            ProgressText = "Load Material";
             AssetName = name;
             Material = await UEngine.Instance.GfxDevice.MaterialInstanceManager.CreateMaterialInstance(name);
             if (Material == null)
                 return false;
+            LoadingPercent = 0.1f;
+            ProgressText = "Initialize PreviewViewport";
 
             ActionRecorder.ClearRecords();
             Material.ActionRecorder = ActionRecorder;
@@ -130,9 +136,12 @@ namespace EngineNS.Editor.Forms
             PreviewViewport.OnInitialize = Initialize_PreviewMaterialInstance;
             await PreviewViewport.Initialize(UEngine.Instance.GfxDevice.SlateApplication, UEngine.Instance.Config.MainRPolicyName, 0, 1);
 
+            LoadingPercent = 0.8f;
+
             MaterialPropGrid.Target = Material;
             EditorPropGrid.Target = this;
             UEngine.Instance.TickableManager.AddTickable(this);
+            LoadingPercent = 1.0f;
             return true;
         }
         public void OnCloseEditor()

@@ -203,222 +203,33 @@ namespace EngineNS.Thread.Async
         }
 
         #region for each
-        public struct MTPSegment
-        {
-            public int Start;
-            public int End;
-        }
-        private MTPSegment[] GetMultThreadSegement(int num)
-        {
-            int stride = num / ContextPools.Length;
-            int remain = num % ContextPools.Length;
-            var result = new MTPSegment[ContextPools.Length];
-            int startIndex = 0;
-            for (int i = 0; i < ContextPools.Length; i++)
-            {
-                result[i].Start = startIndex;
-                startIndex += stride;
-                result[i].End = startIndex;
-            }
-            result[ContextPools.Length - 1].End += remain;
-            return result;
-        }
-        public delegate void FMTS_DoForeach(int index);
-        public delegate void FMTS_DoForeach2(int index, Thread.TtSemaphore smp);
-        public delegate void FMTS_DoForeach<T>(T v);
-        public delegate void FMTS_DoForeachRef<T>(ref T v);
+        public delegate void Delegate_ParrallelForAction(int index);
         public bool EnableMTForeach = true;
-        public void FMTS_Foreach<T>(T[] lst, FMTS_DoForeachRef<T> action)
-        {
-            int num = lst.Length;
-            if (EnableMTForeach == false)
-            {
-                for (int i = 0; i < num; i++)
-                {
-                    action(ref lst[i]);
-                }
-                return;
-            }
-            int stride = num / ContextPools.Length;
-            int remain = num % ContextPools.Length;
-
-            unsafe
-            {
-                MTPSegment* segs = stackalloc MTPSegment[ContextPools.Length];
-
-                int startIndex = 0;
-                for (int i = 0; i < ContextPools.Length; i++)
-                {
-                    segs[i].Start = startIndex;
-                    startIndex += stride;
-                    segs[i].End = startIndex;
-                }
-                segs[ContextPools.Length - 1].End += remain;
-
-                var smp = EngineNS.Thread.TtSemaphore.CreateSemaphore(ContextPools.Length, new System.Threading.AutoResetEvent(false));
-                for (int i = 0; i < ContextPools.Length; i++)
-                {
-                    MTPSegment curSeg = segs[i];
-                    UEngine.Instance.EventPoster.RunOn((state) =>
-                    {
-                        try
-                        {
-                            for (int j = curSeg.Start; j < curSeg.End; j++)
-                            {
-                                action(ref lst[j]);
-                            }
-                        }
-                        catch (Exception ex)
-                        {
-                            Profiler.Log.WriteException(ex);
-                        }
-                        smp.Release();
-                        return true;
-                    }, Thread.Async.EAsyncTarget.TPools);
-                }
-                smp.Wait(int.MaxValue);
-            }
-        }
-        public void FMTS_Foreach<T>(List<T> lst, FMTS_DoForeach<T> action)
-        {
-            int num = lst.Count;
-            if (EnableMTForeach == false)
-            {
-                for (int i = 0; i < num; i++)
-                {
-                    action(lst[i]);
-                }
-                return;
-            }            
-            int stride = num / ContextPools.Length;
-            int remain = num % ContextPools.Length;
-
-            unsafe
-            {
-                MTPSegment* segs = stackalloc MTPSegment[ContextPools.Length];
-
-                int startIndex = 0;
-                for (int i = 0; i < ContextPools.Length; i++)
-                {
-                    segs[i].Start = startIndex;
-                    startIndex += stride;
-                    segs[i].End = startIndex;
-                }
-                segs[ContextPools.Length - 1].End += remain;
-
-                var smp = EngineNS.Thread.TtSemaphore.CreateSemaphore(ContextPools.Length, new System.Threading.AutoResetEvent(false));
-                for (int i = 0; i < ContextPools.Length; i++)
-                {
-                    MTPSegment curSeg = segs[i];
-                    UEngine.Instance.EventPoster.RunOn((state) =>
-                    {
-                        try
-                        {
-                            for (int j = curSeg.Start; j < curSeg.End; j++)
-                            {
-                                action(lst[j]);
-                            }
-                        }
-                        catch (Exception ex)
-                        {
-                            Profiler.Log.WriteException(ex);
-                        }
-                        smp.Release();
-                        return true;
-                    }, Thread.Async.EAsyncTarget.TPools);
-                }
-                smp.Wait(int.MaxValue);
-            }
-        }
-        public void MTS_Foreach(int num, FMTS_DoForeach action)
+        public Thread.TtSemaphore ParrallelFor(int num, Delegate_ParrallelForAction action)
         {
             if(EnableMTForeach==false)
             {
-                for(int i=0;i<num;i++)
+                for (int i = 0; i < num; i++)
                 {
                     action(i);
                 }
-                return;
+                return null;
             }
-            int stride = num / ContextPools.Length;
-            int remain = num % ContextPools.Length;
-            unsafe
+            else
             {
-                MTPSegment* segs = stackalloc MTPSegment[ContextPools.Length];
-
-                int startIndex = 0;
-                for (int i = 0; i < ContextPools.Length; i++)
+                var smp = EngineNS.Thread.TtSemaphore.CreateSemaphore(num, new System.Threading.AutoResetEvent(false));
+                for (int i = 0; i < num; i++)
                 {
-                    segs[i].Start = startIndex;
-                    startIndex += stride;
-                    segs[i].End = startIndex;
-                }
-                segs[ContextPools.Length - 1].End += remain;
-
-                var smp = EngineNS.Thread.TtSemaphore.CreateSemaphore(ContextPools.Length, new System.Threading.AutoResetEvent(false));
-                for (int i = 0; i < ContextPools.Length; i++)
-                {
-                    MTPSegment curSeg = segs[i];
                     UEngine.Instance.EventPoster.RunOn((state) =>
                     {
-                        try
-                        {
-                            for (int j = curSeg.Start; j < curSeg.End; j++)
-                            {
-                                action(j);
-                            }
-                        }
-                        catch (Exception ex)
-                        {
-                            Profiler.Log.WriteException(ex);
-                        }                        
+                        action(i);
                         smp.Release();
                         return true;
                     }, Thread.Async.EAsyncTarget.TPools);
                 }
-                smp.Wait(int.MaxValue);
-            }            
-        }
-        public async System.Threading.Tasks.Task AwaitMTS_Foreach(int num, FMTS_DoForeach2 action)
-        {
-            int stride = num / ContextPools.Length;
-            int remain = num % ContextPools.Length;
-            var smp = EngineNS.Thread.TtSemaphore.CreateSemaphore(ContextPools.Length, new System.Threading.AutoResetEvent(false));
-            unsafe
-            {
-                MTPSegment* segs = stackalloc MTPSegment[ContextPools.Length];
-
-                int startIndex = 0;
-                for (int i = 0; i < ContextPools.Length; i++)
-                {
-                    segs[i].Start = startIndex;
-                    startIndex += stride;
-                    segs[i].End = startIndex;
-                }
-                segs[ContextPools.Length - 1].End += remain;
-
-                for (int i = 0; i < ContextPools.Length; i++)
-                {
-                    MTPSegment curSeg = segs[i];
-                    UEngine.Instance.EventPoster.RunOn((state) =>
-                    {
-                        try
-                        {
-                            for (int j = curSeg.Start; j < curSeg.End; j++)
-                            {
-                                action(j, smp);
-                            }
-                        }
-                        catch (Exception ex)
-                        {
-                            Profiler.Log.WriteException(ex);
-                        }
-                        smp.Release();
-                        return true;
-                    }, Thread.Async.EAsyncTarget.TPools);
-                }
+                //smp.Wait(int.MaxValue);
+                return smp;
             }
-            await smp.Await();
         }
         #endregion
 

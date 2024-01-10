@@ -91,6 +91,7 @@ namespace EngineNS.Editor
 
             InitMainMenu();
 
+            await AssetEditorManager.Initialize();
             return true;
         }
 #if PWindow
@@ -469,6 +470,8 @@ namespace EngineNS.Editor
                 ImGuiAPI.SetNextWindowPos(in pos, ImGuiCond_.ImGuiCond_FirstUseEver, in pivot);
                 ImGuiAPI.ShowDemoWindow(ref _showDemoWindow);
             }
+
+            AssetEditorManager.OnDrawTopMost();
         }
         List<EGui.UIProxy.MenuItemProxy> mMenuItems = new List<EGui.UIProxy.MenuItemProxy>();
         private void DrawMainMenu()

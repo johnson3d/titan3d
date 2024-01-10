@@ -1,4 +1,5 @@
 ﻿using Microsoft.CodeAnalysis;
+using NPOI.Util;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -131,13 +132,29 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
 
         public void SaveClassGraph(RName rn)
         {
-            var ameta = UEngine.Instance.AssetMetaManager.GetAssetMeta(AssetName);
+            var ameta = UEngine.Instance.AssetMetaManager.GetAssetMeta(AssetName) as UMacrossAMeta;
             if (ameta != null)
             {
-                var tmp = new UMacross();
-                tmp.AssetName = rn;
-                tmp.UpdateAMetaReferences(ameta);
-                ameta.SaveAMeta();
+                if(DefClass.SupperClassNames.Count > 0)
+                {
+                    var baseType = Rtti.UTypeDesc.TypeOfFullName(DefClass.SupperClassNames[0]);
+                    if(baseType != null && ameta.BaseTypeStr != baseType.TypeString)
+                    {
+                        var tmp = new UMacross();
+                        tmp.AssetName = rn;
+                        tmp.SelectedType = baseType;
+                        tmp.UpdateAMetaReferences(ameta);
+                        ameta.SaveAMeta();
+                    }
+                    else if(baseType == null && !string.IsNullOrEmpty(ameta.BaseTypeStr))
+                    {
+                        var tmp = new UMacross();
+                        tmp.AssetName = rn;
+                        tmp.SelectedType = null;
+                        tmp.UpdateAMetaReferences(ameta);
+                        ameta.SaveAMeta();
+                    }
+                }
             }
 
             if (!IO.TtFileManager.DirectoryExists(rn.Address))
@@ -939,7 +956,8 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
             }
             ImGuiAPI.EndChild();
         }
-
+        public float LoadingPercent { get; set; } = 1.0f;
+        public string ProgressText { get; set; } = "Loading";
         public async Task<bool> OpenEditor(Editor.UMainEditorApplication mainEditor, RName name, object arg)
         {
             LoadClassGraph(AssetName);

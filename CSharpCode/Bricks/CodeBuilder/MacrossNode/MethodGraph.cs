@@ -2,10 +2,12 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Reflection;
 using System.Threading.Tasks;
 using EngineNS.Bricks.NodeGraph;
 using EngineNS.EGui.Controls.PropertyGrid;
 using Mono.CompilerServices.SymbolWriter;
+using NPOI.SS.UserModel;
 
 namespace EngineNS.Bricks.CodeBuilder.MacrossNode
 {
@@ -238,7 +240,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
             }
             return null;
         }
-        public override void OnMouseStayPin(NodePin stayPin)
+        public override void OnMouseStayPin(NodePin stayPin, UNodeGraph graph)
         {
             for(int i=0; i<Arguments.Count; i++)
             {
@@ -964,6 +966,16 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
             return false;
         }
 
+        string[] GetContextPath(Rtti.UTypeDesc type, string name)
+        {
+            var typeStr = Rtti.UTypeDescManager.Instance.GetTypeStringFromType(type, false);
+            typeStr = typeStr.Replace("EngineNS.", "").Replace("Bricks.", "");
+            var idx = typeStr.LastIndexOf('@');
+            if(idx >= 0)
+                typeStr = typeStr.Substring(0, idx);
+            typeStr += "." + name;
+            return typeStr.Split('.');
+        }
         public override void UpdateCanvasMenus()
         {
             CanvasMenus.SubMenuItems.Clear();
@@ -972,28 +984,158 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
             {
                 foreach (var typeDesc in service.Types.Values)
                 {
-                    var atts = typeDesc.SystemType.GetCustomAttributes(typeof(ContextMenuAttribute), true);
-                    if (atts.Length > 0)
                     {
-                        var parentMenu = CanvasMenus;
-                        var att = atts[0] as ContextMenuAttribute;
-                        if (!att.HasKeyString(UMacross.MacrossEditorKeyword))
-                            continue;
-                        for (var menuIdx = 0; menuIdx < att.MenuPaths.Length; menuIdx++)
+                        var atts = typeDesc.GetCustomAttributes(typeof(ContextMenuAttribute), true);
+                        if (atts.Length > 0)
                         {
-                            var menuStr = att.MenuPaths[menuIdx];
-                            var menuName = GetMenuName(menuStr);
-                            if (menuIdx < att.MenuPaths.Length - 1)
-                                parentMenu = parentMenu.AddMenuItem(menuName, null, null);
-                            else
+                            var parentMenu = CanvasMenus;
+                            var att = atts[0] as ContextMenuAttribute;
+                            if (!att.HasKeyString(UMacross.MacrossEditorKeyword))
+                                continue;
+                            for (var menuIdx = 0; menuIdx < att.MenuPaths.Length; menuIdx++)
                             {
-                                parentMenu.AddMenuItem(menuName, att.FilterStrings, null,
+                                var menuStr = att.MenuPaths[menuIdx];
+                                var menuName = GetMenuName(menuStr);
+                                if (menuIdx < att.MenuPaths.Length - 1)
+                                    parentMenu = parentMenu.AddMenuItem(menuName, null, null);
+                                else
+                                {
+                                    parentMenu.AddMenuItem(menuName, att.FilterStrings, null,
+                                        (UMenuItem item, object sender) =>
+                                        {
+                                            var node = Rtti.UTypeDescManager.CreateInstance(typeDesc) as UNodeBase;
+                                            var nodeName = GetSerialFinalString(menuStr, GenSerialId());
+                                            if (nodeName != null)
+                                                node.Name = nodeName;
+                                            node.UserData = MacrossEditor;
+                                            node.Position = PopMenuPosition;
+                                            SetDefaultActionForNode(node);
+                                            this.AddNode(node);
+                                        });
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            foreach(var metaData in Rtti.TtClassMetaManager.Instance.Metas)
+            {
+                // create
+                if(metaData.Value.MetaAttribute != null && !metaData.Value.MetaAttribute.IsNoMacrossCreate)
+                {
+
+                }
+                // static method
+                foreach(var methodMeta in metaData.Value.Methods)
+                {
+                    if (!methodMeta.IsStatic)
+                        continue;
+                    if (methodMeta.Meta.IsNoMacrossUseable)
+                        continue;
+                    string[] path = methodMeta.Meta.MacrossDisplayPath;
+                    if(path == null)
+                        path = GetContextPath(methodMeta.DeclaringType, methodMeta.MethodName);
+                    var parentMenu = CanvasMenus;
+                    for(var menuIdx = 0; menuIdx < path.Length; menuIdx++)
+                    {
+                        var menuStr = path[menuIdx];
+                        var menuName = GetMenuName(menuStr);
+                        if (menuIdx < path.Length - 1)
+                            parentMenu = parentMenu.AddMenuItem(menuName, null, null);
+                        else
+                        {
+                            parentMenu.AddMenuItem(menuName, methodMeta.MethodName, null,
+                                (UMenuItem item, object sender) =>
+                                {
+                                    var node = MethodNode.NewMethodNode(methodMeta);
+                                    node.Position = PopMenuPosition;
+                                    SetDefaultActionForNode(node);
+                                    this.AddNode(node);
+                                });
+                        }
+                    }
+                }
+                // static fields
+                foreach(var fieldMeta in metaData.Value.Fields)
+                {
+                    if (!fieldMeta.IsStatic)
+                        continue;
+                    if(!fieldMeta.IsPublic)
+                        continue;
+                    if (fieldMeta.Meta.IsNoMacrossUseable)
+                        continue;
+                    var path = fieldMeta.Meta.MacrossDisplayPath;
+                    if (path == null)
+                        path = GetContextPath(fieldMeta.DeclaringType, fieldMeta.FieldName);
+                    var parentMenu = CanvasMenus;
+                    for (var menuIdx = 0; menuIdx < path.Length; menuIdx++)
+                    {
+                        var menuStr = path[menuIdx];
+                        var menuName = GetMenuName(menuStr);
+                        if (menuIdx < path.Length - 1)
+                            parentMenu = parentMenu.AddMenuItem(menuName, null, null);
+                        else
+                        {
+                            parentMenu.AddMenuItem("get " + menuName, fieldMeta.FieldName, null,
+                                (UMenuItem item, object sender) =>
+                                {
+                                    var node = ClassFieldVar.NewClassMemberVar(fieldMeta, true);
+                                    node.Position = PopMenuPosition;
+                                    SetDefaultActionForNode(node);
+                                    this.AddNode(node);
+                                });
+                            parentMenu.AddMenuItem("set " + menuName, fieldMeta.FieldName, null,
+                                (UMenuItem item, object sender) =>
+                                {
+                                    var node = ClassFieldVar.NewClassMemberVar(fieldMeta, false);
+                                    node.Position = PopMenuPosition;
+                                    SetDefaultActionForNode(node);
+                                    this.AddNode(node);
+                                });
+                        }
+                    }
+                }
+                // static properties
+                foreach(var proMeta in metaData.Value.Properties)
+                {
+                    if (!proMeta.IsGetStatic && !proMeta.IsSetStatic)
+                        continue;
+                    if (!proMeta.IsGetPublic && !proMeta.IsSetPublic)
+                        continue;
+                    if (proMeta.Meta.IsNoMacrossUseable)
+                        continue;
+                    string[] path = proMeta.Meta.MacrossDisplayPath;
+                    if (path == null)
+                        path = GetContextPath(proMeta.HostType, proMeta.PropertyName);
+                    var parentMenu = CanvasMenus;
+                    for(var menuIdx = 0; menuIdx < path.Length; menuIdx++)
+                    {
+                        var menuStr = path[menuIdx];
+                        var menuName = GetMenuName(menuStr);
+                        if (menuIdx < path.Length - 1)
+                            parentMenu = parentMenu.AddMenuItem(menuName, null, null);
+                        else
+                        {
+                            if(proMeta.IsGetStatic && proMeta.IsGetPublic)
+                            {
+                                parentMenu.AddMenuItem("get " + menuName, proMeta.PropertyName, null,
                                     (UMenuItem item, object sender) =>
                                     {
-                                        var node = Rtti.UTypeDescManager.CreateInstance(typeDesc) as UNodeBase;
-                                        var nodeName = GetSerialFinalString(menuStr, GenSerialId());
-                                        if (nodeName != null)
-                                            node.Name = nodeName;
+                                        var node = ClassPropertyVar.NewClassProperty(proMeta, true);
+                                        node.Label = metaData.Value.ClassMetaName;
+                                        node.UserData = MacrossEditor;
+                                        node.Position = PopMenuPosition;
+                                        SetDefaultActionForNode(node);
+                                        this.AddNode(node);
+                                    });
+                            }
+                            if(proMeta.IsSetStatic && proMeta.IsSetPublic && !proMeta.Meta.IsMacrossReadOnly)
+                            {
+                                parentMenu.AddMenuItem("set " + menuName, proMeta.PropertyName, null,
+                                    (UMenuItem item, object sender) =>
+                                    {
+                                        var node = ClassPropertyVar.NewClassProperty(proMeta, false);
+                                        node.Label = metaData.Value.ClassMetaName;
                                         node.UserData = MacrossEditor;
                                         node.Position = PopMenuPosition;
                                         SetDefaultActionForNode(node);
@@ -1120,9 +1262,9 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
 
         private void UpdateMenuWithClassMeta(Rtti.UClassMeta classMeta, UMenuItem menu)
         {
-            for (int proIdx = 0; proIdx < classMeta.CurrentVersion.Propertys.Count; proIdx++)
+            for (int proIdx = 0; proIdx < classMeta.Properties.Count; proIdx++)
             {
-                var pro = classMeta.CurrentVersion.Propertys[proIdx];
+                var pro = classMeta.Properties[proIdx];
                 string[] menuPath = null;
                 string filterStr = pro.PropertyName;
                 var proInfo = pro.PropInfo;
@@ -1170,7 +1312,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
                                     }
                                 });
                         }
-                        if(proInfo.CanWrite)
+                        if(proInfo.CanWrite && !pro.Meta.IsMacrossReadOnly)
                         {
                             parentMenu.AddMenuItem("Set " + menuName, filterStr, null,
                                 (UMenuItem item, object sender) =>
@@ -1303,7 +1445,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
                                     var outPin = LinkingOp.StartPin as PinOut;
                                     AddLink(outPin, node.Self, true);
                                     var afterNode = outPin.HostNode as IAfterExecNode;
-                                    if (afterNode != null)
+                                    if (afterNode != null && afterNode.AfterExec.HostNode == afterNode)
                                         AddLink(afterNode.AfterExec, node.BeforeExec, true);
                                 }
                             });
@@ -1359,31 +1501,31 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
             node.OnPreReadAction = NodeOnPreRead;
         }
 
-        Bricks.CodeBuilder.MacrossNode.MethodSelector mMethodSelector = new Bricks.CodeBuilder.MacrossNode.MethodSelector();
+        //Bricks.CodeBuilder.MacrossNode.MethodSelector mMethodSelector = new Bricks.CodeBuilder.MacrossNode.MethodSelector();
         MacrossSelector KlassSelector = new MacrossSelector();
         public override void OnAfterDrawMenu(UNodeGraphStyles styles)
         {
-            mMethodSelector.mSltMember = null;
-            mMethodSelector.mSltField = null;
-            mMethodSelector.mSltMethod = null;
-            mMethodSelector.OnDrawTree();
-            if (mMethodSelector.mSltMember != null)
-            {
-                CurMenuType = EGraphMenu.None;
-            }
-            else if (mMethodSelector.mSltField != null)
-            {
-                CurMenuType = EGraphMenu.None;
-            }
-            else if (mMethodSelector.mSltMethod != null)
-            {
-                CurMenuType = EGraphMenu.None;
-                var node = MethodNode.NewMethodNode(mMethodSelector.mSltMethod);
-                node.UserData = MacrossEditor;
-                node.Position = PopMenuPosition;
-                SetDefaultActionForNode(node);
-                this.AddNode(node);
-            }
+            //mMethodSelector.mSltMember = null;
+            //mMethodSelector.mSltField = null;
+            //mMethodSelector.mSltMethod = null;
+            //mMethodSelector.OnDrawTree();
+            //if (mMethodSelector.mSltMember != null)
+            //{
+            //    CurMenuType = EGraphMenu.None;
+            //}
+            //else if (mMethodSelector.mSltField != null)
+            //{
+            //    CurMenuType = EGraphMenu.None;
+            //}
+            //else if (mMethodSelector.mSltMethod != null)
+            //{
+            //    CurMenuType = EGraphMenu.None;
+            //    var node = MethodNode.NewMethodNode(mMethodSelector.mSltMethod);
+            //    node.UserData = MacrossEditor;
+            //    node.Position = PopMenuPosition;
+            //    SetDefaultActionForNode(node);
+            //    this.AddNode(node);
+            //}
         }
         public override void OnDrawAfter(Bricks.NodeGraph.UGraphRenderer renderer, UNodeGraphStyles styles, ImDrawList cmdlist)
         {

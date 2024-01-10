@@ -88,7 +88,6 @@ namespace EngineNS.Graphics.Pipeline.Common
             {
                 GBuffers.SetSize(x * OutputScaleFactor, y * OutputScaleFactor);
             }
-            UEngine.Instance.UIManager.ScreenSize = new SizeF(x, y);
         }
         [ThreadStatic]
         private static Profiler.TimeScope ScopeTick = Profiler.TimeScopeManager.GetTimeScope(typeof(TtScreenSpaceUINode), nameof(TickLogic));
@@ -99,21 +98,25 @@ namespace EngineNS.Graphics.Pipeline.Common
                 var cmdlist = BasePass.DrawCmdList;
                 using (new NxRHI.TtCmdListScope(cmdlist))
                 {
-                    if (UEngine.Instance.UIManager.ScreenSpaceUIHost != null)
+                    var hud = policy.ViewportSlate?.HUD;
+                    if (hud != null)
                     {
-                        var host = UEngine.Instance.UIManager.ScreenSpaceUIHost;
+                        var host = hud;
                         host.UpdateCameraOffset(world);
-                        foreach (var i in host.DrawMesh.SubMeshes)
+                        if(host.DrawMesh != null)
                         {
-                            foreach (var j in i.Atoms)
+                            foreach (var i in host.DrawMesh.SubMeshes)
                             {
-                                var drawCall = j.GetDrawCall(cmdlist.mCoreObject, GBuffers, ScreenDrawPolicy, Graphics.Pipeline.URenderPolicy.EShadingType.BasePass, this);
-                                if (drawCall == null)
-                                    continue;
-                                drawCall.TagObject = this;
-                                drawCall.BindCBuffer(drawCall.Effect.BindIndexer.cbPerViewport, GBuffers.PerViewportCBuffer);
-                                drawCall.BindCBuffer(drawCall.Effect.BindIndexer.cbPerCamera, policy.DefaultCamera.PerCameraCBuffer);
-                                cmdlist.PushGpuDraw(drawCall);
+                                foreach (var j in i.Atoms)
+                                {
+                                    var drawCall = j.GetDrawCall(cmdlist.mCoreObject, GBuffers, ScreenDrawPolicy, Graphics.Pipeline.URenderPolicy.EShadingType.BasePass, this);
+                                    if (drawCall == null)
+                                        continue;
+                                    drawCall.TagObject = this;
+                                    drawCall.BindCBuffer(drawCall.Effect.BindIndexer.cbPerViewport, GBuffers.PerViewportCBuffer);
+                                    drawCall.BindCBuffer(drawCall.Effect.BindIndexer.cbPerCamera, policy.DefaultCamera.PerCameraCBuffer);
+                                    cmdlist.PushGpuDraw(drawCall);
+                                }
                             }
                         }
                     }

@@ -458,17 +458,17 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Control
         }
 
         [Rtti.Meta]
-        [TtHLSLProvider(Name = "Pivot_WindAnimation_Sway")]
-        [ContextMenu("Pivot_WindAnimation_Sway", "Pivot\\WindAnimation_Sway", UMaterialGraph.MaterialEditorKeyword)]
-        public static void Pivot_WindAnimation_Sway( Vector3 windSwayDirection, float windSwayGustFrequency, float windSwayIntensity, Vector3 localPoss, out Vector3 localVertexOffset )
+        [TtHLSLProvider(Name = "Pivot_WindAnimation_Sway2")]
+        [ContextMenu("Pivot_WindAnimation_Sway2", "Pivot\\WindAnimation_Sway2", UMaterialGraph.MaterialEditorKeyword)]
+        public static void Pivot_WindAnimation_Sway2(Vector3 windSwayDirection, float windSwayGustFrequency, float windSwayIntensity, Vector3 localPos, float time, out Vector3 localVertexOffset)
         {
             localVertexOffset = Vector3.Zero;
         }
 
         [Rtti.Meta]
-        [TtHLSLProvider(Name = "Pivot_WindAnimation_Sway2")]
-        [ContextMenu("Pivot_WindAnimation_Sway2", "Pivot\\WindAnimation_Sway2", UMaterialGraph.MaterialEditorKeyword)]
-        public static void Pivot_WindAnimation_Sway2(Vector3 windSwayDirection, float windSwayGustFrequency, float windSwayIntensity, Vector3 localPos, float time, out Vector3 localVertexOffset)
+        [TtHLSLProvider(Name = "Pivot_WindAnimation_Sway3")]
+        [ContextMenu("Pivot_WindAnimation_Sway3", "Pivot\\WindAnimation_Sway3", UMaterialGraph.MaterialEditorKeyword)]
+        public static void Pivot_WindAnimation_Sway3(Vector3 windSwayDirection, float windSwayGustFrequency, float windSwayIntensity, Vector3 localPos, float time, float windSwayEffectOffset, float windSwayEffectFalloff, out Vector3 localVertexOffset)
         {
             localVertexOffset = Vector3.Zero;
         }
@@ -479,6 +479,22 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Control
         public static void Pivot_WindAnimation_Rustle(float windSpeed, float windIntensity, Vector3 localPos, float time, out Vector3 localVertexOffset)
         {
             localVertexOffset = Vector3.Zero;
+        }
+
+        [Rtti.Meta]
+        [TtHLSLProvider(Name = "Pivot_Gradient")]
+        [ContextMenu("Pivot_Gradient", "Pivot\\Pivot_Gradient", UMaterialGraph.MaterialEditorKeyword)]
+        public static float Pivot_Gradient(Vector3 worldPos, float gradientOffset, float gradientFallout)
+        {
+            return 0;
+        }
+
+        [Rtti.Meta]
+        [TtHLSLProvider(Name = "Pivot_LeafNormal")]
+        [ContextMenu("Pivot_LeafNormal", "Pivot\\Pivot_LeafNormal", UMaterialGraph.MaterialEditorKeyword)]
+        public static Vector3 Pivot_LeafNormal(bool frontFace, Vector3 normal)
+        {
+            return Vector3.UnitY;
         }
     }
     public partial class TtHLSLMethodManager

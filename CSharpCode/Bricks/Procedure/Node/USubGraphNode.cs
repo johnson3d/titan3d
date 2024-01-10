@@ -36,7 +36,7 @@ namespace EngineNS.Bricks.Procedure.Node
         {
             Icon.Size = new Vector2(25, 25);
         }
-        public override void OnMouseStayPin(NodePin stayPin)
+        public override void OnMouseStayPin(NodePin stayPin, UNodeGraph graph)
         {
             var creator = stayPin.Tag as UBufferCreator;
             if (creator != null)

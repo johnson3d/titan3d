@@ -116,6 +116,13 @@ namespace EngineNS.Bricks.SourceControl
                 }
             }
         }
+        public void RemoveFile(string file, bool delLocal = true)
+        {
+            if (Source != null)
+            {
+                Source.RemoveFile(file, delLocal);
+            }
+        }
     }
 }
 

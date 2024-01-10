@@ -146,7 +146,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
             return null;
         }
 
-        public override void OnMouseStayPin(NodePin stayPin)
+        public override void OnMouseStayPin(NodePin stayPin, UNodeGraph graph)
         {
             if(IsStart)
             {
@@ -509,7 +509,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
             pin.Tag = ((UnionPinDefine)pinDef).Type;
         }
 
-        public override void OnMouseStayPin(NodePin stayPin)
+        public override void OnMouseStayPin(NodePin stayPin, UNodeGraph graph)
         {
             if (stayPin.Tag == null)
                 return;

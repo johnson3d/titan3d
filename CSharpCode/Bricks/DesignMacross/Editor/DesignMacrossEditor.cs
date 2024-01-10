@@ -325,6 +325,8 @@ namespace EngineNS.DesignMacross.Editor
         {
             return this;
         }
+        public float LoadingPercent { get; set; } = 1.0f;
+        public string ProgressText { get; set; } = "Loading";
         public async Task<bool> OpenEditor(EngineNS.Editor.UMainEditorApplication mainEditor, RName name, object arg)
         {
             mDesignMacross = new UDesignMacross();

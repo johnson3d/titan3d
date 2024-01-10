@@ -22,6 +22,7 @@ namespace EngineNS.UI
                 }
             }
         }
+        public Graphics.Pipeline.UViewportSlate ViewportSlate { get; internal set; }
 
         float mDPIScale = 1.0f;
         [Browsable(false)]
@@ -113,7 +114,7 @@ namespace EngineNS.UI
         }
         public override bool IsMousePointIn(in Vector2 mousePoint)
         {
-            var vp = this.mSceneNode.GetViewport();
+            var vp = this.ViewportSlate;
             var aabb = this.BoundingBox;
             if (aabb.IsEmpty())
                 return false;
@@ -151,7 +152,7 @@ namespace EngineNS.UI
         {
             if (this.mSceneNode == null)
                 return null;
-            var vp = this.mSceneNode.GetViewport();
+            var vp = this.ViewportSlate;
             var aabb = this.BoundingBox;
             if (aabb.Minimum.X >= aabb.Maximum.X ||
                 aabb.Minimum.Y >= aabb.Maximum.Y)

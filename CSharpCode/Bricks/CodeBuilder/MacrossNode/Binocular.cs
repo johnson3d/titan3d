@@ -137,7 +137,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
             : base(op, name)
         {
         }
-        public override void OnMouseStayPin(NodePin stayPin)
+        public override void OnMouseStayPin(NodePin stayPin, UNodeGraph graph)
         {
             if (LeftType != null)
                 EGui.Controls.CtrlUtility.DrawHelper(LeftType.FullName);
@@ -279,7 +279,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
         {
             return Rtti.UTypeDesc.TypeOf(typeof(bool));
         }
-        public override void OnMouseStayPin(NodePin stayPin)
+        public override void OnMouseStayPin(NodePin stayPin, UNodeGraph graph)
         {
             if (Result == stayPin)
             {

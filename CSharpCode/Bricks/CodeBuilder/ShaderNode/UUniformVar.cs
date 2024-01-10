@@ -76,7 +76,7 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode
             
             return VarType;
         }
-        public override void OnMouseStayPin(NodePin stayPin)
+        public override void OnMouseStayPin(NodePin stayPin, UNodeGraph graph)
         {
             if (VarType == null)
                 return;

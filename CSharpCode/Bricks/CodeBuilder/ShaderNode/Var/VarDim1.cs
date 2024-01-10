@@ -86,7 +86,7 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Var
         [Rtti.Meta]
         public bool IsHalfPrecision { get; set; } = false;
         public Rtti.UTypeDesc VarType;
-        public override void OnMouseStayPin(NodePin stayPin)
+        public override void OnMouseStayPin(NodePin stayPin, UNodeGraph graph)
         {
             if (VarType == null)
                 return;

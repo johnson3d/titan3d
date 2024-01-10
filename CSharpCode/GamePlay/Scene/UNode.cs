@@ -52,6 +52,7 @@ namespace EngineNS.GamePlay.Scene
             NodeStyles &= ~style;
         }
     }
+    [Rtti.Meta()]
     public partial class UNode : IDisposable
     {
         public virtual void Dispose()
@@ -305,7 +306,7 @@ namespace EngineNS.GamePlay.Scene
                     ParentSceneChanged(oldScene, newScene);
                 }
 
-                if (Placement != null)
+                if (mParent !=null && Placement != null)
                 {
                     Placement.Position = Placement.Position;
                 }
@@ -325,6 +326,8 @@ namespace EngineNS.GamePlay.Scene
                 return scene.World;
             return null;
         }
+        [Rtti.Meta(Flags = Rtti.MetaAttribute.EMetaFlags.Unserializable | Rtti.MetaAttribute.EMetaFlags.MacrossReadOnly)]
+        public UWorld HostWorld { get => GetWorld(); }
         public List<UNode> Children { get; } = new List<UNode>();
         UNodeData mNodeData = null;
         public UNodeData NodeData

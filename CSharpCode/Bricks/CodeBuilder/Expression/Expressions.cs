@@ -1,5 +1,6 @@
 ﻿using EngineNS.Bricks.NodeGraph;
 using EngineNS.EGui.Controls.PropertyGrid;
+using EngineNS.Rtti;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -1037,6 +1038,19 @@ namespace EngineNS.Bricks.CodeBuilder
         {
             return ((Namespace != null) ? Namespace.ToString() : "") + "." + ClassName;
         }
+
+        public static UClassDeclaration GetClassDeclaration(UTypeDesc type)
+        {
+            var dec = new UClassDeclaration()
+            {
+                VisitMode = type.IsPublic? EVisisMode.Public : EVisisMode.Private,
+                IsStruct = type.SystemType.IsValueType,
+                ClassName = type.Name,
+                Namespace = new UNamespaceDeclaration(type.Namespace),
+            };
+            dec.SupperClassNames.Add(type.BaseType.FullName);
+            return dec;
+        }
     }
 
     public class UClassReferenceExpression : UExpressionBase, IO.ISerializer
@@ -1297,6 +1311,7 @@ namespace EngineNS.Bricks.CodeBuilder
             GreaterThanOrEqual,
             AddAssignment,
             SubtractAssignment,
+            Is,
         }
         [Rtti.Meta]
         public EBinaryOperation Operation { get; set; } = EBinaryOperation.Add;
@@ -1405,6 +1420,8 @@ namespace EngineNS.Bricks.CodeBuilder
             get => mValueStr;
             set => mValueStr = value;
         }
+        [Rtti.Meta]
+        public bool TypeIsTypeof { get; set; } = true;
 
         public override bool Equals(object obj)
         {
@@ -1526,7 +1543,13 @@ namespace EngineNS.Bricks.CodeBuilder
             Type = type;
             ValueStr = CalculateValueString(type, value);
         }
-        public static string CalculateValueString(Rtti.UTypeDesc type, object value)
+        public UPrimitiveExpression(Rtti.UTypeDesc type, bool typeIsTypeOf)
+        {
+            Type = Rtti.UTypeDesc.TypeOf(typeof(System.Type));
+            TypeIsTypeof = typeIsTypeOf;
+            ValueStr = CalculateValueString(Type, type, typeIsTypeOf);
+        }
+        public static string CalculateValueString(Rtti.UTypeDesc type, object value, bool typeIsTypeof = true)
         {
             string retValue;
             if (value == null)
@@ -1546,7 +1569,10 @@ namespace EngineNS.Bricks.CodeBuilder
             else if(type == Rtti.UTypeDescGetter<System.Type>.TypeDesc)
             {
                 var typeDesc = (Rtti.UTypeDesc)value;
-                retValue = $"typeof({typeDesc.FullName})";
+                if (typeIsTypeof)
+                    retValue = $"typeof({typeDesc.FullName})";
+                else
+                    retValue = typeDesc.FullName;
             }
             else
             {
@@ -1750,6 +1776,40 @@ namespace EngineNS.Bricks.CodeBuilder
         public override string ToString()
         {
             return "null value";
+        }
+    }
+    public class TtTypeOfExpression : UExpressionBase
+    {
+        [Rtti.Meta]
+        public UTypeReference Variable { get; set; }
+
+        public TtTypeOfExpression()
+        {
+
+        }
+        public TtTypeOfExpression(UTypeReference val)
+        {
+            Variable = val;
+        }
+        public TtTypeOfExpression(Rtti.UTypeDesc type)
+        {
+            Variable = new UTypeReference(type);
+        }
+
+        public override bool Equals(object obj)
+        {
+            var val = obj as TtTypeOfExpression;
+            if (val == null)
+                return false;
+            return Variable.Equals(val.Variable);
+        }
+        public override int GetHashCode()
+        {
+            return ToString().GetHashCode();
+        }
+        public override string ToString()
+        {
+            return $"typeof({Variable.ToString()})";
         }
     }
 

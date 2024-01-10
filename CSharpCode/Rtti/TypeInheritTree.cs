@@ -37,7 +37,7 @@ namespace EngineNS.Rtti
                     if (j.FieldName.Contains(filter))
                         return true;
                 }
-                foreach (var j in i.CurrentVersion.Propertys)
+                foreach (var j in i.Properties)
                 {
                     if (j.PropertyName.Contains(filter))
                         return true;

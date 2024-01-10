@@ -16,6 +16,8 @@
     <Compile Include="$(MSBuildThisFileDirectory)ICodeGen.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)IExpression.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)MacrossNode\Binocular.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)MacrossNode\Checker.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)MacrossNode\CreatorNode.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)MacrossNode\MethodGraph.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)MacrossNode\UMacrossEditor.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)MacrossNode\Exception.cs" />

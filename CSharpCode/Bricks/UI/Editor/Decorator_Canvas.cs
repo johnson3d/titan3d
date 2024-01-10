@@ -721,28 +721,28 @@ namespace EngineNS.UI.Editor
                                     else
                                     {
                                         mEditor.mMouseCursor = ImGuiMouseCursor_.ImGuiMouseCursor_Arrow;
-                                        //bool bFind = false;
-                                        //for(int i=0; i< mAnchorNodes.Length; i++)
-                                        //{
-                                        //    if((proxy == mAnchorNodes[i]) && (mAnchorNodes[i] != mCurrentPointAtAnchor))
-                                        //    {
-                                        //        var mesh = mAnchorNodes[i].Mesh;
-                                        //        mesh.UpdateMesh(0, mesh.MaterialMesh.SubMeshes[0].Mesh, mHighLightAnchorMats);
-                                        //        mCurrentPointAtAnchor = mAnchorNodes[i];
-                                        //        bFind = true;
-                                        //        Log.WriteLine(ELogTag.Info, "Test", "Set current point at anchor " + i);
-                                        //        break;
-                                        //    }
-                                        //}
-                                        //if(!bFind)
-                                        //{
-                                        //    if (mCurrentPointAtAnchor != null)
-                                        //    {
-                                        //        mCurrentPointAtAnchor.Mesh.UpdateMesh(0, mCurrentPointAtAnchor.Mesh.MaterialMesh.SubMeshes[0].Mesh, mNormalAnchorMats);
-                                        //    }
-                                        //    mCurrentPointAtAnchor = null;
-                                        //    Log.WriteLine(ELogTag.Info, "Test", "clear current point at anchor");
-                                        //}
+                                        bool bFind = false;
+                                        for(int i=0; i< mAnchorNodes.Length; i++)
+                                        {
+                                            if((proxy == mAnchorNodes[i]) && (mAnchorNodes[i] != mCurrentPointAtAnchor))
+                                            {
+                                                var mesh = mAnchorNodes[i].Mesh;
+                                                mesh.UpdateMesh(0, mesh.MaterialMesh.SubMeshes[0].Mesh, mHighLightAnchorMats);
+                                                mCurrentPointAtAnchor = mAnchorNodes[i];
+                                                bFind = true;
+                                                Log.WriteLine(ELogTag.Info, "Test", "Set current point at anchor " + i);
+                                                break;
+                                            }
+                                        }
+                                        if(!bFind)
+                                        {
+                                            if (mCurrentPointAtAnchor != null)
+                                            {
+                                                mCurrentPointAtAnchor.Mesh.UpdateMesh(0, mCurrentPointAtAnchor.Mesh.MaterialMesh.SubMeshes[0].Mesh, mNormalAnchorMats);
+                                            }
+                                            mCurrentPointAtAnchor = null;
+                                            Log.WriteLine(ELogTag.Info, "Test", "clear current point at anchor");
+                                        }
                                     }
                                 }
                                 break;

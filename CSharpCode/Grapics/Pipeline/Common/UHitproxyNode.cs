@@ -18,7 +18,7 @@ namespace EngineNS.Graphics.Pipeline.Common
     public class UHitproxyNode : URenderGraphNode
     {
         public Common.URenderGraphPin HitIdPinOut = Common.URenderGraphPin.CreateOutput("HitId", false, EPixelFormat.PXF_R8G8B8A8_UNORM);
-        public Common.URenderGraphPin DepthPinOut = Common.URenderGraphPin.CreateOutput("Depth", false, EPixelFormat.PXF_D16_UNORM);
+        public Common.URenderGraphPin DepthPinInOut = Common.URenderGraphPin.CreateInputOutput("Depth", false, EPixelFormat.PXF_D16_UNORM);
         public UHitproxyNode()
         {
             Name = "Hitproxy";
@@ -26,7 +26,8 @@ namespace EngineNS.Graphics.Pipeline.Common
         public override void InitNodePins()
         {
             AddOutput(HitIdPinOut, NxRHI.EBufferType.BFT_RTV | NxRHI.EBufferType.BFT_SRV);
-            AddOutput(DepthPinOut, NxRHI.EBufferType.BFT_DSV | NxRHI.EBufferType.BFT_SRV);
+            AddInputOutput(DepthPinInOut, NxRHI.EBufferType.BFT_DSV | NxRHI.EBufferType.BFT_SRV);
+            DepthPinInOut.IsAllowInputNull = true;
         }
         #region GetHitproxy
         private Support.UBlobObject mHitProxyData = new Support.UBlobObject();
@@ -140,6 +141,13 @@ namespace EngineNS.Graphics.Pipeline.Common
             var rc = UEngine.Instance.GfxDevice.RenderContext;
             HitproxyPass.Initialize(rc, debugName);
 
+            CreateGBuffers(policy, DepthPinInOut.Attachement.Format, true);
+            mCopyFence = rc.CreateFence(new NxRHI.FFenceDesc(), "Copy Hitproxy Texture");
+        }
+        public unsafe void CreateGBuffers(URenderPolicy policy, EPixelFormat DSFormat, bool bClearDS)
+        {
+            var rc = UEngine.Instance.GfxDevice.RenderContext;
+
             var HitproxyPassDesc = new NxRHI.FRenderPassDesc();
             unsafe
             {
@@ -148,16 +156,16 @@ namespace EngineNS.Graphics.Pipeline.Common
                 HitproxyPassDesc.AttachmentMRTs[0].Samples = 1;
                 HitproxyPassDesc.AttachmentMRTs[0].LoadAction = NxRHI.EFrameBufferLoadAction.LoadActionClear;
                 HitproxyPassDesc.AttachmentMRTs[0].StoreAction = NxRHI.EFrameBufferStoreAction.StoreActionStore;
-                HitproxyPassDesc.m_AttachmentDepthStencil.Format = DepthPinOut.Attachement.Format;
+                HitproxyPassDesc.m_AttachmentDepthStencil.Format = DSFormat;
                 HitproxyPassDesc.m_AttachmentDepthStencil.Samples = 1;
-                HitproxyPassDesc.m_AttachmentDepthStencil.LoadAction = NxRHI.EFrameBufferLoadAction.LoadActionClear;
+                HitproxyPassDesc.m_AttachmentDepthStencil.LoadAction = bClearDS ? NxRHI.EFrameBufferLoadAction.LoadActionClear : NxRHI.EFrameBufferLoadAction.LoadActionDontCare; 
                 HitproxyPassDesc.m_AttachmentDepthStencil.StoreAction = NxRHI.EFrameBufferStoreAction.StoreActionStore;
                 HitproxyPassDesc.m_AttachmentDepthStencil.StencilLoadAction = NxRHI.EFrameBufferLoadAction.LoadActionClear;
                 HitproxyPassDesc.m_AttachmentDepthStencil.StencilStoreAction = NxRHI.EFrameBufferStoreAction.StoreActionStore;
                 //HitproxyPassDesc.mFBClearColorRT0 = new Color4f(0, 0, 0, 0);
                 //HitproxyPassDesc.mDepthClearValue = 1.0f;
                 //HitproxyPassDesc.mStencilClearValue = 0u;
-            }            
+            }
             HitproxyRenderPass = UEngine.Instance.GfxDevice.RenderPassManager.GetPipelineState<NxRHI.FRenderPassDesc>(rc, in HitproxyPassDesc);
 
             var GizmosPassDesc = new NxRHI.FRenderPassDesc();
@@ -168,7 +176,7 @@ namespace EngineNS.Graphics.Pipeline.Common
                 GizmosPassDesc.AttachmentMRTs[0].Samples = 1;
                 GizmosPassDesc.AttachmentMRTs[0].LoadAction = NxRHI.EFrameBufferLoadAction.LoadActionDontCare;
                 GizmosPassDesc.AttachmentMRTs[0].StoreAction = NxRHI.EFrameBufferStoreAction.StoreActionStore;
-                GizmosPassDesc.m_AttachmentDepthStencil.Format = DepthPinOut.Attachement.Format;
+                GizmosPassDesc.m_AttachmentDepthStencil.Format = DSFormat;
                 GizmosPassDesc.m_AttachmentDepthStencil.Samples = 1;
                 GizmosPassDesc.m_AttachmentDepthStencil.LoadAction = NxRHI.EFrameBufferLoadAction.LoadActionClear;
                 GizmosPassDesc.m_AttachmentDepthStencil.StoreAction = NxRHI.EFrameBufferStoreAction.StoreActionStore;
@@ -184,15 +192,13 @@ namespace EngineNS.Graphics.Pipeline.Common
 
             GHitproxyBuffers.Initialize(policy, HitproxyRenderPass);
             GHitproxyBuffers.SetRenderTarget(policy, 0, HitIdPinOut);
-            GHitproxyBuffers.SetDepthStencil(policy, DepthPinOut);
+            GHitproxyBuffers.SetDepthStencil(policy, DepthPinInOut);
             GHitproxyBuffers.TargetViewIdentifier = policy.DefaultCamera.TargetViewIdentifier;
 
             GGizmosBuffers.Initialize(policy, GizmosRenderPass);
             GGizmosBuffers.SetRenderTarget(policy, 0, HitIdPinOut);
-            GGizmosBuffers.SetDepthStencil(policy, DepthPinOut);
+            GGizmosBuffers.SetDepthStencil(policy, DepthPinInOut);
             GGizmosBuffers.TargetViewIdentifier = policy.DefaultCamera.TargetViewIdentifier;
-
-            mCopyFence = rc.CreateFence(new NxRHI.FFenceDesc(), "Copy Hitproxy Texture");
         }
         public unsafe override void Dispose()
         {
@@ -211,8 +217,8 @@ namespace EngineNS.Graphics.Pipeline.Common
         {
             HitIdPinOut.Attachement.Width = (uint)(x * ScaleFactor);
             HitIdPinOut.Attachement.Height = (uint)(y * ScaleFactor);
-            DepthPinOut.Attachement.Width = (uint)(x * ScaleFactor);
-            DepthPinOut.Attachement.Height = (uint)(y * ScaleFactor);
+            DepthPinInOut.Attachement.Width = (uint)(x * ScaleFactor);
+            DepthPinInOut.Attachement.Height = (uint)(y * ScaleFactor);
             if (GHitproxyBuffers != null)
             {
                 GHitproxyBuffers.SetSize(x * ScaleFactor, y * ScaleFactor);
@@ -401,6 +407,24 @@ namespace EngineNS.Graphics.Pipeline.Common
 
             //    IsHitproxyBuilding = false;
             //}, "Fetch Image");
+        }
+
+        public override void BeforeTickLogic(URenderPolicy policy)
+        {
+            var buffer = this.FindAttachBuffer(DepthPinInOut);
+            if (buffer != null)
+            {
+                if (DepthPinInOut.Attachement.Format != buffer.BufferDesc.Format || 
+                       HitproxyRenderPass.mCoreObject.Desc.AttachmentDepthStencil.LoadAction == NxRHI.EFrameBufferLoadAction.LoadActionClear)
+                {
+                    this.CreateGBuffers(policy, buffer.BufferDesc.Format, false);
+                    DepthPinInOut.Attachement.Format = buffer.BufferDesc.Format;
+                }
+            }
+            //else
+            //{
+            //    this.CreateGBuffers(policy, DepthPinInOut.Attachement.Format, true);
+            //}
         }
         public unsafe override void TickSync(URenderPolicy policy)
         {

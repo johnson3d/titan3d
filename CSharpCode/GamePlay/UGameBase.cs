@@ -97,7 +97,7 @@ namespace EngineNS.GamePlay
         }
 
         [Rtti.Meta]
-        public async System.Threading.Tasks.Task<bool> LoadScene(
+        public async System.Threading.Tasks.Task<GamePlay.Scene.UScene> LoadScene(
             [RName.PGRName(FilterExts = GamePlay.Scene.UScene.AssetExt)]
             RName mapName)
         {
@@ -116,9 +116,9 @@ namespace EngineNS.GamePlay
                 //await CreateSpereActor(scene);
                 //await CreateBoxActor(scene);
                 //world.CameraOffset = DVector3.Zero;
-                return true;
+                return scene;
             }
-            return false;
+            return null;
         }
         public GamePlay.Scene.Actor.UActor ChiefPlayer;
         [Rtti.Meta]
@@ -242,7 +242,7 @@ namespace EngineNS
 {
     public partial class UEngine
     {
-        [Rtti.Meta(Flags = Rtti.MetaAttribute.EMetaFlags.MacrossReadOnly)]
+        [Rtti.Meta(Flags = Rtti.MetaAttribute.EMetaFlags.Unserializable | Rtti.MetaAttribute.EMetaFlags.MacrossReadOnly)]
         public GamePlay.UGameInstance GameInstance
         {
             get;

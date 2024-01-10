@@ -70,8 +70,8 @@ namespace EngineNS.GamePlay
             mSunLightColor = new Vector3(1, 1, 1);
             mSunLightIntensity = 2.5f;
                     
-            mSkyLightColor = new Vector3(0.1f, 0.1f, 0.1f);
-            mGroundLightColor = new Vector3(0.1f, 0.1f, 0.1f);
+            mSkyLightColor = new Vector3(0.5f, 0.5f, 0.5f);
+            mGroundLightColor = new Vector3(0.5f, 0.5f, 0.5f);
         }
     }
 }

@@ -368,6 +368,29 @@ namespace EngineNS.Graphics.Mesh
                     TargetViews = new List<ViewDrawCalls>();
                 }
                 ViewDrawCalls drawCalls = GetOrCreateDrawCalls(targetView.TargetViewIdentifier, policy);
+                if (drawCalls.Policy != policy)
+                {
+                    Material = this.GetMeshMaterial();
+                    MaterialSerialId = Material.SerialId;
+                    ResetDrawCalls();
+                    if (TargetViews == null)
+                    {
+                        TargetViews = new List<ViewDrawCalls>();
+                    }
+                    drawCalls = GetOrCreateDrawCalls(targetView.TargetViewIdentifier, policy);
+                }
+                var result = drawCalls.DrawCalls[(int)shadingType];
+                if (drawCalls.State == 1 && result == null)
+                {
+                    Material = this.GetMeshMaterial();
+                    MaterialSerialId = Material.SerialId;
+                    ResetDrawCalls();
+                    if (TargetViews == null)
+                    {
+                        TargetViews = new List<ViewDrawCalls>();
+                    }
+                    drawCalls = GetOrCreateDrawCalls(targetView.TargetViewIdentifier, policy);
+                }
 
                 switch (drawCalls.State)
                 {
@@ -394,23 +417,7 @@ namespace EngineNS.Graphics.Mesh
                         }
                 }
 
-                if (drawCalls.Policy != policy)
-                {
-                    Material = this.GetMeshMaterial();
-                    MaterialSerialId = Material.SerialId;
-                    ResetDrawCalls();
-                    return null;
-                }
-
-                var result = drawCalls.DrawCalls[(int)shadingType];
-                if (result == null)
-                {
-                    Material = this.GetMeshMaterial();
-                    MaterialSerialId = Material.SerialId;
-                    ResetDrawCalls();
-                    return null;
-                }
-
+                result = drawCalls.DrawCalls[(int)shadingType];
                 //检查shading切换参数
                 if (result.IsPermutationChanged())
                 {
@@ -419,6 +426,7 @@ namespace EngineNS.Graphics.Mesh
                     ResetDrawCalls();
                     return null;
                 }
+
                 result.TagObject = node;
                 //result.CheckPermutation(Material.ParentMaterial, mesh.MdfQueue);
                 //检查材质参数被修改

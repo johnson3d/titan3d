@@ -90,6 +90,8 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode
         }
         #endregion
         #region IAssetEditor
+        public float LoadingPercent { get; set; } = 1.0f;
+        public string ProgressText { get; set; } = "Loading";
         bool IsStarting = false;
         protected async System.Threading.Tasks.Task Initialize_PreviewMaterial(Graphics.Pipeline.UViewportSlate viewport, USlateApplication application, Graphics.Pipeline.URenderPolicy policy, float zMin, float zMax)
         {

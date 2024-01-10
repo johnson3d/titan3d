@@ -985,11 +985,20 @@ namespace EngineNS.Bricks.NodeGraph
             else if (Rtti.UTypeDesc.CanCast(pKls, typeof(NodePin)))
             {
                 var pin = hit as NodePin;
-                LinkingOp.StartPin = pin;
-                LinkingOp.HoverPin = pin;
-                LinkingOp.BlockingEnd = PressPosition;
-                PopMenuPressObject = pin.HostNode.GetPinType(pin);
-                PinLinkMenuDirty = true;
+                var pinIn = hit as PinIn;
+                bool canHasContextMenu = true;
+                if(pinIn != null && pinIn.EditValue != null)
+                {
+                    canHasContextMenu = pinIn.EditValue.IsPopupPinContextMenu();
+                }
+                if(canHasContextMenu)
+                {
+                    LinkingOp.StartPin = pin;
+                    LinkingOp.HoverPin = pin;
+                    LinkingOp.BlockingEnd = PressPosition;
+                    PopMenuPressObject = pin.HostNode.GetPinType(pin);
+                    PinLinkMenuDirty = true;
+                }
             }
         }
 
@@ -1283,7 +1292,7 @@ namespace EngineNS.Bricks.NodeGraph
                     LinkingOp.HoverPin = hit as NodePin;
                     if (LinkingOp.HoverPin != null)
                     {
-                        LinkingOp.HoverPin.HostNode.OnMouseStayPin(LinkingOp.HoverPin);
+                        LinkingOp.HoverPin.HostNode.OnMouseStayPin(LinkingOp.HoverPin, this);
                     }
                 }
                 else if(Rtti.UTypeDesc.CanCast(hit.GetType(), typeof(UNodeBase)))

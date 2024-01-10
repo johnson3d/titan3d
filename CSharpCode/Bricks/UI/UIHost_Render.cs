@@ -14,25 +14,10 @@ namespace EngineNS.UI
 {
     public partial class TtUIHost
     {
-        [Rtti.Meta]
+        [Rtti.Meta(Flags = Rtti.MetaAttribute.EMetaFlags.Unserializable)]
         public bool IsScreenSpace
         {
             get { return ReadFlag(ECoreFlags.IsScreenSpace); }
-            set 
-            { 
-                WriteFlag(ECoreFlags.IsScreenSpace, value);
-                if(value)
-                {
-                    if (UEngine.Instance.UIManager.ScreenSpaceUIHost != null)
-                        UEngine.Instance.UIManager.ScreenSpaceUIHost.IsScreenSpace = false;
-                    UEngine.Instance.UIManager.ScreenSpaceUIHost = this;
-                }
-                else
-                {
-                    UEngine.Instance.UIManager.ScreenSpaceUIHost = null;
-                }
-                MeshDirty = true;
-            }
         }
 
         public void OnDispose()
@@ -390,7 +375,8 @@ namespace EngineNS.UI
             if(world.CameralOffsetSerialId != mCameralOffsetSerialId)
             {
                 mCameralOffsetSerialId = world.CameralOffsetSerialId;
-                mDrawMesh.UpdateCameraOffset(world);
+                if (mDrawMesh != null)
+                    mDrawMesh.UpdateCameraOffset(world);
             }
         }
 

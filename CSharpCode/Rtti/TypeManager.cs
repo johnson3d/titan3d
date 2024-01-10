@@ -256,6 +256,7 @@ namespace EngineNS.Rtti
                 return SystemType.Namespace;
             }
         }
+        public bool IsPublic => (SystemType != null) ? SystemType.IsPublic : false;
         public bool IsValueType => (SystemType != null) ? SystemType.IsValueType : false;
         public bool IsEnum => (SystemType != null) ? SystemType.IsEnum : false;
         public bool IsArray => (SystemType != null) ? SystemType.IsArray : false;
@@ -286,7 +287,7 @@ namespace EngineNS.Rtti
         }
         public static System.Reflection.PropertyInfo GetProperty(System.Type type, string name)
         {
-            var fld = type.GetProperty(name);
+            var fld = type.GetProperty(name, BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.Static);
             if (fld != null)
                 return fld;
 
@@ -401,6 +402,18 @@ namespace EngineNS.Rtti
             if (types == null)
                 return SystemType.GetMethod(name);
             return SystemType.GetMethod(name, types);
+        }
+        public System.Reflection.MethodInfo[] GetMethods()
+        {
+            return SystemType.GetMethods();
+        }
+        public System.Reflection.PropertyInfo[] GetProperties()
+        {
+            return SystemType.GetProperties();
+        }
+        public System.Reflection.PropertyInfo? GetProperty(string name)
+        {
+            return SystemType.GetProperty(name);
         }
         public Attribute? GetCustomAttribute(Type type, bool inherit)
         {

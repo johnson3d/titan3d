@@ -347,6 +347,11 @@ namespace EngineNS.Bricks.NodeGraph
             Value = value;
             mNotify?.OnValueChanged(this);
         }
+
+        public virtual bool IsPopupPinContextMenu()
+        {
+            return true;
+        }
     }
     public class UTypeSelectorEValue : UEditableValue
     {
@@ -469,6 +474,10 @@ namespace EngineNS.Bricks.NodeGraph
             {
                 this.Value = UEngine.Instance.EditorInstance.RNamePopupContentBrowser.SelectedAssets[0].GetAssetName();
             }
+        }
+        public override bool IsPopupPinContextMenu()
+        {
+            return !BrowserVisible;
         }
     }
 }

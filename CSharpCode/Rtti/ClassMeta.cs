@@ -1,6 +1,7 @@
 ﻿using NPOI.SS.Formula.Functions;
 using System;
 using System.Collections.Generic;
+using System.Reflection;
 
 namespace EngineNS.Rtti
 {
@@ -47,31 +48,27 @@ namespace EngineNS.Rtti
             NoMacrossOverride = (1 << 3),//只可使用在虚函数上，不允许Macross重载
 
             MacrossReadOnly = (1 << 4),//只可使用在成员变量，成员属性上，该属性对Macross只读
-            MacrossDeclareable = (1<<5),//可在Macross中申明实例
+            //MacrossDeclareable = (1<<5),//可在Macross中申明实例
 
             DiscardWhenCooked = (1 << 6),//在cook资源中不序列化
             DiscardWhenRPC = (1 << 7),//在做RPC的时候不序列化
 
             ManualMarshal = (1 << 8),
+
+            Unserializable = (1 << 9),// 不能序列化
         }
         public int Order = 0;
         public EMetaFlags Flags = 0;
         public string[] NameAlias = null;
         public System.Type[] MethodGenericParameters = null;
-        public bool IsReadOnly
-        {
-            get
-            {
-                return (Flags & EMetaFlags.MacrossReadOnly) != 0;
-            }
-        }
-        public bool IsMacrossDeclareable
-        {
-            get
-            {
-                return (Flags & EMetaFlags.MacrossDeclareable) != 0;
-            }
-        }
+        public string[] MacrossDisplayPath = null;
+        public bool IsNoMacrossUseable => (Flags & EMetaFlags.NoMacrossUseable) != 0;
+        public bool IsNoMacrossCreate => (Flags & EMetaFlags.NoMacrossCreate) != 0;
+        public bool IsNoMacrossInherit => (Flags & EMetaFlags.NoMacrossInherit) != 0;
+        public bool IsNoMacrossOverride => (Flags & EMetaFlags.NoMacrossOverride) != 0;
+        public bool IsMacrossReadOnly => (Flags & EMetaFlags.MacrossReadOnly) != 0;
+        //public bool IsMacrossDeclareable => (Flags & EMetaFlags.MacrossDeclareable) != 0;
+        public bool IsUnserializable => (Flags & EMetaFlags.Unserializable) != 0;
     }
     public class UClassMeta
     {
@@ -335,7 +332,9 @@ namespace EngineNS.Rtti
                 var attrs = type.GetCustomAttributes(typeof(MetaAttribute), true);
                 if (attrs.Length == 1)
                 {
-                    MetaAttribute = attrs[0] as MetaAttribute;
+                    var att = attrs[0] as MetaAttribute;
+                    if(!att.IsUnserializable)
+                        MetaAttribute = att;
                 }
             }
             var result = new UMetaVersion(this);
@@ -348,7 +347,9 @@ namespace EngineNS.Rtti
                 var meta = attrs[0] as MetaAttribute;
                 var fd = new TtPropertyMeta();
                 fd.Build(result, UTypeDesc.TypeOf(i.PropertyType), i.Name, true);
-                result.Propertys.Add(fd);
+                Properties.Add(fd);
+                if (!meta.IsUnserializable)
+                    result.Propertys.Add(fd);
             }
             result.Propertys.Sort();
             string hashString = "";
@@ -591,7 +592,8 @@ namespace EngineNS.Rtti
             }
             public bool IsAsync()
             {
-                return (ReturnType.IsEqual(typeof(System.Threading.Tasks.Task)) || ReturnType.IsSubclassOf(typeof(System.Threading.Tasks.Task)));
+                return (ReturnType.IsEqual(typeof(System.Threading.Tasks.Task)) || ReturnType.IsSubclassOf(typeof(System.Threading.Tasks.Task)) ||
+                        ReturnType.IsEqual(typeof(Thread.Async.TtTask)) || ReturnType.IsSubclassOf(typeof(Thread.Async.TtTask)));
             }
         }
         public static string GetNameByDeclstring(string declString)
@@ -661,6 +663,26 @@ namespace EngineNS.Rtti
             public UTypeDesc DeclaringType;
             private string Name;
             System.Reflection.FieldInfo mFieldInfoRef;
+            public bool IsStatic
+            {
+                get
+                {
+                    var info = GetFieldInfo();
+                    if (info != null)
+                        return info.IsStatic;
+                    return false;
+                }
+            }
+            public bool IsPublic
+            {
+                get
+                {
+                    var info = GetFieldInfo();
+                    if (info != null)
+                        return info.IsPublic;
+                    return false;
+                }
+            }
             public void ResetSystemRef()
             {
                 mFieldInfoRef = null;
@@ -711,6 +733,17 @@ namespace EngineNS.Rtti
             }
             return null;
         }
+        // MetaVersion中只存储能够保存的property，所以这里需要单独一份包含所有metaattribute的property列表
+        public List<TtPropertyMeta> Properties { get; } = new List<TtPropertyMeta>();
+        public UClassMeta.TtPropertyMeta GetProperty(string declString)
+        {
+            for(int i=0; i<Properties.Count; i++)
+            {
+                if (Properties[i].PropertyName == declString)
+                    return Properties[i];
+            }
+            return null;
+        }
         #endregion
 
         #region MacrossProperty
@@ -741,6 +774,54 @@ namespace EngineNS.Rtti
             public UTypeDesc HostType { get => mHostType; }
             string mPropertyName;
             public string PropertyName { get => mPropertyName; }
+            public bool IsGetStatic
+            {
+                get
+                {
+                    var info = PropInfo;
+                    if (info == null)
+                        return false;
+                    if (info.GetMethod == null)
+                        return false;
+                    return info.GetMethod.IsStatic;
+                }
+            }
+            public bool IsGetPublic
+            {
+                get
+                {
+                    var info = PropInfo;
+                    if (info == null)
+                        return false;
+                    if (info.GetMethod == null)
+                        return false;
+                    return info.GetMethod.IsPublic;
+                }
+            }
+            public bool IsSetStatic
+            {
+                get
+                {
+                    var info = PropInfo;
+                    if (info == null)
+                        return false;
+                    if (info.SetMethod == null)
+                        return false;
+                    return info.SetMethod.IsStatic;
+                }
+            }
+            public bool IsSetPublic
+            {
+                get
+                {
+                    var info = PropInfo;
+                    if (info == null)
+                        return false;
+                    if (info.SetMethod == null)
+                        return false;
+                    return !info.SetMethod.IsPublic;
+                }
+            }
             
             public void Build(UMetaVersion metaVersion, UTypeDesc propType, string name, bool bUpdateOrder)
             {

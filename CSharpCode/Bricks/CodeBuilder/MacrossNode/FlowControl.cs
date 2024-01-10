@@ -302,7 +302,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
             }
         }
 
-        public override void OnMouseStayPin(NodePin stayPin)
+        public override void OnMouseStayPin(NodePin stayPin, UNodeGraph graph)
         {
             for (int i = 0; i < ConditionResultPairs.Count; i++)
             {
@@ -654,7 +654,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
         //    set;
         //}
         //public PinIn ReturnValuePin { get; set; } = null;
-        public override void OnMouseStayPin(NodePin stayPin)
+        public override void OnMouseStayPin(NodePin stayPin, UNodeGraph graph)
         {
             //if (ReturnValuePin != stayPin)
             //    return;
@@ -882,7 +882,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
             return this;
         }
 
-        public override void OnMouseStayPin(NodePin stayPin)
+        public override void OnMouseStayPin(NodePin stayPin, UNodeGraph graph)
         {
             var nodeId = (uint)NodeId.GetHashCode();
             if(stayPin == BeginIdxPin)
@@ -1085,7 +1085,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
                 nextNode.BuildStatements(nextNodePin, ref data);
         }
 
-        public override void OnMouseStayPin(NodePin stayPin)
+        public override void OnMouseStayPin(NodePin stayPin, UNodeGraph graph)
         {
             if(stayPin == ConditionPin)
             {

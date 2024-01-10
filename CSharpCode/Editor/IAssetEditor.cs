@@ -8,7 +8,12 @@ namespace EngineNS.Editor
     {
         public Type EditorType;
     }
-    public interface IAssetEditor
+    public interface IProgressBar
+    {
+        float LoadingPercent { get; set; }
+        string ProgressText { get; set; }
+    }
+    public interface IAssetEditor : IProgressBar
     {
         System.Threading.Tasks.Task<bool> OpenEditor(UMainEditorApplication mainEditor, RName name, object arg);
         void OnCloseEditor();
@@ -19,8 +24,45 @@ namespace EngineNS.Editor
         IRootForm GetRootForm();
         System.Threading.Tasks.Task<bool> Initialize();
     }
+    public class TtAssetEditorOpenProgress : IRootForm
+    {
+        public async System.Threading.Tasks.Task<bool> Initialize()
+        {
+            await EngineNS.Thread.TtAsyncDummyClass.DummyFunc();
+            return true;
+        }
+
+        public void Dispose() { }
+        bool mVisible = true;
+        public bool Visible
+        {
+            get => mVisible;
+            set => mVisible = value;
+        }
+        public uint DockId { get; set; }
+        public ImGuiWindowClass DockKeyClass { get; }
+        public ImGuiCond_ DockCond { get; set; } = ImGuiCond_.ImGuiCond_FirstUseEver;
+        public IAssetEditor CurrentEditor;
+        public void OnDraw()
+        {
+            var size = new Vector2(800, 600);
+            ImGuiAPI.SetNextWindowSize(in size, ImGuiCond_.ImGuiCond_FirstUseEver);
+            if (EGui.UIProxy.DockProxy.BeginMainForm($"Progress: Open {CurrentEditor.AssetName}", this, ImGuiWindowFlags_.ImGuiWindowFlags_None))
+            {
+                ImGuiAPI.Button($"Loading:{CurrentEditor.LoadingPercent}->{CurrentEditor.ProgressText}");
+            }
+            EGui.UIProxy.DockProxy.EndMainForm();
+        }
+    }
     public class UAssetEditorManager
     {
+        TtAssetEditorOpenProgress mAssetEditorOpenProgress = null;
+        public async System.Threading.Tasks.Task<bool> Initialize()
+        {
+            mAssetEditorOpenProgress = new TtAssetEditorOpenProgress();
+            await mAssetEditorOpenProgress.Initialize();
+            return true;
+        }
         public List<IAssetEditor> OpenedEditors { get; } = new List<IAssetEditor>();
         public IAssetEditor CurrentActiveEditor = null;
         public async System.Threading.Tasks.Task OpenEditor(UMainEditorApplication mainEditor, Type editorType, RName name, object arg)
@@ -37,18 +79,23 @@ namespace EngineNS.Editor
             if (editor == null)
             {
                 editor = Rtti.UTypeDescManager.CreateInstance(editorType) as IAssetEditor;
-                editor.AssetName = name;
-                if (await editor.Initialize() == false)
-                    return;
-                OpenedEditors.Add(editor);
             }
+            editor.AssetName = name;
+            mAssetEditorOpenProgress.CurrentEditor = editor;
+            this.ShowTopMost(mAssetEditorOpenProgress);
+            
+            if (await editor.Initialize() == false)
+                return;
             var ok = await editor.OpenEditor(mainEditor, name, arg);
+            mAssetEditorOpenProgress.Visible = false;
+            mAssetEditorOpenProgress.CurrentEditor = null;
             if (ok == false)
             {
                 Profiler.Log.WriteLine(Profiler.ELogTag.Warning, "Editor", $"AssetEditor {name} open failed");
             }
             else
             {
+                OpenedEditors.Add(editor);
                 var form = editor.GetRootForm();
                 if (form != null)
                 {
@@ -116,6 +163,30 @@ namespace EngineNS.Editor
                 }
             }
             return wr;
+        }
+
+        private List<IRootForm> TopMostForms { get; } = new List<IRootForm>();
+        public void ShowTopMost(IRootForm form)
+        {
+            if (TopMostForms.Contains(form))
+                return;
+            form.Visible = true;
+            TopMostForms.Add(form);
+        }
+        public void OnDrawTopMost()
+        {
+            for (int i = 0; i < TopMostForms.Count; i++)
+            {
+                if (TopMostForms[i].Visible)
+                {
+                    TopMostForms[i].OnDraw();
+                }
+                else
+                {
+                    TopMostForms.RemoveAt(i);
+                    i--;
+                }
+            }
         }
     }
 }

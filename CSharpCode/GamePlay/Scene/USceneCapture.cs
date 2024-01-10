@@ -53,7 +53,7 @@ namespace EngineNS.GamePlay.Scene
             var rpAsset = Bricks.RenderPolicyEditor.URenderPolicyAsset.LoadAsset(nd.RPolicyName);
             if (rpAsset != null)
             {
-                policy = rpAsset.CreateRenderPolicy();
+                policy = rpAsset.CreateRenderPolicy(null);
             }
             await policy.Initialize(null);
             policy.OnResize(nd.TargetSize.X, nd.TargetSize.Y);

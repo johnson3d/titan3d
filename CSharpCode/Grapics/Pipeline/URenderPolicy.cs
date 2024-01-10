@@ -78,6 +78,11 @@ namespace EngineNS.Graphics.Pipeline
         //public Common.URenderGraphNode TagObject;
         public object TagObject;
         protected UCamera mDefaultCamera;
+        public UViewportSlate ViewportSlate
+        {
+            get;
+            internal set;
+        }
         public bool IsInitialized { get; set; } = false;
         public UCamera DefaultCamera { get => mDefaultCamera; }
         public Dictionary<string, UCamera> CameraAttachments { get; } = new Dictionary<string, UCamera>();

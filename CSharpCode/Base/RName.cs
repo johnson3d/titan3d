@@ -97,7 +97,7 @@ namespace EngineNS
                 var index = ImGuiAPI.TableGetColumnIndex();
                 mComboBox.Flags = ImGuiComboFlags_.ImGuiComboFlags_None | ImGuiComboFlags_.ImGuiComboFlags_NoArrowButton | ImGuiComboFlags_.ImGuiComboFlags_HeightLarge;
                 mComboBox.Width = ImGuiAPI.GetColumnWidth(index) - EGui.UIProxy.StyleConfig.Instance.PGCellPadding.X;
-                mComboBox.Name = TName.FromString2("##", info.Name).ToString();
+                mComboBox.Name = TName.FromString2("##", info.Name != null ? info.Name : "").ToString();
                 mComboBox.PreviewValue = preViewStr;
                 var contentBrowserSize = new Vector2(500, 600);
                 ImGuiAPI.SetNextWindowSize(in contentBrowserSize, ImGuiCond_.ImGuiCond_Always);

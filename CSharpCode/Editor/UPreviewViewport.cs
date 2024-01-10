@@ -51,15 +51,18 @@ namespace EngineNS.Editor
             //this.RenderPolicy.GBuffers.GroundLightColor = new Vector3(0.1f, 0.1f, 0.1f);
             //this.RenderPolicy.GBuffers.UpdateViewportCBuffer();
         }
-        bool Initialized = false;
         public override async System.Threading.Tasks.Task Initialize(USlateApplication application, RName policyName, float zMin, float zMax)
         {
-            Graphics.Pipeline.URenderPolicy policy = null;
-            var rpAsset = Bricks.RenderPolicyEditor.URenderPolicyAsset.LoadAsset(policyName);
-            if (rpAsset != null)
+            Graphics.Pipeline.URenderPolicy policy = await UEngine.Instance.EventPoster.Post((state) =>
             {
-                policy = rpAsset.CreateRenderPolicy();
-            }
+                var rpAsset = Bricks.RenderPolicyEditor.URenderPolicyAsset.LoadAsset(policyName);
+                if (rpAsset == null)
+                {
+                    return null;
+                }
+                return rpAsset.CreateRenderPolicy(this);
+            }, Thread.Async.EAsyncTarget.AsyncIO);
+            
             await policy.Initialize(null);
             if (ClientSize.X == 0 || ClientSize.Y == 0)
             {
@@ -78,7 +81,10 @@ namespace EngineNS.Editor
             }
             await OnInitialize(this, application, policy, zMin, zMax);
 
-            Initialized = true;
+            mDefaultHUD.RenderCamera = this.RenderPolicy.DefaultCamera;
+            this.PushHUD(mDefaultHUD);
+
+            IsInlitialized = true;
         }
         protected override void OnClientChanged(bool bSizeChanged)
         {
@@ -89,11 +95,20 @@ namespace EngineNS.Editor
             }
         }
         public RName PreviewAsset { get; set; } = null;
+        public delegate void Delegate_OnDrawViewportUIAction(in Vector2 startDrawPos);
+        public Delegate_OnDrawViewportUIAction OnDrawViewportUIAction;
         public override void OnDrawViewportUI(in Vector2 startDrawPos) 
         {
-            if (PreviewAsset != null && EGui.UIProxy.CustomButton.ToolButton("S", in Vector2.Zero))
+            if(OnDrawViewportUIAction != null)
             {
-                Editor.USnapshot.Save(PreviewAsset, UEngine.Instance.AssetMetaManager.GetAssetMeta(PreviewAsset), RenderPolicy.GetFinalShowRSV());
+                OnDrawViewportUIAction.Invoke(startDrawPos);
+            }
+            else
+            {
+                if (PreviewAsset != null && EGui.UIProxy.CustomButton.ToolButton("S", in Vector2.Zero))
+                {
+                    Editor.USnapshot.Save(PreviewAsset, UEngine.Instance.AssetMetaManager.GetAssetMeta(PreviewAsset), RenderPolicy.GetFinalShowRSV());
+                }
             }
             if (ShowWorldAxis && CameraController.Camera != null)
                 DrawWorldAxis(this.CameraController.Camera);
@@ -201,9 +216,9 @@ namespace EngineNS.Editor
             get => mVisParameter;
         }
 
-        public void TickLogic(float ellapse)
+        public override void TickLogic(float ellapse)
         {
-            if (Initialized == false)
+            if (IsInlitialized == false)
                 return;
             
             if (IsDrawing)
@@ -229,6 +244,8 @@ namespace EngineNS.Editor
 
                 IsDrawing = false;
             }
+
+            base.TickLogic(ellapse);
         }
         public void TickRender(float ellapse)
         {
@@ -237,7 +254,7 @@ namespace EngineNS.Editor
         public Action AfterTickSync;
         public void TickSync(float ellapse)
         {
-            if (Initialized == false)
+            if (IsInlitialized == false)
                 return;
             //if (IsDrawing == false)
             //    return;

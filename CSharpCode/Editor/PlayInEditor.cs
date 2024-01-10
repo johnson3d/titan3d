@@ -83,7 +83,7 @@ namespace EngineNS.Editor
 
                 var info = new EGui.Controls.PropertyGrid.PGCustomValueEditorAttribute.EditorInfo()
                 {
-                    Name = mCurrentName.Name,
+                    Name = mCurrentName?.Name,
                     Value = mCurrentName,
                     Readonly = false,
                 };

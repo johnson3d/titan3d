@@ -728,7 +728,7 @@ namespace EngineNS.Bricks.NodeGraph
             return this;
         }
         public Action<UNodeBase, NodePin> OnMouseStayPinAction;
-        public virtual void OnMouseStayPin(NodePin stayPin)
+        public virtual void OnMouseStayPin(NodePin stayPin, UNodeGraph graph)
         {
             OnMouseStayPinAction?.Invoke(this, stayPin);
         }
@@ -748,10 +748,16 @@ namespace EngineNS.Bricks.NodeGraph
         }
         public Rtti.UTypeDesc GetPinType<T>(T pin)
         {
-            if (typeof(T) == typeof(PinIn))
-                return GetInPinType(pin as PinIn);
+            var pinIn = pin as PinIn;
+            if(pinIn != null)
+                return GetInPinType(pinIn);
             else
-                return GetOutPinType(pin as PinOut);
+            {
+                var pinOut = pin as PinOut;
+                if(pinOut != null)
+                    return GetOutPinType(pinOut);
+            }
+            return null;
         }
         public virtual void BuildStatements(NodePin pin, ref BuildCodeStatementsData data) 
         {
@@ -837,6 +843,30 @@ namespace EngineNS.Bricks.NodeGraph
             if(!withId)
                 target.NodeId = id;
             return true;
+        }
+
+        protected void LightDebuggerLine(PinIn execPin)
+        {
+            var linker = ParentGraph.GetFirstLinker(execPin);
+            if (linker != null)
+            {
+                linker.InDebuggerLine = true;
+                var node = ParentGraph.GetOppositePinNode(execPin) as IBeforeExecNode;
+                if (node != null)
+                    node.LightDebuggerLine();
+            }
+        }
+
+        protected void UnLightDebuggerLine(PinIn execPin)
+        {
+            var linker = ParentGraph.GetFirstLinker(execPin);
+            if (linker != null)
+            {
+                linker.InDebuggerLine = false;
+                var node = ParentGraph.GetOppositePinNode(execPin) as IBeforeExecNode;
+                if (node != null)
+                    node.UnLightDebuggerLine();
+            }
         }
     }
 }

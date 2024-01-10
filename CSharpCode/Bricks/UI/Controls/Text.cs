@@ -9,6 +9,7 @@ using System.Text;
 
 namespace EngineNS.UI.Controls
 {
+    [Editor_UIControl("Controls.Text", "Text control, for display string", "")]
     public partial class TtText : TtUIElement
     {
         TtFontSDF mFontAsset;
@@ -111,7 +112,9 @@ namespace EngineNS.UI.Controls
 
             batch.Middleground.PushTransformIndex(TransformIndex);
             batch.Middleground.PushFont(mFontAsset);
+            //batch.Middleground.PushClip(in this.mCurFinalRect);
             batch.Middleground.AddText(mText, mCurFinalRect.Left, mCurFinalRect.Top, Color4f.FromABGR(Color.LightPink));
+            //batch.Middleground.PopClip();
             batch.Middleground.PopFont();
             batch.Middleground.PopTransformIndex();
         }
