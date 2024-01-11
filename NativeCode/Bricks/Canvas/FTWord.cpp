@@ -2,6 +2,7 @@
 #include "FTFont.h"
 #include "../../NextRHI/NxGpuDevice.h"
 #include "../../NextRHI/NxCommandList.h"
+#include "../../NextRHI/NxDrawcall.h"
 #include "../../Base/sdf/sdf_8ssedt.h"
 #include "../Canvas/FCanvas.h"
 #include "FDrawCmdList.h"
@@ -262,8 +263,9 @@ namespace Canvas
 
 		NxRHI::FBufferDesc bfDesc{};
 		bfDesc.SetDefault();
+		bfDesc.Type = NxRHI::EBufferType::BFT_SRV;
 		bfDesc.Usage = NxRHI::USAGE_STAGING;
-		bfDesc.CpuAccess = NxRHI::CAS_READ;
+		bfDesc.CpuAccess = NxRHI::CAS_WRITE;
 		bfDesc.InitData = nullptr;
 		bfDesc.RowPitch = device->GetGpuResourceAlignment()->RoundupTexturePitch(PixelWidth * sizeof(BYTE));
 		bfDesc.DepthPitch = bfDesc.RowPitch * PixelHeight;
@@ -280,17 +282,41 @@ namespace Canvas
 			}
 			buffer->Unmap(0);
 		}
-		NxRHI::FSubResourceFootPrint footPrint{};
-		footPrint.Format = EPixelFormat::PXF_A8_UNORM;
-		footPrint.X = TexX;
-		footPrint.Y = TexY;
-		footPrint.Z = 0;
-		footPrint.Width = PixelWidth;
-		footPrint.Height = PixelHeight;
-		footPrint.Depth = 1;
-		footPrint.RowPitch = bfDesc.RowPitch;
+		
+		if (0)
+		{
+			NxRHI::FSubResourceFootPrint footPrint{};
+			footPrint.Format = EPixelFormat::PXF_A8_UNORM;
+			footPrint.X = TexX;
+			footPrint.Y = TexY;
+			footPrint.Z = 0;
+			footPrint.Width = PixelWidth;
+			footPrint.Height = PixelHeight;
+			footPrint.Depth = 1;
+			footPrint.RowPitch = bfDesc.RowPitch;
+			cmdlist->GetCmdRecorder()->UseResource(buffer);
+			cmdlist->GetCmdRecorder()->UseResource(Brush->SrView->Buffer);
+			cmdlist->CopyBufferToTexture(Brush->SrView->Buffer.UnsafeConvertTo<NxRHI::ITexture>(), 0, buffer, &footPrint);
+		}
+		else
+		{
+			AutoRef<NxRHI::ICopyDraw> cpDraw = MakeWeakRef(device->CreateCopyDraw());
+			cpDraw->BindTextureDest(Brush->SrView->Buffer);
+			cpDraw->BindBufferSrc(buffer);
+			cpDraw->DestSubResource = 0;
+			cpDraw->Mode = NxRHI::ECopyDrawMode::CDM_Buffer2Texture;
+			cpDraw->FootPrint.Format = EPixelFormat::PXF_A8_UNORM;
+			cpDraw->FootPrint.X = TexX;
+			cpDraw->FootPrint.Y = TexY;
+			cpDraw->FootPrint.Z = 0;
+			cpDraw->FootPrint.Width = PixelWidth;
+			cpDraw->FootPrint.Height = PixelHeight;
+			cpDraw->FootPrint.Depth = 1;
+			cpDraw->FootPrint.RowPitch = bfDesc.RowPitch;
+			cpDraw->FootPrint.TotalSize = bfDesc.RowPitch * PixelHeight;
 
-		cmdlist->CopyBufferToTexture(Brush->SrView->Buffer.UnsafeConvertTo<NxRHI::ITexture>(), 0, buffer, &footPrint);
+			cmdlist->PushGpuDraw(cpDraw);
+		}
 	}
 
 	struct FSDFBuilder

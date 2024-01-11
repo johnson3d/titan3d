@@ -117,7 +117,18 @@ namespace NxRHI
 				GpuState = EGpuResourceState::GRS_GenericRead;
 				break;
 			case USAGE_STAGING:
-				properties.Type = D3D12_HEAP_TYPE_READBACK;
+				{
+					if ((desc.CpuAccess & ECpuAccess::CAS_READ) == ECpuAccess::CAS_READ)
+					{
+						properties.Type = D3D12_HEAP_TYPE_READBACK;
+					}
+					else
+					{
+						properties.Type = D3D12_HEAP_TYPE_UPLOAD;
+						resState = D3D12_RESOURCE_STATES::D3D12_RESOURCE_STATE_GENERIC_READ;
+						GpuState = EGpuResourceState::GRS_CopySrc;
+					}
+				}
 				break;
 		}
 		
@@ -211,7 +222,16 @@ namespace NxRHI
 		}
 		if (mGpuMemory == nullptr)
 		{
-			mGpuMemory = MakeWeakRef(DX12DefaultGpuMemAllocator::AllocGpuMem(device, &resDesc, &properties, resState, "Buffer"));
+			/*if (desc.Usage == USAGE_STAGING)
+			{
+				properties.Type = D3D12_HEAP_TYPE_UPLOAD;
+				mGpuMemory = MakeWeakRef(DX12DefaultGpuMemAllocator::AllocGpuMem(device, &resDesc, &properties, D3D12_RESOURCE_STATE_GENERIC_READ, "Buffer"));
+			}
+			else*/
+			{
+				mGpuMemory = MakeWeakRef(DX12DefaultGpuMemAllocator::AllocGpuMem(device, &resDesc, &properties, resState, "Buffer"));
+			}
+			
 			//mGpuMemory->GetDX12GpuHeap()-> mGpuResource->SetName(L"Memory:Pooled");
 		}
 		

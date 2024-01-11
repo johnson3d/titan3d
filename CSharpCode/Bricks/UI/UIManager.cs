@@ -193,7 +193,9 @@ namespace EngineNS.UI
                     }
                     xnd.RootNode.AddAttribute(attr);
                 }
-                xnd.SaveXnd(name.Address + "/" + name.PureName + name.ExtName);
+                var fileName = name.Address + "/" + name.PureName + name.ExtName;
+                xnd.SaveXnd(fileName);
+                UEngine.Instance.SourceControlModule.AddFile(fileName);
             }
         }
         [Rtti.Meta]

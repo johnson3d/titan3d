@@ -635,7 +635,7 @@ namespace NxRHI
 			box.right = box.left + footPrint->Width;
 			box.bottom = box.top + footPrint->Height;
 			box.back = box.front + footPrint->Depth;
-			cmd->mContext->UpdateSubresource(mTexture1D, subRes, &box, pData, footPrint->RowPitch, footPrint->TotalSize);
+			cmd->mContext4->UpdateSubresource1(mTexture1D, subRes, &box, pData, footPrint->RowPitch, footPrint->TotalSize, D3D11_COPY_NO_OVERWRITE);
 			if (cmd->mCmdRecorder != nullptr)
 				cmd->mCmdRecorder->mDirectDrawNum++;
 		}
@@ -687,7 +687,7 @@ namespace NxRHI
 			box.right = box.left + footPrint->Width;
 			box.bottom = box.top + footPrint->Height;
 			box.back = box.front + footPrint->Depth;
-			cmd->mContext->UpdateSubresource(mTexture1D, subRes, &box, pData, footPrint->RowPitch, footPrint->TotalSize);
+			cmd->mContext4->UpdateSubresource1(mTexture1D, subRes, &box, pData, footPrint->RowPitch, footPrint->TotalSize, D3D11_COPY_NO_OVERWRITE);
 			if (cmd->mCmdRecorder != nullptr)
 				cmd->mCmdRecorder->mDirectDrawNum++;
 		}

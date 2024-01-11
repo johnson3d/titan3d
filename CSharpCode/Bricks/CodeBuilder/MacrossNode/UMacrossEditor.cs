@@ -165,7 +165,9 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
             xml.AppendChild(xmlRoot);
             IO.SerializerHelper.WriteObjectMetaFields(xml, xmlRoot, this);
             var xmlText = IO.TtFileManager.GetXmlText(xml);
-            IO.TtFileManager.WriteAllText($"{rn.Address}/class_graph.dat", xmlText);
+            var graphDataFileName = $"{rn.Address}/class_graph.dat";
+            IO.TtFileManager.WriteAllText(graphDataFileName, xmlText);
+            UEngine.Instance.SourceControlModule.AddFile(graphDataFileName);
 
             for(int i=0; i<Methods.Count; i++)
             {
@@ -174,7 +176,9 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
                 funcXml.AppendChild(funcXmlRoot);
                 IO.SerializerHelper.WriteObjectMetaFields(funcXml, funcXmlRoot, Methods[i]);
                 var funcXmlText = IO.TtFileManager.GetXmlText(funcXml);
-                IO.TtFileManager.WriteAllText($"{rn.Address}/{Methods[i].Name}.func", funcXmlText);
+                var methodFileName = $"{rn.Address}/{Methods[i].Name}.func";
+                IO.TtFileManager.WriteAllText(methodFileName, funcXmlText);
+                UEngine.Instance.SourceControlModule.AddFile(methodFileName);
             }
 
             //LoadClassGraph(rn);
@@ -411,6 +415,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
             {
                 sr.Write(code);
             }
+            UEngine.Instance.SourceControlModule.AddFile(fileName);
         }
 
         List<EGui.UIProxy.MenuItemProxy> mMenuItems = new List<EGui.UIProxy.MenuItemProxy>();
@@ -641,7 +646,9 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
 
             if (AssetName != null)
             {
-                IO.TtFileManager.DeleteFile($"{AssetName.Address}/{method.Name}.func");
+                var funcFileName = $"{AssetName.Address}/{method.Name}.func";
+                IO.TtFileManager.DeleteFile(funcFileName);
+                UEngine.Instance.SourceControlModule.RemoveFile(funcFileName);
             }
             Methods.Remove(method);
             for (int methodIdx = 0; methodIdx < method.MethodDatas.Count; methodIdx++)

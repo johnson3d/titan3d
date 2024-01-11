@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Root Type="EngineNS.Bricks.Font.TtFontSDFAMeta@EngineCore">
-  <AssetId Type="System.Guid@Unknown" Value="a03d1ffd-d40c-4ad4-a001-b1251967d2a6" />
+  <AssetId Type="System.Guid@Unknown" Value="dd648400-4dd1-46dc-b5f6-ab10313d21fc" />
   <Description Type="System.String@Unknown" Value="This is a EngineNS.Bricks.Font.TtFontSDFAMeta&#xA;" />
   <Icon Type="EngineNS.EGui.UUvAnim@EngineCore">
     <Color Type="System.UInt32@Unknown" Value="4294967295" />

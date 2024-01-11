@@ -76,7 +76,7 @@ namespace Canvas
 	}
 	void FCanvasDrawCmdList::PopClip()
 	{
-		//mClipRects.erase(mClipRects.begin() + mClipRects.size()); //TODO
+		mClipRects.pop_back();
 	}
 	void FCanvasDrawCmdList::PushBrush(ICanvasBrush* brush)
 	{

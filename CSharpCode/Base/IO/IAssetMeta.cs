@@ -264,7 +264,11 @@ namespace EngineNS.IO
         public void SaveAMeta()
         {
             if (mAssetName != null)
-                IO.TtFileManager.SaveObjectToXml(mAssetName.Address + MetaExt, this);
+            {
+                var fileName = mAssetName.Address + MetaExt;
+                IO.TtFileManager.SaveObjectToXml(fileName, this);
+                UEngine.Instance.SourceControlModule.AddFile(fileName);
+            }
         }
         public virtual bool CanRefAssetType(IAssetMeta ameta)
         {

@@ -322,6 +322,7 @@ namespace EngineNS.Bricks.Font
             //});
             //smp?.Wait(int.MaxValue);
 
+            Profiler.Log.WriteLine(Profiler.ELogTag.Info, "Font",$"Begin SFFont = {filter.CharBegin} : {filter.CharEnd}");
             for (uint unicode = filter.CharBegin; unicode < filter.CharEnd; unicode++)
             {
                 if (font.mCoreObject.GetCharIndex(unicode) == 0)
@@ -329,7 +330,9 @@ namespace EngineNS.Bricks.Font
                 if (filter.IsInclude(unicode) == false && filter.IsExclude(unicode))
                     continue;
                 font.mCoreObject.AddWordForBuild(unicode);
+                System.Diagnostics.Debug.WriteLine($"AddWord {unicode}");
             }
+            Profiler.Log.WriteLine(Profiler.ELogTag.Info, "Font", "End SFFont");
             font.mCoreObject.SaveFontSDF(name.Address);
         }
 

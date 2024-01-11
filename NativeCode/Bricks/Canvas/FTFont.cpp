@@ -489,10 +489,17 @@ namespace Canvas
 
 		//auto dsize = (UINT)CoreSDK::Compress_ZSTD(nullptr, 0, &word->Pixels[0], word->Pixels.size(), 1);
 		std::vector<BYTE>	Pixels;
-		Pixels.resize(CoreSDK::CompressBound_ZSTD(word->Pixels.size()));
-		auto dsize = (UINT)CoreSDK::Compress_ZSTD(&Pixels[0], Pixels.size(), &word->Pixels[0], word->Pixels.size(), 1);
-		attr->Write(dsize);
-		attr->Write(&Pixels[0], dsize);
+		if (word->Pixels.size() > 0)
+		{
+			Pixels.resize(CoreSDK::CompressBound_ZSTD(word->Pixels.size()));
+			auto dsize = (UINT)CoreSDK::Compress_ZSTD(&Pixels[0], Pixels.size(), &word->Pixels[0], word->Pixels.size(), 1);
+			attr->Write(dsize);
+			attr->Write(&Pixels[0], dsize);
+		}
+		else
+		{
+			attr->Write((UINT)0);
+		}
 	}
 	void FTFont::FWordHolder::Load(XndAttribute* attr, FTWord* word, UINT Unicode)
 	{
@@ -628,8 +635,8 @@ namespace Canvas
 		auto result = wh->BuildWord(this, false);
 		if (result != nullptr)
 		{
-			mWordTable.insert(it, wh);
 			NeedSave = true;
+			mWordTable.insert(it, wh);
 		}
 		return result->RealObject;
 	}
@@ -648,17 +655,43 @@ namespace Canvas
 	}
 
 	void FTFont::Update(NxRHI::IGpuDevice* device, bool bflipV)
-	{
+	{		
+		bool temp = false;
+		if (temp)
+		{
+			for (auto& i : mWordTable)
+			{
+				if (i->FtWord != nullptr && i->Unicode == 'o')
+				{
+					i->FtWord->RealObject->SetDirty();
+				}
+			}
+		}
 		if (Dirty)
 		{
 			Dirty = false;
 			NxRHI::FTransientCmd tsCmd(device, NxRHI::QU_Transfer, "Font.Update");
 			auto cmd = tsCmd.GetCmdList();
+			int NumOfDirty = 0;
+			int NumOfFlush = 0;
 			for (auto& i : mWordTable)
 			{
 				if (i->FtWord != nullptr)
-					i->FtWord->RealObject->Flush2Texture(device, cmd);
+				{
+					if (i->FtWord->RealObject->Dirty)
+					{
+						NumOfDirty++;
+						if (NumOfFlush < 24)
+						{
+							NumOfFlush++;
+							i->FtWord->RealObject->Flush2Texture(device, cmd);
+						}
+					}
+				}	
 			}
+			cmd->FlushDraws();
+			if (NumOfFlush < NumOfDirty)
+				Dirty = true;
 		}
 		//remove cold words
 		
