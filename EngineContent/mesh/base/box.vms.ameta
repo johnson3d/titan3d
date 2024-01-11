@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
-<Root Type="EngineNS.GamePlay.Scene.USceneAMeta@EngineCore">
-  <AssetId Type="System.Guid@Unknown" Value="40c22bd4-a6ad-4599-b3e9-dbfe79f1a7d7" />
-  <Description Type="System.String@Unknown" Value="This is a EngineNS.GamePlay.Scene.UScene&#xA;Hahah" />
+<Root Type="EngineNS.Graphics.Mesh.UMeshPrimitivesAMeta@EngineCore">
+  <AssetId Type="System.Guid@Unknown" Value="E271D73D-858E-4A6C-89C2-BCC52069CBBF" />
+  <Description Type="System.String@Unknown" Value="This is a EngineNS.Graphics.Mesh.UMeshPrimitives&#xA;" />
   <Icon Type="EngineNS.EGui.UUvAnim@EngineCore">
     <Color Type="System.UInt32@Unknown" Value="4294967295" />
     <Duration Type="System.Single@Unknown" Value="1000" />
@@ -10,8 +10,9 @@
     </FrameUVs>
     <Size Type="EngineNS.Vector2@EngineCore" Value="50,50" />
   </Icon>
+  <IsClustered Type="System.Boolean@Unknown" Value="True" />
   <RefAssetRNames Type="System.Collections.Generic.List&lt;EngineNS.RName@EngineCore,&gt;@Unknown" Count="1">
-    <e_0 Value="Engine,mesh/base/box_1.ums,b91bb4f4-7d54-4ba5-8342-a0767ec2e0ac" />
+    <e_0 Value="Game,utest/mesh/box1.vms.clustermesh,00000000-0000-0000-0000-000000000000" />
   </RefAssetRNames>
-  <TypeStr Type="System.String@Unknown" Value="EngineNS.GamePlay.Scene.UScene@EngineCore" />
+  <TypeStr Type="System.String@Unknown" Value="EngineNS.Graphics.Mesh.UMeshPrimitives@EngineCore" />
 </Root>
