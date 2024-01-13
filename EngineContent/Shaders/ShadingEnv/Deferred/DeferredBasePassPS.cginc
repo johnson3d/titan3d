@@ -41,6 +41,9 @@ PS_OUTPUT PS_MobileBasePass(PS_INPUT input)
     GBuffer.WorldNormal = mtl.GetWorldNormal(input);
 	GBuffer.Specular = (half)mtl.mAbsSpecular;
 	GBuffer.ObjectFlags_2Bit = ObjectFLags_2Bit;
+#ifdef MTL_ID_UNLIT
+	GBuffer.SetUnlit(true);
+#endif
     GBuffer.RenderFlags_10Bit = MaterialRenderFlags;
 	//GBuffer.MotionVector.xy = input.psCustomUV0.xy;
 	

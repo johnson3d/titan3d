@@ -11,4 +11,7 @@ enum ERenderFlags
 #define ERenderFlags_None 0
 #define ERenderFlags_DisableEnvColor 1
 
+#define ObjectFlags_2Bit_Shadow 1
+#define ObjectFlags_2Bit_Lighting (1 << 1)
+
 #endif 
