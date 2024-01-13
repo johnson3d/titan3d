@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using EngineNS.Bricks.NodeGraph;
+using System.ComponentModel;
 
 namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Var
 {
@@ -307,27 +308,27 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Var
         protected Vector4 mValue = Vector4.Zero;
         [Rtti.Meta]
         public Vector4 Value { get => mValue; set => mValue = value; }
-        [EGui.Controls.PropertyGrid.PGCustomValueEditor(HideInPG = true)]
+        [Browsable(false)]
         public PinIn InXYZW { get; set; } = new PinIn();
-        [EGui.Controls.PropertyGrid.PGCustomValueEditor(HideInPG = true)]
+        [Browsable(false)]
         public PinIn InX { get; set; } = new PinIn();
-        [EGui.Controls.PropertyGrid.PGCustomValueEditor(HideInPG = true)]
+        [Browsable(false)]
         public PinIn InY { get; set; } = new PinIn();
-        [EGui.Controls.PropertyGrid.PGCustomValueEditor(HideInPG = true)]
+        [Browsable(false)]
         public PinIn InZ { get; set; } = new PinIn();
-        [EGui.Controls.PropertyGrid.PGCustomValueEditor(HideInPG = true)]
+        [Browsable(false)]
         public PinIn InW { get; set; } = new PinIn();
-        [EGui.Controls.PropertyGrid.PGCustomValueEditor(HideInPG = true)]
+        [Browsable(false)]
         public PinOut OutXYZW { get; set; } = new PinOut();
-        [EGui.Controls.PropertyGrid.PGCustomValueEditor(HideInPG = true)]
+        [Browsable(false)]
         public PinOut OutXYZ { get; set; } = new PinOut();
-        [EGui.Controls.PropertyGrid.PGCustomValueEditor(HideInPG = true)]
+        [Browsable(false)]
         public PinOut OutX { get; set; } = new PinOut();
-        [EGui.Controls.PropertyGrid.PGCustomValueEditor(HideInPG = true)]
+        [Browsable(false)]
         public PinOut OutY { get; set; } = new PinOut();
-        [EGui.Controls.PropertyGrid.PGCustomValueEditor(HideInPG = true)]
+        [Browsable(false)]
         public PinOut OutZ { get; set; } = new PinOut();
-        [EGui.Controls.PropertyGrid.PGCustomValueEditor(HideInPG = true)]
+        [Browsable(false)]
         public PinOut OutW { get; set; } = new PinOut();
         public VarDimF4()
         {
@@ -574,27 +575,27 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Var
         protected Vector4i mValue = Vector4i.Zero;
         [Rtti.Meta]
         public Vector4i Value { get => mValue; set => mValue = value; }
-        [EGui.Controls.PropertyGrid.PGCustomValueEditor(HideInPG = true)]
+        [Browsable(false)]
         public PinIn InXYZW { get; set; } = new PinIn();
-        [EGui.Controls.PropertyGrid.PGCustomValueEditor(HideInPG = true)]
+        [Browsable(false)]
         public PinIn InX { get; set; } = new PinIn();
-        [EGui.Controls.PropertyGrid.PGCustomValueEditor(HideInPG = true)]
+        [Browsable(false)]
         public PinIn InY { get; set; } = new PinIn();
-        [EGui.Controls.PropertyGrid.PGCustomValueEditor(HideInPG = true)]
+        [Browsable(false)]
         public PinIn InZ { get; set; } = new PinIn();
-        [EGui.Controls.PropertyGrid.PGCustomValueEditor(HideInPG = true)]
+        [Browsable(false)]
         public PinIn InW { get; set; } = new PinIn();
-        [EGui.Controls.PropertyGrid.PGCustomValueEditor(HideInPG = true)]
+        [Browsable(false)]
         public PinOut OutXYZW { get; set; } = new PinOut();
-        [EGui.Controls.PropertyGrid.PGCustomValueEditor(HideInPG = true)]
+        [Browsable(false)]
         public PinOut OutXYZ { get; set; } = new PinOut();
-        [EGui.Controls.PropertyGrid.PGCustomValueEditor(HideInPG = true)]
+        [Browsable(false)]
         public PinOut OutX { get; set; } = new PinOut();
-        [EGui.Controls.PropertyGrid.PGCustomValueEditor(HideInPG = true)]
+        [Browsable(false)]
         public PinOut OutY { get; set; } = new PinOut();
-        [EGui.Controls.PropertyGrid.PGCustomValueEditor(HideInPG = true)]
+        [Browsable(false)]
         public PinOut OutZ { get; set; } = new PinOut();
-        [EGui.Controls.PropertyGrid.PGCustomValueEditor(HideInPG = true)]
+        [Browsable(false)]
         public PinOut OutW { get; set; } = new PinOut();
         public VarDimI4()
         {

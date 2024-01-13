@@ -221,11 +221,11 @@ namespace EngineNS.Bricks.Procedure.Node
     
     public class ULogicBoolean : UPgcNodeBase
     {
-        [EGui.Controls.PropertyGrid.PGCustomValueEditor(HideInPG = true)]
+        [Browsable(false)]
         public PinIn LeftPin { get; set; } = new PinIn();
-        [EGui.Controls.PropertyGrid.PGCustomValueEditor(HideInPG = true)]
+        [Browsable(false)]
         public PinIn RightPin { get; set; } = new PinIn();
-        [EGui.Controls.PropertyGrid.PGCustomValueEditor(HideInPG = true)]
+        [Browsable(false)]
         public PinOut ResultPin { get; set; } = new PinOut();
         public UBufferCreator InputDesc { get; } = UBufferCreator.CreateInstance<USuperBuffer<sbyte, FSByteOperator>>(-1, -1, -1);
         public UBufferCreator OutputDesc { get; } = UBufferCreator.CreateInstance<USuperBuffer<sbyte, FSByteOperator>>(-1, -1, -1);
@@ -345,9 +345,9 @@ namespace EngineNS.Bricks.Procedure.Node
     [Bricks.CodeBuilder.ContextMenu("Not", "Mask\\Bool\\Not", UPgcGraph.PgcEditorKeyword)]
     public class UBooleanNot : UPgcNodeBase
     {
-        [EGui.Controls.PropertyGrid.PGCustomValueEditor(HideInPG = true)]
+        [Browsable(false)]
         public PinIn SrcPin { get; set; } = new PinIn();
-        [EGui.Controls.PropertyGrid.PGCustomValueEditor(HideInPG = true)]
+        [Browsable(false)]
         public PinOut ResultPin { get; set; } = new PinOut();
         public UBufferCreator InputDesc { get; } = UBufferCreator.CreateInstance<USuperBuffer<sbyte, FSByteOperator>>(-1, -1, -1);
         public UBufferCreator OutputDesc { get; } = UBufferCreator.CreateInstance<USuperBuffer<sbyte, FSByteOperator>>(-1, -1, -1);
@@ -397,7 +397,7 @@ namespace EngineNS.Bricks.Procedure.Node
     [Bricks.CodeBuilder.ContextMenu("Sdf", "Mask\\Sdf", UPgcGraph.PgcEditorKeyword)]
     public partial class USdfCalculator : UMonocular
     {
-        [EGui.Controls.PropertyGrid.PGCustomValueEditor(HideInPG = true)]
+        [Browsable(false)]
         public PinOut ClosestPin { get; set; } = new PinOut();
         public UBufferCreator ClosestDesc { get; } = UBufferCreator.CreateInstance<USuperBuffer<Vector3i, FInt3Operator>>(-1, -1, -1);
         public USdfCalculator()

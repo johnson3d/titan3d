@@ -5,11 +5,11 @@ using System.Text;
 namespace EngineNS.Bricks.PhysicsCore
 {
     [Rtti.Meta]
-    public class UPhyTriMeshAMeta : IO.IAssetMeta
+    public class TtPhyTriMeshAMeta : IO.IAssetMeta
     {
         public override string GetAssetExtType()
         {
-            return UPhyTriMesh.AssetExt;
+            return TtPhyTriMesh.AssetExt;
         }
         public override bool CanRefAssetType(IO.IAssetMeta ameta)
         {
@@ -30,17 +30,17 @@ namespace EngineNS.Bricks.PhysicsCore
             return "Physic Mesh";
         }
     }
-    [UPhyTriMesh.UPhyMeshImport]
+    [TtPhyTriMesh.UPhyMeshImport]
     [IO.AssetCreateMenu(MenuName = "PhysicsMesh")]
     [Editor.UAssetEditor(EditorType = typeof(UPhyTriMeshEditor))]
 
-    public class UPhyTriMesh : AuxPtrType<PhyTriMesh>, IO.IAsset, IO.ISerializer
+    public class TtPhyTriMesh : AuxPtrType<PhyTriMesh>, IO.IAsset, IO.ISerializer
     {
-        public UPhyTriMesh(PhyTriMesh self)
+        public TtPhyTriMesh(PhyTriMesh self)
         {
             mCoreObject = self;
         }
-        public UPhyTriMesh()
+        public TtPhyTriMesh()
         {
             mCoreObject = PhyTriMesh.CreateInstance();
         }
@@ -69,6 +69,7 @@ namespace EngineNS.Bricks.PhysicsCore
             {
                 mAsset = UEngine.Instance.PhyModule.PhyContext.CookTriMesh(mMesh.MeshDataProvider, null, null, null);
                 mAsset.AssetName = GetAssetRName();
+                UEngine.Instance.SourceControlModule.AddFile(mAsset.AssetName.Address);
 
                 return base.DoImportAsset();
             }
@@ -109,7 +110,7 @@ namespace EngineNS.Bricks.PhysicsCore
         #region IAsset
         public IO.IAssetMeta CreateAMeta()
         {
-            var result = new UPhyTriMeshAMeta();
+            var result = new TtPhyTriMeshAMeta();
             return result;
         }
         public IO.IAssetMeta GetAMeta()
@@ -135,14 +136,14 @@ namespace EngineNS.Bricks.PhysicsCore
 
             xnd.SaveXnd(name.Address);
         }
-        public static UPhyTriMesh LoadXnd(UPhyMeshManager manager, IO.TtXndNode node)
+        public static TtPhyTriMesh LoadXnd(UPhyMeshManager manager, IO.TtXndNode node)
         {
-            UPhyTriMesh result = new UPhyTriMesh();
+            TtPhyTriMesh result = new TtPhyTriMesh();
             if (ReloadXnd(result, manager, node) == false)
                 return null;
             return result;
         }
-        public static bool ReloadXnd(UPhyTriMesh mesh, UPhyMeshManager manager, IO.TtXndNode node)
+        public static bool ReloadXnd(TtPhyTriMesh mesh, UPhyMeshManager manager, IO.TtXndNode node)
         {
             var attr = node.TryGetAttribute("PhyTriMesh");
             if (attr.NativePointer != IntPtr.Zero)
@@ -175,7 +176,7 @@ namespace EngineNS.Bricks.PhysicsCore
             public override unsafe void Save(IO.IWriter ar, object host, string propName)
             {
                 System.Diagnostics.Debug.Assert(propName == "MeshDataSave");
-                var mesh = host as UPhyTriMesh;
+                var mesh = host as TtPhyTriMesh;
                 var blob = mesh.mCoreObject.GetCookedData();
                 ar.Write(blob.GetSize());
                 ar.WritePtr(blob.GetData(), (int)blob.GetSize());
@@ -183,7 +184,7 @@ namespace EngineNS.Bricks.PhysicsCore
             public override unsafe object Load(IO.IReader ar, object host, string propName)
             {
                 System.Diagnostics.Debug.Assert(propName == "MeshDataSave");
-                var mesh = host as UPhyTriMesh;
+                var mesh = host as TtPhyTriMesh;
                 var blob = new Support.UBlobObject();
                 uint size;
                 ar.Read(out size);
@@ -209,7 +210,7 @@ namespace EngineNS.Bricks.PhysicsCore
     }
     public class UPhyMeshManager
     {
-        public Dictionary<RName, UPhyTriMesh> TriMeshes { get; } = new Dictionary<RName, UPhyTriMesh>();
+        public Dictionary<RName, TtPhyTriMesh> TriMeshes { get; } = new Dictionary<RName, TtPhyTriMesh>();
         public void Cleanup()
         {
             foreach (var i in TriMeshes)
@@ -218,12 +219,12 @@ namespace EngineNS.Bricks.PhysicsCore
             }
             TriMeshes.Clear();
         }
-        public UPhyTriMesh GetMeshSync(RName rn)
+        public TtPhyTriMesh GetMeshSync(RName rn)
         {
             if (rn == null)
                 return null;
 
-            UPhyTriMesh result;
+            TtPhyTriMesh result;
             if (TriMeshes.TryGetValue(rn, out result))
                 return result;
 
@@ -231,7 +232,7 @@ namespace EngineNS.Bricks.PhysicsCore
             {
                 if (xnd != null)
                 {
-                    var mesh = UPhyTriMesh.LoadXnd(this, xnd.RootNode);
+                    var mesh = TtPhyTriMesh.LoadXnd(this, xnd.RootNode);
                     if (mesh == null)
                         return null;
 
@@ -245,12 +246,12 @@ namespace EngineNS.Bricks.PhysicsCore
                 }
             }
         }
-        public async System.Threading.Tasks.Task<UPhyTriMesh> GetMesh(RName rn)
+        public async System.Threading.Tasks.Task<TtPhyTriMesh> GetMesh(RName rn)
         {
             if (rn == null)
                 return null;
 
-            UPhyTriMesh result;
+            TtPhyTriMesh result;
             if (TriMeshes.TryGetValue(rn, out result))
                 return result;
 
@@ -260,7 +261,7 @@ namespace EngineNS.Bricks.PhysicsCore
                 {
                     if (xnd != null)
                     {
-                        var mesh = UPhyTriMesh.LoadXnd(this, xnd.RootNode);
+                        var mesh = TtPhyTriMesh.LoadXnd(this, xnd.RootNode);
                         if (mesh == null)
                             return null;
 

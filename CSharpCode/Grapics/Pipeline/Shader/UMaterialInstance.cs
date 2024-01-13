@@ -391,6 +391,8 @@ namespace EngineNS.Graphics.Pipeline.Shader
         {
             get
             {
+                if (mParentMaterial == null)
+                    return false;
                 return mParentMaterial.DisableEnvColor;
             }
             set
@@ -400,7 +402,12 @@ namespace EngineNS.Graphics.Pipeline.Shader
         }
         public override ENormalMode NormalMode
         {
-            get => mParentMaterial.NormalMode;
+            get
+            {
+                if (mParentMaterial == null)
+                    return ENormalMode.Normal;
+                return mParentMaterial.NormalMode;
+            }
             set
             {
                 
@@ -408,7 +415,12 @@ namespace EngineNS.Graphics.Pipeline.Shader
         }
         public override ELightingMode LightingMode
         {
-            get => mParentMaterial.LightingMode;
+            get
+            {
+                if (mParentMaterial == null)
+                    return ELightingMode.Unlight;
+                return mParentMaterial.LightingMode;
+            }
             set
             {
 
@@ -416,7 +428,12 @@ namespace EngineNS.Graphics.Pipeline.Shader
         }
         public override bool Is64bitVColorAlpha
         {
-            get => mParentMaterial.Is64bitVColorAlpha;
+            get
+            {
+                if (mParentMaterial == null)
+                    return false;
+                return mParentMaterial.Is64bitVColorAlpha;
+            }
             set
             {
 
@@ -425,7 +442,12 @@ namespace EngineNS.Graphics.Pipeline.Shader
 
         public override ERenderLayer RenderLayer
         {
-            get => mParentMaterial.RenderLayer;
+            get
+            {
+                if (mParentMaterial == null)
+                    return ERenderLayer.RL_Opaque;
+                return mParentMaterial.RenderLayer;
+            }
             set
             {
                 
@@ -433,7 +455,12 @@ namespace EngineNS.Graphics.Pipeline.Shader
         }
         public override bool AlphaTest
         {
-            get => mParentMaterial.AlphaTest;
+            get
+            {
+                if (mParentMaterial == null)
+                    return false;
+                return mParentMaterial.AlphaTest;
+            }
             set
             {
 

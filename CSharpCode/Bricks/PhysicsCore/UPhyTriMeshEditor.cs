@@ -19,7 +19,7 @@ namespace EngineNS.Bricks.PhysicsCore
         public ImGuiWindowClass DockKeyClass => mDockKeyClass;
         public ImGuiCond_ DockCond { get; set; } = ImGuiCond_.ImGuiCond_FirstUseEver;
 
-        public UPhyTriMesh TriMesh;
+        public TtPhyTriMesh TriMesh;
         public Graphics.Mesh.UMaterialMesh ShowMesh;
         public Editor.UPreviewViewport PreviewViewport = new Editor.UPreviewViewport();
         public EGui.Controls.PropertyGrid.PropertyGrid TriMeshPropGrid = new EGui.Controls.PropertyGrid.PropertyGrid();
@@ -54,16 +54,21 @@ namespace EngineNS.Bricks.PhysicsCore
             (viewport as Editor.UPreviewViewport).CameraController.ControlCamera(viewport.RenderPolicy.DefaultCamera);
 
             ShowMesh = new Graphics.Mesh.UMaterialMesh();
+            //pxmesh: no normal, no uv
             var meshPrimitve = TriMesh.ToMeshProvider().ToMesh();
-            var matrials = new Graphics.Pipeline.Shader.UMaterial[1];
-            matrials[0] = await UEngine.Instance.GfxDevice.MaterialManager.CreateMaterial(RName.GetRName("material/SysDft_Color.material", RName.ERNameType.Engine));
-            matrials[0].RenderLayer = Graphics.Pipeline.ERenderLayer.RL_Translucent;
-            var rast = matrials[0].Rasterizer;
-            rast.FillMode = NxRHI.EFillMode.FMD_WIREFRAME;
-            matrials[0].Rasterizer = rast;
-            ShowMesh.Initialize(new List<Graphics.Mesh.UMeshPrimitives>() { meshPrimitve },
-                new List<Graphics.Pipeline.Shader.UMaterial[]>() { matrials });
 
+            var matrials = new Graphics.Pipeline.Shader.UMaterial[1];
+            matrials[0] = await UEngine.Instance.GfxDevice.MaterialInstanceManager.GetMaterialInstance(RName.GetRName("material/whitecolor.uminst", RName.ERNameType.Engine));
+
+            var matrials1 = new Graphics.Pipeline.Shader.UMaterial[1];
+            matrials1[0] = await UEngine.Instance.GfxDevice.MaterialInstanceManager.CreateMaterialInstance(RName.GetRName("material/redcolor.uminst", RName.ERNameType.Engine));
+            var rast = matrials1[0].Rasterizer;
+            rast.FillMode = NxRHI.EFillMode.FMD_WIREFRAME;
+            matrials1[0].Rasterizer = rast;
+
+            ShowMesh.Initialize(new List<Graphics.Mesh.UMeshPrimitives>() { meshPrimitve, meshPrimitve },
+                new List<Graphics.Pipeline.Shader.UMaterial[]>() { matrials, matrials1 });
+            
             var mesh = new Graphics.Mesh.TtMesh();
             var ok = mesh.Initialize(ShowMesh, Rtti.UTypeDescGetter<Graphics.Mesh.UMdfStaticMesh>.TypeDesc);
             if (ok)
@@ -72,7 +77,7 @@ namespace EngineNS.Bricks.PhysicsCore
                 meshNode.HitproxyType = Graphics.Pipeline.UHitProxy.EHitproxyType.Root;
                 meshNode.NodeData.Name = "PreviewObject";
                 meshNode.IsAcceptShadow = false;
-                meshNode.IsCastShadow = true;
+                meshNode.IsCastShadow = false;
             }
 
             var aabb = mesh.MaterialMesh.AABB;

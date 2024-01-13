@@ -139,7 +139,7 @@ namespace EngineNS.Graphics.Mesh
             SubMeshes = new List<TtSubMaterialedMesh>();
             for (int i = 0; i < mesh.Count; i++)
             {
-                SubMeshes[i] = new TtSubMaterialedMesh();
+                SubMeshes.Add(new TtSubMaterialedMesh());
                 if (false == SubMeshes[i].Initialize(mesh[i], materials[i]))
                     return false;
             }

@@ -351,8 +351,7 @@ namespace EngineNS.Thread
                     var e = RunUntilFinishEvents[i];
                     
                     {
-                        bool bFinish;
-                        e.ExecutePostEventCondition(out bFinish);
+                        bool bFinish = e.ExecutePostEventCondition();
                         if (bFinish)
                         {
                             RunUntilFinishEvents.RemoveAt(i);

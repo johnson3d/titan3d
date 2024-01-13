@@ -2,16 +2,17 @@
 using System.Collections.Generic;
 using System.Reflection;
 using EngineNS.Bricks.NodeGraph;
+using System.ComponentModel;
 
 namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Operator
 {
     public class Binocular : UNodeBase
     {
         public Rtti.UTypeDesc LeftType;
-        [EGui.Controls.PropertyGrid.PGCustomValueEditor(HideInPG = true)]
+        [Browsable(false)]
         public UBinaryOperatorExpression.EBinaryOperation Op { get; set; }
         [Rtti.Meta]
-        [EGui.Controls.PropertyGrid.PGCustomValueEditor(HideInPG = true)]
+        [Browsable(false)]
         public string LeftTypeString
         {
             get
@@ -25,11 +26,11 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Operator
                 LeftType = Rtti.UTypeDesc.TypeOf(value);
             }
         }
-        [EGui.Controls.PropertyGrid.PGCustomValueEditor(HideInPG = true)]
+        [Browsable(false)]
         public PinIn Left { get; set; } = new PinIn();
-        [EGui.Controls.PropertyGrid.PGCustomValueEditor(HideInPG = true)]
+        [Browsable(false)]
         public PinIn Right { get; set; } = new PinIn();
-        [EGui.Controls.PropertyGrid.PGCustomValueEditor(HideInPG = true)]
+        [Browsable(false)]
         public PinOut Result { get; set; } = new PinOut();
         public Binocular(UBinaryOperatorExpression.EBinaryOperation InOp, string name)
         {

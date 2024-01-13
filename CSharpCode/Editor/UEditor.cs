@@ -24,6 +24,8 @@ namespace EngineNS.Editor
         [Rtti.Meta]
         public RName PhyMaterialIconName { get; set; }
         [Rtti.Meta]
+        public RName FontIconName { get; set; }
+        [Rtti.Meta]
         public RName MacrossIconName { get; set; }
         //[Rtti.Meta]
         //public GamePlay.UWorld.UVisParameter.EVisCullFilter CullFilters { get; set; } = GamePlay.UWorld.UVisParameter.EVisCullFilter.All;
@@ -37,10 +39,11 @@ namespace EngineNS.Editor
     {
         public UEditorConfig Config { get; set; } = new UEditorConfig();
         public EGui.UUvAnim PhyMaterialIcon { get; set; }
+        public EGui.UUvAnim FontIcon { get; set; }
         public EGui.UUvAnim MacrossIcon { get; set; }
         public override void Cleanup(UEngine host)
         {
-            CoreSDK.DisposeObject(ref RNamePopupContentBrowser);
+            //CoreSDK.DisposeObject(ref RNamePopupContentBrowser);
             base.Cleanup(host);
         }
 
@@ -54,6 +57,8 @@ namespace EngineNS.Editor
                 Config.GameProject = "Module/GameProject/GameProject.csproj";
                 Config.GameAssembly = $"binaries/{UEngine.DotNetVersion}/GameProject.dll";
                 Config.PhyMaterialIconName = RName.GetRName("icons/phymaterialicon.uvanim", RName.ERNameType.Engine);
+                Config.FontIconName = RName.GetRName("icons/font.uvanim", RName.ERNameType.Engine);
+                Config.MacrossIconName = RName.GetRName("icons/macrossicon.uvanim", RName.ERNameType.Engine);
                 IO.TtFileManager.SaveObjectToXml(cfgFile, Config);
             }
 
@@ -61,7 +66,7 @@ namespace EngineNS.Editor
             
             UEngine.Instance.MacrossModule.ReloadAssembly(gameAssembly);
 
-            await RNamePopupContentBrowser.Initialize();
+            //await RNamePopupContentBrowser.Initialize();
 
             return await base.Initialize(host);
         }
@@ -72,6 +77,12 @@ namespace EngineNS.Editor
                 Config.PhyMaterialIconName = RName.GetRName("icons/phymaterialicon.uvanim", RName.ERNameType.Engine);
             }
             PhyMaterialIcon = await UEngine.Instance.GfxDevice.UvAnimManager.GetUVAnim(Config.PhyMaterialIconName);
+
+            if (Config.FontIconName == null)
+            {
+                Config.FontIconName = RName.GetRName("icons/font.uvanim", RName.ERNameType.Engine);
+            }
+            FontIcon = await UEngine.Instance.GfxDevice.UvAnimManager.GetUVAnim(Config.FontIconName);
 
             if (Config.MacrossIconName == null)
             {

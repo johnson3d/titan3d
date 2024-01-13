@@ -5,18 +5,18 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 using System.Threading.Tasks;
-using static EngineNS.Bricks.PhysicsCore.SceneNode.UCapsulePhyControllerNode;
-using static EngineNS.Bricks.PhysicsCore.SceneNode.UPhyCollisionNode;
+using static EngineNS.Bricks.PhysicsCore.SceneNode.TtCapsulePhyControllerNode;
+using static EngineNS.Bricks.PhysicsCore.SceneNode.TtPhyCollisionNode;
 
 namespace EngineNS.Bricks.PhysicsCore.SceneNode
 {
-    public abstract class UPhyCollisionNode : GamePlay.Scene.ULightWeightNodeBase
+    public abstract class TtPhyCollisionNode : GamePlay.Scene.ULightWeightNodeBase
     {
-        public class UPhyCollisionNodeData : GamePlay.Scene.UNodeData
+        public class TtPhyCollisionNodeData : GamePlay.Scene.UNodeData
         {
            
         }
-        public Bricks.PhysicsCore.UPhyActor PhyActor { get; set; }
+        public Bricks.PhysicsCore.TtPhyActor PhyActor { get; set; }
         protected override void OnParentChanged(UNode prev, UNode cur)
         {
             base.OnParentChanged(prev, cur);
@@ -48,9 +48,9 @@ namespace EngineNS.Bricks.PhysicsCore.SceneNode
     }
 
     //only contians one shape
-    public class UPhySingleShapeCollisionNode : UPhyCollisionNode
+    public class TtPhySingleShapeCollisionNode : TtPhyCollisionNode
     {
-        public class UPhySingleShapeCollisionNodeData : UPhyCollisionNodeData
+        public class UPhySingleShapeCollisionNodeData : TtPhyCollisionNodeData
         {
             [Rtti.Meta]
             public EPhyActorType PhyActorType { get; set; } = EPhyActorType.PAT_Dynamic;
@@ -66,14 +66,14 @@ namespace EngineNS.Bricks.PhysicsCore.SceneNode
     }
 
     //contain some shapes
-    public class UPhyMutiShapesCollisionNode : UPhyCollisionNode
+    public class TtPhyMutiShapesCollisionNode : TtPhyCollisionNode
     {
 
     }
 
     [Bricks.CodeBuilder.ContextMenu("SphereCollisionNode", "SphereCollisionNode", UNode.EditorKeyword)]
-    [UNode(NodeDataType = typeof(UPhySphereCollisionNode.UPhySphereCollisionNodeData), DefaultNamePrefix = "SphereCollisionNode")]
-    public class UPhySphereCollisionNode : UPhySingleShapeCollisionNode
+    [UNode(NodeDataType = typeof(TtPhySphereCollisionNode.UPhySphereCollisionNodeData), DefaultNamePrefix = "SphereCollisionNode")]
+    public class TtPhySphereCollisionNode : TtPhySingleShapeCollisionNode
     {
         public class UPhySphereCollisionNodeData : UPhySingleShapeCollisionNodeData
         {
@@ -93,7 +93,7 @@ namespace EngineNS.Bricks.PhysicsCore.SceneNode
             PhyActor = pc.CreateActor(CollisionNodeData.PhyActorType, in transform.mPosition, in transform.mQuat);
             PhyActor.mCoreObject.SetActorFlag(EPhyActorFlag.PAF_eVISUALIZATION, true);
 
-            Bricks.PhysicsCore.UPhyMaterial mtl;
+            Bricks.PhysicsCore.TtPhyMaterial mtl;
             if (CollisionNodeData.PxMaterial != null)
                 mtl = UEngine.Instance.PhyModule.PhyContext.PhyMaterialManager.GetMaterialSync(CollisionNodeData.PxMaterial);
             else
@@ -110,7 +110,7 @@ namespace EngineNS.Bricks.PhysicsCore.SceneNode
             return true;
         }
     }
-    public class UPhyBoxCollisionNode : UPhySingleShapeCollisionNode
+    public class TtPhyBoxCollisionNode : TtPhySingleShapeCollisionNode
     {
         public class UPhyBoxCollisionNodeData : UPhySingleShapeCollisionNodeData
         {
@@ -130,7 +130,7 @@ namespace EngineNS.Bricks.PhysicsCore.SceneNode
             PhyActor = pc.CreateActor(CollisionNodeData.PhyActorType, in transform.mPosition, in transform.mQuat);
             PhyActor.mCoreObject.SetActorFlag(EPhyActorFlag.PAF_eVISUALIZATION, true);
 
-            Bricks.PhysicsCore.UPhyMaterial mtl;
+            Bricks.PhysicsCore.TtPhyMaterial mtl;
             if (CollisionNodeData.PxMaterial != null)
                 mtl = UEngine.Instance.PhyModule.PhyContext.PhyMaterialManager.GetMaterialSync(CollisionNodeData.PxMaterial);
             else
@@ -147,7 +147,7 @@ namespace EngineNS.Bricks.PhysicsCore.SceneNode
             return true;
         }
     }
-    public class UPhyPlaneCollisionNode : UPhySingleShapeCollisionNode
+    public class TtPhyPlaneCollisionNode : TtPhySingleShapeCollisionNode
     {
         public class UPhySphereCollisionNodeData : UPhySingleShapeCollisionNodeData
         {
@@ -155,7 +155,7 @@ namespace EngineNS.Bricks.PhysicsCore.SceneNode
         }
     }
 
-    public class UPhyCapsuleCollisionNode : UPhySingleShapeCollisionNode
+    public class TtPhyCapsuleCollisionNode : TtPhySingleShapeCollisionNode
     {
         public class UPhyCapsuleCollisionNodeData : UPhySingleShapeCollisionNodeData
         {
@@ -164,14 +164,14 @@ namespace EngineNS.Bricks.PhysicsCore.SceneNode
         }
     }
 
-    public class UPhyConvexCollisionNode : UPhySingleShapeCollisionNode
+    public class TtPhyConvexCollisionNode : TtPhySingleShapeCollisionNode
     {
         public class UPhyConvexCollisionNodeData : UPhySingleShapeCollisionNodeData
         {
             public RName ConvexSource;
         }
     }
-    public class UPhyTriMeshCollisionNode : UPhySingleShapeCollisionNode
+    public class TtPhyTriMeshCollisionNode : TtPhySingleShapeCollisionNode
     {
         public class UPhyTriMeshCollisionNodeData : UPhySingleShapeCollisionNodeData
         {

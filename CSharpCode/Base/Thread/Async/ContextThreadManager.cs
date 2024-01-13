@@ -20,7 +20,7 @@ namespace EngineNS.Thread.Async
         TPools,//塞在这个队列的异步处理，必须相互之间没有依赖，可以并行，因为线程池会有多条线程去取出来执行
     }
     public delegate T FPostEvent<T>(TtAsyncTaskStateBase state);
-    public delegate T FPostEventCondition<T>(out bool bFinish, TtAsyncTaskStateBase state);
+    public delegate bool FPostEventCondition(TtAsyncTaskStateBase state);
     internal enum EAsyncType
     {
         Normal,
@@ -102,7 +102,7 @@ namespace EngineNS.Thread.Async
 
         public abstract void Dispose();
         public abstract TtAsyncTaskStateBase ExecutePostEvent();
-        public abstract void ExecutePostEventCondition(out bool bFinish);
+        public abstract bool ExecutePostEventCondition();
 
         public void ExecuteContinue()
         {
@@ -129,7 +129,7 @@ namespace EngineNS.Thread.Async
     {
         internal T Result = default(T);
         public FPostEvent<T> PostAction;
-        public FPostEventCondition<T> PostActionCondition;
+        public FPostEventCondition PostActionCondition;
         #region life manage
         public class TtAsyncTaskStateAllocator : TtObjectPool<TtAsyncTaskState<T>>
         {
@@ -165,9 +165,9 @@ namespace EngineNS.Thread.Async
             Result = PostAction(this);
             return this;
         }
-        public override void ExecutePostEventCondition(out bool bFinish)
+        public override bool ExecutePostEventCondition()
         {
-            Result = PostActionCondition(out bFinish, this);
+            return PostActionCondition(this);
         }
     }
 
@@ -308,9 +308,9 @@ namespace EngineNS.Thread.Async
             }
             return new FTaskAwaiter<T>(eh);
         }
-        public void RunOnUntilFinish<T>(FPostEventCondition<T> evt, EAsyncTarget target = EAsyncTarget.AsyncIO, object userArgs = null)
+        public void RunOnUntilFinish(FPostEventCondition evt, EAsyncTarget target = EAsyncTarget.AsyncIO, object userArgs = null)
         {
-            var eh = TtAsyncTaskState<T>.CreateInstance();
+            var eh = TtAsyncTaskState<bool>.CreateInstance();
             eh.PostActionCondition = evt;
             eh.ContinueThread = null;
             eh.AsyncType = EAsyncType.ParallelTasks;

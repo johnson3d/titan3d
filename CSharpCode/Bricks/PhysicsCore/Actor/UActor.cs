@@ -11,8 +11,8 @@ namespace EngineNS.GamePlay.Scene.Actor
             [Rtti.Meta]
             public RName PxMaterial { get; set; }
         }
-        public Bricks.PhysicsCore.UPhyActor PhyActor{ get; set; }
-        public Bricks.PhysicsCore.UPhyScene GetPxScene() {
+        public Bricks.PhysicsCore.TtPhyActor PhyActor{ get; set; }
+        public Bricks.PhysicsCore.TtPhyScene GetPxScene() {
             return this.ParentScene?.PxSceneMB.PxScene;
         }
         partial void CreatePxCapsuleActor(ref bool result, Scene.UScene scene, float radius, float height)
@@ -20,7 +20,7 @@ namespace EngineNS.GamePlay.Scene.Actor
             var pc = UEngine.Instance.PhyModule.PhyContext;
             ref var transform = ref Placement.TransformRef;
             PhyActor = pc.CreateActor(EPhyActorType.PAT_Dynamic, in transform.mPosition, in transform.mQuat);
-            Bricks.PhysicsCore.UPhyMaterial mtl;
+            Bricks.PhysicsCore.TtPhyMaterial mtl;
             
             if (this.ActorData.PxMaterial != null)
                 mtl = UEngine.Instance.PhyModule.PhyContext.PhyMaterialManager.GetMaterialSync(this.ActorData.PxMaterial);

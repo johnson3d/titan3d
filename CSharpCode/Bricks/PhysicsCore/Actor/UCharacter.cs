@@ -10,13 +10,13 @@ namespace EngineNS.GamePlay.Character
         {
             
         }
-        public Bricks.PhysicsCore.UPhyController PhyController { get; set; }
+        public Bricks.PhysicsCore.TtPhyController PhyController { get; set; }
         partial void CreatePxCapsuleController(ref bool result, Scene.UScene scene, float radius, float height)
         {
-            var desc = new Bricks.PhysicsCore.UPhyCapsuleControllerDesc();
+            var desc = new Bricks.PhysicsCore.TtPhyCapsuleControllerDesc();
             desc.mCoreObject.SetCapsuleHeight(height);
             desc.mCoreObject.SetCapsuleRadius(radius);
-            Bricks.PhysicsCore.UPhyMaterial mtl;
+            Bricks.PhysicsCore.TtPhyMaterial mtl;
             if (this.PlayerData.PxMaterial!=null)
                 mtl = UEngine.Instance.PhyModule.PhyContext.PhyMaterialManager.GetMaterialSync(this.PlayerData.PxMaterial);
             else

@@ -46,13 +46,13 @@ namespace EngineNS.Bricks.Procedure.Node
     [Bricks.CodeBuilder.ContextMenu("Float3Unpack", "Float3\\Unpack", UPgcGraph.PgcEditorKeyword)]
     public class UFloat3UnpackNodes : UPgcNodeBase
     {
-        [EGui.Controls.PropertyGrid.PGCustomValueEditor(HideInPG = true)]
+        [Browsable(false)]
         public PinIn InXYZ { get; set; } = new PinIn();
-        [EGui.Controls.PropertyGrid.PGCustomValueEditor(HideInPG = true)]
+        [Browsable(false)]
         public PinOut XPin { get; set; } = new PinOut();
-        [EGui.Controls.PropertyGrid.PGCustomValueEditor(HideInPG = true)]
+        [Browsable(false)]
         public PinOut YPin { get; set; } = new PinOut();
-        [EGui.Controls.PropertyGrid.PGCustomValueEditor(HideInPG = true)]
+        [Browsable(false)]
         public PinOut ZPin { get; set; } = new PinOut();
 
         public UBufferCreator InputFloat3Desc { get; } = UBufferCreator.CreateInstance<USuperBuffer<Vector3, FFloat3Operator>>(-1, -1, -1);
@@ -115,13 +115,13 @@ namespace EngineNS.Bricks.Procedure.Node
     [Bricks.CodeBuilder.ContextMenu("Float3Pack", "Float3\\Pack", UPgcGraph.PgcEditorKeyword)]
     public class UFloat3PackNodes : UPgcNodeBase
     {
-        [EGui.Controls.PropertyGrid.PGCustomValueEditor(HideInPG = true)]
+        [Browsable(false)]
         public PinIn XPin { get; set; } = new PinIn();
-        [EGui.Controls.PropertyGrid.PGCustomValueEditor(HideInPG = true)]
+        [Browsable(false)]
         public PinIn YPin { get; set; } = new PinIn();
-        [EGui.Controls.PropertyGrid.PGCustomValueEditor(HideInPG = true)]
+        [Browsable(false)]
         public PinIn ZPin { get; set; } = new PinIn();
-        [EGui.Controls.PropertyGrid.PGCustomValueEditor(HideInPG = true)]
+        [Browsable(false)]
         public PinOut OutXYZ { get; set; } = new PinOut();
 
         public UBufferCreator InputFloatDesc { get; } = UBufferCreator.CreateInstance< USuperBuffer <float, FFloatOperator>>(-1, -1, -1);
@@ -231,9 +231,9 @@ namespace EngineNS.Bricks.Procedure.Node
     [Bricks.CodeBuilder.ContextMenu("Float3HeightToNormal", "Float3\\Height2Normal", UPgcGraph.PgcEditorKeyword)]
     public class UFloat3HeightToNormal : UPgcNodeBase
     {
-        [EGui.Controls.PropertyGrid.PGCustomValueEditor(HideInPG = true)]
+        [Browsable(false)]
         public PinIn HFieldPin { get; set; } = new PinIn();
-        [EGui.Controls.PropertyGrid.PGCustomValueEditor(HideInPG = true)]
+        [Browsable(false)]
         public PinOut Normal { get; set; } = new PinOut();
 
         public UBufferCreator InputFloatDesc { get; } = UBufferCreator.CreateInstance<USuperBuffer<float, FFloatOperator>>(-1, -1, -1);
@@ -315,9 +315,9 @@ namespace EngineNS.Bricks.Procedure.Node
     [Bricks.CodeBuilder.ContextMenu("Float3Normalize", "Float3\\Normalize", UPgcGraph.PgcEditorKeyword)]
     public class UFloat3Normalize : UPgcNodeBase
     {
-        [EGui.Controls.PropertyGrid.PGCustomValueEditor(HideInPG = true)]
+        [Browsable(false)]
         public PinIn InXYZ { get; set; } = new PinIn();
-        [EGui.Controls.PropertyGrid.PGCustomValueEditor(HideInPG = true)]
+        [Browsable(false)]
         public PinOut OutXYZ { get; set; } = new PinOut();
         public UBufferCreator InputFloat3Desc { get; } = UBufferCreator.CreateInstance<USuperBuffer<Vector3, FFloat3Operator>>(-1, -1, -1);
         public UBufferCreator OutputFloat3Desc { get; } = UBufferCreator.CreateInstance<USuperBuffer<Vector3, FFloat3Operator>>(-1, -1, -1);
@@ -612,15 +612,15 @@ namespace EngineNS.Bricks.Procedure.Node
     [Bricks.CodeBuilder.ContextMenu("MeshMorph", "Float3\\Morph", UPgcGraph.PgcEditorKeyword)]
     public class UFloat3Morph : UPgcNodeBase
     {
-        [EGui.Controls.PropertyGrid.PGCustomValueEditor(HideInPG = true)]
+        [Browsable(false)]
         public PinIn InXYZ { get; set; } = new PinIn();
-        [EGui.Controls.PropertyGrid.PGCustomValueEditor(HideInPG = true)]
+        [Browsable(false)]
         public PinIn XBezierPin { get; set; } = new PinIn();
-        [EGui.Controls.PropertyGrid.PGCustomValueEditor(HideInPG = true)]
+        [Browsable(false)]
         public PinIn YBezierPin { get; set; } = new PinIn();
-        [EGui.Controls.PropertyGrid.PGCustomValueEditor(HideInPG = true)]
+        [Browsable(false)]
         public PinIn ZBezierPin { get; set; } = new PinIn();
-        [EGui.Controls.PropertyGrid.PGCustomValueEditor(HideInPG = true)]
+        [Browsable(false)]
         public PinOut OutXYZ { get; set; } = new PinOut();
 
         public UBufferCreator XYZBufferCreator { get; } = UBufferCreator.CreateInstance<USuperBuffer<Vector3, FFloat3Operator>>(-1, -1, -1);
@@ -765,9 +765,9 @@ namespace EngineNS.Bricks.Procedure.Node
     [Bricks.CodeBuilder.ContextMenu("Transform", "Float3\\Transform", UPgcGraph.PgcEditorKeyword)]
     public class UFloat3Transform : UPgcNodeBase
     {
-        [EGui.Controls.PropertyGrid.PGCustomValueEditor(HideInPG = true)]
+        [Browsable(false)]
         public PinIn InXYZ { get; set; } = new PinIn();        
-        [EGui.Controls.PropertyGrid.PGCustomValueEditor(HideInPG = true)]
+        [Browsable(false)]
         public PinOut OutXYZ { get; set; } = new PinOut();
         FTransform mTransform = FTransform.Identity;
         [Rtti.Meta]

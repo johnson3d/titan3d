@@ -7,9 +7,9 @@ namespace EngineNS.Bricks.Procedure.Node
 {
     public class UMonocular : UPgcNodeBase
     {
-        [EGui.Controls.PropertyGrid.PGCustomValueEditor(HideInPG = true)]
+        [Browsable(false)]
         public PinIn SrcPin { get; set; } = new PinIn();
-        [EGui.Controls.PropertyGrid.PGCustomValueEditor(HideInPG = true)]
+        [Browsable(false)]
         public PinOut ResultPin { get; set; } = new PinOut();
         [Rtti.Meta]
         public UBufferCreator SourceDesc { get; } = UBufferCreator.CreateInstance<USuperBuffer<float, FFloatOperator>>(-1, -1, -1);
@@ -48,7 +48,7 @@ namespace EngineNS.Bricks.Procedure.Node
 
     public class UMonocularWithMask : UMonocular
     {
-        [EGui.Controls.PropertyGrid.PGCustomValueEditor(HideInPG = true)]
+        [Browsable(false)]
         public PinIn MaskPin { get; set; } = new PinIn();
         public UMonocularWithMask()
         {

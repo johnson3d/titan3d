@@ -27,15 +27,29 @@ namespace EngineNS.Editor
     public partial class UEditor
     {
         public Forms.UFileDialog FileDialog { get; set; } = new Forms.UFileDialog();
-        public EGui.Controls.UContentBrowser RNamePopupContentBrowser = new EGui.Controls.UContentBrowser()
+        //public EGui.Controls.UContentBrowser RNamePopupContentBrowser = new EGui.Controls.UContentBrowser()
+        //{
+        //    DrawInWindow = false,
+        //    CreateNewAssets = false,
+        //    ItemSelectedAction = (asset) =>
+        //    {
+        //        ImGuiAPI.CloseCurrentPopup();
+        //    },
+        //};
+        public static EGui.Controls.UContentBrowser NewPopupContentBrowser()
         {
-            DrawInWindow = false,
-            CreateNewAssets = false,
-            ItemSelectedAction = (asset) =>
+            var result = new EGui.Controls.UContentBrowser()
             {
-                ImGuiAPI.CloseCurrentPopup();
-            },
-        };
+                DrawInWindow = false,
+                CreateNewAssets = false,
+                ItemSelectedAction = (asset) =>
+                {
+                    ImGuiAPI.CloseCurrentPopup();
+                },
+            };
+            _ = result.Initialize();
+            return result;
+        }
     }
 }
 

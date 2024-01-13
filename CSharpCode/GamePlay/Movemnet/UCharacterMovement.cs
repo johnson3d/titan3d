@@ -31,7 +31,7 @@ namespace EngineNS.GamePlay.Movemnet
             currentAngularVelocity = settedAngularVelocity;
 
             DVector3 newPosition = DVector3.Zero;
-            var phyControlNode = Parent.FindFirstChild<UPhyControllerNodeBase>() as UPhyControllerNodeBase;
+            var phyControlNode = Parent.FindFirstChild<TtPhyControllerNodeBase>() as TtPhyControllerNodeBase;
             if (phyControlNode != null)
             {
                 phyControlNode.TryMove(currentLinearVelocity.AsDVector() * world.DeltaTimeSecond, world.DeltaTimeSecond, out newPosition);

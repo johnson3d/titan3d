@@ -2,20 +2,20 @@
 using System.Collections.Generic;
 using EngineNS.Bricks.NodeGraph;
 using EngineNS.Bricks.Terrain.CDLOD;
-using NPOI.Util;
+using System.ComponentModel;
 
 namespace EngineNS.Bricks.Procedure.Node
 {
     [Bricks.CodeBuilder.ContextMenu("TransformUnpack", "Transform\\Unpack", UPgcGraph.PgcEditorKeyword)]
     public class UTransformUnpackNodes : UPgcNodeBase
     {
-        [EGui.Controls.PropertyGrid.PGCustomValueEditor(HideInPG = true)]
+        [Browsable(false)]
         public PinIn InTransform { get; set; } = new PinIn();
-        [EGui.Controls.PropertyGrid.PGCustomValueEditor(HideInPG = true)]
+        [Browsable(false)]
         public PinOut PosPin { get; set; } = new PinOut();
-        [EGui.Controls.PropertyGrid.PGCustomValueEditor(HideInPG = true)]
+        [Browsable(false)]
         public PinOut ScalePin { get; set; } = new PinOut();
-        [EGui.Controls.PropertyGrid.PGCustomValueEditor(HideInPG = true)]
+        [Browsable(false)]
         public PinOut QuatPin { get; set; } = new PinOut();
 
         public PinOut SinglePosPin { get; set; } = new PinOut();
@@ -102,15 +102,15 @@ namespace EngineNS.Bricks.Procedure.Node
     [Bricks.CodeBuilder.ContextMenu("Transformpack", "Transform\\Pack", UPgcGraph.PgcEditorKeyword)]
     public class UTransformPackNodes : UPgcNodeBase
     {
-        [EGui.Controls.PropertyGrid.PGCustomValueEditor(HideInPG = true)]
+        [Browsable(false)]
         public PinOut OutTransform { get; set; } = new PinOut();
-        [EGui.Controls.PropertyGrid.PGCustomValueEditor(HideInPG = true)]
+        [Browsable(false)]
         public PinIn PosPin { get; set; } = new PinIn();
-        [EGui.Controls.PropertyGrid.PGCustomValueEditor(HideInPG = true)]
+        [Browsable(false)]
         public PinIn ScalePin { get; set; } = new PinIn();
-        [EGui.Controls.PropertyGrid.PGCustomValueEditor(HideInPG = true)]
+        [Browsable(false)]
         public PinIn QuatPin { get; set; } = new PinIn();
-        [EGui.Controls.PropertyGrid.PGCustomValueEditor(HideInPG = true)]
+        [Browsable(false)]
         public PinIn SinglePosPin { get; set; } = new PinIn();
 
         public UBufferCreator InputDouble3Desc = UBufferCreator.CreateInstance<USuperBuffer<DVector3, FDouble3Operator>>(-1, -1, -1);
@@ -185,19 +185,19 @@ namespace EngineNS.Bricks.Procedure.Node
     [Bricks.CodeBuilder.ContextMenu("TransformBuilder", "Transform\\Builder", UPgcGraph.PgcEditorKeyword)]
     public class UTransformBuilder : UPgcNodeBase
     {
-        [EGui.Controls.PropertyGrid.PGCustomValueEditor(HideInPG = true)]
+        [Browsable(false)]
         public PinIn HeightPin { get; set; } = new PinIn();
-        [EGui.Controls.PropertyGrid.PGCustomValueEditor(HideInPG = true)]
+        [Browsable(false)]
         public PinIn NormPin { get; set; } = new PinIn();
-        [EGui.Controls.PropertyGrid.PGCustomValueEditor(HideInPG = true)]
+        [Browsable(false)]
         public PinIn MatIdPin { get; set; } = new PinIn();
-        [EGui.Controls.PropertyGrid.PGCustomValueEditor(HideInPG = true)]
+        [Browsable(false)]
         public PinIn IdMapPin { get; set; } = new PinIn();
-        [EGui.Controls.PropertyGrid.PGCustomValueEditor(HideInPG = true)]
+        [Browsable(false)]
         public PinOut OutTransform { get; set; } = new PinOut();
-        [EGui.Controls.PropertyGrid.PGCustomValueEditor(HideInPG = true)]
+        [Browsable(false)]
         public PinOut OutPlant { get; set; } = new PinOut();
-        //[EGui.Controls.PropertyGrid.PGCustomValueEditor(HideInPG = true)]
+        //[Browsable(false)]
         //public PinOut OutGrass { get; set; } = new PinOut();
         public UBufferCreator InputHeightDesc = UBufferCreator.CreateInstance<USuperBuffer<float, FFloatOperator>>(-1, -1, -1);
         public UBufferCreator InputNormDesc = UBufferCreator.CreateInstance<USuperBuffer<Vector3, FFloat3Operator>>(-1, -1, -1);

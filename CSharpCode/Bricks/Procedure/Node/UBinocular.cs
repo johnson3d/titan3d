@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using EngineNS.Bricks.NodeGraph;
+using System.ComponentModel;
 
 namespace EngineNS.Bricks.Procedure.Node
 {
@@ -15,11 +16,11 @@ namespace EngineNS.Bricks.Procedure.Node
     }
     public class UBinocular : UPgcNodeBase
     {
-        [EGui.Controls.PropertyGrid.PGCustomValueEditor(HideInPG = true)]
+        [Browsable(false)]
         public PinIn LeftPin { get; set; } = new PinIn();
-        [EGui.Controls.PropertyGrid.PGCustomValueEditor(HideInPG = true)]
+        [Browsable(false)]
         public PinIn RightPin { get; set; } = new PinIn();
-        [EGui.Controls.PropertyGrid.PGCustomValueEditor(HideInPG = true)]
+        [Browsable(false)]
         public PinOut ResultPin { get; set; } = new PinOut();
         [Rtti.Meta]
         public UBufferCreator InputLeftDesc { get; } = UBufferCreator.CreateInstance<USuperBuffer<float, FFloatOperator>>(-1, -1, -1);
@@ -123,7 +124,7 @@ namespace EngineNS.Bricks.Procedure.Node
     }
     public class UBinocularWithMask : UBinocular
     {
-        [EGui.Controls.PropertyGrid.PGCustomValueEditor(HideInPG = true)]
+        [Browsable(false)]
         public PinIn MaskPin { get; set; } = new PinIn();        
         public UBinocularWithMask()
         {
@@ -333,7 +334,7 @@ namespace EngineNS.Bricks.Procedure.Node
     [Bricks.CodeBuilder.ContextMenu("Lerp", "BaseOp\\Lerp", UPgcGraph.PgcEditorKeyword)]
     public class UPixelLerp : UBinocularWithMask
     {
-        [EGui.Controls.PropertyGrid.PGCustomValueEditor(HideInPG = true)]
+        [Browsable(false)]
         public PinIn FactorPin { get; set; } = new PinIn();
         public UPixelLerp()
         {

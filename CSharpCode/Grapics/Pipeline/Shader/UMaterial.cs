@@ -304,7 +304,7 @@ namespace EngineNS.Graphics.Pipeline.Shader
         }
         #endregion
 
-        [EGui.Controls.PropertyGrid.PGCustomValueEditor(HideInPG = true)]
+        [Browsable(false)]
         public virtual UMaterial ParentMaterial
         {
             get { return this; }
@@ -609,11 +609,11 @@ namespace EngineNS.Graphics.Pipeline.Shader
 
             mMaterialHash = GetHash();
         }
-        [EGui.Controls.PropertyGrid.PGCustomValueEditor(HideInPG = true)]
+        [Browsable(false)]
         public NxRHI.UShaderCode DefineCode { get; } = new NxRHI.UShaderCode();
-        [EGui.Controls.PropertyGrid.PGCustomValueEditor(HideInPG = true)]
+        [Browsable(false)]
         public NxRHI.UShaderCode SourceCode { get; } = new NxRHI.UShaderCode();
-        [EGui.Controls.PropertyGrid.PGCustomValueEditor(HideInPG = true)]
+        [Browsable(false)]
         public NxRHI.UShaderDefinitions Defines { get; } = new NxRHI.UShaderDefinitions();
 
         public EngineNS.NxRHI.EVertexStreamType[] GetVSNeedStreams()

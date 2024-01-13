@@ -422,6 +422,7 @@ namespace EngineNS.Bricks.NodeGraph
             }
         }
         public Rtti.UTypeDesc MacrossType { get; set; }
+        public EGui.Controls.UContentBrowser ContentBrowser;
         bool BrowserVisible = false;
         public override void OnDraw(UNodeBase node, PinIn pin, UNodeGraphStyles styles, float fScale)
         {
@@ -433,6 +434,12 @@ namespace EngineNS.Bricks.NodeGraph
             //mComboBox.Width = ImGuiAPI.GetColumnWidth(index) - EGui.UIProxy.StyleConfig.Instance.PGCellPadding.X;
             //mComboBox.Name = TName.FromString2("##", info.Name).ToString();
             //mComboBox.PreviewValue = preViewStr;
+
+            if (ContentBrowser == null)
+            {
+                ContentBrowser = Editor.UEditor.NewPopupContentBrowser();//UEngine.Instance.EditorInstance.RNamePopupContentBrowser
+            }
+
             if (AssetName != null)
             {
                 var pos = ImGuiAPI.GetCursorScreenPos();
@@ -451,12 +458,12 @@ namespace EngineNS.Bricks.NodeGraph
             }
             //ImGuiAPI.SameLine(0, -1);
 
-            UEngine.Instance.EditorInstance.RNamePopupContentBrowser.ExtNames = FilterExts;
-            UEngine.Instance.EditorInstance.RNamePopupContentBrowser.MacrossBase = MacrossType;
-            UEngine.Instance.EditorInstance.RNamePopupContentBrowser.SelectedAssets.Clear();
+            ContentBrowser.ExtNames = FilterExts;
+            ContentBrowser.MacrossBase = MacrossType;
+            ContentBrowser.SelectedAssets.Clear();
             if (ImGuiAPI.Button("+"))
             {
-                UEngine.Instance.EditorInstance.RNamePopupContentBrowser.Visible = true;
+                ContentBrowser.Visible = true;
                 ImGuiAPI.OpenPopup($"RName: {node.NodeId} {pin.Name}", ImGuiPopupFlags_.ImGuiPopupFlags_None);
                 BrowserVisible = true;
             }
@@ -465,14 +472,14 @@ namespace EngineNS.Bricks.NodeGraph
             {
                 if (ImGuiAPI.BeginPopupModal($"RName: {node.NodeId} {pin.Name}", ref BrowserVisible, ImGuiWindowFlags_.ImGuiWindowFlags_None))
                 {
-                    UEngine.Instance.EditorInstance.RNamePopupContentBrowser.OnDraw();
+                    ContentBrowser.OnDraw();
                     ImGuiAPI.EndPopup();
                 }
             }
-            if (UEngine.Instance.EditorInstance.RNamePopupContentBrowser.SelectedAssets.Count > 0 &&
-                    UEngine.Instance.EditorInstance.RNamePopupContentBrowser.SelectedAssets[0].GetAssetName() != AssetName)
+            if (ContentBrowser.SelectedAssets.Count > 0 &&
+                    ContentBrowser.SelectedAssets[0].GetAssetName() != AssetName)
             {
-                this.Value = UEngine.Instance.EditorInstance.RNamePopupContentBrowser.SelectedAssets[0].GetAssetName();
+                this.Value = ContentBrowser.SelectedAssets[0].GetAssetName();
             }
         }
         public override bool IsPopupPinContextMenu()

@@ -4,9 +4,9 @@ using System.Text;
 
 namespace EngineNS.Bricks.PhysicsCore
 {
-    public class UPhyConvexMesh : AuxPtrType<PhyConvexMesh>
+    public class TtPhyConvexMesh : AuxPtrType<PhyConvexMesh>
     {
-        public UPhyConvexMesh(PhyConvexMesh self)
+        public TtPhyConvexMesh(PhyConvexMesh self)
         {
             mCoreObject = self;
         }

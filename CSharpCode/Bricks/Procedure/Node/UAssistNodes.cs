@@ -1,13 +1,13 @@
 ﻿using EngineNS.Bricks.NodeGraph;
 using System;
 using System.Collections.Generic;
-using System.Text;
+using System.ComponentModel;
 
 namespace EngineNS.Bricks.Procedure.Node
 {
     public class UUnpackNode : UPgcNodeBase
     {
-        [EGui.Controls.PropertyGrid.PGCustomValueEditor(HideInPG = true)]
+        [Browsable(false)]
         public PinIn ValuePin { get; set; } = new PinIn();
 
         Rtti.UTypeDesc mType;
@@ -96,7 +96,7 @@ namespace EngineNS.Bricks.Procedure.Node
 
     public class UPackNode : UPgcNodeBase
     {
-        [EGui.Controls.PropertyGrid.PGCustomValueEditor(HideInPG = true)]
+        [Browsable(false)]
         public PinOut ResultPin { get; set; } = new PinOut();
         UBufferCreator mResultBuffer;
         public UBufferCreator ResultBuffer => mResultBuffer;

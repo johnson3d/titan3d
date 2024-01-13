@@ -69,8 +69,8 @@ namespace EngineNS.Bricks.Terrain.CDLOD
         public int HeightfieldHeight;
         public PhyHeightFieldSample[] PxHeightfieldSamples;
         public float PxHeightfieldScale;
-        public Bricks.PhysicsCore.UPhyHeightfield PhyHeightfield { get; protected set; }
-        public Bricks.PhysicsCore.UPhyActor PhyActor { get; protected set; }
+        public Bricks.PhysicsCore.TtPhyHeightfield PhyHeightfield { get; protected set; }
+        public Bricks.PhysicsCore.TtPhyActor PhyActor { get; protected set; }
         public float RemainUnloadTime = 10.0f;
         public UTerainPlantManager PlantManager = new UTerainPlantManager();
         ~UTerrainLevelData()
@@ -654,8 +654,7 @@ namespace EngineNS.Bricks.Terrain.CDLOD
             fixed (PhyHeightFieldSample* pPixelData = &PxHeightfieldSamples[0])
             {
                 PhyHeightfield = pc.CookHeightfield(texSize, texSize, pPixelData, 0, false);
-                var materials = new Bricks.PhysicsCore.UPhyMaterial[1];
-                materials[0] = UEngine.Instance.PhyModule.PhyContext.PhyMaterialManager.DefaultMaterial;
+                var materials = new List<Bricks.PhysicsCore.TtPhyMaterial>() { UEngine.Instance.PhyModule.PhyContext.PhyMaterialManager.DefaultMaterial };
                 var terrainShape = pc.CreateShapeHeightfield(materials,
                     PhyHeightfield, PxHeightfieldScale, in Vector3.One);
                 PhyFilterData SimulationFilterData = new PhyFilterData();

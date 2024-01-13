@@ -182,8 +182,8 @@ namespace EngineNS.GamePlay
             camera.Parent = springArm;
             camera.Camera = WorldViewportSlate.RenderPolicy.DefaultCamera;
 
-            var phyControl = new UCapsulePhyControllerNode();
-            var phyNodeData = new UCapsulePhyControllerNode.UCapsulePhyControllerNodeData();
+            var phyControl = new TtCapsulePhyControllerNode();
+            var phyNodeData = new TtCapsulePhyControllerNode.TtCapsulePhyControllerNodeData();
             phyNodeData.Height = 1.5f;
             phyNodeData.Radius = 0.5f;
             await phyControl.InitializeNode(scene.World, phyNodeData, Scene.EBoundVolumeType.Box, typeof(EngineNS.GamePlay.UPlacement));
@@ -210,8 +210,8 @@ namespace EngineNS.GamePlay
             actor.SetStyle(EngineNS.GamePlay.Scene.UNode.ENodeStyles.VisibleFollowParent);
             actor.Placement.SetTransform(new DVector3(100, 10, 50), Vector3.One, Quaternion.Identity);
 
-            var phyControl = new UPhySphereCollisionNode();
-            var phyNodeData = new UPhySphereCollisionNode.UPhySphereCollisionNodeData();
+            var phyControl = new TtPhySphereCollisionNode();
+            var phyNodeData = new TtPhySphereCollisionNode.UPhySphereCollisionNodeData();
             phyNodeData.Radius = 0.5f;
             await phyControl.InitializeNode(scene.World, phyNodeData, Scene.EBoundVolumeType.Box, typeof(EngineNS.GamePlay.UPlacement));
             phyControl.Parent = actor;
@@ -229,8 +229,8 @@ namespace EngineNS.GamePlay
             actor.SetStyle(EngineNS.GamePlay.Scene.UNode.ENodeStyles.VisibleFollowParent);
             actor.Placement.SetTransform(new DVector3(100, 2, 50), Vector3.One, Quaternion.Identity);
 
-            var phyControl = new UPhyBoxCollisionNode();
-            var phyNodeData = new UPhyBoxCollisionNode.UPhyBoxCollisionNodeData();
+            var phyControl = new TtPhyBoxCollisionNode();
+            var phyNodeData = new TtPhyBoxCollisionNode.UPhyBoxCollisionNodeData();
             phyNodeData.PhyActorType = EPhyActorType.PAT_Static;
             await phyControl.InitializeNode(scene.World, phyNodeData, Scene.EBoundVolumeType.Box, typeof(EngineNS.GamePlay.UPlacement));
             phyControl.Parent = actor;

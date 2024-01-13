@@ -4,31 +4,31 @@ using System.Text;
 
 namespace EngineNS.Bricks.PhysicsCore
 {
-    public class UPhyCapsuleControllerDesc : AuxPtrType<PhyCapsuleControllerDesc>
+    public class TtPhyCapsuleControllerDesc : AuxPtrType<PhyCapsuleControllerDesc>
     {
-        public UPhyCapsuleControllerDesc()
+        public TtPhyCapsuleControllerDesc()
         {
             mCoreObject = PhyCapsuleControllerDesc.CreateInstance();
         }
-        public void SetMaterial(UPhyMaterial mtl)
+        public void SetMaterial(TtPhyMaterial mtl)
         {
             mCoreObject.NativeSuper.SetMaterial(mtl.mCoreObject);
         }
     }
-    public class UPhyBoxControllerDesc : AuxPtrType<PhyBoxControllerDesc>
+    public class TtPhyBoxControllerDesc : AuxPtrType<PhyBoxControllerDesc>
     {
-        public UPhyBoxControllerDesc()
+        public TtPhyBoxControllerDesc()
         {
             mCoreObject = PhyBoxControllerDesc.CreateInstance();
         }
-        public void SetMaterial(UPhyMaterial mtl)
+        public void SetMaterial(TtPhyMaterial mtl)
         {
             mCoreObject.NativeSuper.SetMaterial(mtl.mCoreObject);
         }
     }
-    public class UPhyController : AuxPtrType<PhyController>
+    public class TtPhyController : AuxPtrType<PhyController>
     {
-        public UPhyController(PhyController self)
+        public TtPhyController(PhyController self)
         {
             mCoreObject = self;
         }

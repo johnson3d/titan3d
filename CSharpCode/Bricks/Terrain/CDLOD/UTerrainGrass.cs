@@ -317,12 +317,12 @@ namespace EngineNS.Bricks.Terrain.CDLOD
             {
                 var tempPatchOffset = patchOffset;
                 var tempTrans = trans;
-                UEngine.Instance.EventPoster.RunOnUntilFinish((out bool isFinish, Thread.Async.TtAsyncTaskStateBase state) =>
+                UEngine.Instance.EventPoster.RunOnUntilFinish((Thread.Async.TtAsyncTaskStateBase state) =>
                 {
-                    isFinish = type.CreateFinished;
+                    var isFinish = type.CreateFinished;
                     if (isFinish)
                         PushInstance(mHostPatch, type, tempPatchOffset, grass, tempTrans, capacity);
-                    return true;
+                    return isFinish;
                 }, Thread.Async.EAsyncTarget.Logic);
             }
             else
@@ -435,12 +435,12 @@ namespace EngineNS.Bricks.Terrain.CDLOD
             }
             if(type.CreateFinished == false)
             {
-                UEngine.Instance.EventPoster.RunOnUntilFinish((out bool isFinish, Thread.Async.TtAsyncTaskStateBase state) =>
+                UEngine.Instance.EventPoster.RunOnUntilFinish((Thread.Async.TtAsyncTaskStateBase state) =>
                 {
-                    isFinish = type.CreateFinished;
+                    var isFinish = type.CreateFinished;
                     if(isFinish)
                         UpdateGrass(mHostPatch, type);
-                    return true;
+                    return isFinish;
                 }, Thread.Async.EAsyncTarget.Logic);
             }
             else

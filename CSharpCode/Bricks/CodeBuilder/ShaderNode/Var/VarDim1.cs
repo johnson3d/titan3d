@@ -1,8 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Text;
 using EngineNS.Bricks.NodeGraph;
 using EngineNS.Graphics.Pipeline.Shader;
+using System.ComponentModel;
 
 namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Var
 {
@@ -184,9 +184,9 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Var
         }
         [Rtti.Meta]
         public float Value { get; set; } = 0;
-        [EGui.Controls.PropertyGrid.PGCustomValueEditor(HideInPG = true)]
+        [Browsable(false)]
         public PinIn InX { get; set; } = new PinIn();
-        [EGui.Controls.PropertyGrid.PGCustomValueEditor(HideInPG = true)]
+        [Browsable(false)]
         public PinOut OutX { get; set; } = new PinOut();
         public VarDimF1()
         {
@@ -323,9 +323,9 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Var
         }
         [Rtti.Meta]
         public float Value { get; set; } = 0;
-        [EGui.Controls.PropertyGrid.PGCustomValueEditor(HideInPG = true)]
+        [Browsable(false)]
         public PinIn InX { get; set; } = new PinIn();
-        [EGui.Controls.PropertyGrid.PGCustomValueEditor(HideInPG = true)]
+        [Browsable(false)]
         public PinOut OutX { get; set; } = new PinOut();
         public VarDimI1()
         {

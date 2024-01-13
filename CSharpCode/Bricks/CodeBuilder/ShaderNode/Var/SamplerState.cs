@@ -2,13 +2,14 @@
 using System;
 using System.Collections.Generic;
 using EngineNS.Bricks.NodeGraph;
+using System.ComponentModel;
 
 namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Var
 {
     [ContextMenu("sampler", "Data\\Sampler@_serial@", UMaterialGraph.MaterialEditorKeyword)]
     public class SamplerState : VarNode
     {
-        [EGui.Controls.PropertyGrid.PGCustomValueEditor(HideInPG = true)]
+        [Browsable(false)]
         public PinOut OutSampler { get; set; } = new PinOut();
         public SamplerState()
         {

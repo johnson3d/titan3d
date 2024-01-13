@@ -2,13 +2,14 @@
 using System;
 using System.Collections.Generic;
 using EngineNS.Bricks.NodeGraph;
+using System.ComponentModel;
 
 namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Var
 {
     [ContextMenu("texture2d", "Data\\Texture2D@_serial@", UMaterialGraph.MaterialEditorKeyword)]
     public class Texture2D : VarNode
     {
-        [EGui.Controls.PropertyGrid.PGCustomValueEditor(HideInPG = true)]
+        [Browsable(false)]
         public PinOut OutTex { get; set; } = new PinOut();
         [Rtti.Meta]
         [RName.PGRName(FilterExts = NxRHI.USrView.AssetExt)]
@@ -104,7 +105,7 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Var
     [ContextMenu("texture2darray", "Data\\Texture2DArray@_serial@", UMaterialGraph.MaterialEditorKeyword)]
     public class Texture2DArray : VarNode
     {
-        [EGui.Controls.PropertyGrid.PGCustomValueEditor(HideInPG = true)]
+        [Browsable(false)]
         public PinOut OutTex { get; set; } = new PinOut();
         public Texture2DArray()
         {

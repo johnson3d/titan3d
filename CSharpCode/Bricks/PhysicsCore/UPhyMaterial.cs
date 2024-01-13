@@ -5,11 +5,11 @@ using System.Text;
 namespace EngineNS.Bricks.PhysicsCore
 {
     [Rtti.Meta]
-    public class UPhyMaterialAMeta : IO.IAssetMeta
+    public class TtPhyMaterialAMeta : IO.IAssetMeta
     {
         public override string GetAssetExtType()
         {
-            return UPhyMaterial.AssetExt;
+            return TtPhyMaterial.AssetExt;
         }
         public override bool CanRefAssetType(IO.IAssetMeta ameta)
         {
@@ -20,21 +20,20 @@ namespace EngineNS.Bricks.PhysicsCore
         {
             return await UEngine.Instance.PhyModule.PhyContext.PhyMaterialManager.GetMaterial(GetAssetName());
         }
-        //public override void OnDrawSnapshot(in ImDrawList cmdlist, ref Vector2 start, ref Vector2 end)
-        //{
-        //    UEngine.Instance.EditorInstance.PhyMaterialIcon?.OnDraw(cmdlist, in start, in end, 0);
-        //    cmdlist.AddText(in start, 0xFFFFFFFF, "PhyMtl", null);
-        //}
+        public override void OnDrawSnapshot(in ImDrawList cmdlist, ref Vector2 start, ref Vector2 end)
+        {
+            UEngine.Instance.EditorInstance.PhyMaterialIcon?.OnDraw(cmdlist, in start, in end, 0);
+            //cmdlist.AddText(in start, 0xFFFFFFFF, "PhyMtl", null);
+        }
         public override string GetAssetTypeName()
         {
             return "PhyMtl";
         }
     }
-    [Rtti.Meta]
-    [UPhyMaterial.UPhyMaterialImport]
+    [TtPhyMaterial.UPhyMaterialImport]
     [IO.AssetCreateMenu(MenuName = "PhysicsMaterial")]
-    [Editor.UAssetEditor(EditorType = typeof(UPhyMaterialEditor))]
-    public class UPhyMaterial : AuxPtrType<PhyMaterial>, IO.IAsset, IO.ISerializer
+    [Editor.UAssetEditor(EditorType = typeof(TtPhyMaterialEditor))]
+    public class TtPhyMaterial : AuxPtrType<PhyMaterial>, IO.IAsset, IO.ISerializer
     {
         public const string AssetExt = ".pxmtl";
         public class UPhyMaterialImportAttribute : IO.CommonCreateAttribute
@@ -70,7 +69,7 @@ namespace EngineNS.Bricks.PhysicsCore
         #region IAsset
         public IO.IAssetMeta CreateAMeta()
         {
-            var result = new UPhyMaterialAMeta();
+            var result = new TtPhyMaterialAMeta();
             return result;
         }
         public IO.IAssetMeta GetAMeta()
@@ -96,14 +95,14 @@ namespace EngineNS.Bricks.PhysicsCore
 
             xnd.SaveXnd(name.Address);
         }
-        public static UPhyMaterial LoadXnd(UPhyMaterialManager manager, IO.TtXndNode node)
+        public static TtPhyMaterial LoadXnd(TtPhyMaterialManager manager, IO.TtXndNode node)
         {
-            UPhyMaterial result = UEngine.Instance.PhyModule.PhyContext.CreateMaterial(0, 0, 0);
+            TtPhyMaterial result = UEngine.Instance.PhyModule.PhyContext.CreateMaterial(0, 0, 0);
             if (ReloadXnd(result, manager, node) == false)
                 return null;
             return result;
         }
-        public static bool ReloadXnd(UPhyMaterial material, UPhyMaterialManager manager, IO.TtXndNode node)
+        public static bool ReloadXnd(TtPhyMaterial material, TtPhyMaterialManager manager, IO.TtXndNode node)
         {
             var attr = node.TryGetAttribute("Material");
             if (attr.NativePointer != IntPtr.Zero)
@@ -130,7 +129,7 @@ namespace EngineNS.Bricks.PhysicsCore
             set;
         }
         #endregion
-        public UPhyMaterial(PhyMaterial self)
+        public TtPhyMaterial(PhyMaterial self)
         {
             mCoreObject = self;
         }
@@ -154,14 +153,14 @@ namespace EngineNS.Bricks.PhysicsCore
         }
     }
 
-    public class UPhyMaterialManager
+    public class TtPhyMaterialManager
     {
         public void Cleanup()
         {
             Materials.Clear();
         }
-        UPhyMaterial mDefaultMaterial;
-        public UPhyMaterial DefaultMaterial
+        TtPhyMaterial mDefaultMaterial;
+        public TtPhyMaterial DefaultMaterial
         {
             get
             {
@@ -172,13 +171,13 @@ namespace EngineNS.Bricks.PhysicsCore
                 return mDefaultMaterial;
             }
         }
-        public Dictionary<RName, UPhyMaterial> Materials { get; } = new Dictionary<RName, UPhyMaterial>();
-        public UPhyMaterial GetMaterialSync(RName rn)
+        public Dictionary<RName, TtPhyMaterial> Materials { get; } = new Dictionary<RName, TtPhyMaterial>();
+        public TtPhyMaterial GetMaterialSync(RName rn)
         {
             if (rn == null)
                 return null;
 
-            UPhyMaterial result;
+            TtPhyMaterial result;
             if (Materials.TryGetValue(rn, out result))
                 return result;
 
@@ -186,7 +185,7 @@ namespace EngineNS.Bricks.PhysicsCore
             {
                 if (xnd != null)
                 {
-                    var material = UPhyMaterial.LoadXnd(this, xnd.RootNode);
+                    var material = TtPhyMaterial.LoadXnd(this, xnd.RootNode);
                     if (material == null)
                         return null;
 
@@ -201,12 +200,12 @@ namespace EngineNS.Bricks.PhysicsCore
                 }
             }
         }
-        public async System.Threading.Tasks.Task<UPhyMaterial> GetMaterial(RName rn)
+        public async System.Threading.Tasks.Task<TtPhyMaterial> GetMaterial(RName rn)
         {
             if (rn == null)
                 return null;
 
-            UPhyMaterial result;
+            TtPhyMaterial result;
             if (Materials.TryGetValue(rn, out result))
                 return result;
 
@@ -216,7 +215,7 @@ namespace EngineNS.Bricks.PhysicsCore
                 {
                     if (xnd != null)
                     {
-                        var material = UPhyMaterial.LoadXnd(this, xnd.RootNode);
+                        var material = TtPhyMaterial.LoadXnd(this, xnd.RootNode);
                         if (material == null)
                             return null;
 
@@ -238,16 +237,16 @@ namespace EngineNS.Bricks.PhysicsCore
 
             return null;
         }
-        public async System.Threading.Tasks.Task<UPhyMaterial> CreateMaterial(RName rn)
+        public async System.Threading.Tasks.Task<TtPhyMaterial> CreateMaterial(RName rn)
         {
-            UPhyMaterial result;
+            TtPhyMaterial result;
             result = await UEngine.Instance.EventPoster.Post((state) =>
             {
                 using (var xnd = IO.TtXndHolder.LoadXnd(rn.Address))
                 {
                     if (xnd != null)
                     {
-                        var material = UPhyMaterial.LoadXnd(this, xnd.RootNode);
+                        var material = TtPhyMaterial.LoadXnd(this, xnd.RootNode);
                         if (material == null)
                             return null;
 
@@ -264,7 +263,7 @@ namespace EngineNS.Bricks.PhysicsCore
         }
         public async System.Threading.Tasks.Task<bool> ReloadMaterial(RName rn)
         {
-            UPhyMaterial result;
+            TtPhyMaterial result;
             if (Materials.TryGetValue(rn, out result) == false)
                 return true;
 
@@ -274,7 +273,7 @@ namespace EngineNS.Bricks.PhysicsCore
                 {
                     if (xnd != null)
                     {
-                        return UPhyMaterial.ReloadXnd(result, this, xnd.RootNode);
+                        return TtPhyMaterial.ReloadXnd(result, this, xnd.RootNode);
                     }
                     else
                     {

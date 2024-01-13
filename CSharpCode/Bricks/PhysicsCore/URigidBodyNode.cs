@@ -1,153 +1,71 @@
 ﻿using EngineNS.IO;
 using EngineNS.Rtti;
+using Org.BouncyCastle.Asn1.X509.Qualified;
 using System;
 using System.Collections.Generic;
-using System.Text;
+using System.ComponentModel;
 
 namespace EngineNS.Bricks.PhysicsCore
 {
-    public class URigidBodyNode : GamePlay.Scene.ULightWeightNodeBase
+    [Bricks.CodeBuilder.ContextMenu("PxMeshNode", "PxMeshNode", GamePlay.Scene.UNode.EditorKeyword)]
+    [GamePlay.Scene.UNode(NodeDataType = typeof(TtRigidBodyNode.TtRigidBodyNodeData), DefaultNamePrefix = "PxMesh")]
+    [EGui.Controls.PropertyGrid.PGCategoryFilters(ExcludeFilters = new string[] { "Misc" })]
+    //[Rtti.Meta(NameAlias = new string[] { "URigidBodyNode" })]
+    public class TtRigidBodyNode : GamePlay.Scene.USceneActorNode
     {
-        public class URigidBodyNodeData : GamePlay.Scene.UNodeData
+        public class TtRigidBodyNodeData : GamePlay.Scene.UNodeData
         {
             [Rtti.Meta]
             public EPhyActorType PxActorType { get; set; }
-            public List<UPhyShape> PxShapes = new List<UPhyShape>();
-            public override void OnWriteMember(IWriter ar, ISerializer obj, UMetaVersion metaVersion)
+            public class TtShapeSerializer : IO.UCustomSerializerAttribute
             {
-                base.OnWriteMember(ar, obj, metaVersion);
-
-                PxShapes.Clear();
-                ar.Write(PxShapes.Count);
-                foreach (var i in PxShapes)
+                public override unsafe void Save(IO.IWriter ar, object host, string propName)
                 {
-                    ar.Write(i.ShapeType);
-                    Vector3 p = new Vector3();
-                    Quaternion q = new Quaternion();
-                    i.mCoreObject.GetLocalPose(ref p, ref q);
-                    ar.Write(p);
-                    ar.Write(q);
-                    ar.Write(i.Materials.Length);
-                    foreach (var j in i.Materials)
+                    System.Diagnostics.Debug.Assert(propName == "PxShapes");
+                    var rbData = host as TtRigidBodyNodeData;
+                    ar.Write(rbData.PxShapes.Count);
+                    foreach (var i in rbData.PxShapes)
                     {
-                        ar.Write(j.AssetName);
-                    }
-                    switch (i.ShapeType)
-                    {
-                        case EPhysShapeType.PST_Plane:
-                            break;
-                        case EPhysShapeType.PST_Box:
-                            {
-                                var shape = i as UPhyBoxShape;
-                                ar.Write(shape.HalfExtent);
-                            }
-                            break;
-                        case EPhysShapeType.PST_Sphere:
-                            {
-                                var shape = i as UPhySphereShape;
-                                ar.Write(shape.Radius);
-                            }
-                            break;
-                        case EPhysShapeType.PST_Capsule:
-                            {
-                                var shape = i as UPhyCapsuleShape;
-                                ar.Write(shape.Radius);
-                                ar.Write(shape.HalfHeight);
-                            }
-                            break;
-                        case EPhysShapeType.PST_Convex:
-                            break;
-                        case EPhysShapeType.PST_TriangleMesh:
-                            {
-                                var shape = i as UPhyTriMeshShape;
-                                ar.Write(shape.TriMeshSource);
-                            }
-                            break;
-                        case EPhysShapeType.PST_Unknown:
-                            break;
+                        var sr = i.GetShapeSerializer();
+                        IO.SerializerHelper.WriteObject(ar, sr.GetType(), sr);
                     }
                 }
-            }
-            public override void OnReadMember(IReader ar, ISerializer obj, UMetaVersion metaVersion)
-            {
-                base.OnReadMember(ar, obj, metaVersion);
-                int nbShape = 0;
-                ar.Read(out nbShape);
-                for (int i = 0; i < nbShape; i++)
+                public override unsafe object Load(IO.IReader ar, object host, string propName)
                 {
-                    EPhysShapeType type;
-                    ar.Read(out type);
-                    Vector3 p = new Vector3();
-                    Quaternion q = new Quaternion();
-                    ar.Read(out p);
-                    ar.Read(out q);
-                    int nbMaterial;
-                    ar.Read(out nbMaterial);                    
-                    UPhyMaterial[] pxMaterials = new UPhyMaterial[nbMaterial];                    
-                    for (int j = 0; j < nbMaterial; j++)
+                    System.Diagnostics.Debug.Assert(propName == "PxShapes");
+                    var rbData = host as TtRigidBodyNodeData;
+                    rbData.PxShapes.Clear();
+                    int count = 0;
+                    ar.Read(out count);
+                    for (int i = 0; i < count; i++)
                     {
-                        RName mtlName;
-                        ar.Read(out mtlName);
-                        pxMaterials[j] = UEngine.Instance.PhyModule.PhyContext.PhyMaterialManager.GetMaterialSync(mtlName);
+                        var sr = IO.SerializerHelper.ReadObject(ar, typeof(TtPhyShape.TtShapeSerializer), null) as TtPhyShape.TtShapeSerializer;
+                        var shape = TtPhyShape.CreateShape(sr);
+                        rbData.PxShapes.Add(shape);
                     }
-                    switch (type)
-                    {
-                        case EPhysShapeType.PST_Plane:
-                            break;
-                        case EPhysShapeType.PST_Box:
-                            {
-                                Vector3 extent = new Vector3();
-                                ar.Read(out extent);
-                                var shape = UEngine.Instance.PhyModule.PhyContext.CreateShapeBox(pxMaterials[0], in extent);
-                                PxShapes.Add(shape);
-                            }
-                            break;
-                        case EPhysShapeType.PST_Sphere:
-                            {
-                                float fRadius = 0;
-                                ar.Read(out fRadius);
-                                var shape = UEngine.Instance.PhyModule.PhyContext.CreateShapeSphere(pxMaterials[0], fRadius);
-                                PxShapes.Add(shape);
-                            }
-                            break;
-                        case EPhysShapeType.PST_Capsule:
-                            {
-                                float fRadius = 0;
-                                float fHalfHeight = 0;
-                                ar.Read(out fRadius);
-                                ar.Read(out fHalfHeight);
-                                var shape = UEngine.Instance.PhyModule.PhyContext.CreateShapeCapsule(pxMaterials[0], fRadius, fHalfHeight);
-                                PxShapes.Add(shape);
-                            }
-                            break;
-                        case EPhysShapeType.PST_Convex:
-                            break;
-                        case EPhysShapeType.PST_TriangleMesh:
-                            {
-                                RName triMeshSource;
-                                ar.Read(out triMeshSource);
-                                var triMesh = UEngine.Instance.PhyModule.PhyContext.PhyMeshManager.GetMeshSync(triMeshSource);
-                                Vector3 scale = new Vector3();
-                                Quaternion quat = new Quaternion();
-                                var shape = UEngine.Instance.PhyModule.PhyContext.CreateShapeTriMesh(pxMaterials, triMesh, in scale, in quat);
-                                PxShapes.Add(shape);
-                            }
-                            break;
-                        case EPhysShapeType.PST_Unknown:
-                            break;
-                    }
+                    return rbData.PxShapes;
                 }
             }
+            [TtShapeSerializer]
+            [Rtti.Meta]
+            public object PxShapeSerializer 
+            { 
+                get => null; 
+                set
+                {
+                }
+            }
+            public List<TtPhyShape> PxShapes { get; set; } = new List<TtPhyShape>();
         }
         public override async System.Threading.Tasks.Task<bool> InitializeNode(GamePlay.UWorld world, GamePlay.Scene.UNodeData data, GamePlay.Scene.EBoundVolumeType bvType, Type placementType)
         {
             if (data==null)
             {
-                data = new URigidBodyNodeData();
+                data = new TtRigidBodyNodeData();
             }
             await base.InitializeNode(world, data, bvType, placementType);
 
-            var rbNodeData = data as URigidBodyNodeData;
+            var rbNodeData = data as TtRigidBodyNodeData;
             if (rbNodeData == null)
                 return false;
 
@@ -155,7 +73,7 @@ namespace EngineNS.Bricks.PhysicsCore
 
             return true;
         }
-        private void InitPhysics(URigidBodyNodeData rbNodeData)
+        private void InitPhysics(TtRigidBodyNodeData rbNodeData)
         {
             ref FTransform transform = ref this.Placement.AbsTransform;
             PxActor = UEngine.Instance.PhyModule.PhyContext.CreateActor(rbNodeData.PxActorType, in transform.mPosition, in transform.mQuat);
@@ -163,7 +81,7 @@ namespace EngineNS.Bricks.PhysicsCore
 
             UpdatePxShape(rbNodeData.PxShapes);
         }
-        public bool UpdatePxShape(List<UPhyShape> shapes)
+        public bool UpdatePxShape(List<TtPhyShape> shapes)
         {
             foreach (var i in Shapes)
             {
@@ -177,7 +95,7 @@ namespace EngineNS.Bricks.PhysicsCore
                 i.mCoreObject.GetLocalPose(ref p, ref q);
                 i.mCoreObject.AddToActor(PxActor.mCoreObject, in p, in q);
             }
-            var rbNodeData = this.NodeData as URigidBodyNodeData;
+            var rbNodeData = this.NodeData as TtRigidBodyNodeData;
             if (rbNodeData != null)
             {
                 rbNodeData.PxShapes = shapes;
@@ -208,16 +126,16 @@ namespace EngineNS.Bricks.PhysicsCore
                 PxActor.SetPose2Physics(in transform.mPosition, transform.mQuat, false);
             }
         }
-        public UPhyActor PxActor
+        public TtPhyActor PxActor
         {
             get;
             private set;
         }
-        public List<UPhyShape> Shapes
+        public List<TtPhyShape> Shapes
         {
             get
             {
-                var rbNodeData = this.NodeData as URigidBodyNodeData;
+                var rbNodeData = this.NodeData as TtRigidBodyNodeData;
                 if (rbNodeData == null)
                     return null;
                 return rbNodeData.PxShapes;
@@ -254,7 +172,7 @@ namespace EngineNS.Bricks.PhysicsCore
                 }                
                 if (ImGuiAPI.Button("AddBoxShape", in sz))
                 {
-                    var node = info.ObjectInstance as URigidBodyNode;
+                    var node = info.ObjectInstance as TtRigidBodyNode;
                     if (node != null)
                     {
                         var mtl = UEngine.Instance.PhyModule.PhyContext.PhyMaterialManager.DefaultMaterial;
@@ -267,12 +185,101 @@ namespace EngineNS.Bricks.PhysicsCore
             }
         }
         [PGAddBoxShape()]
-        [System.ComponentModel.Category("Editor")]
-        public bool Ed_AddBoxShape
+        [Category("Editor")]
+        public bool AddBoxShape
         {
             get
             {
-                return true;
+                return false;
+            }
+            set
+            {
+
+            }
+        }
+
+        public class PGAddTriMeshShapeAttribute : EGui.Controls.PropertyGrid.PGCustomValueEditorAttribute
+        {
+            RName.PGRNameAttribute mMeshRNameEditor;
+            RName.PGRNameAttribute mMtlRNameEditor;
+            RName mTriMeshName;
+            RName mTriMaterialName;
+            public PGAddTriMeshShapeAttribute()
+            {
+                FullRedraw = false;
+            }
+            protected override async System.Threading.Tasks.Task<bool> Initialize_Override()
+            {
+                mMeshRNameEditor = new RName.PGRNameAttribute();
+                await mMeshRNameEditor.Initialize();
+                mMeshRNameEditor.ContentBrowser.Name = "TriMesh";
+
+                mMtlRNameEditor = new RName.PGRNameAttribute();
+                await mMtlRNameEditor.Initialize();
+                mMtlRNameEditor.ContentBrowser.Name = "TriMaterial";
+
+                return await base.Initialize_Override();
+            }
+            protected override void Cleanup_Override()
+            {
+                mMeshRNameEditor?.Cleanup();
+                mMtlRNameEditor?.Cleanup();
+                base.Cleanup_Override();
+            }
+            public unsafe override bool OnDraw(in EditorInfo info, out object newValue)
+            {
+                var tmInfo = new EditorInfo();
+                tmInfo.Value = mTriMeshName;
+                ImGuiAPI.Text("TriMesh");
+                mMeshRNameEditor.FilterExts = TtPhyTriMesh.AssetExt;
+                object newMesh;
+                ImGuiAPI.PushID("TriMesh");
+                mMeshRNameEditor.OnDraw(in tmInfo, out newMesh);
+                ImGuiAPI.PopID();
+                if (newMesh != mTriMeshName)
+                {
+                    mTriMeshName = newMesh as RName;
+                }
+                var tmInfo1 = new EditorInfo();
+                tmInfo1.Value = mTriMaterialName;
+                ImGuiAPI.Text("TriMaterial");
+                mMtlRNameEditor.FilterExts = TtPhyMaterial.AssetExt;
+                object newMtl;
+                ImGuiAPI.PushID("TriMaterial");
+                mMtlRNameEditor.OnDraw(in tmInfo1, out newMtl);
+                ImGuiAPI.PopID();
+                if (newMtl != mTriMaterialName)
+                {
+                    mTriMaterialName = newMtl as RName;
+                }
+                ImGuiAPI.Separator();
+                if (mTriMeshName != null && mTriMaterialName != null)
+                {
+                    if (ImGuiAPI.Button("AddTriMeshShape"))
+                    {
+                        var pc = UEngine.Instance.PhyModule.PhyContext;
+                        var mesh = pc.PhyMeshManager.GetMeshSync(mTriMeshName);
+                        var mtl = pc.PhyMaterialManager.GetMaterialSync(mTriMaterialName);
+                        var rbNode = info.ObjectInstance as TtRigidBodyNode;
+                        if (rbNode != null)
+                        {
+                            var shape = UEngine.Instance.PhyModule.PhyContext.CreateShapeTriMesh(new List<TtPhyMaterial>() { mtl }, mesh, rbNode.Placement.Scale, rbNode.Placement.Quat);
+                            rbNode.Shapes.Add(shape);
+                            rbNode.UpdateShapeAABB();
+                        }
+                    }
+                }
+                newValue = false;
+                return false;
+            }
+        }
+        [PGAddTriMeshShape()]
+        [Category("Editor")]
+        public bool AddTriMeshShape
+        {
+            get
+            {
+                return false;
             }
             set
             {
@@ -302,8 +309,61 @@ namespace EngineNS.Bricks.PhysicsCore
                     i.DebugMesh.SetWorldTransform(in absTransform, rp.World, true);
                     rp.VisibleMeshes.Add(i.DebugMesh);
                 }
-            }   
+            }
         }
         #endregion
     }
 }
+
+namespace EngineNS.GamePlay.Scene
+{
+    //public partial class UMeshNode
+    //{
+    //    public class IsRigidBody_EditorAttribute : EGui.Controls.PropertyGrid.PGCustomValueEditorAttribute
+    //    {
+    //        public override unsafe bool OnDraw(in EditorInfo info, out object newValue)
+    //        {
+    //            if (ImGuiAPI.Button("BuildRB"))
+    //            {
+    //                (info.ObjectInstance as UMeshNode).BuildPhyRBNode();
+    //            }
+    //            newValue = info.Value;
+    //            return true;
+    //        }
+    //    }
+    //    [IsRigidBody_EditorAttribute]
+    //    [Category("Option")]
+    //    public bool IsRigidBody
+    //    {
+    //        get;
+    //        set;
+    //    }
+    //    public void BuildPhyRBNode()
+    //    {
+    //        var name = this.NodeName + ".PhyRB";
+    //        var rbNode = this.Children.Find((c) =>
+    //        {
+    //            return c.NodeName == name;
+    //        });
+    //        if (rbNode == null)
+    //        {
+    //            var rbData = new Bricks.PhysicsCore.URigidBodyNode.URigidBodyNodeData();
+    //            rbData.Name = name;
+    //            rbData.PxActorType = EPhyActorType.PAT_Static;
+    //            //UEngine.Instance.PhyModule.PhyContext.CreateShapeTriMesh(,,)
+    //            //rbData.PxShapes.Add()
+    //            rbNode = new Bricks.PhysicsCore.URigidBodyNode();
+    //            var task = rbNode.InitializeNode(GetWorld(), rbData, EBoundVolumeType.Box, this.Placement.GetType());
+    //            UEngine.Instance.EventPoster.RunOnUntilFinish((state) =>
+    //            {
+    //                if (task.IsCompleted)
+    //                {
+    //                    rbNode.Parent = this;
+    //                }
+    //                return task.IsCompleted;
+    //            }, Thread.Async.EAsyncTarget.Logic);
+    //        }
+    //    }
+    //}
+}
+

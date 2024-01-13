@@ -6,22 +6,22 @@ using System.Text;
 
 namespace EngineNS.Bricks.PhysicsCore
 {
-    public class UPhySceneDesc : AuxPtrType<PhySceneDesc>
+    public class TtPhySceneDesc : AuxPtrType<PhySceneDesc>
     {
-        public UPhySceneDesc(PhySceneDesc self)
+        public TtPhySceneDesc(PhySceneDesc self)
         {
             mCoreObject = self;
         }
     }
-    public class UPhyScene : AuxPtrType<PhyScene>
+    public class TtPhyScene : AuxPtrType<PhyScene>
     {
-        public UPhyScene(PhyScene self)
+        public TtPhyScene(PhyScene self)
         {
             mCoreObject = self;
         }
         public bool IsPxFetchingPose { get; protected set; }
-        private static Profiler.TimeScope ScopeTickSimulate = Profiler.TimeScopeManager.GetTimeScope(typeof(UPhyScene), "Tick.Simulate");
-        private static Profiler.TimeScope ScopeTickUpdateActor = Profiler.TimeScopeManager.GetTimeScope(typeof(UPhyScene), "Tick.UpdateActor");
+        private static Profiler.TimeScope ScopeTickSimulate = Profiler.TimeScopeManager.GetTimeScope(typeof(TtPhyScene), "Tick.Simulate");
+        private static Profiler.TimeScope ScopeTickUpdateActor = Profiler.TimeScopeManager.GetTimeScope(typeof(TtPhyScene), "Tick.UpdateActor");
         public unsafe void Tick(float elapsedSecond)
         {
             var elapse = elapsedSecond;
@@ -63,7 +63,7 @@ namespace EngineNS.Bricks.PhysicsCore
                         {
                             actor.UpdateTransform();
 
-                            var csActor = UPhyActor.GetActor(actor);
+                            var csActor = TtPhyActor.GetActor(actor);
                             if (csActor != null && csActor.TagNode != null)
                             {
                                 csActor.TagNode.Placement.Position = csActor.mCoreObject.mPosition.AsDVector();
@@ -79,27 +79,27 @@ namespace EngineNS.Bricks.PhysicsCore
                 }
             }   
         }
-        public UPhyController CreateBoxController(in PhyBoxControllerDesc desc)
+        public TtPhyController CreateBoxController(in PhyBoxControllerDesc desc)
         {
             var self = mCoreObject.CreateBoxController(desc);
             if (self.IsValidPointer == false)
                 return null;
-            return new UPhyController(self);
+            return new TtPhyController(self);
         }
-        public UPhyController CreateCapsuleController(in PhyCapsuleControllerDesc desc)
+        public TtPhyController CreateCapsuleController(in PhyCapsuleControllerDesc desc)
         {
             var self = mCoreObject.CreateCapsuleController(desc);
             if (self.IsValidPointer == false)
                 return null;
-            return new UPhyController(self);
+            return new TtPhyController(self);
         }        
     }
 
     public class UPhySceneMember : IMemberTickable
     {
         private GamePlay.Scene.UScene HostScene;
-        private UPhyScene mPxScene;
-        public UPhyScene PxScene
+        private TtPhyScene mPxScene;
+        public TtPhyScene PxScene
         {
             get
             {

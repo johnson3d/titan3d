@@ -19,6 +19,7 @@ namespace EngineNS.Graphics.Pipeline.Common
     {
         public Common.URenderGraphPin HitIdPinOut = Common.URenderGraphPin.CreateOutput("HitId", false, EPixelFormat.PXF_R8G8B8A8_UNORM);
         public Common.URenderGraphPin DepthPinInOut = Common.URenderGraphPin.CreateInputOutput("Depth", false, EPixelFormat.PXF_D16_UNORM);
+        public Common.URenderGraphPin GizmosDepthPinOut = Common.URenderGraphPin.CreateOutput("GizmosDepth", false, EPixelFormat.PXF_D16_UNORM);
         public UHitproxyNode()
         {
             Name = "Hitproxy";
@@ -27,6 +28,7 @@ namespace EngineNS.Graphics.Pipeline.Common
         {
             AddOutput(HitIdPinOut, NxRHI.EBufferType.BFT_RTV | NxRHI.EBufferType.BFT_SRV);
             AddInputOutput(DepthPinInOut, NxRHI.EBufferType.BFT_DSV | NxRHI.EBufferType.BFT_SRV);
+            AddOutput(GizmosDepthPinOut, NxRHI.EBufferType.BFT_DSV | NxRHI.EBufferType.BFT_SRV); 
             DepthPinInOut.IsAllowInputNull = true;
         }
         #region GetHitproxy
@@ -176,7 +178,7 @@ namespace EngineNS.Graphics.Pipeline.Common
                 GizmosPassDesc.AttachmentMRTs[0].Samples = 1;
                 GizmosPassDesc.AttachmentMRTs[0].LoadAction = NxRHI.EFrameBufferLoadAction.LoadActionDontCare;
                 GizmosPassDesc.AttachmentMRTs[0].StoreAction = NxRHI.EFrameBufferStoreAction.StoreActionStore;
-                GizmosPassDesc.m_AttachmentDepthStencil.Format = DSFormat;
+                GizmosPassDesc.m_AttachmentDepthStencil.Format = GizmosDepthPinOut.Attachement.Format;
                 GizmosPassDesc.m_AttachmentDepthStencil.Samples = 1;
                 GizmosPassDesc.m_AttachmentDepthStencil.LoadAction = NxRHI.EFrameBufferLoadAction.LoadActionClear;
                 GizmosPassDesc.m_AttachmentDepthStencil.StoreAction = NxRHI.EFrameBufferStoreAction.StoreActionStore;
@@ -197,7 +199,7 @@ namespace EngineNS.Graphics.Pipeline.Common
 
             GGizmosBuffers.Initialize(policy, GizmosRenderPass);
             GGizmosBuffers.SetRenderTarget(policy, 0, HitIdPinOut);
-            GGizmosBuffers.SetDepthStencil(policy, DepthPinInOut);
+            GGizmosBuffers.SetDepthStencil(policy, GizmosDepthPinOut);
             GGizmosBuffers.TargetViewIdentifier = policy.DefaultCamera.TargetViewIdentifier;
         }
         public unsafe override void Dispose()
@@ -219,6 +221,8 @@ namespace EngineNS.Graphics.Pipeline.Common
             HitIdPinOut.Attachement.Height = (uint)(y * ScaleFactor);
             DepthPinInOut.Attachement.Width = (uint)(x * ScaleFactor);
             DepthPinInOut.Attachement.Height = (uint)(y * ScaleFactor);
+            GizmosDepthPinOut.Attachement.Width = (uint)(x * ScaleFactor);
+            GizmosDepthPinOut.Attachement.Height = (uint)(y * ScaleFactor); 
             if (GHitproxyBuffers != null)
             {
                 GHitproxyBuffers.SetSize(x * ScaleFactor, y * ScaleFactor);

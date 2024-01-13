@@ -156,16 +156,15 @@ namespace EngineNS.Bricks.Terrain.CDLOD
             if(type.CreateFinished == false)
             {
                 var tempTrans = trans;
-                UEngine.Instance.EventPoster.RunOnUntilFinish((out bool isFinish, Thread.Async.TtAsyncTaskStateBase state) =>
+                UEngine.Instance.EventPoster.RunOnUntilFinish((Thread.Async.TtAsyncTaskStateBase state) =>
                 {
-                    isFinish = type.CreateFinished;
-                    if (isFinish)
+                    if (type.CreateFinished)
                     {
                         var inst = new UPlantInstance();
                         inst.Placement.TransformData = tempTrans;
                         type.PushInstance(inst, capacity);
                     }
-                    return true;
+                    return type.CreateFinished;
                 }, Thread.Async.EAsyncTarget.Logic);
             }
             else

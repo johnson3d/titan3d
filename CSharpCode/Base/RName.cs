@@ -42,10 +42,13 @@ namespace EngineNS
             [System.ThreadStatic]
             static DrawData mDrawData = new DrawData();
 
+            public EGui.Controls.UContentBrowser ContentBrowser;
+
             public float MaxWidth = -1;
             public float MinWidth = -1;
             protected override async Task<bool> Initialize_Override()
             {
+                ContentBrowser = Editor.UEditor.NewPopupContentBrowser();
                 mComboBox = new EGui.UIProxy.ComboBox()
                 {
                     ComboOpenAction = ComboOpenAction
@@ -65,7 +68,8 @@ namespace EngineNS
             }
             void ComboOpenAction(in Support.UAnyPointer data)
             {
-                UEngine.Instance.EditorInstance.RNamePopupContentBrowser.OnDraw();
+                ContentBrowser.OnDraw();
+                //UEngine.Instance.EditorInstance.RNamePopupContentBrowser.OnDraw();
             }
             public override unsafe bool OnDraw(in EditorInfo info, out object newValue)
             {
@@ -101,14 +105,14 @@ namespace EngineNS
                 mComboBox.PreviewValue = preViewStr;
                 var contentBrowserSize = new Vector2(500, 600);
                 ImGuiAPI.SetNextWindowSize(in contentBrowserSize, ImGuiCond_.ImGuiCond_Always);
-                UEngine.Instance.EditorInstance.RNamePopupContentBrowser.ExtNames = FilterExts;
-                UEngine.Instance.EditorInstance.RNamePopupContentBrowser.MacrossBase = Rtti.UTypeDesc.TypeOf(MacrossType);
-                UEngine.Instance.EditorInstance.RNamePopupContentBrowser.SelectedAssets.Clear();
+                ContentBrowser.ExtNames = FilterExts;
+                ContentBrowser.MacrossBase = Rtti.UTypeDesc.TypeOf(MacrossType);
+                ContentBrowser.SelectedAssets.Clear();
                 mComboBox.OnDraw(in drawList, in anyPt);
-                if(UEngine.Instance.EditorInstance.RNamePopupContentBrowser.SelectedAssets.Count > 0 &&
-                    UEngine.Instance.EditorInstance.RNamePopupContentBrowser.SelectedAssets[0].GetAssetName() != name)
+                if(ContentBrowser.SelectedAssets.Count > 0 &&
+                    ContentBrowser.SelectedAssets[0].GetAssetName() != name)
                 {
-                    mDrawData.NewValue = UEngine.Instance.EditorInstance.RNamePopupContentBrowser.SelectedAssets[0].GetAssetName();
+                    mDrawData.NewValue = ContentBrowser.SelectedAssets[0].GetAssetName();
                 }
                 var pos = ImGuiAPI.GetCursorScreenPos();
                 pos.X += snapSize.X + 8;

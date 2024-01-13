@@ -4,10 +4,10 @@ using System.Text;
 
 namespace EngineNS.Bricks.PhysicsCore
 {
-    public class UPhyActor : AuxPtrType<PhyActor>
+    public class TtPhyActor : AuxPtrType<PhyActor>
     {
         public GamePlay.Scene.UNode TagNode;
-        public UPhyActor(PhyActor self)
+        public TtPhyActor(PhyActor self)
         {
             mCoreObject = self;
             var gchandle = System.Runtime.InteropServices.GCHandle.Alloc(this, System.Runtime.InteropServices.GCHandleType.Weak);
@@ -17,7 +17,7 @@ namespace EngineNS.Bricks.PhysicsCore
                 super.mCSharpHandle = System.Runtime.InteropServices.GCHandle.ToIntPtr(gchandle).ToPointer();
             }
         }
-        ~UPhyActor()
+        ~TtPhyActor()
         {
             unsafe
             {
@@ -27,7 +27,7 @@ namespace EngineNS.Bricks.PhysicsCore
                 gchandle.Free();
             }
         }
-        public static UPhyActor GetActor(PhyActor actor)
+        public static TtPhyActor GetActor(PhyActor actor)
         {
             unsafe
             {
@@ -35,11 +35,11 @@ namespace EngineNS.Bricks.PhysicsCore
                 if (ptr == IntPtr.Zero)
                     return null;
                 var gchandle = System.Runtime.InteropServices.GCHandle.FromIntPtr(ptr);
-                return gchandle.Target as UPhyActor;
+                return gchandle.Target as TtPhyActor;
             }
         }
-        public List<UPhyShape> Shapes { get; } = new List<UPhyShape>();
-        public bool AddToScene(UPhyScene scene)
+        public List<TtPhyShape> Shapes { get; } = new List<TtPhyShape>();
+        public bool AddToScene(TtPhyScene scene)
         {
             if (scene == null)
             {
@@ -50,7 +50,7 @@ namespace EngineNS.Bricks.PhysicsCore
                 return mCoreObject.AddToScene(scene.mCoreObject);
             }
         }
-        public UPhyScene GetScene()
+        public TtPhyScene GetScene()
         {
             unsafe
             {
@@ -62,7 +62,7 @@ namespace EngineNS.Bricks.PhysicsCore
                     return null;
                 }
                 var handle = System.Runtime.InteropServices.GCHandle.FromIntPtr((IntPtr)scene.NativeSuper.mCSharpHandle);
-                return handle.Target as UPhyScene;
+                return handle.Target as TtPhyScene;
             }
         }
         public ref Vector3 Position
@@ -89,11 +89,11 @@ namespace EngineNS.Bricks.PhysicsCore
         {
             return mCoreObject.SetPose2Physics(p.ToSingleVector3(), in q, autowake);
         }
-        public bool AttachShape(UPhyShape shape, in Vector3 p, in Quaternion q)
+        public bool AttachShape(TtPhyShape shape, in Vector3 p, in Quaternion q)
         {
             return mCoreObject.AttachShape(shape.mCoreObject, in p, in q);
         }
-        public void DetachShape(UPhyShape shape, bool wakeOnLostTouch)
+        public void DetachShape(TtPhyShape shape, bool wakeOnLostTouch)
         {
             mCoreObject.DetachShape(shape.mCoreObject, wakeOnLostTouch);
         }
@@ -105,14 +105,14 @@ namespace EngineNS.Bricks.PhysicsCore
         {
             return mCoreObject.SetActorFlag(flag, value);
         }
-        public void AddShape(UPhyShape shape, in Vector3 p, in Quaternion q)
+        public void AddShape(TtPhyShape shape, in Vector3 p, in Quaternion q)
         {
             if (Shapes.Contains(shape))
                 return;
             Shapes.Add(shape);
             shape.mCoreObject.AddToActor(mCoreObject, in p, in q);
         }
-        public void RemoveShape(UPhyShape shape)
+        public void RemoveShape(TtPhyShape shape)
         {
             Shapes.Remove(shape);
             shape.mCoreObject.RemoveFromActor();

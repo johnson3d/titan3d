@@ -4,9 +4,9 @@ using System.Text;
 
 namespace EngineNS.Bricks.PhysicsCore
 {
-    public class UPhyHeightfield : AuxPtrType<PhyHeightfield>
+    public class TtPhyHeightfield : AuxPtrType<PhyHeightfield>
     {
-        public UPhyHeightfield(PhyHeightfield self)
+        public TtPhyHeightfield(PhyHeightfield self)
         {
             mCoreObject = self;
         }

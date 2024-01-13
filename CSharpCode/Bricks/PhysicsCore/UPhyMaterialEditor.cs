@@ -4,7 +4,7 @@ using System.Text;
 
 namespace EngineNS.Bricks.PhysicsCore
 {
-    public class UPhyMaterialEditor : Editor.IAssetEditor, IRootForm
+    public class TtPhyMaterialEditor : Editor.IAssetEditor, IRootForm
     {
         public RName AssetName { get; set; }
         public bool Visible { get; set; }
@@ -13,9 +13,9 @@ namespace EngineNS.Bricks.PhysicsCore
         public ImGuiWindowClass DockKeyClass => mDockKeyClass;
         public ImGuiCond_ DockCond { get; set; } = ImGuiCond_.ImGuiCond_FirstUseEver;
 
-        public UPhyMaterial Material;
+        public TtPhyMaterial Material;
         public EGui.Controls.PropertyGrid.PropertyGrid MaterialPropGrid = new EGui.Controls.PropertyGrid.PropertyGrid();
-        ~UPhyMaterialEditor()
+        ~TtPhyMaterialEditor()
         {
             Dispose();
         }
@@ -43,6 +43,7 @@ namespace EngineNS.Bricks.PhysicsCore
                 return false;
 
             MaterialPropGrid.Target = Material;
+            Visible = true;
             return true;
         }
         public void OnCloseEditor()

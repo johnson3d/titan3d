@@ -28,6 +28,11 @@ namespace EngineNS.Bricks.Font
             //return await UEngine.Instance.GfxDevice.MeshPrimitiveManager.GetMeshPrimitive(GetAssetName());
             return null;
         }
+        public override void OnDrawSnapshot(in ImDrawList cmdlist, ref Vector2 start, ref Vector2 end)
+        {
+            UEngine.Instance.EditorInstance.FontIcon?.OnDraw(cmdlist, in start, in end, 0);
+            //cmdlist.AddText(in start, 0xFFFFFFFF, "PhyMtl", null);
+        }
         public override bool CanRefAssetType(IO.IAssetMeta ameta)
         {
             return false;
