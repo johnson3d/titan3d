@@ -1131,7 +1131,8 @@ void Pivot_WindAnimation_Rustle(float windSpeed, float windIntensity, float3 loc
 	float3 pivotPos = float3(0,-0.1f,0);
 	// rotation angle
 	float windDistance = time * windSpeed * -0.5f;
-	float zWindDistance = zAxis * windDistance;
+	// float3 xWindDistance = rotationAxis * windDistance;
+	float3 zWindDistance = zAxis * windDistance;
 	float3 deltaWindOffset = abs(frac(windDistance + localPos / 2.0f + 0.5f) * 2.0f - 1.0f);
 	float3 zDeltaWindOffset = abs(frac(zWindDistance + localPos / 10.0f + 0.5f) * 2.0f - 1.0f);
 	float rotationAngle1 = length((3.0f - deltaWindOffset*2.0f) * deltaWindOffset * deltaWindOffset);
@@ -1140,7 +1141,7 @@ void Pivot_WindAnimation_Rustle(float windSpeed, float windIntensity, float3 loc
 
 	// rotation position & normal
 	float3 currPos = localPos;
-	RotateAboutAxis(rotationAxis, rotationAngle, pivotPos, currPos, localVertexOffset);
+	RotateAboutAxis(rotationAxis, rotationAngle * 3.14f / 180.0f, pivotPos, currPos, localVertexOffset);
 	localVertexOffset = localVertexOffset * windIntensity;
 }
 
