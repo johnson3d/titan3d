@@ -238,7 +238,7 @@ namespace EngineNS.Bricks.GpuDriven
 
             drawcall.BindSrv("VisibleClusterBuffer", node.GetAttachBuffer(node.VisibleClustersPinIn).Srv);
 
-            drawcall.BindUav("IndirectArgBuffer", node.IndirectArgBuffer.DataUAV);
+            drawcall.BindUav("IndirectArgBuffer", node.IndirectArgBuffer.Uav);
 
             var index = drawcall.FindBinder(NxRHI.EShaderBindType.SBT_CBuffer, "cbShadingEnv");
             if (index.IsValidPointer)

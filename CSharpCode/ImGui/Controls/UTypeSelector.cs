@@ -138,6 +138,7 @@ namespace EngineNS.EGui.Controls
         bool mSearchBarFocused = false;
         public string CtrlId = "##ComboTypeSelector";
         public delegate bool FOnTypeFilter(Rtti.UTypeDesc type);
+        public bool PopupVisible = false;
         public unsafe bool OnDraw(float itemWidth, int showMaxItems, FOnTypeFilter onTypeFilter = null)
         {
             ImGuiAPI.PushID(CtrlId);
@@ -158,6 +159,7 @@ namespace EngineNS.EGui.Controls
                 ImGuiButtonFlags_.ImGuiButtonFlags_MouseButtonLeft))
             {
                 ImGuiAPI.OpenPopup("combobox", ImGuiPopupFlags_.ImGuiPopupFlags_None);
+                PopupVisible = true;
             }
 
             bool bChanged = false;
@@ -166,7 +168,7 @@ namespace EngineNS.EGui.Controls
             var size = new Vector2(300, 500);
             ImGuiAPI.SetNextWindowPos(popWinPos, ImGuiCond_.ImGuiCond_None, in pivot);
             ImGuiAPI.SetNextWindowSize(in size, ImGuiCond_.ImGuiCond_None);
-            if (ImGuiAPI.BeginPopup("combobox", ImGuiWindowFlags_.ImGuiWindowFlags_NoMove | ImGuiWindowFlags_.ImGuiWindowFlags_Popup))
+            if (ImGuiAPI.BeginPopupModal("combobox", ref PopupVisible, ImGuiWindowFlags_.ImGuiWindowFlags_NoMove | ImGuiWindowFlags_.ImGuiWindowFlags_Popup))
             {
                 var sz = new Vector2(0, 0);
                 var popDrawList = ImGuiAPI.GetWindowDrawList();

@@ -231,6 +231,16 @@ namespace EngineNS.Bricks.CodeBuilder
         public UTypeReference VariableType { get; set; }
         [Rtti.Meta]
         public string VariableName { get; set; } = "Unknow";
+        public Func<UVariableDeclaration, string> GetDisplayNameFunc;
+        public string DisplayName
+        {
+            get
+            {
+                if (GetDisplayNameFunc != null)
+                    return GetDisplayNameFunc.Invoke(this);
+                return VariableName;
+            }
+        }
         [Rtti.Meta]
         public UExpressionBase InitValue { get; set; }
         [Rtti.Meta]
@@ -1017,6 +1027,18 @@ namespace EngineNS.Bricks.CodeBuilder
                     return Properties[i];
             }
             return null;
+        }
+        public bool RemoveMember(string name)
+        {
+            for(int i=0; i<Properties.Count; i++)
+            {
+                if (Properties[i].VariableName == name)
+                {
+                    Properties.RemoveAt(i);
+                    return true;
+                }
+            }
+            return false;
         }
 
         public override bool Equals(object obj)

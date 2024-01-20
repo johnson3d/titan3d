@@ -43,6 +43,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)Deferred\UDeferredDirLightingNode.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Deferred\UDeferredPolicy.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Deferred\UForwordNode.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)GpuBuffer.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Mobile\UFinalCopyNode.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Shader\MdfQueue.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Shadow\UCascadedShadowMap.cs" />

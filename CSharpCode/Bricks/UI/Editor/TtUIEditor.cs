@@ -298,6 +298,7 @@ namespace EngineNS.UI.Editor
                         var mc = mUIHost.Children[0].MacrossGetter.Get();
                         mc.HostElement = mUIHost.Children[0];
                         mc.InitializeEvents();
+                        mc.InitializeUIElementVariables();
                     }
 
                     UEngine.Instance.UIManager.AddUI(AssetName, "UIEditorSimulate", mUIHost);
@@ -564,6 +565,105 @@ namespace EngineNS.UI.Editor
             var sz = new Vector2(-1);
             if (EGui.UIProxy.DockProxy.BeginPanel(mDockKeyClass, "Details", ref mDetailsShow, ImGuiWindowFlags_.ImGuiWindowFlags_None))
             {
+                //if (ImGuiAPI.BeginChild($"Details_VIValues", in sz, false, ImGuiWindowFlags_.ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_.ImGuiWindowFlags_NoScrollbar))
+                {
+                    if (mSelectedElements.Count > 1)
+                    {
+                        string name = "Multiple Values";
+                        ImGuiAPI.InputText("##Details_Name", ref name, ImGuiInputTextFlags_.ImGuiInputTextFlags_ReadOnly);
+                        bool firstValue = mSelectedElements[0].IsVariable;
+                        bool sameValue = true;
+                        for(int i=1; i<mSelectedElements.Count; i++)
+                        {
+                            if (firstValue != mSelectedElements[i].IsVariable)
+                            {
+                                sameValue = false;
+                                break;
+                            }
+                        }
+                        int checkValue = -1;
+                        if(sameValue)
+                        {
+                            checkValue = firstValue ? 1 : 0;
+                        }
+                        ImGuiAPI.SameLine(0, -1);
+                        if (ImGuiAPI.CheckBoxTristate("Is Variable##Details", ref checkValue))
+                        {
+                            if(checkValue == 1)
+                            {
+                                for(int i=0; i<mSelectedElements.Count; i++)
+                                {
+                                    // add variables to class
+                                    var element = mSelectedElements[i];
+                                    element.IsVariable = true;
+                                    if(string.IsNullOrEmpty(element.Name))
+                                    {
+                                        element.Name = GetValidName(element);
+                                    }
+                                    var varName = GetUIElementMacrossVariableName(element);
+                                    var elementVariable = new UVariableDeclaration()
+                                    {
+                                        VariableType = new UTypeReference(element.GetType()),
+                                        VariableName = varName,
+                                        GetDisplayNameFunc = element.GetVariableDisplayName,
+                                        InitValue = new UNullValueExpression(),
+                                        VisitMode = EVisisMode.Public,
+                                    };
+                                    if (UIAsset.MacrossEditor.DefClass.FindMember(varName) == null)
+                                        UIAsset.MacrossEditor.DefClass.Properties.Add(elementVariable);
+                                }
+                            }
+                            else if(checkValue == 0)
+                            {
+                                for(int i=0; i<mSelectedElements.Count; i++)
+                                {
+                                    // remove variable from class
+                                    UIAsset.MacrossEditor.DefClass.RemoveMember(GetUIElementMacrossVariableName(mSelectedElements[i]));
+                                    mSelectedElements[i].IsVariable = false;
+                                }
+                            }
+                        }
+                    }
+                    else if(mSelectedElements.Count == 1)
+                    {
+                        var element = mSelectedElements[0];
+                        string name = element.Name;
+                        if(ImGuiAPI.InputText("##Details_Name", ref name, ImGuiInputTextFlags_.ImGuiInputTextFlags_AutoSelectAll | ImGuiInputTextFlags_.ImGuiInputTextFlags_EnterReturnsTrue))
+                            element.Name = name;
+                        ImGuiAPI.SameLine(0, -1);
+                        bool isVariable = element.IsVariable;
+                        if(ImGuiAPI.Checkbox("Is Variable##Details", ref isVariable))
+                        {
+                            element.IsVariable = isVariable;
+                            if(isVariable)
+                            {
+                                // add variable to class
+                                var varName = GetUIElementMacrossVariableName(element);
+                                var elementVariable = new UVariableDeclaration()
+                                {
+                                    VariableType = new UTypeReference(element.GetType()),
+                                    VariableName = varName,
+                                    GetDisplayNameFunc = element.GetVariableDisplayName,
+                                    InitValue = new UNullValueExpression(),
+                                    VisitMode = EVisisMode.Public,
+                                };
+                                if(UIAsset.MacrossEditor.DefClass.FindMember(varName) == null)
+                                    UIAsset.MacrossEditor.DefClass.Properties.Add(elementVariable);
+                            }
+                            else
+                            {
+                                // remove variable from class
+                                UIAsset.MacrossEditor.DefClass.RemoveMember(GetUIElementMacrossVariableName(element));
+                            }
+                        }
+                    }
+                    else
+                    {
+                        ImGuiAPI.Text("Nothing selected");
+                    }
+                }
+                //ImGuiAPI.EndChild();
+
                 DetailsGrid.OnDraw(true, false, false);
             }
             EGui.UIProxy.DockProxy.EndPanel();

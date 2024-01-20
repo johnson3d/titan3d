@@ -82,7 +82,7 @@ namespace EngineNS.Graphics.Pipeline.Deferred
             {
                 //drawcall.mCoreObject.BindShaderCBuffer(index, Manager.GetGpuSceneNode().PerGpuSceneCBuffer.mCoreObject);
                 var attachBuffer = dirLightingNode.GetAttachBuffer(dirLightingNode.GpuScenePinIn);
-                drawcall.BindCBuffer(index, attachBuffer.CBuffer);
+                drawcall.BindCBuffer(index, attachBuffer.Cbv);
             }
 
             #region MRT

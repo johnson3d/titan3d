@@ -94,5 +94,10 @@ namespace EngineNS.UI.Controls
             methodDisplayName = "";
             return false;
         }
+
+        public string GetVariableDisplayName(Bricks.CodeBuilder.UVariableDeclaration desc)
+        {
+            return this.Name;
+        }
     }
 }

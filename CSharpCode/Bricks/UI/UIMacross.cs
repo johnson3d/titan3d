@@ -5,18 +5,54 @@ using System.Text;
 
 namespace EngineNS.UI
 {
-    public class TtUIMacrossBase
+    public partial class TtUIMacrossBase
     {
         public TtUIElement HostElement;
         public virtual void InitializeEvents()
         {
-            TtButton element = HostElement.FindElement("xx") as TtButton;
-            element.Click += Element_Click;
+            //TtButton element = HostElement.FindElement("xx") as TtButton;
+            //element.Click += Element_Click;
         }
 
-        private void Element_Click(object sender, TtRoutedEventArgs args)
+        public virtual void InitializeUIElementVariables()
         {
-            throw new NotImplementedException();
+
+        }
+
+        //private void Element_Click(object sender, TtRoutedEventArgs args)
+        //{
+        //    throw new NotImplementedException();
+        //}
+
+        [Rtti.Meta]
+        public virtual TtUIElement FindElement(string name)
+        {
+            if (HostElement == null)
+                return null;
+            return HostElement.FindElement(name);
+        }
+        [Rtti.Meta]
+        public virtual TtUIElement FindElement(UInt64 id)
+        {
+            if (HostElement == null)
+                return null;
+            return HostElement.FindElement(id);
+        }
+        [Rtti.Meta]
+        public virtual TtUIElement FindElement(
+            [Rtti.MetaParameter(FilterType = typeof(TtUIElement), ConvertOutArguments = Rtti.MetaParameterAttribute.EArgumentFilter.R)]
+            System.Type rType,
+            string name)
+        {
+            return FindElement(name);
+        }
+        [Rtti.Meta]
+        public virtual TtUIElement FindElement(
+            [Rtti.MetaParameter(FilterType = typeof(TtUIElement), ConvertOutArguments = Rtti.MetaParameterAttribute.EArgumentFilter.R)]
+            System.Type rType,
+            UInt64 id)
+        {
+            return FindElement(id);
         }
     }
 }

@@ -257,8 +257,8 @@ namespace EngineNS.Graphics.Pipeline.Common
             var attachement = RenderGraph.AttachmentCache.ImportAttachment(InstancePinOut);
             
             attachement.Buffer = GpuInstances.GpuBuffer;
-            attachement.Srv = GpuInstances.DataSRV;
-            attachement.Uav = GpuInstances.DataUAV;
+            attachement.Srv = GpuInstances.Srv;
+            attachement.Uav = GpuInstances.Uav;
 
             // TODO CullInstancesBuffer
         }
@@ -315,10 +315,10 @@ namespace EngineNS.Graphics.Pipeline.Common
 
                 //HZBCullInstanceCBuffer.SetValue
 
-                Cull_CullGpuIndexsDrawcall.BindUav("InstanceSceneData", CullInstancesBuffer.DataUAV);
-                Cull_CullGpuIndexsDrawcall.BindUav("NumberVisibilityGpuActorBuffer", NumberVisibilityGpuActorBuffer.DataUAV);
-                Cull_CullGpuIndexsDrawcall.BindUav("VisibilityGpuActorsBuffer", VisibilityGpuActorsBuffer.DataUAV);
-                Cull_CullGpuIndexsDrawcall.BindSrv("NumberGpuActors", NumberGpuActorsBuffer.DataSRV);
+                Cull_CullGpuIndexsDrawcall.BindUav("InstanceSceneData", CullInstancesBuffer.Uav);
+                Cull_CullGpuIndexsDrawcall.BindUav("NumberVisibilityGpuActorBuffer", NumberVisibilityGpuActorBuffer.Uav);
+                Cull_CullGpuIndexsDrawcall.BindUav("VisibilityGpuActorsBuffer", VisibilityGpuActorsBuffer.Uav);
+                Cull_CullGpuIndexsDrawcall.BindSrv("NumberGpuActors", NumberGpuActorsBuffer.Srv);
 
                 //Cull_CullGpuIndexsDrawcall.Commit(cmd);
                 cmd.PushGpuDraw(Cull_CullGpuIndexsDrawcall);
@@ -334,8 +334,8 @@ namespace EngineNS.Graphics.Pipeline.Common
                     Cull_SetupCullClusterArgsDrawcall.SetComputeEffect(Cull_SetupCullClusterArgs);
                 }
 
-                Cull_SetupCullClusterArgsDrawcall.BindUav("CullClusterIndirectArgs", CullClusterIndirectArgs.DataUAV);
-                Cull_SetupCullClusterArgsDrawcall.BindSrv("NumberVisibilityGpuActorBuffer", NumberVisibilityGpuActorBuffer.DataSRV);
+                Cull_SetupCullClusterArgsDrawcall.BindUav("CullClusterIndirectArgs", CullClusterIndirectArgs.Uav);
+                Cull_SetupCullClusterArgsDrawcall.BindSrv("NumberVisibilityGpuActorBuffer", NumberVisibilityGpuActorBuffer.Srv);
 
                 //Cull_SetupCullClusterArgsDrawcall.Commit(cmd);
                 cmd.PushGpuDraw(Cull_SetupCullClusterArgsDrawcall);
@@ -356,9 +356,9 @@ namespace EngineNS.Graphics.Pipeline.Common
                     Cull_CullClusterDrawcall.BindIndirectDispatchArgsBuffer(CullClusterIndirectArgs.GpuBuffer);
                 }
 
-                Cull_CullClusterDrawcall.BindSrv("NumberVisibilityGpuActorBuffer", NumberVisibilityGpuActorBuffer.DataSRV);
-                Cull_CullClusterDrawcall.BindUav("VisibleClusterMeshData", VisibleClusterMeshData.DataUAV);
-                Cull_CullClusterDrawcall.BindUav("NumnerVisibleClusterMeshData", NumnerVisibleClusterMeshData.DataUAV);
+                Cull_CullClusterDrawcall.BindSrv("NumberVisibilityGpuActorBuffer", NumberVisibilityGpuActorBuffer.Srv);
+                Cull_CullClusterDrawcall.BindUav("VisibleClusterMeshData", VisibleClusterMeshData.Uav);
+                Cull_CullClusterDrawcall.BindUav("NumnerVisibleClusterMeshData", NumnerVisibleClusterMeshData.Uav);
 
                 //Cull_CullClusterDrawcall.Commit(cmd);
                 cmd.PushGpuDraw(Cull_CullClusterDrawcall);
@@ -374,8 +374,8 @@ namespace EngineNS.Graphics.Pipeline.Common
                     Cull_SetupDrawClusterArgsDrawcall.SetComputeEffect(Cull_SetupDrawClusterArgsBuffer);
                 }
 
-                Cull_SetupDrawClusterArgsDrawcall.BindSrv("NumnerVisibleClusterMeshData", NumnerVisibleClusterMeshData.DataSRV);
-                Cull_SetupDrawClusterArgsDrawcall.BindUav("DrawClusterIndirectArgs", SetupDrawClusterIndirectArgs.DataUAV);
+                Cull_SetupDrawClusterArgsDrawcall.BindSrv("NumnerVisibleClusterMeshData", NumnerVisibleClusterMeshData.Srv);
+                Cull_SetupDrawClusterArgsDrawcall.BindUav("DrawClusterIndirectArgs", SetupDrawClusterIndirectArgs.Uav);
 
                 //Cull_SetupDrawClusterArgsDrawcall.Commit(cmd);
                 cmd.PushGpuDraw(Cull_SetupDrawClusterArgsDrawcall);

@@ -226,6 +226,7 @@ namespace EngineNS.UI
                         {
                             mc.HostElement = element;
                             mc.InitializeEvents();
+                            mc.InitializeUIElementVariables();
                         }
                     }
                     catch(Exception ex)

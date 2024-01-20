@@ -33,8 +33,8 @@ namespace EngineNS.Graphics.Pipeline.Common
             //    PointLights.Flush2GPU(this.BasePass.DrawCmdList.mCoreObject);
             //}
             attachement.Buffer = PointLights.GpuBuffer;
-            attachement.Srv = PointLights.DataSRV;
-            attachement.Uav = PointLights.DataUAV;
+            attachement.Srv = PointLights.Srv;
+            attachement.Uav = PointLights.Uav;
         }
         private void TickLogic_Light(GamePlay.UWorld world, Graphics.Pipeline.URenderPolicy policy, NxRHI.UCommandList cmd)
         {

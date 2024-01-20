@@ -40,7 +40,7 @@ namespace EngineNS.Graphics.Pipeline.Common
 
             index = drawcall.FindBinder("cbPerGpuScene");
             if (index.IsValidPointer)
-                drawcall.BindCBuffer(index, Manager.GetGpuSceneNode().PerGpuSceneCBuffer);
+                drawcall.BindCBuffer(index, Manager.GetGpuSceneNode().PerGpuSceneCbv);
         }
     }
     public class UHdrNode : USceenSpaceNode

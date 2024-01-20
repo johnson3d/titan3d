@@ -19,6 +19,139 @@ namespace EngineNS.Graphics.Mesh.Modifier
         public Vector4ui PointLightIndices;
     };
 
+    public interface IInstanceBuffers
+    {
+        uint PushInstance(UInstanceModifier mdf, in Vector3 pos, in Vector3 scale, in Quaternion quat, in Vector4ui f41, uint hitProxyId);
+        unsafe void SetInstance(uint index, Vector3* pos, Vector3* scale, Quaternion* quat, Vector4ui* f41, uint* hitProxyId);
+        void Flush2GPU(NxRHI.ICommandList cmd, UInstanceModifier mdf);
+        void OnDrawCall(NxRHI.ICommandList cmd, Pipeline.URenderPolicy.EShadingType shadingType, NxRHI.UGraphicDraw drawcall, Pipeline.URenderPolicy policy, TtMesh.TtAtom atom);
+        void InstanceCulling(NxRHI.ICommandList cmd, NxRHI.UGraphicDraw drawcall, Pipeline.URenderPolicy policy, NxRHI.UUaView argBufferUAV, uint argBufferOffset);
+    }
+
+    public class TtInstanceBufferSSBO : IInstanceBuffers, IDisposable
+    {
+        public FVSInstantData[] InstData;
+        public NxRHI.UBuffer InstantBuffer;
+        public NxRHI.USrView InstantSRV;
+        public bool IsDirty { get; private set; } = true;
+        public void Dispose()
+        {
+            InstantSRV?.Dispose();
+            InstantSRV = null;
+
+            InstantBuffer?.Dispose();
+            InstantBuffer = null;
+
+            InstData = null;
+        }
+        public unsafe void SureBuffers(UInstanceModifier mdf, uint nSize)
+        {
+            if (mdf.mMaxNumber >= nSize)
+            {
+                return;
+            }
+
+            var oldData = InstData;
+
+            Dispose();
+
+            mdf.mMaxNumber = nSize;
+
+            InstData = new FVSInstantData[mdf.mMaxNumber];
+
+            var bfDesc = new NxRHI.FBufferDesc();
+            bfDesc.SetDefault(false, NxRHI.EBufferType.BFT_SRV);
+            bfDesc.Type = NxRHI.EBufferType.BFT_SRV;// | NxRHI.EBufferType.BFT_UAV;
+            bfDesc.CpuAccess = NxRHI.ECpuAccess.CAS_WRITE;
+            bfDesc.Usage = NxRHI.EGpuUsage.USAGE_DYNAMIC;
+            bfDesc.StructureStride = (uint)sizeof(FVSInstantData);
+            bfDesc.Size = (uint)sizeof(FVSInstantData) * mdf.mMaxNumber;
+
+            if (mdf.mCurNumber > 0)
+            {
+                fixed (FVSInstantData* pSrc = &oldData[0])
+                fixed (FVSInstantData* pTar = &InstData[0])
+                {
+                    CoreSDK.MemoryCopy(pTar, pSrc, mdf.mCurNumber * (uint)sizeof(FVSInstantData));
+                    bfDesc.InitData = pTar;
+                    InstantBuffer = UEngine.Instance.GfxDevice.RenderContext.CreateBuffer(in bfDesc);
+                }
+            }
+            else
+            {
+                InstantBuffer = UEngine.Instance.GfxDevice.RenderContext.CreateBuffer(in bfDesc);
+            }
+
+            var srvDesc = new NxRHI.FSrvDesc();
+            srvDesc.SetBuffer(false);
+            srvDesc.Buffer.NumElements = mdf.mMaxNumber;
+            srvDesc.Buffer.StructureByteStride = bfDesc.StructureStride;
+            InstantSRV = UEngine.Instance.GfxDevice.RenderContext.CreateSRV(InstantBuffer, in srvDesc);
+        }
+        public uint PushInstance(UInstanceModifier mdf, in Vector3 pos, in Vector3 scale, in Quaternion quat, in Vector4ui f41, uint hitProxyId)
+        {
+            var rc = UEngine.Instance.GfxDevice.RenderContext;
+
+            //uint growSize = 1;
+            //if (mdf.mMaxNumber > 10)
+            //{
+            //    growSize += mdf.mMaxNumber;
+            //}
+            //SureBuffers(mdf, mdf.mCurNumber + growSize);
+            System.Diagnostics.Debug.Assert(mdf.CurNumber < mdf.mMaxNumber);
+
+            InstData[mdf.mCurNumber].Position = pos;
+            InstData[mdf.mCurNumber].Quat = quat;
+            InstData[mdf.mCurNumber].Scale = scale;
+            InstData[mdf.mCurNumber].UserData = f41;
+            InstData[mdf.mCurNumber].HitProxyId = hitProxyId;
+
+            var result = mdf.mCurNumber;
+            mdf.mCurNumber++;
+
+            IsDirty = true;
+            return result;
+        }
+        public unsafe void SetInstance(uint index, Vector3* pos, Vector3* scale, Quaternion* quat, Vector4ui* f41, uint* hitProxyId)
+        {
+            if (pos != IntPtr.Zero.ToPointer())
+                InstData[index].Position = *pos;
+            if (quat != IntPtr.Zero.ToPointer())
+                InstData[index].Quat = *quat;
+            if (scale != IntPtr.Zero.ToPointer())
+                InstData[index].Scale = *scale;
+            if (f41 != IntPtr.Zero.ToPointer())
+                InstData[index].UserData = *f41;
+            if (hitProxyId != IntPtr.Zero.ToPointer())
+                InstData[index].HitProxyId = *hitProxyId;
+
+            IsDirty = true;
+        }
+        public unsafe void Flush2GPU(NxRHI.ICommandList cmd, UInstanceModifier mdf)
+        {
+            if (mdf.mCurNumber == 0)
+                return;
+
+            if (IsDirty)
+            {
+                var rc = UEngine.Instance.GfxDevice.RenderContext;
+                fixed (FVSInstantData* pTar = &InstData[0])
+                {
+                    InstantBuffer.UpdateGpuData(cmd, 0, pTar, mdf.mCurNumber * (uint)sizeof(FVSInstantData));
+                }
+                IsDirty = false;
+            }
+        }
+
+        public void OnDrawCall(NxRHI.ICommandList cmd, Pipeline.URenderPolicy.EShadingType shadingType, NxRHI.UGraphicDraw drawcall, Pipeline.URenderPolicy policy, TtMesh.TtAtom atom)
+        {
+
+        }
+        public void InstanceCulling(NxRHI.ICommandList cmd, NxRHI.UGraphicDraw drawcall, Pipeline.URenderPolicy policy, NxRHI.UUaView argBufferUAV, uint argBufferOffset)
+        {
+
+        }
+    }
     public class UInstanceModifier : Pipeline.Shader.IMeshModifier
     {
         public void Dispose()
@@ -51,12 +184,12 @@ namespace EngineNS.Graphics.Mesh.Modifier
             };
         }
 
-        uint mCurNumber = 0;
+        internal uint mCurNumber = 0;
         public uint CurNumber
         {
             get => mCurNumber;
         }
-        uint mMaxNumber = 0;
+        internal uint mMaxNumber = 0;
         public uint MaxNumber
         {
             get => mMaxNumber;

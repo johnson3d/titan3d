@@ -33,9 +33,9 @@ namespace EngineNS.Bricks.GpuDriven
         {
             var node = drawcall.TagObject as TtCullClusterNode;
 
-            drawcall.BindSrv("ClusterBuffer", node.Clusters.DataSRV);
-            drawcall.BindSrv("SrcClusterBuffer", node.SrcClusters.DataSRV);
-            drawcall.BindUav("VisClusterBuffer", node.VisClusters.DataUAV);
+            drawcall.BindSrv("ClusterBuffer", node.Clusters.Srv);
+            drawcall.BindSrv("SrcClusterBuffer", node.SrcClusters.Srv);
+            drawcall.BindUav("VisClusterBuffer", node.VisClusters.Uav);
             
             var index = drawcall.FindBinder(NxRHI.EShaderBindType.SBT_CBuffer, "cbCameraFrustum");
             if (index.IsValidPointer)
@@ -225,20 +225,20 @@ namespace EngineNS.Bricks.GpuDriven
 
             {
                 var attachment = ImportAttachment(VerticesPinOut);
-                attachment.Srv = Vertices.DataSRV;
+                attachment.Srv = Vertices.Srv;
             }
             {
                 var attachment = ImportAttachment(IndicesPinOut);
-                attachment.Srv = Indices.DataSRV;
+                attachment.Srv = Indices.Srv;
             }
             {
                 var attachment = ImportAttachment(ClustersPinOut);
-                attachment.Srv = Clusters.DataSRV;
+                attachment.Srv = Clusters.Srv;
             }
 
             {
                 var attachment = ImportAttachment(SrcClustersPin);
-                attachment.Srv = SrcClusters.DataSRV;
+                attachment.Srv = SrcClusters.Srv;
             }
         }
         public override void BeforeTickLogic(URenderPolicy policy)
@@ -247,8 +247,8 @@ namespace EngineNS.Bricks.GpuDriven
 
             {
                 var attachment = ImportAttachment(VisibleClutersPinOut);
-                attachment.Uav = VisClusters.DataUAV;
-                attachment.Srv = VisClusters.DataSRV;
+                attachment.Uav = VisClusters.Uav;
+                attachment.Srv = VisClusters.Srv;
             }
 
         }

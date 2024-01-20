@@ -1331,7 +1331,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
                                         var outPin = LinkingOp.StartPin as PinOut;
                                         AddLink(outPin, node.Self, true);
                                         var afterNode = outPin.HostNode as IAfterExecNode;
-                                        if (afterNode != null)
+                                        if (afterNode != null && afterNode.AfterExec.HostNode == afterNode)
                                             AddLink(afterNode.AfterExec, node.BeforeExec, true);
                                     }
                                 });
@@ -1398,7 +1398,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
                                     var outPin = LinkingOp.StartPin as PinOut;
                                     AddLink(outPin, node.Self, true);
                                     var afterNode = outPin.HostNode as IAfterExecNode;
-                                    if (afterNode != null)
+                                    if (afterNode != null && afterNode.AfterExec.HostNode == afterNode)
                                         AddLink(afterNode.AfterExec, node.BeforeExec, true);
                                 }
                             });

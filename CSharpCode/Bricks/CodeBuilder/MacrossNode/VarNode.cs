@@ -4,6 +4,7 @@ using System.ComponentModel;
 using System.Text;
 using EngineNS.Bricks.NodeGraph;
 using EngineNS.EGui.Controls.PropertyGrid;
+using EngineNS.Rtti;
 
 namespace EngineNS.Bricks.CodeBuilder.MacrossNode
 {
@@ -91,6 +92,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
         public PinOut OutPin { get; set; } = new PinOut();
         public SelfNode()
         {
+            Name = "self";
             AddPinOut(OutPin);
         }
 
@@ -99,10 +101,14 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
             return new USelfReferenceExpression();
         }
 
-        //public override Type GetOutPinType(PinOut pin)
-        //{
-        //    return base.GetOutPinType(pin);
-        //}
+        public override UTypeDesc GetOutPinType(PinOut pin)
+        {
+            var editor = this.ParentGraph.Editor as UMacrossEditor;
+            var type = editor.DefClass.TryGetTypeDesc();
+            if (type == null && editor.DefClass.SupperClassNames.Count > 0)
+                type = Rtti.UTypeDescManager.Instance.GetTypeDescFromFullName(editor.DefClass.SupperClassNames[0]);
+            return type;
+        }
     }
     [ContextMenu("null", "Data\\null", UMacross.MacrossEditorKeyword)]
     public partial class NullNode : UNodeBase
@@ -110,6 +116,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
         public PinOut OutPin { get; set; } = new PinOut();
         public NullNode()
         {
+            Name = "null";
             AddPinOut(OutPin);
         }
 
@@ -227,6 +234,16 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
                 }
                 Initialize(mDefClass, MemberName, IsGet);
             }
+        }
+        public override string Label
+        { 
+            get
+            {
+                if (Var != null)
+                    return Var.DisplayName;
+                return base.Label;
+            }
+            set => base.Label = value;
         }
         bool mIsGet = true;
         [Rtti.Meta(Order = 0)]

@@ -64,6 +64,9 @@ namespace EngineNS.UI.Controls
 
             Is3D = 1 << 14,
             IsScreenSpace = 1 << 15,
+
+            IsEnable = 1 << 16,
+            IsVariable = 1 << 17,
         }
         private ECoreFlags mCoreFlags;
         internal bool ReadFlag(ECoreFlags flag)
@@ -153,7 +156,7 @@ namespace EngineNS.UI.Controls
 
         string mName;
         [Bind.BindProperty]
-        [Rtti.Meta]
+        [Rtti.Meta, Browsable(false)]
         public string Name  // Name需要保证在当前编辑上下文的所有控件中唯一
         {
             get => mName;
@@ -165,16 +168,27 @@ namespace EngineNS.UI.Controls
             }
         }
 
-        bool mIsEnabled = true;
         [Bind.BindProperty]
         [Rtti.Meta]
         public bool IsEnabled
         {
-            get => mIsEnabled;
+            get => ReadFlag(ECoreFlags.IsEnable);
             set
             {
-                OnValueChange(value, mIsEnabled);
-                mIsEnabled = value;
+                OnValueChange(value, IsEnabled);
+                WriteFlag(ECoreFlags.IsEnable, value);
+            }
+        }
+
+        [Bind.BindProperty]
+        [Rtti.Meta, Browsable(false)]
+        public bool IsVariable
+        {
+            get => ReadFlag(ECoreFlags.IsVariable);
+            set
+            {
+                OnValueChange(value, IsVariable);
+                WriteFlag(ECoreFlags.IsVariable, value);
             }
         }
 
@@ -592,17 +606,35 @@ namespace EngineNS.UI.Controls
             mLoadedAttachedValues.Clear();
         }
 
+        [Rtti.Meta]
         public virtual TtUIElement FindElement(string name)
         {
             if (mName == name)
                 return this;
             return null;
         }
+        [Rtti.Meta]
         public virtual TtUIElement FindElement(UInt64 id)
         {
             if(mId == id)
                 return this;
             return null;
+        }
+        [Rtti.Meta]
+        public virtual TtUIElement FindElement(
+            [Rtti.MetaParameter(FilterType = typeof(TtUIElement), ConvertOutArguments = Rtti.MetaParameterAttribute.EArgumentFilter.R)]
+            System.Type rType,
+            string name)
+        {
+            return FindElement(name);
+        }
+        [Rtti.Meta]
+        public virtual TtUIElement FindElement(
+            [Rtti.MetaParameter(FilterType = typeof(TtUIElement), ConvertOutArguments = Rtti.MetaParameterAttribute.EArgumentFilter.R)]
+            System.Type rType,
+            UInt64 id)
+        {
+            return FindElement(id);
         }
     }
 }

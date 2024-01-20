@@ -394,6 +394,10 @@ namespace EngineNS.Bricks.NodeGraph
         {
 
         }
+        public override bool IsPopupPinContextMenu()
+        {
+            return !Selector.PopupVisible;
+        }
     }
 
     public class URNameEValue : UEditableValue

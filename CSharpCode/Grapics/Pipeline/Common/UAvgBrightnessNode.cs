@@ -74,7 +74,7 @@ namespace EngineNS.Graphics.Pipeline.Common
             srvIdx = SetupAvgBrightnessDrawcall.FindBinder(NxRHI.EShaderBindType.SBT_CBuffer, "cbPerGpuScene");
             if (srvIdx.IsValidPointer)
             {
-                SetupAvgBrightnessDrawcall.BindCBuffer(srvIdx, gpuScene.PerGpuSceneCBuffer);
+                SetupAvgBrightnessDrawcall.BindCBuffer(srvIdx, gpuScene.PerGpuSceneCbv);
             }
 
             //var lightSRV = policy.QuerySRV("LightRT");

@@ -89,7 +89,7 @@ namespace EngineNS.Graphics.Pipeline.Common
             var rc = UEngine.Instance.GfxDevice.RenderContext;
 
             var gpuScene = policy.GetGpuSceneNode();// .FindNode("GpuSceneNode") as Common.UGpuSceneNode;
-            var ConfigCBuffer = policy.GetGpuSceneNode().PerGpuSceneCBuffer;
+            var ConfigCBuffer = policy.GetGpuSceneNode().PerGpuSceneCbv;
 
             CoreSDK.DisposeObject(ref SetupTileDataDrawcall);
             SetupTileDataDrawcall = rc.CreateComputeDraw();
@@ -188,7 +188,7 @@ namespace EngineNS.Graphics.Pipeline.Common
                 var cmd = BasePass.DrawCmdList;
                 using (new NxRHI.TtCmdListScope(cmd))
                 {
-                    var ConfigCBuffer = policy.GetGpuSceneNode().PerGpuSceneCBuffer;
+                    var ConfigCBuffer = policy.GetGpuSceneNode().PerGpuSceneCbv;
                     if (ConfigCBuffer != null)
                     {
                         var idx = ConfigCBuffer.ShaderBinder.FindField("LightNum");

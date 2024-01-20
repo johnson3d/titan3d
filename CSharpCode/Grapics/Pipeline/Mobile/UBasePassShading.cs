@@ -107,7 +107,7 @@ namespace EngineNS.Graphics.Pipeline.Mobile
 
                     index = drawcall.FindBinder("cbPerGpuScene");
                     if (index.IsValidPointer)
-                        drawcall.BindCBuffer(index, Manager.GetGpuSceneNode().PerGpuSceneCBuffer);
+                        drawcall.BindCBuffer(index, Manager.GetGpuSceneNode().PerGpuSceneCbv);
 
                     index = drawcall.FindBinder("TilingBuffer");
                     if (index.IsValidPointer)

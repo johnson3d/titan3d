@@ -113,7 +113,7 @@ namespace EngineNS.Graphics.Pipeline
         public NxRHI.UDepthStencilView Dsv;
         public NxRHI.UUaView Uav;
         public NxRHI.USrView Srv;
-        public NxRHI.UCbView CBuffer;
+        public NxRHI.UCbView Cbv;
         public void Dispose()
         {
             if (LifeMode == ELifeMode.Imported)

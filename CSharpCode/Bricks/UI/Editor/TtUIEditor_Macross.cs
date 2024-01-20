@@ -42,6 +42,20 @@ namespace EngineNS.UI.Editor
             }
             return false;
         }
+        bool OnMacrossEditorRemoveMember(Bricks.CodeBuilder.UVariableDeclaration variable)
+        {
+            mUIHost.QueryElements(ElementOnRemoveMacrossMember, ref variable);
+            return true;
+        }
+        bool ElementOnRemoveMacrossMember(TtUIElement element, ref UVariableDeclaration desc)
+        {
+            if(desc.VariableName == GetUIElementMacrossVariableName(element))
+            {
+                element.IsVariable = false;
+                return true;
+            }
+            return false;
+        }
         async System.Threading.Tasks.Task InitMacrossEditor()
         {
             await UIAsset.MacrossEditor.Initialize();
@@ -50,14 +64,15 @@ namespace EngineNS.UI.Editor
             UIAsset.MacrossEditor.LoadClassGraph(AssetName);
             UIAsset.MacrossEditor.DrawToolbarAction = DrawMacrossToolbar;
             UIAsset.MacrossEditor.OnRemoveMethod = OnMacrossEditorRemoveMethod;
+            UIAsset.MacrossEditor.OnRemoveMember = OnMacrossEditorRemoveMember;
             UIAsset.MacrossEditor.BeforeGenerateCode = OnBeforeGenerateCode;
             UIAsset.MacrossEditor.AfterCompileCode = OnAfterCompileCode;
 
             //mMacrossGetter
             int temp = 0;
-            this.mUIHost.QueryElements(ElementEventBindMacrossMethod, ref temp);
+            this.mUIHost.QueryElements(ElementBindMacross, ref temp);
         }
-        bool ElementEventBindMacrossMethod(TtUIElement element, ref int temp)
+        bool ElementBindMacross(TtUIElement element, ref int temp)
         {
             List<string> needDeletes = new List<string>();
             foreach(var evt in element.MacrossEvents)
@@ -80,6 +95,15 @@ namespace EngineNS.UI.Editor
             for(int i = 0; i<needDeletes.Count; i++)
             {
                 element.MacrossEvents.Remove(needDeletes[i]);
+            }
+
+            if(element.IsVariable)
+            {
+                var variable = UIAsset.MacrossEditor.DefClass.FindMember(GetUIElementMacrossVariableName(element));
+                if(variable != null)
+                {
+                    variable.GetDisplayNameFunc = element.GetVariableDisplayName;
+                }
             }
 
             return false;
@@ -181,8 +205,13 @@ namespace EngineNS.UI.Editor
 
             DrawType = enDrawType.Macross;
         }
-
-        bool GenericElementEventBindCode(TtUIElement element, ref UClassDeclaration cls)
+        string GetUIElementMacrossVariableName(TtUIElement element)
+        {
+            if (element == null)
+                return null;
+            return "ElementVar_" + element.Id;
+        }
+        bool GenericElementCode(TtUIElement element, ref UClassDeclaration cls)
         {
             foreach(var data in element.MacrossEvents)
             {
@@ -279,11 +308,38 @@ namespace EngineNS.UI.Editor
                 if(seqStatements.FindStatement(addAssigStatement) == null)
                     seqStatements.Sequence.Add(addAssigStatement);
             }
+            if(element.IsVariable)
+            {
+                var initMethod = UIAsset.MacrossEditor.DefClass.FindMethod("InitializeUIElementVariables");
+                if(initMethod == null)
+                {
+                    initMethod = new UMethodDeclaration()
+                    {
+                        MethodName = "InitializeUIElementVariables",
+                        IsOverride = true,
+                    };
+                    UIAsset.MacrossEditor.DefClass.AddMethod(initMethod);
+                }
+                var findElementInvokeStatement = new UMethodInvokeStatement(
+                        "FindElement",
+                        new UVariableDeclaration()
+                        {
+                            VariableName = GetUIElementMacrossVariableName(element),
+                            VariableType = new UTypeReference(element.GetType()),
+                        },
+                        new UVariableReferenceExpression("HostElement"),
+                        new UMethodInvokeArgumentExpression(new UPrimitiveExpression(element.Id)))
+                {
+                    DeclarationReturnValue = false,
+                    ForceCastReturnType = true,
+                };
+                initMethod.MethodBody.Sequence.Add(findElementInvokeStatement);
+            }
             return false;
         }
         void OnBeforeGenerateCode(UClassDeclaration cls)
         {
-            mUIHost.QueryElements(GenericElementEventBindCode, ref cls);
+            mUIHost.QueryElements(GenericElementCode, ref cls);
         }
         void OnAfterCompileCode(UMacrossEditor editor)
         {

@@ -681,6 +681,8 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
             return func;
         }
 
+        public Func<UVariableDeclaration, bool> OnRemoveMember;
+
         bool mClassViewShow = true;
         EGui.UIProxy.MenuItemProxy.MenuState mNewMethodMenuState = new EGui.UIProxy.MenuItemProxy.MenuState();
         EGui.UIProxy.MenuItemProxy.MenuState mOverrideMenuState = new EGui.UIProxy.MenuItemProxy.MenuState();
@@ -739,13 +741,17 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
                     for(int i=0; i<DefClass.Properties.Count; i++)
                     {
                         var mem = DefClass.Properties[i];
-                        var memberTreeNodeResult = ImGuiAPI.TreeNodeEx(mem.VariableName, flags);
+                        var memberTreeNodeResult = ImGuiAPI.TreeNodeEx(mem.DisplayName, flags);
                         var memberTreeNodeClicked = ImGuiAPI.IsItemClicked(ImGuiMouseButton_.ImGuiMouseButton_Left);
                         ImGuiAPI.SameLine(regionSize.X - buttonSize.X - buttonOffset, -1.0f);
                         if(EGui.UIProxy.CustomButton.ToolButton("x", in buttonSize, 0xFF0000FF, "mem_X_" + i))
                         {
                             // todo: 引用删除警告
-                            DefClass.Properties.Remove(mem);
+                            bool result = true;
+                            if (OnRemoveMember != null)
+                                result = OnRemoveMember.Invoke(mem);
+                            if(result)
+                                DefClass.Properties.Remove(mem);
                             break;
                         }
                         if (memberTreeNodeResult)
