@@ -11,16 +11,16 @@ namespace EngineNS.Graphics.Mesh
         
     }
 
-    public class UMdfInstanceStaticMesh : Graphics.Pipeline.Shader.TtMdfQueue2<Modifier.UInstanceModifier, Mesh.Modifier.CStaticModifier>
+    public class UMdfInstanceStaticMesh : Graphics.Pipeline.Shader.TtMdfQueue2<Modifier.TtInstanceModifier, Mesh.Modifier.CStaticModifier>
     {
         public UMdfInstanceStaticMesh()
         {
             InstanceModifier.SetMode(true);
             UpdateShaderCode();
         }
-        public Modifier.UInstanceModifier InstanceModifier
+        public Modifier.TtInstanceModifier InstanceModifier
         {
-            get => this.Modifiers[0] as Modifier.UInstanceModifier;
+            get => this.Modifiers[0] as Modifier.TtInstanceModifier;
         }
         public void SetInstantMode(bool bSSBO = true)
         {

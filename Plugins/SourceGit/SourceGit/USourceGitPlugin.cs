@@ -65,9 +65,10 @@ namespace EngineNS.Plugins.SourceGit
             {
                 result = System.Diagnostics.Process.Start(processStartInfo);
                 var hr = new Bricks.SourceControl.USourceOpResult(0);
-                if (result != null && result.StandardOutput != null)
+                if (result != null)
                 {
-                    hr.Info = result.StandardOutput.ReadToEnd();
+                    //if (result.StandardOutput != null)
+                    //    hr.Info = result.StandardOutput.ReadToEnd();
                 }
                 return hr;
             }
@@ -94,9 +95,10 @@ namespace EngineNS.Plugins.SourceGit
             {
                 result = System.Diagnostics.Process.Start(processStartInfo);
                 var hr = new Bricks.SourceControl.USourceOpResult(0);
-                if (result != null && result.StandardOutput != null)
+                if (result != null)
                 {
-                    hr.Info = result.StandardOutput.ReadToEnd();
+                    //if (result.StandardOutput != null)
+                    //    hr.Info = result.StandardOutput.ReadToEnd();
                 }
 
                 if (delLocal)
