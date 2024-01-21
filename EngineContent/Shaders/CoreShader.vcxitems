@@ -16,6 +16,7 @@
   <ItemGroup>
     <None Include="$(MSBuildThisFileDirectory)Bricks\GpuDriven\ClusterCulling.cginc" />
     <None Include="$(MSBuildThisFileDirectory)Bricks\GpuDriven\FRaster.cginc" />
+    <None Include="$(MSBuildThisFileDirectory)Bricks\GpuDriven\GpuCulling.cginc" />
     <None Include="$(MSBuildThisFileDirectory)Bricks\GpuDriven\QuarkResolve.cginc" />
     <None Include="$(MSBuildThisFileDirectory)Bricks\Particle\NebulaParticle.cginc" />
     <None Include="$(MSBuildThisFileDirectory)Bricks\Particle\ParticleCommon.cginc" />
@@ -39,6 +40,8 @@
     <None Include="$(MSBuildThisFileDirectory)Inc\Algorithm\Queue.cginc" />
     <None Include="$(MSBuildThisFileDirectory)Inc\Algorithm\WaveTask.cginc" />
     <None Include="$(MSBuildThisFileDirectory)Inc\BaseStructure\Box2.cginc" />
+    <None Include="$(MSBuildThisFileDirectory)Inc\BaseStructure\Frustum.cginc" />
+    <None Include="$(MSBuildThisFileDirectory)Inc\BaseStructure\Ray.cginc" />
     <None Include="$(MSBuildThisFileDirectory)Inc\FogCommon.cginc" />
     <None Include="$(MSBuildThisFileDirectory)Inc\CommonLightFunc.cginc" />
     <None Include="$(MSBuildThisFileDirectory)Inc\FXAAMobile.cginc" />

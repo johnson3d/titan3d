@@ -31,6 +31,10 @@ namespace EngineNS.Bricks.Particle
         {
             return null;
         }
+        public void Initialize(Graphics.Mesh.UMaterialMesh materialMesh)
+        {
+
+        }
     }
 
     public class UParticleMdfQueue<FParticle, FParticleSystem> : Graphics.Pipeline.Shader.TtMdfQueue1<TtParticleModifier>

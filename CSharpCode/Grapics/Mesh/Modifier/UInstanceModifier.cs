@@ -6,7 +6,7 @@ using System.Text;
 namespace EngineNS.Graphics.Mesh.Modifier
 {
     [System.Runtime.InteropServices.StructLayout(System.Runtime.InteropServices.LayoutKind.Sequential, Pack = 16)]
-    public struct FVSInstantData
+    public struct FVSInstanceData
     {
         public Vector3 Position;
         public uint HitProxyId;
@@ -20,322 +20,342 @@ namespace EngineNS.Graphics.Mesh.Modifier
         public Vector4ui PointLightIndices;
     };
 
+    public class TtGpuCullSetupShading : Graphics.Pipeline.Shader.UComputeShadingEnv
+    {
+        public override Vector3ui DispatchArg
+        {
+            get => new Vector3ui(128, 1, 1);
+        }
+        public TtGpuCullSetupShading()
+        {
+            CodeName = RName.GetRName("Shaders/Bricks/GpuDriven/GpuCulling.cginc", RName.ERNameType.Engine);
+            MainName = "CS_GPUCullingSetup";
+
+            this.UpdatePermutation();
+        }
+        protected override void EnvShadingDefines(in FPermutationId id, NxRHI.UShaderDefinitions defines)
+        {
+            base.EnvShadingDefines(in id, defines);
+        }
+        public override void OnDrawCall(NxRHI.UComputeDraw drawcall, Graphics.Pipeline.URenderPolicy policy)
+        {
+            var instanceSSBO = drawcall.TagObject as TtInstanceBufferSSBO;
+            if (instanceSSBO == null)
+                return;
+        }
+    }
+    public class TtGpuCullShading : Graphics.Pipeline.Shader.UComputeShadingEnv
+    {
+        public override Vector3ui DispatchArg
+        {
+            get => new Vector3ui(128, 1, 1);
+        }
+        public TtGpuCullShading()
+        {
+            CodeName = RName.GetRName("Shaders/Bricks/GpuDriven/GpuCulling.cginc", RName.ERNameType.Engine);
+            MainName = "CS_GPUCullingMain";
+
+            this.UpdatePermutation();
+        }
+        protected override void EnvShadingDefines(in FPermutationId id, NxRHI.UShaderDefinitions defines)
+        {
+            base.EnvShadingDefines(in id, defines);
+        }
+        public override void OnDrawCall(NxRHI.UComputeDraw drawcall, Graphics.Pipeline.URenderPolicy policy)
+        {
+            var instanceSSBO = drawcall.TagObject as TtInstanceBufferSSBO;
+            if (instanceSSBO == null)
+                return;
+        }
+    }
     public interface IInstanceBuffers : IDisposable
     {
-        void SureBuffers(TtInstanceModifier mdf, uint nSize);
-        uint PushInstance(TtInstanceModifier mdf, in Vector3 pos, in Vector3 scale, in Quaternion quat, in Vector4ui f41, uint hitProxyId);
-        unsafe void SetInstance(uint index, Vector3* pos, Vector3* scale, Quaternion* quat, Vector4ui* f41, uint* hitProxyId);
+        int NumOfInstance { get; }
+        void SetCapacity(TtInstanceModifier mdf, uint nSize);
+        uint PushInstance(TtInstanceModifier mdf, in FVSInstanceData instance);
+        void SetInstance(uint index, in FVSInstanceData instance);
         void Flush2GPU(NxRHI.ICommandList cmd, TtInstanceModifier mdf);
         void OnDrawCall(TtInstanceModifier mdf, NxRHI.ICommandList cmd, Pipeline.URenderPolicy.EShadingType shadingType, NxRHI.UGraphicDraw drawcall, Pipeline.URenderPolicy policy, TtMesh.TtAtom atom);
-        void InstanceCulling(NxRHI.ICommandList cmd, NxRHI.UGraphicDraw drawcall, Pipeline.URenderPolicy policy, NxRHI.UUaView argBufferUAV, uint argBufferOffset);
+        void InstanceCulling(TtInstanceModifier mdf, NxRHI.ICommandList cmd, Pipeline.URenderPolicy policy, NxRHI.UUaView argBufferUAV, uint argBufferOffset);
     }
     public class TtInstanceBufferSSBO : IInstanceBuffers
     {
-        public FVSInstantData[] InstData;
-        public NxRHI.UBuffer InstantBuffer;
-        public NxRHI.USrView InstantSRV;
-        public bool IsDirty { get; private set; } = true;
+        public Pipeline.TtCpu2GpuBuffer<FVSInstanceData> InstanceBuffer = new Pipeline.TtCpu2GpuBuffer<FVSInstanceData>();
+        public Pipeline.TtGpuBuffer<FVSInstanceData> CullingBuffer = new Pipeline.TtGpuBuffer<FVSInstanceData>();
+        public TtGpuCullSetupShading GpuCullSetupShading;
+        public NxRHI.UComputeDraw GpuCullSetupDrawcall;
+        public TtGpuCullShading GpuCullShading;
+        public NxRHI.UComputeDraw GpuCullDrawcall;
+        public NxRHI.UCbView GPUCullingCBV = null;
+        public TtInstanceBufferSSBO()
+        {
+            InstanceBuffer.Initialize(NxRHI.EBufferType.BFT_SRV);
+            GpuCullSetupShading = UEngine.Instance.ShadingEnvManager.GetShadingEnv<TtGpuCullSetupShading>();
+            GpuCullSetupDrawcall = UEngine.Instance.GfxDevice.RenderContext.CreateComputeDraw();
+            GpuCullSetupDrawcall.TagObject = this;
+
+            GpuCullShading = UEngine.Instance.ShadingEnvManager.GetShadingEnv<TtGpuCullShading>();
+            GpuCullDrawcall = UEngine.Instance.GfxDevice.RenderContext.CreateComputeDraw();
+            GpuCullDrawcall.TagObject = this;
+        }
         public void Dispose()
         {
-            InstantSRV?.Dispose();
-            InstantSRV = null;
-
-            InstantBuffer?.Dispose();
-            InstantBuffer = null;
-
-            InstData = null;
+            CoreSDK.DisposeObject(ref InstanceBuffer);
         }
-        public unsafe void SureBuffers(TtInstanceModifier mdf, uint nSize)
+        public int NumOfInstance
         {
-            if (mdf.mMaxNumber >= nSize)
+            get
             {
-                return;
+                return InstanceBuffer.DataArray.Count;
             }
-
-            var oldData = InstData;
-
-            Dispose();
-
-            mdf.mMaxNumber = nSize;
-
-            InstData = new FVSInstantData[mdf.mMaxNumber];
-
-            var bfDesc = new NxRHI.FBufferDesc();
-            bfDesc.SetDefault(false, NxRHI.EBufferType.BFT_SRV);
-            bfDesc.Type = NxRHI.EBufferType.BFT_SRV;// | NxRHI.EBufferType.BFT_UAV;
-            bfDesc.CpuAccess = NxRHI.ECpuAccess.CAS_WRITE;
-            bfDesc.Usage = NxRHI.EGpuUsage.USAGE_DYNAMIC;
-            bfDesc.StructureStride = (uint)sizeof(FVSInstantData);
-            bfDesc.Size = (uint)sizeof(FVSInstantData) * mdf.mMaxNumber;
-
-            if (mdf.mCurNumber > 0)
-            {
-                fixed (FVSInstantData* pSrc = &oldData[0])
-                fixed (FVSInstantData* pTar = &InstData[0])
-                {
-                    CoreSDK.MemoryCopy(pTar, pSrc, mdf.mCurNumber * (uint)sizeof(FVSInstantData));
-                    bfDesc.InitData = pTar;
-                    InstantBuffer = UEngine.Instance.GfxDevice.RenderContext.CreateBuffer(in bfDesc);
-                }
-            }
-            else
-            {
-                InstantBuffer = UEngine.Instance.GfxDevice.RenderContext.CreateBuffer(in bfDesc);
-            }
-
-            var srvDesc = new NxRHI.FSrvDesc();
-            srvDesc.SetBuffer(false);
-            srvDesc.Buffer.NumElements = mdf.mMaxNumber;
-            srvDesc.Buffer.StructureByteStride = bfDesc.StructureStride;
-            InstantSRV = UEngine.Instance.GfxDevice.RenderContext.CreateSRV(InstantBuffer, in srvDesc);
         }
-        public uint PushInstance(TtInstanceModifier mdf, in Vector3 pos, in Vector3 scale, in Quaternion quat, in Vector4ui f41, uint hitProxyId)
+        public unsafe void SetCapacity(TtInstanceModifier mdf, uint nSize)
         {
-            var rc = UEngine.Instance.GfxDevice.RenderContext;
-
-            //uint growSize = 1;
-            //if (mdf.mMaxNumber > 10)
-            //{
-            //    growSize += mdf.mMaxNumber;
-            //}
-            //SureBuffers(mdf, mdf.mCurNumber + growSize);
-            System.Diagnostics.Debug.Assert(mdf.CurNumber < mdf.mMaxNumber);
-
-            InstData[mdf.mCurNumber].Position = pos;
-            InstData[mdf.mCurNumber].Quat = quat;
-            InstData[mdf.mCurNumber].Scale = scale;
-            InstData[mdf.mCurNumber].UserData = f41;
-            InstData[mdf.mCurNumber].HitProxyId = hitProxyId;
-
-            var result = mdf.mCurNumber;
-            mdf.mCurNumber++;
-
-            IsDirty = true;
-            return result;
+            InstanceBuffer.SetCapacity((int)nSize);
+            CullingBuffer.SetSize(nSize, IntPtr.Zero.ToPointer(), NxRHI.EBufferType.BFT_SRV| NxRHI.EBufferType.BFT_UAV);
         }
-        public unsafe void SetInstance(uint index, Vector3* pos, Vector3* scale, Quaternion* quat, Vector4ui* f41, uint* hitProxyId)
+        public uint PushInstance(TtInstanceModifier mdf, in FVSInstanceData instance)
         {
-            if (pos != IntPtr.Zero.ToPointer())
-                InstData[index].Position = *pos;
-            if (quat != IntPtr.Zero.ToPointer())
-                InstData[index].Quat = *quat;
-            if (scale != IntPtr.Zero.ToPointer())
-                InstData[index].Scale = *scale;
-            if (f41 != IntPtr.Zero.ToPointer())
-                InstData[index].UserData = *f41;
-            if (hitProxyId != IntPtr.Zero.ToPointer())
-                InstData[index].HitProxyId = *hitProxyId;
-
-            IsDirty = true;
+            return (uint)InstanceBuffer.PushData(in instance);
+        }
+        public unsafe void SetInstance(uint index, in FVSInstanceData instance)
+        {
+            InstanceBuffer.UpdateData((int)index, in instance);
         }
         public unsafe void Flush2GPU(NxRHI.ICommandList cmd, TtInstanceModifier mdf)
         {
-            if (mdf.mCurNumber == 0)
-                return;
-
-            if (IsDirty)
-            {
-                var rc = UEngine.Instance.GfxDevice.RenderContext;
-                fixed (FVSInstantData* pTar = &InstData[0])
-                {
-                    InstantBuffer.UpdateGpuData(cmd, 0, pTar, mdf.mCurNumber * (uint)sizeof(FVSInstantData));
-                }
-                IsDirty = false;
-            }
+            InstanceBuffer.Flush2GPU(cmd);
         }
 
         public void OnDrawCall(TtInstanceModifier mdf, NxRHI.ICommandList cmd, Pipeline.URenderPolicy.EShadingType shadingType, NxRHI.UGraphicDraw drawcall, Pipeline.URenderPolicy policy, TtMesh.TtAtom atom)
         {
-            var binder = drawcall.FindBinder("VSInstantDataArray");
+            //InstanceCulling(mdf, cmd, policy, mdf.DrawArgsBuffer.Uav, 0);
+
+            var binder = drawcall.FindBinder("VSInstanceDataArray");
             if (binder.IsValidPointer == false)
                 return;
             this.Flush2GPU(cmd, mdf);
-            drawcall.BindSRV(binder, InstantSRV);
+            drawcall.BindSRV(binder, InstanceBuffer.Srv);
         }
-        public void InstanceCulling(NxRHI.ICommandList cmd, NxRHI.UGraphicDraw drawcall, Pipeline.URenderPolicy policy, NxRHI.UUaView argBufferUAV, uint argBufferOffset)
+        public unsafe void InstanceCulling(TtInstanceModifier mdf, NxRHI.ICommandList cmd, Pipeline.URenderPolicy policy, NxRHI.UUaView argBufferUAV, uint argBufferOffset)
         {
+            GpuCullSetupShading.SetDrawcallDispatch(this, policy, GpuCullSetupDrawcall, 1, 1, 1, true);
+            var index = GpuCullDrawcall.FindBinder(NxRHI.EShaderBindType.SBT_CBuffer, "cbGPUCulling");
+            if (index.IsValidPointer)
+            {
+                if (GPUCullingCBV == null)
+                {
+                    GPUCullingCBV = UEngine.Instance.GfxDevice.RenderContext.CreateCBV(index);
+                }
+                GpuCullDrawcall.BindCBuffer(index, GPUCullingCBV);
+            }
+            GPUCullingCBV.SetValue("BoundCenter", mdf.MeshAABB.GetCenter());
+            GPUCullingCBV.SetValue("BoundExtent", mdf.MeshAABB.GetSize() * 0.5f);
+            GPUCullingCBV.SetValue("MaxInstance", CullingBuffer.NumElement);
+            GPUCullingCBV.SetValue("IndirectArgsOffset", argBufferOffset);
 
+            GpuCullSetupDrawcall.BindUav("IndirectArgsBuffer", mdf.DrawArgsBuffer.Uav);
+
+            GpuCullSetupDrawcall.mCoreObject.NativeSuper.SetDebugName("InstanceCulling.Setup");
+            cmd.PushGpuDraw(GpuCullSetupDrawcall.mCoreObject.NativeSuper);
+
+            GpuCullShading.SetDrawcallDispatch(this, policy, GpuCullDrawcall, 1, 1, 1, true);
+            index = GpuCullDrawcall.FindBinder(NxRHI.EShaderBindType.SBT_CBuffer, "cbGPUCulling");
+            if (index.IsValidPointer)
+            {
+                if (GPUCullingCBV == null)
+                {
+                    GPUCullingCBV = UEngine.Instance.GfxDevice.RenderContext.CreateCBV(index);
+                }
+                GpuCullDrawcall.BindCBuffer(index, GPUCullingCBV);
+            }
+            GpuCullDrawcall.BindSrv("InstanceDataArray", InstanceBuffer.Srv);
+            GpuCullDrawcall.BindUav("CullInstanceDataArray", CullingBuffer.Uav);
+            GpuCullDrawcall.BindUav("IndirectArgsBuffer", mdf.DrawArgsBuffer.Uav);
+
+            GpuCullDrawcall.mCoreObject.NativeSuper.SetDebugName("InstanceCulling");
+            cmd.PushGpuDraw(GpuCullDrawcall.mCoreObject.NativeSuper);
         }
     }
-    public class TtInstanceBufferVB : IInstanceBuffers
-    {
-        public Vector3[] mPosData = null;
-        public Vector4[] mScaleData = null;
-        public Quaternion[] mRotateData = null;
-        public Vector4ui[] mF41Data = null;
+    //public class TtInstanceBufferVB : IInstanceBuffers
+    //{
+    //    public Vector3[] mPosData = null;
+    //    public Vector4[] mScaleData = null;
+    //    public Quaternion[] mRotateData = null;
+    //    public Vector4ui[] mF41Data = null;
 
-        public NxRHI.UVbView mPosVB;
-        public NxRHI.UVbView mScaleVB;
-        public NxRHI.UVbView mRotateVB;
-        public NxRHI.UVbView mF41VB;
+    //    public NxRHI.UVbView mPosVB;
+    //    public NxRHI.UVbView mScaleVB;
+    //    public NxRHI.UVbView mRotateVB;
+    //    public NxRHI.UVbView mF41VB;
 
-        public NxRHI.UVertexArray mAttachVBs = null;
-        public void Dispose()
-        {
-            mPosVB?.Dispose();
-            mPosVB = null;
-            mScaleVB?.Dispose();
-            mScaleVB = null;
-            mRotateVB?.Dispose();
-            mRotateVB = null;
-            mF41VB?.Dispose();
-            mF41VB = null;
+    //    public NxRHI.UVertexArray mAttachVBs = null;
+    //    public void Dispose()
+    //    {
+    //        mPosVB?.Dispose();
+    //        mPosVB = null;
+    //        mScaleVB?.Dispose();
+    //        mScaleVB = null;
+    //        mRotateVB?.Dispose();
+    //        mRotateVB = null;
+    //        mF41VB?.Dispose();
+    //        mF41VB = null;
 
-            mPosData = null;
-            mScaleData = null;
-            mRotateData = null;
-            mF41Data = null;
-        }
-        public unsafe void SureBuffers(TtInstanceModifier mdf, uint nSize)
-        {
-            if (mdf.mMaxNumber > nSize)
-            {
-                return;
-            }
+    //        mPosData = null;
+    //        mScaleData = null;
+    //        mRotateData = null;
+    //        mF41Data = null;
+    //    }
+    //    public unsafe void SureBuffers(TtInstanceModifier mdf, uint nSize)
+    //    {
+    //        if (mdf.mMaxNumber > nSize)
+    //        {
+    //            return;
+    //        }
 
-            var oldPos = mPosData;
-            var oldScale = mScaleData;
-            var oldQuat = mRotateData;
-            var oldF41 = mF41Data;
+    //        var oldPos = mPosData;
+    //        var oldScale = mScaleData;
+    //        var oldQuat = mRotateData;
+    //        var oldF41 = mF41Data;
 
-            Dispose();
+    //        Dispose();
 
-            mdf.mMaxNumber = nSize * 2;
-            //mInstDataArray = new VSInstantData[mMaxNumber];
-            mPosData = new Vector3[mdf.mMaxNumber];
-            mScaleData = new Vector4[mdf.mMaxNumber];
-            mRotateData = new Quaternion[mdf.mMaxNumber];
-            mF41Data = new Vector4ui[mdf.mMaxNumber];
+    //        mdf.mMaxNumber = nSize * 2;
+    //        //mInstDataArray = new VSInstantData[mMaxNumber];
+    //        mPosData = new Vector3[mdf.mMaxNumber];
+    //        mScaleData = new Vector4[mdf.mMaxNumber];
+    //        mRotateData = new Quaternion[mdf.mMaxNumber];
+    //        mF41Data = new Vector4ui[mdf.mMaxNumber];
 
-            if (mdf.mCurNumber > 0)
-            {
-                fixed (Vector3* pSrc = &oldPos[0])
-                fixed (Vector3* pTar = &mPosData[0])
-                {
-                    CoreSDK.MemoryCopy(pTar, pSrc, mdf.mCurNumber * (uint)sizeof(Vector3));
-                }
+    //        if (mdf.mCurNumber > 0)
+    //        {
+    //            fixed (Vector3* pSrc = &oldPos[0])
+    //            fixed (Vector3* pTar = &mPosData[0])
+    //            {
+    //                CoreSDK.MemoryCopy(pTar, pSrc, mdf.mCurNumber * (uint)sizeof(Vector3));
+    //            }
 
-                fixed (Vector4* pSrc = &oldScale[0])
-                fixed (Vector4* pTar = &mScaleData[0])
-                {
-                    CoreSDK.MemoryCopy(pTar, pSrc, mdf.mCurNumber * (uint)sizeof(Vector4));
-                }
+    //            fixed (Vector4* pSrc = &oldScale[0])
+    //            fixed (Vector4* pTar = &mScaleData[0])
+    //            {
+    //                CoreSDK.MemoryCopy(pTar, pSrc, mdf.mCurNumber * (uint)sizeof(Vector4));
+    //            }
 
-                fixed (Quaternion* pSrc = &oldQuat[0])
-                fixed (Quaternion* pTar = &mRotateData[0])
-                {
-                    CoreSDK.MemoryCopy(pTar, pSrc, mdf.mCurNumber * (uint)sizeof(Quaternion));
-                }
+    //            fixed (Quaternion* pSrc = &oldQuat[0])
+    //            fixed (Quaternion* pTar = &mRotateData[0])
+    //            {
+    //                CoreSDK.MemoryCopy(pTar, pSrc, mdf.mCurNumber * (uint)sizeof(Quaternion));
+    //            }
 
-                fixed (Vector4ui* pSrc = &oldF41[0])
-                fixed (Vector4ui* pTar = &mF41Data[0])
-                {
-                    CoreSDK.MemoryCopy(pTar, pSrc, mdf.mCurNumber * (uint)sizeof(Vector4ui));
-                }
-            }
+    //            fixed (Vector4ui* pSrc = &oldF41[0])
+    //            fixed (Vector4ui* pTar = &mF41Data[0])
+    //            {
+    //                CoreSDK.MemoryCopy(pTar, pSrc, mdf.mCurNumber * (uint)sizeof(Vector4ui));
+    //            }
+    //        }
 
 
-            var rc = UEngine.Instance.GfxDevice.RenderContext;
+    //        var rc = UEngine.Instance.GfxDevice.RenderContext;
 
-            if (mAttachVBs == null)
-                mAttachVBs = rc.CreateVertexArray();
+    //        if (mAttachVBs == null)
+    //            mAttachVBs = rc.CreateVertexArray();
 
-            var desc = new NxRHI.FVbvDesc();
-            //desc.CpuAccess = NxRHI.ECpuAccess.CAS_WRITE;
-            desc.m_Size = (UInt32)(sizeof(Vector3) * mdf.mMaxNumber);
-            desc.m_Stride = (UInt32)sizeof(Vector3);
-            mPosVB = rc.CreateVBV(null, in desc);
+    //        var desc = new NxRHI.FVbvDesc();
+    //        //desc.CpuAccess = NxRHI.ECpuAccess.CAS_WRITE;
+    //        desc.m_Size = (UInt32)(sizeof(Vector3) * mdf.mMaxNumber);
+    //        desc.m_Stride = (UInt32)sizeof(Vector3);
+    //        mPosVB = rc.CreateVBV(null, in desc);
 
-            desc.m_Size = (UInt32)(sizeof(Vector4) * mdf.mMaxNumber);
-            desc.m_Stride = (UInt32)sizeof(Vector4);
-            mScaleVB = rc.CreateVBV(null, in desc);
+    //        desc.m_Size = (UInt32)(sizeof(Vector4) * mdf.mMaxNumber);
+    //        desc.m_Stride = (UInt32)sizeof(Vector4);
+    //        mScaleVB = rc.CreateVBV(null, in desc);
 
-            desc.m_Size = (UInt32)(sizeof(Quaternion) * mdf.mMaxNumber);
-            desc.m_Stride = (UInt32)sizeof(Quaternion);
-            mRotateVB = rc.CreateVBV(null, in desc);
+    //        desc.m_Size = (UInt32)(sizeof(Quaternion) * mdf.mMaxNumber);
+    //        desc.m_Stride = (UInt32)sizeof(Quaternion);
+    //        mRotateVB = rc.CreateVBV(null, in desc);
 
-            desc.m_Size = (UInt32)(sizeof(Vector4) * mdf.mMaxNumber);
-            desc.m_Stride = (UInt32)sizeof(Vector4);
-            mF41VB = rc.CreateVBV(null, in desc);
-        }
+    //        desc.m_Size = (UInt32)(sizeof(Vector4) * mdf.mMaxNumber);
+    //        desc.m_Stride = (UInt32)sizeof(Vector4);
+    //        mF41VB = rc.CreateVBV(null, in desc);
+    //    }
 
-        public unsafe void Flush2GPU(NxRHI.ICommandList cmd, TtInstanceModifier mdf)
-        {
-            if (mdf.mCurNumber == 0)
-                return;
+    //    public unsafe void Flush2GPU(NxRHI.ICommandList cmd, TtInstanceModifier mdf)
+    //    {
+    //        if (mdf.mCurNumber == 0)
+    //            return;
 
-            var rc = UEngine.Instance.GfxDevice.RenderContext;
-            fixed (Vector3* p = &mPosData[0])
-            {
-                var dataSize = (UInt32)sizeof(Vector3) * mdf.mCurNumber;
-                mPosVB.UpdateGpuData(cmd, 0, p, dataSize);
-            }
-            fixed (Vector4* p = &mScaleData[0])
-            {
-                var dataSize = (UInt32)sizeof(Vector4) * mdf.mCurNumber;
-                mScaleVB.UpdateGpuData(cmd, 0, p, dataSize);
-            }
-            fixed (Quaternion* p = &mRotateData[0])
-            {
-                var dataSize = (UInt32)sizeof(Quaternion) * mdf.mCurNumber;
-                mRotateVB.UpdateGpuData(cmd, 0, p, dataSize);
-            }
-            fixed (Vector4ui* p = &mF41Data[0])
-            {
-                var dataSize = (UInt32)sizeof(Vector4ui) * mdf.mCurNumber;
-                mF41VB.UpdateGpuData(cmd, 0, p, dataSize);
-            }
+    //        var rc = UEngine.Instance.GfxDevice.RenderContext;
+    //        fixed (Vector3* p = &mPosData[0])
+    //        {
+    //            var dataSize = (UInt32)sizeof(Vector3) * mdf.mCurNumber;
+    //            mPosVB.UpdateGpuData(cmd, 0, p, dataSize);
+    //        }
+    //        fixed (Vector4* p = &mScaleData[0])
+    //        {
+    //            var dataSize = (UInt32)sizeof(Vector4) * mdf.mCurNumber;
+    //            mScaleVB.UpdateGpuData(cmd, 0, p, dataSize);
+    //        }
+    //        fixed (Quaternion* p = &mRotateData[0])
+    //        {
+    //            var dataSize = (UInt32)sizeof(Quaternion) * mdf.mCurNumber;
+    //            mRotateVB.UpdateGpuData(cmd, 0, p, dataSize);
+    //        }
+    //        fixed (Vector4ui* p = &mF41Data[0])
+    //        {
+    //            var dataSize = (UInt32)sizeof(Vector4ui) * mdf.mCurNumber;
+    //            mF41VB.UpdateGpuData(cmd, 0, p, dataSize);
+    //        }
 
-            mAttachVBs.BindVB(NxRHI.EVertexStreamType.VST_InstPos, mPosVB);
-            mAttachVBs.BindVB(NxRHI.EVertexStreamType.VST_InstQuat, mRotateVB);
-            mAttachVBs.BindVB(NxRHI.EVertexStreamType.VST_InstScale, mScaleVB);
-            mAttachVBs.BindVB(NxRHI.EVertexStreamType.VST_F4_1, mF41VB);
-        }
+    //        mAttachVBs.BindVB(NxRHI.EVertexStreamType.VST_InstPos, mPosVB);
+    //        mAttachVBs.BindVB(NxRHI.EVertexStreamType.VST_InstQuat, mRotateVB);
+    //        mAttachVBs.BindVB(NxRHI.EVertexStreamType.VST_InstScale, mScaleVB);
+    //        mAttachVBs.BindVB(NxRHI.EVertexStreamType.VST_F4_1, mF41VB);
+    //    }
 
-        public uint PushInstance(TtInstanceModifier mdf, in Vector3 pos, in Vector3 scale, in Quaternion quat, in Vector4ui f41, uint hitProxyId)
-        {
-            var rc = UEngine.Instance.GfxDevice.RenderContext;
-            SureBuffers(mdf, mdf.mCurNumber + 1);
+    //    public uint PushInstance(TtInstanceModifier mdf, in FVSInstanceData instance)
+    //    {
+    //        var rc = UEngine.Instance.GfxDevice.RenderContext;
+    //        SureBuffers(mdf, mdf.mCurNumber + 1);
 
-            mPosData[mdf.mCurNumber] = pos;
-            mScaleData[mdf.mCurNumber].X = scale.X;
-            mScaleData[mdf.mCurNumber].Y = scale.Y;
-            mScaleData[mdf.mCurNumber].Z = scale.Z;
-            mScaleData[mdf.mCurNumber].W = hitProxyId;
-            mRotateData[mdf.mCurNumber] = quat;
-            mF41Data[mdf.mCurNumber] = f41;
+    //        mPosData[mdf.mCurNumber] = pos;
+    //        mScaleData[mdf.mCurNumber].X = scale.X;
+    //        mScaleData[mdf.mCurNumber].Y = scale.Y;
+    //        mScaleData[mdf.mCurNumber].Z = scale.Z;
+    //        mScaleData[mdf.mCurNumber].W = hitProxyId;
+    //        mRotateData[mdf.mCurNumber] = quat;
+    //        mF41Data[mdf.mCurNumber] = f41;
 
-            var result = mdf.mCurNumber;
-            mdf.mCurNumber++;
-            return result;
-        }
-        public unsafe void SetInstance(uint index, Vector3* pos, Vector3* scale, Quaternion* quat, Vector4ui* f41, uint* hitProxyId)
-        {
-            if (pos != IntPtr.Zero.ToPointer())
-                mPosData[index] = *pos;
-            if (scale != IntPtr.Zero.ToPointer())
-            {
-                mScaleData[index].X = scale->X;
-                mScaleData[index].Y = scale->Y;
-                mScaleData[index].Z = scale->Z;
-            }
-            if (hitProxyId != IntPtr.Zero.ToPointer())
-                mScaleData[index].W = *hitProxyId;
-            if (quat != IntPtr.Zero.ToPointer())
-                mRotateData[index] = *quat;
-            if (f41 != IntPtr.Zero.ToPointer())
-                mF41Data[index] = *f41;
-        }
+    //        var result = mdf.mCurNumber;
+    //        mdf.mCurNumber++;
+    //        return result;
+    //    }
+    //    public unsafe void SetInstance(uint index, in FVSInstanceData instance)
+    //    {
+    //        if (pos != IntPtr.Zero.ToPointer())
+    //            mPosData[index] = *pos;
+    //        if (scale != IntPtr.Zero.ToPointer())
+    //        {
+    //            mScaleData[index].X = scale->X;
+    //            mScaleData[index].Y = scale->Y;
+    //            mScaleData[index].Z = scale->Z;
+    //        }
+    //        if (hitProxyId != IntPtr.Zero.ToPointer())
+    //            mScaleData[index].W = *hitProxyId;
+    //        if (quat != IntPtr.Zero.ToPointer())
+    //            mRotateData[index] = *quat;
+    //        if (f41 != IntPtr.Zero.ToPointer())
+    //            mF41Data[index] = *f41;
+    //    }
 
-        public void OnDrawCall(TtInstanceModifier mdf, NxRHI.ICommandList cmd, Pipeline.URenderPolicy.EShadingType shadingType, NxRHI.UGraphicDraw drawcall, Pipeline.URenderPolicy policy, TtMesh.TtAtom atom)
-        {
-            drawcall.BindAttachVertexArray(mAttachVBs);
-        }
-        public void InstanceCulling(NxRHI.ICommandList cmd, NxRHI.UGraphicDraw drawcall, Pipeline.URenderPolicy policy, NxRHI.UUaView argBufferUAV, uint argBufferOffset)
-        {
+    //    public void OnDrawCall(TtInstanceModifier mdf, NxRHI.ICommandList cmd, Pipeline.URenderPolicy.EShadingType shadingType, NxRHI.UGraphicDraw drawcall, Pipeline.URenderPolicy policy, TtMesh.TtAtom atom)
+    //    {
+    //        drawcall.BindAttachVertexArray(mAttachVBs);
+    //    }
+    //    public void InstanceCulling(NxRHI.ICommandList cmd, NxRHI.UGraphicDraw drawcall, Pipeline.URenderPolicy policy, NxRHI.UUaView argBufferUAV, uint argBufferOffset)
+    //    {
 
-        }
-    }
+    //    }
+    //}
 
     public class TtInstanceModifier : Pipeline.Shader.IMeshModifier, IDisposable
     {
@@ -365,24 +385,43 @@ namespace EngineNS.Graphics.Mesh.Modifier
             };
         }
 
-        internal uint mCurNumber = 0;
-        public uint CurNumber
-        {
-            get => mCurNumber;
-        }
-        internal uint mMaxNumber = 0;
-        public uint MaxNumber
-        {
-            get => mMaxNumber;
-        }
-
         public IInstanceBuffers InstanceBuffers;
-        
+
+        public BoundingBox MeshAABB;
+        public Pipeline.TtCpu2GpuBuffer<uint> DrawArgsBuffer = new Pipeline.TtCpu2GpuBuffer<uint>();
+        public Dictionary<uint, uint> DrawArgsOffsetDict = new Dictionary<uint, uint>();
         ~TtInstanceModifier()
         {
             Dispose();
         }
+        public unsafe void Initialize(Graphics.Mesh.UMaterialMesh materialMesh)
+        {
+            MeshAABB = materialMesh.AABB;
+            DrawArgsBuffer.Initialize(NxRHI.EBufferType.BFT_UAV | NxRHI.EBufferType.BFT_IndirectArgs);
 
+            DrawArgsOffsetDict.Clear();
+            for (int i = 0; i < materialMesh.SubMeshes.Count; i++)
+            {
+                var mesh = materialMesh.SubMeshes[i].Mesh;
+                for (uint j = 0; j < mesh.NumAtom; j++)
+                {
+                    var key = (uint)(i << 16) | j;
+                    DrawArgsOffsetDict.Add(key, (uint)DrawArgsBuffer.DataArray.Count);
+
+                    ref var atom = ref *mesh.mCoreObject.GetAtom(j, 0);
+                    DrawArgsBuffer.PushData(atom.m_NumPrimitives);
+                    DrawArgsBuffer.PushData(0);
+                    DrawArgsBuffer.PushData(atom.m_StartIndex);
+                    DrawArgsBuffer.PushData(atom.m_BaseVertexIndex);
+                    DrawArgsBuffer.PushData(0);
+                }
+            }
+            using (var tsCmd = new NxRHI.FTransientCmd(NxRHI.EQueueType.QU_Default, "TtInstanceModifier.FlushArgsBuffer"))
+            {
+                DrawArgsBuffer.Flush2GPU(tsCmd.CmdList);
+            }
+            
+        }
         public void Dispose()
         {
             CoreSDK.DisposeObject(ref InstanceBuffers);
@@ -394,27 +433,35 @@ namespace EngineNS.Graphics.Mesh.Modifier
 
             InstanceBuffers = new TtInstanceBufferSSBO();
         }
-        public void SureBuffers(uint nSize)
+        public void SetCapacity(uint nSize)
         {
-            InstanceBuffers.SureBuffers(this, nSize);
+            InstanceBuffers.SetCapacity(this, nSize);
         }
 
-        public uint PushInstance(in Vector3 pos, in Vector3 scale, in Quaternion quat, in Vector4ui f41, uint hitProxyId)
+        public uint PushInstance(in FVSInstanceData instance)
         {
-            return InstanceBuffers.PushInstance(this, in pos, in scale, in quat, in f41, hitProxyId);
+            return InstanceBuffers.PushInstance(this, in instance);
         }
-        public unsafe void SetInstance(uint index, Vector3* pos, Vector3* scale, Quaternion* quat, Vector4ui* f41, uint* hitProxyId)
+        public unsafe void SetInstance(uint index, in FVSInstanceData instance)
         {
-            InstanceBuffers.SetInstance(index, pos, scale, quat, f41, hitProxyId);
+            InstanceBuffers.SetInstance(index, instance);
         }
 
-        public unsafe void FlushGpuBuffer(NxRHI.ICommandList cmd)
+        public unsafe void Flush2GPU(NxRHI.ICommandList cmd)
         {
             InstanceBuffers.Flush2GPU(cmd, this);
         }
         public unsafe void OnDrawCall(NxRHI.ICommandList cmd, Pipeline.URenderPolicy.EShadingType shadingType, NxRHI.UGraphicDraw drawcall, Pipeline.URenderPolicy policy, TtMesh.TtAtom atom)
         {
-            drawcall.mCoreObject.DrawInstance = (ushort)this.CurNumber;
+            drawcall.mCoreObject.DrawInstance = (ushort)this.InstanceBuffers.NumOfInstance;
+            //drawcall.SourceAtom.SubMesh;
+            //drawcall.mCoreObject.IndirectDrawArgsBuffer =
+            uint key = ((uint)(drawcall.SubMesh << 16) | drawcall.MeshAtom);
+            uint offset;
+            if (DrawArgsOffsetDict.TryGetValue(key, out offset))
+            {
+                offset += 0;
+            }
             InstanceBuffers.OnDrawCall(this, cmd, shadingType, drawcall, policy, atom);
         }
     }

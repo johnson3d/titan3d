@@ -48,6 +48,10 @@ namespace EngineNS.Graphics.Pipeline
             Dirty = true;
             DataArray.SetSize(Count);
         }
+        public void SetCapacity(int Count)
+        {
+            DataArray.SetCapacity(Count);
+        }
         public int PushData(in T data)
         {
             Dirty = true;
@@ -110,10 +114,9 @@ namespace EngineNS.Graphics.Pipeline
                 bfDesc.Size = (uint)sizeof(T) * GpuCapacity;
                 bfDesc.StructureStride = (uint)sizeof(T);
                 bfDesc.InitData = DataArray.UnsafeGetElementAddress(0);
-                bfDesc.Type = NxRHI.EBufferType.BFT_SRV;
+                bfDesc.Type = BufferTypes;
                 if ((BufferTypes & NxRHI.EBufferType.BFT_UAV) != 0)
                 {
-                    bfDesc.Type |= NxRHI.EBufferType.BFT_UAV;
                     bfDesc.Usage = NxRHI.EGpuUsage.USAGE_DEFAULT;
                 }
                 else
@@ -159,6 +162,7 @@ namespace EngineNS.Graphics.Pipeline
         {
             get => GpuResource as NxRHI.UTexture;
         }
+        public uint NumElement { get; private set; }
         public NxRHI.UUaView Uav;
         public NxRHI.USrView Srv;
         public NxRHI.UCbView Cbv;
@@ -188,6 +192,8 @@ namespace EngineNS.Graphics.Pipeline
             {
                 isRaw = true;
             }
+
+            NumElement = Count;
 
             var bfDesc = new NxRHI.FBufferDesc();
             bfDesc.SetDefault(isRaw, bufferType);

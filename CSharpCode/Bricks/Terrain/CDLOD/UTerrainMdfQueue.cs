@@ -35,6 +35,10 @@ namespace EngineNS.Bricks.Terrain.CDLOD
                 EPixelShaderInput.PST_LightMap,
             };
         }
+        public void Initialize(Graphics.Mesh.UMaterialMesh materialMesh)
+        {
+
+        }
     }
     public class UTerrainMdfQueue : Graphics.Pipeline.Shader.TtMdfQueue1<TtTerrainModifier>
     {

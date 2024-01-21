@@ -276,7 +276,7 @@ struct PS_INPUT
     }
 };
 
-struct VSInstantData
+struct VSInstanceData
 {
 	float3 Position;
 	uint HitProxyId;
@@ -291,7 +291,7 @@ struct VSInstantData
 	uint4 PointLightIndices;
 };
 
-VSInstantData GetInstanceData(VS_MODIFIER input);
+VSInstanceData GetInstanceData(VS_MODIFIER input);
 
 #define FIX_NAN_NORMAL 1
 

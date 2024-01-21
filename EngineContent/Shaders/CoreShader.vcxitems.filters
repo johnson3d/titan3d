@@ -357,6 +357,15 @@
     <None Include="$(MSBuildThisFileDirectory)Inc\Algorithm\Queue.cginc">
       <Filter>Inc\Algorithm</Filter>
     </None>
+    <None Include="$(MSBuildThisFileDirectory)Inc\BaseStructure\Ray.cginc">
+      <Filter>Inc\BaseStructure</Filter>
+    </None>
+    <None Include="$(MSBuildThisFileDirectory)Inc\BaseStructure\Frustum.cginc">
+      <Filter>Inc\BaseStructure</Filter>
+    </None>
+    <None Include="$(MSBuildThisFileDirectory)Bricks\GpuDriven\GpuCulling.cginc">
+      <Filter>Bricks\GpuDriven</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="$(MSBuildThisFileDirectory)Compute\calcrate.compute">

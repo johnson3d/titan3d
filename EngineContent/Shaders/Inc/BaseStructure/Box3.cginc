@@ -145,62 +145,14 @@ struct TtBox3
     }
 };
 
-float3 TransformedBoxAABB(in float3 dims, in float3x3 mat)
+float3 TransformedBoxAABB(in float3 extent, in float3x3 mat)
 {
-    float3 w = mat[0] * dims.x;
-    float3 h = mat[1] * dims.y;
-    float3 d = mat[2] * dims.z;
+    float3 w = mat[0] * extent.x;
+    float3 h = mat[1] * extent.y;
+    float3 d = mat[2] * extent.z;
     float3 a = w + h, b = w - h;
     return max(max(abs(a + d), abs(a - d)),
                max(abs(b + d), abs(b - d)));
 }
-
-bool FrustumPlaneCull(float3 BoundsCenter, float3 BoundsExtent, float4 PlanesX, float4 PlanesY, float4 PlanesZ, float4 PlanesW)
-{
-    float4 OrigX = BoundsCenter.xxxx;
-    float4 OrigY = BoundsCenter.yyyy;
-    float4 OrigZ = BoundsCenter.zzzz;
-
-    float3 AbsExt = abs(BoundsExtent);
-    float4 AbsExtentX = AbsExt.xxxx;
-    float4 AbsExtentY = AbsExt.yyyy;
-    float4 AbsExtentZ = AbsExt.zzzz;
-
-    // Calculate the distance (x * x) + (y * y) + (z * z) - w
-    float4 DistX = OrigX * PlanesX;
-    float4 DistY = OrigY * PlanesY + DistX;
-    float4 DistZ = OrigZ * PlanesZ + DistY;
-    float4 Distance = DistZ - PlanesW;
-		// Now do the push out FMath::Abs(x * x) + FMath::Abs(y * y) + FMath::Abs(z * z)
-    float4 PushX = AbsExtentX * abs(PlanesX);
-    float4 PushY = AbsExtentY * abs(PlanesY) + PushX;
-    float4 PushOut = AbsExtentZ * abs(PlanesZ) + PushY;
-
-		// Check for completely outside
-    if (any(Distance > PushOut))
-    {
-        return false;
-    }
-
-    return true;
-}
-
-struct Ray
-{
-    float3 pos;
-    float3 dir;
-};
-// Box intersector adapted from https://www.shadertoy.com/view/ld23DV
-bool TestAABB(in float3 pos, in float3 dims, in Ray ray)
-{
-    ray.pos -= pos;
-    float3 n = ray.pos / ray.dir;
-    float3 k = dims / abs(ray.dir);
-    float3 t1 = -k - n, t2 = k - n;
-    float tN = max(max(t1.x, t1.y), t1.z);
-    float tF = min(min(t2.x, t2.y), t2.z);
-    return tN < tF && tF > 0.0;
-}
-
 
 #endif//_BaseStructure_Box3_Compute_H_

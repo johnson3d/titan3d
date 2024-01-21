@@ -56,6 +56,10 @@ namespace EngineNS.Bricks.Terrain.Grass
         {
             return null;
         }
+        public void Initialize(Graphics.Mesh.UMaterialMesh materialMesh)
+        {
+
+        }
         public CDLOD.UTerrainGrassManager.UGrassType GrassType;
         uint mCurNumber = 0;
         public uint CurNumber => mCurNumber;

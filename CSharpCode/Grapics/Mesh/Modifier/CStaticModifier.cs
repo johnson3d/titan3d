@@ -27,5 +27,9 @@ namespace EngineNS.Graphics.Mesh.Modifier
         {
             return null;
         }
+        public void Initialize(Graphics.Mesh.UMaterialMesh materialMesh)
+        {
+
+        }
     }
 }

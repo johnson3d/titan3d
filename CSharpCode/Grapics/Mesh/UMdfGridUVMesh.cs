@@ -31,6 +31,10 @@ namespace EngineNS.Graphics.Mesh
                 Graphics.Pipeline.Shader.EPixelShaderInput.PST_UV
             };
         }
+        public void Initialize(Graphics.Mesh.UMaterialMesh materialMesh)
+        {
+
+        }
     }
 
     public class UMdfGridUVMesh : Graphics.Pipeline.Shader.TtMdfQueue1<TtGridUVModifier>

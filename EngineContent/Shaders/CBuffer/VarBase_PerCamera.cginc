@@ -23,6 +23,11 @@ VK_BIND(0) cbuffer cbPerCamera DX_BIND_B(0)
 
 	float4 CornerRays[4];
 	float4 ClipPlanes[6];
+    
+    float4 ClipPlanesX;
+    float4 ClipPlanesY;
+    float4 ClipPlanesZ;
+    float4 ClipPlanesW;
 
 	float3 CameraPosition;
 	float gZNear;

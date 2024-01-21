@@ -220,6 +220,10 @@ namespace EngineNS.Support
         {
             mCoreObject.SetSize(Count);
         }
+        public void SetCapacity(int Count)
+        {
+            mCoreObject.SetCapacity(Count);
+        }
         public IntPtr UnsafeAddressAt(int index)
         {
             unsafe

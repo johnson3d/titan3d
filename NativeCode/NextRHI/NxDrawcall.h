@@ -31,6 +31,13 @@ namespace NxRHI
 		virtual void ForeachGpuResource(const std::function<FOnVisit>&fun) {
 
 		}
+		std::string					DebugName;
+		inline void SetDebugName(const char* name) {
+			DebugName = name;
+		}
+		const char* GetDebugName() {
+			return DebugName.c_str();
+		}
 	};
 	class TR_CLASS()
 		IGraphicDraw : public IGpuDraw

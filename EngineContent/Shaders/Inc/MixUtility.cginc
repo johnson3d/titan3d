@@ -9,7 +9,7 @@ half3 MultiPbrPointLightMobile(PS_INPUT input, float3 WorldPos, half3 V, half3 N
 #if defined(VS_NO_WorldTransform)
 #if CP_SM_major >= 4
 	uint instanceId = input.SpecialData.x;
-	VSInstantData InstData = VSInstantDataArray[instanceId];
+	VSInstanceData InstData = VSInstanceDataArray[instanceId];
 	for (int i = 0; i < 4; i++)
 	{
 		uint lightIndex = InstData.PointLightIndices[i];

@@ -233,6 +233,11 @@ namespace NxRHI
 		if (Mesh == nullptr || ShaderEffect == nullptr)
 			return;
 
+		if (DebugName.empty() == false)
+		{
+			cmdlist->BeginEvent(DebugName.c_str());
+		}
+
 		auto device = (DX12GpuDevice*)cmdlist->GetGpuDevice();
 		device->CheckDeviceThread();
 		auto dx12Cmd = (DX12CommandList*)cmdlist;
@@ -319,6 +324,10 @@ namespace NxRHI
 					cmdlist->Draw(pDrawDesc->PrimitiveType, pDrawDesc->BaseVertexIndex, pDrawDesc->NumPrimitives, DrawInstance);
 				}
 			}
+		}
+		if (DebugName.empty() == false)
+		{
+			cmdlist->EndEvent();
 		}
 	}
 
@@ -496,6 +505,11 @@ namespace NxRHI
 		auto dx12Cmd = (DX12CommandList*)cmdlist;
 		auto effect = mEffect.UnsafeConvertTo<DX12ComputeEffect>();
 
+		if (DebugName.empty() == false)
+		{
+			cmdlist->BeginEvent(DebugName.c_str());
+		}
+
 		dx12Cmd->mContext->SetPipelineState(effect->mPipelineState);
 		dx12Cmd->mContext->SetComputeRootSignature(effect->mSignature);
 		//effect->Commit(cmdlist, this);
@@ -555,6 +569,11 @@ namespace NxRHI
 		else
 		{
 			cmdlist->Dispatch(mDispatchX, mDispatchY, mDispatchZ);
+		}
+
+		if (DebugName.empty() == false)
+		{
+			cmdlist->EndEvent();
 		}
 	}
 }

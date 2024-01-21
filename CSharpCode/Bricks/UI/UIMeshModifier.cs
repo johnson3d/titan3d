@@ -56,6 +56,10 @@ namespace EngineNS.UI
         {
             return null;
         }
+        public void Initialize(Graphics.Mesh.UMaterialMesh materialMesh)
+        {
+
+        }
     }
     public class TtMdfUIMesh : Graphics.Pipeline.Shader.TtMdfQueue1<TtUIModifier>
     {

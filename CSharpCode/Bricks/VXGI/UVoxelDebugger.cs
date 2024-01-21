@@ -27,6 +27,10 @@ namespace EngineNS.Bricks.VXGI
         {
             return null;
         }
+        public void Initialize(Graphics.Mesh.UMaterialMesh materialMesh)
+        {
+
+        }
     }
     public class UMdfVoxelDebugMesh : Graphics.Pipeline.Shader.TtMdfQueue1<TtVoxelDebugModifier>
     {

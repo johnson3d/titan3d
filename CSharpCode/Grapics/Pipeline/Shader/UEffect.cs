@@ -304,6 +304,7 @@ namespace EngineNS.Graphics.Pipeline.Shader
             if (mdf == null)
                 return false;
 
+            mdf.Initialize(null);
             this.Desc.MaterialHash = material.GetHash();
             this.Desc.MdfQueueHash = mdf.GetHash();
 

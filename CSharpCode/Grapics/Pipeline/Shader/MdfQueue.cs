@@ -143,6 +143,7 @@ namespace EngineNS.Graphics.Pipeline.Shader
         public RName SourceName { get; }
         public NxRHI.EVertexStreamType[] GetNeedStreams();
         public EPixelShaderInput[] GetPSNeedInputs();
+        public void Initialize(Graphics.Mesh.UMaterialMesh materialMesh);
     }
 
     public abstract class TtMdfQueueBase : AuxPtrType<IMdfQueue>, IShaderCodeProvider
@@ -160,6 +161,13 @@ namespace EngineNS.Graphics.Pipeline.Shader
             }
             Modifiers.Clear();
             base.Dispose();
+        }
+        public virtual void Initialize(Graphics.Mesh.UMaterialMesh materialMesh)
+        {
+            foreach (var i in Modifiers)
+            {
+                i.Initialize(materialMesh);
+            }
         }
         public virtual NxRHI.EVertexStreamType[] GetNeedStreams()
         {

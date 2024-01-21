@@ -54,10 +54,13 @@ namespace EngineNS.Bricks.Terrain.CDLOD
             {
                 if (PlantType == null)
                     return;
-                var pos = (Placement.Position - PlantType.InstanceOffset).ToSingleVector3();
-                var scale = Placement.Scale;
-                var quat = Placement.Quat;
-                PlantType.InstanceMdf.InstanceModifier.SetInstance(InstanceIndex, &pos, &scale, &quat, (Vector4ui*)IntPtr.Zero.ToPointer(), (uint*)IntPtr.Zero.ToPointer());
+
+                var instance = new Graphics.Mesh.Modifier.FVSInstanceData();
+                instance.Position = (Placement.Position - PlantType.InstanceOffset).ToSingleVector3();
+                instance.Scale = Placement.Scale;
+                instance.Quat = Placement.Quat;
+                
+                PlantType.InstanceMdf.InstanceModifier.SetInstance(InstanceIndex, in instance);
                 DebugHitproxyMesh?.SetWorldTransform(Placement.TransformData, PlantType.Terrain.GetWorld(), false);
             }
             public override void OnHitProxyChanged()
@@ -117,12 +120,17 @@ namespace EngineNS.Bricks.Terrain.CDLOD
                 obj.PlantType = this;
                 if (InstanceMdf == null)
                     return;
-                InstanceMdf.InstanceModifier.SureBuffers((uint)capacity);
+                InstanceMdf.InstanceModifier.SetCapacity((uint)capacity);
                 UEngine.Instance.GfxDevice.HitproxyManager.MapProxy(obj);
                 ObjInstances.Add(obj);
 
                 var pos = (obj.Placement.Position - InstanceOffset).ToSingleVector3();
-                obj.InstanceIndex = InstanceMdf.InstanceModifier.PushInstance(in pos, obj.Placement.Scale, obj.Placement.Quat, in Vector4ui.Zero, obj.HitProxy.ProxyId);
+                var instance = new Graphics.Mesh.Modifier.FVSInstanceData();
+                instance.Position = pos;
+                instance.Scale = obj.Placement.Scale;
+                instance.Quat = obj.Placement.Quat;
+                instance.HitProxyId = obj.HitProxy.ProxyId;
+                obj.InstanceIndex = InstanceMdf.InstanceModifier.PushInstance(in instance);
                 //InstanceMdf.InstanceModifier.PushInstance(obj.Transform.mPosition.ToSingleVector3(), in obj.Transform.mScale, in obj.Transform.mQuat, in UInt32_4.Zero, obj.HitProxy.ProxyId);
             }
             public void OnHitProxyChanged()
@@ -180,7 +188,7 @@ namespace EngineNS.Bricks.Terrain.CDLOD
             {
                 if (i.Mesh == null)
                     continue;
-                if (i.InstanceMdf.InstanceModifier.CurNumber == 0)
+                if (i.InstanceMdf.InstanceModifier.InstanceBuffers.NumOfInstance == 0)
                     continue;
                 if (rp.World.CameralOffsetSerialId != CameralOffsetSerialId)
                 {
@@ -202,7 +210,7 @@ namespace EngineNS.Bricks.Terrain.CDLOD
             {
                 if (i.Mesh == null)
                     continue;
-                if (i.InstanceMdf.InstanceModifier.CurNumber == 0)
+                if (i.InstanceMdf.InstanceModifier.InstanceBuffers.NumOfInstance == 0)
                     continue;
                 meshes.Add(i.Mesh);
             }

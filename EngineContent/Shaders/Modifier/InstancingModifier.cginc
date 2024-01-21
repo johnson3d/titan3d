@@ -1,9 +1,9 @@
 
 #if HW_VS_STRUCTUREBUFFER == 1
-StructuredBuffer<VSInstantData> VSInstantDataArray DX_AUTOBIND;//: register(t13);
-VSInstantData GetInstanceData(VS_MODIFIER input)
+StructuredBuffer<VSInstanceData> VSInstanceDataArray DX_AUTOBIND;//: register(t13);
+VSInstanceData GetInstanceData(VS_MODIFIER input)
 {
-	VSInstantData result = VSInstantDataArray[input.vInstanceId];
+	VSInstanceData result = VSInstanceDataArray[input.vInstanceId];
 	//result.InstanceId = input.vInstanceId;
 	return result;
 }
@@ -25,7 +25,7 @@ float3 InstancingRotateVec(in float3 inPos, in float4 inQuat)
 
 void DoInstancingModifierVS(inout PS_INPUT vsOut, inout VS_MODIFIER vert)
 {
-	VSInstantData instData = GetInstanceData(vert);
+	VSInstanceData instData = GetInstanceData(vert);
 
 	float3 Pos = instData.Position.xyz + InstancingRotateVec(vert.vPosition * instData.Scale.xyz, instData.Quat);
 
@@ -46,7 +46,7 @@ void DoInstancingModifierVS(inout PS_INPUT vsOut, inout VS_MODIFIER vert)
 		vsOut.PointLightIndices[i] = (uint)lightIndex;
 	}*/
 //#if HW_VS_STRUCTUREBUFFER
-//	VSInstantData InstData = VSInstantDataArray[vert.vInstanceId];
+//	VSInstanceData InstData = VSInstanceDataArray[vert.vInstanceId];
 //	vert.vPosition = mul(float4(vert.vPosition.xyz, 1), InstData.WorldMatrix).xyz;
 //	vert.vNormal = normalize(mul(float4(vert.vNormal.xyz, 0), InstData.WorldMatrix).xyz);
 //	vert.vTangent.xyz = normalize(mul(float4(vert.vTangent.xyz, 0), InstData.WorldMatrix).xyz);

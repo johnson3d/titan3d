@@ -178,7 +178,7 @@ namespace EngineNS.GamePlay.Scene
 
                     var instantMesh = mDebugPointMesh.MdfQueue as Graphics.Mesh.UMdfInstanceStaticMesh;
 
-                    instantMesh.InstanceModifier.SureBuffers((uint)Spline.Curves.Count);
+                    instantMesh.InstanceModifier.SetCapacity((uint)Spline.Curves.Count);
 
                     foreach(var i in SplinePoints)
                     {
@@ -197,7 +197,12 @@ namespace EngineNS.GamePlay.Scene
                         UEngine.Instance.GfxDevice.HitproxyManager.MapProxy(sPoint);
                         SplinePoints.Add(sPoint);
                         //instantMesh.InstanceModifier.PushInstance(in i.End, in Vector3.UnitXYZ, in Quaternion.Identity, in UInt32_4.Zero, this.HitProxy.ProxyId);
-                        instantMesh.InstanceModifier.PushInstance(in Spline.Curves[i].mEnd, in Vector3.One, in Quaternion.Identity, in Vector4ui.Zero, sPoint.HitProxy.ProxyId);
+                        var instance = new Graphics.Mesh.Modifier.FVSInstanceData();
+                        instance.Position = Spline.Curves[i].mEnd;
+                        instance.Scale = Vector3.One;
+                        instance.Quat = Quaternion.Identity;
+                        instance.HitProxyId = sPoint.HitProxy.ProxyId;
+                        instantMesh.InstanceModifier.PushInstance(in instance);
 
                         //var cache = i.GetPointCache(Spline.Segments);
                         //for (int j = 0; j < cache.CachedPoints.Length; j++)
