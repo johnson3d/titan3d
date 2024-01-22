@@ -75,7 +75,6 @@ namespace NxRHI
 		AutoRef<ID3D12CommandSignature> GetIndirectDrawIndexCmdSig(DX12GpuDevice* device, ICommandList* cmdlist);
 	public:
 		TWeakRefHandle<DX12GpuDevice>	mDeviceRef;
-		int								mVSMutiDrawRootIndex = -1;
 		AutoRef<ID3D12RootSignature>	mSignature;
 		AutoRef<ID3D12CommandSignature>	mCmdSignature;
 		UINT							mIndirectOffset = 0;
@@ -98,7 +97,6 @@ namespace NxRHI
 		AutoRef<ID3D12CommandSignature> GetIndirectDispatchCmdSig(DX12GpuDevice* device, ICommandList* cmdlist);
 	public:
 		TWeakRefHandle<DX12GpuDevice>	mDeviceRef;
-		int								mCSMutiDrawRootIndex = -1;
 		AutoRef<ID3D12RootSignature>	mSignature;
 		UINT							mIndirectOffset = 0;
 		AutoRef<ID3D12CommandSignature>	mCmdSignature;

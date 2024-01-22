@@ -298,10 +298,11 @@ namespace NxRHI
 	{
 		if (mCmdSignature != nullptr)
 			return mCmdSignature;
-		if (mVSMutiDrawRootIndex == -1)
+		mCmdSignature = device->CmdSigForIndirectDrawIndex;
+		mIndirectOffset = offsetof(FIndirectDrawArgument, VertexCountPerInstance);
+		/*if (mVSMutiDrawRootIndex == -1)
 		{
-			mCmdSignature = device->CmdSigForIndirectDrawIndex;
-			mIndirectOffset = offsetof(FIndirectDrawArgument, VertexCountPerInstance);
+			
 		}
 		else
 		{
@@ -318,7 +319,7 @@ namespace NxRHI
 			auto hr = device->mDevice->CreateCommandSignature(&desc, mSignature, IID_PPV_ARGS(mCmdSignature.GetAddressOf()));
 			ASSERT(hr == S_OK);
 			mIndirectOffset = 0;
-		}
+		}*/
 		return mCmdSignature;
 	}
 	void DX12GraphicsEffect::Commit(ICommandList* cmdlist, IGraphicDraw* drawcall)
@@ -596,7 +597,9 @@ namespace NxRHI
 	{
 		if (mCmdSignature != nullptr)
 			return mCmdSignature;
-		if (mCSMutiDrawRootIndex == -1)
+		mCmdSignature = device->CmdSigForIndirectDispatch;
+		mIndirectOffset = offsetof(FIndirectDispatchArgument, X);
+		/*if (mCSMutiDrawRootIndex == -1)
 		{
 			mCmdSignature = device->CmdSigForIndirectDispatch;
 			mIndirectOffset = offsetof(FIndirectDispatchArgument, X);
@@ -616,7 +619,7 @@ namespace NxRHI
 			auto hr = device->mDevice->CreateCommandSignature(&desc, mSignature, IID_PPV_ARGS(mCmdSignature.GetAddressOf()));
 			ASSERT(hr == S_OK);
 			mIndirectOffset = 0;
-		}
+		}*/
 		return mCmdSignature;
 	}
 }

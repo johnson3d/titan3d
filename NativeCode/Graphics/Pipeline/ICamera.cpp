@@ -79,6 +79,22 @@ void ICamera::UpdateConstBufferData(EngineNS::NxRHI::IGpuDevice* device, EngineN
 			buffer->SetValue(fld, ENUM_FRUSTUMPL_LEFT, mFrustum.GetPlane(ENUM_FRUSTUMPL_LEFT), bFlush, pUpdater);
 			buffer->SetValue(fld, ENUM_FRUSTUMPL_NEAR, mFrustum.GetPlane(ENUM_FRUSTUMPL_NEAR), bFlush, pUpdater);
 			buffer->SetValue(fld, ENUM_FRUSTUMPL_FAR, mFrustum.GetPlane(ENUM_FRUSTUMPL_FAR), bFlush, pUpdater);
+
+			v3dxBox3 aabb;
+			mFrustum.GetAABB(&aabb);
+			buffer->SetValue(pBinder->FindField("ClipMinPoint"), aabb.minbox, bFlush, pUpdater);
+			buffer->SetValue(pBinder->FindField("ClipMaxPoint"), aabb.maxbox, bFlush, pUpdater);
+		}
+		{
+			v3dxPlane3* planes = mFrustum.m_aPlane;
+			v3dxVector4 planesX(planes[0].A(), planes[1].A(), planes[2].A(), planes[3].A());
+			v3dxVector4 planesY(planes[0].B(), planes[1].B(), planes[2].B(), planes[3].B());
+			v3dxVector4 planesZ(planes[0].C(), planes[1].C(), planes[2].C(), planes[3].C());
+			v3dxVector4 planesW(planes[0].D(), planes[1].D(), planes[2].D(), planes[3].D());
+			buffer->SetValue(pBinder->FindField("ClipPlanesX"), planesX, bFlush, pUpdater);
+			buffer->SetValue(pBinder->FindField("ClipPlanesY"), planesY, bFlush, pUpdater);
+			buffer->SetValue(pBinder->FindField("ClipPlanesZ"), planesZ, bFlush, pUpdater);
+			buffer->SetValue(pBinder->FindField("ClipPlanesW"), planesW, bFlush, pUpdater);
 		}
 
 		//ASSERT(mLogicData->mJitterViewProjection.m11 == mLogicData->mViewProjection.m11);

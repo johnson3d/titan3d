@@ -201,28 +201,10 @@ namespace NxRHI
 			mSamplerHeap = nullptr;
 		}
 		ResetHeap(device, effect);
-		auto multiDrawIndex = this->ShaderEffect.UnsafeConvertTo<DX12GraphicsEffect>()->mVSMutiDrawRootIndex;
-		if (multiDrawIndex != -1)
+		
+		for (auto& i : BindResources)
 		{
-			static VNameString multiDrawName = VNameString("cbForMultiDraw");
-			for (auto& i : BindResources)
-			{
-				if (i.first->Name == multiDrawName)
-				{
-					dx12Cmd->mContext->SetGraphicsRootConstantBufferView(multiDrawIndex, i.second.UnsafeConvertTo<DX12CbView>()->GetBufferVirtualAddress());
-				}
-				else
-				{
-					BindResourceToHeap(device, i.first, i.second);
-				}
-			}
-		}
-		else
-		{
-			for (auto& i : BindResources)
-			{
-				BindResourceToHeap(device, i.first, i.second);
-			}
+			BindResourceToHeap(device, i.first, i.second);
 		}
 
 		BindDescriptors(device, dx12Cmd, effect);
@@ -306,6 +288,7 @@ namespace NxRHI
 			ASSERT(pDrawDesc);
 			if (IndirectDrawArgsBuffer)
 			{
+				IndirectDrawArgsBuffer->TransitionTo(cmdlist, GRS_UavIndirect);
 				auto effect = this->ShaderEffect.UnsafeConvertTo<DX12GraphicsEffect>();
 				dx12Cmd->mCurrentCmdSig = effect->GetIndirectDrawIndexCmdSig(device, dx12Cmd);
 				dx12Cmd->mCurrentIndirectOffset = effect->mIndirectOffset;
@@ -471,28 +454,9 @@ namespace NxRHI
 		ResetHeap(device, effect);
 		BindDescriptors(device, dx12Cmd, effect);
 
-		auto multiDrawIndex = ((DX12ComputeEffect*)GetComputeEffect())->mCSMutiDrawRootIndex;
-		if (multiDrawIndex != -1)
+		for (auto& i : BindResources)
 		{
-			static VNameString multiDrawName = VNameString("cbForMultiDraw");
-			for (auto& i : BindResources)
-			{
-				if (i.first->Name == multiDrawName)
-				{
-					dx12Cmd->mContext->SetGraphicsRootConstantBufferView(multiDrawIndex, i.second.UnsafeConvertTo<DX12CbView>()->GetBufferVirtualAddress());
-				}
-				else
-				{
-					BindResourceToHeap(device, i.first, i.second);
-				}
-			}
-		}
-		else
-		{
-			for (auto& i : BindResources)
-			{
-				BindResourceToHeap(device, i.first, i.second);
-			}
+			BindResourceToHeap(device, i.first, i.second);
 		}
 	}
 	void DX12ComputeDraw::Commit(ICommandList* cmdlist, bool bRefResource)
@@ -559,6 +523,7 @@ namespace NxRHI
 
 		if (IndirectDispatchArgsBuffer != nullptr)
 		{
+			IndirectDispatchArgsBuffer->TransitionTo(cmdlist, GRS_UavIndirect);
 			auto effect = this->mEffect.UnsafeConvertTo<DX12ComputeEffect>();
 			dx12Cmd->mCurrentCmdSig = effect->GetIndirectDispatchCmdSig(device, dx12Cmd);
 			dx12Cmd->mCurrentIndirectOffset = effect->mIndirectOffset;

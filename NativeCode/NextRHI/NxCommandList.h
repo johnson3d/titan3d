@@ -28,7 +28,6 @@ namespace NxRHI
 	struct TR_CLASS(SV_LayoutStruct = 8)
 		FIndirectDrawArgument
 	{
-		UINT DrawID;
 		UINT VertexCountPerInstance;
 		UINT InstanceCount;
 		UINT StartIndex;
@@ -38,7 +37,6 @@ namespace NxRHI
 	struct TR_CLASS(SV_LayoutStruct = 8)
 		FIndirectDispatchArgument
 	{
-		UINT DrawID;
 		UINT X;
 		UINT Y;
 		UINT Z;

@@ -690,10 +690,10 @@ namespace NxRHI
 		tmp.Transition.StateAfter = GpuStateToDX12(dstAccess);
 		//if (D3D12_RESOURCE_STATE_UNORDERED_ACCESS == tmp.Transition.StateBefore && D3D12_RESOURCE_STATE_INDIRECT_ARGUMENT == tmp.Transition.StateAfter)
 		{
-			if (this->mDebugName == "PostCmdList")
+			/*if (this->mDebugName == "PostCmdList")
 			{
 				int xx = 0;
-			}
+			}*/
 		}
 		if (tmp.Transition.StateBefore == tmp.Transition.StateAfter)
 		{
