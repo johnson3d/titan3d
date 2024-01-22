@@ -125,17 +125,8 @@ struct VS_MODIFIER
 	float4 vF4_3;
 	uint vVertexID;
 	uint vInstanceId;
-#if RHI_TYPE != RHI_DX11
-	uint vMultiDrawId;
-#endif
+    uint vMultiDrawId;
 };
-
-#if RHI_TYPE == RHI_DX12
-cbuffer cbForMultiDraw DX_AUTOBIND
-{//only for VS/CS,pls pass it by PS_INPUT for ps stage
-	uint MultiDrawId;
-};
-#endif
 
 VS_MODIFIER VS_INPUT_TO_VS_MODIFIER(VS_INPUT input);
 

@@ -12,7 +12,7 @@
 #include "Material"
 #include "MdfQueue"
 
-#include "Inc/SysFunctionDefImpl.cginc"
+#include "../Inc/SysFunctionDefImpl.cginc"
 #include "CommonLighting.cginc"
 
 #ifdef MDFQUEUE_FUNCTION

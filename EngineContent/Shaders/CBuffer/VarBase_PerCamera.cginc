@@ -1,6 +1,6 @@
 #ifndef __VARBASE_PERCAMERA_SHADERINC__
 #define __VARBASE_PERCAMERA_SHADERINC__
-#include "GlobalDefine.cginc"
+#include "../Inc/GlobalDefine.cginc"
 
 VK_BIND(0) cbuffer cbPerCamera DX_BIND_B(0)
 {
@@ -20,14 +20,20 @@ VK_BIND(0) cbuffer cbPerCamera DX_BIND_B(0)
 	matrix JitterPreFrameViewPrjMtx;
 
 	float2 JitterOffset;
+    float2 JitterOffset_Pad;
 
 	float4 CornerRays[4];
 	float4 ClipPlanes[6];
     
-    float4 ClipPlanesX;
+	float4 ClipPlanesX;
     float4 ClipPlanesY;
     float4 ClipPlanesZ;
     float4 ClipPlanesW;
+	
+    float3 ClipMinPoint;
+    float ClipMinPoint_Pad;
+    float3 ClipMaxPoint;
+    float ClipMaxPoint_Pad;
 
 	float3 CameraPosition;
 	float gZNear;

@@ -60,7 +60,9 @@ VS_MODIFIER VS_INPUT_TO_VS_MODIFIER(VS_INPUT input)
 #if RHI_TYPE == RHI_VK
 	result.vMultiDrawId = input.vMultiDrawId;
 #elif RHI_TYPE == RHI_DX12
-	result.vMultiDrawId = MultiDrawId;
+	result.vMultiDrawId = 0;//input.vMultiDrawId;
+#else
+	result.vMultiDrawId = 0;
 #endif
 
 	return result;

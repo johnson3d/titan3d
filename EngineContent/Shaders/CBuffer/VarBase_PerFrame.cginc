@@ -1,6 +1,6 @@
 #ifndef __VARBASE_PERFRAME_SHADERINC__
 #define __VARBASE_PERFRAME_SHADERINC__
-#include "GlobalDefine.cginc"
+#include "../Inc/GlobalDefine.cginc"
 
 VK_BIND(3) cbuffer cbPerFrame DX_BIND_B(3)
 {

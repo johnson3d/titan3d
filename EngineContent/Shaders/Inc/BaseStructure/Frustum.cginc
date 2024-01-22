@@ -1,6 +1,7 @@
 #ifndef _BaseStructure_Frustum_Compute_H_
 #define _BaseStructure_Frustum_Compute_H_
 #include "Box3.cginc"
+#include "../../CBuffer/VarBase_PerCamera.cginc"
 
 struct TtFrustum
 {
@@ -9,10 +10,24 @@ struct TtFrustum
     float4 PlanesZ;
     float4 PlanesW;
     
-    float4 NearPlane;
-    float4 FarPlane;
+    float4 Planes[6];
+    float3 MinPoint;
+    float3 MaxPoint;
     
-    bool Cull(float3 BoundsCenter, float3 BoundsExtent)
+    static TtFrustum CreateByCamera()
+    {
+        TtFrustum result;
+        result.PlanesX = ClipPlanesX;
+        result.PlanesY = ClipPlanesY;
+        result.PlanesZ = ClipPlanesZ;
+        result.PlanesW = ClipPlanesW;
+        result.MinPoint = ClipMinPoint;
+        result.MaxPoint = ClipMaxPoint;
+        result.Planes = ClipPlanes;
+        return result;
+    }
+    
+    bool IsOverlap4(float3 BoundsCenter, float3 BoundsExtent)
     {
         float4 OrigX = BoundsCenter.xxxx;
         float4 OrigY = BoundsCenter.yyyy;
@@ -39,6 +54,30 @@ struct TtFrustum
             return false;
         }
 
+        return true;
+    }
+    
+    bool IsOverlap6(float3 BoundsCenter, float3 BoundsExtent)
+    {
+        float3 center = BoundsCenter;
+        float3 extent = BoundsExtent;
+
+        float3 minPos = BoundsCenter - BoundsExtent;
+        float3 maxPos = BoundsCenter + BoundsExtent;
+    
+        float outOfRange = dot(MinPoint > maxPos, 1) + dot(MaxPoint < minPos, 1);
+        if (outOfRange > 0.5)
+            return false;
+
+        for (uint i = 0; i < 6; ++i)
+        {
+            float4 plane = Planes[i];
+            float3 absNormal = abs(plane.xyz);
+            if ((dot(center, plane.xyz) - dot(absNormal, extent)) > -plane.w)
+            {
+                return false;
+            }
+        }
         return true;
     }
 };

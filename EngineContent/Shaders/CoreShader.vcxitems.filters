@@ -264,9 +264,6 @@
     <None Include="$(MSBuildThisFileDirectory)Bricks\TextFont\FontSDF.cginc">
       <Filter>Bricks\TextFont</Filter>
     </None>
-    <None Include="$(MSBuildThisFileDirectory)Inc\LargeWorldCoordinates.cginc">
-      <Filter>Inc</Filter>
-    </None>
     <None Include="$(MSBuildThisFileDirectory)Occlusion\GpuSceneSetupCullCluster.cginc">
       <Filter>Occlusion</Filter>
     </None>
@@ -283,7 +280,6 @@
       <Filter>ShadingEnv</Filter>
     </None>
     <None Include="$(MSBuildThisFileDirectory)Bricks\SoftRaster\FRaster.cginc" />
-    <None Include="$(MSBuildThisFileDirectory)CBuffer\VarBase_PreFramePerMesh.cginc" />
     <None Include="$(MSBuildThisFileDirectory)ShadingEnv\FogShading.cginc">
       <Filter>ShadingEnv</Filter>
     </None>
@@ -316,7 +312,6 @@
     </None>
     <None Include="$(MSBuildThisFileDirectory)ShadingEnv\CommonLighting.cginc" />
     <None Include="$(MSBuildThisFileDirectory)Occlusion\SetupDrawClusterArgs.cginc" />
-    <None Include="$(MSBuildThisFileDirectory)ShadingEnv\DrawViewportShading.cginc" />
     <None Include="$(MSBuildThisFileDirectory)Inc\BaseStructure\Box2.cginc">
       <Filter>Inc\BaseStructure</Filter>
     </None>
@@ -365,6 +360,15 @@
     </None>
     <None Include="$(MSBuildThisFileDirectory)Bricks\GpuDriven\GpuCulling.cginc">
       <Filter>Bricks\GpuDriven</Filter>
+    </None>
+    <None Include="$(MSBuildThisFileDirectory)CBuffer\VarBase_PreFramePerMesh.cginc">
+      <Filter>CBuffer</Filter>
+    </None>
+    <None Include="$(MSBuildThisFileDirectory)ShadingEnv\DrawViewportShading.cginc">
+      <Filter>ShadingEnv</Filter>
+    </None>
+    <None Include="$(MSBuildThisFileDirectory)Inc\BaseStructure\Quat.cginc">
+      <Filter>Inc\BaseStructure</Filter>
     </None>
   </ItemGroup>
   <ItemGroup>

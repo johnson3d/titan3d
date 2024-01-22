@@ -41,13 +41,13 @@
     <None Include="$(MSBuildThisFileDirectory)Inc\Algorithm\WaveTask.cginc" />
     <None Include="$(MSBuildThisFileDirectory)Inc\BaseStructure\Box2.cginc" />
     <None Include="$(MSBuildThisFileDirectory)Inc\BaseStructure\Frustum.cginc" />
+    <None Include="$(MSBuildThisFileDirectory)Inc\BaseStructure\Quat.cginc" />
     <None Include="$(MSBuildThisFileDirectory)Inc\BaseStructure\Ray.cginc" />
     <None Include="$(MSBuildThisFileDirectory)Inc\FogCommon.cginc" />
     <None Include="$(MSBuildThisFileDirectory)Inc\CommonLightFunc.cginc" />
     <None Include="$(MSBuildThisFileDirectory)Inc\FXAAMobile.cginc" />
     <None Include="$(MSBuildThisFileDirectory)Inc\GlobalDefine.cginc" />
     <None Include="$(MSBuildThisFileDirectory)Inc\GpuSceneCommon.cginc" />
-    <None Include="$(MSBuildThisFileDirectory)Inc\LargeWorldCoordinates.cginc" />
     <None Include="$(MSBuildThisFileDirectory)Inc\LightCommon.cginc" />
     <None Include="$(MSBuildThisFileDirectory)Inc\Math.cginc" />
     <None Include="$(MSBuildThisFileDirectory)Inc\MixUtility.cginc" />

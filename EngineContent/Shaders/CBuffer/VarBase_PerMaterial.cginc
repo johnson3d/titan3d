@@ -1,6 +1,6 @@
 #ifndef __VARBASE_PERINSTANCE_SHADERINC__
 #define __VARBASE_PERINSTANCE_SHADERINC__
-#include "GlobalDefine.cginc"
+#include "../Inc/GlobalDefine.cginc"
 
 VK_BIND(2) cbuffer cbPerMaterial DX_BIND_B(2)
 {

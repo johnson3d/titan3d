@@ -3,7 +3,7 @@ struct BufType
 {
 	uint count;
 };
-RWStructuredBuffer<BufType> BufferOut DX_BIND_U(0);
+RWStructuredBuffer<BufType> BufferOut;
 
 [numthreads(8, 8, 1)]
 void CSMain(uint3 id : SV_DispatchThreadID)
@@ -28,7 +28,7 @@ void CSMain(uint3 id : SV_DispatchThreadID)
 // Distributed under the zlib License (see readme.txt)
 //////////////////////////////////////////////////////////////////////
 
-#include "common.sh"
+//#include "common.sh"
 
 float4            g_quadOffset;           // .z holds the z center of the AABB
 float4            g_quadScale;            // .z holds the current LOD level

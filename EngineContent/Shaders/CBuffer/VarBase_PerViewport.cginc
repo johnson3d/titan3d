@@ -1,6 +1,6 @@
 #ifndef __VARBASE_PERVIEWPORT_SHADERINC__
 #define __VARBASE_PERVIEWPORT_SHADERINC__
-#include "GlobalDefine.cginc"
+#include "../Inc/GlobalDefine.cginc"
 
 #include "../Inc/LightCommon.cginc"
 #include "../Inc/Math.cginc"
