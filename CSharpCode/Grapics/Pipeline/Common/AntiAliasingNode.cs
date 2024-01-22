@@ -146,11 +146,11 @@ namespace EngineNS.Graphics.Pipeline.Common
     }
     public class TtAntiAliasingNode : USceenSpaceNode
     {
-        public Common.URenderGraphPin ColorPinIn = Common.URenderGraphPin.CreateInput("Color");
-        public Common.URenderGraphPin PreColorPinIn = Common.URenderGraphPin.CreateInput("PreColor");
-        public Common.URenderGraphPin DepthPinIn = Common.URenderGraphPin.CreateInput("Depth");
-        public Common.URenderGraphPin PreDepthPinIn = Common.URenderGraphPin.CreateInput("PreDepth");
-        public Common.URenderGraphPin MotionVectorPinIn = Common.URenderGraphPin.CreateInput("MotionVector");
+        public TtRenderGraphPin ColorPinIn = TtRenderGraphPin.CreateInput("Color");
+        public TtRenderGraphPin PreColorPinIn = TtRenderGraphPin.CreateInput("PreColor");
+        public TtRenderGraphPin DepthPinIn = TtRenderGraphPin.CreateInput("Depth");
+        public TtRenderGraphPin PreDepthPinIn = TtRenderGraphPin.CreateInput("PreDepth");
+        public TtRenderGraphPin MotionVectorPinIn = TtRenderGraphPin.CreateInput("MotionVector");
 
         public NxRHI.UCopyDraw mCopyColorDrawcall;
         public NxRHI.UCopyDraw mCopyDepthDrawcall;
@@ -304,7 +304,7 @@ namespace EngineNS.Graphics.Pipeline.Common
             }
         }
 
-        public void CopyAttachBuff(Common.URenderGraphPin SrcPin, UAttachBuffer DesAttachBuffer, NxRHI.UCopyDraw CopyDrawcall, NxRHI.UCommandList DrawCommandList)
+        public void CopyAttachBuff(TtRenderGraphPin SrcPin, UAttachBuffer DesAttachBuffer, NxRHI.UCopyDraw CopyDrawcall, NxRHI.UCommandList DrawCommandList)
         {
             var srcPin = GetAttachBuffer(SrcPin);
 

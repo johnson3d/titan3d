@@ -45,8 +45,8 @@ namespace EngineNS.Graphics.Pipeline.Common
     }
     public class UHdrNode : USceenSpaceNode
     {
-        public Common.URenderGraphPin ColorPinIn = Common.URenderGraphPin.CreateInput("Color");
-        public Common.URenderGraphPin GpuScenePinIn = Common.URenderGraphPin.CreateInput("GpuScene");
+        public TtRenderGraphPin ColorPinIn = TtRenderGraphPin.CreateInput("Color");
+        public TtRenderGraphPin GpuScenePinIn = TtRenderGraphPin.CreateInput("GpuScene");
         public UHdrNode()
         {
             Name = "HdrNode";            

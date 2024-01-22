@@ -227,18 +227,18 @@ namespace EngineNS.Graphics.Pipeline.Deferred
     }
     public partial class UDeferredDirLightingNode : Common.USceenSpaceNode
     {
-        public Common.URenderGraphPin Rt0PinIn = Common.URenderGraphPin.CreateInput("MRT0");
-        public Common.URenderGraphPin Rt1PinIn = Common.URenderGraphPin.CreateInput("MRT1");
-        public Common.URenderGraphPin Rt2PinIn = Common.URenderGraphPin.CreateInput("MRT2");
-        public Common.URenderGraphPin Rt3PinIn = Common.URenderGraphPin.CreateInputOutput("MRT3");
-        public Common.URenderGraphPin DepthStencilPinIn = Common.URenderGraphPin.CreateInputOutput("DepthStencil");
+        public TtRenderGraphPin Rt0PinIn = TtRenderGraphPin.CreateInput("MRT0");
+        public TtRenderGraphPin Rt1PinIn = TtRenderGraphPin.CreateInput("MRT1");
+        public TtRenderGraphPin Rt2PinIn = TtRenderGraphPin.CreateInput("MRT2");
+        public TtRenderGraphPin Rt3PinIn = TtRenderGraphPin.CreateInputOutput("MRT3");
+        public TtRenderGraphPin DepthStencilPinIn = TtRenderGraphPin.CreateInputOutput("DepthStencil");
         
-        public Common.URenderGraphPin ShadowMapPinIn = Common.URenderGraphPin.CreateInput("ShadowMap");
-        public Common.URenderGraphPin EnvMapPinIn = Common.URenderGraphPin.CreateInput("EnvMap");
-        public Common.URenderGraphPin VignettePinIn = Common.URenderGraphPin.CreateInput("Vignette");
-        public Common.URenderGraphPin TileScreenPinIn = Common.URenderGraphPin.CreateInput("TileScreen");
-        public Common.URenderGraphPin GpuScenePinIn = Common.URenderGraphPin.CreateInput("GpuScene");
-        public Common.URenderGraphPin PointLightsPinIn = Common.URenderGraphPin.CreateInput("PointLights");
+        public TtRenderGraphPin ShadowMapPinIn = TtRenderGraphPin.CreateInput("ShadowMap");
+        public TtRenderGraphPin EnvMapPinIn = TtRenderGraphPin.CreateInput("EnvMap");
+        public TtRenderGraphPin VignettePinIn = TtRenderGraphPin.CreateInput("Vignette");
+        public TtRenderGraphPin TileScreenPinIn = TtRenderGraphPin.CreateInput("TileScreen");
+        public TtRenderGraphPin GpuScenePinIn = TtRenderGraphPin.CreateInput("GpuScene");
+        public TtRenderGraphPin PointLightsPinIn = TtRenderGraphPin.CreateInput("PointLights");
 
         public UDeferredDirLightingNode()
         {

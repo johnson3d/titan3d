@@ -217,7 +217,7 @@ namespace EngineNS.Graphics.Mesh
             public List<ViewDrawCalls> TargetViews;
             
             private async Thread.Async.TtTask BuildDrawCall(ViewDrawCalls vdc, Pipeline.URenderPolicy policy,
-                Pipeline.URenderPolicy.EShadingType shadingType, Pipeline.Common.URenderGraphNode node)
+                Pipeline.URenderPolicy.EShadingType shadingType, Pipeline.TtRenderGraphNode node)
             {
                 var device = UEngine.Instance.GfxDevice;
                 NxRHI.UGraphicDraw[] drawCalls = vdc.DrawCalls;
@@ -361,7 +361,7 @@ namespace EngineNS.Graphics.Mesh
             [ThreadStatic]
             private static Profiler.TimeScope ScopeOnDrawCall = Profiler.TimeScopeManager.GetTimeScope(typeof(TtAtom), "OnDrawCall");
             public unsafe virtual NxRHI.UGraphicDraw GetDrawCall(NxRHI.ICommandList cmd, Pipeline.UGraphicsBuffers targetView, Pipeline.URenderPolicy policy,
-                Pipeline.URenderPolicy.EShadingType shadingType, Pipeline.Common.URenderGraphNode node)
+                Pipeline.URenderPolicy.EShadingType shadingType, Pipeline.TtRenderGraphNode node)
             {
                 if (Material == null)
                     return null;

@@ -6,7 +6,7 @@ namespace EngineNS.Graphics.Pipeline.Common
 {
     public partial class UGpuSceneNode
     {
-        public Common.URenderGraphPin PointLightsPinOut = Common.URenderGraphPin.CreateOutput("PointLights", false, EPixelFormat.PXF_UNKNOWN);
+        public TtRenderGraphPin PointLightsPinOut = TtRenderGraphPin.CreateOutput("PointLights", false, EPixelFormat.PXF_UNKNOWN);
         public struct FPointLight
         {
             public Vector4 PositionAndRadius;

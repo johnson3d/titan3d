@@ -12,9 +12,9 @@ namespace EngineNS.Bricks.RenderPolicyEditor
         {
             this.Icon.Size = new Vector2(20, 20);
         }
-        Graphics.Pipeline.Common.URenderGraphNode mGraphNode;
+        Graphics.Pipeline.TtRenderGraphNode mGraphNode;
         [Rtti.Meta(Order = 1)]
-        public Graphics.Pipeline.Common.URenderGraphNode GraphNode 
+        public Graphics.Pipeline.TtRenderGraphNode GraphNode 
         {
             get => mGraphNode;
         }
@@ -32,7 +32,7 @@ namespace EngineNS.Bricks.RenderPolicyEditor
                 var typeDesc = Rtti.UTypeDesc.TypeOf(value);
                 if (typeDesc != null)
                 {
-                    var rgNode = Rtti.UTypeDescManager.CreateInstance(typeDesc) as Graphics.Pipeline.Common.URenderGraphNode;
+                    var rgNode = Rtti.UTypeDescManager.CreateInstance(typeDesc) as Graphics.Pipeline.TtRenderGraphNode;
                     rgNode.InitNodePins();
                     InitNode(rgNode);
                 }
@@ -59,7 +59,7 @@ namespace EngineNS.Bricks.RenderPolicyEditor
             }
         }
         
-        public void InitNode(Graphics.Pipeline.Common.URenderGraphNode node)
+        public void InitNode(Graphics.Pipeline.TtRenderGraphNode node)
         {
             mGraphNode = node;
             
@@ -199,7 +199,7 @@ namespace EngineNS.Bricks.RenderPolicyEditor
                     {
                         foreach (var j in i.Types)
                         {
-                            if (j.Value.SystemType.IsSubclassOf(typeof(Graphics.Pipeline.Common.URenderGraphNode)))
+                            if (j.Value.SystemType.IsSubclassOf(typeof(Graphics.Pipeline.TtRenderGraphNode)))
                             {
                                 mGraphNodeTypes.Add(j.Value);
                             }
@@ -221,7 +221,7 @@ namespace EngineNS.Bricks.RenderPolicyEditor
                 (UMenuItem item, object sender) =>
                 {
                     var node = new UPolicyNode();
-                    var rgNode = Rtti.UTypeDescManager.CreateInstance(i) as Graphics.Pipeline.Common.URenderGraphNode;
+                    var rgNode = Rtti.UTypeDescManager.CreateInstance(i) as Graphics.Pipeline.TtRenderGraphNode;
                     //rgNode.RenderGraph = this;
                     rgNode.InitNodePins();
                     node.InitNode(rgNode);

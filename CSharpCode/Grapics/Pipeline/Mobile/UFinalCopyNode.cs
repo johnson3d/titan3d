@@ -124,11 +124,11 @@ namespace EngineNS.Graphics.Pipeline.Mobile
     }
     public class UFinalCopyNode : Common.USceenSpaceNode
     {
-        public Common.URenderGraphPin ColorPinIn = Common.URenderGraphPin.CreateInput("Color");
-        //public Common.URenderGraphPin DepthPinIn = Common.URenderGraphPin.CreateInput("Depth");
+        public TtRenderGraphPin ColorPinIn = TtRenderGraphPin.CreateInput("Color");
+        //public TtRenderGraphPin DepthPinIn = TtRenderGraphPin.CreateInput("Depth");
 
-        public Common.URenderGraphPin PickPinIn = Common.URenderGraphPin.CreateInput("Pick");
-        public Common.URenderGraphPin VignettePinIn = Common.URenderGraphPin.CreateInput("Vignette");
+        public TtRenderGraphPin PickPinIn = TtRenderGraphPin.CreateInput("Pick");
+        public TtRenderGraphPin VignettePinIn = TtRenderGraphPin.CreateInput("Vignette");
         public UFinalCopyNode()
         {
             Name = "UFinalCopyNode";

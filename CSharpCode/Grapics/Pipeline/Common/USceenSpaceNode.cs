@@ -7,7 +7,7 @@ using System.Text;
 
 namespace EngineNS.Graphics.Pipeline.Common
 {
-    public class USceenSpaceNode : URenderGraphNode
+    public class USceenSpaceNode : TtRenderGraphNode
     {
         public override void Dispose()
         {
@@ -16,7 +16,7 @@ namespace EngineNS.Graphics.Pipeline.Common
             GBuffers = null;
             base.Dispose();
         }
-        public Common.URenderGraphPin ResultPinOut = Common.URenderGraphPin.CreateOutput("Result", true, EPixelFormat.PXF_R8G8B8A8_UNORM);
+        public TtRenderGraphPin ResultPinOut = TtRenderGraphPin.CreateOutput("Result", true, EPixelFormat.PXF_R8G8B8A8_UNORM);
         public USceenSpaceNode()
         {
             Name = "USceenSpaceNode";

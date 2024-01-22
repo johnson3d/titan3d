@@ -5,7 +5,7 @@ using System.Text;
 
 namespace EngineNS.Graphics.Pipeline.Common
 {
-    public class UAvgBrightnessNode : Graphics.Pipeline.Common.URenderGraphNode
+    public class UAvgBrightnessNode : Graphics.Pipeline.TtRenderGraphNode
     {
         public override void Dispose()
         {
@@ -13,8 +13,8 @@ namespace EngineNS.Graphics.Pipeline.Common
             CoreSDK.DisposeObject(ref CountAvgBrightnessDrawcall);
             base.Dispose();
         }
-        public Common.URenderGraphPin GpuScenePinInOut = Common.URenderGraphPin.CreateInputOutput("GpuScene");
-        public Common.URenderGraphPin ColorPinIn = Common.URenderGraphPin.CreateInput("Color");
+        public TtRenderGraphPin GpuScenePinInOut = TtRenderGraphPin.CreateInputOutput("GpuScene");
+        public TtRenderGraphPin ColorPinIn = TtRenderGraphPin.CreateInput("Color");
         public UAvgBrightnessNode()
         {
             Name = "AvgBrightnessNode";

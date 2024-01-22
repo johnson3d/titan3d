@@ -6,10 +6,10 @@ using System.Text;
 
 namespace EngineNS.Bricks.Particle
 {
-    public class UParticleGraphNode : Graphics.Pipeline.Common.URenderGraphNode
+    public class UParticleGraphNode : Graphics.Pipeline.TtRenderGraphNode
     {
-        public Graphics.Pipeline.Common.URenderGraphPin ColorPinInOut = Graphics.Pipeline.Common.URenderGraphPin.CreateInputOutput("Color");
-        public Graphics.Pipeline.Common.URenderGraphPin DepthPinInOut = Graphics.Pipeline.Common.URenderGraphPin.CreateInputOutput("Depth");
+        public Graphics.Pipeline.TtRenderGraphPin ColorPinInOut = Graphics.Pipeline.TtRenderGraphPin.CreateInputOutput("Color");
+        public Graphics.Pipeline.TtRenderGraphPin DepthPinInOut = Graphics.Pipeline.TtRenderGraphPin.CreateInputOutput("Depth");
         public UParticleGraphNode()
         {
             Name = "ParticleGraphNode";

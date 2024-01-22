@@ -143,11 +143,11 @@ namespace EngineNS.Graphics.Pipeline.Mobile
     }
     public class UMobileForwordNodeBase : Common.UBasePassNode
     {
-        public Common.URenderGraphPin ShadowMapPinIn = Common.URenderGraphPin.CreateInput("ShadowMap");
-        public Common.URenderGraphPin EnvMapPinIn = Common.URenderGraphPin.CreateInput("EnvMap");
-        public Common.URenderGraphPin VignettePinIn = Common.URenderGraphPin.CreateInput("Vignette");        
-        public Common.URenderGraphPin TileScreenPinIn = Common.URenderGraphPin.CreateInput("TileScreen");
-        public Common.URenderGraphPin PointLightsPinIn = Common.URenderGraphPin.CreateInput("PointLights");
+        public TtRenderGraphPin ShadowMapPinIn = TtRenderGraphPin.CreateInput("ShadowMap");
+        public TtRenderGraphPin EnvMapPinIn = TtRenderGraphPin.CreateInput("EnvMap");
+        public TtRenderGraphPin VignettePinIn = TtRenderGraphPin.CreateInput("Vignette");        
+        public TtRenderGraphPin TileScreenPinIn = TtRenderGraphPin.CreateInput("TileScreen");
+        public TtRenderGraphPin PointLightsPinIn = TtRenderGraphPin.CreateInput("PointLights");
 
         public override void InitNodePins()
         {
@@ -161,9 +161,9 @@ namespace EngineNS.Graphics.Pipeline.Mobile
 
     public class UMobileOpaqueNode : UMobileForwordNodeBase
     {
-        public Common.URenderGraphPin ColorPinOut = Common.URenderGraphPin.CreateOutput("Color", true, EPixelFormat.PXF_R16G16B16A16_FLOAT);
-        public Common.URenderGraphPin DepthPinOut = Common.URenderGraphPin.CreateOutput("Depth", true, EPixelFormat.PXF_D24_UNORM_S8_UINT);
-        public Common.URenderGraphPin GizmosDepthPinOut = Common.URenderGraphPin.CreateOutput("GizmosDepth", true, EPixelFormat.PXF_D16_UNORM);
+        public TtRenderGraphPin ColorPinOut = TtRenderGraphPin.CreateOutput("Color", true, EPixelFormat.PXF_R16G16B16A16_FLOAT);
+        public TtRenderGraphPin DepthPinOut = TtRenderGraphPin.CreateOutput("Depth", true, EPixelFormat.PXF_D24_UNORM_S8_UINT);
+        public TtRenderGraphPin GizmosDepthPinOut = TtRenderGraphPin.CreateOutput("GizmosDepth", true, EPixelFormat.PXF_D16_UNORM);
 
         public UGraphicsBuffers GGizmosBuffers { get; protected set; } = new UGraphicsBuffers();
         public UMobileOpaqueNode()
@@ -336,10 +336,10 @@ namespace EngineNS.Graphics.Pipeline.Mobile
 
     public class UMobileTranslucentNode : Common.UBasePassNode
     {
-        public Graphics.Pipeline.Common.URenderGraphPin AlbedoPinInOut = Graphics.Pipeline.Common.URenderGraphPin.CreateInputOutput("Albedo");
-        public Graphics.Pipeline.Common.URenderGraphPin DepthPinInOut = Graphics.Pipeline.Common.URenderGraphPin.CreateInputOutput("Depth");
+        public Graphics.Pipeline.TtRenderGraphPin AlbedoPinInOut = Graphics.Pipeline.TtRenderGraphPin.CreateInputOutput("Albedo");
+        public Graphics.Pipeline.TtRenderGraphPin DepthPinInOut = Graphics.Pipeline.TtRenderGraphPin.CreateInputOutput("Depth");
 
-        public Graphics.Pipeline.Common.URenderGraphPin GizmosDepthPinOut = Graphics.Pipeline.Common.URenderGraphPin.CreateOutput("GizmosDepth", true, EPixelFormat.PXF_D16_UNORM);
+        public Graphics.Pipeline.TtRenderGraphPin GizmosDepthPinOut = Graphics.Pipeline.TtRenderGraphPin.CreateOutput("GizmosDepth", true, EPixelFormat.PXF_D16_UNORM);
 
         public UGraphicsBuffers GGizmosBuffers { get; protected set; } = new UGraphicsBuffers();
         public UMobileTranslucentNode()

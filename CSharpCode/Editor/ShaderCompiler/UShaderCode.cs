@@ -45,6 +45,13 @@ namespace EngineNS.Editor.ShaderCompiler
                         if (!DependencyCodes.Contains(rn))
                             DependencyCodes.Add(rn);
                     }
+                    else
+                    {
+                        if (inc.Contains('.'))
+                        {
+                            //int xx = 0;
+                        }
+                    }
                 }
                 cur = code.IndexOf("#", cur);
             }
@@ -87,7 +94,7 @@ namespace EngineNS.Editor.ShaderCompiler
                 root = UEngine.Instance.FileManager.GetRoot(IO.TtFileManager.ERootDir.Game);
             foreach (var i in files)
             {
-                if (i.EndsWith(".vcxitems") || i.EndsWith(".filters"))
+                if (i.EndsWith(".vcxitems") || i.EndsWith(".filters") || i.EndsWith(".bak"))
                     continue;
 
                 var path = IO.TtFileManager.GetRelativePath(root, i);

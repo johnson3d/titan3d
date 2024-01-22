@@ -9,6 +9,7 @@ namespace EngineNS.NxRHI
         public class UShaderVarAttribute : Attribute
         {
             public System.Type VarType;
+            public int NumElement = 1;
         }
         public class UShaderBinderIndexer
         {

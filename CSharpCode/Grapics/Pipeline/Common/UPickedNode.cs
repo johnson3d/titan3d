@@ -17,10 +17,10 @@ namespace EngineNS.Graphics.Pipeline.Common
                 NxRHI.EVertexStreamType.VST_Tangent,};
         }
     }
-    public class UPickedNode : URenderGraphNode
+    public class UPickedNode : TtRenderGraphNode
     {
-        public Common.URenderGraphPin PickedPinOut = Common.URenderGraphPin.CreateOutput("Picked", false, EPixelFormat.PXF_R16G16_FLOAT);
-        public Common.URenderGraphPin DepthPinOut = Common.URenderGraphPin.CreateOutput("Depth", false, EPixelFormat.PXF_D16_UNORM);
+        public TtRenderGraphPin PickedPinOut = TtRenderGraphPin.CreateOutput("Picked", false, EPixelFormat.PXF_R16G16_FLOAT);
+        public TtRenderGraphPin DepthPinOut = TtRenderGraphPin.CreateOutput("Depth", false, EPixelFormat.PXF_D16_UNORM);
         public UPickedNode()
         {
             Name = "PickedNode";

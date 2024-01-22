@@ -5,10 +5,10 @@ using System.Text;
 
 namespace EngineNS.Graphics.Pipeline.Common
 {
-    public class UHzbNode : Graphics.Pipeline.Common.URenderGraphNode
+    public class UHzbNode : Graphics.Pipeline.TtRenderGraphNode
     {
-        public Common.URenderGraphPin DepthPinIn = Common.URenderGraphPin.CreateInput("Depth");
-        public Common.URenderGraphPin HzbPinOut = Common.URenderGraphPin.CreateOutput("Hzb", false, EPixelFormat.PXF_UNKNOWN);
+        public TtRenderGraphPin DepthPinIn = TtRenderGraphPin.CreateInput("Depth");
+        public TtRenderGraphPin HzbPinOut = TtRenderGraphPin.CreateOutput("Hzb", false, EPixelFormat.PXF_UNKNOWN);
         public UHzbNode()
         {
             Name = "Hzb";

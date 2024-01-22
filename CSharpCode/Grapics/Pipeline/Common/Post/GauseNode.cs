@@ -53,7 +53,7 @@ namespace EngineNS.Graphics.Pipeline.Common.Post
     }
     public class TtGaussNode : USceenSpaceNode
     {
-        public Common.URenderGraphPin ColorPinIn = Common.URenderGraphPin.CreateInput("Color");
+        public TtRenderGraphPin ColorPinIn = TtRenderGraphPin.CreateInput("Color");
         public TtGaussNode()
         {
             Name = "GaussNode";
@@ -203,8 +203,8 @@ namespace EngineNS.Graphics.Pipeline.Common.Post
     }
     public class TtGaussAdditiveNode : USceenSpaceNode
     {
-        public Common.URenderGraphPin Color1PinIn = Common.URenderGraphPin.CreateInput("Color1");
-        public Common.URenderGraphPin Color2PinIn = Common.URenderGraphPin.CreateInput("Color2");
+        public TtRenderGraphPin Color1PinIn = TtRenderGraphPin.CreateInput("Color1");
+        public TtRenderGraphPin Color2PinIn = TtRenderGraphPin.CreateInput("Color2");
         public TtGaussAdditiveNode()
         {
             Name = "GaussAdditiveNode";

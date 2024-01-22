@@ -31,10 +31,10 @@ namespace EngineNS.Graphics.Pipeline.Shadow
             drawcall.mCoreObject.BindPipeline(UEngine.Instance.GfxDevice.RenderContext.mCoreObject, shadowMapNode.DepthRaster.mCoreObject);
         }
     }
-    public class UShadowMapNode : Common.URenderGraphNode
+    public class UShadowMapNode : TtRenderGraphNode
     {
-        public Common.URenderGraphPin ColorPinOut = Common.URenderGraphPin.CreateOutput("Color", false, EPixelFormat.PXF_B8G8R8A8_UNORM);
-        public Common.URenderGraphPin DepthPinOut = Common.URenderGraphPin.CreateOutput("Depth", false, EPixelFormat.PXF_D24_UNORM_S8_UINT);
+        public TtRenderGraphPin ColorPinOut = TtRenderGraphPin.CreateOutput("Color", false, EPixelFormat.PXF_B8G8R8A8_UNORM);
+        public TtRenderGraphPin DepthPinOut = TtRenderGraphPin.CreateOutput("Depth", false, EPixelFormat.PXF_D24_UNORM_S8_UINT);
         public UShadowMapNode()
         {
             Name = "ShadowMap";

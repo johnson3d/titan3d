@@ -59,16 +59,16 @@ namespace EngineNS.Bricks.GpuDriven
 
         }
     }
-    public class TtCullClusterNode : URenderGraphNode
+    public class TtCullClusterNode : TtRenderGraphNode
     {
-        public URenderGraphPin HzbPinIn = URenderGraphPin.CreateInput("Hzb");
-        public URenderGraphPin SrcClustersPin = URenderGraphPin.CreateInput("SrcClusters");
+        public TtRenderGraphPin HzbPinIn = TtRenderGraphPin.CreateInput("Hzb");
+        public TtRenderGraphPin SrcClustersPin = TtRenderGraphPin.CreateInput("SrcClusters");
 
-        public URenderGraphPin VerticesPinOut = URenderGraphPin.CreateInputOutput("Vertices", false, EPixelFormat.PXF_UNKNOWN);
-        public URenderGraphPin IndicesPinOut = URenderGraphPin.CreateInputOutput("Indices", false, EPixelFormat.PXF_UNKNOWN);
-        public URenderGraphPin ClustersPinOut = URenderGraphPin.CreateInputOutput("Clusters", false, EPixelFormat.PXF_UNKNOWN);
+        public TtRenderGraphPin VerticesPinOut = TtRenderGraphPin.CreateInputOutput("Vertices", false, EPixelFormat.PXF_UNKNOWN);
+        public TtRenderGraphPin IndicesPinOut = TtRenderGraphPin.CreateInputOutput("Indices", false, EPixelFormat.PXF_UNKNOWN);
+        public TtRenderGraphPin ClustersPinOut = TtRenderGraphPin.CreateInputOutput("Clusters", false, EPixelFormat.PXF_UNKNOWN);
         
-        public URenderGraphPin VisibleClutersPinOut = URenderGraphPin.CreateOutput("VisibleClusters", false, EPixelFormat.PXF_UNKNOWN);
+        public TtRenderGraphPin VisibleClutersPinOut = TtRenderGraphPin.CreateOutput("VisibleClusters", false, EPixelFormat.PXF_UNKNOWN);
         
         public TtCullClusterShading CullClusterShading;
         private NxRHI.UComputeDraw CullClusterShadingDrawcall;

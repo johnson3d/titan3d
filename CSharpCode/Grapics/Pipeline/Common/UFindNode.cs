@@ -4,9 +4,9 @@ using System.Text;
 
 namespace EngineNS.Graphics.Pipeline.Common
 {
-    public class UFindNode : URenderGraphNode
+    public class UFindNode : TtRenderGraphNode
     {
-        public Common.URenderGraphPin ResultPinOut = Common.URenderGraphPin.CreateOutput("Result", false, EPixelFormat.PXF_UNKNOWN);
+        public TtRenderGraphPin ResultPinOut = TtRenderGraphPin.CreateOutput("Result", false, EPixelFormat.PXF_UNKNOWN);
         [Rtti.Meta]
         public string ProxyNodeName
         {

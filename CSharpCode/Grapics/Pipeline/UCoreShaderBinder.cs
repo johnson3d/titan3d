@@ -22,9 +22,6 @@ namespace EngineNS.Graphics.Pipeline
             binder = effect.FindBinder("cbPerMesh");
             if (binder != null)
                 CBPerMesh.UpdateFieldVar(binder.GetShaderBinder());
-            binder = effect.FindBinder("cbPreFramePerMesh");
-            if (binder != null)
-                CBPreFramePerMesh.UpdateFieldVar(binder.GetShaderBinder());
             binder = effect.FindBinder("cbPerGpuScene");
             if (binder != null)
                 CBPerGpuScene.UpdateFieldVar(binder.GetShaderBinder());
@@ -157,6 +154,24 @@ namespace EngineNS.Graphics.Pipeline
             public NxRHI.FShaderVarDesc CameraUp;
             [NxRHI.UShader.UShaderVar(VarType = typeof(Vector3))]
             public NxRHI.FShaderVarDesc CameraOffset;
+            
+            [NxRHI.UShader.UShaderVar(VarType = typeof(Vector4))]
+            public NxRHI.FShaderVarDesc ClipPlanesX;
+            [NxRHI.UShader.UShaderVar(VarType = typeof(Vector4))]
+            public NxRHI.FShaderVarDesc ClipPlanesY;
+            [NxRHI.UShader.UShaderVar(VarType = typeof(Vector4))]
+            public NxRHI.FShaderVarDesc ClipPlanesZ;
+            [NxRHI.UShader.UShaderVar(VarType = typeof(Vector4))]
+            public NxRHI.FShaderVarDesc ClipPlanesW;
+
+            [NxRHI.UShader.UShaderVar(VarType = typeof(Vector4), NumElement = 4)]
+            public NxRHI.FShaderVarDesc CornerRays;
+            [NxRHI.UShader.UShaderVar(VarType = typeof(Vector4), NumElement = 6)]
+            public NxRHI.FShaderVarDesc ClipPlanes;
+            [NxRHI.UShader.UShaderVar(VarType = typeof(Vector3))]
+            public NxRHI.FShaderVarDesc ClipMinPoint;
+            [NxRHI.UShader.UShaderVar(VarType = typeof(Vector3))]
+            public NxRHI.FShaderVarDesc ClipMaxPoint;
         }
         public readonly UCBufferPerCameraIndexer CBPerCamera = new UCBufferPerCameraIndexer();
         public class UCBufferPerMeshIndexer : NxRHI.UShader.UShaderVarIndexer
@@ -187,8 +202,6 @@ namespace EngineNS.Graphics.Pipeline
         {
             
         }
-        public readonly UCBufferPreFramePerMeshIndexer CBPreFramePerMesh = new UCBufferPreFramePerMeshIndexer();
-
         public class UCBufferPerGpuSceneIndexer : NxRHI.UShader.UShaderVarIndexer
         {
             [NxRHI.UShader.UShaderVar(VarType = typeof(uint))]

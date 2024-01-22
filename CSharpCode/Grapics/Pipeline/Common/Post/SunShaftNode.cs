@@ -84,8 +84,8 @@ namespace EngineNS.Graphics.Pipeline.Common.Post
     }
     public class TtSunShaftDepthThresholeNode : USceenSpaceNode
     {
-        public Common.URenderGraphPin ColorPinIn = Common.URenderGraphPin.CreateInput("Color");
-        public Common.URenderGraphPin DepthPinIn = Common.URenderGraphPin.CreateInput("Depth");
+        public TtRenderGraphPin ColorPinIn = TtRenderGraphPin.CreateInput("Color");
+        public TtRenderGraphPin DepthPinIn = TtRenderGraphPin.CreateInput("Depth");
         public TtSunShaftDepthThresholeNode()
         {
             Name = "SunShaftDepthThreshole";
@@ -217,7 +217,7 @@ namespace EngineNS.Graphics.Pipeline.Common.Post
     }
     public class TtSunShaftRadialBlurNode : USceenSpaceNode
     {
-        public Common.URenderGraphPin ColorPinIn = Common.URenderGraphPin.CreateInput("Color");
+        public TtRenderGraphPin ColorPinIn = TtRenderGraphPin.CreateInput("Color");
         public TtSunShaftRadialBlurNode()
         {
             Name = "SunShaftRadialBlurNode";

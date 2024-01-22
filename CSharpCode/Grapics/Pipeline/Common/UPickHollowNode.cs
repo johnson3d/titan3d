@@ -48,8 +48,8 @@ namespace EngineNS.Graphics.Pipeline.Common
     }
     public class UPickHollowNode : USceenSpaceNode
     {
-        public Common.URenderGraphPin PickedPinIn = Common.URenderGraphPin.CreateInput("Picked");
-        public Common.URenderGraphPin BlurPinIn = Common.URenderGraphPin.CreateInput("Blur");
+        public TtRenderGraphPin PickedPinIn = TtRenderGraphPin.CreateInput("Picked");
+        public TtRenderGraphPin BlurPinIn = TtRenderGraphPin.CreateInput("Blur");
         public UPickHollowNode()
         {
             Name = "PickHollowNode";
@@ -68,7 +68,7 @@ namespace EngineNS.Graphics.Pipeline.Common
             await base.Initialize(policy, debugName);
             ScreenDrawPolicy.mBasePassShading = UEngine.Instance.ShadingEnvManager.GetShadingEnv<UPickHollowShading>();
         }
-        public override void OnLinkIn(URenderGraphLinker linker)
+        public override void OnLinkIn(TtRenderGraphLinker linker)
         {
             //ResultPinOut.Attachement.Format = PickedPinIn.Attachement.Format;
         }
@@ -152,9 +152,9 @@ namespace EngineNS.Graphics.Pipeline.Common
 
     public class TtPickHollowBlendNode : USceenSpaceNode
     {
-        public Common.URenderGraphPin ColorPinIn = Common.URenderGraphPin.CreateInput("Color");
-        public Common.URenderGraphPin DepthPinIn = Common.URenderGraphPin.CreateInputOutput("Depth");
-        public Common.URenderGraphPin PickedPinIn = Common.URenderGraphPin.CreateInput("Picked");
+        public TtRenderGraphPin ColorPinIn = TtRenderGraphPin.CreateInput("Color");
+        public TtRenderGraphPin DepthPinIn = TtRenderGraphPin.CreateInputOutput("Depth");
+        public TtRenderGraphPin PickedPinIn = TtRenderGraphPin.CreateInput("Picked");
         public TtPickHollowBlendNode()
         {
             Name = "PickHollowBlendNode";
@@ -172,7 +172,7 @@ namespace EngineNS.Graphics.Pipeline.Common
             await base.Initialize(policy, debugName);
             ScreenDrawPolicy.mBasePassShading = UEngine.Instance.ShadingEnvManager.GetShadingEnv<TtPickHollowBlendShading>();
         }
-        public override void OnLinkIn(URenderGraphLinker linker)
+        public override void OnLinkIn(TtRenderGraphLinker linker)
         {
             //ResultPinOut.Attachement.Format = PickedPinIn.Attachement.Format;
         }

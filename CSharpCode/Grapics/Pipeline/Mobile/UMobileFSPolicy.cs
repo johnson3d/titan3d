@@ -59,7 +59,7 @@ namespace EngineNS.Graphics.Pipeline.Mobile
             CoreSDK.DisposeObject(ref BasePassNode);
             base.Dispose();
         }
-        public override Shader.UGraphicsShadingEnv GetPassShading(EShadingType type, Mesh.TtMesh.TtAtom atom, Pipeline.Common.URenderGraphNode node)
+        public override Shader.UGraphicsShadingEnv GetPassShading(EShadingType type, Mesh.TtMesh.TtAtom atom, Pipeline.TtRenderGraphNode node)
         {
             switch (type)
             {

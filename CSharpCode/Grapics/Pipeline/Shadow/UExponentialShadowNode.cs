@@ -53,8 +53,8 @@ namespace EngineNS.Graphics.Pipeline.Shadow
     }
     public class UExponentialShadowNode : USceenSpaceNode
     {
-        public Common.URenderGraphPin ShadowMapPinIn = Common.URenderGraphPin.CreateInput("ShadowMap");
-        //public Common.URenderGraphPin ExponentialShadowMapPinOut = Common.URenderGraphPin.CreateOutput("ExponentialShadowMap", false, EPixelFormat.PXF_R32G32B32A32_FLOAT); //EPixelFormat.. Debug
+        public TtRenderGraphPin ShadowMapPinIn = TtRenderGraphPin.CreateInput("ShadowMap");
+        //public TtRenderGraphPin ExponentialShadowMapPinOut = TtRenderGraphPin.CreateOutput("ExponentialShadowMap", false, EPixelFormat.PXF_R32G32B32A32_FLOAT); //EPixelFormat.. Debug
         public UExponentialShadowNode()
         {
             Name = "ExponentialShadowMap";
@@ -73,7 +73,7 @@ namespace EngineNS.Graphics.Pipeline.Shadow
             await base.Initialize(policy, debugName);
             ScreenDrawPolicy.mBasePassShading = UEngine.Instance.ShadingEnvManager.GetShadingEnv<UExponentialShadowShading>();
         }
-        public override void OnLinkIn(URenderGraphLinker linker)
+        public override void OnLinkIn(TtRenderGraphLinker linker)
         {
             //ResultPinOut.Attachement.Format = PickedPinIn.Attachement.Format;
         }

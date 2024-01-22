@@ -7,13 +7,13 @@ using System.Text;
 
 namespace EngineNS.Bricks.VXGI
 {
-    public partial class UVoxelsNode : Graphics.Pipeline.Common.URenderGraphNode
+    public partial class UVoxelsNode : Graphics.Pipeline.TtRenderGraphNode
     {
-        public Graphics.Pipeline.Common.URenderGraphPin GpuScenePinInOut = Graphics.Pipeline.Common.URenderGraphPin.CreateInputOutput("GpuScene");
-        public Graphics.Pipeline.Common.URenderGraphPin AlbedoPinInOut = Graphics.Pipeline.Common.URenderGraphPin.CreateInputOutput("Albedo");
-        public Graphics.Pipeline.Common.URenderGraphPin DepthPinInOut = Graphics.Pipeline.Common.URenderGraphPin.CreateInputOutput("Depth");
+        public Graphics.Pipeline.TtRenderGraphPin GpuScenePinInOut = Graphics.Pipeline.TtRenderGraphPin.CreateInputOutput("GpuScene");
+        public Graphics.Pipeline.TtRenderGraphPin AlbedoPinInOut = Graphics.Pipeline.TtRenderGraphPin.CreateInputOutput("Albedo");
+        public Graphics.Pipeline.TtRenderGraphPin DepthPinInOut = Graphics.Pipeline.TtRenderGraphPin.CreateInputOutput("Depth");
 
-        public Graphics.Pipeline.Common.URenderGraphPin VxPoolPinOut = Graphics.Pipeline.Common.URenderGraphPin.CreateOutput("VxPool", false, EPixelFormat.PXF_UNKNOWN);
+        public Graphics.Pipeline.TtRenderGraphPin VxPoolPinOut = Graphics.Pipeline.TtRenderGraphPin.CreateOutput("VxPool", false, EPixelFormat.PXF_UNKNOWN);
 
         [System.Runtime.InteropServices.StructLayout(System.Runtime.InteropServices.LayoutKind.Sequential, Pack = 16)]
         unsafe struct FVoxelGroup

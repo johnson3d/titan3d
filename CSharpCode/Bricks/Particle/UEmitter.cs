@@ -209,7 +209,6 @@ namespace EngineNS.Bricks.Particle
                 bfDesc.StructureStride = (uint)sizeof(uint);
                 bfDesc.Size = (uint)sizeof(NxRHI.FIndirectDispatchArgument) * NumOfArgument;
                 NxRHI.FIndirectDispatchArgument pInitData = new NxRHI.FIndirectDispatchArgument();
-                pInitData.DrawID = 0;
                 pInitData.X = 1;
                 pInitData.Y = 1;
                 pInitData.Z = 1;

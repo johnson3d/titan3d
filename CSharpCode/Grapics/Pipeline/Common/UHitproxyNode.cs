@@ -15,11 +15,11 @@ namespace EngineNS.Graphics.Pipeline.Common
             return new NxRHI.EVertexStreamType[] { NxRHI.EVertexStreamType.VST_Position};
         }
     }
-    public class UHitproxyNode : URenderGraphNode
+    public class UHitproxyNode : TtRenderGraphNode
     {
-        public Common.URenderGraphPin HitIdPinOut = Common.URenderGraphPin.CreateOutput("HitId", false, EPixelFormat.PXF_R8G8B8A8_UNORM);
-        public Common.URenderGraphPin DepthPinInOut = Common.URenderGraphPin.CreateInputOutput("Depth", false, EPixelFormat.PXF_D16_UNORM);
-        public Common.URenderGraphPin GizmosDepthPinOut = Common.URenderGraphPin.CreateOutput("GizmosDepth", false, EPixelFormat.PXF_D16_UNORM);
+        public TtRenderGraphPin HitIdPinOut = TtRenderGraphPin.CreateOutput("HitId", false, EPixelFormat.PXF_R8G8B8A8_UNORM);
+        public TtRenderGraphPin DepthPinInOut = TtRenderGraphPin.CreateInputOutput("Depth", false, EPixelFormat.PXF_D16_UNORM);
+        public TtRenderGraphPin GizmosDepthPinOut = TtRenderGraphPin.CreateOutput("GizmosDepth", false, EPixelFormat.PXF_D16_UNORM);
         public UHitproxyNode()
         {
             Name = "Hitproxy";

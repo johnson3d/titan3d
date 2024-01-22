@@ -7,10 +7,10 @@ using EngineNS.GamePlay;
 namespace EngineNS.Graphics.Pipeline.Common.Post
 {
     //Bloom: https://zhuanlan.zhihu.com/p/525500877
-    public class TtBloomNode : URenderGraphNode
+    public class TtBloomNode : TtRenderGraphNode
     {
-        public Common.URenderGraphPin ColorPinIn = Common.URenderGraphPin.CreateInputOutput("Color");
-        public Common.URenderGraphPin ResultPinOut = Common.URenderGraphPin.CreateOutput("Result", true, EPixelFormat.PXF_R8G8B8A8_UNORM);
+        public TtRenderGraphPin ColorPinIn = TtRenderGraphPin.CreateInputOutput("Color");
+        public TtRenderGraphPin ResultPinOut = TtRenderGraphPin.CreateOutput("Result", true, EPixelFormat.PXF_R8G8B8A8_UNORM);
         public TtBloomNode()
         {
             Name = "BloomNode";

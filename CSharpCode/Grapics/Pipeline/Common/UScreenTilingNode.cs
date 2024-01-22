@@ -4,11 +4,11 @@ using System.Text;
 
 namespace EngineNS.Graphics.Pipeline.Common
 {
-    public class UScreenTilingNode : Graphics.Pipeline.Common.URenderGraphNode
+    public class UScreenTilingNode : Graphics.Pipeline.TtRenderGraphNode
     {
-        public Common.URenderGraphPin DepthPinIn = Common.URenderGraphPin.CreateInput("Depth");
-        public Common.URenderGraphPin PointLightsPinIn = Common.URenderGraphPin.CreateInput("PointLights");
-        public Common.URenderGraphPin TilingPinOut = Common.URenderGraphPin.CreateOutput("Tiling", false, EPixelFormat.PXF_UNKNOWN);
+        public TtRenderGraphPin DepthPinIn = TtRenderGraphPin.CreateInput("Depth");
+        public TtRenderGraphPin PointLightsPinIn = TtRenderGraphPin.CreateInput("PointLights");
+        public TtRenderGraphPin TilingPinOut = TtRenderGraphPin.CreateOutput("Tiling", false, EPixelFormat.PXF_UNKNOWN);
         public UScreenTilingNode()
         {
             Name = "ScreenTilingNode";
@@ -95,10 +95,7 @@ namespace EngineNS.Graphics.Pipeline.Common
             SetupTileDataDrawcall = rc.CreateComputeDraw();
             SetupTileDataDrawcall.SetComputeEffect(SetupTileData);
             var srvIdx = SetupTileDataDrawcall.FindBinder(NxRHI.EShaderBindType.SBT_CBuffer, "cbPerGpuScene");
-            if (srvIdx.IsValidPointer)
-            {
-                SetupTileDataDrawcall.BindCBuffer(srvIdx, ConfigCBuffer);
-            }
+            SetupTileDataDrawcall.BindCBuffer(srvIdx, ConfigCBuffer);
             srvIdx = SetupTileDataDrawcall.FindBinder(NxRHI.EShaderBindType.SBT_CBuffer, "cbPerCamera");
             if (srvIdx.IsValidPointer)
             {

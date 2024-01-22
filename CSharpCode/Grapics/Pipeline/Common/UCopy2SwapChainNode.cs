@@ -19,13 +19,13 @@ namespace EngineNS.Graphics.Pipeline.Common
         }
     }
 
-    public class UCopy2SwapChainNode : URenderGraphNode
+    public class UCopy2SwapChainNode : TtRenderGraphNode
     {
-        public Common.URenderGraphPin ColorPinIn = Common.URenderGraphPin.CreateInput("Color");
-        public Common.URenderGraphPin HitIdPinIn = Common.URenderGraphPin.CreateInput("HitId");
-        public Common.URenderGraphPin HzbPinIn = Common.URenderGraphPin.CreateInput("Hzb");
-        public Common.URenderGraphPin SavedPinIn0 = Common.URenderGraphPin.CreateInput("Save0");
-        public Common.URenderGraphPin ColorPinOut = Common.URenderGraphPin.CreateOutput("Color", true, EPixelFormat.PXF_R8G8B8A8_UNORM);
+        public TtRenderGraphPin ColorPinIn = TtRenderGraphPin.CreateInput("Color");
+        public TtRenderGraphPin HitIdPinIn = TtRenderGraphPin.CreateInput("HitId");
+        public TtRenderGraphPin HzbPinIn = TtRenderGraphPin.CreateInput("Hzb");
+        public TtRenderGraphPin SavedPinIn0 = TtRenderGraphPin.CreateInput("Save0");
+        public TtRenderGraphPin ColorPinOut = TtRenderGraphPin.CreateOutput("Color", true, EPixelFormat.PXF_R8G8B8A8_UNORM);
 
         public UAttachBuffer ColorAttachement = new UAttachBuffer();
         public NxRHI.UCopyDraw mCopyDrawcall;

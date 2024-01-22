@@ -4,10 +4,10 @@ using System.Text;
 
 namespace EngineNS.Graphics.Pipeline.Common
 {
-    public class UCopyNode : Graphics.Pipeline.Common.URenderGraphNode
+    public class UCopyNode : Graphics.Pipeline.TtRenderGraphNode
     {
-        public Common.URenderGraphPin SrcPinIn = Common.URenderGraphPin.CreateInput("Src");
-        public Common.URenderGraphPin DestPinOut = Common.URenderGraphPin.CreateOutput("Dest", false, EPixelFormat.PXF_UNKNOWN);
+        public TtRenderGraphPin SrcPinIn = TtRenderGraphPin.CreateInput("Src");
+        public TtRenderGraphPin DestPinOut = TtRenderGraphPin.CreateOutput("Dest", false, EPixelFormat.PXF_UNKNOWN);
         public UCopyNode()
         {
             Name = "CopyNode";
@@ -107,10 +107,10 @@ namespace EngineNS.Graphics.Pipeline.Common
         }
     }
 
-    public class UCopy2NextFrameNode : Graphics.Pipeline.Common.URenderGraphNode
+    public class UCopy2NextFrameNode : Graphics.Pipeline.TtRenderGraphNode
     {
-        public Common.URenderGraphPin SrcPinIn = Common.URenderGraphPin.CreateInput("Src");
-        public Common.URenderGraphPin PrevPinOut = Common.URenderGraphPin.CreateOutput("Prev", false, EPixelFormat.PXF_UNKNOWN);
+        public TtRenderGraphPin SrcPinIn = TtRenderGraphPin.CreateInput("Src");
+        public TtRenderGraphPin PrevPinOut = TtRenderGraphPin.CreateOutput("Prev", false, EPixelFormat.PXF_UNKNOWN);
 
         public UCopy2NextFrameNode()
         {

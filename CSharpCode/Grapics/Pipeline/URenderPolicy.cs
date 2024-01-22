@@ -11,7 +11,7 @@ using System.Text;
 namespace EngineNS.Graphics.Pipeline
 {
     [EGui.Controls.PropertyGrid.PGCategoryFilters(ExcludeFilters = new string[] { "Misc" })]
-    public class URenderPolicy : Common.URenderGraph, IO.ISerializer
+    public partial class URenderPolicy : TtRenderGraph, IO.ISerializer
     {
         #region ISerializer
         public void OnPreRead(object tagObject, object hostObject, bool fromXml)
@@ -75,7 +75,7 @@ namespace EngineNS.Graphics.Pipeline
             get;
         } = new TtNodeListDefine();
         //TagObject通常用来处理ShadingEnv.OnDrawCall的特殊参数设置
-        //public Common.URenderGraphNode TagObject;
+        //public TtRenderGraphNode TagObject;
         public object TagObject;
         protected UCamera mDefaultCamera;
         public UViewportSlate ViewportSlate
@@ -222,7 +222,7 @@ namespace EngineNS.Graphics.Pipeline
         public List<Mesh.TtMesh> VisibleMeshes = new List<Mesh.TtMesh>();
         public List<GamePlay.Scene.UNode> VisibleNodes = new List<GamePlay.Scene.UNode>();
 
-        public virtual Shader.UGraphicsShadingEnv GetPassShading(EShadingType type, Mesh.TtMesh.TtAtom atom, Pipeline.Common.URenderGraphNode node)
+        public virtual Shader.UGraphicsShadingEnv GetPassShading(EShadingType type, Mesh.TtMesh.TtAtom atom, Pipeline.TtRenderGraphNode node)
         {
             switch (type)
             {
@@ -479,7 +479,7 @@ namespace EngineNS.Graphics.Pipeline
                 return mPickedNode;
             }
         }
-        public override Shader.UGraphicsShadingEnv GetPassShading(EShadingType type, Mesh.TtMesh.TtAtom atom, Pipeline.Common.URenderGraphNode node)
+        public override Shader.UGraphicsShadingEnv GetPassShading(EShadingType type, Mesh.TtMesh.TtAtom atom, Pipeline.TtRenderGraphNode node)
         {
             if (atom.UserShading != null)
                 return atom.UserShading;
@@ -608,7 +608,7 @@ namespace EngineNS.Graphics.Pipeline
                 return mPickedNode;
             }
         }
-        public override Shader.UGraphicsShadingEnv GetPassShading(EShadingType type, Mesh.TtMesh.TtAtom atom, Pipeline.Common.URenderGraphNode node)
+        public override Shader.UGraphicsShadingEnv GetPassShading(EShadingType type, Mesh.TtMesh.TtAtom atom, Pipeline.TtRenderGraphNode node)
         {
             switch (type)
             {

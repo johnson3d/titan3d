@@ -58,7 +58,7 @@ namespace EngineNS.Graphics.Pipeline.Common.Post
     }
     public class TtLuminanceThresholeNode : USceenSpaceNode
     {
-        public Common.URenderGraphPin ColorPinIn = Common.URenderGraphPin.CreateInput("Color");
+        public TtRenderGraphPin ColorPinIn = TtRenderGraphPin.CreateInput("Color");
         public TtLuminanceThresholeNode()
         {
             Name = "LuminanceThresholeNode";

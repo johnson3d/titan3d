@@ -133,6 +133,10 @@ namespace EngineNS.NxRHI
         {
             mCoreObject.BindIndirectDrawArgsBuffer(buffer.mCoreObject, offset);
         }
+        public void SetDebugName(string name)
+        {
+            mCoreObject.NativeSuper.SetDebugName(name);
+        }
     }
     public class UComputeDraw : AuxPtrType<NxRHI.IComputeDraw>
     {
@@ -173,7 +177,7 @@ namespace EngineNS.NxRHI
         }
         public void BindCBuffer(FShaderBinder binder, UCbView resource)
         {
-            if (resource == null)
+            if (resource == null || binder.IsValidPointer == false)
                 return;
             mCoreObject.BindResource(binder, resource.mCoreObject.NativeSuper);
         }
@@ -183,9 +187,20 @@ namespace EngineNS.NxRHI
             if (binder.IsValidPointer)
                 BindCBuffer(binder, resource);
         }
+        public void BindCBuffer(string name, ref UCbView resource)
+        {
+            var binder = mCoreObject.FindBinder(EShaderBindType.SBT_CBuffer, name);
+            if (binder.IsValidPointer == false)
+                return;
+            if (resource == null)
+            {
+                resource = UEngine.Instance.GfxDevice.RenderContext.CreateCBV(binder);
+            }
+            mCoreObject.BindResource(binder, resource.mCoreObject.NativeSuper);
+        }
         public void BindSrv(FShaderBinder binder, USrView resource)
         {
-            if (resource == null)
+            if (resource == null || binder.IsValidPointer == false)
                 return;
             mCoreObject.BindResource(binder, resource.mCoreObject.NativeSuper);
         }
@@ -197,7 +212,7 @@ namespace EngineNS.NxRHI
         }
         public void BindUav(FShaderBinder binder, UUaView resource)
         {
-            if (resource == null)
+            if (resource == null || binder.IsValidPointer == false)
                 return;
             mCoreObject.BindResource(binder, resource.mCoreObject.NativeSuper);
         }
@@ -209,7 +224,7 @@ namespace EngineNS.NxRHI
         }
         public void BindSampler(FShaderBinder binder, USampler resource)
         {
-            if (resource == null)
+            if (resource == null || binder.IsValidPointer == false)
                 return;
             mCoreObject.BindResource(binder, resource.mCoreObject.NativeSuper);
         }
@@ -218,6 +233,10 @@ namespace EngineNS.NxRHI
             var binder = mCoreObject.FindBinder(EShaderBindType.SBT_Sampler, name);
             if (binder.IsValidPointer)
                 BindSampler(binder, resource);
+        }
+        public void SetDebugName(string name)
+        {
+            mCoreObject.NativeSuper.SetDebugName(name);
         }
     }
     public class UCopyDraw : AuxPtrType<NxRHI.ICopyDraw>
@@ -294,6 +313,10 @@ namespace EngineNS.NxRHI
         public void BindTextureDest(UTexture res)
         {
             mCoreObject.BindTextureDest(res.mCoreObject);
+        }
+        public void SetDebugName(string name)
+        {
+            mCoreObject.NativeSuper.SetDebugName(name);
         }
     }
 }

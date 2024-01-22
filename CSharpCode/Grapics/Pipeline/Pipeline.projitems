@@ -9,6 +9,7 @@
     <Import_RootNamespace>EngineNS.Graphics.Pipeline</Import_RootNamespace>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="$(MSBuildThisFileDirectory)AttachementCache.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)CCamera.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Common\ExpHeightFog.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Common\FogNode.cs" />
@@ -36,15 +37,17 @@
     <Compile Include="$(MSBuildThisFileDirectory)Common\UPickBlurNode.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Common\UPickedNode.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Common\UPickHollowNode.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Common\URenderGraph.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Common\USceenSpaceNode.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Common\UScreenTilingNode.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)GpuCullingNode.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Deferred\UDeferredBasePassNode.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Deferred\UDeferredDirLightingNode.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Deferred\UDeferredPolicy.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Deferred\UForwordNode.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)GpuBuffer.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Mobile\UFinalCopyNode.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)RenderGraph.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)RenderGraphNode.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Shader\MdfQueue.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Shadow\UCascadedShadowMap.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Shadow\UExponentialShadowNode.cs" />

@@ -68,8 +68,8 @@ namespace EngineNS.Graphics.Pipeline.Common.Post
     }
     public class TtAdditiveNode : USceenSpaceNode
     {
-        public Common.URenderGraphPin Color1PinIn = Common.URenderGraphPin.CreateInput("Color1");
-        public Common.URenderGraphPin Color2PinIn = Common.URenderGraphPin.CreateInput("Color2");
+        public TtRenderGraphPin Color1PinIn = TtRenderGraphPin.CreateInput("Color1");
+        public TtRenderGraphPin Color2PinIn = TtRenderGraphPin.CreateInput("Color2");
         public TtAdditiveNode()
         {
             Name = "AdditiveNode";

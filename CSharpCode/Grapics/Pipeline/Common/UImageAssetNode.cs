@@ -4,9 +4,9 @@ using System.Text;
 
 namespace EngineNS.Graphics.Pipeline.Common
 {
-    public class UImageAssetNode : URenderGraphNode
+    public class UImageAssetNode : TtRenderGraphNode
     {
-        public Common.URenderGraphPin ImagePinOut = Common.URenderGraphPin.CreateOutput("Image", false, EPixelFormat.PXF_R8G8B8A8_UNORM);
+        public TtRenderGraphPin ImagePinOut = TtRenderGraphPin.CreateOutput("Image", false, EPixelFormat.PXF_R8G8B8A8_UNORM);
         public UImageAssetNode()
         {
             Name = "ImageAssetNode";

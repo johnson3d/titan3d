@@ -57,9 +57,9 @@ namespace EngineNS.Graphics.Pipeline.Common
     [EGui.Controls.PropertyGrid.PGCategoryFilters(ExcludeFilters = new string[] { "Misc" })]
     public partial class TtFogNode : USceenSpaceNode
     {
-        public Common.URenderGraphPin ColorPinIn = Common.URenderGraphPin.CreateInput("Color");
-        public Common.URenderGraphPin DepthPinIn = Common.URenderGraphPin.CreateInput("Depth");
-        public Common.URenderGraphPin NoisePinIn = Common.URenderGraphPin.CreateInput("Noise");
+        public TtRenderGraphPin ColorPinIn = TtRenderGraphPin.CreateInput("Color");
+        public TtRenderGraphPin DepthPinIn = TtRenderGraphPin.CreateInput("Depth");
+        public TtRenderGraphPin NoisePinIn = TtRenderGraphPin.CreateInput("Noise");
         public TtFogNode()
         {
             Name = "FogNode";

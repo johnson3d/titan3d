@@ -6,9 +6,9 @@ using System.Text;
 
 namespace EngineNS.Graphics.Pipeline.Common
 {
-    public partial class UGpuSceneNode : Graphics.Pipeline.Common.URenderGraphNode
+    public partial class UGpuSceneNode : Graphics.Pipeline.TtRenderGraphNode
     {
-        public Common.URenderGraphPin GpuScenePinOut = Common.URenderGraphPin.CreateOutput("GpuScene", false, EPixelFormat.PXF_UNKNOWN);
+        public TtRenderGraphPin GpuScenePinOut = TtRenderGraphPin.CreateOutput("GpuScene", false, EPixelFormat.PXF_UNKNOWN);
         public UGpuSceneNode()
         {
             Name = "GpuSceneNode";

@@ -283,6 +283,10 @@ namespace EngineNS.Graphics.Pipeline.Shader
         [Rtti.Meta]
         public string MainName { get; set; }
         private NxRHI.UComputeEffect CurrentEffect;
+        public bool IsReady
+        {
+            get => CurrentEffect != null;
+        }
         public abstract Vector3ui DispatchArg { get; }
         public override string ToString()
         {

@@ -7,7 +7,7 @@ namespace EngineNS.Graphics.Pipeline.Shader.CommanShading
     public class UBasePassPolicy : URenderPolicy
     {
         public UGraphicsShadingEnv mBasePassShading;
-        public override Shader.UGraphicsShadingEnv GetPassShading(EShadingType type, Mesh.TtMesh.TtAtom atom, Pipeline.Common.URenderGraphNode node)
+        public override Shader.UGraphicsShadingEnv GetPassShading(EShadingType type, Mesh.TtMesh.TtAtom atom, Pipeline.TtRenderGraphNode node)
         {
             switch (type)
             {

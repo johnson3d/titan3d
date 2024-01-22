@@ -424,8 +424,8 @@ namespace EngineNS.Graphics.Pipeline
         public NxRHI.FViewPort Viewport = new NxRHI.FViewPort();
         NxRHI.UFrameBuffers mFrameBuffers;
         public NxRHI.UFrameBuffers FrameBuffers { get => mFrameBuffers; set => mFrameBuffers = value; }
-        public Common.URenderGraphPin[] RenderTargets;
-        public Common.URenderGraphPin DepthStencil;
+        public TtRenderGraphPin[] RenderTargets;
+        public TtRenderGraphPin DepthStencil;
         NxRHI.UCbView mPerViewportCBuffer;
         public NxRHI.UCbView PerViewportCBuffer
         {
@@ -483,7 +483,7 @@ namespace EngineNS.Graphics.Pipeline
             cBuffer.SetValue(coreBinder.CBPerViewport.gEnvMapMaxMipLevel, in EnvMapMaxMipLevel);
             cBuffer.SetValue(coreBinder.CBPerViewport.gEyeEnvMapMaxMipLevel, in EnvMapMaxMipLevel);
         }
-        public void BuildFrameBuffers(Common.URenderGraph policy)
+        public void BuildFrameBuffers(TtRenderGraph policy)
         {
             for (int i = 0; i < RenderTargets.Length; i++)
             {
@@ -510,7 +510,7 @@ namespace EngineNS.Graphics.Pipeline
             FrameBuffers = rc.CreateFrameBuffers(renderPass);
 
             var rpsDesc = renderPass.mCoreObject.Desc;
-            RenderTargets = new Common.URenderGraphPin[renderPass.mCoreObject.Desc.m_NumOfMRT];
+            RenderTargets = new TtRenderGraphPin[renderPass.mCoreObject.Desc.m_NumOfMRT];
 
             Viewport.m_TopLeftX = 0;
             Viewport.m_TopLeftY = 0;
@@ -522,7 +522,7 @@ namespace EngineNS.Graphics.Pipeline
         {
             if (RenderTargets[index] == null)
             {
-                RenderTargets[index] = new Common.URenderGraphPin();
+                RenderTargets[index] = new TtRenderGraphPin();
             }
             RenderTargets[index].LifeMode = UAttachBuffer.ELifeMode.Imported;
             RenderTargets[index].ImportedBuffer = new UAttachBuffer();
@@ -533,16 +533,16 @@ namespace EngineNS.Graphics.Pipeline
         {
             if (DepthStencil == null)
             {
-                DepthStencil = new Common.URenderGraphPin();
+                DepthStencil = new TtRenderGraphPin();
             }
             DepthStencil.LifeMode = UAttachBuffer.ELifeMode.Imported;
             DepthStencil.ImportedBuffer = new UAttachBuffer();
             DepthStencil.ImportedBuffer.Dsv = dsv;
             FrameBuffers.BindDepthStencilView(dsv);
         }
-        public bool SetRenderTarget(Common.URenderGraph policy, int index, Common.URenderGraphPin pin)
+        public bool SetRenderTarget(TtRenderGraph policy, int index, TtRenderGraphPin pin)
         {
-            if (pin.PinType == Common.URenderGraphPin.EPinType.Input ||
+            if (pin.PinType == TtRenderGraphPin.EPinType.Input ||
                 (pin.Attachement.BufferViewTypes & NxRHI.EBufferType.BFT_RTV) != NxRHI.EBufferType.BFT_RTV)
             {
                 System.Diagnostics.Debug.Assert(false);
@@ -551,9 +551,9 @@ namespace EngineNS.Graphics.Pipeline
             RenderTargets[index] = pin;
             return true;
         }
-        public bool SetDepthStencil(Common.URenderGraph policy, Common.URenderGraphPin pin)
+        public bool SetDepthStencil(TtRenderGraph policy, TtRenderGraphPin pin)
         {
-            if (pin.PinType == Common.URenderGraphPin.EPinType.Input ||
+            if (pin.PinType == TtRenderGraphPin.EPinType.Input ||
                 (pin.Attachement.BufferViewTypes & NxRHI.EBufferType.BFT_DSV) != NxRHI.EBufferType.BFT_DSV)
             {
                 System.Diagnostics.Debug.Assert(false);

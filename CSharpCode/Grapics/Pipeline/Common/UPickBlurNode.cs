@@ -51,7 +51,7 @@ namespace EngineNS.Graphics.Pipeline.Common
     }    
     public class UPickBlurNode : USceenSpaceNode
     {
-        public Common.URenderGraphPin PickedPinIn = Common.URenderGraphPin.CreateInput("Picked");
+        public TtRenderGraphPin PickedPinIn = TtRenderGraphPin.CreateInput("Picked");
         public UPickBlurNode()
         {
             Name = "PickBlurNode";            
@@ -69,7 +69,7 @@ namespace EngineNS.Graphics.Pipeline.Common
             await base.Initialize(policy, debugName);
             ScreenDrawPolicy.mBasePassShading = UEngine.Instance.ShadingEnvManager.GetShadingEnv<UPickBlurShading>();
         }
-        public override void OnLinkIn(URenderGraphLinker linker)
+        public override void OnLinkIn(TtRenderGraphLinker linker)
         {
             //ResultPinOut.Attachement.Format = PickedPinIn.Attachement.Format;
         }

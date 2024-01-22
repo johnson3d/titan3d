@@ -132,11 +132,11 @@ namespace EngineNS.Graphics.Pipeline.Common.Post
         }
     }
 
-    public class TtFsrNode : URenderGraphNode
+    public class TtFsrNode : TtRenderGraphNode
     {
-        public Common.URenderGraphPin ColorPinIn = Common.URenderGraphPin.CreateInputOutput("Color");
-        public Common.URenderGraphPin UpSamplePinOut = Common.URenderGraphPin.CreateOutput("UpSample", false, EPixelFormat.PXF_R8G8B8A8_UNORM);
-        public Common.URenderGraphPin RcasPinOut = Common.URenderGraphPin.CreateOutput("Rcas", false, EPixelFormat.PXF_R8G8B8A8_UNORM);
+        public TtRenderGraphPin ColorPinIn = TtRenderGraphPin.CreateInputOutput("Color");
+        public TtRenderGraphPin UpSamplePinOut = TtRenderGraphPin.CreateOutput("UpSample", false, EPixelFormat.PXF_R8G8B8A8_UNORM);
+        public TtRenderGraphPin RcasPinOut = TtRenderGraphPin.CreateOutput("Rcas", false, EPixelFormat.PXF_R8G8B8A8_UNORM);
         [Rtti.Meta]
         public float Scale { get; set; } = 2.0f;
         public NxRHI.UCbView CBShadingEnv;
