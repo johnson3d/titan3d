@@ -63,7 +63,7 @@ float3 GetInstancingPosition(VSGrassData data)
 }
 float3 GetTerrainPos(float2 pos)
 {
-	float3 outPos = GetPosition(float2(pos.x / PatchSize + PatchIdxX, pos.y / PatchSize + PatchIdxZ));
+    float3 outPos = GetTerrrainVertexPosition(float2(pos.x / PatchSize + PatchIdxX, pos.y / PatchSize + PatchIdxZ), 0);
 	outPos.y += HeightMapMinHeight;
 	return outPos;
 }

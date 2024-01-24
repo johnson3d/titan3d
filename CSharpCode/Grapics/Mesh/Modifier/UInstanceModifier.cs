@@ -18,6 +18,10 @@ namespace EngineNS.Graphics.Mesh.Modifier
         public Vector4ui UserData;
 
         public Vector4ui PointLightIndices;
+        public void SetMatrix(in Matrix mat)
+        {
+
+        }
     };
 
     public class TtGpuCullSetupShading : Graphics.Pipeline.Shader.UComputeShadingEnv

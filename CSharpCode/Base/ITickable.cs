@@ -78,6 +78,12 @@ namespace EngineNS
     public partial class UTickableManager
     {
         public List<WeakReference<ITickable>> Tickables { get; } = new List<WeakReference<ITickable>>();
+        private struct FTickSync
+        {
+            public object Arg;
+            public Action<object> OnTick;
+        }
+        private List<FTickSync> SyncTicks = new List<FTickSync>();
         public void Cleanup()
         {
             Tickables.Clear();
@@ -133,6 +139,28 @@ namespace EngineNS
                         }
                     }
                 }
+            }
+        }
+
+        public void AddTickSync(Action<object> action, object arg)
+        {
+            lock (this)
+            {
+                var t = new FTickSync();
+                t.OnTick = action;
+                t.Arg = arg;
+                SyncTicks.Add(t);
+            }
+        }
+        public void ProcessTicSync()
+        {
+            lock (this)
+            {
+                foreach (var i in SyncTicks)
+                {
+                    i.OnTick(i.Arg);
+                }
+                SyncTicks.Clear();
             }
         }
     }

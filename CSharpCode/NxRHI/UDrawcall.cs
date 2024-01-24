@@ -61,19 +61,15 @@ namespace EngineNS.NxRHI
         }
         public void BindCBuffer(FEffectBinder binder, UCbView buffer)
         {
-            if (buffer == null)
-                return;
-            if (binder.IsValidPointer == false)
+            if (binder.IsValidPointer == false || buffer == null)
                 return;
             mCoreObject.BindResource(binder, buffer.mCoreObject.NativeSuper);
         }
         public void BindCBuffer(UEffectBinder binder, UCbView buffer)
         {
-            if (buffer == null)
+            if (binder == null || buffer == null)
                 return;
-            if (binder == null)
-                return;
-            mCoreObject.BindResource(binder.mCoreObject, buffer.mCoreObject.NativeSuper);
+            BindCBuffer(binder.mCoreObject, buffer);
         }
         public bool BindSRV(VNameString name, USrView srv)
         {
@@ -81,15 +77,15 @@ namespace EngineNS.NxRHI
         }
         public void BindSRV(FEffectBinder binder, USrView srv)
         {
-            if (binder.IsValidPointer == false)
+            if (binder.IsValidPointer == false || srv == null)
                 return;
             mCoreObject.BindResource(binder, srv.mCoreObject.NativeSuper);
         }
         public void BindSRV(NxRHI.UEffectBinder binder, USrView srv)
         {
-            if (binder == null)
+            if (binder == null || srv == null)
                 return;
-            mCoreObject.BindResource(binder.mCoreObject, srv.mCoreObject.NativeSuper);
+            BindSRV(binder.mCoreObject, srv);
         }
         public bool BindUAV(VNameString name, UUaView uav)
         {
@@ -97,11 +93,15 @@ namespace EngineNS.NxRHI
         }
         public void BindUAV(FEffectBinder binder, UUaView uav)
         {
-            if (uav == null)
-                return;
-            if (binder.IsValidPointer == false)
+            if (binder.IsValidPointer == false || uav == null)
                 return;
             mCoreObject.BindResource(binder, uav.mCoreObject.NativeSuper);
+        }
+        public void BindUAV(UEffectBinder binder, UUaView uav)
+        {
+            if (binder == null || uav == null)
+                return;
+            BindUAV(binder.mCoreObject, uav);
         }
         public bool BindSampler(VNameString name, USampler sampler)
         {
@@ -111,11 +111,15 @@ namespace EngineNS.NxRHI
         }
         public void BindSampler(FEffectBinder binder, USampler sampler)
         {
-            if (sampler == null)
-                return;
-            if (binder.IsValidPointer == false)
+            if (binder.IsValidPointer == false || sampler == null)
                 return;
             mCoreObject.BindResource(binder, sampler.mCoreObject.NativeSuper);
+        }
+        public void BindSampler(UEffectBinder binder, USampler sampler)
+        {
+            if (binder == null || sampler == null)
+                return;
+            BindSampler(binder.mCoreObject, sampler);
         }
         public void BindGeomMesh(UGeomMesh mesh)
         {
@@ -266,6 +270,41 @@ namespace EngineNS.NxRHI
                 mCoreObject.Mode = value;
             }
         }
+        public uint SrcSubResource
+        {
+            get => mCoreObject.SrcSubResource;
+            set => mCoreObject.SrcSubResource = value;
+        }
+        public uint DestSubResource
+        {
+            get => mCoreObject.DestSubResource;
+            set => mCoreObject.DestSubResource = value;
+        }
+        public uint DstX
+        {
+            get => mCoreObject.DstX;
+            set => mCoreObject.DstX = value;
+        }
+        public uint DstY
+        {
+            get => mCoreObject.DstY;
+            set => mCoreObject.DstY = value;
+        }
+        public uint DstZ
+        {
+            get => mCoreObject.DstZ;
+            set => mCoreObject.DstZ = value;
+        }
+        public ref FSubResourceFootPrint FootPrint
+        {
+            get
+            {
+                unsafe
+                {
+                    return ref *mCoreObject.GetFootPrint();
+                }
+            }
+        }
         public void BindSrc(UGpuResource res)
         {
             var bf = res as UBuffer;
@@ -306,6 +345,10 @@ namespace EngineNS.NxRHI
         {
             mCoreObject.BindTextureSrc(res.mCoreObject);
         }
+        public void BindTextureSrc(ITexture res)
+        {
+            mCoreObject.BindTextureSrc(res);
+        }
         public void BindBufferDest(UBuffer res)
         {
             mCoreObject.BindBufferDest(res.mCoreObject);
@@ -313,6 +356,10 @@ namespace EngineNS.NxRHI
         public void BindTextureDest(UTexture res)
         {
             mCoreObject.BindTextureDest(res.mCoreObject);
+        }
+        public void BindTextureDest(ITexture res)
+        {
+            mCoreObject.BindTextureDest(res);
         }
         public void SetDebugName(string name)
         {

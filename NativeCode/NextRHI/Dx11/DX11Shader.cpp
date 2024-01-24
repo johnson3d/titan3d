@@ -367,6 +367,7 @@ namespace NxRHI
 				binder->Type = EShaderBindType::SBT_CBuffer;
 				binder->Name = csibDesc.Name;
 				binder->Slot = csibDesc.BindPoint;
+				binder->BindCount = csibDesc.BindCount;
 				binder->Size = cDesc.Size;
 				binder->Space = 0;
 
@@ -407,6 +408,7 @@ namespace NxRHI
 				binder->Type = EShaderBindType::SBT_UAV;
 				binder->Name = csibDesc.Name;
 				binder->Slot = csibDesc.BindPoint;
+				binder->BindCount = csibDesc.BindCount;
 				binder->IsStructuredBuffer = TRUE;
 
 				Reflector->Uavs.push_back(binder);
@@ -417,6 +419,7 @@ namespace NxRHI
 				binder->Type = EShaderBindType::SBT_SRV;
 				binder->Name = csibDesc.Name;
 				binder->Slot = csibDesc.BindPoint;
+				binder->BindCount = csibDesc.BindCount;
 
 				Reflector->Srvs.push_back(binder);
 				/*if (desc->ShaderType == EShaderType::EST_ComputeShader)
@@ -445,6 +448,7 @@ namespace NxRHI
 				binder->Type = EShaderBindType::SBT_SRV;
 				binder->Name = csibDesc.Name;
 				binder->Slot = csibDesc.BindPoint;
+				binder->BindCount = csibDesc.BindCount;
 				binder->IsStructuredBuffer = TRUE;
 				Reflector->Srvs.push_back(binder);
 			}
@@ -454,6 +458,7 @@ namespace NxRHI
 				binder->Type = EShaderBindType::SBT_SRV;
 				binder->Name = csibDesc.Name;
 				binder->Slot = csibDesc.BindPoint;
+				binder->BindCount = csibDesc.BindCount;
 				Reflector->Srvs.push_back(binder);
 			}
 			break;
@@ -462,6 +467,7 @@ namespace NxRHI
 				binder->Type = EShaderBindType::SBT_Sampler;
 				binder->Name = csibDesc.Name;
 				binder->Slot = csibDesc.BindPoint;
+				binder->BindCount = csibDesc.BindCount;
 				Reflector->Samplers.push_back(binder);
 			}
 			break;

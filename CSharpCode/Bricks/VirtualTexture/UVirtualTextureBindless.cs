@@ -4,7 +4,7 @@ using System.Text;
 
 namespace EngineNS.Bricks.VirtualTexture
 {
-    public class UVirtualTextureBindless : UVirtualTextureBase
+    public class UVirtualTextureBindless : TtVirtualTextureBase
     {
     }
 }

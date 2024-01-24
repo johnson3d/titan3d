@@ -16,11 +16,11 @@ namespace EngineNS.Profiler
         public TimeScopeHelper(TimeScope t)
         {
             mTime = t;
-            mTime.Begin(true);
+            mTime?.Begin(true);
         }
         public void Dispose()
         {
-            mTime.End();
+            mTime?.End();
         }
     }
     public ref struct TimeScopeRAII

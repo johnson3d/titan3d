@@ -25,9 +25,11 @@ namespace EngineNS.Graphics.Pipeline.Shader
             {
 
             }
-            public const uint CurrentEffectVersion = 3;
+            public const uint CurrentEffectVersion = 4;
             [Rtti.Meta()]
             public uint EffectVersion { get; set; } = CurrentEffectVersion;
+            [Rtti.Meta()]
+            public Hash160 GlobalEnvHash { get; set; }
             [Rtti.Meta()]
             public Hash160 CodeHash { get; set; }
             [Rtti.Meta(Flags = Rtti.MetaAttribute.EMetaFlags.DiscardWhenCooked)]
@@ -91,6 +93,7 @@ namespace EngineNS.Graphics.Pipeline.Shader
         }
         public static async Thread.Async.TtTask<UEffect> LoadEffect(Hash160 hash, UShadingEnv shading, UMaterial material, TtMdfQueueBase mdf)
         {
+            var rc = UEngine.Instance.GfxDevice.RenderContext;
             var path = UEngine.Instance.FileManager.GetPath(IO.TtFileManager.ERootDir.Cache, IO.TtFileManager.ESystemDir.Effect);
             var file = path + hash.ToString() + UEffect.AssetExt;
 
@@ -132,7 +135,8 @@ namespace EngineNS.Graphics.Pipeline.Shader
                         return null;
 
                     var shadingCode = Editor.ShaderCompiler.UShaderCodeManager.Instance.GetShaderCode(shading.CodeName);
-                    if (shadingCode.CodeHash != effectDesc.CodeHash ||
+                    if (rc.GlobalEnvHash != effectDesc.GlobalEnvHash ||
+                            shadingCode.CodeHash != effectDesc.CodeHash ||
                             material.GetHash() != effectDesc.MaterialHash ||
                             mdf.GetHash() != effectDesc.MdfQueueHash)
                     {
@@ -159,7 +163,6 @@ namespace EngineNS.Graphics.Pipeline.Shader
                     return null;
             }
 
-            var rc = UEngine.Instance.GfxDevice.RenderContext;
             NxRHI.UShader VertexShader = null;
             NxRHI.UShader PixelShader = null;
             bool created = await UEngine.Instance.EventPoster.Post((state) =>
@@ -210,6 +213,7 @@ namespace EngineNS.Graphics.Pipeline.Shader
             if (shadingCode == null)
                 return null;
 
+            result.Desc.GlobalEnvHash = Hash160.CreateHash160(rc.GlobalEnvDefines.ToString());
             result.Desc.CodeHash = shadingCode.CodeHash;
             result.Desc.MaterialHash = material.GetHash();
             result.Desc.MdfQueueHash = mdf.GetHash();
@@ -434,7 +438,7 @@ namespace EngineNS.Graphics.Pipeline.Shader
             //var caps = new IRenderContextCaps();
             //UEngine.Instance.GfxDevice.RenderContext.mCoreObject.GetRenderContextCaps(ref caps);
             //return Hash160.CreateHash160($"{shading},{material.AssetName},{mdf},{caps}");
-            return Hash160.CreateHash160($"{shading},{material.AssetName},{mdf}");
+            return Hash160.CreateHash160($"{UEngine.Instance.GfxDevice.RenderContext.GlobalEnvHash},{shading},{material.AssetName},{mdf}");
         }
         public Dictionary<Hash160, UEffect> MaterialEditingEffects { get; } = new Dictionary<Hash160, UEffect>();
         public async Thread.Async.TtTask<UEffect> GetEffect(UShadingEnv shading, UMaterial material, TtMdfQueueBase mdf)
@@ -579,7 +583,8 @@ namespace EngineNS.Graphics.Pipeline.Shader
                 hashStr += shadingEnv.ToString();
             if (defines != null)
                 hashStr += defines.mCoreObject.NativeSuper.GetHash64().ToString();
-            var hash = Hash160.CreateHash160(hashStr);
+            hashStr += UEngine.Instance.GfxDevice.RenderContext.GlobalEnvHash.ToString();
+            var hash = Hash160.CreateHash160(hashStr);            var shadingCode = Editor.ShaderCompiler.UShaderCodeManager.Instance.GetShaderCode(shaderName);
             NxRHI.UComputeEffect result;
             lock (Effects)
             {

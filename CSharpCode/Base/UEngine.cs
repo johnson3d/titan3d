@@ -44,6 +44,8 @@ namespace EngineNS
         public EMultiRenderMode MultiRenderMode { get; set; } = EMultiRenderMode.QueueNextFrame;
         [Rtti.Meta]
         public bool UseRenderDoc { get; set; } = false;
+        [Rtti.Meta]
+        public bool Feature_UseRVT { get; set; } = false;
         public string ConfigName;
         [Rtti.Meta]
         public int NumOfThreadPool { get; set; } = -1;

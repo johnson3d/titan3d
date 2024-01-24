@@ -74,6 +74,10 @@ namespace EngineNS.Bricks.Terrain.CDLOD
         public TtPatchLayers Layers = new TtPatchLayers();
 
         public UTerrainLevelData Level;
+        public UTerrainNode TerrainNode
+        {
+            get => Level.Level.Node;
+        }
         public Graphics.Mesh.TtMesh[] TerrainMesh;
         public Graphics.Mesh.TtMesh[] WaterMesh;
         public Graphics.Mesh.TtMesh[] WireFrameTerrainMesh;

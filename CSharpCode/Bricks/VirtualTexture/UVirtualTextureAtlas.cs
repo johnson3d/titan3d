@@ -4,7 +4,7 @@ using System.Text;
 
 namespace EngineNS.Bricks.VirtualTexture
 {
-    public class UVirtualTextureAtlas : UVirtualTextureBase
+    public class TtVirtualTextureAtlas : TtVirtualTextureBase
     {
     }
 }

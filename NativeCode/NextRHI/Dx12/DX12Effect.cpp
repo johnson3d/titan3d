@@ -40,7 +40,7 @@ namespace NxRHI
 			return;
 		D3D12_DESCRIPTOR_RANGE rangeVS{};
 		rangeVS.RangeType = type;
-		rangeVS.NumDescriptors = 1;
+		rangeVS.NumDescriptors = pBinder->BindCount;
 		rangeVS.BaseShaderRegister = pBinder->Slot;
 		rangeVS.RegisterSpace = pBinder->Space;
 		rangeVS.OffsetInDescriptorsFromTableStart = D3D12_DESCRIPTOR_RANGE_OFFSET_APPEND;
@@ -53,7 +53,7 @@ namespace NxRHI
 			return;
 		D3D12_DESCRIPTOR_RANGE rangeVS{};
 		rangeVS.RangeType = type;
-		rangeVS.NumDescriptors = 1;
+		rangeVS.NumDescriptors = pBinder->BindCount;
 		rangeVS.BaseShaderRegister = pBinder->Slot;
 		rangeVS.RegisterSpace = pBinder->Space;
 		rangeVS.OffsetInDescriptorsFromTableStart = D3D12_DESCRIPTOR_RANGE_OFFSET_APPEND;

@@ -697,6 +697,15 @@ namespace EngineNS.NxRHI
             }
         }
 
+        public ITexture GetTexture()
+        {
+            return mCoreObject.GetBufferAsTexture();
+        }
+        public IBuffer GetBuffer()
+        {
+            return mCoreObject.GetBufferAsBuffer();
+        }
+
         #region IAsset
         public const string AssetExt = ".srv";
         public IO.IAssetMeta CreateAMeta()

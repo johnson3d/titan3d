@@ -58,8 +58,11 @@ namespace EngineNS.Bricks.Terrain.CDLOD
     {
         public UTerrainLevel Level;
         public TtPatch[,] TiledPatch;
+        public NxRHI.UTexture HeightMap;
         public NxRHI.USrView HeightMapSRV;
+        public NxRHI.UTexture WaterHMap;
         public NxRHI.USrView WaterHMapSRV;
+        public NxRHI.UTexture NormalMap;
         public NxRHI.USrView NormalMapSRV;
         public NxRHI.USrView MaterialIdMapSRV;
         public float HeightMapMinHeight;
@@ -271,7 +274,7 @@ namespace EngineNS.Bricks.Terrain.CDLOD
 
             InitPhysics(Level);
 
-            HeightMapSRV = hMap.CreateAsHeightMapTexture2D(HeightMapMinHeight, HeightMapMaxHeight, EPixelFormat.PXF_R16_FLOAT);
+            HeightMapSRV = hMap.CreateAsHeightMapTexture2D(out HeightMap, HeightMapMinHeight, HeightMapMaxHeight, EPixelFormat.PXF_R16_FLOAT);
             HeightMapSRV.SetDebugName("HeightMapSRV");
             HeightMapSRV.SetDebugName("HeightMapSRV");
         }
@@ -280,7 +283,7 @@ namespace EngineNS.Bricks.Terrain.CDLOD
         {
             if (waterMap == null)
                 return;
-            WaterHMapSRV = waterMap.CreateAsHeightMapTexture2D(HeightMapMinHeight, HeightMapMaxHeight, EPixelFormat.PXF_R16_FLOAT);
+            WaterHMapSRV = waterMap.CreateAsHeightMapTexture2D(out WaterHMap, HeightMapMinHeight, HeightMapMaxHeight, EPixelFormat.PXF_R16_FLOAT);
         }
         
         public void UpdateNormalMap(Procedure.UBufferConponent norMap)
@@ -290,7 +293,8 @@ namespace EngineNS.Bricks.Terrain.CDLOD
                 norMap as Procedure.USuperBuffer<Vector3, Procedure.FFloat3Operator>,
                 null, 0);
 
-            NormalMapSRV = norImage.CreateRGBA8Texture2DAsNormal(); //terrainGen.mResultNormalImage.CreateRGBA8Texture2DAsNormal();
+            NormalMapSRV = norImage.CreateRGBA8Texture2DAsNormal(out NormalMap); //terrainGen.mResultNormalImage.CreateRGBA8Texture2DAsNormal();            
+            NormalMapSRV.AssetName = RName.GetRName($"@{this.GetTerrainNode().TerrainName}_{Level.LevelX}_{Level.LevelZ}@", RName.ERNameType.Transient);
         }
         public void UpdateMaterialIdMap(Procedure.UBufferConponent idMap)
         {

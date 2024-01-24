@@ -407,9 +407,9 @@ namespace EngineNS.Bricks.Procedure
                 return result;
             }
         }
-        public virtual unsafe NxRHI.USrView CreateAsHeightMapTexture2D(float minHeight, float maxHeight, EPixelFormat format = EPixelFormat.PXF_R32_FLOAT, float finalScale = 1.0f, bool bNomalized = false)
+        public virtual unsafe NxRHI.USrView CreateAsHeightMapTexture2D(out NxRHI.UTexture texture, float minHeight, float maxHeight, EPixelFormat format = EPixelFormat.PXF_R32_FLOAT, float finalScale = 1.0f, bool bNomalized = false)
         {
-            NxRHI.UTexture texture;
+            texture = null;
             if (minHeight >= 0 && minHeight <= 1 && maxHeight >= 0 && maxHeight <= 1)
             {
                 minHeight = 0;

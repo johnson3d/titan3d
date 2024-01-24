@@ -297,6 +297,8 @@ namespace EngineNS
                         Profiler.Log.WriteException(ex);
                     }
                 }
+
+                TickableManager.ProcessTicSync();
             }
             catch (Exception ex)
             {

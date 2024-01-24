@@ -199,6 +199,9 @@ namespace NxRHI
 		virtual UINT GetPrimitiveNum() override{
 			return 1;
 		}
+		FSubResourceFootPrint* GetFootPrint() {
+			return &FootPrint;
+		}
 	public:
 		static int GetNumOfInstance() {
 			return NumOfInstance;

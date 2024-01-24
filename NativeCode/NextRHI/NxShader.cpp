@@ -28,6 +28,7 @@ namespace NxRHI
 		pAttr->Write(Type);
 		pAttr->Write(Space);
 		pAttr->Write(Slot);
+		pAttr->Write(BindCount);
 		pAttr->Write(Size);
 		pAttr->Write(IsStructuredBuffer);
 		pAttr->Write(DescriptorIndex);
@@ -47,7 +48,8 @@ namespace NxRHI
 		pAttr->Read(Name);
 		pAttr->Read(Type);
 		pAttr->Read(Space);
-		pAttr->Read(Slot);
+		pAttr->Read(Slot); 
+		pAttr->Read(BindCount);
 		pAttr->Read(Size);
 		pAttr->Read(IsStructuredBuffer);
 		pAttr->Read(DescriptorIndex);

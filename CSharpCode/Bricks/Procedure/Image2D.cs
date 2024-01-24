@@ -304,9 +304,8 @@ namespace EngineNS.Bricks.Procedure
                 return result;
             }
         }
-        public NxRHI.USrView CreateRGBA8Texture2DAsNormal()
+        public NxRHI.USrView CreateRGBA8Texture2DAsNormal(out NxRHI.UTexture texture)
         {
-            NxRHI.UTexture texture;
             unsafe
             {
                 var desc = new NxRHI.FTextureDesc();

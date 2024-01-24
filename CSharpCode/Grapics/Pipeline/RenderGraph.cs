@@ -58,7 +58,7 @@ namespace EngineNS.Graphics.Pipeline
             {
                 if (i.Value.GetType() == typeof(T))
                 {
-                    return (T)i.Value;
+                    return i.Value as T;
                 }
             }
             return null;

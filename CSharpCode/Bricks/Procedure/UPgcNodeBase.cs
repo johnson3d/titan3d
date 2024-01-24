@@ -10,6 +10,7 @@ namespace EngineNS.Bricks.Procedure
         public int RootDistance;
         protected int mPreviewResultIndex = -1;
         public float ScaleForPreview { get; set; } = 1.0f;
+        protected NxRHI.UTexture PreviewTexture;
         protected NxRHI.USrView PreviewSRV;
         public class UCompileButton
         {
@@ -318,14 +319,14 @@ namespace EngineNS.Bricks.Procedure
                             float minV = float.MaxValue;
                             float maxV = float.MinValue;
                             previewBuffer.GetRangeUnsafe<float, FFloatOperator>(out minV, out maxV);
-                            PreviewSRV = previewBuffer.CreateAsHeightMapTexture2D(minV, maxV, EPixelFormat.PXF_R16_FLOAT, ScaleForPreview, true);
+                            PreviewSRV = previewBuffer.CreateAsHeightMapTexture2D(out PreviewTexture, minV, maxV, EPixelFormat.PXF_R16_FLOAT, ScaleForPreview, true);
                         }
                         else if (previewBuffer.BufferCreator.ElementType == Rtti.UTypeDescGetter<sbyte>.TypeDesc)
                         {
                             sbyte minV = sbyte.MaxValue;
                             sbyte maxV = sbyte.MinValue;
                             previewBuffer.GetRangeUnsafe<sbyte, FSByteOperator>(out minV, out maxV);
-                            PreviewSRV = previewBuffer.CreateAsHeightMapTexture2D((float)minV, (float)maxV, EPixelFormat.PXF_R16_FLOAT, ScaleForPreview, true);
+                            PreviewSRV = previewBuffer.CreateAsHeightMapTexture2D(out PreviewTexture, (float)minV, (float)maxV, EPixelFormat.PXF_R16_FLOAT, ScaleForPreview, true);
                         }
                         else if (previewBuffer.BufferCreator.ElementType == Rtti.UTypeDescGetter<Vector2>.TypeDesc)
                         {

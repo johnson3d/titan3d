@@ -34,26 +34,31 @@ cbuffer cbPerPatch DX_AUTOBIND
 	float2 TexUVOffset;
 };
 
+#if defined(FEATURE_USE_RVT)
+Texture2DArray	HeightMapTexture DX_AUTOBIND;
+#else
 Texture2D		HeightMapTexture DX_AUTOBIND;
-SamplerState	Samp_HeightMapTexture DX_AUTOBIND;
+#endif
+SamplerState Samp_HeightMapTexture DX_AUTOBIND;
 
-float3 GetPosition(float2 uv)
+float GetTerrrainVertexHeight(float2 uv, int uniqueTextureId = 0)
 {
-	float3 result = float3(0, 0, 0);
-	result.xz = uv * PatchSize;
-	float2 heightUV = uv * TexUVScale;
-	heightUV += TexUVOffset.xy;
-	result.y = HeightMapTexture.SampleLevel(Samp_HeightMapTexture, heightUV.xy, 0).r;
+#if defined(FEATURE_USE_RVT)
+	uint arrayIndex = TextureSlotBuffer.Load((uniqueTextureId & 0xffff) * 4);
+	return HeightMapTexture.SampleLevel(Samp_HeightMapTexture, float3(uv.xy, arrayIndex), 0).r;
+#else
+    return HeightMapTexture.SampleLevel(Samp_HeightMapTexture, uv.xy, 0).r;
+#endif
+}
 
-	//test code
-	//FRVTArray rvt = (FRVTArray)0;
-	//float3 myCoord = float3(heightUV.x, heightUV.y, rvt.ArrayIndex);
-	//result.y += HeightMapTextureArray.SampleLevel(Samp_HeightMapTexture, myCoord, 0).r;
-	//result.y += ArrayTextures[1].SampleLevel(Samp_HeightMapTexture, heightUV, 0).r;
-	//test code
-
-	//result += StartPosition;
-	return result;
+float3 GetTerrrainVertexPosition(float2 uv, int uniqueTextureId = 0)
+{
+    float3 result = float3(0, 0, 0);
+    result.xz = uv * PatchSize;
+    float2 heightUV = uv * TexUVScale;
+    heightUV += TexUVOffset.xy;
+    result.y = GetTerrrainVertexHeight(heightUV, uniqueTextureId);
+    return result;
 }
 
 #endif //_TerrainCommonModifier_cginc_

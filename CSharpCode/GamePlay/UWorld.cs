@@ -124,10 +124,11 @@ namespace EngineNS.GamePlay
 
                 EditorObject = LightDebug | PhyxDebug | UtilityDebug,
                 All = 0xFFFFFFFF,
+                None = 0,
             }
             public const string FilterTypeCountAs = "PhyxDebug";
             public EVisCull CullType = EVisCull.Normal;
-            public EVisCullFilter CullFilters = EVisCullFilter.All;
+            public EVisCullFilter CullFilters = EVisCullFilter.None;// EVisCullFilter.All;
             public UWorld World;
             public Graphics.Pipeline.UCamera CullCamera;
             public List<Graphics.Mesh.TtMesh> VisibleMeshes = null;// new List<Graphics.Mesh.TtMesh>();

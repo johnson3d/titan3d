@@ -4,7 +4,7 @@ using System.Text;
 
 namespace EngineNS.Bricks.Terrain.CDLOD
 {
-    public class UTerrainSystem
+    public class UTerrainSystem : IDisposable
     {
         public enum EShowMode
         {
@@ -17,7 +17,10 @@ namespace EngineNS.Bricks.Terrain.CDLOD
         public Graphics.Pipeline.Shader.UMaterial Material;
         public Graphics.Pipeline.Shader.UMaterial WaterMaterial;
         public Graphics.Pipeline.Shader.UMaterial WireFrameMaterial;
-        
+        public VirtualTexture.TtVirtualTextureArray HeightmapRVT;
+        public VirtualTexture.TtVirtualTextureArray NormalmapRVT;
+        public NxRHI.UCommandList UpdateRvtPass;
+
         public int MipLevels { get; set; } = 6;
         public Graphics.Mesh.UMeshPrimitives[] GridMipLevels;
 
@@ -29,6 +32,11 @@ namespace EngineNS.Bricks.Terrain.CDLOD
             //Material = await UEngine.Instance.GfxDevice.MaterialManager.CreateMaterial(RName.GetRName("material/SysDft.material", RName.ERNameType.Engine));
             Material = await UEngine.Instance.GfxDevice.MaterialManager.CreateMaterial(RName.GetRName("utest/material/terrainidmap.material"));
             Material.IsEditingMaterial = false;
+
+            HeightmapRVT = new VirtualTexture.TtVirtualTextureArray();
+            HeightmapRVT.Initialize(EPixelFormat.PXF_R16_FLOAT, 1024, 1, 32);
+            NormalmapRVT = new VirtualTexture.TtVirtualTextureArray();
+            NormalmapRVT.Initialize(EPixelFormat.PXF_R8G8B8A8_UNORM, 1024, 1, 32);
 
             WireFrameMaterial = await UEngine.Instance.GfxDevice.MaterialManager.CreateMaterial(RName.GetRName("material/sysdft_color.material", RName.ERNameType.Engine));
             WireFrameMaterial.IsEditingMaterial = false;
@@ -53,10 +61,10 @@ namespace EngineNS.Bricks.Terrain.CDLOD
             //Parameters.LODDistanceRatio = 0.6f;
             //Parameters.MorphStartRatio = 0.3f;
 
-            
+            UpdateRvtPass = UEngine.Instance.GfxDevice.RenderContext.CreateCommandList();
             return true;
         }
-        public void Cleanup()
+        public void Dispose()
         {
             for (int i = 0; i < GridMipLevels.Length; i++)
             {
@@ -64,9 +72,10 @@ namespace EngineNS.Bricks.Terrain.CDLOD
             }
             GridMipLevels = null;
         }        
-        public void Tick()
+        public void TickSync()
         {
-            
+            NormalmapRVT.TickSync(UpdateRvtPass);
+            HeightmapRVT.TickSync(UpdateRvtPass);
         }
     }
 }

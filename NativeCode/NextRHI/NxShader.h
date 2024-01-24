@@ -50,6 +50,7 @@ namespace NxRHI
 		{
 			Space = 0;
 			Slot = -1;
+			BindCount = 1;
 			Size = 0;
 			DescriptorIndex = -1;
 			IsStructuredBuffer = FALSE;
@@ -58,6 +59,7 @@ namespace NxRHI
 		EShaderBindType		Type;
 		int					Space = 0;
 		int					Slot = 0;
+		int					BindCount = 1;
 		UINT				Size = 0;
 		vBOOL				IsStructuredBuffer = FALSE;
 		int					DescriptorIndex = -1;

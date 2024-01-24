@@ -127,9 +127,16 @@ namespace EngineNS.Bricks.Terrain.CDLOD
 
         public NxRHI.UCbView TerrainCBuffer;
 
-        public VirtualTexture.UVirtualTextureArray RVTextureArray;
+        public VirtualTexture.TtVirtualTextureArray RVTextureArray;
         public UTerrainMaterialIdManager TerrainMaterialIdManager { get; set; }
-        
+        public string TerrainName
+        {
+            get
+            {
+                return GetNodeData<UTerrainData>()?.PgcName?.Name;
+            }
+        }
+
         public override async System.Threading.Tasks.Task<bool> InitializeNode(GamePlay.UWorld world, GamePlay.Scene.UNodeData data, GamePlay.Scene.EBoundVolumeType bvType, Type placementType)
         {
             if (data as UTerrainData == null)
@@ -412,6 +419,16 @@ namespace EngineNS.Bricks.Terrain.CDLOD
                 }
 
                 LevelStreaming.Tick(UEngine.Instance.ElapsedSecond);
+                
+                if (UEngine.Instance.Config.Feature_UseRVT)
+                {
+                    UEngine.Instance.TickableManager.AddTickSync(static (arg) =>
+                    {
+                        var ts = arg as UTerrainSystem;
+                        ts.TickSync();
+                    }, this.Terrain);
+                }
+
                 return base.OnTickLogic(world, policy);
             }   
         }

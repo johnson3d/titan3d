@@ -21,6 +21,7 @@ namespace EngineNS.NxRHI
             var result = new UGpuDevice();
             result.mCoreObject = mCoreObject.CreateDevice(in desc);
             result.mGpuQueue = new UGpuQueue(result, result.mCoreObject.GetCmdQueue());
+            result.InitShaderGlobalEnv();
             return result;
         }
         public int NumOfContext
@@ -46,13 +47,6 @@ namespace EngineNS.NxRHI
     }
     public unsafe partial struct FGpuDeviceCaps
     {
-        public void SetShaderGlobalEnv(IShaderDefinitions defPtr)
-        {
-            if (IsSupportSSBO_VS)
-            {
-                defPtr.AddDefine("HW_VS_STRUCTUREBUFFER", "1");
-            }
-        }
         public override string ToString()
         {
             string result = "";
@@ -81,6 +75,25 @@ namespace EngineNS.NxRHI
             {
                 return mCoreObject.mCaps;
             }
+        }
+        public UShaderDefinitions GlobalEnvDefines { get; } = new UShaderDefinitions();
+        Hash160 mGlobalEnvHash;
+        public Hash160 GlobalEnvHash
+        {
+            get => mGlobalEnvHash;
+        }
+        internal void InitShaderGlobalEnv()
+        {
+            var caps = DeviceCaps;
+            if (caps.IsSupportSSBO_VS)
+            {
+                GlobalEnvDefines.AddDefine("HW_VS_STRUCTUREBUFFER", "1");
+                if (UEngine.Instance.Config.Feature_UseRVT)
+                {
+                    GlobalEnvDefines.AddDefine("FEATURE_USE_RVT", "1");
+                }
+            }
+            mGlobalEnvHash = Hash160.CreateHash160(GlobalEnvDefines.ToString());
         }
         public UCommandList CreateCommandList()
         {
@@ -553,7 +566,7 @@ namespace EngineNS.NxRHI
             }
         }
         
-        public void QueueCmdlist(UCommandList cmd, string name = null)
+        public void QueueCmdlist(UCommandList cmd, string name = null, EQueueType qType = EQueueType.QU_Default)
         {
             System.Diagnostics.Debug.Assert(cmd.mCoreObject.IsRecording() == false);
             if (UEngine.Instance.Config.MultiRenderMode == EMultiRenderMode.None)

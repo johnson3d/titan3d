@@ -112,6 +112,12 @@ namespace EngineNS
                     return -1;
             }
         }
+        public static void Swap<T>(ref T a, ref T b)
+        {
+            T c = b;
+            b = a;
+            a = c;
+        }
     }
     public unsafe partial struct BigStackBuffer : IDisposable
     {

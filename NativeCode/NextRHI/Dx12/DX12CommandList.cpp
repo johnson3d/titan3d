@@ -355,7 +355,9 @@ namespace NxRHI
 		if (buffer == nullptr)
 			return;
 		//buffer->FlushDirty(this);
-		//mContext->SetGraphicsRootConstantBufferView(binder->DescriptorIndex, ((DX12Buffer*)buffer)->mGpuResource->GetGPUVirtualAddress());
+		//mContext->SetGraphicsRootConstantBufferView(binder->
+		// 
+		// , ((DX12Buffer*)buffer)->mGpuResource->GetGPUVirtualAddress());
 
 #ifndef DESCRIPTOR_IN_DRAWCALL
 		buffer->Buffer->TransitionTo(this, EGpuResourceState::GRS_GenericRead);

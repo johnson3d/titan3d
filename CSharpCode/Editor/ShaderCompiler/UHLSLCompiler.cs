@@ -395,7 +395,7 @@ namespace EngineNS.Editor.ShaderCompiler
                         break;
                 }
 
-                UEngine.Instance.GfxDevice.RenderContext.DeviceCaps.SetShaderGlobalEnv(defPtr.mCoreObject);
+                defPtr.MergeDefinitions(UEngine.Instance.GfxDevice.RenderContext.GlobalEnvDefines);
 
                 var cfg = UEngine.Instance.Config;
                 if (cfg.CookDXBC)

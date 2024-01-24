@@ -253,6 +253,12 @@ namespace EngineNS
             CalcHash64(in result, source);
             return result;
         }
+        public static unsafe Hash64 FromData(byte* pData, int size)
+        {
+            Hash64 result = new Hash64();
+            CalcHash64(in result, pData, size);
+            return result;
+        }
         public static void CalcHash64(in Hash64 hash, string source)
         {
             CalcHash64(in hash, System.Text.Encoding.ASCII.GetBytes(source));
@@ -266,6 +272,13 @@ namespace EngineNS
                 {
                     SDK_HashHelper_CalcHash64(p, pSource, source.Length);
                 }
+            }
+        }
+        public static unsafe void CalcHash64(in Hash64 hash, byte* source, int size)
+        {
+            fixed (Hash64* p = &hash)
+            {
+                SDK_HashHelper_CalcHash64(p, source, size);
             }
         }
         public static Hash64 Empty = new Hash64();

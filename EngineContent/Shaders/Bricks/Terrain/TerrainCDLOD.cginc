@@ -1,22 +1,34 @@
 #ifndef _TerrainCDLOD_cginc_
 #define _TerrainCDLOD_cginc_
 
+//#define FEATURE_USE_RVT
+
 #include "Common.cginc"
 
-Texture2D		NormalMapTexture DX_AUTOBIND;
-SamplerState	Samp_NormalMapTexture DX_AUTOBIND;
+//Texture2D HeightMapTextureDX_AUTOBIND;
+//SamplerState Samp_HeightMapTextureDX_AUTOBIND;
+#if defined(FEATURE_USE_RVT)
+Texture2DArray	NormalMapTexture DX_AUTOBIND;
+ByteAddressBuffer TextureSlotBuffer DX_AUTOBIND;
+#else
+Texture2D NormalMapTexture DX_AUTOBIND;
+#endif
+SamplerState Samp_NormalMapTexture DX_AUTOBIND;
 
-//test code
-Texture2DArray	HeightMapTextureArray DX_AUTOBIND;
-Texture2D		ArrayTextures[3];
-//test code
+float3 GetTerrrainVertexNormal(float2 uv, int uniqueTextureId)
+{
+#if defined(FEATURE_USE_RVT)
+    uint arrayIndex = TextureSlotBuffer.Load((uniqueTextureId & 0xffff) * 4);
+	return NormalMapTexture.SampleLevel(Samp_NormalMapTexture, float3(uv.xy, arrayIndex), 0).xyz;
+#else
+    return NormalMapTexture.SampleLevel(Samp_NormalMapTexture, uv.xy, 0).xyz;
+ #endif
+}
 
 Texture2D		MaterialIdTexture DX_AUTOBIND;
 SamplerState	Samp_MaterialIdTexture DX_AUTOBIND;
-
 Texture2DArray	DiffuseTextureArray DX_AUTOBIND;
 SamplerState	Samp_DiffuseTextureArray DX_AUTOBIND;
-
 Texture2DArray	NormalTextureArray DX_AUTOBIND;
 SamplerState	Samp_NormalTextureArray DX_AUTOBIND;
 
@@ -114,7 +126,11 @@ void DoTerrainModifierVS(inout PS_INPUT vsOut, inout VS_MODIFIER vert)
 {
 	float2 uv = vert.vPosition.xz;
 	half3 nor = half3(0,1,0);
-	float3 pos = GetPosition(uv);
+	
+	//todo: heighmapID & normalmapID from instance data
+    uint heighmapID = 0;
+    uint normalmapID = 0;
+    float3 pos = GetTerrrainVertexPosition(uv, heighmapID);
 
 	float3 eyePos = EyeCenter;// - StartPosition;
 	float eyeDist = distance(pos.xyz, eyePos.xyz);
@@ -133,15 +149,15 @@ void DoTerrainModifierVS(inout PS_INPUT vsOut, inout VS_MODIFIER vert)
 	//float2 heightUV = pos.xz * TexUVScale;
 	//heightUV += TexUVOffset.xy;
 	//heightUV = final_pos.xy / 1024.0f;
-	vsOut.vPosition.y = HeightMapTexture.SampleLevel(Samp_HeightMapTexture, heightUV.xy, 0).r;
+    vsOut.vPosition.y = GetTerrrainVertexHeight(heightUV.xy, heighmapID);
 	//vsOut.vPosition.y += StartPosition.y;
 	vsOut.vPosition.xyz += StartPosition;
 #if USE_PS_WorldPos == 1
 	vsOut.vWorldPos = vsOut.vPosition.xyz;
 #endif
-
+	
 #if USE_PS_Normal == 1
-	vsOut.vNormal = NormalMapTexture.SampleLevel(Samp_NormalMapTexture, heightUV.xy, 0).xyz;
+	vsOut.vNormal = GetTerrrainVertexNormal(heightUV.xy, normalmapID);
 	vsOut.vNormal = normalize(vsOut.vNormal * 2.0f - float3(1.0f, 1.0f, 1.0f));
 	//vsOut.vNormal.xy = heightUV.xy;
 	//vsOut.vTangent.xyz = normalize(mul(float4(vertexData.Tangent.xyz, 0), instData.Matrix).xyz);
