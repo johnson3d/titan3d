@@ -3,6 +3,24 @@
 
 #include "Common.cginc"
 
+Texture2D HeightMapTexture DX_AUTOBIND;
+SamplerState Samp_HeightMapTexture DX_AUTOBIND;
+
+float GetTerrrainVertexHeight(float2 uv, int uniqueTextureId = 0)
+{
+    return HeightMapTexture.SampleLevel(Samp_HeightMapTexture, uv.xy, 0).r;
+}
+
+float3 GetTerrrainVertexPosition(float2 uv, int uniqueTextureId = 0)
+{
+    float3 result = float3(0, 0, 0);
+    result.xz = uv * PatchSize;
+    float2 heightUV = uv * TexUVScale;
+    heightUV += TexUVOffset.xy;
+    result.y = GetTerrrainVertexHeight(heightUV, uniqueTextureId);
+    return result;
+}
+
 cbuffer cbPerGrassType DX_AUTOBIND
 {
 	float MinScale;

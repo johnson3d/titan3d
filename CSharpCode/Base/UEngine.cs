@@ -40,6 +40,10 @@ namespace EngineNS
     [Rtti.Meta]
     public partial class UEngineConfig
     {
+        public void SaveConfig(string sltFile)
+        {
+            IO.TtFileManager.SaveObjectToXml(sltFile, this);
+        }
         [Rtti.Meta]
         public EMultiRenderMode MultiRenderMode { get; set; } = EMultiRenderMode.QueueNextFrame;
         [Rtti.Meta]
@@ -254,7 +258,7 @@ namespace EngineNS
                     Value = 1.ToString(),
                     ValueType = NxRHI.EShaderVarType.SVT_Int
                 });
-                IO.TtFileManager.SaveObjectToXml(cfgFile, Config);
+                Config.SaveConfig(cfgFile);
             }
 
             if (Config.IsGpuDump)

@@ -35,6 +35,10 @@ namespace EngineNS.Bricks.Particle
         {
 
         }
+        public unsafe void OnDrawCall(Graphics.Pipeline.Shader.TtMdfQueueBase mdfQueue1, NxRHI.ICommandList cmd, Graphics.Pipeline.URenderPolicy.EShadingType shadingType, NxRHI.UGraphicDraw drawcall, Graphics.Pipeline.URenderPolicy policy, TtMesh.TtAtom atom)
+        {
+
+        }
     }
 
     public class UParticleMdfQueue<FParticle, FParticleSystem> : Graphics.Pipeline.Shader.TtMdfQueue1<TtParticleModifier>
@@ -80,12 +84,6 @@ namespace EngineNS.Bricks.Particle
             {
                 drawcall.DrawInstance = 1;
             }
-        }
-        public override Hash160 GetHash()
-        {
-            string CodeString = IO.TtFileManager.ReadAllText(RName.GetRName("shaders/Bricks/Particle/NebulaParticle.cginc", RName.ERNameType.Engine).Address);
-            mMdfQueueHash = Hash160.CreateHash160(CodeString);
-            return mMdfQueueHash;
         }
     }
 }

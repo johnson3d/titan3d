@@ -12,6 +12,7 @@ namespace EngineNS
         public Thread.TtAtomic_Int GraphicsDrawcall = new Thread.TtAtomic_Int();
         public Thread.TtAtomic_Int ComputeDrawcall = new Thread.TtAtomic_Int();
         public Thread.TtAtomic_Int TransferDrawcall = new Thread.TtAtomic_Int();
+        public Thread.TtAtomic_Int ActionDrawcall = new Thread.TtAtomic_Int();
         public int NativeGraphicsDrawcall
         {
             get

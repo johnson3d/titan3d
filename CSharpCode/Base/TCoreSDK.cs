@@ -118,6 +118,10 @@ namespace EngineNS
             b = a;
             a = c;
         }
+        public static unsafe uint AsUInt32(float v)
+        {
+            return *(uint*)&v;
+        }
     }
     public unsafe partial struct BigStackBuffer : IDisposable
     {

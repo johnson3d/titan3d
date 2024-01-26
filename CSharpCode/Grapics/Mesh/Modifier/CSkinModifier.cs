@@ -5,10 +5,10 @@ using System.Text;
 
 namespace EngineNS.Graphics.Mesh.Modifier
 {
-    public class CSkinModifier : AuxPtrType<ISkinModifier>, Pipeline.Shader.IMeshModifier
+    public class TtSkinModifier : AuxPtrType<ISkinModifier>, Pipeline.Shader.IMeshModifier
     {
         public Animation.SkeletonAnimation.Runtime.Pose.UMeshSpaceRuntimePose RuntimeMeshSpacePose;
-        public CSkinModifier()
+        public TtSkinModifier()
         {
             mCoreObject = ISkinModifier.CreateInstance();
         }
@@ -36,6 +36,10 @@ namespace EngineNS.Graphics.Mesh.Modifier
         public void Initialize(Graphics.Mesh.UMaterialMesh materialMesh)
         {
 
+        }
+        public unsafe void OnDrawCall(Graphics.Pipeline.Shader.TtMdfQueueBase mdfQueue1, NxRHI.ICommandList cmd, Graphics.Pipeline.URenderPolicy.EShadingType shadingType, NxRHI.UGraphicDraw drawcall, Graphics.Pipeline.URenderPolicy policy, Graphics.Mesh.TtMesh.TtAtom atom)
+        {
+            
         }
     }
 }

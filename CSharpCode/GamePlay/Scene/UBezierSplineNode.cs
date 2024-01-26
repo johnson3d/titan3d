@@ -178,7 +178,7 @@ namespace EngineNS.GamePlay.Scene
 
                     var instantMesh = mDebugPointMesh.MdfQueue as Graphics.Mesh.UMdfInstanceStaticMesh;
 
-                    instantMesh.InstanceModifier.SetCapacity((uint)Spline.Curves.Count);
+                    instantMesh.InstanceModifier.SetCapacity((uint)Spline.Curves.Count, false);
 
                     foreach(var i in SplinePoints)
                     {
@@ -202,7 +202,7 @@ namespace EngineNS.GamePlay.Scene
                         instance.Scale = Vector3.One;
                         instance.Quat = Quaternion.Identity;
                         instance.HitProxyId = sPoint.HitProxy.ProxyId;
-                        instantMesh.InstanceModifier.PushInstance(in instance);
+                        instantMesh.InstanceModifier.PushInstance(in instance, new Graphics.Mesh.Modifier.FCullBounding());
 
                         //var cache = i.GetPointCache(Spline.Segments);
                         //for (int j = 0; j < cache.CachedPoints.Length; j++)
@@ -251,10 +251,10 @@ namespace EngineNS.GamePlay.Scene
                 return;
 
             if (DebugSplineMesh != null)
-                rp.VisibleMeshes.Add(mDebugSplineMesh);
+                rp.AddVisibleMesh(mDebugSplineMesh);
 
             if (DebugPointMesh != null)
-                rp.VisibleMeshes.Add(mDebugPointMesh);
+                rp.AddVisibleMesh(mDebugPointMesh);
         }
         protected override void OnAbsTransformChanged()
         {

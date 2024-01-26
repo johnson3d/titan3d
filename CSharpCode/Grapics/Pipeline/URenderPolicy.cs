@@ -3,6 +3,7 @@ using EngineNS.Thread;
 using Microsoft.CodeAnalysis.Host.Mef;
 using NPOI.SS.Formula.Functions;
 using NPOI.Util;
+using Org.BouncyCastle.Asn1.X509;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -10,6 +11,17 @@ using System.Text;
 
 namespace EngineNS.Graphics.Pipeline
 {
+    public struct FVisibleMesh
+    {
+        public enum EDrawMode
+        {
+            Normal,
+            Instance,
+        }
+        public EDrawMode DrawMode;
+        public Mesh.TtMesh Mesh;
+    }
+
     [EGui.Controls.PropertyGrid.PGCategoryFilters(ExcludeFilters = new string[] { "Misc" })]
     public partial class URenderPolicy : TtRenderGraph, IO.ISerializer
     {
@@ -219,7 +231,7 @@ namespace EngineNS.Graphics.Pipeline
         }
         #endregion
         public Common.UPickedProxiableManager PickedProxiableManager { get; protected set; } = new Common.UPickedProxiableManager();
-        public List<Mesh.TtMesh> VisibleMeshes = new List<Mesh.TtMesh>();
+        public List<FVisibleMesh> VisibleMeshes = new List<FVisibleMesh>();
         public List<GamePlay.Scene.UNode> VisibleNodes = new List<GamePlay.Scene.UNode>();
 
         public virtual Shader.UGraphicsShadingEnv GetPassShading(EShadingType type, Mesh.TtMesh.TtAtom atom, Pipeline.TtRenderGraphNode node)

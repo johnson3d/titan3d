@@ -471,7 +471,7 @@ namespace EngineNS.Bricks.Terrain.CDLOD
                     i.Mesh.UpdateCameraOffset(rp.World);
                 }
 
-                rp.VisibleMeshes.Add(i.Mesh);
+                rp.AddVisibleMesh(i.Mesh);
             }
             CameralOffsetSerialId = rp.World.CameralOffsetSerialId;
         }

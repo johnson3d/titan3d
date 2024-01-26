@@ -120,7 +120,7 @@ namespace EngineNS.Bricks.Terrain.CDLOD
                 obj.PlantType = this;
                 if (InstanceMdf == null)
                     return;
-                InstanceMdf.InstanceModifier.SetCapacity((uint)capacity);
+                InstanceMdf.InstanceModifier.SetCapacity((uint)capacity, false);
                 UEngine.Instance.GfxDevice.HitproxyManager.MapProxy(obj);
                 ObjInstances.Add(obj);
 
@@ -130,7 +130,7 @@ namespace EngineNS.Bricks.Terrain.CDLOD
                 instance.Scale = obj.Placement.Scale;
                 instance.Quat = obj.Placement.Quat;
                 instance.HitProxyId = obj.HitProxy.ProxyId;
-                obj.InstanceIndex = InstanceMdf.InstanceModifier.PushInstance(in instance);
+                obj.InstanceIndex = InstanceMdf.InstanceModifier.PushInstance(in instance, new Graphics.Mesh.Modifier.FCullBounding());
                 //InstanceMdf.InstanceModifier.PushInstance(obj.Transform.mPosition.ToSingleVector3(), in obj.Transform.mScale, in obj.Transform.mQuat, in UInt32_4.Zero, obj.HitProxy.ProxyId);
             }
             public void OnHitProxyChanged()
@@ -195,7 +195,7 @@ namespace EngineNS.Bricks.Terrain.CDLOD
                     i.Mesh.UpdateCameraOffset(rp.World);
                 }
 
-                rp.VisibleMeshes.Add(i.Mesh);
+                rp.AddVisibleMesh(i.Mesh);
 
                 //if (rp.CullType == GamePlay.UWorld.UVisParameter.EVisCull.Shadow)
                 //{

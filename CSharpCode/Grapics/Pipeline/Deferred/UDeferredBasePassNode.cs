@@ -193,7 +193,7 @@ namespace EngineNS.Graphics.Pipeline.Deferred
                         //BasePass.DrawCmdList.SetViewport(GBuffers.ViewPort.mCoreObject);
                         foreach (var i in policy.VisibleMeshes)
                         {
-                            foreach (var j in i.SubMeshes)
+                            foreach (var j in i.Mesh.SubMeshes)
                             {
                                 foreach (var k in j.Atoms)
                                 {
@@ -208,23 +208,30 @@ namespace EngineNS.Graphics.Pipeline.Deferred
                                         if (drawcall != null)
                                         {
                                             drawcall.BindGBuffer(policy.DefaultCamera, GBuffers);
-
                                             cmd.PushGpuDraw(drawcall);
                                         }
                                     }
                                     else if (layer == ERenderLayer.RL_Opaque)
                                     {
+                                        if (i.DrawMode == FVisibleMesh.EDrawMode.Instance)
+                                            continue;
+
                                         var cmd = BasePass.DrawCmdList;
                                         var drawcall = k.GetDrawCall(cmd.mCoreObject, GBuffers, policy, URenderPolicy.EShadingType.BasePass, this);
                                         if (drawcall != null)
                                         {
                                             drawcall.BindGBuffer(policy.DefaultCamera, GBuffers);
-
                                             cmd.PushGpuDraw(drawcall);
                                         }
                                     }
                                 }
                             }
+                        }
+
+                        var cullingNode = policy.FindFirstNode<TtCullingNode>();
+                        if (cullingNode != null)
+                        {
+                            cullingNode.Commit(policy, BasePass.DrawCmdList, GBuffers);
                         }
                     }
 #endif
@@ -273,8 +280,8 @@ namespace EngineNS.Graphics.Pipeline.Deferred
 
             foreach (var i in policy.VisibleMeshes)
             {
-                var preMatrix = i.PerMeshCBuffer.GetMatrix(UEngine.Instance.GfxDevice.CoreShaderBinder.CBPerMesh.WorldMatrix);
-                i.PerMeshCBuffer.SetMatrix(UEngine.Instance.GfxDevice.CoreShaderBinder.CBPerMesh.PreWorldMatrix, preMatrix);
+                var preMatrix = i.Mesh.PerMeshCBuffer.GetMatrix(UEngine.Instance.GfxDevice.CoreShaderBinder.CBPerMesh.WorldMatrix);
+                i.Mesh.PerMeshCBuffer.SetMatrix(UEngine.Instance.GfxDevice.CoreShaderBinder.CBPerMesh.PreWorldMatrix, preMatrix);
             }
         }
         

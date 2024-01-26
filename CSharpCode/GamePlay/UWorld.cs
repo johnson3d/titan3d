@@ -131,10 +131,14 @@ namespace EngineNS.GamePlay
             public EVisCullFilter CullFilters = EVisCullFilter.None;// EVisCullFilter.All;
             public UWorld World;
             public Graphics.Pipeline.UCamera CullCamera;
-            public List<Graphics.Mesh.TtMesh> VisibleMeshes = null;// new List<Graphics.Mesh.TtMesh>();
+            public List<Graphics.Pipeline.FVisibleMesh> VisibleMeshes = null;// new List<Graphics.Mesh.TtMesh>();
             public List<GamePlay.Scene.UNode> VisibleNodes = null;
             public delegate bool FOnVisitNode(Scene.UNode node, UVisParameter arg);
             public FOnVisitNode OnVisitNode = null;
+            public void AddVisibleMesh(Graphics.Mesh.TtMesh mesh)
+            {
+                VisibleMeshes.Add(new Graphics.Pipeline.FVisibleMesh() { Mesh = mesh });
+            }
         }
         [ThreadStatic]
         private static Profiler.TimeScope ScopeGatherVisibleMeshes = Profiler.TimeScopeManager.GetTimeScope(typeof(UWorld), nameof(GatherVisibleMeshes));
@@ -207,7 +211,7 @@ namespace EngineNS.GamePlay
 
         #region DebugAssist
         
-        public void GatherBoundShapes(List<Graphics.Mesh.TtMesh> boundVolumes, Scene.UNode node = null)
+        public void GatherBoundShapes(List<Graphics.Pipeline.FVisibleMesh> boundVolumes, Scene.UNode node = null)
         {
             if (node == null)
                 node = Root;
@@ -219,7 +223,7 @@ namespace EngineNS.GamePlay
             if (node.HasStyle(Scene.UNode.ENodeStyles.HideBoundShape))
                 return false;
 
-            var bvs = arg as List<Graphics.Mesh.TtMesh>;
+            var bvs = arg as List<Graphics.Pipeline.FVisibleMesh>;
 
             ref var aabb = ref node.AABB;
             var size = aabb.GetSize();
@@ -239,7 +243,7 @@ namespace EngineNS.GamePlay
             mesh2.IsAcceptShadow = false;
             mesh2.IsUnlit = true;
 
-            bvs.Add(mesh2);
+            bvs.Add(new Graphics.Pipeline.FVisibleMesh() { Mesh = mesh2 });
 
             return false;
         }

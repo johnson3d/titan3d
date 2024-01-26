@@ -201,7 +201,7 @@ namespace EngineNS.Graphics.Pipeline.Deferred
                 {
                     foreach (var i in policy.VisibleMeshes)
                     {
-                        foreach (var j in i.SubMeshes)
+                        foreach (var j in i.Mesh.SubMeshes)
                         {
                             foreach (var k in j.Atoms)
                             {
@@ -408,7 +408,7 @@ namespace EngineNS.Graphics.Pipeline.Deferred
                 {
                     foreach (var i in policy.VisibleMeshes)
                     {
-                        foreach (var j in i.SubMeshes)
+                        foreach (var j in i.Mesh.SubMeshes)
                         {
                             if (j == null)
                                 continue;

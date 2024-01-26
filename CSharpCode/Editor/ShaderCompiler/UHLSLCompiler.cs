@@ -232,8 +232,6 @@ namespace EngineNS.Editor.ShaderCompiler
                     return "USE_PS_Custom3";
                 case Graphics.Pipeline.Shader.EPixelShaderInput.PST_Custom4:
                     return "USE_PS_Custom4";
-                case Graphics.Pipeline.Shader.EPixelShaderInput.PST_PointLightIndices:
-                    return "USE_PS_PointLightIndices";
                 case Graphics.Pipeline.Shader.EPixelShaderInput.PST_F4_1:
                     return "USE_PS_F4_1";
                 case Graphics.Pipeline.Shader.EPixelShaderInput.PST_F4_2:

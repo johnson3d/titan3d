@@ -31,14 +31,10 @@ namespace EngineNS.Bricks.VXGI
         {
 
         }
-    }
-    public class UMdfVoxelDebugMesh : Graphics.Pipeline.Shader.TtMdfQueue1<TtVoxelDebugModifier>
-    {
-        public unsafe override void OnDrawCall(NxRHI.ICommandList cmd, Graphics.Pipeline.URenderPolicy.EShadingType shadingType, NxRHI.UGraphicDraw drawcall, Graphics.Pipeline.URenderPolicy policy, Graphics.Mesh.TtMesh.TtAtom atom)
+        public unsafe void OnDrawCall(Graphics.Pipeline.Shader.TtMdfQueueBase mdfQueue1, NxRHI.ICommandList cmd, Graphics.Pipeline.URenderPolicy.EShadingType shadingType, NxRHI.UGraphicDraw drawcall, Graphics.Pipeline.URenderPolicy policy, Graphics.Mesh.TtMesh.TtAtom atom)
         {
-            base.OnDrawCall(cmd, shadingType, drawcall, policy, atom);
-
-            var vxNode = this.MdfDatas as UVoxelsNode;
+            UMdfVoxelDebugMesh mdfQueue = mdfQueue1 as UMdfVoxelDebugMesh;
+            var vxNode = mdfQueue.MdfDatas as UVoxelsNode;
             if (vxNode == null)
             {
                 return;
@@ -57,6 +53,9 @@ namespace EngineNS.Bricks.VXGI
             drawcall.BindSRV(binder, vxNode.SrvVoxelDebugger);
             drawcall.mCoreObject.BindIndirectDrawArgsBuffer(vxNode.VxIndirectDebugDraws.mCoreObject, (uint)sizeof(UVoxelsNode.FIndirectDrawArgs));
         }
+    }
+    public class UMdfVoxelDebugMesh : Graphics.Pipeline.Shader.TtMdfQueue1<TtVoxelDebugModifier>
+    {
     }
 
     partial class UVoxelsNode

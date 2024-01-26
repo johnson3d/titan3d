@@ -13,6 +13,7 @@ cbuffer cbGPUCulling DX_AUTOBIND
     float3 BoundExtent;
     uint MaxInstance;
     
+    int UseInstanceBounding;
     uint NumOfIndirectDraw;
     
     //uint Draw_IndexCountPerInstance;
@@ -21,7 +22,16 @@ cbuffer cbGPUCulling DX_AUTOBIND
     //uint Draw_StartInstanceLocation;
 };
 
+struct FCullBounding
+{
+    float3 Center;
+    float Center_Pad;
+    float3 Extent;
+    float Radius;
+};
+
 StructuredBuffer<VSInstanceData> InstanceDataArray DX_AUTOBIND;
+StructuredBuffer<FCullBounding> InstanceBoundingArray DX_AUTOBIND;
 RWStructuredBuffer<VSInstanceData> CullInstanceDataArray DX_AUTOBIND;
 RWBuffer<uint> IndirectArgsBuffer DX_AUTOBIND;
 
@@ -70,14 +80,28 @@ void CS_GPUCullingMain(uint DispatchThreadId : SV_DispatchThreadID, uint3 LocalT
     TtFrustum frustum = TtFrustum::CreateByCamera();    
     VSInstanceData instance = InstanceDataArray[DispatchThreadId.x];
     TtQuat quat = TtQuat::CreateQuat(instance.Quat);
-    //float3 extent = TtQuat::TransformedBoxAABB(BoundExtent, quat);
-    float3 extent = max(max(BoundExtent.x, BoundExtent.y), BoundExtent.z);
-    //float3 extent = abs(QuatRotateVec(BoundExtent, instance.Quat));
-    float3 center = BoundCenter + instance.Position;
-    if (frustum.IsOverlap6(center, extent) == false)
+    if (UseInstanceBounding == 0)
     {
-        return;
+        //float3 extent = TtQuat::TransformedBoxAABB(BoundExtent, quat);
+        //float3 extent = abs(QuatRotateVec(BoundExtent, instance.Quat));
+        float3 extent = max(max(BoundExtent.x, BoundExtent.y), BoundExtent.z);        
+        float3 center = BoundCenter + instance.Position;
+        if (frustum.IsOverlap6(center, extent) == false)
+        {
+            return;
+        }
     }
+    else
+    {
+        FCullBounding bounding = InstanceBoundingArray[DispatchThreadId.x];
+        float3 extent = bounding.Extent;
+        float3 center = bounding.Center;
+        if (frustum.IsOverlap6(center, extent) == false)
+        {
+            return;
+        }
+    }
+    
     PushInstance(instance);
 }
 

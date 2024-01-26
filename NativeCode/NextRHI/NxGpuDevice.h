@@ -40,6 +40,7 @@ namespace NxRHI
 	class IGraphicDraw;
 	class IComputeDraw;
 	class ICopyDraw;
+	class IActionDraw;
 	struct FTextureDesc;
 	class ITexture;
 	class IGpuResource;
@@ -226,6 +227,7 @@ namespace NxRHI
 		virtual IGraphicDraw* CreateGraphicDraw();
 		virtual IComputeDraw* CreateComputeDraw();
 		virtual ICopyDraw* CreateCopyDraw();
+		virtual IActionDraw* CreateActionDraw();
 
 		virtual FVertexArray* CreateVertexArray();
 		virtual FGeomMesh* CreateGeomMesh();

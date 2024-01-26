@@ -321,6 +321,18 @@ namespace EngineNS.Editor
                                     _ = mPIEController.Initialize();
                             },
                         },
+                        new EGui.UIProxy.MenuItemProxy()
+                        {
+                            MenuName = "Settings",
+                            Selected = false,
+                            Action = (EGui.UIProxy.MenuItemProxy item, Support.UAnyPointer data)=>
+                            {
+                                mEditorSettings.Visible = !mEditorSettings.Visible;
+                                item.Selected = mEditorSettings.Visible;
+                                if(mEditorSettings.Visible)
+                                    _ = mEditorSettings.Initialize();
+                            },
+                        },
                     },
                 },
             };

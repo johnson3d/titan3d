@@ -60,6 +60,10 @@ namespace EngineNS.UI
         {
 
         }
+        public unsafe void OnDrawCall(Graphics.Pipeline.Shader.TtMdfQueueBase mdfQueue1, NxRHI.ICommandList cmd, Graphics.Pipeline.URenderPolicy.EShadingType shadingType, NxRHI.UGraphicDraw drawcall, Graphics.Pipeline.URenderPolicy policy, Graphics.Mesh.TtMesh.TtAtom atom)
+        {
+
+        }
     }
     public class TtMdfUIMesh : Graphics.Pipeline.Shader.TtMdfQueue1<TtUIModifier>
     {

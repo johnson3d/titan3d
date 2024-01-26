@@ -143,6 +143,11 @@ namespace NxRHI
 		auto result = new ICopyDraw();
 		return result;
 	}
+	IActionDraw* IGpuDevice::CreateActionDraw()
+	{
+		auto result = new IActionDraw();
+		return result;
+	}
 	FVertexArray* IGpuDevice::CreateVertexArray()
 	{
 		return new FVertexArray();

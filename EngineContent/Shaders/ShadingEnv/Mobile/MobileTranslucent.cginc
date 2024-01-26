@@ -25,11 +25,6 @@ PS_INPUT VS_Main(VS_INPUT input1)
 	PS_INPUT output = (PS_INPUT)0;
 	Default_VSInput2PSInput(output, input);
 
-#if defined(VS_NO_WorldTransform)
-	output.PointLightIndices = PointLightIndices;
-	output.SpecialData.x = PointLightNum;
-#endif
-
 	MTL_OUTPUT mtl = (MTL_OUTPUT)0;
 	//mtl template stuff;
 	{

@@ -27,6 +27,22 @@ void DoInstancingModifierVS(inout PS_INPUT vsOut, inout VS_MODIFIER vert)
 {
 	VSInstanceData instData = GetInstanceData(vert);
 
+    float3 inst_pos = instData.Position.xyz;
+    float4 inst_quat = instData.Quat;
+    float3 inst_scale = instData.Scale.xyz;
+	
+	#if defined(INSTANCE_NONE_POS)
+	inst_pos = float3(0,0,0);
+	#endif
+	
+	#if defined(INSTANCE_NONE_QUAT)
+	inst_quat = float4(0,0,0,1);
+	#endif
+	
+	#if defined(INSTANCE_NONE_SCALE)
+	inst_pos = float3(1,1,1);
+	#endif
+	
 	float3 Pos = instData.Position.xyz + InstancingRotateVec(vert.vPosition * instData.Scale.xyz, instData.Quat);
 
 	vert.vPosition.xyz = Pos;
@@ -38,13 +54,6 @@ void DoInstancingModifierVS(inout PS_INPUT vsOut, inout VS_MODIFIER vert)
 
 	//vsOut.vWorldPos = Pos;
 	
-	/*vsOut.SpecialData.x = vert.vInstScale.w;
-
-	for (int i = 0; i < vert.vInstScale.w; i++)
-	{
-		uint lightIndex = vert.vF4_1[i];
-		vsOut.PointLightIndices[i] = (uint)lightIndex;
-	}*/
 //#if HW_VS_STRUCTUREBUFFER
 //	VSInstanceData InstData = VSInstanceDataArray[vert.vInstanceId];
 //	vert.vPosition = mul(float4(vert.vPosition.xyz, 1), InstData.WorldMatrix).xyz;

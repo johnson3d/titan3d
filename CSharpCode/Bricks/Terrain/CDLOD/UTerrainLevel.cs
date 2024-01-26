@@ -1,4 +1,5 @@
-﻿using System;
+﻿using EngineNS.Bricks.VirtualTexture;
+using System;
 using System.Collections.Generic;
 using System.Text;
 
@@ -76,6 +77,18 @@ namespace EngineNS.Bricks.Terrain.CDLOD
         public Bricks.PhysicsCore.TtPhyActor PhyActor { get; protected set; }
         public float RemainUnloadTime = 10.0f;
         public UTerainPlantManager PlantManager = new UTerainPlantManager();
+        public Bricks.VirtualTexture.TtRVT GetHeightmapRVT()
+        {
+            return Level.Node.Terrain.HeightmapRVT.RegRVT(HeightMapSRV);
+        }
+        public Bricks.VirtualTexture.TtRVT GetNormalmapRVT()
+        {
+            return Level.Node.Terrain.NormalmapRVT.RegRVT(NormalMapSRV);
+        }
+        public Bricks.VirtualTexture.TtRVT GetMaterialIdRVT()
+        {
+            return Level.Node.Terrain.MaterialIdRVT.RegRVT(MaterialIdMapSRV);
+        }
         ~UTerrainLevelData()
         {
             Dispose();
@@ -276,7 +289,7 @@ namespace EngineNS.Bricks.Terrain.CDLOD
 
             HeightMapSRV = hMap.CreateAsHeightMapTexture2D(out HeightMap, HeightMapMinHeight, HeightMapMaxHeight, EPixelFormat.PXF_R16_FLOAT);
             HeightMapSRV.SetDebugName("HeightMapSRV");
-            HeightMapSRV.SetDebugName("HeightMapSRV");
+            HeightMapSRV.AssetName = RName.GetRName($"@Height_{this.GetTerrainNode().TerrainName}_{Level.LevelX}_{Level.LevelZ}@", RName.ERNameType.Transient);
         }
 
         public void UpdateWaterMap(Procedure.UBufferConponent waterMap)
@@ -294,7 +307,8 @@ namespace EngineNS.Bricks.Terrain.CDLOD
                 null, 0);
 
             NormalMapSRV = norImage.CreateRGBA8Texture2DAsNormal(out NormalMap); //terrainGen.mResultNormalImage.CreateRGBA8Texture2DAsNormal();            
-            NormalMapSRV.AssetName = RName.GetRName($"@{this.GetTerrainNode().TerrainName}_{Level.LevelX}_{Level.LevelZ}@", RName.ERNameType.Transient);
+            NormalMapSRV.SetDebugName("NormalMapSRV");
+            NormalMapSRV.AssetName = RName.GetRName($"@Normal_{this.GetTerrainNode().TerrainName}_{Level.LevelX}_{Level.LevelZ}@", RName.ERNameType.Transient);
         }
         public void UpdateMaterialIdMap(Procedure.UBufferConponent idMap)
         {
@@ -309,6 +323,8 @@ namespace EngineNS.Bricks.Terrain.CDLOD
                 null);
 
             MaterialIdMapSRV = idMapImage.CreateRGBA8Texture2D(false);
+            MaterialIdMapSRV.SetDebugName("MaterialIdMapSRV");
+            MaterialIdMapSRV.AssetName = RName.GetRName($"@MtlID_{this.GetTerrainNode().TerrainName}_{Level.LevelX}_{Level.LevelZ}@", RName.ERNameType.Transient);
         }
         public void UpdatePlants(Procedure.UBufferConponent transform, Procedure.UBufferConponent plants)
         {

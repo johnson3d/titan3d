@@ -157,7 +157,7 @@ namespace EngineNS.Bricks.Collision.DDA
 
             var Voxels = DetailLayer.Voxels;
             var maxSize = Voxels.GetLength(0) * Voxels.GetLength(1) * Voxels.GetLength(2);
-            DebugMeshInstanceMdf.InstanceModifier.SetCapacity((uint)maxSize);
+            DebugMeshInstanceMdf.InstanceModifier.SetCapacity((uint)maxSize, false);
             
             for (int z = 0; z < Voxels.GetLength(0); z++)
             {//z
@@ -176,7 +176,7 @@ namespace EngineNS.Bricks.Collision.DDA
                             instance.Scale = Vector3.One;
                             instance.Quat = Quaternion.Identity;
 
-                            DebugMeshInstanceMdf.InstanceModifier.PushInstance(in instance);
+                            DebugMeshInstanceMdf.InstanceModifier.PushInstance(in instance, new Graphics.Mesh.Modifier.FCullBounding());
                         }
                     }
                 }

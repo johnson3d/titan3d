@@ -73,6 +73,8 @@ namespace EngineNS.NxRHI
         }
         public bool BindSRV(VNameString name, USrView srv)
         {
+            if (srv == null)
+                return false;
             return mCoreObject.BindResource(name, srv.mCoreObject.NativeSuper);
         }
         public void BindSRV(FEffectBinder binder, USrView srv)
@@ -364,6 +366,16 @@ namespace EngineNS.NxRHI
         public void SetDebugName(string name)
         {
             mCoreObject.NativeSuper.SetDebugName(name);
+        }
+    }
+
+    public class TtActionDraw : AuxPtrType<NxRHI.IActionDraw>
+    {
+        public override void Dispose()
+        {
+            if (IsDisposed == false)
+                TtStatistic.Instance.ActionDrawcall--;
+            base.Dispose();
         }
     }
 }

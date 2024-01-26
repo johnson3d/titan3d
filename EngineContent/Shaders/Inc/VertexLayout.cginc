@@ -179,10 +179,6 @@ struct PS_INPUT
 #if USE_PS_Custom4 == 1
 	VK_LOCATION(11) float4 psCustomUV4	: TEXCOORD8;
 #endif
-	
-#if USE_PS_PointLightIndices == 1
-	VK_LOCATION(12) nointerpolation uint4 PointLightIndices	: TEXCOORD9;
-#endif
 
 #if USE_PS_F4_1 == 1
 	VK_LOCATION(13) nointerpolation uint4 vF4_1 : TEXCOORD10;
@@ -226,6 +222,12 @@ struct PS_INPUT
         return (uint) (-1);
 #endif
     }
+    void SetWorldPos(float3 v)
+    {
+#if USE_PS_WorldPos == 1
+        vWorldPos = v;
+#endif
+    }
     void SetNormal(float3 v)
     {
 #if USE_PS_Normal == 1
@@ -240,6 +242,26 @@ struct PS_INPUT
         return float3(1, 0, 0);
 #endif
     }
+    void SetTangent(float3 v)
+    {
+#if USE_PS_Tangent == 1
+        vTangent.xyz = v;
+#endif
+    }    
+    void SetTangent(float4 v)
+    {
+#if USE_PS_Tangent == 1
+        vTangent.xyzw = v;
+#endif
+    }
+    float4 GetTangent()
+    {
+#if USE_PS_Tangent == 1
+        return vTangent.xyzw;
+#else
+        return float4(1, 0, 0, 0);
+#endif
+    }
 	
     void SetSpecialData(uint4 v)
     {
@@ -251,6 +273,24 @@ struct PS_INPUT
     {
 #if USE_PS_SpecialData == 1
 	SpecialData.x = v;
+#endif		
+    }
+    void SetSpecialDataY(uint v)
+    {
+#if USE_PS_SpecialData == 1
+	SpecialData.y = v;
+#endif		
+    }
+    void SetSpecialDataZ(uint v)
+    {
+#if USE_PS_SpecialData == 1
+	SpecialData.z = v;
+#endif		
+    }
+    void SetSpecialDataW(uint v)
+    {
+#if USE_PS_SpecialData == 1
+	SpecialData.w = v;
 #endif		
     }
     void SetSpecialDataXY(uint2 v)
@@ -273,13 +313,12 @@ struct VSInstanceData
 	uint HitProxyId;
 	
 	float3 Scale;
-	uint CustomData2;
+    uint Scale_Pad;
 
 	float4 Quat;
 
 	uint4 UserData;
-
-	uint4 PointLightIndices;
+    uint4 UserData2;
 };
 
 VSInstanceData GetInstanceData(VS_MODIFIER input);

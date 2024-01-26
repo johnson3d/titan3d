@@ -22,16 +22,6 @@ PS_INPUT VS_Main(VS_INPUT input1)
 	PS_INPUT output = (PS_INPUT)0;
 	Default_VSInput2PSInput(output, input);
 
-#if defined(VS_NO_WorldTransform)
-#if USE_PS_PointLightIndices == 1
-	output.PointLightIndices = PointLightIndices;
-#endif
-
-#if USE_PS_SpecialData == 1
-	output.SpecialData.x = PointLightNum;
-#endif
-#endif
-
 	MTL_OUTPUT mtl = (MTL_OUTPUT)0;
 	{
 #ifdef DO_VS_MATERIAL
@@ -47,18 +37,9 @@ PS_INPUT VS_Main(VS_INPUT input1)
 	output.vPosition.xyz += mtl.mVertexOffset;
 
 	float4 wp4 = mul(float4(output.vPosition.xyz, 1), WorldMatrix);
-#if USE_PS_WorldPos == 1
-	output.vWorldPos = wp4.xyz;
-#endif
-
-#if USE_PS_Normal == 1
-	output.vNormal = normalize(mul(float4(output.vNormal.xyz, 0), WorldMatrix).xyz);
-#endif
-
-#if USE_PS_Tangent == 1
-	output.vTangent.xyz = normalize(mul(float4(output.vTangent.xyz, 0), WorldMatrix).xyz);
-#endif
-
+    output.SetWorldPos(wp4.xyz);
+    output.SetNormal(normalize(mul(float4(output.GetNormal(), 0), WorldMatrix).xyz));
+    output.SetTangent(normalize(mul(float4(output.GetTangent().xyz, 0), WorldMatrix).xyz));
 #else
 	float4 wp4 = float4(output.vPosition.xyz, 1);
 #endif

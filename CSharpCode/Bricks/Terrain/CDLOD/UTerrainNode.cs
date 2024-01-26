@@ -233,14 +233,12 @@ namespace EngineNS.Bricks.Terrain.CDLOD
             if (TerrainCBuffer == null)
                 return;
             var coreBinder = UEngine.Instance.GfxDevice.CoreShaderBinder;
+            TerrainCBuffer.SetValue(coreBinder.CBPerTerrain.EyeCenter, EyeLocalCenter);
             TerrainCBuffer.SetValue(coreBinder.CBPerTerrain.GridSize, GridSize);
 
             TerrainCBuffer.SetValue(coreBinder.CBPerTerrain.PatchSize, PatchSize);
-
             TerrainCBuffer.SetValue(coreBinder.CBPerTerrain.TexUVScale, TexUVScale);
-
             TerrainCBuffer.SetValue(coreBinder.CBPerTerrain.MaterialIdUVStep, MaterialIdUVStep);
-
             TerrainCBuffer.SetValue(coreBinder.CBPerTerrain.DiffuseUVStep, DiffuseUVStep);
 
             for (int i = 0; i < MorphRange.Length; i++)

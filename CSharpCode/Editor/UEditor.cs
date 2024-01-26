@@ -8,6 +8,10 @@ namespace EngineNS.Editor
     [Rtti.Meta]
     public partial class UEditorConfig
     {
+        public void SaveConfig(string sltFile)
+        {
+            IO.TtFileManager.SaveObjectToXml(sltFile, this);
+        }
         [Rtti.Meta]
         public string GameProject { get; set; }
         public string GameProjectPath 
@@ -59,7 +63,7 @@ namespace EngineNS.Editor
                 Config.PhyMaterialIconName = RName.GetRName("icons/phymaterialicon.uvanim", RName.ERNameType.Engine);
                 Config.FontIconName = RName.GetRName("icons/font.uvanim", RName.ERNameType.Engine);
                 Config.MacrossIconName = RName.GetRName("icons/macrossicon.uvanim", RName.ERNameType.Engine);
-                IO.TtFileManager.SaveObjectToXml(cfgFile, Config);
+                Config.SaveConfig(cfgFile);
             }
 
             var gameAssembly = UEngine.Instance.FileManager.GetRoot(IO.TtFileManager.ERootDir.EngineSource) + Config.GameAssembly;

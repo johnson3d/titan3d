@@ -84,6 +84,20 @@ namespace EngineNS.Bricks.Terrain.CDLOD
         //public Graphics.Pipeline.Shader.UMaterialInstance Material;
         //public Graphics.Pipeline.Shader.UMaterialInstance WaterMaterial;
         public NxRHI.UCbView PatchCBuffer;
+        public void SureCBuffer(NxRHI.IGraphicsEffect shaderProg, ref NxRHI.UCbView cbuffer)
+        {
+            var coreBinder = UEngine.Instance.GfxDevice.CoreShaderBinder;
+            if (cbuffer == null)
+            {
+                coreBinder.CBPerTerrainPatch.UpdateFieldVar(shaderProg, "cbPerPatch");
+                cbuffer = UEngine.Instance.GfxDevice.RenderContext.CreateCBV(coreBinder.CBPerTerrainPatch.Binder.mCoreObject);
+            }
+            if (TerrainNode.TerrainCBuffer == null)
+            {
+                coreBinder.CBPerTerrain.UpdateFieldVar(shaderProg, "cbPerTerrain");
+                TerrainNode.TerrainCBuffer = UEngine.Instance.GfxDevice.RenderContext.CreateCBV(coreBinder.CBPerTerrain.Binder.mCoreObject);
+            }
+        }
 
         public UTerrainGrassManager GrassManager;
 
@@ -171,22 +185,25 @@ namespace EngineNS.Bricks.Terrain.CDLOD
             {
                 TerrainMesh[i] = new Graphics.Mesh.TtMesh();
                 TerrainMesh[i].Initialize(terrain.GridMipLevels[i], tMaterials, mdfType);
-                var trMdfQueue = TerrainMesh[i].MdfQueue as UTerrainMdfQueue;                
-                trMdfQueue.MdfDatas = this;
-                trMdfQueue.Dimension = (int)Math.Pow(2, terrain.GridMipLevels.Length - i - 1);
+                var trMdfQueue = TerrainMesh[i].MdfQueue as UTerrainMdfQueue;
+                trMdfQueue.TerrainModifier.TerrainNode = this.TerrainNode;
+                trMdfQueue.TerrainModifier.Patch = this;
+                trMdfQueue.TerrainModifier.Dimension = (int)Math.Pow(2, terrain.GridMipLevels.Length - i - 1);
 
                 WireFrameTerrainMesh[i] = new Graphics.Mesh.TtMesh();
                 WireFrameTerrainMesh[i].Initialize(terrain.GridMipLevels[i], tWireFrameMaterials, mdfType);
                 trMdfQueue = WireFrameTerrainMesh[i].MdfQueue as UTerrainMdfQueue;
-                trMdfQueue.MdfDatas = this;
-                trMdfQueue.Dimension = (int)Math.Pow(2, terrain.GridMipLevels.Length - i - 1);
+                trMdfQueue.TerrainModifier.TerrainNode = this.TerrainNode;
+                trMdfQueue.TerrainModifier.Patch = this;
+                trMdfQueue.TerrainModifier.Dimension = (int)Math.Pow(2, terrain.GridMipLevels.Length - i - 1);
 
                 WaterMesh[i] = new Graphics.Mesh.TtMesh();
                 WaterMesh[i].Initialize(terrain.GridMipLevels[i], twMaterials, mdfType);
                 trMdfQueue = WaterMesh[i].MdfQueue as UTerrainMdfQueue;
-                trMdfQueue.MdfDatas = this;
-                trMdfQueue.Dimension = (int)Math.Pow(2, terrain.GridMipLevels.Length - i - 1);
-                trMdfQueue.IsWater = true;
+                trMdfQueue.TerrainModifier.TerrainNode = this.TerrainNode;
+                trMdfQueue.TerrainModifier.Patch = this;
+                trMdfQueue.TerrainModifier.Dimension = (int)Math.Pow(2, terrain.GridMipLevels.Length - i - 1);
+                trMdfQueue.TerrainModifier.IsWater = true;
 
                 //trMdfQueue.StartPosition.X = IndexX * terrain.PatchSize;
                 //trMdfQueue.StartPosition.Z = IndexZ * terrain.PatchSize;
@@ -283,6 +300,14 @@ namespace EngineNS.Bricks.Terrain.CDLOD
             {
                 i.SetWorldTransform(in transform, world, false);
             }
+            foreach (var i in WireFrameTerrainMesh)
+            {
+                i.SetWorldTransform(in transform, world, false);
+            }
+            foreach (var i in WaterMesh)
+            {
+                i.SetWorldTransform(in transform, world, false);
+            }
         }
         public void UpdateCameraOffset(GamePlay.UWorld world)
         {
@@ -299,21 +324,21 @@ namespace EngineNS.Bricks.Terrain.CDLOD
             switch (Level.GetTerrainNode().Terrain.ShowMode)
             {
                 case UTerrainSystem.EShowMode.Normal:
-                    rp.VisibleMeshes.Add(TerrainMesh[CurrentLOD]);
+                    rp.AddVisibleMesh(TerrainMesh[CurrentLOD]);
                     break;
                 case UTerrainSystem.EShowMode.WireFrame:
-                    rp.VisibleMeshes.Add(WireFrameTerrainMesh[CurrentLOD]);
+                    rp.AddVisibleMesh(WireFrameTerrainMesh[CurrentLOD]);
                     break;
                 case UTerrainSystem.EShowMode.Both:
                     {
-                        rp.VisibleMeshes.Add(TerrainMesh[CurrentLOD]);
-                        rp.VisibleMeshes.Add(WireFrameTerrainMesh[CurrentLOD]);
+                        rp.AddVisibleMesh(TerrainMesh[CurrentLOD]);
+                        rp.AddVisibleMesh(WireFrameTerrainMesh[CurrentLOD]);
                     }
                     break;
             }
 
             if (Level.GetTerrainNode().Terrain.IsShowWater)
-                rp.VisibleMeshes.Add(WaterMesh[CurrentLOD]);
+                rp.AddVisibleMesh(WaterMesh[CurrentLOD]);
 
             GrassManager?.OnGatherVisibleMeshes(rp);
         }

@@ -19,6 +19,7 @@ namespace EngineNS.Bricks.Terrain.CDLOD
         public Graphics.Pipeline.Shader.UMaterial WireFrameMaterial;
         public VirtualTexture.TtVirtualTextureArray HeightmapRVT;
         public VirtualTexture.TtVirtualTextureArray NormalmapRVT;
+        public VirtualTexture.TtVirtualTextureArray MaterialIdRVT;
         public NxRHI.UCommandList UpdateRvtPass;
 
         public int MipLevels { get; set; } = 6;
@@ -33,10 +34,15 @@ namespace EngineNS.Bricks.Terrain.CDLOD
             Material = await UEngine.Instance.GfxDevice.MaterialManager.CreateMaterial(RName.GetRName("utest/material/terrainidmap.material"));
             Material.IsEditingMaterial = false;
 
-            HeightmapRVT = new VirtualTexture.TtVirtualTextureArray();
-            HeightmapRVT.Initialize(EPixelFormat.PXF_R16_FLOAT, 1024, 1, 32);
-            NormalmapRVT = new VirtualTexture.TtVirtualTextureArray();
-            NormalmapRVT.Initialize(EPixelFormat.PXF_R8G8B8A8_UNORM, 1024, 1, 32);
+            if (UEngine.Instance.Config.Feature_UseRVT)
+            {
+                HeightmapRVT = new VirtualTexture.TtVirtualTextureArray();
+                HeightmapRVT.Initialize(EPixelFormat.PXF_R16_FLOAT, 1024, 1, 32);
+                NormalmapRVT = new VirtualTexture.TtVirtualTextureArray();
+                NormalmapRVT.Initialize(EPixelFormat.PXF_R8G8B8A8_UNORM, 1024, 1, 32);
+                MaterialIdRVT = new VirtualTexture.TtVirtualTextureArray();
+                MaterialIdRVT.Initialize(EPixelFormat.PXF_R8G8B8A8_UNORM, 1024, 1, 32);
+            }
 
             WireFrameMaterial = await UEngine.Instance.GfxDevice.MaterialManager.CreateMaterial(RName.GetRName("material/sysdft_color.material", RName.ERNameType.Engine));
             WireFrameMaterial.IsEditingMaterial = false;
@@ -76,6 +82,7 @@ namespace EngineNS.Bricks.Terrain.CDLOD
         {
             NormalmapRVT.TickSync(UpdateRvtPass);
             HeightmapRVT.TickSync(UpdateRvtPass);
+            MaterialIdRVT.TickSync(UpdateRvtPass);
         }
     }
 }

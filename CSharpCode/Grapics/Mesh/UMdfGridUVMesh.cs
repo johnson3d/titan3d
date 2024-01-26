@@ -35,6 +35,20 @@ namespace EngineNS.Graphics.Mesh
         {
 
         }
+        public unsafe void OnDrawCall(TtMdfQueueBase mdfQueue1, NxRHI.ICommandList cmd, Graphics.Pipeline.URenderPolicy.EShadingType shadingType, NxRHI.UGraphicDraw drawcall, Graphics.Pipeline.URenderPolicy policy, Graphics.Mesh.TtMesh.TtAtom atom)
+        {
+            UMdfGridUVMesh mdfQueue = mdfQueue1 as UMdfGridUVMesh;
+            var binder = drawcall.FindBinder("cbGridUVMesh");
+            if (binder.IsValidPointer == false)
+            {
+                return;
+            }
+            if (mdfQueue.PerGridUVMeshCBuffer == null)
+            {
+                mdfQueue.PerGridUVMeshCBuffer = UEngine.Instance.GfxDevice.RenderContext.CreateCBV(binder);
+            }
+            drawcall.BindCBuffer(binder, mdfQueue.PerGridUVMeshCBuffer);
+        }
     }
 
     public class UMdfGridUVMesh : Graphics.Pipeline.Shader.TtMdfQueue1<TtGridUVModifier>
@@ -51,23 +65,6 @@ namespace EngineNS.Graphics.Mesh
         {
             base.CopyFrom(mdf);
             PerGridUVMeshCBuffer = (mdf as UMdfGridUVMesh).PerGridUVMeshCBuffer;
-        }
-        public override void OnDrawCall(NxRHI.ICommandList cmd, Pipeline.URenderPolicy.EShadingType shadingType, NxRHI.UGraphicDraw drawcall, Pipeline.URenderPolicy policy, Mesh.TtMesh.TtAtom atom)
-        {
-            base.OnDrawCall(cmd, shadingType, drawcall, policy, atom);
-            unsafe
-            {
-                var binder = drawcall.FindBinder("cbGridUVMesh");
-                if (binder.IsValidPointer == false)
-                {
-                    return;
-                }
-                if (PerGridUVMeshCBuffer == null)
-                {
-                    PerGridUVMeshCBuffer = UEngine.Instance.GfxDevice.RenderContext.CreateCBV(binder);
-                }
-                drawcall.BindCBuffer(binder, PerGridUVMeshCBuffer);
-            }
         }
     }
 }

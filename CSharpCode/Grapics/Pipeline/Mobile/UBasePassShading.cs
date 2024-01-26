@@ -280,7 +280,7 @@ namespace EngineNS.Graphics.Pipeline.Mobile
 
                     foreach (var i in policy.VisibleMeshes)
                     {
-                        foreach (var j in i.SubMeshes)
+                        foreach (var j in i.Mesh.SubMeshes)
                         {
                             foreach (var k in j.Atoms)
                             {
@@ -461,7 +461,7 @@ namespace EngineNS.Graphics.Pipeline.Mobile
 
                     foreach (var i in policy.VisibleMeshes)
                     {
-                        foreach (var j in i.SubMeshes)
+                        foreach (var j in i.Mesh.SubMeshes)
                         {
                             foreach (var k in j.Atoms)
                             {

@@ -227,7 +227,7 @@ namespace EngineNS.Graphics.Pipeline.Shadow
                 mOrtho2UVMtx.M34 = 0.0f;
             }
 
-            mVisParameter.VisibleMeshes = new List<Mesh.TtMesh>();
+            mVisParameter.VisibleMeshes = new List<Graphics.Pipeline.FVisibleMesh>();
 
             var dpRastDesc = new NxRHI.FGpuPipelineDesc();
             dpRastDesc.SetDefault();
@@ -484,9 +484,9 @@ namespace EngineNS.Graphics.Pipeline.Shadow
                         {
                             foreach (var i in mVisParameter.VisibleMeshes)
                             {
-                                if (i.IsCastShadow == false)
+                                if (i.Mesh.IsCastShadow == false)
                                     continue;
-                                foreach (var j in i.SubMeshes)
+                                foreach (var j in i.Mesh.SubMeshes)
                                 {
                                     foreach (var k in j.Atoms)
                                     {

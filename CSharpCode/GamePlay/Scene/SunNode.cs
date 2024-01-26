@@ -65,7 +65,7 @@ namespace EngineNS.GamePlay.Scene
             base.OnGatherVisibleMeshes(rp);
 
             if (DebugMesh != null)
-                rp.VisibleMeshes.Add(DebugMesh);
+                rp.AddVisibleMesh(DebugMesh);
         }
         public override void GetHitProxyDrawMesh(List<TtMesh> meshes)
         {

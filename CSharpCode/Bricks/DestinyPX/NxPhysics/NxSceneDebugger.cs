@@ -104,7 +104,7 @@ namespace EngineNS.NxPhysics
             {
                 foreach (var j in i.Shapes)
                 {
-                    rp.VisibleMeshes.Add(j.DebugMesh);
+                    rp.AddVisibleMesh(j.DebugMesh);
                 }
             }
         }

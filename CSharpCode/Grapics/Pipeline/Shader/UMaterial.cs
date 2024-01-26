@@ -107,7 +107,6 @@ namespace EngineNS.Graphics.Pipeline.Shader
             public Vector4 psCustomUV2;
             public Vector4 psCustomUV3;
             public Vector4 psCustomUV4;
-            public Vector4ui PointLightIndices;
             public Vector4ui vF4_1;
             public Vector4 vF4_2;
             public Vector4 vF4_3;
@@ -142,8 +141,6 @@ namespace EngineNS.Graphics.Pipeline.Shader
                         return Graphics.Pipeline.Shader.EPixelShaderInput.PST_Custom3;
                     case "psCustomUV4":
                         return Graphics.Pipeline.Shader.EPixelShaderInput.PST_Custom4;
-                    case "PointLightIndices":
-                        return Graphics.Pipeline.Shader.EPixelShaderInput.PST_PointLightIndices;
                     case "vF4_1":
                         return Graphics.Pipeline.Shader.EPixelShaderInput.PST_F4_1;
                     case "vF4_2":
@@ -648,7 +645,6 @@ namespace EngineNS.Graphics.Pipeline.Shader
                     EPixelShaderInput.PST_Custom2,
                     EPixelShaderInput.PST_Custom3,
                     EPixelShaderInput.PST_Custom4,
-                    EPixelShaderInput.PST_PointLightIndices,
                     EPixelShaderInput.PST_F4_1,
                     EPixelShaderInput.PST_F4_2,
                     EPixelShaderInput.PST_F4_3,

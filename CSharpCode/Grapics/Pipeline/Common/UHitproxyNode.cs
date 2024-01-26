@@ -277,11 +277,11 @@ namespace EngineNS.Graphics.Pipeline.Common
                 {
                     foreach (var i in policy.VisibleMeshes)
                     {
-                        if (i.IsDrawHitproxy == false)
+                        if (i.Mesh.IsDrawHitproxy == false)
                         {
                             continue;
                         }
-                        foreach (var j in i.SubMeshes)
+                        foreach (var j in i.Mesh.SubMeshes)
                         {
                             foreach (var k in j.Atoms)
                             {

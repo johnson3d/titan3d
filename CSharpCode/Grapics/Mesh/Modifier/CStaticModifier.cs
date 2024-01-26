@@ -4,9 +4,9 @@ using System.Text;
 
 namespace EngineNS.Graphics.Mesh.Modifier
 {
-    public class CStaticModifier : AuxPtrType<IStaticModifier>, Pipeline.Shader.IMeshModifier
+    public class TtStaticModifier : AuxPtrType<IStaticModifier>, Pipeline.Shader.IMeshModifier
     {
-        public CStaticModifier()
+        public TtStaticModifier()
         {
             mCoreObject = IStaticModifier.CreateInstance();
         }
@@ -28,6 +28,10 @@ namespace EngineNS.Graphics.Mesh.Modifier
             return null;
         }
         public void Initialize(Graphics.Mesh.UMaterialMesh materialMesh)
+        {
+
+        }
+        public unsafe void OnDrawCall(Graphics.Pipeline.Shader.TtMdfQueueBase mdfQueue1, NxRHI.ICommandList cmd, Graphics.Pipeline.URenderPolicy.EShadingType shadingType, NxRHI.UGraphicDraw drawcall, Graphics.Pipeline.URenderPolicy policy, Graphics.Mesh.TtMesh.TtAtom atom)
         {
 
         }

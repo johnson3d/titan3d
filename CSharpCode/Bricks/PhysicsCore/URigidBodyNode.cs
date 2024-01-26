@@ -307,7 +307,7 @@ namespace EngineNS.Bricks.PhysicsCore
                     FTransform absTransform;
                     FTransform.Multiply(out absTransform, i.Transform, in nodeTransform);
                     i.DebugMesh.SetWorldTransform(in absTransform, rp.World, true);
-                    rp.VisibleMeshes.Add(i.DebugMesh);
+                    rp.AddVisibleMesh(i.DebugMesh);
                 }
             }
         }

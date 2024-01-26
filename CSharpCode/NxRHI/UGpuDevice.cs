@@ -391,6 +391,15 @@ namespace EngineNS.NxRHI
             TtStatistic.Instance.TransferDrawcall++;
             return result;
         }
+        public TtActionDraw CreateActionDraw()
+        {
+            var result = new TtActionDraw();
+            result.mCoreObject = mCoreObject.CreateActionDraw();
+            if (result.mCoreObject.IsValidPointer == false)
+                return null;
+            TtStatistic.Instance.ActionDrawcall++;
+            return result;
+        }
         public UEvent CreateGpuEvent(in FEventDesc desc, string name)
         {
             var result = new UEvent();

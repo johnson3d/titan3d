@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Runtime.CompilerServices;
 using System.Text;
 using static EngineNS.NxRHI.URenderCmdQueue;
 
@@ -18,6 +19,14 @@ namespace EngineNS.NxRHI
         public void PushGpuDraw(UCopyDraw draw)
         {
             PushGpuDraw(draw.mCoreObject.NativeSuper);
+        }
+        public void PushGpuDraw(TtActionDraw draw)
+        {
+            PushGpuDraw(draw.mCoreObject.NativeSuper);
+        }
+        public void PushGpuDraw(IActionDraw draw)
+        {
+            PushGpuDraw(draw);
         }
     }
     public class UCmdRecorder : AuxPtrType<NxRHI.ICmdRecorder>
@@ -208,6 +217,22 @@ namespace EngineNS.NxRHI
         {
             mCoreObject.GetCmdRecorder().PushGpuDraw(draw);
         }
+        public void PushGpuDraw(TtActionDraw draw)
+        {
+            mCoreObject.GetCmdRecorder().PushGpuDraw(draw);
+        }
+        public void PushGpuDraw(IActionDraw draw)
+        {
+            mCoreObject.GetCmdRecorder().PushGpuDraw(draw);
+        }
+        public unsafe void PushAction(IActionDraw.FDelegate_OnActionDraw action, void* arg)
+        {
+            var draw = UEngine.Instance.GfxDevice.RenderContext.mCoreObject.CreateActionDraw();
+            draw.OnActionDraw = action;
+            draw.Arg = arg;
+            mCoreObject.PushGpuDraw(draw.NativeSuper);
+            draw.NativeSuper.NativeSuper.Release();
+        }
         #endregion
     }
 
@@ -323,6 +348,29 @@ namespace EngineNS.NxRHI
             {
                 i.Value.Update();
             }
+        }
+    }
+
+    public class TtGpuEventScope : IDisposable
+    {
+        UCommandList mCmdList;
+        public unsafe TtGpuEventScope(UCommandList cmdlist, VNameString name)
+        {
+            mCmdList = cmdlist;
+            mCmdList.PushAction(static (EngineNS.NxRHI.ICommandList cmd, void* arg1) =>
+            {
+                var str = new VNameString();
+                str.m_Index = (int)(arg1);
+                cmd.BeginEvent(str);
+            }, (void*)name.Index);
+        }
+        public unsafe void Dispose()
+        {
+            mCmdList.PushAction(static (EngineNS.NxRHI.ICommandList cmd, void* arg1) =>
+            {
+                cmd.EndEvent();
+            }, IntPtr.Zero.ToPointer());
+            mCmdList = null;
         }
     }
 }

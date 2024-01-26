@@ -260,12 +260,12 @@ namespace EngineNS.EGui.Slate
             RenderPolicy?.TickSync();
         }
         #region Debug Assist
-        List<Graphics.Mesh.TtMesh> mWorldBoundShapes;
+        List<FVisibleMesh> mWorldBoundShapes;
         public void ShowBoundVolumes(bool bShow, GamePlay.Scene.UNode node = null)
         {
             if (bShow)
             {
-                mWorldBoundShapes = new List<Graphics.Mesh.TtMesh>();
+                mWorldBoundShapes = new List<FVisibleMesh>();
                 World.GatherBoundShapes(mWorldBoundShapes, node);
             }
             else

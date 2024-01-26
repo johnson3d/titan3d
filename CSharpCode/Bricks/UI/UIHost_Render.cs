@@ -361,7 +361,7 @@ namespace EngineNS.UI
 
             UpdateCameraOffset(param.World);
 
-            param.VisibleMeshes.Add(mDrawMesh);
+            param.AddVisibleMesh(mDrawMesh);
             if(param.VisibleNodes != null && SceneNode != null)
             {
                 param.VisibleNodes.Add(SceneNode);

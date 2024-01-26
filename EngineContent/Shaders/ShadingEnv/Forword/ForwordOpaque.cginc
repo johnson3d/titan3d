@@ -22,11 +22,6 @@ PS_INPUT VS_Main(VS_INPUT input1)
 	PS_INPUT output = (PS_INPUT)0;
 	Default_VSInput2PSInput(output, input);
 
-#if defined(VS_NO_WorldTransform)
-	output.PointLightIndices = PointLightIndices;
-	output.SpecialData.x = PointLightNum;
-#endif
-
 	MTL_OUTPUT mtl = (MTL_OUTPUT)0;
 	{
 #ifdef MDFQUEUE_FUNCTION
@@ -40,24 +35,17 @@ PS_INPUT VS_Main(VS_INPUT input1)
 
 #if !defined(VS_NO_WorldTransform)
 	output.vPosition.xyz += mtl.mVertexOffset;
-
 	float4 wp4 = mul(float4(output.vPosition.xyz, 1), WorldMatrix);
-#if USE_PS_WorldPos == 1
-	output.vWorldPos = wp4.xyz;
-#endif
-
-#if USE_PS_Normal == 1
-	output.vNormal = normalize(mul(float4(output.vNormal.xyz, 0), WorldMatrix).xyz);
-#endif
-
-#if USE_PS_Tangent == 1
-	output.vTangent.xyz = normalize(mul(float4(output.vTangent.xyz, 0), WorldMatrix).xyz);
-#endif
+	
+    output.SetNormal(normalize(mul(float4(output.GetNormal().xyz, 0), WorldMatrix).xyz));
+    output.SetTangent(normalize(mul(float4(output.GetTangent().xyz, 0), WorldMatrix).xyz));
 
 #else
 	float4 wp4 = float4(output.vPosition.xyz, 1);
 #endif
 
+    output.SetWorldPos(wp4.xyz);
+	
 	output.vPosition = mul(wp4, GetViewPrjMtx(false));
 
 #if USE_PS_Custom0 == 1

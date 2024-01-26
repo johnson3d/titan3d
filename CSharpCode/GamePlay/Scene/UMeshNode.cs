@@ -314,7 +314,7 @@ namespace EngineNS.GamePlay.Scene
                 mMesh.UpdateCameraOffset(rp.World);
             }
 
-            rp.VisibleMeshes.Add(mMesh);
+            rp.AddVisibleMesh(mMesh);
             if (rp.VisibleNodes != null)
             {
                 rp.VisibleNodes.Add(this);

@@ -7,16 +7,6 @@ namespace EngineNS.Bricks.Terrain.Grass
     public class UMdfGrassStaticMesh : Graphics.Pipeline.Shader.TtMdfQueue1<TtGrassModifier>
     {
         public TtGrassModifier GrassModifier => this.Modifiers[0] as TtGrassModifier;
-        [ThreadStatic]
-        private static Profiler.TimeScope ScopeOnDrawCall = Profiler.TimeScopeManager.GetTimeScope(typeof(UMdfGrassStaticMesh), nameof(OnDrawCall));
-        public override void OnDrawCall(NxRHI.ICommandList cmd, Graphics.Pipeline.URenderPolicy.EShadingType shadingType, NxRHI.UGraphicDraw drawcall, Graphics.Pipeline.URenderPolicy policy, Graphics.Mesh.TtMesh.TtAtom atom)
-        {
-            using (new Profiler.TimeScopeHelper(ScopeOnDrawCall))
-            {
-                GrassModifier?.OnDrawCall(cmd, shadingType, drawcall, policy, atom);
-            }
-            base.OnDrawCall(cmd, shadingType, drawcall, policy, atom);
-        }
     }
 
     public class UMdf_Grass_VertexFollowHeight { }

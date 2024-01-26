@@ -130,7 +130,7 @@ namespace EngineNS.GamePlay.Scene
                 return;
 
             if (DebugMesh != null)
-                rp.VisibleMeshes.Add(mDebugMesh);
+                rp.AddVisibleMesh(mDebugMesh);
         }
         protected override void OnAbsTransformChanged()
         {

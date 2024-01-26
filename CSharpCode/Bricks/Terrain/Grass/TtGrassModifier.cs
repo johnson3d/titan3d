@@ -344,11 +344,10 @@ namespace EngineNS.Bricks.Terrain.Grass
             public NxRHI.UEffectBinder cbPerGrassType;
             public NxRHI.UEffectBinder VSGrassDataArray;
         }
-        public unsafe void OnDrawCall(NxRHI.ICommandList cmd, Graphics.Pipeline.URenderPolicy.EShadingType shadingType, NxRHI.UGraphicDraw drawcall, Graphics.Pipeline.URenderPolicy policy, Graphics.Mesh.TtMesh.TtAtom atom)
+        public unsafe void OnDrawCall(Graphics.Pipeline.Shader.TtMdfQueueBase mdfQueue1, NxRHI.ICommandList cmd, Graphics.Pipeline.URenderPolicy.EShadingType shadingType, NxRHI.UGraphicDraw drawcall, Graphics.Pipeline.URenderPolicy policy, Graphics.Mesh.TtMesh.TtAtom atom)
         {
             var pat = GrassType.Patch;
-            if ((pat.Level.Level.Node.TerrainCBuffer == null) || (pat.PatchCBuffer == null))
-                return;
+            pat.SureCBuffer(drawcall.mCoreObject.GetGraphicsEffect(), ref pat.PatchCBuffer);
 
             SureCBuffer(drawcall.mCoreObject.GetGraphicsEffect());
 
@@ -380,9 +379,6 @@ namespace EngineNS.Bricks.Terrain.Grass
                 pat.PatchCBuffer.SetValue(coreBinder.CBPerTerrainPatch.StartPosition, in pat.StartPosition);
 
                 pat.PatchCBuffer.SetValue(coreBinder.CBPerTerrainPatch.CurrentLOD, pat.CurrentLOD);
-
-                var terrain = pat.Level.GetTerrainNode();
-                pat.PatchCBuffer.SetValue(coreBinder.CBPerTerrainPatch.EyeCenter, terrain.EyeLocalCenter - pat.StartPosition);
 
                 pat.TexUVOffset.X = ((float)pat.XInLevel / (float)pat.Level.GetTerrainNode().PatchSide);
                 pat.TexUVOffset.Y = ((float)pat.ZInLevel / (float)pat.Level.GetTerrainNode().PatchSide);

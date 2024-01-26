@@ -160,6 +160,10 @@ namespace NxRHI
 		virtual void WriteBufferUINT32(UINT Count, FBufferWriter* BufferWriters);
 
 		virtual void BeginEvent(const char* info) = 0;
+		inline void BeginEvent(VNameString info)
+		{
+			BeginEvent(info.c_str());
+		}
 		virtual void EndEvent() = 0;
 
 		ICmdRecorder* GetCmdRecorder() {

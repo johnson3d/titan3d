@@ -67,7 +67,7 @@ namespace EngineNS.Bricks.Particle
                         i.Mesh.UpdateCameraOffset(rp.World);
                     }
 
-                    rp.VisibleMeshes.Add(i.Mesh);
+                    rp.AddVisibleMesh(i.Mesh);
                 }
             }
             if (rp.VisibleNodes != null)

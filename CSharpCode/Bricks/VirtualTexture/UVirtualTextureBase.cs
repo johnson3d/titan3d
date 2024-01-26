@@ -40,11 +40,10 @@ namespace EngineNS.Bricks.VirtualTexture
             TextureArray = rc.CreateTexture(in TexDesc);
             TextureArraySRV = rc.CreateSRV(TextureArray, srcDesc);
 
-            int rvtNum = MaxActive;
-            for (uint i = 0; i < rvtNum; i++)
+            for (int i = MaxActive - 1; i >= 0; i--)
             {
                 var ttTextureSlot = new TtTextureSlot();
-                ttTextureSlot.ArrayIndex = i % arrayNum;
+                ttTextureSlot.ArrayIndex = (uint)i % arrayNum;
 
                 FreeSlots.Push(ttTextureSlot);
             }
@@ -81,7 +80,7 @@ namespace EngineNS.Bricks.VirtualTexture
         public TtRVT()
         {            
         }
-        public int UniqueTexID;
+        public uint UniqueTexID;
         public TtTextureSlot Slot = null;
         public NxRHI.USrView Texture;
         public RName TextureName;
@@ -93,10 +92,10 @@ namespace EngineNS.Bricks.VirtualTexture
         public Graphics.Pipeline.TtCpu2GpuBuffer<uint> TextureSlotBuffer = new Graphics.Pipeline.TtCpu2GpuBuffer<uint>();
         public TtTextureSlotAllocator TextureSlotAllocator = new TtTextureSlotAllocator();
         public List<TtRVT> Rvts = new List<TtRVT>();
-        private List<int> PrevActiveTexIDs = new List<int>();
-        private List<int> ActiveTexIDs = new List<int>();
-        private List<int> AddTexIDs = new List<int>();
-        private List<int> RemoveTexIDs = new List<int>();
+        private List<uint> PrevActiveTexIDs = new List<uint>();
+        private List<uint> ActiveTexIDs = new List<uint>();
+        private List<uint> AddTexIDs = new List<uint>();
+        private List<uint> RemoveTexIDs = new List<uint>();
         NxRHI.FTextureDesc TexDesc = new NxRHI.FTextureDesc();
         public void ActiveRVT(NxRHI.USrView tex)
         {
@@ -165,7 +164,7 @@ namespace EngineNS.Bricks.VirtualTexture
                 TtRVT result = new TtRVT();
                 result.Texture = tex;
                 result.TextureName = tex.AssetName;
-                result.UniqueTexID = Rvts.Count;
+                result.UniqueTexID = (uint)Rvts.Count;
                 result.Slot = null;
                 result.Owner = this;
                 tex.Rvt = result;
@@ -202,15 +201,15 @@ namespace EngineNS.Bricks.VirtualTexture
             
             foreach (var i in RemoveTexIDs)
             {
-                TextureSlotAllocator.Free(Rvts[i].Slot);
+                TextureSlotAllocator.Free(Rvts[(int)i].Slot);
             }
             RemoveTexIDs.Clear();
             using (new NxRHI.TtCmdListScope(cmd))
             {
                 foreach (var i in AddTexIDs)
                 {
-                    Rvts[i].Slot = TextureSlotAllocator.Alloc();
-                    UploadRVT(cmd, Rvts[i]);
+                    Rvts[(int)i].Slot = TextureSlotAllocator.Alloc();
+                    UpLoadRVT(cmd, Rvts[(int)i]);
                 }
                 AddTexIDs.Clear();
                 cmd.FlushDraws();
@@ -226,7 +225,7 @@ namespace EngineNS.Bricks.VirtualTexture
             TextureSlotBuffer.Flush2GPU(cmd);
             UEngine.Instance.GfxDevice.RenderContext.GpuQueue.ExecuteCommandList(cmd, NxRHI.EQueueType.QU_Transfer);
         }
-        public void UploadRVT(NxRHI.UCommandList cmd, TtRVT rvt)
+        public void UpLoadRVT(NxRHI.UCommandList cmd, TtRVT rvt)
         {
             //Copy rvt to
             //TextureArrays[rvt.SlotDesc.TextureIndex]

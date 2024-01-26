@@ -5,13 +5,13 @@ using System.Text;
 
 namespace EngineNS.Graphics.Mesh
 {
-    public class UMdfSkinMesh : Graphics.Pipeline.Shader.TtMdfQueue1<Mesh.Modifier.CSkinModifier>
+    public class UMdfSkinMesh : Graphics.Pipeline.Shader.TtMdfQueue1<Mesh.Modifier.TtSkinModifier>
     {
-        public Mesh.Modifier.CSkinModifier SkinModifier 
+        public Mesh.Modifier.TtSkinModifier SkinModifier 
         { 
             get
             {
-                return this.Modifiers[0] as Mesh.Modifier.CSkinModifier;
+                return this.Modifiers[0] as Mesh.Modifier.TtSkinModifier;
             }
         }
         public NxRHI.UCbView PerSkinMeshCBuffer { get; set; }

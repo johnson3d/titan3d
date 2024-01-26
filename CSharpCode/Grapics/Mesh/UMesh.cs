@@ -404,6 +404,7 @@ namespace EngineNS.Graphics.Mesh
                         TargetViews = new List<ViewDrawCalls>();
                     }
                     drawCalls = GetOrCreateDrawCalls(targetView.TargetViewIdentifier, policy);
+                    drawCalls.State = 0;
                 }
 
                 switch (drawCalls.State)
@@ -432,6 +433,18 @@ namespace EngineNS.Graphics.Mesh
                 }
 
                 result = drawCalls.DrawCalls[(int)shadingType];
+                if (result == null)
+                {
+                    //如果需要这个Pass，那么BuildDrawCall中的policy.GetPassShading就应该能提供shading
+                    if (policy.GetPassShading(shadingType, this, node) == null)
+                    {
+                        System.Diagnostics.Debug.Assert(false);
+                    }
+                    else
+                    {
+                        System.Diagnostics.Debug.Assert(false);
+                    }
+                }
                 //检查shading切换参数
                 if (result.IsPermutationChanged())
                 {

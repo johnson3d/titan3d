@@ -144,6 +144,7 @@ namespace EngineNS.Graphics.Pipeline.Shader
         public NxRHI.EVertexStreamType[] GetNeedStreams();
         public EPixelShaderInput[] GetPSNeedInputs();
         public void Initialize(Graphics.Mesh.UMaterialMesh materialMesh);
+        public void OnDrawCall(TtMdfQueueBase mdfQueue, NxRHI.ICommandList cmd, Graphics.Pipeline.URenderPolicy.EShadingType shadingType, NxRHI.UGraphicDraw drawcall, Graphics.Pipeline.URenderPolicy policy, Graphics.Mesh.TtMesh.TtAtom atom);
     }
 
     public abstract class TtMdfQueueBase : AuxPtrType<IMdfQueue>, IShaderCodeProvider
@@ -271,11 +272,21 @@ namespace EngineNS.Graphics.Pipeline.Shader
                 mMdfQueueHash = value;
             }
         }
-        public virtual Hash160 GetHash()
+        public Hash160 GetHash()
         {
-            string result = DefineCode?.TextCode;
-            result += SourceCode.TextCode;
-            mMdfQueueHash = Hash160.CreateHash160(result);
+            if (mMdfQueueHash == Hash160.Emtpy)
+            {
+                string result = DefineCode?.TextCode;
+                result += SourceCode.TextCode;
+                foreach (var i in Modifiers)
+                {
+                    if (i.SourceName == null)
+                        continue;
+                    var shadingCode = Editor.ShaderCompiler.UShaderCodeManager.Instance.GetShaderCode(i.SourceName);
+                    result += shadingCode;
+                }
+                mMdfQueueHash = Hash160.CreateHash160(result);
+            }
             return mMdfQueueHash;
         }
         public TtMdfQueueBase()
@@ -294,6 +305,10 @@ namespace EngineNS.Graphics.Pipeline.Shader
         {
             if (OnDrawCallCallback != null)
                 OnDrawCallCallback(shadingType, drawcall, policy, atom);
+            foreach(var i in Modifiers)
+            {
+                i.OnDrawCall(this, cmd, shadingType, drawcall, policy, atom);
+            }
         }
     }
 

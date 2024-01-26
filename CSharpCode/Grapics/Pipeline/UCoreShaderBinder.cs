@@ -234,6 +234,8 @@ namespace EngineNS.Graphics.Pipeline
 
         public class UCBufferPerTerrainIndexer : NxRHI.UShader.UShaderVarIndexer
         {
+            [NxRHI.UShader.UShaderVar(VarType = typeof(Vector3))]
+            public NxRHI.FShaderVarDesc EyeCenter;// = 1.0f;
             [NxRHI.UShader.UShaderVar(VarType = typeof(float))]
             public NxRHI.FShaderVarDesc GridSize;
             [NxRHI.UShader.UShaderVar(VarType = typeof(float))]
@@ -255,8 +257,6 @@ namespace EngineNS.Graphics.Pipeline
             public NxRHI.FShaderVarDesc StartPosition;
             [NxRHI.UShader.UShaderVar(VarType = typeof(uint))]
             public NxRHI.FShaderVarDesc CurrentLOD;// = 1.0f;
-            [NxRHI.UShader.UShaderVar(VarType = typeof(Vector3))]
-            public NxRHI.FShaderVarDesc EyeCenter;// = 1.0f;
             [NxRHI.UShader.UShaderVar(VarType = typeof(Vector2))]
             public NxRHI.FShaderVarDesc TexUVOffset;
         }

@@ -12,17 +12,41 @@ namespace EngineNS.Graphics.Mesh.Modifier
         public uint HitProxyId;
 
         public Vector3 Scale;
-        public uint CustomData2;
+        public uint Scale_Pad;
 
         public Quaternion Quat;
+        
         public Vector4ui UserData;
-
-        public Vector4ui PointLightIndices;
+        public Vector4ui UserData2;
         public void SetMatrix(in Matrix mat)
+        {
+            Position = mat.Translation;
+            Scale = mat.Scale;
+            Quat = mat.Rotation;
+        }
+    };
+    [System.Runtime.InteropServices.StructLayout(System.Runtime.InteropServices.LayoutKind.Sequential, Pack = 16)]
+    public struct FCullBounding
+    {
+        public FCullBounding()
         {
 
         }
-    };
+        public FCullBounding(in BoundingBox box)
+        {
+            Center = box.GetCenter();
+            Extent = box.GetSize() * 0.5f;
+        }
+        public FCullBounding(in DBoundingBox box)
+        {
+            Center = box.GetCenter().ToSingleVector3();
+            Extent = box.GetSize().ToSingleVector3() * 0.5f;
+        }
+        public Vector3 Center;
+        public float Center_Pad;
+        public Vector3 Extent;
+        public float Radius;
+    }
 
     public class TtGpuCullSetupShading : Graphics.Pipeline.Shader.UComputeShadingEnv
     {
@@ -99,8 +123,9 @@ namespace EngineNS.Graphics.Mesh.Modifier
     public interface IInstanceBuffers : IDisposable
     {
         int NumOfInstance { get; }
-        void SetCapacity(TtInstanceModifier mdf, uint nSize);
-        uint PushInstance(TtInstanceModifier mdf, in FVSInstanceData instance);
+        void SetCapacity(TtInstanceModifier mdf, uint nSize, bool useInstanceBounding);
+        void ResetInstance();
+        uint PushInstance(TtInstanceModifier mdf, in FVSInstanceData instance, in FCullBounding bounding);
         void SetInstance(uint index, in FVSInstanceData instance);
         void Flush2GPU(NxRHI.ICommandList cmd, TtInstanceModifier mdf);
         void OnDrawCall(TtInstanceModifier mdf, NxRHI.ICommandList cmd, Pipeline.URenderPolicy.EShadingType shadingType, NxRHI.UGraphicDraw drawcall, Pipeline.URenderPolicy policy, TtMesh.TtAtom atom);
@@ -109,6 +134,7 @@ namespace EngineNS.Graphics.Mesh.Modifier
     public class TtInstanceBufferSSBO : IInstanceBuffers
     {
         public Pipeline.TtCpu2GpuBuffer<FVSInstanceData> InstanceBuffer = new Pipeline.TtCpu2GpuBuffer<FVSInstanceData>();
+        public Pipeline.TtCpu2GpuBuffer<FCullBounding> InstanceBoundingBuffer = null;
         public Pipeline.TtGpuBuffer<FVSInstanceData> CullingBuffer = new Pipeline.TtGpuBuffer<FVSInstanceData>();
         public TtGpuCullSetupShading GpuCullSetupShading;
         public NxRHI.UComputeDraw GpuCullSetupDrawcall;
@@ -143,14 +169,35 @@ namespace EngineNS.Graphics.Mesh.Modifier
                 return InstanceBuffer.DataArray.Count;
             }
         }
-        public unsafe void SetCapacity(TtInstanceModifier mdf, uint nSize)
+        public unsafe void SetCapacity(TtInstanceModifier mdf, uint nSize, bool useInstanceBounding)
         {
             InstanceBuffer.SetCapacity((int)nSize);
             CullingBuffer.SetSize(nSize, IntPtr.Zero.ToPointer(), NxRHI.EBufferType.BFT_SRV| NxRHI.EBufferType.BFT_UAV);
+            if (useInstanceBounding)
+            {
+                InstanceBoundingBuffer = new Pipeline.TtCpu2GpuBuffer<FCullBounding>();
+                InstanceBoundingBuffer.Initialize(NxRHI.EBufferType.BFT_SRV);
+                InstanceBoundingBuffer.SetCapacity((int)nSize);
+            }
+            else
+            {
+                CoreSDK.DisposeObject(ref InstanceBoundingBuffer);
+            }
         }
-        public uint PushInstance(TtInstanceModifier mdf, in FVSInstanceData instance)
+        public void ResetInstance()
         {
-            return (uint)InstanceBuffer.PushData(in instance);
+            InstanceBuffer.SetSize(0);
+            if (InstanceBoundingBuffer != null)
+                InstanceBoundingBuffer.SetSize(0);
+        }
+        public uint PushInstance(TtInstanceModifier mdf, in FVSInstanceData instance, in FCullBounding bounding)
+        {
+            var index = (uint)InstanceBuffer.PushData(in instance);
+            if (InstanceBoundingBuffer != null)
+            {
+                InstanceBoundingBuffer.PushData(bounding);
+            }
+            return index;
         }
         public unsafe void SetInstance(uint index, in FVSInstanceData instance)
         {
@@ -159,6 +206,10 @@ namespace EngineNS.Graphics.Mesh.Modifier
         public unsafe void Flush2GPU(NxRHI.ICommandList cmd, TtInstanceModifier mdf)
         {
             InstanceBuffer.Flush2GPU(cmd);
+            if (InstanceBoundingBuffer != null)
+            {
+                InstanceBoundingBuffer.Flush2GPU(cmd);
+            }
         }
 
         public void OnDrawCall(TtInstanceModifier mdf, NxRHI.ICommandList cmd, Pipeline.URenderPolicy.EShadingType shadingType, NxRHI.UGraphicDraw drawcall, Pipeline.URenderPolicy policy, TtMesh.TtAtom atom)
@@ -187,31 +238,41 @@ namespace EngineNS.Graphics.Mesh.Modifier
             {
                 return;
             }
+            if (InstanceBuffer.DataArray.Count > CullingBuffer.NumElement)
+            {
+                CullingBuffer.SetSize((uint)InstanceBuffer.DataArray.Count, IntPtr.Zero.ToPointer(), NxRHI.EBufferType.BFT_SRV | NxRHI.EBufferType.BFT_UAV);
+            }
+            this.Flush2GPU(cmd, mdf);
             int NumOfIndirectDraw = mdf.DrawArgsOffsetDict.Count;
             GpuCullSetupShading.SetDrawcallDispatch(this, policy, GpuCullSetupDrawcall, 1, 1, 1, true);
             GpuCullSetupDrawcall.BindCBuffer("cbGPUCulling", ref GPUCullingCBV);
             GPUCullingCBV.SetValue("BoundCenter", mdf.MeshAABB.GetCenter());
             GPUCullingCBV.SetValue("BoundExtent", mdf.MeshAABB.GetSize() * 0.5f);
-            GPUCullingCBV.SetValue("MaxInstance", CullingBuffer.NumElement);
+            GPUCullingCBV.SetValue("MaxInstance", InstanceBuffer.DataArray.Count);
             GPUCullingCBV.SetValue("IndirectArgsOffset", argBufferOffset);
             GPUCullingCBV.SetValue("NumOfIndirectDraw", NumOfIndirectDraw);
+            GPUCullingCBV.SetValue("UseInstanceBounding", InstanceBoundingBuffer != null ? (int)1 : (int)0);
             GpuCullSetupDrawcall.BindUav("IndirectArgsBuffer", mdf.DrawArgsBuffer.Uav);
-            GpuCullSetupDrawcall.SetDebugName("InstanceCulling.Setup");
+            //GpuCullSetupDrawcall.SetDebugName("InstanceCulling.Setup");
             cmd.PushGpuDraw(GpuCullSetupDrawcall.mCoreObject.NativeSuper);
 
-            GpuCullShading.SetDrawcallDispatch(this, policy, GpuCullDrawcall, 1, 1, 1, true);
+            GpuCullShading.SetDrawcallDispatch(this, policy, GpuCullDrawcall, (uint)InstanceBuffer.DataArray.Count, 1, 1, true);
             GpuCullDrawcall.BindCBuffer("cbGPUCulling", ref GPUCullingCBV);
             GpuCullDrawcall.BindCBuffer("cbPerCamera", policy.DefaultCamera.PerCameraCBuffer);
             GpuCullDrawcall.BindSrv("InstanceDataArray", InstanceBuffer.Srv);
+            if (InstanceBoundingBuffer != null)
+            {
+                GpuCullDrawcall.BindSrv("InstanceBoundingArray", InstanceBoundingBuffer.Srv);
+            }
             GpuCullDrawcall.BindUav("CullInstanceDataArray", CullingBuffer.Uav);
             GpuCullDrawcall.BindUav("IndirectArgsBuffer", mdf.DrawArgsBuffer.Uav);
-            GpuCullDrawcall.SetDebugName("InstanceCulling");
+            //GpuCullDrawcall.SetDebugName("InstanceCulling");
             cmd.PushGpuDraw(GpuCullDrawcall.mCoreObject.NativeSuper);
 
             GpuCullFlushShading.SetDrawcallDispatch(this, policy, GpuCullFlushDrawcall, (uint)(NumOfIndirectDraw - 1), 1, 1, true);
             GpuCullFlushDrawcall.BindCBuffer("cbGPUCulling", ref GPUCullingCBV);
             GpuCullFlushDrawcall.BindUav("IndirectArgsBuffer", mdf.DrawArgsBuffer.Uav);
-            GpuCullFlushDrawcall.SetDebugName("InstanceCulling.Flush");
+            //GpuCullFlushDrawcall.SetDebugName("InstanceCulling.Flush");
             cmd.PushGpuDraw(GpuCullFlushDrawcall.mCoreObject.NativeSuper);
         }
     }
@@ -462,6 +523,7 @@ namespace EngineNS.Graphics.Mesh.Modifier
                 DrawArgsBuffer.Flush2GPU(tsCmd.CmdList);
                 DrawArgsBuffer.GpuBuffer.TransitionTo(tsCmd.CmdList, NxRHI.EGpuResourceState.GRS_UavIndirect);
             }
+            this.SetMode(UEngine.Instance.GfxDevice.RenderContext.DeviceCaps.IsSupportSSBO_VS);
         }
         public void Dispose()
         {
@@ -474,27 +536,23 @@ namespace EngineNS.Graphics.Mesh.Modifier
 
             InstanceBuffers = new TtInstanceBufferSSBO();
         }
-        public void SetCapacity(uint nSize)
+        public void SetCapacity(uint nSize, bool useInstanceBounding)
         {
-            InstanceBuffers.SetCapacity(this, nSize);
+            InstanceBuffers.SetCapacity(this, nSize, useInstanceBounding);
         }
 
         public bool IsGpuCulling { get; set; } = true;
 
-        public uint PushInstance(in FVSInstanceData instance)
+        public uint PushInstance(in FVSInstanceData instance, in FCullBounding bounding)
         {
-            return InstanceBuffers.PushInstance(this, in instance);
+            return InstanceBuffers.PushInstance(this, in instance, in bounding);
         }
         public unsafe void SetInstance(uint index, in FVSInstanceData instance)
         {
             InstanceBuffers.SetInstance(index, instance);
         }
 
-        public unsafe void Flush2GPU(NxRHI.ICommandList cmd)
-        {
-            InstanceBuffers.Flush2GPU(cmd, this);
-        }
-        public unsafe void OnDrawCall(NxRHI.ICommandList cmd, Pipeline.URenderPolicy.EShadingType shadingType, NxRHI.UGraphicDraw drawcall, Pipeline.URenderPolicy policy, TtMesh.TtAtom atom)
+        public unsafe void OnDrawCall(Graphics.Pipeline.Shader.TtMdfQueueBase mdfQueue1, NxRHI.ICommandList cmd, Pipeline.URenderPolicy.EShadingType shadingType, NxRHI.UGraphicDraw drawcall, Pipeline.URenderPolicy policy, TtMesh.TtAtom atom)
         {
             InstanceBuffers.OnDrawCall(this, cmd, shadingType, drawcall, policy, atom);
         }

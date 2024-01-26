@@ -219,6 +219,24 @@ namespace NxRHI
 		
 		FSubResourceFootPrint FootPrint{};
 	};
+
+	class TR_CLASS()
+		IActionDraw : public IGpuDraw
+	{
+	public:
+		TR_CALLBACK(SV_CallConvention = System.Runtime.InteropServices.CallingConvention.Cdecl)
+		typedef void(*FOnActionDraw)(ICommandList* cmdlist, void* arg);
+		FOnActionDraw OnActionDraw = nullptr;
+		void* Arg = nullptr;
+		virtual void Commit(ICommandList* cmdlist, bool bRefResource) override
+		{
+			if (OnActionDraw != nullptr)
+			{
+				OnActionDraw(cmdlist, Arg);
+			}
+		}
+		virtual UINT GetPrimitiveNum() override { return 0; }
+	};
 }
 
 NS_END
