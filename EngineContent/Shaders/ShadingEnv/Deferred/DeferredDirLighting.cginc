@@ -120,8 +120,8 @@ PS_OUTPUT PS_Main(PS_INPUT input)
 	GBufferData GBuffer = (GBufferData)0;
 	GBuffer.DecodeGBuffer(rt0, rt1, rt2, rt3);
 
-    //if (GBuffer.IsUnlit() && GBuffer.IsAcceptShadow() == false)
-    if (GBuffer.ObjectFlags_2Bit == 0)
+	//if (GBuffer.ObjectFlags_2Bit == 0)
+    if (GBuffer.IsUnlit() && GBuffer.IsAcceptShadow() == false)
     {
         output.RT0.rgb = GBuffer.MtlColorRaw;
         return output;
