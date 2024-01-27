@@ -1,4 +1,6 @@
-﻿using System;
+﻿using EngineNS.Graphics.Mesh;
+using EngineNS.Graphics.Pipeline.Shader;
+using System;
 using System.Collections.Generic;
 using System.Text;
 
@@ -87,9 +89,9 @@ namespace EngineNS.Graphics.Pipeline.Mobile
         public unsafe override void OnBuildDrawCall(URenderPolicy policy, NxRHI.UGraphicDraw drawcall)
         {
         }
-        public unsafe override void OnDrawCall(NxRHI.ICommandList cmd, Pipeline.URenderPolicy.EShadingType shadingType, NxRHI.UGraphicDraw drawcall, URenderPolicy policy, Mesh.TtMesh.TtAtom atom)
+        public unsafe override void OnDrawCall(NxRHI.ICommandList cmd, NxRHI.UGraphicDraw drawcall, URenderPolicy policy, Mesh.TtMesh.TtAtom atom)
         {
-            base.OnDrawCall(cmd, shadingType, drawcall, policy, atom);
+            base.OnDrawCall(cmd, drawcall, policy, atom);
 
             var Manager = policy.TagObject as URenderPolicy;
 
@@ -144,10 +146,15 @@ namespace EngineNS.Graphics.Pipeline.Mobile
             ResultPinOut.Attachement.Format = EPixelFormat.PXF_R8G8B8A8_UNORM;
             //result by base
         }
+        public UFinalCopyShading mBasePassShading;
+        public override UGraphicsShadingEnv GetPassShading(TtMesh.TtAtom atom = null)
+        {
+            return mBasePassShading;
+        }
         public override async System.Threading.Tasks.Task Initialize(URenderPolicy policy, string debugName)
         {
             await base.Initialize(policy, debugName);
-            ScreenDrawPolicy.mBasePassShading = UEngine.Instance.ShadingEnvManager.GetShadingEnv<UFinalCopyShading>();
+            mBasePassShading = UEngine.Instance.ShadingEnvManager.GetShadingEnv<UFinalCopyShading>();
         }
     }
 }

@@ -147,8 +147,14 @@ namespace EngineNS.GamePlay.Scene
             IsCaptureVisible = true;
 
             mVisParameter.World = CaptureWorld;
-            mVisParameter.VisibleMeshes = RenderPolicy.VisibleMeshes;
-            mVisParameter.VisibleNodes = RenderPolicy.VisibleNodes;
+            if (mVisParameter.VisibleMeshes == null)
+            {
+                mVisParameter.VisibleMeshes = new List<FVisibleMesh>();
+            }
+            if (mVisParameter.VisibleNodes == null)
+            {
+                mVisParameter.VisibleNodes = new List<UNode>();
+            }
             mVisParameter.CullCamera = RenderPolicy.DefaultCamera;
             CaptureWorld.GatherVisibleMeshes(mVisParameter);
 

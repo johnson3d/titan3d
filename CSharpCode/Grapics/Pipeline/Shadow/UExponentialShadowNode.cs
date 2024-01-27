@@ -1,4 +1,6 @@
-﻿using EngineNS.Graphics.Pipeline.Common;
+﻿using EngineNS.Graphics.Mesh;
+using EngineNS.Graphics.Pipeline.Common;
+using EngineNS.Graphics.Pipeline.Shader;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -31,15 +33,15 @@ namespace EngineNS.Graphics.Pipeline.Shadow
             //    drawcall.mCoreObject.BindCBufferAll(cbIndex, PerShadingCBuffer.mCoreObject.Ptr);
             //}
         }
-        public unsafe override void OnDrawCall(NxRHI.ICommandList cmd, Pipeline.URenderPolicy.EShadingType shadingType, NxRHI.UGraphicDraw drawcall, URenderPolicy policy, Mesh.TtMesh.TtAtom atom)
+        public unsafe override void OnDrawCall(NxRHI.ICommandList cmd, NxRHI.UGraphicDraw drawcall, URenderPolicy policy, Mesh.TtMesh.TtAtom atom)
         {
-            base.OnDrawCall(cmd, shadingType, drawcall, policy, atom);
+            base.OnDrawCall(cmd, drawcall, policy, atom);
 
-            var Manager = policy.TagObject as URenderPolicy;
-
-            var ESMNode = Manager.FindFirstNode<UExponentialShadowNode>();
+            var ESMNode = drawcall.TagObject as UExponentialShadowNode;
 
             var index = drawcall.FindBinder("GShadowMap");
+            //var attachBuffer = ESMNode.GetAttachBuffer(ESMNode.ShadowMapPinIn);
+            //drawcall.BindSRV(VNameString.FromString("GShadowMap"), attachBuffer.Srv);
             if (index.IsValidPointer)
             {
                 var attachBuffer = ESMNode.GetAttachBuffer(ESMNode.ShadowMapPinIn);
@@ -65,13 +67,18 @@ namespace EngineNS.Graphics.Pipeline.Shadow
             AddInput(ShadowMapPinIn, NxRHI.EBufferType.BFT_SRV);
 
             ResultPinOut.IsAutoResize = false;
-            ResultPinOut.Attachement.Format = EPixelFormat.PXF_R32G32B32A32_FLOAT;
+            ResultPinOut.Attachement.Format = EPixelFormat.PXF_R16_FLOAT;
             base.InitNodePins();
+        }
+        public UExponentialShadowShading mBasePassShading;
+        public override UGraphicsShadingEnv GetPassShading(TtMesh.TtAtom atom = null)
+        {
+            return mBasePassShading;
         }
         public override async System.Threading.Tasks.Task Initialize(URenderPolicy policy, string debugName)
         {
             await base.Initialize(policy, debugName);
-            ScreenDrawPolicy.mBasePassShading = UEngine.Instance.ShadingEnvManager.GetShadingEnv<UExponentialShadowShading>();
+            mBasePassShading = UEngine.Instance.ShadingEnvManager.GetShadingEnv<UExponentialShadowShading>();
         }
         public override void OnLinkIn(TtRenderGraphLinker linker)
         {

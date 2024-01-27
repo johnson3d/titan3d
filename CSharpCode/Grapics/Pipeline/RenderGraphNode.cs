@@ -1,4 +1,5 @@
-﻿using System;
+﻿using NPOI.Util;
+using System;
 using System.Collections.Generic;
 using System.Text;
 
@@ -340,7 +341,7 @@ namespace EngineNS.Graphics.Pipeline
             }
         }
 
-        public virtual Shader.UGraphicsShadingEnv GetPassShading(Graphics.Pipeline.URenderPolicy.EShadingType type, Mesh.TtMesh.TtAtom atom)
+        public virtual Shader.UGraphicsShadingEnv GetPassShading(Mesh.TtMesh.TtAtom atom = null)
         {
             return null;
         }

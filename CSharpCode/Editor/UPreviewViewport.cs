@@ -232,12 +232,6 @@ namespace EngineNS.Editor
                     TickOnFocus();
                 }
 
-                mVisParameter.World = World;
-                mVisParameter.VisibleMeshes = RenderPolicy.VisibleMeshes;
-                mVisParameter.VisibleNodes = RenderPolicy.VisibleNodes;
-                mVisParameter.CullCamera = RenderPolicy.DefaultCamera;
-                World.GatherVisibleMeshes(mVisParameter);
-
                 RenderPolicy?.TickLogic(World);
 
                 RenderPolicy?.EndTickLogic(World);

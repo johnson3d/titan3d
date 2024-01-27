@@ -128,7 +128,7 @@ namespace EngineNS.Graphics.Mesh.Modifier
         uint PushInstance(TtInstanceModifier mdf, in FVSInstanceData instance, in FCullBounding bounding);
         void SetInstance(uint index, in FVSInstanceData instance);
         void Flush2GPU(NxRHI.ICommandList cmd, TtInstanceModifier mdf);
-        void OnDrawCall(TtInstanceModifier mdf, NxRHI.ICommandList cmd, Pipeline.URenderPolicy.EShadingType shadingType, NxRHI.UGraphicDraw drawcall, Pipeline.URenderPolicy policy, TtMesh.TtAtom atom);
+        void OnDrawCall(TtInstanceModifier mdf, NxRHI.ICommandList cmd, NxRHI.UGraphicDraw drawcall, Pipeline.URenderPolicy policy, TtMesh.TtAtom atom);
         void InstanceCulling(TtInstanceModifier mdf, NxRHI.ICommandList cmd, Pipeline.URenderPolicy policy, NxRHI.UUaView argBufferUAV, uint argBufferOffset);
     }
     public class TtInstanceBufferSSBO : IInstanceBuffers
@@ -212,7 +212,7 @@ namespace EngineNS.Graphics.Mesh.Modifier
             }
         }
 
-        public void OnDrawCall(TtInstanceModifier mdf, NxRHI.ICommandList cmd, Pipeline.URenderPolicy.EShadingType shadingType, NxRHI.UGraphicDraw drawcall, Pipeline.URenderPolicy policy, TtMesh.TtAtom atom)
+        public void OnDrawCall(TtInstanceModifier mdf, NxRHI.ICommandList cmd, NxRHI.UGraphicDraw drawcall, Pipeline.URenderPolicy policy, TtMesh.TtAtom atom)
         {
             drawcall.mCoreObject.DrawInstance = (ushort)NumOfInstance;
             
@@ -552,9 +552,9 @@ namespace EngineNS.Graphics.Mesh.Modifier
             InstanceBuffers.SetInstance(index, instance);
         }
 
-        public unsafe void OnDrawCall(Graphics.Pipeline.Shader.TtMdfQueueBase mdfQueue1, NxRHI.ICommandList cmd, Pipeline.URenderPolicy.EShadingType shadingType, NxRHI.UGraphicDraw drawcall, Pipeline.URenderPolicy policy, TtMesh.TtAtom atom)
+        public unsafe void OnDrawCall(Graphics.Pipeline.Shader.TtMdfQueueBase mdfQueue1, NxRHI.ICommandList cmd, NxRHI.UGraphicDraw drawcall, Pipeline.URenderPolicy policy, TtMesh.TtAtom atom)
         {
-            InstanceBuffers.OnDrawCall(this, cmd, shadingType, drawcall, policy, atom);
+            InstanceBuffers.OnDrawCall(this, cmd, drawcall, policy, atom);
         }
     }
 }

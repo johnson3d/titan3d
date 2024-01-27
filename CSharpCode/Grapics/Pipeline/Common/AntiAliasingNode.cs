@@ -1,4 +1,6 @@
 ﻿using EngineNS.GamePlay;
+using EngineNS.Graphics.Mesh;
+using EngineNS.Graphics.Pipeline.Shader;
 using EngineNS.NxRHI;
 using System;
 using System.Collections.Generic;
@@ -131,17 +133,13 @@ namespace EngineNS.Graphics.Pipeline.Common
             }
 
         }
-        public unsafe override void OnDrawCall(NxRHI.ICommandList cmd, Pipeline.URenderPolicy.EShadingType shadingType, NxRHI.UGraphicDraw drawcall, URenderPolicy policy, Mesh.TtMesh.TtAtom atom)
+        public unsafe override void OnDrawCall(NxRHI.ICommandList cmd, NxRHI.UGraphicDraw drawcall, URenderPolicy policy, Mesh.TtMesh.TtAtom atom)
         {
-            base.OnDrawCall(cmd, shadingType, drawcall, policy, atom);
-
-            var pipelinPolicy = policy.TagObject as URenderPolicy;
+            base.OnDrawCall(cmd, drawcall, policy, atom);
 
             var aaNode = drawcall.TagObject as Common.TtAntiAliasingNode;
-            if (aaNode == null)
-                aaNode = pipelinPolicy.FindFirstNode<Common.TtAntiAliasingNode>();
 
-            OnDrawcallTAA(drawcall, pipelinPolicy, aaNode);
+            OnDrawcallTAA(drawcall, policy, aaNode);
         }
     }
     public class TtAntiAliasingNode : USceenSpaceNode
@@ -175,13 +173,18 @@ namespace EngineNS.Graphics.Pipeline.Common
 
             base.InitNodePins();
         }
+        public TtAntiAliasingShading mBasePassShading;
+        public override UGraphicsShadingEnv GetPassShading(TtMesh.TtAtom atom = null)
+        {
+            return mBasePassShading;
+        }
         public override async System.Threading.Tasks.Task Initialize(URenderPolicy policy, string debugName)
         {
             await base.Initialize(policy, debugName);
 
             var rc = UEngine.Instance.GfxDevice.RenderContext;
 
-            ScreenDrawPolicy.mBasePassShading = UEngine.Instance.ShadingEnvManager.GetShadingEnv<TtAntiAliasingShading>();
+            mBasePassShading = UEngine.Instance.ShadingEnvManager.GetShadingEnv<TtAntiAliasingShading>();
 
             mCopyColorDrawcall = UEngine.Instance.GfxDevice.RenderContext.CreateCopyDraw();
             mCopyDepthDrawcall = UEngine.Instance.GfxDevice.RenderContext.CreateCopyDraw();

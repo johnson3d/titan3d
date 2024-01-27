@@ -202,6 +202,7 @@ namespace CompilingGenerator
 
             string getPropertyValueSwitch = "";
             string setPropertyValueSwitch = "";
+            string tourBindableProperties = "";
 
             var source = $@"
 using System;
@@ -340,6 +341,9 @@ namespace {namespaceName}
                 case {Standart.Hash.xxHash.xxHash64.ComputeHash(propName)}: //{propName}
                         return true;";
                         }
+
+                        tourBindableProperties += $@"
+            tourAction.Invoke(""{propName}"", {bindPropName});";
 
                         bindImpSource += $@"
     public class {bindingExprImpName} : EngineNS.UI.Bind.TtBindingExpression<{propTypeDisplayName}>
@@ -700,7 +704,7 @@ namespace {namespaceName}
             if (!classSymbol.MemberNames.Any(name => "FindBindableProperty" == name) && !baseHasBindObjectInterface)
             {
                 source += $@"
-        public EngineNS.UI.Bind.TtBindableProperty FindBindableProperty(string propertyName)
+        public{(baseHasBindObjectInterface ? " override" : " virtual")} EngineNS.UI.Bind.TtBindableProperty FindBindableProperty(string propertyName)
         {{
             var nameHash = Standart.Hash.xxHash.xxHash64.ComputeHash(propertyName);
             return GetBindableProperty(nameHash, propertyName);
@@ -787,6 +791,17 @@ namespace {namespaceName}
                 }}
                 else
                     bpVal.SetValue<T>(this, bp, value);
+            }}
+        }}";
+            }
+            if(!classSymbol.MemberNames.Any(name => "HasBinded" == name))
+            {
+                source += $@"
+        public{(baseHasBindObjectInterface ? " override" : " virtual")} bool HasBinded(EngineNS.UI.Bind.TtBindableProperty bp)
+        {{
+            lock({bindExprDicName})
+            {{
+                return {bindExprDicName}.ContainsKey(bp);
             }}
         }}";
             }
@@ -967,6 +982,22 @@ namespace {namespaceName}
             }
             source += $@"
         }}";
+            if (!classSymbol.MemberNames.Any(name => "TourBindProperties" == name))
+            {
+                source += $@"
+        public{(baseHasBindObjectInterface ? " override" : " virtual")} void TourBindProperties(Action<string, EngineNS.UI.Bind.TtBindableProperty> tourAction)
+        {{
+            if(tourAction == null)
+                return;
+            {tourBindableProperties}";
+                if(baseHasBindObjectInterface)
+                {
+                    source += $@"
+            base.TourBindProperties(tourAction);";
+                }
+                source += $@"
+        }}";
+            }
             if (!classSymbol.MemberNames.Any(name => "GetPropertyValue" == name))
             {
                 source += $@"

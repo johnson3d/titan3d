@@ -20,9 +20,9 @@ namespace EngineNS.Graphics.Mesh
             base.CopyFrom(mdf);
             PerSkinMeshCBuffer = (mdf as UMdfSkinMesh).PerSkinMeshCBuffer;
         }
-        public override void OnDrawCall(NxRHI.ICommandList cmd, Pipeline.URenderPolicy.EShadingType shadingType, NxRHI.UGraphicDraw drawcall, Pipeline.URenderPolicy policy, Mesh.TtMesh.TtAtom atom)
+        public override void OnDrawCall(NxRHI.ICommandList cmd, NxRHI.UGraphicDraw drawcall, Pipeline.URenderPolicy policy, Mesh.TtMesh.TtAtom atom)
         {
-            base.OnDrawCall(cmd, shadingType, drawcall, policy, atom);
+            base.OnDrawCall(cmd, drawcall, policy, atom);
             unsafe
             {
                 var skeleton = atom.MeshPrimitives.PartialSkeleton;

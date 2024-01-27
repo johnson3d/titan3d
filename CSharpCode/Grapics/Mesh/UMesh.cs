@@ -199,54 +199,38 @@ namespace EngineNS.Graphics.Mesh
                 {
                     if (DrawCalls != null)
                     {
-                        foreach (var i in DrawCalls)
-                        {
-                            if (i == null)
-                                continue;
-                            i.Dispose();
-                        }
+                        DrawCalls.Dispose();
                         DrawCalls = null;
                     }
                 }
                 internal int State = 0;
                 public WeakReference<Pipeline.UGraphicsBuffers.UTargetViewIdentifier> TargetView;
-                public NxRHI.UGraphicDraw[] DrawCalls;
+                public NxRHI.UGraphicDraw DrawCalls;
                 //不同的View上可以有不同的渲染策略，同一个模型，可以渲染在不同视口上，比如装备预览的策略可以和GameView不一样
                 public Pipeline.URenderPolicy Policy;                
             }
             public List<ViewDrawCalls> TargetViews;
             
             private async Thread.Async.TtTask BuildDrawCall(ViewDrawCalls vdc, Pipeline.URenderPolicy policy,
-                Pipeline.URenderPolicy.EShadingType shadingType, Pipeline.TtRenderGraphNode node)
+                Pipeline.TtRenderGraphNode node)
             {
                 var device = UEngine.Instance.GfxDevice;
-                NxRHI.UGraphicDraw[] drawCalls = vdc.DrawCalls;
-                for (Pipeline.URenderPolicy.EShadingType i = Pipeline.URenderPolicy.EShadingType.BasePass;
-                    i < Pipeline.URenderPolicy.EShadingType.Count; i++)
+                Graphics.Pipeline.Shader.UGraphicsShadingEnv shading = null;
+                try
                 {
-                    Graphics.Pipeline.Shader.UGraphicsShadingEnv shading = null;
-                    try
-                    {
-                        shading = policy.GetPassShading(i, this, node);
-                    }
-                    catch(Exception ex)
-                    {
-                        Profiler.Log.WriteException(ex);
-                        Profiler.Log.WriteLine(Profiler.ELogTag.Warning, "Mesh", "policy.GetPassShading except");
-                        continue;
-                    }
+                    shading = node.GetPassShading(this);
                     if (shading != null)
                     {
                         var effect = await UEngine.Instance.GfxDevice.EffectManager.GetEffect(shading, Material.ParentMaterial, this.MdfQueue);
                         if (effect == null)
-                            continue;
+                            return;
                         var drawcall = UEngine.Instance.GfxDevice.RenderContext.CreateGraphicDraw();// (shading, Material.ParentMaterial, mesh.MdfQueue);
                         drawcall.SetSourceAtom(this);
                         drawcall.BindShaderEffect(effect);
                         drawcall.BindGeomMesh(this.MeshPrimitives.mCoreObject.GetGeomtryMesh());
                         drawcall.BindPipeline(Material.Pipeline);
                         drawcall.PermutationId = shading.mCurrentPermutationId;
-                        
+
 
                         #region Textures
                         for (int j = 0; j < Material.NumOfSRV; j++)
@@ -254,7 +238,7 @@ namespace EngineNS.Graphics.Mesh
                             var srv = await Material.GetSRV(j);
                             if (srv == null)
                                 continue;
-                            var varName = Material.GetNameOfSRV(j);                            
+                            var varName = Material.GetNameOfSRV(j);
                             unsafe
                             {
                                 var binder = drawcall.FindBinder(varName);
@@ -297,7 +281,7 @@ namespace EngineNS.Graphics.Mesh
                                         Material.UpdateCBufferVars(Material.PerMaterialCBuffer, Material.PerMaterialCBuffer.ShaderBinder);
                                 }
                                 if (Material.PerMaterialCBuffer != null)
-                                {   
+                                {
                                     drawcall.BindCBuffer(effect.BindIndexer.cbPerMaterial, Material.PerMaterialCBuffer);
                                 }
                             }
@@ -305,16 +289,21 @@ namespace EngineNS.Graphics.Mesh
                         #endregion
 
                         shading.OnBuildDrawCall(policy, drawcall);
-                        //drawcall.MaterialSerialId = Material.SerialId;
-                        if (drawCalls[(int)i] != null)
-                        {
-                            drawCalls[(int)i].Dispose();
-                        }
-                        drawCalls[(int)i] = drawcall;
+
+                        vdc.DrawCalls = drawcall;
+                        vdc.State = 1;
+                    }
+                    else
+                    {
+                        System.Diagnostics.Debug.Assert(false);
                     }
                 }
-
-                vdc.State = 1;
+                catch (Exception ex)
+                {
+                    System.Diagnostics.Debug.Assert(false);
+                    Profiler.Log.WriteException(ex);
+                    Profiler.Log.WriteLine(Profiler.ELogTag.Warning, "Mesh", "policy.GetPassShading except");
+                }
             }
             internal void ResetDrawCalls()
             {
@@ -352,7 +341,6 @@ namespace EngineNS.Graphics.Mesh
                 {
                     drawCalls = new ViewDrawCalls();
                     drawCalls.TargetView = new WeakReference<Pipeline.UGraphicsBuffers.UTargetViewIdentifier>(id);
-                    drawCalls.DrawCalls = new NxRHI.UGraphicDraw[(int)Pipeline.URenderPolicy.EShadingType.Count];
                     drawCalls.Policy = policy;
                     TargetViews.Add(drawCalls);
                 }
@@ -361,7 +349,7 @@ namespace EngineNS.Graphics.Mesh
             [ThreadStatic]
             private static Profiler.TimeScope ScopeOnDrawCall = Profiler.TimeScopeManager.GetTimeScope(typeof(TtAtom), "OnDrawCall");
             public unsafe virtual NxRHI.UGraphicDraw GetDrawCall(NxRHI.ICommandList cmd, Pipeline.UGraphicsBuffers targetView, Pipeline.URenderPolicy policy,
-                Pipeline.URenderPolicy.EShadingType shadingType, Pipeline.TtRenderGraphNode node)
+                Pipeline.TtRenderGraphNode node)
             {
                 if (Material == null)
                     return null;
@@ -393,7 +381,7 @@ namespace EngineNS.Graphics.Mesh
                     }
                     drawCalls = GetOrCreateDrawCalls(targetView.TargetViewIdentifier, policy);
                 }
-                var result = drawCalls.DrawCalls[(int)shadingType];
+                var result = drawCalls.DrawCalls;
                 if (drawCalls.State == 1 && result == null)
                 {
                     Material = this.GetMeshMaterial();
@@ -414,16 +402,12 @@ namespace EngineNS.Graphics.Mesh
                     case 0:
                         {
                             drawCalls.State = -1;
-                            var task = BuildDrawCall(drawCalls, policy, shadingType, node);
+                            var task = BuildDrawCall(drawCalls, policy, node);
                             if (task.IsCompleted == false)
                             {
                                 return null;
                             }
-                            else
-                            {
-                                drawCalls.State = 1;
-                                break;
-                            }
+                            break;
                         }
                     case -1:
                     default:
@@ -432,18 +416,11 @@ namespace EngineNS.Graphics.Mesh
                         }
                 }
 
-                result = drawCalls.DrawCalls[(int)shadingType];
+                result = drawCalls.DrawCalls;
                 if (result == null)
                 {
                     //如果需要这个Pass，那么BuildDrawCall中的policy.GetPassShading就应该能提供shading
-                    if (policy.GetPassShading(shadingType, this, node) == null)
-                    {
-                        System.Diagnostics.Debug.Assert(false);
-                    }
-                    else
-                    {
-                        System.Diagnostics.Debug.Assert(false);
-                    }
+                    System.Diagnostics.Debug.Assert(false);
                 }
                 //检查shading切换参数
                 if (result.IsPermutationChanged())
@@ -455,19 +432,12 @@ namespace EngineNS.Graphics.Mesh
                 }
 
                 result.TagObject = node;
-                //result.CheckPermutation(Material.ParentMaterial, mesh.MdfQueue);
-                //检查材质参数被修改
-                //if (result.CheckMaterialParameters(Material))
-                //{
-                //    if (result.Effect.CBPerMeshIndex != 0xFFFFFFFF)
-                //    {
-                //        result.mCoreObject.BindCBufferAll(result.Effect.CBPerMeshIndex, mesh.PerMeshCBuffer.mCoreObject);
-                //    }
-                //}
-
+                
+                var shading = node.GetPassShading(this);
                 using (new Profiler.TimeScopeHelper(ScopeOnDrawCall))
                 {
-                    policy.OnDrawCall(cmd, shadingType, result, this);
+                    shading.OnDrawCall(cmd, result, policy, this);
+                    this.MdfQueue.OnDrawCall(cmd, result, policy, this);
                 }
                 return result;
             }

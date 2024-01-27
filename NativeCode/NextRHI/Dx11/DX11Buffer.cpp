@@ -32,37 +32,45 @@ namespace NxRHI
 		BufferDesc.CPUAccessFlags = (UINT)desc.CpuAccess;// D3D11_CPU_ACCESS_WRITE;
 		BufferDesc.MiscFlags = desc.MiscFlags;
 		BufferDesc.StructureByteStride = desc.StructureStride;
-		if (desc.Type & BFT_CBuffer)
+		EBufferType descType = desc.Type;
+		if (BufferDesc.Usage == D3D11_USAGE::D3D11_USAGE_STAGING)
+		{
+			BufferDesc.MiscFlags = 0;
+			descType = EBufferType::BFT_NONE;
+		}
+		
+		if (descType & BFT_CBuffer)
 		{
 			BufferDesc.BindFlags |= D3D11_BIND_CONSTANT_BUFFER;
 			//BufferDesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
 		}
-		if (desc.Type & EBufferType::BFT_UAV)
+		if (descType & EBufferType::BFT_UAV)
 		{
 			BufferDesc.BindFlags |= D3D11_BIND_UNORDERED_ACCESS;
 			BufferDesc.CPUAccessFlags = 0;
 			BufferDesc.Usage = D3D11_USAGE_DEFAULT;
-			if ((desc.Type & EBufferType::BFT_IndirectArgs) == 0)
+			if ((descType & EBufferType::BFT_IndirectArgs) == 0)
 				BufferDesc.MiscFlags |= D3D11_RESOURCE_MISC_BUFFER_STRUCTURED;
 		}
-		if (desc.Type & EBufferType::BFT_SRV)
+		if (descType & EBufferType::BFT_SRV)
 		{
 			BufferDesc.BindFlags |= D3D11_BIND_SHADER_RESOURCE;
-			BufferDesc.MiscFlags |= D3D11_RESOURCE_MISC_BUFFER_STRUCTURED;
+			if (BufferDesc.StructureByteStride != 0)
+				BufferDesc.MiscFlags |= D3D11_RESOURCE_MISC_BUFFER_STRUCTURED;
 		}
-		if (desc.Type & EBufferType::BFT_Vertex)
+		if (descType & EBufferType::BFT_Vertex)
 		{
 			BufferDesc.BindFlags |= D3D11_BIND_VERTEX_BUFFER;
 		}
-		if (desc.Type & EBufferType::BFT_Index)
+		if (descType & EBufferType::BFT_Index)
 		{
 			BufferDesc.BindFlags |= D3D11_BIND_INDEX_BUFFER;
 		}
-		if (desc.Type & EBufferType::BFT_IndirectArgs)
+		if (descType & EBufferType::BFT_IndirectArgs)
 		{
 			BufferDesc.MiscFlags |= D3D11_RESOURCE_MISC_DRAWINDIRECT_ARGS;
 		}
-		if (desc.Type & EBufferType::BFT_RAW)
+		if (descType & EBufferType::BFT_RAW)
 		{
 			BufferDesc.MiscFlags &= ~D3D11_RESOURCE_MISC_BUFFER_STRUCTURED;
 			BufferDesc.MiscFlags |= D3D11_RESOURCE_MISC_BUFFER_ALLOW_RAW_VIEWS;

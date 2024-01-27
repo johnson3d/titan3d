@@ -1,9 +1,11 @@
 ﻿using EngineNS.EGui.Controls.PropertyGrid;
 using EngineNS.Rtti;
+using EngineNS.UI.Controls;
 using EngineNS.UI.Trigger;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using NPOI.SS.Formula.Functions;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Formats.Asn1;
@@ -228,9 +230,10 @@ namespace EngineNS.UI.Bind
     //}
     //////////////////////////////////////////////////////////
 
+
     // 用于自动代码生成
     [AttributeUsage(AttributeTargets.Property, AllowMultiple = false)]
-    public class BindPropertyAttribute : Attribute
+    public class BindPropertyAttribute : Attribute, IExternalPropertyData
     {
         public EBindingMode DefaultMode = EBindingMode.OneWay;
         public EUpdateSourceTrigger UpdateSourceTrigger = EUpdateSourceTrigger.PropertyChanged;
@@ -241,7 +244,122 @@ namespace EngineNS.UI.Bind
 
         public BindPropertyAttribute()
         {
+        }
 
+        List<IBindableObject> mBindObjects = new List<IBindableObject>();
+        string mBindPopFilterString = "";
+        bool mBindFilterFocus = false;
+        public void OnDraw(in ExternalInfo info)
+        {
+            unsafe
+            {
+                TtUIElement firstElement = null;
+                bool hasBinded = false;
+                mBindObjects.Clear();
+                var enumerableInterfaace = info.Target.GetType().GetInterface(typeof(IEnumerable).FullName, false);
+                if(enumerableInterfaace != null)
+                {
+                    foreach(var objIns in (IEnumerable)info.Target)
+                    {
+                        if (objIns == null)
+                            continue;
+
+                        var bindObj = objIns as IBindableObject;
+                        if (bindObj == null)
+                            continue;
+
+                        var bp = bindObj.FindBindableProperty(info.PropertyDescriptor.Name);
+                        if (bp == null)
+                            continue;
+                        hasBinded = hasBinded || bindObj.HasBinded(bp);
+                        mBindObjects.Add(bindObj);
+                        if(firstElement == null)
+                        {
+                            var element = objIns as TtUIElement;
+                            if(element != null && element.RootUIHost != null && element.RootUIHost.Children.Count > 0)
+                            {
+                                firstElement = element.RootUIHost.Children[0];
+                            }
+                        }
+                    }
+                }
+                else
+                {
+                    var bindObj = info.Target as IBindableObject;
+                    if (bindObj != null)
+                    {
+                        var bp = bindObj.FindBindableProperty(info.PropertyDescriptor.Name);
+                        if(bp != null)
+                        {
+                            hasBinded = hasBinded || bindObj.HasBinded(bp);
+                            mBindObjects.Add(bindObj);
+                        }
+                    }
+                    var element = info.Target as TtUIElement;
+                    if (element != null && element.RootUIHost != null && element.RootUIHost.Children.Count > 0)
+                    {
+                        firstElement = element.RootUIHost.Children[0];
+                    }
+                }
+                if (mBindObjects.Count == 0)
+                    return;
+                if (firstElement == null)
+                    return;
+
+                var id = ImGuiAPI.GetID("#BindButton");
+
+                var drawList = ImGuiAPI.GetWindowDrawList();
+                var cursorPos = ImGuiAPI.GetCursorScreenPos();
+                ImGuiStyle* style = ImGuiAPI.GetStyle();
+                var size = new Vector2(10, 10);
+                var start = new Vector2(cursorPos.X + style->FramePadding.X, cursorPos.Y + style->FramePadding.Y);
+                var end = new Vector2(start.X + size.X, start.Y + size.Y);
+                //drawList.AddRect(in start, in end, 0xff0000ff, 2.0f, ImDrawFlags_.ImDrawFlags_None, 2.0f);
+                ImGuiAPI.ItemSize(in size, 0);
+                if (!ImGuiAPI.ItemAdd(in start, in end, id, 0))
+                    return;
+                bool hovered = false, held = false;
+                var pressed = ImGuiAPI.ButtonBehavior(in start, in end, id, ref hovered, ref held, ImGuiButtonFlags_.ImGuiButtonFlags_MouseButtonLeft);
+
+                if(hovered)
+                {
+                    drawList.AddRectFilled(in start, in end, EGui.UIProxy.StyleConfig.Instance.ToolButtonTextColor, 2.0f, ImDrawFlags_.ImDrawFlags_None);
+                }
+                else if(hasBinded)
+                {
+                    drawList.AddRectFilled(in start, in end, 0xFF00FF00, 2.0f, ImDrawFlags_.ImDrawFlags_None);
+                }
+                else
+                {
+                    drawList.AddRectFilled(in start, in end, EGui.UIProxy.StyleConfig.Instance.ToolButtonTextColor_Hover, 2.0f, ImDrawFlags_.ImDrawFlags_None);
+                }
+                if(pressed)
+                {
+                    ImGuiAPI.OpenPopup("BindSourceSelectPopup", ImGuiPopupFlags_.ImGuiPopupFlags_None);
+                }
+                if(ImGuiAPI.BeginPopup("BindSourceSelectPopup", 
+                    ImGuiWindowFlags_.ImGuiWindowFlags_AlwaysAutoResize |
+                    ImGuiWindowFlags_.ImGuiWindowFlags_NoTitleBar |
+                    ImGuiWindowFlags_.ImGuiWindowFlags_NoSavedSettings |
+                    ImGuiWindowFlags_.ImGuiWindowFlags_NoScrollbar |
+                    ImGuiWindowFlags_.ImGuiWindowFlags_NoNav))
+                {
+                    var cmdList = ImGuiAPI.GetWindowDrawList();
+                    var width = ImGuiAPI.GetColumnWidth(0);
+                    EGui.UIProxy.SearchBarProxy.OnDraw(ref mBindFilterFocus, in cmdList, "search item", ref mBindPopFilterString, width);
+                    DrawUIElementBindableProperty(firstElement, in cmdList);
+                }
+            }
+        }
+
+        void BindPropertyTourAction(string name, TtBindableProperty bp)
+        {
+
+        }
+        void DrawUIElementBindableProperty(TtUIElement element, in ImDrawList drawList)
+        {
+            // todo: 两个框，一个是 DrawUIElementInHierachy，另一个
+            element.TourBindProperties(BindPropertyTourAction);
         }
     }
     [AttributeUsage(AttributeTargets.Method, AllowMultiple = false)]
@@ -489,6 +607,7 @@ namespace EngineNS.UI.Bind
         public void SetAttachedProperties(IBindableObject target);
         public void AddAttachedProperty<T>(TtBindableProperty property, IBindableObject bpHost, in T defaultValue);
         public TtBindableProperty FindBindableProperty(string propertyName);
+        public bool HasBinded(EngineNS.UI.Bind.TtBindableProperty bp);
 #nullable disable
     }
     public class TtBindableObject : IBindableObject, IPropertyCustomization
@@ -636,7 +755,10 @@ namespace EngineNS.UI.Bind
         }
         public virtual void RemoveAttachedProperty(TtBindableProperty property)
         {
-            mBindExprDic.Remove(property);
+            lock(mBindExprDic)
+            {
+                mBindExprDic.Remove(property);
+            }
         }
         public virtual void SetAttachedProperties(IBindableObject target)
         {
@@ -706,6 +828,14 @@ namespace EngineNS.UI.Bind
                         break;
                     }
                 }
+            }
+        }
+
+        public bool HasBinded(TtBindableProperty bp)
+        {
+            lock(mBindExprDic)
+            {
+                return mBindExprDic.ContainsKey(bp);
             }
         }
     }

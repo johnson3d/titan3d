@@ -3,6 +3,7 @@ using EngineNS.NxRHI;
 using System;
 using System.Collections.Generic;
 using EngineNS.Graphics.Pipeline.Shader;
+using EngineNS.Graphics.Mesh;
 
 namespace EngineNS.Graphics.Pipeline.Shadow
 {
@@ -33,6 +34,12 @@ namespace EngineNS.Graphics.Pipeline.Shadow
     }
     public class UShadowMapNode : TtRenderGraphNode
     {
+        public TtRenderGraphPin[] VisiblePinIn = new TtRenderGraphPin[]{
+            TtRenderGraphPin.CreateInput("Visible0"),
+            TtRenderGraphPin.CreateInput("Visible1"),
+            TtRenderGraphPin.CreateInput("Visible2"),
+            TtRenderGraphPin.CreateInput("Visible3"),
+        };
         public TtRenderGraphPin ColorPinOut = TtRenderGraphPin.CreateOutput("Color", false, EPixelFormat.PXF_B8G8R8A8_UNORM);
         public TtRenderGraphPin DepthPinOut = TtRenderGraphPin.CreateOutput("Depth", false, EPixelFormat.PXF_D24_UNORM_S8_UINT);
         public UShadowMapNode()
@@ -41,6 +48,12 @@ namespace EngineNS.Graphics.Pipeline.Shadow
         }
         public override void InitNodePins()
         {
+            foreach (var i in VisiblePinIn)
+            {
+                AddInput(i, NxRHI.EBufferType.BFT_NONE);
+                i.IsAllowInputNull = true;
+            }
+
             AddOutput(ColorPinOut, NxRHI.EBufferType.BFT_RTV | NxRHI.EBufferType.BFT_SRV);
             AddOutput(DepthPinOut, NxRHI.EBufferType.BFT_DSV | NxRHI.EBufferType.BFT_SRV);
         }
@@ -50,7 +63,9 @@ namespace EngineNS.Graphics.Pipeline.Shadow
         public UCamera ViewerCamera;
         public UGraphicsBuffers[] GBuffersArray;
         public UDrawBuffers[] CSMPass = new UDrawBuffers[4];
-        
+
+        TtCpuCullingNode[] CSMCullingNode = new TtCpuCullingNode[4];
+
         public NxRHI.UGpuPipeline DepthRaster;
 
         private UInt32 mResolutionX = 1024; //3072
@@ -87,21 +102,16 @@ namespace EngineNS.Graphics.Pipeline.Shadow
         private Vector3[] mSSM_FrustumVtx = new Vector3[8];
         public UShadowShading mShadowShading;
 
+        public override UGraphicsShadingEnv GetPassShading(TtMesh.TtAtom atom = null)
+        {
+            return mShadowShading;
+        }
         public override async System.Threading.Tasks.Task Initialize(URenderPolicy policy, string debugName)
         {
             await Thread.TtAsyncDummyClass.DummyFunc();
             var rc = UEngine.Instance.GfxDevice.RenderContext;
 
             mShadowShading = UEngine.Instance.ShadingEnvManager.GetShadingEnv<Shadow.UShadowShading>();
-
-           
-
-            // ShadowCamera = new CCamera();
-            // {
-            //     ShadowCamera.mCoreObject.PerspectiveFovLH(3.14f / 4f, 1, 1, 0.3f, 1000.0f);
-            //     var eyePos = new DVector3(0, 0, -10);
-            //     ShadowCamera.mCoreObject.LookAtLH(in eyePos, in DVector3.Zero, in Vector3.Up);
-            // }
 
             mShadowCameraArray = new UCamera[4];
             for (UInt32 CamIdx = 0; CamIdx < mCsmNum; CamIdx++)
@@ -110,28 +120,38 @@ namespace EngineNS.Graphics.Pipeline.Shadow
                 mShadowCameraArray[CamIdx] .mCoreObject.PerspectiveFovLH(3.14f / 4f, 1, 1, 0.3f, 1000.0f);
                 var eyePos = new DVector3(0, 0, -10);
                 mShadowCameraArray[CamIdx] .mCoreObject.LookAtLH(in eyePos, in DVector3.Zero, in Vector3.Up);
+
+                policy.AddCamera($"CSM_Camera_{CamIdx}", mShadowCameraArray[CamIdx]);
+            }
+
+            foreach (var i in VisiblePinIn)
+            {
+                var linker = i.FindInLinker();
+                if (linker != null)
+                {
+                    CSMCullingNode[0] = linker.OutPin.HostNode as TtCpuCullingNode;
+                    CSMCullingNode[0].VisParameter.CullCamera = mShadowCameraArray[0];
+                }
             }
 
             GBuffersArray = new UGraphicsBuffers[4];
+            unsafe
             {
                 var PassDesc = new NxRHI.FRenderPassDesc();
-                unsafe
-                {
-                    PassDesc.NumOfMRT = 1;
-                    PassDesc.AttachmentMRTs[0].Format = EPixelFormat.PXF_B8G8R8A8_UNORM;
-                    PassDesc.AttachmentMRTs[0].Samples = 1;
-                    PassDesc.AttachmentMRTs[0].LoadAction = NxRHI.EFrameBufferLoadAction.LoadActionClear;
-                    PassDesc.AttachmentMRTs[0].StoreAction = NxRHI.EFrameBufferStoreAction.StoreActionStore;
-                    PassDesc.m_AttachmentDepthStencil.Format = DepthPinOut.Attachement.Format;
-                    PassDesc.m_AttachmentDepthStencil.Samples = 1;
-                    PassDesc.m_AttachmentDepthStencil.LoadAction = NxRHI.EFrameBufferLoadAction.LoadActionClear;
-                    PassDesc.m_AttachmentDepthStencil.StoreAction = NxRHI.EFrameBufferStoreAction.StoreActionStore;
-                    PassDesc.m_AttachmentDepthStencil.StencilLoadAction = NxRHI.EFrameBufferLoadAction.LoadActionClear;
-                    PassDesc.m_AttachmentDepthStencil.StencilStoreAction = NxRHI.EFrameBufferStoreAction.StoreActionStore;
-                    //PassDesc.mFBClearColorRT0 = TempClearColor;
-                    //PassDesc.mDepthClearValue = 1.0f;
-                    //PassDesc.mStencilClearValue = 0u;
-                }
+                PassDesc.NumOfMRT = 1;
+                PassDesc.AttachmentMRTs[0].Format = EPixelFormat.PXF_B8G8R8A8_UNORM;
+                PassDesc.AttachmentMRTs[0].Samples = 1;
+                PassDesc.AttachmentMRTs[0].LoadAction = NxRHI.EFrameBufferLoadAction.LoadActionClear;
+                PassDesc.AttachmentMRTs[0].StoreAction = NxRHI.EFrameBufferStoreAction.StoreActionStore;
+                PassDesc.m_AttachmentDepthStencil.Format = DepthPinOut.Attachement.Format;
+                PassDesc.m_AttachmentDepthStencil.Samples = 1;
+                PassDesc.m_AttachmentDepthStencil.LoadAction = NxRHI.EFrameBufferLoadAction.LoadActionClear;
+                PassDesc.m_AttachmentDepthStencil.StoreAction = NxRHI.EFrameBufferStoreAction.StoreActionStore;
+                PassDesc.m_AttachmentDepthStencil.StencilLoadAction = NxRHI.EFrameBufferLoadAction.LoadActionClear;
+                PassDesc.m_AttachmentDepthStencil.StencilStoreAction = NxRHI.EFrameBufferStoreAction.StoreActionStore;
+                //PassDesc.mFBClearColorRT0 = TempClearColor;
+                //PassDesc.mDepthClearValue = 1.0f;
+                //PassDesc.mStencilClearValue = 0u;
                 NxRHI.URenderPass RenderPass = UEngine.Instance.GfxDevice.RenderPassManager.GetPipelineState<NxRHI.FRenderPassDesc>(rc, in PassDesc);
 
                 GBuffersArray[0] = new UGraphicsBuffers();
@@ -144,23 +164,17 @@ namespace EngineNS.Graphics.Pipeline.Shadow
                 GBuffersArray[0].SetSize(mResolutionX, mResolutionY);
 
                 var PassDescTwo = new NxRHI.FRenderPassDesc();
-                unsafe
-                {
-                    PassDescTwo.NumOfMRT = 1;
-                    PassDescTwo.AttachmentMRTs[0].Format = EPixelFormat.PXF_B8G8R8A8_UNORM;
-                    PassDescTwo.AttachmentMRTs[0].Samples = 1;
-                    PassDescTwo.AttachmentMRTs[0].LoadAction = NxRHI.EFrameBufferLoadAction.LoadActionLoad;
-                    PassDescTwo.AttachmentMRTs[0].StoreAction = NxRHI.EFrameBufferStoreAction.StoreActionStore;
-                    PassDescTwo.m_AttachmentDepthStencil.Format = DepthPinOut.Attachement.Format;
-                    PassDescTwo.m_AttachmentDepthStencil.Samples = 1;
-                    PassDescTwo.m_AttachmentDepthStencil.LoadAction = NxRHI.EFrameBufferLoadAction.LoadActionLoad;
-                    PassDescTwo.m_AttachmentDepthStencil.StoreAction = NxRHI.EFrameBufferStoreAction.StoreActionStore;
-                    PassDescTwo.m_AttachmentDepthStencil.StencilLoadAction = NxRHI.EFrameBufferLoadAction.LoadActionLoad;
-                    PassDescTwo.m_AttachmentDepthStencil.StencilStoreAction = NxRHI.EFrameBufferStoreAction.StoreActionStore;
-                    //PassDesc.mFBClearColorRT0 = TempClearColor;
-                    //PassDesc.mDepthClearValue = 1.0f;
-                    //PassDesc.mStencilClearValue = 0u;
-                }
+                PassDescTwo.NumOfMRT = 1;
+                PassDescTwo.AttachmentMRTs[0].Format = EPixelFormat.PXF_B8G8R8A8_UNORM;
+                PassDescTwo.AttachmentMRTs[0].Samples = 1;
+                PassDescTwo.AttachmentMRTs[0].LoadAction = NxRHI.EFrameBufferLoadAction.LoadActionLoad;
+                PassDescTwo.AttachmentMRTs[0].StoreAction = NxRHI.EFrameBufferStoreAction.StoreActionStore;
+                PassDescTwo.m_AttachmentDepthStencil.Format = DepthPinOut.Attachement.Format;
+                PassDescTwo.m_AttachmentDepthStencil.Samples = 1;
+                PassDescTwo.m_AttachmentDepthStencil.LoadAction = NxRHI.EFrameBufferLoadAction.LoadActionLoad;
+                PassDescTwo.m_AttachmentDepthStencil.StoreAction = NxRHI.EFrameBufferStoreAction.StoreActionStore;
+                PassDescTwo.m_AttachmentDepthStencil.StencilLoadAction = NxRHI.EFrameBufferLoadAction.LoadActionLoad;
+                PassDescTwo.m_AttachmentDepthStencil.StencilStoreAction = NxRHI.EFrameBufferStoreAction.StoreActionStore;
                 NxRHI.URenderPass RenderPassTwo = UEngine.Instance.GfxDevice.RenderPassManager.GetPipelineState<NxRHI.FRenderPassDesc>(rc, in PassDescTwo);
 
                 for (UInt32 CamIdx = 1; CamIdx < mCsmNum; CamIdx++)
@@ -285,6 +299,8 @@ namespace EngineNS.Graphics.Pipeline.Shadow
         private static Profiler.TimeScope ScopePushGpuDraw = Profiler.TimeScopeManager.GetTimeScope(typeof(UShadowMapNode), "PushGpuDraw");
         public override unsafe void TickLogic(GamePlay.UWorld world, URenderPolicy policy, bool bClear)
         {
+            Vector3* AABBCorners = stackalloc Vector3[8];
+            Vector3* NewPoints = stackalloc Vector3[8];
             using (new Profiler.TimeScopeHelper(ScopeTick))
             {
                 mDirLightDirection = world.DirectionLight.Direction;
@@ -403,10 +419,8 @@ namespace EngineNS.Graphics.Pipeline.Shadow
                         Matrix LookAtLHMat = Matrix.LookAtLH(-mDirLightDirection, Vector3.Zero, Vector3.UnitY);
                         Matrix ShadowProj = new Matrix();
                         Matrix.Transpose(in LookAtLHMat, out ShadowProj);
-                        Vector3[] AABBCorners = AABB.GetCorners();
-                        //Vector3* NewPoints = stackalloc Vector3[8];
-                        Vector3[] NewPoints = new Vector3[8];
-                       
+                        
+                        AABB.UnsafeGetCorners(AABBCorners);
                         for (int i = 0; i < 8; i++)
                         {
                             Vector4 TempPoints = Vector3.Transform(AABBCorners[i], in ShadowProj);
@@ -416,7 +430,7 @@ namespace EngineNS.Graphics.Pipeline.Shadow
                             NewPoints[i].Z = TempPoints.Z * w;
                         }
 
-                        BoundingBox ShadowBound = BoundingBox.FromPoints(NewPoints);
+                        BoundingBox ShadowBound = BoundingBox.FromPoints(NewPoints, 8);
 
                         float BoxExt = 1.5f;
                         if ((ShadowBound.Maximum.X - ShadowBound.Minimum.X) * BoxExt < FrustumSphereDiameter && (ShadowBound.Maximum.Z - ShadowBound.Minimum.Z) * BoxExt < FrustumSphereDiameter)
@@ -490,7 +504,7 @@ namespace EngineNS.Graphics.Pipeline.Shadow
                                 {
                                     foreach (var k in j.Atoms)
                                     {
-                                        var drawcall = k.GetDrawCall(cmdlist.mCoreObject, GBuffersArray[CsmIdx], policy, URenderPolicy.EShadingType.DepthPass, this);
+                                        var drawcall = k.GetDrawCall(cmdlist.mCoreObject, GBuffersArray[CsmIdx], policy, this);
 
                                         if (drawcall != null)
                                         {

@@ -78,7 +78,7 @@ PS_OUTPUT PS_Main(PS_INPUT input)
     
     //texcolor.g =GShadowMap.Sample(Samp_GShadowMap, uv).r;
     //return texcolor;
-    float4 texcolor = GShadowMap.Sample(Samp_GShadowMap, uv);
+    float4 texcolor = GShadowMap.Sample(Samp_GShadowMap, uv).r;
 	output.RT0 = texcolor;
 
 	return output;

@@ -5,6 +5,8 @@ using EngineNS.Graphics.Pipeline.Common;
 using EngineNS.GamePlay;
 using System.Threading.Tasks;
 using System.Diagnostics;
+using EngineNS.Graphics.Pipeline.Shader;
+using EngineNS.Graphics.Mesh;
 
 namespace EngineNS.Bricks.GpuDriven
 {
@@ -490,7 +492,7 @@ namespace EngineNS.Bricks.GpuDriven
         {
 
         }
-        public override void OnDrawCall(NxRHI.ICommandList cmd, URenderPolicy.EShadingType shadingType, NxRHI.UGraphicDraw drawcall, URenderPolicy policy, Graphics.Mesh.TtMesh.TtAtom atom)
+        public override void OnDrawCall(NxRHI.ICommandList cmd, NxRHI.UGraphicDraw drawcall, URenderPolicy policy, Graphics.Mesh.TtMesh.TtAtom atom)
         {
             var node = drawcall.TagObject as TtQuarkResolveNode;
 
@@ -504,7 +506,7 @@ namespace EngineNS.Bricks.GpuDriven
             if (index.IsValidPointer)
                 drawcall.BindSampler(index, UEngine.Instance.GfxDevice.SamplerStateManager.LinearClampState);
 
-            base.OnDrawCall(cmd, shadingType, drawcall, policy, atom);
+            base.OnDrawCall(cmd, drawcall, policy, atom);
         }
     }
     public class TtQuarkResolveNode : USceenSpaceNode
@@ -536,13 +538,18 @@ namespace EngineNS.Bricks.GpuDriven
 
             //base.InitNodePins();
         }
+        public TtQuarkResolveShading mBasePassShading;
+        public override UGraphicsShadingEnv GetPassShading(TtMesh.TtAtom atom)
+        {
+            return mBasePassShading;
+        }
         public override async System.Threading.Tasks.Task Initialize(URenderPolicy policy, string debugName)
         {
             await base.Initialize(policy, debugName);
 
             CreateGBuffers(policy, DepthStencilPinIn.Attachement.Format);
 
-            ScreenDrawPolicy.mBasePassShading = UEngine.Instance.ShadingEnvManager.GetShadingEnv<TtQuarkResolveShading>();
+            mBasePassShading = UEngine.Instance.ShadingEnvManager.GetShadingEnv<TtQuarkResolveShading>();
         }
 
         public override unsafe UGraphicsBuffers CreateGBuffers(URenderPolicy policy, EPixelFormat format)

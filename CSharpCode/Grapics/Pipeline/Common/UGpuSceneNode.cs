@@ -8,6 +8,7 @@ namespace EngineNS.Graphics.Pipeline.Common
 {
     public partial class UGpuSceneNode : Graphics.Pipeline.TtRenderGraphNode
     {
+        public TtRenderGraphPin VisiblesPinIn = TtRenderGraphPin.CreateInput("Visibles");
         public TtRenderGraphPin GpuScenePinOut = TtRenderGraphPin.CreateOutput("GpuScene", false, EPixelFormat.PXF_UNKNOWN);
         public UGpuSceneNode()
         {
@@ -24,6 +25,7 @@ namespace EngineNS.Graphics.Pipeline.Common
         }
         public override void InitNodePins()
         {
+            AddInput(VisiblesPinIn, NxRHI.EBufferType.BFT_NONE);
             GpuScenePinOut.LifeMode = UAttachBuffer.ELifeMode.Imported;
             AddOutput(GpuScenePinOut, NxRHI.EBufferType.BFT_SRV | NxRHI.EBufferType.BFT_UAV);
             PointLightsPinOut.LifeMode = UAttachBuffer.ELifeMode.Imported;
@@ -143,9 +145,8 @@ namespace EngineNS.Graphics.Pipeline.Common
         {
             public Int32 ClusterCount = 0;
         }
-        
 
-        
+        public TtCpuCullingNode CpuCullNode = null;
         public async override System.Threading.Tasks.Task Initialize(URenderPolicy policy, string debugName)
         {
             await Thread.TtAsyncDummyClass.DummyFunc();
@@ -169,6 +170,12 @@ namespace EngineNS.Graphics.Pipeline.Common
 
             Exposure = 1.0f;
             EyeAdapterTimeRange = 5.0f;
+
+            var linker = VisiblesPinIn.FindInLinker();
+            if (linker != null)
+            {
+                CpuCullNode = linker.OutPin.HostNode as TtCpuCullingNode;
+            }
         }
         public override unsafe void OnResize(URenderPolicy policy, float x, float y)
         {
@@ -180,7 +187,7 @@ namespace EngineNS.Graphics.Pipeline.Common
         {
             using (new Profiler.TimeScopeHelper(ScopeTick))
             {
-                if (policy.VisibleNodes == null)
+                if (CpuCullNode.VisParameter.VisibleNodes == null)
                     return;
 
                 var cmd = BasePass.DrawCmdList;

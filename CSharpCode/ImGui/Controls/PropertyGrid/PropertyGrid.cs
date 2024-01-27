@@ -30,6 +30,16 @@ namespace EngineNS.EGui.Controls.PropertyGrid
             set; 
         }
     }
+
+    public struct ExternalInfo
+    {
+        public CustomPropertyDescriptor PropertyDescriptor;
+        public object Target;
+    }
+    public interface IExternalPropertyData
+    {
+        void OnDraw(in ExternalInfo info);
+    }
     [AttributeUsage(AttributeTargets.Class | AttributeTargets.Struct, AllowMultiple = false)]
     public class PGNoCategoryAttribute : Attribute
     {

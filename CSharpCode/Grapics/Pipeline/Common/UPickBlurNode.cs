@@ -1,4 +1,6 @@
 ﻿using EngineNS.GamePlay;
+using EngineNS.Graphics.Mesh;
+using EngineNS.Graphics.Pipeline.Shader;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -31,9 +33,9 @@ namespace EngineNS.Graphics.Pipeline.Common
             //    drawcall.mCoreObject.BindCBufferAll(cbIndex, PerShadingCBuffer.mCoreObject.Ptr);
             //}
         }
-        public unsafe override void OnDrawCall(NxRHI.ICommandList cmd, Pipeline.URenderPolicy.EShadingType shadingType, NxRHI.UGraphicDraw drawcall, URenderPolicy policy, Mesh.TtMesh.TtAtom atom)
+        public unsafe override void OnDrawCall(NxRHI.ICommandList cmd, NxRHI.UGraphicDraw drawcall, URenderPolicy policy, Mesh.TtMesh.TtAtom atom)
         {
-            base.OnDrawCall(cmd, shadingType, drawcall, policy, atom);
+            base.OnDrawCall(cmd, drawcall, policy, atom);
 
             var pickBlurNode = drawcall.TagObject as Common.UPickBlurNode;
 
@@ -64,10 +66,15 @@ namespace EngineNS.Graphics.Pipeline.Common
             ResultPinOut.Attachement.Format = EPixelFormat.PXF_R16G16_FLOAT;
             base.InitNodePins();
         }
+        public UPickBlurShading mBasePassShading;
+        public override UGraphicsShadingEnv GetPassShading(TtMesh.TtAtom atom = null)
+        {
+            return mBasePassShading;
+        }
         public override async System.Threading.Tasks.Task Initialize(URenderPolicy policy, string debugName)
         {
             await base.Initialize(policy, debugName);
-            ScreenDrawPolicy.mBasePassShading = UEngine.Instance.ShadingEnvManager.GetShadingEnv<UPickBlurShading>();
+            mBasePassShading = UEngine.Instance.ShadingEnvManager.GetShadingEnv<UPickBlurShading>();
         }
         public override void OnLinkIn(TtRenderGraphLinker linker)
         {

@@ -71,6 +71,10 @@ namespace EngineNS.NxRHI
                 return;
             BindCBuffer(binder.mCoreObject, buffer);
         }
+        public bool BindSRV(string name, USrView srv)
+        {
+            return BindSRV(VNameString.FromString(name), srv);
+        }
         public bool BindSRV(VNameString name, USrView srv)
         {
             if (srv == null)

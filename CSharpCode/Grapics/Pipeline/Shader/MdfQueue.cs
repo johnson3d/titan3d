@@ -144,7 +144,7 @@ namespace EngineNS.Graphics.Pipeline.Shader
         public NxRHI.EVertexStreamType[] GetNeedStreams();
         public EPixelShaderInput[] GetPSNeedInputs();
         public void Initialize(Graphics.Mesh.UMaterialMesh materialMesh);
-        public void OnDrawCall(TtMdfQueueBase mdfQueue, NxRHI.ICommandList cmd, Graphics.Pipeline.URenderPolicy.EShadingType shadingType, NxRHI.UGraphicDraw drawcall, Graphics.Pipeline.URenderPolicy policy, Graphics.Mesh.TtMesh.TtAtom atom);
+        public void OnDrawCall(TtMdfQueueBase mdfQueue, NxRHI.ICommandList cmd, NxRHI.UGraphicDraw drawcall, Graphics.Pipeline.URenderPolicy policy, Graphics.Mesh.TtMesh.TtAtom atom);
     }
 
     public abstract class TtMdfQueueBase : AuxPtrType<IMdfQueue>, IShaderCodeProvider
@@ -299,15 +299,15 @@ namespace EngineNS.Graphics.Pipeline.Shader
             OnDrawCallCallback = mdf.OnDrawCallCallback;
         }
         
-        public delegate void FOnDrawCall(Pipeline.URenderPolicy.EShadingType shadingType, NxRHI.UGraphicDraw drawcall, URenderPolicy policy, Mesh.TtMesh.TtAtom atom);
+        public delegate void FOnDrawCall(NxRHI.UGraphicDraw drawcall, URenderPolicy policy, Mesh.TtMesh.TtAtom atom);
         public FOnDrawCall OnDrawCallCallback = null;
-        public virtual void OnDrawCall(NxRHI.ICommandList cmd, Pipeline.URenderPolicy.EShadingType shadingType, NxRHI.UGraphicDraw drawcall, URenderPolicy policy, Mesh.TtMesh.TtAtom atom)
+        public virtual void OnDrawCall(NxRHI.ICommandList cmd, NxRHI.UGraphicDraw drawcall, URenderPolicy policy, Mesh.TtMesh.TtAtom atom)
         {
             if (OnDrawCallCallback != null)
-                OnDrawCallCallback(shadingType, drawcall, policy, atom);
+                OnDrawCallCallback(drawcall, policy, atom);
             foreach(var i in Modifiers)
             {
-                i.OnDrawCall(this, cmd, shadingType, drawcall, policy, atom);
+                i.OnDrawCall(this, cmd, drawcall, policy, atom);
             }
         }
     }

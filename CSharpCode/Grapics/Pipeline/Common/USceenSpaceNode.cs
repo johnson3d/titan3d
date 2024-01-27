@@ -29,18 +29,13 @@ namespace EngineNS.Graphics.Pipeline.Common
         [Category("Option")]
         public float OutputScaleFactor { get; set; } = 1.0f;
         public Graphics.Mesh.TtMesh ScreenMesh;
-        public Shader.CommanShading.UBasePassPolicy ScreenDrawPolicy;
         public UGraphicsBuffers GBuffers { get; protected set; } = new UGraphicsBuffers();
         public NxRHI.URenderPass RenderPass;
         public string DebugName;
+        //public override Graphics.Pipeline.Shader.UGraphicsShadingEnv GetPassShading(URenderPolicy.EShadingType type = URenderPolicy.EShadingType.Count, Graphics.Mesh.TtMesh.TtAtom atom = null) abstract;
         public override async System.Threading.Tasks.Task Initialize(URenderPolicy policy, string debugName)
         {
             var rc = UEngine.Instance.GfxDevice.RenderContext;
-
-            ScreenDrawPolicy = new Shader.CommanShading.UBasePassPolicy();
-            await ScreenDrawPolicy.Initialize(null);
-            //ScreenDrawPolicy.mBasePassShading = shading;
-            ScreenDrawPolicy.TagObject = policy;
 
             CreateGBuffers(policy, ResultPinOut.Attachement.Format);
 
@@ -132,7 +127,7 @@ namespace EngineNS.Graphics.Pipeline.Common
                         {
                             foreach (var j in i.Atoms)
                             {
-                                var drawcall = j.GetDrawCall(cmdlist.mCoreObject, GBuffers, ScreenDrawPolicy, Graphics.Pipeline.URenderPolicy.EShadingType.BasePass, this);
+                                var drawcall = j.GetDrawCall(cmdlist.mCoreObject, GBuffers, policy, this);
                                 if (drawcall == null)
                                     continue;
                                 drawcall.TagObject = this;

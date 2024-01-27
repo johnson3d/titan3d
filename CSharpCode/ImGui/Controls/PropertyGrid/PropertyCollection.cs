@@ -73,7 +73,7 @@ namespace EngineNS.EGui.Controls.PropertyGrid
         bool mIsReadonly = false;
         public bool IsReadonly 
         { 
-            get=>mIsReadonly;
+            get => mIsReadonly;
             set { mIsReadonly = value; }
         }
         public bool GetIsReadonly(object objIns)
@@ -122,6 +122,12 @@ namespace EngineNS.EGui.Controls.PropertyGrid
         }
 
         public bool IsBrowsable
+        {
+            get;
+            set;
+        }
+
+        public IExternalPropertyData ExternalData
         {
             get;
             set;
@@ -176,6 +182,10 @@ namespace EngineNS.EGui.Controls.PropertyGrid
                     mIsReadonly = mIsReadonly || tAtt.ReadOnly;
                     CustomValueEditor = tAtt;
                 }
+                if(att is IExternalPropertyData)
+                {
+                    ExternalData = att as IExternalPropertyData;
+                }
             }
             Category = property.Category;
             if (parentIsValueType)
@@ -216,6 +226,10 @@ namespace EngineNS.EGui.Controls.PropertyGrid
                     IsBrowsable = !tAtt.HideInPG;
                     mIsReadonly = tAtt.ReadOnly;
                     CustomValueEditor = tAtt;
+                }
+                if (atts[i] is IExternalPropertyData)
+                {
+                    ExternalData = atts[i] as IExternalPropertyData;
                 }
             }
             Attributes = new AttributeCollection(tAtts);
@@ -502,6 +516,7 @@ namespace EngineNS.EGui.Controls.PropertyGrid
             Category = "Misc";
             ParentIsValueType = default;
             IsBrowsable = default;
+            ExternalData = null;
             DeclaringType = default;            
             CustomValueEditor?.Cleanup();
             CustomValueEditor = default;
@@ -530,6 +545,7 @@ namespace EngineNS.EGui.Controls.PropertyGrid
             Category = proDesc.Category;
             ParentIsValueType = proDesc.ParentIsValueType;
             IsBrowsable = proDesc.IsBrowsable;
+            ExternalData = proDesc.ExternalData;
             DeclaringType = proDesc.DeclaringType;
             CustomValueEditor?.Cleanup();
             CustomValueEditor = proDesc.CustomValueEditor;

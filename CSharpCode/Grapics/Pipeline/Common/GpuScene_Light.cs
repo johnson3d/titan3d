@@ -41,7 +41,7 @@ namespace EngineNS.Graphics.Pipeline.Common
             PointLights.Clear();
             if (policy.DisablePointLight == false)
             {
-                foreach (var i in policy.VisibleNodes)
+                foreach (var i in CpuCullNode.VisParameter.VisibleNodes)
                 {
                     var pointLight = i as GamePlay.Scene.UPointLightNode;
                     if (pointLight == null)

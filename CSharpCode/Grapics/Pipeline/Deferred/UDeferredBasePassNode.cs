@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using EngineNS.Graphics.Pipeline.Shader;
 using System.ComponentModel;
+using EngineNS.GamePlay;
 
 namespace EngineNS.Graphics.Pipeline.Deferred
 {
@@ -36,12 +37,16 @@ namespace EngineNS.Graphics.Pipeline.Deferred
     }
     public class UDeferredBasePassNode : Common.UBasePassNode
     {
+        public TtRenderGraphPin VisiblesPinIn = TtRenderGraphPin.CreateInput("Visibles");
+        public TtRenderGraphPin GpuCullPinIn = TtRenderGraphPin.CreateInput("GpuCull");
         public TtRenderGraphPin Rt0PinOut = TtRenderGraphPin.CreateInputOutput("MRT0", true, EPixelFormat.PXF_R16G16B16A16_FLOAT);//rgb - metallicty
         public TtRenderGraphPin Rt1PinOut = TtRenderGraphPin.CreateInputOutput("MRT1", true, EPixelFormat.PXF_R10G10B10A2_UNORM);//normal - Flags
         public TtRenderGraphPin Rt2PinOut = TtRenderGraphPin.CreateInputOutput("MRT2", true, EPixelFormat.PXF_R8G8B8A8_UNORM);//Roughness,Emissive,Specular,unused
         public TtRenderGraphPin Rt3PinOut = TtRenderGraphPin.CreateInputOutput("MRT3", true, EPixelFormat.PXF_R16G16_UNORM);//EPixelFormat.PXF_R10G10B10A2_UNORM//motionXY
         public TtRenderGraphPin DepthStencilPinOut = TtRenderGraphPin.CreateInputOutput("DepthStencil", true, EPixelFormat.PXF_D24_UNORM_S8_UINT);
 
+        public TtCpuCullingNode CpuCullNode = null;
+        public TtGpuCullingNode GpuCullNode = null;
         public UDrawBuffers BackgroundPass = new UDrawBuffers();
         [Category("Option")]
         [Rtti.Meta]
@@ -56,6 +61,9 @@ namespace EngineNS.Graphics.Pipeline.Deferred
         }
         public override void InitNodePins()
         {
+            AddInput(VisiblesPinIn, NxRHI.EBufferType.BFT_NONE);
+            AddInput(GpuCullPinIn, NxRHI.EBufferType.BFT_NONE);
+            GpuCullPinIn.IsAllowInputNull = true;
             AddInputOutput(Rt0PinOut, NxRHI.EBufferType.BFT_RTV | NxRHI.EBufferType.BFT_SRV);
             AddInputOutput(Rt1PinOut, NxRHI.EBufferType.BFT_RTV | NxRHI.EBufferType.BFT_SRV);
             AddInputOutput(Rt2PinOut, NxRHI.EBufferType.BFT_RTV | NxRHI.EBufferType.BFT_SRV);
@@ -80,6 +88,7 @@ namespace EngineNS.Graphics.Pipeline.Deferred
         }
         public override void FrameBuild(URenderPolicy policy)
         {
+            
         }
         
         public UDeferredOpaque mOpaqueShading;
@@ -96,6 +105,18 @@ namespace EngineNS.Graphics.Pipeline.Deferred
             CreateGBuffers(policy, Rt0PinOut.Attachement.Format);
             
             mOpaqueShading = UEngine.Instance.ShadingEnvManager.GetShadingEnv<UDeferredOpaque>();
+
+            var linker = VisiblesPinIn.FindInLinker();
+            if (linker != null)
+            {
+                CpuCullNode = linker.OutPin.HostNode as TtCpuCullingNode;
+            }
+            System.Diagnostics.Debug.Assert(CpuCullNode != null);
+            linker = GpuCullPinIn.FindInLinker();
+            if (linker != null)
+            {
+                GpuCullNode = linker.OutPin.HostNode as TtGpuCullingNode;
+            }
         }
         public virtual unsafe UGraphicsBuffers CreateGBuffers(URenderPolicy policy, EPixelFormat format)
         {
@@ -146,7 +167,7 @@ namespace EngineNS.Graphics.Pipeline.Deferred
 
             base.Dispose();
         }
-        public override Shader.UGraphicsShadingEnv GetPassShading(Graphics.Pipeline.URenderPolicy.EShadingType type, Mesh.TtMesh.TtAtom atom)
+        public override Shader.UGraphicsShadingEnv GetPassShading(Mesh.TtMesh.TtAtom atom)
         {
             return mOpaqueShading;
         }
@@ -187,11 +208,10 @@ namespace EngineNS.Graphics.Pipeline.Deferred
                 using (new NxRHI.TtCmdListScope(BasePass.DrawCmdList))
                 using (new NxRHI.TtCmdListScope(BackgroundPass.DrawCmdList))
                 {
-#if true
                     using (new Profiler.TimeScopeHelper(ScopePushGpuDraw))
                     {
-                        //BasePass.DrawCmdList.SetViewport(GBuffers.ViewPort.mCoreObject);
-                        foreach (var i in policy.VisibleMeshes)
+                        var visibleMeshes = CpuCullNode.VisParameter.VisibleMeshes;
+                        foreach (var i in visibleMeshes)
                         {
                             foreach (var j in i.Mesh.SubMeshes)
                             {
@@ -204,7 +224,7 @@ namespace EngineNS.Graphics.Pipeline.Deferred
                                     if (layer == ERenderLayer.RL_Background)
                                     {
                                         var cmd = BackgroundPass.DrawCmdList;
-                                        var drawcall = k.GetDrawCall(cmd.mCoreObject, GBuffers, policy, URenderPolicy.EShadingType.BasePass, this);
+                                        var drawcall = k.GetDrawCall(cmd.mCoreObject, GBuffers, policy, this);
                                         if (drawcall != null)
                                         {
                                             drawcall.BindGBuffer(policy.DefaultCamera, GBuffers);
@@ -217,7 +237,7 @@ namespace EngineNS.Graphics.Pipeline.Deferred
                                             continue;
 
                                         var cmd = BasePass.DrawCmdList;
-                                        var drawcall = k.GetDrawCall(cmd.mCoreObject, GBuffers, policy, URenderPolicy.EShadingType.BasePass, this);
+                                        var drawcall = k.GetDrawCall(cmd.mCoreObject, GBuffers, policy, this);
                                         if (drawcall != null)
                                         {
                                             drawcall.BindGBuffer(policy.DefaultCamera, GBuffers);
@@ -228,13 +248,12 @@ namespace EngineNS.Graphics.Pipeline.Deferred
                             }
                         }
 
-                        var cullingNode = policy.FindFirstNode<TtCullingNode>();
-                        if (cullingNode != null)
+                        if (GpuCullNode != null)
                         {
-                            cullingNode.Commit(policy, BasePass.DrawCmdList, GBuffers);
+                            GpuCullNode.Commit(policy, BasePass.DrawCmdList, GBuffers);
                         }
                     }
-#endif
+
                     var bgCmdlist = BackgroundPass.DrawCmdList;
                     var cmdlist = BasePass.DrawCmdList;
                     var passClears = new NxRHI.FRenderPassClears();
@@ -278,7 +297,7 @@ namespace EngineNS.Graphics.Pipeline.Deferred
             BackgroundPass.SwapBuffer();
             base.TickSync(policy);
 
-            foreach (var i in policy.VisibleMeshes)
+            foreach (var i in CpuCullNode.VisParameter.VisibleMeshes)
             {
                 var preMatrix = i.Mesh.PerMeshCBuffer.GetMatrix(UEngine.Instance.GfxDevice.CoreShaderBinder.CBPerMesh.WorldMatrix);
                 i.Mesh.PerMeshCBuffer.SetMatrix(UEngine.Instance.GfxDevice.CoreShaderBinder.CBPerMesh.PreWorldMatrix, preMatrix);

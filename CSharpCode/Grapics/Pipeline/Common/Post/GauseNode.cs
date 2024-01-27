@@ -2,6 +2,8 @@
 using System.Collections.Generic;
 using System.ComponentModel;
 using EngineNS.GamePlay;
+using EngineNS.Graphics.Mesh;
+using EngineNS.Graphics.Pipeline.Shader;
 using EngineNS.Rtti;
 
 namespace EngineNS.Graphics.Pipeline.Common.Post
@@ -19,7 +21,7 @@ namespace EngineNS.Graphics.Pipeline.Common.Post
             return new NxRHI.EVertexStreamType[] { NxRHI.EVertexStreamType.VST_Position,
                 NxRHI.EVertexStreamType.VST_UV,};
         }
-        public override void OnDrawCall(NxRHI.ICommandList cmd, URenderPolicy.EShadingType shadingType, NxRHI.UGraphicDraw drawcall, URenderPolicy policy, Graphics.Mesh.TtMesh.TtAtom atom)
+        public override void OnDrawCall(NxRHI.ICommandList cmd, NxRHI.UGraphicDraw drawcall, URenderPolicy policy, Graphics.Mesh.TtMesh.TtAtom atom)
         {
             var aaNode = drawcall.TagObject as TtGaussNode;
             if (aaNode == null)
@@ -48,7 +50,7 @@ namespace EngineNS.Graphics.Pipeline.Common.Post
                 drawcall.BindCBuffer(index, aaNode.CBShadingEnv);
             }
 
-            base.OnDrawCall(cmd, shadingType, drawcall, policy, atom);
+            base.OnDrawCall(cmd, drawcall, policy, atom);
         }
     }
     public class TtGaussNode : USceenSpaceNode
@@ -66,10 +68,15 @@ namespace EngineNS.Graphics.Pipeline.Common.Post
 
             base.InitNodePins();
         }
+        public TtGaussShading mBasePassShading;
+        public override UGraphicsShadingEnv GetPassShading(TtMesh.TtAtom atom = null)
+        {
+            return mBasePassShading;
+        }
         public override async System.Threading.Tasks.Task Initialize(URenderPolicy policy, string debugName)
         {
             await base.Initialize(policy, debugName);
-            ScreenDrawPolicy.mBasePassShading = UEngine.Instance.ShadingEnvManager.GetShadingEnv<TtGaussShading>();
+            mBasePassShading = UEngine.Instance.ShadingEnvManager.GetShadingEnv<TtGaussShading>();
         }
         public override void OnResize(URenderPolicy policy, float x, float y)
         {
@@ -159,7 +166,7 @@ namespace EngineNS.Graphics.Pipeline.Common.Post
             return new NxRHI.EVertexStreamType[] { NxRHI.EVertexStreamType.VST_Position,
                 NxRHI.EVertexStreamType.VST_UV,};
         }
-        public override void OnDrawCall(NxRHI.ICommandList cmd, URenderPolicy.EShadingType shadingType, NxRHI.UGraphicDraw drawcall, URenderPolicy policy, Graphics.Mesh.TtMesh.TtAtom atom)
+        public override void OnDrawCall(NxRHI.ICommandList cmd, NxRHI.UGraphicDraw drawcall, URenderPolicy policy, Graphics.Mesh.TtMesh.TtAtom atom)
         {
             var aaNode = drawcall.TagObject as TtGaussAdditiveNode;
             if (aaNode == null)
@@ -198,7 +205,7 @@ namespace EngineNS.Graphics.Pipeline.Common.Post
                 drawcall.BindCBuffer(index, aaNode.CBShadingEnv);
             }
 
-            base.OnDrawCall(cmd, shadingType, drawcall, policy, atom);
+            base.OnDrawCall(cmd, drawcall, policy, atom);
         }
     }
     public class TtGaussAdditiveNode : USceenSpaceNode
@@ -218,10 +225,15 @@ namespace EngineNS.Graphics.Pipeline.Common.Post
 
             base.InitNodePins();
         }
+        public TtGaussAdditiveShading mBasePassShading;
+        public override UGraphicsShadingEnv GetPassShading(TtMesh.TtAtom atom = null)
+        {
+            return mBasePassShading;
+        }
         public override async System.Threading.Tasks.Task Initialize(URenderPolicy policy, string debugName)
         {
             await base.Initialize(policy, debugName);
-            ScreenDrawPolicy.mBasePassShading = UEngine.Instance.ShadingEnvManager.GetShadingEnv<TtGaussAdditiveShading>();
+            mBasePassShading = UEngine.Instance.ShadingEnvManager.GetShadingEnv<TtGaussAdditiveShading>();
         }
         [System.Runtime.InteropServices.StructLayout(System.Runtime.InteropServices.LayoutKind.Sequential, Pack = 16)]
         struct FGaussStruct

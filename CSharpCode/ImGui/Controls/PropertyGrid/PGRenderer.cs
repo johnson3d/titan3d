@@ -507,11 +507,12 @@ namespace EngineNS.EGui.Controls.PropertyGrid
                 if(!isSubPropertyGrid)
                 {
                     Vector2 outerSize = Vector2.Zero;
-                    tableBegin = ImGuiAPI.BeginTable("PGTable", 2, mTabFlags, in outerSize, 0.0f);
+                    tableBegin = ImGuiAPI.BeginTable("PGTable", 3, mTabFlags, in outerSize, 0.0f);
                     if(tableBegin)
                     {
                         ImGuiAPI.TableSetupColumn(TName.FromString("Name").ToString(), ImGuiTableColumnFlags_.ImGuiTableColumnFlags_None, 0, 0);
                         ImGuiAPI.TableSetupColumn(TName.FromString("Value").ToString(), ImGuiTableColumnFlags_.ImGuiTableColumnFlags_None, 0, 0);
+                        ImGuiAPI.TableSetupColumn(TName.FromString("Ext").ToString(), ImGuiTableColumnFlags_.ImGuiTableColumnFlags_WidthFixed, 80, 0);
                     }
                 }
                 if (tableBegin || isSubPropertyGrid)
@@ -726,6 +727,17 @@ namespace EngineNS.EGui.Controls.PropertyGrid
                                         ImGuiAPI.TreePop();
                                 }
                             }
+
+                            if(propDesc.ExternalData != null)
+                            {
+                                ImGuiAPI.TableSetColumnIndex(2);
+                                var info = new ExternalInfo()
+                                {
+                                    PropertyDescriptor = propDesc,
+                                    Target = target,
+                                };
+                                propDesc.ExternalData.OnDraw(in info);
+                            }    
 
                             //ImGuiAPI.GetTableRowEndY(&y);
                             //mHightlightRowMax.Y = y;

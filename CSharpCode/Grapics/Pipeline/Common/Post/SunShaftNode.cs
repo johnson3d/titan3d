@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using EngineNS.GamePlay;
 using EngineNS.Graphics.Mesh;
+using EngineNS.Graphics.Pipeline.Shader;
 using EngineNS.NxRHI;
 
 namespace EngineNS.Graphics.Pipeline.Common.Post
@@ -41,7 +42,7 @@ namespace EngineNS.Graphics.Pipeline.Common.Post
             return new NxRHI.EVertexStreamType[] { NxRHI.EVertexStreamType.VST_Position,
                 NxRHI.EVertexStreamType.VST_UV,};
         }
-        public override void OnDrawCall(NxRHI.ICommandList cmd, URenderPolicy.EShadingType shadingType, UGraphicDraw drawcall, URenderPolicy policy, TtMesh.TtAtom atom)
+        public override void OnDrawCall(NxRHI.ICommandList cmd, UGraphicDraw drawcall, URenderPolicy policy, TtMesh.TtAtom atom)
         {
             var aaNode = drawcall.TagObject as TtSunShaftDepthThresholeNode;
             if (aaNode == null)
@@ -79,7 +80,7 @@ namespace EngineNS.Graphics.Pipeline.Common.Post
                 drawcall.BindCBuffer(index, aaNode.CBShadingEnv);
             }
 
-            base.OnDrawCall(cmd, shadingType, drawcall, policy, atom);
+            base.OnDrawCall(cmd, drawcall, policy, atom);
         }
     }
     public class TtSunShaftDepthThresholeNode : USceenSpaceNode
@@ -100,10 +101,15 @@ namespace EngineNS.Graphics.Pipeline.Common.Post
             base.InitNodePins();
             ResultPinOut.Attachement.Format = EPixelFormat.PXF_R16_FLOAT;
         }
+        public TtDepthThresholeShading mBasePassShading;
+        public override UGraphicsShadingEnv GetPassShading(TtMesh.TtAtom atom = null)
+        {
+            return mBasePassShading;
+        }
         public override async System.Threading.Tasks.Task Initialize(URenderPolicy policy, string debugName)
         {
             await base.Initialize(policy, debugName);
-            ScreenDrawPolicy.mBasePassShading = UEngine.Instance.ShadingEnvManager.GetShadingEnv<TtDepthThresholeShading>();
+            mBasePassShading = UEngine.Instance.ShadingEnvManager.GetShadingEnv<TtDepthThresholeShading>();
         }
 
         FSunShaftStruct mSunShaftStruct = new FSunShaftStruct();
@@ -184,7 +190,7 @@ namespace EngineNS.Graphics.Pipeline.Common.Post
             return new NxRHI.EVertexStreamType[] { NxRHI.EVertexStreamType.VST_Position,
                 NxRHI.EVertexStreamType.VST_UV,};
         }
-        public override void OnDrawCall(NxRHI.ICommandList cmd, URenderPolicy.EShadingType shadingType, UGraphicDraw drawcall, URenderPolicy policy, TtMesh.TtAtom atom)
+        public override void OnDrawCall(NxRHI.ICommandList cmd, UGraphicDraw drawcall, URenderPolicy policy, TtMesh.TtAtom atom)
         {
             var aaNode = drawcall.TagObject as TtSunShaftRadialBlurNode;
             if (aaNode == null)
@@ -212,7 +218,7 @@ namespace EngineNS.Graphics.Pipeline.Common.Post
                 drawcall.BindCBuffer(index, aaNode.CBShadingEnv);
             }
 
-            base.OnDrawCall(cmd, shadingType, drawcall, policy, atom);
+            base.OnDrawCall(cmd, drawcall, policy, atom);
         }
     }
     public class TtSunShaftRadialBlurNode : USceenSpaceNode
@@ -232,10 +238,15 @@ namespace EngineNS.Graphics.Pipeline.Common.Post
             ResultPinOut.IsAutoResize = false;
             ResultPinOut.Attachement.Format = EPixelFormat.PXF_R16_FLOAT;
         }
+        public TtRadialBlurShading mBasePassShading;
+        public override UGraphicsShadingEnv GetPassShading(TtMesh.TtAtom atom = null)
+        {
+            return mBasePassShading;
+        }
         public override async System.Threading.Tasks.Task Initialize(URenderPolicy policy, string debugName)
         {
             await base.Initialize(policy, debugName);
-            ScreenDrawPolicy.mBasePassShading = UEngine.Instance.ShadingEnvManager.GetShadingEnv<TtRadialBlurShading>();
+            mBasePassShading = UEngine.Instance.ShadingEnvManager.GetShadingEnv<TtRadialBlurShading>();
         }
 
         FSunShaftStruct mSunShaftStruct = new FSunShaftStruct();

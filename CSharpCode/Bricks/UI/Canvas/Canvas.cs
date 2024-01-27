@@ -151,7 +151,7 @@ namespace EngineNS.UI.Canvas
             var mesh = new Graphics.Mesh.TtMesh();
             var ok = mesh.Initialize(Mesh, materials, Rtti.UTypeDescGetter<Graphics.Mesh.UMdfStaticMesh>.TypeDesc);
             var mdf = mesh.MdfQueue as Graphics.Mesh.UMdfStaticMesh;
-            mdf.OnDrawCallCallback = static (shadingType, drawcall, policy, atom) =>
+            mdf.OnDrawCallCallback = static (drawcall, policy, atom) =>
             {
                 EngineNS.Canvas.FDrawCmd cmd = new EngineNS.Canvas.FDrawCmd();
                 cmd.NativePointer = atom.GetAtomExtData().NativePointer;

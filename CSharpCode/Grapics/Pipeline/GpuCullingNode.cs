@@ -77,18 +77,26 @@ namespace EngineNS.Graphics.Pipeline
             return Hash64.FromData((byte*)data, sizeof(int) * (1 + mesh.Materials.Count));
         }
     }
-    public class TtCullingNode : TtRenderGraphNode
+    public class TtGpuCullingNode : TtRenderGraphNode
     {
-        public TtRenderGraphPin HzbPinInOut = TtRenderGraphPin.CreateInputOutput("Hzb", false, EPixelFormat.PXF_UNKNOWN);
-        public TtCullingNode()
+        public TtRenderGraphPin VisiblesPinIn = TtRenderGraphPin.CreateInput("Visibles");
+        public TtRenderGraphPin HzbPinIn = TtRenderGraphPin.CreateInput("Hzb");
+        public TtRenderGraphPin GpuCullOut = TtRenderGraphPin.CreateOutput("GpuCull", false, EPixelFormat.PXF_UNKNOWN);
+        
+        public TtGpuCullingNode()
         {
             Name = "GpuCulling";
         }
         public override void InitNodePins()
         {
-            AddInputOutput(HzbPinInOut, NxRHI.EBufferType.BFT_SRV | NxRHI.EBufferType.BFT_DSV);
+            AddInput(VisiblesPinIn, NxRHI.EBufferType.BFT_NONE);
+            AddInput(HzbPinIn, NxRHI.EBufferType.BFT_SRV | NxRHI.EBufferType.BFT_DSV);
+            
+            GpuCullOut.LifeMode = UAttachBuffer.ELifeMode.Imported;
+            AddOutput(GpuCullOut, NxRHI.EBufferType.BFT_NONE);
         }
         public Shader.UGraphicsShadingEnv mOpaqueShading;
+        public TtCpuCullingNode CpuCullNode = null;
         public async override System.Threading.Tasks.Task Initialize(URenderPolicy policy, string debugName)
         {
             await Thread.TtAsyncDummyClass.DummyFunc();
@@ -96,6 +104,13 @@ namespace EngineNS.Graphics.Pipeline
             mOpaqueShading = UEngine.Instance.ShadingEnvManager.GetShadingEnv<Graphics.Pipeline.Deferred.UDeferredOpaque>();
             var rc = UEngine.Instance.GfxDevice.RenderContext;
             BasePass.Initialize(rc, debugName);
+
+            var linker = VisiblesPinIn.FindInLinker();
+            if (linker != null)
+            {
+                CpuCullNode = linker.OutPin.HostNode as TtCpuCullingNode;
+            }
+            System.Diagnostics.Debug.Assert(CpuCullNode != null);
         }
         public override unsafe void TickLogic(GamePlay.UWorld world, Graphics.Pipeline.URenderPolicy policy, bool bClear)
         {
@@ -108,7 +123,7 @@ namespace EngineNS.Graphics.Pipeline
             }
             UEngine.Instance.GfxDevice.RenderCmdQueue.QueueCmdlist(cmd, "GpuCulling");
         }
-        public override Shader.UGraphicsShadingEnv GetPassShading(Graphics.Pipeline.URenderPolicy.EShadingType type, Mesh.TtMesh.TtAtom atom)
+        public override Shader.UGraphicsShadingEnv GetPassShading(Mesh.TtMesh.TtAtom atom)
         {
             return mOpaqueShading;
         }
@@ -123,7 +138,7 @@ namespace EngineNS.Graphics.Pipeline
                         var layer = k.Material.RenderLayer;
                         if (layer == ERenderLayer.RL_Opaque)
                         {
-                            var drawcall = k.GetDrawCall(cmd.mCoreObject, GBuffers, policy, URenderPolicy.EShadingType.BasePass, this);
+                            var drawcall = k.GetDrawCall(cmd.mCoreObject, GBuffers, policy, this);
                             if (drawcall != null)
                             {
                                 drawcall.BindGBuffer(policy.DefaultCamera, GBuffers);
@@ -141,11 +156,12 @@ namespace EngineNS.Graphics.Pipeline
             ResetTerrainMeshBatch();
             using (new NxRHI.TtGpuEventScope(cmd, VNameString.FromString("InstanceCulling")))
             {
-                for (int i = 0; i < policy.VisibleMeshes.Count; i++)
+                var visibleMeshes = CpuCullNode.VisParameter.VisibleMeshes;
+                for (int i = 0; i < visibleMeshes.Count; i++)
                 {
                     if (EnableGpuCulling)
                     {
-                        var mdfQueue = policy.VisibleMeshes[i].Mesh.MdfQueue as Mesh.UMdfInstanceStaticMesh;
+                        var mdfQueue = visibleMeshes[i].Mesh.MdfQueue as Mesh.UMdfInstanceStaticMesh;
                         if (mdfQueue != null)
                         {
                             var modifier = mdfQueue.InstanceModifier;
@@ -156,19 +172,19 @@ namespace EngineNS.Graphics.Pipeline
                     }
                     if (EnableStaticMeshBatch)
                     {
-                        var mdfQueue = policy.VisibleMeshes[i].Mesh.MdfQueue as Mesh.UMdfStaticMesh;
+                        var mdfQueue = visibleMeshes[i].Mesh.MdfQueue as Mesh.UMdfStaticMesh;
                         if (mdfQueue != null)
                         {
-                            policy.VisibleMeshes[i] = PushStaticMeshBatch(policy.VisibleMeshes[i].Mesh);
+                            visibleMeshes[i] = PushStaticMeshBatch(visibleMeshes[i].Mesh);
                             continue;
                         }
                     }
                     if (UseRVT)
                     {
-                        var mdfQueue = policy.VisibleMeshes[i].Mesh.MdfQueue as Bricks.Terrain.CDLOD.UTerrainMdfQueue;
+                        var mdfQueue = visibleMeshes[i].Mesh.MdfQueue as Bricks.Terrain.CDLOD.UTerrainMdfQueue;
                         if (mdfQueue != null)
                         {
-                            policy.VisibleMeshes[i] = PushTerrainMeshBatch(policy.VisibleMeshes[i].Mesh, mdfQueue);
+                            visibleMeshes[i] = PushTerrainMeshBatch(visibleMeshes[i].Mesh, mdfQueue);
                             continue;
                         }
                     }

@@ -88,6 +88,7 @@ namespace EngineNS.Graphics.Pipeline.Deferred
     }
     public class UForwordNode : Common.UBasePassNode
     {
+        public TtRenderGraphPin VisiblesPinIn = TtRenderGraphPin.CreateInput("Visibles");
         public TtRenderGraphPin ColorPinInOut = TtRenderGraphPin.CreateInputOutput("Color");
         public TtRenderGraphPin DepthPinInOut = TtRenderGraphPin.CreateInputOutput("Depth");
         public UForwordNode()
@@ -96,6 +97,7 @@ namespace EngineNS.Graphics.Pipeline.Deferred
         }
         public override void InitNodePins()
         {
+            AddInput(VisiblesPinIn, NxRHI.EBufferType.BFT_NONE);
             AddInputOutput(ColorPinInOut, NxRHI.EBufferType.BFT_RTV | NxRHI.EBufferType.BFT_SRV);
             AddInputOutput(DepthPinInOut, NxRHI.EBufferType.BFT_DSV | NxRHI.EBufferType.BFT_SRV);
         }
@@ -103,6 +105,7 @@ namespace EngineNS.Graphics.Pipeline.Deferred
         public UTranslucentShading mTranslucentShading;
         public TtLayerDrawBuffers LayerBasePass = new TtLayerDrawBuffers();
         public NxRHI.URenderPass RenderPass;
+        public TtCpuCullingNode CpuCullNode = null;
         public override async System.Threading.Tasks.Task Initialize(URenderPolicy policy, string debugName)
         {
             await Thread.TtAsyncDummyClass.DummyFunc();
@@ -115,6 +118,12 @@ namespace EngineNS.Graphics.Pipeline.Deferred
 
             mOpaqueShading = UEngine.Instance.ShadingEnvManager.GetShadingEnv<UOpaqueShading>();
             mTranslucentShading = UEngine.Instance.ShadingEnvManager.GetShadingEnv<UTranslucentShading>();
+
+            var linker = VisiblesPinIn.FindInLinker();
+            if (linker != null)
+            {
+                CpuCullNode = linker.OutPin.HostNode as TtCpuCullingNode;
+            }
         }
         public virtual unsafe UGraphicsBuffers CreateGBuffers(URenderPolicy policy, EPixelFormat format)
         {
@@ -163,7 +172,7 @@ namespace EngineNS.Graphics.Pipeline.Deferred
                 GBuffers.SetSize(x, y);
             }
         }
-        public override Shader.UGraphicsShadingEnv GetPassShading(Graphics.Pipeline.URenderPolicy.EShadingType type, Mesh.TtMesh.TtAtom atom)
+        public override Shader.UGraphicsShadingEnv GetPassShading(Mesh.TtMesh.TtAtom atom)
         {
             switch (atom.Material.RenderLayer)
             {
@@ -199,7 +208,7 @@ namespace EngineNS.Graphics.Pipeline.Deferred
                 
                 using (new TtLayerDrawBuffers.TtLayerDrawBuffersScope(LayerBasePass))
                 {
-                    foreach (var i in policy.VisibleMeshes)
+                    foreach (var i in CpuCullNode.VisParameter.VisibleMeshes)
                     {
                         foreach (var j in i.Mesh.SubMeshes)
                         {
@@ -212,7 +221,7 @@ namespace EngineNS.Graphics.Pipeline.Deferred
                                 if (layer == ERenderLayer.RL_Translucent || layer == ERenderLayer.RL_Sky)
                                 {
                                     var cmdlist = LayerBasePass.GetCmdList(layer);
-                                    var drawcall = k.GetDrawCall(cmdlist.mCoreObject, GBuffers, policy, URenderPolicy.EShadingType.BasePass, this);
+                                    var drawcall = k.GetDrawCall(cmdlist.mCoreObject, GBuffers, policy, this);
                                     if (drawcall != null)
                                     {
                                         drawcall.BindGBuffer(policy.DefaultCamera, GBuffers);
@@ -255,6 +264,7 @@ namespace EngineNS.Graphics.Pipeline.Deferred
 
     public class TtGizmosNode : Common.UBasePassNode
     {
+        public TtRenderGraphPin VisiblesPinIn = TtRenderGraphPin.CreateInput("Visibles");
         public TtRenderGraphPin ColorPinInOut = TtRenderGraphPin.CreateInputOutput("Color");
         public TtRenderGraphPin DepthPinInOut = TtRenderGraphPin.CreateInputOutput("Depth");
         public TtRenderGraphPin GizmosDepthPinOut = TtRenderGraphPin.CreateOutput("GizmosDepth", true, EPixelFormat.PXF_D24_UNORM_S8_UINT);
@@ -272,11 +282,13 @@ namespace EngineNS.Graphics.Pipeline.Deferred
         }
         public override void InitNodePins()
         {
+            AddInput(VisiblesPinIn, NxRHI.EBufferType.BFT_NONE);
             AddInputOutput(ColorPinInOut, NxRHI.EBufferType.BFT_RTV | NxRHI.EBufferType.BFT_SRV);
             AddInputOutput(DepthPinInOut, NxRHI.EBufferType.BFT_DSV | NxRHI.EBufferType.BFT_SRV);
 
             AddOutput(GizmosDepthPinOut, NxRHI.EBufferType.BFT_DSV | NxRHI.EBufferType.BFT_SRV);
         }
+        public TtCpuCullingNode CpuCullNode = null;
         public override async System.Threading.Tasks.Task Initialize(URenderPolicy policy, string debugName)
         {
             await Thread.TtAsyncDummyClass.DummyFunc();
@@ -288,6 +300,12 @@ namespace EngineNS.Graphics.Pipeline.Deferred
 
             mOpaqueShading = UEngine.Instance.ShadingEnvManager.GetShadingEnv<UOpaqueShading>();
             mTranslucentShading = UEngine.Instance.ShadingEnvManager.GetShadingEnv<UTranslucentShading>();
+
+            var linker = VisiblesPinIn.FindInLinker();
+            if (linker != null)
+            {
+                CpuCullNode = linker.OutPin.HostNode as TtCpuCullingNode;
+            }
         }
         public virtual unsafe UGraphicsBuffers CreateGBuffers(URenderPolicy policy, EPixelFormat format)
         {
@@ -370,7 +388,7 @@ namespace EngineNS.Graphics.Pipeline.Deferred
                 WithDepthGBuffers.SetSize(x, y);
             }
         }
-        public override Shader.UGraphicsShadingEnv GetPassShading(Graphics.Pipeline.URenderPolicy.EShadingType type, Mesh.TtMesh.TtAtom atom)
+        public override Shader.UGraphicsShadingEnv GetPassShading(Mesh.TtMesh.TtAtom atom)
         {
             switch (atom.Material.RenderLayer)
             {
@@ -406,7 +424,7 @@ namespace EngineNS.Graphics.Pipeline.Deferred
 
                 using (new TtLayerDrawBuffers.TtLayerDrawBuffersScope(LayerBasePass))
                 {
-                    foreach (var i in policy.VisibleMeshes)
+                    foreach (var i in CpuCullNode.VisParameter.VisibleMeshes)
                     {
                         foreach (var j in i.Mesh.SubMeshes)
                         {
@@ -424,7 +442,7 @@ namespace EngineNS.Graphics.Pipeline.Deferred
                                     || layer == ERenderLayer.RL_TranslucentGizmos || layer == ERenderLayer.RL_Gizmos)
                                 {
                                     var cmdlist = LayerBasePass.GetCmdList(layer);
-                                    var drawcall = k.GetDrawCall(cmdlist.mCoreObject, GBuffers, policy, URenderPolicy.EShadingType.BasePass, this);
+                                    var drawcall = k.GetDrawCall(cmdlist.mCoreObject, GBuffers, policy, this);
                                     if (drawcall != null)
                                     {
                                         drawcall.BindGBuffer(policy.DefaultCamera, GBuffers);

@@ -7,16 +7,23 @@ namespace EngineNS.Graphics.Pipeline.Common
     public class UFindNode : TtRenderGraphNode
     {
         public TtRenderGraphPin ResultPinOut = TtRenderGraphPin.CreateOutput("Result", false, EPixelFormat.PXF_UNKNOWN);
+        TtRenderGraphNode mNode;
+        public string mProxyNodeName = "";
         [Rtti.Meta]
         public string ProxyNodeName
         {
-            get; set;
+            get => mProxyNodeName;
+            set
+            {
+                mProxyNodeName = value;
+                mNode = RenderGraph?.FindNode(ProxyNodeName);
+            }
         }
         [Rtti.Meta]
         public string ProxyPinName
         {
             get; set;
-        }
+        } = "";
         public UFindNode()
         {
             
@@ -37,12 +44,17 @@ namespace EngineNS.Graphics.Pipeline.Common
             ResultPinOut.LifeMode = UAttachBuffer.ELifeMode.Imported;
             AddOutput(ResultPinOut, NxRHI.EBufferType.BFT_SRV | NxRHI.EBufferType.BFT_UAV);
         }
+        public override async Task Initialize(URenderPolicy policy, string debugName)
+        {
+            await base.Initialize(policy, debugName);
+        }
         public override void BeforeTickLogic(URenderPolicy policy)
         {
-            var node = RenderGraph.FindNode(ProxyNodeName);
-            if (node == null)
+            if (mNode == null)
+                mNode = RenderGraph.FindNode(ProxyNodeName);
+            if (mNode == null)
                 return;
-            var pin = node.FindOutput(ProxyPinName);
+            var pin = mNode.FindOutput(ProxyPinName);
             if (pin == null)
                 return;
             var refAttachement = RenderGraph.AttachmentCache.FindAttachement(pin.Attachement.AttachmentName);

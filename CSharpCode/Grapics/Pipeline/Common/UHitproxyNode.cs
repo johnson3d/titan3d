@@ -1,4 +1,6 @@
-﻿using System;
+﻿using EngineNS.Graphics.Mesh;
+using EngineNS.Graphics.Pipeline.Shader;
+using System;
 using System.Collections.Generic;
 using System.Text;
 
@@ -17,6 +19,7 @@ namespace EngineNS.Graphics.Pipeline.Common
     }
     public class UHitproxyNode : TtRenderGraphNode
     {
+        public TtRenderGraphPin VisiblesPinIn = TtRenderGraphPin.CreateInput("Visibles");
         public TtRenderGraphPin HitIdPinOut = TtRenderGraphPin.CreateOutput("HitId", false, EPixelFormat.PXF_R8G8B8A8_UNORM);
         public TtRenderGraphPin DepthPinInOut = TtRenderGraphPin.CreateInputOutput("Depth", false, EPixelFormat.PXF_D16_UNORM);
         public TtRenderGraphPin GizmosDepthPinOut = TtRenderGraphPin.CreateOutput("GizmosDepth", false, EPixelFormat.PXF_D16_UNORM);
@@ -26,6 +29,7 @@ namespace EngineNS.Graphics.Pipeline.Common
         }
         public override void InitNodePins()
         {
+            AddInput(VisiblesPinIn, NxRHI.EBufferType.BFT_NONE);
             AddOutput(HitIdPinOut, NxRHI.EBufferType.BFT_RTV | NxRHI.EBufferType.BFT_SRV);
             AddInputOutput(DepthPinInOut, NxRHI.EBufferType.BFT_DSV | NxRHI.EBufferType.BFT_SRV);
             AddOutput(GizmosDepthPinOut, NxRHI.EBufferType.BFT_DSV | NxRHI.EBufferType.BFT_SRV); 
@@ -136,6 +140,11 @@ namespace EngineNS.Graphics.Pipeline.Common
         public NxRHI.URenderPass GizmosRenderPass;
         [Rtti.Meta]
         public float ScaleFactor { get; set; } = 0.5f;
+        public override UGraphicsShadingEnv GetPassShading(TtMesh.TtAtom atom = null)
+        {
+            return mHitproxyShading;
+        }
+        public TtCpuCullingNode CpuCullNode = null;
         public override async System.Threading.Tasks.Task Initialize(URenderPolicy policy, string debugName)
         {
             await Thread.TtAsyncDummyClass.DummyFunc();
@@ -145,6 +154,12 @@ namespace EngineNS.Graphics.Pipeline.Common
 
             CreateGBuffers(policy, DepthPinInOut.Attachement.Format, true);
             mCopyFence = rc.CreateFence(new NxRHI.FFenceDesc(), "Copy Hitproxy Texture");
+
+            var linker = VisiblesPinIn.FindInLinker();
+            if (linker != null)
+            {
+                CpuCullNode = linker.OutPin.HostNode as TtCpuCullingNode;
+            }
         }
         public unsafe void CreateGBuffers(URenderPolicy policy, EPixelFormat DSFormat, bool bClearDS)
         {
@@ -195,12 +210,12 @@ namespace EngineNS.Graphics.Pipeline.Common
             GHitproxyBuffers.Initialize(policy, HitproxyRenderPass);
             GHitproxyBuffers.SetRenderTarget(policy, 0, HitIdPinOut);
             GHitproxyBuffers.SetDepthStencil(policy, DepthPinInOut);
-            GHitproxyBuffers.TargetViewIdentifier = policy.DefaultCamera.TargetViewIdentifier;
+            GHitproxyBuffers.TargetViewIdentifier = new UGraphicsBuffers.UTargetViewIdentifier();// policy.DefaultCamera.TargetViewIdentifier;
 
             GGizmosBuffers.Initialize(policy, GizmosRenderPass);
             GGizmosBuffers.SetRenderTarget(policy, 0, HitIdPinOut);
             GGizmosBuffers.SetDepthStencil(policy, GizmosDepthPinOut);
-            GGizmosBuffers.TargetViewIdentifier = policy.DefaultCamera.TargetViewIdentifier;
+            GGizmosBuffers.TargetViewIdentifier = GHitproxyBuffers.TargetViewIdentifier;
         }
         public unsafe override void Dispose()
         {
@@ -243,19 +258,6 @@ namespace EngineNS.Graphics.Pipeline.Common
             CopyTexDesc.BindFlags = 0;
             CopyTexDesc.MipLevels = 1;
 
-            //CopyBufferFootPrint.Width = CopyTexDesc.Width;
-            //CopyBufferFootPrint.Height = CopyTexDesc.Height;
-            //CopyBufferFootPrint.Depth = 1;
-            //CopyBufferFootPrint.Format = HitIdPinOut.Attachement.Format;
-            //CopyBufferFootPrint.RowPitch = (uint)CoreSDK.GetPixelFormatByteWidth(CopyBufferFootPrint.Format) * HitIdPinOut.Attachement.Width;
-            //var pAlignment = UEngine.Instance.GfxDevice.RenderContext.mCoreObject.GetGpuResourceAlignment();
-            //if (CopyBufferFootPrint.RowPitch % pAlignment->TexturePitchAlignment > 0)
-            //{
-            //    CopyBufferFootPrint.RowPitch = (CopyBufferFootPrint.RowPitch / pAlignment->TexturePitchAlignment + 1) * pAlignment->TexturePitchAlignment;
-            //}
-            //mReadableHitproxyTexture = UEngine.Instance.GfxDevice.RenderContext.CreateTextureToCpuBuffer(in CopyTexDesc, in CopyBufferFootPrint);
-            //mReadableHitproxyTexture.SetDebugName("Readback Hitproxy Buffer");
-
             mReadableHitproxyTexture?.Dispose();
             mReadableHitproxyTexture = null;
         }
@@ -275,7 +277,7 @@ namespace EngineNS.Graphics.Pipeline.Common
             {
                 using(new TtLayerDrawBuffers.TtLayerDrawBuffersScope(HitproxyPass))
                 {
-                    foreach (var i in policy.VisibleMeshes)
+                    foreach (var i in CpuCullNode.VisParameter.VisibleMeshes)
                     {
                         if (i.Mesh.IsDrawHitproxy == false)
                         {
@@ -290,7 +292,7 @@ namespace EngineNS.Graphics.Pipeline.Common
 
                                 var layer = k.Material.RenderLayer;
                                 var cmd = HitproxyPass.GetCmdList(layer);
-                                var hpDrawcall = k.GetDrawCall(cmd.mCoreObject, GHitproxyBuffers, policy, URenderPolicy.EShadingType.HitproxyPass, this);
+                                var hpDrawcall = k.GetDrawCall(cmd.mCoreObject, GHitproxyBuffers, policy, this);
                                 if (hpDrawcall != null)
                                 {
                                     hpDrawcall.BindGBuffer(policy.DefaultCamera, GHitproxyBuffers);

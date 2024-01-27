@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using EngineNS.GamePlay;
 using EngineNS.Graphics.Mesh;
+using EngineNS.Graphics.Pipeline.Shader;
 using EngineNS.NxRHI;
 
 namespace EngineNS.Graphics.Pipeline.Common.Post
@@ -24,7 +25,7 @@ namespace EngineNS.Graphics.Pipeline.Common.Post
         {
             defines.AddDefine("ENV_ADD_COLOR", "1");
         }
-        public override void OnDrawCall(NxRHI.ICommandList cmd, URenderPolicy.EShadingType shadingType, UGraphicDraw drawcall, URenderPolicy policy, TtMesh.TtAtom atom)
+        public override void OnDrawCall(NxRHI.ICommandList cmd, UGraphicDraw drawcall, URenderPolicy policy, TtMesh.TtAtom atom)
         {
             var aaNode = drawcall.TagObject as TtAdditiveNode;
             if (aaNode == null)
@@ -63,7 +64,7 @@ namespace EngineNS.Graphics.Pipeline.Common.Post
                 drawcall.BindCBuffer(index, aaNode.CBShadingEnv);
             }
 
-            base.OnDrawCall(cmd, shadingType, drawcall, policy, atom);
+            base.OnDrawCall(cmd, drawcall, policy, atom);
         }
     }
     public class TtAdditiveNode : USceenSpaceNode
@@ -83,10 +84,15 @@ namespace EngineNS.Graphics.Pipeline.Common.Post
 
             base.InitNodePins();
         }
+        public TtAdditiveShading mBasePassShading;
+        public override UGraphicsShadingEnv GetPassShading(TtMesh.TtAtom atom = null)
+        {
+            return mBasePassShading;
+        }
         public override async System.Threading.Tasks.Task Initialize(URenderPolicy policy, string debugName)
         {
             await base.Initialize(policy, debugName);
-            ScreenDrawPolicy.mBasePassShading = UEngine.Instance.ShadingEnvManager.GetShadingEnv<TtAdditiveShading>();
+            mBasePassShading = UEngine.Instance.ShadingEnvManager.GetShadingEnv<TtAdditiveShading>();
         }
         [System.Runtime.InteropServices.StructLayout(System.Runtime.InteropServices.LayoutKind.Sequential, Pack = 16)]
         struct FAdditiveStruct
@@ -154,10 +160,15 @@ namespace EngineNS.Graphics.Pipeline.Common.Post
         {
             Name = "AdditiveLumNode";
         }
+        public TtAdditiveLumShading mAdditiveLumShading;
+        public override UGraphicsShadingEnv GetPassShading(TtMesh.TtAtom atom = null)
+        {
+            return mAdditiveLumShading;
+        }
         public override async System.Threading.Tasks.Task Initialize(URenderPolicy policy, string debugName)
         {
             await base.Initialize(policy, debugName);
-            ScreenDrawPolicy.mBasePassShading = UEngine.Instance.ShadingEnvManager.GetShadingEnv<TtAdditiveLumShading>();
+            mAdditiveLumShading = UEngine.Instance.ShadingEnvManager.GetShadingEnv<TtAdditiveLumShading>();
         }
     }
 }

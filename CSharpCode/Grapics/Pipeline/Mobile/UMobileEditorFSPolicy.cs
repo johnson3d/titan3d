@@ -35,7 +35,7 @@ namespace EngineNS.Graphics.Pipeline.Mobile
             set
             {
                 mDisableAO = value;
-                var finalShading = FinalCopyNode.ScreenDrawPolicy.mBasePassShading as UFinalCopyShading;
+                var finalShading = FinalCopyNode.GetPassShading() as UFinalCopyShading;
                 if (finalShading != null)
                 {
                     finalShading.SetDisableAO(value);
@@ -51,7 +51,7 @@ namespace EngineNS.Graphics.Pipeline.Mobile
             set
             {
                 mDisableHDR = value;
-                var shading = FinalCopyNode.ScreenDrawPolicy.mBasePassShading as UFinalCopyShading;
+                var shading = FinalCopyNode.GetPassShading() as UFinalCopyShading;
                 shading?.SetDisableHDR(value);
             }
         }
@@ -199,58 +199,19 @@ namespace EngineNS.Graphics.Pipeline.Mobile
 
             base.Dispose();
         }
-        //Build DrawCall的时候调用，如果本渲染策略不提供指定的EShadingType，那么UAtom内的s对应的Drawcall就不会产生出来
-        public override Shader.UGraphicsShadingEnv GetPassShading(EShadingType type, Mesh.TtMesh.TtAtom atom, Pipeline.TtRenderGraphNode node)
-        {
-            switch (type)
-            {
-                case EShadingType.BasePass:
-                    {
-                        if (node == BasePassNode)
-                        {
-                            return BasePassNode.mOpaqueShading;
-                        }
-                        else if (node == TranslucentNode)
-                        {
-                            switch (atom.Material.RenderLayer)
-                            {
-                                case ERenderLayer.RL_Translucent:
-                                    return TranslucentNode.mTranslucentShading;
-                                case ERenderLayer.RL_Sky:
-                                    return TranslucentNode.mTranslucentShading;
-                                default:
-                                    return BasePassNode.mOpaqueShading;
-                            }
-                        }
-                    }
-                    break;
-                case EShadingType.DepthPass:
-                    return mShadowMapNode.mShadowShading;
-                case EShadingType.HitproxyPass:
-                    return HitproxyNode.mHitproxyShading;
-                case EShadingType.Picked:
-                    return PickedNode.PickedShading;
-                default:
-                    break;
-            }
-            return null;
-        }
         //渲染DrawCall的时候调用，如果产生了对应的ShadingType的Drawcall，则会callback到这里设置一些这个shading的特殊参数
-        public override void OnDrawCall(NxRHI.ICommandList cmd, Pipeline.URenderPolicy.EShadingType shadingType, NxRHI.UGraphicDraw drawcall, Mesh.TtMesh.TtAtom atom)
+        public override void OnDrawCall(NxRHI.ICommandList cmd, NxRHI.UGraphicDraw drawcall, Mesh.TtMesh.TtAtom atom)
         {
-            atom.MdfQueue.OnDrawCall(cmd, shadingType, drawcall, this, atom);
+            atom.MdfQueue.OnDrawCall(cmd, drawcall, this, atom);
             //drawcall.Effect.ShadingEnv
-            if (shadingType == EShadingType.BasePass)
+            switch (atom.Material.RenderLayer)
             {
-                switch (atom.Material.RenderLayer)
-                {
-                    case ERenderLayer.RL_Translucent:
-                        TranslucentNode.mTranslucentShading.OnDrawCall(cmd, shadingType, drawcall, this, atom);
-                        return;
-                    default:
-                        BasePassNode.mOpaqueShading.OnDrawCall(cmd, shadingType, drawcall, this, atom);
-                        return;
-                }
+                case ERenderLayer.RL_Translucent:
+                    TranslucentNode.mTranslucentShading.OnDrawCall(cmd, drawcall, this, atom);
+                    return;
+                default:
+                    BasePassNode.mOpaqueShading.OnDrawCall(cmd, drawcall, this, atom);
+                    return;
             }
         }
         public unsafe override void TickLogic(GamePlay.UWorld world)

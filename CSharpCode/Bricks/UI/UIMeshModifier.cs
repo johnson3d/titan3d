@@ -60,7 +60,7 @@ namespace EngineNS.UI
         {
 
         }
-        public unsafe void OnDrawCall(Graphics.Pipeline.Shader.TtMdfQueueBase mdfQueue1, NxRHI.ICommandList cmd, Graphics.Pipeline.URenderPolicy.EShadingType shadingType, NxRHI.UGraphicDraw drawcall, Graphics.Pipeline.URenderPolicy policy, Graphics.Mesh.TtMesh.TtAtom atom)
+        public unsafe void OnDrawCall(Graphics.Pipeline.Shader.TtMdfQueueBase mdfQueue1, NxRHI.ICommandList cmd, NxRHI.UGraphicDraw drawcall, Graphics.Pipeline.URenderPolicy policy, Graphics.Mesh.TtMesh.TtAtom atom)
         {
 
         }
@@ -74,9 +74,9 @@ namespace EngineNS.UI
             base.CopyFrom(mdf);
             PerUIMeshCBuffer = (mdf as TtMdfUIMesh).PerUIMeshCBuffer;
         }
-        public override void OnDrawCall(NxRHI.ICommandList cmdlist, URenderPolicy.EShadingType shadingType, UGraphicDraw drawcall, URenderPolicy policy, TtMesh.TtAtom atom)
+        public override void OnDrawCall(NxRHI.ICommandList cmdlist, UGraphicDraw drawcall, URenderPolicy policy, TtMesh.TtAtom atom)
         {
-            base.OnDrawCall(cmdlist, shadingType, drawcall, policy, atom);
+            base.OnDrawCall(cmdlist, drawcall, policy, atom);
             unsafe
             {
                 var shaderBinder = UEngine.Instance.GfxDevice.CoreShaderBinder;

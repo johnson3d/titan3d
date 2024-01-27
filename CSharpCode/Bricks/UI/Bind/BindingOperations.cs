@@ -793,6 +793,10 @@ namespace EngineNS.UI.Bind
 
             return tagExpr;
         }
+        public static bool HasBinding(IBindableObject target, TtBindableProperty bp)
+        {
+            return false;
+        }
         public static void ClearBinding(IBindableObject target, TtBindableProperty bp)
         {
             target.ClearBindExpression(bp);

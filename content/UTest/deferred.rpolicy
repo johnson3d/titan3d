@@ -2,7 +2,7 @@
 <Root Type="EngineNS.Bricks.RenderPolicyEditor.UPolicyGraph@EngineCore">
   <AssetName Type="EngineNS.RName@EngineCore" Value="Game,utest/deferred.rpolicy,6bec2549-4d63-4af4-90eb-ec4cda04da9b" />
   <GraphName Type="System.String@Unknown" Value="NodeGraph" />
-  <Nodes Type="System.Collections.Generic.List&lt;EngineNS.Bricks.NodeGraph.UNodeBase@EngineCore,&gt;@Unknown" Count="42">
+  <Nodes Type="System.Collections.Generic.List&lt;EngineNS.Bricks.NodeGraph.UNodeBase@EngineCore,&gt;@Unknown" Count="43">
     <e_0 Type="EngineNS.Bricks.RenderPolicyEditor.UPolicyNode@EngineCore">
       <GraphNodeTypeString Type="System.String@Unknown" Value="EngineNS.Graphics.Pipeline.Deferred.UDeferredBasePassNode@EngineCore" />
       <Label Type="System.String@Unknown" Value="BasePassNode" />
@@ -30,7 +30,7 @@
       <Label Type="System.String@Unknown" Value="ShadwoMapNode" />
       <Name Type="System.String@Unknown" Value="ShadwoMapNode" />
       <NodeId Type="System.Guid@Unknown" Value="390b3f71-ed8a-4b35-a8ec-5b7d816606e9" />
-      <Position Type="EngineNS.Vector2@EngineCore" Value="33.083252,-43.874256" />
+      <Position Type="EngineNS.Vector2@EngineCore" Value="-94.41669,-163.87428" />
       <GraphNode Type="EngineNS.Graphics.Pipeline.Shadow.UShadowMapNode@EngineCore" />
       <InputEditableValues Type="System.Collections.Generic.List&lt;EngineNS.Bricks.NodeGraph.UNodeBase.UInputEditableValueInfo@EngineCore,&gt;@Unknown" Count="0" />
     </e_2>
@@ -39,7 +39,7 @@
       <Label Type="System.String@Unknown" Value="EnvMapNode" />
       <Name Type="System.String@Unknown" Value="EnvMapNode" />
       <NodeId Type="System.Guid@Unknown" Value="353b082f-7045-4c6e-827c-4a928cf62de5" />
-      <Position Type="EngineNS.Vector2@EngineCore" Value="-107.62729,259.11816" />
+      <Position Type="EngineNS.Vector2@EngineCore" Value="300.3726,291.4182" />
       <GraphNode Type="EngineNS.Graphics.Pipeline.Common.UImageAssetNode@EngineCore">
         <ImageName Type="EngineNS.RName@EngineCore" Value="Engine,texture/default_envmap.srv,503f8435-1844-4cd7-9725-4a5db9892a88" />
       </GraphNode>
@@ -50,7 +50,7 @@
       <Label Type="System.String@Unknown" Value="VignetteNode" />
       <Name Type="System.String@Unknown" Value="VignetteNode" />
       <NodeId Type="System.Guid@Unknown" Value="a4a38911-2885-4e41-a849-b60a581774fb" />
-      <Position Type="EngineNS.Vector2@EngineCore" Value="53.90909,313.87274" />
+      <Position Type="EngineNS.Vector2@EngineCore" Value="60.709015,358.0727" />
       <GraphNode Type="EngineNS.Graphics.Pipeline.Common.UImageAssetNode@EngineCore">
         <ImageName Type="EngineNS.RName@EngineCore" Value="Engine,texture/default_envmap.srv,503f8435-1844-4cd7-9725-4a5db9892a88" />
       </GraphNode>
@@ -110,7 +110,7 @@
       <Label Type="System.String@Unknown" Value="UForwordNode" />
       <Name Type="System.String@Unknown" Value="UForwordNode" />
       <NodeId Type="System.Guid@Unknown" Value="004f199a-1f8a-491e-9d9e-177088c9b69f" />
-      <Position Type="EngineNS.Vector2@EngineCore" Value="1325.9332,562.7999" />
+      <Position Type="EngineNS.Vector2@EngineCore" Value="1317.8333,506.99994" />
       <GraphNode Type="EngineNS.Graphics.Pipeline.Deferred.UForwordNode@EngineCore" />
       <InputEditableValues Type="System.Collections.Generic.List&lt;EngineNS.Bricks.NodeGraph.UNodeBase.UInputEditableValueInfo@EngineCore,&gt;@Unknown" Count="0" />
     </e_10>
@@ -137,7 +137,7 @@
       <Label Type="System.String@Unknown" Value="Hitproxy" />
       <Name Type="System.String@Unknown" Value="Hitproxy" />
       <NodeId Type="System.Guid@Unknown" Value="2d931ff4-e1a3-4e4d-9e6c-1f3f4989ef6e" />
-      <Position Type="EngineNS.Vector2@EngineCore" Value="3191.394,892.1089" />
+      <Position Type="EngineNS.Vector2@EngineCore" Value="1855.394,380.10883" />
       <GraphNode Type="EngineNS.Graphics.Pipeline.Common.UHitproxyNode@EngineCore">
         <ScaleFactor Type="System.Single@Unknown" Value="1" />
       </GraphNode>
@@ -369,7 +369,7 @@
       <Label Type="System.String@Unknown" Value="GizmosNode" />
       <Name Type="System.String@Unknown" Value="GizmosNode" />
       <NodeId Type="System.Guid@Unknown" Value="76616e1e-98ed-4fd3-a94c-ba4b30515e33" />
-      <Position Type="EngineNS.Vector2@EngineCore" Value="3187.3003,1100.2998" />
+      <Position Type="EngineNS.Vector2@EngineCore" Value="3174.5002,1169.0999" />
       <GraphNode Type="EngineNS.Graphics.Pipeline.Deferred.TtGizmosNode@EngineCore" />
       <InputEditableValues Type="System.Collections.Generic.List&lt;EngineNS.Bricks.NodeGraph.UNodeBase.UInputEditableValueInfo@EngineCore,&gt;@Unknown" Count="0" />
     </e_33>
@@ -407,7 +407,7 @@
       <Label Type="System.String@Unknown" Value="Find_NextDepthNode:Prev" />
       <Name Type="System.String@Unknown" Value="Find_NextDepthNode:Prev" />
       <NodeId Type="System.Guid@Unknown" Value="4133d647-335f-4c4c-b850-e6b5a38f3646" />
-      <Position Type="EngineNS.Vector2@EngineCore" Value="-85,921" />
+      <Position Type="EngineNS.Vector2@EngineCore" Value="-384.60004,949" />
       <GraphNode Type="EngineNS.Graphics.Pipeline.Common.UFindNode@EngineCore">
         <ProxyNodeName Type="System.String@Unknown" Value="NextDepthNode" />
         <ProxyPinName Type="System.String@Unknown" Value="Prev" />
@@ -419,7 +419,7 @@
       <Label Type="System.String@Unknown" Value="Hzb" />
       <Name Type="System.String@Unknown" Value="Hzb" />
       <NodeId Type="System.Guid@Unknown" Value="aec88a75-caa4-4349-a2a1-7aae3527dd94" />
-      <Position Type="EngineNS.Vector2@EngineCore" Value="218,918" />
+      <Position Type="EngineNS.Vector2@EngineCore" Value="-113.900085,947.69995" />
       <GraphNode Type="EngineNS.Graphics.Pipeline.Common.UHzbNode@EngineCore" />
       <InputEditableValues Type="System.Collections.Generic.List&lt;EngineNS.Bricks.NodeGraph.UNodeBase.UInputEditableValueInfo@EngineCore,&gt;@Unknown" Count="0" />
     </e_38>
@@ -446,14 +446,26 @@
       <InputEditableValues Type="System.Collections.Generic.List&lt;EngineNS.Bricks.NodeGraph.UNodeBase.UInputEditableValueInfo@EngineCore,&gt;@Unknown" Count="0" />
     </e_40>
     <e_41 Type="EngineNS.Bricks.RenderPolicyEditor.UPolicyNode@EngineCore">
-      <GraphNodeTypeString Type="System.String@Unknown" Value="EngineNS.Graphics.Pipeline.TtCullingNode@EngineCore" />
-      <Label Type="System.String@Unknown" Value="GpuCulling" />
-      <Name Type="System.String@Unknown" Value="GpuCulling" />
-      <NodeId Type="System.Guid@Unknown" Value="4d1de070-9ef8-46d8-a3db-a1dee4b81bd6" />
-      <Position Type="EngineNS.Vector2@EngineCore" Value="150.60013,1075.0001" />
-      <GraphNode Type="EngineNS.Graphics.Pipeline.TtCullingNode@EngineCore" />
+      <GraphNodeTypeString Type="System.String@Unknown" Value="EngineNS.Graphics.Pipeline.TtCpuCullingNode@EngineCore" />
+      <Label Type="System.String@Unknown" Value="CpuCulling" />
+      <Name Type="System.String@Unknown" Value="CpuCulling" />
+      <NodeId Type="System.Guid@Unknown" Value="686e3ad1-3fb5-43e1-9aa4-71862515d83b" />
+      <Position Type="EngineNS.Vector2@EngineCore" Value="-455.10004,332.09998" />
+      <GraphNode Type="EngineNS.Graphics.Pipeline.TtCpuCullingNode@EngineCore" />
       <InputEditableValues Type="System.Collections.Generic.List&lt;EngineNS.Bricks.NodeGraph.UNodeBase.UInputEditableValueInfo@EngineCore,&gt;@Unknown" Count="0" />
     </e_41>
+    <e_42 Type="EngineNS.Bricks.RenderPolicyEditor.UPolicyNode@EngineCore">
+      <GraphNodeTypeString Type="System.String@Unknown" Value="EngineNS.Graphics.Pipeline.TtGpuCullingNode@EngineCore" />
+      <Label Type="System.String@Unknown" Value="GpuCulling" />
+      <Name Type="System.String@Unknown" Value="GpuCulling" />
+      <NodeId Type="System.Guid@Unknown" Value="44db0432-12ea-4ee9-b543-c2d735bb138c" />
+      <Position Type="EngineNS.Vector2@EngineCore" Value="-251.7002,613.09985" />
+      <GraphNode Type="EngineNS.Graphics.Pipeline.TtGpuCullingNode@EngineCore">
+        <EnableGpuCulling Type="System.Boolean@Unknown" Value="True" />
+        <EnableStaticMeshBatch Type="System.Boolean@Unknown" Value="False" />
+      </GraphNode>
+      <InputEditableValues Type="System.Collections.Generic.List&lt;EngineNS.Bricks.NodeGraph.UNodeBase.UInputEditableValueInfo@EngineCore,&gt;@Unknown" Count="0" />
+    </e_42>
   </Nodes>
   <PolicyType Type="EngineNS.Rtti.UTypeDesc@EngineCore" Value="EngineNS.Graphics.Pipeline.UDeferredPolicyBase@EngineCore" />
   <RenderPolicy Type="EngineNS.Graphics.Pipeline.UDeferredPolicyBase@EngineCore">
@@ -464,7 +476,7 @@
     <TypeAA Type="EngineNS.Graphics.Pipeline.URenderPolicy.ETypeAA@EngineCore" Value="Fsaa" />
     <TypeFog Type="EngineNS.Graphics.Pipeline.URenderPolicy.ETypeFog@EngineCore" Value="None" />
   </RenderPolicy>
-  <Linkers Type="System.Collections.Generic.List&lt;EngineNS.Bricks.NodeGraph.UPinLinker@EngineCore,&gt;@Unknown" Count="74">
+  <Linkers Type="System.Collections.Generic.List&lt;EngineNS.Bricks.NodeGraph.UPinLinker@EngineCore,&gt;@Unknown" Count="81">
     <e_0 Type="EngineNS.Bricks.NodeGraph.UPinLinker@EngineCore">
       <SaveData Type="EngineNS.Bricks.NodeGraph.UPinLinker.TSaveData@EngineCore">
         <InNodeId Type="System.Guid@Unknown" Value="14fa3edc-067d-4614-8120-302e42977e5e" />
@@ -603,80 +615,80 @@
     </e_16>
     <e_17 Type="EngineNS.Bricks.NodeGraph.UPinLinker@EngineCore">
       <SaveData Type="EngineNS.Bricks.NodeGraph.UPinLinker.TSaveData@EngineCore">
-        <InNodeId Type="System.Guid@Unknown" Value="14fa3edc-067d-4614-8120-302e42977e5e" />
-        <InPinName Type="System.String@Unknown" Value="ShadowMap" />
-        <OutNodeId Type="System.Guid@Unknown" Value="2350731c-6b29-432d-8936-06281a7de040" />
-        <OutPinName Type="System.String@Unknown" Value="Result" />
-      </SaveData>
-    </e_17>
-    <e_18 Type="EngineNS.Bricks.NodeGraph.UPinLinker@EngineCore">
-      <SaveData Type="EngineNS.Bricks.NodeGraph.UPinLinker.TSaveData@EngineCore">
         <InNodeId Type="System.Guid@Unknown" Value="79e1d50f-c6fd-4bfc-b60c-f27462844e55" />
         <InPinName Type="System.String@Unknown" Value="GpuScene" />
         <OutNodeId Type="System.Guid@Unknown" Value="c3d13463-dc07-41f9-b5c6-34a145700b92" />
         <OutPinName Type="System.String@Unknown" Value="GpuScene" />
       </SaveData>
-    </e_18>
-    <e_19 Type="EngineNS.Bricks.NodeGraph.UPinLinker@EngineCore">
+    </e_17>
+    <e_18 Type="EngineNS.Bricks.NodeGraph.UPinLinker@EngineCore">
       <SaveData Type="EngineNS.Bricks.NodeGraph.UPinLinker.TSaveData@EngineCore">
         <InNodeId Type="System.Guid@Unknown" Value="004f199a-1f8a-491e-9d9e-177088c9b69f" />
         <InPinName Type="System.String@Unknown" Value="Color" />
         <OutNodeId Type="System.Guid@Unknown" Value="79e1d50f-c6fd-4bfc-b60c-f27462844e55" />
         <OutPinName Type="System.String@Unknown" Value="Albedo" />
       </SaveData>
-    </e_19>
-    <e_20 Type="EngineNS.Bricks.NodeGraph.UPinLinker@EngineCore">
+    </e_18>
+    <e_19 Type="EngineNS.Bricks.NodeGraph.UPinLinker@EngineCore">
       <SaveData Type="EngineNS.Bricks.NodeGraph.UPinLinker.TSaveData@EngineCore">
         <InNodeId Type="System.Guid@Unknown" Value="79e1d50f-c6fd-4bfc-b60c-f27462844e55" />
         <InPinName Type="System.String@Unknown" Value="Depth" />
         <OutNodeId Type="System.Guid@Unknown" Value="4c9d280e-524e-4f0c-8edd-94af227c4175" />
         <OutPinName Type="System.String@Unknown" Value="DepthStencil" />
       </SaveData>
-    </e_20>
-    <e_21 Type="EngineNS.Bricks.NodeGraph.UPinLinker@EngineCore">
+    </e_19>
+    <e_20 Type="EngineNS.Bricks.NodeGraph.UPinLinker@EngineCore">
       <SaveData Type="EngineNS.Bricks.NodeGraph.UPinLinker.TSaveData@EngineCore">
         <InNodeId Type="System.Guid@Unknown" Value="004f199a-1f8a-491e-9d9e-177088c9b69f" />
         <InPinName Type="System.String@Unknown" Value="Depth" />
         <OutNodeId Type="System.Guid@Unknown" Value="79e1d50f-c6fd-4bfc-b60c-f27462844e55" />
         <OutPinName Type="System.String@Unknown" Value="Depth" />
       </SaveData>
-    </e_21>
-    <e_22 Type="EngineNS.Bricks.NodeGraph.UPinLinker@EngineCore">
+    </e_20>
+    <e_21 Type="EngineNS.Bricks.NodeGraph.UPinLinker@EngineCore">
       <SaveData Type="EngineNS.Bricks.NodeGraph.UPinLinker.TSaveData@EngineCore">
         <InNodeId Type="System.Guid@Unknown" Value="14fa3edc-067d-4614-8120-302e42977e5e" />
         <InPinName Type="System.String@Unknown" Value="MRT3" />
         <OutNodeId Type="System.Guid@Unknown" Value="4c9d280e-524e-4f0c-8edd-94af227c4175" />
         <OutPinName Type="System.String@Unknown" Value="MRT3" />
       </SaveData>
-    </e_22>
-    <e_23 Type="EngineNS.Bricks.NodeGraph.UPinLinker@EngineCore">
+    </e_21>
+    <e_22 Type="EngineNS.Bricks.NodeGraph.UPinLinker@EngineCore">
       <SaveData Type="EngineNS.Bricks.NodeGraph.UPinLinker.TSaveData@EngineCore">
         <InNodeId Type="System.Guid@Unknown" Value="6ae2bed6-1995-4618-9e62-f8b923949222" />
         <InPinName Type="System.String@Unknown" Value="MotionVector" />
         <OutNodeId Type="System.Guid@Unknown" Value="14fa3edc-067d-4614-8120-302e42977e5e" />
         <OutPinName Type="System.String@Unknown" Value="MRT3" />
       </SaveData>
-    </e_23>
-    <e_24 Type="EngineNS.Bricks.NodeGraph.UPinLinker@EngineCore">
+    </e_22>
+    <e_23 Type="EngineNS.Bricks.NodeGraph.UPinLinker@EngineCore">
       <SaveData Type="EngineNS.Bricks.NodeGraph.UPinLinker.TSaveData@EngineCore">
         <InNodeId Type="System.Guid@Unknown" Value="5d9022df-3600-4977-86c7-d0aaa8f20947" />
         <InPinName Type="System.String@Unknown" Value="Src" />
         <OutNodeId Type="System.Guid@Unknown" Value="14fa3edc-067d-4614-8120-302e42977e5e" />
         <OutPinName Type="System.String@Unknown" Value="Result" />
       </SaveData>
-    </e_24>
-    <e_25 Type="EngineNS.Bricks.NodeGraph.UPinLinker@EngineCore">
+    </e_23>
+    <e_24 Type="EngineNS.Bricks.NodeGraph.UPinLinker@EngineCore">
       <SaveData Type="EngineNS.Bricks.NodeGraph.UPinLinker.TSaveData@EngineCore">
         <InNodeId Type="System.Guid@Unknown" Value="6ae2bed6-1995-4618-9e62-f8b923949222" />
         <InPinName Type="System.String@Unknown" Value="PreColor" />
         <OutNodeId Type="System.Guid@Unknown" Value="5d9022df-3600-4977-86c7-d0aaa8f20947" />
         <OutPinName Type="System.String@Unknown" Value="Prev" />
       </SaveData>
-    </e_25>
-    <e_26 Type="EngineNS.Bricks.NodeGraph.UPinLinker@EngineCore">
+    </e_24>
+    <e_25 Type="EngineNS.Bricks.NodeGraph.UPinLinker@EngineCore">
       <SaveData Type="EngineNS.Bricks.NodeGraph.UPinLinker.TSaveData@EngineCore">
         <InNodeId Type="System.Guid@Unknown" Value="f98b5d25-8f51-4693-b0e7-3d378b32289b" />
         <InPinName Type="System.String@Unknown" Value="Src" />
+        <OutNodeId Type="System.Guid@Unknown" Value="14fa3edc-067d-4614-8120-302e42977e5e" />
+        <OutPinName Type="System.String@Unknown" Value="DepthStencil" />
+      </SaveData>
+    </e_25>
+    <e_26 Type="EngineNS.Bricks.NodeGraph.UPinLinker@EngineCore">
+      <SaveData Type="EngineNS.Bricks.NodeGraph.UPinLinker.TSaveData@EngineCore">
+        <InNodeId Type="System.Guid@Unknown" Value="6ae2bed6-1995-4618-9e62-f8b923949222" />
+        <InPinName Type="System.String@Unknown" Value="Depth" />
         <OutNodeId Type="System.Guid@Unknown" Value="14fa3edc-067d-4614-8120-302e42977e5e" />
         <OutPinName Type="System.String@Unknown" Value="DepthStencil" />
       </SaveData>
@@ -684,378 +696,434 @@
     <e_27 Type="EngineNS.Bricks.NodeGraph.UPinLinker@EngineCore">
       <SaveData Type="EngineNS.Bricks.NodeGraph.UPinLinker.TSaveData@EngineCore">
         <InNodeId Type="System.Guid@Unknown" Value="6ae2bed6-1995-4618-9e62-f8b923949222" />
-        <InPinName Type="System.String@Unknown" Value="Depth" />
-        <OutNodeId Type="System.Guid@Unknown" Value="14fa3edc-067d-4614-8120-302e42977e5e" />
-        <OutPinName Type="System.String@Unknown" Value="DepthStencil" />
-      </SaveData>
-    </e_27>
-    <e_28 Type="EngineNS.Bricks.NodeGraph.UPinLinker@EngineCore">
-      <SaveData Type="EngineNS.Bricks.NodeGraph.UPinLinker.TSaveData@EngineCore">
-        <InNodeId Type="System.Guid@Unknown" Value="6ae2bed6-1995-4618-9e62-f8b923949222" />
         <InPinName Type="System.String@Unknown" Value="PreDepth" />
         <OutNodeId Type="System.Guid@Unknown" Value="f98b5d25-8f51-4693-b0e7-3d378b32289b" />
         <OutPinName Type="System.String@Unknown" Value="Prev" />
       </SaveData>
-    </e_28>
-    <e_29 Type="EngineNS.Bricks.NodeGraph.UPinLinker@EngineCore">
+    </e_27>
+    <e_28 Type="EngineNS.Bricks.NodeGraph.UPinLinker@EngineCore">
       <SaveData Type="EngineNS.Bricks.NodeGraph.UPinLinker.TSaveData@EngineCore">
         <InNodeId Type="System.Guid@Unknown" Value="14fa3edc-067d-4614-8120-302e42977e5e" />
         <InPinName Type="System.String@Unknown" Value="DepthStencil" />
         <OutNodeId Type="System.Guid@Unknown" Value="4c9d280e-524e-4f0c-8edd-94af227c4175" />
         <OutPinName Type="System.String@Unknown" Value="DepthStencil" />
       </SaveData>
-    </e_29>
-    <e_30 Type="EngineNS.Bricks.NodeGraph.UPinLinker@EngineCore">
+    </e_28>
+    <e_29 Type="EngineNS.Bricks.NodeGraph.UPinLinker@EngineCore">
       <SaveData Type="EngineNS.Bricks.NodeGraph.UPinLinker.TSaveData@EngineCore">
         <InNodeId Type="System.Guid@Unknown" Value="6ae2bed6-1995-4618-9e62-f8b923949222" />
         <InPinName Type="System.String@Unknown" Value="Color" />
         <OutNodeId Type="System.Guid@Unknown" Value="14fa3edc-067d-4614-8120-302e42977e5e" />
         <OutPinName Type="System.String@Unknown" Value="Result" />
       </SaveData>
-    </e_30>
-    <e_31 Type="EngineNS.Bricks.NodeGraph.UPinLinker@EngineCore">
+    </e_29>
+    <e_30 Type="EngineNS.Bricks.NodeGraph.UPinLinker@EngineCore">
       <SaveData Type="EngineNS.Bricks.NodeGraph.UPinLinker.TSaveData@EngineCore">
         <InNodeId Type="System.Guid@Unknown" Value="79e1d50f-c6fd-4bfc-b60c-f27462844e55" />
         <InPinName Type="System.String@Unknown" Value="Albedo" />
         <OutNodeId Type="System.Guid@Unknown" Value="6ae2bed6-1995-4618-9e62-f8b923949222" />
         <OutPinName Type="System.String@Unknown" Value="Result" />
       </SaveData>
-    </e_31>
-    <e_32 Type="EngineNS.Bricks.NodeGraph.UPinLinker@EngineCore">
+    </e_30>
+    <e_31 Type="EngineNS.Bricks.NodeGraph.UPinLinker@EngineCore">
       <SaveData Type="EngineNS.Bricks.NodeGraph.UPinLinker.TSaveData@EngineCore">
         <InNodeId Type="System.Guid@Unknown" Value="177bcc57-8cfb-40fa-9747-bbd4b09c3617" />
         <InPinName Type="System.String@Unknown" Value="Color" />
         <OutNodeId Type="System.Guid@Unknown" Value="1123f32e-2333-455b-9308-451e1ba426d8" />
         <OutPinName Type="System.String@Unknown" Value="Color" />
       </SaveData>
-    </e_32>
-    <e_33 Type="EngineNS.Bricks.NodeGraph.UPinLinker@EngineCore">
+    </e_31>
+    <e_32 Type="EngineNS.Bricks.NodeGraph.UPinLinker@EngineCore">
       <SaveData Type="EngineNS.Bricks.NodeGraph.UPinLinker.TSaveData@EngineCore">
         <InNodeId Type="System.Guid@Unknown" Value="177bcc57-8cfb-40fa-9747-bbd4b09c3617" />
         <InPinName Type="System.String@Unknown" Value="Depth" />
         <OutNodeId Type="System.Guid@Unknown" Value="1123f32e-2333-455b-9308-451e1ba426d8" />
         <OutPinName Type="System.String@Unknown" Value="Depth" />
       </SaveData>
-    </e_33>
-    <e_34 Type="EngineNS.Bricks.NodeGraph.UPinLinker@EngineCore">
+    </e_32>
+    <e_33 Type="EngineNS.Bricks.NodeGraph.UPinLinker@EngineCore">
       <SaveData Type="EngineNS.Bricks.NodeGraph.UPinLinker.TSaveData@EngineCore">
         <InNodeId Type="System.Guid@Unknown" Value="177bcc57-8cfb-40fa-9747-bbd4b09c3617" />
         <InPinName Type="System.String@Unknown" Value="Noise" />
         <OutNodeId Type="System.Guid@Unknown" Value="ec12c04a-f9e8-43e4-a5af-29db9168cb17" />
         <OutPinName Type="System.String@Unknown" Value="Image" />
       </SaveData>
-    </e_34>
-    <e_35 Type="EngineNS.Bricks.NodeGraph.UPinLinker@EngineCore">
+    </e_33>
+    <e_34 Type="EngineNS.Bricks.NodeGraph.UPinLinker@EngineCore">
       <SaveData Type="EngineNS.Bricks.NodeGraph.UPinLinker.TSaveData@EngineCore">
         <InNodeId Type="System.Guid@Unknown" Value="c913d30f-2057-493d-a61b-dff3c452ec9d" />
         <InPinName Type="System.String@Unknown" Value="Color" />
         <OutNodeId Type="System.Guid@Unknown" Value="bb8405b5-dfd1-468a-aead-f11a77b22a7f" />
         <OutPinName Type="System.String@Unknown" Value="Result" />
       </SaveData>
-    </e_35>
-    <e_36 Type="EngineNS.Bricks.NodeGraph.UPinLinker@EngineCore">
+    </e_34>
+    <e_35 Type="EngineNS.Bricks.NodeGraph.UPinLinker@EngineCore">
       <SaveData Type="EngineNS.Bricks.NodeGraph.UPinLinker.TSaveData@EngineCore">
         <InNodeId Type="System.Guid@Unknown" Value="107f0928-b890-4adf-a01a-b947bb084a11" />
         <InPinName Type="System.String@Unknown" Value="Color1" />
         <OutNodeId Type="System.Guid@Unknown" Value="177bcc57-8cfb-40fa-9747-bbd4b09c3617" />
         <OutPinName Type="System.String@Unknown" Value="Result" />
       </SaveData>
-    </e_36>
-    <e_37 Type="EngineNS.Bricks.NodeGraph.UPinLinker@EngineCore">
+    </e_35>
+    <e_36 Type="EngineNS.Bricks.NodeGraph.UPinLinker@EngineCore">
       <SaveData Type="EngineNS.Bricks.NodeGraph.UPinLinker.TSaveData@EngineCore">
         <InNodeId Type="System.Guid@Unknown" Value="107f0928-b890-4adf-a01a-b947bb084a11" />
         <InPinName Type="System.String@Unknown" Value="Color2" />
         <OutNodeId Type="System.Guid@Unknown" Value="c913d30f-2057-493d-a61b-dff3c452ec9d" />
         <OutPinName Type="System.String@Unknown" Value="Result" />
       </SaveData>
-    </e_37>
-    <e_38 Type="EngineNS.Bricks.NodeGraph.UPinLinker@EngineCore">
+    </e_36>
+    <e_37 Type="EngineNS.Bricks.NodeGraph.UPinLinker@EngineCore">
       <SaveData Type="EngineNS.Bricks.NodeGraph.UPinLinker.TSaveData@EngineCore">
         <InNodeId Type="System.Guid@Unknown" Value="7cda79d9-1646-46fe-8919-c96d0fcf8ddb" />
         <InPinName Type="System.String@Unknown" Value="Color" />
         <OutNodeId Type="System.Guid@Unknown" Value="107f0928-b890-4adf-a01a-b947bb084a11" />
         <OutPinName Type="System.String@Unknown" Value="Result" />
       </SaveData>
-    </e_38>
-    <e_39 Type="EngineNS.Bricks.NodeGraph.UPinLinker@EngineCore">
+    </e_37>
+    <e_38 Type="EngineNS.Bricks.NodeGraph.UPinLinker@EngineCore">
       <SaveData Type="EngineNS.Bricks.NodeGraph.UPinLinker.TSaveData@EngineCore">
         <InNodeId Type="System.Guid@Unknown" Value="f997237e-844d-4504-9b58-eabba41cc638" />
         <InPinName Type="System.String@Unknown" Value="GpuScene" />
         <OutNodeId Type="System.Guid@Unknown" Value="c3d13463-dc07-41f9-b5c6-34a145700b92" />
         <OutPinName Type="System.String@Unknown" Value="GpuScene" />
       </SaveData>
-    </e_39>
-    <e_40 Type="EngineNS.Bricks.NodeGraph.UPinLinker@EngineCore">
+    </e_38>
+    <e_39 Type="EngineNS.Bricks.NodeGraph.UPinLinker@EngineCore">
       <SaveData Type="EngineNS.Bricks.NodeGraph.UPinLinker.TSaveData@EngineCore">
         <InNodeId Type="System.Guid@Unknown" Value="f997237e-844d-4504-9b58-eabba41cc638" />
         <InPinName Type="System.String@Unknown" Value="Color" />
         <OutNodeId Type="System.Guid@Unknown" Value="107f0928-b890-4adf-a01a-b947bb084a11" />
         <OutPinName Type="System.String@Unknown" Value="Result" />
       </SaveData>
-    </e_40>
-    <e_41 Type="EngineNS.Bricks.NodeGraph.UPinLinker@EngineCore">
+    </e_39>
+    <e_40 Type="EngineNS.Bricks.NodeGraph.UPinLinker@EngineCore">
       <SaveData Type="EngineNS.Bricks.NodeGraph.UPinLinker.TSaveData@EngineCore">
         <InNodeId Type="System.Guid@Unknown" Value="7cda79d9-1646-46fe-8919-c96d0fcf8ddb" />
         <InPinName Type="System.String@Unknown" Value="GpuScene" />
         <OutNodeId Type="System.Guid@Unknown" Value="f997237e-844d-4504-9b58-eabba41cc638" />
         <OutPinName Type="System.String@Unknown" Value="GpuScene" />
       </SaveData>
-    </e_41>
-    <e_42 Type="EngineNS.Bricks.NodeGraph.UPinLinker@EngineCore">
+    </e_40>
+    <e_41 Type="EngineNS.Bricks.NodeGraph.UPinLinker@EngineCore">
       <SaveData Type="EngineNS.Bricks.NodeGraph.UPinLinker.TSaveData@EngineCore">
         <InNodeId Type="System.Guid@Unknown" Value="52affd62-6d6f-43fe-9165-98f8c78fb3ef" />
         <InPinName Type="System.String@Unknown" Value="Depth" />
         <OutNodeId Type="System.Guid@Unknown" Value="1123f32e-2333-455b-9308-451e1ba426d8" />
         <OutPinName Type="System.String@Unknown" Value="Depth" />
       </SaveData>
-    </e_42>
-    <e_43 Type="EngineNS.Bricks.NodeGraph.UPinLinker@EngineCore">
+    </e_41>
+    <e_42 Type="EngineNS.Bricks.NodeGraph.UPinLinker@EngineCore">
       <SaveData Type="EngineNS.Bricks.NodeGraph.UPinLinker.TSaveData@EngineCore">
         <InNodeId Type="System.Guid@Unknown" Value="327940ef-db99-4d80-8665-77b8c7dd3026" />
         <InPinName Type="System.String@Unknown" Value="Color" />
         <OutNodeId Type="System.Guid@Unknown" Value="c65ce80c-7ed2-437a-90fa-5f6321ceaade" />
         <OutPinName Type="System.String@Unknown" Value="Result" />
       </SaveData>
-    </e_43>
-    <e_44 Type="EngineNS.Bricks.NodeGraph.UPinLinker@EngineCore">
+    </e_42>
+    <e_43 Type="EngineNS.Bricks.NodeGraph.UPinLinker@EngineCore">
       <SaveData Type="EngineNS.Bricks.NodeGraph.UPinLinker.TSaveData@EngineCore">
         <InNodeId Type="System.Guid@Unknown" Value="d457136e-23e0-4105-a3ac-93823f99f446" />
         <InPinName Type="System.String@Unknown" Value="Color" />
         <OutNodeId Type="System.Guid@Unknown" Value="327940ef-db99-4d80-8665-77b8c7dd3026" />
         <OutPinName Type="System.String@Unknown" Value="Result" />
       </SaveData>
-    </e_44>
-    <e_45 Type="EngineNS.Bricks.NodeGraph.UPinLinker@EngineCore">
+    </e_43>
+    <e_44 Type="EngineNS.Bricks.NodeGraph.UPinLinker@EngineCore">
       <SaveData Type="EngineNS.Bricks.NodeGraph.UPinLinker.TSaveData@EngineCore">
         <InNodeId Type="System.Guid@Unknown" Value="ea3de692-fb7c-449b-8b04-f060b216a3c6" />
         <InPinName Type="System.String@Unknown" Value="Color" />
         <OutNodeId Type="System.Guid@Unknown" Value="d457136e-23e0-4105-a3ac-93823f99f446" />
         <OutPinName Type="System.String@Unknown" Value="Result" />
       </SaveData>
-    </e_45>
-    <e_46 Type="EngineNS.Bricks.NodeGraph.UPinLinker@EngineCore">
+    </e_44>
+    <e_45 Type="EngineNS.Bricks.NodeGraph.UPinLinker@EngineCore">
       <SaveData Type="EngineNS.Bricks.NodeGraph.UPinLinker.TSaveData@EngineCore">
         <InNodeId Type="System.Guid@Unknown" Value="616c1b57-2ca5-4560-8ebb-cfaf25228a66" />
         <InPinName Type="System.String@Unknown" Value="Color1" />
         <OutNodeId Type="System.Guid@Unknown" Value="7cda79d9-1646-46fe-8919-c96d0fcf8ddb" />
         <OutPinName Type="System.String@Unknown" Value="Result" />
       </SaveData>
-    </e_46>
-    <e_47 Type="EngineNS.Bricks.NodeGraph.UPinLinker@EngineCore">
+    </e_45>
+    <e_46 Type="EngineNS.Bricks.NodeGraph.UPinLinker@EngineCore">
       <SaveData Type="EngineNS.Bricks.NodeGraph.UPinLinker.TSaveData@EngineCore">
         <InNodeId Type="System.Guid@Unknown" Value="52affd62-6d6f-43fe-9165-98f8c78fb3ef" />
         <InPinName Type="System.String@Unknown" Value="Color" />
         <OutNodeId Type="System.Guid@Unknown" Value="4c9d280e-524e-4f0c-8edd-94af227c4175" />
         <OutPinName Type="System.String@Unknown" Value="MRT0" />
       </SaveData>
-    </e_47>
-    <e_48 Type="EngineNS.Bricks.NodeGraph.UPinLinker@EngineCore">
+    </e_46>
+    <e_47 Type="EngineNS.Bricks.NodeGraph.UPinLinker@EngineCore">
       <SaveData Type="EngineNS.Bricks.NodeGraph.UPinLinker.TSaveData@EngineCore">
         <InNodeId Type="System.Guid@Unknown" Value="dd6e3283-42fd-4516-8d7b-36c25a86a0bc" />
         <InPinName Type="System.String@Unknown" Value="Color" />
         <OutNodeId Type="System.Guid@Unknown" Value="107f0928-b890-4adf-a01a-b947bb084a11" />
         <OutPinName Type="System.String@Unknown" Value="Result" />
       </SaveData>
-    </e_48>
-    <e_49 Type="EngineNS.Bricks.NodeGraph.UPinLinker@EngineCore">
+    </e_47>
+    <e_48 Type="EngineNS.Bricks.NodeGraph.UPinLinker@EngineCore">
       <SaveData Type="EngineNS.Bricks.NodeGraph.UPinLinker.TSaveData@EngineCore">
         <InNodeId Type="System.Guid@Unknown" Value="c65ce80c-7ed2-437a-90fa-5f6321ceaade" />
         <InPinName Type="System.String@Unknown" Value="Color" />
         <OutNodeId Type="System.Guid@Unknown" Value="52affd62-6d6f-43fe-9165-98f8c78fb3ef" />
         <OutPinName Type="System.String@Unknown" Value="Result" />
       </SaveData>
-    </e_49>
-    <e_50 Type="EngineNS.Bricks.NodeGraph.UPinLinker@EngineCore">
+    </e_48>
+    <e_49 Type="EngineNS.Bricks.NodeGraph.UPinLinker@EngineCore">
       <SaveData Type="EngineNS.Bricks.NodeGraph.UPinLinker.TSaveData@EngineCore">
         <InNodeId Type="System.Guid@Unknown" Value="616c1b57-2ca5-4560-8ebb-cfaf25228a66" />
         <InPinName Type="System.String@Unknown" Value="Color2" />
         <OutNodeId Type="System.Guid@Unknown" Value="ea3de692-fb7c-449b-8b04-f060b216a3c6" />
         <OutPinName Type="System.String@Unknown" Value="Result" />
       </SaveData>
-    </e_50>
-    <e_51 Type="EngineNS.Bricks.NodeGraph.UPinLinker@EngineCore">
+    </e_49>
+    <e_50 Type="EngineNS.Bricks.NodeGraph.UPinLinker@EngineCore">
       <SaveData Type="EngineNS.Bricks.NodeGraph.UPinLinker.TSaveData@EngineCore">
         <InNodeId Type="System.Guid@Unknown" Value="bb8405b5-dfd1-468a-aead-f11a77b22a7f" />
         <InPinName Type="System.String@Unknown" Value="Color" />
         <OutNodeId Type="System.Guid@Unknown" Value="177bcc57-8cfb-40fa-9747-bbd4b09c3617" />
         <OutPinName Type="System.String@Unknown" Value="Result" />
       </SaveData>
-    </e_51>
-    <e_52 Type="EngineNS.Bricks.NodeGraph.UPinLinker@EngineCore">
+    </e_50>
+    <e_51 Type="EngineNS.Bricks.NodeGraph.UPinLinker@EngineCore">
       <SaveData Type="EngineNS.Bricks.NodeGraph.UPinLinker.TSaveData@EngineCore">
         <InNodeId Type="System.Guid@Unknown" Value="79369e32-46b5-4cbd-a541-1e9ef31d29d5" />
         <InPinName Type="System.String@Unknown" Value="QuarkRT" />
         <OutNodeId Type="System.Guid@Unknown" Value="b5ec4ad0-6ed9-4b84-9266-456767d95997" />
         <OutPinName Type="System.String@Unknown" Value="QuarkRT" />
       </SaveData>
-    </e_52>
-    <e_53 Type="EngineNS.Bricks.NodeGraph.UPinLinker@EngineCore">
+    </e_51>
+    <e_52 Type="EngineNS.Bricks.NodeGraph.UPinLinker@EngineCore">
       <SaveData Type="EngineNS.Bricks.NodeGraph.UPinLinker.TSaveData@EngineCore">
         <InNodeId Type="System.Guid@Unknown" Value="b5ec4ad0-6ed9-4b84-9266-456767d95997" />
         <InPinName Type="System.String@Unknown" Value="Vertices" />
         <OutNodeId Type="System.Guid@Unknown" Value="1389292e-2f74-4807-b292-324e3b4ce169" />
         <OutPinName Type="System.String@Unknown" Value="Vertices" />
       </SaveData>
-    </e_53>
-    <e_54 Type="EngineNS.Bricks.NodeGraph.UPinLinker@EngineCore">
+    </e_52>
+    <e_53 Type="EngineNS.Bricks.NodeGraph.UPinLinker@EngineCore">
       <SaveData Type="EngineNS.Bricks.NodeGraph.UPinLinker.TSaveData@EngineCore">
         <InNodeId Type="System.Guid@Unknown" Value="b5ec4ad0-6ed9-4b84-9266-456767d95997" />
         <InPinName Type="System.String@Unknown" Value="Indices" />
         <OutNodeId Type="System.Guid@Unknown" Value="1389292e-2f74-4807-b292-324e3b4ce169" />
         <OutPinName Type="System.String@Unknown" Value="Indices" />
       </SaveData>
-    </e_54>
-    <e_55 Type="EngineNS.Bricks.NodeGraph.UPinLinker@EngineCore">
+    </e_53>
+    <e_54 Type="EngineNS.Bricks.NodeGraph.UPinLinker@EngineCore">
       <SaveData Type="EngineNS.Bricks.NodeGraph.UPinLinker.TSaveData@EngineCore">
         <InNodeId Type="System.Guid@Unknown" Value="b5ec4ad0-6ed9-4b84-9266-456767d95997" />
         <InPinName Type="System.String@Unknown" Value="Clusters" />
         <OutNodeId Type="System.Guid@Unknown" Value="1389292e-2f74-4807-b292-324e3b4ce169" />
         <OutPinName Type="System.String@Unknown" Value="Clusters" />
       </SaveData>
-    </e_55>
-    <e_56 Type="EngineNS.Bricks.NodeGraph.UPinLinker@EngineCore">
+    </e_54>
+    <e_55 Type="EngineNS.Bricks.NodeGraph.UPinLinker@EngineCore">
       <SaveData Type="EngineNS.Bricks.NodeGraph.UPinLinker.TSaveData@EngineCore">
         <InNodeId Type="System.Guid@Unknown" Value="b5ec4ad0-6ed9-4b84-9266-456767d95997" />
         <InPinName Type="System.String@Unknown" Value="VisibleClusters" />
         <OutNodeId Type="System.Guid@Unknown" Value="1389292e-2f74-4807-b292-324e3b4ce169" />
         <OutPinName Type="System.String@Unknown" Value="VisibleClusters" />
       </SaveData>
-    </e_56>
-    <e_57 Type="EngineNS.Bricks.NodeGraph.UPinLinker@EngineCore">
+    </e_55>
+    <e_56 Type="EngineNS.Bricks.NodeGraph.UPinLinker@EngineCore">
       <SaveData Type="EngineNS.Bricks.NodeGraph.UPinLinker.TSaveData@EngineCore">
         <InNodeId Type="System.Guid@Unknown" Value="4c9d280e-524e-4f0c-8edd-94af227c4175" />
         <InPinName Type="System.String@Unknown" Value="MRT0" />
         <OutNodeId Type="System.Guid@Unknown" Value="79369e32-46b5-4cbd-a541-1e9ef31d29d5" />
         <OutPinName Type="System.String@Unknown" Value="MRT0" />
       </SaveData>
-    </e_57>
-    <e_58 Type="EngineNS.Bricks.NodeGraph.UPinLinker@EngineCore">
+    </e_56>
+    <e_57 Type="EngineNS.Bricks.NodeGraph.UPinLinker@EngineCore">
       <SaveData Type="EngineNS.Bricks.NodeGraph.UPinLinker.TSaveData@EngineCore">
         <InNodeId Type="System.Guid@Unknown" Value="4c9d280e-524e-4f0c-8edd-94af227c4175" />
         <InPinName Type="System.String@Unknown" Value="MRT1" />
         <OutNodeId Type="System.Guid@Unknown" Value="79369e32-46b5-4cbd-a541-1e9ef31d29d5" />
         <OutPinName Type="System.String@Unknown" Value="MRT1" />
       </SaveData>
-    </e_58>
-    <e_59 Type="EngineNS.Bricks.NodeGraph.UPinLinker@EngineCore">
+    </e_57>
+    <e_58 Type="EngineNS.Bricks.NodeGraph.UPinLinker@EngineCore">
       <SaveData Type="EngineNS.Bricks.NodeGraph.UPinLinker.TSaveData@EngineCore">
         <InNodeId Type="System.Guid@Unknown" Value="4c9d280e-524e-4f0c-8edd-94af227c4175" />
         <InPinName Type="System.String@Unknown" Value="MRT2" />
         <OutNodeId Type="System.Guid@Unknown" Value="79369e32-46b5-4cbd-a541-1e9ef31d29d5" />
         <OutPinName Type="System.String@Unknown" Value="MRT2" />
       </SaveData>
-    </e_59>
-    <e_60 Type="EngineNS.Bricks.NodeGraph.UPinLinker@EngineCore">
+    </e_58>
+    <e_59 Type="EngineNS.Bricks.NodeGraph.UPinLinker@EngineCore">
       <SaveData Type="EngineNS.Bricks.NodeGraph.UPinLinker.TSaveData@EngineCore">
         <InNodeId Type="System.Guid@Unknown" Value="4c9d280e-524e-4f0c-8edd-94af227c4175" />
         <InPinName Type="System.String@Unknown" Value="MRT3" />
         <OutNodeId Type="System.Guid@Unknown" Value="79369e32-46b5-4cbd-a541-1e9ef31d29d5" />
         <OutPinName Type="System.String@Unknown" Value="MRT3" />
       </SaveData>
-    </e_60>
-    <e_61 Type="EngineNS.Bricks.NodeGraph.UPinLinker@EngineCore">
+    </e_59>
+    <e_60 Type="EngineNS.Bricks.NodeGraph.UPinLinker@EngineCore">
       <SaveData Type="EngineNS.Bricks.NodeGraph.UPinLinker.TSaveData@EngineCore">
         <InNodeId Type="System.Guid@Unknown" Value="4c9d280e-524e-4f0c-8edd-94af227c4175" />
         <InPinName Type="System.String@Unknown" Value="DepthStencil" />
         <OutNodeId Type="System.Guid@Unknown" Value="79369e32-46b5-4cbd-a541-1e9ef31d29d5" />
         <OutPinName Type="System.String@Unknown" Value="DepthStencil" />
       </SaveData>
-    </e_61>
-    <e_62 Type="EngineNS.Bricks.NodeGraph.UPinLinker@EngineCore">
+    </e_60>
+    <e_61 Type="EngineNS.Bricks.NodeGraph.UPinLinker@EngineCore">
       <SaveData Type="EngineNS.Bricks.NodeGraph.UPinLinker.TSaveData@EngineCore">
         <InNodeId Type="System.Guid@Unknown" Value="aec88a75-caa4-4349-a2a1-7aae3527dd94" />
         <InPinName Type="System.String@Unknown" Value="Depth" />
         <OutNodeId Type="System.Guid@Unknown" Value="4133d647-335f-4c4c-b850-e6b5a38f3646" />
         <OutPinName Type="System.String@Unknown" Value="Result" />
       </SaveData>
-    </e_62>
-    <e_63 Type="EngineNS.Bricks.NodeGraph.UPinLinker@EngineCore">
+    </e_61>
+    <e_62 Type="EngineNS.Bricks.NodeGraph.UPinLinker@EngineCore">
       <SaveData Type="EngineNS.Bricks.NodeGraph.UPinLinker.TSaveData@EngineCore">
         <InNodeId Type="System.Guid@Unknown" Value="561e828a-09e1-4d6e-a844-231a9f4189a2" />
         <InPinName Type="System.String@Unknown" Value="Color" />
         <OutNodeId Type="System.Guid@Unknown" Value="616c1b57-2ca5-4560-8ebb-cfaf25228a66" />
         <OutPinName Type="System.String@Unknown" Value="Result" />
       </SaveData>
-    </e_63>
-    <e_64 Type="EngineNS.Bricks.NodeGraph.UPinLinker@EngineCore">
+    </e_62>
+    <e_63 Type="EngineNS.Bricks.NodeGraph.UPinLinker@EngineCore">
       <SaveData Type="EngineNS.Bricks.NodeGraph.UPinLinker.TSaveData@EngineCore">
         <InNodeId Type="System.Guid@Unknown" Value="76616e1e-98ed-4fd3-a94c-ba4b30515e33" />
         <InPinName Type="System.String@Unknown" Value="Depth" />
         <OutNodeId Type="System.Guid@Unknown" Value="561e828a-09e1-4d6e-a844-231a9f4189a2" />
         <OutPinName Type="System.String@Unknown" Value="Depth" />
       </SaveData>
-    </e_64>
-    <e_65 Type="EngineNS.Bricks.NodeGraph.UPinLinker@EngineCore">
+    </e_63>
+    <e_64 Type="EngineNS.Bricks.NodeGraph.UPinLinker@EngineCore">
       <SaveData Type="EngineNS.Bricks.NodeGraph.UPinLinker.TSaveData@EngineCore">
         <InNodeId Type="System.Guid@Unknown" Value="76616e1e-98ed-4fd3-a94c-ba4b30515e33" />
         <InPinName Type="System.String@Unknown" Value="Color" />
         <OutNodeId Type="System.Guid@Unknown" Value="561e828a-09e1-4d6e-a844-231a9f4189a2" />
         <OutPinName Type="System.String@Unknown" Value="Result" />
       </SaveData>
-    </e_65>
-    <e_66 Type="EngineNS.Bricks.NodeGraph.UPinLinker@EngineCore">
+    </e_64>
+    <e_65 Type="EngineNS.Bricks.NodeGraph.UPinLinker@EngineCore">
       <SaveData Type="EngineNS.Bricks.NodeGraph.UPinLinker.TSaveData@EngineCore">
         <InNodeId Type="System.Guid@Unknown" Value="561e828a-09e1-4d6e-a844-231a9f4189a2" />
         <InPinName Type="System.String@Unknown" Value="Depth" />
         <OutNodeId Type="System.Guid@Unknown" Value="1123f32e-2333-455b-9308-451e1ba426d8" />
         <OutPinName Type="System.String@Unknown" Value="Depth" />
       </SaveData>
-    </e_66>
-    <e_67 Type="EngineNS.Bricks.NodeGraph.UPinLinker@EngineCore">
+    </e_65>
+    <e_66 Type="EngineNS.Bricks.NodeGraph.UPinLinker@EngineCore">
       <SaveData Type="EngineNS.Bricks.NodeGraph.UPinLinker.TSaveData@EngineCore">
         <InNodeId Type="System.Guid@Unknown" Value="561e828a-09e1-4d6e-a844-231a9f4189a2" />
         <InPinName Type="System.String@Unknown" Value="Picked" />
         <OutNodeId Type="System.Guid@Unknown" Value="e5e97345-c5ea-4bad-a8a0-51f3c347c41f" />
         <OutPinName Type="System.String@Unknown" Value="Result" />
       </SaveData>
-    </e_67>
-    <e_68 Type="EngineNS.Bricks.NodeGraph.UPinLinker@EngineCore">
+    </e_66>
+    <e_67 Type="EngineNS.Bricks.NodeGraph.UPinLinker@EngineCore">
       <SaveData Type="EngineNS.Bricks.NodeGraph.UPinLinker.TSaveData@EngineCore">
         <InNodeId Type="System.Guid@Unknown" Value="5649e62e-c586-402d-9db7-f7bb2b1f5fc8" />
         <InPinName Type="System.String@Unknown" Value="Color" />
         <OutNodeId Type="System.Guid@Unknown" Value="76616e1e-98ed-4fd3-a94c-ba4b30515e33" />
         <OutPinName Type="System.String@Unknown" Value="Color" />
       </SaveData>
-    </e_68>
-    <e_69 Type="EngineNS.Bricks.NodeGraph.UPinLinker@EngineCore">
+    </e_67>
+    <e_68 Type="EngineNS.Bricks.NodeGraph.UPinLinker@EngineCore">
       <SaveData Type="EngineNS.Bricks.NodeGraph.UPinLinker.TSaveData@EngineCore">
         <InNodeId Type="System.Guid@Unknown" Value="aedd9899-9edf-402a-93f1-926795e2b59f" />
         <InPinName Type="System.String@Unknown" Value="Color" />
         <OutNodeId Type="System.Guid@Unknown" Value="5649e62e-c586-402d-9db7-f7bb2b1f5fc8" />
         <OutPinName Type="System.String@Unknown" Value="Color" />
       </SaveData>
-    </e_69>
-    <e_70 Type="EngineNS.Bricks.NodeGraph.UPinLinker@EngineCore">
+    </e_68>
+    <e_69 Type="EngineNS.Bricks.NodeGraph.UPinLinker@EngineCore">
       <SaveData Type="EngineNS.Bricks.NodeGraph.UPinLinker.TSaveData@EngineCore">
         <InNodeId Type="System.Guid@Unknown" Value="5649e62e-c586-402d-9db7-f7bb2b1f5fc8" />
         <InPinName Type="System.String@Unknown" Value="Depth" />
         <OutNodeId Type="System.Guid@Unknown" Value="76616e1e-98ed-4fd3-a94c-ba4b30515e33" />
         <OutPinName Type="System.String@Unknown" Value="Depth" />
       </SaveData>
-    </e_70>
-    <e_71 Type="EngineNS.Bricks.NodeGraph.UPinLinker@EngineCore">
+    </e_69>
+    <e_70 Type="EngineNS.Bricks.NodeGraph.UPinLinker@EngineCore">
       <SaveData Type="EngineNS.Bricks.NodeGraph.UPinLinker.TSaveData@EngineCore">
         <InNodeId Type="System.Guid@Unknown" Value="2d931ff4-e1a3-4e4d-9e6c-1f3f4989ef6e" />
         <InPinName Type="System.String@Unknown" Value="Depth" />
         <OutNodeId Type="System.Guid@Unknown" Value="1123f32e-2333-455b-9308-451e1ba426d8" />
         <OutPinName Type="System.String@Unknown" Value="Depth" />
       </SaveData>
+    </e_70>
+    <e_71 Type="EngineNS.Bricks.NodeGraph.UPinLinker@EngineCore">
+      <SaveData Type="EngineNS.Bricks.NodeGraph.UPinLinker.TSaveData@EngineCore">
+        <InNodeId Type="System.Guid@Unknown" Value="14fa3edc-067d-4614-8120-302e42977e5e" />
+        <InPinName Type="System.String@Unknown" Value="ShadowMap" />
+        <OutNodeId Type="System.Guid@Unknown" Value="2350731c-6b29-432d-8936-06281a7de040" />
+        <OutPinName Type="System.String@Unknown" Value="Result" />
+      </SaveData>
     </e_71>
     <e_72 Type="EngineNS.Bricks.NodeGraph.UPinLinker@EngineCore">
       <SaveData Type="EngineNS.Bricks.NodeGraph.UPinLinker.TSaveData@EngineCore">
-        <InNodeId Type="System.Guid@Unknown" Value="4d1de070-9ef8-46d8-a3db-a1dee4b81bd6" />
-        <InPinName Type="System.String@Unknown" Value="Hzb" />
-        <OutNodeId Type="System.Guid@Unknown" Value="aec88a75-caa4-4349-a2a1-7aae3527dd94" />
-        <OutPinName Type="System.String@Unknown" Value="Hzb" />
+        <InNodeId Type="System.Guid@Unknown" Value="4c9d280e-524e-4f0c-8edd-94af227c4175" />
+        <InPinName Type="System.String@Unknown" Value="Visibles" />
+        <OutNodeId Type="System.Guid@Unknown" Value="686e3ad1-3fb5-43e1-9aa4-71862515d83b" />
+        <OutPinName Type="System.String@Unknown" Value="Visibles" />
       </SaveData>
     </e_72>
     <e_73 Type="EngineNS.Bricks.NodeGraph.UPinLinker@EngineCore">
       <SaveData Type="EngineNS.Bricks.NodeGraph.UPinLinker.TSaveData@EngineCore">
-        <InNodeId Type="System.Guid@Unknown" Value="1389292e-2f74-4807-b292-324e3b4ce169" />
+        <InNodeId Type="System.Guid@Unknown" Value="44db0432-12ea-4ee9-b543-c2d735bb138c" />
         <InPinName Type="System.String@Unknown" Value="Hzb" />
-        <OutNodeId Type="System.Guid@Unknown" Value="4d1de070-9ef8-46d8-a3db-a1dee4b81bd6" />
+        <OutNodeId Type="System.Guid@Unknown" Value="aec88a75-caa4-4349-a2a1-7aae3527dd94" />
         <OutPinName Type="System.String@Unknown" Value="Hzb" />
       </SaveData>
     </e_73>
+    <e_74 Type="EngineNS.Bricks.NodeGraph.UPinLinker@EngineCore">
+      <SaveData Type="EngineNS.Bricks.NodeGraph.UPinLinker.TSaveData@EngineCore">
+        <InNodeId Type="System.Guid@Unknown" Value="1389292e-2f74-4807-b292-324e3b4ce169" />
+        <InPinName Type="System.String@Unknown" Value="Hzb" />
+        <OutNodeId Type="System.Guid@Unknown" Value="aec88a75-caa4-4349-a2a1-7aae3527dd94" />
+        <OutPinName Type="System.String@Unknown" Value="Hzb" />
+      </SaveData>
+    </e_74>
+    <e_75 Type="EngineNS.Bricks.NodeGraph.UPinLinker@EngineCore">
+      <SaveData Type="EngineNS.Bricks.NodeGraph.UPinLinker.TSaveData@EngineCore">
+        <InNodeId Type="System.Guid@Unknown" Value="4c9d280e-524e-4f0c-8edd-94af227c4175" />
+        <InPinName Type="System.String@Unknown" Value="GpuCull" />
+        <OutNodeId Type="System.Guid@Unknown" Value="44db0432-12ea-4ee9-b543-c2d735bb138c" />
+        <OutPinName Type="System.String@Unknown" Value="GpuCull" />
+      </SaveData>
+    </e_75>
+    <e_76 Type="EngineNS.Bricks.NodeGraph.UPinLinker@EngineCore">
+      <SaveData Type="EngineNS.Bricks.NodeGraph.UPinLinker.TSaveData@EngineCore">
+        <InNodeId Type="System.Guid@Unknown" Value="44db0432-12ea-4ee9-b543-c2d735bb138c" />
+        <InPinName Type="System.String@Unknown" Value="Visibles" />
+        <OutNodeId Type="System.Guid@Unknown" Value="686e3ad1-3fb5-43e1-9aa4-71862515d83b" />
+        <OutPinName Type="System.String@Unknown" Value="Visibles" />
+      </SaveData>
+    </e_76>
+    <e_77 Type="EngineNS.Bricks.NodeGraph.UPinLinker@EngineCore">
+      <SaveData Type="EngineNS.Bricks.NodeGraph.UPinLinker.TSaveData@EngineCore">
+        <InNodeId Type="System.Guid@Unknown" Value="c3d13463-dc07-41f9-b5c6-34a145700b92" />
+        <InPinName Type="System.String@Unknown" Value="Visibles" />
+        <OutNodeId Type="System.Guid@Unknown" Value="686e3ad1-3fb5-43e1-9aa4-71862515d83b" />
+        <OutPinName Type="System.String@Unknown" Value="Visibles" />
+      </SaveData>
+    </e_77>
+    <e_78 Type="EngineNS.Bricks.NodeGraph.UPinLinker@EngineCore">
+      <SaveData Type="EngineNS.Bricks.NodeGraph.UPinLinker.TSaveData@EngineCore">
+        <InNodeId Type="System.Guid@Unknown" Value="76616e1e-98ed-4fd3-a94c-ba4b30515e33" />
+        <InPinName Type="System.String@Unknown" Value="Visibles" />
+        <OutNodeId Type="System.Guid@Unknown" Value="686e3ad1-3fb5-43e1-9aa4-71862515d83b" />
+        <OutPinName Type="System.String@Unknown" Value="Visibles" />
+      </SaveData>
+    </e_78>
+    <e_79 Type="EngineNS.Bricks.NodeGraph.UPinLinker@EngineCore">
+      <SaveData Type="EngineNS.Bricks.NodeGraph.UPinLinker.TSaveData@EngineCore">
+        <InNodeId Type="System.Guid@Unknown" Value="2d931ff4-e1a3-4e4d-9e6c-1f3f4989ef6e" />
+        <InPinName Type="System.String@Unknown" Value="Visibles" />
+        <OutNodeId Type="System.Guid@Unknown" Value="686e3ad1-3fb5-43e1-9aa4-71862515d83b" />
+        <OutPinName Type="System.String@Unknown" Value="Visibles" />
+      </SaveData>
+    </e_79>
+    <e_80 Type="EngineNS.Bricks.NodeGraph.UPinLinker@EngineCore">
+      <SaveData Type="EngineNS.Bricks.NodeGraph.UPinLinker.TSaveData@EngineCore">
+        <InNodeId Type="System.Guid@Unknown" Value="004f199a-1f8a-491e-9d9e-177088c9b69f" />
+        <InPinName Type="System.String@Unknown" Value="Visibles" />
+        <OutNodeId Type="System.Guid@Unknown" Value="686e3ad1-3fb5-43e1-9aa4-71862515d83b" />
+        <OutPinName Type="System.String@Unknown" Value="Visibles" />
+      </SaveData>
+    </e_80>
   </Linkers>
 </Root>

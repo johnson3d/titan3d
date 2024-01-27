@@ -45,17 +45,7 @@ namespace EngineNS.Graphics.Pipeline
             //{
             //    i.Dispose();
             //}
-            VisibleMeshes.Clear();
-            VisibleNodes.Clear();
             base.Dispose();
-        }
-        public enum EShadingType
-        {
-            BasePass,
-            DepthPass,
-            HitproxyPass,//Mesh绘制HitproxyID
-            Picked,//Mesh绘制选择高亮
-            Count,
         }
         public class TtNodeListDefine
         {
@@ -102,6 +92,7 @@ namespace EngineNS.Graphics.Pipeline
         {
             if (CameraAttachments.ContainsKey(name))
                 return false;
+            camera.Name = name;
             CameraAttachments.Add(name, camera);
             return true;
         }
@@ -231,61 +222,10 @@ namespace EngineNS.Graphics.Pipeline
         }
         #endregion
         public Common.UPickedProxiableManager PickedProxiableManager { get; protected set; } = new Common.UPickedProxiableManager();
-        public List<FVisibleMesh> VisibleMeshes = new List<FVisibleMesh>();
-        public List<GamePlay.Scene.UNode> VisibleNodes = new List<GamePlay.Scene.UNode>();
-
-        public virtual Shader.UGraphicsShadingEnv GetPassShading(EShadingType type, Mesh.TtMesh.TtAtom atom, Pipeline.TtRenderGraphNode node)
+        
+        public virtual void OnDrawCall(NxRHI.ICommandList cmd, NxRHI.UGraphicDraw drawcall, Mesh.TtMesh.TtAtom atom)
         {
-            switch (type)
-            {
-                case EShadingType.BasePass:
-                    {
-                        var BasePassNode = FindFirstNode<Deferred.UDeferredBasePassNode>();
-                        if (node == BasePassNode)
-                        {
-                            return BasePassNode.mOpaqueShading;
-                        }
-                        else
-                        {
-                            var ForwordNode = FindFirstNode<Deferred.UForwordNode>();
-                            if (node == ForwordNode)
-                            {
-                                switch (atom.Material.RenderLayer)
-                                {
-                                    case ERenderLayer.RL_Translucent:
-                                        return ForwordNode.mTranslucentShading;
-                                    case ERenderLayer.RL_Sky:
-                                        return ForwordNode.mTranslucentShading;
-                                    default:
-                                        return ForwordNode.mOpaqueShading;
-                                }
-                            }   
-                        }
-                    }
-                    break;
-                case EShadingType.DepthPass:
-                    {
-                        var ShadowMapNode = FindFirstNode<Shadow.UShadowMapNode>();
-                        return ShadowMapNode.mShadowShading;
-                    }
-                case EShadingType.HitproxyPass:
-                    {
-                        var HitproxyNode = FindFirstNode<Common.UHitproxyNode>();
-                        return HitproxyNode.mHitproxyShading;
-                    }
-                case EShadingType.Picked:
-                    {
-                        var PickedNode = FindFirstNode<Common.UPickedNode>();
-                        return PickedNode.PickedShading;
-                    }
-                default:
-                    break;
-            }
-            return null;
-        }
-        public virtual void OnDrawCall(NxRHI.ICommandList cmd, Pipeline.URenderPolicy.EShadingType shadingType, NxRHI.UGraphicDraw drawcall, Mesh.TtMesh.TtAtom atom)
-        {
-            atom.MdfQueue.OnDrawCall(cmd, shadingType, drawcall, this, atom);
+            atom.MdfQueue.OnDrawCall(cmd, drawcall, this, atom);
         }
         public virtual async System.Threading.Tasks.Task Initialize(UCamera camera)
         {
@@ -400,7 +340,7 @@ namespace EngineNS.Graphics.Pipeline
             set
             {
                 mDisableShadow = value;
-                var shading = this.FindFirstNode<Deferred.UDeferredDirLightingNode>()?.ScreenDrawPolicy.mBasePassShading as Deferred.UDeferredDirLightingShading;
+                var shading = this.FindFirstNode<Deferred.UDeferredDirLightingNode>()?.GetPassShading() as Deferred.UDeferredDirLightingShading;
                 //var shading = DirLightingNode.ScreenDrawPolicy.mBasePassShading as UDeferredDirLightingShading;
                 shading?.SetDisableShadow(value);
             }
@@ -416,7 +356,7 @@ namespace EngineNS.Graphics.Pipeline
             set
             {
                 mDisablePointLight = value;
-                var shading = this.FindFirstNode<Deferred.UDeferredDirLightingNode>()?.ScreenDrawPolicy.mBasePassShading as Deferred.UDeferredDirLightingShading;
+                var shading = this.FindFirstNode<Deferred.UDeferredDirLightingNode>()?.GetPassShading() as Deferred.UDeferredDirLightingShading;
                 //var shading = DirLightingNode.ScreenDrawPolicy.mBasePassShading as UDeferredDirLightingShading;
                 shading?.SetDisablePointLights(value);
             }
@@ -432,7 +372,7 @@ namespace EngineNS.Graphics.Pipeline
             set
             {
                 mDisableHDR = value;
-                var shading = this.FindFirstNode<Deferred.UDeferredDirLightingNode>()?.ScreenDrawPolicy.mBasePassShading as Deferred.UDeferredDirLightingShading;
+                var shading = this.FindFirstNode<Deferred.UDeferredDirLightingNode>()?.GetPassShading() as Deferred.UDeferredDirLightingShading;
                 //var shading = DirLightingNode.ScreenDrawPolicy.mBasePassShading as UDeferredDirLightingShading;
                 shading?.SetDisableHDR(value);
             }
@@ -445,7 +385,7 @@ namespace EngineNS.Graphics.Pipeline
             set
             {
                 base.TypeAA = value;
-                var shading = this.FindFirstNode<Common.TtAntiAliasingNode>()?.ScreenDrawPolicy.mBasePassShading as Common.TtAntiAliasingShading;
+                var shading = this.FindFirstNode<Common.TtAntiAliasingNode>()?.GetPassShading() as Common.TtAntiAliasingShading;
                 if (shading != null)
                 {
                     shading.TypeAA.SetValue((uint)value);
@@ -491,36 +431,6 @@ namespace EngineNS.Graphics.Pipeline
                 return mPickedNode;
             }
         }
-        public override Shader.UGraphicsShadingEnv GetPassShading(EShadingType type, Mesh.TtMesh.TtAtom atom, Pipeline.TtRenderGraphNode node)
-        {
-            if (atom.UserShading != null)
-                return atom.UserShading;
-            switch (type)
-            {
-                case EShadingType.BasePass:
-                    {
-                        return node.GetPassShading(type, atom);
-                    }
-                case EShadingType.DepthPass:
-                    {
-                        //var ShadowMapNode = FindFirstNode<Shadow.UShadowMapNode>();
-                        return ShadowMapNode.mShadowShading;
-                    }
-                case EShadingType.HitproxyPass:
-                    {
-                        //var HitproxyNode = FindFirstNode<Common.UHitproxyNode>();
-                        return HitproxyNode.mHitproxyShading;
-                    }
-                case EShadingType.Picked:
-                    {
-                        //var PickedNode = FindFirstNode<Common.UPickedNode>();
-                        return PickedNode.PickedShading;
-                    }
-                default:
-                    break;
-            }
-            return null;
-        }
     }
     public class UForwordPolicyBase : URenderPolicy
     {
@@ -533,7 +443,7 @@ namespace EngineNS.Graphics.Pipeline
             set
             {
                 mDisableAO = value;
-                var finalShading = FindFirstNode<Mobile.UFinalCopyNode>()?.ScreenDrawPolicy.mBasePassShading as Mobile.UFinalCopyShading;
+                var finalShading = FindFirstNode<Mobile.UFinalCopyNode>()?.GetPassShading() as Mobile.UFinalCopyShading;
                 if (finalShading != null)
                 {
                     finalShading.SetDisableAO(value);
@@ -554,7 +464,7 @@ namespace EngineNS.Graphics.Pipeline
                 var node = FindFirstNode<Mobile.UFinalCopyNode>();
                 if (node == null)
                     return;
-                var shading = node.ScreenDrawPolicy.mBasePassShading as Mobile.UFinalCopyShading;
+                var shading = node.GetPassShading() as Mobile.UFinalCopyShading;
                 shading?.SetDisableHDR(value);
             }
         }
@@ -619,52 +529,6 @@ namespace EngineNS.Graphics.Pipeline
                 }
                 return mPickedNode;
             }
-        }
-        public override Shader.UGraphicsShadingEnv GetPassShading(EShadingType type, Mesh.TtMesh.TtAtom atom, Pipeline.TtRenderGraphNode node)
-        {
-            switch (type)
-            {
-                case EShadingType.BasePass:
-                    {
-                        //var BasePassNode = FindFirstNode<Mobile.UMobileOpaqueNode>();
-                        //var TranslucentNode = FindFirstNode<Mobile.UMobileTranslucentNode>();
-                        if (node == BasePassNode)
-                        {
-                            return BasePassNode.mOpaqueShading;
-                        }
-                        else if (node == TranslucentNode)
-                        {
-                            switch (atom.Material.RenderLayer)
-                            {
-                                case ERenderLayer.RL_Translucent:
-                                    return TranslucentNode.mTranslucentShading;
-                                case ERenderLayer.RL_Sky:
-                                    return TranslucentNode.mTranslucentShading;
-                                default:
-                                    return BasePassNode.mOpaqueShading;
-                            }
-                        }
-                    }
-                    break;
-                case EShadingType.DepthPass:
-                    {
-                        //var ShadowMapNode = FindFirstNode<Shadow.UShadowMapNode>();
-                        return ShadowMapNode.mShadowShading;
-                    }
-                case EShadingType.HitproxyPass:
-                    {
-                        //var HitproxyNode = FindFirstNode<Common.UHitproxyNode>();
-                        return HitproxyNode.mHitproxyShading;
-                    }
-                case EShadingType.Picked:
-                    {
-                        //var PickedNode = FindFirstNode<Common.UPickedNode>();
-                        return PickedNode.PickedShading;
-                    }
-                default:
-                    break;
-            }
-            return null;
         }
     }
 }

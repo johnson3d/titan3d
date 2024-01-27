@@ -1,4 +1,5 @@
-﻿using System;
+﻿using NPOI.SS.Formula.Functions;
+using System;
 
 using System.Globalization;
 
@@ -104,18 +105,25 @@ namespace EngineNS
         /// | /    | /
         /// |/     |/
         /// 7------6
-        public Vector3[] GetCorners()
+        public unsafe void UnsafeGetCorners(Vector3* results)
+        {
+            SetVector3Value(ref results[0], Minimum.X, Maximum.Y, Maximum.Z);
+            SetVector3Value(ref results[1], Maximum.X, Maximum.Y, Maximum.Z);
+            SetVector3Value(ref results[2], Maximum.X, Minimum.Y, Maximum.Z);
+            SetVector3Value(ref results[3], Minimum.X, Minimum.Y, Maximum.Z);
+            SetVector3Value(ref results[4], Minimum.X, Maximum.Y, Minimum.Z);
+            SetVector3Value(ref results[5], Maximum.X, Maximum.Y, Minimum.Z);
+            SetVector3Value(ref results[6], Maximum.X, Minimum.Y, Minimum.Z);
+            SetVector3Value(ref results[7], Minimum.X, Minimum.Y, Minimum.Z);
+        }
+        public unsafe Vector3[] GetCorners()
 	    {
 		    Vector3[] results = new Vector3[8];
-		    SetVector3Value(ref results[0], Minimum.X, Maximum.Y, Maximum.Z);
-		    SetVector3Value(ref results[1], Maximum.X, Maximum.Y, Maximum.Z);
-		    SetVector3Value(ref results[2], Maximum.X, Minimum.Y, Maximum.Z);
-		    SetVector3Value(ref results[3], Minimum.X, Minimum.Y, Maximum.Z);
-		    SetVector3Value(ref results[4], Minimum.X, Maximum.Y, Minimum.Z);
-		    SetVector3Value(ref results[5], Maximum.X, Maximum.Y, Minimum.Z);
-		    SetVector3Value(ref results[6], Maximum.X, Minimum.Y, Minimum.Z);
-            SetVector3Value(ref results[7], Minimum.X, Minimum.Y, Minimum.Z);
-		    return results;
+            fixed (Vector3* p = &results[0])
+            {
+                UnsafeGetCorners(p);
+            }
+            return results;
 	    }
         public DVector3[] GetDCorners()
         {
@@ -262,10 +270,17 @@ namespace EngineNS
         /// </summary>
         /// <param name="points">点列表</param>
         /// <returns>返回创建的包围盒</returns>
-        public static BoundingBox FromPoints(Vector3[] points)
+        public static unsafe BoundingBox FromPoints(Vector3[] points)
 	    {
-		    if( points == null || points.Length <= 0 )
-			    throw new ArgumentNullException( "points" );
+            fixed (Vector3* p = &points[0])
+            {
+                return FromPoints(p, points.Length);
+            }
+	    }
+        public static unsafe BoundingBox FromPoints(Vector3* points, int count)
+        {
+            if (points == null || count <= 0)
+                throw new ArgumentNullException("points");
 
             BoundingBox result;
             Vector3 min;
@@ -278,17 +293,17 @@ namespace EngineNS
             result.Maximum.Y = float.MinValue;
             result.Maximum.Z = float.MinValue;
 
-            foreach ( var i in points )
-		    {
-                Vector3 vector = i;
-			    Vector3.Minimize( in result.Minimum, in vector, out min );
+            for (int i = 0; i < count; i++)
+            {
+                ref Vector3 vector = ref points[i];
+                Vector3.Minimize(in result.Minimum, in vector, out min);
                 result.Minimum = min;
-			    Vector3.Maximize(in result.Maximum, in vector, out max );
+                Vector3.Maximize(in result.Maximum, in vector, out max);
                 result.Maximum = max;
-		    }
+            }
 
-		    return result;
-	    }
+            return result;
+        }
 
         //BoundingBox FromPoints( DataStream points, int count, int stride )
         //{

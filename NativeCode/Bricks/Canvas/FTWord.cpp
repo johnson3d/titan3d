@@ -263,12 +263,13 @@ namespace Canvas
 
 		NxRHI::FBufferDesc bfDesc{};
 		bfDesc.SetDefault();
-		bfDesc.Type = NxRHI::EBufferType::BFT_SRV;
+		bfDesc.Type = NxRHI::EBufferType::BFT_NONE;// NxRHI::EBufferType::BFT_SRV;
 		bfDesc.Usage = NxRHI::USAGE_STAGING;
 		bfDesc.CpuAccess = NxRHI::CAS_WRITE;
 		bfDesc.InitData = nullptr;
 		bfDesc.RowPitch = device->GetGpuResourceAlignment()->RoundupTexturePitch(PixelWidth * sizeof(BYTE));
 		bfDesc.DepthPitch = bfDesc.RowPitch * PixelHeight;
+		bfDesc.StructureStride = 0;
 		bfDesc.Size = bfDesc.RowPitch * PixelHeight;
 		auto buffer = MakeWeakRef(device->CreateBuffer(&bfDesc));
 		NxRHI::FMappedSubResource mapped{};

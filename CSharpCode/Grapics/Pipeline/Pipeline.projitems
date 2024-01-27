@@ -39,6 +39,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)Common\UPickHollowNode.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Common\USceenSpaceNode.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Common\UScreenTilingNode.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)CpuCullingNode.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)GpuCullingNode.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Deferred\UDeferredBasePassNode.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Deferred\UDeferredDirLightingNode.cs" />

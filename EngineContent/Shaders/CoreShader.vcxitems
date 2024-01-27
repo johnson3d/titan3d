@@ -98,6 +98,7 @@
     <None Include="$(MSBuildThisFileDirectory)ShadingEnv\Post\SunShaft\SunShaftCommon.cginc" />
     <None Include="$(MSBuildThisFileDirectory)ShadingEnv\ScreenSpaceUI.cginc" />
     <None Include="$(MSBuildThisFileDirectory)ShadingEnv\Sys\copy2d.shadingenv" />
+    <None Include="$(MSBuildThisFileDirectory)ShadingEnv\Sys\ESM.cginc" />
     <None Include="$(MSBuildThisFileDirectory)ShadingEnv\Sys\NoPixelShader.shadingenv" />
     <None Include="$(MSBuildThisFileDirectory)ShadingEnv\Sys\pick\HitProxy.cginc" />
     <None Include="$(MSBuildThisFileDirectory)ShadingEnv\Sys\pick\pick_blur.cginc" />

@@ -277,6 +277,18 @@ namespace EngineNS.Editor.Forms
         }
         public float LoadingPercent { get; set; } = 1.0f;
         public string ProgressText { get; set; } = "Loading";
+        public Graphics.Pipeline.TtCpuCullingNode CpuCullNode = null;
+        public GamePlay.UWorld.UVisParameter.EVisCullFilter CullFilters 
+        { 
+            get
+            {
+                return CpuCullNode.VisParameter.CullFilters;
+            }
+            set
+            {
+                CpuCullNode.VisParameter.CullFilters = value;
+            }
+        }
         public async System.Threading.Tasks.Task<bool> OpenEditor(UMainEditorApplication mainEditor, RName name, object arg)
         {
             AssetName = name;
@@ -298,6 +310,9 @@ namespace EngineNS.Editor.Forms
             mWorldOutliner.Title = $"Outliner:{name}";
 
             UEngine.Instance.TickableManager.AddTickable(this);
+
+            CpuCullNode = PreviewViewport.RenderPolicy.FindNode("CpuCulling") as Graphics.Pipeline.TtCpuCullingNode;
+            System.Diagnostics.Debug.Assert(CpuCullNode != null);
             return true;
         }
         public void OnCloseEditor()
@@ -410,11 +425,12 @@ namespace EngineNS.Editor.Forms
             }
             ImGuiAPI.SameLine(0, 15);
             ImGuiAPI.BeginGroup();
+            
             for (int i = 0; i < (int)GamePlay.UWorld.UVisParameter.EVisCullFilter.FilterTypeCount; i++)
             {
                 var type = (GamePlay.UWorld.UVisParameter.EVisCullFilter)(1 << i);
                 ImGuiAPI.SameLine(0, -1);
-                bool checkValue = (PreviewViewport.VisParameter.CullFilters & type) != 0;
+                bool checkValue = (CullFilters & type) != 0;
                 var name = type.ToString();
                 if (name == "FilterTypeCount")
                 {
@@ -424,11 +440,11 @@ namespace EngineNS.Editor.Forms
                 {
                     if (checkValue)
                     {
-                        PreviewViewport.VisParameter.CullFilters |= type;
+                        CullFilters |= type;
                     }
                     else
                     {
-                        PreviewViewport.VisParameter.CullFilters &= (~type);
+                        CullFilters &= (~type);
                     }
                 }
             }

@@ -388,9 +388,9 @@ namespace EngineNS.Bricks.NodeGraph
                     drawStart.Y += textSize.Y + styles.TitleTextOffset;
                 }
                 if (node.HasError)
-                    cmdlist.AddText(in drawStart, styles.TitleTextErrorColor, node.Name, null);
+                    cmdlist.AddText(in drawStart, styles.TitleTextErrorColor, node.Name != null ? node.Name : "none", null);
                 else
-                    cmdlist.AddText(in drawStart, styles.TitleTextColor, node.Name, null);
+                    cmdlist.AddText(in drawStart, styles.TitleTextColor, node.Name != null ? node.Name : "none", null);
             }
 
             {//Draw Preview
@@ -845,10 +845,10 @@ namespace EngineNS.Bricks.NodeGraph
                                     mGraph.ObjectMenus.SetIsExpanded(false, true);
                                 }
 
-                                var cmdList = ImGuiAPI.GetWindowDrawList();
+                                //var cmdList = ImGuiAPI.GetWindowDrawList();
                                 EGui.UIProxy.SearchBarProxy.OnDraw(ref mCanvasMenuFilterFocused, in drawList, "search item", ref CanvasMenuFilterStr, width);
                                 for (var childIdx = 0; childIdx < mGraph.ObjectMenus.SubMenuItems.Count; childIdx++)
-                                    DrawMenu(mGraph.ObjectMenus.SubMenuItems[childIdx], CanvasMenuFilterStr.ToLower(), cmdList);
+                                    DrawMenu(mGraph.ObjectMenus.SubMenuItems[childIdx], CanvasMenuFilterStr.ToLower(), in drawList);
                             }
                         }
                         break;
@@ -885,7 +885,7 @@ namespace EngineNS.Bricks.NodeGraph
             TreeList,
             Menu,
         }
-        void DrawMenu(UMenuItem item, string filter, ImDrawList cmdList, eMenuStyle style = eMenuStyle.TreeList)
+        void DrawMenu(UMenuItem item, string filter, in ImDrawList cmdList, eMenuStyle style = eMenuStyle.TreeList)
         {
             if (!item.FilterCheck(filter))
                 return;
@@ -904,7 +904,7 @@ namespace EngineNS.Bricks.NodeGraph
             {
                 if (item.IsSeparator)
                 {
-                    EGui.UIProxy.NamedMenuSeparator.OnDraw(item.Text, cmdList, EGui.UIProxy.StyleConfig.Instance.NamedMenuSeparatorThickness);
+                    EGui.UIProxy.NamedMenuSeparator.OnDraw(item.Text, in cmdList, EGui.UIProxy.StyleConfig.Instance.NamedMenuSeparatorThickness);
                 }
                 else if (!string.IsNullOrEmpty(item.Text))
                 {
@@ -931,7 +931,7 @@ namespace EngineNS.Bricks.NodeGraph
                             clicked = ImGuiAPI.IsItemClicked(ImGuiMouseButton_.ImGuiMouseButton_Left);
                             break;
                         case eMenuStyle.Menu:
-                            clicked = EGui.UIProxy.MenuItemProxy.MenuItem(item.Text, "", false, null, cmdList, Support.UAnyPointer.Default, ref item.MenuState);
+                            clicked = EGui.UIProxy.MenuItemProxy.MenuItem(item.Text, "", false, null, in cmdList, Support.UAnyPointer.Default, ref item.MenuState);
                             break;
                     }
                     if (clicked)

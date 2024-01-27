@@ -35,7 +35,7 @@ namespace EngineNS.Bricks.Particle
         {
 
         }
-        public unsafe void OnDrawCall(Graphics.Pipeline.Shader.TtMdfQueueBase mdfQueue1, NxRHI.ICommandList cmd, Graphics.Pipeline.URenderPolicy.EShadingType shadingType, NxRHI.UGraphicDraw drawcall, Graphics.Pipeline.URenderPolicy policy, TtMesh.TtAtom atom)
+        public unsafe void OnDrawCall(Graphics.Pipeline.Shader.TtMdfQueueBase mdfQueue1, NxRHI.ICommandList cmd, NxRHI.UGraphicDraw drawcall, Graphics.Pipeline.URenderPolicy policy, TtMesh.TtAtom atom)
         {
 
         }
@@ -51,9 +51,9 @@ namespace EngineNS.Bricks.Particle
             Emitter = (mdf as UParticleMdfQueue<FParticle, FParticleSystem>).Emitter;
         }
         public UEmitter<FParticle, FParticleSystem> Emitter;
-        public override unsafe void OnDrawCall(NxRHI.ICommandList cmd, URenderPolicy.EShadingType shadingType, NxRHI.UGraphicDraw drawcall, URenderPolicy policy, TtMesh.TtAtom atom)
+        public override unsafe void OnDrawCall(NxRHI.ICommandList cmd, NxRHI.UGraphicDraw drawcall, URenderPolicy policy, TtMesh.TtAtom atom)
         {
-            base.OnDrawCall(cmd, shadingType, drawcall, policy, atom);
+            base.OnDrawCall(cmd, drawcall, policy, atom);
 
             if (Emitter != null)
             {

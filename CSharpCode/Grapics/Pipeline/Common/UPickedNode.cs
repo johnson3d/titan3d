@@ -1,4 +1,6 @@
-﻿using System;
+﻿using EngineNS.Graphics.Mesh;
+using EngineNS.Graphics.Pipeline.Shader;
+using System;
 using System.Collections.Generic;
 using System.Text;
 
@@ -52,7 +54,10 @@ namespace EngineNS.Graphics.Pipeline.Common
         public UPickSetupShading PickedShading = null;
         public UGraphicsBuffers PickedBuffer { get; protected set; } = new UGraphicsBuffers();
         public NxRHI.URenderPass RenderPass;
-
+        public override UGraphicsShadingEnv GetPassShading(TtMesh.TtAtom atom = null)
+        {
+            return PickedShading;
+        }
         public async override System.Threading.Tasks.Task Initialize(URenderPolicy policy, string debugName)
         {
             await Thread.TtAsyncDummyClass.DummyFunc();
@@ -85,8 +90,8 @@ namespace EngineNS.Graphics.Pipeline.Common
             PickedBuffer.Initialize(policy, RenderPass);
             PickedBuffer.SetRenderTarget(policy, 0, PickedPinOut);
             PickedBuffer.SetDepthStencil(policy, DepthPinOut);
-            
-            PickedBuffer.TargetViewIdentifier = policy.DefaultCamera.TargetViewIdentifier;
+
+            PickedBuffer.TargetViewIdentifier = new UGraphicsBuffers.UTargetViewIdentifier();// policy.DefaultCamera.TargetViewIdentifier;
 
             PickedManager = policy.PickedProxiableManager;
         }
@@ -123,7 +128,7 @@ namespace EngineNS.Graphics.Pipeline.Common
                         {
                             foreach (var k in i.Atoms)
                             {
-                                var drawcall = k.GetDrawCall(cmdlist.mCoreObject, PickedBuffer, policy, Graphics.Pipeline.URenderPolicy.EShadingType.Picked, this);
+                                var drawcall = k.GetDrawCall(cmdlist.mCoreObject, PickedBuffer, policy, this);
                                 if (drawcall != null)
                                 {
                                     if (PickedBuffer.PerViewportCBuffer != null)

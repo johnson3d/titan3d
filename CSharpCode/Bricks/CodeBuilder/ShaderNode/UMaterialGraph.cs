@@ -127,6 +127,25 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode
                         this.AddNode(node);
                     });
             }
+            var perCameraMenus = uniformVarMenus.AddMenuItem("PerCamera", null, null);
+            var cameraMembers = UEngine.Instance.GfxDevice.CoreShaderBinder.CBPerCamera.GetType().GetFields();
+            foreach (var i in cameraMembers)
+            {
+                var attrs = i.GetCustomAttributes(typeof(NxRHI.UShader.UShaderVarAttribute), false);
+                if (attrs.Length == 0)
+                    continue;
+                perCameraMenus.AddMenuItem(i.Name, null,
+                    (UMenuItem item, object sender) =>
+                    {
+                        var node = new UUniformVar();
+                        node.VarType = Rtti.UTypeDesc.TypeOf((attrs[0] as NxRHI.UShader.UShaderVarAttribute).VarType);
+                        node.Name = i.Name;
+                        node.UserData = this;
+                        node.Position = PopMenuPosition;
+                        SetDefaultActionForNode(node);
+                        this.AddNode(node);
+                    });
+            }
             var inputVarMenus = CanvasMenus.AddMenuItem("InputVars", null, null);
             var psInputMenus = inputVarMenus.AddMenuItem("PSInput", null, null);
             psInputMenus.AddMenuItem("Input", null,

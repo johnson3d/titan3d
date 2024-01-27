@@ -59,30 +59,10 @@ namespace EngineNS.Graphics.Pipeline.Mobile
             CoreSDK.DisposeObject(ref BasePassNode);
             base.Dispose();
         }
-        public override Shader.UGraphicsShadingEnv GetPassShading(EShadingType type, Mesh.TtMesh.TtAtom atom, Pipeline.TtRenderGraphNode node)
+        public override void OnDrawCall(NxRHI.ICommandList cmd, NxRHI.UGraphicDraw drawcall, Mesh.TtMesh.TtAtom atom)
         {
-            switch (type)
-            {
-                case EShadingType.BasePass:
-                    return BasePassNode.mOpaqueShading;
-            }
-            return null;
-        }
-        public override void OnDrawCall(NxRHI.ICommandList cmd, Pipeline.URenderPolicy.EShadingType shadingType, NxRHI.UGraphicDraw drawcall, Mesh.TtMesh.TtAtom atom)
-        {
-            base.OnDrawCall(cmd, shadingType, drawcall, atom);
-            if (shadingType == EShadingType.BasePass)
-            {
-                switch (atom.Material.RenderLayer)
-                {
-                    case ERenderLayer.RL_Translucent:
-                        //BasePassNode.mTranslucentShading.OnDrawCall(shadingType, drawcall, this, mesh);
-                        return;
-                    default:
-                        BasePassNode.mOpaqueShading.OnDrawCall(cmd, shadingType, drawcall, this, atom);
-                        return;
-                }
-            }
+            base.OnDrawCall(cmd, drawcall, atom);
+            BasePassNode.mOpaqueShading.OnDrawCall(cmd, drawcall, this, atom);
         }
         public unsafe override void TickLogic(GamePlay.UWorld world)
         {

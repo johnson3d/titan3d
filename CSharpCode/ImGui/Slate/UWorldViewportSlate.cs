@@ -180,11 +180,7 @@ namespace EngineNS.EGui.Slate
             return base.OnEvent(in e);
         }
         #endregion
-        GamePlay.UWorld.UVisParameter mVisParameter = new GamePlay.UWorld.UVisParameter();
-        public GamePlay.UWorld.UVisParameter VisParameter
-        {
-            get => mVisParameter;
-        }
+        
         protected virtual void TickOnFocus()
         {
             float step = (UEngine.Instance.ElapseTickCountMS * 0.001f) * CameraMoveSpeed;
@@ -228,17 +224,6 @@ namespace EngineNS.EGui.Slate
                     if (this.IsFocused)
                     {
                         TickOnFocus();
-                    }
-
-                    mVisParameter.World = World;
-                    mVisParameter.VisibleMeshes = RenderPolicy.VisibleMeshes;
-                    mVisParameter.VisibleNodes = RenderPolicy.VisibleNodes;
-                    mVisParameter.CullCamera = RenderPolicy.DefaultCamera;
-                    World.GatherVisibleMeshes(mVisParameter);
-
-                    if (mWorldBoundShapes != null)
-                    {
-                        RenderPolicy.VisibleMeshes.AddRange(mWorldBoundShapes);
                     }
 
                     using (new Profiler.TimeScopeHelper(ScopeRPolicyTick))

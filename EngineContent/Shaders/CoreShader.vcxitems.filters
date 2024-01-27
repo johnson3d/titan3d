@@ -370,6 +370,9 @@
     <None Include="$(MSBuildThisFileDirectory)Inc\BaseStructure\Quat.cginc">
       <Filter>Inc\BaseStructure</Filter>
     </None>
+    <None Include="$(MSBuildThisFileDirectory)ShadingEnv\Sys\ESM.cginc">
+      <Filter>ShadingEnv\Sys</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="$(MSBuildThisFileDirectory)Compute\calcrate.compute">

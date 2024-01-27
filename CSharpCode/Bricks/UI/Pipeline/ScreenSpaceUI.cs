@@ -1,4 +1,6 @@
 ﻿using EngineNS.GamePlay;
+using EngineNS.Graphics.Mesh;
+using EngineNS.Graphics.Pipeline.Shader;
 using EngineNS.NxRHI;
 using System;
 using System.Collections.Generic;
@@ -41,20 +43,21 @@ namespace EngineNS.Graphics.Pipeline.Common
             AddInputOutput(ColorPinInOut, NxRHI.EBufferType.BFT_RTV | NxRHI.EBufferType.BFT_SRV);
             AddInputOutput(DepthPinInOut, NxRHI.EBufferType.BFT_DSV | NxRHI.EBufferType.BFT_SRV);
         }
+        public override UGraphicsShadingEnv GetPassShading(TtMesh.TtAtom atom)
+        {
+            return mBasePassShading;
+        }
+        public TtScreenSpaceUIShading mBasePassShading;
         public override async Task Initialize(URenderPolicy policy, string debugName)
         {
             var rc = UEngine.Instance.GfxDevice.RenderContext;
-
-            ScreenDrawPolicy = new Shader.CommanShading.UBasePassPolicy();
-            await ScreenDrawPolicy.Initialize(null);
-            ScreenDrawPolicy.TagObject = policy;
 
             CreateGBuffers(policy, ColorPinInOut.Attachement.Format);
 
             BasePass.Initialize(rc, debugName + ".BasePass");
             DebugName = debugName;
 
-            ScreenDrawPolicy.mBasePassShading = UEngine.Instance.ShadingEnvManager.GetShadingEnv<TtScreenSpaceUIShading>();
+            mBasePassShading = UEngine.Instance.ShadingEnvManager.GetShadingEnv<TtScreenSpaceUIShading>();
         }
         public override unsafe UGraphicsBuffers CreateGBuffers(URenderPolicy policy, EPixelFormat format)
         {
@@ -109,7 +112,7 @@ namespace EngineNS.Graphics.Pipeline.Common
                             {
                                 foreach (var j in i.Atoms)
                                 {
-                                    var drawCall = j.GetDrawCall(cmdlist.mCoreObject, GBuffers, ScreenDrawPolicy, Graphics.Pipeline.URenderPolicy.EShadingType.BasePass, this);
+                                    var drawCall = j.GetDrawCall(cmdlist.mCoreObject, GBuffers, policy, this);
                                     if (drawCall == null)
                                         continue;
                                     drawCall.TagObject = this;

@@ -65,9 +65,9 @@ namespace EngineNS.Graphics.Pipeline.Mobile
         public unsafe override void OnBuildDrawCall(URenderPolicy policy, NxRHI.UGraphicDraw drawcall)
         {
         }
-        public unsafe override void OnDrawCall(NxRHI.ICommandList cmd, Pipeline.URenderPolicy.EShadingType shadingType, NxRHI.UGraphicDraw drawcall, URenderPolicy policy, Mesh.TtMesh.TtAtom atom)
+        public unsafe override void OnDrawCall(NxRHI.ICommandList cmd, NxRHI.UGraphicDraw drawcall, URenderPolicy policy, Mesh.TtMesh.TtAtom atom)
         {
-            base.OnDrawCall(cmd, shadingType, drawcall, policy, atom);
+            base.OnDrawCall(cmd, drawcall, policy, atom);
 
             var Manager = policy as Mobile.UMobileEditorFSPolicy;
             if (Manager != null)
@@ -143,14 +143,17 @@ namespace EngineNS.Graphics.Pipeline.Mobile
     }
     public class UMobileForwordNodeBase : Common.UBasePassNode
     {
+        public TtRenderGraphPin VisiblesPinIn = TtRenderGraphPin.CreateInput("Visibles");
         public TtRenderGraphPin ShadowMapPinIn = TtRenderGraphPin.CreateInput("ShadowMap");
         public TtRenderGraphPin EnvMapPinIn = TtRenderGraphPin.CreateInput("EnvMap");
         public TtRenderGraphPin VignettePinIn = TtRenderGraphPin.CreateInput("Vignette");        
         public TtRenderGraphPin TileScreenPinIn = TtRenderGraphPin.CreateInput("TileScreen");
         public TtRenderGraphPin PointLightsPinIn = TtRenderGraphPin.CreateInput("PointLights");
 
+        public TtCpuCullingNode CpuCullNode = null;
         public override void InitNodePins()
         {
+            AddInput(VisiblesPinIn, NxRHI.EBufferType.BFT_NONE);
             AddInput(ShadowMapPinIn, NxRHI.EBufferType.BFT_SRV | NxRHI.EBufferType.BFT_DSV);
             AddInput(EnvMapPinIn, NxRHI.EBufferType.BFT_SRV);
             AddInput(VignettePinIn, NxRHI.EBufferType.BFT_SRV);
@@ -243,6 +246,12 @@ namespace EngineNS.Graphics.Pipeline.Mobile
 
             //mBasePassShading = shading as Pipeline.Mobile.UBasePassOpaque;
             mOpaqueShading = UEngine.Instance.ShadingEnvManager.GetShadingEnv<UBasePassOpaque>();
+
+            var linker = VisiblesPinIn.FindInLinker();
+            if (linker != null)
+            {
+                CpuCullNode = linker.OutPin.HostNode as TtCpuCullingNode;
+            }
         }
         public override void Dispose()
         {
@@ -278,7 +287,7 @@ namespace EngineNS.Graphics.Pipeline.Mobile
                 {
                     LayerBasePass.SetViewport(in GBuffers.Viewport);
 
-                    foreach (var i in policy.VisibleMeshes)
+                    foreach (var i in CpuCullNode.VisParameter.VisibleMeshes)
                     {
                         foreach (var j in i.Mesh.SubMeshes)
                         {
@@ -288,7 +297,7 @@ namespace EngineNS.Graphics.Pipeline.Mobile
                                 if (layer != ERenderLayer.RL_Opaque)
                                     continue;
                                 var cmdlist = LayerBasePass.GetCmdList(layer);
-                                var drawcall = k.GetDrawCall(cmdlist.mCoreObject, GBuffers, policy, URenderPolicy.EShadingType.BasePass, this);
+                                var drawcall = k.GetDrawCall(cmdlist.mCoreObject, GBuffers, policy, this);
                                 if (drawcall != null)
                                 {
                                     drawcall.BindGBuffer(policy.DefaultCamera, GBuffers);
@@ -336,6 +345,7 @@ namespace EngineNS.Graphics.Pipeline.Mobile
 
     public class UMobileTranslucentNode : Common.UBasePassNode
     {
+        public TtRenderGraphPin VisiblesPinIn = TtRenderGraphPin.CreateInput("Visibles");
         public Graphics.Pipeline.TtRenderGraphPin AlbedoPinInOut = Graphics.Pipeline.TtRenderGraphPin.CreateInputOutput("Albedo");
         public Graphics.Pipeline.TtRenderGraphPin DepthPinInOut = Graphics.Pipeline.TtRenderGraphPin.CreateInputOutput("Depth");
 
@@ -363,6 +373,7 @@ namespace EngineNS.Graphics.Pipeline.Mobile
         public TtLayerDrawBuffers LayerBasePass = new TtLayerDrawBuffers();
         public NxRHI.URenderPass RenderPass;
         public NxRHI.URenderPass GizmosRenderPass;
+        public TtCpuCullingNode CpuCullNode = null;
         public override async System.Threading.Tasks.Task Initialize(URenderPolicy policy, string debugName)
         {
             await Thread.TtAsyncDummyClass.DummyFunc();
@@ -423,6 +434,12 @@ namespace EngineNS.Graphics.Pipeline.Mobile
             GGizmosBuffers.TargetViewIdentifier = policy.DefaultCamera.TargetViewIdentifier;
 
             mTranslucentShading = UEngine.Instance.ShadingEnvManager.GetShadingEnv<UBasePassTranslucent>();
+
+            var linker = VisiblesPinIn.FindInLinker();
+            if (linker != null)
+            {
+                CpuCullNode = linker.OutPin.HostNode as TtCpuCullingNode;
+            }
         }
         public override void Dispose()
         {
@@ -459,7 +476,7 @@ namespace EngineNS.Graphics.Pipeline.Mobile
                 {
                     LayerBasePass.SetViewport(in GBuffers.Viewport);
 
-                    foreach (var i in policy.VisibleMeshes)
+                    foreach (var i in CpuCullNode.VisParameter.VisibleMeshes)
                     {
                         foreach (var j in i.Mesh.SubMeshes)
                         {
@@ -471,7 +488,7 @@ namespace EngineNS.Graphics.Pipeline.Mobile
                                 if (layer == ERenderLayer.RL_Opaque)
                                     continue;
                                 var cmdlist = LayerBasePass.GetCmdList(layer);
-                                var drawcall = k.GetDrawCall(cmdlist.mCoreObject, GBuffers, policy, URenderPolicy.EShadingType.BasePass, this);
+                                var drawcall = k.GetDrawCall(cmdlist.mCoreObject, GBuffers, policy, this);
                                 if (drawcall != null)
                                 {
                                     drawcall.BindGBuffer(policy.DefaultCamera, GBuffers);

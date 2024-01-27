@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using EngineNS.GamePlay;
 using EngineNS.Graphics.Mesh;
+using EngineNS.Graphics.Pipeline.Shader;
 using EngineNS.NxRHI;
 
 namespace EngineNS.Graphics.Pipeline.Common.Post
@@ -24,7 +25,7 @@ namespace EngineNS.Graphics.Pipeline.Common.Post
         {
             defines.AddDefine("ENV_OUT_COLOR", "1");
         }
-        public override void OnDrawCall(NxRHI.ICommandList cmd, URenderPolicy.EShadingType shadingType, UGraphicDraw drawcall, URenderPolicy policy, TtMesh.TtAtom atom)
+        public override void OnDrawCall(NxRHI.ICommandList cmd, UGraphicDraw drawcall, URenderPolicy policy, TtMesh.TtAtom atom)
         {
             var aaNode = drawcall.TagObject as TtLuminanceThresholeNode;
             if (aaNode == null)
@@ -53,7 +54,7 @@ namespace EngineNS.Graphics.Pipeline.Common.Post
                 drawcall.BindCBuffer(index, aaNode.CBShadingEnv);
             }
 
-            base.OnDrawCall(cmd, shadingType, drawcall, policy, atom);
+            base.OnDrawCall(cmd, drawcall, policy, atom);
         }
     }
     public class TtLuminanceThresholeNode : USceenSpaceNode
@@ -71,10 +72,15 @@ namespace EngineNS.Graphics.Pipeline.Common.Post
 
             base.InitNodePins();
         }
+        public TtLuminanceThresholeShading mBasePassShading;
+        public override UGraphicsShadingEnv GetPassShading(TtMesh.TtAtom atom = null)
+        {
+            return mBasePassShading;
+        }
         public override async System.Threading.Tasks.Task Initialize(URenderPolicy policy, string debugName)
         {
             await base.Initialize(policy, debugName);
-            ScreenDrawPolicy.mBasePassShading = UEngine.Instance.ShadingEnvManager.GetShadingEnv<TtLuminanceThresholeShading>();
+            mBasePassShading = UEngine.Instance.ShadingEnvManager.GetShadingEnv<TtLuminanceThresholeShading>();
         }
         [System.Runtime.InteropServices.StructLayout(System.Runtime.InteropServices.LayoutKind.Sequential, Pack = 16)]
         struct FLuminanceThresholeStruct
@@ -137,10 +143,15 @@ namespace EngineNS.Graphics.Pipeline.Common.Post
         {
             Name = "LuminanceThresholeOutLumNode";
         }
+        public TtLuminanceThresholeOutLumShading mLuminanceShading;
+        public override UGraphicsShadingEnv GetPassShading(TtMesh.TtAtom atom = null)
+        {
+            return mLuminanceShading;
+        }
         public override async System.Threading.Tasks.Task Initialize(URenderPolicy policy, string debugName)
         {
             await base.Initialize(policy, debugName);
-            ScreenDrawPolicy.mBasePassShading = UEngine.Instance.ShadingEnvManager.GetShadingEnv<TtLuminanceThresholeOutLumShading>();
+            mLuminanceShading = UEngine.Instance.ShadingEnvManager.GetShadingEnv<TtLuminanceThresholeOutLumShading>();
         }
         public override void BeforeTickLogic(URenderPolicy policy)
         {
