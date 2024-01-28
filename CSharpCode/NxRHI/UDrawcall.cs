@@ -141,6 +141,11 @@ namespace EngineNS.NxRHI
         }
         public void BindIndirectDrawArgsBuffer(UBuffer buffer, uint offset)
         {
+            if (buffer == null)
+            {
+                mCoreObject.BindIndirectDrawArgsBuffer(new IBuffer(), offset);
+                return;
+            }
             mCoreObject.BindIndirectDrawArgsBuffer(buffer.mCoreObject, offset);
         }
         public void SetDebugName(string name)

@@ -51,7 +51,7 @@ namespace EngineNS.Animation.SkeletonAnimation.Skeleton
         public List<ILimb> Limbs { get; set; } = new List<ILimb>(); //all Limbs, like bone, sockets or others
         public List<ILimb> Children { get; set; } = new List<ILimb>(); //Roots
         private Dictionary<uint, ILimb> HashDic { get; set; } = new Dictionary<uint, ILimb>();
-        public ILimbDesc Desc { get; set; }
+        public ILimbDesc Desc { get; set; } = null;
         public IndexInSkeleton ParentIndex { get; set; } = IndexInSkeleton.Invalid;
         public IndexInSkeleton Index { get; set; } = IndexInSkeleton.Invalid;
         public ILimb Root { get; set; } //Named "Root" bone in children
@@ -73,6 +73,11 @@ namespace EngineNS.Animation.SkeletonAnimation.Skeleton
                 return limb;
             }
             return null;
+        }
+        public ILimb FindLimb(string name)
+        {
+            var nameHash = Standart.Hash.xxHash.xxHash32.ComputeHash(name);
+            return FindLimb(nameHash);
         }
         public List<T> GetLimb<T>() where T : ILimb
         {

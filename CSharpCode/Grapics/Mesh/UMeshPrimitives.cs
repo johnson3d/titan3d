@@ -67,6 +67,7 @@ namespace EngineNS.Graphics.Mesh
             }
 
             public unsafe partial bool FBXCreateCreateDraw(EGui.Controls.UContentBrowser ContentBrowser);
+            public unsafe partial bool AssimpCreateCreateDraw(EGui.Controls.UContentBrowser ContentBrowser);
         }
         public UMeshPrimitives()
         {

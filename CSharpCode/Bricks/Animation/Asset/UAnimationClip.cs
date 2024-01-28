@@ -67,7 +67,7 @@ namespace EngineNS.Animation.Asset
         #region AnimationChunk
         [Rtti.Meta]
         public RName AnimationChunkName { get; set; }
-        UAnimationChunk AnimationChunk = null;
+        public UAnimationChunk AnimationChunk { get; set; } = null;
         public Base.UAnimHierarchy AnimatedHierarchy
         {
             get
@@ -221,6 +221,7 @@ namespace EngineNS.Animation.Asset
             }
 
             public unsafe partial bool FBXCreateCreateDraw(EGui.Controls.UContentBrowser ContentBrowser);
+            public unsafe partial bool AssimpCreateCreateDraw(EGui.Controls.UContentBrowser ContentBrowser);
         }
         #endregion
 

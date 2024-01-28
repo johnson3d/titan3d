@@ -131,6 +131,10 @@ namespace EngineNS.Graphics.Mesh
                 return mPerMeshCBuffer;
             }
         }
+        public void UnsafeSetPerMeshCBuffer(NxRHI.UCbView cbv)
+        {
+            mPerMeshCBuffer = cbv;
+        }
         public class UMeshAttachment
         {
             

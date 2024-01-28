@@ -283,6 +283,8 @@ namespace EngineNS.Graphics.Pipeline.Common
                         {
                             continue;
                         }
+                        if (i.DrawMode == FVisibleMesh.EDrawMode.Instance)
+                            continue;
                         foreach (var j in i.Mesh.SubMeshes)
                         {
                             foreach (var k in j.Atoms)

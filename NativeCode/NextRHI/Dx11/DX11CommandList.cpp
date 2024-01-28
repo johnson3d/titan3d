@@ -404,8 +404,7 @@ namespace NxRHI
 		mContext->IASetPrimitiveTopology(PrimitiveTypeToDX(topology, 0, &dpCount));
 
 		ASSERT(countBuffer == nullptr);
-		const auto argOffset = offsetof(FIndirectDrawArgument, VertexCountPerInstance);
-		mContext->DrawIndexedInstancedIndirect(((DX11Buffer*)indirectArg)->mBuffer, indirectArgOffset + argOffset);
+		mContext->DrawIndexedInstancedIndirect(((DX11Buffer*)indirectArg)->mBuffer, indirectArgOffset);
 	}
 	void DX11CommandList::Dispatch(UINT x, UINT y, UINT z)
 	{
@@ -413,8 +412,7 @@ namespace NxRHI
 	}
 	void DX11CommandList::IndirectDispatch(IBuffer* indirectArg, UINT indirectArgOffset)
 	{
-		const auto argOffset = offsetof(FIndirectDispatchArgument, X);
-		mContext->DispatchIndirect(((DX11Buffer*)indirectArg)->mBuffer, indirectArgOffset + argOffset);
+		mContext->DispatchIndirect(((DX11Buffer*)indirectArg)->mBuffer, indirectArgOffset);
 	}
 	void DX11CommandList::SetMemoryBarrier(EPipelineStage srcStage, EPipelineStage dstStage, EBarrierAccess srcAccess, EBarrierAccess dstAccess)
 	{

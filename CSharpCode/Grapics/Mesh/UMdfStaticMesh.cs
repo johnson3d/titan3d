@@ -21,9 +21,5 @@ namespace EngineNS.Graphics.Mesh
         {
             get => this.Modifiers[1] as Modifier.TtInstanceModifier;
         }
-        public void SetInstanceMode(bool bSSBO = true)
-        {
-            InstanceModifier.SetMode(bSSBO);
-        }
     }
 }

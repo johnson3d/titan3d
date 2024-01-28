@@ -456,7 +456,7 @@ namespace EngineNS.UI.Editor
                 ImGuiAPI.TreePop();
             }
         }
-        string GetElementShowName(TtUIElement element)
+        public static string GetElementShowName(TtUIElement element)
         {
             return "[" + element.GetType().Name + "] " + element.Name;
         }

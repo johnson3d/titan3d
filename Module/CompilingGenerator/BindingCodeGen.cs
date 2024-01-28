@@ -203,6 +203,7 @@ namespace CompilingGenerator
             string getPropertyValueSwitch = "";
             string setPropertyValueSwitch = "";
             string tourBindableProperties = "";
+            string hasBindablePropertiesStr = "";
 
             var source = $@"
 using System;
@@ -343,7 +344,19 @@ namespace {namespaceName}
                         }
 
                         tourBindableProperties += $@"
-            tourAction.Invoke(""{propName}"", {bindPropName});";
+            tourAction.Invoke(""{propName}"", {bindPropName}, ref data);";
+
+                        hasBindablePropertiesStr += $@"
+            if(matchCase)
+            {{
+                if(""{propName}"".Contains(containString))
+                    return true;
+            }}
+            else
+            {{
+                if(""{propName}"".ToLower().Contains(containString))
+                    return true;
+            }}";
 
                         bindImpSource += $@"
     public class {bindingExprImpName} : EngineNS.UI.Bind.TtBindingExpression<{propTypeDisplayName}>
@@ -984,8 +997,13 @@ namespace {namespaceName}
         }}";
             if (!classSymbol.MemberNames.Any(name => "TourBindProperties" == name))
             {
+                if(!baseHasBindObjectInterface)
+                {
+                    source += $@"
+        public delegate void TourBindProperyAction<T>(string propertyName, EngineNS.UI.Bind.TtBindableProperty bindProperty, ref T data);";
+                }
                 source += $@"
-        public{(baseHasBindObjectInterface ? " override" : " virtual")} void TourBindProperties(Action<string, EngineNS.UI.Bind.TtBindableProperty> tourAction)
+        public{(baseHasBindObjectInterface ? " override" : " virtual")} void TourBindProperties<T>(ref T data, TourBindProperyAction<T> tourAction)
         {{
             if(tourAction == null)
                 return;
@@ -993,7 +1011,45 @@ namespace {namespaceName}
                 if(baseHasBindObjectInterface)
                 {
                     source += $@"
-            base.TourBindProperties(tourAction);";
+            base.TourBindProperties(ref data, tourAction);";
+                }
+                source += $@"
+        }}";
+            }
+            if(!classSymbol.MemberNames.Any(name => "HasBindProperties" == name))
+            {
+                source += $@"
+        public{(baseHasBindObjectInterface ? " override" : " virtual")} bool HasBindProperties(string containString, bool matchCase = false)
+        {{
+            if(!matchCase)
+                containString = containString.ToLower();";
+                if(string.IsNullOrEmpty(hasBindablePropertiesStr))
+                {
+                    if(baseHasBindObjectInterface)
+                    {
+                        source += $@"
+            return base.HasBindProperties(containString, matchCase);";
+                    }
+                    else
+                    {
+                        source += $@"
+            return false;";
+                    }
+                }
+                else
+                {
+                    source += $@"
+            {hasBindablePropertiesStr}";
+                    if(baseHasBindObjectInterface)
+                    {
+                        source += $@"
+            return base.HasBindProperties(containString, matchCase);";
+                    }
+                    else
+                    {
+                        source += $@"
+            return false;";
+                    }
                 }
                 source += $@"
         }}";

@@ -210,6 +210,8 @@ namespace EngineNS.Graphics.Pipeline.Deferred
                 {
                     foreach (var i in CpuCullNode.VisParameter.VisibleMeshes)
                     {
+                        if (i.DrawMode == FVisibleMesh.EDrawMode.Instance)
+                            continue;
                         foreach (var j in i.Mesh.SubMeshes)
                         {
                             foreach (var k in j.Atoms)

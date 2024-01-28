@@ -1,0 +1,374 @@
+﻿using Assimp;
+using EngineNS.Animation.SkeletonAnimation.Skeleton;
+using EngineNS.Bricks.AssetImpExp;
+using System;
+using System.Collections.Generic;
+using System.Text;
+
+namespace EngineNS.Graphics.Mesh
+{
+    public partial class UMeshPrimitives
+    {
+        public partial class ImportAttribute : IO.CommonCreateAttribute
+        {
+            AssetImporter AssetImporter = new AssetImporter();
+            AssetDescription AssetDescription = null;
+            AssetImportOption AssetImportOption = new AssetImportOption();
+            public unsafe partial bool AssimpCreateCreateDraw(EGui.Controls.UContentBrowser ContentBrowser)
+            {
+                if (bPopOpen == false)
+                    ImGuiAPI.OpenPopup($"Import MeshPrimitives", ImGuiPopupFlags_.ImGuiPopupFlags_None);
+                var mFileDialog = UEngine.Instance.EditorInstance.FileDialog.mFileDialog;
+                var visible = true;
+                var retValue = false;
+                if (ImGuiAPI.BeginPopupModal($"Import MeshPrimitives", &visible, ImGuiWindowFlags_.ImGuiWindowFlags_None))
+                {
+                    if (ImGuiAPI.BeginCombo("MeshType", MeshType, ImGuiComboFlags_.ImGuiComboFlags_None))
+                    {
+                        bool bSelected = false;
+                        if (ImGuiAPI.Selectable("FromFile", ref bSelected, ImGuiSelectableFlags_.ImGuiSelectableFlags_None, in Vector2.Zero))
+                        {
+                            MeshType = "FromFile";
+                        }
+                        if (ImGuiAPI.Selectable("Box", ref bSelected, ImGuiSelectableFlags_.ImGuiSelectableFlags_None, in Vector2.Zero))
+                        {
+                            MeshType = "Box";
+                        }
+                        if (ImGuiAPI.Selectable("Rect2D", ref bSelected, ImGuiSelectableFlags_.ImGuiSelectableFlags_None, in Vector2.Zero))
+                        {
+                            MeshType = "Rect2D";
+                        }
+                        if (ImGuiAPI.Selectable("Sphere", ref bSelected, ImGuiSelectableFlags_.ImGuiSelectableFlags_None, in Vector2.Zero))
+                        {
+                            MeshType = "Sphere";
+                        }
+                        if (ImGuiAPI.Selectable("Cylinder", ref bSelected, ImGuiSelectableFlags_.ImGuiSelectableFlags_None, in Vector2.Zero))
+                        {
+                            MeshType = "Cylinder";
+                        }
+                        if (ImGuiAPI.Selectable("Torus", ref bSelected, ImGuiSelectableFlags_.ImGuiSelectableFlags_None, in Vector2.Zero))
+                        {
+                            MeshType = "Torus";
+                        }
+                        if (ImGuiAPI.Selectable("Capsule", ref bSelected, ImGuiSelectableFlags_.ImGuiSelectableFlags_None, in Vector2.Zero))
+                        {
+                            MeshType = "Capsule";
+                        }
+                        ImGuiAPI.EndCombo();
+                    }
+                    switch (MeshType)
+                    {
+                        case "FromFile":
+                            {
+                                //PGAsset.Target = null;
+                                var sz = new Vector2(-1, 0);
+                                if (ImGuiAPI.Button("Select FBX", in sz))
+                                {
+                                    mFileDialog.OpenModal("ChooseFileDlgKey", "Choose File", ".FBX,.fbx", ".");
+                                }
+                                // display
+                                if (mFileDialog.DisplayDialog("ChooseFileDlgKey"))
+                                {
+                                    // action if OK
+                                    if (mFileDialog.IsOk() == true)
+                                    {
+                                        mSourceFile = mFileDialog.GetFilePathName();
+                                        string filePath = mFileDialog.GetCurrentPath();
+                                        if (!string.IsNullOrEmpty(mSourceFile))
+                                        {
+                                            AssetDescription = AssetImporter.PreImport(mSourceFile);
+                                            if (AssetDescription == null)
+                                            {
+                                                eErrorType = enErrorType.EmptyName;
+                                            }
+                                            else
+                                            {
+                                                PGAsset.Target = AssetDescription;
+                                                mName = IO.TtFileManager.GetPureName(mSourceFile);
+                                            }
+                                        }
+                                    }
+                                    // close
+                                    mFileDialog.CloseDialog();
+                                }
+                                if (eErrorType != enErrorType.None)
+                                {
+                                    var clr = new Vector4(1, 0, 0, 1);
+                                    ImGuiAPI.TextColored(in clr, $"Source:{mSourceFile}");
+                                }
+                                else
+                                {
+                                    var clr = new Vector4(1, 1, 1, 1);
+                                    ImGuiAPI.TextColored(in clr, $"Source:{mSourceFile}");
+                                }
+                            }
+                            break;
+                        case "Box":
+                            PGAsset.Target = BoxParameter;
+                            break;
+                        case "Rect2D":
+                            PGAsset.Target = Rect2DParameter;
+                            break;
+                        case "Sphere":
+                            PGAsset.Target = SphereParameter;
+                            break;
+                        case "Cylinder":
+                            PGAsset.Target = CylinderParameter;
+                            break;
+                        case "Torus":
+                            PGAsset.Target = TorusParameter;
+                            break;
+                        case "Capsule":
+                            PGAsset.Target = CapsuleParameter;
+                            break;
+                    }
+
+                    ImGuiAPI.Separator();
+
+                    bool nameChanged = ImGuiAPI.InputText("##in_rname", ref mName);
+                    if (nameChanged)
+                    {
+                        if (IO.TtFileManager.FileExists(mDir.Address + mName + UMeshPrimitives.AssetExt))
+                            eErrorType = enErrorType.IsExisting;
+                    }
+                    ImGuiAPI.Separator();
+
+                    if (eErrorType == enErrorType.None)
+                    {
+                        if (ImGuiAPI.Button("Create Asset", in Vector2.Zero))
+                        {
+                            switch (MeshType)
+                            {
+                                case "FromFile":
+                                    {
+                                        var task = DoImport();
+                                        ImGuiAPI.CloseCurrentPopup();
+                                        retValue = true;
+                                    }
+                                    break;
+                                case "Box":
+                                    {
+                                        var mesh = UMeshDataProvider.MakeBox(BoxParameter.Position.X, BoxParameter.Position.Y, BoxParameter.Position.Z,
+                                            BoxParameter.Extent.X, BoxParameter.Extent.Y, BoxParameter.Extent.Z, new Color4f(BoxParameter.Color).ToArgb(), BoxParameter.FaceFlags);
+
+                                        var name = this.GetAssetRName();
+                                        var ameta = new UMeshPrimitivesAMeta();
+                                        ameta.SetAssetName(name);
+                                        ameta.AssetId = Guid.NewGuid();
+                                        ameta.TypeStr = Rtti.UTypeDescManager.Instance.GetTypeStringFromType(typeof(UMeshPrimitives));
+                                        ameta.Description = $"This is a {typeof(UMeshPrimitives).FullName}\n";
+                                        ameta.SaveAMeta();
+                                        UEngine.Instance.AssetMetaManager.RegAsset(ameta);
+
+                                        mesh.ToMesh().SaveAssetTo(name);
+                                        ImGuiAPI.CloseCurrentPopup();
+                                        retValue = true;
+                                    }
+                                    break;
+                                case "Rect2D":
+                                    {
+                                        var mesh = UMeshDataProvider.MakeRect2D(Rect2DParameter.Position.X, Rect2DParameter.Position.Y,
+                                            Rect2DParameter.Width, Rect2DParameter.Height, Rect2DParameter.Position.Z);
+
+                                        var name = this.GetAssetRName();
+                                        var ameta = new UMeshPrimitivesAMeta();
+                                        ameta.SetAssetName(name);
+                                        ameta.AssetId = Guid.NewGuid();
+                                        ameta.TypeStr = Rtti.UTypeDescManager.Instance.GetTypeStringFromType(typeof(UMeshPrimitives));
+                                        ameta.Description = $"This is a {typeof(UMeshPrimitives).FullName}\n";
+                                        ameta.SaveAMeta();
+                                        UEngine.Instance.AssetMetaManager.RegAsset(ameta);
+
+                                        mesh.ToMesh().SaveAssetTo(name);
+                                        ImGuiAPI.CloseCurrentPopup();
+                                        retValue = true;
+                                    }
+                                    break;
+                                case "Sphere":
+                                    {
+                                        var mesh = UMeshDataProvider.MakeSphere(SphereParameter.Radius, SphereParameter.Slices,
+                                            SphereParameter.Stacks, new Color4f(SphereParameter.Color).ToArgb());
+
+                                        var name = this.GetAssetRName();
+                                        var ameta = new UMeshPrimitivesAMeta();
+                                        ameta.SetAssetName(name);
+                                        ameta.AssetId = Guid.NewGuid();
+                                        ameta.TypeStr = Rtti.UTypeDescManager.Instance.GetTypeStringFromType(typeof(UMeshPrimitives));
+                                        ameta.Description = $"This is a {typeof(UMeshPrimitives).FullName}\n";
+                                        ameta.SaveAMeta();
+                                        UEngine.Instance.AssetMetaManager.RegAsset(ameta);
+
+                                        mesh.ToMesh().SaveAssetTo(name);
+                                        ImGuiAPI.CloseCurrentPopup();
+                                        retValue = true;
+                                    }
+                                    break;
+                                case "Cylinder":
+                                    {
+                                        var mesh = UMeshDataProvider.MakeCylinder(CylinderParameter.Radius1, CylinderParameter.Radius2, CylinderParameter.Length,
+                                            CylinderParameter.Slices, CylinderParameter.Stacks, new Color4f(CylinderParameter.Color).ToArgb());
+
+                                        var name = this.GetAssetRName();
+                                        var ameta = new UMeshPrimitivesAMeta();
+                                        ameta.SetAssetName(name);
+                                        ameta.AssetId = Guid.NewGuid();
+                                        ameta.TypeStr = Rtti.UTypeDescManager.Instance.GetTypeStringFromType(typeof(UMeshPrimitives));
+                                        ameta.Description = $"This is a {typeof(UMeshPrimitives).FullName}\n";
+                                        ameta.SaveAMeta();
+                                        UEngine.Instance.AssetMetaManager.RegAsset(ameta);
+
+                                        mesh.ToMesh().SaveAssetTo(name);
+                                        ImGuiAPI.CloseCurrentPopup();
+                                        retValue = true;
+                                    }
+                                    break;
+                                case "Torus":
+                                    {
+                                        var mesh = UMeshDataProvider.MakeTorus(TorusParameter.InnerRadius, TorusParameter.OutRadius2,
+                                            TorusParameter.Slices, TorusParameter.Rings, new Color4f(TorusParameter.Color).ToArgb());
+
+                                        var name = this.GetAssetRName();
+                                        var ameta = new UMeshPrimitivesAMeta();
+                                        ameta.SetAssetName(name);
+                                        ameta.AssetId = Guid.NewGuid();
+                                        ameta.TypeStr = Rtti.UTypeDescManager.Instance.GetTypeStringFromType(typeof(UMeshPrimitives));
+                                        ameta.Description = $"This is a {typeof(UMeshPrimitives).FullName}\n";
+                                        ameta.SaveAMeta();
+                                        UEngine.Instance.AssetMetaManager.RegAsset(ameta);
+
+                                        mesh.ToMesh().SaveAssetTo(name);
+                                        ImGuiAPI.CloseCurrentPopup();
+                                        retValue = true;
+                                    }
+                                    break;
+                                case "Capsule":
+                                    {
+                                        var mesh = UMeshDataProvider.MakeCapsule(CapsuleParameter.Radius, CapsuleParameter.Depth,
+                                            (int)CapsuleParameter.Latitudes, (int)CapsuleParameter.Longitudes, (int)CapsuleParameter.Rings, CapsuleParameter.UvProfile, new Color4f(TorusParameter.Color).ToArgb());
+
+                                        var name = this.GetAssetRName();
+                                        var ameta = new UMeshPrimitivesAMeta();
+                                        ameta.SetAssetName(name);
+                                        ameta.AssetId = Guid.NewGuid();
+                                        ameta.TypeStr = Rtti.UTypeDescManager.Instance.GetTypeStringFromType(typeof(UMeshPrimitives));
+                                        ameta.Description = $"This is a {typeof(UMeshPrimitives).FullName}\n";
+                                        ameta.SaveAMeta();
+                                        UEngine.Instance.AssetMetaManager.RegAsset(ameta);
+
+                                        mesh.ToMesh().SaveAssetTo(name);
+                                        ImGuiAPI.CloseCurrentPopup();
+                                        retValue = true;
+                                    }
+                                    break;
+                            }
+                        }
+                        ImGuiAPI.SameLine(0, 20);
+                    }
+                    if (ImGuiAPI.Button("Cancel", in Vector2.Zero))
+                    {
+                        ImGuiAPI.CloseCurrentPopup();
+                        retValue = true;
+                    }
+
+                    ImGuiAPI.Separator();
+                    if (PGAsset.Target != null)
+                    {
+                        PGAsset.OnDraw(false, false, false);
+                    }
+
+                    ImGuiAPI.EndPopup();
+                }
+
+                return retValue;
+            }
+
+            private async System.Threading.Tasks.Task<bool> DoImport()
+            {
+                var meshPrimitives = MeshGenerater.Generate(AssetImporter.AiScene, AssetImportOption);
+                foreach(var mesh in meshPrimitives)
+                {
+                    var rn = RName.GetRName(mDir.Name + mesh.mCoreObject.GetName()+ UMeshPrimitives.AssetExt, mDir.RNameType);
+                    await SaveMesh(rn, mesh);
+                }
+                var fileDesc = mFBXImporter.GetFileImportDesc();
+                for (uint i = 0; i < fileDesc.MeshNum; ++i)
+                {
+                    using (var meshImporter = mFBXImporter.CreateMeshImporter(i))
+                    {
+                        meshImporter.Process(UEngine.Instance.GfxDevice.RenderContext.mCoreObject);
+                        string meshName = "";
+                        bool hasSkin = false;
+                        unsafe
+                        {
+                            var meshDesc = mFBXImporter.GetFBXMeshDescs(i);
+                            meshName = meshDesc->NativeSuper->Name.Text;
+                            hasSkin = meshDesc->HaveSkin;
+                        }
+                        System.Diagnostics.Debug.Assert(!string.IsNullOrEmpty(meshName));
+                        if (hasSkin)
+                        {
+                            var rn = RName.GetRName(mDir.Name + meshName + Animation.Asset.USkeletonAsset.AssetExt, mDir.RNameType);
+                            var fbxSkeletonDesc = meshImporter.GetSkeletonDesc();
+                            await CreateOrMergeSkeleton(rn, fbxSkeletonDesc);
+                        }
+                        {
+                            var rn = RName.GetRName(mDir.Name + meshName + UMeshPrimitives.AssetExt, mDir.RNameType);
+                            CreateMesh(rn, meshImporter.GetMeshPrimitives(), hasSkin, meshImporter.GetSkeletonDesc());
+                        }
+                    }
+                }
+                mFBXImporter.Dispose();
+                return true;
+            }
+
+            private async System.Threading.Tasks.Task SaveSkeleton(RName skeletonAsset, USkinSkeleton skeleton, bool bIsNeedMerge = false)
+            {
+                if(!bIsNeedMerge || !EngineNS.UEngine.Instance.AnimationModule.SkeletonAssetManager.SkeletonAssets.ContainsKey(skeletonAsset))
+                {
+                    Animation.Asset.USkeletonAsset newAsset = new Animation.Asset.USkeletonAsset();
+                    newAsset.Skeleton = skeleton;
+                    newAsset.SaveAssetTo(skeletonAsset);
+
+                    var sktameta = new Animation.Asset.USkeletonAssetAMeta();
+                    sktameta.SetAssetName(skeletonAsset);
+                    sktameta.AssetId = Guid.NewGuid();
+                    sktameta.TypeStr = Rtti.UTypeDescManager.Instance.GetTypeStringFromType(typeof(Animation.Asset.USkeletonAssetAMeta));
+                    sktameta.Description = $"This is a {typeof(Animation.Asset.USkeletonAssetAMeta).FullName}\n";
+                    sktameta.SaveAMeta();
+                    UEngine.Instance.AssetMetaManager.RegAsset(sktameta);
+
+                    if (EngineNS.UEngine.Instance.AnimationModule.SkeletonAssetManager.SkeletonAssets.ContainsKey(skeletonAsset))
+                    {
+                        EngineNS.UEngine.Instance.AnimationModule.SkeletonAssetManager.SkeletonAssets[skeletonAsset] = newAsset;
+                    }
+                }
+                else
+                {
+                    var result = await EngineNS.UEngine.Instance.AnimationModule.SkeletonAssetManager.GetSkeletonAsset(skeletonAsset);
+                    if(result != null)
+                    {
+                        //merge
+                    }
+
+                }
+            }
+            private async System.Threading.Tasks.Task SaveMesh(RName name, UMeshPrimitives meshPrimitives)
+            {
+                var ameta = new UMeshPrimitivesAMeta();
+                ameta.SetAssetName(name);
+                ameta.AssetId = Guid.NewGuid();
+                ameta.TypeStr = Rtti.UTypeDescManager.Instance.GetTypeStringFromType(typeof(UMeshPrimitives));
+                ameta.Description = $"This is a {typeof(UMeshPrimitives).FullName}\n";
+                ameta.SaveAMeta();
+                UEngine.Instance.AssetMetaManager.RegAsset(ameta);
+
+                if (meshPrimitives.PartialSkeleton != null)
+                {
+                    var rn = RName.GetRName(mDir.Name + meshPrimitives.mCoreObject.GetName() + Animation.Asset.USkeletonAsset.AssetExt, mDir.RNameType);
+                    await SaveSkeleton(rn, meshPrimitives.PartialSkeleton);
+                }
+                meshPrimitives.SaveAssetTo(name);
+            }
+        }
+    }
+}

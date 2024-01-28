@@ -33,12 +33,12 @@ struct FCullBounding
 StructuredBuffer<VSInstanceData> InstanceDataArray DX_AUTOBIND;
 StructuredBuffer<FCullBounding> InstanceBoundingArray DX_AUTOBIND;
 RWStructuredBuffer<VSInstanceData> CullInstanceDataArray DX_AUTOBIND;
-RWBuffer<uint> IndirectArgsBuffer DX_AUTOBIND;
+RWByteAddressBuffer IndirectArgsBuffer DX_AUTOBIND;
 
 void PushInstance(VSInstanceData instance)
 {
     uint index;
-    InterlockedAdd(IndirectArgsBuffer[IndirectArgsOffset + 1], 1, index);
+    IndirectArgsBuffer.InterlockedAdd((IndirectArgsOffset + 1) * 4, 1, index);
     //if (index >= MaxInstance)
     //    return;
     CullInstanceDataArray[index] = instance;
@@ -48,7 +48,7 @@ void PushInstance(VSInstanceData instance)
 void CS_GPUCullingSetup(uint DispatchThreadId : SV_DispatchThreadID, uint3 LocalThreadId : SV_GroupThreadID, uint3 GroupId : SV_GroupID)
 {
     //IndirectArgsBuffer[0] = Draw_IndexCountPerInstance;
-    IndirectArgsBuffer[IndirectArgsOffset + 1] = 0;
+    IndirectArgsBuffer.Store((IndirectArgsOffset + 1) * 4, 0);
     //IndirectArgsBuffer[2] = Draw_StartIndexLocation;
     //IndirectArgsBuffer[3] = Draw_BaseVertexLocation;
     //IndirectArgsBuffer[4] = Draw_StartInstanceLocation;
@@ -59,7 +59,9 @@ void CS_GPUCullingFlush(uint DispatchThreadId : SV_DispatchThreadID, uint3 Local
 {
     if (DispatchThreadId.x >= NumOfIndirectDraw)
         return;
-    IndirectArgsBuffer[IndirectArgsOffset + 5 * (DispatchThreadId.x + 1) + 1] = IndirectArgsBuffer[IndirectArgsOffset * 0 + 1];
+    uint value = IndirectArgsBuffer.Load((IndirectArgsOffset * 0 + 1) * 4);
+    int index = IndirectArgsOffset +5 * (DispatchThreadId.x + 1) + 1;
+    IndirectArgsBuffer.Store(index * 4, value);
 }
 
 float3 QuatRotateVec(in float3 inPos, in float4 inQuat)
@@ -77,14 +79,15 @@ void CS_GPUCullingMain(uint DispatchThreadId : SV_DispatchThreadID, uint3 LocalT
 {
     if (DispatchThreadId.x >= MaxInstance)
         return;
-    TtFrustum frustum = TtFrustum::CreateByCamera();    
+    
     VSInstanceData instance = InstanceDataArray[DispatchThreadId.x];
+    TtFrustum frustum = TtFrustum::CreateByCamera();
     TtQuat quat = TtQuat::CreateQuat(instance.Quat);
     if (UseInstanceBounding == 0)
     {
         //float3 extent = TtQuat::TransformedBoxAABB(BoundExtent, quat);
         //float3 extent = abs(QuatRotateVec(BoundExtent, instance.Quat));
-        float3 extent = max(max(BoundExtent.x, BoundExtent.y), BoundExtent.z);        
+        float3 extent = max(max(BoundExtent.x, BoundExtent.y), BoundExtent.z);
         float3 center = BoundCenter + instance.Position;
         if (frustum.IsOverlap6(center, extent) == false)
         {
@@ -94,8 +97,8 @@ void CS_GPUCullingMain(uint DispatchThreadId : SV_DispatchThreadID, uint3 LocalT
     else
     {
         FCullBounding bounding = InstanceBoundingArray[DispatchThreadId.x];
-        float3 extent = bounding.Extent;
-        float3 center = bounding.Center;
+        float3 extent = bounding.Extent; //max(max(bounding.Extent.x, bounding.Extent.y), bounding.Extent.z);
+        float3 center = bounding.Center; // + instance.Position;
         if (frustum.IsOverlap6(center, extent) == false)
         {
             return;

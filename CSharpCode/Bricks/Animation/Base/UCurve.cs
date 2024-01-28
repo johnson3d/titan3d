@@ -9,14 +9,18 @@ namespace EngineNS.Animation
         [Rtti.Meta]
         public struct Keyframe
         {
+            public Keyframe()
+            {
+            }
+
             [Rtti.Meta]
-            public float Time { get; set; }
+            public float Time { get; set; } = 0;
             [Rtti.Meta]
-            public float Value { get; set; }
+            public float Value { get; set; } = 0;
             [Rtti.Meta]
-            public float InSlope { get; set; }
+            public float InSlope { get; set; } = 0;
             [Rtti.Meta]
-            public float OutSlope { get; set; }
+            public float OutSlope { get; set; } = 0;
         }
         [Rtti.Meta]
         public struct CurveCache

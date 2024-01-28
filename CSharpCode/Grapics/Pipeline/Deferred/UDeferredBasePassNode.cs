@@ -210,9 +210,16 @@ namespace EngineNS.Graphics.Pipeline.Deferred
                 {
                     using (new Profiler.TimeScopeHelper(ScopePushGpuDraw))
                     {
+                        if (GpuCullNode != null)
+                        {
+                            GpuCullNode.Commit(policy, BasePass.DrawCmdList, GBuffers);
+                        }
+
                         var visibleMeshes = CpuCullNode.VisParameter.VisibleMeshes;
                         foreach (var i in visibleMeshes)
                         {
+                            if (i.DrawMode == FVisibleMesh.EDrawMode.Instance)
+                                continue;
                             foreach (var j in i.Mesh.SubMeshes)
                             {
                                 foreach (var k in j.Atoms)
@@ -246,11 +253,6 @@ namespace EngineNS.Graphics.Pipeline.Deferred
                                     }
                                 }
                             }
-                        }
-
-                        if (GpuCullNode != null)
-                        {
-                            GpuCullNode.Commit(policy, BasePass.DrawCmdList, GBuffers);
                         }
                     }
 

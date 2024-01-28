@@ -1,6 +1,7 @@
 ﻿using EngineNS.EGui.Controls.PropertyGrid;
 using EngineNS.Rtti;
 using EngineNS.UI.Controls;
+using EngineNS.UI.Controls.Containers;
 using EngineNS.UI.Trigger;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using NPOI.SS.Formula.Functions;
@@ -347,19 +348,47 @@ namespace EngineNS.UI.Bind
                     var cmdList = ImGuiAPI.GetWindowDrawList();
                     var width = ImGuiAPI.GetColumnWidth(0);
                     EGui.UIProxy.SearchBarProxy.OnDraw(ref mBindFilterFocus, in cmdList, "search item", ref mBindPopFilterString, width);
-                    DrawUIElementBindableProperty(firstElement, in cmdList);
+                    
+                    if(ImGuiAPI.TreeNodeEx("UIControls", ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_SpanFullWidth))
+                    {
+                        var host = firstElement.RootUIHost as Editor.EditorUIHost;
+                        int idx = 0;
+                        DrawUIElementBindableProperty(firstElement, in cmdList, host.HostEditor, ref idx, mBindPopFilterString);
+                    }
                 }
             }
         }
 
-        void BindPropertyTourAction(string name, TtBindableProperty bp)
+        void BindPropertyTourAction(string name, TtBindableProperty bp, ref int idx)
         {
-
+            ImGuiAPI.TreeNodeEx(name + "##" + idx, ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_SpanFullWidth);
+            if(ImGuiAPI.IsItemClicked(ImGuiMouseButton_.ImGuiMouseButton_Left))
+            {
+                ImGuiAPI.CloseCurrentPopup();
+            }
         }
-        void DrawUIElementBindableProperty(TtUIElement element, in ImDrawList drawList)
+        void DrawUIElementBindableProperty(TtUIElement element, in ImDrawList drawList, Editor.TtUIEditor editor, ref int idx, string filter)
         {
-            // todo: 两个框，一个是 DrawUIElementInHierachy，另一个
-            element.TourBindProperties(BindPropertyTourAction);
+            var container = element as TtContainer;
+            if (!element.HasBindProperties(filter) && container == null)
+                return;
+            if(ImGuiAPI.TreeNodeEx(Editor.TtUIEditor.GetElementShowName(element) + "##" + idx, ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_SpanFullWidth))
+            {
+                if(ImGuiAPI.TreeNodeEx("Properties##" + idx, ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_SpanFullWidth))
+                    element.TourBindProperties(ref idx, BindPropertyTourAction);
+                if(container != null)
+                {
+                    if(ImGuiAPI.TreeNodeEx("Children##" + idx, ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_SpanFullWidth))
+                    {
+                        for(int i=0; i<container.Children.Count; i++)
+                        {
+                            DrawUIElementBindableProperty(container.Children[i], in drawList, editor, ref idx, filter);
+                        }
+                    }
+                }
+            }
+
+            idx++;
         }
     }
     [AttributeUsage(AttributeTargets.Method, AllowMultiple = false)]

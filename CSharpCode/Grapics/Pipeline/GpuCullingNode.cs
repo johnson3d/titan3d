@@ -13,6 +13,7 @@ namespace EngineNS.Graphics.Pipeline
         public List<UMaterial> Materials;
         public Graphics.Mesh.UMaterialMesh MaterialMesh;
         public Graphics.Mesh.TtMesh RenderMesh;
+        public Graphics.Mesh.Modifier.TtGpuDrivenData GpuDrivenData = new Graphics.Mesh.Modifier.TtGpuDrivenData();
         public virtual Graphics.Mesh.Modifier.TtInstanceModifier GetInstanceModifier()
         {
             return null;
@@ -29,12 +30,38 @@ namespace EngineNS.Graphics.Pipeline
             return RenderMesh.MdfQueue as T;
         }
     }
+    public class TtInstanceStaticMeshBatch
+    {
+        public bool IsDraw = false;
+        public Graphics.Mesh.TtMesh RenderMesh;
+        public Mesh.UMdfInstanceStaticMesh MdfQueue;
+        public Graphics.Mesh.Modifier.TtGpuDrivenData GpuDrivenData = new Graphics.Mesh.Modifier.TtGpuDrivenData();
+        public void Initialize(Mesh.UMaterialMesh mesh, Mesh.UMdfInstanceStaticMesh mdfQueue)
+        {
+            RenderMesh = new Graphics.Mesh.TtMesh();
+            RenderMesh.Initialize(mesh, Rtti.UTypeDescGetter<Mesh.UMdfInstanceStaticMesh>.TypeDesc);
+
+            MdfQueue = RenderMesh.MdfQueue as Mesh.UMdfInstanceStaticMesh;
+            GpuDrivenData.SetupGpuData(mdfQueue.InstanceModifier);
+            MdfQueue.InstanceModifier.GpuDrivenData = GpuDrivenData;
+            IsDraw = true;
+        }
+        public static unsafe Hash64 MeshBatchHash(Mesh.TtMesh mesh)
+        {
+            var data = stackalloc int[1];
+            data[0] = mesh.GetHashCode();
+            return Hash64.FromData((byte*)data, sizeof(int));
+        }
+    }
     public class TtStaticMeshBatch : TtMeshBatchBase
     {
         public Mesh.UMdfInstanceStaticMesh MdfQueue;
         public void Initialize(Mesh.UMaterialMesh.TtSubMaterialedMesh mesh)
         {
             MdfQueue = InitRenderMesh<Mesh.UMdfInstanceStaticMesh>(mesh);
+            MdfQueue.InstanceModifier.SetCapacity(512, true);
+            GpuDrivenData.SetupGpuData(MdfQueue.InstanceModifier);
+            MdfQueue.InstanceModifier.GpuDrivenData = GpuDrivenData;
         }
         public override Graphics.Mesh.Modifier.TtInstanceModifier GetInstanceModifier()
         {
@@ -51,7 +78,7 @@ namespace EngineNS.Graphics.Pipeline
             return Hash64.FromData((byte*)data, sizeof(int) * (1 + mesh.Materials.Count));
         }
     }
-    public class TtTerrainMeshBatch : TtMeshBatchBase, IPooledObject
+    public class TtTerrainMeshBatch : TtMeshBatchBase
     {
         public bool IsAlloc { get; set; }
         public Bricks.Terrain.CDLOD.UTerrainInstanceMdfQueue MdfQueue;
@@ -59,6 +86,8 @@ namespace EngineNS.Graphics.Pipeline
         {
             MdfQueue = InitRenderMesh<Bricks.Terrain.CDLOD.UTerrainInstanceMdfQueue>(mesh);
             MdfQueue.InstanceModifier.SetCapacity(512, true);
+            GpuDrivenData.SetupGpuData(MdfQueue.InstanceModifier);
+            MdfQueue.InstanceModifier.GpuDrivenData = GpuDrivenData;
         }
         public override Graphics.Mesh.Modifier.TtInstanceModifier GetInstanceModifier()
         {
@@ -127,31 +156,10 @@ namespace EngineNS.Graphics.Pipeline
         {
             return mOpaqueShading;
         }
-        public void Commit(URenderPolicy policy, NxRHI.UCommandList cmd, UGraphicsBuffers GBuffers)
-        {
-            foreach (var i in TerrainMeshBatches.Values)
-            {
-                foreach (var j in i.RenderMesh.SubMeshes)
-                {
-                    foreach (var k in j.Atoms)
-                    {
-                        var layer = k.Material.RenderLayer;
-                        if (layer == ERenderLayer.RL_Opaque)
-                        {
-                            var drawcall = k.GetDrawCall(cmd.mCoreObject, GBuffers, policy, this);
-                            if (drawcall != null)
-                            {
-                                drawcall.BindGBuffer(policy.DefaultCamera, GBuffers);
-                                cmd.PushGpuDraw(drawcall);
-                            }
-                        }   
-                    }
-                }
-            }
-        }
         private  unsafe void Culling(URenderPolicy policy, NxRHI.UCommandList cmd)
         {
             bool UseRVT = UEngine.Instance.Config.Feature_UseRVT;
+            ResetInstanceMesh();
             ResetStaticMeshBatch();
             ResetTerrainMeshBatch();
             using (new NxRHI.TtGpuEventScope(cmd, VNameString.FromString("InstanceCulling")))
@@ -159,14 +167,12 @@ namespace EngineNS.Graphics.Pipeline
                 var visibleMeshes = CpuCullNode.VisParameter.VisibleMeshes;
                 for (int i = 0; i < visibleMeshes.Count; i++)
                 {
-                    if (EnableGpuCulling)
+                    if (EnableInstanceMeshCullling)
                     {
                         var mdfQueue = visibleMeshes[i].Mesh.MdfQueue as Mesh.UMdfInstanceStaticMesh;
                         if (mdfQueue != null)
                         {
-                            var modifier = mdfQueue.InstanceModifier;
-                            if (modifier.IsGpuCulling)
-                                modifier.InstanceBuffers.InstanceCulling(modifier, cmd.mCoreObject, policy, modifier.DrawArgsBuffer.Uav, 0);
+                            visibleMeshes[i] = PushInstanceMesh(visibleMeshes[i].Mesh, mdfQueue);
                             continue;
                         }
                     }
@@ -190,30 +196,119 @@ namespace EngineNS.Graphics.Pipeline
                     }
                 }
             }
-            if (EnableGpuCulling)
+            if (EnableInstanceMeshCullling)
             {
-                using(new NxRHI.TtGpuEventScope(cmd, VNameString.FromString("StaticMeshBatchCulling")))
+                using (new NxRHI.TtGpuEventScope(cmd, VNameString.FromString("InstanceMeshCulling")))
+                {
+                    foreach (var i in InstanceMeshes)
+                    {
+                        if (i.Value.IsDraw == false)
+                            continue;
+                        var modifier = i.Value.MdfQueue.InstanceModifier;
+                        i.Value.GpuDrivenData.InstanceCulling(modifier, cmd.mCoreObject, policy);
+                    }
+                }
+            }
+            if (EnableStaticMeshBatch)
+            {
+                using (new NxRHI.TtGpuEventScope(cmd, VNameString.FromString("StaticMeshBatchCulling")))
                 {
                     foreach (var i in StaticMeshBatches)
                     {
                         var modifier = i.Value.GetInstanceModifier();
-                        modifier.InstanceBuffers.InstanceCulling(modifier, cmd.mCoreObject, policy, modifier.DrawArgsBuffer.Uav, 0);
+                        i.Value.GpuDrivenData.InstanceCulling(modifier, cmd.mCoreObject, policy);
                     }
                 }
+            }
+            if (UseRVT)
+            {
                 using (new NxRHI.TtGpuEventScope(cmd, VNameString.FromString("TerrainMeshBatchCulling")))
                 {
                     foreach (var i in TerrainMeshBatches)
                     {
                         var modifier = i.Value.GetInstanceModifier();
-                        modifier.InstanceBuffers.InstanceCulling(modifier, cmd.mCoreObject, policy, modifier.DrawArgsBuffer.Uav, 0);
+                        i.Value.GpuDrivenData.InstanceCulling(modifier, cmd.mCoreObject, policy);
+                    }
+                }
+            }   
+        }
+        public void Commit(URenderPolicy policy, NxRHI.UCommandList cmd, UGraphicsBuffers GBuffers)
+        {
+            foreach (var i in TerrainMeshBatches.Values)
+            {
+                foreach (var j in i.RenderMesh.SubMeshes)
+                {
+                    foreach (var k in j.Atoms)
+                    {
+                        var layer = k.Material.RenderLayer;
+                        if (layer == ERenderLayer.RL_Opaque)
+                        {
+                            var drawcall = k.GetDrawCall(cmd.mCoreObject, GBuffers, policy, this);
+                            if (drawcall != null)
+                            {
+                                drawcall.BindGBuffer(policy.DefaultCamera, GBuffers);
+                                cmd.PushGpuDraw(drawcall);
+                            }
+                        }
+                    }
+                }
+            }
+
+            foreach (var i in InstanceMeshes.Values)
+            {
+                if (i.IsDraw == false)
+                    continue;
+                foreach (var j in i.RenderMesh.SubMeshes)
+                {
+                    foreach (var k in j.Atoms)
+                    {
+                        var layer = k.Material.RenderLayer;
+                        if (layer == ERenderLayer.RL_Opaque)
+                        {
+                            var drawcall = k.GetDrawCall(cmd.mCoreObject, GBuffers, policy, this);
+                            if (drawcall != null)
+                            {
+                                drawcall.BindGBuffer(policy.DefaultCamera, GBuffers);
+                                cmd.PushGpuDraw(drawcall);
+                            }
+                        }
                     }
                 }
             }
         }
         [Rtti.Meta]
-        public bool EnableGpuCulling { get; set; } = true;
+        public bool EnableInstanceMeshCullling { get; set; } = true;
         [Rtti.Meta]
         public bool EnableStaticMeshBatch { get; set; } = false;
+        #region InstanceMeshCulling
+        public Dictionary<Hash64, TtInstanceStaticMeshBatch> InstanceMeshes = new Dictionary<Hash64, TtInstanceStaticMeshBatch>();
+        private void ResetInstanceMesh()
+        {
+            foreach (var i in InstanceMeshes.Values)
+            {
+                i.IsDraw = false;
+            }
+        }
+        private FVisibleMesh PushInstanceMesh(Mesh.TtMesh mesh, Mesh.UMdfInstanceStaticMesh mdfQueue)
+        {
+            var hash = TtInstanceStaticMeshBatch.MeshBatchHash(mesh);
+            TtInstanceStaticMeshBatch batch;
+            if (InstanceMeshes.TryGetValue(hash, out batch) == false)
+            {
+                batch = new TtInstanceStaticMeshBatch();
+                batch.Initialize(mesh.MaterialMesh, mdfQueue);
+                InstanceMeshes.Add(hash, batch);
+            }
+            batch.IsDraw = true;
+            //var tm = mesh.PerMeshCBuffer.GetMatrix(UEngine.Instance.GfxDevice.CoreShaderBinder.CBPerMesh.WorldMatrix);
+            //batch.RenderMesh.DirectSetWorldMatrix(in tm);
+            batch.RenderMesh.UnsafeSetPerMeshCBuffer(mesh.PerMeshCBuffer);
+            batch.MdfQueue.InstanceModifier.InstanceBuffers.InstanceBuffer = mdfQueue.InstanceModifier.InstanceBuffers.InstanceBuffer;
+            batch.MdfQueue.InstanceModifier.InstanceBuffers.InstanceBoundingBuffer = mdfQueue.InstanceModifier.InstanceBuffers.InstanceBoundingBuffer;
+            return new FVisibleMesh() { Mesh = mesh, DrawMode = FVisibleMesh.EDrawMode.Instance };
+        }
+        #endregion
+        #region StaticMeshBatch
         public Dictionary<Hash64, TtStaticMeshBatch> StaticMeshBatches = new Dictionary<Hash64, TtStaticMeshBatch>();
         private void ResetStaticMeshBatch()
         {
@@ -243,6 +338,8 @@ namespace EngineNS.Graphics.Pipeline
             }
             return new FVisibleMesh(){Mesh = mesh, DrawMode = FVisibleMesh.EDrawMode.Instance };
         }
+        #endregion
+        #region TerrainMeshBatch
         public Dictionary<Hash64, TtTerrainMeshBatch> TerrainMeshBatches = new Dictionary<Hash64, TtTerrainMeshBatch>();
         private void ResetTerrainMeshBatch()
         {
@@ -266,6 +363,7 @@ namespace EngineNS.Graphics.Pipeline
                     batch.RenderMesh.SetWorldTransform(in mdfQueue.Patch.TerrainNode.Placement.TransformRef, mdfQueue.Patch.TerrainNode.GetWorld(), true);
                     TerrainMeshBatches.Add(hash, batch);
                 }
+                batch.RenderMesh.UnsafeSetPerMeshCBuffer(mesh.PerMeshCBuffer);
 
                 var world = mdfQueue.TerrainModifier.TerrainNode.GetWorld();
                 mdfQueue.TerrainModifier.ActiveRVTs();
@@ -279,6 +377,7 @@ namespace EngineNS.Graphics.Pipeline
             }
             return new FVisibleMesh() { Mesh = mesh, DrawMode = FVisibleMesh.EDrawMode.Instance };
         }
+        #endregion
     }
 }
 

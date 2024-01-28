@@ -1,0 +1,16 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <MSBuildAllProjects Condition="'$(MSBuildVersion)' == '' Or '$(MSBuildVersion)' &lt; '16.0'">$(MSBuildAllProjects);$(MSBuildThisFileFullPath)</MSBuildAllProjects>
+    <HasSharedItems>true</HasSharedItems>
+    <SharedGUID>98988e6f-4a71-4b73-8baf-d5bbdb679adf</SharedGUID>
+  </PropertyGroup>
+  <PropertyGroup Label="Configuration">
+    <Import_RootNamespace>EngineNS.Bricks.AssetImpExp</Import_RootNamespace>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="$(MSBuildThisFileDirectory)AssetImporter.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)PartialAnimationClip.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)PartialMeshPrimitives.cs" />
+  </ItemGroup>
+</Project>

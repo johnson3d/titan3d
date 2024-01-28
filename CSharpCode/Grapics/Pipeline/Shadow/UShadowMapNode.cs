@@ -299,6 +299,14 @@ namespace EngineNS.Graphics.Pipeline.Shadow
         private static Profiler.TimeScope ScopePushGpuDraw = Profiler.TimeScopeManager.GetTimeScope(typeof(UShadowMapNode), "PushGpuDraw");
         public override unsafe void TickLogic(GamePlay.UWorld world, URenderPolicy policy, bool bClear)
         {
+            foreach (var i in CSMCullingNode)
+            {
+                if (i != null)
+                {
+                    i.VisParameter.CullType = GamePlay.UWorld.UVisParameter.EVisCull.Shadow;
+                    i.VisParameter.World = world;
+                }
+            }
             Vector3* AABBCorners = stackalloc Vector3[8];
             Vector3* NewPoints = stackalloc Vector3[8];
             using (new Profiler.TimeScopeHelper(ScopeTick))
@@ -499,6 +507,8 @@ namespace EngineNS.Graphics.Pipeline.Shadow
                             foreach (var i in mVisParameter.VisibleMeshes)
                             {
                                 if (i.Mesh.IsCastShadow == false)
+                                    continue;
+                                if (i.DrawMode == FVisibleMesh.EDrawMode.Instance)
                                     continue;
                                 foreach (var j in i.Mesh.SubMeshes)
                                 {

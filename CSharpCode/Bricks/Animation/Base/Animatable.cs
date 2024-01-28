@@ -39,6 +39,7 @@ namespace EngineNS.Animation.Animatable
         //  |   |-AnimatableProperty
         //  |   |-List<AnimatableObject>
 
+
         public override void Binding(in IAnimatable animatableObject, in Base.UAnimHierarchy animHierarchy, in Asset.UAnimationClip animationClip, ref UAnimationPropertiesSetter animationPropertiesSetter)
         {
             System.Diagnostics.Debug.Assert(animHierarchy != null);
