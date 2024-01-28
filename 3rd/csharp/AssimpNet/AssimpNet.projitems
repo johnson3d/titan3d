@@ -1,0 +1,79 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <MSBuildAllProjects Condition="'$(MSBuildVersion)' == '' Or '$(MSBuildVersion)' &lt; '16.0'">$(MSBuildAllProjects);$(MSBuildThisFileFullPath)</MSBuildAllProjects>
+    <HasSharedItems>true</HasSharedItems>
+    <SharedGUID>0971e63f-1c76-4e26-953d-63991fa73c97</SharedGUID>
+  </PropertyGroup>
+  <PropertyGroup Label="Configuration">
+    <Import_RootNamespace>AssimpNet</Import_RootNamespace>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="$(MSBuildThisFileDirectory)Animation.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)AssimpContext.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)AssimpException.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Bone.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)BoundingBox.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Camera.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Color3D.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Color4D.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Configs\PropertyConfig.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)EmbeddedTexture.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Enums.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)ExportDataBlob.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)ExportFormatDescription.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Face.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)FileIOSystem.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)ImporterDescription.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Interfaces.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)IOStream.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)IOSystem.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Light.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)LogStream.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Material.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)MaterialProperty.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Matrix3x3.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Matrix4x4.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)MemoryHelper.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Mesh.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)MeshAnimationAttachment.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)MeshAnimationChannel.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)MeshKey.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)MeshMorphAnimationChannel.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)MeshMorphKey.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Metadata.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)NativeMarshalerAttribute.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Node.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)NodeAnimationChannel.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)NodeCollection.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Plane.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)PostProcessPreset.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Quaternion.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)QuaternionKey.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Ray.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Scene.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Texel.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)TextureSlot.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Unmanaged\AiConfigs.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Unmanaged\AiDefines.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Unmanaged\AiMatKeys.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Unmanaged\AssimpLibrary.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Unmanaged\Platform.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Unmanaged\PlatformHelper.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Unmanaged\Platforms\UnmanagedLinuxLibc6LibraryImplementation.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Unmanaged\Platforms\UnmanagedLinuxLibdlLibraryImplementation.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Unmanaged\Platforms\UnmanagedMacLibraryImplementation.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Unmanaged\Platforms\UnmanagedUwpLibraryImplementation.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Unmanaged\Platforms\UnmanagedWin32LibraryImplementation.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Unmanaged\UnmanagedFunctionNameAttribute.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Unmanaged\UnmanagedLibrary.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Unmanaged\UnmanagedLibraryImplementation.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Unmanaged\UnmanagedLibraryResolver.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Unmanaged\UnmanagedStructures.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)UVTransform.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Vector2D.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Vector3D.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)VectorKey.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)VertexWeight.cs" />
+  </ItemGroup>
+</Project>
