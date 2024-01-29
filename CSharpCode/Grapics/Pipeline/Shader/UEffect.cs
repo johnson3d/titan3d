@@ -165,18 +165,30 @@ namespace EngineNS.Graphics.Pipeline.Shader
 
             NxRHI.UShader VertexShader = null;
             NxRHI.UShader PixelShader = null;
-            bool created = await UEngine.Instance.EventPoster.Post((state) =>
+            if (UEngine.Instance.GfxDevice.RenderContext.RhiType == NxRHI.ERhiType.RHI_GL)
+            {
+                bool created = await UEngine.Instance.EventPoster.Post((state) =>
+                {
+                    VertexShader = rc.CreateShader(result.DescVS);
+                    if (VertexShader == null)
+                        return false;
+                    PixelShader = rc.CreateShader(result.DescPS);
+                    if (PixelShader == null)
+                        return false;
+                    return true;
+                }, Thread.Async.EAsyncTarget.Render);
+                if (created == false)
+                    return null;
+            }
+            else
             {
                 VertexShader = rc.CreateShader(result.DescVS);
                 if (VertexShader == null)
-                    return false;
+                    return null;
                 PixelShader = rc.CreateShader(result.DescPS);
                 if (PixelShader == null)
-                    return false;
-                return true;
-            }, Thread.Async.EAsyncTarget.Render);
-            if (created == false)
-                return null;
+                    return null;
+            }
 
             NxRHI.UInputLayout InputLayout = null;
             unsafe
@@ -246,18 +258,31 @@ namespace EngineNS.Graphics.Pipeline.Shader
 
             NxRHI.UShader VertexShader = null;
             NxRHI.UShader PixelShader = null;
-            bool created = await UEngine.Instance.EventPoster.Post((state) =>
+            if (UEngine.Instance.GfxDevice.RenderContext.RhiType == NxRHI.ERhiType.RHI_GL)
             {
                 VertexShader = rc.CreateShader(result.DescVS);
                 if (VertexShader == null)
-                    return false;
+                    return null;
                 PixelShader = rc.CreateShader(result.DescPS);
                 if (PixelShader == null)
-                    return false;
-                return true;
-            }, Thread.Async.EAsyncTarget.Render);
-            if (created == false)
-                return null;
+                    return null;
+            }
+            else
+            {
+                bool created = await UEngine.Instance.EventPoster.Post((state) =>
+                {
+                    VertexShader = rc.CreateShader(result.DescVS);
+                    if (VertexShader == null)
+                        return false;
+                    PixelShader = rc.CreateShader(result.DescPS);
+                    if (PixelShader == null)
+                        return false;
+                    return true;
+                }, Thread.Async.EAsyncTarget.Render);
+                if (created == false)
+                    return null;
+            }
+                
 
             NxRHI.UInputLayout InputLayout = null;
             unsafe
@@ -631,7 +656,7 @@ namespace EngineNS.Graphics.Pipeline.Shader
                 ComputeEffects.Add(hash, result);
             }
 
-            var nu = UEngine.Instance.EventPoster.RunOn((state) =>
+            UEngine.Instance.EventPoster.RunOn((state) =>
             {
                 result.SaveTo(shaderName, hash);
                 return true;

@@ -56,8 +56,24 @@ namespace EngineNS.Thread.Async
         internal EAsyncType AsyncType = EAsyncType.Normal;
         public TtContextThread ContinueThread;
         public TtContextThread AsyncTarget;
-        public object UserArguments = null;
-        
+        public struct FUserArguments : IDisposable
+        {
+            public Vector2ui Value0;
+            public object Obj0;
+            public object Obj1;
+            public object Obj2;
+            public object Obj3;
+            public void Dispose()
+            {
+                Obj0 = null;
+                Obj1 = null;
+                Obj2 = null;
+                Obj3 = null;
+                Value0 = Vector2ui.Zero;
+            }
+        }
+        public FUserArguments UserArguments = new FUserArguments();
+
         public object Tag = null;
         public System.Exception ExceptionInfo = null;
         public System.Diagnostics.StackTrace CallStackTrace;
@@ -74,12 +90,12 @@ namespace EngineNS.Thread.Async
             ExceptionInfo = null;
             CallStackTrace = null;
 
-            UserArguments = null;
+            UserArguments.Dispose();
         }
 
         public void DoContinueAction()
         {
-            long t1 = Support.Time.HighPrecision_GetTickCount();
+            //long t1 = Support.Time.HighPrecision_GetTickCount();
             try
             {
                 ContinueAction();
@@ -91,11 +107,11 @@ namespace EngineNS.Thread.Async
             finally
             {
                 TaskState = EAsyncTaskState.Completed;
-                var t2 = Support.Time.HighPrecision_GetTickCount();
-                if (t2 - t1 > 10000)
-                {
-                    Profiler.Log.WriteLine(Profiler.ELogTag.Info, "Performance", $"Continue({t2 - t1}): {this}");
-                }
+                //var t2 = Support.Time.HighPrecision_GetTickCount();
+                //if (t2 - t1 > 10000)
+                //{
+                //    Profiler.Log.WriteLine(Profiler.ELogTag.Info, "Performance", $"Continue({t2 - t1}): {this}");
+                //}
                 this.Dispose();
             }
         }
@@ -130,6 +146,19 @@ namespace EngineNS.Thread.Async
         internal T Result = default(T);
         public FPostEvent<T> PostAction;
         public FPostEventCondition PostActionCondition;
+        public override string ToString()
+        {
+            var result = "Post=>\n";
+            if (PostAction != null)
+                result += PostAction.ToString();
+            if (PostActionCondition != null)
+                result += PostActionCondition.ToString();
+            result += "Coninue=>\n";
+            result += ContinueAction?.ToString();
+            result += "Result=>\n";
+            result += Result?.ToString();
+            return result;
+        }
         #region life manage
         public class TtAsyncTaskStateAllocator : TtObjectPool<TtAsyncTaskState<T>>
         {
@@ -203,32 +232,40 @@ namespace EngineNS.Thread.Async
         }
 
         #region for each
-        public delegate void Delegate_ParrallelForAction(int index);
+        public delegate void Delegate_ParrallelForAction(int index, object arg1, object arg2);
         public bool EnableMTForeach = true;
-        public Thread.TtSemaphore ParrallelFor(int num, Delegate_ParrallelForAction action)
+        private TtPooledSemaphoreAllocator ParrallelForSmpAllocator = new TtPooledSemaphoreAllocator();
+        public void ParrallelFor(int num, Delegate_ParrallelForAction action, object userData1 = null, object userData2 = null)
         {
             if(EnableMTForeach==false)
             {
                 for (int i = 0; i < num; i++)
                 {
-                    action(i);
+                    action(i, userData1, userData2);
                 }
-                return null;
             }
             else
             {
-                var smp = EngineNS.Thread.TtSemaphore.CreateSemaphore(num, new System.Threading.AutoResetEvent(false));
+                var smp = ParrallelForSmpAllocator.QueryObjectSync();
+                smp.Reset(num);
                 for (int i = 0; i < num; i++)
                 {
-                    UEngine.Instance.EventPoster.RunOn((state) =>
+                    var userArgs = new TtAsyncTaskStateBase.FUserArguments();
+                    userArgs.Obj0 = action;
+                    userArgs.Obj1 = smp;
+                    userArgs.Obj2 = userData1;
+                    userArgs.Obj3 = userData2;
+                    userArgs.Value0.X = (uint)i;
+                    UEngine.Instance.EventPoster.RunParallel(static (state) =>
                     {
-                        action(i);
-                        smp.Release();
+                        var action = (Delegate_ParrallelForAction)state.UserArguments.Obj0;
+                        action((int)state.UserArguments.Value0.X, state.UserArguments.Obj2, state.UserArguments.Obj3);
+                        ((TtPooledSemaphore)state.UserArguments.Obj1).Semaphore.Release();
                         return true;
-                    }, Thread.Async.EAsyncTarget.TPools);
+                    }, in userArgs, smp.WaitEvent);
                 }
-                //smp.Wait(int.MaxValue);
-                return smp;
+                smp.WaitEvent.WaitOne(int.MaxValue);
+                ParrallelForSmpAllocator.ReleaseObject(smp);
             }
         }
         #endregion
@@ -281,13 +318,35 @@ namespace EngineNS.Thread.Async
         }
 
         #region post event
-        public FTaskAwaiter<T> RunOn<T>(FPostEvent<T> evt, EAsyncTarget target = EAsyncTarget.AsyncIO, object userArgs = null, System.Threading.AutoResetEvent completedEvent = null)
+        public void RunParallel<T>(FPostEvent<T> evt, in TtAsyncTaskStateBase.FUserArguments userArgs, System.Threading.AutoResetEvent completedEvent = null)
         {
             var eh = TtAsyncTaskState<T>.CreateInstance();
             eh.PostAction = evt;
             eh.ContinueThread = null;
             eh.AsyncType = EAsyncType.ParallelTasks;
             eh.UserArguments = userArgs;
+            eh.CompletedEvent = completedEvent;
+
+            lock (TPoolEvents)
+            {
+                TPoolEvents.Enqueue(eh);
+                mTPoolTrigger.Set();
+            }
+        }
+        public void RunOn<T>(FPostEvent<T> evt, EAsyncTarget target = EAsyncTarget.AsyncIO, object userArgs = null, System.Threading.AutoResetEvent completedEvent = null)
+        {
+            var eh = TtAsyncTaskState<T>.CreateInstance();
+            //eh.PostAction = static (state) =>
+            //{
+            //    var ret = ((FPostEvent<T>)state.UserArguments.Obj1)(state);
+            //    state.Dispose();
+            //    return ret;
+            //};
+            eh.PostAction = evt;
+            eh.ContinueThread = null;
+            eh.AsyncType = EAsyncType.ParallelTasks;
+            eh.UserArguments.Obj0 = userArgs;
+            eh.UserArguments.Obj1 = evt;
             eh.CompletedEvent = completedEvent;
 
             if (target == EAsyncTarget.TPools)
@@ -306,7 +365,6 @@ namespace EngineNS.Thread.Async
                     ctx.EnqueuePriority(eh);
                 }
             }
-            return new FTaskAwaiter<T>(eh);
         }
         public void RunOnUntilFinish(FPostEventCondition evt, EAsyncTarget target = EAsyncTarget.AsyncIO, object userArgs = null)
         {
@@ -314,7 +372,7 @@ namespace EngineNS.Thread.Async
             eh.PostActionCondition = evt;
             eh.ContinueThread = null;
             eh.AsyncType = EAsyncType.ParallelTasks;
-            eh.UserArguments = userArgs;
+            eh.UserArguments.Obj0 = userArgs;
 
             if (target != EAsyncTarget.TPools)
             {

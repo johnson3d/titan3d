@@ -376,7 +376,12 @@ namespace EngineNS.Bricks.Procedure
             }
             else
             {
-                var smp = Thread.TtSemaphore.CreateSemaphore(result.Depth * result.Height * result.Width);
+                //UEngine.Instance.EventPoster.ParrallelFor(result.Depth * result.Height * result.Width, (index, arg0, arg1) =>
+                //{
+                //    var pThis = arg1 as UBufferConponent;
+                //    pThis.OnPerPixel(graph, this, result, x, y, z, tag);
+                //}, this, null);
+                var smp = Thread.TtSemaphore.CreateSemaphore(result.Depth * result.Height * result.Width, new AutoResetEvent(false));
                 if (result.Depth == 1 && result.Height == 1)
                 {
                     for (int i = 0; i < result.Depth; i++)

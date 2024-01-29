@@ -216,6 +216,8 @@ namespace EngineNS.Graphics.Pipeline.Deferred
                         }
 
                         var visibleMeshes = CpuCullNode.VisParameter.VisibleMeshes;
+                        var camera = policy.DefaultCamera;//CpuCullNode.VisParameter.CullCamera;
+                        //todo:ParrallelFor
                         foreach (var i in visibleMeshes)
                         {
                             if (i.DrawMode == FVisibleMesh.EDrawMode.Instance)
@@ -234,7 +236,7 @@ namespace EngineNS.Graphics.Pipeline.Deferred
                                         var drawcall = k.GetDrawCall(cmd.mCoreObject, GBuffers, policy, this);
                                         if (drawcall != null)
                                         {
-                                            drawcall.BindGBuffer(policy.DefaultCamera, GBuffers);
+                                            drawcall.BindGBuffer(camera, GBuffers);
                                             cmd.PushGpuDraw(drawcall);
                                         }
                                     }
@@ -247,7 +249,7 @@ namespace EngineNS.Graphics.Pipeline.Deferred
                                         var drawcall = k.GetDrawCall(cmd.mCoreObject, GBuffers, policy, this);
                                         if (drawcall != null)
                                         {
-                                            drawcall.BindGBuffer(policy.DefaultCamera, GBuffers);
+                                            drawcall.BindGBuffer(camera, GBuffers);
                                             cmd.PushGpuDraw(drawcall);
                                         }
                                     }

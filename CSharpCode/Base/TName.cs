@@ -67,4 +67,20 @@ namespace EngineNS
         }
         #endregion
     }
+
+    public class TtNameTable
+    {
+        public static VNameString FontTexture = VNameString.FromString("FontTexture");
+        public static VNameString Samp_FontTexture = VNameString.FromString("Samp_FontTexture");
+
+        public static VNameString InstanceCulling = VNameString.FromString("InstanceCulling");
+        public static VNameString InstanceMeshCulling = VNameString.FromString("InstanceMeshCulling");
+        public static VNameString StaticMeshBatchCulling = VNameString.FromString("StaticMeshBatchCulling");
+        public static VNameString TerrainMeshBatchCulling = VNameString.FromString("TerrainMeshBatchCulling");
+
+        public static VNameString VSInstanceDataArray = VNameString.FromString("VSInstanceDataArray");
+        public static VNameString UITexture = VNameString.FromString("UITexture");
+        public static VNameString cbPerMaterial = VNameString.FromString("cbPerMaterial");
+        public static VNameString cbGBufferDesc = VNameString.FromString("cbGBufferDesc");
+    }
 }

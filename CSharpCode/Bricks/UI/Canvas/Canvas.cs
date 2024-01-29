@@ -161,7 +161,7 @@ namespace EngineNS.UI.Canvas
                     var srv = cmd.GetBrush().GetSrv();
                     if (srv.IsValidPointer)
                     {
-                        drawcall.mCoreObject.BindResource(VNameString.FromString("FontTexture"), srv.NativeSuper);
+                        drawcall.mCoreObject.BindResource(TtNameTable.FontTexture, srv.NativeSuper);
                     }
                 }
                 else if (brush.Name == VNameString.FromString("utest/ddd.uminst"))

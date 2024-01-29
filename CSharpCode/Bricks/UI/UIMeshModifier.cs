@@ -112,7 +112,7 @@ namespace EngineNS.UI
                     var srv = brush.GetSrv();
                     if (srv.IsValidPointer)
                     {
-                        drawcall.mCoreObject.BindResource(VNameString.FromString("FontTexture"), srv.NativeSuper);
+                        drawcall.mCoreObject.BindResource(TtNameTable.FontTexture, srv.NativeSuper);
                     }
                 }
                 else if (brush.Name.StartWith("@MatInst:"))// == VNameString.FromString("utest/ddd.uminst"))
@@ -120,14 +120,14 @@ namespace EngineNS.UI
                     var srv = brush.GetSrv();
                     if (srv.IsValidPointer)
                     {
-                        drawcall.mCoreObject.BindResource(VNameString.FromString("UITexture"), srv.NativeSuper);
+                        drawcall.mCoreObject.BindResource(TtNameTable.UITexture, srv.NativeSuper);
                         //var matIns = mesh.Atoms[atom].Material as UMaterialInstance;
                     }
                     unsafe
                     {
                         if (brush.IsDirty)
                         {
-                            var res = drawcall.mCoreObject.FindGpuResource(VNameString.FromString("cbPerMaterial"));
+                            var res = drawcall.mCoreObject.FindGpuResource(TtNameTable.cbPerMaterial);
                             var cbuffer = new NxRHI.ICbView(res.CppPointer);
                             if (cbuffer.IsValidPointer)
                             {

@@ -156,15 +156,17 @@ namespace EngineNS.Graphics.Pipeline
         {
             return mOpaqueShading;
         }
+        
         private  unsafe void Culling(URenderPolicy policy, NxRHI.UCommandList cmd)
         {
             bool UseRVT = UEngine.Instance.Config.Feature_UseRVT;
             ResetInstanceMesh();
             ResetStaticMeshBatch();
             ResetTerrainMeshBatch();
-            using (new NxRHI.TtGpuEventScope(cmd, VNameString.FromString("InstanceCulling")))
+            using (new NxRHI.TtGpuEventScope(cmd, TtNameTable.InstanceCulling))
             {
                 var visibleMeshes = CpuCullNode.VisParameter.VisibleMeshes;
+                //todo:ParrallelFor
                 for (int i = 0; i < visibleMeshes.Count; i++)
                 {
                     if (EnableInstanceMeshCullling)
@@ -198,7 +200,7 @@ namespace EngineNS.Graphics.Pipeline
             }
             if (EnableInstanceMeshCullling)
             {
-                using (new NxRHI.TtGpuEventScope(cmd, VNameString.FromString("InstanceMeshCulling")))
+                using (new NxRHI.TtGpuEventScope(cmd, TtNameTable.InstanceMeshCulling))
                 {
                     foreach (var i in InstanceMeshes)
                     {
@@ -211,7 +213,7 @@ namespace EngineNS.Graphics.Pipeline
             }
             if (EnableStaticMeshBatch)
             {
-                using (new NxRHI.TtGpuEventScope(cmd, VNameString.FromString("StaticMeshBatchCulling")))
+                using (new NxRHI.TtGpuEventScope(cmd, TtNameTable.StaticMeshBatchCulling))
                 {
                     foreach (var i in StaticMeshBatches)
                     {
@@ -222,7 +224,7 @@ namespace EngineNS.Graphics.Pipeline
             }
             if (UseRVT)
             {
-                using (new NxRHI.TtGpuEventScope(cmd, VNameString.FromString("TerrainMeshBatchCulling")))
+                using (new NxRHI.TtGpuEventScope(cmd, TtNameTable.TerrainMeshBatchCulling))
                 {
                     foreach (var i in TerrainMeshBatches)
                     {
@@ -234,6 +236,7 @@ namespace EngineNS.Graphics.Pipeline
         }
         public void Commit(URenderPolicy policy, NxRHI.UCommandList cmd, UGraphicsBuffers GBuffers)
         {
+            var camera = policy.DefaultCamera;//CpuCullNode.VisParameter.CullCamera;
             foreach (var i in TerrainMeshBatches.Values)
             {
                 foreach (var j in i.RenderMesh.SubMeshes)
@@ -246,7 +249,7 @@ namespace EngineNS.Graphics.Pipeline
                             var drawcall = k.GetDrawCall(cmd.mCoreObject, GBuffers, policy, this);
                             if (drawcall != null)
                             {
-                                drawcall.BindGBuffer(policy.DefaultCamera, GBuffers);
+                                drawcall.BindGBuffer(camera, GBuffers);
                                 cmd.PushGpuDraw(drawcall);
                             }
                         }
@@ -268,7 +271,7 @@ namespace EngineNS.Graphics.Pipeline
                             var drawcall = k.GetDrawCall(cmd.mCoreObject, GBuffers, policy, this);
                             if (drawcall != null)
                             {
-                                drawcall.BindGBuffer(policy.DefaultCamera, GBuffers);
+                                drawcall.BindGBuffer(camera, GBuffers);
                                 cmd.PushGpuDraw(drawcall);
                             }
                         }

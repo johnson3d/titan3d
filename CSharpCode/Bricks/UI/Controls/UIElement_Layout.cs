@@ -293,7 +293,7 @@ namespace EngineNS.UI.Controls
         {
             UEngine.Instance.EventPoster.RunOn(static (state) =>
             {
-                var This = (TtUIElement)state.UserArguments;
+                var This = (TtUIElement)state.UserArguments.Obj0;
                 if (!This.MeasureDirty && !This.MeasureInProgress)
                 {
                     System.Diagnostics.Debug.Assert(This.MeasureRequest == null, "can't be clean and still have MeasureRequest");
@@ -307,7 +307,7 @@ namespace EngineNS.UI.Controls
         {
             UEngine.Instance.EventPoster.RunOn(static (state) =>
             {
-                var This = (TtUIElement)state.UserArguments;
+                var This = (TtUIElement)state.UserArguments.Obj0;
                 if (!This.ArrangeDirty && !This.ArrangeInProgress)
                 {
                     var parent = VisualTreeHelper.GetParent(This);

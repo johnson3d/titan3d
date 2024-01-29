@@ -647,8 +647,8 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Control
                     cmdParams.CBuffer = rc.CreateCBV(cbBinder);
                     cmdParams.Drawcall.BindShaderEffect(mSlateEffect);
                     cmdParams.Drawcall.BindCBuffer(cbBinder.mCoreObject, cmdParams.CBuffer);
-                    cmdParams.Drawcall.BindSRV(VNameString.FromString("FontTexture"), TextureSRV);
-                    cmdParams.Drawcall.BindSampler(VNameString.FromString("Samp_FontTexture"), UEngine.Instance.GfxDevice.SamplerStateManager.PointState);
+                    cmdParams.Drawcall.BindSRV(TtNameTable.FontTexture, TextureSRV);
+                    cmdParams.Drawcall.BindSampler(TtNameTable.Samp_FontTexture, UEngine.Instance.GfxDevice.SamplerStateManager.PointState);
 
                     cmdParams.IsNormalMap = 0;
                     if (TextureSRV.PicDesc.Format == EPixelFormat.PXF_BC5_UNORM || TextureSRV.PicDesc.Format == EPixelFormat.PXF_BC5_TYPELESS || TextureSRV.PicDesc.Format == EPixelFormat.PXF_BC5_SNORM)
@@ -857,8 +857,8 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Control
                     cmdParams.CBuffer = rc.CreateCBV(cbBinder);
                     cmdParams.Drawcall.BindShaderEffect(mSlateEffect);
                     cmdParams.Drawcall.BindCBuffer(cbBinder.mCoreObject, cmdParams.CBuffer);
-                    cmdParams.Drawcall.BindSRV(VNameString.FromString("FontTexture"), TextureSRV);
-                    cmdParams.Drawcall.BindSampler(VNameString.FromString("Samp_FontTexture"), UEngine.Instance.GfxDevice.SamplerStateManager.PointState);
+                    cmdParams.Drawcall.BindSRV(TtNameTable.FontTexture, TextureSRV);
+                    cmdParams.Drawcall.BindSampler(TtNameTable.Samp_FontTexture, UEngine.Instance.GfxDevice.SamplerStateManager.PointState);
 
                     cmdParams.IsNormalMap = 0;
                     if (TextureSRV.PicDesc.Format == EPixelFormat.PXF_BC5_UNORM || TextureSRV.PicDesc.Format == EPixelFormat.PXF_BC5_TYPELESS || TextureSRV.PicDesc.Format == EPixelFormat.PXF_BC5_SNORM)

@@ -208,6 +208,7 @@ namespace EngineNS.Graphics.Pipeline.Deferred
                 
                 using (new TtLayerDrawBuffers.TtLayerDrawBuffersScope(LayerBasePass))
                 {
+                    var camera = policy.DefaultCamera;//CpuCullNode.VisParameter.CullCamera;
                     foreach (var i in CpuCullNode.VisParameter.VisibleMeshes)
                     {
                         if (i.DrawMode == FVisibleMesh.EDrawMode.Instance)
@@ -226,7 +227,7 @@ namespace EngineNS.Graphics.Pipeline.Deferred
                                     var drawcall = k.GetDrawCall(cmdlist.mCoreObject, GBuffers, policy, this);
                                     if (drawcall != null)
                                     {
-                                        drawcall.BindGBuffer(policy.DefaultCamera, GBuffers);
+                                        drawcall.BindGBuffer(camera, GBuffers);
                                         //GGizmosBuffers.PerViewportCBuffer = GBuffers.PerViewportCBuffer;
 
                                         cmdlist.PushGpuDraw(drawcall);
@@ -426,6 +427,7 @@ namespace EngineNS.Graphics.Pipeline.Deferred
 
                 using (new TtLayerDrawBuffers.TtLayerDrawBuffersScope(LayerBasePass))
                 {
+                    var camera = policy.DefaultCamera;//CpuCullNode.VisParameter.CullCamera;
                     foreach (var i in CpuCullNode.VisParameter.VisibleMeshes)
                     {
                         foreach (var j in i.Mesh.SubMeshes)
@@ -447,7 +449,7 @@ namespace EngineNS.Graphics.Pipeline.Deferred
                                     var drawcall = k.GetDrawCall(cmdlist.mCoreObject, GBuffers, policy, this);
                                     if (drawcall != null)
                                     {
-                                        drawcall.BindGBuffer(policy.DefaultCamera, GBuffers);
+                                        drawcall.BindGBuffer(camera, GBuffers);
                                         //GGizmosBuffers.PerViewportCBuffer = GBuffers.PerViewportCBuffer;
 
                                         cmdlist.PushGpuDraw(drawcall);

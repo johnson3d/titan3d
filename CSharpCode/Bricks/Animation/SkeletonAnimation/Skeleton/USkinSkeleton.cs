@@ -32,7 +32,7 @@ namespace EngineNS.Animation.SkeletonAnimation.Skeleton
         public AnimatablePose.IAnimatableLimbPose CreatePose()
         {
             var pose = new AnimatablePose.UAnimatableSkeletonPose();
-            foreach(var limb in Limbs)
+            foreach (var limb in Limbs)
             {
                 pose.LimbPoses.Add(limb.CreatePose());
             }
@@ -55,7 +55,7 @@ namespace EngineNS.Animation.SkeletonAnimation.Skeleton
         public IndexInSkeleton ParentIndex { get; set; } = IndexInSkeleton.Invalid;
         public IndexInSkeleton Index { get; set; } = IndexInSkeleton.Invalid;
         public ILimb Root { get; set; } //Named "Root" bone in children
-       
+
         public void AddLimb(ILimb limb)
         {
             var exist = FindLimb(limb.Desc.NameHash);
@@ -68,7 +68,11 @@ namespace EngineNS.Animation.SkeletonAnimation.Skeleton
         public ILimb FindLimb(uint nameHash)
         {
             ILimb limb;
-            if(HashDic.TryGetValue(nameHash, out limb))
+            if(HashDic.Count == 0)
+            {
+                ConstructHierarchy();
+            }
+            if (HashDic.TryGetValue(nameHash, out limb))
             {
                 return limb;
             }
@@ -82,9 +86,9 @@ namespace EngineNS.Animation.SkeletonAnimation.Skeleton
         public List<T> GetLimb<T>() where T : ILimb
         {
             List<T> temp = new List<T>();
-            for(int i = 0; i < Limbs.Count; ++i)
+            for (int i = 0; i < Limbs.Count; ++i)
             {
-                if(Limbs[i].GetType() == typeof(T))
+                if (Limbs[i].GetType() == typeof(T))
                 {
                     temp.Add((T)Limbs[i]);
                 }
@@ -104,23 +108,23 @@ namespace EngineNS.Animation.SkeletonAnimation.Skeleton
             for (int i = 0; i < Limbs.Count; ++i)
             {
                 var limb = Limbs[i];
-                if(string.IsNullOrEmpty(limb.Desc.ParentName))
+                if (string.IsNullOrEmpty(limb.Desc.ParentName))
                 {
                     Children.Add(limb);
                 }
                 else
                 {
                     var parent = FindLimb(limb.Desc.ParentHash);
-                    if(parent!=null)
+                    if (parent != null)
                     {
                         limb.ParentIndex = parent.Index;
                         parent.Children.Add(limb);
                     }
                 }
             }
-            foreach(var limb in Children)
+            foreach (var limb in Children)
             {
-                if(limb.Desc.Name.ToLower() == "root")
+                if (limb.Desc.Name.ToLower() == "root")
                 {
                     Root = limb;
                     break;
@@ -130,7 +134,7 @@ namespace EngineNS.Animation.SkeletonAnimation.Skeleton
 
         public override void OnPropertyRead(object tagObject, PropertyInfo prop, bool fromXml)
         {
-            if(prop.Name == "Limbs")
+            if (prop.Name == "Limbs")
             {
                 ConstructHierarchy();
             }

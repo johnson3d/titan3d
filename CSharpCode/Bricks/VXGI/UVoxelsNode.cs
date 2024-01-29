@@ -155,7 +155,7 @@ namespace EngineNS.Bricks.VXGI
             EraseVoxelGroup = await UEngine.Instance.GfxDevice.EffectManager.GetComputeEffect(RName.GetRName("Shaders/Bricks/VXGI/VoxelInject.compute", RName.ERNameType.Engine),
                 "CS_EraseVoxelGroup", NxRHI.EShaderType.SDT_ComputeShader, null, defines, null);
 
-            var cbIndex = InjectVoxels.FindBinder(VNameString.FromString("cbGBufferDesc"));
+            var cbIndex = InjectVoxels.FindBinder(TtNameTable.cbGBufferDesc);
             CBuffer = rc.CreateCBV(cbIndex);
 
             if (true)

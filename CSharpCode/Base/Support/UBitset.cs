@@ -735,6 +735,10 @@ namespace EngineNS.Support
 
         public static UAnyPointer Default = new UAnyPointer();
 
+        public UAnyPointer(int v)
+        {
+            SetValue(v);
+        }
         public void SetValue<T>(T v) where T : unmanaged
         {
             Value.SetValue<T>(v);

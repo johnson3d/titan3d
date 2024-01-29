@@ -122,8 +122,8 @@ namespace EngineNS.NxRHI
                     cmdParams.CBuffer = rc.CreateCBV(cbBinder);
                     cmdParams.Drawcall.BindShaderEffect(SlateEffect);
                     cmdParams.Drawcall.BindCBuffer(cbBinder.mCoreObject, cmdParams.CBuffer);
-                    cmdParams.Drawcall.BindSRV(VNameString.FromString("FontTexture"), SnapTask.Value.Result);
-                    cmdParams.Drawcall.BindSampler(VNameString.FromString("Samp_FontTexture"), UEngine.Instance.GfxDevice.SamplerStateManager.PointState);
+                    cmdParams.Drawcall.BindSRV(TtNameTable.FontTexture, SnapTask.Value.Result);
+                    cmdParams.Drawcall.BindSampler(TtNameTable.Samp_FontTexture, UEngine.Instance.GfxDevice.SamplerStateManager.PointState);
 
                     cmdParams.IsNormalMap = 0;
                     if (SnapTask.Value.Result.PicDesc.Format == EPixelFormat.PXF_BC5_UNORM || SnapTask.Value.Result.PicDesc.Format == EPixelFormat.PXF_BC5_TYPELESS || SnapTask.Value.Result.PicDesc.Format == EPixelFormat.PXF_BC5_SNORM)

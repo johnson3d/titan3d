@@ -21,6 +21,7 @@ namespace EngineNS.Graphics.Mesh
                 var mFileDialog = UEngine.Instance.EditorInstance.FileDialog.mFileDialog;
                 var visible = true;
                 var retValue = false;
+                MeshType = "FromFile";
                 if (ImGuiAPI.BeginPopupModal($"Import MeshPrimitives", &visible, ImGuiWindowFlags_.ImGuiWindowFlags_None))
                 {
                     if (ImGuiAPI.BeginCombo("MeshType", MeshType, ImGuiComboFlags_.ImGuiComboFlags_None))
@@ -284,40 +285,29 @@ namespace EngineNS.Graphics.Mesh
 
             private async System.Threading.Tasks.Task<bool> DoImport()
             {
-                var meshPrimitives = MeshGenerater.Generate(AssetImporter.AiScene, AssetImportOption);
+                var skeletons = SkeletonGenerater.Generate(AssetImporter.AiScene);
+                if(skeletons.Count == 1)
+                {
+                    var rn = RName.GetRName(mDir.Name + AssetDescription.FileName + Animation.Asset.USkeletonAsset.AssetExt, mDir.RNameType);
+                    await SaveSkeleton(rn, skeletons[0]);
+                }
+                else
+                {
+                    //TODO: muti skeletons in the scene
+                    //var meshNode = SkeletonGenerater.FindSkeletonMeshNode(skeletons[0], AssetImporter.AiScene);
+                    //foreach(var skeleton in skeletons)
+                    //{
+                    //    var rn = RName.GetRName(mDir.Name + meshPrimitives.mCoreObject.GetName() + Animation.Asset.USkeletonAsset.AssetExt, mDir.RNameType);
+                    //    await SaveSkeleton(rn, meshPrimitives.PartialSkeleton);
+                    //}
+                }
+
+                var meshPrimitives = MeshGenerater.Generate(skeletons ,AssetImporter.AiScene, AssetImportOption);
                 foreach(var mesh in meshPrimitives)
                 {
                     var rn = RName.GetRName(mDir.Name + mesh.mCoreObject.GetName()+ UMeshPrimitives.AssetExt, mDir.RNameType);
                     await SaveMesh(rn, mesh);
                 }
-                var fileDesc = mFBXImporter.GetFileImportDesc();
-                for (uint i = 0; i < fileDesc.MeshNum; ++i)
-                {
-                    using (var meshImporter = mFBXImporter.CreateMeshImporter(i))
-                    {
-                        meshImporter.Process(UEngine.Instance.GfxDevice.RenderContext.mCoreObject);
-                        string meshName = "";
-                        bool hasSkin = false;
-                        unsafe
-                        {
-                            var meshDesc = mFBXImporter.GetFBXMeshDescs(i);
-                            meshName = meshDesc->NativeSuper->Name.Text;
-                            hasSkin = meshDesc->HaveSkin;
-                        }
-                        System.Diagnostics.Debug.Assert(!string.IsNullOrEmpty(meshName));
-                        if (hasSkin)
-                        {
-                            var rn = RName.GetRName(mDir.Name + meshName + Animation.Asset.USkeletonAsset.AssetExt, mDir.RNameType);
-                            var fbxSkeletonDesc = meshImporter.GetSkeletonDesc();
-                            await CreateOrMergeSkeleton(rn, fbxSkeletonDesc);
-                        }
-                        {
-                            var rn = RName.GetRName(mDir.Name + meshName + UMeshPrimitives.AssetExt, mDir.RNameType);
-                            CreateMesh(rn, meshImporter.GetMeshPrimitives(), hasSkin, meshImporter.GetSkeletonDesc());
-                        }
-                    }
-                }
-                mFBXImporter.Dispose();
                 return true;
             }
 
@@ -362,11 +352,7 @@ namespace EngineNS.Graphics.Mesh
                 ameta.SaveAMeta();
                 UEngine.Instance.AssetMetaManager.RegAsset(ameta);
 
-                if (meshPrimitives.PartialSkeleton != null)
-                {
-                    var rn = RName.GetRName(mDir.Name + meshPrimitives.mCoreObject.GetName() + Animation.Asset.USkeletonAsset.AssetExt, mDir.RNameType);
-                    await SaveSkeleton(rn, meshPrimitives.PartialSkeleton);
-                }
+
                 meshPrimitives.SaveAssetTo(name);
             }
         }

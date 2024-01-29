@@ -366,6 +366,7 @@ namespace EngineNS.Bricks.Procedure.Node
 
             result.DispatchPixels((target, x, y, z) =>
             {
+                System.Diagnostics.Debug.Assert(target == result);
                 if (this.IsMask(x, y, z, mask) == false)
                 {
                     result.PixelOperator.Copy(resultType, result.GetSuperPixelAddress(x, y, z),

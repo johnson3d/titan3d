@@ -851,72 +851,84 @@ namespace EngineNS.Bricks.Procedure
             }
             else
             {
-                var evt = new System.Threading.AutoResetEvent(false);
-                var smp = Thread.TtSemaphore.CreateSemaphore(Depth * Height * Width, evt);
-                
-                if (Depth == 1 && Height == 1)
+                UEngine.Instance.EventPoster.ParrallelFor(Width * Height * Depth, static (index, arg1, arg2) =>
                 {
-                    for (int i = 0; i < Depth; i++)
-                    {
-                        for (int j = 0; j < Height; j++)
-                        {
-                            for (int k = 0; k < Width; k++)
-                            {
-                                int x = k;
-                                int y = j;
-                                int z = i;
-                                UEngine.Instance.EventPoster.RunOn((state) =>
-                                {
-                                    onPerPiexel(this, x, y, z);
-                                    smp.Release();
-                                    return true;
-                                }, Thread.Async.EAsyncTarget.TPools);
-                            }
-                        }
-                    }
-                }
-                else if (Depth == 1)
-                {
-                    for (int i = 0; i < Depth; i++)
-                    {
-                        for (int j = 0; j < Height; j++)
-                        {
-                            int y = j;
-                            int z = i;
-                            UEngine.Instance.EventPoster.RunOn((state) =>
-                            {
-                                for (int k = 0; k < Width; k++)
-                                {
-                                    onPerPiexel(this, k, y, z);
-                                    smp.Release();
-                                }
-                                return true;
-                            }, Thread.Async.EAsyncTarget.TPools);
-                        }
-                    }
-                }
-                else
-                {
-                    for (int i = 0; i < Depth; i++)
-                    {
-                        int z = i;
-                        UEngine.Instance.EventPoster.RunOn((state) =>
-                        {
-                            for (int j = 0; j < Height; j++)
-                            {
-                                for (int k = 0; k < Width; k++)
-                                {
-                                    onPerPiexel(this, k, j, i);
-                                    smp.Release();
-                                }
-                            }
-                            return true;
-                        }, Thread.Async.EAsyncTarget.TPools);
-                    }
-                }
+                    var pThis = arg1 as UBufferConponent;
+                    var onPerPiexel = arg2 as FOnPerPixel;
+                    int pitch = pThis.Height * pThis.Width;
+                    int z = index / pitch;
+                    int y = (index % pitch) / pThis.Width;
+                    int x = (index % pitch) % pThis.Width;
 
-                smp.Wait(int.MaxValue);
-                smp.FreeSemaphore();
+                    onPerPiexel(pThis, x, y, z);
+                }, this, onPerPiexel);
+
+                //var evt = new System.Threading.AutoResetEvent(false);
+                //var smp = Thread.TtSemaphore.CreateSemaphore(Depth * Height * Width, evt);
+
+                //if (Depth == 1 && Height == 1)
+                //{
+                //    for (int i = 0; i < Depth; i++)
+                //    {
+                //        for (int j = 0; j < Height; j++)
+                //        {
+                //            for (int k = 0; k < Width; k++)
+                //            {
+                //                int x = k;
+                //                int y = j;
+                //                int z = i;
+                //                UEngine.Instance.EventPoster.RunOn((state) =>
+                //                {
+                //                    onPerPiexel(this, x, y, z);
+                //                    smp.Release();
+                //                    return true;
+                //                }, Thread.Async.EAsyncTarget.TPools);
+                //            }
+                //        }
+                //    }
+                //}
+                //else if (Depth == 1)
+                //{
+                //    for (int i = 0; i < Depth; i++)
+                //    {
+                //        for (int j = 0; j < Height; j++)
+                //        {
+                //            int y = j;
+                //            int z = i;
+                //            UEngine.Instance.EventPoster.RunOn((state) =>
+                //            {
+                //                for (int k = 0; k < Width; k++)
+                //                {
+                //                    onPerPiexel(this, k, y, z);
+                //                    smp.Release();
+                //                }
+                //                return true;
+                //            }, Thread.Async.EAsyncTarget.TPools);
+                //        }
+                //    }
+                //}
+                //else
+                //{
+                //    for (int i = 0; i < Depth; i++)
+                //    {
+                //        int z = i;
+                //        UEngine.Instance.EventPoster.RunOn((state) =>
+                //        {
+                //            for (int j = 0; j < Height; j++)
+                //            {
+                //                for (int k = 0; k < Width; k++)
+                //                {
+                //                    onPerPiexel(this, k, j, i);
+                //                    smp.Release();
+                //                }
+                //            }
+                //            return true;
+                //        }, Thread.Async.EAsyncTarget.TPools);
+                //    }
+                //}
+
+                //smp.Wait(int.MaxValue);
+                //smp.FreeSemaphore();
             }
         }
         [Rtti.Meta]

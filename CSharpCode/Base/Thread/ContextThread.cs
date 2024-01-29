@@ -259,104 +259,87 @@ namespace EngineNS.Thread
         {
             get;
             set;
-        } = 5 * 1000;
-        private int LimitTimeScalar = 1;
+        } = 5 * 1000;//5 ms
         private bool TimeOut = false;
-        public void TickAwaitEvent()
+
+        private bool TestTimeOut(long start, long t1, long limit, Async.TtAsyncTaskStateBase state)
         {
-            if(TimeOut)
+            var cur = Support.Time.HighPrecision_GetTickCount();
+            var delta = cur - start;
+            if (delta > limit)
             {
-                LimitTimeScalar = 2 * LimitTimeScalar;
-            }
-            else
-            {
-                LimitTimeScalar = 1;
-            }
-            long limit = LimitTime * LimitTimeScalar;
-            Async.TtAsyncTaskStateBase cur;
-            var t1 = Support.Time.HighPrecision_GetTickCount();
-            int count = 0;
-            while(DoOnePriorityEvent(out cur))
-            {
-                count++;
-                //var t2 = Support.Time.HighPrecision_GetTickCount();
-                //if (t2 - t1 > limit)
-                //{
-                //    if (CEngine.Instance.EventPoster.IsThread(Async.EAsyncTarget.Logic))
-                //    {
-                //        Profiler.Log.WriteLine(Profiler.ELogTag.Warning, "Async", $"Logic Thread[Priority] is Blocked({t2 - t1}):{cur.Awaiter}");
-                //    }
-                //    TimeOut = true;
-                //    CEngine.Instance.EventPoster.mRunOnPEAllocator.ReleaseObject(cur);
-                //    return;
-                //}
-                //else
-                {
-                    cur.Dispose();
-                }
-            }
-            //DoPriorityEvents();
-            
-            while (DoOneAsyncEvent(out cur))
-            {
-                var t2 = Support.Time.HighPrecision_GetTickCount();
-                if(t2-t1> limit)
-                {
-                    if(UEngine.Instance.EventPoster.IsThread(Async.EAsyncTarget.Logic) )
-                    {
-                        Profiler.Log.WriteLine(Profiler.ELogTag.Warning, "Async", $"Logic Thread[Async] is Blocked({t2 - t1}):{cur.ToString()}");
-
-                        //if (cur.CallStackTrace != null)
-                        //{
-                        //    Profiler.Log.WriteLine(Profiler.ELogTag.Warning, "Async", $"StackInof=>{cur.CallStackTrace}");
-                        //}
-                    }
-                    else if (UEngine.Instance.EventPoster.IsThread(Async.EAsyncTarget.Render))
-                    {
-                        Profiler.Log.WriteLine(Profiler.ELogTag.Warning, "Async", $"Render Thread[Async] is Blocked({t2 - t1}):{cur.ToString()}");
-
-                        //if (cur.CallStackTrace != null)
-                        //{
-                        //    Profiler.Log.WriteLine(Profiler.ELogTag.Warning, "Async", $"StackInof=>{cur.CallStackTrace}");
-                        //}
-                    }
-                    TimeOut = true;
-                    return;
-                }
-            }
-            while(DoOneContinueEvent(out cur))
-            {
-                var t2 = Support.Time.HighPrecision_GetTickCount();
-                if (t2 - t1 > limit)
+                if (cur - t1 > 4 * limit)//20 ms
                 {
                     if (UEngine.Instance.EventPoster.IsThread(Async.EAsyncTarget.Logic))
                     {
-                        if(t2 - t1>200000)
-                        {
-                            Profiler.Log.WriteLine(Profiler.ELogTag.Warning, "Async", $"Logic Thread[Continue] is Blocked({t2 - t1}):{cur}");
-                            //if(cur.CallStackTrace!=null)
-                            //{
-                            //    Profiler.Log.WriteLine(Profiler.ELogTag.Warning, "Async", $"StackInof=>{cur.CallStackTrace}");
-                            //}
-                        }
+                        Profiler.Log.WriteLine(Profiler.ELogTag.Warning, "Async", $"Logic Thread[Async] is Blocked({(cur - t1)/1000}ms > {limit / 1000}):\n{state.ToString()}");
                     }
+                    else if (UEngine.Instance.EventPoster.IsThread(Async.EAsyncTarget.Render))
+                    {
+                        Profiler.Log.WriteLine(Profiler.ELogTag.Warning, "Async", $"Render Thread[Async] is Blocked({(cur - t1)/1000}ms > {limit / 1000}):\n{state.ToString()}");
+                        //if (cur.CallStackTrace != null)
+                        //{
+                        //    Profiler.Log.WriteLine(Profiler.ELogTag.Warning, "Async", $"StackInof=>{cur.CallStackTrace}");
+                        //}
+                    }
+                }
+                
+                return true;
+            }
+            return false;
+        }
+        public void TickAwaitEvent()
+        {
+            Async.TtAsyncTaskStateBase cur;
+            var start = Support.Time.HighPrecision_GetTickCount();
+            long t1 = 0;
+            while ((t1 = Support.Time.HighPrecision_GetTickCount())>0 && DoOnePriorityEvent(out cur))
+            {
+                cur.Dispose();
+                if (TestTimeOut(start, t1, LimitTime, cur))
+                {
                     TimeOut = true;
                     return;
                 }
             }
+            
+            while ((t1 = Support.Time.HighPrecision_GetTickCount()) > 0 && DoOneAsyncEvent(out cur))
+            {
+                if (TestTimeOut(start, t1, LimitTime, cur))
+                {
+                    TimeOut = true;
+                    return;
+                }
+            }
+            while (DoOneContinueEvent(out cur))
+            {
+
+            }
+            //while ((t1 = Support.Time.HighPrecision_GetTickCount()) > 0 && DoOneContinueEvent(out cur))
+            //{
+            //    if (TestTimeOut(start, t1, LimitTime, cur))
+            //    {
+            //        TimeOut = true;
+            //        return;
+            //    }
+            //}
             lock(RunUntilFinishEvents)
             {
                 for (int i = RunUntilFinishEvents.Count - 1; i >= 0; i--)
                 {
+                    t1 = Support.Time.HighPrecision_GetTickCount();
                     var e = RunUntilFinishEvents[i];
-                    
+                    bool bFinish = e.ExecutePostEventCondition();
+                    if (bFinish)
                     {
-                        bool bFinish = e.ExecutePostEventCondition();
-                        if (bFinish)
-                        {
-                            RunUntilFinishEvents.RemoveAt(i);
-                            e.Dispose();
-                        }
+                        RunUntilFinishEvents.RemoveAt(i);
+                        e.Dispose();
+                    }
+
+                    if (TestTimeOut(start, t1, LimitTime, e))
+                    {
+                        TimeOut = true;
+                        return;
                     }
                 }
             }

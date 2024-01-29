@@ -1,4 +1,5 @@
-﻿using System;
+﻿using NPOI.SS.Formula.Functions;
+using System;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
@@ -43,6 +44,11 @@ namespace EngineNS.Thread
             PostEvent = null;
             Waiter = waiter;
             System.Threading.Interlocked.Exchange(ref mCount, num);
+        }
+        public void Reset(int count)
+        {
+            System.Threading.Interlocked.Exchange(ref mCount, count);
+            Waiter?.Reset();
         }
         public void FreeSemaphore()
         {
@@ -98,28 +104,34 @@ namespace EngineNS.Thread
             await UEngine.Instance.EventPoster.AwaitSemaphore(this);
         }
     }
-    public class TtThreadSafeNumber
+
+    public class TtPooledSemaphore : IPooledObject
     {
-        int mCount = -1;
-        public TtThreadSafeNumber(int num)
+        public bool IsAlloc { get; set; }
+        public TtSemaphore Semaphore;
+        public System.Threading.AutoResetEvent WaitEvent;
+        public void Reset(int num)
         {
-            mCount = num;
+            Semaphore.Reset(num);
+            WaitEvent.Reset();
         }
-        public int Add()
+    }
+    public class TtPooledSemaphoreAllocator : TtObjectPool<TtPooledSemaphore>
+    {
+        protected override TtPooledSemaphore CreateObjectSync()
         {
-            return System.Threading.Interlocked.Increment(ref mCount);
+            var result = new TtPooledSemaphore();
+            result.WaitEvent = new AutoResetEvent(false);
+            result.Semaphore = TtSemaphore.CreateSemaphore(0, result.WaitEvent);
+            return result;
         }
-        public int Release()
+        protected override void OnObjectQuery(TtPooledSemaphore obj)
         {
-            return System.Threading.Interlocked.Decrement(ref mCount);
+
         }
-        public int Exchange(int value)
+        protected override bool OnObjectRelease(TtPooledSemaphore obj)
         {
-            return System.Threading.Interlocked.Exchange(ref mCount, value);
-        }
-        public int GetValue()
-        {
-            return System.Threading.Interlocked.Exchange(ref mCount, mCount);
+            return true;
         }
     }
 

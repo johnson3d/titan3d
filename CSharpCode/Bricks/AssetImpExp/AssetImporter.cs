@@ -32,8 +32,10 @@ namespace EngineNS.Bricks.AssetImpExp
     public class AssetImporter
     {
         public Assimp.Scene AiScene { get; set; } = null;
+        public string FilePath { get; set; } = null;
         public AssetDescription PreImport(string filePath)
         {
+            FilePath = filePath;
             Assimp.PostProcessSteps convertToLeftHanded = Assimp.PostProcessSteps.MakeLeftHanded | Assimp.PostProcessSteps.FlipUVs | Assimp.PostProcessSteps.FlipWindingOrder;
             Assimp.AssimpContext assimpContext = new Assimp.AssimpContext();
             Assimp.PostProcessSteps sceneFlags = convertToLeftHanded | Assimp.PostProcessSteps.Triangulate;
@@ -49,9 +51,10 @@ namespace EngineNS.Bricks.AssetImpExp
             {
                 return null;
             }
+            var meshNodes = AssimpSceneUtil.FindMeshNodes(AiScene);
             AssetDescription assetsGenerateDescription = new AssetDescription();
-            assetsGenerateDescription.FileName = AiScene.Name;
-            assetsGenerateDescription.MeshesCount = AiScene.MeshCount;
+            assetsGenerateDescription.FileName = Path.GetFileNameWithoutExtension(filePath); ;
+            assetsGenerateDescription.MeshesCount = meshNodes.Count;
             assetsGenerateDescription.AnimationsCount = AiScene.AnimationCount;
             return assetsGenerateDescription;
         }
@@ -97,6 +100,19 @@ namespace EngineNS.Bricks.AssetImpExp
             }
             return null;
         }
+        public static USkinSkeleton FindMeshSkeleton(Assimp.Node meshNode, List<USkinSkeleton> skeletons, Assimp.Scene scene)
+        {
+            var mesh = AssimpSceneUtil.FindMesh(meshNode.Name, scene);
+            Debug.Assert(mesh != null);
+            foreach (var skeleton in skeletons)
+            {
+                if (skeleton.FindLimb(mesh.Bones[0].Name) != null)
+                {
+                    return skeleton;
+                }
+            }
+            return null;
+        }
         public static Assimp.Node FindNode(string name, Assimp.Scene scene)
         {
             return FindNodeRecursively(name, scene.RootNode, scene);
@@ -121,9 +137,10 @@ namespace EngineNS.Bricks.AssetImpExp
                 {
                     return child;
                 }
-                else
+                var result = FindNodeRecursively(name, child, scene);
+                if(result != null)
                 {
-                    return FindNodeRecursively(name, child, scene);
+                    return result;
                 }
             }
             return null;
@@ -156,7 +173,7 @@ namespace EngineNS.Bricks.AssetImpExp
             inOutNodesMap.Add(node, false);
             foreach (var child in node.Children)
             {
-                InitNodesMarkMap(node, ref inOutNodesMap);
+                InitNodesMarkMap(child, ref inOutNodesMap);
             }
         }
         static void MarkBones(Assimp.Scene scene, ref Dictionary<Assimp.Node, bool> inOutNodesMap, ref List<Assimp.Node> inOutSkeletonRootNodes)
@@ -166,19 +183,30 @@ namespace EngineNS.Bricks.AssetImpExp
                 foreach (var bone in mesh.Bones)
                 {
                     var boneNode = AssimpSceneUtil.FindNode(bone.Name, scene);
+                    Debug.Assert(boneNode != null);
                     MarkBonesRecursively(boneNode, scene, ref inOutNodesMap, ref inOutSkeletonRootNodes);
                 }
             }
         }
         static void MarkBonesRecursively(Assimp.Node node, Assimp.Scene scene, ref Dictionary<Assimp.Node, bool> inOutNodesMap, ref List<Assimp.Node> inOutSkeletonRootNodes)
         {
-            if (node.HasMeshes || node.Parent == scene.RootNode)
+            if (node.HasMeshes)
             {
                 inOutSkeletonRootNodes.Add(node);
                 return;
             }
+            var parent = GetValidParentNode(node, scene);
+            if (IsRootBoneNodeParent(parent, scene))
+            {
+                if(!inOutSkeletonRootNodes.Contains(node))
+                {
+                    inOutSkeletonRootNodes.Add(node);
+                    inOutNodesMap[node] = true;
+                }
+                return;
+            }
 
-            if (inOutNodesMap.ContainsKey(node))
+            if (!node.Name.Contains("_$AssimpFbx$_") && inOutNodesMap.ContainsKey(node))
             {
                 if (inOutNodesMap[node])
                 {
@@ -189,13 +217,21 @@ namespace EngineNS.Bricks.AssetImpExp
                     inOutNodesMap[node] = true;
                 }
             }
-            MarkBonesRecursively(node.Parent, scene, ref inOutNodesMap, ref inOutSkeletonRootNodes);
+            else
+            {
+                MarkBonesRecursively(parent, scene, ref inOutNodesMap, ref inOutSkeletonRootNodes);
+
+            }
         }
         static Assimp.Node GetValidParentNode(Assimp.Node node, Assimp.Scene scene)
         {
             var parent = node.Parent;
-            while (parent != null && scene.RootNode != parent)
+            while (parent != null)
             {
+                if (parent == scene.RootNode)
+                {
+                    return parent;
+                }
                 if (parent.Name.Contains("_$AssimpFbx$_"))
                 {
                     parent = parent.Parent;
@@ -205,7 +241,16 @@ namespace EngineNS.Bricks.AssetImpExp
                     return parent;
                 }
             }
+            Debug.Assert(false);
             return null;
+        }
+        static bool IsRootBoneNodeParent(Assimp.Node node, Assimp.Scene scene)
+        {
+            if (node.Name == "RootNode" || node.HasMeshes)
+            {
+                return true;
+            }
+            return false;
         }
         static List<USkinSkeleton> MakeSkeletons(Assimp.Scene scene, List<Assimp.Node> skeletonRootNodes, ref Dictionary<Assimp.Node, bool> inOutNodesMap)
         {
@@ -220,8 +265,12 @@ namespace EngineNS.Bricks.AssetImpExp
                         UBoneDesc boneDesc = new UBoneDesc();
                         boneDesc.Name = marked.Key.Name;
                         boneDesc.NameHash = Standart.Hash.xxHash.xxHash32.ComputeHash(boneDesc.Name);
-                        boneDesc.ParentName = GetValidParentNode(marked.Key, scene).Name;
-                        boneDesc.ParentHash = Standart.Hash.xxHash.xxHash32.ComputeHash(boneDesc.ParentName);
+                        var parentNode = GetValidParentNode(marked.Key, scene);
+                        if (parentNode == null || !IsRootBoneNodeParent(parentNode, scene))
+                        {
+                            boneDesc.ParentName = parentNode.Name;
+                            boneDesc.ParentHash = Standart.Hash.xxHash.xxHash32.ComputeHash(boneDesc.ParentName);
+                        }
 
                         Assimp.Vector3D assimpTrans, assimpScaling;
                         Assimp.Quaternion assimpQuat;
@@ -237,6 +286,7 @@ namespace EngineNS.Bricks.AssetImpExp
                         skeleton.AddLimb(new UBone(boneDesc));
                     }
                 }
+                skeleton.ConstructHierarchy();
                 skeletonsGenerate.Add(skeleton);
             }
             else
@@ -253,7 +303,21 @@ namespace EngineNS.Bricks.AssetImpExp
 
             InitNodesMarkMap(scene.RootNode, ref nodesMap);
             MarkBones(scene, ref nodesMap, ref skeletonRootNodes);
-            return MakeSkeletons(scene, skeletonRootNodes, ref nodesMap);
+            var skeletons = MakeSkeletons(scene, skeletonRootNodes, ref nodesMap);
+            return skeletons;
+        }
+        static public Assimp.Node FindSkeletonMeshNode(USkinSkeleton skeleton, Assimp.Scene scene)
+        {
+            foreach(var mesh in scene.Meshes)
+            {
+                if(mesh.HasBones && skeleton.FindLimb(mesh.Bones[0].Name) != null)
+                {
+                    var meshNode = AssimpSceneUtil.FindNode(mesh.Name, scene);
+                    
+                }
+            }
+
+            return null;
         }
 
     }
@@ -265,31 +329,25 @@ namespace EngineNS.Bricks.AssetImpExp
             var skeletons = SkeletonGenerater.Generate(scene);
             return Generate(meshNodes, skeletons, scene, importOption);
         }
+        public static List<UMeshPrimitives> Generate(List<USkinSkeleton> meshSkeletons, Assimp.Scene scene, AssetImportOption importOption)
+        {
+            var meshNodes = AssimpSceneUtil.FindMeshNodes(scene);
+            var skeletons = SkeletonGenerater.Generate(scene);
+            return Generate(meshNodes, skeletons, scene, importOption);
+        }
         public static List<UMeshPrimitives> Generate(List<Assimp.Node> meshNodes, List<USkinSkeleton> meshSkeletons, Assimp.Scene scene, AssetImportOption importOption)
         {
             List<UMeshPrimitives> meshPrimitives = new List<UMeshPrimitives>();
             foreach (var meshNode in meshNodes)
             {
-                var skeleton = FindMeshSkeleton(meshNode, meshSkeletons, scene);
+                var skeleton = AssimpSceneUtil.FindMeshSkeleton(meshNode, meshSkeletons, scene);
                 var meshPrimitive = CreateMeshPrimitives(meshNode, skeleton, scene, importOption);
                 meshPrimitive.PartialSkeleton = skeleton;
                 meshPrimitives.Add(meshPrimitive);
             }
             return meshPrimitives;
         }
-        private static USkinSkeleton FindMeshSkeleton(Assimp.Node meshNode, List<USkinSkeleton> skeletons, Assimp.Scene scene)
-        {
-            var mesh = AssimpSceneUtil.FindMesh(meshNode.Name, scene);
-            Debug.Assert(mesh != null);
-            foreach (var skeleton in skeletons)
-            {
-                if (skeleton.FindLimb(mesh.Bones[0].Name) != null)
-                {
-                    return skeleton;
-                }
-            }
-            return null;
-        }
+
         private static UMeshPrimitives CreateMeshPrimitives(Assimp.Node meshNode, USkinSkeleton skeleton, Assimp.Scene scene, AssetImportOption importOption)
         {
             Debug.Assert(meshNode.MeshCount > 0);
@@ -364,8 +422,8 @@ namespace EngineNS.Bricks.AssetImpExp
                 vertexSkinWeight = new List<List<float>>(vertextCount);
                 for (int i = 0; i < vertextCount; i++)
                 {
-                    vertexSkinIndex[i] = new List<uint>();
-                    vertexSkinWeight[i] = new List<float>();
+                    vertexSkinIndex.Add(new List<uint>());
+                    vertexSkinWeight.Add(new List<float>());
                 }
             }
 

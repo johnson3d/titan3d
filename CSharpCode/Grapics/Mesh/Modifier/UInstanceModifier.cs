@@ -221,7 +221,6 @@ namespace EngineNS.Graphics.Mesh.Modifier
             cmd.PushGpuDraw(GpuCullFlushDrawcall.mCoreObject.NativeSuper);
         }
 
-        VNameString Name_VSInstanceDataArray = VNameString.FromString("VSInstanceDataArray");
         //static bool bIndirect = true;
         public void OnDrawCall(TtInstanceModifier mdf, NxRHI.ICommandList cmd, NxRHI.UGraphicDraw drawcall, Pipeline.URenderPolicy policy, TtMesh.TtAtom atom)
         {
@@ -229,7 +228,7 @@ namespace EngineNS.Graphics.Mesh.Modifier
             TtGpuDrivenData.FDrawArgs drawArgs;
             if (DrawArgsOffsetDict.TryGetValue(key, out drawArgs))
             {
-                drawcall.BindSRV(Name_VSInstanceDataArray, CullingBuffer.Srv);//mdf.InstanceBuffers.InstanceBuffer.Srv);// 
+                drawcall.BindSRV(TtNameTable.VSInstanceDataArray, CullingBuffer.Srv);//mdf.InstanceBuffers.InstanceBuffer.Srv);// 
                 drawcall.BindIndirectDrawArgsBuffer(DrawArgsBuffer.GpuBuffer, drawArgs.Offset * sizeof(int));
                 //if (bIndirect)
                 //    drawcall.BindIndirectDrawArgsBuffer(DrawArgsBuffer.GpuBuffer, drawArgs.Offset * sizeof(int));
@@ -311,7 +310,7 @@ namespace EngineNS.Graphics.Mesh.Modifier
             else
             {
                 this.Flush2GPU(cmd, mdf);
-                drawcall.BindSRV(VNameString.FromString("VSInstanceDataArray"), InstanceBuffer.Srv);
+                drawcall.BindSRV(TtNameTable.VSInstanceDataArray, InstanceBuffer.Srv);
             }
         }
     }

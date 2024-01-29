@@ -64,6 +64,7 @@ namespace EngineNS.Graphics.Mesh
             {
                 //we also can import from other types
                 return FBXCreateCreateDraw(ContentBrowser);
+                //return AssimpCreateCreateDraw(ContentBrowser);
             }
 
             public unsafe partial bool FBXCreateCreateDraw(EGui.Controls.UContentBrowser ContentBrowser);

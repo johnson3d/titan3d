@@ -277,6 +277,7 @@ namespace EngineNS.Graphics.Pipeline.Common
             {
                 using(new TtLayerDrawBuffers.TtLayerDrawBuffersScope(HitproxyPass))
                 {
+                    var camera = policy.DefaultCamera;//CpuCullNode.VisParameter.CullCamera;
                     foreach (var i in CpuCullNode.VisParameter.VisibleMeshes)
                     {
                         if (i.Mesh.IsDrawHitproxy == false)
@@ -297,7 +298,7 @@ namespace EngineNS.Graphics.Pipeline.Common
                                 var hpDrawcall = k.GetDrawCall(cmd.mCoreObject, GHitproxyBuffers, policy, this);
                                 if (hpDrawcall != null)
                                 {
-                                    hpDrawcall.BindGBuffer(policy.DefaultCamera, GHitproxyBuffers);
+                                    hpDrawcall.BindGBuffer(camera, GHitproxyBuffers);
 
                                     cmd.PushGpuDraw(hpDrawcall);
                                 }
