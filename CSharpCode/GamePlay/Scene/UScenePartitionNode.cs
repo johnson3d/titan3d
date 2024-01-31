@@ -107,24 +107,27 @@ namespace EngineNS.GamePlay.Scene
             //}
         }
 
-        public override void TickLogic(UWorld world, URenderPolicy policy)
+        public override void TickLogic(TtNodeTickParameters args)
         {
             //可能不需要每帧都分割场景
             PartitioningScene();
 
-            if (OnTickLogic(world, policy) == false)
+            if (OnTickLogic(args.World, args.Policy) == false)
                 return;
 
             foreach (var i in ActiveLevels)
             {
                 if (i == null)
                     continue;
-                i.TickLogic(world, policy);
+                i.TickLogic(args);
             }
 
-            for (int i = 0; i < Children.Count; i++)
+            if (args.IsTickChildren)
             {
-                Children[i].TickLogic(world, policy);
+                for (int i = 0; i < Children.Count; i++)
+                {
+                    Children[i].TickLogic(args);
+                }
             }
         }
         public override bool OnTickLogic(UWorld world, URenderPolicy policy)

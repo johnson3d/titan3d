@@ -42,10 +42,10 @@ namespace EngineNS.GamePlay.Player
 
         }
 
-        public override void TickLogic(UWorld world, URenderPolicy policy)
+        public override void TickLogic(TtNodeTickParameters args)
         {
-            base.TickLogic(world, policy);
-            PlayerData.CharacterController?.TickLogic(world, policy);
+            base.TickLogic(args);
+            PlayerData.CharacterController?.TickLogic(args);
         }
 
         public unsafe bool OnEvent(in Bricks.Input.Event e)

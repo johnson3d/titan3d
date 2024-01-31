@@ -25,6 +25,7 @@
     <None Include="$(MSBuildThisFileDirectory)Bricks\Terrain\GrassModifier.cginc" />
     <None Include="$(MSBuildThisFileDirectory)Bricks\Terrain\TerrainCDLOD.cginc" />
     <None Include="$(MSBuildThisFileDirectory)Bricks\TextFont\FontSDF.cginc" />
+    <None Include="$(MSBuildThisFileDirectory)Bricks\VirtualTexture\RealtimeVT.cginc" />
     <None Include="$(MSBuildThisFileDirectory)Bricks\VXGI\VxDebugModifier.cginc" />
     <None Include="$(MSBuildThisFileDirectory)CBuffer\VarBase_PerCamera.cginc" />
     <None Include="$(MSBuildThisFileDirectory)CBuffer\VarBase_PerFrame.cginc" />

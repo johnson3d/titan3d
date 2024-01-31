@@ -82,6 +82,9 @@
     <Filter Include="Inc\Algorithm">
       <UniqueIdentifier>{a380c2c2-9579-4a72-909c-2d1ba04de0a1}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Bricks\VirtualTexture">
+      <UniqueIdentifier>{a84b8577-40f5-4401-854c-3a5389de654e}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <None Include="$(MSBuildThisFileDirectory)Material\TestMaterial.mtl">
@@ -372,6 +375,9 @@
     </None>
     <None Include="$(MSBuildThisFileDirectory)ShadingEnv\Sys\ESM.cginc">
       <Filter>ShadingEnv\Sys</Filter>
+    </None>
+    <None Include="$(MSBuildThisFileDirectory)Bricks\VirtualTexture\RealtimeVT.cginc">
+      <Filter>Bricks\VirtualTexture</Filter>
     </None>
   </ItemGroup>
   <ItemGroup>

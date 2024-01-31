@@ -92,7 +92,7 @@ namespace EngineNS.Animation.SceneNode
         GamePlay.Movemnet.UMovement Movement = null;
         [ThreadStatic]
         private static Profiler.TimeScope ScopeTick = Profiler.TimeScopeManager.GetTimeScope(typeof(UBlendSpaceAnimPlayNode), nameof(TickLogic));
-        public override void TickLogic(GamePlay.UWorld world, Graphics.Pipeline.URenderPolicy policy)
+        public override void TickLogic(TtNodeTickParameters args)
         {
             using (new Profiler.TimeScopeHelper(ScopeTick))
             {
@@ -101,7 +101,7 @@ namespace EngineNS.Animation.SceneNode
                     Movement = Parent.Parent.FindFirstChild<UMovement>() as GamePlay.Movemnet.UMovement;
                 }
                 Player.Input = new Vector3(Movement.LinearVelocity.Length(), 0, 0);
-                Player.Update(world.DeltaTimeSecond);
+                Player.Update(args.World.DeltaTimeSecond);
                 Player.Evaluate();
             }   
         }

@@ -79,7 +79,7 @@ namespace EngineNS.GamePlay.GamePlayMacross
         }
         [ThreadStatic]
         private static Profiler.TimeScope ScopeTick = Profiler.TimeScopeManager.GetTimeScope(typeof(UGamePlayMacrossNode), nameof(TickLogic));
-        public override void TickLogic(UWorld world, URenderPolicy policy)
+        public override void TickLogic(TtNodeTickParameters args)
         {
             using (new Profiler.TimeScopeHelper(ScopeTick))
             {
@@ -87,11 +87,11 @@ namespace EngineNS.GamePlay.GamePlayMacross
                 var gameplay = macrossNodeData?.McGamePlay?.Get();
                 if (gameplay == null)
                     return;
-                gameplay.TickLogic(world.DeltaTimeSecond);
-                gameplay.TickAnimation(world.DeltaTimeSecond);
-                gameplay.EvaluateAnimation(world.DeltaTimeSecond);
+                gameplay.TickLogic(args.World.DeltaTimeSecond);
+                gameplay.TickAnimation(args.World.DeltaTimeSecond);
+                gameplay.EvaluateAnimation(args.World.DeltaTimeSecond);
 
-                base.TickLogic(world, policy);
+                base.TickLogic(args);
             }   
         }
         public override void OnNodeLoaded(UNode parent)

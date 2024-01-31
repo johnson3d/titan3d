@@ -40,9 +40,9 @@ namespace EngineNS.Animation.SceneNode
             Player.BindingPose(animatablePose);
         }
         UMeshSpaceRuntimePose mAnimatedPose = null;
-        public override void TickLogic(GamePlay.UWorld world, Graphics.Pipeline.URenderPolicy policy)
+        public override void TickLogic(TtNodeTickParameters args)
         {
-            Player.Update(world.DeltaTimeSecond);
+            Player.Update(args.World.DeltaTimeSecond);
             Player.Evaluate();
             URuntimePoseUtility.ConvetToMeshSpaceRuntimePose(ref mAnimatedPose, Player.OutPose);
         }

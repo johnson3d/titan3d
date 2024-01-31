@@ -113,6 +113,10 @@ namespace EngineNS.GamePlay.Scene
                 UpdateAbsTransform();
             }
 
+            if (this.HasStyle(ENodeStyles.NotRegActiveNode) == false)
+            {
+                world.RegActiveNode(this);
+            }
             return true;
         }
         public void GetWorldSpaceBoundingBox(out DBoundingBox outVal)
@@ -137,6 +141,7 @@ namespace EngineNS.GamePlay.Scene
             SceneManaged = (1 << 11),
             Transient = (1 << 12),
             NoTick = (1 << 13),
+            NotRegActiveNode = (1 << 14),
             Invisible = SelfInvisible | ChildrenInvisible,
         }
         public ENodeStyles NodeStyles
@@ -729,17 +734,26 @@ namespace EngineNS.GamePlay.Scene
         #endregion
 
         #region GamePlay
-        public virtual void TickLogic(GamePlay.UWorld world, Graphics.Pipeline.URenderPolicy policy)
+        public class TtNodeTickParameters
+        {
+            public GamePlay.UWorld World;
+            public Graphics.Pipeline.URenderPolicy Policy;
+            public bool IsTickChildren = true;
+        }
+        public virtual void TickLogic(TtNodeTickParameters args)
         {
             if (this.IsNoTick)
                 return;
-            if (OnTickLogic(world, policy) == false)
+            if (OnTickLogic(args.World, args.Policy) == false)
                 return;
 
             //foreach(var i in Children)
-            for (int i = 0; i < Children.Count; i++)
+            if (args.IsTickChildren)
             {
-                Children[i].TickLogic(world, policy);
+                for (int i = 0; i < Children.Count; i++)
+                {
+                    Children[i].TickLogic(args);
+                }
             }
         }
         public virtual bool OnTickLogic(GamePlay.UWorld world, Graphics.Pipeline.URenderPolicy policy)

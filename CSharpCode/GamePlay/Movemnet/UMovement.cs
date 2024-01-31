@@ -29,15 +29,15 @@ namespace EngineNS.GamePlay.Movemnet
 
         [ThreadStatic]
         private static Profiler.TimeScope ScopeTick = Profiler.TimeScopeManager.GetTimeScope(typeof(UMovement), nameof(TickLogic));
-        public override void TickLogic(UWorld world, URenderPolicy policy)
+        public override void TickLogic(TtNodeTickParameters args)
         {
             using (new Profiler.TimeScopeHelper(ScopeTick))
             {
                 DVector3 posBeforeMove = Parent.Placement.AbsTransform.Position;
-                UpdatePlacement(world, policy);
+                UpdatePlacement(args.World, args.Policy);
                 DVector3 posAfterMove = Parent.Placement.AbsTransform.Position;
-                LinearVelocity = (posAfterMove - posBeforeMove).ToSingleVector3() / world.DeltaTimeSecond;
-                base.TickLogic(world, policy);
+                LinearVelocity = (posAfterMove - posBeforeMove).ToSingleVector3() / args.World.DeltaTimeSecond;
+                base.TickLogic(args);
             }   
         }
 

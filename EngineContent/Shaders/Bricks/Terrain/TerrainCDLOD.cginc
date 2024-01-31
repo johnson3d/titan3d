@@ -4,11 +4,9 @@
 //#define FEATURE_USE_RVT
 
 #include "Common.cginc"
+#include "../VirtualTexture/RealtimeVT.cginc"
 
-//Texture2D HeightMapTextureDX_AUTOBIND;
-//SamplerState Samp_HeightMapTextureDX_AUTOBIND;
 #if defined(FEATURE_USE_RVT)
-ByteAddressBuffer TextureSlotBuffer DX_AUTOBIND;
 Texture2DArray	HeightMapTexture DX_AUTOBIND;
 Texture2DArray	NormalMapTexture DX_AUTOBIND;
 Texture2DArray	MaterialIdTexture DX_AUTOBIND;
@@ -88,12 +86,7 @@ uint GetMaterailIdTextureId(VS_MODIFIER input)
 
 float GetTerrrainVertexHeight(float2 uv, int uniqueTextureId = 0)
 {
-#if defined(FEATURE_USE_RVT)
-	uint arrayIndex = TextureSlotBuffer.Load((uniqueTextureId & 0xffff) * 4);
-	return HeightMapTexture.SampleLevel(Samp_HeightMapTexture, float3(uv.xy, arrayIndex), 0).r;
-#else
-    return HeightMapTexture.SampleLevel(Samp_HeightMapTexture, uv.xy, 0).r;
-#endif
+    return SampleLevelRVT(Samp_HeightMapTexture, HeightMapTexture, uv, uniqueTextureId, 0).r;
 }
 
 float3 GetTerrrainVertexPosition(float2 uv, int uniqueTextureId = 0)
@@ -108,12 +101,7 @@ float3 GetTerrrainVertexPosition(float2 uv, int uniqueTextureId = 0)
 
 float3 GetTerrrainVertexNormal(float2 uv, int uniqueTextureId)
 {
-#if defined(FEATURE_USE_RVT)
-    uint arrayIndex = TextureSlotBuffer.Load((uniqueTextureId & 0xffff) * 4);
-	return NormalMapTexture.SampleLevel(Samp_NormalMapTexture, float3(uv.xy, arrayIndex), 0).xyz;
-#else
-    return NormalMapTexture.SampleLevel(Samp_NormalMapTexture, uv.xy, 0).xyz;
- #endif
+    return SampleLevelRVT(Samp_NormalMapTexture, NormalMapTexture, uv, uniqueTextureId, 0).xyz;
 }
 
 float4 GetMaterialId(float2 uv, int uniqueTextureId)

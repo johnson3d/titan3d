@@ -65,16 +65,16 @@ namespace EngineNS.GamePlay.Controller
         float VInput = 0;
         [ThreadStatic]
         private static Profiler.TimeScope ScopeTick = Profiler.TimeScopeManager.GetTimeScope(typeof(UCharacterController), nameof(TickLogic));
-        public override void TickLogic(UWorld world, URenderPolicy policy)
+        public override void TickLogic(TtNodeTickParameters args)
         {
             using (new Profiler.TimeScopeHelper(ScopeTick))
             {
-                base.TickLogic(world, policy);
+                base.TickLogic(args);
 
                 float PitchSpeed = 15, YawSpeed = 15;
                 float yawDelta = Math.Min(YawDelta, 100) * 0.01f;
                 float pitchDelta = Math.Min(PitchDelta, 100) * 0.01f;
-                CameraControlNode.AddDelta(new Vector3(-pitchDelta * PitchSpeed * world.DeltaTimeSecond, yawDelta * YawSpeed * world.DeltaTimeSecond, 0));
+                CameraControlNode.AddDelta(new Vector3(-pitchDelta * PitchSpeed * args.World.DeltaTimeSecond, yawDelta * YawSpeed * args.World.DeltaTimeSecond, 0));
 
                 //MovementNode.AngularVelocity = new DVector3(0, YawDelta * 0.1f, 0);
                 if (OrientCameraRoation)

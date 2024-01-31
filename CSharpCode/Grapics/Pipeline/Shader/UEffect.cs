@@ -260,15 +260,6 @@ namespace EngineNS.Graphics.Pipeline.Shader
             NxRHI.UShader PixelShader = null;
             if (UEngine.Instance.GfxDevice.RenderContext.RhiType == NxRHI.ERhiType.RHI_GL)
             {
-                VertexShader = rc.CreateShader(result.DescVS);
-                if (VertexShader == null)
-                    return null;
-                PixelShader = rc.CreateShader(result.DescPS);
-                if (PixelShader == null)
-                    return null;
-            }
-            else
-            {
                 bool created = await UEngine.Instance.EventPoster.Post((state) =>
                 {
                     VertexShader = rc.CreateShader(result.DescVS);
@@ -282,7 +273,15 @@ namespace EngineNS.Graphics.Pipeline.Shader
                 if (created == false)
                     return null;
             }
-                
+            else
+            {
+                VertexShader = rc.CreateShader(result.DescVS);
+                if (VertexShader == null)
+                    return null;
+                PixelShader = rc.CreateShader(result.DescPS);
+                if (PixelShader == null)
+                    return null;
+            }
 
             NxRHI.UInputLayout InputLayout = null;
             unsafe

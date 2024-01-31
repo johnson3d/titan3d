@@ -62,6 +62,21 @@ namespace EngineNS.GamePlay
             await mMemberTickables.InitializeMembers(this);
             return true;
         }
+        public List<UNode> ActiveNodes { get; } = new List<UNode>();
+        public void RegActiveNode(UNode node)
+        {
+            lock (ActiveNodes)
+            {
+                ActiveNodes.Add(node);
+            }
+        }
+        public void ResetActiveNodes()
+        {
+            lock (ActiveNodes)
+            {
+                ActiveNodes.Clear();
+            }
+        }
         internal DVector3 mCameraOffset = DVector3.Zero;
         internal uint CameralOffsetSerialId = 1;
         public DVector3 CameraOffset 
@@ -287,6 +302,7 @@ namespace EngineNS.GamePlay
         }
         [ThreadStatic]
         private static Profiler.TimeScope ScopeTick = Profiler.TimeScopeManager.GetTimeScope(typeof(UWorld), nameof(TickLogic));
+        private UNode.TtNodeTickParameters NodeTickParameters = new UNode.TtNodeTickParameters();
         public virtual void TickLogic(Graphics.Pipeline.URenderPolicy policy, float ellapse)
         {
             using (new Profiler.TimeScopeHelper(ScopeTick))
@@ -295,8 +311,22 @@ namespace EngineNS.GamePlay
 
                 if (Pause)
                     return;
-                
-                Root.TickLogic(this, policy);
+
+                NodeTickParameters.World = this;
+                NodeTickParameters.Policy = policy;
+                NodeTickParameters.IsTickChildren = true;
+                Root.TickLogic(NodeTickParameters);
+
+                //NodeTickParameters.IsTickChildren = false;
+                //UEngine.Instance.EventPoster.ParrallelFor(ActiveNodes.Count, static (Index, obj1, obj2) =>
+                //{
+                //    var pThis = (UWorld)obj1;
+                //    pThis.ActiveNodes[Index].TickLogic(pThis.NodeTickParameters);
+                //}, this);
+                //foreach (var i in ActiveNodes)
+                //{
+                //    i.TickLogic(NodeTickParameters);
+                //}
 
                 mMemberTickables.TickLogic(this, UEngine.Instance.ElapseTickCountMS);
 
