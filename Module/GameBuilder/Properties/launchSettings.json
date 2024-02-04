@@ -2,7 +2,7 @@
   "profiles": {
     "GameBuilder": {
       "commandName": "Project",
-      "commandLineArgs": "$(ProjectDir)..\\GameProject\\GameProject.csproj $(SolutionDir)content"
+      "commandLineArgs": "$(ProjectDir)..\\GameProject\\GameProject.csproj $(SolutionDir)content net7.0"
     }
   }
 }

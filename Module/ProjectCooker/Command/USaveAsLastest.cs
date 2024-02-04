@@ -1,6 +1,12 @@
-﻿using System;
+﻿using EngineNS;
+using EngineNS.Bricks.CodeBuilder;
+using EngineNS.Bricks.CodeBuilder.MacrossNode;
+using EngineNS.Profiler;
+using EngineNS.UI.Editor;
+using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -231,6 +237,90 @@ namespace ProjectCooker.Command
                 await world.InitWorld();
                 var asset = await EngineNS.UEngine.Instance.SceneManager.GetScene(world, rn);
                 asset.SaveAssetTo(rn);
+            }
+        }
+        async System.Threading.Tasks.Task ProcUI()
+        {
+            var macrossEditor = new UMacrossEditor();
+            await macrossEditor.Initialize();
+            var root = EngineNS.UEngine.Instance.FileManager.GetRoot(EngineNS.IO.TtFileManager.ERootDir.Game);
+            var files = new List<string>(EngineNS.IO.TtFileManager.GetFiles(root, "*" + EngineNS.UI.TtUIAsset.AssetExt, true));
+            foreach (var i in files)
+            {
+                try
+                {
+                    var rp = EngineNS.IO.TtFileManager.GetRelativePath(root, i);
+                    var rn = EngineNS.RName.GetRName(rp, EngineNS.RName.ERNameType.Game);
+                    var element = UEngine.Instance.UIManager.Load(rn);
+                    UEngine.Instance.UIManager.Save(rn, element);
+                    var host = new EditorUIHost();
+                    host.LoadEditorOnlyData(rn);
+                    host.SaveEditorOnlyData(rn);
+                    macrossEditor.LoadClassGraph(rn);
+                    macrossEditor.SaveClassGraph(rn);
+                }
+                catch(Exception ex)
+                {
+                    Log.WriteLine(ELogTag.Error, "UI SaveAsLasted", ex.ToString());
+                }
+            }
+            root = EngineNS.UEngine.Instance.FileManager.GetRoot(EngineNS.IO.TtFileManager.ERootDir.Engine);
+            files = new List<string>(EngineNS.IO.TtFileManager.GetFiles(root, "*" + EngineNS.UI.TtUIAsset.AssetExt, true));
+            foreach (var i in files)
+            {
+                try
+                {
+                    var rp = EngineNS.IO.TtFileManager.GetRelativePath(root, i);
+                    var rn = EngineNS.RName.GetRName(rp, EngineNS.RName.ERNameType.Engine);
+                    var element = UEngine.Instance.UIManager.Load(rn);
+                    UEngine.Instance.UIManager.Save(rn, element);
+                    var host = new EditorUIHost();
+                    host.LoadEditorOnlyData(rn);
+                    host.SaveEditorOnlyData(rn);
+                    macrossEditor.LoadClassGraph(rn);
+                    macrossEditor.SaveClassGraph(rn);
+                }
+                catch (Exception ex)
+                {
+                    Log.WriteLine(ELogTag.Error, "UI SaveAsLasted", ex.ToString());
+                }
+            }
+        }
+        async System.Threading.Tasks.Task ProcMacross()
+        {
+            var macrossEditor = new UMacrossEditor();
+            await macrossEditor.Initialize();
+            var root = EngineNS.UEngine.Instance.FileManager.GetRoot(EngineNS.IO.TtFileManager.ERootDir.Game);
+            var files = new List<string>(EngineNS.IO.TtFileManager.GetFiles(root, "*" + UMacross.AssetExt, true));
+            foreach (var i in files)
+            {
+                try
+                {
+                    var rp = EngineNS.IO.TtFileManager.GetRelativePath(root, i);
+                    var rn = EngineNS.RName.GetRName(rp, EngineNS.RName.ERNameType.Game);
+                    macrossEditor.LoadClassGraph(rn);
+                    macrossEditor.SaveClassGraph(rn);
+                }
+                catch(Exception ex)
+                {
+                    Log.WriteLine(ELogTag.Error, "Macross SaveAsLasted", ex.ToString());
+                }
+            }
+            root = EngineNS.UEngine.Instance.FileManager.GetRoot(EngineNS.IO.TtFileManager.ERootDir.Engine);
+            files = new List<string>(EngineNS.IO.TtFileManager.GetFiles(root, "*" + UMacross.AssetExt, true));
+            foreach (var i in files)
+            {
+                try
+                {
+                    var rp = EngineNS.IO.TtFileManager.GetRelativePath(root, i);
+                    var rn = EngineNS.RName.GetRName(rp, EngineNS.RName.ERNameType.Engine);
+                    macrossEditor.LoadClassGraph(rn);
+                    macrossEditor.SaveClassGraph(rn);
+                }
+                catch(Exception ex)
+                {
+                    Log.WriteLine(ELogTag.Error, "Macross SaveAsLasted", ex.ToString());
+                }
             }
         }
     }

@@ -97,7 +97,8 @@ namespace CppWeaving.Cpp2CS
 			RegClass("v3dxVector2", new USystemTypeStruct() { CppName = "v3dxVector2", CSName = "EngineNS.Vector2", RetPodName = "v3dVector2_t" });
 			RegClass("v3dxVector3", new USystemTypeStruct() { CppName = "v3dxVector3", CSName = "EngineNS.Vector3", RetPodName = "v3dVector3_t" });
 			RegClass("v3dxVector4", new USystemTypeStruct() { CppName = "v3dxVector4", CSName = "EngineNS.Vector4", RetPodName = "v3dVector4_t" });
-			RegClass("v3dxDVector3", new USystemTypeStruct() { CppName = "v3dxDVector3", CSName = "EngineNS.DVector3", RetPodName = "v3dDVector3_t" });
+            RegClass("v3dxPlane3", new USystemTypeStruct() { CppName = "v3dxPlane3", CSName = "EngineNS.Plane", RetPodName = "v3dVector4_t" });
+            RegClass("v3dxDVector3", new USystemTypeStruct() { CppName = "v3dxDVector3", CSName = "EngineNS.DVector3", RetPodName = "v3dDVector3_t" });
 			RegClass("v3dxQuaternion", new USystemTypeStruct() { CppName = "v3dxQuaternion", CSName = "EngineNS.Quaternion", RetPodName = "v3dVector4_t" });
 			RegClass("v3dxColor4", new USystemTypeStruct() { CppName = "v3dxColor4", CSName = "EngineNS.Color4f", RetPodName = "v3dVector4_t" });
             RegClass("FColor", new USystemTypeStruct() { CppName = "FColor", CSName = "EngineNS.Color", RetPodName = "UINT" });
