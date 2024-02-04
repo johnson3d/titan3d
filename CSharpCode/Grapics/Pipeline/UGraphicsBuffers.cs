@@ -459,12 +459,12 @@ namespace EngineNS.Graphics.Pipeline
 
                 cBuffer.SetValue(coreBinder.CBPerViewport.gCsmDistanceArray, in shadowNode.mSumDistanceFarVec);
 
-                cBuffer.SetValue(coreBinder.CBPerViewport.gViewer2ShadowMtxArrayEditor, 0, in shadowNode.mViewer2ShadowMtxArray[0]);
-                cBuffer.SetValue(coreBinder.CBPerViewport.gViewer2ShadowMtxArrayEditor, 1, in shadowNode.mViewer2ShadowMtxArray[1]);
-                cBuffer.SetValue(coreBinder.CBPerViewport.gViewer2ShadowMtxArrayEditor, 2, in shadowNode.mViewer2ShadowMtxArray[2]);
-                cBuffer.SetValue(coreBinder.CBPerViewport.gViewer2ShadowMtxArrayEditor, 3, in shadowNode.mViewer2ShadowMtxArray[3]);
+                cBuffer.SetMatrix(coreBinder.CBPerViewport.gViewer2ShadowMtxArray, 0, in shadowNode.mViewer2ShadowMtxArray[0]);
+                cBuffer.SetMatrix(coreBinder.CBPerViewport.gViewer2ShadowMtxArray, 1, in shadowNode.mViewer2ShadowMtxArray[1]);
+                cBuffer.SetMatrix(coreBinder.CBPerViewport.gViewer2ShadowMtxArray, 2, in shadowNode.mViewer2ShadowMtxArray[2]);
+                cBuffer.SetMatrix(coreBinder.CBPerViewport.gViewer2ShadowMtxArray, 3, in shadowNode.mViewer2ShadowMtxArray[3]);
 
-                cBuffer.SetValue(coreBinder.CBPerViewport.gShadowTransitionScaleArrayEditor, in shadowNode.mShadowTransitionScaleVec);
+                cBuffer.SetValue(coreBinder.CBPerViewport.gShadowTransitionScaleArray, in shadowNode.mShadowTransitionScaleVec);
                 cBuffer.SetValue(coreBinder.CBPerViewport.gCsmNum, in shadowNode.mCsmNum);
             }
 

@@ -293,7 +293,7 @@ namespace EngineNS.Bricks.GpuDriven
 
             return vector;
         }
-        public void UpdateCameraInfo(EngineNS.Graphics.Pipeline.UCamera camera)
+        public unsafe void UpdateCameraInfo(EngineNS.Graphics.Pipeline.UCamera camera)
         {
             if (camera == null)
                 return;
@@ -301,13 +301,13 @@ namespace EngineNS.Bricks.GpuDriven
             var frustum = camera.GetFrustum();
             for (int i = 0; i < 6; i++)
             {
-                var plane = frustum.GetPlane(i);
+                ref var plane = ref *frustum.GetPlane((ENUM_FRUSTUM_PLANE)i);
                 unsafe
                 {
-                    mFrustumCullingData.CameraPlanes[i * 4 + 0] = plane.X;
-                    mFrustumCullingData.CameraPlanes[i * 4 + 1] = plane.Y;
-                    mFrustumCullingData.CameraPlanes[i * 4 + 2] = plane.Z;
-                    mFrustumCullingData.CameraPlanes[i * 4 + 3] = plane.W;
+                    mFrustumCullingData.CameraPlanes[i * 4 + 0] = plane.A;
+                    mFrustumCullingData.CameraPlanes[i * 4 + 1] = plane.B;
+                    mFrustumCullingData.CameraPlanes[i * 4 + 2] = plane.C;
+                    mFrustumCullingData.CameraPlanes[i * 4 + 3] = plane.D;
                 }
             }
             BoundingBox frustumAABB = new BoundingBox();

@@ -98,6 +98,10 @@ namespace EngineNS.Thread.Async
             //long t1 = Support.Time.HighPrecision_GetTickCount();
             try
             {
+                if (ExceptionInfo != null)
+                {
+                    throw ExceptionInfo;
+                }
                 ContinueAction();
             }
             catch (Exception ex)
@@ -191,7 +195,14 @@ namespace EngineNS.Thread.Async
         public override TtAsyncTaskStateBase ExecutePostEvent()
         {
             this.TaskState = EAsyncTaskState.Running;
-            Result = PostAction(this);
+            try
+            {
+                Result = PostAction(this);
+            }
+            catch (Exception exp)
+            {
+                this.ExceptionInfo = exp;
+            }
             return this;
         }
         public override bool ExecutePostEventCondition()

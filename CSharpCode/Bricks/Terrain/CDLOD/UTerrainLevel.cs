@@ -805,7 +805,7 @@ namespace EngineNS.Bricks.Terrain.CDLOD
                     if (DBoundingBox.Intersects(in i.AABB, sphere))
                     {
                         i.CurrentLOD = level;
-                        i.AABB.GetCornersUnsafe(boxCorner);
+                        i.AABB.UnsafeGetCorners(boxCorner);
                         for (int k = 0; k < 8; k++)
                         {
                             double d = DVector3.DistanceSquared(in boxCorner[k], in sphere.Center);

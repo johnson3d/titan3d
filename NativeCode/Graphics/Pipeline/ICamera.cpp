@@ -73,10 +73,6 @@ void ICamera::UpdateConstBufferData(EngineNS::NxRHI::IGpuDevice* device, EngineN
 		}
 		{
 			const NxRHI::FShaderVarDesc* fld = pBinder->FindField("ClipPlanes");
-			buffer->SetValue(fld, ENUM_FRUSTUMPL_TOP, mFrustum.GetPlane(ENUM_FRUSTUMPL_TOP), bFlush, pUpdater);
-			buffer->SetValue(fld, ENUM_FRUSTUMPL_RIGHT, mFrustum.GetPlane(ENUM_FRUSTUMPL_RIGHT), bFlush, pUpdater);
-			buffer->SetValue(fld, ENUM_FRUSTUMPL_BOTTOM, mFrustum.GetPlane(ENUM_FRUSTUMPL_BOTTOM), bFlush, pUpdater);
-			buffer->SetValue(fld, ENUM_FRUSTUMPL_LEFT, mFrustum.GetPlane(ENUM_FRUSTUMPL_LEFT), bFlush, pUpdater);
 			buffer->SetValue(fld, ENUM_FRUSTUMPL_NEAR, mFrustum.GetPlane(ENUM_FRUSTUMPL_NEAR), bFlush, pUpdater);
 			buffer->SetValue(fld, ENUM_FRUSTUMPL_FAR, mFrustum.GetPlane(ENUM_FRUSTUMPL_FAR), bFlush, pUpdater);
 

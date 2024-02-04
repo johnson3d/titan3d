@@ -150,14 +150,17 @@ public:
 	const v3dxPlane3& GetFarPlane() const{
 		return m_aPlane[ENUM_FRUSTUMPL_FAR];
 	}
-	v3dxVector4 GetPlane(int plane)
+	/*v3dxVector4 GetPlane(int plane)
 	{
 		return v3dxVector4(m_aPlane[plane].A(), m_aPlane[plane].B(), m_aPlane[plane].C(), m_aPlane[plane].D());
-	}
-	const v3dxPlane3& GetPlane(ENUM_FRUSTUM_PLANE plane) {
+	}*/
+	inline const v3dxPlane3& GetPlane(ENUM_FRUSTUM_PLANE plane) const {
 		return m_aPlane[plane];
 	}
-	v3dxVector3 GetCornerRay(ENUM_FRUSTUM_CORNER corner){
+	inline const v3dxVector3* GetFrustumVertices() const {
+		return m_vecFrustum;
+	}
+	inline v3dxVector3 GetCornerRay(ENUM_FRUSTUM_CORNER corner) const{
 		v3dxVector3 result;
 		switch (corner)
 		{
@@ -181,7 +184,7 @@ public:
 		result.normalize();
 		return result;
 	}
-	inline void GetAABB(v3dxBox3* pOutAABB)
+	inline void GetAABB(v3dxBox3* pOutAABB) const
 	{
 		pOutAABB->InitializeBox();
 		for (int i = 0; i < 8; i++)

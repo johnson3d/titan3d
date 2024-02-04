@@ -240,6 +240,7 @@ namespace EngineNS.UI.Editor
         void Save()
         {
             UEngine.Instance.UIManager.Save(AssetName, mUIHost.Children[0]);
+            mUIHost.SaveEditorOnlyData(AssetName);
             UIAsset.MacrossEditor.SaveClassGraph(AssetName);
             UIAsset.MacrossEditor.GenerateCode();
             UIAsset.MacrossEditor.CompileCode();
@@ -297,8 +298,7 @@ namespace EngineNS.UI.Editor
                         }
                         var mc = mUIHost.Children[0].MacrossGetter.Get();
                         mc.HostElement = mUIHost.Children[0];
-                        mc.InitializeEvents();
-                        mc.InitializeUIElementVariables();
+                        mc.Initialize();
                     }
 
                     UEngine.Instance.UIManager.AddUI(AssetName, "UIEditorSimulate", mUIHost);
@@ -458,6 +458,8 @@ namespace EngineNS.UI.Editor
         }
         public static string GetElementShowName(TtUIElement element)
         {
+            if (element == null)
+                return "";
             return "[" + element.GetType().Name + "] " + element.Name;
         }
         bool mDesignerShow = true;
@@ -1223,6 +1225,7 @@ namespace EngineNS.UI.Editor
         {
             AssetName = name;
             mUIHost.Children.Add(UEngine.Instance.UIManager.Load(AssetName));
+            mUIHost.LoadEditorOnlyData(AssetName);
             UIAsset = new TtUIAsset();
             UIAsset.AssetName = name;
             //UIAsset.Mesh = await UI.Canvas.TtCanvas.TestCreate();

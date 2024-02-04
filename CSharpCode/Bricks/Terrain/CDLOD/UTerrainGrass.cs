@@ -209,30 +209,30 @@ namespace EngineNS.Bricks.Terrain.CDLOD
             public byte[] WeightMap;
             public bool CreateFinished = false;
 
-            public async System.Threading.Tasks.Task Create(TtPatch patch, DVector3 patchOffset, UTerrainGrass desc)
-            {
-                Patch = patch;
-                GrassDesc = desc;
-                MaterialMesh = await UEngine.Instance.GfxDevice.MaterialMeshManager.GetMaterialMesh(desc.MeshName);
-                Mesh = new Graphics.Mesh.TtMesh();
-                if (desc.FollowHeight)
-                    Mesh.Initialize(MaterialMesh, Rtti.UTypeDescGetter<Grass.UMdfGrassStaticMeshPermutation<Grass.UMdf_Grass_VertexFollowHeight>>.TypeDesc);
-                else
-                    Mesh.Initialize(MaterialMesh, Rtti.UTypeDescGetter<Grass.UMdfGrassStaticMeshPermutation<Grass.UMdf_Grass_VertexNotFollowHeight>>.TypeDesc);
+            //public async System.Threading.Tasks.Task Create(TtPatch patch, DVector3 patchOffset, UTerrainGrass desc)
+            //{
+            //    Patch = patch;
+            //    GrassDesc = desc;
+            //    MaterialMesh = await UEngine.Instance.GfxDevice.MaterialMeshManager.GetMaterialMesh(desc.MeshName);
+            //    Mesh = new Graphics.Mesh.TtMesh();
+            //    if (desc.FollowHeight)
+            //        Mesh.Initialize(MaterialMesh, Rtti.UTypeDescGetter<Grass.UMdfGrassStaticMeshPermutation<Grass.UMdf_Grass_VertexFollowHeight>>.TypeDesc);
+            //    else
+            //        Mesh.Initialize(MaterialMesh, Rtti.UTypeDescGetter<Grass.UMdfGrassStaticMeshPermutation<Grass.UMdf_Grass_VertexNotFollowHeight>>.TypeDesc);
 
-                Mesh.IsAcceptShadow = !desc.NoShadow;
-                Mesh.IsCastShadow = true;
-                InstanceMdf = Mesh.MdfQueue as Grass.UMdfGrassStaticMesh;
-                InstanceMdf.GrassModifier.GrassType = this;
+            //    Mesh.IsAcceptShadow = !desc.NoShadow;
+            //    Mesh.IsCastShadow = false;
+            //    InstanceMdf = Mesh.MdfQueue as Grass.UMdfGrassStaticMesh;
+            //    InstanceMdf.GrassModifier.GrassType = this;
 
-                Mesh.IsDrawHitproxy = false;
-                var meshTrans = FTransform.CreateTransform(in patchOffset, in Vector3.One, in Quaternion.Identity);
-                var world = patch.Level.Level.Node.GetWorld();
-                Mesh.SetWorldTransform(meshTrans, world, false);
-                Mesh.UpdateCameraOffset(world);
+            //    Mesh.IsDrawHitproxy = false;
+            //    var meshTrans = FTransform.CreateTransform(in patchOffset, in Vector3.One, in Quaternion.Identity);
+            //    var world = patch.Level.Level.Node.GetWorld();
+            //    Mesh.SetWorldTransform(meshTrans, world, false);
+            //    Mesh.UpdateCameraOffset(world);
 
-                CreateFinished = true;
-            }
+            //    CreateFinished = true;
+            //}
             public async System.Threading.Tasks.Task Create(TtPatch patch, DVector3 patchOffset, byte[] weights, int weightStride, UTerrainGrass desc)
             {
                 Patch = patch;
@@ -276,6 +276,15 @@ namespace EngineNS.Bricks.Terrain.CDLOD
                 ObjInstances.Add(obj);
                 obj.InstanceIndex = InstanceMdf.GrassModifier.PushInstance(obj.Data, obj.TerrainHeight);
             }
+            public void UpdateAABB()
+            {//todo update aabb for mesh
+                MaterialMesh.AABB.InitEmptyBox();
+                foreach (var i in ObjInstances)
+                {
+                    //MaterialMesh.AABB.Merge(i.Data.Pos)
+                    //MaterialMesh.AABB = BoundingBox.Merge(in MaterialMesh.AABB, );
+                }
+            }
         }
         public Dictionary<UTerrainGrass, UGrassType> GrassTypes = new Dictionary<UTerrainGrass, UGrassType>();
         public uint CameralOffsetSerialId = 0;
@@ -288,46 +297,46 @@ namespace EngineNS.Bricks.Terrain.CDLOD
             mCurrentPatchLOD = mHostPatch.CurrentLOD;
         }
 
-        void PushInstance(TtPatch patch, UGrassType type, in DVector3 patchOffset, UTerrainGrass grass, in FTransform trans, int capacity)
-        {
-            var patchSize = patch.Level.Level.Node.PatchSize;
-            var inst = new UGrassInstance();
-            var pos = (trans.Position - patchOffset).ToSingleVector3();
-            UInt32 xPos = (UInt32)(pos.X * 4096.0f / patchSize);
-            UInt32 zPos = (UInt32)(pos.Z * 4096.0f / patchSize);
-            UInt32 rot = (UInt32)(trans.Quat.GetAngleWithAxis(Vector3.Up) * 7.5f / System.Math.PI);
-            UInt32 scale = (UInt32)((trans.Scale.Y - type.GrassDesc.MinScale) * 15.0f / type.GrassDesc.GetScaleRange());
-            inst.Data = (xPos << 20) + (zPos << 8) + (rot << 4) + scale;
-            inst.TerrainHeight = pos.Y;
-            //inst.GrassPosition = pos;
-            //inst.GrassScale = trans.Scale.Y;
-            //inst.GrassQuat = trans.Quat;
-            type.PushInstance(inst, capacity);
-        }
-        public void AddGrass(in DVector3 patchOffset, UTerrainGrass grass, in FTransform trans, int capacity)
-        {
-            UGrassType type;
-            if(GrassTypes.TryGetValue(grass, out type) == false)
-            {
-                type = new UGrassType();
-                var task = type.Create(mHostPatch, patchOffset, grass);
-                GrassTypes.Add(grass, type);
-            }
-            if(type.CreateFinished == false)
-            {
-                var tempPatchOffset = patchOffset;
-                var tempTrans = trans;
-                UEngine.Instance.EventPoster.RunOnUntilFinish((Thread.Async.TtAsyncTaskStateBase state) =>
-                {
-                    var isFinish = type.CreateFinished;
-                    if (isFinish)
-                        PushInstance(mHostPatch, type, tempPatchOffset, grass, tempTrans, capacity);
-                    return isFinish;
-                }, Thread.Async.EAsyncTarget.Logic);
-            }
-            else
-                PushInstance(mHostPatch, type, patchOffset, grass, trans, capacity);
-        }
+        //void PushInstance(TtPatch patch, UGrassType type, in DVector3 patchOffset, UTerrainGrass grass, in FTransform trans, int capacity)
+        //{
+        //    var patchSize = patch.Level.Level.Node.PatchSize;
+        //    var inst = new UGrassInstance();
+        //    var pos = (trans.Position - patchOffset).ToSingleVector3();
+        //    UInt32 xPos = (UInt32)(pos.X * 4096.0f / patchSize);
+        //    UInt32 zPos = (UInt32)(pos.Z * 4096.0f / patchSize);
+        //    UInt32 rot = (UInt32)(trans.Quat.GetAngleWithAxis(Vector3.Up) * 7.5f / System.Math.PI);
+        //    UInt32 scale = (UInt32)((trans.Scale.Y - type.GrassDesc.MinScale) * 15.0f / type.GrassDesc.GetScaleRange());
+        //    inst.Data = (xPos << 20) + (zPos << 8) + (rot << 4) + scale;
+        //    inst.TerrainHeight = pos.Y;
+        //    //inst.GrassPosition = pos;
+        //    //inst.GrassScale = trans.Scale.Y;
+        //    //inst.GrassQuat = trans.Quat;
+        //    type.PushInstance(inst, capacity);
+        //}
+        //public void AddGrass(in DVector3 patchOffset, UTerrainGrass grass, in FTransform trans, int capacity)
+        //{
+        //    UGrassType type;
+        //    if(GrassTypes.TryGetValue(grass, out type) == false)
+        //    {
+        //        type = new UGrassType();
+        //        var task = type.Create(mHostPatch, patchOffset, grass);
+        //        GrassTypes.Add(grass, type);
+        //    }
+        //    if(type.CreateFinished == false)
+        //    {
+        //        var tempPatchOffset = patchOffset;
+        //        var tempTrans = trans;
+        //        UEngine.Instance.EventPoster.RunOnUntilFinish((Thread.Async.TtAsyncTaskStateBase state) =>
+        //        {
+        //            var isFinish = type.CreateFinished;
+        //            if (isFinish)
+        //                PushInstance(mHostPatch, type, tempPatchOffset, grass, tempTrans, capacity);
+        //            return isFinish;
+        //        }, Thread.Async.EAsyncTarget.Logic);
+        //    }
+        //    else
+        //        PushInstance(mHostPatch, type, patchOffset, grass, trans, capacity);
+        //}
 
         struct GrassInsData
         {

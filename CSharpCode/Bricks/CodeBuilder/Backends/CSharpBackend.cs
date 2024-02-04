@@ -359,7 +359,18 @@ namespace EngineNS.Bricks.CodeBuilder
                     hostGen.GenCodes(methodInvokeExp.Host, ref sourceCode, ref data);
                     sourceCode += ".";
                 }
-                sourceCode += methodInvokeExp.MethodName + "(";
+                sourceCode += methodInvokeExp.MethodName;
+                if(methodInvokeExp.GenericTypes.Count > 0)
+                {
+                    sourceCode += "<";
+                    for (int i = 0; i < methodInvokeExp.GenericTypes.Count; i++)
+                    {
+                        sourceCode += data.CodeGen.GetTypeString(methodInvokeExp.GenericTypes[i]) + ",";
+                    }
+                    sourceCode = sourceCode.TrimEnd(',');
+                    sourceCode += ">";
+                }
+                sourceCode += "(";
                 if(methodInvokeExp.Arguments.Count > 0)
                 {
                     for(int i=0; i<methodInvokeExp.Arguments.Count; i++)
@@ -609,6 +620,8 @@ namespace EngineNS.Bricks.CodeBuilder
                     sourceCode += $"\"{primitiveExp.ValueStr}\"";
                 else if (primitiveExp.Type.IsEqual(typeof(float)))
                     sourceCode += primitiveExp.ValueStr + "f";
+                else if(primitiveExp.Type.IsEnum)
+                    sourceCode += data.CodeGen.GetTypeString(primitiveExp.Type) + "." + primitiveExp.ValueStr;
                 else
                     sourceCode += primitiveExp.ValueStr;
             }

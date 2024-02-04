@@ -132,7 +132,7 @@ namespace EngineNS
             SetVector3Value(ref results[7], Minimum.X, Minimum.Y, Minimum.Z);
             return results;
         }
-        public unsafe void GetCornersUnsafe(DVector3* verts)
+        public unsafe void UnsafeGetCorners(DVector3* verts)
         {
             SetVector3Value(ref verts[0], Minimum.X, Maximum.Y, Maximum.Z);
             SetVector3Value(ref verts[1], Maximum.X, Maximum.Y, Maximum.Z);
@@ -219,6 +219,13 @@ namespace EngineNS
                 return false;
 
             return (box1.Maximum.Z >= box2.Minimum.Z && box1.Minimum.Z <= box2.Maximum.Z);
+        }
+        public static DBoundingBox IntersectBox(in DBoundingBox box1, in DBoundingBox box2)
+        {
+            DBoundingBox result;
+            result.Maximum = DVector3.Minimize(box1.Maximum, box2.Maximum);
+            result.Minimum = DVector3.Maximize(box1.Minimum, box2.Minimum);
+            return result;
         }
         public static void Transform(in DBoundingBox srcBox, in FTransform transform, out DBoundingBox result)
         {

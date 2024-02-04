@@ -512,7 +512,7 @@ namespace EngineNS.EGui.Controls.PropertyGrid
                     {
                         ImGuiAPI.TableSetupColumn(TName.FromString("Name").ToString(), ImGuiTableColumnFlags_.ImGuiTableColumnFlags_None, 0, 0);
                         ImGuiAPI.TableSetupColumn(TName.FromString("Value").ToString(), ImGuiTableColumnFlags_.ImGuiTableColumnFlags_None, 0, 0);
-                        ImGuiAPI.TableSetupColumn(TName.FromString("Ext").ToString(), ImGuiTableColumnFlags_.ImGuiTableColumnFlags_WidthFixed, 80, 0);
+                        ImGuiAPI.TableSetupColumn(TName.FromString("Ext").ToString(), ImGuiTableColumnFlags_.ImGuiTableColumnFlags_WidthFixed, 20, 0);
                     }
                 }
                 if (tableBegin || isSubPropertyGrid)

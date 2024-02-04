@@ -1079,6 +1079,13 @@ namespace EngineNS.Bricks.CodeBuilder
     {
         [Rtti.Meta]
         public Rtti.UTypeDesc Class { get; set; }
+
+        public UClassReferenceExpression() { }
+        public UClassReferenceExpression(Rtti.UTypeDesc classType)
+        {
+            Class = classType;
+        }
+
         public override bool Equals(object obj)
         {
             var cRef = obj as UClassReferenceExpression;
@@ -1209,6 +1216,7 @@ namespace EngineNS.Bricks.CodeBuilder
         public bool IsAsync { get; set; } = false;
         [Rtti.Meta]
         public bool IsUnsafe { get; set; } = false;
+        public List<UTypeDesc> GenericTypes { get; set; } = new List<UTypeDesc>();
         
         public UMethodInvokeStatement() { }
         public UMethodInvokeStatement(string methodName, UVariableDeclaration retValue, UExpressionBase host)
@@ -1571,6 +1579,11 @@ namespace EngineNS.Bricks.CodeBuilder
             TypeIsTypeof = typeIsTypeOf;
             ValueStr = CalculateValueString(Type, type, typeIsTypeOf);
         }
+        public UPrimitiveExpression(Enum enumVal)
+        {
+            Type = Rtti.UTypeDesc.TypeOf(enumVal.GetType());
+            ValueStr = enumVal.ToString();
+        }
         public static string CalculateValueString(Rtti.UTypeDesc type, object value, bool typeIsTypeof = true)
         {
             string retValue;
@@ -1659,6 +1672,12 @@ namespace EngineNS.Bricks.CodeBuilder
                 var idxStart = ValueStr.IndexOf('(');
                 var idxEnd = ValueStr.IndexOf(')');
                 return Rtti.UTypeDesc.TypeOfFullName(ValueStr.Substring(idxStart, idxEnd - idxStart));
+            }
+            else if(Type.IsEnum)
+            {
+                object outValue;
+                if (System.Enum.TryParse(Type.SystemType, ValueStr, out outValue))
+                    return outValue;
             }
             return null;
         }

@@ -211,7 +211,7 @@ namespace EngineNS.UI.Editor
                 return null;
             return "ElementVar_" + element.Id;
         }
-        bool GenericElementCode(TtUIElement element, ref UClassDeclaration cls)
+        bool GenericElementVariableCode(TtUIElement element, ref UClassDeclaration cls)
         {
             foreach(var data in element.MacrossEvents)
             {
@@ -337,9 +337,41 @@ namespace EngineNS.UI.Editor
             }
             return false;
         }
+        void GenericBindingCode(UClassDeclaration cls)
+        {
+            var initMethod = UIAsset.MacrossEditor.DefClass.FindMethod("InitializeBindings");
+            if(initMethod == null)
+            {
+                initMethod = new UMethodDeclaration()
+                {
+                    MethodName = "InitializeBindings",
+                    IsOverride = true,
+                };
+                UIAsset.MacrossEditor.DefClass.AddMethod(initMethod);
+            }
+            foreach(var data in mUIHost.EditorOnlyData.BindingDatas)
+            {
+                data.Source.GenerateStatement(initMethod.MethodBody.Sequence);
+                data.Target.GenerateStatement(initMethod.MethodBody.Sequence);
+                var bindCall = new UMethodInvokeStatement()
+                {
+                    MethodName = "SetBinding",
+                    Host = new UClassReferenceExpression(UTypeDesc.TypeOf(typeof(Bind.TtBindingOperations))),
+                };
+                bindCall.GenericTypes.Add(data.Target.GetVariableType());
+                bindCall.GenericTypes.Add(data.Source.GetVariableType());
+                bindCall.Arguments.Add(new UMethodInvokeArgumentExpression(data.Target.GetVariableExpression()));
+                bindCall.Arguments.Add(new UMethodInvokeArgumentExpression(new UPrimitiveExpression(data.Target.GetBindPath())));
+                bindCall.Arguments.Add(new UMethodInvokeArgumentExpression(data.Source.GetVariableExpression()));
+                bindCall.Arguments.Add(new UMethodInvokeArgumentExpression(new UPrimitiveExpression(data.Source.GetBindPath())));
+                bindCall.Arguments.Add(new UMethodInvokeArgumentExpression(new UPrimitiveExpression(data.Mode)));
+                initMethod.MethodBody.Sequence.Add(bindCall);
+            }
+        }
         void OnBeforeGenerateCode(UClassDeclaration cls)
         {
-            mUIHost.QueryElements(GenericElementCode, ref cls);
+            mUIHost.QueryElements(GenericElementVariableCode, ref cls);
+            GenericBindingCode(cls);
         }
         void OnAfterCompileCode(UMacrossEditor editor)
         {

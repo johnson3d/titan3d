@@ -2176,82 +2176,49 @@ namespace EngineNS
                 }
             }
         }
-
-        //public static Matrix Transformation2D(Vector2 scalingCenter, float scalingRotation, Vector2 scaling, Vector2 rotationCenter, float rotation, Vector2 translation)
-        //{
-        //    Matrix result;
-        //    unsafe
-        //    {
-        //        IDllImportApi.D3DXMatrixTransformation2D((Matrix*)&result, (Vector2*)&scalingCenter, scalingRotation, (Vector2*)&scaling, (Vector2*)&rotationCenter, rotation, (Vector2*)&translation);
-        //    }
-
-        //    return result;
-        //}
-
-        //public static void Transformation2D(ref Vector2 scalingCenter, float scalingRotation, ref Vector2 scaling, ref Vector2 rotationCenter, float rotation, ref Vector2 translation, out Matrix result)
-        //{
-        //    unsafe
-        //    {
-        //        fixed(Vector2* pinScalingCenter = &scalingCenter)
-        //        {
-        //            fixed(Vector2* pinScaling = &scaling)
-        //            {
-        //                fixed(Vector2* pinRotationCenter = &rotationCenter)
-        //                {
-        //                    fixed(Vector2* pinTranslation = &translation)
-        //                    {
-        //                        fixed (Matrix* pinResult = &result)
-        //                        {
-        //                            IDllImportApi.D3DXMatrixTransformation2D(pinResult, pinScalingCenter, scalingRotation,
-        //                                pinScaling, pinRotationCenter, rotation, pinTranslation);                        
-        //                        }
-        //                    }
-        //                }
-        //            }
-        //        }
-        //    }
-        //}
-        /// <summary>
-        /// 视野矩阵
-        /// </summary>
-        /// <param name="eye">摄像机的位置坐标</param>
-        /// <param name="target">目标对象的坐标</param>
-        /// <param name="up">相机向上的方向在世界坐标中的方向</param>
-        /// <returns>返回计算后的矩阵</returns>
-        public static Matrix LookAtLH(Vector3 eye, Vector3 target, Vector3 up)
+        public static void MakeViewMatrix(out Matrix pMatrix,in Vector3 pvPos,in Vector3 pvDir,in Vector3 pvUp,in Vector3 pvRight)
         {
-            Matrix result;
-            unsafe
-            {
-                IDllImportApi.v3dxMatrixLookAtLH((Matrix*)&result, (Vector3*)&eye, (Vector3*)&target, (Vector3*)&up);
-            }
-            return result;
+            pMatrix.M11 = pvRight.X;    pMatrix.M12 = pvUp.X;    pMatrix.M13 = pvDir.X;
+            pMatrix.M21 = pvRight.Y;    pMatrix.M22 = pvUp.Y;    pMatrix.M23 = pvDir.Y;
+            pMatrix.M31 = pvRight.Z;    pMatrix.M32 = pvUp.Z;    pMatrix.M33 = pvDir.Z;
+
+	        pMatrix.M41 = -Vector3.Dot(in pvPos, in pvRight);
+            pMatrix.M42 = -Vector3.Dot(in pvPos, in pvUp);
+            pMatrix.M43 = -Vector3.Dot(in pvPos, in pvDir);
+
+            pMatrix.M14 = 0.0f;
+	        pMatrix.M24 = 0.0f;
+	        pMatrix.M34 = 0.0f;
+	        pMatrix.M44 = 1.0f;
         }
-        /// <summary>
-        /// 视野矩阵
-        /// </summary>
-        /// <param name="eye">摄像机的位置坐标</param>
-        /// <param name="target">目标对象的坐标</param>
-        /// <param name="up">相机向上的方向在世界坐标中的方向</param>
-        /// <param name="result">计算后的矩阵</param>
-        public static void LookAtLH(ref Vector3 eye, ref Vector3 target, ref Vector3 up, out Matrix result)
+        public static void LookAtLH(in Vector3 eye, in Vector3 target, in Vector3 up, out Matrix result)
         {
-            unsafe
-            {
-                fixed (Vector3* pinCamera = &eye)
-                {
-                    fixed (Vector3* pinTarget = &target)
-                    {
-                        fixed (Vector3* pinUp = &up)
-                        {
-                            fixed (Matrix* pinResult = &result)
-                            {
-                                IDllImportApi.v3dxMatrixLookAtLH(pinResult, pinCamera, pinTarget, pinUp);
-                            }
-                        }
-                    }
-                }
-            }
+            Vector3 vDir, vRight, vUp;
+            vDir = target - eye;
+            vDir.Normalize();
+
+            vRight = Vector3.Cross(in up, in vDir);
+            vRight.Normalize();
+            vUp = Vector3.Cross(in vDir, in vRight);
+
+            MakeViewMatrix(out result, in eye, in vDir, in vUp, in vRight);
+
+            //unsafe
+            //{
+            //    fixed (Vector3* pinCamera = &eye)
+            //    {
+            //        fixed (Vector3* pinTarget = &target)
+            //        {
+            //            fixed (Vector3* pinUp = &up)
+            //            {
+            //                fixed (Matrix* pinResult = &result)
+            //                {
+            //                    IDllImportApi.v3dxMatrixLookAtLH(pinResult, pinCamera, pinTarget, pinUp);
+            //                }
+            //            }
+            //        }
+            //    }
+            //}
         }
         public static Matrix CreateOrthographicOffCenter(float left, float right, float bottom, float top, float zNearPlane, float zFarPlane)
         {

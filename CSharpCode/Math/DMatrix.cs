@@ -753,5 +753,32 @@ namespace EngineNS
                 }
             }
         }
+        public static void MakeViewMatrix(out DMatrix pMatrix, in DVector3 pvPos, in DVector3 pvDir, in DVector3 pvUp, in DVector3 pvRight)
+        {
+            pMatrix.M11 = pvRight.X; pMatrix.M12 = pvUp.X; pMatrix.M13 = pvDir.X;
+            pMatrix.M21 = pvRight.Y; pMatrix.M22 = pvUp.Y; pMatrix.M23 = pvDir.Y;
+            pMatrix.M31 = pvRight.Z; pMatrix.M32 = pvUp.Z; pMatrix.M33 = pvDir.Z;
+
+            pMatrix.M41 = -DVector3.Dot(in pvPos, in pvRight);
+            pMatrix.M42 = -DVector3.Dot(in pvPos, in pvUp);
+            pMatrix.M43 = -DVector3.Dot(in pvPos, in pvDir);
+
+            pMatrix.M14 = 0.0f;
+            pMatrix.M24 = 0.0f;
+            pMatrix.M34 = 0.0f;
+            pMatrix.M44 = 1.0f;
+        }
+        public static void LookAtLH(in DVector3 eye, in DVector3 target, in DVector3 up, out DMatrix result)
+        {
+            DVector3 vDir, vRight, vUp;
+            vDir = target - eye;
+            vDir.Normalize();
+
+            vRight = DVector3.Cross(in up, in vDir);
+            vRight.Normalize();
+            vUp = DVector3.Cross(in vDir, in vRight);
+
+            MakeViewMatrix(out result, in eye, in vDir, in vUp, in vRight);
+        }
     }
 }

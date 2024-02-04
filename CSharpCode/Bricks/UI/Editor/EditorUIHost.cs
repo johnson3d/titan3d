@@ -1,12 +1,128 @@
-﻿using EngineNS.UI;
+﻿using EngineNS.Bricks.CodeBuilder;
+using EngineNS.Rtti;
+using EngineNS.UI;
+using EngineNS.UI.Bind;
 using EngineNS.UI.Canvas;
 using EngineNS.UI.Controls;
 using System;
 using System.Collections.Generic;
+using System.Reflection;
 using System.Text;
 
 namespace EngineNS.UI.Editor
 {
+    public interface IUIBindingDataBase : IO.ISerializer
+    {
+        void GenerateStatement(List<UStatementBase> statements);
+        UExpressionBase GetVariableExpression();
+        UTypeDesc GetVariableType();
+        string GetBindPath();
+        bool IsSameTarget<T>(T target);
+        void Draw(EditorUIHost host, in ImDrawList drawList);
+    }
+    public class UIBindingData_Element : IUIBindingDataBase
+    {
+        [Rtti.Meta]
+        public string PropertyName { get; set; }
+        [Rtti.Meta]
+        public Rtti.UTypeDesc PropertyType { get; set; }
+        [Rtti.Meta]
+        public UInt64 Id { get; set; }
+
+        public void GenerateStatement(List<UStatementBase> statements)
+        {
+            var findElementInvokeStatement = new UMethodInvokeStatement(
+                "FindElement",
+                new UVariableDeclaration()
+                {
+                    VariableName = "UIElement" + Id,
+                    VariableType = new UTypeReference(typeof(TtUIElement)),
+                },
+                new UVariableReferenceExpression("HostElement"),
+                new UMethodInvokeArgumentExpression(new UPrimitiveExpression(Id)))
+            {
+                DeclarationReturnValue = true,
+            };
+            for(int i=0; i<statements.Count; i++)
+            {
+                if (findElementInvokeStatement.Equals(statements[i]))
+                    return;
+            }
+            statements.Add(findElementInvokeStatement);
+        }
+        public UExpressionBase GetVariableExpression()
+        {
+            return new UVariableReferenceExpression("UIElement" + Id);
+        }
+        public UTypeDesc GetVariableType()
+        {
+            return PropertyType;
+        }
+        public string GetBindPath()
+        {
+            return PropertyName;
+        }
+        public bool IsSameTarget<T>(T target)
+        {
+            var element = target as TtUIElement;
+            if (element != null)
+                return element.Id == Id;
+            return false;
+        }
+        public void Draw(EditorUIHost host, in ImDrawList drawList)
+        {
+            var element = host.FindElement(Id);
+            ImGuiAPI.Text(TtUIEditor.GetElementShowName(element));
+            ImGuiAPI.SameLine(0, -1);
+            ImGuiAPI.Text(PropertyName);
+        }
+
+        public void OnPreRead(object tagObject, object hostObject, bool fromXml)
+        {
+        }
+
+        public void OnPropertyRead(object tagObject, PropertyInfo prop, bool fromXml)
+        {
+        }
+    }
+    public class EditorOnlyData : IO.BaseSerializer
+    {
+        public class BindingData : IO.BaseSerializer
+        {
+            [Rtti.Meta]
+            public IUIBindingDataBase Source { get; set; }
+            [Rtti.Meta]
+            public IUIBindingDataBase Target { get; set; }
+            [Rtti.Meta]
+            public EBindingMode Mode { get; set; } = EBindingMode.Default;
+
+            public void DrawBindInfo(EditorUIHost host, in ImDrawList drawList)
+            {
+                Source.Draw(host, drawList);
+                ImGuiAPI.SameLine(0, -1);
+                ImGuiAPI.Text(" (" + Mode.ToString() + ")");
+            }
+        }
+
+        [Rtti.Meta]
+        public List<BindingData> BindingDatas
+        {
+            get;
+            set;
+        } = new List<BindingData>();
+
+        public void ClearTargetBindData(IBindableObject target)
+        {
+            for(int i=BindingDatas.Count - 1; i>=0; i--)
+            {
+                if(BindingDatas[i].Target.IsSameTarget(target))
+                {
+                    BindingDatas.RemoveAt(i);
+                }
+            }
+        }
+    }
+
     public partial class EditorUIHost : TtUIHost
     {
         public float PathWidth = 10;
@@ -20,9 +136,64 @@ namespace EngineNS.UI.Editor
         public TtCanvasBrush DrawBrush => mDrawBrush;
         TtUIEditor mHostEditor = null;
         public TtUIEditor HostEditor => mHostEditor;
+
+        EditorOnlyData mEditorOnlyData;
+        public EditorOnlyData EditorOnlyData
+        {
+            get
+            {
+                if (mEditorOnlyData == null)
+                    mEditorOnlyData = new EditorOnlyData();
+                return mEditorOnlyData;
+            }
+        }
+
         public EditorUIHost(TtUIEditor editor)
         {
             mHostEditor = editor;
+        }
+
+        public void SaveEditorOnlyData(RName asset)
+        {
+            var typeStr = Rtti.UTypeDescManager.Instance.GetTypeStringFromType(EditorOnlyData.GetType());
+            using (var xnd = new IO.TtXndHolder(typeStr, 0, 0))
+            {
+                using (var attr = xnd.NewAttribute("EditorOnlyData", 0, 0))
+                {
+                    using (var ar = attr.GetWriter(512))
+                    {
+                        ar.Write(EditorOnlyData);
+                    }
+                    xnd.RootNode.AddAttribute(attr);
+                }
+                var fileName = asset.Address + "/EditorOnlyData.dat";
+                xnd.SaveXnd(fileName);
+                UEngine.Instance.SourceControlModule.AddFile(fileName);
+            }
+        }
+        public void LoadEditorOnlyData(RName asset)
+        {
+            using (var xnd = IO.TtXndHolder.LoadXnd(asset.Address + "/EditorOnlyData.dat"))
+            {
+                if (xnd == null)
+                    return;
+
+                var attr = xnd.RootNode.TryGetAttribute("EditorOnlyData");
+                if (attr.NativePointer == IntPtr.Zero)
+                    return;
+
+                using (var ar = attr.GetReader(null))
+                {
+                    try
+                    {
+                        ar.ReadObject(out mEditorOnlyData);
+                    }
+                    catch (Exception ex)
+                    {
+                        Profiler.Log.WriteException(ex);
+                    }
+                }
+            }
         }
 
         protected override void CustomBuildMesh(Canvas.TtCanvasDrawBatch batch)

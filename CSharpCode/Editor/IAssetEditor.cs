@@ -83,10 +83,21 @@ namespace EngineNS.Editor
             editor.AssetName = name;
             mAssetEditorOpenProgress.CurrentEditor = editor;
             this.ShowTopMost(mAssetEditorOpenProgress);
-            
-            if (await editor.Initialize() == false)
+
+            bool ok = false;
+            try
+            {
+                if (await editor.Initialize() == false)
+                    return;
+                ok = await editor.OpenEditor(mainEditor, name, arg);
+            }
+            catch (Exception exp)
+            {
+                Profiler.Log.WriteException(exp);
+                mAssetEditorOpenProgress.Visible = false;
+                mAssetEditorOpenProgress.CurrentEditor = null;
                 return;
-            var ok = await editor.OpenEditor(mainEditor, name, arg);
+            }
             mAssetEditorOpenProgress.Visible = false;
             mAssetEditorOpenProgress.CurrentEditor = null;
             if (ok == false)

@@ -431,6 +431,7 @@ namespace EngineNS.Thread
                     return false;
                 e = ContinueEvents.Dequeue();
             }
+            
             try
             {
                 e.ExecuteContinue();

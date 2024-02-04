@@ -395,6 +395,10 @@ namespace EngineNS.Graphics.Mesh.Modifier
         {
             return InstanceBuffers.PushInstance(this, in instance, in bounding);
         }
+        public uint PushInstance(in FVSInstanceData instance)
+        {
+            return InstanceBuffers.PushInstance(this, in instance, new FCullBounding());
+        }
         public unsafe void SetInstance(uint index, in FVSInstanceData instance)
         {
             InstanceBuffers.SetInstance(index, instance);

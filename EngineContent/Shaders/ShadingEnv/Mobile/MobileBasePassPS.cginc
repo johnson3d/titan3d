@@ -86,8 +86,8 @@ PS_OUTPUT PS_MobileBasePass(PS_INPUT input)
 		{
 			if (PerPixelViewerDistance < (half)gCsmDistanceArray[CsmIdx])
 			{
-				ShadowMapUV = mul(float4(input.vWorldPos, 1.0f), gViewer2ShadowMtxArrayEditor[CsmIdx]);
-				mSFD.mShadowTransitionScale = (half)gShadowTransitionScaleArrayEditor[CsmIdx];
+				ShadowMapUV = mul(float4(input.vWorldPos, 1.0f), gViewer2ShadowMtxArray[CsmIdx]);
+				mSFD.mShadowTransitionScale = (half)gShadowTransitionScaleArray[CsmIdx];
 				break;
 			}
 		}

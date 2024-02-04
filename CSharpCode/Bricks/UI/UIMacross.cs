@@ -8,6 +8,12 @@ namespace EngineNS.UI
     public partial class TtUIMacrossBase
     {
         public TtUIElement HostElement;
+        public virtual void Initialize()
+        {
+            InitializeEvents();
+            InitializeUIElementVariables();
+            InitializeBindings();
+        }
         public virtual void InitializeEvents()
         {
             //TtButton element = HostElement.FindElement("xx") as TtButton;
@@ -15,6 +21,11 @@ namespace EngineNS.UI
         }
 
         public virtual void InitializeUIElementVariables()
+        {
+
+        }
+
+        public virtual void InitializeBindings()
         {
 
         }

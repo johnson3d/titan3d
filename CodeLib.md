@@ -54,7 +54,7 @@ namespace EngineNS.Rtti
 
 ```
 2.插件编译结果路径
-binaries\Plugins\Debug\net6.0
+binaries\Plugins\Debug\net7.0
 3.在插件目录还要添加插件同名.plugin文件，内容大致如下：
 ```XML
 <?xml version="1.0" encoding="utf-8"?>

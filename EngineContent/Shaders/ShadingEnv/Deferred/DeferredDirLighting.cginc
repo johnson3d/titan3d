@@ -174,15 +174,23 @@ PS_OUTPUT PS_Main(PS_INPUT input)
 	}
 	else
 	{
+        float clip_u_min = 0;
+        float clip_u_max = 0.25;
 		for (int CsmIdx = 0; CsmIdx < gCsmNum; CsmIdx++)
 		{
 			if (PerPixelViewerDistance < (half)gCsmDistanceArray[CsmIdx])
 			{
-				ShadowMapUV = mul(float4(WorldPos, 1.0f), gViewer2ShadowMtxArrayEditor[CsmIdx]);
-				mSFD.mShadowTransitionScale = (half)gShadowTransitionScaleArrayEditor[CsmIdx];
+				ShadowMapUV = mul(float4(WorldPos, 1.0f), gViewer2ShadowMtxArray[CsmIdx]);
+				mSFD.mShadowTransitionScale = (half)gShadowTransitionScaleArray[CsmIdx];
+                if (ShadowMapUV.x > clip_u_max || ShadowMapUV.x < clip_u_min)
+                {
+                    ShadowMapUV.z = 0;
+                }
 				break;
-			}
-		}
+            }
+            clip_u_min = clip_u_max;
+            clip_u_max += 0.25;
+        }
 
 		if (ShadowMapUV.z > 0.0f)
 		{

@@ -17,7 +17,7 @@ float4 SampleLevelRVT(SamplerState samp, Texture2D texture1, float2 uv, uint uni
 #if defined(FEATURE_USE_RVT)
 float4 SampleLevelRVT(SamplerState samp, Texture2DArray texture1, float2 uv, uint uniqueTextureId, uint mipLevel)
 {
-    ActiveRvtBuffer.Store(uniqueTextureId * 4, 1);
+    //ActiveRvtBuffer.Store(uniqueTextureId * 4, 1);
     return texture1.SampleLevel(samp, float3(uv.xy, GetSlotRVT(uniqueTextureId)), mipLevel);
 }
 #endif

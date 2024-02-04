@@ -2,6 +2,7 @@
 using EngineNS.Rtti;
 using EngineNS.UI.Controls;
 using EngineNS.UI.Controls.Containers;
+using EngineNS.UI.Editor;
 using EngineNS.UI.Trigger;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using NPOI.SS.Formula.Functions;
@@ -248,66 +249,99 @@ namespace EngineNS.UI.Bind
         }
 
         List<IBindableObject> mBindObjects = new List<IBindableObject>();
+        List<IBindableObject> mBindingTargets = new List<IBindableObject>();
+        List<EditorOnlyData.BindingData> mBindingDatas = new List<EditorOnlyData.BindingData>();
         string mBindPopFilterString = "";
         bool mBindFilterFocus = false;
+        bool mBindedDataDirty = true;
+        TtUIElement mFirstElement = null;
+        EBindingMode mSelectedMode = EBindingMode.Default;
+        string[] mBindingModeNames;
         public void OnDraw(in ExternalInfo info)
         {
             unsafe
             {
-                TtUIElement firstElement = null;
-                bool hasBinded = false;
-                mBindObjects.Clear();
-                var enumerableInterfaace = info.Target.GetType().GetInterface(typeof(IEnumerable).FullName, false);
-                if(enumerableInterfaace != null)
+                Editor.EditorUIHost host = null;
+                if(mBindedDataDirty)
                 {
-                    foreach(var objIns in (IEnumerable)info.Target)
+                    mBindingModeNames = Enum.GetNames<EBindingMode>();
+                    mBindObjects.Clear();
+                    mBindingTargets.Clear();
+                    mBindingDatas.Clear();
+                    var enumerableInterfaace = info.Target.GetType().GetInterface(typeof(IEnumerable).FullName, false);
+                    if (enumerableInterfaace != null)
                     {
-                        if (objIns == null)
-                            continue;
-
-                        var bindObj = objIns as IBindableObject;
-                        if (bindObj == null)
-                            continue;
-
-                        var bp = bindObj.FindBindableProperty(info.PropertyDescriptor.Name);
-                        if (bp == null)
-                            continue;
-                        hasBinded = hasBinded || bindObj.HasBinded(bp);
-                        mBindObjects.Add(bindObj);
-                        if(firstElement == null)
+                        foreach (var objIns in (IEnumerable)info.Target)
                         {
-                            var element = objIns as TtUIElement;
-                            if(element != null && element.RootUIHost != null && element.RootUIHost.Children.Count > 0)
+                            if (objIns == null)
+                                continue;
+
+                            var bindObj = objIns as IBindableObject;
+                            if (bindObj == null)
+                                continue;
+
+                            var bp = bindObj.FindBindableProperty(info.PropertyDescriptor.Name);
+                            if (bp == null)
+                                continue;
+
+                            mBindingTargets.Add(bindObj);
+                            //hasBinded = hasBinded || bindObj.HasBinded(bp);
+                            mBindObjects.Add(bindObj);
+                            if (mFirstElement == null)
                             {
-                                firstElement = element.RootUIHost.Children[0];
+                                var element = objIns as TtUIElement;
+                                if (element != null && element.RootUIHost != null && element.RootUIHost.Children.Count > 0)
+                                {
+                                    mFirstElement = element.RootUIHost.Children[0];
+                                }
                             }
                         }
                     }
-                }
-                else
-                {
-                    var bindObj = info.Target as IBindableObject;
-                    if (bindObj != null)
+                    else
                     {
-                        var bp = bindObj.FindBindableProperty(info.PropertyDescriptor.Name);
-                        if(bp != null)
+                        var bindObj = info.Target as IBindableObject;
+                        if (bindObj != null)
                         {
-                            hasBinded = hasBinded || bindObj.HasBinded(bp);
-                            mBindObjects.Add(bindObj);
+                            var bp = bindObj.FindBindableProperty(info.PropertyDescriptor.Name);
+                            if (bp != null)
+                            {
+                                //hasBinded = hasBinded || bindObj.HasBinded(bp);
+                                mBindObjects.Add(bindObj);
+                            }
+                            mBindingTargets.Add(bindObj);
+                        }
+                        var element = info.Target as TtUIElement;
+                        if (element != null && element.RootUIHost != null && element.RootUIHost.Children.Count > 0)
+                        {
+                            mFirstElement = element.RootUIHost.Children[0];
                         }
                     }
-                    var element = info.Target as TtUIElement;
-                    if (element != null && element.RootUIHost != null && element.RootUIHost.Children.Count > 0)
+
+                    host = mFirstElement.RootUIHost as Editor.EditorUIHost;
+                    // check if has binded value
+                    for (int i = 0; i < host.EditorOnlyData.BindingDatas.Count; i++)
                     {
-                        firstElement = element.RootUIHost.Children[0];
+                        for (int tagIdx = 0; tagIdx < mBindingTargets.Count; tagIdx++)
+                        {
+                            var data = host.EditorOnlyData.BindingDatas[i];
+                            if (data.Target.IsSameTarget(mBindingTargets[tagIdx]) &&
+                               data.Target.GetBindPath() == info.PropertyDescriptor.Name)
+                            {
+                                mBindingDatas.Add(data);
+                            }
+                        }
                     }
+                    //mBindedDataDirty = false; // 这里有问题，点击绑定按钮后相应到host而不是本身控件
                 }
+
                 if (mBindObjects.Count == 0)
                     return;
-                if (firstElement == null)
+                if (mFirstElement == null)
                     return;
+                host = mFirstElement.RootUIHost as Editor.EditorUIHost;
 
-                var id = ImGuiAPI.GetID("#BindButton");
+                var keyName = "#BindButton" + info.PropertyDescriptor.Name;
+                var id = ImGuiAPI.GetID(keyName);
 
                 var drawList = ImGuiAPI.GetWindowDrawList();
                 var cursorPos = ImGuiAPI.GetCursorScreenPos();
@@ -320,13 +354,13 @@ namespace EngineNS.UI.Bind
                 if (!ImGuiAPI.ItemAdd(in start, in end, id, 0))
                     return;
                 bool hovered = false, held = false;
-                var pressed = ImGuiAPI.ButtonBehavior(in start, in end, id, ref hovered, ref held, ImGuiButtonFlags_.ImGuiButtonFlags_MouseButtonLeft);
+                var pressed = ImGuiAPI.ButtonBehavior(in start, in end, id, ref hovered, ref held, ImGuiButtonFlags_.ImGuiButtonFlags_MouseButtonLeft | ImGuiButtonFlags_.ImGuiButtonFlags_Internal_PressedOnRelease);
 
                 if(hovered)
                 {
                     drawList.AddRectFilled(in start, in end, EGui.UIProxy.StyleConfig.Instance.ToolButtonTextColor, 2.0f, ImDrawFlags_.ImDrawFlags_None);
                 }
-                else if(hasBinded)
+                else if(mBindingDatas.Count > 0)
                 {
                     drawList.AddRectFilled(in start, in end, 0xFF00FF00, 2.0f, ImDrawFlags_.ImDrawFlags_None);
                 }
@@ -336,56 +370,180 @@ namespace EngineNS.UI.Bind
                 }
                 if(pressed)
                 {
-                    ImGuiAPI.OpenPopup("BindSourceSelectPopup", ImGuiPopupFlags_.ImGuiPopupFlags_None);
+                    ImGuiAPI.OpenPopup("BindSourceSelectPopup" + keyName, ImGuiPopupFlags_.ImGuiPopupFlags_None);
                 }
-                if(ImGuiAPI.BeginPopup("BindSourceSelectPopup", 
+                if(ImGuiAPI.BeginPopup("BindSourceSelectPopup" + keyName, 
                     ImGuiWindowFlags_.ImGuiWindowFlags_AlwaysAutoResize |
                     ImGuiWindowFlags_.ImGuiWindowFlags_NoTitleBar |
                     ImGuiWindowFlags_.ImGuiWindowFlags_NoSavedSettings |
-                    ImGuiWindowFlags_.ImGuiWindowFlags_NoScrollbar |
+                    //ImGuiWindowFlags_.ImGuiWindowFlags_NoScrollbar |
                     ImGuiWindowFlags_.ImGuiWindowFlags_NoNav))
                 {
                     var cmdList = ImGuiAPI.GetWindowDrawList();
                     var width = ImGuiAPI.GetColumnWidth(0);
                     EGui.UIProxy.SearchBarProxy.OnDraw(ref mBindFilterFocus, in cmdList, "search item", ref mBindPopFilterString, width);
                     
+                    if(mBindingDatas.Count > 0)
+                    {
+                        mBindingDatas[0].DrawBindInfo(host, cmdList);
+                        if(EGui.UIProxy.CustomButton.ToolButton("Delete Bind", Vector2.Zero))
+                        {
+                            for(int i=0; i<mBindingTargets.Count; i++)
+                            {
+                                host.EditorOnlyData.ClearTargetBindData(mBindingTargets[i]);
+                            }
+                            mBindedDataDirty = true;
+                        }
+                    }
+
+                    var selectedModeStr = mSelectedMode.ToString();
+                    if(EGui.UIProxy.ComboBox.BeginCombo("Mode", selectedModeStr, 200))
+                    {
+                        for(int i=0; i<mBindingModeNames.Length; i++)
+                        {
+                            var selected = (mBindingModeNames[i] == selectedModeStr);
+                            if(ImGuiAPI.Selectable(mBindingModeNames[i], selected, ImGuiSelectableFlags_.ImGuiSelectableFlags_None, in Vector2.Zero))
+                            {
+                                Enum.TryParse<EBindingMode>(mBindingModeNames[i], out mSelectedMode);
+                            }
+                        }
+
+                        EGui.UIProxy.ComboBox.EndCombo();
+                    }
                     if(ImGuiAPI.TreeNodeEx("UIControls", ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_SpanFullWidth))
                     {
-                        var host = firstElement.RootUIHost as Editor.EditorUIHost;
                         int idx = 0;
-                        DrawUIElementBindableProperty(firstElement, in cmdList, host.HostEditor, ref idx, mBindPopFilterString);
+                        DrawUIElementBindableProperty(mFirstElement, in cmdList, host, ref idx, mBindPopFilterString, info);
+
+                        ImGuiAPI.TreePop();
                     }
+
+                    ImGuiAPI.EndPopup();
                 }
             }
         }
 
-        void BindPropertyTourAction(string name, TtBindableProperty bp, ref int idx)
+        struct TourPropertiesData
         {
-            ImGuiAPI.TreeNodeEx(name + "##" + idx, ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_SpanFullWidth);
+            public int Idx;
+            public string Filter;
+            public IBindableObject SourceObject;
+            public List<IBindableObject> TargetObjects;
+            public string TargetName;
+            public Rtti.UTypeDesc TargetType;
+            public EditorUIHost Host;
+            public bool HasProperty;
+        }
+        void BindPropertyTourAction(string name, TtBindableProperty bp, ref TourPropertiesData data)
+        {
+            if (!name.ToLower().Contains(data.Filter))
+                return;
+            if (bp.PropertyType != data.TargetType)
+                return;
+            if (name == data.TargetName)
+            {
+                for (int i = 0; i < data.TargetObjects.Count; i++)
+                {
+                    if (data.TargetObjects[i] == data.SourceObject)
+                        return;
+                }
+            }
+
+            ImGuiAPI.TreeNodeEx(name + "##" + data.Idx, ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_SpanFullWidth);
             if(ImGuiAPI.IsItemClicked(ImGuiMouseButton_.ImGuiMouseButton_Left))
             {
+                IUIBindingDataBase bindSource = null;
+                var element = data.SourceObject as TtUIElement;
+                if (element != null)
+                {
+                    bindSource = new UIBindingData_Element()
+                    {
+                        PropertyName = name,
+                        PropertyType = bp.PropertyType,
+                        Id = element.Id,
+                    };
+                }
+                for (int i=0; i<data.TargetObjects.Count; i++)
+                {
+                    var tElement = data.TargetObjects[i] as TtUIElement;
+                    if(tElement != null)
+                    {
+                        var bindTarget = new UIBindingData_Element()
+                        {
+                            PropertyName = data.TargetName,
+                            PropertyType = data.TargetType,
+                            Id = tElement.Id,
+                        };
+                        data.Host.EditorOnlyData.ClearTargetBindData(tElement);
+                        data.Host.EditorOnlyData.BindingDatas.Add(new EditorOnlyData.BindingData()
+                        {
+                            Source = bindSource,
+                            Target = bindTarget,
+                            Mode = mSelectedMode,
+                        });
+                        mBindedDataDirty = true;
+                    }
+                }
+
                 ImGuiAPI.CloseCurrentPopup();
             }
+            ImGuiAPI.TreePop();
         }
-        void DrawUIElementBindableProperty(TtUIElement element, in ImDrawList drawList, Editor.TtUIEditor editor, ref int idx, string filter)
+        void HasProperty(string name, TtBindableProperty bp, ref TourPropertiesData data)
+        {
+            if (data.HasProperty)
+                return;
+            if (!name.ToLower().Contains(data.Filter))
+                return;
+            if (bp.PropertyType != data.TargetType)
+                return;
+            if(name == data.TargetName)
+            {
+                for(int i=0; i<data.TargetObjects.Count; i++)
+                {
+                    if (data.TargetObjects[i] == data.SourceObject)
+                        return;
+                }
+            }
+            data.HasProperty = true;
+        }
+        void DrawUIElementBindableProperty(TtUIElement element, in ImDrawList drawList, EditorUIHost host, ref int idx, string filter, in ExternalInfo info)
         {
             var container = element as TtContainer;
-            if (!element.HasBindProperties(filter) && container == null)
+            var data = new TourPropertiesData()
+            {
+                Idx = idx,
+                Filter = filter.ToLower(),
+                TargetType = info.PropertyDescriptor.PropertyType,
+                SourceObject = element,
+                TargetObjects = mBindingTargets,
+                TargetName = info.PropertyDescriptor.Name,
+                Host = host,
+                HasProperty = false,
+            };
+            element.TourBindProperties(ref data, HasProperty);
+            if (!data.HasProperty && container == null)
                 return;
             if(ImGuiAPI.TreeNodeEx(Editor.TtUIEditor.GetElementShowName(element) + "##" + idx, ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_SpanFullWidth))
             {
-                if(ImGuiAPI.TreeNodeEx("Properties##" + idx, ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_SpanFullWidth))
-                    element.TourBindProperties(ref idx, BindPropertyTourAction);
+                if (ImGuiAPI.TreeNodeEx("Properties##" + idx, ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_SpanFullWidth))
+                {
+                    element.TourBindProperties(ref data, BindPropertyTourAction);
+                    ImGuiAPI.TreePop();
+                }
                 if(container != null)
                 {
                     if(ImGuiAPI.TreeNodeEx("Children##" + idx, ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_SpanFullWidth))
                     {
                         for(int i=0; i<container.Children.Count; i++)
                         {
-                            DrawUIElementBindableProperty(container.Children[i], in drawList, editor, ref idx, filter);
+                            DrawUIElementBindableProperty(container.Children[i], in drawList, host, ref idx, filter, info);
                         }
+                        ImGuiAPI.TreePop();
                     }
                 }
+
+                ImGuiAPI.TreePop();
             }
 
             idx++;

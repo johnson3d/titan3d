@@ -20,8 +20,6 @@ namespace EngineNS.Graphics.Pipeline
         {
             await Thread.TtAsyncDummyClass.DummyFunc();
 
-            mVisParameter.VisibleMeshes = new List<FVisibleMesh>();
-            mVisParameter.VisibleNodes = new List<GamePlay.Scene.UNode>();
             mVisParameter.CullCamera = policy.DefaultCamera;
 
             mPolicy = policy;

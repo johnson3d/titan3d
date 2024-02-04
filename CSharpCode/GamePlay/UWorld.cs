@@ -1,5 +1,6 @@
 ﻿using EngineNS.EGui.Slate;
 using EngineNS.GamePlay.Scene;
+using ICSharpCode.SharpZipLib.Zip;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -142,16 +143,42 @@ namespace EngineNS.GamePlay
                 None = 0,
             }
             public const string FilterTypeCountAs = "PhyxDebug";
+            public Graphics.Pipeline.UCamera CullCamera;
+
             public EVisCull CullType = EVisCull.Normal;
             public EVisCullFilter CullFilters = EVisCullFilter.None;// EVisCullFilter.All;
+            public bool IsBuildAABB = false;
             public UWorld World;
-            public Graphics.Pipeline.UCamera CullCamera;
-            public List<Graphics.Pipeline.FVisibleMesh> VisibleMeshes = null;// new List<Graphics.Mesh.TtMesh>();
-            public List<GamePlay.Scene.UNode> VisibleNodes = null;
+
+            public DBoundingBox AABB;
+            public List<Graphics.Pipeline.FVisibleMesh> VisibleMeshes = new List<Graphics.Pipeline.FVisibleMesh>();
+            public List<GamePlay.Scene.UNode> VisibleNodes = new List<UNode>();
+            
             public delegate bool FOnVisitNode(Scene.UNode node, UVisParameter arg);
             public FOnVisitNode OnVisitNode = null;
-            public void AddVisibleMesh(Graphics.Mesh.TtMesh mesh)
+            public void Reset()
             {
+                AABB.InitEmptyBox();
+                VisibleMeshes?.Clear();
+                VisibleNodes?.Clear();
+            }
+            public void MergeAABB(in DBoundingBox aabb)
+            {
+                if (IsBuildAABB)
+                {
+                    AABB = DBoundingBox.Merge(in AABB, in aabb);
+                }
+            }
+            public void AddVisibleMesh(Graphics.Mesh.TtMesh mesh, bool bAABB = true)
+            {
+                if (CullType == EVisCull.Shadow && mesh.IsCastShadow == false)
+                {
+                    return;
+                }
+                if (IsBuildAABB && bAABB)
+                {
+                    AABB = DBoundingBox.Merge(in AABB, mesh.WorldAABB);
+                }
                 VisibleMeshes.Add(new Graphics.Pipeline.FVisibleMesh() { Mesh = mesh });
             }
         }
@@ -162,8 +189,7 @@ namespace EngineNS.GamePlay
             rp.CullCamera.VisParameter = rp;
             using (new Profiler.TimeScopeHelper(ScopeGatherVisibleMeshes))
             {
-                rp.VisibleMeshes.Clear();
-                rp.VisibleNodes?.Clear();
+                rp.Reset();
 
                 OnVisitNode_GatherVisibleMeshes(Root, rp);
             }   

@@ -38,11 +38,11 @@ VK_BIND(1) cbuffer cbPerViewport DX_BIND_B(1)
 
 	matrix gViewer2ShadowMtx[1];
 
-	matrix gViewer2ShadowMtxArrayEditor[4];
+	matrix gViewer2ShadowMtxArray[4];
 	
 	float4 gCsmDistanceArray;
 
-	float4 gShadowTransitionScaleArrayEditor;
+	float4 gShadowTransitionScaleArray;
 	
 	float4 gSunPosNDC;
 	float4 gAoParam;//radius_platform_bias_dark;

@@ -87,11 +87,11 @@ namespace EngineNS.Graphics.Pipeline
             [NxRHI.UShader.UShaderVar(VarType = typeof(Matrix))]
             public NxRHI.FShaderVarDesc gViewer2ShadowMtx;
             [NxRHI.UShader.UShaderVar(VarType = typeof(Matrix))]
-            public NxRHI.FShaderVarDesc gViewer2ShadowMtxArrayEditor;
+            public NxRHI.FShaderVarDesc gViewer2ShadowMtxArray;
             [NxRHI.UShader.UShaderVar(VarType = typeof(Vector4))]
             public NxRHI.FShaderVarDesc gCsmDistanceArray;
             [NxRHI.UShader.UShaderVar(VarType = typeof(Vector4))]
-            public NxRHI.FShaderVarDesc gShadowTransitionScaleArrayEditor;
+            public NxRHI.FShaderVarDesc gShadowTransitionScaleArray;
             [NxRHI.UShader.UShaderVar(VarType = typeof(Vector4))]
             public NxRHI.FShaderVarDesc gSunPosNDC;
             [NxRHI.UShader.UShaderVar(VarType = typeof(Vector2))]

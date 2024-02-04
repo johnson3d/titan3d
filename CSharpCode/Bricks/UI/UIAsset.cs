@@ -2,6 +2,7 @@
 using EngineNS.UI.Controls.Containers;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Text;
 
 namespace EngineNS.UI
@@ -64,6 +65,7 @@ namespace EngineNS.UI
         }
         public TtUIHost UIHost = null;
         UMacrossEditor mMacrossEditor = null;
+        [Browsable(false)]
         public UMacrossEditor MacrossEditor
         {
             get

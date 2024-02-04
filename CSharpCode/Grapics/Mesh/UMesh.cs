@@ -686,10 +686,24 @@ namespace EngineNS.Graphics.Mesh
             tm.Translation = realPos.ToSingleVector3();
             this.DirectSetWorldMatrix(in tm);
         }
-        private DVector3 WorldLocation = DVector3.Zero;
+        private DVector3 WorldLocation
+        {
+            get => mTransform.Position;
+        }
+        public DBoundingBox WorldAABB
+        {
+            get
+            {
+                DBoundingBox result;
+                var src = new DBoundingBox(in MaterialMesh.AABB);
+                DBoundingBox.Transform(in src, in mTransform, out result);
+                return result;
+            }
+        }
+        public FTransform mTransform = FTransform.Identity;
         public void SetWorldTransform(in FTransform transform, GamePlay.UWorld world, bool isNoScale)
         {
-            WorldLocation = transform.Position;
+            mTransform = transform;
             if (world != null)
             {
                 if (isNoScale == false)

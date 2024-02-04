@@ -302,7 +302,7 @@ namespace EngineNS.NxRHI
         {
             return ref *((T*)mCoreObject.GetVarPtrToWrite(binder, (uint)sizeof(T)) + elem);
         }
-        public void SetMatrix(FShaderVarDesc binder, in Matrix value, int elem = 0, bool transpose = true)
+        public void SetMatrix(FShaderVarDesc binder, int elem, in Matrix value, bool transpose = true)
         {
             if (transpose == false)
             {
@@ -312,6 +312,18 @@ namespace EngineNS.NxRHI
             {
                 var tm = Matrix.Transpose(in value);
                 SetValue(binder, elem, tm);
+            }
+        }
+        public void SetMatrix(FShaderVarDesc binder, in Matrix value, bool transpose = true)
+        {
+            if (transpose == false)
+            {
+                SetValue(binder, 0, value);
+            }
+            else
+            {
+                var tm = Matrix.Transpose(in value);
+                SetValue(binder, 0, tm);
             }
         }
         public Matrix GetMatrix(FShaderVarDesc binder, int elem = 0, bool transpose = true)

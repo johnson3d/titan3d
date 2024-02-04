@@ -60,7 +60,7 @@ namespace EngineNS.Bricks.Terrain.CDLOD
                 instance.Scale = Placement.Scale;
                 instance.Quat = Placement.Quat;
                 
-                PlantType.InstanceMdf.InstanceModifier.SetInstance(InstanceIndex, in instance);
+                //PlantType.InstanceMdf.InstanceModifier.SetInstance(InstanceIndex, in instance);
                 DebugHitproxyMesh?.SetWorldTransform(Placement.TransformData, PlantType.Terrain.GetWorld(), false);
             }
             public override void OnHitProxyChanged()
@@ -80,7 +80,7 @@ namespace EngineNS.Bricks.Terrain.CDLOD
                 meshes.Add(DebugHitproxyMesh);
             }
             public UPlantType PlantType;
-            public uint InstanceIndex = uint.MaxValue;
+            //public uint InstanceIndex = uint.MaxValue;
             //public FTransform Transform = FTransform.Identity;
             public Graphics.Mesh.TtMesh DebugHitproxyMesh;
         }
@@ -123,15 +123,6 @@ namespace EngineNS.Bricks.Terrain.CDLOD
                 InstanceMdf.InstanceModifier.SetCapacity((uint)capacity, false);
                 UEngine.Instance.GfxDevice.HitproxyManager.MapProxy(obj);
                 ObjInstances.Add(obj);
-
-                var pos = (obj.Placement.Position - InstanceOffset).ToSingleVector3();
-                var instance = new Graphics.Mesh.Modifier.FVSInstanceData();
-                instance.Position = pos;
-                instance.Scale = obj.Placement.Scale;
-                instance.Quat = obj.Placement.Quat;
-                instance.HitProxyId = obj.HitProxy.ProxyId;
-                obj.InstanceIndex = InstanceMdf.InstanceModifier.PushInstance(in instance, new Graphics.Mesh.Modifier.FCullBounding());
-                //InstanceMdf.InstanceModifier.PushInstance(obj.Transform.mPosition.ToSingleVector3(), in obj.Transform.mScale, in obj.Transform.mQuat, in UInt32_4.Zero, obj.HitProxy.ProxyId);
             }
             public void OnHitProxyChanged()
             {
@@ -188,19 +179,37 @@ namespace EngineNS.Bricks.Terrain.CDLOD
             {
                 if (i.Mesh == null)
                     continue;
-                if (i.InstanceMdf.InstanceModifier.InstanceBuffers.NumOfInstance == 0)
+                if (i.ObjInstances.Count == 0)
                     continue;
                 if (rp.World.CameralOffsetSerialId != CameralOffsetSerialId)
                 {
                     i.Mesh.UpdateCameraOffset(rp.World);
                 }
 
-                rp.AddVisibleMesh(i.Mesh);
+                i.InstanceMdf.InstanceModifier.InstanceBuffers.ResetInstance();
+                foreach (var j in i.ObjInstances)
+                {
+                    DBoundingBox result;
+                    var src = new DBoundingBox(in i.Mesh.MaterialMesh.AABB);
+                    DBoundingBox.Transform(in src, in j.Placement.TransformRef, out result);
+                    if (rp.CullCamera.WhichContainTypeFast(rp.World, in result, false) == CONTAIN_TYPE.CONTAIN_TEST_OUTER)
+                        continue;
 
-                //if (rp.CullType == GamePlay.UWorld.UVisParameter.EVisCull.Shadow)
-                //{
-                //    csm test
-                //}
+                    var pos = (j.Placement.Position - i.InstanceOffset).ToSingleVector3();
+                    var instance = new Graphics.Mesh.Modifier.FVSInstanceData();
+                    instance.Position = pos;
+                    instance.Scale = j.Placement.Scale;
+                    instance.Quat = j.Placement.Quat;
+                    instance.HitProxyId = j.HitProxy.ProxyId;
+
+                    i.InstanceMdf.InstanceModifier.PushInstance(in instance);
+                    //j.InstanceIndex = i.InstanceMdf.InstanceModifier.PushInstance(in instance);
+
+                    
+                    rp.MergeAABB(in result);
+                }
+
+                rp.AddVisibleMesh(i.Mesh, false);
             }
             CameralOffsetSerialId = rp.World.CameralOffsetSerialId;
         }
