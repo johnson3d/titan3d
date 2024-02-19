@@ -311,7 +311,7 @@ namespace EngineNS.Editor.Forms
 
             UEngine.Instance.TickableManager.AddTickable(this);
 
-            CpuCullNode = PreviewViewport.RenderPolicy.FindNode("CpuCulling") as Graphics.Pipeline.TtCpuCullingNode;
+            CpuCullNode = PreviewViewport.RenderPolicy.FindNode<Graphics.Pipeline.TtCpuCullingNode>("CpuCulling");
             System.Diagnostics.Debug.Assert(CpuCullNode != null);
             return true;
         }

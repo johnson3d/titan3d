@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Root Type="EngineNS.UI.TtUIAssetAMeta@EngineCore">
-  <AssetId Type="System.Guid@Unknown" Value="97361e77-f7d1-4088-bbc9-72303a8d76bc" />
+  <AssetId Type="System.Guid@Unknown" Value="a074e2ca-aad7-4a35-8509-597a65a2d525" />
   <Description Type="System.String@Unknown" Value="This is a EngineNS.UI.TtUIAsset&#xA;Hahah" />
   <Icon Type="EngineNS.EGui.UUvAnim@EngineCore">
     <Color Type="System.UInt32@Unknown" Value="4294967295" />

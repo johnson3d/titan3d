@@ -103,20 +103,20 @@ namespace EngineNS.Bricks.Procedure.Node
         public int Y { get; set; } = 0;
         [Rtti.Meta]
         public int Z { get; set; } = 0;
-        public override UBufferCreator GetOutBufferCreator(PinOut pin)
-        {
-            if (ResultPin == pin)
-            {
-                var graph = ParentGraph as UPgcGraph;
-                var buffer = graph.BufferCache.FindBuffer(SrcPin);
-                if (buffer != null)
-                {
-                    ResultDesc.BufferType = buffer.BufferCreator.BufferType;
-                    return ResultDesc;
-                }
-            }
-            return null;
-        }
+        //public override UBufferCreator GetOutBufferCreator(PinOut pin)
+        //{
+        //    if (ResultPin == pin)
+        //    {
+        //        var graph = ParentGraph as UPgcGraph;
+        //        var buffer = graph.BufferCache.FindBuffer(SrcPin);
+        //        if (buffer != null)
+        //        {
+        //            ResultDesc.BufferType = buffer.BufferCreator.BufferType;
+        //            return ResultDesc;
+        //        }
+        //    }
+        //    return null;
+        //}
         public unsafe override bool OnProcedure(UPgcGraph graph)
         {
             var curComp = graph.BufferCache.FindBuffer(SrcPin);
@@ -147,20 +147,20 @@ namespace EngineNS.Bricks.Procedure.Node
     [Bricks.CodeBuilder.ContextMenu("Stretch", "BaseOp\\Stretch", UPgcGraph.PgcEditorKeyword)]
     public class UStretch : UAnyTypeMonocular
     {
-        public override UBufferCreator GetOutBufferCreator(PinOut pin)
-        {
-            if (ResultPin == pin)
-            {
-                var graph = ParentGraph as UPgcGraph;
-                var buffer = graph.BufferCache.FindBuffer(SrcPin);
-                if (buffer != null)
-                {
-                    ResultDesc.BufferType = buffer.BufferCreator.BufferType;
-                    return ResultDesc;
-                }
-            }
-            return null;
-        }
+        //public override UBufferCreator GetOutBufferCreator(PinOut pin)
+        //{
+        //    if (ResultPin == pin)
+        //    {
+        //        var graph = ParentGraph as UPgcGraph;
+        //        var buffer = graph.BufferCache.FindBuffer(SrcPin);
+        //        if (buffer != null)
+        //        {
+        //            ResultDesc.BufferType = buffer.BufferCreator.BufferType;
+        //            return ResultDesc;
+        //        }
+        //    }
+        //    return null;
+        //}
         public unsafe override bool OnProcedure(UPgcGraph graph)
         {
             var left = graph.BufferCache.FindBuffer(SrcPin);

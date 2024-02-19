@@ -130,7 +130,7 @@ namespace EngineNS.Bricks.RenderPolicyEditor
             policy.ViewportSlate = viewport;
             foreach (UPolicyNode i in PolicyGraph.Nodes)
             {
-                if (false == policy.RegRenderNode(i.Name, i.GraphNode))
+                if (false == policy.RegRenderNode(i.NodeId, i.GraphNode))
                 {
                     policy.Dispose();
                     return null;
@@ -140,10 +140,10 @@ namespace EngineNS.Bricks.RenderPolicyEditor
             {
                 if (i.InNode == null || i.OutNode == null)
                     continue;
-                var inNode = policy.FindNode(i.InNode.Name);
+                var inNode = policy.FindNode(i.InNode.NodeId);
                 if (inNode == null)
                     continue;
-                var outNode = policy.FindNode(i.OutNode.Name);
+                var outNode = policy.FindNode(i.OutNode.NodeId);
                 if (outNode == null)
                     continue;
                 var inPin = inNode.FindInput(i.InPin.Name);

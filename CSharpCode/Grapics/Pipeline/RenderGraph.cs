@@ -26,29 +26,55 @@ namespace EngineNS.Graphics.Pipeline
             GraphNodes.Clear();
         }
         public Common.UCopy2SwapChainNode RootNode { get; set; }
-        public Dictionary<string, TtRenderGraphNode> GraphNodes { get; } = new Dictionary<string, TtRenderGraphNode>();
+        public Dictionary<Guid, TtRenderGraphNode> GraphNodes { get; } = new Dictionary<Guid, TtRenderGraphNode>();
         public List<TtRenderGraphNode>[] NodeLayers;
         public List<TtRenderGraphLinker> Linkers { get; } = new List<TtRenderGraphLinker>();
         public TtAttachmentCache AttachmentCache { get; } = new TtAttachmentCache();
-        public bool RegRenderNode(string name, TtRenderGraphNode node)
+        public bool RegRenderNode(in Guid id, TtRenderGraphNode node)
         {
             TtRenderGraphNode fNode;
-            if (GraphNodes.TryGetValue(name, out fNode))
+            if (GraphNodes.TryGetValue(id, out fNode))
             {
-                Profiler.Log.WriteLine(Profiler.ELogTag.Error, "Graphics", $"Policy() node({name}) is repeated");
+                Profiler.Log.WriteLine(Profiler.ELogTag.Error, "Graphics", $"Policy() node({node}) is repeated");
                 return false;
             }
             node.RenderGraph = this;
-            node.Name = name;
-            GraphNodes.Add(name, node);
+            GraphNodes.Add(id, node);
             return true;
         }
-        public TtRenderGraphNode FindNode(string name)
+        public void RegRenderNode2(string name, TtRenderGraphNode node)
+        {
+            node.Name = name;
+            GraphNodes.Add(Guid.NewGuid(), node);
+        }
+        public TtRenderGraphNode FindNode(in Guid id)
         {
             TtRenderGraphNode fNode;
-            if (GraphNodes.TryGetValue(name, out fNode))
+            if (GraphNodes.TryGetValue(id, out fNode))
             {
                 return fNode;
+            }
+            return null;
+        }
+        public T FindNode<T>(string name) where T : TtRenderGraphNode
+        {
+            foreach(var node in GraphNodes.Values)
+            {
+                if (node.GetType() != typeof(T))
+                    continue;
+                if (node.Name == name)
+                    return node as T;
+            }
+            return null;
+        }
+        public TtRenderGraphNode FindNodeIgnore(string name, Type ignoreType)
+        {
+            foreach (var node in GraphNodes.Values)
+            {
+                if (node.GetType() == ignoreType)
+                    continue;
+                if (node.Name == name)
+                    return node;
             }
             return null;
         }

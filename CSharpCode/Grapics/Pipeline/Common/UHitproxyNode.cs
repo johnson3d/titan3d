@@ -158,7 +158,7 @@ namespace EngineNS.Graphics.Pipeline.Common
             var linker = VisiblesPinIn.FindInLinker();
             if (linker != null)
             {
-                CpuCullNode = linker.OutPin.HostNode as TtCpuCullingNode;
+                CpuCullNode = linker.OutPin.GetNakedHostNode<TtCpuCullingNode>();
             }
         }
         public unsafe void CreateGBuffers(URenderPolicy policy, EPixelFormat DSFormat, bool bClearDS)

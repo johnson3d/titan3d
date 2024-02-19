@@ -203,17 +203,17 @@ namespace EngineNS.Bricks.RenderPolicyEditor
             var policy = new Graphics.Pipeline.URenderPolicy();
             foreach (UPolicyNode i in PolicyGraph.PolicyGraph.Nodes)
             {
-                if (false == policy.RegRenderNode(i.Name, i.GraphNode))
+                if (false == policy.RegRenderNode(i.NodeId, i.GraphNode))
                 {
                     Profiler.Log.WriteLine(Profiler.ELogTag.Warning, "PolicyEditor", $"Node{i.Name} regist failed");
                 }
             }
             foreach (var i in PolicyGraph.PolicyGraph.Linkers)
             {
-                var inNode = policy.FindNode(i.InNode.Name);
+                var inNode = policy.FindNode(i.InNode.NodeId);
                 if (inNode == null)
                     continue;
-                var outNode = policy.FindNode(i.OutNode.Name);
+                var outNode = policy.FindNode(i.OutNode.NodeId);
                 if (outNode == null)
                     continue;
                 var inPin = inNode.FindInput(i.InPin.Name);

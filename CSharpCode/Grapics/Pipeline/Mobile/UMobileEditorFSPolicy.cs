@@ -8,18 +8,18 @@ namespace EngineNS.Graphics.Pipeline.Mobile
     {
         public UMobileEditorFSPolicy()
         {
-            RegRenderNode("BasePassNode", BasePassNode);
-            RegRenderNode("ShadowMapNode", mShadowMapNode);
-            RegRenderNode("HitproxyNode", HitproxyNode);
-            RegRenderNode("PickedNode", PickedNode);
-            RegRenderNode("PickBlurNode", PickBlurNode);
-            RegRenderNode("PickHollowNode", PickHollowNode);
-            RegRenderNode("GpuSceneNode", GpuSceneNode);
-            RegRenderNode("ScreenTilingNode", ScreenTilingNode);
-            RegRenderNode("VoxelsNode", VoxelsNode);
-            RegRenderNode("FinalCopyNode", FinalCopyNode);
-            RegRenderNode("HzbNode", HzbNode);
-            RegRenderNode("TranslucentNode", TranslucentNode);
+            RegRenderNode2("BasePassNode", BasePassNode);
+            RegRenderNode2("ShadowMapNode", mShadowMapNode);
+            RegRenderNode2("HitproxyNode", HitproxyNode);
+            RegRenderNode2("PickedNode", PickedNode);
+            RegRenderNode2("PickBlurNode", PickBlurNode);
+            RegRenderNode2("PickHollowNode", PickHollowNode);
+            RegRenderNode2("GpuSceneNode", GpuSceneNode);
+            RegRenderNode2("ScreenTilingNode", ScreenTilingNode);
+            RegRenderNode2("VoxelsNode", VoxelsNode);
+            RegRenderNode2("FinalCopyNode", FinalCopyNode);
+            RegRenderNode2("HzbNode", HzbNode);
+            RegRenderNode2("TranslucentNode", TranslucentNode);
         }
         public override Common.UGpuSceneNode GetGpuSceneNode()
         {

@@ -11,6 +11,7 @@ namespace EngineNS.Bricks.RenderPolicyEditor
         public UPolicyNode()
         {
             this.Icon.Size = new Vector2(20, 20);
+            TitleColor = 0xffff00ff;
         }
         Graphics.Pipeline.TtRenderGraphNode mGraphNode;
         [Rtti.Meta(Order = 1)]
@@ -62,7 +63,8 @@ namespace EngineNS.Bricks.RenderPolicyEditor
         public void InitNode(Graphics.Pipeline.TtRenderGraphNode node)
         {
             mGraphNode = node;
-            
+            TitleColor = node.GetTileColor().ToArgb();
+
             Inputs.Clear();
             for (int i = 0; i < GraphNode.NumOfInput; i++)
             {

@@ -3,23 +3,14 @@
     [EngineNS.Macross.UMacross]
     public partial class hello : EngineNS.UI.TtUIMacrossBase
     {
-        public EngineNS.Macross.UMacrossBreak breaker_if_555846347 = new EngineNS.Macross.UMacrossBreak("breaker_if_555846347");
-        EngineNS.Macross.UMacrossStackFrame mFrame_On_Click_13068764605028994591 = new EngineNS.Macross.UMacrossStackFrame(EngineNS.RName.GetRName("tutorials/helloword/hello.ui", EngineNS.RName.ERNameType.Game));
+        EngineNS.Macross.UMacrossStackFrame mFrame_On_Click_2240035251220394824 = new EngineNS.Macross.UMacrossStackFrame(EngineNS.RName.GetRName("tutorials/helloword/hello.ui", EngineNS.RName.ERNameType.Game));
         [EngineNS.Rtti.Meta]
-        public void On_Click_13068764605028994591(System.Object sender,EngineNS.UI.Controls.TtRoutedEventArgs args)
+        public void On_Click_2240035251220394824(System.Object sender,EngineNS.UI.Controls.TtRoutedEventArgs args)
         {
-            using(var guard_On_Click_13068764605028994591 = new EngineNS.Macross.UMacrossStackGuard(mFrame_On_Click_13068764605028994591))
+            using(var guard_On_Click_2240035251220394824 = new EngineNS.Macross.UMacrossStackGuard(mFrame_On_Click_2240035251220394824))
             {
-                mFrame_On_Click_13068764605028994591.SetWatchVariable("sender", sender);
-                mFrame_On_Click_13068764605028994591.SetWatchVariable("args", args);
-                mFrame_On_Click_13068764605028994591.SetWatchVariable("Condition0_555846347", true);
-                breaker_if_555846347.TryBreak();
-                if (true)
-                {
-                }
-                else
-                {
-                }
+                mFrame_On_Click_2240035251220394824.SetWatchVariable("sender", sender);
+                mFrame_On_Click_2240035251220394824.SetWatchVariable("args", args);
             }
         }
         EngineNS.Macross.UMacrossStackFrame mFrame_InitializeEvents = new EngineNS.Macross.UMacrossStackFrame(EngineNS.RName.GetRName("tutorials/helloword/hello.ui", EngineNS.RName.ERNameType.Game));
@@ -28,12 +19,20 @@
         {
             using(var guard_InitializeEvents = new EngineNS.Macross.UMacrossStackGuard(mFrame_InitializeEvents))
             {
-                EngineNS.UI.Controls.TtButton var_TtButton_13068764605028994591 = (EngineNS.UI.Controls.TtButton)HostElement.FindElement(13068764605028994591);
-                if ((var_TtButton_13068764605028994591 != null))
+                EngineNS.UI.Controls.TtButton var_TtButton_2240035251220394824 = (EngineNS.UI.Controls.TtButton)HostElement.FindElement(2240035251220394824);
+                if ((var_TtButton_2240035251220394824 != null))
                 {
-                    var_TtButton_13068764605028994591.Click -= On_Click_13068764605028994591;
-                    var_TtButton_13068764605028994591.Click += On_Click_13068764605028994591;
+                    var_TtButton_2240035251220394824.Click -= On_Click_2240035251220394824;
+                    var_TtButton_2240035251220394824.Click += On_Click_2240035251220394824;
                 }
+            }
+        }
+        EngineNS.Macross.UMacrossStackFrame mFrame_InitializeBindings = new EngineNS.Macross.UMacrossStackFrame(EngineNS.RName.GetRName("tutorials/helloword/hello.ui", EngineNS.RName.ERNameType.Game));
+        [EngineNS.Rtti.Meta]
+        public override void InitializeBindings()
+        {
+            using(var guard_InitializeBindings = new EngineNS.Macross.UMacrossStackGuard(mFrame_InitializeBindings))
+            {
             }
         }
     }

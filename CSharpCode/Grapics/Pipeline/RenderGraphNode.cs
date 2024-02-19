@@ -1,4 +1,5 @@
-﻿using NPOI.Util;
+﻿using EngineNS.Graphics.Pipeline.Common;
+using NPOI.Util;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -19,6 +20,17 @@ namespace EngineNS.Graphics.Pipeline
         public bool IsAutoResize { get; set; } = true;
         public bool IsAllowInputNull { get; set; } = false;
         public TtRenderGraphNode HostNode { get; set; }
+        public T GetNakedHostNode<T>() where T : TtRenderGraphNode
+        {
+            if (HostNode is UFindNode)
+            {
+                return (HostNode as UFindNode).GetReferNode() as T;
+            }
+            else
+            {
+                return HostNode as T;
+            }
+        }
 
         public UAttachmentDesc Attachement = new UAttachmentDesc();
         public UAttachBuffer ImportedBuffer = null;
@@ -107,6 +119,10 @@ namespace EngineNS.Graphics.Pipeline
                     i.Attachement.AttachmentName = FHashText.Create($"{Name}->{i.Name}");
                 }
             }
+        }
+        public virtual Color GetTileColor()
+        {
+            return Color.FromRgb(255, 0, 255);
         }
         public UDrawBuffers BasePass = new UDrawBuffers();
         public TtRenderGraph RenderGraph { get; internal set; }

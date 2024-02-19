@@ -16,8 +16,20 @@ namespace EngineNS.Graphics.Pipeline.Common
             set
             {
                 mProxyNodeName = value;
-                mNode = RenderGraph?.FindNode(ProxyNodeName);
+                mNode = RenderGraph?.FindNodeIgnore(mProxyNodeName, typeof(UFindNode));
             }
+        }
+        public TtRenderGraphNode GetReferNode()
+        {
+            if (mNode == null)
+            {
+                ProxyNodeName = ProxyNodeName;
+            }
+            return mNode;
+        }
+        public override Color GetTileColor()
+        {
+            return Color.FromRgb(0, 255, 255);
         }
         [Rtti.Meta]
         public string ProxyPinName
@@ -51,7 +63,9 @@ namespace EngineNS.Graphics.Pipeline.Common
         public override void BeforeTickLogic(URenderPolicy policy)
         {
             if (mNode == null)
-                mNode = RenderGraph.FindNode(ProxyNodeName);
+            {
+                ProxyNodeName = ProxyNodeName;
+            }
             if (mNode == null)
                 return;
             var pin = mNode.FindOutput(ProxyPinName);

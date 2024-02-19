@@ -85,6 +85,49 @@ namespace EngineNS.UI.Editor
         {
         }
     }
+    public class UIBindingData_Method : IUIBindingDataBase
+    {
+
+        public void Draw(EditorUIHost host, in ImDrawList drawList)
+        {
+
+        }
+
+        public void GenerateStatement(List<UStatementBase> statements)
+        {
+
+        }
+
+        public string GetBindPath()
+        {
+            throw new NotImplementedException();
+        }
+
+        public UExpressionBase GetVariableExpression()
+        {
+            throw new NotImplementedException();
+        }
+
+        public UTypeDesc GetVariableType()
+        {
+            throw new NotImplementedException();
+        }
+
+        public bool IsSameTarget<T>(T target)
+        {
+            throw new NotImplementedException();
+        }
+
+        public void OnPreRead(object tagObject, object hostObject, bool fromXml)
+        {
+            throw new NotImplementedException();
+        }
+
+        public void OnPropertyRead(object tagObject, PropertyInfo prop, bool fromXml)
+        {
+            throw new NotImplementedException();
+        }
+    }
     public class EditorOnlyData : IO.BaseSerializer
     {
         public class BindingData : IO.BaseSerializer
@@ -96,11 +139,55 @@ namespace EngineNS.UI.Editor
             [Rtti.Meta]
             public EBindingMode Mode { get; set; } = EBindingMode.Default;
 
-            public void DrawBindInfo(EditorUIHost host, in ImDrawList drawList)
+            public virtual void DrawBindInfo(EditorUIHost host, in ImDrawList drawList)
             {
                 Source.Draw(host, drawList);
                 ImGuiAPI.SameLine(0, -1);
                 ImGuiAPI.Text(" (" + Mode.ToString() + ")");
+            }
+            public virtual void GenerateStatement(List<UStatementBase> sequence)
+            {
+                Source.GenerateStatement(sequence);
+                Target.GenerateStatement(sequence);
+                var bindCall = new UMethodInvokeStatement()
+                {
+                    MethodName = "SetBinding",
+                    Host = new UClassReferenceExpression(UTypeDesc.TypeOf(typeof(Bind.TtBindingOperations))),
+                };
+                bindCall.GenericTypes.Add(Target.GetVariableType());
+                bindCall.GenericTypes.Add(Source.GetVariableType());
+                bindCall.Arguments.Add(new UMethodInvokeArgumentExpression(Target.GetVariableExpression()));
+                bindCall.Arguments.Add(new UMethodInvokeArgumentExpression(new UPrimitiveExpression(Target.GetBindPath())));
+                bindCall.Arguments.Add(new UMethodInvokeArgumentExpression(Source.GetVariableExpression()));
+                bindCall.Arguments.Add(new UMethodInvokeArgumentExpression(new UPrimitiveExpression(Source.GetBindPath())));
+                bindCall.Arguments.Add(new UMethodInvokeArgumentExpression(new UPrimitiveExpression(Mode)));
+                sequence.Add(bindCall);
+            }
+        }
+
+        public class BindingData_Method : BindingData
+        {
+            public override void DrawBindInfo(EditorUIHost host, in ImDrawList drawList)
+            {
+                var tg = Target as UIBindingData_Element;
+                var element = host.FindElement(tg.Id);
+                if (element == null)
+                {
+                    return;
+                }
+                var name = TtUIEditor.GetElementShowName(element);
+                ImGuiAPI.Text($"Method: {name}");
+                ImGuiAPI.SameLine(0, -1);
+                ImGuiAPI.Text(" (" + Mode.ToString() + ")");                
+            }
+            public override void GenerateStatement(List<UStatementBase> sequence)
+            {
+                Target.GenerateStatement(sequence);
+                var bindCall = new UMethodInvokeStatement()
+                {
+                    MethodName = "SetMethodBinding",
+                    Host = new UClassReferenceExpression(UTypeDesc.TypeOf(typeof(Bind.TtBindingOperations))),
+                };
             }
         }
 
@@ -111,13 +198,16 @@ namespace EngineNS.UI.Editor
             set;
         } = new List<BindingData>();
 
-        public void ClearTargetBindData(IBindableObject target)
+        public void ClearTargetBindData(IBindableObject target, string path)
         {
             for(int i=BindingDatas.Count - 1; i>=0; i--)
             {
                 if(BindingDatas[i].Target.IsSameTarget(target))
                 {
-                    BindingDatas.RemoveAt(i);
+                    if(string.IsNullOrEmpty(path))
+                        BindingDatas.RemoveAt(i);
+                    else if(path == BindingDatas[i].Target.GetBindPath())
+                        BindingDatas.RemoveAt(i);
                 }
             }
         }

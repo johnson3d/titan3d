@@ -122,7 +122,7 @@ namespace EngineNS.Graphics.Pipeline.Deferred
             var linker = VisiblesPinIn.FindInLinker();
             if (linker != null)
             {
-                CpuCullNode = linker.OutPin.HostNode as TtCpuCullingNode;
+                CpuCullNode = linker.OutPin.GetNakedHostNode<TtCpuCullingNode>();
             }
         }
         public virtual unsafe UGraphicsBuffers CreateGBuffers(URenderPolicy policy, EPixelFormat format)
@@ -307,7 +307,7 @@ namespace EngineNS.Graphics.Pipeline.Deferred
             var linker = VisiblesPinIn.FindInLinker();
             if (linker != null)
             {
-                CpuCullNode = linker.OutPin.HostNode as TtCpuCullingNode;
+                CpuCullNode = linker.OutPin.GetNakedHostNode<TtCpuCullingNode>();
             }
         }
         public virtual unsafe UGraphicsBuffers CreateGBuffers(URenderPolicy policy, EPixelFormat format)

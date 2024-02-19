@@ -1,4 +1,5 @@
-﻿using EngineNS.Rtti;
+﻿using EngineNS.Bricks.CodeBuilder.MacrossNode;
+using EngineNS.Rtti;
 //using MathNet.Numerics.Distributions;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Text;
@@ -13,6 +14,7 @@ using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Runtime.Intrinsics.Arm;
 using System.Text;
+using static EngineNS.UI.Bind.TtBindingOperations;
 
 namespace EngineNS.UI.Bind
 {
@@ -633,6 +635,56 @@ namespace EngineNS.UI.Bind
         }
 
     }
+    public abstract class TtBindingMethodStoreBase
+    {
+        public void SetValue<T>(IBindableObject obj, TtBindableProperty bp, in T value)
+        {
+            var ms = this as TtBindingMethodStore<T>;
+            if (ms != null)
+                ms.Setter?.Invoke(obj, bp, value);
+        }
+        public T GetValue<T>(IBindableObject obj, TtBindableProperty bp)
+        {
+            var ms = this as TtBindingMethodStore<T>;
+            if (ms != null)
+                return ms.Getter.Invoke(obj, bp);
+            return default;
+        }
+    }
+    public class TtBindingMethodStore<T> : TtBindingMethodStoreBase
+    {
+        public Delegate_BindingMethodGet<T> Getter;
+        public Delegate_BindingMethodSet<T> Setter;
+    }
+    public class TtBindingMethodExpression<TProp> : TtBindingExpressionBase
+    {
+        public TtBindingMethodStoreBase MethodStore;
+
+        public TtBindingMethodExpression(TtBindingBase binding, TtBindingExpressionBase parent) : base(binding, parent)
+        {
+        }
+
+        public override T GetValue<T>(TtBindableProperty bp)
+        {
+            if(MethodStore != null)
+                return MethodStore.GetValue<T>(Source, bp);
+            return default(T);
+        }
+
+        public override void SetValue<T>(TtBindableProperty bp, T value)
+        {
+            if (MethodStore != null)
+                MethodStore.SetValue(Source, bp, value);
+        }
+
+        public override void SetValueStore<T>(T value)
+        {
+        }
+
+        public override void UpdateSource()
+        {
+        }
+    }
 
     public abstract class TtBindablePropertyValueBase
     {
@@ -712,6 +764,46 @@ namespace EngineNS.UI.Bind
 
     public static class TtBindingOperations
     {
+        public delegate T Delegate_BindingMethodGet<T>(IBindableObject obj, TtBindableProperty prop);
+        public delegate void Delegate_BindingMethodSet<T>(IBindableObject obj, TtBindableProperty prop, in T value);
+        public static TtBindingExpressionBase SetMethodBinding<TProp>(in IBindableObject target, string targetPath, Delegate_BindingMethodGet<TProp> getMethod, Delegate_BindingMethodSet<TProp> setMethod, EBindingMode mode = EBindingMode.Default)
+        {
+            var binding = new TtBinding()
+            {
+                Mode = mode,
+            };
+            return SetMethodBinding<TProp>(target, targetPath, getMethod, setMethod, binding);
+        }
+        public static TtBindingExpressionBase SetMethodBinding<TProp>(in IBindableObject source, string sourcePath, Delegate_BindingMethodGet<TProp> getMethod, Delegate_BindingMethodSet<TProp> setMethod, TtBindingBase binding)
+        {
+            if (source == null)
+                throw new ArgumentNullException("source");
+            var sourceProp = source.FindBindableProperty(sourcePath);
+            if (sourceProp == null)
+                return null;
+            var finalMode = binding.Mode;
+            if(finalMode == EBindingMode.Default)
+            {
+                finalMode = sourceProp.BindingMode;
+            }
+            var updateSourceTrigger = binding.UpdateSourceTriger;
+            if (updateSourceTrigger == EUpdateSourceTrigger.Default)
+                updateSourceTrigger = sourceProp.UpdateSourceTrigger;
+
+            var exp = new TtBindingMethodExpression<TProp>(binding, null);
+            exp.Mode = finalMode;
+            exp.UpdateSourceTriger = updateSourceTrigger;
+            exp.Source = source;
+            exp.Path = new TtPropertyPath(sourcePath);
+            var methodStore = new TtBindingMethodStore<TProp>();
+            methodStore.Getter = getMethod;
+            methodStore.Setter = setMethod;
+            exp.MethodStore = methodStore;
+            source.SetBindExpression(sourceProp, exp);
+            binding.TargetExp = exp;
+
+            return exp;
+        }
         public static TtBindingExpressionBase SetBinding<TTagProp, TSrcProp>(in IBindableObject target, string targetPath, in IBindableObject source, string sourcePath, EBindingMode mode = EBindingMode.Default)
         {
             var binding = new TtBinding()

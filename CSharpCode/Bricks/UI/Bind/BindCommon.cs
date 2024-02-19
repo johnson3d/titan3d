@@ -1,4 +1,5 @@
-﻿using EngineNS.EGui.Controls.PropertyGrid;
+﻿using EngineNS.Bricks.WorldSimulator;
+using EngineNS.EGui.Controls.PropertyGrid;
 using EngineNS.Rtti;
 using EngineNS.UI.Controls;
 using EngineNS.UI.Controls.Containers;
@@ -385,15 +386,31 @@ namespace EngineNS.UI.Bind
                     
                     if(mBindingDatas.Count > 0)
                     {
+                        var curSt = ImGuiAPI.GetCursorScreenPos();
+                        var curEd = curSt + new Vector2(width, 100);
+                        cmdList.AddRectFilled(in curSt, in curEd, EGui.UIProxy.StyleConfig.Instance.PanelBackground, 0.0f, ImDrawFlags_.ImDrawFlags_None);
+                        ImGuiAPI.Text("Current Bind:");
+
+                        ImGuiAPI.PushStyleColor(ImGuiCol_.ImGuiCol_Text, 0xff00ff00);
                         mBindingDatas[0].DrawBindInfo(host, cmdList);
-                        if(EGui.UIProxy.CustomButton.ToolButton("Delete Bind", Vector2.Zero))
+                        ImGuiAPI.PopStyleColor(1);
+
+                        ImGuiAPI.PushStyleColor(ImGuiCol_.ImGuiCol_Text, 0xff0000ff);
+                        if(EGui.UIProxy.CustomButton.ToolButton("Delete Bind", Vector2.Zero,
+                            0xff0000be,
+                            0xff0000be,
+                            0xff0000ff,
+                            EGui.UIProxy.StyleConfig.Instance.PanelBackground,
+                            EGui.UIProxy.StyleConfig.Instance.PanelBackground,
+                            EGui.UIProxy.StyleConfig.Instance.PanelBackground))
                         {
                             for(int i=0; i<mBindingTargets.Count; i++)
                             {
-                                host.EditorOnlyData.ClearTargetBindData(mBindingTargets[i]);
+                                host.EditorOnlyData.ClearTargetBindData(mBindingTargets[i], info.PropertyDescriptor.Name);
                             }
                             mBindedDataDirty = true;
                         }
+                        ImGuiAPI.PopStyleColor(1);
                     }
 
                     var selectedModeStr = mSelectedMode.ToString();
@@ -410,7 +427,42 @@ namespace EngineNS.UI.Bind
 
                         EGui.UIProxy.ComboBox.EndCombo();
                     }
-                    if(ImGuiAPI.TreeNodeEx("UIControls", ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_SpanFullWidth))
+                    if (ImGuiAPI.TreeNodeEx("Create bind method", ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_SpanFullWidth | ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_Leaf))
+                    {
+                        ImGuiAPI.TreePop();
+                    }
+                    if(ImGuiAPI.IsItemClicked(ImGuiMouseButton_.ImGuiMouseButton_Left))
+                    {
+                        var bindSource = new UIBindingData_Method()
+                        {
+                        };
+                        for (int i=0; i<mBindingTargets.Count; i++)
+                        {
+                            var tElement = mBindingTargets[i] as TtUIElement;
+                            if (tElement == null)
+                                continue;
+                            var bindTarget = new UIBindingData_Element()
+                            {
+                                PropertyName = info.PropertyDescriptor.Name,
+                                PropertyType = info.PropertyDescriptor.PropertyType,
+                                Id = tElement.Id,
+                            };
+                            host.EditorOnlyData.ClearTargetBindData(tElement, info.PropertyDescriptor.Name);
+                            host.EditorOnlyData.BindingDatas.Add(new EditorOnlyData.BindingData_Method()
+                            {
+                                Source = bindSource,
+                                Target = bindTarget,
+                                Mode = mSelectedMode,
+                            });
+                        }
+                        ImGuiAPI.CloseCurrentPopup();
+                    }
+                    if (ImGuiAPI.TreeNodeEx("Self", ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_SpanFullWidth))
+                    {
+
+                        ImGuiAPI.TreePop();
+                    }
+                    if (ImGuiAPI.TreeNodeEx("UIControls", ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_SpanFullWidth))
                     {
                         int idx = 0;
                         DrawUIElementBindableProperty(mFirstElement, in cmdList, host, ref idx, mBindPopFilterString, info);
@@ -449,7 +501,7 @@ namespace EngineNS.UI.Bind
                 }
             }
 
-            ImGuiAPI.TreeNodeEx(name + "##" + data.Idx, ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_SpanFullWidth);
+            ImGuiAPI.TreeNodeEx(name + "##" + data.Idx, ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_SpanFullWidth | ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_Bullet);
             if(ImGuiAPI.IsItemClicked(ImGuiMouseButton_.ImGuiMouseButton_Left))
             {
                 IUIBindingDataBase bindSource = null;
@@ -474,7 +526,7 @@ namespace EngineNS.UI.Bind
                             PropertyType = data.TargetType,
                             Id = tElement.Id,
                         };
-                        data.Host.EditorOnlyData.ClearTargetBindData(tElement);
+                        data.Host.EditorOnlyData.ClearTargetBindData(tElement, data.TargetName);
                         data.Host.EditorOnlyData.BindingDatas.Add(new EditorOnlyData.BindingData()
                         {
                             Source = bindSource,
@@ -531,7 +583,7 @@ namespace EngineNS.UI.Bind
                     element.TourBindProperties(ref data, BindPropertyTourAction);
                     ImGuiAPI.TreePop();
                 }
-                if(container != null)
+                if(container != null && container.Children.Count > 0)
                 {
                     if(ImGuiAPI.TreeNodeEx("Children##" + idx, ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_SpanFullWidth))
                     {

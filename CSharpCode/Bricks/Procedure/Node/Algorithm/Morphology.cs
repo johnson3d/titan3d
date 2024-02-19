@@ -1,23 +1,28 @@
 using System.Collections;
 using System.Collections.Generic;
 
-namespace EngineNS.Bricks.Procedure.Algorithm
+namespace EngineNS.Bricks.Procedure.Node
 {
-    public class Morphology
+    public class TtMorphology : Node.UAnyTypeMonocular
     {
-        public UBufferConponent Input;
         public int iteration = 1;
-        public float LerpValue = 0.0f;
+        public float LerpValue = 1.0f;
         public string SavePath;
-        public void DilateGrey()
+        public unsafe override bool OnProcedure(UPgcGraph graph)
         {
+            var Input = graph.BufferCache.FindBuffer(SrcPin);
+            var Output = graph.BufferCache.FindBuffer(ResultPin);
+            if (Input.BufferCreator.BufferType != Rtti.UTypeDescGetter<float>.TypeDesc)
+                return false;
+
             int width = Input.Width;
-            int count = width * width;
-            float[] grey = new float[count];
-            float[] result = new float[count];
+            int height = Input.Height;
+            int count = width * height;
+            var grey = (float*)Input.GetSuperPixelAddress(0, 0, 0); //new float[count];
+            var result = (float*)Output.GetSuperPixelAddress(0, 0, 0);
             for (int i = 0; i < width; i++)
             {
-                for (int j = 0; j < width; j++)
+                for (int j = 0; j < height; j++)
                 {
                     grey[i + j * width] = Input.GetPixel<Color4f>(i, j).Red;
                     result[i + j * width] = grey[i + j * width];
@@ -29,16 +34,16 @@ namespace EngineNS.Bricks.Procedure.Algorithm
             int loops = iteration;
             while (loops-- > 0)
             {
-                Profiler.Log.WriteInfoSimple("iteration");
+                //Profiler.Log.WriteInfoSimple("iteration");
                 for (int i = 0; i < width; i++)
                 {
-                    for (int j = 0; j < width; j++)
+                    for (int j = 0; j < height; j++)
                     {
                         int current = i + j * width;
                         float max = 0;
                         for (int n = 0; n <= 8; n++)
                         {
-                            if (i + dx[n] > -1 && i + dx[n] < width && j + dy[n] > -1 && j + dy[n] < width)
+                            if (i + dx[n] > -1 && i + dx[n] < width && j + dy[n] > -1 && j + dy[n] < height)
                             {
                                 int target = i + dx[n] + (j + dy[n]) * width;
                                 max = max < grey[target] ? grey[target] : max;
@@ -47,18 +52,9 @@ namespace EngineNS.Bricks.Procedure.Algorithm
                         result[current] = MathHelper.Lerp(grey[current], max, LerpValue);
                     }
                 }
-                for (int i = 0; i < count; i++) grey[i] = result[i];
             }
 
-            var creator = UBufferCreator.CreateInstance<USuperBuffer<Vector4, FFloat4Operator>>(width, width, 1);
-            var Output = UBufferConponent.CreateInstance(creator);
-            for (int i = 0; i < width; i++)
-            {
-                for (int j = 0; j < width; j++)
-                {
-                    Output.SetPixel(i, j, new Color4f(result[i + j * width], result[i + j * width], result[i + j * width]));
-                }
-            }
+            return true;
             //Output.Apply();
             //PCGNode.WrapNode.SaveTexture2D(Output, SavePath);
         }

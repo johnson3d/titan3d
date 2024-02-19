@@ -121,6 +121,10 @@ namespace EngineNS.Graphics.Pipeline.Common
             AddInput(SrcPinIn, NxRHI.EBufferType.BFT_SRV);
             AddOutput(PrevPinOut, NxRHI.EBufferType.BFT_SRV);
         }
+        public override Color GetTileColor()
+        {
+            return Color.FromRgb(255, 255, 0);
+        }
         public override async System.Threading.Tasks.Task Initialize(URenderPolicy policy, string debugName)
         {
             var rc = UEngine.Instance.GfxDevice.RenderContext;

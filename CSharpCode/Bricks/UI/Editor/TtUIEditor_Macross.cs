@@ -351,21 +351,7 @@ namespace EngineNS.UI.Editor
             }
             foreach(var data in mUIHost.EditorOnlyData.BindingDatas)
             {
-                data.Source.GenerateStatement(initMethod.MethodBody.Sequence);
-                data.Target.GenerateStatement(initMethod.MethodBody.Sequence);
-                var bindCall = new UMethodInvokeStatement()
-                {
-                    MethodName = "SetBinding",
-                    Host = new UClassReferenceExpression(UTypeDesc.TypeOf(typeof(Bind.TtBindingOperations))),
-                };
-                bindCall.GenericTypes.Add(data.Target.GetVariableType());
-                bindCall.GenericTypes.Add(data.Source.GetVariableType());
-                bindCall.Arguments.Add(new UMethodInvokeArgumentExpression(data.Target.GetVariableExpression()));
-                bindCall.Arguments.Add(new UMethodInvokeArgumentExpression(new UPrimitiveExpression(data.Target.GetBindPath())));
-                bindCall.Arguments.Add(new UMethodInvokeArgumentExpression(data.Source.GetVariableExpression()));
-                bindCall.Arguments.Add(new UMethodInvokeArgumentExpression(new UPrimitiveExpression(data.Source.GetBindPath())));
-                bindCall.Arguments.Add(new UMethodInvokeArgumentExpression(new UPrimitiveExpression(data.Mode)));
-                initMethod.MethodBody.Sequence.Add(bindCall);
+                data.GenerateStatement(initMethod.MethodBody.Sequence);
             }
         }
         void OnBeforeGenerateCode(UClassDeclaration cls)

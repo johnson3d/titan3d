@@ -256,6 +256,8 @@ namespace EngineNS.UI.Layout
 
         public override void TickLogic(UEngine host)
         {
+            if (host.GfxDevice.SlateApplication == null)
+                return;
             UpdateLayout();
         }
     }
