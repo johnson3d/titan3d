@@ -38,7 +38,7 @@ namespace EngineNS.Bricks.PhysicsCore
         public const string AssetExt = ".pxmtl";
         public class UPhyMaterialImportAttribute : IO.CommonCreateAttribute
         {
-            public override void DoCreate(RName dir, Rtti.UTypeDesc type, string ext)
+            public override async Thread.Async.TtTask DoCreate(RName dir, Rtti.UTypeDesc type, string ext)
             {
                 ExtName = ext;
                 mName = null;

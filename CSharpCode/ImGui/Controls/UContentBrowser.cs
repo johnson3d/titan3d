@@ -117,7 +117,7 @@ namespace EngineNS.EGui.Controls
                     {
                         MenuName = ((IO.AssetCreateMenuAttribute)atts[0]).MenuName,
                         Shortcut = ((IO.AssetCreateMenuAttribute)atts[0]).Shortcut,
-                        Action = (proxy, data)=>
+                        Action = async (proxy, data)=>
                         {
                             EnqueueAssetImporter(UEngine.Instance.AssetMetaManager.ImportAsset(CurrentDir, typeDesc, (string)assetExtField.GetValue(null)), "");
                         }

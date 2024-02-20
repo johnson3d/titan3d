@@ -409,7 +409,7 @@
       <NodeId Type="System.Guid@Unknown" Value="4133d647-335f-4c4c-b850-e6b5a38f3646" />
       <Position Type="EngineNS.Vector2@EngineCore" Value="-391.8001,956.2" />
       <GraphNode Type="EngineNS.Graphics.Pipeline.Common.UFindNode@EngineCore">
-        <ProxyNodeName Type="System.String@Unknown" Value="NextDepthNode" />
+        <ProxyNodeName Type="System.String@Unknown" Value="PrevDepth" />
         <ProxyPinName Type="System.String@Unknown" Value="Prev" />
       </GraphNode>
       <InputEditableValues Type="System.Collections.Generic.List&lt;EngineNS.Bricks.NodeGraph.UNodeBase.UInputEditableValueInfo@EngineCore,&gt;@Unknown" Count="0" />

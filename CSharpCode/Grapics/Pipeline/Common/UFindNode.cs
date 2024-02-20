@@ -67,10 +67,16 @@ namespace EngineNS.Graphics.Pipeline.Common
                 ProxyNodeName = ProxyNodeName;
             }
             if (mNode == null)
+            {
+                Profiler.Log.WriteLine(Profiler.ELogTag.Error, "Graphics", $"{ProxyNodeName} is not found");
                 return;
+            }
             var pin = mNode.FindOutput(ProxyPinName);
             if (pin == null)
+            {
+                Profiler.Log.WriteLine(Profiler.ELogTag.Error, "Graphics", $"{ProxyNodeName}:{ProxyPinName} is not found");
                 return;
+            }
             var refAttachement = RenderGraph.AttachmentCache.FindAttachement(pin.Attachement.AttachmentName);
             if (refAttachement == null)
                 return;

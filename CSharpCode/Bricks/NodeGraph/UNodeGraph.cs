@@ -172,6 +172,8 @@ namespace EngineNS.Bricks.NodeGraph
                 if (Nodes[i].Name == name)
                     return Nodes[i];
             }
+            if (findInSubGraphs == false || SubGraphs == null)
+                return null;
             foreach(var subGraph in SubGraphs.Values)
             {
                 var node = subGraph.FindFirstNode(name, findInSubGraphs);

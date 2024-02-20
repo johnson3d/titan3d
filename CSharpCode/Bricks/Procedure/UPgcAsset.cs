@@ -133,11 +133,17 @@ namespace EngineNS.Bricks.Procedure
             result.AssetName = name;
             result.AssetGraph.AssetName = name;
 
-            result.AssetGraph.Root = result.AssetGraph.FindFirstNode("RootNode") as Node.UEndingNode;
+            result.AssetGraph.Root = result.AssetGraph.FindFirstNode("RootNode", false) as Node.UEndingNode;
             if (result.AssetGraph.Root == null)
             {
                 result.AssetGraph.Root = new Node.UEndingNode();
                 result.AssetGraph.Root.Name = "RootNode";
+                var nodeDef = result.AssetGraph.Root;
+                var inputs = new List<Bricks.Procedure.Node.UNodePinDefine>();
+                var height = new Bricks.Procedure.Node.UNodePinDefine();
+                height.Name = "Height";
+                inputs.Add(height);
+                nodeDef.UserInputs = inputs;
                 result.AssetGraph.AddNode(result.AssetGraph.Root);
             }
 

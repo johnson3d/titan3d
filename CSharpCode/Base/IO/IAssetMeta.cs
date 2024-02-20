@@ -9,7 +9,7 @@ namespace EngineNS.IO
     //资源导入引擎的接口
     public class IAssetCreateAttribute : Attribute
     {
-        public virtual void DoCreate(RName dir, Rtti.UTypeDesc type, string ext)
+        public virtual async Thread.Async.TtTask DoCreate(RName dir, Rtti.UTypeDesc type, string ext)
         {
 
         }
@@ -50,7 +50,7 @@ namespace EngineNS.IO
                 return null;
             return RName.GetRName(mDir.Name + mName + ExtName, mDir.RNameType);
         }
-        public override void DoCreate(RName dir, Rtti.UTypeDesc type, string ext)
+        public override async Thread.Async.TtTask DoCreate(RName dir, Rtti.UTypeDesc type, string ext)
         {
             ExtName = ext;
             mName = null;
@@ -579,7 +579,18 @@ namespace EngineNS.IO
             if (attrs.Length > 0)
             {
                 var importer = attrs[0] as IAssetCreateAttribute;
-                importer.DoCreate(dir, type, ext);
+                _ = importer.DoCreate(dir, type, ext);
+                return importer;
+            }
+            return null;
+        }
+        public async Thread.Async.TtTask<IAssetCreateAttribute> AwaitImportAsset(RName dir, Rtti.UTypeDesc type, string ext)
+        {
+            var attrs = type.GetCustomAttributes(typeof(IAssetCreateAttribute), true);
+            if (attrs.Length > 0)
+            {
+                var importer = attrs[0] as IAssetCreateAttribute;
+                await importer.DoCreate(dir, type, ext);
                 return importer;
             }
             return null;

@@ -41,7 +41,7 @@ namespace EngineNS.GamePlay.Scene
         public const string AssetExt = ".scene";
         public class SceneCreateAttribute : IO.CommonCreateAttribute
         {
-            public override void DoCreate(RName dir, Rtti.UTypeDesc type, string ext)
+            public override async Thread.Async.TtTask DoCreate(RName dir, Rtti.UTypeDesc type, string ext)
             {
                 ExtName = ext;
                 mName = null;
@@ -52,7 +52,9 @@ namespace EngineNS.GamePlay.Scene
                 PGAssetInitTask = PGAsset.Initialize();
                 //mAsset = Rtti.UTypeDescManager.CreateInstance(TypeSlt.SelectedType, new USceneData()) as IO.IAsset;
                 mAsset = Rtti.UTypeDescManager.CreateInstance(TypeSlt.SelectedType) as IO.IAsset;
-                var task = (mAsset as UScene).InitializeNode(null, new USceneData(), EBoundVolumeType.Box, typeof(UPlacement));
+                var world = new UWorld(null);
+                await world.InitWorld();
+                var task = (mAsset as UScene).InitializeNode(world, new USceneData(), EBoundVolumeType.Box, typeof(UPlacement));
                 PGAsset.Target = mAsset;
             }
         }

@@ -48,7 +48,7 @@ namespace EngineNS.Bricks.PhysicsCore
         
         public class UPhyMeshImportAttribute : IO.CommonCreateAttribute
         {
-            public override void DoCreate(RName dir, Rtti.UTypeDesc type, string ext)
+            public override async Thread.Async.TtTask DoCreate(RName dir, Rtti.UTypeDesc type, string ext)
             {
                 ExtName = ext;
                 mName = null;

@@ -72,9 +72,9 @@ namespace EngineNS.BehaviorTree.Macross
         public class BehaviorTreeMacrossCreateAttribute : IO.CommonCreateAttribute
         {
             UTypeDesc mSelectedType = null;
-            public override void DoCreate(RName dir, UTypeDesc type, string ext)
+            public override async Thread.Async.TtTask DoCreate(RName dir, UTypeDesc type, string ext)
             {
-                base.DoCreate(dir, type, ext);
+                await base.DoCreate(dir, type, ext);
                 mSelectedType = null;
             }
 

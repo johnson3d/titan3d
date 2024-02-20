@@ -219,9 +219,9 @@ namespace EngineNS.Graphics.Pipeline.Shader
         }
         public class MaterialImportAttribute : IO.CommonCreateAttribute
         {
-            public override void DoCreate(RName dir, Rtti.UTypeDesc type, string ext)
+            public override async Thread.Async.TtTask DoCreate(RName dir, Rtti.UTypeDesc type, string ext)
             {
-                base.DoCreate(dir, type, ext);
+                await base.DoCreate(dir, type, ext);
 
                 var material = (mAsset as UMaterial);
                 material.mPipelineDesc.SetDefault();

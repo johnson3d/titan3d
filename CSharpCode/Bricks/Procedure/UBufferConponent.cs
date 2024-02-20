@@ -836,6 +836,7 @@ namespace EngineNS.Bricks.Procedure
         [Rtti.Meta]
         public void DispatchPixels(FOnPerPixel onPerPiexel, bool bMultThread = false)
         {
+            //bMultThread = false;
             if (bMultThread == false)
             {
                 for (int i = 0; i < Depth; i++)
