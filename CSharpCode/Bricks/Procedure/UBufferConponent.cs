@@ -1298,9 +1298,16 @@ namespace EngineNS.Bricks.Procedure
             else
             {
                 var linker = pin.HostNode.ParentGraph.FindInLinkerSingle(pin as PinIn);
-                if (linker != null)
+                while (linker != null)
                 {
-                    if (CachedBuffers.TryGetValue(linker.OutPin, out buffer))
+                    oPin = linker.OutPin;
+                    if (oPin.RefInput == null)
+                        break;
+                    linker = pin.HostNode.ParentGraph.FindInLinkerSingle(linker.InPin);
+                }
+                if (oPin != null)
+                {
+                    if (CachedBuffers.TryGetValue(oPin, out buffer))
                         return buffer;
                 }
             }

@@ -205,6 +205,14 @@ namespace CompilingGenerator
             string tourBindableProperties = "";
             string hasBindablePropertiesStr = "";
 
+            //bool hasCreateBindingMethodExpressionMethodSwitch = false;
+            //string createBindingMethodExpressionMethodSwitch = $@"
+            //if(string.IsNullOrEmpty(propertyName))
+            //    return null;
+            //var propertyNameHash = Standart.Hash.xxHash.xxHash64.ComputeHash(propertyName);
+            //switch(propertyNameHash)
+            //{{";
+
             var source = $@"
 using System;
 using System.Collections.Generic;
@@ -303,6 +311,7 @@ namespace {namespaceName}
 
                         var bindingImpName = $"{className}_BindingImp_{propName}";
                         var bindingExprImpName = $"{className}_BindingExprImp_{propName}";
+                        //var bindingMethodExprImpName = $"{className}_BindingMethodExprImp_{propName}";
 
                         hasCreateBindingExpressionMethodSwitch = true;
                         createBindingExpressionMethodSwitch += $@"
@@ -313,6 +322,13 @@ namespace {namespaceName}
                         beImp.TargetProperty = (EngineNS.UI.Bind.TtBindableProperty<{propTypeDisplayName}>){bindPropName};
                         return beImp;
                     }}";
+                //        hasCreateBindingMethodExpressionMethodSwitch = true;
+                //        createBindingMethodExpressionMethodSwitch += $@"
+                //case {Standart.Hash.xxHash.xxHash64.ComputeHash(propName)}: //{propName}
+                //    {{
+                //        var beImp = new {bindingMethodExprImpName}(binding, parent);
+                //        return beImp;
+                //    }}";
                         hasSetValueWithPropertyNameSwitch = true;
                         setValueWithPropertyNameSwitch += $@"
                 case {Standart.Hash.xxHash.xxHash64.ComputeHash(propName)}: //{propName}
@@ -401,6 +417,16 @@ namespace {namespaceName}
             return GetFinalValue<{propTypeDisplayName}>().GetValue<{propTypeDisplayName}>();
         }}
     }}";
+
+    //                    bindImpSource += $@"
+    //public class {bindingMethodExprImpName} : EngineNS.UI.Bind.TtBindingMethodExpression<{propTypeDisplayName}>
+    //{{
+    //    public {bindingMethodExprImpName}(EngineNS.UI.Bind.TtBindingBase binding, EngineNS.UI.Bind.TtBindingExpressionBase parent)
+    //        : base(binding, parent)
+    //    {{
+    //    }}
+    //}}";
+
                     }
                 }
                 else if (symbol is IMethodSymbol)
@@ -588,6 +614,22 @@ namespace {namespaceName}
 ";
             }
             source += createBindingExpressionMethod;
+
+        //    source += $@"
+        //public{(baseHasBindObjectInterface ? " override" : " virtual")} EngineNS.UI.Bind.TtBindingExpressionBase CreateBindingMethodExpression(string propertyName, EngineNS.UI.Bind.TtBindingBase binding, EngineNS.UI.Bind.TtBindingExpressionBase parent)
+        //{{";
+        //    createBindingMethodExpressionMethodSwitch += $@"
+        //    }}";
+        //    if (hasCreateBindingMethodExpressionMethodSwitch)
+        //        source += createBindingMethodExpressionMethodSwitch;
+        //    if (baseHasBindObjectInterface)
+        //        source += $@"
+        //    return base.CreateBindingMethodExpression(propertyName, binding, parent);";
+        //    else
+        //        source += $@"
+        //    return null;";
+        //    source += $@"
+        //}}";
 
             setValueWithPropertyNameSwitch += $@"
             }}";

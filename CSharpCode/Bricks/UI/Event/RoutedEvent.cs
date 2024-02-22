@@ -80,7 +80,7 @@ namespace EngineNS.UI.Event
             else
             {
                 string methodDisplayName;
-                if(element.HasEventMethod(info.HostProperty.Name, out methodDisplayName))
+                if(element.HasMethod(info.HostProperty.Name, out methodDisplayName))
                 {
                     if(CustomButton.ToolButton(methodDisplayName, size))
                     {

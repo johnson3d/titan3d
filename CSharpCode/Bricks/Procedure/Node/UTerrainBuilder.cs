@@ -232,6 +232,8 @@ namespace EngineNS.Bricks.Procedure.Node
         [System.ComponentModel.Browsable(false)]
         public PinIn HMapPin { get; set; } = new PinIn();
         [System.ComponentModel.Browsable(false)]
+        public PinOut HMapOutPin { get; set; } = new PinOut();
+        [System.ComponentModel.Browsable(false)]
         public PinIn NormPin { get; set; } = new PinIn();
         [System.ComponentModel.Browsable(false)]
         public PinIn MatIdPin { get; set; } = new PinIn();
@@ -252,6 +254,9 @@ namespace EngineNS.Bricks.Procedure.Node
             AddInput(NormPin, "Normal", NormalBufferCreator);
             AddInput(MatIdPin, "MatId", Float1Desc);
             AddInput(WaterPin, "Water", Float1Desc);
+
+            AddOutput(HMapOutPin, "Height", Float1Desc);
+            HMapOutPin.RefInput = HMapPin;
         }
         public override UBufferCreator GetOutBufferCreator(PinOut pin)
         {

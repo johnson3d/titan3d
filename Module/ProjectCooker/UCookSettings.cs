@@ -21,6 +21,7 @@ namespace ProjectCooker
         public const string Type_MaterialInst = "MaterialInst";
         public const string Type_Scene = "Scene";
         public const string Type_AnimClip = "AnimClip";
+        public const string Type_UI = "UI";
 
         public const string DS_Port = "DS_Port=";
 

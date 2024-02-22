@@ -1,4 +1,5 @@
-﻿using EngineNS.Bricks.WorldSimulator;
+﻿using EngineNS.Bricks.CodeBuilder;
+using EngineNS.Bricks.WorldSimulator;
 using EngineNS.EGui.Controls.PropertyGrid;
 using EngineNS.Rtti;
 using EngineNS.UI.Controls;
@@ -454,6 +455,49 @@ namespace EngineNS.UI.Bind
                                 Target = bindTarget,
                                 Mode = mSelectedMode,
                             });
+                            switch(mSelectedMode)
+                            {
+                                case EBindingMode.Default:
+                                case EBindingMode.TwoWay:
+                                    {
+                                        var setMethodName = tElement.GetPropertyBindMethodName(info.PropertyDescriptor.Name, true);
+                                        var setMethodDesc = new UMethodDeclaration();
+                                        setMethodDesc.MethodName = setMethodName;
+                                        setMethodDesc.GetDisplayNameFunc = tElement.GetMethodDisplayName;
+                                        setMethodDesc.Arguments.Add(new UMethodArgumentDeclaration()
+                                        {
+                                            VariableName = "valueIn",
+                                            VariableType = new UTypeReference(info.PropertyDescriptor.PropertyType),
+                                        });
+                                        var setGraph = host.HostEditor.UIAsset.MacrossEditor.AddMethod(setMethodDesc);
+                                        tElement.SetPropertyBindMethod(info.PropertyDescriptor.Name, setMethodDesc, true);
+                                        host.HostEditor.UIAsset.MacrossEditor.OpenMethodGraph(setGraph);
+
+                                        var getMethodName = tElement.GetPropertyBindMethodName(info.PropertyDescriptor.Name, false);
+                                        var getMethodDesc = new UMethodDeclaration();
+                                        getMethodDesc.MethodName = getMethodName;
+                                        getMethodDesc.GetDisplayNameFunc = tElement.GetMethodDisplayName;
+                                        getMethodDesc.ReturnValue = new UVariableDeclaration()
+                                        {
+                                            VariableType = new UTypeReference(info.PropertyDescriptor.PropertyType),
+                                        };
+                                        var getGraph = host.HostEditor.UIAsset.MacrossEditor.AddMethod(getMethodDesc);
+                                        tElement.SetPropertyBindMethod(info.PropertyDescriptor.Name, getMethodDesc, true);
+                                        
+                                        host.HostEditor.DrawType = TtUIEditor.enDrawType.Macross;
+                                    }
+                                    break;
+                                case EBindingMode.OneWay:
+                                    {
+
+                                    }
+                                    break;
+                                case EBindingMode.OneWayToSource:
+                                    {
+
+                                    }
+                                    break;
+                            }
                         }
                         ImGuiAPI.CloseCurrentPopup();
                     }

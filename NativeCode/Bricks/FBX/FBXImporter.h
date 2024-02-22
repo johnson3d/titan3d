@@ -67,7 +67,7 @@ namespace AssetImportAndExport
 				HaveSkin = false;
 				AsStaticMesh = false;
 				RenderAtom = 0;
-				TransformVertexToAbsolute = false;
+				TransformVertexToAbsolute = true;
 				BakePivotInVertex = false;
 			}
 			bool ReCalculateTangent;

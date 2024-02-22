@@ -28,17 +28,25 @@ namespace EngineNS.UI.Editor
         bool ElementOnRemoveMacrossMethod(TtUIElement element, ref UMethodDeclaration desc)
         {
             List<string> needDeletes = new List<string>();
-            foreach(var data in element.MacrossEvents)
+            foreach(var data in element.MacrossMethods)
             {
-                if (data.Value.Desc.Equals(desc))
+                if(data.Value is TtUIElement.MacrossEventMethodData)
                 {
-                    needDeletes.Add(data.Key);
-                    element.mEventMethodDisplayNames.Remove(desc);
+                    var evd = data.Value as TtUIElement.MacrossEventMethodData;
+                    if (evd.Desc.Equals(desc))
+                    {
+                        needDeletes.Add(data.Key);
+                        element.mMethodDisplayNames.Remove(desc);
+                    }
+                }
+                else if(data.Value is TtUIElement.MacrossPropertyBindMethodData)
+                {
+
                 }
             }
             for(int i=0; i<needDeletes.Count; i++)
             {
-                element.MacrossEvents.Remove(needDeletes[i]);
+                element.MacrossMethods.Remove(needDeletes[i]);
             }
             return false;
         }
@@ -75,26 +83,51 @@ namespace EngineNS.UI.Editor
         bool ElementBindMacross(TtUIElement element, ref int temp)
         {
             List<string> needDeletes = new List<string>();
-            foreach(var evt in element.MacrossEvents)
+            foreach(var evt in element.MacrossMethods)
             {
-                var eventName = evt.Value.EventName;
-                var methodDesc = UIAsset.MacrossEditor.DefClass.FindMethod(element.GetEventMethodName(eventName));
-                if(methodDesc == null)
+                if(evt.Value is TtUIElement.MacrossEventMethodData)
                 {
-                    // method已删除或不存在
-                    needDeletes.Add(evt.Key);
+                    var data = evt.Value as TtUIElement.MacrossEventMethodData;
+                    var eventName = data.EventName;
+                    var methodDesc = UIAsset.MacrossEditor.DefClass.FindMethod(element.GetEventMethodName(eventName));
+                    if(methodDesc == null)
+                    {
+                        // method已删除或不存在
+                        needDeletes.Add(evt.Key);
+                    }
+                    else
+                    {
+                        data.Desc = methodDesc;
+                        methodDesc.GetDisplayNameFunc = element.GetMethodDisplayName;
+                        element.mMethodDisplayNames[methodDesc] = data;
+                    }
                 }
-                else
+                else if(evt.Value is TtUIElement.MacrossPropertyBindMethodData)
                 {
-                    evt.Value.Desc = methodDesc;
-                    methodDesc.GetDisplayNameFunc = element.GetEventMethodDisplayName;
-                    element.mEventMethodDisplayNames[methodDesc] = evt.Value;
+                    var data = evt.Value as TtUIElement.MacrossPropertyBindMethodData;
+                    var propertyName = data.PropertyName;
+                    var setMethodDesc = UIAsset.MacrossEditor.DefClass.FindMethod(element.GetPropertyBindMethodName(propertyName, true));
+                    var getMethodDesc = UIAsset.MacrossEditor.DefClass.FindMethod(element.GetPropertyBindMethodName(propertyName, false));
+                    if(setMethodDesc == null && getMethodDesc == null)
+                    {
+                        // method已删除或不存在
+                        needDeletes.Add(evt.Key);
+                    }
+                    else
+                    {
+                        data.SetDesc = setMethodDesc;
+                        data.GetDesc = getMethodDesc;
+                        getMethodDesc.GetDisplayNameFunc = element.GetMethodDisplayName;
+                        setMethodDesc.GetDisplayNameFunc = element.GetMethodDisplayName;
+                        element.mMethodDisplayNames[getMethodDesc] = data;
+                        element.mMethodDisplayNames[setMethodDesc] = data;
+                    }
                 }
             }
 
             for(int i = 0; i<needDeletes.Count; i++)
             {
-                element.MacrossEvents.Remove(needDeletes[i]);
+                element.MacrossMethods.Remove(needDeletes[i]);
             }
 
             if(element.IsVariable)
@@ -174,7 +207,7 @@ namespace EngineNS.UI.Editor
             }
             var methodName = element.GetEventMethodName(name);
             var methodDesc = new UMethodDeclaration();
-            methodDesc.GetDisplayNameFunc = element.GetEventMethodDisplayName;
+            methodDesc.GetDisplayNameFunc = element.GetMethodDisplayName;
             methodDesc.MethodName = methodName;
             var pams = eventType.GetMethod("Invoke").GetParameters();
             for(int i=0; i<pams.Length; i++)
@@ -211,102 +244,116 @@ namespace EngineNS.UI.Editor
                 return null;
             return "ElementVar_" + element.Id;
         }
-        bool GenericElementVariableCode(TtUIElement element, ref UClassDeclaration cls)
+        void GenericEventBindMethodCode(TtUIElement.MacrossEventMethodData data, TtUIElement element, ref UClassDeclaration cls)
         {
-            foreach(var data in element.MacrossEvents)
+            var methodName = element.GetEventMethodName(data.EventName);
+            var initEvtMethod = UIAsset.MacrossEditor.DefClass.FindMethod("InitializeEvents");
+            if (initEvtMethod == null)
             {
-                var methodName = element.GetEventMethodName(data.Value.EventName);
-                var initEvtMethod = UIAsset.MacrossEditor.DefClass.FindMethod("InitializeEvents");
-                if (initEvtMethod == null)
+                initEvtMethod = new UMethodDeclaration()
                 {
-                    initEvtMethod = new UMethodDeclaration()
-                    {
-                        MethodName = "InitializeEvents",
-                        IsOverride = true,
-                    };
-                    UIAsset.MacrossEditor.DefClass.AddMethod(initEvtMethod);
-                }
-                var varName = $"var_{element.GetType().Name}_{element.Id}";
-                var findElementInvokeStatement = new UMethodInvokeStatement(
-                        "FindElement",
-                        new UVariableDeclaration()
-                        {
-                            VariableName = varName,
-                            VariableType = new UTypeReference(element.GetType()),
-                        },
-                        new UVariableReferenceExpression("HostElement"),
-                        new UMethodInvokeArgumentExpression(new UPrimitiveExpression(element.Id)))
-                {
-                    DeclarationReturnValue = true,
-                    ForceCastReturnType = true,
+                    MethodName = "InitializeEvents",
+                    IsOverride = true,
                 };
-                if (initEvtMethod.MethodBody.FindStatement(findElementInvokeStatement) == null)
-                    initEvtMethod.MethodBody.Sequence.Add(findElementInvokeStatement);
-                UIfStatement ifStatement = null;
-                for (int i = 0; i < initEvtMethod.MethodBody.Sequence.Count; i++)
-                {
-                    var seq = initEvtMethod.MethodBody.Sequence[i];
-                    var ifSt = seq as UIfStatement;
-                    if (ifSt != null)
+                UIAsset.MacrossEditor.DefClass.AddMethod(initEvtMethod);
+            }
+            var varName = $"var_{element.GetType().Name}_{element.Id}";
+            var findElementInvokeStatement = new UMethodInvokeStatement(
+                    "FindElement",
+                    new UVariableDeclaration()
                     {
-                        var cond = ifSt.Condition as UBinaryOperatorExpression;
-                        if (cond != null)
+                        VariableName = varName,
+                        VariableType = new UTypeReference(element.GetType()),
+                    },
+                    new UVariableReferenceExpression("HostElement"),
+                    new UMethodInvokeArgumentExpression(new UPrimitiveExpression(element.Id)))
+            {
+                DeclarationReturnValue = true,
+                ForceCastReturnType = true,
+            };
+            if (initEvtMethod.MethodBody.FindStatement(findElementInvokeStatement) == null)
+                initEvtMethod.MethodBody.Sequence.Add(findElementInvokeStatement);
+            UIfStatement ifStatement = null;
+            for (int i = 0; i < initEvtMethod.MethodBody.Sequence.Count; i++)
+            {
+                var seq = initEvtMethod.MethodBody.Sequence[i];
+                var ifSt = seq as UIfStatement;
+                if (ifSt != null)
+                {
+                    var cond = ifSt.Condition as UBinaryOperatorExpression;
+                    if (cond != null)
+                    {
+                        var varRef = cond.Left as UVariableReferenceExpression;
+                        if (varRef != null)
                         {
-                            var varRef = cond.Left as UVariableReferenceExpression;
-                            if (varRef != null)
+                            if (varRef.VariableName == varName && cond.Operation == UBinaryOperatorExpression.EBinaryOperation.NotEquality)
                             {
-                                if (varRef.VariableName == varName && cond.Operation == UBinaryOperatorExpression.EBinaryOperation.NotEquality)
-                                {
-                                    ifStatement = ifSt;
-                                    break;
-                                }
+                                ifStatement = ifSt;
+                                break;
                             }
                         }
                     }
                 }
-                if (ifStatement == null)
+            }
+            if (ifStatement == null)
+            {
+                ifStatement = new UIfStatement()
                 {
-                    ifStatement = new UIfStatement()
+                    Condition = new UBinaryOperatorExpression()
                     {
-                        Condition = new UBinaryOperatorExpression()
+                        Left = new UVariableReferenceExpression(varName),
+                        Right = new UNullValueExpression(),
+                        Operation = UBinaryOperatorExpression.EBinaryOperation.NotEquality,
+                    },
+                    TrueStatement = new UExecuteSequenceStatement(),
+                };
+                initEvtMethod.MethodBody.Sequence.Add(ifStatement);
+            }
+            var seqStatements = ifStatement.TrueStatement as UExecuteSequenceStatement;
+            var subAssigStatement = new UExpressionStatement(
+                    new UBinaryOperatorExpression()
+                    {
+                        Operation = UBinaryOperatorExpression.EBinaryOperation.SubtractAssignment,
+                        Left = new UVariableReferenceExpression()
                         {
-                            Left = new UVariableReferenceExpression(varName),
-                            Right = new UNullValueExpression(),
-                            Operation = UBinaryOperatorExpression.EBinaryOperation.NotEquality,
+                            Host = new UVariableReferenceExpression(varName),
+                            VariableName = data.EventName,
                         },
-                        TrueStatement = new UExecuteSequenceStatement(),
-                    };
-                    initEvtMethod.MethodBody.Sequence.Add(ifStatement);
+                        Right = new UVariableReferenceExpression(methodName),
+                        Cell = false,
+                    });
+            var addAssigStatement = new UExpressionStatement(
+                    new UBinaryOperatorExpression()
+                    {
+                        Operation = UBinaryOperatorExpression.EBinaryOperation.AddAssignment,
+                        Left = new UVariableReferenceExpression()
+                        {
+                            Host = new UVariableReferenceExpression(varName),
+                            VariableName = data.EventName,
+                        },
+                        Right = new UVariableReferenceExpression(methodName),
+                        Cell = false,
+                    });
+            if (seqStatements.FindStatement(subAssigStatement) == null)
+                seqStatements.Sequence.Add(subAssigStatement);
+            if (seqStatements.FindStatement(addAssigStatement) == null)
+                seqStatements.Sequence.Add(addAssigStatement);
+        }
+
+        bool GenericElementVariableCode(TtUIElement element, ref UClassDeclaration cls)
+        {
+            foreach(var data in element.MacrossMethods)
+            {
+                if(data.Value is TtUIElement.MacrossEventMethodData)
+                {
+                    var bindData = data.Value as TtUIElement.MacrossEventMethodData;
+                    GenericEventBindMethodCode(bindData, element, ref cls);
                 }
-                var seqStatements = ifStatement.TrueStatement as UExecuteSequenceStatement;
-                var subAssigStatement = new UExpressionStatement(
-                        new UBinaryOperatorExpression()
-                        {
-                            Operation = UBinaryOperatorExpression.EBinaryOperation.SubtractAssignment,
-                            Left = new UVariableReferenceExpression()
-                            {
-                                Host = new UVariableReferenceExpression(varName),
-                                VariableName = data.Value.EventName,
-                            },
-                            Right = new UVariableReferenceExpression(methodName),
-                            Cell = false,
-                        });
-                var addAssigStatement = new UExpressionStatement(
-                        new UBinaryOperatorExpression()
-                        {
-                            Operation = UBinaryOperatorExpression.EBinaryOperation.AddAssignment,
-                            Left = new UVariableReferenceExpression()
-                            {
-                                Host = new UVariableReferenceExpression(varName),
-                                VariableName = data.Value.EventName,
-                            },
-                            Right = new UVariableReferenceExpression(methodName),
-                            Cell = false,
-                        });
-                if(seqStatements.FindStatement(subAssigStatement) == null)
-                    seqStatements.Sequence.Add(subAssigStatement);
-                if(seqStatements.FindStatement(addAssigStatement) == null)
-                    seqStatements.Sequence.Add(addAssigStatement);
+                else if(data.Value is TtUIElement.MacrossPropertyBindMethodData)
+                {
+                    //var bindData = data.Value as TtUIElement.MacrossPropertyBindMethodData;
+
+                }
             }
             if(element.IsVariable)
             {

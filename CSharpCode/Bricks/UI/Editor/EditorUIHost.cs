@@ -52,7 +52,7 @@ namespace EngineNS.UI.Editor
         }
         public UExpressionBase GetVariableExpression()
         {
-            return new UVariableReferenceExpression("UIElement" + Id);
+            return new UVariableReferenceExpression("UIElement_" + Id);
         }
         public UTypeDesc GetVariableType()
         {
@@ -105,27 +105,25 @@ namespace EngineNS.UI.Editor
 
         public UExpressionBase GetVariableExpression()
         {
-            throw new NotImplementedException();
+            return null;
         }
 
         public UTypeDesc GetVariableType()
         {
-            throw new NotImplementedException();
+            return null;
         }
 
         public bool IsSameTarget<T>(T target)
         {
-            throw new NotImplementedException();
+            return false;
         }
 
         public void OnPreRead(object tagObject, object hostObject, bool fromXml)
         {
-            throw new NotImplementedException();
         }
 
         public void OnPropertyRead(object tagObject, PropertyInfo prop, bool fromXml)
         {
-            throw new NotImplementedException();
         }
     }
     public class EditorOnlyData : IO.BaseSerializer

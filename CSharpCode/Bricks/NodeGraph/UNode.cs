@@ -160,6 +160,7 @@ namespace EngineNS.Bricks.NodeGraph
     }
     public class PinOut : NodePin
     {
+        public PinIn RefInput = null;
     }
 
     public interface IBeforeExecNode

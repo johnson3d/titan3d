@@ -155,13 +155,13 @@ namespace EngineNS.UI.Editor
         public Vector2 WindowSize = new Vector2(800, 600);
         public Vector2 WindowContentRegionMin, WindowContentRegionMax;
         public EGui.Controls.PropertyGrid.PropertyGrid DetailsGrid = new EGui.Controls.PropertyGrid.PropertyGrid();
-        enum enDrawType : byte
+        public enum enDrawType : byte
         {
             Designer,
             Macross,
         }
         enDrawType mDrawType = enDrawType.Designer;
-        enDrawType DrawType
+        public enDrawType DrawType
         {
             get => mDrawType;
             set

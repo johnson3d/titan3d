@@ -8,12 +8,12 @@
     <ZSize Type="System.Int32@Unknown" Value="1" />
   </DefaultCreator>
   <GraphName Type="System.String@Unknown" Value="NodeGraph" />
-  <Nodes Type="System.Collections.Generic.List&lt;EngineNS.Bricks.NodeGraph.UNodeBase@EngineCore,&gt;@Unknown" Count="2">
+  <Nodes Type="System.Collections.Generic.List&lt;EngineNS.Bricks.NodeGraph.UNodeBase@EngineCore,&gt;@Unknown" Count="7">
     <e_0 Type="EngineNS.Bricks.Procedure.Node.UEndingNode@EngineCore">
       <Label Type="System.String@Unknown" Value="RootNode" />
       <Name Type="System.String@Unknown" Value="RootNode" />
       <NodeId Type="System.Guid@Unknown" Value="82cd9084-64e3-458f-a4cf-33379c35bc70" />
-      <Position Type="EngineNS.Vector2@EngineCore" Value="884,256" />
+      <Position Type="EngineNS.Vector2@EngineCore" Value="1367,478" />
       <PreviewResultIndex Type="System.Int32@Unknown" Value="-1" />
       <UserInputs Type="System.Collections.Generic.List&lt;EngineNS.Bricks.Procedure.Node.UNodePinDefine@EngineCore,&gt;@Unknown" Count="3">
         <e_0 Type="EngineNS.Bricks.Procedure.Node.UNodePinDefine@EngineCore">
@@ -28,7 +28,7 @@
         </e_0>
         <e_1 Type="EngineNS.Bricks.Procedure.Node.UNodePinDefine@EngineCore">
           <BufferCreator Type="EngineNS.Bricks.Procedure.UBufferCreator@EngineCore">
-            <BufferType Type="EngineNS.Rtti.UTypeDesc@EngineCore" Value="EngineNS.Bricks.Procedure.USuperBuffer&lt;EngineNS.Vector3@EngineCore,EngineNS.Bricks.Procedure.FFloat3Operator@EngineCore,&gt;@EngineCore" />
+            <BufferType Type="EngineNS.Rtti.UTypeDesc@EngineCore" Value="EngineNS.Bricks.Procedure.USuperBuffer&lt;System.Single@Unknown,EngineNS.Bricks.Procedure.FFloatOperator@EngineCore,&gt;@EngineCore" />
             <XSize Type="System.Int32@Unknown" Value="-1" />
             <YSize Type="System.Int32@Unknown" Value="-1" />
             <ZSize Type="System.Int32@Unknown" Value="-1" />
@@ -50,8 +50,8 @@
       <InputEditableValues Type="System.Collections.Generic.List&lt;EngineNS.Bricks.NodeGraph.UNodeBase.UInputEditableValueInfo@EngineCore,&gt;@Unknown" Count="0" />
     </e_0>
     <e_1 Type="EngineNS.Bricks.Procedure.Node.UNoisePerlin@EngineCore">
-      <Amptitude Type="System.Single@Unknown" Value="10" />
-      <Border Type="System.Single@Unknown" Value="3" />
+      <Amptitude Type="System.Single@Unknown" Value="130" />
+      <Border Type="System.Single@Unknown" Value="5" />
       <FbmMode Type="EngineNS.Support.UPerlin.EFbmMode@EngineCore" Value="Classic" />
       <Freq Type="System.Single@Unknown" Value="0.002" />
       <Gain Type="System.Single@Unknown" Value="0.5" />
@@ -61,23 +61,154 @@
       <Name Type="System.String@Unknown" Value="Perlin" />
       <NodeId Type="System.Guid@Unknown" Value="c1796e95-5f49-4de2-a567-0ac77837d449" />
       <Octaves Type="System.Int32@Unknown" Value="8" />
-      <Position Type="EngineNS.Vector2@EngineCore" Value="589,245" />
+      <Position Type="EngineNS.Vector2@EngineCore" Value="136.00002,298.00003" />
       <PreviewResultIndex Type="System.Int32@Unknown" Value="0" />
       <Rotator Type="System.Single@Unknown" Value="0" />
       <SamplerSize Type="System.Int32@Unknown" Value="1024" />
       <Seed Type="System.Int32@Unknown" Value="486947" />
       <InputEditableValues Type="System.Collections.Generic.List&lt;EngineNS.Bricks.NodeGraph.UNodeBase.UInputEditableValueInfo@EngineCore,&gt;@Unknown" Count="0" />
     </e_1>
+    <e_2 Type="EngineNS.Bricks.Procedure.Node.UCopyRect@EngineCore">
+      <Label Type="System.String@Unknown" Value="CopyRect" />
+      <Name Type="System.String@Unknown" Value="CopyRect" />
+      <NodeId Type="System.Guid@Unknown" Value="cd026d98-1fdf-4233-9add-9212bd4c8a8b" />
+      <Position Type="EngineNS.Vector2@EngineCore" Value="660.80005,461" />
+      <PreviewResultIndex Type="System.Int32@Unknown" Value="0" />
+      <ResultDesc Type="EngineNS.Bricks.Procedure.UBufferCreator@EngineCore">
+        <BufferType Type="EngineNS.Rtti.UTypeDesc@EngineCore" Value="EngineNS.Bricks.Procedure.USuperBuffer&lt;System.Single@Unknown,EngineNS.Bricks.Procedure.FFloatOperator@EngineCore,&gt;@EngineCore" />
+        <XSize Type="System.Int32@Unknown" Value="1024" />
+        <YSize Type="System.Int32@Unknown" Value="1024" />
+        <ZSize Type="System.Int32@Unknown" Value="-1" />
+      </ResultDesc>
+      <SourceDesc Type="EngineNS.Bricks.Procedure.UBufferCreator@EngineCore">
+        <BufferType Type="EngineNS.Rtti.UTypeDesc@EngineCore" Value="EngineNS.Bricks.Procedure.USuperBuffer&lt;System.Single@Unknown,EngineNS.Bricks.Procedure.FFloatOperator@EngineCore,&gt;@EngineCore" />
+        <XSize Type="System.Int32@Unknown" Value="-1" />
+        <YSize Type="System.Int32@Unknown" Value="-1" />
+        <ZSize Type="System.Int32@Unknown" Value="-1" />
+      </SourceDesc>
+      <X Type="System.Int32@Unknown" Value="5" />
+      <Y Type="System.Int32@Unknown" Value="5" />
+      <Z Type="System.Int32@Unknown" Value="0" />
+      <InputEditableValues Type="System.Collections.Generic.List&lt;EngineNS.Bricks.NodeGraph.UNodeBase.UInputEditableValueInfo@EngineCore,&gt;@Unknown" Count="0" />
+    </e_2>
+    <e_3 Type="EngineNS.Bricks.Procedure.Node.UHeightmapPreviewNode@EngineCore">
+      <Label Type="System.String@Unknown" Value="HeightmapPreview" />
+      <Name Type="System.String@Unknown" Value="HeightmapPreview" />
+      <NodeId Type="System.Guid@Unknown" Value="8be71e86-8ddd-4b41-a9f8-d13109d7df49" />
+      <Position Type="EngineNS.Vector2@EngineCore" Value="968,480" />
+      <PreviewResultIndex Type="System.Int32@Unknown" Value="-1" />
+      <InputEditableValues Type="System.Collections.Generic.List&lt;EngineNS.Bricks.NodeGraph.UNodeBase.UInputEditableValueInfo@EngineCore,&gt;@Unknown" Count="0" />
+    </e_3>
+    <e_4 Type="EngineNS.Bricks.Procedure.Node.UFloat3HeightToNormal@EngineCore">
+      <GridSize Type="System.Single@Unknown" Value="1" />
+      <Label Type="System.String@Unknown" Value="Height2Normal" />
+      <Name Type="System.String@Unknown" Value="Height2Normal" />
+      <NodeId Type="System.Guid@Unknown" Value="efe7edb6-2d61-4361-8a97-7e9933b21fbc" />
+      <Position Type="EngineNS.Vector2@EngineCore" Value="388,697.2001" />
+      <PreviewResultIndex Type="System.Int32@Unknown" Value="-1" />
+      <InputEditableValues Type="System.Collections.Generic.List&lt;EngineNS.Bricks.NodeGraph.UNodeBase.UInputEditableValueInfo@EngineCore,&gt;@Unknown" Count="0" />
+    </e_4>
+    <e_5 Type="EngineNS.Bricks.Procedure.Node.UCopyRect@EngineCore">
+      <Label Type="System.String@Unknown" Value="CopyRect" />
+      <Name Type="System.String@Unknown" Value="CopyRect" />
+      <NodeId Type="System.Guid@Unknown" Value="8ff2089c-75cb-4cd8-919a-90135225bf1e" />
+      <Position Type="EngineNS.Vector2@EngineCore" Value="657.8,680.00006" />
+      <PreviewResultIndex Type="System.Int32@Unknown" Value="0" />
+      <ResultDesc Type="EngineNS.Bricks.Procedure.UBufferCreator@EngineCore">
+        <BufferType Type="EngineNS.Rtti.UTypeDesc@EngineCore" Value="EngineNS.Bricks.Procedure.USuperBuffer&lt;EngineNS.Vector3@EngineCore,EngineNS.Bricks.Procedure.FFloat3Operator@EngineCore,&gt;@EngineCore" />
+        <XSize Type="System.Int32@Unknown" Value="1024" />
+        <YSize Type="System.Int32@Unknown" Value="1024" />
+        <ZSize Type="System.Int32@Unknown" Value="-1" />
+      </ResultDesc>
+      <SourceDesc Type="EngineNS.Bricks.Procedure.UBufferCreator@EngineCore">
+        <BufferType Type="EngineNS.Rtti.UTypeDesc@EngineCore" Value="EngineNS.Bricks.Procedure.USuperBuffer&lt;EngineNS.Vector3@EngineCore,EngineNS.Bricks.Procedure.FFloat3Operator@EngineCore,&gt;@EngineCore" />
+        <XSize Type="System.Int32@Unknown" Value="-1" />
+        <YSize Type="System.Int32@Unknown" Value="-1" />
+        <ZSize Type="System.Int32@Unknown" Value="-1" />
+      </SourceDesc>
+      <X Type="System.Int32@Unknown" Value="5" />
+      <Y Type="System.Int32@Unknown" Value="5" />
+      <Z Type="System.Int32@Unknown" Value="0" />
+      <InputEditableValues Type="System.Collections.Generic.List&lt;EngineNS.Bricks.NodeGraph.UNodeBase.UInputEditableValueInfo@EngineCore,&gt;@Unknown" Count="0" />
+    </e_5>
+    <e_6 Type="EngineNS.Bricks.Procedure.Node.TtMorphology@EngineCore">
+      <Label Type="System.String@Unknown" Value="Morphology" />
+      <Name Type="System.String@Unknown" Value="Morphology" />
+      <NodeId Type="System.Guid@Unknown" Value="95a8259d-345b-4613-a95e-55ccd4f71e79" />
+      <Position Type="EngineNS.Vector2@EngineCore" Value="385.99997,309.00003" />
+      <PreviewResultIndex Type="System.Int32@Unknown" Value="0" />
+      <ResultDesc Type="EngineNS.Bricks.Procedure.UBufferCreator@EngineCore">
+        <BufferType Type="EngineNS.Rtti.UTypeDesc@EngineCore" Value="EngineNS.Bricks.Procedure.USuperBuffer&lt;System.Single@Unknown,EngineNS.Bricks.Procedure.FFloatOperator@EngineCore,&gt;@EngineCore" />
+        <XSize Type="System.Int32@Unknown" Value="-1" />
+        <YSize Type="System.Int32@Unknown" Value="-1" />
+        <ZSize Type="System.Int32@Unknown" Value="-1" />
+      </ResultDesc>
+      <SourceDesc Type="EngineNS.Bricks.Procedure.UBufferCreator@EngineCore">
+        <BufferType Type="EngineNS.Rtti.UTypeDesc@EngineCore" Value="EngineNS.Bricks.Procedure.USuperBuffer&lt;System.Single@Unknown,EngineNS.Bricks.Procedure.FFloatOperator@EngineCore,&gt;@EngineCore" />
+        <XSize Type="System.Int32@Unknown" Value="-1" />
+        <YSize Type="System.Int32@Unknown" Value="-1" />
+        <ZSize Type="System.Int32@Unknown" Value="-1" />
+      </SourceDesc>
+      <InputEditableValues Type="System.Collections.Generic.List&lt;EngineNS.Bricks.NodeGraph.UNodeBase.UInputEditableValueInfo@EngineCore,&gt;@Unknown" Count="0" />
+    </e_6>
   </Nodes>
-  <Version Type="System.UInt32@Unknown" Value="5" />
-  <Linkers Type="System.Collections.Generic.List&lt;EngineNS.Bricks.NodeGraph.UPinLinker@EngineCore,&gt;@Unknown" Count="1">
+  <Version Type="System.UInt32@Unknown" Value="20" />
+  <Linkers Type="System.Collections.Generic.List&lt;EngineNS.Bricks.NodeGraph.UPinLinker@EngineCore,&gt;@Unknown" Count="7">
     <e_0 Type="EngineNS.Bricks.NodeGraph.UPinLinker@EngineCore">
       <SaveData Type="EngineNS.Bricks.NodeGraph.UPinLinker.TSaveData@EngineCore">
-        <InNodeId Type="System.Guid@Unknown" Value="82cd9084-64e3-458f-a4cf-33379c35bc70" />
+        <InNodeId Type="System.Guid@Unknown" Value="8be71e86-8ddd-4b41-a9f8-d13109d7df49" />
         <InPinName Type="System.String@Unknown" Value="Height" />
-        <OutNodeId Type="System.Guid@Unknown" Value="c1796e95-5f49-4de2-a567-0ac77837d449" />
+        <OutNodeId Type="System.Guid@Unknown" Value="cd026d98-1fdf-4233-9add-9212bd4c8a8b" />
         <OutPinName Type="System.String@Unknown" Value="Result" />
       </SaveData>
     </e_0>
+    <e_1 Type="EngineNS.Bricks.NodeGraph.UPinLinker@EngineCore">
+      <SaveData Type="EngineNS.Bricks.NodeGraph.UPinLinker.TSaveData@EngineCore">
+        <InNodeId Type="System.Guid@Unknown" Value="82cd9084-64e3-458f-a4cf-33379c35bc70" />
+        <InPinName Type="System.String@Unknown" Value="Height" />
+        <OutNodeId Type="System.Guid@Unknown" Value="8be71e86-8ddd-4b41-a9f8-d13109d7df49" />
+        <OutPinName Type="System.String@Unknown" Value="Height" />
+      </SaveData>
+    </e_1>
+    <e_2 Type="EngineNS.Bricks.NodeGraph.UPinLinker@EngineCore">
+      <SaveData Type="EngineNS.Bricks.NodeGraph.UPinLinker.TSaveData@EngineCore">
+        <InNodeId Type="System.Guid@Unknown" Value="8ff2089c-75cb-4cd8-919a-90135225bf1e" />
+        <InPinName Type="System.String@Unknown" Value="Src" />
+        <OutNodeId Type="System.Guid@Unknown" Value="efe7edb6-2d61-4361-8a97-7e9933b21fbc" />
+        <OutPinName Type="System.String@Unknown" Value="Normal" />
+      </SaveData>
+    </e_2>
+    <e_3 Type="EngineNS.Bricks.NodeGraph.UPinLinker@EngineCore">
+      <SaveData Type="EngineNS.Bricks.NodeGraph.UPinLinker.TSaveData@EngineCore">
+        <InNodeId Type="System.Guid@Unknown" Value="8be71e86-8ddd-4b41-a9f8-d13109d7df49" />
+        <InPinName Type="System.String@Unknown" Value="Normal" />
+        <OutNodeId Type="System.Guid@Unknown" Value="8ff2089c-75cb-4cd8-919a-90135225bf1e" />
+        <OutPinName Type="System.String@Unknown" Value="Result" />
+      </SaveData>
+    </e_3>
+    <e_4 Type="EngineNS.Bricks.NodeGraph.UPinLinker@EngineCore">
+      <SaveData Type="EngineNS.Bricks.NodeGraph.UPinLinker.TSaveData@EngineCore">
+        <InNodeId Type="System.Guid@Unknown" Value="95a8259d-345b-4613-a95e-55ccd4f71e79" />
+        <InPinName Type="System.String@Unknown" Value="Src" />
+        <OutNodeId Type="System.Guid@Unknown" Value="c1796e95-5f49-4de2-a567-0ac77837d449" />
+        <OutPinName Type="System.String@Unknown" Value="Result" />
+      </SaveData>
+    </e_4>
+    <e_5 Type="EngineNS.Bricks.NodeGraph.UPinLinker@EngineCore">
+      <SaveData Type="EngineNS.Bricks.NodeGraph.UPinLinker.TSaveData@EngineCore">
+        <InNodeId Type="System.Guid@Unknown" Value="cd026d98-1fdf-4233-9add-9212bd4c8a8b" />
+        <InPinName Type="System.String@Unknown" Value="Src" />
+        <OutNodeId Type="System.Guid@Unknown" Value="95a8259d-345b-4613-a95e-55ccd4f71e79" />
+        <OutPinName Type="System.String@Unknown" Value="Result" />
+      </SaveData>
+    </e_5>
+    <e_6 Type="EngineNS.Bricks.NodeGraph.UPinLinker@EngineCore">
+      <SaveData Type="EngineNS.Bricks.NodeGraph.UPinLinker.TSaveData@EngineCore">
+        <InNodeId Type="System.Guid@Unknown" Value="efe7edb6-2d61-4361-8a97-7e9933b21fbc" />
+        <InPinName Type="System.String@Unknown" Value="Height" />
+        <OutNodeId Type="System.Guid@Unknown" Value="95a8259d-345b-4613-a95e-55ccd4f71e79" />
+        <OutPinName Type="System.String@Unknown" Value="Result" />
+      </SaveData>
+    </e_6>
   </Linkers>
 </Root>

@@ -21,10 +21,13 @@ namespace ProjectCooker.Command
             {
                 //throw new Exception("AssetType error");
                 //await ProcTextures();
+                await ProcMeshPrimitive();
                 await ProcUMesh();
                 await ProcMaterial();
                 await ProcMaterialInstance();
                 await ProcScene();
+                await ProcAnimClip();
+                await ProcUI();
             }
             else
             {
@@ -65,6 +68,11 @@ namespace ProjectCooker.Command
                         case Type_AnimClip:
                             {
                                 await ProcAnimClip();
+                            }
+                            break;
+                        case Type_UI:
+                            {
+                                await ProcUI();
                             }
                             break;
                         default:
@@ -244,7 +252,7 @@ namespace ProjectCooker.Command
             var macrossEditor = new UMacrossEditor();
             await macrossEditor.Initialize();
             var root = EngineNS.UEngine.Instance.FileManager.GetRoot(EngineNS.IO.TtFileManager.ERootDir.Game);
-            var files = new List<string>(EngineNS.IO.TtFileManager.GetFiles(root, "*" + EngineNS.UI.TtUIAsset.AssetExt, true));
+            var files = new List<string>(EngineNS.IO.TtFileManager.GetDirectories(root, "*" + EngineNS.UI.TtUIAsset.AssetExt, true));
             foreach (var i in files)
             {
                 try
@@ -265,7 +273,7 @@ namespace ProjectCooker.Command
                 }
             }
             root = EngineNS.UEngine.Instance.FileManager.GetRoot(EngineNS.IO.TtFileManager.ERootDir.Engine);
-            files = new List<string>(EngineNS.IO.TtFileManager.GetFiles(root, "*" + EngineNS.UI.TtUIAsset.AssetExt, true));
+            files = new List<string>(EngineNS.IO.TtFileManager.GetDirectories(root, "*" + EngineNS.UI.TtUIAsset.AssetExt, true));
             foreach (var i in files)
             {
                 try
