@@ -85,6 +85,14 @@ namespace EngineNS.Bricks.VirtualTexture
         public NxRHI.USrView Texture;
         public RName TextureName;
         public TtVirtualTextureBase Owner;
+        public bool IsDirty = false;
+        public void UpdateTexture(NxRHI.USrView texture)
+        {
+            Texture.Rvt = null;
+            Texture = texture;
+            IsDirty = true;
+            Texture.Rvt = this;
+        }
     }
 
     public class TtVirtualTextureBase : IDisposable
@@ -96,6 +104,7 @@ namespace EngineNS.Bricks.VirtualTexture
         private List<uint> ActiveTexIDs = new List<uint>();
         private List<uint> AddTexIDs = new List<uint>();
         private List<uint> RemoveTexIDs = new List<uint>();
+        private List<uint> DirtyTexIDs = new List<uint>();
         NxRHI.FTextureDesc TexDesc = new NxRHI.FTextureDesc();
         public void ActiveRVT(NxRHI.USrView tex)
         {
@@ -119,6 +128,7 @@ namespace EngineNS.Bricks.VirtualTexture
             ActiveTexIDs.Clear();
             AddTexIDs.Clear();
             RemoveTexIDs.Clear();
+            DirtyTexIDs.Clear();
         }
         public bool Initialize(EPixelFormat format, uint texSize = 512, uint mipLevel = 1, uint arrayNum = 256)
         {
@@ -175,11 +185,17 @@ namespace EngineNS.Bricks.VirtualTexture
         private bool ProcessChanged()
         {
             AddTexIDs.Clear();
+            DirtyTexIDs.Clear();
             foreach (var i in ActiveTexIDs)
             {
                 if (PrevActiveTexIDs.BinarySearch(i) < 0)
                 {
                     AddTexIDs.Add(i);
+                }
+                else if (Rvts[(int)i].IsDirty)
+                {
+                    DirtyTexIDs.Add(i);
+                    Rvts[(int)i].IsDirty = false;
                 }
             }
             RemoveTexIDs.Clear();
@@ -192,7 +208,7 @@ namespace EngineNS.Bricks.VirtualTexture
             }
             CoreSDK.Swap(ref PrevActiveTexIDs, ref ActiveTexIDs);
             ActiveTexIDs.Clear();
-            return (AddTexIDs.Count + RemoveTexIDs.Count) > 0;
+            return (AddTexIDs.Count + RemoveTexIDs.Count + DirtyTexIDs.Count) > 0;
         }
         public void TickSync(NxRHI.UCommandList cmd)
         {
@@ -202,6 +218,7 @@ namespace EngineNS.Bricks.VirtualTexture
             foreach (var i in RemoveTexIDs)
             {
                 TextureSlotAllocator.Free(Rvts[(int)i].Slot);
+                Rvts[(int)i].Slot = null;
             }
             RemoveTexIDs.Clear();
             using (new NxRHI.TtCmdListScope(cmd))
@@ -212,6 +229,11 @@ namespace EngineNS.Bricks.VirtualTexture
                     UpLoadRVT(cmd, Rvts[(int)i]);
                 }
                 AddTexIDs.Clear();
+                foreach (var i in DirtyTexIDs)
+                {
+                    UpLoadRVT(cmd, Rvts[(int)i]);
+                }
+                DirtyTexIDs.Clear();
                 cmd.FlushDraws();
             }
             for (int i = 0; i < Rvts.Count; i++)
@@ -237,7 +259,7 @@ namespace EngineNS.Bricks.VirtualTexture
                 cpDraw.BindTextureDest(TextureSlotAllocator.TextureArray);
                 ref var fp = ref cpDraw.FootPrint;
                 cpDraw.DestSubResource = rvt.Slot.ArrayIndex * TextureSlotAllocator.TexDesc.MipLevels + mip;
-                cpDraw.SrcSubResource = 0;
+                cpDraw.SrcSubResource = mip;
                 cmd.PushGpuDraw(cpDraw);
             }
         }

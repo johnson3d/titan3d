@@ -287,7 +287,12 @@ namespace EngineNS.Bricks.Terrain.CDLOD
 
             InitPhysics(Level);
 
+            var rvt = HeightMapSRV?.Rvt;
             HeightMapSRV = hMap.CreateAsHeightMapTexture2D(out HeightMap, HeightMapMinHeight, HeightMapMaxHeight, EPixelFormat.PXF_R16_FLOAT);
+            if (rvt != null)
+            {
+                rvt.UpdateTexture(HeightMapSRV);
+            }
             HeightMapSRV.SetDebugName("HeightMapSRV");
             HeightMapSRV.AssetName = RName.GetRName($"@Height_{this.GetTerrainNode().TerrainName}_{Level.LevelX}_{Level.LevelZ}@", RName.ERNameType.Transient);
         }
@@ -306,7 +311,12 @@ namespace EngineNS.Bricks.Terrain.CDLOD
                 norMap as Procedure.USuperBuffer<Vector3, Procedure.FFloat3Operator>,
                 null, 0);
 
+            var rvt = NormalMapSRV?.Rvt;
             NormalMapSRV = norImage.CreateRGBA8Texture2DAsNormal(out NormalMap); //terrainGen.mResultNormalImage.CreateRGBA8Texture2DAsNormal();            
+            if (rvt != null)
+            {
+                rvt.UpdateTexture(NormalMapSRV);
+            }
             NormalMapSRV.SetDebugName("NormalMapSRV");
             NormalMapSRV.AssetName = RName.GetRName($"@Normal_{this.GetTerrainNode().TerrainName}_{Level.LevelX}_{Level.LevelZ}@", RName.ERNameType.Transient);
         }
@@ -322,7 +332,12 @@ namespace EngineNS.Bricks.Terrain.CDLOD
                 null,
                 null);
 
+            var rvt = MaterialIdMapSRV?.Rvt;
             MaterialIdMapSRV = idMapImage.CreateRGBA8Texture2D(false);
+            if (rvt != null)
+            {
+                rvt.UpdateTexture(MaterialIdMapSRV);
+            }
             MaterialIdMapSRV.SetDebugName("MaterialIdMapSRV");
             MaterialIdMapSRV.AssetName = RName.GetRName($"@MtlID_{this.GetTerrainNode().TerrainName}_{Level.LevelX}_{Level.LevelZ}@", RName.ERNameType.Transient);
         }
