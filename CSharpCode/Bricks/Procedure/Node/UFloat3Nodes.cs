@@ -275,16 +275,66 @@ namespace EngineNS.Bricks.Procedure.Node
             //float range = HeightRange;// maxHeight - minHeight;
             xyzResult.DispatchPixels((result, x, y, z) =>
             {
-                if (x >= result.Width - 1 || y >= result.Height - 1)
+                if (x < 1 || y < 1 || x >= result.Width - 1 || y >= result.Height - 1)
                     return;
-                float altInfo = heightFiels.GetPixel<float>(x, y);
-                float v_du = heightFiels.GetPixel<float>(x + 1, y);
-                float v_dv = heightFiels.GetPixel<float>(x, y + 1);
+                //float altInfo = heightFiels.GetPixel<float>(x, y);
+                //float v_du = heightFiels.GetPixel<float>(x + 1, y);
+                //float v_dv = heightFiels.GetPixel<float>(x, y + 1);
 
-                var A = new Vector3(GridSize, (v_du - altInfo), 0);
-                var B = new Vector3(0, (v_dv - altInfo), -GridSize);
+                //var A = new Vector3(GridSize, (v_du - altInfo), 0);
+                //var B = new Vector3(0, (v_dv - altInfo), -GridSize);
 
-                var n = Vector3.Cross(A, B);
+                //var n = Vector3.Cross(A, B);
+                //n = Vector3.Normalize(n);
+                /* It's terrain mesh topology
+                 *-1-2
+                 |/|/|
+                 6-0-3
+                 |/|/|
+                 5-4-*
+                 */
+                float h0 = heightFiels.GetPixel<float>(x, y);
+                float h1 = heightFiels.GetPixel<float>(x, y + 1) - h0;
+                float h2 = heightFiels.GetPixel<float>(x + 1, y + 1) - h0;
+                float h3 = heightFiels.GetPixel<float>(x + 1, y) - h0;
+                float h4 = heightFiels.GetPixel<float>(x, y - 1) - h0;
+                float h5 = heightFiels.GetPixel<float>(x - 1, y - 1) - h0;
+                float h6 = heightFiels.GetPixel<float>(x - 1, y) - h0;
+
+                Vector3 v0 = new Vector3(0, 0, 0);
+                Vector3 v1 = new Vector3(0, h1, GridSize);
+                Vector3 v2 = new Vector3(GridSize, h2, GridSize);
+                Vector3 v3 = new Vector3(GridSize, h3, 0);
+                Vector3 v4 = new Vector3(0, h4, -GridSize);
+                Vector3 v5 = new Vector3(-GridSize, h5, -GridSize);
+                Vector3 v6 = new Vector3(-GridSize, h6, 0);
+
+                Vector3 n = Vector3.Zero;
+                var A = v1 - v0;
+                var B = v2 - v0;
+                n += Vector3.Normalize(Vector3.Cross(A, B));
+
+                A = B;
+                B = v3 - v0;
+                n += Vector3.Normalize(Vector3.Cross(A, B));
+
+                A = B;
+                B = v4 - v0;
+                n += Vector3.Normalize(Vector3.Cross(A, B));
+
+                A = B;
+                B = v4 - v0;
+                n += Vector3.Normalize(Vector3.Cross(A, B));
+
+                A = B;
+                B = v5 - v0;
+                n += Vector3.Normalize(Vector3.Cross(A, B));
+
+                A = B;
+                B = v6 - v0;
+                n += Vector3.Normalize(Vector3.Cross(A, B));
+
+                n /= 6.0f;
                 n = Vector3.Normalize(n);
 
                 xyzResult.SetPixel(x, y, n);

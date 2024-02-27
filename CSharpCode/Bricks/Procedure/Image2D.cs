@@ -326,22 +326,29 @@ namespace EngineNS.Bricks.Procedure
                         Byte4 px = new Byte4();
                         if (CompX != null)
                         {
-                            var v = (CompX.GetPixel<float>(j, i) + 1.0f) / 2.0f;
+                            var v = CompX.GetPixel<float>(j, i);
+                            v = (v + 1.0f) / 2.0f;
+                            System.Diagnostics.Debug.Assert(v >= 0 && v <= 1.0f);
                             px.X = (byte)(v * 255.0f);
                         }
                         if (CompY != null)
                         {
-                            var v = (CompY.GetPixel<float>(j, i) + 1.0f) / 2.0f;
+                            var v = CompY.GetPixel<float>(j, i);
+                            v = (v + 1.0f) / 2.0f;
+                            System.Diagnostics.Debug.Assert(v >= 0 && v <= 1.0f);
                             px.Y = (byte)(v * 255.0f);
                         }
                         if (CompZ != null)
                         {
-                            var v = (CompZ.GetPixel<float>(j, i) + 1.0f) / 2.0f;
+                            var v = CompZ.GetPixel<float>(j, i);
+                            v = (v + 1.0f) / 2.0f;
+                            System.Diagnostics.Debug.Assert(v >= 0 && v <= 1.0f);
                             px.Z = (byte)(v * 255.0f);
                         }
                         if (CompW != null)
                         {
-                            var v = (CompW.GetPixel<float>(j, i) + 1.0f) / 2.0f;
+                            var v = CompW.GetPixel<float>(j, i);
+                            v = (v + 1.0f) / 2.0f;
                             px.W = (byte)(v * 255.0f);
                         }
                         pixels[i, j] = px;

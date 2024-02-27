@@ -70,14 +70,38 @@ namespace EngineNS.GamePlay.Scene
         public override void GetHitProxyDrawMesh(List<TtMesh> meshes)
         {
             base.GetHitProxyDrawMesh(meshes);
+            if (DebugMesh != null)
+                meshes.Add(DebugMesh);
         }
 
         protected override void OnAbsTransformChanged()
         {
             base.OnAbsTransformChanged();
             DirectionLight.Direction = Quaternion.RotateVector3(in Placement.TransformRef.mQuat, in Vector3.UnitX);
+            if (mDebugMesh != null)
+                mDebugMesh.DirectSetWorldMatrix(Placement.AbsTransform.ToMatrixNoScale(this.GetWorld().CameraOffset));
         }
+        public override void OnHitProxyChanged()
+        {
+            if (mDebugMesh == null)
+                return;
+            if (this.HitProxy == null)
+            {
+                mDebugMesh.IsDrawHitproxy = false;
+                return;
+            }
 
+            if (HitproxyType != Graphics.Pipeline.UHitProxy.EHitproxyType.None)
+            {
+                mDebugMesh.IsDrawHitproxy = true;
+                var value = HitProxy.ConvertHitProxyIdToVector4();
+                mDebugMesh.SetHitproxy(in value);
+            }
+            else
+            {
+                mDebugMesh.IsDrawHitproxy = false;
+            }
+        }
         Graphics.Mesh.TtMesh mDebugMesh;
         public Graphics.Mesh.TtMesh DebugMesh
         {

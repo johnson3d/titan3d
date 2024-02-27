@@ -6,7 +6,9 @@ namespace EngineNS.Bricks.Procedure.Node
     [Bricks.CodeBuilder.ContextMenu("Morphology", "Float1\\Morphology", UPgcGraph.PgcEditorKeyword)]
     public class TtMorphology : Node.UAnyTypeMonocular
     {
+        [Rtti.Meta]
         public int Step { get; set; } = 1;
+        [Rtti.Meta]
         public float LerpValue { get; set; } = 1.0f;
         public unsafe override bool OnProcedure(UPgcGraph graph)
         {
@@ -55,12 +57,15 @@ namespace EngineNS.Bricks.Procedure.Node
                         Output.SetPixel(i, j, fv);
                     }
                 }
-                for (int i = 0; i < width; i++)
+                if (loops > 0)
                 {
-                    for (int j = 0; j < height; j++)
+                    for (int i = 0; i < width; i++)
                     {
-                        var src = Output.GetPixel<float>(i, j);
-                        prevStep.SetPixel(i, j, src);
+                        for (int j = 0; j < height; j++)
+                        {
+                            var src = Output.GetPixel<float>(i, j);
+                            prevStep.SetPixel(i, j, src);
+                        }
                     }
                 }
             }

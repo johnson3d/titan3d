@@ -10,6 +10,15 @@ namespace EngineNS.Support
         {
             mCoreObject = vfxRandom.CreateInstance();
         }
+        public URandom(int seed)
+        {
+            mCoreObject = vfxRandom.CreateInstance();
+            SetSeed(seed);
+        }
+        public void SetSeed(int seed)
+        {
+            mCoreObject.SetSeed(seed);
+        }
         public ushort GetNextByte()
         {
             return (byte)mCoreObject.NextValue8Bit();
@@ -18,6 +27,12 @@ namespace EngineNS.Support
         {
             return (ushort)mCoreObject.NextValue16Bit();
         }
+        public uint GetNextUInt32()
+        {
+            var l = (uint)mCoreObject.NextValue16Bit();
+            var h = (uint)mCoreObject.NextValue16Bit();
+            return (h << 16) | l;
+        }
         public int GetNextInt32()
         {
             return mCoreObject.NextValue();
@@ -25,6 +40,11 @@ namespace EngineNS.Support
         public float GetUnit()
         {
             return ((float)mCoreObject.NextValue16Bit()) / (float)UInt16.MaxValue;
+        }
+        public int GetRange(int min, int max)
+        {
+            var d = (uint)(max - min);
+            return (int)(GetNextUInt32() % d) + min;
         }
         //probability[0-1]
         public bool GetProbability(float probability)

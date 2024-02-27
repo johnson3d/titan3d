@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Runtime.CompilerServices;
 using EngineNS.Bricks.NodeGraph;
 
 namespace EngineNS.Bricks.Procedure
@@ -1071,6 +1072,39 @@ namespace EngineNS.Bricks.Procedure
         public float GetFloat1(int x, int y, int z)
         {
             return GetPixel<float>(x, y, z);
+        }
+        public Vector3 GetGradAndHeight(int x, int y, int z, in Vector2 uv)
+        {
+            System.Diagnostics.Debug.Assert(this.BufferCreator.ElementType.SystemType == typeof(float));
+
+            float h1 = GetPixel<float>(x,y,z);
+            float h2 = GetPixel<float>(x + 1, y, z);
+            float h3 = GetPixel<float>(x, y + 1, z);
+            float h4 = GetPixel<float>(x + 1, y + 1, z);
+
+            var result = new Vector3();
+            var u = uv.U;
+            var v = uv.V;
+            // gradient
+            result.X = (h2 - h1) * (1 - v) + (h4 - h3) * v;
+            result.Y = (h3 - h1) * (1 - u) + (h4 - h2) * u;
+            // height
+            result.Z = h1 * (1 - u) * (1 - v) + h2 * u * (1 - v) + h3 * (1 - u) * v + h4 * u * v;
+            return result;
+        }
+        public float GetHeight(float x, float y)
+        {
+            int i = (int)x;
+            int j = (int)y;
+            float u = x - i;
+            float v = y - j;
+
+            float h1 = GetPixel<float>(i, j, 0);
+            float h2 = GetPixel<float>(i + 1, j, 0);
+            float h3 = GetPixel<float>(i, j + 1, 0);
+            float h4 = GetPixel<float>(i + 1, j + 1, 0);
+
+            return h1 * (1 - u) * (1 - v) + h2 * u * (1 - v) + h3 * (1 - u) * v + h4 * u * v;
         }
         public enum EBufferSamplerType
         {

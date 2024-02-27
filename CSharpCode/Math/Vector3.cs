@@ -1024,8 +1024,9 @@ namespace EngineNS
         [Rtti.Meta]
         public static Vector3 Normalize(in Vector3 vector)
 	    {
-		    vector.Normalize();
-		    return vector;
+            Vector3 result;
+            Normalize(in vector, out result);
+		    return result;
 	    }
         /// <summary>
         /// 向量的单位化

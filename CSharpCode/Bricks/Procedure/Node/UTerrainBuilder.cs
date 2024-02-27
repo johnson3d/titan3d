@@ -274,6 +274,22 @@ namespace EngineNS.Bricks.Procedure.Node
         {
             return true;
         }
+        public Terrain.CDLOD.UTerrainSystem.EShowMode ShowMode
+        {
+            get
+            {
+                if (PreviewTerrainNode == null)
+                    return Terrain.CDLOD.UTerrainSystem.EShowMode.Normal;
+                return PreviewTerrainNode.Terrain.ShowMode;
+            }
+            set
+            {
+                if (PreviewTerrainNode == null)
+                    return;
+                PreviewTerrainNode.Terrain.ShowMode = value;
+            }
+        }
+
         public unsafe override void OnPreviewDraw(in Vector2 prevStart, in Vector2 prevEnd, ImDrawList cmdlist)
         {
             //var ctrlPos = ParentGraph.CanvasToViewport(in prevStart);
@@ -335,9 +351,11 @@ namespace EngineNS.Bricks.Procedure.Node
                 await terrainNode.InitializeNode(viewport.World, terrainData, GamePlay.Scene.EBoundVolumeType.Box, typeof(GamePlay.UPlacement));
                 terrainNode.Parent = graph.GraphEditor.PreviewRoot;
                 terrainNode.Placement.Position = DVector3.Zero;
-                terrainNode.IsAcceptShadow = true;
+                terrainNode.IsCastShadow = false;
+                terrainNode.IsAcceptShadow = false;
                 terrainNode.SetActiveCenter(in DVector3.Zero);
                 PreviewTerrainNode = terrainNode;
+                PreviewTerrainNode.Terrain.ShowMode = Terrain.CDLOD.UTerrainSystem.EShowMode.Both;
             }
             else
             {

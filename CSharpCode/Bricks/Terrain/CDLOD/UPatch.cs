@@ -315,6 +315,14 @@ namespace EngineNS.Bricks.Terrain.CDLOD
             {
                 i.UpdateCameraOffset(world);
             }
+            foreach (var i in WireFrameTerrainMesh)
+            {
+                i.UpdateCameraOffset(world);
+            }
+            foreach (var i in WaterMesh)
+            {
+                i.UpdateCameraOffset(world);
+            }
         }
         public void OnGatherVisibleMeshes(GamePlay.UWorld.UVisParameter rp)
         {

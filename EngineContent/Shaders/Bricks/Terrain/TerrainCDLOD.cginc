@@ -101,7 +101,8 @@ float3 GetTerrrainVertexPosition(float2 uv, int uniqueTextureId = 0)
 
 float3 GetTerrrainVertexNormal(float2 uv, int uniqueTextureId)
 {
-    return SampleLevelRVT(Samp_NormalMapTexture, NormalMapTexture, uv, uniqueTextureId, 0).xyz;
+    float3 nor = SampleLevelRVT(Samp_NormalMapTexture, NormalMapTexture, uv, uniqueTextureId, 0).xyz;
+    return (nor - 0.5f) * 2.0f;
 }
 
 float4 GetMaterialId(float2 uv, int uniqueTextureId)

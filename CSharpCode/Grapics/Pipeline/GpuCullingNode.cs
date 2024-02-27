@@ -96,14 +96,16 @@ namespace EngineNS.Graphics.Pipeline
 
         public static unsafe Hash64 MeshBatchHash(Mesh.UMaterialMesh.TtSubMaterialedMesh mesh, Bricks.Terrain.CDLOD.UTerrainMdfQueue mdfQueue)
         {
-            var data = stackalloc int[1 + mesh.Materials.Count + 1];
-            data[0] = mesh.Mesh.GetHashCode();
-            data[1] = mdfQueue.Patch.TerrainNode.GetHashCode();
+            var size = 2 + mesh.Materials.Count;
+            var data = stackalloc int[size];
+            int index = 0;
+            data[index++] = mesh.Mesh.GetHashCode();
+            data[index++] = mdfQueue.Patch.TerrainNode.GetHashCode();
             for (int i = 0; i < mesh.Materials.Count; i++)
             {
-                data[2 + i] = mesh.Materials[i].GetHashCode();
+                data[index++] = mesh.Materials[i].GetHashCode();//mesh.Materials[i].AssetName.GetHashCode();// 
             }
-            return Hash64.FromData((byte*)data, sizeof(int) * (1 + mesh.Materials.Count));
+            return Hash64.FromData((byte*)data, sizeof(int) * size);
         }
     }
     public class TtGpuCullingNode : TtRenderGraphNode

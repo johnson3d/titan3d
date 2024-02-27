@@ -124,6 +124,8 @@ namespace EngineNS
         /// </summary>
         public float Y;
 
+        public float U { get => X; set => X = value; }
+        public float V { get => Y; set => Y = value; }
         public float Width
         {
             get => X;

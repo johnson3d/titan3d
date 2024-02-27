@@ -1,92 +1,94 @@
-namespace EngineNS.Bricks.Procedure.Algorithm
+using NPOI.Util;
+
+namespace EngineNS.Bricks.Procedure.Node
 {
-    public class ErosionNode
+    //https://zhuanlan.zhihu.com/p/434435957
+    //https://github.com/bshishov/UnityTerrainErosionGPU?tab=readme-ov-file
+    [Bricks.CodeBuilder.ContextMenu("Erosion", "Float1\\Erosion", UPgcGraph.PgcEditorKeyword)]
+    public class TtErosionNode : Node.UAnyTypeMonocular
     {
-        private static float init_speed = 1;
-        private static float init_water = 1;
-        private static int max_life = 30; 
-        private static float inertia = 0.05f;
-        private static float sediment_capacity_factor = 4;
-        private static float min_sediment_capacity = 0.01f;
-        private static float deposit_speed = 0.3f, erode_speed = 0.4f, evaporate_speed = 0.01f;
-        private static float gravity = 4;
-        private static void calculate_height(
-            float[] map, 
-            int width, 
-            float x, 
-            float y, 
-            out float height)
+        [Rtti.Meta]
+        public int DropNum { get; set; } = 100;
+        [Rtti.Meta]
+        public float init_speed { get; set; } = 1;
+        [Rtti.Meta]
+        public float init_water { get; set; } = 1;
+        [Rtti.Meta]
+        public int max_life { get; set; } = 30;
+        [Rtti.Meta]
+        public float inertia { get; set; } = 0.05f;
+        [Rtti.Meta]
+        public float sediment_capacity_factor { get; set; } = 4;
+        [Rtti.Meta]
+        public float min_sediment_capacity { get; set; } = 0.01f;
+        [Rtti.Meta]
+        public float deposit_speed { get; set; } = 0.3f;
+        [Rtti.Meta]
+        public float erode_speed { get; set; } = 0.4f;
+        [Rtti.Meta]
+        public float evaporate_speed { get; set; } = 0.01f;
+        [Rtti.Meta]
+        public float gravity { get; set; } = 4;
+        int mSeed = (int)Support.Time.GetTickCount();
+        [Rtti.Meta]
+        public int Seed
         {
-            int i = (int) x,
-                j = (int) y;
-            int index = i + j * width;
-            float u = x - i;
-            float v = y - j;
-            float h1 = map[index];
-            float h2 = map[index + 1];
-            float h3 = map[index + width];
-            float h4 = map[index + width + 1];
-            height = h1 * (1 - u) * (1 - v) + h2 * u * (1 - v) + h3 * (1 - u) * v + h4 * u * v;
-        }
-        private static void calculate_height_and_gradient(
-            float[] map, 
-            int width, 
-            int index,
-            float u, 
-            float v, 
-            out float height, 
-            out float grad_x, 
-            out float grad_y)
-        {
-            float h1 = map[index];
-            float h2 = map[index + 1];
-            float h3 = map[index + width];
-            float h4 = map[index + width + 1];
-            // gradient
-            grad_x = (h2 - h1) * (1 - v) + (h4 - h3) * v;
-            grad_y = (h3 - h1) * (1 - u) + (h4 - h2) * u;
-            // height
-            height = h1 * (1 - u) * (1 - v) + h2 * u * (1 - v) + h3 * (1 - u) * v + h4 * u * v;
-        }
-        /// <summary>
-        /// Hydraulic erosion simulation
-        /// </summary>
-        /// <param name="map">高度图数组</param>
-        /// <param name="width">高度图边长</param>
-        /// <param name="iterations">模拟次数</param>
-        public static void erode(float[] map, int width, int iterations)
-        {
-            while (iterations --> 0)
+            get => mSeed;
+            set
             {
-                float pos_x = MathHelper.RandomRange(0, width - 1);
-                float pos_y = MathHelper.RandomRange(0, width - 1);
-                float dir_x = 0, dir_y = 0;
+                mSeed = value;
+            }
+        }
+        public unsafe override bool OnProcedure(UPgcGraph graph)
+        {
+            var Input = graph.BufferCache.FindBuffer(SrcPin);
+            var Output = graph.BufferCache.FindBuffer(ResultPin);
+
+            var rnd = new Support.URandom(Seed);
+            for (int i = 0; i < Input.Width; i++)
+            {
+                for (int j = 0; j < Input.Height; j++)
+                {
+                    var src = Input.GetPixel<float>(i, j);
+                    Output.SetPixel(i, j, src);
+                }
+            }
+
+            int step = DropNum;
+            while (step-- > 0)
+            {
+                Vector2 pos = new Vector2();
+                pos.X = rnd.GetRange(0, Input.Width - 1);
+                pos.Y = rnd.GetRange(0, Input.Height - 1);
+                Vector2 dir = Vector2.Zero;
                 float speed = init_speed;
                 float water = init_water;
                 float sediment = 0;
                 for (int life = 0; life < max_life; life++)
                 {
-                    int grid_x = (int) pos_x;
-                    int grid_y = (int) pos_y;
-                    int grid_index = grid_x + grid_y * width;
-                    float offset_x = pos_x - grid_x;
-                    float offset_y = pos_y - grid_y;
+                    int grid_x = (int) pos.X;
+                    int grid_y = (int) pos.Y;
+                    Vector2 uv = new Vector2();
+                    float offset_x = pos.X - grid_x;
+                    float offset_y = pos.Y - grid_y;
+                    uv.U = offset_x;
+                    uv.V = offset_y;
                     // Calculate Height and Gradient
-                    float height, grad_x, grad_y;
-                    calculate_height_and_gradient(map, width, grid_index, offset_x, offset_y, out height, out grad_x, out grad_y);
+                    var uvh = Output.GetGradAndHeight(grid_x, grid_y, 0, in uv);
+                    Vector2 grad = uvh.XY;
+                    float height = uvh.Z;
                     // Update direction and position
-                    dir_x = dir_x * inertia - grad_x * (1 - inertia);
-                    dir_y = dir_y * inertia - grad_y * (1 - inertia);
-                    float len = MathHelper.Sqrt(dir_x * dir_x + dir_y * dir_y);
-                    if (len != 0) {dir_x /= len; dir_y /= len;}
-                    pos_x += dir_x;
-                    pos_y += dir_y;
+                    dir = dir * inertia - grad * (1 - inertia);
+                    dir.Normalize();
+                    pos += dir;
                     // Stop if not moving, or moving out of map
-                    if (dir_x == 0 && dir_y == 0) break;
-                    if (pos_x < 0 || pos_x >= width - 1 || pos_y < 0 || pos_y >= width - 1) break;
+                    if (dir.X == 0 && dir.Y == 0) 
+                        break;
+                    if (pos.X < 0 || pos.X >= Input.Width - 1 || pos.Y < 0 || pos.Y >= Input.Height - 1) 
+                        break;
                     // Calculate Change
                     float new_height, delta_height;
-                    calculate_height(map, width, pos_x, pos_y, out new_height);
+                    new_height = Output.GetHeight(pos.X, pos.Y);
                     delta_height = new_height - height;
                     // Calculate Sediment : if enough -> deposit, if lack -> erode
                     float sediment_capacity = MathHelper.Max(
@@ -96,26 +98,50 @@ namespace EngineNS.Bricks.Procedure.Algorithm
                     if (sediment > sediment_capacity || delta_height > 0)
                     {
                         float deposit = (delta_height > 0) ? MathHelper.Min(delta_height, sediment) : (sediment - sediment_capacity) * deposit_speed;
-                        map[grid_index] += deposit * (1 - offset_x) * (1 - offset_y);
-                        map[grid_index + 1] += deposit * offset_x * (1 - offset_y);
-                        map[grid_index + width] += deposit * (1 - offset_x) * offset_y;
-                        map[grid_index + width + 1] += deposit * offset_x * offset_y;
+                        var t = Output.GetFloat1(grid_x, grid_y, 0);
+                        Output.SetFloat1(grid_x, grid_y, 0, t + deposit * (1 - offset_x) * (1 - offset_y));
+                        t = Output.GetFloat1(grid_x + 1, grid_y, 0);
+                        Output.SetFloat1(grid_x + 1, grid_y, 0, t + deposit * offset_x * (1 - offset_y));
+                        t = Output.GetFloat1(grid_x, grid_y + 1, 0);
+                        Output.SetFloat1(grid_x, grid_y + 1, 0, t + deposit * (1 - offset_x) * offset_y);
+                        t = Output.GetFloat1(grid_x + 1, grid_y + 1, 0);
+                        Output.SetFloat1(grid_x + 1, grid_y + 1, 0, t + deposit * offset_x * offset_y);
+
+                        //map[grid_index] += deposit * (1 - offset_x) * (1 - offset_y);
+                        //map[grid_index + 1] += deposit * offset_x * (1 - offset_y);
+                        //map[grid_index + width] += deposit * (1 - offset_x) * offset_y;
+                        //map[grid_index + width + 1] += deposit * offset_x * offset_y;
                         sediment -= deposit;
                     }
                     else 
                     {
                         float erode = MathHelper.Min((sediment_capacity - sediment) * erode_speed, -delta_height);
-                        map[grid_index] -= erode * (1 - offset_x) * (1 - offset_y);
-                        map[grid_index + 1] -= erode * offset_x * (1 - offset_y);
-                        map[grid_index + width] -= erode * (1 - offset_x) * offset_y;
-                        map[grid_index + width + 1] -= erode * offset_x * offset_y;
+
+                        var t = Output.GetFloat1(grid_x, grid_y, 0);
+                        Output.SetFloat1(grid_x, grid_y, 0, t - erode * (1 - offset_x) * (1 - offset_y));
+                        t = Output.GetFloat1(grid_x + 1, grid_y, 0);
+                        Output.SetFloat1(grid_x + 1, grid_y, 0, t - erode * offset_x * (1 - offset_y));
+                        t = Output.GetFloat1(grid_x, grid_y + 1, 0);
+                        Output.SetFloat1(grid_x, grid_y + 1, 0, t - erode * (1 - offset_x) * offset_y);
+                        t = Output.GetFloat1(grid_x + 1, grid_y + 1, 0);
+                        Output.SetFloat1(grid_x + 1, grid_y + 1, 0, t - erode * offset_x * offset_y);
+
+                        //map[grid_index] -= erode * (1 - offset_x) * (1 - offset_y);
+                        //map[grid_index + 1] -= erode * offset_x * (1 - offset_y);
+                        //map[grid_index + width] -= erode * (1 - offset_x) * offset_y;
+                        //map[grid_index + width + 1] -= erode * offset_x * offset_y;
                         sediment += erode;
                     }
                     // Gravity and Evaporation
-                    speed = MathHelper.Sqrt(speed * speed + delta_height * gravity);
+                    if (delta_height < 0)
+                    {
+                        var sqSpeed = speed * speed - delta_height * gravity;
+                        speed = MathHelper.Sqrt(sqSpeed);
+                    }
                     water -= water * evaporate_speed;
                 }
             }
+            return true;
         }
     }
 }
