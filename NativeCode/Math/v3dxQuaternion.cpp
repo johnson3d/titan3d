@@ -80,12 +80,12 @@ void v3dxQuaternion::fromRotationMatrix (const v3dxMatrix3& kRot)
 	{
 		float sqrt = (float)(Math::Sqrt(((double)(scale + 1.0f))));
 
-		result.w = sqrt * 0.5f;
+		result.W = sqrt * 0.5f;
 		sqrt = 0.5f / sqrt;
 
-		result.x = (kRot.m23 - kRot.m32) * sqrt;
-		result.y = (kRot.m31 - kRot.m13) * sqrt;
-		result.z = (kRot.m12 - kRot.m21) * sqrt;
+		result.X = (kRot.m23 - kRot.m32) * sqrt;
+		result.Y = (kRot.m31 - kRot.m13) * sqrt;
+		result.Z = (kRot.m12 - kRot.m21) * sqrt;
 
 		return;
 	}
@@ -95,10 +95,10 @@ void v3dxQuaternion::fromRotationMatrix (const v3dxMatrix3& kRot)
 		float sqrt = (float)(Math::Sqrt((double)(1.0f + kRot.m11 - kRot.m22 - kRot.m33)));
 		float half = 0.5f / sqrt;
 
-		result.x = 0.5f * sqrt;
-		result.y = (kRot.m12 + kRot.m21) * half;
-		result.z = (kRot.m13 + kRot.m31) * half;
-		result.w = (kRot.m23 - kRot.m32) * half;
+		result.X = 0.5f * sqrt;
+		result.Y = (kRot.m12 + kRot.m21) * half;
+		result.Z = (kRot.m13 + kRot.m31) * half;
+		result.W = (kRot.m23 - kRot.m32) * half;
 
 		return;
 	}
@@ -108,10 +108,10 @@ void v3dxQuaternion::fromRotationMatrix (const v3dxMatrix3& kRot)
 		float sqrt = (float)(Math::Sqrt((double)(1.0f + kRot.m22 - kRot.m11 - kRot.m33)));
 		float half = 0.5f / sqrt;
 
-		result.x = (kRot.m21 + kRot.m12) * half;
-		result.y = 0.5f * sqrt;
-		result.z = (kRot.m32 + kRot.m23) * half;
-		result.w = (kRot.m31 - kRot.m13) * half;
+		result.X = (kRot.m21 + kRot.m12) * half;
+		result.Y = 0.5f * sqrt;
+		result.Z = (kRot.m32 + kRot.m23) * half;
+		result.W = (kRot.m31 - kRot.m13) * half;
 
 		return;
 	}
@@ -119,10 +119,10 @@ void v3dxQuaternion::fromRotationMatrix (const v3dxMatrix3& kRot)
 	float sqrt = (float)(Math::Sqrt((double)(1.0f + kRot.m33 - kRot.m11 - kRot.m22)));
 	float half = 0.5f / sqrt;
 
-	result.x = (kRot.m31 + kRot.m13) * half;
-	result.y = (kRot.m32 + kRot.m23) * half;
-	result.z = 0.5f * sqrt;
-	result.w = (kRot.m12 - kRot.m21) * half;
+	result.X = (kRot.m31 + kRot.m13) * half;
+	result.Y = (kRot.m32 + kRot.m23) * half;
+	result.Z = 0.5f * sqrt;
+	result.W = (kRot.m12 - kRot.m21) * half;
 }
 
 void v3dxQuaternion::fromRotationMatrix (const v3dxMatrix4& kRot)
@@ -138,12 +138,12 @@ void v3dxQuaternion::fromRotationMatrix (const v3dxMatrix4& kRot)
 	{
 		float sqrt = (float)( Math::Sqrt(( (double)(scale + 1.0f) ) ));
 
-		result.w = sqrt * 0.5f;
+		result.W = sqrt * 0.5f;
 		sqrt = 0.5f / sqrt;
 
-		result.x = (kRot.m23 - kRot.m32) * sqrt;
-		result.y = (kRot.m31 - kRot.m13) * sqrt;
-		result.z = (kRot.m12 - kRot.m21) * sqrt;
+		result.X = (kRot.m23 - kRot.m32) * sqrt;
+		result.Y = (kRot.m31 - kRot.m13) * sqrt;
+		result.Z = (kRot.m12 - kRot.m21) * sqrt;
 
 		return;
 	}
@@ -153,10 +153,10 @@ void v3dxQuaternion::fromRotationMatrix (const v3dxMatrix4& kRot)
 		float sqrt = (float)( Math::Sqrt( (double)(1.0f + kRot.m11 - kRot.m22 - kRot.m33) ) );
 		float half = 0.5f / sqrt;
 
-		result.x = 0.5f * sqrt;
-		result.y = (kRot.m12 + kRot.m21) * half;
-		result.z = (kRot.m13 + kRot.m31) * half;
-		result.w = (kRot.m23 - kRot.m32) * half;
+		result.X = 0.5f * sqrt;
+		result.Y = (kRot.m12 + kRot.m21) * half;
+		result.Z = (kRot.m13 + kRot.m31) * half;
+		result.W = (kRot.m23 - kRot.m32) * half;
 
 		return ;
 	}
@@ -166,10 +166,10 @@ void v3dxQuaternion::fromRotationMatrix (const v3dxMatrix4& kRot)
 		float sqrt = (float)( Math::Sqrt( (double)(1.0f + kRot.m22 - kRot.m11 - kRot.m33) ) );
 		float half = 0.5f / sqrt;
 
-		result.x = (kRot.m21 + kRot.m12) * half;
-		result.y = 0.5f * sqrt;
-		result.z = (kRot.m32 + kRot.m23) * half;
-		result.w = (kRot.m31 - kRot.m13) * half;
+		result.X = (kRot.m21 + kRot.m12) * half;
+		result.Y = 0.5f * sqrt;
+		result.Z = (kRot.m32 + kRot.m23) * half;
+		result.W = (kRot.m31 - kRot.m13) * half;
 
 		return ;
 	}
@@ -177,10 +177,10 @@ void v3dxQuaternion::fromRotationMatrix (const v3dxMatrix4& kRot)
 	float sqrt = (float)( Math::Sqrt( (double)(1.0f + kRot.m33 - kRot.m11 - kRot.m22) ) );
 	float half = 0.5f / sqrt;
 
-	result.x = (kRot.m31 + kRot.m13) * half;
-	result.y = (kRot.m32 + kRot.m23) * half;
-	result.z = 0.5f * sqrt;
-	result.w = (kRot.m12 - kRot.m21) * half;
+	result.X = (kRot.m31 + kRot.m13) * half;
+	result.Y = (kRot.m32 + kRot.m23) * half;
+	result.Z = 0.5f * sqrt;
+	result.W = (kRot.m12 - kRot.m21) * half;
 
 	// Algorithm in Ken Shoemake's article in 1987 SIGGRAPH course notes
 	// article "Quaternion Calculus and Fast Animation".
@@ -261,12 +261,12 @@ void v3dxQuaternion::fromRotationDMatrix(const v3dDMatrix4_t& kRot)
 	{
 		auto sqrt = Math::D_Sqrt(scale + 1.0);
 
-		result.w = sqrt * 0.5;
+		result.W = sqrt * 0.5;
 		sqrt = 0.5 / sqrt;
 
-		result.x = (kRot.m23 - kRot.m32) * sqrt;
-		result.y = (kRot.m31 - kRot.m13) * sqrt;
-		result.z = (kRot.m12 - kRot.m21) * sqrt;
+		result.X = (kRot.m23 - kRot.m32) * sqrt;
+		result.Y = (kRot.m31 - kRot.m13) * sqrt;
+		result.Z = (kRot.m12 - kRot.m21) * sqrt;
 
 		return;
 	}
@@ -276,10 +276,10 @@ void v3dxQuaternion::fromRotationDMatrix(const v3dDMatrix4_t& kRot)
 		auto sqrt = Math::D_Sqrt(1.0 + kRot.m11 - kRot.m22 - kRot.m33);
 		auto half = 0.5 / sqrt;
 
-		result.x = 0.5 * sqrt;
-		result.y = (kRot.m12 + kRot.m21) * half;
-		result.z = (kRot.m13 + kRot.m31) * half;
-		result.w = (kRot.m23 - kRot.m32) * half;
+		result.X = 0.5 * sqrt;
+		result.Y = (kRot.m12 + kRot.m21) * half;
+		result.Z = (kRot.m13 + kRot.m31) * half;
+		result.W = (kRot.m23 - kRot.m32) * half;
 
 		return;
 	}
@@ -289,10 +289,10 @@ void v3dxQuaternion::fromRotationDMatrix(const v3dDMatrix4_t& kRot)
 		auto sqrt = Math::D_Sqrt(1.0 + kRot.m22 - kRot.m11 - kRot.m33);
 		auto half = 0.5 / sqrt;
 
-		result.x = (kRot.m21 + kRot.m12) * half;
-		result.y = 0.5f * sqrt;
-		result.z = (kRot.m32 + kRot.m23) * half;
-		result.w = (kRot.m31 - kRot.m13) * half;
+		result.X = (kRot.m21 + kRot.m12) * half;
+		result.Y = 0.5f * sqrt;
+		result.Z = (kRot.m32 + kRot.m23) * half;
+		result.W = (kRot.m31 - kRot.m13) * half;
 
 		return;
 	}
@@ -300,26 +300,26 @@ void v3dxQuaternion::fromRotationDMatrix(const v3dDMatrix4_t& kRot)
 	auto sqrt = Math::D_Sqrt(1.0 + kRot.m33 - kRot.m11 - kRot.m22);
 	auto half = 0.5 / sqrt;
 
-	result.x = (kRot.m31 + kRot.m13) * half;
-	result.y = (kRot.m32 + kRot.m23) * half;
-	result.z = 0.5f * sqrt;
-	result.w = (kRot.m12 - kRot.m21) * half;
+	result.X = (kRot.m31 + kRot.m13) * half;
+	result.Y = (kRot.m32 + kRot.m23) * half;
+	result.Z = 0.5f * sqrt;
+	result.W = (kRot.m12 - kRot.m21) * half;
 }
 
 void v3dxQuaternion::toRotationMatrix(v3dxMatrix3& Matrix3) const
 {
-	float fTx = 2.0f*x;
-	float fTy = 2.0f*y;
-	float fTz = 2.0f*z;
-	float fTwx = fTx*w;
-	float fTwy = fTy*w;
-	float fTwz = fTz*w;
-	float fTxx = fTx*x;
-	float fTxy = fTy*x;
-	float fTxz = fTz*x;
-	float fTyy = fTy*y;
-	float fTyz = fTz*y;
-	float fTzz = fTz*z;
+	float fTx = 2.0f*X;
+	float fTy = 2.0f*Y;
+	float fTz = 2.0f*Z;
+	float fTwx = fTx*W;
+	float fTwy = fTy*W;
+	float fTwz = fTz*W;
+	float fTxx = fTx*X;
+	float fTxy = fTy*X;
+	float fTxz = fTz*X;
+	float fTyy = fTy*Y;
+	float fTyz = fTz*Y;
+	float fTzz = fTz*Z;
 
 	Matrix3[0][0] = 1.0f - (fTyy + fTzz);
 	Matrix3[0][1] = fTxy + fTwz;
@@ -382,17 +382,17 @@ void v3dxQuaternion::toRotationMatrix(v3dxMatrix4& Matrix4) const
 {
 	v3dxMatrix3 kRot;
 
-	kRot[0][0] = xAxis.x;
-	kRot[1][0] = xAxis.y;
-	kRot[2][0] = xAxis.z;
+	kRot[0][0] = xAxis.X;
+	kRot[1][0] = xAxis.Y;
+	kRot[2][0] = xAxis.Z;
 
-	kRot[0][1] = yAxis.x;
-	kRot[1][1] = yAxis.y;
-	kRot[2][1] = yAxis.z;
+	kRot[0][1] = yAxis.X;
+	kRot[1][1] = yAxis.Y;
+	kRot[2][1] = yAxis.Z;
 
-	kRot[0][2] = zAxis.x;
-	kRot[1][2] = zAxis.y;
-	kRot[2][2] = zAxis.z;
+	kRot[0][2] = zAxis.X;
+	kRot[1][2] = zAxis.Y;
+	kRot[2][2] = zAxis.Z;
 
 	fromRotationMatrix(kRot);
 
@@ -476,45 +476,45 @@ void v3dxQuaternion::toRotationMatrix(v3dxMatrix4& Matrix4) const
 //-----------------------------------------------------------------------
  v3dxVector3 v3dxQuaternion::xAxis(void)
 {
-	float fTx  = 2.0*x;
-	float fTy  = 2.0*y;
-	float fTz  = 2.0*z;
-	float fTwy = fTy*w;
-	float fTwz = fTz*w;
-	float fTxy = fTy*x;
-	float fTxz = fTz*x;
-	float fTyy = fTy*y;
-	float fTzz = fTz*z;
+	float fTx  = 2.0*X;
+	float fTy  = 2.0*Y;
+	float fTz  = 2.0*Z;
+	float fTwy = fTy*W;
+	float fTwz = fTz*W;
+	float fTxy = fTy*X;
+	float fTxz = fTz*X;
+	float fTyy = fTy*Y;
+	float fTzz = fTz*Z;
 
 	return v3dxVector3(1.0-(fTyy+fTzz), fTxy+fTwz, fTxz-fTwy);
 }
 //-----------------------------------------------------------------------
  v3dxVector3 v3dxQuaternion::yAxis(void)
 {
-	float fTx  = 2.0*x;
-	float fTy  = 2.0*y;
-	float fTz  = 2.0*z;
-	float fTwx = fTx*w;
-	float fTwz = fTz*w;
-	float fTxx = fTx*x;
-	float fTxy = fTy*x;
-	float fTyz = fTz*y;
-	float fTzz = fTz*z;
+	float fTx  = 2.0*X;
+	float fTy  = 2.0*Y;
+	float fTz  = 2.0*Z;
+	float fTwx = fTx*W;
+	float fTwz = fTz*W;
+	float fTxx = fTx*X;
+	float fTxy = fTy*X;
+	float fTyz = fTz*Y;
+	float fTzz = fTz*Z;
 
 	return v3dxVector3(fTxy-fTwz, 1.0-(fTxx+fTzz), fTyz+fTwx);
 }
 //-----------------------------------------------------------------------
  v3dxVector3 v3dxQuaternion::zAxis(void)
 {
-	float fTx  = 2.0*x;
-	float fTy  = 2.0*y;
-	float fTz  = 2.0*z;
-	float fTwx = fTx*w;
-	float fTwy = fTy*w;
-	float fTxx = fTx*x;
-	float fTxz = fTz*x;
-	float fTyy = fTy*y;
-	float fTyz = fTz*y;
+	float fTx  = 2.0*X;
+	float fTy  = 2.0*Y;
+	float fTz  = 2.0*Z;
+	float fTwx = fTx*W;
+	float fTwy = fTy*W;
+	float fTxx = fTx*X;
+	float fTxz = fTz*X;
+	float fTyy = fTy*Y;
+	float fTyz = fTz*Y;
 
 	return v3dxVector3(fTxz+fTwy, fTyz-fTwx, 1.0-(fTxx+fTyy));
 }
@@ -526,24 +526,24 @@ void v3dxQuaternion::toRotationMatrix(v3dxMatrix4& Matrix4) const
 	// exp(q) = cos(A)+sin(A)*(x*i+y*j+z*k).  If sin(A) is near zero,
 	// use exp(q) = cos(A)+A*(x*i+y*j+z*k) since A/sin(A) has limit 1.
 
-	float fAngle = Math::Sqrt(x*x+y*y+z*z);
+	float fAngle = Math::Sqrt(X*X+Y*Y+Z*Z);
 	float fSin = Math::Sin(fAngle);
 
 	v3dxQuaternion kResult;
-	kResult.w = Math::Cos(fAngle);
+	kResult.W = Math::Cos(fAngle);
 
 	if ( Math::Abs(fSin) >= ms_fEpsilon )
 	{
 		float fCoeff = fSin/fAngle;
-		kResult.x = fCoeff*x;
-		kResult.y = fCoeff*y;
-		kResult.z = fCoeff*z;
+		kResult.X = fCoeff*X;
+		kResult.Y = fCoeff*Y;
+		kResult.Z = fCoeff*Z;
 	}
 	else
 	{
-		kResult.x = x;
-		kResult.y = y;
-		kResult.z = z;
+		kResult.X = X;
+		kResult.Y = Y;
+		kResult.Z = Z;
 	}
 
 	return kResult;
@@ -556,25 +556,25 @@ void v3dxQuaternion::toRotationMatrix(v3dxMatrix4& Matrix4) const
 	// sin(A)*(x*i+y*j+z*k) since sin(A)/A has limit 1.
 
 	v3dxQuaternion kResult;
-	kResult.w = 0.0;
+	kResult.W = 0.0;
 
-	if ( Math::Abs(w) < 1.0 )
+	if ( Math::Abs(W) < 1.0 )
 	{
-		float fAngle = Math::ACos(w);
+		float fAngle = Math::ACos(W);
 		float fSin = Math::Sin(fAngle);
 		if ( Math::Abs(fSin) >= ms_fEpsilon )
 		{
 			float fCoeff = fAngle/fSin;
-			kResult.x = fCoeff*x;
-			kResult.y = fCoeff*y;
-			kResult.z = fCoeff*z;
+			kResult.X = fCoeff*X;
+			kResult.Y = fCoeff*Y;
+			kResult.Z = fCoeff*Z;
 			return kResult;
 		}
 	}
 
-	kResult.x = x;
-	kResult.y = y;
-	kResult.z = z;
+	kResult.X = X;
+	kResult.Y = Y;
+	kResult.Z = Z;
 
 	return kResult;
 }
@@ -657,11 +657,11 @@ void v3dxQuaternion::toRotationMatrix(v3dxMatrix4& Matrix4) const
 
  v3dxQuaternion v3dxQuaternion::inverse() const
 {
-	float fNorm = w*w+x*x+y*y+z*z;
+	float fNorm = W*W+X*X+Y*Y+Z*Z;
 	if ( fNorm > 0.0f )
 	{
 		float fInvNorm = 1.0f/fNorm;
-		return v3dxQuaternion(-x*fInvNorm,-y*fInvNorm,-z*fInvNorm, w*fInvNorm);
+		return v3dxQuaternion(-X*fInvNorm,-Y*fInvNorm,-Z*fInvNorm, W*fInvNorm);
 	}
 	else
 	{
@@ -706,16 +706,16 @@ void v3dxQuaternion::toRotationMatrix(v3dxMatrix4& Matrix4) const
 
 	float fMagnitude = magnitude();
 
-	w /= fMagnitude;
-	x /= fMagnitude;
-	y /= fMagnitude;
-	z /= fMagnitude;
+	W /= fMagnitude;
+	X /= fMagnitude;
+	Y /= fMagnitude;
+	Z /= fMagnitude;
 
 	//limit v3dxQuaternion's element at range -1.0f ~ 1.-0f
-	vfxLimit(w, -1.0f, 1.0f);
-	vfxLimit(x, -1.0f, 1.0f);
-	vfxLimit(y, -1.0f, 1.0f);
-	vfxLimit(z, -1.0f, 1.0f);
+	vfxLimit(W, -1.0f, 1.0f);
+	vfxLimit(X, -1.0f, 1.0f);
+	vfxLimit(Y, -1.0f, 1.0f);
+	vfxLimit(Z, -1.0f, 1.0f);
 }
 
 //inline Vector3f RotateVectorByQuat(const Quaternionf& lhs, const Vector3f& rhs)
@@ -772,10 +772,10 @@ v3dxVector3 v3dxQuaternion::operator *(const v3dxVector3 &v3) const
 	if(bDefault)
 	{
 		v3dxVector3 uv, uuv; 
-		v3dxVector3 qvec(x, y, z);
+		v3dxVector3 qvec(X, Y, Z);
 		v3dxVec3Cross( &uv, &qvec, &v3 );
 		v3dxVec3Cross( &uuv, &qvec, &uv );
-		uv *= (2.0f * w); 
+		uv *= (2.0f * W); 
 		uuv *= 2.0f; 
 
 		return v3 + uv + uuv;

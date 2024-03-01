@@ -188,7 +188,7 @@ namespace Canvas
 				{
 					const v3dxVector2& Position = Poly.Vertices[i];
 					Canvas::FCanvasVertex vCanvas;
-					vCanvas.Pos = v3dxVector3(Position.x, Position.y, 0);
+					vCanvas.Pos = v3dxVector3(Position.X, Position.Y, 0);
 					vCanvas.UV = UvAlongPath && bHasUV ?
 						RemapUV(PathBds, BrushRect, Tiling, Poly.UVs[i]) :
 						RemapUV(Bounds, BrushRect, Tiling, Position);
@@ -211,7 +211,7 @@ namespace Canvas
 				for (UINT i = StartInd; i < EndInd; i++)
 				{
 					v3dxVector3& Pos = pCmd->mVertices[i].Pos;
-					Pos = v3dxVector4(Pos.x, Pos.y, 0, 1) * (*Matrix);
+					Pos = v3dxVector4(Pos.X, Pos.Y, 0, 1) * (*Matrix);
 				}
 			}
 		}
@@ -219,26 +219,26 @@ namespace Canvas
 		void FPath::MoveTo(const v3dxVector2& P)
 		{
 			CmdList.push_back(Cmd_MoveTo);
-			Params.push_back(P.x);
-			Params.push_back(P.y);
+			Params.push_back(P.X);
+			Params.push_back(P.Y);
 		}
 
 		void FPath::LineTo(const v3dxVector2& P)
 		{
 			CmdList.push_back(Cmd_LineTo);
-			Params.push_back(P.x);
-			Params.push_back(P.y);
+			Params.push_back(P.X);
+			Params.push_back(P.Y);
 		}
 
 		void FPath::CubicTo(const v3dxVector2& C0, const v3dxVector2& C1, const v3dxVector2& P1)
 		{
 			CmdList.push_back(Cmd_CubicTo);
-			Params.push_back(C0.x);
-			Params.push_back(C0.y);
-			Params.push_back(C1.x);
-			Params.push_back(C1.y);
-			Params.push_back(P1.x);
-			Params.push_back(P1.y);
+			Params.push_back(C0.X);
+			Params.push_back(C0.Y);
+			Params.push_back(C1.X);
+			Params.push_back(C1.Y);
+			Params.push_back(P1.X);
+			Params.push_back(P1.Y);
 		}
 
 		void FPath::ArcTo(const v3dxVector2& P, float Radius, bool IsCCW, bool IsSmall)
@@ -256,8 +256,8 @@ namespace Canvas
 				CmdList.push_back(Cmd_SCWArcTo);
 			else
 				CmdList.push_back(Cmd_LCWArcTo);
-			Params.push_back(P.x);
-			Params.push_back(P.y);
+			Params.push_back(P.X);
+			Params.push_back(P.Y);
 			Params.push_back(Rh);
 			Params.push_back(Rv);
 			Params.push_back(Rot);
@@ -273,25 +273,25 @@ namespace Canvas
 			if (Round < 1.e-6f)
 			{
 				MoveTo(Min);
-				LineTo(v3dxVector2(Max.x, Min.y));
+				LineTo(v3dxVector2(Max.X, Min.Y));
 				LineTo(Max);
-				LineTo(v3dxVector2(Min.x, Max.y));
+				LineTo(v3dxVector2(Min.X, Max.Y));
 				Close();
 			}
 			else
 			{
-				const float HalfWidth = (Max.x - Min.x) * 0.5f;
-				const float HalfHeight = (Max.y - Min.y) * 0.5f;
+				const float HalfWidth = (Max.X - Min.X) * 0.5f;
+				const float HalfHeight = (Max.Y - Min.Y) * 0.5f;
 				Round = std::min(HalfWidth, std::min(HalfHeight, Round));
-				MoveTo(v3dxVector2(Min.x + Round, Min.y));
-				LineTo(v3dxVector2(Max.x - Round, Min.y));
-				ArcTo(v3dxVector2(Max.x, Min.y + Round), Round);
-				LineTo(v3dxVector2(Max.x, Max.y - Round));
-				ArcTo(v3dxVector2(Max.x - Round, Max.y), Round);
-				LineTo(v3dxVector2(Min.x + Round, Max.y));
-				ArcTo(v3dxVector2(Min.x, Max.y - Round), Round);
-				LineTo(v3dxVector2(Min.x, Min.y + Round));
-				ArcTo(v3dxVector2(Min.x + Round, Min.y), Round);
+				MoveTo(v3dxVector2(Min.X + Round, Min.Y));
+				LineTo(v3dxVector2(Max.X - Round, Min.Y));
+				ArcTo(v3dxVector2(Max.X, Min.Y + Round), Round);
+				LineTo(v3dxVector2(Max.X, Max.Y - Round));
+				ArcTo(v3dxVector2(Max.X - Round, Max.Y), Round);
+				LineTo(v3dxVector2(Min.X + Round, Max.Y));
+				ArcTo(v3dxVector2(Min.X, Max.Y - Round), Round);
+				LineTo(v3dxVector2(Min.X, Min.Y + Round));
+				ArcTo(v3dxVector2(Min.X + Round, Min.Y), Round);
 				Close();
 			}
 		}
@@ -842,8 +842,8 @@ namespace Canvas
 				Points.push_back(FPathPoint(P1, Forward1, Distance, Point_End));
 			}
 #else
-			const float Rad0 = std::atan2(Radial0.y, Radial0.x);
-			const float Rad1 = std::atan2(Radial1.y, Radial1.x);
+			const float Rad0 = std::atan2(Radial0.Y, Radial0.X);
+			const float Rad1 = std::atan2(Radial1.Y, Radial1.X);
 			const float Delta = IsCCW
 				? (Rad0 < Rad1 ? Rad1 - Rad0 : FPathUtility::TWO_PI + Rad1 - Rad0)
 				: (Rad0 > Rad1 ? Rad1 - Rad0 : -FPathUtility::TWO_PI + Rad1 - Rad0);
@@ -947,8 +947,8 @@ namespace Canvas
 		{
 			v3dxVector2 C0, C1;
 			if (Rh < 1e-6f || Rv < 1e-6f ||
-				!findEllipses(Rh, Rv, Rot, P0.x, P0.y, P1.x, P1.y, 
-				&C0.x, &C0.y, &C1.x, &C1.y))
+				!findEllipses(Rh, Rv, Rot, P0.X, P0.Y, P1.X, P1.Y, 
+				&C0.X, &C0.Y, &C1.X, &C1.Y))
 			{
 				return LineToInternal(P0, P1, Distance, Group);
 			}
@@ -958,8 +958,8 @@ namespace Canvas
 			float tmp;
 			FPathUtility::SafeNormalize(L0, L0, tmp);
 			FPathUtility::SafeNormalize(L1, L1, tmp);
-			float Rad0 = std::atan2f(L0.y, L0.x);
-			float Rad1 = std::atan2f(L1.y, L1.x);
+			float Rad0 = std::atan2f(L0.Y, L0.X);
+			float Rad1 = std::atan2f(L1.Y, L1.X);
 			if (IsCCW)
 			{
 				if (Rad1 < Rad0)
@@ -995,14 +995,14 @@ namespace Canvas
 					P = P1;
 				else
 					P = v3dxVector2(
-						Center.x + Rh * CosRad * CosRot - Rv * SinRad * SinRot,
-						Center.y + Rh * CosRad * SinRot + Rv * SinRad * CosRot
+						Center.X + Rh * CosRad * CosRot - Rv * SinRad * SinRot,
+						Center.Y + Rh * CosRad * SinRot + Rv * SinRad * CosRot
 					);
 				
 				v3dxVector2 Radial(CosRad / Rh, SinRad / Rv);
 				Radial = v3dxVector2(
-					Radial.x * CosRot - Radial.y * SinRot,
-					Radial.x * SinRot + Radial.y * CosRot
+					Radial.X * CosRot - Radial.Y * SinRot,
+					Radial.X * SinRot + Radial.Y * CosRot
 				);
 				v3dxVector2 Forward = -FPathUtility::GetRight(FPathUtility::Normalize(Radial));
 				if (!IsCCW)
@@ -1126,8 +1126,8 @@ namespace Canvas
 			}
 			Poly.Vertices.push_back(Pos0 + Radial1 * HalfWidth);
 #else
-			const float Rad0 = std::atan2(Radial0.y, Radial0.x);
-			const float Rad1 = std::atan2(Radial1.y, Radial1.x);
+			const float Rad0 = std::atan2(Radial0.Y, Radial0.X);
+			const float Rad1 = std::atan2(Radial1.Y, Radial1.X);
 			const float Delta = IsCCW
 				? (Rad0 < Rad1 ? Rad1 - Rad0 : FPathUtility::TWO_PI + Rad1 - Rad0)
 				: (Rad0 > Rad1 ? Rad1 - Rad0 : -FPathUtility::TWO_PI + Rad1 - Rad0);
@@ -1271,7 +1271,7 @@ namespace Canvas
 					}
 				}
 #else
-				const float sRad = std::atan2(Right.y, Right.x);
+				const float sRad = std::atan2(Right.Y, Right.X);
 				const UINT NumSub = (UINT)std::ceil(FPathUtility::PI / FArcLUT::DELTA);
 				const float Sub = FPathUtility::PI / NumSub;
 
@@ -1408,10 +1408,10 @@ namespace Canvas
 				for (const auto& Point : Points)
 				{
 					const auto& Pos = Point.Position;
-					MinX = std::min(MinX, Pos.x);
-					MaxX = std::max(MaxX, Pos.x);
-					MinY = std::min(MinY, Pos.y);
-					MaxY = std::max(MaxY, Pos.y);
+					MinX = std::min(MinX, Pos.X);
+					MaxX = std::max(MaxX, Pos.X);
+					MinY = std::min(MinY, Pos.Y);
+					MaxY = std::max(MaxY, Pos.Y);
 				}
 				Bounds = FRectanglef(MinX, MinY, MaxX - MinX, MaxY - MinY);
 			}
@@ -1462,8 +1462,8 @@ namespace Canvas
 			}
 
 			UV = v3dxVector2(
-				UV.x * InTiling.x - InTiling.z,
-				UV.y * InTiling.y - InTiling.w);
+				UV.X * InTiling.X - InTiling.Z,
+				UV.Y * InTiling.Y - InTiling.W);
 			return UV;
 		}
 	}

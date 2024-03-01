@@ -205,7 +205,7 @@ bool InputGeom::IsInWalkArea(const v3dxVector3& min, const v3dxVector3& max)
 
 	for (int i = 0; i < WalkDatas.size(); i+=2)
 	{
-		if (WalkDatas[i].x <= min.x && WalkDatas[i].y <= min.y && WalkDatas[i].z <= min.z && WalkDatas[i + 1].x >= max.x && WalkDatas[i + 1].y >= max.y && WalkDatas[i + 1].z >= max.z)
+		if (WalkDatas[i].X <= min.X && WalkDatas[i].Y <= min.Y && WalkDatas[i].Z <= min.Z && WalkDatas[i + 1].X >= max.X && WalkDatas[i + 1].Y >= max.Y && WalkDatas[i + 1].Z >= max.Z)
 			return true;
 	}
 
@@ -246,7 +246,7 @@ void InputGeom::CreateConvexVolumes(EAreaType areatype, IBlobObject* blob, const
 			for (int i = 0; i < m_nhull; ++i)
 				rcVcopy(&verts[i * 3], &m_pts[m_hull[i] * 3]);
 
-			float minh = min.y, maxh = max.y;
+			float minh = min.Y, maxh = max.Y;
 			//for (int i = 0; i < m_nhull; ++i)
 			//	minh = rcMin(minh, verts[i * 3 + 1]);
 			//minh -= m_boxDescent;
@@ -270,7 +270,7 @@ void InputGeom::CreateConvexVolumes(EAreaType areatype, IBlobObject* blob, const
 
 		if (areatype == Walk)
 		{
-			if (max.x > min.x && max.y > min.y && max.z > min.z)
+			if (max.X > min.X && max.Y > min.Y && max.Z > min.Z)
 			{
 				if (IsInWalkArea(min, max) == false)
 				{

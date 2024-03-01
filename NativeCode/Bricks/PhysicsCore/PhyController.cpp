@@ -160,9 +160,9 @@ EPhyControllerCollisionFlag PhyController::Move(const v3dxVector3* disp, float m
 void PhyController::SetPosition(const v3dxVector3* position)
 {
 	physx::PxExtendedVec3 vec;
-	vec.x = position->x;
-	vec.y = position->y;
-	vec.z = position->z;
+	vec.x = position->X;
+	vec.y = position->Y;
+	vec.z = position->Z;
 
 	auto pScene = mScene.GetPtr();
 	physx::PxSceneWriteLock Lock(*pScene->mScene);
@@ -173,17 +173,17 @@ v3dxVector3 PhyController::GetPosition()
 {
 	v3dxVector3 result;
 	const physx::PxExtendedVec3& vec = mController->getPosition();
-	result.x = (float)vec.x;
-	result.y = (float)vec.y;
-	result.z = (float)vec.z;
+	result.X = (float)vec.x;
+	result.Y = (float)vec.y;
+	result.Z = (float)vec.z;
 	return result;
 }
 void PhyController::SetFootPosition(const v3dxVector3* position)
 {
 	physx::PxExtendedVec3 vec;
-	vec.x = position->x;
-	vec.y = position->y;
-	vec.z = position->z;
+	vec.x = position->X;
+	vec.y = position->Y;
+	vec.z = position->Z;
 
 	auto pScene = mScene.GetPtr();
 	physx::PxSceneWriteLock Lock(*pScene->mScene);
@@ -194,9 +194,9 @@ v3dxVector3 PhyController::GetFootPosition()
 {
 	v3dxVector3 result;
 	const physx::PxExtendedVec3& vec = mController->getFootPosition();
-	result.x = (float)vec.x;
-	result.y = (float)vec.y;
-	result.z = (float)vec.z;
+	result.X = (float)vec.x;
+	result.Y = (float)vec.y;
+	result.Z = (float)vec.z;
 	return result;
 }
 float PhyController::GetContactOffset()

@@ -7,7 +7,7 @@ inline void v3dxMatrix4::makeTrans( const v3dxVector3& v )
 	m[0][0] = 1.0; m[0][1] = 0.0; m[0][2] = 0.0; m[0][3] = 0;
 	m[1][0] = 0.0; m[1][1] = 1.0; m[1][2] = 0.0; m[1][3] = 0;
 	m[2][0] = 0.0; m[2][1] = 0.0; m[2][2] = 1.0; m[2][3] = 0;
-	m[3][0] = v.x; m[3][1] = v.y; m[3][2] = v.z; m[3][3] = 1.0;
+	m[3][0] = v.X; m[3][1] = v.Y; m[3][2] = v.Z; m[3][3] = 1.0;
 }
 inline void v3dxMatrix4::makeTrans( float tx, float ty, float tz )
 {
@@ -44,7 +44,7 @@ inline v3dxMatrix4 v3dxMatrix4::getTrans( const v3dxVector3& v )
 	r.m[0][0] = 1.0; r.m[0][1] = 0.0; r.m[0][2] = 0.0; r.m[0][3] = 0.0;
 	r.m[1][0] = 0.0; r.m[1][1] = 1.0; r.m[1][2] = 0.0; r.m[1][3] = 0.0;
 	r.m[2][0] = 0.0; r.m[2][1] = 0.0; r.m[2][2] = 1.0; r.m[2][3] = 0.0;
-	r.m[3][0] = v.x; r.m[3][1] = v.y; r.m[3][2] = v.z; r.m[3][3] = 1.0;
+	r.m[3][0] = v.X; r.m[3][1] = v.Y; r.m[3][2] = v.Z; r.m[3][3] = 1.0;
 
 	return r;
 }
@@ -72,9 +72,9 @@ Scale Transformation
 */
 inline void v3dxMatrix4::setScale( const v3dxVector3& v )
 {
-	m[0][0] = v.x;
-	m[1][1] = v.y;
-	m[2][2] = v.z;
+	m[0][0] = v.X;
+	m[1][1] = v.Y;
+	m[2][2] = v.Z;
 }
 
 /** Gets a scale matrix.
@@ -82,9 +82,9 @@ inline void v3dxMatrix4::setScale( const v3dxVector3& v )
 inline v3dxMatrix4 v3dxMatrix4::getScale( const v3dxVector3& v )
 {
 	v3dxMatrix4 r;
-	r.m[0][0] = v.x; r.m[0][1] = 0.0; r.m[0][2] = 0.0; r.m[0][3] = 0.0;
-	r.m[1][0] = 0.0; r.m[1][1] = v.y; r.m[1][2] = 0.0; r.m[1][3] = 0.0;
-	r.m[2][0] = 0.0; r.m[2][1] = 0.0; r.m[2][2] = v.z; r.m[2][3] = 0.0;
+	r.m[0][0] = v.X; r.m[0][1] = 0.0; r.m[0][2] = 0.0; r.m[0][3] = 0.0;
+	r.m[1][0] = 0.0; r.m[1][1] = v.Y; r.m[1][2] = 0.0; r.m[1][3] = 0.0;
+	r.m[2][0] = 0.0; r.m[2][1] = 0.0; r.m[2][2] = v.Z; r.m[2][3] = 0.0;
 	r.m[3][0] = 0.0; r.m[3][1] = 0.0; r.m[3][2] = 0.0; r.m[3][3] = 1.0;
 
 	return r;
@@ -326,9 +326,9 @@ inline void v3dxMatrix4::setTrans(float x,float y,float z)
 
 inline void v3dxMatrix4::setTrans( const v3dxVector3 &v )
 {
-	m41 = v.x;
-	m42 = v.y;
-	m43 = v.z;
+	m41 = v.X;
+	m42 = v.Y;
+	m43 = v.Z;
 }
 
 inline v3dxVector3 v3dxMatrix4::getTrans() const
@@ -425,8 +425,8 @@ inline vBOOL v3dxMatrix4::ExtractionScale( v3dxVector3& vScale ) const
 	//vScale.x = sqrt(m11*m11 + m21*m21 + m31*m31); // getRow1().getLength();
 	//vScale.y = sqrt(m12*m12 + m22*m22 + m32*m32);
 	//vScale.z = sqrt(m13*m13 + m23*m23 + m33*m33);
-	vScale.x = sqrt(m11*m11 + m12*m12 + m13*m13); // getRow1().getLength();
-	vScale.y = sqrt(m21*m21 + m22*m22 + m23*m23);
-	vScale.z = sqrt(m31*m31 + m32*m32 + m33*m33);
+	vScale.X = sqrt(m11*m11 + m12*m12 + m13*m13); // getRow1().getLength();
+	vScale.Y = sqrt(m21*m21 + m22*m22 + m23*m23);
+	vScale.Z = sqrt(m31*m31 + m32*m32 + m33*m33);
 	return TRUE;
 }

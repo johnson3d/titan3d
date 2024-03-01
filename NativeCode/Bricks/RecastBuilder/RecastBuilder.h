@@ -53,7 +53,7 @@ protected:
 public:
 	bool IsEmptyBoundingBox()
 	{
-		if (mMinBox.x > mMaxBox.x || mMinBox.y > mMaxBox.y || mMinBox.z > mMaxBox.z)
+		if (mMinBox.X > mMaxBox.X || mMinBox.Y > mMaxBox.Y || mMinBox.Z > mMaxBox.Z)
 			return true;
 		return false;
 	}

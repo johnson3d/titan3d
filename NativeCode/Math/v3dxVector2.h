@@ -28,11 +28,11 @@ public:
 	v3dxVector2();
 	v3dxVector2(float v)
 	{
-		x = v; y = v;
+		X = v; Y = v;
 	}
 	v3dxVector2(float ix,float iy);
 	v3dxVector2(const v3dxVector2& v){
-		x = v.x; y = v.y;
+		X = v.X; Y = v.Y;
 	}
 	v3dxVector2(const v3dxVector3& v);
 
@@ -45,58 +45,58 @@ public:
 	void rotate (float angle);
 
 	v3dxVector2& operator+= (const v3dxVector2& v){ 
-		x += v.x;  y += v.y;  return *this; 
+		X += v.X;  Y += v.Y;  return *this; 
 	}
 	v3dxVector2& operator-= (const v3dxVector2& v){ 
-		x -= v.x;  y -= v.y;  return *this; 
+		X -= v.X;  Y -= v.Y;  return *this; 
 	}
 	v3dxVector2& operator*= (float f) { 
-		x *= f;  y *= f;  return *this; 
+		X *= f;  Y *= f;  return *this; 
 	}
 	v3dxVector2& operator/= (float f) {
-		x /= f;  y /= f;  return *this; 
+		X /= f;  Y /= f;  return *this; 
 	}
 
 	inline v3dxVector2 operator+ () const { 
-		return v3dxVector2(this->x,this->y); 
+		return v3dxVector2(this->X,this->Y); 
 	}
 	inline v3dxVector2 operator- () const { 
-		return v3dxVector2(-x,-y); 
+		return v3dxVector2(-X,-Y); 
 	}
 
 	friend inline v3dxVector2 operator+ (const v3dxVector2& v1, const v3dxVector2& v2){ 
-		return v3dxVector2(v1.x+v2.x, v1.y+v2.y); 
+		return v3dxVector2(v1.X+v2.X, v1.Y+v2.Y); 
 	}
 	friend inline v3dxVector2 operator- (const v3dxVector2& v1, const v3dxVector2& v2){ 
-		return v3dxVector2(v1.x-v2.x, v1.y-v2.y); 
+		return v3dxVector2(v1.X-v2.X, v1.Y-v2.Y); 
 	}
 	friend inline float operator* (const v3dxVector2& v1, const v3dxVector2& v2){ 
-		return v1.x*v2.x+v1.y*v2.y; 
+		return v1.X*v2.X+v1.Y*v2.Y; 
 	}
 
 	friend inline v3dxVector2 operator* (const v3dxVector2& v, float f){ 
-		return v3dxVector2(v.x*f,v.y*f); 
+		return v3dxVector2(v.X*f,v.Y*f); 
 	}
 	friend inline v3dxVector2 operator* (float f, const v3dxVector2& v){ 
-		return v3dxVector2(v.x*f,v.y*f); 
+		return v3dxVector2(v.X*f,v.Y*f); 
 	}
 	friend inline v3dxVector2 operator/ (const v3dxVector2& v, float f){ 
-		return v3dxVector2(v.x/f, v.y/f); 
+		return v3dxVector2(v.X/f, v.Y/f); 
 	}
 
 	friend inline bool operator == (const v3dxVector2& v1, const v3dxVector2& v2){ 
-		return (v1.x==v2.x) && (v1.y==v2.y); 
+		return (v1.X==v2.X) && (v1.Y==v2.Y); 
 	}
 	friend inline bool operator != (const v3dxVector2& v1, const v3dxVector2& v2){ 
-		return (v1.x!=v2.x) || (v1.y!=v2.y); 
+		return (v1.X!=v2.X) || (v1.Y!=v2.Y); 
 	}
 	inline bool Equals(const v3dxVector2& v, float epsilon = 0.00001f)
 	{
-		return std::abs(x - v.x) < epsilon &&  std::abs(y - v.y) < epsilon;
+		return std::abs(X - v.X) < epsilon &&  std::abs(Y - v.Y) < epsilon;
 	}
 	inline friend bool Equals(const v3dxVector2& v1, const v3dxVector2& v2, float epsilon = 0.00001f)
 	{
-		return  std::abs(v1.x - v2.x) < epsilon &&  std::abs(v1.y - v2.y) < epsilon;
+		return  std::abs(v1.X - v2.X) < epsilon &&  std::abs(v1.Y - v2.Y) < epsilon;
 	}
 	friend inline bool operator< (const v3dxVector2& v, float f){ 
 		return false;

@@ -62,47 +62,47 @@ public:
 	//vector包含
 	//v需要变换到本OBB的坐标空间中来
 	inline bool In( const v3dxVector3& v ){
-		if( v.x>m_vExtent.x || v.x<-m_vExtent.x ||
-			v.y>m_vExtent.y || v.y<-m_vExtent.y || 
-			v.z>m_vExtent.z || v.z<-m_vExtent.z )
+		if( v.X>m_vExtent.X || v.X<-m_vExtent.X ||
+			v.Y>m_vExtent.Y || v.Y<-m_vExtent.Y || 
+			v.Z>m_vExtent.Z || v.Z<-m_vExtent.Z )
 			return false;
 		return true;
 	}
 
 	inline v3dxPlane3 GetXPlane1() const{
-		return v3dxPlane3( -1.f , 0.f , 0.f , -m_vExtent.x );
+		return v3dxPlane3( -1.f , 0.f , 0.f , -m_vExtent.X );
 	}
 	inline v3dxPlane3 GetXPlane2() const{
-		return v3dxPlane3( 1.f , 0.f , 0.f , m_vExtent.x );
+		return v3dxPlane3( 1.f , 0.f , 0.f , m_vExtent.X );
 	}
 	inline v3dxPlane3 GetYPlane1() const{
-		return v3dxPlane3( 0.f , -1.f , 0.f , -m_vExtent.y );
+		return v3dxPlane3( 0.f , -1.f , 0.f , -m_vExtent.Y );
 	}
 	inline v3dxPlane3 GetYPlane2() const{
-		return v3dxPlane3( 0.f , 1.f , 0.f , m_vExtent.y );
+		return v3dxPlane3( 0.f , 1.f , 0.f , m_vExtent.Y );
 	}
 	inline v3dxPlane3 GetZPlane1() const{
-		return v3dxPlane3( 0.f , 0.f , -1.f , -m_vExtent.z );
+		return v3dxPlane3( 0.f , 0.f , -1.f , -m_vExtent.Z );
 	}
 	inline v3dxPlane3 GetZPlane2() const{
-		return v3dxPlane3( 0.f , 0.f , 1.f , m_vExtent.z );
+		return v3dxPlane3( 0.f , 0.f , 1.f , m_vExtent.Z );
 	}
 	inline v3dxVector3 GetCorner( int e ) const{
 		switch( e ){
 			case BOX3_CORNER_xyz:
-				return v3dxVector3(-m_vExtent.x,-m_vExtent.y,-m_vExtent.z);
+				return v3dxVector3(-m_vExtent.X,-m_vExtent.Y,-m_vExtent.Z);
 			case BOX3_CORNER_xyZ:
-				return v3dxVector3(-m_vExtent.x,-m_vExtent.y,m_vExtent.z);
+				return v3dxVector3(-m_vExtent.X,-m_vExtent.Y,m_vExtent.Z);
 			case BOX3_CORNER_xYz:
-				return v3dxVector3(-m_vExtent.x,m_vExtent.y,-m_vExtent.z);
+				return v3dxVector3(-m_vExtent.X,m_vExtent.Y,-m_vExtent.Z);
 			case BOX3_CORNER_xYZ:
-				return v3dxVector3(-m_vExtent.x,m_vExtent.y,m_vExtent.z);
+				return v3dxVector3(-m_vExtent.X,m_vExtent.Y,m_vExtent.Z);
 			case BOX3_CORNER_Xyz:
-				return v3dxVector3(m_vExtent.x,-m_vExtent.y,-m_vExtent.z);
+				return v3dxVector3(m_vExtent.X,-m_vExtent.Y,-m_vExtent.Z);
 			case BOX3_CORNER_XyZ:
-				return v3dxVector3(m_vExtent.x,-m_vExtent.y,m_vExtent.z);
+				return v3dxVector3(m_vExtent.X,-m_vExtent.Y,m_vExtent.Z);
 			case BOX3_CORNER_XYz:
-				return v3dxVector3(m_vExtent.x,m_vExtent.y,-m_vExtent.z);
+				return v3dxVector3(m_vExtent.X,m_vExtent.Y,-m_vExtent.Z);
 			case BOX3_CORNER_XYZ:
 				return m_vExtent;
 			default:

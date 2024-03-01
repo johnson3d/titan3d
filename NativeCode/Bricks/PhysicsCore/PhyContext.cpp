@@ -215,14 +215,14 @@ PhyScene* PhyContext::CreateScene(const PhySceneDesc* desc)
 PhyActor* PhyContext::CreateActor(EPhyActorType type, const v3dxVector3* p, const v3dxQuaternion* q)
 {
 	physx::PxTransform trf;
-	trf.p.x = p->x;
-	trf.p.y = p->y;
-	trf.p.z = p->z;
+	trf.p.x = p->X;
+	trf.p.y = p->Y;
+	trf.p.z = p->Z;
 
-	trf.q.x = q->x;
-	trf.q.y = q->y;
-	trf.q.z = q->z;
-	trf.q.w = q->w;
+	trf.q.x = q->X;
+	trf.q.y = q->Y;
+	trf.q.z = q->Z;
+	trf.q.w = q->W;
 
 	return CreateActor(type, &trf);
 }
@@ -300,7 +300,7 @@ PhyShape* PhyContext::CreateShapeBox(PhyMaterial* material, const v3dxVector3* h
 {
 	auto ret = new PhyShape();
 	ret->mType = PST_Box;	
-	ret->mShape = mContext->createShape(physx::PxBoxGeometry(halfExtent->x, halfExtent->y, halfExtent->z), *material->mMaterial, true,
+	ret->mShape = mContext->createShape(physx::PxBoxGeometry(halfExtent->X, halfExtent->Y, halfExtent->Z), *material->mMaterial, true,
 		physx::PxShapeFlag::eVISUALIZATION | physx::PxShapeFlag::eSIMULATION_SHAPE | physx::PxShapeFlag::eSCENE_QUERY_SHAPE);
 
 	if (ret->mShape == nullptr)

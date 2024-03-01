@@ -6,27 +6,27 @@
 // Construction/Destruction ======================================================
 inline v3dxQuaternion::v3dxQuaternion()
 {
-	w = 1.0f;
-	x = 0.0f;
-	y = 0.0f;
-	z = 0.0f;
+	W = 1.0f;
+	X = 0.0f;
+	Y = 0.0f;
+	Z = 0.0f;
 }
 
 inline v3dxQuaternion::v3dxQuaternion(float p_x, float p_y, float p_z, float p_w)
 {
-	w = p_w;
-	x = p_x;
-	y = p_y;
-	z = p_z;
+	W = p_w;
+	X = p_x;
+	Y = p_y;
+	Z = p_z;
 }
 
 //-----------------------------------------------------------------------
 inline v3dxQuaternion::v3dxQuaternion(const v3dxQuaternion& rkQ)
 {
-	w = rkQ.w;
-	x = rkQ.x;
-	y = rkQ.y;
-	z = rkQ.z;
+	W = rkQ.W;
+	X = rkQ.X;
+	Y = rkQ.Y;
+	Z = rkQ.Z;
 }
 
 inline v3dxQuaternion::v3dxQuaternion(v3dxVector3 v3, float fRadianAngle)
@@ -82,8 +82,8 @@ inline v3dxQuaternion::v3dxQuaternion(v3dxVector3 v3, float fRadianAngle)
 //-----------------------------------------------------------------------
 inline bool v3dxQuaternion::operator== (const v3dxQuaternion &rhs) const
 {
-	return (rhs.x == x) && (rhs.y == y) &&
-		(rhs.z == z) && (rhs.w == w);
+	return (rhs.X == X) && (rhs.Y == Y) &&
+		(rhs.Z == Z) && (rhs.W == W);
 }
 
 /*
@@ -107,38 +107,38 @@ z   =   az * sin(theta/2)
 inline v3dxQuaternion v3dxQuaternion::unitInverse() const
 {
 	// assert:  'this' is unit length
-	return v3dxQuaternion(w, -x, -y, -z);
+	return v3dxQuaternion(W, -X, -Y, -Z);
 }
 
 inline float v3dxQuaternion::dot(const v3dxQuaternion& rkQ) const
 {
-	return w * rkQ.w + x * rkQ.x + y * rkQ.y + z * rkQ.z;
+	return W * rkQ.W + X * rkQ.X + Y * rkQ.Y + Z * rkQ.Z;
 }
 //-----------------------------------------------------------------------
 inline v3dxQuaternion v3dxQuaternion::operator- () const
 {
-	return v3dxQuaternion(-x, -y, -z, -w);
+	return v3dxQuaternion(-X, -Y, -Z, -W);
 }
 //-----------------------------------------------------------------------
 inline v3dxQuaternion v3dxQuaternion::operator+ (const v3dxQuaternion& rkQ) const
 {
-	return v3dxQuaternion(x + rkQ.x, y + rkQ.y, z + rkQ.z, w + rkQ.w);
+	return v3dxQuaternion(X + rkQ.X, Y + rkQ.Y, Z + rkQ.Z, W + rkQ.W);
 }
 //-----------------------------------------------------------------------
 inline v3dxQuaternion v3dxQuaternion::operator- (const v3dxQuaternion& rkQ) const
 {
-	return v3dxQuaternion(x - rkQ.x, y - rkQ.y, z - rkQ.z, w - rkQ.w);
+	return v3dxQuaternion(X - rkQ.X, Y - rkQ.Y, Z - rkQ.Z, W - rkQ.W);
 }
 //-----------------------------------------------------------------------
 inline v3dxQuaternion v3dxQuaternion::operator* (float fScalar) const
 {
-	return v3dxQuaternion(fScalar*x, fScalar*y, fScalar*z, fScalar*w);
+	return v3dxQuaternion(fScalar*X, fScalar*Y, fScalar*Z, fScalar*W);
 }
 //-----------------------------------------------------------------------
 inline v3dxQuaternion operator* (float fScalar, const v3dxQuaternion& rkQ)
 {
-	return v3dxQuaternion(fScalar*rkQ.x, fScalar*rkQ.y,
-		fScalar*rkQ.z, fScalar*rkQ.w);
+	return v3dxQuaternion(fScalar*rkQ.X, fScalar*rkQ.Y,
+		fScalar*rkQ.Z, fScalar*rkQ.W);
 }
 
 
@@ -305,40 +305,40 @@ inline v3dxQuaternion::~v3dxQuaternion()
 // Basic Operations ==============================================================
 inline float& v3dxQuaternion::operator [] (int i)
 {
-	return *(&x + i);
+	return *(&X + i);
 }
 inline float v3dxQuaternion::operator [](int i) const
 {
-	return *(&x + i);
+	return *(&X + i);
 }
 
 inline void v3dxQuaternion::set(float p_w, float p_x, float p_y, float p_z)
 {
-	w = p_w;
-	x = p_x;
-	y = p_y;
-	z = p_z;
+	W = p_w;
+	X = p_x;
+	Y = p_y;
+	Z = p_z;
 }
 
 inline void v3dxQuaternion::identity()
 {
-	x = 0.0f;
-	y = 0.0f;
-	z = 0.0f;
-	w = 1.0f;
+	X = 0.0f;
+	Y = 0.0f;
+	Z = 0.0f;
+	W = 1.0f;
 }
 
 inline float v3dxQuaternion::norm() const
 {
-	return w * w + x * x + y * y + z * z;
+	return W * W + X * X + Y * Y + Z * Z;
 }
 
 inline v3dxQuaternion &v3dxQuaternion::operator =(const v3dxQuaternion& Quaternion)
 {
-	x = Quaternion[0];
-	y = Quaternion[1];
-	z = Quaternion[2];
-	w = Quaternion[3];
+	X = Quaternion[0];
+	Y = Quaternion[1];
+	Z = Quaternion[2];
+	W = Quaternion[3];
 	return *this;
 }
 
@@ -388,7 +388,7 @@ inline v3dxQuaternion* v3dxQuaternion::Multiply(const v3dxQuaternion* rhs)
 // ||Quanternion|| 
 inline float v3dxQuaternion::magnitude() const
 {
-	return (float)sqrt(w*w + x * x + y * y + z * z);
+	return (float)sqrt(W*W + X * X + Y * Y + Z * Z);
 }
 
 //inline  v3dxQuaternion operator + (const v3dxQuaternion & quat1,const v3dxQuaternion & quat2)

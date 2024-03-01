@@ -55,14 +55,14 @@ public:
 	bool AddToActor(PhyActor * actor, const v3dxVector3 * p, const v3dxQuaternion * q)
 	{
 		physx::PxTransform tm;
-		tm.p.x = p->x;
-		tm.p.y = p->y;
-		tm.p.z = p->z;
+		tm.p.x = p->X;
+		tm.p.y = p->Y;
+		tm.p.z = p->Z;
 
-		tm.q.x = q->x;
-		tm.q.y = q->y;
-		tm.q.z = q->z;
-		tm.q.w = q->w;
+		tm.q.x = q->X;
+		tm.q.y = q->Y;
+		tm.q.z = q->Z;
+		tm.q.w = q->W;
 
 		return AddToActor(actor, &tm) ? true : false;
 	}
@@ -71,14 +71,14 @@ public:
 	void SetLocalPose(const v3dxVector3* p, const v3dxQuaternion* q)
 	{
 		physx::PxTransform tm;
-		tm.p.x = p->x;
-		tm.p.y = p->y;
-		tm.p.z = p->z;
+		tm.p.x = p->X;
+		tm.p.y = p->Y;
+		tm.p.z = p->Z;
 
-		tm.q.x = q->x;
-		tm.q.y = q->y;
-		tm.q.z = q->z;
-		tm.q.w = q->w;
+		tm.q.x = q->X;
+		tm.q.y = q->Y;
+		tm.q.z = q->Z;
+		tm.q.w = q->W;
 		SetLocalPose(&tm);
 	}
 	void GetLocalPose(physx::PxTransform* relativePose);
@@ -86,14 +86,14 @@ public:
 	{
 		physx::PxTransform tm;
 		GetLocalPose(&tm);
-		p->x = tm.p.x;
-		p->y = tm.p.y;
-		p->z = tm.p.z;
+		p->X = tm.p.x;
+		p->Y = tm.p.y;
+		p->Z = tm.p.z;
 
-		q->x = tm.q.x;
-		q->y = tm.q.y;
-		q->z = tm.q.z;
-		q->w = tm.q.w;
+		q->X = tm.q.x;
+		q->Y = tm.q.y;
+		q->Z = tm.q.z;
+		q->W = tm.q.w;
 	}
 	void SetQueryFilterData(const PhyFilterData* filterData);
 	void SetSimulationFilterData(const PhyFilterData* filterData);

@@ -19,8 +19,8 @@ ICamera::ICamera()
 	mFov = V_PI / 2.0f;
 	mZNear = 0.1f;
 	mZFar = 500.0f;
-	mJitterOffset.x = 0.5f;
-	mJitterOffset.y = 0.5f;
+	mJitterOffset.X = 0.5f;
+	mJitterOffset.Y = 0.5f;
 	PerspectiveFovLH(mFov, 800.0f, 600.0f, mZNear, mZFar);
 	v3dxDVector3 eye(0, 10, -10);
 	v3dxDVector3 lookAt(0, 0, 0);
@@ -253,8 +253,8 @@ void ICamera::PerspectiveFovLH(float fov, float width, float height, float zMin,
 	v3dxMatrix4Perspective(&mLogicData->mProjectionMatrix, fov, mAspect, zMin, zMax);
 	mLogicData->mJitterProjectionMatrix = mLogicData->mProjectionMatrix;
 	auto jitterUV = GetJitterUV();
-	mLogicData->mJitterProjectionMatrix.m31 += jitterUV.x * 2.0f;
-	mLogicData->mJitterProjectionMatrix.m32 += jitterUV.y * 2.0f;
+	mLogicData->mJitterProjectionMatrix.m31 += jitterUV.X * 2.0f;
+	mLogicData->mJitterProjectionMatrix.m32 += jitterUV.Y * 2.0f;
 	v3dxMatrix4Inverse(&mLogicData->mProjectionInverse, &mLogicData->mProjectionMatrix, NULL);
 	v3dxMatrix4Inverse(&mLogicData->mJitterProjectionInverse, &mLogicData->mJitterProjectionMatrix, NULL);
 
@@ -366,15 +366,15 @@ vBOOL ICamera::GetPickRay(v3dxVector3* pvPickRay, float x, float y, float sw, fl
 	if (x<0 || x>sw || y<0 || y>sh)
 		return FALSE;
 	v3dVector3_t v;
-	v.x = (((2.0f * x) / sw) - 1) / mLogicData->mProjectionMatrix.m11;
-	v.y = -(((2.0f * y) / sh) - 1) / mLogicData->mProjectionMatrix.m22;
-	v.z = 1.0f;
+	v.X = (((2.0f * x) / sw) - 1) / mLogicData->mProjectionMatrix.m11;
+	v.Y = -(((2.0f * y) / sh) - 1) / mLogicData->mProjectionMatrix.m22;
+	v.Z = 1.0f;
 	//v3dxVector3 v = v3dxVector3( (((2.0f*x)/sw)-1), -(((2.0f*y)/sh)-1), 1.0f) * m_InvProjTM;
 
 	v3dxMatrix4& finaMatrix = mLogicData->mViewInverse;
-	pvPickRay->x = v.x*finaMatrix.m11 + v.y*finaMatrix.m21 + v.z*finaMatrix.m31;
-	pvPickRay->y = v.x*finaMatrix.m12 + v.y*finaMatrix.m22 + v.z*finaMatrix.m32;
-	pvPickRay->z = v.x*finaMatrix.m13 + v.y*finaMatrix.m23 + v.z*finaMatrix.m33;
+	pvPickRay->X = v.X*finaMatrix.m11 + v.Y*finaMatrix.m21 + v.Z*finaMatrix.m31;
+	pvPickRay->Y = v.X*finaMatrix.m12 + v.Y*finaMatrix.m22 + v.Z*finaMatrix.m32;
+	pvPickRay->Z = v.X*finaMatrix.m13 + v.Y*finaMatrix.m23 + v.Z*finaMatrix.m33;
 	pvPickRay->normalize();
 	return TRUE;
 }

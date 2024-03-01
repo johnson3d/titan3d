@@ -65,9 +65,9 @@ inline void v3dxMatrix3::setColumn(int nCol, const v3dxVector3& v3)
 {
 	if (nCol >= 3) return;
 
-	m[nCol][0] = v3.x;
-	m[nCol][1] = v3.y;
-	m[nCol][2] = v3.z;
+	m[nCol][0] = v3.X;
+	m[nCol][1] = v3.Y;
+	m[nCol][2] = v3.Z;
 }
 
 //*-------------------------------------------------------------*
@@ -185,9 +185,9 @@ inline v3dxVector3 v3dxMatrix3::operator *(const v3dxVector3& v3) const
 	for (int nRow = 0; nRow < 3; nRow++)
 	{
 		vector3[nRow] =
-			m[0][nRow]*v3.x +
-			m[1][nRow]*v3.y +
-			m[2][nRow]*v3.z;
+			m[0][nRow]*v3.X +
+			m[1][nRow]*v3.Y +
+			m[2][nRow]*v3.Z;
 	}
 	return vector3;	
 }

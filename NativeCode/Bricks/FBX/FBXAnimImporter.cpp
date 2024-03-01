@@ -275,11 +275,11 @@ namespace AssetImportAndExport
 							FBXKAnimKeyFrame key;
 							key.Time = time;
 
-							key.Value = lV.x;
+							key.Value = lV.X;
 							xCurve.Keys.push_back(key);
-							key.Value = lV.y;
+							key.Value = lV.Y;
 							yCurve.Keys.push_back(key);
-							key.Value = lV.z;
+							key.Value = lV.Z;
 							zCurve.Keys.push_back(key);
 
 							time += delta;

@@ -12,7 +12,7 @@
         EngineNS.Macross.UMacrossBreak breaker_return_484331367 = new EngineNS.Macross.UMacrossBreak("breaker_return_484331367");
         EngineNS.Macross.UMacrossStackFrame mFrame_OnPerPixel = new EngineNS.Macross.UMacrossStackFrame(EngineNS.RName.GetRName("utest/pgc/testprog.macross", EngineNS.RName.ERNameType.Game));
         [EngineNS.Rtti.Meta]
-        public override void OnPerPixel(EngineNS.Bricks.Procedure.UPgcGraph graph,EngineNS.Bricks.Procedure.Node.UProgramNode node,EngineNS.Bricks.Procedure.UBufferConponent resuilt,System.Int32 x,System.Int32 y,System.Int32 z,System.Object tag)
+        public override void OnPerPixel(EngineNS.Bricks.Procedure.UPgcGraph graph,EngineNS.Bricks.Procedure.Node.UProgramNode node,EngineNS.Bricks.Procedure.UBufferComponent resuilt,System.Int32 x,System.Int32 y,System.Int32 z,System.Object tag)
         {
             using(var guard_OnPerPixel = new EngineNS.Macross.UMacrossStackGuard(mFrame_OnPerPixel))
             {
@@ -44,7 +44,7 @@
                 System.Boolean ret_3421051548 = default(System.Boolean);
                 mFrame_OnProcedure.SetWatchVariable("graph", graph);
                 mFrame_OnProcedure.SetWatchVariable("node", node);
-                EngineNS.Bricks.Procedure.UBufferConponent tmp_r_FindBuffer_4158856752 = default(EngineNS.Bricks.Procedure.UBufferConponent);
+                EngineNS.Bricks.Procedure.UBufferComponent tmp_r_FindBuffer_4158856752 = default(EngineNS.Bricks.Procedure.UBufferComponent);
                 mFrame_OnProcedure.SetWatchVariable("v_name_FindBuffer_4158856752", "");
                 breaker_FindBuffer_4158856752.TryBreak();
                 tmp_r_FindBuffer_4158856752 = node.FindBuffer("");

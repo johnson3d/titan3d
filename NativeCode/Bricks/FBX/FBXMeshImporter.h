@@ -48,7 +48,7 @@ namespace AssetImportAndExport
 			/** Initialization constructor. */
 			IndexAndZ(int InIndex, v3dxVector3 V)
 			{
-				Z = 0.30f * V.x + 0.33f * V.y + 0.37f * V.z;
+				Z = 0.30f * V.X + 0.33f * V.Y + 0.37f * V.Z;
 				Index = InIndex;
 				OriginalVector = &V;
 			}
@@ -64,9 +64,9 @@ namespace AssetImportAndExport
 		*/
 		inline bool PointsEqual(const v3dxVector3& V1, const v3dxVector3& V2, float ComparisonThreshold)
 		{
-			if (Math::Abs(V1.x - V2.x) > ComparisonThreshold
-				|| Math::Abs(V1.y - V2.y) > ComparisonThreshold
-				|| Math::Abs(V1.z - V2.z) > ComparisonThreshold)
+			if (Math::Abs(V1.X - V2.X) > ComparisonThreshold
+				|| Math::Abs(V1.Y - V2.Y) > ComparisonThreshold
+				|| Math::Abs(V1.Z - V2.Z) > ComparisonThreshold)
 			{
 				return false;
 			}

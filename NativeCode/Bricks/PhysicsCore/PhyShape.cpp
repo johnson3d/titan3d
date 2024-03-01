@@ -201,18 +201,18 @@ bool PhyShape::IfGetBox(v3dxVector3* halfExtent)
 		physx::PxBoxGeometry geom;
 		if (false == mShape->getBoxGeometry(geom))
 			return false;
-		halfExtent->x = geom.halfExtents.x;
-		halfExtent->y = geom.halfExtents.y;
-		halfExtent->z = geom.halfExtents.z;
+		halfExtent->X = geom.halfExtents.x;
+		halfExtent->Y = geom.halfExtents.y;
+		halfExtent->Z = geom.halfExtents.z;
 	}
 	else
 	{
 		physx::PxBoxGeometry geom;
 		if (false == mShape->getBoxGeometry(geom))
 			return false;
-		halfExtent->x = geom.halfExtents.x;
-		halfExtent->y = geom.halfExtents.y;
-		halfExtent->z = geom.halfExtents.z;
+		halfExtent->X = geom.halfExtents.x;
+		halfExtent->Y = geom.halfExtents.y;
+		halfExtent->Z = geom.halfExtents.z;
 	}
 	return true;
 }
@@ -224,9 +224,9 @@ bool PhyShape::IfSetBox(const v3dxVector3* halfExtent)
 	if (mActor.IsValid() && mActor.GetPtr() && mActor.GetPtr()->mScene.GetPtr() != nullptr)
 	{
 		physx::PxBoxGeometry geom;
-		geom.halfExtents.x = halfExtent->x;
-		geom.halfExtents.y = halfExtent->y;
-		geom.halfExtents.z = halfExtent->z;
+		geom.halfExtents.x = halfExtent->X;
+		geom.halfExtents.y = halfExtent->Y;
+		geom.halfExtents.z = halfExtent->Z;
 
 		mShape->setGeometry(geom);
 

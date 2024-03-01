@@ -35,9 +35,9 @@ namespace NxPhysics
 
 		inline void ToVector3f(NxVector3f* pValue)
 		{
-			pValue->x = X.AsSingle();
-			pValue->y = Y.AsSingle();
-			pValue->z = Z.AsSingle();
+			pValue->X = X.AsSingle();
+			pValue->Y = Y.AsSingle();
+			pValue->Z = Z.AsSingle();
 		}
 		inline static PxVector3 Add(const PxVector3& lh, const PxVector3& rh)
 		{
@@ -68,10 +68,10 @@ namespace NxPhysics
 
 		inline void ToQuatf(NxQuatf* pValue)
 		{
-			pValue->x = X.AsSingle();
-			pValue->y = Y.AsSingle();
-			pValue->z = Z.AsSingle();
-			pValue->w = W.AsSingle();
+			pValue->X = X.AsSingle();
+			pValue->Y = Y.AsSingle();
+			pValue->Z = Z.AsSingle();
+			pValue->W = W.AsSingle();
 		}
 	};
 

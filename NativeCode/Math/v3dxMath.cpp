@@ -259,20 +259,20 @@ inline bool CompareApproximately(float f0, float f1, float epsilon = 0.000001F)
 
 inline void QuaternionToAxisAngle(const v3dxQuaternion& q, v3dxVector3* axis, float* targetAngle)
 {
-	*targetAngle = 2.0f* acos(q.w);
+	*targetAngle = 2.0f* acos(q.W);
 	if (CompareApproximately(*targetAngle, 0.0F))
 	{
 		*axis = v3dxVector3::UNIT_X;
 		return;
 	}
 
-	float div = 1.0f / sqrt(1.0f - Math::Sqr(q.w));
-	axis->setValue(q.x*div, q.y*div, q.z*div);
+	float div = 1.0f / sqrt(1.0f - Math::Sqr(q.W));
+	axis->setValue(q.X*div, q.Y*div, q.Z*div);
 }
 
 inline float Dot(const v3dxQuaternion& q1, const v3dxQuaternion& q2)
 {
-	return (q1.x*q2.x + q1.y*q2.y + q1.z*q2.z + q1.w*q2.w);
+	return (q1.X*q2.X + q1.Y*q2.Y + q1.Z*q2.Z + q1.W*q2.W);
 }
 
 inline float SqrMagnitude(const v3dxQuaternion& q)
@@ -472,55 +472,55 @@ extern "C"
 		v3dxVec3Sub( &v1 , b , a );
 		v3dVector3_t v2;
 		v3dxVec3Sub( &v2 , c , a );
-		return ((v1.y * v2.z + v1.z * v2.x + v1.x * v2.y) -
-				(v1.y * v2.x + v1.x * v2.z + v1.z * v2.y));
+		return ((v1.Y * v2.Z + v1.Z * v2.X + v1.X * v2.Y) -
+				(v1.Y * v2.X + v1.X * v2.Z + v1.Z * v2.Y));
 	}
 
 	VFX_API float v3dxCalAngleXZ(const v3dVector3_t* vect)
 	{
 		v3dVector2_t vtProjection;
-		vtProjection.x=vect->x;
-		vtProjection.y=vect->z;
+		vtProjection.X=vect->X;
+		vtProjection.Y=vect->Z;
 		v3dxVec2Normalize(&vtProjection,&vtProjection);
-		if(vect->z>0.0f)
+		if(vect->Z>0.0f)
 		{
-			return acosf(vtProjection.x);
+			return acosf(vtProjection.X);
 		}
 		else
 		{
-			return 2*V_PI-acosf(vtProjection.x);
+			return 2*V_PI-acosf(vtProjection.X);
 		}
 	}
 
 	VFX_API float CalAngleYZ(const v3dVector3_t* vect)
 	{
 		v3dVector2_t vtProjection;
-		vtProjection.x=vect->y;
-		vtProjection.y=-vect->z;
+		vtProjection.X=vect->Y;
+		vtProjection.Y=-vect->Z;
 		v3dxVec2Normalize(&vtProjection,&vtProjection);
-		if(vect->z<0.0f)
+		if(vect->Z<0.0f)
 		{
-			return acosf(vtProjection.x);
+			return acosf(vtProjection.X);
 		}
 		else
 		{
-			return 2*V_PI-acosf(vtProjection.x);
+			return 2*V_PI-acosf(vtProjection.X);
 		}
 	}
 
 	VFX_API float CalAngleXY(const v3dVector3_t* vect)
 	{
 		v3dVector2_t vtProjection;
-		vtProjection.x=vect->y;
-		vtProjection.y=-vect->x;
+		vtProjection.X=vect->Y;
+		vtProjection.Y=-vect->X;
 		v3dxVec2Normalize(&vtProjection,&vtProjection);
-		if(vect->x<0.0f)
+		if(vect->X<0.0f)
 		{
-			return acosf(vtProjection.x);
+			return acosf(vtProjection.X);
 		}
 		else
 		{
-			return 2*V_PI-acosf(vtProjection.x);
+			return 2*V_PI-acosf(vtProjection.X);
 		}
 	}
 
@@ -531,8 +531,8 @@ extern "C"
 		v3dxVec3Sub( &v1 , b , a );
 		v3dxVector3 v2;
 		v3dxVec3Sub( &v2 , c , a );
-		return ((v1.y * v2.z + v1.z * v2.x + v1.x * v2.y) -
-				(v1.y * v2.x + v1.x * v2.z + v1.z * v2.y));
+		return ((v1.Y * v2.Z + v1.Z * v2.X + v1.X * v2.Y) -
+				(v1.Y * v2.X + v1.X * v2.Z + v1.Z * v2.Y));
 	}
 
 	VFX_API vBOOL v3dxLineIntersectPlane(
@@ -607,12 +607,12 @@ extern "C"
 		}
 
 		// Do fast reject.
-		if (pLineBox->Min().x > pTriBox->Max().x
-			|| pLineBox->Min().y > pTriBox->Max().y
-			|| pLineBox->Min().z > pTriBox->Max().z
-			|| pLineBox->Max().x < pTriBox->Min().x
-			|| pLineBox->Max().y < pTriBox->Min().y
-			|| pLineBox->Max().z < pTriBox->Min().z)
+		if (pLineBox->Min().X > pTriBox->Max().X
+			|| pLineBox->Min().Y > pTriBox->Max().Y
+			|| pLineBox->Min().Z > pTriBox->Max().Z
+			|| pLineBox->Max().X < pTriBox->Min().X
+			|| pLineBox->Max().Y < pTriBox->Min().Y
+			|| pLineBox->Max().Z < pTriBox->Min().Z)
 			return FALSE;
 
 		// Generate normal if not inputed.
@@ -651,9 +651,9 @@ extern "C"
 		enum {PROJECT_X, PROJECT_Y, PROJECT_Z} enProjDir;
 	
 		float sx, sy, sz;
-		sx = vAB.y*vBC.z - vAB.z*vBC.y;
-		sy = vAB.x*vBC.z - vAB.z*vBC.x;
-		sz = vAB.x*vBC.y - vAB.y*vBC.x;
+		sx = vAB.Y*vBC.Z - vAB.Z*vBC.Y;
+		sy = vAB.X*vBC.Z - vAB.Z*vBC.X;
+		sz = vAB.X*vBC.Y - vAB.Y*vBC.X;
 		sx = sx < 0.f ? -sx : sx;
 		sy = sy < 0.f ? -sy : sy;
 		sz = sz < 0.f ? -sz : sz;
@@ -669,19 +669,19 @@ extern "C"
 		switch(enProjDir)
 		{
 		case PROJECT_Z:
-			x0 = pvA->x - pvPoint->x; y0 = pvA->y - pvPoint->y;
-			x1 = pvB->x - pvPoint->x; y1 = pvB->y - pvPoint->y;
-			x2 = pvC->x - pvPoint->x; y2 = pvC->y - pvPoint->y;
+			x0 = pvA->X - pvPoint->X; y0 = pvA->Y - pvPoint->Y;
+			x1 = pvB->X - pvPoint->X; y1 = pvB->Y - pvPoint->Y;
+			x2 = pvC->X - pvPoint->X; y2 = pvC->Y - pvPoint->Y;
 			break;
 		case PROJECT_X:
-			x0 = pvA->z - pvPoint->z; y0 = pvA->y - pvPoint->y;
-			x1 = pvB->z - pvPoint->z; y1 = pvB->y - pvPoint->y;
-			x2 = pvC->z - pvPoint->z; y2 = pvC->y - pvPoint->y;
+			x0 = pvA->Z - pvPoint->Z; y0 = pvA->Y - pvPoint->Y;
+			x1 = pvB->Z - pvPoint->Z; y1 = pvB->Y - pvPoint->Y;
+			x2 = pvC->Z - pvPoint->Z; y2 = pvC->Y - pvPoint->Y;
 			break;
 		default: // case PROJECT_Y:
-			y0 = pvA->x - pvPoint->x; x0 = pvA->z - pvPoint->z;
-			y1 = pvB->x - pvPoint->x; x1 = pvB->z - pvPoint->z;
-			y2 = pvC->x - pvPoint->x; x2 = pvC->z - pvPoint->z;
+			y0 = pvA->X - pvPoint->X; x0 = pvA->Z - pvPoint->Z;
+			y1 = pvB->X - pvPoint->X; x1 = pvB->Z - pvPoint->Z;
+			y2 = pvC->X - pvPoint->X; x2 = pvC->Z - pvPoint->Z;
 		}
 	
 		float t1, t2, t3;
@@ -725,12 +725,12 @@ extern "C"
 		}
 
 		// Do fast reject.
-		if (pLineBox->Min().x > pTriBox->Max().x
-			|| pLineBox->Min().y > pTriBox->Max().y
-			|| pLineBox->Min().z > pTriBox->Max().z
-			|| pLineBox->Max().x < pTriBox->Min().x
-			|| pLineBox->Max().y < pTriBox->Min().y
-			|| pLineBox->Max().z < pTriBox->Min().z)
+		if (pLineBox->Min().X > pTriBox->Max().X
+			|| pLineBox->Min().Y > pTriBox->Max().Y
+			|| pLineBox->Min().Z > pTriBox->Max().Z
+			|| pLineBox->Max().X < pTriBox->Min().X
+			|| pLineBox->Max().Y < pTriBox->Min().Y
+			|| pLineBox->Max().Z < pTriBox->Min().Z)
 			return FALSE;
 
 		// Generate normal if not inputed.
@@ -770,9 +770,9 @@ extern "C"
 		enum {PROJECT_X, PROJECT_Y, PROJECT_Z} enProjDir;
 
 		float sx, sy, sz;
-		sx = vAB.y*vBC.z - vAB.z*vBC.y;
-		sy = vAB.x*vBC.z - vAB.z*vBC.x;
-		sz = vAB.x*vBC.y - vAB.y*vBC.x;
+		sx = vAB.Y*vBC.Z - vAB.Z*vBC.Y;
+		sy = vAB.X*vBC.Z - vAB.Z*vBC.X;
+		sz = vAB.X*vBC.Y - vAB.Y*vBC.X;
 		sx = sx < 0.f ? -sx : sx;
 		sy = sy < 0.f ? -sy : sy;
 		sz = sz < 0.f ? -sz : sz;
@@ -788,19 +788,19 @@ extern "C"
 		switch(enProjDir)
 		{
 		case PROJECT_Z:
-			x0 = pvA->x - pvPoint->x; y0 = pvA->y - pvPoint->y;
-			x1 = pvB->x - pvPoint->x; y1 = pvB->y - pvPoint->y;
-			x2 = pvC->x - pvPoint->x; y2 = pvC->y - pvPoint->y;
+			x0 = pvA->X - pvPoint->X; y0 = pvA->Y - pvPoint->Y;
+			x1 = pvB->X - pvPoint->X; y1 = pvB->Y - pvPoint->Y;
+			x2 = pvC->X - pvPoint->X; y2 = pvC->Y - pvPoint->Y;
 			break;
 		case PROJECT_X:
-			x0 = pvA->z - pvPoint->z; y0 = pvA->y - pvPoint->y;
-			x1 = pvB->z - pvPoint->z; y1 = pvB->y - pvPoint->y;
-			x2 = pvC->z - pvPoint->z; y2 = pvC->y - pvPoint->y;
+			x0 = pvA->Z - pvPoint->Z; y0 = pvA->Y - pvPoint->Y;
+			x1 = pvB->Z - pvPoint->Z; y1 = pvB->Y - pvPoint->Y;
+			x2 = pvC->Z - pvPoint->Z; y2 = pvC->Y - pvPoint->Y;
 			break;
 		default: // case PROJECT_Y:
-			y0 = pvA->x - pvPoint->x; x0 = pvA->z - pvPoint->z;
-			y1 = pvB->x - pvPoint->x; x1 = pvB->z - pvPoint->z;
-			y2 = pvC->x - pvPoint->x; x2 = pvC->z - pvPoint->z;
+			y0 = pvA->X - pvPoint->X; x0 = pvA->Z - pvPoint->Z;
+			y1 = pvB->X - pvPoint->X; x1 = pvB->Z - pvPoint->Z;
+			y2 = pvC->X - pvPoint->X; x2 = pvC->Z - pvPoint->Z;
 		}
 
 		float t1, t2, t3;
@@ -834,30 +834,30 @@ extern "C"
 
 		//Proj_x
 		v3dxVector3 vP1,vP2;
-		float fT1 = (vMin.x - pvFrom->x)/vDir.x;
-		float fT2 = (vMax.x - pvFrom->x)/vDir.x;
-		vP1.x = vMin.x;
-		vP1.y = pvFrom->y + vDir.y*fT1;
-		vP1.z = pvFrom->z + vDir.z*fT1;
+		float fT1 = (vMin.X - pvFrom->X)/vDir.X;
+		float fT2 = (vMax.X - pvFrom->X)/vDir.X;
+		vP1.X = vMin.X;
+		vP1.Y = pvFrom->Y + vDir.Y*fT1;
+		vP1.Z = pvFrom->Z + vDir.Z*fT1;
 
-		vP2.x = vMax.x;
-		vP2.y = pvFrom->y + vDir.y*fT2;
-		vP2.z = pvFrom->z + vDir.z*fT2;
+		vP2.X = vMax.X;
+		vP2.Y = pvFrom->Y + vDir.Y*fT2;
+		vP2.Z = pvFrom->Z + vDir.Z*fT2;
 
-		if( ( vP1.y > vMax.y && vP2.y > vMax.y )||( vP1.y < vMin.y && vP2.y < vMin.y ) ||
-			( vP1.z > vMax.z && vP2.z > vMax.z )||( vP1.z < vMin.z && vP2.z < vMin.z ) )
+		if( ( vP1.Y > vMax.Y && vP2.Y > vMax.Y )||( vP1.Y < vMin.Y && vP2.Y < vMin.Y ) ||
+			( vP1.Z > vMax.Z && vP2.Z > vMax.Z )||( vP1.Z < vMin.Z && vP2.Z < vMin.Z ) )
 		{
 			return FALSE;
 		}
 		else
 		{
-			if( vP1.y < vMax.y && vP1.y > vMin.y && vP1.z < vMax.z && vP1.z > vMin.z )
+			if( vP1.Y < vMax.Y && vP1.Y > vMin.Y && vP1.Z < vMax.Z && vP1.Z > vMin.Z )
 			{
 				vRet[nIntersect].vPos = vP1;
 				vRet[nIntersect].f = fT1;
 				nIntersect++;
 			}
-			if( vP2.y < vMax.y && vP2.y > vMin.y && vP2.z < vMax.z && vP2.z > vMin.z )
+			if( vP2.Y < vMax.Y && vP2.Y > vMin.Y && vP2.Z < vMax.Z && vP2.Z > vMin.Z )
 			{
 				vRet[nIntersect].vPos = vP2;
 				vRet[nIntersect].f = fT2;
@@ -884,24 +884,24 @@ extern "C"
 		}
 
 		//Proj_y
-		fT1 = (vMin.y - pvFrom->y)/vDir.y;
-		fT2 = (vMax.y - pvFrom->y)/vDir.y;
-		vP1.x = pvFrom->x + vDir.x*fT1;
-		vP1.y = vMin.y;
-		vP1.z = pvFrom->z + vDir.z*fT1;
+		fT1 = (vMin.Y - pvFrom->Y)/vDir.Y;
+		fT2 = (vMax.Y - pvFrom->Y)/vDir.Y;
+		vP1.X = pvFrom->X + vDir.X*fT1;
+		vP1.Y = vMin.Y;
+		vP1.Z = pvFrom->Z + vDir.Z*fT1;
 
-		vP2.x = pvFrom->x + vDir.x*fT2;
-		vP2.y = vMax.y;
-		vP2.z = pvFrom->z + vDir.z*fT2;
+		vP2.X = pvFrom->X + vDir.X*fT2;
+		vP2.Y = vMax.Y;
+		vP2.Z = pvFrom->Z + vDir.Z*fT2;
 
-		if( ( vP1.x > vMax.x && vP2.x > vMax.x )||( vP1.x < vMin.x && vP2.x < vMin.x ) ||
-			( vP1.z > vMax.z && vP2.z > vMax.z )||( vP1.z < vMin.z && vP2.z < vMin.z ) )
+		if( ( vP1.X > vMax.X && vP2.X > vMax.X )||( vP1.X < vMin.X && vP2.X < vMin.X ) ||
+			( vP1.Z > vMax.Z && vP2.Z > vMax.Z )||( vP1.Z < vMin.Z && vP2.Z < vMin.Z ) )
 		{
 			return FALSE;
 		}
 		else
 		{
-			if( vP1.x < vMax.x && vP1.x > vMin.x && vP1.z < vMax.z && vP1.z > vMin.z )
+			if( vP1.X < vMax.X && vP1.X > vMin.X && vP1.Z < vMax.Z && vP1.Z > vMin.Z )
 			{
 				vRet[nIntersect].vPos = vP1;
 				vRet[nIntersect].f = fT1;
@@ -925,7 +925,7 @@ extern "C"
 				}
 				return TRUE;
 			}
-			if( vP2.x < vMax.x && vP2.x > vMin.x && vP2.z < vMax.z && vP2.z > vMin.z )
+			if( vP2.X < vMax.X && vP2.X > vMin.X && vP2.Z < vMax.Z && vP2.Z > vMin.Z )
 			{
 				vRet[nIntersect].vPos = vP2;
 				vRet[nIntersect].f = fT2;
@@ -952,24 +952,24 @@ extern "C"
 		}
 
 		//Proj_z
-		fT1 = (vMin.z - pvFrom->z)/vDir.z;
-		fT2 = (vMax.z - pvFrom->z)/vDir.z;
-		vP1.x = pvFrom->x + vDir.x*fT1;
-		vP1.y = pvFrom->y + vDir.y*fT1;
-		vP1.z = vMin.z;
+		fT1 = (vMin.Z - pvFrom->Z)/vDir.Z;
+		fT2 = (vMax.Z - pvFrom->Z)/vDir.Z;
+		vP1.X = pvFrom->X + vDir.X*fT1;
+		vP1.Y = pvFrom->Y + vDir.Y*fT1;
+		vP1.Z = vMin.Z;
 
-		vP2.x = pvFrom->x + vDir.x*fT2;
-		vP2.y = pvFrom->y + vDir.y*fT2;
-		vP2.z = vMax.z;
+		vP2.X = pvFrom->X + vDir.X*fT2;
+		vP2.Y = pvFrom->Y + vDir.Y*fT2;
+		vP2.Z = vMax.Z;
 
-		if( ( vP1.x > vMax.x && vP2.x > vMax.x )||( vP1.x < vMin.x && vP2.x < vMin.x ) ||
-			( vP1.y > vMax.y && vP2.y > vMax.y )||( vP1.y < vMin.y && vP2.y < vMin.y ) )
+		if( ( vP1.X > vMax.X && vP2.X > vMax.X )||( vP1.X < vMin.X && vP2.X < vMin.X ) ||
+			( vP1.Y > vMax.Y && vP2.Y > vMax.Y )||( vP1.Y < vMin.Y && vP2.Y < vMin.Y ) )
 		{
 			return FALSE;
 		}
 		else
 		{
-			if( vP1.x < vMax.x && vP1.x > vMin.x && vP1.y < vMax.y && vP1.y > vMin.y )
+			if( vP1.X < vMax.X && vP1.X > vMin.X && vP1.Y < vMax.Y && vP1.Y > vMin.Y )
 			{
 				vRet[nIntersect].vPos = vP1;
 				vRet[nIntersect].f = fT1;
@@ -993,7 +993,7 @@ extern "C"
 				}
 				return TRUE;
 			}
-			if( vP2.x < vMax.x && vP2.x > vMin.x && vP2.y < vMax.y && vP2.y > vMin.y )
+			if( vP2.X < vMax.X && vP2.X > vMin.X && vP2.Y < vMax.Y && vP2.Y > vMin.Y )
 			{
 				vRet[nIntersect].vPos = vP2;
 				vRet[nIntersect].f = fT2;
@@ -1044,30 +1044,30 @@ extern "C"
 
 		//Proj_x
 		v3dxDVector3 vP1, vP2;
-		double fT1 = (vMin.x - pvFrom->x) / vDir.x;
-		double fT2 = (vMax.x - pvFrom->x) / vDir.x;
-		vP1.x = vMin.x;
-		vP1.y = pvFrom->y + vDir.y * fT1;
-		vP1.z = pvFrom->z + vDir.z * fT1;
+		double fT1 = (vMin.X - pvFrom->X) / vDir.X;
+		double fT2 = (vMax.X - pvFrom->X) / vDir.X;
+		vP1.X = vMin.X;
+		vP1.Y = pvFrom->Y + vDir.Y * fT1;
+		vP1.Z = pvFrom->Z + vDir.Z * fT1;
 
-		vP2.x = vMax.x;
-		vP2.y = pvFrom->y + vDir.y * fT2;
-		vP2.z = pvFrom->z + vDir.z * fT2;
+		vP2.X = vMax.X;
+		vP2.Y = pvFrom->Y + vDir.Y * fT2;
+		vP2.Z = pvFrom->Z + vDir.Z * fT2;
 
-		if ((vP1.y > vMax.y && vP2.y > vMax.y) || (vP1.y < vMin.y && vP2.y < vMin.y) ||
-			(vP1.z > vMax.z && vP2.z > vMax.z) || (vP1.z < vMin.z && vP2.z < vMin.z))
+		if ((vP1.Y > vMax.Y && vP2.Y > vMax.Y) || (vP1.Y < vMin.Y && vP2.Y < vMin.Y) ||
+			(vP1.Z > vMax.Z && vP2.Z > vMax.Z) || (vP1.Z < vMin.Z && vP2.Z < vMin.Z))
 		{
 			return FALSE;
 		}
 		else
 		{
-			if (vP1.y < vMax.y && vP1.y > vMin.y && vP1.z < vMax.z && vP1.z > vMin.z)
+			if (vP1.Y < vMax.Y && vP1.Y > vMin.Y && vP1.Z < vMax.Z && vP1.Z > vMin.Z)
 			{
 				vRet[nIntersect].vPos = vP1;
 				vRet[nIntersect].f = fT1;
 				nIntersect++;
 			}
-			if (vP2.y < vMax.y && vP2.y > vMin.y && vP2.z < vMax.z && vP2.z > vMin.z)
+			if (vP2.Y < vMax.Y && vP2.Y > vMin.Y && vP2.Z < vMax.Z && vP2.Z > vMin.Z)
 			{
 				vRet[nIntersect].vPos = vP2;
 				vRet[nIntersect].f = fT2;
@@ -1094,24 +1094,24 @@ extern "C"
 		}
 
 		//Proj_y
-		fT1 = (vMin.y - pvFrom->y) / vDir.y;
-		fT2 = (vMax.y - pvFrom->y) / vDir.y;
-		vP1.x = pvFrom->x + vDir.x * fT1;
-		vP1.y = vMin.y;
-		vP1.z = pvFrom->z + vDir.z * fT1;
+		fT1 = (vMin.Y - pvFrom->Y) / vDir.Y;
+		fT2 = (vMax.Y - pvFrom->Y) / vDir.Y;
+		vP1.X = pvFrom->X + vDir.X * fT1;
+		vP1.Y = vMin.Y;
+		vP1.Z = pvFrom->Z + vDir.Z * fT1;
 
-		vP2.x = pvFrom->x + vDir.x * fT2;
-		vP2.y = vMax.y;
-		vP2.z = pvFrom->z + vDir.z * fT2;
+		vP2.X = pvFrom->X + vDir.X * fT2;
+		vP2.Y = vMax.Y;
+		vP2.Z = pvFrom->Z + vDir.Z * fT2;
 
-		if ((vP1.x > vMax.x && vP2.x > vMax.x) || (vP1.x < vMin.x && vP2.x < vMin.x) ||
-			(vP1.z > vMax.z && vP2.z > vMax.z) || (vP1.z < vMin.z && vP2.z < vMin.z))
+		if ((vP1.X > vMax.X && vP2.X > vMax.X) || (vP1.X < vMin.X && vP2.X < vMin.X) ||
+			(vP1.Z > vMax.Z && vP2.Z > vMax.Z) || (vP1.Z < vMin.Z && vP2.Z < vMin.Z))
 		{
 			return FALSE;
 		}
 		else
 		{
-			if (vP1.x < vMax.x && vP1.x > vMin.x && vP1.z < vMax.z && vP1.z > vMin.z)
+			if (vP1.X < vMax.X && vP1.X > vMin.X && vP1.Z < vMax.Z && vP1.Z > vMin.Z)
 			{
 				vRet[nIntersect].vPos = vP1;
 				vRet[nIntersect].f = fT1;
@@ -1135,7 +1135,7 @@ extern "C"
 				}
 				return TRUE;
 			}
-			if (vP2.x < vMax.x && vP2.x > vMin.x && vP2.z < vMax.z && vP2.z > vMin.z)
+			if (vP2.X < vMax.X && vP2.X > vMin.X && vP2.Z < vMax.Z && vP2.Z > vMin.Z)
 			{
 				vRet[nIntersect].vPos = vP2;
 				vRet[nIntersect].f = fT2;
@@ -1162,24 +1162,24 @@ extern "C"
 		}
 
 		//Proj_z
-		fT1 = (vMin.z - pvFrom->z) / vDir.z;
-		fT2 = (vMax.z - pvFrom->z) / vDir.z;
-		vP1.x = pvFrom->x + vDir.x * fT1;
-		vP1.y = pvFrom->y + vDir.y * fT1;
-		vP1.z = vMin.z;
+		fT1 = (vMin.Z - pvFrom->Z) / vDir.Z;
+		fT2 = (vMax.Z - pvFrom->Z) / vDir.Z;
+		vP1.X = pvFrom->X + vDir.X * fT1;
+		vP1.Y = pvFrom->Y + vDir.Y * fT1;
+		vP1.Z = vMin.Z;
 
-		vP2.x = pvFrom->x + vDir.x * fT2;
-		vP2.y = pvFrom->y + vDir.y * fT2;
-		vP2.z = vMax.z;
+		vP2.X = pvFrom->X + vDir.X * fT2;
+		vP2.Y = pvFrom->Y + vDir.Y * fT2;
+		vP2.Z = vMax.Z;
 
-		if ((vP1.x > vMax.x && vP2.x > vMax.x) || (vP1.x < vMin.x && vP2.x < vMin.x) ||
-			(vP1.y > vMax.y && vP2.y > vMax.y) || (vP1.y < vMin.y && vP2.y < vMin.y))
+		if ((vP1.X > vMax.X && vP2.X > vMax.X) || (vP1.X < vMin.X && vP2.X < vMin.X) ||
+			(vP1.Y > vMax.Y && vP2.Y > vMax.Y) || (vP1.Y < vMin.Y && vP2.Y < vMin.Y))
 		{
 			return FALSE;
 		}
 		else
 		{
-			if (vP1.x < vMax.x && vP1.x > vMin.x && vP1.y < vMax.y && vP1.y > vMin.y)
+			if (vP1.X < vMax.X && vP1.X > vMin.X && vP1.Y < vMax.Y && vP1.Y > vMin.Y)
 			{
 				vRet[nIntersect].vPos = vP1;
 				vRet[nIntersect].f = fT1;
@@ -1203,7 +1203,7 @@ extern "C"
 				}
 				return TRUE;
 			}
-			if (vP2.x < vMax.x && vP2.x > vMin.x && vP2.y < vMax.y && vP2.y > vMin.y)
+			if (vP2.X < vMax.X && vP2.X > vMin.X && vP2.Y < vMax.Y && vP2.Y > vMin.Y)
 			{
 				vRet[nIntersect].vPos = vP2;
 				vRet[nIntersect].f = fT2;
@@ -1257,30 +1257,30 @@ extern "C"
 
 		//Proj_x
 		v3dxVector3 vP1,vP2;
-		float fT1 = (vMin.x - pvFrom->x)/vDir.x;
-		float fT2 = (vMax.x - pvFrom->x)/vDir.x;
-		vP1.x = vMin.x;
-		vP1.y = pvFrom->y + vDir.y*fT1;
-		vP1.z = pvFrom->z + vDir.z*fT1;
+		float fT1 = (vMin.X - pvFrom->X)/vDir.X;
+		float fT2 = (vMax.X - pvFrom->X)/vDir.X;
+		vP1.X = vMin.X;
+		vP1.Y = pvFrom->Y + vDir.Y*fT1;
+		vP1.Z = pvFrom->Z + vDir.Z*fT1;
 
-		vP2.x = vMax.x;
-		vP2.y = pvFrom->y + vDir.y*fT2;
-		vP2.z = pvFrom->z + vDir.z*fT2;
+		vP2.X = vMax.X;
+		vP2.Y = pvFrom->Y + vDir.Y*fT2;
+		vP2.Z = pvFrom->Z + vDir.Z*fT2;
 
-		if( ( vP1.y > vMax.y && vP2.y > vMax.y )||( vP1.y < vMin.y && vP2.y < vMin.y ) ||
-			( vP1.z > vMax.z && vP2.z > vMax.z )||( vP1.z < vMin.z && vP2.z < vMin.z ) )
+		if( ( vP1.Y > vMax.Y && vP2.Y > vMax.Y )||( vP1.Y < vMin.Y && vP2.Y < vMin.Y ) ||
+			( vP1.Z > vMax.Z && vP2.Z > vMax.Z )||( vP1.Z < vMin.Z && vP2.Z < vMin.Z ) )
 		{
 			return FALSE;
 		}
 		else
 		{
-			if( vP1.y < vMax.y && vP1.y > vMin.y && vP1.z < vMax.z && vP1.z > vMin.z )
+			if( vP1.Y < vMax.Y && vP1.Y > vMin.Y && vP1.Z < vMax.Z && vP1.Z > vMin.Z )
 			{
 				vRet[nIntersect].vPos = vP1;
 				vRet[nIntersect].f = fT1;
 				nIntersect++;
 			}
-			if( vP2.y < vMax.y && vP2.y > vMin.y && vP2.z < vMax.z && vP2.z > vMin.z )
+			if( vP2.Y < vMax.Y && vP2.Y > vMin.Y && vP2.Z < vMax.Z && vP2.Z > vMin.Z )
 			{
 				vRet[nIntersect].vPos = vP2;
 				vRet[nIntersect].f = fT2;
@@ -1304,7 +1304,7 @@ extern "C"
 				}
 
 				// normal 
-				if( pvPoint_n->x < pvPoint_f->x )
+				if( pvPoint_n->X < pvPoint_f->X )
 				{
 					*pvNormal = -v3dxVector3::UNIT_X;
 				}
@@ -1318,24 +1318,24 @@ extern "C"
 		}
 
 		//Proj_y
-		fT1 = (vMin.y - pvFrom->y)/vDir.y;
-		fT2 = (vMax.y - pvFrom->y)/vDir.y;
-		vP1.x = pvFrom->x + vDir.x*fT1;
-		vP1.y = vMin.y;
-		vP1.z = pvFrom->z + vDir.z*fT1;
+		fT1 = (vMin.Y - pvFrom->Y)/vDir.Y;
+		fT2 = (vMax.Y - pvFrom->Y)/vDir.Y;
+		vP1.X = pvFrom->X + vDir.X*fT1;
+		vP1.Y = vMin.Y;
+		vP1.Z = pvFrom->Z + vDir.Z*fT1;
 
-		vP2.x = pvFrom->x + vDir.x*fT2;
-		vP2.y = vMax.y;
-		vP2.z = pvFrom->z + vDir.z*fT2;
+		vP2.X = pvFrom->X + vDir.X*fT2;
+		vP2.Y = vMax.Y;
+		vP2.Z = pvFrom->Z + vDir.Z*fT2;
 
-		if( ( vP1.x > vMax.x && vP2.x > vMax.x )||( vP1.x < vMin.x && vP2.x < vMin.x ) ||
-			( vP1.z > vMax.z && vP2.z > vMax.z )||( vP1.z < vMin.z && vP2.z < vMin.z ) )
+		if( ( vP1.X > vMax.X && vP2.X > vMax.X )||( vP1.X < vMin.X && vP2.X < vMin.X ) ||
+			( vP1.Z > vMax.Z && vP2.Z > vMax.Z )||( vP1.Z < vMin.Z && vP2.Z < vMin.Z ) )
 		{
 			return FALSE;
 		}
 		else
 		{
-			if( vP1.x < vMax.x && vP1.x > vMin.x && vP1.z < vMax.z && vP1.z > vMin.z )
+			if( vP1.X < vMax.X && vP1.X > vMin.X && vP1.Z < vMax.Z && vP1.Z > vMin.Z )
 			{
 				vRet[nIntersect].vPos = vP1;
 				vRet[nIntersect].f = fT1;
@@ -1360,7 +1360,7 @@ extern "C"
 
 
 				// normal 
-				if( pvPoint_n->y < pvPoint_f->y )
+				if( pvPoint_n->Y < pvPoint_f->Y )
 				{
 					*pvNormal = -v3dxVector3::UNIT_Y;
 				}
@@ -1373,7 +1373,7 @@ extern "C"
 
 				return TRUE;
 			}
-			if( vP2.x < vMax.x && vP2.x > vMin.x && vP2.z < vMax.z && vP2.z > vMin.z )
+			if( vP2.X < vMax.X && vP2.X > vMin.X && vP2.Z < vMax.Z && vP2.Z > vMin.Z )
 			{
 				vRet[nIntersect].vPos = vP2;
 				vRet[nIntersect].f = fT2;
@@ -1397,7 +1397,7 @@ extern "C"
 				}
 
 				// normal 
-				if( pvPoint_n->y < pvPoint_f->y )
+				if( pvPoint_n->Y < pvPoint_f->Y )
 				{
 					*pvNormal = -v3dxVector3::UNIT_Y;
 				}
@@ -1412,24 +1412,24 @@ extern "C"
 		}
 
 		//Proj_z
-		fT1 = (vMin.z - pvFrom->z)/vDir.z;
-		fT2 = (vMax.z - pvFrom->z)/vDir.z;
-		vP1.x = pvFrom->x + vDir.x*fT1;
-		vP1.y = pvFrom->y + vDir.y*fT1;
-		vP1.z = vMin.z;
+		fT1 = (vMin.Z - pvFrom->Z)/vDir.Z;
+		fT2 = (vMax.Z - pvFrom->Z)/vDir.Z;
+		vP1.X = pvFrom->X + vDir.X*fT1;
+		vP1.Y = pvFrom->Y + vDir.Y*fT1;
+		vP1.Z = vMin.Z;
 
-		vP2.x = pvFrom->x + vDir.x*fT2;
-		vP2.y = pvFrom->y + vDir.y*fT2;
-		vP2.z = vMax.z;
+		vP2.X = pvFrom->X + vDir.X*fT2;
+		vP2.Y = pvFrom->Y + vDir.Y*fT2;
+		vP2.Z = vMax.Z;
 
-		if( ( vP1.x > vMax.x && vP2.x > vMax.x )||( vP1.x < vMin.x && vP2.x < vMin.x ) ||
-			( vP1.y > vMax.y && vP2.y > vMax.y )||( vP1.y < vMin.y && vP2.y < vMin.y ) )
+		if( ( vP1.X > vMax.X && vP2.X > vMax.X )||( vP1.X < vMin.X && vP2.X < vMin.X ) ||
+			( vP1.Y > vMax.Y && vP2.Y > vMax.Y )||( vP1.Y < vMin.Y && vP2.Y < vMin.Y ) )
 		{
 			return FALSE;
 		}
 		else
 		{
-			if( vP1.x < vMax.x && vP1.x > vMin.x && vP1.y < vMax.y && vP1.y > vMin.y )
+			if( vP1.X < vMax.X && vP1.X > vMin.X && vP1.Y < vMax.Y && vP1.Y > vMin.Y )
 			{
 				vRet[nIntersect].vPos = vP1;
 				vRet[nIntersect].f = fT1;
@@ -1454,7 +1454,7 @@ extern "C"
 
 
 				// normal 
-				if( pvPoint_n->z < pvPoint_f->z )
+				if( pvPoint_n->Z < pvPoint_f->Z )
 				{
 					*pvNormal = -v3dxVector3::UNIT_Z;
 				}
@@ -1465,7 +1465,7 @@ extern "C"
 
 				return TRUE;
 			}
-			if( vP2.x < vMax.x && vP2.x > vMin.x && vP2.y < vMax.y && vP2.y > vMin.y )
+			if( vP2.X < vMax.X && vP2.X > vMin.X && vP2.Y < vMax.Y && vP2.Y > vMin.Y )
 			{
 				vRet[nIntersect].vPos = vP2;
 				vRet[nIntersect].f = fT2;
@@ -1489,7 +1489,7 @@ extern "C"
 				}
 
 				// normal 
-				if( pvPoint_n->z < pvPoint_f->z )
+				if( pvPoint_n->Z < pvPoint_f->Z )
 				{
 					*pvNormal = -v3dxVector3::UNIT_Z;
 				}
@@ -1533,16 +1533,16 @@ extern "C"
 	{
 		float x,y,z, denom;
 
-		x = v.x-u.x;  y = v.y-u.y;  z = v.z-u.z;
+		x = v.X-u.X;  y = v.Y-u.Y;  z = v.Z-u.Z;
 		denom = A*x + B*y + C*z;
 		if (std::abs (denom) < SMALL_EPSILON) 
 			return FALSE; 
 
-		dist = -(A*u.x + B*u.y + C*u.z + D) / denom;
+		dist = -(A*u.X + B*u.Y + C*u.Z + D) / denom;
 		if (dist < -SMALL_EPSILON || dist > 1+SMALL_EPSILON) 
 			return FALSE;
 
-		isect.x = u.x + dist*x;  isect.y = u.y + dist*y;  isect.z = u.z + dist*z;
+		isect.X = u.X + dist*x;  isect.Y = u.Y + dist*y;  isect.Z = u.Z + dist*z;
 		return TRUE;
 	}
 
@@ -1554,8 +1554,8 @@ extern "C"
 	{
 		float x,y,z, denom;
 
-		x = v.x-u.x;  y = v.y-u.y;  z = v.z-u.z;
-		denom = p.m_vNormal.x*x + p.m_vNormal.y*y + p.m_vNormal.z*z;
+		x = v.X-u.X;  y = v.Y-u.Y;  z = v.Z-u.Z;
+		denom = p.m_vNormal.X*x + p.m_vNormal.Y*y + p.m_vNormal.Z*z;
 		if (std::abs(denom) < SMALL_EPSILON)
 			return FALSE; 
 
@@ -1563,7 +1563,7 @@ extern "C"
 		if (dist < -SMALL_EPSILON || dist > 1+SMALL_EPSILON) 
 			return FALSE;
 
-		isect.x = u.x + dist*x;  isect.y = u.y + dist*y;  isect.z = u.z + dist*z;
+		isect.X = u.X + dist*x;  isect.Y = u.Y + dist*y;  isect.Z = u.Z + dist*z;
 		return TRUE;
 	}
 
@@ -1611,14 +1611,14 @@ extern "C"
 
 	VFX_API void	v3dxAABBVertexEdges(const v3dxVector3& aabb_min, const v3dxVector3& aabb_max, v3dxVector3 v[8], int e[12][2])
 	{
-		v[0] = v3dxVector3( aabb_min.x, aabb_max.y, aabb_min.z);
-		v[1] = v3dxVector3( aabb_max.x, aabb_max.y, aabb_min.z);
-		v[2] = v3dxVector3( aabb_max.x, aabb_max.y, aabb_max.z);
-		v[3] = v3dxVector3( aabb_min.x, aabb_max.y, aabb_max.z);
-		v[4] = v3dxVector3( aabb_min.x, aabb_min.y, aabb_min.z);
-		v[5] = v3dxVector3( aabb_max.x, aabb_min.y, aabb_min.z);
-		v[6] = v3dxVector3( aabb_max.x, aabb_min.y, aabb_max.z);
-		v[7] = v3dxVector3( aabb_min.x, aabb_min.y, aabb_max.z);
+		v[0] = v3dxVector3( aabb_min.X, aabb_max.Y, aabb_min.Z);
+		v[1] = v3dxVector3( aabb_max.X, aabb_max.Y, aabb_min.Z);
+		v[2] = v3dxVector3( aabb_max.X, aabb_max.Y, aabb_max.Z);
+		v[3] = v3dxVector3( aabb_min.X, aabb_max.Y, aabb_max.Z);
+		v[4] = v3dxVector3( aabb_min.X, aabb_min.Y, aabb_min.Z);
+		v[5] = v3dxVector3( aabb_max.X, aabb_min.Y, aabb_min.Z);
+		v[6] = v3dxVector3( aabb_max.X, aabb_min.Y, aabb_max.Z);
+		v[7] = v3dxVector3( aabb_min.X, aabb_min.Y, aabb_max.Z);
 
 		e[0][0] = 0;	e[0][1] = 1;
 		e[1][0] = 1;	e[1][1] = 2;
@@ -1657,13 +1657,13 @@ extern "C"
 		for (int i = 0 ; i < Length ; ++i)
 		{
 			pVerticesUp[i] = pPoly[i];
-			pVerticesUp[i].y = MaxY;
+			pVerticesUp[i].Y = MaxY;
 		}
 		v3dxVector3* pVerticesDown = new v3dxVector3[Length];
 		for (int i = 0 ; i < Length ; ++i)
 		{
 			pVerticesDown[i] = pPoly[i];
-			pVerticesDown[i].y = MinY;
+			pVerticesDown[i].Y = MinY;
 		}
 		OutResult.reserve(Length+2);
 		OutResult.resize(Length+2);
@@ -1709,10 +1709,10 @@ extern "C"
 		//v3dxVec4Normalize((v3dColor4_t *)&p,(v3dColor4_t *)plane);
 		p.normalize();
 		float d = v3dxVec4Dot((v3dVector4_t *)&p,l);
-		m->m11 = p.m_vNormal.x * l->x + d; m->m12 = p.m_vNormal.x * l->y;    m->m13 = p.m_vNormal.x * l->z;    m->m14 = p.m_vNormal.x * l->w;
-		m->m21 = p.m_vNormal.y * l->x    ;m->m22 = p.m_vNormal.y * l->y + d;m->m23 = p.m_vNormal.y * l->z;    m->m24 = p.m_vNormal.y * l->w;
-		m->m31 = p.m_vNormal.z * l->x    ;m->m32 = p.m_vNormal.z * l->y;    m->m33 = p.m_vNormal.z * l->z + d;m->m34 = p.m_vNormal.z * l->w;
-		m->m41 = p.m_fDD * l->x    ;m->m42 = p.m_fDD * l->y;    m->m43 = p.m_fDD * l->z;    m->m44 = p.m_fDD * l->w + d;
+		m->m11 = p.m_vNormal.X * l->X + d; m->m12 = p.m_vNormal.X * l->Y;    m->m13 = p.m_vNormal.X * l->Z;    m->m14 = p.m_vNormal.X * l->W;
+		m->m21 = p.m_vNormal.Y * l->X    ;m->m22 = p.m_vNormal.Y * l->Y + d;m->m23 = p.m_vNormal.Y * l->Z;    m->m24 = p.m_vNormal.Y * l->W;
+		m->m31 = p.m_vNormal.Z * l->X    ;m->m32 = p.m_vNormal.Z * l->Y;    m->m33 = p.m_vNormal.Z * l->Z + d;m->m34 = p.m_vNormal.Z * l->W;
+		m->m41 = p.m_fDD * l->X    ;m->m42 = p.m_fDD * l->Y;    m->m43 = p.m_fDD * l->Z;    m->m44 = p.m_fDD * l->W + d;
 	#endif
 	}
 
@@ -1742,9 +1742,9 @@ extern "C"
 
 		if(NULL == v3dxMatrix4Inverse(&m, &m,NULL))
 			return FALSE;
-		q.x = - m.m11 * p1.D() - m.m12 * p2.D() - m.m13 * p3.D();
-		q.y = - m.m21 * p1.D() - m.m22 * p2.D() - m.m23 * p3.D();
-		q.z = - m.m31 * p1.D() - m.m32 * p2.D() - m.m33 * p3.D();
+		q.X = - m.m11 * p1.D() - m.m12 * p2.D() - m.m13 * p3.D();
+		q.Y = - m.m21 * p1.D() - m.m22 * p2.D() - m.m23 * p3.D();
+		q.Z = - m.m31 * p1.D() - m.m32 * p2.D() - m.m33 * p3.D();
 
 		return TRUE;
 	}
@@ -1766,7 +1766,7 @@ extern "C"
 	VFX_API vBOOL VerticelLine(v3dxLine3 & l,const v3dxLine3 & l1,const v3dxLine3 & l2)
 	{
 		v3dxVec3Cross(&l.m_direct,&l1.m_direct,&l2.m_direct);
-		if(l.m_direct.x == 0 && l.m_direct.y == 0 && l.m_direct.z == 0)
+		if(l.m_direct.X == 0 && l.m_direct.Y == 0 && l.m_direct.Z == 0)
 			return FALSE;
 
 		v3dxVector3 n;
@@ -1842,7 +1842,7 @@ extern "C"
 		
 		float opposite;
 		float inverse;
-		float dot = (q1.x * q2.x) + (q1.y * q2.y) + (q1.z * q2.z) + (q1.w * q2.w);
+		float dot = (q1.X * q2.X) + (q1.Y * q2.Y) + (q1.Z * q2.Z) + (q1.W * q2.W);
 		bool flag = false;
 
 		if (dot < 0.0f)
@@ -1865,10 +1865,10 @@ extern "C"
 			opposite = flag ? (((float)(-Math::Sin(t * acos))) * invSin) : (((float)(Math::Sin(t * acos))) * invSin);
 		}
 
-		pOut->x = (inverse * q1.x) + (opposite * q2.x);
-		pOut->y = (inverse * q1.y) + (opposite * q2.y);
-		pOut->z = (inverse * q1.z) + (opposite * q2.z);
-		pOut->w = (inverse * q1.w) + (opposite * q2.w);
+		pOut->X = (inverse * q1.X) + (opposite * q2.X);
+		pOut->Y = (inverse * q1.Y) + (opposite * q2.Y);
+		pOut->Z = (inverse * q1.Z) + (opposite * q2.Z);
+		pOut->W = (inverse * q1.W) + (opposite * q2.W);
 
 		return pOut;
 
@@ -1885,10 +1885,10 @@ extern "C"
 		float halfAngle = Angle * 0.5F;
 		float s = sin(halfAngle);
 
-		pOut->w = cos(halfAngle);
-		pOut->x = s * tempAxis.x;
-		pOut->y = s * tempAxis.y;
-		pOut->z = s * tempAxis.z;
+		pOut->W = cos(halfAngle);
+		pOut->X = s * tempAxis.X;
+		pOut->Y = s * tempAxis.Y;
+		pOut->Z = s * tempAxis.Z;
 		return pOut;
 	#endif
 	}
@@ -1900,10 +1900,10 @@ extern "C"
 		float fPitch = 0.0f;
 		float fRoll = 0.0f;
 
-		float fX = pIn.x;
-		float fY = pIn.y;
-		float fZ = pIn.z;
-		float fW = pIn.w;
+		float fX = pIn.X;
+		float fY = pIn.Y;
+		float fZ = pIn.Z;
+		float fW = pIn.W;
 
 		fYaw = (float)(atan2(2 * (fW * fY + fZ * fX), 1 - 2 * (fX * fX + fY * fY)));
 		float fValue = 2 * (fW * fX - fY * fZ);
@@ -1911,9 +1911,9 @@ extern "C"
 		fPitch = (float)(asin(fValue));
 		fRoll = (float)(atan2(2 * (fW * fZ + fX * fY), 1 - 2 * (fZ * fZ + fX * fX)));
 
-		pOlAngle.y = fYaw;
-		pOlAngle.x = fPitch;
-		pOlAngle.z = fRoll;
+		pOlAngle.Y = fYaw;
+		pOlAngle.X = fPitch;
+		pOlAngle.Z = fRoll;
 
 		return pOutOLAngle;
 	}
@@ -1939,10 +1939,10 @@ extern "C"
 		float sinYaw = (float)(Math::Sin((halfYaw)));
 		float cosYaw = (float)(Math::Cos((halfYaw)));
 
-		result.x = (cosYaw * sinPitch * cosRoll) + (sinYaw * cosPitch * sinRoll);
-		result.y = (sinYaw * cosPitch * cosRoll) - (cosYaw * sinPitch * sinRoll);
-		result.z = (cosYaw * cosPitch * sinRoll) - (sinYaw * sinPitch * cosRoll);
-		result.w = (cosYaw * cosPitch * cosRoll) + (sinYaw * sinPitch * sinRoll);
+		result.X = (cosYaw * sinPitch * cosRoll) + (sinYaw * cosPitch * sinRoll);
+		result.Y = (sinYaw * cosPitch * cosRoll) - (cosYaw * sinPitch * sinRoll);
+		result.Z = (cosYaw * cosPitch * sinRoll) - (sinYaw * sinPitch * cosRoll);
+		result.W = (cosYaw * cosPitch * cosRoll) + (sinYaw * sinPitch * sinRoll);
 
 		return pOut;
 
@@ -1964,18 +1964,18 @@ extern "C"
 	#if defined(USE_DXMATH) && defined(USE_DX)
 		return (v3dxMatrix4*)D3DXMatrixRotationQuaternion((D3DXMATRIX *)pOut, (const D3DXQUATERNION*)pQ);
 	#else
-		float fTx = 2.0f*pQ->x;
-		float fTy = 2.0f*pQ->y;
-		float fTz = 2.0f*pQ->z;
-		float fTwx = fTx*pQ->w;
-		float fTwy = fTy*pQ->w;
-		float fTwz = fTz*pQ->w;
-		float fTxx = fTx*pQ->x;
-		float fTxy = fTy*pQ->x;
-		float fTxz = fTz*pQ->x;
-		float fTyy = fTy*pQ->y;
-		float fTyz = fTz*pQ->y;
-		float fTzz = fTz*pQ->z;
+		float fTx = 2.0f*pQ->X;
+		float fTy = 2.0f*pQ->Y;
+		float fTz = 2.0f*pQ->Z;
+		float fTwx = fTx*pQ->W;
+		float fTwy = fTy*pQ->W;
+		float fTwz = fTz*pQ->W;
+		float fTxx = fTx*pQ->X;
+		float fTxy = fTy*pQ->X;
+		float fTxz = fTz*pQ->X;
+		float fTyy = fTy*pQ->Y;
+		float fTyz = fTz*pQ->Y;
+		float fTzz = fTz*pQ->Z;
 
 		pOut->m[0][0] = 1.0f - (fTyy + fTzz);
 		pOut->m[0][1] = fTxy + fTwz;
@@ -2000,18 +2000,18 @@ extern "C"
 	}
 	VFX_API v3dDMatrix4_t* v3dxDMatrixRotationQuaternion(v3dDMatrix4_t* pOut, CONST v3dxQuaternion* pQ)
 	{
-		double fTx = 2.0f * pQ->x;
-		double fTy = 2.0f * pQ->y;
-		double fTz = 2.0f * pQ->z;
-		double fTwx = fTx * pQ->w;
-		double fTwy = fTy * pQ->w;
-		double fTwz = fTz * pQ->w;
-		double fTxx = fTx * pQ->x;
-		double fTxy = fTy * pQ->x;
-		double fTxz = fTz * pQ->x;
-		double fTyy = fTy * pQ->y;
-		double fTyz = fTz * pQ->y;
-		double fTzz = fTz * pQ->z;
+		double fTx = 2.0f * pQ->X;
+		double fTy = 2.0f * pQ->Y;
+		double fTz = 2.0f * pQ->Z;
+		double fTwx = fTx * pQ->W;
+		double fTwy = fTy * pQ->W;
+		double fTwz = fTz * pQ->W;
+		double fTxx = fTx * pQ->X;
+		double fTxy = fTy * pQ->X;
+		double fTxz = fTz * pQ->X;
+		double fTyy = fTy * pQ->Y;
+		double fTyz = fTz * pQ->Y;
+		double fTzz = fTz * pQ->Z;
 
 		pOut->m[0][0] = 1.0 - (fTyy + fTzz);
 		pOut->m[0][1] = fTxy + fTwz;
@@ -2039,24 +2039,24 @@ extern "C"
 		v3dxVector3 trans, scale;
 		pSrc->ExtractionTrans(trans);
 		pSrc->ExtractionScale(scale);
-		pOut->m[0][0] = scale.x;
-		pOut->m[0][1] = scale.x;
-		pOut->m[0][2] = scale.x;
+		pOut->m[0][0] = scale.X;
+		pOut->m[0][1] = scale.X;
+		pOut->m[0][2] = scale.X;
 		pOut->m[0][3] = 0;
 
-		pOut->m[1][0] = scale.y;
-		pOut->m[1][1] = scale.y;
-		pOut->m[1][2] = scale.y;
+		pOut->m[1][0] = scale.Y;
+		pOut->m[1][1] = scale.Y;
+		pOut->m[1][2] = scale.Y;
 		pOut->m[1][3] = 0;
 
-		pOut->m[2][0] = scale.z;
-		pOut->m[2][1] = scale.z;
-		pOut->m[2][2] = scale.z;
+		pOut->m[2][0] = scale.Z;
+		pOut->m[2][1] = scale.Z;
+		pOut->m[2][2] = scale.Z;
 		pOut->m[2][3] = 0;
 
-		pOut->m[3][0] = trans.x;
-		pOut->m[3][1] = trans.y;
-		pOut->m[3][2] = trans.z;
+		pOut->m[3][0] = trans.X;
+		pOut->m[3][1] = trans.Y;
+		pOut->m[3][2] = trans.Z;
 		pOut->m[3][3] = 1;
 	}
 
@@ -2079,17 +2079,17 @@ extern "C"
 
 		saveMT.ExtractionScale(*pOutScale);
 
-		saveMT.m[0][0] /= pOutScale->x;
-		saveMT.m[0][1] /= pOutScale->x;
-		saveMT.m[0][2] /= pOutScale->x;
+		saveMT.m[0][0] /= pOutScale->X;
+		saveMT.m[0][1] /= pOutScale->X;
+		saveMT.m[0][2] /= pOutScale->X;
 		
-		saveMT.m[1][0] /= pOutScale->y;
-		saveMT.m[1][1] /= pOutScale->y;
-		saveMT.m[1][2] /= pOutScale->y;
+		saveMT.m[1][0] /= pOutScale->Y;
+		saveMT.m[1][1] /= pOutScale->Y;
+		saveMT.m[1][2] /= pOutScale->Y;
 		
-		saveMT.m[2][0] /= pOutScale->z;
-		saveMT.m[2][1] /= pOutScale->z;
-		saveMT.m[2][2] /= pOutScale->z;
+		saveMT.m[2][0] /= pOutScale->Z;
+		saveMT.m[2][1] /= pOutScale->Z;
+		saveMT.m[2][2] /= pOutScale->Z;
 
 		saveMT.ExtractionRotation(*pOutRotation);
 		
@@ -2106,17 +2106,17 @@ extern "C"
 
 		saveMT.ExtractionScale(*pOutScale);
 
-		saveMT.m[0][0] /= pOutScale->x;
-		saveMT.m[0][1] /= pOutScale->x;
-		saveMT.m[0][2] /= pOutScale->x;
+		saveMT.m[0][0] /= pOutScale->X;
+		saveMT.m[0][1] /= pOutScale->X;
+		saveMT.m[0][2] /= pOutScale->X;
 
-		saveMT.m[1][0] /= pOutScale->y;
-		saveMT.m[1][1] /= pOutScale->y;
-		saveMT.m[1][2] /= pOutScale->y;
+		saveMT.m[1][0] /= pOutScale->Y;
+		saveMT.m[1][1] /= pOutScale->Y;
+		saveMT.m[1][2] /= pOutScale->Y;
 
-		saveMT.m[2][0] /= pOutScale->z;
-		saveMT.m[2][1] /= pOutScale->z;
-		saveMT.m[2][2] /= pOutScale->z;
+		saveMT.m[2][0] /= pOutScale->Z;
+		saveMT.m[2][1] /= pOutScale->Z;
+		saveMT.m[2][2] /= pOutScale->Z;
 
 		pOutRotation->fromRotationDMatrix(saveMT);
 	}
@@ -2134,23 +2134,23 @@ extern "C"
 
 		if (pScaling != nullptr)
 		{
-			pOut->m[0][0] *= pScaling->x;
-			pOut->m[0][1] *= pScaling->x;
-			pOut->m[0][2] *= pScaling->x;
+			pOut->m[0][0] *= pScaling->X;
+			pOut->m[0][1] *= pScaling->X;
+			pOut->m[0][2] *= pScaling->X;
 
-			pOut->m[1][0] *= pScaling->y;
-			pOut->m[1][1] *= pScaling->y;
-			pOut->m[1][2] *= pScaling->y;
+			pOut->m[1][0] *= pScaling->Y;
+			pOut->m[1][1] *= pScaling->Y;
+			pOut->m[1][2] *= pScaling->Y;
 
-			pOut->m[2][0] *= pScaling->z;
-			pOut->m[2][1] *= pScaling->z;
-			pOut->m[2][2] *= pScaling->z;
+			pOut->m[2][0] *= pScaling->Z;
+			pOut->m[2][1] *= pScaling->Z;
+			pOut->m[2][2] *= pScaling->Z;
 		}
 		if (pTranslation != nullptr)
 		{
-			pOut->m[3][0] = pTranslation->x;
-			pOut->m[3][1] = pTranslation->y;
-			pOut->m[3][2] = pTranslation->z;
+			pOut->m[3][0] = pTranslation->X;
+			pOut->m[3][1] = pTranslation->Y;
+			pOut->m[3][2] = pTranslation->Z;
 		}
 		return pOut;
 	}
@@ -2168,23 +2168,23 @@ extern "C"
 
 		if (pScaling != nullptr)
 		{
-			pOut->m[0][0] *= pScaling->x;
-			pOut->m[0][1] *= pScaling->x;
-			pOut->m[0][2] *= pScaling->x;
+			pOut->m[0][0] *= pScaling->X;
+			pOut->m[0][1] *= pScaling->X;
+			pOut->m[0][2] *= pScaling->X;
 
-			pOut->m[1][0] *= pScaling->y;
-			pOut->m[1][1] *= pScaling->y;
-			pOut->m[1][2] *= pScaling->y;
+			pOut->m[1][0] *= pScaling->Y;
+			pOut->m[1][1] *= pScaling->Y;
+			pOut->m[1][2] *= pScaling->Y;
 
-			pOut->m[2][0] *= pScaling->z;
-			pOut->m[2][1] *= pScaling->z;
-			pOut->m[2][2] *= pScaling->z;
+			pOut->m[2][0] *= pScaling->Z;
+			pOut->m[2][1] *= pScaling->Z;
+			pOut->m[2][2] *= pScaling->Z;
 		}
 		if (pTranslation != nullptr)
 		{
-			pOut->m[3][0] = pTranslation->x;
-			pOut->m[3][1] = pTranslation->y;
-			pOut->m[3][2] = pTranslation->z;
+			pOut->m[3][0] = pTranslation->X;
+			pOut->m[3][1] = pTranslation->Y;
+			pOut->m[3][2] = pTranslation->Z;
 		}
 		return pOut;
 	}
@@ -2206,14 +2206,14 @@ extern "C"
 		v3dxMatrix4 matS;
 		v3dxMatrix4 matT;
 
-		v3dxMatrix4Translation(&matRC, pRotationCenter->x, pRotationCenter->y, pRotationCenter->z);
-		v3dxMatrix4Translation(&matSC, pScalingCenter->x, pScalingCenter->y, pScalingCenter->z);
-		v3dxMatrix4Translation(&matT, pTranslation->x, pTranslation->y, pTranslation->z);
+		v3dxMatrix4Translation(&matRC, pRotationCenter->X, pRotationCenter->Y, pRotationCenter->Z);
+		v3dxMatrix4Translation(&matSC, pScalingCenter->X, pScalingCenter->Y, pScalingCenter->Z);
+		v3dxMatrix4Translation(&matT, pTranslation->X, pTranslation->Y, pTranslation->Z);
 		
 		pScalingRotation->toRotationMatrix(matSR);
 		pRotation->toRotationMatrix(matR);
 
-		v3dxMatrix4Scale(&matS, pScaling->x, pScaling->y, pScaling->z);
+		v3dxMatrix4Scale(&matS, pScaling->X, pScaling->Y, pScaling->Z);
 		
 		v3dxMatrix4 matSCInv;
 		v3dxMatrix4 matSRInv;
@@ -2241,14 +2241,14 @@ extern "C"
 		v3dDMatrix4_t matS;
 		v3dDMatrix4_t matT;
 
-		v3dxDMatrix4Translation(&matRC, pRotationCenter->x, pRotationCenter->y, pRotationCenter->z);
-		v3dxDMatrix4Translation(&matSC, pScalingCenter->x, pScalingCenter->y, pScalingCenter->z);
-		v3dxDMatrix4Translation(&matT, pTranslation->x, pTranslation->y, pTranslation->z);
+		v3dxDMatrix4Translation(&matRC, pRotationCenter->X, pRotationCenter->Y, pRotationCenter->Z);
+		v3dxDMatrix4Translation(&matSC, pScalingCenter->X, pScalingCenter->Y, pScalingCenter->Z);
+		v3dxDMatrix4Translation(&matT, pTranslation->X, pTranslation->Y, pTranslation->Z);
 
 		v3dxDMatrixRotationQuaternion(&matSR, pScalingRotation);
 		v3dxDMatrixRotationQuaternion(&matR, pRotation);
 
-		v3dxDMatrix4Scale(&matS, pScaling->x, pScaling->y, pScaling->z);
+		v3dxDMatrix4Scale(&matS, pScaling->X, pScaling->Y, pScaling->Z);
 
 		v3dDMatrix4_t matSCInv;
 		v3dDMatrix4_t matSRInv;
@@ -2277,19 +2277,19 @@ extern "C"
 			);*/
 
 
-		float lx = l.x;
-		float ly = l.y;
-		float lz = l.z;
-		float lw = l.w;
-		float rx = r.x;
-		float ry = r.y;
-		float rz = r.z;
-		float rw = r.w;
+		float lx = l.X;
+		float ly = l.Y;
+		float lz = l.Z;
+		float lw = l.W;
+		float rx = r.X;
+		float ry = r.Y;
+		float rz = r.Z;
+		float rw = r.W;
 
-		pOut->x = (rx * lw + lx * rw + ry * lz) - (rz * ly);
-		pOut->y = (ry * lw + ly * rw + rz * lx) - (rx * lz);
-		pOut->z = (rz * lw + lz * rw + rx * ly) - (ry * lx);
-		pOut->w = (rw * lw) - (rx *lx + ry * ly + rz * lz);
+		pOut->X = (rx * lw + lx * rw + ry * lz) - (rz * ly);
+		pOut->Y = (ry * lw + ly * rw + rz * lx) - (rx * lz);
+		pOut->Z = (rz * lw + lz * rw + rx * ly) - (ry * lx);
+		pOut->W = (rw * lw) - (rx *lx + ry * ly + rz * lz);
 
 		return pOut;
 	#endif
@@ -2302,10 +2302,10 @@ extern "C"
 	#else
 		v3dxPlane3 p;
 		v3dxVec4Normalize((v3dVector4_t *)&p,(v3dVector4_t *)plane);
-		m->m11 = -2.0f * p.m_vNormal.x * p.m_vNormal.x + 1.0f;m->m12 = -2.0f * p.m_vNormal.y * p.m_vNormal.x;       m->m13 = -2.0f * p.m_vNormal.z * p.m_vNormal.x;       m->m14 = 0.0f;
-		m->m21 = -2.0f * p.m_vNormal.x * p.m_vNormal.y       ;m->m22 = -2.0f * p.m_vNormal.y * p.m_vNormal.y + 1.0f;m->m23 = -2.0f * p.m_vNormal.z * p.m_vNormal.y;       m->m24 = 0.0f;
-		m->m31 = -2.0f * p.m_vNormal.x * p.m_vNormal.z       ;m->m32 = -2.0f * p.m_vNormal.y * p.m_vNormal.z;       m->m33 = -2.0f * p.m_vNormal.z * p.m_vNormal.z + 1.0f;m->m34 = 0.0f;
-		m->m41 = -2.0f * p.m_vNormal.x * p.m_fDD       ;m->m42 = -2.0f * p.m_vNormal.y * p.m_fDD;       m->m43 = -2.0f * p.m_vNormal.z * p.m_fDD;       m->m44 = 1.0f;
+		m->m11 = -2.0f * p.m_vNormal.X * p.m_vNormal.X + 1.0f;m->m12 = -2.0f * p.m_vNormal.Y * p.m_vNormal.X;       m->m13 = -2.0f * p.m_vNormal.Z * p.m_vNormal.X;       m->m14 = 0.0f;
+		m->m21 = -2.0f * p.m_vNormal.X * p.m_vNormal.Y       ;m->m22 = -2.0f * p.m_vNormal.Y * p.m_vNormal.Y + 1.0f;m->m23 = -2.0f * p.m_vNormal.Z * p.m_vNormal.Y;       m->m24 = 0.0f;
+		m->m31 = -2.0f * p.m_vNormal.X * p.m_vNormal.Z       ;m->m32 = -2.0f * p.m_vNormal.Y * p.m_vNormal.Z;       m->m33 = -2.0f * p.m_vNormal.Z * p.m_vNormal.Z + 1.0f;m->m34 = 0.0f;
+		m->m41 = -2.0f * p.m_vNormal.X * p.m_fDD       ;m->m42 = -2.0f * p.m_vNormal.Y * p.m_fDD;       m->m43 = -2.0f * p.m_vNormal.Z * p.m_fDD;       m->m44 = 1.0f;
 		return m;
 	#endif
 	}
@@ -2371,8 +2371,8 @@ extern "C"
 	{
 		double x, y, z, denom;
 
-		x = v.x - u.x;  y = v.y - u.y;  z = v.z - u.z;
-		denom = p.m_vNormal.x * x + p.m_vNormal.y * y + p.m_vNormal.z * z;
+		x = v.X - u.X;  y = v.Y - u.Y;  z = v.Z - u.Z;
+		denom = p.m_vNormal.X * x + p.m_vNormal.Y * y + p.m_vNormal.Z * z;
 		if (std::abs(denom) < SMALL_EPSILON)
 			return FALSE; 
 
@@ -2380,7 +2380,7 @@ extern "C"
 		if (dist < -SMALL_EPSILON || dist > 1 + SMALL_EPSILON)
 			return FALSE;
 
-		isect.x = u.x + dist * x;  isect.y = u.y + dist * y;  isect.z = u.z + dist * z;
+		isect.X = u.X + dist * x;  isect.Y = u.Y + dist * y;  isect.Z = u.Z + dist * z;
 		return TRUE;
 	}
 
@@ -2396,9 +2396,9 @@ extern "C"
 	VFX_API v3dxPlane3* v3dxPlaneScale
 		(v3dxPlane3 *pOut, CONST v3dxPlane3 *pP, FLOAT s)
 	{
-		pOut->m_vNormal.x = pP->m_vNormal.x * s;
-		pOut->m_vNormal.y = pP->m_vNormal.y * s;
-		pOut->m_vNormal.z = pP->m_vNormal.z * s;
+		pOut->m_vNormal.X = pP->m_vNormal.X * s;
+		pOut->m_vNormal.Y = pP->m_vNormal.Y * s;
+		pOut->m_vNormal.Z = pP->m_vNormal.Z * s;
 		pOut->m_fDD = pP->m_fDD * s;
 		return pOut;
 	}
@@ -2521,7 +2521,7 @@ extern "C"
 
 	inline float PerpDotProduct2D(const v3dxVector3* u, const v3dxVector3* v)
 	{
-		return u->z * v->x - u->x * v->z;
+		return u->Z * v->X - u->X * v->Z;
 	}
 
 	VFX_API vBOOL v3dIntersectSegSeg(const v3dxVector3* ap, const v3dxVector3* aq,
@@ -2604,10 +2604,10 @@ extern "C"
 	{//https://doxygen.reactos.org/de/d57/dll_2directx_2wine_2d3dx9__36_2math_8c.html#abd38e717074a81bef44bcfe057f96f0c
 		const v3dxPlane3& plane = *pplane;
 
-		pout->m_vNormal.x = pm->m[0][0] * plane.m_vNormal.x + pm->m[1][0] * plane.m_vNormal.y + pm->m[2][0] * plane.m_vNormal.z + pm->m[3][0] * plane.m_fDD;
-		pout->m_vNormal.y = pm->m[0][1] * plane.m_vNormal.x + pm->m[1][1] * plane.m_vNormal.y + pm->m[2][1] * plane.m_vNormal.z + pm->m[3][1] * plane.m_fDD;
-		pout->m_vNormal.z = pm->m[0][2] * plane.m_vNormal.x + pm->m[1][2] * plane.m_vNormal.y + pm->m[2][2] * plane.m_vNormal.z + pm->m[3][2] * plane.m_fDD;
-		pout->m_fDD = pm->m[0][3] * plane.m_vNormal.x + pm->m[1][3] * plane.m_vNormal.y + pm->m[2][3] * plane.m_vNormal.z + pm->m[3][3] * plane.m_fDD;
+		pout->m_vNormal.X = pm->m[0][0] * plane.m_vNormal.X + pm->m[1][0] * plane.m_vNormal.Y + pm->m[2][0] * plane.m_vNormal.Z + pm->m[3][0] * plane.m_fDD;
+		pout->m_vNormal.Y = pm->m[0][1] * plane.m_vNormal.X + pm->m[1][1] * plane.m_vNormal.Y + pm->m[2][1] * plane.m_vNormal.Z + pm->m[3][1] * plane.m_fDD;
+		pout->m_vNormal.Z = pm->m[0][2] * plane.m_vNormal.X + pm->m[1][2] * plane.m_vNormal.Y + pm->m[2][2] * plane.m_vNormal.Z + pm->m[3][2] * plane.m_fDD;
+		pout->m_fDD = pm->m[0][3] * plane.m_vNormal.X + pm->m[1][3] * plane.m_vNormal.Y + pm->m[2][3] * plane.m_vNormal.Z + pm->m[3][3] * plane.m_fDD;
 		pout->normalize();
 		return pout;
 	}

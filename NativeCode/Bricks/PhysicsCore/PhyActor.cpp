@@ -82,15 +82,15 @@ void PhyActor::UpdateTransform()
 		auto pRigidActor = (physx::PxRigidActor*)mActor;
 
 		const auto& p = pRigidActor->getGlobalPose().p;
-		mPosition.x = p.x;
-		mPosition.y = p.y;
-		mPosition.z = p.z;
+		mPosition.X = p.x;
+		mPosition.Y = p.y;
+		mPosition.Z = p.z;
 		
 		const auto& q = pRigidActor->getGlobalPose().q;
-		mRotation.x = q.x;
-		mRotation.y = q.y;
-		mRotation.z = q.z;
-		mRotation.w = q.w;
+		mRotation.X = q.x;
+		mRotation.Y = q.y;
+		mRotation.Z = q.z;
+		mRotation.W = q.w;
 	}
 }
 

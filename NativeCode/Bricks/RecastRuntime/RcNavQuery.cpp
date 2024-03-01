@@ -277,10 +277,10 @@ RcNavQuery::~RcNavQuery()
 
 bool RcNavQuery::GetHeight(const v3dxVector3* pos, const v3dxVector3* pickext, float* h)
 {
-	float fpos[3] = { pos->x, pos->y, pos->z };
+	float fpos[3] = { pos->X, pos->Y, pos->Z };
 	dtQueryFilter filter;
 	dtPolyRef polyref;
-	float fpickext[3] = {pickext->x, pickext->y, pickext->z};
+	float fpickext[3] = {pickext->X, pickext->Y, pickext->Z};
 	mNavQuery->findNearestPoly(fpos, fpickext, &filter, &polyref, 0);
 	if (polyref == 0)
 	{
@@ -294,7 +294,7 @@ bool RcNavQuery::GetHeight(const v3dxVector3* pos, const v3dxVector3* pickext, f
 
 bool RcNavQuery::FindStraightPath(const v3dxVector3* start, const v3dxVector3* end, IBlobObject* blob)
 {
-	float startpos[3] = { start->x, start->y, start->z };
+	float startpos[3] = { start->X, start->Y, start->Z };
 	mNavQuery->findNearestPoly(startpos, mPolyPickExt, &mFilter, &mStartRef, 0);
 	if (mStartRef == 0)
 	{
@@ -302,7 +302,7 @@ bool RcNavQuery::FindStraightPath(const v3dxVector3* start, const v3dxVector3* e
 		return false;
 	}
 	
-	float endpos[3] = { end->x, end->y, end->z };
+	float endpos[3] = { end->X, end->Y, end->Z };
 	mNavQuery->findNearestPoly(endpos, mPolyPickExt, &mFilter, &mEndRef, 0);
 	if (mEndRef == 0)
 	{
@@ -324,9 +324,9 @@ void RcNavQuery::ClosestPointOnPoly(const v3dxVector3* start, const v3dxVector3*
 {
 	memcpy(mTempPolys, mPolys, sizeof(dtPolyRef)*mNPolys);
 	mTempNPolys = mNPolys;
-	float startpos[3] = { start->x, start->y, start->z };
+	float startpos[3] = { start->X, start->Y, start->Z };
 	mNavQuery->closestPointOnPoly(mStartRef, startpos, mIterPos, 0);
-	float endpos[3] = { end->x, end->y, end->z };
+	float endpos[3] = { end->X, end->Y, end->Z };
 	mNavQuery->closestPointOnPoly(mTempPolys[mTempNPolys - 1], endpos, mTargetPos, 0);
 
 	mNSmoothPath = 0;
@@ -456,12 +456,12 @@ void RcNavQuery::AutoRecalcStraightPaths(const v3dxVector3* start, const v3dxVec
 	float epos[3];
 
 	
-	float endpos[3] = { end->x, end->y, end->z };
+	float endpos[3] = { end->X, end->Y, end->Z };
 	dtVcopy(epos, endpos);
 	if (mPolys[mNPolys - 1] != mEndRef)
 		mNavQuery->closestPointOnPoly(mPolys[mNPolys - 1], endpos, epos, 0);
 
-	float startpos[3] = { start->x, start->y, start->z };
+	float startpos[3] = { start->X, start->Y, start->Z };
 	mNavQuery->findStraightPath(startpos, epos, mPolys, mNPolys,
 		mStraightPath, mStraightPathFlags,
 		mStraightPathPolys, &mNStraightPath, MAX_POLYS, mStraightPathOptions);

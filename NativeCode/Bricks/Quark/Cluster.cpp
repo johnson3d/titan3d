@@ -383,9 +383,9 @@ void QuarkCluster::SanitizeVertexData()
 	for( UINT32 VertexIndex = 0; VertexIndex < NumVerts; VertexIndex++ )
 	{
 		v3dxVector3& Position = GetPosition( VertexIndex );
-		SanitizeFloat( Position.x, -FltThreshold, FltThreshold, 0.0f );
-		SanitizeFloat( Position.y, -FltThreshold, FltThreshold, 0.0f );
-		SanitizeFloat( Position.z, -FltThreshold, FltThreshold, 0.0f );
+		SanitizeFloat( Position.X, -FltThreshold, FltThreshold, 0.0f );
+		SanitizeFloat( Position.Y, -FltThreshold, FltThreshold, 0.0f );
+		SanitizeFloat( Position.Z, -FltThreshold, FltThreshold, 0.0f );
 
 //         v3dxVector3& Normal = GetNormal(VertexIndex);
 //         if (!(Normal.X >= -FltThreshold && Normal.X <= FltThreshold &&

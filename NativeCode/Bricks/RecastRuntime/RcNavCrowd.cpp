@@ -111,7 +111,7 @@ int RcNavCrowd::AddAgent(const v3dxVector3* pos, float radius, float height, int
 	ap.obstacleAvoidanceType = (unsigned char)m_obstacleAvoidanceType;
 	ap.separationWeight = m_separationWeight;
 
-	float p[3] = { pos->x, pos->y, pos->z };
+	float p[3] = { pos->X, pos->Y, pos->Z };
 	int idx = m_crowd->addAgent(p, &ap);
 	if (idx != -1)
 	{
@@ -181,7 +181,7 @@ void RcNavCrowd::SetMoveTarget(const int id, const v3dxVector3* pos)
 	const dtQueryFilter* filter = m_crowd->getFilter(0);
 	const float* halfExtents = m_crowd->getQueryExtents();
 
-	float p[3] = { pos->x, pos->y, pos->z };
+	float p[3] = { pos->X, pos->Y, pos->Z };
 	m_navquery->findNearestPoly(p, halfExtents, filter, &m_targetRef, m_targetPos);
 
 	m_crowd->requestMoveTarget(id, m_targetRef, m_targetPos);

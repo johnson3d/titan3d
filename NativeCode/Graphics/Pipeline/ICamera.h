@@ -39,16 +39,16 @@ public:
 
 		v3dxVector3 GetLocalPosition() {
 			v3dxVector3 result;
-			result.x = (float)(mPosition.x - mMatrixStartPosition.x);
-			result.y = (float)(mPosition.y - mMatrixStartPosition.y);
-			result.z = (float)(mPosition.z - mMatrixStartPosition.z);
+			result.X = (float)(mPosition.X - mMatrixStartPosition.X);
+			result.Y = (float)(mPosition.Y - mMatrixStartPosition.Y);
+			result.Z = (float)(mPosition.Z - mMatrixStartPosition.Z);
 			return result;
 		}
 		v3dxVector3 GetLocalLookAt() {
 			v3dxVector3 result;
-			result.x = (float)(mLookAt.x - mMatrixStartPosition.x);
-			result.y = (float)(mLookAt.y - mMatrixStartPosition.y);
-			result.z = (float)(mLookAt.z - mMatrixStartPosition.z);
+			result.X = (float)(mLookAt.X - mMatrixStartPosition.X);
+			result.Y = (float)(mLookAt.Y - mMatrixStartPosition.Y);
+			result.Z = (float)(mLookAt.Z - mMatrixStartPosition.Z);
 			return result;
 		}
 	};
@@ -75,8 +75,8 @@ public:
 	}
 	v3dxVector2 GetJitterUV() const{
 		v3dxVector2 jitterUV;
-		jitterUV.x = (mJitterOffset.x - 0.5f) / mWidth;
-		jitterUV.y = (mJitterOffset.y - 0.5f) / mHeight;
+		jitterUV.X = (mJitterOffset.X - 0.5f) / mWidth;
+		jitterUV.Y = (mJitterOffset.Y - 0.5f) / mHeight;
 		return jitterUV;
 	}
 	

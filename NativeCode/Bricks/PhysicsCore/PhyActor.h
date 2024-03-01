@@ -62,26 +62,26 @@ public:
 	bool SetPose2Physics(const v3dxVector3* p, const v3dxQuaternion* q, bool autowake)
 	{
 		physx::PxTransform trf;
-		trf.p.x = p->x;
-		trf.p.y = p->y;
-		trf.p.z = p->z;
-		trf.q.x = q->x;
-		trf.q.y = q->y;
-		trf.q.z = q->z;
-		trf.q.w = q->w;
+		trf.p.x = p->X;
+		trf.p.y = p->Y;
+		trf.p.z = p->Z;
+		trf.q.x = q->X;
+		trf.q.y = q->Y;
+		trf.q.z = q->Z;
+		trf.q.w = q->W;
 		return SetPose2Physics(&trf, autowake ? TRUE : FALSE);
 	}
 	bool SetPose2Physics(const physx::PxTransform* transform, bool autowake);
 	bool AttachShape(PhyShape* shape, const v3dxVector3* p, const v3dxQuaternion* q)
 	{
 		physx::PxTransform trf;
-		trf.p.x = p->x;
-		trf.p.y = p->y;
-		trf.p.z = p->z;
-		trf.q.x = q->x;
-		trf.q.y = q->y;
-		trf.q.z = q->z;
-		trf.q.w = q->w;
+		trf.p.x = p->X;
+		trf.p.y = p->Y;
+		trf.p.z = p->Z;
+		trf.q.x = q->X;
+		trf.q.y = q->Y;
+		trf.q.z = q->Z;
+		trf.q.w = q->W;
 		return AttachShape(shape, &trf);
 	}
 	bool AttachShape(PhyShape* shape, const physx::PxTransform* relativePose);

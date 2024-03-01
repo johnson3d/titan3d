@@ -62,9 +62,9 @@ bool CheckContact( const v3dxVector3& aabbExtents, const v3dxMatrix4& obbTransfo
 	for(int i = 0; i < 3; ++i) 
 	{
 		ra = aabbExtents[i];
-		rb = obbExtents.x * fabs(MatrixHelper_Get( obbTransform, i, 0)) +
-			obbExtents.y * fabs(MatrixHelper_Get( obbTransform, i, 1)) +
-			obbExtents.z * fabs(MatrixHelper_Get( obbTransform, i, 2));
+		rb = obbExtents.X * fabs(MatrixHelper_Get( obbTransform, i, 0)) +
+			obbExtents.Y * fabs(MatrixHelper_Get( obbTransform, i, 1)) +
+			obbExtents.Z * fabs(MatrixHelper_Get( obbTransform, i, 2));
 
 		t = fabs(MatrixHelper_Get(obbTransform, 3, i));
 
@@ -75,9 +75,9 @@ bool CheckContact( const v3dxVector3& aabbExtents, const v3dxMatrix4& obbTransfo
 	// B's basis vectors
 	for(int k = 0; k < 3; ++k) 
 	{
-		ra = aabbExtents.x * fabs(MatrixHelper_Get( obbTransform, 0, k)) +
-			aabbExtents.y * fabs(MatrixHelper_Get( obbTransform, 1, k)) +
-			aabbExtents.z * fabs(MatrixHelper_Get( obbTransform, 2, k));
+		ra = aabbExtents.X * fabs(MatrixHelper_Get( obbTransform, 0, k)) +
+			aabbExtents.Y * fabs(MatrixHelper_Get( obbTransform, 1, k)) +
+			aabbExtents.Z * fabs(MatrixHelper_Get( obbTransform, 2, k));
 
 		rb = obbExtents[k];
 
@@ -93,11 +93,11 @@ bool CheckContact( const v3dxVector3& aabbExtents, const v3dxMatrix4& obbTransfo
 
 	// L = A0 x B0
 	ra =
-		aabbExtents.y * fabs(obbTransform.m31) +
-		aabbExtents.z * fabs(obbTransform.m21);
+		aabbExtents.Y * fabs(obbTransform.m31) +
+		aabbExtents.Z * fabs(obbTransform.m21);
 	rb =
-		obbExtents.y * fabs(obbTransform.m13) +
-		obbExtents.z * fabs(obbTransform.m12);
+		obbExtents.Y * fabs(obbTransform.m13) +
+		obbExtents.Z * fabs(obbTransform.m12);
 	t = fabs(
 		obbTransform.m43 * obbTransform.m21 - obbTransform.m42 * obbTransform.m31
 		);
@@ -106,11 +106,11 @@ bool CheckContact( const v3dxVector3& aabbExtents, const v3dxMatrix4& obbTransfo
 
 	// L = A0 x B1
 	ra =
-		aabbExtents.y * fabs(obbTransform.m32) +
-		aabbExtents.z * fabs(obbTransform.m22);
+		aabbExtents.Y * fabs(obbTransform.m32) +
+		aabbExtents.Z * fabs(obbTransform.m22);
 	rb =
-		obbExtents.x * fabs(obbTransform.m13) +
-		obbExtents.z * fabs(obbTransform.m11);
+		obbExtents.X * fabs(obbTransform.m13) +
+		obbExtents.Z * fabs(obbTransform.m11);
 	t = fabs(
 		obbTransform.m43 * obbTransform.m22 - obbTransform.m42 * obbTransform.m32
 		);
@@ -119,11 +119,11 @@ bool CheckContact( const v3dxVector3& aabbExtents, const v3dxMatrix4& obbTransfo
 
 	// L = A0 x B2
 	ra =
-		aabbExtents.y * fabs(obbTransform.m33) +
-		aabbExtents.z * fabs(obbTransform.m23);
+		aabbExtents.Y * fabs(obbTransform.m33) +
+		aabbExtents.Z * fabs(obbTransform.m23);
 	rb =
-		obbExtents.x * fabs(obbTransform.m12) +
-		obbExtents.y * fabs(obbTransform.m11);
+		obbExtents.X * fabs(obbTransform.m12) +
+		obbExtents.Y * fabs(obbTransform.m11);
 	t = fabs(
 		obbTransform.m43 * obbTransform.m23 - obbTransform.m42 * obbTransform.m33
 		);
@@ -132,11 +132,11 @@ bool CheckContact( const v3dxVector3& aabbExtents, const v3dxMatrix4& obbTransfo
 
 	// L = A1 x B0
 	ra =
-		aabbExtents.x * fabs(obbTransform.m31) +
-		aabbExtents.z * fabs(obbTransform.m11);
+		aabbExtents.X * fabs(obbTransform.m31) +
+		aabbExtents.Z * fabs(obbTransform.m11);
 	rb =
-		obbExtents.y * fabs(obbTransform.m23) +
-		obbExtents.z * fabs(obbTransform.m22);
+		obbExtents.Y * fabs(obbTransform.m23) +
+		obbExtents.Z * fabs(obbTransform.m22);
 	t = fabs(
 		obbTransform.m41 * obbTransform.m31 - obbTransform.m43 * obbTransform.m11
 		);
@@ -145,11 +145,11 @@ bool CheckContact( const v3dxVector3& aabbExtents, const v3dxMatrix4& obbTransfo
 
 	// L = A1 x B1
 	ra =
-		aabbExtents.x * fabs(obbTransform.m32) +
-		aabbExtents.z * fabs(obbTransform.m12);
+		aabbExtents.X * fabs(obbTransform.m32) +
+		aabbExtents.Z * fabs(obbTransform.m12);
 	rb =
-		obbExtents.x * fabs(obbTransform.m23) +
-		obbExtents.z * fabs(obbTransform.m21);
+		obbExtents.X * fabs(obbTransform.m23) +
+		obbExtents.Z * fabs(obbTransform.m21);
 	t = fabs(
 		obbTransform.m41 * obbTransform.m32 - obbTransform.m43 * obbTransform.m12
 		);
@@ -158,11 +158,11 @@ bool CheckContact( const v3dxVector3& aabbExtents, const v3dxMatrix4& obbTransfo
 
 	// L = A1 x B2
 	ra =
-		aabbExtents.x * fabs(obbTransform.m33) +
-		aabbExtents.z * fabs(obbTransform.m13);
+		aabbExtents.X * fabs(obbTransform.m33) +
+		aabbExtents.Z * fabs(obbTransform.m13);
 	rb =
-		obbExtents.x * fabs(obbTransform.m22) +
-		obbExtents.y * fabs(obbTransform.m21);
+		obbExtents.X * fabs(obbTransform.m22) +
+		obbExtents.Y * fabs(obbTransform.m21);
 	t = fabs(
 		obbTransform.m41 * obbTransform.m33 - obbTransform.m43 * obbTransform.m13
 		);
@@ -171,11 +171,11 @@ bool CheckContact( const v3dxVector3& aabbExtents, const v3dxMatrix4& obbTransfo
 
 	// L = A2 x B0
 	ra =
-		aabbExtents.x * fabs(obbTransform.m21) +
-		aabbExtents.y * fabs(obbTransform.m11);
+		aabbExtents.X * fabs(obbTransform.m21) +
+		aabbExtents.Y * fabs(obbTransform.m11);
 	rb =
-		obbExtents.y * fabs(obbTransform.m33) +
-		obbExtents.z * fabs(obbTransform.m32);
+		obbExtents.Y * fabs(obbTransform.m33) +
+		obbExtents.Z * fabs(obbTransform.m32);
 	t = fabs(
 		obbTransform.m42 * obbTransform.m11 - obbTransform.m41 * obbTransform.m21
 		);
@@ -184,11 +184,11 @@ bool CheckContact( const v3dxVector3& aabbExtents, const v3dxMatrix4& obbTransfo
 
 	// L = A2 x B1
 	ra =
-		aabbExtents.x * fabs(obbTransform.m22) +
-		aabbExtents.y * fabs(obbTransform.m12);
+		aabbExtents.X * fabs(obbTransform.m22) +
+		aabbExtents.Y * fabs(obbTransform.m12);
 	rb =
-		obbExtents.x * fabs(obbTransform.m33) +
-		obbExtents.z * fabs(obbTransform.m31);
+		obbExtents.X * fabs(obbTransform.m33) +
+		obbExtents.Z * fabs(obbTransform.m31);
 	t = fabs(
 		obbTransform.m42 * obbTransform.m12 - obbTransform.m41 * obbTransform.m22
 		);
@@ -197,11 +197,11 @@ bool CheckContact( const v3dxVector3& aabbExtents, const v3dxMatrix4& obbTransfo
 
 	// L = A2 x B2
 	ra =
-		aabbExtents.x * fabs(obbTransform.m23) +
-		aabbExtents.y * fabs(obbTransform.m13);
+		aabbExtents.X * fabs(obbTransform.m23) +
+		aabbExtents.Y * fabs(obbTransform.m13);
 	rb =
-		obbExtents.x * fabs(obbTransform.m32) +
-		obbExtents.y * fabs(obbTransform.m31);
+		obbExtents.X * fabs(obbTransform.m32) +
+		obbExtents.Y * fabs(obbTransform.m31);
 	t = fabs(
 		obbTransform.m42 * obbTransform.m13 - obbTransform.m41 * obbTransform.m23
 		);
@@ -615,7 +615,7 @@ vBOOL v3dxOBB::IsFastOutRef( const v3dxOBB& obb , const v3dxMatrix4& tar_tm )
 	vBOOL bOut = TRUE;
 	for( int i=0 ; i<BOX3_CORNER_NUMBER ; i++ )
 	{
-		if( boxCorner[i].x<-m_vExtent.x )
+		if( boxCorner[i].X<-m_vExtent.X )
 		{
 			continue;
 		}
@@ -632,7 +632,7 @@ vBOOL v3dxOBB::IsFastOutRef( const v3dxOBB& obb , const v3dxMatrix4& tar_tm )
 	bOut = TRUE;
 	for( int i=0 ; i<BOX3_CORNER_NUMBER ; i++ )
 	{
-		if( boxCorner[i].x>m_vExtent.x )
+		if( boxCorner[i].X>m_vExtent.X )
 		{
 			continue;
 		}
@@ -650,7 +650,7 @@ vBOOL v3dxOBB::IsFastOutRef( const v3dxOBB& obb , const v3dxMatrix4& tar_tm )
 	bOut = TRUE;
 	for( int i=0 ; i<BOX3_CORNER_NUMBER ; i++ )
 	{
-		if( boxCorner[i].y<-m_vExtent.y )
+		if( boxCorner[i].Y<-m_vExtent.Y )
 		{
 			continue;
 		}
@@ -667,7 +667,7 @@ vBOOL v3dxOBB::IsFastOutRef( const v3dxOBB& obb , const v3dxMatrix4& tar_tm )
 	bOut = TRUE;
 	for( int i=0 ; i<BOX3_CORNER_NUMBER ; i++ )
 	{
-		if( boxCorner[i].y>m_vExtent.y )
+		if( boxCorner[i].Y>m_vExtent.Y )
 		{
 			continue;
 		}
@@ -684,7 +684,7 @@ vBOOL v3dxOBB::IsFastOutRef( const v3dxOBB& obb , const v3dxMatrix4& tar_tm )
 	bOut = TRUE;
 	for( int i=0 ; i<BOX3_CORNER_NUMBER ; i++ )
 	{
-		if( boxCorner[i].z<-m_vExtent.z )
+		if( boxCorner[i].Z<-m_vExtent.Z )
 		{
 			continue;
 		}
@@ -701,7 +701,7 @@ vBOOL v3dxOBB::IsFastOutRef( const v3dxOBB& obb , const v3dxMatrix4& tar_tm )
 	bOut = TRUE;
 	for( int i=0 ; i<BOX3_CORNER_NUMBER ; i++ )
 	{
-		if( boxCorner[i].z>m_vExtent.z )
+		if( boxCorner[i].Z>m_vExtent.Z )
 		{
 			continue;
 		}

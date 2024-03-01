@@ -19,8 +19,8 @@ FbxAMatrix FBXDataConverter::AxisConversionMatrixInv;
 v3dxVector2 FBXDataConverter::ConvertUV(const FbxVector2& Vector)
 {
 	v3dxVector2 Out;
-	Out.x = static_cast<float>(Vector[0]);
-	Out.y = 1.0f - static_cast<float>(Vector[1]);
+	Out.X = static_cast<float>(Vector[0]);
+	Out.Y = 1.0f - static_cast<float>(Vector[1]);
 	return Out;
 }
 
@@ -137,10 +137,10 @@ v3dxVector3 FBXDataConverter::ConvertScale(const v3dxVector3& Vector)
 v3dxQuaternion FBXDataConverter::ConvertQuat(const FbxQuaternion& Quaternion)
 {
 	v3dxQuaternion quat;
-	quat.x = -(float)Quaternion[0];
-	quat.y = -(float)Quaternion[2];
-	quat.z = -(float)Quaternion[1];
-	quat.w = (float)Quaternion[3];
+	quat.X = -(float)Quaternion[0];
+	quat.Y = -(float)Quaternion[2];
+	quat.Z = -(float)Quaternion[1];
+	quat.W = (float)Quaternion[3];
 
 	return quat;
 }

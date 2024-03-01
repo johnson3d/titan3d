@@ -7,7 +7,7 @@
 NS_BEGIN
 
 #define SMALLRADLINE 5
-#define GETUVFROMPOS(pos) v3dxVector2(pos.x / size.x * uvRect.Width + uvRect.X, pos.y / size.y * uvRect.Height + uvRect.Y)
+#define GETUVFROMPOS(pos) v3dxVector2(pos.X / size.X * uvRect.Width + uvRect.X, pos.Y / size.Y * uvRect.Height + uvRect.Y)
 
 namespace Canvas
 {
@@ -193,7 +193,7 @@ namespace Canvas
 				continue;
 			
 			auto PixelY = (word->PixelY);
-			FRectanglef wordRect(offset.x + word->PixelX, offset.y + PixelY, (float)word->PixelWidth, (float)word->PixelHeight);
+			FRectanglef wordRect(offset.X + word->PixelX, offset.Y + PixelY, (float)word->PixelWidth, (float)word->PixelHeight);
 			if (clip.IsContain(wordRect))
 			{
 				if (prevBrush != word->Brush)
@@ -215,23 +215,23 @@ namespace Canvas
 					pCmd = GetOrNewDrawCmd(prevBrush);
 				}
 				auto rect = FRectanglef::And(clip, wordRect);
-				float u = vert[Canvas::RCN_X0_Y0].UV.x;
-				float u1 = ((rect.X - offset.x - word->PixelX) - u) / word->PixelWidth;
-				float u2 = ((rect.X + rect.Width - offset.x - word->PixelX) - u) / word->PixelWidth;
-				float us = vert[Canvas::RCN_X1_Y0].UV.x - u;
-				float v = vert[Canvas::RCN_X0_Y0].UV.y;
-				float v1 = ((rect.Y - offset.y - word->PixelY) - v) / word->PixelHeight;
-				float v2 = ((rect.Y + rect.Height - offset.y - word->PixelY) - v) / word->PixelHeight;
-				float vs = vert[Canvas::RCN_X0_Y1].UV.y - v;
-				vert[Canvas::RCN_X0_Y0].UV.x = u + us * u1;
-				vert[Canvas::RCN_X0_Y1].UV.x = u + us * u1;
-				vert[Canvas::RCN_X0_Y0].UV.y = v + vs * v1;
-				vert[Canvas::RCN_X0_Y1].UV.y = v + vs * v2;
+				float u = vert[Canvas::RCN_X0_Y0].UV.X;
+				float u1 = ((rect.X - offset.X - word->PixelX) - u) / word->PixelWidth;
+				float u2 = ((rect.X + rect.Width - offset.X - word->PixelX) - u) / word->PixelWidth;
+				float us = vert[Canvas::RCN_X1_Y0].UV.X - u;
+				float v = vert[Canvas::RCN_X0_Y0].UV.Y;
+				float v1 = ((rect.Y - offset.Y - word->PixelY) - v) / word->PixelHeight;
+				float v2 = ((rect.Y + rect.Height - offset.Y - word->PixelY) - v) / word->PixelHeight;
+				float vs = vert[Canvas::RCN_X0_Y1].UV.Y - v;
+				vert[Canvas::RCN_X0_Y0].UV.X = u + us * u1;
+				vert[Canvas::RCN_X0_Y1].UV.X = u + us * u1;
+				vert[Canvas::RCN_X0_Y0].UV.Y = v + vs * v1;
+				vert[Canvas::RCN_X0_Y1].UV.Y = v + vs * v2;
 
-				vert[Canvas::RCN_X1_Y0].UV.x = u + us * u2;
-				vert[Canvas::RCN_X1_Y1].UV.x = u + us * u2;
-				vert[Canvas::RCN_X1_Y0].UV.y = v + vs * v1;
-				vert[Canvas::RCN_X1_Y1].UV.y = v + vs * v2;
+				vert[Canvas::RCN_X1_Y0].UV.X = u + us * u2;
+				vert[Canvas::RCN_X1_Y1].UV.X = u + us * u2;
+				vert[Canvas::RCN_X1_Y0].UV.Y = v + vs * v1;
+				vert[Canvas::RCN_X1_Y1].UV.Y = v + vs * v2;
 
 				vert[Canvas::RCN_X0_Y0].Pos.setValue(rect.Get_X0_Y0());
 				vert[Canvas::RCN_X1_Y0].Pos.setValue(rect.Get_X1_Y0());
@@ -246,7 +246,7 @@ namespace Canvas
 				pCmd->PushQuad(vert);
 			}
 			
-			offset.x += word->Advance.x;
+			offset.X += word->Advance.X;
 		}
 	}
 	void FCanvasDrawCmdList::AddLine(const v3dxVector2& s, const v3dxVector2& e, float width, const FColor& color, FSubDrawCmd* pOutCmd)
@@ -276,7 +276,7 @@ namespace Canvas
 		FCanvasVertex vert[4];
 		auto pos = start - ext;
 		auto& v1 = vert[RCN_X0_Y0];
-		v1.Pos.setValue(pos.x, pos.y, 0);
+		v1.Pos.setValue(pos.X, pos.Y, 0);
 		if (matrix != nullptr)
 			v3dxVec3TransformCoord(&v1.Pos, &v1.Pos, matrix);
 		v1.Color = rgba;
@@ -285,7 +285,7 @@ namespace Canvas
 
 		pos = start + ext;
 		auto& v2 = vert[RCN_X0_Y1];
-		v2.Pos.setValue(pos.x, pos.y, 0);
+		v2.Pos.setValue(pos.X, pos.Y, 0);
 		if (matrix != nullptr)
 			v3dxVec3TransformCoord(&v2.Pos, &v2.Pos, matrix);
 		v2.Color = rgba;
@@ -294,7 +294,7 @@ namespace Canvas
 
 		pos = end + ext;
 		auto& v3 = vert[RCN_X1_Y1];
-		v3.Pos.setValue(pos.x, pos.y, 0);
+		v3.Pos.setValue(pos.X, pos.Y, 0);
 		if (matrix != nullptr)
 			v3dxVec3TransformCoord(&v3.Pos, &v3.Pos, matrix);
 		v3.Color = rgba;
@@ -303,7 +303,7 @@ namespace Canvas
 
 		pos = end - ext;
 		auto& v4 = vert[RCN_X1_Y0];
-		v4.Pos.setValue(pos.x, pos.y, 0);
+		v4.Pos.setValue(pos.X, pos.Y, 0);
 		if (matrix != nullptr)
 			v3dxVec3TransformCoord(&v4.Pos, &v4.Pos, matrix);
 		v4.Color = rgba;
@@ -406,23 +406,23 @@ namespace Canvas
 		{
 			auto pCmd = GetOrNewDrawCmd(image);
 			auto rect = FRectanglef::And(clip, imgRect);
-			float u = vert[Canvas::RCN_X0_Y0].UV.x;
+			float u = vert[Canvas::RCN_X0_Y0].UV.X;
 			float u1 = ((rect.X - x) - u) / w;
 			float u2 = ((rect.X + rect.Width - x) - u) / w;
-			float us = vert[Canvas::RCN_X1_Y0].UV.x - u;
-			float v = vert[Canvas::RCN_X0_Y0].UV.y;
+			float us = vert[Canvas::RCN_X1_Y0].UV.X - u;
+			float v = vert[Canvas::RCN_X0_Y0].UV.Y;
 			float v1 = ((rect.Y - y) - v) / h;
 			float v2 = ((rect.Y + rect.Height - y) - v) / h;
-			float vs = vert[Canvas::RCN_X0_Y1].UV.y - v;
-			vert[Canvas::RCN_X0_Y0].UV.x = u + us * u1;
-			vert[Canvas::RCN_X0_Y1].UV.x = u + us * u1;
-			vert[Canvas::RCN_X0_Y0].UV.y = v + vs * v1;
-			vert[Canvas::RCN_X0_Y1].UV.y = v + vs * v2;
+			float vs = vert[Canvas::RCN_X0_Y1].UV.Y - v;
+			vert[Canvas::RCN_X0_Y0].UV.X = u + us * u1;
+			vert[Canvas::RCN_X0_Y1].UV.X = u + us * u1;
+			vert[Canvas::RCN_X0_Y0].UV.Y = v + vs * v1;
+			vert[Canvas::RCN_X0_Y1].UV.Y = v + vs * v2;
 
-			vert[Canvas::RCN_X1_Y0].UV.x = u + us * u2;
-			vert[Canvas::RCN_X1_Y1].UV.x = u + us * u2;
-			vert[Canvas::RCN_X1_Y0].UV.y = v + vs * v1;
-			vert[Canvas::RCN_X1_Y1].UV.y = v + vs * v2;
+			vert[Canvas::RCN_X1_Y0].UV.X = u + us * u2;
+			vert[Canvas::RCN_X1_Y1].UV.X = u + us * u2;
+			vert[Canvas::RCN_X1_Y0].UV.Y = v + vs * v1;
+			vert[Canvas::RCN_X1_Y1].UV.Y = v + vs * v2;
 
 			vert[Canvas::RCN_X0_Y0].Pos.setValue(rect.Get_X0_Y0());
 			vert[Canvas::RCN_X1_Y0].Pos.setValue(rect.Get_X1_Y0());
@@ -527,7 +527,7 @@ namespace Canvas
 			auto rad = delta * i + radiusStart;
 			auto cosVal = std::cos(rad) * radius;
 			auto sinVal = std::sin(rad) * radius;
-			vectices[vectorStartIdx + i].setValue(cornerCenter.x + cosVal, cornerCenter.y - sinVal);
+			vectices[vectorStartIdx + i].setValue(cornerCenter.X + cosVal, cornerCenter.Y - sinVal);
 		}
 
 	}
@@ -538,11 +538,11 @@ namespace Canvas
 	void FCanvasDrawCmdList::AddRectFill(const v3dxVector2& s, const v3dxVector2& e, const v3dxVector4& cornerRadius, const FColor& color, FSubDrawCmd* pOutCmd)
 	{
 		const auto& clip = GetCurrentClipRect();
-		v3dxVector2 min = v3dxVector2(std::min(s.x, e.x), std::min(s.y, e.y));
-		v3dxVector2 max = v3dxVector2(std::max(s.x, e.x), std::max(s.y, e.y));
+		v3dxVector2 min = v3dxVector2(std::min(s.X, e.X), std::min(s.Y, e.Y));
+		v3dxVector2 max = v3dxVector2(std::max(s.X, e.X), std::max(s.Y, e.Y));
 		v3dxVector2 size = max - min;
 
-		if (clip.IsValid() && ((clip.X > max.x) || (clip.Y > max.y) || (clip.GetRight() < min.x) || (clip.GetBottom() < min.y)))
+		if (clip.IsValid() && ((clip.X > max.X) || (clip.Y > max.Y) || (clip.GetRight() < min.X) || (clip.GetBottom() < min.Y)))
 			return;
 
 		int topLeftCornerSliceCount = cornerRadius.topleft != 0 ? (int)Math::Ceil(Math::HALF_PI / (std::asinf(SMALLRADLINE / cornerRadius.topleft) * 2)) : 0;
@@ -553,16 +553,16 @@ namespace Canvas
 		std::vector<v3dxVector2> tempVertices;
 		tempVertices.resize(topLeftCornerSliceCount + topRightCornerSliceCount + bottomRightCornerSliceCount + bottomLeftCornerSliceCount + 4);
 		int tempVerticesStartIdx = 0;
-		v3dxVector2 bottomLeftCenter(min.x + cornerRadius.bottomleft, max.y - cornerRadius.bottomleft);
+		v3dxVector2 bottomLeftCenter(min.X + cornerRadius.bottomleft, max.Y - cornerRadius.bottomleft);
 		CalculateCornerVertices(bottomLeftCornerSliceCount, Math::V3_PI, cornerRadius.bottomleft, bottomLeftCenter, tempVerticesStartIdx, tempVertices);
 		tempVerticesStartIdx += bottomLeftCornerSliceCount + 1;
-		v3dxVector2 bottomRightCenter(max.x - cornerRadius.bottomright, max.y - cornerRadius.bottomright);
+		v3dxVector2 bottomRightCenter(max.X - cornerRadius.bottomright, max.Y - cornerRadius.bottomright);
 		CalculateCornerVertices(bottomRightCornerSliceCount, Math::HALF_PI * 3, cornerRadius.bottomright, bottomRightCenter, tempVerticesStartIdx, tempVertices);
 		tempVerticesStartIdx += bottomRightCornerSliceCount + 1;
-		v3dxVector2 topRightCenter(max.x - cornerRadius.topright, min.y + cornerRadius.topright);
+		v3dxVector2 topRightCenter(max.X - cornerRadius.topright, min.Y + cornerRadius.topright);
 		CalculateCornerVertices(topRightCornerSliceCount, 0, cornerRadius.topright, topRightCenter, tempVerticesStartIdx, tempVertices);
 		tempVerticesStartIdx += topRightCornerSliceCount + 1;
-		v3dxVector2 topLeftCenter(min.x + cornerRadius.topleft, min.y + cornerRadius.topleft);
+		v3dxVector2 topLeftCenter(min.X + cornerRadius.topleft, min.Y + cornerRadius.topleft);
 		CalculateCornerVertices(topLeftCornerSliceCount, Math::HALF_PI, cornerRadius.topleft, topLeftCenter, tempVerticesStartIdx, tempVertices);
 
 		std::vector<v3dxVector2> newVerts;
@@ -590,7 +590,7 @@ namespace Canvas
 		for (UINT i = 0; i < newVerts.size(); i++)
 		{
 			auto& vt = vertices[vst + i];
-			vt.Pos.setValue(newVerts[i].x, newVerts[i].y, 0.0f);
+			vt.Pos.setValue(newVerts[i].X, newVerts[i].Y, 0.0f);
 			vt.Color = color;
 			vt.UV = GETUVFROMPOS(vt.Pos);
 			TransformIndexToColor(index, vt.Index);
@@ -640,31 +640,31 @@ namespace Canvas
 		{
 		case 0: // bottom left
 			cRadius = cornerRadius.bottomleft;
-			cornerInCenter.setValue(min.x + cRadius + thickness.left, max.y - cRadius - thickness.bottom);
-			cornerOutCenter.setValue(min.x + cRadius, max.y - cRadius);
-			tempVertices[0].setValue(min.x, max.y - thickness.bottom - cRadius);
-			tempVertices[sliceCount + 2].setValue(min.x + thickness.left + cRadius, max.y);
+			cornerInCenter.setValue(min.X + cRadius + thickness.left, max.Y - cRadius - thickness.bottom);
+			cornerOutCenter.setValue(min.X + cRadius, max.Y - cRadius);
+			tempVertices[0].setValue(min.X, max.Y - thickness.bottom - cRadius);
+			tempVertices[sliceCount + 2].setValue(min.X + thickness.left + cRadius, max.Y);
 			break;
 		case 1: // bottom right
 			cRadius = cornerRadius.bottomright;
-			cornerInCenter.setValue(max.x - cRadius - thickness.right, max.y - cRadius - thickness.bottom);
-			cornerOutCenter.setValue(max.x - cRadius, max.y - cRadius);
-			tempVertices[0].setValue(max.x - thickness.right - cRadius, max.y);
-			tempVertices[sliceCount + 2].setValue(max.x, max.y - thickness.bottom - cRadius);
+			cornerInCenter.setValue(max.X - cRadius - thickness.right, max.Y - cRadius - thickness.bottom);
+			cornerOutCenter.setValue(max.X - cRadius, max.Y - cRadius);
+			tempVertices[0].setValue(max.X - thickness.right - cRadius, max.Y);
+			tempVertices[sliceCount + 2].setValue(max.X, max.Y - thickness.bottom - cRadius);
 			break;
 		case 2:	// top right
 			cRadius = cornerRadius.topright;
-			cornerInCenter.setValue(max.x - cRadius - thickness.right, min.y + cRadius + thickness.top);
-			cornerOutCenter.setValue(max.x - cRadius, min.y + cRadius);
-			tempVertices[0].setValue(max.x, min.y + thickness.top + cRadius);
-			tempVertices[sliceCount + 2].setValue(max.x - thickness.right - cRadius, min.y);
+			cornerInCenter.setValue(max.X - cRadius - thickness.right, min.Y + cRadius + thickness.top);
+			cornerOutCenter.setValue(max.X - cRadius, min.Y + cRadius);
+			tempVertices[0].setValue(max.X, min.Y + thickness.top + cRadius);
+			tempVertices[sliceCount + 2].setValue(max.X - thickness.right - cRadius, min.Y);
 			break;
 		case 3:	// top left
 			cRadius = cornerRadius.topleft;
-			cornerInCenter.setValue(min.x + cRadius + thickness.left, min.y + cRadius + thickness.top);
-			cornerOutCenter.setValue(min.x + cRadius, min.y + cRadius);
-			tempVertices[0].setValue(min.x + thickness.left + cRadius, min.y);
-			tempVertices[sliceCount + 2].setValue(min.x, min.y + thickness.top + cRadius);
+			cornerInCenter.setValue(min.X + cRadius + thickness.left, min.Y + cRadius + thickness.top);
+			cornerOutCenter.setValue(min.X + cRadius, min.Y + cRadius);
+			tempVertices[0].setValue(min.X + thickness.left + cRadius, min.Y);
+			tempVertices[sliceCount + 2].setValue(min.X, min.Y + thickness.top + cRadius);
 			break;
 		}
 
@@ -675,8 +675,8 @@ namespace Canvas
 			auto radIn = delta * i + radiusStart;
 			auto cosVal = std::cos(radIn) * cRadius;
 			auto sinVal = std::sin(radIn) * cRadius;
-			tempVertices[vs].setValue(cornerInCenter.x + cosVal, cornerInCenter.y - sinVal);
-			tempVertices[verticesCount - vs].setValue(cornerOutCenter.x + cosVal, cornerOutCenter.y  - sinVal);
+			tempVertices[vs].setValue(cornerInCenter.X + cosVal, cornerInCenter.Y - sinVal);
+			tempVertices[verticesCount - vs].setValue(cornerOutCenter.X + cosVal, cornerOutCenter.Y  - sinVal);
 			vs++;
 		}
 		std::vector<UINT> tempInds;
@@ -729,7 +729,7 @@ namespace Canvas
 		for (UINT i = 0; i < newVerts.size(); i++)
 		{
 			auto& vt = vertices[vst + i];
-			vt.Pos.setValue(newVerts[i].x, newVerts[i].y, 0.0f);
+			vt.Pos.setValue(newVerts[i].X, newVerts[i].Y, 0.0f);
 			vt.Color = color;
 			vt.UV = GETUVFROMPOS(vt.Pos);
 			FCanvasDrawCmdList::TransformIndexToColor(transformIndex, vt.Index);
@@ -780,11 +780,11 @@ namespace Canvas
 	void FCanvasDrawCmdList::AddRectLine(const v3dxVector2& s, const v3dxVector2& e, const v3dxThickness& thickness, const v3dxVector4& cornerRadius, const FColor& color, FSubDrawCmd* pOutCmd)
 	{
 		const auto& clip = GetCurrentClipRect();
-		v3dxVector2 min = v3dxVector2(std::min(s.x, e.x), std::min(s.y, e.y));
-		v3dxVector2 max = v3dxVector2(std::max(s.x, e.x), std::max(s.y, e.y));
+		v3dxVector2 min = v3dxVector2(std::min(s.X, e.X), std::min(s.Y, e.Y));
+		v3dxVector2 max = v3dxVector2(std::max(s.X, e.X), std::max(s.Y, e.Y));
 		v3dxVector2 size = max - min;
 
-		if (clip.IsValid() && ((clip.X > max.x) || (clip.Y > max.y) || (clip.GetRight() < min.x) || (clip.GetBottom() < min.y)))
+		if (clip.IsValid() && ((clip.X > max.X) || (clip.Y > max.Y) || (clip.GetRight() < min.X) || (clip.GetBottom() < min.Y)))
 			return;
 
 		int topLeftCornerSliceCount = cornerRadius.topleft != 0 ? (int)Math::Ceil(Math::HALF_PI / (std::asinf(SMALLRADLINE / cornerRadius.topleft) * 2)) : 0;
@@ -820,7 +820,7 @@ namespace Canvas
 		//        \ p8 ---------- p10 /  
 
 		// left
-		FRectanglef tileRect = FRectanglef(min.x, min.y + thickness.top + cornerRadius.topleft, thickness.left, size.y - thickness.top - cornerRadius.topleft - thickness.bottom - cornerRadius.bottomleft);
+		FRectanglef tileRect = FRectanglef(min.X, min.Y + thickness.top + cornerRadius.topleft, thickness.left, size.Y - thickness.top - cornerRadius.topleft - thickness.bottom - cornerRadius.bottomleft);
 		CalculateRect(tileRect, clip, size, uvRect, pCmd, color, index);
 
 		// bottom-left
@@ -829,8 +829,8 @@ namespace Canvas
 			thickness, cornerRadius, color, index);
 		
 		// bottom
-		tileRect = FRectanglef(min.x + thickness.left + cornerRadius.bottomleft, max.y - thickness.bottom,
-			size.x - thickness.left - thickness.right - cornerRadius.bottomleft - cornerRadius.bottomright,
+		tileRect = FRectanglef(min.X + thickness.left + cornerRadius.bottomleft, max.Y - thickness.bottom,
+			size.X - thickness.left - thickness.right - cornerRadius.bottomleft - cornerRadius.bottomright,
 			thickness.bottom);
 		CalculateRect(tileRect, clip, size, uvRect, pCmd, color, index);
 
@@ -840,8 +840,8 @@ namespace Canvas
 			thickness, cornerRadius, color, index);
 
 		// right
-		tileRect = FRectanglef(max.x - thickness.right, min.y + thickness.top + cornerRadius.topright, thickness.right,
-			size.y - thickness.top - thickness.bottom - cornerRadius.topright - cornerRadius.bottomright);
+		tileRect = FRectanglef(max.X - thickness.right, min.Y + thickness.top + cornerRadius.topright, thickness.right,
+			size.Y - thickness.top - thickness.bottom - cornerRadius.topright - cornerRadius.bottomright);
 		CalculateRect(tileRect, clip, size, uvRect, pCmd, color, index);
 
 		// top right
@@ -850,8 +850,8 @@ namespace Canvas
 			thickness, cornerRadius, color, index);
 
 		// top
-		tileRect = FRectanglef(min.x + thickness.left + cornerRadius.topleft, min.y,
-			size.x - thickness.left - thickness.right - cornerRadius.topleft - cornerRadius.topright,
+		tileRect = FRectanglef(min.X + thickness.left + cornerRadius.topleft, min.Y,
+			size.X - thickness.left - thickness.right - cornerRadius.topleft - cornerRadius.topright,
 			thickness.top);
 		CalculateRect(tileRect, clip, size, uvRect, pCmd, color, index);
 

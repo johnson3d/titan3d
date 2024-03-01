@@ -115,7 +115,7 @@ public:
 	v3dxQuaternion operator* (float fScalar) const;
 	v3dxQuaternion operator/ (float aScalar) const
 	{
-		return v3dxQuaternion(x / aScalar, y / aScalar, z / aScalar, w / aScalar);
+		return v3dxQuaternion(X / aScalar, Y / aScalar, Z / aScalar, W / aScalar);
 	}
 	//void rotate(const v3dxVector3 p_vIn[], v3dxVector3 p_vOut[], int p_nCount) const;
 	//void operator *=(const v3dxQuaternion &Quaternion);

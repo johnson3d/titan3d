@@ -133,9 +133,9 @@ int v3dxPoly3::addVertex (float x, float y, float z,vBOOL bUpdateNormal)
 {
 	if (num_vertices >= max_vertices)
 		makeRoom (max_vertices+5);
-	vertices[num_vertices].x = x;
-	vertices[num_vertices].y = y;
-	vertices[num_vertices].z = z;
+	vertices[num_vertices].X = x;
+	vertices[num_vertices].Y = y;
+	vertices[num_vertices].Z = z;
 	num_vertices++;
 	if( bUpdateNormal )
 		UpdatePlaneNormal();
@@ -266,14 +266,14 @@ void v3dxPoly3::splitWithPlaneX (v3dxPoly3& poly1, v3dxPoly3& poly2,
 	v3dxVector3 ptB;
 	float sideA, sideB;
 	v3dxVector3 ptA = vertices[num_vertices - 1];
-	sideA = ptA.x - x;
+	sideA = ptA.X - x;
 	if (std::abs(sideA) < SMALL_EPSILON)
 		sideA = 0;
 
 	for (int i = -1 ; ++i < num_vertices ; )
 	{
 		ptB = vertices[i];
-		sideB = ptB.x - x;
+		sideB = ptB.X - x;
 		if (std::abs(sideB) < SMALL_EPSILON)
 			sideB = 0;
 		if (sideB > 0)
@@ -281,7 +281,7 @@ void v3dxPoly3::splitWithPlaneX (v3dxPoly3& poly1, v3dxPoly3& poly2,
 			if (sideA < 0)
 			{
 				v3dxVector3 v = ptB; v -= ptA;
-				float sect = - (ptA.x - x) / v.x;
+				float sect = - (ptA.X - x) / v.X;
 				v *= sect; v += ptA;
 				poly1.addVertex (v);
 				poly2.addVertex (v);
@@ -293,7 +293,7 @@ void v3dxPoly3::splitWithPlaneX (v3dxPoly3& poly1, v3dxPoly3& poly2,
 			if (sideA > 0)
 			{
 				v3dxVector3 v = ptB; v -= ptA;
-				float sect = - (ptA.x - x) / v.x;
+				float sect = - (ptA.X - x) / v.X;
 				v *= sect; v += ptA;
 				poly1.addVertex (v);
 				poly2.addVertex (v);
@@ -319,14 +319,14 @@ void v3dxPoly3::splitWithPlaneY (v3dxPoly3& poly1, v3dxPoly3& poly2,
 	v3dxVector3 ptB;
 	float sideA, sideB;
 	v3dxVector3 ptA = vertices[num_vertices - 1];
-	sideA = ptA.y - y;
+	sideA = ptA.Y - y;
 	if (std::abs(sideA) < SMALL_EPSILON)
 		sideA = 0;
 
 	for (int i = -1 ; ++i < num_vertices ; )
 	{
 		ptB = vertices[i];
-		sideB = ptB.y - y;
+		sideB = ptB.Y - y;
 		if (std::abs(sideB) < SMALL_EPSILON)
 			sideB = 0;
 		if (sideB > 0)
@@ -334,7 +334,7 @@ void v3dxPoly3::splitWithPlaneY (v3dxPoly3& poly1, v3dxPoly3& poly2,
 			if (sideA < 0)
 			{
 				v3dxVector3 v = ptB; v -= ptA;
-				float sect = - (ptA.y - y) / v.y;
+				float sect = - (ptA.Y - y) / v.Y;
 				v *= sect; v += ptA;
 				poly1.addVertex (v);
 				poly2.addVertex (v);
@@ -346,7 +346,7 @@ void v3dxPoly3::splitWithPlaneY (v3dxPoly3& poly1, v3dxPoly3& poly2,
 			if (sideA > 0)
 			{
 				v3dxVector3 v = ptB; v -= ptA;
-				float sect = - (ptA.y - y) / v.y;
+				float sect = - (ptA.Y - y) / v.Y;
 				v *= sect; v += ptA;
 				poly1.addVertex (v);
 				poly2.addVertex (v);
@@ -372,14 +372,14 @@ void v3dxPoly3::splitWithPlaneZ (v3dxPoly3& poly1, v3dxPoly3& poly2,
 	v3dxVector3 ptB;
 	float sideA, sideB;
 	v3dxVector3 ptA = vertices[num_vertices - 1];
-	sideA = ptA.z - z;
+	sideA = ptA.Z - z;
 	if (std::abs(sideA) < SMALL_EPSILON)
 		sideA = 0;
 
 	for (int i = -1 ; ++i < num_vertices ; )
 	{
 		ptB = vertices[i];
-		sideB = ptB.z - z;
+		sideB = ptB.Z - z;
 		if (std::abs(sideB) < SMALL_EPSILON)
 			sideB = 0;
 		if (sideB > 0)
@@ -387,7 +387,7 @@ void v3dxPoly3::splitWithPlaneZ (v3dxPoly3& poly1, v3dxPoly3& poly2,
 			if (sideA < 0)
 			{
 				v3dxVector3 v = ptB; v -= ptA;
-				float sect = - (ptA.z - z) / v.z;
+				float sect = - (ptA.Z - z) / v.Z;
 				v *= sect; v += ptA;
 				poly1.addVertex (v);
 				poly2.addVertex (v);
@@ -399,7 +399,7 @@ void v3dxPoly3::splitWithPlaneZ (v3dxPoly3& poly1, v3dxPoly3& poly2,
 			if (sideA > 0)
 			{
 				v3dxVector3 v = ptB; v -= ptA;
-				float sect = - (ptA.z - z) / v.z;
+				float sect = - (ptA.Z - z) / v.Z;
 				v *= sect; v += ptA;
 				poly1.addVertex (v);
 				poly2.addVertex (v);
@@ -427,12 +427,12 @@ v3dxVector3 v3dxPoly3::computeNormal (v3dxVector3* vertices, int num)
 	i1 = num-1;
 	for (i = 0 ; i < num; i++)
 	{
-		x = vertices[i].x;
-		y = vertices[i].y;
-		z = vertices[i].z;
-		x1 = vertices[i1].x;
-		y1 = vertices[i1].y;
-		z1 = vertices[i1].z;
+		x = vertices[i].X;
+		y = vertices[i].Y;
+		z = vertices[i].Z;
+		x1 = vertices[i1].X;
+		y1 = vertices[i1].Y;
+		z1 = vertices[i1].Z;
 		ayz += (z1+z) * (y-y1);//按照顺时针，逐个边的计算法向量的累加
 		azx += (x1+x) * (z-z1);
 		axy += (y1+y) * (x-x1);
@@ -458,6 +458,6 @@ v3dxPlane3 v3dxPoly3::computePlane (v3dxVector3* vertices, int num_vertices)
 {
 	float D;
 	v3dxVector3 pl = computeNormal (vertices, num_vertices);
-	D = -pl.x*vertices[0].x - pl.y*vertices[0].y - pl.z*vertices[0].z;
+	D = -pl.X*vertices[0].X - pl.Y*vertices[0].Y - pl.Z*vertices[0].Z;
 	return v3dxPlane3 (pl, D);
 }

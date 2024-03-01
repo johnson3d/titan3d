@@ -24,8 +24,8 @@
 
 inline void v3dxVector3::setValue(const v3dxVector2& v)
 {
-	x = v.x;
-	y = v.y;
+	X = v.X;
+	Y = v.Y;
 }
 //inline void	v3dxVector3::operator*=(const v3dxMatrix3 &m)
 //{
@@ -62,10 +62,10 @@ inline v3dxQuaternion v3dxVector3::getRotationTo(const v3dxVector3& dest) const
 	float s = Math::Sqrt( (1+d)*2 );
 	float invs = 1 / s;
 
-	q.x = c.x * invs;
-	q.y = c.y * invs;
-	q.z = c.z * invs;
-	q.w = s * 0.5f;
+	q.X = c.X * invs;
+	q.Y = c.Y * invs;
+	q.Z = c.Z * invs;
+	q.W = s * 0.5f;
 	return q;
 }
 
@@ -158,18 +158,18 @@ inline v3dxVector3 operator/ (const v3dxVector3& v, const float fValue)
 
 inline v3dxVector3 operator *(const v3dxVector3& vect,const v3dMatrix4_t& mat)
 {
-	return v3dxVector3(mat.m11*vect.x+mat.m21*vect.y+mat.m31*vect.z+mat.m41,
-					mat.m12*vect.x+mat.m22*vect.y+mat.m32*vect.z+mat.m42,
-					mat.m13*vect.x+mat.m23*vect.y+mat.m33*vect.z+mat.m43);
+	return v3dxVector3(mat.m11*vect.X+mat.m21*vect.Y+mat.m31*vect.Z+mat.m41,
+					mat.m12*vect.X+mat.m22*vect.Y+mat.m32*vect.Z+mat.m42,
+					mat.m13*vect.X+mat.m23*vect.Y+mat.m33*vect.Z+mat.m43);
 }
 
 
 //==============================================================================
 inline void v3dxVector3::operator= ( const v3dxVector3 &vect )
 {
-	x = vect.x;
-	y = vect.y;
-	z = vect.z;
+	X = vect.X;
+	Y = vect.Y;
+	Z = vect.Z;
 }
 
 inline v3dxVector3& v3dxVector3::operator *=(const float fValue)
@@ -185,7 +185,7 @@ inline v3dxVector3& v3dxVector3::operator /=(const float fValue)
 }
 
 inline v3dxVector3 v3dxVector3::operator+ () const { 
-	return v3dxVector3(x,y,z); 
+	return v3dxVector3(X,Y,Z); 
 }
 
 inline v3dxVector3& v3dxVector3::operator +=(const v3dxVector3& vect)
@@ -195,7 +195,7 @@ inline v3dxVector3& v3dxVector3::operator +=(const v3dxVector3& vect)
 }
 
 inline v3dxVector3 v3dxVector3::operator- () const { 
-	return v3dxVector3(-x,-y,-z); 
+	return v3dxVector3(-X,-Y,-Z); 
 }
 
 inline v3dxVector3& v3dxVector3::operator -=(const v3dxVector3& vect)
@@ -206,9 +206,9 @@ inline v3dxVector3& v3dxVector3::operator -=(const v3dxVector3& vect)
 
 inline v3dxVector3 v3dxVector3::operator *=(const v3dxVector3 &v3)
 {
-	x *= v3[0];
-	y *= v3[1];
-	z *= v3[2];
+	X *= v3[0];
+	Y *= v3[1];
+	Z *= v3[2];
 
 	return *this;
 }
@@ -239,34 +239,34 @@ inline void v3dxVector3::normalize()
 
 inline float& v3dxVector3::operator [](int i)
 {
-	return *(&x+i);
+	return *(&X+i);
 }
 
 inline float v3dxVector3::operator [](int i) const
 {
-	return *(&x+i);
+	return *(&X+i);
 }
 
 inline void v3dxVector3::Lerp(const v3dxVector3 &v3, float fSlerp)
 {
-	x += fSlerp * (v3[0] - x);
-	y += fSlerp * (v3[1] - y);
-	z += fSlerp * (v3[2] - z);
+	X += fSlerp * (v3[0] - X);
+	Y += fSlerp * (v3[1] - Y);
+	Z += fSlerp * (v3[2] - Z);
 }
 
 
 //-----------------------------------------------------------------------
 inline float v3dxVector3::normalized()
 {
-	float fLength = Math::Sqrt( x * x + y * y + z * z );
+	float fLength = Math::Sqrt( X * X + Y * Y + Z * Z );
 
 	// Will also work for zero-sized vectors, but will change nothing
 	if ( fLength > 1e-06 )
 	{
 		float fInvLength = 1.0f / fLength;
-		x *= fInvLength;
-		y *= fInvLength;
-		z *= fInvLength;
+		X *= fInvLength;
+		Y *= fInvLength;
+		Z *= fInvLength;
 	}
 
 	return fLength;
@@ -274,21 +274,21 @@ inline float v3dxVector3::normalized()
 //-----------------------------------------------------------------------
 inline bool v3dxVector3::operator < ( const v3dxVector3& rhs ) const
 {
-	if( x < rhs.x && y < rhs.y && z < rhs.z )
+	if( X < rhs.X && Y < rhs.Y && Z < rhs.Z )
 		return true;
 	return false;
 }
 //-----------------------------------------------------------------------
 inline bool v3dxVector3::operator > ( const v3dxVector3& rhs ) const
 {
-	if( x > rhs.x && y > rhs.y && z > rhs.z )
+	if( X > rhs.X && Y > rhs.Y && Z > rhs.Z )
 		return true;
 	return false;
 }
 //-----------------------------------------------------------------------
 inline bool v3dxVector3::isZeroLength(void) const
 {
-	float sqlen = (x * x) + (y * y) + (z * z);
+	float sqlen = (X * X) + (Y * Y) + (Z * Z);
 	return (sqlen < (1e-06 * 1e-06));
 
 }
@@ -296,23 +296,23 @@ inline bool v3dxVector3::isZeroLength(void) const
 inline v3dxVector3 v3dxVector3::midPoint( const v3dxVector3& vec ) const
 {
 	return v3dxVector3( 
-		( x + vec.x ) * 0.5f, 
-		( y + vec.y ) * 0.5f, 
-		( z + vec.z ) * 0.5f );
+		( X + vec.X ) * 0.5f, 
+		( Y + vec.Y ) * 0.5f, 
+		( Z + vec.Z ) * 0.5f );
 }
 //-----------------------------------------------------------------------
 inline void v3dxVector3::makeFloor( const v3dxVector3& cmp )
 {
-	if( cmp.x < x ) x = cmp.x;
-	if( cmp.y < y ) y = cmp.y;
-	if( cmp.z < z ) z = cmp.z;
+	if( cmp.X < X ) X = cmp.X;
+	if( cmp.Y < Y ) Y = cmp.Y;
+	if( cmp.Z < Z ) Z = cmp.Z;
 }
 //-----------------------------------------------------------------------
 inline void v3dxVector3::makeCeil( const v3dxVector3& cmp )
 {
-	if( cmp.x > x ) x = cmp.x;
-	if( cmp.y > y ) y = cmp.y;
-	if( cmp.z > z ) z = cmp.z;
+	if( cmp.X > X ) X = cmp.X;
+	if( cmp.Y > Y ) Y = cmp.Y;
+	if( cmp.Z > Z ) Z = cmp.Z;
 }
 //-----------------------------------------------------------------------
 inline float v3dxVector3::dotProduct(const v3dxVector3& vec) const
@@ -323,9 +323,9 @@ inline float v3dxVector3::dotProduct(const v3dxVector3& vec) const
 inline v3dxVector3 v3dxVector3::crossProduct( const v3dxVector3& rkVector ) const
 {
 	v3dxVector3 kCross;
-	kCross.x = y * rkVector.z - z * rkVector.y;
-	kCross.y = z * rkVector.x - x * rkVector.z;
-	kCross.z = x * rkVector.y - y * rkVector.x;
+	kCross.X = Y * rkVector.Z - Z * rkVector.Y;
+	kCross.Y = Z * rkVector.X - X * rkVector.Z;
+	kCross.Z = X * rkVector.Y - Y * rkVector.X;
 	return kCross;
 }
 //-----------------------------------------------------------------------

@@ -214,7 +214,7 @@ vBOOL PhyScene::SweepWithFilter(const PhyShape* shape, const v3dxVector3* positi
 {
 	PxSweepBuffer hit;
 	PxGeometry* geo = &shape->mShape->getGeometry().any();
-	PxTransform transform(position->x, position->y, position->z);
+	PxTransform transform(position->X, position->Y, position->Z);
 
 	PxVec3& pxUnitDir = *(PxVec3*)unitDir;
 	PxQueryFilterData data;/*(PxQueryFlags)filterData*/;
@@ -261,8 +261,8 @@ vBOOL PhyScene::OverlapWithFilter(const PhyShape* shape, const v3dxVector3* posi
 {
 	PxOverlapBuffer hit;
 	PxGeometry* geo = &shape->mShape->getGeometry().any();
-	PxQuat quat(rotation->x, rotation->y, rotation->z, rotation->w);
-	PxTransform transform(position->x, position->y, position->z, quat);
+	PxQuat quat(rotation->X, rotation->Y, rotation->Z, rotation->W);
+	PxTransform transform(position->X, position->Y, position->Z, quat);
 	PxQueryFilterData data;/*(PxQueryFlags)filterData*/;
 	data.data = queryFilterData->data;
 	data.flags = (PxQueryFlags)queryFilterData->flag;

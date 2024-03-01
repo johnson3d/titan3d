@@ -43,14 +43,14 @@ __forceinline UINT32 HashPosition( const v3dxVector3& Position )
 	union { float f; UINT32 i; } y;
 	union { float f; UINT32 i; } z;
 
-	x.f = Position.x;
-	y.f = Position.y;
-	z.f = Position.z;
+	x.f = Position.X;
+	y.f = Position.Y;
+	z.f = Position.Z;
 
 	return Murmur32( {
-		Position.x == 0.0f ? 0u : x.i,
-		Position.y == 0.0f ? 0u : y.i,
-		Position.z == 0.0f ? 0u : z.i
+		Position.X == 0.0f ? 0u : x.i,
+		Position.Y == 0.0f ? 0u : y.i,
+		Position.Z == 0.0f ? 0u : z.i
 	} );
 }
 template< class T >
@@ -124,9 +124,9 @@ namespace Barycentric
 		*/
 
 		// Length of displacement
-		return	-Disp.x * Disp.y * EdgeLengthsSqr[0]
-				-Disp.y * Disp.z * EdgeLengthsSqr[1]
-				-Disp.z * Disp.x * EdgeLengthsSqr[2];
+		return	-Disp.X * Disp.Y * EdgeLengthsSqr[0]
+				-Disp.Y * Disp.Z * EdgeLengthsSqr[1]
+				-Disp.Z * Disp.X * EdgeLengthsSqr[2];
 	}
 
 	__forceinline float SubtriangleArea( const v3dxVector3& Barycentrics0, const v3dxVector3& Barycentrics1, const v3dxVector3& Barycentrics2, float TriangleArea )

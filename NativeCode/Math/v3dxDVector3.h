@@ -8,71 +8,71 @@ class v3dxDVector3 : public v3dDVector3_t
 public:
 	v3dxDVector3()
 	{
-		x = 0; y = 0; z = 0;
+		X = 0; Y = 0; Z = 0;
 	}
 	v3dxDVector3(const v3dxDVector3& rh)
 	{
-		x = rh.x; y = rh.y; z = rh.z;
+		X = rh.X; Y = rh.Y; Z = rh.Z;
 	}
 	v3dxDVector3(const v3dxVector3& rh)
 	{
-		x = rh.x; y = rh.y; z = rh.z;
+		X = rh.X; Y = rh.Y; Z = rh.Z;
 	}
 	v3dxDVector3(double fX, double fY, double fZ)
 	{
-		x = fX;
-		y = fY;
-		z = fZ;
+		X = fX;
+		Y = fY;
+		Z = fZ;
 	}
 	inline v3dxVector3 ToSingleVector() const{
-		return v3dxVector3((float)x, (float)y, (float)z);
+		return v3dxVector3((float)X, (float)Y, (float)Z);
 	}
 	friend inline v3dxDVector3 operator +(const v3dxDVector3& vect1, const v3dxDVector3& vect2)
 	{
 		v3dxDVector3 vRet;
-		vRet.x = vect1.x + vect2.x;
-		vRet.y = vect1.y + vect2.y;
-		vRet.z = vect1.z + vect2.z;
+		vRet.X = vect1.X + vect2.X;
+		vRet.Y = vect1.Y + vect2.Y;
+		vRet.Z = vect1.Z + vect2.Z;
 		return vRet;
 	}
 	friend inline v3dxDVector3 operator -(const v3dxDVector3& vect1, const v3dxDVector3& vect2)
 	{
 		v3dxDVector3 vRet;
-		vRet.x = vect1.x - vect2.x;
-		vRet.y = vect1.y - vect2.y;
-		vRet.z = vect1.z - vect2.z;
+		vRet.X = vect1.X - vect2.X;
+		vRet.Y = vect1.Y - vect2.Y;
+		vRet.Z = vect1.Z - vect2.Z;
 		return vRet;
 	}
 	friend inline v3dxDVector3 operator +(const v3dxDVector3& vect1, const v3dxVector3& vect2)
 	{
 		v3dxDVector3 vRet;
-		vRet.x = vect1.x + vect2.x;
-		vRet.y = vect1.y + vect2.y;
-		vRet.z = vect1.z + vect2.z;
+		vRet.X = vect1.X + vect2.X;
+		vRet.Y = vect1.Y + vect2.Y;
+		vRet.Z = vect1.Z + vect2.Z;
 		return vRet;
 	}
 	friend inline v3dxDVector3 operator -(const v3dxDVector3& vect1, const v3dxVector3& vect2)
 	{
 		v3dxDVector3 vRet;
-		vRet.x = vect1.x - vect2.x;
-		vRet.y = vect1.y - vect2.y;
-		vRet.z = vect1.z - vect2.z;
+		vRet.X = vect1.X - vect2.X;
+		vRet.Y = vect1.Y - vect2.Y;
+		vRet.Z = vect1.Z - vect2.Z;
 		return vRet;
 	}
 	friend inline v3dxDVector3 operator *(const v3dxDVector3& vect1, double fValue)
 	{
 		v3dxDVector3 vRet;
-		vRet.x = vect1.x * fValue;
-		vRet.y = vect1.y * fValue;
-		vRet.z = vect1.z * fValue;
+		vRet.X = vect1.X * fValue;
+		vRet.Y = vect1.Y * fValue;
+		vRet.Z = vect1.Z * fValue;
 		return vRet;
 	}
 	friend inline v3dxDVector3 operator / (const v3dxDVector3& vect1, double fValue)
 	{
 		v3dxDVector3 vRet;
-		vRet.x = vect1.x / fValue;
-		vRet.y = vect1.y / fValue;
-		vRet.z = vect1.z / fValue;
+		vRet.X = vect1.X / fValue;
+		vRet.Y = vect1.Y / fValue;
+		vRet.Z = vect1.Z / fValue;
 		return vRet;
 	}
 };

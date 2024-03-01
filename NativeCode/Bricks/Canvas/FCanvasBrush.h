@@ -68,7 +68,7 @@ struct FRectanglef
 	}
 	bool IsContain(const v3dxVector2& v) const
 	{
-		if (v.x<X || v.y<Y || v.x>X + Width || v.y>Y + Height)
+		if (v.X<X || v.Y<Y || v.X>X + Width || v.Y>Y + Height)
 			return false;
 		return true;
 	}
@@ -187,10 +187,10 @@ namespace Canvas
 		bool						IsDirty;
 		void SetUV(const v3dxVector2 & uv0, const v3dxVector2 & uv1)
 		{
-			Rect.X = uv0.x;
-			Rect.Y = uv0.y;
-			Rect.Width = uv1.x - uv0.x;
-			Rect.Height = uv1.y - uv0.y;
+			Rect.X = uv0.X;
+			Rect.Y = uv0.Y;
+			Rect.Width = uv1.X - uv0.X;
+			Rect.Height = uv1.Y - uv0.Y;
 		}
 		v3dxVector2 GetUV0() const {
 			return v3dxVector2(Rect.X, Rect.Y);

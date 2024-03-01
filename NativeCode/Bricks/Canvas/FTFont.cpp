@@ -379,8 +379,8 @@ namespace Canvas
 		word->PixelY = word->FontSize - ft_bitmap_glyph->top;
 		//word->PixelX = 0;
 		//word->PixelY = 0;
-		word->Advance.x = (float)ft_bitmap_glyph->root.advance.x / 65536.0f;
-		word->Advance.y = (float)ft_bitmap_glyph->root.advance.y / 65536.0f;
+		word->Advance.X = (float)ft_bitmap_glyph->root.advance.x / 65536.0f;
+		word->Advance.Y = (float)ft_bitmap_glyph->root.advance.y / 65536.0f;
 		
 		pitch = ft_bitmap.pitch;
 		src_line = ft_bitmap.buffer;

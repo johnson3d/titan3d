@@ -111,16 +111,16 @@ namespace NxPhysics
 				{
 					continue;
 				}
-				for (const auto& i : lh->mShapes)
+				for (const auto& m : lh->mShapes)
 				{
-					for (const auto& j : rh->mShapes)
+					for (const auto& n : rh->mShapes)
 					{
 						NxReal distance;
 						NxVector3 dir;
-						if (NxShape::Contact(i, j, distance, dir))
+						if (NxShape::Contact(m, n, distance, dir))
 						{
 							auto contact = MakeShared(new NxContactConstraint());
-							contact->mShapePair = std::make_pair(i, j);
+							contact->mShapePair = std::make_pair(m, n);
 							contact->mContactDirection = dir;
 							contact->BuildConstraint();
 							mRbContacts.push_back(contact);

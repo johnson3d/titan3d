@@ -15,7 +15,7 @@
         EngineNS.Macross.UMacrossBreak breaker_DispatchPixels_545367290 = new EngineNS.Macross.UMacrossBreak("breaker_DispatchPixels_545367290");
         EngineNS.Macross.UMacrossStackFrame mFrame_dm_onPerPiexel_DispatchPixels_545367290 = new EngineNS.Macross.UMacrossStackFrame(EngineNS.RName.GetRName("utest/pgc/terrain_bz_height.macross", EngineNS.RName.ERNameType.Game));
         [EngineNS.Rtti.Meta]
-        public void dm_onPerPiexel_DispatchPixels_545367290(EngineNS.Bricks.Procedure.UBufferConponent result,System.Int32 x,System.Int32 y,System.Int32 z,EngineNS.Bricks.Procedure.Node.UBezier Value1)
+        public void dm_onPerPiexel_DispatchPixels_545367290(EngineNS.Bricks.Procedure.UBufferComponent result,System.Int32 x,System.Int32 y,System.Int32 z,EngineNS.Bricks.Procedure.Node.UBezier Value1)
         {
             using(var guard_dm_onPerPiexel_DispatchPixels_545367290 = new EngineNS.Macross.UMacrossStackGuard(mFrame_dm_onPerPiexel_DispatchPixels_545367290))
             {
@@ -46,7 +46,7 @@
         }
         EngineNS.Macross.UMacrossStackFrame mFrame_OnPerPixel = new EngineNS.Macross.UMacrossStackFrame(EngineNS.RName.GetRName("utest/pgc/terrain_bz_height.macross", EngineNS.RName.ERNameType.Game));
         [EngineNS.Rtti.Meta]
-        public override void OnPerPixel(EngineNS.Bricks.Procedure.UPgcGraph graph,EngineNS.Bricks.Procedure.Node.UProgramNode node,EngineNS.Bricks.Procedure.UBufferConponent resuilt,System.Int32 x,System.Int32 y,System.Int32 z,System.Object tag)
+        public override void OnPerPixel(EngineNS.Bricks.Procedure.UPgcGraph graph,EngineNS.Bricks.Procedure.Node.UProgramNode node,EngineNS.Bricks.Procedure.UBufferComponent resuilt,System.Int32 x,System.Int32 y,System.Int32 z,System.Object tag)
         {
             using(var guard_OnPerPixel = new EngineNS.Macross.UMacrossStackGuard(mFrame_OnPerPixel))
             {
@@ -94,7 +94,7 @@
                 mFrame_OnProcedure.SetWatchVariable("graph", graph);
                 mFrame_OnProcedure.SetWatchVariable("node", node);
                 EngineNS.Bricks.Procedure.Node.UBezier tmp_r_GetInputNodeByName_2473213923 = default(EngineNS.Bricks.Procedure.Node.UBezier);
-                EngineNS.Bricks.Procedure.UBufferConponent tmp_r_FindBuffer_2587353212 = default(EngineNS.Bricks.Procedure.UBufferConponent);
+                EngineNS.Bricks.Procedure.UBufferComponent tmp_r_FindBuffer_2587353212 = default(EngineNS.Bricks.Procedure.UBufferComponent);
                 mFrame_OnProcedure.SetWatchVariable("v_graph_GetInputNodeByName_2473213923", graph);
                 mFrame_OnProcedure.SetWatchVariable("v_pinName_GetInputNodeByName_2473213923", "Curve");
                 mFrame_OnProcedure.SetWatchVariable("v_retType_GetInputNodeByName_2473213923", typeof(EngineNS.Bricks.Procedure.Node.UBezier));

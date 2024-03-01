@@ -19,9 +19,9 @@ namespace Canvas
 			for (const WCHAR* c = text; c[0] != '\0'; c++)
 			{
 				auto word = GetWord(0, 0, c[0], 0, nullptr);
-				result.x += word->Advance.x;
-				if (word->TexY + word->PixelHeight > result.y)
-					result.y = (float)(word->TexY + word->PixelHeight);
+				result.X += word->Advance.X;
+				if (word->TexY + word->PixelHeight > result.Y)
+					result.Y = (float)(word->TexY + word->PixelHeight);
 			}
 			return result;
 		}

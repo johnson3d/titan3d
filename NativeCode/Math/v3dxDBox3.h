@@ -35,10 +35,10 @@ public:
 			-1000000.0f,
 			-1000000.0f) {}
 
-	v3dxDBox3(const v3dxDVector3& v) : minbox(v.x, v.y, v.y), maxbox(v.x, v.y, v.z) { }
+	v3dxDBox3(const v3dxDVector3& v) : minbox(v.X, v.Y, v.Y), maxbox(v.X, v.Y, v.Z) { }
 
 	v3dxDBox3(const v3dxDVector3& v1, const v3dxDVector3& v2) :
-		minbox(v1.x, v1.y, v1.z), maxbox(v2.x, v2.y, v2.z) {
+		minbox(v1.X, v1.Y, v1.Z), maxbox(v2.X, v2.Y, v2.Z) {
 		if (IsEmpty())
 			InitializeBox();
 	}
@@ -58,22 +58,22 @@ public:
 		if (x1 > x2 || y1 > y2 || z1 > z2)
 			InitializeBox();
 		else {
-			minbox.x = x1; minbox.y = y1; minbox.z = z1;
-			maxbox.x = x2; maxbox.y = y2; maxbox.z = z2;
+			minbox.X = x1; minbox.Y = y1; minbox.Z = z1;
+			maxbox.X = x2; maxbox.Y = y2; maxbox.Z = z2;
 		}
 	}
 
 	inline double GetBulk() const {
-		return (maxbox.x - minbox.x) * (maxbox.y - minbox.y) * (maxbox.z - minbox.z);
+		return (maxbox.X - minbox.X) * (maxbox.Y - minbox.Y) * (maxbox.Z - minbox.Z);
 	}
 	inline double GetWidth() const {
-		return (maxbox.x - minbox.x);
+		return (maxbox.X - minbox.X);
 	}
 	inline double GetLength() const {
-		return (maxbox.y - minbox.y);
+		return (maxbox.Y - minbox.Y);
 	}
 	inline double GetHeight() const {
-		return (maxbox.z - minbox.z);
+		return (maxbox.Z - minbox.Z);
 	}
 	inline v3dxDVector3 GetExtend() const {
 		v3dxDVector3 ext;
@@ -82,48 +82,48 @@ public:
 	}
 
 	inline double MinX() const {
-		return minbox.x;
+		return minbox.X;
 	}
 	inline double MinY() const {
-		return minbox.y;
+		return minbox.Y;
 	}
 	inline double MinZ() const {
-		return minbox.z;
+		return minbox.Z;
 	}
 	inline double MaxX() const {
-		return maxbox.x;
+		return maxbox.X;
 	}
 	inline double MaxY() const {
-		return maxbox.y;
+		return maxbox.Y;
 	}
 	inline double MaxZ() const {
-		return maxbox.z;
+		return maxbox.Z;
 	}
 
 	inline void SetMinX(double f) {
-		minbox.x = f;
+		minbox.X = f;
 	}
 	inline void SetMinY(double f) {
-		minbox.y = f;
+		minbox.Y = f;
 	}
 	inline void SetMinZ(double f) {
-		minbox.z = f;
+		minbox.Z = f;
 	}
 	inline void SetMaxX(double f) {
-		maxbox.x = f;
+		maxbox.X = f;
 	}
 	inline void SetMaxY(double f) {
-		maxbox.y = f;
+		maxbox.Y = f;
 	}
 	inline void SetMaxZ(double f) {
-		maxbox.z = f;
+		maxbox.Z = f;
 	}
 
 	inline double Min(int idx) const {
-		return idx == 1 ? minbox.y : idx == 0 ? minbox.x : minbox.z;
+		return idx == 1 ? minbox.Y : idx == 0 ? minbox.X : minbox.Z;
 	}
 	inline double Max(int idx) const {
-		return idx == 1 ? maxbox.y : idx == 0 ? maxbox.x : maxbox.z;
+		return idx == 1 ? maxbox.Y : idx == 0 ? maxbox.X : maxbox.Z;
 	}
 	const v3dxDVector3& Min() const {
 		return minbox;
@@ -149,24 +149,24 @@ public:
 	bool Contains(const v3dxDBox3& box) const;
 	bool IsEmpty() const;
 	inline void InitializeBox() {
-		minbox.x = FLT_MAX;  minbox.y = FLT_MAX;  minbox.z = FLT_MAX;
-		maxbox.x = -FLT_MAX;  maxbox.y = -FLT_MAX;  maxbox.z = -FLT_MAX;
+		minbox.X = FLT_MAX;  minbox.Y = FLT_MAX;  minbox.Z = FLT_MAX;
+		maxbox.X = -FLT_MAX;  maxbox.Y = -FLT_MAX;  maxbox.Z = -FLT_MAX;
 	}
 	inline void InitializeBox(double x, double y, double z) {
-		minbox.x = maxbox.x = x;
-		minbox.y = maxbox.y = y;
-		minbox.z = maxbox.z = z;
+		minbox.X = maxbox.X = x;
+		minbox.Y = maxbox.Y = y;
+		minbox.Z = maxbox.Z = z;
 	}
 	inline void InitializeBox(v3dxDVector3 p) {
-		InitializeBox(p.x, p.y, p.z);
+		InitializeBox(p.X, p.Y, p.Z);
 	}
 	inline void OptimalVertex(double x, double y, double z) {
-		if (x < minbox.x) minbox.x = x; if (x > maxbox.x) maxbox.x = x;
-		if (y < minbox.y) minbox.y = y; if (y > maxbox.y) maxbox.y = y;
-		if (z < minbox.z) minbox.z = z; if (z > maxbox.z) maxbox.z = z;
+		if (x < minbox.X) minbox.X = x; if (x > maxbox.X) maxbox.X = x;
+		if (y < minbox.Y) minbox.Y = y; if (y > maxbox.Y) maxbox.Y = y;
+		if (z < minbox.Z) minbox.Z = z; if (z > maxbox.Z) maxbox.Z = z;
 	}
 	inline void OptimalVertex(const v3dxDVector3& v) {
-		OptimalVertex(v.x, v.y, v.z);
+		OptimalVertex(v.X, v.Y, v.Z);
 	}
 	inline void Inflate(const v3dxDVector3& v) { // added by Jones
 		minbox = minbox - v;
@@ -181,12 +181,12 @@ public:
 	int Adjacent(const v3dxDBox3& other) const;
 
 	vBOOL IsIntersectBox3(const v3dxDBox3& box) const {
-		return !(minbox.x > box.Max().x
-			|| minbox.y > box.Max().y
-			|| minbox.z > box.Max().z
-			|| maxbox.x < box.Min().x
-			|| maxbox.y < box.Min().y
-			|| maxbox.z < box.Min().z);
+		return !(minbox.X > box.Max().X
+			|| minbox.Y > box.Max().Y
+			|| minbox.Z > box.Max().Z
+			|| maxbox.X < box.Min().X
+			|| maxbox.Y < box.Min().Y
+			|| maxbox.Z < box.Min().Z);
 	}
 
 	bool Between(const v3dxDBox3& box1, const v3dxDBox3& box2) const;

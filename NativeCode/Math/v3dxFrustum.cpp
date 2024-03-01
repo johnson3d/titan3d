@@ -174,16 +174,16 @@ inline bool PointInBox(float x,float y, float z, float xMin, float yMin, float z
 //------------------------------------------------------------------------
 int v3dxFrustum::_checkBeContained(const v3dxBox3* box)
 {
-	float x = box->minbox.x;
-	float y = box->minbox.y;
-	float z = box->minbox.z;
-	float x2 = box->maxbox.x;
-	float y2 = box->maxbox.y;
-	float z2 = box->maxbox.z;
+	float x = box->minbox.X;
+	float y = box->minbox.Y;
+	float z = box->minbox.Z;
+	float x2 = box->maxbox.X;
+	float y2 = box->maxbox.Y;
+	float z2 = box->maxbox.Z;
 
 	int hitcount = 0;
 	for (int i = 0 ; i < 8; ++i)
-		if ( PointInBox(m_vecFrustum[i].x, m_vecFrustum[i].y, m_vecFrustum[i].z, x,y,z,x2,y2,z2) )
+		if ( PointInBox(m_vecFrustum[i].X, m_vecFrustum[i].Y, m_vecFrustum[i].Z, x,y,z,x2,y2,z2) )
 			++hitcount;
 
 	if (hitcount == 8)
@@ -195,12 +195,12 @@ int v3dxFrustum::_checkBeContained(const v3dxBox3* box)
 
 int v3dxFrustum::_checkContain(const v3dxBox3* box) const
 {
-	float x = box->minbox.x;
-	float y = box->minbox.y;
-	float z = box->minbox.z;
-	float x2 = box->maxbox.x;
-	float y2 = box->maxbox.y;
-	float z2 = box->maxbox.z;
+	float x = box->minbox.X;
+	float y = box->minbox.Y;
+	float z = box->minbox.Z;
+	float x2 = box->maxbox.X;
+	float y2 = box->maxbox.Y;
+	float z2 = box->maxbox.Z;
 	// Detailed explanation on the BSP tutorial 4
 	BYTE mode=0;					// set IN and OUT bit to 0
 	for(int i = 0; i < 6; i++ )
@@ -322,16 +322,16 @@ static inline vBOOL __CheckVectorOutSideFrustum(const v3dxPlane3 * p,float x,flo
 
 vBOOL v3dxFrustum::isContain(const v3dxVector3 & vec) const
 {
-	return __CheckVectorOutSideFrustum(m_aPlane,vec.x,vec.y,vec.z) == 0;
+	return __CheckVectorOutSideFrustum(m_aPlane,vec.X,vec.Y,vec.Z) == 0;
 }
 
 vBOOL v3dxFrustum::isContain(const v3dxVector3 & center, float fRadius) const
 {
 	for (int i = 0; i < ENUM_FRUSTUMPL_NUMBER; i++)
 	{
-		if (m_aPlane[i].A() * center.x +
-			m_aPlane[i].B() * center.y +
-			m_aPlane[i].C() * center.z +
+		if (m_aPlane[i].A() * center.X +
+			m_aPlane[i].B() * center.Y +
+			m_aPlane[i].C() * center.Z +
 			m_aPlane[i].D() > fRadius)
 		{
 			return FALSE;
@@ -350,37 +350,37 @@ vBOOL v3dxFrustum::isContain(const v3dxBox3 & box) const
 		//if (m_aPlane[i].A() > 0)
 		if (m_aPlane[i].A() < 0)
 		{
-			_vcMax.x = box.maxbox.x;
+			_vcMax.X = box.maxbox.X;
 			//_vcMin.x = box.minbox.x;
 		}
 		else
 		{
 			//_vcMin.x = box.maxbox.x;
-			_vcMax.x = box.minbox.x;
+			_vcMax.X = box.minbox.X;
 		}
 
 		//if (m_aPlane[i].B() > 0)
 		if (m_aPlane[i].B() < 0)
 		{
-			_vcMax.y = box.maxbox.y;
+			_vcMax.Y = box.maxbox.Y;
 			//_vcMin.y = box.minbox.y;
 		}
 		else
 		{
 			//_vcMin.y = box.maxbox.y;
-			_vcMax.y = box.minbox.y;
+			_vcMax.Y = box.minbox.Y;
 		}
 
 		//if (m_aPlane[i].C() > 0)
 		if (m_aPlane[i].C() < 0)
 		{
-			_vcMax.z = box.maxbox.z;
+			_vcMax.Z = box.maxbox.Z;
 			//_vcMin.z = box.minbox.z;
 		}
 		else
 		{
 			//_vcMin.z = box.maxbox.z;
-			_vcMax.z = box.minbox.z;
+			_vcMax.Z = box.minbox.Z;
 		}
 
 		//if (D3DXVec3Dot(&D3DXVECTOR3(m_Plane[i].a, m_Plane[i].b, m_Plane[i].c), &_vcMax) + m_Plane[i].d < 0)
@@ -435,37 +435,37 @@ CONTAIN_TYPE v3dxFrustum::whichContainTypeFast( const v3dxBox3* pBBox, vBOOL tes
 	{
 		//auto& pPlane = m_aPlane[i];
 		const auto& pPlane = m_aPlane[i];
-		if (pPlane.m_vNormal.x > 0)
+		if (pPlane.m_vNormal.X > 0)
 		{
-			_vcMax.x = vcMax.x;
-			_vcMin.x = vcMin.x;
+			_vcMax.X = vcMax.X;
+			_vcMin.X = vcMin.X;
 		}
 		else
 		{
-			_vcMin.x = vcMax.x;
-			_vcMax.x = vcMin.x;
+			_vcMin.X = vcMax.X;
+			_vcMax.X = vcMin.X;
 		}
 
-		if (pPlane.m_vNormal.y > 0)
+		if (pPlane.m_vNormal.Y > 0)
 		{
-			_vcMax.y = vcMax.y;
-			_vcMin.y = vcMin.y;
+			_vcMax.Y = vcMax.Y;
+			_vcMin.Y = vcMin.Y;
 		}
 		else
 		{
-			_vcMin.y = vcMax.y;
-			_vcMax.y = vcMin.y;
+			_vcMin.Y = vcMax.Y;
+			_vcMax.Y = vcMin.Y;
 		}
 
-		if (pPlane.m_vNormal.z > 0)
+		if (pPlane.m_vNormal.Z > 0)
 		{
-			_vcMax.z = vcMax.z;
-			_vcMin.z = vcMin.z;
+			_vcMax.Z = vcMax.Z;
+			_vcMin.Z = vcMin.Z;
 		}
 		else
 		{
-			_vcMin.z = vcMax.z;
-			_vcMax.z = vcMin.z;
+			_vcMin.Z = vcMax.Z;
+			_vcMax.Z = vcMin.Z;
 		}
 
 		float dist = v3dxVec3Dot(&pPlane.m_vNormal, &_vcMin) + pPlane.m_fDD;
@@ -677,37 +677,37 @@ CONTAIN_TYPE v3dxFrustum::whichContainTypeFast(const v3dxBox3* pBBox, const v3dx
 	{
 		//auto& pPlane = m_aPlane[i];
 		const auto& pPlane = aPlane[i];
-		if (pPlane.m_vNormal.x > 0)
+		if (pPlane.m_vNormal.X > 0)
 		{
-			_vcMax.x = vcMax.x;
-			_vcMin.x = vcMin.x;
+			_vcMax.X = vcMax.X;
+			_vcMin.X = vcMin.X;
 		}
 		else
 		{
-			_vcMin.x = vcMax.x;
-			_vcMax.x = vcMin.x;
+			_vcMin.X = vcMax.X;
+			_vcMax.X = vcMin.X;
 		}
 
-		if (pPlane.m_vNormal.y > 0)
+		if (pPlane.m_vNormal.Y > 0)
 		{
-			_vcMax.y = vcMax.y;
-			_vcMin.y = vcMin.y;
+			_vcMax.Y = vcMax.Y;
+			_vcMin.Y = vcMin.Y;
 		}
 		else
 		{
-			_vcMin.y = vcMax.y;
-			_vcMax.y = vcMin.y;
+			_vcMin.Y = vcMax.Y;
+			_vcMax.Y = vcMin.Y;
 		}
 
-		if (pPlane.m_vNormal.z > 0)
+		if (pPlane.m_vNormal.Z > 0)
 		{
-			_vcMax.z = vcMax.z;
-			_vcMin.z = vcMin.z;
+			_vcMax.Z = vcMax.Z;
+			_vcMin.Z = vcMin.Z;
 		}
 		else
 		{
-			_vcMin.z = vcMax.z;
-			_vcMax.z = vcMin.z;
+			_vcMin.Z = vcMax.Z;
+			_vcMax.Z = vcMin.Z;
 		}
 
 		float dist = v3dxVec3Dot(&pPlane.m_vNormal, &_vcMin) + pPlane.m_fDD;

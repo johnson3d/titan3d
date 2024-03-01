@@ -46,7 +46,7 @@ void v3dxBezier::CalculateMaxLength2D()
 	if (m_nodeArray.size() < 2)
 		return;
 
-	m_fMaxLength = m_nodeArray[m_nodeArray.size() - 1]->vPos.x - m_nodeArray[0]->vPos.x;
+	m_fMaxLength = m_nodeArray[m_nodeArray.size() - 1]->vPos.X - m_nodeArray[0]->vPos.X;
 }
 
 void v3dxBezier::AddNode(const v3dxVector3* pos, const v3dxVector3* ctrlPos1, const v3dxVector3* ctrlPos2)
@@ -136,18 +136,18 @@ v3dxVector3 v3dxBezier::GetValue(float fTime)
 	float yt = 1 - t;
 
 	v3dxVector3 retValue;
-	retValue.x = pt0.vPos.x * yt * yt * yt +
-				 3 * (pt0.vCtrlPos2.x + pt0.vPos.x) * yt * yt * t +
-				 3 * (pt1.vCtrlPos1.x + pt1.vPos.x) * yt * t * t +
-				 pt1.vPos.x * t * t * t;
-	retValue.y = pt0.vPos.y * yt * yt * yt +
-				 3 * (pt0.vCtrlPos2.y + pt0.vPos.y) * yt * yt * t +
-				 3 * (pt1.vCtrlPos1.y + pt1.vPos.y) * yt * t * t +
-				 pt1.vPos.y * t * t * t;
-	retValue.z = pt0.vPos.z * yt * yt * yt +
-				 3 * (pt0.vCtrlPos2.z + pt0.vPos.z) * yt * yt * t +
-				 3 * (pt1.vCtrlPos1.z + pt1.vPos.z) * yt * t * t +
-				 pt1.vPos.z * t * t * t;
+	retValue.X = pt0.vPos.X * yt * yt * yt +
+				 3 * (pt0.vCtrlPos2.X + pt0.vPos.X) * yt * yt * t +
+				 3 * (pt1.vCtrlPos1.X + pt1.vPos.X) * yt * t * t +
+				 pt1.vPos.X * t * t * t;
+	retValue.Y = pt0.vPos.Y * yt * yt * yt +
+				 3 * (pt0.vCtrlPos2.Y + pt0.vPos.Y) * yt * yt * t +
+				 3 * (pt1.vCtrlPos1.Y + pt1.vPos.Y) * yt * t * t +
+				 pt1.vPos.Y * t * t * t;
+	retValue.Z = pt0.vPos.Z * yt * yt * yt +
+				 3 * (pt0.vCtrlPos2.Z + pt0.vPos.Z) * yt * yt * t +
+				 3 * (pt1.vCtrlPos1.Z + pt1.vPos.Z) * yt * t * t +
+				 pt1.vPos.Z * t * t * t;
 
 	return retValue;
 }
@@ -158,27 +158,27 @@ float v3dxBezier::GetValueY_2D(float fTime)
 	size_t idx = 0;
 	for (idx = 1; idx < m_nodeArray.size(); idx++)
 	{
-		if (m_nodeArray[idx]->vPos.x > fDis)
+		if (m_nodeArray[idx]->vPos.X > fDis)
 			break;
 	}
 
 	if (idx >= m_nodeArray.size())
 	{
 		if (m_nodeArray.size() > 0)
-			return m_nodeArray[m_nodeArray.size() - 1]->vPos.y;
+			return m_nodeArray[m_nodeArray.size() - 1]->vPos.Y;
 		return 0;
 	}
 
 	sBezierPoint& pt0 = *m_nodeArray[idx - 1];
 	sBezierPoint& pt1 = *m_nodeArray[idx];
 
-	float t = (fDis - pt0.vPos.x) / (pt1.vPos.x - pt0.vPos.x);
+	float t = (fDis - pt0.vPos.X) / (pt1.vPos.X - pt0.vPos.X);
 	float yt = 1 - t;
 
-	float y = pt0.vPos.y * yt * yt * yt +
-		3 * (pt0.vCtrlPos2.y + pt0.vPos.y) * yt * yt * t +
-		3 * (pt1.vCtrlPos1.y + pt1.vPos.y) * yt * t * t +
-		pt1.vPos.y * t * t * t;
+	float y = pt0.vPos.Y * yt * yt * yt +
+		3 * (pt0.vCtrlPos2.Y + pt0.vPos.Y) * yt * yt * t +
+		3 * (pt1.vCtrlPos1.Y + pt1.vPos.Y) * yt * t * t +
+		pt1.vPos.Y * t * t * t;
 
 	return y;
 }
@@ -200,11 +200,11 @@ void v3dxBezier::GetRangeX(float* begin, float* end)
 
 	for(size_t i=0; i<m_nodeArray.size(); i++)
 	{
-		if(*begin > m_nodeArray[i]->vPos.x)
-			*begin = m_nodeArray[i]->vPos.x;
+		if(*begin > m_nodeArray[i]->vPos.X)
+			*begin = m_nodeArray[i]->vPos.X;
 
-		if(*end < m_nodeArray[i]->vPos.x)
-			*end = m_nodeArray[i]->vPos.x;
+		if(*end < m_nodeArray[i]->vPos.X)
+			*end = m_nodeArray[i]->vPos.X;
 	}
 }
 vBOOL v3dxBezier::IsInRangeY(float value)
@@ -224,11 +224,11 @@ void v3dxBezier::GetRangeY(float* begin, float* end)
 
 	for(size_t i=0; i<m_nodeArray.size(); i++)
 	{
-		if(*begin > m_nodeArray[i]->vPos.y)
-			*begin = m_nodeArray[i]->vPos.y;
+		if(*begin > m_nodeArray[i]->vPos.Y)
+			*begin = m_nodeArray[i]->vPos.Y;
 
-		if(*end < m_nodeArray[i]->vPos.y)
-			*end = m_nodeArray[i]->vPos.y;
+		if(*end < m_nodeArray[i]->vPos.Y)
+			*end = m_nodeArray[i]->vPos.Y;
 	}
 }
 vBOOL v3dxBezier::IsInRangeZ(float value)
@@ -248,11 +248,11 @@ void v3dxBezier::GetRangeZ(float* begin, float* end)
 
 	for(size_t i=0; i<m_nodeArray.size(); i++)
 	{
-		if(*begin > m_nodeArray[i]->vPos.z)
-			*begin = m_nodeArray[i]->vPos.z;
+		if(*begin > m_nodeArray[i]->vPos.Z)
+			*begin = m_nodeArray[i]->vPos.Z;
 
-		if(*end < m_nodeArray[i]->vPos.z)
-			*end = m_nodeArray[i]->vPos.z;
+		if(*end < m_nodeArray[i]->vPos.Z)
+			*end = m_nodeArray[i]->vPos.Z;
 	}
 }
 
@@ -673,7 +673,7 @@ v3dxColor4 v3dColorVariable::getValueEnd()
 v3dFloat4Variable::v3dFloat4Variable()
 	: v3dVariable(Constant)
 {
-	mConstant.x = mConstant.y = mConstant.z = mConstant.w = 1;
+	mConstant.X = mConstant.Y = mConstant.Z = mConstant.W = 1;
 }
 v3dFloat4Variable::v3dFloat4Variable(const v3dVector4_t& value)
 	: v3dVariable(Constant)
@@ -713,13 +713,13 @@ v3dVector4_t v3dFloat4Variable::getValue(float slider)
 	if (mType == Constant)
 		v = mConstant;
 	else if (mType == ConstantRange) {
-		v.x = mRange.mBegin.x + (mRange.mEnd.x - mRange.mBegin.x) * slider;
-		v.y = mRange.mBegin.y + (mRange.mEnd.y - mRange.mBegin.y) * slider;
-		v.z = mRange.mBegin.z + (mRange.mEnd.z - mRange.mBegin.z) * slider;
-		v.w = mRange.mBegin.w + (mRange.mEnd.w - mRange.mBegin.w) * slider;
+		v.X = mRange.mBegin.X + (mRange.mEnd.X - mRange.mBegin.X) * slider;
+		v.Y = mRange.mBegin.Y + (mRange.mEnd.Y - mRange.mBegin.Y) * slider;
+		v.Z = mRange.mBegin.Z + (mRange.mEnd.Z - mRange.mBegin.Z) * slider;
+		v.W = mRange.mBegin.W + (mRange.mEnd.W - mRange.mBegin.W) * slider;
 	}
 	else {
-		v.x = v.y = v.z = v.w = 1;
+		v.X = v.Y = v.Z = v.W = 1;
 	}
 	return v;
 }

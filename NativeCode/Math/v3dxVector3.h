@@ -39,50 +39,50 @@ public:
 	}
 	v3dxVector3( float fX, float fY, float fZ ) 
 	{
-		x = fX;
-		y = fY;
-		z = fZ;
+		X = fX;
+		Y = fY;
+		Z = fZ;
 	}
 	v3dxVector3( float afCoordinate[3] )
 	{
-		x = afCoordinate[0];
-		y = afCoordinate[1];
-		z = afCoordinate[2];
+		X = afCoordinate[0];
+		Y = afCoordinate[1];
+		Z = afCoordinate[2];
 	}
 	v3dxVector3( int afCoordinate[3] )
 	{
-		x = (float)afCoordinate[0];
-		y = (float)afCoordinate[1];
-		z = (float)afCoordinate[2];
+		X = (float)afCoordinate[0];
+		Y = (float)afCoordinate[1];
+		Z = (float)afCoordinate[2];
 	}
 	v3dxVector3( const float* const r )
 	{
-		x = r[0];
-		y = r[1];
-		z = r[2];
+		X = r[0];
+		Y = r[1];
+		Z = r[2];
 	}
 	v3dxVector3( const v3dxVector3& rkVector )
 	{
-		x = rkVector.x;
-		y = rkVector.y;
-		z = rkVector.z;
+		X = rkVector.X;
+		Y = rkVector.Y;
+		Z = rkVector.Z;
 	}
 	void setValue(const v3dxVector2& v);
 
 
 	void setValue(float ix,float iy,float iz){ 
-		x=ix;y=iy;z=iz; 
+		X=ix;Y=iy;Z=iz; 
 	}
 
 	void setValue( const v3dxVector3 &rkVector)
 	{
-		x = rkVector.x;
-		y = rkVector.y;
-		z = rkVector.z;
+		X = rkVector.X;
+		Y = rkVector.Y;
+		Z = rkVector.Z;
 	}
 	inline float getMax() const
 	{
-		return std::max(std::max(x, y), z);
+		return std::max(std::max(X, Y), Z);
 	}
 	v3dxVector3 operator+ () const;
 	v3dxVector3 operator- () const;
@@ -96,9 +96,9 @@ public:
 	inline v3dxVector3 operator * ( const v3dxVector3& rhs) const
 	{
 		return v3dxVector3(
-			x * rhs.x,
-			y * rhs.y,
-			z * rhs.z);
+			X * rhs.X,
+			Y * rhs.Y,
+			Z * rhs.Z);
 	}
 
 	friend v3dxVector3 operator* (const v3dxVector3& v, float fValue);
@@ -117,22 +117,22 @@ public:
 	friend v3dxVector3 operator *(const v3dxVector3& vect,const v3dMatrix4_t& mat);
 
 	inline friend bool operator== (const v3dxVector3& v1, const v3dxVector3& v2){ 
-		return v1.x==v2.x && v1.y==v2.y && v1.z==v2.z; 
+		return v1.X==v2.X && v1.Y==v2.Y && v1.Z==v2.Z; 
 	}
 	inline friend bool operator!= (const v3dxVector3& v1, const v3dxVector3& v2){ 
-		return v1.x!=v2.x || v1.y!=v2.y || v1.z!=v2.z; 
+		return v1.X!=v2.X || v1.Y!=v2.Y || v1.Z!=v2.Z; 
 	}
 
 	inline bool Equals(const v3dxVector3& v,float epsilon = 0.00001f)
 	{
-		return  std::abs(x - v.x) < epsilon &&  std::abs(y - v.y) < epsilon &&  std::abs(z - v.z) < epsilon;
+		return  std::abs(X - v.X) < epsilon &&  std::abs(Y - v.Y) < epsilon &&  std::abs(Z - v.Z) < epsilon;
 	}
 	inline friend bool Equals(const v3dxVector3& v1, const v3dxVector3& v2, float epsilon = 0.00001f)
 	{
-		return  std::abs(v1.x - v2.x) < epsilon &&  std::abs(v1.y - v2.y) < epsilon &&  std::abs(v1.z - v2.z) < epsilon;
+		return  std::abs(v1.X - v2.X) < epsilon &&  std::abs(v1.Y - v2.Y) < epsilon &&  std::abs(v1.Z - v2.Z) < epsilon;
 	}
 	inline void operator = ( const v3dVector3_t& v2 ){ 
-		x=v2.x ; y=v2.y ; z=v2.z; 
+		X=v2.X ; Y=v2.Y ; Z=v2.Z; 
 	}
 
 	v3dxVector3& operator +=(const v3dxVector3& vect);

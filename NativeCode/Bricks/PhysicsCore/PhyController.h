@@ -51,15 +51,15 @@ public:
 	physx::PxBoxControllerDesc		mBoxDesc;
 	v3dxVector3 GetExtent() {
 		v3dxVector3 v;
-		v.x = mBoxDesc.halfSideExtent;
-		v.y = mBoxDesc.halfHeight;
-		v.z = mBoxDesc.halfForwardExtent;
+		v.X = mBoxDesc.halfSideExtent;
+		v.Y = mBoxDesc.halfHeight;
+		v.Z = mBoxDesc.halfForwardExtent;
 		return v;
 	}
 	void SetExtent(const v3dxVector3 * v) {
-		mBoxDesc.halfSideExtent = v->x;
-		mBoxDesc.halfHeight = v->y;
-		mBoxDesc.halfForwardExtent = v->z;
+		mBoxDesc.halfSideExtent = v->X;
+		mBoxDesc.halfHeight = v->Y;
+		mBoxDesc.halfForwardExtent = v->Z;
 	}
 };
 

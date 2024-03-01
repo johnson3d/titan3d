@@ -27,7 +27,7 @@ public:
 	v3dxVector3 m_vNormal;
 	float m_fDD;
 	v3dxPlane3 () : m_vNormal(0,0,1), m_fDD(0) {}
-	v3dxPlane3 (const v3dVector3_t & plane_norm, float d=0) : m_vNormal(plane_norm.x,plane_norm.y,plane_norm.z), m_fDD(d) {}
+	v3dxPlane3 (const v3dVector3_t & plane_norm, float d=0) : m_vNormal(plane_norm.X,plane_norm.Y,plane_norm.Z), m_fDD(d) {}
 	v3dxPlane3 (float a, float b, float c, float d=0) : m_vNormal(a,b,c), m_fDD(d) {}
 	v3dxPlane3 (const v3dVector3_t & v1, const v3dVector3_t & v2, const v3dVector3_t & v3)
 	{
@@ -46,33 +46,33 @@ public:
 	inline const v3dxVector3& getNormal () const { return m_vNormal; }
 
 	inline float A () const {
-		return m_vNormal.x; 
+		return m_vNormal.X; 
 	}
 	inline float B () const { 
-		return m_vNormal.y; 
+		return m_vNormal.Y; 
 	}
 	inline float C () const { 
-		return m_vNormal.z; 
+		return m_vNormal.Z; 
 	}
 	inline float D () const { 
 		return m_fDD; 
 	}
 
 	inline float& A () { 
-		return m_vNormal.x; 
+		return m_vNormal.X; 
 	}
 	inline float& B () { 
-		return m_vNormal.y; 
+		return m_vNormal.Y; 
 	}
 	inline float& C () {
-		return m_vNormal.z; 
+		return m_vNormal.Z; 
 	}
   	inline float& D () { 
 		return m_fDD; 
 	}
 
 	inline void set (float a, float b, float c, float d){ 
-		m_vNormal.x = a; m_vNormal.y = b; m_vNormal.z = c; m_fDD = d; 
+		m_vNormal.X = a; m_vNormal.Y = b; m_vNormal.Z = c; m_fDD = d; 
 	}
 
   	inline void set (const v3dVector3_t & normal, float d){ 
@@ -93,7 +93,7 @@ public:
 	}
 	static float classify (float A, float B, float C, float D,
                          const v3dVector3_t & pt){ 
-		return A*pt.x + B*pt.y + C*pt.z + D; 
+		return A*pt.X + B*pt.Y + C*pt.Z + D; 
 	}
 
 	inline int witchSide(const v3dVector3_t* pvPos) const{

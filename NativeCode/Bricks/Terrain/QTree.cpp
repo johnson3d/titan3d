@@ -56,12 +56,12 @@ bool QTree::Initialize(int mipLevels, float patchSize)
 			auto leaf = new QLeaf();
 			leaf->X = x;
 			leaf->Z = z;
-			leaf->AABB.minbox.x = x * PatchSize;
-			leaf->AABB.maxbox.x = leaf->AABB.minbox.x + PatchSize;
-			leaf->AABB.minbox.y = FLT_MAX;
-			leaf->AABB.maxbox.y = -FLT_MAX;
-			leaf->AABB.minbox.z = z * PatchSize;
-			leaf->AABB.maxbox.z = leaf->AABB.minbox.z + PatchSize;
+			leaf->AABB.minbox.X = x * PatchSize;
+			leaf->AABB.maxbox.X = leaf->AABB.minbox.X + PatchSize;
+			leaf->AABB.minbox.Y = FLT_MAX;
+			leaf->AABB.maxbox.Y = -FLT_MAX;
+			leaf->AABB.minbox.Z = z * PatchSize;
+			leaf->AABB.maxbox.Z = leaf->AABB.minbox.Z + PatchSize;
 
 			mLeafs.push_back(leaf);
 		}
@@ -76,12 +76,12 @@ bool QTree::Initialize(int mipLevels, float patchSize)
 	mRoot->X = 0;
 	mRoot->Z = 0;
 	mRoot->Level = 0;
-	mRoot->AABB.minbox.x = 0;
-	mRoot->AABB.maxbox.x = patchSize * PatchSide;
-	mRoot->AABB.minbox.y = FLT_MAX;
-	mRoot->AABB.maxbox.y = -FLT_MAX;
-	mRoot->AABB.minbox.z = 0;
-	mRoot->AABB.maxbox.z = patchSize * PatchSide;
+	mRoot->AABB.minbox.X = 0;
+	mRoot->AABB.maxbox.X = patchSize * PatchSide;
+	mRoot->AABB.minbox.Y = FLT_MAX;
+	mRoot->AABB.maxbox.Y = -FLT_MAX;
+	mRoot->AABB.minbox.Z = 0;
+	mRoot->AABB.maxbox.Z = patchSize * PatchSide;
 
 	BuildTree(mRoot);
 	return true;
@@ -101,12 +101,12 @@ void QTree::BuildTree(QNode* node)
 		ASSERT(node->LBNode->X == node->X * 2);
 		ASSERT(node->LBNode->Z == node->Z * 2);
 		auto curNode = node->LBNode;
-		curNode->AABB.minbox.x = node->AABB.minbox.x;
-		curNode->AABB.maxbox.x = curNode->AABB.minbox.x + sz_x * 0.5f;
-		curNode->AABB.minbox.y = FLT_MAX;
-		curNode->AABB.maxbox.y = -FLT_MAX;
-		curNode->AABB.minbox.z = node->AABB.minbox.z;
-		curNode->AABB.maxbox.z = curNode->AABB.minbox.z + sz_z * 0.5f;
+		curNode->AABB.minbox.X = node->AABB.minbox.X;
+		curNode->AABB.maxbox.X = curNode->AABB.minbox.X + sz_x * 0.5f;
+		curNode->AABB.minbox.Y = FLT_MAX;
+		curNode->AABB.maxbox.Y = -FLT_MAX;
+		curNode->AABB.minbox.Z = node->AABB.minbox.Z;
+		curNode->AABB.maxbox.Z = curNode->AABB.minbox.Z + sz_z * 0.5f;
 
 		node->LTNode = GetLeaf(node->X * 2, node->Z * 2 + 1);
 		node->LTNode->NodeStyles = NDS_LT;
@@ -114,12 +114,12 @@ void QTree::BuildTree(QNode* node)
 		ASSERT(node->LTNode->X == node->X * 2);
 		ASSERT(node->LTNode->Z == node->Z * 2 + 1);
 		curNode = node->LTNode;
-		curNode->AABB.minbox.x = node->AABB.minbox.x;
-		curNode->AABB.maxbox.x = curNode->AABB.minbox.x + sz_x * 0.5f;
-		curNode->AABB.minbox.y = FLT_MAX;
-		curNode->AABB.maxbox.y = -FLT_MAX;
-		curNode->AABB.minbox.z = node->AABB.minbox.z + sz_z * 0.5f;
-		curNode->AABB.maxbox.z = curNode->AABB.minbox.z + sz_z * 0.5f;
+		curNode->AABB.minbox.X = node->AABB.minbox.X;
+		curNode->AABB.maxbox.X = curNode->AABB.minbox.X + sz_x * 0.5f;
+		curNode->AABB.minbox.Y = FLT_MAX;
+		curNode->AABB.maxbox.Y = -FLT_MAX;
+		curNode->AABB.minbox.Z = node->AABB.minbox.Z + sz_z * 0.5f;
+		curNode->AABB.maxbox.Z = curNode->AABB.minbox.Z + sz_z * 0.5f;
 
 		node->RTNode = GetLeaf(node->X * 2 + 1, node->Z * 2 + 1);
 		node->RTNode->NodeStyles = NDS_RT;
@@ -127,12 +127,12 @@ void QTree::BuildTree(QNode* node)
 		ASSERT(node->RTNode->X == node->X * 2 + 1);
 		ASSERT(node->RTNode->Z == node->Z * 2 + 1);
 		curNode = node->RTNode;
-		curNode->AABB.minbox.x = node->AABB.minbox.x + sz_x * 0.5f;
-		curNode->AABB.maxbox.x = curNode->AABB.minbox.x + sz_x * 0.5f;
-		curNode->AABB.minbox.y = FLT_MAX;
-		curNode->AABB.maxbox.y = -FLT_MAX;
-		curNode->AABB.minbox.z = node->AABB.minbox.z + sz_z * 0.5f;
-		curNode->AABB.maxbox.z = curNode->AABB.minbox.z + sz_z * 0.5f;
+		curNode->AABB.minbox.X = node->AABB.minbox.X + sz_x * 0.5f;
+		curNode->AABB.maxbox.X = curNode->AABB.minbox.X + sz_x * 0.5f;
+		curNode->AABB.minbox.Y = FLT_MAX;
+		curNode->AABB.maxbox.Y = -FLT_MAX;
+		curNode->AABB.minbox.Z = node->AABB.minbox.Z + sz_z * 0.5f;
+		curNode->AABB.maxbox.Z = curNode->AABB.minbox.Z + sz_z * 0.5f;
 
 		node->RBNode = GetLeaf(node->X * 2 + 1, node->Z * 2);
 		node->RBNode->NodeStyles = NDS_RB;
@@ -142,12 +142,12 @@ void QTree::BuildTree(QNode* node)
 		ASSERT(node->RBNode->X == node->X * 2 + 1);
 		ASSERT(node->RBNode->Z == node->Z * 2);
 		curNode = node->RBNode;
-		curNode->AABB.minbox.x = node->AABB.minbox.x + sz_x * 0.5f;
-		curNode->AABB.maxbox.x = curNode->AABB.minbox.x + sz_x * 0.5f;
-		curNode->AABB.minbox.y = FLT_MAX;
-		curNode->AABB.maxbox.y = -FLT_MAX;
-		curNode->AABB.minbox.z = node->AABB.minbox.z;
-		curNode->AABB.maxbox.z = curNode->AABB.minbox.z + sz_z * 0.5f;
+		curNode->AABB.minbox.X = node->AABB.minbox.X + sz_x * 0.5f;
+		curNode->AABB.maxbox.X = curNode->AABB.minbox.X + sz_x * 0.5f;
+		curNode->AABB.minbox.Y = FLT_MAX;
+		curNode->AABB.maxbox.Y = -FLT_MAX;
+		curNode->AABB.minbox.Z = node->AABB.minbox.Z;
+		curNode->AABB.maxbox.Z = curNode->AABB.minbox.Z + sz_z * 0.5f;
 	}
 	else
 	{
@@ -158,12 +158,12 @@ void QTree::BuildTree(QNode* node)
 		node->LBNode->Z = node->Z * 2;
 
 		auto curNode = node->LBNode;
-		curNode->AABB.minbox.x = node->AABB.minbox.x;
-		curNode->AABB.maxbox.x = curNode->AABB.minbox.x + sz_x * 0.5f;
-		curNode->AABB.minbox.y = FLT_MAX;
-		curNode->AABB.maxbox.y = -FLT_MAX;
-		curNode->AABB.minbox.z = node->AABB.minbox.z;
-		curNode->AABB.maxbox.z = curNode->AABB.minbox.z + sz_z * 0.5f;
+		curNode->AABB.minbox.X = node->AABB.minbox.X;
+		curNode->AABB.maxbox.X = curNode->AABB.minbox.X + sz_x * 0.5f;
+		curNode->AABB.minbox.Y = FLT_MAX;
+		curNode->AABB.maxbox.Y = -FLT_MAX;
+		curNode->AABB.minbox.Z = node->AABB.minbox.Z;
+		curNode->AABB.maxbox.Z = curNode->AABB.minbox.Z + sz_z * 0.5f;
 
 		node->LTNode = new QNode();
 		node->LTNode->NodeStyles = NDS_LT;
@@ -172,12 +172,12 @@ void QTree::BuildTree(QNode* node)
 		node->LTNode->Z = node->Z * 2 + 1;
 
 		curNode = node->LTNode;
-		curNode->AABB.minbox.x = node->AABB.minbox.x;
-		curNode->AABB.maxbox.x = curNode->AABB.minbox.x + sz_x * 0.5f;
-		curNode->AABB.minbox.y = FLT_MAX;
-		curNode->AABB.maxbox.y = -FLT_MAX;
-		curNode->AABB.minbox.z = node->AABB.minbox.z + sz_z * 0.5f;
-		curNode->AABB.maxbox.z = curNode->AABB.minbox.z + sz_z * 0.5f;
+		curNode->AABB.minbox.X = node->AABB.minbox.X;
+		curNode->AABB.maxbox.X = curNode->AABB.minbox.X + sz_x * 0.5f;
+		curNode->AABB.minbox.Y = FLT_MAX;
+		curNode->AABB.maxbox.Y = -FLT_MAX;
+		curNode->AABB.minbox.Z = node->AABB.minbox.Z + sz_z * 0.5f;
+		curNode->AABB.maxbox.Z = curNode->AABB.minbox.Z + sz_z * 0.5f;
 
 		node->RBNode = new QNode();
 		node->RBNode->NodeStyles = NDS_RB;
@@ -186,12 +186,12 @@ void QTree::BuildTree(QNode* node)
 		node->RBNode->Z = node->Z * 2;
 
 		curNode = node->RBNode;
-		curNode->AABB.minbox.x = node->AABB.minbox.x + sz_x * 0.5f;
-		curNode->AABB.maxbox.x = curNode->AABB.minbox.x + sz_x * 0.5f;
-		curNode->AABB.minbox.y = FLT_MAX;
-		curNode->AABB.maxbox.y = -FLT_MAX;
-		curNode->AABB.minbox.z = node->AABB.minbox.z;
-		curNode->AABB.maxbox.z = curNode->AABB.minbox.z + sz_z * 0.5f;
+		curNode->AABB.minbox.X = node->AABB.minbox.X + sz_x * 0.5f;
+		curNode->AABB.maxbox.X = curNode->AABB.minbox.X + sz_x * 0.5f;
+		curNode->AABB.minbox.Y = FLT_MAX;
+		curNode->AABB.maxbox.Y = -FLT_MAX;
+		curNode->AABB.minbox.Z = node->AABB.minbox.Z;
+		curNode->AABB.maxbox.Z = curNode->AABB.minbox.Z + sz_z * 0.5f;
 
 		node->RTNode = new QNode();
 		node->RTNode->NodeStyles = NDS_RT;
@@ -200,12 +200,12 @@ void QTree::BuildTree(QNode* node)
 		node->RTNode->Z = node->Z * 2 + 1;
 
 		curNode = node->RTNode;
-		curNode->AABB.minbox.x = node->AABB.minbox.x + sz_x * 0.5f;
-		curNode->AABB.maxbox.x = curNode->AABB.minbox.x + sz_x * 0.5f;
-		curNode->AABB.minbox.y = FLT_MAX;
-		curNode->AABB.maxbox.y = -FLT_MAX;
-		curNode->AABB.minbox.z = node->AABB.minbox.z + sz_z * 0.5f;
-		curNode->AABB.maxbox.z = curNode->AABB.minbox.z + sz_z * 0.5f;
+		curNode->AABB.minbox.X = node->AABB.minbox.X + sz_x * 0.5f;
+		curNode->AABB.maxbox.X = curNode->AABB.minbox.X + sz_x * 0.5f;
+		curNode->AABB.minbox.Y = FLT_MAX;
+		curNode->AABB.maxbox.Y = -FLT_MAX;
+		curNode->AABB.minbox.Z = node->AABB.minbox.Z + sz_z * 0.5f;
+		curNode->AABB.maxbox.Z = curNode->AABB.minbox.Z + sz_z * 0.5f;
 
 		BuildTree((QNode*)node->LBNode);
 		BuildTree((QNode*)node->LTNode);

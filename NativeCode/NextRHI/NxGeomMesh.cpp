@@ -1664,7 +1664,7 @@ namespace NxRHI
 		v3dxVector3 rcqScale;
 		if (scale != nullptr)
 		{
-			rcqScale = v3dxVector3(1.0f / scale->x, 1.0f / scale->y, 1.0f / scale->z);
+			rcqScale = v3dxVector3(1.0f / scale->X, 1.0f / scale->Y, 1.0f / scale->Z);
 			start *= rcqScale;
 			end *= rcqScale;
 		}
@@ -2038,7 +2038,7 @@ namespace NxRHI
 			for (UINT i = 0; i < num; i++)
 			{
 				auto pos = verts[i].Pos;
-				pos.y = CanvasHeight - pos.y;
+				pos.Y = CanvasHeight - pos.Y;
 				posVB->SetValueToOffset((UINT)posOffset, pos);
 				posOffset += sizeof(v3dxVector3);
 				uvVB->SetValueToOffset((UINT)uvOffset, verts[i].UV);

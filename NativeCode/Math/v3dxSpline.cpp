@@ -15,10 +15,10 @@ v3dxMatrix4 c_matHermite = v3dxMatrix4( 2.f,-2.f, 1.f, 1.f,
 // cubic curve defined by 2 positions and 2 velocities
 v3dxVector3 c_GetPositionOnCubic(const v3dxVector3 &startPos, const v3dxVector3 &startVel, const v3dxVector3 &endPos, const v3dxVector3 &endVel, float time)
 {
-	v3dxMatrix4 m( startPos.x, startPos.y, startPos.z, 0,
-		endPos.x,	endPos.y,	endPos.z,   0,
-		startVel.x,	startVel.y,	startVel.z, 0,
-		endVel.x,	endVel.y,	endVel.z,   1);
+	v3dxMatrix4 m( startPos.X, startPos.Y, startPos.Z, 0,
+		endPos.X,	endPos.Y,	endPos.Z,   0,
+		startVel.X,	startVel.Y,	startVel.Z, 0,
+		endVel.X,	endVel.Y,	endVel.Z,   1);
 	m = c_matHermite * m;
 
 	v3dxVector3 timeVector = v3dxVector3(time*time*time, time*time, time);
@@ -351,10 +351,10 @@ void v3dxCurve2::setViewAspect(float fAspect)
 		for ( int i = 0; i < (int)m_aNodeArray.size(); ++i )
 		{
 			v3dxVector3 v = m_aNodeArray[i].vPos;
-			v.x *= fZoom;
+			v.X *= fZoom;
 			setPosition(i, v);
-			m_aNodeArray[i].vVel1.x *= fZoom;
-			m_aNodeArray[i].vVel2.x *= fZoom;
+			m_aNodeArray[i].vVel1.X *= fZoom;
+			m_aNodeArray[i].vVel2.X *= fZoom;
 		}
 	}
 }
@@ -373,11 +373,11 @@ void v3dxCurve2::insertNode(int idx, const v3dxVector3 &pos)
 {
 	if ( idx == 0 ) idx = 1;
 	v3dxVector3 okpos = pos;
-	okpos.x = okpos.x < 0 ? 0 : okpos.x;
-	okpos.x = okpos.x > m_fHoriLength ? m_fHoriLength : okpos.x;
-	okpos.z = 0;
-	okpos.y = okpos.y < m_fValMin ? m_fValMin : okpos.y;
-	okpos.y = okpos.y > m_fValMax ? m_fValMax : okpos.y;
+	okpos.X = okpos.X < 0 ? 0 : okpos.X;
+	okpos.X = okpos.X > m_fHoriLength ? m_fHoriLength : okpos.X;
+	okpos.Z = 0;
+	okpos.Y = okpos.Y < m_fValMin ? m_fValMin : okpos.Y;
+	okpos.Y = okpos.Y > m_fValMax ? m_fValMax : okpos.Y;
 	v3dxSpline::insertNode(idx, okpos);
 	m_bStraightMode = FALSE;
 }
@@ -391,26 +391,26 @@ void v3dxCurve2::deleteNode(int idx)
 void v3dxCurve2::setPosition(int idx, const v3dxVector3 &pos)
 {
 	v3dxVector3 okpos = pos;
-	okpos.z = 0;
+	okpos.Z = 0;
 	if ( idx == 0 )
-		okpos.x = 0;
+		okpos.X = 0;
 	else if ( idx == getNodeCount() - 1 )
-		okpos.x = m_fHoriLength;
-	okpos.y = okpos.y < m_fValMin ? m_fValMin : okpos.y;
-	okpos.y = okpos.y > m_fValMax ? m_fValMax : okpos.y;
+		okpos.X = m_fHoriLength;
+	okpos.Y = okpos.Y < m_fValMin ? m_fValMin : okpos.Y;
+	okpos.Y = okpos.Y > m_fValMax ? m_fValMax : okpos.Y;
 	if ( !m_bStraightMode )
 	{
 		v3dxSpline::setPosition(idx, okpos);
 		if ( idx == 0 )
-			m_fValBgn = okpos.y;
+			m_fValBgn = okpos.Y;
 		else if ( idx == (int)m_aNodeArray.size() - 1 )
-			m_fValEnd = okpos.y;
+			m_fValEnd = okpos.Y;
 	}
 	else
 	{
-		v3dxSpline::setPosition(0, v3dxVector3(0, okpos.y, 0));
-		v3dxSpline::setPosition(1, v3dxVector3(m_fHoriLength, okpos.y, 0));
-		m_fValBgn = m_fValEnd = okpos.y;
+		v3dxSpline::setPosition(0, v3dxVector3(0, okpos.Y, 0));
+		v3dxSpline::setPosition(1, v3dxVector3(m_fHoriLength, okpos.Y, 0));
+		m_fValBgn = m_fValEnd = okpos.Y;
 	}
 }
 
@@ -438,7 +438,7 @@ float v3dxCurve2::getValue(float fTime)
 {
 	if ( m_bStraightMode || fTime == 0 )
 		return getValBegin();
-	return getPosition(fTime).y;
+	return getPosition(fTime).Y;
 }
 
 void v3dxCurve2::removeAll()
@@ -480,14 +480,14 @@ void v3dxCurve2::setValRange(float fMin, float fMax)
 	for ( int i = 0; i < (int)m_aNodeArray.size(); ++i )
 	{
 		v3dxVector3 pos = m_aNodeArray[i].vPos;
-		if ( pos.y < fMin )
+		if ( pos.Y < fMin )
 		{
-			pos.y = fMin;
+			pos.Y = fMin;
 			v3dxSpline::setPosition(i, pos);
 		}
-		else if ( pos.y > fMax )
+		else if ( pos.Y > fMax )
 		{
-			pos.y = fMax;
+			pos.Y = fMax;
 			v3dxSpline::setPosition(i, pos);
 		}
 	}

@@ -14,7 +14,7 @@ void IMeshSimplify::SimplifyMesh(const v3dxVector3* posArray, int numOfPos, cons
 	for (int i = 0; i < numOfPos; i++)
 	{
 		Simplify::Vertex v; 
-		v.p = vec3f(posArray[i].x, posArray[i].y, posArray[i].z);
+		v.p = vec3f(posArray[i].X, posArray[i].Y, posArray[i].Z);
 		Simplify::vertices.push_back(v);
 	}
 	for (int i = 0; i < numOfTri; i++)

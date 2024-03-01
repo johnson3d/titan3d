@@ -25,7 +25,7 @@ namespace AssetImportAndExport
 
 		bool IsVectorValid(v3dxVector3& val)
 		{
-			if (isnan(val.x) || isnan(val.y) || isnan(val.z))
+			if (isnan(val.X) || isnan(val.Y) || isnan(val.Z))
 			{
 				return false;
 			}
@@ -759,10 +759,10 @@ namespace AssetImportAndExport
 					tangentStream[i] = renderVertexs[i].TangentChirality;
 					vertexColorStream[i] = renderVertexs[i].Color.getABGR();
 					uvStream[i] = renderVertexs[i].UV;
-					lightMapStream[i].x = renderVertexs[i].UV2.x;
-					lightMapStream[i].y = renderVertexs[i].UV2.y;
-					lightMapStream[i].z = 0;
-					lightMapStream[i].w = 0;
+					lightMapStream[i].X = renderVertexs[i].UV2.X;
+					lightMapStream[i].Y = renderVertexs[i].UV2.Y;
+					lightMapStream[i].Z = 0;
+					lightMapStream[i].W = 0;
 				}
 			}
 			bool hasVertexColor = true;
@@ -1608,8 +1608,8 @@ namespace AssetImportAndExport
 					uv[2] = Vertexs[Faces[i].Indices[0]].UV;
 					v3dxVector3  e1 = pos[1] - pos[0];
 					v3dxVector3  e2 = pos[2] - pos[0];
-					v3dxVector2 u1 = { uv[1].x - uv[0].x , uv[1].y - uv[0].y };
-					v3dxVector2 u2 = { uv[2].x - uv[0].x , uv[2].y - uv[0].y };
+					v3dxVector2 u1 = { uv[1].X - uv[0].X , uv[1].Y - uv[0].Y };
+					v3dxVector2 u2 = { uv[2].X - uv[0].X , uv[2].Y - uv[0].Y };
 					faceNormal = (e1 ^ e2);
 					if (!IsVectorValid(faceNormal))
 					{
@@ -1621,7 +1621,7 @@ namespace AssetImportAndExport
 					else
 					{
 						faceNormal.normalize();
-						float det = (u1.x * u2.y - u2.x * u1.y);
+						float det = (u1.X * u2.Y - u2.X * u1.Y);
 						if (det == 0.0f)
 						{
 							if (!e1.isZeroLength())
@@ -1640,10 +1640,10 @@ namespace AssetImportAndExport
 						}
 						else
 						{
-							float a = u2.y / det;
-							float b = -u1.y / det;
-							float c = -u2.x / det;
-							float d = u1.x / det;
+							float a = u2.Y / det;
+							float b = -u1.Y / det;
+							float c = -u2.X / det;
+							float d = u1.X / det;
 							faceTangent = (e1 * a + e2 * b);
 							faceBin = (e1 * c + e2 * d);
 						}
@@ -1787,10 +1787,10 @@ namespace AssetImportAndExport
 							ASSERT(FALSE);
 						}
 
-						vertexTC.x = vertexT.x;
-						vertexTC.y = vertexT.y;
-						vertexTC.z = vertexT.z;
-						vertexTC.w = ((vertexN.crossProduct(vertexT)).dotProduct(vertexB) < 0.0f) ? -1.0f : 1.0f;
+						vertexTC.X = vertexT.X;
+						vertexTC.Y = vertexT.Y;
+						vertexTC.Z = vertexT.Z;
+						vertexTC.W = ((vertexN.crossProduct(vertexT)).dotProduct(vertexB) < 0.0f) ? -1.0f : 1.0f;
 					}
 				}
 			}

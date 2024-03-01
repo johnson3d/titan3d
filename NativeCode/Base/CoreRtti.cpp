@@ -371,7 +371,7 @@ void TestReflection()
 	bool isIUnknown = rtti->IsA(GetClassObject<IWeakReference>());
 	ASSERT(isIUnknown);
 	auto pCastVector3 = (v3dxVector3*)rtti->CastSuper(tmp, GetClassObject<v3dxVector3>());
-	ASSERT(pCastVector3->x==1 && pCastVector3->y == 1 && pCastVector3->z == 1);
+	ASSERT(pCastVector3->X==1 && pCastVector3->Y == 1 && pCastVector3->Z == 1);
 	auto pCastIUnknown = (IWeakReference*)rtti->CastSuper(tmp, GetClassObject<IWeakReference>());
 	ASSERT(pCastIUnknown!=nullptr);
 

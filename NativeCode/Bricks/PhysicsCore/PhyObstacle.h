@@ -19,9 +19,9 @@ public:
 	v3dVector3_t GetPos() {
 		v3dVector3_t result;
 		auto px = GetPxObstacle();
-		result.x = (float)px->mPos.x;
-		result.y = (float)px->mPos.y;
-		result.z = (float)px->mPos.z;
+		result.X = (float)px->mPos.x;
+		result.Y = (float)px->mPos.y;
+		result.Z = (float)px->mPos.z;
 		return result;
 	}
 	v3dxQuaternion* GetQuat() {

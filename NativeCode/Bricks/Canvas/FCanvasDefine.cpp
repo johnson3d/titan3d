@@ -14,18 +14,18 @@ v3dxVector2 FUtility::RotateVector(const v3dxVector2& v, float angle)
 	rotMatrix[0][1] = sinV, rotMatrix[1][1] = cosV;
 
 	v3dxVector2 result;
-	result.x = v.x * rotMatrix[0][0] + v.y * rotMatrix[1][0];
-	result.y = v.x * rotMatrix[0][1] + v.y * rotMatrix[1][1];
+	result.X = v.X * rotMatrix[0][0] + v.Y * rotMatrix[1][0];
+	result.Y = v.X * rotMatrix[0][1] + v.Y * rotMatrix[1][1];
 	return result;
 }
 bool FUtility::LineLineIntersection(const v3dxVector2& ps1, const v3dxVector2& pe1, const v3dxVector2& ps2, const v3dxVector2& pe2, v3dxVector2* pPoint)
 {
 	// Get A,B of first line - points : ps1 to pe1
-	float A1 = pe1.y - ps1.y;
-	float B1 = ps1.x - pe1.x;
+	float A1 = pe1.Y - ps1.Y;
+	float B1 = ps1.X - pe1.X;
 	// Get A,B of second line - points : ps2 to pe2
-	float A2 = pe2.y - ps2.y;
-	float B2 = ps2.x - pe2.x;
+	float A2 = pe2.Y - ps2.Y;
+	float B2 = ps2.X - pe2.X;
 
 	// Get delta and check if the lines are parallel
 	float delta = A1 * B2 - A2 * B1;
@@ -33,13 +33,13 @@ bool FUtility::LineLineIntersection(const v3dxVector2& ps1, const v3dxVector2& p
 		return false;
 
 	// Get C of first and second lines
-	float C2 = A2 * ps2.x + B2 * ps2.y;
-	float C1 = A1 * ps1.x + B1 * ps1.y;
+	float C2 = A2 * ps2.X + B2 * ps2.Y;
+	float C1 = A1 * ps1.X + B1 * ps1.Y;
 	//invert delta to make division cheaper
 	float invdelta = 1 / delta;
 	// now return the Vector2 intersection point
-	pPoint->x = (B2 * C1 - B1 * C2) * invdelta;
-	pPoint->y = (A1 * C2 - A2 * C1) * invdelta;
+	pPoint->X = (B2 * C1 - B1 * C2) * invdelta;
+	pPoint->Y = (A1 * C2 - A2 * C1) * invdelta;
 	return true;
 }
 bool FUtility::LineRectIntersection(const v3dxVector2& s, const v3dxVector2& e, const FRectanglef& rect, v3dxVector2* pPoint)

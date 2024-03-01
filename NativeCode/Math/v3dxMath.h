@@ -319,71 +319,71 @@ inline void v3dxViewLHtoRH(float *d, const float *s)
 }
 
 inline v3dVector2_t* v3dxVec2Add(v3dVector2_t *pOut,const v3dVector2_t* p1,const v3dVector2_t* p2){
-	pOut->x = p1->x + p2->x;
-	pOut->y = p1->y + p2->y;
+	pOut->X = p1->X + p2->X;
+	pOut->Y = p1->Y + p2->Y;
 	return pOut;
 }
 
 inline v3dVector2_t* v3dxVec2Sub(v3dVector2_t *pOut,const v3dVector2_t* p1,const v3dVector2_t* p2){
-	pOut->x = p1->x - p2->x;
-	pOut->y = p1->y - p2->y;
+	pOut->X = p1->X - p2->X;
+	pOut->Y = p1->Y - p2->Y;
 	return pOut;
 }
 
 inline v3dVector2_t* v3dxVec2Mul(v3dVector2_t *pOut,float f,const v3dVector2_t* p){
-	pOut->x = f * p->x;
-	pOut->y = f * p->y;
+	pOut->X = f * p->X;
+	pOut->Y = f * p->Y;
 	return pOut;
 }
 
 inline v3dVector2_t* v3dxVec2Normalize(v3dVector2_t *pOut,const v3dVector2_t* pvt){
-	FLOAT fLen = sqrtf(pvt->x * pvt->x + pvt->y * pvt->y);
-	pOut->x = pvt->x / fLen;
-	pOut->y = pvt->y / fLen;
+	FLOAT fLen = sqrtf(pvt->X * pvt->X + pvt->Y * pvt->Y);
+	pOut->X = pvt->X / fLen;
+	pOut->Y = pvt->Y / fLen;
 	return pOut;
 }
 
 inline FLOAT v3dxVec2Length(const v3dVector2_t* pvt){
-	return sqrtf(pvt->x * pvt->x + pvt->y * pvt->y);
+	return sqrtf(pvt->X * pvt->X + pvt->Y * pvt->Y);
 }
 
 inline FLOAT v3dxVec2LengthSq(const v3dVector2_t* pvt){
-	return (pvt->x * pvt->x + pvt->y * pvt->y);
+	return (pvt->X * pvt->X + pvt->Y * pvt->Y);
 }
 
 /**
    
 **/
 inline float v3dxVec2Dot(const v3dVector2_t* v1, const v3dVector2_t* v2) {
-	return v1->x * v2->x + v1->y * v2->y;
+	return v1->X * v2->X + v1->Y * v2->Y;
 }
 inline float v3dxVec3Dot( const v3dVector3_t* v1,const v3dVector3_t* v2 ){ 
-	return v1->x*v2->x+v1->y*v2->y+v1->z*v2->z; 
+	return v1->X*v2->X+v1->Y*v2->Y+v1->Z*v2->Z; 
 }
 inline double v3dxDVec3Dot(const v3dDVector3_t* v1, const v3dDVector3_t* v2) {
-	return v1->x * v2->x + v1->y * v2->y + v1->z * v2->z;
+	return v1->X * v2->X + v1->Y * v2->Y + v1->Z * v2->Z;
 }
 //#define v3dxVec3Dot(v1,v2)	((v1)->x*(v2)->x+(v1)->y*(v2)->y+(v1)->z*(v2)->z) 
 
 inline v3dVector3_t* v3dxVec3Cross(v3dVector3_t *pOut,const v3dVector3_t* pvt1,const v3dVector3_t* pvt2){
-	pOut->x=pvt1->y*pvt2->z-pvt1->z*pvt2->y;
-	pOut->y=pvt1->z*pvt2->x-pvt1->x*pvt2->z;
-	pOut->z=pvt1->x*pvt2->y-pvt1->y*pvt2->x;
+	pOut->X=pvt1->Y*pvt2->Z-pvt1->Z*pvt2->Y;
+	pOut->Y=pvt1->Z*pvt2->X-pvt1->X*pvt2->Z;
+	pOut->Z=pvt1->X*pvt2->Y-pvt1->Y*pvt2->X;
 	return pOut;
 }
 
 inline v3dDVector3_t* v3dxDVec3Cross(v3dDVector3_t* pOut, const v3dDVector3_t* pvt1, const v3dDVector3_t* pvt2) {
-	pOut->x = pvt1->y * pvt2->z - pvt1->z * pvt2->y;
-	pOut->y = pvt1->z * pvt2->x - pvt1->x * pvt2->z;
-	pOut->z = pvt1->x * pvt2->y - pvt1->y * pvt2->x;
+	pOut->X = pvt1->Y * pvt2->Z - pvt1->Z * pvt2->Y;
+	pOut->Y = pvt1->Z * pvt2->X - pvt1->X * pvt2->Z;
+	pOut->Z = pvt1->X * pvt2->Y - pvt1->Y * pvt2->X;
 	return pOut;
 }
 
 inline v3dVector3_t* v3dxVec3Lerp(v3dVector3_t *pOut, const v3dVector3_t* pvt1, const v3dVector3_t* pvt2, float fSlerp) {
 
-	pOut->x = pvt1->x * (1 - fSlerp) + pvt2->x * fSlerp;
-	pOut->y = pvt1->y * (1 - fSlerp) + pvt2->y * fSlerp;
-	pOut->z = pvt1->z * (1 - fSlerp) + pvt2->z * fSlerp;
+	pOut->X = pvt1->X * (1 - fSlerp) + pvt2->X * fSlerp;
+	pOut->Y = pvt1->Y * (1 - fSlerp) + pvt2->Y * fSlerp;
+	pOut->Z = pvt1->Z * (1 - fSlerp) + pvt2->Z * fSlerp;
 	return pOut;
 }
 //#define v3dxVec3Cross(pOut,pvt1,pvt2)	{\
@@ -393,9 +393,9 @@ inline v3dVector3_t* v3dxVec3Lerp(v3dVector3_t *pOut, const v3dVector3_t* pvt1, 
 //	(pOut);
 
 inline v3dVector3_t* v3dxVec3Add(v3dVector3_t *pOut,const v3dVector3_t* p1,const v3dVector3_t* p2){
-	pOut->x = p1->x + p2->x;
-	pOut->y = p1->y + p2->y;
-	pOut->z = p1->z + p2->z;
+	pOut->X = p1->X + p2->X;
+	pOut->Y = p1->Y + p2->Y;
+	pOut->Z = p1->Z + p2->Z;
 	return pOut;
 }
 
@@ -406,9 +406,9 @@ inline v3dVector3_t* v3dxVec3Add(v3dVector3_t *pOut,const v3dVector3_t* p1,const
 //	(pOut);
 
 inline v3dVector3_t* v3dxVec3Sub(v3dVector3_t *pOut,const v3dVector3_t* p1,const v3dVector3_t* p2){
-	pOut->x = p1->x - p2->x;
-	pOut->y = p1->y - p2->y;
-	pOut->z = p1->z - p2->z;
+	pOut->X = p1->X - p2->X;
+	pOut->Y = p1->Y - p2->Y;
+	pOut->Z = p1->Z - p2->Z;
 	return pOut;
 }
 
@@ -426,50 +426,50 @@ inline v3dVector3_t* v3dxVec3Sub(v3dVector3_t *pOut,const v3dVector3_t* p1,const
 //}
 
 #define v3dxVec3Mul(pOut,f,p)		{\
-	(pOut)->x = f * (p)->x;\
-	(pOut)->y = f * (p)->y;\
-	(pOut)->z = f * (p)->z;}\
+	(pOut)->X = f * (p)->X;\
+	(pOut)->Y = f * (p)->Y;\
+	(pOut)->Z = f * (p)->Z;}\
 	(pOut);
 
 inline v3dVector3_t* v3dxVec3Normalize(v3dVector3_t *pOut,const v3dVector3_t* pvt){
 #if defined(USE_DXMATH) && defined(USE_DX)
 	return (v3dVector3_t*)D3DXVec3Normalize((D3DXVECTOR3*)pOut, (D3DXVECTOR3*)pvt);
 #else
-	FLOAT fLen = sqrtf(pvt->x * pvt->x + pvt->y * pvt->y + pvt->z * pvt->z);
-	pOut->x = pvt->x / fLen;
-	pOut->y = pvt->y / fLen;
-	pOut->z = pvt->z / fLen;
+	FLOAT fLen = sqrtf(pvt->X * pvt->X + pvt->Y * pvt->Y + pvt->Z * pvt->Z);
+	pOut->X = pvt->X / fLen;
+	pOut->Y = pvt->Y / fLen;
+	pOut->Z = pvt->Z / fLen;
 	return pOut;
 #endif
 }
 
 inline v3dDVector3_t* v3dxDVec3Normalize(v3dDVector3_t* pOut, const v3dDVector3_t* pvt) {
-	double fLen = sqrt(pvt->x * pvt->x + pvt->y * pvt->y + pvt->z * pvt->z);
-	pOut->x = pvt->x / fLen;
-	pOut->y = pvt->y / fLen;
-	pOut->z = pvt->z / fLen;
+	double fLen = sqrt(pvt->X * pvt->X + pvt->Y * pvt->Y + pvt->Z * pvt->Z);
+	pOut->X = pvt->X / fLen;
+	pOut->Y = pvt->Y / fLen;
+	pOut->Z = pvt->Z / fLen;
 	return pOut;
 }
 
 inline float v3dxVec4Dot(v3dVector4_t *v1,const v3dVector4_t* v2){
-	return v1->x*v2->x+v1->y*v2->y+v1->z*v2->z+v1->w*v2->w; 
+	return v1->X*v2->X+v1->Y*v2->Y+v1->Z*v2->Z+v1->W*v2->W; 
 }
 
 inline v3dVector4_t* v3dxVec4Normalize(v3dVector4_t *pOut,const v3dVector4_t* pvt){
-	FLOAT fLen = sqrtf(pvt->x * pvt->x + pvt->y * pvt->y + pvt->z * pvt->z + pvt->w * pvt->w );
-	pOut->x = pvt->x / fLen;
-	pOut->y = pvt->y / fLen;
-	pOut->z = pvt->z / fLen;
-	pOut->w = pvt->w / fLen;
+	FLOAT fLen = sqrtf(pvt->X * pvt->X + pvt->Y * pvt->Y + pvt->Z * pvt->Z + pvt->W * pvt->W );
+	pOut->X = pvt->X / fLen;
+	pOut->Y = pvt->Y / fLen;
+	pOut->Z = pvt->Z / fLen;
+	pOut->W = pvt->W / fLen;
 	return pOut;
 }
 
 inline FLOAT v3dxVec3Length(const v3dVector3_t* pvt){
-	return sqrtf(pvt->x * pvt->x + pvt->y * pvt->y + pvt->z * pvt->z);
+	return sqrtf(pvt->X * pvt->X + pvt->Y * pvt->Y + pvt->Z * pvt->Z);
 }
 
 inline FLOAT v3dxVec3LengthSq(const v3dVector3_t* pvt){
-	return (pvt->x * pvt->x + pvt->y * pvt->y + pvt->z * pvt->z);
+	return (pvt->X * pvt->X + pvt->Y * pvt->Y + pvt->Z * pvt->Z);
 }
 
 inline v3dMatrix4_t* v3dxMatrix4Mul( v3dMatrix4_t* pOut , const v3dMatrix4_t* mat1 , const v3dMatrix4_t* mat2){
@@ -639,17 +639,17 @@ inline v3dVector4_t* v3dxVec4Transform(v3dVector4_t* pOut,const v3dVector4_t* pV
 	if( pOut==pVec )
 	{
 		v3dVector4_t vCalc = *pVec;
-		pOut->x = pMatrix->m11*vCalc.x+pMatrix->m21*vCalc.y+pMatrix->m31*vCalc.z+pMatrix->m41*vCalc.w;
-		pOut->y = pMatrix->m12*vCalc.x+pMatrix->m22*vCalc.y+pMatrix->m32*vCalc.z+pMatrix->m42*vCalc.w;
-		pOut->z = pMatrix->m13*vCalc.x+pMatrix->m23*vCalc.y+pMatrix->m33*vCalc.z+pMatrix->m43*vCalc.w;
-		pOut->w = pMatrix->m14*vCalc.x+pMatrix->m24*vCalc.y+pMatrix->m34*vCalc.z+pMatrix->m44*vCalc.w;
+		pOut->X = pMatrix->m11*vCalc.X+pMatrix->m21*vCalc.Y+pMatrix->m31*vCalc.Z+pMatrix->m41*vCalc.W;
+		pOut->Y = pMatrix->m12*vCalc.X+pMatrix->m22*vCalc.Y+pMatrix->m32*vCalc.Z+pMatrix->m42*vCalc.W;
+		pOut->Z = pMatrix->m13*vCalc.X+pMatrix->m23*vCalc.Y+pMatrix->m33*vCalc.Z+pMatrix->m43*vCalc.W;
+		pOut->W = pMatrix->m14*vCalc.X+pMatrix->m24*vCalc.Y+pMatrix->m34*vCalc.Z+pMatrix->m44*vCalc.W;
 	}
 	else
 	{
-		pOut->x = pMatrix->m11*pVec->x+pMatrix->m21*pVec->y+pMatrix->m31*pVec->z+pMatrix->m41*pVec->w;
-		pOut->y = pMatrix->m12*pVec->x+pMatrix->m22*pVec->y+pMatrix->m32*pVec->z+pMatrix->m42*pVec->w;
-		pOut->z = pMatrix->m13*pVec->x+pMatrix->m23*pVec->y+pMatrix->m33*pVec->z+pMatrix->m43*pVec->w;
-		pOut->w = pMatrix->m14*pVec->x+pMatrix->m24*pVec->y+pMatrix->m34*pVec->z+pMatrix->m44*pVec->w;
+		pOut->X = pMatrix->m11*pVec->X+pMatrix->m21*pVec->Y+pMatrix->m31*pVec->Z+pMatrix->m41*pVec->W;
+		pOut->Y = pMatrix->m12*pVec->X+pMatrix->m22*pVec->Y+pMatrix->m32*pVec->Z+pMatrix->m42*pVec->W;
+		pOut->Z = pMatrix->m13*pVec->X+pMatrix->m23*pVec->Y+pMatrix->m33*pVec->Z+pMatrix->m43*pVec->W;
+		pOut->W = pMatrix->m14*pVec->X+pMatrix->m24*pVec->Y+pMatrix->m34*pVec->Z+pMatrix->m44*pVec->W;
 	}
 
 	return pOut;
@@ -660,10 +660,10 @@ inline v3dVector4_t* v3dxVec4Transform(v3dVector4_t* pOut,const v3dVector4_t* pV
 **/
 inline v3dVector4_t* v3dxVec3TransformFull(v3dVector4_t* pOut,const v3dVector3_t* pVec,
 													  const v3dMatrix4_t* pMatrix){
-	pOut->x = pMatrix->m11*pVec->x+pMatrix->m21*pVec->y+pMatrix->m31*pVec->z+pMatrix->m41;
-	pOut->y = pMatrix->m12*pVec->x+pMatrix->m22*pVec->y+pMatrix->m32*pVec->z+pMatrix->m42;
-	pOut->z = pMatrix->m13*pVec->x+pMatrix->m23*pVec->y+pMatrix->m33*pVec->z+pMatrix->m43;
-	pOut->w = pMatrix->m14*pVec->x+pMatrix->m24*pVec->y+pMatrix->m34*pVec->z+pMatrix->m44;
+	pOut->X = pMatrix->m11*pVec->X+pMatrix->m21*pVec->Y+pMatrix->m31*pVec->Z+pMatrix->m41;
+	pOut->Y = pMatrix->m12*pVec->X+pMatrix->m22*pVec->Y+pMatrix->m32*pVec->Z+pMatrix->m42;
+	pOut->Z = pMatrix->m13*pVec->X+pMatrix->m23*pVec->Y+pMatrix->m33*pVec->Z+pMatrix->m43;
+	pOut->W = pMatrix->m14*pVec->X+pMatrix->m24*pVec->Y+pMatrix->m34*pVec->Z+pMatrix->m44;
 	
 	return pOut;
 }
@@ -680,22 +680,22 @@ inline v3dVector3_t* v3dxVec3TransformCoord(v3dVector3_t* pOut,const v3dVector3_
 	float w;
 	if( pVec == pOut ){
 		v3dVector3_t vCalc = *pVec;
-		pOut->x = pMatrix->m11*vCalc.x+pMatrix->m21*vCalc.y+pMatrix->m31*vCalc.z+pMatrix->m41;
-		pOut->y = pMatrix->m12*vCalc.x+pMatrix->m22*vCalc.y+pMatrix->m32*vCalc.z+pMatrix->m42;
-		pOut->z = pMatrix->m13*vCalc.x+pMatrix->m23*vCalc.y+pMatrix->m33*vCalc.z+pMatrix->m43;
-		w = pMatrix->m14*vCalc.x+pMatrix->m24*vCalc.y+pMatrix->m34*vCalc.z+pMatrix->m44;
-		pOut->x /= w;
-		pOut->y /= w;
-		pOut->z /= w;
+		pOut->X = pMatrix->m11*vCalc.X+pMatrix->m21*vCalc.Y+pMatrix->m31*vCalc.Z+pMatrix->m41;
+		pOut->Y = pMatrix->m12*vCalc.X+pMatrix->m22*vCalc.Y+pMatrix->m32*vCalc.Z+pMatrix->m42;
+		pOut->Z = pMatrix->m13*vCalc.X+pMatrix->m23*vCalc.Y+pMatrix->m33*vCalc.Z+pMatrix->m43;
+		w = pMatrix->m14*vCalc.X+pMatrix->m24*vCalc.Y+pMatrix->m34*vCalc.Z+pMatrix->m44;
+		pOut->X /= w;
+		pOut->Y /= w;
+		pOut->Z /= w;
 	}
 	else{
-		pOut->x = pMatrix->m11*pVec->x+pMatrix->m21*pVec->y+pMatrix->m31*pVec->z+pMatrix->m41;
-		pOut->y = pMatrix->m12*pVec->x+pMatrix->m22*pVec->y+pMatrix->m32*pVec->z+pMatrix->m42;
-		pOut->z = pMatrix->m13*pVec->x+pMatrix->m23*pVec->y+pMatrix->m33*pVec->z+pMatrix->m43;
-		w = pMatrix->m14*pVec->x+pMatrix->m24*pVec->y+pMatrix->m34*pVec->z+pMatrix->m44;
-		pOut->x /= w;
-		pOut->y /= w;
-		pOut->z /= w;
+		pOut->X = pMatrix->m11*pVec->X+pMatrix->m21*pVec->Y+pMatrix->m31*pVec->Z+pMatrix->m41;
+		pOut->Y = pMatrix->m12*pVec->X+pMatrix->m22*pVec->Y+pMatrix->m32*pVec->Z+pMatrix->m42;
+		pOut->Z = pMatrix->m13*pVec->X+pMatrix->m23*pVec->Y+pMatrix->m33*pVec->Z+pMatrix->m43;
+		w = pMatrix->m14*pVec->X+pMatrix->m24*pVec->Y+pMatrix->m34*pVec->Z+pMatrix->m44;
+		pOut->X /= w;
+		pOut->Y /= w;
+		pOut->Z /= w;
 	}
 	return pOut;
 #endif
@@ -703,22 +703,22 @@ inline v3dVector3_t* v3dxVec3TransformCoord(v3dVector3_t* pOut,const v3dVector3_
 
 inline v3dVector3_t* v3dxVec3TransformCoord(v3dVector3_t* pOut, const v3dVector3_t* pVec, const v3dVector4_t* rotation)
 {
-	float x = rotation->x + rotation->x;
-	float y = rotation->y + rotation->y;
-	float z = rotation->z + rotation->z;
-	float wx = rotation->w * x;
-	float wy = rotation->w * y;
-	float wz = rotation->w * z;
-	float xx = rotation->x * x;
-	float xy = rotation->x * y;
-	float xz = rotation->x * z;
-	float yy = rotation->y * y;
-	float yz = rotation->y * z;
-	float zz = rotation->z * z;
+	float x = rotation->X + rotation->X;
+	float y = rotation->Y + rotation->Y;
+	float z = rotation->Z + rotation->Z;
+	float wx = rotation->W * x;
+	float wy = rotation->W * y;
+	float wz = rotation->W * z;
+	float xx = rotation->X * x;
+	float xy = rotation->X * y;
+	float xz = rotation->X * z;
+	float yy = rotation->Y * y;
+	float yz = rotation->Y * z;
+	float zz = rotation->Z * z;
 
-	pOut->x = ((pVec->x * ((1.0f - yy) - zz)) + (pVec->y * (xy - wz))) + (pVec->z * (xz + wy));
-	pOut->y = ((pVec->x * (xy + wz)) + (pVec->y * ((1.0f - xx) - zz))) + (pVec->z * (yz - wx));
-	pOut->z = ((pVec->x * (xz - wy)) + (pVec->y * (yz + wx))) + (pVec->z * ((1.0f - xx) - yy));
+	pOut->X = ((pVec->X * ((1.0f - yy) - zz)) + (pVec->Y * (xy - wz))) + (pVec->Z * (xz + wy));
+	pOut->Y = ((pVec->X * (xy + wz)) + (pVec->Y * ((1.0f - xx) - zz))) + (pVec->Z * (yz - wx));
+	pOut->Z = ((pVec->X * (xz - wy)) + (pVec->Y * (yz + wx))) + (pVec->Z * ((1.0f - xx) - yy));
 
 	return pOut;
 }
@@ -1018,14 +1018,14 @@ inline v3dVector3_t* v3dxVec3TransformNormal( v3dVector3_t* pOut,const v3dVector
 #else
 	if( pVec == pOut ){
 		v3dVector3_t vCalc = *pVec;
-		pOut->x = pMatrix->m11*vCalc.x+pMatrix->m21*vCalc.y+pMatrix->m31*vCalc.z;
-		pOut->y = pMatrix->m12*vCalc.x+pMatrix->m22*vCalc.y+pMatrix->m32*vCalc.z;
-		pOut->z = pMatrix->m13*vCalc.x+pMatrix->m23*vCalc.y+pMatrix->m33*vCalc.z;
+		pOut->X = pMatrix->m11*vCalc.X+pMatrix->m21*vCalc.Y+pMatrix->m31*vCalc.Z;
+		pOut->Y = pMatrix->m12*vCalc.X+pMatrix->m22*vCalc.Y+pMatrix->m32*vCalc.Z;
+		pOut->Z = pMatrix->m13*vCalc.X+pMatrix->m23*vCalc.Y+pMatrix->m33*vCalc.Z;
 	}
 	else{
-		pOut->x = pMatrix->m11*pVec->x+pMatrix->m21*pVec->y+pMatrix->m31*pVec->z;
-		pOut->y = pMatrix->m12*pVec->x+pMatrix->m22*pVec->y+pMatrix->m32*pVec->z;
-		pOut->z = pMatrix->m13*pVec->x+pMatrix->m23*pVec->y+pMatrix->m33*pVec->z;
+		pOut->X = pMatrix->m11*pVec->X+pMatrix->m21*pVec->Y+pMatrix->m31*pVec->Z;
+		pOut->Y = pMatrix->m12*pVec->X+pMatrix->m22*pVec->Y+pMatrix->m32*pVec->Z;
+		pOut->Z = pMatrix->m13*pVec->X+pMatrix->m23*pVec->Y+pMatrix->m33*pVec->Z;
 	}
 	return pOut;
 #endif
@@ -1038,15 +1038,15 @@ inline v3dMatrix4_t* v3dxMatrix4RotationAxis( v3dMatrix4_t* Out,const v3dVector3
       (length = 1). In this version, we will assume an arbitrary 
       length and normalize. */
    // normalize
-   float length = sqrtf(vAxis->x*vAxis->x + vAxis->y*vAxis->y + vAxis->z*vAxis->z);
+   float length = sqrtf(vAxis->X*vAxis->X + vAxis->Y*vAxis->Y + vAxis->Z*vAxis->Z);
 
    // too close to 0, can't make a normalized vector
    if (length < 0.000001f)
       return NULL;
 
-   float x = vAxis->x / length;
-   float y = vAxis->y / length;
-   float z = vAxis->z / length;
+   float x = vAxis->X / length;
+   float y = vAxis->Y / length;
+   float z = vAxis->Z / length;
 
    // do the trig
    float c = cosf(-theta);
@@ -1080,13 +1080,13 @@ inline v3dMatrix4_t* v3dxMatrix4MakePose(v3dMatrix4_t* pMatrix,const v3dVector3_
 									 const v3dVector3_t* pvUp,
 									 const v3dVector3_t* pvRight)
 {
-	pMatrix->m11 = pvRight->x;  pMatrix->m21 = pvRight->y;  pMatrix->m31 = pvRight->z;
-	pMatrix->m12 = pvUp->x;     pMatrix->m22 = pvUp->y;     pMatrix->m32 = pvUp->z;
-	pMatrix->m13 = pvDir->x;    pMatrix->m23 = pvDir->y;    pMatrix->m33 = pvDir->z;
+	pMatrix->m11 = pvRight->X;  pMatrix->m21 = pvRight->Y;  pMatrix->m31 = pvRight->Z;
+	pMatrix->m12 = pvUp->X;     pMatrix->m22 = pvUp->Y;     pMatrix->m32 = pvUp->Z;
+	pMatrix->m13 = pvDir->X;    pMatrix->m23 = pvDir->Y;    pMatrix->m33 = pvDir->Z;
 
-	pMatrix->m41 = pvPos->x;
-    pMatrix->m42 = pvPos->y;
-    pMatrix->m43 = pvPos->z;
+	pMatrix->m41 = pvPos->X;
+    pMatrix->m42 = pvPos->Y;
+    pMatrix->m43 = pvPos->Z;
 
 	pMatrix->m14 = 0.f;
 	pMatrix->m24 = 0.f;
@@ -1100,9 +1100,9 @@ inline v3dMatrix4_t* v3dxMatrix4View(v3dMatrix4_t* pMatrix,const v3dVector3_t* p
 									 const v3dVector3_t* pvUp,
 									 const v3dVector3_t* pvRight)
 {
-	pMatrix->m11 = pvRight->x;    pMatrix->m12 = pvUp->x;    pMatrix->m13 = pvDir->x;
-    pMatrix->m21 = pvRight->y;    pMatrix->m22 = pvUp->y;    pMatrix->m23 = pvDir->y;
-    pMatrix->m31 = pvRight->z;    pMatrix->m32 = pvUp->z;    pMatrix->m33 = pvDir->z;
+	pMatrix->m11 = pvRight->X;    pMatrix->m12 = pvUp->X;    pMatrix->m13 = pvDir->X;
+    pMatrix->m21 = pvRight->Y;    pMatrix->m22 = pvUp->Y;    pMatrix->m23 = pvDir->Y;
+    pMatrix->m31 = pvRight->Z;    pMatrix->m32 = pvUp->Z;    pMatrix->m33 = pvDir->Z;
 
 	pMatrix->m41 = -v3dxVec3Dot( pvPos, pvRight );
     pMatrix->m42 = -v3dxVec3Dot( pvPos, pvUp );
@@ -1132,8 +1132,8 @@ inline v3dMatrix4_t* v3dxMatrixLookDirLH( v3dMatrix4_t* pOut,const v3dVector3_t*
 */
 inline int v3dxWhichSide2D(const v3dVector2_t* v,
 	const v3dVector2_t* s1, const v3dVector2_t* s2) {
-	float k = (s1->y - v->y)*(s2->x - s1->x);
-	float k1 = (s1->x - v->x)*(s2->y - s1->y);
+	float k = (s1->Y - v->Y)*(s2->X - s1->X);
+	float k1 = (s1->X - v->X)*(s2->Y - s1->Y);
 	if (k < k1)
 		return -1;
 	else if (k > k1)
@@ -1158,11 +1158,11 @@ inline void v3dxCalcNormal(v3dVector3_t* norm, const v3dVector3_t* v1,
 
 */
 inline float v3dxCalSquareDistance2D(const v3dVector2_t* v1, const v3dVector2_t* v2) {
-	return((v1->x - v2->x)*(v1->x - v2->x) + (v1->y - v2->y)*(v1->y - v2->y));
+	return((v1->X - v2->X)*(v1->X - v2->X) + (v1->Y - v2->Y)*(v1->Y - v2->Y));
 }
 inline float v3dxCalSquareDistance(const v3dVector3_t* v1, const v3dVector3_t* v2)
 {
-	return((v1->x - v2->x)*(v1->x - v2->x) + (v1->y - v2->y)*(v1->y - v2->y) + (v1->z - v2->z)*(v1->z - v2->z));
+	return((v1->X - v2->X)*(v1->X - v2->X) + (v1->Y - v2->Y)*(v1->Y - v2->Y) + (v1->Z - v2->Z)*(v1->Z - v2->Z));
 }
 
 extern "C"

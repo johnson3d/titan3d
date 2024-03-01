@@ -12,17 +12,17 @@ public:
 	}
 	v3dxVector4(float v)
 	{
-		x = v;
-		y = v;
-		z = v;
-		w = v;
+		X = v;
+		Y = v;
+		Z = v;
+		W = v;
 	}
 	v3dxVector4(float ix, float iy, float iz, float iw)
 	{
-		x = ix;
-		y = iy;
-		z = iz;
-		w = iw;
+		X = ix;
+		Y = iy;
+		Z = iz;
+		W = iw;
 	}
 	operator v3dxVector3() const;
 	inline friend v3dxVector4 operator*(const v3dxVector4& v, const v3dxMatrix4&);

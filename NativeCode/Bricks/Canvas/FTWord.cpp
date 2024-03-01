@@ -56,35 +56,35 @@ namespace Canvas
 		//};
 
 		v3dxVector3 pos;
-		quatVerts[Canvas::RCN_X0_Y0].Pos.z = 0;
-		quatVerts[Canvas::RCN_X0_Y0].Pos.x = (float)x + osLeft;
-		quatVerts[Canvas::RCN_X0_Y0].Pos.y = (float)y;
-		quatVerts[Canvas::RCN_X0_Y0].UV.x = (su + osLeft) / texSizeX;//u
-		quatVerts[Canvas::RCN_X0_Y0].UV.y = (sv) / texSizeY;//v
+		quatVerts[Canvas::RCN_X0_Y0].Pos.Z = 0;
+		quatVerts[Canvas::RCN_X0_Y0].Pos.X = (float)x + osLeft;
+		quatVerts[Canvas::RCN_X0_Y0].Pos.Y = (float)y;
+		quatVerts[Canvas::RCN_X0_Y0].UV.X = (su + osLeft) / texSizeX;//u
+		quatVerts[Canvas::RCN_X0_Y0].UV.Y = (sv) / texSizeY;//v
 		quatVerts[Canvas::RCN_X0_Y0].Color.MakeValue(0xff, 0xff, 0xff, 0xff, 1);
 		FCanvasDrawCmdList::TransformIndexToColor(&transformIndex, quatVerts[Canvas::RCN_X0_Y0].Index);
 
-		quatVerts[Canvas::RCN_X1_Y0].Pos.z = 0;
-		quatVerts[Canvas::RCN_X1_Y0].Pos.x = (float)x + PixelWidth - osRight;
-		quatVerts[Canvas::RCN_X1_Y0].Pos.y = (float)y;
-		quatVerts[Canvas::RCN_X1_Y0].UV.x = (su + PixelWidth - osRight) / texSizeX;//u
-		quatVerts[Canvas::RCN_X1_Y0].UV.y = (sv) / texSizeY;//v
+		quatVerts[Canvas::RCN_X1_Y0].Pos.Z = 0;
+		quatVerts[Canvas::RCN_X1_Y0].Pos.X = (float)x + PixelWidth - osRight;
+		quatVerts[Canvas::RCN_X1_Y0].Pos.Y = (float)y;
+		quatVerts[Canvas::RCN_X1_Y0].UV.X = (su + PixelWidth - osRight) / texSizeX;//u
+		quatVerts[Canvas::RCN_X1_Y0].UV.Y = (sv) / texSizeY;//v
 		quatVerts[Canvas::RCN_X1_Y0].Color.MakeValue(0xff, 0xff, 0xff, 0xff, 1);
 		FCanvasDrawCmdList::TransformIndexToColor(&transformIndex, quatVerts[Canvas::RCN_X1_Y0].Index);
 
-		quatVerts[Canvas::RCN_X1_Y1].Pos.z = 0;
-		quatVerts[Canvas::RCN_X1_Y1].Pos.x = (float)x + PixelWidth - osRight;
-		quatVerts[Canvas::RCN_X1_Y1].Pos.y = (float)y + PixelHeight;
-		quatVerts[Canvas::RCN_X1_Y1].UV.x = (su + PixelWidth - osRight) / texSizeX;//u
-		quatVerts[Canvas::RCN_X1_Y1].UV.y = (sv + PixelHeight) / texSizeY;//v
+		quatVerts[Canvas::RCN_X1_Y1].Pos.Z = 0;
+		quatVerts[Canvas::RCN_X1_Y1].Pos.X = (float)x + PixelWidth - osRight;
+		quatVerts[Canvas::RCN_X1_Y1].Pos.Y = (float)y + PixelHeight;
+		quatVerts[Canvas::RCN_X1_Y1].UV.X = (su + PixelWidth - osRight) / texSizeX;//u
+		quatVerts[Canvas::RCN_X1_Y1].UV.Y = (sv + PixelHeight) / texSizeY;//v
 		quatVerts[Canvas::RCN_X1_Y1].Color.MakeValue(0xff, 0xff, 0xff, 0xff, 1);
 		FCanvasDrawCmdList::TransformIndexToColor(&transformIndex, quatVerts[Canvas::RCN_X1_Y1].Index);
 
-		quatVerts[Canvas::RCN_X0_Y1].Pos.z = 0;
-		quatVerts[Canvas::RCN_X0_Y1].Pos.x = (float)x + osLeft;
-		quatVerts[Canvas::RCN_X0_Y1].Pos.y = (float)y + PixelHeight;
-		quatVerts[Canvas::RCN_X0_Y1].UV.x = (su + osLeft) / texSizeX;//u
-		quatVerts[Canvas::RCN_X0_Y1].UV.y = (sv + PixelHeight) / texSizeY;//v
+		quatVerts[Canvas::RCN_X0_Y1].Pos.Z = 0;
+		quatVerts[Canvas::RCN_X0_Y1].Pos.X = (float)x + osLeft;
+		quatVerts[Canvas::RCN_X0_Y1].Pos.Y = (float)y + PixelHeight;
+		quatVerts[Canvas::RCN_X0_Y1].UV.X = (su + osLeft) / texSizeX;//u
+		quatVerts[Canvas::RCN_X0_Y1].UV.Y = (sv + PixelHeight) / texSizeY;//v
 		quatVerts[Canvas::RCN_X0_Y1].Color.MakeValue(0xff, 0xff, 0xff, 0xff, 1);
 		FCanvasDrawCmdList::TransformIndexToColor(&transformIndex, quatVerts[Canvas::RCN_X0_Y1].Index);
 	}
@@ -112,35 +112,35 @@ namespace Canvas
 
 		Canvas::FCanvasVertex verts[4];
 		v3dxVector3 pos;
-		verts[0].Pos.z = 0;
-		verts[0].Pos.x = (float)x + osLeft;
-		verts[0].Pos.y = (float)x + osLeft;
-		verts[0].UV.x = (su + osLeft) / texSizeX;//u
-		verts[0].UV.y = (sv) / texSizeY;//v
+		verts[0].Pos.Z = 0;
+		verts[0].Pos.X = (float)x + osLeft;
+		verts[0].Pos.Y = (float)x + osLeft;
+		verts[0].UV.X = (su + osLeft) / texSizeX;//u
+		verts[0].UV.Y = (sv) / texSizeY;//v
 		verts[0].Color = FColor::White;// 0xffffffff;
 		FCanvasDrawCmdList::TransformIndexToColor(&transformIndex, verts[0].Index);
 
-		verts[1].Pos.z = 0;
-		verts[1].Pos.x = (float)x + PixelWidth - osRight;
-		verts[1].Pos.y = (float)y;
-		verts[1].UV.x = (su + PixelWidth - osRight) / texSizeX;//u
-		verts[1].UV.y = (sv) / texSizeY;//v
+		verts[1].Pos.Z = 0;
+		verts[1].Pos.X = (float)x + PixelWidth - osRight;
+		verts[1].Pos.Y = (float)y;
+		verts[1].UV.X = (su + PixelWidth - osRight) / texSizeX;//u
+		verts[1].UV.Y = (sv) / texSizeY;//v
 		verts[1].Color = FColor::White;//0xffffffff;
 		FCanvasDrawCmdList::TransformIndexToColor(&transformIndex, verts[1].Index);
 
-		verts[2].Pos.z = 0;
-		verts[2].Pos.x = (float)x + PixelWidth - osRight;
-		verts[2].Pos.y = (float)y + PixelHeight;
-		verts[2].UV.x = (su + PixelWidth - osRight) / texSizeX;//u
-		verts[2].UV.y = (sv + PixelHeight) / texSizeY;//v
+		verts[2].Pos.Z = 0;
+		verts[2].Pos.X = (float)x + PixelWidth - osRight;
+		verts[2].Pos.Y = (float)y + PixelHeight;
+		verts[2].UV.X = (su + PixelWidth - osRight) / texSizeX;//u
+		verts[2].UV.Y = (sv + PixelHeight) / texSizeY;//v
 		verts[2].Color = FColor::White;//0xffffffff;
 		FCanvasDrawCmdList::TransformIndexToColor(&transformIndex, verts[2].Index);
 
-		verts[3].Pos.z = 0;
-		verts[3].Pos.x = (float)x + osLeft;
-		verts[3].Pos.y = (float)y + PixelHeight;
-		verts[3].UV.x = (su + osLeft) / texSizeX;//u
-		verts[3].UV.y = (sv + PixelHeight) / texSizeY;//v
+		verts[3].Pos.Z = 0;
+		verts[3].Pos.X = (float)x + osLeft;
+		verts[3].Pos.Y = (float)y + PixelHeight;
+		verts[3].UV.X = (su + osLeft) / texSizeX;//u
+		verts[3].UV.Y = (sv + PixelHeight) / texSizeY;//v
 		verts[3].Color = FColor::White;//0xffffffff;
 		FCanvasDrawCmdList::TransformIndexToColor(&transformIndex, verts[3].Index);
 
@@ -206,40 +206,40 @@ namespace Canvas
 		auto texSizeY = (float)texture->TextureSizeY;
 
 		FTVertex v;
-		v.PosUV.x = (float)x + osLeft;
-		v.PosUV.y = (float)y;
-		v.PosUV.z = (su + osLeft) / texSizeX;//u
-		v.PosUV.w = (sv) / texSizeY;//v
+		v.PosUV.X = (float)x + osLeft;
+		v.PosUV.Y = (float)y;
+		v.PosUV.Z = (su + osLeft) / texSizeX;//u
+		v.PosUV.W = (sv) / texSizeY;//v
 		verts[0] = v;
 
-		v.PosUV.x = (float)x + PixelWidth - osRight;
-		v.PosUV.y = (float)y;
-		v.PosUV.z = (su + PixelWidth - osRight) / texSizeX;//u
-		v.PosUV.w = (sv) / texSizeY;//v
+		v.PosUV.X = (float)x + PixelWidth - osRight;
+		v.PosUV.Y = (float)y;
+		v.PosUV.Z = (su + PixelWidth - osRight) / texSizeX;//u
+		v.PosUV.W = (sv) / texSizeY;//v
 		verts[1] = v;
 
-		v.PosUV.x = (float)x + PixelWidth - osRight;
-		v.PosUV.y = (float)y + PixelHeight;
-		v.PosUV.z = (su + PixelWidth - osRight) / texSizeX;//u
-		v.PosUV.w = (sv + PixelHeight) / texSizeY;//v
+		v.PosUV.X = (float)x + PixelWidth - osRight;
+		v.PosUV.Y = (float)y + PixelHeight;
+		v.PosUV.Z = (su + PixelWidth - osRight) / texSizeX;//u
+		v.PosUV.W = (sv + PixelHeight) / texSizeY;//v
 		verts[2] = v;
 
-		v.PosUV.x = (float)x + osLeft;
-		v.PosUV.y = (float)y;
-		v.PosUV.z = (su + osLeft) / texSizeX;//u
-		v.PosUV.w = (sv) / texSizeX;//v
+		v.PosUV.X = (float)x + osLeft;
+		v.PosUV.Y = (float)y;
+		v.PosUV.Z = (su + osLeft) / texSizeX;//u
+		v.PosUV.W = (sv) / texSizeX;//v
 		verts[3] = v;
 
-		v.PosUV.x = (float)x + PixelWidth - osRight;
-		v.PosUV.y = (float)y + PixelHeight;
-		v.PosUV.z = (su + PixelWidth - osRight) / texSizeX;//u
-		v.PosUV.w = (sv + PixelHeight) / texSizeY;//v
+		v.PosUV.X = (float)x + PixelWidth - osRight;
+		v.PosUV.Y = (float)y + PixelHeight;
+		v.PosUV.Z = (su + PixelWidth - osRight) / texSizeX;//u
+		v.PosUV.W = (sv + PixelHeight) / texSizeY;//v
 		verts[4] = v;
 
-		v.PosUV.x = (float)x + osLeft;
-		v.PosUV.y = (float)y + PixelHeight;
-		v.PosUV.z = (su + osLeft) / texSizeX;//u
-		v.PosUV.w = (sv + PixelHeight) / texSizeY;//v
+		v.PosUV.X = (float)x + osLeft;
+		v.PosUV.Y = (float)y + PixelHeight;
+		v.PosUV.Z = (su + osLeft) / texSizeX;//u
+		v.PosUV.W = (sv + PixelHeight) / texSizeY;//v
 		verts[5] = v;
 	}
 
@@ -487,8 +487,8 @@ namespace Canvas
 		grid2.GenerateSDF();
 		v3dxVector2 range1;
 		v3dxVector2 range2;
-		grid1.UpdateDistanceValues(range1.x, range1.y);
-		grid2.UpdateDistanceValues(range2.x, range2.y);
+		grid1.UpdateDistanceValues(range1.X, range1.Y);
+		grid2.UpdateDistanceValues(range2.X, range2.Y);
 
 		result->SdfScale = (float)result->FontSize / (float)FontSize;
 		result->UniCode = UniCode;
@@ -502,8 +502,8 @@ namespace Canvas
 		result->Pixels.resize(w * h);
 		//range1.x = 0;
 		//range1.y = 128;//size = 64
-		float delta1 = range1.y - range1.x;
-		float delta2 = range2.y - range2.x;
+		float delta1 = range1.Y - range1.X;
+		float delta2 = range2.Y - range2.X;
 
 		int sx = FontSize / (result->FontSize * 2);
 		int sy = FontSize / (result->FontSize * 2);

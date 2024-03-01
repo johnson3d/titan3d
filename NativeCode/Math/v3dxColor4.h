@@ -105,9 +105,9 @@ inline FColor::FColor(float _r, float _g, float _b, float _a)
 
 
 inline FColor::FColor(const v3dxVector3 &vec)
-	: r(Math::clampByte((int)(vec.x*255.f)))
-	, g(Math::clampByte((int)(vec.y*255.f)))
-	, b(Math::clampByte((int)(vec.z*255.f)))
+	: r(Math::clampByte((int)(vec.X*255.f)))
+	, g(Math::clampByte((int)(vec.Y*255.f)))
+	, b(Math::clampByte((int)(vec.Z*255.f)))
 	, a(255)
 {}
 

@@ -205,8 +205,8 @@ NxRHI::FMeshDataProvider* RcNavMesh::CreateRenderMesh()
 				for (int n = 0; n < 3; ++n)
 				{
 					v3dxVector2 uv;
-					uv.x = float(n)/3;
-					uv.y = 1 - float(n) / 3;
+					uv.X = float(n)/3;
+					uv.Y = 1 - float(n) / 3;
 					uvData.push_back(uv);
 					norData.push_back(nor);
 					if (t[n] < p->vertCount)

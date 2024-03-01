@@ -201,10 +201,10 @@ v3dxVector3 TileMeshBuilder::CorrectPosition(v3dxVector3 pos)
 	const float ts = mTileSize * mCellSize;
 	int tx = (int)((pos[0] - bmin[0]) / ts);
 	int ty = (int)((pos[2] - bmin[2]) / ts);
-	cpos.x = (float)tx * ts + bmin[0];
-	cpos.z = (float)ty * ts + bmin[2];
+	cpos.X = (float)tx * ts + bmin[0];
+	cpos.Z = (float)ty * ts + bmin[2];
 
-	cpos.y = pos.y;
+	cpos.Y = pos.Y;
 	return cpos;
 }
 
@@ -283,17 +283,17 @@ void TileMeshBuilder::buildAllTiles(dtNavMesh* m_navMesh)
 		float data[3];
 		for (int i = 0; i < m_geom->WalkDatas.size(); i += 2)
 		{
-			data[0] = m_geom->WalkDatas[i].x;
-			data[1] = m_geom->WalkDatas[i].y;
-			data[2] = m_geom->WalkDatas[i].z;
+			data[0] = m_geom->WalkDatas[i].X;
+			data[1] = m_geom->WalkDatas[i].Y;
+			data[2] = m_geom->WalkDatas[i].Z;
 
 			rcCalcGridSize(bmin, data, mCellSize, &gw, &gh);
 			int minx = (gw + ts - 1) / ts;
 			int miny = (gh + ts - 1) / ts;
 
-			data[0] = m_geom->WalkDatas[i + 1].x;
-			data[1] = m_geom->WalkDatas[i + 1].y;
-			data[2] = m_geom->WalkDatas[i + 1].z;
+			data[0] = m_geom->WalkDatas[i + 1].X;
+			data[1] = m_geom->WalkDatas[i + 1].Y;
+			data[2] = m_geom->WalkDatas[i + 1].Z;
 
 			rcCalcGridSize(bmin, data, mCellSize, &gw, &gh);
 			int maxx = (gw + ts - 1) / ts;

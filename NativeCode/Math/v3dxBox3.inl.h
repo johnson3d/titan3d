@@ -26,37 +26,37 @@ inline void v3dxBox3::SetSize (const v3dxVector3& s)
 
 inline bool v3dxBox3::In (float x, float y, float z) const
 {
-	if (x < minbox.x || x > maxbox.x) return false;
-	if (y < minbox.y || y > maxbox.y) return false;
-	if (z < minbox.z || z > maxbox.z) return false;
+	if (x < minbox.X || x > maxbox.X) return false;
+	if (y < minbox.Y || y > maxbox.Y) return false;
+	if (z < minbox.Z || z > maxbox.Z) return false;
 	return true;
 }
 
 inline bool v3dxBox3::In (const v3dxVector3& v) const
 {
-	return In (v.x, v.y, v.z);
+	return In (v.X, v.Y, v.Z);
 }
 
 inline bool v3dxBox3::Overlap (const v3dxBox3& box) const
 {
-	if (maxbox.x < box.minbox.x || minbox.x > box.maxbox.x) return false;
-	if (maxbox.y < box.minbox.y || minbox.y > box.maxbox.y) return false;
-	if (maxbox.z < box.minbox.z || minbox.z > box.maxbox.z) return false;
+	if (maxbox.X < box.minbox.X || minbox.X > box.maxbox.X) return false;
+	if (maxbox.Y < box.minbox.Y || minbox.Y > box.maxbox.Y) return false;
+	if (maxbox.Z < box.minbox.Z || minbox.Z > box.maxbox.Z) return false;
 	return true;
 }
 
 inline bool v3dxBox3::Contains (const v3dxBox3& box) const
 {
-	return (box.minbox.x >= minbox.x && box.maxbox.x <= maxbox.x) &&
-           (box.minbox.y >= minbox.y && box.maxbox.y <= maxbox.y) &&
-           (box.minbox.z >= minbox.z && box.maxbox.z <= maxbox.z);
+	return (box.minbox.X >= minbox.X && box.maxbox.X <= maxbox.X) &&
+           (box.minbox.Y >= minbox.Y && box.maxbox.Y <= maxbox.Y) &&
+           (box.minbox.Z >= minbox.Z && box.maxbox.Z <= maxbox.Z);
 }
 
 inline bool v3dxBox3::IsEmpty () const
 {
-	if (minbox.x > maxbox.x) return true;
-	if (minbox.y > maxbox.y) return true;
-	if (minbox.z > maxbox.z) return true;
+	if (minbox.X > maxbox.X) return true;
+	if (minbox.Y > maxbox.Y) return true;
+	if (minbox.Z > maxbox.Z) return true;
 	return false;
 }
 
@@ -72,117 +72,117 @@ inline vBOOL v3dxBox3::IsCrossByDatial(const v3dxVector3* pvPos,const v3dxVector
 
 inline v3dxBox3& v3dxBox3::operator+= (const v3dxBox3& box)
 {
-	if (box.minbox.x < minbox.x) minbox.x = box.minbox.x;
-	if (box.minbox.y < minbox.y) minbox.y = box.minbox.y;
-	if (box.minbox.z < minbox.z) minbox.z = box.minbox.z;
-	if (box.maxbox.x > maxbox.x) maxbox.x = box.maxbox.x;
-	if (box.maxbox.y > maxbox.y) maxbox.y = box.maxbox.y;
-	if (box.maxbox.z > maxbox.z) maxbox.z = box.maxbox.z;
+	if (box.minbox.X < minbox.X) minbox.X = box.minbox.X;
+	if (box.minbox.Y < minbox.Y) minbox.Y = box.minbox.Y;
+	if (box.minbox.Z < minbox.Z) minbox.Z = box.minbox.Z;
+	if (box.maxbox.X > maxbox.X) maxbox.X = box.maxbox.X;
+	if (box.maxbox.Y > maxbox.Y) maxbox.Y = box.maxbox.Y;
+	if (box.maxbox.Z > maxbox.Z) maxbox.Z = box.maxbox.Z;
 	return *this;
 }
 
 inline v3dxBox3& v3dxBox3::operator+= (const v3dxVector3& point)
 {
-	if (point.x < minbox.x) minbox.x = point.x;
-	if (point.x > maxbox.x) maxbox.x = point.x;
-	if (point.y < minbox.y) minbox.y = point.y;
-	if (point.y > maxbox.y) maxbox.y = point.y;
-	if (point.z < minbox.z) minbox.z = point.z;
-	if (point.z > maxbox.z) maxbox.z = point.z;
+	if (point.X < minbox.X) minbox.X = point.X;
+	if (point.X > maxbox.X) maxbox.X = point.X;
+	if (point.Y < minbox.Y) minbox.Y = point.Y;
+	if (point.Y > maxbox.Y) maxbox.Y = point.Y;
+	if (point.Z < minbox.Z) minbox.Z = point.Z;
+	if (point.Z > maxbox.Z) maxbox.Z = point.Z;
 	return *this;
 }
 
 inline v3dxBox3& v3dxBox3::operator*= (const v3dxBox3& box)
 {
-	if (box.minbox.x > minbox.x) minbox.x = box.minbox.x;
-	if (box.minbox.y > minbox.y) minbox.y = box.minbox.y;
-	if (box.minbox.z > minbox.z) minbox.z = box.minbox.z;
-	if (box.maxbox.x < maxbox.x) maxbox.x = box.maxbox.x;
-	if (box.maxbox.y < maxbox.y) maxbox.y = box.maxbox.y;
-	if (box.maxbox.z < maxbox.z) maxbox.z = box.maxbox.z;
+	if (box.minbox.X > minbox.X) minbox.X = box.minbox.X;
+	if (box.minbox.Y > minbox.Y) minbox.Y = box.minbox.Y;
+	if (box.minbox.Z > minbox.Z) minbox.Z = box.minbox.Z;
+	if (box.maxbox.X < maxbox.X) maxbox.X = box.maxbox.X;
+	if (box.maxbox.Y < maxbox.Y) maxbox.Y = box.maxbox.Y;
+	if (box.maxbox.Z < maxbox.Z) maxbox.Z = box.maxbox.Z;
 	return *this;
 }
 
 inline v3dxBox3 operator+ (const v3dxBox3& box1, const v3dxBox3& box2)
 {
 	return v3dxBox3(
-  		TPL_HELP::vfxMIN(box1.minbox.x,box2.minbox.x),
-		TPL_HELP::vfxMIN(box1.minbox.y,box2.minbox.y),
-		TPL_HELP::vfxMIN(box1.minbox.z,box2.minbox.z),
-		TPL_HELP::vfxMAX(box1.maxbox.x,box2.maxbox.x),
-		TPL_HELP::vfxMAX(box1.maxbox.y,box2.maxbox.y),
-		TPL_HELP::vfxMAX(box1.maxbox.z,box2.maxbox.z) );
+  		TPL_HELP::vfxMIN(box1.minbox.X,box2.minbox.X),
+		TPL_HELP::vfxMIN(box1.minbox.Y,box2.minbox.Y),
+		TPL_HELP::vfxMIN(box1.minbox.Z,box2.minbox.Z),
+		TPL_HELP::vfxMAX(box1.maxbox.X,box2.maxbox.X),
+		TPL_HELP::vfxMAX(box1.maxbox.Y,box2.maxbox.Y),
+		TPL_HELP::vfxMAX(box1.maxbox.Z,box2.maxbox.Z) );
 }
 
 inline v3dxBox3 operator+ (const v3dxBox3& box, const v3dxVector3& point)
 {
 	return v3dxBox3(
-  		TPL_HELP::vfxMIN(box.minbox.x,point.x),
-		TPL_HELP::vfxMIN(box.minbox.y,point.y),
-		TPL_HELP::vfxMIN(box.minbox.z,point.z),
-		TPL_HELP::vfxMAX(box.maxbox.x,point.x),
-		TPL_HELP::vfxMAX(box.maxbox.y,point.y),
-		TPL_HELP::vfxMAX(box.maxbox.z,point.z) );
+  		TPL_HELP::vfxMIN(box.minbox.X,point.X),
+		TPL_HELP::vfxMIN(box.minbox.Y,point.Y),
+		TPL_HELP::vfxMIN(box.minbox.Z,point.Z),
+		TPL_HELP::vfxMAX(box.maxbox.X,point.X),
+		TPL_HELP::vfxMAX(box.maxbox.Y,point.Y),
+		TPL_HELP::vfxMAX(box.maxbox.Z,point.Z) );
 }
 
 inline v3dxBox3 operator* (const v3dxBox3& box1, const v3dxBox3& box2)
 {
 	return v3dxBox3(
-  		TPL_HELP::vfxMAX(box1.minbox.x,box2.minbox.x),
-		TPL_HELP::vfxMAX(box1.minbox.y,box2.minbox.y),
-		TPL_HELP::vfxMAX(box1.minbox.z,box2.minbox.z),
-		TPL_HELP::vfxMIN(box1.maxbox.x,box2.maxbox.x),
-		TPL_HELP::vfxMIN(box1.maxbox.y,box2.maxbox.y),
-		TPL_HELP::vfxMIN(box1.maxbox.z,box2.maxbox.z));
+  		TPL_HELP::vfxMAX(box1.minbox.X,box2.minbox.X),
+		TPL_HELP::vfxMAX(box1.minbox.Y,box2.minbox.Y),
+		TPL_HELP::vfxMAX(box1.minbox.Z,box2.minbox.Z),
+		TPL_HELP::vfxMIN(box1.maxbox.X,box2.maxbox.X),
+		TPL_HELP::vfxMIN(box1.maxbox.Y,box2.maxbox.Y),
+		TPL_HELP::vfxMIN(box1.maxbox.Z,box2.maxbox.Z));
 }
 
 inline bool operator== (const v3dxBox3& box1, const v3dxBox3& box2)
 {
-	return ( (box1.minbox.x == box2.minbox.x)
-  		&& (box1.minbox.y == box2.minbox.y)
-  		&& (box1.minbox.z == box2.minbox.z)
-		&& (box1.maxbox.x == box2.maxbox.x)
-		&& (box1.maxbox.y == box2.maxbox.y)
-		&& (box1.maxbox.z == box2.maxbox.z) );
+	return ( (box1.minbox.X == box2.minbox.X)
+  		&& (box1.minbox.Y == box2.minbox.Y)
+  		&& (box1.minbox.Z == box2.minbox.Z)
+		&& (box1.maxbox.X == box2.maxbox.X)
+		&& (box1.maxbox.Y == box2.maxbox.Y)
+		&& (box1.maxbox.Z == box2.maxbox.Z) );
 }
 
 inline bool operator!= (const v3dxBox3& box1, const v3dxBox3& box2)
 {
-	return ( (box1.minbox.x != box2.minbox.x)
-  		|| (box1.minbox.y != box2.minbox.y)
-  		|| (box1.minbox.z != box2.minbox.z)
-		|| (box1.maxbox.x != box2.maxbox.x)
-		|| (box1.maxbox.y != box2.maxbox.y)
-		|| (box1.maxbox.z != box2.maxbox.z) );
+	return ( (box1.minbox.X != box2.minbox.X)
+  		|| (box1.minbox.Y != box2.minbox.Y)
+  		|| (box1.minbox.Z != box2.minbox.Z)
+		|| (box1.maxbox.X != box2.maxbox.X)
+		|| (box1.maxbox.Y != box2.maxbox.Y)
+		|| (box1.maxbox.Z != box2.maxbox.Z) );
 }
 
 inline bool operator< (const v3dxBox3& box1, const v3dxBox3& box2)
 {
-	return ( (box1.minbox.x >= box2.minbox.x)
-  		&& (box1.minbox.y >= box2.minbox.y)
-  		&& (box1.minbox.z >= box2.minbox.z)
-		&& (box1.maxbox.x <= box2.maxbox.x)
-		&& (box1.maxbox.y <= box2.maxbox.y)
-		&& (box1.maxbox.z <= box2.maxbox.z) );
+	return ( (box1.minbox.X >= box2.minbox.X)
+  		&& (box1.minbox.Y >= box2.minbox.Y)
+  		&& (box1.minbox.Z >= box2.minbox.Z)
+		&& (box1.maxbox.X <= box2.maxbox.X)
+		&& (box1.maxbox.Y <= box2.maxbox.Y)
+		&& (box1.maxbox.Z <= box2.maxbox.Z) );
 }
 
 inline bool operator> (const v3dxBox3& box1, const v3dxBox3& box2)
 {
-	return ( (box2.minbox.x >= box1.minbox.x)
-  		&& (box2.minbox.y >= box1.minbox.y)
-  		&& (box2.minbox.z >= box1.minbox.z)
-		&& (box2.maxbox.x <= box1.maxbox.x)
-		&& (box2.maxbox.y <= box1.maxbox.y)
-		&& (box2.maxbox.z <= box1.maxbox.z) );
+	return ( (box2.minbox.X >= box1.minbox.X)
+  		&& (box2.minbox.Y >= box1.minbox.Y)
+  		&& (box2.minbox.Z >= box1.minbox.Z)
+		&& (box2.maxbox.X <= box1.maxbox.X)
+		&& (box2.maxbox.Y <= box1.maxbox.Y)
+		&& (box2.maxbox.Z <= box1.maxbox.Z) );
 }
 
 inline bool operator< (const v3dxVector3& point, const v3dxBox3& box)
 {
-	return ( (point.x >= box.minbox.x)
-  		&& (point.x <= box.maxbox.x)
-		&& (point.y >= box.minbox.y)
-		&& (point.y <= box.maxbox.y)
-		&& (point.z >= box.minbox.z)
-		&& (point.z <= box.maxbox.z) );
+	return ( (point.X >= box.minbox.X)
+  		&& (point.X <= box.maxbox.X)
+		&& (point.Y >= box.minbox.Y)
+		&& (point.Y <= box.maxbox.Y)
+		&& (point.Z >= box.minbox.Z)
+		&& (point.Z <= box.maxbox.Z) );
 }
 

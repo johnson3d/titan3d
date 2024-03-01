@@ -20,8 +20,8 @@
 
 struct v3dVector2_t
 {
-	float				x;
-	float				y;
+	float				X;
+	float				Y;
 };
 
 struct v3dUV_t
@@ -32,17 +32,17 @@ struct v3dUV_t
 
 struct v3dVector3_t
 {
-	float				x;
-	float				y;
-	float				z;
+	float				X;
+	float				Y;
+	float				Z;
 };
 
 class v3dDVector3_t
 {
 public:
-	double x;
-	double y;
-	double z;
+	double X;
+	double Y;
+	double Z;
 };
 
 struct v3dVector4_t
@@ -51,10 +51,10 @@ struct v3dVector4_t
 	{
 		struct
 		{
-			float				x;
-			float				y;
-			float				z;
-			float				w;
+			float				X;
+			float				Y;
+			float				Z;
+			float				W;
 		};
 		struct  
 		{
@@ -118,18 +118,18 @@ struct v3dDMatrix4_t
 	}
 	inline void ExtractionTrans(v3dDVector3_t& vTransPos) const
 	{
-		vTransPos.x = m41;
-		vTransPos.y = m42;
-		vTransPos.z = m43;
+		vTransPos.X = m41;
+		vTransPos.Y = m42;
+		vTransPos.Z = m43;
 	}
 	inline void ExtractionScale(v3dVector3_t& vScale) const
 	{
 		//vScale.x = sqrt(m11*m11 + m21*m21 + m31*m31); // getRow1().getLength();
 		//vScale.y = sqrt(m12*m12 + m22*m22 + m32*m32);
 		//vScale.z = sqrt(m13*m13 + m23*m23 + m33*m33);
-		vScale.x = (float)sqrt(m11 * m11 + m12 * m12 + m13 * m13); // getRow1().getLength();
-		vScale.y = (float)sqrt(m21 * m21 + m22 * m22 + m23 * m23);
-		vScale.z = (float)sqrt(m31 * m31 + m32 * m32 + m33 * m33);
+		vScale.X = (float)sqrt(m11 * m11 + m12 * m12 + m13 * m13); // getRow1().getLength();
+		vScale.Y = (float)sqrt(m21 * m21 + m22 * m22 + m23 * m23);
+		vScale.Z = (float)sqrt(m31 * m31 + m32 * m32 + m33 * m33);
 	}
 	inline v3dDMatrix4_t operator * (const v3dDMatrix4_t& Mat) const
 	{

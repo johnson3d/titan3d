@@ -47,17 +47,17 @@ namespace Canvas
 
 	float FPathUtility::DotProduct(const v3dxVector2& V0, const v3dxVector2& V1)
 	{
-		return V0.x * V1.x + V0.y * V1.y;
+		return V0.X * V1.X + V0.Y * V1.Y;
 	}
 
 	float FPathUtility::CrossProduct(const v3dxVector2& V0, const v3dxVector2& V1)
 	{
-		return V0.x * V1.y - V0.y * V1.x;
+		return V0.X * V1.Y - V0.Y * V1.X;
 	}
 
 	v3dxVector2 FPathUtility::GetRight(const v3dxVector2& V)
 	{
-		return v3dxVector2(V.y, -V.x);
+		return v3dxVector2(V.Y, -V.X);
 	}
 
 	float FPathUtility::GetDistance(const v3dxVector2& P0, const v3dxVector2& P1)
@@ -86,7 +86,7 @@ namespace Canvas
 		const float MaxX = Rect.X + Rect.Width;
 		const float MinY = Rect.Y;
 		const float MaxY = Rect.Y + Rect.Height;
-		return P.x >= MinX && P.x <= MaxX && P.y >= MinY && P.y <= MaxY;
+		return P.X >= MinX && P.X <= MaxX && P.Y >= MinY && P.Y <= MaxY;
 	}
 
 	float FPathUtility::GetTriangleArea(const v3dxVector2& A, const v3dxVector2& B, const v3dxVector2& C)
@@ -105,10 +105,10 @@ namespace Canvas
 		v3dxVector2* vp = (v3dxVector2*)InVerts;
 		for (UINT i = 0; i < NumVerts; i++)
 		{
-			MinX = std::min(MinX, (*vp).x);
-			MaxX = std::max(MaxX, (*vp).x);
-			MinY = std::min(MinY, (*vp).y);
-			MaxY = std::max(MaxY, (*vp).y);
+			MinX = std::min(MinX, (*vp).X);
+			MaxX = std::max(MaxX, (*vp).X);
+			MinY = std::min(MinY, (*vp).Y);
+			MaxY = std::max(MaxY, (*vp).Y);
 			vp++;
 		}
 		return FRectanglef(MinX, MinY, MaxX - MinX, MaxY - MinY);
@@ -257,41 +257,41 @@ namespace Canvas
 
 		if (Bounds.Y < Rect.Y)
 		{
-			FIsInFunc IsInside = [Rect](FVInput P) { return P.y >= Rect.Y; };
+			FIsInFunc IsInside = [Rect](FVInput P) { return P.Y >= Rect.Y; };
 			FInscFunc Intersect = [Rect](FVInput P0, FVInput P1, float& Alpha)
 			{
-				Alpha = (Rect.Y - P0.y) / (P1.y - P0.y);
-				return v3dxVector2(P0.x + Alpha * (P1.x - P0.x), Rect.Y);
+				Alpha = (Rect.Y - P0.Y) / (P1.Y - P0.Y);
+				return v3dxVector2(P0.X + Alpha * (P1.X - P0.X), Rect.Y);
 			};
 			ClipByLine(IsInside, Intersect);
 		}
 		if (Bounds.GetRight() > Rect.GetRight())
 		{
-			FIsInFunc IsInside = [Rect](FVInput P) { return P.x <= Rect.GetRight(); };
+			FIsInFunc IsInside = [Rect](FVInput P) { return P.X <= Rect.GetRight(); };
 			FInscFunc Intersect = [Rect](FVInput P0, FVInput P1, float& Alpha)
 			{
-				Alpha = (Rect.GetRight() - P0.x) / (P1.x - P0.x);
-				return v3dxVector2(Rect.GetRight(), P0.y + Alpha * (P1.y - P0.y));
+				Alpha = (Rect.GetRight() - P0.X) / (P1.X - P0.X);
+				return v3dxVector2(Rect.GetRight(), P0.Y + Alpha * (P1.Y - P0.Y));
 			};
 			ClipByLine(IsInside, Intersect);
 		}
 		if (Bounds.GetBottom() > Rect.GetBottom())
 		{
-			FIsInFunc IsInside = [Rect](FVInput P) { return P.y <= Rect.GetBottom(); };
+			FIsInFunc IsInside = [Rect](FVInput P) { return P.Y <= Rect.GetBottom(); };
 			FInscFunc Intersect = [Rect](FVInput P0, FVInput P1, float& Alpha)
 			{
-				Alpha = (Rect.GetBottom() - P0.y) / (P1.y - P0.y);
-				return v3dxVector2(P0.x + Alpha * (P1.x - P0.x), Rect.GetBottom());
+				Alpha = (Rect.GetBottom() - P0.Y) / (P1.Y - P0.Y);
+				return v3dxVector2(P0.X + Alpha * (P1.X - P0.X), Rect.GetBottom());
 			};
 			ClipByLine(IsInside, Intersect);
 		}
 		if (Bounds.X < Rect.X)
 		{
-			FIsInFunc IsInside = [Rect](FVInput P) { return P.x >= Rect.X; };
+			FIsInFunc IsInside = [Rect](FVInput P) { return P.X >= Rect.X; };
 			FInscFunc Intersect = [Rect](FVInput P0, FVInput P1, float& Alpha)
 			{
-				Alpha = (Rect.X - P0.x) / (P1.x - P0.x);
-				return v3dxVector2(Rect.X, P0.y + Alpha * (P1.y - P0.y));
+				Alpha = (Rect.X - P0.X) / (P1.X - P0.X);
+				return v3dxVector2(Rect.X, P0.Y + Alpha * (P1.Y - P0.Y));
 			};
 			ClipByLine(IsInside, Intersect);
 		}
@@ -321,9 +321,9 @@ namespace Canvas
 
 	UINT FArcLUT::GetLUTIndex(const v3dxVector2& Orient, bool InCCW)
 	{
-		if (Orient.x == 1.f)
+		if (Orient.X == 1.f)
 			return 0;
-		if (Orient.x == -1.f)
+		if (Orient.X == -1.f)
 			return NUM_FASTLUT / 2;
 
 		UINT PrevInd = 0;
@@ -331,12 +331,12 @@ namespace Canvas
 		while (NextInd - PrevInd > 1)
 		{
 			UINT MidInd = (NextInd + PrevInd) / 2;
-			if (LUT[MidInd].x <= Orient.x)
+			if (LUT[MidInd].X <= Orient.X)
 				NextInd = MidInd;
 			else
 				PrevInd = MidInd;
 		}
-		UINT Index = Orient.y < 0 ? (PrevInd == 0 ? 0 : NUM_FASTLUT - PrevInd) : NextInd;
+		UINT Index = Orient.Y < 0 ? (PrevInd == 0 ? 0 : NUM_FASTLUT - PrevInd) : NextInd;
 		if (!InCCW)
 			Index = (Index + NUM_FASTLUT - 1) % NUM_FASTLUT;
 		return Index;
@@ -345,9 +345,9 @@ namespace Canvas
 	UINT FArcLUT::GetLUTIndex(const v3dxVector2& Orient, bool InCCW, float& OutArcToIndex)
 	{
 		OutArcToIndex = 0;
-		if (Orient.x == 1.f)
+		if (Orient.X == 1.f)
 			return 0;
-		if (Orient.x == -1.f)
+		if (Orient.X == -1.f)
 			return NUM_FASTLUT / 2;
 
 		UINT PrevInd = 0;
@@ -355,17 +355,17 @@ namespace Canvas
 		while (NextInd - PrevInd > 1)
 		{
 			UINT MidInd = (NextInd + PrevInd) / 2;
-			if (LUT[MidInd].x <= Orient.x)
+			if (LUT[MidInd].X <= Orient.X)
 				NextInd = MidInd;
 			else
 				PrevInd = MidInd;
 		}
-		UINT Index = Orient.y < 0 ? (PrevInd == 0 ? 0 : NUM_FASTLUT - PrevInd) : NextInd;
+		UINT Index = Orient.Y < 0 ? (PrevInd == 0 ? 0 : NUM_FASTLUT - PrevInd) : NextInd;
 		PrevInd = (Index + NUM_FASTLUT - 1) % NUM_FASTLUT;
 		if (!InCCW)
 			std::swap(Index, PrevInd);
-		float SinToNext = Math::Abs(Orient.y * LUT[Index].x - Orient.x * LUT[Index].y);
-		float SinToPrev = Math::Abs(Orient.y * LUT[PrevInd].x - Orient.x * LUT[PrevInd].y);
+		float SinToNext = Math::Abs(Orient.Y * LUT[Index].X - Orient.X * LUT[Index].Y);
+		float SinToPrev = Math::Abs(Orient.Y * LUT[PrevInd].X - Orient.X * LUT[PrevInd].Y);
 		OutArcToIndex = SinToNext / (SinToNext + SinToPrev) * DELTA;
 		return Index;
 	}

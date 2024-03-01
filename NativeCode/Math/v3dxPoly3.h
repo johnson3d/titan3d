@@ -98,7 +98,7 @@ public:
 	//添加一个顶点到多边形，返回被添加的顶点的索引
 	 int addVertex (float x, float y, float z,vBOOL bUpdateNormal=FALSE);
 	int addVertex (const v3dxVector3& v) { 
-		return addVertex (v.x, v.y, v.z); 
+		return addVertex (v.X, v.Y, v.Z); 
 	}
 	
 	void setVertices (v3dxVector3 *v, int num){ 
@@ -185,7 +185,7 @@ inline int v3dxPoly3::classifyX (float x) const
 
 	for (i = 0 ; i < num_vertices ; i++)
 	{
-		float xx = vertices[i].x-x;
+		float xx = vertices[i].X-x;
 		if (xx < -EPSILON) 
 			front++;
 		else if (xx > EPSILON) 
@@ -203,7 +203,7 @@ inline int v3dxPoly3::classifyY (float y) const
 
 	for (i = 0 ; i < num_vertices ; i++)
 	{
-		float yy = vertices[i].y-y;
+		float yy = vertices[i].Y-y;
 		if (yy < -EPSILON) 
 			front++;
 		else if (yy > EPSILON) 
@@ -221,7 +221,7 @@ inline int v3dxPoly3::classifyZ (float z) const
 
 	for (i = 0 ; i < num_vertices ; i++)
 	{
-		float zz = vertices[i].z-z;
+		float zz = vertices[i].Z-z;
 		if (zz < -EPSILON) 
 			front++;
 		else if (zz > EPSILON) 

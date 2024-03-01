@@ -25,28 +25,28 @@ v3dxVector3 v3dxBox3::GetCorner (int corner) const
 	switch(corner)
 	{
 	case BOX3_CORNER_xyz:
-		return v3dxVector3(minbox.x,minbox.y,minbox.z);
+		return v3dxVector3(minbox.X,minbox.Y,minbox.Z);
 		break;
 	case BOX3_CORNER_xyZ:
-		return v3dxVector3(minbox.x,minbox.y,maxbox.z);
+		return v3dxVector3(minbox.X,minbox.Y,maxbox.Z);
 		break;
 	case BOX3_CORNER_xYz:
-		return v3dxVector3(minbox.x,maxbox.y,minbox.z);
+		return v3dxVector3(minbox.X,maxbox.Y,minbox.Z);
 		break;
 	case BOX3_CORNER_xYZ:
-		return v3dxVector3(minbox.x,maxbox.y,maxbox.z);
+		return v3dxVector3(minbox.X,maxbox.Y,maxbox.Z);
 		break;
 	case BOX3_CORNER_Xyz:
-		return v3dxVector3(maxbox.x,minbox.y,minbox.z);
+		return v3dxVector3(maxbox.X,minbox.Y,minbox.Z);
 		break;
 	case BOX3_CORNER_XyZ:
-		return v3dxVector3(maxbox.x,minbox.y,maxbox.z);
+		return v3dxVector3(maxbox.X,minbox.Y,maxbox.Z);
 		break;
 	case BOX3_CORNER_XYz:
-		return v3dxVector3(maxbox.x,maxbox.y,minbox.z);
+		return v3dxVector3(maxbox.X,maxbox.Y,minbox.Z);
 		break;
 	case BOX3_CORNER_XYZ:
-		return v3dxVector3(maxbox.x,maxbox.y,maxbox.z);
+		return v3dxVector3(maxbox.X,maxbox.Y,maxbox.Z);
 		break;
 	}
 	return v3dxVector3(0.0f,0.0f,0.0f);
@@ -120,12 +120,12 @@ int v3dxBox3::Adjacent (const v3dxBox3& other) const
 
 bool v3dxBox3::Between (const v3dxBox3& box1, const v3dxBox3& box2) const
 {
-	if (((maxbox.x >= box1.minbox.x && minbox.x <= box2.maxbox.x) ||
-       (maxbox.x >= box2.minbox.x && minbox.x <= box1.maxbox.x)) &&
-      ((maxbox.y >= box1.minbox.y && minbox.y <= box2.maxbox.y) ||
-       (maxbox.y >= box2.minbox.y && minbox.y <= box1.maxbox.y)) &&
-      ((maxbox.z >= box1.minbox.z && minbox.z <= box2.maxbox.z) ||
-       (maxbox.z >= box2.minbox.z && minbox.z <= box1.maxbox.z)))
+	if (((maxbox.X >= box1.minbox.X && minbox.X <= box2.maxbox.X) ||
+       (maxbox.X >= box2.minbox.X && minbox.X <= box1.maxbox.X)) &&
+      ((maxbox.Y >= box1.minbox.Y && minbox.Y <= box2.maxbox.Y) ||
+       (maxbox.Y >= box2.minbox.Y && minbox.Y <= box1.maxbox.Y)) &&
+      ((maxbox.Z >= box1.minbox.Z && minbox.Z <= box2.maxbox.Z) ||
+       (maxbox.Z >= box2.minbox.Z && minbox.Z <= box1.maxbox.Z)))
 	{
 		return true;
 	}
@@ -134,32 +134,32 @@ bool v3dxBox3::Between (const v3dxBox3& box1, const v3dxBox3& box2) const
 
 void v3dxBox3::ManhattanDistance (const v3dxBox3& other, v3dxVector3& dist) const
 {
-	if (other.MinX () >= MaxX ()) dist.x = other.MinX () - MaxX ();
-	else if (MinX () >= other.MaxX ()) dist.x = MinX () - other.MaxX ();
-	else dist.x = 0;
-	if (other.MinY () >= MaxY ()) dist.y = other.MinY () - MaxY ();
-	else if (MinY () >= other.MaxY ()) dist.y = MinY () - other.MaxY ();
-	else dist.y = 0;
-	if (other.MinZ () >= MaxZ ()) dist.z = other.MinZ () - MaxZ ();
-	else if (MinZ () >= other.MaxZ ()) dist.z = MinZ () - other.MaxZ ();
-	else dist.z = 0;
+	if (other.MinX () >= MaxX ()) dist.X = other.MinX () - MaxX ();
+	else if (MinX () >= other.MaxX ()) dist.X = MinX () - other.MaxX ();
+	else dist.X = 0;
+	if (other.MinY () >= MaxY ()) dist.Y = other.MinY () - MaxY ();
+	else if (MinY () >= other.MaxY ()) dist.Y = MinY () - other.MaxY ();
+	else dist.Y = 0;
+	if (other.MinZ () >= MaxZ ()) dist.Z = other.MinZ () - MaxZ ();
+	else if (MinZ () >= other.MaxZ ()) dist.Z = MinZ () - other.MaxZ ();
+	else dist.Z = 0;
 }
 
 
 float v3dxBox3::SquaredOriginDist() const
 {
 	float res=0;
-	if (minbox.x > 0) 
-		res += minbox.x*minbox.x;
-	else if (maxbox.x < 0) 
-		res += maxbox.x*maxbox.x;
-	if (minbox.y > 0) 
-		res += minbox.y*minbox.y;
-	else if (maxbox.y < 0) res += maxbox.y*maxbox.y;
-	if (minbox.z > 0) 
-		res += minbox.z*minbox.z;
-	else if (maxbox.z < 0) 
-		res += maxbox.z*maxbox.z;;
+	if (minbox.X > 0) 
+		res += minbox.X*minbox.X;
+	else if (maxbox.X < 0) 
+		res += maxbox.X*maxbox.X;
+	if (minbox.Y > 0) 
+		res += minbox.Y*minbox.Y;
+	else if (maxbox.Y < 0) res += maxbox.Y*maxbox.Y;
+	if (minbox.Z > 0) 
+		res += minbox.Z*minbox.Z;
+	else if (maxbox.Z < 0) 
+		res += maxbox.Z*maxbox.Z;;
 	return res;
 }
 

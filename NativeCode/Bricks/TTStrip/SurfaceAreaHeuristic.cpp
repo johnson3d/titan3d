@@ -3,17 +3,17 @@
 
 bool compX(const v3dxBox3& i0, const v3dxBox3& i1)
 {
-	return i0.GetCenter().x < i1.GetCenter().x;
+	return i0.GetCenter().X < i1.GetCenter().X;
 }
 
 bool compY(const v3dxBox3& i0, const v3dxBox3& i1)
 {
-	return i0.GetCenter().y < i1.GetCenter().y;
+	return i0.GetCenter().Y < i1.GetCenter().Y;
 }
 
 bool compZ(const v3dxBox3& i0, const v3dxBox3& i1)
 {
-	return i0.GetCenter().z < i1.GetCenter().z;
+	return i0.GetCenter().Z < i1.GetCenter().Z;
 }
 
 UINT sahSplit(const std::vector<v3dxBox3>& aabbsIn, UINT splitGranularity, UINT* indicesStart, UINT* indicesEnd)

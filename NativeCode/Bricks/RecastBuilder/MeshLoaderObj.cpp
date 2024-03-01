@@ -241,7 +241,7 @@ bool rcMeshLoaderObj::load(NxRHI::FMeshDataProvider* mesh, float scale)
 	auto vertCount = mesh->GetVertexNumber();
 	for (UINT i = 0; i < vertCount; i++)
 	{
-		addVertex(pPos[i].x, pPos[i].y, pPos[i].z, vcap);
+		addVertex(pPos[i].X, pPos[i].Y, pPos[i].Z, vcap);
 	}
 
 	int triCount = mesh->GetPrimitiveNumber();

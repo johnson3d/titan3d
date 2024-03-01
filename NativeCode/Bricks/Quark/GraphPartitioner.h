@@ -161,9 +161,9 @@ public:
             v3dxVector3 CenterLocal = (Center - Bounds.Min()) / v3dxVector3(Bounds.Max() - Bounds.Min()).getMax();
 
             UINT32 Morton;
-            Morton = MortonCode3(UINT32(CenterLocal.x * 1023));
-            Morton |= MortonCode3(UINT32(CenterLocal.y * 1023)) << 1;
-            Morton |= MortonCode3(UINT32(CenterLocal.z * 1023)) << 2;
+            Morton = MortonCode3(UINT32(CenterLocal.X * 1023));
+            Morton |= MortonCode3(UINT32(CenterLocal.Y * 1023)) << 1;
+            Morton |= MortonCode3(UINT32(CenterLocal.Z * 1023)) << 2;
             SortKeys[Index] = Morton;
         }
         //);
