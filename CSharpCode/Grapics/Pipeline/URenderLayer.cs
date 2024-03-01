@@ -132,7 +132,7 @@ namespace EngineNS.Graphics.Pipeline
                 }
             }
         }
-        public unsafe void BuildTranslucentRenderPass(URenderPolicy policy, in NxRHI.FRenderPassClears passClear, UGraphicsBuffers frameBuffers, UGraphicsBuffers gizmosFrameBuffers)
+        public unsafe void BuildTranslucentRenderPass(URenderPolicy policy, in NxRHI.FRenderPassClears passClear, TtGraphicsBuffers frameBuffers, TtGraphicsBuffers gizmosFrameBuffers)
         {
             PassBuffers[(int)ERenderLayer.RL_Translucent].DrawcallNumber = PassBuffers[(int)ERenderLayer.RL_Translucent].DrawCmdList.DrawcallNumber;
             PassBuffers[(int)ERenderLayer.RL_Sky].DrawcallNumber = PassBuffers[(int)ERenderLayer.RL_Sky].DrawCmdList.DrawcallNumber;
@@ -192,7 +192,7 @@ namespace EngineNS.Graphics.Pipeline
                 }
             }
         }
-        public unsafe void BuildRenderPass(URenderPolicy policy, in NxRHI.FViewPort viewport, NxRHI.FRenderPassClears* pLayerClear, int numOfClears, UGraphicsBuffers frameBuffers, UGraphicsBuffers gizmosFrameBuffers, string debugName)
+        public unsafe void BuildRenderPass(URenderPolicy policy, in NxRHI.FViewPort viewport, NxRHI.FRenderPassClears* pLayerClear, int numOfClears, TtGraphicsBuffers frameBuffers, TtGraphicsBuffers gizmosFrameBuffers, string debugName)
         {
             for (ERenderLayer i = ERenderLayer.RL_Begin; i< ERenderLayer.RL_Num; i++)
             {

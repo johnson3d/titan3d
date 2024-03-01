@@ -146,12 +146,12 @@ namespace EngineNS.Bricks.Terrain.CDLOD
             var IdMapNode = terrainGen.AssetGraph.FindFirstNode("MatIdMapping") as Procedure.Node.UMaterialIdMapNode;
             IdMapNode.InitProcedure(terrainGen.AssetGraph);
 
-            var hMap = Procedure.UBufferConponent.CreateInstance(Procedure.UBufferCreator.CreateInstance<Procedure.USuperBuffer<float, Procedure.FFloatOperator>>(1, 1, 1));
-            var norMap = Procedure.UBufferConponent.CreateInstance(Procedure.UBufferCreator.CreateInstance<Procedure.USuperBuffer<Vector3, Procedure.FFloat3Operator>>(1, 1, 1));
-            var waterMap = Procedure.UBufferConponent.CreateInstance(Procedure.UBufferCreator.CreateInstance<Procedure.USuperBuffer<float, Procedure.FFloatOperator>>(1, 1, 1));
-            var idMap = Procedure.UBufferConponent.CreateInstance(Procedure.UBufferCreator.CreateInstance<Procedure.USuperBuffer<float, Procedure.FFloatOperator>>(1, 1, 1));
-            var transform = Procedure.UBufferConponent.CreateInstance(Procedure.UBufferCreator.CreateInstance<Procedure.USuperBuffer<FTransform, Procedure.FTransformOperator>>(1, 1, 1));
-            var plants = Procedure.UBufferConponent.CreateInstance(Procedure.UBufferCreator.CreateInstance<Procedure.USuperBuffer<Vector2i, Procedure.FInt2Operator>>(1, 1, 1));
+            var hMap = Procedure.UBufferComponent.CreateInstance(Procedure.UBufferCreator.CreateInstance<Procedure.USuperBuffer<float, Procedure.FFloatOperator>>(1, 1, 1));
+            var norMap = Procedure.UBufferComponent.CreateInstance(Procedure.UBufferCreator.CreateInstance<Procedure.USuperBuffer<Vector3, Procedure.FFloat3Operator>>(1, 1, 1));
+            var waterMap = Procedure.UBufferComponent.CreateInstance(Procedure.UBufferCreator.CreateInstance<Procedure.USuperBuffer<float, Procedure.FFloatOperator>>(1, 1, 1));
+            var idMap = Procedure.UBufferComponent.CreateInstance(Procedure.UBufferCreator.CreateInstance<Procedure.USuperBuffer<float, Procedure.FFloatOperator>>(1, 1, 1));
+            var transform = Procedure.UBufferComponent.CreateInstance(Procedure.UBufferCreator.CreateInstance<Procedure.USuperBuffer<FTransform, Procedure.FTransformOperator>>(1, 1, 1));
+            var plants = Procedure.UBufferComponent.CreateInstance(Procedure.UBufferCreator.CreateInstance<Procedure.USuperBuffer<Vector2i, Procedure.FInt2Operator>>(1, 1, 1));
 
             using (var xnd = IO.TtXndHolder.LoadXnd(file))
             {
@@ -228,7 +228,7 @@ namespace EngineNS.Bricks.Terrain.CDLOD
                             grassData = (UTerrainGrass)serializer;
                         }
 
-                        var gBuffer = Procedure.UBufferConponent.CreateInstance(Procedure.UBufferCreator.CreateInstance<Procedure.USuperBuffer<float, Procedure.FFloatOperator>>(1, 1, 1));
+                        var gBuffer = Procedure.UBufferComponent.CreateInstance(Procedure.UBufferCreator.CreateInstance<Procedure.USuperBuffer<float, Procedure.FFloatOperator>>(1, 1, 1));
                         gBuffer.LoadXnd(subNode, Hash160.Emtpy);
 
                         UpdateGrass(grassData, gBuffer);
@@ -239,8 +239,8 @@ namespace EngineNS.Bricks.Terrain.CDLOD
             return true;
         }
 
-        private void CreateFromBuffer(Procedure.UBufferConponent hMap, Procedure.UBufferConponent norMap, Procedure.UBufferConponent waterMap,
-            Procedure.UBufferConponent idMap, Procedure.UBufferConponent transform, Procedure.UBufferConponent plants)
+        private void CreateFromBuffer(Procedure.UBufferComponent hMap, Procedure.UBufferComponent norMap, Procedure.UBufferComponent waterMap,
+            Procedure.UBufferComponent idMap, Procedure.UBufferComponent transform, Procedure.UBufferComponent plants)
         {
             UpdateHeightMap(hMap);
 
@@ -253,7 +253,7 @@ namespace EngineNS.Bricks.Terrain.CDLOD
             UpdatePlants(transform, plants);
         }
 
-        public void UpdateHeightMap(Procedure.UBufferConponent hMap)
+        public void UpdateHeightMap(Procedure.UBufferComponent hMap)
         {
             var patchSide = Level.PatchSide;
             TiledPatch = new TtPatch[patchSide, patchSide];
@@ -297,14 +297,14 @@ namespace EngineNS.Bricks.Terrain.CDLOD
             HeightMapSRV.AssetName = RName.GetRName($"@Height_{this.GetTerrainNode().TerrainName}_{Level.LevelX}_{Level.LevelZ}@", RName.ERNameType.Transient);
         }
 
-        public void UpdateWaterMap(Procedure.UBufferConponent waterMap)
+        public void UpdateWaterMap(Procedure.UBufferComponent waterMap)
         {
             if (waterMap == null)
                 return;
             WaterHMapSRV = waterMap.CreateAsHeightMapTexture2D(out WaterHMap, HeightMapMinHeight, HeightMapMaxHeight, EPixelFormat.PXF_R16_FLOAT);
         }
         
-        public void UpdateNormalMap(Procedure.UBufferConponent norMap)
+        public void UpdateNormalMap(Procedure.UBufferComponent norMap)
         {
             var norImage = new Bricks.Procedure.UImage2D();
             norImage.Initialize(norMap.Width, norMap.Height,
@@ -320,7 +320,7 @@ namespace EngineNS.Bricks.Terrain.CDLOD
             NormalMapSRV.SetDebugName("NormalMapSRV");
             NormalMapSRV.AssetName = RName.GetRName($"@Normal_{this.GetTerrainNode().TerrainName}_{Level.LevelX}_{Level.LevelZ}@", RName.ERNameType.Transient);
         }
-        public void UpdateMaterialIdMap(Procedure.UBufferConponent idMap)
+        public void UpdateMaterialIdMap(Procedure.UBufferComponent idMap)
         {
             if (idMap == null)
                 return;
@@ -341,7 +341,7 @@ namespace EngineNS.Bricks.Terrain.CDLOD
             MaterialIdMapSRV.SetDebugName("MaterialIdMapSRV");
             MaterialIdMapSRV.AssetName = RName.GetRName($"@MtlID_{this.GetTerrainNode().TerrainName}_{Level.LevelX}_{Level.LevelZ}@", RName.ERNameType.Transient);
         }
-        public void UpdatePlants(Procedure.UBufferConponent transform, Procedure.UBufferConponent plants)
+        public void UpdatePlants(Procedure.UBufferComponent transform, Procedure.UBufferComponent plants)
         {
             var terrainGen = Level.Node.TerrainGen;
             var IdMapNode = terrainGen.AssetGraph.FindFirstNode("MatIdMapping") as Procedure.Node.UMaterialIdMapNode;
@@ -370,7 +370,7 @@ namespace EngineNS.Bricks.Terrain.CDLOD
                 UpdateGrass(grassData, buffer);
             }
         }
-        public void UpdateGrass(UTerrainGrass grassData, Procedure.UBufferConponent buffer)
+        public void UpdateGrass(UTerrainGrass grassData, Procedure.UBufferComponent buffer)
         {
             if (buffer == null)
                 return;
@@ -672,12 +672,12 @@ namespace EngineNS.Bricks.Terrain.CDLOD
         protected void BuildEmptyLevelData(int xSize, int ySize)
         {
             var creator = Procedure.UBufferCreator.CreateInstance<Procedure.USuperBuffer<float, Procedure.FFloatOperator>>(xSize, ySize, 1);
-            var hMap = Procedure.UBufferConponent.CreateInstance(creator);
-            var waterMap = Procedure.UBufferConponent.CreateInstance(creator);
+            var hMap = Procedure.UBufferComponent.CreateInstance(creator);
+            var waterMap = Procedure.UBufferComponent.CreateInstance(creator);
             creator = Procedure.UBufferCreator.CreateInstance<Procedure.USuperBuffer<Vector3, Procedure.FFloat3Operator>>(xSize, ySize, 1);
-            var norMap = Procedure.UBufferConponent.CreateInstance(creator);
+            var norMap = Procedure.UBufferComponent.CreateInstance(creator);
             creator = Procedure.UBufferCreator.CreateInstance<Procedure.USuperBuffer<float, Procedure.FFloatOperator>>(xSize, ySize, 1);
-            var idMap = Procedure.UBufferConponent.CreateInstance(creator);
+            var idMap = Procedure.UBufferComponent.CreateInstance(creator);
 
             CreateFromBuffer(hMap, norMap, waterMap, idMap, null, null);
         }

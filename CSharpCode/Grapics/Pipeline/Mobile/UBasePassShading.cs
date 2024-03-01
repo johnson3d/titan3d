@@ -168,7 +168,7 @@ namespace EngineNS.Graphics.Pipeline.Mobile
         public TtRenderGraphPin DepthPinOut = TtRenderGraphPin.CreateOutput("Depth", true, EPixelFormat.PXF_D24_UNORM_S8_UINT);
         public TtRenderGraphPin GizmosDepthPinOut = TtRenderGraphPin.CreateOutput("GizmosDepth", true, EPixelFormat.PXF_D16_UNORM);
 
-        public UGraphicsBuffers GGizmosBuffers { get; protected set; } = new UGraphicsBuffers();
+        public TtGraphicsBuffers GGizmosBuffers { get; protected set; } = new TtGraphicsBuffers();
         public UMobileOpaqueNode()
         {
             Name = "MobileOpaqueNode";
@@ -352,7 +352,7 @@ namespace EngineNS.Graphics.Pipeline.Mobile
 
         public Graphics.Pipeline.TtRenderGraphPin GizmosDepthPinOut = Graphics.Pipeline.TtRenderGraphPin.CreateOutput("GizmosDepth", true, EPixelFormat.PXF_D16_UNORM);
 
-        public UGraphicsBuffers GGizmosBuffers { get; protected set; } = new UGraphicsBuffers();
+        public TtGraphicsBuffers GGizmosBuffers { get; protected set; } = new TtGraphicsBuffers();
         public UMobileTranslucentNode()
         {
             Name = "UMobileTranslucentNode";

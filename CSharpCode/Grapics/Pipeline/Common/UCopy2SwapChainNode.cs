@@ -19,7 +19,12 @@ namespace EngineNS.Graphics.Pipeline.Common
         }
     }
 
-    public class UCopy2SwapChainNode : TtRenderGraphNode
+    public class TtEndingNode : TtRenderGraphNode
+    {
+        public TtAttachBuffer ColorAttachement = null;
+    }
+
+    public class UCopy2SwapChainNode : TtEndingNode
     {
         public TtRenderGraphPin ColorPinIn = TtRenderGraphPin.CreateInput("Color");
         public TtRenderGraphPin HitIdPinIn = TtRenderGraphPin.CreateInput("HitId");
@@ -27,11 +32,11 @@ namespace EngineNS.Graphics.Pipeline.Common
         public TtRenderGraphPin SavedPinIn0 = TtRenderGraphPin.CreateInput("Save0");
         public TtRenderGraphPin ColorPinOut = TtRenderGraphPin.CreateOutput("Color", true, EPixelFormat.PXF_R8G8B8A8_UNORM);
 
-        public UAttachBuffer ColorAttachement = new UAttachBuffer();
         public NxRHI.UCopyDraw mCopyDrawcall;
 
         public UCopy2SwapChainNode()
         {
+            ColorAttachement = new TtAttachBuffer();
             Name = "Copy2SwapChainNode";
             //NodeDefine.HostNode = this;
             //UpdateInputOutputs();
@@ -74,7 +79,7 @@ namespace EngineNS.Graphics.Pipeline.Common
                 if(ColorAttachement == null || ColorAttachement.BufferDesc.IsMatch(in buffer.BufferDesc) == false)
                 {
                     CoreSDK.DisposeObject(ref ColorAttachement);
-                    ColorAttachement = new UAttachBuffer();
+                    ColorAttachement = new TtAttachBuffer();
                     ColorAttachement.CreateBufferViews(in buffer.BufferDesc);
                 }
 

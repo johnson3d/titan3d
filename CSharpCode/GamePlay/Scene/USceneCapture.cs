@@ -151,7 +151,7 @@ namespace EngineNS.GamePlay.Scene
             CaptureWorld.GatherVisibleMeshes(mVisParameter);
 
             RenderPolicy?.BeginTickLogic(CaptureWorld);
-            RenderPolicy?.TickLogic(CaptureWorld);
+            RenderPolicy?.TickLogic(CaptureWorld, null);
             RenderPolicy?.EndTickLogic(CaptureWorld);
         }
         public void TickRender(float ellapse)

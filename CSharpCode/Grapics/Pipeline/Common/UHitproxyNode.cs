@@ -132,8 +132,8 @@ namespace EngineNS.Graphics.Pipeline.Common
             return 0;
         }
         #endregion
-        public UGraphicsBuffers GHitproxyBuffers { get; protected set; } = new UGraphicsBuffers();
-        public UGraphicsBuffers GGizmosBuffers { get; protected set; } = new UGraphicsBuffers();
+        public TtGraphicsBuffers GHitproxyBuffers { get; protected set; } = new TtGraphicsBuffers();
+        public TtGraphicsBuffers GGizmosBuffers { get; protected set; } = new TtGraphicsBuffers();
         public Common.UHitproxyShading mHitproxyShading;
         public TtLayerDrawBuffers HitproxyPass = new TtLayerDrawBuffers();
         public NxRHI.URenderPass HitproxyRenderPass;
@@ -210,7 +210,7 @@ namespace EngineNS.Graphics.Pipeline.Common
             GHitproxyBuffers.Initialize(policy, HitproxyRenderPass);
             GHitproxyBuffers.SetRenderTarget(policy, 0, HitIdPinOut);
             GHitproxyBuffers.SetDepthStencil(policy, DepthPinInOut);
-            GHitproxyBuffers.TargetViewIdentifier = new UGraphicsBuffers.UTargetViewIdentifier();// policy.DefaultCamera.TargetViewIdentifier;
+            GHitproxyBuffers.TargetViewIdentifier = new TtGraphicsBuffers.TtTargetViewIdentifier();// policy.DefaultCamera.TargetViewIdentifier;
 
             GGizmosBuffers.Initialize(policy, GizmosRenderPass);
             GGizmosBuffers.SetRenderTarget(policy, 0, HitIdPinOut);

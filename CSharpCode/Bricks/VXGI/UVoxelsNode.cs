@@ -42,7 +42,7 @@ namespace EngineNS.Bricks.VXGI
             AddInputOutput(AlbedoPinInOut, NxRHI.EBufferType.BFT_SRV);
             AddInputOutput(DepthPinInOut, NxRHI.EBufferType.BFT_SRV);
             
-            VxPoolPinOut.LifeMode = Graphics.Pipeline.UAttachBuffer.ELifeMode.Imported;
+            VxPoolPinOut.LifeMode = Graphics.Pipeline.TtAttachBuffer.ELifeMode.Imported;
             AddOutput(VxPoolPinOut, NxRHI.EBufferType.BFT_UAV);
         }
 

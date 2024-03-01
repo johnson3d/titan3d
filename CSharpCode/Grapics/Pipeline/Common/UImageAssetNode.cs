@@ -25,7 +25,7 @@ namespace EngineNS.Graphics.Pipeline.Common
         }
         public override void InitNodePins()
         {
-            ImagePinOut.LifeMode = UAttachBuffer.ELifeMode.Imported;
+            ImagePinOut.LifeMode = TtAttachBuffer.ELifeMode.Imported;
             AddOutput(ImagePinOut, NxRHI.EBufferType.BFT_SRV | NxRHI.EBufferType.BFT_UAV);
 
             ImageName = RName.GetRName("texture/default_envmap.srv", RName.ERNameType.Engine);
@@ -54,9 +54,12 @@ namespace EngineNS.Graphics.Pipeline.Common
                 System.Action action = async () =>
                 {
                     ImageSrv = await UEngine.Instance.GfxDevice.TextureManager.GetTexture(value);
-                    ImagePinOut.Attachement.Format = ImageSrv.SrvFormat;
-                    ImagePinOut.Attachement.Width = (uint)ImageSrv.PicDesc.Width;
-                    ImagePinOut.Attachement.Height = (uint)ImageSrv.PicDesc.Height;
+                    if (ImageSrv != null)
+                    {
+                        ImagePinOut.Attachement.Format = ImageSrv.SrvFormat;
+                        ImagePinOut.Attachement.Width = (uint)ImageSrv.PicDesc.Width;
+                        ImagePinOut.Attachement.Height = (uint)ImageSrv.PicDesc.Height;
+                    }
                 };
                 action();
             }

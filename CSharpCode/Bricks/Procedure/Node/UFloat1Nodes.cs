@@ -642,7 +642,7 @@ namespace EngineNS.Bricks.Procedure.Node
         [Rtti.Meta]
         public uint DstH { get; set; } = 1;
         [Rtti.Meta]
-        public UBufferConponent.EBufferSamplerType SamplerType { get; set; } = UBufferConponent.EBufferSamplerType.Linear;
+        public UBufferComponent.EBufferSamplerType SamplerType { get; set; } = UBufferComponent.EBufferSamplerType.Linear;
         public override UBufferCreator GetOutBufferCreator(PinOut pin)
         {
             if (ResultPin == pin)

@@ -4,7 +4,7 @@ namespace EngineNS.Bricks.Procedure.Algorithm.Common
 {
     public class WrapNode
     {
-        public static float[] Unpack(UBufferConponent input)
+        public static float[] Unpack(UBufferComponent input)
         {
             int width = input.Width;
             float[] result = new float[width * width];
@@ -18,10 +18,10 @@ namespace EngineNS.Bricks.Procedure.Algorithm.Common
             return result;
         }
 
-        public static UBufferConponent Pack(float[] values, int width)
+        public static UBufferComponent Pack(float[] values, int width)
         {
             var creator = UBufferCreator.CreateInstance<USuperBuffer<Vector4, FFloat4Operator>>(width, width, 1);
-            var output = UBufferConponent.CreateInstance(creator);
+            var output = UBufferComponent.CreateInstance(creator);
             for (int i = 0; i < width; i++)
             {
                 for (int j = 0; j < width; j++)
@@ -34,10 +34,10 @@ namespace EngineNS.Bricks.Procedure.Algorithm.Common
             return output;
         }
 
-        public static UBufferConponent PackMask(int[] values, int width)
+        public static UBufferComponent PackMask(int[] values, int width)
         {
             var creator = UBufferCreator.CreateInstance<USuperBuffer<Vector4, FFloat4Operator>>(width, width, 1);
-            var output = UBufferConponent.CreateInstance(creator);
+            var output = UBufferComponent.CreateInstance(creator);
             for (int i = 0; i < width; i++)
             {
                 for (int j = 0; j < width; j++)
@@ -50,7 +50,7 @@ namespace EngineNS.Bricks.Procedure.Algorithm.Common
             return output;
         }
 
-        public static void SaveTexture2D(UBufferConponent toSave, string FileName, bool silent = true)
+        public static void SaveTexture2D(UBufferComponent toSave, string FileName, bool silent = true)
         { 
             
         }

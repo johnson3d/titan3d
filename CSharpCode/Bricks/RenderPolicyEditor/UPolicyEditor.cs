@@ -224,7 +224,7 @@ namespace EngineNS.Bricks.RenderPolicyEditor
                     continue;
                 policy.AddLinker(outPin, inPin);
             }
-            var root = policy.FindFirstNode<Graphics.Pipeline.Common.UCopy2SwapChainNode>();
+            var root = policy.FindFirstNode<Graphics.Pipeline.Common.TtEndingNode>();
             policy.RootNode = root;
             bool hasInputError = false;
             policy.BuildGraph(ref hasInputError);

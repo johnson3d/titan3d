@@ -43,11 +43,11 @@ namespace EngineNS.Graphics.Pipeline
             }
         }
     }
-    public class UAttachmentDesc
+    public class TtAttachmentDesc
     {
         public FHashText AttachmentName;
         public FAttachBufferDesc BufferDesc;
-        public void SetDesc(UAttachmentDesc desc)
+        public void SetDesc(TtAttachmentDesc desc)
         {
             AttachmentName = desc.AttachmentName;
             BufferDesc = desc.BufferDesc;
@@ -73,7 +73,7 @@ namespace EngineNS.Graphics.Pipeline
             set => BufferDesc.Height = value;
         }
     }
-    public class UAttachBuffer : IPooledObject, IDisposable
+    public class TtAttachBuffer : IPooledObject, IDisposable
     {
         public bool IsAlloc { get; set; } = false;
         int mRefCount = 0;
@@ -95,7 +95,7 @@ namespace EngineNS.Graphics.Pipeline
         }
         public void FreeBuffer()
         {
-            if (LifeMode == UAttachBuffer.ELifeMode.Imported)
+            if (LifeMode == TtAttachBuffer.ELifeMode.Imported)
                 return;
             var manager = UEngine.Instance.GfxDevice.AttachBufferManager;
             mRefCount = 0;
@@ -114,6 +114,15 @@ namespace EngineNS.Graphics.Pipeline
         public NxRHI.UUaView Uav;
         public NxRHI.USrView Srv;
         public NxRHI.UCbView Cbv;
+        public void SetImportedBuffer(TtGpuBufferBase gpuBuffer)
+        {
+            Buffer = gpuBuffer.GpuResource;
+            Srv = gpuBuffer.Srv;
+            Uav = gpuBuffer.Uav;
+            Cbv = gpuBuffer.Cbv;
+            Rtv = gpuBuffer.Rtv;
+            Dsv = gpuBuffer.Dsv;
+        }
         public void Dispose()
         {
             if (LifeMode == ELifeMode.Imported)
@@ -271,9 +280,9 @@ namespace EngineNS.Graphics.Pipeline
 
             return false;
         }
-        public UAttachBuffer Clone()
+        public TtAttachBuffer Clone()
         {
-            var result = new UAttachBuffer();
+            var result = new TtAttachBuffer();
             result.BufferDesc = BufferDesc;
             result.CreateBufferViews(in BufferDesc);
             return result;
@@ -282,7 +291,7 @@ namespace EngineNS.Graphics.Pipeline
 
     public class TtAttachBufferManager : IDisposable
     {
-        public class TtAttachBufferPool : TtObjectPool<UAttachBuffer>, IDisposable
+        public class TtAttachBufferPool : TtObjectPool<TtAttachBuffer>, IDisposable
         {
             public void Dispose()
             {
@@ -293,18 +302,18 @@ namespace EngineNS.Graphics.Pipeline
             public int FrameMaxLiveCount = 0;
             public int FrameLiveCount = 0;
             public int FrameAllocCount = 0;
-            protected override UAttachBuffer CreateObjectSync()
+            protected override TtAttachBuffer CreateObjectSync()
             {
-                var result = new UAttachBuffer();
+                var result = new TtAttachBuffer();
                 result.CreateBufferViews(in BufferDesc);
                 return result;
             }
-            protected override void OnFinalObject(UAttachBuffer obj)
+            protected override void OnFinalObject(TtAttachBuffer obj)
             {
                 obj.Dispose();
                 base.OnFinalObject(obj);
             }
-            protected override void OnObjectQuery(UAttachBuffer obj)
+            protected override void OnObjectQuery(TtAttachBuffer obj)
             {
                 System.Diagnostics.Debug.Assert(obj.IsAlloc == false);
                 FrameAllocCount++;
@@ -312,7 +321,7 @@ namespace EngineNS.Graphics.Pipeline
                 if (FrameMaxLiveCount < FrameLiveCount)
                     FrameMaxLiveCount = FrameLiveCount;
             }
-            protected override bool OnObjectRelease(UAttachBuffer obj)
+            protected override bool OnObjectRelease(TtAttachBuffer obj)
             {
                 FrameLiveCount--;
                 return true;
@@ -332,7 +341,7 @@ namespace EngineNS.Graphics.Pipeline
             Pools.Clear();
         }
         public Dictionary<FAttachBufferDesc, TtAttachBufferPool> Pools { get; } = new Dictionary<FAttachBufferDesc, TtAttachBufferPool>();
-        public UAttachBuffer Alloc(in FAttachBufferDesc desc)
+        public TtAttachBuffer Alloc(in FAttachBufferDesc desc)
         {
             TtAttachBufferPool pool;
             if (false == Pools.TryGetValue(desc, out pool))
@@ -344,7 +353,7 @@ namespace EngineNS.Graphics.Pipeline
             }
             return pool.QueryObjectSync();
         }
-        public void Free(UAttachBuffer buffer)
+        public void Free(TtAttachBuffer buffer)
         {
             TtAttachBufferPool pool;
             if (Pools.TryGetValue(buffer.BufferDesc, out pool))
@@ -398,29 +407,30 @@ namespace EngineNS.Graphics.Pipeline
         }
     }
     
-    public class UGraphicsBuffers : IDisposable
+    public class TtGraphicsBuffers
+        : IDisposable
     {
         public void Dispose()
         {
             CoreSDK.DisposeObject(ref mFrameBuffers);
             FrameBuffers = null;
         }
-        public class UTargetViewIdentifier
+        public class TtTargetViewIdentifier
         {
             static int CurrentTargetViewId = 0;
-            public UTargetViewIdentifier()
+            public TtTargetViewIdentifier()
             {
                 TargetViewId = CurrentTargetViewId++;
                 if (CurrentTargetViewId == int.MaxValue)
                     CurrentTargetViewId = 0;
             }
-            ~UTargetViewIdentifier()
+            ~TtTargetViewIdentifier()
             {
                 TargetViewId = -1;
             }
             public int TargetViewId;
         }
-        public UTargetViewIdentifier TargetViewIdentifier;
+        public TtTargetViewIdentifier TargetViewIdentifier;
         public NxRHI.FViewPort Viewport = new NxRHI.FViewPort();
         NxRHI.UFrameBuffers mFrameBuffers;
         public NxRHI.UFrameBuffers FrameBuffers { get => mFrameBuffers; set => mFrameBuffers = value; }
@@ -524,8 +534,8 @@ namespace EngineNS.Graphics.Pipeline
             {
                 RenderTargets[index] = new TtRenderGraphPin();
             }
-            RenderTargets[index].LifeMode = UAttachBuffer.ELifeMode.Imported;
-            RenderTargets[index].ImportedBuffer = new UAttachBuffer();
+            RenderTargets[index].LifeMode = TtAttachBuffer.ELifeMode.Imported;
+            RenderTargets[index].ImportedBuffer = new TtAttachBuffer();
             RenderTargets[index].ImportedBuffer.Rtv = rtv;
             FrameBuffers.BindRenderTargetView(index, rtv);
         }
@@ -535,8 +545,8 @@ namespace EngineNS.Graphics.Pipeline
             {
                 DepthStencil = new TtRenderGraphPin();
             }
-            DepthStencil.LifeMode = UAttachBuffer.ELifeMode.Imported;
-            DepthStencil.ImportedBuffer = new UAttachBuffer();
+            DepthStencil.LifeMode = TtAttachBuffer.ELifeMode.Imported;
+            DepthStencil.ImportedBuffer = new TtAttachBuffer();
             DepthStencil.ImportedBuffer.Dsv = dsv;
             FrameBuffers.BindDepthStencilView(dsv);
         }
@@ -599,7 +609,7 @@ namespace EngineNS.NxRHI
 {
     public partial class UGraphicDraw
     {
-        public void BindGBuffer(Graphics.Pipeline.UCamera camera, Graphics.Pipeline.UGraphicsBuffers GBuffers)
+        public void BindGBuffer(Graphics.Pipeline.UCamera camera, Graphics.Pipeline.TtGraphicsBuffers GBuffers)
         {
             //UEngine.Instance.GfxDevice.CoreShaderBinder.ShaderResource.cbPerViewport
             //UEngine.Instance.GfxDevice.CoreShaderBinder.ShaderResource.cbPerCamera

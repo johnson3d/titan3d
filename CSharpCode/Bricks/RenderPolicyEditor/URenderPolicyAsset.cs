@@ -121,7 +121,7 @@ namespace EngineNS.Bricks.RenderPolicyEditor
         }
         [Rtti.Meta]
         public UPolicyGraph PolicyGraph { get; } = new UPolicyGraph();
-        public Graphics.Pipeline.URenderPolicy CreateRenderPolicy(UViewportSlate viewport)
+        public Graphics.Pipeline.URenderPolicy CreateRenderPolicy(UViewportSlate viewport, string endingName = "Copy2SwapChainNode")
         {
             var typeDesc = PolicyGraph.PolicyType;
             var policy = Rtti.UTypeDescManager.CreateInstance(typeDesc) as Graphics.Pipeline.URenderPolicy; // new Graphics.Pipeline.URenderPolicy();
@@ -154,7 +154,7 @@ namespace EngineNS.Bricks.RenderPolicyEditor
                     continue;
                 policy.AddLinker(outPin, inPin);
             }
-            var root = policy.FindFirstNode<Graphics.Pipeline.Common.UCopy2SwapChainNode>();
+            var root = policy.FindNode<Graphics.Pipeline.Common.TtEndingNode>(endingName, true);
             policy.RootNode = root;
             bool hasInputError = false;
             policy.BuildGraph(ref hasInputError);

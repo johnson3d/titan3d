@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using EngineNS.Bricks.CodeBuilder;
 using EngineNS.Bricks.NodeGraph;
 using EngineNS.EGui.Controls.PropertyGrid;
 
@@ -158,6 +159,7 @@ namespace EngineNS.Bricks.RenderPolicyEditor
     }
     public class UPolicyGraph : UNodeGraph
     {
+        public const string RGDEditorKeyword = "RGD";
         public UPolicyGraph()
         {
             PolicyType = Rtti.UTypeDesc.TypeOf(typeof(Graphics.Pipeline.UDeferredPolicyBase));
@@ -218,19 +220,49 @@ namespace EngineNS.Bricks.RenderPolicyEditor
 
             foreach (var i in GraphNodeTypes)
             {
-                CanvasMenus.AddMenuItem(
-                $"{i.FullName}", null,
-                (UMenuItem item, object sender) =>
+                //CanvasMenus.AddMenuItem(
+                //$"{i.FullName}", null,
+                //(UMenuItem item, object sender) =>
+                //{
+                //    var node = new UPolicyNode();
+                //    var rgNode = Rtti.UTypeDescManager.CreateInstance(i) as Graphics.Pipeline.TtRenderGraphNode;
+                //    //rgNode.RenderGraph = this;
+                //    rgNode.InitNodePins();
+                //    node.InitNode(rgNode);
+                //    node.Name = rgNode.Name;
+                //    node.Position = PopMenuPosition;
+                //    this.AddNode(node);
+                //});
+                var atts = i.GetCustomAttributes(typeof(ContextMenuAttribute), true);
+                if (atts.Length > 0)
                 {
-                    var node = new UPolicyNode();
-                    var rgNode = Rtti.UTypeDescManager.CreateInstance(i) as Graphics.Pipeline.TtRenderGraphNode;
-                    //rgNode.RenderGraph = this;
-                    rgNode.InitNodePins();
-                    node.InitNode(rgNode);
-                    node.Name = rgNode.Name;
-                    node.Position = PopMenuPosition;
-                    this.AddNode(node);
-                });
+                    var parentMenu = CanvasMenus;
+                    var att = atts[0] as ContextMenuAttribute;
+                    if (!att.HasKeyString(RGDEditorKeyword))
+                        continue;
+                    for (var menuIdx = 0; menuIdx < att.MenuPaths.Length; menuIdx++)
+                    {
+                        var menuStr = att.MenuPaths[menuIdx];
+                        var menuName = GetMenuName(menuStr);
+                        if (menuIdx < att.MenuPaths.Length - 1)
+                            parentMenu = parentMenu.AddMenuItem(menuName, null, null);
+                        else
+                        {
+                            parentMenu.AddMenuItem(menuName, att.FilterStrings, null,
+                                (UMenuItem item, object sender) =>
+                                {
+                                    var node = new UPolicyNode();
+                                    var rgNode = Rtti.UTypeDescManager.CreateInstance(i) as Graphics.Pipeline.TtRenderGraphNode;
+                                    //rgNode.RenderGraph = this;
+                                    rgNode.InitNodePins();
+                                    node.InitNode(rgNode);
+                                    node.Name = rgNode.Name;
+                                    node.Position = PopMenuPosition;
+                                    this.AddNode(node);
+                                });
+                        }
+                    }
+                }
             }   
         }
     }

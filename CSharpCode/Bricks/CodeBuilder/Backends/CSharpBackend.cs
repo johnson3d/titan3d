@@ -43,6 +43,29 @@ namespace EngineNS.Bricks.CodeBuilder
                 data.CodeGen.AddLine($"{exp.BreakName}.TryBreak();", ref sourceCode);
             }
         }
+        class TtAttributeCodeGen : ICodeObjectGen
+        {
+            public void GenCodes(UCodeObject obj, ref string sourceCode, ref UCodeGeneratorData data)
+            {
+                var varDec = obj as TtAttribute;
+                string codeStr = "[";
+                codeStr += data.CodeGen.GetTypeString(varDec.AttributeType);
+                if(varDec.Arguments.Count > 0)
+                {
+                    codeStr += "(";
+                    for(int i=0; i<varDec.Arguments.Count; i++)
+                    {
+                        var gen = data.CodeGen.GetCodeObjectGen(varDec.Arguments[i].GetType());
+                        gen.GenCodes(varDec.Arguments[i], ref codeStr, ref data);
+                        codeStr += ",";
+                    }
+                    codeStr = codeStr.TrimEnd(',');
+                    codeStr += ")";
+                }
+                codeStr += "]";
+                data.CodeGen.AddLine(codeStr, ref sourceCode);
+            }
+        }
         class UVariableDeclarationCodeGen : ICodeObjectGen
         {
             public bool IsClassMember = false;
@@ -51,40 +74,89 @@ namespace EngineNS.Bricks.CodeBuilder
             {
                 var varDec = obj as UVariableDeclaration;
                 GenCommentCodes(varDec.Comment, ref data, ref sourceCode);
+                var typeString = data.CodeGen.GetTypeString(varDec.VariableType);
+                if(varDec.IsBindable)
+                {
+                    string memberCode = "";
+                    memberCode += typeString + " m" + varDec.VariableName;
+                    if (varDec.InitValue != null)
+                    {
+                        memberCode += " = ";
+                        var initClsGen = data.CodeGen.GetCodeObjectGen(varDec.InitValue.GetType());
+                        initClsGen.GenCodes(varDec.InitValue, ref memberCode, ref data);
+                        memberCode += ";";
+                    }
+                    else if (!IsProperty)
+                        memberCode += ";";
+                    data.CodeGen.AddLine(memberCode, ref sourceCode);
+                    data.CodeGen.AddLine("[EngineNS.UI.Bind.BindPropertyAttribute]", ref sourceCode);
+                }
+                for(int i=0; i<varDec.Attributes.Count; i++)
+                {
+                    var attGen = data.CodeGen.GetCodeObjectGen(varDec.Attributes[i].GetType());
+                    attGen.GenCodes(varDec.Attributes[i], ref sourceCode, ref data);
+                }
+                if (varDec.IsAutoSaveLoad && (IsProperty || varDec.IsBindable))
+                    data.CodeGen.AddLine("[EngineNS.Rtti.Meta]", ref sourceCode);
                 string codeStr = "";
                 if(IsClassMember)
                 {
-                    switch(varDec.VisitMode)
+                    if(varDec.IsBindable)
                     {
-                        case EVisisMode.Local:
-                        case EVisisMode.Private:
-                            codeStr += "private ";
-                            break;
-                        case EVisisMode.Public:
-                            codeStr += "public ";
-                            break;
-                        case EVisisMode.Protected:
-                            codeStr += "protected ";
-                            break;
-                        case EVisisMode.Internal:
-                            codeStr += "internal ";
-                            break;
+                        codeStr += "public ";
+                    }
+                    else
+                    {
+                        switch(varDec.VisitMode)
+                        {
+                            case EVisisMode.Local:
+                            case EVisisMode.Private:
+                                codeStr += "private ";
+                                break;
+                            case EVisisMode.Public:
+                                codeStr += "public ";
+                                break;
+                            case EVisisMode.Protected:
+                                codeStr += "protected ";
+                                break;
+                            case EVisisMode.Internal:
+                                codeStr += "internal ";
+                                break;
+                        }
                     }
                 }
-                codeStr += data.CodeGen.GetTypeString(varDec.VariableType) + " " + varDec.VariableName;
-                if(IsProperty)
+                codeStr += typeString + " " + varDec.VariableName;
+                if(varDec.IsBindable) // bindable must be a property
                 {
-                    codeStr += " { get; set; }";
+                    if (varDec.IsBindable)
+                    {
+                            codeStr += @$"
+        {{
+            get => m{varDec.VariableName};
+            set
+            {{
+                OnValueChange(value, m{varDec.VariableName});
+                m{varDec.VariableName} = value;
+            }}
+        }}";
+                    }
                 }
-                if (varDec.InitValue != null)
+                else
                 {
-                    codeStr += " = ";
-                    var initClsGen = data.CodeGen.GetCodeObjectGen(varDec.InitValue.GetType());
-                    initClsGen.GenCodes(varDec.InitValue, ref codeStr, ref data);
-                    codeStr += ";";
+                    if (IsProperty)
+                    {
+                        codeStr += " { get; set; }";
+                    }
+                    if (varDec.InitValue != null)
+                    {
+                        codeStr += " = ";
+                        var initClsGen = data.CodeGen.GetCodeObjectGen(varDec.InitValue.GetType());
+                        initClsGen.GenCodes(varDec.InitValue, ref codeStr, ref data);
+                        codeStr += ";";
+                    }
+                    else if (!IsProperty)
+                        codeStr += ";";
                 }
-                else if (!IsProperty)
-                    codeStr += ";";
                 data.CodeGen.AddLine(codeStr, ref sourceCode);
 
                 if(varDec.Next != null)
@@ -107,7 +179,11 @@ namespace EngineNS.Bricks.CodeBuilder
 
                 GenCommentCodes(methodDec.Comment, ref data, ref sourceCode);
                 data.Method = methodDec;
-                data.CodeGen.AddLine("[EngineNS.Rtti.Meta]", ref sourceCode);
+                for(int i=0; i<methodDec.Attributes.Count; i++)
+                {
+                    var attGen = data.CodeGen.GetCodeObjectGen(methodDec.Attributes[i].GetType());
+                    attGen.GenCodes(methodDec.Attributes[i], ref sourceCode, ref data);
+                }
                 string methodDecStr = "";
                 switch(methodDec.VisitMode)
                 {
@@ -262,7 +338,6 @@ namespace EngineNS.Bricks.CodeBuilder
                 {
                     for(int i=0; i<classDec.Properties.Count; i++)
                     {
-                        data.CodeGen.AddLine("[EngineNS.Rtti.Meta]", ref sourceCode);
                         var mem = classDec.Properties[i];
                         var memCodeGen = data.CodeGen.GetCodeObjectGen(mem.GetType()) as UVariableDeclarationCodeGen;
                         memCodeGen.IsClassMember = true;
@@ -962,6 +1037,7 @@ namespace EngineNS.Bricks.CodeBuilder
 
         UDebuggerSetWatchVariableCodeGen mDebuggerSetWatchVariableCodeGen = new UDebuggerSetWatchVariableCodeGen();
         UDebuggerTryBreakCodeGen mDebuggerTryBreakCodeGen = new UDebuggerTryBreakCodeGen();
+        TtAttributeCodeGen mAttributeCodeGen = new TtAttributeCodeGen();
         UVariableDeclarationCodeGen mVariableDeclarationCodeGen = new UVariableDeclarationCodeGen();
         UMethodDeclarationCodeGen mMethodDeclarationCodeGen = new UMethodDeclarationCodeGen();
         UClassDeclarationCodeGen mClassDeclarationCodeGen = new UClassDeclarationCodeGen();
@@ -997,6 +1073,8 @@ namespace EngineNS.Bricks.CodeBuilder
                 return mDebuggerSetWatchVariableCodeGen;
             else if (type.IsEqual(typeof(UDebuggerTryBreak)))
                 return mDebuggerTryBreakCodeGen;
+            else if (type.IsEqual(typeof(TtAttribute)))
+                return mAttributeCodeGen;
             else if (type.IsEqual(typeof(UVariableDeclaration)))
                 return mVariableDeclarationCodeGen;
             else if (type.IsEqual(typeof(UMethodDeclaration)))

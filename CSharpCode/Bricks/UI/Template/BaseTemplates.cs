@@ -27,24 +27,6 @@ namespace EngineNS.UI.Template
         {
             return (T)Value;
         }
-        public void SetTempalteValue(IBindableObject obj)
-        {
-            if (obj == null)
-                return;
-            var objType = obj.GetType();
-            if((Property.HostType.IsEqual(objType) || Property.HostType.IsParentClass(objType)) && !Property.IsAttachedProperty)
-            {
-                var prop = objType.GetProperty(Property.Name);
-                if (prop == null)
-                    return;
-                else
-                    prop.SetValue(obj, Value);
-            }
-            else
-            {
-                obj.SetValue(Value, Property);
-            }
-        }
     }
     public abstract class TtTemplateBindingValue : TtBindablePropertyValueBase
     {

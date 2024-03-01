@@ -10,13 +10,13 @@ namespace EngineNS.Bricks.VirtualShadowMaps
 {
     public struct TtVirtualShadowMapArrayFrameData
     {
-        public UAttachBuffer PageTable;
-        public UAttachBuffer PageFlags;
+        public TtAttachBuffer PageTable;
+        public TtAttachBuffer PageFlags;
 
-        public UAttachBuffer ProjectionData;
-        public UAttachBuffer PageRectBounds;
+        public TtAttachBuffer ProjectionData;
+        public TtAttachBuffer PageRectBounds;
 
-        public UAttachBuffer PhysicalPageMetaData;
+        public TtAttachBuffer PhysicalPageMetaData;
 
         // Need HZBPhysical TODO..
         //TMap<int32, FVirtualShadowMapHZBMetadata> HZBMetadata; TODO..

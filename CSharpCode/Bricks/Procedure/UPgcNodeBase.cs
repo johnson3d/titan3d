@@ -282,7 +282,7 @@ namespace EngineNS.Bricks.Procedure
         public abstract UBufferCreator GetOutBufferCreator(PinOut pin);
 
         #region procedure
-        public virtual UBufferConponent GetResultBuffer(int index)
+        public virtual UBufferComponent GetResultBuffer(int index)
         {
             if (index < 0 || index >= Outputs.Count)
                 return null;
@@ -358,7 +358,7 @@ namespace EngineNS.Bricks.Procedure
 
         }
         [Rtti.Meta]
-        public void DispatchBuffer(UPgcGraph graph, UBufferConponent result, object tag, bool bMultThread = false)
+        public void DispatchBuffer(UPgcGraph graph, UBufferComponent result, object tag, bool bMultThread = false)
         {
             if (result == null)
                 return;
@@ -447,7 +447,7 @@ namespace EngineNS.Bricks.Procedure
                 smp.FreeSemaphore();
             }
         }
-        public virtual void OnPerPixel(UPgcGraph graph, UPgcNodeBase node, UBufferConponent resuilt, int x, int y, int z, object tag)
+        public virtual void OnPerPixel(UPgcGraph graph, UPgcNodeBase node, UBufferComponent resuilt, int x, int y, int z, object tag)
         {
 
         }
@@ -455,7 +455,7 @@ namespace EngineNS.Bricks.Procedure
 
         #region Macross
         [Rtti.Meta()]
-        public UBufferConponent FindBuffer(string name)
+        public UBufferComponent FindBuffer(string name)
         {
             var graph = this.ParentGraph as UPgcGraph;
             var pin = this.FindPinIn(name) as NodePin;

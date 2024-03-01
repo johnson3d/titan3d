@@ -64,7 +64,7 @@ namespace EngineNS.Graphics.Pipeline.Mobile
             base.OnDrawCall(cmd, drawcall, atom);
             BasePassNode.mOpaqueShading.OnDrawCall(cmd, drawcall, this, atom);
         }
-        public unsafe override void TickLogic(GamePlay.UWorld world)
+        public unsafe override void TickLogic(GamePlay.UWorld world, Action<TtRenderGraphNode, TtRenderGraphPin, TtAttachBuffer> onRemove)
         {
             BasePassNode.TickLogic(world, this, true);
         }

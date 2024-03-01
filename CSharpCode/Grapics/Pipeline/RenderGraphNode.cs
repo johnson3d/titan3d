@@ -2,13 +2,14 @@
 using NPOI.Util;
 using System;
 using System.Collections.Generic;
+using System.Runtime.CompilerServices;
 using System.Text;
 
 namespace EngineNS.Graphics.Pipeline
 {
     public class TtRenderGraphPin
     {
-        public UAttachBuffer.ELifeMode LifeMode { get; set; } = UAttachBuffer.ELifeMode.Transient;
+        public TtAttachBuffer.ELifeMode LifeMode { get; set; } = TtAttachBuffer.ELifeMode.Transient;
         public enum EPinType
         {
             Input,
@@ -32,8 +33,8 @@ namespace EngineNS.Graphics.Pipeline
             }
         }
 
-        public UAttachmentDesc Attachement = new UAttachmentDesc();
-        public UAttachBuffer ImportedBuffer = null;
+        public TtAttachmentDesc Attachement = new TtAttachmentDesc();
+        public TtAttachBuffer ImportedBuffer = null;
         public TtRenderGraphLinker FindInLinker()
         {
             return HostNode.RenderGraph.FindInLinker(this);
@@ -217,15 +218,15 @@ namespace EngineNS.Graphics.Pipeline
             }
             return null;
         }
-        public UAttachBuffer ImportAttachment(TtRenderGraphPin pin)
+        public TtAttachBuffer ImportAttachment(TtRenderGraphPin pin)
         {
             return RenderGraph.AttachmentCache.ImportAttachment(pin);
         }
-        public UAttachBuffer FindAttachBuffer(TtRenderGraphPin pin)
+        public TtAttachBuffer FindAttachBuffer(TtRenderGraphPin pin)
         {
             return RenderGraph.AttachmentCache.FindAttachement(pin.Attachement.AttachmentName);
         }
-        public UAttachBuffer GetAttachBuffer(TtRenderGraphPin pin)
+        public TtAttachBuffer GetAttachBuffer(TtRenderGraphPin pin)
         {
             return RenderGraph.AttachmentCache.GetAttachement(pin.Attachement.AttachmentName, pin.Attachement);
         }
@@ -290,7 +291,7 @@ namespace EngineNS.Graphics.Pipeline
             BasePass.SwapBuffer();
         }
 
-        public void TryReleaseBufers(List<TtRenderGraphLinker> linkers)
+        public void TryReleaseBufers(List<TtRenderGraphLinker> linkers, Action<TtRenderGraphNode, TtRenderGraphPin, TtAttachBuffer> onRemove)
         {
             var j = this;
             for (int k = 0; k < j.NumOfOutput; k++)
@@ -300,7 +301,7 @@ namespace EngineNS.Graphics.Pipeline
                 if (linkers.Count > 0)
                 {
                     var buffer = RenderGraph.AttachmentCache.FindAttachement(t.Attachement.AttachmentName);
-                    if (buffer != null && buffer.LifeMode == UAttachBuffer.ELifeMode.Transient)
+                    if (buffer != null && buffer.LifeMode == TtAttachBuffer.ELifeMode.Transient)
                     {
                         buffer.AddRef(linkers.Count);
                     }
@@ -308,10 +309,14 @@ namespace EngineNS.Graphics.Pipeline
                 else
                 {
                     var buffer = RenderGraph.AttachmentCache.FindAttachement(t.Attachement.AttachmentName);
-                    if (buffer != null && buffer.LifeMode == UAttachBuffer.ELifeMode.Transient)
+                    if (buffer != null && buffer.LifeMode == TtAttachBuffer.ELifeMode.Transient)
                     {
                         if (buffer.RefCount == 0)
                         {
+                            if (onRemove != null)
+                            {
+                                onRemove(this, t, buffer);
+                            }
                             RenderGraph.AttachmentCache.RemoveAttachement(t.Attachement.AttachmentName);
                         }
                     }
@@ -324,11 +329,15 @@ namespace EngineNS.Graphics.Pipeline
                 if (t.FindInLinker() == null)
                     continue;
                 var buffer = RenderGraph.AttachmentCache.FindAttachement(t.Attachement.AttachmentName);
-                if (buffer != null && buffer.LifeMode == UAttachBuffer.ELifeMode.Transient)
+                if (buffer != null && buffer.LifeMode == TtAttachBuffer.ELifeMode.Transient)
                 {
                     var count = buffer.Release();
                     if (count <= 0)
                     {
+                        if (onRemove != null)
+                        {
+                            onRemove(this, t, buffer);
+                        }
                         this.RenderGraph.AttachmentCache.RemoveAttachement(t.Attachement.AttachmentName);
                     }
                 }

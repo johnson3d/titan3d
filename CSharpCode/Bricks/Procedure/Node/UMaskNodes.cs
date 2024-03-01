@@ -47,7 +47,7 @@ namespace EngineNS.Bricks.Procedure.Node
     [Bricks.CodeBuilder.ContextMenu("GreatEqual", "Mask\\GreatEqual", UPgcGraph.PgcEditorKeyword)]
     public class UGreatEqual : UMaskBase
     {
-        public unsafe override void OnPerPixel(UPgcGraph graph, UPgcNodeBase node, UBufferConponent result, int x, int y, int z, object tag)
+        public unsafe override void OnPerPixel(UPgcGraph graph, UPgcNodeBase node, UBufferComponent result, int x, int y, int z, object tag)
         {
             var arg = tag as ULeftRightBuffer;
             var left = arg.Left;
@@ -76,7 +76,7 @@ namespace EngineNS.Bricks.Procedure.Node
     [Bricks.CodeBuilder.ContextMenu("Great", "Mask\\Great", UPgcGraph.PgcEditorKeyword)]
     public class UGreat : UMaskBase
     {
-        public unsafe override void OnPerPixel(UPgcGraph graph, UPgcNodeBase node, UBufferConponent result, int x, int y, int z, object tag)
+        public unsafe override void OnPerPixel(UPgcGraph graph, UPgcNodeBase node, UBufferComponent result, int x, int y, int z, object tag)
         {
             var arg = tag as ULeftRightBuffer;
             var left = arg.Left;
@@ -105,7 +105,7 @@ namespace EngineNS.Bricks.Procedure.Node
     [Bricks.CodeBuilder.ContextMenu("LessEqual", "Mask\\LessEqual", UPgcGraph.PgcEditorKeyword)]
     public class ULessEqual : UMaskBase
     {
-        public unsafe override void OnPerPixel(UPgcGraph graph, UPgcNodeBase node, UBufferConponent result, int x, int y, int z, object tag)
+        public unsafe override void OnPerPixel(UPgcGraph graph, UPgcNodeBase node, UBufferComponent result, int x, int y, int z, object tag)
         {
             var arg = tag as ULeftRightBuffer;
             var left = arg.Left;
@@ -134,7 +134,7 @@ namespace EngineNS.Bricks.Procedure.Node
     [Bricks.CodeBuilder.ContextMenu("Less", "Mask\\Less", UPgcGraph.PgcEditorKeyword)]
     public class ULess : UMaskBase
     {
-        public unsafe override void OnPerPixel(UPgcGraph graph, UPgcNodeBase node, UBufferConponent result, int x, int y, int z, object tag)
+        public unsafe override void OnPerPixel(UPgcGraph graph, UPgcNodeBase node, UBufferComponent result, int x, int y, int z, object tag)
         {
             var arg = tag as ULeftRightBuffer;
             var left = arg.Left;
@@ -163,7 +163,7 @@ namespace EngineNS.Bricks.Procedure.Node
     [Bricks.CodeBuilder.ContextMenu("Equal", "Mask\\Equal", UPgcGraph.PgcEditorKeyword)]
     public class UEqual : UMaskBase
     {
-        public unsafe override void OnPerPixel(UPgcGraph graph, UPgcNodeBase node, UBufferConponent result, int x, int y, int z, object tag)
+        public unsafe override void OnPerPixel(UPgcGraph graph, UPgcNodeBase node, UBufferComponent result, int x, int y, int z, object tag)
         {
             var arg = tag as ULeftRightBuffer;
             var left = arg.Left;
@@ -192,7 +192,7 @@ namespace EngineNS.Bricks.Procedure.Node
     [Bricks.CodeBuilder.ContextMenu("NotEqual", "Mask\\NotEqual", UPgcGraph.PgcEditorKeyword)]
     public class UNotEqual : UMaskBase
     {
-        public unsafe override void OnPerPixel(UPgcGraph graph, UPgcNodeBase node, UBufferConponent result, int x, int y, int z, object tag)
+        public unsafe override void OnPerPixel(UPgcGraph graph, UPgcNodeBase node, UBufferComponent result, int x, int y, int z, object tag)
         {
             var arg = tag as ULeftRightBuffer;
             var left = arg.Left;

@@ -12,7 +12,7 @@ namespace EngineNS.Graphics.Pipeline
         }
         public string Name { get; set; }
         public GamePlay.UWorld.UVisParameter VisParameter;
-        public UGraphicsBuffers.UTargetViewIdentifier TargetViewIdentifier = new UGraphicsBuffers.UTargetViewIdentifier();
+        public TtGraphicsBuffers.TtTargetViewIdentifier TargetViewIdentifier = new TtGraphicsBuffers.TtTargetViewIdentifier();
         NxRHI.UCbView mPerCameraCBuffer;
         public NxRHI.UCbView PerCameraCBuffer
         {

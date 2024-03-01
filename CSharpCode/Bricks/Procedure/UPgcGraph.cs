@@ -251,7 +251,7 @@ namespace EngineNS.Bricks.Procedure
             }
         }
         [Rtti.Meta]
-        public UBufferConponent RegBuffer(PinOut pin, UBufferConponent buffer)
+        public UBufferComponent RegBuffer(PinOut pin, UBufferComponent buffer)
         {
             return this.BufferCache.RegBuffer(pin, buffer);
         }

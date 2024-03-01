@@ -125,7 +125,7 @@ namespace EngineNS.UI.Template
                     else if(valData.Value is TtTemplateSimpleValue)
                     {
                         var bindValue = valData.Value as TtTemplateSimpleValue;
-                        bindValue.SetTempalteValue(treeNode);
+                        treeNode.SetTemplateValue(bindValue);
                     }
                     //valData.Value.SetValue(treeNode, valData.Key, container);
                 }

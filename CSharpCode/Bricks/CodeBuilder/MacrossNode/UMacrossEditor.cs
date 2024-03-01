@@ -86,11 +86,8 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
                     menuItem.Action = (proxy, data) =>
                     {
                         var f = UMethodDeclaration.GetMethodDeclaration(method);
-                        DefClass.AddMethod(f);
-
-                        var func = UMacrossMethodGraph.NewGraph(this, f);
+                        var func = AddMethod(f);
                         func.AssetName = this.AssetName;
-                        Methods.Add(func);
                         menuItem.Visible = false;
                     };
 
@@ -635,6 +632,25 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
             }
         }
 
+        public void RemoveMethod(UMethodDeclaration methodDesc)
+        {
+            for(var methodIdx = Methods.Count - 1; methodIdx >= 0; methodIdx--)
+            {
+                var method = Methods[methodIdx];
+                for(int dataIdx = method.MethodDatas.Count - 1; dataIdx >= 0; dataIdx--)
+                {
+                    if(method.MethodDatas[dataIdx].MethodDec.Equals(methodDesc))
+                    {
+                        method.MethodDatas.RemoveAt(dataIdx);
+                    }
+                }
+                if(method.MethodDatas.Count == 0)
+                {
+                    RemoveMethod(method);
+                }
+            }
+        }
+
         public Func<UMacrossMethodGraph, bool> OnRemoveMethod;
         public void RemoveMethod(UMacrossMethodGraph method)
         {
@@ -670,6 +686,12 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
 
         public UMacrossMethodGraph AddMethod(UMethodDeclaration methodDesc)
         {
+            var metaAtt = new TtAttribute()
+            {
+                AttributeType = new UTypeReference(typeof(Rtti.MetaAttribute)),
+            };
+            if(!methodDesc.Attributes.Contains(metaAtt))
+                methodDesc.Attributes.Add(metaAtt);
             DefClass.AddMethod(methodDesc);
 
             var func = UMacrossMethodGraph.NewGraph(this, methodDesc);
@@ -681,6 +703,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
             return func;
         }
 
+        public Func<UVariableDeclaration, bool> OnAddMember;
         public Func<UVariableDeclaration, bool> OnRemoveMember;
 
         bool mClassViewShow = true;
@@ -728,7 +751,11 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
                         mb.VisitMode = EVisisMode.Local;
                         mb.InitValue = new UPrimitiveExpression(Rtti.UTypeDesc.TypeOf(selectedType), selectedType.IsValueType ? Rtti.UTypeDescManager.CreateInstance(selectedType) : null);
                         mb.Comment = new UCommentStatement("");
-                        DefClass.Properties.Add(mb);
+                        bool result = true;
+                        if (OnAddMember != null)
+                            result = OnAddMember.Invoke(mb);
+                        if(result)
+                            DefClass.Properties.Add(mb);
                     }
                 }
                 if (membersTreeNodeResult)

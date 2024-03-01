@@ -129,7 +129,7 @@ namespace EngineNS.Bricks.Procedure.Node
             if(oPT != null)
                 (iPin.Tag as UBufferCreator).BufferType = oPT.BufferType;
         }
-        public UBufferConponent GetResultBuffer(string pinName)
+        public UBufferComponent GetResultBuffer(string pinName)
         {
             var pin = this.FindPinIn(pinName);
             if (pin == null)

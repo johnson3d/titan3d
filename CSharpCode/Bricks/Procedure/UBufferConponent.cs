@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using EngineNS.Bricks.NodeGraph;
+using EngineNS.Graphics.Pipeline;
 
 namespace EngineNS.Bricks.Procedure
 {
@@ -17,7 +18,7 @@ namespace EngineNS.Bricks.Procedure
     public class UBufferCreator : IO.BaseSerializer
     {
         public static UBufferCreator CreateInstance<TBuffer>(int x = -1, int y = -1, int z = -1)
-            where TBuffer : UBufferConponent
+            where TBuffer : UBufferComponent
         {
             var result = new UBufferCreator();
             result.BufferType = Rtti.UTypeDesc.TypeOf<TBuffer>();
@@ -70,7 +71,7 @@ namespace EngineNS.Bricks.Procedure
                 {
                     if (mBufferType == null)
                         return null;
-                    var tmp = Rtti.UTypeDescManager.CreateInstance(mBufferType) as UBufferConponent;
+                    var tmp = Rtti.UTypeDescManager.CreateInstance(mBufferType) as UBufferComponent;
                     if (tmp != null)
                         mElementType = tmp.PixelOperator.ElementType;
                 }
@@ -84,14 +85,14 @@ namespace EngineNS.Bricks.Procedure
         Rtti.UTypeDesc mBufferType = Rtti.UTypeDesc.TypeOf<USuperBuffer<float, FFloatOperator>>();
         [Rtti.Meta]
         //[IO.UTypeDescSerializer()]
-        [EGui.Controls.PropertyGrid.PGTypeEditor(typeof(UBufferConponent), FilterMode = EGui.Controls.UTypeSelector.EFilterMode.IncludeObjectType)]
+        [EGui.Controls.PropertyGrid.PGTypeEditor(typeof(UBufferComponent), FilterMode = EGui.Controls.UTypeSelector.EFilterMode.IncludeObjectType)]
         public Rtti.UTypeDesc BufferType
         {
             get => mBufferType;
             set
             {
                 mBufferType = value;
-                var tmp = Rtti.UTypeDescManager.CreateInstance(value) as UBufferConponent;
+                var tmp = Rtti.UTypeDescManager.CreateInstance(value) as UBufferComponent;
                 if (tmp != null)
                 {
                     ElementType = tmp.PixelOperator.ElementType;
@@ -146,8 +147,13 @@ namespace EngineNS.Bricks.Procedure
             return null;
         }
     }
-    public partial class UBufferConponent
+    public partial class UBufferComponent : IDisposable
     {
+        public void Dispose()
+        {
+            CoreSDK.DisposeObject(ref GpuBuffer);
+            CoreSDK.DisposeObject(ref SuperPixels);
+        }
         public UBufferCreator BufferCreator { get; private set; }
         public virtual ISuperPixelOperatorBase PixelOperator { get => null; }
         public int LifeCount { get; set; } = 0;
@@ -183,13 +189,49 @@ namespace EngineNS.Bricks.Procedure
         public int ElementSize { get; private set; }
         public Vector3 UVWStep = Vector3.Zero;
         public Support.UBlobObject SuperPixels = new Support.UBlobObject();
-        protected UBufferConponent()
+        private TtGpuBufferBase GpuBuffer;
+        public unsafe TtGpuBufferBase GetGpuBuffer<T>() where T : unmanaged
+        {
+            if (GpuBuffer == null)
+            {
+                GpuBuffer = new TtGpuBuffer<T>();
+                GpuBuffer.SetSize((uint)(Width * Height * Depth), SuperPixels.DataPointer, NxRHI.EBufferType.BFT_SRV | NxRHI.EBufferType.BFT_UAV);
+            }
+            return GpuBuffer;
+        }
+        public unsafe void Upload2GpuBuffer(NxRHI.UCommandList cmd)
+        {
+            GpuBuffer.GpuBuffer.UpdateGpuData(cmd.mCoreObject, 0, SuperPixels.DataPointer, SuperPixels.Size);
+        }
+        public unsafe TtGpuBufferBase GetGpuTexture2D<T>() where T : unmanaged
+        {
+            if (GpuBuffer == null)
+            {
+                GpuBuffer = new TtGpuBuffer<T>();
+                GpuBuffer.SetTexture2D((uint)Width, (uint)Height, SuperPixels.DataPointer, NxRHI.EBufferType.BFT_SRV | NxRHI.EBufferType.BFT_UAV);
+            }
+            return GpuBuffer;
+        }
+        public unsafe void Upload2GpuTexture2D(NxRHI.UCommandList cmd, EPixelFormat format)
+        {
+            NxRHI.FSubResourceFootPrint footprint = new NxRHI.FSubResourceFootPrint();
+            footprint.SetDefault();
+            footprint.Width = (uint)Width;
+            footprint.Height = (uint)Height;
+            footprint.Depth = 1;
+            footprint.Format = format;
+            footprint.RowPitch = (uint)(CoreSDK.GetPixelFormatByteWidth(format) * Width);
+            footprint.TotalSize = footprint.RowPitch * footprint.Height;
+
+            GpuBuffer.GpuBuffer.UpdateGpuData(cmd.mCoreObject, 0, SuperPixels.DataPointer, &footprint);
+        }
+        protected UBufferComponent()
         {
 
         }
-        ~UBufferConponent()
+        ~UBufferComponent()
         {
-            SuperPixels.Dispose();
+            Dispose();
         }
 
         public unsafe Hash160 CalcPixelHash()
@@ -553,9 +595,9 @@ namespace EngineNS.Bricks.Procedure
         }
         
         #region CppMemBuffer
-        public unsafe static UBufferConponent CreateInstance(in UBufferCreator creator)
+        public unsafe static UBufferComponent CreateInstance(in UBufferCreator creator)
         {
-            var result = Rtti.UTypeDescManager.CreateInstance(creator.BufferType) as UBufferConponent;
+            var result = Rtti.UTypeDescManager.CreateInstance(creator.BufferType) as UBufferComponent;
             result.BufferCreator = creator.Clone();
             result.CreateBuffer(creator.ElementType, creator.XSize, creator.YSize, creator.ZSize, IntPtr.Zero.ToPointer());
             return result;
@@ -833,7 +875,7 @@ namespace EngineNS.Bricks.Procedure
         #endregion
 
         #region Macross
-        public delegate void FOnPerPixel(UBufferConponent result, int x, int y, int z);
+        public delegate void FOnPerPixel(UBufferComponent result, int x, int y, int z);
         [Rtti.Meta]
         public void DispatchPixels(FOnPerPixel onPerPiexel, bool bMultThread = false)
         {
@@ -855,7 +897,7 @@ namespace EngineNS.Bricks.Procedure
             {
                 UEngine.Instance.EventPoster.ParrallelFor(Width * Height * Depth, static (index, arg1, arg2) =>
                 {
-                    var pThis = arg1 as UBufferConponent;
+                    var pThis = arg1 as UBufferComponent;
                     var onPerPiexel = arg2 as FOnPerPixel;
                     int pitch = pThis.Height * pThis.Width;
                     int z = index / pitch;
@@ -934,14 +976,14 @@ namespace EngineNS.Bricks.Procedure
             }
         }
         [Rtti.Meta]
-        public UBufferConponent Clone()
+        public UBufferComponent Clone()
         {
-            var result = UBufferConponent.CreateInstance(this.BufferCreator);
+            var result = UBufferComponent.CreateInstance(this.BufferCreator);
             CopyData(this, result);
             return result;
         }
         [Rtti.Meta(Flags = Rtti.MetaAttribute.EMetaFlags.ManualMarshal)]
-        public static unsafe bool CopyData(UBufferConponent src, UBufferConponent dst)
+        public static unsafe bool CopyData(UBufferComponent src, UBufferComponent dst)
         {
             if (src.Width != dst.Width ||
                 src.Height != dst.Height)
@@ -958,7 +1000,7 @@ namespace EngineNS.Bricks.Procedure
             }
             return true;
         }
-        public static unsafe bool macross_CopyData(string nodeName, UBufferConponent src, UBufferConponent dst)
+        public static unsafe bool macross_CopyData(string nodeName, UBufferComponent src, UBufferComponent dst)
         {
             using (var stackframe = EngineNS.Macross.UMacrossStackTracer.CurrentFrame)
             {
@@ -1246,7 +1288,7 @@ namespace EngineNS.Bricks.Procedure
         }
         #endregion
     }
-    public class USuperBuffer<T, TOperator> : UBufferConponent where T : unmanaged 
+    public class USuperBuffer<T, TOperator> : UBufferComponent where T : unmanaged 
         where TOperator : ISuperPixelOperator<T>, new()
     {
         public readonly static TOperator mOperator = new TOperator();
@@ -1296,15 +1338,19 @@ namespace EngineNS.Bricks.Procedure
 
     public class UPgcBufferCache
     {
-        public Dictionary<NodePin, UBufferConponent> CachedBuffers { get; } = new Dictionary<NodePin, UBufferConponent>();
+        public Dictionary<NodePin, UBufferComponent> CachedBuffers { get; } = new Dictionary<NodePin, UBufferComponent>();
         public void ResetCache()
         {
+            foreach (var i in CachedBuffers)
+            {
+                i.Value.Dispose();
+            }
             CachedBuffers.Clear();
         }
-        public UBufferConponent FindBuffer(NodePin pin)
+        public UBufferComponent FindBuffer(NodePin pin)
         {
             var node = pin.HostNode as UPgcNodeBase;
-            UBufferConponent buffer;
+            UBufferComponent buffer;
             if (CachedBuffers.TryGetValue(pin, out buffer))
                 return buffer;
             var oPin = pin as PinOut;
@@ -1324,7 +1370,7 @@ namespace EngineNS.Bricks.Procedure
                 {
                     creator.ZSize = graph.DefaultCreator.ZSize;
                 }
-                buffer = UBufferConponent.CreateInstance(in creator);
+                buffer = UBufferComponent.CreateInstance(in creator);
                 buffer.LifeCount = pin.HostNode.ParentGraph.GetNumOfOutLinker(oPin);
                 CachedBuffers.Add(pin, buffer);
                 return buffer;
@@ -1347,9 +1393,9 @@ namespace EngineNS.Bricks.Procedure
             }
             return null;
         }
-        public UBufferConponent RegBuffer(PinOut pin, UBufferConponent buffer)
+        public UBufferComponent RegBuffer(PinOut pin, UBufferComponent buffer)
         {
-            UBufferConponent result = null;
+            UBufferComponent result = null;
             if (CachedBuffers.TryGetValue(pin, out result))
                 return result;
             buffer.LifeCount = pin.HostNode.ParentGraph.GetNumOfOutLinker(pin);

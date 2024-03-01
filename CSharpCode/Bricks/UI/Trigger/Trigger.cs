@@ -68,7 +68,9 @@ namespace EngineNS.UI.Trigger
             NotEqual,
         }
         ELogicalOperation mOp;
+        public ELogicalOperation Op => mOp;
         ValueStoreBase mValue;
+        public ValueStoreBase Value => mValue;
 
         public TtTriggerConditionLogical(TtBindableProperty property, ELogicalOperation op, T value, string sourceName = null)
             : base(property, sourceName)
@@ -79,14 +81,7 @@ namespace EngineNS.UI.Trigger
 
         public override bool IsMatch(IBindableObject obj)
         {
-            switch(mOp)
-            {
-                case ELogicalOperation.Equal:
-                    return EqualityComparer<T>.Default.Equals(mValue.GetValue<T>(), obj.GetValue<T>(Property));
-                case ELogicalOperation.NotEqual:
-                    return !EqualityComparer<T>.Default.Equals(mValue.GetValue<T>(), obj.GetValue<T>(Property));
-            }
-            return false;
+            return obj.IsMatchTriggerCondition(this);
         }
         public override bool IsMatch<TValue>(in TValue value)
         {
@@ -108,8 +103,10 @@ namespace EngineNS.UI.Trigger
     }
     public partial class TtTriggerSimpleValue<TProp> : TtTriggerValue
     {
-        ValueStoreBase mValue;
         ValueStoreBase mOldValue;
+        public ValueStoreBase OldValueStore => mOldValue;
+        ValueStoreBase mValue;
+        public ValueStoreBase ValueStore => mValue;
         public TProp Value => (mValue == null) ? default :  mValue.GetValue<TProp>();
         TtBindableProperty mProperty;
         public TtBindableProperty Property => mProperty;
@@ -149,23 +146,7 @@ namespace EngineNS.UI.Trigger
         {
             if (obj == null)
                 return;
-            var objType = obj.GetType();
-            if (mProperty.IsAttachedProperty)
-            {
-                mOldValue.SetValue(obj.GetValue<TProp>(mProperty));
-                obj.SetValue(mValue.GetValue<TProp>(), mProperty);
-            }
-            else if (mProperty.HostType.IsEqual(objType) || mProperty.HostType.IsParentClass(objType))
-            {
-                var prop = obj.GetType().GetProperty(mProperty.Name);
-                mOldValue.SetValue((TProp)prop.GetValue(obj));
-                prop.SetValue(obj, mValue.GetValue<TProp>());
-            }
-            else
-            {
-                mOldValue.SetValue(obj.GetValue<TProp>(mProperty));
-                obj.SetValue(mValue.GetValue<TProp>(), mProperty);
-            }
+            obj.SetFromTriggerSimpleValue(this);
         }
         public override void RestoreValue()
         {
@@ -175,20 +156,7 @@ namespace EngineNS.UI.Trigger
         {
             if (obj == null)
                 return;
-            var objType = obj.GetType();
-            if(mProperty.IsAttachedProperty)
-            {
-                obj.SetValue(mOldValue.GetValue<TProp>(), mProperty);
-            }
-            else if(mProperty.HostType.IsEqual(objType) || mProperty.HostType.IsParentClass(objType))
-            {
-                var prop = obj.GetType().GetProperty(mProperty.Name);
-                prop.SetValue(obj, mOldValue.GetValue<TProp>());
-            }
-            else
-            {
-                obj.SetValue(mOldValue.GetValue<TProp>(), mProperty);
-            }
+            obj.RestoreFromTriggerSimpleValue(this);
         }
     }
 

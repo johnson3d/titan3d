@@ -447,7 +447,7 @@ namespace EngineNS.Bricks.Procedure.Node
                 ParentGraph.RemoveLinkedInExcept(iPin, OutNode, oPin.Name);
             }
         }
-        public unsafe override void OnPerPixel(UPgcGraph graph, UPgcNodeBase node, UBufferConponent result, int x, int y, int z, object tag)
+        public unsafe override void OnPerPixel(UPgcGraph graph, UPgcNodeBase node, UBufferComponent result, int x, int y, int z, object tag)
         {
             var arg = tag as ULeftRightBuffer;
             var left = arg.Left;

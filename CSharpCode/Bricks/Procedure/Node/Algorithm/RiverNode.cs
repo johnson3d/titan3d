@@ -252,11 +252,11 @@ namespace EngineNS.Bricks.Procedure.Algorithm
             redirect_flats(ref elevations, ref flats, ref inc1, ref inc2, ref FD, width);
         }
 
-        public static UBufferConponent GenerateRiver(float[] elevations, int width, int[] dry_mask, int[] river_mask)
+        public static UBufferComponent GenerateRiver(float[] elevations, int width, int[] dry_mask, int[] river_mask)
         {
             int count = width * width;
             var creator = UBufferCreator.CreateInstance<USuperBuffer<Vector4, FFloat4Operator>>(width, width, 1);
-            var RiverMap = UBufferConponent.CreateInstance(creator);
+            var RiverMap = UBufferComponent.CreateInstance(creator);
             // read data
             int[] flow_mask = new int[count];
             for (int i = 0; i < width; i++) 

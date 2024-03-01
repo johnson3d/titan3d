@@ -232,7 +232,7 @@ namespace EngineNS.Editor
                     TickOnFocus();
                 }
 
-                RenderPolicy?.TickLogic(World);
+                RenderPolicy?.TickLogic(World, null);
 
                 RenderPolicy?.EndTickLogic(World);
 

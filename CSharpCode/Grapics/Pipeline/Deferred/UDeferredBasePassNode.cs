@@ -118,7 +118,7 @@ namespace EngineNS.Graphics.Pipeline.Deferred
                 GpuCullNode = linker.OutPin.HostNode as TtGpuCullingNode;
             }
         }
-        public virtual unsafe UGraphicsBuffers CreateGBuffers(URenderPolicy policy, EPixelFormat format)
+        public virtual unsafe TtGraphicsBuffers CreateGBuffers(URenderPolicy policy, EPixelFormat format)
         {
             var rc = UEngine.Instance.GfxDevice.RenderContext;
             var PassDesc = new NxRHI.FRenderPassDesc();

@@ -13,7 +13,7 @@ namespace EngineNS.Graphics.Pipeline
         }
         public override void InitNodePins()
         {
-            VisiblesOut.LifeMode = UAttachBuffer.ELifeMode.Imported;
+            VisiblesOut.LifeMode = TtAttachBuffer.ELifeMode.Imported;
             AddOutput(VisiblesOut, NxRHI.EBufferType.BFT_NONE);
         }
         public async override System.Threading.Tasks.Task Initialize(URenderPolicy policy, string debugName)

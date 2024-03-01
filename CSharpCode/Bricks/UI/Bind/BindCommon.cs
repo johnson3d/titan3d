@@ -5,6 +5,7 @@ using EngineNS.Rtti;
 using EngineNS.UI.Controls;
 using EngineNS.UI.Controls.Containers;
 using EngineNS.UI.Editor;
+using EngineNS.UI.Template;
 using EngineNS.UI.Trigger;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using NPOI.SS.Formula.Functions;
@@ -252,13 +253,35 @@ namespace EngineNS.UI.Bind
 
         List<IBindableObject> mBindObjects = new List<IBindableObject>();
         List<IBindableObject> mBindingTargets = new List<IBindableObject>();
-        List<EditorOnlyData.BindingData> mBindingDatas = new List<EditorOnlyData.BindingData>();
+        List<TtUIElement.BindingDataBase> mBindingDatas = new List<TtUIElement.BindingDataBase>();
         string mBindPopFilterString = "";
         bool mBindFilterFocus = false;
         bool mBindedDataDirty = true;
+        bool mBindingDatasIsSameOne = true;
         TtUIElement mFirstElement = null;
         EBindingMode mSelectedMode = EBindingMode.Default;
         string[] mBindingModeNames;
+        static Vector2 mCurrentBindBackgroundStart;
+        static Vector2 mCurrentBindBackgroundEnd;
+        void DeleteBind(string propertyName, Editor.EditorUIHost host)
+        {
+            for (int i = 0; i < mBindingTargets.Count; i++)
+            {
+                var bp = mBindingTargets[i].FindBindableProperty(propertyName);
+                if (bp != null)
+                    mBindingTargets[i].ClearBindExpression(bp);
+
+                var tag = mBindingTargets[i] as TtUIElement;
+                TtUIElement.BindingDataBase bindData;
+                if (tag.BindingDatas.TryGetValue(propertyName, out bindData))
+                {
+                    bindData.OnRemove(host.HostEditor);
+                    tag.BindingDatas.Remove(propertyName);
+                }
+            }
+            mBindedDataDirty = true;
+        }
+
         public void OnDraw(in ExternalInfo info)
         {
             unsafe
@@ -266,6 +289,7 @@ namespace EngineNS.UI.Bind
                 Editor.EditorUIHost host = null;
                 if(mBindedDataDirty)
                 {
+                    mBindingDatasIsSameOne = true;
                     mBindingModeNames = Enum.GetNames<EBindingMode>();
                     mBindObjects.Clear();
                     mBindingTargets.Clear();
@@ -321,16 +345,17 @@ namespace EngineNS.UI.Bind
 
                     host = mFirstElement.RootUIHost as Editor.EditorUIHost;
                     // check if has binded value
-                    for (int i = 0; i < host.EditorOnlyData.BindingDatas.Count; i++)
+                    for (int tagIdx = 0; tagIdx < mBindingTargets.Count; tagIdx++)
                     {
-                        for (int tagIdx = 0; tagIdx < mBindingTargets.Count; tagIdx++)
+                        var tag = mBindingTargets[tagIdx] as TtUIElement;
+                        TtUIElement.BindingDataBase data;
+                        if(tag.BindingDatas.TryGetValue(info.PropertyDescriptor.Name, out data))
                         {
-                            var data = host.EditorOnlyData.BindingDatas[i];
-                            if (data.Target.IsSameTarget(mBindingTargets[tagIdx]) &&
-                               data.Target.GetBindPath() == info.PropertyDescriptor.Name)
+                            if(mBindingDatas.Count > 0)
                             {
-                                mBindingDatas.Add(data);
+                                mBindingDatasIsSameOne = mBindingDatasIsSameOne && mBindingDatas[0].IsSame(data);
                             }
+                            mBindingDatas.Add(data);
                         }
                     }
                     //mBindedDataDirty = false; // 这里有问题，点击绑定按钮后相应到host而不是本身控件
@@ -370,7 +395,7 @@ namespace EngineNS.UI.Bind
                 {
                     drawList.AddRectFilled(in start, in end, EGui.UIProxy.StyleConfig.Instance.ToolButtonTextColor_Hover, 2.0f, ImDrawFlags_.ImDrawFlags_None);
                 }
-                if(pressed)
+                if (pressed)
                 {
                     ImGuiAPI.OpenPopup("BindSourceSelectPopup" + keyName, ImGuiPopupFlags_.ImGuiPopupFlags_None);
                 }
@@ -384,17 +409,24 @@ namespace EngineNS.UI.Bind
                     var cmdList = ImGuiAPI.GetWindowDrawList();
                     var width = ImGuiAPI.GetColumnWidth(0);
                     EGui.UIProxy.SearchBarProxy.OnDraw(ref mBindFilterFocus, in cmdList, "search item", ref mBindPopFilterString, width);
-                    
+                    mBindPopFilterString = mBindPopFilterString.ToLower();
                     if(mBindingDatas.Count > 0)
                     {
-                        var curSt = ImGuiAPI.GetCursorScreenPos();
-                        var curEd = curSt + new Vector2(width, 100);
-                        cmdList.AddRectFilled(in curSt, in curEd, EGui.UIProxy.StyleConfig.Instance.PanelBackground, 0.0f, ImDrawFlags_.ImDrawFlags_None);
-                        ImGuiAPI.Text("Current Bind:");
-
-                        ImGuiAPI.PushStyleColor(ImGuiCol_.ImGuiCol_Text, 0xff00ff00);
-                        mBindingDatas[0].DrawBindInfo(host, cmdList);
-                        ImGuiAPI.PopStyleColor(1);
+                        // has binded item
+                        mCurrentBindBackgroundStart = ImGuiAPI.GetCursorScreenPos();
+                        cmdList.AddRectFilled(in mCurrentBindBackgroundStart, in mCurrentBindBackgroundEnd, EGui.UIProxy.StyleConfig.Instance.PanelBackground, 0.0f, ImDrawFlags_.ImDrawFlags_None);
+                        ImGuiAPI.Text("Current Binds:");
+                        if(mBindingDatasIsSameOne)
+                        {
+                            ImGuiAPI.PushStyleColor(ImGuiCol_.ImGuiCol_Text, 0xff00ff00);
+                            mBindingDatas[0].DrawBindInfo(host, cmdList);
+                            ImGuiAPI.PopStyleColor(1);
+                        }
+                        else
+                        {
+                            ImGuiAPI.SameLine(0, -1);
+                            ImGuiAPI.Text(" multi bindings!");
+                        }
 
                         ImGuiAPI.PushStyleColor(ImGuiCol_.ImGuiCol_Text, 0xff0000ff);
                         if(EGui.UIProxy.CustomButton.ToolButton("Delete Bind", Vector2.Zero,
@@ -405,13 +437,10 @@ namespace EngineNS.UI.Bind
                             EGui.UIProxy.StyleConfig.Instance.PanelBackground,
                             EGui.UIProxy.StyleConfig.Instance.PanelBackground))
                         {
-                            for(int i=0; i<mBindingTargets.Count; i++)
-                            {
-                                host.EditorOnlyData.ClearTargetBindData(mBindingTargets[i], info.PropertyDescriptor.Name);
-                            }
-                            mBindedDataDirty = true;
+                            DeleteBind(info.PropertyDescriptor.Name, host);
                         }
                         ImGuiAPI.PopStyleColor(1);
+                        mCurrentBindBackgroundEnd = ImGuiAPI.GetCursorScreenPos() + new Vector2(width, 0);
                     }
 
                     var selectedModeStr = mSelectedMode.ToString();
@@ -434,75 +463,160 @@ namespace EngineNS.UI.Bind
                     }
                     if(ImGuiAPI.IsItemClicked(ImGuiMouseButton_.ImGuiMouseButton_Left))
                     {
-                        var bindSource = new UIBindingData_Method()
-                        {
-                        };
+                        DeleteBind(info.PropertyDescriptor.Name, host);
                         for (int i=0; i<mBindingTargets.Count; i++)
                         {
                             var tElement = mBindingTargets[i] as TtUIElement;
                             if (tElement == null)
                                 continue;
-                            var bindTarget = new UIBindingData_Element()
+                            var bindTarget = new TtUIElement.UIBindingData_Element()
                             {
                                 PropertyName = info.PropertyDescriptor.Name,
                                 PropertyType = info.PropertyDescriptor.PropertyType,
                                 Id = tElement.Id,
                             };
-                            host.EditorOnlyData.ClearTargetBindData(tElement, info.PropertyDescriptor.Name);
-                            host.EditorOnlyData.BindingDatas.Add(new EditorOnlyData.BindingData_Method()
+                            var curMode = mSelectedMode;
+                            var bp = tElement.FindBindableProperty(info.PropertyDescriptor.Name);
+                            if (bp != null && (curMode == EBindingMode.Default))
                             {
-                                Source = bindSource,
+                                curMode = bp.BindingMode;
+                            }
+                            // ------------------------------------------------------
+                            void ConfigSetMethod(in ExternalInfo info)
+                            {
+                                var setMethodName = tElement.GetPropertyBindMethodName(info.PropertyDescriptor.Name, true);
+                                var setMethodDesc = new UMethodDeclaration();
+                                setMethodDesc.MethodName = setMethodName;
+                                setMethodDesc.GetDisplayNameFunc = tElement.GetMethodDisplayName;
+                                setMethodDesc.Arguments.Add(new UMethodArgumentDeclaration()
+                                {
+                                    VariableName = "obj",
+                                    VariableType = new UTypeReference(typeof(IBindableObject)),
+                                });
+                                setMethodDesc.Arguments.Add(new UMethodArgumentDeclaration()
+                                {
+                                    VariableName = "prop",
+                                    VariableType = new UTypeReference(typeof(TtBindableProperty)),
+                                });
+                                setMethodDesc.Arguments.Add(new UMethodArgumentDeclaration()
+                                {
+                                    VariableName = "valueIn",
+                                    VariableType = new UTypeReference(info.PropertyDescriptor.PropertyType),
+                                    OperationType = EMethodArgumentAttribute.In,
+                                });
+                                var setGraph = host.HostEditor.UIAsset.MacrossEditor.AddMethod(setMethodDesc);
+                                tElement.SetPropertyBindMethod(info.PropertyDescriptor.Name, setMethodDesc, true);
+                                host.HostEditor.UIAsset.MacrossEditor.OpenMethodGraph(setGraph);                                        
+                            }
+                            void ConfigGetMethod(in ExternalInfo info)
+                            {
+                                var getMethodName = tElement.GetPropertyBindMethodName(info.PropertyDescriptor.Name, false);
+                                var getMethodDesc = new UMethodDeclaration();
+                                getMethodDesc.MethodName = getMethodName;
+                                getMethodDesc.GetDisplayNameFunc = tElement.GetMethodDisplayName;
+                                getMethodDesc.ReturnValue = new UVariableDeclaration()
+                                {
+                                    VariableName = "tempReturnValue",
+                                    VariableType = new UTypeReference(info.PropertyDescriptor.PropertyType),
+                                    InitValue = new UDefaultValueExpression(info.PropertyDescriptor.PropertyType),
+                                };
+                                getMethodDesc.Arguments.Add(new UMethodArgumentDeclaration()
+                                {
+                                    VariableName = "obj", 
+                                    VariableType = new UTypeReference(typeof(IBindableObject)),
+                                });
+                                getMethodDesc.Arguments.Add(new UMethodArgumentDeclaration()
+                                {
+                                    VariableName = "prop",
+                                    VariableType = new UTypeReference(typeof(TtBindableProperty)),
+                                });
+                                var getGraph = host.HostEditor.UIAsset.MacrossEditor.AddMethod(getMethodDesc);
+                                tElement.SetPropertyBindMethod(info.PropertyDescriptor.Name, getMethodDesc, false);
+                                host.HostEditor.UIAsset.MacrossEditor.OpenMethodGraph(getGraph);
+                            }
+                            // -------------------------------------------------------
+                            var bdMethod = new TtUIElement.BindingData_Method()
+                            {
                                 Target = bindTarget,
-                                Mode = mSelectedMode,
-                            });
-                            switch(mSelectedMode)
+                                Mode = curMode,
+                            };
+                            tElement.BindingDatas[info.PropertyDescriptor.Name] = bdMethod;
+                            switch (curMode)
                             {
-                                case EBindingMode.Default:
                                 case EBindingMode.TwoWay:
                                     {
-                                        var setMethodName = tElement.GetPropertyBindMethodName(info.PropertyDescriptor.Name, true);
-                                        var setMethodDesc = new UMethodDeclaration();
-                                        setMethodDesc.MethodName = setMethodName;
-                                        setMethodDesc.GetDisplayNameFunc = tElement.GetMethodDisplayName;
-                                        setMethodDesc.Arguments.Add(new UMethodArgumentDeclaration()
-                                        {
-                                            VariableName = "valueIn",
-                                            VariableType = new UTypeReference(info.PropertyDescriptor.PropertyType),
-                                        });
-                                        var setGraph = host.HostEditor.UIAsset.MacrossEditor.AddMethod(setMethodDesc);
-                                        tElement.SetPropertyBindMethod(info.PropertyDescriptor.Name, setMethodDesc, true);
-                                        host.HostEditor.UIAsset.MacrossEditor.OpenMethodGraph(setGraph);
+                                        bdMethod.SetMethodName = tElement.GetPropertyBindMethodName(info.PropertyDescriptor.Name, true);
+                                        bdMethod.GetMethodName = tElement.GetPropertyBindMethodName(info.PropertyDescriptor.Name, false);
 
-                                        var getMethodName = tElement.GetPropertyBindMethodName(info.PropertyDescriptor.Name, false);
-                                        var getMethodDesc = new UMethodDeclaration();
-                                        getMethodDesc.MethodName = getMethodName;
-                                        getMethodDesc.GetDisplayNameFunc = tElement.GetMethodDisplayName;
-                                        getMethodDesc.ReturnValue = new UVariableDeclaration()
-                                        {
-                                            VariableType = new UTypeReference(info.PropertyDescriptor.PropertyType),
-                                        };
-                                        var getGraph = host.HostEditor.UIAsset.MacrossEditor.AddMethod(getMethodDesc);
-                                        tElement.SetPropertyBindMethod(info.PropertyDescriptor.Name, getMethodDesc, true);
-                                        
-                                        host.HostEditor.DrawType = TtUIEditor.enDrawType.Macross;
+                                        ConfigSetMethod(info);
+                                        ConfigGetMethod(info); 
                                     }
                                     break;
                                 case EBindingMode.OneWay:
+                                case EBindingMode.OneTime:
                                     {
-
+                                        // update target property when source changed
+                                        bdMethod.GetMethodName = tElement.GetPropertyBindMethodName(info.PropertyDescriptor.Name, false);
+                                        ConfigGetMethod(info);
                                     }
                                     break;
                                 case EBindingMode.OneWayToSource:
                                     {
-
+                                        // update source property when target changed
+                                        bdMethod.SetMethodName = tElement.GetPropertyBindMethodName(info.PropertyDescriptor.Name, true);
+                                        ConfigSetMethod(info);
                                     }
                                     break;
                             }
+                            host.HostEditor.DrawType = TtUIEditor.enDrawType.Macross;
+                            mBindedDataDirty = true;
                         }
                         ImGuiAPI.CloseCurrentPopup();
                     }
                     if (ImGuiAPI.TreeNodeEx("Self", ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_SpanFullWidth))
                     {
+                        int idx = 0;
+                        foreach(var pro in host.HostEditor.UIAsset.MacrossEditor.DefClass.Properties)
+                        {
+                            if (!pro.DisplayName.ToLower().Contains(mBindPopFilterString))
+                                continue;
+                            if (pro.VariableType.TypeDesc != info.PropertyDescriptor.PropertyType)
+                                continue;
+                            // todo: 判断是否本类
+                            ImGuiAPI.TreeNodeEx(pro.DisplayName + "##" + idx++, ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_SpanFullWidth | ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_Bullet);
+                            if(ImGuiAPI.IsItemClicked(ImGuiMouseButton_.ImGuiMouseButton_Left))
+                            {
+                                DeleteBind(info.PropertyDescriptor.Name, host);
+                                for(int i=0; i<mBindingTargets.Count; i++)
+                                {
+                                    var tElement = mBindingTargets[i] as TtUIElement;
+                                    if(tElement != null)
+                                    {
+                                        var bindTarget = new TtUIElement.UIBindingData_Element()
+                                        {
+                                            PropertyName = info.PropertyDescriptor.Name,
+                                            PropertyType = info.PropertyDescriptor.PropertyType,
+                                            Id = tElement.Id,
+                                        };
+                                        var curMode = mSelectedMode;
+                                        var tBp = tElement.FindBindableProperty(info.PropertyDescriptor.Name);
+                                        if (tBp != null && (curMode == EBindingMode.Default))
+                                        {
+                                            curMode = tBp.BindingMode;
+                                        }
+                                        tElement.BindingDatas[info.PropertyDescriptor.Name] = new TtUIElement.BindingData_SelfProperty()
+                                        {
+                                            Target = bindTarget,
+                                            PropertyName = pro.VariableName,
+                                            Mode = curMode,
+                                        };
+                                        mBindedDataDirty = true;
+                                    }
+                                }
+                                ImGuiAPI.CloseCurrentPopup();
+                            }
+                            ImGuiAPI.TreePop();
+                        }
 
                         ImGuiAPI.TreePop();
                     }
@@ -548,11 +662,12 @@ namespace EngineNS.UI.Bind
             ImGuiAPI.TreeNodeEx(name + "##" + data.Idx, ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_SpanFullWidth | ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_Bullet);
             if(ImGuiAPI.IsItemClicked(ImGuiMouseButton_.ImGuiMouseButton_Left))
             {
-                IUIBindingDataBase bindSource = null;
+                DeleteBind(data.TargetName, data.Host);
+                TtUIElement.UIBindingData_Element bindSource = null;
                 var element = data.SourceObject as TtUIElement;
                 if (element != null)
                 {
-                    bindSource = new UIBindingData_Element()
+                    bindSource = new TtUIElement.UIBindingData_Element()
                     {
                         PropertyName = name,
                         PropertyType = bp.PropertyType,
@@ -564,19 +679,24 @@ namespace EngineNS.UI.Bind
                     var tElement = data.TargetObjects[i] as TtUIElement;
                     if(tElement != null)
                     {
-                        var bindTarget = new UIBindingData_Element()
+                        var bindTarget = new TtUIElement.UIBindingData_Element()
                         {
                             PropertyName = data.TargetName,
                             PropertyType = data.TargetType,
                             Id = tElement.Id,
                         };
-                        data.Host.EditorOnlyData.ClearTargetBindData(tElement, data.TargetName);
-                        data.Host.EditorOnlyData.BindingDatas.Add(new EditorOnlyData.BindingData()
+                        var curMode = mSelectedMode;
+                        var tBp = tElement.FindBindableProperty(data.TargetName);
+                        if(tBp != null && (curMode == EBindingMode.Default))
+                        {
+                            curMode = tBp.BindingMode;
+                        }
+                        tElement.BindingDatas[data.TargetName] = new TtUIElement.BindingData_Property()
                         {
                             Source = bindSource,
                             Target = bindTarget,
-                            Mode = mSelectedMode,
-                        });
+                            Mode = curMode,
+                        };
                         mBindedDataDirty = true;
                     }
                 }
@@ -609,7 +729,7 @@ namespace EngineNS.UI.Bind
             var data = new TourPropertiesData()
             {
                 Idx = idx,
-                Filter = filter.ToLower(),
+                Filter = filter,
                 TargetType = info.PropertyDescriptor.PropertyType,
                 SourceObject = element,
                 TargetObjects = mBindingTargets,
@@ -891,6 +1011,11 @@ namespace EngineNS.UI.Bind
         public void AddAttachedProperty<T>(TtBindableProperty property, IBindableObject bpHost, in T defaultValue);
         public TtBindableProperty FindBindableProperty(string propertyName);
         public bool HasBinded(EngineNS.UI.Bind.TtBindableProperty bp);
+
+        public void SetTemplateValue(TtTemplateSimpleValue simpleValue);
+        public bool IsMatchTriggerCondition<T>(TtTriggerConditionLogical<T> triggerCondition);
+        public void SetFromTriggerSimpleValue<T>(TtTriggerSimpleValue<T> triggerSimpleValue);
+        public void RestoreFromTriggerSimpleValue<T>(TtTriggerSimpleValue<T> triggerSimpleValue);
 #nullable disable
     }
     public class TtBindableObject : IBindableObject, IPropertyCustomization
@@ -1119,6 +1244,74 @@ namespace EngineNS.UI.Bind
             lock(mBindExprDic)
             {
                 return mBindExprDic.ContainsKey(bp);
+            }
+        }
+
+        public void SetTemplateValue(TtTemplateSimpleValue simpleValue)
+        {
+            var objType = this.GetType();
+            if ((simpleValue.Property.HostType.IsEqual(objType) || simpleValue.Property.HostType.IsParentClass(objType)) && !simpleValue.Property.IsAttachedProperty)
+            {
+                var prop = objType.GetProperty(simpleValue.Property.Name);
+                if (prop == null)
+                    return;
+                else
+                    prop.SetValue(this, simpleValue.Value);
+            }
+            else
+            {
+                this.SetValue(simpleValue.Value, simpleValue.Property);
+            }
+        }
+
+        public bool IsMatchTriggerCondition<T>(TtTriggerConditionLogical<T> triggerCondition)
+        {
+            switch (triggerCondition.Op)
+            {
+                case TtTriggerConditionLogical<T>.ELogicalOperation.Equal:
+                    return EqualityComparer<T>.Default.Equals(triggerCondition.Value.GetValue<T>(), this.GetValue<T>(triggerCondition.Property));
+                case TtTriggerConditionLogical<T>.ELogicalOperation.NotEqual:
+                    return !EqualityComparer<T>.Default.Equals(triggerCondition.Value.GetValue<T>(), this.GetValue<T>(triggerCondition.Property));
+            }
+            return false;
+        }
+
+        public void SetFromTriggerSimpleValue<T>(TtTriggerSimpleValue<T> triggerSimpleValue)
+        {
+            var objType = this.GetType();
+            if (triggerSimpleValue.Property.IsAttachedProperty)
+            {
+                triggerSimpleValue.OldValueStore.SetValue(this.GetValue<T>(triggerSimpleValue.Property));
+                this.SetValue(triggerSimpleValue.ValueStore.GetValue<T>(), triggerSimpleValue.Property);
+            }
+            else if (triggerSimpleValue.Property.HostType.IsEqual(objType) || triggerSimpleValue.Property.HostType.IsParentClass(objType))
+            {
+                var prop = this.GetType().GetProperty(triggerSimpleValue.Property.Name);
+                triggerSimpleValue.OldValueStore.SetValue((T)prop.GetValue(this));
+                prop.SetValue(this, triggerSimpleValue.ValueStore.GetValue<T>());
+            }
+            else
+            {
+                triggerSimpleValue.OldValueStore.SetValue(this.GetValue<T>(triggerSimpleValue.Property));
+                this.SetValue(triggerSimpleValue.ValueStore.GetValue<T>(), triggerSimpleValue.Property);
+            }
+        }
+
+        public void RestoreFromTriggerSimpleValue<T>(TtTriggerSimpleValue<T> triggerSimpleValue)
+        {
+            var objType = this.GetType();
+            if (triggerSimpleValue.Property.IsAttachedProperty)
+            {
+                this.SetValue(triggerSimpleValue.OldValueStore.GetValue<T>(), triggerSimpleValue.Property);
+            }
+            else if (triggerSimpleValue.Property.HostType.IsEqual(objType) || triggerSimpleValue.Property.HostType.IsParentClass(objType))
+            {
+                var prop = this.GetType().GetProperty(triggerSimpleValue.Property.Name);
+                prop.SetValue(this, triggerSimpleValue.OldValueStore.GetValue<T>());
+            }
+            else
+            {
+                this.SetValue(triggerSimpleValue.OldValueStore.GetValue<T>(), triggerSimpleValue.Property);
             }
         }
     }

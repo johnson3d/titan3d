@@ -410,7 +410,7 @@ namespace EngineNS.Bricks.Terrain.CDLOD
 
             tempArray.Dispose();
         }
-        public void AddGrass(in DVector3 patchOffset, UTerrainGrass grass, Procedure.UBufferConponent weights, float weightMin, float weightMax)
+        public void AddGrass(in DVector3 patchOffset, UTerrainGrass grass, Procedure.UBufferComponent weights, float weightMin, float weightMax)
         {
             var patchSize = mHostPatch.Level.GetTerrainNode().PatchSize;
             var weightStride = (int)Math.Ceiling(patchSize);

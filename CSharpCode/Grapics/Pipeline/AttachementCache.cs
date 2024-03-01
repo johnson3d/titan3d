@@ -18,23 +18,23 @@ namespace EngineNS.Graphics.Pipeline
 
             CachedAttachments.Clear();
         }
-        public Dictionary<FHashText, UAttachBuffer> CachedAttachments = new Dictionary<FHashText, UAttachBuffer>();
-        public UAttachBuffer FindAttachement(TtRenderGraphPin pin)
+        public Dictionary<FHashText, TtAttachBuffer> CachedAttachments = new Dictionary<FHashText, TtAttachBuffer>();
+        public TtAttachBuffer FindAttachement(TtRenderGraphPin pin)
         {
             return FindAttachement(pin.Attachement.AttachmentName);
         }
-        public UAttachBuffer FindAttachement(in FHashText name)
+        public TtAttachBuffer FindAttachement(in FHashText name)
         {
-            UAttachBuffer result;
+            TtAttachBuffer result;
             if (CachedAttachments.TryGetValue(name, out result))
             {
                 return result;
             }
             return null;
         }
-        public UAttachBuffer GetAttachement(in FHashText name, UAttachmentDesc desc)
+        public TtAttachBuffer GetAttachement(in FHashText name, TtAttachmentDesc desc)
         {
-            UAttachBuffer result;
+            TtAttachBuffer result;
             if (CachedAttachments.TryGetValue(name, out result))
             {
                 //System.Diagnostics.Debug.Assert(result.BufferDesc.IsMatchSize(in desc.BufferDesc));
@@ -49,19 +49,19 @@ namespace EngineNS.Graphics.Pipeline
                 return result;
             }
         }
-        public UAttachBuffer ImportAttachment(TtRenderGraphPin pin)
+        public TtAttachBuffer ImportAttachment(TtRenderGraphPin pin)
         {
-            UAttachBuffer result;
+            TtAttachBuffer result;
             if (CachedAttachments.TryGetValue(pin.Attachement.AttachmentName, out result))
                 return result;
-            result = new UAttachBuffer();
-            result.LifeMode = UAttachBuffer.ELifeMode.Imported;
+            result = new TtAttachBuffer();
+            result.LifeMode = TtAttachBuffer.ELifeMode.Imported;
             CachedAttachments.Add(pin.Attachement.AttachmentName, result);
             return result;
         }
         public bool MoveAttachement(in FHashText from, in FHashText to)
         {
-            UAttachBuffer attachment;
+            TtAttachBuffer attachment;
             if (CachedAttachments.TryGetValue(from, out attachment))
             {
                 CachedAttachments.Remove(from);
@@ -72,7 +72,7 @@ namespace EngineNS.Graphics.Pipeline
         }
         public void RemoveAttachement(in FHashText name)
         {
-            UAttachBuffer result;
+            TtAttachBuffer result;
             if (CachedAttachments.TryGetValue(name, out result))
             {
                 result.FreeBuffer();

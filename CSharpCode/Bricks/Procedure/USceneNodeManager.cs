@@ -125,7 +125,7 @@ namespace EngineNS.Bricks.Procedure
             }
             mNodes.Clear();
         }
-        public bool UpdatePgcSceneNodes(UBufferConponent buffer, GamePlay.Scene.UNode node)
+        public bool UpdatePgcSceneNodes(UBufferComponent buffer, GamePlay.Scene.UNode node)
         {
             if (buffer.BufferCreator.ElementType != Rtti.UTypeDesc.TypeOf(typeof(PgcSpawnSceneNodeDesc)))
                 return false;

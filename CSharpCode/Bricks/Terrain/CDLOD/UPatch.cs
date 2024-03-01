@@ -145,7 +145,7 @@ namespace EngineNS.Bricks.Terrain.CDLOD
             }
             CoreSDK.DisposeObject(ref GrassManager);
         }
-        public void Initialize(UTerrainLevelData level, int x, int z, Bricks.Procedure.UBufferConponent HeightMap)
+        public void Initialize(UTerrainLevelData level, int x, int z, Bricks.Procedure.UBufferComponent HeightMap)
         {
             Level = level;
 

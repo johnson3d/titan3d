@@ -495,7 +495,7 @@ namespace EngineNS.Bricks.Procedure.Node
             public int NumOfLowWater = 0;
         }
 
-        private Vector2i DoPixel(int x, int y, UBufferConponent curHMap, FPixelWater[,] PixelWaters, UProcedureProfiler profiler)
+        private Vector2i DoPixel(int x, int y, UBufferComponent curHMap, FPixelWater[,] PixelWaters, UProcedureProfiler profiler)
         {
             ref var center = ref curHMap.GetPixel<Vector2>(x, y, 0);
             if (center.Y <= 0)
@@ -549,7 +549,7 @@ namespace EngineNS.Bricks.Procedure.Node
             var velocity = graph.BufferCache.FindBuffer(VelocityPin);
 
             var opMapCreator = UBufferCreator.CreateInstance<USuperBuffer<Vector2, FFloat2Operator>>(height.Width, height.Height, height.Depth); ;
-            var curHMap = UBufferConponent.CreateInstance(opMapCreator);            
+            var curHMap = UBufferComponent.CreateInstance(opMapCreator);            
             curHMap.DispatchPixels((result, x, y, z) =>
             {
                 Vector2 tmp;
@@ -801,7 +801,7 @@ namespace EngineNS.Bricks.Procedure.Node
             }
             OnPositionChanged();
         }
-        public override UBufferConponent GetResultBuffer(int index)
+        public override UBufferComponent GetResultBuffer(int index)
         {
             if (index < 0 || index >= Inputs.Count)
                 return null;

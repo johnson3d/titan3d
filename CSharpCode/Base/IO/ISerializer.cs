@@ -319,6 +319,20 @@ namespace EngineNS.IO
                     ar.Write(v.Name);
                 }
             }
+            else if(t == typeof(Rtti.UTypeDesc))
+            {
+                var v = (Rtti.UTypeDesc)obj;
+                if(v == null)
+                {
+                    ar.Write(true);
+                }
+                else
+                {
+                    ar.Write(false);
+                    var typeStr = Rtti.UTypeDescManager.Instance.GetTypeStringFromType(v);
+                    ar.Write(typeStr);
+                }
+            }
             else if (t.GetInterface(nameof(ISerializer)) != null)
             {
                 Write(ar, obj as ISerializer, null);
@@ -493,6 +507,18 @@ namespace EngineNS.IO
                 {
                     return null;
                 }
+            }
+            else if(t == typeof(Rtti.UTypeDesc))
+            {
+                bool isNull;
+                ar.Read(out isNull);
+                if(!isNull)
+                {
+                    string typeStr;
+                    ar.Read(out typeStr);
+                    return Rtti.UTypeDesc.TypeOf(typeStr);
+                }
+                return null;
             }
             else if (t.GetInterface(nameof(ISerializer)) != null)
             {

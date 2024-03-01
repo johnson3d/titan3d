@@ -25,7 +25,7 @@ namespace EngineNS.Graphics.Pipeline
             }
             GraphNodes.Clear();
         }
-        public Common.UCopy2SwapChainNode RootNode { get; set; }
+        public Common.TtEndingNode RootNode { get; set; }
         public Dictionary<Guid, TtRenderGraphNode> GraphNodes { get; } = new Dictionary<Guid, TtRenderGraphNode>();
         public List<TtRenderGraphNode>[] NodeLayers;
         public List<TtRenderGraphLinker> Linkers { get; } = new List<TtRenderGraphLinker>();
@@ -56,12 +56,20 @@ namespace EngineNS.Graphics.Pipeline
             }
             return null;
         }
-        public T FindNode<T>(string name) where T : TtRenderGraphNode
+        public T FindNode<T>(string name, bool bInherit = false) where T : TtRenderGraphNode
         {
             foreach(var node in GraphNodes.Values)
             {
-                if (node.GetType() != typeof(T))
-                    continue;
+                if (bInherit)
+                {
+                    if (node.GetType() != typeof(T) && !node.GetType().IsSubclassOf(typeof(T)))
+                        continue;
+                }
+                else
+                {
+                    if (node.GetType() != typeof(T))
+                        continue;
+                }
                 if (node.Name == name)
                     return node as T;
             }
@@ -297,7 +305,7 @@ namespace EngineNS.Graphics.Pipeline
             }
         }
         private List<TtRenderGraphLinker> mTempTryReleaseLinkers = new List<TtRenderGraphLinker>();
-        public virtual void TickLogic(GamePlay.UWorld world)
+        public virtual void TickLogic(GamePlay.UWorld world, Action<TtRenderGraphNode, TtRenderGraphPin, TtAttachBuffer> onRemove)
         {
             //FrameBuild();
 
@@ -317,7 +325,7 @@ namespace EngineNS.Graphics.Pipeline
 
                             j.TickLogic(world, (URenderPolicy)this, true);
 
-                            j.TryReleaseBufers(mTempTryReleaseLinkers);
+                            j.TryReleaseBufers(mTempTryReleaseLinkers, onRemove);
 
                             //int NunOfRefZero = 0; 
                             //foreach (var ca in this.AttachmentCache.CachedAttachments)

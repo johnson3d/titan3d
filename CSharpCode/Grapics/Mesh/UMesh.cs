@@ -208,7 +208,7 @@ namespace EngineNS.Graphics.Mesh
                     }
                 }
                 internal int State = 0;
-                public WeakReference<Pipeline.UGraphicsBuffers.UTargetViewIdentifier> TargetView;
+                public WeakReference<Pipeline.TtGraphicsBuffers.TtTargetViewIdentifier> TargetView;
                 public NxRHI.UGraphicDraw DrawCalls;
                 //不同的View上可以有不同的渲染策略，同一个模型，可以渲染在不同视口上，比如装备预览的策略可以和GameView不一样
                 public Pipeline.URenderPolicy Policy;                
@@ -321,13 +321,13 @@ namespace EngineNS.Graphics.Mesh
                     TargetViews = null;
                 }
             }            
-            private ViewDrawCalls GetOrCreateDrawCalls(Pipeline.UGraphicsBuffers.UTargetViewIdentifier id, Pipeline.URenderPolicy policy)
+            private ViewDrawCalls GetOrCreateDrawCalls(Pipeline.TtGraphicsBuffers.TtTargetViewIdentifier id, Pipeline.URenderPolicy policy)
             {
                 ViewDrawCalls drawCalls = null;
                 //查找或者缓存TargetView
                 for (int i = 0; i < TargetViews.Count; i++)
                 {
-                    Pipeline.UGraphicsBuffers.UTargetViewIdentifier identifier;
+                    Pipeline.TtGraphicsBuffers.TtTargetViewIdentifier identifier;
                     if (TargetViews[i].TargetView.TryGetTarget(out identifier) == false)
                     {//多开的窗口已经关闭
                         TargetViews[i].Dispose();
@@ -344,7 +344,7 @@ namespace EngineNS.Graphics.Mesh
                 if (drawCalls == null)
                 {
                     drawCalls = new ViewDrawCalls();
-                    drawCalls.TargetView = new WeakReference<Pipeline.UGraphicsBuffers.UTargetViewIdentifier>(id);
+                    drawCalls.TargetView = new WeakReference<Pipeline.TtGraphicsBuffers.TtTargetViewIdentifier>(id);
                     drawCalls.Policy = policy;
                     TargetViews.Add(drawCalls);
                 }
@@ -352,7 +352,7 @@ namespace EngineNS.Graphics.Mesh
             }
             [ThreadStatic]
             private static Profiler.TimeScope ScopeOnDrawCall = Profiler.TimeScopeManager.GetTimeScope(typeof(TtAtom), "OnDrawCall");
-            public unsafe virtual NxRHI.UGraphicDraw GetDrawCall(NxRHI.ICommandList cmd, Pipeline.UGraphicsBuffers targetView, Pipeline.URenderPolicy policy,
+            public unsafe virtual NxRHI.UGraphicDraw GetDrawCall(NxRHI.ICommandList cmd, Pipeline.TtGraphicsBuffers targetView, Pipeline.URenderPolicy policy,
                 Pipeline.TtRenderGraphNode node)
             {
                 if (Material == null)

@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Root Type="EngineNS.Bricks.RenderPolicyEditor.UPolicyGraph@EngineCore">
+  <AssetName Type="EngineNS.RName@EngineCore" Value="Game,tutorials/terrain/pgcerosion.rpolicy,f14a4349-6779-4c09-9dbb-cf23ed5f8cdf" />
+  <GraphName Type="System.String@Unknown" Value="NodeGraph" />
+  <Nodes Type="System.Collections.Generic.List&lt;EngineNS.Bricks.NodeGraph.UNodeBase@EngineCore,&gt;@Unknown" Count="2">
+    <e_0 Type="EngineNS.Bricks.RenderPolicyEditor.UPolicyNode@EngineCore">
+      <GraphNodeTypeString Type="System.String@Unknown" Value="EngineNS.Bricks.Procedure.Node.TtErosionIncWaterNode@EngineCore" />
+      <Label Type="System.String@Unknown" Value="ErosionIncWater" />
+      <Name Type="System.String@Unknown" Value="ErosionIncWater" />
+      <NodeId Type="System.Guid@Unknown" Value="a6ab04dd-ecaa-44b8-a648-7727f69c92a8" />
+      <Position Type="EngineNS.Vector2@EngineCore" Value="443,234.99998" />
+      <GraphNode Type="EngineNS.Bricks.Procedure.Node.TtErosionIncWaterNode@EngineCore" />
+      <InputEditableValues Type="System.Collections.Generic.List&lt;EngineNS.Bricks.NodeGraph.UNodeBase.UInputEditableValueInfo@EngineCore,&gt;@Unknown" Count="0" />
+    </e_0>
+    <e_1 Type="EngineNS.Bricks.RenderPolicyEditor.UPolicyNode@EngineCore">
+      <GraphNodeTypeString Type="System.String@Unknown" Value="EngineNS.Bricks.Procedure.Node.TtErosionEndingNode@EngineCore" />
+      <Label Type="System.String@Unknown" Value="ErosionEndingNode" />
+      <Name Type="System.String@Unknown" Value="ErosionEndingNode" />
+      <NodeId Type="System.Guid@Unknown" Value="8ad9f4fa-8a48-4ef8-aa46-d46354176e2a" />
+      <Position Type="EngineNS.Vector2@EngineCore" Value="795,276" />
+      <GraphNode Type="EngineNS.Bricks.Procedure.Node.TtErosionEndingNode@EngineCore" />
+      <InputEditableValues Type="System.Collections.Generic.List&lt;EngineNS.Bricks.NodeGraph.UNodeBase.UInputEditableValueInfo@EngineCore,&gt;@Unknown" Count="0" />
+    </e_1>
+  </Nodes>
+  <PolicyType Type="EngineNS.Rtti.UTypeDesc@EngineCore" Value="EngineNS.Graphics.Pipeline.UDeferredPolicyBase@EngineCore" />
+  <RenderPolicy Type="EngineNS.Graphics.Pipeline.UDeferredPolicyBase@EngineCore">
+    <DisableAO Type="System.Boolean@Unknown" Value="False" />
+    <DisableHDR Type="System.Boolean@Unknown" Value="False" />
+    <DisablePointLight Type="System.Boolean@Unknown" Value="False" />
+    <DisableShadow Type="System.Boolean@Unknown" Value="False" />
+    <TypeAA Type="EngineNS.Graphics.Pipeline.URenderPolicy.ETypeAA@EngineCore" Value="Taa" />
+    <TypeFog Type="EngineNS.Graphics.Pipeline.URenderPolicy.ETypeFog@EngineCore" Value="None" />
+  </RenderPolicy>
+  <Linkers Type="System.Collections.Generic.List&lt;EngineNS.Bricks.NodeGraph.UPinLinker@EngineCore,&gt;@Unknown" Count="1">
+    <e_0 Type="EngineNS.Bricks.NodeGraph.UPinLinker@EngineCore">
+      <SaveData Type="EngineNS.Bricks.NodeGraph.UPinLinker.TSaveData@EngineCore">
+        <InNodeId Type="System.Guid@Unknown" Value="8ad9f4fa-8a48-4ef8-aa46-d46354176e2a" />
+        <InPinName Type="System.String@Unknown" Value="Height" />
+        <OutNodeId Type="System.Guid@Unknown" Value="a6ab04dd-ecaa-44b8-a648-7727f69c92a8" />
+        <OutPinName Type="System.String@Unknown" Value="Water" />
+      </SaveData>
+    </e_0>
+  </Linkers>
+</Root>

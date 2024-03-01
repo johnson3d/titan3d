@@ -59,7 +59,7 @@ namespace EngineNS.Graphics.Pipeline.Common
 
             mBasePassShading = UEngine.Instance.ShadingEnvManager.GetShadingEnv<TtScreenSpaceUIShading>();
         }
-        public override unsafe UGraphicsBuffers CreateGBuffers(URenderPolicy policy, EPixelFormat format)
+        public override unsafe TtGraphicsBuffers CreateGBuffers(URenderPolicy policy, EPixelFormat format)
         {
             var PassDesc = new NxRHI.FRenderPassDesc();
 

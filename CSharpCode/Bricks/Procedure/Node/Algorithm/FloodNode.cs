@@ -6,7 +6,7 @@ namespace EngineNS.Bricks.Procedure.Algorithm
     {
         const string FlowScatterPath = "FlowScatter";
         const string FlowAtomicPath = "FlowAtomic";
-        public static UBufferConponent GenerateFlood_Scatter(UBufferConponent HeightMap, float water_amount, int step_multiplier)
+        public static UBufferComponent GenerateFlood_Scatter(UBufferComponent HeightMap, float water_amount, int step_multiplier)
         {
             return null;
             //int width = HeightMap.Width;
@@ -64,7 +64,7 @@ namespace EngineNS.Bricks.Procedure.Algorithm
             //tex.Apply();
             //return tex;
         }
-        public static UBufferConponent GenerateFlood_Atomic(UBufferConponent HeightMap, float water_amount, int step_multiplier)
+        public static UBufferComponent GenerateFlood_Atomic(UBufferComponent HeightMap, float water_amount, int step_multiplier)
         {
             return null;
             //int width = HeightMap.width;

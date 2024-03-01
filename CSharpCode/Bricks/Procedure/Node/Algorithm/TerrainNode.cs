@@ -3,12 +3,12 @@ namespace EngineNS.Bricks.Procedure.Algorithm
     public class TerrainNode
     {
         #region MPD Algorithm
-        public static unsafe UBufferConponent GenerateMPD(int exp, float spread = 0.3f, float spread_decay = 0.5f)
+        public static unsafe UBufferComponent GenerateMPD(int exp, float spread = 0.3f, float spread_decay = 0.5f)
         {
             int size = (1 << exp) + 1;
             int count = size * size;
             var creator = UBufferCreator.CreateInstance<USuperBuffer<Vector4, FFloat4Operator>>(size, size, 1);
-            var buffer = UBufferConponent.CreateInstance(creator);
+            var buffer = UBufferComponent.CreateInstance(creator);
             var result = (float*)buffer.GetSuperPixelAddress(0, 0, 0);
             mpd_init_corner(result, size);
             int chunk = 1;

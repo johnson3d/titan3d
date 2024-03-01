@@ -1,4 +1,5 @@
-﻿using EngineNS.UI.Controls;
+﻿using EngineNS.Profiler;
+using EngineNS.UI.Controls;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -10,9 +11,16 @@ namespace EngineNS.UI
         public TtUIElement HostElement;
         public virtual void Initialize()
         {
-            InitializeEvents();
-            InitializeUIElementVariables();
-            InitializeBindings();
+            try
+            {
+                InitializeEvents();
+                InitializeUIElementVariables();
+                InitializeBindings();
+            }
+            catch(System.Exception ex)
+            {
+                Log.WriteException(ex);
+            }
         }
         public virtual void InitializeEvents()
         {

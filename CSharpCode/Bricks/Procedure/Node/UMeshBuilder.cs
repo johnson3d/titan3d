@@ -93,7 +93,7 @@ namespace EngineNS.Bricks.Procedure.Node
                 NunPfTrian += (int)desc.NumPrimitives;
             }
             
-            var idxBuffer = UBufferConponent.CreateInstance(UBufferCreator.CreateInstance<USuperBuffer<Vector3i, FInt3Operator>>(NunPfTrian, 1, 1));
+            var idxBuffer = UBufferComponent.CreateInstance(UBufferCreator.CreateInstance<USuperBuffer<Vector3i, FInt3Operator>>(NunPfTrian, 1, 1));
             
             if (Mesh.GetMeshPrimitives(0).MeshDataProvider.mCoreObject.IsIndex32)
             {
@@ -120,9 +120,9 @@ namespace EngineNS.Bricks.Procedure.Node
                 }
             }
 
-            var posBuffer = UBufferConponent.CreateInstance(UBufferCreator.CreateInstance<USuperBuffer<Vector3, FFloat3Operator>>((int)builder.VertexNumber, 1, 1));
-            var norBuffer = UBufferConponent.CreateInstance(UBufferCreator.CreateInstance<USuperBuffer<Vector3, FFloat3Operator>>((int)builder.VertexNumber, 1, 1));
-            var uvBuffer = UBufferConponent.CreateInstance(UBufferCreator.CreateInstance<USuperBuffer<Vector2, FFloat2Operator>>((int)builder.VertexNumber, 1, 1));
+            var posBuffer = UBufferComponent.CreateInstance(UBufferCreator.CreateInstance<USuperBuffer<Vector3, FFloat3Operator>>((int)builder.VertexNumber, 1, 1));
+            var norBuffer = UBufferComponent.CreateInstance(UBufferCreator.CreateInstance<USuperBuffer<Vector3, FFloat3Operator>>((int)builder.VertexNumber, 1, 1));
+            var uvBuffer = UBufferComponent.CreateInstance(UBufferCreator.CreateInstance<USuperBuffer<Vector2, FFloat2Operator>>((int)builder.VertexNumber, 1, 1));
 
             graph.BufferCache.RegBuffer(IndicesPin, idxBuffer);
             graph.BufferCache.RegBuffer(PosPin, posBuffer);

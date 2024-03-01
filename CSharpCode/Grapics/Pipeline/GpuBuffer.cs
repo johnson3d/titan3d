@@ -1,5 +1,8 @@
-﻿using System;
+﻿using NPOI.SS.Formula.Functions;
+using Org.BouncyCastle.Asn1.X509.Qualified;
+using System;
 using System.Collections.Generic;
+using System.Net;
 using System.Text;
 
 namespace EngineNS.Graphics.Pipeline
@@ -151,7 +154,7 @@ namespace EngineNS.Graphics.Pipeline
             }
         }
     }
-    public class TtGpuBuffer<T> : IDisposable where T : unmanaged
+    public class TtGpuBufferBase : IDisposable
     {
         public NxRHI.UGpuResource GpuResource;
         public NxRHI.UBuffer GpuBuffer
@@ -162,14 +165,14 @@ namespace EngineNS.Graphics.Pipeline
         {
             get => GpuResource as NxRHI.UTexture;
         }
-        public uint NumElement { get; private set; }
+        public uint NumElement { get; protected set; }
         public NxRHI.UUaView Uav;
         public NxRHI.USrView Srv;
         public NxRHI.UCbView Cbv;
         public NxRHI.URenderTargetView Rtv;
         public NxRHI.UDepthStencilView Dsv;
-        
-        ~TtGpuBuffer()
+
+        ~TtGpuBufferBase()
         {
             Dispose();
         }
@@ -180,46 +183,105 @@ namespace EngineNS.Graphics.Pipeline
             CoreSDK.DisposeObject(ref Cbv);
             CoreSDK.DisposeObject(ref Rtv);
             CoreSDK.DisposeObject(ref Dsv);
-            
+
             CoreSDK.DisposeObject(ref GpuResource);
         }
-        public unsafe void SetSize(uint Count, void* pInitData, NxRHI.EBufferType bufferType)
+        public virtual unsafe void SetSize(uint Count, void* pInitData, NxRHI.EBufferType bufferType)
         {
-            Dispose();
 
+        }
+        public virtual unsafe void SetTexture2D(uint width, uint height, void* pInitData, NxRHI.EBufferType bufferType)
+        {
+
+        }
+    }
+
+    public class TtGpuBuffer<T> : TtGpuBufferBase where T : unmanaged
+    {
+        public override unsafe void SetSize(uint Count, void* pInitData, NxRHI.EBufferType bufferType)
+        {
+            var bfDesc = new NxRHI.FBufferDesc();
             bool isRaw = false;
             if (typeof(T) == typeof(uint) || typeof(T) == typeof(int) || typeof(T) == typeof(float))
             {
                 isRaw = true;
             }
+            //if (GpuResource == null)
+            {
+                Dispose();
 
-            NumElement = Count;
+                NumElement = Count;
 
-            var bfDesc = new NxRHI.FBufferDesc();
-            bfDesc.SetDefault(isRaw, bufferType);
-            bfDesc.Size = (uint)sizeof(T) * Count;
-            bfDesc.StructureStride = (uint)sizeof(T);
-            bfDesc.InitData = pInitData;
-            bfDesc.Type = bufferType;
+                bfDesc.SetDefault(isRaw, bufferType);
+                bfDesc.Size = (uint)sizeof(T) * Count;
+                bfDesc.StructureStride = (uint)sizeof(T);
+                bfDesc.InitData = pInitData;
+                bfDesc.Type = bufferType;
 
-            GpuResource = UEngine.Instance.GfxDevice.RenderContext.CreateBuffer(in bfDesc);
+                GpuResource = UEngine.Instance.GfxDevice.RenderContext.CreateBuffer(in bfDesc);
+
+                if ((bufferType & NxRHI.EBufferType.BFT_UAV) != 0)
+                {
+                    var uavDesc = new NxRHI.FUavDesc();
+                    uavDesc.SetBuffer(isRaw);
+                    uavDesc.Buffer.NumElements = (uint)Count;
+                    uavDesc.Buffer.StructureByteStride = bfDesc.StructureStride;
+                    Uav = UEngine.Instance.GfxDevice.RenderContext.CreateUAV(GpuBuffer, in uavDesc);
+                }
+
+                if ((bufferType & NxRHI.EBufferType.BFT_SRV) != 0)
+                {
+                    var srvDesc = new NxRHI.FSrvDesc();
+                    srvDesc.SetBuffer(isRaw);
+                    srvDesc.Buffer.NumElements = (uint)Count;
+                    srvDesc.Buffer.StructureByteStride = bfDesc.StructureStride;
+                    Srv = UEngine.Instance.GfxDevice.RenderContext.CreateSRV(GpuBuffer, in srvDesc);
+                }
+            }
+        }
+        public override unsafe void SetTexture2D(uint width, uint height, void* pInitData, NxRHI.EBufferType bufferType)
+        {
+            Dispose();
+
+            NumElement = width * height;
+
+            var desc = new NxRHI.FTextureDesc();
+            desc.SetDefault();
+            desc.Usage = NxRHI.EGpuUsage.USAGE_DEFAULT;
+            desc.BindFlags = NxRHI.EBufferType.BFT_SRV | NxRHI.EBufferType.BFT_UAV;
+            desc.Width = width;
+            desc.Height = height;
+            desc.MipLevels = 1;
+            var initData = new NxRHI.FMappedSubResource();
+            initData.SetDefault();
+            desc.InitData = &initData;
+            
+            if (typeof(T) == typeof(float))
+            {
+                desc.Format = EPixelFormat.PXF_R32_FLOAT;
+                initData.m_RowPitch = desc.Width * (uint)sizeof(float);
+            }
+
+            initData.pData = pInitData;
+            GpuResource = UEngine.Instance.GfxDevice.RenderContext.CreateTexture(in desc);
 
             if ((bufferType & NxRHI.EBufferType.BFT_UAV) != 0)
             {
                 var uavDesc = new NxRHI.FUavDesc();
-                uavDesc.SetBuffer(isRaw);
-                uavDesc.Buffer.NumElements = (uint)Count;
-                uavDesc.Buffer.StructureByteStride = bfDesc.StructureStride;
-                Uav = UEngine.Instance.GfxDevice.RenderContext.CreateUAV(GpuBuffer, in uavDesc);
+                uavDesc.SetTexture2D();
+                uavDesc.Format = desc.Format;
+                //uavDesc.Texture2D.MipSlice = desc.MipLevels;
+                Uav = UEngine.Instance.GfxDevice.RenderContext.CreateUAV(GpuTexture, in uavDesc);
             }
 
             if ((bufferType & NxRHI.EBufferType.BFT_SRV) != 0)
             {
-                var srvDesc = new NxRHI.FSrvDesc();
-                srvDesc.SetBuffer(isRaw);
-                srvDesc.Buffer.NumElements = (uint)Count;
-                srvDesc.Buffer.StructureByteStride = bfDesc.StructureStride;
-                Srv = UEngine.Instance.GfxDevice.RenderContext.CreateSRV(GpuBuffer, in srvDesc);
+                var rsvDesc = new NxRHI.FSrvDesc();
+                rsvDesc.SetTexture2D();
+                rsvDesc.Type = NxRHI.ESrvType.ST_Texture2D;
+                rsvDesc.Format = desc.Format;
+                rsvDesc.Texture2D.MipLevels = desc.MipLevels;
+                Srv = UEngine.Instance.GfxDevice.RenderContext.CreateSRV(GpuTexture, in rsvDesc);
             }
         }
     }

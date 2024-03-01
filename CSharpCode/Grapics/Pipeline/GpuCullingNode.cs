@@ -123,7 +123,7 @@ namespace EngineNS.Graphics.Pipeline
             AddInput(VisiblesPinIn, NxRHI.EBufferType.BFT_NONE);
             AddInput(HzbPinIn, NxRHI.EBufferType.BFT_SRV | NxRHI.EBufferType.BFT_DSV);
             
-            GpuCullOut.LifeMode = UAttachBuffer.ELifeMode.Imported;
+            GpuCullOut.LifeMode = TtAttachBuffer.ELifeMode.Imported;
             AddOutput(GpuCullOut, NxRHI.EBufferType.BFT_NONE);
         }
         public Shader.UGraphicsShadingEnv mOpaqueShading;
@@ -236,7 +236,7 @@ namespace EngineNS.Graphics.Pipeline
                 }
             }   
         }
-        public void Commit(URenderPolicy policy, NxRHI.UCommandList cmd, UGraphicsBuffers GBuffers)
+        public void Commit(URenderPolicy policy, NxRHI.UCommandList cmd, TtGraphicsBuffers GBuffers)
         {
             var camera = policy.DefaultCamera;//CpuCullNode.VisParameter.CullCamera;
             foreach (var i in TerrainMeshBatches.Values)

@@ -125,7 +125,7 @@ namespace EngineNS.Graphics.Pipeline.Deferred
                 CpuCullNode = linker.OutPin.GetNakedHostNode<TtCpuCullingNode>();
             }
         }
-        public virtual unsafe UGraphicsBuffers CreateGBuffers(URenderPolicy policy, EPixelFormat format)
+        public virtual unsafe TtGraphicsBuffers CreateGBuffers(URenderPolicy policy, EPixelFormat format)
         {
             var PassDesc = new NxRHI.FRenderPassDesc();
 
@@ -278,7 +278,7 @@ namespace EngineNS.Graphics.Pipeline.Deferred
         public NxRHI.URenderPass GizmosRenderPass;
 
         public NxRHI.URenderPass WithDepthRenderPass;
-        public UGraphicsBuffers WithDepthGBuffers { get; protected set; } = new UGraphicsBuffers();
+        public TtGraphicsBuffers WithDepthGBuffers { get; protected set; } = new TtGraphicsBuffers();
         public TtGizmosNode()
         {
             Name = "GizmosNode";
@@ -310,7 +310,7 @@ namespace EngineNS.Graphics.Pipeline.Deferred
                 CpuCullNode = linker.OutPin.GetNakedHostNode<TtCpuCullingNode>();
             }
         }
-        public virtual unsafe UGraphicsBuffers CreateGBuffers(URenderPolicy policy, EPixelFormat format)
+        public virtual unsafe TtGraphicsBuffers CreateGBuffers(URenderPolicy policy, EPixelFormat format)
         {
             var rc = UEngine.Instance.GfxDevice.RenderContext;
             {

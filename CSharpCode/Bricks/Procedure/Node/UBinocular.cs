@@ -8,8 +8,8 @@ namespace EngineNS.Bricks.Procedure.Node
     public class ULeftRightBuffer
     {
         public USuperBuffer<sbyte, FSByteOperator> Mask;
-        public UBufferConponent Left;
-        public UBufferConponent Right;
+        public UBufferComponent Left;
+        public UBufferComponent Right;
         public Rtti.UTypeDesc ResultType;
         public Rtti.UTypeDesc LeftType;
         public Rtti.UTypeDesc RightType;
@@ -184,7 +184,7 @@ namespace EngineNS.Bricks.Procedure.Node
     [Bricks.CodeBuilder.ContextMenu("Add", "BaseOp\\Add", UPgcGraph.PgcEditorKeyword)]
     public class UPixelAdd : UBinocularWithMask
     {
-        public unsafe override void OnPerPixel(UPgcGraph graph, UPgcNodeBase node, UBufferConponent result, int x, int y, int z, object tag)
+        public unsafe override void OnPerPixel(UPgcGraph graph, UPgcNodeBase node, UBufferComponent result, int x, int y, int z, object tag)
         {
             var arg = tag as ULeftRightBuffer;
             var left = arg.Left;
@@ -209,7 +209,7 @@ namespace EngineNS.Bricks.Procedure.Node
     [Bricks.CodeBuilder.ContextMenu("Sub", "BaseOp\\Sub", UPgcGraph.PgcEditorKeyword)]
     public class UPixelSub : UBinocularWithMask
     {
-        public unsafe override void OnPerPixel(UPgcGraph graph, UPgcNodeBase node, UBufferConponent result, int x, int y, int z, object tag)
+        public unsafe override void OnPerPixel(UPgcGraph graph, UPgcNodeBase node, UBufferComponent result, int x, int y, int z, object tag)
         {
             var arg = tag as ULeftRightBuffer;
             var left = arg.Left;
@@ -234,7 +234,7 @@ namespace EngineNS.Bricks.Procedure.Node
     [Bricks.CodeBuilder.ContextMenu("Mul", "BaseOp\\Mul", UPgcGraph.PgcEditorKeyword)]
     public class UPixelMul : UBinocularWithMask
     {
-        public unsafe override void OnPerPixel(UPgcGraph graph, UPgcNodeBase node, UBufferConponent result, int x, int y, int z, object tag)
+        public unsafe override void OnPerPixel(UPgcGraph graph, UPgcNodeBase node, UBufferComponent result, int x, int y, int z, object tag)
         {
             var arg = tag as ULeftRightBuffer;
             var left = arg.Left;
@@ -259,7 +259,7 @@ namespace EngineNS.Bricks.Procedure.Node
     [Bricks.CodeBuilder.ContextMenu("Div", "BaseOp\\Div", UPgcGraph.PgcEditorKeyword)]
     public class UPixelDiv : UBinocularWithMask
     {
-        public unsafe override void OnPerPixel(UPgcGraph graph, UPgcNodeBase node, UBufferConponent result, int x, int y, int z, object tag)
+        public unsafe override void OnPerPixel(UPgcGraph graph, UPgcNodeBase node, UBufferComponent result, int x, int y, int z, object tag)
         {
             var arg = tag as ULeftRightBuffer;
             var left = arg.Left;
@@ -284,7 +284,7 @@ namespace EngineNS.Bricks.Procedure.Node
     [Bricks.CodeBuilder.ContextMenu("Max", "BaseOp\\Max", UPgcGraph.PgcEditorKeyword)]
     public class UPixelMax : UBinocularWithMask
     {
-        public unsafe override void OnPerPixel(UPgcGraph graph, UPgcNodeBase node, UBufferConponent result, int x, int y, int z, object tag)
+        public unsafe override void OnPerPixel(UPgcGraph graph, UPgcNodeBase node, UBufferComponent result, int x, int y, int z, object tag)
         {
             var arg = tag as ULeftRightBuffer;
             var left = arg.Left;
@@ -309,7 +309,7 @@ namespace EngineNS.Bricks.Procedure.Node
     [Bricks.CodeBuilder.ContextMenu("Min", "BaseOp\\Min", UPgcGraph.PgcEditorKeyword)]
     public class UPixelMin : UBinocularWithMask
     {
-        public unsafe override void OnPerPixel(UPgcGraph graph, UPgcNodeBase node, UBufferConponent result, int x, int y, int z, object tag)
+        public unsafe override void OnPerPixel(UPgcGraph graph, UPgcNodeBase node, UBufferComponent result, int x, int y, int z, object tag)
         {
             var arg = tag as ULeftRightBuffer;
             var left = arg.Left;
@@ -389,7 +389,7 @@ namespace EngineNS.Bricks.Procedure.Node
                 right.LifeCount--;
             return true;
         }
-        public unsafe override void OnPerPixel(UPgcGraph graph, UPgcNodeBase node, UBufferConponent result, int x, int y, int z, object tag)
+        public unsafe override void OnPerPixel(UPgcGraph graph, UPgcNodeBase node, UBufferComponent result, int x, int y, int z, object tag)
         {
             var arg = tag as ULeftRightBuffer;
             var left = arg.Left;

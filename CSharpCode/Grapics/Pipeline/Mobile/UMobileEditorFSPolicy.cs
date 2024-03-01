@@ -214,9 +214,9 @@ namespace EngineNS.Graphics.Pipeline.Mobile
                     return;
             }
         }
-        public unsafe override void TickLogic(GamePlay.UWorld world)
+        public unsafe override void TickLogic(GamePlay.UWorld world, Action<TtRenderGraphNode, TtRenderGraphPin, TtAttachBuffer> onRemove)
         {
-            base.TickLogic(world);
+            base.TickLogic(world, onRemove);
 
             if (this.DisableShadow == false)
                 mShadowMapNode?.TickLogic(world, this, true);

@@ -6,6 +6,6 @@ namespace EngineNS.Graphics.Pipeline.Common
 {
     public class UBasePassNode : TtRenderGraphNode
     {
-        public UGraphicsBuffers GBuffers { get; protected set; } = new UGraphicsBuffers();
+        public TtGraphicsBuffers GBuffers { get; protected set; } = new TtGraphicsBuffers();
     }
 }

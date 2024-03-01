@@ -163,6 +163,12 @@ namespace EngineNS.Bricks.CodeBuilder
                 return mTypeDesc.IsEqual(type);
             return TypeFullName == type.FullName;
         }
+        public bool IsEqual(UTypeDesc type)
+        {
+            if (mTypeDesc != null)
+                return mTypeDesc == type;
+            return TypeFullName == type.FullName;
+        }
         public virtual void OnPreRead(object tagObject, object hostObject, bool fromXml)
         {
         }
@@ -187,8 +193,8 @@ namespace EngineNS.Bricks.CodeBuilder
             if (w == null)
                 return false;
             return (VariableName == w.VariableName) &&
-                   (VariableValue == w.VariableValue) &&
-                   (VariableType == w.VariableType);
+                   (VariableValue.Equals(w.VariableValue)) &&
+                   (VariableType.Equals(w.VariableType));
         }
         public override int GetHashCode()
         {
@@ -225,6 +231,43 @@ namespace EngineNS.Bricks.CodeBuilder
             return "debugger:breaker_" + BreakName;
         }
     }
+    public class TtAttribute : UExpressionBase
+    {
+        [Rtti.Meta]
+        public UTypeReference AttributeType { get; set; }
+        [Rtti.Meta]
+        public List<UExpressionBase> Arguments { get; set; } = new List<UExpressionBase>();
+
+        public override bool Equals(object obj)
+        {
+            var varDec = obj as TtAttribute;
+            if (varDec == null)
+                return false;
+            if (!AttributeType.Equals(varDec.AttributeType))
+                return false;
+            if (Arguments.Count != varDec.Arguments.Count)
+                return false;
+            for(int i=0; i<Arguments.Count; i++)
+            {
+                if (!Arguments[i].Equals(varDec.Arguments[i]))
+                    return false;
+            }
+            return true;
+        }
+        public override int GetHashCode()
+        {
+            return ToString().GetHashCode();
+        }
+        public override string ToString()
+        {
+            string retVal = AttributeType.TypeFullName;
+            for(int i=0; i<Arguments.Count; i++)
+            {
+                retVal += Arguments[i].ToString();
+            }
+            return retVal;
+        }
+    }
     public class UVariableDeclaration : UStatementBase, IO.ISerializer, EGui.Controls.PropertyGrid.IPropertyCustomization, NodeGraph.UEditableValue.IValueEditNotify
     {
         [Rtti.Meta]
@@ -247,7 +290,14 @@ namespace EngineNS.Bricks.CodeBuilder
         public UCommentStatement Comment { get; set; }
         [Rtti.Meta]
         public EVisisMode VisitMode { get; set; } = EVisisMode.Public;
+        [Rtti.Meta]
+        public List<TtAttribute> Attributes { get; set; } = new List<TtAttribute>();
 
+        [Browsable(false)]
+        [Rtti.Meta]
+        public bool IsBindable { get; set; } = false;
+        [Rtti.Meta]
+        public bool IsAutoSaveLoad { get; set; } = true;
         [Browsable(false)]
         public bool IsPropertyVisibleDirty { get; set; } = false;
 
@@ -260,7 +310,17 @@ namespace EngineNS.Bricks.CodeBuilder
             var varDec = obj as UVariableDeclaration;
             if (varDec == null)
                 return false;
-            return (VariableName == varDec.VariableName) && (VariableType == varDec.VariableType);
+            return (VariableName == varDec.VariableName) && (VariableType.Equals(varDec.VariableType));
+        }
+
+        public bool HasAttribute(UTypeDesc desc)
+        {
+            for(int i=0; i<Attributes.Count; i++)
+            {
+                if (Attributes[i].AttributeType.IsEqual(desc))
+                    return true;
+            }
+            return false;
         }
         public override int GetHashCode()
         {
@@ -398,6 +458,19 @@ namespace EngineNS.Bricks.CodeBuilder
     {
         [Rtti.Meta]
         public string FilePath { get; set; }
+        public override bool Equals(object obj)
+        {
+            var dec = obj as TtIncludeDeclaration;
+            return FilePath == dec.FilePath;
+        }
+        public override int GetHashCode()
+        {
+            return ToString().GetHashCode();
+        }
+        public override string ToString()
+        {
+            return "include:" + FilePath;
+        }
     }
 
     public class UMethodArgumentDeclaration : UCodeObject, IO.ISerializer, EGui.Controls.PropertyGrid.IPropertyCustomization, NodeGraph.UEditableValue.IValueEditNotify
@@ -543,7 +616,7 @@ namespace EngineNS.Bricks.CodeBuilder
             return (VariableType.Equals(arg.VariableType) &&
                     VariableName == arg.VariableName &&
                     IsParamArray == arg.IsParamArray &&
-                    InitValue == arg.InitValue);
+                    InitValue.Equals(arg.InitValue));
         }
         public override int GetHashCode()
         {
@@ -702,6 +775,8 @@ namespace EngineNS.Bricks.CodeBuilder
         public List<UVariableDeclaration> LocalVariables { get; set; } = new List<UVariableDeclaration>();
         [Rtti.Meta]
         public UCommentStatement Comment { get; set; }
+        [Rtti.Meta]
+        public List<TtAttribute> Attributes { get; set; } = new List<TtAttribute>();
         [Rtti.Meta]
         public bool IsOverride { get; set; } = false;
         [Rtti.Meta]

@@ -228,7 +228,7 @@ namespace EngineNS.EGui.Slate
 
                     using (new Profiler.TimeScopeHelper(ScopeRPolicyTick))
                     {
-                        RenderPolicy?.TickLogic(World);
+                        RenderPolicy?.TickLogic(World, null);
                     }
 
                     using (new Profiler.TimeScopeHelper(ScopeRPolicyTick))

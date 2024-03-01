@@ -50,22 +50,22 @@ namespace EngineNS.Bricks.Procedure
             if ((comps & EImageComponent.X) != 0)
             {
                 var creator = UBufferCreator.CreateInstance<USuperBuffer<float, FFloatOperator>>(w, h, 1);
-                CompX = UBufferConponent.CreateInstance(in creator) as USuperBuffer<float, FFloatOperator>;
+                CompX = UBufferComponent.CreateInstance(in creator) as USuperBuffer<float, FFloatOperator>;
             }
             if ((comps & EImageComponent.Y) != 0)
             {
                 var creator = UBufferCreator.CreateInstance<USuperBuffer<float, FFloatOperator>>(w, h, 1);
-                CompY = UBufferConponent.CreateInstance(in creator) as USuperBuffer<float, FFloatOperator>;
+                CompY = UBufferComponent.CreateInstance(in creator) as USuperBuffer<float, FFloatOperator>;
             }
             if ((comps & EImageComponent.Z) != 0)
             {
                 var creator = UBufferCreator.CreateInstance<USuperBuffer<float, FFloatOperator>>(w, h, 1);
-                CompZ = UBufferConponent.CreateInstance(in creator) as USuperBuffer<float, FFloatOperator>;
+                CompZ = UBufferComponent.CreateInstance(in creator) as USuperBuffer<float, FFloatOperator>;
             }
             if ((comps & EImageComponent.W) != 0)
             {
                 var creator = UBufferCreator.CreateInstance<USuperBuffer<float, FFloatOperator>>(w, h, 1);
-                CompW = UBufferConponent.CreateInstance(in creator) as USuperBuffer<float, FFloatOperator>;
+                CompW = UBufferComponent.CreateInstance(in creator) as USuperBuffer<float, FFloatOperator>;
             }
         }
         public void Initialize(int w, int h,
@@ -83,9 +83,9 @@ namespace EngineNS.Bricks.Procedure
             }
 
             var creator = UBufferCreator.CreateInstance<USuperBuffer<float, FFloatOperator>>(w, h, 1);
-            CompX = UBufferConponent.CreateInstance(in creator) as USuperBuffer<float, FFloatOperator>;
-            CompY = UBufferConponent.CreateInstance(in creator) as USuperBuffer<float, FFloatOperator>;
-            CompZ = UBufferConponent.CreateInstance(in creator) as USuperBuffer<float, FFloatOperator>;
+            CompX = UBufferComponent.CreateInstance(in creator) as USuperBuffer<float, FFloatOperator>;
+            CompY = UBufferComponent.CreateInstance(in creator) as USuperBuffer<float, FFloatOperator>;
+            CompZ = UBufferComponent.CreateInstance(in creator) as USuperBuffer<float, FFloatOperator>;
 
             slice = slice % xyzComp.Slice;
 
@@ -137,19 +137,19 @@ namespace EngineNS.Bricks.Procedure
             result.Initialize(Width, Height, 0, Components);
             if (CompX != null)
             {
-                UBufferConponent.CopyData(CompX, result.CompX);
+                UBufferComponent.CopyData(CompX, result.CompX);
             }
             if (CompY != null)
             {
-                UBufferConponent.CopyData(CompY, result.CompY);
+                UBufferComponent.CopyData(CompY, result.CompY);
             }
             if (CompZ != null)
             {
-                UBufferConponent.CopyData(CompZ, result.CompZ);
+                UBufferComponent.CopyData(CompZ, result.CompZ);
             }
             if (CompW != null)
             {
-                UBufferConponent.CopyData(CompW, result.CompW);
+                UBufferComponent.CopyData(CompW, result.CompW);
             }
             return result;
         }

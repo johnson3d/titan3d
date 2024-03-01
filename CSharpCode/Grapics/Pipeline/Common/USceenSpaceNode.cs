@@ -29,7 +29,7 @@ namespace EngineNS.Graphics.Pipeline.Common
         [Category("Option")]
         public float OutputScaleFactor { get; set; } = 1.0f;
         public Graphics.Mesh.TtMesh ScreenMesh;
-        public UGraphicsBuffers GBuffers { get; protected set; } = new UGraphicsBuffers();
+        public TtGraphicsBuffers GBuffers { get; protected set; } = new TtGraphicsBuffers();
         public NxRHI.URenderPass RenderPass;
         public string DebugName;
         //public override Graphics.Pipeline.Shader.UGraphicsShadingEnv GetPassShading(URenderPolicy.EShadingType type = URenderPolicy.EShadingType.Count, Graphics.Mesh.TtMesh.TtAtom atom = null) abstract;
@@ -56,8 +56,8 @@ namespace EngineNS.Graphics.Pipeline.Common
                 ScreenMesh = mesh;
             }
         }
-        public UGraphicsBuffers.UTargetViewIdentifier TargetViewId = new UGraphicsBuffers.UTargetViewIdentifier();
-        public virtual unsafe UGraphicsBuffers CreateGBuffers(URenderPolicy policy, EPixelFormat format)
+        public TtGraphicsBuffers.TtTargetViewIdentifier TargetViewId = new TtGraphicsBuffers.TtTargetViewIdentifier();
+        public virtual unsafe TtGraphicsBuffers CreateGBuffers(URenderPolicy policy, EPixelFormat format)
         {
             var PassDesc = new NxRHI.FRenderPassDesc();
 

@@ -154,9 +154,9 @@ namespace EngineNS.Graphics.Pipeline.Common
         public NxRHI.UCopyDraw mCopyDepthDrawcall;
         public UDrawBuffers CopyPass = new UDrawBuffers();
 
-        public UAttachBuffer[] ResultBuffer = new UAttachBuffer[2];
-        public UAttachBuffer PreColor { get => ResultBuffer[0]; }
-        public UAttachBuffer PreDepth { get => ResultBuffer[1]; }
+        public TtAttachBuffer[] ResultBuffer = new TtAttachBuffer[2];
+        public TtAttachBuffer PreColor { get => ResultBuffer[0]; }
+        public TtAttachBuffer PreDepth { get => ResultBuffer[1]; }
         public TtAntiAliasingNode()
         {
             Name = "TaaNode";
@@ -280,8 +280,8 @@ namespace EngineNS.Graphics.Pipeline.Common
                 {
                     CoreSDK.DisposeObject(ref ResultBuffer[0]);
                     CoreSDK.DisposeObject(ref ResultBuffer[1]);
-                    ResultBuffer[0] = new UAttachBuffer();
-                    ResultBuffer[1] = new UAttachBuffer();
+                    ResultBuffer[0] = new TtAttachBuffer();
+                    ResultBuffer[1] = new TtAttachBuffer();
                     ResultBuffer[0].BufferDesc = ResultPinOut.Attachement.BufferDesc;
                     ResultBuffer[0].CreateBufferViews(in ResultBuffer[0].BufferDesc);
 
@@ -307,7 +307,7 @@ namespace EngineNS.Graphics.Pipeline.Common
             }
         }
 
-        public void CopyAttachBuff(TtRenderGraphPin SrcPin, UAttachBuffer DesAttachBuffer, NxRHI.UCopyDraw CopyDrawcall, NxRHI.UCommandList DrawCommandList)
+        public void CopyAttachBuff(TtRenderGraphPin SrcPin, TtAttachBuffer DesAttachBuffer, NxRHI.UCopyDraw CopyDrawcall, NxRHI.UCommandList DrawCommandList)
         {
             var srcPin = GetAttachBuffer(SrcPin);
 

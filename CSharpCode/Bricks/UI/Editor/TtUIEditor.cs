@@ -240,7 +240,6 @@ namespace EngineNS.UI.Editor
         void Save()
         {
             UEngine.Instance.UIManager.Save(AssetName, mUIHost.Children[0]);
-            mUIHost.SaveEditorOnlyData(AssetName);
             UIAsset.MacrossEditor.SaveClassGraph(AssetName);
             UIAsset.MacrossEditor.GenerateCode();
             UIAsset.MacrossEditor.CompileCode();
@@ -1225,7 +1224,6 @@ namespace EngineNS.UI.Editor
         {
             AssetName = name;
             mUIHost.Children.Add(UEngine.Instance.UIManager.Load(AssetName));
-            mUIHost.LoadEditorOnlyData(AssetName);
             UIAsset = new TtUIAsset();
             UIAsset.AssetName = name;
             //UIAsset.Mesh = await UI.Canvas.TtCanvas.TestCreate();

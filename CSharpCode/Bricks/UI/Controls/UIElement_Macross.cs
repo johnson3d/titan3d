@@ -1,5 +1,6 @@
 ﻿using EngineNS.Bricks.CodeBuilder;
 using EngineNS.IO;
+using EngineNS.UI.Editor;
 using EngineNS.UI.Event;
 using System;
 using System.Collections.Generic;
@@ -12,6 +13,346 @@ namespace EngineNS.UI.Controls
     public partial class TtUIElement
     {
         public Macross.UMacrossGetter<TtUIMacrossBase> MacrossGetter;
+
+        #region Property bind
+
+        public class UIBindingData_Element : IO.ISerializer
+        {
+            [Rtti.Meta]
+            public string PropertyName { get; set; }
+            [Rtti.Meta]
+            public Rtti.UTypeDesc PropertyType { get; set; }
+            [Rtti.Meta]
+            public UInt64 Id { get; set; }
+
+            public bool IsSame(UIBindingData_Element data)
+            {
+                return ((PropertyName == data.PropertyName) &&
+                        (PropertyType == data.PropertyType) &&
+                        (Id == data.Id));
+            }
+
+            public void GenerateStatement(TtUIEditor editor, List<UStatementBase> statements)
+            {
+                var findElementInvokeStatement = new UMethodInvokeStatement(
+                    "FindElement",
+                    new UVariableDeclaration()
+                    {
+                        VariableName = "UIElement_" + Id,
+                        VariableType = new UTypeReference(typeof(TtUIElement)),
+                    },
+                    new UVariableReferenceExpression("HostElement"),
+                    new UMethodInvokeArgumentExpression(new UPrimitiveExpression(Id)))
+                {
+                    DeclarationReturnValue = true,
+                };
+                for (int i = 0; i < statements.Count; i++)
+                {
+                    if (findElementInvokeStatement.Equals(statements[i]))
+                        return;
+                }
+                statements.Add(findElementInvokeStatement);
+            }
+            public UExpressionBase GetVariableExpression()
+            {
+                return new UVariableReferenceExpression("UIElement_" + Id);
+            }
+            public Rtti.UTypeDesc GetVariableType()
+            {
+                return PropertyType;
+            }
+            public string GetBindPath()
+            {
+                return PropertyName;
+            }
+            public bool IsSameTarget<T>(T target)
+            {
+                var element = target as TtUIElement;
+                if (element != null)
+                    return element.Id == Id;
+                return false;
+            }
+            public void Draw(Editor.EditorUIHost host, in ImDrawList drawList)
+            {
+                var element = host.FindElement(Id);
+                ImGuiAPI.Text(Editor.TtUIEditor.GetElementShowName(element));
+                ImGuiAPI.SameLine(0, -1);
+                ImGuiAPI.Text(PropertyName);
+            }
+
+            public void OnPreRead(object tagObject, object hostObject, bool fromXml)
+            {
+            }
+
+            public void OnPropertyRead(object tagObject, PropertyInfo prop, bool fromXml)
+            {
+            }
+        }
+        public abstract class BindingDataBase : IO.BaseSerializer
+        {
+            public virtual void DrawBindInfo(Editor.EditorUIHost host, in ImDrawList drawList) { }
+            public virtual void GenerateStatement(TtUIEditor editor, List<UStatementBase> sequence) { }
+            public virtual void OnRemove(TtUIEditor editor) { }
+            public abstract bool IsSame(BindingDataBase target);
+        }
+
+        // 辅助记录属性之间绑定数据，用于生成代码
+        public class BindingData_Property : BindingDataBase
+        {
+            [Rtti.Meta]
+            public UIBindingData_Element Source { get; set; }
+            [Rtti.Meta]
+            public UIBindingData_Element Target { get; set; }
+            [Rtti.Meta]
+            public UI.Bind.EBindingMode Mode { get; set; } = UI.Bind.EBindingMode.Default;
+
+            public override void DrawBindInfo(Editor.EditorUIHost host, in ImDrawList drawList)
+            {
+                Source.Draw(host, drawList);
+                ImGuiAPI.SameLine(0, -1);
+                ImGuiAPI.Text(" (" + Mode.ToString() + ")");
+            }
+            public override void GenerateStatement(TtUIEditor editor, List<UStatementBase> sequence)
+            {
+                Source.GenerateStatement(editor, sequence);
+                Target.GenerateStatement(editor, sequence);
+                var bindCall = new UMethodInvokeStatement()
+                {
+                    MethodName = "SetBinding",
+                    Host = new UClassReferenceExpression(Rtti.UTypeDesc.TypeOf(typeof(Bind.TtBindingOperations))),
+                };
+                bindCall.GenericTypes.Add(Target.GetVariableType());
+                bindCall.GenericTypes.Add(Source.GetVariableType());
+                bindCall.Arguments.Add(new UMethodInvokeArgumentExpression(Target.GetVariableExpression()));
+                bindCall.Arguments.Add(new UMethodInvokeArgumentExpression(new UPrimitiveExpression(Target.GetBindPath())));
+                bindCall.Arguments.Add(new UMethodInvokeArgumentExpression(Source.GetVariableExpression()));
+                bindCall.Arguments.Add(new UMethodInvokeArgumentExpression(new UPrimitiveExpression(Source.GetBindPath())));
+                bindCall.Arguments.Add(new UMethodInvokeArgumentExpression(new UPrimitiveExpression(Mode)));
+                for (int i = 0; i < sequence.Count; i++)
+                {
+                    if (bindCall.Equals(sequence[i]))
+                        return;
+                }
+                sequence.Add(bindCall);
+            }
+
+            public override bool IsSame(BindingDataBase target)
+            {
+                var bdp = target as BindingData_Property;
+                if (bdp == null)
+                    return false;
+                return Source.IsSame(bdp.Source) &&
+                       Target.IsSame(bdp.Target) &&
+                       (Mode == bdp.Mode);
+            }
+        }
+
+        // 辅助记录属性和macross函数绑定，用于生成代码
+        public class BindingData_Method : BindingDataBase
+        {
+            [Rtti.Meta]
+            public UIBindingData_Element Target { get; set; }
+            [Rtti.Meta]
+            public string SetMethodName { get; set; }
+            [Rtti.Meta]
+            public string GetMethodName { get; set; }
+            [Rtti.Meta]
+            public UI.Bind.EBindingMode Mode { get; set; } = UI.Bind.EBindingMode.Default;
+
+            public override void DrawBindInfo(EditorUIHost host, in ImDrawList drawList)
+            {
+                ImGuiAPI.AlignTextToFramePadding();
+                ImGuiAPI.Text("MethodBind:");
+                ImGuiAPI.SameLine(0, -1);
+                ImGuiAPI.BeginGroup();
+                if (!string.IsNullOrEmpty(SetMethodName))
+                    ImGuiAPI.Text("Set " + Target.PropertyName);
+                if (!string.IsNullOrEmpty(GetMethodName))
+                    ImGuiAPI.Text("Get " + Target.PropertyName);
+                ImGuiAPI.EndGroup();
+                ImGuiAPI.SameLine(0, -1);
+                ImGuiAPI.AlignTextToFramePadding();
+                ImGuiAPI.Text(" (" + Mode.ToString() + ")");
+            }
+
+            public override void GenerateStatement(TtUIEditor editor, List<UStatementBase> sequence)
+            {
+                Target.GenerateStatement(editor, sequence);
+                var bindCall = new UMethodInvokeStatement()
+                {
+                    MethodName = "SetMethodBinding",
+                    Host = new UClassReferenceExpression(Rtti.UTypeDesc.TypeOf(typeof(Bind.TtBindingOperations))),
+                };
+                bindCall.GenericTypes.Add(Target.GetVariableType());
+                bindCall.Arguments.Add(new UMethodInvokeArgumentExpression(Target.GetVariableExpression()));
+                bindCall.Arguments.Add(new UMethodInvokeArgumentExpression(new UPrimitiveExpression(Target.GetBindPath())));
+                bindCall.Arguments.Add(new UMethodInvokeArgumentExpression(string.IsNullOrEmpty(GetMethodName)? (new UNullValueExpression()) : (new UVariableReferenceExpression(GetMethodName))));
+                bindCall.Arguments.Add(new UMethodInvokeArgumentExpression(string.IsNullOrEmpty(SetMethodName)? (new UNullValueExpression()) : (new UVariableReferenceExpression(SetMethodName))));
+                bindCall.Arguments.Add(new UMethodInvokeArgumentExpression(new UPrimitiveExpression(Mode)));
+                for (int i = 0; i < sequence.Count; i++)
+                {
+                    if (bindCall.Equals(sequence[i]))
+                        return;
+                }
+                sequence.Add(bindCall);
+            }
+
+            public override void OnRemove(TtUIEditor editor)
+            {
+                if(!string.IsNullOrEmpty(SetMethodName))
+                {
+                    var methodDesc = editor.UIAsset.MacrossEditor.DefClass.FindMethod(SetMethodName);
+                    if(methodDesc != null)
+                        editor.UIAsset.MacrossEditor.RemoveMethod(methodDesc);
+                }
+                if(!string.IsNullOrEmpty(GetMethodName))
+                {
+                    var methodDesc = editor.UIAsset.MacrossEditor.DefClass.FindMethod(GetMethodName);
+                    if (methodDesc != null)
+                        editor.UIAsset.MacrossEditor.RemoveMethod(methodDesc);
+                }
+            }
+            public override bool IsSame(BindingDataBase target)
+            {
+                var tg = target as BindingData_Method;
+                if (tg == null)
+                    return false;
+                return Target.IsSame(tg.Target) &&
+                       (Mode == tg.Mode) &&
+                       (SetMethodName == tg.SetMethodName) &&
+                       (GetMethodName == tg.GetMethodName);
+            }
+        }
+        public class BindingData_SelfProperty : BindingDataBase
+        {
+            [Rtti.Meta]
+            public UIBindingData_Element Target { get; set; }
+            [Rtti.Meta]
+            public string PropertyName { get; set; }
+            [Rtti.Meta]
+            public UI.Bind.EBindingMode Mode { get; set; } = UI.Bind.EBindingMode.Default;
+            
+            public override void DrawBindInfo(EditorUIHost host, in ImDrawList drawList)
+            {
+                var prop = host.HostEditor.UIAsset.MacrossEditor.DefClass.FindMember(PropertyName);
+                if(prop == null)
+                {
+                    ImGuiAPI.PushStyleColor(ImGuiCol_.ImGuiCol_Text, EGui.UIProxy.StyleConfig.Instance.ErrorStringColor);
+                    ImGuiAPI.Text("Error bind property: " + PropertyName);
+                    ImGuiAPI.PopStyleColor(1);
+                }
+                else
+                {
+                    ImGuiAPI.Text(prop.DisplayName);
+                    ImGuiAPI.SameLine(0, -1);
+                    ImGuiAPI.Text(" (" + Mode.ToString() + ")");
+                }
+            }
+            public override void GenerateStatement(TtUIEditor editor, List<UStatementBase> sequence)
+            {
+                var prop = editor.UIAsset.MacrossEditor.DefClass.FindMember(PropertyName);
+                if (prop == null)
+                    return;
+                Target.GenerateStatement(editor, sequence);
+                var bindCall = new UMethodInvokeStatement()
+                {
+                    MethodName = "SetBinding",
+                    Host = new UClassReferenceExpression(Rtti.UTypeDesc.TypeOf(typeof(Bind.TtBindingOperations))),
+                };
+                bindCall.GenericTypes.Add(Target.GetVariableType());
+                bindCall.GenericTypes.Add(prop.VariableType.TypeDesc);
+                var targetVariableExp = Target.GetVariableExpression();
+                bindCall.Arguments.Add(new UMethodInvokeArgumentExpression(targetVariableExp));
+                bindCall.Arguments.Add(new UMethodInvokeArgumentExpression(new UPrimitiveExpression(Target.GetBindPath())));
+                bindCall.Arguments.Add(new UMethodInvokeArgumentExpression(new USelfReferenceExpression()));
+                bindCall.Arguments.Add(new UMethodInvokeArgumentExpression(new UPrimitiveExpression(PropertyName)));
+                bindCall.Arguments.Add(new UMethodInvokeArgumentExpression(new UPrimitiveExpression(Mode)));
+                var conditionStatement = new UIfStatement()
+                {
+                    Condition = new UBinaryOperatorExpression()
+                    {
+                        Left = targetVariableExp,
+                        Right = new UNullValueExpression(),
+                        Operation = UBinaryOperatorExpression.EBinaryOperation.Equality,
+                    },
+                    TrueStatement = bindCall,
+                };
+                sequence.Add(conditionStatement);
+            }
+            public override bool IsSame(BindingDataBase target)
+            {
+                var tg = target as BindingData_SelfProperty;
+                if (tg == null)
+                    return false;
+                return Target.IsSame(tg.Target) &&
+                       (Mode == tg.Mode) &&
+                       (PropertyName == tg.PropertyName);
+            }
+        }
+
+        [Rtti.Meta]
+        public Dictionary<string, BindingDataBase> BindingDatas
+        {
+            get;
+            set;
+        } = new Dictionary<string, BindingDataBase>();
+
+        public virtual void ClearBindExpression(EngineNS.UI.Bind.TtBindableProperty bp)
+        {
+            if(bp == null)
+            {
+                lock (mBindExprDic)
+                {
+                    mBindExprDic.Clear();
+                }
+                foreach(var data in BindingDatas)
+                {
+                    var bdMethod = data.Value as BindingData_Method;
+                    if (bdMethod == null)
+                        continue;
+
+                    MacrossMethodData md;
+                    if(MacrossMethods.TryGetValue(data.Key, out md))
+                    {
+                        var pbData = md as MacrossPropertyBindMethodData;
+                        if(pbData != null)
+                        {
+                            if (pbData.GetDesc != null)
+                                mMethodDisplayNames.Remove(pbData.GetDesc);
+                            if (pbData.SetDesc != null)
+                                mMethodDisplayNames.Remove(pbData.SetDesc);
+                        }
+                    }
+                }
+
+                BindingDatas.Clear();
+            }
+            else
+            {
+                lock (mBindExprDic)
+                {
+                    mBindExprDic.Remove(bp);
+                }
+
+                BindingDatas.Remove(bp.Name);
+
+                MacrossMethodData data;
+                if(MacrossMethods.TryGetValue(bp.Name, out data))
+                {
+                    var pbData = data as MacrossPropertyBindMethodData;
+                    if(pbData != null)
+                    {
+                        if(pbData.GetDesc != null)
+                            mMethodDisplayNames.Remove(pbData.GetDesc);
+                        if(pbData.SetDesc != null)
+                            mMethodDisplayNames.Remove(pbData.SetDesc);
+                    }
+                    MacrossMethods.Remove(bp.Name);
+                }
+            }
+        }
+
+        #endregion
 
         public string GetPropertyBindMethodName(string propertyName, bool isSet)
         {
@@ -43,6 +384,7 @@ namespace EngineNS.UI.Controls
             }
         }
 
+        // 用于辅助记录event绑定到macross函数
         public class MacrossEventMethodData : MacrossMethodData
         {
             public Bricks.CodeBuilder.UMethodDeclaration Desc;
@@ -60,6 +402,7 @@ namespace EngineNS.UI.Controls
             }
         }
 
+        // 用于辅助记录属性绑定到macross函数
         public class MacrossPropertyBindMethodData : MacrossMethodData
         {
             [Rtti.Meta]
@@ -159,7 +502,8 @@ namespace EngineNS.UI.Controls
                     pbData.SetDesc = desc;
                 else
                     pbData.GetDesc = desc;
-                MacrossMethods[propertyName] = data;
+                MacrossMethods[propertyName] = pbData;
+                data = pbData;
             }
             mMethodDisplayNames[desc] = data;
         }

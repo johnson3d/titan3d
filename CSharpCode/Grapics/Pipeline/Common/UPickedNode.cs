@@ -52,7 +52,7 @@ namespace EngineNS.Graphics.Pipeline.Common
         }
         public UPickedProxiableManager PickedManager;
         public UPickSetupShading PickedShading = null;
-        public UGraphicsBuffers PickedBuffer { get; protected set; } = new UGraphicsBuffers();
+        public TtGraphicsBuffers PickedBuffer { get; protected set; } = new TtGraphicsBuffers();
         public NxRHI.URenderPass RenderPass;
         public override UGraphicsShadingEnv GetPassShading(TtMesh.TtAtom atom = null)
         {
@@ -91,7 +91,7 @@ namespace EngineNS.Graphics.Pipeline.Common
             PickedBuffer.SetRenderTarget(policy, 0, PickedPinOut);
             PickedBuffer.SetDepthStencil(policy, DepthPinOut);
 
-            PickedBuffer.TargetViewIdentifier = new UGraphicsBuffers.UTargetViewIdentifier();// policy.DefaultCamera.TargetViewIdentifier;
+            PickedBuffer.TargetViewIdentifier = new TtGraphicsBuffers.TtTargetViewIdentifier();// policy.DefaultCamera.TargetViewIdentifier;
 
             PickedManager = policy.PickedProxiableManager;
         }

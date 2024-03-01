@@ -16,6 +16,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)Node\Algorithm\ErosionNode.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Node\Algorithm\FloodNode.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Node\Algorithm\FlowNode.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Node\Algorithm\GpuErosionNode.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Node\Algorithm\Morphology.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Node\Algorithm\NoiseNode.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Node\Algorithm\RiverNode.cs" />
@@ -37,6 +38,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)Node\UTerrainBuilder.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Node\UTransformNode.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Node\UValueNodes.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)PgcGpuProcessor.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)UBufferConponent.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)UPgcAsset.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)UPgcEditor.cs" />

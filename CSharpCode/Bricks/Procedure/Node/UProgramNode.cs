@@ -37,7 +37,7 @@ namespace EngineNS.Bricks.Procedure.Node
         }
         [Rtti.Meta]
         public unsafe virtual void OnPerPixel(UPgcGraph graph, UProgramNode node, 
-            UBufferConponent resuilt, int x, int y, int z, object tag)
+            UBufferComponent resuilt, int x, int y, int z, object tag)
         {
             //resuilt.GetSuperPixelAddress(x, y, z);
             //resuilt.GetPixel<float>(x, y, z);
@@ -230,7 +230,7 @@ namespace EngineNS.Bricks.Procedure.Node
                 return false;
             return McProgram.Get().OnProcedure(graph, this);
         }
-        public void DispatchPixels(UPgcGraph graph, UBufferConponent result, object tag)
+        public void DispatchPixels(UPgcGraph graph, UBufferComponent result, object tag)
         {
             var prog = McProgram.Get();
             for (int i = 0; i < result.Depth; i++)

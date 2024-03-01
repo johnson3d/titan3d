@@ -18,7 +18,7 @@ namespace EngineNS.Graphics.Pipeline.Common
         {
             AddInput(DepthPinIn, NxRHI.EBufferType.BFT_DSV | NxRHI.EBufferType.BFT_SRV);
             AddInput(PointLightsPinIn, NxRHI.EBufferType.BFT_SRV | NxRHI.EBufferType.BFT_UAV);
-            TilingPinOut.LifeMode = UAttachBuffer.ELifeMode.Imported;
+            TilingPinOut.LifeMode = TtAttachBuffer.ELifeMode.Imported;
             AddOutput(TilingPinOut, NxRHI.EBufferType.BFT_UAV | NxRHI.EBufferType.BFT_SRV);
         }
         public unsafe override void FrameBuild(Graphics.Pipeline.URenderPolicy policy)

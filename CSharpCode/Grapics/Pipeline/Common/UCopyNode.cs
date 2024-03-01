@@ -26,7 +26,7 @@ namespace EngineNS.Graphics.Pipeline.Common
 
             mCopyDrawcall = UEngine.Instance.GfxDevice.RenderContext.CreateCopyDraw();
         }
-        public UAttachBuffer ResultBuffer;
+        public TtAttachBuffer ResultBuffer;
         public bool IsCpuAceesResult { get; set; } = false;
         public NxRHI.UCopyDraw mCopyDrawcall;
         public override void FrameBuild(Graphics.Pipeline.URenderPolicy policy)
@@ -134,9 +134,9 @@ namespace EngineNS.Graphics.Pipeline.Common
 
             mCopyDrawcall = UEngine.Instance.GfxDevice.RenderContext.CreateCopyDraw();
         }
-        public UAttachBuffer[] ResultBuffer = new UAttachBuffer[2];
-        public UAttachBuffer Current { get => ResultBuffer[0]; }
-        public UAttachBuffer Previos { get => ResultBuffer[1]; }
+        public TtAttachBuffer[] ResultBuffer = new TtAttachBuffer[2];
+        public TtAttachBuffer Current { get => ResultBuffer[0]; }
+        public TtAttachBuffer Previos { get => ResultBuffer[1]; }
         public bool IsCpuAceesResult { get; set; } = false;
         public NxRHI.UCopyDraw mCopyDrawcall;
         public override void FrameBuild(Graphics.Pipeline.URenderPolicy policy)
@@ -152,8 +152,8 @@ namespace EngineNS.Graphics.Pipeline.Common
 
                 CoreSDK.DisposeObject(ref ResultBuffer[0]);
                 CoreSDK.DisposeObject(ref ResultBuffer[1]);
-                ResultBuffer[0] = new UAttachBuffer();
-                ResultBuffer[1] = new UAttachBuffer();
+                ResultBuffer[0] = new TtAttachBuffer();
+                ResultBuffer[1] = new TtAttachBuffer();
                 ResultBuffer[0].BufferDesc = SrcPinIn.Attachement.BufferDesc;
                 ResultBuffer[0].CreateBufferViews(in ResultBuffer[0].BufferDesc);
 

@@ -646,7 +646,7 @@ namespace EngineNS.UI.Bind
         public T GetValue<T>(IBindableObject obj, TtBindableProperty bp)
         {
             var ms = this as TtBindingMethodStore<T>;
-            if (ms != null)
+            if (ms != null && ms.Getter != null)
                 return ms.Getter.Invoke(obj, bp);
             return default;
         }
@@ -774,11 +774,11 @@ namespace EngineNS.UI.Bind
             };
             return SetMethodBinding<TProp>(target, targetPath, getMethod, setMethod, binding);
         }
-        public static TtBindingExpressionBase SetMethodBinding<TProp>(in IBindableObject source, string sourcePath, Delegate_BindingMethodGet<TProp> getMethod, Delegate_BindingMethodSet<TProp> setMethod, TtBindingBase binding)
+        public static TtBindingExpressionBase SetMethodBinding<TProp>(in IBindableObject target, string targetPath, Delegate_BindingMethodGet<TProp> getMethod, Delegate_BindingMethodSet<TProp> setMethod, TtBindingBase binding)
         {
-            if (source == null)
+            if (target == null)
                 throw new ArgumentNullException("source");
-            var sourceProp = source.FindBindableProperty(sourcePath);
+            var sourceProp = target.FindBindableProperty(targetPath);
             if (sourceProp == null)
                 return null;
             var finalMode = binding.Mode;
@@ -793,13 +793,13 @@ namespace EngineNS.UI.Bind
             var exp = new TtBindingMethodExpression<TProp>(binding, null);
             exp.Mode = finalMode;
             exp.UpdateSourceTriger = updateSourceTrigger;
-            exp.Source = source;
-            exp.Path = new TtPropertyPath(sourcePath);
+            exp.Source = target;
+            exp.Path = new TtPropertyPath(targetPath);
             var methodStore = new TtBindingMethodStore<TProp>();
             methodStore.Getter = getMethod;
             methodStore.Setter = setMethod;
             exp.MethodStore = methodStore;
-            source.SetBindExpression(sourceProp, exp);
+            target.SetBindExpression(sourceProp, exp);
             binding.TargetExp = exp;
 
             return exp;

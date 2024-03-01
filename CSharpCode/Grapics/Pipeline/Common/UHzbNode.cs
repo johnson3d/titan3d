@@ -16,7 +16,7 @@ namespace EngineNS.Graphics.Pipeline.Common
         public override void InitNodePins()
         {
             AddInput(DepthPinIn, NxRHI.EBufferType.BFT_SRV | NxRHI.EBufferType.BFT_DSV);
-            HzbPinOut.LifeMode = UAttachBuffer.ELifeMode.Imported;
+            HzbPinOut.LifeMode = TtAttachBuffer.ELifeMode.Imported;
             AddOutput(HzbPinOut, NxRHI.EBufferType.BFT_SRV);
         }
         public override void FrameBuild(Graphics.Pipeline.URenderPolicy policy)

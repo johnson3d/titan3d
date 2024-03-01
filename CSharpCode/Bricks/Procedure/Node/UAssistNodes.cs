@@ -61,7 +61,7 @@ namespace EngineNS.Bricks.Procedure.Node
             var input = graph.BufferCache.FindBuffer(ValuePin);
             if (input.ElementSize != System.Runtime.InteropServices.Marshal.SizeOf(Type.SystemType))
                 return false;
-            var buffers = new UBufferConponent[Outputs.Count];
+            var buffers = new UBufferComponent[Outputs.Count];
             for(int i=0; i<Outputs.Count;++i)
             {
                 buffers[i] = graph.BufferCache.FindBuffer(Outputs[i]);
@@ -150,7 +150,7 @@ namespace EngineNS.Bricks.Procedure.Node
             if (result.ElementSize != System.Runtime.InteropServices.Marshal.SizeOf(Type.SystemType))
                 return false;
 
-            var buffers = new UBufferConponent[Inputs.Count];
+            var buffers = new UBufferComponent[Inputs.Count];
             for(int i=0; i<Inputs.Count; i++)
             {
                 buffers[i] = graph.BufferCache.FindBuffer(Inputs[i]);

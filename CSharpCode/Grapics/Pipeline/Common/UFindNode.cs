@@ -53,7 +53,7 @@ namespace EngineNS.Graphics.Pipeline.Common
         //}
         public override void InitNodePins()
         {
-            ResultPinOut.LifeMode = UAttachBuffer.ELifeMode.Imported;
+            ResultPinOut.LifeMode = TtAttachBuffer.ELifeMode.Imported;
             AddOutput(ResultPinOut, NxRHI.EBufferType.BFT_SRV | NxRHI.EBufferType.BFT_UAV);
         }
         public override async Task Initialize(URenderPolicy policy, string debugName)

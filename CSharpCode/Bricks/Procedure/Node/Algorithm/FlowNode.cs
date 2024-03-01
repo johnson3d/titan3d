@@ -6,10 +6,10 @@ namespace EngineNS.Bricks.Procedure.Algorithm
     {
         static float[] cr = { 0.5f, 0, 1, 0, 1, 0.5f, 0.5f, 0, 1 };
         static float[] cg = { 0.5f, 0, 0, 1, 1, 0, 1, 0.5f, 0.5f };
-        public static UBufferConponent GenerateFlowMap_GIS(UBufferConponent map)
+        public static UBufferComponent GenerateFlowMap_GIS(UBufferComponent map)
         {
             var creator = UBufferCreator.CreateInstance<USuperBuffer<Vector4, FFloat4Operator>>(map.Width, map.Height, 1);
-            var flowMap = UBufferConponent.CreateInstance(creator);
+            var flowMap = UBufferComponent.CreateInstance(creator);
             int width = map.Width;
             int count = width * width;
             float[] elevations = Common.WrapNode.Unpack(map);
@@ -30,10 +30,10 @@ namespace EngineNS.Bricks.Procedure.Algorithm
 
         }
 
-        public static UBufferConponent GenearteFlowMap_Watershed(UBufferConponent map, int level = 20, int grad = 5, bool only_slope = true)
+        public static UBufferComponent GenearteFlowMap_Watershed(UBufferComponent map, int level = 20, int grad = 5, bool only_slope = true)
         {
             var creator = UBufferCreator.CreateInstance<USuperBuffer<Vector4, FFloat4Operator>>(map.Width, map.Height, 1);
-            var flowMap = UBufferConponent.CreateInstance(creator);
+            var flowMap = UBufferComponent.CreateInstance(creator);
             int width = map.Width;
             int count = map.Width * map.Height;
             // Divide map date into different level
@@ -61,7 +61,7 @@ namespace EngineNS.Bricks.Procedure.Algorithm
             //flowMap.Apply();
             return flowMap;
         }
-        public static unsafe int[] divide_tex(UBufferConponent toDivide, int level)
+        public static unsafe int[] divide_tex(UBufferComponent toDivide, int level)
         {
             int[] result = new int[toDivide.Width * toDivide.Height];
             var pixels = (Color4f*)toDivide.GetSuperPixelAddress(0, 0, 0);

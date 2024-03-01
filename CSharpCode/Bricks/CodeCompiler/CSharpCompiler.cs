@@ -1,5 +1,7 @@
-﻿using Microsoft.CodeAnalysis;
+﻿using EngineNS.Profiler;
+using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
+using Microsoft.CodeAnalysis.Diagnostics;
 using Microsoft.CodeAnalysis.Emit;
 using Microsoft.CodeAnalysis.MSBuild;
 using System;
@@ -19,6 +21,8 @@ namespace EngineNS.CodeCompiler
             "System.Runtime.dll",
             "System.Private.CoreLib.dll",
             "System.Collections.dll",
+            "System.ComponentModel.Primitives.dll",
+            "System.ComponentModel.TypeConverter.dll",
         };
 
         public static bool CompilerCSharpCodes(string[] cshaprFiles, string[] refAssemblyFiles, string[] preprocessorSymbols, string outputFile, string pdbFile, CSharpCompilationOptions option)
@@ -48,6 +52,8 @@ namespace EngineNS.CodeCompiler
 
             var name = IO.TtFileManager.GetPureName(outputFile);
             var compilation = CSharpCompilation.Create(name, syntaxTrees, metaRefs, option);
+            var generatorDriver = CSharpGeneratorDriver.Create(new CompilingGenerator.BindingCodeGenerator());
+            generatorDriver.RunGeneratorsAndUpdateCompilation(compilation, out var updateCompilation, out var diagnostics);
             bool retValue = true;
             using (var outStream = new MemoryStream())
             using (var pdbStream = new MemoryStream())
@@ -60,7 +66,7 @@ namespace EngineNS.CodeCompiler
                     emitOptions = emitOptions.WithDebugInformationFormat(DebugInformationFormat.PortablePdb).WithPdbFilePath(pdbFile);
                 }
 
-                var emitResult = compilation.Emit(outStream, pdbStream, null, null, null, emitOptions);
+                var emitResult = updateCompilation.Emit(outStream, pdbStream, null, null, null, emitOptions);
                 if (emitResult.Success)
                 {
                     retValue = true;
@@ -79,14 +85,16 @@ namespace EngineNS.CodeCompiler
                                 fs.Write(pdbStream.ToArray());
                             }
                         }
-                        catch(System.Exception)
+                        catch(System.Exception ex)
                         {
-
+                            Log.WriteException(ex);
                         }
                     }
+                    System.Diagnostics.Debug.WriteLine("Macross build success");
                 }
                 else
                 {
+                    System.Diagnostics.Debug.WriteLine("Macross build failed");
                     foreach (var i in emitResult.Diagnostics)
                     {
                         System.Diagnostics.Debug.WriteLine(i.ToString());

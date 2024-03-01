@@ -707,7 +707,7 @@ namespace EngineNS.NxRHI
             IRenderDocTool.GetInstance().StartFrameCapture();
             return true;
         }
-        public string EndFrameCapture()
+        public string EndFrameCapture(string tagName = null)
         {
             if (CaptureRenderDocFrame == false)
             {
@@ -722,7 +722,8 @@ namespace EngineNS.NxRHI
             var file = IRenderDocTool.GetInstance().GetCapture(idx, ref timeStamp);
             if (!string.IsNullOrEmpty(file) && IO.TtFileManager.FileExists(file))
             {
-                var tarFile = IO.TtFileManager.GetPureName(file) + ".rdc";
+                var extName = (tagName != null) ? "_" + tagName : "";
+                var tarFile = IO.TtFileManager.GetPureName(file) + $"{extName}.rdc";
                 System.IO.File.Move(file, UEngine.Instance.FileManager.GetPath(IO.TtFileManager.ERootDir.Cache, IO.TtFileManager.ESystemDir.RenderDoc) + tarFile);
                 return tarFile;
             }

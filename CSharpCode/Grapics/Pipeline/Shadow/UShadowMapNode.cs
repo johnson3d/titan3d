@@ -63,7 +63,7 @@ namespace EngineNS.Graphics.Pipeline.Shadow
         private UCamera[] mShadowCameraArray;
         public UCamera ViewerCamera;
         public UCamera CullCamera;
-        public UGraphicsBuffers[] GBuffersArray;
+        public TtGraphicsBuffers[] GBuffersArray;
         public UDrawBuffers[] CSMPass = new UDrawBuffers[4];
 
         TtCpuCullingNode[] CSMCullingNode = new TtCpuCullingNode[4];
@@ -135,7 +135,7 @@ namespace EngineNS.Graphics.Pipeline.Shadow
                 }
             }
 
-            GBuffersArray = new UGraphicsBuffers[4];
+            GBuffersArray = new TtGraphicsBuffers[4];
             unsafe
             {
                 var PassDesc = new NxRHI.FRenderPassDesc();
@@ -155,13 +155,13 @@ namespace EngineNS.Graphics.Pipeline.Shadow
                 //PassDesc.mStencilClearValue = 0u;
                 NxRHI.URenderPass RenderPass = UEngine.Instance.GfxDevice.RenderPassManager.GetPipelineState<NxRHI.FRenderPassDesc>(rc, in PassDesc);
 
-                GBuffersArray[0] = new UGraphicsBuffers();
+                GBuffersArray[0] = new TtGraphicsBuffers();
                 GBuffersArray[0].Initialize(policy, RenderPass);
                 //GBuffers.CreateGBuffer(0, EPixelFormat.PXF_UNKNOWN, (uint)x, (uint)y);            
                 //GBuffersArray[0].SetRenderTarget(policy, 0, ColorPinOut);
                 GBuffersArray[0].SetDepthStencil(policy, DepthPinOut);
 
-                GBuffersArray[0].TargetViewIdentifier = new UGraphicsBuffers.UTargetViewIdentifier();
+                GBuffersArray[0].TargetViewIdentifier = new TtGraphicsBuffers.TtTargetViewIdentifier();
                 GBuffersArray[0].SetSize(mResolutionX, mResolutionY);
 
                 var PassDescTwo = new NxRHI.FRenderPassDesc();
@@ -180,14 +180,14 @@ namespace EngineNS.Graphics.Pipeline.Shadow
 
                 for (UInt32 CamIdx = 1; CamIdx < mCsmNum; CamIdx++)
                 {
-                    GBuffersArray[CamIdx] = new UGraphicsBuffers();
+                    GBuffersArray[CamIdx] = new TtGraphicsBuffers();
 
                     GBuffersArray[CamIdx].Initialize(policy, RenderPassTwo);
                     //GBuffers.CreateGBuffer(0, EPixelFormat.PXF_UNKNOWN, (uint)x, (uint)y);
                     //GBuffersArray[CamIdx].SetRenderTarget(policy, 0, ColorPinOut);
                     GBuffersArray[CamIdx].SetDepthStencil(policy, DepthPinOut);
 
-                    GBuffersArray[CamIdx].TargetViewIdentifier = new UGraphicsBuffers.UTargetViewIdentifier();
+                    GBuffersArray[CamIdx].TargetViewIdentifier = new TtGraphicsBuffers.TtTargetViewIdentifier();
                     GBuffersArray[CamIdx].SetSize(mResolutionX, mResolutionY);
                 }
             }

@@ -58,5 +58,9 @@ namespace EngineNS.NxRHI
         {
             mCoreObject.Wait(value, time);
         }
+        public void WaitToExpect(uint time = uint.MaxValue)
+        {
+            mCoreObject.WaitToExpect(time);
+        }
     }
 }

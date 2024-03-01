@@ -112,7 +112,7 @@ namespace EngineNS.UI.Controls
                 // set default value
                 for(int i=0; i<template.DefaultValues.Count; i++)
                 {
-                    template.DefaultValues[i].SetTempalteValue(this);
+                    this.SetTemplateValue(template.DefaultValues[i]);
                 }
             }
 

@@ -6,11 +6,11 @@ namespace EngineNS.Bricks.Procedure.Algorithm
 {
     public class SimulateRainDrop
     {
-        public UBufferConponent SimTex;
+        public UBufferComponent SimTex;
         public int SimulateSize = 512;
-        public UBufferConponent FlowMap;
+        public UBufferComponent FlowMap;
 
-        public UBufferConponent TrackMap;
+        public UBufferComponent TrackMap;
 
         public bool ShouldDrawSlope = false;
 
@@ -353,7 +353,7 @@ namespace EngineNS.Bricks.Procedure.Algorithm
         }
 
 
-        private Vector2 getDirection(UBufferConponent tex, Vector2i pos)
+        private Vector2 getDirection(UBufferComponent tex, Vector2i pos)
         {
             var color = tex.GetPixel<Color4f>(pos.X, pos.Y);
             float r = (color.Red * COLOR_ASPECT / 0.5f - 1.0f);
@@ -362,7 +362,7 @@ namespace EngineNS.Bricks.Procedure.Algorithm
             return flow;
         }
 
-        private Vector2i getDirectionInt(UBufferConponent tex, Vector2i pos)
+        private Vector2i getDirectionInt(UBufferComponent tex, Vector2i pos)
         {
             Vector2 flow = getDirection(tex, pos);
             return new Vector2i(

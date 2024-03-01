@@ -26,11 +26,11 @@ namespace EngineNS.Graphics.Pipeline.Common
         public override void InitNodePins()
         {
             AddInput(VisiblesPinIn, NxRHI.EBufferType.BFT_NONE);
-            GpuScenePinOut.LifeMode = UAttachBuffer.ELifeMode.Imported;
+            GpuScenePinOut.LifeMode = TtAttachBuffer.ELifeMode.Imported;
             AddOutput(GpuScenePinOut, NxRHI.EBufferType.BFT_SRV | NxRHI.EBufferType.BFT_UAV);
-            PointLightsPinOut.LifeMode = UAttachBuffer.ELifeMode.Imported;
+            PointLightsPinOut.LifeMode = TtAttachBuffer.ELifeMode.Imported;
             AddOutput(PointLightsPinOut, NxRHI.EBufferType.BFT_SRV | NxRHI.EBufferType.BFT_UAV);
-            InstancePinOut.LifeMode = UAttachBuffer.ELifeMode.Imported;
+            InstancePinOut.LifeMode = TtAttachBuffer.ELifeMode.Imported;
             AddOutput(InstancePinOut, NxRHI.EBufferType.BFT_SRV | NxRHI.EBufferType.BFT_UAV);
         }
         public unsafe override void FrameBuild(Graphics.Pipeline.URenderPolicy policy)
