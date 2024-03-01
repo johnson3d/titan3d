@@ -85,6 +85,12 @@
     <Filter Include="Bricks\VirtualTexture">
       <UniqueIdentifier>{a84b8577-40f5-4401-854c-3a5389de654e}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Bricks\Procedure">
+      <UniqueIdentifier>{dc74ac44-9c44-4788-9e45-ce87bf09810d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Bricks\Procedure\Erosion">
+      <UniqueIdentifier>{78b0777d-0f66-4381-ac1e-cec5d95ca416}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <None Include="$(MSBuildThisFileDirectory)Material\TestMaterial.mtl">
@@ -378,6 +384,9 @@
     </None>
     <None Include="$(MSBuildThisFileDirectory)Bricks\VirtualTexture\RealtimeVT.cginc">
       <Filter>Bricks\VirtualTexture</Filter>
+    </None>
+    <None Include="$(MSBuildThisFileDirectory)Bricks\Procedure\Erosion\IncWater.compute">
+      <Filter>Bricks\Procedure\Erosion</Filter>
     </None>
   </ItemGroup>
   <ItemGroup>
