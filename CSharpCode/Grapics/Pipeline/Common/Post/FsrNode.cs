@@ -81,7 +81,6 @@ namespace EngineNS.Graphics.Pipeline.Common.Post
             }
         }
     }
-
     public class TtRCASShading : Shader.UComputeShadingEnv
     {
         public override Vector3ui DispatchArg
@@ -131,7 +130,7 @@ namespace EngineNS.Graphics.Pipeline.Common.Post
             }
         }
     }
-
+    [Bricks.CodeBuilder.ContextMenu("Fsr", "Post\\Fsr", Bricks.RenderPolicyEditor.UPolicyGraph.RGDEditorKeyword)]
     public class TtFsrNode : TtRenderGraphNode
     {
         public TtRenderGraphPin ColorPinIn = TtRenderGraphPin.CreateInputOutput("Color");

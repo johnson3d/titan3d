@@ -86,6 +86,7 @@ namespace EngineNS.Graphics.Pipeline.Deferred
             };
         }
     }
+    [Bricks.CodeBuilder.ContextMenu("Forword", "Deferred\\Worword", Bricks.RenderPolicyEditor.UPolicyGraph.RGDEditorKeyword)]
     public class UForwordNode : Common.UBasePassNode
     {
         public TtRenderGraphPin VisiblesPinIn = TtRenderGraphPin.CreateInput("Visibles");
@@ -265,6 +266,7 @@ namespace EngineNS.Graphics.Pipeline.Deferred
         }
     }
 
+    [Bricks.CodeBuilder.ContextMenu("Gizmos", "Deferred\\Gizmos", Bricks.RenderPolicyEditor.UPolicyGraph.RGDEditorKeyword)]
     public class TtGizmosNode : Common.UBasePassNode
     {
         public TtRenderGraphPin VisiblesPinIn = TtRenderGraphPin.CreateInput("Visibles");

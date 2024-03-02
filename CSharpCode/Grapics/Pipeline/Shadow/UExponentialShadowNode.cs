@@ -53,6 +53,7 @@ namespace EngineNS.Graphics.Pipeline.Shadow
                 drawcall.BindSampler(index, UEngine.Instance.GfxDevice.SamplerStateManager.DefaultState);
         }
     }
+    [Bricks.CodeBuilder.ContextMenu("ESM", "Shadow\\ESM", Bricks.RenderPolicyEditor.UPolicyGraph.RGDEditorKeyword)]
     public class UExponentialShadowNode : USceenSpaceNode
     {
         public TtRenderGraphPin ShadowMapPinIn = TtRenderGraphPin.CreateInput("ShadowMap");

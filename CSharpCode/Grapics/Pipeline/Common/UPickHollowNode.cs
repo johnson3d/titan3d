@@ -48,6 +48,7 @@ namespace EngineNS.Graphics.Pipeline.Common
                 drawcall.BindSampler(index, UEngine.Instance.GfxDevice.SamplerStateManager.DefaultState);
         }
     }
+    [Bricks.CodeBuilder.ContextMenu("PickHollow", "Pick\\PickHollow", Bricks.RenderPolicyEditor.UPolicyGraph.RGDEditorKeyword)]
     public class UPickHollowNode : USceenSpaceNode
     {
         public TtRenderGraphPin PickedPinIn = TtRenderGraphPin.CreateInput("Picked");

@@ -61,6 +61,7 @@ namespace EngineNS.Graphics.Pipeline.Common
             }
         }
     }
+    [Bricks.CodeBuilder.ContextMenu("Fog", "Post\\Fog", Bricks.RenderPolicyEditor.UPolicyGraph.RGDEditorKeyword)]
     public partial class TtFogNode
     {
         private void TtFogNode_InitExpHeight()

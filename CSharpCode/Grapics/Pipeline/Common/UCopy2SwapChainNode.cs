@@ -23,7 +23,7 @@ namespace EngineNS.Graphics.Pipeline.Common
     {
         public TtAttachBuffer ColorAttachement = null;
     }
-
+    [Bricks.CodeBuilder.ContextMenu("Copy2SwapChain", "Copy2SwapChain", Bricks.RenderPolicyEditor.UPolicyGraph.RGDEditorKeyword)]
     public class UCopy2SwapChainNode : TtEndingNode
     {
         public TtRenderGraphPin ColorPinIn = TtRenderGraphPin.CreateInput("Color");

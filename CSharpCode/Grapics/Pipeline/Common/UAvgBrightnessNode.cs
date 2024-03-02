@@ -5,6 +5,7 @@ using System.Text;
 
 namespace EngineNS.Graphics.Pipeline.Common
 {
+    [Bricks.CodeBuilder.ContextMenu("AvgBrightness", "AvgBrightness", Bricks.RenderPolicyEditor.UPolicyGraph.RGDEditorKeyword)]
     public class UAvgBrightnessNode : Graphics.Pipeline.TtRenderGraphNode
     {
         public override void Dispose()

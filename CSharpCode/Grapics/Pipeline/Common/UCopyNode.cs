@@ -4,6 +4,7 @@ using System.Text;
 
 namespace EngineNS.Graphics.Pipeline.Common
 {
+    [Bricks.CodeBuilder.ContextMenu("Copy", "Copy", Bricks.RenderPolicyEditor.UPolicyGraph.RGDEditorKeyword)]
     public class UCopyNode : Graphics.Pipeline.TtRenderGraphNode
     {
         public TtRenderGraphPin SrcPinIn = TtRenderGraphPin.CreateInput("Src");

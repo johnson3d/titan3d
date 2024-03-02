@@ -35,6 +35,7 @@ namespace EngineNS.Graphics.Pipeline.Deferred
             };
         }
     }
+    [Bricks.CodeBuilder.ContextMenu("BassPass", "Deferred\\BassPass", Bricks.RenderPolicyEditor.UPolicyGraph.RGDEditorKeyword)]
     public class UDeferredBasePassNode : Common.UBasePassNode
     {
         public TtRenderGraphPin VisiblesPinIn = TtRenderGraphPin.CreateInput("Visibles");

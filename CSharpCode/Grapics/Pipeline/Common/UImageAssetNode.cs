@@ -4,6 +4,7 @@ using System.Text;
 
 namespace EngineNS.Graphics.Pipeline.Common
 {
+    [Bricks.CodeBuilder.ContextMenu("Image", "Image", Bricks.RenderPolicyEditor.UPolicyGraph.RGDEditorKeyword)]
     public class UImageAssetNode : TtRenderGraphNode
     {
         public TtRenderGraphPin ImagePinOut = TtRenderGraphPin.CreateOutput("Image", false, EPixelFormat.PXF_R8G8B8A8_UNORM);

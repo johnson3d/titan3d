@@ -50,7 +50,8 @@ namespace EngineNS.Graphics.Pipeline.Common
             if (index.IsValidPointer)
                 drawcall.BindSampler(index, UEngine.Instance.GfxDevice.SamplerStateManager.DefaultState);
         }
-    }    
+    }
+    [Bricks.CodeBuilder.ContextMenu("PickBlur", "Pick\\PickBlur", Bricks.RenderPolicyEditor.UPolicyGraph.RGDEditorKeyword)]
     public class UPickBlurNode : USceenSpaceNode
     {
         public TtRenderGraphPin PickedPinIn = TtRenderGraphPin.CreateInput("Picked");

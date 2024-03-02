@@ -226,6 +226,7 @@ namespace EngineNS.Graphics.Pipeline.Deferred
             UpdatePermutation();
         }
     }
+    [Bricks.CodeBuilder.ContextMenu("DirLighting", "Deferred\\DirLighting", Bricks.RenderPolicyEditor.UPolicyGraph.RGDEditorKeyword)]
     public partial class UDeferredDirLightingNode : Common.USceenSpaceNode
     {
         public TtRenderGraphPin Rt0PinIn = TtRenderGraphPin.CreateInput("MRT0");

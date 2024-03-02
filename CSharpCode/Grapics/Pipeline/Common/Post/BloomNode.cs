@@ -7,6 +7,7 @@ using EngineNS.GamePlay;
 namespace EngineNS.Graphics.Pipeline.Common.Post
 {
     //Bloom: https://zhuanlan.zhihu.com/p/525500877
+    [Bricks.CodeBuilder.ContextMenu("Bloom", "Post\\Bloom", Bricks.RenderPolicyEditor.UPolicyGraph.RGDEditorKeyword)]
     public class TtBloomNode : TtRenderGraphNode
     {
         public TtRenderGraphPin ColorPinIn = TtRenderGraphPin.CreateInputOutput("Color");

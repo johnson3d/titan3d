@@ -83,6 +83,7 @@ namespace EngineNS.Graphics.Pipeline.Common.Post
             base.OnDrawCall(cmd, drawcall, policy, atom);
         }
     }
+    [Bricks.CodeBuilder.ContextMenu("SunShaftDepthThreshole", "Post\\SunShaftDepthThreshole", Bricks.RenderPolicyEditor.UPolicyGraph.RGDEditorKeyword)]
     public class TtSunShaftDepthThresholeNode : USceenSpaceNode
     {
         public TtRenderGraphPin ColorPinIn = TtRenderGraphPin.CreateInput("Color");
@@ -221,6 +222,7 @@ namespace EngineNS.Graphics.Pipeline.Common.Post
             base.OnDrawCall(cmd, drawcall, policy, atom);
         }
     }
+    [Bricks.CodeBuilder.ContextMenu("SunShaftRadialBlur", "Post\\SunShaftRadialBlur", Bricks.RenderPolicyEditor.UPolicyGraph.RGDEditorKeyword)]
     public class TtSunShaftRadialBlurNode : USceenSpaceNode
     {
         public TtRenderGraphPin ColorPinIn = TtRenderGraphPin.CreateInput("Color");

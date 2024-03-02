@@ -4,6 +4,7 @@ using System.Text;
 
 namespace EngineNS.Graphics.Pipeline
 {
+    [Bricks.CodeBuilder.ContextMenu("CpuCulling", "Culling\\CpuCulling", Bricks.RenderPolicyEditor.UPolicyGraph.RGDEditorKeyword)]
     public class TtCpuCullingNode : TtRenderGraphNode
     {
         public TtRenderGraphPin VisiblesOut = TtRenderGraphPin.CreateOutput("Visibles", false, EPixelFormat.PXF_UNKNOWN);

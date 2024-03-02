@@ -33,6 +33,7 @@ namespace EngineNS.Graphics.Pipeline.Shadow
             drawcall.mCoreObject.BindPipeline(UEngine.Instance.GfxDevice.RenderContext.mCoreObject, shadowMapNode.DepthRaster.mCoreObject);
         }
     }
+    [Bricks.CodeBuilder.ContextMenu("CSM", "Shadow\\CSM", Bricks.RenderPolicyEditor.UPolicyGraph.RGDEditorKeyword)]
     public class UShadowMapNode : TtRenderGraphNode
     {
         public TtRenderGraphPin[] VisiblePinIn = new TtRenderGraphPin[]{

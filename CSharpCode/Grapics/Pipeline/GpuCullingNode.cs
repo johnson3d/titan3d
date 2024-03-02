@@ -108,6 +108,7 @@ namespace EngineNS.Graphics.Pipeline
             return Hash64.FromData((byte*)data, sizeof(int) * size);
         }
     }
+    [Bricks.CodeBuilder.ContextMenu("GpuCulling", "Culling\\GpuCulling", Bricks.RenderPolicyEditor.UPolicyGraph.RGDEditorKeyword)]
     public class TtGpuCullingNode : TtRenderGraphNode
     {
         public TtRenderGraphPin VisiblesPinIn = TtRenderGraphPin.CreateInput("Visibles");

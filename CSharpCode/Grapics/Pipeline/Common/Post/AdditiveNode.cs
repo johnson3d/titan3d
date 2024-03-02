@@ -67,6 +67,7 @@ namespace EngineNS.Graphics.Pipeline.Common.Post
             base.OnDrawCall(cmd, drawcall, policy, atom);
         }
     }
+    [Bricks.CodeBuilder.ContextMenu("Additive", "Post\\Additive", Bricks.RenderPolicyEditor.UPolicyGraph.RGDEditorKeyword)]
     public class TtAdditiveNode : USceenSpaceNode
     {
         public TtRenderGraphPin Color1PinIn = TtRenderGraphPin.CreateInput("Color1");
@@ -154,6 +155,7 @@ namespace EngineNS.Graphics.Pipeline.Common.Post
             defines.AddDefine("ENV_ADD_LUMINANCE", "1");
         }
     }
+    [Bricks.CodeBuilder.ContextMenu("AdditiveLum", "Post\\AdditiveLum", Bricks.RenderPolicyEditor.UPolicyGraph.RGDEditorKeyword)]
     public class TtAdditiveLumNode : TtAdditiveNode
     {
         public TtAdditiveLumNode()

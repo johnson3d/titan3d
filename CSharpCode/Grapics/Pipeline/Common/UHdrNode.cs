@@ -44,6 +44,7 @@ namespace EngineNS.Graphics.Pipeline.Common
                 drawcall.BindCBuffer(index, policy.GetGpuSceneNode().PerGpuSceneCbv);
         }
     }
+    [Bricks.CodeBuilder.ContextMenu("Hdr", "Post\\Hdr", Bricks.RenderPolicyEditor.UPolicyGraph.RGDEditorKeyword)]
     public class UHdrNode : USceenSpaceNode
     {
         public TtRenderGraphPin ColorPinIn = TtRenderGraphPin.CreateInput("Color");
