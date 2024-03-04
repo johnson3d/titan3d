@@ -134,6 +134,14 @@ namespace EngineNS.NxRHI
         {
             mCoreObject.NativeSuper.UpdateGpuDataSimple(offset, pData, size, subRes);
         }
+        public bool FetchGpuData(uint index, EngineNS.IBlobObject blob)
+        {
+            return mCoreObject.FetchGpuData(index, blob);
+        }
+        public NxRHI.IBuffer CreateReadable(int subRes, EngineNS.NxRHI.ICopyDraw cpDraw)
+        {
+            return mCoreObject.CreateReadable(UEngine.Instance.GfxDevice.RenderContext.mCoreObject, subRes, cpDraw);
+        }
         public void TransitionTo(ICommandList cmd, EGpuResourceState state)
         {
             mCoreObject.NativeSuper.TransitionTo(cmd, state);
@@ -182,6 +190,14 @@ namespace EngineNS.NxRHI
         public unsafe void UpdateGpuData(NxRHI.ICommandList cmd, uint offset, void* pData, uint size, uint subRes = 0)
         {
             mCoreObject.NativeSuper.UpdateGpuDataSimple(cmd, offset, pData, size, subRes);
+        }
+        public bool FetchGpuData(uint index, EngineNS.IBlobObject blob)
+        {
+            return mCoreObject.FetchGpuData(index, blob);
+        }
+        public NxRHI.IBuffer CreateReadable(int subRes, EngineNS.NxRHI.ICopyDraw cpDraw)
+        {
+            return mCoreObject.CreateReadable(UEngine.Instance.GfxDevice.RenderContext.mCoreObject, subRes, cpDraw);
         }
         public void TransitionTo(ICommandList cmd, EGpuResourceState state)
         {

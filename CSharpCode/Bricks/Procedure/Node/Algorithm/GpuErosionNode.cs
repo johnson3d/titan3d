@@ -1,4 +1,5 @@
-﻿using EngineNS.Bricks.RenderPolicyEditor;
+﻿using Assimp;
+using EngineNS.Bricks.RenderPolicyEditor;
 using EngineNS.GamePlay;
 using EngineNS.Graphics.Pipeline;
 using System;
@@ -70,14 +71,14 @@ namespace EngineNS.Bricks.Procedure.Node
             {
                 ShadingEnv.SetDrawcallDispatch(this, policy, mDrawcall, 1, 1, 1, true);
                 mCmdList.PushGpuDraw(mDrawcall);
-                mCmdList.PushAction(static (EngineNS.NxRHI.ICommandList cmd, void* arg1) =>
-                {
+                //mCmdList.PushAction(static (EngineNS.NxRHI.ICommandList cmd, void* arg1) =>
+                //{
                     
-                }, IntPtr.Zero.ToPointer());
+                //}, IntPtr.Zero.ToPointer());
                 mCmdList.FlushDraws();
             }
             
-            UEngine.Instance.GfxDevice.RenderContext.GpuQueue.ExecuteCommandList(mCmdList, NxRHI.EQueueType.QU_Compute);            
+            UEngine.Instance.GfxDevice.RenderContext.GpuQueue.ExecuteCommandList(mCmdList, NxRHI.EQueueType.QU_Compute);
         }
     }
 
@@ -96,7 +97,9 @@ namespace EngineNS.Bricks.Procedure.Node
         }
         public override void Dispose()
         {
+            CoreSDK.DisposePtr(ref ReadableTexture);
             CoreSDK.DisposeObject(ref mFinishFence);
+            CoreSDK.DisposeObject(ref mCmdList);
         }
         public override async Task Initialize(URenderPolicy policy, string debugName)
         {
@@ -105,10 +108,23 @@ namespace EngineNS.Bricks.Procedure.Node
             var rc = UEngine.Instance.GfxDevice.RenderContext;
             var fenceDesc = new NxRHI.FFenceDesc();
             mFinishFence = rc.CreateFence(in fenceDesc, "TtErosionEndingNode");
+            mCmdList = rc.CreateCommandList();
         }
         public NxRHI.UFence mFinishFence;
+        public NxRHI.UCommandList mCmdList;
+        public NxRHI.IBuffer ReadableTexture;
         public override void TickLogic(UWorld world, URenderPolicy policy, bool bClear)
         {
+            using (new NxRHI.TtCmdListScope(mCmdList))
+            {
+                var cpDraw = UEngine.Instance.GfxDevice.RenderContext.CreateCopyDraw();
+                var texture = policy.AttachmentCache.FindAttachement(HeightPinIn).Buffer as NxRHI.UTexture;
+                CoreSDK.DisposePtr(ref ReadableTexture);
+                ReadableTexture = texture.CreateReadable(0, cpDraw.mCoreObject);
+                mCmdList.PushGpuDraw(cpDraw);
+                mCmdList.FlushDraws();
+            }
+            UEngine.Instance.GfxDevice.RenderContext.GpuQueue.ExecuteCommandList(mCmdList, NxRHI.EQueueType.QU_Compute);
             UEngine.Instance.GfxDevice.RenderContext.GpuQueue.IncreaseSignal(mFinishFence, NxRHI.EQueueType.QU_Compute);
         }
     }
@@ -173,7 +189,25 @@ namespace EngineNS.Bricks.Procedure.Node
             }
 
             ending.mFinishFence.WaitToExpect();
-            //buffer.Fetch
+            var readTexture = ending.ReadableTexture;
+            var blob = new Support.UBlobObject();
+            readTexture.FetchGpuData(0, blob.mCoreObject);
+            using (var reader = IO.UMemReader.CreateInstance((byte*)blob.DataPointer, blob.Size))
+            {
+                uint rowPitch, depthPitch;
+                reader.Read(out rowPitch);
+                reader.Read(out depthPitch);
+                var pImage = ((byte*)blob.DataPointer + reader.GetPosition());
+
+                for (int y = 0; y < Output.Height; y++)
+                {
+                    for (int x = 0; x < Output.Width; x++)
+                    {
+                        Output.SetFloat1(x, y, 0, ((float*)pImage)[x]);
+                    }
+                    pImage += rowPitch;
+                }
+            }   
             return true;
         }
     }

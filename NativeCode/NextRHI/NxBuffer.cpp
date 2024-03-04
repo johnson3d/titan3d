@@ -1,4 +1,6 @@
 #include "NxBuffer.h"
+#include "NxDrawcall.h"
+#include "NxCommandList.h"
 #include "../../Base/float16/float16.h"
 //#include "../Bricks/ImageDecoder/XImageDecoder.h"
 #include "../Bricks/ImageDecoder/XImageBuffer.h"
@@ -22,6 +24,50 @@ StructEnd(EngineNS::NxRHI::ISrView, VIUnknown)
 
 namespace NxRHI
 {
+	IBuffer* IBuffer::CreateReadable(IGpuDevice* device, int subRes, ICopyDraw* cpDraw)
+	{
+		auto cpDesc = this->Desc;
+		cpDesc.Usage = USAGE_STAGING;
+		cpDesc.CpuAccess = CAS_READ;
+		auto cpBuffer = device->CreateBuffer(&cpDesc);
+		if (cpDraw != nullptr)
+		{
+			cpDraw->BindBufferDest(cpBuffer);
+			cpDraw->BindBufferSrc(this);
+			cpDraw->DestSubResource = 0;
+			cpDraw->Mode = NxRHI::ECopyDrawMode::CDM_Buffer2Buffer;
+		}
+		return cpBuffer;
+	}
+	IBuffer* ITexture::CreateReadable(IGpuDevice* device, int subRes, ICopyDraw* cpDraw)
+	{
+		FBufferDesc cpDesc;
+		cpDesc.SetDefault();
+		cpDesc.Type = NxRHI::EBufferType::BFT_NONE;
+		cpDesc.Usage = USAGE_STAGING;
+		cpDesc.CpuAccess = CAS_READ;
+		cpDesc.RowPitch = device->GetGpuResourceAlignment()->RoundupTexturePitch(Desc.Width * GetPixelByteWidth(Desc.Format));
+		cpDesc.Size = cpDesc.RowPitch * Desc.Height;
+		auto cpBuffer = device->CreateBuffer(&cpDesc);
+		if (cpDraw != nullptr)
+		{
+			cpDraw->BindBufferDest(cpBuffer);
+			cpDraw->BindTextureSrc(this);
+			cpDraw->SrcSubResource = subRes;
+			cpDraw->Mode = NxRHI::ECopyDrawMode::CDM_Texture2Buffer;
+
+			cpDraw->FootPrint.SetDefault();
+			cpDraw->FootPrint.Format = Desc.Format;
+			cpDraw->FootPrint.RowPitch = cpDesc.RowPitch;
+			cpDraw->FootPrint.TotalSize = cpDesc.Size;
+			cpDraw->FootPrint.Width = Desc.Width;
+			cpDraw->FootPrint.Height = Desc.Height;
+			cpDraw->FootPrint.Depth = 1;
+		}
+		//cmdlist->PushGpuDraw(cpDraw);
+		return cpBuffer;
+	}
+
 	long ISrView::AddRef()
 	{
 		/*if (Buffer != nullptr)

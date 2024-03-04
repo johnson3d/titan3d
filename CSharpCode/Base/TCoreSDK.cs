@@ -96,6 +96,14 @@ namespace EngineNS
                 obj = null;
             }
         }
+        public static void DisposePtr<T>(ref T obj) where T : IPtrType, IDisposable
+        {
+            if (obj.NativePointer != IntPtr.Zero)
+            {
+                obj.Dispose();
+                obj.NativePointer = IntPtr.Zero;
+            }
+        }
         public unsafe static bool IsNullPointer<T>(T* ptr) where T : unmanaged
         {
             return ptr == (T*)0;

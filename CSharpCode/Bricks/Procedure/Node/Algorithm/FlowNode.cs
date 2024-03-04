@@ -1,23 +1,24 @@
 using System.Collections.Generic;
 
-namespace EngineNS.Bricks.Procedure.Algorithm
+namespace EngineNS.Bricks.Procedure.Node
 {
     public class FlowNode
     {
         static float[] cr = { 0.5f, 0, 1, 0, 1, 0.5f, 0.5f, 0, 1 };
         static float[] cg = { 0.5f, 0, 0, 1, 1, 0, 1, 0.5f, 0.5f };
-        public static UBufferComponent GenerateFlowMap_GIS(UBufferComponent map)
+        public unsafe static UBufferComponent GenerateFlowMap_GIS(UBufferComponent map)
         {
             var creator = UBufferCreator.CreateInstance<USuperBuffer<Vector4, FFloat4Operator>>(map.Width, map.Height, 1);
             var flowMap = UBufferComponent.CreateInstance(creator);
             int width = map.Width;
+            int height = map.Height;
             int count = width * width;
-            float[] elevations = Common.WrapNode.Unpack(map);
+            float[] elevations = Algorithm.Common.WrapNode.Unpack(map);
             float[] filled_elevations = new float[count];
-            RiverNode.fill_lake(ref elevations, ref filled_elevations, width);
+            TtRiverNode.fill_lake(elevations, filled_elevations, width, height);
             int[] FD = new int[count];
-            RiverNode.calc_flow_directions(ref filled_elevations, ref FD, width);
-            RiverNode.calc_flow_directions_flats(ref filled_elevations, ref FD, width);
+            TtRiverNode.calc_flow_directions(filled_elevations, FD, width, height);
+            TtRiverNode.calc_flow_directions_flats(filled_elevations, FD, width, height);
             for (int i = 0; i < width; i++)
             {
                 for (int j = 0; j < width; j++)

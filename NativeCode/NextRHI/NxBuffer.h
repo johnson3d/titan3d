@@ -198,6 +198,7 @@ namespace NxRHI
 			GpuState = state;
 		}
 		virtual bool FetchGpuData(UINT subRes, IBlobObject* blob) = 0;
+		virtual IBuffer* CreateReadable(IGpuDevice* device, int subRes, ICopyDraw* cpDraw) = 0;
 		virtual void UpdateGpuData(UINT subRes, void* pData, const FSubResourceFootPrint* footPrint) {
 			ASSERT(false);
 		}
@@ -233,7 +234,7 @@ namespace NxRHI
 	public:
 		EGpuResourceState	GpuState = EGpuResourceState::GRS_Undefine;
 	};
-	class TR_CLASS()
+	class TR_CLASS(SV_Dispose = self->Release())
 		IBuffer : public IGpuBufferData
 	{
 	public:
@@ -264,6 +265,7 @@ namespace NxRHI
 			}
 			return false;
 		}
+		virtual IBuffer* CreateReadable(IGpuDevice* device, int subRes, ICopyDraw* cpDraw) override;
 		template<class _T>
 		void SetValue(const FShaderVarDesc& binder, const _T& v)
 		{
@@ -404,7 +406,7 @@ namespace NxRHI
 		EResourceMiscFlag MiscFlags = (EResourceMiscFlag)0;
 		FMappedSubResource* InitData;
 	};
-	class TR_CLASS()
+	class TR_CLASS(SV_Dispose = self->Release())
 		ITexture : public IGpuBufferData
 	{//1,2,3d
 	public:
@@ -446,6 +448,7 @@ namespace NxRHI
 			}
 			return false;
 		}
+		virtual IBuffer* CreateReadable(IGpuDevice* device, int subRes, ICopyDraw* cpDraw) override;
 	public:
 		FTextureDesc		Desc{};
 		FResourceState		mResourceState{};

@@ -1,4 +1,5 @@
-﻿using NPOI.Util;
+﻿using NPOI.SS.Formula.Functions;
+using NPOI.Util;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -78,6 +79,13 @@ namespace EngineNS.IO
         public void Dispose()
         {
             Reader.Dispose();
+        }
+        public unsafe void Read<T>(out T v) where T : unmanaged
+        {
+            fixed(T* p = &v)
+            {
+                ReadPtr(p, sizeof(T));
+            }
         }
     }
 
