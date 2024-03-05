@@ -572,6 +572,7 @@ namespace EngineNS.UI.Controls.Containers
             {
                 OnValueChange(value, mBrush);
                 mBrush = value;
+                mBrush.HostElement = this;
             }
         }
         protected Thickness mBorderThickness = Thickness.Empty;
@@ -605,6 +606,7 @@ namespace EngineNS.UI.Controls.Containers
             {
                 OnValueChange(value, mBorderBrush);
                 mBorderBrush = value;
+                mBorderBrush.HostElement = this;
             }
         }
         protected TtBrush mBackground;
@@ -616,6 +618,7 @@ namespace EngineNS.UI.Controls.Containers
             {
                 OnValueChange(value, mBackground);
                 mBackground = value;
+                mBackground.HostElement = this;
             }
         }
         public TtContainer()

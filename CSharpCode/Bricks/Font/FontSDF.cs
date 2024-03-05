@@ -345,7 +345,7 @@ namespace EngineNS.Bricks.Font
         {
             return mCoreObject.GetWords(pWords, count, text, numOfChar);
         }
-        public unsafe uint GetWords(UNativeArray<EngineNS.Canvas.FTWord> words, string text)
+        public unsafe uint GetWords(ref UNativeArray<EngineNS.Canvas.FTWord> words, string text)
         {
             var count = text.Length;
             words.SetSize(count);
@@ -365,6 +365,24 @@ namespace EngineNS.Bricks.Font
                 {
                     var numOfUtf32 = System.Text.Encoding.UTF32.GetBytes(p, text.Length, (byte*)buffer.GetBuffer(), text.Length * sizeof(wchar_t));
                     return mCoreObject.GetWords(pWords, count, (wchar_t*)buffer.GetBuffer(), (uint)numOfUtf32);
+                }
+            }
+#endif
+        }
+        public unsafe Vector2 GetTextSize(string text)
+        {
+#if PWindow
+            fixed(char* p = text)
+            {
+                return mCoreObject.GetTextSize((wchar_t*)p);
+            }
+#else
+            fixed(char* p = text)
+            {
+                using (var buffer = BigStackBuffer.CreateInstance(text.Length * sizeof(wchar_t)))
+                {
+                    var numOfUtf32 = System.Text.Encoding.UTF32.GetBytes(p, text.Length, (byte*)buffer.GetBuffer(), text.Length * sizeof(wchar_t));
+                    return mCoreObject.GetTextSize((wchar_t*)buffer.GetBuffer());
                 }
             }
 #endif

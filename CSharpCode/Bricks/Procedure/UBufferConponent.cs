@@ -633,6 +633,7 @@ namespace EngineNS.Bricks.Procedure
             UVWStep.Y = 1.0f / (float)ySize;
             UVWStep.Z = 1.0f / (float)zSize;
         }
+        [MethodImplAttribute(MethodImplOptions.AggressiveInlining)]
         public unsafe byte* GetSuperPixelAddress(int x, int y, int z)
         {
             if (x < 0 || x >= Width || y < 0 || y >= Height || z < 0 || z >= Depth)
@@ -642,6 +643,7 @@ namespace EngineNS.Bricks.Procedure
             //return &pBuffer[(z * (Width * Depth) + Width * y + x) * ElementSize];
             return &pBuffer[Slice * z + y * Pitch + x * ElementSize];
         }
+        [MethodImplAttribute(MethodImplOptions.AggressiveInlining)]
         public unsafe void SetSuperPixelAddress(int x, int y, int z, void* valueAddress)
         {
             if (x < 0 || x >= Width || y < 0 || y >= Height || z < 0 || z >= Depth)
@@ -650,6 +652,7 @@ namespace EngineNS.Bricks.Procedure
             var pBuffer = (byte*)SuperPixels.mCoreObject.GetData();
             CoreSDK.MemoryCopy(&pBuffer[Slice * z + y * Pitch + x * ElementSize], valueAddress, (uint)ElementSize);
         }
+        [MethodImplAttribute(MethodImplOptions.AggressiveInlining)]
         public unsafe byte* GetSliceAddress(int index)
         {
             return GetSuperPixelAddress(0, 0, index);
@@ -658,6 +661,7 @@ namespace EngineNS.Bricks.Procedure
 
         #region template
         [Rtti.Meta]
+        [MethodImplAttribute(MethodImplOptions.AggressiveInlining)]
         public bool IsValidPixel(int x, int y = 0, int z = 0)
         {
             if (x < 0 || x >= Width ||
@@ -775,6 +779,7 @@ namespace EngineNS.Bricks.Procedure
                 }
             }
         }
+        [MethodImplAttribute(MethodImplOptions.AggressiveInlining)]
         public ref T GetPixel<T>(int x, int y, int z) where T : unmanaged
         {
             unsafe
@@ -787,6 +792,7 @@ namespace EngineNS.Bricks.Procedure
                 return ref *pAddr;
             }
         }
+        [MethodImplAttribute(MethodImplOptions.AggressiveInlining)]
         public void SetPixel<T>(int x, int y, int z, in T value) where T : unmanaged
         {
             unsafe
@@ -798,6 +804,7 @@ namespace EngineNS.Bricks.Procedure
                 }
             }
         }
+        [MethodImplAttribute(MethodImplOptions.AggressiveInlining)]
         public ref T GetPixel<T>(int x, int y) where T : unmanaged
         {
             unsafe
@@ -805,6 +812,7 @@ namespace EngineNS.Bricks.Procedure
                 return ref *(T*)GetSuperPixelAddress(x, y, 0);
             }
         }
+        [MethodImplAttribute(MethodImplOptions.AggressiveInlining)]
         public void SetPixel<T>(int x, int y, in T value) where T : unmanaged
         {
             unsafe
@@ -816,6 +824,7 @@ namespace EngineNS.Bricks.Procedure
                 }
             }
         }
+        [MethodImplAttribute(MethodImplOptions.AggressiveInlining)]
         public ref T GetPixel<T>(int x) where T : unmanaged
         {
             unsafe
@@ -823,6 +832,7 @@ namespace EngineNS.Bricks.Procedure
                 return ref *(T*)GetSuperPixelAddress(x, 0, 0);
             }
         }
+        [MethodImplAttribute(MethodImplOptions.AggressiveInlining)]
         public void SetPixel<T>(int x, in T value) where T : unmanaged
         {
             unsafe

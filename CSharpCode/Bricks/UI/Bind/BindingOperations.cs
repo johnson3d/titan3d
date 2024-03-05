@@ -20,11 +20,11 @@ namespace EngineNS.UI.Bind
 {
     public enum EBindingMode
     {
-        TwoWay,
-        OneWay,
-        OneTime,
-        OneWayToSource,
-        Default,
+        TwoWay,             // 双向绑定
+        OneWay,             // 单项，source改变时通知target改变
+        OneTime,            // 单次，第一次改变时通知
+        OneWayToSource,     // 单项，target改变时通知source改变
+        Default,            // 按照属性自己配置的方式处理
     }
     public enum EUpdateSourceTrigger
     {

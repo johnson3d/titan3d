@@ -16,9 +16,9 @@ namespace EngineNS.UI.Event
 {
     public enum ERoutedType
     {
-        Tunnel,
-        Bubble,
-        Direct
+        Tunnel, // 隧道路由事件：由UIHost开始事件处理程序并依次向下直到事件源
+        Bubble, // 冒泡路由事件：由事件源开始事件处理并依次向上直到UIHost
+        Direct  // 直接路由事件：直接由事件源进行事件处理并不再传递
     }
 
     public delegate void TtRoutedEventHandler(object sender, TtRoutedEventArgs args);

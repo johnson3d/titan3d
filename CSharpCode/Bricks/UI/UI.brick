@@ -4,7 +4,8 @@
   "FullName": "CSharpCode/Bricks/UI/UI.brick",
   "SharedProjects": [
     "CSharpCode/GamePlay/GamePlay.brick",
-    "CSharpCode/Bricks/CodeBuilder/CodeBuilder.brick"
+    "CSharpCode/Bricks/CodeBuilder/CodeBuilder.brick",
+    "CSharpCode/Bricks/Localization/Localization.brick"
   ],
   "Nugets": [],
   "DllModules": []

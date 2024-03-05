@@ -25,9 +25,11 @@ namespace EngineNS.UI
             {
                 TargetType = UTypeDesc.TypeOf(typeof(Controls.TtButton)),
             };
+            // 设置属性的默认值
             buttonTemplate.DefaultValues.Add(new TtTemplateSimpleValue(new TtBrush(Color.White, TtBrush.EBrushType.Rectangle), TtButton.BackgroundProperty));
             buttonTemplate.DefaultValues.Add(new TtTemplateSimpleValue(new TtBrush(Color.Tomato, TtBrush.EBrushType.Border), TtButton.BorderBrushProperty));
 
+            // 添加模板控件
             var buttonRoot = new TtUIElementFactory(UTypeDesc.TypeOf(typeof(Controls.Containers.TtBorder)));
             buttonRoot.SetValue(Controls.Containers.TtBorder.NameProperty, "border");
             buttonRoot.SetTemplateBindingValue<TtBrush, TtBrush>(Controls.Containers.TtBorder.BackgroundProperty, "Background", "Background");
@@ -42,6 +44,7 @@ namespace EngineNS.UI
             buttonRoot.AppendChild(content);
             mSystemDefaultTemplates[UTypeDesc.TypeOf(typeof(TtButton))] = buttonTemplate;
 
+            // 设置Trigger
             var proTrigger = new TtUIPropertyTrigger();
             proTrigger.AddCondition(TtButton.IsEnabledProperty, false);
             proTrigger.AddTriggerValue(TtBorder.BackgroundProperty, new TtBrush(Color.Gray, TtBrush.EBrushType.Rectangle), "border");

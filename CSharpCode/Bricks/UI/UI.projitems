@@ -31,7 +31,6 @@
     <Compile Include="$(MSBuildThisFileDirectory)Controls\Image.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Controls\Text.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Controls\ToggleButton.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Controls\UIControl.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Controls\UIElement.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Controls\UIElement_Bind.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Controls\UIElement_Editor.cs" />

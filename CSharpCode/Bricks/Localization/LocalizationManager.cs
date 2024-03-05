@@ -20,10 +20,10 @@ namespace EngineNS.Localization
             // https://www.cnblogs.com/crsky/p/13785729.html
             // https://stackoverflow.com/questions/45619497/c-sharp-split-a-string-with-mixed-language-into-different-language-chunks
             // https://blog.csdn.net/weixin_33836874/article/details/91867661
-            splits.Clear();
-            TypeCode cc = text[0].GetTypeCode();
-            CultureInfo.CurrentCulture.
-            CharUnicodeInfo.GetUnicodeCategory
+            //splits.Clear();
+            //TypeCode cc = text[0].GetTypeCode();
+            //CultureInfo.CurrentCulture.
+            //CharUnicodeInfo.GetUnicodeCategory
         }
     }
 }

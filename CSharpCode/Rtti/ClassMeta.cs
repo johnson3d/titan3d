@@ -876,6 +876,8 @@ namespace EngineNS.Rtti
             }
             public int CompareTo(TtPropertyMeta other)
             {
+                if (other == this)
+                    return 0;
                 var cmp = Order.CompareTo(other.Order);
                 if (cmp > 0)
                     return 1;

@@ -4,7 +4,7 @@ using EngineNS.Bricks.NodeGraph;
 
 namespace EngineNS.Bricks.Procedure.Node
 {
-    [Bricks.CodeBuilder.ContextMenu("River", "Float1\\River", UPgcGraph.PgcEditorKeyword)]
+    [Bricks.CodeBuilder.ContextMenu("River", "Water\\River", UPgcGraph.PgcEditorKeyword)]
     public class TtRiverNode : UPgcNodeBase
     {
         [Browsable(false)]
@@ -402,5 +402,74 @@ namespace EngineNS.Bricks.Procedure.Node
             return true;
         }
         
+    }
+
+    [Bricks.CodeBuilder.ContextMenu("Lake", "Water\\Lake", UPgcGraph.PgcEditorKeyword)]
+    public class TtLakeNode : Node.UAnyTypeMonocular
+    {
+        static int[] dx = { 0, -1, 1, -1, 1, 0, 0, -1, 1 };
+        static int[] dy = { 0, -1, -1, 1, 1, -1, 1, 0, 0 };
+        private static bool inside_map(int x, int y, int width, int height) 
+        { 
+            return x > -1 && x < width && y > -1 && y < height; 
+        }
+        //public static unsafe void fill_lake(float* elevations, float* fills, int width, int height)
+        public unsafe override bool OnProcedure(UPgcGraph graph)
+        {
+            var Input = graph.BufferCache.FindBuffer(SrcPin);
+            var Output = graph.BufferCache.FindBuffer(ResultPin);
+
+            for (int i = 0; i < Input.Width; i++)
+            {
+                for (int j = 0; j < Input.Height; j++)
+                {
+                    if (i == 0 || i == Input.Width - 1 || j == 0 || j == Input.Height - 1)
+                    {
+                        Output.SetPixel<float>(i, j, 0, Input.GetPixel<float>(i, j, 0));
+                    }
+                    else
+                    {
+                        Output.SetPixel<float>(i, j, 0, 1.0f);
+                    }
+                }
+            }
+            float* elevations = (float*)Input.GetSuperPixelAddress(0, 0, 0);
+            float* fills = (float*)Output.GetSuperPixelAddress(0, 0, 0);
+            int width = Input.Width;
+            int height = Input.Height;
+            bool change = true;
+            while (change)
+            {
+                change = false;
+                for (int i = 0; i < width; i++)
+                {
+                    for (int j = 0; j < height; j++)
+                    {
+                        int current = i + j * width;
+                        if (fills[current] > elevations[current])
+                        {
+                            for (int n = 1; n <= 8; n++)
+                            {
+                                if (inside_map(i + dx[n], j + dy[n], width, height))
+                                {
+                                    int target = i + dx[n] + (j + dy[n]) * width;
+                                    if (elevations[current] >= fills[target])
+                                    {
+                                        fills[current] = elevations[current];
+                                        change = true;
+                                    }
+                                    else if (fills[current] > fills[target])
+                                    {
+                                        fills[current] = fills[target];
+                                        change = true;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            return true;
+        }
     }
 }

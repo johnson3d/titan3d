@@ -1,6 +1,9 @@
 #ifndef	_PGC_EROSION_INCWATER_H_
 #define _PGC_EROSION_INCWATER_H_
 
+Texture2D RainTexture;
+SamplerState Samp_RainTexture;
+
 RWTexture2D<float> WaterTexture;
 /**Meta Begin:(CS_IncWaterMain)
 HLSL=2021
@@ -8,7 +11,8 @@ Meta End:(CS_IncWaterMain)**/
 [numthreads(DispatchX, DispatchY, DispatchZ)]
 void CS_IncWaterMain(uint3 DispatchThreadId : SV_DispatchThreadID, uint3 LocalThreadId : SV_GroupThreadID, uint3 GroupId : SV_GroupID)
 {
-    WaterTexture[DispatchThreadId.xy].r += 0.1f;
+    float r = RainTexture.SampleLevel(Samp_RainTexture, float2(0,0), 0).r;
+    WaterTexture[DispatchThreadId.xy].r += r;
 }
 
 #endif//_PGC_EROSION_INCWATER_H_

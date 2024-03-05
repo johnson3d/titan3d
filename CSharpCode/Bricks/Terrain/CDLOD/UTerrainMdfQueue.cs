@@ -191,7 +191,10 @@ namespace EngineNS.Bricks.Terrain.CDLOD
             instance.HitProxyId = cb.GetValue<uint>(UEngine.Instance.GfxDevice.CoreShaderBinder.CBPerMesh.HitProxyId);
 
             var patch = mdfQueue.Patch;
-            instance.UserData.X = patch.Level.GetHeightmapRVT().UniqueTexID;
+            if(mdfQueue.TerrainModifier.IsWater)
+                instance.UserData.X = patch.Level.GetWaterHeightmapRVT().UniqueTexID;
+            else
+                instance.UserData.X = patch.Level.GetHeightmapRVT().UniqueTexID;
             instance.UserData.Y = patch.Level.GetNormalmapRVT().UniqueTexID;
             instance.UserData.Z = patch.Level.GetMaterialIdRVT().UniqueTexID; 
             instance.UserData.W = (uint)mdfQueue.Patch.CurrentLOD;

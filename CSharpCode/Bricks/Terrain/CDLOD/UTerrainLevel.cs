@@ -81,6 +81,10 @@ namespace EngineNS.Bricks.Terrain.CDLOD
         {
             return Level.Node.Terrain.HeightmapRVT.RegRVT(HeightMapSRV);
         }
+        public Bricks.VirtualTexture.TtRVT GetWaterHeightmapRVT()
+        {
+            return Level.Node.Terrain.HeightmapRVT.RegRVT(WaterHMapSRV);
+        }
         public Bricks.VirtualTexture.TtRVT GetNormalmapRVT()
         {
             return Level.Node.Terrain.NormalmapRVT.RegRVT(NormalMapSRV);

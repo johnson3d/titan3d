@@ -217,6 +217,31 @@ namespace EngineNS
             }
         }
         public string PureName => IO.TtFileManager.GetPureName(mName);
+        public static RName GetRNameFromAbsPath(string path)
+        {
+            path = IO.TtFileManager.GetValidFileName(path);
+            ERNameType rNameType = ERNameType.Count;
+            string name = null;
+            for (var i = IO.TtFileManager.ERootDir.Game; i < IO.TtFileManager.ERootDir.Count; i++)
+            {
+                var root = UEngine.Instance.FileManager.GetRoot(i);
+                if (path.StartsWith(root))
+                {
+                    switch (i)
+                    {
+                        case IO.TtFileManager.ERootDir.Game:
+                            rNameType = ERNameType.Game;
+                            break;
+                        case IO.TtFileManager.ERootDir.Engine:
+                            rNameType = ERNameType.Engine;
+                            break;
+                    }
+                    name = path.Substring(root.Length);
+                    break;
+                }
+            }
+            return RNameManager.Instance.GetRName(name, rNameType);
+        }
         public static RName GetRName(string name, ERNameType rNameType = ERNameType.Game)
         {
             return RNameManager.Instance.GetRName(name, rNameType);

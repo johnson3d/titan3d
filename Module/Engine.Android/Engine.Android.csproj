@@ -95,6 +95,7 @@
   <Import Project="..\..\CSharpCode\Bricks\GpuDriven\GpuDriven.projitems" Label="Shared" />
   <Import Project="..\..\CSharpCode\Bricks\Font\Font.projitems" Label="Shared" />
   <Import Project="..\..\3rd\csharp\JitherOpenEXR\JitherOpenEXR.projitems" Label="Shared" />
+  <Import Project="..\..\CSharpCode\Bricks\Localization\Localization.projitems" Label="Shared" />
 
   <ItemGroup>
     <PackageReference Include="BCnEncoder.Net" Version="2.1.0" />

@@ -30,8 +30,21 @@ namespace EngineNS.Bricks.Procedure.Node
             var node = drawcall.TagObject as TtErosionIncWaterNode;
             var uav = policy.AttachmentCache.FindAttachement(node.WaterPinInOut).Uav;
             drawcall.BindUav("WaterTexture", uav);
+
+            var binder = drawcall.FindBinder(NxRHI.EShaderBindType.SBT_Sampler, "Samp_RainTexture");
+            if (binder.IsValidPointer)
+            {
+
+            }
+            binder = drawcall.FindBinder(NxRHI.EShaderBindType.SBT_SRV, "RainTexture");
+            if (binder.IsValidPointer)
+            {
+
+            }
+            drawcall.BindSrv(binder, null);
         }
     }
+    [Bricks.CodeBuilder.ContextMenu("IncWater", "PGC\\Erosion\\IncWater", Bricks.RenderPolicyEditor.UPolicyGraph.RGDEditorKeyword)]
     public class TtErosionIncWaterNode : Graphics.Pipeline.TtRenderGraphNode
     {
         public Graphics.Pipeline.TtRenderGraphPin WaterPinInOut = Graphics.Pipeline.TtRenderGraphPin.CreateInputOutput("Water", false, EPixelFormat.PXF_R32_FLOAT);

@@ -1,5 +1,7 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Security.Policy;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
@@ -20,7 +22,23 @@ namespace EngineNS.EGui.Controls
 
         public string Name = "";
         public bool CreateNewAssets = true;
-        public string ExtNames { get; set; } = null;
+        bool mViewDirty = true;
+        string mExtNames = null;
+        public string ExtNames 
+        {
+            get => mExtNames;
+            set
+            {
+                if (mExtNames == value)
+                    return;
+                mExtNames = value;
+                mExtNameArray = mExtNames.Split(',');
+                mDirectoryShowFlags.Clear();
+            }
+        }
+        string[] mExtNameArray;
+        Dictionary<string, bool> mDirectoryShowFlags = new Dictionary<string, bool>();
+
         public Rtti.UTypeDesc MacrossBase = null;
         public string FilterText = "";
         public static IO.IAssetMeta GlobalSelectedAsset = null;
@@ -32,6 +50,23 @@ namespace EngineNS.EGui.Controls
         public static string PreFolderImgName = "uestyle/content/circle-arrow-left.srv";
         public static string NextFolderImgName = "uestyle/content/circle-arrow-right.srv";
         public static string FilterImgName = "uestyle/content/filter.srv";
+
+        // 引擎预留目录名称
+        static List<string> ReservationFolderNames = new List<string>()
+        {
+            "metadata",
+        };
+        static bool IsReservationFolder(string folderName)
+        {
+            for (int rIdx = 0; rIdx < ReservationFolderNames.Count; rIdx++)
+            {
+                if (ReservationFolderNames[rIdx] == folderName)
+                {
+                    return true;
+                }
+            }
+            return false;   
+        }
 
         public void Dispose()
         {
@@ -181,6 +216,8 @@ namespace EngineNS.EGui.Controls
                 foreach (var i in dirs)
                 {
                     var nextDirName = IO.TtFileManager.GetRelativePath(root.Address, i);
+                    if (IsReservationFolder(nextDirName))
+                        continue;
                     DrawTree(root.RNameType, root.Name, nextDirName);
                 }
                 ImGuiAPI.TreePop();
@@ -253,8 +290,52 @@ namespace EngineNS.EGui.Controls
         }
         private unsafe void DrawTree(RName.ERNameType type, string parentDir, string dirName)
         {
-            ImGuiTreeNodeFlags_ flags = ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_SpanFullWidth;
             var nextParent = parentDir + dirName + "/";
+            var path = RName.GetRName(nextParent, type).Address;
+
+            if(mExtNameArray != null && mExtNameArray.Length > 0)
+            {
+                if(!mDirectoryShowFlags.ContainsKey(path))
+                {
+                    bool hasTarget = false;
+                    for(int i=0; i<mExtNameArray.Length; i++)
+                    {
+                        var files = IO.TtFileManager.GetFiles(path, "*" + mExtNameArray[i] + ".ameta");
+                        if (files.Length == 0)
+                            continue;
+                        if (MacrossBase != null && mExtNameArray[i] == Bricks.CodeBuilder.UMacross.AssetExt)
+                        {
+                            foreach (var f in files)
+                            {
+                                var ff = f.Substring(0, f.Length - ".ameta".Length);
+                                var ameta1 = UEngine.Instance.AssetMetaManager.GetAssetMeta(RName.GetRNameFromAbsPath(ff)) as Bricks.CodeBuilder.UMacrossAMeta;
+                                if (ameta1 == null)
+                                    continue;
+
+                                if (ameta1.BaseTypeStr != MacrossBase.TypeString)
+                                {
+                                    continue;
+                                }
+                                hasTarget = true;
+                                break;
+                            }
+                            if (hasTarget)
+                                break;
+                        }
+                        else
+                        {
+                            hasTarget = true;
+                            break;
+                        }
+                    }
+                    mDirectoryShowFlags[path] = hasTarget;
+                }
+                if (!mDirectoryShowFlags[path])
+                    return;
+
+            }
+
+            ImGuiTreeNodeFlags_ flags = ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_SpanFullWidth;
             var rn = RName.GetRName(nextParent, type);
             var textColor = EGui.UIProxy.StyleConfig.Instance.TextColor;
             if (rn == CurrentDir)
@@ -293,7 +374,6 @@ namespace EngineNS.EGui.Controls
             //ImGuiAPI.SameLine(0, 32);
             //ImGuiAPI.Text("_" + dirName);
 
-            var path = RName.GetRName(nextParent, type).Address;
             DrawDirContextMenu(path);
             if (treeNodeResult)
             {   
@@ -308,6 +388,8 @@ namespace EngineNS.EGui.Controls
                     if(IO.TtFileManager.FileExists(i + IO.IAssetMeta.MetaExt))
                         continue;
                     var nextDirName = IO.TtFileManager.GetRelativePath(path, i);
+                    if (IsReservationFolder(nextDirName))
+                        continue;
                     DrawTree(type, nextParent, nextDirName);
                 }
                 ImGuiAPI.TreePop();
@@ -348,14 +430,13 @@ namespace EngineNS.EGui.Controls
                 var file = files[i];
                 file = file.Substring(0, file.Length - IO.IAssetMeta.MetaExt.Length);
                 var name = IO.TtFileManager.GetRelativePath(dir.Address, file);
-                if (!string.IsNullOrEmpty(ExtNames))
+                if (mExtNameArray != null && mExtNameArray.Length > 0)
                 {
-                    var splits = ExtNames.Split(',');
                     var ext = IO.TtFileManager.GetExtName(name);
                     bool find = false;
-                    for (int extIdx = 0; extIdx < splits.Length; extIdx++)
+                    for (int extIdx = 0; extIdx < mExtNameArray.Length; extIdx++)
                     {
-                        if (string.Equals(ext, splits[extIdx], StringComparison.OrdinalIgnoreCase))
+                        if (string.Equals(ext, mExtNameArray[extIdx], StringComparison.OrdinalIgnoreCase))
                         {
                             find = true;
                             break;

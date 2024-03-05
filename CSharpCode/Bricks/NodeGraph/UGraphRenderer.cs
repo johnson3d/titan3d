@@ -121,11 +121,8 @@ namespace EngineNS.Bricks.NodeGraph
                 // ProcessKeyboard/ProcessMouse may be change mGraph, so store graph to make sure operation the same graph
                 var tempGraph = mGraph;
                 var screenPt = tempGraph.ToScreenPos(delta.X, delta.Y);
-                if (delta.X >= 0 && delta.X <= sz.X && delta.Y >= 0 && delta.Y <= sz.Y)
-                {
-                    ProcessKeyboard(in screenPt, tempGraph);
-                    ProcessMouse(in screenPt, in sz, tempGraph);
-                }
+                ProcessKeyboard(in screenPt, tempGraph);
+                ProcessMouse(in screenPt, in sz, tempGraph);
 
                 var cmd = ImGuiAPI.GetWindowDrawList();
                 if (tempGraph.PhysicalSizeVP.X != sz.X || tempGraph.PhysicalSizeVP.Y != sz.Y)
@@ -202,8 +199,10 @@ namespace EngineNS.Bricks.NodeGraph
 
         void ProcessKeyboard(in Vector2 screenPt, UNodeGraph graph)
         {
-            if (ImGuiAPI.IsWindowFocused(ImGuiFocusedFlags_.ImGuiFocusedFlags_ChildWindows | ImGuiFocusedFlags_.ImGuiFocusedFlags_RootWindow) == false)
+            if (!ImGuiAPI.IsWindowHovered(ImGuiHoveredFlags_.ImGuiHoveredFlags_ChildWindows))
                 return;
+            //if (ImGuiAPI.IsWindowFocused(ImGuiFocusedFlags_.ImGuiFocusedFlags_ChildWindows | ImGuiFocusedFlags_.ImGuiFocusedFlags_RootWindow) == false)
+            //    return;
 
             if (UEngine.Instance.InputSystem.IsKeyPressed(Input.Keycode.KEY_DELETE))
             {
@@ -231,15 +230,20 @@ namespace EngineNS.Bricks.NodeGraph
             }
         }
 
+        bool mIsLeftMouseFocusOnGraph = false;
+        bool mIsRightMouseFocusOnGraph = false;
+        bool mIsMiddleMouseFocusOnGraph = false;
         unsafe void ProcessMouse(in Vector2 screenPt, in Vector2 rectSize, UNodeGraph graph)
         {
             //if (ImGuiAPI.IsWindowFocused(ImGuiFocusedFlags_.ImGuiFocusedFlags_ChildWindows | ImGuiFocusedFlags_.ImGuiFocusedFlags_RootWindow) == false)
             //    return;
             if (graph.CurMenuType != UNodeGraph.EGraphMenu.None)
                 return;
+            bool isHovered = false;
             if (ImGuiAPI.IsWindowHovered(ImGuiHoveredFlags_.ImGuiHoveredFlags_ChildWindows))
             {
                 graph.Zoom(screenPt, ImGuiAPI.GetIO().MouseWheel);
+                isHovered = true;
             }
             graph.PressDrag(in screenPt);
 
@@ -251,20 +255,14 @@ namespace EngineNS.Bricks.NodeGraph
             if (ImGuiAPI.IsMouseDown(ImGuiMouseButton_.ImGuiMouseButton_Middle) || ImGuiAPI.IsMouseReleased(ImGuiMouseButton_.ImGuiMouseButton_Middle))
                 clickPos = ImGuiAPI.GetIO().MouseClickedPos[(int)ImGuiMouseButton_.ImGuiMouseButton_Middle];
             var delta = clickPos - DrawOffset;
-            if (delta.X >= 0 && delta.X <= rectSize.X && delta.Y >= 0 && delta.Y <= rectSize.Y)
+            if (delta.X >= 0 && delta.X <= rectSize.X && delta.Y >= 0 && delta.Y <= rectSize.Y && isHovered)
             {
                 if (graph.ButtonPress[(int)UNodeGraph.EMouseButton.Middle] == false)
                 {
                     if (ImGuiAPI.IsMouseDown(ImGuiMouseButton_.ImGuiMouseButton_Middle))
                     {
                         graph.MiddlePress(in screenPt);
-                    }
-                }
-                else
-                {
-                    if (!ImGuiAPI.IsMouseDown(ImGuiMouseButton_.ImGuiMouseButton_Middle))
-                    {
-                        graph.MiddleRelease(in screenPt);
+                        mIsMiddleMouseFocusOnGraph = true;
                     }
                 }
                 if (ImGuiAPI.IsMouseDoubleClicked(ImGuiMouseButton_.ImGuiMouseButton_Middle))
@@ -277,13 +275,7 @@ namespace EngineNS.Bricks.NodeGraph
                     if (ImGuiAPI.IsMouseDown(ImGuiMouseButton_.ImGuiMouseButton_Left))
                     {
                         graph.LeftPress(in screenPt);
-                    }
-                }
-                else
-                {
-                    if (!ImGuiAPI.IsMouseDown(ImGuiMouseButton_.ImGuiMouseButton_Left))
-                    {
-                        graph.LeftRelease(in screenPt);
+                        mIsLeftMouseFocusOnGraph = true;
                     }
                 }
                 if (ImGuiAPI.IsMouseDoubleClicked(ImGuiMouseButton_.ImGuiMouseButton_Left))
@@ -297,19 +289,37 @@ namespace EngineNS.Bricks.NodeGraph
                     if (ImGuiAPI.IsMouseDown(ImGuiMouseButton_.ImGuiMouseButton_Right))
                     {
                         graph.RightPress(in screenPt);
+                        mIsRightMouseFocusOnGraph = true;
                     }
-                }
-                else
-                {
-                    if (!ImGuiAPI.IsMouseDown(ImGuiMouseButton_.ImGuiMouseButton_Right))
-                    {
-                        graph.RightRelease(in screenPt);
-                    }
-                }
+                }                
                 if (ImGuiAPI.IsMouseDoubleClicked(ImGuiMouseButton_.ImGuiMouseButton_Right))
                 {
                     graph.RightRelease(in screenPt);
                     graph.RightDoubleClicked(screenPt);
+                }
+            }
+            if(graph.ButtonPress[(int)UNodeGraph.EMouseButton.Middle] == true)
+            {
+                if (!ImGuiAPI.IsMouseDown(ImGuiMouseButton_.ImGuiMouseButton_Middle))
+                {
+                    graph.MiddleRelease(in screenPt);
+                    mIsMiddleMouseFocusOnGraph = false;
+                }
+            }
+            if (graph.ButtonPress[(int)UNodeGraph.EMouseButton.Left] == true)
+            {
+                if (!ImGuiAPI.IsMouseDown(ImGuiMouseButton_.ImGuiMouseButton_Left))
+                {
+                    graph.LeftRelease(in screenPt);
+                    mIsLeftMouseFocusOnGraph = false;
+                }
+            }
+            if (graph.ButtonPress[(int)UNodeGraph.EMouseButton.Right] == true)
+            {
+                if (!ImGuiAPI.IsMouseDown(ImGuiMouseButton_.ImGuiMouseButton_Right))
+                {
+                    graph.RightRelease(in screenPt);
+                    mIsRightMouseFocusOnGraph = false;
                 }
             }
         }
