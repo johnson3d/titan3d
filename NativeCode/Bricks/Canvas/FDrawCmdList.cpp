@@ -176,11 +176,16 @@ namespace Canvas
 		}
 		auto transIndex = GetCurrentTransformIndex();
 		const auto& clip = GetCurrentClipRect();
+		auto matrix = GetCurrentMatrix();
 		FCanvasVertex vert[4];
 		ICanvasBrush* prevBrush = nullptr;
 		FDrawCmd* pCmd = nullptr;
 		v3dxVector3 offset(x, y, 0);
 		auto rightClip = clip.GetRight();
+		v3dxMatrix4 moveMat, moveMat2;
+		moveMat.moveMatrix(-offset.X, -offset.Y, 0.0f);
+		moveMat2.moveMatrix(offset.X, offset.Y, 0.0f);
+		moveMat = moveMat * (*matrix) * moveMat2;
 
 		auto font = GetCurrentFont();
 		FColor rgba = color;
@@ -188,12 +193,24 @@ namespace Canvas
 		{
 			auto c = text[i];
 			auto word = font->GetWord(0, 0, c, *transIndex, vert);
-			ASSERT(word != nullptr);
+			//ASSERT(word != nullptr);
 			if (word == nullptr)
 				continue;
+
+			v3dxVector3 vMin(FLT_MAX, FLT_MAX, FLT_MAX), vMax(-FLT_MAX, -FLT_MAX, -FLT_MAX);
+			for (int vIdx = 0; vIdx < 4; vIdx++)
+			{
+				auto tempPos = vert[vIdx].Pos + offset;
+				v3dxVec3TransformCoord(&vert[vIdx].Pos, &tempPos, &moveMat);
+				vMin.X = std::min(vMin.X, vert[vIdx].Pos.X);
+				vMin.Y = std::min(vMin.Y, vert[vIdx].Pos.Y);
+				vMin.Z = std::min(vMin.Z, vert[vIdx].Pos.Z);
+				vMax.X = std::max(vMax.X, vert[vIdx].Pos.X);
+				vMax.Y = std::max(vMax.Y, vert[vIdx].Pos.Y);
+				vMax.Z = std::max(vMax.Z, vert[vIdx].Pos.Z);
+			}
 			
-			auto PixelY = (word->PixelY);
-			FRectanglef wordRect(offset.X + word->PixelX, offset.Y + PixelY, (float)word->PixelWidth, (float)word->PixelHeight);
+			FRectanglef wordRect(vMin.X, vMin.Y, vMax.X - vMin.X, vMax.Y - vMin.Y);
 			if (clip.IsContain(wordRect))
 			{
 				if (prevBrush != word->Brush)
@@ -216,12 +233,12 @@ namespace Canvas
 				}
 				auto rect = FRectanglef::And(clip, wordRect);
 				float u = vert[Canvas::RCN_X0_Y0].UV.X;
-				float u1 = ((rect.X - offset.X - word->PixelX) - u) / word->PixelWidth;
-				float u2 = ((rect.X + rect.Width - offset.X - word->PixelX) - u) / word->PixelWidth;
+				float u1 = ((rect.X - wordRect.X) - u) / wordRect.Width;
+				float u2 = ((rect.X + rect.Width - wordRect.X) - u) / wordRect.Width;
 				float us = vert[Canvas::RCN_X1_Y0].UV.X - u;
 				float v = vert[Canvas::RCN_X0_Y0].UV.Y;
-				float v1 = ((rect.Y - offset.Y - word->PixelY) - v) / word->PixelHeight;
-				float v2 = ((rect.Y + rect.Height - offset.Y - word->PixelY) - v) / word->PixelHeight;
+				float v1 = ((rect.Y - wordRect.Y) - v) / wordRect.Height;
+				float v2 = ((rect.Y + rect.Height - wordRect.Y) - v) / wordRect.Height;
 				float vs = vert[Canvas::RCN_X0_Y1].UV.Y - v;
 				vert[Canvas::RCN_X0_Y0].UV.X = u + us * u1;
 				vert[Canvas::RCN_X0_Y1].UV.X = u + us * u1;
@@ -247,6 +264,11 @@ namespace Canvas
 			}
 			
 			offset.X += word->Advance.X;
+			offset.Y += word->Advance.Y;
+			//v3dxVector3 advance(word->Advance.x, word->Advance.y, 0.0f);
+			//v3dxVec3TransformCoord(&advance, &advance, &matrix);
+			//offset.x += advance.x;
+			//offset.y += advance.y;
 		}
 	}
 	void FCanvasDrawCmdList::AddLine(const v3dxVector2& s, const v3dxVector2& e, float width, const FColor& color, FSubDrawCmd* pOutCmd)
