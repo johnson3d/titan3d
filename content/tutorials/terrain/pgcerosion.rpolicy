@@ -4,21 +4,21 @@
   <GraphName Type="System.String@Unknown" Value="NodeGraph" />
   <Nodes Type="System.Collections.Generic.List&lt;EngineNS.Bricks.NodeGraph.UNodeBase@EngineCore,&gt;@Unknown" Count="2">
     <e_0 Type="EngineNS.Bricks.RenderPolicyEditor.UPolicyNode@EngineCore">
-      <GraphNodeTypeString Type="System.String@Unknown" Value="EngineNS.Bricks.Procedure.Node.TtErosionIncWaterNode@EngineCore" />
+      <GraphNodeTypeString Type="System.String@Unknown" Value="EngineNS.Bricks.Procedure.Node.GpuShading.TtErosionIncWaterNode@EngineCore" />
       <Label Type="System.String@Unknown" Value="ErosionIncWater" />
       <Name Type="System.String@Unknown" Value="ErosionIncWater" />
-      <NodeId Type="System.Guid@Unknown" Value="a6ab04dd-ecaa-44b8-a648-7727f69c92a8" />
-      <Position Type="EngineNS.Vector2@EngineCore" Value="443,234.99998" />
-      <GraphNode Type="EngineNS.Bricks.Procedure.Node.TtErosionIncWaterNode@EngineCore" />
+      <NodeId Type="System.Guid@Unknown" Value="77d48e4b-6329-4470-84d3-928b7f957ea1" />
+      <Position Type="EngineNS.Vector2@EngineCore" Value="509,335" />
+      <GraphNode Type="EngineNS.Bricks.Procedure.Node.GpuShading.TtErosionIncWaterNode@EngineCore" />
       <InputEditableValues Type="System.Collections.Generic.List&lt;EngineNS.Bricks.NodeGraph.UNodeBase.UInputEditableValueInfo@EngineCore,&gt;@Unknown" Count="0" />
     </e_0>
     <e_1 Type="EngineNS.Bricks.RenderPolicyEditor.UPolicyNode@EngineCore">
-      <GraphNodeTypeString Type="System.String@Unknown" Value="EngineNS.Bricks.Procedure.Node.TtErosionEndingNode@EngineCore" />
-      <Label Type="System.String@Unknown" Value="ErosionEndingNode" />
-      <Name Type="System.String@Unknown" Value="ErosionEndingNode" />
-      <NodeId Type="System.Guid@Unknown" Value="8ad9f4fa-8a48-4ef8-aa46-d46354176e2a" />
-      <Position Type="EngineNS.Vector2@EngineCore" Value="795,276" />
-      <GraphNode Type="EngineNS.Bricks.Procedure.Node.TtErosionEndingNode@EngineCore" />
+      <GraphNodeTypeString Type="System.String@Unknown" Value="EngineNS.Bricks.Procedure.Node.GpuShading.TtGpuFetchNode@EngineCore" />
+      <Label Type="System.String@Unknown" Value="GpuFetch" />
+      <Name Type="System.String@Unknown" Value="GpuFetch" />
+      <NodeId Type="System.Guid@Unknown" Value="02b38455-9fcc-4e9c-ab1d-76338535e8ca" />
+      <Position Type="EngineNS.Vector2@EngineCore" Value="853,375" />
+      <GraphNode Type="EngineNS.Bricks.Procedure.Node.GpuShading.TtGpuFetchNode@EngineCore" />
       <InputEditableValues Type="System.Collections.Generic.List&lt;EngineNS.Bricks.NodeGraph.UNodeBase.UInputEditableValueInfo@EngineCore,&gt;@Unknown" Count="0" />
     </e_1>
   </Nodes>
@@ -34,9 +34,9 @@
   <Linkers Type="System.Collections.Generic.List&lt;EngineNS.Bricks.NodeGraph.UPinLinker@EngineCore,&gt;@Unknown" Count="1">
     <e_0 Type="EngineNS.Bricks.NodeGraph.UPinLinker@EngineCore">
       <SaveData Type="EngineNS.Bricks.NodeGraph.UPinLinker.TSaveData@EngineCore">
-        <InNodeId Type="System.Guid@Unknown" Value="8ad9f4fa-8a48-4ef8-aa46-d46354176e2a" />
-        <InPinName Type="System.String@Unknown" Value="Height" />
-        <OutNodeId Type="System.Guid@Unknown" Value="a6ab04dd-ecaa-44b8-a648-7727f69c92a8" />
+        <InNodeId Type="System.Guid@Unknown" Value="02b38455-9fcc-4e9c-ab1d-76338535e8ca" />
+        <InPinName Type="System.String@Unknown" Value="Src" />
+        <OutNodeId Type="System.Guid@Unknown" Value="77d48e4b-6329-4470-84d3-928b7f957ea1" />
         <OutPinName Type="System.String@Unknown" Value="Water" />
       </SaveData>
     </e_0>
