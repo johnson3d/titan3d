@@ -56,7 +56,7 @@ namespace EngineNS.Graphics.Pipeline
             }
             return null;
         }
-        public T FindNode<T>(string name, bool bInherit = false) where T : TtRenderGraphNode
+        public T FindNode<T>(string name = null, bool bInherit = false) where T : TtRenderGraphNode
         {
             foreach(var node in GraphNodes.Values)
             {
@@ -70,7 +70,7 @@ namespace EngineNS.Graphics.Pipeline
                     if (node.GetType() != typeof(T))
                         continue;
                 }
-                if (node.Name == name)
+                if (node.Name == name || name == null)
                     return node as T;
             }
             return null;
@@ -81,7 +81,7 @@ namespace EngineNS.Graphics.Pipeline
             {
                 if (node.GetType() == ignoreType)
                     continue;
-                if (node.Name == name)
+                if (node.Name == name || name == null)
                     return node;
             }
             return null;

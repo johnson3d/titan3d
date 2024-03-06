@@ -32,6 +32,10 @@ namespace EngineNS.Graphics.Pipeline
             }
             return null;
         }
+        public TtAttachBuffer GetAttachement(TtRenderGraphPin pin)
+        {
+            return GetAttachement(pin.Attachement.AttachmentName, pin.Attachement);
+        }
         public TtAttachBuffer GetAttachement(in FHashText name, TtAttachmentDesc desc)
         {
             TtAttachBuffer result;

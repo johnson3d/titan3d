@@ -1,18 +1,28 @@
-﻿using Assimp;
-using EngineNS.Bricks.Procedure.Node.GpuNode;
-using EngineNS.Bricks.RenderPolicyEditor;
-using EngineNS.GamePlay;
-using EngineNS.Graphics.Pipeline;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace EngineNS.Bricks.Procedure.Node
+namespace EngineNS.Bricks.Procedure.Node.GpuNode
 {
-
-    [Bricks.CodeBuilder.ContextMenu("GpuErosion", "Float1\\GpuErosion", UPgcGraph.PgcEditorKeyword)]
-    public class TtGpuErosionNode : TtGpuNodeBase
+    [Bricks.CodeBuilder.ContextMenu("Heigh2Flow", "Float1\\Heigh2Flow", UPgcGraph.PgcEditorKeyword)]
+    public class TtHeigh2FlowMapNode : TtGpuNodeBase
     {
+        public TtHeigh2FlowMapNode()
+        {
+            ResultDesc = UBufferCreator.CreateInstance<USuperBuffer<Vector2, FFloat2Operator>>(-1, -1, -1);
+        }
+        public override UBufferCreator GetResultDesc()
+        {
+            return ResultDesc;
+        }
+        public override UBufferCreator GetOutBufferCreator(Bricks.NodeGraph.PinOut pin)
+        {
+            if (ResultPin == pin)
+            {
+                return ResultDesc;
+            }
+            return null;
+        }
         public unsafe override bool OnProcedure(UPgcGraph graph)
         {
             if (Policy == null)
@@ -20,14 +30,16 @@ namespace EngineNS.Bricks.Procedure.Node
             var Input = graph.BufferCache.FindBuffer(SrcPin);
             var Output = graph.BufferCache.FindBuffer(ResultPin);
             var buffer = Input.GetGpuTexture2D<float>();
-            var incWater = Policy.FindNode<GpuShading.TtErosionIncWaterNode>();
-            var waterAttachement = Policy.AttachmentCache.ImportAttachment(incWater.WaterPinInOut);
-            waterAttachement.SetImportedBuffer(buffer);
+            Policy.OnResize(Input.Width, Input.Height);
+            //Input.Upload2GpuTexture2D()
+            var h2flow = Policy.FindNode<GpuShading.TtHeigh2FlowMapNode>();
+            var heightAttachement = Policy.AttachmentCache.ImportAttachment(h2flow.HeightPinIn);
+            heightAttachement.SetImportedBuffer(buffer);
             var ending = Policy.RootNode as GpuShading.TtGpuFetchNode;
 
-            incWater.DispatchThread.X = (uint)Input.Width;
-            incWater.DispatchThread.Y = (uint)Input.Height;
-            incWater.DispatchThread.Z = 1;
+            h2flow.DispatchThread.X = (uint)Input.Width;
+            h2flow.DispatchThread.Y = (uint)Input.Height;
+            h2flow.DispatchThread.Z = 1;
 
             GpuProcess();
 
@@ -46,11 +58,11 @@ namespace EngineNS.Bricks.Procedure.Node
                 {
                     for (int x = 0; x < Output.Width; x++)
                     {
-                        Output.SetFloat1(x, y, 0, ((float*)pImage)[x]);
+                        Output.SetFloat2(x, y, 0, ((Vector2*)pImage)[x]);
                     }
                     pImage += rowPitch;
                 }
-            }   
+            }
             return true;
         }
     }

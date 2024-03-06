@@ -120,6 +120,12 @@ namespace EngineNS.Bricks.RenderPolicyEditor
             return result;
         }
         [Rtti.Meta]
+        public string EndingNode
+        {
+            get;
+            set;
+        }
+        [Rtti.Meta]
         public UPolicyGraph PolicyGraph { get; } = new UPolicyGraph();
         public Graphics.Pipeline.URenderPolicy CreateRenderPolicy(UViewportSlate viewport, string endingName = "Copy2SwapChainNode")
         {
@@ -153,6 +159,10 @@ namespace EngineNS.Bricks.RenderPolicyEditor
                 if (outPin == null)
                     continue;
                 policy.AddLinker(outPin, inPin);
+            }
+            if (endingName == null)
+            {
+                endingName = this.EndingNode;
             }
             var root = policy.FindNode<Graphics.Pipeline.Common.TtEndingNode>(endingName, true);
             policy.RootNode = root;

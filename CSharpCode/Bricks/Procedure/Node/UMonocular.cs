@@ -13,8 +13,11 @@ namespace EngineNS.Bricks.Procedure.Node
         public PinOut ResultPin { get; set; } = new PinOut();
         [Rtti.Meta]
         public UBufferCreator SourceDesc { get; } = UBufferCreator.CreateInstance<USuperBuffer<float, FFloatOperator>>(-1, -1, -1);
-        [Rtti.Meta]
-        public UBufferCreator ResultDesc { get; } = UBufferCreator.CreateInstance<USuperBuffer<float, FFloatOperator>>(-1, -1, -1);
+        public UBufferCreator ResultDesc = UBufferCreator.CreateInstance<USuperBuffer<float, FFloatOperator>>(-1, -1, -1);
+        public virtual UBufferCreator GetResultDesc()
+        {
+            return ResultDesc;
+        }
         public UMonocular()
         {
             Icon.Size = new Vector2(25, 25);
@@ -23,7 +26,7 @@ namespace EngineNS.Bricks.Procedure.Node
             BackColor = 0x80808080;
 
             AddInput(SrcPin, "Src", SourceDesc);
-            AddOutput(ResultPin, "Result", ResultDesc);
+            AddOutput(ResultPin, "Result", GetResultDesc());
         }
 
         public override void OnLinkedFrom(PinIn iPin, UNodeBase OutNode, PinOut oPin)
