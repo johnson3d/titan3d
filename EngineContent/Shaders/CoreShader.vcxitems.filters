@@ -447,6 +447,9 @@
     <FxCompile Include="$(MSBuildThisFileDirectory)Bricks\GpuDriven\SWRasterizer.compute">
       <Filter>Bricks\GpuDriven</Filter>
     </FxCompile>
+    <FxCompile Include="$(MSBuildThisFileDirectory)Bricks\Procedure\Height2FlowMap.compute">
+      <Filter>Bricks\Procedure</Filter>
+    </FxCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="$(MSBuildThisFileDirectory)ShadingEnv\Post\FSR1\ffx_a.h">

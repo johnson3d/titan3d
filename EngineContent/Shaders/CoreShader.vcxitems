@@ -121,6 +121,7 @@
     <FxCompile Include="$(MSBuildThisFileDirectory)Bricks\Particle\Effectors.compute" />
     <FxCompile Include="$(MSBuildThisFileDirectory)Bricks\Particle\EmitShape.compute" />
     <FxCompile Include="$(MSBuildThisFileDirectory)Bricks\Particle\Particle.compute" />
+    <FxCompile Include="$(MSBuildThisFileDirectory)Bricks\Procedure\Height2FlowMap.compute" />
     <FxCompile Include="$(MSBuildThisFileDirectory)Bricks\VXGI\VoxelAllocator.compute" />
     <FxCompile Include="$(MSBuildThisFileDirectory)Bricks\VXGI\VoxelInject.compute" />
     <FxCompile Include="$(MSBuildThisFileDirectory)Bricks\VXGI\VXGICommon.compute" />

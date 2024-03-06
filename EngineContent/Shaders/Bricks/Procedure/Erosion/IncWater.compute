@@ -6,7 +6,7 @@ SamplerState Samp_RainTexture;
 
 RWTexture2D<float> WaterTexture;
 /**Meta Begin:(CS_IncWaterMain)
-HLSL=2021
+HLSL=none
 Meta End:(CS_IncWaterMain)**/
 [numthreads(DispatchX, DispatchY, DispatchZ)]
 void CS_IncWaterMain(uint3 DispatchThreadId : SV_DispatchThreadID, uint3 LocalThreadId : SV_GroupThreadID, uint3 GroupId : SV_GroupID)
