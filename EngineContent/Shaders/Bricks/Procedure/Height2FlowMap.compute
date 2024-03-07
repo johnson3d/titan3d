@@ -35,8 +35,8 @@ void CS_Heigh2FlowMapMain(uint3 DispatchThreadId : SV_DispatchThreadID, uint3 Lo
             dir.y = dy[i];
         }
     }
-    if (any(dir) != 0)
-        dir = normalize(dir);
+    //if (any(dir) != 0)
+    //    dir = normalize(dir);
     FlowTexture[DispatchThreadId.xy] = dir;
     GapTexture[DispatchThreadId.xy] = minHeight - center;
 }

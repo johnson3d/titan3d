@@ -111,6 +111,7 @@ namespace EngineNS.Bricks.Procedure
 
             AssetGraph.Version++;
             IO.TtFileManager.SaveObjectToXml(name.Address, AssetGraph);
+            UEngine.Instance.SourceControlModule.AddFile(name.Address);
         }
         [Rtti.Meta]
         public RName AssetName

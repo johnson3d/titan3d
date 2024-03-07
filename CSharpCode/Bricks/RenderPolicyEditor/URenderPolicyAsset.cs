@@ -1,4 +1,5 @@
 ﻿using EngineNS.Graphics.Pipeline;
+using NPOI.HPSF;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -100,6 +101,7 @@ namespace EngineNS.Bricks.RenderPolicyEditor
             //IO.FileManager.WriteAllText(name.Address, xmlText);
 
             IO.TtFileManager.SaveObjectToXml(name.Address, PolicyGraph);
+            UEngine.Instance.SourceControlModule.AddFile(name.Address);
         }
         [Rtti.Meta]
         public RName AssetName

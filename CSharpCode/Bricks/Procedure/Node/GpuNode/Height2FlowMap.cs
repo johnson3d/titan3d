@@ -9,11 +9,7 @@ namespace EngineNS.Bricks.Procedure.Node.GpuNode
     {
         public TtHeigh2FlowMapNode()
         {
-            ResultDesc = UBufferCreator.CreateInstance<USuperBuffer<Vector2, FFloat2Operator>>(-1, -1, -1);
-        }
-        public override UBufferCreator GetResultDesc()
-        {
-            return ResultDesc;
+            
         }
         public override UBufferCreator GetOutBufferCreator(Bricks.NodeGraph.PinOut pin)
         {
@@ -58,7 +54,12 @@ namespace EngineNS.Bricks.Procedure.Node.GpuNode
                 {
                     for (int x = 0; x < Output.Width; x++)
                     {
-                        Output.SetFloat2(x, y, 0, ((Vector2*)pImage)[x]);
+                        ref var v = ref ((Vector2*)pImage)[x];
+                        //if(v.X !=0 || v.Y!=0)
+                        //{
+                        //    int xxx = 0;
+                        //}
+                        Output.SetFloat2(x, y, 0, in v);
                     }
                     pImage += rowPitch;
                 }

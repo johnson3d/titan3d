@@ -64,6 +64,7 @@ namespace EngineNS.Animation.Asset
             }
 
             xnd.SaveXnd(name.Address);
+            UEngine.Instance.SourceControlModule.AddFile(name.Address);
         }
 
         public void UpdateAMetaReferences(IAssetMeta ameta)

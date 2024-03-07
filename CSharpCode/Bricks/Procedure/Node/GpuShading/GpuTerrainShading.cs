@@ -30,7 +30,7 @@ namespace EngineNS.Bricks.Procedure.Node.GpuShading
 
             var rc = UEngine.Instance.GfxDevice.RenderContext;
             var fenceDesc = new NxRHI.FFenceDesc();
-            mFinishFence = rc.CreateFence(in fenceDesc, "TtErosionEndingNode");
+            mFinishFence = rc.CreateFence(in fenceDesc, "GpuFetch");
             mCmdList = rc.CreateCommandList();
         }
         public NxRHI.UFence mFinishFence;

@@ -362,7 +362,7 @@ namespace EngineNS.Bricks.Procedure
                     for (int i = 0; i < Count; i++)
                     {
                         var tmp = pSlice[i] - min;
-                        tmp = tmp * 255.0f;
+                        tmp = tmp * 256.0f;
                         tmp = tmp / hRange;
                         tarPixels[i].X = (byte)tmp.X;
                         tarPixels[i].Y = (byte)tmp.Y;

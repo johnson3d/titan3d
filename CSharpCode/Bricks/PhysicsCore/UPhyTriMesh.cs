@@ -135,6 +135,7 @@ namespace EngineNS.Bricks.PhysicsCore
             }
 
             xnd.SaveXnd(name.Address);
+            UEngine.Instance.SourceControlModule.AddFile(name.Address);
         }
         public static TtPhyTriMesh LoadXnd(UPhyMeshManager manager, IO.TtXndNode node)
         {

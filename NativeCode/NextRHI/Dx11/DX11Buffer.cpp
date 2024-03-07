@@ -30,6 +30,10 @@ namespace NxRHI
 		BufferDesc.Usage = (D3D11_USAGE)desc.Usage;
 		BufferDesc.ByteWidth = desc.Size;
 		BufferDesc.CPUAccessFlags = (UINT)desc.CpuAccess;// D3D11_CPU_ACCESS_WRITE;
+		/*if (desc.CpuAccess & ECpuAccess::CAS_WRITE)
+		{
+			BufferDesc.CPUAccessFlags |= ECpuAccess::CAS_READ;
+		}*/
 		BufferDesc.MiscFlags = desc.MiscFlags;
 		BufferDesc.StructureByteStride = desc.StructureStride;
 		EBufferType descType = desc.Type;
@@ -221,6 +225,7 @@ namespace NxRHI
 			else
 			{
 				mMappingCmdList = ((DX11CmdQueue*)device->GetCmdQueue())->mHardwareContext;
+				flags = D3D11_MAP_WRITE;
 			}
 		}
 
@@ -545,6 +550,7 @@ namespace NxRHI
 			else
 			{
 				mMappingCmdList = ((DX11CmdQueue*)device->GetCmdQueue())->mHardwareContext;
+				flags = D3D11_MAP_WRITE;
 			}
 		}
 		auto hr = mMappingCmdList->mContext->Map(mTexture1D, subRes, flags, 0, (D3D11_MAPPED_SUBRESOURCE*)res);

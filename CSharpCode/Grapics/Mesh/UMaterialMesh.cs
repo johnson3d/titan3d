@@ -112,6 +112,7 @@ namespace EngineNS.Graphics.Mesh
 
             xnd.SaveXnd(name.Address);
             this.SerialId++;
+            UEngine.Instance.SourceControlModule.AddFile(name.Address);
         }
         [Rtti.Meta]
         [RName.PGRName(ReadOnly = true)]

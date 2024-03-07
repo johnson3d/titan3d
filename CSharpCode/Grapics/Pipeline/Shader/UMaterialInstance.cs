@@ -93,6 +93,7 @@ namespace EngineNS.Graphics.Pipeline.Shader
             }
 
             xnd.SaveXnd(name.Address);
+            UEngine.Instance.SourceControlModule.AddFile(name.Address);
         }
         public static bool ReloadXnd(UMaterialInstance material, UMaterialInstanceManager manager, IO.TtXndNode node)
         {

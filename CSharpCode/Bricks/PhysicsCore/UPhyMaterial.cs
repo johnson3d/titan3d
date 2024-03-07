@@ -94,6 +94,7 @@ namespace EngineNS.Bricks.PhysicsCore
             }
 
             xnd.SaveXnd(name.Address);
+            UEngine.Instance.SourceControlModule.AddFile(name.Address);
         }
         public static TtPhyMaterial LoadXnd(TtPhyMaterialManager manager, IO.TtXndNode node)
         {

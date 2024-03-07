@@ -628,6 +628,7 @@ namespace EngineNS.NxRHI
                 ameta.SaveAMeta();
 
                 UEngine.Instance.AssetMetaManager.RegAsset(ameta);
+                UEngine.Instance.SourceControlModule.AddFile(rn.Address);
 
                 return true;
             }

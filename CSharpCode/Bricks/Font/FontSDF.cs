@@ -212,7 +212,7 @@ namespace EngineNS.Bricks.Font
                 UpdateAMetaReferences(ameta);
                 ameta.SaveAMeta();
             }
-            
+            UEngine.Instance.SourceControlModule.AddFile(name.Address);
         }
         [Rtti.Meta]
         public RName AssetName
