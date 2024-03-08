@@ -1,18 +1,29 @@
 #ifndef	_PGC_EROSION_INCWATER_H_
 #define _PGC_EROSION_INCWATER_H_
+#include "../../../Inc/GlobalDefine.cginc"
+
+cbuffer cbPgc DX_AUTOBIND
+{
+    float RainScalar;
+};
 
 Texture2D RainTexture;
 SamplerState Samp_RainTexture;
 
-RWTexture2D<float> WaterTexture;
+RWByteAddressBuffer WaterTexture;
 /**Meta Begin:(CS_IncWaterMain)
 HLSL=none
 Meta End:(CS_IncWaterMain)**/
 [numthreads(DispatchX, DispatchY, DispatchZ)]
 void CS_IncWaterMain(uint3 DispatchThreadId : SV_DispatchThreadID, uint3 LocalThreadId : SV_GroupThreadID, uint3 GroupId : SV_GroupID)
 {
-    float r = RainTexture.SampleLevel(Samp_RainTexture, float2(0,0), 0).r;
-    WaterTexture[DispatchThreadId.xy].r += r;
+    int width, height;
+    RainTexture.GetDimensions(width, height);
+    float2 uv;
+    uv.x = (float) DispatchThreadId.x / (float) width;
+    uv.y = (float) DispatchThreadId.y / (float) height;
+    float r = RainTexture.SampleLevel(Samp_RainTexture, uv, 0).r * RainScalar;
+    InterlockedAddFloat(WaterTexture, (DispatchThreadId.x + DispatchThreadId.y * width) * 4, r);
 }
 
 #endif//_PGC_EROSION_INCWATER_H_

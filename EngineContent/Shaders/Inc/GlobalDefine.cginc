@@ -111,4 +111,19 @@ void SetIndirectDrawIndexArg(RWByteAddressBuffer buffer, int offset,
 	buffer.Store(offset + 5 * 4, StartInstanceLocation);
 }
 
+void InterlockedAddFloat(RWByteAddressBuffer buf, uint addr, float value)
+{
+    uint i_val = asuint(value);
+    uint tmp0 = 0;
+    uint tmp1;
+    while (true)
+    {
+        buf.InterlockedCompareExchange(addr, tmp0, i_val, tmp1);
+        if (tmp1 == tmp0)
+            break;
+        tmp0 = tmp1;
+        i_val = asuint(value + asfloat(tmp1));
+    }
+}
+
 #endif

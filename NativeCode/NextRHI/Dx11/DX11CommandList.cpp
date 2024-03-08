@@ -514,6 +514,7 @@ namespace NxRHI
 		copyDesc.CpuAccess = ECpuAccess::CAS_READ;
 		copyDesc.Usage = EGpuUsage::USAGE_STAGING;
 		copyDesc.BindFlags = EBufferType(0);
+		copyDesc.InitData = nullptr;
 		
 		auto pDevice = ((DX11Texture*)source)->mDeviceRef.GetPtr();
 		auto copyTexture = MakeWeakRef(pDevice->CreateTexture(&copyDesc));

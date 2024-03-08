@@ -29,6 +29,7 @@ namespace NxRHI
 		auto cpDesc = this->Desc;
 		cpDesc.Usage = USAGE_STAGING;
 		cpDesc.CpuAccess = CAS_READ;
+		cpDesc.Type = EBufferType::BFT_NONE;
 		auto cpBuffer = device->CreateBuffer(&cpDesc);
 		if (cpDraw != nullptr)
 		{

@@ -9,7 +9,9 @@
       <Name Type="System.String@Unknown" Value="ErosionIncWater" />
       <NodeId Type="System.Guid@Unknown" Value="77d48e4b-6329-4470-84d3-928b7f957ea1" />
       <Position Type="EngineNS.Vector2@EngineCore" Value="509,335" />
-      <GraphNode Type="EngineNS.Bricks.Procedure.Node.GpuShading.TtErosionIncWaterNode@EngineCore" />
+      <GraphNode Type="EngineNS.Bricks.Procedure.Node.GpuShading.TtErosionIncWaterNode@EngineCore">
+        <Rain Type="EngineNS.RName@EngineCore" Value="Game,tutorials/terrain/rain.srv,d2ea56cf-55e9-408a-9c9f-492ad2e37de3" />
+      </GraphNode>
       <InputEditableValues Type="System.Collections.Generic.List&lt;EngineNS.Bricks.NodeGraph.UNodeBase.UInputEditableValueInfo@EngineCore,&gt;@Unknown" Count="0" />
     </e_0>
     <e_1 Type="EngineNS.Bricks.RenderPolicyEditor.UPolicyNode@EngineCore">
