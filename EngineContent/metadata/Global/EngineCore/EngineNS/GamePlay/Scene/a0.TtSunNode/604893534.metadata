@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Hash_604893534 Type="EngineNS.GamePlay.Scene.TtSunNode@EngineCore">
+  <DirectionLight Type="EngineNS.GamePlay.TtDirectionLight@EngineCore" Order="0" />
+  <SunMaterialName Type="EngineNS.RName@EngineCore" Order="0" />
+</Hash_604893534>

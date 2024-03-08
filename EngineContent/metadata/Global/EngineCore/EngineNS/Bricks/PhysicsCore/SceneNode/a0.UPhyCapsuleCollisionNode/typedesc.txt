@@ -1,0 +1,1 @@
+EngineNS.Bricks.PhysicsCore.SceneNode.UPhyCapsuleCollisionNode@EngineCore

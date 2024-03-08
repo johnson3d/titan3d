@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Hash_3726920644 Type="EngineNS.Bricks.PhysicsCore.TtPhyTriMeshShape.TtTriMeshSerializer@EngineCore">
+  <Materials Type="System.Collections.Generic.List&lt;EngineNS.Bricks.PhysicsCore.TtPhyMaterial@EngineCore,&gt;@Unknown" Order="0" />
+  <PxMaterialName Type="EngineNS.RName@EngineCore" Order="0" />
+  <Scale Type="EngineNS.Vector3@EngineCore" Order="0" />
+  <TriMeshSource Type="EngineNS.RName@EngineCore" Order="0" />
+</Hash_3726920644>
