@@ -19,6 +19,8 @@
     <Compile Include="$(MSBuildThisFileDirectory)Node\Algorithm\GpuErosionNode.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Node\GpuNode\GpuNodeBase.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Node\GpuNode\Height2FlowMap.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Node\GpuNode\Height2Water.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Node\GpuShading\GpuFetch.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Node\GpuShading\GpuTerrainShading.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Node\Algorithm\Morphology.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Node\Algorithm\NoiseNode.cs" />
@@ -51,8 +53,5 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="$(MSBuildThisFileDirectory)Procedure.brick" />
-  </ItemGroup>
-  <ItemGroup>
-    <Folder Include="$(MSBuildThisFileDirectory)Node\GpuShading\" />
   </ItemGroup>
 </Project>

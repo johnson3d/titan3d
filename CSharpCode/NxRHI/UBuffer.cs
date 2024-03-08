@@ -86,6 +86,7 @@ namespace EngineNS.NxRHI
         {
             get;
         }
+        NxRHI.IBuffer CreateReadable(int subRes, EngineNS.NxRHI.ICopyDraw cpDraw);
     }
     public class UBuffer : AuxPtrType<NxRHI.IBuffer>, UGpuResource
     {
