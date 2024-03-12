@@ -282,15 +282,16 @@ namespace EngineNS.IO
                 ar.Write(isNull);
                 return;
             }
-            ar.Write(isNull);
 
             if (t.IsEnum)
             {
+                ar.Write(isNull);
                 var v = System.Convert.ToString(obj);
                 ar.Write(v);
             }
             else if (t.IsValueType)
             {
+                ar.Write(isNull);
                 unsafe
                 {
                     var size = System.Runtime.InteropServices.Marshal.SizeOf(t);
@@ -301,11 +302,13 @@ namespace EngineNS.IO
             }
             else if (t == typeof(string))
             {
+                ar.Write(isNull);
                 var v = (string)obj;
                 ar.Write(v);
             }
             else if (t == typeof(RName))
             {
+                ar.Write(isNull);
                 var v = (RName)obj;
                 if (v == null)
                 {
@@ -321,6 +324,7 @@ namespace EngineNS.IO
             }
             else if(t == typeof(Rtti.UTypeDesc))
             {
+                ar.Write(isNull);
                 var v = (Rtti.UTypeDesc)obj;
                 if(v == null)
                 {
@@ -335,10 +339,12 @@ namespace EngineNS.IO
             }
             else if (t.GetInterface(nameof(ISerializer)) != null)
             {
+                ar.Write(isNull);
                 Write(ar, obj as ISerializer, null);
             }            
             else if(obj is System.Collections.IList)
             {
+                ar.Write(isNull);
                 var lst = obj as System.Collections.IList;
                 var elemType = obj.GetType().GetGenericArguments()[0];
                 ar.Write(elemType.IsValueType);
@@ -370,6 +376,7 @@ namespace EngineNS.IO
             }
             else if (obj is System.Collections.IDictionary)
             {
+                ar.Write(isNull);
                 var lst = obj as System.Collections.IDictionary;
                 var elemKeyType = obj.GetType().GetGenericArguments()[0];
                 var elemValueType = obj.GetType().GetGenericArguments()[1];
@@ -445,6 +452,9 @@ namespace EngineNS.IO
             }
             else
             {
+                // 无法存盘默认null
+                ar.Write(true);
+
                 var typeStr = Rtti.UTypeDescManager.Instance.GetTypeStringFromType(t);
                 var meta = Rtti.TtClassMetaManager.Instance.GetMeta(typeStr);
             }

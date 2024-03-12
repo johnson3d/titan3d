@@ -258,7 +258,7 @@ namespace EngineNS.UI.Bind
         bool mBindFilterFocus = false;
         bool mBindedDataDirty = true;
         bool mBindingDatasIsSameOne = true;
-        TtUIElement mFirstElement = null;
+        //TtUIElement mFirstElement = null;
         EBindingMode mSelectedMode = EBindingMode.Default;
         string[] mBindingModeNames;
         static Vector2 mCurrentBindBackgroundStart;
@@ -271,7 +271,7 @@ namespace EngineNS.UI.Bind
                 if (bp != null)
                     mBindingTargets[i].ClearBindExpression(bp);
 
-                var tag = mBindingTargets[i] as TtUIElement;
+                dynamic tag = mBindingTargets[i];
                 TtUIElement.BindingDataBase bindData;
                 if (tag.BindingDatas.TryGetValue(propertyName, out bindData))
                 {
@@ -313,14 +313,14 @@ namespace EngineNS.UI.Bind
                             mBindingTargets.Add(bindObj);
                             //hasBinded = hasBinded || bindObj.HasBinded(bp);
                             mBindObjects.Add(bindObj);
-                            if (mFirstElement == null)
-                            {
-                                var element = objIns as TtUIElement;
-                                if (element != null && element.RootUIHost != null && element.RootUIHost.Children.Count > 0)
-                                {
-                                    mFirstElement = element.RootUIHost.Children[0];
-                                }
-                            }
+                            //if (mFirstElement == null)
+                            //{
+                            //    var element = objIns as TtUIElement;
+                            //    if (element != null && element.RootUIHost != null && element.RootUIHost.Children.Count > 0)
+                            //    {
+                            //        mFirstElement = element.RootUIHost.Children[0];
+                            //    }
+                            //}
                         }
                     }
                     else
@@ -336,18 +336,17 @@ namespace EngineNS.UI.Bind
                             }
                             mBindingTargets.Add(bindObj);
                         }
-                        var element = info.Target as TtUIElement;
-                        if (element != null && element.RootUIHost != null && element.RootUIHost.Children.Count > 0)
-                        {
-                            mFirstElement = element.RootUIHost.Children[0];
-                        }
+                        //var element = info.Target as TtUIElement;
+                        //if (element != null && element.RootUIHost != null && element.RootUIHost.Children.Count > 0)
+                        //{
+                        //    mFirstElement = element.RootUIHost.Children[0];
+                        //}
                     }
 
-                    host = mFirstElement.RootUIHost as Editor.EditorUIHost;
                     // check if has binded value
                     for (int tagIdx = 0; tagIdx < mBindingTargets.Count; tagIdx++)
                     {
-                        var tag = mBindingTargets[tagIdx] as TtUIElement;
+                        dynamic tag = mBindingTargets[tagIdx];
                         TtUIElement.BindingDataBase data;
                         if(tag.BindingDatas.TryGetValue(info.PropertyDescriptor.Name, out data))
                         {
@@ -363,9 +362,17 @@ namespace EngineNS.UI.Bind
 
                 if (mBindObjects.Count == 0)
                     return;
-                if (mFirstElement == null)
+                var uiEditor = info.HostEditor as TtUIEditor;
+                if (uiEditor == null)
                     return;
-                host = mFirstElement.RootUIHost as Editor.EditorUIHost;
+                host = uiEditor.mUIHost;
+                if (host == null)
+                    return;
+                if (host.Children.Count <= 0)
+                    return;
+                var firstElement = host.Children[0];
+                if (firstElement == null)
+                    return;
 
                 var keyName = "#BindButton" + info.PropertyDescriptor.Name;
                 var id = ImGuiAPI.GetID(keyName);
@@ -466,17 +473,17 @@ namespace EngineNS.UI.Bind
                         DeleteBind(info.PropertyDescriptor.Name, host);
                         for (int i=0; i<mBindingTargets.Count; i++)
                         {
-                            var tElement = mBindingTargets[i] as TtUIElement;
-                            if (tElement == null)
+                            dynamic bindObj = mBindingTargets[i];
+                            if (bindObj == null)
                                 continue;
                             var bindTarget = new TtUIElement.UIBindingData_Element()
                             {
                                 PropertyName = info.PropertyDescriptor.Name,
                                 PropertyType = info.PropertyDescriptor.PropertyType,
-                                Id = tElement.Id,
+                                Id = bindObj.Id,
                             };
                             var curMode = mSelectedMode;
-                            var bp = tElement.FindBindableProperty(info.PropertyDescriptor.Name);
+                            var bp = bindObj.FindBindableProperty(info.PropertyDescriptor.Name);
                             if (bp != null && (curMode == EBindingMode.Default))
                             {
                                 curMode = bp.BindingMode;
@@ -484,10 +491,10 @@ namespace EngineNS.UI.Bind
                             // ------------------------------------------------------
                             void ConfigSetMethod(in ExternalInfo info)
                             {
-                                var setMethodName = tElement.GetPropertyBindMethodName(info.PropertyDescriptor.Name, true);
+                                //var setMethodName = bindObj.GetPropertyBindMethodName(info.PropertyDescriptor.Name, true);
                                 var setMethodDesc = new UMethodDeclaration();
-                                setMethodDesc.MethodName = setMethodName;
-                                setMethodDesc.GetDisplayNameFunc = tElement.GetMethodDisplayName;
+                                //setMethodDesc.MethodName = setMethodName;
+                                //setMethodDesc.GetDisplayNameFunc = bindObj.GetMethodDisplayName;
                                 setMethodDesc.Arguments.Add(new UMethodArgumentDeclaration()
                                 {
                                     VariableName = "obj",
@@ -504,16 +511,17 @@ namespace EngineNS.UI.Bind
                                     VariableType = new UTypeReference(info.PropertyDescriptor.PropertyType),
                                     OperationType = EMethodArgumentAttribute.In,
                                 });
+                                bindObj.InitialMethodDeclaration(info.PropertyDescriptor.Name, setMethodDesc, true);
                                 var setGraph = host.HostEditor.UIAsset.MacrossEditor.AddMethod(setMethodDesc);
-                                tElement.SetPropertyBindMethod(info.PropertyDescriptor.Name, setMethodDesc, true);
+                                //bindObj.SetPropertyBindMethod(info.PropertyDescriptor.Name, setMethodDesc, true);
                                 host.HostEditor.UIAsset.MacrossEditor.OpenMethodGraph(setGraph);                                        
                             }
                             void ConfigGetMethod(in ExternalInfo info)
                             {
-                                var getMethodName = tElement.GetPropertyBindMethodName(info.PropertyDescriptor.Name, false);
+                                //var getMethodName = bindObj.GetPropertyBindMethodName(info.PropertyDescriptor.Name, false);
                                 var getMethodDesc = new UMethodDeclaration();
-                                getMethodDesc.MethodName = getMethodName;
-                                getMethodDesc.GetDisplayNameFunc = tElement.GetMethodDisplayName;
+                                //getMethodDesc.MethodName = getMethodName;
+                                //getMethodDesc.GetDisplayNameFunc = bindObj.GetMethodDisplayName;
                                 getMethodDesc.ReturnValue = new UVariableDeclaration()
                                 {
                                     VariableName = "tempReturnValue",
@@ -530,8 +538,9 @@ namespace EngineNS.UI.Bind
                                     VariableName = "prop",
                                     VariableType = new UTypeReference(typeof(TtBindableProperty)),
                                 });
+                                bindObj.InitialMethodDeclaration(info.PropertyDescriptor.Name, getMethodDesc, false);
                                 var getGraph = host.HostEditor.UIAsset.MacrossEditor.AddMethod(getMethodDesc);
-                                tElement.SetPropertyBindMethod(info.PropertyDescriptor.Name, getMethodDesc, false);
+                                //bindObj.SetPropertyBindMethod(info.PropertyDescriptor.Name, getMethodDesc, false);
                                 host.HostEditor.UIAsset.MacrossEditor.OpenMethodGraph(getGraph);
                             }
                             // -------------------------------------------------------
@@ -540,13 +549,13 @@ namespace EngineNS.UI.Bind
                                 Target = bindTarget,
                                 Mode = curMode,
                             };
-                            tElement.BindingDatas[info.PropertyDescriptor.Name] = bdMethod;
+                            bindObj.BindingDatas[info.PropertyDescriptor.Name] = bdMethod;
                             switch (curMode)
                             {
                                 case EBindingMode.TwoWay:
                                     {
-                                        bdMethod.SetMethodName = tElement.GetPropertyBindMethodName(info.PropertyDescriptor.Name, true);
-                                        bdMethod.GetMethodName = tElement.GetPropertyBindMethodName(info.PropertyDescriptor.Name, false);
+                                        bdMethod.SetMethodName = bindObj.GetPropertyBindMethodName(info.PropertyDescriptor.Name, true);
+                                        bdMethod.GetMethodName = bindObj.GetPropertyBindMethodName(info.PropertyDescriptor.Name, false);
 
                                         ConfigSetMethod(info);
                                         ConfigGetMethod(info); 
@@ -556,14 +565,14 @@ namespace EngineNS.UI.Bind
                                 case EBindingMode.OneTime:
                                     {
                                         // update target property when source changed
-                                        bdMethod.GetMethodName = tElement.GetPropertyBindMethodName(info.PropertyDescriptor.Name, false);
+                                        bdMethod.GetMethodName = bindObj.GetPropertyBindMethodName(info.PropertyDescriptor.Name, false);
                                         ConfigGetMethod(info);
                                     }
                                     break;
                                 case EBindingMode.OneWayToSource:
                                     {
                                         // update source property when target changed
-                                        bdMethod.SetMethodName = tElement.GetPropertyBindMethodName(info.PropertyDescriptor.Name, true);
+                                        bdMethod.SetMethodName = bindObj.GetPropertyBindMethodName(info.PropertyDescriptor.Name, true);
                                         ConfigSetMethod(info);
                                     }
                                     break;
@@ -589,7 +598,7 @@ namespace EngineNS.UI.Bind
                                 DeleteBind(info.PropertyDescriptor.Name, host);
                                 for(int i=0; i<mBindingTargets.Count; i++)
                                 {
-                                    var tElement = mBindingTargets[i] as TtUIElement;
+                                    dynamic tElement = mBindingTargets[i];
                                     if(tElement != null)
                                     {
                                         var bindTarget = new TtUIElement.UIBindingData_Element()
@@ -623,7 +632,7 @@ namespace EngineNS.UI.Bind
                     if (ImGuiAPI.TreeNodeEx("UIControls", ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_SpanFullWidth))
                     {
                         int idx = 0;
-                        DrawUIElementBindableProperty(mFirstElement, in cmdList, host, ref idx, mBindPopFilterString, info);
+                        DrawUIElementBindableProperty(firstElement, in cmdList, host, ref idx, mBindPopFilterString, info);
 
                         ImGuiAPI.TreePop();
                     }
@@ -664,7 +673,7 @@ namespace EngineNS.UI.Bind
             {
                 DeleteBind(data.TargetName, data.Host);
                 TtUIElement.UIBindingData_Element bindSource = null;
-                var element = data.SourceObject as TtUIElement;
+                dynamic element = data.SourceObject;
                 if (element != null)
                 {
                     bindSource = new TtUIElement.UIBindingData_Element()
@@ -676,7 +685,7 @@ namespace EngineNS.UI.Bind
                 }
                 for (int i=0; i<data.TargetObjects.Count; i++)
                 {
-                    var tElement = data.TargetObjects[i] as TtUIElement;
+                    dynamic tElement = data.TargetObjects[i];
                     if(tElement != null)
                     {
                         var bindTarget = new TtUIElement.UIBindingData_Element()
@@ -997,6 +1006,7 @@ namespace EngineNS.UI.Bind
     public interface IBindableObject
     {
 #nullable enable
+        public string Name { get; set; }
         public T GetValue<T>([CallerMemberName] string? propertyName = null);
         public T GetValue<T>(TtBindableProperty bp);
         public void SetValue<T>(in T value, [CallerMemberName] string? propertyName = null);
@@ -1181,6 +1191,7 @@ namespace EngineNS.UI.Bind
             get;
             set;
         } = false;
+        public string Name { get; set; }
 
         public virtual void GetProperties(ref CustomPropertyDescriptorCollection collection, bool parentIsValueType)
         {

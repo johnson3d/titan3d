@@ -35,6 +35,7 @@ namespace EngineNS.EGui.Controls.PropertyGrid
     {
         public CustomPropertyDescriptor PropertyDescriptor;
         public object Target;
+        public object HostEditor;
     }
     public interface IExternalPropertyData
     {

@@ -31,28 +31,35 @@ namespace EngineNS.UTest
             var ass = AppDomain.CurrentDomain.GetAssemblies();
             foreach (var i in ass)
             {
-                var types = i.GetTypes();
-                foreach (var j in types)
+                try
                 {
-                    var attrs = j.GetCustomAttributes(typeof(UTestAttribute), false);
-                    if (attrs.Length == 0)
-                        continue;
-                    var ut = attrs[0] as UTestAttribute;
-                    if (ut.Enable == false)
-                        continue;
-                    var obj = Rtti.UTypeDescManager.CreateInstance(j);
-                    var mtd = j.GetMethod("UnitTestEntrance");
-                    if (mtd != null)
+                    var types = i.GetTypes();
+                    foreach (var j in types)
                     {
-                        try
+                        var attrs = j.GetCustomAttributes(typeof(UTestAttribute), false);
+                        if (attrs.Length == 0)
+                            continue;
+                        var ut = attrs[0] as UTestAttribute;
+                        if (ut.Enable == false)
+                            continue;
+                        var obj = Rtti.UTypeDescManager.CreateInstance(j);
+                        var mtd = j.GetMethod("UnitTestEntrance");
+                        if (mtd != null)
                         {
-                            mtd.Invoke(obj, null);
-                        }
-                        catch (Exception ex)
-                        {
-                            Console.WriteLine(ex);
+                            try
+                            {
+                                mtd.Invoke(obj, null);
+                            }
+                            catch (Exception ex)
+                            {
+                                Console.WriteLine(ex);
+                            }
                         }
                     }
+                }
+                catch(Exception ex)
+                {
+                    Console.WriteLine(ex);
                 }
             }
         }

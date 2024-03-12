@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using EngineNS.Graphics.Pipeline.Shader;
+using System.Runtime.CompilerServices;
 
 namespace EngineNS.Graphics.Pipeline.Deferred
 {
@@ -86,7 +87,7 @@ namespace EngineNS.Graphics.Pipeline.Deferred
             };
         }
     }
-    [Bricks.CodeBuilder.ContextMenu("Forword", "Deferred\\Worword", Bricks.RenderPolicyEditor.UPolicyGraph.RGDEditorKeyword)]
+    [Bricks.CodeBuilder.ContextMenu("Forword", "Deferred\\Forword", Bricks.RenderPolicyEditor.UPolicyGraph.RGDEditorKeyword)]
     public class UForwordNode : Common.UBasePassNode
     {
         public TtRenderGraphPin VisiblesPinIn = TtRenderGraphPin.CreateInput("Visibles");
@@ -180,6 +181,8 @@ namespace EngineNS.Graphics.Pipeline.Deferred
                 case ERenderLayer.RL_Translucent:
                 case ERenderLayer.RL_Sky:
                     return mTranslucentShading;
+                case ERenderLayer.RL_Opaque:
+                    return mTranslucentShading;
                 default:
                     return mOpaqueShading;
             }
@@ -195,6 +198,18 @@ namespace EngineNS.Graphics.Pipeline.Deferred
                     ColorPinInOut.Attachement.Format = buffer.BufferDesc.Format;
                 }
             }
+        }
+        [Rtti.Meta]
+        public List<ERenderLayer> LayerFilters { get; set; } = new List<ERenderLayer> { ERenderLayer.RL_Translucent, ERenderLayer.RL_Sky };
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        private bool IsFilters(ERenderLayer layer)
+        {
+            foreach(var i in LayerFilters)
+            {
+                if (i == layer)
+                    return true;
+            }
+            return false;
         }
         [ThreadStatic]
         private static Profiler.TimeScope ScopeTick = Profiler.TimeScopeManager.GetTimeScope(typeof(UForwordNode), nameof(TickLogic));
@@ -222,7 +237,7 @@ namespace EngineNS.Graphics.Pipeline.Deferred
                                     continue;
 
                                 var layer = k.Material.RenderLayer;
-                                if (layer == ERenderLayer.RL_Translucent || layer == ERenderLayer.RL_Sky)
+                                if (IsFilters(layer))
                                 {
                                     var cmdlist = LayerBasePass.GetCmdList(layer);
                                     var drawcall = k.GetDrawCall(cmdlist.mCoreObject, GBuffers, policy, this);

@@ -11,6 +11,7 @@
   <ItemGroup>
     <Compile Include="$(MSBuildThisFileDirectory)AttachementCache.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)CCamera.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Common\ClearMRTNode.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Common\ExpHeightFog.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Common\FogNode.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Common\Post\FsrNode.cs" />

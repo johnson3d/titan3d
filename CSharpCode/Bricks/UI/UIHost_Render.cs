@@ -289,7 +289,8 @@ namespace EngineNS.UI
                     var clr = mtl.FindVar("FontColor");
                     if (clr != null)
                     {
-                        clr.SetValue(Color3f.FromColor(Color.DarkRed));
+                        clr.SetValue(Color3f.FromColor(brush.Color));
+                        //clr.SetValue(Color3f.FromColor(Color.DarkRed));
                         //mtl.UpdateUniformVars();
                     }
                 }

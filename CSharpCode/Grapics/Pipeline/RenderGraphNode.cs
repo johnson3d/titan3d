@@ -176,6 +176,7 @@ namespace EngineNS.Graphics.Pipeline
         {
             if (pin.PinType != TtRenderGraphPin.EPinType.InputOutput)
                 return false;
+            pin.Attachement.AttachmentName = FHashText.Create($"{Name}->{pin.Name}");
             pin.HostNode = this;
             pin.Attachement.BufferViewTypes = needTypes;
             foreach (var i in InputGraphPins)

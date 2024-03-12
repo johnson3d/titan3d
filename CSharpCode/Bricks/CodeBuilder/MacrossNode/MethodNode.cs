@@ -194,7 +194,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
                     }
 
                     if (pin.EditValue != null)
-                        tmp.DefaultArguments[pin.Name] = pin.EditValue.Value.ToString();// GetValueString();
+                        tmp.DefaultArguments[pin.Name] = pin.EditValue.Value?.ToString();// GetValueString();
                 }
                 return tmp;
             }

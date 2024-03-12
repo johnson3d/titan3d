@@ -1,5 +1,6 @@
 ﻿using EngineNS.Bricks.CodeBuilder;
 using EngineNS.IO;
+using EngineNS.UI.Bind;
 using EngineNS.UI.Editor;
 using EngineNS.UI.Event;
 using System;
@@ -35,11 +36,11 @@ namespace EngineNS.UI.Controls
             public void GenerateStatement(TtUIEditor editor, List<UStatementBase> statements)
             {
                 var findElementInvokeStatement = new UMethodInvokeStatement(
-                    "FindElement",
+                    "FindBindObject",
                     new UVariableDeclaration()
                     {
-                        VariableName = "UIElement_" + Id,
-                        VariableType = new UTypeReference(typeof(TtUIElement)),
+                        VariableName = "object_" + Id,
+                        VariableType = new UTypeReference(typeof(IBindableObject)),
                     },
                     new UVariableReferenceExpression("HostElement"),
                     new UMethodInvokeArgumentExpression(new UPrimitiveExpression(Id)))
@@ -55,7 +56,7 @@ namespace EngineNS.UI.Controls
             }
             public UExpressionBase GetVariableExpression()
             {
-                return new UVariableReferenceExpression("UIElement_" + Id);
+                return new UVariableReferenceExpression("object_" + Id);
             }
             public Rtti.UTypeDesc GetVariableType()
             {
@@ -290,90 +291,91 @@ namespace EngineNS.UI.Controls
             }
         }
 
-        [Rtti.Meta]
-        public Dictionary<string, BindingDataBase> BindingDatas
-        {
-            get;
-            set;
-        } = new Dictionary<string, BindingDataBase>();
+        //[Browsable(false)]
+        //[Rtti.Meta]
+        //public Dictionary<string, BindingDataBase> BindingDatas
+        //{
+        //    get;
+        //    set;
+        //} = new Dictionary<string, BindingDataBase>();
 
-        public virtual void ClearBindExpression(EngineNS.UI.Bind.TtBindableProperty bp)
-        {
-            if(bp == null)
-            {
-                lock (mBindExprDic)
-                {
-                    mBindExprDic.Clear();
-                }
-                foreach(var data in BindingDatas)
-                {
-                    var bdMethod = data.Value as BindingData_Method;
-                    if (bdMethod == null)
-                        continue;
+        //public virtual void ClearBindExpression(EngineNS.UI.Bind.TtBindableProperty bp)
+        //{
+        //    if(bp == null)
+        //    {
+        //        lock (mBindExprDic)
+        //        {
+        //            mBindExprDic.Clear();
+        //        }
+        //        foreach(var data in BindingDatas)
+        //        {
+        //            var bdMethod = data.Value as BindingData_Method;
+        //            if (bdMethod == null)
+        //                continue;
 
-                    MacrossMethodData md;
-                    if(MacrossMethods.TryGetValue(data.Key, out md))
-                    {
-                        var pbData = md as MacrossPropertyBindMethodData;
-                        if(pbData != null)
-                        {
-                            if (pbData.GetDesc != null)
-                                mMethodDisplayNames.Remove(pbData.GetDesc);
-                            if (pbData.SetDesc != null)
-                                mMethodDisplayNames.Remove(pbData.SetDesc);
-                        }
-                    }
-                }
+        //            MacrossMethodData md;
+        //            if(MacrossMethods.TryGetValue(data.Key, out md))
+        //            {
+        //                var pbData = md as MacrossPropertyBindMethodData;
+        //                if(pbData != null)
+        //                {
+        //                    if (pbData.GetDesc != null)
+        //                        mMethodDisplayNames.Remove(pbData.GetDesc);
+        //                    if (pbData.SetDesc != null)
+        //                        mMethodDisplayNames.Remove(pbData.SetDesc);
+        //                }
+        //            }
+        //        }
 
-                BindingDatas.Clear();
-            }
-            else
-            {
-                lock (mBindExprDic)
-                {
-                    mBindExprDic.Remove(bp);
-                }
+        //        BindingDatas.Clear();
+        //    }
+        //    else
+        //    {
+        //        lock (mBindExprDic)
+        //        {
+        //            mBindExprDic.Remove(bp);
+        //        }
 
-                BindingDatas.Remove(bp.Name);
+        //        BindingDatas.Remove(bp.Name);
 
-                MacrossMethodData data;
-                if(MacrossMethods.TryGetValue(bp.Name, out data))
-                {
-                    var pbData = data as MacrossPropertyBindMethodData;
-                    if(pbData != null)
-                    {
-                        if(pbData.GetDesc != null)
-                            mMethodDisplayNames.Remove(pbData.GetDesc);
-                        if(pbData.SetDesc != null)
-                            mMethodDisplayNames.Remove(pbData.SetDesc);
-                    }
-                    MacrossMethods.Remove(bp.Name);
-                }
-            }
-        }
+        //        MacrossMethodData data;
+        //        if(MacrossMethods.TryGetValue(bp.Name, out data))
+        //        {
+        //            var pbData = data as MacrossPropertyBindMethodData;
+        //            if(pbData != null)
+        //            {
+        //                if(pbData.GetDesc != null)
+        //                    mMethodDisplayNames.Remove(pbData.GetDesc);
+        //                if(pbData.SetDesc != null)
+        //                    mMethodDisplayNames.Remove(pbData.SetDesc);
+        //            }
+        //            MacrossMethods.Remove(bp.Name);
+        //        }
+        //    }
+        //}
 
         #endregion
 
-        public string GetPropertyBindMethodName(string propertyName, bool isSet)
-        {
-            if (isSet)
-                return "Set_" + propertyName + "_" + Id;
-            else
-                return "Get_" + propertyName + "_" + Id;
-        }
+        //public string GetPropertyBindMethodName(string propertyName, bool isSet)
+        //{
+        //    if (isSet)
+        //        return "Set_" + propertyName + "_" + Id;
+        //    else
+        //        return "Get_" + propertyName + "_" + Id;
+        //}
 
-        public string GetEventMethodName(string eventName)
-        {
-            return "On_" + eventName + "_" + Id;
-        }
+        //public string GetEventMethodName(string eventName)
+        //{
+        //    return "On_" + eventName + "_" + Id;
+        //}
         public class MacrossMethodData : BaseSerializer
         {
-            public TtUIElement HostElement;
+            public IBindableObject HostObject;
             public bool DisplayNameDirty = true;
 
             public override void OnPreRead(object tagObject, object hostObject, bool fromXml)
             {
-                HostElement = hostObject as TtUIElement;
+                HostObject = hostObject as IBindableObject;
             }
 
             public virtual string GetDisplayName(Bricks.CodeBuilder.UMethodDeclaration desc)
@@ -395,7 +397,7 @@ namespace EngineNS.UI.Controls
             {
                 if(DisplayNameDirty)
                 {
-                    mDisplayName = $"On {EventName}({HostElement.Name})";
+                    mDisplayName = $"On {EventName}({HostObject.Name})";
                     DisplayNameDirty = false;
                 }
                 return mDisplayName;
@@ -416,8 +418,8 @@ namespace EngineNS.UI.Controls
             {
                 if (DisplayNameDirty)
                 {
-                    mSetMethodDisplayName = $"Set {PropertyName}({HostElement.Name})";
-                    mGetMethodDisplayName = $"Get {PropertyName}({HostElement.Name})";
+                    mSetMethodDisplayName = $"Set {PropertyName}({HostObject.Name})";
+                    mGetMethodDisplayName = $"Get {PropertyName}({HostObject.Name})";
                     DisplayNameDirty = false;
                 }
                 if (desc == GetDesc)
@@ -428,85 +430,85 @@ namespace EngineNS.UI.Controls
             }
         }
 
-        internal Dictionary<Bricks.CodeBuilder.UMethodDeclaration, MacrossMethodData> mMethodDisplayNames = new Dictionary<Bricks.CodeBuilder.UMethodDeclaration, MacrossMethodData>();
-        public string GetMethodDisplayName(Bricks.CodeBuilder.UMethodDeclaration desc)
-        {
-            MacrossMethodData val = null;
-            if(mMethodDisplayNames.TryGetValue(desc, out val))
-            {
-                return val.GetDisplayName(desc);
-            }
-            return desc.MethodName;
-        }
-        void SetMethodDisplayNamesDirty()
-        {
-            foreach(var name in mMethodDisplayNames)
-            {
-                name.Value.DisplayNameDirty = true;
-            }
-        }
+        //internal Dictionary<Bricks.CodeBuilder.UMethodDeclaration, MacrossMethodData> mMethodDisplayNames = new Dictionary<Bricks.CodeBuilder.UMethodDeclaration, MacrossMethodData>();
+        //public string GetMethodDisplayName(Bricks.CodeBuilder.UMethodDeclaration desc)
+        //{
+        //    MacrossMethodData val = null;
+        //    if(mMethodDisplayNames.TryGetValue(desc, out val))
+        //    {
+        //        return val.GetDisplayName(desc);
+        //    }
+        //    return desc.MethodName;
+        //}
+        //void SetMethodDisplayNamesDirty()
+        //{
+        //    foreach(var name in mMethodDisplayNames)
+        //    {
+        //        name.Value.DisplayNameDirty = true;
+        //    }
+        //}
 
-        Dictionary<string, MacrossMethodData> mMacrossMethods = new Dictionary<string, MacrossMethodData>();
-        [Rtti.Meta]
-        [Browsable(false)]
-        public Dictionary<string, MacrossMethodData> MacrossMethods
-        {
-            get => mMacrossMethods;
-            set
-            {
-                mMacrossMethods = value;
-            }
-        }
-        public void SetEventBindMethod(string eventName, Bricks.CodeBuilder.UMethodDeclaration desc)
-        {
-            var data = new TtUIElement.MacrossEventMethodData()
-            {
-                EventName = eventName,
-                Desc = desc,
-                HostElement = this,
-            };
-            MacrossMethods[eventName] = data;
-            mMethodDisplayNames[desc] = data;
-        }
-        public bool HasMethod(string keyName, out string methodDisplayName)
-        {
-            MacrossMethodData data;
-            if (MacrossMethods.TryGetValue(keyName, out data))
-            {
-                methodDisplayName = data.GetDisplayName(null);
-                return true;
-            }
-            methodDisplayName = "";
-            return false;
-        }
+        //Dictionary<string, MacrossMethodData> mMacrossMethods = new Dictionary<string, MacrossMethodData>();
+        //[Rtti.Meta]
+        //[Browsable(false)]
+        //public Dictionary<string, MacrossMethodData> MacrossMethods
+        //{
+        //    get => mMacrossMethods;
+        //    set
+        //    {
+        //        mMacrossMethods = value;
+        //    }
+        //}
+        //public void SetEventBindMethod(string eventName, Bricks.CodeBuilder.UMethodDeclaration desc)
+        //{
+        //    var data = new TtUIElement.MacrossEventMethodData()
+        //    {
+        //        EventName = eventName,
+        //        Desc = desc,
+        //        HostObject = this,
+        //    };
+        //    MacrossMethods[eventName] = data;
+        //    mMethodDisplayNames[desc] = data;
+        //}
+        //public bool HasMethod(string keyName, out string methodDisplayName)
+        //{
+        //    MacrossMethodData data;
+        //    if (MacrossMethods.TryGetValue(keyName, out data))
+        //    {
+        //        methodDisplayName = data.GetDisplayName(null);
+        //        return true;
+        //    }
+        //    methodDisplayName = "";
+        //    return false;
+        //}
 
-        public void SetPropertyBindMethod(string propertyName, Bricks.CodeBuilder.UMethodDeclaration desc, bool isSet)
-        {
-            MacrossMethodData data;
-            if(MacrossMethods.TryGetValue(propertyName, out data))
-            {
-                var pbData = data as MacrossPropertyBindMethodData;
-                if (isSet)
-                    pbData.SetDesc = desc;
-                else
-                    pbData.GetDesc = desc;
-            }
-            else
-            {
-                var pbData = new TtUIElement.MacrossPropertyBindMethodData()
-                {
-                    PropertyName = propertyName,
-                    HostElement = this,
-                };
-                if (isSet)
-                    pbData.SetDesc = desc;
-                else
-                    pbData.GetDesc = desc;
-                MacrossMethods[propertyName] = pbData;
-                data = pbData;
-            }
-            mMethodDisplayNames[desc] = data;
-        }
+        //public void SetPropertyBindMethod(string propertyName, Bricks.CodeBuilder.UMethodDeclaration desc, bool isSet)
+        //{
+        //    MacrossMethodData data;
+        //    if(MacrossMethods.TryGetValue(propertyName, out data))
+        //    {
+        //        var pbData = data as MacrossPropertyBindMethodData;
+        //        if (isSet)
+        //            pbData.SetDesc = desc;
+        //        else
+        //            pbData.GetDesc = desc;
+        //    }
+        //    else
+        //    {
+        //        var pbData = new TtUIElement.MacrossPropertyBindMethodData()
+        //        {
+        //            PropertyName = propertyName,
+        //            HostObject = this,
+        //        };
+        //        if (isSet)
+        //            pbData.SetDesc = desc;
+        //        else
+        //            pbData.GetDesc = desc;
+        //        MacrossMethods[propertyName] = pbData;
+        //        data = pbData;
+        //    }
+        //    mMethodDisplayNames[desc] = data;
+        //}
 
         public string GetVariableDisplayName(Bricks.CodeBuilder.UVariableDeclaration desc)
         {

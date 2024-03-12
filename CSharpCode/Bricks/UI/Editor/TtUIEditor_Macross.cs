@@ -15,11 +15,12 @@ namespace EngineNS.UI.Editor
     {
         //Macross.UMacrossGetter<TtUIMacrossBase> mMacrossGetter;
 
-        struct MacrossEditorRemoveMethodQueryData
+        public struct MacrossEditorRemoveMethodQueryData
         {
             public UMethodDeclaration Desc;
             public bool RemoveSuccess;
         };
+
         bool OnMacrossEditorRemoveMethod(Bricks.CodeBuilder.MacrossNode.UMacrossMethodGraph method)
         {
             MacrossEditorRemoveMethodQueryData data = new MacrossEditorRemoveMethodQueryData();
@@ -34,36 +35,37 @@ namespace EngineNS.UI.Editor
         }
         bool ElementOnRemoveMacrossMethod(TtUIElement element, ref MacrossEditorRemoveMethodQueryData data)
         {
-            List<string> needDeletes = new List<string>();
-            foreach(var method in element.MacrossMethods)
-            {
-                if(method.Value is TtUIElement.MacrossEventMethodData)
-                {
-                    // remove event bind method
-                    var evd = method.Value as TtUIElement.MacrossEventMethodData;
-                    if (evd.Desc.Equals(data.Desc))
-                    {
-                        needDeletes.Add(method.Key);
-                        element.mMethodDisplayNames.Remove(data.Desc);
-                    }
-                }
-                else if(method.Value is TtUIElement.MacrossPropertyBindMethodData)
-                {
-                    // remove property bind method
-                    var pvd = method.Value as TtUIElement.MacrossPropertyBindMethodData;
-                    if(pvd.SetDesc.Equals(data.Desc) ||
-                       pvd.GetDesc.Equals(data.Desc))
-                    {
-                        needDeletes.Add(method.Key);
-                        element.mMethodDisplayNames.Remove(data.Desc);
-                        element.BindingDatas.Remove(method.Key);
-                    }
-                }
-            }
-            for(int i=0; i<needDeletes.Count; i++)
-            {
-                element.MacrossMethods.Remove(needDeletes[i]);
-            }
+            element.OnRemoveMacrossMethod(ref data);
+            //List<string> needDeletes = new List<string>();
+            //foreach(var method in element.MacrossMethods)
+            //{
+            //    if(method.Value is TtUIElement.MacrossEventMethodData)
+            //    {
+            //        // remove event bind method
+            //        var evd = method.Value as TtUIElement.MacrossEventMethodData;
+            //        if (evd.Desc.Equals(data.Desc))
+            //        {
+            //            needDeletes.Add(method.Key);
+            //            element.MethodDisplayNames.Remove(data.Desc);
+            //        }
+            //    }
+            //    else if(method.Value is TtUIElement.MacrossPropertyBindMethodData)
+            //    {
+            //        // remove property bind method
+            //        var pvd = method.Value as TtUIElement.MacrossPropertyBindMethodData;
+            //        if(pvd.SetDesc.Equals(data.Desc) ||
+            //           pvd.GetDesc.Equals(data.Desc))
+            //        {
+            //            needDeletes.Add(method.Key);
+            //            element.MethodDisplayNames.Remove(data.Desc);
+            //            element.BindingDatas.Remove(method.Key);
+            //        }
+            //    }
+            //}
+            //for(int i=0; i<needDeletes.Count; i++)
+            //{
+            //    element.MacrossMethods.Remove(needDeletes[i]);
+            //}
             return false;
         }
         bool OnMacrossEditorAddMember(Bricks.CodeBuilder.UVariableDeclaration variable)
@@ -131,61 +133,62 @@ namespace EngineNS.UI.Editor
         }
         bool ElementBindMacross(TtUIElement element, ref int temp)
         {
-            List<string> needDeletes = new List<string>();
-            foreach(var evt in element.MacrossMethods)
-            {
-                if(evt.Value is TtUIElement.MacrossEventMethodData)
-                {
-                    var data = evt.Value as TtUIElement.MacrossEventMethodData;
-                    var eventName = data.EventName;
-                    var methodDesc = UIAsset.MacrossEditor.DefClass.FindMethod(element.GetEventMethodName(eventName));
-                    if(methodDesc == null)
-                    {
-                        // method已删除或不存在
-                        needDeletes.Add(evt.Key);
-                    }
-                    else
-                    {
-                        data.Desc = methodDesc;
-                        methodDesc.GetDisplayNameFunc = element.GetMethodDisplayName;
-                        element.mMethodDisplayNames[methodDesc] = data;
-                    }
-                }
-                else if(evt.Value is TtUIElement.MacrossPropertyBindMethodData)
-                {
-                    var data = evt.Value as TtUIElement.MacrossPropertyBindMethodData;
-                    var propertyName = data.PropertyName;
-                    var setMethodDesc = UIAsset.MacrossEditor.DefClass.FindMethod(element.GetPropertyBindMethodName(propertyName, true));
-                    var getMethodDesc = UIAsset.MacrossEditor.DefClass.FindMethod(element.GetPropertyBindMethodName(propertyName, false));
-                    if(setMethodDesc == null && getMethodDesc == null)
-                    {
-                        // method已删除或不存在
-                        needDeletes.Add(evt.Key);
-                    }
-                    else
-                    {
-                        if(getMethodDesc != null)
-                        {
-                            data.GetDesc = getMethodDesc;
-                            getMethodDesc.GetDisplayNameFunc = element.GetMethodDisplayName;
-                            element.mMethodDisplayNames[getMethodDesc] = data;
-                        }
-                        if(setMethodDesc != null)
-                        {
-                            data.SetDesc = setMethodDesc;
-                            setMethodDesc.GetDisplayNameFunc = element.GetMethodDisplayName;
-                            element.mMethodDisplayNames[setMethodDesc] = data;
-                        }
-                    }
-                }
-            }
+            //List<string> needDeletes = new List<string>();
+            //foreach(var evt in element.MacrossMethods)
+            //{
+            //    if(evt.Value is TtUIElement.MacrossEventMethodData)
+            //    {
+            //        var data = evt.Value as TtUIElement.MacrossEventMethodData;
+            //        var eventName = data.EventName;
+            //        var methodDesc = UIAsset.MacrossEditor.DefClass.FindMethod(element.GetEventMethodName(eventName));
+            //        if(methodDesc == null)
+            //        {
+            //            // method已删除或不存在
+            //            needDeletes.Add(evt.Key);
+            //        }
+            //        else
+            //        {
+            //            data.Desc = methodDesc;
+            //            methodDesc.GetDisplayNameFunc = element.GetMethodDisplayName;
+            //            element.mMethodDisplayNames[methodDesc] = data;
+            //        }
+            //    }
+            //    else if(evt.Value is TtUIElement.MacrossPropertyBindMethodData)
+            //    {
+            //        var data = evt.Value as TtUIElement.MacrossPropertyBindMethodData;
+            //        var propertyName = data.PropertyName;
+            //        var setMethodDesc = UIAsset.MacrossEditor.DefClass.FindMethod(element.GetPropertyBindMethodName(propertyName, true));
+            //        var getMethodDesc = UIAsset.MacrossEditor.DefClass.FindMethod(element.GetPropertyBindMethodName(propertyName, false));
+            //        if(setMethodDesc == null && getMethodDesc == null)
+            //        {
+            //            // method已删除或不存在
+            //            needDeletes.Add(evt.Key);
+            //        }
+            //        else
+            //        {
+            //            if(getMethodDesc != null)
+            //            {
+            //                data.GetDesc = getMethodDesc;
+            //                getMethodDesc.GetDisplayNameFunc = element.GetMethodDisplayName;
+            //                element.mMethodDisplayNames[getMethodDesc] = data;
+            //            }
+            //            if(setMethodDesc != null)
+            //            {
+            //                data.SetDesc = setMethodDesc;
+            //                setMethodDesc.GetDisplayNameFunc = element.GetMethodDisplayName;
+            //                element.mMethodDisplayNames[setMethodDesc] = data;
+            //            }
+            //        }
+            //    }
+            //}
 
-            for(int i = 0; i<needDeletes.Count; i++)
-            {
-                element.MacrossMethods.Remove(needDeletes[i]);
-            }
+            //for(int i = 0; i<needDeletes.Count; i++)
+            //{
+            //    element.MacrossMethods.Remove(needDeletes[i]);
+            //}
+            element.BindMacross(ref temp, UIAsset.MacrossEditor.DefClass);
 
-            if(element.IsVariable)
+            if (element.IsVariable)
             {
                 var variable = UIAsset.MacrossEditor.DefClass.FindMember(GetUIElementMacrossVariableName(element));
                 if(variable != null)
@@ -311,7 +314,7 @@ namespace EngineNS.UI.Editor
                         VariableName = varName,
                         VariableType = new UTypeReference(element.GetType()),
                     },
-                    new UVariableReferenceExpression("HostElement"),
+                    new UVariableReferenceExpression("HostObject"),
                     new UMethodInvokeArgumentExpression(new UPrimitiveExpression(element.Id)))
             {
                 DeclarationReturnValue = true,
@@ -402,11 +405,12 @@ namespace EngineNS.UI.Editor
             }
 
             var bindInitMethod = UIAsset.MacrossEditor.DefClass.FindMethod("InitializeBindings");
-            foreach(var data in element.BindingDatas)
-            {
-                data.Value.GenerateStatement(this, bindInitMethod.MethodBody.Sequence);
-            }
-            if(element.IsVariable)
+            element.GenerateBindingDataStatement(this, bindInitMethod.MethodBody.Sequence);
+            //foreach(var data in element.BindingDatas)
+            //{
+            //    data.Value.GenerateStatement(this, bindInitMethod.MethodBody.Sequence);
+            //}
+            if (element.IsVariable)
             {
                 var initMethod = UIAsset.MacrossEditor.DefClass.FindMethod("InitializeUIElementVariables");
                 var findElementInvokeStatement = new UMethodInvokeStatement(
@@ -416,7 +420,7 @@ namespace EngineNS.UI.Editor
                             VariableName = GetUIElementMacrossVariableName(element),
                             VariableType = new UTypeReference(element.GetType()),
                         },
-                        new UVariableReferenceExpression("HostElement"),
+                        new UVariableReferenceExpression("HostObject"),
                         new UMethodInvokeArgumentExpression(new UPrimitiveExpression(element.Id)))
                 {
                     DeclarationReturnValue = false,

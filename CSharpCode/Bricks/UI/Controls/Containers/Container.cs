@@ -1,4 +1,5 @@
 ﻿using EngineNS.IO;
+using EngineNS.UI.Bind;
 using EngineNS.UI.Canvas;
 using NPOI.SS.Formula.PTG;
 using System;
@@ -563,18 +564,18 @@ namespace EngineNS.UI.Controls.Containers
             mChildren.Clear();
         }
 
-        protected TtBrush mBrush;
-        [Rtti.Meta, Bind.BindProperty]
-        public TtBrush Brush
-        {
-            get => mBrush;
-            set
-            {
-                OnValueChange(value, mBrush);
-                mBrush = value;
-                mBrush.HostElement = this;
-            }
-        }
+        //protected TtBrush mBrush;
+        //[Rtti.Meta, Bind.BindProperty]
+        //public TtBrush Brush
+        //{
+        //    get => mBrush;
+        //    set
+        //    {
+        //        OnValueChange(value, mBrush);
+        //        mBrush = value;
+        //        mBrush.HostElement = this;
+        //    }
+        //}
         protected Thickness mBorderThickness = Thickness.Empty;
         [Rtti.Meta, Bind.BindProperty]
         public Thickness BorderThickness
@@ -829,6 +830,34 @@ namespace EngineNS.UI.Controls.Containers
             for(int i=0; i<Children.Count; i++)
             {
                 retVal = Children[i].FindElement(id);
+                if (retVal != null)
+                    return retVal;
+            }
+
+            return null;
+        }
+        public override IBindableObject FindBindObject(ulong id)
+        {
+            var retVal = base.FindBindObject(id);
+            if (retVal != null)
+                return retVal;
+
+            if (BorderBrush != null)
+            {
+                retVal = BorderBrush.FindBindObject(id);
+                if (retVal != null)
+                    return retVal;
+            }
+            if (Background != null)
+            {
+                retVal = Background.FindBindObject(id);
+                if (retVal != null)
+                    return retVal;
+            }
+
+            for(int i=0; i<Children.Count; i++)
+            {
+                retVal = Children[i].FindBindObject(id);
                 if (retVal != null)
                     return retVal;
             }

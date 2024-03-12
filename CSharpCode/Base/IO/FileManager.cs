@@ -24,6 +24,7 @@ namespace EngineNS.IO
             //Root,
             Game,
             Engine,
+            PluginContent,
             Editor,
             Cache,
             Plugin,

@@ -70,6 +70,8 @@ namespace EngineNS.EGui.Controls.PropertyGrid
         public EGui.UIProxy.ImageProxy IndentDec;
         EGui.UIProxy.ImageProxy mDropShadowDec;
 
+        public object HostEditor;
+
         public void Dispose()
         {
             mSearchBar?.Cleanup();
@@ -735,6 +737,7 @@ namespace EngineNS.EGui.Controls.PropertyGrid
                                 {
                                     PropertyDescriptor = propDesc,
                                     Target = target,
+                                    HostEditor = HostEditor,
                                 };
                                 propDesc.ExternalData.OnDraw(in info);
                             }    

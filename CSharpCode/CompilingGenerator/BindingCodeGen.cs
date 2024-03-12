@@ -19,12 +19,15 @@ namespace CompilingGenerator
         static readonly string mBindPropAttrName = "EngineNS.UI.Bind.BindPropertyAttribute";
         static readonly string mAttachedPropAttrName = "EngineNS.UI.Bind.AttachedPropertyAttribute";
         static readonly string mBindObjectAttrName = "EngineNS.UI.Bind.BindableObjectAttribute";
+        static readonly string mMetaAttrName = "EngineNS.Rtti.Meta";
         sealed class BindingSyntaxReceiver : ISyntaxContextReceiver
         {
             public List<FieldDeclarationSyntax> CandidateFields = new List<FieldDeclarationSyntax>();
             public List<PropertyDeclarationSyntax> CandidateProperties = new List<PropertyDeclarationSyntax>();
             public List<MethodDeclarationSyntax> CandidateMethods = new List<MethodDeclarationSyntax>();
             public List<ClassDeclarationSyntax> CandidateClasses = new List<ClassDeclarationSyntax>();
+            public List<PropertyDeclarationSyntax> CandidateIBindableObjectProperties = new List<PropertyDeclarationSyntax>();
+            public List<FieldDeclarationSyntax> CandidateIBindableObjectFields = new List<FieldDeclarationSyntax>();
             //static bool IsValidFieldDecSyntax(FieldDeclarationSyntax fieldDecSyntax, GeneratorSyntaxContext context)
             //{
             //    foreach(var attributeListSyntax in fieldDecSyntax.AttributeLists)
@@ -51,6 +54,13 @@ namespace CompilingGenerator
                 }
                 return false;
             }
+            //static bool IsValidIBindableObjectTypePropertyDecSyntax(PropertyDeclarationSyntax propertyDecSyntax, GeneratorSyntaxContext context)
+            //{
+            //    var symbol = context.SemanticModel.GetSymbolInfo(propertyDecSyntax).Symbol;
+            //    if(symbol != null && symbol.ContainingType.ToDisplayString() == "EngineNS.UI.Bind.IBindableObject")
+            //        return true;
+            //    return false;
+            //}
             static bool IsValidMethodDecSyntax(MethodDeclarationSyntax methodDecSyntax, GeneratorSyntaxContext context)
             {
                 foreach (var attributeListSyntax in methodDecSyntax.AttributeLists)
@@ -99,10 +109,15 @@ namespace CompilingGenerator
             public void OnVisitSyntaxNode(GeneratorSyntaxContext context)
             {
                 var syntaxNode = context.Node;
-                if (syntaxNode is PropertyDeclarationSyntax propertyDecSyntax && propertyDecSyntax.AttributeLists.Count > 0)
+                if (syntaxNode is PropertyDeclarationSyntax propertyDecSyntax)
                 {
-                    if (IsValidPropertyDecSyntax(propertyDecSyntax, context))
-                        CandidateProperties.Add(propertyDecSyntax);
+                    if(propertyDecSyntax.AttributeLists.Count > 0)
+                    {
+                        if (IsValidPropertyDecSyntax(propertyDecSyntax, context))
+                            CandidateProperties.Add(propertyDecSyntax);
+                    }
+                    //if(IsValidIBindableObjectTypePropertyDecSyntax(propertyDecSyntax, context))
+                    //    CandidateIBindableObjectProperties.Add(propertyDecSyntax);
                 }
                 //else if (syntaxNode is FieldDeclarationSyntax fieldDecSyntax && fieldDecSyntax.AttributeLists.Count > 0)
                 //{
@@ -122,7 +137,7 @@ namespace CompilingGenerator
             }
         }
 
-        string ProcessClass(INamedTypeSymbol? classSymbol, List<ISymbol> symbols, ISymbol? bindPropertySymbol, ISymbol? attachedPropertySymbol, ISymbol? bindObjectSymbol, GeneratorExecutionContext context)
+        string ProcessClass(INamedTypeSymbol? classSymbol, List<ISymbol> symbols, List<ISymbol> bindObjectMemberSymbols, ISymbol? bindPropertySymbol, ISymbol? attachedPropertySymbol, ISymbol? bindObjectSymbol, GeneratorExecutionContext context)
         {
             if (classSymbol == null || bindPropertySymbol == null || attachedPropertySymbol == null)
                 return "";
@@ -219,8 +234,51 @@ using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 
 namespace {namespaceName}
-{{
-    public partial class {className} : EngineNS.UI.Bind.IBindableObject, EngineNS.EGui.Controls.PropertyGrid.IPropertyCustomization
+{{";
+            //        var classAttrs = classSymbol.GetAttributes();
+            //        if (classAttrs.Length > 0)
+            //        {
+            //            var metaSymbol = context.Compilation.GetTypeByMetadataName(mMetaAttrName);
+            //            var attData = classAttrs.SingleOrDefault(ad => (ad.AttributeClass == null) ? false : ad.AttributeClass.Equals(metaSymbol, SymbolEqualityComparer.Default));
+            //            if (attData == null)
+            //            {
+            //                source += $@"
+            //[{mMetaAttrName}]";
+            //            }
+            //        }
+            bool HasIBindableObject = false;
+            bool HasIPropertyCustomization = false;
+            bool HasISerializer = false;
+            foreach (var iface in classSymbol.AllInterfaces)
+            {
+                var ifaceStr = iface.ToDisplayString();
+                switch(ifaceStr)
+                {
+                    case "EngineNS.UI.Bind.IBindableObject":
+                        HasIBindableObject = true;
+                        break;
+                    case "EngineNS.EGui.Controls.PropertyGrid.IPropertyCustomization":
+                        HasIPropertyCustomization = true;
+                        break;
+                    case "EngineNS.IO.ISerializer":
+                        HasISerializer = true;
+                        break;
+                }
+            }
+            string attributes = "";
+            if (!HasIBindableObject)
+                attributes += "EngineNS.UI.Bind.IBindableObject,";
+            if (!HasIPropertyCustomization)
+                attributes += "EngineNS.EGui.Controls.PropertyGrid.IPropertyCustomization,";
+            if (!HasISerializer)
+                attributes += "EngineNS.IO.ISerializer,";
+            if(!string.IsNullOrEmpty(attributes))
+            {
+                attributes = " : " + attributes.TrimEnd(',');
+            }
+
+            source += $@"
+    public partial class {className}{attributes}
     {{";
             var bindExprDicName = $"mBindExprDic";
             var triggerDicName = "mPropertyTriggers_";
@@ -869,6 +927,50 @@ namespace {namespaceName}
             {{
                 {bindExprDicName}.Remove(bp);
             }}
+
+            if(bp == null)
+            {{
+                foreach(var data in BindingDatas)
+                {{
+                    var bdMethod = data.Value as EngineNS.UI.Controls.TtUIElement.BindingData_Method;
+                    if (bdMethod == null)
+                        continue;
+
+                    EngineNS.UI.Controls.TtUIElement.MacrossMethodData md;
+                    if(MacrossMethods.TryGetValue(data.Key, out md))
+                    {{
+                        var pbData = md as EngineNS.UI.Controls.TtUIElement.MacrossPropertyBindMethodData;
+                        if(pbData != null)
+                        {{
+                            if (pbData.GetDesc != null)
+                                MethodDisplayNames.Remove(pbData.GetDesc);
+                            if (pbData.SetDesc != null)
+                                MethodDisplayNames.Remove(pbData.SetDesc);
+                        }}
+                    }}
+                }}
+
+                BindingDatas.Clear();
+            }}
+            else
+            {{
+
+                BindingDatas.Remove(bp.Name);
+
+                EngineNS.UI.Controls.TtUIElement.MacrossMethodData data;
+                if(MacrossMethods.TryGetValue(bp.Name, out data))
+                {{
+                    var pbData = data as EngineNS.UI.Controls.TtUIElement.MacrossPropertyBindMethodData;
+                    if(pbData != null)
+                    {{
+                        if(pbData.GetDesc != null)
+                            MethodDisplayNames.Remove(pbData.GetDesc);
+                        if(pbData.SetDesc != null)
+                            MethodDisplayNames.Remove(pbData.SetDesc);
+                    }}
+                    MacrossMethods.Remove(bp.Name);
+                }}
+            }}
         }}";
             }
             if (!classSymbol.MemberNames.Any(name => "RemoveAttachedProperties" == name))
@@ -1444,6 +1546,437 @@ namespace {namespaceName}
         }}";
             }
 
+            // macross used bind values
+            if (!baseHasBindObjectInterface && !classSymbol.MemberNames.Any(name => "BindingDatas" == name))
+            {
+                source += $@"
+        [System.ComponentModel.Browsable(false)]
+        [{mMetaAttrName}]
+        public Dictionary<string, EngineNS.UI.Controls.TtUIElement.BindingDataBase> BindingDatas
+        {{
+            get;
+            set;
+        }} = new Dictionary<string, EngineNS.UI.Controls.TtUIElement.BindingDataBase>();";
+            }
+            if (!baseHasBindObjectInterface && !classSymbol.MemberNames.Any(name => "Id" == name))
+            {
+                source += $@"
+        UInt64 mPrivateId = 0;
+        [{mMetaAttrName}]
+        public UInt64 Id
+        {{
+            get
+            {{
+                if (mPrivateId == 0)
+                    mPrivateId = Standart.Hash.xxHash.xxHash64.ComputeHash(Guid.NewGuid().ToByteArray());
+                return mPrivateId;
+            }}
+            set => mPrivateId = value;
+        }}";
+            }
+            if (!classSymbol.MemberNames.Any(name => "GetPropertyBindMethodName" == name))
+            {
+                source += $@"
+        public {(baseHasBindObjectInterface ? "override" : "virtual")} string GetPropertyBindMethodName(string propertyName, bool isSet)
+        {{
+            if (isSet)
+                return ""Set_"" + propertyName + ""_"" + Id;
+            else
+                return ""Get_"" + propertyName + ""_"" + Id;
+        }}";
+            }
+            if (!classSymbol.MemberNames.Any(name => "GetEventMethodName" == name))
+            {
+                source += $@"
+        public {(baseHasBindObjectInterface ? "override" : "virtual")} string GetEventMethodName(string eventName)
+        {{
+            return ""On_"" + eventName + ""_"" + Id;
+        }}";
+            }
+            if (!baseHasBindObjectInterface && !classSymbol.MemberNames.Any(name => "MethodDisplayNames" == name))
+            {
+                source += $@"
+        [System.ComponentModel.Browsable(false)]
+        public Dictionary<EngineNS.Bricks.CodeBuilder.UMethodDeclaration, EngineNS.UI.Controls.TtUIElement.MacrossMethodData> MethodDisplayNames = new Dictionary<EngineNS.Bricks.CodeBuilder.UMethodDeclaration, EngineNS.UI.Controls.TtUIElement.MacrossMethodData>();";
+            }
+            if (!classSymbol.MemberNames.Any(name => "GetMethodDisplayName" == name))
+            {
+                source += $@"
+        public {(baseHasBindObjectInterface ? "override" : "virtual")} string GetMethodDisplayName(EngineNS.Bricks.CodeBuilder.UMethodDeclaration desc)
+        {{
+            EngineNS.UI.Controls.TtUIElement.MacrossMethodData val = null;
+            if(MethodDisplayNames.TryGetValue(desc, out val))
+            {{
+                return val.GetDisplayName(desc);
+            }}
+            return desc.MethodName;
+        }}";
+            }
+            if (!classSymbol.MemberNames.Any(name => "SetMethodDisplayNamesDirty" == name))
+            {
+                source += $@"
+        public {(baseHasBindObjectInterface ? "override" : "virtual")} void SetMethodDisplayNamesDirty()
+        {{
+            foreach(var name in MethodDisplayNames)
+            {{
+                name.Value.DisplayNameDirty = true;
+            }}
+        }}";
+            }
+            if (!baseHasBindObjectInterface && !classSymbol.MemberNames.Any(name => "MacrossMethods" == name))
+            {
+                source += $@"
+        Dictionary<string, EngineNS.UI.Controls.TtUIElement.MacrossMethodData> mMacrossMethods = new Dictionary<string, EngineNS.UI.Controls.TtUIElement.MacrossMethodData>();
+        [EngineNS.Rtti.Meta]
+        [System.ComponentModel.Browsable(false)]
+        public Dictionary<string, EngineNS.UI.Controls.TtUIElement.MacrossMethodData> MacrossMethods
+        {{
+            get => mMacrossMethods;
+            set
+            {{
+                mMacrossMethods = value;
+            }}
+        }}";
+            }
+            if (!classSymbol.MemberNames.Any(name => "SetEventBindMethod" == name))
+            {
+                source += $@"
+        public {(baseHasBindObjectInterface ? "override" : "virtual")} void SetEventBindMethod(string eventName, EngineNS.Bricks.CodeBuilder.UMethodDeclaration desc)
+        {{
+            var data = new EngineNS.UI.Controls.TtUIElement.MacrossEventMethodData()
+            {{
+                EventName = eventName,
+                Desc = desc,
+                HostObject = this,
+            }};
+            MacrossMethods[eventName] = data;
+            MethodDisplayNames[desc] = data;
+        }}";
+            }
+            if (!classSymbol.MemberNames.Any(name => "HasMethod" == name))
+            {
+                source += $@"
+        public {(baseHasBindObjectInterface ? "override" : "virtual")} bool HasMethod(string keyName, out string methodDisplayName)
+        {{
+            EngineNS.UI.Controls.TtUIElement.MacrossMethodData data;
+            if (MacrossMethods.TryGetValue(keyName, out data))
+            {{
+                methodDisplayName = data.GetDisplayName(null);
+                return true;
+            }}
+            methodDisplayName = """";
+            return false;
+        }}";
+            }
+        //    if (!classSymbol.MemberNames.Any(name => "SetPropertyBindMethod" == name))
+        //    {
+        //        source += $@"
+        //public {(baseHasBindObjectInterface ? "override" : "virtual")} void SetPropertyBindMethod(string propertyName, EngineNS.Bricks.CodeBuilder.UMethodDeclaration desc, bool isSet)
+        //{{
+        //    EngineNS.UI.Controls.TtUIElement.MacrossMethodData data;
+        //    if(MacrossMethods.TryGetValue(propertyName, out data))
+        //    {{
+        //        var pbData = data as EngineNS.UI.Controls.TtUIElement.MacrossPropertyBindMethodData;
+        //        if (isSet)
+        //            pbData.SetDesc = desc;
+        //        else
+        //            pbData.GetDesc = desc;
+        //    }}
+        //    else
+        //    {{
+        //        var pbData = new EngineNS.UI.Controls.TtUIElement.MacrossPropertyBindMethodData()
+        //        {{
+        //            PropertyName = propertyName,
+        //            HostObject = this,
+        //        }};
+        //        if (isSet)
+        //            pbData.SetDesc = desc;
+        //        else
+        //            pbData.GetDesc = desc;
+        //        MacrossMethods[propertyName] = pbData;
+        //        data = pbData;
+        //    }}
+        //    MethodDisplayNames[desc] = data;
+        //}}";
+        //    }
+            if (!classSymbol.MemberNames.Any(name => "OnRemoveMacrossMethod" == name))
+            {
+                source += $@"
+        public {(baseHasBindObjectInterface ? "override" : "virtual")} void OnRemoveMacrossMethod(ref EngineNS.UI.Editor.TtUIEditor.MacrossEditorRemoveMethodQueryData data)
+        {{";
+                if(baseHasBindObjectInterface)
+                {
+                    source += $@"
+            base.OnRemoveMacrossMethod(ref data);";
+                }
+                else
+                {
+                    source += $@"
+            List<string> needDeletes = new List<string>();
+            foreach(var method in MacrossMethods)
+            {{
+                if(method.Value is EngineNS.UI.Controls.TtUIElement.MacrossEventMethodData)
+                {{
+                    // remove event bind method
+                    var evd = method.Value as EngineNS.UI.Controls.TtUIElement.MacrossEventMethodData;
+                    if (evd.Desc.Equals(data.Desc))
+                    {{
+                        needDeletes.Add(method.Key);
+                        MethodDisplayNames.Remove(data.Desc);
+                    }}
+                }}
+                else if(method.Value is EngineNS.UI.Controls.TtUIElement.MacrossPropertyBindMethodData)
+                {{
+                    // remove property bind method
+                    var pvd = method.Value as EngineNS.UI.Controls.TtUIElement.MacrossPropertyBindMethodData;
+                    if(pvd.SetDesc.Equals(data.Desc) ||
+                       pvd.GetDesc.Equals(data.Desc))
+                    {{
+                        needDeletes.Add(method.Key);
+                        MethodDisplayNames.Remove(data.Desc);
+                        BindingDatas.Remove(method.Key);
+                    }}
+                }}
+            }}
+            for(int i=0; i<needDeletes.Count; i++)
+            {{
+                MacrossMethods.Remove(needDeletes[i]);
+            }}";
+                }
+                foreach(var bindObj in bindObjectMemberSymbols)
+                {
+                    source += $@"
+            if({bindObj.Name} != null)
+                {bindObj.Name}.OnRemoveMacrossMethod(ref data);";
+                }
+            source += $@"
+        }}";
+            }
+            if (!classSymbol.MemberNames.Any(name => "BindMacross" == name))
+            {
+                source += $@"
+        public {(baseHasBindObjectInterface ? "override" : "virtual")} void BindMacross(ref int temp, EngineNS.Bricks.CodeBuilder.UClassDeclaration defClass)
+        {{";
+                if(baseHasBindObjectInterface)
+                {
+                    source += $@"
+            base.BindMacross(ref temp, defClass);";
+                }
+                else
+                {
+                    source += $@"
+            List<string> needDeletes = new List<string>();
+            foreach(var evt in MacrossMethods)
+            {{
+                if(evt.Value is EngineNS.UI.Controls.TtUIElement.MacrossEventMethodData)
+                {{
+                    var data = evt.Value as EngineNS.UI.Controls.TtUIElement.MacrossEventMethodData;
+                    var eventName = data.EventName;
+                    var methodDesc = defClass.FindMethod(GetEventMethodName(eventName));
+                    if(methodDesc == null)
+                    {{
+                        // method已删除或不存在
+                        needDeletes.Add(evt.Key);
+                    }}
+                    else
+                    {{
+                        data.Desc = methodDesc;
+                        methodDesc.GetDisplayNameFunc = GetMethodDisplayName;
+                        MethodDisplayNames[methodDesc] = data;
+                    }}
+                }}
+                else if(evt.Value is EngineNS.UI.Controls.TtUIElement.MacrossPropertyBindMethodData)
+                {{
+                    var data = evt.Value as EngineNS.UI.Controls.TtUIElement.MacrossPropertyBindMethodData;
+                    var propertyName = data.PropertyName;
+                    var setMethodDesc = defClass.FindMethod(GetPropertyBindMethodName(propertyName, true));
+                    var getMethodDesc = defClass.FindMethod(GetPropertyBindMethodName(propertyName, false));
+                    if(setMethodDesc == null && getMethodDesc == null)
+                    {{
+                        // method已删除或不存在
+                        needDeletes.Add(evt.Key);
+                    }}
+                    else
+                    {{
+                        if(getMethodDesc != null)
+                        {{
+                            data.GetDesc = getMethodDesc;
+                            getMethodDesc.GetDisplayNameFunc = GetMethodDisplayName;
+                            MethodDisplayNames[getMethodDesc] = data;
+                        }}
+                        if(setMethodDesc != null)
+                        {{
+                            data.SetDesc = setMethodDesc;
+                            setMethodDesc.GetDisplayNameFunc = GetMethodDisplayName;
+                            MethodDisplayNames[setMethodDesc] = data;
+                        }}
+                    }}
+                }}
+            }}
+
+            for(int i = 0; i<needDeletes.Count; i++)
+            {{
+                MacrossMethods.Remove(needDeletes[i]);
+            }}";
+                }
+                foreach (var bindObj in bindObjectMemberSymbols)
+                {
+                    source += $@"
+            if({bindObj.Name} != null)
+                {bindObj.Name}.BindMacross(ref temp, defClass);";
+                }
+                source += $@"
+        }}";
+            }
+            if (!baseHasBindObjectInterface && !classSymbol.MemberNames.Any(name => "Name" == name))
+            {
+                //bool find = false;
+                //var tempBaseType = classSymbol.BaseType;
+                //while ((baseType != null))
+                //{
+                //    if(baseType.MemberNames.Any(name => "Name" == name))
+                //    {
+                //        find = true;
+                //        break;
+                //    }
+                //    baseType = baseType.BaseType;
+                //}
+                //if(!find)
+                {
+                    source += $@"
+        [System.ComponentModel.Browsable(false)]
+        public string Name {{ get; set; }}";
+                }
+            }
+            if (!classSymbol.MemberNames.Any(name => "UpdatePropertiesName" == name))
+            {
+                source += $@"
+        public {(baseHasBindObjectInterface ? "override" : "virtual")} void UpdatePropertiesName()
+        {{";
+                if(baseHasBindObjectInterface)
+                {
+                    source += $@"
+            base.UpdatePropertiesName();";
+                }
+                foreach (var bindObj in bindObjectMemberSymbols)
+                {
+                    source += $@"
+            if({bindObj.Name} != null)
+            {{
+                {bindObj.Name}.Name = Name + "".{bindObj.Name}"";
+                {bindObj.Name}.UpdatePropertiesName();
+            }}";
+                }
+
+                source += $@"
+        }}";
+            }
+            if (!classSymbol.MemberNames.Any(name => "FindBindObject" == name))
+            {
+                source += $@"
+        public {(baseHasBindObjectInterface ? "override" : "virtual")} EngineNS.UI.Bind.IBindableObject FindBindObject(UInt64 id)
+        {{
+            if (Id == id)
+                return this;";
+                foreach (var bindObj in bindObjectMemberSymbols)
+                {
+                    source += $@"
+            if({bindObj.Name} != null)
+            {{
+                var retVal = {bindObj.Name}.FindBindObject(id);
+                if(retVal != null)
+                    return retVal;
+            }}";
+                }
+                if (baseHasBindObjectInterface)
+                {
+                    source += $@"
+            return base.FindBindObject(id);";
+                }
+                else
+                {
+                    source += $@"
+            return null;";
+                }
+                
+                source += $@"
+        }}";
+            }
+            if (!classSymbol.MemberNames.Any(name => "GenerateBindingDataStatement" == name))
+            {
+                source += $@"
+        public {(baseHasBindObjectInterface ? "override" : "virtual")} void GenerateBindingDataStatement(EngineNS.UI.Editor.TtUIEditor editor, List<EngineNS.Bricks.CodeBuilder.UStatementBase> sequence)
+        {{";
+                foreach (var bindObj in bindObjectMemberSymbols)
+                {
+                    source += $@"
+            if({bindObj.Name} != null)
+                {bindObj.Name}.GenerateBindingDataStatement(editor, sequence);";
+                }
+                if(baseHasBindObjectInterface)
+                {
+                    source += $@"
+            base.GenerateBindingDataStatement(editor, sequence);";
+                }
+                else
+                {
+                    source += $@"
+            foreach(var data in BindingDatas)
+            {{
+                data.Value.GenerateStatement(editor, sequence);
+            }}";
+                }
+                source += $@"
+        }}";
+            }
+            if (!HasISerializer)
+            {
+                if (!classSymbol.MemberNames.Any(name => "OnPreRead" == name))
+                {
+                    source += $@"
+        public {(baseHasBindObjectInterface ? "override" : "virtual")} void OnPreRead(object tagObject, object hostObject, bool fromXml) {{}}";
+                }
+                if (!classSymbol.MemberNames.Any(name => "OnPropertyRead" == name))
+                {
+                    source += $@"
+        public {(baseHasBindObjectInterface ? "override" : "virtual")} void OnPropertyRead(object tagObject, System.Reflection.PropertyInfo prop, bool fromXml) {{}}";
+                }
+            }
+            if (!classSymbol.MemberNames.Any(name => "InitialMethodDeclaration" == name))
+            {
+                source += $@"
+        public {(baseHasBindObjectInterface ? "override" : "virtual")} void InitialMethodDeclaration(string propertyName, EngineNS.Bricks.CodeBuilder.UMethodDeclaration desc, bool isSet)
+        {{
+            desc.MethodName = GetPropertyBindMethodName(propertyName, isSet);
+            desc.GetDisplayNameFunc = GetMethodDisplayName;
+
+            EngineNS.UI.Controls.TtUIElement.MacrossMethodData data;
+            if(MacrossMethods.TryGetValue(propertyName, out data))
+            {{
+                var pbData = data as EngineNS.UI.Controls.TtUIElement.MacrossPropertyBindMethodData;
+                if (isSet)
+                    pbData.SetDesc = desc;
+                else
+                    pbData.GetDesc = desc;
+            }}
+            else
+            {{
+                var pbData = new EngineNS.UI.Controls.TtUIElement.MacrossPropertyBindMethodData()
+                {{
+                    PropertyName = propertyName,
+                    HostObject = this,
+                }};
+                if (isSet)
+                    pbData.SetDesc = desc;
+                else
+                    pbData.GetDesc = desc;
+                MacrossMethods[propertyName] = pbData;
+                data = pbData;
+            }}
+            MethodDisplayNames[desc] = data;
+        }}";
+            }
+
             source += "\r\n    }\r\n";
             source += bindImpSource;
             source += "}\r\n";
@@ -1459,6 +1992,7 @@ namespace {namespaceName}
             var attachedPropertySymbol = compilation.GetTypeByMetadataName(mAttachedPropAttrName);
             var bindObjectSymbol = compilation.GetTypeByMetadataName(mBindObjectAttrName);
             List<ISymbol> symbols = new List<ISymbol>();
+            List<ISymbol> bindObjectMemberSymbols = new List<ISymbol>();
             foreach(var prop in receiver.CandidateProperties)
             {
                 var model = compilation.GetSemanticModel(prop.SyntaxTree);
@@ -1478,6 +2012,14 @@ namespace {namespaceName}
                     symbols.Add(propertySymbol);
                 }
             }
+            //foreach(var prop in receiver.CandidateIBindableObjectProperties)
+            //{
+            //    var model = compilation.GetSemanticModel(prop.SyntaxTree);
+            //    var propertySymbol = model.GetDeclaredSymbol(prop) as IPropertySymbol;
+            //    if (propertySymbol == null)
+            //        continue;
+            //    bindObjectMemberSymbols.Add(propertySymbol);
+            //}
             foreach (var field in receiver.CandidateFields)
             {
                 var model = compilation.GetSemanticModel(field.SyntaxTree);
@@ -1509,7 +2051,24 @@ namespace {namespaceName}
             {
                 var key = group.Key;
                 if(key == null) continue;
-                var classSource = ProcessClass(key as INamedTypeSymbol, group.ToList(), bindPropertySymbol, attachedPropertySymbol, bindObjectSymbol, context);
+
+                List<ISymbol> groupSymbols = group.ToList();
+                bindObjectMemberSymbols.Clear();
+                foreach (var symbol in groupSymbols)
+                {
+                    if(symbol is IPropertySymbol propertySymbol)
+                    {
+                        foreach(var tempGroup in groups)
+                        {
+                            if(tempGroup.Key.Equals(propertySymbol.Type, SymbolEqualityComparer.Default))
+                            {
+                                bindObjectMemberSymbols.Add(symbol);
+                            }
+                        }
+                    }
+                }
+
+                var classSource = ProcessClass(key as INamedTypeSymbol, groupSymbols, bindObjectMemberSymbols, bindPropertySymbol, attachedPropertySymbol, bindObjectSymbol, context);
                 var fileName = $"{key.ToDisplayString()}_bind.g.cs";
                 context.AddSource(fileName, SourceText.From(classSource, Encoding.UTF8));
             }

@@ -180,46 +180,6 @@ namespace EngineNS.NxRHI
                 return null;
             return result;
         }
-        public unsafe UGpuResource CreateTextureToCpuBuffer(in FTextureDesc texDesc, in FSubResourceFootPrint desc)
-        {
-            switch (mCoreObject.Desc.RhiType)
-            {
-                case ERhiType.RHI_D3D11:
-                    //{
-                    //    return UEngine.Instance.GfxDevice.RenderContext.CreateTexture(in texDesc);
-                    //}
-                case ERhiType.RHI_D3D12:
-                case ERhiType.RHI_VK:
-                    {
-                        var pAlignment = UEngine.Instance.GfxDevice.RenderContext.mCoreObject.GetGpuResourceAlignment();
-                        var bfDesc = new FBufferDesc();
-                        bfDesc.CpuAccess = ECpuAccess.CAS_READ;
-                        bfDesc.Usage = EGpuUsage.USAGE_STAGING;
-                        bfDesc.RowPitch = desc.RowPitch;
-
-                        //bfDesc.RowPitch = desc.Width * (uint)CoreSDK.GetPixelFormatByteWidth(desc.Format);
-                        //if (bfDesc.RowPitch % pAlignment->TexturePitchAlignment > 0)
-                        //{
-                        //    bfDesc.RowPitch = (bfDesc.RowPitch / pAlignment->TexturePitchAlignment) * pAlignment->TexturePitchAlignment + pAlignment->TexturePitchAlignment;
-                        //}
-                        bfDesc.DepthPitch = bfDesc.RowPitch * texDesc.Height;
-                        if (bfDesc.DepthPitch % pAlignment->TextureAlignment > 0)
-                        {
-                            bfDesc.DepthPitch = (bfDesc.DepthPitch / pAlignment->TextureAlignment) * pAlignment->TextureAlignment + pAlignment->TextureAlignment;
-                        }
-                        if (desc.Depth == 0)
-                            bfDesc.Size = bfDesc.DepthPitch;
-                        else
-                            bfDesc.Size = bfDesc.DepthPitch * desc.Depth;
-
-                        bfDesc.StructureStride = (uint)CoreSDK.GetPixelFormatByteWidth(desc.Format);
-                        bfDesc.Type = (EBufferType)0;
-                        return UEngine.Instance.GfxDevice.RenderContext.CreateBuffer(in bfDesc);
-                    }
-                default:
-                    return null;
-            }
-        }
         public UTexture CreateTexture(in FTextureDesc desc)
         {
             var ptr = mCoreObject.CreateTexture(in desc);

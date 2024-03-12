@@ -27,6 +27,9 @@
     <Compile Include="$(MSBuildThisFileDirectory)Controls\Containers\Border.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Controls\Containers\Canvas.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Controls\Containers\Container.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Controls\Containers\StackPanel.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Controls\Containers\UniformGridPanel.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Controls\Containers\WrapPanel.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Controls\ContentPresenter.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Controls\Image.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Controls\Text.cs" />

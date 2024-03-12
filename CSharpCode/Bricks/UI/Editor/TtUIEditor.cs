@@ -47,6 +47,7 @@ namespace EngineNS.UI.Editor
         public async Task<bool> Initialize()
         {
             await DetailsGrid.Initialize();
+            DetailsGrid.HostEditor = this;
 
             if (mUIHost == null)
                 mUIHost = new EditorUIHost(this);
@@ -1170,7 +1171,7 @@ namespace EngineNS.UI.Editor
         public void OnEvent(in Bricks.Input.Event e)
         {
         }
-
+        bool mIsWireFrame = false;
         void DrawViewportUIAction(in Vector2 startDrawPos)
         {
             if (AssetName != null)
@@ -1216,10 +1217,26 @@ namespace EngineNS.UI.Editor
                 sphere.Radius = ((size.X > size.Y) ? size.X : size.Y);
                 mUIHost.RenderCamera.AutoZoom(ref sphere);
             }
+            ImGuiAPI.SameLine(0, -1);
+            if(EGui.UIProxy.CustomButton.ToggleButton("Wireframe", in Vector2.Zero, ref mIsWireFrame))
+            {
+                async Thread.Async.TtTask WireFrameProcess()
+                {
+                    if (mIsWireFrame)
+                    {
+                        var mtl = await UEngine.Instance.GfxDevice.MaterialInstanceManager.CreateMaterialInstance(RName.GetRName("material/wireframe_red.uminst", RName.ERNameType.Engine));
+                        mUIHost.DrawMesh.UpdateMaterial(mtl);
+                    }
+                    else
+                        mUIHost.MeshDirty = true;
+                }
+
+                _ = WireFrameProcess();
+            }
         }
         public float LoadingPercent { get; set; } = 1.0f;
         public string ProgressText { get; set; } = "Loading";
-        public async System.Threading.Tasks.Task<bool> OpenEditor(EngineNS.Editor.UMainEditorApplication mainEditor, RName name, object arg)
+        public async Task<bool> OpenEditor(EngineNS.Editor.UMainEditorApplication mainEditor, RName name, object arg)
         {
             AssetName = name;
             mUIHost.Children.Add(UEngine.Instance.UIManager.Load(AssetName));

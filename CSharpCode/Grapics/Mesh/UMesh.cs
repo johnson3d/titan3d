@@ -603,6 +603,55 @@ namespace EngineNS.Graphics.Mesh
                 new List<List<Pipeline.Shader.UMaterial>>() { materials },
                 mdfQueueType, atomType);
         }
+        public bool UpdateMaterial(Pipeline.Shader.UMaterial material, int subMesh = -1, Rtti.UTypeDesc atomType = null)
+        {
+            if(subMesh >= 0 && subMesh < MaterialMesh.SubMeshes.Count)
+            {
+                var sbMesh = MaterialMesh.SubMeshes[subMesh];
+                return UpdateMesh(subMesh, sbMesh.Mesh, material, atomType);
+            }
+            else
+            {
+                for (int i = 0; i < MaterialMesh.SubMeshes.Count; i++)
+                {
+                    if (!UpdateMaterial(material, i, atomType))
+                        return false;
+                }
+            }
+            return true;
+        }
+        public bool UpdateMaterial(List<Pipeline.Shader.UMaterial> materials, int subMesh = -1, Rtti.UTypeDesc atomType = null)
+        {
+            if(subMesh >= 0 && subMesh < MaterialMesh.SubMeshes.Count)
+            {
+                var sbMesh = MaterialMesh.SubMeshes[subMesh];
+                return UpdateMesh(subMesh, sbMesh.Mesh, materials, atomType);
+            }
+            else
+            {
+                for (int i = 0; i < MaterialMesh.SubMeshes.Count; i++)
+                {
+                    if (!UpdateMaterial(materials, i, atomType))
+                        return false;
+                }
+            }
+            return true;
+        }
+        public bool UpdateMesh(int subMesh, UMeshPrimitives mesh, Pipeline.Shader.UMaterial material, Rtti.UTypeDesc atomType = null)
+        {
+            if (atomType == null)
+                atomType = Rtti.UTypeDescGetter<TtAtom>.TypeDesc;
+
+            var sbMesh = MaterialMesh.SubMeshes[subMesh];
+            sbMesh.Mesh = mesh;
+            for (int i = 0; i < sbMesh.Materials.Count; i++)
+            {
+                sbMesh.Materials[i] = material;
+            }
+
+            MeshAtomUpdate(subMesh, atomType);
+            return true;
+        }
         public bool UpdateMesh(int subMesh, UMeshPrimitives mesh, List<Pipeline.Shader.UMaterial> materials, Rtti.UTypeDesc atomType = null)
         {
             if (atomType == null)
@@ -617,6 +666,12 @@ namespace EngineNS.Graphics.Mesh
                 sbMesh.Materials[i] = materials[i];
             }
 
+            MeshAtomUpdate(subMesh, atomType);
+            return true;
+        }
+        void MeshAtomUpdate(int subMesh, Rtti.UTypeDesc atomType)
+        {
+            var sbMesh = MaterialMesh.SubMeshes[subMesh];
             var tarMesh = this.SubMeshes[subMesh];
             System.Diagnostics.Debug.Assert(tarMesh.MeshIndex == subMesh);
             if (tarMesh.Atoms == null || tarMesh.Atoms.Count != sbMesh.Materials.Count)
@@ -647,7 +702,6 @@ namespace EngineNS.Graphics.Mesh
                     }
                 }
             }
-            return true;
         }
         public bool UpdateMesh(List<UMeshPrimitives> mesh, List<List<Pipeline.Shader.UMaterial>> materials, Rtti.UTypeDesc atomType = null)
         {

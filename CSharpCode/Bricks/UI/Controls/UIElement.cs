@@ -123,6 +123,7 @@ namespace EngineNS.UI.Controls
 
         UInt64 mId = 0;
         [Rtti.Meta]
+        [Browsable(false)]
         public UInt64 Id
         {
             get
@@ -165,6 +166,8 @@ namespace EngineNS.UI.Controls
                 OnValueChange(value, mName);
                 SetMethodDisplayNamesDirty();
                 mName = value;
+
+                UpdatePropertiesName();
             }
         }
 

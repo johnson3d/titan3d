@@ -69,7 +69,11 @@ namespace EngineNS.GamePlay
         }
         public virtual async System.Threading.Tasks.Task<bool> BeginPlay()
         {
-            return await McObject?.Get()?.BeginPlay(this);
+            if (McObject == null)
+                return false;
+            if (McObject.Get() == null)
+                return false;
+            return await McObject.Get().BeginPlay(this);
         }
         public virtual void Tick(float elapsedMillisecond)
         {

@@ -24,7 +24,7 @@ namespace EngineNS.UI
         }
         public virtual void InitializeEvents()
         {
-            //TtButton element = HostElement.FindElement("xx") as TtButton;
+            //TtButton element = HostObject.FindElement("xx") as TtButton;
             //element.Click += Element_Click;
         }
 

@@ -135,6 +135,12 @@ namespace EngineNS
 
             this.GameInstance.McObject.Name = main;
             var ret = await this.GameInstance.BeginPlay();
+            if (ret == false)
+            {
+                Profiler.Log.WriteLine(Profiler.ELogTag.Error, "PIE", $"{main} BeginPlay failed!");
+                this.GameInstance = null;
+                return false;
+            }
             
             UEngine.Instance.TickableManager.AddTickable(this.GameInstance);
 

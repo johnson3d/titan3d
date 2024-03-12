@@ -777,7 +777,7 @@ namespace EngineNS.UI.Bind
         public static TtBindingExpressionBase SetMethodBinding<TProp>(in IBindableObject target, string targetPath, Delegate_BindingMethodGet<TProp> getMethod, Delegate_BindingMethodSet<TProp> setMethod, TtBindingBase binding)
         {
             if (target == null)
-                throw new ArgumentNullException("source");
+                return null;
             var sourceProp = target.FindBindableProperty(targetPath);
             if (sourceProp == null)
                 return null;
@@ -815,9 +815,9 @@ namespace EngineNS.UI.Bind
         public static TtBindingExpressionBase SetBinding<TTagProp, TSrcProp>(in IBindableObject target, string targetPath, in IBindableObject source, string sourcePath, TtBindingBase binding)
         {
             if (target == null)
-                throw new ArgumentNullException("target");
+                return null;
             if (source == null)
-                throw new ArgumentNullException("source");
+                return null;
 
             var targetProp = target.FindBindableProperty(targetPath);
             if (targetProp == null)

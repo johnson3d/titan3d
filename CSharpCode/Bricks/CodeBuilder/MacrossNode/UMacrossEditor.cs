@@ -389,19 +389,22 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
             {
                 UEngine.Instance.MacrossModule.ReloadAssembly(assemblyFile);
                 var typeDesc = DefClass.TryGetTypeDesc();
-                var meta = Rtti.TtClassMetaManager.Instance.GetMeta(typeDesc);
-                meta.BuildMethods();
-                meta.BuildFields();
-                var version = meta.BuildCurrentVersion();
-                version.SaveVersion();
-                meta.SaveClass();
-
-                for (int i = 0; i < Methods.Count; i++)
+                if(typeDesc != null)
                 {
-                    Methods[i].CanvasMenuDirty = true;
-                }
+                    var meta = Rtti.TtClassMetaManager.Instance.GetMeta(typeDesc);
+                    meta.BuildMethods();
+                    meta.BuildFields();
+                    var version = meta.BuildCurrentVersion();
+                    version.SaveVersion();
+                    meta.SaveClass();
 
-                AfterCompileCode?.Invoke(this);
+                    for (int i = 0; i < Methods.Count; i++)
+                    {
+                        Methods[i].CanvasMenuDirty = true;
+                    }
+
+                    AfterCompileCode?.Invoke(this);
+                }
             }
         }
 

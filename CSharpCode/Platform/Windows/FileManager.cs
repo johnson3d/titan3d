@@ -24,6 +24,7 @@ namespace EngineNS.IO
             SetRoot(ERootDir.Execute, root + "binaries");// AppDomain.CurrentDomain.BaseDirectory);
             SetRoot(ERootDir.Engine, root + "enginecontent");
             SetRoot(ERootDir.Game, root + "content");
+            SetRoot(ERootDir.PluginContent, root + "plugincontent");
             SetRoot(ERootDir.Editor, root + "editorcontent");
             SetRoot(ERootDir.Cache, root + "cache");
             SetRoot(ERootDir.Plugin, root + $"binaries/Plugins/");
