@@ -7,8 +7,8 @@
         public EngineNS.Macross.UMacrossBreak breaker_LoadScene_3113493897 = new EngineNS.Macross.UMacrossBreak("breaker_LoadScene_3113493897");
         public EngineNS.Macross.UMacrossBreak breaker_Load_2325772087 = new EngineNS.Macross.UMacrossBreak("breaker_Load_2325772087");
         public EngineNS.Macross.UMacrossBreak breaker_Add_1937078671 = new EngineNS.Macross.UMacrossBreak("breaker_Add_1937078671");
+        public EngineNS.Macross.UMacrossBreak breaker_return_1529912777 = new EngineNS.Macross.UMacrossBreak("breaker_return_1529912777");
         EngineNS.Macross.UMacrossStackFrame mFrame_BeginPlay = new EngineNS.Macross.UMacrossStackFrame(EngineNS.RName.GetRName("tutorials/helloword/helloword.macross", EngineNS.RName.ERNameType.Game));
-        [EngineNS.Rtti.Meta]
         public override async System.Threading.Tasks.Task<System.Boolean> BeginPlay(EngineNS.GamePlay.UGameInstance host)
         {
             using(var guard_BeginPlay = new EngineNS.Macross.UMacrossStackGuard(mFrame_BeginPlay))
@@ -33,6 +33,10 @@
                 mFrame_BeginPlay.SetWatchVariable("v_item_Add_1937078671", tmp_r_Load_2325772087);
                 breaker_Add_1937078671.TryBreak();
                 host.WorldViewportSlate.DefaultHUD.Children.Add(tmp_r_Load_2325772087);
+                ret_4129711059 = true;
+                mFrame_BeginPlay.SetWatchVariable("ret_4129711059_1529912777", ret_4129711059);
+                breaker_return_1529912777.TryBreak();
+                return ret_4129711059;
                 return ret_4129711059;
             }
         }
