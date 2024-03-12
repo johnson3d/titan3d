@@ -1,0 +1,43 @@
+#ifndef	_PGC_WaterBasin_H_
+#define _PGC_WaterBasin_H_
+#include "../../Inc/GlobalDefine.cginc"
+#include "../../Inc/Math.cginc"
+
+Texture2D<float> HeightTexture;
+Texture2D<float2> FlowTexture;
+RWByteAddressBuffer WaterTexture;
+
+/**Meta Begin:(CS_IncWaterMain)
+HLSL=none
+Meta End:(CS_IncWaterMain)**/
+[numthreads(DispatchX, DispatchY, DispatchZ)]
+void CS_WaterBasinMain(uint3 DispatchThreadId : SV_DispatchThreadID, uint3 LocalThreadId : SV_GroupThreadID, uint3 GroupId : SV_GroupID)
+{
+    int width, height;
+    HeightTexture.GetDimensions(width, height);
+    int2 dir = (int2) FlowTexture[DispatchThreadId.xy];
+    int2 src = DispatchThreadId.xy;
+    int2 tar = DispatchThreadId.xy + dir;
+    if (any(tar < 0) || tar.x >= width || tar.y >= height)
+        return;
+    int idxSrc = src.x + src.y * width;
+    int idxTar = tar.x + tar.y * width;
+    float sw = WaterTexture.Load(idxSrc * 4);
+    float tw = WaterTexture.Load(idxTar * 4);
+    float srcH = HeightTexture[src] + sw;
+    float tarH = HeightTexture[tar] + tw;
+    float delta = srcH - tarH;
+    if (delta < 0)
+    {
+        return;
+    }
+    
+    float change = (sw < HeightTexture[src] - tarH) ? sw : delta * 0.5;
+    float reduce_change = -change;
+    InterlockedAddFloat(WaterTexture, idxSrc * 4, reduce_change);
+    InterlockedAddFloat(WaterTexture, idxTar * 4, change);
+    //WaterTexture[src] += reduce_change;
+    //WaterTexture[target] += change;
+}
+
+#endif//_PGC_WaterBasin_H_

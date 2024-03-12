@@ -218,7 +218,7 @@ namespace Canvas
 					prevBrush = word->Brush;
 					pCmd = GetOrNewDrawCmd(prevBrush);
 				}
-				pCmd->PushQuad(vert, offset);
+				pCmd->PushQuad(vert);
 			}
 			else if (clip.IsOverlap(wordRect) == false)
 			{
@@ -233,12 +233,12 @@ namespace Canvas
 				}
 				auto rect = FRectanglef::And(clip, wordRect);
 				float u = vert[Canvas::RCN_X0_Y0].UV.X;
-				float u1 = ((rect.X - wordRect.X) - u) / wordRect.Width;
-				float u2 = ((rect.X + rect.Width - wordRect.X) - u) / wordRect.Width;
+				float u1 = (rect.X - wordRect.X) / wordRect.Width;
+				float u2 = (rect.X + rect.Width - wordRect.X) / wordRect.Width;
 				float us = vert[Canvas::RCN_X1_Y0].UV.X - u;
 				float v = vert[Canvas::RCN_X0_Y0].UV.Y;
-				float v1 = ((rect.Y - wordRect.Y) - v) / wordRect.Height;
-				float v2 = ((rect.Y + rect.Height - wordRect.Y) - v) / wordRect.Height;
+				float v1 = (rect.Y - wordRect.Y) / wordRect.Height;
+				float v2 = (rect.Y + rect.Height - wordRect.Y) / wordRect.Height;
 				float vs = vert[Canvas::RCN_X0_Y1].UV.Y - v;
 				vert[Canvas::RCN_X0_Y0].UV.X = u + us * u1;
 				vert[Canvas::RCN_X0_Y1].UV.X = u + us * u1;

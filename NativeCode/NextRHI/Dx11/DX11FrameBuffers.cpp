@@ -110,7 +110,9 @@ namespace NxRHI
 		{
 			if (BackBuffers[i].Texture == nullptr)
 			{
-				BackBuffers[i].Texture = MakeWeakRef(new DX11Texture());
+				auto pTex = new DX11Texture();
+				pTex->mDeviceRef.FromObject(device);
+				BackBuffers[i].Texture = MakeWeakRef(pTex);
 			}
 			auto pDx11Texture = (DX11Texture*)GetBackBuffer(i);			
 			ID3D11Texture2D* pBackBuffer = nullptr;
