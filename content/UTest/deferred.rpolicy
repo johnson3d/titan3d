@@ -111,7 +111,12 @@
       <Name Type="System.String@Unknown" Value="UForwordNode" />
       <NodeId Type="System.Guid@Unknown" Value="004f199a-1f8a-491e-9d9e-177088c9b69f" />
       <Position Type="EngineNS.Vector2@EngineCore" Value="1317.8333,506.99994" />
-      <GraphNode Type="EngineNS.Graphics.Pipeline.Deferred.UForwordNode@EngineCore" />
+      <GraphNode Type="EngineNS.Graphics.Pipeline.Deferred.UForwordNode@EngineCore">
+        <LayerFilters Type="System.Collections.Generic.List&lt;EngineNS.Graphics.Pipeline.ERenderLayer@EngineCore,&gt;@Unknown" Count="2">
+          <e_0 Value="RL_Translucent" />
+          <e_1 Value="RL_Sky" />
+        </LayerFilters>
+      </GraphNode>
       <InputEditableValues Type="System.Collections.Generic.List&lt;EngineNS.Bricks.NodeGraph.UNodeBase.UInputEditableValueInfo@EngineCore,&gt;@Unknown" Count="0" />
     </e_10>
     <e_11 Type="EngineNS.Bricks.RenderPolicyEditor.UPolicyNode@EngineCore">

@@ -89,26 +89,20 @@ bool4 or_internal(bool4 a, bool4 b) { return bool4(a.x || b.x, a.y || b.y, a.z |
 
 void SetIndirectDispatchArg(RWByteAddressBuffer buffer, int offset, uint3 dispatchArg, uint drawId)
 {
-#if RHI_TYPE == RHI_DX12
-	buffer.Store(offset + 0 * 4, drawId);
-#endif
-	buffer.Store(offset + 1 * 4, dispatchArg.x);//dispatchx
-	buffer.Store(offset + 2 * 4, dispatchArg.y);//dispatchy
-	buffer.Store(offset + 3 * 4, dispatchArg.z);//dispatchz
+	buffer.Store(offset + 0 * 4, dispatchArg.x);//dispatchx
+	buffer.Store(offset + 1 * 4, dispatchArg.y);//dispatchy
+	buffer.Store(offset + 2 * 4, dispatchArg.z);//dispatchz
 }
 
 void SetIndirectDrawIndexArg(RWByteAddressBuffer buffer, int offset, 
 	uint IndexCountPerInstance, uint InstanceCount, uint StartIndexLocation, 
 	uint BaseVertexLocation, uint StartInstanceLocation, uint drawId)
 {
-#if RHI_TYPE == RHI_DX11
-	buffer.Store(offset + 0 * 4, drawId);
-#endif
-	buffer.Store(offset + 1 * 4, IndexCountPerInstance);
-	buffer.Store(offset + 2 * 4, InstanceCount);
-	buffer.Store(offset + 3 * 4, StartIndexLocation);
-	buffer.Store(offset + 4 * 4, BaseVertexLocation);
-	buffer.Store(offset + 5 * 4, StartInstanceLocation);
+	buffer.Store(offset + 0 * 4, IndexCountPerInstance);
+	buffer.Store(offset + 1 * 4, InstanceCount);
+	buffer.Store(offset + 2 * 4, StartIndexLocation);
+	buffer.Store(offset + 3 * 4, BaseVertexLocation);
+	buffer.Store(offset + 4 * 4, StartInstanceLocation);
 }
 
 void InterlockedAddFloat(RWByteAddressBuffer buf, uint addr, float value)
