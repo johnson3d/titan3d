@@ -420,6 +420,7 @@ namespace EngineNS.GamePlay.Scene
             Children.Clear();
             UpdateAABB();
         }
+        [Rtti.Meta]
         public UNode FindFirstChild(string name)
         {
             foreach (var i in Children)

@@ -83,7 +83,7 @@
       </MethodDec>
     </e_0>
   </MethodDatas>
-  <Nodes Type="System.Collections.Generic.List&lt;EngineNS.Bricks.NodeGraph.UNodeBase@EngineCore,&gt;@Unknown" Count="5">
+  <Nodes Type="System.Collections.Generic.List&lt;EngineNS.Bricks.NodeGraph.UNodeBase@EngineCore,&gt;@Unknown" Count="6">
     <e_0 Type="EngineNS.Bricks.CodeBuilder.MacrossNode.UMethodStartNode@EngineCore">
       <MethodDecKeyword Type="System.String@Unknown" Value="System.Boolean BeginPlay(EngineNS.GamePlay.UGameInstance)" />
       <Name Type="System.String@Unknown" Value="BeginPlay" />
@@ -137,7 +137,7 @@
       <MethodMeta Type="System.String@Unknown" Value="EngineNS.GamePlay.UGameInstance@EngineCore#System.Threading.Tasks.Task`1[[EngineNS.GamePlay.Scene.UScene, Engine.Window, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]] LoadScene(EngineNS.RName)" />
       <Name Type="System.String@Unknown" Value="LoadScene" />
       <NodeId Type="System.Guid@Unknown" Value="25840c59-f1aa-4aac-9016-14041e588a41" />
-      <Position Type="EngineNS.Vector2@EngineCore" Value="962,97" />
+      <Position Type="EngineNS.Vector2@EngineCore" Value="662.99994,102" />
       <SelfMethod Type="System.Boolean@Unknown" Value="False" />
       <InputEditableValues Type="System.Collections.Generic.List&lt;EngineNS.Bricks.NodeGraph.UNodeBase.UInputEditableValueInfo@EngineCore,&gt;@Unknown" Count="1">
         <e_0 Type="EngineNS.Bricks.NodeGraph.UNodeBase.UInputEditableValueInfo@EngineCore">
@@ -170,8 +170,22 @@
       <Value Type="System.Boolean@Unknown" Value="True" />
       <InputEditableValues Type="System.Collections.Generic.List&lt;EngineNS.Bricks.NodeGraph.UNodeBase.UInputEditableValueInfo@EngineCore,&gt;@Unknown" Count="0" />
     </e_4>
+    <e_5 Type="EngineNS.Bricks.CodeBuilder.MacrossNode.MethodNode@EngineCore">
+      <InputControlWidth Type="System.Single@Unknown" Value="60" />
+      <Label Type="System.String@Unknown" Value="CreateCharacter" />
+      <MethodMeta Type="System.String@Unknown" Value="EngineNS.GamePlay.UGameInstance@EngineCore#System.Threading.Tasks.Task CreateCharacter(EngineNS.GamePlay.Scene.UScene)" />
+      <Name Type="System.String@Unknown" Value="CreateCharacter" />
+      <NodeId Type="System.Guid@Unknown" Value="ae035731-ccb1-4d40-a71d-85b749d15092" />
+      <Position Type="EngineNS.Vector2@EngineCore" Value="1191,98.00001" />
+      <SelfMethod Type="System.Boolean@Unknown" Value="False" />
+      <InputEditableValues Type="System.Collections.Generic.List&lt;EngineNS.Bricks.NodeGraph.UNodeBase.UInputEditableValueInfo@EngineCore,&gt;@Unknown" Count="0" />
+      <SaveData Type="EngineNS.Bricks.CodeBuilder.MacrossNode.MethodNode.TSaveData@EngineCore">
+        <DefaultArguments Type="System.Collections.Generic.Dictionary&lt;System.String@Unknown,System.String@Unknown,&gt;@Unknown" Count="0" />
+        <DelegateArgumentSaveDatas Type="System.Collections.Generic.List&lt;EngineNS.Bricks.CodeBuilder.MacrossNode.MethodNode.DelegateArgumentSaveData@EngineCore,&gt;@Unknown" Count="0" />
+      </SaveData>
+    </e_5>
   </Nodes>
-  <Linkers Type="System.Collections.Generic.List&lt;EngineNS.Bricks.NodeGraph.UPinLinker@EngineCore,&gt;@Unknown" Count="6">
+  <Linkers Type="System.Collections.Generic.List&lt;EngineNS.Bricks.NodeGraph.UPinLinker@EngineCore,&gt;@Unknown" Count="8">
     <e_0 Type="EngineNS.Bricks.NodeGraph.UPinLinker@EngineCore">
       <SaveData Type="EngineNS.Bricks.NodeGraph.UPinLinker.TSaveData@EngineCore">
         <InNodeId Type="System.Guid@Unknown" Value="09ce0a39-68ab-4f80-b518-8fbdd20cf99b" />
@@ -207,18 +221,34 @@
     <e_4 Type="EngineNS.Bricks.NodeGraph.UPinLinker@EngineCore">
       <SaveData Type="EngineNS.Bricks.NodeGraph.UPinLinker.TSaveData@EngineCore">
         <InNodeId Type="System.Guid@Unknown" Value="69705f95-b040-42e5-b864-54a287c979d3" />
-        <InPinName Type="System.String@Unknown" Value=" &gt;&gt;" />
-        <OutNodeId Type="System.Guid@Unknown" Value="25840c59-f1aa-4aac-9016-14041e588a41" />
-        <OutPinName Type="System.String@Unknown" Value="&gt;&gt; " />
-      </SaveData>
-    </e_4>
-    <e_5 Type="EngineNS.Bricks.NodeGraph.UPinLinker@EngineCore">
-      <SaveData Type="EngineNS.Bricks.NodeGraph.UPinLinker.TSaveData@EngineCore">
-        <InNodeId Type="System.Guid@Unknown" Value="69705f95-b040-42e5-b864-54a287c979d3" />
         <InPinName Type="System.String@Unknown" Value="ret_3675910725" />
         <OutNodeId Type="System.Guid@Unknown" Value="5232551c-c33d-45a1-b27a-58ed5253b119" />
         <OutPinName Type="System.String@Unknown" Value="Get" />
       </SaveData>
+    </e_4>
+    <e_5 Type="EngineNS.Bricks.NodeGraph.UPinLinker@EngineCore">
+      <SaveData Type="EngineNS.Bricks.NodeGraph.UPinLinker.TSaveData@EngineCore">
+        <InNodeId Type="System.Guid@Unknown" Value="ae035731-ccb1-4d40-a71d-85b749d15092" />
+        <InPinName Type="System.String@Unknown" Value="Self" />
+        <OutNodeId Type="System.Guid@Unknown" Value="8d587562-bee6-46fc-8cc3-735921d33f7c" />
+        <OutPinName Type="System.String@Unknown" Value="host" />
+      </SaveData>
     </e_5>
+    <e_6 Type="EngineNS.Bricks.NodeGraph.UPinLinker@EngineCore">
+      <SaveData Type="EngineNS.Bricks.NodeGraph.UPinLinker.TSaveData@EngineCore">
+        <InNodeId Type="System.Guid@Unknown" Value="ae035731-ccb1-4d40-a71d-85b749d15092" />
+        <InPinName Type="System.String@Unknown" Value="scene" />
+        <OutNodeId Type="System.Guid@Unknown" Value="25840c59-f1aa-4aac-9016-14041e588a41" />
+        <OutPinName Type="System.String@Unknown" Value="Result" />
+      </SaveData>
+    </e_6>
+    <e_7 Type="EngineNS.Bricks.NodeGraph.UPinLinker@EngineCore">
+      <SaveData Type="EngineNS.Bricks.NodeGraph.UPinLinker.TSaveData@EngineCore">
+        <InNodeId Type="System.Guid@Unknown" Value="69705f95-b040-42e5-b864-54a287c979d3" />
+        <InPinName Type="System.String@Unknown" Value=" &gt;&gt;" />
+        <OutNodeId Type="System.Guid@Unknown" Value="25840c59-f1aa-4aac-9016-14041e588a41" />
+        <OutPinName Type="System.String@Unknown" Value="&gt;&gt; " />
+      </SaveData>
+    </e_7>
   </Linkers>
 </Root>

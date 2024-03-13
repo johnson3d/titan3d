@@ -84,9 +84,13 @@ namespace EngineNS
                 //var tt = Encoding.UTF8.GetString((byte*)buffer.GetBuffer(), len);
             }
         }
-        public static void IUnknown_Release(IntPtr unk)
+        public static void PtrType_Add(IPtrType ptr)
         {
-            IUnknown_Release(unk.ToPointer());
+            IUnknown_AddRef(ptr.NativePointer.ToPointer());
+        }
+        public static void PtrType_Release(IPtrType ptr)
+        {
+            IUnknown_Release(ptr.NativePointer.ToPointer());
         }
         public static void DisposeObject<T>(ref T obj) where T : class, IDisposable
         {

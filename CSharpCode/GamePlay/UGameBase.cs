@@ -1,4 +1,6 @@
 ﻿using EngineNS.Bricks.PhysicsCore.SceneNode;
+using EngineNS.GamePlay.Camera;
+using EngineNS.GamePlay.Scene;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -52,7 +54,11 @@ namespace EngineNS.GamePlay
 
         [Rtti.Meta]
         public UGameViewportSlate WorldViewportSlate { get; } = new UGameViewportSlate(true);
-
+        [Rtti.Meta]
+        public Graphics.Pipeline.UCamera DefaultCamera 
+        {
+            get => WorldViewportSlate.RenderPolicy.DefaultCamera;
+        }
         Macross.UMacrossGetter<UMacrossGame> mMcObject;
         public Macross.UMacrossGetter<UMacrossGame> McObject
         {
@@ -116,7 +122,7 @@ namespace EngineNS.GamePlay
                 scene.Parent = world.Root;
 
                 //await CreateCharacter(WorldViewportSlate.World, WorldViewportSlate.World.Root);
-                await CreateCharacter(scene);
+                //await CreateCharacter(scene);
                 //await CreateSpereActor(scene);
                 //await CreateBoxActor(scene);
                 //world.CameraOffset = DVector3.Zero;
@@ -124,7 +130,8 @@ namespace EngineNS.GamePlay
             }
             return null;
         }
-        public GamePlay.Scene.Actor.UActor ChiefPlayer;
+        [Rtti.Meta]
+        public GamePlay.Scene.Actor.UActor ChiefPlayer { get; set; }
         [Rtti.Meta]
         public async System.Threading.Tasks.Task CreateCharacter(Scene.UScene scene)
         {
@@ -141,8 +148,8 @@ namespace EngineNS.GamePlay
 
             var meshData1 = new EngineNS.GamePlay.Scene.UMeshNode.UMeshNodeData();
             meshData1.MeshName = RName.GetRName("utest/puppet/mesh/puppet.ums");
-            meshData1.MdfQueueType = EngineNS.Rtti.UTypeDesc.TypeStr(typeof(EngineNS.Graphics.Mesh.UMdfSkinMesh));
-            meshData1.AtomType = EngineNS.Rtti.UTypeDesc.TypeStr(typeof(EngineNS.Graphics.Mesh.TtMesh.TtAtom));
+            meshData1.MdfQueueType = EngineNS.Rtti.UTypeDesc.TypeOf(typeof(EngineNS.Graphics.Mesh.UMdfSkinMesh)).TypeString;
+            meshData1.AtomType = EngineNS.Rtti.UTypeDesc.TypeOf(typeof(EngineNS.Graphics.Mesh.TtMesh.TtAtom)).TypeString;
             var meshNode1 = new EngineNS.GamePlay.Scene.UMeshNode();
             await meshNode1.InitializeNode(scene.World, meshData1, EngineNS.GamePlay.Scene.EBoundVolumeType.Box, typeof(EngineNS.GamePlay.UPlacement));
             meshNode1.NodeData.Name = "Robot1";

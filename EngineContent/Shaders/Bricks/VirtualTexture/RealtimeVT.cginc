@@ -4,6 +4,10 @@
 ByteAddressBuffer TextureSlotBuffer DX_AUTOBIND;
 RWByteAddressBuffer ActiveRvtBuffer DX_AUTOBIND;
 
+//NonUniformResourceIndex for bindless
+//Texture2D<float4> tex1[] : register(t0)
+//tex1[NonUniformResourceIndex(myMaterialID)].Sample(samp[NonUniformResourceIndex(samplerID)], texCoords);
+
 uint GetSlotRVT(uint uniqueTextureId)
 {
     return TextureSlotBuffer.Load((uniqueTextureId & 0xffff) * 4);

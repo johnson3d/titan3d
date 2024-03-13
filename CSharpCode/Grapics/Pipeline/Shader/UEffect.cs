@@ -82,12 +82,12 @@ namespace EngineNS.Graphics.Pipeline.Shader
             var vsNode = xnd.mCoreObject.NewNode("VSCode", 0, 0);
             xnd.RootNode.mCoreObject.AddNode(vsNode);
             DescVS.mCoreObject.SaveXnd(vsNode);
-            CoreSDK.IUnknown_Release(vsNode);
+            CoreSDK.PtrType_Release(vsNode);
 
             var psNode = xnd.mCoreObject.NewNode("PSCode", 0, 0);
             xnd.RootNode.mCoreObject.AddNode(psNode);
             DescPS.mCoreObject.SaveXnd(psNode);
-            CoreSDK.IUnknown_Release(psNode);
+            CoreSDK.PtrType_Release(psNode);
 
             xnd.SaveXnd(file);
         }
