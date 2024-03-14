@@ -17,6 +17,10 @@ void CS_Heigh2FlowMapMain(uint3 DispatchThreadId : SV_DispatchThreadID, uint3 Lo
     const int dy[] = { 0, -1, -1, 1, 1, -1, 1, 0, 0 };
     uint width, height;
     HeightTexture.GetDimensions(width, height);
+    if (DispatchThreadId.x > width || DispatchThreadId.y > height)
+    {
+        return;
+    }
     float center = HeightTexture[DispatchThreadId.xy];
     float minHeight = center; //FLT_MAX;
     float2 dir = (float2)0;
@@ -24,7 +28,7 @@ void CS_Heigh2FlowMapMain(uint3 DispatchThreadId : SV_DispatchThreadID, uint3 Lo
     {
         int2 xy;
         xy.x = DispatchThreadId.x + dx[i];
-        xy.y = DispatchThreadId.x + dy[i];
+        xy.y = DispatchThreadId.y + dy[i];
         if (xy.x < 0 || xy.x >= width || xy.y < 0 || xy.y >= height)
             continue;
         

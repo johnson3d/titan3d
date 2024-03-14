@@ -394,6 +394,8 @@ namespace EngineNS.Bricks.Procedure.Node
                 var waterMap = graph.BufferCache.FindBuffer(WaterPin);
                 if (waterMap != null)
                 {
+                    if (hMap != null)
+                        level.LevelData.UpdateAABB(hMap, waterMap);
                     PreviewTerrainNode.Terrain.IsShowWater = true;
                     level.LevelData.UpdateWaterMap(waterMap);
                 }

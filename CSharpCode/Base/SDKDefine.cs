@@ -35,6 +35,10 @@ namespace EngineNS
         {
             return (left > right) ? left : right;
         }
+        public static double Max(double left, double right)
+        {
+            return (left > right) ? left : right;
+        }
         public static int Min(int left, int right)
         {
             return (left < right) ? left : right;
@@ -44,6 +48,10 @@ namespace EngineNS
             return (left < right) ? left : right;
         }       
         public static float Min(float left, float right)
+        {
+            return (left < right) ? left : right;
+        }
+        public static double Min(double left, double right)
         {
             return (left < right) ? left : right;
         }

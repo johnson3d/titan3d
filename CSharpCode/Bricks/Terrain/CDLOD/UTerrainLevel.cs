@@ -255,8 +255,23 @@ namespace EngineNS.Bricks.Terrain.CDLOD
             UpdateMaterialIdMap(idMap);
 
             UpdatePlants(transform, plants);
+
+            UpdateAABB(hMap, waterMap);
         }
 
+        public void UpdateAABB(Procedure.UBufferComponent hMap, Procedure.UBufferComponent waterMap)
+        {
+            if (TiledPatch == null)
+                return;
+            var patchSide = Level.PatchSide;
+            for (int i = 0; i < patchSide; i++)
+            {
+                for (int j = 0; j < patchSide; j++)
+                {
+                    TiledPatch[i, j].UpdateAABB(hMap, waterMap);
+                }
+            }
+        }
         public void UpdateHeightMap(Procedure.UBufferComponent hMap)
         {
             var patchSide = Level.PatchSide;
@@ -305,7 +320,12 @@ namespace EngineNS.Bricks.Terrain.CDLOD
         {
             if (waterMap == null)
                 return;
+            var rvt = WaterHMapSRV?.Rvt;
             WaterHMapSRV = waterMap.CreateAsHeightMapTexture2D(out WaterHMap, HeightMapMinHeight, HeightMapMaxHeight, EPixelFormat.PXF_R16_FLOAT);
+            if (rvt != null)
+            {
+                rvt.UpdateTexture(WaterHMapSRV);
+            }
         }
         
         public void UpdateNormalMap(Procedure.UBufferComponent norMap)

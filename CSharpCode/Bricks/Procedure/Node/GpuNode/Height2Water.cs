@@ -34,6 +34,8 @@ namespace EngineNS.Bricks.Procedure.Node.GpuNode
             var incWater = Policy.FindNode<GpuShading.TtErosionIncWaterNode>();
             incWater.Rain = RainMap;
             incWater.RainScalar = RainScalar;
+            incWater.TextureWidth = Output.Width;
+            incWater.TextureHeight = Output.Height;
             var incWaterAttachement = Policy.AttachmentCache.ImportAttachment(incWater.WaterPinInOut);
             incWaterAttachement.SetImportedBuffer(waterBuffer);
 

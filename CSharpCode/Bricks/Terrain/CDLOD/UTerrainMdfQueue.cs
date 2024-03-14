@@ -16,6 +16,7 @@ namespace EngineNS.Bricks.Terrain.CDLOD
         public void ActiveRVTs()
         {
             TerrainNode.Terrain.HeightmapRVT.ActiveRVT(Patch.Level.HeightMapSRV);
+            TerrainNode.Terrain.HeightmapRVT.ActiveRVT(Patch.Level.WaterHMapSRV);
             TerrainNode.Terrain.NormalmapRVT.ActiveRVT(Patch.Level.NormalMapSRV);
             TerrainNode.Terrain.MaterialIdRVT.ActiveRVT(Patch.Level.MaterialIdMapSRV);
         }

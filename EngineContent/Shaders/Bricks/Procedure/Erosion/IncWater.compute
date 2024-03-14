@@ -4,6 +4,8 @@
 
 cbuffer cbPgc DX_AUTOBIND
 {
+    int TextureWidth;
+    int TextureHeight;
     float RainScalar;
 };
 
@@ -17,13 +19,18 @@ Meta End:(CS_IncWaterMain)**/
 [numthreads(DispatchX, DispatchY, DispatchZ)]
 void CS_IncWaterMain(uint3 DispatchThreadId : SV_DispatchThreadID, uint3 LocalThreadId : SV_GroupThreadID, uint3 GroupId : SV_GroupID)
 {
+    if (DispatchThreadId.x >= TextureWidth || DispatchThreadId.y >= TextureHeight)
+    {
+        return;
+    }
     int width, height;
     RainTexture.GetDimensions(width, height);
     float2 uv;
-    uv.x = (float) DispatchThreadId.x / (float) width;
-    uv.y = (float) DispatchThreadId.y / (float) height;
+    uv.x = (float) DispatchThreadId.x / (float) TextureWidth;
+    uv.y = (float) DispatchThreadId.y / (float) TextureHeight;
     float r = RainTexture.SampleLevel(Samp_RainTexture, uv, 0).r * RainScalar;
-    InterlockedAddFloat(WaterTexture, (DispatchThreadId.x + DispatchThreadId.y * width) * 4, r);
+    InterlockedAddFloat(WaterTexture, (DispatchThreadId.x + DispatchThreadId.y * TextureWidth) * 4, r);
+    //WaterTexture.Store((DispatchThreadId.x + DispatchThreadId.y * TextureWidth) * 4, asuint(r));
 }
 
 #endif//_PGC_EROSION_INCWATER_H_

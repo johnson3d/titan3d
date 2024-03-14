@@ -73,6 +73,8 @@ namespace EngineNS.Bricks.Procedure.Node.GpuShading
         internal NxRHI.USrView mRainTexture;
         [Rtti.Meta]
         public float RainScalar { get; set; } = 10.0f;
+        public int TextureWidth { get; set; } = 1;
+        public int TextureHeight { get; set; } = 1;
         public NxRHI.UCbView CBuffer = null;
         public NxRHI.UCbView GetCBuffer(NxRHI.FShaderBinder binder)
         {
@@ -80,6 +82,8 @@ namespace EngineNS.Bricks.Procedure.Node.GpuShading
             {
                 CBuffer = UEngine.Instance.GfxDevice.RenderContext.CreateCBV(binder);
             }
+            CBuffer.SetValue("TextureWidth", TextureWidth);
+            CBuffer.SetValue("TextureHeight", TextureHeight);
             CBuffer.SetValue("RainScalar", RainScalar);
             return CBuffer;
         }

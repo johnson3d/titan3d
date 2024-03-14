@@ -15,6 +15,10 @@ void CS_WaterBasinMain(uint3 DispatchThreadId : SV_DispatchThreadID, uint3 Local
 {
     int width, height;
     HeightTexture.GetDimensions(width, height);
+    if (DispatchThreadId.x > width || DispatchThreadId.y > height)
+    {
+        return;
+    }
     int2 dir = (int2) FlowTexture[DispatchThreadId.xy];
     int2 src = DispatchThreadId.xy;
     int2 tar = DispatchThreadId.xy + dir;
@@ -22,17 +26,22 @@ void CS_WaterBasinMain(uint3 DispatchThreadId : SV_DispatchThreadID, uint3 Local
         return;
     int idxSrc = src.x + src.y * width;
     int idxTar = tar.x + tar.y * width;
-    float sw = WaterTexture.Load(idxSrc * 4);
-    float tw = WaterTexture.Load(idxTar * 4);
+    float sw = max(asfloat(WaterTexture.Load(idxSrc * 4)), 0);
+    float tw = max(asfloat(WaterTexture.Load(idxTar * 4)), 0);
     float srcH = HeightTexture[src] + sw;
     float tarH = HeightTexture[tar] + tw;
     float delta = srcH - tarH;
+    float change;
     if (delta < 0)
     {
-        return;
+        //delta = -delta;
+        change = delta * 0.5;
+    }
+    else
+    {
+        change = (sw < HeightTexture[src] - tarH) ? sw : delta * 0.5;
     }
     
-    float change = (sw < HeightTexture[src] - tarH) ? sw : delta * 0.5;
     float reduce_change = -change;
     InterlockedAddFloat(WaterTexture, idxSrc * 4, reduce_change);
     InterlockedAddFloat(WaterTexture, idxTar * 4, change);

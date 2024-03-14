@@ -221,24 +221,8 @@ namespace EngineNS.Bricks.Terrain.CDLOD
             AABB.Maximum.Z = (IndexZ + 1) * PatchSize;
             AABB.Maximum.Y = double.MinValue;
 
-            int TexSizePerPatch  = level.GetTerrainNode().TexSizePerPatch;
-            var heightData = HeightMap;
-            for (int i = 0; i < TexSizePerPatch; i++)
-            {
-                for (int j = 0; j < TexSizePerPatch; j++)
-                {
-                    float alt = heightData.GetPixel<float>(x * TexSizePerPatch + j, z * TexSizePerPatch + i);
-                    if (alt > AABB.Maximum.Y)
-                    {
-                        AABB.Maximum.Y = alt;
-                    }
-                    if (alt < AABB.Minimum.Y)
-                    {
-                        AABB.Minimum.Y = alt;
-                    }
-                }
-            }
-
+            UpdateAABB(HeightMap, null);
+            
             AABB.Minimum += level.GetTerrainNode().Placement.AbsTransform.mPosition;
             AABB.Maximum += level.GetTerrainNode().Placement.AbsTransform.mPosition;
 
@@ -248,6 +232,26 @@ namespace EngineNS.Bricks.Terrain.CDLOD
             SetAcceptShadow(level.GetTerrainNode().IsAcceptShadow);
 
             GrassManager = new UTerrainGrassManager(this);
+        }
+        public void UpdateAABB(Bricks.Procedure.UBufferComponent HeightMap, Bricks.Procedure.UBufferComponent WaterHMap)
+        {
+            int TexSizePerPatch = Level.GetTerrainNode().TexSizePerPatch;
+            for (int i = 0; i < TexSizePerPatch; i++)
+            {
+                for (int j = 0; j < TexSizePerPatch; j++)
+                {
+                    float alt = HeightMap.GetPixel<float>(XInLevel * TexSizePerPatch + j, ZInLevel * TexSizePerPatch + i);
+                    AABB.Maximum.Y = MathHelper.Max(alt, AABB.Maximum.Y);
+                    AABB.Minimum.Y = MathHelper.Min(alt, AABB.Minimum.Y);
+
+                    if (WaterHMap != null)
+                    {
+                        alt = WaterHMap.GetPixel<float>(XInLevel * TexSizePerPatch + j, ZInLevel * TexSizePerPatch + i);
+                        AABB.Maximum.Y = MathHelper.Max(alt, AABB.Maximum.Y);
+                        AABB.Minimum.Y = MathHelper.Min(alt, AABB.Minimum.Y);
+                    }
+                }
+            }
         }
         public void SetAcceptShadow(bool value)
         {
