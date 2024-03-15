@@ -28,7 +28,7 @@ namespace EngineNS.Graphics.Pipeline.Common
             TilingPinOut.Attachement.Width = (uint)sizeof(FTileData);
 
             var attachement = RenderGraph.AttachmentCache.ImportAttachment(TilingPinOut);
-            attachement.Buffer = TileBuffer;
+            attachement.GpuResource = TileBuffer;
             attachement.Srv = TileSRV;
             attachement.Uav = TileUAV;
         }

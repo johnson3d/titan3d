@@ -1,6 +1,6 @@
 #ifndef	_PGC_Height2FlowMap_H_
 #define _PGC_Height2FlowMap_H_
-#include "../../Inc/Math.cginc"
+#include "PgcCommon.cginc"
 //https://www.jeremyong.com/graphics/2023/09/05/f32-interlocked-min-max-hlsl/
 
 Texture2D<float> HeightTexture;
@@ -13,8 +13,6 @@ Meta End:(CS_IncWaterMain)**/
 [numthreads(DispatchX, DispatchY, DispatchZ)]
 void CS_Heigh2FlowMapMain(uint3 DispatchThreadId : SV_DispatchThreadID, uint3 LocalThreadId : SV_GroupThreadID, uint3 GroupId : SV_GroupID)
 {
-    const int dx[] = { 0, -1, 1, -1, 1, 0, 0, -1, 1 };
-    const int dy[] = { 0, -1, -1, 1, 1, -1, 1, 0, 0 };
     uint width, height;
     HeightTexture.GetDimensions(width, height);
     if (DispatchThreadId.x > width || DispatchThreadId.y > height)
@@ -26,17 +24,15 @@ void CS_Heigh2FlowMapMain(uint3 DispatchThreadId : SV_DispatchThreadID, uint3 Lo
     float2 dir = (float2)0;
     for (int i = 1; i < 9; i++)
     {
-        int2 xy;
-        xy.x = DispatchThreadId.x + dx[i];
-        xy.y = DispatchThreadId.y + dy[i];
+        int2 nb = GetNeighbor(i);
+        int2 xy = DispatchThreadId.xy + nb;
         if (xy.x < 0 || xy.x >= width || xy.y < 0 || xy.y >= height)
             continue;
         
         if (minHeight >= HeightTexture[xy])
         {
             minHeight = HeightTexture[xy];
-            dir.x = dx[i];
-            dir.y = dy[i];
+            dir.x = nb;
         }
     }
     //if (any(dir) != 0)

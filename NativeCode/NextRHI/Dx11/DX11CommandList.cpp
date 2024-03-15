@@ -470,7 +470,8 @@ namespace NxRHI
 			copyDesc.MiscFlags = (EResourceMiscFlag)0;
 
 			copyBuffer = MakeWeakRef(pDevice->CreateBuffer(&copyDesc));
-			cmd->mContext->CopyResource((ID3D11Resource*)copyBuffer->GetHWBuffer(), (ID3D11Resource*)src->GetHWBuffer());
+			auto hwCmd = ((DX11CmdQueue*)pDevice->GetCmdQueue())->mHardwareContext;
+			hwCmd->mContext->CopyResource((ID3D11Resource*)copyBuffer->GetHWBuffer(), (ID3D11Resource*)src->GetHWBuffer());
 		}
 		
 		auto pixelStride = GetPixelByteWidth(footprint->Format);

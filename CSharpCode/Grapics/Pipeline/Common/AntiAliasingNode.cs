@@ -312,24 +312,24 @@ namespace EngineNS.Graphics.Pipeline.Common
         {
             var srcPin = GetAttachBuffer(SrcPin);
 
-            if (srcPin.Buffer.GetType() == typeof(NxRHI.UBuffer) && DesAttachBuffer.Buffer.GetType() == typeof(NxRHI.UBuffer))
+            if (srcPin.GpuResource.GetType() == typeof(NxRHI.UBuffer) && DesAttachBuffer.GpuResource.GetType() == typeof(NxRHI.UBuffer))
             {
                 CopyDrawcall.Mode = NxRHI.ECopyDrawMode.CDM_Buffer2Buffer;
             }
-            else if (srcPin.Buffer.GetType() == typeof(NxRHI.UTexture) && DesAttachBuffer.Buffer.GetType() == typeof(NxRHI.UTexture))
+            else if (srcPin.GpuResource.GetType() == typeof(NxRHI.UTexture) && DesAttachBuffer.GpuResource.GetType() == typeof(NxRHI.UTexture))
             {
                 CopyDrawcall.Mode = NxRHI.ECopyDrawMode.CDM_Texture2Texture;
             }
-            else if (srcPin.Buffer.GetType() == typeof(NxRHI.UTexture) && DesAttachBuffer.Buffer.GetType() == typeof(NxRHI.UBuffer))
+            else if (srcPin.GpuResource.GetType() == typeof(NxRHI.UTexture) && DesAttachBuffer.GpuResource.GetType() == typeof(NxRHI.UBuffer))
             {
                 CopyDrawcall.Mode = NxRHI.ECopyDrawMode.CDM_Texture2Buffer;
             }
-            else if (srcPin.Buffer.GetType() == typeof(NxRHI.UTexture) && DesAttachBuffer.Buffer.GetType() == typeof(NxRHI.UBuffer))
+            else if (srcPin.GpuResource.GetType() == typeof(NxRHI.UTexture) && DesAttachBuffer.GpuResource.GetType() == typeof(NxRHI.UBuffer))
             {
                 CopyDrawcall.Mode = NxRHI.ECopyDrawMode.CDM_Buffer2Texture;
             }
-            CopyDrawcall.BindSrc(srcPin.Buffer);
-            CopyDrawcall.BindDest(DesAttachBuffer.Buffer);
+            CopyDrawcall.BindSrc(srcPin.GpuResource);
+            CopyDrawcall.BindDest(DesAttachBuffer.GpuResource);
 
             DrawCommandList.PushGpuDraw(CopyDrawcall);
             //var fp = new NxRHI.FSubResourceFootPrint();

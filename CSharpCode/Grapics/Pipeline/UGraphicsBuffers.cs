@@ -108,7 +108,15 @@ namespace EngineNS.Graphics.Pipeline
         }
         public ELifeMode LifeMode = ELifeMode.Imported;
         public FAttachBufferDesc BufferDesc;
-        public NxRHI.UGpuResource Buffer;
+        public NxRHI.UGpuResource GpuResource;
+        public NxRHI.UBuffer Buffer
+        {
+            get { return GpuResource as NxRHI.UBuffer; }
+        }
+        public NxRHI.UTexture Texture
+        {
+            get { return GpuResource as NxRHI.UTexture; }
+        }
         public NxRHI.URenderTargetView Rtv;
         public NxRHI.UDepthStencilView Dsv;
         public NxRHI.UUaView Uav;
@@ -116,7 +124,7 @@ namespace EngineNS.Graphics.Pipeline
         public NxRHI.UCbView Cbv;
         public void SetImportedBuffer(TtGpuBufferBase gpuBuffer)
         {
-            Buffer = gpuBuffer.GpuResource;
+            GpuResource = gpuBuffer.GpuResource;
             Srv = gpuBuffer.Srv;
             Uav = gpuBuffer.Uav;
             Cbv = gpuBuffer.Cbv;
@@ -127,7 +135,7 @@ namespace EngineNS.Graphics.Pipeline
         {
             if (LifeMode == ELifeMode.Imported)
             {
-                Buffer = null;
+                GpuResource = null;
                 Rtv = null;
                 Dsv = null;
                 Uav = null;
@@ -139,7 +147,7 @@ namespace EngineNS.Graphics.Pipeline
                 CoreSDK.DisposeObject(ref Rtv);
                 CoreSDK.DisposeObject(ref Dsv);
                 CoreSDK.DisposeObject(ref Uav);
-                CoreSDK.DisposeObject(ref Buffer);
+                CoreSDK.DisposeObject(ref GpuResource);
             }
         }
         public bool CreateBufferViews(in FAttachBufferDesc abfdesc)
@@ -183,8 +191,8 @@ namespace EngineNS.Graphics.Pipeline
                 {
                     desc.m_BindFlags |= NxRHI.EBufferType.BFT_DSV;
                 }
-                Buffer = rc.CreateTexture(in desc);
-                System.Diagnostics.Debug.Assert(Buffer != null);
+                GpuResource = rc.CreateTexture(in desc);
+                System.Diagnostics.Debug.Assert(GpuResource != null);
 
                 if ((types & NxRHI.EBufferType.BFT_RTV) != 0)
                 {
@@ -194,7 +202,7 @@ namespace EngineNS.Graphics.Pipeline
                     viewDesc.Width = BufferDesc.Width;
                     viewDesc.Height = BufferDesc.Height;
                     viewDesc.Texture2D.MipSlice = 0;
-                    Rtv = rc.CreateRTV(Buffer as NxRHI.UTexture, in viewDesc);
+                    Rtv = rc.CreateRTV(GpuResource as NxRHI.UTexture, in viewDesc);
                 }
                 if ((types & NxRHI.EBufferType.BFT_DSV) != 0)
                 {
@@ -204,7 +212,7 @@ namespace EngineNS.Graphics.Pipeline
                     viewDesc.Width = BufferDesc.Width;
                     viewDesc.Height = BufferDesc.Height;
                     viewDesc.MipLevel = 0;
-                    Dsv = rc.CreateDSV(Buffer as NxRHI.UTexture, in viewDesc);
+                    Dsv = rc.CreateDSV(GpuResource as NxRHI.UTexture, in viewDesc);
                 }
                 if ((types & NxRHI.EBufferType.BFT_SRV) != 0)
                 {
@@ -213,7 +221,7 @@ namespace EngineNS.Graphics.Pipeline
                     viewDesc.Type = NxRHI.ESrvType.ST_Texture2D;
                     viewDesc.Format = BufferDesc.Format;
                     viewDesc.Texture2D.MipLevels = 1;
-                    Srv = rc.CreateSRV(Buffer as NxRHI.UTexture, in viewDesc);
+                    Srv = rc.CreateSRV(GpuResource as NxRHI.UTexture, in viewDesc);
                 }
                 if ((types & NxRHI.EBufferType.BFT_UAV) != 0)
                 {
@@ -221,7 +229,7 @@ namespace EngineNS.Graphics.Pipeline
                     viewDesc.SetTexture2D();
                     viewDesc.Format = BufferDesc.Format;
                     viewDesc.Texture2D.MipSlice = 0;
-                    Uav = rc.CreateUAV(Buffer as NxRHI.UTexture, in viewDesc);
+                    Uav = rc.CreateUAV(GpuResource as NxRHI.UTexture, in viewDesc);
                 }
             }
             else
@@ -254,7 +262,7 @@ namespace EngineNS.Graphics.Pipeline
                 //{
                 //    desc.Type |= NxRHI.EBufferType.BFT_UAV;
                 //}
-                Buffer = rc.CreateBuffer(in desc);
+                GpuResource = rc.CreateBuffer(in desc);
                 if ((types & NxRHI.EBufferType.BFT_SRV) != 0)
                 {
                     var viewDesc = new NxRHI.FSrvDesc();
@@ -264,7 +272,7 @@ namespace EngineNS.Graphics.Pipeline
                     //viewDesc.Buffer.FirstElement = 1;
                     viewDesc.Buffer.NumElements = BufferDesc.Height;
                     viewDesc.Buffer.StructureByteStride = desc.StructureStride;
-                    Srv = rc.CreateSRV(Buffer as NxRHI.UBuffer, in viewDesc);
+                    Srv = rc.CreateSRV(GpuResource as NxRHI.UBuffer, in viewDesc);
                 }
                 if ((types & NxRHI.EBufferType.BFT_UAV) != 0)
                 {
@@ -274,7 +282,7 @@ namespace EngineNS.Graphics.Pipeline
                     viewDesc.Buffer.FirstElement = 0;
                     viewDesc.Buffer.NumElements = BufferDesc.Height;
                     viewDesc.Buffer.StructureByteStride = desc.StructureStride;
-                    Uav = rc.CreateUAV(Buffer as NxRHI.UBuffer, in viewDesc);
+                    Uav = rc.CreateUAV(GpuResource as NxRHI.UBuffer, in viewDesc);
                 }
             }
 

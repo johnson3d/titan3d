@@ -32,7 +32,7 @@ namespace EngineNS.Graphics.Pipeline.Common
             //{
             //    PointLights.Flush2GPU(this.BasePass.DrawCmdList.mCoreObject);
             //}
-            attachement.Buffer = PointLights.GpuBuffer;
+            attachement.GpuResource = PointLights.GpuBuffer;
             attachement.Srv = PointLights.Srv;
             attachement.Uav = PointLights.Uav;
         }

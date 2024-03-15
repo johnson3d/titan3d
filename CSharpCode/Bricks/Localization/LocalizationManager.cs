@@ -80,6 +80,42 @@ namespace EngineNS.Localization
             return startIndex;
         }
 
+        public int GetNextWordBreaker(string text, int startIndex, int lastIndex, out ECulture breakerCulture)
+        {
+            breakerCulture = ECulture.Unknow;
+            if (lastIndex < startIndex || lastIndex >= text.Length)
+                return -1;
+            var chr = text[startIndex];
+            var chrCul = GetCulture(chr);
+            breakerCulture = chrCul;
+            switch (chrCul)
+            {
+                case ECulture.Chinese:
+                    return startIndex + 1;
+                case ECulture.English:
+                case ECulture.Digit:
+                    {
+                        for(int i= startIndex; i< lastIndex; i++)
+                        {
+                            var cul = GetCulture(text[i]);
+                            breakerCulture = cul;
+                            switch(cul)
+                            {
+                                case ECulture.Separator:
+                                case ECulture.Punctuation:
+                                    return i;
+                                case ECulture.Symbol:
+                                    return i;
+                            }
+                        }
+                    }
+                    break;
+                default:
+                    return startIndex + 1;
+            }
+            return startIndex;
+        }
+
         public ECulture GetCulture(char chr)
         {
             if (chr > 0x4e00 && chr < 0x9fbb)

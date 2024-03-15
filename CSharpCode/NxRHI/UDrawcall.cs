@@ -376,6 +376,24 @@ namespace EngineNS.NxRHI
         {
             mCoreObject.NativeSuper.SetDebugName(name);
         }
+        public void Copy(UBuffer tar, UBuffer src, uint size = 0, uint tarOffset = 0, uint srcOffset = 0)
+        {
+            if (size == 0)
+            {
+                size = tar.mCoreObject.Desc.Size;
+            }
+            mCoreObject.Mode = NxRHI.ECopyDrawMode.CDM_Buffer2Buffer;
+            BindBufferSrc(src);
+            BindBufferDest(tar);
+            SrcSubResource = 0;
+            this.DestSubResource = 0;
+            this.DstX = tarOffset;
+            var footPrint = new NxRHI.FSubResourceFootPrint();
+            footPrint.SetDefault();
+            footPrint.X = (int)srcOffset;
+            footPrint.Width = size;
+            mCoreObject.FootPrint = footPrint;
+        }
     }
 
     public class TtActionDraw : AuxPtrType<NxRHI.IActionDraw>

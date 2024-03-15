@@ -108,6 +108,8 @@ namespace EngineNS.Bricks.VirtualTexture
         NxRHI.FTextureDesc TexDesc = new NxRHI.FTextureDesc();
         public void ActiveRVT(NxRHI.USrView tex)
         {
+            if (tex == null)
+                return;
             var rvt = RegRVT(tex);
             var index = ActiveTexIDs.BinarySearch(rvt.UniqueTexID);
             if (index >= 0)
@@ -148,6 +150,8 @@ namespace EngineNS.Bricks.VirtualTexture
         }
         public TtRVT RegRVT(NxRHI.USrView tex)
         {
+            if (tex == null)
+                return null;
             lock (Rvts)
             {
                 if (tex.Rvt != null)

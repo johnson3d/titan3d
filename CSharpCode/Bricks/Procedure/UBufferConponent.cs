@@ -809,7 +809,12 @@ namespace EngineNS.Bricks.Procedure
         {
             unsafe
             {
-                return ref *(T*)GetSuperPixelAddress(x, y, 0);
+                var p = GetSuperPixelAddress(x, y, 0);
+                if (p == (void*)0)
+                {
+                    System.Diagnostics.Debug.Assert(false);
+                }
+                return ref *(T*)p;
             }
         }
         [MethodImplAttribute(MethodImplOptions.AggressiveInlining)]

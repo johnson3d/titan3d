@@ -21,6 +21,7 @@
     <None Include="$(MSBuildThisFileDirectory)Bricks\Particle\NebulaParticle.cginc" />
     <None Include="$(MSBuildThisFileDirectory)Bricks\Particle\ParticleCommon.cginc" />
     <None Include="$(MSBuildThisFileDirectory)Bricks\Procedure\Erosion\IncWater.compute" />
+    <None Include="$(MSBuildThisFileDirectory)Bricks\Procedure\PgcCommon.cginc" />
     <None Include="$(MSBuildThisFileDirectory)Bricks\SoftRaster\FRaster.cginc" />
     <None Include="$(MSBuildThisFileDirectory)Bricks\Terrain\Common.cginc" />
     <None Include="$(MSBuildThisFileDirectory)Bricks\Terrain\GrassModifier.cginc" />

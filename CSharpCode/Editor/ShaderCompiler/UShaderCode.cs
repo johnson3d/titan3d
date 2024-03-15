@@ -60,16 +60,33 @@ namespace EngineNS.Editor.ShaderCompiler
             {
                 return x.CodeName.CompareTo(y.CodeName);
             });
-
-            string fullCode = code;
-            foreach(var i in DependencyCodes)
+        }
+        public void GatherDependencyTree(List<UShaderSourceCode> depends)
+        {
+            foreach (var i in DependencyCodes)
+            {
+                if (depends.Contains(i) == false)
+                {
+                    depends.Add(i);
+                    i.GatherDependencyTree(depends);
+                }
+            }
+        }
+        public void UpdateCodeHash()
+        {
+            var depends = new List<UShaderSourceCode>();
+            GatherDependencyTree(depends);
+            depends.Sort((x, y) =>
+            {
+                return x.CodeName.CompareTo(y.CodeName);
+            });
+            var fullCode = SourceCode.TextCode;
+            foreach (var i in depends)
             {
                 fullCode += i.SourceCode.TextCode;
             }
             CodeHash = Hash160.CreateHash160(fullCode);
-            IsDirty = false;
         }
-        public bool IsDirty { get; set; } = true;
         public RName CodeName { get; set; }
         public NxRHI.UShaderCode DefineCode { get; private set; } = new NxRHI.UShaderCode();
         public NxRHI.UShaderCode SourceCode { get; private set; } = new NxRHI.UShaderCode();
@@ -106,6 +123,11 @@ namespace EngineNS.Editor.ShaderCompiler
             foreach(var i in Codes)
             {
                 i.Value.CollectIncludes();
+            }
+
+            foreach (var i in Codes)
+            {
+                i.Value.UpdateCodeHash();
             }
         }
         public void Cleanup()

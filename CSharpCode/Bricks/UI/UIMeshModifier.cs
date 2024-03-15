@@ -114,6 +114,24 @@ namespace EngineNS.UI
                     {
                         drawcall.mCoreObject.BindResource(TtNameTable.FontTexture, srv.NativeSuper);
                     }
+                    unsafe
+                    {
+                        if(brush.IsDirty)
+                        {
+                            var res = drawcall.mCoreObject.FindGpuResource(TtNameTable.cbPerMaterial);
+                            var cbuffer = new NxRHI.ICbView(res.CppPointer);
+                            if (cbuffer.IsValidPointer)
+                            {
+                                var fld = cbuffer.ShaderBinder.FindField("FontColor");
+                                if (fld.IsValidPointer)
+                                {
+                                    var color = brush.Color.ToColor4Float();
+                                    cbuffer.SetValue(fld, &color, sizeof(Color4f), true, UEngine.Instance.GfxDevice.CbvUpdater.mCoreObject);
+                                    brush.IsDirty = false;
+                                }
+                            }
+                        }
+                    }
                 }
                 else if (brush.Name.StartWith("@MatInst:"))// == VNameString.FromString("utest/ddd.uminst"))
                 {

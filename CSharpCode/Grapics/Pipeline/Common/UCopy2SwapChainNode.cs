@@ -85,7 +85,7 @@ namespace EngineNS.Graphics.Pipeline.Common
 
                 var attachement = RenderGraph.AttachmentCache.ImportAttachment(ColorPinOut);
 
-                attachement.Buffer = ColorAttachement.Buffer;
+                attachement.GpuResource = ColorAttachement.GpuResource;
                 attachement.Srv = ColorAttachement.Srv;
                 attachement.Rtv = ColorAttachement.Rtv;
             }
@@ -100,8 +100,8 @@ namespace EngineNS.Graphics.Pipeline.Common
                 var srcPin = GetAttachBuffer(ColorPinIn);
                 var tarPin = GetAttachBuffer(ColorPinOut);
                 mCopyDrawcall.Mode = NxRHI.ECopyDrawMode.CDM_Texture2Texture;
-                mCopyDrawcall.BindSrc(srcPin.Buffer);
-                mCopyDrawcall.BindDest(tarPin.Buffer);
+                mCopyDrawcall.BindSrc(srcPin.GpuResource);
+                mCopyDrawcall.BindDest(tarPin.GpuResource);
 
                 //mCopyDrawcall.Commit(cmdlist);
                 cmdlist.PushGpuDraw(mCopyDrawcall);

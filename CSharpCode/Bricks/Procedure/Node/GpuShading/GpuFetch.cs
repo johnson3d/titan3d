@@ -41,7 +41,7 @@ namespace EngineNS.Bricks.Procedure.Node.GpuShading
             using (new NxRHI.TtCmdListScope(mCmdList))
             {
                 var cpDraw = UEngine.Instance.GfxDevice.RenderContext.CreateCopyDraw();
-                var texture = policy.AttachmentCache.FindAttachement(SrcPinIn).Buffer;
+                var texture = policy.AttachmentCache.FindAttachement(SrcPinIn).GpuResource;
                 CoreSDK.DisposePtr(ref ReadableTexture);
                 ReadableTexture = texture.CreateReadable(0, cpDraw.mCoreObject);
                 mCmdList.PushGpuDraw(cpDraw);

@@ -49,7 +49,7 @@ namespace EngineNS.Bricks.VXGI
         public override void FrameBuild(Graphics.Pipeline.URenderPolicy policy)
         {
             var attachement = RenderGraph.AttachmentCache.ImportAttachment(VxPoolPinOut);
-            attachement.Buffer = VoxelPool;
+            attachement.GpuResource = VoxelPool;
             attachement.Uav = UavVoxelPool;
         }
         #region ConstantVar

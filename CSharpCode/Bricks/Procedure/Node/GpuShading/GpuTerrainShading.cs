@@ -255,6 +255,11 @@ namespace EngineNS.Bricks.Procedure.Node.GpuShading
                 var flow = policy.AttachmentCache.GetAttachement(node.FlowPinIn);
                 drawcall.BindSrv(binder, flow.Srv);
             }
+            binder = drawcall.FindBinder(NxRHI.EShaderBindType.SBT_SRV, "PrevWaterTexture");
+            if (binder.IsValidPointer)
+            {
+                drawcall.BindSrv(binder, node.PrevWaterTexture.Srv);
+            }
             binder = drawcall.FindBinder(NxRHI.EShaderBindType.SBT_UAV, "WaterTexture");
             if (binder.IsValidPointer)
             {
@@ -274,7 +279,10 @@ namespace EngineNS.Bricks.Procedure.Node.GpuShading
         public TtWaterBasinShading ShadingEnv;
         public NxRHI.UCommandList mCmdList;
         private NxRHI.UComputeDraw mDrawcall;
+        private NxRHI.UCopyDraw mCopyDrawcall;
         public Vector3ui DispatchThread = new Vector3ui(1, 1, 1);
+
+        public Graphics.Pipeline.TtGpuBuffer<uint> PrevWaterTexture = new TtGpuBuffer<uint>();
         [Rtti.Meta]
         public int Step { get; set; } = 16;
         public TtWaterBasinNode()
@@ -283,6 +291,7 @@ namespace EngineNS.Bricks.Procedure.Node.GpuShading
         }
         public override void Dispose()
         {
+            CoreSDK.DisposeObject(ref mCopyDrawcall); 
             CoreSDK.DisposeObject(ref mDrawcall);
             CoreSDK.DisposeObject(ref mCmdList);
         }
@@ -303,18 +312,31 @@ namespace EngineNS.Bricks.Procedure.Node.GpuShading
             mCmdList = rc.CreateCommandList();
             mDrawcall = rc.CreateComputeDraw();
             mDrawcall.TagObject = this;
+            mCopyDrawcall = rc.CreateCopyDraw();
+        }
+        public unsafe override void BeforeTickLogic(URenderPolicy policy)
+        {
+            var water = policy.AttachmentCache.FindAttachement(WaterPinInOut);
+
+            var count = water.Buffer.mCoreObject.Desc.Size / sizeof(uint);
+            if (PrevWaterTexture.NumElement != count)
+            {
+                PrevWaterTexture.SetSize(count, IntPtr.Zero.ToPointer(), NxRHI.EBufferType.BFT_SRV);
+            }
+            mCopyDrawcall.Copy(PrevWaterTexture.GpuBuffer, water.Buffer as NxRHI.UBuffer);
         }
         public unsafe override void TickLogic(UWorld world, URenderPolicy policy, bool bClear)
         {
             using (new NxRHI.TtCmdListScope(mCmdList))
             {
                 ShadingEnv.SetDrawcallDispatch(this, policy, mDrawcall, DispatchThread.X, DispatchThread.Y, DispatchThread.Z, true);
-                mCmdList.PushGpuDraw(mDrawcall);
-
+                
                 for (int i = 0; i < Step; i++)
                 {
-                    mCmdList.FlushDraws();
+                    mCmdList.PushGpuDraw(mCopyDrawcall);
+                    mCmdList.PushGpuDraw(mDrawcall);
                 }
+                mCmdList.FlushDraws();
             }
 
             UEngine.Instance.GfxDevice.RenderContext.GpuQueue.ExecuteCommandList(mCmdList, NxRHI.EQueueType.QU_Compute);

@@ -336,7 +336,7 @@ namespace EngineNS.Graphics.Pipeline.Common
 
             if (mReadableHitproxyTexture == null)
             {
-                var rtTex = attachBuffer.Buffer as NxRHI.UTexture;
+                var rtTex = attachBuffer.GpuResource as NxRHI.UTexture;
                 mReadableHitproxyTexture = rtTex.CreateBufferData(0, NxRHI.ECpuAccess.CAS_READ, ref CopyBufferFootPrint);
             }
             var readTexture = mReadableHitproxyTexture;

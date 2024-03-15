@@ -38,7 +38,7 @@ namespace EngineNS.Graphics.Pipeline.Common
                 SrcPinIn.Attachement.Height != DestPinOut.Attachement.Height)
             {
                 ResultBuffer = attachement.Clone();
-                attachement.Buffer = ResultBuffer.Buffer;
+                attachement.GpuResource = ResultBuffer.GpuResource;
                 attachement.Srv = ResultBuffer.Srv;
                 attachement.Rtv = ResultBuffer.Rtv;
                 attachement.Dsv = ResultBuffer.Dsv;
@@ -49,7 +49,7 @@ namespace EngineNS.Graphics.Pipeline.Common
             }
             if (ResultBuffer != null)
             {
-                attachement.Buffer = ResultBuffer.Buffer;
+                attachement.GpuResource = ResultBuffer.GpuResource;
                 attachement.Srv = ResultBuffer.Srv;
                 attachement.Rtv = ResultBuffer.Rtv;
                 attachement.Dsv = ResultBuffer.Dsv;
@@ -71,24 +71,24 @@ namespace EngineNS.Graphics.Pipeline.Common
                     var srcPin = GetAttachBuffer(SrcPinIn);
                     var tarPin = GetAttachBuffer(DestPinOut);
 
-                    if (srcPin.Buffer.GetType() == typeof(NxRHI.UBuffer) && tarPin.Buffer.GetType() == typeof(NxRHI.UBuffer))
+                    if (srcPin.GpuResource.GetType() == typeof(NxRHI.UBuffer) && tarPin.GpuResource.GetType() == typeof(NxRHI.UBuffer))
                     {
                         mCopyDrawcall.Mode = NxRHI.ECopyDrawMode.CDM_Buffer2Buffer;
                     }
-                    else if (srcPin.Buffer.GetType() == typeof(NxRHI.UTexture) && tarPin.Buffer.GetType() == typeof(NxRHI.UTexture))
+                    else if (srcPin.GpuResource.GetType() == typeof(NxRHI.UTexture) && tarPin.GpuResource.GetType() == typeof(NxRHI.UTexture))
                     {
                         mCopyDrawcall.Mode = NxRHI.ECopyDrawMode.CDM_Texture2Texture;
                     }
-                    else if (srcPin.Buffer.GetType() == typeof(NxRHI.UTexture) && tarPin.Buffer.GetType() == typeof(NxRHI.UBuffer))
+                    else if (srcPin.GpuResource.GetType() == typeof(NxRHI.UTexture) && tarPin.GpuResource.GetType() == typeof(NxRHI.UBuffer))
                     {
                         mCopyDrawcall.Mode = NxRHI.ECopyDrawMode.CDM_Texture2Buffer;
                     }
-                    else if (srcPin.Buffer.GetType() == typeof(NxRHI.UTexture) && tarPin.Buffer.GetType() == typeof(NxRHI.UBuffer))
+                    else if (srcPin.GpuResource.GetType() == typeof(NxRHI.UTexture) && tarPin.GpuResource.GetType() == typeof(NxRHI.UBuffer))
                     {
                         mCopyDrawcall.Mode = NxRHI.ECopyDrawMode.CDM_Buffer2Texture;
                     }
-                    mCopyDrawcall.BindSrc(srcPin.Buffer);
-                    mCopyDrawcall.BindDest(tarPin.Buffer);
+                    mCopyDrawcall.BindSrc(srcPin.GpuResource);
+                    mCopyDrawcall.BindDest(tarPin.GpuResource);
 
                     //if (SrcPinIn.Attachement.Format == EPixelFormat.PXF_UNKNOWN)
                     //{
@@ -161,7 +161,7 @@ namespace EngineNS.Graphics.Pipeline.Common
                 ResultBuffer[1].BufferDesc = SrcPinIn.Attachement.BufferDesc;
                 ResultBuffer[1].CreateBufferViews(in ResultBuffer[0].BufferDesc);
             }
-            attachement.Buffer = Previos.Buffer;
+            attachement.GpuResource = Previos.GpuResource;
             attachement.Srv = Previos.Srv;
             attachement.Rtv = Previos.Rtv;
             attachement.Dsv = Previos.Dsv;
@@ -180,24 +180,24 @@ namespace EngineNS.Graphics.Pipeline.Common
                 {
                     var srcPin = GetAttachBuffer(SrcPinIn);
 
-                    if (srcPin.Buffer.GetType() == typeof(NxRHI.UBuffer) && Current.Buffer.GetType() == typeof(NxRHI.UBuffer))
+                    if (srcPin.GpuResource.GetType() == typeof(NxRHI.UBuffer) && Current.GpuResource.GetType() == typeof(NxRHI.UBuffer))
                     {
                         mCopyDrawcall.Mode = NxRHI.ECopyDrawMode.CDM_Buffer2Buffer;
                     }
-                    else if (srcPin.Buffer.GetType() == typeof(NxRHI.UTexture) && Current.Buffer.GetType() == typeof(NxRHI.UTexture))
+                    else if (srcPin.GpuResource.GetType() == typeof(NxRHI.UTexture) && Current.GpuResource.GetType() == typeof(NxRHI.UTexture))
                     {
                         mCopyDrawcall.Mode = NxRHI.ECopyDrawMode.CDM_Texture2Texture;
                     }
-                    else if (srcPin.Buffer.GetType() == typeof(NxRHI.UTexture) && Current.Buffer.GetType() == typeof(NxRHI.UBuffer))
+                    else if (srcPin.GpuResource.GetType() == typeof(NxRHI.UTexture) && Current.GpuResource.GetType() == typeof(NxRHI.UBuffer))
                     {
                         mCopyDrawcall.Mode = NxRHI.ECopyDrawMode.CDM_Texture2Buffer;
                     }
-                    else if (srcPin.Buffer.GetType() == typeof(NxRHI.UTexture) && Current.Buffer.GetType() == typeof(NxRHI.UBuffer))
+                    else if (srcPin.GpuResource.GetType() == typeof(NxRHI.UTexture) && Current.GpuResource.GetType() == typeof(NxRHI.UBuffer))
                     {
                         mCopyDrawcall.Mode = NxRHI.ECopyDrawMode.CDM_Buffer2Texture;
                     }
-                    mCopyDrawcall.BindSrc(srcPin.Buffer);
-                    mCopyDrawcall.BindDest(Current.Buffer);
+                    mCopyDrawcall.BindSrc(srcPin.GpuResource);
+                    mCopyDrawcall.BindDest(Current.GpuResource);
 
                     //var fp = new NxRHI.FSubResourceFootPrint();
                     //fp.SetDefault();

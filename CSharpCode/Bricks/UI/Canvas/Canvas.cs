@@ -190,6 +190,10 @@ namespace EngineNS.UI.Canvas
         {
             mCoreObject = EngineNS.Canvas.ICanvasBrush.CreateInstance();
         }
+        public TtCanvasBrush(ICanvasBrush brush)
+        {
+            mCoreObject = brush;
+        }
         public string Name
         {
             get

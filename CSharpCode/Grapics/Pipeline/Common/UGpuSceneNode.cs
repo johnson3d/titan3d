@@ -40,7 +40,7 @@ namespace EngineNS.Graphics.Pipeline.Common
             GpuScenePinOut.Attachement.Width = (uint)sizeof(FGpuSceneDesc);
 
             var attachement = RenderGraph.AttachmentCache.ImportAttachment(GpuScenePinOut);
-            attachement.Buffer = GpuSceneDescBuffer.GpuResource;
+            attachement.GpuResource = GpuSceneDescBuffer.GpuResource;
             attachement.Srv = GpuSceneDescBuffer.Srv;
             attachement.Uav = GpuSceneDescBuffer.Uav;
             attachement.Cbv = PerGpuSceneCbv;

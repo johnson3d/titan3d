@@ -123,8 +123,11 @@ namespace EngineNS.UI.Controls
             {
                 OnValueChange(value, mColor);
                 mColor = value;
-                //MeshDirty = true;
-                UpdateLayout();
+
+                for(int i=0; i<mBrushes.Count; i++)
+                {
+                    mBrushes[i].Color = mColor;
+                }
             }
         }
 
@@ -151,6 +154,13 @@ namespace EngineNS.UI.Controls
                 UpdateLayout();
             }
         }
+
+        [Rtti.Meta, BindProperty, Category("Text")]
+        public string TrimmingText
+        {
+            get;
+            set;
+        } = "...";
 
         public enum ETextWrapping
         {
@@ -196,9 +206,11 @@ namespace EngineNS.UI.Controls
             public RectangleF Rect;
             public int StartIndex;
             public int EndIndex;
+            public bool IsTrimming;
         }
         List<stTextLineData> mTextInLines = new List<stTextLineData>();
         List<string> mTextSplitWithLanguages = new List<string>();
+        List<TtCanvasBrush> mBrushes = new List<TtCanvasBrush>();
 
         public enum ETextDirection
         {
@@ -250,7 +262,27 @@ namespace EngineNS.UI.Controls
                 var x = mCurFinalRect.Left + mTextInLines[i].Rect.Left;
                 var y = mCurFinalRect.Top + mTextInLines[i].Rect.Top;
                 var text = mText.Substring(mTextInLines[i].StartIndex, mTextInLines[i].EndIndex - mTextInLines[i].StartIndex);
-                batch.Middleground.AddText(text, x, y, Color);
+                if(mTextInLines[i].IsTrimming)
+                    text += TrimmingText;
+                Support.UBlobObject blobObj = new UBlobObject();
+                batch.Middleground.AddText(text, x, y, Color, blobObj);
+                unsafe
+                {
+                    using(var reader = IO.UMemReader.CreateInstance((byte*)blobObj.DataPointer, blobObj.Size))
+                    {
+                        var ptrSize = sizeof(void*);
+                        while(true)
+                        {
+                            void* ptr;
+                            reader.ReadPtr(&ptr, ptrSize);
+                            if (ptr == (void*)1)
+                                break;
+                            var canvasBrush = new EngineNS.Canvas.ICanvasBrush(ptr);
+                            CoreSDK.IUnknown_AddRef(ptr);
+                            mBrushes.Add(new TtCanvasBrush(canvasBrush));
+                        }
+                    }
+                }
             }
             //batch.Middleground.AddText(mText, mCurFinalRect.Left, mCurFinalRect.Top, Color4f.FromABGR(Color.LightPink));
             batch.Middleground.PopClip();
@@ -259,25 +291,23 @@ namespace EngineNS.UI.Controls
             batch.Middleground.PopTransformIndex();
         }
 
-        //RectangleF CalculateLinesRectangele()
-        //{
-        //    if (string.IsNullOrEmpty(mText))
-        //        return RectangleF.Empty;
-        //    float left = float.MaxValue;
-        //    float top = float.MaxValue;
-        //    float right = float.MinValue;
-        //    float bottom = float.MinValue;
-        //    for(int i=0; i<mTextInLines.Count; i++)
-        //    {
-        //        var width = mTextInLines[i].Rect.Width;
-        //        var height = mTextInLines[i].Rect.Height;
-        //        left = Math.Min(mTextInLines[i].Rect.X, left);
-        //        top = Math.Min(mTextInLines[i].Rect.Y, top);
-        //        right = Math.Max(mTextInLines[i].Rect.Right, right);
-        //        bottom = Math.Max(mTextInLines[i].Rect.Bottom, bottom);
-        //    }
-        //    return new RectangleF(left, top, right - left, bottom - top);
-        //}
+        float CalculateFlowDirection(ETextDirection flowDirection, in SizeF areaSize, float newWidth)
+        {
+            float lineX = 0;
+            switch (flowDirection)
+            {
+                case ETextDirection.LeftToRight:
+                    lineX = 0;
+                    break;
+                case ETextDirection.RightToLeft:
+                    lineX = areaSize.Width - newWidth;
+                    break;
+                case ETextDirection.Center:
+                    lineX = (areaSize.Width - newWidth) * 0.5f;
+                    break;
+            }
+            return lineX;
+        }
 
         void CalculateLines(string text, 
             in UNativeArray<FTWord> words, 
@@ -304,11 +334,17 @@ namespace EngineNS.UI.Controls
                 linesSize.Height += lineHeight;
                 if(generateLine)
                 {
+                    int newCount;
+                    float newWidth;
+                    var isTrimming = CalculateTextTrimming(text, in words, in areaSize, fontScaleDelta, startIndex, text.Length, out newCount, width, out newWidth);
+
+                    float lineX = CalculateFlowDirection(flowDirection, in areaSize, newWidth);
                     var line = new stTextLineData()
                     {
                         StartIndex = startIndex,
-                        EndIndex = text.Length,
-                        Rect = new RectangleF(0, 0, width, lineHeight),
+                        EndIndex = startIndex + newCount,
+                        Rect = new RectangleF(lineX, 0, newWidth, lineHeight),
+                        IsTrimming = isTrimming,
                     };
                     lines.Add(line);
                 }
@@ -332,40 +368,62 @@ namespace EngineNS.UI.Controls
                         }
                         else
                         {
-                            LocalizationManager.ECulture breakerCulture;
-                            var breakerIdx = UEngine.Instance.LocalizationManager.GetLastWordBreaker(Text, startIndex, i, out breakerCulture);
-                            if ((breakerCulture == LocalizationManager.ECulture.Separator) ||
-                                (breakerCulture == LocalizationManager.ECulture.Punctuation))
-                                breakerIdx += 1;
                             if (i == startIndex)
                             {
-                                currentCount += 1;
-                                currentWidth += wordWidth;
-                                break;
-                            }
-                            else if(breakerIdx <= startIndex)
-                            {
-                                if (TextWrapping == ETextWrapping.Wrap)
-                                    break;
-                                else if(TextWrapping == ETextWrapping.WrapWithOverflow)
+                                if(TextWrapping == ETextWrapping.Wrap)
                                 {
                                     currentCount += 1;
                                     currentWidth += wordWidth;
                                 }
+                                else if(TextWrapping == ETextWrapping.WrapWithOverflow)
+                                {
+                                    LocalizationManager.ECulture breakerCulture;
+                                    var breakerIdx = UEngine.Instance.LocalizationManager.GetNextWordBreaker(Text, startIndex, words.Count - 1, out breakerCulture);
+                                    if ((breakerCulture == LocalizationManager.ECulture.Separator) ||
+                                        (breakerCulture == LocalizationManager.ECulture.Punctuation))
+                                        breakerIdx += 1;
+                                    if (breakerIdx <= startIndex)
+                                        breakerIdx = words.Count;
+                                    currentCount += (breakerIdx - startIndex);
+                                    for(int tempIdx = startIndex; tempIdx < breakerIdx; tempIdx++)
+                                    {
+                                        var tempWordWidth = words[tempIdx].Advance.X * fontScaleDelta;
+                                        currentWidth += tempWordWidth;
+                                    }
+                                }
+                                break;
                             }
                             else
                             {
-                                currentCount = breakerIdx - startIndex;
-                                var tempIdxStart = breakerIdx;
+                                LocalizationManager.ECulture breakerCulture;
+                                var breakerIdx = UEngine.Instance.LocalizationManager.GetLastWordBreaker(Text, startIndex, i, out breakerCulture);
                                 if ((breakerCulture == LocalizationManager.ECulture.Separator) ||
                                     (breakerCulture == LocalizationManager.ECulture.Punctuation))
-                                    tempIdxStart = breakerIdx - 1;
-                                for (int tempIdx = tempIdxStart; tempIdx < i; tempIdx++)
+                                    breakerIdx += 1;
+                                if(breakerIdx <= startIndex)
                                 {
-                                    var tempWordWidth = words[tempIdx].Advance.X * fontScaleDelta;
-                                    currentWidth -= tempWordWidth;
+                                    if (TextWrapping == ETextWrapping.Wrap)
+                                        break;
+                                    else if(TextWrapping == ETextWrapping.WrapWithOverflow)
+                                    {
+                                        currentCount += 1;
+                                        currentWidth += wordWidth;
+                                    }
                                 }
-                                break;
+                                else
+                                {
+                                    currentCount = breakerIdx - startIndex;
+                                    var tempIdxStart = breakerIdx;
+                                    if ((breakerCulture == LocalizationManager.ECulture.Separator) ||
+                                        (breakerCulture == LocalizationManager.ECulture.Punctuation))
+                                        tempIdxStart = breakerIdx - 1;
+                                    for (int tempIdx = tempIdxStart; tempIdx < i; tempIdx++)
+                                    {
+                                        var tempWordWidth = words[tempIdx].Advance.X * fontScaleDelta;
+                                        currentWidth -= tempWordWidth;
+                                    }
+                                    break;
+                                }
                             }
                         }
                     }
@@ -377,24 +435,17 @@ namespace EngineNS.UI.Controls
                 }
                 if (generateLine)
                 {
-                    float lineX  = 0;
-                    switch(flowDirection)
-                    {
-                        case ETextDirection.LeftToRight:
-                            lineX = 0;
-                            break;
-                        case ETextDirection.RightToLeft:
-                            lineX = areaSize.Width - currentWidth;
-                            break;
-                        case ETextDirection.Center:
-                            lineX = (areaSize.Width - currentWidth) * 0.5f;
-                            break;
-                    }
+                    int newCount;
+                    float newWidth;
+                    var isTrimming = CalculateTextTrimming(text, in words, in areaSize, fontScaleDelta, startIndex, currentCount, out newCount, currentWidth, out newWidth);
+
+                    float lineX = CalculateFlowDirection(flowDirection, in areaSize, newWidth);
                     var line = new stTextLineData()
                     {
                         StartIndex = startIndex,
-                        EndIndex = startIndex + currentCount,
-                        Rect = new RectangleF(lineX, linesSize.Height, currentWidth, lineHeight),
+                        EndIndex = startIndex + newCount,
+                        Rect = new RectangleF(lineX, linesSize.Height, newWidth, lineHeight),
+                        IsTrimming = isTrimming,
                     };
                     
                     lines.Add(line);
@@ -406,265 +457,96 @@ namespace EngineNS.UI.Controls
             }
         }
 
-        //void CalculateLines(in SizeF size)
-        //{
-        //    mTextInLines.Clear();
-        //    if (string.IsNullOrEmpty(mText))
-        //        return;
-        //    var words = new UNativeArray<FTWord>();
-        //    FontAsset.GetWords(ref words, mText);
+        bool CalculateTextTrimming(string text,
+            in UNativeArray<FTWord> words,
+            in SizeF areaSize,
+            float fontScaleDelta,
+            int startIndex,
+            int currentCount,
+            out int newCount,
+            float currentWidth,
+            out float newWidth)
+        {
+            newCount = currentCount;
+            newWidth = currentWidth;
+            if (TextTrimming == ETextTrimming.None)
+                return false;
 
-        //    LocalizationManager.ECulture breakerCulture;
-        //    var scaleDelta = mFontSize * 1.0f / FontAsset.FontSize;
-        //    var lineHeight = mFontSize * mLineSpacingScale;
-        //    switch (FlowDirection)
-        //    {
-        //        case ETextDirection.LeftToRight:
-        //            {
-        //                var line = new stTextLineData()
-        //                {
-        //                    StartIndex = 0,
-        //                    EndIndex = 0,
-        //                    Rect = new RectangleF(0, 0, 0, lineHeight),
-        //                };
-        //                if (TextWrapping == ETextWrapping.NoWrap)
-        //                {
-        //                    line.EndIndex = mText.Length;
-        //                    line.Rect.Height = lineHeight;
-        //                    for (int i = 0; i < words.Count; i++)
-        //                    {
-        //                        line.Rect.Width += words[i].Advance.X * scaleDelta;
-        //                    }
-        //                }
-        //                else
-        //                {
-        //                    float lastHeight = 0;
-        //                    for (int i = 0; i < words.Count; i++)
-        //                    {
-        //                        var wordWidth = words[i].Advance.X * scaleDelta;
-        //                        var culture = UEngine.Instance.LocalizationManager.GetCulture(mText[i]);
-        //                        if ((line.Rect.Width + wordWidth > size.Width) &&
-        //                            (culture != LocalizationManager.ECulture.Separator) &&
-        //                            (culture != LocalizationManager.ECulture.Punctuation))
-        //                        {
-        //                            switch (TextWrapping)
-        //                            {
-        //                                case ETextWrapping.Wrap:
-        //                                    {
-        //                                        var breakerIdx = UEngine.Instance.LocalizationManager.GetLastWordBreaker(Text, line.StartIndex, i, out breakerCulture);
-        //                                        if ((breakerCulture == LocalizationManager.ECulture.Separator) ||
-        //                                            (breakerCulture == LocalizationManager.ECulture.Punctuation))
-        //                                            breakerIdx += 1;
-        //                                        if (i == line.StartIndex)
-        //                                        {
-        //                                            line.EndIndex = i + 1;
-        //                                            line.Rect.Width += wordWidth;
-        //                                        }
-        //                                        else if (breakerIdx <= line.StartIndex)
-        //                                        {
-        //                                            line.EndIndex = i;
-        //                                            line.Rect.Width += wordWidth;
-        //                                            if (i < words.Count - 1)
-        //                                            {
-        //                                                mTextInLines.Add(line);
-        //                                                lastHeight += line.Rect.Height;
-        //                                                line = new stTextLineData()
-        //                                                {
-        //                                                    StartIndex = i,
-        //                                                    Rect = new RectangleF(0, lastHeight, 0, lineHeight),
-        //                                                };
-        //                                                i--;
-        //                                            }
-        //                                        }
-        //                                        else
-        //                                        {
-        //                                            line.EndIndex = breakerIdx;
-        //                                            mTextInLines.Add(line);
-        //                                            lastHeight += line.Rect.Height;
-        //                                            line = new stTextLineData()
-        //                                            {
-        //                                                StartIndex = breakerIdx,
-        //                                                Rect = new RectangleF(0, lastHeight, 0, lineHeight),
-        //                                            };
-        //                                            i = breakerIdx - 1;
-        //                                        }
-        //                                    }
-        //                                    break;
-        //                                case ETextWrapping.WrapWithOverflow:
-        //                                    {
-        //                                        var breakerIdx = UEngine.Instance.LocalizationManager.GetLastWordBreaker(Text, line.StartIndex, i, out breakerCulture);
-        //                                        if ((breakerCulture == LocalizationManager.ECulture.Separator) ||
-        //                                            (breakerCulture == LocalizationManager.ECulture.Punctuation))
-        //                                            breakerIdx += 1;
-        //                                        if (breakerIdx <= line.StartIndex)
-        //                                        {
-        //                                            line.EndIndex = i + 1;
-        //                                            line.Rect.Width += wordWidth;
-        //                                        }
-        //                                        else
-        //                                        {
-        //                                            line.EndIndex = breakerIdx;
-        //                                            mTextInLines.Add(line);
-        //                                            lastHeight += line.Rect.Height;
-        //                                            line = new stTextLineData()
-        //                                            {
-        //                                                StartIndex = breakerIdx,
-        //                                                Rect = new RectangleF(0, lastHeight, 0, lineHeight),
-        //                                            };
-        //                                            i = breakerIdx - 1;
-        //                                        }
-        //                                    }
-        //                                    break;
-        //                            }
-        //                        }
-        //                        else
-        //                        {
-        //                            line.EndIndex = i + 1;
-        //                            line.Rect.Width += wordWidth;
-        //                        }
-        //                    }
-        //                }
-        //                mTextInLines.Add(line);
-        //            }
-        //            break;
-        //        case ETextDirection.RightToLeft:
-        //            {
-        //                var line = new stTextLineData()
-        //                {
-        //                    StartIndex = 0,
-        //                    EndIndex = 0,
-        //                    Rect = new RectangleF(size.Width, 0, 0, lineHeight),
-        //                };
-        //                if (TextWrapping == ETextWrapping.NoWrap)
-        //                {
-        //                    line.EndIndex = mText.Length;
-        //                    line.Rect.Height = lineHeight;
-        //                    for (int i = 0; i < words.Count; i++)
-        //                    {
-        //                        var wordWidth = words[i].Advance.X * scaleDelta;
-        //                        line.Rect.X -= wordWidth;
-        //                        line.Rect.Width += wordWidth;
-        //                    }
-        //                }
-        //                else
-        //                {
-        //                    float lastHeight = 0;
-        //                    for (int i = 0; i < words.Count; i++)
-        //                    {
-        //                        var wordWidth = words[i].Advance.X * scaleDelta;
-        //                        var culture = UEngine.Instance.LocalizationManager.GetCulture(mText[i]);
-        //                        if ((line.Rect.Width + wordWidth > size.Width) &&
-        //                            (culture != LocalizationManager.ECulture.Separator) &&
-        //                            (culture != LocalizationManager.ECulture.Punctuation))
-        //                        {
-        //                            switch (TextWrapping)
-        //                            {
-        //                                case ETextWrapping.Wrap:
-        //                                    {
-        //                                        var breakerIdx = UEngine.Instance.LocalizationManager.GetLastWordBreaker(Text, line.StartIndex, i, out breakerCulture);
-        //                                        if ((breakerCulture == LocalizationManager.ECulture.Separator) ||
-        //                                            (breakerCulture == LocalizationManager.ECulture.Punctuation))
-        //                                            breakerIdx += 1;
-        //                                        if (i == line.StartIndex)
-        //                                        {
-        //                                            line.EndIndex = i + 1;
-        //                                            line.Rect.X -= wordWidth;
-        //                                            line.Rect.Width += wordWidth;
-        //                                        }
-        //                                        else if (breakerIdx <= line.StartIndex)
-        //                                        {
-        //                                            line.EndIndex = i;
-        //                                            //line.Rect.X -= wordWidth;
-        //                                            //line.Rect.Width += wordWidth;
-        //                                            if (i < words.Count - 1)
-        //                                            {
-        //                                                mTextInLines.Add(line);
-        //                                                lastHeight += line.Rect.Height;
-        //                                                line = new stTextLineData()
-        //                                                {
-        //                                                    StartIndex = i,
-        //                                                    Rect = new RectangleF(size.Width, lastHeight, 0, lineHeight),
-        //                                                };
-        //                                                i--;
-        //                                            }
-        //                                        }
-        //                                        else
-        //                                        {
-        //                                            line.EndIndex = breakerIdx;
-        //                                            var tempIdxStart = breakerIdx;
-        //                                            if ((breakerCulture == LocalizationManager.ECulture.Separator) ||
-        //                                                (breakerCulture == LocalizationManager.ECulture.Punctuation))
-        //                                                tempIdxStart = breakerIdx - 1;
-        //                                            for (int tempIdx = tempIdxStart; tempIdx < i;  tempIdx++)
-        //                                            {
-        //                                                var tempWordWidth = words[tempIdx].Advance.X * scaleDelta;
-        //                                                line.Rect.X += tempWordWidth;
-        //                                                line.Rect.Width -= tempWordWidth;
-        //                                            }
-        //                                            mTextInLines.Add(line);
-        //                                            lastHeight += line.Rect.Height;
-        //                                            line = new stTextLineData()
-        //                                            {
-        //                                                StartIndex = breakerIdx,
-        //                                                Rect = new RectangleF(size.Width, lastHeight, 0, lineHeight),
-        //                                            };
-        //                                            i = breakerIdx - 1;
-        //                                        }
-        //                                    }
-        //                                    break;
-        //                                case ETextWrapping.WrapWithOverflow:
-        //                                    {
-        //                                        var breakerIdx = UEngine.Instance.LocalizationManager.GetLastWordBreaker(Text, line.StartIndex, i, out breakerCulture);
-        //                                        if ((breakerCulture == LocalizationManager.ECulture.Separator) ||
-        //                                            (breakerCulture == LocalizationManager.ECulture.Punctuation))
-        //                                            breakerIdx += 1;
-        //                                        if (breakerIdx <= line.StartIndex)
-        //                                        {
-        //                                            line.EndIndex = i + 1;
-        //                                            line.Rect.X -= wordWidth;
-        //                                            line.Rect.Width += wordWidth;
-        //                                        }
-        //                                        else
-        //                                        {
-        //                                            line.EndIndex = breakerIdx;
-        //                                            var tempIdxStart = breakerIdx;
-        //                                            if ((breakerCulture == LocalizationManager.ECulture.Separator) ||
-        //                                                (breakerCulture == LocalizationManager.ECulture.Punctuation))
-        //                                                tempIdxStart = breakerIdx - 1;
-        //                                            for (int tempIdx = tempIdxStart; tempIdx < i;  tempIdx++)
-        //                                            {
-        //                                                var tempWordWidth = words[tempIdx].Advance.X * scaleDelta;
-        //                                                line.Rect.X += tempWordWidth;
-        //                                                line.Rect.Width -= tempWordWidth;
-        //                                            }
-        //                                            mTextInLines.Add(line);
-        //                                            lastHeight += line.Rect.Height;
-        //                                            line = new stTextLineData()
-        //                                            {
-        //                                                StartIndex = breakerIdx,
-        //                                                Rect = new RectangleF(size.Width, lastHeight, 0, lineHeight),
-        //                                            };
-        //                                            i = breakerIdx - 1;
-        //                                        }
-        //                                    }
-        //                                    break;
-        //                            }
-        //                        }
-        //                        else
-        //                        {
-        //                            line.EndIndex = i + 1;
-        //                            line.Rect.X -= wordWidth;
-        //                            line.Rect.Width += wordWidth;
-        //                        }
-        //                    }
-        //                }
-        //                mTextInLines.Add(line);
-        //            }
-        //            break;
-        //    }
-        //}
+            var trimmingWords = new UNativeArray<FTWord>();
+            FontAsset.GetWords(ref trimmingWords, TrimmingText);
+            float trimmingWordsWidth = 0;
+            for(int idx = 0; idx < trimmingWords.Count; idx++)
+            {
+                trimmingWordsWidth += trimmingWords[idx].Advance.X * fontScaleDelta;
+            }
+            if (currentWidth > areaSize.Width)
+            {
+                switch(TextTrimming)
+                {
+                    case ETextTrimming.WordEllipsis:
+                        {
+                            while(newWidth + trimmingWordsWidth > areaSize.Width)
+                            {
+                                var endIndex = startIndex + newCount - 1;
+                                LocalizationManager.ECulture breakerCulture;
+                                var breakerIdx = UEngine.Instance.LocalizationManager.GetLastWordBreaker(Text, startIndex, endIndex, out breakerCulture);
+                                //if ((breakerCulture == LocalizationManager.ECulture.Separator) ||
+                                //    (breakerCulture == LocalizationManager.ECulture.Punctuation))
+                                //    breakerIdx += 1;
+                                if(breakerIdx <= startIndex)
+                                {
+                                    newCount = 1;
+                                    newWidth = words[startIndex].Advance.X * fontScaleDelta + trimmingWordsWidth;
+                                    return true;
+                                }
+                                else
+                                {
+                                    newCount = breakerIdx - startIndex;
+                                    var tempIdxStart = breakerIdx;
+                                    //if ((breakerCulture == LocalizationManager.ECulture.Separator) ||
+                                    //    (breakerCulture == LocalizationManager.ECulture.Punctuation))
+                                    //    tempIdxStart = breakerIdx - 1;
+                                    if(tempIdxStart == endIndex)
+                                    {
+                                        newCount -= 1;
+                                        newWidth -= words[tempIdxStart].Advance.X * fontScaleDelta;
+                                    }
+                                    else
+                                    {
+                                        for (int tempIdx = tempIdxStart; tempIdx <= endIndex; tempIdx++)
+                                        {
+                                            var tempWordWidth = words[tempIdx].Advance.X * fontScaleDelta;
+                                            newWidth -= tempWordWidth;
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                        break;
+                    case ETextTrimming.CharacterEllipsis:
+                        {
+                            for(int wordIdx = currentCount - 1; wordIdx >= 1; wordIdx--)
+                            {
+                                newWidth -= words[wordIdx + startIndex].Advance.X * fontScaleDelta;
+                                if(newWidth + trimmingWordsWidth <= areaSize.Width)
+                                {
+                                    newCount = wordIdx;
+                                    break;
+                                }
+                            }
+                            if(newCount == currentCount)
+                            {
+                                newCount = 1;
+                            }
+                        }
+                        break;
+                }
 
-        //SizeF mMeasureAvailableSize;
+                newWidth += trimmingWordsWidth;
+                return true;
+            }
+            return false;
+        }
 
         protected override SizeF MeasureOverride(in SizeF availableSize)
         {

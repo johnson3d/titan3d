@@ -23,7 +23,7 @@ namespace EngineNS.Graphics.Pipeline.Common
         public override void FrameBuild(Graphics.Pipeline.URenderPolicy policy)
         {
             var hzbBuffer = RenderGraph.AttachmentCache.ImportAttachment(HzbPinOut);
-            hzbBuffer.Buffer = HzbTexture;
+            hzbBuffer.GpuResource = HzbTexture;
             hzbBuffer.Srv = HzbSRV;
         }
         public readonly Vector3ui Dispatch_SetupDimArray2 = new Vector3ui(32, 32, 1);

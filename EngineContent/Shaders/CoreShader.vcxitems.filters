@@ -388,6 +388,9 @@
     <None Include="$(MSBuildThisFileDirectory)Bricks\Procedure\Erosion\IncWater.compute">
       <Filter>Bricks\Procedure\Erosion</Filter>
     </None>
+    <None Include="$(MSBuildThisFileDirectory)Bricks\Procedure\PgcCommon.cginc">
+      <Filter>Bricks\Procedure</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="$(MSBuildThisFileDirectory)Compute\calcrate.compute">

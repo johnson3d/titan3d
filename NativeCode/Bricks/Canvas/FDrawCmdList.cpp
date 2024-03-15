@@ -216,6 +216,10 @@ namespace Canvas
 				if (prevBrush != word->Brush)
 				{
 					prevBrush = word->Brush;
+					if (pOutCmds != nullptr)
+					{
+						pOutCmds->PushData(&prevBrush, sizeof(prevBrush));
+					}
 					pCmd = GetOrNewDrawCmd(prevBrush);
 				}
 				pCmd->PushQuad(vert);
@@ -229,6 +233,10 @@ namespace Canvas
 				if (prevBrush != word->Brush)
 				{
 					prevBrush = word->Brush;
+					if (pOutCmds != nullptr)
+					{
+						pOutCmds->PushData(&prevBrush, sizeof(prevBrush));
+					}
 					pCmd = GetOrNewDrawCmd(prevBrush);
 				}
 				auto rect = FRectanglef::And(clip, wordRect);
@@ -269,6 +277,12 @@ namespace Canvas
 			//v3dxVec3TransformCoord(&advance, &advance, &matrix);
 			//offset.x += advance.x;
 			//offset.y += advance.y;
+		}
+
+		if (pOutCmds != nullptr)
+		{
+			void* temp = (void*)1;
+			pOutCmds->PushData(&temp, sizeof(void*));
 		}
 	}
 	void FCanvasDrawCmdList::AddLine(const v3dxVector2& s, const v3dxVector2& e, float width, const FColor& color, FSubDrawCmd* pOutCmd)

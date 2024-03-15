@@ -256,7 +256,7 @@ namespace EngineNS.Graphics.Pipeline.Common
             InstancePinOut.Attachement.Width = (uint)sizeof(FActorInstance);
             var attachement = RenderGraph.AttachmentCache.ImportAttachment(InstancePinOut);
             
-            attachement.Buffer = GpuInstances.GpuBuffer;
+            attachement.GpuResource = GpuInstances.GpuBuffer;
             attachement.Srv = GpuInstances.Srv;
             attachement.Uav = GpuInstances.Uav;
 

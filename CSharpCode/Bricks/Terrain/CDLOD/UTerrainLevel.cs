@@ -152,10 +152,10 @@ namespace EngineNS.Bricks.Terrain.CDLOD
 
             var hMap = Procedure.UBufferComponent.CreateInstance(Procedure.UBufferCreator.CreateInstance<Procedure.USuperBuffer<float, Procedure.FFloatOperator>>(1, 1, 1));
             var norMap = Procedure.UBufferComponent.CreateInstance(Procedure.UBufferCreator.CreateInstance<Procedure.USuperBuffer<Vector3, Procedure.FFloat3Operator>>(1, 1, 1));
-            var waterMap = Procedure.UBufferComponent.CreateInstance(Procedure.UBufferCreator.CreateInstance<Procedure.USuperBuffer<float, Procedure.FFloatOperator>>(1, 1, 1));
             var idMap = Procedure.UBufferComponent.CreateInstance(Procedure.UBufferCreator.CreateInstance<Procedure.USuperBuffer<float, Procedure.FFloatOperator>>(1, 1, 1));
-            var transform = Procedure.UBufferComponent.CreateInstance(Procedure.UBufferCreator.CreateInstance<Procedure.USuperBuffer<FTransform, Procedure.FTransformOperator>>(1, 1, 1));
-            var plants = Procedure.UBufferComponent.CreateInstance(Procedure.UBufferCreator.CreateInstance<Procedure.USuperBuffer<Vector2i, Procedure.FInt2Operator>>(1, 1, 1));
+            Procedure.UBufferComponent waterMap = null;
+            Procedure.UBufferComponent transform = null;
+            Procedure.UBufferComponent plants = null;
 
             using (var xnd = IO.TtXndHolder.LoadXnd(file))
             {
@@ -184,30 +184,32 @@ namespace EngineNS.Bricks.Terrain.CDLOD
                     return false;
                 norMap.LoadXnd(node, Hash160.Emtpy);
 
-                node = xnd.RootNode.TryGetChildNode("WaterMap");
-                if (node.IsValidPointer == false)
-                {
-                    waterMap.LoadXnd(node, Hash160.Emtpy);
-                }
-                else
-                {
-                    waterMap = null;
-                }
-
                 node = xnd.RootNode.TryGetChildNode("MatIdMap");
                 if (node.IsValidPointer == false)
                     return false;
                 idMap.LoadXnd(node, Hash160.Emtpy);
 
+                node = xnd.RootNode.TryGetChildNode("WaterMap");
+                if (node.IsValidPointer)
+                {
+                    waterMap = Procedure.UBufferComponent.CreateInstance(Procedure.UBufferCreator.CreateInstance<Procedure.USuperBuffer<float, Procedure.FFloatOperator>>(1, 1, 1));
+                    waterMap.LoadXnd(node, Hash160.Emtpy);
+                }
+
                 node = xnd.RootNode.TryGetChildNode("PlantTransform");
-                if (node.IsValidPointer == false)
-                    return false;
-                transform.LoadXnd(node, Hash160.Emtpy);
+                if (node.IsValidPointer)
+                {
+                    transform = Procedure.UBufferComponent.CreateInstance(Procedure.UBufferCreator.CreateInstance<Procedure.USuperBuffer<FTransform, Procedure.FTransformOperator>>(1, 1, 1));
+                    transform.LoadXnd(node, Hash160.Emtpy);
+                }
 
                 node = xnd.RootNode.TryGetChildNode("PlantInfo");
-                if (node.IsValidPointer == false)
-                    return false;
-                plants.LoadXnd(node, Hash160.Emtpy);
+                if (node.IsValidPointer)
+                {
+                    plants = Procedure.UBufferComponent.CreateInstance(Procedure.UBufferCreator.CreateInstance<Procedure.USuperBuffer<Vector2i, Procedure.FInt2Operator>>(1, 1, 1));
+                    plants.LoadXnd(node, Hash160.Emtpy);
+                }
+                
 
                 CreateFromBuffer(hMap, norMap, waterMap, idMap, transform, plants);
 
@@ -526,15 +528,6 @@ namespace EngineNS.Bricks.Terrain.CDLOD
                     using (var ar = attr.GetWriter(24))
                     {
                         ar.Write(hash);
-                    }
-                }
-
-                if (hMap != null)
-                {
-                    using (var node = xnd.NewNode("HeightMap", 0, 0))
-                    {
-                        xnd.RootNode.AddNode(node);
-                        hMap.SaveXnd(xnd, node, in Hash160.Emtpy);
                     }
                 }
 
