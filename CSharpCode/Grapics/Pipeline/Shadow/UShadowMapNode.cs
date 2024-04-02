@@ -337,7 +337,7 @@ namespace EngineNS.Graphics.Pipeline.Shadow
                     //先得到阴影裁剪摄像机，确保CSM区段内看得到的对象都产生投影 
                     var aabb = new DBoundingBox();
                     {
-                        CullCamera.PerspectiveFovLH(ViewerCamera.Fov, ViewerCamera.Width, ViewerCamera.Height, zNear, mSumDistanceFarArray[CsmIdx]);
+                        CullCamera.PerspectiveFovLH(ViewerCamera.Fov, ViewerCamera.Width, ViewerCamera.Height, ViewerCamera.ZNear, mSumDistanceFarArray[CsmIdx]);
                         CullCamera.LookAtLH(ViewerCamera.GetPosition(), ViewerCamera.GetLookAt(), in Vector3.UnitY);
                         //收集本csm阶段可投影Mesh
                         mVisParameter.CullType = GamePlay.UWorld.UVisParameter.EVisCull.Shadow;

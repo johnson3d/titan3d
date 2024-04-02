@@ -141,16 +141,16 @@ namespace EngineNS.UI.Controls
         {
             NeverMeasured = true;
             NeverArranged = true;
+            IsEnabled = true;
             TtUIElementConstructor_Template();
-            TtUIElementConstructor_Editor();
-
-            
+            TtUIElementConstructor_Editor();            
         }
         public TtUIElement(TtContainer parent)
         {
             mParent = parent;
             NeverMeasured = true;
             NeverArranged = true;
+            IsEnabled = true;
             TtUIElementConstructor_Template();
             TtUIElementConstructor_Editor();
         }
@@ -171,7 +171,7 @@ namespace EngineNS.UI.Controls
             }
         }
 
-        [Bind.BindProperty]
+        [Bind.BindProperty(DefaultValue = true)]
         [Rtti.Meta]
         public bool IsEnabled
         {
@@ -288,10 +288,14 @@ namespace EngineNS.UI.Controls
         {
             return null;
         }
-        public virtual TtUIElement GetPointAtElement(in Vector2 pt, bool onlyClipped = true)
+        public virtual TtUIElement GetPointAtElement(in Vector2 pt, out Vector2 pointOffset, bool onlyClipped = true)
         {
+            pointOffset = Vector2.Zero;
             if(IsMousePointIn(in pt))
+            {
+                pointOffset = new Vector2(pt.X - DesignRect.X, pt.Y - DesignRect.Y);
                 return this;
+            }
             return null;
         }
         TtUIElement Get3DParent()

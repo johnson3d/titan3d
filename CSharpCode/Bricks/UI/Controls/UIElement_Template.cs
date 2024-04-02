@@ -65,7 +65,7 @@ namespace EngineNS.UI.Controls
         {
 
         }
-        public bool ApplyTemplate()
+        public virtual bool ApplyTemplate()
         {
             if (!UEngine.Instance.EventPoster.IsThread(Thread.Async.EAsyncTarget.Logic))
             {

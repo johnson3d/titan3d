@@ -345,7 +345,7 @@ namespace EngineNS.Bricks.Font
         {
             return mCoreObject.GetWords(pWords, count, text, numOfChar);
         }
-        public unsafe uint GetWords(ref UNativeArray<EngineNS.Canvas.FTWord> words, string text)
+        public unsafe uint GetWords(in UNativeArray<EngineNS.Canvas.FTWord> words, string text)
         {
             var count = text.Length;
             words.SetSize(count);

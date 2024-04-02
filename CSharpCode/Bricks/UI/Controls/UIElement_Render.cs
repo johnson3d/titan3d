@@ -112,7 +112,7 @@ namespace EngineNS.UI.Controls
 
             return false;
         }
-        public virtual UInt16 UpdateTransformIndex(UInt16 parentTransformIdx)
+        public UInt16 ElementUpdateTransformIndex(UInt16 parentTransformIdx)
         {
             if (mRenderTransform.IsIdentity)
                 mTransformIndex = parentTransformIdx;
@@ -120,6 +120,10 @@ namespace EngineNS.UI.Controls
                 mTransformIndex = RootUIHost.AddTransformedUIElement(this, parentTransformIdx);
 
             return mTransformIndex;
+        }
+        public virtual UInt16 UpdateTransformIndex(UInt16 parentTransformIdx)
+        {
+            return ElementUpdateTransformIndex(parentTransformIdx);
         }
 
         private bool IsRenderable()

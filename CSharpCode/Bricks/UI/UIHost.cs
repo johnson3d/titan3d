@@ -9,20 +9,47 @@ namespace EngineNS.UI
 {
     public partial class TtUIHost : Controls.Containers.TtContainer
     {
-        TtUINode mSceneNode;
+        internal TtUINode mSceneNode;
         public TtUINode SceneNode
         {
             get => mSceneNode;
-            set
+        }
+        public void AddToNode(TtUINode node)
+        {
+            node.AddUIHost(this);
+        }
+        public Graphics.Pipeline.UViewportSlate ViewportSlate { get; internal set; }
+
+        #region Popup
+        protected List<TtUIHost> mPopupUIHost = new List<TtUIHost>();
+        public List<TtUIHost> PopupUIHost
+        {
+            get => mPopupUIHost;
+        }
+        public void InsertPopupUIHost(int index, TtUIHost host)
+        {
+            mPopupUIHost.Insert(index, host);
+        }
+        public void AddPopupUIHost(TtUIHost host)
+        {
+            InsertPopupUIHost(mPopupUIHost.Count, host);
+        }
+        public void RemovePopupUIHost(int index)
+        {
+            mPopupUIHost.RemoveAt(index);
+        }
+        public void RemovePopupUIHost(TtUIHost host)
+        {
+            for (int i = 0; i < mPopupUIHost.Count; i++)
             {
-                mSceneNode = value;
-                if(mSceneNode != null && mSceneNode.UIHost != this)
+                if (mPopupUIHost[i] == host)
                 {
-                    mSceneNode.UIHost = this;
+                    mPopupUIHost.RemoveAt(i);
+                    return;
                 }
             }
         }
-        public Graphics.Pipeline.UViewportSlate ViewportSlate { get; internal set; }
+        #endregion
 
         float mDPIScale = 1.0f;
         [Browsable(false)]
@@ -143,13 +170,14 @@ namespace EngineNS.UI
             return false;
         }
         // pt为鼠标位置
-        public override TtUIElement GetPointAtElement(in Vector2 mousePt, bool onlyClipped = true)
+        public override TtUIElement GetPointAtElement(in Vector2 mousePt, out Vector2 pointOffset, bool onlyClipped = true)
         {
             var data = new RayIntersectData();
-            return GetPointAtElement(mousePt, ref data, onlyClipped);
+            return GetPointAtElement(mousePt, ref data, out pointOffset, onlyClipped);
         }
-        public TtUIElement GetPointAtElement(in Vector2 mousePt, ref RayIntersectData data, bool onlyClipped = true)
+        public TtUIElement GetPointAtElement(in Vector2 mousePt, ref RayIntersectData data, out Vector2 pointOffset, bool onlyClipped = true)
         {
+            pointOffset = Vector2.Zero;
             if (this.mSceneNode == null)
                 return null;
             var vp = this.ViewportSlate;
@@ -175,11 +203,11 @@ namespace EngineNS.UI
 
             if(QueryElements(RayIntersect3DElements, ref data))
             {
-                return data.IntersectedElement.GetPointAtElement(in data.IntersectPos, onlyClipped);
+                return data.IntersectedElement.GetPointAtElement(in data.IntersectPos, out pointOffset, onlyClipped);
             }
             if (!RayIntersect(ref data))
                 return null;
-            return base.GetPointAtElement(in data.IntersectPos, onlyClipped);
+            return base.GetPointAtElement(in data.IntersectPos, out pointOffset, onlyClipped);
         }
 
         // white a c# method for line intersect triangle in 3d, and with intersect point out

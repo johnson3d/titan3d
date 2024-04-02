@@ -19,7 +19,6 @@ namespace EngineNS.UI
         public TtUIManager()
         {
             UIManagerConstruct_Msg();
-            InitSystemDefaultTemplates();
         }
 
         public struct UIKeyName

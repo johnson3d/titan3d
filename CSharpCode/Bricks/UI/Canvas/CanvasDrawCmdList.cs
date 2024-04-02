@@ -26,6 +26,10 @@ namespace EngineNS.UI.Canvas
             mCoreObject = self;
             Core_AddRef();
         }
+        public void NewDrawCmd()
+        {
+            mCoreObject.NewDrawCmd();
+        }
         public void PushMatrix(in Matrix matrix)
         {
             mCoreObject.PushMatrix(matrix);
@@ -115,42 +119,42 @@ namespace EngineNS.UI.Canvas
                 mCoreObject.AddRectFill(in start, in end, in color, ref outCmd);
             }
         }
-        public unsafe void AddText(string text, float x, float y, in EngineNS.Color color)
+        public unsafe void AddText(string text, float x, float y, in EngineNS.Canvas.FDrawCmdInstanceData data)
         {
 #if PWindow
             fixed (char* p = text)
-            fixed (Color* pColor = &color)
+            fixed (EngineNS.Canvas.FDrawCmdInstanceData* pData = &data)
             {
-                mCoreObject.AddText((wchar_t*)p, text.Length, x, y, pColor, new IBlobObject());
+                mCoreObject.AddText((wchar_t*)p, text.Length, x, y, pData, new IBlobObject());
             }
 #else
             fixed (char* p = text)
-            fixed (Color* pColor = &color)
+            fixed (EngineNS.Canvas.FDrawCmdInstanceData* pData = &data)
             {
                 using (var buffer = BigStackBuffer.CreateInstance(text.Length * sizeof(wchar_t)))
                 {
                     var numOfUtf32 = System.Text.Encoding.UTF32.GetBytes(p, text.Length, (byte*)buffer.GetBuffer(), text.Length * sizeof(wchar_t));
-                    mCoreObject.AddText((wchar_t*)buffer.GetBuffer(), numOfUtf32, x, y, pColor, new IBlobObject());
+                    mCoreObject.AddText((wchar_t*)buffer.GetBuffer(), numOfUtf32, x, y, pData, new IBlobObject());
                 }
             }
 #endif
         }
-        public unsafe void AddText(string text, float x, float y, in EngineNS.Color color, UBlobObject outCmds)
+        public unsafe void AddText(string text, float x, float y, in EngineNS.Canvas.FDrawCmdInstanceData data, UBlobObject outCmds)
         {
 #if PWindow
             fixed (char* p = text)
-            fixed (Color* pColor = &color)
+            fixed (EngineNS.Canvas.FDrawCmdInstanceData* pData = &data)
             {
-                mCoreObject.AddText((wchar_t*)p, text.Length, x, y, pColor, outCmds.mCoreObject);
+                mCoreObject.AddText((wchar_t*)p, text.Length, x, y, pData, outCmds.mCoreObject);
             }
 #else
             fixed (char* p = text)
-            fixed (Color* pColor = &color)
+            fixed (EngineNS.Canvas.FDrawCmdInstanceData* pData = &data)
             {
                 using (var buffer = BigStackBuffer.CreateInstance(text.Length * sizeof(wchar_t)))
                 {
                     var numOfUtf32 = System.Text.Encoding.UTF32.GetBytes(p, text.Length, (byte*)buffer.GetBuffer(), text.Length * sizeof(wchar_t));
-                    mCoreObject.AddText((wchar_t*)buffer.GetBuffer(), numOfUtf32, x, y, pColor, outCmds.mCoreObject);
+                    mCoreObject.AddText((wchar_t*)buffer.GetBuffer(), numOfUtf32, x, y, pData, outCmds.mCoreObject);
                 }
             }
 #endif

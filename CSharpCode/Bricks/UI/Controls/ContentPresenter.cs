@@ -19,6 +19,20 @@ namespace EngineNS.UI.Controls
         //        OnValueChange(value);
         //    }
         //}
+        string mContentSource;
+        [UI.Bind.BindProperty, Rtti.Meta]
+        public string ContentSource
+        {
+            get => mContentSource;
+            set
+            {
+                OnValueChange(in value, in mContentSource);
+                mContentSource = value;
+                mContentSourceHash = Standart.Hash.xxHash.xxHash64.ComputeHash(mContentSource);
+            }
+        }
+        UInt64 mContentSourceHash = 0;
+        public UInt64 ContentSourceHash => mContentSourceHash;
 
         protected override SizeF MeasureOverride(in SizeF availableSize)
         {

@@ -1,13 +1,15 @@
 ﻿using SDL2;
+using SixLabors.ImageSharp.Advanced;
 using System;
 using System.Collections.Generic;
+using System.Runtime.InteropServices;
 using System.Text;
 
 namespace EngineNS.Bricks.Input
 {
     public partial class UInputSystem
     {
-        public static void MappedEvent(in SDL.SDL_Event source, out Input.Event target)
+        public static unsafe void MappedEvent(in SDL.SDL_Event source, ref Input.Event target)
         {
             //can't using Event inputEvent = *(Event*)(p); cause of SDL_Event have non-public members
             target.Type = (EventType)source.type;
@@ -169,18 +171,39 @@ namespace EngineNS.Bricks.Input
             target.MouseMotion.yRel = source.motion.yrel;
             #endregion MouseMotion
             #region TextInput
-            target.TextInput.Type = (EventType)source.text.type;
-            target.TextInput.Timestamp = source.text.timestamp;
-            target.TextInput.WindowID = source.text.windowID;
-            //target.TextInput.Text = source.text.text;
+            {
+                target.TextInput.Type = (EventType)source.text.type;
+                target.TextInput.Timestamp = source.text.timestamp;
+                target.TextInput.WindowID = source.text.windowID;
+                fixed (SDL2.SDL.SDL_TextInputEvent* ptr = &source.text)
+                {
+                    var text = System.Text.Encoding.UTF8.GetString(ptr->text, 32);
+                    var endIdx = text.IndexOf('\0');
+                    if (endIdx >= 0)
+                        text = text.Substring(0, endIdx);
+                    target.TextInput.Text = text;
+                }
+                //target.TextInput.Text = source.text.text;
+            }
             #endregion TextInput
             #region TextEdit
-            target.TextEdit.Type = (EventType)source.edit.type;
-            target.TextEdit.Timestamp = source.edit.timestamp;
-            target.TextEdit.WindowID = source.edit.windowID;
-            //target.TextEdit.Text = source.edit.text;
-            target.TextEdit.Start = source.edit.start;
-            target.TextEdit.Length = source.edit.length;
+            {
+                target.TextEdit.Type = (EventType)source.edit.type;
+                target.TextEdit.Timestamp = source.edit.timestamp;
+                target.TextEdit.WindowID = source.edit.windowID;
+                fixed (SDL2.SDL.SDL_TextInputEvent* ptr = &source.text)
+                {
+                    var text = System.Text.Encoding.UTF8.GetString(ptr->text, 32);
+                    var endIdx = text.IndexOf('\0');
+                    if (endIdx >= 0)
+                        text = text.Substring(0, endIdx);
+                    target.TextEdit.Text = text;
+                }
+                //target.TextEdit.Text = source.edit.text;
+                target.TextEdit.Start = source.edit.start;
+                target.TextEdit.Length = source.edit.length;
+
+            }
             #endregion TextEdit
             #region Keyboard
             target.Keyboard.Type = (EventType)source.key.type;
@@ -232,7 +255,7 @@ namespace EngineNS.Bricks.Input
                 {
                     EGui.UDockWindowSDL.ImGui_ImplSDL2_ProcessEvent(in sdlEvt);
                 }
-                MappedEvent(sdlEvt, out evt);
+                MappedEvent(sdlEvt, ref evt);
             }
             return ret;
         }
@@ -242,5 +265,119 @@ namespace EngineNS.Bricks.Input
             closeEvent.type = SDL2.SDL.SDL_EventType.SDL_QUIT;
             SDL2.SDL.SDL_PushEvent(ref closeEvent);
         }
+        public static void StartTextInput()
+        {
+            SDL2.SDL.SDL_StartTextInput();
+        }
+        public static void StopTextInput()
+        {
+            SDL2.SDL.SDL_StopTextInput();
+        }
+        public static void SetTextInputRect(in EngineNS.Rectangle rect)
+        {
+            SDL2.SDL.SDL_Rect sdlRect = new SDL.SDL_Rect()
+            {
+                x = rect.X,
+                y = rect.Y,
+                w = rect.Width,
+                h = rect.Height,
+            };
+            SDL2.SDL.SDL_SetTextInputRect(ref sdlRect);
+        }
+        public static void SetTextInputRect(in EngineNS.RectangleF rect)
+        {
+            SDL2.SDL.SDL_Rect sdlRect = new SDL.SDL_Rect()
+            {
+                x = (int)rect.X,
+                y = (int)rect.Y,
+                w = (int)rect.Width,
+                h = (int)rect.Height,
+            };
+            SDL2.SDL.SDL_SetTextInputRect(ref sdlRect);
+        }
+
+        #region IME
+
+        public class IMEHandler
+        {
+            [DllImport("Imm32.dll", CharSet = CharSet.Unicode)]
+            private static extern IntPtr ImmGetContext(IntPtr hWnd);
+
+            [DllImport("Imm32.dll", CharSet = CharSet.Unicode)]
+            private static extern bool ImmReleaseContext(IntPtr hWnd, IntPtr hIMC);
+
+            [DllImport("Imm32.dll", CharSet = CharSet.Unicode)]
+            private static extern bool ImmGetOpenStatus(IntPtr hIMC);
+
+            [DllImport("Imm32.dll", CharSet = CharSet.Unicode)]
+            private static extern bool ImmSetOpenStatus(IntPtr hIMC, bool b);
+
+            [DllImport("Imm32.dll")]
+            private static extern bool ImmSetCompositionWindow(IntPtr hIMC, ref COMPOSITIONFORM lpCompForm);
+
+            [StructLayout(LayoutKind.Sequential)]
+            struct COMPOSITIONFORM
+            {
+                public uint dwStyle;
+                public POINT ptCurrentPos;
+                public RECT rcArea;
+            }
+
+            [StructLayout(LayoutKind.Sequential)]
+            struct POINT
+            {
+                public int x;
+                public int y;
+            }
+
+            [StructLayout(LayoutKind.Sequential)]
+            struct RECT
+            {
+                public int left;
+                public int top;
+                public int right;
+                public int bottom;
+            }
+
+            // 获取当前的IME状态
+            public static bool GetIMEStatus(IntPtr hwnd)
+            {
+                IntPtr hIMC = ImmGetContext(hwnd);
+                bool isOpen = ImmGetOpenStatus(hIMC);
+                ImmReleaseContext(hwnd, hIMC);
+                return isOpen;
+            }
+
+            // 设置IME状态
+            public static unsafe void SetIMEStatus(bool open, in Vector2 pos)
+            {
+                var hwnd = new IntPtr(EngineNS.UEngine.Instance.GfxDevice.SlateApplication.NativeWindow.HWindow.ToPointer());
+                IntPtr hIMC = ImmGetContext(hwnd);
+                if(hIMC != IntPtr.Zero)
+                {
+                    var result = ImmSetOpenStatus(hIMC, open);
+                    var compos = new COMPOSITIONFORM()
+                    {
+                        dwStyle = 2,
+                        ptCurrentPos = new POINT()
+                        {
+                            x = (int)pos.X,
+                            y = (int)pos.Y,
+                        },
+                        rcArea = new RECT()
+                        {
+                            left = 0,
+                            top = 0,
+                            right = 1920,
+                            bottom = 1080,
+                        },
+                    };
+                    ImmSetCompositionWindow(hIMC, ref compos);
+                    ImmReleaseContext(hwnd, hIMC);
+                }
+            }
+        }
+
+        #endregion
     }
 }

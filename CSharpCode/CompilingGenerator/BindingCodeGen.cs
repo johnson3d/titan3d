@@ -219,6 +219,8 @@ namespace CompilingGenerator
             string setPropertyValueSwitch = "";
             string tourBindableProperties = "";
             string hasBindablePropertiesStr = "";
+            string getContentsPresenterContainerSwitchStr = "";
+            string tourContentsPresenterContainersStr = "";
 
             //bool hasCreateBindingMethodExpressionMethodSwitch = false;
             //string createBindingMethodExpressionMethodSwitch = $@"
@@ -372,40 +374,41 @@ namespace {namespaceName}
                         //var bindingMethodExprImpName = $"{className}_BindingMethodExprImp_{propName}";
 
                         hasCreateBindingExpressionMethodSwitch = true;
+                        var propNameHash = Standart.Hash.xxHash.xxHash64.ComputeHash(propName);
                         createBindingExpressionMethodSwitch += $@"
-                case {Standart.Hash.xxHash.xxHash64.ComputeHash(propName)}: //{propName}
+                case {propNameHash}: //{propName}
                     {{
                         var beImp = new {bindingExprImpName}(binding, {propName}, parent);
                         beImp.TargetObject = this;
                         beImp.TargetProperty = (EngineNS.UI.Bind.TtBindableProperty<{propTypeDisplayName}>){bindPropName};
                         return beImp;
                     }}";
-                //        hasCreateBindingMethodExpressionMethodSwitch = true;
-                //        createBindingMethodExpressionMethodSwitch += $@"
-                //case {Standart.Hash.xxHash.xxHash64.ComputeHash(propName)}: //{propName}
-                //    {{
-                //        var beImp = new {bindingMethodExprImpName}(binding, parent);
-                //        return beImp;
-                //    }}";
+                        //        hasCreateBindingMethodExpressionMethodSwitch = true;
+                        //        createBindingMethodExpressionMethodSwitch += $@"
+                        //case {propNameHash}: //{propName}
+                        //    {{
+                        //        var beImp = new {bindingMethodExprImpName}(binding, parent);
+                        //        return beImp;
+                        //    }}";
                         hasSetValueWithPropertyNameSwitch = true;
                         setValueWithPropertyNameSwitch += $@"
-                case {Standart.Hash.xxHash.xxHash64.ComputeHash(propName)}: //{propName}
+                case {propNameHash}: //{propName}
                     SetValue<T>(value, {bindPropName});
                     return;";
                         hasGetValueWithPropertyNameSwitch = true;
                         getValueWithPropertyNameSwitch += $@"
-                case {Standart.Hash.xxHash.xxHash64.ComputeHash(propName)}: //{propName}
+                case {propNameHash}: //{propName}
                     return GetValue<T>({bindPropName});";
 
                         getPropertyValueSwitch += $@"
-                case {Standart.Hash.xxHash.xxHash64.ComputeHash(propName)}: //{propName}
+                case {propNameHash}: //{propName}
                     value = {propName};//GetValue<{propTypeDisplayName}>({bindPropName});
                     return true;";
 
                         if(!propSymbol.IsReadOnly)
                         {
                             setPropertyValueSwitch += $@"
-                case {Standart.Hash.xxHash.xxHash64.ComputeHash(propName)}: //{propName}
+                case {propNameHash}: //{propName}
                     //SetValue<{propTypeDisplayName}>(({propTypeDisplayName})value, {bindPropName});
                     {propName} = ({propTypeDisplayName})value;
                     return true;";
@@ -413,7 +416,7 @@ namespace {namespaceName}
                         else
                         {
                             setPropertyValueSwitch += $@"
-                case {Standart.Hash.xxHash.xxHash64.ComputeHash(propName)}: //{propName}
+                case {propNameHash}: //{propName}
                         return true;";
                         }
 
@@ -431,6 +434,16 @@ namespace {namespaceName}
                 if(""{propName}"".ToLower().Contains(containString))
                     return true;
             }}";
+
+                        if (propTypeDisplayName == "EngineNS.UI.Controls.Containers.TtTemplateContainer")
+                        {
+                            getContentsPresenterContainerSwitchStr += $@"
+                case {propNameHash}: //{propName}
+                    return {propName};
+            ";
+                            tourContentsPresenterContainersStr += $@"
+            action?.Invoke({propName}, ref data);";
+                        }
 
                         bindImpSource += $@"
     public class {bindingExprImpName} : EngineNS.UI.Bind.TtBindingExpression<{propTypeDisplayName}>
@@ -774,7 +787,7 @@ namespace {namespaceName}
             return bpVal.GetValue<T>(bp);
         }}
 ";
-            if (baseFromUIElement && !classSymbol.Constructors.Any(symbol => ((symbol.Parameters.Length == 0) && (!symbol.IsImplicitlyDeclared))))
+            if (baseFromUIElement && !classSymbol.Constructors.Any(symbol => ((symbol.Parameters.Length == 0) && (!symbol.IsImplicitlyDeclared) && (!symbol.IsStatic))))
             {
                 source += $@"
         public {className}()
@@ -1974,6 +1987,53 @@ namespace {namespaceName}
                 data = pbData;
             }}
             MethodDisplayNames[desc] = data;
+        }}";
+            }
+            if(!classSymbol.MemberNames.Any(name => "GetContentsPresenterContainer" == name))
+            {
+                source += $@"
+        public {(baseHasBindObjectInterface ? "override" : "virtual")} EngineNS.UI.Controls.Containers.TtTemplateContainer GetContentsPresenterContainer(System.UInt64 contentsPresenterHash)
+        {{";
+                if (!string.IsNullOrEmpty(getContentsPresenterContainerSwitchStr))
+                {
+                    source += $@"
+            switch(contentsPresenterHash)
+            {{";
+                    source += getContentsPresenterContainerSwitchStr;
+                    source += $@"
+            }}";
+                }
+                if (baseHasBindObjectInterface)
+                {
+                    source += $@"
+            return base.GetContentsPresenterContainer(contentsPresenterHash);
+        }}";
+                }
+                else
+                {
+                    source += $@"
+            return null;
+        }}";
+                }
+            }
+            if(!classSymbol.MemberNames.Any(name => "TourContentsPresenterContainers" == name))
+            {
+                if(!baseHasBindObjectInterface)
+                {
+                    source += $@"
+        public delegate void Delegate_TourContentsPresenterContainer<T>(EngineNS.UI.Controls.TtUIElement element, ref T data);";
+                }
+
+                source += $@"
+        public {(baseHasBindObjectInterface ? "override" : "virtual")} void TourContentsPresenterContainers<T>(Delegate_TourContentsPresenterContainer<T> action, ref T data)
+        {{";
+                source += tourContentsPresenterContainersStr;
+                if (baseHasBindObjectInterface)
+                {
+                    source += $@"
+            base.TourContentsPresenterContainers(action, ref data);";
+                }
+                    source += $@"
         }}";
             }
 

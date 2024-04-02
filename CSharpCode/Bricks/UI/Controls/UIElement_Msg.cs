@@ -26,7 +26,9 @@ namespace EngineNS.UI.Controls
         public object OriginalSource = null;
         //public TtUIHost Host = null;
         public TtRoutedEvent RoutedEvent = null;
+        #pragma warning disable CS8500
         public Bricks.Input.Event* InputEventPtr = null;
+        #pragma warning restore CS8500
         public bool Handled = false;
 
         public void Reset()
@@ -330,28 +332,52 @@ namespace EngineNS.UI.Controls
             get => UEngine.Instance.UIManager.KeyboardFocusUIElement == this;
         }
 
-        public delegate void Delegate_Focus(TtRoutedEventArgs eventArgs, TtUIElement newFocused, TtUIElement oldFocused);
-        public Delegate_Focus OnLostFocus;
-        public Delegate_Focus OnFocus;
-        public virtual void ProcessOnLostFocus(TtRoutedEventArgs eventArgs, TtUIElement newFocused, TtUIElement oldFocused)
+        //public delegate void Delegate_Focus(TtRoutedEventArgs eventArgs, TtUIElement newFocused, TtUIElement oldFocused);
+        //public Delegate_Focus OnLostFocus;
+        //public Delegate_Focus OnFocus;
+        //public virtual void ProcessOnLostFocus(TtRoutedEventArgs eventArgs, TtUIElement newFocused, TtUIElement oldFocused)
+        //{
+        //    OnLostFocus?.Invoke(eventArgs, newFocused, oldFocused);
+        //}
+        //public virtual void ProcessOnFocus(TtRoutedEventArgs eventArgs, TtUIElement newFocused, TtUIElement oldFocused)
+        //{
+        //    OnFocus?.Invoke(eventArgs, newFocused, oldFocused);
+        //}
+        public static readonly TtRoutedEvent OnFocusEvent = TtEventManager.RegisterRoutedEvent("OnFocus", ERoutedType.Direct, typeof(TtRoutedEventHandler), typeof(TtUIElement));
+        public event TtRoutedEventHandler OnFocus
         {
-            OnLostFocus?.Invoke(eventArgs, newFocused, oldFocused);
+            add { AddHandler(OnFocusEvent, value); }
+            remove { RemoveHandler(OnFocusEvent, value); }
         }
-        public virtual void ProcessOnFocus(TtRoutedEventArgs eventArgs, TtUIElement newFocused, TtUIElement oldFocused)
+        public static readonly TtRoutedEvent OnLostFocusEvent = TtEventManager.RegisterRoutedEvent("OnLostFocus", ERoutedType.Direct, typeof(TtRoutedEventHandler), typeof(TtUIElement));
+        public event TtRoutedEventHandler OnLostFocus
         {
-            OnFocus?.Invoke(eventArgs, newFocused, oldFocused);
+            add { AddHandler(OnLostFocusEvent, value); }
+            remove { RemoveHandler(OnLostFocusEvent, value); }
         }
 
-        public delegate void Delegate_MouseCapture(TtRoutedEventArgs eventArgs, TtUIElement newCapture, TtUIElement oldCapture);
-        public Delegate_MouseCapture OnMouseCapture;
-        public Delegate_MouseCapture OnLostMouseCapture;
-        public virtual void ProcessOnMouseCapture(TtRoutedEventArgs eventArgs, TtUIElement newCapture, TtUIElement oldCapture)
+        //public delegate void Delegate_MouseCapture(TtRoutedEventArgs eventArgs, TtUIElement newCapture, TtUIElement oldCapture);
+        //public Delegate_MouseCapture OnMouseCapture;
+        //public Delegate_MouseCapture OnLostMouseCapture;
+        //public virtual void ProcessOnMouseCapture(TtRoutedEventArgs eventArgs, TtUIElement newCapture, TtUIElement oldCapture)
+        //{
+        //    OnMouseCapture?.Invoke(eventArgs, newCapture, oldCapture);
+        //}
+        //public virtual void ProcessOnLostMouseCapture(TtRoutedEventArgs eventArgs, TtUIElement newCapture, TtUIElement oldCapture)
+        //{
+        //    OnLostMouseCapture?.Invoke(eventArgs, newCapture, oldCapture);
+        //}
+        public static readonly TtRoutedEvent OnMouseCaptureEvent = TtEventManager.RegisterRoutedEvent("OnMouseCapture", ERoutedType.Direct, typeof(TtRoutedEventHandler), typeof(TtUIElement));
+        public event TtRoutedEventHandler OnMouseCapture
         {
-            OnMouseCapture?.Invoke(eventArgs, newCapture, oldCapture);
+            add { AddHandler(OnMouseCaptureEvent, value); }
+            remove { RemoveHandler(OnMouseCaptureEvent, value); }
         }
-        public virtual void ProcessOnLostMouseCapture(TtRoutedEventArgs eventArgs, TtUIElement newCapture, TtUIElement oldCapture)
+        public static readonly TtRoutedEvent OnLostMouseCaptureEvent = TtEventManager.RegisterRoutedEvent("OnLostMouseCapture", ERoutedType.Direct, typeof(TtRoutedEventHandler), typeof(TtUIElement));
+        public event TtRoutedEventHandler OnLostMouseCapture
         {
-            OnLostMouseCapture?.Invoke(eventArgs, newCapture, oldCapture);
+            add { AddHandler(OnLostMouseCaptureEvent, value); }
+            remove { RemoveHandler(OnLostMouseCaptureEvent, value); }
         }
 
         //public delegate void Delegate_MouseEvent(TtUIElement ui, TtRoutedEventArgs eventArgs, in Bricks.Input.Event e);
@@ -848,6 +874,44 @@ namespace EngineNS.UI.Controls
         //    if (!eventArgs.Handled)
         //        Parent?.ProcessMessage(eventArgs, e);
         //}
+
+        public bool GetMousePointOffset(in Vector2 point, out Vector2 offset)
+        {
+            var host = this.RootUIHost;
+            var parent = VisualTreeHelper.GetParent(this);
+            while(parent != null && parent != host && !parent.Is3D)
+            {
+                parent = VisualTreeHelper.GetParent(parent);
+            }
+            offset = new Vector2(point.X - DesignRect.X, point.Y - DesignRect.Y);
+            if (parent == null)
+                return true;
+            if (host.SceneNode == null)
+                return false;
+            var vp = host.ViewportSlate;
+            var aabb = host.BoundingBox;
+            if (aabb.Minimum.X >= aabb.Maximum.X ||
+                aabb.Minimum.Y >= aabb.Maximum.Y)
+                return false;
+            if (host.RenderCamera == null)
+                return false;
+            RayIntersectData data = new RayIntersectData();
+            var delta = vp.WindowPos - vp.ViewportPos;
+            data.Start = host.RenderCamera.GetLocalPosition();
+            Vector3 dir = Vector3.Zero;
+            //var mousePt = new Vector2(178, 209) + delta;
+            host.RenderCamera.GetPickRay(ref dir, point.X - delta.X, point.Y - delta.Y, vp.ClientSize.Width, vp.ClientSize.Height);
+            if (dir == Vector3.Zero)
+                return false;
+            data.Direction = dir;
+
+            if(parent.RayIntersect(ref data))
+            {
+                offset = new Vector2(data.IntersectPos.X - DesignRect.X, data.IntersectPos.Y - DesignRect.Y);
+                return true;
+            }
+            return false;
+        }
     }
 
 }

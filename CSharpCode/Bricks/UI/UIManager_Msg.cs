@@ -77,38 +77,97 @@ namespace EngineNS.UI
 
             return element.IsFocusable;
         }
-        public void KeyboardFocus(TtRoutedEventArgs eventArgs, TtUIElement element)
+        public unsafe void KeyboardFocus(TtRoutedEventArgs eventArgs, TtUIElement element)
         {
             if(element == null)
             {
                 if(mKeyboardFocusUIElement != null)
-                    mKeyboardFocusUIElement.ProcessOnLostFocus(eventArgs, element, mKeyboardFocusUIElement);
+                {
+                    //mKeyboardFocusUIElement.ProcessOnLostFocus(eventArgs, element, mKeyboardFocusUIElement);
+                    var arg = UEngine.Instance.UIManager.QueryEventSync();
+                    arg.RoutedEvent = TtUIElement.OnLostFocusEvent;
+                    arg.Source = this;
+                    if(eventArgs != null)
+                        arg.InputEventPtr = eventArgs.InputEventPtr;
+                    mKeyboardFocusUIElement.RaiseEvent(arg);
+                    UEngine.Instance.UIManager.ReleaseEventSync(arg);
+                }
             }
             else if(IsKeyboardFocusable(element))
             {
                 if (mKeyboardFocusUIElement != null)
-                    mKeyboardFocusUIElement.ProcessOnLostFocus(eventArgs, element, mKeyboardFocusUIElement);
-                element.ProcessOnFocus(eventArgs, element, mKeyboardFocusUIElement);
+                {
+                    //mKeyboardFocusUIElement.ProcessOnLostFocus(eventArgs, element, mKeyboardFocusUIElement);
+                    var arg = UEngine.Instance.UIManager.QueryEventSync();
+                    arg.RoutedEvent = TtUIElement.OnLostFocusEvent;
+                    arg.Source = this;
+                    if(eventArgs != null)
+                        arg.InputEventPtr = eventArgs.InputEventPtr;
+                    mKeyboardFocusUIElement.RaiseEvent(arg);
+                    UEngine.Instance.UIManager.ReleaseEventSync(arg);
+                }
+                var focArg = UEngine.Instance.UIManager.QueryEventSync();
+                focArg.RoutedEvent = TtUIElement.OnFocusEvent;
+                focArg.Source = this;
+                if(eventArgs != null)
+                    focArg.InputEventPtr = eventArgs.InputEventPtr;
+                element.RaiseEvent(focArg);
+                UEngine.Instance.UIManager.ReleaseEventSync(focArg);
+                //element.ProcessOnFocus(eventArgs, element, mKeyboardFocusUIElement);
                 mKeyboardFocusUIElement = element;
             }
             else if(element.TemplateChildIndex != -1)
             {
                 if (mKeyboardFocusUIElement != null)
-                    mKeyboardFocusUIElement.ProcessOnLostFocus(eventArgs, element, mKeyboardFocusUIElement);
-                element.ProcessOnFocus(eventArgs, element, mKeyboardFocusUIElement);
+                {
+                    //mKeyboardFocusUIElement.ProcessOnLostFocus(eventArgs, element, mKeyboardFocusUIElement);
+                    var arg = UEngine.Instance.UIManager.QueryEventSync();
+                    arg.RoutedEvent = TtUIElement.OnLostFocusEvent;
+                    arg.Source = this;
+                    if(eventArgs != null)
+                        arg.InputEventPtr = eventArgs.InputEventPtr;
+                    mKeyboardFocusUIElement.RaiseEvent(arg);
+                    UEngine.Instance.UIManager.ReleaseEventSync(arg);
+                }
+                //element.ProcessOnFocus(eventArgs, element, mKeyboardFocusUIElement);
+                var focArg = UEngine.Instance.UIManager.QueryEventSync();
+                focArg.RoutedEvent = TtUIElement.OnFocusEvent;
+                focArg.Source = this;
+                if(eventArgs != null)
+                    focArg.InputEventPtr = eventArgs.InputEventPtr;
+                element.RaiseEvent(focArg);
+                UEngine.Instance.UIManager.ReleaseEventSync(focArg);
                 mKeyboardFocusUIElement = element.Parent;
             }
         }
 
         public TtUIElement MouseCaptured => mCapturedElements[UInputSystem.MaxMultiTouchNumber];
-        public void CaptureMouse(TtRoutedEventArgs eventArgs, TtUIElement element)
+        public unsafe void CaptureMouse(TtRoutedEventArgs eventArgs, TtUIElement element)
         {
             var old = mCapturedElements[UInputSystem.MaxMultiTouchNumber];
             if (old != null)
-                old.ProcessOnLostMouseCapture(eventArgs, element, old);
+            {
+                //old.ProcessOnLostMouseCapture(eventArgs, element, old);
+                var arg = UEngine.Instance.UIManager.QueryEventSync();
+                arg.RoutedEvent = TtUIElement.OnLostMouseCaptureEvent;
+                arg.Source = this;
+                if(eventArgs != null)
+                    arg.InputEventPtr = eventArgs.InputEventPtr;
+                mKeyboardFocusUIElement.RaiseEvent(arg);
+                UEngine.Instance.UIManager.ReleaseEventSync(arg);
+            }
             mCapturedElements[UInputSystem.MaxMultiTouchNumber] = element;
             if (element != null)
-                element.ProcessOnMouseCapture(eventArgs, element, old);
+            {
+                //element.ProcessOnMouseCapture(eventArgs, element, old);
+                var focArg = UEngine.Instance.UIManager.QueryEventSync();
+                focArg.RoutedEvent = TtUIElement.OnMouseCaptureEvent;
+                focArg.Source = this;
+                if(eventArgs != null)
+                    focArg.InputEventPtr = eventArgs.InputEventPtr;
+                element.RaiseEvent(focArg);
+                UEngine.Instance.UIManager.ReleaseEventSync(focArg);
+            }
         }
         public void CaptureTouch(int index, TtUIElement element)
         {
@@ -132,9 +191,11 @@ namespace EngineNS.UI
         public Vector2 DebugHitPt;
         public string DebugPointatElement;
         ///////////////////////////////////////////
+        #pragma warning disable CS8500
         TtUIElement CheckHoveredElement(in Bricks.Input.Event e)
         {
             Vector2 pt;
+            Vector2 offsetOfElement;
             long index;
             switch(e.Type)
             {
@@ -158,7 +219,9 @@ namespace EngineNS.UI
                     return null;
             }
             if (mCapturedElements[index] != null)
+            {
                 return mCapturedElements[index];
+            }
 
             //TtUIHost procWin = null;
             TtUIElement newStay = null;
@@ -167,7 +230,7 @@ namespace EngineNS.UI
                 // 后打开的在上面
                 for(int i= mPopupHosts.Count - 1; i >= 0; i--)
                 {
-                    var element = mPopupHosts[i].GetPointAtElement(in pt);
+                    var element = mPopupHosts[i].GetPointAtElement(in pt, out offsetOfElement);
                     if (element != null)
                     {
                         newStay = element;
@@ -178,7 +241,7 @@ namespace EngineNS.UI
             if(mDialogHosts.Count > 0)
             {
                 var procWin = mDialogHosts.Peek();
-                newStay = procWin.GetPointAtElement(pt);
+                newStay = procWin.GetPointAtElement(pt, out offsetOfElement);
             }
             else
             {
@@ -187,7 +250,7 @@ namespace EngineNS.UI
                 for (int i = mUserUIList.Count - 1; i >= 0; i--)
                 {
                     var ui = mUserUIList[i];
-                    var element = ui.GetPointAtElement(in pt, ref data);
+                    var element = ui.GetPointAtElement(in pt, ref data, out offsetOfElement);
                     if (element != null && minDistance > data.Distance)
                     {
                         minDistance = data.Distance;
@@ -200,8 +263,8 @@ namespace EngineNS.UI
             var hoveredUIElement = mHoveredElements[index];
             if(newStay != hoveredUIElement)
             {
-                if(e.Type == EventType.MOUSEBUTTONDOWN ||
-                   e.Type == EventType.CONTROLLERTOUCHPADDOWN)
+                //if(e.Type == EventType.MOUSEBUTTONDOWN ||
+                //   e.Type == EventType.CONTROLLERTOUCHPADDOWN)
                 {
                     if (newStay != null)
                         mActiveHost = newStay.RootUIHost;
@@ -580,19 +643,22 @@ namespace EngineNS.UI
                 case EventType.KEYDOWN:
                 case EventType.KEYUP:
                     {
-                        TtUIHost procHost = mActiveHost;
-                        if(mDialogHosts.Count > 0)
-                            procHost = mDialogHosts.Peek();
-                        if(procHost != null)
+                        TtUIElement procElement = mActiveHost;
+                        if (mKeyboardFocusUIElement != null)
+                            procElement = mKeyboardFocusUIElement;
+                        else if(mDialogHosts.Count > 0)
+                            procElement = mDialogHosts.Peek();
+                        if(procElement != null)
                         {
                             // 处理快捷键
-                            procHost.ProcessHotKey(in e);
+                            if(procElement is TtUIHost)
+                                ((TtUIHost)procElement).ProcessHotKey(in e);
 
                             // 处理焦点控件
                             if(e.Type == EventType.KEYDOWN)
                             {
                                 var arg = QueryEventSync();
-                                //arg.Host = procHost;
+                                //arg.Host = procElement;
                                 arg.RoutedEvent = TtUIElement.KeyDownEvent;
                                 fixed (Bricks.Input.Event* ePtr = &e)
                                     arg.InputEventPtr = ePtr;
@@ -603,15 +669,15 @@ namespace EngineNS.UI
                                 }
                                 else
                                 {
-                                    arg.Source = procHost;
-                                    procHost.RaiseEvent(arg);
+                                    arg.Source = procElement;
+                                    procElement.RaiseEvent(arg);
                                 }
                                 ReleaseEventSync(arg);
                             }
                             else if(e.Type == EventType.KEYUP)
                             {
                                 var arg = QueryEventSync();
-                                //arg.Host = procHost;
+                                //arg.Host = procElement;
                                 arg.RoutedEvent = TtUIElement.KeyUpEvent;
                                 fixed (Bricks.Input.Event* ePtr = &e)
                                     arg.InputEventPtr = ePtr;
@@ -622,11 +688,39 @@ namespace EngineNS.UI
                                 }
                                 else
                                 {
-                                    arg.Source = procHost;
-                                    procHost.RaiseEvent(arg);
+                                    arg.Source = procElement;
+                                    procElement.RaiseEvent(arg);
                                 }
                                 ReleaseEventSync(arg);
                             }
+                        }
+                    }
+                    break;
+                case EventType.TEXTINPUT:
+                    {
+                        if(mKeyboardFocusUIElement != null)
+                        {
+                            var arg = QueryEventSync();
+                            arg.RoutedEvent = TtEditableText.TextInputEvent;
+                            fixed (Bricks.Input.Event* ePtr = &e)
+                                arg.InputEventPtr = ePtr;
+                            arg.Source = mKeyboardFocusUIElement;
+                            mKeyboardFocusUIElement.RaiseEvent(arg);
+                            ReleaseEventSync(arg);
+                        }
+                    }
+                    break;
+                case EventType.TEXTEDITING:
+                    {
+                        if(mKeyboardFocusUIElement != null)
+                        {
+                            var arg = QueryEventSync();
+                            arg.RoutedEvent = TtEditableText.TextEditingEvent;
+                            fixed (Bricks.Input.Event* ePtr = &e)
+                                arg.InputEventPtr = ePtr;
+                            arg.Source = mKeyboardFocusUIElement;
+                            mKeyboardFocusUIElement.RaiseEvent(arg);
+                            ReleaseEventSync(arg);
                         }
                     }
                     break;
@@ -634,5 +728,6 @@ namespace EngineNS.UI
 
             return true;
         }
+        #pragma warning restore CS8500
     }
 }

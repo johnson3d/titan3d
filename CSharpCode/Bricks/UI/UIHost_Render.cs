@@ -60,7 +60,7 @@ namespace EngineNS.UI
                 return mBoundingBoxData.AABB;
             }
         }
-        List<TtUIElement> mUIElementWithTransforms;
+        //List<TtUIElement> mUIElementWithTransforms;
 
         [Browsable(false)]
         public override bool MeshDirty
@@ -206,6 +206,10 @@ namespace EngineNS.UI
                 child?.UpdateTransformIndex(mTransformIndex);
             }
 
+            foreach (var i in mPopupUIHost)
+            {
+                i.ElementUpdateTransformIndex(mTransformIndex);
+            }
             return mTransformIndex;
         }
 
@@ -214,6 +218,15 @@ namespace EngineNS.UI
 
         }
         public async Thread.Async.TtTask<Graphics.Mesh.TtMesh> BuildMesh()
+        {
+            var mesh = await OnBuildMesh();
+            foreach (var i in mPopupUIHost)
+            {
+                await i.BuildMesh();
+            }
+            return mesh;
+        }
+        protected async Thread.Async.TtTask<Graphics.Mesh.TtMesh> OnBuildMesh()
         {
             if (!MeshDirty)
                 return mDrawMesh;
@@ -341,6 +354,17 @@ namespace EngineNS.UI
 
         public unsafe bool OnLineCheckTriangle(in Vector3 start, in Vector3 end, ref VHitResult result)
         {
+            for (int i = mPopupUIHost.Count - 1; i >= 0; i--)
+            {
+                if(mPopupUIHost[i].OnLineCheckTriangle(in start, in end, ref result) == true)
+                {
+                    return true;
+                }
+            }
+            return OnMeshLineCheckTriangle(in start, in end, ref result);
+        }
+        protected unsafe bool OnMeshLineCheckTriangle(in Vector3 start, in Vector3 end, ref VHitResult result)
+        {
             if (mMeshProvider == null)
                 return false;
 
@@ -367,6 +391,11 @@ namespace EngineNS.UI
             {
                 param.VisibleNodes.Add(SceneNode);
             }
+
+            foreach (var i in mPopupUIHost)
+            {
+                i.GatherVisibleMeshes(param);
+            }
         }
 
         public void UpdateCameraOffset(UWorld world)
@@ -379,6 +408,10 @@ namespace EngineNS.UI
                 if (mDrawMesh != null)
                     mDrawMesh.UpdateCameraOffset(world);
             }
+            foreach (var i in mPopupUIHost)
+            {
+                i.UpdateCameraOffset(world);
+            }
         }
 
         public void OnHostNodeAbsTransformChanged(TtUINode hostNode, UWorld world)
@@ -387,6 +420,10 @@ namespace EngineNS.UI
                 return;
 
             mDrawMesh.SetWorldTransform(in hostNode.Placement.AbsTransform, world, false);
+            foreach (var i in mPopupUIHost)
+            {
+                i.OnHostNodeAbsTransformChanged(hostNode, world);
+            }
         }
     }
 }

@@ -158,10 +158,10 @@ namespace EngineNS.UI.Controls.Containers
                                           mCurFinalRect.Y + mBorderThickness.Top,
                                           mCurFinalRect.Width - mBorderThickness.Left - mBorderThickness.Right,
                                           mCurFinalRect.Height - mBorderThickness.Top - mBorderThickness.Bottom);
-                Background.Draw(mDesignClipRect, rect, batch, mCornerRadius);
+                Background.Draw(this, in mDesignClipRect, in rect, batch, in mCornerRadius);
             }
             if (BorderBrush != null && !BorderThickness.IsEmpty())
-                BorderBrush.Draw(mDesignClipRect, mCurFinalRect, batch, mCornerRadius, mBorderThickness);
+                BorderBrush.Draw(this, in mDesignClipRect, in mCurFinalRect, batch, in mCornerRadius, in mBorderThickness);
 
             var count = VisualTreeHelper.GetChildrenCount(this);
             for (int i = 0; i < count; i++)

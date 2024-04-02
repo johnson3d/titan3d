@@ -99,7 +99,7 @@ namespace EngineNS.UI.Editor
             mUINode.HitproxyType = Graphics.Pipeline.UHitProxy.EHitproxyType.None;
             mUINode.IsAcceptShadow = false;
             mUINode.IsCastShadow = false;
-            mUIHost.SceneNode = mUINode;
+            mUIHost.AddToNode(mUINode);
 
             mUIHost.RenderCamera = PreviewViewport.RenderPolicy.DefaultCamera;
 
@@ -286,6 +286,8 @@ namespace EngineNS.UI.Editor
             if(EGui.UIProxy.CustomButton.ToggleButton("Simulate", in btSize, ref mIsSimulateMode))
             {
                 PreviewViewport.FreezCameraControl = mIsSimulateMode;
+                UEngine.Instance.UIManager.KeyboardFocus(null, null);
+                UEngine.Instance.UIManager.CaptureMouse(null, null);
                 if (mIsSimulateMode)
                 {
                     if (mUIHost.Children.Count > 0)
@@ -502,7 +504,8 @@ namespace EngineNS.UI.Editor
                 if (dragDropPayload != null)
                 {
                     var curPos = new Vector2(UEngine.Instance.InputSystem.Mouse.EventMouseX, UEngine.Instance.InputSystem.Mouse.EventMouseY);
-                    var element = mUIHost.GetPointAtElement(in curPos);
+                    Vector2 pointOffset;
+                    var element = mUIHost.GetPointAtElement(in curPos, out pointOffset);
                     if(element != null)
                     {
                         var container = element as TtContainer;
@@ -1091,6 +1094,7 @@ namespace EngineNS.UI.Editor
             {
                 if(container != null)
                 {
+                    container.TourContentsPresenterContainers(TourContentsPresenterContainersAction, ref idx);
                     if(mShowTemplateControls)
                     {
                         for (int i = 0; i < VisualTreeHelper.GetChildrenCount(container); i++)
@@ -1111,6 +1115,11 @@ namespace EngineNS.UI.Editor
             }
 
             ImGuiAPI.PopStyleColor(1);
+        }
+    
+        void TourContentsPresenterContainersAction(TtUIElement element, ref int idx)
+        {
+            DrawUIElementInHierachy(element, ref idx);
         }
         void DrawInsertLine(sbyte dropType, in Vector2 itemMin, in Vector2 itemMax)
         {
@@ -1276,7 +1285,8 @@ namespace EngineNS.UI.Editor
                     {
                         var pt = new Vector2(e.MouseButton.X, e.MouseButton.Y);
                         var data = new TtUIElement.RayIntersectData();
-                        var element = mUIHost.GetPointAtElement(in pt);
+                        Vector2 pointOffset;
+                        var element = mUIHost.GetPointAtElement(in pt, out pointOffset);
                         if(mCurrentPointAtElement != element && (CurrentDecorator == null || !CurrentDecorator.IsInDecoratorOperation()))
                         {
                             SetCurrentPointAtElement(element);

@@ -501,6 +501,10 @@ namespace EngineNS.UI.Controls.Containers
         }
     }
 
+    public partial class TtTemplateContainer : TtContainer
+    {
+
+    }
 
     public abstract partial class TtContainer : TtUIElement
     {
@@ -642,9 +646,10 @@ namespace EngineNS.UI.Controls.Containers
             mBackground.HostElement = this;
         }
         // pt位置相对于linecheck到的element
-        public override TtUIElement GetPointAtElement(in Vector2 pt, bool onlyClipped = true)
+        public override TtUIElement GetPointAtElement(in Vector2 pt, out Vector2 pointOffset, bool onlyClipped = true)
         {
             // todo: inv transform
+            pointOffset = Vector2.Zero;
             if (onlyClipped)
             {
                 if (!DesignRect.Contains(in pt))
@@ -660,7 +665,7 @@ namespace EngineNS.UI.Controls.Containers
                     var container = child as TtContainer;
                     if (container != null)
                     {
-                        var retVal = container.GetPointAtElement(in pt, onlyClipped);
+                        var retVal = container.GetPointAtElement(in pt, out pointOffset, onlyClipped);
                         if (retVal != null)
                             return retVal;
                     }
@@ -679,7 +684,7 @@ namespace EngineNS.UI.Controls.Containers
                     var container = child as TtContainer;
                     if (container != null)
                     {
-                        var retVal = container.GetPointAtElement(in pt, onlyClipped);
+                        var retVal = container.GetPointAtElement(in pt, out pointOffset, onlyClipped);
                         if (retVal != null)
                             return retVal;
                     }

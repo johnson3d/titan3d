@@ -10,6 +10,11 @@ namespace EngineNS.UI.Controls
 {
     public partial class TtToggleButton : TtButtonBase
     {
+        static TtToggleButton()
+        {
+
+        }
+
         public static readonly TtRoutedEvent CheckedEvent = TtEventManager.RegisterRoutedEvent("Checked", ERoutedType.Bubble, typeof(TtRoutedEventHandler), typeof(TtToggleButton));
         public event TtRoutedEventHandler Checked
         {

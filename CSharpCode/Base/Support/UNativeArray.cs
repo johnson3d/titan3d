@@ -48,6 +48,7 @@ namespace EngineNS.Support
                 CoreSDK.SetMemDebugInfo(mCoreObject.CppPointer, typeof(T).FullName);
             }
         }
+
         public static UNativeArray<T> CreateInstance()
         {
             return new UNativeArray<T>();

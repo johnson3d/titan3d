@@ -246,14 +246,14 @@ namespace EngineNS.Bricks.Input
         public EventType Type;
         public uint Timestamp;
         public uint WindowID;
-        public unsafe fixed byte Text[64];
+        public string Text;
     }
     public struct TextEditingEvent
     {
         public EventType Type;
         public uint Timestamp;
         public uint WindowID;
-        public unsafe fixed byte Text[64];
+        public string Text;
         public int Start;
         public int Length;
     }

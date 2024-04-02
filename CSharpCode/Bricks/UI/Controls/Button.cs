@@ -41,13 +41,22 @@ namespace EngineNS.UI.Controls
 
         public TtButtonBase()
         {
+            IsFocusable = true;
+
             MouseLeftButtonDown += TtButtonBase_MouseLeftButtonDown;
+            TouchDown += TtButtonBase_MouseLeftButtonDown;
             MouseLeftButtonUp += TtButtonBase_MouseLeftButtonUp;
+            TouchUp += TtButtonBase_MouseLeftButtonUp;
             MouseEnter += TtButtonBase_MouseEnter;
+            TouchEnter += TtButtonBase_MouseEnter;
             MouseLeave += TtButtonBase_MouseLeave;
+            TouchLeave += TtButtonBase_MouseLeave;
             MouseMove += TtButtonBase_MouseMove;
+            TouchMove += TtButtonBase_MouseMove;
             KeyDown += TtButtonBase_KeyDown;
             KeyUp += TtButtonBase_KeyUp;
+            OnLostFocus += TtButtonBase_OnLostFocus;
+            OnLostMouseCapture += TtButtonBase_OnLostMouseCapture;
         }
 
         private void TtButtonBase_MouseLeftButtonDown(object sender, TtRoutedEventArgs eventArgs)
@@ -239,32 +248,29 @@ namespace EngineNS.UI.Controls
                 IsPressed = false;
             }
         }
-        public override void ProcessOnLostFocus(TtRoutedEventArgs eventArgs, TtUIElement newFocused, TtUIElement oldFocused)
+        private void TtButtonBase_OnLostFocus(object sender, TtRoutedEventArgs args)
         {
-            base.ProcessOnLostFocus(eventArgs, newFocused, oldFocused);
-
             if (ClickType == EClickType.Hover)
                 return;
 
-            if(eventArgs.Source == this)
+            if(args.Source == this)
             {
                 if (IsPressed)
                     IsPressed = false;
 
                 if (IsMouseCaptured)
-                    UEngine.Instance.UIManager.CaptureMouse(eventArgs, null);
+                    UEngine.Instance.UIManager.CaptureMouse(args, null);
 
                 IsSpaceKeyDown = false;
             }
         }
-        public override void ProcessOnLostMouseCapture(TtRoutedEventArgs eventArgs, TtUIElement newCapture, TtUIElement oldCapture)
-        {
-            base.ProcessOnLostMouseCapture(eventArgs, newCapture, oldCapture);
 
-            if((eventArgs.Source == this) && (ClickType != EClickType.Hover) && !IsSpaceKeyDown)
+        private void TtButtonBase_OnLostMouseCapture(object sender, TtRoutedEventArgs args)
+        {
+            if((args.Source == this) && (ClickType != EClickType.Hover) && !IsSpaceKeyDown)
             {
                 if (IsKeyboardFocused)
-                    UEngine.Instance.UIManager.KeyboardFocus(eventArgs, null);
+                    UEngine.Instance.UIManager.KeyboardFocus(args, null);
 
                 IsPressed = false;
             }
@@ -280,6 +286,56 @@ namespace EngineNS.UI.Controls
             Template.Seal();
 
             //UEngine.Instance.UIManager.RegisterTickElement(this);
+        }
+
+        static TtButton()
+        {
+            InitSystemDefaultTemplate();
+        }
+
+        static void InitSystemDefaultTemplate()
+        {
+            var buttonTemplate = new Template.TtControlTemplate()
+            {
+                TargetType = UTypeDesc.TypeOf(typeof(TtButton)),
+            };
+            // 设置属性的默认值
+            buttonTemplate.DefaultValues.Add(new Template.TtTemplateSimpleValue(new TtBrush(Color.White, TtBrush.EBrushType.Rectangle), TtButton.BackgroundProperty));
+            buttonTemplate.DefaultValues.Add(new Template.TtTemplateSimpleValue(new TtBrush(Color.Tomato, TtBrush.EBrushType.Border), TtButton.BorderBrushProperty));
+
+            // 添加模板控件
+            var buttonRoot = new Template.TtUIElementFactory(UTypeDesc.TypeOf(typeof(Controls.Containers.TtBorder)));
+            buttonRoot.SetValue(Controls.Containers.TtBorder.NameProperty, "border");
+            buttonRoot.SetTemplateBindingValue<TtBrush, TtBrush>(Controls.Containers.TtBorder.BackgroundProperty, "Background", "Background");
+            buttonRoot.SetTemplateBindingValue<TtBrush, TtBrush>(Controls.Containers.TtBorder.BorderBrushProperty, "BorderBrush", "BorderBrush");
+            buttonRoot.SetTemplateBindingValue<Thickness, Thickness>(Controls.Containers.TtBorder.BorderThicknessProperty, "BorderThickness", "BorderThickness");
+            buttonTemplate.TemplateRoot = buttonRoot;
+            var content = new Template.TtUIElementFactory(UTypeDesc.TypeOf(typeof(Controls.TtContentsPresenter)));
+            content.SetValue(Controls.TtContentsPresenter.NameProperty, "contentPresenter");
+            content.SetTemplateBindingValue<Thickness, Thickness>(Controls.TtContentsPresenter.MarginProperty, "Margin", "Padding");
+            content.SetValue(Controls.Containers.TtBorder.HorizontalAlignmentProperty, Controls.HorizontalAlignment.Center);
+            content.SetValue(Controls.Containers.TtBorder.VerticalAlignmentProperty, Controls.VerticalAlignment.Center);
+            buttonRoot.AppendChild(content);
+            TtUIManager.SystemDefaultTemplates[UTypeDesc.TypeOf(typeof(TtButton))] = buttonTemplate;
+
+            // 设置Trigger
+            var proTrigger = new Trigger.TtUIPropertyTrigger();
+            proTrigger.AddCondition(TtButton.IsEnabledProperty, false);
+            proTrigger.AddTriggerValue(TtBorder.BackgroundProperty, new TtBrush(Color.Gray, TtBrush.EBrushType.Rectangle), "border");
+            proTrigger.AddTriggerValue(TtBorder.BorderBrushProperty, new TtBrush(Color.DarkGray, TtBrush.EBrushType.Rectangle), "border");
+            buttonTemplate.AddTrigger(proTrigger);
+
+            var mouseOverTrigger = new Trigger.TtUIPropertyTrigger();
+            mouseOverTrigger.AddCondition(TtButton.IsMouseOverProperty, true);
+            mouseOverTrigger.AddTriggerValue(TtBorder.BackgroundProperty, new TtBrush(Color.GreenYellow, TtBrush.EBrushType.Rectangle), "border");
+            mouseOverTrigger.AddTriggerValue(TtBorder.BorderBrushProperty, new TtBrush(Color.Yellow, TtBrush.EBrushType.Rectangle), "border");
+            buttonTemplate.AddTrigger(mouseOverTrigger);
+
+            var pressedTrigger = new Trigger.TtUIPropertyTrigger();
+            pressedTrigger.AddCondition(TtButton.IsPressedProperty, true);
+            pressedTrigger.AddTriggerValue(TtBorder.BackgroundProperty, new TtBrush(Color.Red, TtBrush.EBrushType.Rectangle), "border");
+            pressedTrigger.AddTriggerValue(TtBorder.BorderBrushProperty, new TtBrush(Color.IndianRed, TtBrush.EBrushType.Rectangle), "border");
+            buttonTemplate.AddTrigger(pressedTrigger);
         }
 
         public override void Tick(float elapsedSecond)

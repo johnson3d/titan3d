@@ -4,6 +4,7 @@ using System.Text;
 
 namespace EngineNS
 {
+    //https://blog.csdn.net/tiao_god/article/details/111240808
     public struct ThreeBandSHVector
     {
         public Vector4 V0;
@@ -35,7 +36,7 @@ namespace EngineNS
         public ThreeBandSHVector B;
         public ThreeBandSHVector G;
 
-        //public ThreeBandSHVectorRGB()
+        //public ThreeBandSHVectorRGB() 
         //{
         //    R = new ThreeBandSHVector();
         //    G = new ThreeBandSHVector();

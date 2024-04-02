@@ -71,18 +71,18 @@ namespace EngineNS.UI.Editor
                 {
                     if(CurrentDecorator != null)
                         CurrentDecorator.IsDirty = true;
-                    SelectedRect.UIHost.MeshDirty = true;
+                    SelectedRect.GetUIHost(0).MeshDirty = true;
                 }
             }
 
-            if(SelectedRect.UIHost.MeshDirty && (SelectedRect.Parent != null))
+            if(SelectedRect.GetUIHost(0).MeshDirty && (SelectedRect.Parent != null))
             {
-                var mesh = await SelectedRect.UIHost.BuildMesh();
+                var mesh = await SelectedRect.GetUIHost(0).BuildMesh();
                 SelectedRect.AABB = new DBoundingBox(mesh.MaterialMesh.AABB);
             }
-            if(PointAtRect.UIHost.MeshDirty && (PointAtRect.Parent != null))
+            if(PointAtRect.GetUIHost(0).MeshDirty && (PointAtRect.Parent != null))
             {
-                var mesh = await PointAtRect.UIHost.BuildMesh();
+                var mesh = await PointAtRect.GetUIHost(0).BuildMesh();
                 PointAtRect.AABB = new DBoundingBox(mesh.MaterialMesh.AABB);
             }
 
@@ -102,12 +102,12 @@ namespace EngineNS.UI.Editor
 
             if (element != null)
             {
-                PointAtRect.UIHost.SetDesignRect(element.DesignRect);
-                if(PointAtRect.UIHost.TransformedElements.Count <= 0)
-                    PointAtRect.UIHost.AddTransformedUIElement(PointAtRect.UIHost, 0);
-                PointAtRect.UIHost.TransformedElements[0].SetMatrix(in mUIHost.TransformedElements[element.TransformIndex].Matrix);
+                PointAtRect.GetUIHost(0).SetDesignRect(element.DesignRect);
+                if(PointAtRect.GetUIHost(0).TransformedElements.Count <= 0)
+                    PointAtRect.GetUIHost(0).AddTransformedUIElement(PointAtRect.GetUIHost(0), 0);
+                PointAtRect.GetUIHost(0).TransformedElements[0].SetMatrix(in mUIHost.TransformedElements[element.TransformIndex].Matrix);
 
-                PointAtRect.UIHost.MeshDirty = true;
+                PointAtRect.GetUIHost(0).MeshDirty = true;
                 PointAtRect.Parent = mUINode;
             }
             else
@@ -133,7 +133,7 @@ namespace EngineNS.UI.Editor
                 //if (mSelectedRect.UIHost.TransformedElements.Count <= 0)
                 //    mSelectedRect.UIHost.AddTransformedUIElement(mSelectedRect.UIHost, 0);
                 //mSelectedRect.UIHost.TransformedElements[0].SetMatrix(in transMat);
-                SelectedRect.UIHost.MeshDirty = true;
+                SelectedRect.GetUIHost(0).MeshDirty = true;
                 SelectedRect.Parent = mUINode;
 
                 UTypeDesc decalType;

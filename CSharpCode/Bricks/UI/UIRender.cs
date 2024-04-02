@@ -1,4 +1,5 @@
 ﻿using EngineNS.EGui.Controls.PropertyGrid;
+using EngineNS.Graphics.Pipeline.Shader;
 using EngineNS.UI.Bind;
 using EngineNS.UI.Canvas;
 using EngineNS.UI.Controls;
@@ -96,6 +97,19 @@ namespace EngineNS.UI
         }
         Thread.Async.TtTask<EGui.UUvAnim>? mUVAnimTask;
 
+        RName mMaterial = RName.GetRName("ui/uimat_inst_default.uminst", RName.ERNameType.Engine);
+        [Rtti.Meta, BindProperty]
+        [RName.PGRName(FilterExts = Graphics.Pipeline.Shader.UMaterialInstance.AssetExt)]
+        public RName Material
+        {
+            get => mMaterial;
+            set
+            {
+                OnValueChange(value, mMaterial);
+                mMaterial = value;
+            }
+        }
+
         public enum EBrushType
         {
             Image,
@@ -124,13 +138,16 @@ namespace EngineNS.UI
             get => mColor;
             set
             {
+                if (mColor == value)
+                    return;
                 OnValueChange(value, mColor);
                 mColor = value;
 
                 if (mDrawBrush != null)
                     mDrawBrush.Color = value;
 
-                //UpdateMesh();
+                if (mDrawCmd.DrawCmd.DrawCount > 1)
+                    UpdateMesh();
             }
         }
 
@@ -203,24 +220,30 @@ namespace EngineNS.UI
             return true;
         }
 
-        public void Draw(in RectangleF clipRect, in RectangleF drawRect, TtCanvasDrawBatch batch)
+        public void Draw(TtUIElement host, in RectangleF clipRect, in RectangleF drawRect, TtCanvasDrawBatch batch)
         {
-            Draw(clipRect, drawRect, batch, Vector4.Zero);
+            Draw(host, clipRect, drawRect, batch, Vector4.Zero);
         }
-        public void Draw(in RectangleF clipRect, in RectangleF drawRect, TtCanvasDrawBatch batch, in Vector4 cornerRadius)
+        public void Draw(TtUIElement host, in RectangleF clipRect, in RectangleF drawRect, TtCanvasDrawBatch batch, in Vector4 cornerRadius)
         {
-            Draw(clipRect, drawRect, batch, cornerRadius, Thickness.Empty);
+            Draw(host, clipRect, drawRect, batch, cornerRadius, Thickness.Empty);
         }
-        public void Draw(in RectangleF clipRect, in RectangleF drawRect, TtCanvasDrawBatch batch, in Vector4 cornerRadius, in Thickness borderThickness)
+        EngineNS.Canvas.FSubDrawCmd mDrawCmd = new EngineNS.Canvas.FSubDrawCmd();
+        public void Draw(TtUIElement host, in RectangleF clipRect, in RectangleF drawRect, TtCanvasDrawBatch batch, in Vector4 cornerRadius, in Thickness borderThickness)
         {
             if (!IsReadyToDraw())
                 return;
+
+            HostElement = host;
 
 #if DEBUG_UI
             Profiler.Log.WriteLine(Profiler.ELogTag.Info, "UI", $"Draw element:{HostElement.Name}({HostElement.GetType().FullName}), BrushType:{BrushType}");
 #endif
 
-            mDrawBrush.Name = "@MatInst:ui/uimat_inst_default.uminst:Engine";
+            if (RName.IsEmpty(mMaterial))
+                mDrawBrush.Name = "@MatInst:ui/uimat_inst_default.uminst:Engine";
+            else
+                mDrawBrush.Name = "@MatInst:" + mMaterial.ToString();
             if (mUVAnimTask != null)
             {
                 var texture = mUVAnimTask.Value.Result.Texture;
@@ -239,22 +262,21 @@ namespace EngineNS.UI
             }
             mDrawBrush.Color = Color;
 
-            var outCmd = new EngineNS.Canvas.FSubDrawCmd();
             batch.Middleground.PushClip(clipRect);
             batch.Middleground.PushTransformIndex(HostElement.TransformIndex);
             switch(BrushType)
             {
                 case EBrushType.Image:
-                    batch.Middleground.AddImage(mDrawBrush.mCoreObject, drawRect.Left, drawRect.Top, drawRect.Width, drawRect.Height, mColor, ref outCmd);
+                    batch.Middleground.AddImage(mDrawBrush.mCoreObject, drawRect.Left, drawRect.Top, drawRect.Width, drawRect.Height, mColor, ref mDrawCmd);
                     break;
                 case EBrushType.Border:
                     batch.Middleground.PushBrush(mDrawBrush);
-                    batch.Middleground.AddRect(drawRect, borderThickness, cornerRadius, mColor, ref outCmd);
+                    batch.Middleground.AddRect(drawRect, borderThickness, cornerRadius, mColor, ref mDrawCmd);
                     batch.Middleground.PopBrush();
                     break;
                 case EBrushType.Rectangle:
                     batch.Middleground.PushBrush(mDrawBrush);
-                    batch.Middleground.AddRectFill(drawRect, cornerRadius, mColor, ref outCmd);
+                    batch.Middleground.AddRectFill(drawRect, cornerRadius, mColor, ref mDrawCmd);
                     batch.Middleground.PopBrush();
                     break;
             }

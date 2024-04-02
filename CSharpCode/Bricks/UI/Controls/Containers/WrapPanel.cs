@@ -1,5 +1,6 @@
 ﻿using EngineNS.BehaviorTree;
 using EngineNS.Rtti;
+using EngineNS.UI.Bind;
 using EngineNS.UI.Canvas;
 using System;
 using System.Collections.Generic;
@@ -12,13 +13,17 @@ namespace EngineNS.UI.Controls.Containers
     {
         ELayout_Orientation mOrientation = ELayout_Orientation.Horizontal;
         [Meta]
+        [BindProperty]
         public ELayout_Orientation Orientation
         {
             get => mOrientation;
             set
             {
+                if(mOrientation == value) 
+                    return;
                 OnValueChange(value, mOrientation);
                 mOrientation = value;
+                InvalidateArrange();
             }
         }
         public TtWrapPanel()
@@ -114,8 +119,8 @@ namespace EngineNS.UI.Controls.Containers
             var visualChildrenCount = VisualTreeHelper.GetChildrenCount(this);
             if (Orientation == ELayout_Orientation.Horizontal)
             {
-                float accumulateInCol = 0;
-                float accumulateY = 0;
+                float accumulateInCol = innerRect.X;
+                float accumulateY = innerRect.Y;
                 float lastMaxHeightInCol = 0;
                 for (int i = 0; i < visualChildrenCount; i++)
                 {
@@ -124,7 +129,7 @@ namespace EngineNS.UI.Controls.Containers
                     var childDesiredSize = childUI.DesiredSize;
                     RectangleF childFinalRect = RectangleF.Empty;
                     childFinalRect.Size = childDesiredSize;
-                    if (accumulateInCol + childDesiredSize.Width > arrangeSize.Width)
+                    if (accumulateInCol + childDesiredSize.Width > innerRect.Right)
                     {
                         accumulateInCol = 0;
                         accumulateY += lastMaxHeightInCol;
@@ -138,8 +143,8 @@ namespace EngineNS.UI.Controls.Containers
             }
             else
             {
-                float accumulateInRow = 0;
-                float accumulateX = 0;
+                float accumulateInRow = innerRect.Y;
+                float accumulateX = innerRect.X;
                 float lastMaxWidthInRow = 0;
                 for (int i = 0; i < visualChildrenCount; i++)
                 {
@@ -148,7 +153,7 @@ namespace EngineNS.UI.Controls.Containers
                     var childDesiredSize = childUI.DesiredSize;
                     RectangleF childFinalRect = RectangleF.Empty;
                     childFinalRect.Size = childDesiredSize;
-                    if (accumulateInRow + childDesiredSize.Height > arrangeSize.Height)
+                    if (accumulateInRow + childDesiredSize.Height > innerRect.Bottom)
                     {
                         accumulateInRow = 0;
                         accumulateX += lastMaxWidthInRow;
@@ -177,10 +182,10 @@ namespace EngineNS.UI.Controls.Containers
                                           mCurFinalRect.Y + mBorderThickness.Top,
                                           mCurFinalRect.Width - mBorderThickness.Left - mBorderThickness.Right,
                                           mCurFinalRect.Height - mBorderThickness.Top - mBorderThickness.Bottom);
-                Background.Draw(mDesignClipRect, rect, batch, Vector4.Zero);
+                Background.Draw(this, in mDesignClipRect, in rect, batch, in Vector4.Zero);
             }
             if (BorderBrush != null && !BorderThickness.IsEmpty())
-                BorderBrush.Draw(mDesignClipRect, mCurFinalRect, batch, Vector4.Zero, mBorderThickness);
+                BorderBrush.Draw(this, in mDesignClipRect, in mCurFinalRect, batch, in Vector4.Zero, in mBorderThickness);
 
             var count = VisualTreeHelper.GetChildrenCount(this);
             for (int i = 0; i < count; i++)

@@ -22,7 +22,7 @@ namespace EngineNS.EGui.Controls
 
         public string Name = "";
         public bool CreateNewAssets = true;
-        bool mViewDirty = true;
+        //bool mViewDirty = true;
         string mExtNames = null;
         public string ExtNames 
         {

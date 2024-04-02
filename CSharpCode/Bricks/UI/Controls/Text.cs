@@ -55,7 +55,8 @@ namespace EngineNS.UI.Controls
         Vector2i mTextureSize = new Vector2i(1024, 1024);
 
         TtFontSDF mFontAsset;
-        TtFontSDF FontAsset
+        [Browsable(false)]
+        protected TtFontSDF FontAsset
         {
             get
             {
@@ -68,7 +69,7 @@ namespace EngineNS.UI.Controls
             }
         }
         bool mFontDirty = true;
-        RName mFont = RName.GetRName("fonts/simli.fontsdf", RName.ERNameType.Engine);
+        protected RName mFont = RName.GetRName("fonts/simli.fontsdf", RName.ERNameType.Engine);
         [Rtti.Meta, BindProperty]
         [DisplayName("Font"), Category("Text")]
         [RName.PGRName(FilterExts = TtFontManager.FontSDFAssetExt + "," + TtFontManager.FontAssetExt)]
@@ -85,7 +86,7 @@ namespace EngineNS.UI.Controls
             }
         }
 
-        int mFontSize = 64;
+        protected int mFontSize = 64;
         [Rtti.Meta, BindProperty]
         [Category("Text")]
         public int FontSize
@@ -99,8 +100,8 @@ namespace EngineNS.UI.Controls
             }
         }
 
-        string mText = "Text";
-        [Rtti.Meta, BindProperty]
+        protected string mText = "Text";
+        [Rtti.Meta, BindProperty(DefaultMode = EBindingMode.TwoWay)]
         [Category("Text")]
         public string Text
         {
@@ -126,7 +127,20 @@ namespace EngineNS.UI.Controls
 
                 for(int i=0; i<mBrushes.Count; i++)
                 {
-                    mBrushes[i].Color = mColor;
+                    if (mBrushes[i].GetDrawCount() > 1)
+                    {
+                        MeshDirty = true;
+                        mCreatenewDrawCmd = true;
+                        break;
+                    }
+                    else
+                    {
+                        var insData = new FDrawCmdInstanceData()
+                        {
+                            Color = mColor,
+                        };
+                        mBrushes[i].DrawCommand.SetInstanceData(in insData);
+                    }
                 }
             }
         }
@@ -186,7 +200,7 @@ namespace EngineNS.UI.Controls
             }
         }
 
-        float mLineSpacingScale = 1.0f;
+        protected float mLineSpacingScale = 1.0f;
         [Rtti.Meta, BindProperty]
         [Category("Text")]
         public float LineSpacingScale
@@ -200,17 +214,32 @@ namespace EngineNS.UI.Controls
                 UpdateLayout();
             }
         }
-        int mLineCount = 1;
-        struct stTextLineData
+        //int mLineCount = 1;
+        protected struct stTextLineData
         {
             public RectangleF Rect;
             public int StartIndex;
-            public int EndIndex;
+            //public int EndIndex;
+            public int Count;
             public bool IsTrimming;
+            public List<float> WordAdvances;
         }
-        List<stTextLineData> mTextInLines = new List<stTextLineData>();
-        List<string> mTextSplitWithLanguages = new List<string>();
-        List<TtCanvasBrush> mBrushes = new List<TtCanvasBrush>();
+        protected List<stTextLineData> mTextInLines = new List<stTextLineData>();
+        protected struct stBrushData
+        {
+            //public TtCanvasBrush Brush;
+            public FDrawCmd DrawCommand;
+
+            public bool IsEqual(in stBrushData target)
+            {
+                return (DrawCommand.NativePointer == target.DrawCommand.NativePointer);
+            }
+            public uint GetDrawCount()
+            {
+                return DrawCommand.DrawCount;
+            }
+        }
+        protected List<stBrushData> mBrushes = new List<stBrushData>();
 
         public enum ETextDirection
         {
@@ -241,12 +270,25 @@ namespace EngineNS.UI.Controls
             TextWrapping = ETextWrapping.NoWrap;
             FlowDirection = ETextDirection.LeftToRight;
         }
+        ~TtText()
+        {
+            unsafe
+            {
+                for (int i = 0; i < mBrushes.Count; i++)
+                {
+                    //CoreSDK.IUnknown_Release(mBrushes[i].Brush.mCoreObject.CppPointer);
+                    CoreSDK.IUnknown_Release(mBrushes[i].DrawCommand.CppPointer);
+                }
+            }
+            mBrushes.Clear();
+        }
 
         public override bool IsReadyToDraw()
         {
             return true;
         }
-        public override void Draw(TtCanvas canvas, TtCanvasDrawBatch batch)
+        bool mCreatenewDrawCmd = false;
+        public unsafe override void Draw(TtCanvas canvas, TtCanvasDrawBatch batch)
         {
             if (string.IsNullOrEmpty(mText))
                 return;
@@ -257,29 +299,80 @@ namespace EngineNS.UI.Controls
             batch.Middleground.PushFont(FontAsset);
             batch.Middleground.PushMatrix(mat);
             batch.Middleground.PushClip(in mCurFinalRect);
-            for(int i=0;i<mTextInLines.Count; i++)
+            Support.UBlobObject blobObj = new UBlobObject();
+            blobObj.PushValue((int)0);
+            blobObj.PushValue((int)0);
+            for(int i=0; i<mBrushes.Count; i++)
+            {
+                //CoreSDK.IUnknown_Release(mBrushes[i].Brush.mCoreObject.CppPointer);
+                CoreSDK.IUnknown_Release(mBrushes[i].DrawCommand.CppPointer);
+            }
+            mBrushes.Clear();
+            if(mCreatenewDrawCmd)
+            {
+                batch.Middleground.NewDrawCmd();
+                mCreatenewDrawCmd = false;
+            }
+            // blob结构
+            // int / count
+            // int / start
+            // ptr brush0
+            // ptr cmd0
+            // ptr brush1
+            // ptr cmd1
+            // ...
+            // ptr 1 / end
+            // ptr 1
+            for (int i=0;i<mTextInLines.Count; i++)
             {
                 var x = mCurFinalRect.Left + mTextInLines[i].Rect.Left;
                 var y = mCurFinalRect.Top + mTextInLines[i].Rect.Top;
-                var text = mText.Substring(mTextInLines[i].StartIndex, mTextInLines[i].EndIndex - mTextInLines[i].StartIndex);
+                var text = mText.Substring(mTextInLines[i].StartIndex, mTextInLines[i].Count); //mTextInLines[i].EndIndex - mTextInLines[i].StartIndex);
                 if(mTextInLines[i].IsTrimming)
                     text += TrimmingText;
-                Support.UBlobObject blobObj = new UBlobObject();
-                batch.Middleground.AddText(text, x, y, Color, blobObj);
+                var drawCmdInsData = new FDrawCmdInstanceData();
+                drawCmdInsData.m_Color = Color;
+                batch.Middleground.AddText(text, x, y, in drawCmdInsData, blobObj);
                 unsafe
                 {
                     using(var reader = IO.UMemReader.CreateInstance((byte*)blobObj.DataPointer, blobObj.Size))
                     {
+                        int count = 0;
+                        reader.Read(out count);
+                        int startIdx = 0;
+                        reader.Read(out startIdx);
                         var ptrSize = sizeof(void*);
+                        reader.Seek((ulong)(startIdx * ptrSize + sizeof(int) * 2));
                         while(true)
                         {
-                            void* ptr;
-                            reader.ReadPtr(&ptr, ptrSize);
-                            if (ptr == (void*)1)
+                            //void* ptr;
+                            //reader.ReadPtr(&ptr, ptrSize);
+                            void* cmdPtr;
+                            reader.ReadPtr(&cmdPtr, ptrSize);
+                            if (cmdPtr == (void*)1)
                                 break;
-                            var canvasBrush = new EngineNS.Canvas.ICanvasBrush(ptr);
-                            CoreSDK.IUnknown_AddRef(ptr);
-                            mBrushes.Add(new TtCanvasBrush(canvasBrush));
+                            //var canvasBrush = new EngineNS.Canvas.ICanvasBrush(ptr);
+                            var drawCmd = new FDrawCmd(cmdPtr);
+                            var brushData = new stBrushData()
+                            {
+                                //Brush = new TtCanvasBrush(canvasBrush),
+                                DrawCommand = drawCmd,
+                            };
+                            int brushIdx = 0;
+                            for(brushIdx = 0; brushIdx < mBrushes.Count; brushIdx ++)
+                            {
+                                if (mBrushes[brushIdx].IsEqual(brushData))
+                                {
+                                    mBrushes[brushIdx] = brushData;
+                                    break;
+                                }
+                            }
+                            if(brushIdx >= mBrushes.Count)
+                            {
+                                mBrushes.Add(brushData);
+                                //CoreSDK.IUnknown_AddRef(ptr);
+                                CoreSDK.IUnknown_AddRef(cmdPtr);
+                            }
                         }
                     }
                 }
@@ -342,10 +435,18 @@ namespace EngineNS.UI.Controls
                     var line = new stTextLineData()
                     {
                         StartIndex = startIndex,
-                        EndIndex = startIndex + newCount,
-                        Rect = new RectangleF(lineX, 0, newWidth, lineHeight),
+                        //EndIndex = startIndex + newCount,
+                        Count = newCount,
                         IsTrimming = isTrimming,
                     };
+                    line.WordAdvances = new List<float>();
+                    float tempHeight = lineHeight;
+                    for(int i=line.StartIndex; i<(line.StartIndex + line.Count); i++)
+                    {
+                        tempHeight = MathHelper.Max(tempHeight, words[i].PixelY + words[i].PixelHeight);
+                        line.WordAdvances.Add(words[i].Advance.X * fontScaleDelta);
+                    }
+                    line.Rect = new RectangleF(lineX, 0, newWidth, tempHeight);
                     lines.Add(line);
                 }
             }
@@ -443,11 +544,18 @@ namespace EngineNS.UI.Controls
                     var line = new stTextLineData()
                     {
                         StartIndex = startIndex,
-                        EndIndex = startIndex + newCount,
-                        Rect = new RectangleF(lineX, linesSize.Height, newWidth, lineHeight),
+                        //EndIndex = startIndex + newCount,
+                        Count = newCount,
                         IsTrimming = isTrimming,
                     };
-                    
+                    line.WordAdvances = new List<float>();
+                    float tempHeight = lineHeight;
+                    for (int i = line.StartIndex; i < (line.StartIndex + line.Count); i++)
+                    {
+                        tempHeight = MathHelper.Max(tempHeight, words[i].PixelY + words[i].PixelHeight);
+                        line.WordAdvances.Add(words[i].Advance.X * fontScaleDelta);
+                    }
+                    line.Rect = new RectangleF(lineX, linesSize.Height, newWidth, tempHeight);
                     lines.Add(line);
                 }
                 linesSize.Width = MathHelper.Max(currentWidth, linesSize.Width);
@@ -472,78 +580,82 @@ namespace EngineNS.UI.Controls
             if (TextTrimming == ETextTrimming.None)
                 return false;
 
-            var trimmingWords = new UNativeArray<FTWord>();
-            FontAsset.GetWords(ref trimmingWords, TrimmingText);
-            float trimmingWordsWidth = 0;
-            for(int idx = 0; idx < trimmingWords.Count; idx++)
+            using (var trimmingWords = new UNativeArray<FTWord>())
             {
-                trimmingWordsWidth += trimmingWords[idx].Advance.X * fontScaleDelta;
-            }
-            if (currentWidth > areaSize.Width)
-            {
-                switch(TextTrimming)
+                FontAsset.GetWords(in trimmingWords, TrimmingText);
+
+                float trimmingWordsWidth = 0;
+                for (int idx = 0; idx < trimmingWords.Count; idx++)
                 {
-                    case ETextTrimming.WordEllipsis:
-                        {
-                            while(newWidth + trimmingWordsWidth > areaSize.Width)
+                    trimmingWordsWidth += trimmingWords[idx].Advance.X * fontScaleDelta;
+                }
+
+                if (currentWidth > areaSize.Width)
+                {
+                    switch (TextTrimming)
+                    {
+                        case ETextTrimming.WordEllipsis:
                             {
-                                var endIndex = startIndex + newCount - 1;
-                                LocalizationManager.ECulture breakerCulture;
-                                var breakerIdx = UEngine.Instance.LocalizationManager.GetLastWordBreaker(Text, startIndex, endIndex, out breakerCulture);
-                                //if ((breakerCulture == LocalizationManager.ECulture.Separator) ||
-                                //    (breakerCulture == LocalizationManager.ECulture.Punctuation))
-                                //    breakerIdx += 1;
-                                if(breakerIdx <= startIndex)
+                                while (newWidth + trimmingWordsWidth > areaSize.Width)
                                 {
-                                    newCount = 1;
-                                    newWidth = words[startIndex].Advance.X * fontScaleDelta + trimmingWordsWidth;
-                                    return true;
-                                }
-                                else
-                                {
-                                    newCount = breakerIdx - startIndex;
-                                    var tempIdxStart = breakerIdx;
+                                    var endIndex = startIndex + newCount - 1;
+                                    LocalizationManager.ECulture breakerCulture;
+                                    var breakerIdx = UEngine.Instance.LocalizationManager.GetLastWordBreaker(Text, startIndex, endIndex, out breakerCulture);
                                     //if ((breakerCulture == LocalizationManager.ECulture.Separator) ||
                                     //    (breakerCulture == LocalizationManager.ECulture.Punctuation))
-                                    //    tempIdxStart = breakerIdx - 1;
-                                    if(tempIdxStart == endIndex)
+                                    //    breakerIdx += 1;
+                                    if (breakerIdx <= startIndex)
                                     {
-                                        newCount -= 1;
-                                        newWidth -= words[tempIdxStart].Advance.X * fontScaleDelta;
+                                        newCount = 1;
+                                        newWidth = words[startIndex].Advance.X * fontScaleDelta + trimmingWordsWidth;
+                                        return true;
                                     }
                                     else
                                     {
-                                        for (int tempIdx = tempIdxStart; tempIdx <= endIndex; tempIdx++)
+                                        newCount = breakerIdx - startIndex;
+                                        var tempIdxStart = breakerIdx;
+                                        //if ((breakerCulture == LocalizationManager.ECulture.Separator) ||
+                                        //    (breakerCulture == LocalizationManager.ECulture.Punctuation))
+                                        //    tempIdxStart = breakerIdx - 1;
+                                        if (tempIdxStart == endIndex)
                                         {
-                                            var tempWordWidth = words[tempIdx].Advance.X * fontScaleDelta;
-                                            newWidth -= tempWordWidth;
+                                            newCount -= 1;
+                                            newWidth -= words[tempIdxStart].Advance.X * fontScaleDelta;
+                                        }
+                                        else
+                                        {
+                                            for (int tempIdx = tempIdxStart; tempIdx <= endIndex; tempIdx++)
+                                            {
+                                                var tempWordWidth = words[tempIdx].Advance.X * fontScaleDelta;
+                                                newWidth -= tempWordWidth;
+                                            }
                                         }
                                     }
                                 }
                             }
-                        }
-                        break;
-                    case ETextTrimming.CharacterEllipsis:
-                        {
-                            for(int wordIdx = currentCount - 1; wordIdx >= 1; wordIdx--)
+                            break;
+                        case ETextTrimming.CharacterEllipsis:
                             {
-                                newWidth -= words[wordIdx + startIndex].Advance.X * fontScaleDelta;
-                                if(newWidth + trimmingWordsWidth <= areaSize.Width)
+                                for (int wordIdx = currentCount - 1; wordIdx >= 1; wordIdx--)
                                 {
-                                    newCount = wordIdx;
-                                    break;
+                                    newWidth -= words[wordIdx + startIndex].Advance.X * fontScaleDelta;
+                                    if (newWidth + trimmingWordsWidth <= areaSize.Width)
+                                    {
+                                        newCount = wordIdx;
+                                        break;
+                                    }
+                                }
+                                if (newCount == currentCount)
+                                {
+                                    newCount = 1;
                                 }
                             }
-                            if(newCount == currentCount)
-                            {
-                                newCount = 1;
-                            }
-                        }
-                        break;
-                }
+                            break;
+                    }
 
-                newWidth += trimmingWordsWidth;
-                return true;
+                    newWidth += trimmingWordsWidth;
+                    return true;
+                }
             }
             return false;
         }
@@ -556,9 +668,11 @@ namespace EngineNS.UI.Controls
             SizeF linesSize = SizeF.Empty;
             var scaleDelta = mFontSize * 1.0f / FontAsset.FontSize;
             var lineHeight = mFontSize * mLineSpacingScale;
-            var words = new UNativeArray<FTWord>();
-            FontAsset.GetWords(ref words, mText);
-            CalculateLines(mText, in words, 0, availableSize, scaleDelta, lineHeight, FlowDirection, ref mTextInLines, false, ref linesSize);
+            using (var words = new UNativeArray<FTWord>())
+            {
+                FontAsset.GetWords(in words, mText);
+                CalculateLines(mText, in words, 0, availableSize, scaleDelta, lineHeight, FlowDirection, ref mTextInLines, false, ref linesSize);
+            }
             return linesSize;
         }
         protected override void ArrangeOverride(in RectangleF arrangeSize)
@@ -570,9 +684,11 @@ namespace EngineNS.UI.Controls
             var linesSize = SizeF.Empty;
             var scaleDelta = mFontSize * 1.0f / FontAsset.FontSize;
             var lineHeight = mFontSize * mLineSpacingScale;
-            var words = new UNativeArray<FTWord>();
-            FontAsset.GetWords(ref words, mText);
-            CalculateLines(mText, in words, 0, arrangeSize.Size, scaleDelta, lineHeight, FlowDirection, ref mTextInLines, true, ref linesSize);
+            using (var words = new UNativeArray<FTWord>())
+            {
+                FontAsset.GetWords(in words, mText);
+                CalculateLines(mText, in words, 0, arrangeSize.Size, scaleDelta, lineHeight, FlowDirection, ref mTextInLines, true, ref linesSize);
+            }
         }
     }
 }

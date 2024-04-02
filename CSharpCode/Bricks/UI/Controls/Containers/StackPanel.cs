@@ -16,14 +16,18 @@ namespace EngineNS.UI.Controls.Containers
     public partial class TtStackPanel : TtContainer
     {
         ELayout_Orientation mOrientation = ELayout_Orientation.Horizontal;
+        [Bind.BindProperty]
         [Meta]
         public ELayout_Orientation Orientation
         {
             get => mOrientation;
             set
             {
+                if(mOrientation == value)
+                    return;
                 OnValueChange(value, mOrientation);
                 mOrientation = value;
+                InvalidateArrange();
             }
         }
 
@@ -82,7 +86,7 @@ namespace EngineNS.UI.Controls.Containers
                 Math.Max(0.0f, arrangeSize.Height - borderThick.Top - borderThick.Bottom));
 
             var visualChildrenCount = VisualTreeHelper.GetChildrenCount(this);
-            float accumulateX = 0, accumulateY = 0;
+            float accumulateX = innerRect.X, accumulateY = innerRect.Y;
             for (int i = 0; i < visualChildrenCount; i++)
             {
                 var childUI = VisualTreeHelper.GetChild(this, i);
@@ -91,16 +95,18 @@ namespace EngineNS.UI.Controls.Containers
                 RectangleF childFinalRect = RectangleF.Empty;
                 if (Orientation == ELayout_Orientation.Horizontal)
                 {
-                    childFinalRect.X = arrangeSize.X;
-                    childFinalRect.Width = arrangeSize.Width;
+                    childFinalRect.X = innerRect.X;
                     childFinalRect.Y = accumulateY;
+                    childFinalRect.Width = innerRect.Width;
+                    childFinalRect.Height = childDesiredSize.Height;
                     accumulateY += childFinalRect.Height;
                 }
                 else
                 {
-                    childFinalRect.Y = arrangeSize.Y;
-                    childFinalRect.Height = arrangeSize.Height;
                     childFinalRect.X = accumulateX;
+                    childFinalRect.Y = innerRect.Y;
+                    childFinalRect.Width = childDesiredSize.Width;
+                    childFinalRect.Height = innerRect.Height;
                     accumulateX += childFinalRect.Width;
                 }
                 childUI.Arrange(in childFinalRect);
@@ -122,10 +128,10 @@ namespace EngineNS.UI.Controls.Containers
                                           mCurFinalRect.Y + mBorderThickness.Top,
                                           mCurFinalRect.Width - mBorderThickness.Left - mBorderThickness.Right,
                                           mCurFinalRect.Height - mBorderThickness.Top - mBorderThickness.Bottom);
-                Background.Draw(mDesignClipRect, rect, batch, Vector4.Zero);
+                Background.Draw(this, in mDesignClipRect, in rect, batch, in Vector4.Zero);
             }
             if (BorderBrush != null && !BorderThickness.IsEmpty())
-                BorderBrush.Draw(mDesignClipRect, mCurFinalRect, batch, Vector4.Zero, mBorderThickness);
+                BorderBrush.Draw(this, in mDesignClipRect, in mCurFinalRect, batch, in Vector4.Zero, in mBorderThickness);
 
             var count = VisualTreeHelper.GetChildrenCount(this);
             for (int i = 0; i < count; i++)

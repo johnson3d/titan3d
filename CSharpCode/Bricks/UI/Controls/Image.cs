@@ -12,13 +12,14 @@ namespace EngineNS.UI.Controls
     public partial class TtImage : TtUIElement
     {
         TtBrush mUIBrush;
-        [BindProperty]
+        [BindProperty, Rtti.Meta]
         public TtBrush UIBrush
         {
             get => mUIBrush;
             set
             {
                 OnValueChange(value, mUIBrush);
+                mUIBrush.HostElement = this;
                 mUIBrush = value;
             }
         }
@@ -49,7 +50,7 @@ namespace EngineNS.UI.Controls
             //var texture = await UEngine.Instance.GfxDevice.TextureManager.GetTexture(RName.GetRName("utest/texture/groundsnow.srv"));
             //mBrush.mCoreObject.SetSrv(texture.mCoreObject);
             //batch.Middleground.PushBrush(mBrush);
-            mUIBrush.Draw(mDesignClipRect, mCurFinalRect, batch);
+            mUIBrush.Draw(this, in mDesignClipRect, in mCurFinalRect, batch);
         }
     }
 }

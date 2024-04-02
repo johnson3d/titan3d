@@ -116,7 +116,7 @@ namespace EngineNS.UI
                     }
                     unsafe
                     {
-                        if(brush.IsDirty)
+                        if(cmd.IsDirty)
                         {
                             var res = drawcall.mCoreObject.FindGpuResource(TtNameTable.cbPerMaterial);
                             var cbuffer = new NxRHI.ICbView(res.CppPointer);
@@ -125,9 +125,9 @@ namespace EngineNS.UI
                                 var fld = cbuffer.ShaderBinder.FindField("FontColor");
                                 if (fld.IsValidPointer)
                                 {
-                                    var color = brush.Color.ToColor4Float();
+                                    var color = cmd.InstanceData.Color.ToColor4Float();
                                     cbuffer.SetValue(fld, &color, sizeof(Color4f), true, UEngine.Instance.GfxDevice.CbvUpdater.mCoreObject);
-                                    brush.IsDirty = false;
+                                    cmd.IsDirty = false;
                                 }
                             }
                         }

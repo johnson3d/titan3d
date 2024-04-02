@@ -111,6 +111,7 @@ namespace EngineNS.UI.Editor
         Graphics.Pipeline.Shader.UMaterialInstance mGreenColorMat;
         List<Graphics.Pipeline.Shader.UMaterial> mNormalAnchorMats;
         List<Graphics.Pipeline.Shader.UMaterial> mHighLightAnchorMats;
+        bool mInitialized = false;
 
         public bool IsDirty { get; set; } = false;
 
@@ -332,6 +333,7 @@ namespace EngineNS.UI.Editor
                         break;
                 }
             }
+            mInitialized = true;
         }
         public async Thread.Async.TtTask UpdateDecorator()
         {
@@ -692,6 +694,9 @@ namespace EngineNS.UI.Editor
         UMeshNode mCurrentPointAtAnchor;
         public void DecoratorEventProcess(in Bricks.Input.Event e)
         {
+            if (!mInitialized)
+                return;
+
             switch (e.Type)
             {
                 case Bricks.Input.EventType.MOUSEMOTION:
@@ -1219,7 +1224,7 @@ namespace EngineNS.UI.Editor
                                 else
                                     throw new InvalidOperationException($"No operation with type:{mCurDecoratorType}");
 
-                                mPickPlaneNormal = Vector3.TransformCoordinate(Vector3.UnitZ, mEditor.SelectedRect.UIHost.TransformedElements[0].Matrix);
+                                mPickPlaneNormal = Vector3.TransformCoordinate(Vector3.UnitZ, mEditor.SelectedRect.GetUIHost(0).TransformedElements[0].Matrix);
                                 PickPlanePos(e.MouseButton.X, e.MouseButton.Y, mPickPlanePos, mPickPlaneNormal, out pickPos);
                                 mDecoratorMouseDownOffset = pickPos - mPickPlanePos;
 

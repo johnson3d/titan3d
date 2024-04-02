@@ -131,8 +131,17 @@ namespace EngineNS.UI.Template
                 }
                 if(mType.IsEqual(typeof(TtContentsPresenter)))
                 {
-                    parentContainer.ChildIsContentsPresenter = true;
-                    logicParent.mLogicContentsPresenter = treeNode as TtContentsPresenter;
+                    var cpNode = treeNode as TtContentsPresenter;
+                    if(string.IsNullOrEmpty(cpNode.ContentSource))
+                    {
+                        parentContainer.ChildIsContentsPresenter = true;
+                        logicParent.mLogicContentsPresenter = cpNode;
+                    }
+                    else
+                    {
+                        var contentParent = logicParent.GetContentsPresenterContainer(cpNode.ContentSourceHash);
+                        contentParent.mLogicContentsPresenter = cpNode;
+                    }
                 }
                 var child = mFirstChild;
                 while(child != null)

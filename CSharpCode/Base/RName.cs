@@ -146,6 +146,12 @@ namespace EngineNS
                 return false;
             }
         }
+
+        public static bool IsEmpty(RName rName)
+        {
+            return string.IsNullOrEmpty(rName.mName);
+        }
+
         internal RName(string name, ERNameType type)
         {
             mName = name;

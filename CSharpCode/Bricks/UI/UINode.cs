@@ -18,22 +18,56 @@ namespace EngineNS.UI
     {
         public override void Dispose()
         {
-            UIHost?.OnDispose();
+            foreach(var i in mUIHost)
+            {
+                i.OnDispose();
+            }
+            mUIHost.Clear();
             base.Dispose();
         }
 
-        TtUIHost mUIHost;
-        public TtUIHost UIHost
+        List< TtUIHost> mUIHost = new List<TtUIHost>();
+        public void InsertUIHost(int index, TtUIHost host)
         {
-            get => mUIHost;
-            set
+            if (host.SceneNode != this)
             {
-                mUIHost = value;
-                if (mUIHost != null && mUIHost.SceneNode != this)
-                    mUIHost.SceneNode = this;
+                host.SceneNode?.mUIHost.Remove(host);
+            }
+            else
+            {
+                return;
+            }
+            host.mSceneNode = this;
+            mUIHost.Insert(index, host);
+        }
+        public void AddUIHost(TtUIHost host)
+        {
+            InsertUIHost(mUIHost.Count, host);
+        }
+        public void RemoveUIHost(int index)
+        {
+            mUIHost[index].mSceneNode = null;
+            mUIHost.RemoveAt(index);
+        }
+        public void RemoveUIHost(TtUIHost host)
+        {
+            for (int i = 0; i < mUIHost.Count; i++)
+            {
+                if(mUIHost[i] == host)
+                {
+                    mUIHost[i].mSceneNode = null;
+                    mUIHost.RemoveAt(i);
+                    return;
+                }
             }
         }
-
+        
+        public TtUIHost GetUIHost(int index = 0)
+        {
+            if (index < 0 || index >= mUIHost.Count)
+                return null;
+            return mUIHost[index];
+        }
         public class TtUINodeData : UNodeData
         {
             [Rtti.Meta]
@@ -90,24 +124,29 @@ namespace EngineNS.UI
         }
         public override void OnGatherVisibleMeshes(UWorld.UVisParameter rp)
         {
-            if (UIHost == null)
-                return;
-
-            UIHost.GatherVisibleMeshes(rp);
+            foreach (var i in mUIHost)
+            {
+                i.GatherVisibleMeshes(rp);
+            }
         }
         protected override void OnAbsTransformChanged()
         {
-            if (UIHost == null)
-                return;
-            UIHost.OnHostNodeAbsTransformChanged(this, GetWorld());
+            foreach (var i in mUIHost)
+            {
+                i.OnHostNodeAbsTransformChanged(this, GetWorld());
+            }
         }
         public unsafe override bool OnLineCheckTriangle(in DVector3 start, in DVector3 end, ref VHitResult result)
         {
-            if (UIHost == null)
-                return false;
             var startF = start.ToSingleVector3();
             var endF = end.ToSingleVector3();
-            return UIHost.OnLineCheckTriangle(startF, endF, ref result);
+            //foreach (var i in mUIHost)
+            for (int i = mUIHost.Count - 1; i >= 0; i--)
+            {
+                if (mUIHost[i].OnLineCheckTriangle(startF, endF, ref result))
+                    return true;
+            }
+            return false;
         }
         public override void AddAssetReferences(IAssetMeta ameta)
         {
@@ -122,7 +161,7 @@ namespace EngineNS.UI
                 uiNode.NodeData.Name = uiHost.AssetName.Name;
             else
                 uiNode.NodeData.Name = uiNode.SceneId.ToString();
-            uiNode.UIHost = uiHost;
+            uiNode.AddUIHost(uiHost);
             uiNode.Parent = parent;
             uiNode.Placement.SetTransform(in pos, in scale, in quat);
             return uiNode;
