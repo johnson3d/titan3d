@@ -24,8 +24,9 @@ namespace Canvas
 		// todo: default font
 		// mFonts.push()
 	}
-	FDrawCmd* FCanvasDrawCmdList::GetOrNewDrawCmd(ICanvasBrush* brush)
+	FDrawCmd* FCanvasDrawCmdList::GetOrNewDrawCmd(ICanvasBrush* brush, bool& isNewOne)
 	{
+		isNewOne = false;
 		if (mCurrentDrawCmd != nullptr && mCurrentDrawCmd->mBrush->IsSameCmd(brush))
 		{
 			return mCurrentDrawCmd;
@@ -41,6 +42,11 @@ namespace Canvas
 				}
 			}
 		}
+		isNewOne = true;
+		return NewDrawCmd(brush);
+	}
+	FDrawCmd* FCanvasDrawCmdList::NewDrawCmd(ICanvasBrush* brush)
+	{
 		auto tmp = MakeWeakRef(new FDrawCmd());
 		tmp->mBrush = brush;
 		tmp->Batch = Batch;
@@ -94,9 +100,10 @@ namespace Canvas
 			return nullptr;
 		return mBrushes.top();
 	}
-	FDrawCmd* FCanvasDrawCmdList::GetTopBrushDrawCmd() 
+	FDrawCmd* FCanvasDrawCmdList::GetTopBrushDrawCmd()
 	{
-		return GetOrNewDrawCmd(GetCurrentBrush());
+		bool isNewOne;
+		return GetOrNewDrawCmd(GetCurrentBrush(), isNewOne);
 	}
 	void FCanvasDrawCmdList::PushFont(FTFont* font)
 	{
@@ -164,7 +171,7 @@ namespace Canvas
 		return mPathStyles.pop();
 	}
 
-	void FCanvasDrawCmdList::AddText(const WCHAR* text, int charCount, float x, float y, const FColor& color, IBlobObject* pOutCmds)
+	void FCanvasDrawCmdList::AddText(const WCHAR* text, int charCount, float x, float y, const FDrawCmdInstanceData& insData, IBlobObject* pOutCmds)
 	{
 		if (charCount == 0)
 		{
@@ -187,8 +194,38 @@ namespace Canvas
 		moveMat2.moveMatrix(offset.X, offset.Y, 0.0f);
 		moveMat = moveMat * (*matrix) * moveMat2;
 
+		int oldCount = 0;
+		char* dataPtr = (char*)pOutCmds->GetData();
+		std::vector<FDrawCmd*> pOldCmds;
+		if (pOutCmds != nullptr)
+		{
+			int ptrOffset = 0;
+			memcpy(&oldCount, dataPtr, sizeof(int));
+			ptrOffset += sizeof(int);
+			int startIdx = oldCount;
+			memcpy(dataPtr + ptrOffset, &startIdx, sizeof(int));
+			ptrOffset += sizeof(int);
+			for (int i = 0; i < oldCount; i++)
+			{
+				//ptrOffset += sizeof(void*);
+				FDrawCmd* cmdPtr = (FDrawCmd*)(*(void**)(dataPtr + ptrOffset));
+				int cmdIdx = 0;
+				for (cmdIdx = 0; cmdIdx < pOldCmds.size(); cmdIdx++)
+				{
+					if (pOldCmds[cmdIdx] == cmdPtr)
+						break;
+				}
+				if(cmdIdx >= pOldCmds.size())
+					pOldCmds.push_back(cmdPtr);
+				ptrOffset += sizeof(void*);
+			}
+			if (oldCount > 0)
+			{
+				pOutCmds->ReSize(pOutCmds->GetSize() - (sizeof(void*)));
+			}
+		}
+
 		auto font = GetCurrentFont();
-		FColor rgba = color;
 		for (int i = 0; i < charCount; i++)
 		{
 			auto c = text[i];
@@ -216,11 +253,35 @@ namespace Canvas
 				if (prevBrush != word->Brush)
 				{
 					prevBrush = word->Brush;
+					bool isNewOne = false;
+					pCmd = GetOrNewDrawCmd(prevBrush, isNewOne);
+					if(isNewOne)
+						pCmd->SetInstanceData(insData);
+					else if(!pCmd->InstanceData.IsEqual(insData))
+					{
+						pCmd = NewDrawCmd(prevBrush);
+						pCmd->SetInstanceData(insData);
+					}
 					if (pOutCmds != nullptr)
 					{
-						pOutCmds->PushData(&prevBrush, sizeof(prevBrush));
+						//pOutCmds->PushData(&prevBrush, sizeof(prevBrush));
+						pOutCmds->PushData(&pCmd, sizeof(pCmd));
+						oldCount++;
 					}
-					pCmd = GetOrNewDrawCmd(prevBrush);
+					bool isFind = false;
+					for (auto oldCmd : pOldCmds)
+					{
+						if (oldCmd == pCmd)
+						{
+							isFind = true;
+							break;
+						}
+					}
+					if (!isFind)
+					{
+						pOldCmds.push_back(pCmd);
+						pCmd->DrawCount++;
+					}
 				}
 				pCmd->PushQuad(vert);
 			}
@@ -233,11 +294,35 @@ namespace Canvas
 				if (prevBrush != word->Brush)
 				{
 					prevBrush = word->Brush;
+					bool isNewOne = false;
+					pCmd = GetOrNewDrawCmd(prevBrush, isNewOne);
+					if(isNewOne)
+						pCmd->SetInstanceData(insData);
+					else if (!pCmd->InstanceData.IsEqual(insData))
+					{
+						pCmd = NewDrawCmd(prevBrush);
+						pCmd->SetInstanceData(insData);
+					}
 					if (pOutCmds != nullptr)
 					{
-						pOutCmds->PushData(&prevBrush, sizeof(prevBrush));
+						//pOutCmds->PushData(&prevBrush, sizeof(prevBrush));
+						pOutCmds->PushData(&pCmd, sizeof(pCmd));
+						oldCount++;
 					}
-					pCmd = GetOrNewDrawCmd(prevBrush);
+					bool isFind = false;
+					for (auto oldCmd : pOldCmds)
+					{
+						if (oldCmd == pCmd)
+						{
+							isFind = true;
+							break;
+						}
+					}
+					if (!isFind)
+					{
+						pOldCmds.push_back(pCmd);
+						pCmd->DrawCount++;
+					}
 				}
 				auto rect = FRectanglef::And(clip, wordRect);
 				float u = vert[Canvas::RCN_X0_Y0].UV.X;
@@ -282,7 +367,9 @@ namespace Canvas
 		if (pOutCmds != nullptr)
 		{
 			void* temp = (void*)1;
+			//pOutCmds->PushData(&temp, sizeof(void*));
 			pOutCmds->PushData(&temp, sizeof(void*));
+			pOutCmds->SetValueToOffset(0, oldCount);
 		}
 	}
 	void FCanvasDrawCmdList::AddLine(const v3dxVector2& s, const v3dxVector2& e, float width, const FColor& color, FSubDrawCmd* pOutCmd)
@@ -305,6 +392,7 @@ namespace Canvas
 		auto ext = dir * halfWidth;
 
 		auto pCmd = GetTopBrushDrawCmd();
+		pCmd->DrawCount++;
 		auto matrix =  GetCurrentMatrix();
 		auto index = GetCurrentTransformIndex();
 
@@ -419,7 +507,9 @@ namespace Canvas
 		FRectanglef imgRect(x, y, w, h);
 		if (clip.IsContain(imgRect))
 		{
-			auto pCmd = GetOrNewDrawCmd(image);
+			bool isNewOne;
+			auto pCmd = GetOrNewDrawCmd(image, isNewOne);
+			pCmd->DrawCount++;
 			if (pOutCmd)
 			{
 				pOutCmd->DrawCmd = pCmd;
@@ -440,7 +530,9 @@ namespace Canvas
 		}
 		else
 		{
-			auto pCmd = GetOrNewDrawCmd(image);
+			bool isNewOne;
+			auto pCmd = GetOrNewDrawCmd(image, isNewOne);
+			pCmd->DrawCount++;
 			auto rect = FRectanglef::And(clip, imgRect);
 			float u = vert[Canvas::RCN_X0_Y0].UV.X;
 			float u1 = ((rect.X - x) - u) / w;
@@ -615,6 +707,7 @@ namespace Canvas
 
 		auto brush = GetCurrentBrush();
 		auto pCmd = GetTopBrushDrawCmd();
+		pCmd->DrawCount++;
 		auto matrix = GetCurrentMatrix();
 		auto index = GetCurrentTransformIndex();
 		const auto& uvRect = brush->Rect;
@@ -830,6 +923,7 @@ namespace Canvas
 
 		auto brush = GetCurrentBrush();
 		auto pCmd = GetTopBrushDrawCmd();
+		pCmd->DrawCount++;
 		auto matrix = GetCurrentMatrix();
 		auto index = GetCurrentTransformIndex();
 		const auto& uvRect = brush->Rect;

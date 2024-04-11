@@ -36,7 +36,6 @@ void CS_WaterBasinMain(uint3 DispatchThreadId : SV_DispatchThreadID, uint3 Local
     {
         //delta = -delta;
         change = delta * 0.5;
-        return;
     }
     else
     {

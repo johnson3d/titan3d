@@ -209,6 +209,8 @@ namespace Canvas
 		{
 			if (GetRtti() != other->GetRtti())
 				return false;
+			if (Color != other->Color)
+				return false;
 			if (SrView == nullptr && other->SrView == nullptr)
 				return this == other;
 			return (SrView == other->SrView);
@@ -216,7 +218,7 @@ namespace Canvas
 		FColor GetColor() const {
 			return Color;
 		}
-		void SetColor(FColor color)
+		void SetColor(const FColor& color)
 		{
 			Color = color;
 			IsDirty = true;

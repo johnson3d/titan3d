@@ -14,6 +14,19 @@ namespace Canvas
 	class ICanvasBrush;
 	class FTFont;
 	
+	struct TR_CLASS(SV_LayoutStruct = 8)
+		FDrawCmdInstanceData
+	{
+		FColor							Color;
+
+		bool IsEqual(const FDrawCmdInstanceData& target)
+		{
+			if (Color != target.Color)
+				return false;
+			return true;
+		}
+	};
+
 	struct TR_CLASS()
 		FDrawCmd : public VIUnknown
 	{
@@ -21,6 +34,18 @@ namespace Canvas
 		FCanvasDrawBatch*				Batch = nullptr;
 		std::vector<FCanvasVertex>		mVertices;
 		std::vector<UINT>				mIndices;
+		UInt32							DrawCount = 0;
+
+		// instance data
+		FDrawCmdInstanceData			InstanceData;
+		bool							IsDirty;
+
+
+		void SetInstanceData(const FDrawCmdInstanceData& data)
+		{
+			InstanceData = data;
+			IsDirty = true;
+		}
 
 		void PushQuad(FCanvasVertex vert[4])
 		{
@@ -120,7 +145,8 @@ namespace Canvas
 		}
 		void SetCurrentDrawCmd(ICanvasBrush * brush)
 		{
-			GetOrNewDrawCmd(brush);
+			bool isNewOne;
+			GetOrNewDrawCmd(brush, isNewOne);
 		}
 		FDrawCmd* GetTopBrushDrawCmd();
 		void PushClip(const FRectanglef & rect);
@@ -161,7 +187,7 @@ namespace Canvas
 
 		static void TransformIndexToColor(const UInt16* index, FColor& color);
 
-		void AddText(const WCHAR * text, int charCount, float x, float y, const FColor & color, IBlobObject* pOutCmds = nullptr);
+		void AddText(const WCHAR * text, int charCount, float x, float y, const FDrawCmdInstanceData& insData, IBlobObject* pOutCmds = nullptr);
 		void AddLine(const v3dxVector2 & start, const v3dxVector2 & end, float width, const FColor & color, FSubDrawCmd* pOutCmd = nullptr);
 		void AddLineStrips(const v3dxVector2 * pPoints, UINT num, float width, const FColor & color, bool loop, FSubDrawCmd* pOutCmd = nullptr);
 		void AddImage(ICanvasBrush * image, float x, float y, float w, float h, const FColor & color, FSubDrawCmd* pOutCmd = nullptr);
@@ -172,7 +198,8 @@ namespace Canvas
 		void AddRectFill(const v3dxVector2 & s, const v3dxVector2 & e, const v3dxVector4& cornerRadius, const FColor & color, FSubDrawCmd* pOutCmd = nullptr);
 		void AddRectFill(const FRectanglef& rect, const v3dxVector4& cornerRadius, const FColor & color, FSubDrawCmd* pOutCmd = nullptr);
 	protected:
-		FDrawCmd* GetOrNewDrawCmd(ICanvasBrush* brush);
+		FDrawCmd* GetOrNewDrawCmd(ICanvasBrush* brush, bool& isNewOne);
+		FDrawCmd* NewDrawCmd(ICanvasBrush* brush);
 	public:
 		FCanvasDrawBatch* Batch = nullptr;
 	protected:

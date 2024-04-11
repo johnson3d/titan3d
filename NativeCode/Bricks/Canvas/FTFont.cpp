@@ -312,6 +312,7 @@ namespace Canvas
 		FT_Int32 flags = 0;
 		flags |= FT_LOAD_NO_BITMAP;
 		flags |= FT_LOAD_FORCE_AUTOHINT;
+		//flags |= FT_LOAD_VERTICAL_LAYOUT;
 
 		err = FT_Load_Char(mFtFace, unicode, flags);
 		if (err)
