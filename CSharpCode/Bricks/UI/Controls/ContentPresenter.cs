@@ -37,12 +37,10 @@ namespace EngineNS.UI.Controls
         protected override SizeF MeasureOverride(in SizeF availableSize)
         {
             // measure with parent measure rule
-            //this.Children
-            return base.MeasureOverride(availableSize);
+            return SizeF.Empty;
         }
         protected override void ArrangeOverride(in RectangleF arrangeSize)
         {
-            base.ArrangeOverride(arrangeSize);
         }
     }
 }

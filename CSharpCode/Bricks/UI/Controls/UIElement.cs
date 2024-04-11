@@ -67,6 +67,7 @@ namespace EngineNS.UI.Controls
 
             IsEnable = 1 << 16,
             IsVariable = 1 << 17,
+            IsSelectedable = 1 << 18,
         }
         private ECoreFlags mCoreFlags;
         internal bool ReadFlag(ECoreFlags flag)
@@ -142,6 +143,7 @@ namespace EngineNS.UI.Controls
             NeverMeasured = true;
             NeverArranged = true;
             IsEnabled = true;
+            IsSelectedable = true;
             TtUIElementConstructor_Template();
             TtUIElementConstructor_Editor();            
         }
@@ -151,6 +153,7 @@ namespace EngineNS.UI.Controls
             NeverMeasured = true;
             NeverArranged = true;
             IsEnabled = true;
+            IsSelectedable = true;
             TtUIElementConstructor_Template();
             TtUIElementConstructor_Editor();
         }
@@ -169,6 +172,11 @@ namespace EngineNS.UI.Controls
 
                 UpdatePropertiesName();
             }
+        }
+
+        public virtual string GetEditorShowName()
+        {
+            return "[" + GetType().Name + "] " + mName;
         }
 
         [Bind.BindProperty(DefaultValue = true)]
@@ -192,6 +200,16 @@ namespace EngineNS.UI.Controls
             {
                 OnValueChange(value, IsVariable);
                 WriteFlag(ECoreFlags.IsVariable, value);
+            }
+        }
+        [Browsable(false)]
+        public bool IsSelectedable
+        {
+            get => ReadFlag(ECoreFlags.IsSelectedable);
+            set
+            {
+                OnValueChange(value, IsSelectedable);
+                WriteFlag(ECoreFlags.IsSelectedable, value);
             }
         }
 

@@ -1,4 +1,5 @@
 ﻿using EngineNS.NxRHI;
+using NPOI.SS.Formula.Functions;
 using System;
 using System.Collections.Generic;
 using System.Numerics;
@@ -56,6 +57,14 @@ namespace EngineNS.Graphics.Mesh
                 return result;
             }
         }
+        public Graphics.Mesh.TtMesh ToDrawMesh(Graphics.Pipeline.Shader.UMaterial material)
+        {
+            var mesh = new Graphics.Mesh.TtMesh();
+            var materials = new Graphics.Pipeline.Shader.UMaterial[1];
+            materials[0] = material;
+            mesh.Initialize(ToMesh(), materials, Rtti.UTypeDescGetter<Graphics.Mesh.UMdfStaticMesh>.TypeDesc);
+            return mesh;
+        }
         public void ToMesh(UMeshPrimitives mesh)
         {
             unsafe
@@ -89,6 +98,13 @@ namespace EngineNS.Graphics.Mesh
             [EGui.Controls.PropertyGrid.Color4PickerEditor()]
             public Vector4 Color { get; set; }
             public EBoxFace FaceFlags { get; set; } = EBoxFace.All;
+        }
+        public static unsafe UMeshDataProvider MakeBox(in BoundingBox aabb, uint color = 0xffffffff,
+            EBoxFace faceFlags = EBoxFace.All)
+        {
+            var center = aabb.GetCenter();
+            var size = aabb.GetSize();
+            return MakeBox(center.X, center.Y, center.Z, size.X, size.Y, size.Z, color, faceFlags);
         }
         public static unsafe UMeshDataProvider MakeBox(float x, float y, float z, float xSize, float ySize, float zSize, uint color = 0xffffffff,
             EBoxFace faceFlags = EBoxFace.All)

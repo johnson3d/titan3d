@@ -461,7 +461,7 @@ namespace EngineNS
         /// <param name="box">包围盒</param>
         /// <returns>返回平面与包围盒对象的相对位置类型</returns>
         [Rtti.Meta]
-        public static PlaneIntersectionType Intersects(DPlane plane, DBoundingBox box)
+        public static PlaneIntersectionType Intersects(in DPlane plane, in DBoundingBox box)
         {
             DVector3 min;
             DVector3 max;
@@ -483,6 +483,47 @@ namespace EngineNS
                 return PlaneIntersectionType.Back;
 
             return PlaneIntersectionType.Intersecting;
+        }
+        public static unsafe bool Intersects(DPlane* planes, int num, in DBoundingBox box)
+        {
+            for (int i = 0; i < num; i++)
+            {
+                if (Intersects(in planes[i], in box) == PlaneIntersectionType.Back)
+                    return false;
+            }
+            return true;
+        }
+        public static PlaneIntersectionType Intersects(in DPlane plane, in Aabb box)
+        {
+            DVector3 min;
+            DVector3 max;
+            max.X = (plane.Normal.X >= 0.0f) ? box.Minimum.X : box.Maximum.X;
+            max.Y = (plane.Normal.Y >= 0.0f) ? box.Minimum.Y : box.Maximum.Y;
+            max.Z = (plane.Normal.Z >= 0.0f) ? box.Minimum.Z : box.Maximum.Z;
+            min.X = (plane.Normal.X >= 0.0f) ? box.Maximum.X : box.Minimum.X;
+            min.Y = (plane.Normal.Y >= 0.0f) ? box.Maximum.Y : box.Minimum.Y;
+            min.Z = (plane.Normal.Z >= 0.0f) ? box.Maximum.Z : box.Minimum.Z;
+
+            double dot = (plane.Normal.X * max.X) + (plane.Normal.Y * max.Y) + (plane.Normal.Z * max.Z);
+
+            if (dot + plane.D > 0.0f)
+                return PlaneIntersectionType.Front;
+
+            dot = (plane.Normal.X * min.X) + (plane.Normal.Y * min.Y) + (plane.Normal.Z * min.Z);
+
+            if (dot + plane.D < 0.0f)
+                return PlaneIntersectionType.Back;
+
+            return PlaneIntersectionType.Intersecting;
+        }
+        public static unsafe bool Intersects(DPlane* planes, int num, in Aabb box)
+        {
+            for (int i = 0; i < num; i++)
+            {
+                if (Intersects(in planes[i], in box) == PlaneIntersectionType.Back)
+                    return false;
+            }
+            return true;
         }
         /// <summary>
         /// 平面位置判断

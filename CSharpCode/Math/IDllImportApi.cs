@@ -122,6 +122,8 @@ namespace EngineNS
         [System.Runtime.InteropServices.DllImport(ModuleNC, CallingConvention = CallingConvention.Cdecl)]
         public unsafe extern static int v3dxIntersectTri(Vector3* p0, Vector3* p1, Vector3* p2, Vector3* pRayPos, Vector3* pRayDir, float* pU, float* pV, float* pDist);
         [System.Runtime.InteropServices.DllImport(ModuleNC, CallingConvention = CallingConvention.Cdecl)]
+        public unsafe extern static int v3dxIntersectDTri(DVector3* p0, DVector3* p1, DVector3* p2, DVector3* pRayPos, DVector3* pRayDir, double* pU, double* pV, double* pDist);
+        [System.Runtime.InteropServices.DllImport(ModuleNC, CallingConvention = CallingConvention.Cdecl)]
         public unsafe extern static int v3dxLineIntersectBox3(float* pfT_n,
                                                                  EngineNS.Vector3* pvPoint_n,
                                                                  float* pfT_f,

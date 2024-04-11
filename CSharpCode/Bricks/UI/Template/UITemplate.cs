@@ -135,12 +135,24 @@ namespace EngineNS.UI.Template
                     if(string.IsNullOrEmpty(cpNode.ContentSource))
                     {
                         parentContainer.ChildIsContentsPresenter = true;
-                        logicParent.mLogicContentsPresenter = cpNode;
+                        parentContainer.ChildContentsPresenter = cpNode;
+                        logicParent.mLogicContentsPresenters["Content"] = cpNode;
                     }
                     else
                     {
                         var contentParent = logicParent.GetContentsPresenterContainer(cpNode.ContentSourceHash);
-                        contentParent.mLogicContentsPresenter = cpNode;
+                        parentContainer.ChildIsContentsPresenter = true;
+                        parentContainer.ChildContentsPresenter = cpNode;
+                        logicParent.mLogicContentsPresenters[cpNode.ContentSource] = cpNode;
+                        for(int i= contentParent.mChildren.mChildren.Count - 1; i>=0; i--)
+                        {
+                            var tempChild = contentParent.mChildren.mChildren[i];
+                            if (cpNode.mChildren.Count > 0)
+                                cpNode.mChildren.Insert(0, tempChild);
+                            else
+                                cpNode.mChildren.Add(tempChild);
+                        }
+                        contentParent.mChildren = cpNode.mChildren;
                     }
                 }
                 var child = mFirstChild;

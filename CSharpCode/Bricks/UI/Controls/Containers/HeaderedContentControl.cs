@@ -1,4 +1,5 @@
-﻿using EngineNS.UI.Bind;
+﻿using EngineNS.Rtti;
+using EngineNS.UI.Bind;
 using EngineNS.UI.Template;
 using System;
 using System.Collections.Generic;
@@ -9,8 +10,8 @@ namespace EngineNS.UI.Controls.Containers
 {
     public partial class TtHeaderedContentsControl : TtContainer
     {
-        TtTemplateContainer mHeader;
-        [Bind.BindProperty]
+        TtTemplateContainer mHeader = new TtTemplateContainer();
+        [Bind.BindProperty, Rtti.Meta, Browsable(false)]
         public TtTemplateContainer Header
         {
             get => mHeader;
@@ -41,8 +42,8 @@ namespace EngineNS.UI.Controls.Containers
             }
         }
 
-        TtTemplateContainer mContent;
-        [Bind.BindProperty]
+        TtTemplateContainer mContent = new TtTemplateContainer();
+        [Bind.BindProperty, Rtti.Meta, Browsable(false)]
         public TtTemplateContainer Content
         {
             get => mContent;

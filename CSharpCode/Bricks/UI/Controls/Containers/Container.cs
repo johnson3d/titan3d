@@ -36,8 +36,8 @@ namespace EngineNS.UI.Controls.Containers
                 {
                     if (mLogicalParent.HasTemplateGeneratedSubTree)
                     {
-                        if (mLogicalParent.mLogicContentsPresenter != null)
-                            return mLogicalParent.mLogicContentsPresenter.Children.Count;
+                        if (mVisualParent.ChildContentsPresenter != null)
+                            return mVisualParent.ChildContentsPresenter.Children.Count;
                         else
                             return 0;
                     }
@@ -65,8 +65,8 @@ namespace EngineNS.UI.Controls.Containers
                 {
                     if (mLogicalParent.HasTemplateGeneratedSubTree)
                     {
-                        if (mLogicalParent.mLogicContentsPresenter != null)
-                            return mLogicalParent.mLogicContentsPresenter.Children[index];
+                        if (mVisualParent.ChildContentsPresenter != null)
+                            return mVisualParent.ChildContentsPresenter.Children[index];
                         else
                             return null;
                     }
@@ -87,9 +87,9 @@ namespace EngineNS.UI.Controls.Containers
                 {
                     if(mLogicalParent.HasTemplateGeneratedSubTree)
                     {
-                        if (mLogicalParent.mLogicContentsPresenter != null)
+                        if (mVisualParent.ChildContentsPresenter != null)
                         {
-                            var children = mLogicalParent.mLogicContentsPresenter.Children;
+                            var children = mVisualParent.ChildContentsPresenter.Children;
                             children[index] = value;
                         }
                     }
@@ -125,7 +125,12 @@ namespace EngineNS.UI.Controls.Containers
             {
                 if (mLogicalParent.IsLogicalChildrenIterationInProgress)
                     throw new InvalidOperationException("Can not modify logical children during three walk");
-                mLogicalParent.HasLogicalChildren = (mLogicalParent.mLogicContentsPresenter == null) ? false : mLogicalParent.mLogicContentsPresenter.Children.Count > 0;
+                bool hasLogicChildren = false;
+                foreach(var lcp in mLogicalParent.mLogicContentsPresenters)
+                {
+                    hasLogicChildren = hasLogicChildren || (lcp.Value.Children.Count > 0);
+                }
+                mLogicalParent.HasLogicalChildren = hasLogicChildren;
             }
             if(element != null)
             {
@@ -148,12 +153,22 @@ namespace EngineNS.UI.Controls.Containers
             if(element != null)
             {
                 if(element.mVisualParent != null)
-                    element.RemoveAttachedProperties(element.mVisualParent.GetType());
+                {
+                    if (element.mVisualParent is TtContentsPresenter)
+                        element.RemoveAttachedProperties(element.mVisualParent.mVisualParent.GetType());
+                    else
+                        element.RemoveAttachedProperties(element.mVisualParent.GetType());
+                }
                 element.mParent = mLogicalParent;
                 element.RootUIHost = mVisualParent.RootUIHost;
                 element.mVisualParent = mVisualParent;
                 if(mVisualParent != null)
-                    mVisualParent.SetAttachedProperties(element);
+                {
+                    if (element.mVisualParent is TtContentsPresenter)
+                        mVisualParent.mVisualParent.SetAttachedProperties(element);
+                    else
+                        mVisualParent.SetAttachedProperties(element);
+                }
             }
         }
 
@@ -178,9 +193,9 @@ namespace EngineNS.UI.Controls.Containers
             {
                 if (mLogicalParent.HasTemplateGeneratedSubTree)
                 {
-                    if (mLogicalParent.mLogicContentsPresenter != null)
+                    if (mVisualParent.ChildContentsPresenter != null)
                     {
-                        var children = mLogicalParent.mLogicContentsPresenter.Children;
+                        var children = mVisualParent.ChildContentsPresenter.Children;
                         return children.IndexOf(item);
                     }
                     else
@@ -203,9 +218,9 @@ namespace EngineNS.UI.Controls.Containers
             {
                 if (mLogicalParent.HasTemplateGeneratedSubTree)
                 {
-                    if (mLogicalParent.mLogicContentsPresenter != null)
+                    if (mVisualParent.ChildContentsPresenter != null)
                     {
-                        var children = mLogicalParent.mLogicContentsPresenter.Children;
+                        var children = mVisualParent.ChildContentsPresenter.Children;
                         children.Insert(index, item);
                     }
                 }
@@ -238,9 +253,9 @@ namespace EngineNS.UI.Controls.Containers
             {
                 if (mLogicalParent.HasTemplateGeneratedSubTree)
                 {
-                    if (mLogicalParent.mLogicContentsPresenter != null)
+                    if (mVisualParent.ChildContentsPresenter != null)
                     {
-                        var children = mLogicalParent.mLogicContentsPresenter.Children;
+                        var children = mVisualParent.ChildContentsPresenter.Children;
                         children.RemoveAt(index);
                     }
                 }
@@ -270,9 +285,9 @@ namespace EngineNS.UI.Controls.Containers
             {
                 if (mLogicalParent.HasTemplateGeneratedSubTree)
                 {
-                    if (mLogicalParent.mLogicContentsPresenter != null)
+                    if (mVisualParent.ChildContentsPresenter != null)
                     {
-                        var children = mLogicalParent.mLogicContentsPresenter.Children;
+                        var children = mVisualParent.ChildContentsPresenter.Children;
                         returnValue = children.Remove(item);
                     }
                     else
@@ -309,9 +324,9 @@ namespace EngineNS.UI.Controls.Containers
             {
                 if(mLogicalParent.HasTemplateGeneratedSubTree)
                 {
-                    if (mLogicalParent.mLogicContentsPresenter != null)
+                    if (mVisualParent.ChildContentsPresenter != null)
                     {
-                        var children = mLogicalParent.mLogicContentsPresenter.Children;
+                        var children = mVisualParent.ChildContentsPresenter.Children;
                         children.Add(item);
                     }
                 }
@@ -349,9 +364,9 @@ namespace EngineNS.UI.Controls.Containers
             {
                 if (mLogicalParent.HasTemplateGeneratedSubTree)
                 {
-                    if (mLogicalParent.mLogicContentsPresenter != null)
+                    if (mVisualParent.ChildContentsPresenter != null)
                     {
-                        var children = mLogicalParent.mLogicContentsPresenter.Children;
+                        var children = mVisualParent.ChildContentsPresenter.Children;
                         children.Clear();
                     }
                 }
@@ -396,9 +411,9 @@ namespace EngineNS.UI.Controls.Containers
             {
                 if (mLogicalParent.HasTemplateGeneratedSubTree)
                 {
-                    if (mLogicalParent.mLogicContentsPresenter != null)
+                    if (mVisualParent.ChildContentsPresenter != null)
                     {
-                        var children = mLogicalParent.mLogicContentsPresenter.Children;
+                        var children = mVisualParent.ChildContentsPresenter.Children;
                         return children.Contains(item);
                     }
                     else
@@ -421,9 +436,9 @@ namespace EngineNS.UI.Controls.Containers
             {
                 if (mLogicalParent.HasTemplateGeneratedSubTree)
                 {
-                    if (mLogicalParent.mLogicContentsPresenter != null)
+                    if (mVisualParent.ChildContentsPresenter != null)
                     {
-                        var children = mLogicalParent.mLogicContentsPresenter.Children;
+                        var children = mVisualParent.ChildContentsPresenter.Children;
                         children.CopyTo(array, arrayIndex);
                     }
                 }
@@ -444,9 +459,9 @@ namespace EngineNS.UI.Controls.Containers
             {
                 if (mLogicalParent.HasTemplateGeneratedSubTree)
                 {
-                    if (mLogicalParent.mLogicContentsPresenter != null)
+                    if (mVisualParent.ChildContentsPresenter != null)
                     {
-                        var children = mLogicalParent.mLogicContentsPresenter.Children;
+                        var children = mVisualParent.ChildContentsPresenter.Children;
                         return children.GetEnumerator();
                     }
                     else
@@ -469,9 +484,9 @@ namespace EngineNS.UI.Controls.Containers
             {
                 if (mLogicalParent.HasTemplateGeneratedSubTree)
                 {
-                    if (mLogicalParent.mLogicContentsPresenter != null)
+                    if (mVisualParent.ChildContentsPresenter != null)
                     {
-                        var children = mLogicalParent.mLogicContentsPresenter.Children;
+                        var children = mVisualParent.ChildContentsPresenter.Children;
                         return children.GetEnumerator();
                     }
                     else
@@ -489,9 +504,9 @@ namespace EngineNS.UI.Controls.Containers
         {
             if (!mLogicalParent.HasTemplateGeneratedSubTree)
                 throw new InvalidOperationException("OnApplyTemplate need generated subtree");
-            if (mLogicalParent.mLogicContentsPresenter != null)
+            if (mVisualParent.ChildContentsPresenter != null)
             {
-                var children = mLogicalParent.mLogicContentsPresenter.Children;
+                var children = mVisualParent.ChildContentsPresenter.Children;
                 for (int i = 0; i < mChildrenHolder.Count; i++)
                 {
                     children.Add(mChildrenHolder[i]);
@@ -503,12 +518,28 @@ namespace EngineNS.UI.Controls.Containers
 
     public partial class TtTemplateContainer : TtContainer
     {
+        public TtTemplateContainer()
+        {
+            IsSelectedable = false;
+        }
 
+        public override string GetEditorShowName()
+        {
+            return Name;
+        }
+
+        protected override SizeF MeasureOverride(in SizeF availableSize)
+        {
+            return SizeF.Empty;
+        }
+        protected override void ArrangeOverride(in RectangleF arrangeSize)
+        {
+        }
     }
 
     public abstract partial class TtContainer : TtUIElement
     {
-        TtUIElementCollection mChildren;
+        internal TtUIElementCollection mChildren;
         public class ElementCollectionSaverAttribute : IO.UCustomSerializerAttribute
         {
             public override void Save(IWriter ar, object host, string propName)
@@ -562,6 +593,8 @@ namespace EngineNS.UI.Controls.Containers
             get => ReadInternalFlag(eInternalFlags.ChildIsContentsPresenter);
             set => WriteInternalFlag(eInternalFlags.ChildIsContentsPresenter, value);
         }
+
+        internal TtContentsPresenter ChildContentsPresenter;
 
         public override void Cleanup()
         {
@@ -731,7 +764,7 @@ namespace EngineNS.UI.Controls.Containers
             get => ReadInternalFlag(eInternalFlags.IsLogicalChildrenIterationInProgress);
             set => WriteInternalFlag(eInternalFlags.IsLogicalChildrenIterationInProgress, value);
         }
-        protected internal TtContentsPresenter mLogicContentsPresenter;
+        protected internal Dictionary<string, TtContentsPresenter> mLogicContentsPresenters = new Dictionary<string, TtContentsPresenter>();
 
         protected override SizeF MeasureOverride(in SizeF availableSize)
         {

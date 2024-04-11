@@ -102,5 +102,9 @@ namespace EngineNS.Profiler
             var info = ex.ToString();
             OnReportLog?.Invoke(ELogTag.Error, category, memberName, sourceFilePath, sourceLineNumber, info);
         }
+        public static void WriteLineSingle(string info)
+        {
+            WriteLine(ELogTag.Info, "Default", info);
+        }
     }
 }

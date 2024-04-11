@@ -102,6 +102,40 @@ namespace EngineNS
         public double X;
         public double Y;
         public double Z;
+        public double this[int index]
+        {
+            get
+            {
+                switch (index)
+                {
+                    case 0:
+                        return X;
+                    case 1:
+                        return Y;
+                    case 2:
+                        return Z;
+                    default:
+                        throw new ArgumentOutOfRangeException("index", "Indices for DVector3 run from 0 to 2, inclusive.");
+                }
+            }
+            set
+            {
+                switch (index)
+                {
+                    case 0:
+                        X = value;
+                        break;
+                    case 1:
+                        Y = value;
+                        break;
+                    case 2:
+                        Z = value;
+                        break;
+                    default:
+                        throw new ArgumentOutOfRangeException("index", "Indices for DVector3 run from 0 to 2, inclusive.");
+                }
+            }
+        }
         public DVector3(double x, double y, double z)
         {
             X = x;

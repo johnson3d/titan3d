@@ -9,6 +9,7 @@
     <Import_RootNamespace>EngineNS</Import_RootNamespace>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="$(MSBuildThisFileDirectory)Aabb.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Algorithm\DelaunayTriangle.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Algorithm\FastPoissonDisk.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Algorithm\RamerDouglasPeucker.cs" />

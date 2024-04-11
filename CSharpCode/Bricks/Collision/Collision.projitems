@@ -11,5 +11,12 @@
   <ItemGroup>
     <Compile Include="$(MSBuildThisFileDirectory)DDA\HierarchicalVoxelSpace3D.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)DDA\VoxelSpace3D.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Octree\BoundsOctree.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Octree\BoundsOctreeNode.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Octree\PointOctree.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Octree\PointOctreeNode.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="$(MSBuildThisFileDirectory)Octree\License.txt" />
   </ItemGroup>
 </Project>

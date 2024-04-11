@@ -124,6 +124,8 @@ namespace EngineNS.UI.Controls
                     RaiseEvent(arg);
                     UEngine.Instance.UIManager.ReleaseEventSync(arg);
                 }
+
+                UpdateLayout();
             }
         }
 

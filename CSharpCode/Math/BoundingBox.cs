@@ -116,6 +116,51 @@ namespace EngineNS
             SetVector3Value(ref results[6], Maximum.X, Minimum.Y, Minimum.Z);
             SetVector3Value(ref results[7], Minimum.X, Minimum.Y, Minimum.Z);
         }
+        public static void CalculateClosestPointInBox(in Vector3 point, in BoundingBox AABB, out Vector3 outPoint, out float outSqrDistance)
+        {
+            // compute coordinates of point in box coordinate system
+            var closest = point - AABB.GetCenter();
+
+            var halfSize = AABB.GetSize() * 0.5f;
+            // project test point onto box
+            float fSqrDistance = 0.0f;
+            float fDelta;
+
+            for (int i = 0; i < 3; i++)
+            {
+                if (closest[i] < -halfSize[i])
+                {
+                    fDelta = closest[i] + halfSize[i];
+                    fSqrDistance += fDelta * fDelta;
+                    closest[i] = -halfSize[i];
+                }
+                else if (closest[i] > halfSize[i])
+                {
+                    fDelta = closest[i] - halfSize[i];
+                    fSqrDistance += fDelta * fDelta;
+                    closest[i] = halfSize[i];
+                }
+            }
+
+            // Inside
+            if (fSqrDistance == 0.0F)
+            {
+                outPoint = point;
+                outSqrDistance = 0.0F;
+            }
+            // Outside
+            else
+            {
+                outPoint = closest + AABB.GetCenter();
+                outSqrDistance = fSqrDistance;
+            }
+        }
+        public Vector3 ClosestPoint(in Vector3 pos)
+        {
+            Vector3 result;
+            CalculateClosestPointInBox(in pos, in this, out result, out var sqrDist);
+            return result;
+        }
         public unsafe Vector3[] GetCorners()
 	    {
 		    Vector3[] results = new Vector3[8];
@@ -176,6 +221,20 @@ namespace EngineNS
         public Vector3 GetSize()
         {
             return Maximum - Minimum;
+        }
+        public void Expand(in Vector3 size)
+        {
+            var oriSize = GetSize();
+            var center = GetCenter();
+            oriSize = Vector3.Maximize(in oriSize, size);
+            Minimum = center - oriSize;
+            Maximum = center + oriSize;
+        }
+        public void SetSize(in Vector3 size)
+        {
+            var center = GetCenter();
+            Minimum = center - size;
+            Maximum = center + size;
         }
         public float GetVolume()
         {

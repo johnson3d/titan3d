@@ -181,6 +181,24 @@ namespace EngineNS.GamePlay
                 }
                 VisibleMeshes.Add(new Graphics.Pipeline.FVisibleMesh() { Mesh = mesh });
             }
+            public void AddAABB(in Aabb aabb, in Color4f color, in FTransform transform)
+            {
+                BoundingBox box = new BoundingBox(-aabb.Extent, aabb.Extent);
+                var meshProvider = Graphics.Mesh.UMeshDataProvider.MakeBox(in box, color.ToArgb());
+                var mesh = meshProvider.ToDrawMesh(UEngine.Instance.GfxDevice.MaterialManager.VtxColorMaterial);
+                var localTrans = FTransform.CreateTransform(aabb.Minimum, in Vector3.One, in Quaternion.Identity);
+                FTransform trans;
+                FTransform.Multiply(out trans, in transform, in localTrans);
+                mesh.SetWorldTransform(in trans, this.World, true);
+                AddVisibleMesh(mesh);
+            }
+            public void AddBoundingBox(in BoundingBox box, in Color4f color)
+            {
+                var meshProvider = Graphics.Mesh.UMeshDataProvider.MakeBox(in box, color.ToArgb());
+                var mesh = meshProvider.ToDrawMesh(UEngine.Instance.GfxDevice.MaterialManager.VtxColorMaterial);
+                mesh.SetWorldTransform(in FTransform.Identity, this.World, true);
+                AddVisibleMesh(mesh);
+            }
         }
         [ThreadStatic]
         private static Profiler.TimeScope ScopeGatherVisibleMeshes = Profiler.TimeScopeManager.GetTimeScope(typeof(UWorld), nameof(GatherVisibleMeshes));

@@ -461,7 +461,7 @@ namespace EngineNS.UI.Editor
         {
             if (element == null)
                 return "";
-            return "[" + element.GetType().Name + "] " + element.Name;
+            return element.GetEditorShowName();
         }
         bool mDesignerShow = true;
         protected unsafe void DrawDesigner()
@@ -952,8 +952,10 @@ namespace EngineNS.UI.Editor
         }
         unsafe void DrawUIElementInHierachy(TtUIElement element, ref int idx)
         {
-            if(element.TemplateParent != null)
+            if (element.TemplateParent != null)
                 ImGuiAPI.PushStyleColor(ImGuiCol_.ImGuiCol_Text, StyleConfig.Instance.TextDisableColor);
+            else if (element is TtTemplateContainer)
+                ImGuiAPI.PushStyleColor(ImGuiCol_.ImGuiCol_Text, 0xffbb7200);
             else
                 ImGuiAPI.PushStyleColor(ImGuiCol_.ImGuiCol_Text, StyleConfig.Instance.TextColor);
 
@@ -1151,7 +1153,7 @@ namespace EngineNS.UI.Editor
             {
                 mSelectedElements.Clear();
             }
-            else
+            else if(element.IsSelectedable)
             {
                 if(multi)
                 {

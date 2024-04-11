@@ -430,7 +430,7 @@ namespace EngineNS
         /// <param name="intersectPoint">交点坐标</param>
         /// <returns>相交返回true，否则返回false</returns>
         [Rtti.Meta]
-        public static bool Intersects(ref Plane plane, ref Vector3 start, ref Vector3 end, out Vector3 intersectPoint)
+        public static bool Intersects(in Plane plane, in Vector3 start, in Vector3 end, out Vector3 intersectPoint)
 	    {
             unsafe
             {
@@ -460,7 +460,7 @@ namespace EngineNS
         /// <param name="box">包围盒</param>
         /// <returns>返回平面与包围盒对象的相对位置类型</returns>
         [Rtti.Meta]
-        public static PlaneIntersectionType Intersects(Plane plane, BoundingBox box)
+        public static PlaneIntersectionType Intersects(in Plane plane, in BoundingBox box)
         {
             Vector3 min;
             Vector3 max;
@@ -482,6 +482,15 @@ namespace EngineNS
                 return PlaneIntersectionType.Back;
 
             return PlaneIntersectionType.Intersecting;
+        }
+        public static unsafe bool Intersects(Plane* planes, int num, in BoundingBox box)
+        {
+            for (int i = 0; i < num; i++)
+            {
+                if (Intersects(in planes[i], in box) == PlaneIntersectionType.Back)
+                    return false;
+            }
+            return true;
         }
         /// <summary>
         /// 平面位置判断

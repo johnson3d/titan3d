@@ -413,12 +413,22 @@ namespace EngineNS.Graphics.Pipeline.Shader
         protected ERenderLayer mRenderLayer = ERenderLayer.RL_Opaque;
         [Rtti.Meta]
         [Category("Option")]
-        public virtual ERenderLayer RenderLayer
+        public virtual unsafe ERenderLayer RenderLayer
         {
             get => mRenderLayer;
             set
             {
                 mRenderLayer = value;
+                if (mRenderLayer == ERenderLayer.RL_Translucent ||
+                    mRenderLayer == ERenderLayer.RL_PostTranslucent ||
+                    mRenderLayer == ERenderLayer.RL_TranslucentGizmos)
+                {
+                    mPipelineDesc.m_Blend.RenderTarget[0].BlendEnable = 1;
+                }
+                else
+                {
+                    mPipelineDesc.m_Blend.RenderTarget[0].BlendEnable = 0;
+                }
                 SerialId++;
             }
         }
@@ -1133,9 +1143,11 @@ namespace EngineNS.Graphics.Pipeline.Shader
             ScreenMaterial.DepthStencil = dsDesc;
 
             PxDebugMaterial = await this.CreateMaterial(RName.GetRName("material/sysdft_color.material", RName.ERNameType.Engine));
+            VtxColorMaterial = await this.CreateMaterial(RName.GetRName("material/vtx_color.material", RName.ERNameType.Engine));
         }
         public UMaterial ScreenMaterial;
         public UMaterial PxDebugMaterial;
+        public UMaterial VtxColorMaterial;
         public Dictionary<RName, UMaterial> Materials { get; } = new Dictionary<RName, UMaterial>();
         public async Thread.Async.TtTask<UMaterial> CreateMaterial(RName rn)
         {
