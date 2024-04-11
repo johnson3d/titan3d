@@ -27,6 +27,18 @@ public:
 	inline v3dxVector3 ToSingleVector() const{
 		return v3dxVector3((float)X, (float)Y, (float)Z);
 	}
+	inline double dotProduct(const v3dxDVector3& vec) const
+	{
+		return v3dxDVec3Dot(this, &vec);
+	}
+	inline v3dxDVector3 crossProduct(const v3dxDVector3& rkVector) const
+	{
+		v3dxDVector3 kCross;
+		kCross.X = Y * rkVector.Z - Z * rkVector.Y;
+		kCross.Y = Z * rkVector.X - X * rkVector.Z;
+		kCross.Z = X * rkVector.Y - Y * rkVector.X;
+		return kCross;
+	}
 	friend inline v3dxDVector3 operator +(const v3dxDVector3& vect1, const v3dxDVector3& vect2)
 	{
 		v3dxDVector3 vRet;

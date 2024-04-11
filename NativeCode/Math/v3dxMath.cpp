@@ -2566,6 +2566,29 @@ extern "C"
 		return true;
 	}
 
+	bool _IntersectDTri(const v3dxDVector3& ray_origin, const v3dxDVector3& ray_direction, const v3dxDVector3& v0, const v3dxDVector3& v1, const v3dxDVector3& v2, double& t, double& u, double& v)
+	{
+		v3dxDVector3 edge1 = v1 - v0;
+		v3dxDVector3 edge2 = v2 - v0;
+		v3dxDVector3 pvec = ray_direction.crossProduct(edge2);
+		double det = edge1.dotProduct(pvec);
+		if (det > -EPSILON && det < EPSILON)
+			return false;
+		double invDet = 1 / det;
+		v3dxDVector3 tvec = ray_origin - v0;
+		u = tvec.dotProduct(pvec) * invDet;
+		if (u < 0 || u > 1)
+			return false;
+		v3dxDVector3 qvec = tvec.crossProduct(edge1);
+		v = ray_direction.dotProduct(qvec) * invDet;
+		if (v < 0 || u + v > 1)
+			return false;
+		t = edge2.dotProduct(qvec) * invDet;
+		if (t < 0)
+			return false;
+		return true;
+	}
+
 	VFX_API vBOOL v3dxIntersectTri(
 		CONST v3dxVector3 *p0,           // Triangle vertex 0 position
 		CONST v3dxVector3 *p1,           // Triangle vertex 1 position
@@ -2590,6 +2613,19 @@ extern "C"
 #else
 		return _IntersectTri(*pRayPos, *pRayDir, *p0, *p1, *p2, *pDist, *pU, *pV) ? 1 : 0;
 #endif
+	}
+
+	VFX_API vBOOL v3dxIntersectDTri(
+		CONST v3dxDVector3* p0,           // Triangle vertex 0 position
+		CONST v3dxDVector3* p1,           // Triangle vertex 1 position
+		CONST v3dxDVector3* p2,           // Triangle vertex 2 position
+		CONST v3dxDVector3* pRayPos,      // Ray origin
+		CONST v3dxDVector3* pRayDir,      // Ray direction
+		double* pU,                       // Barycentric Hit Coordinates
+		double* pV,                       // Barycentric Hit Coordinates
+		double* pDist)
+	{
+		return _IntersectDTri(*pRayPos, *pRayDir, *p0, *p1, *p2, *pDist, *pU, *pV) ? 1 : 0;
 	}
 
 	VFX_API void v3dxMatrix4Mul_CSharp(v3dMatrix4_t* pOut, const v3dMatrix4_t* mat1, const v3dMatrix4_t* mat2)

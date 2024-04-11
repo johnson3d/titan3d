@@ -1377,6 +1377,16 @@ extern "C"
 			FLOAT *pV,                       // Barycentric Hit Coordinates
 			FLOAT *pDist);                   // Ray-Intersection Parameter Distance
 
+	 VFX_API vBOOL v3dxIntersectDTri(
+		 CONST v3dxDVector3* p0,           // Triangle vertex 0 position
+		 CONST v3dxDVector3* p1,           // Triangle vertex 1 position
+		 CONST v3dxDVector3* p2,           // Triangle vertex 2 position
+		 CONST v3dxDVector3* pRayPos,      // Ray origin
+		 CONST v3dxDVector3* pRayDir,      // Ray direction
+		 double* pU,                       // Barycentric Hit Coordinates
+		 double* pV,                       // Barycentric Hit Coordinates
+		 double* pDist);                   // Ray-Intersection Parameter Distance
+
 	 VFX_API v3dxPlane3* WINAPI v3dxPlaneTransform(v3dxPlane3* pout,
 		 const v3dxPlane3* pplane,
 		 const v3dxMatrix4* pm);

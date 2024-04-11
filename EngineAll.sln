@@ -400,6 +400,12 @@ Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "AssetImpExp", "CSharpCode\B
 EndProject
 Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "AssimpNet", "3rd\csharp\AssimpNet\AssimpNet.shproj", "{0971E63F-1C76-4E26-953D-63991FA73C97}"
 EndProject
+Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "CompilingGenerator", "CSharpCode\CompilingGenerator\CompilingGenerator.shproj", "{C01CE747-DDE3-424B-89B3-95E9716C6130}"
+EndProject
+Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "Localization", "CSharpCode\Bricks\Localization\Localization.shproj", "{2E83D749-257F-4CEA-9370-CB44422524B9}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Localization", "NativeCode\Bricks\Localization\Localization.vcxitems", "{410D0BD4-4FE7-4D97-AFE3-1AE527D8B56E}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -1044,12 +1050,16 @@ Global
 		{8D584D87-62A1-41DE-AF08-4E4527FE106E} = {BD7ED910-C8AD-4273-A759-9465CF41F3D1}
 		{98988E6F-4A71-4B73-8BAF-D5BBDB679ADF} = {B28E2174-4783-47F9-98B2-3C589DE43B04}
 		{0971E63F-1C76-4E26-953D-63991FA73C97} = {1BEAD919-8866-4753-B5EE-64ACC9CC2E5B}
+		{C01CE747-DDE3-424B-89B3-95E9716C6130} = {424B9266-46E0-4F38-BFE3-9F1338152F96}
+		{2E83D749-257F-4CEA-9370-CB44422524B9} = {B28E2174-4783-47F9-98B2-3C589DE43B04}
+		{410D0BD4-4FE7-4D97-AFE3-1AE527D8B56E} = {041F2057-6090-446E-8CEF-D524C973477F}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {F7EC7EF6-F92D-464A-93A0-66C2A8E15609}
 	EndGlobalSection
 	GlobalSection(SharedMSBuildProjectFiles) = preSolution
 		EngineConfig.vcxitems*{009d7483-131d-43de-bcbe-56f21fecadcf}*SharedItemsImports = 9
+		CSharpCode\CompilingGenerator\CompilingGenerator.projitems*{015286df-5ed8-4fa9-9b45-0e73ed25d3a7}*SharedItemsImports = 5
 		Plugins\GameTasks\GameTasks\GameTasks.projitems*{059e7030-ebfa-4923-b7c0-8acfdbc347a9}*SharedItemsImports = 5
 		Plugins\GameItems\GameItems\GameItem.projitems*{06a7e536-e6de-4033-afca-27030a7ff2a3}*SharedItemsImports = 13
 		3rd\csharp\xxHash\xxHash.projitems*{06df8867-c29e-4424-95a8-3592453e3fee}*SharedItemsImports = 13
@@ -1093,6 +1103,7 @@ Global
 		CSharpCode\Bricks\GpuDriven\GpuDriven.projitems*{0d4fc498-20f3-445f-8f8a-43cbe8891938}*SharedItemsImports = 5
 		CSharpCode\Bricks\ImageDecoder\ImageDecoder.projitems*{0d4fc498-20f3-445f-8f8a-43cbe8891938}*SharedItemsImports = 5
 		CSharpCode\Bricks\Input\Input.projitems*{0d4fc498-20f3-445f-8f8a-43cbe8891938}*SharedItemsImports = 5
+		CSharpCode\Bricks\Localization\Localization.projitems*{0d4fc498-20f3-445f-8f8a-43cbe8891938}*SharedItemsImports = 5
 		CSharpCode\Bricks\Network\Network.projitems*{0d4fc498-20f3-445f-8f8a-43cbe8891938}*SharedItemsImports = 5
 		CSharpCode\Bricks\NodeGraph\NodeGraph.projitems*{0d4fc498-20f3-445f-8f8a-43cbe8891938}*SharedItemsImports = 5
 		CSharpCode\Bricks\Particle\Particle.projitems*{0d4fc498-20f3-445f-8f8a-43cbe8891938}*SharedItemsImports = 5
@@ -1112,6 +1123,7 @@ Global
 		CSharpCode\Bricks\VXGI\VXGI.projitems*{0d4fc498-20f3-445f-8f8a-43cbe8891938}*SharedItemsImports = 5
 		CSharpCode\Bricks\WindowSDL\WindowSDL.projitems*{0d4fc498-20f3-445f-8f8a-43cbe8891938}*SharedItemsImports = 5
 		CSharpCode\Bricks\WorldSimulator\WorldSimulator.projitems*{0d4fc498-20f3-445f-8f8a-43cbe8891938}*SharedItemsImports = 5
+		CSharpCode\CompilingGenerator\CompilingGenerator.projitems*{0d4fc498-20f3-445f-8f8a-43cbe8891938}*SharedItemsImports = 5
 		CSharpCode\Editor\Editor.projitems*{0d4fc498-20f3-445f-8f8a-43cbe8891938}*SharedItemsImports = 5
 		CSharpCode\GamePlay\GamePlay.projitems*{0d4fc498-20f3-445f-8f8a-43cbe8891938}*SharedItemsImports = 5
 		CSharpCode\Grapics\Mesh\Mesh.projitems*{0d4fc498-20f3-445f-8f8a-43cbe8891938}*SharedItemsImports = 5
@@ -1157,6 +1169,7 @@ Global
 		CSharpCode\Bricks\GpuDriven\GpuDriven.projitems*{2b57f697-2492-4d3b-859c-7d47e12e6819}*SharedItemsImports = 5
 		CSharpCode\Bricks\ImageDecoder\ImageDecoder.projitems*{2b57f697-2492-4d3b-859c-7d47e12e6819}*SharedItemsImports = 5
 		CSharpCode\Bricks\Input\Input.projitems*{2b57f697-2492-4d3b-859c-7d47e12e6819}*SharedItemsImports = 5
+		CSharpCode\Bricks\Localization\Localization.projitems*{2b57f697-2492-4d3b-859c-7d47e12e6819}*SharedItemsImports = 5
 		CSharpCode\Bricks\Network\Network.projitems*{2b57f697-2492-4d3b-859c-7d47e12e6819}*SharedItemsImports = 5
 		CSharpCode\Bricks\NodeGraph\NodeGraph.projitems*{2b57f697-2492-4d3b-859c-7d47e12e6819}*SharedItemsImports = 5
 		CSharpCode\Bricks\Particle\Particle.projitems*{2b57f697-2492-4d3b-859c-7d47e12e6819}*SharedItemsImports = 5
@@ -1184,6 +1197,7 @@ Global
 		CSharpCode\Platform\Android\Android.projitems*{2b57f697-2492-4d3b-859c-7d47e12e6819}*SharedItemsImports = 5
 		CSharpCode\Rtti\Rtti.projitems*{2b57f697-2492-4d3b-859c-7d47e12e6819}*SharedItemsImports = 5
 		CSharpCode\Bricks\TcpServer\TcpServer.projitems*{2d94aeaf-8c89-4373-9987-79259902bdba}*SharedItemsImports = 13
+		CSharpCode\Bricks\Localization\Localization.projitems*{2e83d749-257f-4cea-9370-cb44422524b9}*SharedItemsImports = 13
 		CSharpCode\ImGui\ImGui.projitems*{30bc6f10-34dc-43fc-aa1e-ea73602b074f}*SharedItemsImports = 13
 		CSharpCode\Grapics\Mesh\Mesh.projitems*{34d2b60f-879e-4656-882f-810e3fbbf177}*SharedItemsImports = 13
 		CSharpCode\Bricks\VXGI\VXGI.projitems*{3806a9cf-7036-4eed-982b-f0f925be69c1}*SharedItemsImports = 13
@@ -1194,6 +1208,7 @@ Global
 		CSharpCode\Bricks\WindowSDL\WindowSDL.projitems*{3da775bf-8df6-4000-9458-5975dc3377a2}*SharedItemsImports = 13
 		NativeCode\Bricks\DestinyPX\NxPhysics\NxPhysics.vcxitems*{3f713005-d69f-4477-a9db-83e9b13a27f8}*SharedItemsImports = 9
 		CSharpCode\Bricks\NodeGraph\NodeGraph.projitems*{406055cd-ecc3-4aef-a7f2-b2ff5f8ea54c}*SharedItemsImports = 13
+		NativeCode\Bricks\Localization\Localization.vcxitems*{410d0bd4-4fe7-4d97-afe3-1ae527d8b56e}*SharedItemsImports = 9
 		NativeCode\Bricks\ImageDecoder\ImageDecoder.vcxitems*{414404d4-3771-482c-9f20-4b962de071b0}*SharedItemsImports = 9
 		NativeCode\Bricks\RecastBuilder\RecastBuilder.vcxitems*{4355e073-1750-445b-81c4-80d9566ea60c}*SharedItemsImports = 9
 		CSharpCode\Bricks\Recast\Recast.projitems*{462207b7-2926-4af3-8dcd-90feb7442b1c}*SharedItemsImports = 13
@@ -1304,6 +1319,7 @@ Global
 		NativeCode\Bricks\FBX\FBX.vcxitems*{ad0e23e3-eca5-4e52-b69d-bb6e669c48c6}*SharedItemsImports = 4
 		NativeCode\Bricks\GpuDump\GpuDump.vcxitems*{ad0e23e3-eca5-4e52-b69d-bb6e669c48c6}*SharedItemsImports = 4
 		NativeCode\Bricks\ImageDecoder\ImageDecoder.vcxitems*{ad0e23e3-eca5-4e52-b69d-bb6e669c48c6}*SharedItemsImports = 4
+		NativeCode\Bricks\Localization\Localization.vcxitems*{ad0e23e3-eca5-4e52-b69d-bb6e669c48c6}*SharedItemsImports = 4
 		NativeCode\Bricks\MathLib\MathLib.vcxitems*{ad0e23e3-eca5-4e52-b69d-bb6e669c48c6}*SharedItemsImports = 4
 		NativeCode\Bricks\MeshSimplify\MeshSimplify.vcxitems*{ad0e23e3-eca5-4e52-b69d-bb6e669c48c6}*SharedItemsImports = 4
 		NativeCode\Bricks\Particle\Particle.vcxitems*{ad0e23e3-eca5-4e52-b69d-bb6e669c48c6}*SharedItemsImports = 4
@@ -1345,6 +1361,7 @@ Global
 		3rd\native\miniz\miniz.vcxitems*{bb5c9f78-44f7-4300-8c3e-0502f529e1cc}*SharedItemsImports = 9
 		3rd\native\Recast\Recast\Recast.vcxitems*{bccbb13c-8f09-42ab-b3c9-da9a40c43e0b}*SharedItemsImports = 9
 		Plugins\GameServer\ClientRobot\ClientRobot\ClientRobot.projitems*{beb33a99-ad2a-475e-87c1-0699e0032286}*SharedItemsImports = 13
+		CSharpCode\CompilingGenerator\CompilingGenerator.projitems*{c01ce747-dde3-424b-89b3-95e9716c6130}*SharedItemsImports = 13
 		NativeCode\Bricks\MathLib\MathLib.vcxitems*{c0ca4d70-0c03-4a0e-a9e2-c837e2cf3687}*SharedItemsImports = 9
 		CSharpCode\Base\Base.projitems*{c0f05488-22ec-4212-8fc4-4873d8360c52}*SharedItemsImports = 13
 		Plugins\GameServer\Login\LoginServer\LoginServer.projitems*{c24b3899-e5a9-44ba-89ac-d1b7940b390e}*SharedItemsImports = 13
