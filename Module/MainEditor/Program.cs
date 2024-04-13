@@ -73,14 +73,14 @@ namespace MainEditor
         static void Main(string[] args)
         {
             //SampleA.Test();
-            var it = FnOnTest(true);
-            var itt = it.GetAsyncEnumerator();
-            while (itt.MoveNextAsync().Result == true)
-            {
-                var rr = itt.Current;
-                if (rr == -1)
-                    break;
-            }
+            //var it = FnOnTest(true);
+            //var itt = it.GetAsyncEnumerator();
+            //while (itt.MoveNextAsync().Result == true)
+            //{
+            //    var rr = itt.Current;
+            //    if (rr == -1)
+            //        break;
+            //}
 
             {
                 var ev1 = Environment.GetEnvironmentVariable("CORECLR_ENABLE_PROFILING");
@@ -154,7 +154,7 @@ namespace MainEditor
             var cfg = FindArgument(args, "config=");
             Console.WriteLine($"Config={cfg}");
 
-            var task = EngineNS.UEngine.StartEngine(new EngineNS.UEngine(), cfg);
+            var task = EngineNS.UEngine.StartEngine(new EngineNS.UEngine(args), cfg);
 
             while (true)
             {

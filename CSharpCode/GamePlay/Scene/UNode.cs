@@ -173,6 +173,7 @@ namespace EngineNS.GamePlay.Scene
         {
             NodeStyles &= ~style;
         }
+        [Category("Option")]
         public bool IsNoTick
         {
             get
@@ -191,6 +192,7 @@ namespace EngineNS.GamePlay.Scene
                 }
             }
         }
+        [Category("Option")]
         public virtual bool IsCastShadow
         {
             get
@@ -209,6 +211,7 @@ namespace EngineNS.GamePlay.Scene
                 }
             }
         }
+        [Category("Option")]
         public virtual bool IsAcceptShadow
         {
             get
@@ -227,6 +230,7 @@ namespace EngineNS.GamePlay.Scene
                 }
             }
         }
+        [Category("Option")]
         public virtual bool IsSceneManaged
         {
             get
@@ -563,6 +567,7 @@ namespace EngineNS.GamePlay.Scene
         public virtual void OnSceneLoaded()
         {
             this.HitproxyType = this.HitproxyType;
+            this.IsSceneManaged = this.IsSceneManaged;
         }
         #endregion
 

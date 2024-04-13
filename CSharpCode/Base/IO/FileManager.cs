@@ -6,9 +6,9 @@ namespace EngineNS.IO
 {
     public partial class TtFileManager
     {
-        internal TtFileManager()
+        internal TtFileManager(string[] args)
         {
-            InitDirectory();
+            InitDirectory(args);
             SetSysDir(ESystemDir.MetaData, "metadata");
             SetSysDir(ESystemDir.Effect, "effect");
             SetSysDir(ESystemDir.Shader, "shader");
@@ -18,7 +18,7 @@ namespace EngineNS.IO
             SureDirectory(GetPath(ERootDir.Cache, ESystemDir.Shader));
             SureDirectory(GetPath(ERootDir.Cache, ESystemDir.RenderDoc));
         }
-        partial void InitDirectory();
+        partial void InitDirectory(string[] args);
         public enum ERootDir
         {
             //Root,

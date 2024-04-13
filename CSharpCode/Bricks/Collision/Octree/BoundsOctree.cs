@@ -267,24 +267,71 @@ namespace EngineNS.Bricks.Collision.Octree
             RootNode = RootNode.ShrinkIfPossible(initialSize);
         }
     }
+
+    public class TtSceneOctree : IMemberTickable
+    {
+        Bricks.Collision.Octree.TtBoundsOctree<GamePlay.Scene.UNode> mOctree;
+        public async System.Threading.Tasks.Task<bool> Initialize(object host)
+        {
+            var scene = host as GamePlay.Scene.UScene;
+            mOctree = new Bricks.Collision.Octree.TtBoundsOctree<GamePlay.Scene.UNode>(15, scene.Placement.AbsTransform.Position, 1, 1.25f);
+            return true;
+        }
+
+        public void Cleanup(object host)
+        {
+
+        }
+        public void TickLogic(object host, float ellapse)
+        {
+
+        }
+        public void TickRender(object host, float ellapse)
+        {
+
+        }
+        public void TickSync(object host, float ellapse)
+        {
+
+        }
+        public void OnHostNotify(object host, in FHostNotify notify)
+        {
+            switch (notify.Info)
+            {
+                case "OnSceneLoaded":
+                    {
+                        var scene = host as GamePlay.Scene.UScene;
+                        var nodes = scene.GetManagedNodes();
+                        foreach (var i in nodes)
+                        {
+
+                        }
+                    }
+                    break;
+                case "OnSceneAllocId":
+                    {
+                        var scene = host as GamePlay.Scene.UScene;
+                        var node = notify.Parameter as GamePlay.Scene.UNode;
+                        var aabb = new Aabb(node.AABB);
+                        mOctree.Add(node, aabb);
+                    }
+                    break;
+                case "OnSceneFreeId":
+                    {
+                        var scene = host as GamePlay.Scene.UScene;
+                        var node = notify.Parameter as GamePlay.Scene.UNode;
+                    }
+                    break;
+            }
+        }
+    }
 }
 
 namespace EngineNS.GamePlay.Scene
 {
     public partial class UScene
     {
-        Bricks.Collision.Octree.TtBoundsOctree<UNode> mOctree;
-        public Bricks.Collision.Octree.TtBoundsOctree<UNode> Octree 
-        { 
-            get
-            {
-                if (mOctree == null)
-                {
-                    mOctree = new Bricks.Collision.Octree.TtBoundsOctree<UNode>(15, this.Placement.AbsTransform.Position, 1, 1.25f);
-                }
-                return mOctree;
-            }
-        }
+        public Bricks.Collision.Octree.TtSceneOctree SceneOctree { get; } = new Bricks.Collision.Octree.TtSceneOctree();
     }
 }
 

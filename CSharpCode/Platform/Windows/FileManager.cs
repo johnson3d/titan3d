@@ -5,23 +5,22 @@ namespace EngineNS.IO
 {
     partial class TtFileManager
     {
-        partial void InitDirectory()
+        partial void InitDirectory(string[] args)
         {
             var mBin = System.IO.Directory.GetCurrentDirectory();//AppDomain.CurrentDomain.BaseDirectory;
             var root = GetBaseDirectory(mBin, 1);
 
-            if (FileExists(root + "Engine.cfg"))
+            //SetRoot(ERootDir.Root, root);
+
+            var cfg = UEngine.FindArgument(args, "publish=");
+            if (cfg == "true")
             {
-                var xml = new System.Xml.XmlDocument();
-                xml.Load(root + "Engine.cfg");
+                SetRoot(ERootDir.Execute, root + "publishbin");
             }
             else
             {
-
+                SetRoot(ERootDir.Execute, root + "binaries");// AppDomain.CurrentDomain.BaseDirectory);
             }
-
-            //SetRoot(ERootDir.Root, root);
-            SetRoot(ERootDir.Execute, root + "binaries");// AppDomain.CurrentDomain.BaseDirectory);
             SetRoot(ERootDir.Engine, root + "enginecontent");
             SetRoot(ERootDir.Game, root + "content");
             SetRoot(ERootDir.PluginContent, root + "plugincontent");

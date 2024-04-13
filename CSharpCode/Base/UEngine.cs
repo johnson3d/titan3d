@@ -138,6 +138,21 @@ namespace EngineNS
     [Rtti.Meta]
     public partial class UEngine : UModuleHost<UEngine>
     {
+        public static string FindArgument(string[] args, string startWith)
+        {
+            foreach (var i in args)
+            {
+                if (i.StartsWith(startWith))
+                {
+                    return i.Substring(startWith.Length);
+                }
+            }
+            return null;
+        }
+        public UEngine(string[] args)
+        {
+            mFileManager = new IO.TtFileManager(args);
+        }
         private static UEngine mInstance;
         [Rtti.Meta(Flags = Rtti.MetaAttribute.EMetaFlags.Unserializable | Rtti.MetaAttribute.EMetaFlags.MacrossReadOnly)]
         public static UEngine Instance { get => mInstance; }
@@ -145,10 +160,11 @@ namespace EngineNS
         [Rtti.Meta]
         public UEngineConfig Config { get; set; }
         public URuntimeConfig RuntimeConfig { get; set; }
+        private IO.TtFileManager mFileManager;
         public IO.TtFileManager FileManager
         {
-            get;
-        } = new IO.TtFileManager();
+            get => mFileManager;
+        }
         [Rtti.Meta]
         public UTickableManager TickableManager
         {

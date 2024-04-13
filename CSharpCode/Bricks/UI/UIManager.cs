@@ -21,6 +21,12 @@ namespace EngineNS.UI
             UIManagerConstruct_Msg();
         }
 
+        public override void Cleanup(UEngine host)
+        {
+            ClearTemplates();
+            base.Cleanup(host);
+        }
+
         public struct UIKeyName
         {
             public RName RName;

@@ -96,30 +96,44 @@ namespace EngineNS.GamePlay.Scene
         public UWorld World;
         #region Allocator
         int PrevAllocId = 0;
-        private UNode[] ContainNodes = new UNode[UInt16.MaxValue];
+        private UNode[] ManagedNodes = new UNode[UInt16.MaxValue];
+        public UNode[] GetManagedNodes()
+        {
+            return ManagedNodes;
+        }
         public void AllocId(UNode node)
         {
-            lock (ContainNodes)
+            lock (ManagedNodes)
             {
                 if (node is ULightWeightNodeBase)
                     return;
-                for (int i = PrevAllocId; i < ContainNodes.Length; i++)
+                for (int i = PrevAllocId; i < ManagedNodes.Length; i++)
                 {
-                    if (ContainNodes[i] == null)
+                    if (ManagedNodes[i] == null)
                     {
-                        ContainNodes[i] = node;
+                        ManagedNodes[i] = node;
                         node.SceneId = (UInt32)i;
                         PrevAllocId = i;
+
+                        var notify = new FHostNotify();
+                        notify.Info = "OnSceneAllocId";
+                        notify.Parameter = node;
+                        mMemberTickables.SendNotify(this, in notify);
                         return;
                     }
                 }
-                for (int i = 0; i < ContainNodes.Length; i++)
+                for (int i = 0; i < ManagedNodes.Length; i++)
                 {
-                    if (ContainNodes[i] == null)
+                    if (ManagedNodes[i] == null)
                     {
-                        ContainNodes[i] = node;
+                        ManagedNodes[i] = node;
                         node.SceneId = (UInt32)i;
                         PrevAllocId = i;
+
+                        var notify = new FHostNotify();
+                        notify.Info = "OnSceneAllocId";
+                        notify.Parameter = node;
+                        mMemberTickables.SendNotify(this, in notify);
                         return;
                     }
                 }
@@ -130,12 +144,18 @@ namespace EngineNS.GamePlay.Scene
         {
             if (node is ULightWeightNodeBase)
                 return;
-            lock (ContainNodes)
+            lock (ManagedNodes)
             {
                 if (node.SceneId >= UInt16.MaxValue)
                     return;
-                System.Diagnostics.Debug.Assert(ContainNodes[node.SceneId] == node);
-                ContainNodes[node.SceneId] = null;
+                
+                var notify = new FHostNotify();
+                notify.Info = "OnSceneFreeId";
+                notify.Parameter = node;
+                mMemberTickables.SendNotify(this, in notify);
+
+                System.Diagnostics.Debug.Assert(ManagedNodes[node.SceneId] == node);
+                ManagedNodes[node.SceneId] = null;
                 node.SceneId = UInt32.MaxValue;
             }
         }
@@ -239,8 +259,11 @@ namespace EngineNS.GamePlay.Scene
                     inNode.OnSceneLoaded();
                     return false;
                 }, null);
+                var notify = new FHostNotify();
+                notify.Info = "OnSceneLoaded";
+                scene.mMemberTickables.SendNotify(scene, in notify);
                 return scene;
-            }   
+            }
         }
         public IO.IAssetMeta CreateAMeta()
         {

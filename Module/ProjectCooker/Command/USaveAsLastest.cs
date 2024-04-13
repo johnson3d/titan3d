@@ -261,9 +261,6 @@ namespace ProjectCooker.Command
                     var rn = EngineNS.RName.GetRName(rp, EngineNS.RName.ERNameType.Game);
                     var element = UEngine.Instance.UIManager.Load(rn);
                     UEngine.Instance.UIManager.Save(rn, element);
-                    var host = new EditorUIHost();
-                    host.LoadEditorOnlyData(rn);
-                    host.SaveEditorOnlyData(rn);
                     macrossEditor.LoadClassGraph(rn);
                     macrossEditor.SaveClassGraph(rn);
                 }
@@ -282,9 +279,6 @@ namespace ProjectCooker.Command
                     var rn = EngineNS.RName.GetRName(rp, EngineNS.RName.ERNameType.Engine);
                     var element = UEngine.Instance.UIManager.Load(rn);
                     UEngine.Instance.UIManager.Save(rn, element);
-                    var host = new EditorUIHost();
-                    host.LoadEditorOnlyData(rn);
-                    host.SaveEditorOnlyData(rn);
                     macrossEditor.LoadClassGraph(rn);
                     macrossEditor.SaveClassGraph(rn);
                 }

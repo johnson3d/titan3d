@@ -171,6 +171,10 @@ namespace EngineNS.Bricks.PhysicsCore
         {
 
         }
+        public void OnHostNotify(object host, in FHostNotify notify)
+        {
+
+        }
     }
 }
 

@@ -15,7 +15,12 @@ namespace EngineNS.UI
         public static Dictionary<UTypeDesc, TtUITemplate> SystemDefaultTemplates = new Dictionary<UTypeDesc, TtUITemplate>();
         Dictionary<UTypeDesc, TtUITemplate> mDefaultTemplates = new Dictionary<UTypeDesc, TtUITemplate>();
         Dictionary<string, TtUITemplate> mTemplates = new Dictionary<string, TtUITemplate>();
-
+        public void ClearTemplates()
+        {
+            SystemDefaultTemplates.Clear();
+            mDefaultTemplates.Clear();
+            mTemplates.Clear();
+        }
         public TtUITemplate GetDefaultTemplate(UTypeDesc type)
         {
             if (mDefaultTemplates.TryGetValue(type, out var defaultTemplate))

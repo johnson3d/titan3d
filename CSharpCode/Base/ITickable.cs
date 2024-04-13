@@ -11,6 +11,14 @@ namespace EngineNS
         void TickBeginFrame(float ellapse);
         void TickSync(float ellapse);
     }
+
+    public struct FHostNotify
+    {
+        public int Msg;
+        public string Info;
+        public object Parameter;
+    }
+
     public interface IMemberTickable
     {
         System.Threading.Tasks.Task<bool> Initialize(object host);
@@ -18,6 +26,7 @@ namespace EngineNS
         void TickLogic(object host, float ellapse);
         void TickRender(object host, float ellapse);
         void TickSync(object host, float ellapse);
+        void OnHostNotify(object host, in FHostNotify notify);
     }
     public class UMemberTickables
     {
@@ -71,6 +80,13 @@ namespace EngineNS
             foreach (var i in Members)
             {
                 i.TickSync(host, ellapse);
+            }
+        }
+        public void SendNotify(object host, in FHostNotify notify)
+        {
+            foreach (var i in Members)
+            {
+                i.OnHostNotify(host, in notify);
             }
         }
     }
