@@ -32,7 +32,8 @@ namespace NxRHI
 				{
 					auto vb = vbv->Buffer.UnsafeConvertTo<DX11Buffer>();
 					dxVBs[i] = vb->mBuffer;
-					strides[i] = vb->Desc.StructureStride;
+					strides[i] = vbv->Desc.Stride;// vb->Desc.StructureStride;
+					offset[i] = vbv->Desc.Offset;
 				}
 				else
 					dxVBs[i] = nullptr;

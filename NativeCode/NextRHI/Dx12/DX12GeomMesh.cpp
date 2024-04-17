@@ -23,10 +23,10 @@ namespace NxRHI
 				if (vbv != nullptr)
 				{
 					auto vb = vbv->Buffer.UnsafeConvertTo<DX12Buffer>();
-					auto& vbv = dxVBs[j];
-					vbv.BufferLocation = vb->GetGPUVirtualAddress();
-					vbv.StrideInBytes = vb->Desc.StructureStride;
-					vbv.SizeInBytes = vb->Desc.Size;
+					auto& dxvbv = dxVBs[j];
+					dxvbv.BufferLocation = vb->GetGPUVirtualAddress() + vbv->Desc.Offset;
+					dxvbv.StrideInBytes = vbv->Desc.Stride;// vb->Desc.StructureStride;
+					dxvbv.SizeInBytes = vbv->Desc.Size;
 				}
 			}
 		}

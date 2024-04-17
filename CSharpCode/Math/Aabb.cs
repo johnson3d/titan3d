@@ -109,6 +109,13 @@ namespace EngineNS
         }
         public static bool IsContain(in Aabb box1, in DVector3 pos)
         {
+            var dist = pos - box1.Center;
+            if (Math.Abs(dist.X) > box1.Extent.X ||
+                Math.Abs(dist.Y) > box1.Extent.Y ||
+                Math.Abs(dist.Z) > box1.Extent.Z)
+            {
+                return false;
+            }
             return true;
         }
         public bool IsContain(in DVector3 pos)

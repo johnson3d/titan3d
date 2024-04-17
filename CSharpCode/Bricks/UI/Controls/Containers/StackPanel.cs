@@ -60,7 +60,7 @@ namespace EngineNS.UI.Controls.Containers
                     var childSize = childUI.DesiredSize;
                     tempSize.Width = Math.Max(tempSize.Width, childSize.Width);
                     tempSize.Height = Math.Max(tempSize.Height, childSize.Height);
-                    if (Orientation == ELayout_Orientation.Horizontal)
+                    if (Orientation == ELayout_Orientation.Vertical)
                     {
                         retVal.Height += tempSize.Height;
                         retVal.Width = MathF.Max(retVal.Width, tempSize.Width);
@@ -93,7 +93,7 @@ namespace EngineNS.UI.Controls.Containers
                 var childMargin = childUI.Margin;
                 var childDesiredSize = childUI.DesiredSize;
                 RectangleF childFinalRect = RectangleF.Empty;
-                if (Orientation == ELayout_Orientation.Horizontal)
+                if (Orientation == ELayout_Orientation.Vertical)
                 {
                     childFinalRect.X = innerRect.X;
                     childFinalRect.Y = accumulateY;

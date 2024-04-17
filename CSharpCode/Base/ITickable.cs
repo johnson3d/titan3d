@@ -24,8 +24,6 @@ namespace EngineNS
         System.Threading.Tasks.Task<bool> Initialize(object host);
         void Cleanup(object host);
         void TickLogic(object host, float ellapse);
-        void TickRender(object host, float ellapse);
-        void TickSync(object host, float ellapse);
         void OnHostNotify(object host, in FHostNotify notify);
     }
     public class UMemberTickables
@@ -66,20 +64,6 @@ namespace EngineNS
             foreach(var i in Members)
             {
                 i.TickLogic(host, ellapse);
-            }
-        }
-        public void TickRender(object host, float ellapse)
-        {
-            foreach (var i in Members)
-            {
-                i.TickRender(host, ellapse);
-            }
-        }
-        public void TickSync(object host, float ellapse)
-        {
-            foreach (var i in Members)
-            {
-                i.TickSync(host, ellapse);
             }
         }
         public void SendNotify(object host, in FHostNotify notify)

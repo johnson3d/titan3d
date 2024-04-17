@@ -12,7 +12,7 @@
   </Icon>
   <RefAssetRNames Type="System.Collections.Generic.List&lt;EngineNS.RName@EngineCore,&gt;@Unknown" Count="2">
     <e_0 Value="Engine,ui/uimaterial_default.material,1f4f2fbf-4afc-468b-930e-84f215eddab4" />
-    <e_1 Value="Engine,texture/checkboard.srv,88bb693e-9940-444e-b5c9-a1776d0b93da" />
+    <e_1 Value="Engine,texture/white.srv,371d2dd9-ce90-4818-ab15-7635e6aa8aaf" />
   </RefAssetRNames>
   <TypeStr Type="System.String@Unknown" Value="EngineNS.Graphics.Pipeline.Shader.UMaterialInstance@EngineCore" />
 </Root>

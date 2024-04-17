@@ -88,6 +88,14 @@ namespace EngineNS.Graphics.Mesh
         {
             return mCoreObject.Init(UEngine.Instance.GfxDevice.RenderContext.mCoreObject, name, atom);
         }
+        public void SetTransientVertexBuffer(NxRHI.TtTransientBuffer buffer)
+        {
+            mCoreObject.SetTransientVertexBuffer(buffer.mCoreObject);
+        }
+        public void SetTransientIndexBuffer(NxRHI.TtTransientBuffer buffer)
+        {
+            mCoreObject.SetTransientIndexBuffer(buffer.mCoreObject);
+        }
         public void PushAtom(uint index, in EngineNS.NxRHI.FMeshAtomDesc desc)
         {
             mCoreObject.PushAtom(index, in desc);

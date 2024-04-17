@@ -119,7 +119,14 @@ namespace NxRHI
 
 			auto device = mDeviceRef.GetPtr();
 			//auto cmd = ((DX11CmdQueue*)device->GetCmdQueue())->mHardwareContext;
-			((DX11CommandList*)cmd)->mContext->UpdateSubresource(mBuffer, subRes, nullptr, pData, footPrint->RowPitch, footPrint->TotalSize);
+			D3D11_BOX box{};
+			box.left = footPrint->X;
+			box.right = footPrint->X + footPrint->Width;
+			box.top = footPrint->Y;
+			box.bottom = footPrint->Y + footPrint->Height;
+			box.front = footPrint->Z;
+			box.back = footPrint->Z + footPrint->Depth;
+			((DX11CommandList*)cmd)->mContext4->UpdateSubresource1(mBuffer, subRes, &box, pData, footPrint->RowPitch, footPrint->TotalSize, D3D11_COPY_NO_OVERWRITE);
 			if (cmd->mCmdRecorder != nullptr)
 				cmd->mCmdRecorder->mDirectDrawNum++;
 		}

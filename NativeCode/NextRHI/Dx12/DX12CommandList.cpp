@@ -440,6 +440,7 @@ namespace NxRHI
 	void DX12CommandList::SetVertexBuffer(UINT slot, IVbView* buffer, UINT32 Offset, UINT Stride)
 	{
 		ASSERT(false);
+		Offset = Offset + (UINT)buffer->Desc.Offset;
 		ASSERT(mIsRecording);
 		D3D12_VERTEX_BUFFER_VIEW tmp{};
 		tmp.StrideInBytes = Stride;
@@ -466,7 +467,7 @@ namespace NxRHI
 		}
 		if (buffer != nullptr)
 		{
-			tmp.BufferLocation = buffer->Buffer.UnsafeConvertTo<DX12Buffer>()->GetGPUVirtualAddress();
+			tmp.BufferLocation = buffer->Buffer.UnsafeConvertTo<DX12Buffer>()->GetGPUVirtualAddress() + buffer->Desc.Offset;
 			tmp.SizeInBytes = buffer->Desc.Size;
 		}
 		mContext->IASetIndexBuffer(&tmp);

@@ -288,14 +288,55 @@ namespace EngineNS.UI.Controls
         Visibility mVisibility = Visibility.Visible;
         [BindProperty]
         [Rtti.Meta]
-        public Visibility Visibility
+        public virtual Visibility Visibility
         {
             get => mVisibility;
             set
             {
                 OnValueChange(value, mVisibility);
+
+                switch(value)
+                {
+                    case Visibility.Visible:
+                        {
+                            if(mVisibility == Visibility.Hidden)
+                            {
+                                MeshDirty = true;
+                            }
+                            else if(mVisibility == Visibility.Collapsed)
+                            {
+                                InvalidParent();
+                            }
+                        }
+                        break;
+                    case Visibility.Hidden:
+                        {
+                            if(mVisibility == Visibility.Collapsed)
+                            {
+                                InvalidParent();
+                            }
+                            else if(mVisibility == Visibility.Visible)
+                            {
+                                MeshDirty = true;
+                            }
+                        }
+                        break;
+                    case Visibility.Collapsed:
+                        {
+                            if(mVisibility != Visibility.Collapsed)
+                                InvalidParent();
+                        }
+                        break;
+                }
+
                 mVisibility = value;
             }
+        }
+        void InvalidParent()
+        {
+            var p = VisualTreeHelper.GetParent(this);
+            if (p != null && !p.MeasureInProgress)
+                p.OnChildDesiredSizeChanged(this);
         }
         public virtual bool IsMousePointIn(in Vector2 mousePoint)
         {

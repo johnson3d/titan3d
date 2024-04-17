@@ -163,14 +163,6 @@ namespace EngineNS.Bricks.PhysicsCore
                 PxScene?.Tick(ellapse * 0.001f);
             }
         }
-        public void TickRender(object host, float ellapse)
-        {
-
-        }
-        public void TickSync(object host, float ellapse)
-        {
-
-        }
         public void OnHostNotify(object host, in FHostNotify notify)
         {
 

@@ -514,6 +514,11 @@ namespace EngineNS.Graphics.Pipeline.Shader
                 return mWireColorMateria;
             }
         }
+        public UMaterialInstance WireVtxColorMateria
+        {
+            get;
+            private set;
+        }
         public async Thread.Async.TtTask<bool> Initialize(UEngine engine)
         {
             await Thread.TtAsyncDummyClass.DummyFunc();
@@ -532,6 +537,8 @@ namespace EngineNS.Graphics.Pipeline.Shader
             rast.CullMode = NxRHI.ECullMode.CMD_NONE;
             mWireColorMateria.Rasterizer = rast;
             mWireColorMateria.RenderLayer = ERenderLayer.RL_Translucent;
+
+            WireVtxColorMateria = await CreateMaterialInstance(RName.GetRName("material/wire_vfx_color.uminst", RName.ERNameType.Engine));
 
             return true;
         }

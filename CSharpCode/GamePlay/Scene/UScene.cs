@@ -303,6 +303,14 @@ namespace EngineNS.GamePlay.Scene
         {
             return true;
         }
+        public override void OnGatherVisibleMeshes(UWorld.UVisParameter rp)
+        {
+            FHostNotify notify = new FHostNotify();
+            notify.Info = "OnGatherVisibleMeshes";
+            notify.Parameter = rp;
+            mMemberTickables.SendNotify(this, in notify);
+            base.OnGatherVisibleMeshes(rp);
+        }
 
     }
 

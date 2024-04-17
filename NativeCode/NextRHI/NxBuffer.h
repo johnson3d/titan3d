@@ -572,6 +572,7 @@ namespace NxRHI
 	struct TR_CLASS(SV_LayoutStruct = 8)
 		FVbvDesc
 	{
+		UINT64		Offset = 0;
 		UINT		Stride = 0;
 		UINT		Size = 0;
 		EGpuUsage	Usage = EGpuUsage::USAGE_DEFAULT;
@@ -579,6 +580,7 @@ namespace NxRHI
 		void*		InitData = nullptr;
 		void SetDefault()
 		{
+			Offset = 0;
 			Stride = 0;
 			Size = 0;
 			Usage = EGpuUsage::USAGE_DEFAULT;
@@ -592,11 +594,11 @@ namespace NxRHI
 	public:
 		void UpdateGpuData(ICommandList* cmd, UINT offset, void* pData, UINT size)
 		{
-			Buffer->UpdateGpuDataSimple(cmd, offset, pData, size, 0);
+			Buffer->UpdateGpuDataSimple(cmd, (UINT)Desc.Offset + offset, pData, size, 0);
 		}
 		void UpdateGpuData(UINT offset, void* pData, UINT size)
 		{
-			Buffer->UpdateGpuDataSimple(offset, pData, size, 0);
+			Buffer->UpdateGpuDataSimple((UINT)Desc.Offset + offset, pData, size, 0);
 		}
 	public:
 		FVbvDesc			Desc{};
@@ -606,6 +608,7 @@ namespace NxRHI
 	struct TR_CLASS(SV_LayoutStruct = 8)
 		FIbvDesc
 	{
+		UINT64		Offset = 0;
 		UINT		Stride = sizeof(UINT);
 		UINT		Size = 0;
 		EGpuUsage	Usage = EGpuUsage::USAGE_DEFAULT;
@@ -614,6 +617,7 @@ namespace NxRHI
 
 		void SetDefault()
 		{
+			Offset = 0;
 			Stride = 0;
 			Size = 0;
 			Usage = EGpuUsage::USAGE_DEFAULT;
@@ -627,11 +631,11 @@ namespace NxRHI
 	public:
 		void UpdateGpuData(ICommandList* cmd, UINT offset, void* pData, UINT size)
 		{
-			Buffer->UpdateGpuDataSimple(cmd, offset, pData, size, 0);
+			Buffer->UpdateGpuDataSimple(cmd, (UINT)Desc.Offset + offset, pData, size, 0);
 		}
 		void UpdateGpuData(UINT offset, void* pData, UINT size)
 		{
-			Buffer->UpdateGpuDataSimple(offset, pData, size, 0);
+			Buffer->UpdateGpuDataSimple((UINT)Desc.Offset + offset, pData, size, 0);
 		}
 	public:
 		FIbvDesc			Desc{};

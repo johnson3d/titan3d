@@ -970,7 +970,7 @@ namespace EngineNS.UI.Editor
             {
                 if(mShowTemplateControls)
                 {
-                    childrenCount = VisualTreeHelper.GetChildrenCount(container);
+                    childrenCount = VisualTreeHelper.GetChildrenCount(container, VisualTreeHelper.EFlag.PassContentsPresenter);
                 }
                 else
                 {
@@ -1099,9 +1099,9 @@ namespace EngineNS.UI.Editor
                     container.TourContentsPresenterContainers(TourContentsPresenterContainersAction, ref idx);
                     if(mShowTemplateControls)
                     {
-                        for (int i = 0; i < VisualTreeHelper.GetChildrenCount(container); i++)
+                        for (int i = 0; i < VisualTreeHelper.GetChildrenCount(container, VisualTreeHelper.EFlag.PassContentsPresenter); i++)
                         {
-                            var child = VisualTreeHelper.GetChild(container, i);
+                            var child = VisualTreeHelper.GetChild(container, i, VisualTreeHelper.EFlag.PassContentsPresenter);
                             DrawUIElementInHierachy(child, ref idx);
                         }
                     }

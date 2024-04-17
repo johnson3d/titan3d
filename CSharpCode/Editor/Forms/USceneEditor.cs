@@ -301,7 +301,6 @@ namespace EngineNS.Editor.Forms
             if (Scene == null)
                 return false;
 
-            await Scene.InitializeNode(PreviewViewport.World, Scene.NodeData, GamePlay.Scene.EBoundVolumeType.Box, typeof(EngineNS.GamePlay.UPlacement));
             Scene.Parent = PreviewViewport.World.Root;
 
             ScenePropGrid.Target = Scene;

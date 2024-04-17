@@ -224,5 +224,10 @@ namespace EngineNS.UI.Controls.Containers
             SetAnchorRectZ(element, size.X);
             SetAnchorRectW(element, size.Y);
         }
+
+        public override bool NeedUpdateLayoutWhenChildDesiredSizeChanged(TtUIElement child)
+        {
+            return false;
+        }
     }
 }

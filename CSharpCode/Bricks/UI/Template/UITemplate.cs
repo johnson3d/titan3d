@@ -114,6 +114,7 @@ namespace EngineNS.UI.Template
                 parentContainer.Children.mChildren.Add(treeNode);
                 treeNode.RootUIHost = parent.RootUIHost;
                 treeNode.mVisualParent = parentContainer;
+                parentContainer.SetAttachedProperties(treeNode);
                 // instance values
                 foreach(var valData in mTemplateProperties)
                 {

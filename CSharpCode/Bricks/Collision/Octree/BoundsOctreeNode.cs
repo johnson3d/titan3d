@@ -74,7 +74,7 @@ namespace EngineNS.Bricks.Collision.Octree
             {
                 return false;
             }
-            SubAdd(obj, objBounds);
+            SubAdd(obj, in objBounds);
             return true;
         }
 
@@ -83,7 +83,7 @@ namespace EngineNS.Bricks.Collision.Octree
         /// </summary>
         /// <param name="obj">Object to remove.</param>
         /// <returns>True if the object was removed successfully.</returns>
-        public bool Remove(T obj)
+        public bool Remove(in T obj)
         {
             bool removed = false;
 
@@ -100,7 +100,7 @@ namespace EngineNS.Bricks.Collision.Octree
             {
                 for (int i = 0; i < 8; i++)
                 {
-                    removed = Children[i].Remove(obj);
+                    removed = Children[i].Remove(in obj);
                     if (removed) break;
                 }
             }
@@ -330,7 +330,7 @@ namespace EngineNS.Bricks.Collision.Octree
         /// Must be called from OnDrawGizmos externally. See also: DrawAllObjects.
         /// </summary>
         /// <param name="depth">Used for recurcive calls to this method.</param>
-        public void DrawAllBounds(GamePlay.UWorld.UVisParameter vp, GamePlay.UPlacement placement, float depth)
+        public void DrawAllBounds(GamePlay.UWorld.UVisParameter vp, GamePlay.UPlacementBase placement, float depth)
         {
             float tintVal = depth / 7; // Will eventually get values > 1. Color rounds to 1 automatically
             var color = new Color4f(tintVal, 0, 1.0f - tintVal);
@@ -352,7 +352,7 @@ namespace EngineNS.Bricks.Collision.Octree
         /// Draws the bounds of all objects in the tree visually for debugging.
         /// Must be called from OnDrawGizmos externally. See also: DrawAllBounds.
         /// </summary>
-        public void DrawAllObjects(GamePlay.UWorld.UVisParameter vp, GamePlay.UPlacement placement)
+        public void DrawAllObjects(GamePlay.UWorld.UVisParameter vp, GamePlay.UPlacementBase placement)
         {
             float tintVal = BaseLength / 20;
             var color = new Color4f(1.0f - tintVal, tintVal, 0.25f);

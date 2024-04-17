@@ -45,7 +45,7 @@ namespace EngineNS.UI.Controls
 
             var root = new Template.TtUIElementFactory(UTypeDesc.TypeOf(typeof(TtStackPanel)));
             root.SetValue(TtStackPanel.NameProperty, "panel");
-            root.SetValue(TtStackPanel.OrientationProperty, ELayout_Orientation.Vertical);
+            root.SetValue(TtStackPanel.OrientationProperty, ELayout_Orientation.Horizontal);
             root.SetTemplateBindingValue<TtBrush, TtBrush>(TtStackPanel.BackgroundProperty, "Background", "Background");
             root.SetTemplateBindingValue<TtBrush, TtBrush>(TtStackPanel.BorderBrushProperty, "BorderBrush", "BorderBrush");
             root.SetTemplateBindingValue<Thickness, Thickness>(TtStackPanel.BorderThicknessProperty, "BorderThickness", "BorderThickness");
@@ -53,10 +53,16 @@ namespace EngineNS.UI.Controls
 
             var headerBorder = new Template.TtUIElementFactory(UTypeDesc.TypeOf(typeof(TtBorder)));
             headerBorder.SetValue(TtBorder.NameProperty, "headerBorder");
+            headerBorder.SetValue(TtBorder.BackgroundProperty, new TtBrush(Color.Transparent, TtBrush.EBrushType.Rectangle));
             root.AppendChild(headerBorder);
             var headerToggle = new Template.TtUIElementFactory(UTypeDesc.TypeOf(typeof(TtToggleButton)));
             headerToggle.SetValue(TtToggleButton.NameProperty, "headerToggle");
+            headerToggle.SetValue(TtToggleButton.BackgroundProperty, new TtBrush(Color.Transparent, TtBrush.EBrushType.Rectangle));
+            headerToggle.SetValue(TtToggleButton.SizeToContentProperty, ESizeToContent.WidthAndHeight);
+            headerToggle.SetValue(TtBorder.HorizontalAlignmentProperty, HorizontalAlignment.Stretch);
+            headerToggle.SetValue(TtBorder.VerticalAlignmentProperty, VerticalAlignment.Stretch);
             headerToggle.SetTemplateBindingValue<bool, bool>(TtToggleButton.IsCheckedProperty, "IsExpanded", "IsExpanded");
+            headerBorder.AppendChild(headerToggle);
             var headerContent = new Template.TtUIElementFactory(UTypeDesc.TypeOf(typeof(TtContentsPresenter)));
             headerContent.SetValue(TtContentsPresenter.NameProperty, "headerContentPresenter");
             headerContent.SetValue(TtContentsPresenter.ContentSourceProperty, "Header");
@@ -65,6 +71,7 @@ namespace EngineNS.UI.Controls
             var content = new Template.TtUIElementFactory(UTypeDesc.TypeOf(typeof(TtContentsPresenter)));
             content.SetValue(TtContentsPresenter.NameProperty, "contentPresenter");
             content.SetValue(TtContentsPresenter.ContentSourceProperty, "Content");
+            content.SetValue(TtContentsPresenter.VisibilityProperty, Visibility.Collapsed);
             content.SetTemplateBindingValue<Thickness, Thickness>(TtContentsPresenter.MarginProperty, "Margin", "Padding");
             root.AppendChild(content);
 

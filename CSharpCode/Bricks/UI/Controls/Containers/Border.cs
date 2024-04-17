@@ -49,11 +49,13 @@ namespace EngineNS.UI.Controls.Containers
         public TtBorder()
         {
             mBorderThickness = new Thickness(1, 1, 1, 1);
+            SizeToContent = ESizeToContent.WidthAndHeight;
         }
         public TtBorder(TtContainer parent)
             : base(parent)
         {
             mBorderThickness = new Thickness(1, 1, 1, 1);
+            SizeToContent = ESizeToContent.WidthAndHeight;
         }
 
         protected override SizeF MeasureOverride(in SizeF availableSize)

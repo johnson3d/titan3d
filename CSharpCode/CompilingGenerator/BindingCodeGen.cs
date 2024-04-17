@@ -1468,39 +1468,39 @@ namespace {namespaceName}
             }}
             else if(triggerSimpleValue.Property.HostType.IsEqual(objType) || triggerSimpleValue.Property.HostType.IsParentClass(objType))
             {{";
-            string triggerValSwitchCode = "";
-            foreach(var valSymbol in symbols)
-            {
-                if(valSymbol is IPropertySymbol)
+                string triggerValSwitchCode = "";
+                foreach(var valSymbol in symbols)
                 {
-                    var propertySymbol = valSymbol as IPropertySymbol;
-                    if(propertySymbol != null && !propertySymbol.IsReadOnly)
+                    if(valSymbol is IPropertySymbol)
                     {
-                        triggerValSwitchCode += $@"
+                       var propertySymbol = valSymbol as IPropertySymbol;
+                       if(propertySymbol != null && !propertySymbol.IsReadOnly)
+                       {
+                            triggerValSwitchCode += $@"
                 case {Standart.Hash.xxHash.xxHash64.ComputeHash(valSymbol.Name)}: // {valSymbol.Name}
                     triggerSimpleValue.OldValueStore.SetValue(this.{valSymbol.Name});
                     this.{valSymbol.Name} = triggerSimpleValue.ValueStore.GetValue<{propertySymbol.Type.ToDisplayString()}>();
                     return;";
+                        }
                     }
                 }
-            }
-            if(!string.IsNullOrEmpty(triggerValSwitchCode))
-            {
-                source += $@"
+                if(!string.IsNullOrEmpty(triggerValSwitchCode))
+                {
+                    source += $@"
                 switch(triggerSimpleValue.PropertyNameHash)
                 {{{triggerValSwitchCode}
                 }}";
-            }
-            if(baseType != null)
-            {
-                var baseTypeDS = baseType.ToDisplayString();
-                if(baseTypeDS != "object")
-                {
-                    source += $@"
-                base.SetFromTriggerSimpleValue(triggerSimpleValue);";
                 }
-            }
-            source += $@"
+                if(baseType != null)
+                {
+                    var baseTypeDS = baseType.ToDisplayString();
+                    if(baseTypeDS != "object")
+                    {
+                        source += $@"
+                base.SetFromTriggerSimpleValue(triggerSimpleValue);";
+                    }
+                }
+                source += $@"
             }}
             else
             {{
@@ -1509,6 +1509,54 @@ namespace {namespaceName}
             }}
         }}";
             }
+
+            if (!classSymbol.MemberNames.Any(name => "GetDefaultTriggerValue" == name))
+            {
+                source += $@"
+        public {(baseHasBindObjectInterface ? "override" : "virtual")} EngineNS.UI.Bind.ValueStoreBase GetDefaultTriggerValue(UInt64 propertyNameHash)
+        {{";
+                string triggerDefaultSwitchCode = "";
+                foreach(var valSymbol in symbols)
+                {
+                    if(valSymbol is IPropertySymbol)
+                    {
+                        var propertySymbol = valSymbol as IPropertySymbol;
+                        if (propertySymbol != null && !propertySymbol.IsReadOnly)
+                        {
+                            triggerDefaultSwitchCode += $@"
+                case {Standart.Hash.xxHash.xxHash64.ComputeHash(valSymbol.Name)}: // {valSymbol.Name}
+                    return new EngineNS.UI.Bind.ValueStore<{propertySymbol.Type.ToDisplayString()}>({valSymbol.Name});";
+                        }
+                    }
+                }
+                if(!string.IsNullOrEmpty(triggerDefaultSwitchCode))
+                {
+                    source += $@"
+            switch(propertyNameHash)
+            {{{triggerDefaultSwitchCode}
+            }}";
+                }
+                if (baseType != null)
+                {
+                    var baseTypeDS = baseType.ToDisplayString();
+                    if (baseTypeDS != "object")
+                    {
+                        source += $@"
+            return base.GetDefaultTriggerValue(propertyNameHash);";
+                    }
+                    else
+                    {
+                    source += $@"
+            return null;";
+                    }
+                }
+                else
+                    source += $@"
+            return null;";
+                source += $@"
+        }}";     
+            }
+
             if (!classSymbol.MemberNames.Any(name => "RestoreFromTriggerSimpleValue" == name))
             {
                 source += $@"

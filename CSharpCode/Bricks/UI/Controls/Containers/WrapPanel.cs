@@ -49,7 +49,7 @@ namespace EngineNS.UI.Controls.Containers
                     MathF.Max(0.0f, availableSize.Width - retVal.Width),
                     MathF.Max(0.0f, availableSize.Height - retVal.Height));
                 var tempSize = SizeF.Empty;
-                if (Orientation == ELayout_Orientation.Horizontal)
+                if (Orientation == ELayout_Orientation.Vertical)
                 {
                     float accumulateInCol = 0;
                     List<float> maxHeightsEachCol = new List<float>();
@@ -117,7 +117,7 @@ namespace EngineNS.UI.Controls.Containers
                 Math.Max(0.0f, arrangeSize.Height - borderThick.Top - borderThick.Bottom));
 
             var visualChildrenCount = VisualTreeHelper.GetChildrenCount(this);
-            if (Orientation == ELayout_Orientation.Horizontal)
+            if (Orientation == ELayout_Orientation.Vertical)
             {
                 float accumulateInCol = innerRect.X;
                 float accumulateY = innerRect.Y;

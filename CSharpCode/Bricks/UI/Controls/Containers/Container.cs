@@ -659,6 +659,27 @@ namespace EngineNS.UI.Controls.Containers
                 mBackground.HostElement = this;
             }
         }
+
+        public enum ESizeToContent
+        {
+            None,
+            Width,
+            Height,
+            WidthAndHeight,
+        }
+        protected ESizeToContent mSizeToContent = ESizeToContent.None;
+        [Rtti.Meta, Bind.BindProperty]
+        public ESizeToContent SizeToContent
+        {
+            get => mSizeToContent;
+            set
+            {
+                OnValueChange(value, mSizeToContent);
+                mSizeToContent = value;
+                UpdateLayout();
+            }
+        }
+
         public TtContainer()
         {
             mChildren = new TtUIElementCollection(this, this);
@@ -731,7 +752,7 @@ namespace EngineNS.UI.Controls.Containers
         }
         public virtual bool NeedUpdateLayoutWhenChildDesiredSizeChanged(TtUIElement child)
         {
-            return false;
+            return true;
         }
         public virtual void OnChildDesiredSizeChanged(TtUIElement child)
         {
@@ -769,10 +790,25 @@ namespace EngineNS.UI.Controls.Containers
         protected override SizeF MeasureOverride(in SizeF availableSize)
         {
             var count = VisualTreeHelper.GetChildrenCount(this);
+            var tempSize = SizeF.Empty;
             for(int i=0; i<count; i++)
             {
                 var childUI = VisualTreeHelper.GetChild(this, i);
                 childUI.Measure(in availableSize);
+                var childSize = childUI.DesiredSize;
+                tempSize.Width = Math.Max(tempSize.Width, childSize.Width);
+                tempSize.Height = Math.Max(tempSize.Height, childSize.Height);
+            }
+            switch (mSizeToContent)
+            {
+                case ESizeToContent.None:
+                    return availableSize;
+                case ESizeToContent.Width:
+                    return new SizeF(tempSize.Width, availableSize.Height);
+                case ESizeToContent.Height:
+                    return new SizeF(availableSize.Width, tempSize.Height);
+                case ESizeToContent.WidthAndHeight:
+                    return tempSize;
             }
             return availableSize;
         }

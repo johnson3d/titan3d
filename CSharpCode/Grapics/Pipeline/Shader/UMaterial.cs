@@ -1143,7 +1143,7 @@ namespace EngineNS.Graphics.Pipeline.Shader
             ScreenMaterial.DepthStencil = dsDesc;
 
             PxDebugMaterial = await this.CreateMaterial(RName.GetRName("material/sysdft_color.material", RName.ERNameType.Engine));
-            VtxColorMaterial = await this.CreateMaterial(RName.GetRName("material/vtx_color.material", RName.ERNameType.Engine));
+            VtxColorMaterial = await this.CreateMaterial(RName.GetRName("material/vfx_color.material", RName.ERNameType.Engine));
         }
         public UMaterial ScreenMaterial;
         public UMaterial PxDebugMaterial;

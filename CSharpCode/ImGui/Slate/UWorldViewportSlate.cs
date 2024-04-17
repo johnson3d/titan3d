@@ -219,8 +219,6 @@ namespace EngineNS.EGui.Slate
                         RenderPolicy?.BeginTickLogic(World);
                     }
 
-                    World.TickLogic(this.RenderPolicy, ellapse);
-
                     if (this.IsFocused)
                     {
                         TickOnFocus();
@@ -230,6 +228,8 @@ namespace EngineNS.EGui.Slate
                     {
                         RenderPolicy?.TickLogic(World, null);
                     }
+
+                    World.TickLogic(this.RenderPolicy, ellapse);
 
                     using (new Profiler.TimeScopeHelper(ScopeRPolicyTick))
                     {

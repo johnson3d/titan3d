@@ -133,6 +133,27 @@ namespace NxRHI
 		std::vector<std::vector<FMeshAtomDesc>>	Atoms;
 	};
 
+	class TR_CLASS()
+		FTransientBuffer : public IResourceBase
+	{
+	public:
+		FTransientBuffer() {}
+		void Initialize(IGpuDevice* device, UINT size, EBufferType type, EGpuUsage usage, ECpuAccess cpuAccess);
+		UINT Alloc(IGpuDevice* device, UINT size, bool bGrow);
+		IVbView* AllocVBV(IGpuDevice* device, UINT stride, UINT size, bool bGrow);
+		IIbView* AllocIBV(IGpuDevice* device, UINT stride, UINT size, bool bGrow);
+		void Reset()
+		{
+			mCurrentOffset = 0;
+		}
+		IBuffer* GetBuffer() {
+			return mBuffer;
+		}
+	protected:
+		AutoRef<IBuffer>			mBuffer;
+		UINT						mCurrentOffset = 0;
+	};
+
 	class FMeshDataProvider;
 	class TR_CLASS()
 		FMeshPrimitives : public IResourceBase
@@ -171,6 +192,14 @@ namespace NxRHI
 
 		bool Init(IGpuDevice* device, const char* name, UINT atom);
 		bool Init(IGpuDevice* device, FGeomMesh* mesh, const v3dxBox3 * aabb);
+		void SetTransientVertexBuffer(FTransientBuffer* buffer)
+		{
+			mVertexBuffer = buffer;
+		}
+		void SetTransientIndexBuffer(FTransientBuffer* buffer)
+		{
+			mIndexBuffer = buffer;
+		}
 		bool LoadXnd(IGpuDevice* device, const char* name, XndHolder * xnd, bool isLoad);
 		void Save2Xnd(IGpuDevice* device, XndNode * node);
 
@@ -260,6 +289,9 @@ namespace NxRHI
 
         AutoRef<FVertexArray>		mClustersVertexArray;
         AutoRef<IIbView>			mClustersIndexView;
+
+		AutoRef<FTransientBuffer>	mVertexBuffer;
+		AutoRef<FTransientBuffer>	mIndexBuffer;
 	};
 	
 	struct TR_CLASS(SV_LayoutStruct = 8)

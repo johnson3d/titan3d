@@ -39,7 +39,8 @@ namespace EngineNS.Graphics.Mesh
         {
             return mCoreObject.GetAtomExtData(index);
         }
-
+        public NxRHI.TtTransientBuffer TransientVB;
+        public NxRHI.TtTransientBuffer TransientIB;
         public UMeshPrimitives ToMesh()
         {
             unsafe
@@ -47,6 +48,10 @@ namespace EngineNS.Graphics.Mesh
                 var rc = UEngine.Instance.GfxDevice.RenderContext;
                 var result = new UMeshPrimitives();
                 result.Init("", 1);
+                if (TransientVB != null)
+                    result.SetTransientVertexBuffer(TransientVB);
+                if (TransientIB != null)
+                    result.SetTransientIndexBuffer(TransientIB);
 
                 using (var cmd = new FTransientCmd(EQueueType.QU_Default, "ToMesh"))
                 {

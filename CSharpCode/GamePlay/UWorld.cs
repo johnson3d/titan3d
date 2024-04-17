@@ -181,11 +181,15 @@ namespace EngineNS.GamePlay
                 }
                 VisibleMeshes.Add(new Graphics.Pipeline.FVisibleMesh() { Mesh = mesh });
             }
+            public NxRHI.TtTransientBuffer TransientVB = null;
+            public NxRHI.TtTransientBuffer TransientIB = null;
             public void AddAABB(in Aabb aabb, in Color4f color, in FTransform transform)
             {
                 BoundingBox box = new BoundingBox(-aabb.Extent, aabb.Extent);
                 var meshProvider = Graphics.Mesh.UMeshDataProvider.MakeBox(in box, color.ToArgb());
-                var mesh = meshProvider.ToDrawMesh(UEngine.Instance.GfxDevice.MaterialManager.VtxColorMaterial);
+                meshProvider.TransientVB = TransientVB;
+                meshProvider.TransientIB = TransientIB;
+                var mesh = meshProvider.ToDrawMesh(UEngine.Instance.GfxDevice.MaterialInstanceManager.WireVtxColorMateria);
                 var localTrans = FTransform.CreateTransform(aabb.Minimum, in Vector3.One, in Quaternion.Identity);
                 FTransform trans;
                 FTransform.Multiply(out trans, in transform, in localTrans);
@@ -195,7 +199,7 @@ namespace EngineNS.GamePlay
             public void AddBoundingBox(in BoundingBox box, in Color4f color)
             {
                 var meshProvider = Graphics.Mesh.UMeshDataProvider.MakeBox(in box, color.ToArgb());
-                var mesh = meshProvider.ToDrawMesh(UEngine.Instance.GfxDevice.MaterialManager.VtxColorMaterial);
+                var mesh = meshProvider.ToDrawMesh(UEngine.Instance.GfxDevice.MaterialInstanceManager.WireVtxColorMateria);
                 mesh.SetWorldTransform(in FTransform.Identity, this.World, true);
                 AddVisibleMesh(mesh);
             }

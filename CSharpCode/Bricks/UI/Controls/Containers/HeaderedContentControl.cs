@@ -22,7 +22,7 @@ namespace EngineNS.UI.Controls.Containers
             }
         }
 
-        [Bind.BindProperty]
+        [Bind.BindProperty, Browsable(false)]
         public bool HasHeader
         {
             get { return GetValue<bool>(); }

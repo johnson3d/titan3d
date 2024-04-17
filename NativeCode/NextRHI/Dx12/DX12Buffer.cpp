@@ -338,7 +338,7 @@ namespace NxRHI
 			D3D12_RESOURCE_DESC resDesc{};
 			resDesc.Dimension = D3D12_RESOURCE_DIMENSION_BUFFER;
 			//resDesc.Width = desc.Size;
-			resDesc.Width = Desc.Size;
+			resDesc.Width = pFootPrint->Width;
 			resDesc.Height = 1;
 			resDesc.DepthOrArraySize = 1;
 			resDesc.MipLevels = 1;
@@ -393,6 +393,7 @@ namespace NxRHI
 				cpDraw->FootPrint.Depth = footPrint.Footprint.Depth;
 				cpDraw->FootPrint.RowPitch = footPrint.Footprint.RowPitch;
 				cpDraw->FootPrint.TotalSize = footPrint.Footprint.RowPitch * footPrint.Footprint.Height;
+				cpDraw->DstX = pFootPrint->X;
 
 				cmd->PushGpuDraw(cpDraw);
 			}

@@ -1438,6 +1438,10 @@ namespace EngineNS
         {
             get { return FromArgb(unchecked((int)(0xFF9ACD32))); }
         }
+        public static Color Transparent
+        {
+            get { return FromArgb(unchecked((int)(0x00000000))); }
+        }
 
         #endregion
     }

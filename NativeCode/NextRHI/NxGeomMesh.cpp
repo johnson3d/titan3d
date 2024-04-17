@@ -11,6 +11,57 @@ NS_BEGIN
 
 namespace NxRHI
 {
+	void FTransientBuffer::Initialize(IGpuDevice* device, UINT size, EBufferType type, EGpuUsage usage, ECpuAccess cpuAccess)
+	{
+		FBufferDesc desc;
+		desc.SetDefault(false, type);
+		desc.Size = size;
+		desc.CpuAccess = cpuAccess;
+		desc.Usage = usage;
+		mBuffer = MakeWeakRef(device->CreateBuffer(&desc));
+		Reset();
+	}
+	UINT FTransientBuffer::Alloc(IGpuDevice* device, UINT size, bool bGrow)
+	{
+		if (mBuffer == nullptr || mCurrentOffset + size >= mBuffer->Desc.Size)
+		{
+			if (bGrow == false)
+			{
+				return UINT32_MAX;
+			}
+			else
+			{
+				FBufferDesc desc;
+				desc.SetDefault(false, (EBufferType)(EBufferType::BFT_Vertex | EBufferType::BFT_Index));
+				desc.Size = mCurrentOffset + size * 10;
+				//desc.CpuAccess = cpuAccess;
+				desc.Usage = EGpuUsage::USAGE_DEFAULT;
+				mBuffer = MakeWeakRef(device->CreateBuffer(&desc));
+			}
+		}
+		auto result = mCurrentOffset;
+		mCurrentOffset += size;
+		return result;
+	}
+	IVbView* FTransientBuffer::AllocVBV(IGpuDevice* device, UINT stride, UINT size, bool bGrow)
+	{
+		FVbvDesc vbvDesc{};
+		vbvDesc.SetDefault();
+		vbvDesc.Stride = stride;
+		vbvDesc.Size = size;
+		vbvDesc.Offset = Alloc(device, size, bGrow);
+		return device->CreateVBV(mBuffer, &vbvDesc);
+	}
+	IIbView* FTransientBuffer::AllocIBV(IGpuDevice* device, UINT stride, UINT size, bool bGrow)
+	{
+		FIbvDesc ibvDesc{};
+		ibvDesc.SetDefault();
+		ibvDesc.Stride = stride;
+		ibvDesc.Size = size;
+
+		ibvDesc.Offset = Alloc(device, size, bGrow);
+		return device->CreateIBV(mBuffer, &ibvDesc);
+	}
 	struct FStreamTypeInfo
 	{
 		const char* XndName = nullptr;
@@ -1141,14 +1192,25 @@ namespace NxRHI
 			return true;
 		}
 
-		FVbvDesc vbvDesc{};
-		vbvDesc.Stride = stride;
-		vbvDesc.Size = size;
-		vbvDesc.InitData = data;
-		auto vb = MakeWeakRef(cmd->mDevice.GetPtr()->CreateVBV(nullptr, &vbvDesc));
-		if (vb == nullptr)
-			return false;
-		mGeometryMesh->VertexArray->BindVB(stream, vb);
+		if (mVertexBuffer != nullptr)
+		{
+			auto vb = MakeWeakRef(mVertexBuffer->AllocVBV(cmd->mDevice.GetPtr(), stride, size, true));
+			if (vb == nullptr)
+				return false;
+			vb->UpdateGpuData(cmd, 0, data, size);
+			mGeometryMesh->VertexArray->BindVB(stream, vb);
+		}
+		else
+		{
+			FVbvDesc vbvDesc{};
+			vbvDesc.Stride = stride;
+			vbvDesc.Size = size;
+			vbvDesc.InitData = data;
+			auto vb = MakeWeakRef(cmd->mDevice.GetPtr()->CreateVBV(nullptr, &vbvDesc));
+			if (vb == nullptr)
+				return false;
+			mGeometryMesh->VertexArray->BindVB(stream, vb);
+		}
 		return true;
 	}
 
@@ -1164,16 +1226,27 @@ namespace NxRHI
 			return true;
 		}
 
-		FIbvDesc ibvDesc{};
-		ibvDesc.Stride = isBit32 ? sizeof(UINT) : sizeof(USHORT);
-		ibvDesc.Size = size;
-		ibvDesc.InitData = data;
-		auto ib = MakeWeakRef(cmd->mDevice.GetPtr()->CreateIBV(nullptr, &ibvDesc));
-		if (ib == nullptr)
-			return false;
-
 		mGeometryMesh->IsIndex32 = isBit32;
-		mGeometryMesh->BindIndexBuffer(ib);
+		if (mIndexBuffer != nullptr)
+		{
+			auto ib = MakeWeakRef(mIndexBuffer->AllocIBV(cmd->mDevice.GetPtr(), isBit32 ? sizeof(UINT) : sizeof(USHORT), size, true));
+			if (ib == nullptr)
+				return false;
+			ib->UpdateGpuData(cmd, 0, data, size);
+			mGeometryMesh->BindIndexBuffer(ib);
+		}
+		else
+		{
+			FIbvDesc ibvDesc{};
+			ibvDesc.Stride = isBit32 ? sizeof(UINT) : sizeof(USHORT);
+			ibvDesc.Size = size;
+			ibvDesc.InitData = data;
+			auto ib = MakeWeakRef(cmd->mDevice.GetPtr()->CreateIBV(nullptr, &ibvDesc));
+			if (ib == nullptr)
+				return false;
+
+			mGeometryMesh->BindIndexBuffer(ib);
+		}
 		return true;
 	}
 

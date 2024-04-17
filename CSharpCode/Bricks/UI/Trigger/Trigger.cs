@@ -125,17 +125,31 @@ namespace EngineNS.UI.Trigger
             mTarget = target;
         }
 
+        public TtTriggerSimpleValue(TtBindableProperty property, TProp value, TProp defaultValue, string target)
+        {
+            mProperty = property;
+            mPropertyNameHash = Standart.Hash.xxHash.xxHash64.ComputeHash(mProperty.Name);
+            mValue = new ValueStore<TProp>(value);
+            mOldValue = new ValueStore<TProp>(defaultValue);
+            mTarget = target;
+        }
+
         public override void Seal(IBindableObject host, TtUITemplate template)
         {
             var container = host as TtContainer;
             if (container == null)
                 return;
-            mElement = VisualTreeHelper.GetChild(container, mTarget);
+            mElement = VisualTreeHelper.GetChild(container, mTarget, true, VisualTreeHelper.EFlag.None);
+            if(mElement != null)
+            {
+                if(mOldValue.IsValueEqual(mValue))
+                    mOldValue = mElement.GetDefaultTriggerValue(mPropertyNameHash);
+            }
         }
 
         public override T GetValue<T>(TtBindableProperty bp)
         {
-            return mValue.GetValue<T>();;
+            return mValue.GetValue<T>();
         }
 
         public override void SetValue<T>(IBindableObject obj, TtBindableProperty bp, in T value)
@@ -181,7 +195,7 @@ namespace EngineNS.UI.Trigger
     }
     public partial class TtUIPropertyTrigger : TtTriggerBase
     {
-        public bool CanRestoreValue = false;
+        public bool CanRestoreValue = true;
         List<TtTriggerConditionBase> mConditions = new List<TtTriggerConditionBase>();
         List<TtTriggerValue> mSetValues = new List<TtTriggerValue>();
 
@@ -199,9 +213,13 @@ namespace EngineNS.UI.Trigger
         {
             mSetValues.Add(value);
         }
-        public void AddTriggerValue<T>(TtBindableProperty property, T value, string target = null)
+        public void AddTriggerValue<T>(TtBindableProperty property, in T value, string target = null)
         {
-            var setter = new TtTriggerSimpleValue<T>(property, value, target);
+            AddTriggerValue(property, in value, in value, target);
+        }
+        public void AddTriggerValue<T>(TtBindableProperty property, in T value, in T defaultValue, string target = null)
+        {
+            var setter = new TtTriggerSimpleValue<T>(property, value, defaultValue, target);
             mSetValues.Add(setter);
         }
 

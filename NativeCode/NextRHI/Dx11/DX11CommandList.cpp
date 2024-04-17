@@ -311,6 +311,7 @@ namespace NxRHI
 	}
 	void DX11CommandList::SetVertexBuffer(UINT slot, IVbView* buffer, UINT32 Offset, UINT Stride)
 	{
+		Offset = Offset + (UINT)buffer->Desc.Offset;
 		if (buffer == nullptr)
 		{
 			auto tmp = (ID3D11Buffer*)nullptr;
@@ -334,7 +335,7 @@ namespace NxRHI
 		}
 		else
 		{
-			mContext->IASetIndexBuffer(buffer->Buffer.UnsafeConvertTo<DX11Buffer>()->mBuffer, fmt, 0);
+			mContext->IASetIndexBuffer(buffer->Buffer.UnsafeConvertTo<DX11Buffer>()->mBuffer, fmt, (UINT)buffer->Desc.Offset);
 		}
 	}
 	void DX11CommandList::SetGraphicsPipeline(const IGpuDrawState* drawState)

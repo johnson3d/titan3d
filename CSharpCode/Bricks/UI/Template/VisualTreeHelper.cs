@@ -2,26 +2,38 @@
 using EngineNS.UI.Controls.Containers;
 using System;
 using System.Collections.Generic;
+using System.Runtime.CompilerServices;
 using System.Text;
 
 namespace EngineNS.UI
 {
     internal class VisualTreeHelper
     {
-        public static int GetChildrenCount(TtContainer container, bool passContentsPresenter = true)
+        [Flags]
+        public enum EFlag
+        {
+            None                                    = 0,
+            PassContentsPresenter                   = 1<<0,
+            PassCollapsedContentsPresenterChildren  = 1<<1,
+        }
+        static bool HasFlag(EFlag flag, EFlag checker)
+        {
+            return ((flag & checker) == checker);
+        }
+        public static int GetChildrenCount(TtContainer container, EFlag flags = EFlag.PassContentsPresenter | EFlag.PassCollapsedContentsPresenterChildren)
         {
             int count = 0;
             var children = container.Children.mChildren;
             if (children == null)
                 return 0;
-            if (passContentsPresenter && container.ChildIsContentsPresenter)
+            if (HasFlag(flags, EFlag.PassContentsPresenter) && container.ChildIsContentsPresenter)
             {
                 for(int i=0; i< children.Count; i++)
                 {
                     var cp = children[i] as TtContentsPresenter;
                     if (cp == null)
                         count++;
-                    else
+                    else if(!HasFlag(flags, EFlag.PassCollapsedContentsPresenterChildren) || cp.Visibility != Visibility.Collapsed)
                         count += cp.Children.mChildren.Count;
                 }
             }
@@ -31,12 +43,12 @@ namespace EngineNS.UI
             }
             return count;
         }
-        public static TtUIElement GetChild(TtContainer container, int index, bool passContentsPresenter = true)
+        public static TtUIElement GetChild(TtContainer container, int index, EFlag flags = EFlag.PassContentsPresenter | EFlag.PassCollapsedContentsPresenterChildren)
         {
             var children = container.Children.mChildren;
             if (children == null)
                 return null;
-            if (passContentsPresenter && container.ChildIsContentsPresenter)
+            if (HasFlag(flags, EFlag.PassContentsPresenter) && container.ChildIsContentsPresenter)
             {
                 var count = children.Count;
                 var realIndex = 0;
@@ -49,7 +61,7 @@ namespace EngineNS.UI
                             return children[i];
                         realIndex++;
                     }
-                    else
+                    else if(!HasFlag(flags, EFlag.PassCollapsedContentsPresenterChildren) || cp.Visibility != Visibility.Collapsed)
                     {
                         var cpChildren = cp.Children.mChildren;
                         if((index - realIndex) < cpChildren.Count)
@@ -68,7 +80,7 @@ namespace EngineNS.UI
             }
             return null;
         }
-        static TtUIElement GetChildFromChildren(string name, List<TtUIElement> children, bool findInChildren, bool passContentsPresenter)
+        static TtUIElement GetChildFromChildren(string name, List<TtUIElement> children, bool findInChildren, EFlag flags)
         {
             for(int i=0; i<children.Count; i++)
             {
@@ -79,7 +91,7 @@ namespace EngineNS.UI
                     var cct = children[i] as TtContainer;
                     if(cct != null)
                     {
-                        var result = VisualTreeHelper.GetChild(cct, name, passContentsPresenter);
+                        var result = VisualTreeHelper.GetChild(cct, name, findInChildren, flags);
                         if (result != null)
                             return result;
                     }
@@ -87,12 +99,12 @@ namespace EngineNS.UI
             }
             return null;
         }
-        public static TtUIElement GetChild(TtContainer container, string name, bool findInChildren = true, bool passContentsPresenter = true)
+        public static TtUIElement GetChild(TtContainer container, string name, bool findInChildren = true, EFlag flags = EFlag.PassContentsPresenter | EFlag.PassCollapsedContentsPresenterChildren)
         {
             var children = container.Children.mChildren;
             if (children == null)
                 return null;
-            if (passContentsPresenter && container.ChildIsContentsPresenter)
+            if (HasFlag(flags, EFlag.PassContentsPresenter) && container.ChildIsContentsPresenter)
             {
                 for(int i=0; i<children.Count; i++)
                 {
@@ -106,28 +118,28 @@ namespace EngineNS.UI
                             var cct = children[i] as TtContainer;
                             if (cct != null)
                             {
-                                var result = VisualTreeHelper.GetChild(cct, name, passContentsPresenter);
+                                var result = VisualTreeHelper.GetChild(cct, name, findInChildren, flags);
                                 if (result != null)
                                     return result;
                             }
                         }
                     }
-                    else
+                    else if (!HasFlag(flags, EFlag.PassCollapsedContentsPresenterChildren) || cp.Visibility != Visibility.Collapsed)
                     {
                         var cChildren = container.ChildContentsPresenter.Children.mChildren;
-                        return GetChildFromChildren(name, cChildren, findInChildren, passContentsPresenter);
+                        return GetChildFromChildren(name, cChildren, findInChildren, flags);
                     }
                 }
             }
             else
             {
-                return GetChildFromChildren(name, children, findInChildren, passContentsPresenter);
+                return GetChildFromChildren(name, children, findInChildren, flags);
             }
             return null;
         }
-        public static TtContainer GetParent(TtUIElement element, bool passContentsPresenter = true)
+        public static TtContainer GetParent(TtUIElement element, EFlag flags = EFlag.PassContentsPresenter | EFlag.PassCollapsedContentsPresenterChildren)
         {
-            if(passContentsPresenter)
+            if(HasFlag(flags, EFlag.PassContentsPresenter))
             {
                 if (element.mVisualParent is TtContentsPresenter)
                     return element.mVisualParent.mVisualParent;

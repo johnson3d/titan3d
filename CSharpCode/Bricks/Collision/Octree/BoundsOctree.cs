@@ -25,12 +25,15 @@ namespace EngineNS.Bricks.Collision.Octree
 {
     public class TtBoundsOctree<T>
     {
-        public GamePlay.UPlacement Placement;
         // The total amount of objects currently in the tree
         public int Count { get; private set; }
 
         // Root node of the octree
-        TtBoundsOctreeNode<T> RootNode;
+        TtBoundsOctreeNode<T> RootNode
+        {
+            get;
+            set;
+        }
 
         // Should be a value between 1 and 2. A multiplier for the base size of a node.
         // 1.0 is a "normal" octree, while values > 1 have overlap
@@ -92,9 +95,9 @@ namespace EngineNS.Bricks.Collision.Octree
         /// </summary>
         /// <param name="obj">Object to remove.</param>
         /// <returns>True if the object was removed successfully.</returns>
-        public bool Remove(T obj)
+        public bool Remove(in T obj)
         {
-            bool removed = RootNode.Remove(obj);
+            bool removed = RootNode.Remove(in obj);
 
             // See if we can shrink the octree down now that we've removed the item
             if (removed)
@@ -204,8 +207,10 @@ namespace EngineNS.Bricks.Collision.Octree
         /// Draws node boundaries visually for debugging.
         /// Must be called from OnDrawGizmos externally. See also: DrawAllObjects.
         /// </summary>
-        public void DrawAllBounds(GamePlay.UWorld.UVisParameter vp)
+        public void DrawAllBounds(GamePlay.UPlacementBase Placement, GamePlay.UWorld.UVisParameter vp)
         {
+            if (Placement == null)
+                return;
             RootNode.DrawAllBounds(vp, Placement, 0);
         }
 
@@ -213,8 +218,10 @@ namespace EngineNS.Bricks.Collision.Octree
         /// Draws the bounds of all objects in the tree visually for debugging.
         /// Must be called from OnDrawGizmos externally. See also: DrawAllBounds.
         /// </summary>
-        public void DrawAllObjects(GamePlay.UWorld.UVisParameter vp, GamePlay.UPlacement placement)
+        public void DrawAllObjects(GamePlay.UPlacementBase Placement, GamePlay.UWorld.UVisParameter vp)
         {
+            if (Placement == null)
+                return;
             RootNode.DrawAllObjects(vp, Placement);
         }
         /// <summary>
@@ -271,10 +278,12 @@ namespace EngineNS.Bricks.Collision.Octree
     public class TtSceneOctree : IMemberTickable
     {
         Bricks.Collision.Octree.TtBoundsOctree<GamePlay.Scene.UNode> mOctree;
+        public NxRHI.TtTransientBuffer TransientVB = new();
+        public NxRHI.TtTransientBuffer TransientIB = new();
         public async System.Threading.Tasks.Task<bool> Initialize(object host)
         {
             var scene = host as GamePlay.Scene.UScene;
-            mOctree = new Bricks.Collision.Octree.TtBoundsOctree<GamePlay.Scene.UNode>(15, scene.Placement.AbsTransform.Position, 1, 1.25f);
+            mOctree = new Bricks.Collision.Octree.TtBoundsOctree<GamePlay.Scene.UNode>(0.5f, scene.Placement.AbsTransform.Position, 1, 1.25f);
             return true;
         }
 
@@ -284,15 +293,8 @@ namespace EngineNS.Bricks.Collision.Octree
         }
         public void TickLogic(object host, float ellapse)
         {
-
-        }
-        public void TickRender(object host, float ellapse)
-        {
-
-        }
-        public void TickSync(object host, float ellapse)
-        {
-
+            TransientVB.Reset();
+            TransientIB.Reset();
         }
         public void OnHostNotify(object host, in FHostNotify notify)
         {
@@ -320,6 +322,16 @@ namespace EngineNS.Bricks.Collision.Octree
                     {
                         var scene = host as GamePlay.Scene.UScene;
                         var node = notify.Parameter as GamePlay.Scene.UNode;
+                    }
+                    break;
+                case "OnGatherVisibleMeshes":
+                    {
+                        var scene = host as GamePlay.Scene.UScene;
+                        var vp = notify.Parameter as GamePlay.UWorld.UVisParameter;
+                        vp.TransientVB = TransientVB;
+                        vp.TransientIB = TransientIB;
+
+                        mOctree.DrawAllBounds(scene.Placement, vp);
                     }
                     break;
             }

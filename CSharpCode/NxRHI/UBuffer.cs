@@ -156,6 +156,40 @@ namespace EngineNS.NxRHI
             get => mCoreObject.NativeSuper.GpuState;
         }
     }
+    public class TtTransientBuffer : AuxPtrType<NxRHI.FTransientBuffer>
+    {
+        public TtTransientBuffer()
+        {
+            mCoreObject = FTransientBuffer.CreateInstance();
+        }
+        public void Initialize(uint size, EngineNS.NxRHI.EBufferType type = EBufferType.BFT_Vertex | EBufferType.BFT_Index,
+            EngineNS.NxRHI.EGpuUsage usage = EGpuUsage.USAGE_DEFAULT, EngineNS.NxRHI.ECpuAccess cpuAccess = (ECpuAccess)0)
+        {
+            mCoreObject.Initialize(UEngine.Instance.GfxDevice.RenderContext.mCoreObject, size, type, usage, cpuAccess);
+        }
+        public uint Alloc(uint size, bool bGrow)
+        {
+            return mCoreObject.Alloc(UEngine.Instance.GfxDevice.RenderContext.mCoreObject, size, bGrow);
+        }
+        public UVbView AllocVBV(uint stride, uint size, bool bGrow)
+        {
+            var ptr = mCoreObject.AllocVBV(UEngine.Instance.GfxDevice.RenderContext.mCoreObject, stride, size, bGrow);
+            return new UVbView(ptr);
+        }
+        public UIbView AllocIBV(uint stride, uint size, bool bGrow)
+        {
+            var ptr = mCoreObject.AllocIBV(UEngine.Instance.GfxDevice.RenderContext.mCoreObject, stride, size, bGrow);
+            return new UIbView(ptr);
+        }
+        public void Reset()
+        {
+            mCoreObject.Reset();
+        }
+        public IBuffer GetBuffer()
+        {
+            return mCoreObject.GetBuffer();
+        }
+    }
     public class UTexture : AuxPtrType<NxRHI.ITexture>, UGpuResource
     {
         //public static UTexture CreateTexture2D(EPixelFormat format, uint w, uint h)
@@ -371,6 +405,14 @@ namespace EngineNS.NxRHI
     }
     public class UVbView : AuxPtrType<NxRHI.IVbView>
     {
+        public UVbView()
+        {
+
+        }
+        public UVbView(IVbView ptr)
+        {
+            mCoreObject = ptr;
+        }
         public unsafe void UpdateGpuData(NxRHI.ICommandList cmd, uint offset, void* pData, uint size)
         {
             mCoreObject.UpdateGpuData(cmd, offset, pData, size);
@@ -382,6 +424,14 @@ namespace EngineNS.NxRHI
     }
     public class UIbView : AuxPtrType<NxRHI.IIbView>
     {
+        public UIbView()
+        {
+
+        }
+        public UIbView(IIbView ptr)
+        {
+            mCoreObject = ptr;
+        }
         public unsafe void UpdateGpuData(NxRHI.ICommandList cmd, uint offset, void* pData, uint size)
         {
             mCoreObject.UpdateGpuData(cmd, offset, pData, size);

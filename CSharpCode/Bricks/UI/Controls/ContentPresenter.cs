@@ -1,4 +1,5 @@
-﻿using EngineNS.UI.Controls.Containers;
+﻿using EngineNS.UI.Bind;
+using EngineNS.UI.Controls.Containers;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -34,6 +35,20 @@ namespace EngineNS.UI.Controls
         UInt64 mContentSourceHash = 0;
         public UInt64 ContentSourceHash => mContentSourceHash;
 
+        //public override Visibility Visibility 
+        //{ 
+        //    get => base.Visibility;
+        //    set
+        //    {
+        //        base.Visibility = value;
+        //        for(int i=this.Children.mChildren.Count - 1; i>=0; i--)
+        //        {
+        //            var child = Children.mChildren[i];
+        //            child.Visibility = value;
+        //        }
+        //    }
+        //}
+
         protected override SizeF MeasureOverride(in SizeF availableSize)
         {
             // measure with parent measure rule
@@ -41,6 +56,12 @@ namespace EngineNS.UI.Controls
         }
         protected override void ArrangeOverride(in RectangleF arrangeSize)
         {
+        }
+        public override void OnChildDesiredSizeChanged(TtUIElement child)
+        {
+            var parent = VisualTreeHelper.GetParent(this);
+            if (parent != null && !parent.MeasureInProgress)
+                parent.OnChildDesiredSizeChanged(child);
         }
     }
 }
