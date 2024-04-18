@@ -284,7 +284,7 @@ namespace EngineNS.Bricks.CodeBuilder
                     var awaitDummyIdx = sourceCode.LastIndexOf(awaitDummyPosCode);
                     sourceCode = sourceCode.Remove(awaitDummyIdx, awaitDummyPosCode.Length);
                     if (!methodDec.HasAwaitCode && methodDec.IsAsync)
-                        sourceCode = sourceCode.Insert(awaitDummyIdx, "await EngineNS.Thread.AsyncDummyClass.DummyFunc();");
+                        sourceCode = sourceCode.Insert(awaitDummyIdx, $"await {typeof(EngineNS.Thread.TtAsyncDummyClass).FullName}.DummyFunc();");
                     else
                         sourceCode = sourceCode.Remove(awaitDummyIdx, data.CodeGen.CurIndentStr.Length + 1);
                 }

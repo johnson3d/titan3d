@@ -245,15 +245,8 @@ namespace EngineNS.Bricks.CodeBuilder
             return UEngine.Instance.AssetMetaManager.GetAssetMeta(AssetName);
         }
 
-        public void UpdateAMetaReferences(IO.IAssetMeta ameta)
+        public static void UpdateAMetaReferences(MacrossNode.UMacrossEditor graph, UMacrossAMeta ameta)
         {
-            ameta.RefAssetRNames.Clear();
-            var macrossMeta = (ameta as UMacrossAMeta);
-            if (macrossMeta != null && SelectedType != null)
-                macrossMeta.BaseTypeStr = SelectedType.TypeString;
-
-            var graph = new MacrossNode.UMacrossEditor();
-            graph.LoadClassGraph(this.AssetName);
             foreach (var i in graph.Methods)
             {
                 foreach (var j in i.Nodes)
@@ -274,14 +267,45 @@ namespace EngineNS.Bricks.CodeBuilder
                 }
             }
         }
+        public void UpdateAMetaReferences(IO.IAssetMeta ameta)
+        {
+            ameta.RefAssetRNames.Clear();
+            var macrossMeta = (ameta as UMacrossAMeta);
+            if (macrossMeta != null && SelectedType != null)
+                macrossMeta.BaseTypeStr = SelectedType.TypeString;
+
+            var graph = new MacrossNode.UMacrossEditor();
+            graph.LoadClassGraph(this.AssetName);
+            UpdateAMetaReferences(graph, ameta as UMacrossAMeta);
+            //foreach (var i in graph.Methods)
+            //{
+            //    foreach (var j in i.Nodes)
+            //    {
+            //        var n = j as Bricks.CodeBuilder.MacrossNode.MethodNode;
+            //        if (n == null)
+            //            continue;
+            //        foreach (var pin in n.Inputs)
+            //        {
+            //            if (pin.EditValue == null)
+            //                continue;
+            //            var rnm = pin.EditValue.Value as RName;
+            //            if (rnm != null)
+            //            {
+            //                ameta.AddReferenceAsset(rnm);
+            //            }
+            //        }
+            //    }
+            //}
+        }
 
         public UTypeDesc SelectedType = null;
         public MacrossNode.UMacrossEditor MacrossEditor = null;
         public void SaveAssetTo(RName name)
         {
-            var ameta = GetAMeta();
+            var ameta = GetAMeta() as UMacrossAMeta;
             if (ameta != null)
             {
+                ameta.Description = $"MacrossType:{ameta.BaseTypeStr}\n";
                 UpdateAMetaReferences(ameta);
                 ameta.SaveAMeta();
             }

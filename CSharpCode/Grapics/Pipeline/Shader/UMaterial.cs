@@ -1075,6 +1075,33 @@ namespace EngineNS.Graphics.Pipeline.Shader
                 return mPerMaterialCBuffer;
             }
         }
+        [Rtti.Meta]
+        public void SetColor4(string name, in Color4f color)
+        {
+            var v = FindVar(name);
+            if (v == null)
+                return;
+            v.SetValue(in color);
+            PerMaterialCBuffer?.SetValue(name, in color);
+        }
+        [Rtti.Meta]
+        public void SetColor3(string name, in Color3f color)
+        {
+            var v = FindVar(name);
+            if (v == null)
+                return;
+            v.SetValue(in color);
+            PerMaterialCBuffer?.SetValue(name, in color);
+        }
+        [Rtti.Meta]
+        public void SetFloat4(string name, in Vector4 value)
+        {
+            var v = FindVar(name);
+            if (v == null)
+                return;
+            v.SetValue(in value);
+            PerMaterialCBuffer?.SetValue(name, in value);
+        }
         public bool CreateCBuffer(UEffect effect)
         {
             var binder = effect.ShaderEffect.FindBinder("cbPerMaterial");

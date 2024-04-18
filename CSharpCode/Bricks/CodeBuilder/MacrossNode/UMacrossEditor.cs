@@ -520,6 +520,13 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
             if(EGui.UIProxy.ToolbarIconButtonProxy.DrawButton(in drawList, 
                 ref mToolBtnDatas[toolBarItemIdx].IsMouseDown, ref mToolBtnDatas[toolBarItemIdx].IsMouseHover, null, "Save"))
             {
+                var ameta = UEngine.Instance.AssetMetaManager.GetAssetMeta(AssetName) as UMacrossAMeta;
+                if (ameta != null)
+                {
+                    UMacross.UpdateAMetaReferences(this, ameta);
+                    ameta.Description = $"MacrossType:{ameta.BaseTypeStr}\n";
+                    ameta.SaveAMeta();
+                }
                 SaveClassGraph(AssetName);
                 GenerateCode();
                 CompileCode();

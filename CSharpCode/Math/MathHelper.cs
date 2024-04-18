@@ -629,7 +629,7 @@ namespace EngineNS
         }
         #endregion
     }
-
+    [Rtti.Meta]
     public partial class MathHelper
     {
         public const float Epsilon = ((float)0.00001);
@@ -790,6 +790,33 @@ namespace EngineNS
         {
             return (int)((float)to * t + (float)from * (1.0f - t));
         }
+        #region CreateInstance
+        [Rtti.Meta]
+        public static Vector2 CreateVector2(float x, float y)
+        {
+            return new Vector2(x, y);
+        }
+        [Rtti.Meta]
+        public static Vector3 CreateVector3(float x, float y, float z)
+        {
+            return new Vector3(x, y, z);
+        }
+        [Rtti.Meta]
+        public static Vector4 CreateVectorf(float x, float y, float z, float w)
+        {
+            return new Vector4(x, y, z, w);
+        }
+        [Rtti.Meta]
+        public static Color3f CreateColor3f(float r, float g, float b)
+        {
+            return new Color3f(r, g, b);
+        }
+        [Rtti.Meta]
+        public static Color4f CreateColor4f(float r, float g, float b)
+        {
+            return new Color4f(r, g, b);
+        }
+        #endregion
         // 圆与线段碰撞检测
         // 圆心p(x, y), 半径r, 线段两端点p1(x1, y1)和p2(x2, y2)
         [Rtti.Meta]

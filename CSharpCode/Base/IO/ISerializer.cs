@@ -774,6 +774,8 @@ namespace EngineNS.IO
 
         public static bool WriteObjectMetaFields(System.Xml.XmlDocument xml, System.Xml.XmlElement node, object obj)
         {
+            if (obj == null)
+                return false;
             var typeStr = Rtti.UTypeDescManager.Instance.GetTypeStringFromType(obj.GetType());
             var meta = Rtti.TtClassMetaManager.Instance.GetMeta(typeStr);
 

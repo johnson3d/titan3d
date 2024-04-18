@@ -239,6 +239,9 @@ namespace EngineNS
         /// <value>The Z component of the vector.</value>
         [Rtti.Meta]
         public float Z;
+        public float R => X;
+        public float G => Y;
+        public float B => Z;
         public float this[int index]
         {
             get

@@ -280,6 +280,7 @@ namespace EngineNS.Bricks.Collision.Octree
         Bricks.Collision.Octree.TtBoundsOctree<GamePlay.Scene.UNode> mOctree;
         public NxRHI.TtTransientBuffer TransientVB = new();
         public NxRHI.TtTransientBuffer TransientIB = new();
+        public bool IsDrawBounds { get; set; } = false;
         public async System.Threading.Tasks.Task<bool> Initialize(object host)
         {
             var scene = host as GamePlay.Scene.UScene;
@@ -326,12 +327,15 @@ namespace EngineNS.Bricks.Collision.Octree
                     break;
                 case "OnGatherVisibleMeshes":
                     {
-                        var scene = host as GamePlay.Scene.UScene;
-                        var vp = notify.Parameter as GamePlay.UWorld.UVisParameter;
-                        vp.TransientVB = TransientVB;
-                        vp.TransientIB = TransientIB;
+                        if (IsDrawBounds)
+                        {
+                            var scene = host as GamePlay.Scene.UScene;
+                            var vp = notify.Parameter as GamePlay.UWorld.UVisParameter;
+                            vp.TransientVB = TransientVB;
+                            vp.TransientIB = TransientIB;
 
-                        mOctree.DrawAllBounds(scene.Placement, vp);
+                            mOctree.DrawAllBounds(scene.Placement, vp);
+                        }
                     }
                     break;
             }

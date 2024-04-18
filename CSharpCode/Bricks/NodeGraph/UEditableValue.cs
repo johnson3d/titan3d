@@ -1,4 +1,5 @@
-﻿using EngineNS.EGui.Controls.PropertyGrid;
+﻿using Assimp;
+using EngineNS.EGui.Controls.PropertyGrid;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -153,6 +154,18 @@ namespace EngineNS.Bricks.NodeGraph
                 result.ValueType = type;
                 result.Tag = tag;
                 return result; 
+            }
+            else if (type.IsEqual(typeof(Color3f)))
+            {
+                var result = CreateEditableValue_Internal(notify, type, tag);
+                result.Value = Color3f.FromColor(Color.White);
+                return result;
+            }
+            else if(type.IsEqual(typeof(Color4f)))
+            {
+                var result = CreateEditableValue_Internal(notify, type, tag);
+                result.Value = Color4f.FromABGR(Color.White);
+                return result;
             }
             return null;
         }

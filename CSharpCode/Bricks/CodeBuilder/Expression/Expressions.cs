@@ -1618,9 +1618,19 @@ namespace EngineNS.Bricks.CodeBuilder
             Type = Rtti.UTypeDesc.TypeOf(typeof(Vector3));
             mValueStr = val.ToString();
         }
+        public UPrimitiveExpression(Color3f val)
+        {
+            Type = Rtti.UTypeDesc.TypeOf(typeof(Color3f));
+            mValueStr = val.ToString();
+        }
         public UPrimitiveExpression(Vector4 val)
         {
             Type = Rtti.UTypeDesc.TypeOf(typeof(Vector4));
+            mValueStr = val.ToString();
+        }
+        public UPrimitiveExpression(Color4f val)
+        {
+            Type = Rtti.UTypeDesc.TypeOf(typeof(Color4f));
             mValueStr = val.ToString();
         }
         public UPrimitiveExpression(Vector2i val)
@@ -1683,6 +1693,14 @@ namespace EngineNS.Bricks.CodeBuilder
                     retValue = $"typeof({typeDesc.FullName})";
                 else
                     retValue = typeDesc.FullName;
+            }
+            else if(type == Rtti.UTypeDescGetter<Color4f>.TypeDesc)
+            {
+                retValue = $"new EngineNS.Color4f({value.ToString()})";
+            }
+            else if (type == Rtti.UTypeDescGetter<Color3f>.TypeDesc)
+            {
+                retValue = $"new EngineNS.Color3f({value.ToString()})";
             }
             else
             {

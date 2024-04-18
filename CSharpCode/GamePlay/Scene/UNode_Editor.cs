@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Text;
 
 namespace EngineNS.GamePlay.Scene
@@ -14,6 +15,7 @@ namespace EngineNS.GamePlay.Scene
         {
             return;
         }
+        [Category("Option")]
         public Graphics.Pipeline.UHitProxy.EHitproxyType HitproxyType
         {
             get

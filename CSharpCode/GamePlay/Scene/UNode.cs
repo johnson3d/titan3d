@@ -1,4 +1,6 @@
-﻿using EngineNS.Bricks.GpuDriven;
+﻿using Assimp;
+using EngineNS.Bricks.GpuDriven;
+using NPOI.SS.UserModel;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -270,6 +272,7 @@ namespace EngineNS.GamePlay.Scene
             get => UInt32.MaxValue;
             internal set { }
         }
+        [Category("Option")]
         public virtual string NodeName
         {
             get
@@ -279,6 +282,13 @@ namespace EngineNS.GamePlay.Scene
                     return mNodeData.Name;
                 }
                 return SceneId.ToString();
+            }
+            set
+            {
+                if (mNodeData != null)
+                {
+                    mNodeData.Name = value;
+                }
             }
         }
         protected UNode mParent;
@@ -425,12 +435,21 @@ namespace EngineNS.GamePlay.Scene
             UpdateAABB();
         }
         [Rtti.Meta]
-        public UNode FindFirstChild(string name)
+        public UNode FindFirstChild(string name, bool bRecursive = false)
         {
             foreach (var i in Children)
             {
                 if (i.NodeName == name)
                     return i;
+            }
+            if (bRecursive)
+            {
+                foreach (var i in Children)
+                {
+                    var result = i.FindFirstChild(name, true);
+                    if (result != null)
+                        return result;
+                }
             }
             return null;
         }

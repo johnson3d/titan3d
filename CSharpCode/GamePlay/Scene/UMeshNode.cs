@@ -1,4 +1,5 @@
-﻿using System;
+﻿using EngineNS.Rtti;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 
@@ -187,6 +188,7 @@ namespace EngineNS.GamePlay.Scene
             return BoundVolume as UBoxBV;
         }
         Graphics.Mesh.TtMesh mMesh;
+        [Rtti.Meta]
         public Graphics.Mesh.TtMesh Mesh 
         {
             get 

@@ -187,6 +187,7 @@ namespace EngineNS
         }
         public float ElapseTickCountMS { get; set; }  // 毫秒
         public int FrameCount { get; set; }
+        [Rtti.Meta]
         public float TickCountSecond { get; set; }
         public float ElapsedSecond { get; set; }
         protected override UEngine GetHost()

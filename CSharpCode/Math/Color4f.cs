@@ -45,13 +45,20 @@ namespace EngineNS
         /// <param name="red">红色值</param>
         /// <param name="green">绿色值</param>
         /// <param name="blue">蓝色值</param>
-	    public Color4f( float alpha, float red, float green, float blue )
-	    {
+	    public Color4f(float alpha, float red, float green, float blue)
+        {
 		    Alpha = alpha;
 		    Red = red;
 		    Green = green;
 		    Blue = blue;
 	    }
+        public Color4f(double alpha, double red, double green, double blue)
+        {
+            Alpha = (float)alpha;
+            Red = (float)red;
+            Green = (float)green;
+            Blue = (float)blue;
+        }
         public Vector3 ToVector3()
         {
             Vector3 result;
@@ -84,6 +91,13 @@ namespace EngineNS
 		    Green = green;
 		    Blue = blue;
 	    }
+        public Color4f(double red, double green, double blue)
+        {
+            Alpha = 1.0f;
+            Red = (float)red;
+            Green = (float)green;
+            Blue = (float)blue;
+        }
         /// <summary>
         /// 带参构造函数
         /// </summary>
@@ -770,7 +784,7 @@ namespace EngineNS
                         result[j] = float.Parse(chars.Slice(iStart, i - iStart));
                         iStart = i + 1;
                         j++;
-                        if (j == 2)
+                        if (j == 3)
                             break;
                     }
                 }

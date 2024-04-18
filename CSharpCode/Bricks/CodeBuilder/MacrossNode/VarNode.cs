@@ -335,12 +335,12 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
         {
             if (IsGet)
                 return null;
-            return SetPin.EditValue.Value;
+            return SetPin.EditValue?.Value;
         }
 
         public void SetPropertyValue(string propertyName, object value)
         {
-            if (IsGet)
+            if (IsGet || SetPin.EditValue == null)
                 return;
             SetPin.EditValue.Value = value;
         }
@@ -1785,6 +1785,82 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
         public override UExpressionBase GetExpression(NodePin pin, ref BuildCodeStatementsData data)
         {
             mValue = (Vector4)SetPin.EditValue.Value;
+            return new UPrimitiveExpression(Value);
+        }
+        public override void OnMouseStayPin(NodePin stayPin, UNodeGraph graph)
+        {
+            EGui.Controls.CtrlUtility.DrawHelper(Value.ToString());
+        }
+    }
+
+    [ContextMenu("Color3f", "Data\\POD\\BaseData\\Color3f@_serial@", UMacross.MacrossEditorKeyword)]
+    public partial class Color3fLVar : LocalVar, UEditableValue.IValueEditNotify
+    {
+        Color3f mValue;
+        [Rtti.Meta]
+        public Color3f Value
+        {
+            get => mValue;
+            set
+            {
+                if (mValue != value)
+                    SetPin.EditValue.Value = value;
+                mValue = value;
+            }
+        }
+
+        public Color3fLVar()
+        {
+            VarType = Rtti.UTypeDescManager.Instance.GetTypeDescFromFullName(typeof(Color3f).FullName);
+            var edtValue = UEditableValue.CreateEditableValue(this, typeof(Color3f), SetPin);
+            edtValue.Value = new Color3f(1, 1, 1);
+            SetPin.EditValue = edtValue;
+        }
+        public void OnValueChanged(UEditableValue ev)
+        {
+            mValue = (Color3f)ev.Value;
+        }
+        public override UExpressionBase GetExpression(NodePin pin, ref BuildCodeStatementsData data)
+        {
+            mValue = (Color3f)SetPin.EditValue.Value;
+            return new UPrimitiveExpression(Value);
+        }
+        public override void OnMouseStayPin(NodePin stayPin, UNodeGraph graph)
+        {
+            EGui.Controls.CtrlUtility.DrawHelper(Value.ToString());
+        }
+    }
+
+    [ContextMenu("Color4f", "Data\\POD\\BaseData\\Color4f@_serial@", UMacross.MacrossEditorKeyword)]
+    public partial class Color4fLVar : LocalVar, UEditableValue.IValueEditNotify
+    {
+        Color4f mValue;
+        [Rtti.Meta]
+        public Color4f Value
+        {
+            get => mValue;
+            set
+            {
+                if (mValue != value)
+                    SetPin.EditValue.Value = value;
+                mValue = value;
+            }
+        }
+
+        public Color4fLVar()
+        {
+            VarType = Rtti.UTypeDescManager.Instance.GetTypeDescFromFullName(typeof(Color4f).FullName);
+            var edtValue = UEditableValue.CreateEditableValue(this, typeof(Color4f), SetPin);
+            edtValue.Value = new Color4f(1, 1, 1);
+            SetPin.EditValue = edtValue;
+        }
+        public void OnValueChanged(UEditableValue ev)
+        {
+            mValue = (Color4f)ev.Value;
+        }
+        public override UExpressionBase GetExpression(NodePin pin, ref BuildCodeStatementsData data)
+        {
+            mValue = (Color4f)SetPin.EditValue.Value;
             return new UPrimitiveExpression(Value);
         }
         public override void OnMouseStayPin(NodePin stayPin, UNodeGraph graph)

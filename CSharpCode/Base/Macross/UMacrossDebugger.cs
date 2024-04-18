@@ -50,7 +50,7 @@ namespace EngineNS.Macross
         public static UMacrossDebugger Instance = new UMacrossDebugger();
         internal System.Threading.AutoResetEvent BreakEvent { get; } = new System.Threading.AutoResetEvent(false);
         internal UMacrossBreak CurrrentBreak;
-        public List<WeakReference<UMacrossBreak>> Breaks = new List<WeakReference<UMacrossBreak>>();
+        public Dictionary<string, WeakReference<UMacrossBreak>> Breaks = new();
         internal Dictionary<string, bool> mBreakEnableStore = new Dictionary<string, bool>();
         private bool mIsEnableDebugger = true;
         public bool IsEnableDebugger
@@ -69,13 +69,21 @@ namespace EngineNS.Macross
         {
             lock (Instance)
             {
-                for (int i = 0; i < Breaks.Count; i++)
+                List<string> rvm = null;
+                foreach(var i in Breaks)
                 {
-                    UMacrossBreak tmp;
-                    if (Breaks[i].TryGetTarget(out tmp) == false)
+                    if (i.Value.TryGetTarget(out var tmp) == false)
                     {
-                        Breaks.RemoveAt(i);
-                        i--;
+                        if (rvm == null)
+                            rvm = new List<string>();
+                        rvm.Add(i.Key);
+                    }
+                }
+                if (rvm != null)
+                {
+                    foreach(var i in rvm)
+                    {
+                        Breaks.Remove(i);
                     }
                 }
             }
@@ -112,20 +120,11 @@ namespace EngineNS.Macross
         {
             lock (Instance)
             {
-                foreach(var i in Breaks)
+                Breaks[brk.BreakName] = new WeakReference<UMacrossBreak>(brk);
+
+                if (mBreakEnableStore.TryGetValue(brk.BreakName, out var eb))
                 {
-                    UMacrossBreak tmp;
-                    if (i.TryGetTarget(out tmp))
-                    {
-                        if (tmp == brk)
-                            return;
-                    }
-                }
-                Breaks.Add(new WeakReference<UMacrossBreak>(brk));
-                bool enable = false;
-                if(mBreakEnableStore.TryGetValue(brk.BreakName, out enable))
-                {
-                    brk.Enable = enable;
+                    brk.Enable = eb;
                 }
             }   
         }
@@ -134,18 +133,8 @@ namespace EngineNS.Macross
             lock (Instance)
             {
                 brk.Enable = false;
-                foreach (var i in Breaks)
-                {
-                    UMacrossBreak tmp;
-                    if (i.TryGetTarget(out tmp))
-                    {
-                        if (tmp == brk)
-                        {
-                            Breaks.Remove(i);
-                            return;
-                        }
-                    }
-                }
+                Breaks.Remove(brk.BreakName);
+                mBreakEnableStore.Remove(brk.BreakName);
             }
         }
         public void RemoveAllBreaks()
@@ -162,7 +151,7 @@ namespace EngineNS.Macross
 
             lock (Instance)
             {
-                foreach (var i in Breaks)
+                foreach (var i in Breaks.Values)
                 {
                     UMacrossBreak tmp;
                     if (i.TryGetTarget(out tmp))
@@ -174,13 +163,12 @@ namespace EngineNS.Macross
         }
         public UMacrossBreak FindBreak(string name)
         {
-            foreach(var i in Breaks)
+            if (Breaks.TryGetValue(name, out var v))
             {
                 UMacrossBreak tmp;
-                if (i.TryGetTarget(out tmp))
+                if (v.TryGetTarget(out tmp))
                 {
-                    if (tmp.BreakName == name)
-                        return tmp;
+                    return tmp;
                 }
             }
             return null;

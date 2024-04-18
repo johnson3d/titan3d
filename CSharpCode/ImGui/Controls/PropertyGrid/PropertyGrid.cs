@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using EngineNS;
 using Org.BouncyCastle.Asn1.X509.Qualified;
+using SixLabors.Fonts;
 
 namespace EngineNS.EGui.Controls.PropertyGrid
 {
@@ -274,6 +275,15 @@ namespace EngineNS.EGui.Controls.PropertyGrid
             RegTypeEditor(Rtti.UTypeDesc.TypeOf(typeof(float)), new FloatEditor());
             RegTypeEditor(Rtti.UTypeDesc.TypeOf(typeof(double)), new DoubleEditor());
             RegTypeEditor(Rtti.UTypeDesc.TypeOf(typeof(string)), new StringEditor());
+            var rNameEditor = new RName.PGRNameAttribute();
+            await rNameEditor.Initialize();
+            RegTypeEditor(Rtti.UTypeDesc.TypeOf(typeof(RName)), rNameEditor);
+            var color4fEditor = new Color4PickerEditorAttribute();
+            await color4fEditor.Initialize();
+            RegTypeEditor(Rtti.UTypeDesc.TypeOf(typeof(Color4f)), color4fEditor);
+            var color3fEditor = new Color3PickerEditorAttribute();
+            await color3fEditor.Initialize();
+            RegTypeEditor(Rtti.UTypeDesc.TypeOf(typeof(Color3f)), color3fEditor);
 
             ObjectWithCreateEditor = new ObjectWithCreateEditor();
             await ObjectWithCreateEditor.Initialize();
@@ -382,7 +392,13 @@ namespace EngineNS.EGui.Controls.PropertyGrid
                     misc_flags | ImGuiColorEditFlags_.ImGuiColorEditFlags_NoSidePreview | ImGuiColorEditFlags_.ImGuiColorEditFlags_NoSmallPreview);
                 if (v != saved)
                 {
-                    newValue = v;
+                    if (info.Type.IsEqual(typeof(Color)))
+                        newValue = Color.FromArgb((int)(255), (int)(v.R * 255), (int)(v.G * 255), (int)(v.B * 255));
+                    else if (info.Type.IsEqual(typeof(Color3f)))
+                        newValue = (Color3f)v;
+                    else
+                        newValue = v;
+
                     valueChanged = true;
                 }
                 ImGuiAPI.EndPopup();
@@ -448,8 +464,10 @@ namespace EngineNS.EGui.Controls.PropertyGrid
                     misc_flags | ImGuiColorEditFlags_.ImGuiColorEditFlags_NoSidePreview | ImGuiColorEditFlags_.ImGuiColorEditFlags_NoSmallPreview, (float*)0);
                 if (v != saved)
                 {
-                    if(info.Type.IsEqual(typeof(Color)))
+                    if (info.Type.IsEqual(typeof(Color)))
                         newValue = Color.FromArgb((int)(v.A * 255), (int)(v.R * 255), (int)(v.G * 255), (int)(v.B * 255));
+                    else if (info.Type.IsEqual(typeof(Color4f)))
+                        newValue = (Color4f)v;
                     else
                         newValue = v;
 

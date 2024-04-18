@@ -22,7 +22,7 @@ namespace EngineNS.NxRHI
 
 namespace EngineNS.Graphics.Mesh
 {
-    public class TtMesh : IDisposable
+    public partial class TtMesh : IDisposable
     {
         public void Dispose()
         {
@@ -472,6 +472,15 @@ namespace EngineNS.Graphics.Mesh
                 CheckVersionUpdated();
                 return mSubMeshes;
             }
+        }
+        [Rtti.Meta]
+        public Pipeline.Shader.UMaterial GetMaterial(uint subMesh, uint atom)
+        {
+            if (subMesh >= SubMeshes.Count)
+                return null;
+            if (atom >= SubMeshes[(int)subMesh].Atoms.Count)
+                return null;
+            return SubMeshes[(int)subMesh].Atoms[(int)atom].Material;
         }
         [ReadOnly(true)]
         public string MdfQueueType

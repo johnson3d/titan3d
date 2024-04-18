@@ -111,6 +111,12 @@ namespace EngineNS
             Green = green;
             Blue = blue;
 	    }
+        public Color3f(double red, double green, double blue)
+        {
+            Red = (float)red;
+            Green = (float)green;
+            Blue = (float)blue;
+        }
         public Vector3 ToVector3()
         {
             return new Vector3(Red, Green, Blue);

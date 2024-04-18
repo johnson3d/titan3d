@@ -11,6 +11,10 @@ namespace EngineNS.Editor
     {
         public override void TickModule(UEngine engine)
         {
+            
+        }
+        public override void TickLogic(UEngine engine)
+        {
             if (engine.GameInstance == null)
                 return;
             engine.GameInstance.Tick(engine.ElapseTickCountMS);
@@ -96,7 +100,7 @@ namespace EngineNS.Editor
                 Vector2 sz = new Vector2(-1, 40);
                 if (ImGuiAPI.Button("Play", sz))
                 {
-                    _ = OnPlayGame(mCurrentName);
+                    OnPlayGame(mCurrentName);
                 }
                 if (ImGuiAPI.Button("Stop", sz))
                 {
@@ -108,9 +112,14 @@ namespace EngineNS.Editor
             EGui.UIProxy.DockProxy.EndMainForm();
         }
 
-        async System.Threading.Tasks.Task OnPlayGame(RName assetName)
+        void OnPlayGame(RName assetName)
         {
-            await UEngine.Instance.StartPlayInEditor(UEngine.Instance.GfxDevice.SlateApplication, assetName);
+            if (UEngine.Instance.GameInstance != null)
+                return;
+            UEngine.Instance.EventPoster.RunOn(async (state) =>
+            {
+                return await UEngine.Instance.StartPlayInEditor(UEngine.Instance.GfxDevice.SlateApplication, assetName);
+            }, Thread.Async.EAsyncTarget.Logic);
         }
     }
 }

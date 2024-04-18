@@ -1057,6 +1057,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
             var pinType = ((pinData.PinIn != null) ? pinData.PinIn.Tag : pinData.PinOut.Tag) as Rtti.UTypeDesc;
             if (pinType.IsPointer && invokeStatement != null)
                 invokeStatement.IsUnsafe = true;
+            
             if (pinType.IsDelegate)
             {
                 var inPin = pinData.PinIn;
