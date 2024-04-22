@@ -228,6 +228,8 @@ namespace EngineNS.Bricks.NodeGraph
             {
                 if(!iPin.MultiLinks)
                     RemoveLink(iPin);
+                if (!oPin.MultiLinks)
+                    RemoveLink(oPin);
                 var result = new UPinLinker();
                 if (iPin != null)
                 {
@@ -1431,6 +1433,19 @@ namespace EngineNS.Bricks.NodeGraph
                         LinkingOp.BlockingEnd = DragPosition;
                     }
                 }
+
+                // move viewport when drag to edge
+                float edgeDelta = 20;
+                float edgeMoveSpeed = 500 * UEngine.Instance.ElapsedSecond;
+                var delta = DragPosition - PositionVP;
+                if (delta.X <= edgeDelta)
+                    PositionVP.X -= edgeMoveSpeed;
+                else if (delta.X >= (SizeVP.X - edgeDelta))
+                    PositionVP.X += edgeMoveSpeed;
+                if (delta.Y <= edgeDelta)
+                    PositionVP.Y -= edgeMoveSpeed;
+                else if (delta.Y >= (SizeVP.Y - edgeDelta))
+                    PositionVP.Y += edgeMoveSpeed;
             }
             else if (ButtonPress[(int)EMouseButton.Middle])
             {

@@ -166,7 +166,7 @@ namespace EngineNS.EGui.Controls.PropertyGrid
         {
             OnDraw(false, true, false);
         }
-        public void OnDraw(bool bShowReadOnly, bool bNewForm/*=true*/, bool bKeepColums/*=false*/)
+        public void OnDraw(bool bShowReadOnly, bool bNewForm/*=true*/, bool bKeepColums/*=false*/, ImGuiWindowFlags_ flags = ImGuiWindowFlags_.ImGuiWindowFlags_None)
         {
             if (Visible == false)
                 return;
@@ -176,7 +176,7 @@ namespace EngineNS.EGui.Controls.PropertyGrid
             ImGuiAPI.PushStyleColor(ImGuiCol_.ImGuiCol_WindowBg, EGui.UIProxy.StyleConfig.Instance.PanelBackground);
             if (bNewForm)
             {
-                if (ImGuiAPI.Begin($"{PGName}", ref mVisible, ImGuiWindowFlags_.ImGuiWindowFlags_None))
+                if (ImGuiAPI.Begin($"{PGName}", ref mVisible, flags))
                 //var sz = new Vector2(-1);
                 //if (ImGuiAPI.BeginChild($"{PGName}", ref sz, true, ImGuiWindowFlags_.ImGuiWindowFlags_None))
                 {
@@ -192,7 +192,7 @@ namespace EngineNS.EGui.Controls.PropertyGrid
                 var winPos = ImGuiAPI.GetWindowPos();
                 var winSize = ImGuiAPI.GetWindowSize();
                 var sz = new Vector2(-1);
-                if(ImGuiAPI.BeginChild($"{PGName}", in sz, false, ImGuiWindowFlags_.ImGuiWindowFlags_None))
+                if(ImGuiAPI.BeginChild($"{PGName}", in sz, false, flags))
                 {
                     OnDrawContent(bShowReadOnly, in winPos, in winSize, bKeepColums);
                 }

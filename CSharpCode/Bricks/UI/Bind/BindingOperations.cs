@@ -848,6 +848,8 @@ namespace EngineNS.UI.Bind
                         tagExpr.Path = new TtPropertyPath(sourcePath);
                         source.SetBindExpression(sourceProp, tagExpr);
                         binding.TargetExp = tagExpr;
+                        //tagExpr.SetValue(targetProp, source.GetValue<TSrcProp>(sourceProp));
+                        source.SetExpressionValue(tagExpr, sourceProp);
                     }
                     break;
                 case EBindingMode.TwoWay:

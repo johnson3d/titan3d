@@ -1,4 +1,5 @@
-﻿using System;
+﻿using EngineNS.Graphics.Mesh;
+using System;
 using System.Collections.Generic;
 using System.Text;
 
@@ -288,13 +289,24 @@ namespace EngineNS.Editor.Forms
             var sz = new Vector2(-1);
             if (EGui.UIProxy.DockProxy.BeginPanel(mDockKeyClass, "Left", ref mLeftShow, ImGuiWindowFlags_.ImGuiWindowFlags_None))
             {
-                if (ImGuiAPI.CollapsingHeader("MeshProperty", ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_None))
+                if (ImGuiAPI.CollapsingHeader("MeshProperty", ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_CollapsingHeader))
                 {
-                    MeshPropGrid.OnDraw(true, false, false);
+                    MeshPropGrid.OnDraw(true, false, false, ImGuiWindowFlags_.ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_.ImGuiWindowFlags_AlwaysAutoResize);
+                    if(ImGuiAPI.Button("Build SDF"))
+                    {
+                        UMeshDataProvider meshProvider = new UMeshDataProvider();
+                        if(meshProvider.InitFrom(Mesh))
+                        {
+                            var embreeScene = new DistanceField.UEmbreeScene();
+                            var embreeManager = new DistanceField.UEmbreeManager();
+                            embreeManager.SetupEmbreeScene(Mesh.AssetName.ToString(), meshProvider, 1.0f, embreeScene);
+                            embreeManager.DeleteEmbreeScene(embreeScene);
+                        }
+                    }
                 }
-                if (ImGuiAPI.CollapsingHeader("EditorProperty", ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_None))
+                if (ImGuiAPI.CollapsingHeader("EditorProperty", ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_CollapsingHeader))
                 {
-                    EditorPropGrid.OnDraw(true, false, false);
+                    EditorPropGrid.OnDraw(true, false, false, ImGuiWindowFlags_.ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_.ImGuiWindowFlags_AlwaysAutoResize);
                 }
             }
             EGui.UIProxy.DockProxy.EndPanel();

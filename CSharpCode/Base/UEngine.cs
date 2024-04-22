@@ -126,9 +126,12 @@ namespace EngineNS
         [Rtti.Meta]
         public RName EditorFont { get; set; }
         public string EditorLanguage { get; set; } = "English";
+        [Rtti.Meta]
+        public RName UIDefaultTexture { get; set; }
         public UEngineConfig()
         {
             EditorFont = RName.GetRName("fonts/Roboto-Regular.ttf", RName.ERNameType.Engine);
+            UIDefaultTexture = RName.GetRName("texture/white.srv", RName.ERNameType.Engine);
         }
     }
     public partial class URuntimeConfig

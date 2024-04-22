@@ -182,12 +182,16 @@ namespace CompilingGenerator
 #nullable enable
         public{(baseHasBindObjectInterface ? " override" : " virtual")} void SetValue<T>(in T value, [CallerMemberName] string? propertyName = null)
 #nullable disable
-        {{";
-            bool hasSetValueWithPropertyNameSwitch = false;
-            string setValueWithPropertyNameSwitch = $@"
+        {{
             if(string.IsNullOrEmpty(propertyName))
                 return;
             var propertyNameHash = Standart.Hash.xxHash.xxHash64.ComputeHash(propertyName);
+            SetValue_<T>(in value, in propertyNameHash);
+        }}
+        protected{(baseHasBindObjectInterface ? " override" : " virtual")} void SetValue_<T>(in T value, in UInt64 propertyNameHash)
+        {{";
+            bool hasSetValueWithPropertyNameSwitch = false;
+            string setValueWithPropertyNameSwitch = $@"
             switch(propertyNameHash)
             {{";
 
@@ -195,33 +199,35 @@ namespace CompilingGenerator
 #nullable enable
         public{(baseHasBindObjectInterface ? " override" : " virtual")} T GetValue<T>([CallerMemberName] string? propertyName = null)
 #nullable disable
-        {{";
-            bool hasGetValueWithPropertyNameSwitch = false;
-            string getValueWithPropertyNameSwitch = $@"
+        {{
             if(string.IsNullOrEmpty(propertyName))
                 return default(T);
             var propertyNameHash = Standart.Hash.xxHash.xxHash64.ComputeHash(propertyName);
+            return GetValue_<T>(in propertyNameHash);
+        }}
+        protected{(baseHasBindObjectInterface ? " override" : " virtual")} T GetValue_<T>(in UInt64 propertyNameHash)
+        {{";
+            bool hasGetValueWithPropertyNameSwitch = false;
+            string getValueWithPropertyNameSwitch = $@"
             switch(propertyNameHash)
             {{";
 
             string createBindingExpressionMethod = $@"
-        public{(baseHasBindObjectInterface ? " override" : " virtual")} EngineNS.UI.Bind.TtBindingExpressionBase CreateBindingExpression<TProperty>(string propertyName, EngineNS.UI.Bind.TtBindingBase binding, EngineNS.UI.Bind.TtBindingExpressionBase parent)
+        protected{(baseHasBindObjectInterface ? " override" : " virtual")} EngineNS.UI.Bind.TtBindingExpressionBase CreateBindingExpression_<TProperty>(in UInt64 propertyNameHash, EngineNS.UI.Bind.TtBindingBase binding, EngineNS.UI.Bind.TtBindingExpressionBase parent)
         {{";
             bool hasCreateBindingExpressionMethodSwitch = false;
             string createBindingExpressionMethodSwitch = $@"
-            if(string.IsNullOrEmpty(propertyName))
-                return null;
-            var propertyNameHash = Standart.Hash.xxHash.xxHash64.ComputeHash(propertyName);
             switch(propertyNameHash)
             {{";
 
+            string onValueChangePropertys = "";
             string getPropertyValueSwitch = "";
             string setPropertyValueSwitch = "";
             string tourBindableProperties = "";
             string hasBindablePropertiesStr = "";
             string getContentsPresenterContainerSwitchStr = "";
             string tourContentsPresenterContainersStr = "";
-
+            string setExpressionValueSwitchStr = "";
             //bool hasCreateBindingMethodExpressionMethodSwitch = false;
             //string createBindingMethodExpressionMethodSwitch = $@"
             //if(string.IsNullOrEmpty(propertyName))
@@ -293,7 +299,10 @@ namespace {namespaceName}
         protected Dictionary<EngineNS.UI.Bind.TtBindableProperty, EngineNS.UI.Bind.TtBindablePropertyValueBase> {bindExprDicName} = new Dictionary<EngineNS.UI.Bind.TtBindableProperty, EngineNS.UI.Bind.TtBindablePropertyValueBase>();
         protected EngineNS.UI.Trigger.TtTriggerCollection {triggerDicName} = new EngineNS.UI.Trigger.TtTriggerCollection();
         [System.ComponentModel.Browsable(false)]        
-        public EngineNS.UI.Trigger.TtTriggerCollection Triggers => {triggerDicName};";
+        public EngineNS.UI.Trigger.TtTriggerCollection Triggers => {triggerDicName};
+        public string PropertyNameInHost;
+        public UInt64 PropertyNameInHostHash;
+        public EngineNS.UI.Controls.TtUIElement HostElement;";
 
             }
             //Dictionary<ITypeSymbol, List<ISymbol>> symbolTypeDic = new Dictionary<ITypeSymbol, List<ISymbol>>();
@@ -310,6 +319,18 @@ namespace {namespaceName}
                     {
                         var propName = propSymbol.Name;
                         var propTypeDisplayName = propSymbol.Type.ToDisplayString();
+                        bool isBindableObject = false;
+                        foreach (var att in propSymbol.Type.GetAttributes())
+                        {
+                            if (att.AttributeClass == null)
+                                continue;
+                            if(att.AttributeClass.ToDisplayString() == BindingCodeGenerator.mBindObjectAttrName)
+                            {
+                                isBindableObject = true;
+                                break;
+                            }
+                        }
+                        
                         //if(!symbolTypeDic.TryGetValue(propSymbol.Type,out var symbolList))
                         //{
                         //    symbolList = new List<ISymbol>();
@@ -392,9 +413,23 @@ namespace {namespaceName}
                         //    }}";
                         hasSetValueWithPropertyNameSwitch = true;
                         setValueWithPropertyNameSwitch += $@"
-                case {propNameHash}: //{propName}
+                case {propNameHash}: //{propName}";
+                        if(isBindableObject)
+                        {
+                            setValueWithPropertyNameSwitch += $@"
+                    dynamic valueDynamic_{propName} = value;
+                    valueDynamic_{propName}.HostElement = this;
+                    valueDynamic_{propName}.PropertyNameInHost = ""{propName}"";
+                    valueDynamic_{propName}.PropertyNameInHostHash = {propNameHash};
+                    SetValue<T>(valueDynamic_{propName}, {bindPropName});
+                    return;";
+                        }
+                        else
+                        {
+                            setValueWithPropertyNameSwitch += $@"
                     SetValue<T>(value, {bindPropName});
                     return;";
+                        }
                         hasGetValueWithPropertyNameSwitch = true;
                         getValueWithPropertyNameSwitch += $@"
                 case {propNameHash}: //{propName}
@@ -408,10 +443,25 @@ namespace {namespaceName}
                         if(!propSymbol.IsReadOnly)
                         {
                             setPropertyValueSwitch += $@"
-                case {propNameHash}: //{propName}
+                case {propNameHash}: //{propName}";
+                            if(isBindableObject)
+                            {
+                                setPropertyValueSwitch += $@"
+                    dynamic valueDynamic_{propName} = value;
+                    valueDynamic_{propName}.HostElement = this;
+                    valueDynamic_{propName}.PropertyNameInHost = ""{propName}"";
+                    valueDynamic_{propName}.PropertyNameInHostHash = {propNameHash};
+                    //SetValue<{propTypeDisplayName}>(({propTypeDisplayName})value, {bindPropName});
+                    {propName} = ({propTypeDisplayName})valueDynamic_{propName};
+                    return true;";
+                            }
+                            else
+                            {
+                                setPropertyValueSwitch += $@"
                     //SetValue<{propTypeDisplayName}>(({propTypeDisplayName})value, {bindPropName});
                     {propName} = ({propTypeDisplayName})value;
                     return true;";
+                            }
                         }
                         else
                         {
@@ -419,6 +469,17 @@ namespace {namespaceName}
                 case {propNameHash}: //{propName}
                         return true;";
                         }
+
+                        if(isBindableObject)
+                        {
+                            onValueChangePropertys += $@"
+                case {propNameHash}: //{propName}";
+                        }
+
+                        setExpressionValueSwitchStr += $@"
+                case {propNameHash}: // {propName}
+                    exp.SetValue(bp, {propName});
+                    return;";
 
                         tourBindableProperties += $@"
             tourAction.Invoke(""{propName}"", {bindPropName}, ref data);";
@@ -666,6 +727,14 @@ namespace {namespaceName}
             //";
             //            source += createBindingMethod;
 
+            source += $@"
+        public{(baseHasBindObjectInterface ? " override" : " virtual")} EngineNS.UI.Bind.TtBindingExpressionBase CreateBindingExpression<TProperty>(string propertyName, EngineNS.UI.Bind.TtBindingBase binding, EngineNS.UI.Bind.TtBindingExpressionBase parent)
+        {{
+            if(string.IsNullOrEmpty(propertyName))
+                return null;
+            var propertyNameHash = Standart.Hash.xxHash.xxHash64.ComputeHash(propertyName);
+            return CreateBindingExpression_<TProperty>(in propertyNameHash, binding, parent);
+        }}";
             createBindingExpressionMethodSwitch += $@"
             }}";
             if (hasCreateBindingExpressionMethodSwitch)
@@ -673,7 +742,7 @@ namespace {namespaceName}
             if (baseHasBindObjectInterface)
             {
                 createBindingExpressionMethod += $@"
-            return base.CreateBindingExpression<TProperty>(propertyName, binding, parent);
+            return base.CreateBindingExpression_<TProperty>(in propertyNameHash, binding, parent);
         }}
 ";
             }
@@ -709,7 +778,7 @@ namespace {namespaceName}
             if (baseHasBindObjectInterface)
             {
                 setValueWithPropertyName += $@"
-            base.SetValue<T>(value, propertyName);
+            base.SetValue_<T>(in value, in propertyNameHash);
         }}
 ";
             }
@@ -752,6 +821,13 @@ namespace {namespaceName}
             }}
             else
                 bpVal.SetValue<T>(this, bp, in value);
+
+            if(HostElement != null && !string.IsNullOrEmpty(PropertyNameInHost))
+            {{
+                var hostBP = HostElement.GetBindableProperty(PropertyNameInHostHash, PropertyNameInHost);
+                if(HostElement.HasBinded(hostBP))
+                    HostElement.SetValue(this, hostBP);
+            }}
         }}
 ";
             getValueWithPropertyNameSwitch += $@"
@@ -761,7 +837,7 @@ namespace {namespaceName}
             if (baseHasBindObjectInterface)
             {
                 getValueWithPropertyName += $@"
-            return base.GetValue<T>(propertyName);
+            return base.GetValue_<T>(in propertyNameHash);
         }}
 ";
             }
@@ -884,7 +960,47 @@ namespace {namespaceName}
         }}";
                 }
             }
-
+            if (!classSymbol.MemberNames.Any(name => "ResetHostPropertyData" == name))
+            {
+                source += $@"
+        protected{(baseHasBindObjectInterface ? " override" : " virtual")} void ResetHostPropertyData<T>(in T value, in T oldValue, in UInt64 propertyHash, in string propertyName)
+        {{
+            if(string.IsNullOrEmpty(propertyName))
+                return;";
+                if(!string.IsNullOrEmpty(onValueChangePropertys))
+                {
+                    source += $@"
+            switch(propertyHash)
+            {{";
+                    source += onValueChangePropertys;
+                    source += $@"
+                {{
+                    dynamic valueDynamic = value;
+                    if(valueDynamic != null)
+                    {{
+                        valueDynamic.HostElement = this;
+                        valueDynamic.PropertyNameInHost = propertyName;
+                        valueDynamic.PropertyNameInHostHash = propertyHash;
+                    }}
+                    dynamic oldValueDynamic = oldValue;
+                    if(oldValueDynamic != null)
+                    {{
+                        oldValueDynamic.HostElement = null;
+                        oldValueDynamic.PropertyNameInHost = """";
+                        oldValueDynamic.PropertyNameInHostHash = 0;
+                    }}
+                }}
+                break;
+            }}";
+                }
+                if(baseHasBindObjectInterface)
+                {
+                    source += $@"
+            base.ResetHostPropertyData(in value, in oldValue, in propertyHash, in propertyName);";
+                }
+                source += $@"
+        }}";
+            }
             if (!classSymbol.MemberNames.Any(name => "OnValueChange" == name))
             {
                 source += $@"
@@ -898,6 +1014,7 @@ namespace {namespaceName}
             var bp = GetBindableProperty(propertyNameHash, propertyName);
             if (bp == null)
                 return;
+            ResetHostPropertyData(in value, in oldValue, in propertyNameHash, in propertyName);
             EngineNS.UI.Bind.TtBindablePropertyValueBase bpVal = null;
             lock ({bindExprDicName})
             {{
@@ -917,6 +1034,12 @@ namespace {namespaceName}
                 }}
                 else
                     bpVal.SetValue<T>(this, bp, value);
+            }}
+            if(HostElement != null && !string.IsNullOrEmpty(PropertyNameInHost))
+            {{
+                var hostBP = HostElement.GetBindableProperty(PropertyNameInHostHash, PropertyNameInHost);
+                if(HostElement.HasBinded(hostBP))
+                    HostElement.SetValue(this, hostBP);
             }}
         }}";
             }
@@ -1476,11 +1599,37 @@ namespace {namespaceName}
                        var propertySymbol = valSymbol as IPropertySymbol;
                        if(propertySymbol != null && !propertySymbol.IsReadOnly)
                        {
+                            bool isBindableObject = false;
+                            foreach (var att in propertySymbol.Type.GetAttributes())
+                            {
+                                if (att.AttributeClass == null)
+                                    continue;
+                                if (att.AttributeClass.ToDisplayString() == BindingCodeGenerator.mBindObjectAttrName)
+                                {
+                                    isBindableObject = true;
+                                    break;
+                                }
+                            }
+                            var proHash = Standart.Hash.xxHash.xxHash64.ComputeHash(valSymbol.Name);
                             triggerValSwitchCode += $@"
-                case {Standart.Hash.xxHash.xxHash64.ComputeHash(valSymbol.Name)}: // {valSymbol.Name}
-                    triggerSimpleValue.OldValueStore.SetValue(this.{valSymbol.Name});
+                case {proHash}: // {valSymbol.Name}
+                    triggerSimpleValue.OldValueStore.SetValue(this.{valSymbol.Name});";
+                            if(isBindableObject)
+                            {
+                                triggerValSwitchCode += $@"
+                    var tempVal_{valSymbol.Name} = triggerSimpleValue.ValueStore.GetValue<{propertySymbol.Type.ToDisplayString()}>();
+                    tempVal_{valSymbol.Name}.HostElement = this;
+                    tempVal_{valSymbol.Name}.PropertyNameInHost = ""{valSymbol.Name}"";
+                    tempVal_{valSymbol.Name}.PropertyNameInHostHash = {proHash};
+                    this.{valSymbol.Name} = tempVal_{valSymbol.Name};
+                    return;";
+                            }
+                            else
+                            {
+                                triggerValSwitchCode += $@"
                     this.{valSymbol.Name} = triggerSimpleValue.ValueStore.GetValue<{propertySymbol.Type.ToDisplayString()}>();
                     return;";
+                            }
                         }
                     }
                 }
@@ -1569,37 +1718,63 @@ namespace {namespaceName}
             }}
             else if(triggerSimpleValue.Property.HostType.IsEqual(objType) || triggerSimpleValue.Property.HostType.IsParentClass(objType))
             {{";
-            string triggerRestoreValSwitchCode = "";
-            foreach(var valSymbol in symbols)
-            {
-                if(valSymbol is IPropertySymbol)
+                string triggerRestoreValSwitchCode = "";
+                foreach(var valSymbol in symbols)
                 {
-                    var propertySymbol = valSymbol as IPropertySymbol;
-                    if(propertySymbol != null && !propertySymbol.IsReadOnly)
+                    if(valSymbol is IPropertySymbol)
                     {
-                        triggerRestoreValSwitchCode += $@"
-                case {Standart.Hash.xxHash.xxHash64.ComputeHash(valSymbol.Name)}: // {{valSymbol.Name}}
+                        var propertySymbol = valSymbol as IPropertySymbol;
+                        if(propertySymbol != null && !propertySymbol.IsReadOnly)
+                        {
+                            bool isBindableObject = false;
+                            foreach (var att in propertySymbol.Type.GetAttributes())
+                            {
+                                if (att.AttributeClass == null)
+                                    continue;
+                                if (att.AttributeClass.ToDisplayString() == BindingCodeGenerator.mBindObjectAttrName)
+                                {
+                                    isBindableObject = true;
+                                    break;
+                                }
+                            }
+                            var proHash = Standart.Hash.xxHash.xxHash64.ComputeHash(valSymbol.Name);
+                            if (isBindableObject)
+                            {
+                                triggerRestoreValSwitchCode += $@"
+                case {proHash}: // {valSymbol.Name}
+                    var tempVal_{valSymbol.Name} = triggerSimpleValue.OldValueStore.GetValue<{propertySymbol.Type.ToDisplayString()}>();
+                    tempVal_{valSymbol.Name}.HostElement = this;
+                    tempVal_{valSymbol.Name}.PropertyNameInHost = ""{valSymbol.Name}"";
+                    tempVal_{valSymbol.Name}.PropertyNameInHostHash = {proHash};
+                    this.{valSymbol.Name} = tempVal_{valSymbol.Name};
+                    return;";
+                            }
+                            else
+                            {
+                                triggerRestoreValSwitchCode += $@"
+                case {proHash}: // {valSymbol.Name}
                     this.{valSymbol.Name} = triggerSimpleValue.OldValueStore.GetValue<{propertySymbol.Type.ToDisplayString()}>();
                     return;";
+                            }
+                        }
                     }
                 }
-            }
-            if(!string.IsNullOrEmpty(triggerRestoreValSwitchCode))
-            {
-                source += $@"
+                if(!string.IsNullOrEmpty(triggerRestoreValSwitchCode))
+                {
+                    source += $@"
                 switch(triggerSimpleValue.PropertyNameHash)
                 {{{triggerRestoreValSwitchCode}
                 }}";
-            }
-            if(baseType != null)
-            {
-                var baseTypeDS = baseType.ToDisplayString();
-                if(baseTypeDS != "object")
-                {
-                    source += $@"
-                base.RestoreFromTriggerSimpleValue(triggerSimpleValue);";
                 }
-            }
+                if(baseType != null)
+                {
+                    var baseTypeDS = baseType.ToDisplayString();
+                    if(baseTypeDS != "object")
+                    {
+                        source += $@"
+                base.RestoreFromTriggerSimpleValue(triggerSimpleValue);";
+                    }
+                }
                 source += $@"
             }}
             else
@@ -2083,6 +2258,29 @@ namespace {namespaceName}
                 }
                     source += $@"
         }}";
+            }
+            if(!classSymbol.MemberNames.Any(name => "SetExpressionValue" == name))
+            {
+                if(!string.IsNullOrEmpty(setExpressionValueSwitchStr))
+                {
+                    source += $@"
+        protected {(baseHasBindObjectInterface ? "override" : "virtual")} void SetExpressionValue_(EngineNS.UI.Bind.TtBindingExpressionBase exp, EngineNS.UI.Bind.TtBindableProperty bp, in UInt64 propertyNameHash)
+        {{
+            switch(propertyNameHash)
+            {{";
+                    source += setExpressionValueSwitchStr;
+                    source += $@"
+            }}
+            {(baseHasBindObjectInterface ? "base.SetExpressionValue_(exp, bp, in propertyNameHash);" : "")}
+        }}";
+
+                    source += $@"
+        public {(baseHasBindObjectInterface ? "override" : "virtual")} void SetExpressionValue(EngineNS.UI.Bind.TtBindingExpressionBase exp, EngineNS.UI.Bind.TtBindableProperty bp)
+        {{
+            var propertyNameHash = Standart.Hash.xxHash.xxHash64.ComputeHash(bp.Name);
+            SetExpressionValue_(exp, bp, in propertyNameHash);
+        }}";
+                }
             }
 
             source += "\r\n    }\r\n";

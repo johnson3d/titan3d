@@ -1026,6 +1026,7 @@ namespace EngineNS.UI.Bind
         public bool IsMatchTriggerCondition<T>(TtTriggerConditionLogical<T> triggerCondition);
         public void SetFromTriggerSimpleValue<T>(TtTriggerSimpleValue<T> triggerSimpleValue);
         public void RestoreFromTriggerSimpleValue<T>(TtTriggerSimpleValue<T> triggerSimpleValue);
+        public void SetExpressionValue(TtBindingExpressionBase exp, TtBindableProperty bp);
 #nullable disable
     }
     public class TtBindableObject : IBindableObject, IPropertyCustomization
@@ -1324,6 +1325,12 @@ namespace EngineNS.UI.Bind
             {
                 this.SetValue(triggerSimpleValue.OldValueStore.GetValue<T>(), triggerSimpleValue.Property);
             }
+        }
+
+        public void SetExpressionValue(TtBindingExpressionBase exp, TtBindableProperty bp)
+        {
+            var value = this.GetPropertyValue(bp.Name);
+            exp.SetValue(bp, value);
         }
     }
 }

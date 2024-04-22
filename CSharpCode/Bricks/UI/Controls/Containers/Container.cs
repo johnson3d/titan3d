@@ -622,6 +622,7 @@ namespace EngineNS.UI.Controls.Containers
             {
                 OnValueChange(value, mBorderThickness);
                 mBorderThickness = value;
+                UpdateLayout();
             }
         }
         protected Thickness mPadding = Thickness.Empty;
@@ -633,6 +634,7 @@ namespace EngineNS.UI.Controls.Containers
             {
                 OnValueChange(value, mPadding);
                 mPadding = value;
+                UpdateLayout();
             }
         }
         protected TtBrush mBorderBrush;
@@ -644,7 +646,8 @@ namespace EngineNS.UI.Controls.Containers
             {
                 OnValueChange(value, mBorderBrush);
                 mBorderBrush = value;
-                mBorderBrush.HostElement = this;
+                //mBorderBrush.HostElement = this;
+                MeshDirty = true;
             }
         }
         protected TtBrush mBackground;
@@ -656,7 +659,8 @@ namespace EngineNS.UI.Controls.Containers
             {
                 OnValueChange(value, mBackground);
                 mBackground = value;
-                mBackground.HostElement = this;
+                //mBackground.HostElement = this;
+                MeshDirty = true;
             }
         }
 
@@ -683,20 +687,17 @@ namespace EngineNS.UI.Controls.Containers
         public TtContainer()
         {
             mChildren = new TtUIElementCollection(this, this);
-            mBorderBrush = new TtBrush();
-            mBorderBrush.HostElement = this;
+            BorderBrush = new TtBrush();
             mBorderBrush.BrushType = TtBrush.EBrushType.Border;
-            mBackground = new TtBrush();
-            mBackground.HostElement = this;
+            Background = new TtBrush();
         }
         public TtContainer(TtContainer parent)
             : base(parent)
         {
             mChildren = new TtUIElementCollection(this, parent);
-            mBorderBrush = new TtBrush();
-            mBorderBrush.HostElement = this;
+            BorderBrush = new TtBrush();
             mBorderBrush.BrushType = TtBrush.EBrushType.Border;
-            mBackground = new TtBrush();
+            Background = new TtBrush();
             mBackground.HostElement = this;
         }
         // pt位置相对于linecheck到的element

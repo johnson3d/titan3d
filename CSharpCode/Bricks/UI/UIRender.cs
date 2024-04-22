@@ -68,7 +68,7 @@ namespace EngineNS.UI
         }
 
         TtCanvasBrush mDrawBrush = new TtCanvasBrush();
-        public TtUIElement HostElement;
+        //public TtUIElement HostElement;
 
         //EGui.UUvAnim mUVAnim;
         //[Browsable(false)]
@@ -204,7 +204,7 @@ namespace EngineNS.UI
         {
             if (mDefaultTextureTask == null)
             {
-                mDefaultTextureTask = UEngine.Instance.GfxDevice.TextureManager.GetTexture(RName.GetRName("texture/checkboard.srv", RName.ERNameType.Engine));
+                mDefaultTextureTask = UEngine.Instance.GfxDevice.TextureManager.GetTexture(UEngine.Instance.Config.UIDefaultTexture);
                 return false;
             }
             else if (mDefaultTextureTask.Value.IsCompleted == false)
