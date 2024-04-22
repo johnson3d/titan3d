@@ -91,6 +91,7 @@ public:
 
 	friend v3dxVector3 operator +(const v3dxVector3& vect1,const v3dxVector3& vect2);
 	friend v3dxVector3 operator -(const v3dxVector3& vect1,const v3dxVector3& vect2);
+	friend v3dxVector3 operator /(const v3dxVector3& vect1,const v3dxVector3& vect2);
 
 	//friend float operator *(const v3dxVector3& vect1,const v3dxVector3& vect2);
 	inline v3dxVector3 operator * ( const v3dxVector3& rhs) const
@@ -236,6 +237,7 @@ public:
 //====global fuction to oparate v3dxVector3 class
 v3dxVector3 operator +(const v3dxVector3& vect1,const v3dxVector3& vect2);
 v3dxVector3 operator -(const v3dxVector3& vect1,const v3dxVector3& vect2);
+v3dxVector3 operator /(const v3dxVector3& vect1, const v3dxVector3& vect2);
 //float operator *(const v3dxVector3& vect1,const v3dxVector3& vect2);
 v3dxVector3 operator ^(const v3dxVector3& vect1,const v3dxVector3& vect2);
 

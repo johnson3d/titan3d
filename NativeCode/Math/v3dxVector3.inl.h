@@ -123,6 +123,13 @@ inline v3dxVector3 operator -(const v3dxVector3& vect1,const v3dxVector3& vect2)
 	return vRet;
 }
 
+inline v3dxVector3 operator /(const v3dxVector3& vect1, const v3dxVector3& vect2)
+{
+	v3dxVector3 vRet;
+	v3dxVec3Div(&vRet, &vect1, &vect2);
+	return vRet;
+}
+
 //inline float operator *(const v3dxVector3& vect1,const v3dxVector3& vect2)
 //{
 //	return v3dxVec3Dot( &vect1 , &vect2 );

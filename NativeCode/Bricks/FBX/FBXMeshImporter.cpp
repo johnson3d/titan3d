@@ -796,7 +796,7 @@ namespace AssetImportAndExport
 				if (isIndex32)
 					mMeshPrimitives->SetGeomtryMeshIndex(Cmd, renderIndex32, polyVertexCount * sizeof(UINT), isIndex32, NxRHI::ECpuAccess::CAS_DEFAULT);
 				else
-					mMeshPrimitives->SetGeomtryMeshIndex(Cmd, renderIndex16, polyVertexCount * sizeof(UINT), isIndex32, NxRHI::ECpuAccess::CAS_DEFAULT);
+					mMeshPrimitives->SetGeomtryMeshIndex(Cmd, renderIndex16, polyVertexCount * sizeof(UINT16), isIndex32, NxRHI::ECpuAccess::CAS_DEFAULT);
 				
 				if (meshDesc->HaveSkin)
 				{

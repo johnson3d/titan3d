@@ -411,6 +411,12 @@ inline v3dVector3_t* v3dxVec3Sub(v3dVector3_t *pOut,const v3dVector3_t* p1,const
 	pOut->Z = p1->Z - p2->Z;
 	return pOut;
 }
+inline v3dVector3_t* v3dxVec3Div(v3dVector3_t* pOut, const v3dVector3_t* p1, const v3dVector3_t* p2) {
+	pOut->X = p1->X / p2->X;
+	pOut->Y = p1->Y / p2->Y;
+	pOut->Z = p1->Z / p2->Z;
+	return pOut;
+}
 
 //#define v3dxVec3Sub( pOut, p1, p2)	{\
 //	(pOut)->x = (p1)->x - (p2)->x;\

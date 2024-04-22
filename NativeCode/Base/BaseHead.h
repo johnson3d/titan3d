@@ -44,6 +44,7 @@
 #define HasModule_PythonRuntime
 #define HasModule_Quark
 #define HasModule_NxPhysics
+#define HasModule_DistanceField
 
 #include <WinSock2.h>
 #include <mswsock.h>

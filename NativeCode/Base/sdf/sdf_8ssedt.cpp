@@ -85,7 +85,7 @@ void sdf_partial(
 
 vector<float> sdf(const vector<bool>& in_filled, int width)
 {
-	const auto height = in_filled.size() / width;
+	const int height = (int)in_filled.size() / width;
 	// Initialize vectors represented as half values.
 	vector<pair<int, int>> half_vector(
 		in_filled.size(), { 2 * width + 1, 2 * height + 1 });

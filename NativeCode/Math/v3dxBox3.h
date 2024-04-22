@@ -107,6 +107,11 @@ public:
 		ext =(maxbox-minbox)*0.5f;
 		return ext;
 	}
+	inline v3dxVector3 GetSize() const {
+		v3dxVector3 ext;
+		ext = (maxbox - minbox);
+		return ext;
+	}
 
 	inline float MinX () const { 
 		return minbox.X; 

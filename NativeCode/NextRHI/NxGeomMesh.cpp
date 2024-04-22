@@ -378,7 +378,7 @@ namespace NxRHI
 			mDesc.PolyNumber = 0;
 			for (const auto& i : mGeometryMesh->Atoms)
 			{
-				mDesc.PolyNumber += i[0].NumPrimitives / 3;
+				mDesc.PolyNumber += i[0].NumPrimitives;
 			}
 			mDesc.VertexNumber = pos_vb->Desc.Size / sizeof(v3dxVector3);
 			mDesc.Flags = 0;
