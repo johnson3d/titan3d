@@ -406,6 +406,10 @@ Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "Localization", "CSharpCode\
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Localization", "NativeCode\Bricks\Localization\Localization.vcxitems", "{410D0BD4-4FE7-4D97-AFE3-1AE527D8B56E}"
 EndProject
+Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "DistanceField", "CSharpCode\Bricks\DistanceField\DistanceField.shproj", "{8481F1E1-E0EA-4805-95BC-E74C65B16A00}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "DistanceField", "NativeCode\Bricks\DistanceField\DistanceField.vcxitems", "{579066EA-1563-47F7-B50E-ACAEA875DDF6}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -1053,6 +1057,8 @@ Global
 		{C01CE747-DDE3-424B-89B3-95E9716C6130} = {424B9266-46E0-4F38-BFE3-9F1338152F96}
 		{2E83D749-257F-4CEA-9370-CB44422524B9} = {B28E2174-4783-47F9-98B2-3C589DE43B04}
 		{410D0BD4-4FE7-4D97-AFE3-1AE527D8B56E} = {041F2057-6090-446E-8CEF-D524C973477F}
+		{8481F1E1-E0EA-4805-95BC-E74C65B16A00} = {B28E2174-4783-47F9-98B2-3C589DE43B04}
+		{579066EA-1563-47F7-B50E-ACAEA875DDF6} = {041F2057-6090-446E-8CEF-D524C973477F}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {F7EC7EF6-F92D-464A-93A0-66C2A8E15609}
@@ -1097,6 +1103,7 @@ Global
 		CSharpCode\Bricks\DesignMacross\DesignMacross.projitems*{0d4fc498-20f3-445f-8f8a-43cbe8891938}*SharedItemsImports = 5
 		CSharpCode\Bricks\DestinyPX\NxMath\NxMath.projitems*{0d4fc498-20f3-445f-8f8a-43cbe8891938}*SharedItemsImports = 5
 		CSharpCode\Bricks\DestinyPX\NxPhysics\NxPhysics.projitems*{0d4fc498-20f3-445f-8f8a-43cbe8891938}*SharedItemsImports = 5
+		CSharpCode\Bricks\DistanceField\DistanceField.projitems*{0d4fc498-20f3-445f-8f8a-43cbe8891938}*SharedItemsImports = 5
 		CSharpCode\Bricks\FarShadow\FarShadow.projitems*{0d4fc498-20f3-445f-8f8a-43cbe8891938}*SharedItemsImports = 5
 		CSharpCode\Bricks\FBX\FBX.projitems*{0d4fc498-20f3-445f-8f8a-43cbe8891938}*SharedItemsImports = 5
 		CSharpCode\Bricks\Font\Font.projitems*{0d4fc498-20f3-445f-8f8a-43cbe8891938}*SharedItemsImports = 5
@@ -1223,6 +1230,7 @@ Global
 		CSharpCode\Bricks\DestinyPX\NxMath\NxMath.projitems*{55e6cae1-0f10-4840-ba9f-81ffa2008361}*SharedItemsImports = 13
 		NativeCode\NextRHI\Dx12\Dx12.vcxitems*{5755f6e4-767b-41d9-99c3-a9b574f1c9a6}*SharedItemsImports = 9
 		CSharpCode\Bricks\CSScripting\CSScripting.projitems*{575605b6-98e4-4c83-a845-88061a67ad6b}*SharedItemsImports = 13
+		NativeCode\Bricks\DistanceField\DistanceField.vcxitems*{579066ea-1563-47f7-b50e-acaea875ddf6}*SharedItemsImports = 9
 		CSharpCode\Bricks\ProjectGen\ProjectGen.projitems*{587b8268-f3bc-4ed2-8913-6c95115780ed}*SharedItemsImports = 13
 		Plugins\GameServer\Root\RootServer\RootServer.projitems*{5a2456d3-51f6-46ed-8eff-4c16f500f6b5}*SharedItemsImports = 13
 		NativeCode\Bricks\TcpServer\TcpServer.vcxitems*{5b10575b-b34e-4644-8a58-e6ca5b3dbe3f}*SharedItemsImports = 9
@@ -1240,6 +1248,7 @@ Global
 		Plugins\GameServer\Login\LoginServer\LoginServer.projitems*{7f28becc-80b5-41e7-bff7-e10a9f5de596}*SharedItemsImports = 5
 		NativeCode\Math\Math.vcxitems*{7f39f73c-1410-498f-a711-6a13209642e4}*SharedItemsImports = 9
 		NativeCode\Bricks\PhysicsCore\PhysicsCore.vcxitems*{7fdc9cd7-e523-4067-b5ea-0ae6c697a858}*SharedItemsImports = 9
+		CSharpCode\Bricks\DistanceField\DistanceField.projitems*{8481f1e1-e0ea-4805-95bc-e74c65b16a00}*SharedItemsImports = 13
 		CSharpCode\Bricks\DestinyPX\NxPhysics\NxPhysics.projitems*{8d584d87-62a1-41de-af08-4e4527fe106e}*SharedItemsImports = 13
 		3rd\native\FreeType\FreeType.vcxitems*{8de1fcd5-27c3-4af6-8fc3-3590240a7a5f}*SharedItemsImports = 4
 		3rd\native\iconv\iconv.vcxitems*{8de1fcd5-27c3-4af6-8fc3-3590240a7a5f}*SharedItemsImports = 4
@@ -1316,6 +1325,7 @@ Global
 		NativeCode\Bricks\CrossShaderCompiler\CrossShaderCompiler.vcxitems*{ad0e23e3-eca5-4e52-b69d-bb6e669c48c6}*SharedItemsImports = 4
 		NativeCode\Bricks\DestinyPX\NxMath\NxMath.vcxitems*{ad0e23e3-eca5-4e52-b69d-bb6e669c48c6}*SharedItemsImports = 4
 		NativeCode\Bricks\DestinyPX\NxPhysics\NxPhysics.vcxitems*{ad0e23e3-eca5-4e52-b69d-bb6e669c48c6}*SharedItemsImports = 4
+		NativeCode\Bricks\DistanceField\DistanceField.vcxitems*{ad0e23e3-eca5-4e52-b69d-bb6e669c48c6}*SharedItemsImports = 4
 		NativeCode\Bricks\FBX\FBX.vcxitems*{ad0e23e3-eca5-4e52-b69d-bb6e669c48c6}*SharedItemsImports = 4
 		NativeCode\Bricks\GpuDump\GpuDump.vcxitems*{ad0e23e3-eca5-4e52-b69d-bb6e669c48c6}*SharedItemsImports = 4
 		NativeCode\Bricks\ImageDecoder\ImageDecoder.vcxitems*{ad0e23e3-eca5-4e52-b69d-bb6e669c48c6}*SharedItemsImports = 4

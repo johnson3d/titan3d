@@ -108,6 +108,7 @@
     <Import Project="..\NativeCode\Bricks\DestinyPX\NxMath\NxMath.vcxitems" Label="Shared" />
     <Import Project="..\NativeCode\Bricks\DestinyPX\NxPhysics\NxPhysics.vcxitems" Label="Shared" />
     <Import Project="..\NativeCode\Bricks\Localization\Localization.vcxitems" Label="Shared" />
+    <Import Project="..\NativeCode\Bricks\DistanceField\DistanceField.vcxitems" Label="Shared" />
   </ImportGroup>
   <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
@@ -178,7 +179,7 @@
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
       <LanguageStandard>stdcpp20</LanguageStandard>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
-      <AdditionalIncludeDirectories>..\3rd\native\PhysX-4.1\physx\include;..\3rd\native\PhysX-4.1\PxShared\include;..\3rd\native\Vulkan\Include;..\3rd\native\eigen-3.4.0;..\3rd\native\FBXSDK\2019.2\include;..\3rd\native\FreeType\include;..\3rd\native\Recast\Detour\include;..\3rd\native\Recast\DetourCrowd\include;..\3rd\native\Recast\DetourTileCache\include;..\3rd\native\Recast\DebugUtils\include;..\3rd\native\Recast\Recast\include;..\3rd\native\pthread\include;..\3rd\native\atlmfc\include;$(WindowsSDK_IncludePath)$(WindowsSDK_IncludePath);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\3rd\native\PhysX-4.1\physx\include;..\3rd\native\PhysX-4.1\PxShared\include;..\3rd\native\Vulkan\Include;..\3rd\native\eigen-3.4.0;..\3rd\native\FBXSDK\2019.2\include;..\3rd\native\FreeType\include;..\3rd\native\Recast\Detour\include;..\3rd\native\Recast\DetourCrowd\include;..\3rd\native\Recast\DetourTileCache\include;..\3rd\native\Recast\DebugUtils\include;..\3rd\native\Recast\Recast\include;..\3rd\native\pthread\include;..\3rd\native\atlmfc\include;..\3rd\native\embree\Embree3122\Win64\include;$(WindowsSDK_IncludePath)$(WindowsSDK_IncludePath);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
       <OpenMPSupport>true</OpenMPSupport>
       <BrowseInformation>false</BrowseInformation>
@@ -188,7 +189,7 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <ModuleDefinitionFile>Core.Window.def</ModuleDefinitionFile>
       <EnableUAC>false</EnableUAC>
-      <AdditionalLibraryDirectories>../3rd/native/Python3/Win64/libs;../3rd/native/pthread/lib/x64;../3rd/native/NVAftermath/lib/x64;../3rd/native/crunch/lib/$(Configuration);../3rd/native/atlmfc/lib/x64;..\3rd\native\FBXSDK\2019.2\lib\x64\release;../3rd/native/HPSocket/Windows/lib;../3rd/native/Vulkan/Lib;../3rd/native/renderdoc/Lib;..\3rd\native\PhysX-4.1\physx\Lib\windows\debug;../3rd/native/ShaderConductor/Lib/Release;..\3rd\native\metis\5.1.0\libmetis\Debug;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>../3rd/native/Python3/Win64/libs;../3rd/native/pthread/lib/x64;../3rd/native/NVAftermath/lib/x64;../3rd/native/crunch/lib/$(Configuration);../3rd/native/atlmfc/lib/x64;..\3rd\native\FBXSDK\2019.2\lib\x64\release;../3rd/native/HPSocket/Windows/lib;../3rd/native/Vulkan/Lib;../3rd/native/renderdoc/Lib;..\3rd\native\PhysX-4.1\physx\Lib\windows\debug;../3rd/native/ShaderConductor/Lib/Release;..\3rd\native\metis\5.1.0\libmetis\Debug;..\3rd\native\embree\Embree3122\Win64\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <AdditionalDependencies>libfbxsdk.lib;renderdoc.lib;metis.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PreBuildEvent>
@@ -240,7 +241,7 @@
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
       <LanguageStandard>stdcpp20</LanguageStandard>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
-      <AdditionalIncludeDirectories>..\3rd\native\PhysX-4.1\physx\include;..\3rd\native\PhysX-4.1\PxShared\include;..\3rd\native\Vulkan\Include;..\3rd\native\eigen-3.4.0;..\3rd\native\FBXSDK\2019.2\include;..\3rd\native\FreeType\include;..\3rd\native\Recast\Detour\include;..\3rd\native\Recast\DetourCrowd\include;..\3rd\native\Recast\DetourTileCache\include;..\3rd\native\Recast\DebugUtils\include;..\3rd\native\Recast\Recast\include;..\3rd\native\atlmfc\include;..\3rd\native\pthread\include;$(WindowsSDK_IncludePath);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\3rd\native\PhysX-4.1\physx\include;..\3rd\native\PhysX-4.1\PxShared\include;..\3rd\native\Vulkan\Include;..\3rd\native\eigen-3.4.0;..\3rd\native\FBXSDK\2019.2\include;..\3rd\native\FreeType\include;..\3rd\native\Recast\Detour\include;..\3rd\native\Recast\DetourCrowd\include;..\3rd\native\Recast\DetourTileCache\include;..\3rd\native\Recast\DebugUtils\include;..\3rd\native\Recast\Recast\include;..\3rd\native\atlmfc\include;..\3rd\native\pthread\include;..\3rd\native\embree\Embree3122\Win64\include;$(WindowsSDK_IncludePath);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
       <OpenMPSupport>true</OpenMPSupport>
     </ClCompile>
@@ -251,7 +252,7 @@
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableUAC>false</EnableUAC>
-      <AdditionalLibraryDirectories>../3rd/native/Python3/Win64/libs;../3rd/native/pthread/lib/x64;../3rd/native/NVAftermath/lib/x64;../3rd/native/crunch/lib/$(Configuration);../3rd/native/atlmfc/lib/x64;../3rd/native/eigen;..\3rd\native\FBXSDK\2019.2\lib\x64\release;../3rd/native/HPSocket/Windows/lib;../3rd/native/Vulkan/Lib;../3rd/native/renderdoc/Lib;../3rd/native/eigen-3.4.0;..\3rd\native\PhysX-4.1\physx\Lib\windows\release;../3rd/native/ShaderConductor/Lib/Release;..\3rd\native\metis\5.1.0\libmetis\Release;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>../3rd/native/Python3/Win64/libs;../3rd/native/pthread/lib/x64;../3rd/native/NVAftermath/lib/x64;../3rd/native/crunch/lib/$(Configuration);../3rd/native/atlmfc/lib/x64;../3rd/native/eigen;..\3rd\native\FBXSDK\2019.2\lib\x64\release;../3rd/native/HPSocket/Windows/lib;../3rd/native/Vulkan/Lib;../3rd/native/renderdoc/Lib;../3rd/native/eigen-3.4.0;..\3rd\native\PhysX-4.1\physx\Lib\windows\release;../3rd/native/ShaderConductor/Lib/Release;..\3rd\native\metis\5.1.0\libmetis\Release;..\3rd\native\embree\Embree3122\Win64\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <AdditionalDependencies>libfbxsdk.lib;renderdoc.lib;metis.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PreBuildEvent>
