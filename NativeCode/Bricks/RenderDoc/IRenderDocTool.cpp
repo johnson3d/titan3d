@@ -37,6 +37,8 @@ void IRenderDocTool::InitRenderDoc(const char* path)
 
 		opt = FGlobalConfig::GetInstance()->GetConfigValueI32("RenderDocSaveAllInitials");
 		mApi->SetCaptureOptionU32(RENDERDOC_CaptureOption::eRENDERDOC_Option_SaveAllInitials, opt);
+
+		mApi->MaskOverlayBits(RENDERDOC_OverlayBits::eRENDERDOC_Overlay_None, RENDERDOC_OverlayBits::eRENDERDOC_Overlay_None);
 	}
 }
 
@@ -132,6 +134,11 @@ const char* IRenderDocTool::GetCapture(UINT idx, UINT64* timestamp)
 	{
 		return "";
 	}
+}
+
+UINT IRenderDocTool::OpenFile(const char* capturedFile)
+{
+	return mApi->LaunchReplayUI(1, capturedFile);
 }
 
 NS_END

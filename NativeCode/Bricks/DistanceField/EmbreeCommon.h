@@ -48,6 +48,7 @@ public:
 
 class FEmbreeRay : public RTCRayHit
 {
+public:
 	FEmbreeRay() :
 		ElementIndex(-1)
 	{
@@ -103,9 +104,10 @@ public:
 	void SetupEmbreeScene(VNameString meshName, NxRHI::FMeshDataProvider& meshProvider, float DistanceFieldResolutionScale, FEmbreeScene& embreeScene);
 
 	void DeleteEmbreeScene(FEmbreeScene& embreeScene);
+
+	void EmbreePointQuery(FEmbreeScene& embreeScene, v3dxVector3 VoxelPosition, float LocalSpaceTraceDistance, bool &bOutNeedTracyRays, float &OutClosestDistance);
+	void EmbreeRayTrace(FEmbreeScene& embreeScene, v3dxVector3 StartPosition, v3dxVector3 RayDirection, bool& bOutHit, bool& bOutHitTwoSided, v3dxVector3& OutHitNormal);
 };
 
-
-void GenerateStratifiedUniformHemisphereSamples(INT32 NumSamples, std::vector<v3dxVector3> &Samples);
 
 NS_END

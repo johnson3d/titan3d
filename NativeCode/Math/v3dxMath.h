@@ -1393,6 +1393,21 @@ extern "C"
 		 double* pV,                       // Barycentric Hit Coordinates
 		 double* pDist);                   // Ray-Intersection Parameter Distance
 
+	 /**
+	  * Returns closest point on a triangle to a point.
+	  * The idea is to identify the halfplanes that the point is
+	  * in relative to each triangle segment "plane"
+	  *
+	  * @param	Point			point to check distance for
+	  * @param	A,B,C			counter clockwise ordering of points defining a triangle
+	  *
+	  * @return	Point on triangle ABC closest to given point
+	  */
+	 VFX_API v3dxVector3 *ClosestPointOnSegment(v3dxVector3* pOut, const v3dxVector3* Point, const v3dxVector3* StartPoint, const v3dxVector3* EndPoint);
+	 VFX_API v3dxVector3* PointPlaneProject(v3dxVector3* pOut, const v3dxVector3* Point, const v3dxVector3* A, const v3dxVector3* B, const v3dxVector3* C);
+	 VFX_API v3dxVector3 *ClosestPointOnTriangleToPoint(v3dxVector3* pOut, const v3dxVector3 *Point, const v3dxVector3 *A, const v3dxVector3 *B, const v3dxVector3 *C);
+
+
 	 VFX_API v3dxPlane3* WINAPI v3dxPlaneTransform(v3dxPlane3* pout,
 		 const v3dxPlane3* pplane,
 		 const v3dxMatrix4* pm);

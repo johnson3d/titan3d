@@ -2628,6 +2628,95 @@ extern "C"
 		return _IntersectDTri(*pRayPos, *pRayDir, *p0, *p1, *p2, *pDist, *pU, *pV) ? 1 : 0;
 	}
 
+	VFX_API v3dxVector3* ClosestPointOnSegment(v3dxVector3* pOut, const v3dxVector3* Point, const v3dxVector3* StartPoint, const v3dxVector3* EndPoint)
+	{
+		const v3dxVector3 Segment = *EndPoint - *StartPoint;
+		const v3dxVector3 VectToPoint = *Point - *StartPoint;
+
+		// See if closest point is before StartPoint
+		const float Dot1 = v3dxVec3Dot(&VectToPoint, &Segment);
+		if (Dot1 <= 0)
+		{
+			*pOut = *StartPoint;
+			return pOut;
+		}
+
+		// See if closest point is beyond EndPoint
+		const float Dot2 = v3dxVec3Dot(&Segment, &Segment);
+		if (Dot2 <= Dot1)
+		{
+			*pOut = *EndPoint;
+			return pOut;
+		}
+
+		// Closest Point is within segment
+		*pOut = *StartPoint + Segment * (Dot1 / Dot2);
+		return pOut;
+
+	}
+
+	VFX_API v3dxVector3* PointPlaneProject(v3dxVector3* pOut, const v3dxVector3* Point, const v3dxVector3* A, const v3dxVector3* B, const v3dxVector3* C)
+	{
+		v3dxPlane3 plane(*A, *B, *C);
+
+		*pOut = *Point - plane.Dot(*Point)* plane.getNormal();
+		return pOut;
+	}
+
+	VFX_API v3dxVector3 *ClosestPointOnTriangleToPoint(v3dxVector3* pOut, const v3dxVector3* Point, const v3dxVector3* A, const v3dxVector3* B, const v3dxVector3* C)
+	{
+		//Figure out what region the point is in and compare against that "point" or "edge"
+		v3dxVector3 BA, AC, CB;
+		v3dxVec3Sub(&BA, A, B);
+		v3dxVec3Sub(&AC, C, A);
+		v3dxVec3Sub(&CB, B, C);
+
+		const v3dxVector3 TriNormal = BA ^ CB;
+
+		// Get the planes that define this triangle
+		// edges BA, AC, BC with normals perpendicular to the edges facing outward
+		const v3dxPlane3 Planes[3] = { v3dxPlane3(TriNormal ^ BA, *B), v3dxPlane3(TriNormal ^ AC, *A), v3dxPlane3(TriNormal ^ CB, *C) };
+		int PlaneHalfspaceBitmask = 0;
+
+		//Determine which side of each plane the test point exists
+		for (int i = 0; i < 3; i++)
+		{
+			if (Planes[i].Dot(*Point) > 0.0f)
+			{
+				PlaneHalfspaceBitmask |= (1 << i);
+			}
+		}
+
+		*pOut = *Point;
+		switch (PlaneHalfspaceBitmask)
+		{
+		case 0: //000 Inside
+			return PointPlaneProject(pOut, Point, A, B, C);
+		case 1:	//001 Segment BA
+			ClosestPointOnSegment(pOut, Point, B, A);
+			break;
+		case 2:	//010 Segment AC
+			ClosestPointOnSegment(pOut, Point, A, C);
+			break;
+		case 3:	//011 point A
+			*pOut = *A;
+			return pOut;
+		case 4: //100 Segment BC
+			ClosestPointOnSegment(pOut, Point, B, C);
+			break;
+		case 5: //101 point B
+			*pOut = *B;
+			return pOut;
+		case 6: //110 point C
+			*pOut = *C;
+			return pOut;
+		default:
+			break;
+		}
+
+		return pOut;
+	}
+
 	VFX_API void v3dxMatrix4Mul_CSharp(v3dMatrix4_t* pOut, const v3dMatrix4_t* mat1, const v3dMatrix4_t* mat2)
 	{
 		v3dxMatrix4Mul(pOut, mat1, mat2);

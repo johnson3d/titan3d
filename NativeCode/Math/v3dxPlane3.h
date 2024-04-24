@@ -95,6 +95,10 @@ public:
                          const v3dVector3_t & pt){ 
 		return A*pt.X + B*pt.Y + C*pt.Z + D; 
 	}
+	inline float Dot(const v3dxVector3& p) const
+	{
+		return classify(p);
+	}
 
 	inline int witchSide(const v3dVector3_t* pvPos) const{
 		return v3dxVec3Dot( &m_vNormal , pvPos ) + m_fDD > EPSILON; 

@@ -1,5 +1,7 @@
 #pragma once
 #include "FCanvasDefine.h"
+#include "../../Base/csharp/CsBinder.h"
+#include "../../NextRHI/NxBuffer.h"
 
 NS_BEGIN
 
@@ -184,6 +186,7 @@ namespace Canvas
 		AutoRef<NxRHI::ISrView>		SrView;
 		VNameString					Name;
 		FColor						Color;
+		std::map<const char*, UAnyValue>	ExtValues;
 		bool						IsDirty;
 		void SetUV(const v3dxVector2 & uv0, const v3dxVector2 & uv1)
 		{
@@ -228,6 +231,36 @@ namespace Canvas
 		}
 		void SetIsDirty(bool isDirty) {
 			IsDirty = isDirty;
+		}
+		void SetValue(const char* name, const UAnyValue& value)
+		{
+			auto iter = ExtValues.find(name);
+			if (iter != ExtValues.end())
+				iter->second = value;
+			else
+				ExtValues.insert(std::make_pair(name, value));
+			IsDirty = true;
+		}
+		bool GetValue(const char* name, UAnyValue& value)
+		{
+			auto iter = ExtValues.find(name);
+			if (iter == ExtValues.end())
+				return false;
+
+			value = iter->second;
+			return true;
+		}
+		void SetValuesToCbView(NxRHI::ICbView& cbuffer, NxRHI::FCbvUpdater& updater)
+		{
+			for (auto data : ExtValues)
+			{
+				auto fld = cbuffer.ShaderBinder->FindField(data.first);
+				if (fld != nullptr)
+				{
+					auto size = data.second.GetValueSize();
+					cbuffer.SetValue(*fld, &(data.second.mI8Value), size, true, &updater);
+				}
+			}
 		}
 	};
 }

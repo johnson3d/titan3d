@@ -154,63 +154,102 @@ void EmbreeManager::DeleteEmbreeScene(FEmbreeScene& embreeScene)
 	rtcReleaseDevice(embreeScene.EmbreeDevice);
 }
 
-static v3dxVector3 _UniformSampleHemisphere(v3dxVector2 Uniforms)
+class FEmbreePointQueryContext : public RTCPointQueryContext
 {
-	Uniforms = Uniforms * 2.0f - 1.0f;
-
-	if (Uniforms == v3dxVector2::Zero)
-	{
-		return v3dxVector3::ZERO;
-	}
-
-	float R;
-	float Theta;
-
-	if (Math::Abs(Uniforms.X) > Math::Abs(Uniforms.Y))
-	{
-		R = Uniforms.X;
-		Theta = (float)Math::V3_PI / 4 * (Uniforms.Y / Uniforms.X);
-	}
-	else
-	{
-		R = Uniforms.Y;
-		Theta = (float)Math::V3_PI / 2 - (float)Math::V3_PI / 4 * (Uniforms.X / Uniforms.Y);
-	}
-
-	// concentric disk sample
-	const float U = R * Math::Cos(Theta);
-	const float V = R * Math::Sin(Theta);
-	const float R2 = R * R;
-
-	// map to hemisphere [P. Shirley, Kenneth Chiu; 1997; A Low Distortion Map Between Disk and Square]
-	return v3dxVector3(U * Math::Sqrt(2 - R2), V * Math::Sqrt(2 - R2), 1.0f - R2);
-}
-
-void GenerateStratifiedUniformHemisphereSamples(INT32 NumSamples, std::vector<v3dxVector3>& Samples)
+public:
+	RTCGeometry MeshGeometry;
+	INT32 NumTriangles;
+};
+bool EmbreePointQueryFunction(RTCPointQueryFunctionArguments* args)
 {
-	const INT32 NumSamplesDim = (INT32)(Math::Sqrt((float)NumSamples));
+	const FEmbreePointQueryContext* Context = (const FEmbreePointQueryContext*)args->context;
 
-	Samples.reserve(NumSamplesDim * NumSamplesDim);
-	vfxRandom random;
-	random.SetSeed(0);
+	assert(args->userPtr);
+	float& ClosestDistanceSq = *(float*)(args->userPtr);
 
-	for (INT32 IndexX = 0; IndexX < NumSamplesDim; IndexX++)
+	const INT32 TriangleIndex = args->primID;
+	assert(TriangleIndex < Context->NumTriangles);
+
+	const v3dxVector3* VertexBuffer = (const v3dxVector3*)rtcGetGeometryBufferData(Context->MeshGeometry, RTC_BUFFER_TYPE_VERTEX, 0);
+	const UINT32* IndexBuffer = (const UINT32*)rtcGetGeometryBufferData(Context->MeshGeometry, RTC_BUFFER_TYPE_INDEX, 0);
+
+	const UINT32 I0 = IndexBuffer[TriangleIndex * 3 + 0];
+	const UINT32 I1 = IndexBuffer[TriangleIndex * 3 + 1];
+	const UINT32 I2 = IndexBuffer[TriangleIndex * 3 + 2];
+
+	const v3dxVector3 V0 = VertexBuffer[I0];
+	const v3dxVector3 V1 = VertexBuffer[I1];
+	const v3dxVector3 V2 = VertexBuffer[I2];
+
+	v3dxVector3 QueryPosition(args->query->x, args->query->y, args->query->z);
+	v3dxVector3 ClosestPoint; 
+	ClosestPointOnTriangleToPoint(&ClosestPoint, &QueryPosition, &V0, &V1, &V2);
+	const float QueryDistanceSq = (ClosestPoint - QueryPosition).getLengthSq();
+
+	if (QueryDistanceSq < ClosestDistanceSq)
 	{
-		for (INT32 IndexY = 0; IndexY < NumSamplesDim; IndexY++)
-		{			
-			const float U1 = ((float)random.NextValue16Bit()) / (float)USHRT_MAX;
-			const float U2 = ((float)random.NextValue16Bit()) / (float)USHRT_MAX;
+		ClosestDistanceSq = QueryDistanceSq;
 
-			const float Fraction1 = (IndexX + U1) / (float)NumSamplesDim;
-			const float Fraction2 = (IndexY + U2) / (float)NumSamplesDim;
+		bool bShrinkQuery = true;
 
-			v3dxVector3 Tmp = _UniformSampleHemisphere(v3dxVector2(Fraction1, Fraction2));
-
-			// Workaround issue with compiler optimization by using copy constructor here.
-			Samples.push_back(v3dxVector3(Tmp));
+		if (bShrinkQuery)
+		{
+			args->query->radius = Math::Sqrt(ClosestDistanceSq);
+			// Return true to indicate that the query radius has shrunk
+			return true;
 		}
 	}
+
+	// Return false to indicate that the query radius hasn't changed
+	return false;
 }
+void EmbreeManager::EmbreePointQuery(FEmbreeScene& embreeScene, v3dxVector3 VoxelPosition, float LocalSpaceTraceDistance, bool& bOutNeedTracyRays, float& OutClosestDistance)
+{
+	RTCPointQuery PointQuery;
+	PointQuery.x = VoxelPosition.X;
+	PointQuery.y = VoxelPosition.Y;
+	PointQuery.z = VoxelPosition.Z;
+	PointQuery.time = 0;
+	PointQuery.radius = LocalSpaceTraceDistance;
+
+	FEmbreePointQueryContext QueryContext;
+	rtcInitPointQueryContext(&QueryContext);
+	QueryContext.MeshGeometry = embreeScene.Geometry.InternalGeometry;
+	QueryContext.NumTriangles = (INT32)embreeScene.Geometry.TriangleDescs.size();
+	float ClosestUnsignedDistanceSq = (LocalSpaceTraceDistance * 2.0f) * (LocalSpaceTraceDistance * 2.0f);
+	rtcPointQuery(embreeScene.EmbreeScene, &PointQuery, &QueryContext, EmbreePointQueryFunction, &ClosestUnsignedDistanceSq);
+
+	OutClosestDistance = Math::Sqrt(ClosestUnsignedDistanceSq);
+	bOutNeedTracyRays = OutClosestDistance <= LocalSpaceTraceDistance;
+}
+
+void EmbreeManager::EmbreeRayTrace(FEmbreeScene& embreeScene, v3dxVector3 StartPosition, v3dxVector3 RayDirection, bool& bOutHit, bool& bOutHitTwoSided, v3dxVector3 &OutHitNormal)
+{
+	FEmbreeRay EmbreeRay;
+
+	EmbreeRay.ray.org_x = StartPosition.X;
+	EmbreeRay.ray.org_y = StartPosition.Y;
+	EmbreeRay.ray.org_z = StartPosition.Z;
+	EmbreeRay.ray.dir_x = RayDirection.X;
+	EmbreeRay.ray.dir_y = RayDirection.Y;
+	EmbreeRay.ray.dir_z = RayDirection.Z;
+	EmbreeRay.ray.tnear = 0;
+	EmbreeRay.ray.tfar = 1.0f;
+
+	FEmbreeIntersectionContext EmbreeContext;
+	rtcInitIntersectContext(&EmbreeContext);
+	rtcIntersect1(embreeScene.EmbreeScene, &EmbreeContext, &EmbreeRay);
+
+	bOutHit = false;
+	bOutHitTwoSided = false;
+	if (EmbreeRay.hit.geomID != RTC_INVALID_GEOMETRY_ID && EmbreeRay.hit.primID != RTC_INVALID_GEOMETRY_ID)
+	{
+		bOutHit = true;
+		OutHitNormal = EmbreeRay.GetHitNormal();
+		bOutHitTwoSided = EmbreeContext.IsHitTwoSided();
+	}
+}
+
 
 
 NS_END

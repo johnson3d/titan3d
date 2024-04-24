@@ -497,6 +497,50 @@ struct UAnyValue
 			}
 		}
 	}
+	int GetValueSize()
+	{
+		switch (mValueType)
+		{
+		case Unknown:
+			return 0;
+		case ManagedHandle:
+			return sizeof(void*);
+		case I8:
+			return sizeof(char);
+		case I16:
+			return sizeof(short);
+		case I32:
+			return sizeof(int);
+		case I64:
+			return sizeof(INT64);
+		case UI8:
+			return sizeof(BYTE);
+		case UI16:
+			return sizeof(UINT16);
+		case UI32:
+			return sizeof(UINT32);
+		case UI64:
+			return sizeof(UINT64);
+		case F32:
+			return sizeof(float);
+		case F64:
+			return sizeof(double);
+		case Name:
+			return sizeof(int);
+		case Struct:
+			return mStruct.mStructSize;
+		case Ptr:
+			return sizeof(void*);
+		case V2:
+			return sizeof(v3dVector2_t);
+		case V3:
+			return sizeof(v3dVector3_t);
+		case V4:
+			return sizeof(v3dVector4_t);
+		default:
+			return 0;
+		}
+	}
 };
 
 struct UAnyValue_t

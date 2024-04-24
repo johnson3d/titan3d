@@ -32,6 +32,7 @@ public:
 
 	UINT GetNumCaptures();
 	const char* GetCapture(UINT idx, UINT64* timestamp);
+	UINT OpenFile(const char* capturedFile);
 };
 
 NS_END
