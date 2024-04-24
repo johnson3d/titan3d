@@ -180,7 +180,7 @@ namespace EngineNS.IO
     }
     public class AssetCreateMenuAttribute : Attribute
     {
-        public string MenuName = "Unknow";
+        public string MenuName = "Unknow"; // menuParent/menuChild/menuSubChild
         public string Shortcut = null;
     }
     public interface IAsset
@@ -350,6 +350,12 @@ namespace EngineNS.IO
                 var drawList = ImGuiAPI.GetWindowDrawList();
                 Support.UAnyPointer menuData = new Support.UAnyPointer();
 
+                if (EGui.UIProxy.MenuItemProxy.MenuItem("ExplorerTo", null, false, null, in drawList, in menuData, ref mRefGraphMenuState))
+                {
+                    var psi = new System.Diagnostics.ProcessStartInfo("Explorer.exe");
+                    psi.Arguments = "/e,/select," + mAssetName.Address.Replace("/", "\\");
+                    System.Diagnostics.Process.Start(psi);
+                }
                 if (EGui.UIProxy.MenuItemProxy.MenuItem("RefGraph", null, false, null, in drawList, in menuData, ref mRefGraphMenuState))
                 {
                     var mainEditor = UEngine.Instance.GfxDevice.SlateApplication as Editor.UMainEditorApplication;

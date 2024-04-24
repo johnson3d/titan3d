@@ -6,14 +6,15 @@ using SixLabors.Fonts;
 using System;
 using System.Collections.Generic;
 using System.Text;
-using static EngineNS.Bricks.NodeGraph.UMenuItem;
+using EngineNS.EGui.Controls;
+using static EngineNS.EGui.Controls.TtMenuItem;
 
 namespace EngineNS.DesignMacross.Base.Graph
 {
     public class TtPopupMenu
     {
         public string StringId;
-        public UMenuItem Menu = new UMenuItem();
+        public TtMenuItem Menu = new TtMenuItem();
         TtPopupMenuRender PopupMenuRender = new TtPopupMenuRender();
         public Vector2 PopedPosition { get; set; } = Vector2.Zero;
         public bool bHasSearchBox { get; set; } = false;
@@ -34,7 +35,7 @@ namespace EngineNS.DesignMacross.Base.Graph
             Menu.SubMenuItems.Clear();
             //for now just new a new one
             // menuItem could be a struct 
-            Menu = new UMenuItem();
+            Menu = new TtMenuItem();
         }
     }
 
@@ -94,7 +95,7 @@ namespace EngineNS.DesignMacross.Base.Graph
             TreeList,
             Menu,
         }
-        void DrawMenu(TtPopupMenu popupMenu, UMenuItem item, string filter, ImDrawList cmdList, eMenuStyle style = eMenuStyle.TreeList)
+        void DrawMenu(TtPopupMenu popupMenu, TtMenuItem item, string filter, ImDrawList cmdList, eMenuStyle style = eMenuStyle.TreeList)
         {
             if (!item.FilterCheck(filter))
                 return;
@@ -194,7 +195,7 @@ namespace EngineNS.DesignMacross.Base.Graph
     public class TtMenuUtil
     {
 
-        public static void ConstructMenuItem(UMenuItem menuToAdded, UTypeDesc typeDesc, string[] menuPaths, string filterStrings, FMenuAction action, Func<UMenuItem, object, bool> beforeAction = null)
+        public static void ConstructMenuItem(TtMenuItem menuToAdded, UTypeDesc typeDesc, string[] menuPaths, string filterStrings, FMenuAction action, Func<TtMenuItem, object, bool> beforeAction = null)
         {
             var parentMenu = menuToAdded;
             for (var menuIdx = 0; menuIdx < menuPaths.Length; menuIdx++)

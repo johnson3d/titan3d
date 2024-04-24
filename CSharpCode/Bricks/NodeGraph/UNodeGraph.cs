@@ -1,4 +1,5 @@
-﻿using EngineNS.EGui.Controls.PropertyGrid;
+﻿using EngineNS.EGui.Controls;
+using EngineNS.EGui.Controls.PropertyGrid;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -628,10 +629,10 @@ namespace EngineNS.Bricks.NodeGraph
         }
         public object PopMenuPressObject;
         public Vector2 PopMenuPosition;
-        public UMenuItem CanvasMenus = new UMenuItem();
-        public UMenuItem NodeMenus = new UMenuItem();
-        public UMenuItem PinMenus = new UMenuItem();
-        public UMenuItem ObjectMenus = new UMenuItem();
+        public TtMenuItem CanvasMenus = new TtMenuItem();
+        public TtMenuItem NodeMenus = new TtMenuItem();
+        public TtMenuItem PinMenus = new TtMenuItem();
+        public TtMenuItem ObjectMenus = new TtMenuItem();
 
         public bool CanvasMenuDirty = true;
         public virtual void UpdateCanvasMenus()
@@ -737,7 +738,7 @@ namespace EngineNS.Bricks.NodeGraph
             NodeMenus.AddMenuSeparator("GENERAL");
             NodeMenus.AddMenuItem(
                 "Delete Node", null,
-                (UMenuItem item, object sender) =>
+                (TtMenuItem item, object sender) =>
                 {
                     var pNode = sender as UNodeBase;
                     if (pNode == null)
@@ -747,11 +748,11 @@ namespace EngineNS.Bricks.NodeGraph
                 });            
             NodeMenus.AddMenuItem(
                 "Delete Selected", null,
-                (UMenuItem item, object sender) =>
+                (TtMenuItem item, object sender) =>
                 {
                     DeleteSelectedNodes();
                 },
-                (UMenuItem item, object sender) =>
+                (TtMenuItem item, object sender) =>
                 {
                     if (SelectedNodes.Count == 0)
                         item.MenuState.Enable = false;
@@ -761,14 +762,14 @@ namespace EngineNS.Bricks.NodeGraph
                 });
             NodeMenus.AddMenuItem(
                 "Copy", null,
-                (UMenuItem item, object sender) =>
+                (TtMenuItem item, object sender) =>
                 {
                     Copy();
                 });
             NodeMenus.AddMenuSeparator("ORGANIZATION");
             NodeMenus.AddMenuItem(
                 "Collapse Nodes", null,
-                (UMenuItem item, object sender) =>
+                (TtMenuItem item, object sender) =>
                 {
                     var nodeList = new List<UNodeBase>(SelectedNodes.Count);
                     for (int i = 0; i < SelectedNodes.Count; i++)
@@ -777,7 +778,7 @@ namespace EngineNS.Bricks.NodeGraph
                     }
                     CollapseNodes(nodeList);
                 },
-                (UMenuItem item, object sender) =>
+                (TtMenuItem item, object sender) =>
                 {
                     if(SelectedNodes.Count == 0)
                         item.MenuState.Enable = false;
@@ -787,7 +788,7 @@ namespace EngineNS.Bricks.NodeGraph
                 });
             NodeMenus.AddMenuItem(
                 "Expand Nodes", null,
-                (UMenuItem item, object sender) =>
+                (TtMenuItem item, object sender) =>
                 {
                     var nodeList = new List<UNodeBase>(SelectedNodes.Count);
                     for (int i = 0; i < SelectedNodes.Count; i++)
@@ -796,7 +797,7 @@ namespace EngineNS.Bricks.NodeGraph
                     }
                     ExpandNodes(nodeList);
                 },
-                (UMenuItem item, object sender) =>
+                (TtMenuItem item, object sender) =>
                 {
                     for (int i = 0; i < SelectedNodes.Count; i++)
                     {
@@ -842,7 +843,7 @@ namespace EngineNS.Bricks.NodeGraph
             PinMenus.Text = "Pin";
             PinMenus.AddMenuItem(
                 "Break All", null,
-                (UMenuItem item, object sender) =>
+                (TtMenuItem item, object sender) =>
                 {
                     if (PopMenuPressObject != null &&
                         Rtti.UTypeDesc.CanCast(PopMenuPressObject.GetType(), typeof(NodePin)))

@@ -12,9 +12,44 @@ namespace EngineNS.UI.Controls.Containers
         Horizontal,
         Vertical,
     }
+
+    public enum EAlignment_Horizontal
+    {
+        Left,
+        Center,
+        Stretch,
+        Right,
+    }
+    public enum EAlignment_Vertical
+    {
+        Top,
+        Center,
+        Stretch,
+        Bottom,
+    }
     [Editor_UIControl("Container.StackPanel", "StackPanel", "")]
     public partial class TtStackPanel : TtContainer
     {
+        [Bind.AttachedProperty(Name = "HorizontalAlignment", Category = "Layout(StackPanel)")]
+        static void OnChildHorizontalAlignmentChanged(IBindableObject element, TtBindableProperty property, EAlignment_Horizontal value)
+        {
+            var ui = element as TtUIElement;
+            if(ui != null)
+            {
+                var canvas = VisualTreeHelper.GetParent(ui) as TtStackPanel;
+                canvas?.InvalidateArrange();
+            }
+        }
+        [Bind.AttachedProperty(Name = "VerticalAlignment", Category = "Layout(StackPanel)")]
+        static void OnChildVerticalAlignmentChanged(IBindableObject element, TtBindableProperty property, EAlignment_Vertical value)
+        {
+            var ui = element as TtUIElement;
+            if(ui != null)
+            {
+                var canvas = VisualTreeHelper.GetParent(ui) as TtStackPanel;
+                canvas?.InvalidateArrange();
+            }
+        }
         ELayout_Orientation mOrientation = ELayout_Orientation.Horizontal;
         [Bind.BindProperty]
         [Meta]
@@ -95,18 +130,77 @@ namespace EngineNS.UI.Controls.Containers
                 RectangleF childFinalRect = RectangleF.Empty;
                 if (Orientation == ELayout_Orientation.Vertical)
                 {
-                    childFinalRect.X = innerRect.X;
+                    EAlignment_Horizontal alignment = TtStackPanel.GetHorizontalAlignment(childUI);
+                    switch (alignment)
+                    {
+                        case EAlignment_Horizontal.Left:
+                        {
+                            childFinalRect.X = innerRect.X;
+                            childFinalRect.Width = childDesiredSize.Width;
+                        } 
+                            break;
+                        case EAlignment_Horizontal.Center:
+                        {
+                            childFinalRect.X = (innerRect.Width - childDesiredSize.Width) * 0.5f + innerRect.X;
+                            childFinalRect.Width = childDesiredSize.Width;
+                        } 
+                            break;
+
+                        case EAlignment_Horizontal.Stretch:
+                        {
+                            childFinalRect.X = innerRect.X;
+                            childFinalRect.Width = innerRect.Width;
+                        }
+                            break;
+                        case EAlignment_Horizontal.Right:
+                        {
+                            childFinalRect.X = innerRect.Width - childDesiredSize.Width + innerRect.X;
+                            childFinalRect.Width = childDesiredSize.Width;
+                        }
+                            break;
+                        default:
+                            throw new ArgumentOutOfRangeException();
+                    }
+                    
                     childFinalRect.Y = accumulateY;
-                    childFinalRect.Width = innerRect.Width;
                     childFinalRect.Height = childDesiredSize.Height;
                     accumulateY += childFinalRect.Height;
                 }
                 else
                 {
+                    EAlignment_Vertical alignment = TtStackPanel.GetVerticalAlignment(childUI);
+                    switch (alignment)
+                    {
+                        case EAlignment_Vertical.Top:
+                        {
+                            childFinalRect.Y = innerRect.Y;
+                            childFinalRect.Height = childDesiredSize.Height;        
+                        }
+                            break;
+                        case EAlignment_Vertical.Center:
+                        {
+                            childFinalRect.Y = (innerRect.Height - childDesiredSize.Height) * 0.5f + innerRect.Y;
+                            childFinalRect.Height = childDesiredSize.Height;        
+                        }
+                            break;
+                        case EAlignment_Vertical.Stretch:
+                        {
+                            childFinalRect.Y = innerRect.Y;
+                            childFinalRect.Height = innerRect.Height;
+                        }
+                            break;
+                        case EAlignment_Vertical.Bottom:
+                        {
+                            childFinalRect.Y = innerRect.Height - childDesiredSize.Height + innerRect.Y;
+                            childFinalRect.Height = childDesiredSize.Height;    
+                        }
+                            break;
+                        default:
+                            throw new ArgumentOutOfRangeException();
+                    }
                     childFinalRect.X = accumulateX;
-                    childFinalRect.Y = innerRect.Y;
                     childFinalRect.Width = childDesiredSize.Width;
-                    childFinalRect.Height = innerRect.Height;
+                    
                     accumulateX += childFinalRect.Width;
                 }
                 childUI.Arrange(in childFinalRect);

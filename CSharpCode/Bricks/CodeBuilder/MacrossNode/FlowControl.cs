@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.ComponentModel;
 using EngineNS.Bricks.NodeGraph;
+using EngineNS.EGui.Controls;
 
 namespace EngineNS.Bricks.CodeBuilder.MacrossNode
 {
@@ -136,16 +137,16 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
             }
         }
 
-        public void AddMenuItems(UMenuItem parentItem)
+        public void AddMenuItems(TtMenuItem parentItem)
         {
             parentItem.AddMenuSeparator("BREAKPOINTS");
             parentItem.AddMenuItem("Add Breakpoint", null,
-                (UMenuItem item, object sender) =>
+                (TtMenuItem item, object sender) =>
                 {
                     BreakerState = EBreakerState.Enable;
                 });
             parentItem.AddMenuItem("Remove Breakpoint", null,
-                (UMenuItem item, object sender) =>
+                (TtMenuItem item, object sender) =>
                 {
                     BreakerState = EBreakerState.Hidden;
                 });
@@ -171,16 +172,16 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
                 Macross.UMacrossDebugger.Instance.SetBreakEnable(BreakerName, (value == EBreakerState.Enable));
             }
         }
-        public void AddMenuItems(UMenuItem parentItem)
+        public void AddMenuItems(TtMenuItem parentItem)
         {
             parentItem.AddMenuSeparator("BREAKPOINTS");
             parentItem.AddMenuItem("Add Breakpoint", null,
-                (UMenuItem item, object sender) =>
+                (TtMenuItem item, object sender) =>
                 {
                     BreakerState = EBreakerState.Enable;
                 });
             parentItem.AddMenuItem("Remove Breakpoint", null,
-                (UMenuItem item, object sender) =>
+                (TtMenuItem item, object sender) =>
                 {
                     BreakerState = EBreakerState.Hidden;
                 });
@@ -499,16 +500,16 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
                 Macross.UMacrossDebugger.Instance.SetBreakEnable(BreakerName, (value == EBreakerState.Enable));
             }
         }
-        public void AddMenuItems(UMenuItem parentItem)
+        public void AddMenuItems(TtMenuItem parentItem)
         {
             parentItem.AddMenuSeparator("BREAKPOINTS");
             parentItem.AddMenuItem("Add Breakpoint", null,
-                (UMenuItem item, object sender) =>
+                (TtMenuItem item, object sender) =>
                 {
                     BreakerState = EBreakerState.Enable;
                 });
             parentItem.AddMenuItem("Remove Breakpoint", null,
-                (UMenuItem item, object sender) =>
+                (TtMenuItem item, object sender) =>
                 {
                     BreakerState = EBreakerState.Hidden;
                 });
@@ -838,16 +839,16 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
                 Macross.UMacrossDebugger.Instance.SetBreakEnable(BreakerName, (value == EBreakerState.Enable));
             }
         }
-        public void AddMenuItems(UMenuItem parentItem)
+        public void AddMenuItems(TtMenuItem parentItem)
         {
             parentItem.AddMenuSeparator("BREAKPOINTS");
             parentItem.AddMenuItem("Add Breakpoint", null,
-                (UMenuItem item, object sender) =>
+                (TtMenuItem item, object sender) =>
                 {
                     BreakerState = EBreakerState.Enable;
                 });
             parentItem.AddMenuItem("Remove Breakpoint", null,
-                (UMenuItem item, object sender) =>
+                (TtMenuItem item, object sender) =>
                 {
                     BreakerState = EBreakerState.Hidden;
                 });
@@ -1017,16 +1018,16 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
                 Macross.UMacrossDebugger.Instance.SetBreakEnable(BreakerName, (value == EBreakerState.Enable));
             }
         }
-        public void AddMenuItems(UMenuItem parentItem)
+        public void AddMenuItems(TtMenuItem parentItem)
         {
             parentItem.AddMenuSeparator("BREAKPOINTS");
             parentItem.AddMenuItem("Add Breakpoint", null,
-                (UMenuItem item, object sender) =>
+                (TtMenuItem item, object sender) =>
                 {
                     BreakerState = EBreakerState.Enable;
                 });
             parentItem.AddMenuItem("Remove Breakpoint", null,
-                (UMenuItem item, object sender) =>
+                (TtMenuItem item, object sender) =>
                 {
                     BreakerState = EBreakerState.Hidden;
                 });
@@ -1135,16 +1136,16 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
                 Macross.UMacrossDebugger.Instance.SetBreakEnable(BreakerName, (value == EBreakerState.Enable));
             }
         }
-        public void AddMenuItems(UMenuItem parentItem)
+        public void AddMenuItems(TtMenuItem parentItem)
         {
             parentItem.AddMenuSeparator("BREAKPOINTS");
             parentItem.AddMenuItem("Add Breakpoint", null,
-                (UMenuItem item, object sender) =>
+                (TtMenuItem item, object sender) =>
                 {
                     BreakerState = EBreakerState.Enable;
                 });
             parentItem.AddMenuItem("Remove Breakpoint", null,
-                (UMenuItem item, object sender) =>
+                (TtMenuItem item, object sender) =>
                 {
                     BreakerState = EBreakerState.Hidden;
                 });
@@ -1209,16 +1210,16 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
                 Macross.UMacrossDebugger.Instance.SetBreakEnable(BreakerName, (value == EBreakerState.Enable));
             }
         }
-        public void AddMenuItems(UMenuItem parentItem)
+        public void AddMenuItems(TtMenuItem parentItem)
         {
             parentItem.AddMenuSeparator("BREAKPOINTS");
             parentItem.AddMenuItem("Add Breakpoint", null,
-                (UMenuItem item, object sender) =>
+                (TtMenuItem item, object sender) =>
                 {
                     BreakerState = EBreakerState.Enable;
                 });
             parentItem.AddMenuItem("Remove Breakpoint", null,
-                (UMenuItem item, object sender) =>
+                (TtMenuItem item, object sender) =>
                 {
                     BreakerState = EBreakerState.Hidden;
                 });

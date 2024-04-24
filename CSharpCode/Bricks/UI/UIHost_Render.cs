@@ -130,7 +130,7 @@ namespace EngineNS.UI
                                 height = (float)(2 * camera.ZNear * Math.Tan(camera.Fov * 0.5f));
                                 width = camera.Aspect * height;
                             }
-                            var scale = (float)(height / uiHost.WindowSize.Height);
+                            var scale = (float)(height / uiHost.DesignRect.Height);
                             mMatrix = Matrix.Scaling(scale) * Matrix.Translate(-width * 0.5f, -height * 0.5f, camera.ZNear);
                             mInvMatrix = Matrix.Invert(in mMatrix);
                             uiHost.RenderTransformDirty = false;
@@ -155,7 +155,7 @@ namespace EngineNS.UI
                         var absTrans = ELement.RenderTransform;
                         Vector3 localOffset = new Vector3(
                             ELement.DesignRect.Width * ELement.RenderTransformCenter.X, 
-                            ELement.RootUIHost.WindowSize.Height - ELement.DesignRect.Height * ELement.RenderTransformCenter.Y, 0.0f);
+                            ELement.RootUIHost.DesignRect.Height - ELement.DesignRect.Height * ELement.RenderTransformCenter.Y, 0.0f);
                         Vector3 pos = new Vector3(absTrans.Position - offset) + localOffset;
 
                         var invTransMat = Matrix.Translate(-localOffset);
@@ -250,8 +250,8 @@ namespace EngineNS.UI
             }
 
             mCanvas.Reset();
-            var winSize = WindowSize;
-            mCanvas.SetClientClip(winSize.Width, winSize.Height);
+            //var winSize = WindowSize;
+            mCanvas.SetClientClip(mDesignRect.Width, mDesignRect.Height);
 
             //var subCmd = new EngineNS.Canvas.FSubDrawCmd();
 

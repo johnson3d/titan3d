@@ -1,5 +1,6 @@
 ﻿using EngineNS.Bricks.NodeGraph;
 using EngineNS.Bricks.WorldSimulator;
+using EngineNS.EGui.Controls;
 using EngineNS.EGui.Controls.PropertyGrid;
 using EngineNS.Rtti;
 using System;
@@ -286,7 +287,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
             }
         }
         [Browsable(false)]
-        public UMenuItem ContextMenu { get; set; } = new UMenuItem();
+        public TtMenuItem ContextMenu { get; set; } = new TtMenuItem();
         [Browsable(false), Rtti.Meta]
         public List<UnionNodePropertyData> PropertyDatas { get; set; } = new List<UnionNodePropertyData>();
 
@@ -296,7 +297,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
         public UnionNode()
         {
             ContextMenu.AddMenuItem("Config", null,
-                (UMenuItem item, object sender) =>
+                (TtMenuItem item, object sender) =>
                 {
                     this.ParentGraph.SetConfigUnionNode(this);
                 }, null);

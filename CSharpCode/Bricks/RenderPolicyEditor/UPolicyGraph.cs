@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using EngineNS.Bricks.CodeBuilder;
 using EngineNS.Bricks.NodeGraph;
+using EngineNS.EGui.Controls;
 using EngineNS.EGui.Controls.PropertyGrid;
 
 namespace EngineNS.Bricks.RenderPolicyEditor
@@ -249,7 +250,7 @@ namespace EngineNS.Bricks.RenderPolicyEditor
                         else
                         {
                             parentMenu.AddMenuItem(menuName, att.FilterStrings, null,
-                                (UMenuItem item, object sender) =>
+                                (TtMenuItem item, object sender) =>
                                 {
                                     var node = new UPolicyNode();
                                     var rgNode = Rtti.UTypeDescManager.CreateInstance(i) as Graphics.Pipeline.TtRenderGraphNode;

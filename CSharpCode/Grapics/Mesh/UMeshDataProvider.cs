@@ -35,6 +35,19 @@ namespace EngineNS.Graphics.Mesh
                 return mCoreObject.GetAtomNumber();
             }
         }
+        public BoundingBox AABB
+        {
+            get
+            {
+                return mCoreObject.mAABB;
+            }
+            set
+            {
+                mCoreObject.mAABB = value;
+            }
+        }
+
+
         public VIUnknown GetAtomExtData(uint index)
         {
             return mCoreObject.GetAtomExtData(index);
@@ -82,6 +95,8 @@ namespace EngineNS.Graphics.Mesh
                 }   
             }
         }
+
+
         public RName AssetName { get; set; }
         #region box
         [Flags]

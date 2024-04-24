@@ -19,6 +19,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)Controls\PropertyGrid\PropertyGrid.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Controls\PropertyGrid\TypeEditors.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Controls\UItemDragging.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Controls\MenuItem.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Controls\UTypeSelector.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Controls\UAssetSelector.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Controls\ULogWatcher.cs" />

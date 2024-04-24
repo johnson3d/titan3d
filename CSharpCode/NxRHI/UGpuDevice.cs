@@ -1,4 +1,5 @@
-﻿using System;
+﻿using EngineNS.Profiler;
+using System;
 using System.Collections.Generic;
 using System.Text;
 
@@ -667,7 +668,7 @@ namespace EngineNS.NxRHI
             IRenderDocTool.GetInstance().StartFrameCapture();
             return true;
         }
-        public string EndFrameCapture(string tagName = null)
+        public string EndFrameCapture(string tagName = null, bool openRenderDoc = true)
         {
             if (CaptureRenderDocFrame == false)
             {
@@ -684,7 +685,26 @@ namespace EngineNS.NxRHI
             {
                 var extName = (tagName != null) ? "_" + tagName : "";
                 var tarFile = IO.TtFileManager.GetPureName(file) + $"{extName}.rdc";
-                System.IO.File.Move(file, UEngine.Instance.FileManager.GetPath(IO.TtFileManager.ERootDir.Cache, IO.TtFileManager.ESystemDir.RenderDoc) + tarFile);
+                var absTarFile = UEngine.Instance.FileManager.GetPath(IO.TtFileManager.ERootDir.Cache, IO.TtFileManager.ESystemDir.RenderDoc) + tarFile;
+                try
+                {
+                    System.IO.File.Move(file, absTarFile, true);
+                }
+                catch(System.Exception e)
+                {
+                    if(openRenderDoc)
+                    {
+                        IRenderDocTool.GetInstance().OpenFile(file);
+                    }
+                    Log.WriteException(e);
+                }
+                finally
+                {
+                    if(openRenderDoc)
+                    {
+                        IRenderDocTool.GetInstance().OpenFile(absTarFile);
+                    }
+                }
                 return tarFile;
             }
             return null;

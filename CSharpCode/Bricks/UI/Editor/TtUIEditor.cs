@@ -37,6 +37,7 @@ namespace EngineNS.UI.Editor
         public EditorUIHost mUIHost;
         public TtUINode mUINode;
         Vector2 mNewCreateUISize = new Vector2(100, 50);
+        SizeF mDesignSize = new SizeF(1920, 1080);
         public void Dispose()
         {
             CoreSDK.DisposeObject(ref UIAsset);
@@ -52,7 +53,9 @@ namespace EngineNS.UI.Editor
             if (mUIHost == null)
                 mUIHost = new EditorUIHost(this);
             mUIHost.Name = "UIEditorHost";
-            mUIHost.WindowSize = new SizeF(1920, 1080);
+            mUIHost.WindowSize = mDesignSize;
+            var newRect = new RectangleF(0, 0, mDesignSize.Width, mDesignSize.Height);
+            mUIHost.SetDesignRect(in newRect, true);
             mUIHost.ViewportSlate = PreviewViewport;
 
             /*/ test /////////////////////////
@@ -112,11 +115,18 @@ namespace EngineNS.UI.Editor
             //meshNode.IsCastShadow = true;
 
             //var aabb = UIAsset.Mesh.MaterialMesh.Mesh.mCoreObject.mAABB;
-            float radius = Math.Max(mUIHost.WindowSize.Width, mUIHost.WindowSize.Height);
-            BoundingSphere sphere;
-            sphere.Center = new Vector3(mUIHost.WindowSize.Width * 0.5f, mUIHost.WindowSize.Height * 0.5f, 0);
-            sphere.Radius = radius;
-            policy.DefaultCamera.AutoZoom(ref sphere);
+            if(mUIHost.IsScreenSpace)
+            {
+
+            }
+            else
+            { 
+                float radius = Math.Max(mUIHost.WindowSize.Width, mUIHost.WindowSize.Height);
+                BoundingSphere sphere;
+                sphere.Center = new Vector3(mUIHost.WindowSize.Width * 0.5f, mUIHost.WindowSize.Height * 0.5f, 0);
+                sphere.Radius = radius;
+                policy.DefaultCamera.AutoZoom(ref sphere);
+            }
 
             //var gridNode = await GamePlay.Scene.UGridNode.AddGridNode(viewport.World, viewport.World.Root);
             //gridNode.ViewportSlate = this.PreviewViewport;
@@ -246,6 +256,7 @@ namespace EngineNS.UI.Editor
         }
         protected unsafe void DrawToolBar()
         {
+            var drawList = ImGuiAPI.GetWindowDrawList();
             var btSize = Vector2.Zero;
             if(EGui.UIProxy.CustomButton.ToolButton("Show Graph", in btSize,
                 EGui.UIProxy.StyleConfig.Instance.ToolButtonTextColor,
@@ -273,6 +284,8 @@ namespace EngineNS.UI.Editor
 
             }
             ImGuiAPI.SameLine(0, -1);
+            EGui.UIProxy.ToolbarSeparator.DrawSeparator(in drawList, in Support.UAnyPointer.Default);
+            ImGuiAPI.SameLine(0, -1);
             if (EGui.UIProxy.CustomButton.ToolButton("Undo", in btSize))
             {
 
@@ -282,6 +295,8 @@ namespace EngineNS.UI.Editor
             {
 
             }
+            ImGuiAPI.SameLine(0, -1);
+            EGui.UIProxy.ToolbarSeparator.DrawSeparator(in drawList, in Support.UAnyPointer.Default);
             ImGuiAPI.SameLine(0, -1);
             if(EGui.UIProxy.CustomButton.ToggleButton("Simulate", in btSize, ref mIsSimulateMode))
             {
@@ -1183,6 +1198,7 @@ namespace EngineNS.UI.Editor
         {
         }
         bool mIsWireFrame = false;
+        string mDimensionToolButtonName = "3D";
         void DrawViewportUIAction(in Vector2 startDrawPos)
         {
             if (AssetName != null)
@@ -1193,40 +1209,54 @@ namespace EngineNS.UI.Editor
             }
             if (EGui.UIProxy.CustomButton.ToolButton("Reset Camera", in Vector2.Zero))
             {
-                BoundingSphere sphere;
-                sphere.Center = new Vector3(mUIHost.WindowSize.Width * 0.5f, mUIHost.WindowSize.Height * 0.5f, 0);
-                sphere.Radius = Math.Max(mUIHost.WindowSize.Width, mUIHost.WindowSize.Height);
-                mUIHost.RenderCamera.LookAtLH(-DVector3.UnitZ, DVector3.Zero, Vector3.UnitY);
-                mUIHost.RenderCamera.AutoZoom(ref sphere);
+                if(mUIHost.IsScreenSpace)
+                {
+
+                }
+                else
+                {
+                    BoundingSphere sphere;
+                    sphere.Center = new Vector3(mUIHost.WindowSize.Width * 0.5f, mUIHost.WindowSize.Height * 0.5f, 0);
+                    sphere.Radius = Math.Max(mUIHost.WindowSize.Width, mUIHost.WindowSize.Height);
+                    mUIHost.RenderCamera.LookAtLH(-DVector3.UnitZ, DVector3.Zero, Vector3.UnitY);
+                    mUIHost.RenderCamera.AutoZoom(ref sphere);
+                }
             }
             ImGuiAPI.SameLine(0, -1);
             if(EGui.UIProxy.CustomButton.ToolButton("Focus", in Vector2.Zero))
             {
-                Vector2 rectMin = Vector2.MaxValue;
-                Vector2 rectMax = Vector2.MinValue;
-                for(int i=0; i<mSelectedElements.Count; i++)
+                if(mUIHost.IsScreenSpace)
                 {
-                    Vector2 offset;
-                    var designRect = mSelectedElements[i].DesignRect;
-                    mSelectedElements[i].GetOffsetFromElement(mUIHost, out offset);
-                    var min = new Vector2(designRect.Left, designRect.Top) + offset;
-                    if (min.X < rectMin.X)
-                        rectMin.X = min.X;
-                    if (min.Y < rectMin.Y)
-                        rectMin.Y = min.Y;
-                    var max = new Vector2(designRect.Right, designRect.Bottom) + offset;
-                    if(max.X > rectMax.X)
-                        rectMax.X = max.X;
-                    if (max.Y > rectMax.Y)
-                        rectMax.Y = max.Y;
+
                 }
-                var size = rectMax - rectMin;
-                rectMax.Y = mUIHost.WindowSize.Height - rectMax.Y;
-                rectMin.Y = mUIHost.WindowSize.Height - rectMin.Y;
-                BoundingSphere sphere;
-                sphere.Center = new Vector3((rectMin.X + rectMax.X) * 0.5f, (rectMin.Y + rectMax.Y) * 0.5f, 0.0f);
-                sphere.Radius = ((size.X > size.Y) ? size.X : size.Y);
-                mUIHost.RenderCamera.AutoZoom(ref sphere);
+                else
+                {
+                    Vector2 rectMin = Vector2.MaxValue;
+                    Vector2 rectMax = Vector2.MinValue;
+                    for(int i=0; i<mSelectedElements.Count; i++)
+                    {
+                        Vector2 offset;
+                        var designRect = mSelectedElements[i].DesignRect;
+                        mSelectedElements[i].GetOffsetFromElement(mUIHost, out offset);
+                        var min = new Vector2(designRect.Left, designRect.Top) + offset;
+                        if (min.X < rectMin.X)
+                            rectMin.X = min.X;
+                        if (min.Y < rectMin.Y)
+                            rectMin.Y = min.Y;
+                        var max = new Vector2(designRect.Right, designRect.Bottom) + offset;
+                        if(max.X > rectMax.X)
+                            rectMax.X = max.X;
+                        if (max.Y > rectMax.Y)
+                            rectMax.Y = max.Y;
+                    }
+                    var size = rectMax - rectMin;
+                    rectMax.Y = mUIHost.DesignRect.Height - rectMax.Y;
+                    rectMin.Y = mUIHost.DesignRect.Height - rectMin.Y;
+                    BoundingSphere sphere;
+                    sphere.Center = new Vector3((rectMin.X + rectMax.X) * 0.5f, (rectMin.Y + rectMax.Y) * 0.5f, 0.0f);
+                    sphere.Radius = ((size.X > size.Y) ? size.X : size.Y);
+                    mUIHost.RenderCamera.AutoZoom(ref sphere);
+                }
             }
             ImGuiAPI.SameLine(0, -1);
             if(EGui.UIProxy.CustomButton.ToggleButton("Wireframe", in Vector2.Zero, ref mIsWireFrame))
@@ -1243,6 +1273,28 @@ namespace EngineNS.UI.Editor
                 }
 
                 _ = WireFrameProcess();
+            }
+            ImGuiAPI.SameLine(0, -1);
+            if (EGui.UIProxy.CustomButton.ToolButton(mDimensionToolButtonName, in Vector2.Zero))
+            {
+                switch (mDimensionToolButtonName)
+                {
+                    case "2D":
+                        {
+                            mDimensionToolButtonName = "3D";
+                            PreviewViewport.PopHUD();
+                            mUINode.AddUIHost(mUIHost);
+                        }
+                        break;
+                    case "3D":
+                        {
+                            mDimensionToolButtonName = "2D";
+                            PreviewViewport.PushHUD(mUIHost);
+                            mUINode.RemoveUIHost(mUIHost);
+                        }
+                        break;
+                }
+                mUIHost.MeshDirty = true;
             }
         }
         public float LoadingPercent { get; set; } = 1.0f;

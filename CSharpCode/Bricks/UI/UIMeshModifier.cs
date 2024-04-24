@@ -129,6 +129,7 @@ namespace EngineNS.UI
                                     cbuffer.SetValue(fld, &color, sizeof(Color4f), true, UEngine.Instance.GfxDevice.CbvUpdater.mCoreObject);
                                     cmd.IsDirty = false;
                                 }
+                                brush.SetValuesToCbView(cbuffer, UEngine.Instance.GfxDevice.CbvUpdater.mCoreObject);
                             }
                         }
                     }
@@ -156,6 +157,7 @@ namespace EngineNS.UI
                                     cbuffer.SetValue(fld, &color, sizeof(Color4f), true, UEngine.Instance.GfxDevice.CbvUpdater.mCoreObject);
                                     brush.IsDirty = false;
                                 }
+                                brush.SetValuesToCbView(cbuffer, UEngine.Instance.GfxDevice.CbvUpdater.mCoreObject);
                                 //var fld = cbuffer->ShaderBinder.FindField("UIMatrix");
                                 //cbuffer->SetMatrix(fld, new Matrix(), true);
                             }

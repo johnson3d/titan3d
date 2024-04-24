@@ -1,4 +1,5 @@
 ﻿using EngineNS.Canvas;
+using EngineNS.Support;
 using System;
 using System.Collections.Generic;
 using System.Security.Cryptography;
@@ -226,6 +227,18 @@ namespace EngineNS.UI.Canvas
         public void SetUV(in Vector2 uv0, in Vector2 uv1)
         {
             mCoreObject.SetUV(in uv0, in uv1);
+        }
+        public void SetValue(string name, in UAnyValue value)
+        {
+            mCoreObject.SetValue(name, in value);
+        }
+        public bool GetValue(string name, ref UAnyValue value)
+        {
+            return mCoreObject.GetValue(name, ref value);
+        }
+        public void SetValuesToCbView(in NxRHI.ICbView cbuffer, in NxRHI.FCbvUpdater updater)
+        {
+            mCoreObject.SetValuesToCbView(cbuffer, updater);
         }
     }
 }

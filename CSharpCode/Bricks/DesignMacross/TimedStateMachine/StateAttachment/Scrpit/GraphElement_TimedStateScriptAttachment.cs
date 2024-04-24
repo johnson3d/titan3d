@@ -9,6 +9,7 @@ using System;
 using System.Collections.Generic;
 using System.Reflection.Metadata;
 using System.Text;
+using EngineNS.EGui.Controls;
 
 namespace EngineNS.DesignMacross.TimedStateMachine
 {
@@ -40,7 +41,7 @@ namespace EngineNS.DesignMacross.TimedStateMachine
             PopupMenu.Reset();
             var parentMenu = PopupMenu.Menu;
             var editorInteroperation = context.EditorInteroperation;
-            parentMenu.AddMenuItem("Open Script Graph", null, (UMenuItem item, object sender) =>
+            parentMenu.AddMenuItem("Open Script Graph", null, (TtMenuItem item, object sender) =>
             {
                 editorInteroperation.GraphEditPanel.ActiveGraphNavigatedPanel.OpenSubGraph(Description);
             });

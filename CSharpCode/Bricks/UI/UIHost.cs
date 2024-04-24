@@ -51,13 +51,13 @@ namespace EngineNS.UI
         }
         #endregion
 
-        float mDPIScale = 1.0f;
+        protected float mDPIScale = 1.0f;
         [Browsable(false)]
         public float DPIScale => mDPIScale;
 
         SizeF mWindowSize;
         [Browsable(false)]
-        public SizeF WindowSize
+        public virtual SizeF WindowSize
         {
             get => mWindowSize;
             set

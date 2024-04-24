@@ -76,17 +76,24 @@ namespace EngineNS.EGui.Controls
             mSearchBar = null;
         }
 
+        TtMenuItem mContextMenu;
+        string mContextMenuFilterStr = "";
+        int mSelectQuickMenuIdx = 0;
+        int mCurrentQuickMenuIdx = 0;
+        bool mContextMenuFilterFocused = false;
+        bool mContextMenuOpenCheck = false;
+        bool mOldContextMenuOpenCheck = false;
+
         public async Task<bool> Initialize()
         {
             await Thread.TtAsyncDummyClass.DummyFunc();
 
-            if(mNewAssetMenuItem == null)
+            if(mContextMenu == null)
             {
-                mNewAssetMenuItem = new UIProxy.MenuItemProxy()
+                mContextMenu = new TtMenuItem()
                 {
-                    MenuName = "New Asset",
+                    Text = "Content context menu",
                 };
-                await mNewAssetMenuItem.Initialize();
 
                 OnTypeChanged();
             }
@@ -134,11 +141,11 @@ namespace EngineNS.EGui.Controls
             }
         }
 
-        EGui.UIProxy.MenuItemProxy mNewAssetMenuItem;
         public void OnTypeChanged()
         {
-            mNewAssetMenuItem.CleanupSubMenus();
+            mContextMenu.SubMenuItems.Clear();
 
+            // New Asset menu
             foreach (var service in Rtti.UTypeDescManager.Instance.Services.Values)
             {
                 foreach(var typeDesc in service.Types.Values)
@@ -146,17 +153,24 @@ namespace EngineNS.EGui.Controls
                     var atts = typeDesc.SystemType.GetCustomAttributes(typeof(IO.AssetCreateMenuAttribute), false);
                     if (atts.Length == 0)
                         continue;
-
                     var assetExtField = Rtti.UTypeDesc.GetField(typeDesc.SystemType, "AssetExt");
-                    mNewAssetMenuItem.SubMenus.Add(new EGui.UIProxy.MenuItemProxy()
+                    var parentMenu = mContextMenu;
+                    var att = atts[0] as IO.AssetCreateMenuAttribute;
+                    var splits = att.MenuName.Split('/');
+                    for(var menuIdx = 0; menuIdx < splits.Length; menuIdx++)
                     {
-                        MenuName = ((IO.AssetCreateMenuAttribute)atts[0]).MenuName,
-                        Shortcut = ((IO.AssetCreateMenuAttribute)atts[0]).Shortcut,
-                        Action = async (proxy, data)=>
+                        var menuStr = splits[menuIdx];
+                        if (menuIdx < splits.Length - 1)
+                            parentMenu = mContextMenu.AddMenuItem(menuStr, null, null);
+                        else
                         {
-                            EnqueueAssetImporter(UEngine.Instance.AssetMetaManager.ImportAsset(CurrentDir, typeDesc, (string)assetExtField.GetValue(null)), "");
+                            parentMenu.AddMenuItem(menuStr, menuStr, null,
+                                (TtMenuItem item, object sender) =>
+                                {
+                                    EnqueueAssetImporter(UEngine.Instance.AssetMetaManager.ImportAsset(CurrentDir, typeDesc, (string)assetExtField.GetValue(null)), ""); 
+                                });
                         }
-                    });
+                    }
                 }
             }
         }
@@ -526,11 +540,30 @@ namespace EngineNS.EGui.Controls
             if (CreateNewAssets && ImGuiAPI.BeginPopupContextWindow("##ContentFilesMenuWindow", ImGuiPopupFlags_.ImGuiPopupFlags_MouseButtonRight))
             {
                 var drawList = ImGuiAPI.GetWindowDrawList();
-                var menuData = new Support.UAnyPointer();
-
-                mNewAssetMenuItem.OnDraw(in drawList, in menuData);
+                var popMenuWidth = ImGuiAPI.GetWindowContentRegionWidth();
+                EGui.UIProxy.SearchBarProxy.OnDraw(ref mContextMenuFilterFocused, in drawList, "search items", ref mContextMenuFilterStr, popMenuWidth);
+                var wsize = new Vector2(200, 400);
+                if (ImGuiAPI.BeginChild("GraphContextMenu", in wsize, false, ImGuiWindowFlags_.ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_.ImGuiWindowFlags_NoSavedSettings))
+                {
+                    for (var childIdx = 0; childIdx < mContextMenu.SubMenuItems.Count; childIdx++)
+                    {
+                        TtMenuItem.Draw(mContextMenu.SubMenuItems[childIdx], this, this, mContextMenuFilterStr, in drawList, ref mSelectQuickMenuIdx, ref mCurrentQuickMenuIdx, null);
+                    }
+                }
+                ImGuiAPI.EndChild();
                 ImGuiAPI.EndPopup();
+
+                mContextMenuOpenCheck = true;
             }
+            else
+            {
+                mContextMenuOpenCheck = false;
+            }
+            if(mContextMenuOpenCheck && !mOldContextMenuOpenCheck)
+            {
+                mContextMenuFilterStr = "";
+            }
+            mOldContextMenuOpenCheck = mContextMenuOpenCheck;
         }
         private void DrawItem(in ImDrawList cmdlist, UUvAnim icon, IO.IAssetMeta ameta, in Vector2 sz)
         {

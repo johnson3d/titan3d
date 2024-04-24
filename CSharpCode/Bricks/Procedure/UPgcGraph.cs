@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using EngineNS.Bricks.NodeGraph;
+using EngineNS.EGui.Controls;
 
 namespace EngineNS.Bricks.Procedure
 {
@@ -68,7 +69,7 @@ namespace EngineNS.Bricks.Procedure
                             else
                             {
                                 parentMenu.AddMenuItem(menuStr, att.FilterStrings, null,
-                                    (UMenuItem item, object sender) =>
+                                    (TtMenuItem item, object sender) =>
                                     {
                                         var node = Rtti.UTypeDescManager.CreateInstance(typeDesc) as UNodeBase;
                                         if (nodeName != null)
@@ -91,7 +92,7 @@ namespace EngineNS.Bricks.Procedure
 
                         var parentMenu = CanvasMenus.AddMenuItem("Struct", null, null);
                         parentMenu.AddMenuItem("Pack " + typeDesc.Name, typeDesc.Name, null,
-                            (UMenuItem item, object sender) =>
+                            (TtMenuItem item, object sender) =>
                             {
                                 var node = new Node.UPackNode();
                                 node.Name = "Pack " + typeDesc.Name;
@@ -102,7 +103,7 @@ namespace EngineNS.Bricks.Procedure
                                 this.AddNode(node);
                             });
                         parentMenu.AddMenuItem("Unpack " + typeDesc.Name, typeDesc.Name, null,
-                            (UMenuItem item, object sender) =>
+                            (TtMenuItem item, object sender) =>
                             {
                                 var node = new Node.UUnpackNode();
                                 node.Name = "Unpack " + typeDesc.Name;

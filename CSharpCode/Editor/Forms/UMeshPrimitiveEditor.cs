@@ -297,10 +297,14 @@ namespace EngineNS.Editor.Forms
                         UMeshDataProvider meshProvider = new UMeshDataProvider();
                         if(meshProvider.InitFrom(Mesh))
                         {
-                            var embreeScene = new DistanceField.UEmbreeScene();
-                            var embreeManager = new DistanceField.UEmbreeManager();
-                            embreeManager.SetupEmbreeScene(Mesh.AssetName.ToString(), meshProvider, 1.0f, embreeScene);
-                            embreeManager.DeleteEmbreeScene(embreeScene);
+                            var sdfConfig = new DistanceField.DistanceFieldConfig();
+                            DistanceField.UMeshUtilities.GenerateSignedDistanceFieldVolumeData(Mesh.AssetName.ToString(), meshProvider, sdfConfig, 1.0f, false);
+
+                            // debug code
+                            //var embreeScene = new DistanceField.UEmbreeScene();
+                            //var embreeManager = new DistanceField.UEmbreeManager();
+                            //embreeManager.SetupEmbreeScene(Mesh.AssetName.ToString(), meshProvider, 1.0f, embreeScene);
+                            //embreeManager.DeleteEmbreeScene(embreeScene);
                         }
                     }
                 }

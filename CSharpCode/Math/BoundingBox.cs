@@ -218,6 +218,10 @@ namespace EngineNS
 	    {
 		    return (Maximum + Minimum) * 0.5f;
 	    }
+        public Vector3 GetExtent()
+        {
+            return (Maximum - Minimum)*0.5f;
+        }
         public Vector3 GetSize()
         {
             return Maximum - Minimum;

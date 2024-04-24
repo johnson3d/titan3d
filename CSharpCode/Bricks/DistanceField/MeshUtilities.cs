@@ -1,6 +1,8 @@
 ﻿using Assimp;
+using NPOI.SS.Formula.Functions;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Text;
 
 namespace EngineNS.DistanceField
@@ -11,28 +13,229 @@ namespace EngineNS.DistanceField
         { }
 
         // One voxel border around object for handling gradient
-        int MeshDistanceFieldObjectBorder = 1;
-        int UniqueDataBrickSize = 7;
+        public int MeshDistanceFieldObjectBorder = 1;
+        public int UniqueDataBrickSize = 7;
+        // Half voxel border around brick for trilinear filtering
+        public int BrickSize = 8;
         // Trade off between SDF memory and number of steps required to find intersection
-        int BandSizeInVoxels = 4;
+        public int BandSizeInVoxels = 4;
 
-        int MaxPerMeshResolution = 256;
-        int MaxIndirectionDimension = 1024;
+        public int MaxPerMeshResolution = 256;
+        public int MaxIndirectionDimension = 1024;
 
-        float fDefaultVoxelDensity = 20.0f;
+        public float fDefaultVoxelDensity = 20.0f;
 
-        int NumMips = 3;
+        public int NumMips = 1; // TODO
     };
+
+    public class FSparseMeshDistanceFieldAsyncTask
+    {
+	    public FSparseMeshDistanceFieldAsyncTask(
+            DistanceFieldConfig InSdfConfig,
+            DistanceField.UEmbreeManager InEmbreeManager,
+            UEmbreeScene InEmbreeScene,
+            List<Vector3> InSampleDirections,
+            float InLocalSpaceTraceDistance,
+            BoundingBox InVolumeBounds,
+            float InLocalToVolumeScale,
+            Vector2 InDistanceFieldToVolumeScaleBias,
+            Vector3i InBrickCoordinate,
+            Vector3i InIndirectionSize,
+            bool bInUsePointQuery)
+        {
+            SdfConfig = InSdfConfig;
+            EmbreeManager = InEmbreeManager;
+            EmbreeScene = InEmbreeScene;
+            SampleDirections = InSampleDirections;
+            LocalSpaceTraceDistance = InLocalSpaceTraceDistance;
+            VolumeBounds = InVolumeBounds;
+            LocalToVolumeScale = InLocalToVolumeScale;
+            DistanceFieldToVolumeScaleBias = InDistanceFieldToVolumeScaleBias;
+            BrickCoordinate = InBrickCoordinate;
+            IndirectionSize = InIndirectionSize;
+            bUsePointQuery = bInUsePointQuery;
+            BrickMaxDistance = Byte.MinValue;
+            BrickMinDistance = Byte.MaxValue;
+        }
+
+        // Readonly inputs
+        DistanceFieldConfig SdfConfig;
+        DistanceField.UEmbreeManager EmbreeManager;
+        UEmbreeScene EmbreeScene;
+    	List<Vector3> SampleDirections;
+        float LocalSpaceTraceDistance;
+        BoundingBox VolumeBounds;
+        float LocalToVolumeScale;
+        Vector2 DistanceFieldToVolumeScaleBias;
+        Vector3i BrickCoordinate;
+        Vector3i IndirectionSize;
+        bool bUsePointQuery;
+
+        // Output
+        public Byte BrickMaxDistance;
+        public Byte BrickMinDistance;
+        public List<Byte> DistanceFieldVolume;
+
+        public void DoWork()
+        {
+            Vector3 IndirectionVoxelSize = VolumeBounds.GetSize() / new Vector3(IndirectionSize);
+            Vector3 DistanceFieldVoxelSize = IndirectionVoxelSize / new Vector3(SdfConfig.UniqueDataBrickSize);
+            Vector3 BrickMinPosition = VolumeBounds.Minimum + new Vector3(BrickCoordinate) * IndirectionVoxelSize;
+
+            DistanceFieldVolume = new List<Byte>();
+            DistanceFieldVolume.Resize(SdfConfig.BrickSize * SdfConfig.BrickSize * SdfConfig.BrickSize);
+
+            for (int ZIndex = 0; ZIndex < SdfConfig.BrickSize; ZIndex++)
+            {
+                for (int YIndex = 0; YIndex < SdfConfig.BrickSize; YIndex++)
+                {
+                    for (int XIndex = 0; XIndex < SdfConfig.BrickSize; XIndex++)
+                    {
+                        Vector3 VoxelPosition = new Vector3(XIndex, YIndex, ZIndex) * DistanceFieldVoxelSize + BrickMinPosition;
+                        int Index = (ZIndex * SdfConfig.BrickSize * SdfConfig.BrickSize + YIndex * SdfConfig.BrickSize + XIndex);
+
+                        float MinLocalSpaceDistance = LocalSpaceTraceDistance;
+
+                        bool bTraceRays = true;
+
+                        if (bUsePointQuery)
+                        {
+                            float ClosestDistance = 0.0f;
+                            EmbreeManager.EmbreePointQuery(EmbreeScene, VoxelPosition, LocalSpaceTraceDistance, ref bTraceRays, ref ClosestDistance);
+                            MinLocalSpaceDistance = MathHelper.Min(MinLocalSpaceDistance, ClosestDistance);
+                        }
+
+                        if (bTraceRays)
+                        {
+                            int Hit = 0;
+                            int HitBack = 0;
+
+                            for (int SampleIndex = 0; SampleIndex < SampleDirections.Count; SampleIndex++)
+                            {
+                                var UnitRayDirection = SampleDirections[SampleIndex];
+                                const float PullbackEpsilon = 0.0001f;
+                                // Pull back the starting position slightly to make sure we hit a triangle that VoxelPosition is exactly on.  
+                                // This happens a lot with boxes, since we trace from voxel corners.
+                                var StartPosition = VoxelPosition - PullbackEpsilon * LocalSpaceTraceDistance * UnitRayDirection;
+                                var EndPosition = VoxelPosition + UnitRayDirection * LocalSpaceTraceDistance;
+
+                                bool bIntersectVolume = false;
+                                {
+                                    var ray = new Ray(StartPosition, EndPosition - StartPosition);
+                                    float t = 0;
+                                    if (Ray.Intersects(ray, VolumeBounds, out t) == true)
+                                    {
+                                        bIntersectVolume = (EndPosition - StartPosition).LengthSquared() >= t * t;
+                                    }
+                                }
+                                if (bIntersectVolume)
+                                {
+                                    var RayDirection = EndPosition - VoxelPosition;
+                                    bool bHit = false;
+                                    bool bHitTwoSide = false;
+                                    Vector3 HitNormal = Vector3.Zero;
+                                    EmbreeManager.EmbreeRayTrace(EmbreeScene, StartPosition, RayDirection, ref bHit, ref bHitTwoSide, ref HitNormal);
+
+                                    if (bHit == true)
+                                    {
+                                        Hit++;
+
+                                        if (Vector3.Dot(UnitRayDirection, HitNormal) > 0 && !bHitTwoSide)
+                                        {
+                                            HitBack++;
+                                        }
+
+                                        if (!bUsePointQuery)
+                                        {
+                                            // TODO
+                                        }
+                                    }
+                                }
+                            }
+
+                            // Consider this voxel 'inside' an object if we hit a significant number of backfaces
+                            if (Hit > 0 && HitBack > .25f * SampleDirections.Count)
+                            {
+                                MinLocalSpaceDistance *= -1;
+                            }
+                        }
+
+                        // Transform to the tracing shader's Volume space
+                        float VolumeSpaceDistance = MinLocalSpaceDistance * LocalToVolumeScale;
+                        // Transform to the Distance Field texture's space
+                        float RescaledDistance = (VolumeSpaceDistance - DistanceFieldToVolumeScaleBias.Y) / DistanceFieldToVolumeScaleBias.X;
+                        Byte QuantizedDistance = (Byte)Math.Clamp((int)Math.Floor(RescaledDistance * 255.0f + .5f), 0, 255);
+                        DistanceFieldVolume[Index] = QuantizedDistance;
+                        BrickMaxDistance = Math.Max(BrickMaxDistance, QuantizedDistance);
+                        BrickMinDistance = Math.Min(BrickMinDistance, QuantizedDistance);
+                    }
+                }
+            }
+        }
+
+    };
+
 
     public class UMeshUtilities
     {
-        public void GenerateStratifiedUniformHemisphereSamples(int NumSamples, List<Vector3> Samples)
+        static Vector3 UniformSampleHemisphere(Vector2 Uniforms)
         {
-            
+            Uniforms = Uniforms * 2.0f - Vector2.One;
+
+            if (Uniforms == Vector2.Zero)
+            {
+                return Vector3.Zero;
+            }
+
+            float R;
+            float Theta;
+
+            if (Math.Abs(Uniforms.X) > Math.Abs(Uniforms.Y))
+            {
+                R = Uniforms.X;
+                Theta = MathHelper.PI / 4 * (Uniforms.Y / Uniforms.X);
+            }
+            else
+            {
+                R = Uniforms.Y;
+                Theta = MathHelper.PI / 2 - MathHelper.PI / 4 * (Uniforms.X / Uniforms.Y);
+            }
+
+            // concentric disk sample
+            float U = R * MathHelper.Cos(Theta);
+            float V = R * MathHelper.Sin(Theta);
+            float R2 = R * R;
+
+            var result = new Vector3(U * MathHelper.Sqrt(2 - R2), V * MathHelper.Sqrt(2 - R2), 1.0f - R2);
+            return result;
         }
 
 
-        public void GenerateSignedDistanceFieldVolumeData(string MeshName,
+        public static void GenerateStratifiedUniformHemisphereSamples(int NumSamples, ref List<Vector3> Samples)
+        {            
+            int NumSamplesDim = (int)Math.Truncate(Math.Sqrt(NumSamples));
+
+            Samples.Capacity = NumSamplesDim * NumSamplesDim;
+            var rand = new Random();           
+
+            for (int IndexX = 0; IndexX < NumSamplesDim; IndexX++)
+            {
+                for (int IndexY = 0; IndexY < NumSamplesDim; IndexY++)
+                {
+                    float U1 = (float)rand.NextDouble();
+                    float U2 = (float)rand.NextDouble();
+
+                    float Fraction1 = (IndexX + U1) / (float)NumSamplesDim;
+                    float Fraction2 = (IndexY + U2) / (float)NumSamplesDim;
+
+                    Vector3 Tmp = UniformSampleHemisphere(new Vector2(Fraction1, Fraction2));
+
+                    Samples.Add(Tmp);
+                }
+            }
+        }
+
+        public static void GenerateSignedDistanceFieldVolumeData(string MeshName,
             Graphics.Mesh.UMeshDataProvider meshProvider,
             DistanceFieldConfig sdfConfig,
             float DistanceFieldResolutionScale,
@@ -48,82 +251,110 @@ namespace EngineNS.DistanceField
             // Whether to use an Embree Point Query to compute the closest unsigned distance.  Rays will only be traced to determine backfaces visible for sign.
             const bool bUsePointQuery = true;
 
-            //var rand = new Random();
-            //rand.NextDouble
-            //std::vector<v3dxVector3> SampleDirections;
-            //{
-            //    const INT32 NumVoxelDistanceSamples = bUsePointQuery ? 49 : 576;
-            //    GenerateStratifiedUniformHemisphereSamples(NumVoxelDistanceSamples, SampleDirections);
-            //    std::vector<v3dxVector3> OtherHemisphereSamples;
-            //    GenerateStratifiedUniformHemisphereSamples(NumVoxelDistanceSamples, OtherHemisphereSamples);
+            List<Vector3> SampleDirections = new List<Vector3>();
+            {
+                int NumVoxelDistanceSamples = bUsePointQuery ? 49 : 576;
+                GenerateStratifiedUniformHemisphereSamples(NumVoxelDistanceSamples, ref SampleDirections);
+                List<Vector3> OtherHemisphereSamples = new List<Vector3>();
+                GenerateStratifiedUniformHemisphereSamples(NumVoxelDistanceSamples, ref OtherHemisphereSamples);
 
-            //    for (INT32 i = 0; i < OtherHemisphereSamples.size(); i++)
-            //    {
-            //        v3dxVector3 Sample = OtherHemisphereSamples[i];
-            //        Sample.Z *= -1.0f;
-            //        SampleDirections.push_back(Sample);
-            //    }
+                for (int i = 0; i < OtherHemisphereSamples.Count; i++)
+                {
+                    var Sample = OtherHemisphereSamples[i];
+                    Sample.Z *= -1.0f;
+                    SampleDirections.Add(Sample);
+                }
+            }
+
+            int PerMeshMax = sdfConfig.MaxPerMeshResolution;
+
+            // Meshes with explicit artist-specified scale can go higher
+            int MaxNumBlocksOneDim = (int)MathHelper.Min(Math.Round((DistanceFieldResolutionScale <= 1 ? PerMeshMax / 2.0 : PerMeshMax) / sdfConfig.UniqueDataBrickSize), sdfConfig.MaxIndirectionDimension - 1);
+
+            float VoxelDensity = sdfConfig.fDefaultVoxelDensity;
+
+            float NumVoxelsPerLocalSpaceUnit = VoxelDensity * DistanceFieldResolutionScale;
+
+            var LocalSpaceMeshBounds = meshProvider.AABB;
+            // Make sure the mesh bounding box has positive extents to handle planes
+            {
+                var MeshBoundsCenter = LocalSpaceMeshBounds.GetCenter();
+                var MeshBoundsExtent = Vector3.Maximize(LocalSpaceMeshBounds.GetExtent(), Vector3.One);
+                LocalSpaceMeshBounds = new BoundingBox(MeshBoundsCenter - MeshBoundsExtent, MeshBoundsCenter + MeshBoundsExtent);
+            }
+
+            // We sample on voxel corners and use central differencing for gradients, so a box mesh using two-sided materials whose vertices lie on LocalSpaceMeshBounds produces a zero gradient on intersection
+            // Expand the mesh bounds by a fraction of a voxel to allow room for a pullback on the hit location for computing the gradient.
+            // Only expand for two sided meshes as this adds significant Mesh SDF tracing cost
+            //if (embreeScene.bMostlyTwoSided)
+            //{
+                // TODO
             //}
 
-            //const INT32 PerMeshMax = sdfConfig.MaxPerMeshResolution;
+            // The tracing shader uses a Volume space that is normalized by the maximum extent, to keep Volume space within [-1, 1], we must match that behavior when encoding
+            float LocalToVolumeScale = 1.0f / LocalSpaceMeshBounds.GetExtent().GetMaxValue();
 
-            //// Meshes with explicit artist-specified scale can go higher
-            //const INT32 MaxNumBlocksOneDim = std::min(Math::ICeil((DistanceFieldResolutionScale <= 1 ? PerMeshMax / 2 : PerMeshMax) / sdfConfig.UniqueDataBrickSize), sdfConfig.MaxIndirectionDimension - 1);
+            Vector3 DesiredDimensions = LocalSpaceMeshBounds.GetSize() * (NumVoxelsPerLocalSpaceUnit / (float)sdfConfig.UniqueDataBrickSize);
+            Vector3i Mip0IndirectionDimensions = new Vector3i(
+                MathHelper.Clamp((int)Math.Round(DesiredDimensions.X), 1, MaxNumBlocksOneDim),
+                MathHelper.Clamp((int)Math.Round(DesiredDimensions.Y), 1, MaxNumBlocksOneDim),
+                MathHelper.Clamp((int)Math.Round(DesiredDimensions.Z), 1, MaxNumBlocksOneDim));
 
-            //const float VoxelDensity = sdfConfig.fDefaultVoxelDensity;
+            List<Byte> StreamableMipData = new List<byte>();
 
-            //const float NumVoxelsPerLocalSpaceUnit = VoxelDensity * DistanceFieldResolutionScale;
-            //v3dxBox3 LocalSpaceMeshBounds;
-            //meshProvider.GetAABB(&LocalSpaceMeshBounds);
-            //// Make sure the mesh bounding box has positive extents to handle planes
-            //{
-            //	auto MeshBoundsCenter = LocalSpaceMeshBounds.GetCenter();
-            //	v3dxVector3 MeshBoundsExtent = LocalSpaceMeshBounds.GetExtend();
-            //	MeshBoundsExtent.makeCeil(v3dxVector3::UNIT_SCALE);
-            //	LocalSpaceMeshBounds.Set(MeshBoundsCenter - MeshBoundsExtent, MeshBoundsCenter + MeshBoundsExtent);
-            //}
+            for (int MipIndex = 0; MipIndex < sdfConfig.NumMips; MipIndex++)
+            {
+                Vector3i IndirectionDimensions = new Vector3i(
+                    (int)MathHelper.DivideAndRoundUp((uint)Mip0IndirectionDimensions.X, (uint)(1 << MipIndex)),
+                    (int)MathHelper.DivideAndRoundUp((uint)Mip0IndirectionDimensions.Y, (uint)(1 << MipIndex)),
+                    (int)MathHelper.DivideAndRoundUp((uint)Mip0IndirectionDimensions.Z, (uint)(1 << MipIndex)));
 
-            //// We sample on voxel corners and use central differencing for gradients, so a box mesh using two-sided materials whose vertices lie on LocalSpaceMeshBounds produces a zero gradient on intersection
-            //// Expand the mesh bounds by a fraction of a voxel to allow room for a pullback on the hit location for computing the gradient.
-            //// Only expand for two sided meshes as this adds significant Mesh SDF tracing cost
-            //if (EmbreeScene.bMostlyTwoSided)
-            //{
-            //	// TODO
-            //}
+                // Expand to guarantee one voxel border for gradient reconstruction using bilinear filtering
+                Vector3 TexelObjectSpaceSize = LocalSpaceMeshBounds.GetSize() / new Vector3(IndirectionDimensions * sdfConfig.UniqueDataBrickSize - new Vector3i(2 * sdfConfig.MeshDistanceFieldObjectBorder));
+                BoundingBox DistanceFieldVolumeBounds = LocalSpaceMeshBounds;
+                DistanceFieldVolumeBounds.Merge(TexelObjectSpaceSize);
 
-            //// The tracing shader uses a Volume space that is normalized by the maximum extent, to keep Volume space within [-1, 1], we must match that behavior when encoding
-            //const float LocalToVolumeScale = 1.0f / LocalSpaceMeshBounds.GetExtend().getMax();
+                Vector3 IndirectionVoxelSize = DistanceFieldVolumeBounds.GetSize() / new Vector3(IndirectionDimensions);
+                float IndirectionVoxelRadius = IndirectionVoxelSize.Length();
 
-            //const v3dxVector3 DesiredDimensions = v3dxVector3(LocalSpaceMeshBounds.GetSize() * v3dxVector3::UNIT_SCALE*(NumVoxelsPerLocalSpaceUnit / (float)sdfConfig.UniqueDataBrickSize));
-            //const v3dxVector3 Mip0IndirectionDimensions = v3dxVector3(
-            //	std::clamp(Math::IFloor(DesiredDimensions.X), 1, MaxNumBlocksOneDim),
-            //	std::clamp(Math::IFloor(DesiredDimensions.Y), 1, MaxNumBlocksOneDim),
-            //	std::clamp(Math::IFloor(DesiredDimensions.Z), 1, MaxNumBlocksOneDim));
-
-            //std::vector<UINT8> StreamableMipData;
-
-            //for (INT32 MipIndex = 0; MipIndex < sdfConfig.NumMips; MipIndex++)
-            //{
-            //	const v3dxVector3 IndirectionDimensions = v3dxVector3(
-            //		Math::ICeil(Mip0IndirectionDimensions.X / (1 << MipIndex)),
-            //		Math::ICeil(Mip0IndirectionDimensions.Y / (1 << MipIndex)),
-            //		Math::ICeil(Mip0IndirectionDimensions.Z / (1 << MipIndex)));
-
-            //	// Expand to guarantee one voxel border for gradient reconstruction using bilinear filtering
-            //	const v3dxVector3 TexelObjectSpaceSize = (v3dxVector3::UNIT_SCALE*LocalSpaceMeshBounds.GetSize()) / (IndirectionDimensions * sdfConfig.UniqueDataBrickSize - v3dxVector3::UNIT_SCALE*(2 * sdfConfig.MeshDistanceFieldObjectBorder));
-            //	v3dxBox3 DistanceFieldVolumeBounds = LocalSpaceMeshBounds;
-            //	DistanceFieldVolumeBounds.MergeVertex(TexelObjectSpaceSize);
-
-            //	const v3dxVector3 IndirectionVoxelSize = v3dxVector3::UNIT_SCALE*DistanceFieldVolumeBounds.GetSize() / IndirectionDimensions;
-            //	const float IndirectionVoxelRadius = IndirectionVoxelSize.getLength();
-
-            //	const v3dxVector3 VolumeSpaceDistanceFieldVoxelSize = IndirectionVoxelSize * LocalToVolumeScale / (v3dxVector3::UNIT_SCALE*(sdfConfig.UniqueDataBrickSize));
-            //	const float MaxDistanceForEncoding = VolumeSpaceDistanceFieldVoxelSize.getLength() * sdfConfig.BandSizeInVoxels;
-            //	const float LocalSpaceTraceDistance = MaxDistanceForEncoding / LocalToVolumeScale;
-            //	const v3dxVector2 DistanceFieldToVolumeScaleBias(2.0f * MaxDistanceForEncoding, -MaxDistanceForEncoding);
+                Vector3 VolumeSpaceDistanceFieldVoxelSize = IndirectionVoxelSize * LocalToVolumeScale / sdfConfig.UniqueDataBrickSize;
+                float MaxDistanceForEncoding = VolumeSpaceDistanceFieldVoxelSize.Length() * sdfConfig.BandSizeInVoxels;
+                float LocalSpaceTraceDistance = MaxDistanceForEncoding / LocalToVolumeScale;
+                Vector2 DistanceFieldToVolumeScaleBias = new Vector2(2.0f * MaxDistanceForEncoding, -MaxDistanceForEncoding);
 
 
-            //}
+                List<FSparseMeshDistanceFieldAsyncTask> sdfTaskList = new List<FSparseMeshDistanceFieldAsyncTask>();
+                for (int ZIndex = 0; ZIndex < IndirectionDimensions.Z; ZIndex++)
+                {
+                    for (int YIndex = 0; YIndex < IndirectionDimensions.Y; YIndex++)
+                    {
+                        for (int XIndex = 0; XIndex < IndirectionDimensions.X; XIndex++)
+                        {
+                            sdfTaskList.Add(new FSparseMeshDistanceFieldAsyncTask(
+                                sdfConfig,
+                                embreeManager,
+                                embreeScene,
+                                SampleDirections,
+                                LocalSpaceTraceDistance,
+                                DistanceFieldVolumeBounds,
+                                LocalToVolumeScale,
+                                DistanceFieldToVolumeScaleBias,
+                                new Vector3i(XIndex, YIndex, ZIndex),
+                                IndirectionDimensions,
+                                bUsePointQuery));
+                        }
+                    }
+                }
+                UEngine.Instance.EventPoster.ParrallelFor(sdfTaskList.Count, static (index, arg1, arg2) =>
+                {
+                    var pTaskList = arg1 as List<FSparseMeshDistanceFieldAsyncTask>;
+                    var task = pTaskList[index];
+
+                    task.DoWork();
+
+                }, sdfTaskList);
+
+            }
         }
     }
 }

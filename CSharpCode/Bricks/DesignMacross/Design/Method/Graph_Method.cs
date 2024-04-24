@@ -5,6 +5,7 @@ using EngineNS.DesignMacross.Base.Description;
 using EngineNS.DesignMacross.Base.Graph;
 using EngineNS.DesignMacross.Base.Render;
 using EngineNS.DesignMacross.Design;
+using EngineNS.EGui.Controls;
 using EngineNS.EGui.Controls.PropertyGrid;
 using NPOI.POIFS.Properties;
 using System;
@@ -70,7 +71,7 @@ namespace EngineNS.DesignMacross.Design
             //    }
             //}
         }
-        UMenuItem GetMenu(string menuName)
+        TtMenuItem GetMenu(string menuName)
         {
             foreach(var sub in CanvasMenus.SubMenuItems)
             {

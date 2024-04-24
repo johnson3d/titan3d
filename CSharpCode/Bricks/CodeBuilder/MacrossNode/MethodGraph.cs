@@ -5,6 +5,7 @@ using System.ComponentModel;
 using System.Reflection;
 using System.Threading.Tasks;
 using EngineNS.Bricks.NodeGraph;
+using EngineNS.EGui.Controls;
 using EngineNS.EGui.Controls.PropertyGrid;
 using Mono.CompilerServices.SymbolWriter;
 using NPOI.SS.UserModel;
@@ -1001,7 +1002,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
                                 else
                                 {
                                     parentMenu.AddMenuItem(menuName, att.FilterStrings, null,
-                                        (UMenuItem item, object sender) =>
+                                        (TtMenuItem item, object sender) =>
                                         {
                                             var node = Rtti.UTypeDescManager.CreateInstance(typeDesc) as UNodeBase;
                                             var nodeName = GetSerialFinalString(menuStr, GenSerialId());
@@ -1045,7 +1046,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
                         else
                         {
                             parentMenu.AddMenuItem(menuName, methodMeta.MethodName, null,
-                                (UMenuItem item, object sender) =>
+                                (TtMenuItem item, object sender) =>
                                 {
                                     var node = MethodNode.NewMethodNode(methodMeta);
                                     node.Position = PopMenuPosition;
@@ -1077,7 +1078,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
                         else
                         {
                             parentMenu.AddMenuItem("get " + menuName, fieldMeta.FieldName, null,
-                                (UMenuItem item, object sender) =>
+                                (TtMenuItem item, object sender) =>
                                 {
                                     var node = ClassFieldVar.NewClassMemberVar(fieldMeta, true);
                                     node.Position = PopMenuPosition;
@@ -1085,7 +1086,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
                                     this.AddNode(node);
                                 });
                             parentMenu.AddMenuItem("set " + menuName, fieldMeta.FieldName, null,
-                                (UMenuItem item, object sender) =>
+                                (TtMenuItem item, object sender) =>
                                 {
                                     var node = ClassFieldVar.NewClassMemberVar(fieldMeta, false);
                                     node.Position = PopMenuPosition;
@@ -1119,7 +1120,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
                             if(proMeta.IsGetStatic && proMeta.IsGetPublic)
                             {
                                 parentMenu.AddMenuItem("get " + menuName, proMeta.PropertyName, null,
-                                    (UMenuItem item, object sender) =>
+                                    (TtMenuItem item, object sender) =>
                                     {
                                         var node = ClassPropertyVar.NewClassProperty(proMeta, true);
                                         node.Label = metaData.Value.ClassMetaName;
@@ -1132,7 +1133,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
                             if(proMeta.IsSetStatic && proMeta.IsSetPublic && !proMeta.Meta.IsMacrossReadOnly)
                             {
                                 parentMenu.AddMenuItem("set " + menuName, proMeta.PropertyName, null,
-                                    (UMenuItem item, object sender) =>
+                                    (TtMenuItem item, object sender) =>
                                     {
                                         var node = ClassPropertyVar.NewClassProperty(proMeta, false);
                                         node.Label = metaData.Value.ClassMetaName;
@@ -1149,7 +1150,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
             var Datas = CanvasMenus.AddMenuItem("Data", null, null);
             {
                 Datas.AddMenuItem("TypeConverter", null,
-                    (UMenuItem item, object sender) =>
+                    (TtMenuItem item, object sender) =>
                     {
                         var type = Rtti.TtClassMetaManager.Instance.GetMeta(Rtti.UTypeDesc.TypeStr(typeof(object)));
                         var node = TypeConverterVar.NewTypeConverterVar(type, type);
@@ -1163,7 +1164,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
             var flowControls = CanvasMenus.AddMenuItem("FlowControl", null, null);
             {
                 flowControls.AddMenuItem("Return", null,
-                    (UMenuItem item, object sender) =>
+                    (TtMenuItem item, object sender) =>
                     {
                         var node = ReturnNode.NewReturnNode(this);
                         node.UserData = MacrossEditor;
@@ -1260,7 +1261,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
             return GraphRenderer;
         }
 
-        private void UpdateMenuWithClassMeta(Rtti.UClassMeta classMeta, UMenuItem menu)
+        private void UpdateMenuWithClassMeta(Rtti.UClassMeta classMeta, TtMenuItem menu)
         {
             for (int proIdx = 0; proIdx < classMeta.Properties.Count; proIdx++)
             {
@@ -1294,7 +1295,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
                         if(proInfo.CanRead)
                         {
                             parentMenu.AddMenuItem("Get " + menuName, filterStr, null,
-                                (UMenuItem item, object sender) =>
+                                (TtMenuItem item, object sender) =>
                                 {
                                     var node = ClassPropertyVar.NewClassProperty(pro, true);
                                     var nodeName = GetSerialFinalString(menuStr, GenSerialId());
@@ -1315,7 +1316,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
                         if(proInfo.CanWrite && !pro.Meta.IsMacrossReadOnly)
                         {
                             parentMenu.AddMenuItem("Set " + menuName, filterStr, null,
-                                (UMenuItem item, object sender) =>
+                                (TtMenuItem item, object sender) =>
                                 {
                                     var node = ClassPropertyVar.NewClassProperty(pro, false);
                                     var nodeName = GetSerialFinalString(menuStr, GenSerialId());
@@ -1364,7 +1365,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
                     else
                     {
                         parentMenu.AddMenuItem("Get " + menuName, filterStr, null,
-                            (UMenuItem item, object sender) =>
+                            (TtMenuItem item, object sender) =>
                             {
                                 var node = ClassFieldVar.NewClassMemberVar(field, true);
                                 var nodeName = GetSerialFinalString(menuStr, GenSerialId());
@@ -1382,7 +1383,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
                                 }
                             });
                         parentMenu.AddMenuItem("Set " + menuName, filterStr, null,
-                            (UMenuItem item, object sender) =>
+                            (TtMenuItem item, object sender) =>
                             {
                                 var node = ClassFieldVar.NewClassMemberVar(field, false);
                                 var nodeName = GetSerialFinalString(menuStr, GenSerialId());
@@ -1429,7 +1430,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
                     else
                     {
                         parentMenu.AddMenuItem(menuName, filterStr, null,
-                            (UMenuItem item, object sender) =>
+                            (TtMenuItem item, object sender) =>
                             {
                                 var node = MethodNode.NewMethodNode(method);
                                 var nodeName = GetSerialFinalString(menuStr, GenSerialId());
@@ -1474,7 +1475,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
                     {
                         var clsTypeName = subClass.ClassType.FullName;
                         ObjectMenus.AddMenuItem($"Cast to {clsTypeName}", clsTypeName, null,
-                            (UMenuItem item, object sender) =>
+                            (TtMenuItem item, object sender) =>
                             {
                                 var node = TypeConverterVar.NewTypeConverterVar(classMeta, subClass);
                                 node.UserData = MacrossEditor;

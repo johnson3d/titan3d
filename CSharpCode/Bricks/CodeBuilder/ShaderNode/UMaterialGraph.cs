@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using EngineNS.Bricks.NodeGraph;
 using System.Linq;
+using EngineNS.EGui.Controls;
 
 namespace EngineNS.Bricks.CodeBuilder.ShaderNode
 {
@@ -42,7 +43,7 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode
                             else
                             {
                                 parentMenu.AddMenuItem(menuName, att.FilterStrings, null,
-                                    (UMenuItem item, object sender) =>
+                                    (TtMenuItem item, object sender) =>
                                     {
                                         var node = Rtti.UTypeDescManager.CreateInstance(typeDesc) as UNodeBase;
                                         var nodeName = GetSerialFinalString(menuStr, GenSerialId());
@@ -65,7 +66,7 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode
             {
                 var attrs = i.GetMethod().GetCustomAttributes(typeof(Bricks.CodeBuilder.ShaderNode.Control.UserCallNodeAttribute), false);
                 var menuAtts = i.GetMethod().GetCustomAttributes(typeof(ContextMenuAttribute), true);
-                UMenuItem.FMenuAction action = (UMenuItem item, object sender) =>
+                TtMenuItem.FMenuAction action = (TtMenuItem item, object sender) =>
                                 {
                                     Control.CallNode node;
                                     if (attrs.Length > 0)
@@ -116,7 +117,7 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode
                 if (attrs.Length == 0)
                     continue;
                 perFrameMenus.AddMenuItem(i.Name, null,
-                    (UMenuItem item, object sender) =>
+                    (TtMenuItem item, object sender) =>
                     {
                         var node = new UUniformVar();
                         node.VarType = Rtti.UTypeDesc.TypeOf((attrs[0] as NxRHI.UShader.UShaderVarAttribute).VarType);
@@ -135,7 +136,7 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode
                 if (attrs.Length == 0)
                     continue;
                 perCameraMenus.AddMenuItem(i.Name, null,
-                    (UMenuItem item, object sender) =>
+                    (TtMenuItem item, object sender) =>
                     {
                         var node = new UUniformVar();
                         node.VarType = Rtti.UTypeDesc.TypeOf((attrs[0] as NxRHI.UShader.UShaderVarAttribute).VarType);
@@ -149,7 +150,7 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode
             var inputVarMenus = CanvasMenus.AddMenuItem("InputVars", null, null);
             var psInputMenus = inputVarMenus.AddMenuItem("PSInput", null, null);
             psInputMenus.AddMenuItem("Input", null,
-                (UMenuItem item, object sender) =>
+                (TtMenuItem item, object sender) =>
                 {
                     var node = new UUniformVar();
                     node.VarType = Rtti.UTypeDesc.TypeOf(typeof(Graphics.Pipeline.Shader.UMaterial.PSInput));
@@ -163,7 +164,7 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode
             foreach (var i in psInputmembers)
             {
                 psInputMenus.AddMenuItem(i.Name, null,
-                    (UMenuItem item, object sender) =>
+                    (TtMenuItem item, object sender) =>
                     {
                         var node = new UUniformVar();
                         node.VarType = Rtti.UTypeDesc.TypeOf(i.FieldType);

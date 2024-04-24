@@ -521,8 +521,8 @@ namespace EngineNS.UI.Controls
             // 0 ---- 1
             // |      |
             // 2 ---- 3
-            var top = (this == RootUIHost)? mCurFinalRect.Top : (RootUIHost.WindowSize.Height - mCurFinalRect.Top);
-            var bottom = (this == RootUIHost)? mCurFinalRect.Bottom : (RootUIHost.WindowSize.Height - mCurFinalRect.Bottom);
+            var top = (this == RootUIHost)? mCurFinalRect.Top : (RootUIHost.DesignRect.Height - mCurFinalRect.Top);
+            var bottom = (this == RootUIHost)? mCurFinalRect.Bottom : (RootUIHost.DesignRect.Height - mCurFinalRect.Bottom);
             var v0 = new Vector3(mCurFinalRect.Left, top, 0.0f);
             TransformVertex3(in v0, out v0);
             var v1 = new Vector3(mCurFinalRect.Right, top, 0.0f);
@@ -539,7 +539,7 @@ namespace EngineNS.UI.Controls
                 data.IntersectPos = Vector2.TransformCoordinate(data.IntersectPos,
                     in RootUIHost.TransformedElements[mTransformIndex].InvMatrix);
                 if(this != RootUIHost)
-                    data.IntersectPos.Y = RootUIHost.WindowSize.Height - data.IntersectPos.Y;
+                    data.IntersectPos.Y = RootUIHost.DesignRect.Height - data.IntersectPos.Y;
                 data.Distance = distance;
                 //UEngine.Instance.UIManager.DebugHitPt = data.IntersectPos;
                 return true;
@@ -551,7 +551,7 @@ namespace EngineNS.UI.Controls
                 data.IntersectPos = Vector2.TransformCoordinate(data.IntersectPos,
                     in RootUIHost.TransformedElements[mTransformIndex].InvMatrix);
                 if(this != RootUIHost)
-                    data.IntersectPos.Y = RootUIHost.WindowSize.Height - data.IntersectPos.Y;
+                    data.IntersectPos.Y = RootUIHost.DesignRect.Height - data.IntersectPos.Y;
                 data.Distance = distance;
                 //UEngine.Instance.UIManager.DebugHitPt = data.IntersectPos;
                 return true;
@@ -561,8 +561,8 @@ namespace EngineNS.UI.Controls
 
         public virtual void MergeAABB(ref BoundingBox aabb)
         {
-            var top = RootUIHost.WindowSize.Height - mCurFinalRect.Top;
-            var bottom = RootUIHost.WindowSize.Height - mCurFinalRect.Bottom;
+            var top = RootUIHost.DesignRect.Height - mCurFinalRect.Top;
+            var bottom = RootUIHost.DesignRect.Height - mCurFinalRect.Bottom;
             var v0 = new Vector3(mCurFinalRect.Left, top, 0.0f);
             TransformVertex3(in v0, out v0);
             var v1 = new Vector3(mCurFinalRect.Right, top, 0.0f);

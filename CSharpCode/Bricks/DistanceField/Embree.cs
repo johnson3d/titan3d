@@ -27,5 +27,14 @@ namespace EngineNS.DistanceField
         {
             mCoreObject.DeleteEmbreeScene(embreeScene.mCoreObject);
         }
+        public void EmbreePointQuery(UEmbreeScene embreeScene, Vector3 VoxelPosition, float LocalSpaceTraceDistance, ref bool bOutNeedTracyRays, ref float OutClosestDistance)
+        {
+            mCoreObject.EmbreePointQuery(embreeScene.mCoreObject, VoxelPosition, LocalSpaceTraceDistance, ref bOutNeedTracyRays, ref OutClosestDistance);
+        }
+        public void EmbreeRayTrace(UEmbreeScene embreeScene, Vector3 StartPosition, Vector3 RayDirection, ref bool bOutHit, ref bool bOutHitTwoSided, ref Vector3 OutHitNormal)
+        {
+            mCoreObject.EmbreeRayTrace(embreeScene.mCoreObject, StartPosition, RayDirection, ref bOutHit, ref bOutHitTwoSided, ref OutHitNormal);
+        }
+
     }
 }

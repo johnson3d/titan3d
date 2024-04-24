@@ -14,6 +14,7 @@ using EngineNS.DesignMacross.Base.Render;
 using EngineNS.DesignMacross.Base.Description;
 using EngineNS.DesignMacross.TimedStateMachine.CompoundState;
 using System.Diagnostics;
+using EngineNS.EGui.Controls;
 
 namespace EngineNS.DesignMacross.TimedStateMachine.CompoundState
 {
@@ -113,7 +114,7 @@ namespace EngineNS.DesignMacross.TimedStateMachine.CompoundState
                     if (att != null)
                     {
                         TtMenuUtil.ConstructMenuItem(PopupMenu.Menu, typeDesc, att.MenuPaths, att.FilterStrings,
-                             (UMenuItem item, object sender) =>
+                             (TtMenuItem item, object sender) =>
                              {
                                  var popMenu = sender as TtPopupMenu;
                                  if (Rtti.UTypeDescManager.CreateInstance(typeDesc) is TtTimedSubStateClassDescription state)
@@ -141,7 +142,7 @@ namespace EngineNS.DesignMacross.TimedStateMachine.CompoundState
                 string[] menuPaths = new[] { "StateMachine", "Hub", compoundState.Name };
                 string filterStrings = compoundState.Name;
                 TtMenuUtil.ConstructMenuItem(PopupMenu.Menu, typeDesc, menuPaths, filterStrings,
-                             (UMenuItem item, object sender) =>
+                             (TtMenuItem item, object sender) =>
                              {
                                  var popMenu = sender as TtPopupMenu;
                                  var hubDesc = new TtTimedCompoundStateHubClassDescription

@@ -1,4 +1,5 @@
 ﻿using EngineNS.Bricks.NodeGraph;
+using EngineNS.EGui.Controls;
 using EngineNS.Rtti;
 using System;
 using System.Collections.Generic;
@@ -138,16 +139,16 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
             }
         }
 
-        public void AddMenuItems(UMenuItem parentItem)
+        public void AddMenuItems(TtMenuItem parentItem)
         {
             parentItem.AddMenuSeparator("BREAKPOINTS");
             parentItem.AddMenuItem("Add Breakpoint", null,
-                (UMenuItem item, object sender) =>
+                (TtMenuItem item, object sender) =>
                 {
                     BreakerState = EBreakerState.Enable;
                 });
             parentItem.AddMenuItem("Remove Breakpoint", null,
-                (UMenuItem item, object sender) =>
+                (TtMenuItem item, object sender) =>
                 {
                     BreakerState = EBreakerState.Hidden;
                 });

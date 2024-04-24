@@ -38,6 +38,19 @@ namespace EngineNS
             Y = (float)vec.Y;
             Z = (float)vec.Z;
         }
+        public Vector3(in Vector3i vec)
+        {
+            X = (float)vec.X;
+            Y = (float)vec.Y;
+            Z = (float)vec.Z;
+        }
+        public Vector3(in Vector3ui vec)
+        {
+            X = (float)vec.X;
+            Y = (float)vec.Y;
+            Z = (float)vec.Z;
+        }
+
         public class TypeConverterAttribute : Support.TypeConverterAttributeBase
         {
             public override bool ConvertFromString(ref object obj, string text)

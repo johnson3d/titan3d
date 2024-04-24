@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.ComponentModel;
 using EngineNS.Bricks.NodeGraph;
+using EngineNS.EGui.Controls;
 
 namespace EngineNS.Bricks.Procedure.Node
 {
@@ -119,14 +120,14 @@ namespace EngineNS.Bricks.Procedure.Node
         [Browsable(false), Rtti.Meta]
         public List<UnionNodePropertyData> PropertyDatas { get; set; } = new List<UnionNodePropertyData>();
         [Browsable(false)]
-        public UMenuItem ContextMenu { get; set; } = new UMenuItem();
+        public TtMenuItem ContextMenu { get; set; } = new TtMenuItem();
 
         public UUnionNode()
         {
             Icon.Size = new Vector2(25, 25);
 
             ContextMenu.AddMenuItem("Config", null,
-                (UMenuItem item, object sender) =>
+                (TtMenuItem item, object sender) =>
                 {
                     this.ParentGraph.SetConfigUnionNode(this);
                 }, null);

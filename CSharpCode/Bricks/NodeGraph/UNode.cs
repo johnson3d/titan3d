@@ -1,4 +1,5 @@
-﻿using EngineNS.EGui.Controls.PropertyGrid;
+﻿using EngineNS.EGui.Controls;
+using EngineNS.EGui.Controls.PropertyGrid;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -186,12 +187,12 @@ namespace EngineNS.Bricks.NodeGraph
         public string BreakerName { get; }
         [Browsable(false)]
         public EBreakerState BreakerState { get; set; }
-        public void AddMenuItems(UMenuItem parentItem);
+        public void AddMenuItems(TtMenuItem parentItem);
     }
 
     public interface INodeWithContextMenu
     {
-        public UMenuItem ContextMenu { get; set; }
+        public TtMenuItem ContextMenu { get; set; }
     }
     public class UNodeBase : IO.ISerializer
     {

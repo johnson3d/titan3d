@@ -8,6 +8,7 @@ using System.Text;
 using EngineNS.Rtti;
 using EngineNS.Bricks.NodeGraph;
 using EngineNS.DesignMacross.Base.Render;
+using EngineNS.EGui.Controls;
 
 namespace EngineNS.DesignMacross.TimedStateMachine.CompoundState
 {
@@ -80,7 +81,7 @@ namespace EngineNS.DesignMacross.TimedStateMachine.CompoundState
                         if (Description == state)
                             continue;
 
-                        transitionItem.AddMenuItem(state.Name, null, (UMenuItem item, object sender) =>
+                        transitionItem.AddMenuItem(state.Name, null, (TtMenuItem item, object sender) =>
                         {
                             var transitionDesc = new TtTimedStateTransitionClassDescription() { FromId = Description.Id, ToId = state.Id};
                             cmdHistory.CreateAndExtuteCommand("Transition From" + this.Name + " To " + state.Name,

@@ -8,6 +8,7 @@ using System.Text;
 using EngineNS.DesignMacross.Base.Render;
 using EngineNS.Rtti;
 using EngineNS.Bricks.NodeGraph;
+using EngineNS.EGui.Controls;
 
 namespace EngineNS.DesignMacross.TimedStateMachine.CompoundState
 {
@@ -69,7 +70,7 @@ namespace EngineNS.DesignMacross.TimedStateMachine.CompoundState
             parentMenu.AddMenuSeparator("GENERAL");
             parentMenu.AddMenuItem(
                "Delete", null,
-               (UMenuItem item, object sender) =>
+               (TtMenuItem item, object sender) =>
                {
                    Dictionary<TtTimedSubStateClassDescription, TtTimedStateTransitionClassDescription> transitionsToBeRemoved = new();
                    foreach (var state in ParentTimedCompoundStateClassDescription.States)

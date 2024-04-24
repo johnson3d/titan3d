@@ -269,8 +269,12 @@ namespace EngineNS.Graphics.Pipeline
         }
         protected virtual void OnClientChanged(bool bSizeChanged)
         {
-            if (mDefaultHUD != null)
-                mDefaultHUD.WindowSize = new SizeF(this.ClientSize.X, this.ClientSize.Y);
+            //if (mDefaultHUD != null)
+            //    mDefaultHUD.WindowSize = new SizeF(this.ClientSize.X, this.ClientSize.Y);
+            foreach (var i in mHUDStack)
+            {
+                _ = i.WindowSize = new SizeF(this.ClientSize.X, this.ClientSize.Y);
+            }
         }
         public void ProcessHitproxySelected(float mouseX, float mouseY)
         {
@@ -347,6 +351,17 @@ namespace EngineNS.Graphics.Pipeline
         public UI.TtUIHost DefaultHUD
         {
             get => mDefaultHUD;
+            set
+            {
+                mDefaultHUD = value;
+                if(mDefaultHUD != null)
+                {
+                    mDefaultHUD.RenderCamera = RenderPolicy.DefaultCamera;
+                    mHUDStack.Clear();
+                    mHUDStack.Push(value);
+                    OnClientChanged(true);
+                }
+            }
         }
         protected Stack<UI.TtUIHost> mHUDStack = new Stack<UI.TtUIHost>();
         public void PushHUD(UI.TtUIHost hud)

@@ -1,4 +1,5 @@
-﻿using System;
+﻿using EngineNS.EGui.Controls;
+using System;
 using System.Collections.Generic;
 using System.Text;
 
@@ -178,7 +179,7 @@ namespace EngineNS.Editor.Forms
         bool mNodeMenuShow = false;
         bool mAddNodeMenuFilterFocused = false;
         string mAddNodeMenuFilterStr = "";
-        public Bricks.NodeGraph.UMenuItem mAddNodeMenus = new Bricks.NodeGraph.UMenuItem();
+        public TtMenuItem mAddNodeMenus = new TtMenuItem();
         static void GetNodeNameAndMenuStr(in string menuString, ref string nodeName, ref string menuName)
         {
             menuName = menuString;
@@ -205,7 +206,7 @@ namespace EngineNS.Editor.Forms
         }
         public void UpdateAddNodeMenu()
         {
-            mAddNodeMenus = new Bricks.NodeGraph.UMenuItem();
+            mAddNodeMenus = new TtMenuItem();
             var typeDesc = Rtti.UTypeDescGetter<GamePlay.Scene.UNode>.TypeDesc;
             var meta = Rtti.TtClassMetaManager.Instance.GetMeta(typeDesc);
             var subClasses = meta.SubClasses;
@@ -239,7 +240,7 @@ namespace EngineNS.Editor.Forms
                 }
             }
         }
-        private void DrawMenu(Bricks.NodeGraph.UMenuItem item, string filter = "")
+        private void DrawMenu(TtMenuItem item, string filter = "")
         {
             if (!item.FilterCheck(filter))
                 return;

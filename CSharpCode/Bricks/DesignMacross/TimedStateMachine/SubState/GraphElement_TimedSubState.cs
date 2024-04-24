@@ -4,6 +4,7 @@ using EngineNS.DesignMacross.Base.Graph;
 using EngineNS.DesignMacross.Base.Render;
 using EngineNS.DesignMacross.Editor;
 using EngineNS.DesignMacross.TimedStateMachine.CompoundState;
+using EngineNS.EGui.Controls;
 using System.Collections.Generic;
 
 namespace EngineNS.DesignMacross.TimedStateMachine
@@ -68,7 +69,7 @@ namespace EngineNS.DesignMacross.TimedStateMachine
             parentMenu.AddMenuSeparator("GENERAL");
             parentMenu.AddMenuItem(
                "Delete", null,
-               (UMenuItem item, object sender) =>
+               (TtMenuItem item, object sender) =>
                {
                    Dictionary<TtTimedSubStateClassDescription, TtTimedStateTransitionClassDescription> transitionsToBeRemoved = new();
                    foreach (var state in ParentTimedCompoundStateClassDescription.States)
@@ -119,7 +120,7 @@ namespace EngineNS.DesignMacross.TimedStateMachine
                });
             parentMenu.AddMenuItem(
                 "Duplicate", null,
-                (UMenuItem item, object sender) =>
+                (TtMenuItem item, object sender) =>
                 {
                     //var copied = Copy();
                     //cmdHistory.CreateAndExtuteCommand("DuplicateSubState",
@@ -137,7 +138,7 @@ namespace EngineNS.DesignMacross.TimedStateMachine
                     {
                         if (Description == state)
                             continue;
-                        transitionItem.AddMenuItem(state.Name, null, (UMenuItem item, object sender) =>
+                        transitionItem.AddMenuItem(state.Name, null, (TtMenuItem item, object sender) =>
                         {
                             var transitionDesc = new TtTimedStateTransitionClassDescription() { FromId = this.Description.Id, ToId = state.Id };
                             cmdHistory.CreateAndExtuteCommand("Transition From" + this.Name + " To " + state.Name,
@@ -149,7 +150,7 @@ namespace EngineNS.DesignMacross.TimedStateMachine
                     var hubTransitionItem = parentMenu.AddMenuItem("TransitionTo", null, null);
                     foreach (var hub in hubsInParent)
                     {
-                        transitionItem.AddMenuItem(hub.Name, null, (UMenuItem item, object sender) =>
+                        transitionItem.AddMenuItem(hub.Name, null, (TtMenuItem item, object sender) =>
                         {
                             var transitionDesc = new TtTimedStateTransitionClassDescription() { FromId = this.Description.Id, ToId = hub.Id };
                             cmdHistory.CreateAndExtuteCommand("Transition From" + this.Name + " To " + hub.Name,
@@ -166,7 +167,7 @@ namespace EngineNS.DesignMacross.TimedStateMachine
                 if (type.AttributeInstance != null)
                 {
                     TtMenuUtil.ConstructMenuItem(PopupMenu.Menu, type.TypeDesc, type.AttributeInstance.MenuPaths, type.AttributeInstance.FilterStrings,
-                         (UMenuItem item, object sender) =>
+                         (TtMenuItem item, object sender) =>
                          {
                              var popMenu = sender as TtPopupMenu;
                              if (Rtti.UTypeDescManager.CreateInstance(type.TypeDesc) is TtTimedStateAttachmentClassDescription attachment)

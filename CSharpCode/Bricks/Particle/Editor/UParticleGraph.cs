@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 using EngineNS.Bricks.NodeGraph;
+using EngineNS.EGui.Controls;
 
 namespace EngineNS.Bricks.Particle.Editor
 {
@@ -21,7 +22,7 @@ namespace EngineNS.Bricks.Particle.Editor
 
             CanvasMenus.AddMenuItem(
                 "AddEmitter", null,
-                (UMenuItem item, object sender) =>
+                (TtMenuItem item, object sender) =>
                 {
                     var node = new UEmitterNode();
                     node.NebulaEditor = NebulaEditor;
@@ -30,14 +31,14 @@ namespace EngineNS.Bricks.Particle.Editor
                 });
             var shapes = CanvasMenus.AddMenuItem("Shape", null, null);
             {
-                shapes.AddMenuItem("Box", null, (UMenuItem item, object sender) =>
+                shapes.AddMenuItem("Box", null, (TtMenuItem item, object sender) =>
                 {
                     var node = new UBoxEmitShapeNode();
                     node.NebulaEditor = NebulaEditor;
                     node.Position = PopMenuPosition;
                     this.AddNode(node);
                 });
-                shapes.AddMenuItem("Sphere", null, (UMenuItem item, object sender) =>
+                shapes.AddMenuItem("Sphere", null, (TtMenuItem item, object sender) =>
                 {
                     var node = new USphereEmitShapeNode();
                     node.NebulaEditor = NebulaEditor;
@@ -47,7 +48,7 @@ namespace EngineNS.Bricks.Particle.Editor
             }
             var effectors = CanvasMenus.AddMenuItem("Effector", null, null);
             {
-                effectors.AddMenuItem("Accelerated", null, (UMenuItem item, object sender) =>
+                effectors.AddMenuItem("Accelerated", null, (TtMenuItem item, object sender) =>
                 {
                     var node = new UAcceleratedEffectorNode();
                     node.NebulaEditor = NebulaEditor;

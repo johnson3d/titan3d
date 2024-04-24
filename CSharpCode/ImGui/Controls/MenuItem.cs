@@ -2,9 +2,9 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace EngineNS.Bricks.NodeGraph
+namespace EngineNS.EGui.Controls
 {
-    /*public class TtMenuItem
+    public class TtMenuItem
     {
         public string Text;
         public string TextForFilter;
@@ -200,14 +200,113 @@ namespace EngineNS.Bricks.NodeGraph
             return checkResult;
         }
 
-        public enum eMenuStyle
+        public enum EMenuStyle
         {
             TreeList,
             Menu,
         }
-        public static void Draw(TtMenuItem item, string filter, ImDrawList cmdList, eMenuStyle style = eMenuStyle.TreeList)
+        public static void Draw(
+            TtMenuItem item, 
+            object drawSender,
+            object actionSender,
+            string filter, 
+            in ImDrawList cmdList,
+            ref int selectQuickMenuIdx,
+            ref int currentQuickMenuIdx,
+            Action<TtMenuItem> postActionWhenMenuActive,
+            EMenuStyle style = EMenuStyle.TreeList)
         {
+            if (!item.FilterCheck(filter))
+                return;
 
+            if (item.OnMenuDraw != null)
+            {
+                item.OnMenuDraw(item, drawSender);
+                return;
+            }
+            if (item.BeforeMenuDraw != null)
+            {
+                if (item.BeforeMenuDraw(item, drawSender) == false)
+                    return;
+            }
+            if (item.SubMenuItems.Count == 0)
+            {
+                if (item.IsSeparator)
+                {
+                    EGui.UIProxy.NamedMenuSeparator.OnDraw(item.Text, in cmdList, EGui.UIProxy.StyleConfig.Instance.NamedMenuSeparatorThickness);
+                }
+                else if (!string.IsNullOrEmpty(item.Text))
+                {
+                    var flag = ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_NoTreePushOnOpen;
+                    if (selectQuickMenuIdx == currentQuickMenuIdx && !string.IsNullOrEmpty(filter))
+                    {
+                        flag |= ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_Selected;
+                        if (ImGuiAPI.IsKeyPressed(ImGuiKey.ImGuiKey_Enter, false))
+                        {
+                            if (item.Action != null)
+                            {
+                                item.Action(item, actionSender);
+                                ImGuiAPI.CloseCurrentPopup();
+                                postActionWhenMenuActive?.Invoke(item);
+                            }
+                        }
+                    }
+                    bool clicked = false;
+                    switch (style)
+                    {
+                        case EMenuStyle.TreeList:
+                            ImGuiAPI.TreeNodeEx(item.Text, flag);
+                            clicked = ImGuiAPI.IsItemClicked(ImGuiMouseButton_.ImGuiMouseButton_Left);
+                            break;
+                        case EMenuStyle.Menu:
+                            clicked = EGui.UIProxy.MenuItemProxy.MenuItem(item.Text, "", false, null, in cmdList, Support.UAnyPointer.Default, ref item.MenuState);
+                            break;
+                    }
+                    if (clicked)
+                    {
+                        if (item.Action != null)
+                        {
+                            item.Action(item, actionSender);
+                            ImGuiAPI.CloseCurrentPopup();
+                            postActionWhenMenuActive?.Invoke(item);
+                        }
+                    }
+                    currentQuickMenuIdx++;
+                }
+            }
+            else
+            {
+                if (!string.IsNullOrEmpty(filter))
+                    item.MenuState.Opened = true;
+                switch (style)
+                {
+                    case EMenuStyle.TreeList:
+                        ImGuiAPI.SetNextItemOpen(item.MenuState.Opened, ImGuiCond_.ImGuiCond_None);
+                        if (ImGuiAPI.TreeNode(item.Text))
+                        {
+                            item.MenuState.Opened = true;
+                            for (int menuIdx = 0; menuIdx < item.SubMenuItems.Count; menuIdx++)
+                            {
+                                Draw(item.SubMenuItems[menuIdx], drawSender, actionSender, filter, cmdList, ref selectQuickMenuIdx, ref currentQuickMenuIdx, postActionWhenMenuActive, style);
+                            }
+                            ImGuiAPI.TreePop();
+                        }
+                        else
+                            item.MenuState.Opened = false;
+                        break;
+                    case EMenuStyle.Menu:
+                        if (EGui.UIProxy.MenuItemProxy.BeginMenuItem(item.Text, "", null, cmdList, Support.UAnyPointer.Default, ref item.MenuState))
+                        {
+                            for (int menuIdx = 0; menuIdx < item.SubMenuItems.Count; menuIdx++)
+                            {
+                                Draw(item.SubMenuItems[menuIdx], drawSender, actionSender, filter, cmdList, ref selectQuickMenuIdx, ref currentQuickMenuIdx, postActionWhenMenuActive, style);
+                            }
+                            EGui.UIProxy.MenuItemProxy.EndMenuItem();
+                        }
+                        break;
+                }
+
+            }
         }
-    }*/
+    }
 }
