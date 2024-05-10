@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
-<Root Type="EngineNS.Animation.Asset.UAnimationClipAMeta@EngineCore">
-  <AssetId Type="System.Guid@Unknown" Value="b38af185-4760-4a34-a4c5-3f17ad042dd3" />
-  <Description Type="System.String@Unknown" Value="This is a EngineNS.Animation.Asset.UAnimationClip&#xA;" />
+<Root Type="EngineNS.Animation.Asset.TtAnimationClipAMeta@EngineCore">
+  <AssetId Type="System.Guid@Unknown" Value="41425243-4d14-428d-a432-2b9f92111e1e" />
+  <Description Type="System.String@Unknown" Value="This is a EngineNS.Animation.Asset.TtAnimationClip&#xA;" />
   <Icon Type="EngineNS.EGui.UUvAnim@EngineCore">
     <Color Type="System.UInt32@Unknown" Value="4294967295" />
     <Duration Type="System.Single@Unknown" Value="1000" />
@@ -11,5 +11,5 @@
     <Size Type="EngineNS.Vector2@EngineCore" Value="50,50" />
   </Icon>
   <RefAssetRNames Type="System.Collections.Generic.List&lt;EngineNS.RName@EngineCore,&gt;@Unknown" Count="0" />
-  <TypeStr Type="System.String@Unknown" Value="EngineNS.Animation.Asset.UAnimationClip@EngineCore" />
+  <TypeStr Type="System.String@Unknown" Value="EngineNS.Animation.Asset.TtAnimationClip@EngineCore" />
 </Root>

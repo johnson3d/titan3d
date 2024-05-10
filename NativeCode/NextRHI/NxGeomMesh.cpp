@@ -1337,6 +1337,7 @@ namespace NxRHI
 	{
 		Cleanup();
 		
+		mAABB = mesh->mAABB;
 		StreamTypes = 0;
 		auto geom = mesh->GetGeomtryMesh();
 		auto ib = geom->GetIndexBuffer();

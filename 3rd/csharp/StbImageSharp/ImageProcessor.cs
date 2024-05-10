@@ -8,6 +8,19 @@ namespace StbImageSharp
     {
         public static unsafe ImageResult GetBoxDownSampler(ImageResult src, int targetWidth, int targetHeight)
         {
+            switch (src.Comp)
+            {
+                case ColorComponents.RedGreenBlueAlpha:
+                    return GetBoxDownSampler_rgba(src, targetWidth, targetHeight);
+                case ColorComponents.RedGreenBlue:
+                    return GetBoxDownSampler_rgb(src, targetWidth, targetHeight);
+                default:
+                    break;
+            }
+            return null;
+        }
+        public static unsafe ImageResult GetBoxDownSampler_rgba(ImageResult src, int targetWidth, int targetHeight)
+        {
             System.Diagnostics.Debug.Assert(src.Comp == ColorComponents.RedGreenBlueAlpha);
             ImageResult result = new ImageResult();
             int hW = targetWidth;
@@ -27,7 +40,36 @@ namespace StbImageSharp
                 {
                     for (int j = 0; j < hW; j++)
                     {
-                        uint color = GetSamplerStride4(pSrc, src.Width, src.Height, (int)((float)j * scaleX), (int)((float)i * scaleY));
+                        uint color = GetSamplerStride(pSrc, src.Width, src.Height, (int)((float)j * scaleX), (int)((float)i * scaleY), 4);
+                        ((uint*)curTar)[j] = color;
+                    }
+                    curTar += result.Width * 4;
+                }
+            }
+            return result;
+        }
+        public static unsafe ImageResult GetBoxDownSampler_rgb(ImageResult src, int targetWidth, int targetHeight)
+        {
+            System.Diagnostics.Debug.Assert(src.Comp == ColorComponents.RedGreenBlue);
+            ImageResult result = new ImageResult();
+            int hW = targetWidth;
+            int hH = targetHeight;
+            float scaleX = (float)src.Width / (float)hW;
+            float scaleY = (float)src.Height / (float)hH;
+            result.Width = hW;
+            result.Height = hH;
+            result.SourceComp = ColorComponents.RedGreenBlueAlpha;
+            result.Comp = src.Comp;
+            result.Data = new byte[hW * hH * 4];
+            fixed (byte* pSrc = &src.Data[0])
+            fixed (byte* pTar = &result.Data[0])
+            {
+                byte* curTar = pTar;
+                for (int i = 0; i < hH; i++)
+                {
+                    for (int j = 0; j < hW; j++)
+                    {
+                        uint color = GetSamplerStride(pSrc, src.Width, src.Height, (int)((float)j * scaleX), (int)((float)i * scaleY), 3);
                         ((uint*)curTar)[j] = color;
                     }
                     curTar += result.Width * 4;
@@ -107,7 +149,7 @@ namespace StbImageSharp
                 {
                     for (int j = 0; j < hW; j++)
                     {
-                        uint color = GetSamplerStride4(pSrc, src.Width, src.Height, (int)SrcX + (int)((float)j * scaleX), (int)SrcY + (int)((float)i * scaleY));
+                        uint color = GetSamplerStride(pSrc, src.Width, src.Height, (int)SrcX + (int)((float)j * scaleX), (int)SrcY + (int)((float)i * scaleY), 4);
                         ((uint*)curTar)[j] = color;
                     }
                     curTar += result.Width * 4;
@@ -121,7 +163,7 @@ namespace StbImageSharp
                 { 20, 80, 20},
                 { 10, 20, 10}
         };
-        private static unsafe uint GetSamplerStride4(byte* pBuffer, int w, int h, int x, int y)
+        private static unsafe uint GetSamplerStride(byte* pBuffer, int w, int h, int x, int y, int pixelBitwise = 4)
         {
             x = x - 1;
             y = y - 1;
@@ -131,7 +173,7 @@ namespace StbImageSharp
             uint tr = 0;
             uint ta = 0;
             uint value = 0;
-            uint stride = (uint)w * 4;
+            uint stride = (uint)(w * pixelBitwise);
             for (int i = 0; i < 3; i++)
             {
                 int sy = y + i;
@@ -142,7 +184,7 @@ namespace StbImageSharp
                     int sx = x + j;
                     if (sx < 0 || sx >= w)
                         continue;
-                    int start = sy * (int)stride + sx * 4;
+                    int start = sy * (int)stride + sx * pixelBitwise;
                     int b = pBuffer[start];
                     int g = pBuffer[start + 1];
                     int r = pBuffer[start + 2];

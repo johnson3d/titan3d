@@ -158,7 +158,7 @@ namespace ProjectCooker.Command
         async System.Threading.Tasks.Task ProcAnimClip()
         {
             var root = EngineNS.UEngine.Instance.FileManager.GetRoot(EngineNS.IO.TtFileManager.ERootDir.Game);
-            var files = EngineNS.IO.TtFileManager.GetFiles(root, "*" + EngineNS.Animation.Asset.UAnimationClip.AssetExt, true);
+            var files = EngineNS.IO.TtFileManager.GetFiles(root, "*" + EngineNS.Animation.Asset.TtAnimationClip.AssetExt, true);
             foreach (var i in files)
             {
                 var rp = EngineNS.IO.TtFileManager.GetRelativePath(root, i);
@@ -168,7 +168,7 @@ namespace ProjectCooker.Command
             }
 
             root = EngineNS.UEngine.Instance.FileManager.GetRoot(EngineNS.IO.TtFileManager.ERootDir.Engine);
-            files = EngineNS.IO.TtFileManager.GetFiles(root, "*" + EngineNS.Animation.Asset.UAnimationClip.AssetExt, true);
+            files = EngineNS.IO.TtFileManager.GetFiles(root, "*" + EngineNS.Animation.Asset.TtAnimationClip.AssetExt, true);
             foreach (var i in files)
             {
                 var rp = EngineNS.IO.TtFileManager.GetRelativePath(root, i);

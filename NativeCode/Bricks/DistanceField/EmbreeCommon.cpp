@@ -223,7 +223,7 @@ void EmbreeManager::EmbreePointQuery(FEmbreeScene& embreeScene, v3dxVector3 Voxe
 	bOutNeedTracyRays = OutClosestDistance <= LocalSpaceTraceDistance;
 }
 
-void EmbreeManager::EmbreeRayTrace(FEmbreeScene& embreeScene, v3dxVector3 StartPosition, v3dxVector3 RayDirection, bool& bOutHit, bool& bOutHitTwoSided, v3dxVector3 &OutHitNormal)
+void EmbreeManager::EmbreeRayTrace(FEmbreeScene& embreeScene, v3dxVector3 StartPosition, v3dxVector3 RayDirection, bool& bOutHit, bool& bOutHitTwoSided, v3dxVector3 &OutHitNormal, float &OutTFar)
 {
 	FEmbreeRay EmbreeRay;
 
@@ -247,6 +247,7 @@ void EmbreeManager::EmbreeRayTrace(FEmbreeScene& embreeScene, v3dxVector3 StartP
 		bOutHit = true;
 		OutHitNormal = EmbreeRay.GetHitNormal();
 		bOutHitTwoSided = EmbreeContext.IsHitTwoSided();
+		OutTFar = EmbreeRay.ray.tfar;
 	}
 }
 
