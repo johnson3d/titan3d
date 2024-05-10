@@ -1,12 +1,5 @@
-namespace Eigen {
-
-/** \page TopicEigenExpressionTemplates Expression templates in Eigen
-
-
-TODO: write this dox page!
-
-Is linked from the tutorial on arithmetic ops.
-
-*/
-
-}
+{
+  "version": 2,
+  "dgSpecHash": "Un8MU2s/+vmHqXngEdwD98rFG6QJMrlCVwt4FRzvI/U72FT6bZ2o/lvJW6EyQDPkgpliNHpckfQcfJt3QgduHA==",
+  "success": true,
+  "projectFilePath": "J:\\TEngine\\P

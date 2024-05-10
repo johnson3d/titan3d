@@ -1,97 +1,174 @@
-namespace Eigen {
+﻿using EngineNS.EGui.Controls.PropertyGrid;
+using System;
+using System.Collections.Generic;
+using System.Text;
 
-/** \page TopicLazyEvaluation Lazy Evaluation and Aliasing
+namespace EngineNS
+{
+    [TypeConverter, PGNoCategory]
+    public struct FTransform
+    {
+        public static FTransform IdentityForRef = FTransform.CreateTransform(in DVector3.Zero, in Vector3.One, in Quaternion.Identity);
+        public readonly static FTransform Identity = FTransform.CreateTransform(in DVector3.Zero, in Vector3.One, in Quaternion.Identity);
+        public FTransform(in FTransform trans)
+        {
+            mPosition = trans.mPosition;
+            mScale = trans.mScale;
+            mQuat = trans.mQuat;
+        }
+        public class TypeConverterAttribute : Support.TypeConverterAttributeBase
+        {
+            public override bool ConvertFromString(ref object obj, string text)
+            {
+                FTransform result = new FTransform();
+                int cur = 0;
+                var posStr = GetMatchPair(text, ref cur, '(', ')');
+                if (posStr == null)
+                    return false;
+                result.mPosition = DVector3.FromString(posStr);
+                var segs = posStr.Split(',');
+                var scaleStr = GetMatchPair(text, ref cur, '(', ')');
+                if (scaleStr == null)
+                    return false;
+                result.mScale = Vector3.FromString(scaleStr);
+                var quatStr = GetMatchPair(text, ref cur, '(', ')');
+                if (quatStr == null)
+                    return false;
+                result.mQuat = Quaternion.FromString(quatStr);
 
-Executive summary: %Eigen has intelligent compile-time mechanisms to enable lazy evaluation and removing temporaries where appropriate.
-It will handle aliasing automatically in most cases, for example with matrix products. The automatic behavior can be overridden
-manually by using the MatrixBase::eval() and MatrixBase::noalias() methods.
+                obj = result;
+                return true;
+            }
+        }
 
-When you write a line of code involving a complex expression such as
+        public override string ToString()
+        {
+            //return $"[Position({mPosition.ToString()}),Scale({mScale.ToString()}),Quat({mQuat.ToString()})]";
+            return $"({mPosition.ToString()}),({mScale.ToString()}),({mQuat.ToString()})";
+        }
+        public static FTransform Parse(string text)
+        {
+            FTransform result = FTransform.Identity;
+            var segs = text.Split("),(");
+            var posStr = segs[0].Substring(1);
+            result.mPosition = DVector3.FromString(posStr);
+            var scaleStr = segs[1];
+            result.mScale= Vector3.FromString(scaleStr);
+            var quatStr = segs[2].Substring(0, segs[2].Length - 1);
+            result.mQuat = Quaternion.FromString(quatStr);
+            return result;
+        }
+        public void InitData()
+        {
+            mPosition = DVector3.Zero;
+            mScale = Vector3.One;
+            mQuat = Quaternion.Identity;
+        }
+        public static FTransform CreateTransform(in DVector3 pos, in Vector3 scale, in Quaternion quat)
+        {
+            FTransform tmp;
+            tmp.mPosition = pos;
+            tmp.mScale = scale;
+            tmp.mQuat = quat;
+            return tmp;
+        }
+        public bool HasScale
+        {
+            get
+            {
+                return Vector3.Equals(in mScale, in Vector3.One).All() == false;
+            }
+        }
+        public bool IsIdentity
+        {
+            get
+            {
+                if (Vector3.Equals(in mScale, in Vector3.One).All() == false)
+                    return false;
+                if (DVector3.Equals(in mPosition, in DVector3.Zero).All() == false)
+                    return false;
+                if (Quaternion.Equals(in mQuat, in Quaternion.Identity).All() == false)
+                    return false;
+                return true;
+            }
+        }
+        public DVector3 mPosition;
+        public Vector3 mScale;//为了Hierarchical计算方便，我们设定mScale在Transform中只影响本节点而不传递，如果需要整体放缩，在Node上新增一个ScaleMatrix
+        public Quaternion mQuat;
 
-\code mat1 = mat2 + mat3 * (mat4 + mat5);
-\endcode
+        [Rtti.Meta]
+        public DVector3 Position { get => mPosition; set => mPosition = value; }
+        [Rtti.Meta]
+        public Vector3 Scale { get => mScale; set => mScale = value; }
+        [Rtti.Meta]
+        public Quaternion Quat { get => mQuat; set => mQuat = value; }
 
-%Eigen determines automatically, for each sub-expression, whether to evaluate it into a temporary variable. Indeed, in certain cases it is better to evaluate a sub-expression into a temporary variable, while in other cases it is better to avoid that.
+        #region Matrix
+        public DMatrix ToDMatrixWithScale()
+        {
+            DMatrix OutMatrix;
 
-A traditional math library without expression templates always evaluates all sub-expressions into temporaries. So with this code,
+            OutMatrix.M41 = mPosition.X;
+            OutMatrix.M42 = mPosition.Y;
+            OutMatrix.M43 = mPosition.Z;
 
-\code vec1 = vec2 + vec3;
-\endcode
+            var x2 = mQuat.X + mQuat.X;
+            var y2 = mQuat.Y + mQuat.Y;
+            var z2 = mQuat.Z + mQuat.Z;
+            {
+                var xx2 = mQuat.X * x2;
+                var yy2 = mQuat.Y * y2;
+                var zz2 = mQuat.Z * z2;
 
-a traditional library would evaluate \c vec2 + vec3 into a temporary \c vec4 and then copy \c vec4  into \c vec1. This is of course inefficient: the arrays are traversed twice, so there are a lot of useless load/store operations.
+                OutMatrix.M11 = (1.0f - (yy2 + zz2)) * mScale.X;
+                OutMatrix.M22 = (1.0f - (xx2 + zz2)) * mScale.Y;
+                OutMatrix.M33 = (1.0f - (xx2 + yy2)) * mScale.Z;
+            }
+            {
+                var yz2 = mQuat.Y * z2;
+                var wx2 = mQuat.W * x2;
 
-Expression-templates-based libraries can avoid evaluating sub-expressions into temporaries, which in many cases results in large speed improvements.
-This is called <i>lazy evaluation</i> as an expression is getting evaluated as late as possible.
-In %Eigen <b>all expressions are lazy-evaluated</b>.
-More precisely, an expression starts to be evaluated once it is assigned to a matrix.
-Until then nothing happens beyond constructing the abstract expression tree.
-In contrast to most other expression-templates-based libraries, however, <b>%Eigen might choose to evaluate some sub-expressions into temporaries</b>.
-There are two reasons for that: first, pure lazy evaluation is not always a good choice for performance; second, pure lazy evaluation can be very dangerous, for example with matrix products: doing <tt>mat = mat*mat</tt> gives a wrong result if the matrix product is directly evaluated within the destination matrix, because of the way matrix product works.
+                OutMatrix.M32 = (yz2 - wx2) * mScale.Z;
+                OutMatrix.M23 = (yz2 + wx2) * mScale.Y;
+            }
+            {
+                var xy2 = mQuat.X * y2;
+                var wz2 = mQuat.W * z2;
 
-For these reasons, %Eigen has intelligent compile-time mechanisms to determine automatically which sub-expression should be evaluated into a temporary variable.
+                OutMatrix.M21 = (xy2 - wz2) * mScale.Y;
+                OutMatrix.M12 = (xy2 + wz2) * mScale.X;
+            }
+            {
+                var xz2 = mQuat.X * z2;
+                var wy2 = mQuat.W * y2;
 
-So in the basic example,
+                OutMatrix.M31 = (xz2 + wy2) * mScale.Z;
+                OutMatrix.M13 = (xz2 - wy2) * mScale.X;
+            }
 
-\code mat1 = mat2 + mat3;
-\endcode
+            OutMatrix.M14 = 0.0f;
+            OutMatrix.M24 = 0.0f;
+            OutMatrix.M34 = 0.0f;
+            OutMatrix.M44 = 1.0f;
 
-%Eigen chooses not to introduce any temporary. Thus the arrays are traversed only once, producing optimized code.
-If you really want to force immediate evaluation, use \link MatrixBase::eval() eval()\endlink:
+            return OutMatrix;
+        }
+        public DMatrix ToDMatrixNoScale()
+        {
+            DMatrix OutMatrix;
 
-\code mat1 = (mat2 + mat3).eval();
-\endcode
+            OutMatrix.M41 = mPosition.X;
+            OutMatrix.M42 = mPosition.Y;
+            OutMatrix.M43 = mPosition.Z;
 
-Here is now a more involved example:
+            var x2 = mQuat.X + mQuat.X;
+            var y2 = mQuat.Y + mQuat.Y;
+            var z2 = mQuat.Z + mQuat.Z;
+            {
+                var xx2 = mQuat.X * x2;
+                var yy2 = mQuat.Y * y2;
+                var zz2 = mQuat.Z * z2;
 
-\code mat1 = -mat2 + mat3 + 5 * mat4;
-\endcode
-
-Here again %Eigen won't introduce any temporary, thus producing a single <b>fused</b> evaluation loop, which is clearly the correct choice.
-
-\section TopicLazyEvaluationWhichExpr Which sub-expressions are evaluated into temporaries?
-
-The default evaluation strategy is to fuse the operations in a single loop, and %Eigen will choose it except in a few circumstances.
-
-<b>The first circumstance</b> in which %Eigen chooses to evaluate a sub-expression is when it sees an assignment <tt>a = b;</tt> and the expression \c b has the evaluate-before-assigning \link flags flag\endlink.
-The most important example of such an expression is the \link Product matrix product expression\endlink. For example, when you do
-
-\code mat = mat * mat;
-\endcode
-
-%Eigen will evaluate <tt>mat * mat</tt> into a temporary matrix, and then copies it into the original \c mat.
-This guarantees a correct result as we saw above that lazy evaluation gives wrong results with matrix products.
-It also doesn't cost much, as the cost of the matrix product itself is much higher.
-Note that this temporary is introduced at evaluation time only, that is, within operator= in this example.
-The expression <tt>mat * mat</tt> still return a abstract product type.
-
-What if you know that the result does no alias the operand of the product and want to force lazy evaluation? Then use \link MatrixBase::noalias() .noalias()\endlink instead. Here is an example:
-
-\code mat1.noalias() = mat2 * mat2;
-\endcode
-
-Here, since we know that mat2 is not the same matrix as mat1, we know that lazy evaluation is not dangerous, so we may force lazy evaluation. Concretely, the effect of noalias() here is to bypass the evaluate-before-assigning \link flags flag\endlink.
-
-<b>The second circumstance</b> in which %Eigen chooses to evaluate a sub-expression, is when it sees a nested expression such as <tt>a + b</tt> where \c b is already an expression having the evaluate-before-nesting \link flags flag\endlink.
-Again, the most important example of such an expression is the \link Product matrix product expression\endlink.
-For example, when you do
-
-\code mat1 = mat2 * mat3 + mat4 * mat5;
-\endcode
-
-the products <tt>mat2 * mat3</tt> and <tt>mat4 * mat5</tt> gets evaluated separately into temporary matrices before being summed up in <tt>mat1</tt>.
-Indeed, to be efficient matrix products need to be evaluated within a destination matrix at hand, and not as simple "dot products".
-For small matrices, however, you might want to enforce a "dot-product" based lazy evaluation with lazyProduct().
-Again, it is important to understand that those temporaries are created at evaluation time only, that is in operator =.
-See TopicPitfalls_auto_keyword for common pitfalls regarding this remark.
-
-<b>The third circumstance</b> in which %Eigen chooses to evaluate a sub-expression, is when its cost model shows that the total cost of an operation is reduced if a sub-expression gets evaluated into a temporary.
-Indeed, in certain cases, an intermediate result is sufficiently costly to compute and is reused sufficiently many times, that is worth "caching". Here is an example:
-
-\code mat1 = mat2 * (mat3 + mat4);
-\endcode
-
-Here, provided the matrices have at least 2 rows and 2 columns, each coefficient of the expression <tt>mat3 + mat4</tt> is going to be used several times in the matrix product. Instead of computing the sum every time, it is much better to compute it once and store it in a temporary variable. %Eigen understands this and evaluates <tt>mat3 + mat4</tt> into a temporary variable before evaluating the product.
-
-*/
-
-}
+                OutMatrix.M11 = (1.0f - (yy2 + zz2));
+                OutMatrix.M22 = (1.0f - (xx2 + zz2));
+                OutMatrix.M33 = (1.0f - (xx2 + yy

@@ -9,7 +9,7 @@
 # created on: 2011may26
 # created by: Markus W. Scherer
 #
-# See http://site.icu-project.org/processes/release/tasks/healthy-code#TOC-Check-library-dependencies
+# See https://unicode-org.github.io/icu/processes/release/tasks/healthy-code.html#check-library-dependencies
 
 # Standard library symbols used by ICU --------------------------------------- #
 
@@ -19,9 +19,10 @@ system_symbols:
     PIC system_misc system_debug malloc_functions ubsan
     c_strings c_string_formatting
     int_functions floating_point trigonometry
+    exp_and_tanhf
     stdlib_qsort
     system_locale
-    stdio_input stdio_output file_io readlink_function dir_io mmap_functions dlfcn
+    stdio_input stdio_output file_io dir_io mmap_functions dlfcn
     # C++
     cplusplus iostream
     std_mutex
@@ -47,6 +48,9 @@ group: std_mutex
     std::condition_variable::~condition_variable()
     std::condition_variable_any::condition_variable_any()
     std::condition_variable_any::~condition_variable_any()
+    pthread_once
+    pthread_mutex_lock
+    pthread_mutex_unlock
 
 group: ubsan
     # UBSan=UndefinedBehaviorSanitizer, clang -fsanitize=bounds
@@ -76,6 +80,9 @@ group: int_functions
 group: floating_point
     abs fabs floor ceil modf fmod log pow round sqrt trunc
 
+group: exp_and_tanhf
+    expf tanhf
+
 group: trigonometry
     acos asin atan atan2 cos sin tan
     # Additional symbols in an optimized build.
@@ -103,11 +110,8 @@ group: file_io
     # Additional symbols in an optimized build.
     __xstat
 
-group: readlink_function
-    readlink  # putil.cpp uprv_tzname() calls this in a hack to get the time zone name
-
 group: dir_io
-    opendir closedir readdir  # for a hack to get the time zone name
+    opendir closedir readdir readlink realpath # for a hack to get the time zone name
 
 group: mmap_functions  # for memory-mapped data loading
     mmap munmap
@@ -141,6 +145,7 @@ group: iostream
     "std::basic_ostream<char, std::char_traits<char> >& std::operator<< <std::char_traits<char> >(std::basic_ostream<char, std::char_traits<char> >&, char const*)"
     std::ios_base::Init::Init()
     std::ios_base::Init::~Init()
+    std::ios_base_library_init()
     std::istream::get()
     std::istream::putback(char)
     # Additional symbols in an optimized build.
@@ -168,7 +173,7 @@ library: common
     static_unicode_sets
     uiter edits
     ucasemap ucasemap_titlecase_brkiter script_runs
-    uprops ubidi_props ucase uscript uscript_props characterproperties
+    uprops ubidi_props ucase uscript uscript_props emojiprops characterproperties
     ubidi ushape ubiditransform
     resourcebundle service_registration resbund_cnv ures_cnv icudataver ucat
     currency
@@ -207,7 +212,7 @@ group: breakiterator
     brkiter.o brkeng.o ubrk.o
     rbbi.o rbbinode.o rbbiscan.o rbbisetb.o rbbistbl.o rbbitblb.o
     rbbidata.o rbbirb.o rbbi_cache.o
-    dictionarydata.o dictbe.o
+    dictionarydata.o dictbe.o lstmbe.o mlbe.o
     # BreakIterator::makeInstance() factory implementation makes for circular dependency
     # between BreakIterator base and FilteredBreakIteratorBuilder.
     filteredbrk.o
@@ -219,6 +224,8 @@ group: breakiterator
     ucharstriebuilder  # for filteredbrk.o
     normlzr  # for dictbe.o, should switch to Normalizer2
     uvector32 # for dictbe.o
+    exp_and_tanhf # for lstmbe.o
+    usetiter # for dictbe.o
 
 group: unormcmp  # unorm_compare()
     unormcmp.o
@@ -342,7 +349,7 @@ group: uniset_core
 group: icu_utility_with_props
     util_props.o
   deps
-    icu_utility uchar ucase
+    icu_utility uchar ucase uprops
 
 group: icu_utility
     util.o
@@ -406,6 +413,7 @@ group: uprops
     ubidi_props
     unistr_case ustring_case  # only for case folding
     ucase
+    emojiprops
 
 group: characterproperties
     characterproperties.o
@@ -468,6 +476,12 @@ group: ubidi_props
     ubidi_props.o
   deps
     utrie2
+
+group: emojiprops
+    emojiprops.o
+  deps
+    ucharstrie ucharstrieiterator
+    ucptrie udata
 
 group: unistr_props
     unistr_props.o
@@ -637,17 +651,21 @@ group: resourcebundle
     locbased.o
     loclikely.o
     localebuilder.o
+    ulocale.o
+    ulocbuilder.o
+    loclikelysubtags.o
   deps
     udata ucol_swp
     sort stringenumeration uhash uvector
     uscript_props propname
     bytesinkutil
     errorcode
+    lsr
 
 group: localematcher
     localematcher.o
   deps
-    resourcebundle localeprioritylist loclikelysubtags locdistance lsr
+    resourcebundle localeprioritylist locdistance
 
 group: localeprioritylist
     localeprioritylist.o
@@ -657,12 +675,7 @@ group: localeprioritylist
 group: locdistance
     locdistance.o
   deps
-    loclikelysubtags
-
-group: loclikelysubtags
-    loclikelysubtags.o
-  deps
-    lsr resourcebundle
+    resourcebundle
 
 group: lsr
     lsr.o
@@ -853,7 +866,7 @@ group: platform
     PIC system_misc system_debug malloc_functions ubsan
     c_strings c_string_formatting
     floating_point system_locale
-    stdio_input readlink_function dir_io
+    stdio_input dir_io
     dlfcn  # Move related code into icuplug.c?
     cplusplus
     std_mutex
@@ -872,6 +885,7 @@ library: i18n
     units_extra unitsformatter
     universal_time_scale
     uclean_i18n
+    display_options
 
 group: region
     region.o uregion.o
@@ -901,7 +915,7 @@ group: charset_detector
 group: spoof_detection
     uspoof.o uspoof_build.o uspoof_conf.o uspoof_impl.o scriptset.o
   deps
-    uniset_props regex unorm uscript
+    uniset_props regex unorm uscript ubidi
 
 group: alphabetic_index
     alphaindex.o
@@ -978,6 +992,7 @@ group: number_output
     number_representation format formatted_value_sbimpl units
     # PluralRules internals:
     unifiedcache
+    display_options
 
 group: numberformatter
     # ICU 60+ NumberFormatter API
@@ -992,6 +1007,9 @@ group: numberformatter
     number_scientific.o
     currpinf.o
     numrange_fluent.o numrange_impl.o
+    # NOTE: This could go into its own dependency block, but it would require
+    # refactoring more of the dependencies (e.g. removing class methods).
+    number_simple.o
   deps
     decnumber double_conversion formattable units unitsformatter
     listformatter number_representation number_output
@@ -1063,7 +1081,7 @@ group: formatting
     measfmt.o quantityformatter.o
     # dateformat
     astro.o buddhcal.o calendar.o cecal.o chnsecal.o coptccal.o dangical.o ethpccal.o
-    gregocal.o gregoimp.o hebrwcal.o indiancal.o islamcal.o japancal.o persncal.o taiwncal.o
+    gregocal.o gregoimp.o hebrwcal.o indiancal.o islamcal.o iso8601cal.o japancal.o persncal.o taiwncal.o
     erarules.o  # mostly for Japanese eras
     ucal.o
     basictz.o olsontz.o rbtz.o simpletz.o timezone.o tzrule.o tztrans.o
@@ -1175,6 +1193,11 @@ group: universal_time_scale
 
 group: uclean_i18n
     ucln_in.o
+  deps
+    platform
+
+group: display_options
+    displayoptions.o
   deps
     platform
 

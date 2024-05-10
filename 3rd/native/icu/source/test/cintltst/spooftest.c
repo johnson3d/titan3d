@@ -10,7 +10,7 @@
 * File spooftest.c
 *
 *********************************************************************************/
-/*C API TEST for the uspoof Unicode Indentifier Spoofing and Security API */
+/*C API TEST for the uspoof Unicode Identifier Spoofing and Security API */
 /**
 *   This is an API test for ICU spoof detection in plain C.  It doesn't test very many cases, and doesn't
 *   try to test the full functionality.  It just calls each function and verifies that it
@@ -22,8 +22,9 @@
 #include "unicode/utypes.h"
 #if !UCONFIG_NO_REGULAR_EXPRESSIONS && !UCONFIG_NO_NORMALIZATION
 
-#include <stdlib.h>
+#include <stdbool.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 #include "unicode/uspoof.h"
 #include "unicode/ustring.h"
@@ -38,7 +39,7 @@
 } UPRV_BLOCK_MACRO_END
 
 #define TEST_ASSERT(expr) UPRV_BLOCK_MACRO_BEGIN { \
-    if ((expr)==FALSE) { \
+    if ((expr)==false) { \
         log_err("Test Failure at file %s, line %d: \"%s\" is false.\n", __FILE__, __LINE__, #expr); \
     } \
 } UPRV_BLOCK_MACRO_END
@@ -111,7 +112,7 @@ const UChar lll_Latin_b[] = {(UChar)0xff29, (UChar)0x217c, (UChar)0x196, 0};
 
 const UChar lll_Cyrl[]    = {(UChar)0x0406, (UChar)0x04C0, (UChar)0x31, 0};
 
-/* The skeleton transform for all of thes 'lll' lookalikes is all lower case l. */
+/* The skeleton transform for all of these 'lll' lookalikes is all lower case l. */
 const UChar lll_Skel[]    = {(UChar)0x6c, (UChar)0x6c, (UChar)0x6c, 0};  
 
 const UChar han_Hiragana[] = {(UChar)0x3086, (UChar)0x308A, (UChar)0x0020, (UChar)0x77F3, (UChar)0x7530, 0};
@@ -545,6 +546,26 @@ static void TestUSpoofCAPI(void) {
     TEST_TEARDOWN;
 
     /*
+     * uspoof_areBidiConfusable()
+     */
+    TEST_SETUP
+        int32_t checkResults;
+
+        checkResults = uspoof_areBidiConfusable(sc, UBIDI_LTR, scLatin, -1, scMixed, -1, &status);
+        TEST_ASSERT_SUCCESS(status);
+        TEST_ASSERT_EQ(USPOOF_MIXED_SCRIPT_CONFUSABLE, checkResults);
+
+        checkResults = uspoof_areBidiConfusable(sc, UBIDI_LTR, goodGreek, -1, scLatin, -1, &status);
+        TEST_ASSERT_SUCCESS(status);
+        TEST_ASSERT_EQ(0, checkResults);
+
+        checkResults = uspoof_areBidiConfusable(sc, UBIDI_LTR, lll_Latin_a, -1, lll_Latin_b, -1, &status);
+        TEST_ASSERT_SUCCESS(status);
+        TEST_ASSERT_EQ(USPOOF_SINGLE_SCRIPT_CONFUSABLE, checkResults);
+
+    TEST_TEARDOWN;
+
+    /*
      * areConfusableUTF8
      */
     TEST_SETUP
@@ -576,6 +597,38 @@ static void TestUSpoofCAPI(void) {
 
     TEST_TEARDOWN;
 
+    /*
+     * areBidiConfusableUTF8
+     */
+    TEST_SETUP
+        int32_t checkResults;
+        char s1[200];
+        char s2[200];
+
+
+        u_strToUTF8(s1, sizeof(s1), NULL, scLatin, -1, &status);
+        u_strToUTF8(s2, sizeof(s2), NULL, scMixed, -1, &status);
+        TEST_ASSERT_SUCCESS(status);
+        checkResults = uspoof_areBidiConfusableUTF8(sc, UBIDI_LTR, s1, -1, s2, -1, &status);
+        TEST_ASSERT_SUCCESS(status);
+        TEST_ASSERT_EQ(USPOOF_MIXED_SCRIPT_CONFUSABLE, checkResults);
+
+        u_strToUTF8(s1, sizeof(s1), NULL, goodGreek, -1, &status);
+        u_strToUTF8(s2, sizeof(s2), NULL, scLatin, -1, &status);
+        TEST_ASSERT_SUCCESS(status);
+        checkResults = uspoof_areBidiConfusableUTF8(sc, UBIDI_LTR, s1, -1, s2, -1, &status);
+        TEST_ASSERT_SUCCESS(status);
+        TEST_ASSERT_EQ(0, checkResults);
+
+        u_strToUTF8(s1, sizeof(s1), NULL, lll_Latin_a, -1, &status);
+        u_strToUTF8(s2, sizeof(s2), NULL, lll_Latin_b, -1, &status);
+        TEST_ASSERT_SUCCESS(status);
+        checkResults = uspoof_areBidiConfusableUTF8(sc, UBIDI_LTR, s1, -1, s2, -1, &status);
+        TEST_ASSERT_SUCCESS(status);
+        TEST_ASSERT_EQ(USPOOF_SINGLE_SCRIPT_CONFUSABLE, checkResults);
+
+    TEST_TEARDOWN;
+
 
   /*
    * getSkeleton
@@ -601,6 +654,31 @@ static void TestUSpoofCAPI(void) {
 
     TEST_TEARDOWN;
 
+
+    /*
+     * getBidiSkeleton
+     */
+
+    TEST_SETUP
+        UChar dest[100];
+        int32_t   skelLength;
+
+        skelLength = uspoof_getBidiSkeleton(sc, UBIDI_LTR, lll_Latin_a, -1, dest, UPRV_LENGTHOF(dest), &status);
+        TEST_ASSERT_SUCCESS(status);
+        TEST_ASSERT_EQ(0, u_strcmp(lll_Skel, dest));
+        TEST_ASSERT_EQ(u_strlen(lll_Skel), skelLength);
+
+        skelLength = uspoof_getBidiSkeletonUTF8(sc, UBIDI_LTR, goodLatinUTF8, -1, (char *)dest,
+                                                UPRV_LENGTHOF(dest), &status);
+        TEST_ASSERT_SUCCESS(status);
+
+        skelLength = uspoof_getBidiSkeleton(sc, UBIDI_LTR, lll_Latin_a, -1, NULL, 0, &status);
+        TEST_ASSERT_EQ(U_BUFFER_OVERFLOW_ERROR, status);
+        TEST_ASSERT_EQ(3, skelLength);
+        status = U_ZERO_ERROR;
+
+    TEST_TEARDOWN;
+
     /*
      * get Inclusion and Recommended sets
      */
@@ -610,12 +688,12 @@ static void TestUSpoofCAPI(void) {
 
         inclusions = uspoof_getInclusionSet(&status);
         TEST_ASSERT_SUCCESS(status);
-        TEST_ASSERT_EQ(TRUE, uset_isFrozen(inclusions));
+        TEST_ASSERT_EQ(true, uset_isFrozen(inclusions));
 
         status = U_ZERO_ERROR;
         recommended = uspoof_getRecommendedSet(&status);
         TEST_ASSERT_SUCCESS(status);
-        TEST_ASSERT_EQ(TRUE, uset_isFrozen(recommended));
+        TEST_ASSERT_EQ(true, uset_isFrozen(recommended));
     TEST_TEARDOWN;
 
 }

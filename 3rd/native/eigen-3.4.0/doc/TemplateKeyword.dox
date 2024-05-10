@@ -1,133 +1,47 @@
-namespace Eigen {
-
-/** \page TopicTemplateKeyword The template and typename keywords in C++
-
-There are two uses for the \c template and \c typename keywords in C++. One of them is fairly well known
-amongst programmers: to define templates. The other use is more obscure: to specify that an expression refers
-to a template function or a type. This regularly trips up programmers that use the %Eigen library, often
-leading to error messages from the compiler that are difficult to understand, such as "expected expression" or
-"no match for operator<".
-
-\eigenAutoToc
-
-
-\section TopicTemplateKeywordToDefineTemplates Using the template and typename keywords to define templates
-
-The \c template and \c typename keywords are routinely used to define templates. This is not the topic of this
-page as we assume that the reader is aware of this (otherwise consult a C++ book). The following example
-should illustrate this use of the \c template keyword.
-
-\code
-template <typename T>
-bool isPositive(T x)
 {
-    return x > 0;
-}
-\endcode
-
-We could just as well have written <tt>template &lt;class T&gt;</tt>; the keywords \c typename and \c class have the
-same meaning in this context.
-
-
-\section TopicTemplateKeywordExample An example showing the second use of the template keyword
-
-Let us illustrate the second use of the \c template keyword with an example. Suppose we want to write a
-function which copies all entries in the upper triangular part of a matrix into another matrix, while keeping
-the lower triangular part unchanged. A straightforward implementation would be as follows:
-
-<table class="example">
-<tr><th>Example:</th><th>Output:</th></tr>
-<tr><td>
-\include TemplateKeyword_simple.cpp
-</td>
-<td>
-\verbinclude TemplateKeyword_simple.out
-</td></tr></table>
-
-That works fine, but it is not very flexible. First, it only works with dynamic-size matrices of
-single-precision floats; the function \c copyUpperTriangularPart() does not accept static-size matrices or
-matrices with double-precision numbers. Second, if you use an expression such as
-<tt>mat.topLeftCorner(3,3)</tt> as the parameter \c src, then this is copied into a temporary variable of type
-MatrixXf; this copy can be avoided.
-
-As explained in \ref TopicFunctionTakingEigenTypes, both issues can be resolved by making 
-\c copyUpperTriangularPart() accept any object of type MatrixBase. This leads to the following code:
-
-<table class="example">
-<tr><th>Example:</th><th>Output:</th></tr>
-<tr><td>
-\include TemplateKeyword_flexible.cpp
-</td>
-<td>
-\verbinclude TemplateKeyword_flexible.out
-</td></tr></table>
-
-The one line in the body of the function \c copyUpperTriangularPart() shows the second, more obscure use of
-the \c template keyword in C++.  Even though it may look strange, the \c template keywords are necessary
-according to the standard. Without it, the compiler may reject the code with an error message like "no match
-for operator<".
-
-
-\section TopicTemplateKeywordExplanation Explanation
-
-The reason that the \c template keyword is necessary in the last example has to do with the rules for how
-templates are supposed to be compiled in C++. The compiler has to check the code for correct syntax at the
-point where the template is defined, without knowing the actual value of the template arguments (\c Derived1
-and \c Derived2 in the example). That means that the compiler cannot know that <tt>dst.triangularView</tt> is
-a member template and that the following &lt; symbol is part of the delimiter for the template
-parameter. Another possibility would be that <tt>dst.triangularView</tt> is a member variable with the &lt;
-symbol referring to the <tt>operator&lt;()</tt> function. In fact, the compiler should choose the second
-possibility, according to the standard. If <tt>dst.triangularView</tt> is a member template (as in our case),
-the programmer should specify this explicitly with the \c template keyword and write <tt>dst.template
-triangularView</tt>.
-
-The precise rules are rather complicated, but ignoring some subtleties we can summarize them as follows:
-- A <em>dependent name</em> is name that depends (directly or indirectly) on a template parameter. In the
-  example, \c dst is a dependent name because it is of type <tt>MatrixBase&lt;Derived1&gt;</tt> which depends
-  on the template parameter \c Derived1.
-- If the code contains either one of the constructs <tt>xxx.yyy</tt> or <tt>xxx-&gt;yyy</tt> and \c xxx is a
-  dependent name and \c yyy refers to a member template, then the \c template keyword must be used before 
-  \c yyy, leading to <tt>xxx.template yyy</tt> or <tt>xxx-&gt;template yyy</tt>.
-- If the code contains the construct <tt>xxx::yyy</tt> and \c xxx is a dependent name and \c yyy refers to a
-  member typedef, then the \c typename keyword must be used before the whole construct, leading to
-  <tt>typename xxx::yyy</tt>.
-
-As an example where the \c typename keyword is required, consider the following code in \ref TutorialSparse
-for iterating over the non-zero entries of a sparse matrix type:
-
-\code
-SparseMatrixType mat(rows,cols);
-for (int k=0; k<mat.outerSize(); ++k)
-  for (SparseMatrixType::InnerIterator it(mat,k); it; ++it)
-  {
-    /* ... */
-  }
-\endcode
-
-If \c SparseMatrixType depends on a template parameter, then the \c typename keyword is required:
-
-\code
-template <typename T>
-void iterateOverSparseMatrix(const SparseMatrix<T>& mat;
-{
-  for (int k=0; k<m1.outerSize(); ++k)
-    for (typename SparseMatrix<T>::InnerIterator it(mat,k); it; ++it)
-    {
-      /* ... */
-    }
-}
-\endcode
-
-
-\section TopicTemplateKeywordResources Resources for further reading
-
-For more information and a fuller explanation of this topic, the reader may consult the following sources:
-- The book "C++ Template Metaprogramming" by David Abrahams and Aleksey Gurtovoy contains a very good
-  explanation in Appendix B ("The typename and template Keywords") which formed the basis for this page.
-- http://pages.cs.wisc.edu/~driscoll/typename.html
-- http://www.parashift.com/c++-faq-lite/templates.html#faq-35.18
-- http://www.comeaucomputing.com/techtalk/templates/#templateprefix
-- http://www.comeaucomputing.com/techtalk/templates/#typename
-
-*/
-}
+  "version": 2,
+  "dgSpecHash": "c9uXpmAqK2m93Yo5BgTmO0loFx4N6j3Gwal2SDE7TZTaZRdT4SAeECHcC5Y+zlpBVM8+htH73uWZe2grZTsN5g==",
+  "success": true,
+  "projectFilePath": "J:\\TEngine\\Plugins\\GameTasks\\GameTasks.Android\\GameTasks.Android.csproj",
+  "expectedPackageFiles": [
+    "C:\\Users\\wityang\\.nuget\\packages\\bcnencoder.net\\2.1.0\\bcnencoder.net.2.1.0.nupkg.sha512",
+    "C:\\Users\\wityang\\.nuget\\packages\\clangsharp\\15.0.2\\clangsharp.15.0.2.nupkg.sha512",
+    "C:\\Users\\wityang\\.nuget\\packages\\clangsharp.interop\\15.0.2\\clangsharp.interop.15.0.2.nupkg.sha512",
+    "C:\\Users\\wityang\\.nuget\\packages\\enums.net\\4.0.0\\enums.net.4.0.0.nupkg.sha512",
+    "C:\\Users\\wityang\\.nuget\\packages\\humanizer.core\\2.2.0\\humanizer.core.2.2.0.nupkg.sha512",
+    "C:\\Users\\wityang\\.nuget\\packages\\libclang\\15.0.0\\libclang.15.0.0.nupkg.sha512",
+    "C:\\Users\\wityang\\.nuget\\packages\\libclangsharp\\15.0.0\\libclangsharp.15.0.0.nupkg.sha512",
+    "C:\\Users\\wityang\\.nuget\\packages\\mathnet.numerics.signed\\4.15.0\\mathnet.numerics.signed.4.15.0.nupkg.sha512",
+    "C:\\Users\\wityang\\.nuget\\packages\\microsoft.bcl.asyncinterfaces\\5.0.0\\microsoft.bcl.asyncinterfaces.5.0.0.nupkg.sha512",
+    "C:\\Users\\wityang\\.nuget\\packages\\microsoft.build.framework\\16.5.0\\microsoft.build.framework.16.5.0.nupkg.sha512",
+    "C:\\Users\\wityang\\.nuget\\packages\\microsoft.codeanalysis.analyzers\\3.3.2\\microsoft.codeanalysis.analyzers.3.3.2.nupkg.sha512",
+    "C:\\Users\\wityang\\.nuget\\packages\\microsoft.codeanalysis.common\\4.0.0-3.final\\microsoft.codeanalysis.common.4.0.0-3.final.nupkg.sha512",
+    "C:\\Users\\wityang\\.nuget\\packages\\microsoft.codeanalysis.csharp\\4.0.0-3.final\\microsoft.codeanalysis.csharp.4.0.0-3.final.nupkg.sha512",
+    "C:\\Users\\wityang\\.nuget\\packages\\microsoft.codeanalysis.csharp.workspaces\\4.0.0-3.final\\microsoft.codeanalysis.csharp.workspaces.4.0.0-3.final.nupkg.sha512",
+    "C:\\Users\\wityang\\.nuget\\packages\\microsoft.codeanalysis.workspaces.common\\4.0.0-3.final\\microsoft.codeanalysis.workspaces.common.4.0.0-3.final.nupkg.sha512",
+    "C:\\Users\\wityang\\.nuget\\packages\\microsoft.codeanalysis.workspaces.msbuild\\4.0.0-3.final\\microsoft.codeanalysis.workspaces.msbuild.4.0.0-3.final.nupkg.sha512",
+    "C:\\Users\\wityang\\.nuget\\packages\\microsoft.io.recyclablememorystream\\2.2.0\\microsoft.io.recyclablememorystream.2.2.0.nupkg.sha512",
+    "C:\\Users\\wityang\\.nuget\\packages\\microsoft.netcore.platforms\\1.1.0\\microsoft.netcore.platforms.1.1.0.nupkg.sha512",
+    "C:\\Users\\wityang\\.nuget\\packages\\microsoft.netcore.targets\\1.1.0\\microsoft.netcore.targets.1.1.0.nupkg.sha512",
+    "C:\\Users\\wityang\\.nuget\\packages\\microsoft.toolkit.highperformance\\7.0.2\\microsoft.toolkit.highperformance.7.0.2.nupkg.sha512",
+    "C:\\Users\\wityang\\.nuget\\packages\\microsoft.win32.primitives\\4.3.0\\microsoft.win32.primitives.4.3.0.nupkg.sha512",
+    "C:\\Users\\wityang\\.nuget\\packages\\microsoft.win32.systemevents\\6.0.0\\microsoft.win32.systemevents.6.0.0.nupkg.sha512",
+    "C:\\Users\\wityang\\.nuget\\packages\\mono.cecil\\0.11.4\\mono.cecil.0.11.4.nupkg.sha512",
+    "C:\\Users\\wityang\\.nuget\\packages\\netstandard.library\\1.6.1\\netstandard.library.1.6.1.nupkg.sha512",
+    "C:\\Users\\wityang\\.nuget\\packages\\npoi\\2.6.0\\npoi.2.6.0.nupkg.sha512",
+    "C:\\Users\\wityang\\.nuget\\packages\\portable.bouncycastle\\1.9.0\\portable.bouncycastle.1.9.0.nupkg.sha512",
+    "C:\\Users\\wityang\\.nuget\\packages\\ripemd160\\1.0.1\\ripemd160.1.0.1.nupkg.sha512",
+    "C:\\Users\\wityang\\.nuget\\packages\\runtime.debian.8-x64.runtime.native.system.security.cryptography.openssl\\4.3.0\\runtime.debian.8-x64.runtime.native.system.security.cryptography.openssl.4.3.0.nupkg.sha512",
+    "C:\\Users\\wityang\\.nuget\\packages\\runtime.fedora.23-x64.runtime.native.system.security.cryptography.openssl\\4.3.0\\runtime.fedora.23-x64.runtime.native.system.security.cryptography.openssl.4.3.0.nupkg.sha512",
+    "C:\\Users\\wityang\\.nuget\\packages\\runtime.fedora.24-x64.runtime.native.system.security.cryptography.openssl\\4.3.0\\runtime.fedora.24-x64.runtime.native.system.security.cryptography.openssl.4.3.0.nupkg.sha512",
+    "C:\\Users\\wityang\\.nuget\\packages\\runtime.native.system\\4.3.0\\runtime.native.system.4.3.0.nupkg.sha512",
+    "C:\\Users\\wityang\\.nuget\\packages\\runtime.native.system.io.compression\\4.3.0\\runtime.native.system.io.compression.4.3.0.nupkg.sha512",
+    "C:\\Users\\wityang\\.nuget\\packages\\runtime.native.system.net.http\\4.3.0\\runtime.native.system.net.http.4.3.0.nupkg.sha512",
+    "C:\\Users\\wityang\\.nuget\\packages\\runtime.native.system.security.cryptography.apple\\4.3.0\\runtime.native.system.security.cryptography.apple.4.3.0.nupkg.sha512",
+    "C:\\Users\\wityang\\.nuget\\packages\\runtime.native.system.security.cryptography.openssl\\4.3.0\\runtime.native.system.security.cryptography.openssl.4.3.0.nupkg.sha512",
+    "C:\\Users\\wityang\\.nuget\\packages\\runtime.opensuse.13.2-x64.runtime.native.system.security.cryptography.openssl\\4.3.0\\runtime.opensuse.13.2-x64.runtime.native.system.security.cryptography.openssl.4.3.0.nupkg.sha512",
+    "C:\\Users\\wityang\\.nuget\\packages\\runtime.opensuse.42.1-x64.runtime.native.system.security.cryptography.openssl\\4.3.0\\runtime.opensuse.42.1-x64.runtime.native.system.security.cryptography.openssl.4.3.0.nupkg.sha512",
+    "C:\\Users\\wityang\\.nuget\\packages\\runtime.osx.10.10-x64.runtime.native.system.security.cryptography.apple\\4.3.0\\runtime.osx.10.10-x64.runtime.native.system.security.cryptography.apple.4.3.0.nupkg.sha512",
+    "C:\\Users\\wityang\\.nuget\\packages\\runtime.osx.10.10-x64.runtime.native.system.security.cryptography.openssl\\4.3.0\\runtime.osx.10.10-x64.runtime.native.system.security.cryptography.openssl.4.3.0.nupkg.sha512",
+    "C:\\Users\\wityang\\.nuget\\packages\\runtime.rhel.7-x64.runtime.native.system.security.cryptography.openssl\\4.3.0\\runtime.rhel.7-x64.runtime.native.system.security.cryptography.openssl.4.3.0.nupkg.sha512",
+    "C:\\Users\\wityang\\.nuget\\packages\\runtime.ubuntu.14.04-x64.runtime.native.system.security.cryptography.openssl\\4.3.0\\runtime.ubuntu.14.04

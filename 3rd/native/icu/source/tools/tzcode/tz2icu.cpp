@@ -373,7 +373,7 @@ void readzoneinfo(ifstream& file, ZoneInfo& info, bool is64bitData) {
                     }
                 } else if (transitionTimes[i] > HIGHEST_TIME32) {
                     // Skipping the rest of the transition data.  We cannot put such
-                    // transitions into zoneinfo.res, because data is limited to singed
+                    // transitions into zoneinfo.res, because data is limited to signed
                     // 32bit int by the ICU resource bundle.
                     break;
                 } else {
@@ -650,7 +650,7 @@ void scandir(string dir, string prefix="") {
     vector<string> subdirs;
     vector<string> subfiles;
 
-    if ((dp = opendir(dir.c_str())) == NULL) {
+    if ((dp = opendir(dir.c_str())) == nullptr) {
         cerr << "Error: Invalid directory: " << dir << endl;
         exit(1);
     }
@@ -659,7 +659,7 @@ void scandir(string dir, string prefix="") {
         exit(1);
     }
     chdir(dir.c_str());
-    while ((dir_entry = readdir(dp)) != NULL) {
+    while ((dir_entry = readdir(dp)) != nullptr) {
         string name = dir_entry->d_name;
         string path = dir + "/" + name;
         lstat(dir_entry->d_name,&stat_info);
@@ -774,16 +774,16 @@ struct FinalRulePart {
     // wall time, local standard time, and GMT standard time.
     // Here is how the isstd & isgmt flags are set by zic:
     //| case 's':       /* Standard */
-    //|         rp->r_todisstd = TRUE;
-    //|         rp->r_todisgmt = FALSE;
+    //|         rp->r_todisstd = true;
+    //|         rp->r_todisgmt = false;
     //| case 'w':       /* Wall */
-    //|         rp->r_todisstd = FALSE;
-    //|         rp->r_todisgmt = FALSE;
+    //|         rp->r_todisstd = false;
+    //|         rp->r_todisgmt = false;
     //| case 'g':       /* Greenwich */
     //| case 'u':       /* Universal */
     //| case 'z':       /* Zulu */
-    //|         rp->r_todisstd = TRUE;
-    //|         rp->r_todisgmt = TRUE;
+    //|         rp->r_todisstd = true;
+    //|         rp->r_todisgmt = true;
     bool isstd;
     bool isgmt;
 
@@ -1047,7 +1047,7 @@ void ZoneInfo::print(ostream& os, const string& id) const {
             os << " }" << endl;
         }
 
-        // 32bit transtions
+        // 32bit transitions
         if (trn != transitions.end() && trn->time < HIGHEST_TIME32) {
             os << "    trans:intvector { ";
             for (first = true; trn != transitions.end() && trn->time < HIGHEST_TIME32; ++trn) {
@@ -1060,7 +1060,7 @@ void ZoneInfo::print(ostream& os, const string& id) const {
             os << " }" << endl;
         }
 
-        // post 32bit transitons
+        // post 32bit transitions
         if (trn != transitions.end()) {
             os << "    transPost32:intvector { ";
             for (first = true; trn != transitions.end(); ++trn) {

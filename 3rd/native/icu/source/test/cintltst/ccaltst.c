@@ -19,6 +19,7 @@
 
 #if !UCONFIG_NO_FORMATTING
 
+#include <stdbool.h>
 #include <stdlib.h>
 #include <string.h>
 
@@ -42,6 +43,8 @@ void TestGetTimeZoneIDByWindowsID(void);
 void TestJpnCalAddSetNextEra(void);
 void TestUcalOpenBufferRead(void);
 void TestGetTimeZoneOffsetFromLocal(void);
+
+void TestFWWithISO8601(void);
 
 void addCalTest(TestNode** root);
 
@@ -67,6 +70,8 @@ void addCalTest(TestNode** root)
     addTest(root, &TestJpnCalAddSetNextEra, "tsformat/ccaltst/TestJpnCalAddSetNextEra");
     addTest(root, &TestUcalOpenBufferRead, "tsformat/ccaltst/TestUcalOpenBufferRead");
     addTest(root, &TestGetTimeZoneOffsetFromLocal, "tsformat/ccaltst/TestGetTimeZoneOffsetFromLocal");
+    addTest(root, &TestFWWithISO8601, "tsformat/ccaltst/TestFWWithISO8601");
+    addTest(root, &TestGetIanaTimeZoneID, "tstformat/ccaltst/TestGetIanaTimeZoneID");
 }
 
 /* "GMT" */
@@ -96,7 +101,10 @@ static const UCalGetTypeTest ucalGetTypeTests[] = {
     { "fr_CH",                   UCAL_DEFAULT,   "gregorian" },
     { "fr_SA",                   UCAL_DEFAULT,   "islamic-umalqura" },
     { "fr_CH@rg=sazzzz",         UCAL_DEFAULT,   "islamic-umalqura" },
+    { "fr_CH@rg=sa14",           UCAL_DEFAULT,   "islamic-umalqura" },
     { "fr_CH@calendar=japanese;rg=sazzzz", UCAL_DEFAULT, "japanese" },
+    { "fr_CH@rg=twcyi",          UCAL_DEFAULT,   "gregorian" }, // test for ICU-22364
+    { "fr_CH@rg=ugw",            UCAL_DEFAULT,   "gregorian" }, // test for ICU-22364
     { "fr_TH@rg=SA",             UCAL_DEFAULT,   "buddhist"  }, /* ignore malformed rg tag */
     { "th@rg=SA",                UCAL_DEFAULT,   "buddhist"  }, /* ignore malformed rg tag */
     { "",                        UCAL_GREGORIAN, "gregorian" },
@@ -120,8 +128,9 @@ static void TestCalendar()
     char tempMsgBuf2[256];  // u_austrcpy() of some formatted dates & times.
     UChar zone1[64], zone2[64];
     const char *tzver = 0;
+    int32_t tzverLen = 0;
     UChar canonicalID[64];
-    UBool isSystemID = FALSE;
+    UBool isSystemID = false;
     const UCalGetTypeTest * ucalGetTypeTestPtr;
 
 #ifdef U_USE_UCAL_OBSOLETE_2_8
@@ -274,10 +283,13 @@ static void TestCalendar()
     tzver = ucal_getTZDataVersion(&status);
     if (U_FAILURE(status)) {
         log_err_status(status, "FAIL: ucal_getTZDataVersion() => %s\n", u_errorName(status));
-    } else if (uprv_strlen(tzver) != 5 /*4 digits + 1 letter*/) {
-        log_err("FAIL: Bad version string was returned by ucal_getTZDataVersion\n");
     } else {
-        log_verbose("PASS: ucal_getTZDataVersion returned %s\n", tzver);
+        tzverLen = uprv_strlen(tzver);
+        if (tzverLen == 5 || tzverLen == 6 /* 4 digits + 1 or 2 letters */) {
+            log_verbose("PASS: ucal_getTZDataVersion returned %s\n", tzver);
+        } else {
+            log_err("FAIL: Bad version string was returned by ucal_getTZDataVersion\n");
+        }
     }
     
     /*Testing ucal_getCanonicalTimeZoneID*/
@@ -332,7 +344,7 @@ static void TestCalendar()
     /* use something sensible w/o hardcoding the count */
     if(count > 0) {
         log_verbose("PASS: ucal_countAvailable() works fine\n");
-        log_verbose("The no: of locales for which calendars are avilable are %d\n", count);
+        log_verbose("The no: of locales for which calendars are available are %d\n", count);
     } else {
         log_data_err("FAIL: Error in countAvailable()\n");
     }
@@ -345,8 +357,8 @@ static void TestCalendar()
     /*Testing the equality between calendar's*/
     log_verbose("\nTesting ucal_equivalentTo()\n");
     if(caldef && caldef2 && calfr && calit) { 
-      if(ucal_equivalentTo(caldef, caldef2) == FALSE || ucal_equivalentTo(caldef, calfr)== TRUE || 
-        ucal_equivalentTo(caldef, calit)== TRUE || ucal_equivalentTo(calfr, calfrclone) == FALSE) {
+      if(ucal_equivalentTo(caldef, caldef2) == false || ucal_equivalentTo(caldef, calfr)== true || 
+        ucal_equivalentTo(caldef, calit)== true || ucal_equivalentTo(calfr, calfrclone) == false) {
           log_data_err("FAIL: Error. equivalentTo test failed (Are you missing data?)\n");
       } else {
           log_verbose("PASS: equivalentTo test passed\n");
@@ -434,7 +446,7 @@ static void TestCalendar()
         log_err("FAIL: there is an error in getAttributes or setAttributes\n");
     else
         log_verbose("PASS: attribute set and got successfully\n");
-        /*set it back to orginal value */
+        /*set it back to original value */
     log_verbose("Setting it back to normal\n");
     ucal_setAttribute(calit, UCAL_LENIENT, count);
     if(ucal_getAttribute(calit, UCAL_LENIENT)!=count)
@@ -710,7 +722,7 @@ static void TestGetSetDateAPI()
 
     /*Testing  if setDate works fine  */
     log_verbose("\nTesting the ucal_setDate() function \n");
-    u_uastrcpy(temp, "Dec 17, 1971, 11:05:28 PM");
+    u_strcpy(temp, u"Dec 17, 1971, 11:05:28\u202FPM");
     ucal_setDate(caldef,1971, UCAL_DECEMBER, 17, &status);
     if(U_FAILURE(status)){
         log_err("error in setting the calendar date : %s\n", u_errorName(status));
@@ -741,7 +753,7 @@ static void TestGetSetDateAPI()
 
     /*Testing if setDateTime works fine */
     log_verbose("\nTesting the ucal_setDateTime() function \n");
-    u_uastrcpy(temp, "May 3, 1972, 4:30:42 PM");
+    u_strcpy(temp, u"May 3, 1972, 4:30:42\u202FPM");
     ucal_setDateTime(caldef,1972, UCAL_MAY, 3, 16, 30, 42, &status);
     if(U_FAILURE(status)){
         log_err("error in setting the calendar date : %s\n", u_errorName(status));
@@ -1563,6 +1575,24 @@ void TestGregorianChange() {
         }
     }
     ucal_close(cal);
+    /* Test ucal_setGregorianChange() on a iso8601 calendar and it should work
+     * as Gregorian. */
+    errorCode = U_ZERO_ERROR;
+    cal = ucal_open(utc, -1, "en@calendar=iso8601", UCAL_TRADITIONAL, &errorCode);
+    if(U_FAILURE(errorCode)) {
+        log_data_err("ucal_open(UTC) failed: %s - (Are you missing data?)\n", u_errorName(errorCode));
+        return;
+    }
+    ucal_setGregorianChange(cal, -365 * (dayMillis * (UDate)1), &errorCode);
+    if(U_FAILURE(errorCode)) {
+        log_err("ucal_setGregorianChange(1969) failed: %s\n", u_errorName(errorCode));
+    } else {
+        date = ucal_getGregorianChange(cal, &errorCode);
+        if(U_FAILURE(errorCode) || date != -365 * (dayMillis * (UDate)1)) {
+            log_err("ucal_getGregorianChange() failed: %s, date = %f\n", u_errorName(errorCode), date);
+        }
+    }
+    ucal_close(cal);
 
     /* Test ucal_setGregorianChange() on a non-Gregorian calendar where it should fail. */
     errorCode = U_ZERO_ERROR;
@@ -1586,7 +1616,7 @@ void TestGregorianChange() {
 }
 
 static void TestGetKeywordValuesForLocale() {
-#define PREFERRED_SIZE 16
+#define PREFERRED_SIZE 26
 #define MAX_NUMBER_OF_KEYWORDS 5
     const char *PREFERRED[PREFERRED_SIZE][MAX_NUMBER_OF_KEYWORDS+1] = {
             { "root",        "gregorian", NULL, NULL, NULL, NULL },
@@ -1605,8 +1635,20 @@ static void TestGetKeywordValuesForLocale() {
             { "zh_TW",       "gregorian", "roc", "chinese", NULL, NULL },
             { "ar_IR",       "persian", "gregorian", "islamic", "islamic-civil", "islamic-tbla" },
             { "th@rg=SAZZZZ", "islamic-umalqura", "gregorian", "islamic", "islamic-rgsa", NULL },
+
+            // tests for ICU-22364
+            { "zh_CN@rg=TW",           "gregorian", "chinese", NULL, NULL, NULL }, // invalid subdivision code
+            { "zh_CN@rg=TWzzzz",       "gregorian", "roc", "chinese", NULL, NULL }, // whole region
+            { "zh_TW@rg=TWxxxx",       "gregorian", "roc", "chinese", NULL, NULL }, // invalid subdivision code (ignored)
+            { "zh_TW@rg=ARa",          "gregorian", NULL, NULL, NULL, NULL }, // single-letter subdivision code
+            { "zh_TW@rg=AT1",          "gregorian", NULL, NULL, NULL, NULL }, // single-digit subdivision code
+            { "zh_TW@rg=USca",         "gregorian", NULL, NULL, NULL, NULL }, // two-letter subdivision code
+            { "zh_TW@rg=IT53",         "gregorian", NULL, NULL, NULL, NULL }, // two-digit subdivision code
+            { "zh_TW@rg=AUnsw",        "gregorian", NULL, NULL, NULL, NULL }, // three-letter subdivision code
+            { "zh_TW@rg=EE130",        "gregorian", NULL, NULL, NULL, NULL }, // three-digit subdivision code
+            { "zh_TW@rg=417zzzz",      "gregorian", NULL, NULL, NULL, NULL }, // three-digit region code
     };
-    const int32_t EXPECTED_SIZE[PREFERRED_SIZE] = { 1, 1, 1, 1, 2, 2, 2, 5, 5, 2, 2, 2, 1, 3, 5, 4 };
+    const int32_t EXPECTED_SIZE[PREFERRED_SIZE] = { 1, 1, 1, 1, 2, 2, 2, 5, 5, 2, 2, 2, 1, 3, 5, 4, 2, 3, 3, 1, 1, 1, 1, 1, 1, 1 };
     UErrorCode status = U_ZERO_ERROR;
     int32_t i, size, j;
     UEnumeration *all, *pref;
@@ -1616,29 +1658,29 @@ static void TestGetKeywordValuesForLocale() {
     int32_t valueLength;
     UList *ALLList = NULL;
     
-    UEnumeration *ALL = ucal_getKeywordValuesForLocale("calendar", uloc_getDefault(), FALSE, &status);
+    UEnumeration *ALL = ucal_getKeywordValuesForLocale("calendar", uloc_getDefault(), false, &status);
     if (U_SUCCESS(status)) {
         for (i = 0; i < PREFERRED_SIZE; i++) {
             pref = NULL;
             all = NULL;
             loc = PREFERRED[i][0];
-            pref = ucal_getKeywordValuesForLocale("calendar", loc, TRUE, &status);
-            matchPref = FALSE;
-            matchAll = FALSE;
+            pref = ucal_getKeywordValuesForLocale("calendar", loc, true, &status);
+            matchPref = false;
+            matchAll = false;
             
             value = NULL;
             valueLength = 0;
             
             if (U_SUCCESS(status) && uenum_count(pref, &status) == EXPECTED_SIZE[i]) {
-                matchPref = TRUE;
+                matchPref = true;
                 for (j = 0; j < EXPECTED_SIZE[i]; j++) {
                     if ((value = uenum_next(pref, &valueLength, &status)) != NULL && U_SUCCESS(status)) {
                         if (uprv_strcmp(value, PREFERRED[i][j+1]) != 0) {
-                            matchPref = FALSE;
+                            matchPref = false;
                             break;
                         }
                     } else {
-                        matchPref = FALSE;
+                        matchPref = false;
                         log_err("ERROR getting keyword value for locale \"%s\"\n", loc);
                         break;
                     }
@@ -1651,22 +1693,22 @@ static void TestGetKeywordValuesForLocale() {
             }
             uenum_close(pref);
             
-            all = ucal_getKeywordValuesForLocale("calendar", loc, FALSE, &status);
+            all = ucal_getKeywordValuesForLocale("calendar", loc, false, &status);
             
             size = uenum_count(all, &status);
             
             if (U_SUCCESS(status) && size == uenum_count(ALL, &status)) {
-                matchAll = TRUE;
+                matchAll = true;
                 ALLList = ulist_getListFromEnum(ALL);
                 for (j = 0; j < size; j++) {
                     if ((value = uenum_next(all, &valueLength, &status)) != NULL && U_SUCCESS(status)) {
                         if (!ulist_containsString(ALLList, value, (int32_t)uprv_strlen(value))) {
                             log_err("Locale %s have %s not in ALL\n", loc, value);
-                            matchAll = FALSE;
+                            matchAll = false;
                             break;
                         }
                     } else {
-                        matchAll = FALSE;
+                        matchAll = false;
                         log_err("ERROR getting \"all\" keyword value for locale \"%s\"\n", loc);
                         break;
                     }
@@ -1686,7 +1728,7 @@ static void TestGetKeywordValuesForLocale() {
 
 /*
  * Weekend tests, ported from
- * icu4j/trunk/main/tests/core/src/com/ibm/icu/dev/test/calendar/IBMCalendarTest.java
+ * icu4j/main/core/src/test/java/com/ibm/icu/dev/test/calendar/IBMCalendarTest.java
  * and extended a bit. Notes below from IBMCalendarTest.java ...
  * This test tests for specific locale data. This is probably okay
  * as far as US data is concerned, but if the Arabic/Yemen data
@@ -1782,7 +1824,7 @@ static void TestWeekend() {
     UErrorCode fmtStatus = U_ZERO_ERROR;
     UDateFormat * fmt = udat_open(UDAT_NONE, UDAT_NONE, "en", NULL, 0, NULL, 0, &fmtStatus);
     if (U_SUCCESS(fmtStatus)) {
-        udat_applyPattern(fmt, FALSE, logDateFormat, -1);
+        udat_applyPattern(fmt, false, logDateFormat, -1);
     } else {
         log_data_err("Unable to create UDateFormat - %s\n", u_errorName(fmtStatus));
         return;
@@ -1868,7 +1910,7 @@ typedef struct {
     const char *  locale;
     UDate         start;
     UDate         target;
-    UBool         progressive; /* TRUE to compute progressive difference for each field, FALSE to reset calendar after each call */
+    UBool         progressive; /* true to compute progressive difference for each field, false to reset calendar after each call */
     int32_t       yDiff;
     int32_t       MDiff;
     int32_t       dDiff;
@@ -1881,37 +1923,37 @@ static const UChar tzUSPacific[] = { 0x55,0x53,0x2F,0x50,0x61,0x63,0x69,0x66,0x6
 static const UChar tzGMT[] = { 0x47,0x4D,0x54,0 }; /* "GMT" */
 
 static const TFDItem tfdItems[] = {
-    /* timezone    locale          start              target           progres  yDf  MDf    dDf     HDf       mDf         sDf */
+    /* timezone    locale          start              target           progress yDf  MDf    dDf     HDf       mDf         sDf */
     /* For these we compute the progressive difference for each field - not resetting the calendar after each call */
-    { tzUSPacific, "en_US",        1267459800000.0,   1277772600000.0,  TRUE,     0,   3,    27,      9,       40,          0 }, /* 2010-Mar-01 08:10 -> 2010-Jun-28 17:50 */
-    { tzUSPacific, "en_US",        1267459800000.0,   1299089280000.0,  TRUE,     1,   0,     1,      1,       58,          0 }, /* 2010-Mar-01 08:10 -> 2011-Mar-02 10:08 */
+    { tzUSPacific, "en_US",        1267459800000.0,   1277772600000.0,  true,     0,   3,    27,      9,       40,          0 }, /* 2010-Mar-01 08:10 -> 2010-Jun-28 17:50 */
+    { tzUSPacific, "en_US",        1267459800000.0,   1299089280000.0,  true,     1,   0,     1,      1,       58,          0 }, /* 2010-Mar-01 08:10 -> 2011-Mar-02 10:08 */
     /* For these we compute the total difference for each field - resetting the calendar after each call */
-    { tzGMT,       "en_US",        0.0,               1073692800000.0,  FALSE,   34, 408, 12427, 298248, 17894880, 1073692800 }, /* 1970-Jan-01 00:00 -> 2004-Jan-10 00:00 */
-    { tzGMT,       "en_US",        0.0,               1073779200000.0,  FALSE,   34, 408, 12428, 298272, 17896320, 1073779200 }, /* 1970-Jan-01 00:00 -> 2004-Jan-11 00:00 */
-    { tzGMT,       "en_US",        0.0,               2147472000000.0,  FALSE,   68, 816, 24855, 596520, 35791200, 2147472000 }, /* 1970-Jan-01 00:00 -> 2038-Jan-19 00:00 */
-    { tzGMT,       "en_US",        0.0,               2147558400000.0,  FALSE,   68, 816, 24856, 596544, 35792640, 0x7FFFFFFF }, /* 1970-Jan-01 00:00 -> 2038-Jan-20 00:00, seconds diff overflow */
-    { tzGMT,       "en_US",        0.0,              -1073692800000.0,  FALSE,  -34,-408,-12427,-298248,-17894880,-1073692800 }, /* 1970-Jan-01 00:00 -> 1935-Dec-24 00:00 */
-    { tzGMT,       "en_US",        0.0,              -1073779200000.0,  FALSE,  -34,-408,-12428,-298272,-17896320,-1073779200 }, /* 1970-Jan-01 00:00 -> 1935-Dec-23 00:00 */
+    { tzGMT,       "en_US",        0.0,               1073692800000.0,  false,   34, 408, 12427, 298248, 17894880, 1073692800 }, /* 1970-Jan-01 00:00 -> 2004-Jan-10 00:00 */
+    { tzGMT,       "en_US",        0.0,               1073779200000.0,  false,   34, 408, 12428, 298272, 17896320, 1073779200 }, /* 1970-Jan-01 00:00 -> 2004-Jan-11 00:00 */
+    { tzGMT,       "en_US",        0.0,               2147472000000.0,  false,   68, 816, 24855, 596520, 35791200, 2147472000 }, /* 1970-Jan-01 00:00 -> 2038-Jan-19 00:00 */
+    { tzGMT,       "en_US",        0.0,               2147558400000.0,  false,   68, 816, 24856, 596544, 35792640, 0x7FFFFFFF }, /* 1970-Jan-01 00:00 -> 2038-Jan-20 00:00, seconds diff overflow */
+    { tzGMT,       "en_US",        0.0,              -1073692800000.0,  false,  -34,-408,-12427,-298248,-17894880,-1073692800 }, /* 1970-Jan-01 00:00 -> 1935-Dec-24 00:00 */
+    { tzGMT,       "en_US",        0.0,              -1073779200000.0,  false,  -34,-408,-12428,-298272,-17896320,-1073779200 }, /* 1970-Jan-01 00:00 -> 1935-Dec-23 00:00 */
     /* check fwd/backward on either side of era boundary and across era boundary */
-    { tzGMT,       "en_US",       -61978089600000.0,-61820409600000.0,  FALSE,    4,  59,  1825,  43800,  2628000,  157680000 }, /* CE   5-Dec-31 00:00 -> CE  10-Dec-30 00:00 */
-    { tzGMT,       "en_US",       -61820409600000.0,-61978089600000.0,  FALSE,   -4, -59, -1825, -43800, -2628000, -157680000 }, /* CE  10-Dec-30 00:00 -> CE   5-Dec-31 00:00 */
-    { tzGMT,       "en_US",       -62451129600000.0,-62293449600000.0,  FALSE,    4,  59,  1825,  43800,  2628000,  157680000 }, /* BCE 10-Jan-04 00:00 -> BCE  5-Jan-03 00:00 */
-    { tzGMT,       "en_US",       -62293449600000.0,-62451129600000.0,  FALSE,   -4, -59, -1825, -43800, -2628000, -157680000 }, /* BCE  5-Jan-03 00:00 -> BCE 10-Jan-04 00:00 */
-    { tzGMT,       "en_US",       -62293449600000.0,-61978089600000.0,  FALSE,    9, 119,  3650,  87600,  5256000,  315360000 }, /* BCE  5-Jan-03 00:00 -> CE   5-Dec-31 00:00 */
-    { tzGMT,       "en_US",       -61978089600000.0,-62293449600000.0,  FALSE,   -9,-119, -3650, -87600, -5256000, -315360000 }, /* CE   5-Dec-31 00:00 -> BCE  5-Jan-03 00:00 */
-    { tzGMT, "en@calendar=roc",    -1672704000000.0, -1515024000000.0,  FALSE,    4,  59,  1825,  43800,  2628000,  157680000 }, /* MG   5-Dec-30 00:00 -> MG  10-Dec-29 00:00 */
-    { tzGMT, "en@calendar=roc",    -1515024000000.0, -1672704000000.0,  FALSE,   -4, -59, -1825, -43800, -2628000, -157680000 }, /* MG  10-Dec-29 00:00 -> MG   5-Dec-30 00:00 */
-    { tzGMT, "en@calendar=roc",    -2145744000000.0, -1988064000000.0,  FALSE,    4,  59,  1825,  43800,  2628000,  157680000 }, /* BMG 10-Jan-03 00:00 -> BMG  5-Jan-02 00:00 */
-    { tzGMT, "en@calendar=roc",    -1988064000000.0, -2145744000000.0,  FALSE,   -4, -59, -1825, -43800, -2628000, -157680000 }, /* BMG  5-Jan-02 00:00 -> BMG 10-Jan-03 00:00 */
-    { tzGMT, "en@calendar=roc",    -1988064000000.0, -1672704000000.0,  FALSE,    9, 119,  3650,  87600,  5256000,  315360000 }, /* BMG  5-Jan-02 00:00 -> MG   5-Dec-30 00:00 */
-    { tzGMT, "en@calendar=roc",    -1672704000000.0, -1988064000000.0,  FALSE,   -9,-119, -3650, -87600, -5256000, -315360000 }, /* MG   5-Dec-30 00:00 -> BMG  5-Jan-02 00:00 */
-    { tzGMT, "en@calendar=coptic",-53026531200000.0,-52868851200000.0,  FALSE,    4,  64,  1825,  43800,  2628000,  157680000 }, /* Er1  5-Nas-05 00:00 -> Er1 10-Nas-04 00:00 */
-    { tzGMT, "en@calendar=coptic",-52868851200000.0,-53026531200000.0,  FALSE,   -4, -64, -1825, -43800, -2628000, -157680000 }, /* Er1 10-Nas-04 00:00 -> Er1  5-Nas-05 00:00 */
-    { tzGMT, "en@calendar=coptic",-53499571200000.0,-53341891200000.0,  FALSE,    4,  64,  1825,  43800,  2628000,  157680000 }, /* Er0 10-Tou-04 00:00 -> Er0  5-Tou-02 00:00 */
-    { tzGMT, "en@calendar=coptic",-53341891200000.0,-53499571200000.0,  FALSE,   -4, -64, -1825, -43800, -2628000, -157680000 }, /* Er0  5-Tou-02 00:00 -> Er0 10-Tou-04 00:00 */
-    { tzGMT, "en@calendar=coptic",-53341891200000.0,-53026531200000.0,  FALSE,    9, 129,  3650,  87600,  5256000,  315360000 }, /* Er0  5-Tou-02 00:00 -> Er1  5-Nas-05 00:00 */
-    { tzGMT, "en@calendar=coptic",-53026531200000.0,-53341891200000.0,  FALSE,   -9,-129, -3650, -87600, -5256000, -315360000 }, /* Er1  5-Nas-05 00:00 -> Er0  5-Tou-02 00:00 */
-    { NULL,        NULL,           0.0,               0.0,              FALSE,    0,   0,     0,      0,        0,          0 }  /* terminator */
+    { tzGMT,       "en_US",       -61978089600000.0,-61820409600000.0,  false,    4,  59,  1825,  43800,  2628000,  157680000 }, /* CE   5-Dec-31 00:00 -> CE  10-Dec-30 00:00 */
+    { tzGMT,       "en_US",       -61820409600000.0,-61978089600000.0,  false,   -4, -59, -1825, -43800, -2628000, -157680000 }, /* CE  10-Dec-30 00:00 -> CE   5-Dec-31 00:00 */
+    { tzGMT,       "en_US",       -62451129600000.0,-62293449600000.0,  false,    4,  59,  1825,  43800,  2628000,  157680000 }, /* BCE 10-Jan-04 00:00 -> BCE  5-Jan-03 00:00 */
+    { tzGMT,       "en_US",       -62293449600000.0,-62451129600000.0,  false,   -4, -59, -1825, -43800, -2628000, -157680000 }, /* BCE  5-Jan-03 00:00 -> BCE 10-Jan-04 00:00 */
+    { tzGMT,       "en_US",       -62293449600000.0,-61978089600000.0,  false,    9, 119,  3650,  87600,  5256000,  315360000 }, /* BCE  5-Jan-03 00:00 -> CE   5-Dec-31 00:00 */
+    { tzGMT,       "en_US",       -61978089600000.0,-62293449600000.0,  false,   -9,-119, -3650, -87600, -5256000, -315360000 }, /* CE   5-Dec-31 00:00 -> BCE  5-Jan-03 00:00 */
+    { tzGMT, "en@calendar=roc",    -1672704000000.0, -1515024000000.0,  false,    4,  59,  1825,  43800,  2628000,  157680000 }, /* MG   5-Dec-30 00:00 -> MG  10-Dec-29 00:00 */
+    { tzGMT, "en@calendar=roc",    -1515024000000.0, -1672704000000.0,  false,   -4, -59, -1825, -43800, -2628000, -157680000 }, /* MG  10-Dec-29 00:00 -> MG   5-Dec-30 00:00 */
+    { tzGMT, "en@calendar=roc",    -2145744000000.0, -1988064000000.0,  false,    4,  59,  1825,  43800,  2628000,  157680000 }, /* BMG 10-Jan-03 00:00 -> BMG  5-Jan-02 00:00 */
+    { tzGMT, "en@calendar=roc",    -1988064000000.0, -2145744000000.0,  false,   -4, -59, -1825, -43800, -2628000, -157680000 }, /* BMG  5-Jan-02 00:00 -> BMG 10-Jan-03 00:00 */
+    { tzGMT, "en@calendar=roc",    -1988064000000.0, -1672704000000.0,  false,    9, 119,  3650,  87600,  5256000,  315360000 }, /* BMG  5-Jan-02 00:00 -> MG   5-Dec-30 00:00 */
+    { tzGMT, "en@calendar=roc",    -1672704000000.0, -1988064000000.0,  false,   -9,-119, -3650, -87600, -5256000, -315360000 }, /* MG   5-Dec-30 00:00 -> BMG  5-Jan-02 00:00 */
+    { tzGMT, "en@calendar=coptic",-53026531200000.0,-52868851200000.0,  false,    4,  64,  1825,  43800,  2628000,  157680000 }, /* Er1  5-Nas-05 00:00 -> Er1 10-Nas-04 00:00 */
+    { tzGMT, "en@calendar=coptic",-52868851200000.0,-53026531200000.0,  false,   -4, -64, -1825, -43800, -2628000, -157680000 }, /* Er1 10-Nas-04 00:00 -> Er1  5-Nas-05 00:00 */
+    { tzGMT, "en@calendar=coptic",-53499571200000.0,-53341891200000.0,  false,    4,  64,  1825,  43800,  2628000,  157680000 }, /* Er0 10-Tou-04 00:00 -> Er0  5-Tou-02 00:00 */
+    { tzGMT, "en@calendar=coptic",-53341891200000.0,-53499571200000.0,  false,   -4, -64, -1825, -43800, -2628000, -157680000 }, /* Er0  5-Tou-02 00:00 -> Er0 10-Tou-04 00:00 */
+    { tzGMT, "en@calendar=coptic",-53341891200000.0,-53026531200000.0,  false,    9, 129,  3650,  87600,  5256000,  315360000 }, /* Er0  5-Tou-02 00:00 -> Er1  5-Nas-05 00:00 */
+    { tzGMT, "en@calendar=coptic",-53026531200000.0,-53341891200000.0,  false,   -9,-129, -3650, -87600, -5256000, -315360000 }, /* Er1  5-Nas-05 00:00 -> Er0  5-Tou-02 00:00 */
+    { NULL,        NULL,           0.0,               0.0,              false,    0,   0,     0,      0,        0,          0 }  /* terminator */
 };
 
 void TestFieldDifference() {
@@ -2100,22 +2142,22 @@ void TestAmbiguousWallTime() {
 
 static const EraTestItem eraTestItems[] = {
     /* calendars with non-modern era 0 that goes backwards, max era == 1 */
-    { "en@calendar=gregorian", TRUE },
-    { "en@calendar=roc", TRUE },
-    { "en@calendar=coptic", TRUE },
+    { "en@calendar=gregorian", true },
+    { "en@calendar=roc", true },
+    { "en@calendar=coptic", true },
     /* calendars with non-modern era 0 that goes forwards, max era > 1 */
-    { "en@calendar=japanese", FALSE },
-    { "en@calendar=chinese", FALSE },
+    { "en@calendar=japanese", false },
+    { "en@calendar=chinese", false },
     /* calendars with non-modern era 0 that goes forwards, max era == 1 */
-    { "en@calendar=ethiopic", FALSE },
+    { "en@calendar=ethiopic", false },
     /* calendars with only one era  = 0, forwards */
-    { "en@calendar=buddhist", FALSE },
-    { "en@calendar=hebrew", FALSE },
-    { "en@calendar=islamic", FALSE },
-    { "en@calendar=indian", FALSE },
-    { "en@calendar=persian", FALSE },
-    { "en@calendar=ethiopic-amete-alem", FALSE },
-    { NULL, FALSE }
+    { "en@calendar=buddhist", false },
+    { "en@calendar=hebrew", false },
+    { "en@calendar=islamic", false },
+    { "en@calendar=indian", false },
+    { "en@calendar=persian", false },
+    { "en@calendar=ethiopic-amete-alem", false },
+    { NULL, false }
 };
 
 static const UChar zoneGMT[] = { 0x47,0x4D,0x54,0 };
@@ -2336,11 +2378,11 @@ static const UChar zoneCairo[]     = { 0x41,0x66,0x72,0x69,0x63,0x61,0x2F,0x43,0
 static const UChar zoneIceland[]   = { 0x41,0x74,0x6C,0x61,0x6E,0x74,0x69,0x63,0x2F,0x52,0x65,0x79,0x6B,0x6A,0x61,0x76,0x69,0x6B,0 }; /* "Atlantic/Reykjavik", always on DST (since when?) */
 
 static const TZTransitionItem tzTransitionItems[] = {
-    { "USPacific mid 2012", zoneUSPacific, 2012, UCAL_JULY, 1, TRUE , TRUE  },
-    { "USPacific mid  100", zoneUSPacific,  100, UCAL_JULY, 1, FALSE, TRUE  }, /* no transitions before 100 CE... */
-    { "Cairo     mid 2012", zoneCairo,     2012, UCAL_JULY, 1, TRUE , TRUE  }, /* DST cancelled since 2011 (Changed since 2014c) */
-    { "Iceland   mid 2012", zoneIceland,   2012, UCAL_JULY, 1, TRUE , FALSE }, /* always on DST */
-    { NULL,                 NULL,             0,         0, 0, FALSE, FALSE } /* terminator */
+    { "USPacific mid 2012", zoneUSPacific, 2012, UCAL_JULY, 1, true , true  },
+    { "USPacific mid  100", zoneUSPacific,  100, UCAL_JULY, 1, false, true  }, /* no transitions before 100 CE... */
+    { "Cairo     mid 2012", zoneCairo,     2012, UCAL_JULY, 1, true , true  }, /* DST cancelled since 2011 (Changed since 2014c) */
+    { "Iceland   mid 2012", zoneIceland,   2012, UCAL_JULY, 1, true , false }, /* always on DST */
+    { NULL,                 NULL,             0,         0, 0, false, false } /* terminator */
 };
 
 void TestGetTZTransition() {
@@ -2769,6 +2811,84 @@ TestGetTimeZoneOffsetFromLocal() {
         }
     }
     ucal_close(cal);
+}
+
+void
+TestFWWithISO8601() {
+    /* UCAL_SUNDAY is 1, UCAL_MONDAY is 2, ..., UCAL_SATURDAY is 7 */
+    const char* LOCALES[] = {
+        "",
+        "en-u-ca-iso8601-fw-sun",
+        "en-u-ca-iso8601-fw-mon",
+        "en-u-ca-iso8601-fw-tue",
+        "en-u-ca-iso8601-fw-wed",
+        "en-u-ca-iso8601-fw-thu",
+        "en-u-ca-iso8601-fw-fri",
+        "en-u-ca-iso8601-fw-sat",
+    };
+    for (int32_t i = UCAL_SUNDAY; i <= UCAL_SATURDAY; i++) {
+        const char* locale = LOCALES[i];
+        UErrorCode status = U_ZERO_ERROR;
+        UCalendar* cal = ucal_open(0, 0, locale, UCAL_TRADITIONAL, &status);
+        if(U_FAILURE(status)){
+            log_data_err("FAIL: error in ucal_open caldef : %s\n - (Are you missing data?)", u_errorName(status));
+        }
+        int32_t actual = ucal_getAttribute(cal, UCAL_FIRST_DAY_OF_WEEK);
+        if (i != actual) {
+            log_err("ERROR: ucal_getAttribute(\"%s\", UCAL_FIRST_DAY_OF_WEEK) should be %d but get %d\n",
+                    locale, i, actual);
+        }
+        ucal_close(cal);
+    }
+}
+
+void
+TestGetIanaTimeZoneID() {
+    const UChar* UNKNOWN = u"Etc/Unknown";
+    typedef struct {
+        const UChar* id;
+        const UChar* expected;
+    } IanaTimeZoneIDTestData;
+    
+    const IanaTimeZoneIDTestData TESTDATA[] = {
+        {u"",                   UNKNOWN},
+        {0,                     UNKNOWN},
+        {UNKNOWN,               UNKNOWN},
+        {u"America/New_York",   u"America/New_York"},
+        {u"Asia/Calcutta",      u"Asia/Kolkata"},
+        {u"Europe/Kiev",        u"Europe/Kyiv"},
+        {u"Europe/Zaporozhye",  u"Europe/Kyiv"},
+        {u"Etc/GMT-1",          u"Etc/GMT-1"},
+        {u"Etc/GMT+20",         UNKNOWN},
+        {u"PST8PDT",            u"PST8PDT"},
+        {u"GMT-08:00",          UNKNOWN},
+        {0,                     0}
+    };
+
+    for (int32_t i = 0; TESTDATA[i].expected != 0; i++) {
+        UErrorCode sts = U_ZERO_ERROR;
+        UChar ianaID[128];
+        int32_t ianaLen = 0;
+
+        ianaLen = ucal_getIanaTimeZoneID(TESTDATA[i].id, -1, ianaID, sizeof(ianaID), &sts);
+
+        if (u_strcmp(TESTDATA[i].expected, UNKNOWN) == 0) {
+            if (sts != U_ILLEGAL_ARGUMENT_ERROR) {
+                log_err("Expected U_ILLEGAL_ERROR: TESTDATA[%d]", i);
+            }
+        } else {
+            if (u_strlen(TESTDATA[i].expected) != ianaLen || u_strncmp(TESTDATA[i].expected, ianaID, ianaLen) != 0) {
+                log_err("Error: TESTDATA[%d]", i);
+            }
+            // Calling ucal_getIanaTimeZoneID with an IANA ID should return the same
+            UChar ianaID2[128];
+            int32_t ianaLen2 = 0;
+            ianaLen2 = ucal_getIanaTimeZoneID(ianaID, ianaLen, ianaID2, sizeof(ianaID2), &sts);
+            if (U_FAILURE(sts) || ianaLen != ianaLen2 || u_strncmp(ianaID, ianaID2, ianaLen) != 0) {
+                    log_err("Error: IANA ID for IANA ID %s", ianaID);
+                }
+        }
+    }
 }
 
 #endif /* #if !UCONFIG_NO_FORMATTING */

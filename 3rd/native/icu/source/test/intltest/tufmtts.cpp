@@ -25,7 +25,7 @@
 #endif
 
 class TimeUnitTest : public IntlTest {
-    void runIndexedTest(int32_t index, UBool exec, const char* &name, char* /*par*/ ) {
+    void runIndexedTest(int32_t index, UBool exec, const char* &name, char* /*par*/ ) override {
         if (exec) logln("TestSuite TimeUnitTest");
         TESTCASE_AUTO_BEGIN;
         TESTCASE_AUTO(testBasic);
@@ -60,10 +60,10 @@ public:
      * Performs tests for Greek
      * This tests that if the plural count listed in time unit format does not
      * match those in the plural rules for the locale, those plural count in
-     * time unit format will be ingored and subsequently, fall back will kick in
+     * time unit format will be ignored and subsequently, fall back will kick in
      * which is tested above.
      * Without data sanitization, setNumberFormat() would crash.
-     * As of CLDR shiped in ICU4.8, Greek is one such language.
+     * As of CLDR shipped in ICU4.8, Greek is one such language.
      */
     void testGreekWithSanitization();
 
@@ -84,15 +84,15 @@ extern IntlTest *createTimeUnitTest() {
 // double 3.0 hours to be equal
 static UBool tmaEqual(const TimeUnitAmount& left, const TimeUnitAmount& right) {
     if (left.getTimeUnitField() != right.getTimeUnitField()) {
-        return FALSE;
+        return false;
     }
     UErrorCode status = U_ZERO_ERROR;
     if (!left.getNumber().isNumeric() || !right.getNumber().isNumeric()) {
-        return FALSE;
+        return false;
     }
     UBool result = left.getNumber().getDouble(status) == right.getNumber().getDouble(status);
     if (U_FAILURE(status)) {
-        return FALSE;
+        return false;
     }
     return result;
 }
@@ -109,7 +109,7 @@ void TimeUnitTest::testBasic() {
         Locale loc(locales[locIndex]);
         TimeUnitFormat** formats = new TimeUnitFormat*[2];
         formats[UTMUTFMT_FULL_STYLE] = new TimeUnitFormat(loc, status);
-        if (!assertSuccess("TimeUnitFormat(full)", status, TRUE)) return;
+        if (!assertSuccess("TimeUnitFormat(full)", status, true)) return;
         formats[UTMUTFMT_ABBREVIATED_STYLE] = new TimeUnitFormat(loc, UTMUTFMT_ABBREVIATED_STYLE, status);
         if (!assertSuccess("TimeUnitFormat(short)", status)) return;
 #ifdef TUFMTTS_DEBUG
@@ -134,7 +134,7 @@ void TimeUnitTest::testBasic() {
                 UnicodeString formatted;
                 Formattable formattable;
                 formattable.adoptObject(source);
-                formatted = ((Format*)formats[style])->format(formattable, formatted, status);
+                formatted = (dynamic_cast<Format*>(formats[style]))->format(formattable, formatted, status);
                 if (!assertSuccess("format()", status)) return;
 #ifdef TUFMTTS_DEBUG
                 char formatResult[1000];
@@ -142,16 +142,16 @@ void TimeUnitTest::testBasic() {
                 std::cout << "format result: " << formatResult << "\n";
 #endif
                 Formattable result;
-                ((Format*)formats[style])->parseObject(formatted, result, status);
+                (dynamic_cast<Format*>(formats[style]))->parseObject(formatted, result, status);
                 if (!assertSuccess("parseObject()", status)) return;
-                if (!tmaEqual(*((TimeUnitAmount *)result.getObject()), *((TimeUnitAmount *) formattable.getObject()))) {
+                if (!tmaEqual(*(dynamic_cast<const TimeUnitAmount*>(result.getObject())), *(dynamic_cast<const TimeUnitAmount*>(formattable.getObject())))) {
                     dataerrln("No round trip: ");
                 }
                 // other style parsing
                 Formattable result_1;
-                ((Format*)formats[1-style])->parseObject(formatted, result_1, status);
+                (dynamic_cast<Format*>(formats[1-style]))->parseObject(formatted, result_1, status);
                 if (!assertSuccess("parseObject()", status)) return;
-                if (!tmaEqual(*((TimeUnitAmount *)result_1.getObject()), *((TimeUnitAmount *) formattable.getObject()))) {
+                if (!tmaEqual(*(dynamic_cast<const TimeUnitAmount*>(result_1.getObject())), *(dynamic_cast<const TimeUnitAmount*>(formattable.getObject())))) {
                     dataerrln("No round trip: ");
                 }
             }
@@ -254,7 +254,7 @@ void TimeUnitTest::testAPI() {
     //================= TimeUnitFormat =================
     //
     TimeUnitFormat* tmf_en = new TimeUnitFormat(Locale("en"), status);
-    if (!assertSuccess("TimeUnitFormat(en...)", status, TRUE)) return;
+    if (!assertSuccess("TimeUnitFormat(en...)", status, true)) return;
     TimeUnitFormat tmf_fr(Locale("fr"), status);
     if (!assertSuccess("TimeUnitFormat(fr...)", status)) return;
 
@@ -312,33 +312,35 @@ void TimeUnitTest::testGreekWithFallback() {
     UTimeUnitFormatStyle styles[] = {UTMUTFMT_FULL_STYLE, UTMUTFMT_ABBREVIATED_STYLE};
     const int numbers[] = {1, 7};
 
-    const UChar oneSecond[] = {0x0031, 0x0020, 0x03b4, 0x03b5, 0x03c5, 0x03c4, 0x03b5, 0x03c1, 0x03cc, 0x03bb, 0x03b5, 0x03c0, 0x03c4, 0x03bf, 0};
-    const UChar oneSecondShort[] = {0x0031, 0x0020, 0x03b4, 0x03b5, 0x03c5, 0x03c4, 0x002e, 0};
-    const UChar oneMinute[] = {0x0031, 0x0020, 0x03bb, 0x03b5, 0x03c0, 0x03c4, 0x03cc, 0};
-    const UChar oneMinuteShort[] = {0x0031, 0x0020, 0x03bb, 0x03b5, 0x03c0, 0x002e, 0};
-    const UChar oneHour[] = {0x0031, 0x0020, 0x03ce, 0x03c1, 0x03b1, 0};
-    const UChar oneDay[] = {0x0031, 0x0020, 0x03b7, 0x03bc, 0x03ad, 0x03c1, 0x03b1, 0};
-    const UChar oneMonth[] = {0x0031, 0x0020, 0x03bc, 0x03ae, 0x03bd, 0x03b1, 0x03c2, 0};
-    const UChar oneMonthShort[] = {0x0031, 0x0020, 0x03bc, 0x03ae, 0x03bd, 0x002e, 0};
-    const UChar oneYear[] = {0x0031, 0x0020, 0x03ad, 0x03c4, 0x03bf, 0x03c2, 0};
-    const UChar oneYearShort[] = {0x0031, 0x0020, 0x03ad, 0x03c4, 0x002e, 0};
-    const UChar sevenSeconds[] = {0x0037, 0x0020, 0x03b4, 0x03b5, 0x03c5, 0x03c4, 0x03b5, 0x03c1, 0x03cc, 0x03bb, 0x03b5, 0x03c0, 0x03c4, 0x03b1, 0};
-    const UChar sevenSecondsShort[] = {0x0037, 0x0020, 0x03b4, 0x03b5, 0x03c5, 0x03c4, 0x002e, 0};
-    const UChar sevenMinutes[] = {0x0037, 0x0020, 0x03bb, 0x03b5, 0x03c0, 0x03c4, 0x03ac, 0};
-    const UChar sevenMinutesShort[] = {0x0037, 0x0020, 0x03bb, 0x03b5, 0x03c0, 0x002e, 0};
-    const UChar sevenHours[] = {0x0037, 0x0020, 0x03ce, 0x03c1, 0x03b5, 0x03c2, 0};
-    const UChar sevenHoursShort[] = {0x0037, 0x0020, 0x03ce, 0x03c1, 0x002e, 0};
-    const UChar sevenDays[] = {0x0037, 0x0020, 0x03b7, 0x03bc, 0x03ad, 0x03c1, 0x03b5, 0x03c2, 0};
-    const UChar sevenMonths[] = {0x0037, 0x0020, 0x03bc, 0x03ae, 0x03bd, 0x03b5, 0x3c2, 0};
-    const UChar sevenMonthsShort[] = {0x0037, 0x0020, 0x03bc, 0x03ae, 0x03bd, 0x002e, 0};
-    const UChar sevenYears[] = {0x0037, 0x0020, 0x03ad, 0x03c4, 0x03b7, 0};
-    const UChar sevenYearsShort[] = {0x0037, 0x0020, 0x03ad, 0x03c4, 0x002e, 0};
+    const char16_t oneSecond[] = {0x0031, 0x0020, 0x03b4, 0x03b5, 0x03c5, 0x03c4, 0x03b5, 0x03c1, 0x03cc, 0x03bb, 0x03b5, 0x03c0, 0x03c4, 0x03bf, 0};
+    const char16_t oneSecondShort[] = {0x0031, 0x0020, 0x03b4, 0x03b5, 0x03c5, 0x03c4, 0x002e, 0};
+    const char16_t oneMinute[] = {0x0031, 0x0020, 0x03bb, 0x03b5, 0x03c0, 0x03c4, 0x03cc, 0};
+    const char16_t oneMinuteShort[] = {0x0031, 0x0020, 0x03bb, 0x002e, 0};
+    const char16_t oneHour[] = {0x0031, 0x0020, 0x03ce, 0x03c1, 0x03b1, 0};
+    const char16_t oneHourShort[] = {0x0031, 0x0020, 0x03ce, 0x002e, 0};
+    const char16_t oneDay[] = {0x0031, 0x0020, 0x03b7, 0x03bc, 0x03ad, 0x03c1, 0x03b1, 0};
+    const char16_t oneMonth[] = {0x0031, 0x0020, 0x03bc, 0x03ae, 0x03bd, 0x03b1, 0x03c2, 0};
+    const char16_t oneMonthShort[] = {0x0031, 0x0020, 0x03bc, 0x03ae, 0x03bd, 0x002e, 0};
+    const char16_t oneYear[] = {0x0031, 0x0020, 0x03ad, 0x03c4, 0x03bf, 0x03c2, 0};
+    const char16_t oneYearShort[] = {0x0031, 0x0020, 0x03ad, 0x03c4, 0x002e, 0};
+    const char16_t sevenSeconds[] = {0x0037, 0x0020, 0x03b4, 0x03b5, 0x03c5, 0x03c4, 0x03b5, 0x03c1, 0x03cc, 0x03bb, 0x03b5, 0x03c0, 0x03c4, 0x03b1, 0};
+    const char16_t sevenSecondsShort[] = {0x0037, 0x0020, 0x03b4, 0x03b5, 0x03c5, 0x03c4, 0x002e, 0};
+    const char16_t sevenMinutes[] = {0x0037, 0x0020, 0x03bb, 0x03b5, 0x03c0, 0x03c4, 0x03ac, 0};
+    const char16_t sevenMinutesShort[] = {0x0037, 0x0020, 0x03bb, 0x002e, 0};
+    const char16_t sevenHours[] = {0x0037, 0x0020, 0x03ce, 0x03c1, 0x03b5, 0x03c2, 0};
+    const char16_t sevenHoursShort[] = {0x0037, 0x0020, 0x03ce, 0x002e, 0};
+    const char16_t sevenDays[] = {0x0037, 0x0020, 0x03b7, 0x03bc, 0x03ad, 0x03c1, 0x03b5, 0x03c2, 0};
+    const char16_t sevenMonths[] = {0x0037, 0x0020, 0x03bc, 0x03ae, 0x03bd, 0x03b5, 0x3c2, 0};
+    const char16_t sevenMonthsShort[] = {0x0037, 0x0020, 0x03bc, 0x03ae, 0x03bd, 0x002e, 0};
+    const char16_t sevenYears[] = {0x0037, 0x0020, 0x03ad, 0x03c4, 0x03b7, 0};
+    const char16_t sevenYearsShort[] = {0x0037, 0x0020, 0x03ad, 0x03c4, 0x002e, 0};
 
     const UnicodeString oneSecondStr(oneSecond);
     const UnicodeString oneSecondShortStr(oneSecondShort);
     const UnicodeString oneMinuteStr(oneMinute);
     const UnicodeString oneMinuteShortStr(oneMinuteShort);
     const UnicodeString oneHourStr(oneHour);
+    const UnicodeString oneHourShortStr(oneHourShort);
     const UnicodeString oneDayStr(oneDay);
     const UnicodeString oneMonthStr(oneMonth);
     const UnicodeString oneMonthShortStr(oneMonthShort);
@@ -358,12 +360,12 @@ void TimeUnitTest::testGreekWithFallback() {
 
     const UnicodeString expected[] = {
             oneSecondStr, oneMinuteStr, oneHourStr, oneDayStr, oneMonthStr, oneYearStr,
-            oneSecondShortStr, oneMinuteShortStr, oneHourStr, oneDayStr, oneMonthShortStr, oneYearShortStr,
+            oneSecondShortStr, oneMinuteShortStr, oneHourShortStr, oneDayStr, oneMonthShortStr, oneYearShortStr,
             sevenSecondsStr, sevenMinutesStr, sevenHoursStr, sevenDaysStr, sevenMonthsStr, sevenYearsStr,
             sevenSecondsShortStr, sevenMinutesShortStr, sevenHoursShortStr, sevenDaysStr, sevenMonthsShortStr, sevenYearsShortStr,
 
             oneSecondStr, oneMinuteStr, oneHourStr, oneDayStr, oneMonthStr, oneYearStr,
-            oneSecondShortStr, oneMinuteShortStr, oneHourStr, oneDayStr, oneMonthShortStr, oneYearShortStr,
+            oneSecondShortStr, oneMinuteShortStr, oneHourShortStr, oneDayStr, oneMonthShortStr, oneYearShortStr,
             sevenSecondsStr, sevenMinutesStr, sevenHoursStr, sevenDaysStr, sevenMonthsStr, sevenYearsStr,
             sevenSecondsShortStr, sevenMinutesShortStr, sevenHoursShortStr, sevenDaysStr, sevenMonthsShortStr, sevenYearsShortStr};
 
@@ -408,7 +410,7 @@ void TimeUnitTest::testGreekWithFallback() {
                     UnicodeString str;
 
                     fmt.adoptObject(tamt.orphan());
-                    str = ((Format *)tfmt.getAlias())->format(fmt, str, status);
+                    str = (dynamic_cast<Format*>(tfmt.getAlias()))->format(fmt, str, status);
                     if (!assertSuccess("formatting relative time failed", status)) {
 #ifdef TUFMTTS_DEBUG
                         std::cout <<  "Failed to format" << "\n";
@@ -442,7 +444,7 @@ void TimeUnitTest::testGreekWithSanitization() {
     UErrorCode status = U_ZERO_ERROR;
     Locale elLoc("el");
     NumberFormat* numberFmt = NumberFormat::createInstance(Locale("el"), status);
-    if (!assertSuccess("NumberFormat::createInstance for el locale", status, TRUE)) return;
+    if (!assertSuccess("NumberFormat::createInstance for el locale", status, true)) return;
     numberFmt->setMaximumFractionDigits(1);
 
     TimeUnitFormat* timeUnitFormat = new TimeUnitFormat(elLoc, status);
@@ -467,7 +469,7 @@ void TimeUnitTest::test10219Plurals() {
         dataerrln("generating TimeUnitFormat Object failed: %s", u_errorName(status));
         return;
     }
-    LocalPointer<DecimalFormat> nf((DecimalFormat *) NumberFormat::createInstance(usLocale, status));
+    LocalPointer<DecimalFormat> nf(dynamic_cast<DecimalFormat*>(NumberFormat::createInstance(usLocale, status)));
     if (U_FAILURE(status)) {
         dataerrln("generating NumberFormat Object failed: %s", u_errorName(status));
         return;
@@ -521,7 +523,7 @@ void TimeUnitTest::TestBritishShortHourFallback() {
     UnicodeString result;
     formatter.format(oneHour, result, status);
     assertSuccess("TestBritishShortHourFallback()", status);
-    assertEquals("TestBritishShortHourFallback()", UNICODE_STRING_SIMPLE("1 hr"), result, TRUE);
+    assertEquals("TestBritishShortHourFallback()", UNICODE_STRING_SIMPLE("1 hr"), result, true);
 }
 
 #endif

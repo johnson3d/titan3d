@@ -135,10 +135,10 @@ UBool IntlTestDateFormatSymbols::UnicodeStringsArePrefixes(int32_t count, int32_
     for (i = 0; i < count; i++) {
         if (baseArray[i].compare(0, prefixLen, prefixArray[i]) != 0) {
             errln("ERROR: Mismatch example: expect prefix \"" + prefixArray[i] + "\" of base \"" + baseArray[i] + "\".");
-            return FALSE;
+            return false;
         }
     }
-    return TRUE;
+    return true;
 }
 
 void IntlTestDateFormatSymbols::TestGetSetSpecificItems()
@@ -348,6 +348,13 @@ void IntlTestDateFormatSymbols::TestSymbols(/* char *par */)
         errln("ERROR: setQuarters(FORMAT, ABBREVIATED) failed");
     }
 
+    const UnicodeString *narrowQuarters = en.getQuarters(count,DateFormatSymbols::FORMAT, DateFormatSymbols::NARROW);
+    fr2.setQuarters(narrowQuarters, count, DateFormatSymbols::FORMAT, DateFormatSymbols::NARROW);
+    if( *en.getQuarters(count,DateFormatSymbols::FORMAT, DateFormatSymbols::NARROW) != 
+        *fr2.getQuarters(count,DateFormatSymbols::FORMAT ,DateFormatSymbols::NARROW )) {
+        errln("ERROR: setQuarters(FORMAT, NARROW) failed");
+    }
+
     const UnicodeString *standaloneWideQuarters = en.getQuarters(count,DateFormatSymbols::STANDALONE, DateFormatSymbols::WIDE);
     fr.setQuarters(standaloneWideQuarters, count, DateFormatSymbols::STANDALONE, DateFormatSymbols::WIDE);
     if( *en.getQuarters(count,DateFormatSymbols::STANDALONE, DateFormatSymbols::WIDE) != 
@@ -360,6 +367,13 @@ void IntlTestDateFormatSymbols::TestSymbols(/* char *par */)
     if( *en.getQuarters(count,DateFormatSymbols::STANDALONE, DateFormatSymbols::ABBREVIATED) != 
         *fr.getQuarters(count,DateFormatSymbols::STANDALONE, DateFormatSymbols::ABBREVIATED )) {
         errln("ERROR: setQuarters(STANDALONE, ABBREVIATED) failed");
+    }
+
+    const UnicodeString *standaloneNarrowQuarters = en.getQuarters(count,DateFormatSymbols::STANDALONE, DateFormatSymbols::NARROW);
+    fr2.setQuarters(standaloneNarrowQuarters, count, DateFormatSymbols::STANDALONE, DateFormatSymbols::NARROW);
+    if( *en.getQuarters(count,DateFormatSymbols::STANDALONE, DateFormatSymbols::NARROW) != 
+        *fr2.getQuarters(count,DateFormatSymbols::STANDALONE ,DateFormatSymbols::NARROW )) {
+        errln("ERROR: setQuarters(STANDALONE, NARROW) failed");
     }
 
     const UnicodeString *ampms = en.getAmPmStrings(count);

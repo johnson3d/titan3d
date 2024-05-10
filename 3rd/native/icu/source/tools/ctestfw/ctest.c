@@ -8,12 +8,13 @@
 *
 ********************************************************************************
 */
+#include <assert.h>
+#include <ctype.h>
+#include <stdarg.h>
+#include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <assert.h>
-#include <stdarg.h>
-#include <ctype.h>
 
 #include "unicode/utrace.h"
 #include "unicode/uclean.h"
@@ -113,11 +114,11 @@ static int ERROR_COUNT = 0; /* Count of errors from all tests. */
 static int ONE_ERROR = 0; /* were there any other errors? */
 static int DATA_ERROR_COUNT = 0; /* count of data related errors or warnings */
 static int INDENT_LEVEL = 0;
-static UBool NO_KNOWN = FALSE;
+static UBool NO_KNOWN = false;
 static void *knownList = NULL;
 static char gTestName[1024] = "";
-static UBool ON_LINE = FALSE; /* are we on the top line with our test name? */
-static UBool HANGING_OUTPUT = FALSE; /* did the user leave us without a trailing \n ? */
+static UBool ON_LINE = false; /* are we on the top line with our test name? */
+static UBool HANGING_OUTPUT = false; /* did the user leave us without a trailing \n ? */
 static int GLOBAL_PRINT_COUNT = 0; /* global count of printouts */
 int REPEAT_TESTS_INIT = 0; /* Was REPEAT_TESTS initialized? */
 int REPEAT_TESTS = 1; /* Number of times to run the test */
@@ -126,6 +127,7 @@ int ERR_MSG =1; /* error messages will be displayed by default*/
 int QUICK = 1;  /* Skip some of the slower tests? */
 int WARN_ON_MISSING_DATA = 0; /* Reduce data errs to warnings? */
 UTraceLevel ICU_TRACE = UTRACE_OFF;  /* ICU tracing level */
+int WRITE_GOLDEN_DATA = 0; /* Overwrite golden data files? */
 size_t MINIMUM_MEMORY_SIZE_FAILURE = (size_t)-1; /* Minimum library memory allocation window that will fail. */
 size_t MAXIMUM_MEMORY_SIZE_FAILURE = (size_t)-1; /* Maximum library memory allocation window that will fail. */
 static const char *ARGV_0 = "[ALL]";
@@ -363,7 +365,7 @@ static void iterateTestsWithLevel ( const TestNode* root,
     } else {
     	log_testinfo_i("(%s) ", ARGV_0);
     }
-    ON_LINE = TRUE;  /* we are still on the line with the test name */
+    ON_LINE = true;  /* we are still on the line with the test name */
 
 
     if ( (mode == RUNTESTS) &&
@@ -382,7 +384,7 @@ static void iterateTestsWithLevel ( const TestNode* root,
         currentTest = root;
         INDENT_LEVEL = depth;  /* depth of subitems */
         ONE_ERROR=0;
-        HANGING_OUTPUT=FALSE;
+        HANGING_OUTPUT=false;
 #if SHOW_TIMES
         startTime = uprv_getRawUTCtime();
 #endif
@@ -393,7 +395,7 @@ static void iterateTestsWithLevel ( const TestNode* root,
 #endif
         if(HANGING_OUTPUT) {
           log_testinfo("\n");
-          HANGING_OUTPUT=FALSE;
+          HANGING_OUTPUT=false;
         }
         INDENT_LEVEL = depth-1;  /* depth of root */
         currentTest = NULL;
@@ -430,12 +432,12 @@ static void iterateTestsWithLevel ( const TestNode* root,
         if(timeDelta[0]) printf("%s", timeDelta);
 #endif
          
-        ON_LINE = TRUE; /* we are back on-line */
+        ON_LINE = true; /* we are back on-line */
     }
 
     INDENT_LEVEL = depth-1; /* root */
 
-    /* we want these messages to be at 0 indent. so just push the indent level breifly. */
+    /* we want these messages to be at 0 indent. so just push the indent level briefly. */
     if(mode==SHOWTESTS) {
     	log_testinfo("---%s%c\n",pathToFunction, nodeList[i]->test?' ':TEST_SEPARATOR );
     }
@@ -466,7 +468,7 @@ static void iterateTestsWithLevel ( const TestNode* root,
                   }
                 }
 
-    		ON_LINE=TRUE;
+    		ON_LINE=true;
     	}
 	}
     depth--;
@@ -518,7 +520,7 @@ runTests ( const TestNode *root )
 
     /*print out result summary*/
 
-    ON_LINE=FALSE; /* just in case */
+    ON_LINE=false; /* just in case */
 
     if(knownList != NULL) {
       if( udbg_knownIssue_print(knownList) ) {
@@ -639,7 +641,7 @@ static void go_offline_with_marker(const char *mrk) {
   
   if(ON_LINE) {
     log_testinfo(" {\n");
-    ON_LINE=FALSE;
+    ON_LINE=false;
   }
   
   if(!HANGING_OUTPUT || wasON_LINE) {
@@ -676,7 +678,7 @@ static void first_line_test() {
 
 static void vlog_err(const char *prefix, const char *pattern, va_list ap)
 {
-    if( ERR_MSG == FALSE){
+    if( ERR_MSG == false){
         return;
     }
     fputs("!", stdout); /* col 1 - bang */
@@ -686,7 +688,6 @@ static void vlog_err(const char *prefix, const char *pattern, va_list ap)
     }
     vfprintf(stdout, pattern, ap);
     fflush(stdout);
-    va_end(ap);
     if((*pattern==0) || (pattern[strlen(pattern)-1]!='\n')) {
     	HANGING_OUTPUT=1;
     } else {
@@ -701,7 +702,7 @@ static UBool vlog_knownIssue(const char *ticket, const char *pattern, va_list ap
     UBool firstForTicket;
     UBool firstForWhere;
 
-    if(NO_KNOWN) return FALSE;
+    if(NO_KNOWN) return false;
     if(pattern==NULL) pattern="";
 
     vsprintf(buf, pattern, ap);
@@ -714,7 +715,7 @@ static UBool vlog_knownIssue(const char *ticket, const char *pattern, va_list ap
       log_verbose("(Known issue %s) %s\n", ticket, buf);
     }
 
-    return TRUE;
+    return true;
 }
 
 
@@ -728,7 +729,6 @@ vlog_info(const char *prefix, const char *pattern, va_list ap)
     }
     vfprintf(stdout, pattern, ap);
     fflush(stdout);
-    va_end(ap);
     if((*pattern==0) || (pattern[strlen(pattern)-1]!='\n')) {
     	HANGING_OUTPUT=1;
     } else {
@@ -767,7 +767,7 @@ static void log_testinfo(const char *pattern, ...)
 
 static void vlog_verbose(const char *prefix, const char *pattern, va_list ap)
 {
-    if ( VERBOSITY == FALSE )
+    if ( VERBOSITY == false )
         return;
 
     first_line_verbose();
@@ -777,7 +777,6 @@ static void vlog_verbose(const char *prefix, const char *pattern, va_list ap)
     }
     vfprintf(stdout, pattern, ap);
     fflush(stdout);
-    va_end(ap);
     GLOBAL_PRINT_COUNT++;
     if((*pattern==0) || (pattern[strlen(pattern)-1]!='\n')) {
     	HANGING_OUTPUT=1;
@@ -803,13 +802,16 @@ log_err(const char* pattern, ...)
     }
     va_start(ap, pattern);
     vlog_err(NULL, pattern, ap);
+    va_end(ap);
 }
 
 UBool T_CTEST_EXPORT2
 log_knownIssue(const char *ticket, const char *pattern, ...) {
   va_list ap;
   va_start(ap, pattern);
-  return vlog_knownIssue(ticket, pattern, ap);
+  UBool result = vlog_knownIssue(ticket, pattern, ap);
+  va_end(ap);
+  return result;
 }
 
 void T_CTEST_EXPORT2
@@ -843,6 +845,7 @@ log_err_status(UErrorCode status, const char* pattern, ...)
         }
         vlog_err(NULL, pattern, ap); /* no need for prefix in default case */
     }
+    va_end(ap);
 }
 
 void T_CTEST_EXPORT2
@@ -852,6 +855,7 @@ log_info(const char* pattern, ...)
 
     va_start(ap, pattern);
     vlog_info(NULL, pattern, ap);
+    va_end(ap);
 }
 
 void T_CTEST_EXPORT2
@@ -861,6 +865,7 @@ log_verbose(const char* pattern, ...)
 
     va_start(ap, pattern);
     vlog_verbose(NULL, pattern, ap);
+    va_end(ap);
 }
 
 
@@ -882,6 +887,7 @@ log_data_err(const char* pattern, ...)
     } else {
         vlog_info("[DATA] ", pattern, ap); 
     }
+    va_end(ap);
 }
 
 
@@ -959,8 +965,8 @@ initArgs( int argc, const char* const argv[], ArgHandlerPtr argHandler, void *co
     int                i;
     int                argSkip = 0;
 
-    VERBOSITY = FALSE;
-    ERR_MSG = TRUE;
+    VERBOSITY = false;
+    ERR_MSG = true;
 
     ARGV_0=argv[0];
 
@@ -978,11 +984,11 @@ initArgs( int argc, const char* const argv[], ArgHandlerPtr argHandler, void *co
         }
         else if (strcmp( argv[i], "-v" )==0 || strcmp( argv[i], "-verbose")==0)
         {
-            VERBOSITY = TRUE;
+            VERBOSITY = true;
         }
         else if (strcmp( argv[i], "-l" )==0 )
         {
-            /* doList = TRUE; */
+            /* doList = true; */
         }
         else if (strcmp( argv[i], "-e1") == 0)
         {
@@ -1002,7 +1008,7 @@ initArgs( int argc, const char* const argv[], ArgHandlerPtr argHandler, void *co
         }
         else if (strcmp( argv[i], "-w") ==0)
         {
-            WARN_ON_MISSING_DATA = TRUE;
+            WARN_ON_MISSING_DATA = true;
         }
         else if (strcmp( argv[i], "-m") ==0)
         {
@@ -1036,7 +1042,7 @@ initArgs( int argc, const char* const argv[], ArgHandlerPtr argHandler, void *co
         }
         else if(strcmp( argv[i], "-n") == 0 || strcmp( argv[i], "-no_err_msg") == 0)
         {
-            ERR_MSG = FALSE;
+            ERR_MSG = false;
         }
         else if (strcmp( argv[i], "-r") == 0)
         {
@@ -1068,6 +1074,9 @@ initArgs( int argc, const char* const argv[], ArgHandlerPtr argHandler, void *co
         }
         else if (strcmp( argv[i], "-t_oc") == 0) {
             ICU_TRACE = UTRACE_OPEN_CLOSE;
+        }
+        else if (strcmp( argv[i], "-G") == 0) {
+            WRITE_GOLDEN_DATA = 1;
         }
         else if (strcmp( argv[i], "-h" )==0 || strcmp( argv[i], "--help" )==0)
         {
@@ -1103,8 +1112,8 @@ runTestRequest(const TestNode* root,
      */
     const TestNode*    toRun;
     int                i;
-    int                doList = FALSE;
-    int                subtreeOptionSeen = FALSE;
+    int                doList = false;
+    int                subtreeOptionSeen = false;
 
     int                errorCount = 0;
 
@@ -1131,40 +1140,40 @@ runTestRequest(const TestNode* root,
                 return -1;
             }
 
-            ON_LINE=FALSE; /* just in case */
+            ON_LINE=false; /* just in case */
 
-            if( doList == TRUE)
+            if( doList == true)
                 showTests(toRun);
             else
                 runTests(toRun);
 
-            ON_LINE=FALSE; /* just in case */
+            ON_LINE=false; /* just in case */
 
             errorCount += ERROR_COUNT;
 
-            subtreeOptionSeen = TRUE;
+            subtreeOptionSeen = true;
         } else if ((strcmp( argv[i], "-a") == 0) || (strcmp(argv[i],"-all") == 0)) {
-            subtreeOptionSeen=FALSE;
+            subtreeOptionSeen=false;
         } else if (strcmp( argv[i], "-l") == 0) {
-            doList = TRUE;
+            doList = true;
         }
         /* else option already handled by initArgs */
     }
 
-    if( subtreeOptionSeen == FALSE) /* no other subtree given, run the default */
+    if( subtreeOptionSeen == false) /* no other subtree given, run the default */
     {
-        ON_LINE=FALSE; /* just in case */
-        if( doList == TRUE)
+        ON_LINE=false; /* just in case */
+        if( doList == true)
             showTests(toRun);
         else
             runTests(toRun);
-        ON_LINE=FALSE; /* just in case */
+        ON_LINE=false; /* just in case */
 
         errorCount += ERROR_COUNT;
     }
     else
     {
-        if( ( doList == FALSE ) && ( errorCount > 0 ) )
+        if( ( doList == false ) && ( errorCount > 0 ) )
             printf(" Total errors: %d\n", errorCount );
     }
 
@@ -1202,6 +1211,7 @@ static void help ( const char *argv0 )
     printf("    -m n[-q] Min-Max memory size that will cause an allocation failure.\n");
     printf("        The default is the maximum value of size_t. Max is optional.\n");
     printf("    -r  Repeat tests after calling u_cleanup \n");
+    printf("    -G  Write golden data files \n");
     printf("    [/subtest]  To run a subtest \n");
     printf("    eg: to run just the utility tests type: cintltest /tsutil) \n");
 }
@@ -1221,6 +1231,8 @@ getTestOption ( int32_t testOption ) {
             return ERR_MSG;
         case ICU_TRACE_OPTION:
             return ICU_TRACE;
+        case WRITE_GOLDEN_DATA_OPTION:
+            return WRITE_GOLDEN_DATA;
         default :
             return 0;
     }
@@ -1248,6 +1260,8 @@ setTestOption ( int32_t testOption, int32_t value) {
         case ICU_TRACE_OPTION:
             ICU_TRACE = (UTraceLevel)value;
             break;
+        case WRITE_GOLDEN_DATA_OPTION:
+            WRITE_GOLDEN_DATA = value;
         default :
             break;
     }

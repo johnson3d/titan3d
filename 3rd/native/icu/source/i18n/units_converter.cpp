@@ -9,6 +9,7 @@
 #include "cmemory.h"
 #include "double-conversion-string-to-double.h"
 #include "measunit_impl.h"
+#include "putilimp.h"
 #include "uassert.h"
 #include "unicode/errorcode.h"
 #include "unicode/localpointer.h"
@@ -371,11 +372,11 @@ void U_I18N_API addSingleFactorConstant(StringPiece baseStr, int32_t power, Sign
         factor.constantExponents[CONSTANT_FT2M] += 3 * power * signum;
     } else if (baseStr == "in3_to_m3") {
         factor.constantExponents[CONSTANT_FT2M] += 3 * power * signum;
-        factor.factorDen *= 12 * 12 * 12;
+        factor.factorDen *= std::pow(12 * 12 * 12, power * signum);
     } else if (baseStr == "gal_to_m3") {
-        factor.factorNum *= 231;
         factor.constantExponents[CONSTANT_FT2M] += 3 * power * signum;
-        factor.factorDen *= 12 * 12 * 12;
+        factor.factorNum *= std::pow(231, power * signum);
+        factor.factorDen *= std::pow(12 * 12 * 12, power * signum);
     } else if (baseStr == "gal_imp_to_m3") {
         factor.constantExponents[CONSTANT_GAL_IMP2M3] += power * signum;
     } else if (baseStr == "G") {
@@ -388,8 +389,22 @@ void U_I18N_API addSingleFactorConstant(StringPiece baseStr, int32_t power, Sign
         factor.constantExponents[CONSTANT_GLUCOSE_MOLAR_MASS] += power * signum;
     } else if (baseStr == "item_per_mole") {
         factor.constantExponents[CONSTANT_ITEM_PER_MOLE] += power * signum;
+    } else if (baseStr == "meters_per_AU") {
+        factor.constantExponents[CONSTANT_METERS_PER_AU] += power * signum;
     } else if (baseStr == "PI") {
         factor.constantExponents[CONSTANT_PI] += power * signum;
+    } else if (baseStr == "sec_per_julian_year") {
+        factor.constantExponents[CONSTANT_SEC_PER_JULIAN_YEAR] += power * signum;
+    } else if (baseStr == "speed_of_light_meters_per_second") {
+        factor.constantExponents[CONSTANT_SPEED_OF_LIGHT_METERS_PER_SECOND] += power * signum;
+    } else if (baseStr == "sho_to_m3") {
+        factor.constantExponents[CONSTANT_SHO_TO_M3] += power * signum;
+    } else if (baseStr == "tsubo_to_m2") {
+        factor.constantExponents[CONSTANT_TSUBO_TO_M2] += power * signum;
+    } else if (baseStr == "shaku_to_m") {
+        factor.constantExponents[CONSTANT_SHAKU_TO_M] += power * signum;
+    } else if (baseStr == "AMU") {
+        factor.constantExponents[CONSTANT_AMU] += power * signum;
     } else {
         if (signum == Signum::NEGATIVE) {
             factor.factorDen *= std::pow(strToDouble(baseStr, status), power);
@@ -461,7 +476,7 @@ Convertibility U_I18N_API extractConvertibility(const MeasureUnitImpl &source,
 
     if (source.complexity == UMeasureUnitComplexity::UMEASURE_UNIT_MIXED ||
         target.complexity == UMeasureUnitComplexity::UMEASURE_UNIT_MIXED) {
-        status = U_INTERNAL_PROGRAM_ERROR;
+        status = U_ARGUMENT_TYPE_MISMATCH;
         return UNCONVERTIBLE;
     }
 
@@ -514,7 +529,7 @@ void UnitsConverter::init(const ConversionRates &ratesInfo, UErrorCode &status) 
 
     if (this->conversionRate_.source.complexity == UMeasureUnitComplexity::UMEASURE_UNIT_MIXED ||
         this->conversionRate_.target.complexity == UMeasureUnitComplexity::UMEASURE_UNIT_MIXED) {
-        status = U_INTERNAL_PROGRAM_ERROR;
+        status = U_ARGUMENT_TYPE_MISMATCH;
         return;
     }
 
@@ -522,13 +537,13 @@ void UnitsConverter::init(const ConversionRates &ratesInfo, UErrorCode &status) 
                                                       this->conversionRate_.target, ratesInfo, status);
     if (U_FAILURE(status)) return;
     if (unitsState == Convertibility::UNCONVERTIBLE) {
-        status = U_INTERNAL_PROGRAM_ERROR;
+        status = U_ARGUMENT_TYPE_MISMATCH;
         return;
     }
 
     loadConversionRate(conversionRate_, conversionRate_.source, conversionRate_.target, unitsState,
                        ratesInfo, status);
-                          
+
 }
 
 int32_t UnitsConverter::compareTwoUnits(const MeasureUnitImpl &firstUnit,
@@ -540,7 +555,7 @@ int32_t UnitsConverter::compareTwoUnits(const MeasureUnitImpl &firstUnit,
 
     if (firstUnit.complexity == UMeasureUnitComplexity::UMEASURE_UNIT_MIXED ||
         secondUnit.complexity == UMeasureUnitComplexity::UMEASURE_UNIT_MIXED) {
-        status = U_INTERNAL_PROGRAM_ERROR;
+        status = U_ARGUMENT_TYPE_MISMATCH;
         return 0;
     }
 
@@ -550,7 +565,7 @@ int32_t UnitsConverter::compareTwoUnits(const MeasureUnitImpl &firstUnit,
     }
 
     if (unitsState == Convertibility::UNCONVERTIBLE || unitsState == Convertibility::RECIPROCAL) {
-        status = U_INTERNAL_PROGRAM_ERROR;
+        status = U_ARGUMENT_TYPE_MISMATCH;
         return 0;
     }
 
@@ -588,10 +603,7 @@ double UnitsConverter::convert(double inputValue) const {
 
     if (conversionRate_.reciprocal) {
         if (result == 0) {
-            // TODO: demonstrate the resulting behaviour in tests... and figure
-            // out desired behaviour. (Theoretical result should be infinity,
-            // not 0.)
-            return 0.0;
+            return uprv_getInfinity();
         }
         result = 1.0 / result;
     }
@@ -603,10 +615,7 @@ double UnitsConverter::convertInverse(double inputValue) const {
     double result = inputValue;
     if (conversionRate_.reciprocal) {
         if (result == 0) {
-            // TODO: demonstrate the resulting behaviour in tests... and figure
-            // out desired behaviour. (Theoretical result should be infinity,
-            // not 0.)
-            return 0.0;
+            return uprv_getInfinity();
         }
         result = 1.0 / result;
     }

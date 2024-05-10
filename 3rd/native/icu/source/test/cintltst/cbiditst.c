@@ -22,7 +22,8 @@
 #include "unicode/ushape.h"
 #include "cbiditst.h"
 #include "cstring.h"
-/* the following include is needed for sprintf */
+#include <stdbool.h>
+/* the following include is needed for snprintf */
 #include <stdio.h>
 
 #define MAXLEN      MAX_STRING_LENGTH
@@ -181,8 +182,8 @@ testBidi(void) {
     if(pBiDi!=NULL) {
         pLine=ubidi_open();
         if(pLine!=NULL) {
-            doTests(pBiDi, pLine, FALSE);
-            doTests(pBiDi, pLine, TRUE);
+            doTests(pBiDi, pLine, false);
+            doTests(pBiDi, pLine, true);
         } else {
             log_err("ubidi_open() returned NULL, out of memory\n");
         }
@@ -241,7 +242,7 @@ doTests(UBiDi *pBiDi, UBiDi *pLine, UBool countRunsFirst) {
 static const char columns[] = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
 
 #define TABLE_SIZE  256
-static UBool   tablesInitialized = FALSE;
+static UBool   tablesInitialized = false;
 static UChar   pseudoToUChar[TABLE_SIZE];
 static uint8_t UCharToPseudo[TABLE_SIZE];    /* used for Unicode chars < 0x0100 */
 static uint8_t UCharToPseud2[TABLE_SIZE];    /* used for Unicode chars >=0x0100 */
@@ -258,10 +259,12 @@ static void buildPseudoTables(void)
     - & == RLM
     - A-F == Arabic Letters 0631-0636
     - G-V == Hebrew letters 05d7-05e6
-    - W-Z == Unassigned RTL 08d0-08d3
+    - W-Z == Unassigned RTL 05CC..05CF
+        originally 08D0..08D3
         Unicode 6.1 changes U+08A0..U+08FF from R to AL which works ok.
         Unicode 11 adds U+08D3 ARABIC SMALL LOW WAW which has bc=NSM
             so we stop using Z in this test.
+        Unicode 14 assigns 08D0..08D2 to diacritics (bc=NSM) so we switch to 05CC..05CF.
     - 0-5 == western digits 0030-0035
     - 6-9 == Arabic-Indic digits 0666-0669
     - ` == Combining Grave Accent 0300 (NSM)
@@ -342,7 +345,7 @@ static void buildPseudoTables(void)
         UCharToPseud2[uchar & 0x00ff] = c;
     }
     /* initialize Unassigned code points */
-    for (i = 32, uchar=0x08D0; i < 36; i++, uchar++) {
+    for (i = 32, uchar=0x05CC; i < 36; i++, uchar++) {
         c = (uint8_t)columns[i];
         pseudoToUChar[c] = uchar;
         UCharToPseud2[uchar & 0x00ff] = c;
@@ -353,7 +356,7 @@ static void buildPseudoTables(void)
         pseudoToUChar[c] = uchar;
         UCharToPseudo[uchar & 0x00ff] = c;
     }
-    tablesInitialized = TRUE;
+    tablesInitialized = true;
 }
 
 /*----------------------------------------------------------------------*/
@@ -505,22 +508,22 @@ static UBool matchingPair(UBiDi *bidi, int32_t i, char c1, char c2)
     int k, len;
 
     if (c1 == c2) {
-        return TRUE;
+        return true;
     }
     /* For UBIDI_REORDER_RUNS_ONLY, it would not be correct to check levels[i],
        so we use the appropriate run's level, which is good for all cases.
      */
     ubidi_getLogicalRun(bidi, i, NULL, &level);
     if ((level & 1) == 0) {
-        return FALSE;
+        return false;
     }
     len = (int)strlen(mates1Chars);
     for (k = 0; k < len; k++) {
         if ((c1 == mates1Chars[k]) && (c2 == mates2Chars[k])) {
-            return TRUE;
+            return true;
         }
     }
-    return FALSE;
+    return false;
 }
 
 static UBool checkWhatYouCan(UBiDi *bidi, const char *srcChars, const char *dstChars)
@@ -537,11 +540,11 @@ static UBool checkWhatYouCan(UBiDi *bidi, const char *srcChars, const char *dstC
     ubidi_getLogicalMap(bidi, logMap, &errorCode);
     if (U_FAILURE(errorCode)) {
         log_err("Error #1 invoking ICU within checkWhatYouCan\n");
-        return FALSE;
+        return false;
     }
 
-    testOK = TRUE;
-    errMap = errDst = FALSE;
+    testOK = true;
+    errMap = errDst = false;
     logLimit = ubidi_getProcessedLength(bidi);
     visLimit = ubidi_getResultLength(bidi);
     memset(accumSrc, '?', logLimit);
@@ -550,7 +553,7 @@ static UBool checkWhatYouCan(UBiDi *bidi, const char *srcChars, const char *dstC
     for (i = 0; i < logLimit; i++) {
         idx = ubidi_getVisualIndex(bidi, i, &errorCode);
         if (idx != logMap[i]) {
-            errMap = TRUE;
+            errMap = true;
         }
         if (idx == UBIDI_MAP_NOWHERE) {
             continue;
@@ -560,18 +563,18 @@ static UBool checkWhatYouCan(UBiDi *bidi, const char *srcChars, const char *dstC
         }
         accumDst[idx] = srcChars[i];
         if (!matchingPair(bidi, i, srcChars[i], dstChars[idx])) {
-            errDst = TRUE;
+            errDst = true;
         }
     }
     accumDst[visLimit] = 0;
     if (U_FAILURE(errorCode)) {
         log_err("Error #2 invoking ICU within checkWhatYouCan\n");
-        return FALSE;
+        return false;
     }
     if (errMap) {
         if (testOK) {
             printCaseInfo(bidi, srcChars, dstChars);
-            testOK = FALSE;
+            testOK = false;
         }
         log_err("Mismatch between getLogicalMap() and getVisualIndex()\n");
         log_err("Map    :");
@@ -588,17 +591,17 @@ static UBool checkWhatYouCan(UBiDi *bidi, const char *srcChars, const char *dstC
     if (errDst) {
         if (testOK) {
             printCaseInfo(bidi, srcChars, dstChars);
-            testOK = FALSE;
+            testOK = false;
         }
         log_err("Source does not map to Result\n");
         log_err("We got: %s", accumDst); fputs("\n", stderr);
     }
 
-    errMap = errDst = FALSE;
+    errMap = errDst = false;
     for (i = 0; i < visLimit; i++) {
         idx = ubidi_getLogicalIndex(bidi, i, &errorCode);
         if (idx != visMap[i]) {
-            errMap = TRUE;
+            errMap = true;
         }
         if (idx == UBIDI_MAP_NOWHERE) {
             continue;
@@ -608,18 +611,18 @@ static UBool checkWhatYouCan(UBiDi *bidi, const char *srcChars, const char *dstC
         }
         accumSrc[idx] = dstChars[i];
         if (!matchingPair(bidi, idx, srcChars[idx], dstChars[i])) {
-            errDst = TRUE;
+            errDst = true;
         }
     }
     accumSrc[logLimit] = 0;
     if (U_FAILURE(errorCode)) {
         log_err("Error #3 invoking ICU within checkWhatYouCan\n");
-        return FALSE;
+        return false;
     }
     if (errMap) {
         if (testOK) {
             printCaseInfo(bidi, srcChars, dstChars);
-            testOK = FALSE;
+            testOK = false;
         }
         log_err("Mismatch between getVisualMap() and getLogicalIndex()\n");
         log_err("Map    :");
@@ -636,7 +639,7 @@ static UBool checkWhatYouCan(UBiDi *bidi, const char *srcChars, const char *dstC
     if (errDst) {
         if (testOK) {
             printCaseInfo(bidi, srcChars, dstChars);
-            testOK = FALSE;
+            testOK = false;
         }
         log_err("Result does not map to Source\n");
         log_err("We got: %s", accumSrc);
@@ -817,7 +820,7 @@ testReorder(void) {
         log_verbose("Testing V2L #3 for case %d\n", i);
         pseudoToU16(srcSize,logicalOrder[i],src);
         ec = U_ZERO_ERROR;
-        ubidi_setInverse(bidi,TRUE);
+        ubidi_setInverse(bidi,true);
         ubidi_setPara(bidi,src,srcSize,UBIDI_DEFAULT_LTR ,NULL,&ec);
         if(U_FAILURE(ec)){
             log_err("ubidi_setPara(tests[%d], paraLevel %d) failed with errorCode %s\n",
@@ -1038,7 +1041,7 @@ testReorderArabicMathSymbols(void) {
 
 static void
 doTest(UBiDi *pBiDi, int testNumber, const BiDiTestData *test, int32_t lineStart, UBool countRunsFirst) {
-    const uint8_t *dirProps=test->text+lineStart;
+    const uint8_t *dirProps= (test->text == NULL) ? NULL : test->text+lineStart;
     const UBiDiLevel *levels=test->levels;
     const uint8_t *visualMap=test->visualMap;
     int32_t i, len=ubidi_getLength(pBiDi), logicalIndex, runCount = 0;
@@ -1624,7 +1627,7 @@ static void doMisc(void) {
                 aescstrdup(src, srcLen), aescstrdup(dest, destLen));
     }
     RETURN_IF_BAD_ERRCODE("#18#");
-    ubidi_orderParagraphsLTR(bidi, TRUE);
+    ubidi_orderParagraphsLTR(bidi, true);
     srcLen = u_unescape("\n\r   \n\rabc\n\\u05d0\\u05d1\rabc \\u05d2\\u05d3\n\r"
                         "\\u05d4\\u05d5 abc\n\\u05d6\\u05d7 abc .-=\r\n"
                         "-* \\u05d8\\u05d9 abc .-=", src, MAXLEN);
@@ -1948,7 +1951,7 @@ testMultipleParagraphs(void) {
                 i, k, u_errorName(errorCode));
         errorCode=U_ZERO_ERROR;
     }
-    /* check level of block separator at end of paragraph when orderParagraphsLTR==FALSE */
+    /* check level of block separator at end of paragraph when orderParagraphsLTR==false */
     ubidi_setPara(pBidi, src, srcSize, UBIDI_RTL, NULL, &errorCode);
     /* get levels through para Bidi block */
     gotLevels=ubidi_getLevels(pBidi, &errorCode);
@@ -1991,14 +1994,14 @@ testMultipleParagraphs(void) {
     }
     orderParagraphsLTR=ubidi_isOrderParagraphsLTR(pBidi);
     if (orderParagraphsLTR) {
-        log_err("Found orderParagraphsLTR=%d expected=%d\n", orderParagraphsLTR, FALSE);
+        log_err("Found orderParagraphsLTR=%d expected=%d\n", orderParagraphsLTR, false);
     }
-    ubidi_orderParagraphsLTR(pBidi, TRUE);
+    ubidi_orderParagraphsLTR(pBidi, true);
     orderParagraphsLTR=ubidi_isOrderParagraphsLTR(pBidi);
     if (!orderParagraphsLTR) {
-        log_err("Found orderParagraphsLTR=%d expected=%d\n", orderParagraphsLTR, TRUE);
+        log_err("Found orderParagraphsLTR=%d expected=%d\n", orderParagraphsLTR, true);
     }
-    /* check level of block separator at end of paragraph when orderParagraphsLTR==TRUE */
+    /* check level of block separator at end of paragraph when orderParagraphsLTR==true */
     ubidi_setPara(pBidi, src, srcSize, UBIDI_RTL, NULL, &errorCode);
     /* get levels through para Bidi block */
     gotLevels=ubidi_getLevels(pBidi, &errorCode);
@@ -2034,7 +2037,7 @@ testMultipleParagraphs(void) {
      */
     u_unescape(text, src, MAXLEN);      /* restore original content */
     srcSize=u_strlen(src);
-    ubidi_orderParagraphsLTR(pBidi, FALSE);
+    ubidi_orderParagraphsLTR(pBidi, false);
     ubidi_setPara(pBidi, src, srcSize, UBIDI_DEFAULT_RTL, NULL, &errorCode);
     gotLevels=ubidi_getLevels(pBidi, &errorCode);
     for (i=0; i<paraCount; i++) {
@@ -2056,7 +2059,7 @@ testMultipleParagraphs(void) {
      */
     u_unescape(text2, src, MAXLEN);
     srcSize=u_strlen(src);
-    ubidi_orderParagraphsLTR(pBidi, TRUE);
+    ubidi_orderParagraphsLTR(pBidi, true);
     ubidi_setPara(pBidi, src, srcSize, UBIDI_RTL, NULL, &errorCode);
     gotLevels=ubidi_getLevels(pBidi, &errorCode);
     if (U_FAILURE(errorCode)) {
@@ -2071,11 +2074,11 @@ testMultipleParagraphs(void) {
     }
 
     /* check handling of whitespace before end of paragraph separator when
-     * orderParagraphsLTR==TRUE, when last paragraph has, and lacks, a terminating B
+     * orderParagraphsLTR==true, when last paragraph has, and lacks, a terminating B
      */
     u_memset(src, 0x0020, MAXLEN);
     srcSize = 5;
-    ubidi_orderParagraphsLTR(pBidi, TRUE);
+    ubidi_orderParagraphsLTR(pBidi, true);
     for (i=0x001c; i<=0x0020; i+=(0x0020-0x001c)) {
         src[4]=(UChar)i;                /* with and without terminating B */
         for (j=0x0041; j<=0x05d0; j+=(0x05d0-0x0041)) {
@@ -2222,7 +2225,7 @@ testInverse(void) {
 
     ubidi_close(pBiDi);
 
-    log_verbose("inverse Bidi: rountrips: %5u\nnon-roundtrips: %5u\n", countRoundtrips, countNonRoundtrips);
+    log_verbose("inverse Bidi: roundtrips: %5u\nnon-roundtrips: %5u\n", countRoundtrips, countNonRoundtrips);
 
     _testWriteReverse();
 
@@ -2280,9 +2283,9 @@ _testInverseBidi(UBiDi *pBiDi, const UChar *src, int32_t srcLength,
         log_verbose("inverse Bidi: testInverse(L)\n");
 
         /* convert visual to logical */
-        ubidi_setInverse(pBiDi, TRUE);
+        ubidi_setInverse(pBiDi, true);
         if (!ubidi_isInverse(pBiDi)) {
-            log_err("Error while doing ubidi_setInverse(TRUE)\n");
+            log_err("Error while doing ubidi_setInverse(true)\n");
         }
         ubidi_setPara(pBiDi, src, srcLength, 0, NULL, pErrorCode);
         if (src != ubidi_getText(pBiDi)) {
@@ -2295,9 +2298,9 @@ _testInverseBidi(UBiDi *pBiDi, const UChar *src, int32_t srcLength,
         log_verbose("\n");
 
         /* convert back to visual LTR */
-        ubidi_setInverse(pBiDi, FALSE);
+        ubidi_setInverse(pBiDi, false);
         if (ubidi_isInverse(pBiDi)) {
-            log_err("Error while doing ubidi_setInverse(FALSE)\n");
+            log_err("Error while doing ubidi_setInverse(false)\n");
         }
         ubidi_setPara(pBiDi, logicalDest, logicalLength, 0, NULL, pErrorCode);
         visualLength=ubidi_writeReordered(pBiDi, visualDest, UPRV_LENGTHOF(visualDest),
@@ -2312,7 +2315,7 @@ _testInverseBidi(UBiDi *pBiDi, const UChar *src, int32_t srcLength,
         log_verbose("\n");
 
         /* convert visual RTL to logical */
-        ubidi_setInverse(pBiDi, TRUE);
+        ubidi_setInverse(pBiDi, true);
         ubidi_setPara(pBiDi, visualLTR, ltrLength, 0, NULL, pErrorCode);
         logicalLength=ubidi_writeReordered(pBiDi, logicalDest, UPRV_LENGTHOF(logicalDest),
                                            UBIDI_DO_MIRRORING|UBIDI_INSERT_LRM_FOR_NUMERIC, pErrorCode);
@@ -2321,7 +2324,7 @@ _testInverseBidi(UBiDi *pBiDi, const UChar *src, int32_t srcLength,
         log_verbose("\n");
 
         /* convert back to visual RTL */
-        ubidi_setInverse(pBiDi, FALSE);
+        ubidi_setInverse(pBiDi, false);
         ubidi_setPara(pBiDi, logicalDest, logicalLength, 0, NULL, pErrorCode);
         visualLength=ubidi_writeReordered(pBiDi, visualDest, UPRV_LENGTHOF(visualDest),
                                           UBIDI_DO_MIRRORING|UBIDI_REMOVE_BIDI_CONTROLS|UBIDI_OUTPUT_REVERSE, pErrorCode);
@@ -2420,7 +2423,7 @@ static void _testMisc(void) {
     UBiDi *bidi = ubidi_open();
     UChar src[3], dest[MAXLEN], expected[5];
     int destLen;
-    ubidi_setInverse(bidi, TRUE);
+    ubidi_setInverse(bidi, true);
     src[0] = src[1] = src[2] = 0x0020;
     ubidi_setPara(bidi, src, UPRV_LENGTHOF(src), UBIDI_RTL, NULL, &errorCode);
     destLen = ubidi_writeReordered(bidi, dest, MAXLEN,
@@ -3623,9 +3626,9 @@ static UBool
 assertSuccessful(const char* message, UErrorCode* rc) {
     if (rc != NULL && U_FAILURE(*rc)) {
         log_err("%s() failed with error %s.\n", message, myErrorName(*rc));
-        return FALSE;
+        return false;
     }
-    return TRUE;
+    return true;
 }
 
 static UBool
@@ -3642,9 +3645,9 @@ assertStringsEqual(const char* expected, const char* actual, const char* src,
             "Reordering mode:", ubidi_getReorderingMode(pBiDi), mode,
             "Paragraph level:", ubidi_getParaLevel(pBiDi),
             "Reordering option:", ubidi_getReorderingOptions(pBiDi), option);
-        return FALSE;
+        return false;
     }
-    return TRUE;
+    return true;
 }
 
 static UBiDi*
@@ -4107,18 +4110,18 @@ assertRoundTrip(UBiDi *pBiDi, int32_t tc, int32_t outIndex, const char *srcChars
                     "Reordering option:", options[option].description,
                     "Paragraph level:", level);
         }
-        return FALSE;
+        return false;
     }
     if (!checkResultLength(pBiDi, destChars, destChars2, destLen2,
                            desc, "UBIDI_OPTION_REMOVE_CONTROLS", level)) {
-        return FALSE;
+        return false;
     }
     if (outIndex > -1 && !checkMaps(pBiDi, outIndex, srcChars, destChars,
                                     desc, "UBIDI_OPTION_REMOVE_CONTROLS",
-                                    level, FALSE)) {
-        return FALSE;
+                                    level, false)) {
+        return false;
     }
-    return TRUE;
+    return true;
 }
 
 static UBool
@@ -4137,9 +4140,9 @@ checkResultLength(UBiDi *pBiDi, const char *srcChars, const char *destChars,
                 "Input:", srcChars, "Output:", destChars,
                 "Reordering mode:", mode, "Reordering option:", option,
                 "Paragraph level:", level);
-        return FALSE;
+        return false;
     }
-    return TRUE;
+    return true;
 }
 
 static void
@@ -4276,7 +4279,7 @@ testReorderingMode(void) {
     UBiDiReorderingMode modeValue, modeBack;
     int32_t srcLen, destLen, idx;
     const char *expectedChars;
-    UBool testOK = TRUE;
+    UBool testOK = true;
 
     log_verbose("\nEntering TestReorderingMode\n\n");
 
@@ -4289,7 +4292,7 @@ testReorderingMode(void) {
         return;
     }
 
-    ubidi_setInverse(pBiDi2, TRUE);
+    ubidi_setInverse(pBiDi2, true);
 
     for (tc = 0; tc < TC_COUNT; tc++) {
         const char *srcChars = textIn[tc];
@@ -4344,31 +4347,31 @@ testReorderingMode(void) {
                                 modes[mode].description,
                                 options[option].description,
                                 pBiDi)) {
-                        testOK = FALSE;
+                        testOK = false;
                     }
                     if (options[option].value == UBIDI_OPTION_INSERT_MARKS &&
                              !assertRoundTrip(pBiDi3, tc, idx, srcChars,
                                               destChars, dest, destLen,
                                               mode, option, paraLevels[level])) {
-                        testOK = FALSE;
+                        testOK = false;
                     }
                     else if (!checkResultLength(pBiDi, srcChars, destChars,
                                 destLen, modes[mode].description,
                                 options[option].description,
                                 paraLevels[level])) {
-                        testOK = FALSE;
+                        testOK = false;
                     }
                     else if (idx > -1 && !checkMaps(pBiDi, idx, srcChars,
                             destChars, modes[mode].description,
                             options[option].description, paraLevels[level],
-                            TRUE)) {
-                        testOK = FALSE;
+                            true)) {
+                        testOK = false;
                     }
                 }
             }
         }
     }
-    if (testOK == TRUE) {
+    if (testOK == true) {
         log_verbose("\nReordering mode test OK\n");
     }
     ubidi_close(pBiDi3);
@@ -4446,14 +4449,14 @@ testStreaming(void) {
     int i, j, levelIndex;
     UBiDiLevel level;
     int nTests = UPRV_LENGTHOF(testData), nLevels = UPRV_LENGTHOF(paraLevels);
-    UBool mismatch, testOK = TRUE;
+    UBool mismatch, testOK = true;
    char processedLenStr[MAXPORTIONS * 5];
 
     log_verbose("\nEntering TestStreaming\n\n");
 
     pBiDi = getBiDiObject();
 
-    ubidi_orderParagraphsLTR(pBiDi, TRUE);
+    ubidi_orderParagraphsLTR(pBiDi, true);
 
     for (levelIndex = 0; levelIndex < nLevels; levelIndex++) {
         for (i = 0; i < nTests; i++) {
@@ -4464,7 +4467,7 @@ testStreaming(void) {
             processedLenStr[0] = NULL_CHAR;
             log_verbose("Testing level %d, case %d\n", level, i);
 
-            mismatch = FALSE;
+            mismatch = false;
 
             ubidi_setReorderingOptions(pBiDi, UBIDI_OPTION_STREAMING);
             for (j = 0, pSrc = src; j < MAXPORTIONS && srcLen > 0; j++) {
@@ -4486,12 +4489,12 @@ testStreaming(void) {
                 mismatch |= (UBool)(j >= nPortions ||
                            processedLen != testData[i].portionLens[levelIndex][j]);
 
-                sprintf(processedLenStr + j * 4, "%4d", processedLen);
+                snprintf(processedLenStr + j * 4, sizeof(processedLenStr) - j * 4, "%4d", processedLen);
                 srcLen -= processedLen, pSrc += processedLen;
             }
 
             if (mismatch || j != nPortions) {
-                testOK = FALSE;
+                testOK = false;
                 log_err("\nProcessed lengths mismatch.\n"
                     "\tParagraph level: %u\n"
                     "\tInput string: %s\n"
@@ -4503,7 +4506,7 @@ testStreaming(void) {
         }
     }
     ubidi_close(pBiDi);
-    if (testOK == TRUE) {
+    if (testOK == true) {
         log_verbose("\nBiDi streaming test OK\n");
     }
     log_verbose("\nExiting TestStreaming\n\n");
@@ -4589,6 +4592,15 @@ testClassOverride(void) {
         ubidi_close(pBiDi);
         return;
     }
+    // Quick callback test (API coverage).
+    if (ubidi_getCustomizedClass(pBiDi, u'A')!=AL ||
+            ubidi_getCustomizedClass(pBiDi, u'H')!=R ||
+            ubidi_getCustomizedClass(pBiDi, u'^')!=PDF ||
+            ubidi_getCustomizedClass(pBiDi, u'~')!=BN) {
+        log_err("ubidi_getCustomizedClass() returns different values than "
+                "expected from overrideBidiClass() customClasses[]\n");
+    }
+
     verifyCallbackParams(oldFn, oldContext, NULL, NULL, 0);
 
     ubidi_getClassCallback(pBiDi, &oldFn, &oldContext);
@@ -4651,7 +4663,7 @@ checkMaps(UBiDi *pBiDi, int32_t stringIndex, const char *src, const char *dest,
     int32_t i, srcLen, resLen, idx;
     const int32_t *expectedLogicalMap, *expectedVisualMap;
     UErrorCode rc = U_ZERO_ERROR;
-    UBool testOK = TRUE;
+    UBool testOK = true;
 
     if (forward) {
         expectedLogicalMap = forwardMap[stringIndex];
@@ -4663,7 +4675,7 @@ checkMaps(UBiDi *pBiDi, int32_t stringIndex, const char *src, const char *dest,
     }
     ubidi_getLogicalMap(pBiDi, actualLogicalMap, &rc);
     if (!assertSuccessful("ubidi_getLogicalMap", &rc)) {
-        testOK = FALSE;
+        testOK = false;
     }
     srcLen = ubidi_getProcessedLength(pBiDi);
     if (memcmp(expectedLogicalMap, actualLogicalMap, srcLen * sizeof(int32_t))) {
@@ -4688,7 +4700,7 @@ checkMaps(UBiDi *pBiDi, int32_t stringIndex, const char *src, const char *dest,
                 option, ubidi_getReorderingOptions(pBiDi),
                 forward
                 );
-        testOK = FALSE;
+        testOK = false;
     }
     resLen = ubidi_getResultLength(pBiDi);
     ubidi_getVisualMap(pBiDi, actualVisualMap, &rc);
@@ -4715,7 +4727,7 @@ checkMaps(UBiDi *pBiDi, int32_t stringIndex, const char *src, const char *dest,
                 option, ubidi_getReorderingOptions(pBiDi),
                 forward
                 );
-        testOK = FALSE;
+        testOK = false;
     }
     for (i = 0; i < srcLen; i++) {
         idx = ubidi_getVisualIndex(pBiDi, i, &rc);
@@ -4744,7 +4756,7 @@ checkMaps(UBiDi *pBiDi, int32_t stringIndex, const char *src, const char *dest,
                 option, ubidi_getReorderingOptions(pBiDi),
                 forward
                 );
-        testOK = FALSE;
+        testOK = false;
     }
     for (i = 0; i < resLen; i++) {
         idx = ubidi_getLogicalIndex(pBiDi, i, &rc);
@@ -4773,7 +4785,7 @@ checkMaps(UBiDi *pBiDi, int32_t stringIndex, const char *src, const char *dest,
                 option, ubidi_getReorderingOptions(pBiDi),
                 forward
                 );
-        testOK = FALSE;
+        testOK = false;
     }
     return testOK;
 }
@@ -4782,9 +4794,9 @@ static UBool
 assertIllegalArgument(const char* message, UErrorCode* rc) {
     if (*rc != U_ILLEGAL_ARGUMENT_ERROR) {
         log_err("%s() failed with error %s.\n", message, myErrorName(*rc));
-        return FALSE;
+        return false;
     }
-    return TRUE;
+    return true;
 }
 
 typedef struct {
@@ -4834,7 +4846,7 @@ testContext(void) {
     UErrorCode rc;
     int32_t proLength, epiLength, srcLen, destLen, tc;
     contextCase cc;
-    UBool testOK = TRUE;
+    UBool testOK = true;
 
     log_verbose("\nEntering TestContext \n\n");
 
@@ -4844,7 +4856,7 @@ testContext(void) {
     testOK &= assertIllegalArgument("Error when BiDi object is null", &rc);
 
     pBiDi = getBiDiObject();
-    ubidi_orderParagraphsLTR(pBiDi, TRUE);
+    ubidi_orderParagraphsLTR(pBiDi, true);
 
     /* test proLength < -1 */
     rc = U_ZERO_ERROR;
@@ -4897,10 +4909,10 @@ testContext(void) {
                 "Reordering mode:", ubidi_getReorderingMode(pBiDi),
                 "Paragraph level:", ubidi_getParaLevel(pBiDi),
                 "Reordering option:", ubidi_getReorderingOptions(pBiDi));
-            testOK = FALSE;
+            testOK = false;
         }
     }
-    if (testOK == TRUE) {
+    if (testOK == true) {
         log_verbose("\nContext test OK\n");
     }
     ubidi_close(pBiDi);

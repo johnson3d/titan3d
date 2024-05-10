@@ -1,0 +1,23 @@
+﻿  
+  Microsoft (R) ����ά��ʵ�ù��� 14.34.31944.0 ��
+  ��Ȩ���� (C) Microsoft Corporation��  ��������Ȩ����
+  
+  ICU data make path is J:\TEngine\3rd\native\icu\source\data\
+  ICU root path is J:\TEngine\3rd\native\icu
+  ICU data DLL_OUTPUT path is J:\TEngine\3rd\native\icu\bin64UWP
+  ICU tools path is J:\TEngine\3rd\native\icu\source\tools
+  ICU tools CFG subpath is x64\Release
+  Building ICU data from scratch
+  	cd "J:\TEngine\3rd\native\icu\source\data\out\build\icudt74l"
+  	"J:\TEngine\3rd\native\icu\bin64\pkgdata" -f -e icudt74 -v -m dll -c -p icudt74l -T "J:\TEngine\3rd\native\icu\source\data\out\tmp" -L icudt74 -d "J:\TEngine\3rd\native\icu\source\data\out\build\icudt74l" -s . -u -a X64 J:\TEngine\3rd\native\icu\source\data\out\tmp\icudata.lst
+    正在创建库 .\icudt.lib 和对象 .\icudt.exp
+  	copy "icudt74.dll" "J:\TEngine\3rd\native\icu\bin64UWP\icudt74.dll"
+          1 file(s) copied.
+  	copy "J:\TEngine\3rd\native\icu\source\data\out\tmp\icudt74l.dat" "J:\TEngine\3rd\native\icu\source\data\out\icudt74l.dat"
+          1 file(s) copied.
+  building testdata...
+  	nmake /nologo /f "J:\TEngine\3rd\native\icu\source\test\testdata\testdata.mak" TESTDATA=. ICUTOOLS="J:\TEngine\3rd\native\icu\source\tools" ICUPBIN="J:\TEngine\3rd\native\icu\bin64" ICUP="J:\TEngine\3rd\native\icu" CFG=x64\Release TESTDATAOUT="J:\TEngine\3rd\native\icu\source\test\testdata\out" TESTDATABLD="J:\TEngine\3rd\native\icu\source\test\testdata\out\build" ICUSRCDATA="J:\TEngine\3rd\native\icu\source\data" DLL_OUTPUT="J:\TEngine\3rd\native\icu\bin64UWP"
+  Test data is built.
+  All targets are up to date
+  	copy "J:\TEngine\3rd\native\icu\source\data\out\icudt74l.dat" "J:\TEngine\3rd\native\icu\source\data\\..\..\commondata\"
+          1 file(s) copied.

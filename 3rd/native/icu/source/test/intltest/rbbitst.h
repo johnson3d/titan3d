@@ -22,6 +22,7 @@
 #include "intltest.h"
 #include "unicode/brkiter.h"
 #include "unicode/rbbi.h"
+#include "unicode/uscript.h"
 
 class  Enumeration;
 class  BITestData;
@@ -41,7 +42,7 @@ public:
     RBBITest();
     virtual ~RBBITest();
 
-    void runIndexedTest( int32_t index, UBool exec, const char* &name, char* par = NULL );
+    void runIndexedTest( int32_t index, UBool exec, const char* &name, char* par = nullptr ) override;
 
     void TestGetAvailableLocales();
     void TestGetDisplayName();
@@ -54,7 +55,6 @@ public:
     void TestMonkey();
 
     void TestExtended();
-    UChar *ReadAndConvertFile(const char *fileName, int &ulen, const char *encoding, UErrorCode &status);
     void executeTest(TestParams *, UErrorCode &status);
 
     void TestWordBreaks();
@@ -93,6 +93,11 @@ public:
     void Test16BitsTrieWith16BitStateTable();
     void TestTable_8_16_Bits();
     void TestBug13590();
+    void TestLSTMThai();
+    void TestLSTMBurmese();
+    void TestRandomAccess();
+    void TestExternalBreakEngineWithFakeTaiLe();
+    void TestExternalBreakEngineWithFakeYue();
 
 #if U_ENABLE_TRACING
     void TestTraceCreateCharacter();
@@ -103,6 +108,10 @@ public:
     void TestTraceCreateLineNormal();
     void TestTraceCreateLineStrict();
     void TestTraceCreateLineLoose();
+    void TestTraceCreateLineNormalPhrase();
+    void TestTraceCreateLineLoosePhrase();
+    void TestTraceCreateLineStrictPhrase();
+    void TestTraceCreateLinePhrase();
     void TestTraceCreateBreakEngine();
 #endif
 
@@ -117,6 +126,9 @@ private:
 
     // Run one of the Unicode Consortium boundary test data files.
     void runUnicodeTestData(const char *fileName, RuleBasedBreakIterator *bi);
+
+    // Run tests from one of the LSTM test files.
+    void runLSTMTestFromFile(const char* filename, UScriptCode script);
 
     // Run a single test case from one of the Unicode Consortium test files.
     void checkUnicodeTestCase(const char *testFileName, int lineNumber,
@@ -133,7 +145,7 @@ private:
      *  Unicode boundary specifications.
      *  @param testCase the test data string.
      *  @param fileName the Unicode test data file name.
-     *  @return FALSE if the test case should be run, TRUE if it should be skipped.
+     *  @return false if the test case should be run, true if it should be skipped.
      */
     UBool testCaseIsKnownIssue(const UnicodeString &testCase, const char *fileName);
 

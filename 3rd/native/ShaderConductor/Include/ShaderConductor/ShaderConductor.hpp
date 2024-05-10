@@ -39,7 +39,7 @@
 #define SC_SYMBOL_IMPORT
 #endif
 
-#ifdef SHADER_CONDUCTOR_SOURCE
+#ifdef ShaderConductor_EXPORTS
 #define SC_API SC_SYMBOL_EXPORT
 #else
 #define SC_API SC_SYMBOL_IMPORT

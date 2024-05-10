@@ -37,23 +37,23 @@ void SimpleThread::join() {
 class ThreadPoolThread: public SimpleThread {
   public:
     ThreadPoolThread(ThreadPoolBase *pool, int32_t threadNum) : fPool(pool), fNum(threadNum) {}
-    virtual void run() {fPool->callFn(fNum); }
+    virtual void run() override { fPool->callFn(fNum); }
     ThreadPoolBase *fPool;
     int32_t         fNum;
 };
 
 
 ThreadPoolBase::ThreadPoolBase(IntlTest *test, int32_t howMany) :
-        fIntlTest(test), fNumThreads(howMany), fThreads(NULL) {
+        fIntlTest(test), fNumThreads(howMany), fThreads(nullptr) {
     fThreads = new SimpleThread *[fNumThreads];
-    if (fThreads == NULL) {
+    if (fThreads == nullptr) {
         fIntlTest->errln("%s:%d memory allocation failure.", __FILE__, __LINE__);
         return;
     }
 
     for (int i=0; i<fNumThreads; i++) {
         fThreads[i] = new ThreadPoolThread(this, i);
-        if (fThreads[i] == NULL) {
+        if (fThreads[i] == nullptr) {
             fIntlTest->errln("%s:%d memory allocation failure.", __FILE__, __LINE__);
         }
     }
@@ -79,9 +79,9 @@ ThreadPoolBase::~ThreadPoolBase() {
     if (fThreads) {
         for (int i=0; i<fNumThreads; i++) {
             delete fThreads[i];
-            fThreads[i] = NULL;
+            fThreads[i] = nullptr;
         }
         delete[] fThreads;
-        fThreads = NULL;
+        fThreads = nullptr;
     }
 }

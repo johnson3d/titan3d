@@ -17,6 +17,7 @@
 *
 */
 
+#include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include "unicode/utypes.h"
@@ -64,7 +65,7 @@
  *
  * UTrie stringPrepTrie;                        -- size in bytes=indexes[_SPREP_INDEX_TRIE_SIZE]
  *
- * uint16_t mappingTable[];                     -- Contains the sequecence of code units that the code point maps to
+ * uint16_t mappingTable[];                     -- Contains the sequence of code units that the code point maps to
  *                                                 size in bytes = indexes[_SPREP_INDEX_MAPPING_DATA_SIZE]
  *
  * The indexes array contains the following values:
@@ -203,7 +204,7 @@ init() {
     sprepTrie = (UNewTrie *)uprv_calloc(1, sizeof(UNewTrie));
 
     /* initialize the two tries */
-    if(NULL==utrie_open(sprepTrie, NULL, MAX_DATA_LENGTH, 0, 0, FALSE)) {
+    if(NULL==utrie_open(sprepTrie, NULL, MAX_DATA_LENGTH, 0, 0, false)) {
         fprintf(stderr, "error: failed to initialize tries\n");
         exit(U_MEMORY_ALLOCATION_ERROR);
     }
@@ -459,7 +460,7 @@ storeMapping(uint32_t codepoint, uint32_t* mapping,int32_t length,
     mappingDataCapacity += adjustedLen;
 
     if(U_FAILURE(*status)){
-        fprintf(stderr, "Failed to put entries into the hastable. Error: %s\n", u_errorName(*status));
+        fprintf(stderr, "Failed to put entries into the hash table. Error: %s\n", u_errorName(*status));
         exit(*status);
     }
 }
@@ -517,7 +518,7 @@ storeRange(uint32_t start, uint32_t end, UStringPrepType type, UErrorCode* statu
             exit(U_ILLEGAL_ARGUMENT_ERROR);
         }
     }else{
-        if(!utrie_setRange32(sprepTrie, start, end+1, trieWord, FALSE)){
+        if(!utrie_setRange32(sprepTrie, start, end+1, trieWord, false)){
             fprintf(stderr,"Value for certain codepoint already set.\n");
             exit(U_ILLEGAL_CHAR_FOUND);
         }
@@ -569,7 +570,7 @@ generateData(const char *dataDir, const char* bundleName) {
     /* sort and add mapping data */
     storeMappingData();
 
-    sprepTrieSize=utrie_serialize(sprepTrie, sprepTrieBlock, sizeof(sprepTrieBlock), getFoldedValue, TRUE, &errorCode);
+    sprepTrieSize=utrie_serialize(sprepTrie, sprepTrieBlock, sizeof(sprepTrieBlock), getFoldedValue, true, &errorCode);
     if(U_FAILURE(errorCode)) {
         fprintf(stderr, "error: utrie_serialize(sprep trie) failed, %s\n", u_errorName(errorCode));
         exit(errorCode);

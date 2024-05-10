@@ -77,6 +77,7 @@ extern IntlTest *createStringSegmentTest();
 extern IntlTest *createUnitsDataTest();
 extern IntlTest *createUnitsTest();
 extern IntlTest *createUnitsRouterTest();
+extern IntlTest *createDisplayOptionsTest();
 
 
 #define TESTCLASS(id, TestClass)          \
@@ -93,7 +94,7 @@ extern IntlTest *createUnitsRouterTest();
 void IntlTestFormat::runIndexedTest( int32_t index, UBool exec, const char* &name, char* par )
 {
     // for all format tests, always set default Locale and TimeZone to ENGLISH and PST.
-    TimeZone* saveDefaultTimeZone = NULL;
+    TimeZone* saveDefaultTimeZone = nullptr;
     Locale  saveDefaultLocale = Locale::getDefault();
     if (exec) {
         saveDefaultTimeZone = TimeZone::createDefault();
@@ -274,6 +275,15 @@ void IntlTestFormat::runIndexedTest( int32_t index, UBool exec, const char* &nam
             logln("UnitsRouterTest test---");
             logln((UnicodeString)"");
             LocalPointer<IntlTest> test(createUnitsRouterTest());
+            callTest(*test, par);
+          }
+          break;
+        case 59:
+          name = "DisplayOptionsTest";
+          if (exec) {
+            logln("DisplayOptionsTest test---");
+            logln((UnicodeString)"");
+            LocalPointer<IntlTest> test(createDisplayOptionsTest());
             callTest(*test, par);
           }
           break;

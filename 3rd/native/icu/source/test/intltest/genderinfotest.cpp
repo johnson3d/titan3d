@@ -36,7 +36,7 @@ public:
     GenderInfoTest() {
     }
 
-    void runIndexedTest(int32_t index, UBool exec, const char *&name, char *par=0);
+    void runIndexedTest(int32_t index, UBool exec, const char *&name, char *par=0) override;
 private:
     void TestGetListGender();
     void TestFallback();
@@ -55,7 +55,7 @@ void GenderInfoTest::runIndexedTest(int32_t index, UBool exec, const char *&name
 }
 
 void GenderInfoTest::TestGetListGender() {
-    check(UGENDER_OTHER, UGENDER_OTHER, UGENDER_OTHER, NULL, 0);
+    check(UGENDER_OTHER, UGENDER_OTHER, UGENDER_OTHER, nullptr, 0);
     check(UGENDER_FEMALE, UGENDER_FEMALE, UGENDER_FEMALE, kSingleFemale, UPRV_LENGTHOF(kSingleFemale));
     check(UGENDER_MALE, UGENDER_MALE, UGENDER_MALE, kSingleMale, UPRV_LENGTHOF(kSingleMale));
     check(UGENDER_OTHER, UGENDER_OTHER, UGENDER_OTHER, kSingleOther, UPRV_LENGTHOF(kSingleOther));

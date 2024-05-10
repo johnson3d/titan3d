@@ -96,8 +96,9 @@ class TestThreadsThread : public SimpleThread
 {
 public:
     TestThreadsThread(char* whatToChange) { fWhatToChange = whatToChange; }
-    virtual void run() { Mutex m;
-                         *fWhatToChange = '*';
+    virtual void run() override {
+        Mutex m;
+        *fWhatToChange = '*';
     }
 private:
     char *fWhatToChange;
@@ -159,17 +160,17 @@ class TestArabicShapeThreads : public SimpleThread
 {
 public:
     TestArabicShapeThreads() {}
-    virtual void run() { doTailTest(); }
+    virtual void run() override { doTailTest(); }
 private:
 	void doTailTest();
 };
 
 
-void TestArabicShapeThreads::doTailTest(void) {
-    static const UChar src[] = { 0x0020, 0x0633, 0 };
-    static const UChar dst_old[] = { 0xFEB1, 0x200B,0 };
-    static const UChar dst_new[] = { 0xFEB1, 0xFE73,0 };
-    UChar dst[3] = { 0x0000, 0x0000,0 };
+void TestArabicShapeThreads::doTailTest() {
+    static const char16_t src[] = { 0x0020, 0x0633, 0 };
+    static const char16_t dst_old[] = { 0xFEB1, 0x200B,0 };
+    static const char16_t dst_new[] = { 0xFEB1, 0xFE73,0 };
+    char16_t dst[3] = { 0x0000, 0x0000,0 };
     int32_t length;
     UErrorCode status;
 
@@ -336,24 +337,24 @@ class ThreadSafeFormatSharedData {
     UnicodeString  fBBDStr;
 };
 
-const ThreadSafeFormatSharedData *gSharedData = NULL;
+const ThreadSafeFormatSharedData *gSharedData = nullptr;
 
 ThreadSafeFormatSharedData::ThreadSafeFormatSharedData(UErrorCode &status) {
     fFormat.adoptInstead(NumberFormat::createCurrencyInstance(Locale::getUS(), status));
-    static const UChar *kYDD = u"YDD";
-    static const UChar *kBBD = u"BBD";
+    static const char16_t *kYDD = u"YDD";
+    static const char16_t *kBBD = u"BBD";
     fYDDThing.adoptObject(new CurrencyAmount(123.456, kYDD, status));
     fBBDThing.adoptObject(new CurrencyAmount(987.654, kBBD, status));
     if (U_FAILURE(status)) {
         return;
     }
-    fFormat->format(fYDDThing, fYDDStr, NULL, status);
-    fFormat->format(fBBDThing, fBBDStr, NULL, status);
+    fFormat->format(fYDDThing, fYDDStr, nullptr, status);
+    fFormat->format(fBBDThing, fBBDStr, nullptr, status);
     gSharedData = this;
 }
 
 ThreadSafeFormatSharedData::~ThreadSafeFormatSharedData() {
-    gSharedData = NULL;
+    gSharedData = nullptr;
 }
 
 /**
@@ -377,10 +378,10 @@ ThreadSafeFormat::ThreadSafeFormat(UErrorCode &status) {
   fFormat.adoptInstead(NumberFormat::createCurrencyInstance(Locale::getUS(), status));
 }
 
-static const UChar *kUSD = u"USD";
+static const char16_t *kUSD = u"USD";
 
 UBool ThreadSafeFormat::doStuff(int32_t offset, UnicodeString &appendErr, UErrorCode &status) const {
-  UBool okay = TRUE;
+  UBool okay = true;
 
   if(u_strcmp(fFormat->getCurrency(), kUSD)) {
     appendErr.append(u"fFormat currency != ")
@@ -388,7 +389,7 @@ UBool ThreadSafeFormat::doStuff(int32_t offset, UnicodeString &appendErr, UError
       .append(u", =")
       .append(fFormat->getCurrency())
       .append(u"! ");
-    okay = FALSE;
+    okay = false;
   }
 
   if(u_strcmp(gSharedData->fFormat->getCurrency(), kUSD)) {
@@ -397,32 +398,32 @@ UBool ThreadSafeFormat::doStuff(int32_t offset, UnicodeString &appendErr, UError
       .append(u", =")
       .append(gSharedData->fFormat->getCurrency())
       .append(u"! ");
-    okay = FALSE;
+    okay = false;
   }
   UnicodeString str;
-  const UnicodeString *o=NULL;
+  const UnicodeString *o=nullptr;
   Formattable f;
-  const NumberFormat *nf = NULL; // only operate on it as const.
+  const NumberFormat *nf = nullptr; // only operate on it as const.
   switch(offset%4) {
   case 0:  f = gSharedData->fYDDThing;  o = &gSharedData->fYDDStr;  nf = gSharedData->fFormat.getAlias();  break;
   case 1:  f = gSharedData->fBBDThing;  o = &gSharedData->fBBDStr;  nf = gSharedData->fFormat.getAlias();  break;
   case 2:  f = gSharedData->fYDDThing;  o = &gSharedData->fYDDStr;  nf = fFormat.getAlias();  break;
   case 3:  f = gSharedData->fBBDThing;  o = &gSharedData->fBBDStr;  nf = fFormat.getAlias();  break;
   }
-  nf->format(f, str, NULL, status);
+  nf->format(f, str, nullptr, status);
 
   if(*o != str) {
     appendErr.append(showDifference(*o, str));
-    okay = FALSE;
+    okay = false;
   }
   return okay;
 }
 
 UBool U_CALLCONV isAcceptable(void *, const char *, const char *, const UDataInfo *) {
-    return TRUE;
+    return true;
 }
 
-//static UMTX debugMutex = NULL;
+//static UMTX debugMutex = nullptr;
 //static UMTX gDebugMutex;
 
 
@@ -438,7 +439,7 @@ public:
         : SimpleThread(),
         fNum(0),
         fTraceInfo(0),
-        fTSF(NULL),
+        fTSF(nullptr),
         fOffset(0)
         // the locale to use
     {
@@ -450,7 +451,7 @@ public:
     }
 
 
-    virtual void run()
+    virtual void run() override
     {
         fTraceInfo                     = 1;
         LocalPointer<NumberFormat> percentFormatter;
@@ -477,8 +478,8 @@ public:
         int m;
         for (m=0; m<4000; m++) {
             status         = U_ZERO_ERROR;
-            UResourceBundle *res   = NULL;
-            const char *localeName = NULL;
+            UResourceBundle *res   = nullptr;
+            const char *localeName = nullptr;
 
             Locale  loc = Locale::getEnglish();
 
@@ -487,7 +488,7 @@ public:
 
             // ResourceBundle bund = ResourceBundle(0, loc, status);
             //umtx_lock(&gDebugMutex);
-            res = ures_open(NULL, localeName, &status);
+            res = ures_open(nullptr, localeName, &status);
             //umtx_unlock(&gDebugMutex);
 
             //umtx_lock(&gDebugMutex);
@@ -664,7 +665,7 @@ void MultithreadTest::TestThreadedIntl()
     UErrorCode threadSafeErr = U_ZERO_ERROR;
 
     ThreadSafeFormatSharedData sharedData(threadSafeErr);
-    assertSuccess(WHERE, threadSafeErr, TRUE);
+    assertSuccess(WHERE, threadSafeErr, true);
 
     //
     //  Create and start the test threads
@@ -706,7 +707,7 @@ void MultithreadTest::TestThreadedIntl()
 #define kCollatorThreadPatience kCollatorThreadThreads*30
 
 struct Line {
-    UChar buff[25];
+    char16_t buff[25];
     int32_t buflen;
 } ;
 
@@ -725,10 +726,10 @@ private:
     UBool isAtLeastUCA62;
 public:
     CollatorThreadTest()  : SimpleThread(),
-        coll(NULL),
-        lines(NULL),
+        coll(nullptr),
+        lines(nullptr),
         noLines(0),
-        isAtLeastUCA62(TRUE)
+        isAtLeastUCA62(true)
     {
     }
     void setCollator(Collator *c, Line *l, int32_t nl, UBool atLeastUCA62)
@@ -738,9 +739,9 @@ public:
         noLines = nl;
         isAtLeastUCA62 = atLeastUCA62;
     }
-    virtual void run() {
+    virtual void run() override {
         uint8_t sk1[1024], sk2[1024];
-        uint8_t *oldSk = NULL, *newSk = sk1;
+        uint8_t *oldSk = nullptr, *newSk = sk1;
         int32_t oldLen = 0;
         int32_t prev = 0;
         int32_t i = 0;
@@ -750,7 +751,7 @@ public:
 
             int32_t resLen = coll->getSortKey(lines[i].buff, lines[i].buflen, newSk, 1024);
 
-            if(oldSk != NULL) {
+            if(oldSk != nullptr) {
                 int32_t skres = strcmp((char *)oldSk, (char *)newSk);
                 int32_t cmpres = coll->compare(lines[prev].buff, lines[prev].buflen, lines[i].buff, lines[i].buflen);
                 int32_t cmpres2 = coll->compare(lines[i].buff, lines[i].buflen, lines[prev].buff, lines[prev].buflen);
@@ -794,7 +795,7 @@ void MultithreadTest::TestCollators()
 {
 
     UErrorCode status = U_ZERO_ERROR;
-    FILE *testFile = NULL;
+    FILE *testFile = nullptr;
     char testDataPath[1024];
     strcpy(testDataPath, IntlTest::getSourceTestData(status));
     if (U_FAILURE(status)) {
@@ -843,7 +844,7 @@ void MultithreadTest::TestCollators()
                     "INFO: Working with the stub file.\n"
                     "If you need the full conformance test, please\n"
                     "download the appropriate data files from:\n"
-                    "http://source.icu-project.org/repos/icu/tools/trunk/unicodetools/com/ibm/text/data/");
+                    "https://github.com/unicode-org/cldr/tree/main/common/uca");
             }
         }
     }
@@ -852,10 +853,10 @@ void MultithreadTest::TestCollators()
     memset(lines.getAlias(), 0, sizeof(Line)*200000);
     int32_t lineNum = 0;
 
-    UChar bufferU[1024];
+    char16_t bufferU[1024];
     uint32_t first = 0;
 
-    while (fgets(buffer, 1024, testFile) != NULL) {
+    while (fgets(buffer, 1024, testFile) != nullptr) {
         if(*buffer == 0 || buffer[0] == '#') {
             // Store empty and comment lines so that errors are reported
             // for the real test file lines.
@@ -945,7 +946,7 @@ public:
     }
 
 
-    virtual void run()
+    virtual void run() override
     {
         fTraceInfo    = 1;
         int loopCount = 0;
@@ -969,7 +970,7 @@ public:
 
 };
 
-const UnicodeString *StringThreadTest2::gSharedString = NULL;
+const UnicodeString *StringThreadTest2::gSharedString = nullptr;
 
 // ** The actual test function.
 
@@ -997,7 +998,7 @@ void MultithreadTest::TestString()
     }
 
     delete StringThreadTest2::gSharedString;
-    StringThreadTest2::gSharedString = NULL;
+    StringThreadTest2::gSharedString = nullptr;
 }
 
 
@@ -1009,12 +1010,12 @@ void MultithreadTest::TestString()
 //
 
 #if !UCONFIG_NO_TRANSLITERATION
-Transliterator *gSharedTranslit = NULL;
+Transliterator *gSharedTranslit = nullptr;
 class TxThread: public SimpleThread {
   public:
     TxThread() {}
     ~TxThread();
-    void run();
+    void run() override;
 };
 
 TxThread::~TxThread() {}
@@ -1042,7 +1043,7 @@ void MultithreadTest::TestAnyTranslit() {
     for (i=0; i<UPRV_LENGTHOF(threads); i++) {
         threads[i].join();
     }
-    gSharedTranslit = NULL;
+    gSharedTranslit = nullptr;
 #endif  // !UCONFIG_NO_TRANSLITERATION
 }
 
@@ -1071,7 +1072,7 @@ static const int32_t CACHE_LOAD = 3;
 class UCTMultiThreadItem : public SharedObject {
   public:
     char *value;
-    UCTMultiThreadItem(const char *x) : value(NULL) {
+    UCTMultiThreadItem(const char *x) : value(nullptr) {
         value = uprv_strdup(x);
     }
     virtual ~UCTMultiThreadItem() {
@@ -1087,11 +1088,11 @@ static std::condition_variable *gCTConditionVar = nullptr;
 template<> U_EXPORT
 const UCTMultiThreadItem *LocaleCacheKey<UCTMultiThreadItem>::createObject(
         const void *context, UErrorCode &status) const {
-    const UnifiedCache *cacheContext = (const UnifiedCache *) context;
+    const UnifiedCache *cacheContext = static_cast<const UnifiedCache*>(context);
 
     if (uprv_strcmp(fLoc.getLanguage(), fLoc.getName()) != 0) {
-        const UCTMultiThreadItem *result = NULL;
-        if (cacheContext == NULL) {
+        const UCTMultiThreadItem *result = nullptr;
+        if (cacheContext == nullptr) {
             UnifiedCache::getByLocale(fLoc.getLanguage(), result, status);
             return result;
         }
@@ -1108,7 +1109,7 @@ const UCTMultiThreadItem *LocaleCacheKey<UCTMultiThreadItem>::createObject(
             // until other have completed. Verifies that cache doesn't
             // deadlock when a creation is slow.
 
-            // Note that gObjectsCreated needs to be incremeneted from 0 to 1
+            // Note that gObjectsCreated needs to be incremented from 0 to 1
             // early, to keep subsequent threads from entering this path.
             gObjectsCreated = 1;
             while (gObjectsCreated < 3) {
@@ -1119,7 +1120,7 @@ const UCTMultiThreadItem *LocaleCacheKey<UCTMultiThreadItem>::createObject(
 
     const UCTMultiThreadItem *result =
         new UCTMultiThreadItem(fLoc.getLanguage());
-    if (result == NULL) {
+    if (result == nullptr) {
         status = U_MEMORY_ALLOCATION_ERROR;
     } else {
         result->addRef();
@@ -1147,7 +1148,7 @@ class UnifiedCacheThread: public SimpleThread {
             const char *loc,
             const char *loc2) : fCache(cache), fLoc(loc), fLoc2(loc2) {}
     ~UnifiedCacheThread() {}
-    void run();
+    void run() override;
     void exerciseByLocale(const Locale &);
     const UnifiedCache *fCache;
     Locale fLoc;
@@ -1156,7 +1157,7 @@ class UnifiedCacheThread: public SimpleThread {
 
 void UnifiedCacheThread::exerciseByLocale(const Locale &locale) {
     UErrorCode status = U_ZERO_ERROR;
-    const UCTMultiThreadItem *origItem = NULL;
+    const UCTMultiThreadItem *origItem = nullptr;
     fCache->get(
             LocaleCacheKey<UCTMultiThreadItem>(locale), fCache, origItem, status);
     U_ASSERT(U_SUCCESS(status));
@@ -1165,11 +1166,11 @@ void UnifiedCacheThread::exerciseByLocale(const Locale &locale) {
     // Fetch the same item again many times. We should always get the same
     // pointer since this client is already holding onto it
     for (int32_t i = 0; i < 1000; ++i) {
-        const UCTMultiThreadItem *item = NULL;
+        const UCTMultiThreadItem *item = nullptr;
         fCache->get(
                 LocaleCacheKey<UCTMultiThreadItem>(locale), fCache, item, status);
         IntlTest::gTest->assertTrue(WHERE, item == origItem);
-        if (item != NULL) {
+        if (item != nullptr) {
             item->removeRef();
         }
     }
@@ -1257,7 +1258,7 @@ class BreakTranslitThread: public SimpleThread {
   public:
     BreakTranslitThread() {}
     ~BreakTranslitThread() {}
-    void run();
+    void run() override;
 };
 
 void BreakTranslitThread::run() {
@@ -1298,15 +1299,15 @@ void MultithreadTest::TestBreakTranslit() {
     }
 
     delete gSharedTransliterator;
-    gTranslitInput = NULL;
-    gTranslitExpected = NULL;
+    gTranslitInput = nullptr;
+    gTranslitExpected = nullptr;
 }
 
 
 class TestIncDecThread : public SimpleThread {
 public:
     TestIncDecThread() {}
-    virtual void run();
+    virtual void run() override;
 };
 
 static u_atomic_int32_t gIncDecCounter;
@@ -1339,7 +1340,7 @@ static Calendar  *gSharedCalendar = {};
 class Test20104Thread : public SimpleThread {
 public:
     Test20104Thread() {}
-    virtual void run();
+    virtual void run() override;
 };
 
 void Test20104Thread::run() {

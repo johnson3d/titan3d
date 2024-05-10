@@ -36,7 +36,7 @@ void printUnicodeString(const UnicodeString &s)
 void printUChar(UChar32 ch)
 {
     if(ch < 127) {
-        u_fprintf(out, "%C", (UChar) ch);
+        u_fprintf(out, "%C", (char16_t) ch);
     } else if (ch == CharacterIterator::DONE) {
         u_fprintf(out, "[CharacterIterator::DONE = 0xFFFF]");
     } else {
@@ -56,7 +56,7 @@ void Test::TestUChariter() {
         "to the aid of their country.";
 
     UnicodeString testString(testChars,"");
-    const UChar *testText = testString.getTerminatedBuffer();
+    const char16_t *testText = testString.getTerminatedBuffer();
 
     UCharCharacterIterator iter(testText, u_strlen(testText));
     UCharCharacterIterator* test2 = iter.clone();
@@ -73,14 +73,14 @@ void Test::TestUChariter() {
     test2->getText(result2);
     if (result1 != result2) {
         u_fprintf(out, "iter.getText() != clone.getText()\n");
-    } 
+    }
 
     u_fprintf(out, "\n");
 
     // Demonstrates seeking forward using the iterator.
     u_fprintf(out, "Forward  = ");
 
-    UChar c = iter.first();
+    char16_t c = iter.first();
     printUChar(c);    // The first char
     int32_t i = 0;
 
@@ -95,7 +95,7 @@ void Test::TestUChariter() {
             u_fprintf(out, "Iterator reached end prematurely");
         }
         else if (c != testText[i]) {
-            u_fprintf(out, "Character mismatch at position %d\n" + i);
+          u_fprintf(out, "Character mismatch at position %d\n", i);
         }
         if (iter.current() != c) {
             u_fprintf(out, "current() isn't working right");
@@ -111,7 +111,7 @@ void Test::TestUChariter() {
         u_fprintf(out, "|");
         printUChar(c);
 
-    } while (c != CharacterIterator::DONE);        
+    } while (c != CharacterIterator::DONE);
 
     delete test2;
     u_fprintf(out, "\n");
@@ -123,7 +123,7 @@ void Test::TestStringiter() {
         "to the aid of their country.";
 
     UnicodeString testString(testChars,"");
-    const UChar *testText    = testString.getTerminatedBuffer();
+    const char16_t *testText    = testString.getTerminatedBuffer();
 
     StringCharacterIterator iter(testText, u_strlen(testText));
     StringCharacterIterator* test2 = iter.clone();
@@ -142,11 +142,11 @@ void Test::TestStringiter() {
 
     u_fprintf(out, "Backwards: ");
 
-    UChar c = iter.last();
+    char16_t c = iter.last();
     int32_t i = iter.endIndex();
 
     printUChar(c);
-    i--; // already printed out the last char 
+    i--; // already printed out the last char
 
     if (iter.startIndex() != 0 || iter.endIndex() != u_strlen(testText)) {
         u_fprintf(out, "startIndex() or endIndex() failed\n");
@@ -180,11 +180,11 @@ void Test::TestStringiter() {
 }
 
 /* Creating and using text boundaries */
-int main( void )
+int main()
 {
     UErrorCode status = U_ZERO_ERROR;
 
-    out = u_finit(stdout, NULL, NULL);
+    out = u_finit(stdout, nullptr, nullptr);
 
     u_fprintf(out, "ICU Iteration Sample Program (C++)\n\n");
 

@@ -24,6 +24,7 @@
 
 #if !UCONFIG_NO_BREAK_ITERATION
 
+#include <stdbool.h>
 #include <stdlib.h>
 #include <string.h>
 #include "unicode/uloc.h"
@@ -42,7 +43,7 @@
 } UPRV_BLOCK_MACRO_END
 
 #define TEST_ASSERT(expr) UPRV_BLOCK_MACRO_BEGIN { \
-    if ((expr)==FALSE) { \
+    if ((expr)==false) { \
         log_data_err("Test Failure at file %s, line %d (Are you missing data?)\n", __FILE__, __LINE__); \
     } \
 } UPRV_BLOCK_MACRO_END
@@ -229,16 +230,16 @@ static void TestBreakIteratorCAPI()
     status=U_ZERO_ERROR;
 
 
-/* ======= Test ubrk_countAvialable() and ubrk_getAvialable() */
+/* ======= Test ubrk_countAvailable() and ubrk_getAvailable() */
 
     log_verbose("\nTesting ubrk_countAvailable() and ubrk_getAvailable()\n");
     count=ubrk_countAvailable();
     /* use something sensible w/o hardcoding the count */
     if(count < 0){
-        log_err("FAIL: Error in ubrk_countAvialable() returned %d\n", count);
+        log_err("FAIL: Error in ubrk_countAvailable() returned %d\n", count);
     }
     else{
-        log_verbose("PASS: ubrk_countAvialable() successful returned %d\n", count);
+        log_verbose("PASS: ubrk_countAvailable() successful returned %d\n", count);
     }
     for(i=0;i<count;i++)
     {
@@ -275,15 +276,15 @@ static void TestBreakIteratorCAPI()
     pos=ubrk_previous(word);
     log_verbose("%d \n", pos);
 
-    if (ubrk_isBoundary(word, 2) != FALSE) {
-        log_err("error ubrk_isBoundary(word, 2) did not return FALSE\n");
+    if (ubrk_isBoundary(word, 2) != false) {
+        log_err("error ubrk_isBoundary(word, 2) did not return false\n");
     }
     pos=ubrk_current(word);
     if (pos != 4) {
         log_err("error ubrk_current() != 4 after ubrk_isBoundary(word, 2)\n");
     }
-    if (ubrk_isBoundary(word, 4) != TRUE) {
-        log_err("error ubrk_isBoundary(word, 4) did not return TRUE\n");
+    if (ubrk_isBoundary(word, 4) != true) {
+        log_err("error ubrk_isBoundary(word, 4) did not return true\n");
     }
 
 
@@ -378,7 +379,7 @@ static void TestBreakIteratorCAPI()
 static void TestBreakIteratorSafeClone(void)
 {
     UChar text[51];     /* Keep this odd to test for 64-bit memory alignment */
-                        /*  NOTE:  This doesn't reliably force mis-alignment of following items. */
+                        /*  NOTE:  This doesn't reliably force misalignment of following items. */
     uint8_t buffer [CLONETEST_ITERATOR_COUNT] [U_BRK_SAFECLONE_BUFFERSIZE];
     int32_t bufferSize = U_BRK_SAFECLONE_BUFFERSIZE;
 
@@ -702,7 +703,7 @@ static void TestBreakIteratorRules() {
                     pos = ubrk_first(bi);
                     do {
                         if (pos2 != pos) {
-                            log_err("FAIL: interator from ubrk_openBinaryRules does not match original, get pos = %d instead of %d", pos2, pos);
+                            log_err("FAIL: iterator from ubrk_openBinaryRules does not match original, get pos = %d instead of %d", pos2, pos);
                         }
                         pos2 = ubrk_next(bi2);
                         pos = ubrk_next(bi);
@@ -751,7 +752,7 @@ static void TestBreakIteratorRuleError() {
 
 
 /*
-*   TestsBreakIteratorStatusVals()   Test the ubrk_getRuleStatusVec() funciton
+*   TestsBreakIteratorStatusVals()   Test the ubrk_getRuleStatusVec() function
 */
 static void TestBreakIteratorStatusVec() {
     #define RULE_STRING_LENGTH 200
@@ -930,16 +931,16 @@ static void TestBreakIteratorTailoring(void) {
             int32_t offset, offsindx;
             UBool foundError;
 
-            foundError = FALSE;
+            foundError = false;
             for (offsindx = 0; (offset = ubrk_next(ubrkiter)) != UBRK_DONE; ++offsindx) {
                 if (!foundError && offsindx >= testPtr->numOffsets) {
                     log_err("FAIL: locale %s, break type %d, ubrk_next expected UBRK_DONE, got %d\n",
                             testPtr->locale, testPtr->type, offset);
-                    foundError = TRUE;
+                    foundError = true;
                 } else if (!foundError && offset != testPtr->offsFwd[offsindx]) {
                     log_err("FAIL: locale %s, break type %d, ubrk_next expected %d, got %d\n",
                             testPtr->locale, testPtr->type, testPtr->offsFwd[offsindx], offset);
-                    foundError = TRUE;
+                    foundError = true;
                 }
             }
             if (!foundError && offsindx < testPtr->numOffsets) {
@@ -947,16 +948,16 @@ static void TestBreakIteratorTailoring(void) {
                         testPtr->locale, testPtr->type, testPtr->offsFwd[offsindx]);
             }
 
-            foundError = FALSE;
+            foundError = false;
             for (offsindx = 0; (offset = ubrk_previous(ubrkiter)) != UBRK_DONE; ++offsindx) {
                 if (!foundError && offsindx >= testPtr->numOffsets) {
                     log_err("FAIL: locale %s, break type %d, ubrk_previous expected UBRK_DONE, got %d\n",
                             testPtr->locale, testPtr->type, offset);
-                    foundError = TRUE;
+                    foundError = true;
                 } else if (!foundError && offset != testPtr->offsRev[offsindx]) {
                     log_err("FAIL: locale %s, break type %d, ubrk_previous expected %d, got %d\n",
                             testPtr->locale, testPtr->type, testPtr->offsRev[offsindx], offset);
-                    foundError = TRUE;
+                    foundError = true;
                 }
             }
             if (!foundError && offsindx < testPtr->numOffsets) {
