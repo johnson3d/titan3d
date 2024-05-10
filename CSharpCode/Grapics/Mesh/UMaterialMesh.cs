@@ -57,7 +57,7 @@ namespace EngineNS.Graphics.Mesh
     }
     [Rtti.Meta]
     [UMaterialMesh.Import]
-    [IO.AssetCreateMenu(MenuName = "MaterialMesh")]
+    [IO.AssetCreateMenu(MenuName = "Mesh/MaterialMesh")]
     public partial class UMaterialMesh : IO.ISerializer, IO.IAsset
     {
         public const string AssetExt = ".ums";

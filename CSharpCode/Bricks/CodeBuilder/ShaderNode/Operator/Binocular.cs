@@ -40,6 +40,7 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Operator
             Left.Name = " L";
             Right.Name = " R";
             Result.Name = "= ";
+            Result.MultiLinks = true;
 
             Left.LinkDesc = UShaderEditorStyles.Instance.NewInOutPinDesc();
             Right.LinkDesc = UShaderEditorStyles.Instance.NewInOutPinDesc();

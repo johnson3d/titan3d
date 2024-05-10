@@ -1,16 +1,23 @@
 ﻿using EngineNS.Bricks.AssetImpExp;
+using EngineNS.Graphics.Mesh;
 using System;
 using System.Collections.Generic;
 using System.Text;
 
 namespace EngineNS.Animation.Asset
 {
-    public partial class UAnimationClip
+    public class TtAnimImprotSetting
+    {
+        public string FileName { get; set; } = "";
+        public int AnimationsCount { get; set; } = 0;
+        public float Scale { get; set; } = 0.01f;
+    }
+    public partial class TtAnimationClip
     {
         public partial class ImportAttribute
         {
-            AssetImporter AssetImporter = new AssetImporter();
-            AssetDescription AssetDescription = null;
+            TtAssetImporter AssetImporter = new TtAssetImporter();
+            TtAnimImprotSetting AnimImprotSetting = new TtAnimImprotSetting();
             public unsafe partial bool AssimpCreateCreateDraw(EGui.Controls.UContentBrowser ContentBrowser)
             {
                 if (bPopOpen == false)
@@ -34,14 +41,16 @@ namespace EngineNS.Animation.Asset
                             string filePath = mFileDialog.GetCurrentPath();
                             if (!string.IsNullOrEmpty(mSourceFile))
                             {
-                                AssetDescription = AssetImporter.PreImport(mSourceFile);
+                                var AssetDescription = AssetImporter.PreImport(mSourceFile);
                                 if(AssetDescription == null)
                                 {
                                     eErrorType = enErrorType.EmptyName;
                                 }
                                 else
                                 {
-                                    PGAsset.Target = AssetDescription;
+                                    AnimImprotSetting.FileName = AssetDescription.FileName;
+                                    AnimImprotSetting.AnimationsCount = AssetDescription.AnimationsCount;
+                                    PGAsset.Target = AnimImprotSetting;
                                     mName = IO.TtFileManager.GetPureName(mSourceFile);
                                 }
                             }
@@ -64,15 +73,10 @@ namespace EngineNS.Animation.Asset
                     bool nameChanged = ImGuiAPI.InputText("##in_rname", ref mName);
                     if (nameChanged)
                     {
-                        if (IO.TtFileManager.FileExists(mDir.Address + mName + UAnimationClip.AssetExt))
+                        if (IO.TtFileManager.FileExists(mDir.Address + mName + TtAnimationClip.AssetExt))
                             eErrorType = enErrorType.IsExisting;
                     }
-
-                    ImGuiAPI.Separator();
-                    if (PGAsset.Target != null)
-                    {
-                        PGAsset.OnDraw(false, false, false);
-                    }
+ 
                     ImGuiAPI.Separator();
 
                     sz = new Vector2(0, 0);
@@ -93,6 +97,13 @@ namespace EngineNS.Animation.Asset
                         ImGuiAPI.CloseCurrentPopup();
                         retValue = true;
                     }
+
+                    ImGuiAPI.Separator();
+                    if (PGAsset.Target != null)
+                    {
+                        PGAsset.OnDraw(false, false, false);
+                    }
+
                     ImGuiAPI.EndPopup();
                 }
 
@@ -102,7 +113,7 @@ namespace EngineNS.Animation.Asset
             private unsafe bool DoImport()
             {
                 bool hasOnlyOneAnim = false;
-                if (AssetDescription.AnimationsCount == 1)
+                if (AnimImprotSetting.AnimationsCount == 1)
                 {
                     hasOnlyOneAnim = true;
                 }
@@ -112,28 +123,31 @@ namespace EngineNS.Animation.Asset
                     string animName = null;
                     if (hasOnlyOneAnim)
                     {
-                        animName = AssetDescription.FileName;
+                        animName = AnimImprotSetting.FileName;
                     }
                     else
                     {
                         animName = anim.Name;
                     }
-                    var rn = RName.GetRName(mDir.Name + animName + UAnimationClip.AssetExt);
-                    
-                    var chunk = AnimationChunkGenerater.Generate(rn, anim, AssetImporter.AiScene);
-                    var animClip = new UAnimationClip();
+                    var rn = RName.GetRName(mDir.Name + animName + TtAnimationClip.AssetExt);
+                    var importSetting = new TtAssetImportOption_Animation();
+                    importSetting.Scale = AnimImprotSetting.Scale;
+                    var chunk = AnimationChunkGenerater.Generate(rn, anim, AssetImporter.AiScene, importSetting);
+                    var animClip = new TtAnimationClip();
                     animClip.SampleRate = (float)anim.TicksPerSecond;
                     animClip.Duration = (float)(anim.DurationInTicks / anim.TicksPerSecond);
                     animClip.AnimationChunkName = chunk.RescouceName;
                     animClip.AnimationChunk = chunk;
                     animClip.SaveAssetTo(rn);
+                    EngineNS.UEngine.Instance.AnimationModule.AnimationChunkManager.Remove(rn);
+                    EngineNS.UEngine.Instance.AnimationModule.AnimationClipManager.Remove(rn);
                     if (animClip != null)
                     {
-                        var ameta = new UAnimationClipAMeta();
+                        var ameta = new TtAnimationClipAMeta();
                         ameta.SetAssetName(rn);
                         ameta.AssetId = Guid.NewGuid();
-                        ameta.TypeStr = Rtti.UTypeDescManager.Instance.GetTypeStringFromType(typeof(UAnimationClip));
-                        ameta.Description = $"This is a {typeof(UAnimationClip).FullName}\n";
+                        ameta.TypeStr = Rtti.UTypeDescManager.Instance.GetTypeStringFromType(typeof(TtAnimationClip));
+                        ameta.Description = $"This is a {typeof(TtAnimationClip).FullName}\n";
                         ameta.SaveAMeta();
                         UEngine.Instance.AssetMetaManager.RegAsset(ameta);
                     }

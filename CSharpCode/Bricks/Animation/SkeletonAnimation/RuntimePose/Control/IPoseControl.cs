@@ -4,10 +4,10 @@ using System.Text;
 
 namespace EngineNS.Animation.SkeletonAnimation.Runtime.Control
 {
-    public abstract class URuntimePoseControl
+    public abstract class TtRuntimePoseControl
     {
-        public Pose.ULocalSpaceRuntimePose mOutPose = null;
-        public Pose.ULocalSpaceRuntimePose OutPose { get => mOutPose; set => mOutPose = value; }
+        public Pose.TtLocalSpaceRuntimePose mOutPose = null;
+        public Pose.TtLocalSpaceRuntimePose OutPose { get => mOutPose; set => mOutPose = value; }
         public void Tick(float elapseSecond)
         {
             Update(elapseSecond);

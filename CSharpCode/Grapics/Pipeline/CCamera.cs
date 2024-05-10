@@ -4,7 +4,7 @@ using System.Text;
 
 namespace EngineNS.Graphics.Pipeline
 {
-    public class UCamera : AuxPtrType<ICamera>
+    public class UCamera : AuxPtrType<ICamera>, ITickable
     {
         public UCamera()
         {
@@ -27,7 +27,13 @@ namespace EngineNS.Graphics.Pipeline
                 return mPerCameraCBuffer;
             }
         }
-        public void AutoZoom(ref BoundingSphere sphere, bool bOptZRange = true)
+        DVector3 TargetEye;
+        DVector3 TargetLookAt;
+        Vector3 TargetUp;
+        DVector3 TargetEyeMoveSpeed;
+        DVector3 TargetLookAtMoveSpeed;
+        Vector3 TargetUpMoveSpeed;
+        public void AutoZoom(ref BoundingSphere sphere, float zoomTimeInSecond = 0.0f, bool bOptZRange = true)
         {
             var dist = (sphere.Radius) / (float)Math.Sin((float)this.mCoreObject.mFov);
             var eye = sphere.Center - this.mCoreObject.GetDirection() * dist;
@@ -36,7 +42,21 @@ namespace EngineNS.Graphics.Pipeline
             {
                 SetZRange(this.ZNear, 2.0f * dist);
             }
-            mCoreObject.LookAtLH(eye.AsDVector(), sphere.Center.AsDVector(), in up);
+            if (MathHelper.Abs(zoomTimeInSecond) <= MathHelper.Epsilon)
+            {
+                mCoreObject.LookAtLH(eye.AsDVector(), sphere.Center.AsDVector(), in up);
+                UEngine.Instance.TickableManager.RemoveTickable(this);
+            }
+            else
+            {
+                TargetEye = eye.AsDVector();
+                TargetLookAt = sphere.Center.AsDVector();
+                TargetUp = up;
+                TargetEyeMoveSpeed = (TargetEye - mCoreObject.GetPosition()) / zoomTimeInSecond;
+                TargetLookAtMoveSpeed = (TargetLookAt - mCoreObject.GetLookAt()) / zoomTimeInSecond;
+                TargetUpMoveSpeed = Vector3.Zero;
+                UEngine.Instance.TickableManager.AddTickable(this);
+            }
         }
         public float GetScaleWithFixSizeInScreen(in DVector3 position, float screenSize)
         {
@@ -276,6 +296,71 @@ namespace EngineNS.Graphics.Pipeline
             PreFrameViewProjectionMatrix = GetViewProjection();
             JitterPreFrameViewProjectionMatrix = GetJitterViewProjection();
         }
+
+        public void TickLogic(float ellapse)
+        {
+            var eyePos = mCoreObject.GetPosition();
+            var eyeLookAt = mCoreObject.GetLookAt();
+            var eyeUp = mCoreObject.GetUp();
+            var deltaEye = TargetEye - eyePos;
+            var deltaLookAt = TargetLookAt - eyeLookAt;
+            var deltaUp = TargetUp - eyeUp;
+            var speedEye = TargetEyeMoveSpeed * ellapse * 0.001f;
+            var speedLookAt = TargetLookAtMoveSpeed * ellapse * 0.001f;
+            var speedUp = TargetUpMoveSpeed * ellapse * 0.001f;
+
+            eyePos += speedEye;
+            var deltaE = (TargetEye - eyePos) * deltaEye;
+            if (deltaE.X <= 0 &&
+                deltaE.Y <= 0 &&
+                deltaE.Z <= 0)
+            {
+                eyePos = TargetEye;
+            }
+            eyeLookAt += speedLookAt;
+            var deltaL = (TargetLookAt - eyeLookAt) * deltaLookAt;
+            if(deltaL.X <= 0 &&
+               deltaL.Y <= 0 &&
+               deltaL.Z <= 0)
+            {
+                eyeLookAt = TargetLookAt;
+            }
+            eyeUp += speedUp;
+            var deltaU = (TargetUp - eyeUp) * deltaUp;
+            if(deltaU.X <= 0 &&
+               deltaU.Y <= 0 &&
+               deltaU.Z <= 0)
+            {
+                eyeUp = TargetUp;
+            }
+
+            mCoreObject.LookAtLH(in eyePos, in eyeLookAt, in eyeUp);
+            if(deltaE.X <= 0 &&
+               deltaE.Y <= 0 &&
+               deltaE.Z <= 0 &&
+               deltaL.X <= 0 &&
+               deltaL.Y <= 0 &&
+               deltaL.Z <= 0 &&
+               deltaU.X <= 0 &&
+               deltaU.Y <= 0 &&
+               deltaU.Z <= 0)
+            {
+                UEngine.Instance.TickableManager.RemoveTickable(this);
+            }
+        }
+
+        public void TickRender(float ellapse)
+        {
+        }
+
+        public void TickBeginFrame(float ellapse)
+        {
+        }
+
+        public void TickSync(float ellapse)
+        {
+        }
+
         Matrix? PreFrameViewProjectionMatrix = null;
         Matrix? JitterPreFrameViewProjectionMatrix = null;
         #endregion

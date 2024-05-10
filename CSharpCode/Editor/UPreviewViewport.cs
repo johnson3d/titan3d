@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Security.Permissions;
 
 namespace EngineNS.Editor
 {
@@ -88,6 +89,7 @@ namespace EngineNS.Editor
         }
         protected override void OnClientChanged(bool bSizeChanged)
         {
+            base.OnClientChanged(bSizeChanged);
             var vpSize = this.ClientSize;
             if (bSizeChanged)
             {
@@ -124,11 +126,18 @@ namespace EngineNS.Editor
         Vector2 mPreMousePt;
         public float CameraMoveSpeed { get; set; } = 1.0f;
         public float CameraMouseWheelSpeed { get; set; } = 1.0f;
+        public float CameraRotSpeed = 1.0f;
         public bool FreezCameraControl = false;
         public delegate void Delegate_OnEvent(in Bricks.Input.Event e);
         public Delegate_OnEvent OnEventAction;
         public unsafe override bool OnEvent(in Bricks.Input.Event e)
         {
+            if(e.Type == Bricks.Input.EventType.MOUSEBUTTONDOWN)
+            {
+                mPreMousePt.X = e.MouseButton.X;
+                mPreMousePt.Y = e.MouseButton.Y;
+            }
+
             if (this.IsFocused == false)
             {
                 return true;
@@ -145,8 +154,8 @@ namespace EngineNS.Editor
                 {
                     if (keyboards.IsKeyDown(Bricks.Input.Keycode.KEY_LALT))
                     {
-                        CameraController.Rotate(Graphics.Pipeline.ECameraAxis.Up, (e.MouseMotion.X - mPreMousePt.X) * 0.01f);
-                        CameraController.Rotate(Graphics.Pipeline.ECameraAxis.Right, (e.MouseMotion.Y - mPreMousePt.Y) * 0.01f);
+                        CameraController.Rotate(Graphics.Pipeline.ECameraAxis.Up, (e.MouseMotion.X - mPreMousePt.X) * CameraRotSpeed * UEngine.Instance.ElapsedSecond);
+                        CameraController.Rotate(Graphics.Pipeline.ECameraAxis.Right, (e.MouseMotion.Y - mPreMousePt.Y) * CameraRotSpeed * UEngine.Instance.ElapsedSecond);
                         /*if (keyboards.IsKeyDown(Bricks.Input.Keycode.KEY_LCTRL))
                         {
                             UEngine.Instance.GfxDevice.RenderCmdQueue.CaptureRenderDocFrame = true;
@@ -155,8 +164,8 @@ namespace EngineNS.Editor
                 }
                 else if (e.MouseButton.Button == (byte)Bricks.Input.EMouseButton.BUTTON_MIDDLE)
                 {
-                    CameraController.Move(Graphics.Pipeline.ECameraAxis.Right, (e.MouseMotion.X - mPreMousePt.X) * 0.01f);
-                    CameraController.Move(Graphics.Pipeline.ECameraAxis.Up, (e.MouseMotion.Y - mPreMousePt.Y) * 0.01f);
+                    CameraController.Move(Graphics.Pipeline.ECameraAxis.Right, (e.MouseMotion.X - mPreMousePt.X) * CameraMoveSpeed * UEngine.Instance.ElapsedSecond);
+                    CameraController.Move(Graphics.Pipeline.ECameraAxis.Up, (e.MouseMotion.Y - mPreMousePt.Y) * CameraMoveSpeed * UEngine.Instance.ElapsedSecond);
                 }
                 else if (e.MouseButton.Button == (byte)Bricks.Input.EMouseButton.BUTTON_X1)
                 {
@@ -166,8 +175,8 @@ namespace EngineNS.Editor
                     }
                     else
                     {
-                        CameraController.Rotate(Graphics.Pipeline.ECameraAxis.Up, (e.MouseMotion.X - mPreMousePt.X) * 0.01f, true);
-                        CameraController.Rotate(Graphics.Pipeline.ECameraAxis.Right, (e.MouseMotion.Y - mPreMousePt.Y) * 0.01f, true);
+                        CameraController.Rotate(Graphics.Pipeline.ECameraAxis.Up, (e.MouseMotion.X - mPreMousePt.X) * CameraRotSpeed * UEngine.Instance.ElapsedSecond, true);
+                        CameraController.Rotate(Graphics.Pipeline.ECameraAxis.Right, (e.MouseMotion.Y - mPreMousePt.Y) * CameraRotSpeed * UEngine.Instance.ElapsedSecond, true);
                     }
                 }
 

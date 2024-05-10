@@ -32,7 +32,7 @@ namespace EngineNS.Bricks.Particle
         //}
     }
     [UNebulaParticle.UNebulaParticleImport]
-    [IO.AssetCreateMenu(MenuName = "NubulaParticle")]
+    [IO.AssetCreateMenu(MenuName = "FX/NubulaParticle")]
     [EngineNS.Editor.UAssetEditor(EditorType = typeof(Editor.UParticleEditor))]
     public class UNebulaParticle : IO.IAsset, IDisposable
     {

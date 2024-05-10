@@ -6,7 +6,7 @@ using System.Text;
 
 namespace EngineNS.Animation.Asset.BlendSpace
 {
-    public class BlendSpaceGrid
+    public class TtBlendSpaceGrid
     {
         /**
 	 * Find Triangle this TestPoint is within
@@ -18,13 +18,13 @@ namespace EngineNS.Animation.Asset.BlendSpace
 	 * 
 	 * @return	true if successfully found the triangle this point is within
 	 */
-        public bool FindTriangleThisPointBelongsTo(Vector3 TestPoint, ref Vector3 OutBaryCentricCoords, ref BSTriangle OutTriangle, List<BSTriangle> TriangleList)
+        public bool FindTriangleThisPointBelongsTo(Vector3 TestPoint, ref Vector3 OutBaryCentricCoords, ref TtBSTriangle OutTriangle, List<TtBSTriangle> TriangleList)
         {
             // Calculate distance from point to triangle and sort the triangle list accordingly
-            List<BSSortByDistance> SortedTriangles = new List<BSSortByDistance>();
+            List<TtBSSortByDistance> SortedTriangles = new List<TtBSSortByDistance>();
             for (int i = 0; i < TriangleList.Count; ++i)
             {
-                SortedTriangles.Add(new BSSortByDistance(-1, 0));
+                SortedTriangles.Add(new TtBSSortByDistance(-1, 0));
             }
             for (int TriangleIndex = 0; TriangleIndex < TriangleList.Count; ++TriangleIndex)
             {
@@ -41,7 +41,7 @@ namespace EngineNS.Animation.Asset.BlendSpace
             // Now loop over the sorted triangles and test the barycentric coordinates with the point
             for (int i = 0; i < SortedTriangles.Count; ++i)
             {
-                BSTriangle Triangle = TriangleList[SortedTriangles[i].Index];
+                TtBSTriangle Triangle = TriangleList[SortedTriangles[i].Index];
 
                 Vector3 Coords = GetBaryCentric2D(TestPoint, Triangle.Vertices[0].Position, Triangle.Vertices[1].Position, Triangle.Vertices[2].Position);
 
@@ -91,7 +91,7 @@ namespace EngineNS.Animation.Asset.BlendSpace
          * @param	SamplePoints		: Sample Point List
          * @param	TriangleList		: List of triangles
          */
-        public void GenerateGridElements(List<BSPoint> SamplePoints, List<BSTriangle> TriangleList)
+        public void GenerateGridElements(List<TtBSPoint> SamplePoints, List<TtBSTriangle> TriangleList)
         {
             if (!(NumGridDivisions.X > 0 && NumGridDivisions.Y > 0))
                 return;
@@ -109,15 +109,15 @@ namespace EngineNS.Animation.Asset.BlendSpace
 
             for (int i = 0; i < TotalNumGridPoints; ++i)
             {
-                GridPoints.Add(new UBlentSpace_Triangle());
+                GridPoints.Add(new TtBlentSpace_Triangle());
             }
             Vector3 GridPointPosition;
             for (int GridPositionX = 0; GridPositionX < NumGridPointsForAxis.X; ++GridPositionX)
             {
                 for (int GridPositionY = 0; GridPositionY < NumGridPointsForAxis.Y; ++GridPositionY)
                 {
-                    BSTriangle SelectedTriangle = null;
-                    UBlentSpace_Triangle GridPoint = GridPoints[GridPositionX * (int)NumGridPointsForAxis.Y + GridPositionY];
+                    TtBSTriangle SelectedTriangle = null;
+                    TtBlentSpace_Triangle GridPoint = GridPoints[GridPositionX * (int)NumGridPointsForAxis.Y + GridPositionY];
 
                     GridPointPosition = GetPosFromIndex(GridPositionX, GridPositionY);
 
@@ -141,33 +141,33 @@ namespace EngineNS.Animation.Asset.BlendSpace
                     }
                     else
                     {
-                        List<BSSortByDistance> SortedTriangles = new List<BSSortByDistance>();
+                        List<TtBSSortByDistance> SortedTriangles = new List<TtBSSortByDistance>();
                         for (int TriangleIndex = 0; TriangleIndex < TriangleList.Count; ++TriangleIndex)
                         {
                             // Check if points are collinear
-                            BSTriangle Triangle = TriangleList[TriangleIndex];
+                            TtBSTriangle Triangle = TriangleList[TriangleIndex];
                             Vector3 EdgeA = Triangle.Vertices[1].Position - Triangle.Vertices[0].Position;
                             Vector3 EdgeB = Triangle.Vertices[2].Position - Triangle.Vertices[0].Position;
                             float Result = EdgeA.X * EdgeB.Y - EdgeA.Y * EdgeB.X;
                             // Only add valid triangles
                             if (Result > 0.0f)
                             {
-                                SortedTriangles.Add(new BSSortByDistance(TriangleIndex, Triangle.GetDistance(GridPointPosition)));
+                                SortedTriangles.Add(new TtBSSortByDistance(TriangleIndex, Triangle.GetDistance(GridPointPosition)));
                             }
                         }
 
                         if (SortedTriangles.Count > 0)
                         {
                             // SortedTriangles.Sort([](FSortByDistance A, FSortByDistance B) { return A.Distance < B.Distance; });
-                            BSTriangle ClosestTriangle = TriangleList[SortedTriangles[0].Index];
+                            TtBSTriangle ClosestTriangle = TriangleList[SortedTriangles[0].Index];
 
                             // For the closest triangle, determine which of its edges is closest to the grid point
-                            List<BSSortByDistance> Edges = new List<BSSortByDistance>();
+                            List<TtBSSortByDistance> Edges = new List<TtBSSortByDistance>();
                             List<Vector3> PointsOnEdges = new List<Vector3>();
                             for (int EdgeIndex = 0; EdgeIndex < 3; ++EdgeIndex)
                             {
                                 Vector3 ClosestPoint = ClosestPointOnLine(ClosestTriangle.Edges[EdgeIndex].Vertices[0].Position, ClosestTriangle.Edges[EdgeIndex].Vertices[1].Position, GridPointPosition);
-                                Edges.Add(new BSSortByDistance(EdgeIndex, (ClosestPoint - GridPointPosition).LengthSquared()));
+                                Edges.Add(new TtBSSortByDistance(EdgeIndex, (ClosestPoint - GridPointPosition).LengthSquared()));
                                 PointsOnEdges.Add(ClosestPoint);
                             }
                             //Edges.Sort([](FSortByDistance A, FSortByDistance B) { return A.Distance < B.Distance; });
@@ -193,13 +193,13 @@ namespace EngineNS.Animation.Asset.BlendSpace
                             else
                             {
                                 // Two points or co-linear triangles, first find the two closest samples
-                                List<BSSortByDistance> SampleDistances = new List<BSSortByDistance>();
+                                List<TtBSSortByDistance> SampleDistances = new List<TtBSSortByDistance>();
                                 for (int PointIndex = 0; PointIndex < SamplePoints.Count; ++PointIndex)
                                 {
                                     var vec = (SamplePoints[PointIndex].Position - GridPointPosition);
                                     Vector2 vector2 = new Vector2(vec.X, vec.Y);
                                     float DistanceFromSampleToPoint = vector2.LengthSquared();
-                                    SampleDistances.Add(new BSSortByDistance(PointIndex, DistanceFromSampleToPoint));
+                                    SampleDistances.Add(new TtBSSortByDistance(PointIndex, DistanceFromSampleToPoint));
                                 }
                                 SampleDistances.Sort((A, B) =>
                                 {
@@ -209,7 +209,7 @@ namespace EngineNS.Animation.Asset.BlendSpace
                                 });
 
                                 // Find closest point on line between the two samples (clamping the grid position to the line, just like clamping to the triangle edges)
-                                BSPoint[] Samples = new BSPoint[2];
+                                TtBSPoint[] Samples = new TtBSPoint[2];
                                 Samples[0] = SamplePoints[SampleDistances[0].Index];
                                 Samples[1] = SamplePoints[SampleDistances[1].Index];
                                 Vector3 ClosestPointOnTheLine = ClosestPointOnLine(Samples[0].Position, Samples[1].Position, GridPointPosition);
@@ -236,9 +236,9 @@ namespace EngineNS.Animation.Asset.BlendSpace
         /** 
          * default value 
          */
-        public BlendSpaceGrid()
+        public TtBlendSpaceGrid()
         {
-            GridDimensions = new BSBox();
+            GridDimensions = new FBSBox();
             GridDimensions.Min = new Vector3(0, 0, 0);
             GridDimensions.Max = new Vector3(100, 100, 0);
             NumGridPointsForAxis = new Vector2(5, 5);
@@ -249,7 +249,7 @@ namespace EngineNS.Animation.Asset.BlendSpace
             GridPoints.Clear();
         }
 
-        public void SetGridInfo(UBlendSpace_Axis BlendParamX, UBlendSpace_Axis BlendParamY)
+        public void SetGridInfo(TtBlendSpace_Axis BlendParamX, TtBlendSpace_Axis BlendParamY)
         {
             NumGridPointsForAxis.X = (int)BlendParamX.GridNum + 1;
             NumGridPointsForAxis.Y = (int)BlendParamY.GridNum + 1;
@@ -264,7 +264,7 @@ namespace EngineNS.Animation.Asset.BlendSpace
             GridDimensions.Max.Y = BlendParamY.Max;
         }
 
-        public UBlentSpace_Triangle GetElement(int GridX, int GridY)
+        public TtBlentSpace_Triangle GetElement(int GridX, int GridY)
         {
             //check(NumGridPointsForAxis.X >= GridX);
             //check(NumGridPointsForAxis.Y >= GridY);
@@ -272,7 +272,7 @@ namespace EngineNS.Animation.Asset.BlendSpace
             //check(GridPoints.Num() > 0);
             return GridPoints[GridX * (int)NumGridPointsForAxis.Y + GridY];
         }
-        public List<UBlentSpace_Triangle> GetElements() { return GridPoints; }
+        public List<TtBlentSpace_Triangle> GetElements() { return GridPoints; }
 
         /** 
          * Convert grid index (GridX, GridY) to triangle coords and returns Vector3
@@ -287,13 +287,13 @@ namespace EngineNS.Animation.Asset.BlendSpace
             // for now only 2D
             return new Vector3(GridX * EachGridSize.X + GridDimensions.Min.X, GridY * EachGridSize.Y + GridDimensions.Min.Y, 0.0f);
         }
-        BSBox GridDimensions;
+        FBSBox GridDimensions;
 
         // how many rows/cols for each axis
         Vector2 NumGridPointsForAxis;
         Vector2 NumGridDivisions;
 
         // Each point data -output data
-        List<UBlentSpace_Triangle> GridPoints = new List<UBlentSpace_Triangle>(); // 2D array saved in 1D array, to search (x, y), x*GridSizeX+y;
+        List<TtBlentSpace_Triangle> GridPoints = new List<TtBlentSpace_Triangle>(); // 2D array saved in 1D array, to search (x, y), x*GridSizeX+y;
     }
 }

@@ -7,6 +7,7 @@ namespace EngineNS.Graphics.Pipeline.Common
     [Bricks.CodeBuilder.ContextMenu("Find", "Find", Bricks.RenderPolicyEditor.UPolicyGraph.RGDEditorKeyword)]
     public class UFindNode : TtRenderGraphNode
     {
+        public TtRenderGraphPin InputPinInOut = TtRenderGraphPin.CreateInputOutput("Input");
         public TtRenderGraphPin ResultPinOut = TtRenderGraphPin.CreateOutput("Result", false, EPixelFormat.PXF_UNKNOWN);
         TtRenderGraphNode mNode;
         public string mProxyNodeName = "";
@@ -54,6 +55,8 @@ namespace EngineNS.Graphics.Pipeline.Common
         //}
         public override void InitNodePins()
         {
+            InputPinInOut.IsAllowInputNull = true;
+            AddInputOutput(InputPinInOut, NxRHI.EBufferType.BFT_SRV);
             ResultPinOut.LifeMode = TtAttachBuffer.ELifeMode.Imported;
             AddOutput(ResultPinOut, NxRHI.EBufferType.BFT_SRV | NxRHI.EBufferType.BFT_UAV);
         }
@@ -63,6 +66,8 @@ namespace EngineNS.Graphics.Pipeline.Common
         }
         public override void BeforeTickLogic(URenderPolicy policy)
         {
+            if (string.IsNullOrEmpty(ProxyNodeName))
+                return;
             if (mNode == null)
             {
                 ProxyNodeName = ProxyNodeName;

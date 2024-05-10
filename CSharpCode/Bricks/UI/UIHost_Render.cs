@@ -130,7 +130,7 @@ namespace EngineNS.UI
                                 height = (float)(2 * camera.ZNear * Math.Tan(camera.Fov * 0.5f));
                                 width = camera.Aspect * height;
                             }
-                            var scale = (float)(height / uiHost.DesignRect.Height);
+                            var scale = (float)(height / uiHost.WindowSize.Height);
                             mMatrix = Matrix.Scaling(scale) * Matrix.Translate(-width * 0.5f, -height * 0.5f, camera.ZNear);
                             mInvMatrix = Matrix.Invert(in mMatrix);
                             uiHost.RenderTransformDirty = false;
@@ -151,7 +151,9 @@ namespace EngineNS.UI
                         var parentData = ELement.RootUIHost.TransformedElements[ParentTransformIdx];
                         parentData.UpdateMatrix();
 
-                        var offset = ELement.RootUIHost.SceneNode.GetWorld().CameraOffset;
+                        DVector3 offset = DVector3.Zero;
+                        if(!ELement.RootUIHost.IsScreenSpace)
+                            offset = ELement.RootUIHost.SceneNode.GetWorld().CameraOffset;
                         var absTrans = ELement.RenderTransform;
                         Vector3 localOffset = new Vector3(
                             ELement.DesignRect.Width * ELement.RenderTransformCenter.X, 
@@ -224,9 +226,16 @@ namespace EngineNS.UI
             {
                 await i.BuildMesh();
             }
+            mSceneNode?.UpdateAABB();
             return mesh;
         }
-        protected async Thread.Async.TtTask<Graphics.Mesh.TtMesh> OnBuildMesh()
+        protected virtual void ResetCanvas()
+        {
+            mCanvas.Reset();
+            var winSize = WindowSize;
+            mCanvas.SetClientClip(winSize.Width, winSize.Height);
+        }
+        protected virtual async Thread.Async.TtTask<Graphics.Mesh.TtMesh> OnBuildMesh()
         {
             if (!MeshDirty)
                 return mDrawMesh;
@@ -249,10 +258,7 @@ namespace EngineNS.UI
                 builder.Init(streams, false, 0);
             }
 
-            mCanvas.Reset();
-            //var winSize = WindowSize;
-            mCanvas.SetClientClip(mDesignRect.Width, mDesignRect.Height);
-
+            ResetCanvas();
             //var subCmd = new EngineNS.Canvas.FSubDrawCmd();
 
             //var canvasBackground = mCanvas.Background;
@@ -267,7 +273,7 @@ namespace EngineNS.UI
 
             //assistBatch.Backgroud.AddRect(Vector2.Zero, new Vector2(winSize.Width, winSize.Height), 10, Color.White, Canvas.CanvasDrawRectType.Line, ref subCmd);
             //mCanvas.PushBatch(assistBatch);
-            if(mDrawBatch == null)
+            if (mDrawBatch == null)
                 mDrawBatch = new Canvas.TtCanvasDrawBatch();
 
             UpdateTransformIndex(0);

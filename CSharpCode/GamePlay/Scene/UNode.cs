@@ -639,7 +639,7 @@ namespace EngineNS.GamePlay.Scene
                 i.UpdateAbsTransform();
             }
         }
-        public void UpdateAABB()
+        public virtual void UpdateAABB()
         {
             if (NodeData == null || BoundVolume == null || Placement == null)
                 return;
@@ -670,7 +670,7 @@ namespace EngineNS.GamePlay.Scene
                         var matrix = uplc.TransformData;
                         DBoundingBox.TransformNoScale(in i.AABB, in matrix, out tmp);
                         //BoundingBox.Transform(in i.AABB, in uplc.mTransform, out tmp);
-                        AABB = DBoundingBox.Merge(AABB, tmp);
+                        AABB = DBoundingBox.Merge(in AABB, in tmp);
                     }
                     else
                     {
@@ -679,7 +679,7 @@ namespace EngineNS.GamePlay.Scene
                         //var trans = i.Placement.TransformData.ToMatrixNoScale();
                         var trans = i.Placement.TransformData;
                         DBoundingBox.TransformNoScale(in i.AABB, in trans, out tmp);
-                        AABB = DBoundingBox.Merge(AABB, tmp);
+                        AABB = DBoundingBox.Merge(in AABB, in tmp);
                     }
                 }
                 else

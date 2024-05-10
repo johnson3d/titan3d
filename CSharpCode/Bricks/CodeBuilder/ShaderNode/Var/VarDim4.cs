@@ -354,21 +354,27 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Var
 
             OutXYZW.Name = " xyzw";
             OutXYZW.LinkDesc = UShaderEditorStyles.Instance.NewInOutPinDesc();
+            OutXYZW.MultiLinks = true;
             this.AddPinOut(OutXYZW);
             OutXYZ.Name = " xyz";
             OutXYZ.LinkDesc = UShaderEditorStyles.Instance.NewInOutPinDesc();
+            OutXYZ.MultiLinks = true;
             this.AddPinOut(OutXYZ);
             OutX.Name = " x";
             OutX.LinkDesc = UShaderEditorStyles.Instance.NewInOutPinDesc();
+            OutX.MultiLinks = true;
             this.AddPinOut(OutX);
             OutY.Name = " y";
             OutY.LinkDesc = UShaderEditorStyles.Instance.NewInOutPinDesc();
+            OutY.MultiLinks = true;
             this.AddPinOut(OutY);
             OutZ.Name = " z";
             OutZ.LinkDesc = UShaderEditorStyles.Instance.NewInOutPinDesc();
+            OutZ.MultiLinks = true;
             this.AddPinOut(OutZ);
             OutW.Name = " w";
             OutW.LinkDesc = UShaderEditorStyles.Instance.NewInOutPinDesc();
+            OutW.MultiLinks = true;
             this.AddPinOut(OutW);
         }
     }
@@ -380,6 +386,7 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Var
             PrevSize = new Vector2(100, 100);
             OutXYZ.Name = " xyz";
             OutXYZ.LinkDesc = UShaderEditorStyles.Instance.NewInOutPinDesc();
+            OutXYZ.MultiLinks = true;
             this.AddPinOut(OutXYZ);
         }
         [EGui.Controls.PropertyGrid.Color4PickerEditor()]
@@ -621,21 +628,27 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Var
 
             OutXYZW.Name = " xyzw";
             OutXYZW.LinkDesc = UShaderEditorStyles.Instance.NewInOutPinDesc();
+            OutXYZW.MultiLinks = true;
             this.AddPinOut(OutXYZW);
             OutXYZ.Name = " xyz";
             OutXYZ.LinkDesc = UShaderEditorStyles.Instance.NewInOutPinDesc();
+            OutXYZ.MultiLinks = true;
             this.AddPinOut(OutXYZ);
             OutX.Name = " x";
             OutX.LinkDesc = UShaderEditorStyles.Instance.NewInOutPinDesc();
+            OutX.MultiLinks = true;
             this.AddPinOut(OutX);
             OutY.Name = " y";
             OutY.LinkDesc = UShaderEditorStyles.Instance.NewInOutPinDesc();
+            OutY.MultiLinks = true;
             this.AddPinOut(OutY);
             OutZ.Name = " z";
             OutZ.LinkDesc = UShaderEditorStyles.Instance.NewInOutPinDesc();
+            OutZ.MultiLinks = true;
             this.AddPinOut(OutZ);
             OutW.Name = " w";
             OutW.LinkDesc = UShaderEditorStyles.Instance.NewInOutPinDesc();
+            OutW.MultiLinks = true;
             this.AddPinOut(OutW);
         }
     }

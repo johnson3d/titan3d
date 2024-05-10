@@ -200,6 +200,7 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Var
 
             OutX.Name = "x";
             OutX.LinkDesc = UShaderEditorStyles.Instance.NewInOutPinDesc();
+            OutX.MultiLinks = true;
             this.AddPinOut(OutX);
         }
         //public override void PreGenExpr()
@@ -339,6 +340,7 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Var
 
             OutX.Name = "x";
             OutX.LinkDesc = UShaderEditorStyles.Instance.NewInOutPinDesc();
+            OutX.MultiLinks = true;
             this.AddPinOut(OutX);
         }
         public override void BuildStatements(NodePin pin, ref BuildCodeStatementsData data)

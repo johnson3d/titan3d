@@ -273,7 +273,7 @@ namespace EngineNS.Thread.Async
                         action((int)state.UserArguments.Value0.X, state.UserArguments.Obj2, state.UserArguments.Obj3);
                         ((TtPooledSemaphore)state.UserArguments.Obj1).Semaphore.Release();
                         return true;
-                    }, in userArgs, smp.WaitEvent);
+                    }, in userArgs/*, smp.WaitEvent*/);
                 }
                 smp.WaitEvent.WaitOne(int.MaxValue);
                 ParrallelForSmpAllocator.ReleaseObject(smp);

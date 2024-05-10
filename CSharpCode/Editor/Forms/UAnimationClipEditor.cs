@@ -1,6 +1,11 @@
-﻿using EngineNS.Graphics.Pipeline;
+﻿using Assimp;
+using EngineNS.Animation.Asset;
+using EngineNS.Graphics.Mesh;
+using EngineNS.Graphics.Pipeline;
+using SixLabors.ImageSharp.PixelFormats;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -12,7 +17,7 @@ namespace EngineNS.Editor.Forms
         {
             return 0;
         }
-        public Animation.Asset.UAnimationClip AnimationClip;
+        public Animation.Asset.TtAnimationClip AnimationClip;
         public Editor.UPreviewViewport PreviewViewport = new Editor.UPreviewViewport();
         public EGui.Controls.PropertyGrid.PropertyGrid AnimationClipPropGrid = new EGui.Controls.PropertyGrid.PropertyGrid();
         ~UAnimationClipEditor()
@@ -156,8 +161,51 @@ namespace EngineNS.Editor.Forms
         {
             //throw new NotImplementedException();
         }
+        EngineNS.GamePlay.Scene.UMeshNode mCurrentMeshNode;
+        public float PlaneScale = 5.0f;
+        EngineNS.GamePlay.Scene.UMeshNode PlaneMeshNode;
+        protected async System.Threading.Tasks.Task Initialize_PreviewScene(Graphics.Pipeline.UViewportSlate viewport, USlateApplication application, Graphics.Pipeline.URenderPolicy policy, float zMin, float zMax)
+        {
+            viewport.RenderPolicy = policy;
+
+            await viewport.World.InitWorld();
+
+            (viewport as Editor.UPreviewViewport).CameraController.ControlCamera(viewport.RenderPolicy.DefaultCamera);
+
+
+            var aabb = new BoundingBox(10,10,10);
+            float radius = aabb.GetMaxSide();
+            BoundingSphere sphere;
+            sphere.Center = aabb.GetCenter();
+            sphere.Radius = radius;
+            policy.DefaultCamera.AutoZoom(ref sphere);
+
+            {
+                var meshCenter = aabb.GetCenter();
+                var meshSize = aabb.GetSize() * PlaneScale;
+                meshSize.Y = aabb.GetSize().Y * 0.05f;
+                var boxStart = meshCenter - meshSize * 0.5f;
+                boxStart.Y -= aabb.GetSize().Y * 0.5f;
+                var box = Graphics.Mesh.UMeshDataProvider.MakeBox(boxStart.X, boxStart.Y, boxStart.Z, meshSize.X, meshSize.Y, meshSize.Z).ToMesh();
+
+                var PlaneMesh = new Graphics.Mesh.TtMesh();
+                var tMaterials = new Graphics.Pipeline.Shader.UMaterial[1];
+                tMaterials[0] = await UEngine.Instance.GfxDevice.MaterialInstanceManager.GetMaterialInstance(UEngine.Instance.Config.MeshPrimitiveEditorConfig.PlaneMaterialName);
+                PlaneMesh.Initialize(box, tMaterials,
+                    Rtti.UTypeDescGetter<Graphics.Mesh.UMdfStaticMesh>.TypeDesc);
+                PlaneMeshNode = await GamePlay.Scene.UMeshNode.AddMeshNode(viewport.World, viewport.World.Root, new GamePlay.Scene.UMeshNode.UMeshNodeData(), typeof(GamePlay.UPlacement), PlaneMesh, DVector3.Zero, Vector3.One, Quaternion.Identity);
+                PlaneMeshNode.HitproxyType = Graphics.Pipeline.UHitProxy.EHitproxyType.None;
+                PlaneMeshNode.NodeData.Name = "Plane";
+                PlaneMeshNode.IsAcceptShadow = true;
+                PlaneMeshNode.IsCastShadow = false;
+            }
+
+            var gridNode = await GamePlay.Scene.UGridNode.AddGridNode(viewport.World, viewport.World.Root);
+            gridNode.ViewportSlate = this.PreviewViewport;
+        }
         public float LoadingPercent { get; set; } = 1.0f;
         public string ProgressText { get; set; } = "Loading";
+        TtAnimationClipPreview AnimationClipPreview = null;
         public async Task<bool> OpenEditor(UMainEditorApplication mainEditor, RName name, object arg)
         {
             AssetName = name;
@@ -167,14 +215,87 @@ namespace EngineNS.Editor.Forms
 
             PreviewViewport.PreviewAsset = AssetName;
             PreviewViewport.Title = $"MaterialMesh:{name}";
-            //PreviewViewport.OnInitialize = Initialize_PreviewMesh;
+            PreviewViewport.OnInitialize = Initialize_PreviewScene;
             await PreviewViewport.Initialize(UEngine.Instance.GfxDevice.SlateApplication, UEngine.Instance.Config.MainRPolicyName, 0, 1);
-
-            AnimationClipPropGrid.Target = AnimationClip;
+            AnimationClipPreview = new TtAnimationClipPreview();
+            AnimationClipPreview.AnimationClipEditor = this;
+            AnimationClipPreview.AnimationClip = AnimationClip;
+            AnimationClipPropGrid.Target = AnimationClipPreview;
             UEngine.Instance.TickableManager.AddTickable(this);
             return true;
         }
+        public async Task OnPreviewMeshChange(UMeshPrimitives meshPrimitives)
+        {
+            if(mCurrentMeshNode != null)
+            {
+                mCurrentMeshNode.Parent = null;
+            }
+            var mtl = await UEngine.Instance.GfxDevice.MaterialManager.GetMaterial(UEngine.Instance.Config.MeshPrimitiveEditorConfig.MaterialName);
+            var materials = new Graphics.Pipeline.Shader.UMaterial[meshPrimitives.mCoreObject.GetAtomNumber()];
+            for (int i = 0; i < materials.Length; i++)
+            {
+                materials[i] = mtl;
+            }
 
+            var meshData = new EngineNS.GamePlay.Scene.UMeshNode.UMeshNodeData();
+            meshData.MeshName = meshPrimitives.AssetName;
+            meshData.MdfQueueType = EngineNS.Rtti.UTypeDesc.TypeStr(typeof(EngineNS.Graphics.Mesh.UMdfSkinMesh));
+            meshData.AtomType = EngineNS.Rtti.UTypeDesc.TypeStr(typeof(EngineNS.Graphics.Mesh.TtMesh.TtAtom));
+            var mesh = new Graphics.Mesh.TtMesh();
+            mesh.Initialize(meshPrimitives, materials, Rtti.UTypeDescGetter<Graphics.Mesh.UMdfSkinMesh>.TypeDesc);
+
+            var meshNode = await GamePlay.Scene.UMeshNode.AddMeshNode(PreviewViewport.World, PreviewViewport.World.Root, meshData, typeof(GamePlay.UPlacement), mesh,
+                        DVector3.Zero, Vector3.One, Quaternion.Identity);
+            meshNode.HitproxyType = Graphics.Pipeline.UHitProxy.EHitproxyType.Root;
+            meshNode.NodeData.Name = "PreviewObject";
+            meshNode.IsAcceptShadow = true;
+            meshNode.IsCastShadow = true;
+            
+            mCurrentMeshNode = meshNode;
+
+            var sapnd = new EngineNS.Animation.SceneNode.TtSkeletonAnimPlayNode.TtSkeletonAnimPlayNodeData();
+            sapnd.Name = "PlayAnim";
+            sapnd.AnimatinName = AssetName;
+            await EngineNS.Animation.SceneNode.TtSkeletonAnimPlayNode.AddSkeletonAnimPlayNode(PreviewViewport.World, mCurrentMeshNode, sapnd, 
+                            EngineNS.GamePlay.Scene.EBoundVolumeType.Box, typeof(EngineNS.GamePlay.UIdentityPlacement));
+        }
+
+        class TtAnimationClipPreview
+        {
+            [Browsable(false)]
+            public UAnimationClipEditor AnimationClipEditor = null;
+            [Browsable(false)]
+            public IO.EAssetState AssetState { get; private set; } = IO.EAssetState.Initialized;
+            private RName mPreivewMeshName;
+            public RName PreivewMesh
+            {
+                get
+                {
+                    return mPreivewMeshName;
+                }
+                set
+                {
+                    if (AssetState == IO.EAssetState.Loading)
+                        return;
+                    mPreivewMeshName = value;
+                    AssetState = IO.EAssetState.Loading;
+                    System.Action exec = async () =>
+                    {
+                        var Mesh = await UEngine.Instance.GfxDevice.MeshPrimitiveManager.GetMeshPrimitive(value);
+                        if (Mesh.mCoreObject.IsValidPointer == false)
+                        {
+                            AssetState = IO.EAssetState.LoadFailed;
+                            return;
+                        }
+                        AssetState = IO.EAssetState.LoadFinished;
+                        await AnimationClipEditor.OnPreviewMeshChange(Mesh);
+                    };
+                    exec();
+                }
+            }
+
+            public TtAnimationClip AnimationClip { get; set; } = new TtAnimationClip();
+        }
 
         #endregion IAssetEditor
 
@@ -202,7 +323,7 @@ namespace EngineNS.Editor.Forms
 namespace EngineNS.Animation.Asset
 {
     [Editor.UAssetEditor(EditorType = typeof(Editor.Forms.UAnimationClipEditor))]
-    public partial class UAnimationClip
+    public partial class TtAnimationClip
     {
 
     }

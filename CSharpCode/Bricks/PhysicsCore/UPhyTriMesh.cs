@@ -31,7 +31,7 @@ namespace EngineNS.Bricks.PhysicsCore
         }
     }
     [TtPhyTriMesh.UPhyMeshImport]
-    [IO.AssetCreateMenu(MenuName = "PhysicsMesh")]
+    [IO.AssetCreateMenu(MenuName = "Physics/PhysicsMesh")]
     [Editor.UAssetEditor(EditorType = typeof(UPhyTriMeshEditor))]
 
     public class TtPhyTriMesh : AuxPtrType<PhyTriMesh>, IO.IAsset, IO.ISerializer

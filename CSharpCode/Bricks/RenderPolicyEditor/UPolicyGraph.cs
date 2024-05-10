@@ -75,6 +75,7 @@ namespace EngineNS.Bricks.RenderPolicyEditor
                 var iPin = new PinIn();
                 iPin.Name = pin.Name;
                 iPin.LinkDesc = NewInOutPinDesc("GraphNode");
+                iPin.MultiLinks = true;
                 AddPinIn(iPin);
             }
             Outputs.Clear();
@@ -85,6 +86,7 @@ namespace EngineNS.Bricks.RenderPolicyEditor
                 var oPin = new PinOut();
                 oPin.Name = pin.Name;
                 oPin.LinkDesc = NewInOutPinDesc("GraphNode");
+                oPin.MultiLinks = true;
                 AddPinOut(oPin);
             }
         }
@@ -106,6 +108,13 @@ namespace EngineNS.Bricks.RenderPolicyEditor
             {
                 graph.PolicyEditor.NodePropGrid.Target = this;
             }
+        }
+
+
+        public override void OnLinkedFrom(PinIn iPin, UNodeBase OutNode, PinOut oPin)
+        {
+            base.OnLinkedFrom(iPin, OutNode, oPin);
+            ParentGraph.RemoveLinkedInExcept(iPin, OutNode, oPin.Name);
         }
         //#region PG
         //[Browsable(false)]
@@ -160,7 +169,7 @@ namespace EngineNS.Bricks.RenderPolicyEditor
     }
     public class UPolicyGraph : UNodeGraph
     {
-        public const string RGDEditorKeyword = "RGD";
+        public const string RGDEditorKeyword = "RDG";
         public UPolicyGraph()
         {
             PolicyType = Rtti.UTypeDesc.TypeOf(typeof(Graphics.Pipeline.UDeferredPolicyBase));

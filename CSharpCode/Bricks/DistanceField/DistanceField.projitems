@@ -9,6 +9,7 @@
     <Import_RootNamespace>DistanceField</Import_RootNamespace>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="$(MSBuildThisFileDirectory)DistanceField.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Embree.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)MeshUtilities.cs" />
   </ItemGroup>

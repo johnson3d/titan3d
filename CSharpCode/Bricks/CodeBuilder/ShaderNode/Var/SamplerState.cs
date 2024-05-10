@@ -22,6 +22,7 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Var
 
             OutSampler.Name = "sampler";
             OutSampler.LinkDesc = UShaderEditorStyles.Instance.NewInOutPinDesc();
+            OutSampler.MultiLinks = true;
             this.AddPinOut(OutSampler);
 
             mDesc.SetDefault();

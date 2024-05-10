@@ -100,7 +100,7 @@ namespace EngineNS.Bricks.NodeGraph
         
         public Vector2 Position { get; set; }
         public Vector2 Size { get; set; }
-        public bool MultiLinks { get; set; }
+        public bool MultiLinks { get; set; } = false;
         public object Tag { get; set; }
 
         public Vector2 HotPosition;

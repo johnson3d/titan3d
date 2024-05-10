@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 using System.Globalization;
+using System.Xml.Schema;
 
 namespace EngineNS
 {
@@ -190,6 +191,21 @@ namespace EngineNS
         {
             Minimum = DVector3.Minimize(in Minimum, in pos);
             Maximum = DVector3.Maximize(in Maximum, in pos);
+        }
+        public void Merge(in DBoundingBox box)
+        {
+            if (IsEmpty())
+            {
+                Minimum = box.Minimum;
+                Maximum = box.Maximum;
+            }
+            else if (box.IsEmpty())
+                return;
+            else
+            {
+                Minimum = DVector3.Minimize(in Minimum, in box.Minimum);
+                Maximum = DVector3.Maximize(in Maximum, in box.Maximum);
+            }
         }
         public static DBoundingBox Merge(in DBoundingBox box1, in DBoundingBox box2)
         {

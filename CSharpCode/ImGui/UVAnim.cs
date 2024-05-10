@@ -81,7 +81,7 @@ namespace EngineNS.EGui
     [Rtti.Meta]
     [UUvAnim.Import]
     [Editor.UAssetEditor(EditorType = typeof(UUvAnimEditor))]
-    [IO.AssetCreateMenu(MenuName = "UVAnim")]
+    [IO.AssetCreateMenu(MenuName = "UI/UVAnim")]
     public partial class UUvAnim : IO.IAsset, IO.ISerializer
     {
         public const string AssetExt = ".uvanim";

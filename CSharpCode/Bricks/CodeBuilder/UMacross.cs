@@ -92,7 +92,7 @@ namespace EngineNS.Bricks.CodeBuilder
 
     [Rtti.Meta]
     [UMacross.MacrossCreate]
-    [IO.AssetCreateMenu(MenuName = "Macross")]
+    [IO.AssetCreateMenu(MenuName = "Script/Macross")]
     [Editor.UAssetEditor(EditorType = typeof(Bricks.CodeBuilder.MacrossNode.UMacrossEditor))]
     public partial class UMacross : IO.IAsset
     {

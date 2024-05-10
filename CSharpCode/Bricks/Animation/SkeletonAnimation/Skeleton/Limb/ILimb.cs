@@ -17,6 +17,13 @@ namespace EngineNS.Animation.SkeletonAnimation.Skeleton
             return mValue != -1 ? true : false;
         }
         private int mValue;
+
+        public static bool operator ==(IndexInSkeleton lhs, IndexInSkeleton rhs)
+        {
+            return lhs.Value == rhs.Value;
+        }
+
+        public static bool operator !=(IndexInSkeleton lhs, IndexInSkeleton rhs) => !(lhs == rhs);
     }
 }
 

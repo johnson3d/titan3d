@@ -7,14 +7,19 @@ using System.Text;
 
 namespace EngineNS.Graphics.Mesh
 {
+    public class TtMeshImprotSetting
+    {
+        public string FileName { get; set; } = "";
+        public int MeshesCount { get; set; } = 0;
+        public float Scale { get; set; } = 0.01f;
+    }
     public partial class UMeshPrimitives
     {
         public partial class ImportAttribute : IO.CommonCreateAttribute
         {
-            AssetImporter AssetImporter = new AssetImporter();
-            AssetDescription AssetDescription = null;
-            AssetImportOption AssetImportOption = new AssetImportOption();
-            public unsafe partial bool AssimpCreateCreateDraw(EGui.Controls.UContentBrowser ContentBrowser)
+            TtAssetImporter AssetImporter = new TtAssetImporter();
+            TtMeshImprotSetting MeshImprotSetting = new TtMeshImprotSetting();
+        public unsafe partial bool AssimpCreateCreateDraw(EGui.Controls.UContentBrowser ContentBrowser)
             {
                 if (bPopOpen == false)
                     ImGuiAPI.OpenPopup($"Import MeshPrimitives", ImGuiPopupFlags_.ImGuiPopupFlags_None);
@@ -77,14 +82,16 @@ namespace EngineNS.Graphics.Mesh
                                         string filePath = mFileDialog.GetCurrentPath();
                                         if (!string.IsNullOrEmpty(mSourceFile))
                                         {
-                                            AssetDescription = AssetImporter.PreImport(mSourceFile);
+                                            var AssetDescription = AssetImporter.PreImport(mSourceFile);
                                             if (AssetDescription == null)
                                             {
                                                 eErrorType = enErrorType.EmptyName;
                                             }
                                             else
                                             {
-                                                PGAsset.Target = AssetDescription;
+                                                MeshImprotSetting.FileName = AssetDescription.FileName;
+                                                MeshImprotSetting.MeshesCount = AssetDescription.MeshesCount;
+                                                PGAsset.Target = MeshImprotSetting;
                                                 mName = IO.TtFileManager.GetPureName(mSourceFile);
                                             }
                                         }
@@ -285,10 +292,12 @@ namespace EngineNS.Graphics.Mesh
 
             private async System.Threading.Tasks.Task<bool> DoImport()
             {
-                var skeletons = SkeletonGenerater.Generate(AssetImporter.AiScene);
+                var AssetImportOption = new TtAssetImportOption_Mesh();
+                AssetImportOption.Scale = MeshImprotSetting.Scale;
+                var skeletons = SkeletonGenerater.Generate(AssetImporter.AiScene, AssetImportOption);
                 if(skeletons.Count == 1)
                 {
-                    var rn = RName.GetRName(mDir.Name + AssetDescription.FileName + Animation.Asset.USkeletonAsset.AssetExt, mDir.RNameType);
+                    var rn = RName.GetRName(mDir.Name + MeshImprotSetting.FileName + Animation.Asset.TtSkeletonAsset.AssetExt, mDir.RNameType);
                     await SaveSkeleton(rn, skeletons[0]);
                 }
                 else
@@ -311,19 +320,19 @@ namespace EngineNS.Graphics.Mesh
                 return true;
             }
 
-            private async System.Threading.Tasks.Task SaveSkeleton(RName skeletonAsset, USkinSkeleton skeleton, bool bIsNeedMerge = false)
+            private async System.Threading.Tasks.Task SaveSkeleton(RName skeletonAsset, TtSkinSkeleton skeleton, bool bIsNeedMerge = false)
             {
                 if(!bIsNeedMerge || !EngineNS.UEngine.Instance.AnimationModule.SkeletonAssetManager.SkeletonAssets.ContainsKey(skeletonAsset))
                 {
-                    Animation.Asset.USkeletonAsset newAsset = new Animation.Asset.USkeletonAsset();
+                    Animation.Asset.TtSkeletonAsset newAsset = new Animation.Asset.TtSkeletonAsset();
                     newAsset.Skeleton = skeleton;
                     newAsset.SaveAssetTo(skeletonAsset);
 
-                    var sktameta = new Animation.Asset.USkeletonAssetAMeta();
+                    var sktameta = new Animation.Asset.TtSkeletonAssetAMeta();
                     sktameta.SetAssetName(skeletonAsset);
                     sktameta.AssetId = Guid.NewGuid();
-                    sktameta.TypeStr = Rtti.UTypeDescManager.Instance.GetTypeStringFromType(typeof(Animation.Asset.USkeletonAssetAMeta));
-                    sktameta.Description = $"This is a {typeof(Animation.Asset.USkeletonAssetAMeta).FullName}\n";
+                    sktameta.TypeStr = Rtti.UTypeDescManager.Instance.GetTypeStringFromType(typeof(Animation.Asset.TtSkeletonAssetAMeta));
+                    sktameta.Description = $"This is a {typeof(Animation.Asset.TtSkeletonAssetAMeta).FullName}\n";
                     sktameta.SaveAMeta();
                     UEngine.Instance.AssetMetaManager.RegAsset(sktameta);
 

@@ -34,7 +34,7 @@ namespace EngineNS.UI
     }
     [Rtti.Meta]
     [TtUIAsset.Import]
-    [IO.AssetCreateMenu(MenuName = "UI")]
+    [IO.AssetCreateMenu(MenuName = "UI/UI")]
     [EngineNS.Editor.UAssetEditor(EditorType = typeof(EngineNS.UI.Editor.TtUIEditor))]
     public class TtUIAsset : IO.IAsset, IDisposable
     {

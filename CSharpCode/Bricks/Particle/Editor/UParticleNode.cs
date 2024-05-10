@@ -22,8 +22,14 @@ namespace EngineNS.Bricks.Particle.Editor
     }
     public class UEmitterNode : UParticleNode
     {
-        public PinOut Shapes { get; set; } = new PinOut();
-        public PinOut Effectors { get; set; } = new PinOut();
+        public PinOut Shapes { get; set; } = new PinOut()
+        {
+            MultiLinks = true,
+        };
+        public PinOut Effectors { get; set; } = new PinOut()
+        {
+            MultiLinks = true,
+        };
         public UEmitterNode()
         {
             Shapes.LinkDesc = UParticleEditor.NewInOutPinDesc();

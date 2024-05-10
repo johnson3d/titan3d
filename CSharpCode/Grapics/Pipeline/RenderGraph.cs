@@ -86,11 +86,11 @@ namespace EngineNS.Graphics.Pipeline
             }
             return null;
         }
-        public T FindFirstNode<T>() where T : TtRenderGraphNode
+        public T FindFirstNode<T>(bool bInherit = false) where T : TtRenderGraphNode
         {
             foreach (var i in GraphNodes)
             {
-                if (i.Value.GetType() == typeof(T))
+                if (i.Value.GetType() == typeof(T) || (bInherit && i.Value.GetType().IsSubclassOf(typeof(T))))
                 {
                     return i.Value as T;
                 }

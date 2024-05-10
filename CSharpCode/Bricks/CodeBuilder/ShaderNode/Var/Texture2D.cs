@@ -43,6 +43,7 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Var
 
             OutTex.Name = "texture";
             OutTex.LinkDesc = UShaderEditorStyles.Instance.NewInOutPinDesc();
+            OutTex.MultiLinks = true;
             this.AddPinOut(OutTex);
         }
         ~Texture2D()
@@ -119,6 +120,7 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Var
 
             OutTex.Name = "texture";
             OutTex.LinkDesc = UShaderEditorStyles.Instance.NewInOutPinDesc();
+            OutTex.MultiLinks = true;
             this.AddPinOut(OutTex);
         }
         public override Rtti.UTypeDesc GetOutPinType(PinOut pin)

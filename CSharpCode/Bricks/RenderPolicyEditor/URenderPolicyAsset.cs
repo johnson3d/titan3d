@@ -60,7 +60,7 @@ namespace EngineNS.Bricks.RenderPolicyEditor
     }
     [Rtti.Meta]
     [URenderPolicyAsset.Import]
-    [IO.AssetCreateMenu(MenuName = "RenderPolicy")]
+    [IO.AssetCreateMenu(MenuName = "Graphics/RenderPolicy")]
     [Editor.UAssetEditor(EditorType = typeof(UPolicyEditor))]
     public class URenderPolicyAsset : IO.IAsset
     {

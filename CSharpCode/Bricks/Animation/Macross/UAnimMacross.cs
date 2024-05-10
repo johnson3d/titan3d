@@ -63,7 +63,7 @@ namespace EngineNS.Animation.Macross
     }
     [Rtti.Meta]
     [AnimMacrossCreate]
-    [IO.AssetCreateMenu(MenuName = "AnimMacross")]
+    [IO.AssetCreateMenu(MenuName = "Anim/AnimMacross")]
     [Editor.UAssetEditor(EditorType = typeof(UAnimMacrossEditor))]
     public partial class UAnimMacross : IO.IAsset
     {

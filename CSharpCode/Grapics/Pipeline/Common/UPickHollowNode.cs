@@ -158,6 +158,7 @@ namespace EngineNS.Graphics.Pipeline.Common
         }
     }
 
+    [Bricks.CodeBuilder.ContextMenu("PickHollowBlend", "Pick\\PickHollowBlend", Bricks.RenderPolicyEditor.UPolicyGraph.RGDEditorKeyword)]
     public class TtPickHollowBlendNode : USceenSpaceNode
     {
         public TtRenderGraphPin ColorPinIn = TtRenderGraphPin.CreateInput("Color");
@@ -169,11 +170,11 @@ namespace EngineNS.Graphics.Pipeline.Common
         }
         public override void InitNodePins()
         {
+            base.InitNodePins();
+
             AddInput(ColorPinIn, NxRHI.EBufferType.BFT_SRV);
             AddInputOutput(DepthPinIn, NxRHI.EBufferType.BFT_SRV);
-            AddInput(PickedPinIn, NxRHI.EBufferType.BFT_SRV);            
-
-            base.InitNodePins();
+            AddInput(PickedPinIn, NxRHI.EBufferType.BFT_SRV);
         }
         public TtPickHollowBlendShading mBasePassShading;
         public override UGraphicsShadingEnv GetPassShading(TtMesh.TtAtom atom = null)

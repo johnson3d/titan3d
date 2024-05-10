@@ -102,7 +102,7 @@ namespace EngineNS.UI
 
         public TtUIHost()
         {
-            WindowSize = new SizeF(1920, 1080);
+            WindowSize = UEngine.Instance.UIManager.Config.DefaultDesignRect.Size;
             BypassLayoutPolicies = true;
         }
 

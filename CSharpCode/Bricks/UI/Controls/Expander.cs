@@ -45,7 +45,7 @@ namespace EngineNS.UI.Controls
 
             var root = new Template.TtUIElementFactory(UTypeDesc.TypeOf(typeof(TtStackPanel)));
             root.SetValue(TtStackPanel.NameProperty, "panel");
-            root.SetValue(TtStackPanel.OrientationProperty, ELayout_Orientation.Horizontal);
+            root.SetValue(TtStackPanel.OrientationProperty, ELayout_Orientation.Vertical);
             root.SetTemplateBindingValue<TtBrush, TtBrush>(TtStackPanel.BackgroundProperty, "Background", "Background");
             root.SetTemplateBindingValue<TtBrush, TtBrush>(TtStackPanel.BorderBrushProperty, "BorderBrush", "BorderBrush");
             root.SetTemplateBindingValue<Thickness, Thickness>(TtStackPanel.BorderThicknessProperty, "BorderThickness", "BorderThickness");
@@ -106,7 +106,7 @@ namespace EngineNS.UI.Controls
         /// IsExpanded indicates whether the expander is currently expanded.
         /// </summary>
         [Rtti.Meta, BindProperty]
-        [Category("Appearance")]
+        [Category("Behavior")]
         public bool IsExpanded
         {
             get => mIsExpanded;

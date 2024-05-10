@@ -106,7 +106,7 @@ namespace EngineNS.DesignMacross
     }
     [Rtti.Meta]
     [DesignMacrossCreate]
-    [IO.AssetCreateMenu(MenuName = "DesignMacross")]
+    [IO.AssetCreateMenu(MenuName = "Script/DesignMacross")]
     [EngineNS.Editor.UAssetEditor(EditorType = typeof(DesignMacross.Editor.TtDesignMacrossEditor))]
     public partial class UDesignMacross : IO.BaseSerializer, IO.IAsset
     {

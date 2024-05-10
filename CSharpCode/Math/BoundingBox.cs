@@ -234,6 +234,10 @@ namespace EngineNS
             Minimum = center - oriSize;
             Maximum = center + oriSize;
         }
+        public static BoundingBox ExpandBy(BoundingBox box, in Vector3 size)
+        {
+            return new BoundingBox(box.Minimum - size, box.Maximum + size);
+        }
         public void SetSize(in Vector3 size)
         {
             var center = GetCenter();

@@ -524,6 +524,10 @@ namespace EngineNS.IO
             foreach (var i in metas)
             {
                 var m = IO.TtFileManager.LoadXmlToObject<IAssetMeta>(i);
+                if(m == null)
+                {
+                    continue;
+                }
                 var rn = IO.TtFileManager.GetRelativePath(root, i);
                 m.SetAssetName(RName.GetRName(rn.Substring(0, rn.Length - 6), RName.ERNameType.Game));
                 IAssetMeta om;

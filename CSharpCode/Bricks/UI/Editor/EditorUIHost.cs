@@ -30,35 +30,60 @@ namespace EngineNS.UI.Editor
         {
             Name = "@MatInst:ui/grid_matins.uminst:Engine",
         };
-        Vector2 mGridUVMin = Vector2.Zero;
-        public Vector2 GridUVMin
+
+        Vector2 mSnapTile = Vector2.One;
+        public Vector2 SnapTile
         {
-            get => mGridUVMin;
+            get => mSnapTile;
             set
             {
+                mSnapTile = value;
                 var anyValue = new Support.UAnyValue();
-                anyValue.SetVector2(value);
-                mGridBrush.SetValue("UVMin", in anyValue);
-                mGridUVMin = value;
+                anyValue.SetValue(value);
+                mGridBrush.SetValue("SnapTile", in anyValue);
             }
         }
-        Vector2 mGridUVMax = Vector2.One;
-        public Vector2 GridUVMax
+        void CalculateSnapTile()
         {
-            get => mGridUVMax;
+            SnapTile = new Vector2(WindowSize.Width / GridSize.X * mViewScale, WindowSize.Height / GridSize.Y * mViewScale);
+        }
+
+        Vector2 mUVOffset = Vector2.Zero;
+        public Vector2 UVOffset
+        {
+            get => mUVOffset;
             set
             {
                 var anyValue = new Support.UAnyValue();
-                anyValue.SetVector2(value);
-                mGridBrush.SetValue("UVMax", in anyValue);
-                mGridUVMax = value;
+                anyValue.SetValue(value);
+                mGridBrush.SetValue("UVOffset", in anyValue);
+                mUVOffset = value;
+            }
+        }
+        Vector2 mGridSize = new Vector2(500, 500);
+        public Vector2 GridSize
+        {
+            get => mGridSize;
+            set
+            {
+                mGridSize = value;
+                CalculateSnapTile();
+            }
+        }
+        float mViewScale = 1.0f;
+        public float ViewScale
+        {
+            get => mViewScale;
+            set
+            {
+                mViewScale = value;
+                CalculateSnapTile();
             }
         }
 
         public TtCanvasBrush DrawBrush => mDrawBrush;
         TtUIEditor mHostEditor = null;
         public TtUIEditor HostEditor => mHostEditor;
-        float mViewScale = 1.0f;
         SizeF mWindowSize;
         public override SizeF WindowSize
         {
@@ -71,21 +96,35 @@ namespace EngineNS.UI.Editor
                 if (IsScreenSpace)
                 {
                     mWindowSize = value;
-
+                    CalculateSnapTile();
+                    MeshDirty = true;
                 }
                 else
                 {
                     mWindowSize = value;
-                    SizeF tagDesignSize;
-                    mDPIScale = UEngine.Instance.UIManager.Config.GetDPIScaleAndDesignSize(mWindowSize.Width, mWindowSize.Height, out tagDesignSize);
-                    var newRect = new RectangleF(0, 0, tagDesignSize.Width, tagDesignSize.Height);
-                    SetDesignRect(in newRect, true);
-                    var childrenCount = VisualTreeHelper.GetChildrenCount(this);
-                    for (int i = 0; i < childrenCount; i++)
-                    {
-                        var child = VisualTreeHelper.GetChild(this, i);
-                        child?.UpdateLayout();
-                    }
+                    DesignWindowSize = value;
+                }
+            }
+        }
+        SizeF mDesignWindowSize;
+        public SizeF DesignWindowSize
+        {
+            get => mDesignWindowSize;
+            set
+            {
+                if (mDesignWindowSize.Equals(in value))
+                    return;
+
+                mDesignWindowSize = value;
+                SizeF tagDesignSize;
+                mDPIScale = UEngine.Instance.UIManager.Config.GetDPIScaleAndDesignSize(mDesignWindowSize.Width, mDesignWindowSize.Height, out tagDesignSize);
+                var newRect = new RectangleF(0, 0, tagDesignSize.Width, tagDesignSize.Height);
+                SetDesignRect(in newRect, true);
+                var childrenCount = VisualTreeHelper.GetChildrenCount(this);
+                for (int i = 0; i < childrenCount; i++)
+                {
+                    var child = VisualTreeHelper.GetChild(this, i);
+                    child?.UpdateLayout();
                 }
             }
         }
@@ -119,8 +158,8 @@ namespace EngineNS.UI.Editor
         public EditorUIHost(TtUIEditor editor)
         {
             mHostEditor = editor;
-            GridUVMin = Vector2.Zero;
-            GridUVMax = Vector2.One;
+            DesignRect = UEngine.Instance.UIManager.Config.DefaultDesignRect;
+            DesignWindowSize = UEngine.Instance.UIManager.Config.DefaultDesignRect.Size;
         }
 
         //public void SaveEditorOnlyData(RName asset)
@@ -201,13 +240,28 @@ namespace EngineNS.UI.Editor
         //    }
         //}
 
+        protected override void ResetCanvas()
+        {
+            mCanvas.Reset();
+            if (IsScreenSpace)
+                mCanvas.SetClientClip(mWindowSize.Width, mWindowSize.Height);
+            else
+                mCanvas.SetClientClip(mDesignClipRect.Width, mDesignClipRect.Height);
+        }
+
+        EngineNS.Canvas.FSubDrawCmd mDrawCmd = new EngineNS.Canvas.FSubDrawCmd();
         protected override void CustomBuildMesh(Canvas.TtCanvasDrawBatch batch)
         {
             var canvas = mCanvas.Background; //batch.Middleground;
 
-            canvas.PushBrush(mGridBrush);
-
-            canvas.PopBrush();
+            if(IsScreenSpace)
+            {
+                canvas.PushBrush(mGridBrush);
+                var winRect = new RectangleF(0, 0, WindowSize.Width, WindowSize.Height);
+                canvas.AddRectFill(in winRect, Vector4.Zero, Color.White, ref mDrawCmd);
+                canvas.PopBrush();
+                mGridBrush.IsDirty = true;
+            }
 
             if (mEdgePath == null)
             {
@@ -246,6 +300,11 @@ namespace EngineNS.UI.Editor
             if (Children.Count > 0)
                 return false;
             return true;
+        }
+
+        protected override SizeF MeasureOverride(in SizeF availableSize)
+        {
+            return mDesignWindowSize;
         }
     }
 

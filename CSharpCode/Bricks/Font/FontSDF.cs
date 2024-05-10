@@ -44,7 +44,7 @@ namespace EngineNS.Bricks.Font
     }
     [Rtti.Meta]
     [TtFontSDF.Import]
-    [IO.AssetCreateMenu(MenuName = "FontSDF")]
+    [IO.AssetCreateMenu(MenuName = "UI/FontSDF")]
     public class TtFontSDF : AuxPtrType<Canvas.FTFont>, IO.IAsset
     {
         public const string AssetExt = ".fontsdf";

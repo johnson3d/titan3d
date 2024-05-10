@@ -254,12 +254,15 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Var
 
             OutXY.Name = " xy";
             OutXY.LinkDesc = UShaderEditorStyles.Instance.NewInOutPinDesc();
+            OutXY.MultiLinks = true;
             this.AddPinOut(OutXY);
             OutX.Name = " x";
             OutX.LinkDesc = UShaderEditorStyles.Instance.NewInOutPinDesc();
+            OutX.MultiLinks = true;
             this.AddPinOut(OutX);
             OutY.Name = " y";
             OutY.LinkDesc = UShaderEditorStyles.Instance.NewInOutPinDesc();
+            OutY.MultiLinks = true;
             this.AddPinOut(OutY);
         }
     }
@@ -412,12 +415,15 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Var
 
             OutXY.Name = " xy";
             OutXY.LinkDesc = UShaderEditorStyles.Instance.NewInOutPinDesc();
+            OutXY.MultiLinks = true;
             this.AddPinOut(OutXY);
             OutX.Name = " x";
             OutX.LinkDesc = UShaderEditorStyles.Instance.NewInOutPinDesc();
+            OutX.MultiLinks = true;
             this.AddPinOut(OutX);
             OutY.Name = " y";
             OutY.LinkDesc = UShaderEditorStyles.Instance.NewInOutPinDesc();
+            OutY.MultiLinks = true;
             this.AddPinOut(OutY);
         }
     }

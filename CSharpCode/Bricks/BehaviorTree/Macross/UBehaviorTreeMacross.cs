@@ -63,7 +63,7 @@ namespace EngineNS.BehaviorTree.Macross
     }
     [Rtti.Meta]
     [BehaviorTreeMacrossCreate]
-    [IO.AssetCreateMenu(MenuName = "BehaviorTreeMacross")]
+    [IO.AssetCreateMenu(MenuName = "Anim/BehaviorTreeMacross")]
     [Editor.UAssetEditor(EditorType = typeof(UBehaviorTreeMacrossEditor))]
     public partial class UBehaviorTreeMacross : IO.IAsset
     {

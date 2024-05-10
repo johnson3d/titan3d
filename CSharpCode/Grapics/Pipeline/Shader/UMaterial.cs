@@ -42,7 +42,7 @@ namespace EngineNS.Graphics.Pipeline.Shader
     }
     [Rtti.Meta]
     [UMaterial.MaterialImport]
-    [IO.AssetCreateMenu(MenuName = "Material")]
+    [IO.AssetCreateMenu(MenuName = "Graphics/Material")]
     [EGui.Controls.PropertyGrid.PGCategoryFilters(ExcludeFilters = new string[] { "Misc" })]
     public partial class UMaterial : IO.ISerializer, IO.IAsset, IShaderCodeProvider
     {
@@ -601,9 +601,17 @@ namespace EngineNS.Graphics.Pipeline.Shader
                 {
                     uniformVarsCode += $"{i.VarType} {i.Name} = float4({i.Value});";
                 }
-                else
+                else if(i.VarType == "float3")
                 {
-                    uniformVarsCode += $"{i.VarType} {i.Name};";
+                    uniformVarsCode += $"{i.VarType} {i.Name} = float3({i.Value});";
+                }
+                else if (i.VarType == "float2")
+                {
+                    uniformVarsCode += $"{i.VarType} {i.Name} = float2({i.Value});";
+                }
+                else if (i.VarType == "float1" || i.VarType == "float")
+                {
+                    uniformVarsCode += $"{i.VarType} {i.Name} = {i.Value};";
                 }
             }
 
@@ -980,8 +988,9 @@ namespace EngineNS.Graphics.Pipeline.Shader
                             {
                                 case 1:
                                     {
-                                        var v = System.Convert.ToSingle(i.Value);
-                                        cBuffer.SetValue(desc, in v);
+                                        float v = 0;
+                                        if(float.TryParse(i.Value, out v))
+                                            cBuffer.SetValue(desc, in v);
                                     }
                                     break;
                                 case 2:
@@ -1011,8 +1020,9 @@ namespace EngineNS.Graphics.Pipeline.Shader
                             {
                                 case 1:
                                     {
-                                        var v = System.Convert.ToInt32(i.Value);
-                                        cBuffer.SetValue(desc, in v);
+                                        int v = 0;
+                                        if(int.TryParse(i.Value, out v))
+                                            cBuffer.SetValue(desc, in v);
                                     }
                                     break;
                                 case 2:

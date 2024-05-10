@@ -304,7 +304,7 @@ namespace EngineNS.Graphics.Mesh
                         System.Diagnostics.Debug.Assert(!string.IsNullOrEmpty(meshName));
                         if (hasSkin)
                         {
-                            var rn = RName.GetRName(mDir.Name + meshName + Animation.Asset.USkeletonAsset.AssetExt, mDir.RNameType);
+                            var rn = RName.GetRName(mDir.Name + meshName + Animation.Asset.TtSkeletonAsset.AssetExt, mDir.RNameType);
                             var fbxSkeletonDesc = meshImporter.GetSkeletonDesc();
                             await CreateOrMergeSkeleton(rn, fbxSkeletonDesc);
                         }
@@ -323,15 +323,15 @@ namespace EngineNS.Graphics.Mesh
                 var ska = await EngineNS.UEngine.Instance.AnimationModule.SkeletonAssetManager.GetSkeletonAsset(skeletonAsset);
                 if (ska == null)
                 {
-                    Animation.Asset.USkeletonAsset newAsset = new Animation.Asset.USkeletonAsset();
+                    Animation.Asset.TtSkeletonAsset newAsset = new Animation.Asset.TtSkeletonAsset();
                     newAsset.Skeleton = AssetImportAndExport.FBX.FBXMeshImportUtility.CreateSkinSkeleton(fBXSkeletonDesc);
 
                     newAsset.SaveAssetTo(skeletonAsset);
-                    var sktameta = new Animation.Asset.USkeletonAssetAMeta();
+                    var sktameta = new Animation.Asset.TtSkeletonAssetAMeta();
                     sktameta.SetAssetName(skeletonAsset);
                     sktameta.AssetId = Guid.NewGuid();
-                    sktameta.TypeStr = Rtti.UTypeDescManager.Instance.GetTypeStringFromType(typeof(Animation.Asset.USkeletonAssetAMeta));
-                    sktameta.Description = $"This is a {typeof(Animation.Asset.USkeletonAssetAMeta).FullName}\n";
+                    sktameta.TypeStr = Rtti.UTypeDescManager.Instance.GetTypeStringFromType(typeof(Animation.Asset.TtSkeletonAssetAMeta));
+                    sktameta.Description = $"This is a {typeof(Animation.Asset.TtSkeletonAssetAMeta).FullName}\n";
                     sktameta.SaveAMeta();
                     UEngine.Instance.AssetMetaManager.RegAsset(sktameta);
                 }
@@ -368,14 +368,14 @@ namespace AssetImportAndExport.FBX
 
     public static class FBXMeshImportUtility
     {
-        public static USkinSkeleton CreateSkinSkeleton(FBXSkeletonDesc fbxSkeletonDesc)
+        public static TtSkinSkeleton CreateSkinSkeleton(FBXSkeletonDesc fbxSkeletonDesc)
         {
-            var skinSkeleton = new USkinSkeleton();
+            var skinSkeleton = new TtSkinSkeleton();
             for (int i = 0; i < fbxSkeletonDesc.GetBoneDescsNum(); ++i)
             {
                 var fbxBoneDesc = fbxSkeletonDesc.GetBoneDesc(i);
 
-                UBoneDesc desc = new UBoneDesc();
+                TtBoneDesc desc = new TtBoneDesc();
                 desc.Name = fbxBoneDesc.m_Name.Text;
                 desc.NameHash = fbxBoneDesc.m_NameHash;
                 desc.ParentName = fbxBoneDesc.m_ParentName.Text;
@@ -386,7 +386,7 @@ namespace AssetImportAndExport.FBX
                 desc.InvQuat = fbxBoneDesc.m_InvQuat;
                 desc.InvScale = fbxBoneDesc.m_InvScale;
 
-                UBone bone = new UBone(desc);
+                TtBone bone = new TtBone(desc);
                 skinSkeleton.AddLimb(bone);
             }
 

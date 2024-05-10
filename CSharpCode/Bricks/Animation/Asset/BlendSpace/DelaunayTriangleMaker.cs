@@ -10,27 +10,27 @@ namespace EngineNS.Animation.Asset.BlendSpace
         On = 0,
         Inside = 1,
     };
-    public struct BSIndexPoint
+    public struct FBSIndexPoint
     {
-        public BSPoint Point;
+        public TtBSPoint Point;
         public int OriginalIndex;
-        public BSIndexPoint(BSPoint P, int InOriginalIndex)
+        public FBSIndexPoint(TtBSPoint P, int InOriginalIndex)
         {
             Point = P;
             OriginalIndex = InOriginalIndex;
         }
     };
-    public class BSSortByDistance
+    public class TtBSSortByDistance
     {
         public int Index = 0;
         public float Distance = 0;
-        public BSSortByDistance(int index, float distance)
+        public TtBSSortByDistance(int index, float distance)
         {
             Index = index;
             Distance = distance;
         }
     };
-    public struct BSBox
+    public struct FBSBox
     {
         /** Holds the box's minimum point. */
         public Vector3 Min;
@@ -47,19 +47,19 @@ namespace EngineNS.Animation.Asset.BlendSpace
     }
 
 
-    public class BSPoint
+    public class TtBSPoint
     {
         // position of Point
         public Vector3 Position;
         // Triangles this point belongs to
-        public List<BSTriangle> Triangles;
+        public List<TtBSTriangle> Triangles;
 
-        public BSPoint(Vector3 Pos)
+        public TtBSPoint(Vector3 Pos)
         {
             Position = Pos;
-            Triangles = new List<BSTriangle>();
+            Triangles = new List<TtBSTriangle>();
         }
-        public bool Equals(BSPoint right)
+        public bool Equals(TtBSPoint right)
         {
             if (right == null)
                 return false;
@@ -76,39 +76,39 @@ namespace EngineNS.Animation.Asset.BlendSpace
         //    return (left.Position != right.Position);
         //}
 
-        public void AddTriangle(BSTriangle NewTriangle)
+        public void AddTriangle(TtBSTriangle NewTriangle)
         {
             // Triangles.AddUnique(NewTriangle);
         }
 
-        public void RemoveTriangle(BSTriangle TriangleToRemove)
+        public void RemoveTriangle(TtBSTriangle TriangleToRemove)
         {
             //Triangles.Remove(TriangleToRemove);
         }
 
-        public float GetDistance(BSPoint Other)
+        public float GetDistance(TtBSPoint Other)
         {
             return (Other.Position - Position).Length();
         }
     };
 
-    public class BSHalfEdge
+    public class TtBSHalfEdge
     {
         // 3 vertices in CCW order
-        public BSPoint[] Vertices = new BSPoint[2];
+        public TtBSPoint[] Vertices = new TtBSPoint[2];
 
-        public BSHalfEdge() { }
-        public BSHalfEdge(BSPoint A, BSPoint B)
+        public TtBSHalfEdge() { }
+        public TtBSHalfEdge(TtBSPoint A, TtBSPoint B)
         {
             Vertices[0] = A;
             Vertices[1] = B;
         }
 
-        public bool DoesShare(BSHalfEdge A)
+        public bool DoesShare(TtBSHalfEdge A)
         {
             return (Vertices[0] == A.Vertices[1] && Vertices[1] == A.Vertices[0]);
         }
-        public bool Equals(BSHalfEdge right)
+        public bool Equals(TtBSHalfEdge right)
         {
             if (right == null)
                 return false;
@@ -125,15 +125,15 @@ namespace EngineNS.Animation.Asset.BlendSpace
         //}
     };
 
-    public class BSTriangle
+    public class TtBSTriangle
     {
         // 3 vertices in CCW order
-        public BSPoint[] Vertices = new BSPoint[3];
+        public TtBSPoint[] Vertices = new TtBSPoint[3];
         // average points for Vertices
         public Vector3 Center;
         // FEdges
-        public BSHalfEdge[] Edges = new BSHalfEdge[3];
-        public bool Equals(BSHalfEdge right)
+        public TtBSHalfEdge[] Edges = new TtBSHalfEdge[3];
+        public bool Equals(TtBSHalfEdge right)
         {
             if (right == null)
                 return false;
@@ -161,7 +161,7 @@ namespace EngineNS.Animation.Asset.BlendSpace
         //    //Vertices[2]->AddTriangle(this);
         //}
 
-        public BSTriangle(BSPoint A, BSPoint B, BSPoint C)
+        public TtBSTriangle(TtBSPoint A, TtBSPoint B, TtBSPoint C)
         {
             Vertices[0] = A;
             Vertices[1] = B;
@@ -175,12 +175,12 @@ namespace EngineNS.Animation.Asset.BlendSpace
             MakeCCW();
 
             // now create edges, this should be in the CCW order
-            Edges[0] = new BSHalfEdge(Vertices[0], Vertices[1]);
-            Edges[1] = new BSHalfEdge(Vertices[1], Vertices[2]);
-            Edges[2] = new BSHalfEdge(Vertices[2], Vertices[0]);
+            Edges[0] = new TtBSHalfEdge(Vertices[0], Vertices[1]);
+            Edges[1] = new TtBSHalfEdge(Vertices[1], Vertices[2]);
+            Edges[2] = new TtBSHalfEdge(Vertices[2], Vertices[0]);
         }
 
-        public BSTriangle(BSPoint A)
+        public TtBSTriangle(TtBSPoint A)
         {
             Vertices[0] = A;
             Vertices[1] = A;
@@ -192,12 +192,12 @@ namespace EngineNS.Animation.Asset.BlendSpace
             Vertices[2].AddTriangle(this);
 
             // now create edges, this should be in the CCW order
-            Edges[0] = new BSHalfEdge(Vertices[0], Vertices[1]);
-            Edges[1] = new BSHalfEdge(Vertices[1], Vertices[2]);
-            Edges[2] = new BSHalfEdge(Vertices[2], Vertices[0]);
+            Edges[0] = new TtBSHalfEdge(Vertices[0], Vertices[1]);
+            Edges[1] = new TtBSHalfEdge(Vertices[1], Vertices[2]);
+            Edges[2] = new TtBSHalfEdge(Vertices[2], Vertices[0]);
         }
 
-        public BSTriangle(BSPoint A, BSPoint B)
+        public TtBSTriangle(TtBSPoint A, TtBSPoint B)
         {
             Vertices[0] = A;
             Vertices[1] = B;
@@ -209,19 +209,19 @@ namespace EngineNS.Animation.Asset.BlendSpace
             Vertices[2].AddTriangle(this);
 
             // now create edges, this should be in the CCW order
-            Edges[0] = new BSHalfEdge(Vertices[0], Vertices[1]);
-            Edges[1] = new BSHalfEdge(Vertices[1], Vertices[2]);
-            Edges[2] = new BSHalfEdge(Vertices[2], Vertices[0]);
+            Edges[0] = new TtBSHalfEdge(Vertices[0], Vertices[1]);
+            Edges[1] = new TtBSHalfEdge(Vertices[1], Vertices[2]);
+            Edges[2] = new TtBSHalfEdge(Vertices[2], Vertices[0]);
         }
 
-        public BSTriangle()
+        public TtBSTriangle()
         {
             Vertices[0] = null;
             Vertices[1] = null;
             Vertices[2] = null;
         }
 
-        ~BSTriangle()
+        ~TtBSTriangle()
         {
             for (int VertexIndex = 0; VertexIndex < 3; ++VertexIndex)
             {
@@ -232,12 +232,12 @@ namespace EngineNS.Animation.Asset.BlendSpace
             }
         }
 
-        bool Contains(BSPoint Other)
+        bool Contains(TtBSPoint Other)
         {
             return (Other == Vertices[0] || Other == Vertices[1] || Other == Vertices[2]);
         }
 
-        public float GetDistance(BSPoint Other)
+        public float GetDistance(TtBSPoint Other)
         {
             return (Other.Position - Center).Length();
         }
@@ -247,7 +247,7 @@ namespace EngineNS.Animation.Asset.BlendSpace
             return (Other - Center).Length();
         }
 
-        public bool HasSameHalfEdge(BSTriangle Other)
+        public bool HasSameHalfEdge(TtBSTriangle Other)
         {
             for (int I = 0; I < 3; ++I)
             {
@@ -263,7 +263,7 @@ namespace EngineNS.Animation.Asset.BlendSpace
             return false;
         }
 
-        public bool DoesShareSameEdge(BSTriangle Other)
+        public bool DoesShareSameEdge(TtBSTriangle Other)
         {
             for (int I = 0; I < 3; ++I)
             {
@@ -281,7 +281,7 @@ namespace EngineNS.Animation.Asset.BlendSpace
 
         // find point that doesn't share with this
         // this should only get called if it shares same edge
-        public BSPoint FindNonSharingPoint(BSTriangle Other)
+        public TtBSPoint FindNonSharingPoint(TtBSTriangle Other)
         {
             if (!Contains(Other.Vertices[0]))
             {
@@ -317,13 +317,13 @@ namespace EngineNS.Animation.Asset.BlendSpace
             if (Result < 0.0f)
             {
                 // swap 1&2 
-                BSPoint TempPt = Vertices[2];
+                TtBSPoint TempPt = Vertices[2];
                 Vertices[2] = Vertices[1];
                 Vertices[1] = TempPt;
             }
         }
     }
-    public class DelaunayTriangleMaker
+    public class TtDelaunayTriangleMaker
     {
         public void Reset()
         {
@@ -348,13 +348,13 @@ namespace EngineNS.Animation.Asset.BlendSpace
             else if (SamplesList.Count == 1)
             {
                 // degenerate case 1
-                BSTriangle triangle = new BSTriangle(SamplesList[0]);
+                TtBSTriangle triangle = new TtBSTriangle(SamplesList[0]);
                 AddTriangle(triangle);
             }
             else if (SamplesList.Count == 2)
             {
                 // degenerate case 2
-                BSTriangle triangle = new BSTriangle(SamplesList[0], SamplesList[1]);
+                TtBSTriangle triangle = new TtBSTriangle(SamplesList[0], SamplesList[1]);
                 AddTriangle(triangle);
             }
             else
@@ -370,7 +370,7 @@ namespace EngineNS.Animation.Asset.BlendSpace
                     if (AllCoincident(SamplesList))
                     {
                         // coincident case - just create one triangle
-                        BSTriangle triangle = new BSTriangle(SamplesList[0]);
+                        TtBSTriangle triangle = new TtBSTriangle(SamplesList[0]);
                         AddTriangle(triangle);
                     }
                     else
@@ -378,7 +378,7 @@ namespace EngineNS.Animation.Asset.BlendSpace
                         // collinear case: create degenerate triangles between pairs of points
                         for (int pointIndex = 0; pointIndex < SamplesList.Count - 1; ++pointIndex)
                         {
-                            BSTriangle triangle = new BSTriangle(SamplesList[pointIndex], SamplesList[pointIndex + 1]);
+                            TtBSTriangle triangle = new TtBSTriangle(SamplesList[pointIndex], SamplesList[pointIndex + 1]);
                             AddTriangle(triangle);
                         }
                     }
@@ -390,7 +390,7 @@ namespace EngineNS.Animation.Asset.BlendSpace
         {
             if(SamplesList.Count == 0)
             {
-                SamplesList.Add(new BSPoint(position));
+                SamplesList.Add(new TtBSPoint(position));
                 Sorted2Indices.Add(index);
             }
             if (SamplesList.Find((a) => 
@@ -398,7 +398,7 @@ namespace EngineNS.Animation.Asset.BlendSpace
                 return a.Position == position;
             }) == null)
             {
-                SamplesList.Add(new BSPoint(position));
+                SamplesList.Add(new TtBSPoint(position));
                 Sorted2Indices.Add(index);
             }
         }
@@ -409,10 +409,10 @@ namespace EngineNS.Animation.Asset.BlendSpace
         }
         void Sort()
         {
-            List<BSIndexPoint> sortedPoints = new List<BSIndexPoint>();
+            List<FBSIndexPoint> sortedPoints = new List<FBSIndexPoint>();
             for (int i = 0; i < SamplesList.Count; ++i)
             {
-                sortedPoints.Add(new BSIndexPoint(SamplesList[i], Sorted2Indices[i]));
+                sortedPoints.Add(new FBSIndexPoint(SamplesList[i], Sorted2Indices[i]));
             }
             sortedPoints.Sort((A, B) =>
             {
@@ -444,7 +444,7 @@ namespace EngineNS.Animation.Asset.BlendSpace
 
         }
 
-        ~DelaunayTriangleMaker()
+        ~TtDelaunayTriangleMaker()
         {
 
         }
@@ -452,7 +452,7 @@ namespace EngineNS.Animation.Asset.BlendSpace
         /** 
          * Get TriangleList
          */
-        public List<BSTriangle> GetTriangleList() { return TriangleList; }
+        public List<TtBSTriangle> GetTriangleList() { return TriangleList; }
 
         public void EditPointValue(int SamplePointIndex, Vector3 NewValue)
         {
@@ -468,9 +468,9 @@ namespace EngineNS.Animation.Asset.BlendSpace
         public List<int> GetIndiceMapping() { return Sorted2Indices; }
 
         /* Set the grid box, so we can normalize the sample points */
-        public void SetGridBox(UBlendSpace_Axis BlendParamX, UBlendSpace_Axis BlendParamY)
+        public void SetGridBox(TtBlendSpace_Axis BlendParamX, TtBlendSpace_Axis BlendParamY)
         {
-            BSBox GridBox = new BSBox();
+            FBSBox GridBox = new FBSBox();
             GridBox.Min.X = BlendParamX.Min;
             GridBox.Max.X = BlendParamX.Max;
             GridBox.Min.Y = BlendParamY.Min;
@@ -493,7 +493,7 @@ namespace EngineNS.Animation.Asset.BlendSpace
          * return true if the TestPoint is WITHIN the triangle circumcircle
          *	http://en.wikipedia.org/wiki/Delaunay_triangulation 
          */
-        private ECircumCircleState GetCircumcircleState(BSTriangle triangle, BSPoint testPoint)
+        private ECircumCircleState GetCircumcircleState(TtBSTriangle triangle, TtBSPoint testPoint)
         {
             int NumPointsPerTriangle = 3;
 
@@ -557,7 +557,7 @@ namespace EngineNS.Animation.Asset.BlendSpace
         /**
          * return true if they can make triangle
          */
-        private bool IsEligibleForTriangulation(BSPoint A, BSPoint B, BSPoint C)
+        private bool IsEligibleForTriangulation(TtBSPoint A, TtBSPoint B, TtBSPoint C)
         {
             return (IsCollinear(A, B, C) == false);
         }
@@ -566,7 +566,7 @@ namespace EngineNS.Animation.Asset.BlendSpace
          * return true if 3 points are collinear
          * by that if those 3 points create straight line
          */
-        private bool IsCollinear(BSPoint A, BSPoint B, BSPoint C)
+        private bool IsCollinear(TtBSPoint A, TtBSPoint B, TtBSPoint C)
         {
             // this eventually has to happen on the plane that contains this 3 pages
             // for now we ignore Z
@@ -582,14 +582,14 @@ namespace EngineNS.Animation.Asset.BlendSpace
          * return true if all points are coincident
          * (i.e. if all points are the same)
          */
-        private bool AllCoincident(List<BSPoint> InPoints)
+        private bool AllCoincident(List<TtBSPoint> InPoints)
         {
             if (InPoints.Count > 0)
             {
-                BSPoint FirstPoint = InPoints[0];
+                TtBSPoint FirstPoint = InPoints[0];
                 for (int PointIndex = 0; PointIndex < InPoints.Count; ++PointIndex)
                 {
-                    BSPoint Point = InPoints[PointIndex];
+                    TtBSPoint Point = InPoints[PointIndex];
                     if (Point.Position != FirstPoint.Position)
                     {
                         return false;
@@ -607,11 +607,11 @@ namespace EngineNS.Animation.Asset.BlendSpace
          */
         private bool FlipTriangles(int TriangleIndexOne, int TriangleIndexTwo)
         {
-            BSTriangle A = TriangleList[TriangleIndexOne];
-            BSTriangle B = TriangleList[TriangleIndexTwo];
+            TtBSTriangle A = TriangleList[TriangleIndexOne];
+            TtBSTriangle B = TriangleList[TriangleIndexTwo];
 
             // if already optimized, don't have to do any
-            BSPoint TestPt = A.FindNonSharingPoint(B);
+            TtBSPoint TestPt = A.FindNonSharingPoint(B);
 
             // If it's not inside, we don't have to do any
             if (GetCircumcircleState(A, TestPt) != ECircumCircleState.Inside)
@@ -619,7 +619,7 @@ namespace EngineNS.Animation.Asset.BlendSpace
                 return false;
             }
 
-            BSTriangle[] NewTriangles = new BSTriangle[2];
+            TtBSTriangle[] NewTriangles = new TtBSTriangle[2];
             int TrianglesMade = 0;
 
             for (int VertexIndexOne = 0; VertexIndexOne < 2; ++VertexIndexOne)
@@ -630,7 +630,7 @@ namespace EngineNS.Animation.Asset.BlendSpace
                     if (IsEligibleForTriangulation(A.Vertices[VertexIndexOne], A.Vertices[VertexIndexTwo], TestPt))
                     {
                         // Create the new triangle and check if the final (original) vertex falls inside or outside of it's circumcircle
-                        BSTriangle NewTriangle = new BSTriangle(A.Vertices[VertexIndexOne], A.Vertices[VertexIndexTwo], TestPt);
+                        TtBSTriangle NewTriangle = new TtBSTriangle(A.Vertices[VertexIndexOne], A.Vertices[VertexIndexTwo], TestPt);
                         int VertexIndexThree = 3 - (VertexIndexTwo + VertexIndexOne);
                         if (GetCircumcircleState(NewTriangle, A.Vertices[VertexIndexThree]) == ECircumCircleState.Outside)
                         {
@@ -656,7 +656,7 @@ namespace EngineNS.Animation.Asset.BlendSpace
         /** 
          * Add new Triangle
          */
-        private void AddTriangle(BSTriangle triangle, bool bCheckHalfEdge = true)
+        private void AddTriangle(TtBSTriangle triangle, bool bCheckHalfEdge = true)
         {
             // see if it's same vertices
             for (int i = 0; i < TriangleList.Count; ++i)
@@ -672,33 +672,33 @@ namespace EngineNS.Animation.Asset.BlendSpace
                 }
             }
 
-            TriangleList.Add(new BSTriangle(triangle.Vertices[0], triangle.Vertices[1], triangle.Vertices[2]));
+            TriangleList.Add(new TtBSTriangle(triangle.Vertices[0], triangle.Vertices[1], triangle.Vertices[2]));
         }
 
         /** 
          * Used as incremental step to triangulate all points
          * Create triangles TotalNum of PointList
          */
-        private int GenerateTriangles(List<BSPoint> PointList, int TotalNum)
+        private int GenerateTriangles(List<TtBSPoint> PointList, int TotalNum)
         {
             if (TotalNum == 3)
             {
                 if (IsEligibleForTriangulation(PointList[0], PointList[1], PointList[2]))
                 {
-                    BSTriangle Triangle = new BSTriangle(PointList[0], PointList[1], PointList[2]);
+                    TtBSTriangle Triangle = new TtBSTriangle(PointList[0], PointList[1], PointList[2]);
                     AddTriangle(Triangle);
                 }
             }
             else if (TriangleList.Count == 0)
             {
-                BSPoint TestPoint = PointList[TotalNum - 1];
+                TtBSPoint TestPoint = PointList[TotalNum - 1];
 
                 // so far no triangle is made, try to make it with new points that are just entered
                 for (int I = 0; I < TotalNum - 2; ++I)
                 {
                     if (IsEligibleForTriangulation(PointList[I], PointList[I + 1], TestPoint))
                     {
-                        BSTriangle NewTriangle = new BSTriangle(PointList[I], PointList[I + 1], TestPoint);
+                        TtBSTriangle NewTriangle = new TtBSTriangle(PointList[I], PointList[I + 1], TestPoint);
                         AddTriangle(NewTriangle);
                     }
                 }
@@ -706,27 +706,27 @@ namespace EngineNS.Animation.Asset.BlendSpace
             else
             {
                 // get the last addition
-                BSPoint TestPoint = PointList[TotalNum - 1];
+                TtBSPoint TestPoint = PointList[TotalNum - 1];
                 int TriangleNum = TriangleList.Count;
 
                 for (int I = 0; I < TriangleList.Count; ++I)
                 {
-                    BSTriangle Triangle = TriangleList[I];
+                    TtBSTriangle Triangle = TriangleList[I];
                     if (IsEligibleForTriangulation(Triangle.Vertices[0], Triangle.Vertices[1], TestPoint))
                     {
-                        BSTriangle NewTriangle = new BSTriangle(Triangle.Vertices[0], Triangle.Vertices[1], TestPoint);
+                        TtBSTriangle NewTriangle = new TtBSTriangle(Triangle.Vertices[0], Triangle.Vertices[1], TestPoint);
                         AddTriangle(NewTriangle);
                     }
 
                     if (IsEligibleForTriangulation(Triangle.Vertices[0], Triangle.Vertices[2], TestPoint))
                     {
-                        BSTriangle NewTriangle = new BSTriangle(Triangle.Vertices[0], Triangle.Vertices[2], TestPoint);
+                        TtBSTriangle NewTriangle = new TtBSTriangle(Triangle.Vertices[0], Triangle.Vertices[2], TestPoint);
                         AddTriangle(NewTriangle);
                     }
 
                     if (IsEligibleForTriangulation(Triangle.Vertices[1], Triangle.Vertices[2], TestPoint))
                     {
-                        BSTriangle NewTriangle = new BSTriangle(Triangle.Vertices[1], Triangle.Vertices[2], TestPoint);
+                        TtBSTriangle NewTriangle = new TtBSTriangle(Triangle.Vertices[1], Triangle.Vertices[2], TestPoint);
                         AddTriangle(NewTriangle);
                     }
                 }
@@ -735,10 +735,10 @@ namespace EngineNS.Animation.Asset.BlendSpace
                 // we need to make sure all triangles are locally optimized. If not optimize it. 
                 for (int I = 0; I < TriangleList.Count; ++I)
                 {
-                    BSTriangle A = TriangleList[I];
+                    TtBSTriangle A = TriangleList[I];
                     for (int J = I + 1; J < TriangleList.Count; ++J)
                     {
-                        BSTriangle B = TriangleList[J];
+                        TtBSTriangle B = TriangleList[J];
 
                         // does share same edge
                         if (A.DoesShareSameEdge(B))
@@ -766,10 +766,10 @@ namespace EngineNS.Animation.Asset.BlendSpace
             return TriangleList.Count;
         }
 
-        public List<BSPoint> GetSamplePointList() { return SamplesList; }
-        List<BSPoint> SamplesList = new List<BSPoint>();
+        public List<TtBSPoint> GetSamplePointList() { return SamplesList; }
+        List<TtBSPoint> SamplesList = new List<TtBSPoint>();
         List<int> Sorted2Indices = new List<int>();
-        List<BSTriangle> TriangleList = new List<BSTriangle>();
+        List<TtBSTriangle> TriangleList = new List<TtBSTriangle>();
         Vector3 GridMin = Vector3.Zero;
         Vector3 RecipGridSize = Vector3.Zero;
     }

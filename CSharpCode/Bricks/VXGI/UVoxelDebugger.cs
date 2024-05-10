@@ -58,6 +58,7 @@ namespace EngineNS.Bricks.VXGI
     {
     }
 
+    [Bricks.CodeBuilder.ContextMenu("Voxelize", "GI\\Voxelize", Bricks.RenderPolicyEditor.UPolicyGraph.RGDEditorKeyword)]
     partial class UVoxelsNode
     {
         #region VxDebugger

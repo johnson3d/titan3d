@@ -34,6 +34,12 @@ namespace EngineNS
             Height = height;
         }
 
+        public SizeF(in Vector2 size)
+        {
+            Width = size.Width;
+            Height = size.Height;
+        }
+
         public static bool operator ==(SizeF left, SizeF right)
         {
             return ((left.Width == right.Width) && (left.Height == right.Height));

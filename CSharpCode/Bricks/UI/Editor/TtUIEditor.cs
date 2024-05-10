@@ -37,7 +37,6 @@ namespace EngineNS.UI.Editor
         public EditorUIHost mUIHost;
         public TtUINode mUINode;
         Vector2 mNewCreateUISize = new Vector2(100, 50);
-        SizeF mDesignSize = new SizeF(1920, 1080);
         public void Dispose()
         {
             CoreSDK.DisposeObject(ref UIAsset);
@@ -53,10 +52,13 @@ namespace EngineNS.UI.Editor
             if (mUIHost == null)
                 mUIHost = new EditorUIHost(this);
             mUIHost.Name = "UIEditorHost";
-            mUIHost.WindowSize = mDesignSize;
-            var newRect = new RectangleF(0, 0, mDesignSize.Width, mDesignSize.Height);
+            var newRect = UEngine.Instance.UIManager.Config.DefaultDesignRect;
+            mDesignResolution = new Vector2i((int)newRect.Width, (int)newRect.Height);
+            mUIHost.WindowSize = newRect.Size;
             mUIHost.SetDesignRect(in newRect, true);
             mUIHost.ViewportSlate = PreviewViewport;
+
+            PreviewViewport.CameraMouseWheelSpeed = 50.0f;
 
             /*/ test /////////////////////////
             //var element = new TtImage(); // new TtUIElement();
@@ -1197,6 +1199,21 @@ namespace EngineNS.UI.Editor
         public void OnEvent(in Bricks.Input.Event e)
         {
         }
+        void ResetCamera()
+        {
+            if (mUIHost.IsScreenSpace)
+            {
+
+            }
+            else
+            {
+                BoundingSphere sphere;
+                sphere.Center = new Vector3(mUIHost.WindowSize.Width * 0.5f, mUIHost.WindowSize.Height * 0.5f, 0);
+                sphere.Radius = Math.Max(mUIHost.WindowSize.Width, mUIHost.WindowSize.Height);
+                mUIHost.RenderCamera.LookAtLH(-DVector3.UnitZ, DVector3.Zero, Vector3.UnitY);
+                mUIHost.RenderCamera.AutoZoom(ref sphere);
+            }
+        }
         bool mIsWireFrame = false;
         string mDimensionToolButtonName = "3D";
         void DrawViewportUIAction(in Vector2 startDrawPos)
@@ -1209,53 +1226,49 @@ namespace EngineNS.UI.Editor
             }
             if (EGui.UIProxy.CustomButton.ToolButton("Reset Camera", in Vector2.Zero))
             {
-                if(mUIHost.IsScreenSpace)
-                {
-
-                }
-                else
-                {
-                    BoundingSphere sphere;
-                    sphere.Center = new Vector3(mUIHost.WindowSize.Width * 0.5f, mUIHost.WindowSize.Height * 0.5f, 0);
-                    sphere.Radius = Math.Max(mUIHost.WindowSize.Width, mUIHost.WindowSize.Height);
-                    mUIHost.RenderCamera.LookAtLH(-DVector3.UnitZ, DVector3.Zero, Vector3.UnitY);
-                    mUIHost.RenderCamera.AutoZoom(ref sphere);
-                }
+                ResetCamera();
             }
             ImGuiAPI.SameLine(0, -1);
             if(EGui.UIProxy.CustomButton.ToolButton("Focus", in Vector2.Zero))
             {
-                if(mUIHost.IsScreenSpace)
+                if(mSelectedElements.Count > 0)
                 {
+                    if(mUIHost.IsScreenSpace)
+                    {
 
+                    }
+                    else
+                    {
+                        Vector2 rectMin = Vector2.MaxValue;
+                        Vector2 rectMax = Vector2.MinValue;
+                        for(int i=0; i<mSelectedElements.Count; i++)
+                        {
+                            Vector2 offset;
+                            var designRect = mSelectedElements[i].DesignRect;
+                            mSelectedElements[i].GetOffsetFromElement(mUIHost, out offset);
+                            var min = new Vector2(designRect.Left, designRect.Top) + offset;
+                            if (min.X < rectMin.X)
+                                rectMin.X = min.X;
+                            if (min.Y < rectMin.Y)
+                                rectMin.Y = min.Y;
+                            var max = new Vector2(designRect.Right, designRect.Bottom) + offset;
+                            if(max.X > rectMax.X)
+                                rectMax.X = max.X;
+                            if (max.Y > rectMax.Y)
+                                rectMax.Y = max.Y;
+                        }
+                        var size = rectMax - rectMin;
+                        rectMax.Y = mUIHost.DesignRect.Height - rectMax.Y;
+                        rectMin.Y = mUIHost.DesignRect.Height - rectMin.Y;
+                        BoundingSphere sphere;
+                        sphere.Center = new Vector3((rectMin.X + rectMax.X) * 0.5f, (rectMin.Y + rectMax.Y) * 0.5f, 0.0f);
+                        sphere.Radius = ((size.X > size.Y) ? size.X : size.Y);
+                        mUIHost.RenderCamera.AutoZoom(ref sphere, 0.3f);
+                    }
                 }
                 else
                 {
-                    Vector2 rectMin = Vector2.MaxValue;
-                    Vector2 rectMax = Vector2.MinValue;
-                    for(int i=0; i<mSelectedElements.Count; i++)
-                    {
-                        Vector2 offset;
-                        var designRect = mSelectedElements[i].DesignRect;
-                        mSelectedElements[i].GetOffsetFromElement(mUIHost, out offset);
-                        var min = new Vector2(designRect.Left, designRect.Top) + offset;
-                        if (min.X < rectMin.X)
-                            rectMin.X = min.X;
-                        if (min.Y < rectMin.Y)
-                            rectMin.Y = min.Y;
-                        var max = new Vector2(designRect.Right, designRect.Bottom) + offset;
-                        if(max.X > rectMax.X)
-                            rectMax.X = max.X;
-                        if (max.Y > rectMax.Y)
-                            rectMax.Y = max.Y;
-                    }
-                    var size = rectMax - rectMin;
-                    rectMax.Y = mUIHost.DesignRect.Height - rectMax.Y;
-                    rectMin.Y = mUIHost.DesignRect.Height - rectMin.Y;
-                    BoundingSphere sphere;
-                    sphere.Center = new Vector3((rectMin.X + rectMax.X) * 0.5f, (rectMin.Y + rectMax.Y) * 0.5f, 0.0f);
-                    sphere.Radius = ((size.X > size.Y) ? size.X : size.Y);
-                    mUIHost.RenderCamera.AutoZoom(ref sphere);
+                    ResetCamera();
                 }
             }
             ImGuiAPI.SameLine(0, -1);
@@ -1274,7 +1287,7 @@ namespace EngineNS.UI.Editor
 
                 _ = WireFrameProcess();
             }
-            ImGuiAPI.SameLine(0, -1);
+            /*ImGuiAPI.SameLine(0, -1);
             if (EGui.UIProxy.CustomButton.ToolButton(mDimensionToolButtonName, in Vector2.Zero))
             {
                 switch (mDimensionToolButtonName)
@@ -1283,7 +1296,10 @@ namespace EngineNS.UI.Editor
                         {
                             mDimensionToolButtonName = "3D";
                             PreviewViewport.PopHUD();
+                            mUIHost.ViewportSlate = PreviewViewport;
                             mUINode.AddUIHost(mUIHost);
+                            mUIHost.MeshDirty = true;
+                            mUIHost.WindowSize = mUIHost.DesiredWindowSize;
                         }
                         break;
                     case "3D":
@@ -1291,12 +1307,42 @@ namespace EngineNS.UI.Editor
                             mDimensionToolButtonName = "2D";
                             PreviewViewport.PushHUD(mUIHost);
                             mUINode.RemoveUIHost(mUIHost);
+                            mUIHost.MeshDirty = true;
+                            mUIHost.WindowSize = new SizeF(PreviewViewport.ClientSize);
                         }
                         break;
                 }
                 mUIHost.MeshDirty = true;
+            }*/
+            ImGuiAPI.SameLine(0, -1);
+            var str = $"Design:{mDesignResolution.X}x{mDesignResolution.Y}";
+            if(EGui.UIProxy.CustomButton.ToolButton(str, in Vector2.Zero))
+            {
+                ImGuiAPI.OpenPopup("##DesignResolution", ImGuiPopupFlags_.ImGuiPopupFlags_None);
+            }
+            if(ImGuiAPI.BeginPopup("##DesignResolution", ImGuiWindowFlags_.ImGuiWindowFlags_NoTitleBar))
+            {
+                unsafe
+                {
+                    ImGuiAPI.Text("Custom:");
+                    fixed(Vector2i* resPtr = &mDesignResolution)
+                    {
+                        if(ImGuiAPI.InputInt2("##CustomDesignResolution", (int*)resPtr, ImGuiInputTextFlags_.ImGuiInputTextFlags_None))
+                        {
+                            if((mDesignResolution.X > 0) && (mDesignResolution.Y > 0))
+                            {
+                                if(mUIHost.IsScreenSpace)
+                                    mUIHost.DesignWindowSize = new SizeF(mDesignResolution.X, mDesignResolution.Y);
+                                else
+                                    mUIHost.WindowSize = new SizeF(mDesignResolution.X, mDesignResolution.Y);
+                            }
+                        }
+                    }
+                }
+                ImGuiAPI.EndPopup();
             }
         }
+        Vector2i mDesignResolution;
         public float LoadingPercent { get; set; } = 1.0f;
         public string ProgressText { get; set; } = "Loading";
         public async Task<bool> OpenEditor(EngineNS.Editor.UMainEditorApplication mainEditor, RName name, object arg)
@@ -1351,17 +1397,51 @@ namespace EngineNS.UI.Editor
                     {
                         var delta = PreviewViewport.WindowPos - PreviewViewport.ViewportPos;
                         var mousePt = new Vector2(e.MouseButton.X - delta.X, e.MouseButton.Y - delta.Y);
-                        if(mousePt.X >= PreviewViewport.ClientMin.X && 
+                        if(mousePt.X >= PreviewViewport.ClientMin.X &&
                            mousePt.X <= PreviewViewport.ClientMax.X &&
-                           mousePt.Y >= PreviewViewport.ClientMin.Y &&
+                           mousePt.Y >= (PreviewViewport.ClientMin.Y + 25) && // 避开工具栏
                            mousePt.Y <= PreviewViewport.ClientMax.Y &&
                            (CurrentDecorator == null || !CurrentDecorator.IsInDecoratorOperation()))
                         {
                             ProcessSelectElement(mCurrentPointAtElement, UEngine.Instance.InputSystem.IsCtrlKeyDown());
                         }
+
+                        if(e.MouseButton.Button == (byte)Bricks.Input.EMouseButton.BUTTON_MIDDLE)
+                        {
+                            CalculateCameraMovingSpeed(e.MouseButton.X, e.MouseButton.Y);
+                        }
                     }
                     break;
+                case EventType.MOUSEWHEEL:
+                    break;
             }
+        }
+
+        void CalculateCameraMovingSpeed(in float mousePointX, in float mousePointY)
+        {
+            if (mUIHost.IsScreenSpace)
+                return;
+
+            var hostRect = mUIHost.DesignRect;
+            var transMatrix = mUIHost.AbsRenderTransform.ToMatrixWithScale(in DVector3.Zero);
+            var v0 = new Vector3(hostRect.Left, hostRect.Top, 0.0f);
+            v0 = Vector3.TransformCoordinate(in v0, in transMatrix);
+            var v1 = new Vector3(hostRect.Right, hostRect.Top, 0.0f);
+            v1 = Vector3.TransformCoordinate(in v1, in transMatrix);
+            var v2 = new Vector3(hostRect.Left, hostRect.Bottom, 0.0f);
+            v2 = Vector3.TransformCoordinate(in v2, in transMatrix);
+            var plane = new Plane(v0, v1, v2);
+            var delta = mUIHost.ViewportSlate.WindowPos - mUIHost.ViewportSlate.ViewportPos;
+            float distance;
+            Vector3 dir = Vector3.Zero;
+            mUIHost.RenderCamera.GetPickRay(ref dir, mousePointX - delta.X, mousePointY - delta.Y, mUIHost.ViewportSlate.ClientSize.Width, mUIHost.ViewportSlate.ClientSize.Height);
+            if (dir == Vector3.Zero)
+                return;
+            var cameraPos = PreviewViewport.CameraController.Camera.GetPosition().ToSingleVector3();
+            Ray.Intersects(new Ray(in cameraPos, in dir), in plane, out distance);
+            var angle = PreviewViewport.CameraController.Camera.Fov * 0.5f;
+            var uiPos = mUIHost.AbsRenderTransform.Position;
+            PreviewViewport.CameraMoveSpeed = distance * 0.048f;
         }
 
         async Thread.Async.TtTask BuildMesh()

@@ -31,7 +31,7 @@ namespace EngineNS.Bricks.PhysicsCore
         }
     }
     [TtPhyMaterial.UPhyMaterialImport]
-    [IO.AssetCreateMenu(MenuName = "PhysicsMaterial")]
+    [IO.AssetCreateMenu(MenuName = "Physics/PhysicsMaterial")]
     [Editor.UAssetEditor(EditorType = typeof(TtPhyMaterialEditor))]
     public class TtPhyMaterial : AuxPtrType<PhyMaterial>, IO.IAsset, IO.ISerializer
     {

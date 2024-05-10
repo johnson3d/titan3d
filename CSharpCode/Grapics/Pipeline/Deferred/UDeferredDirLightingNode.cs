@@ -248,6 +248,9 @@ namespace EngineNS.Graphics.Pipeline.Deferred
         }
         public override void InitNodePins()
         {
+            ResultPinOut.Attachement.Format = EPixelFormat.PXF_R16G16B16A16_FLOAT;
+            base.InitNodePins();
+
             AddInput(Rt0PinIn, NxRHI.EBufferType.BFT_SRV);
             AddInput(Rt1PinIn, NxRHI.EBufferType.BFT_SRV);
             AddInput(Rt2PinIn, NxRHI.EBufferType.BFT_SRV);
@@ -260,9 +263,6 @@ namespace EngineNS.Graphics.Pipeline.Deferred
             AddInput(TileScreenPinIn, NxRHI.EBufferType.BFT_SRV);
             AddInput(PointLightsPinIn, NxRHI.EBufferType.BFT_SRV);
             AddInput(GpuScenePinIn, NxRHI.EBufferType.BFT_SRV | NxRHI.EBufferType.BFT_UAV);
-
-            ResultPinOut.Attachement.Format = EPixelFormat.PXF_R16G16B16A16_FLOAT;
-            base.InitNodePins();
         }
         public override void FrameBuild(Graphics.Pipeline.URenderPolicy policy)
         {

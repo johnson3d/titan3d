@@ -116,7 +116,7 @@ namespace EngineNS.GamePlay.GamePlayMacross
     {
         protected TtGamePlayStateMachine<UGameplayMacross> mGamePlayStateMachine = new TtGamePlayStateMachine<UGameplayMacross>();
 
-        protected UMeshSpaceRuntimePose mMeshSpaceRuntimePose = null;
+        protected TtLocalSpaceRuntimePose mRuntimePose = null;
 
         public virtual void ConstructLogicGraph()
         {
@@ -124,10 +124,10 @@ namespace EngineNS.GamePlay.GamePlayMacross
         public async virtual Task<bool> ConstructAnimGraph(UMeshNode animatedMeshNode)
         {
             //return false;
-            var animatablePose = animatedMeshNode?.Mesh?.MaterialMesh?.SubMeshes[0].Mesh?.PartialSkeleton?.CreatePose() as EngineNS.Animation.SkeletonAnimation.AnimatablePose.UAnimatableSkeletonPose;
+            var animatablePose = animatedMeshNode?.Mesh?.MaterialMesh?.SubMeshes[0].Mesh?.PartialSkeleton?.CreatePose() as EngineNS.Animation.SkeletonAnimation.AnimatablePose.TtAnimatableSkeletonPose;
             var skinMDfQueue = animatedMeshNode.Mesh.MdfQueue as EngineNS.Graphics.Mesh.UMdfSkinMesh;
-            mMeshSpaceRuntimePose = URuntimePoseUtility.CreateMeshSpaceRuntimePose(animatablePose);
-            skinMDfQueue.SkinModifier.RuntimeMeshSpacePose = mMeshSpaceRuntimePose;
+            mRuntimePose = TtRuntimePoseUtility.CreateLocalSpaceRuntimePose(animatablePose);
+            skinMDfQueue.SkinModifier.RuntimePose = mRuntimePose;
 
             mGamePlayStateMachine = new TtGamePlayStateMachine<UGameplayMacross>();
             var idleState = new TtGamePlayState<UGameplayMacross>(mGamePlayStateMachine);
@@ -163,10 +163,10 @@ namespace EngineNS.GamePlay.GamePlayMacross
                 return;
             FConstructAnimationCommandTreeContext context = new FConstructAnimationCommandTreeContext();
             context.Create();
-            UAnimationCommand<ULocalSpaceRuntimePose> cmd = null;
+            TtAnimationCommand<TtLocalSpaceRuntimePose> cmd = null;
             var root = mGamePlayStateMachine.ConstructAnimationCommandTree(cmd, ref context);
             context.CmdExecuteStack.Execute();
-            URuntimePoseUtility.ConvetToMeshSpaceRuntimePose(ref mMeshSpaceRuntimePose, root.OutPose);
+            TtRuntimePoseUtility.CopyPose(ref mRuntimePose, root.OutPose);
         }
     }
 
@@ -178,10 +178,10 @@ namespace EngineNS.GamePlay.GamePlayMacross
         }
         public async override Task<bool> ConstructAnimGraph(UMeshNode animatedMeshNode)
         {
-            var animatablePose = animatedMeshNode?.Mesh?.MaterialMesh?.SubMeshes[0].Mesh?.PartialSkeleton?.CreatePose() as EngineNS.Animation.SkeletonAnimation.AnimatablePose.UAnimatableSkeletonPose;
+            var animatablePose = animatedMeshNode?.Mesh?.MaterialMesh?.SubMeshes[0].Mesh?.PartialSkeleton?.CreatePose() as EngineNS.Animation.SkeletonAnimation.AnimatablePose.TtAnimatableSkeletonPose;
             var skinMDfQueue = animatedMeshNode.Mesh.MdfQueue as EngineNS.Graphics.Mesh.UMdfSkinMesh;
-            mMeshSpaceRuntimePose = URuntimePoseUtility.CreateMeshSpaceRuntimePose(animatablePose);
-            skinMDfQueue.SkinModifier.RuntimeMeshSpacePose = mMeshSpaceRuntimePose;
+            mRuntimePose = TtRuntimePoseUtility.CreateLocalSpaceRuntimePose(animatablePose);
+            skinMDfQueue.SkinModifier.RuntimePose = mRuntimePose;
 
             mGamePlayStateMachine = new TtGamePlayStateMachine<UGameplayMacross>();
             var idleState = new TtGamePlayState<UGameplayMacross>(mGamePlayStateMachine);
@@ -198,10 +198,10 @@ namespace EngineNS.GamePlay.GamePlayMacross
         {
             FConstructAnimationCommandTreeContext context = new FConstructAnimationCommandTreeContext();
             context.Create();
-            UAnimationCommand<ULocalSpaceRuntimePose> cmd = null;
+            TtAnimationCommand<TtLocalSpaceRuntimePose> cmd = null;
             var root = mGamePlayStateMachine.ConstructAnimationCommandTree(cmd, ref context);
             context.CmdExecuteStack.Execute();
-            URuntimePoseUtility.ConvetToMeshSpaceRuntimePose(ref mMeshSpaceRuntimePose, root.OutPose);
+            TtRuntimePoseUtility.CopyPose(ref mRuntimePose, root.OutPose);
         }
     }
 }

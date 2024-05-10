@@ -8,7 +8,7 @@ namespace EngineNS.Graphics.Pipeline.Common
     public class UScreenTilingNode : Graphics.Pipeline.TtRenderGraphNode
     {
         public TtRenderGraphPin DepthPinIn = TtRenderGraphPin.CreateInput("Depth");
-        public TtRenderGraphPin PointLightsPinIn = TtRenderGraphPin.CreateInput("PointLights");
+        public TtRenderGraphPin PointLightsPinIn = TtRenderGraphPin.CreateInputOutput("PointLights");
         public TtRenderGraphPin TilingPinOut = TtRenderGraphPin.CreateOutput("Tiling", false, EPixelFormat.PXF_UNKNOWN);
         public UScreenTilingNode()
         {
@@ -17,10 +17,11 @@ namespace EngineNS.Graphics.Pipeline.Common
         
         public override void InitNodePins()
         {
-            AddInput(DepthPinIn, NxRHI.EBufferType.BFT_DSV | NxRHI.EBufferType.BFT_SRV);
-            AddInput(PointLightsPinIn, NxRHI.EBufferType.BFT_SRV | NxRHI.EBufferType.BFT_UAV);
             TilingPinOut.LifeMode = TtAttachBuffer.ELifeMode.Imported;
             AddOutput(TilingPinOut, NxRHI.EBufferType.BFT_UAV | NxRHI.EBufferType.BFT_SRV);
+
+            AddInput(DepthPinIn, NxRHI.EBufferType.BFT_DSV | NxRHI.EBufferType.BFT_SRV);
+            AddInputOutput(PointLightsPinIn, NxRHI.EBufferType.BFT_SRV | NxRHI.EBufferType.BFT_UAV);
         }
         public unsafe override void FrameBuild(Graphics.Pipeline.URenderPolicy policy)
         {

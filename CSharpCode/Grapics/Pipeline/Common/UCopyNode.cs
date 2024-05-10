@@ -108,6 +108,7 @@ namespace EngineNS.Graphics.Pipeline.Common
         }
     }
 
+    [Bricks.CodeBuilder.ContextMenu("Copy", "Copy2NextFrame", Bricks.RenderPolicyEditor.UPolicyGraph.RGDEditorKeyword)]
     public class UCopy2NextFrameNode : Graphics.Pipeline.TtRenderGraphNode
     {
         public TtRenderGraphPin SrcPinIn = TtRenderGraphPin.CreateInput("Src");

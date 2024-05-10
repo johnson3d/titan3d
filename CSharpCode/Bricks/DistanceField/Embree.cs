@@ -11,6 +11,9 @@ namespace EngineNS.DistanceField
         {
             mCoreObject = EngineNS.FEmbreeScene.CreateInstance();
         }
+
+        public int NumIndices { get => mCoreObject.NumIndices; set => mCoreObject.NumIndices = value; }
+        public bool bMostlyTwoSided { get => mCoreObject.bMostlyTwoSided; set => mCoreObject.bMostlyTwoSided = value; }
     }
 
     public class UEmbreeManager : AuxPtrType<EngineNS.EmbreeManager>
@@ -31,9 +34,9 @@ namespace EngineNS.DistanceField
         {
             mCoreObject.EmbreePointQuery(embreeScene.mCoreObject, VoxelPosition, LocalSpaceTraceDistance, ref bOutNeedTracyRays, ref OutClosestDistance);
         }
-        public void EmbreeRayTrace(UEmbreeScene embreeScene, Vector3 StartPosition, Vector3 RayDirection, ref bool bOutHit, ref bool bOutHitTwoSided, ref Vector3 OutHitNormal)
+        public void EmbreeRayTrace(UEmbreeScene embreeScene, Vector3 StartPosition, Vector3 RayDirection, ref bool bOutHit, ref bool bOutHitTwoSided, ref Vector3 OutHitNormal, ref float OutTFar)
         {
-            mCoreObject.EmbreeRayTrace(embreeScene.mCoreObject, StartPosition, RayDirection, ref bOutHit, ref bOutHitTwoSided, ref OutHitNormal);
+            mCoreObject.EmbreeRayTrace(embreeScene.mCoreObject, StartPosition, RayDirection, ref bOutHit, ref bOutHitTwoSided, ref OutHitNormal, ref OutTFar);
         }
 
     }

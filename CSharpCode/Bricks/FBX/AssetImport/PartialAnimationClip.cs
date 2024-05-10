@@ -5,7 +5,7 @@ using System.Text;
 
 namespace EngineNS.Animation.Asset
 {
-    public partial class UAnimationClip
+    public partial class TtAnimationClip
     {
         public partial class ImportAttribute
         {
@@ -57,7 +57,7 @@ namespace EngineNS.Animation.Asset
                     bool nameChanged = ImGuiAPI.InputText("##in_rname", ref mName);
                     if (nameChanged)
                     {
-                        if (IO.TtFileManager.FileExists(mDir.Address + mName + UAnimationClip.AssetExt))
+                        if (IO.TtFileManager.FileExists(mDir.Address + mName + TtAnimationClip.AssetExt))
                             eErrorType = enErrorType.IsExisting;
                     }
 
@@ -103,7 +103,7 @@ namespace EngineNS.Animation.Asset
                 {
                     System.Diagnostics.Debug.Assert(i == 0);
                     
-                    UAnimationClip animClip = null;
+                    TtAnimationClip animClip = null;
                     using (var animImporter = mFBXImporter.CreateAnimImporter(i))
                     {
                          var animDesc = mFBXImporter.GetFBXAnimDesc(i);
@@ -116,7 +116,7 @@ namespace EngineNS.Animation.Asset
                         {
                             animName = animDesc->Name.c_str();
                         }
-                        var rn = RName.GetRName(mDir.Name + animName + UAnimationClip.AssetExt);
+                        var rn = RName.GetRName(mDir.Name + animName + TtAnimationClip.AssetExt);
                         animImporter.Process();
                         List<AssetImportAndExport.FBX.FBXAnimElement> animElements = new List<AssetImportAndExport.FBX.FBXAnimElement>();
                         for (int animIndex = 0; animIndex < animImporter.GetAnimElementsNum(); ++animIndex)
@@ -125,7 +125,7 @@ namespace EngineNS.Animation.Asset
                             animElements.Add(animElement);
                         }
                         var chunk = AssetImportAndExport.FBX.FBXAnimationImportUtility.MakeAnimationChunkFromFBX(rn, *mFBXImporter.GetFBXAnimDesc(i), animElements);
-                        animClip = new UAnimationClip();
+                        animClip = new TtAnimationClip();
                         animClip.SampleRate = animDesc->SampleRate;
                         animClip.Duration = animDesc->Duration;
                         animClip.AnimationChunkName = chunk.RescouceName;
@@ -133,11 +133,11 @@ namespace EngineNS.Animation.Asset
                         animClip.SaveAssetTo(rn);
                         if (animClip != null)
                         {
-                            var ameta = new UAnimationClipAMeta();
+                            var ameta = new TtAnimationClipAMeta();
                             ameta.SetAssetName(rn);
                             ameta.AssetId = Guid.NewGuid();
-                            ameta.TypeStr = Rtti.UTypeDescManager.Instance.GetTypeStringFromType(typeof(UAnimationClip));
-                            ameta.Description = $"This is a {typeof(UAnimationClip).FullName}\n";
+                            ameta.TypeStr = Rtti.UTypeDescManager.Instance.GetTypeStringFromType(typeof(TtAnimationClip));
+                            ameta.Description = $"This is a {typeof(TtAnimationClip).FullName}\n";
                             ameta.SaveAMeta();
                             UEngine.Instance.AssetMetaManager.RegAsset(ameta);
                         }
@@ -159,18 +159,15 @@ namespace AssetImportAndExport.FBX
 
     public static class FBXAnimationImportUtility
     {
-        public unsafe static EngineNS.Animation.Asset.UAnimationChunk MakeAnimationChunkFromFBX(RName assetName, FBXAnimImportDesc animDesc, List<FBXAnimElement> animElements)
+        public unsafe static EngineNS.Animation.Asset.TtAnimationChunk MakeAnimationChunkFromFBX(RName assetName, FBXAnimImportDesc animDesc, List<FBXAnimElement> animElements)
         {
-            var animChunk = new EngineNS.Animation.Asset.UAnimationChunk();
+            var animChunk = new EngineNS.Animation.Asset.TtAnimationChunk();
             animChunk.RescouceName = assetName;
-            Dictionary<uint, UAnimHierarchy> animHDic = new Dictionary<uint, UAnimHierarchy>();
             for (int i = 0; i < animElements.Count; ++i)
             {
                 var animElement = animElements[i];
-                UAnimHierarchy animHierarchy = new UAnimHierarchy();
-
-                AnimatableObjectClassDesc objectClassDesc = new AnimatableObjectClassDesc();
-                objectClassDesc.ClassType = EngineNS.Rtti.UTypeDesc.TypeOf(typeof(EngineNS.Animation.SkeletonAnimation.AnimatablePose.UAnimatableBonePose));
+                TtAnimatedObjectDescription objectClassDesc = new TtAnimatedObjectDescription();
+                objectClassDesc.ClassType = EngineNS.Rtti.UTypeDesc.TypeOf(typeof(EngineNS.Animation.SkeletonAnimation.AnimatablePose.TtAnimatableBonePose));
                 var t = objectClassDesc.ClassType;
                 objectClassDesc.Name = animElement.Desc.Name.Text;
                 uint hash = UniHash32.APHash(objectClassDesc.Name.ToString());
@@ -183,14 +180,14 @@ namespace AssetImportAndExport.FBX
 
                     if (xCurve != null || yCurve != null || zCurve != null)
                     {
-                        Vector3Curve curve = new Vector3Curve();
-                        curve.XCurve = CreateCurveFromFbxCurve(xCurve);
-                        curve.YCurve = CreateCurveFromFbxCurve(yCurve);
-                        curve.ZCurve = CreateCurveFromFbxCurve(zCurve);
+                        TtVector3Curve curve = new TtVector3Curve();
+                        curve.XTrack = CreateCurveFromFbxCurve(xCurve);
+                        curve.YTrack = CreateCurveFromFbxCurve(yCurve);
+                        curve.ZTrack = CreateCurveFromFbxCurve(zCurve);
                         animChunk.AnimCurvesList.Add(curve.Id, curve);
 
-                        AnimatableObjectPropertyDesc posDesc = new AnimatableObjectPropertyDesc();
-                        posDesc.ClassType = EngineNS.Rtti.UTypeDesc.TypeOf<NullableVector3>();
+                        TtAnimatedPropertyDescription posDesc = new TtAnimatedPropertyDescription();
+                        posDesc.ClassType = EngineNS.Rtti.UTypeDesc.TypeOf<FNullableVector3>();
                         posDesc.Name = "Position";
                         posDesc.CurveId = curve.Id;
                         objectClassDesc.Properties.Add(posDesc);
@@ -208,14 +205,14 @@ namespace AssetImportAndExport.FBX
 
                     if (xCurve != null || yCurve != null || zCurve != null)
                     {
-                        Vector3Curve curve = new Vector3Curve();
-                        curve.XCurve = CreateCurveFromFbxCurve(xCurve);
-                        curve.YCurve = CreateCurveFromFbxCurve(yCurve);
-                        curve.ZCurve = CreateCurveFromFbxCurve(zCurve);
+                        TtVector3Curve curve = new TtVector3Curve();
+                        curve.XTrack = CreateCurveFromFbxCurve(xCurve);
+                        curve.YTrack = CreateCurveFromFbxCurve(yCurve);
+                        curve.ZTrack = CreateCurveFromFbxCurve(zCurve);
                         animChunk.AnimCurvesList.Add(curve.Id, curve);
 
-                        AnimatableObjectPropertyDesc rotDesc = new AnimatableObjectPropertyDesc();
-                        rotDesc.ClassType = EngineNS.Rtti.UTypeDesc.TypeOf<NullableVector3>();
+                        TtAnimatedPropertyDescription rotDesc = new TtAnimatedPropertyDescription();
+                        rotDesc.ClassType = EngineNS.Rtti.UTypeDesc.TypeOf<FNullableVector3>();
                         rotDesc.Name = "Rotation";
                         rotDesc.CurveId = curve.Id;
                         objectClassDesc.Properties.Add(rotDesc);
@@ -232,71 +229,36 @@ namespace AssetImportAndExport.FBX
 
                     if (xCurve != null || yCurve != null || zCurve != null)
                     {
-                        Vector3Curve curve = new Vector3Curve();
-                        curve.XCurve = CreateCurveFromFbxCurve(xCurve);
-                        curve.YCurve = CreateCurveFromFbxCurve(yCurve);
-                        curve.ZCurve = CreateCurveFromFbxCurve(zCurve);
+                        TtVector3Curve curve = new TtVector3Curve();
+                        curve.XTrack = CreateCurveFromFbxCurve(xCurve);
+                        curve.YTrack = CreateCurveFromFbxCurve(yCurve);
+                        curve.ZTrack = CreateCurveFromFbxCurve(zCurve);
                         animChunk.AnimCurvesList.Add(curve.Id, curve);
 
-                        AnimatableObjectPropertyDesc scaleDesc = new AnimatableObjectPropertyDesc();
-                        scaleDesc.ClassType = EngineNS.Rtti.UTypeDesc.TypeOf<NullableVector3>();
+                        TtAnimatedPropertyDescription scaleDesc = new TtAnimatedPropertyDescription();
+                        scaleDesc.ClassType = EngineNS.Rtti.UTypeDesc.TypeOf<FNullableVector3>();
                         scaleDesc.Name = "Scale";
                         scaleDesc.CurveId = curve.Id;
                         objectClassDesc.Properties.Add(scaleDesc);
                     }
 
                 }
-
-
-                animHierarchy.Node = objectClassDesc;
-                animHDic.Add(hash, animHierarchy);
+                animChunk.AnimatedObjectDescs.Add(objectClassDesc.Name, objectClassDesc);
             }
-            //construct hierarchy
-            System.Diagnostics.Debug.Assert(animHDic.Count == animElements.Count);
-            UAnimHierarchy Root = null;
-            bool rootCheck = false;
-            for (int i = 0; i < animElements.Count; ++i)
-            {
-                UAnimHierarchy parent = null;
-                var hasParent = animHDic.TryGetValue(animElements[i].Desc.ParentHash, out parent);
-                if (hasParent)
-                {
-                    UAnimHierarchy child = null;
-                    var isExist = animHDic.TryGetValue(animElements[i].Desc.NameHash, out child);
-                    if (isExist)
-                    {
-                        parent.Children.Add(child);
-                        child.Parent = parent;
-                    }
-                }
-                else
-                {
-                    System.Diagnostics.Debug.Assert(!rootCheck);
-                    rootCheck = true;
-                    UAnimHierarchy root = null;
-                    var isExist = animHDic.TryGetValue(animElements[i].Desc.NameHash, out root);
-                    if (isExist)
-                    {
-                        Root = root;
-                    }
-                }
-            }
-
-            animChunk.AnimatedHierarchy = Root;
 
             return animChunk;
         }
 
-        private static unsafe UCurve CreateCurveFromFbxCurve(AssetImportAndExport.FBX.FBXAnimCurve* fbxAnimCurve)
+        private static unsafe TtTrack CreateCurveFromFbxCurve(AssetImportAndExport.FBX.FBXAnimCurve* fbxAnimCurve)
         {
             if (fbxAnimCurve == null)
                 return null;
-            UCurve temp = new UCurve();
+            TtTrack temp = new TtTrack();
             var fbxCurve = *fbxAnimCurve;
             for (int keyIndex = 0; keyIndex < fbxCurve.GetKeyFrameNum(); ++keyIndex)
             {
                 var fbxKey = *fbxCurve.GetKeyFrame(keyIndex);
-                Keyframe keyFrame = new Keyframe();
+                FKeyframe keyFrame = new FKeyframe();
                 keyFrame.Time = fbxKey.Time;
                 keyFrame.Value = fbxKey.Value;
                 keyFrame.InSlope = fbxKey.InSlope;

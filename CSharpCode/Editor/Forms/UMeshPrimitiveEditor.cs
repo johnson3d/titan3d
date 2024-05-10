@@ -119,9 +119,19 @@ namespace EngineNS.Editor.Forms
                 materials[i] = mtl;
             }
             var mesh = new Graphics.Mesh.TtMesh();
-            mesh.Initialize(Mesh, materials, Rtti.UTypeDescGetter<Graphics.Mesh.UMdfStaticMesh>.TypeDesc);
-
-            var meshNode = await GamePlay.Scene.UMeshNode.AddMeshNode(viewport.World, viewport.World.Root, new GamePlay.Scene.UMeshNode.UMeshNodeData(), typeof(GamePlay.UPlacement), mesh,
+            var meshNodeData = new GamePlay.Scene.UMeshNode.UMeshNodeData();
+            if (Mesh.PartialSkeleton != null)
+            {
+                mesh.Initialize(Mesh, materials, Rtti.UTypeDescGetter<Graphics.Mesh.UMdfSkinMesh>.TypeDesc);
+                meshNodeData.MdfQueueType = EngineNS.Rtti.UTypeDesc.TypeStr(typeof(EngineNS.Graphics.Mesh.UMdfSkinMesh));
+            }
+            else
+            {
+                mesh.Initialize(Mesh, materials, Rtti.UTypeDescGetter<Graphics.Mesh.UMdfStaticMesh>.TypeDesc);
+                meshNodeData.MdfQueueType = EngineNS.Rtti.UTypeDesc.TypeStr(typeof(EngineNS.Graphics.Mesh.UMdfStaticMesh));
+            }
+            meshNodeData.MeshName = Mesh.AssetName;
+            var meshNode = await GamePlay.Scene.UMeshNode.AddMeshNode(viewport.World, viewport.World.Root, meshNodeData, typeof(GamePlay.UPlacement), mesh,
                         DVector3.Zero, Vector3.One, Quaternion.Identity);
             meshNode.HitproxyType = Graphics.Pipeline.UHitProxy.EHitproxyType.Root;
             meshNode.NodeData.Name = "PreviewObject";
@@ -298,7 +308,8 @@ namespace EngineNS.Editor.Forms
                         if(meshProvider.InitFrom(Mesh))
                         {
                             var sdfConfig = new DistanceField.DistanceFieldConfig();
-                            DistanceField.UMeshUtilities.GenerateSignedDistanceFieldVolumeData(Mesh.AssetName.ToString(), meshProvider, sdfConfig, 1.0f, false);
+                            var outSDF = new DistanceField.UDistanceFieldVolumeData();
+                            DistanceField.UMeshUtilities.GenerateSignedDistanceFieldVolumeData(Mesh.AssetName.ToString(), meshProvider, sdfConfig, 1.0f, false, ref outSDF);
 
                             // debug code
                             //var embreeScene = new DistanceField.UEmbreeScene();

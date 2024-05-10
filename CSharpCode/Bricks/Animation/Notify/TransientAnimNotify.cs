@@ -8,7 +8,7 @@ namespace EngineNS.Animation.Notify
 {
     public delegate void NotifyHandle(IAnimNotify sender);
     [Rtti.Meta]
-    public class TransientAnimNotify : IO.BaseSerializer, IAnimNotify
+    public class TtTransientAnimNotify : IO.BaseSerializer, IAnimNotify
     {
         Int64 mTriggerTime = 0;
         public Int64 TriggerTime  //ms

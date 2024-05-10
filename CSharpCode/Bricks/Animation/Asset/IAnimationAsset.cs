@@ -13,8 +13,4 @@ namespace EngineNS.Animation.Asset
     {
 
     }
-    public class UAnimationTrack
-    {
-
-    }
 }

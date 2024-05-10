@@ -76,6 +76,7 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Control
                 Result = new PinOut();
                 Result.LinkDesc = UShaderEditorStyles.Instance.NewInOutPinDesc();
                 Result.Name = "Result";
+                Result.MultiLinks = true;
                 AddPinOut(Result);
             }
 
@@ -108,6 +109,7 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Control
                     pinOut.LinkDesc.CanLinks.Add("Value");
                     pinOut.Name = i.Name;
                     pinOut.Tag = i.ParameterType;
+                    pinOut.MultiLinks = true;
                     AddPinOut(pinOut);
                     pinData.PinOut = pinOut;
                 }

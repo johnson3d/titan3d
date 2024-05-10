@@ -1,4 +1,5 @@
-﻿using Assimp.Unmanaged;
+﻿using Assimp;
+using Assimp.Unmanaged;
 using EngineNS.Animation.Asset;
 using EngineNS.Animation.Base;
 using EngineNS.Animation.Curve;
@@ -13,27 +14,33 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Numerics;
 using System.Text;
+using static NPOI.HSSF.Util.HSSFColor;
 
 namespace EngineNS.Bricks.AssetImpExp
 {
     
-    public class AssetDescription
+    public class TtAssetDescription
     {
         public string FileName { get; set; } = "";
         public int MeshesCount { get; set; } = 0;
         public int AnimationsCount { get; set; } = 0;
 
     }
-    public class AssetImportOption
+    public class TtAssetImportOption_Mesh
     {
         public bool GenerateUMS { get; set; } = false;
         public bool AsStaticMesh { get; set; } = false;
+        public float Scale { get; set; } = 0.01f;
     }
-    public class AssetImporter
+    public class TtAssetImportOption_Animation
+    {
+        public float Scale { get; set; } = 0.01f;
+    }
+    public class TtAssetImporter
     {
         public Assimp.Scene AiScene { get; set; } = null;
         public string FilePath { get; set; } = null;
-        public AssetDescription PreImport(string filePath)
+        public TtAssetDescription PreImport(string filePath)
         {
             FilePath = filePath;
             Assimp.PostProcessSteps convertToLeftHanded = Assimp.PostProcessSteps.MakeLeftHanded | Assimp.PostProcessSteps.FlipUVs | Assimp.PostProcessSteps.FlipWindingOrder;
@@ -42,7 +49,7 @@ namespace EngineNS.Bricks.AssetImpExp
             try
             {
                 AiScene = assimpContext.ImportFile(filePath, sceneFlags);
-                if(AiScene == null)
+                if (AiScene == null)
                 {
                     return null;
                 }
@@ -52,7 +59,7 @@ namespace EngineNS.Bricks.AssetImpExp
                 return null;
             }
             var meshNodes = AssimpSceneUtil.FindMeshNodes(AiScene);
-            AssetDescription assetsGenerateDescription = new AssetDescription();
+            TtAssetDescription assetsGenerateDescription = new TtAssetDescription();
             assetsGenerateDescription.FileName = Path.GetFileNameWithoutExtension(filePath); ;
             assetsGenerateDescription.MeshesCount = meshNodes.Count;
             assetsGenerateDescription.AnimationsCount = AiScene.AnimationCount;
@@ -100,7 +107,7 @@ namespace EngineNS.Bricks.AssetImpExp
             }
             return null;
         }
-        public static USkinSkeleton FindMeshSkeleton(Assimp.Node meshNode, List<USkinSkeleton> skeletons, Assimp.Scene scene)
+        public static TtSkinSkeleton FindMeshSkeleton(Assimp.Node meshNode, List<TtSkinSkeleton> skeletons, Assimp.Scene scene)
         {
             var mesh = AssimpSceneUtil.FindMesh(meshNode.Name, scene);
             Debug.Assert(mesh != null);
@@ -165,6 +172,40 @@ namespace EngineNS.Bricks.AssetImpExp
         {
             return new Quaternion(value.X, value.Y, value.Z, value.W);
         }
+
+        public static Assimp.Matrix4x4 AccumulatePreTransform(Assimp.Node preTransformNode)
+        {
+            var transform = preTransformNode.Transform;
+            if (IsParentIs_AssimpFbxPre_Node(preTransformNode))
+            {
+                return transform * AccumulatePreTransform(preTransformNode.Parent);
+            }
+            else
+            {
+                return transform;
+            }
+        }
+        public static bool IsParentIs_AssimpFbxPre_Node(Assimp.Node node)
+        {
+            if (node.Parent.Name.Contains("_$AssimpFbx$_"))
+            {
+                return true;
+            }
+            return false;
+        }
+        public static Assimp.Node FindParent_AssimpFbx_Node(Assimp.Node node)
+        {
+            if(node.Parent == null)
+                return null;
+            if (node.Parent.Name.Contains("_$AssimpFbx$_"))
+            {
+                return node.Parent;
+            }
+            else
+            {
+                return FindParent_AssimpFbx_Node(node.Parent);
+            }
+        }
     }
     public class SkeletonGenerater
     {
@@ -216,11 +257,11 @@ namespace EngineNS.Bricks.AssetImpExp
                 {
                     inOutNodesMap[node] = true;
                 }
+                MarkBonesRecursively(parent, scene, ref inOutNodesMap, ref inOutSkeletonRootNodes);
             }
             else
             {
-                MarkBonesRecursively(parent, scene, ref inOutNodesMap, ref inOutSkeletonRootNodes);
-
+                Debug.Assert(false);
             }
         }
         static Assimp.Node GetValidParentNode(Assimp.Node node, Assimp.Scene scene)
@@ -252,38 +293,68 @@ namespace EngineNS.Bricks.AssetImpExp
             }
             return false;
         }
-        static List<USkinSkeleton> MakeSkeletons(Assimp.Scene scene, List<Assimp.Node> skeletonRootNodes, ref Dictionary<Assimp.Node, bool> inOutNodesMap)
+        static (Vector3 scaling, Quaternion rotation, Vector3 translation) AssimpMatrix4x4Decompose(Assimp.Matrix4x4 matrix)
         {
-            List<USkinSkeleton> skeletonsGenerate = new List<USkinSkeleton>();
+            Assimp.Vector3D assimpTrans, assimpScaling;
+            Assimp.Quaternion assimpQuat;
+            matrix.Decompose(out assimpScaling, out assimpQuat, out assimpTrans);
+            var translation = new Vector3(assimpTrans.X, assimpTrans.Y, assimpTrans.Z);
+            var scaling = new Vector3(assimpScaling.X, assimpScaling.Y, assimpScaling.Z);
+            var rotation = new Quaternion(assimpQuat.X, assimpQuat.Y, assimpQuat.Z, assimpQuat.W);
+            return (scaling, rotation, translation);
+        }
+
+        static TtBoneDesc MakeBoneDesc(Assimp.Scene scene, Node boneNode, TtAssetImportOption_Mesh importOption)
+        {
+            TtBoneDesc boneDesc = new TtBoneDesc();
+            boneDesc.Name = boneNode.Name;
+            boneDesc.NameHash = Standart.Hash.xxHash.xxHash32.ComputeHash(boneDesc.Name);
+            var parentNode = GetValidParentNode(boneNode, scene);
+            if (parentNode == null || !IsRootBoneNodeParent(parentNode, scene))
+            {
+                boneDesc.ParentName = parentNode.Name;
+                boneDesc.ParentHash = Standart.Hash.xxHash.xxHash32.ComputeHash(boneDesc.ParentName);
+            }
+
+            var bone = AssimpSceneUtil.FindBone(boneDesc.Name, scene);
+            if (bone != null)
+            {
+                var nodeTransform = bone.OffsetMatrix;
+                (boneDesc.InvScale, boneDesc.InvQuat, boneDesc.InvPos) = AssimpMatrix4x4Decompose(nodeTransform);
+            }
+            else
+            {
+                var node = AssimpSceneUtil.FindNode(boneDesc.Name, scene);
+                Debug.Assert(node != null);
+                var nodeTransform = node.Transform;
+                nodeTransform.Inverse();
+                (boneDesc.InvScale, boneDesc.InvQuat, boneDesc.InvPos) = AssimpMatrix4x4Decompose(nodeTransform);
+            }
+
+            boneDesc.InvPos *= importOption.Scale;
+            var invInitMatrix = Matrix.Transformation(boneDesc.InvScale, boneDesc.InvQuat, boneDesc.InvPos);
+
+            boneDesc.InvInitMatrix = invInitMatrix;
+            invInitMatrix.Inverse();
+            boneDesc.InitMatrix = invInitMatrix;
+            return boneDesc;
+        }
+        static List<TtSkinSkeleton> MakeSkeletons(Assimp.Scene scene, List<Assimp.Node> skeletonRootNodes, TtAssetImportOption_Mesh importOption, ref Dictionary<Assimp.Node, bool> inOutNodesMap)
+        {
+            List<TtSkinSkeleton> skeletonsGenerate = new List<TtSkinSkeleton>();
             if (skeletonRootNodes.Count == 1)
             {
-                USkinSkeleton skeleton = new USkinSkeleton();
+                var skeletonRootNode = skeletonRootNodes[0];
+                TtSkinSkeleton skeleton = new TtSkinSkeleton();
+                var preTransformMatrix = AssimpSceneUtil.AccumulatePreTransform(skeletonRootNode.Parent);
+                var transform = AssimpMatrix4x4Decompose(preTransformMatrix);
+                skeleton.RootPreTransform = FTransform.CreateTransform(transform.translation.AsDVector() * importOption.Scale, transform.scaling, transform.rotation);
                 foreach (var marked in inOutNodesMap)
                 {
                     if (marked.Value)
                     {
-                        UBoneDesc boneDesc = new UBoneDesc();
-                        boneDesc.Name = marked.Key.Name;
-                        boneDesc.NameHash = Standart.Hash.xxHash.xxHash32.ComputeHash(boneDesc.Name);
-                        var parentNode = GetValidParentNode(marked.Key, scene);
-                        if (parentNode == null || !IsRootBoneNodeParent(parentNode, scene))
-                        {
-                            boneDesc.ParentName = parentNode.Name;
-                            boneDesc.ParentHash = Standart.Hash.xxHash.xxHash32.ComputeHash(boneDesc.ParentName);
-                        }
-
-                        Assimp.Vector3D assimpTrans, assimpScaling;
-                        Assimp.Quaternion assimpQuat;
-                        AssimpSceneUtil.FindBone(boneDesc.Name, scene).OffsetMatrix.Decompose(out assimpScaling, out assimpQuat, out assimpTrans);
-                        boneDesc.InvPos = new Vector3(assimpTrans.X, assimpTrans.Y, assimpTrans.Z);
-                        boneDesc.InvScale = new Vector3(assimpScaling.X, assimpScaling.Y, assimpScaling.Z);
-                        boneDesc.InvQuat = new Quaternion(assimpQuat.X, assimpQuat.Y, assimpQuat.Z, assimpQuat.W);
-                        var invInitMatrix = Matrix.Transformation(boneDesc.InvScale, boneDesc.InvQuat, boneDesc.InvPos);
-
-                        boneDesc.InvInitMatrix = invInitMatrix;
-                        invInitMatrix.Inverse();
-                        boneDesc.InitMatrix = invInitMatrix;
-                        skeleton.AddLimb(new UBone(boneDesc));
+                        TtBoneDesc boneDesc = MakeBoneDesc(scene, marked.Key, importOption);
+                        skeleton.AddLimb(new TtBone(boneDesc));
                     }
                 }
                 skeleton.ConstructHierarchy();
@@ -296,17 +367,17 @@ namespace EngineNS.Bricks.AssetImpExp
             }
             return skeletonsGenerate;
         }
-        static public List<USkinSkeleton> Generate(Assimp.Scene scene)
+        static public List<TtSkinSkeleton> Generate(Assimp.Scene scene, TtAssetImportOption_Mesh importOption)
         {
             Dictionary<Assimp.Node, bool> nodesMap = new Dictionary<Assimp.Node, bool>();
             List<Assimp.Node> skeletonRootNodes = new List<Assimp.Node>();
 
             InitNodesMarkMap(scene.RootNode, ref nodesMap);
             MarkBones(scene, ref nodesMap, ref skeletonRootNodes);
-            var skeletons = MakeSkeletons(scene, skeletonRootNodes, ref nodesMap);
+            var skeletons = MakeSkeletons(scene, skeletonRootNodes, importOption, ref nodesMap);
             return skeletons;
         }
-        static public Assimp.Node FindSkeletonMeshNode(USkinSkeleton skeleton, Assimp.Scene scene)
+        static public Assimp.Node FindSkeletonMeshNode(TtSkinSkeleton skeleton, Assimp.Scene scene)
         {
             foreach(var mesh in scene.Meshes)
             {
@@ -323,19 +394,19 @@ namespace EngineNS.Bricks.AssetImpExp
     }
     public class MeshGenerater
     {
-        public static List<UMeshPrimitives> Generate(Assimp.Scene scene, AssetImportOption importOption)
+        public static List<UMeshPrimitives> Generate(Assimp.Scene scene, TtAssetImportOption_Mesh importOption)
         {
             var meshNodes = AssimpSceneUtil.FindMeshNodes(scene);
-            var skeletons = SkeletonGenerater.Generate(scene);
+            var skeletons = SkeletonGenerater.Generate(scene, importOption);
             return Generate(meshNodes, skeletons, scene, importOption);
         }
-        public static List<UMeshPrimitives> Generate(List<USkinSkeleton> meshSkeletons, Assimp.Scene scene, AssetImportOption importOption)
+        public static List<UMeshPrimitives> Generate(List<TtSkinSkeleton> meshSkeletons, Assimp.Scene scene, TtAssetImportOption_Mesh importOption)
         {
             var meshNodes = AssimpSceneUtil.FindMeshNodes(scene);
-            var skeletons = SkeletonGenerater.Generate(scene);
+            var skeletons = SkeletonGenerater.Generate(scene, importOption);
             return Generate(meshNodes, skeletons, scene, importOption);
         }
-        public static List<UMeshPrimitives> Generate(List<Assimp.Node> meshNodes, List<USkinSkeleton> meshSkeletons, Assimp.Scene scene, AssetImportOption importOption)
+        public static List<UMeshPrimitives> Generate(List<Assimp.Node> meshNodes, List<TtSkinSkeleton> meshSkeletons, Assimp.Scene scene, TtAssetImportOption_Mesh importOption)
         {
             List<UMeshPrimitives> meshPrimitives = new List<UMeshPrimitives>();
             foreach (var meshNode in meshNodes)
@@ -348,9 +419,19 @@ namespace EngineNS.Bricks.AssetImpExp
             return meshPrimitives;
         }
 
-        private static UMeshPrimitives CreateMeshPrimitives(Assimp.Node meshNode, USkinSkeleton skeleton, Assimp.Scene scene, AssetImportOption importOption)
+
+        private static UMeshPrimitives CreateMeshPrimitives(Assimp.Node meshNode, TtSkinSkeleton skeleton, Assimp.Scene scene, TtAssetImportOption_Mesh importOption)
         {
             Debug.Assert(meshNode.MeshCount > 0);
+            //Assimp.Matrix4x4 preAssimpTransform = Assimp.Matrix4x4.Identity;
+            //if (AssimpSceneUtil.IsParentIs_AssimpFbxPre_Node(meshNode))
+            //{
+            //    preAssimpTransform = AssimpSceneUtil.AccumulatePreTransform(meshNode.Parent);
+            //}
+            //Assimp.Vector3D assimpTrans, assimpScaling;
+            //Assimp.Quaternion assimpQuat;
+            //preAssimpTransform.Decompose(out assimpScaling, out assimpQuat, out assimpTrans);
+            //var preTransform = FTransform.CreateTransform(AssimpSceneUtil.ConvertVector3(assimpTrans).AsDVector(), AssimpSceneUtil.ConvertVector3(assimpScaling), AssimpSceneUtil.ConvertQuaternion(assimpQuat));
             UMeshPrimitives meshPrimitives = new UMeshPrimitives(meshNode.Name, (uint)meshNode.MeshCount);
             int vertextCount = 0;
             int indicesCount = 0;
@@ -453,7 +534,9 @@ namespace EngineNS.Bricks.AssetImpExp
                 for (int j = 0; j < subMesh.VertexCount; j++)
                 {
                     vertexIndex = vertexCounting + j;
-                    posStream[vertexIndex] = AssimpSceneUtil.ConvertVector3(subMesh.Vertices[j]) * 0.01f;
+                    //posStream[vertexIndex] = preTransform.TransformPosition(AssimpSceneUtil.ConvertVector3(subMesh.Vertices[j]).AsDVector()).ToSingleVector3();
+                    //normalStream[vertexIndex] = preTransform.TransformVector3(AssimpSceneUtil.ConvertVector3(subMesh.Normals[j]));
+                    posStream[vertexIndex] = AssimpSceneUtil.ConvertVector3(subMesh.Vertices[j]) * importOption.Scale;
                     normalStream[vertexIndex] = AssimpSceneUtil.ConvertVector3(subMesh.Normals[j]);
 
                     //TODO: TangentChirality
@@ -500,7 +583,7 @@ namespace EngineNS.Bricks.AssetImpExp
                 Debug.Assert(vertextCount == vertexSkinWeight.Count);
                 for (int i = 0; i < vertextCount; i++)
                 {
-                    var size = vertexSkinIndex[i].Count();
+                    var size = vertexSkinIndex[i].Count;
                     float totalWeight = 0.0f;
                     if (size > 4)
                         size = 4;
@@ -591,17 +674,17 @@ namespace EngineNS.Bricks.AssetImpExp
     }
     public class AnimationChunkGenerater
     {
-        public static UAnimationChunk Generate(RName assetName, Assimp.Animation aiAnim, Assimp.Scene aiScene)
+        public static TtAnimationChunk Generate(RName assetName, Assimp.Animation aiAnim, Assimp.Scene aiScene, TtAssetImportOption_Animation importOption)
         {
             //UAnimationClip animClip = new UAnimationClip();
             //animClip.SampleRate = (float)aiAnim.TicksPerSecond;
             //animClip.Duration = (float)(aiAnim.DurationInTicks / aiAnim.TicksPerSecond);
-            UAnimationChunk chunk = null;
+            TtAnimationChunk chunk = null;
 
             if (aiAnim.HasNodeAnimations)
             {
                 //skeleton animation or scene animation
-                chunk = GenerateNodeAnimation(assetName, aiAnim, aiScene);
+                chunk = GenerateNodeAnimation(assetName, aiAnim, aiScene, importOption);
             }
             else if (aiAnim.HasMeshAnimations)
             {
@@ -616,147 +699,140 @@ namespace EngineNS.Bricks.AssetImpExp
             return chunk;
         }
 
-        private static UAnimationChunk GenerateNodeAnimation(RName assetName, Assimp.Animation aiAnim, Assimp.Scene aiScene)
+        private static TtAnimationChunk GenerateNodeAnimation(RName assetName, Assimp.Animation aiAnim, Assimp.Scene aiScene, TtAssetImportOption_Animation importOption)
         {
-            var animChunk = new EngineNS.Animation.Asset.UAnimationChunk();
+            var animChunk = new EngineNS.Animation.Asset.TtAnimationChunk();
             animChunk.RescouceName = assetName;
-            Dictionary<uint, UAnimHierarchy> animHDic = new Dictionary<uint, UAnimHierarchy>();
             foreach (var element in aiAnim.NodeAnimationChannels)
             {
-                UAnimHierarchy animHierarchy = new UAnimHierarchy();
-
-                AnimatableObjectClassDesc objectClassDesc = new AnimatableObjectClassDesc();
-                objectClassDesc.ClassType = EngineNS.Rtti.UTypeDesc.TypeOf(typeof(EngineNS.Animation.SkeletonAnimation.AnimatablePose.UAnimatableBonePose));
-                var t = objectClassDesc.ClassType;
-                objectClassDesc.Name = element.NodeName;
-                uint hash = UniHash32.APHash(objectClassDesc.Name);
+                TtAnimatedObjectDescription objectBinding = new TtAnimatedObjectDescription();
+                objectBinding.ClassType = EngineNS.Rtti.UTypeDesc.TypeOf(typeof(EngineNS.Animation.SkeletonAnimation.AnimatablePose.TtAnimatableBonePose));
+                objectBinding.Name = element.NodeName;
 
                 // position
                 {
-                    var curve = GenerateCurve(element.PositionKeys);
+                    var curve = GeneratePositionCurve(element.PositionKeys, aiAnim.TicksPerSecond, importOption);
                     animChunk.AnimCurvesList.Add(curve.Id, curve);
 
-                    AnimatableObjectPropertyDesc posDesc = new AnimatableObjectPropertyDesc();
-                    posDesc.ClassType = EngineNS.Rtti.UTypeDesc.TypeOf<NullableVector3>();
-                    posDesc.Name = "Position";
-                    posDesc.CurveId = curve.Id;
-                    objectClassDesc.Properties.Add(posDesc);
+                    TtAnimatedPropertyDescription propertyBinding = new TtAnimatedPropertyDescription();
+                    propertyBinding.ClassType = EngineNS.Rtti.UTypeDesc.TypeOf<FNullableVector3>();
+                    propertyBinding.Name = "Position";
+                    propertyBinding.CurveId = curve.Id;
+                    objectBinding.TranslationProperty = propertyBinding;
                 }
 
                 // rotation
                 {
-                    var curve = GenerateCurve(element.RotationKeys);
+                    var curve = GenerateRotationCurve(element.RotationKeys, aiAnim.TicksPerSecond);
                     animChunk.AnimCurvesList.Add(curve.Id, curve);
 
-                    AnimatableObjectPropertyDesc rotDesc = new AnimatableObjectPropertyDesc();
-                    rotDesc.ClassType = EngineNS.Rtti.UTypeDesc.TypeOf<NullableVector3>();
-                    rotDesc.Name = "Rotation";
-                    rotDesc.CurveId = curve.Id;
-                    objectClassDesc.Properties.Add(rotDesc);
+                    TtAnimatedPropertyDescription propertyBinding = new TtAnimatedPropertyDescription();
+                    propertyBinding.ClassType = EngineNS.Rtti.UTypeDesc.TypeOf<FNullableVector3>();
+                    propertyBinding.Name = "Rotation";
+                    propertyBinding.CurveId = curve.Id;
+                    objectBinding.RotationProperty = propertyBinding;
                 }
 
                 // scale
                 {
-                    var curve = GenerateCurve(element.ScalingKeys);
+                    var curve = GenerateScaleCurve(element.ScalingKeys, aiAnim.TicksPerSecond);
                     animChunk.AnimCurvesList.Add(curve.Id, curve);
 
-                    AnimatableObjectPropertyDesc scaleDesc = new AnimatableObjectPropertyDesc();
-                    scaleDesc.ClassType = EngineNS.Rtti.UTypeDesc.TypeOf<NullableVector3>();
-                    scaleDesc.Name = "Scale";
-                    scaleDesc.CurveId = curve.Id;
-                    objectClassDesc.Properties.Add(scaleDesc);
+                    TtAnimatedPropertyDescription propertyBinding = new TtAnimatedPropertyDescription();
+                    propertyBinding.ClassType = EngineNS.Rtti.UTypeDesc.TypeOf<FNullableVector3>();
+                    propertyBinding.Name = "Scale";
+                    propertyBinding.CurveId = curve.Id;
+                    objectBinding.ScaleProperty = propertyBinding;
                 }
-
-                animHierarchy.Node = objectClassDesc;
-                animHDic.Add(hash, animHierarchy);
+                
+                animChunk.AnimatedObjectDescs.Add(objectBinding.Name, objectBinding);
             }
-
-            //TODO 这里不在需要用这个TtAnimHierarchy了 打算改成列表
-            System.Diagnostics.Debug.Assert(animHDic.Count == aiAnim.NodeAnimationChannelCount);
-            UAnimHierarchy Root = null;
-            //bool rootCheck = false;
-            //for (int i = 0; i < animHDic.Count; ++i)
-            //{
-            //    TtAnimHierarchy parent = null;
-            //    var hasParent = animHDic.TryGetValue(animElements[i].Desc.ParentHash, out parent);
-            //    if (hasParent)
-            //    {
-            //        TtAnimHierarchy child = null;
-            //        var isExist = animHDic.TryGetValue(animElements[i].Desc.NameHash, out child);
-            //        if (isExist)
-            //        {
-            //            parent.Children.Add(child);
-            //            child.Parent = parent;
-            //        }
-            //    }
-            //    else
-            //    {
-            //        System.Diagnostics.Debug.Assert(!rootCheck);
-            //        rootCheck = true;
-            //        TtAnimHierarchy root = null;
-            //        var isExist = animHDic.TryGetValue(animElements[i].Desc.NameHash, out root);
-            //        if (isExist)
-            //        {
-            //            Root = root;
-            //        }
-            //    }
-            //}
-
-            animChunk.AnimatedHierarchy = Root;
-
             return animChunk;
         }
-        private static Vector3Curve GenerateCurve(List<Assimp.VectorKey> aiVectorKeys)
+        private static TtVector3Curve GeneratePositionCurve(List<Assimp.VectorKey> aiVectorKeys, double TicksPerSecond, TtAssetImportOption_Animation importOption)
         {
-            Vector3Curve vector3Curve = new Vector3Curve();
-            vector3Curve.XCurve = new UCurve();
-            vector3Curve.YCurve = new UCurve();
-            vector3Curve.ZCurve = new UCurve();
+            TtVector3Curve vector3Curve = new TtVector3Curve();
+            vector3Curve.XTrack = new TtTrack();
+            vector3Curve.YTrack = new TtTrack();
+            vector3Curve.ZTrack = new TtTrack();
             foreach (var key in aiVectorKeys)
             {
-                Keyframe xKeyFrame = new Keyframe();
-                xKeyFrame.Time = (float)key.Time;
-                xKeyFrame.Value = key.Value.X;
-                vector3Curve.XCurve.AddKeyframeBack(ref xKeyFrame);
+                float keyTime = (float)(key.Time / TicksPerSecond);
+                FKeyframe xKeyFrame = new FKeyframe();
+                xKeyFrame.Time = keyTime;
+                xKeyFrame.Value = key.Value.X * importOption.Scale;
+                vector3Curve.XTrack.AddKeyframeBack(ref xKeyFrame);
 
-                Keyframe yKeyFrame = new Keyframe();
-                yKeyFrame.Time = (float)key.Time;
-                yKeyFrame.Value = key.Value.Y;
-                vector3Curve.YCurve.AddKeyframeBack(ref yKeyFrame);
+                FKeyframe yKeyFrame = new FKeyframe();
+                yKeyFrame.Time = keyTime;
+                yKeyFrame.Value = key.Value.Y * importOption.Scale;
+                vector3Curve.YTrack.AddKeyframeBack(ref yKeyFrame);
 
-                Keyframe zKeyFrame = new Keyframe();
-                zKeyFrame.Time = (float)key.Time;
-                zKeyFrame.Value = key.Value.Z;
-                vector3Curve.ZCurve.AddKeyframeBack(ref zKeyFrame);
+                FKeyframe zKeyFrame = new FKeyframe();
+                zKeyFrame.Time = keyTime;
+                zKeyFrame.Value = key.Value.Z * importOption.Scale;
+                vector3Curve.ZTrack.AddKeyframeBack(ref zKeyFrame);
             }
             return vector3Curve;
         }
-        private static Vector3Curve GenerateCurve(List<Assimp.QuaternionKey> aiQuaternionKeys)
+        private static TtVector3Curve GenerateScaleCurve(List<Assimp.VectorKey> aiVectorKeys, double TicksPerSecond)
         {
-            Vector3Curve vector3Curve = new Vector3Curve();
-            vector3Curve.XCurve = new UCurve();
-            vector3Curve.YCurve = new UCurve();
-            vector3Curve.ZCurve = new UCurve();
-            foreach (var key in aiQuaternionKeys)
+            TtVector3Curve vector3Curve = new TtVector3Curve();
+            vector3Curve.XTrack = new TtTrack();
+            vector3Curve.YTrack = new TtTrack();
+            vector3Curve.ZTrack = new TtTrack();
+            foreach (var key in aiVectorKeys)
             {
-                Quaternion quaternion = AssimpSceneUtil.ConvertQuaternion(key.Value);
-                var euler = quaternion.ToEuler();
-                Keyframe xKeyFrame = new Keyframe();
-                xKeyFrame.Time = (float)key.Time;
-                xKeyFrame.Value = euler.X;
-                vector3Curve.XCurve.AddKeyframeBack(ref xKeyFrame);
+                float keyTime = (float)(key.Time / TicksPerSecond);
+                FKeyframe xKeyFrame = new FKeyframe();
+                xKeyFrame.Time = keyTime;
+                xKeyFrame.Value = key.Value.X;
+                vector3Curve.XTrack.AddKeyframeBack(ref xKeyFrame);
 
-                Keyframe yKeyFrame = new Keyframe();
-                yKeyFrame.Time = (float)key.Time;
-                yKeyFrame.Value = euler.Y;
-                vector3Curve.YCurve.AddKeyframeBack(ref yKeyFrame);
+                FKeyframe yKeyFrame = new FKeyframe();
+                yKeyFrame.Time = keyTime;
+                yKeyFrame.Value = key.Value.Y;
+                vector3Curve.YTrack.AddKeyframeBack(ref yKeyFrame);
 
-                Keyframe zKeyFrame = new Keyframe();
-                zKeyFrame.Time = (float)key.Time;
-                zKeyFrame.Value = euler.Z;
-                vector3Curve.ZCurve.AddKeyframeBack(ref zKeyFrame);
+                FKeyframe zKeyFrame = new FKeyframe();
+                zKeyFrame.Time = keyTime;
+                zKeyFrame.Value = key.Value.Z;
+                vector3Curve.ZTrack.AddKeyframeBack(ref zKeyFrame);
             }
             return vector3Curve;
+        }
+        private static TtQuaternionCurve GenerateRotationCurve(List<Assimp.QuaternionKey> aiQuaternionKeys, double TicksPerSecond)
+        {
+            TtQuaternionCurve curve = new TtQuaternionCurve();
+            curve.XTrack = new TtTrack();
+            curve.YTrack = new TtTrack();
+            curve.ZTrack = new TtTrack();
+            curve.WTrack = new TtTrack();
+            foreach (var key in aiQuaternionKeys)
+            {
+                float keyTime = (float)(key.Time / TicksPerSecond);
+                Quaternion quaternion = AssimpSceneUtil.ConvertQuaternion(key.Value);
+                FKeyframe xKeyFrame = new FKeyframe();
+                xKeyFrame.Time = keyTime;
+                xKeyFrame.Value = quaternion.X;
+                curve.XTrack.AddKeyframeBack(ref xKeyFrame);
+
+                FKeyframe yKeyFrame = new FKeyframe();
+                yKeyFrame.Time = keyTime;
+                yKeyFrame.Value = quaternion.Y;
+                curve.YTrack.AddKeyframeBack(ref yKeyFrame);
+
+                FKeyframe zKeyFrame = new FKeyframe();
+                zKeyFrame.Time = keyTime;
+                zKeyFrame.Value = quaternion.Z;
+                curve.ZTrack.AddKeyframeBack(ref zKeyFrame);
+
+                FKeyframe wKeyFrame = new FKeyframe();
+                wKeyFrame.Time = keyTime;
+                wKeyFrame.Value = quaternion.W;
+                curve.WTrack.AddKeyframeBack(ref wKeyFrame);
+            }
+            return curve;
         }
     }
 }

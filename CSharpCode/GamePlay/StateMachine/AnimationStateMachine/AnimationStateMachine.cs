@@ -13,7 +13,7 @@ namespace EngineNS.GamePlay.StateMachine.AnimationStateMachine
     {
         
 
-        public UAnimationCommand<ULocalSpaceRuntimePose> ConstructAnimationCommandTree(IAnimationCommand parentNode, ref FConstructAnimationCommandTreeContext context)
+        public TtAnimationCommand<TtLocalSpaceRuntimePose> ConstructAnimationCommandTree(IAnimationCommand parentNode, ref FConstructAnimationCommandTreeContext context)
         {
             throw new NotImplementedException();
         }

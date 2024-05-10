@@ -39,7 +39,7 @@ namespace EngineNS.Graphics.Mesh
 
     [Rtti.Meta]
     [UMeshPrimitives.Import]
-    [IO.AssetCreateMenu(MenuName = "Mesh")]
+    [IO.AssetCreateMenu(MenuName = "Mesh/Mesh")]
     public partial class UMeshPrimitives : AuxPtrType<NxRHI.FMeshPrimitives>, IO.IAsset
     {
         public const string AssetExt = ".vms";
@@ -63,8 +63,8 @@ namespace EngineNS.Graphics.Mesh
             public override unsafe bool OnDraw(EGui.Controls.UContentBrowser ContentBrowser)
             {
                 //we also can import from other types
-                return FBXCreateCreateDraw(ContentBrowser);
-                //return AssimpCreateCreateDraw(ContentBrowser);
+                //return FBXCreateCreateDraw(ContentBrowser);
+                return AssimpCreateCreateDraw(ContentBrowser);
             }
 
             public unsafe partial bool FBXCreateCreateDraw(EGui.Controls.UContentBrowser ContentBrowser);
@@ -162,7 +162,7 @@ namespace EngineNS.Graphics.Mesh
         #endregion
 
         [Rtti.Meta]
-        public Animation.SkeletonAnimation.Skeleton.USkinSkeleton PartialSkeleton
+        public Animation.SkeletonAnimation.Skeleton.TtSkinSkeleton PartialSkeleton
         {
             get;
             set;
@@ -183,9 +183,9 @@ namespace EngineNS.Graphics.Mesh
                     {
                         ar.Read(out partialSkeleton, manager);
                     }
-                    if(partialSkeleton is Animation.SkeletonAnimation.Skeleton.USkinSkeleton)
+                    if(partialSkeleton is Animation.SkeletonAnimation.Skeleton.TtSkinSkeleton)
                     {
-                        result.PartialSkeleton = partialSkeleton as Animation.SkeletonAnimation.Skeleton.USkinSkeleton;
+                        result.PartialSkeleton = partialSkeleton as Animation.SkeletonAnimation.Skeleton.TtSkinSkeleton;
                     }
                 }
                 return result;

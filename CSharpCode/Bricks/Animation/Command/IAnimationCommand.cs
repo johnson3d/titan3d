@@ -7,16 +7,16 @@ namespace EngineNS.Animation.Command
     /// <summary>
     /// 栈式执行AnimationCommand，依赖于先后关系
     /// </summary>
-    public class UAnimationCommandExecuteStack
+    public class TtAnimationCommandExecuteStack
     {
-        public List<UParallelExecuteCommandList> CommandLists = new List<UParallelExecuteCommandList>();
+        public List<TtParallelExecuteCommandList> CommandLists = new List<TtParallelExecuteCommandList>();
         public void AddCommand(int depth, IAnimationCommand cmd)
         {
             if(CommandLists.Count == 0)
             {
                 for (int i = 0; i < 10; ++i)
                 {
-                    CommandLists.Add(new UParallelExecuteCommandList());
+                    CommandLists.Add(new TtParallelExecuteCommandList());
                 }
             }
             CommandLists[depth].AddCommand(cmd);
@@ -32,7 +32,7 @@ namespace EngineNS.Animation.Command
     /// <summary>
     /// 可并行的AnimationCommand，之间没有关系
     /// </summary>
-    public class UParallelExecuteCommandList
+    public class TtParallelExecuteCommandList
     {
         List<IAnimationCommand> Commands = new List<IAnimationCommand>();
         public void AddCommand(IAnimationCommand cmd)
@@ -59,7 +59,7 @@ namespace EngineNS.Animation.Command
     {
 
     }
-    public class UAnimationCommand<T> : IAnimationCommand
+    public class TtAnimationCommand<T> : IAnimationCommand
     {
         protected T mOutPose = default;
         public T OutPose { get => mOutPose; set => mOutPose = value; }

@@ -166,5 +166,17 @@ namespace EngineNS.UI
             uiNode.Placement.SetTransform(in pos, in scale, in quat);
             return uiNode;
         }
+
+        public override void UpdateAABB()
+        {
+            AABB = DBoundingBox.EmptyBox();
+            for(int i=0; i<mUIHost.Count; i++)
+            {
+                if(mUIHost[i].DrawMesh != null)
+                {
+                    AABB.Merge(mUIHost[i].DrawMesh.WorldAABB);
+                }
+            }
+        }
     }
 }

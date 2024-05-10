@@ -10,6 +10,6 @@ namespace EngineNS.GamePlay.StateMachine.AnimationStateMachine
 {
     public interface IAnimationState //: IState
     {
-        UAnimationCommand<ULocalSpaceRuntimePose> ConstructAnimationCommandTree(IAnimationCommand parentNode, ref FConstructAnimationCommandTreeContext context);
+        TtAnimationCommand<TtLocalSpaceRuntimePose> ConstructAnimationCommandTree(IAnimationCommand parentNode, ref FConstructAnimationCommandTreeContext context);
     }
 }

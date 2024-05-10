@@ -13,7 +13,10 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
         public UVariableDeclaration Var;
         public Rtti.UTypeDesc VarType;
         public PinIn SetPin { get; set; } = new PinIn();
-        public PinOut GetPin { get; set; } = new PinOut();
+        public PinOut GetPin { get; set; } = new PinOut()
+        {
+            MultiLinks = true,
+        };
         public override Rtti.UTypeDesc GetOutPinType(PinOut pin)
         {
             return VarType;
@@ -93,6 +96,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
         public SelfNode()
         {
             Name = "self";
+            OutPin.MultiLinks = true;
             AddPinOut(OutPin);
         }
 
@@ -117,6 +121,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
         public NullNode()
         {
             Name = "null";
+            OutPin.MultiLinks = true;
             AddPinOut(OutPin);
         }
 

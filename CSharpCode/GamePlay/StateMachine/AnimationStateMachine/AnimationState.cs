@@ -12,9 +12,9 @@ namespace EngineNS.GamePlay.StateMachine.AnimationStateMachine
 {
     public class TtAnimationState<T> : TtTimedState<T>, IAnimationState
     {
-        public Animation.Asset.UAnimationClip Animation { get; set; }
-        public UExtractPoseFromClipCommand mExtractPoseFromClipCommand { get; set; } = null;
-        IBlendTree<ULocalSpaceRuntimePose> BlendTreeRoot = null;
+        public Animation.Asset.TtAnimationClip Animation { get; set; }
+        public TtExtractPoseFromClipCommand mExtractPoseFromClipCommand { get; set; } = null;
+        IBlendTree<TtLocalSpaceRuntimePose> BlendTreeRoot = null;
 
         public TtAnimationState(TtGamePlayStateMachine<T> stateMachine, string name = "AnimationState") : base(stateMachine, name)
         {
@@ -23,8 +23,8 @@ namespace EngineNS.GamePlay.StateMachine.AnimationStateMachine
         public override bool Initialize()
         {
             StateTimeDuration = Animation.Duration;
-            mExtractPoseFromClipCommand = new UExtractPoseFromClipCommand(Animation);
-            BlendTreeRoot = new UBlendTree_BindedPose();
+            mExtractPoseFromClipCommand = new TtExtractPoseFromClipCommand(Animation);
+            BlendTreeRoot = new TtBlendTree_BindedPose();
             return true;
         }
 
@@ -34,7 +34,7 @@ namespace EngineNS.GamePlay.StateMachine.AnimationStateMachine
             mExtractPoseFromClipCommand.Time = StateTime;
         }
 
-        public UAnimationCommand<ULocalSpaceRuntimePose> ConstructAnimationCommandTree(IAnimationCommand parentNode, ref FConstructAnimationCommandTreeContext context)
+        public TtAnimationCommand<TtLocalSpaceRuntimePose> ConstructAnimationCommandTree(IAnimationCommand parentNode, ref FConstructAnimationCommandTreeContext context)
         {
             context.AddCommand(context.TreeDepth, mExtractPoseFromClipCommand);
             context.TreeDepth++;

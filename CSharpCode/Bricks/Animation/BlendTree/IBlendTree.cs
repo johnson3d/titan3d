@@ -9,7 +9,7 @@ namespace EngineNS.Animation.BlendTree
     public struct FConstructAnimationCommandTreeContext
     {
         public int TreeDepth;
-        public UAnimationCommandExecuteStack CmdExecuteStack;
+        public TtAnimationCommandExecuteStack CmdExecuteStack;
         public void AddCommand(int depth, IAnimationCommand cmd)
         {
             CmdExecuteStack.AddCommand(depth, cmd);
@@ -17,7 +17,7 @@ namespace EngineNS.Animation.BlendTree
         public void Create()
         {
             TreeDepth = 0;
-            CmdExecuteStack = new UAnimationCommandExecuteStack();
+            CmdExecuteStack = new TtAnimationCommandExecuteStack();
         }
     }
     public interface IBlendTree<T> where T : IRuntimePose
@@ -25,10 +25,10 @@ namespace EngineNS.Animation.BlendTree
         void Initialize();
         void Tick(float elapseSecond);
         //void Notifying();
-        UAnimationCommand<T> ConstructAnimationCommandTree(IAnimationCommand parentNode, ref FConstructAnimationCommandTreeContext context);
+        TtAnimationCommand<T> ConstructAnimationCommandTree(IAnimationCommand parentNode, ref FConstructAnimationCommandTreeContext context);
     }
 
-    public class UBlendTree<T> : IBlendTree<T> where T : IRuntimePose
+    public class TtBlendTree<T> : IBlendTree<T> where T : IRuntimePose
     {
         public virtual void Initialize()
         {
@@ -38,7 +38,7 @@ namespace EngineNS.Animation.BlendTree
         {
 
         }
-        public virtual UAnimationCommand<T> ConstructAnimationCommandTree(IAnimationCommand parentNode, ref FConstructAnimationCommandTreeContext context)
+        public virtual TtAnimationCommand<T> ConstructAnimationCommandTree(IAnimationCommand parentNode, ref FConstructAnimationCommandTreeContext context)
         {
             return null;
         }

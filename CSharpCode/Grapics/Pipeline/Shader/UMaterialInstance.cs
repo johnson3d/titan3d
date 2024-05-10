@@ -43,7 +43,7 @@ namespace EngineNS.Graphics.Pipeline.Shader
     }
     [Rtti.Meta]
     [UMaterialInstance.MaterialInstanceImport]
-    [IO.AssetCreateMenu(MenuName = "MaterialInstance")]
+    [IO.AssetCreateMenu(MenuName = "Graphics/MaterialInstance")]
     public partial class UMaterialInstance : UMaterial
     {
         public new const string AssetExt = ".uminst";
