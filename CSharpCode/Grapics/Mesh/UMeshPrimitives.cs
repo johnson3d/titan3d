@@ -167,10 +167,11 @@ namespace EngineNS.Graphics.Mesh
             get;
             set;
         }
-        public static UMeshPrimitives LoadXnd(UMeshPrimitiveManager manager, IO.TtXndHolder xnd)
+        public unsafe static UMeshPrimitives LoadXnd(UMeshPrimitiveManager manager, IO.TtXndHolder xnd)
         {
             var result = new UMeshPrimitives();
-            unsafe
+            
+            try
             {
                 var ret = result.mCoreObject.LoadXnd(UEngine.Instance.GfxDevice.RenderContext.mCoreObject, "", xnd.mCoreObject, true);
                 if (ret == false)
@@ -189,6 +190,11 @@ namespace EngineNS.Graphics.Mesh
                     }
                 }
                 return result;
+            }
+            catch (Exception exp)
+            {
+                Profiler.Log.WriteException(exp);
+                return null;
             }
         }
 
@@ -291,6 +297,8 @@ namespace EngineNS.Graphics.Mesh
         //public async System.Threading.Tasks.Task<UMeshPrimitives> GetMeshPrimitive(RName name)
         public async Thread.Async.TtTask<UMeshPrimitives> GetMeshPrimitive(RName name)
         {
+            if (name == null)
+                return null;
             UMeshPrimitives result;
             if (Meshes.TryGetValue(name, out result))
                 return result;

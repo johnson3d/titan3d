@@ -120,7 +120,14 @@ namespace ProjectCooker.Command
                 var rp = EngineNS.IO.TtFileManager.GetRelativePath(root, i);
                 var rn = EngineNS.RName.GetRName(rp, EngineNS.RName.ERNameType.Game);
                 var asset = await EngineNS.UEngine.Instance.GfxDevice.MaterialMeshManager.GetMaterialMesh(rn);
-                asset.SaveAssetTo(rn);
+                if (asset != null)
+                {
+                    asset.SaveAssetTo(rn); 
+                }
+                else
+                {
+                    EngineNS.Profiler.Log.WriteLineSingle($"GetMaterialMesh {rn} failed");
+                }
             }
 
             root = EngineNS.UEngine.Instance.FileManager.GetRoot(EngineNS.IO.TtFileManager.ERootDir.Engine);
@@ -130,7 +137,14 @@ namespace ProjectCooker.Command
                 var rp = EngineNS.IO.TtFileManager.GetRelativePath(root, i);
                 var rn = EngineNS.RName.GetRName(rp, EngineNS.RName.ERNameType.Engine);
                 var asset = await EngineNS.UEngine.Instance.GfxDevice.MaterialMeshManager.GetMaterialMesh(rn);
-                asset.SaveAssetTo(rn);
+                if (asset != null)
+                {
+                    asset.SaveAssetTo(rn); 
+                }
+                else
+                {
+                    EngineNS.Profiler.Log.WriteLineSingle($"GetMaterialMesh {rn} failed");
+                }
             }
         }
         async System.Threading.Tasks.Task ProcMeshPrimitive()
@@ -142,7 +156,14 @@ namespace ProjectCooker.Command
                 var rp = EngineNS.IO.TtFileManager.GetRelativePath(root, i);
                 var rn = EngineNS.RName.GetRName(rp, EngineNS.RName.ERNameType.Game);
                 var asset = await EngineNS.UEngine.Instance.GfxDevice.MeshPrimitiveManager.GetMeshPrimitive(rn);
-                asset.SaveAssetTo(rn);
+                if (asset != null)
+                {
+                    asset.SaveAssetTo(rn);
+                }
+                else
+                {
+                    EngineNS.Profiler.Log.WriteLineSingle($"GetMeshPrimitive {rn} failed");
+                }
             }
 
             root = EngineNS.UEngine.Instance.FileManager.GetRoot(EngineNS.IO.TtFileManager.ERootDir.Engine);
@@ -152,7 +173,14 @@ namespace ProjectCooker.Command
                 var rp = EngineNS.IO.TtFileManager.GetRelativePath(root, i);
                 var rn = EngineNS.RName.GetRName(rp, EngineNS.RName.ERNameType.Engine);
                 var asset = await EngineNS.UEngine.Instance.GfxDevice.MeshPrimitiveManager.GetMeshPrimitive(rn);
-                asset.SaveAssetTo(rn);
+                if (asset != null)
+                {
+                    asset.SaveAssetTo(rn);
+                }
+                else
+                {
+                    EngineNS.Profiler.Log.WriteLineSingle($"GetMeshPrimitive {rn} failed");
+                }
             }
         }
         async System.Threading.Tasks.Task ProcAnimClip()
@@ -164,7 +192,14 @@ namespace ProjectCooker.Command
                 var rp = EngineNS.IO.TtFileManager.GetRelativePath(root, i);
                 var rn = EngineNS.RName.GetRName(rp, EngineNS.RName.ERNameType.Game);
                 var asset = await EngineNS.UEngine.Instance.AnimationModule.AnimationClipManager.GetAnimationClip(rn);
-                asset.SaveAssetTo(rn);
+                if (asset != null)
+                {
+                    asset.SaveAssetTo(rn);
+                }
+                else
+                {
+                    EngineNS.Profiler.Log.WriteLineSingle($"GetAnimationClip {rn} failed");
+                }
             }
 
             root = EngineNS.UEngine.Instance.FileManager.GetRoot(EngineNS.IO.TtFileManager.ERootDir.Engine);
@@ -174,7 +209,14 @@ namespace ProjectCooker.Command
                 var rp = EngineNS.IO.TtFileManager.GetRelativePath(root, i);
                 var rn = EngineNS.RName.GetRName(rp, EngineNS.RName.ERNameType.Engine);
                 var asset = await EngineNS.UEngine.Instance.AnimationModule.AnimationClipManager.GetAnimationClip(rn);
-                asset.SaveAssetTo(rn);
+                if (asset != null)
+                {
+                    asset.SaveAssetTo(rn);
+                }
+                else
+                {
+                    EngineNS.Profiler.Log.WriteLineSingle($"GetAnimationClip {rn} failed");
+                }
             }
         }
         async System.Threading.Tasks.Task ProcMaterial()
@@ -186,7 +228,14 @@ namespace ProjectCooker.Command
                 var rp = EngineNS.IO.TtFileManager.GetRelativePath(root, i);
                 var rn = EngineNS.RName.GetRName(rp, EngineNS.RName.ERNameType.Game);
                 var asset = await EngineNS.UEngine.Instance.GfxDevice.MaterialManager.GetMaterial(rn);
-                asset.SaveAssetTo(rn);
+                if (asset != null)
+                {
+                    asset.SaveAssetTo(rn);
+                }
+                else
+                {
+                    EngineNS.Profiler.Log.WriteLineSingle($"GetMaterial {rn} failed");
+                }
             }
 
             root = EngineNS.UEngine.Instance.FileManager.GetRoot(EngineNS.IO.TtFileManager.ERootDir.Engine);
@@ -196,7 +245,14 @@ namespace ProjectCooker.Command
                 var rp = EngineNS.IO.TtFileManager.GetRelativePath(root, i);
                 var rn = EngineNS.RName.GetRName(rp, EngineNS.RName.ERNameType.Engine);
                 var asset = await EngineNS.UEngine.Instance.GfxDevice.MaterialManager.GetMaterial(rn);
-                asset.SaveAssetTo(rn);
+                if (asset != null)
+                {
+                    asset.SaveAssetTo(rn);
+                }
+                else
+                {
+                    EngineNS.Profiler.Log.WriteLineSingle($"GetMaterial {rn} failed");
+                }
             }
         }
         async System.Threading.Tasks.Task ProcMaterialInstance()
@@ -208,7 +264,14 @@ namespace ProjectCooker.Command
                 var rp = EngineNS.IO.TtFileManager.GetRelativePath(root, i);
                 var rn = EngineNS.RName.GetRName(rp, EngineNS.RName.ERNameType.Game);
                 var asset = await EngineNS.UEngine.Instance.GfxDevice.MaterialInstanceManager.GetMaterialInstance(rn);
-                asset.SaveAssetTo(rn);
+                if (asset != null)
+                {
+                    asset.SaveAssetTo(rn);
+                }
+                else
+                {
+                    EngineNS.Profiler.Log.WriteLineSingle($"GetMaterialInstance {rn} failed");
+                }
             }
 
             root = EngineNS.UEngine.Instance.FileManager.GetRoot(EngineNS.IO.TtFileManager.ERootDir.Engine);
@@ -218,7 +281,14 @@ namespace ProjectCooker.Command
                 var rp = EngineNS.IO.TtFileManager.GetRelativePath(root, i);
                 var rn = EngineNS.RName.GetRName(rp, EngineNS.RName.ERNameType.Engine);
                 var asset = await EngineNS.UEngine.Instance.GfxDevice.MaterialInstanceManager.GetMaterialInstance(rn);
-                asset.SaveAssetTo(rn);
+                if (asset != null)
+                {
+                    asset.SaveAssetTo(rn);
+                }
+                else
+                {
+                    EngineNS.Profiler.Log.WriteLineSingle($"GetMaterialInstance {rn} failed");
+                }
             }
         }
         async System.Threading.Tasks.Task ProcScene()
@@ -232,7 +302,14 @@ namespace ProjectCooker.Command
                 var world = new EngineNS.GamePlay.UWorld(null);
                 await world.InitWorld();
                 var asset = await EngineNS.UEngine.Instance.SceneManager.GetScene(world, rn);
-                asset.SaveAssetTo(rn);
+                if (asset != null)
+                {
+                    asset.SaveAssetTo(rn);
+                }
+                else
+                {
+                    EngineNS.Profiler.Log.WriteLineSingle($"GetScene {rn} failed");
+                }
             }
 
             root = EngineNS.UEngine.Instance.FileManager.GetRoot(EngineNS.IO.TtFileManager.ERootDir.Engine);
@@ -244,7 +321,14 @@ namespace ProjectCooker.Command
                 var world = new EngineNS.GamePlay.UWorld(null);
                 await world.InitWorld();
                 var asset = await EngineNS.UEngine.Instance.SceneManager.GetScene(world, rn);
-                asset.SaveAssetTo(rn);
+                if (asset != null)
+                {
+                    asset.SaveAssetTo(rn);
+                }
+                else
+                {
+                    EngineNS.Profiler.Log.WriteLineSingle($"GetScene {rn} failed");
+                }
             }
         }
         async System.Threading.Tasks.Task ProcUI()

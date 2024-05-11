@@ -164,9 +164,9 @@ namespace EngineNS.Graphics.Mesh
             UpdateAABB();
             return true;
         }
-        public static UMaterialMesh LoadXnd(UMaterialMeshManager manager, IO.TtXndNode node)
+        public unsafe static UMaterialMesh LoadXnd(UMaterialMeshManager manager, IO.TtXndNode node)
         {
-            unsafe
+            try
             {
                 IO.ISerializer result = null;
                 var attr = node.TryGetAttribute("MaterialMesh");
@@ -184,6 +184,11 @@ namespace EngineNS.Graphics.Mesh
                     mesh.UpdateAABB();
                     return mesh;
                 }
+                return null;
+            }
+            catch (Exception exp)
+            {
+                Profiler.Log.WriteException(exp);
                 return null;
             }
         }

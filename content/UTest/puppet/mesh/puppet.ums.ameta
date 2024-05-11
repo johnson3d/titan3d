@@ -15,7 +15,7 @@
     <Size Type="EngineNS.Vector2@EngineCore" Value="50,50" />
   </Icon>
   <RefAssetRNames Type="System.Collections.Generic.List&lt;EngineNS.RName@EngineCore,&gt;@Unknown" Count="3">
-    <e_0 Value="Game,utest/puppet/mesh/puppet.vms,73be124e-0198-4301-966a-8f3fb171cc74" />
+    <e_0 Value="Game,utest/puppet/mesh/puppet.vms,0113d25b-2ed5-4392-9fd9-872aeeef2168" />
     <e_1 Value="Game,utest/puppet/texture/gra.uminst,6e6c974c-ca58-49b8-9bd7-77e6148722fc" />
     <e_2 Value="Game,utest/ground.uminst,333fadf5-5a6d-48aa-86a8-e6ebff8b6d85" />
   </RefAssetRNames>
