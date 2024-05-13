@@ -1,23 +1,147 @@
 ﻿using Assimp;
 using EngineNS.Animation.Asset;
+using EngineNS.Animation.Pipeline;
+using EngineNS.Animation.Player;
+using EngineNS.Animation.SkeletonAnimation.Runtime.Pose;
+using EngineNS.Animation.SkeletonAnimation.Skeleton.Limb;
+using EngineNS.GamePlay;
+using EngineNS.GamePlay.Scene;
 using EngineNS.Graphics.Mesh;
 using EngineNS.Graphics.Pipeline;
+using NPOI.SS.Formula.Functions;
 using SixLabors.ImageSharp.PixelFormats;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Security.Cryptography.Xml;
 using System.Text;
 using System.Threading.Tasks;
 
 namespace EngineNS.Editor.Forms
 {
+    struct FBoneLine : IEquatable<FBoneLine>
+    {
+        public int Start;
+        public int End;
+
+        public override bool Equals(object obj)
+        {
+            return obj is FBoneLine line && Equals(line);
+        }
+
+        public bool Equals(FBoneLine other)
+        {
+            return Start == other.Start;
+        }
+
+        public override int GetHashCode()
+        {
+            return HashCode.Combine(Start, End);
+        }
+
+        public static bool operator ==(FBoneLine left, FBoneLine right)
+        {
+            return left.Equals(right);
+        }
+
+        public static bool operator !=(FBoneLine left, FBoneLine right)
+        {
+            return !(left == right);
+        }
+    }
+    public class USkeletonShowNode : USceneActorNode
+    {
+        public static async System.Threading.Tasks.Task<USkeletonShowNode> AddNode(GamePlay.UWorld world, UNode parent, UNodeData data, Type placementType, DVector3 pos, Vector3 scale, Quaternion quat)
+        {
+            var scene = parent.GetNearestParentScene();
+            var node = await scene.NewNode(world, typeof(USkeletonShowNode), data, EBoundVolumeType.Box, placementType) as USkeletonShowNode;
+            node.NodeData.Name = node.SceneId.ToString();
+            node.Parent = parent;
+
+            node.Placement.SetTransform(in pos, in scale, in quat);
+
+            return node;
+        }
+
+        public class USkeletonShowNodeData : UNodeData
+        {
+            public TtSkeletonAsset SkeletonAsset { get; set; } = null;
+        }
+        Dictionary<int, TtMesh> BoneMeshes = new();
+        Dictionary<FBoneLine, TtMesh> BoneLineMeshes = new();
+        public TtSkeletonAsset SkeletonAsset { get; set; } = null;
+        public TtLocalSpaceRuntimePose CurrentPose = null;
+        public override Task<bool> InitializeNode(UWorld world, UNodeData data, EBoundVolumeType bvType, Type placementType)
+        {
+            var nodeData = data as USkeletonShowNodeData;
+            SkeletonAsset = nodeData.SkeletonAsset;
+            var animPose = SkeletonAsset.Skeleton.CreatePose() as Animation.SkeletonAnimation.AnimatablePose.TtAnimatableSkeletonPose;
+            CurrentPose = TtRuntimePoseUtility.CreateLocalSpaceRuntimePose(animPose);
+            for (int i = 0; i < SkeletonAsset.Skeleton.Limbs.Count; ++i)
+            {
+                var index = SkeletonAsset.Skeleton.Limbs[i].Index.Value;
+                var meshProvider = Graphics.Mesh.UMeshDataProvider.MakeSphere(0.01f, 5, 5, Color.Green.ToArgb());
+                var mesh = meshProvider.ToDrawMesh(UEngine.Instance.GfxDevice.MaterialInstanceManager.WireVtxColorMateria);
+                BoneMeshes.Add(index, mesh);
+            }
+            CreateBoneLineMesh(SkeletonAsset.Skeleton.Root);
+            return base.InitializeNode(world, data, bvType, placementType);
+        }
+        void CreateBoneLineMesh(ILimb limb)
+        {
+            var start = limb.Index.Value;
+            foreach (var child in limb.Children)
+            {
+                var end = child.Index.Value;
+                var meshProvider = Graphics.Mesh.UMeshDataProvider.MakeBox(0, -0.005f, -0.005f, 1, 0.01f, 0.01f, Color.Green.ToArgb());
+                var mesh = meshProvider.ToDrawMesh(UEngine.Instance.GfxDevice.MaterialInstanceManager.WireVtxColorMateria);
+                var boneLine = new FBoneLine() { Start = start, End = end };
+                BoneLineMeshes.Add(boneLine, mesh);
+                CreateBoneLineMesh(child);
+            }
+        }
+        void ShowBoneLine(ILimb limb, TtMeshSpaceRuntimePose runtimePose, UWorld.UVisParameter rp)
+        {
+            var startIndex = limb.Index.Value;
+            var startTransform = runtimePose.Transforms[startIndex];
+            foreach(var child in limb.Children)
+            {
+                var endIndex = child.Index.Value;
+                var endTransform = runtimePose.Transforms[endIndex];
+                var dir = endTransform.Position.ToSingleVector3() - startTransform.Position.ToSingleVector3();
+                var length = dir.Length();
+                dir.Normalize();
+                Quaternion rotation = Quaternion.GetQuaternion(Vector3.Right, dir);
+                var boneLine = new FBoneLine() { Start = startIndex, End = endIndex };
+                if(BoneLineMeshes.ContainsKey(boneLine))
+                {
+                    FTransform transfrom = FTransform.CreateTransform(startTransform.Position, new Vector3(length, 1, 1), rotation);
+                    BoneLineMeshes[boneLine].SetWorldTransform(transfrom, rp.World, false);
+                    rp.AddVisibleMesh(BoneLineMeshes[boneLine]);
+                }
+                ShowBoneLine(child, runtimePose, rp);
+            }
+        }
+        public override void OnGatherVisibleMeshes(UWorld.UVisParameter rp)
+        {
+            var runtimePose = TtRuntimePoseUtility.ConvetToMeshSpaceRuntimePose(CurrentPose);
+            foreach(var bone in SkeletonAsset.Skeleton.Limbs)
+            {
+                var transfrom = runtimePose.Transforms[bone.Index.Value];
+                BoneMeshes[bone.Index.Value].SetWorldTransform(in transfrom, rp.World, true);
+                rp.AddVisibleMesh(BoneMeshes[bone.Index.Value]);
+            }
+            ShowBoneLine(SkeletonAsset.Skeleton.Root, runtimePose, rp);
+            base.OnGatherVisibleMeshes(rp);
+        }
+    }
     public class USkeletonEditor : Editor.IAssetEditor, ITickable, IRootForm
     {
         public int GetTickOrder()
         {
             return 0;
         }
-        public Animation.Asset.TtAnimationClip AnimationClip;
+        public Animation.Asset.TtSkeletonAsset SkeletonAsset;
         public Editor.UPreviewViewport PreviewViewport = new Editor.UPreviewViewport();
         public EGui.Controls.PropertyGrid.PropertyGrid AnimationClipPropGrid = new EGui.Controls.PropertyGrid.PropertyGrid();
         ~USkeletonEditor()
@@ -26,7 +150,7 @@ namespace EngineNS.Editor.Forms
         }
         public void Dispose()
         {
-            AnimationClip = null;
+            SkeletonAsset = null;
             CoreSDK.DisposeObject(ref PreviewViewport);
             AnimationClipPropGrid.Target = null;
         }
@@ -82,12 +206,12 @@ namespace EngineNS.Editor.Forms
         public Vector2 WindowSize = new Vector2(800, 600);
         public void OnDraw()
         {
-            if(Visible == false || AnimationClip == null)
+            if (Visible == false || SkeletonAsset == null)
                 return;
 
             var pivot = new Vector2(0);
             ImGuiAPI.SetNextWindowSize(in WindowSize, ImGuiCond_.ImGuiCond_FirstUseEver);
-            if (EGui.UIProxy.DockProxy.BeginMainForm(AnimationClip.AssetName.Name, this, ImGuiWindowFlags_.ImGuiWindowFlags_None |
+            if (EGui.UIProxy.DockProxy.BeginMainForm(SkeletonAsset.AssetName.Name, this, ImGuiWindowFlags_.ImGuiWindowFlags_None |
                 ImGuiWindowFlags_.ImGuiWindowFlags_NoSavedSettings))
             {
                 if (ImGuiAPI.IsWindowFocused(ImGuiFocusedFlags_.ImGuiFocusedFlags_RootAndChildWindows))
@@ -114,8 +238,8 @@ namespace EngineNS.Editor.Forms
             var btSize = Vector2.Zero;
             if (EGui.UIProxy.CustomButton.ToolButton("Save", in btSize))
             {
-                AnimationClip.SaveAssetTo(AnimationClip.AssetName);
-                var unused = UEngine.Instance.GfxDevice.MaterialMeshManager.ReloadMaterialMesh(AnimationClip.AssetName);
+                SkeletonAsset.SaveAssetTo(SkeletonAsset.AssetName);
+                var unused = UEngine.Instance.GfxDevice.MaterialMeshManager.ReloadMaterialMesh(SkeletonAsset.AssetName);
 
                 //USnapshot.Save(AnimationClip.AssetName, AnimationClip.GetAMeta(), PreviewViewport.RenderPolicy.GetFinalShowRSV(), UEngine.Instance.GfxDevice.RenderContext.mCoreObject.GetImmCommandList());
             }
@@ -159,11 +283,10 @@ namespace EngineNS.Editor.Forms
         }
         public void OnEvent(in Bricks.Input.Event e)
         {
-            //throw new NotImplementedException();
+
         }
-        EngineNS.GamePlay.Scene.UMeshNode mCurrentMeshNode;
-        public float PlaneScale = 5.0f;
         EngineNS.GamePlay.Scene.UMeshNode PlaneMeshNode;
+        USkeletonShowNode SkeletonShowNode = null;
         protected async System.Threading.Tasks.Task Initialize_PreviewScene(Graphics.Pipeline.UViewportSlate viewport, USlateApplication application, Graphics.Pipeline.URenderPolicy policy, float zMin, float zMax)
         {
             viewport.RenderPolicy = policy;
@@ -172,13 +295,16 @@ namespace EngineNS.Editor.Forms
 
             (viewport as Editor.UPreviewViewport).CameraController.ControlCamera(viewport.RenderPolicy.DefaultCamera);
 
-
-            var aabb = new BoundingBox(3,3,3);
-            float radius = aabb.GetMaxSide();
             BoundingSphere sphere;
-            sphere.Center = aabb.GetCenter() + new Vector3(0, 1, 0);
-            sphere.Radius = radius;
+            sphere.Center = new Vector3(0, 1, 0);
+            sphere.Radius = 5;
             policy.DefaultCamera.AutoZoom(ref sphere);
+
+            {
+                var nodeDta = new USkeletonShowNode.USkeletonShowNodeData();
+                nodeDta.SkeletonAsset = SkeletonAsset;
+                SkeletonShowNode = await USkeletonShowNode.AddNode(viewport.World, viewport.World.Root, nodeDta, typeof(GamePlay.UPlacement), DVector3.Zero, Vector3.One, Quaternion.Identity);
+            }
 
             {
                 var box = Graphics.Mesh.UMeshDataProvider.MakeBox(-5, -0.1001f, -5, 10, 0.1f, 10).ToMesh();
@@ -203,8 +329,8 @@ namespace EngineNS.Editor.Forms
         public async Task<bool> OpenEditor(UMainEditorApplication mainEditor, RName name, object arg)
         {
             AssetName = name;
-            AnimationClip = await UEngine.Instance.AnimationModule.AnimationClipManager.GetAnimationClip(name);
-            if (AnimationClip == null)
+            SkeletonAsset = await UEngine.Instance.AnimationModule.SkeletonAssetManager.GetSkeletonAsset(name);
+            if (SkeletonAsset == null)
                 return false;
 
             PreviewViewport.PreviewAsset = AssetName;
@@ -212,83 +338,54 @@ namespace EngineNS.Editor.Forms
             PreviewViewport.OnInitialize = Initialize_PreviewScene;
             await PreviewViewport.Initialize(UEngine.Instance.GfxDevice.SlateApplication, UEngine.Instance.Config.MainRPolicyName, 0, 1);
             AnimationClipPreview = new TtAnimationClipPreview();
-            AnimationClipPreview.AnimationClipEditor = this;
-            AnimationClipPreview.AnimationClip = AnimationClip;
+            AnimationClipPreview.SkeletonEditor = this;
             AnimationClipPropGrid.Target = AnimationClipPreview;
             UEngine.Instance.TickableManager.AddTickable(this);
             return true;
         }
-        public async Task OnPreviewMeshChange(UMeshPrimitives meshPrimitives)
+        TtAnimationClip PreviewAnimationClip = null;
+        TtSkeletonAnimationPlayer AnimationPlayer = null;
+        public async Task OnPreviewAnimationhChange(TtAnimationClip clip)
         {
-            if(mCurrentMeshNode != null)
-            {
-                mCurrentMeshNode.Parent = null;
-            }
-            var mtl = await UEngine.Instance.GfxDevice.MaterialManager.GetMaterial(UEngine.Instance.Config.MeshPrimitiveEditorConfig.MaterialName);
-            var materials = new Graphics.Pipeline.Shader.UMaterial[meshPrimitives.mCoreObject.GetAtomNumber()];
-            for (int i = 0; i < materials.Length; i++)
-            {
-                materials[i] = mtl;
-            }
-
-            var meshData = new EngineNS.GamePlay.Scene.UMeshNode.UMeshNodeData();
-            meshData.MeshName = meshPrimitives.AssetName;
-            meshData.MdfQueueType = EngineNS.Rtti.UTypeDesc.TypeStr(typeof(EngineNS.Graphics.Mesh.UMdfSkinMesh));
-            meshData.AtomType = EngineNS.Rtti.UTypeDesc.TypeStr(typeof(EngineNS.Graphics.Mesh.TtMesh.TtAtom));
-            var mesh = new Graphics.Mesh.TtMesh();
-            mesh.Initialize(meshPrimitives, materials, Rtti.UTypeDescGetter<Graphics.Mesh.UMdfSkinMesh>.TypeDesc);
-
-            var meshNode = await GamePlay.Scene.UMeshNode.AddMeshNode(PreviewViewport.World, PreviewViewport.World.Root, meshData, typeof(GamePlay.UPlacement), mesh,
-                        DVector3.Zero, Vector3.One, Quaternion.Identity);
-            meshNode.HitproxyType = Graphics.Pipeline.UHitProxy.EHitproxyType.Root;
-            meshNode.NodeData.Name = "PreviewObject";
-            meshNode.IsAcceptShadow = true;
-            meshNode.IsCastShadow = true;
-            
-            mCurrentMeshNode = meshNode;
-
-            var sapnd = new EngineNS.Animation.SceneNode.TtSkeletonAnimPlayNode.TtSkeletonAnimPlayNodeData();
-            sapnd.Name = "PlayAnim";
-            sapnd.AnimatinName = AssetName;
-            await EngineNS.Animation.SceneNode.TtSkeletonAnimPlayNode.AddSkeletonAnimPlayNode(PreviewViewport.World, mCurrentMeshNode, sapnd, 
-                            EngineNS.GamePlay.Scene.EBoundVolumeType.Box, typeof(EngineNS.GamePlay.UIdentityPlacement));
+            PreviewAnimationClip = clip;
+            AnimationPlayer = new TtSkeletonAnimationPlayer(clip);
+            var animPose = SkeletonAsset.Skeleton.CreatePose() as Animation.SkeletonAnimation.AnimatablePose.TtAnimatableSkeletonPose;
+            AnimationPlayer.BindingPose(animPose);
         }
 
         class TtAnimationClipPreview
         {
             [Browsable(false)]
-            public USkeletonEditor AnimationClipEditor = null;
+            public USkeletonEditor SkeletonEditor = null;
             [Browsable(false)]
             public IO.EAssetState AssetState { get; private set; } = IO.EAssetState.Initialized;
-            private RName mPreivewMeshName;
-            public RName PreivewMesh
+            private RName mPreivewAnimation;
+            public RName PreivewAnimation
             {
                 get
                 {
-                    return mPreivewMeshName;
+                    return mPreivewAnimation;
                 }
                 set
                 {
                     if (AssetState == IO.EAssetState.Loading)
                         return;
-                    mPreivewMeshName = value;
+                    mPreivewAnimation = value;
                     AssetState = IO.EAssetState.Loading;
                     System.Action exec = async () =>
                     {
-                        var Mesh = await UEngine.Instance.GfxDevice.MeshPrimitiveManager.GetMeshPrimitive(value);
-                        if (Mesh.mCoreObject.IsValidPointer == false)
+                        var animation = await UEngine.Instance.AnimationModule.AnimationClipManager.GetAnimationClip(value);
+                        if (animation == null)
                         {
                             AssetState = IO.EAssetState.LoadFailed;
                             return;
                         }
                         AssetState = IO.EAssetState.LoadFinished;
-                        await AnimationClipEditor.OnPreviewMeshChange(Mesh);
+                        await SkeletonEditor.OnPreviewAnimationhChange(animation);
                     };
                     exec();
                 }
             }
-
-            public TtAnimationClip AnimationClip { get; set; } = new TtAnimationClip();
         }
 
         #endregion IAssetEditor
@@ -296,6 +393,13 @@ namespace EngineNS.Editor.Forms
         #region ITickable
         public void TickLogic(float ellapse)
         {
+            var second = ellapse / 1000;
+            if (SkeletonShowNode != null && AnimationPlayer != null)
+            {
+                AnimationPlayer.Update(second);
+                AnimationPlayer.Evaluate();
+                SkeletonShowNode.CurrentPose = AnimationPlayer.OutPose;
+            }
             PreviewViewport.TickLogic(ellapse);
         }
 

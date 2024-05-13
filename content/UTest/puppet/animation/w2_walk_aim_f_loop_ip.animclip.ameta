@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Root Type="EngineNS.Animation.Asset.TtAnimationClipAMeta@EngineCore">
-  <AssetId Type="System.Guid@Unknown" Value="41425243-4d14-428d-a432-2b9f92111e1e" />
+  <AssetId Type="System.Guid@Unknown" Value="935e7a23-958e-4718-99a3-e95a2524ddfd" />
   <Description Type="System.String@Unknown" Value="This is a EngineNS.Animation.Asset.TtAnimationClip&#xA;" />
   <Icon Type="EngineNS.EGui.UUvAnim@EngineCore">
     <Color Type="System.UInt32@Unknown" Value="4294967295" />
