@@ -486,6 +486,46 @@ namespace EngineNS.Editor
             AssetEditorManager.OnDrawTopMost();
         }
         List<EGui.UIProxy.MenuItemProxy> mMenuItems = new List<EGui.UIProxy.MenuItemProxy>();
+        public void AppendToMainMenu(params EGui.UIProxy.MenuItemProxy[] menus)
+        {
+            for(int i=0; i<menus.Length; i++)
+            {
+                if (mMenuItems.Contains(menus[i]))
+                    continue;
+
+                bool hasSameName = false;
+                for(int j=0; j<mMenuItems.Count; j++)
+                {
+                    if(mMenuItems[j].MenuName == menus[i].MenuName)
+                    {
+                        hasSameName = true;
+                        mMenuItems[j].Merge(menus[i]);
+                        break;
+                    }
+                }
+                if(!hasSameName)
+                    mMenuItems.Add(menus[i]);
+            }
+        }
+        public void RemoveFromMainMenu(params EGui.UIProxy.MenuItemProxy[] menus)
+        {
+            for(int i=0; i<menus.Length; i++)
+            {
+                if (mMenuItems.Contains(menus[i]))
+                    mMenuItems.Remove(menus[i]);
+                else
+                {
+                    for(int j=0; j<mMenuItems.Count; j++)
+                    {
+                        if (mMenuItems[j].MenuName == menus[i].MenuName)
+                        {
+                            mMenuItems[j].Eliminate(menus[i]);
+                            break;
+                        }
+                    }
+                }
+            }
+        }
         private void DrawMainMenu()
         {
             if (ImGuiAPI.BeginMenuBar())

@@ -2,15 +2,25 @@
 using EngineNS.Graphics.Mesh;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Text;
 
 namespace EngineNS.Animation.Asset
 {
     public class TtAnimImprotSetting
     {
+        [Category("FileInfo")]
         public string FileName { get; set; } = "";
+        [Category("FileInfo")]
         public int AnimationsCount { get; set; } = 0;
-        public float Scale { get; set; } = 0.01f;
+        [Category("FileInfo")]
+        public string UpAxis { get; set; } = "";
+        [Category("FileInfo")]
+        public float UnitScaleFactor { get; set; } = 1;
+        [Category("FileInfo")]
+        public string Generator { get; set; } = "";
+        [Category("ImportSetting")]
+        public float UnitScale { get; set; } = 0.01f;
     }
     public partial class TtAnimationClip
     {
@@ -50,6 +60,9 @@ namespace EngineNS.Animation.Asset
                                 {
                                     AnimImprotSetting.FileName = AssetDescription.FileName;
                                     AnimImprotSetting.AnimationsCount = AssetDescription.AnimationsCount;
+                                    AnimImprotSetting.UpAxis = AssetDescription.UpAxis;
+                                    AnimImprotSetting.UnitScaleFactor = AssetDescription.UnitScaleFactor;
+                                    AnimImprotSetting.Generator = AssetDescription.Generator;
                                     PGAsset.Target = AnimImprotSetting;
                                     mName = IO.TtFileManager.GetPureName(mSourceFile);
                                 }
@@ -131,7 +144,7 @@ namespace EngineNS.Animation.Asset
                     }
                     var rn = RName.GetRName(mDir.Name + animName + TtAnimationClip.AssetExt);
                     var importSetting = new TtAssetImportOption_Animation();
-                    importSetting.Scale = AnimImprotSetting.Scale;
+                    importSetting.Scale = AnimImprotSetting.UnitScale;
                     var chunk = AnimationChunkGenerater.Generate(rn, anim, AssetImporter.AiScene, importSetting);
                     var animClip = new TtAnimationClip();
                     animClip.SampleRate = (float)anim.TicksPerSecond;

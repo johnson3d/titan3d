@@ -125,6 +125,8 @@ namespace EngineNS.Graphics.Pipeline.Common
                     }
                     foreach (var mesh in mPickedMeshes)
                     {
+                        if (mesh == null)
+                            continue;
                         foreach (var i in mesh.SubMeshes)
                         {
                             foreach (var k in i.Atoms)

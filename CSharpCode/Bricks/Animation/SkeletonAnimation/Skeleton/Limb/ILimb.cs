@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Text;
 
 namespace EngineNS.Animation.SkeletonAnimation.Skeleton
@@ -24,6 +25,16 @@ namespace EngineNS.Animation.SkeletonAnimation.Skeleton
         }
 
         public static bool operator !=(IndexInSkeleton lhs, IndexInSkeleton rhs) => !(lhs == rhs);
+        public override bool Equals([NotNullWhen(true)] object obj)
+        {
+            if (obj is IndexInSkeleton == false)
+                return false;
+            return this == (IndexInSkeleton)obj;
+        }
+        public override int GetHashCode()
+        {
+            return mValue;
+        }
     }
 }
 

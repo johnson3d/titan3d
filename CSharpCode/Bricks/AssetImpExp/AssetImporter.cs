@@ -15,22 +15,26 @@ using System.Diagnostics;
 using System.Numerics;
 using System.Text;
 using static NPOI.HSSF.Util.HSSFColor;
+using Matrix4x4 = Assimp.Matrix4x4;
 
 namespace EngineNS.Bricks.AssetImpExp
 {
-    
+
     public class TtAssetDescription
     {
         public string FileName { get; set; } = "";
         public int MeshesCount { get; set; } = 0;
         public int AnimationsCount { get; set; } = 0;
+        public string UpAxis { get; set; } = "";
+        public float UnitScaleFactor { get; set; } = 1;
+        public string Generator { get; set; } = "";
 
     }
     public class TtAssetImportOption_Mesh
     {
         public bool GenerateUMS { get; set; } = false;
         public bool AsStaticMesh { get; set; } = false;
-        public float Scale { get; set; } = 0.01f;
+        public float UnitScale { get; set; } = 0.01f;
     }
     public class TtAssetImportOption_Animation
     {
@@ -54,7 +58,7 @@ namespace EngineNS.Bricks.AssetImpExp
                     return null;
                 }
             }
-            catch(Exception)
+            catch (Exception)
             {
                 return null;
             }
@@ -63,6 +67,11 @@ namespace EngineNS.Bricks.AssetImpExp
             assetsGenerateDescription.FileName = Path.GetFileNameWithoutExtension(filePath); ;
             assetsGenerateDescription.MeshesCount = meshNodes.Count;
             assetsGenerateDescription.AnimationsCount = AiScene.AnimationCount;
+            string[] Axis = new[] { "X", "Y", "Z" };
+            assetsGenerateDescription.UpAxis = (Int32)AiScene.Metadata["UpAxisSign"].Data == -1 ? "-" + Axis[(Int32)AiScene.Metadata["UpAxis"].Data] : Axis[(Int32)AiScene.Metadata["UpAxis"].Data];
+            assetsGenerateDescription.UnitScaleFactor = (float)AiScene.Metadata["UnitScaleFactor"].Data;
+            assetsGenerateDescription.Generator = (String)AiScene.Metadata["SourceAsset_Generator"].Data;
+
             return assetsGenerateDescription;
         }
         public List<Assimp.Animation> GetAnimations()
@@ -73,6 +82,30 @@ namespace EngineNS.Bricks.AssetImpExp
 
     public class AssimpSceneUtil
     {
+        public static bool IsZUpLeftHandCoordinate(Assimp.Scene scene)
+        {
+            //the scene has already convert to left hand when read
+            var upAxis = scene.Metadata["UpAxis"].DataAs<int>();
+            return upAxis == 2;
+        }
+        public static Assimp.Matrix4x4 GetCoordinateConvertMatrix(Assimp.Scene scene)
+        {
+            var upAxis = scene.Metadata["UpAxis"].DataAs<int>();
+            var upAxisSign = scene.Metadata["UpAxisSign"].DataAs<int>();
+            var frontAxis = scene.Metadata["FrontAxis"].DataAs<int>();
+            var frontAxisSign = scene.Metadata["FrontAxisSign"].DataAs<int>();
+            var coordAxis = scene.Metadata["CoordAxis"].DataAs<int>();
+            var coordAxisSign = scene.Metadata["CoordAxisSign"].DataAs<int>();
+            Assimp.Vector3D upVec = upAxis == 0 ? new Assimp.Vector3D(upAxisSign.Value, 0, 0) : upAxis == 1 ? new Assimp.Vector3D(0, upAxisSign.Value, 0) : new Assimp.Vector3D(0, 0, upAxisSign.Value);
+            Assimp.Vector3D forwardVec = frontAxis == 0 ? new Assimp.Vector3D(frontAxisSign.Value, 0, 0) : frontAxis == 1 ? new Assimp.Vector3D(0, frontAxisSign.Value, 0) : new Assimp.Vector3D(0, 0, frontAxisSign.Value);
+            Assimp.Vector3D rightVec = coordAxis == 0 ? new Assimp.Vector3D(coordAxisSign.Value, 0, 0) : coordAxis == 1 ? new Assimp.Vector3D(0, coordAxisSign.Value, 0) : new Assimp.Vector3D(0, 0, coordAxisSign.Value);
+            Assimp.Matrix4x4 coordinateConvert = new Assimp.Matrix4x4(rightVec.X, rightVec.Y, rightVec.Z, 0.0f,
+                                                            upVec.X, upVec.Y, upVec.Z, 0.0f,
+                                                            forwardVec.X, forwardVec.Y, forwardVec.Z, 0.0f,
+                                                            0.0f, 0.0f, 0.0f, 1.0f);
+            coordinateConvert.Inverse();
+            return coordinateConvert;
+        }
         public static List<Assimp.Node> FindMeshNodes(Assimp.Scene scene)
         {
             List<Assimp.Node> meshNodes = new List<Assimp.Node>();
@@ -109,13 +142,15 @@ namespace EngineNS.Bricks.AssetImpExp
         }
         public static TtSkinSkeleton FindMeshSkeleton(Assimp.Node meshNode, List<TtSkinSkeleton> skeletons, Assimp.Scene scene)
         {
-            var mesh = AssimpSceneUtil.FindMesh(meshNode.Name, scene);
-            Debug.Assert(mesh != null);
+            var meshes = AssimpSceneUtil.FindMesh(meshNode, scene);
             foreach (var skeleton in skeletons)
             {
-                if (skeleton.FindLimb(mesh.Bones[0].Name) != null)
+                foreach (var mesh in meshes)
                 {
-                    return skeleton;
+                    if (skeleton.FindLimb(mesh.Bones[0].Name) != null)
+                    {
+                        return skeleton;
+                    }
                 }
             }
             return null;
@@ -124,16 +159,17 @@ namespace EngineNS.Bricks.AssetImpExp
         {
             return FindNodeRecursively(name, scene.RootNode, scene);
         }
-        public static Assimp.Mesh FindMesh(string name, Assimp.Scene scene)
+        public static List<Assimp.Mesh> FindMesh(Assimp.Node meshNode, Assimp.Scene scene)
         {
-            foreach (var mesh in scene.Meshes)
+            List<Assimp.Mesh> meshes = new();
+            if (meshNode.HasMeshes)
             {
-                if (mesh.Name == name)
+                foreach (var meshIndex in meshNode.MeshIndices)
                 {
-                    return mesh;
+                    meshes.Add(scene.Meshes[meshIndex]);
                 }
             }
-            return null;
+            return meshes;
         }
 
         private static Assimp.Node FindNodeRecursively(string name, Assimp.Node parentNode, Assimp.Scene scene)
@@ -145,7 +181,7 @@ namespace EngineNS.Bricks.AssetImpExp
                     return child;
                 }
                 var result = FindNodeRecursively(name, child, scene);
-                if(result != null)
+                if (result != null)
                 {
                     return result;
                 }
@@ -185,6 +221,24 @@ namespace EngineNS.Bricks.AssetImpExp
                 return transform;
             }
         }
+        public static bool IsSceneHave_AssimpFbxPre_Node(Assimp.Node node)
+        {
+            if(node.Name.Contains("_$AssimpFbx$_"))
+            {
+                return true;
+            }
+            else
+            {
+                foreach(var child in node.Children)
+                {
+                    if(IsSceneHave_AssimpFbxPre_Node(child))
+                    {
+                        return true;
+                    }
+                }
+                return false;
+            }
+        }
         public static bool IsParentIs_AssimpFbxPre_Node(Assimp.Node node)
         {
             if (node.Parent.Name.Contains("_$AssimpFbx$_"))
@@ -195,7 +249,7 @@ namespace EngineNS.Bricks.AssetImpExp
         }
         public static Assimp.Node FindParent_AssimpFbx_Node(Assimp.Node node)
         {
-            if(node.Parent == null)
+            if (node.Parent == null)
                 return null;
             if (node.Parent.Name.Contains("_$AssimpFbx$_"))
             {
@@ -205,6 +259,27 @@ namespace EngineNS.Bricks.AssetImpExp
             {
                 return FindParent_AssimpFbx_Node(node.Parent);
             }
+        }
+        public static (Vector3 scaling, Quaternion rotation, Vector3 translation) AssimpMatrix4x4Decompose(Assimp.Matrix4x4 matrix)
+        {
+            Assimp.Vector3D assimpTrans, assimpScaling;
+            Assimp.Quaternion assimpQuat;
+            matrix.Decompose(out assimpScaling, out assimpQuat, out assimpTrans);
+            var translation = new Vector3(assimpTrans.X, assimpTrans.Y, assimpTrans.Z);
+            var scaling = new Vector3(assimpScaling.X, assimpScaling.Y, assimpScaling.Z);
+            var rotation = new Quaternion(assimpQuat.X, assimpQuat.Y, assimpQuat.Z, assimpQuat.W);
+            return (scaling, rotation, translation);
+        }
+
+        public static FTransform AssimpMatrix4x4DecomposeToTransform(Assimp.Matrix4x4 matrix)
+        {
+            var result = AssimpMatrix4x4Decompose(matrix);
+            return FTransform.CreateTransform(result.translation.AsDVector(), result.scaling, result.rotation);
+        }
+        public static Matrix AssimpMatrix4xMatrix(Assimp.Matrix4x4 matrix)
+        {
+            var result = AssimpMatrix4x4Decompose(matrix);
+            return Matrix.Transformation(result.scaling, result.rotation, result.translation);
         }
     }
     public class SkeletonGenerater
@@ -239,7 +314,7 @@ namespace EngineNS.Bricks.AssetImpExp
             var parent = GetValidParentNode(node, scene);
             if (IsRootBoneNodeParent(parent, scene))
             {
-                if(!inOutSkeletonRootNodes.Contains(node))
+                if (!inOutSkeletonRootNodes.Contains(node))
                 {
                     inOutSkeletonRootNodes.Add(node);
                     inOutNodesMap[node] = true;
@@ -293,18 +368,7 @@ namespace EngineNS.Bricks.AssetImpExp
             }
             return false;
         }
-        static (Vector3 scaling, Quaternion rotation, Vector3 translation) AssimpMatrix4x4Decompose(Assimp.Matrix4x4 matrix)
-        {
-            Assimp.Vector3D assimpTrans, assimpScaling;
-            Assimp.Quaternion assimpQuat;
-            matrix.Decompose(out assimpScaling, out assimpQuat, out assimpTrans);
-            var translation = new Vector3(assimpTrans.X, assimpTrans.Y, assimpTrans.Z);
-            var scaling = new Vector3(assimpScaling.X, assimpScaling.Y, assimpScaling.Z);
-            var rotation = new Quaternion(assimpQuat.X, assimpQuat.Y, assimpQuat.Z, assimpQuat.W);
-            return (scaling, rotation, translation);
-        }
-
-        static TtBoneDesc MakeBoneDesc(Assimp.Scene scene, Node boneNode, TtAssetImportOption_Mesh importOption)
+        static TtBoneDesc MakeBoneDesc(Assimp.Scene scene, Node boneNode, TtAssetImportOption_Mesh importOption, Assimp.Matrix4x4 pre)
         {
             TtBoneDesc boneDesc = new TtBoneDesc();
             boneDesc.Name = boneNode.Name;
@@ -316,11 +380,11 @@ namespace EngineNS.Bricks.AssetImpExp
                 boneDesc.ParentHash = Standart.Hash.xxHash.xxHash32.ComputeHash(boneDesc.ParentName);
             }
 
+            var assimpBoneOffsetMatrix = Assimp.Matrix4x4.Identity;
             var bone = AssimpSceneUtil.FindBone(boneDesc.Name, scene);
             if (bone != null)
             {
-                var nodeTransform = bone.OffsetMatrix;
-                (boneDesc.InvScale, boneDesc.InvQuat, boneDesc.InvPos) = AssimpMatrix4x4Decompose(nodeTransform);
+                assimpBoneOffsetMatrix = bone.OffsetMatrix;
             }
             else
             {
@@ -328,32 +392,60 @@ namespace EngineNS.Bricks.AssetImpExp
                 Debug.Assert(node != null);
                 var nodeTransform = node.Transform;
                 nodeTransform.Inverse();
-                (boneDesc.InvScale, boneDesc.InvQuat, boneDesc.InvPos) = AssimpMatrix4x4Decompose(nodeTransform);
+                assimpBoneOffsetMatrix = nodeTransform;
             }
-
-            boneDesc.InvPos *= importOption.Scale;
-            var invInitMatrix = Matrix.Transformation(boneDesc.InvScale, boneDesc.InvQuat, boneDesc.InvPos);
-
-            boneDesc.InvInitMatrix = invInitMatrix;
-            invInitMatrix.Inverse();
-            boneDesc.InitMatrix = invInitMatrix;
+            var preMatrix =  AssimpSceneUtil.AssimpMatrix4xMatrix(pre);
+            preMatrix.NoScale();
+            var boneOffsetMatrix = AssimpSceneUtil.AssimpMatrix4xMatrix(assimpBoneOffsetMatrix);
+            var invInitMatrix = preMatrix * boneOffsetMatrix;
+            
+            DVector3 invPos = DVector3.Zero;
+            Vector3 invScale = Vector3.One;
+            Quaternion invQuat = Quaternion.Identity;
+            invInitMatrix.Decompose(out invScale, out  invQuat,out  invPos);
+            if (!invQuat.IsNormalized())
+            {
+                invQuat.Normalize();
+            }
+            boneDesc.InvScale = invScale;
+            boneDesc.InvQuat = invQuat;
+            boneDesc.InvPos = invPos.ToSingleVector3() * importOption.UnitScale;
+            
+            var finalInvInitMatrix = Matrix.Transformation(boneDesc.InvScale, boneDesc.InvQuat, boneDesc.InvPos);
+            boneDesc.InvInitMatrix =  finalInvInitMatrix;
+            finalInvInitMatrix.Inverse();
+            boneDesc.InitMatrix = finalInvInitMatrix;
             return boneDesc;
         }
         static List<TtSkinSkeleton> MakeSkeletons(Assimp.Scene scene, List<Assimp.Node> skeletonRootNodes, TtAssetImportOption_Mesh importOption, ref Dictionary<Assimp.Node, bool> inOutNodesMap)
         {
             List<TtSkinSkeleton> skeletonsGenerate = new List<TtSkinSkeleton>();
+            if (skeletonRootNodes.Count == 0)
+                return skeletonsGenerate;
+
             if (skeletonRootNodes.Count == 1)
-            {
+            {        
                 var skeletonRootNode = skeletonRootNodes[0];
+                var preAssimpTransform = Assimp.Matrix4x4.Identity;
+                if(AssimpSceneUtil.IsZUpLeftHandCoordinate(scene))
+                {
+                    preAssimpTransform = AssimpSceneUtil.GetCoordinateConvertMatrix(scene);
+                }
+                else
+                {
+                    if (AssimpSceneUtil.IsParentIs_AssimpFbxPre_Node(skeletonRootNode))
+                    {
+                        preAssimpTransform = AssimpSceneUtil.AccumulatePreTransform(skeletonRootNode.Parent);
+                    }
+                }
+       
                 TtSkinSkeleton skeleton = new TtSkinSkeleton();
-                var preTransformMatrix = AssimpSceneUtil.AccumulatePreTransform(skeletonRootNode.Parent);
-                var transform = AssimpMatrix4x4Decompose(preTransformMatrix);
-                skeleton.RootPreTransform = FTransform.CreateTransform(transform.translation.AsDVector() * importOption.Scale, transform.scaling, transform.rotation);
+                preAssimpTransform.Inverse();
                 foreach (var marked in inOutNodesMap)
                 {
                     if (marked.Value)
                     {
-                        TtBoneDesc boneDesc = MakeBoneDesc(scene, marked.Key, importOption);
+                        TtBoneDesc boneDesc = MakeBoneDesc(scene, marked.Key, importOption, preAssimpTransform);
                         skeleton.AddLimb(new TtBone(boneDesc));
                     }
                 }
@@ -367,7 +459,7 @@ namespace EngineNS.Bricks.AssetImpExp
             }
             return skeletonsGenerate;
         }
-        static public List<TtSkinSkeleton> Generate(Assimp.Scene scene, TtAssetImportOption_Mesh importOption)
+        public static List<TtSkinSkeleton> Generate(Assimp.Scene scene, TtAssetImportOption_Mesh importOption)
         {
             Dictionary<Assimp.Node, bool> nodesMap = new Dictionary<Assimp.Node, bool>();
             List<Assimp.Node> skeletonRootNodes = new List<Assimp.Node>();
@@ -377,14 +469,14 @@ namespace EngineNS.Bricks.AssetImpExp
             var skeletons = MakeSkeletons(scene, skeletonRootNodes, importOption, ref nodesMap);
             return skeletons;
         }
-        static public Assimp.Node FindSkeletonMeshNode(TtSkinSkeleton skeleton, Assimp.Scene scene)
+        public static Assimp.Node FindSkeletonMeshNode(TtSkinSkeleton skeleton, Assimp.Scene scene)
         {
-            foreach(var mesh in scene.Meshes)
+            foreach (var mesh in scene.Meshes)
             {
-                if(mesh.HasBones && skeleton.FindLimb(mesh.Bones[0].Name) != null)
+                if (mesh.HasBones && skeleton.FindLimb(mesh.Bones[0].Name) != null)
                 {
                     var meshNode = AssimpSceneUtil.FindNode(mesh.Name, scene);
-                    
+
                 }
             }
 
@@ -403,10 +495,9 @@ namespace EngineNS.Bricks.AssetImpExp
         public static List<UMeshPrimitives> Generate(List<TtSkinSkeleton> meshSkeletons, Assimp.Scene scene, TtAssetImportOption_Mesh importOption)
         {
             var meshNodes = AssimpSceneUtil.FindMeshNodes(scene);
-            var skeletons = SkeletonGenerater.Generate(scene, importOption);
-            return Generate(meshNodes, skeletons, scene, importOption);
+            return Generate(meshNodes, meshSkeletons, scene, importOption);
         }
-        public static List<UMeshPrimitives> Generate(List<Assimp.Node> meshNodes, List<TtSkinSkeleton> meshSkeletons, Assimp.Scene scene, TtAssetImportOption_Mesh importOption)
+        private static List<UMeshPrimitives> Generate(List<Assimp.Node> meshNodes, List<TtSkinSkeleton> meshSkeletons, Assimp.Scene scene, TtAssetImportOption_Mesh importOption)
         {
             List<UMeshPrimitives> meshPrimitives = new List<UMeshPrimitives>();
             foreach (var meshNode in meshNodes)
@@ -422,16 +513,23 @@ namespace EngineNS.Bricks.AssetImpExp
 
         private static UMeshPrimitives CreateMeshPrimitives(Assimp.Node meshNode, TtSkinSkeleton skeleton, Assimp.Scene scene, TtAssetImportOption_Mesh importOption)
         {
+            var preAssimpTransform = Assimp.Matrix4x4.Identity;
+            if(AssimpSceneUtil.IsZUpLeftHandCoordinate(scene))
+            {
+                preAssimpTransform = AssimpSceneUtil.GetCoordinateConvertMatrix(scene);
+            }
+            else
+            {
+                if (AssimpSceneUtil.IsParentIs_AssimpFbxPre_Node(meshNode))
+                {
+                    preAssimpTransform = AssimpSceneUtil.AccumulatePreTransform(meshNode.Parent);
+                }
+            }
             Debug.Assert(meshNode.MeshCount > 0);
-            //Assimp.Matrix4x4 preAssimpTransform = Assimp.Matrix4x4.Identity;
-            //if (AssimpSceneUtil.IsParentIs_AssimpFbxPre_Node(meshNode))
-            //{
-            //    preAssimpTransform = AssimpSceneUtil.AccumulatePreTransform(meshNode.Parent);
-            //}
-            //Assimp.Vector3D assimpTrans, assimpScaling;
-            //Assimp.Quaternion assimpQuat;
-            //preAssimpTransform.Decompose(out assimpScaling, out assimpQuat, out assimpTrans);
-            //var preTransform = FTransform.CreateTransform(AssimpSceneUtil.ConvertVector3(assimpTrans).AsDVector(), AssimpSceneUtil.ConvertVector3(assimpScaling), AssimpSceneUtil.ConvertQuaternion(assimpQuat));
+            var transformTuple = AssimpSceneUtil.AssimpMatrix4x4Decompose(preAssimpTransform);
+            var vertexPreTransform = FTransform.CreateTransform(transformTuple.translation.AsDVector(),
+                Vector3.One * importOption.UnitScale, transformTuple.rotation);
+
             UMeshPrimitives meshPrimitives = new UMeshPrimitives(meshNode.Name, (uint)meshNode.MeshCount);
             int vertextCount = 0;
             int indicesCount = 0;
@@ -488,13 +586,18 @@ namespace EngineNS.Bricks.AssetImpExp
                 vertexColorStream = new UInt32[vertextCount];
             }
             bool bHasSkin = false;
-            var mesh = AssimpSceneUtil.FindMesh(meshNode.Name, scene);
-            if (mesh.HasBones && !importOption.AsStaticMesh)
+            var meshes = AssimpSceneUtil.FindMesh(meshNode, scene);
+            foreach (var mesh in meshes)
             {
-                bHasSkin = true;
-                Debug.Assert(skeleton != null);
-                meshPrimitives.PartialSkeleton = skeleton;
+                if (mesh.HasBones && !importOption.AsStaticMesh)
+                {
+                    bHasSkin = true;
+                    Debug.Assert(skeleton != null);
+                    meshPrimitives.PartialSkeleton = skeleton;
+                    break;
+                }
             }
+         
             if (bHasSkin)
             {
                 skinIndexsStream = new Byte[4 * vertextCount];
@@ -507,8 +610,7 @@ namespace EngineNS.Bricks.AssetImpExp
                     vertexSkinWeight.Add(new List<float>());
                 }
             }
-
-
+            
             int indicesIndex = 0;
             int vertexIndex = 0;
             int vertexCounting = 0;
@@ -534,10 +636,15 @@ namespace EngineNS.Bricks.AssetImpExp
                 for (int j = 0; j < subMesh.VertexCount; j++)
                 {
                     vertexIndex = vertexCounting + j;
-                    //posStream[vertexIndex] = preTransform.TransformPosition(AssimpSceneUtil.ConvertVector3(subMesh.Vertices[j]).AsDVector()).ToSingleVector3();
-                    //normalStream[vertexIndex] = preTransform.TransformVector3(AssimpSceneUtil.ConvertVector3(subMesh.Normals[j]));
-                    posStream[vertexIndex] = AssimpSceneUtil.ConvertVector3(subMesh.Vertices[j]) * importOption.Scale;
-                    normalStream[vertexIndex] = AssimpSceneUtil.ConvertVector3(subMesh.Normals[j]);
+                    posStream[vertexIndex] = vertexPreTransform.TransformPosition(AssimpSceneUtil.ConvertVector3(subMesh.Vertices[j]).AsDVector()).ToSingleVector3();
+                    var pos = posStream[vertexIndex];
+                    if (pos.X > 2)
+                    {
+                        
+                    }
+                    normalStream[vertexIndex] = vertexPreTransform.TransformVector3NoScale(AssimpSceneUtil.ConvertVector3(subMesh.Normals[j]));
+                    //posStream[vertexIndex] = AssimpSceneUtil.ConvertVector3(subMesh.Vertices[j]) * importOption.Scale;
+                    //normalStream[vertexIndex] = AssimpSceneUtil.ConvertVector3(subMesh.Normals[j]);
 
                     //TODO: TangentChirality
                     //tangentStream[i] = ConvertVector3(mesh->mTangents[j]);
@@ -744,7 +851,7 @@ namespace EngineNS.Bricks.AssetImpExp
                     propertyBinding.CurveId = curve.Id;
                     objectBinding.ScaleProperty = propertyBinding;
                 }
-                
+
                 animChunk.AnimatedObjectDescs.Add(objectBinding.Name, objectBinding);
             }
             return animChunk;

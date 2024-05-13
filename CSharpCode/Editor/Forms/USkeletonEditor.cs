@@ -11,7 +11,7 @@ using System.Threading.Tasks;
 
 namespace EngineNS.Editor.Forms
 {
-    public class UAnimationClipEditor : Editor.IAssetEditor, ITickable, IRootForm
+    public class USkeletonEditor : Editor.IAssetEditor, ITickable, IRootForm
     {
         public int GetTickOrder()
         {
@@ -20,7 +20,7 @@ namespace EngineNS.Editor.Forms
         public Animation.Asset.TtAnimationClip AnimationClip;
         public Editor.UPreviewViewport PreviewViewport = new Editor.UPreviewViewport();
         public EGui.Controls.PropertyGrid.PropertyGrid AnimationClipPropGrid = new EGui.Controls.PropertyGrid.PropertyGrid();
-        ~UAnimationClipEditor()
+        ~USkeletonEditor()
         {
             Dispose();
         }
@@ -257,7 +257,7 @@ namespace EngineNS.Editor.Forms
         class TtAnimationClipPreview
         {
             [Browsable(false)]
-            public UAnimationClipEditor AnimationClipEditor = null;
+            public USkeletonEditor AnimationClipEditor = null;
             [Browsable(false)]
             public IO.EAssetState AssetState { get; private set; } = IO.EAssetState.Initialized;
             private RName mPreivewMeshName;
@@ -316,8 +316,8 @@ namespace EngineNS.Editor.Forms
 }
 namespace EngineNS.Animation.Asset
 {
-    [Editor.UAssetEditor(EditorType = typeof(Editor.Forms.UAnimationClipEditor))]
-    public partial class TtAnimationClip
+    [Editor.UAssetEditor(EditorType = typeof(Editor.Forms.USkeletonEditor))]
+    public partial class TtSkeletonAsset
     {
 
     }

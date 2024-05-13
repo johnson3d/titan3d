@@ -322,6 +322,63 @@ namespace EngineNS.EGui.UIProxy
         {
             ImGuiAPI.EndMenu();
         }
+
+        public void Merge(MenuItemProxy menu)
+        {
+            for(int i=0; i<menu.SubMenus.Count; i++)
+            {
+                if (SubMenus.Contains(menu.SubMenus[i]))
+                    continue;
+
+                var sourceMenuProxy = menu.SubMenus[i] as MenuItemProxy;
+                if (sourceMenuProxy != null)
+                {
+                    bool hasSameName = false;
+                    for (int j = 0; j < SubMenus.Count; j++)
+                    {
+                        var subMenuProxy = SubMenus[j] as MenuItemProxy;
+                        if (subMenuProxy == null)
+                            continue;
+                        if(subMenuProxy.MenuName == sourceMenuProxy.MenuName)
+                        {
+                            hasSameName = true;
+                            subMenuProxy.Merge(sourceMenuProxy);
+                            break;
+                        }
+                    }
+                    if (!hasSameName)
+                        SubMenus.Add(sourceMenuProxy);
+                }
+                else
+                    SubMenus.Add(menu.SubMenus[i]);
+            }
+        }
+        public void Eliminate(MenuItemProxy menu)
+        {
+            for(int i=0; i<menu.SubMenus.Count; i++)
+            {
+                if (SubMenus.Contains(menu.SubMenus[i]))
+                    SubMenus.Remove(menu.SubMenus[i]);
+                else
+                {
+                    var sourceMenuProxy = menu.SubMenus[i] as MenuItemProxy;
+                    if(sourceMenuProxy != null)
+                    {
+                        for(int j=0; j<SubMenus.Count; j++)
+                        {
+                            var subMenuProxy = SubMenus[j] as MenuItemProxy;
+                            if (subMenuProxy == null)
+                                continue;
+                            if(subMenuProxy.MenuName == sourceMenuProxy.MenuName)
+                            {
+                                subMenuProxy.Eliminate(sourceMenuProxy);
+                                break;
+                            }
+                        }
+                    }
+                }
+            }
+        }
     }
 
     public class NamedMenuSeparator : IUIProxyBase

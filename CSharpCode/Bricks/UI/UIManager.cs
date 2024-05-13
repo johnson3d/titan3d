@@ -181,6 +181,8 @@ namespace EngineNS.UI
             {
                 mTickUIElements[i].Tick(elapsedSecond);
             }
+
+            TickTimeline(elapsedSecond);
         }
 
         public void Save(RName name, TtUIElement element)

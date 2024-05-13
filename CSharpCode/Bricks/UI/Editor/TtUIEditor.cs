@@ -259,6 +259,7 @@ namespace EngineNS.UI.Editor
         protected unsafe void DrawToolBar()
         {
             var drawList = ImGuiAPI.GetWindowDrawList();
+            EGui.UIProxy.Toolbar.BeginToolbar(drawList);
             var btSize = Vector2.Zero;
             if(EGui.UIProxy.CustomButton.ToolButton("Show Graph", in btSize,
                 EGui.UIProxy.StyleConfig.Instance.ToolButtonTextColor,
@@ -326,6 +327,7 @@ namespace EngineNS.UI.Editor
                     UEngine.Instance.UIManager.RemoveUI(AssetName, "UIEditorSimulate");
                 }
             }
+            EGui.UIProxy.Toolbar.EndToolbar();
         }
 
         protected class ControlItemData

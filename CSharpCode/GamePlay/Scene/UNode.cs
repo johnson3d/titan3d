@@ -121,6 +121,20 @@ namespace EngineNS.GamePlay.Scene
             }
             return true;
         }
+
+        public EBoundVolumeType BoundVolumeType
+        {
+            get
+            {
+                if (NodeData.BoundVolume == null)
+                    return EBoundVolumeType.None;
+                else if (NodeData.BoundVolume is UBoxBV)
+                    return EBoundVolumeType.Box;
+                else if (NodeData.BoundVolume is USphereBV)
+                    return EBoundVolumeType.Sphere;
+                return EBoundVolumeType.None;
+            }
+        }
         public void GetWorldSpaceBoundingBox(out DBoundingBox outVal)
         {
             //var matrix = this.Placement.AbsTransform.ToMatrixNoScale();
@@ -349,9 +363,37 @@ namespace EngineNS.GamePlay.Scene
         public UWorld HostWorld { get => GetWorld(); }
         public List<UNode> Children { get; } = new List<UNode>();
         UNodeData mNodeData = null;
+        UNodeData mTemplateNodeData = null;
+        public void SetPrefabTemplate(UNodeData data)
+        {
+            mTemplateNodeData = data;
+            mIsPrefab = true;
+            OnSetPrefabTemplate();
+        }
+        protected virtual void OnSetPrefabTemplate()
+        {
+
+        }
+        internal bool mIsPrefab = false;
+        [Category("Option")]
+        public bool IsPrefab
+        {
+            get => mIsPrefab && (mTemplateNodeData != null);
+            set
+            {
+                mIsPrefab = value;
+            }
+        }
         public UNodeData NodeData
         {
-            get => mNodeData;
+            get
+            {
+                if (IsPrefab && mTemplateNodeData != null)
+                {
+                    return mTemplateNodeData;
+                }   
+                return mNodeData;
+            }
             set
             {
                 mNodeData = value;
@@ -435,18 +477,28 @@ namespace EngineNS.GamePlay.Scene
             UpdateAABB();
         }
         [Rtti.Meta]
-        public UNode FindFirstChild(string name, bool bRecursive = false)
+        public UNode FindFirstChild(string name, System.Type type = null, bool bRecursive = false)
         {
             foreach (var i in Children)
             {
                 if (i.NodeName == name)
-                    return i;
+                {
+                    if (type == null)
+                    {
+                        return i;
+                    }
+                    else
+                    {
+                        if (type == i.GetType())
+                            return i;
+                    }
+                }
             }
             if (bRecursive)
             {
                 foreach (var i in Children)
                 {
-                    var result = i.FindFirstChild(name, true);
+                    var result = i.FindFirstChild(name, type, true);
                     if (result != null)
                         return result;
                 }
@@ -454,12 +506,29 @@ namespace EngineNS.GamePlay.Scene
             return null;
         }
 
-        public UNode FindFirstChild<T>()
+        public UNode FindFirstChild<T>(string name = null, bool bRecursive = false)
         {
             foreach (var i in Children)
             {
                 if (i.GetType() == typeof(T) || i.GetType().IsSubclassOf(typeof(T)))
-                    return i;
+                {
+                    if (name == null)
+                        return i;
+                    else
+                    {
+                        if (i.NodeName == name)
+                            return i;
+                    }
+                }
+            }
+            if (bRecursive)
+            {
+                foreach (var i in Children)
+                {
+                    var result = i.FindFirstChild<T>(name, true);
+                    if (result != null)
+                        return result;
+                }
             }
             return null;
         }
@@ -494,8 +563,13 @@ namespace EngineNS.GamePlay.Scene
         #endregion
 
         #region Save&Load
-        public const uint NodeDescAttributeFlags = 1;
-        public unsafe void SaveChildNode(UScene scene, EngineNS.XndHolder xnd, EngineNS.XndNode node)
+        [Flags]
+        public enum ENodeFlags : uint
+        {
+            IsNodeDesc = 1,
+            IgnoreNodeDesc = (1 << 1),
+        }
+        public unsafe void SaveChildNode(UNode scene, EngineNS.XndHolder xnd, EngineNS.XndNode node)
         {
             foreach(var i in Children)
             {
@@ -509,7 +583,12 @@ namespace EngineNS.GamePlay.Scene
 
                     if (i.NodeData != null)
                     {
-                        using (var dataAttr = xnd.NewAttribute(Rtti.UTypeDesc.TypeStr(i.NodeData.GetType()), 1, NodeDescAttributeFlags))
+                        uint nodeFlags = (uint)ENodeFlags.IsNodeDesc;
+                        if (this.mIsPrefab)
+                        {
+                            nodeFlags |= (uint)ENodeFlags.IgnoreNodeDesc;
+                        }
+                        using (var dataAttr = xnd.NewAttribute(Rtti.UTypeDesc.TypeStr(i.NodeData.GetType()), 1, nodeFlags))
                         {
                             var attrProxy = new EngineNS.IO.TtXndAttributeWriter(dataAttr);
 
@@ -525,17 +604,21 @@ namespace EngineNS.GamePlay.Scene
                 }   
             }
         }
-        public async System.Threading.Tasks.Task<bool> LoadChildNode(GamePlay.UWorld world, UScene scene, EngineNS.XndNode node)
+        public async System.Threading.Tasks.Task<bool> LoadChildNode(GamePlay.UWorld world, UNode scene, EngineNS.XndNode node)
         {
             for(uint i = 0; i < node.GetNumOfNode(); i++)
             {
                 var cld = node.GetNode(i);
                 var cldTypeStr = cld.NativeSuper.Name;
                 
-                var attr = cld.FindFirstAttributeByFlags(NodeDescAttributeFlags);
+                var attr = cld.FindFirstAttributeByFlags((uint)ENodeFlags.IsNodeDesc);
                 if (attr.NativePointer == IntPtr.Zero)
                 {
                     continue;
+                }
+                if ((attr.Flags & (uint)ENodeFlags.IgnoreNodeDesc) != 0)
+                {
+                    this.mIsPrefab = true;
                 }
                 UNodeData nodeData = Rtti.UTypeDescManager.CreateInstance(Rtti.UTypeDesc.TypeOf(attr.Name)) as UNodeData;
                 var nd = Rtti.UTypeDescManager.CreateInstance(Rtti.UTypeDesc.TypeOf(cldTypeStr)) as UNode;
@@ -544,31 +627,35 @@ namespace EngineNS.GamePlay.Scene
                     Profiler.Log.WriteLine(Profiler.ELogTag.Warning, "Scene", $"SceneNode Load failed: NodeDataType={attr.Name}, NodeData={cldTypeStr}");
                     continue;
                 }
+                
                 using (var ar = attr.GetReader(nd))
                 {
                     IO.ISerializer data = nodeData;
                     try
                     {
                         //ar.Tag = nd;
-                        if (false == ar.ReadTo(data, this))
+                        System.Type placementType = null;                        
+                        if (this.mIsPrefab == false)
                         {
-                            continue;
+                            if (false == ar.ReadTo(data, this))
+                            {
+                                continue;
+                            }
                         }
 
-                        var ok = await nd.InitializeNode(world, nodeData, EBoundVolumeType.None, null);
+                        var ok = await nd.InitializeNode(world, nodeData, EBoundVolumeType.None, placementType);
                         if (ok == false)
                         {
                             Profiler.Log.WriteLine(Profiler.ELogTag.Warning, "Scene", $"SceneNode Load Initialize failed: NodeDataType={attr.Name}, NodeData={cldTypeStr}");
                             continue;
                         }
                         //nd.NodeData = data as UNodeData;
-
-                        nd.OnNodeLoaded(this);
+                        //nd.OnNodeLoaded(this);
                     }
                     catch (Exception ex)
                     {
                         Profiler.Log.WriteException(ex);
-                        Profiler.Log.WriteLine(Profiler.ELogTag.Warning, "IO", $"Scene({scene.AssetName}): Node({nd.NodeData?.Name}) load failed");
+                        Profiler.Log.WriteLine(Profiler.ELogTag.Warning, "IO", $"Scene({scene}): Node({nd.NodeData?.Name}) load failed");
                     }
                 }
                 if (nd.Placement != null)
@@ -576,6 +663,7 @@ namespace EngineNS.GamePlay.Scene
                     nd.Parent = this;
                     await nd.LoadChildNode(world, scene, cld);
                 }
+                nd.OnNodeLoaded(this);
             }
             return true;
         }

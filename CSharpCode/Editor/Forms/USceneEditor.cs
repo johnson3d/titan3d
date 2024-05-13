@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using EngineNS.Thread;
+using MathNet.Numerics.LinearAlgebra.Solvers;
 
 namespace EngineNS.Editor.Forms
 {
@@ -59,21 +60,41 @@ namespace EngineNS.Editor.Forms
         public GamePlay.Scene.UScene Scene;
         public USceneEditorViewport PreviewViewport = new USceneEditorViewport();
         public USceneEditorOutliner mWorldOutliner;
-        
+        EGui.Controls.UContentBrowser mContentBrowser = new EGui.Controls.UContentBrowser();
+
         public EGui.Controls.PropertyGrid.PropertyGrid ScenePropGrid = new EGui.Controls.PropertyGrid.PropertyGrid();
         public EGui.Controls.PropertyGrid.PropertyGrid EditorPropGrid = new EGui.Controls.PropertyGrid.PropertyGrid();
         public Graphics.Pipeline.URenderPolicy RenderPolicy { get => PreviewViewport.RenderPolicy; }
 
+        bool mIsDrawing = true;
+        bool IsDrawing
+        {
+            get => mIsDrawing;
+            set
+            {
+                if(mIsDrawing && !value)
+                {
+                    var mainEditor = UEngine.Instance.GfxDevice.SlateApplication as Editor.UMainEditorApplication;
+                    mainEditor?.RemoveFromMainMenu(mMenuItems.ToArray());
+                }
+                else if(!mIsDrawing && value)
+                {
+                    var mainEditor = UEngine.Instance.GfxDevice.SlateApplication as Editor.UMainEditorApplication;
+                    mainEditor?.AppendToMainMenu(mMenuItems.ToArray());
+                }
+                mIsDrawing = value;
+            }
+        }
         List<EGui.UIProxy.MenuItemProxy> mMenuItems = new List<EGui.UIProxy.MenuItemProxy>();
         public void InitMainMenu()
         {
-            mMenuItems = new List<EGui.UIProxy.MenuItemProxy>()
+            var mainEditor = UEngine.Instance.GfxDevice.SlateApplication as Editor.UMainEditorApplication;
+            EGui.UIProxy.MenuItemProxy menu0 = null;
+            menu0 = new EGui.UIProxy.MenuItemProxy()
             {
-                new EGui.UIProxy.MenuItemProxy()
-                {
-                    MenuName = "View",
-                    IsTopMenuItem = true,
-                    SubMenus = new List<EGui.UIProxy.IUIProxyBase>()
+                MenuName = "View",
+                IsTopMenuItem = true,
+                SubMenus = new List<EGui.UIProxy.IUIProxyBase>()
                     {
                         new EGui.UIProxy.MenuItemProxy()
                         {
@@ -117,8 +138,8 @@ namespace EngineNS.Editor.Forms
                                     Action = (EGui.UIProxy.MenuItemProxy item, Support.UAnyPointer data)=>
                                     {
                                         PreviewViewport.RenderPolicy.TypeAA = Graphics.Pipeline.URenderPolicy.ETypeAA.None;
-                                        item.Selected = PreviewViewport.RenderPolicy.TypeAA == Graphics.Pipeline.URenderPolicy.ETypeAA.None;                                        
-                                        var typeAA = EGui.UIProxy.MenuItemProxy.FindSubMenu(this.mMenuItems[0], new string[]{"TypeAA" });
+                                        item.Selected = PreviewViewport.RenderPolicy.TypeAA == Graphics.Pipeline.URenderPolicy.ETypeAA.None;
+                                        var typeAA = EGui.UIProxy.MenuItemProxy.FindSubMenu(menu0, new string[]{"TypeAA" });
                                         if (typeAA != null)
                                         {
                                             var tm = typeAA.SubMenus[1] as EGui.UIProxy.MenuItemProxy;
@@ -136,7 +157,7 @@ namespace EngineNS.Editor.Forms
                                     {
                                         PreviewViewport.RenderPolicy.TypeAA = Graphics.Pipeline.URenderPolicy.ETypeAA.Fsaa;
                                         item.Selected = PreviewViewport.RenderPolicy.TypeAA == Graphics.Pipeline.URenderPolicy.ETypeAA.Fsaa;
-                                        var typeAA = EGui.UIProxy.MenuItemProxy.FindSubMenu(this.mMenuItems[0], new string[]{"TypeAA" });
+                                        var typeAA = EGui.UIProxy.MenuItemProxy.FindSubMenu(menu0, new string[]{"TypeAA" });
                                         if (typeAA != null)
                                         {
                                             var tm = typeAA.SubMenus[0] as EGui.UIProxy.MenuItemProxy;
@@ -154,7 +175,7 @@ namespace EngineNS.Editor.Forms
                                     {
                                         PreviewViewport.RenderPolicy.TypeAA = Graphics.Pipeline.URenderPolicy.ETypeAA.Taa;
                                         item.Selected = PreviewViewport.RenderPolicy.TypeAA == Graphics.Pipeline.URenderPolicy.ETypeAA.Taa;
-                                        var typeAA = EGui.UIProxy.MenuItemProxy.FindSubMenu(this.mMenuItems[0], new string[]{"TypeAA" });
+                                        var typeAA = EGui.UIProxy.MenuItemProxy.FindSubMenu(menu0, new string[]{"TypeAA" });
                                         if (typeAA != null)
                                         {
                                             var tm = typeAA.SubMenus[0] as EGui.UIProxy.MenuItemProxy;
@@ -185,12 +206,12 @@ namespace EngineNS.Editor.Forms
                             },
                         },
                     },
-                },
-                new EGui.UIProxy.MenuItemProxy()
-                {
-                    MenuName = "Illumination",
-                    IsTopMenuItem = true,
-                    SubMenus = new List<EGui.UIProxy.IUIProxyBase>()
+            };
+            var menu1 = new EGui.UIProxy.MenuItemProxy()
+            {
+                MenuName = "Illumination",
+                IsTopMenuItem = true,
+                SubMenus = new List<EGui.UIProxy.IUIProxyBase>()
                     {
                         new EGui.UIProxy.MenuItemProxy()
                         {
@@ -220,20 +241,11 @@ namespace EngineNS.Editor.Forms
                             //},
                         },
                     },
-                },
             };
-        }
-        private void DrawMainMenu()
-        {
-            if (ImGuiAPI.BeginMenuBar())
-            {
-                var drawList = ImGuiAPI.GetWindowDrawList();
-                for (int i = 0; i < mMenuItems.Count; i++)
-                {
-                    mMenuItems[i].OnDraw(in drawList, in Support.UAnyPointer.Default);
-                }
-                ImGuiAPI.EndMenuBar();
-            }
+            mMenuItems.Clear();
+            mMenuItems.Add(menu0);
+            mMenuItems.Add(menu1);
+            mainEditor.AppendToMainMenu(mMenuItems.ToArray());
         }
         public USceneEditor()
         {
@@ -254,6 +266,9 @@ namespace EngineNS.Editor.Forms
         {
             await ScenePropGrid.Initialize();
             await EditorPropGrid.Initialize();
+
+            mContentBrowser.DrawInWindow = false;
+            await mContentBrowser.Initialize();
 
             InitMainMenu();
             return true;
@@ -337,11 +352,24 @@ namespace EngineNS.Editor.Forms
             mDockInitialized = true;
 
             var rightId = id;
+            uint middleId = 0;
+            uint downId = 0;
             uint leftId = 0;
-            ImGuiAPI.DockBuilderSplitNode(rightId, ImGuiDir_.ImGuiDir_Left, 0.2f, ref leftId, ref rightId);
+            uint rightUpId = 0;
+            uint rightDownId = 0;
+            ImGuiAPI.DockBuilderSplitNode(rightId, ImGuiDir_.ImGuiDir_Left, 0.8f, ref middleId, ref rightId);
+            ImGuiAPI.DockBuilderSplitNode(rightId, ImGuiDir_.ImGuiDir_Down, 0.5f, ref rightDownId, ref rightUpId);
+            ImGuiAPI.DockBuilderSplitNode(middleId, ImGuiDir_.ImGuiDir_Down, 0.3f, ref downId, ref middleId);
+            ImGuiAPI.DockBuilderSplitNode(middleId, ImGuiDir_.ImGuiDir_Left, 0.2f, ref leftId, ref middleId);
 
-            ImGuiAPI.DockBuilderDockWindow(EGui.UIProxy.DockProxy.GetDockWindowName("Left", mDockKeyClass), leftId);
-            ImGuiAPI.DockBuilderDockWindow(EGui.UIProxy.DockProxy.GetDockWindowName("Preview", mDockKeyClass), rightId);
+            ImGuiAPI.DockBuilderDockWindow(EGui.UIProxy.DockProxy.GetDockWindowName("Details", mDockKeyClass), rightDownId);
+            ImGuiAPI.DockBuilderDockWindow(EGui.UIProxy.DockProxy.GetDockWindowName("Editor Settings", mDockKeyClass), rightDownId);
+            ImGuiAPI.DockBuilderDockWindow(EGui.UIProxy.DockProxy.GetDockWindowName("Camera Settings", mDockKeyClass), rightDownId);
+            ImGuiAPI.DockBuilderDockWindow(EGui.UIProxy.DockProxy.GetDockWindowName("Outliner", mDockKeyClass), rightUpId);
+            ImGuiAPI.DockBuilderDockWindow(EGui.UIProxy.DockProxy.GetDockWindowName("Preview", mDockKeyClass), middleId);
+            ImGuiAPI.DockBuilderDockWindow(EGui.UIProxy.DockProxy.GetDockWindowName("Content Browser", mDockKeyClass), downId);
+            ImGuiAPI.DockBuilderDockWindow(EGui.UIProxy.DockProxy.GetDockWindowName("Place Items", mDockKeyClass), leftId);
+
             ImGuiAPI.DockBuilderFinish(id);
         }
         public Vector2 WindowPos;
@@ -353,12 +381,9 @@ namespace EngineNS.Editor.Forms
 
             var pivot = new Vector2(0);
             ImGuiAPI.SetNextWindowSize(in WindowSize, ImGuiCond_.ImGuiCond_FirstUseEver);
-            if (EGui.UIProxy.DockProxy.BeginMainForm(AssetName.Name, this, 
-                ImGuiWindowFlags_.ImGuiWindowFlags_NoSavedSettings |
-                ImGuiWindowFlags_.ImGuiWindowFlags_MenuBar))
+            IsDrawing = EGui.UIProxy.DockProxy.BeginMainForm(AssetName.Name, this, ImGuiWindowFlags_.ImGuiWindowFlags_NoSavedSettings);
+            if (IsDrawing)
             {
-                DrawMainMenu();
-
                 if (ImGuiAPI.IsWindowFocused(ImGuiFocusedFlags_.ImGuiFocusedFlags_RootAndChildWindows))
                 {
                     var mainEditor = UEngine.Instance.GfxDevice.SlateApplication as Editor.UMainEditorApplication;
@@ -375,11 +400,18 @@ namespace EngineNS.Editor.Forms
             ResetDockspace();
             EGui.UIProxy.DockProxy.EndMainForm();
 
-            DrawLeft();
-            DrawRight();
+            DrawEditorSettings();
+            DrawCameraSettings();
+            DrawDetails();
+            DrawOutliner();
+            DrawPreview();
+            DrawContentBrowser();
+            DrawPlaceItemPanel();
         }
         protected void DrawToolBar()
         {
+            var drawList = ImGuiAPI.GetWindowDrawList();
+            EGui.UIProxy.Toolbar.BeginToolbar(drawList);
             var btSize = Vector2.Zero;
             if (EGui.UIProxy.CustomButton.ToolButton("Save", in btSize))
             {
@@ -422,8 +454,8 @@ namespace EngineNS.Editor.Forms
                 Scene.ClearChildren();
                 var task = EngineNS.Editor.UMainEditorApplication.TestCreateScene(PreviewViewport, PreviewViewport.World, Scene);
             }
-            ImGuiAPI.SameLine(0, 15);
-            ImGuiAPI.BeginGroup();
+            EGui.UIProxy.ToolbarSeparator.DrawSeparator(in drawList);
+            //ImGuiAPI.BeginGroup();
             
             for (int i = 0; i < (int)GamePlay.UWorld.UVisParameter.EVisCullFilter.FilterTypeCount; i++)
             {
@@ -435,7 +467,7 @@ namespace EngineNS.Editor.Forms
                 {
                     name = GamePlay.UWorld.UVisParameter.FilterTypeCountAs;
                 }
-                if (EngineNS.EGui.UIProxy.CheckBox.DrawCheckBox(name, ref checkValue))
+                if(EGui.UIProxy.CustomButton.ToggleButton(name, in btSize, ref checkValue))
                 {
                     if (checkValue)
                     {
@@ -447,79 +479,101 @@ namespace EngineNS.Editor.Forms
                     }
                 }
             }
-            ImGuiAPI.EndGroup();
+            //ImGuiAPI.EndGroup();
+            EGui.UIProxy.Toolbar.EndToolbar();
         }
-        bool mLeftShow = true;
-        protected unsafe void DrawLeft()
+        bool mDrawDetailsShow = true;
+        protected void DrawDetails()
         {
             var sz = new Vector2(-1);
-            if (EGui.UIProxy.DockProxy.BeginPanel(mDockKeyClass, "Left", ref mLeftShow, ImGuiWindowFlags_.ImGuiWindowFlags_None))
+            if (EGui.UIProxy.DockProxy.BeginPanel(mDockKeyClass, "Details", ref mDrawDetailsShow, ImGuiWindowFlags_.ImGuiWindowFlags_None))
             {
-                if (ImGuiAPI.BeginTabBar("SceneTab", ImGuiTabBarFlags_.ImGuiTabBarFlags_None))
-                {
-                    if (ImGuiAPI.BeginTabItem("Scene", null, ImGuiTabItemFlags_.ImGuiTabItemFlags_None))
-                    {
-                        if (ImGuiAPI.CollapsingHeader("Camera", ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_DefaultOpen))
-                        {
-                            float v = PreviewViewport.CameraMoveSpeed;
-                            ImGuiAPI.SliderFloat("KeyMove", ref v, 1.0f, 150.0f, "%.3f", ImGuiSliderFlags_.ImGuiSliderFlags_None);
-                            PreviewViewport.CameraMoveSpeed = v;
-
-                            v = PreviewViewport.CameraMouseWheelSpeed;
-                            ImGuiAPI.InputFloat("WheelMove", ref v, 0.1f, 1.0f, "%.3f", ImGuiInputTextFlags_.ImGuiInputTextFlags_None);
-                            PreviewViewport.CameraMouseWheelSpeed = v;
-
-                            var zN = PreviewViewport.CameraController.Camera.mCoreObject.mZNear;
-                            var zF = PreviewViewport.CameraController.Camera.mCoreObject.mZFar;
-                            ImGuiAPI.SliderFloat("ZNear", ref zN, 0.1f, 100.0f, "%.1f", ImGuiSliderFlags_.ImGuiSliderFlags_None);
-                            ImGuiAPI.SliderFloat("ZFar", ref zF, 10.0f, 10000.0f, "%.1f", ImGuiSliderFlags_.ImGuiSliderFlags_None);
-                            if (zN != PreviewViewport.CameraController.Camera.mCoreObject.mZNear ||
-                                zF != PreviewViewport.CameraController.Camera.mCoreObject.mZFar)
-                            {
-                                PreviewViewport.CameraController.Camera.SetZRange(zN, zF);
-                            }
-
-                            var camPos = PreviewViewport.CameraController.Camera.mCoreObject.GetPosition();
-                            var saved = camPos;
-                            ImGuiAPI.InputDouble($"X", ref camPos.X, 0.1, 10.0, "%.2f", ImGuiInputTextFlags_.ImGuiInputTextFlags_None);
-                            ImGuiAPI.InputDouble($"Y", ref camPos.Y, 0.1, 10.0, "%.2f", ImGuiInputTextFlags_.ImGuiInputTextFlags_None);
-                            ImGuiAPI.InputDouble($"Z", ref camPos.Z, 0.1, 10.0, "%.2f", ImGuiInputTextFlags_.ImGuiInputTextFlags_None);
-                            if (saved != camPos)
-                            {
-                                var lookAt = PreviewViewport.CameraController.Camera.mCoreObject.GetLookAt();
-                                var up = PreviewViewport.CameraController.Camera.mCoreObject.GetUp();
-                                PreviewViewport.CameraController.Camera.mCoreObject.LookAtLH(in camPos, lookAt - saved + camPos, up);
-                            }
-                        }
-                        if (ImGuiAPI.CollapsingHeader("Scene", ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_None))
-                        {
-                            ScenePropGrid.OnDraw(true, false, false);
-                        }
-                        if (ImGuiAPI.CollapsingHeader("Editor", ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_None))
-                        {
-                            EditorPropGrid.OnDraw(true, false, false);
-                        }
-                        mWorldOutliner.DrawAsChildWindow(ref sz);
-
-                        ImGuiAPI.EndTabItem();
-                    }
-                    if (ImGuiAPI.BeginTabItem("Node", null, ImGuiTabItemFlags_.ImGuiTabItemFlags_None))
-                    {
-                        PreviewViewport.NodeInspector.OnDraw(true, false, false);
-                        ImGuiAPI.EndTabItem();
-                    }
-                    ImGuiAPI.EndTabBar();
-                }   
+                ScenePropGrid.OnDraw(true, false, false);
             }
             EGui.UIProxy.DockProxy.EndPanel();
         }
-        bool mRightShow = true;
-        protected unsafe void DrawRight()
+        bool mEditorSettingsShow = true;
+        protected void DrawEditorSettings()
         {
-            if (EGui.UIProxy.DockProxy.BeginPanel(mDockKeyClass, "Preview", ref mRightShow, ImGuiWindowFlags_.ImGuiWindowFlags_None))
+            var sz = new Vector2(-1);
+            if (EGui.UIProxy.DockProxy.BeginPanel(mDockKeyClass, "Editor Settings", ref mEditorSettingsShow, ImGuiWindowFlags_.ImGuiWindowFlags_None))
+            {
+                EditorPropGrid.OnDraw(true, false, false);
+            }
+            EGui.UIProxy.DockProxy.EndPanel();
+        }
+        bool mCameraSettingsShow = true;
+        protected void DrawCameraSettings()
+        {
+            var sz = new Vector2(-1);
+            if (EGui.UIProxy.DockProxy.BeginPanel(mDockKeyClass, "Camera Settings", ref mCameraSettingsShow, ImGuiWindowFlags_.ImGuiWindowFlags_None))
+            {
+                float v = PreviewViewport.CameraMoveSpeed;
+                ImGuiAPI.SliderFloat("KeyMove", ref v, 1.0f, 150.0f, "%.3f", ImGuiSliderFlags_.ImGuiSliderFlags_None);
+                PreviewViewport.CameraMoveSpeed = v;
+
+                v = PreviewViewport.CameraMouseWheelSpeed;
+                ImGuiAPI.InputFloat("WheelMove", ref v, 0.1f, 1.0f, "%.3f", ImGuiInputTextFlags_.ImGuiInputTextFlags_None);
+                PreviewViewport.CameraMouseWheelSpeed = v;
+
+                var zN = PreviewViewport.CameraController.Camera.mCoreObject.mZNear;
+                var zF = PreviewViewport.CameraController.Camera.mCoreObject.mZFar;
+                ImGuiAPI.SliderFloat("ZNear", ref zN, 0.1f, 100.0f, "%.1f", ImGuiSliderFlags_.ImGuiSliderFlags_None);
+                ImGuiAPI.SliderFloat("ZFar", ref zF, 10.0f, 10000.0f, "%.1f", ImGuiSliderFlags_.ImGuiSliderFlags_None);
+                if (zN != PreviewViewport.CameraController.Camera.mCoreObject.mZNear ||
+                    zF != PreviewViewport.CameraController.Camera.mCoreObject.mZFar)
+                {
+                    PreviewViewport.CameraController.Camera.SetZRange(zN, zF);
+                }
+
+                var camPos = PreviewViewport.CameraController.Camera.mCoreObject.GetPosition();
+                var saved = camPos;
+                ImGuiAPI.InputDouble($"X", ref camPos.X, 0.1, 10.0, "%.2f", ImGuiInputTextFlags_.ImGuiInputTextFlags_None);
+                ImGuiAPI.InputDouble($"Y", ref camPos.Y, 0.1, 10.0, "%.2f", ImGuiInputTextFlags_.ImGuiInputTextFlags_None);
+                ImGuiAPI.InputDouble($"Z", ref camPos.Z, 0.1, 10.0, "%.2f", ImGuiInputTextFlags_.ImGuiInputTextFlags_None);
+                if (saved != camPos)
+                {
+                    var lookAt = PreviewViewport.CameraController.Camera.mCoreObject.GetLookAt();
+                    var up = PreviewViewport.CameraController.Camera.mCoreObject.GetUp();
+                    PreviewViewport.CameraController.Camera.mCoreObject.LookAtLH(in camPos, lookAt - saved + camPos, up);
+                }
+            }
+            EGui.UIProxy.DockProxy.EndPanel();
+        }
+        bool mOutlinerShow = true;
+        protected void DrawOutliner()
+        {
+            var sz = new Vector2(-1);
+            if (EGui.UIProxy.DockProxy.BeginPanel(mDockKeyClass, "Outliner", ref mOutlinerShow, ImGuiWindowFlags_.ImGuiWindowFlags_None))
+            {
+                PreviewViewport.NodeInspector.OnDraw(true, false, false);
+            }
+            EGui.UIProxy.DockProxy.EndPanel();
+        }
+        bool mPreviewShow = true;
+        protected unsafe void DrawPreview()
+        {
+            if (EGui.UIProxy.DockProxy.BeginPanel(mDockKeyClass, "Preview", ref mPreviewShow, ImGuiWindowFlags_.ImGuiWindowFlags_None))
             {
                 PreviewViewport.ViewportType = Graphics.Pipeline.UViewportSlate.EViewportType.ChildWindow;
                 PreviewViewport.OnDraw();
+            }
+            EGui.UIProxy.DockProxy.EndPanel();
+        }
+        bool mContentBrowserShow = true;
+        protected unsafe void DrawContentBrowser()
+        {
+            if (EGui.UIProxy.DockProxy.BeginPanel(mDockKeyClass, "Content Browser", ref mContentBrowserShow, ImGuiWindowFlags_.ImGuiWindowFlags_None))
+            {
+                mContentBrowser.OnDraw();
+            }
+            EGui.UIProxy.DockProxy.EndPanel();
+        }
+        bool mPlaceItemPanelShow = true;
+        protected void DrawPlaceItemPanel()
+        {
+            if (EGui.UIProxy.DockProxy.BeginPanel(mDockKeyClass, "Place Items", ref mPlaceItemPanelShow, ImGuiWindowFlags_.ImGuiWindowFlags_None))
+            {
             }
             EGui.UIProxy.DockProxy.EndPanel();
         }

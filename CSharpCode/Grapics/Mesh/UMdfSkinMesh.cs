@@ -51,31 +51,20 @@ namespace EngineNS.Graphics.Mesh
                 }
                 drawcall.BindCBuffer(binder, PerSkinMeshCBuffer);
 
-                List<Vector4> tempPos = new List<Vector4>();
                 Vector4* absPos = (Vector4*)PerSkinMeshCBuffer.mCoreObject.GetVarPtrToWrite(shaderBinder.CBPerSkinMesh.AbsBonePos, (uint)length);
                 Quaternion* absQuat = (Quaternion*)PerSkinMeshCBuffer.mCoreObject.GetVarPtrToWrite(shaderBinder.CBPerSkinMesh.AbsBoneQuat, (uint)length);
 
-                var rootIndex = Animation.SkeletonAnimation.Runtime.Pose.TtRuntimePoseUtility.GetRoot(runtimePose);
-                var localRuntimePose = Animation.SkeletonAnimation.Runtime.Pose.TtRuntimePoseUtility.CopyPose(runtimePose);
-                var rootTransform = runtimePose.Transforms[rootIndex.Value];
-                FTransform.Multiply(out rootTransform, rootTransform, skeleton.RootPreTransform);
-                localRuntimePose.Transforms[rootIndex.Value] = rootTransform;
-                var meshSpaceRutimePose = Animation.SkeletonAnimation.Runtime.Pose.TtRuntimePoseUtility.ConvetToMeshSpaceRuntimePose(localRuntimePose);
+                var meshSpaceRuntimePose = Animation.SkeletonAnimation.Runtime.Pose.TtRuntimePoseUtility.ConvetToMeshSpaceRuntimePose(runtimePose);
                 foreach (var bone in bones)
                 {
                     var boneDesc = bone.Desc as Animation.SkeletonAnimation.Skeleton.Limb.TtBoneDesc;
-                    var index = Animation.SkeletonAnimation.Runtime.Pose.TtRuntimePoseUtility.GetIndex(boneDesc.NameHash, meshSpaceRutimePose);
+                    var index = Animation.SkeletonAnimation.Runtime.Pose.TtRuntimePoseUtility.GetIndex(boneDesc.NameHash, meshSpaceRuntimePose);
                     if(index.IsValid())
                     {
-                        //var trans = limPose.Transtorm;
-                        var trans = meshSpaceRutimePose.Transforms[index.Value];
+                        var trans = meshSpaceRuntimePose.Transforms[index.Value];
                         * ((Vector3*)absPos) = trans.Position.ToSingleVector3() + trans.Quat * boneDesc.InvPos;
-                        //*((Vector3*)absPos) = Vector3.Zero;
-                        tempPos.Add(*absPos);
                         absPos->W = 0;
                         *absQuat = boneDesc.InvQuat * trans.Quat;
-                        var qq = boneDesc.InvQuat* trans.Quat;
-                        //*absQuat = Quaternion.Identity;
                     }
                     
                     absPos++;

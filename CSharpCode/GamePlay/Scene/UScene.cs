@@ -17,7 +17,8 @@ namespace EngineNS.GamePlay.Scene
         }
         public override async System.Threading.Tasks.Task<IO.IAsset> LoadAsset()
         {
-            return await UEngine.Instance.GfxDevice.TextureManager.GetTexture(GetAssetName());
+            //return await UEngine.Instance.GfxDevice.TextureManager.GetTexture(GetAssetName());
+            return null;
         }
         public override bool CanRefAssetType(IO.IAssetMeta ameta)
         {
@@ -39,6 +40,10 @@ namespace EngineNS.GamePlay.Scene
     public partial class UScene : UNode, IO.IAsset
     {
         public const string AssetExt = ".scene";
+        public override string ToString()
+        {
+            return this.AssetName.ToString();
+        }
         public class SceneCreateAttribute : IO.CommonCreateAttribute
         {
             public override async Thread.Async.TtTask DoCreate(RName dir, Rtti.UTypeDesc type, string ext)

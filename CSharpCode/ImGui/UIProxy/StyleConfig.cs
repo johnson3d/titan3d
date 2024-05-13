@@ -221,7 +221,7 @@ namespace EngineNS.EGui.UIProxy
         [Category("Button")]
         [Controls.PropertyGrid.PGShowInPropertyGrid]
         [Controls.PropertyGrid.UByte4ToColor4PickerEditor(IsABGR = true)]
-        public UInt32 ToolButtonTextColor_Press = 0xFFFFFFFF;// new Vector4(1.00f, 1.00f, 1.00f, 1.00f);
+        public UInt32 ToolButtonTextColor_Press = 0xFFE8A200;// new Vector4(1.00f, 1.00f, 1.00f, 1.00f);
 
         // PropertyGrid
         [Category("PropertyGrid")]

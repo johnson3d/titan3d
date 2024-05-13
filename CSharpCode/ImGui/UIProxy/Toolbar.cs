@@ -211,6 +211,10 @@ namespace EngineNS.EGui.UIProxy
         {
             return DrawSeparator(drawList, drawData, NextItemOffset, NextItemSpacing);
         }
+        public static bool DrawSeparator(in ImDrawList drawList, float itemOffset = 0, float itemSpacing = -1)
+        {
+            return DrawSeparator(in drawList, in Support.UAnyPointer.Default, itemOffset, itemSpacing);
+        }
         public static bool DrawSeparator(in ImDrawList drawList, in Support.UAnyPointer drawData, float itemOffset = 0, float itemSpacing = -1)
         {
             ImGuiAPI.SameLine(itemOffset, itemSpacing);

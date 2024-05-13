@@ -142,7 +142,19 @@ namespace CompilingGenerator
             if (classSymbol == null || bindPropertySymbol == null || attachedPropertySymbol == null)
                 return "";
             var namespaceName = classSymbol.ContainingNamespace.ToDisplayString();
+            var genericTypeName = "___T___";
             var className = classSymbol.Name;
+            var classGeneric = "";
+            if(classSymbol.IsGenericType)
+            {
+                classGeneric = "<";
+                foreach(var arg in classSymbol.TypeArguments)
+                {
+                    classGeneric += arg.Name + ",";
+                }
+                classGeneric = classGeneric.TrimEnd(',');
+                classGeneric += ">";
+            }
             bool baseHasBindObjectInterface = false;
             var baseType = classSymbol.BaseType;
             bool baseFromUIElement = false;
@@ -180,15 +192,15 @@ namespace CompilingGenerator
             string bindImpSource = "";
             string setValueWithPropertyName = $@"
 #nullable enable
-        public{(baseHasBindObjectInterface ? " override" : " virtual")} void SetValue<T>(in T value, [CallerMemberName] string? propertyName = null)
+        public{(baseHasBindObjectInterface ? " override" : " virtual")} void SetValue<{genericTypeName}>(in {genericTypeName} value, [CallerMemberName] string? propertyName = null)
 #nullable disable
         {{
             if(string.IsNullOrEmpty(propertyName))
                 return;
             var propertyNameHash = Standart.Hash.xxHash.xxHash64.ComputeHash(propertyName);
-            SetValue_<T>(in value, in propertyNameHash);
+            SetValue_<{genericTypeName}>(in value, in propertyNameHash);
         }}
-        protected{(baseHasBindObjectInterface ? " override" : " virtual")} void SetValue_<T>(in T value, in UInt64 propertyNameHash)
+        protected{(baseHasBindObjectInterface ? " override" : " virtual")} void SetValue_<{genericTypeName}>(in {genericTypeName} value, in UInt64 propertyNameHash)
         {{";
             bool hasSetValueWithPropertyNameSwitch = false;
             string setValueWithPropertyNameSwitch = $@"
@@ -197,15 +209,15 @@ namespace CompilingGenerator
 
             string getValueWithPropertyName = $@"
 #nullable enable
-        public{(baseHasBindObjectInterface ? " override" : " virtual")} T GetValue<T>([CallerMemberName] string? propertyName = null)
+        public{(baseHasBindObjectInterface ? " override" : " virtual")} {genericTypeName} GetValue<{genericTypeName}>([CallerMemberName] string? propertyName = null)
 #nullable disable
         {{
             if(string.IsNullOrEmpty(propertyName))
-                return default(T);
+                return default({genericTypeName});
             var propertyNameHash = Standart.Hash.xxHash.xxHash64.ComputeHash(propertyName);
-            return GetValue_<T>(in propertyNameHash);
+            return GetValue_<{genericTypeName}>(in propertyNameHash);
         }}
-        protected{(baseHasBindObjectInterface ? " override" : " virtual")} T GetValue_<T>(in UInt64 propertyNameHash)
+        protected{(baseHasBindObjectInterface ? " override" : " virtual")} {genericTypeName} GetValue_<{genericTypeName}>(in UInt64 propertyNameHash)
         {{";
             bool hasGetValueWithPropertyNameSwitch = false;
             string getValueWithPropertyNameSwitch = $@"
@@ -286,7 +298,7 @@ namespace {namespaceName}
             }
 
             source += $@"
-    public partial class {className}{attributes}
+    public partial class {className}{classGeneric}{attributes}
     {{";
             var bindExprDicName = $"mBindExprDic";
             var triggerDicName = "mPropertyTriggers_";
@@ -360,7 +372,7 @@ namespace {namespaceName}
                         if (valEditorAttOpt != null && valEditorAttOpt.AttributeClass != null)
                         {
                             var editorName = valEditorAttOpt.AttributeClass.ToDisplayString();
-                            valEditorStr = @$"typeof({namespaceName}.{className}).GetProperty(""{propName}"").GetCustomAttributes(typeof({editorName}), false)[0] as {editorName}";
+                            valEditorStr = @$"typeof({namespaceName}.{className}{classGeneric}).GetProperty(""{propName}"").GetCustomAttributes(typeof({editorName}), false)[0] as {editorName}";
                         }
                         var displayNameAttOpt = propSymbol.GetAttributes().SingleOrDefault(ad =>
                         {
@@ -377,7 +389,7 @@ namespace {namespaceName}
                         if (displayNameAttOpt != null && displayNameAttOpt.AttributeClass != null)
                         {
                             var attName = displayNameAttOpt.AttributeClass.ToDisplayString();
-                            displayNameStr = @$"typeof({namespaceName}.{className}).GetProperty(""{propName}"").GetCustomAttributes(typeof({attName}), false)[0] as {attName}";
+                            displayNameStr = @$"typeof({namespaceName}.{className}{classGeneric}).GetProperty(""{propName}"").GetCustomAttributes(typeof({attName}), false)[0] as {attName}";
                         }
                         var valCategoryAttData = propSymbol.GetAttributes().SingleOrDefault(ad => (ad.AttributeClass == null) ? false : (ad.AttributeClass.ToDisplayString() == "System.ComponentModel.CategoryAttribute"));
                         string categoryValue = "";
@@ -387,10 +399,10 @@ namespace {namespaceName}
                         if (!classSymbol.MemberNames.Any(name => bindPropName == name))
                         {
                             source += @$"
-        public static EngineNS.UI.Bind.TtBindableProperty {bindPropName} = EngineNS.UEngine.Instance.UIBindManager.Register<{propTypeDisplayName}, {className}>(""{propName}"",{(string.IsNullOrEmpty(categoryValue) ? "" : @$" ""{categoryValue}"",")} {defValStr}, null, {valEditorStr}, {displayNameStr});";
+        public static EngineNS.UI.Bind.TtBindableProperty {bindPropName} = EngineNS.UEngine.Instance.UIBindManager.Register<{propTypeDisplayName}, {className}{classGeneric}>(""{propName}"",{(string.IsNullOrEmpty(categoryValue) ? "" : @$" ""{categoryValue}"",")} {defValStr}, null, {valEditorStr}, {displayNameStr});";
                         }
 
-                        var bindingImpName = $"{className}_BindingImp_{propName}";
+                        //var bindingImpName = $"{className}_BindingImp_{propName}";
                         var bindingExprImpName = $"{className}_BindingExprImp_{propName}";
                         //var bindingMethodExprImpName = $"{className}_BindingMethodExprImp_{propName}";
 
@@ -399,7 +411,7 @@ namespace {namespaceName}
                         createBindingExpressionMethodSwitch += $@"
                 case {propNameHash}: //{propName}
                     {{
-                        var beImp = new {bindingExprImpName}(binding, {propName}, parent);
+                        var beImp = new {bindingExprImpName}{classGeneric}(binding, {propName}, parent);
                         beImp.TargetObject = this;
                         beImp.TargetProperty = (EngineNS.UI.Bind.TtBindableProperty<{propTypeDisplayName}>){bindPropName};
                         return beImp;
@@ -421,19 +433,19 @@ namespace {namespaceName}
                     valueDynamic_{propName}.HostElement = this;
                     valueDynamic_{propName}.PropertyNameInHost = ""{propName}"";
                     valueDynamic_{propName}.PropertyNameInHostHash = {propNameHash};
-                    SetValue<T>(valueDynamic_{propName}, {bindPropName});
+                    SetValue<{genericTypeName}>(valueDynamic_{propName}, {bindPropName});
                     return;";
                         }
                         else
                         {
                             setValueWithPropertyNameSwitch += $@"
-                    SetValue<T>(value, {bindPropName});
+                    SetValue<{genericTypeName}>(value, {bindPropName});
                     return;";
                         }
                         hasGetValueWithPropertyNameSwitch = true;
                         getValueWithPropertyNameSwitch += $@"
                 case {propNameHash}: //{propName}
-                    return GetValue<T>({bindPropName});";
+                    return GetValue<{genericTypeName}>({bindPropName});";
 
                         getPropertyValueSwitch += $@"
                 case {propNameHash}: //{propName}
@@ -507,7 +519,7 @@ namespace {namespaceName}
                         }
 
                         bindImpSource += $@"
-    public class {bindingExprImpName} : EngineNS.UI.Bind.TtBindingExpression<{propTypeDisplayName}>
+    public class {bindingExprImpName}{classGeneric} : EngineNS.UI.Bind.TtBindingExpression<{propTypeDisplayName}>
     {{
         public {bindingExprImpName}(EngineNS.UI.Bind.TtBindingBase binding, EngineNS.UI.Bind.TtBindingExpressionBase parent)
             : base(binding, parent)
@@ -539,7 +551,7 @@ namespace {namespaceName}
             else
             {{
                 TargetProperty?.OnValueChanged?.Invoke(TargetObject, TargetProperty, GetFinalValue<{propTypeDisplayName}>().GetValue<{propTypeDisplayName}>());
-                (({namespaceName}.{className})TargetObject).{propName} = GetValueStore<{propTypeDisplayName}>().GetValue<{propTypeDisplayName}>();
+                (({namespaceName}.{className}{classGeneric})TargetObject).{propName} = GetValueStore<{propTypeDisplayName}>().GetValue<{propTypeDisplayName}>();
             }}
         }}";
                         }
@@ -673,7 +685,7 @@ namespace {namespaceName}
                         if (valEditorAttOpt != null && valEditorAttOpt.AttributeClass != null)
                         {
                             var editorName = valEditorAttOpt.AttributeClass.ToDisplayString();
-                            valEditorStr = @$"typeof({namespaceName}.{className}).GetMethod(""{methodName}"", System.Reflection.BindingFlags.Static | System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.NonPublic, null, new Type[] {{ typeof({methodSymbol.Parameters[0].Type.ToDisplayString()}), typeof({methodSymbol.Parameters[1].Type.ToDisplayString()}), typeof({methodSymbol.Parameters[2].Type.ToDisplayString()}) }}, null).GetCustomAttributes(typeof({editorName}), false)[0] as {editorName}";
+                            valEditorStr = @$"typeof({namespaceName}.{className}{classGeneric}).GetMethod(""{methodName}"", System.Reflection.BindingFlags.Static | System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.NonPublic, null, new Type[] {{ typeof({methodSymbol.Parameters[0].Type.ToDisplayString()}), typeof({methodSymbol.Parameters[1].Type.ToDisplayString()}), typeof({methodSymbol.Parameters[2].Type.ToDisplayString()}) }}, null).GetCustomAttributes(typeof({editorName}), false)[0] as {editorName}";
                         }
                         var displayNameAttOpt = methodSymbol.GetAttributes().SingleOrDefault(ad =>
                         {
@@ -690,12 +702,12 @@ namespace {namespaceName}
                         if (displayNameAttOpt != null && displayNameAttOpt.AttributeClass != null)
                         {
                             var attName = displayNameAttOpt.AttributeClass.ToDisplayString();
-                            displayNameStr = @$"typeof({namespaceName}.{className}).GetMethod(""{methodName}"", System.Reflection.BindingFlags.Static | System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.NonPublic, null, new Type[] {{ typeof({methodSymbol.Parameters[0].Type.ToDisplayString()}), typeof({methodSymbol.Parameters[1].Type.ToDisplayString()}), typeof({methodSymbol.Parameters[2].Type.ToDisplayString()}) }}, null).GetCustomAttributes(typeof({attName}), false)[0] as {attName}";
+                            displayNameStr = @$"typeof({namespaceName}.{className}{classGeneric}).GetMethod(""{methodName}"", System.Reflection.BindingFlags.Static | System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.NonPublic, null, new Type[] {{ typeof({methodSymbol.Parameters[0].Type.ToDisplayString()}), typeof({methodSymbol.Parameters[1].Type.ToDisplayString()}), typeof({methodSymbol.Parameters[2].Type.ToDisplayString()}) }}, null).GetCustomAttributes(typeof({attName}), false)[0] as {attName}";
                         }
                         if (!classSymbol.MemberNames.Any(name => bindPropName == name))
                         {
                             source += $@"
-        public static EngineNS.UI.Bind.TtBindableProperty {bindPropName} = EngineNS.UEngine.Instance.UIBindManager.RegisterAttached<{propTypeDisplayName}, {className}>(""{nameVal}"",{(string.IsNullOrEmpty(categoryVal) ? "" : @$" ""{categoryVal}"",")} {defValStr}, {methodName}, {valEditorStr}, {displayNameStr});";
+        public static EngineNS.UI.Bind.TtBindableProperty {bindPropName} = EngineNS.UEngine.Instance.UIBindManager.RegisterAttached<{propTypeDisplayName}, {className}{classGeneric}>(""{nameVal}"",{(string.IsNullOrEmpty(categoryVal) ? "" : @$" ""{categoryVal}"",")} {defValStr}, {methodName}, {valEditorStr}, {displayNameStr});";
                         }
 
                         if (!classSymbol.MemberNames.Any(name => $"Get{nameVal}" == name))
@@ -778,7 +790,7 @@ namespace {namespaceName}
             if (baseHasBindObjectInterface)
             {
                 setValueWithPropertyName += $@"
-            base.SetValue_<T>(in value, in propertyNameHash);
+            base.SetValue_<{genericTypeName}>(in value, in propertyNameHash);
         }}
 ";
             }
@@ -790,7 +802,7 @@ namespace {namespaceName}
             }
             source += setValueWithPropertyName;
             source += $@"
-        public{(baseHasBindObjectInterface ? " override" : " virtual")} void SetValue<T>(in T value, EngineNS.UI.Bind.TtBindableProperty bp)
+        public{(baseHasBindObjectInterface ? " override" : " virtual")} void SetValue<{genericTypeName}>(in {genericTypeName} value, EngineNS.UI.Bind.TtBindableProperty bp)
         {{
             EngineNS.UI.Bind.TtBindablePropertyValueBase bpVal = null;
             lock ({bindExprDicName})
@@ -799,13 +811,13 @@ namespace {namespaceName}
                 {{
                     if (bp.IsAttachedProperty)
                     {{
-                        //bpVal = new EngineNS.UI.Bind.TtAttachedValue<EngineNS.UI.Bind.IBindableObject, T>(bpHost);
+                        //bpVal = new EngineNS.UI.Bind.TtAttachedValue<EngineNS.UI.Bind.IBindableObject, {genericTypeName}>(bpHost);
                         //{bindExprDicName}[bp] = bpVal;
                     }}
                     else
                     {{
                         var expVals = new EngineNS.UI.Bind.TtExpressionValues();
-                        expVals.Expressions.Add(new EngineNS.UI.Bind.TtDefaultValueExpression(new EngineNS.UI.Bind.ValueStore<T>(((EngineNS.UI.Bind.TtBindableProperty<T>)bp).DefaultValue)));
+                        expVals.Expressions.Add(new EngineNS.UI.Bind.TtDefaultValueExpression(new EngineNS.UI.Bind.ValueStore<{genericTypeName}>(((EngineNS.UI.Bind.TtBindableProperty<{genericTypeName}>)bp).DefaultValue)));
                         bpVal = expVals;
                         {bindExprDicName}[bp] = bpVal;
                     }}
@@ -815,12 +827,12 @@ namespace {namespaceName}
                 return;
             if({triggerDicName}.HasTrigger(bp))
             {{
-                var oldVal = bpVal.GetValue<T>(bp);
-                bpVal.SetValue<T>(this, bp, in value);
+                var oldVal = bpVal.GetValue<{genericTypeName}>(bp);
+                bpVal.SetValue<{genericTypeName}>(this, bp, in value);
                 {triggerDicName}.InvokeTriggers(this, bp, oldVal, value);
             }}
             else
-                bpVal.SetValue<T>(this, bp, in value);
+                bpVal.SetValue<{genericTypeName}>(this, bp, in value);
 
             if(HostElement != null && !string.IsNullOrEmpty(PropertyNameInHost))
             {{
@@ -837,30 +849,30 @@ namespace {namespaceName}
             if (baseHasBindObjectInterface)
             {
                 getValueWithPropertyName += $@"
-            return base.GetValue_<T>(in propertyNameHash);
+            return base.GetValue_<{genericTypeName}>(in propertyNameHash);
         }}
 ";
             }
             else
             {
                 getValueWithPropertyName += $@"
-            return default(T);
+            return default({genericTypeName});
         }}
 ";
             }
             source += getValueWithPropertyName;
             source += $@"
-        public{(baseHasBindObjectInterface ? " override" : " virtual")} T GetValue<T>(EngineNS.UI.Bind.TtBindableProperty bp)
+        public{(baseHasBindObjectInterface ? " override" : " virtual")} {genericTypeName} GetValue<{genericTypeName}>(EngineNS.UI.Bind.TtBindableProperty bp)
         {{
             if (bp == null)
-                return default(T);
+                return default({genericTypeName});
             EngineNS.UI.Bind.TtBindablePropertyValueBase bpVal = null;
             lock ({bindExprDicName})
             {{
                 if (!{bindExprDicName}.TryGetValue(bp, out bpVal))
-                    return default(T);
+                    return default({genericTypeName});
             }}
-            return bpVal.GetValue<T>(bp);
+            return bpVal.GetValue<{genericTypeName}>(bp);
         }}
 ";
             if (baseFromUIElement && !classSymbol.Constructors.Any(symbol => ((symbol.Parameters.Length == 0) && (!symbol.IsImplicitlyDeclared) && (!symbol.IsStatic))))
@@ -963,7 +975,7 @@ namespace {namespaceName}
             if (!classSymbol.MemberNames.Any(name => "ResetHostPropertyData" == name))
             {
                 source += $@"
-        protected{(baseHasBindObjectInterface ? " override" : " virtual")} void ResetHostPropertyData<T>(in T value, in T oldValue, in UInt64 propertyHash, in string propertyName)
+        protected{(baseHasBindObjectInterface ? " override" : " virtual")} void ResetHostPropertyData<{genericTypeName}>(in {genericTypeName} value, in {genericTypeName} oldValue, in UInt64 propertyHash, in string propertyName)
         {{
             if(string.IsNullOrEmpty(propertyName))
                 return;";
@@ -1005,7 +1017,7 @@ namespace {namespaceName}
             {
                 source += $@"
 #nullable enable
-        public{(baseHasBindObjectInterface ? " override" : " virtual")} void OnValueChange<T>(in T value, in T oldValue, [CallerMemberName] string? propertyName = null)
+        public{(baseHasBindObjectInterface ? " override" : " virtual")} void OnValueChange<{genericTypeName}>(in {genericTypeName} value, in {genericTypeName} oldValue, [CallerMemberName] string? propertyName = null)
 #nullable disable
         {{
             if(string.IsNullOrEmpty(propertyName))
@@ -1028,12 +1040,12 @@ namespace {namespaceName}
             {{
                 if({triggerDicName}.HasTrigger(bp))
                 {{
-                    var oldVal = bpVal.GetValue<T>(bp);
-                    bpVal.SetValue<T>(this, bp, in value);
+                    var oldVal = bpVal.GetValue<{genericTypeName}>(bp);
+                    bpVal.SetValue<{genericTypeName}>(this, bp, in value);
                     {triggerDicName}.InvokeTriggers(this, bp, oldVal, value);
                 }}
                 else
-                    bpVal.SetValue<T>(this, bp, value);
+                    bpVal.SetValue<{genericTypeName}>(this, bp, value);
             }}
             if(HostElement != null && !string.IsNullOrEmpty(PropertyNameInHost))
             {{
@@ -1149,18 +1161,18 @@ namespace {namespaceName}
             if(!classSymbol.MemberNames.Any(name => "AddAttachedProperty" == name))
             {
                 source += $@"
-        public{(baseHasBindObjectInterface? " override" : " virtual")} void AddAttachedProperty<T>(EngineNS.UI.Bind.TtBindableProperty property, EngineNS.UI.Bind.IBindableObject bpHost, in T defaultValue)
+        public{(baseHasBindObjectInterface? " override" : " virtual")} void AddAttachedProperty<{genericTypeName}>(EngineNS.UI.Bind.TtBindableProperty property, EngineNS.UI.Bind.IBindableObject bpHost, in {genericTypeName} defaultValue)
         {{
-            var bpVal = new EngineNS.UI.Bind.TtAttachedValue<EngineNS.UI.Bind.IBindableObject, T>(bpHost);
+            var bpVal = new EngineNS.UI.Bind.TtAttachedValue<EngineNS.UI.Bind.IBindableObject, {genericTypeName}>(bpHost);
             mBindExprDic[property] = bpVal;
             if(mPropertyTriggers_.HasTrigger(property))
             {{
-                var oldVal = bpVal.GetValue<T>(property);
-                bpVal.SetValue<T>(this, property, in defaultValue);
+                var oldVal = bpVal.GetValue<{genericTypeName}>(property);
+                bpVal.SetValue<{genericTypeName}>(this, property, in defaultValue);
                 mPropertyTriggers_.InvokeTriggers(this, property, oldVal, defaultValue);
             }}
             else
-                bpVal.SetValue<T>(this, property, in defaultValue);
+                bpVal.SetValue<{genericTypeName}>(this, property, in defaultValue);
         }}";
             }
 
@@ -1280,10 +1292,10 @@ namespace {namespaceName}
                 if(!baseHasBindObjectInterface)
                 {
                     source += $@"
-        public delegate void TourBindProperyAction<T>(string propertyName, EngineNS.UI.Bind.TtBindableProperty bindProperty, ref T data);";
+        public delegate void TourBindProperyAction<{genericTypeName}>(string propertyName, EngineNS.UI.Bind.TtBindableProperty bindProperty, ref {genericTypeName} data);";
                 }
                 source += $@"
-        public{(baseHasBindObjectInterface ? " override" : " virtual")} void TourBindProperties<T>(ref T data, TourBindProperyAction<T> tourAction)
+        public{(baseHasBindObjectInterface ? " override" : " virtual")} void TourBindProperties<{genericTypeName}>(ref {genericTypeName} data, TourBindProperyAction<{genericTypeName}> tourAction)
         {{
             if(tourAction == null)
                 return;
@@ -1398,7 +1410,7 @@ namespace {namespaceName}
         }}";
             if (!classSymbol.MemberNames.Any(name => "SetPropertyValue" == name))
             {
-                // todo: 这里可以生成代码来设置属性，不需要通过反射，另外可以生成泛型的 SetPropertyValue(string propertyName, T value) 来对应设置不同类型的属性，减少GC
+                // todo: 这里可以生成代码来设置属性，不需要通过反射，另外可以生成泛型的 SetPropertyValue(string propertyName, {genericTypeName} value) 来对应设置不同类型的属性，减少GC
                 source += $@"
         public {(baseHasBindObjectInterface ? "override" : "virtual")} void SetPropertyValue(string propertyName, object value)
         {{
@@ -1497,7 +1509,7 @@ namespace {namespaceName}
             if (!classSymbol.MemberNames.Any(name => "IsMatchTriggerCondition" == name))
             {
                 source += $@"
-        public {(baseHasBindObjectInterface ? "override" : "virtual")} bool IsMatchTriggerCondition<T>(EngineNS.UI.Trigger.TtTriggerConditionLogical<T> triggerCondition)
+        public {(baseHasBindObjectInterface ? "override" : "virtual")} bool IsMatchTriggerCondition<{genericTypeName}>(EngineNS.UI.Trigger.TtTriggerConditionLogical<{genericTypeName}> triggerCondition)
         {{
             if(triggerCondition.Property.HostType.IsParentClass(this.GetType()))
             {{";
@@ -1516,9 +1528,9 @@ namespace {namespaceName}
                     case {Standart.Hash.xxHash.xxHash64.ComputeHash(valSymbol.Name)}: // {valSymbol.Name}
                         switch(triggerCondition.Op)
                         {{
-                            case EngineNS.UI.Trigger.TtTriggerConditionLogical<T>.ELogicalOperation.Equal:
+                            case EngineNS.UI.Trigger.TtTriggerConditionLogical<{genericTypeName}>.ELogicalOperation.Equal:
                                 return this.{valSymbol.Name} == triggerCondition.Value.GetValue<{propertySymbol.Type.ToDisplayString()}>();
-                            case EngineNS.UI.Trigger.TtTriggerConditionLogical<T>.ELogicalOperation.NotEqual:
+                            case EngineNS.UI.Trigger.TtTriggerConditionLogical<{genericTypeName}>.ELogicalOperation.NotEqual:
                                 return this.{valSymbol.Name} != triggerCondition.Value.GetValue<{propertySymbol.Type.ToDisplayString()}>();
                         }}
                         break;";
@@ -1529,9 +1541,9 @@ namespace {namespaceName}
                     case {Standart.Hash.xxHash.xxHash64.ComputeHash(valSymbol.Name)}: // {valSymbol.Name}
                         switch(triggerCondition.Op)
                         {{
-                            case EngineNS.UI.Trigger.TtTriggerConditionLogical<T>.ELogicalOperation.Equal:
+                            case EngineNS.UI.Trigger.TtTriggerConditionLogical<{genericTypeName}>.ELogicalOperation.Equal:
                                 return this.{valSymbol.Name}.Equals(triggerCondition.Value.GetValue<{propertySymbol.Type.ToDisplayString()}>());
-                            case EngineNS.UI.Trigger.TtTriggerConditionLogical<T>.ELogicalOperation.NotEqual:
+                            case EngineNS.UI.Trigger.TtTriggerConditionLogical<{genericTypeName}>.ELogicalOperation.NotEqual:
                                 return !this.{valSymbol.Name}.Equals(triggerCondition.Value.GetValue<{propertySymbol.Type.ToDisplayString()}>());
                         }}
                         break;";
@@ -1568,10 +1580,10 @@ namespace {namespaceName}
             {{
                 switch(triggerCondition.Op)
                 {{
-                    case EngineNS.UI.Trigger.TtTriggerConditionLogical<T>.ELogicalOperation.Equal:
-                        return triggerCondition.Value.IsValueEqual<T>(this.GetValue<T>(triggerCondition.Property));
-                    case EngineNS.UI.Trigger.TtTriggerConditionLogical<T>.ELogicalOperation.NotEqual:
-                        return !triggerCondition.Value.IsValueEqual<T>(this.GetValue<T>(triggerCondition.Property));
+                    case EngineNS.UI.Trigger.TtTriggerConditionLogical<{genericTypeName}>.ELogicalOperation.Equal:
+                        return triggerCondition.Value.IsValueEqual<{genericTypeName}>(this.GetValue<{genericTypeName}>(triggerCondition.Property));
+                    case EngineNS.UI.Trigger.TtTriggerConditionLogical<{genericTypeName}>.ELogicalOperation.NotEqual:
+                        return !triggerCondition.Value.IsValueEqual<{genericTypeName}>(this.GetValue<{genericTypeName}>(triggerCondition.Property));
                 }}
             }}
             return false;
@@ -1581,13 +1593,13 @@ namespace {namespaceName}
             if (!classSymbol.MemberNames.Any(name => "SetFromTriggerSimpleValue" == name))
             {
                 source += $@"
-        public {(baseHasBindObjectInterface ? "override" : "virtual")} void SetFromTriggerSimpleValue<T>(EngineNS.UI.Trigger.TtTriggerSimpleValue<T> triggerSimpleValue)
+        public {(baseHasBindObjectInterface ? "override" : "virtual")} void SetFromTriggerSimpleValue<{genericTypeName}>(EngineNS.UI.Trigger.TtTriggerSimpleValue<{genericTypeName}> triggerSimpleValue)
         {{
             var objType = this.GetType();
             if(triggerSimpleValue.Property.IsAttachedProperty)
             {{
-                triggerSimpleValue.OldValueStore.SetValue(this.GetValue<T>(triggerSimpleValue.Property));
-                this.SetValue(triggerSimpleValue.ValueStore.GetValue<T>(), triggerSimpleValue.Property);
+                triggerSimpleValue.OldValueStore.SetValue(this.GetValue<{genericTypeName}>(triggerSimpleValue.Property));
+                this.SetValue(triggerSimpleValue.ValueStore.GetValue<{genericTypeName}>(), triggerSimpleValue.Property);
             }}
             else if(triggerSimpleValue.Property.HostType.IsEqual(objType) || triggerSimpleValue.Property.HostType.IsParentClass(objType))
             {{";
@@ -1653,8 +1665,8 @@ namespace {namespaceName}
             }}
             else
             {{
-                triggerSimpleValue.OldValueStore.SetValue(this.GetValue<T>(triggerSimpleValue.Property));
-                this.SetValue(triggerSimpleValue.ValueStore.GetValue<T>(), triggerSimpleValue.Property);
+                triggerSimpleValue.OldValueStore.SetValue(this.GetValue<{genericTypeName}>(triggerSimpleValue.Property));
+                this.SetValue(triggerSimpleValue.ValueStore.GetValue<{genericTypeName}>(), triggerSimpleValue.Property);
             }}
         }}";
             }
@@ -1709,12 +1721,12 @@ namespace {namespaceName}
             if (!classSymbol.MemberNames.Any(name => "RestoreFromTriggerSimpleValue" == name))
             {
                 source += $@"
-        public {(baseHasBindObjectInterface ? "override" : "virtual")} void RestoreFromTriggerSimpleValue<T>(EngineNS.UI.Trigger.TtTriggerSimpleValue<T> triggerSimpleValue)
+        public {(baseHasBindObjectInterface ? "override" : "virtual")} void RestoreFromTriggerSimpleValue<{genericTypeName}>(EngineNS.UI.Trigger.TtTriggerSimpleValue<{genericTypeName}> triggerSimpleValue)
         {{
             var objType = this.GetType();
             if(triggerSimpleValue.Property.IsAttachedProperty)
             {{
-                this.SetValue(triggerSimpleValue.OldValueStore.GetValue<T>(), triggerSimpleValue.Property);
+                this.SetValue(triggerSimpleValue.OldValueStore.GetValue<{genericTypeName}>(), triggerSimpleValue.Property);
             }}
             else if(triggerSimpleValue.Property.HostType.IsEqual(objType) || triggerSimpleValue.Property.HostType.IsParentClass(objType))
             {{";
@@ -1778,7 +1790,7 @@ namespace {namespaceName}
                 source += $@"
             }}
             else
-                this.SetValue(triggerSimpleValue.OldValueStore.GetValue<T>(), triggerSimpleValue.Property);
+                this.SetValue(triggerSimpleValue.OldValueStore.GetValue<{genericTypeName}>(), triggerSimpleValue.Property);
         }}";
             }
 
@@ -2244,11 +2256,11 @@ namespace {namespaceName}
                 if(!baseHasBindObjectInterface)
                 {
                     source += $@"
-        public delegate void Delegate_TourContentsPresenterContainer<T>(EngineNS.UI.Controls.TtUIElement element, ref T data);";
+        public delegate void Delegate_TourContentsPresenterContainer<{genericTypeName}>(EngineNS.UI.Controls.TtUIElement element, ref {genericTypeName} data);";
                 }
 
                 source += $@"
-        public {(baseHasBindObjectInterface ? "override" : "virtual")} void TourContentsPresenterContainers<T>(Delegate_TourContentsPresenterContainer<T> action, ref T data)
+        public {(baseHasBindObjectInterface ? "override" : "virtual")} void TourContentsPresenterContainers<{genericTypeName}>(Delegate_TourContentsPresenterContainer<{genericTypeName}> action, ref {genericTypeName} data)
         {{";
                 source += tourContentsPresenterContainersStr;
                 if (baseHasBindObjectInterface)
@@ -2261,16 +2273,19 @@ namespace {namespaceName}
             }
             if(!classSymbol.MemberNames.Any(name => "SetExpressionValue" == name))
             {
-                if(!string.IsNullOrEmpty(setExpressionValueSwitchStr))
+                source += $@"
+        protected {(baseHasBindObjectInterface ? "override" : "virtual")} void SetExpressionValue_(EngineNS.UI.Bind.TtBindingExpressionBase exp, EngineNS.UI.Bind.TtBindableProperty bp, in UInt64 propertyNameHash)
+        {{";
+                if (!string.IsNullOrEmpty(setExpressionValueSwitchStr))
                 {
                     source += $@"
-        protected {(baseHasBindObjectInterface ? "override" : "virtual")} void SetExpressionValue_(EngineNS.UI.Bind.TtBindingExpressionBase exp, EngineNS.UI.Bind.TtBindableProperty bp, in UInt64 propertyNameHash)
-        {{
             switch(propertyNameHash)
             {{";
                     source += setExpressionValueSwitchStr;
                     source += $@"
-            }}
+            }}";
+                }
+                source += $@"
             {(baseHasBindObjectInterface ? "base.SetExpressionValue_(exp, bp, in propertyNameHash);" : "")}
         }}";
 
@@ -2280,7 +2295,6 @@ namespace {namespaceName}
             var propertyNameHash = Standart.Hash.xxHash.xxHash64.ComputeHash(bp.Name);
             SetExpressionValue_(exp, bp, in propertyNameHash);
         }}";
-                }
             }
 
             source += "\r\n    }\r\n";
@@ -2375,7 +2389,7 @@ namespace {namespaceName}
                 }
 
                 var classSource = ProcessClass(key as INamedTypeSymbol, groupSymbols, bindObjectMemberSymbols, bindPropertySymbol, attachedPropertySymbol, bindObjectSymbol, context);
-                var fileName = $"{key.ToDisplayString()}_bind.g.cs";
+                var fileName = $"{key.ToDisplayString().Replace('<', '_').Replace('>', '_')}_bind.g.cs";
                 context.AddSource(fileName, SourceText.From(classSource, Encoding.UTF8));
             }
         }

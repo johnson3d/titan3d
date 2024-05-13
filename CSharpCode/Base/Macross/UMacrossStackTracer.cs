@@ -68,13 +68,13 @@ namespace EngineNS.Macross
             tmp.SetValue(value);
             mFrameStates[name] = tmp;
         }
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public unsafe void SetWatchVariable(string name, void* value)
-        {
-            Support.UAnyPointer tmp = new Support.UAnyPointer();
-            tmp.Value.SetPointer((IntPtr)value);
-            mFrameStates[name] = tmp;
-        }
+        //[MethodImpl(MethodImplOptions.AggressiveInlining)]
+        //public unsafe void SetWatchVariable(string name, void* value)
+        //{
+        //    Support.UAnyPointer tmp = new Support.UAnyPointer();
+        //    tmp.Value.SetPointer((IntPtr)value);
+        //    mFrameStates[name] = tmp;
+        //}
         public bool HasWatchVariable(string name)
         {
             return mFrameStates.ContainsKey(name);
