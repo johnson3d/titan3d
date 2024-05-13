@@ -14,7 +14,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)EngineNS.Bricks.NodeGraph.UNodeGraph.macross.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)EngineNS.Bricks.Procedure.Node.UBezier.macross.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)EngineNS.Bricks.Procedure.Node.UProgram.macross.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)EngineNS.Bricks.Procedure.UBufferConponent.macross.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)EngineNS.Bricks.Procedure.UBufferComponent.macross.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)EngineNS.Bricks.Procedure.UPgcGraph.macross.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)EngineNS.Bricks.Procedure.UPgcGraphProgram.macross.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)EngineNS.Bricks.Procedure.UPgcNodeBase.macross.cs" />
@@ -26,8 +26,11 @@
     <Compile Include="$(MSBuildThisFileDirectory)EngineNS.Bricks.WorldSimulator.GOAP.IItemContain.macross.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)EngineNS.Converter.macross.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)EngineNS.CustomConvert.macross.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)EngineNS.GamePlay.Scene.UNode.macross.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)EngineNS.GamePlay.UGameInstance.macross.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)EngineNS.GamePlay.UMacrossGame.macross.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)EngineNS.Graphics.Mesh.TtMesh.macross.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)EngineNS.Graphics.Pipeline.Shader.UMaterial.macross.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)EngineNS.Graphics.Pipeline.UViewportSlate.macross.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)EngineNS.Macross.BaseClass.macross.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)EngineNS.Macross.SubClass1.macross.cs" />

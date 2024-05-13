@@ -196,7 +196,7 @@ public:
 	XndAttribute* FindFirstAttributeByFlags(UINT flags) {
 		for (auto i : mAttributes)
 		{
-			if (i->mFlags == flags)
+			if ((i->mFlags & flags) == flags)
 			{
 				return i;
 			}
