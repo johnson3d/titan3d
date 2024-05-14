@@ -256,7 +256,7 @@ namespace EngineNS.GamePlay.Scene
                 }
 
                 scene.AssetName = name;
-                if (await scene.LoadChildNode(world, scene, xnd.RootNode.mCoreObject) == false)
+                if (await scene.LoadChildNode(world, scene, xnd.RootNode.mCoreObject, false) == false)
                     return null;
 
                 scene.DFS_VisitNodeTree((UNode inNode, object inArg) =>
@@ -362,6 +362,16 @@ namespace EngineNS.GamePlay.Scene
                 }
             }
             Scenes.Add(name, new WeakReference<UScene>(scene));
+            return scene;
+        }
+        public async System.Threading.Tasks.Task<UScene> CreateScene(GamePlay.UWorld world, RName name)
+        {
+            System.GC.Collect();
+            UScene scene;
+            scene = await UScene.LoadScene(world, name);
+            if (scene == null)
+                return null;
+
             return scene;
         }
         public void UnloadScene(RName name)

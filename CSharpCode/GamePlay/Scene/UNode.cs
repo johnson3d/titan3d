@@ -19,6 +19,15 @@ namespace EngineNS.GamePlay.Scene
             //return System.Runtime.InteropServices.Marshal.SizeOf(this.GetType());
             return 1024;
         }
+        public bool IsDirty { get; set; } = false;
+        public void CheckDirty(UNode node)
+        {
+            if (IsDirty)
+            {
+                node.UpdateAbsTransform();
+                IsDirty = false;
+            }
+        }
         [Rtti.Meta]
         public UNode.ENodeStyles NodeStyles { get; set; } = 0;
         [Rtti.Meta(Order = 0)]
@@ -55,6 +64,7 @@ namespace EngineNS.GamePlay.Scene
         }
     }
     [Rtti.Meta()]
+    [EGui.Controls.PropertyGrid.PGCategoryFilters(ExcludeFilters = new string[] { "Misc" })]
     public partial class UNode : IDisposable
     {
         public virtual void Dispose()
@@ -291,17 +301,17 @@ namespace EngineNS.GamePlay.Scene
         {
             get
             {
-                if (mNodeData != null)
+                if (NodeData != null)
                 {
-                    return mNodeData.Name;
+                    return NodeData.Name;
                 }
                 return SceneId.ToString();
             }
             set
             {
-                if (mNodeData != null)
+                if (NodeData != null)
                 {
-                    mNodeData.Name = value;
+                    NodeData.Name = value;
                 }
             }
         }
@@ -369,6 +379,7 @@ namespace EngineNS.GamePlay.Scene
             mTemplateNodeData = data;
             mIsPrefab = true;
             OnSetPrefabTemplate();
+            OnAbsTransformChanged();
         }
         protected virtual void OnSetPrefabTemplate()
         {
@@ -378,7 +389,7 @@ namespace EngineNS.GamePlay.Scene
         [Category("Option")]
         public bool IsPrefab
         {
-            get => mIsPrefab && (mTemplateNodeData != null);
+            get => mIsPrefab;// && (mTemplateNodeData != null);
             set
             {
                 mIsPrefab = value;
@@ -604,7 +615,7 @@ namespace EngineNS.GamePlay.Scene
                 }   
             }
         }
-        public async System.Threading.Tasks.Task<bool> LoadChildNode(GamePlay.UWorld world, UNode scene, EngineNS.XndNode node)
+        public async System.Threading.Tasks.Task<bool> LoadChildNode(GamePlay.UWorld world, UNode scene, EngineNS.XndNode node, bool isPrefab)
         {
             for(uint i = 0; i < node.GetNumOfNode(); i++)
             {
@@ -620,11 +631,12 @@ namespace EngineNS.GamePlay.Scene
                 {
                     this.mIsPrefab = true;
                 }
-                UNodeData nodeData = Rtti.UTypeDescManager.CreateInstance(Rtti.UTypeDesc.TypeOf(attr.Name)) as UNodeData;
+                var nodeTypeDesc = Rtti.UTypeDesc.TypeOf(attr.Name);
+                UNodeData nodeData = Rtti.UTypeDescManager.CreateInstance(nodeTypeDesc) as UNodeData;
                 var nd = Rtti.UTypeDescManager.CreateInstance(Rtti.UTypeDesc.TypeOf(cldTypeStr)) as UNode;
                 if (nd == null || nodeData == null)
                 {
-                    Profiler.Log.WriteLine(Profiler.ELogTag.Warning, "Scene", $"SceneNode Load failed: NodeDataType={attr.Name}, NodeData={cldTypeStr}");
+                    Profiler.Log.WriteLine(Profiler.ELogTag.Warning, isPrefab? "Prefab" : "Scene", $"SceneNode Load failed: NodeDataType={attr.Name}, NodeData={cldTypeStr}");
                     continue;
                 }
                 
@@ -634,19 +646,32 @@ namespace EngineNS.GamePlay.Scene
                     try
                     {
                         //ar.Tag = nd;
-                        System.Type placementType = null;                        
+                        System.Type placementType = typeof(UPlacement);
                         if (this.mIsPrefab == false)
                         {
                             if (false == ar.ReadTo(data, this))
                             {
                                 continue;
                             }
+
+                            if (isPrefab)
+                            {
+                                var old = FindFirstChild(nodeData.Name, nd.GetType());
+                                if (old != null)
+                                {
+                                    var typeDesc = Rtti.UTypeDesc.TypeOf(nodeData.GetType());
+                                    var meta = Rtti.TtClassMetaManager.Instance.GetMeta(typeDesc);
+                                    meta.CopyObjectMetaField(old.NodeData, nodeData);
+                                    nodeData = old.NodeData;
+                                    nodeData.IsDirty = true;
+                                }
+                            }
                         }
 
-                        var ok = await nd.InitializeNode(world, nodeData, EBoundVolumeType.None, placementType);
+                        var ok = await nd.InitializeNode(world, nodeData, EBoundVolumeType.Box, placementType);
                         if (ok == false)
                         {
-                            Profiler.Log.WriteLine(Profiler.ELogTag.Warning, "Scene", $"SceneNode Load Initialize failed: NodeDataType={attr.Name}, NodeData={cldTypeStr}");
+                            Profiler.Log.WriteLine(Profiler.ELogTag.Warning, isPrefab ? "Prefab" : "Scene", $"SceneNode Load Initialize failed: NodeDataType={attr.Name}, NodeData={cldTypeStr}");
                             continue;
                         }
                         //nd.NodeData = data as UNodeData;
@@ -661,7 +686,7 @@ namespace EngineNS.GamePlay.Scene
                 if (nd.Placement != null)
                 {
                     nd.Parent = this;
-                    await nd.LoadChildNode(world, scene, cld);
+                    await nd.LoadChildNode(world, scene, cld, isPrefab);
                 }
                 nd.OnNodeLoaded(this);
             }

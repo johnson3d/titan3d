@@ -637,17 +637,18 @@ namespace EngineNS.Bricks.AssetImpExp
                 {
                     vertexIndex = vertexCounting + j;
                     posStream[vertexIndex] = vertexPreTransform.TransformPosition(AssimpSceneUtil.ConvertVector3(subMesh.Vertices[j]).AsDVector()).ToSingleVector3();
-                    var pos = posStream[vertexIndex];
-                    if (pos.X > 2)
-                    {
-                        
-                    }
                     normalStream[vertexIndex] = vertexPreTransform.TransformVector3NoScale(AssimpSceneUtil.ConvertVector3(subMesh.Normals[j]));
-                    //posStream[vertexIndex] = AssimpSceneUtil.ConvertVector3(subMesh.Vertices[j]) * importOption.Scale;
-                    //normalStream[vertexIndex] = AssimpSceneUtil.ConvertVector3(subMesh.Normals[j]);
 
-                    //TODO: TangentChirality
-                    //tangentStream[i] = ConvertVector3(mesh->mTangents[j]);
+                    if (subMesh.HasTangentBasis)
+                    {
+                        var normal = AssimpSceneUtil.ConvertVector3(subMesh.Normals[j]);
+                        var tangent = AssimpSceneUtil.ConvertVector3(subMesh.Tangents[j]);
+                        var binTan = AssimpSceneUtil.ConvertVector3(subMesh.BiTangents[j]);
+                        float dp = Vector3.Dot(Vector3.Cross(normal, tangent), binTan);
+                        var transformedTangent = vertexPreTransform.TransformVector3NoScale(tangent);
+                        float w = dp > 0.0f ? 1.0f : -1.0f;
+                        tangentStream[vertexIndex] = new Vector4(transformedTangent, w);
+                    }
                     if (hasVertexColor)
                     {
                         vertexColorStream[vertexIndex] = AssimpSceneUtil.ConvertColor(subMesh.VertexColorChannels[0][j]).ToAbgr();
@@ -732,6 +733,10 @@ namespace EngineNS.Bricks.AssetImpExp
                 fixed (void* data = normalStream)
                 {
                     meshPrimitives.mCoreObject.SetGeomtryMeshStream(cmd.mCoreObject, EVertexStreamType.VST_Normal, data, (uint)(sizeof(Vector3) * vertextCount), (uint)sizeof(Vector3), ECpuAccess.CAS_DEFAULT);
+                }
+                fixed (void* data = tangentStream)
+                {
+                    meshPrimitives.mCoreObject.SetGeomtryMeshStream(cmd.mCoreObject, EVertexStreamType.VST_Tangent, data, (uint)(sizeof(Vector4) * vertextCount), (uint)sizeof(Vector4), ECpuAccess.CAS_DEFAULT);
                 }
                 fixed (void* data = uvStream)
                 {

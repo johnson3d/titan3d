@@ -2,11 +2,15 @@
 using System.Collections.Generic;
 using System.Text;
 using System.ComponentModel;
+using Assimp;
+using NPOI.Util;
 
 namespace EngineNS.GamePlay.Scene
 {
+    [Bricks.CodeBuilder.ContextMenu("Prefab", "Prefab", UNode.EditorKeyword)]
     [UNode(NodeDataType = typeof(TtPrefabNode.TtPrefabNodeData), DefaultNamePrefix = "Prefab")]
-    public class TtPrefabNode : UNode
+    [EGui.Controls.PropertyGrid.PGCategoryFilters(ExcludeFilters = new string[] { "Misc" })]
+    public class TtPrefabNode : GamePlay.Scene.USceneActorNode
     {
         public class TtPrefabNodeData : UNodeData
         {
@@ -14,10 +18,10 @@ namespace EngineNS.GamePlay.Scene
             [Rtti.Meta(Order = 3)]
             public RName PrefabName
             {
-                get => PrefabName;
+                get => mPrefabName;
                 set
                 {
-                    PrefabName = value;
+                    mPrefabName = value;
                 }
             }
         }
@@ -29,6 +33,7 @@ namespace EngineNS.GamePlay.Scene
             }
         }
         [Category("Option")]
+        [RName.PGRName(FilterExts = TtPrefab.AssetExt)]
         public RName PrefabName
         {
             get
@@ -39,12 +44,9 @@ namespace EngineNS.GamePlay.Scene
             {
                 if (PrefabNodeData == null)
                     return;
-                if (PrefabNodeData.PrefabName != value)
-                {
-                    var save = PrefabNodeData.PrefabName;
-                    _ = UpdatePrefab(save, value);
-                    PrefabNodeData.PrefabName = value;
-                }
+                var save = PrefabNodeData.PrefabName;
+                _ = UpdatePrefab(save, value);
+                PrefabNodeData.PrefabName = value;
             }
         }
         private async Thread.Async.TtTask UpdatePrefab(RName save, RName value)
@@ -96,7 +98,7 @@ namespace EngineNS.GamePlay.Scene
 
     [TtPrefab.PrefabCreateAttribute]
     [IO.AssetCreateMenu(MenuName = "Prefab")]
-    public class TtPrefab : IO.IAsset
+    public partial class TtPrefab : IO.IAsset
     {
         public TtPrefabNode Root;
         public static bool TryParsePrefabPath(string prefabPath, out RName name, out string[] path)
@@ -114,6 +116,17 @@ namespace EngineNS.GamePlay.Scene
         {
         }
         public const string AssetExt = ".prefab";
+
+        public static async Thread.Async.TtTask CreatePrefab(TtPrefabNode node, RName assetName)
+        {
+            var prefab = new TtPrefab();
+            prefab.Root = node;
+            prefab.Root.PrefabNodeData.PrefabName = assetName;
+            prefab.Root.NodeName = "Prefab";
+
+            prefab.SaveAssetTo(assetName);
+            await UEngine.Instance.PrefabManager.ReloadPrefab(assetName);
+        }
         
         #region IAsset
         public class PrefabCreateAttribute : IO.CommonCreateAttribute
@@ -127,13 +140,18 @@ namespace EngineNS.GamePlay.Scene
                 TypeSlt.SelectedType = type;
 
                 PGAssetInitTask = PGAsset.Initialize();
-                mAsset = Rtti.UTypeDescManager.CreateInstance(TypeSlt.SelectedType) as IO.IAsset;
                 var world = new UWorld(null);
                 await world.InitWorld();
-                var task = (mAsset as UScene).InitializeNode(world, new TtPrefabNodeData(), EBoundVolumeType.Box, typeof(UPlacement));
                 PGAsset.Target = mAsset;
+
+                mAsset = Rtti.UTypeDescManager.CreateInstance(TypeSlt.SelectedType) as IO.IAsset;
+                
+                var prefab = mAsset as TtPrefab;
+                prefab.Root = new TtPrefabNode();
+                _ = prefab.Root.InitializeNode(world, new TtPrefabNode.TtPrefabNodeData() { PrefabName = dir, }, EBoundVolumeType.Box, typeof(GamePlay.UIdentityPlacement));
             }
         }
+        [Category("Option")]
         public RName AssetName { get; set; }
         public const uint PrefabDescAttributeFlags = 1;
         public void SaveAssetTo(RName name)
@@ -151,6 +169,7 @@ namespace EngineNS.GamePlay.Scene
             var node = xndHolder.RootNode;
             if (Root != null)
             {
+                Root.PrefabNodeData.PrefabName = name;
                 using (var dataAttr = xnd.NewAttribute(Rtti.UTypeDesc.TypeStr(Root.NodeData.GetType()), 1, PrefabDescAttributeFlags))
                 {
                     node.AddAttribute(dataAttr);
@@ -159,9 +178,8 @@ namespace EngineNS.GamePlay.Scene
                         ar.Write(Root.NodeData);
                     }
                 }
+                Root.SaveChildNode(Root, xnd.mCoreObject, node.mCoreObject);
             }
-
-            Root.SaveChildNode(Root, xnd.mCoreObject, node.mCoreObject);
 
             xndHolder.SaveXnd(name.Address);
         }
@@ -169,6 +187,9 @@ namespace EngineNS.GamePlay.Scene
         {
             using (var xnd = IO.TtXndHolder.LoadXnd(name.Address))
             {
+                if (xnd == null)
+                    return null;
+
                 var descAttr = xnd.RootNode.mCoreObject.FindFirstAttributeByFlags(PrefabDescAttributeFlags);
                 if (descAttr.NativePointer == IntPtr.Zero)
                 {
@@ -177,11 +198,11 @@ namespace EngineNS.GamePlay.Scene
 
                 var nodeData = Rtti.UTypeDescManager.CreateInstance(Rtti.UTypeDesc.TypeOf(descAttr.Name)) as UNodeData;
 
-                var node = Rtti.UTypeDescManager.CreateInstance(Rtti.UTypeDesc.TypeOf(xnd.RootNode.Name)) as TtPrefabNode;
-                if (node == null)
+                var prefab = Rtti.UTypeDescManager.CreateInstance(Rtti.UTypeDesc.TypeOf(xnd.RootNode.Name)) as TtPrefab;
+                if (prefab == null)
                     return null;
-
-                var prefab = new TtPrefab();
+                var node = new TtPrefabNode();
+                await node.InitializeNode(world, new TtPrefabNode.TtPrefabNodeData(), EBoundVolumeType.Box, typeof(GamePlay.UIdentityPlacement));
                 prefab.Root = node;
                 prefab.AssetName = name;
 
@@ -191,6 +212,7 @@ namespace EngineNS.GamePlay.Scene
                     try
                     {
                         ar.ReadTo(desc, node);
+                        nodeData.IsDirty = true;
                         if (await node.InitializeNode(world, nodeData, EBoundVolumeType.None, null) == false)
                         {
                             Profiler.Log.WriteLine(Profiler.ELogTag.Warning, "Scene", $"InitializeNode failed: NodeDataType={descAttr.Name}, NodeData={xnd.RootNode.Name}");
@@ -204,7 +226,7 @@ namespace EngineNS.GamePlay.Scene
                     }
                 }
 
-                if (await node.LoadChildNode(world, node, xnd.RootNode.mCoreObject) == false)
+                if (await node.LoadChildNode(world, node, xnd.RootNode.mCoreObject, false) == false)
                     return null;
 
                 node.DFS_VisitNodeTree((UNode inNode, object inArg) =>
@@ -213,6 +235,52 @@ namespace EngineNS.GamePlay.Scene
                     return false;
                 }, null);
                 return prefab;
+            }
+        }
+        internal static async System.Threading.Tasks.Task ReLoadPrefab(GamePlay.UWorld world, TtPrefab prefab, RName name)
+        {
+            using (var xnd = IO.TtXndHolder.LoadXnd(name.Address))
+            {
+                if (xnd == null)
+                    return;
+
+                var descAttr = xnd.RootNode.mCoreObject.FindFirstAttributeByFlags(PrefabDescAttributeFlags);
+                if (descAttr.NativePointer == IntPtr.Zero)
+                {
+                    return;
+                }
+
+                var nodeData = prefab.Root.NodeData;
+                var node = prefab.Root;
+
+                using (var ar = descAttr.GetReader(node))
+                {
+                    IO.ISerializer desc = nodeData;
+                    try
+                    {
+                        ar.ReadTo(desc, node);
+                        if (await node.InitializeNode(world, nodeData, EBoundVolumeType.None, null) == false)
+                        {
+                            Profiler.Log.WriteLine(Profiler.ELogTag.Warning, "Scene", $"InitializeNode failed: NodeDataType={descAttr.Name}, NodeData={xnd.RootNode.Name}");
+                            return;
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        Profiler.Log.WriteException(ex);
+                        Profiler.Log.WriteLine(Profiler.ELogTag.Warning, "IO", $"Prefab({prefab.AssetName}): load failed");
+                    }
+                }
+
+                if (await node.LoadChildNode(world, node, xnd.RootNode.mCoreObject, true) == false)
+                    return;
+
+                node.DFS_VisitNodeTree((UNode inNode, object inArg) =>
+                {
+                    inNode.OnSceneLoaded();
+                    return false;
+                }, null);
+                return;
             }
         }
         public IO.IAssetMeta CreateAMeta()
@@ -234,6 +302,8 @@ namespace EngineNS.GamePlay.Scene
         }
         protected void UpdateNodeAssetReferences(UNode node, IO.IAssetMeta ameta)
         {
+            if (node == null)
+                return;
             node.AddAssetReferences(ameta);
             foreach (var i in node.Children)
             {
@@ -249,13 +319,15 @@ namespace EngineNS.GamePlay.Scene
             if (result == null)
             {
                 result = Rtti.UTypeDescManager.CreateInstance(node.GetType()) as UNode;
-                var nd = Rtti.UTypeDescManager.CreateInstance(node.NodeData.GetType()) as UNodeData;
-                await result.InitializeNode(world, nd, node.BoundVolumeType, node.Placement.GetType());
             }
             else
             {
                 System.Diagnostics.Debug.Assert(tarNode.GetType() == node.GetType());
             }
+            var nd = Rtti.UTypeDescManager.CreateInstance(node.NodeData.GetType()) as UNodeData;
+            var meta = Rtti.TtClassMetaManager.Instance.GetMeta(Rtti.UTypeDesc.TypeOf(node.NodeData.GetType()));
+            meta.CopyObjectMetaField(nd, node.NodeData);
+            await result.InitializeNode(world, nd, node.BoundVolumeType, node.Placement.GetType());
             result.SetPrefabTemplate(node.NodeData);
             
             foreach (var i in node.Children)
@@ -279,7 +351,8 @@ namespace EngineNS.GamePlay.Scene
             {
                 var cnodeTar = tarNode.FindFirstChild(i.NodeName, i.GetType());
                 RemovePrefabChildren(cnodeTar, i);
-                cnodeTar.Parent = null;
+                if (cnodeTar != null)
+                    cnodeTar.Parent = null;
             }
         }
         public void RemovePrefabChildren(UNode tarNode)
@@ -298,24 +371,15 @@ namespace EngineNS.GamePlay.Scene
             PrefabWorld = new UWorld(null);
             return await PrefabWorld.InitWorld();
         }
-        public Dictionary<RName, WeakReference<TtPrefab>> Prefabs { get; } = new Dictionary<RName, WeakReference<TtPrefab>>();
+        public Dictionary<RName, TtPrefab> Prefabs { get; } = new Dictionary<RName, TtPrefab>();
         public GamePlay.UWorld PrefabWorld;
         public async System.Threading.Tasks.Task<TtPrefab> GetPrefab(RName name)
         {
-            System.GC.Collect();
             TtPrefab scene;
-            WeakReference<TtPrefab> result;
+            TtPrefab result;
             if (Prefabs.TryGetValue(name, out result))
             {
-                result.TryGetTarget(out scene);
-                if (scene != null)
-                {
-                    return scene;
-                }
-                else
-                {
-                    Prefabs.Remove(name);
-                }
+                return result;
             }
 
             scene = await TtPrefab.LoadPrefab(PrefabWorld, name);
@@ -324,17 +388,37 @@ namespace EngineNS.GamePlay.Scene
 
             if (Prefabs.TryGetValue(name, out result))
             {
-                result.TryGetTarget(out scene);
-                if (scene != null)
-                {
-                    return scene;
-                }
-                else
-                {
-                    Prefabs.Remove(name);
-                }
+                return result;
             }
-            Prefabs.Add(name, new WeakReference<TtPrefab>(scene));
+            Prefabs.Add(name, scene);
+            return scene;
+        }
+        public async System.Threading.Tasks.Task<TtPrefab> ReloadPrefab(RName name)
+        {
+            TtPrefab scene;
+            TtPrefab result;
+            if (Prefabs.TryGetValue(name, out result))
+            {
+                await TtPrefab.ReLoadPrefab(PrefabWorld, result, name);
+                return result;
+            }
+            scene = await TtPrefab.LoadPrefab(PrefabWorld, name);
+            if (scene == null)
+                return null;
+
+            if (Prefabs.TryGetValue(name, out result))
+            {
+                return result;
+            }
+            Prefabs.Add(name, scene);
+            return scene;
+        }
+        public async System.Threading.Tasks.Task<TtPrefab> CreatePrefab(RName name)
+        {
+            var scene = await TtPrefab.LoadPrefab(PrefabWorld, name);
+            if (scene == null)
+                return null;
+
             return scene;
         }
         public void UnloadPrefab(RName name)
@@ -343,6 +427,69 @@ namespace EngineNS.GamePlay.Scene
                 return;
             if (Prefabs.ContainsKey(name))
                 Prefabs.Remove(name);
+        }
+    }
+
+    [EGui.Controls.PropertyGrid.PGCategoryFilters(ExcludeFilters = new string[] { "Misc" })]
+    public class TtPrefabCreateForm
+    {
+        public async System.Threading.Tasks.Task<bool> Initialize()
+        {
+            await SettingsPropGrid.Initialize();
+
+            SettingsPropGrid.Target = this;
+            
+            return true;
+        }
+
+        bool mVisible;
+        public bool Visible
+        {
+            get => mVisible;
+            set
+            {
+                mVisible = value;
+            }
+        }
+        public uint DockId { get; set; }
+        public ImGuiWindowClass DockKeyClass { get; }
+        public ImGuiCond_ DockCond { get; set; } = ImGuiCond_.ImGuiCond_FirstUseEver;
+
+        public TtPrefabNode RootNode;
+        [RName.PGRName(FilterExts = TtPrefab.AssetExt)]
+        [Category("Option")]
+        public RName PrefabName { get; set; }
+
+        public EGui.Controls.PropertyGrid.PropertyGrid SettingsPropGrid = new EGui.Controls.PropertyGrid.PropertyGrid();
+        public unsafe void OnDraw()
+        {
+            var visible = true;
+            var size = Vector2.Zero;// new Vector2(800, 600);
+            ImGuiAPI.SetNextWindowSize(in size, ImGuiCond_.ImGuiCond_FirstUseEver);
+            if (mVisible)
+                ImGuiAPI.OpenPopup($"PrefabCreator", ImGuiPopupFlags_.ImGuiPopupFlags_None);
+            if (ImGuiAPI.BeginPopupModal($"PrefabCreator", &visible, ImGuiWindowFlags_.ImGuiWindowFlags_None))
+            {
+                SettingsPropGrid.OnDraw(false, false, false);
+
+                if (PrefabName != null && ImGuiAPI.Button("Create"))
+                {
+                    _ = TtPrefab.CreatePrefab(RootNode, PrefabName);
+                    
+                    mVisible = false;
+                    ImGuiAPI.CloseCurrentPopup();
+                    PrefabName = null;
+                    RootNode = null;
+                }
+                if (ImGuiAPI.Button("Cancel"))
+                {
+                    PrefabName = null;
+                    mVisible = false;
+                    RootNode = null;
+                    ImGuiAPI.CloseCurrentPopup();
+                }
+                ImGuiAPI.EndPopup();
+            }
         }
     }
 }

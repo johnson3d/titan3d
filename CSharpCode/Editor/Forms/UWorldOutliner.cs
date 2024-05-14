@@ -29,10 +29,9 @@ namespace EngineNS.Editor.Forms
 
         }
         //List<EGui.UIProxy.MenuItemProxy> mDirContextMenu;
-        public async System.Threading.Tasks.Task<bool> Initialize()
+        public virtual async System.Threading.Tasks.Task<bool> Initialize()
         {
-            await EngineNS.Thread.TtAsyncDummyClass.DummyFunc();
-
+            await Thread.TtAsyncDummyClass.DummyFunc();
             //mDirContextMenu = new List<EGui.UIProxy.MenuItemProxy>()
             //{
             //    new EGui.UIProxy.MenuItemProxy()
@@ -73,7 +72,7 @@ namespace EngineNS.Editor.Forms
         public uint DockId { get; set; }
         public ImGuiWindowClass DockKeyClass { get; }
         public ImGuiCond_ DockCond { get; set; } = ImGuiCond_.ImGuiCond_FirstUseEver;
-        public unsafe void DrawAsChildWindow(ref Vector2 size)
+        public virtual unsafe void DrawAsChildWindow(in Vector2 size)
         {
             if (ImGuiAPI.BeginChild(Title, in size, true, ImGuiWindowFlags_.ImGuiWindowFlags_None))
             {
@@ -89,6 +88,8 @@ namespace EngineNS.Editor.Forms
             if (OnDrawMenu != null)
                 OnDrawMenu();
             ImGuiAPI.EndChild();
+
+            
         }
         public unsafe void OnDraw()
         {
@@ -279,6 +280,7 @@ namespace EngineNS.Editor.Forms
             }
         }
         #endregion
+
         protected override void OnNodeUI_RClick(INodeUIProvider provider)
         {
             var node = provider as GamePlay.Scene.UNode;
@@ -295,33 +297,7 @@ namespace EngineNS.Editor.Forms
                 {
                     mAddToNode = node;
                     mNodeMenuShow = true;
-                    if (ImGuiAPI.MenuItem($"Goto", null, false, true))
-                    {
-                        var camera = WorldViewportState.CameraController.Camera;
-                        var radius = (node.AABB.GetMaxSide()) *  5.0f;
-                        camera.LookAtLH(node.Placement.Position - camera.GetDirection().AsDVector() * radius, node.Placement.Position, Vector3.Up);
-                    }
-                    if (ImGuiAPI.MenuItem($"DoCommand", null, false, true))
-                    {
-                        node.OnCommand("WorldOutliner");
-                    }
-                    if (ImGuiAPI.BeginMenu("AddChild", true))
-                    {
-                        var drawList = ImGuiAPI.GetWindowDrawList();
-                        EGui.UIProxy.SearchBarProxy.OnDraw(ref mAddNodeMenuFilterFocused, in drawList, "search item", ref mAddNodeMenuFilterStr, -1);
-                        for (var childIdx = 0; childIdx < mAddNodeMenus.SubMenuItems.Count; childIdx++)
-                            DrawMenu(mAddNodeMenus.SubMenuItems[childIdx], mAddNodeMenuFilterStr.ToLower());
-
-                        ImGuiAPI.EndMenu();
-                    }
-
-                    if (ImGuiAPI.MenuItem($"Delete", null, false, true))
-                    {
-                        if (World.Root != node)
-                        {
-                            node.Parent = null;
-                        }
-                    }
+                    DrawBaseMenu(node);
                     ImGuiAPI.EndPopup();
                 }
                 else
@@ -334,6 +310,36 @@ namespace EngineNS.Editor.Forms
                     mNodeMenuShow = false;
                 }
             };
+        }
+
+        protected virtual void DrawBaseMenu(GamePlay.Scene.UNode node)
+        {
+            if (ImGuiAPI.MenuItem($"Goto", null, false, true))
+            {
+                var camera = WorldViewportState.CameraController.Camera;
+                var radius = (node.AABB.GetMaxSide()) * 5.0f;
+                camera.LookAtLH(node.Placement.Position - camera.GetDirection().AsDVector() * radius, node.Placement.Position, Vector3.Up);
+            }
+            if (ImGuiAPI.MenuItem($"DoCommand", null, false, true))
+            {
+                node.OnCommand("WorldOutliner");
+            }
+            if (ImGuiAPI.BeginMenu("AddChild", true))
+            {
+                var drawList = ImGuiAPI.GetWindowDrawList();
+                EGui.UIProxy.SearchBarProxy.OnDraw(ref mAddNodeMenuFilterFocused, in drawList, "search item", ref mAddNodeMenuFilterStr, -1);
+                for (var childIdx = 0; childIdx < mAddNodeMenus.SubMenuItems.Count; childIdx++)
+                    DrawMenu(mAddNodeMenus.SubMenuItems[childIdx], mAddNodeMenuFilterStr.ToLower());
+
+                ImGuiAPI.EndMenu();
+            }
+            if (ImGuiAPI.MenuItem($"Delete", null, false, true))
+            {
+                if (World.Root != node)
+                {
+                    node.Parent = null;
+                }
+            }
         }
         protected override void OnNodeUI_LClick(INodeUIProvider provider)
         {

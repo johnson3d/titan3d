@@ -5,6 +5,18 @@ using MathNet.Numerics.LinearAlgebra.Solvers;
 
 namespace EngineNS.Editor.Forms
 {
+    public class USceneEditorOutliner : UWorldOutliner
+    {
+        public USceneEditorOutliner(EGui.Slate.UWorldViewportSlate viewport, bool regRoot)
+            : base(viewport, regRoot)
+        {
+
+        }
+        protected override void OnNodeUI_LClick(INodeUIProvider provider)
+        {
+            base.OnNodeUI_LClick(provider);
+        }
+    }
     public class USceneEditor : Editor.IAssetEditor, ITickable, IRootForm
     {
         public int GetTickOrder()
@@ -37,18 +49,6 @@ namespace EngineNS.Editor.Forms
                 NodeInspector.Target = proxy;
             }
         }
-        public class USceneEditorOutliner : UWorldOutliner
-        {
-            public USceneEditorOutliner(EGui.Slate.UWorldViewportSlate viewport, bool regRoot)
-                : base(viewport, regRoot)
-            {
-
-            }            
-            protected override void OnNodeUI_LClick(INodeUIProvider provider)
-            {
-                base.OnNodeUI_LClick(provider);
-            }
-        }
         public RName AssetName { get; set; }
         protected bool mVisible = true;
         public bool Visible { get => mVisible; set => mVisible = value; }
@@ -57,9 +57,13 @@ namespace EngineNS.Editor.Forms
         public ImGuiWindowClass DockKeyClass => mDockKeyClass;
         public ImGuiCond_ DockCond { get; set; } = ImGuiCond_.ImGuiCond_FirstUseEver;
 
+        public virtual IO.IAsset GetAsset()
+        {
+            return Scene;
+        }
         public GamePlay.Scene.UScene Scene;
         public USceneEditorViewport PreviewViewport = new USceneEditorViewport();
-        public USceneEditorOutliner mWorldOutliner;
+        public UWorldOutliner mWorldOutliner;
         EGui.Controls.UContentBrowser mContentBrowser = new EGui.Controls.UContentBrowser();
 
         public EGui.Controls.PropertyGrid.PropertyGrid ScenePropGrid = new EGui.Controls.PropertyGrid.PropertyGrid();
@@ -270,6 +274,8 @@ namespace EngineNS.Editor.Forms
             mContentBrowser.DrawInWindow = false;
             await mContentBrowser.Initialize();
 
+            await mWorldOutliner.Initialize();
+
             InitMainMenu();
             return true;
         }
@@ -304,7 +310,7 @@ namespace EngineNS.Editor.Forms
                 CpuCullNode.VisParameter.CullFilters = value;
             }
         }
-        public async System.Threading.Tasks.Task<bool> OpenEditor(UMainEditorApplication mainEditor, RName name, object arg)
+        public async virtual System.Threading.Tasks.Task<bool> OpenEditor(UMainEditorApplication mainEditor, RName name, object arg)
         {
             AssetName = name;
             //PreviewViewport.PreviewAsset = name;
@@ -312,7 +318,7 @@ namespace EngineNS.Editor.Forms
             PreviewViewport.OnInitialize = Initialize_PreviewScene;
             await PreviewViewport.Initialize(UEngine.Instance.GfxDevice.SlateApplication, UEngine.Instance.Config.MainRPolicyName, 0, 1);
 
-            Scene = await UEngine.Instance.SceneManager.GetScene(PreviewViewport.World, name);
+            Scene = await UEngine.Instance.SceneManager.CreateScene(PreviewViewport.World, name);
             if (Scene == null)
                 return false;
 
@@ -329,7 +335,7 @@ namespace EngineNS.Editor.Forms
             System.Diagnostics.Debug.Assert(CpuCullNode != null);
             return true;
         }
-        public void OnCloseEditor()
+        public virtual void OnCloseEditor()
         {
             //UEngine.Instance.EventProcessorManager.UnregProcessor(PreviewViewport);
             PreviewViewport.NodeInspector.Target = null;
@@ -362,7 +368,8 @@ namespace EngineNS.Editor.Forms
             ImGuiAPI.DockBuilderSplitNode(middleId, ImGuiDir_.ImGuiDir_Down, 0.3f, ref downId, ref middleId);
             ImGuiAPI.DockBuilderSplitNode(middleId, ImGuiDir_.ImGuiDir_Left, 0.2f, ref leftId, ref middleId);
 
-            ImGuiAPI.DockBuilderDockWindow(EGui.UIProxy.DockProxy.GetDockWindowName("Details", mDockKeyClass), rightDownId);
+            ImGuiAPI.DockBuilderDockWindow(EGui.UIProxy.DockProxy.GetDockWindowName("SceneDetails", mDockKeyClass), rightDownId);
+            ImGuiAPI.DockBuilderDockWindow(EGui.UIProxy.DockProxy.GetDockWindowName("NodeDetails", mDockKeyClass), rightDownId);
             ImGuiAPI.DockBuilderDockWindow(EGui.UIProxy.DockProxy.GetDockWindowName("Editor Settings", mDockKeyClass), rightDownId);
             ImGuiAPI.DockBuilderDockWindow(EGui.UIProxy.DockProxy.GetDockWindowName("Camera Settings", mDockKeyClass), rightDownId);
             ImGuiAPI.DockBuilderDockWindow(EGui.UIProxy.DockProxy.GetDockWindowName("Outliner", mDockKeyClass), rightUpId);
@@ -374,9 +381,10 @@ namespace EngineNS.Editor.Forms
         }
         public Vector2 WindowPos;
         public Vector2 WindowSize = new Vector2(800, 600);
+        public virtual bool IsAssetLoaed { get => Scene != null; }
         public unsafe void OnDraw()
         {
-            if (Visible == false || Scene == null)
+            if (Visible == false || IsAssetLoaed == false)
                 return;
 
             var pivot = new Vector2(0);
@@ -402,7 +410,8 @@ namespace EngineNS.Editor.Forms
 
             DrawEditorSettings();
             DrawCameraSettings();
-            DrawDetails();
+            DrawSceneDetails();
+            DrawNodeDetails();
             DrawOutliner();
             DrawPreview();
             DrawContentBrowser();
@@ -420,7 +429,7 @@ namespace EngineNS.Editor.Forms
             ImGuiAPI.SameLine(0, -1);
             if (EGui.UIProxy.CustomButton.ToolButton("Snapshot", in btSize))
             {
-                USnapshot.Save(AssetName, Scene.GetAMeta(), PreviewViewport.RenderPolicy.GetFinalShowRSV());
+                USnapshot.Save(AssetName, GetAsset().GetAMeta(), PreviewViewport.RenderPolicy.GetFinalShowRSV());
             }
             ImGuiAPI.SameLine(0, -1);
             if (EGui.UIProxy.CustomButton.ToolButton("Reload", in btSize))
@@ -482,13 +491,24 @@ namespace EngineNS.Editor.Forms
             //ImGuiAPI.EndGroup();
             EGui.UIProxy.Toolbar.EndToolbar();
         }
-        bool mDrawDetailsShow = true;
-        protected void DrawDetails()
+        bool mDrawSceneDetailsShow = true;
+        bool mDrawNodeDetailsShow = true;
+        protected void DrawSceneDetails()
         {
             var sz = new Vector2(-1);
-            if (EGui.UIProxy.DockProxy.BeginPanel(mDockKeyClass, "Details", ref mDrawDetailsShow, ImGuiWindowFlags_.ImGuiWindowFlags_None))
+            if (EGui.UIProxy.DockProxy.BeginPanel(mDockKeyClass, "SceneDetails", ref mDrawSceneDetailsShow, ImGuiWindowFlags_.ImGuiWindowFlags_None))
             {
                 ScenePropGrid.OnDraw(true, false, false);
+            }
+            EGui.UIProxy.DockProxy.EndPanel();
+        }
+
+        protected void DrawNodeDetails()
+        {
+            var sz = new Vector2(-1);
+            if (EGui.UIProxy.DockProxy.BeginPanel(mDockKeyClass, "NodeDetails", ref mDrawNodeDetailsShow, ImGuiWindowFlags_.ImGuiWindowFlags_None))
+            {
+                PreviewViewport.NodeInspector.OnDraw(true, false, false);
             }
             EGui.UIProxy.DockProxy.EndPanel();
         }
@@ -546,7 +566,7 @@ namespace EngineNS.Editor.Forms
             var sz = new Vector2(-1);
             if (EGui.UIProxy.DockProxy.BeginPanel(mDockKeyClass, "Outliner", ref mOutlinerShow, ImGuiWindowFlags_.ImGuiWindowFlags_None))
             {
-                PreviewViewport.NodeInspector.OnDraw(true, false, false);
+                mWorldOutliner.DrawAsChildWindow(in sz);
             }
             EGui.UIProxy.DockProxy.EndPanel();
         }
@@ -606,6 +626,78 @@ namespace EngineNS.Editor.Forms
         }
         #endregion
     }
+
+    public class TtPrefabEditorOutliner : UWorldOutliner
+    {
+        public TtPrefabEditorOutliner(EGui.Slate.UWorldViewportSlate viewport, bool regRoot)
+            : base(viewport, regRoot)
+        {
+
+        }
+        public override async System.Threading.Tasks.Task<bool> Initialize()
+        {
+            await PrefabCreateForm.Initialize();
+            return true;
+        }
+        GamePlay.Scene.TtPrefabCreateForm PrefabCreateForm = new GamePlay.Scene.TtPrefabCreateForm();
+        protected override void DrawBaseMenu(GamePlay.Scene.UNode node)
+        {
+            base.DrawBaseMenu(node);
+            if (node.GetType() == typeof(GamePlay.Scene.TtPrefabNode))
+            {
+                if (ImGuiAPI.MenuItem($"SavePrefab", null, false, true))
+                {
+                    PrefabCreateForm.RootNode = node as GamePlay.Scene.TtPrefabNode;
+                    PrefabCreateForm.PrefabName = PrefabCreateForm.RootNode.PrefabName;
+                    PrefabCreateForm.Visible = true;
+                }
+            }
+        }
+        public override unsafe void DrawAsChildWindow(in Vector2 size)
+        {
+            base.DrawAsChildWindow(in size);
+
+            PrefabCreateForm.OnDraw();
+        }
+    }
+    public class TtPrefabEditor : USceneEditor
+    {
+        public GamePlay.Scene.TtPrefab Prefab;
+        public override IO.IAsset GetAsset()
+        {
+            return Prefab;
+        }
+        public TtPrefabEditor()
+        {
+            mWorldOutliner = new TtPrefabEditorOutliner(PreviewViewport, false);
+        }
+        public override bool IsAssetLoaed { get => Prefab != null; }
+        public async override System.Threading.Tasks.Task<bool> OpenEditor(UMainEditorApplication mainEditor, RName name, object arg)
+        {
+            AssetName = name;
+            //PreviewViewport.PreviewAsset = name;
+            PreviewViewport.Title = $"Prefab:{name}";
+            PreviewViewport.OnInitialize = Initialize_PreviewScene;
+            await PreviewViewport.Initialize(UEngine.Instance.GfxDevice.SlateApplication, UEngine.Instance.Config.MainRPolicyName, 0, 1);
+
+            Prefab = await UEngine.Instance.PrefabManager.CreatePrefab(name);
+            if (Prefab == null)
+                return false;
+
+            Prefab.Root.Parent = PreviewViewport.World.Root;
+
+            ScenePropGrid.Target = Prefab;
+            EditorPropGrid.Target = this;
+
+            mWorldOutliner.Title = $"Outliner:{name}";
+
+            UEngine.Instance.TickableManager.AddTickable(this);
+
+            CpuCullNode = PreviewViewport.RenderPolicy.FindNode<Graphics.Pipeline.TtCpuCullingNode>("CpuCulling");
+            System.Diagnostics.Debug.Assert(CpuCullNode != null);
+            return true;
+        }
+    }
 }
 
 namespace EngineNS.GamePlay.Scene
@@ -615,8 +707,8 @@ namespace EngineNS.GamePlay.Scene
     {
     }
 
-    [Editor.UAssetEditor(EditorType = typeof(Editor.Forms.USceneEditor))]
-    public partial class UPartitionScene
+    [Editor.UAssetEditor(EditorType = typeof(Editor.Forms.TtPrefabEditor))]
+    public partial class TtPrefab
     {
     }
 }

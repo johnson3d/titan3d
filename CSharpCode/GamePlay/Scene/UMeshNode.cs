@@ -107,6 +107,10 @@ namespace EngineNS.GamePlay.Scene
                 mMesh.IsDrawHitproxy = false;
             }
         }
+        protected override void OnSetPrefabTemplate()
+        {
+            
+        }
         public override bool IsAcceptShadow
         {
             get
@@ -219,6 +223,7 @@ namespace EngineNS.GamePlay.Scene
                     meshData.MdfQueueType = mMesh.MdfQueueType;
                     meshData.AtomType = Rtti.UTypeDesc.TypeStr(mMesh.SubMeshes[0].Atoms[0].GetType());
                 }
+                this.UpdateAbsTransform();
                 UpdateAABB();
                 Parent?.UpdateAABB();
 
@@ -242,6 +247,8 @@ namespace EngineNS.GamePlay.Scene
                 if (meshData == null)
                     return;
                 meshData.MeshName = value;
+                if (meshData.MeshName == null)
+                    return;
                 System.Action action = async () =>
                 {
                     var mesh = new Graphics.Mesh.TtMesh();
@@ -309,6 +316,8 @@ namespace EngineNS.GamePlay.Scene
         {
             if (mMesh == null)
                 return;
+
+            NodeData.CheckDirty(this);
 
             if (rp.World.CameralOffsetSerialId != CameralOffsetSerialId)
             {

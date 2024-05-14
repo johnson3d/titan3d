@@ -40,6 +40,8 @@ namespace EngineNS
     [Rtti.Meta]
     public partial class UEngineConfig
     {
+        public const int MajorVersion = 1;
+        public const int MiniVersion = 0;
         public void SaveConfig(string sltFile)
         {
             IO.TtFileManager.SaveObjectToXml(sltFile, this);
@@ -294,7 +296,7 @@ namespace EngineNS
                     Config.UseRenderDoc = false;
                 }
             }
-            Config.ConfigName = "Titan3D  [" + IO.TtFileManager.GetPureName(cfgFile) + "]";
+            Config.ConfigName = $"Titan3D.{UEngineConfig.MajorVersion}.{UEngineConfig.MiniVersion} [{IO.TtFileManager.GetPureName(cfgFile)}]";
 
             CoreSDK.SetOnGpuDeviceRemovedCallBack(OnGpuDeviceRemoved);
             
