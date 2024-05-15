@@ -385,8 +385,9 @@ namespace EngineNS.Editor
             ImGuiAPI.SetNextWindowPos(in mainPos, ImGuiCond_.ImGuiCond_FirstUseEver, in mainPos);
             var wSize = new Vector2(1290, 800);
             ImGuiAPI.SetNextWindowSize(in wSize, ImGuiCond_.ImGuiCond_FirstUseEver);
-            if (EGui.UIProxy.DockProxy.BeginMainForm("UI Test", this, 
-                ImGuiWindowFlags_.ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_.ImGuiWindowFlags_MenuBar))
+            var result = EGui.UIProxy.DockProxy.BeginMainForm("UI Test", this,
+                ImGuiWindowFlags_.ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_.ImGuiWindowFlags_MenuBar);
+            if (result)
             {
 
                 // Menu
@@ -438,7 +439,7 @@ namespace EngineNS.Editor
                 //var drawList = ImGuiAPI.GetWindowDrawList();
                 //drawList.AddRect(ref menubarMin, ref menubarMax, 0xFF0000FF, 0, ImDrawFlags_.ImDrawFlags_None, 2);
             }
-            EGui.UIProxy.DockProxy.EndMainForm();
+            EGui.UIProxy.DockProxy.EndMainForm(result);
 
             //ImGuiAPI.PopFont();
         }

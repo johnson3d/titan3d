@@ -215,8 +215,9 @@ namespace EngineNS.UI.Editor
             var pivot = new Vector2(0);
             ImGuiAPI.SetNextWindowSize(in WindowSize, ImGuiCond_.ImGuiCond_FirstUseEver);
             ImGuiAPI.SetNextWindowDockID(DockId, DockCond);
-            if (EGui.UIProxy.DockProxy.BeginMainForm(UIAsset.AssetName.Name, this, ImGuiWindowFlags_.ImGuiWindowFlags_None |
-                ImGuiWindowFlags_.ImGuiWindowFlags_NoSavedSettings))
+            var result = EGui.UIProxy.DockProxy.BeginMainForm(UIAsset.AssetName.Name, this, ImGuiWindowFlags_.ImGuiWindowFlags_None |
+                ImGuiWindowFlags_.ImGuiWindowFlags_NoSavedSettings);
+            if (result)
             {
                 if (ImGuiAPI.IsWindowFocused(ImGuiFocusedFlags_.ImGuiFocusedFlags_RootAndChildWindows))
                 {
@@ -234,7 +235,7 @@ namespace EngineNS.UI.Editor
                 ImGuiAPI.Separator();
             }
             ResetDockspace();
-            EGui.UIProxy.DockProxy.EndMainForm();
+            EGui.UIProxy.DockProxy.EndMainForm(result);
 
             DrawDesigner();
             DrawDetails();
@@ -399,14 +400,15 @@ namespace EngineNS.UI.Editor
         protected unsafe void DrawControls()
         {
             var sz = new Vector2(-1);
-            if (EGui.UIProxy.DockProxy.BeginPanel(mDockKeyClass, "Controls", ref mControlsShow, ImGuiWindowFlags_.ImGuiWindowFlags_None))
+            var show = EGui.UIProxy.DockProxy.BeginPanel(mDockKeyClass, "Controls", ref mControlsShow, ImGuiWindowFlags_.ImGuiWindowFlags_None);
+            if (show)
             {
                 for(int i=0; i<mUIControls.Count; i++)
                 {
                     DrawControlItemData(mUIControls[i]);
                 }
             }
-            EGui.UIProxy.DockProxy.EndPanel();
+            EGui.UIProxy.DockProxy.EndPanel(show);
         }
         protected struct ControlCreateDragData
         {
@@ -485,7 +487,8 @@ namespace EngineNS.UI.Editor
         bool mDesignerShow = true;
         protected unsafe void DrawDesigner()
         {
-            if (EGui.UIProxy.DockProxy.BeginPanel(mDockKeyClass, "Designer", ref mDesignerShow, ImGuiWindowFlags_.ImGuiWindowFlags_None))
+            var show = EGui.UIProxy.DockProxy.BeginPanel(mDockKeyClass, "Designer", ref mDesignerShow, ImGuiWindowFlags_.ImGuiWindowFlags_None);
+            if (show)
             {
                 var pos = ImGuiAPI.GetWindowPos();
                 var size = ImGuiAPI.GetWindowSize();
@@ -580,13 +583,14 @@ namespace EngineNS.UI.Editor
                     }
                 }
             }
-            EGui.UIProxy.DockProxy.EndPanel();
+            EGui.UIProxy.DockProxy.EndPanel(show);
         }
         bool mDetailsShow = true;
         protected unsafe void DrawDetails()
         {
             var sz = new Vector2(-1);
-            if (EGui.UIProxy.DockProxy.BeginPanel(mDockKeyClass, "Details", ref mDetailsShow, ImGuiWindowFlags_.ImGuiWindowFlags_None))
+            var show = EGui.UIProxy.DockProxy.BeginPanel(mDockKeyClass, "Details", ref mDetailsShow, ImGuiWindowFlags_.ImGuiWindowFlags_None);
+            if (show)
             {
                 //if (ImGuiAPI.BeginChild($"Details_VIValues", in sz, false, ImGuiWindowFlags_.ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_.ImGuiWindowFlags_NoScrollbar))
                 {
@@ -689,14 +693,15 @@ namespace EngineNS.UI.Editor
 
                 DetailsGrid.OnDraw(true, false, false);
             }
-            EGui.UIProxy.DockProxy.EndPanel();
+            EGui.UIProxy.DockProxy.EndPanel(show);
         }
         bool mHierachyShow = true;
         bool mShowTemplateControls = false;
         protected unsafe void DrawHierachy()
         {
             var sz = new Vector2(-1);
-            if (EGui.UIProxy.DockProxy.BeginPanel(mDockKeyClass, "Hierachy", ref mHierachyShow, ImGuiWindowFlags_.ImGuiWindowFlags_None))
+            var show = EGui.UIProxy.DockProxy.BeginPanel(mDockKeyClass, "Hierachy", ref mHierachyShow, ImGuiWindowFlags_.ImGuiWindowFlags_None);
+            if (show)
             {
                 EGui.UIProxy.CheckBox.DrawCheckBox("Show Template Controls", ref mShowTemplateControls);
                 
@@ -707,7 +712,7 @@ namespace EngineNS.UI.Editor
                 DrawUIElementInHierachy(mUIHost, ref idx);
                 ImGuiAPI.PopStyleColor(3);
             }
-            EGui.UIProxy.DockProxy.EndPanel();
+            EGui.UIProxy.DockProxy.EndPanel(show);
         }
         void DrawHierachyContextMenu(TtUIElement element, string name)
         {

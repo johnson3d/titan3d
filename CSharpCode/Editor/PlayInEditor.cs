@@ -71,7 +71,8 @@ namespace EngineNS.Editor
         bool[] mToolBtn_IsMouseHover = new bool[4];
         public void OnDraw()
         {
-            if(EGui.UIProxy.DockProxy.BeginMainForm("PIEController", this, ImGuiWindowFlags_.ImGuiWindowFlags_None))
+            var result = EGui.UIProxy.DockProxy.BeginMainForm("PIEController", this, ImGuiWindowFlags_.ImGuiWindowFlags_None);
+            if (result)
             {
                 var drawList = ImGuiAPI.GetWindowDrawList();
                 //EGui.UIProxy.Toolbar.BeginToolbar(drawList);
@@ -109,7 +110,7 @@ namespace EngineNS.Editor
 
                 //EGui.UIProxy.Toolbar.EndToolbar();
             }
-            EGui.UIProxy.DockProxy.EndMainForm();
+            EGui.UIProxy.DockProxy.EndMainForm(result);
         }
 
         void OnPlayGame(RName assetName)

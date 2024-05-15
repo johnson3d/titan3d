@@ -96,7 +96,8 @@ namespace EngineNS.Editor.Forms
             if (Visible == false)
                 return;
             ImGuiAPI.SetNextWindowDockID(DockId, DockCond);
-            if (EGui.UIProxy.DockProxy.BeginMainForm(Title, this, ImGuiWindowFlags_.ImGuiWindowFlags_None))
+            var result = EGui.UIProxy.DockProxy.BeginMainForm(Title, this, ImGuiWindowFlags_.ImGuiWindowFlags_None);
+            if (result)
             {
                 if (ImGuiAPI.IsWindowDocked())
                 {
@@ -109,7 +110,7 @@ namespace EngineNS.Editor.Forms
             }
             if (OnDrawMenu != null)
                 OnDrawMenu();
-            EGui.UIProxy.DockProxy.EndMainForm();
+            EGui.UIProxy.DockProxy.EndMainForm(result);
         }
         public List<INodeUIProvider> SelectedNodes = new List<INodeUIProvider>();
         protected override void AfterNodeShow(INodeUIProvider provider, int index)

@@ -85,39 +85,16 @@ namespace EngineNS.Bricks.RenderPolicyEditor
         #endregion
 
         #region DrawUI
-        bool mDockInitialized = false;
-        protected void ResetDockspace(bool force = false)
-        {
-            var pos = ImGuiAPI.GetCursorPos();
-            var id = ImGuiAPI.GetID(AssetName.Name + "_Dockspace");
-            mDockKeyClass.ClassId = id;
-            ImGuiAPI.DockSpace(id, Vector2.Zero, ImGuiDockNodeFlags_.ImGuiDockNodeFlags_None, mDockKeyClass);
-            if (mDockInitialized && !force)
-                return;
-            ImGuiAPI.DockBuilderRemoveNode(id);
-            ImGuiAPI.DockBuilderAddNode(id, ImGuiDockNodeFlags_.ImGuiDockNodeFlags_None);
-            ImGuiAPI.DockBuilderSetNodePos(id, pos);
-            ImGuiAPI.DockBuilderSetNodeSize(id, Vector2.One);
-            mDockInitialized = true;
-
-            var rightId = id;
-            uint leftId = 0;
-            ImGuiAPI.DockBuilderSplitNode(rightId, ImGuiDir_.ImGuiDir_Left, 0.2f, ref leftId, ref rightId);
-
-            ImGuiAPI.DockBuilderDockWindow(EGui.UIProxy.DockProxy.GetDockWindowName("Left", mDockKeyClass), leftId);
-            ImGuiAPI.DockBuilderDockWindow(EGui.UIProxy.DockProxy.GetDockWindowName("Right", mDockKeyClass), rightId);
-            ImGuiAPI.DockBuilderFinish(id);
-        }
+        public bool IsDrawing { get; set; }
         public unsafe void OnDraw()
         {
             if (Visible == false)
                 return;
 
-            bool drawing = true;
             var pivot = new Vector2(0);
             ImGuiAPI.SetNextWindowSize(in WindowSize, ImGuiCond_.ImGuiCond_FirstUseEver);
-            if (EGui.UIProxy.DockProxy.BeginMainForm(AssetName.Name, this, ImGuiWindowFlags_.ImGuiWindowFlags_None |
-                ImGuiWindowFlags_.ImGuiWindowFlags_NoSavedSettings))
+            IsDrawing = EGui.UIProxy.DockProxy.BeginMainForm(AssetName.Name, this, ImGuiWindowFlags_.ImGuiWindowFlags_NoSavedSettings);
+            if (IsDrawing)
             {
                 if (ImGuiAPI.IsWindowFocused(ImGuiFocusedFlags_.ImGuiFocusedFlags_RootAndChildWindows))
                 {
@@ -128,25 +105,15 @@ namespace EngineNS.Bricks.RenderPolicyEditor
                 WindowPos = ImGuiAPI.GetWindowPos();
                 WindowSize = ImGuiAPI.GetWindowSize();
                 DrawToolBar();
+                //var sz = new Vector2(-1);
+                //ImGuiAPI.BeginChild("Client", ref sz, false, ImGuiWindowFlags_.)
                 ImGuiAPI.Separator();
             }
-            else
-            {
-                drawing = false;
-            }
             ResetDockspace();
-            EGui.UIProxy.DockProxy.EndMainForm();
+            EGui.UIProxy.DockProxy.EndMainForm(IsDrawing);
 
-            DrawLeft();
-            DrawRight();
-
-            if (drawing)
-            {
-                if (PreviewDockId != 0)
-                {
-                    
-                }
-            }
+            DrawRenderGraph();
+            DrawNodeDetails();
         }
         protected void DrawToolBar()
         {
@@ -166,7 +133,59 @@ namespace EngineNS.Bricks.RenderPolicyEditor
                 var noused = SetCurrentPolicy();
             }
         }
-        uint PreviewDockId = 0;
+        bool mDockInitialized = false;
+        protected void ResetDockspace(bool force = false)
+        {
+            var pos = ImGuiAPI.GetCursorPos();
+            var id = ImGuiAPI.GetID(AssetName.Name + "_Dockspace");
+            mDockKeyClass.ClassId = id;
+            ImGuiAPI.DockSpace(id, Vector2.Zero, ImGuiDockNodeFlags_.ImGuiDockNodeFlags_None, mDockKeyClass);
+            if (mDockInitialized && !force)
+                return;
+            ImGuiAPI.DockBuilderRemoveNode(id);
+            ImGuiAPI.DockBuilderAddNode(id, ImGuiDockNodeFlags_.ImGuiDockNodeFlags_None);
+            ImGuiAPI.DockBuilderSetNodePos(id, pos);
+            ImGuiAPI.DockBuilderSetNodeSize(id, Vector2.One);
+            mDockInitialized = true;
+
+            var rightId = id;
+            uint middleId = 0;
+            uint downId = 0;
+            uint leftId = 0;
+            uint rightUpId = 0;
+            uint rightDownId = 0;
+            ImGuiAPI.DockBuilderSplitNode(rightId, ImGuiDir_.ImGuiDir_Left, 0.8f, ref middleId, ref rightId);
+            ImGuiAPI.DockBuilderSplitNode(rightId, ImGuiDir_.ImGuiDir_Down, 0.5f, ref rightDownId, ref rightUpId);
+            ImGuiAPI.DockBuilderSplitNode(middleId, ImGuiDir_.ImGuiDir_Down, 0.3f, ref downId, ref middleId);
+            ImGuiAPI.DockBuilderSplitNode(middleId, ImGuiDir_.ImGuiDir_Left, 0.2f, ref leftId, ref middleId);
+
+            ImGuiAPI.DockBuilderDockWindow(EGui.UIProxy.DockProxy.GetDockWindowName("RenderGraph", mDockKeyClass), middleId);
+            ImGuiAPI.DockBuilderDockWindow(EGui.UIProxy.DockProxy.GetDockWindowName("NodeDetails", mDockKeyClass), rightDownId);
+
+            ImGuiAPI.DockBuilderFinish(id);
+        }
+        bool ShowNodeGraph = true;
+        protected void DrawRenderGraph()
+        {
+            var sz = new Vector2(-1);
+            var show = EGui.UIProxy.DockProxy.BeginPanel(mDockKeyClass, "RenderGraph", ref ShowNodeGraph, ImGuiWindowFlags_.ImGuiWindowFlags_None);
+            if (show)
+            {
+                GraphRenderer.OnDraw();
+            }
+            EGui.UIProxy.DockProxy.EndPanel(show);
+        }
+        bool ShowNodePropGrid = true;
+        protected void DrawNodeDetails()
+        {
+            var sz = new Vector2(-1);
+            var show = EGui.UIProxy.DockProxy.BeginPanel(mDockKeyClass, "NodeDetails", ref ShowNodePropGrid, ImGuiWindowFlags_.ImGuiWindowFlags_None);
+            if (show)
+            {
+                NodePropGrid.OnDraw(true, false, false);
+            }
+            EGui.UIProxy.DockProxy.EndPanel(show);
+        }
         private async System.Threading.Tasks.Task Save()
         {
             PolicyGraph.SaveAssetTo(AssetName);
@@ -233,42 +252,6 @@ namespace EngineNS.Bricks.RenderPolicyEditor
 
             }
             root.Dispose();
-        }
-        bool mLeftShow = true;
-        protected unsafe void DrawLeft()
-        {
-            if (PreviewDockId == 0)
-                PreviewDockId = ImGuiAPI.GetID($"{AssetName}");
-
-            var size = new Vector2(-1, -1);
-            if (EGui.UIProxy.DockProxy.BeginPanel(mDockKeyClass, "Left", ref mLeftShow, ImGuiWindowFlags_.ImGuiWindowFlags_None))
-            {
-                if (ImGuiAPI.CollapsingHeader("Preview", ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_None))
-                {
-                    //ImGuiDockNodeFlags_ dockspace_flags = ImGuiDockNodeFlags_.ImGuiDockNodeFlags_None;
-                    //var winClass = new ImGuiWindowClass();
-                    //winClass.UnsafeCallConstructor();
-                    //var sz = ImGuiAPI.GetWindowSize();
-                    //sz.Y = sz.X;
-                    //ImGuiAPI.DockSpace(PreviewDockId, in sz, dockspace_flags, in winClass);
-                    //winClass.UnsafeCallDestructor();
-                }
-                if (ImGuiAPI.CollapsingHeader("NodeProperty", ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_DefaultOpen))
-                {
-                    NodePropGrid.OnDraw(true, false, false);
-                }
-            }
-            EGui.UIProxy.DockProxy.EndPanel();
-        }
-        bool mRightShow = true;
-        protected unsafe void DrawRight()
-        {
-            var size = new Vector2(-1, -1);
-            if (EGui.UIProxy.DockProxy.BeginPanel(mDockKeyClass, "Right", ref mRightShow, ImGuiWindowFlags_.ImGuiWindowFlags_None))
-            {
-                GraphRenderer.OnDraw();
-            }
-            EGui.UIProxy.DockProxy.EndPanel();
         }
         #endregion
     }

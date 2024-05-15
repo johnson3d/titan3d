@@ -36,7 +36,8 @@ namespace EngineNS.EGui.Controls
             ImGuiAPI.SetNextWindowDockID(DockId, DockCond);
             var size = new Vector2(800, 600);
             ImGuiAPI.SetNextWindowSize(in size, ImGuiCond_.ImGuiCond_FirstUseEver);
-            if (EGui.UIProxy.DockProxy.BeginMainForm("LogWatcher", this, ImGuiWindowFlags_.ImGuiWindowFlags_None))
+            var result = EGui.UIProxy.DockProxy.BeginMainForm("LogWatcher", this, ImGuiWindowFlags_.ImGuiWindowFlags_None);
+            if (result)
             {
                 DockId = ImGuiAPI.GetWindowDockID();
 
@@ -197,7 +198,7 @@ namespace EngineNS.EGui.Controls
                 }
                 ImGuiAPI.EndChild();
             }
-            EGui.UIProxy.DockProxy.EndMainForm();
+            EGui.UIProxy.DockProxy.EndMainForm(result);
         }
         private struct FLogInfo
         {

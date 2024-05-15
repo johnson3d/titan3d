@@ -49,7 +49,8 @@ namespace EngineNS.Editor.Forms
 
             Vector2 size = Vector2.Zero;
             var fileDlg = UEngine.Instance.EditorInstance.FileDialog.mFileDialog;
-            if (EGui.UIProxy.DockProxy.BeginMainForm("EditorSettings", this, ImGuiWindowFlags_.ImGuiWindowFlags_None))
+            var result = EGui.UIProxy.DockProxy.BeginMainForm("EditorSettings", this, ImGuiWindowFlags_.ImGuiWindowFlags_None);
+            if (result)
             {
                 DockId = ImGuiAPI.GetWindowDockID();
                 if (ImGuiAPI.Button("Save"))
@@ -58,7 +59,7 @@ namespace EngineNS.Editor.Forms
                 }
                 SettingsPropGrid.OnDraw(true, false, false);
             }
-            EGui.UIProxy.DockProxy.EndMainForm();
+            EGui.UIProxy.DockProxy.EndMainForm(result);
             if (fileDlg.DisplayDialog("ChooseConfigKey"))
             {
                 if (fileDlg.IsOk() == true)

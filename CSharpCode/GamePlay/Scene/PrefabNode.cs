@@ -429,69 +429,6 @@ namespace EngineNS.GamePlay.Scene
                 Prefabs.Remove(name);
         }
     }
-
-    [EGui.Controls.PropertyGrid.PGCategoryFilters(ExcludeFilters = new string[] { "Misc" })]
-    public class TtPrefabCreateForm
-    {
-        public async System.Threading.Tasks.Task<bool> Initialize()
-        {
-            await SettingsPropGrid.Initialize();
-
-            SettingsPropGrid.Target = this;
-            
-            return true;
-        }
-
-        bool mVisible;
-        public bool Visible
-        {
-            get => mVisible;
-            set
-            {
-                mVisible = value;
-            }
-        }
-        public uint DockId { get; set; }
-        public ImGuiWindowClass DockKeyClass { get; }
-        public ImGuiCond_ DockCond { get; set; } = ImGuiCond_.ImGuiCond_FirstUseEver;
-
-        public TtPrefabNode RootNode;
-        [RName.PGRName(FilterExts = TtPrefab.AssetExt)]
-        [Category("Option")]
-        public RName PrefabName { get; set; }
-
-        public EGui.Controls.PropertyGrid.PropertyGrid SettingsPropGrid = new EGui.Controls.PropertyGrid.PropertyGrid();
-        public unsafe void OnDraw()
-        {
-            var visible = true;
-            var size = Vector2.Zero;// new Vector2(800, 600);
-            ImGuiAPI.SetNextWindowSize(in size, ImGuiCond_.ImGuiCond_FirstUseEver);
-            if (mVisible)
-                ImGuiAPI.OpenPopup($"PrefabCreator", ImGuiPopupFlags_.ImGuiPopupFlags_None);
-            if (ImGuiAPI.BeginPopupModal($"PrefabCreator", &visible, ImGuiWindowFlags_.ImGuiWindowFlags_None))
-            {
-                SettingsPropGrid.OnDraw(false, false, false);
-
-                if (PrefabName != null && ImGuiAPI.Button("Create"))
-                {
-                    _ = TtPrefab.CreatePrefab(RootNode, PrefabName);
-                    
-                    mVisible = false;
-                    ImGuiAPI.CloseCurrentPopup();
-                    PrefabName = null;
-                    RootNode = null;
-                }
-                if (ImGuiAPI.Button("Cancel"))
-                {
-                    PrefabName = null;
-                    mVisible = false;
-                    RootNode = null;
-                    ImGuiAPI.CloseCurrentPopup();
-                }
-                ImGuiAPI.EndPopup();
-            }
-        }
-    }
 }
 
 namespace EngineNS

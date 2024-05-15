@@ -241,6 +241,17 @@ namespace EngineNS.Editor
                         },
                         new EGui.UIProxy.MenuItemProxy()
                         {
+                            MenuName = "ContentBrowser",
+                            Selected = true,
+                            Action = (EGui.UIProxy.MenuItemProxy item, Support.UAnyPointer data)=>
+                            {
+                                ContentBrowser.Visible = !ContentBrowser.Visible;
+                                var application = UEngine.Instance.GfxDevice.SlateApplication as EngineNS.Editor.UMainEditorApplication;
+                                item.Selected = ContentBrowser.Visible;
+                            },
+                        },
+                        new EGui.UIProxy.MenuItemProxy()
+                        {
                             MenuName = "LogWatcher",
                             Selected = true,
                             Action = (EGui.UIProxy.MenuItemProxy item, Support.UAnyPointer data)=>
@@ -414,10 +425,11 @@ namespace EngineNS.Editor
                 var wsz = new Vector2(1290, 800);
                 ImGuiAPI.SetNextWindowSize(in wsz, ImGuiCond_.ImGuiCond_FirstUseEver);
                 uint dockId = 0;
-                if (EGui.UIProxy.DockProxy.BeginMainForm(UEngine.Instance.Config.ConfigName, ref IsVisible, ref dockId, //ImGuiWindowFlags_.ImGuiWindowFlags_NoMove |
-                    //ImGuiWindowFlags_.ImGuiWindowFlags_NoResize |
+                var result = EGui.UIProxy.DockProxy.BeginMainForm(UEngine.Instance.Config.ConfigName, ref IsVisible, ref dockId, //ImGuiWindowFlags_.ImGuiWindowFlags_NoMove |
+                                                                                                                                 //ImGuiWindowFlags_.ImGuiWindowFlags_NoResize |
                     ImGuiWindowFlags_.ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_.ImGuiWindowFlags_NoTitleBar |
-                    ImGuiWindowFlags_.ImGuiWindowFlags_MenuBar))
+                    ImGuiWindowFlags_.ImGuiWindowFlags_MenuBar);
+                if (result)
                 {
                     wsz = ImGuiAPI.GetWindowSize();
                     //DrawToolBar();
@@ -457,7 +469,7 @@ namespace EngineNS.Editor
                     }
                     ImGuiAPI.EndChild();
                 }
-                EGui.UIProxy.DockProxy.EndMainForm();
+                EGui.UIProxy.DockProxy.EndMainForm(result);
 
                 //WorldViewportSlate.DockId = CenterDockId;
 

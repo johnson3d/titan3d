@@ -864,7 +864,7 @@ namespace EngineNS.EGui.Controls
 
                 //bool open = true;
                 ImGuiAPI.PushStyleColor(ImGuiCol_.ImGuiCol_ChildBg, 0xFF1A1A1A);
-                if (ImGuiAPI.BeginChild("LeftWindow", in Vector2.MinusOne, true, ImGuiWindowFlags_.ImGuiWindowFlags_NoMove))
+                if (ImGuiAPI.BeginChild("LeftWindow", in Vector2.MinusOne, true, ImGuiWindowFlags_.ImGuiWindowFlags_HorizontalScrollbar | ImGuiWindowFlags_.ImGuiWindowFlags_NoMove))
                 {
                     //var winMin = ImGuiAPI.GetWindowPos();
                     //var winMax = winMin + ImGuiAPI.GetWindowSize();
@@ -914,7 +914,7 @@ namespace EngineNS.EGui.Controls
                     }
                     DrawFilterMenu();
 
-                    if (ImGuiAPI.BeginChild("RightWindow", in Vector2.MinusOne, false, ImGuiWindowFlags_.ImGuiWindowFlags_None))
+                    if (ImGuiAPI.BeginChild("RightWindow", in Vector2.MinusOne, false, ImGuiWindowFlags_.ImGuiWindowFlags_None | ImGuiWindowFlags_.ImGuiWindowFlags_NoMove))
                     {
                         var min = ImGuiAPI.GetWindowContentRegionMin();
                         var max = ImGuiAPI.GetWindowContentRegionMax();
@@ -1001,7 +1001,7 @@ namespace EngineNS.EGui.Controls
 
             }
             if (DrawInWindow)
-                EGui.UIProxy.DockProxy.EndMainForm();
+                EGui.UIProxy.DockProxy.EndMainForm(draw);
             else
             {
                 ImGuiAPI.PopStyleVar(1);

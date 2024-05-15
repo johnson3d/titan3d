@@ -240,24 +240,18 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode
         #region DrawUI
         protected ImGuiWindowClass mDockKeyClass;
         public ImGuiWindowClass DockKeyClass => mDockKeyClass;
+
+        public bool IsDrawing { get; set; }
         public unsafe void OnDraw()
         {
-            if (Material == null)
-                return;
-
-            if (Visible == false)
+            if (Visible == false || Material == null)
                 return;
 
             var pivot = new Vector2(0);
             ImGuiAPI.SetNextWindowSize(in WindowSize, ImGuiCond_.ImGuiCond_FirstUseEver);
-            ImGuiAPI.SetNextWindowDockID(DockId, DockCond);
-            if (EGui.UIProxy.DockProxy.BeginMainForm(Material.AssetName.Name, this, ImGuiWindowFlags_.ImGuiWindowFlags_None |
-                ImGuiWindowFlags_.ImGuiWindowFlags_NoSavedSettings))
+            IsDrawing = EGui.UIProxy.DockProxy.BeginMainForm(AssetName.Name, this, ImGuiWindowFlags_.ImGuiWindowFlags_NoSavedSettings);
+            if (IsDrawing)
             {
-                if (ImGuiAPI.IsWindowDocked())
-                {
-                    DockId = ImGuiAPI.GetWindowDockID();
-                }
                 if (ImGuiAPI.IsWindowFocused(ImGuiFocusedFlags_.ImGuiFocusedFlags_RootAndChildWindows))
                 {
                     var mainEditor = UEngine.Instance.GfxDevice.SlateApplication as Editor.UMainEditorApplication;
@@ -267,29 +261,53 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode
                 WindowPos = ImGuiAPI.GetWindowPos();
                 WindowSize = ImGuiAPI.GetWindowSize();
                 DrawToolBar();
+                //var sz = new Vector2(-1);
+                //ImGuiAPI.BeginChild("Client", ref sz, false, ImGuiWindowFlags_.)
                 ImGuiAPI.Separator();
-                ImGuiAPI.Columns(2, null, true);
-                if (LeftWidth == 0)
-                {
-                    ImGuiAPI.SetColumnWidth(0, 300);
-                }
-                LeftWidth = ImGuiAPI.GetColumnWidth(0);
-                var min = ImGuiAPI.GetWindowContentRegionMin();
-                var max = ImGuiAPI.GetWindowContentRegionMax();
-
-                DrawLeft(ref min, ref max);
-                ImGuiAPI.NextColumn();
-
-                DrawRight(ref min, ref max);
-                ImGuiAPI.NextColumn();
-
-                ImGuiAPI.Columns(1, null, true);
             }
-            else
-            {
-                
-            }
-            EGui.UIProxy.DockProxy.EndMainForm();
+            ResetDockspace();
+            EGui.UIProxy.DockProxy.EndMainForm(IsDrawing);
+
+            DrawShaderGraph();
+            DrawNodeDetails();
+            DrawMaterialDetails();
+            DrawEditorDetails();
+
+            DrawPreview();
+        }
+        bool mDockInitialized = false;
+        protected void ResetDockspace(bool force = false)
+        {
+            var pos = ImGuiAPI.GetCursorPos();
+            var id = ImGuiAPI.GetID(AssetName.Name + "_Dockspace");
+            mDockKeyClass.ClassId = id;
+            ImGuiAPI.DockSpace(id, Vector2.Zero, ImGuiDockNodeFlags_.ImGuiDockNodeFlags_None, mDockKeyClass);
+            if (mDockInitialized && !force)
+                return;
+            ImGuiAPI.DockBuilderRemoveNode(id);
+            ImGuiAPI.DockBuilderAddNode(id, ImGuiDockNodeFlags_.ImGuiDockNodeFlags_None);
+            ImGuiAPI.DockBuilderSetNodePos(id, pos);
+            ImGuiAPI.DockBuilderSetNodeSize(id, Vector2.One);
+            mDockInitialized = true;
+
+            var rightId = id;
+            uint middleId = 0;
+            uint downId = 0;
+            uint leftId = 0;
+            uint rightUpId = 0;
+            uint rightDownId = 0;
+            ImGuiAPI.DockBuilderSplitNode(rightId, ImGuiDir_.ImGuiDir_Left, 0.8f, ref middleId, ref rightId);
+            ImGuiAPI.DockBuilderSplitNode(rightId, ImGuiDir_.ImGuiDir_Down, 0.5f, ref rightDownId, ref rightUpId);
+            ImGuiAPI.DockBuilderSplitNode(middleId, ImGuiDir_.ImGuiDir_Down, 0.3f, ref downId, ref middleId);
+            ImGuiAPI.DockBuilderSplitNode(middleId, ImGuiDir_.ImGuiDir_Left, 0.2f, ref leftId, ref middleId);
+
+            ImGuiAPI.DockBuilderDockWindow(EGui.UIProxy.DockProxy.GetDockWindowName("ShaderGraph", mDockKeyClass), middleId);
+            ImGuiAPI.DockBuilderDockWindow(EGui.UIProxy.DockProxy.GetDockWindowName("NodeDetails", mDockKeyClass), rightDownId);
+            ImGuiAPI.DockBuilderDockWindow(EGui.UIProxy.DockProxy.GetDockWindowName("EditorDetails", mDockKeyClass), rightDownId);
+            ImGuiAPI.DockBuilderDockWindow(EGui.UIProxy.DockProxy.GetDockWindowName("MaterialDetails", mDockKeyClass), rightDownId);
+            ImGuiAPI.DockBuilderDockWindow(EGui.UIProxy.DockProxy.GetDockWindowName("Preview", mDockKeyClass), rightUpId);
+
+            ImGuiAPI.DockBuilderFinish(id);
         }
         protected void DrawToolBar()
         {
@@ -318,6 +336,74 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode
                 //Material.SerialId++;
             }
         }
+        bool ShowNodeGraph = true;
+        protected void DrawShaderGraph()
+        {
+            var sz = new Vector2(-1);
+            var show = EGui.UIProxy.DockProxy.BeginPanel(mDockKeyClass, "ShaderGraph", ref ShowNodeGraph, ImGuiWindowFlags_.ImGuiWindowFlags_None);
+            if (show)
+            {
+                GraphRenderer.OnDraw();
+            }
+            EGui.UIProxy.DockProxy.EndPanel(show);
+        }
+        bool ShowNodePropGrid = true;
+        protected void DrawNodeDetails()
+        {
+            var sz = new Vector2(-1);
+            var show = EGui.UIProxy.DockProxy.BeginPanel(mDockKeyClass, "NodeDetails", ref ShowNodePropGrid, ImGuiWindowFlags_.ImGuiWindowFlags_None);
+            if (show)
+            {
+                if (GraphRenderer.Graph != null && GraphRenderer.Graph.SelectedNodesDirty)
+                {
+                    List<object> tagList = new List<object>(GraphRenderer.Graph.SelectedNodes.Count);
+                    for (int i = 0; i < GraphRenderer.Graph.SelectedNodes.Count; i++)
+                    {
+                        var node = GraphRenderer.Graph.SelectedNodes[i].Node;
+                        if (node.GetPropertyEditObject() == null)
+                            continue;
+                        tagList.Add(node.GetPropertyEditObject());
+                    }
+                    NodePropGrid.HideInheritDeclareType = Rtti.UTypeDescGetter<UNodeBase>.TypeDesc;
+                    NodePropGrid.Target = tagList;
+                }
+                NodePropGrid.OnDraw(true, false, false);
+            }
+            EGui.UIProxy.DockProxy.EndPanel(show);
+        }
+        bool ShowMaterialPropGrid = true;
+        protected void DrawMaterialDetails()
+        {
+            var sz = new Vector2(-1);
+            var show = EGui.UIProxy.DockProxy.BeginPanel(mDockKeyClass, "MaterialDetails", ref ShowMaterialPropGrid, ImGuiWindowFlags_.ImGuiWindowFlags_None);
+            if (show)
+            {
+                MaterialPropGrid.OnDraw(true, false, false);
+            }
+            EGui.UIProxy.DockProxy.EndPanel(show);
+        }
+        bool ShowEditorPropGrid = true;
+        protected void DrawEditorDetails()
+        {
+            var sz = new Vector2(-1);
+            var show = EGui.UIProxy.DockProxy.BeginPanel(mDockKeyClass, "EditorDetails", ref ShowEditorPropGrid, ImGuiWindowFlags_.ImGuiWindowFlags_None);
+            if (show)
+            {
+                PreviewPropGrid.OnDraw(true, false, false);
+            }
+            EGui.UIProxy.DockProxy.EndPanel(show);
+        }
+        bool ShowPreview = true;
+        protected unsafe void DrawPreview()
+        {
+            var show = EGui.UIProxy.DockProxy.BeginPanel(mDockKeyClass, "Preview", ref ShowPreview, ImGuiWindowFlags_.ImGuiWindowFlags_None);
+            if (show)
+            {
+                PreviewViewport.ViewportType = Graphics.Pipeline.UViewportSlate.EViewportType.ChildWindow;
+                PreviewViewport.OnDraw();
+            }
+            EGui.UIProxy.DockProxy.EndPanel(show);
+        }
         private async System.Threading.Tasks.Task Save()
         {
             var xml = new System.Xml.XmlDocument();
@@ -338,57 +424,6 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode
             {
                 
             }
-        }
-        protected unsafe void DrawLeft(ref Vector2 min, ref Vector2 max)
-        {
-            var size = new Vector2(-1, -1);
-            if (ImGuiAPI.BeginChild("LeftWindow", in size, false, ImGuiWindowFlags_.ImGuiWindowFlags_None))
-            {
-                size.Y = ImGuiAPI.GetWindowWidth();
-                if (ImGuiAPI.BeginChild("PreviewWindow", in size, false, ImGuiWindowFlags_.ImGuiWindowFlags_None))
-                {
-                    PreviewViewport.ViewportType = Graphics.Pipeline.UViewportSlate.EViewportType.ChildWindow;
-                    PreviewViewport.OnDraw();
-                }
-                ImGuiAPI.EndChild();
-
-                if (ImGuiAPI.CollapsingHeader("NodeProperty", ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_None))
-                {
-                    if(GraphRenderer.Graph != null && GraphRenderer.Graph.SelectedNodesDirty)
-                    {
-                        List<object> tagList = new List<object>(GraphRenderer.Graph.SelectedNodes.Count);
-                        for(int i=0; i<GraphRenderer.Graph.SelectedNodes.Count; i++)
-                        {
-                            var node = GraphRenderer.Graph.SelectedNodes[i].Node;
-                            if (node.GetPropertyEditObject() == null)
-                                continue;
-                            tagList.Add(node.GetPropertyEditObject());
-                        }
-                        NodePropGrid.HideInheritDeclareType = Rtti.UTypeDescGetter<UNodeBase>.TypeDesc;
-                        NodePropGrid.Target = tagList;
-                    }
-                    NodePropGrid.OnDraw(true, false, false);
-                }
-                if (ImGuiAPI.CollapsingHeader("MaterialProperty", ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_None))
-                {
-                    MaterialPropGrid.OnDraw(true, false, false);
-                }
-                if (ImGuiAPI.CollapsingHeader("PreviewProperty", ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_None))
-                {
-                    PreviewPropGrid.OnDraw(true, false, false);
-                }
-            }
-            ImGuiAPI.EndChild();
-        }
-        protected unsafe void DrawRight(ref Vector2 min, ref Vector2 max)
-        {
-            var size = new Vector2(-1, -1);
-            if (ImGuiAPI.BeginChild("RightWindow", in size, false, ImGuiWindowFlags_.ImGuiWindowFlags_None))
-            {
-                //MaterialGraph.OnDraw(null, false);
-                GraphRenderer.OnDraw();
-            }
-            ImGuiAPI.EndChild();
         }
         #endregion
 

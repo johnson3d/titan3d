@@ -58,8 +58,9 @@ namespace EngineNS.Bricks.Particle.Editor
             var pivot = new Vector2(0);
             ImGuiAPI.SetNextWindowSize(in WindowSize, ImGuiCond_.ImGuiCond_FirstUseEver);
             ImGuiAPI.SetNextWindowDockID(DockId, DockCond);
-            if (EGui.UIProxy.DockProxy.BeginMainForm(AssetName.Name, this, ImGuiWindowFlags_.ImGuiWindowFlags_None |
-                ImGuiWindowFlags_.ImGuiWindowFlags_NoSavedSettings))
+            var result = EGui.UIProxy.DockProxy.BeginMainForm(AssetName.Name, this, ImGuiWindowFlags_.ImGuiWindowFlags_None |
+                ImGuiWindowFlags_.ImGuiWindowFlags_NoSavedSettings);
+            if (result)
             {
                 if (ImGuiAPI.IsWindowDocked())
                 {
@@ -96,7 +97,7 @@ namespace EngineNS.Bricks.Particle.Editor
             {
                 drawing = false;
             }
-            EGui.UIProxy.DockProxy.EndMainForm();
+            EGui.UIProxy.DockProxy.EndMainForm(result);
 
             if (drawing)
             {

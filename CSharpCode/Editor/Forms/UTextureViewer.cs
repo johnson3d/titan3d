@@ -156,14 +156,15 @@ namespace EngineNS.Editor.Forms
 
             var pivot = new Vector2(0);
             ImGuiAPI.SetNextWindowSize(in WindowSize, ImGuiCond_.ImGuiCond_FirstUseEver);
-            if (EGui.UIProxy.DockProxy.BeginMainForm(TextureSRV.AssetName.Name, this, ImGuiWindowFlags_.ImGuiWindowFlags_None |
-                ImGuiWindowFlags_.ImGuiWindowFlags_NoSavedSettings))
+            var result = EGui.UIProxy.DockProxy.BeginMainForm(TextureSRV.AssetName.Name, this, ImGuiWindowFlags_.ImGuiWindowFlags_None |
+                ImGuiWindowFlags_.ImGuiWindowFlags_NoSavedSettings);
+            if (result)
             {
                 DrawToolBar();
                 ImGuiAPI.Separator();
             }
             ResetDockspace();
-            EGui.UIProxy.DockProxy.EndMainForm();
+            EGui.UIProxy.DockProxy.EndMainForm(result);
 
             DrawLeft();
             DrawRight();
@@ -245,16 +246,18 @@ namespace EngineNS.Editor.Forms
         protected unsafe void DrawLeft()
         {
             var sz = new Vector2(-1);
-            if (EGui.UIProxy.DockProxy.BeginPanel(mDockKeyClass, "Left", ref mLeftShow, ImGuiWindowFlags_.ImGuiWindowFlags_None))
+            var show = EGui.UIProxy.DockProxy.BeginPanel(mDockKeyClass, "Left", ref mLeftShow, ImGuiWindowFlags_.ImGuiWindowFlags_None);
+            if (show)
             {
                 TexturePropGrid.OnDraw(true, false, false);
             }
-            EGui.UIProxy.DockProxy.EndPanel();
+            EGui.UIProxy.DockProxy.EndPanel(show);
         }
         bool mTextureViewShow = true;
         protected unsafe void DrawRight()
         {
-            if (EGui.UIProxy.DockProxy.BeginPanel(mDockKeyClass, "TextureView", ref mTextureViewShow, ImGuiWindowFlags_.ImGuiWindowFlags_None))
+            var show = EGui.UIProxy.DockProxy.BeginPanel(mDockKeyClass, "TextureView", ref mTextureViewShow, ImGuiWindowFlags_.ImGuiWindowFlags_None);
+            if (show)
             {
                 if (ImGuiAPI.IsWindowFocused(ImGuiFocusedFlags_.ImGuiFocusedFlags_ChildWindows))
                 {
@@ -283,7 +286,7 @@ namespace EngineNS.Editor.Forms
                 //drawlist.AddImage(TextureSRV.GetTextureHandle().ToPointer(), in min1, in max1, in uv1, in uv2, 0xFFFFFFFF);
                 drawlist.AddRect(in min1, in max1, 0xFF00FF00, 0, ImDrawFlags_.ImDrawFlags_None, 0);
             }
-            EGui.UIProxy.DockProxy.EndPanel();
+            EGui.UIProxy.DockProxy.EndPanel(show);
         }
         public void OnEvent(in Bricks.Input.Event e)
         {

@@ -615,7 +615,7 @@ namespace EngineNS.GamePlay.Scene
                 }   
             }
         }
-        public async System.Threading.Tasks.Task<bool> LoadChildNode(GamePlay.UWorld world, UNode scene, EngineNS.XndNode node, bool isPrefab)
+        public async System.Threading.Tasks.Task<bool> LoadChildNode(GamePlay.UWorld world, UNode scene, EngineNS.XndNode node, bool bTryFindNode)
         {
             for(uint i = 0; i < node.GetNumOfNode(); i++)
             {
@@ -636,7 +636,7 @@ namespace EngineNS.GamePlay.Scene
                 var nd = Rtti.UTypeDescManager.CreateInstance(Rtti.UTypeDesc.TypeOf(cldTypeStr)) as UNode;
                 if (nd == null || nodeData == null)
                 {
-                    Profiler.Log.WriteLine(Profiler.ELogTag.Warning, isPrefab? "Prefab" : "Scene", $"SceneNode Load failed: NodeDataType={attr.Name}, NodeData={cldTypeStr}");
+                    Profiler.Log.WriteLine(Profiler.ELogTag.Warning, bTryFindNode ? "Prefab" : "Scene", $"SceneNode Load failed: NodeDataType={attr.Name}, NodeData={cldTypeStr}");
                     continue;
                 }
                 
@@ -654,7 +654,7 @@ namespace EngineNS.GamePlay.Scene
                                 continue;
                             }
 
-                            if (isPrefab)
+                            if (bTryFindNode)
                             {
                                 var old = FindFirstChild(nodeData.Name, nd.GetType());
                                 if (old != null)
@@ -671,7 +671,7 @@ namespace EngineNS.GamePlay.Scene
                         var ok = await nd.InitializeNode(world, nodeData, EBoundVolumeType.Box, placementType);
                         if (ok == false)
                         {
-                            Profiler.Log.WriteLine(Profiler.ELogTag.Warning, isPrefab ? "Prefab" : "Scene", $"SceneNode Load Initialize failed: NodeDataType={attr.Name}, NodeData={cldTypeStr}");
+                            Profiler.Log.WriteLine(Profiler.ELogTag.Warning, bTryFindNode ? "Prefab" : "Scene", $"SceneNode Load Initialize failed: NodeDataType={attr.Name}, NodeData={cldTypeStr}");
                             continue;
                         }
                         //nd.NodeData = data as UNodeData;
@@ -686,7 +686,7 @@ namespace EngineNS.GamePlay.Scene
                 if (nd.Placement != null)
                 {
                     nd.Parent = this;
-                    await nd.LoadChildNode(world, scene, cld, isPrefab);
+                    await nd.LoadChildNode(world, scene, cld, bTryFindNode);
                 }
                 nd.OnNodeLoaded(this);
             }

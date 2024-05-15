@@ -580,10 +580,11 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
         public virtual unsafe void OnDraw()
         {
             //ImGuiAPI.SetNextWindowDockID(DockId, DockCond);
-            if (EGui.UIProxy.DockProxy.BeginMainForm(
-                string.IsNullOrEmpty(FormName)? $"Macross:{IO.TtFileManager.GetPureName(AssetName!=null? AssetName.Name :"NoName")}" : FormName,
-                (RootForm != null) ? RootForm : this, 
-                ImGuiWindowFlags_.ImGuiWindowFlags_None| ImGuiWindowFlags_.ImGuiWindowFlags_MenuBar))
+            var result = EGui.UIProxy.DockProxy.BeginMainForm(
+                string.IsNullOrEmpty(FormName) ? $"Macross:{IO.TtFileManager.GetPureName(AssetName != null ? AssetName.Name : "NoName")}" : FormName,
+                (RootForm != null) ? RootForm : this,
+                ImGuiWindowFlags_.ImGuiWindowFlags_None | ImGuiWindowFlags_.ImGuiWindowFlags_MenuBar);
+            if (result)
             {
                 DrawToolbar();
 
@@ -628,7 +629,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
                 //ImGuiAPI.NextColumn();
             }
             ResetDockspace();
-            EGui.UIProxy.DockProxy.EndMainForm();
+            EGui.UIProxy.DockProxy.EndMainForm(result);
 
             DrawClassView();
             DrawGraph();
@@ -722,7 +723,8 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
         protected unsafe void DrawClassView()
         {
             ImGuiTreeNodeFlags_ flags = ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_NoTreePushOnOpen | ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_Bullet | ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_SpanFullWidth | ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_AllowItemOverlap;
-            if (EGui.UIProxy.DockProxy.BeginPanel(mDockKeyClass, "ClassView", ref mClassViewShow, ImGuiWindowFlags_.ImGuiWindowFlags_None))
+            var show = EGui.UIProxy.DockProxy.BeginPanel(mDockKeyClass, "ClassView", ref mClassViewShow, ImGuiWindowFlags_.ImGuiWindowFlags_None);
+            if (show)
             {
                 Vector2 buttonSize = new Vector2(16, 16);
                 float buttonOffset = 16;
@@ -894,7 +896,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
                     ImGuiAPI.TreePop();
                 }
             }
-            EGui.UIProxy.DockProxy.EndPanel();
+            EGui.UIProxy.DockProxy.EndPanel(show);
         }
         public void OpenMethodGraph(UMacrossMethodGraph method)
         {
@@ -910,11 +912,12 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
         bool mNodePropertyShow = true;
         protected void DrawPropertyGrid()
         {
-            if(EGui.UIProxy.DockProxy.BeginPanel(mDockKeyClass, "NodeProperty", ref mNodePropertyShow, ImGuiWindowFlags_.ImGuiWindowFlags_None))
+            var show = EGui.UIProxy.DockProxy.BeginPanel(mDockKeyClass, "NodeProperty", ref mNodePropertyShow, ImGuiWindowFlags_.ImGuiWindowFlags_None);
+            if (show)
             {
                 PGMember.OnDraw(true, false, false);
             }
-            EGui.UIProxy.DockProxy.EndPanel();
+            EGui.UIProxy.DockProxy.EndPanel(show);
         }
         NodeGraph.UnionNodeConfigRenderer mUnionNodeConfigRenderer = new NodeGraph.UnionNodeConfigRenderer();
         bool mUnionNodeConfigShow = false;
@@ -922,11 +925,12 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
         {
             if (!mUnionNodeConfigShow)
                 return;
-            if(EGui.UIProxy.DockProxy.BeginPanel(mDockKeyClass, "UnionNodeConfig", ref mUnionNodeConfigShow, ImGuiWindowFlags_.ImGuiWindowFlags_None))
+            var show = EGui.UIProxy.DockProxy.BeginPanel(mDockKeyClass, "UnionNodeConfig", ref mUnionNodeConfigShow, ImGuiWindowFlags_.ImGuiWindowFlags_None);
+            if (show)
             {
                 mUnionNodeConfigRenderer.DrawConfigPanel();
             }
-            EGui.UIProxy.DockProxy.EndPanel();
+            EGui.UIProxy.DockProxy.EndPanel(show);
         }
         public void SetConfigUnionNode(NodeGraph.IUnionNode node)
         {
@@ -939,7 +943,8 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
         int mSettingCurrentFuncIndex = -1;
         protected unsafe void DrawGraph()
         {
-            if(EGui.UIProxy.DockProxy.BeginPanel(mDockKeyClass, "GraphWindow", ref mGraphWindowShow, ImGuiWindowFlags_.ImGuiWindowFlags_None))
+            var show = EGui.UIProxy.DockProxy.BeginPanel(mDockKeyClass, "GraphWindow", ref mGraphWindowShow, ImGuiWindowFlags_.ImGuiWindowFlags_None);
+            if (show)
             {
                 var vMin = ImGuiAPI.GetWindowContentRegionMin();
                 var vMax = ImGuiAPI.GetWindowContentRegionMax();
@@ -993,7 +998,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
                     ImGuiAPI.EndTabBar();
                 }
             }
-            EGui.UIProxy.DockProxy.EndPanel();
+            EGui.UIProxy.DockProxy.EndPanel(show);
         }
 
         public void DrawFunctionGraph(UMacrossMethodGraph func, Vector2 size)

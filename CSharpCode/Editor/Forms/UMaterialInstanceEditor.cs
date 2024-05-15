@@ -166,12 +166,21 @@ namespace EngineNS.Editor.Forms
             ImGuiAPI.DockBuilderSetNodeSize(id, Vector2.One);
             mDockInitialized = true;
 
-            var viewId = id;
+            var rightId = id;
+            uint middleId = 0;
+            uint downId = 0;
             uint leftId = 0;
-            ImGuiAPI.DockBuilderSplitNode(viewId, ImGuiDir_.ImGuiDir_Left, 0.2f, ref leftId, ref viewId);
+            uint rightUpId = 0;
+            uint rightDownId = 0;
+            ImGuiAPI.DockBuilderSplitNode(rightId, ImGuiDir_.ImGuiDir_Left, 0.8f, ref middleId, ref rightId);
+            ImGuiAPI.DockBuilderSplitNode(rightId, ImGuiDir_.ImGuiDir_Down, 0.5f, ref rightDownId, ref rightUpId);
+            ImGuiAPI.DockBuilderSplitNode(middleId, ImGuiDir_.ImGuiDir_Down, 0.3f, ref downId, ref middleId);
+            ImGuiAPI.DockBuilderSplitNode(middleId, ImGuiDir_.ImGuiDir_Left, 0.2f, ref leftId, ref middleId);
 
-            ImGuiAPI.DockBuilderDockWindow(EGui.UIProxy.DockProxy.GetDockWindowName("Detial", mDockKeyClass), leftId);
-            ImGuiAPI.DockBuilderDockWindow(EGui.UIProxy.DockProxy.GetDockWindowName("PreView", mDockKeyClass), viewId);
+            ImGuiAPI.DockBuilderDockWindow(EGui.UIProxy.DockProxy.GetDockWindowName("EditorDetails", mDockKeyClass), rightDownId);
+            ImGuiAPI.DockBuilderDockWindow(EGui.UIProxy.DockProxy.GetDockWindowName("MaterialDetails", mDockKeyClass), rightDownId);
+            ImGuiAPI.DockBuilderDockWindow(EGui.UIProxy.DockProxy.GetDockWindowName("Preview", mDockKeyClass), middleId);
+
             ImGuiAPI.DockBuilderFinish(id);
         }
         public float LeftWidth = 0;
@@ -179,60 +188,90 @@ namespace EngineNS.Editor.Forms
         float ObjecRotAngle = 0;
         public float ObjectRotateSpeed { get; set; } = 0;
         int test0 = 0;
+        bool mIsDrawing = true;
+        bool IsDrawing
+        {
+            get => mIsDrawing;
+            set
+            {
+                if (mIsDrawing && !value)
+                {
+                }
+                else if (!mIsDrawing && value)
+                {
+                    
+                }
+                mIsDrawing = value;
+            }
+        }
+        public Vector2 WindowPos;
+        public Vector2 WindowSize = new Vector2(800, 600);
         public unsafe void OnDraw()
         {
             if (Visible == false || Material == null)
                 return;
 
-            if (PreviewNode != null)
-            {
-                ObjecRotAngle += UEngine.Instance.ElapsedSecond * ObjectRotateSpeed;
-                PreviewNode.Placement.Quat = Quaternion.RotationAxis(in Vector3.Up, ObjecRotAngle);
-            }
-
-            if (false && RenderPolicy != null)
-            {
-                test0++;
-                var cp = this.RenderPolicy.DefaultCamera.GetPosition();
-                var cpa = this.RenderPolicy.DefaultCamera.GetLookAt();
-                if (test0 % 2 == 0)
-                {
-                    cp += new DVector3(5, 0, 0);
-                    //cpa += new DVector3(0.5, 0, 0);
-                }
-                else
-                {
-                    cp -= new DVector3(5, 0, 0);
-                    //cpa -= new DVector3(0.5, 0, 0);
-                }
-                this.RenderPolicy.DefaultCamera.LookAtLH(cp, cpa, Vector3.UnitY);
-            }            
-
             var pivot = new Vector2(0);
-            //ImGuiAPI.SetNextWindowSize(in WindowSize, ImGuiCond_.ImGuiCond_FirstUseEver);
-            //ImGuiAPI.SetNextWindowDockID(DockId, DockCond);
-            if (EGui.UIProxy.DockProxy.BeginMainForm(Material.AssetName.Name, this, ImGuiWindowFlags_.ImGuiWindowFlags_NoScrollbar |
-                ImGuiWindowFlags_.ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_.ImGuiWindowFlags_NoScrollWithMouse))
+            ImGuiAPI.SetNextWindowSize(in WindowSize, ImGuiCond_.ImGuiCond_FirstUseEver);
+            IsDrawing = EGui.UIProxy.DockProxy.BeginMainForm(AssetName.Name, this, ImGuiWindowFlags_.ImGuiWindowFlags_NoSavedSettings);
+            if (IsDrawing)
             {
-                //if (ImGuiAPI.IsWindowDocked())
-                //{
-                //    DockId = ImGuiAPI.GetWindowDockID();
-                //}
                 if (ImGuiAPI.IsWindowFocused(ImGuiFocusedFlags_.ImGuiFocusedFlags_RootAndChildWindows))
                 {
                     var mainEditor = UEngine.Instance.GfxDevice.SlateApplication as Editor.UMainEditorApplication;
                     if (mainEditor != null)
                         mainEditor.AssetEditorManager.CurrentActiveEditor = this;
                 }
+                WindowPos = ImGuiAPI.GetWindowPos();
+                WindowSize = ImGuiAPI.GetWindowSize();
                 DrawToolBar();
+                //var sz = new Vector2(-1);
+                //ImGuiAPI.BeginChild("Client", ref sz, false, ImGuiWindowFlags_.)
                 ImGuiAPI.Separator();
             }
             ResetDockspace();
-            EGui.UIProxy.DockProxy.EndMainForm();
+            EGui.UIProxy.DockProxy.EndMainForm(IsDrawing);
 
-            DrawPropertyGrid();
-            DrawViewport();
+            DrawMaterialDetails();
+            DrawEditorDetails();
+
+            DrawPreview();
         }
+        bool ShowMaterialPropGrid = true;
+        protected void DrawMaterialDetails()
+        {
+            var sz = new Vector2(-1);
+            var show = EGui.UIProxy.DockProxy.BeginPanel(mDockKeyClass, "MaterialDetails", ref ShowMaterialPropGrid, ImGuiWindowFlags_.ImGuiWindowFlags_None);
+            if (show)
+            {
+                MaterialPropGrid.OnDraw(true, false, false);
+            }
+            EGui.UIProxy.DockProxy.EndPanel(show);
+        }
+        bool ShowEditorPropGrid = true;
+        protected void DrawEditorDetails()
+        {
+            var sz = new Vector2(-1);
+            var show = EGui.UIProxy.DockProxy.BeginPanel(mDockKeyClass, "EditorDetails", ref ShowEditorPropGrid, ImGuiWindowFlags_.ImGuiWindowFlags_None);
+            if (show)
+            {
+                EditorPropGrid.OnDraw(true, false, false);
+            }
+            EGui.UIProxy.DockProxy.EndPanel(show);
+        }
+        bool ShowPreview = true;
+        protected unsafe void DrawPreview()
+        {
+            var show = EGui.UIProxy.DockProxy.BeginPanel(mDockKeyClass, "Preview", ref ShowPreview, ImGuiWindowFlags_.ImGuiWindowFlags_None);
+            if (show)
+            {
+                PreviewViewport.ViewportType = Graphics.Pipeline.UViewportSlate.EViewportType.ChildWindow;
+                PreviewViewport.OnDraw();
+            }
+            this.PreviewViewport.Visible = show;
+            EGui.UIProxy.DockProxy.EndPanel(show);
+        }
+
         protected unsafe void DrawToolBar()
         {
             var btSize = Vector2.Zero;
@@ -261,32 +300,7 @@ namespace EngineNS.Editor.Forms
             }
         }
         bool mPropertyShow = true;
-        protected unsafe void DrawPropertyGrid()
-        {
-            var sz = new Vector2(-1);
-            if (EGui.UIProxy.DockProxy.BeginPanel(mDockKeyClass, "Detial", ref mPropertyShow, ImGuiWindowFlags_.ImGuiWindowFlags_None))
-            {
-                if (ImGuiAPI.CollapsingHeader("MaterialProperty", ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_None))
-                {
-                    MaterialPropGrid.OnDraw(true, false, false);
-                }
-                if (ImGuiAPI.CollapsingHeader("EditorProperty", ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_None))
-                {
-                    EditorPropGrid.OnDraw(true, false, false);
-                }
-            }
-            EGui.UIProxy.DockProxy.EndPanel();
-        }
-        protected unsafe void DrawViewport()
-        {
-            if (EGui.UIProxy.DockProxy.BeginPanel(mDockKeyClass, "PreView", ref mPropertyShow, ImGuiWindowFlags_.ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_.ImGuiWindowFlags_NoScrollWithMouse))
-            {
-                PreviewViewport.ViewportType = UViewportSlate.EViewportType.ChildWindow;            
-                PreviewViewport.OnDraw();
-            }
-            EGui.UIProxy.DockProxy.EndPanel();
-        }
-
+        
         public void OnEvent(in Bricks.Input.Event e)
         {
             //throw new NotImplementedException();

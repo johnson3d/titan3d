@@ -47,7 +47,8 @@ namespace EngineNS.Windows
                 return;
             
             Vector2 size = new Vector2(0, 0);
-            if (EGui.UIProxy.DockProxy.BeginMainForm("ClrProfiler", this, ImGuiWindowFlags_.ImGuiWindowFlags_None))
+            var result = EGui.UIProxy.DockProxy.BeginMainForm("ClrProfiler", this, ImGuiWindowFlags_.ImGuiWindowFlags_None);
+            if (result)
             {
                 UpdateLogs();
                 foreach (var i in mClrLogs)
@@ -55,7 +56,7 @@ namespace EngineNS.Windows
                     ImGuiAPI.TextAsPointer((sbyte*)&i.m_mString);
                 }
             }
-            EGui.UIProxy.DockProxy.EndMainForm();
+            EGui.UIProxy.DockProxy.EndMainForm(result);
         }
     }
 }

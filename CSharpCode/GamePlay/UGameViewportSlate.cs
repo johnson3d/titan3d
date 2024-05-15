@@ -109,7 +109,7 @@ namespace EngineNS.GamePlay
                 mPresentWindow?.UnregEventProcessor(this);
                 mPresentWindow = null;
             }
-            EGui.UIProxy.DockProxy.EndMainForm();
+            EGui.UIProxy.DockProxy.EndMainForm(bShow);
             if (mClientChanged && IsValidClientArea())
             {
                 OnClientChanged(mSizeChanged);

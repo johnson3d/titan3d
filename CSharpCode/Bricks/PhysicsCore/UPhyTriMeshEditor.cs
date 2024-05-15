@@ -145,8 +145,9 @@ namespace EngineNS.Bricks.PhysicsCore
 
             var pivot = new Vector2(0);
             ImGuiAPI.SetNextWindowSize(in WindowSize, ImGuiCond_.ImGuiCond_FirstUseEver);
-            if (EGui.UIProxy.DockProxy.BeginMainForm(TriMesh.AssetName.Name, this, ImGuiWindowFlags_.ImGuiWindowFlags_None |
-                ImGuiWindowFlags_.ImGuiWindowFlags_NoSavedSettings))
+            var result = EGui.UIProxy.DockProxy.BeginMainForm(TriMesh.AssetName.Name, this, ImGuiWindowFlags_.ImGuiWindowFlags_None |
+                ImGuiWindowFlags_.ImGuiWindowFlags_NoSavedSettings);
+            if (result)
             {
                 if (ImGuiAPI.IsWindowFocused(ImGuiFocusedFlags_.ImGuiFocusedFlags_RootAndChildWindows))
                 {
@@ -162,7 +163,7 @@ namespace EngineNS.Bricks.PhysicsCore
                 ImGuiAPI.Separator();
             }
             ResetDockspace();
-            EGui.UIProxy.DockProxy.EndMainForm();
+            EGui.UIProxy.DockProxy.EndMainForm(result);
 
             DrawLeft();
             DrawRight();
@@ -179,24 +180,26 @@ namespace EngineNS.Bricks.PhysicsCore
         protected unsafe void DrawLeft()
         {
             var sz = new Vector2(-1);
-            if (EGui.UIProxy.DockProxy.BeginPanel(mDockKeyClass, "LeftView", ref mLeftDraw, ImGuiWindowFlags_.ImGuiWindowFlags_None))
+            var show = EGui.UIProxy.DockProxy.BeginPanel(mDockKeyClass, "LeftView", ref mLeftDraw, ImGuiWindowFlags_.ImGuiWindowFlags_None);
+            if (show)
             {
                 if (ImGuiAPI.CollapsingHeader("MeshProperty", ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_None))
                 {
                     TriMeshPropGrid.OnDraw(true, false, false);
                 }
             }
-            EGui.UIProxy.DockProxy.EndPanel();
+            EGui.UIProxy.DockProxy.EndPanel(show);
         }
         bool mRightDraw = true;
         protected unsafe void DrawRight()
         {
-            if (EGui.UIProxy.DockProxy.BeginPanel(mDockKeyClass, "Right", ref mRightDraw, ImGuiWindowFlags_.ImGuiWindowFlags_None))
+            var show = EGui.UIProxy.DockProxy.BeginPanel(mDockKeyClass, "Right", ref mRightDraw, ImGuiWindowFlags_.ImGuiWindowFlags_None);
+            if (show)
             {
                 PreviewViewport.ViewportType = Graphics.Pipeline.UViewportSlate.EViewportType.ChildWindow;
                 PreviewViewport.OnDraw();
             }
-            EGui.UIProxy.DockProxy.EndPanel();
+            EGui.UIProxy.DockProxy.EndPanel(show);
         }
 
         public void OnEvent(in Bricks.Input.Event e)

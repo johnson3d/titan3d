@@ -188,56 +188,18 @@ namespace EngineNS.Bricks.Procedure
         #endregion
 
         #region DrawUI
-        bool mDockInitialized = false;
-        unsafe void ResetDockspace(bool force = false)
-        {
-            //if (mDockInitialized)
-            //    return;
-            //mDockInitialized = true;
-
-            var pos = ImGuiAPI.GetCursorPos();
-
-            var id = ImGuiAPI.GetID(AssetName.Name + "_Dockspace");
-            //if (id == 0)
-            //    id = ImGuiAPI.GetID(AssetName.Name + "_Content");
-            mDockKeyClass.ClassId = id;
-            ImGuiAPI.DockSpace(id, Vector2.Zero, ImGuiDockNodeFlags_.ImGuiDockNodeFlags_None, mDockKeyClass);
-            if (mDockInitialized && !force )
-                return;
-            ImGuiAPI.DockBuilderRemoveNode(id);
-            ImGuiAPI.DockBuilderAddNode(id, ImGuiDockNodeFlags_.ImGuiDockNodeFlags_None);
-            ImGuiAPI.DockBuilderSetNodePos(id, pos);
-            ImGuiAPI.DockBuilderSetNodeSize(id, Vector2.One);
-            mDockInitialized = true;
-
-            var graphId = id;
-            uint leftId = 0;
-            ImGuiAPI.DockBuilderSplitNode(graphId, ImGuiDir_.ImGuiDir_Left, 0.2f, ref leftId, ref graphId);
-            uint propertyId = 0;
-            ImGuiAPI.DockBuilderSplitNode(graphId, ImGuiDir_.ImGuiDir_Right, 0.2f, ref propertyId, ref graphId);
-            uint unionConfigId = 0;
-            ImGuiAPI.DockBuilderSplitNode(graphId, ImGuiDir_.ImGuiDir_Right, 0.4f, ref unionConfigId, ref graphId);
-            uint previewId = 0;
-            ImGuiAPI.DockBuilderSplitNode(leftId, ImGuiDir_.ImGuiDir_Up, 0.3f, ref previewId, ref leftId);
-
-            ImGuiAPI.DockBuilderDockWindow(EGui.UIProxy.DockProxy.GetDockWindowName("GraphWindow", mDockKeyClass), graphId);
-            ImGuiAPI.DockBuilderDockWindow(EGui.UIProxy.DockProxy.GetDockWindowName("PreviewWindow", mDockKeyClass), previewId);
-            ImGuiAPI.DockBuilderDockWindow(EGui.UIProxy.DockProxy.GetDockWindowName("NodeProperty", mDockKeyClass), propertyId);
-            ImGuiAPI.DockBuilderDockWindow(EGui.UIProxy.DockProxy.GetDockWindowName("UnionNodeConfig", mDockKeyClass), unionConfigId);
-            ImGuiAPI.DockBuilderDockWindow(EGui.UIProxy.DockProxy.GetDockWindowName("EditorProperty", mDockKeyClass), propertyId);
-            ImGuiAPI.DockBuilderDockWindow(EGui.UIProxy.DockProxy.GetDockWindowName("Hierarchy", mDockKeyClass), leftId);
-            ImGuiAPI.DockBuilderFinish(id);
-        }
+        //public Vector2 WindowPos;
+        //public Vector2 WindowSize = new Vector2(800, 600);
+        public bool IsDrawing { get; set; }
         public unsafe void OnDraw()
         {
             if (Visible == false)
                 return;
 
-            //bool drawing = true;
             var pivot = new Vector2(0);
             ImGuiAPI.SetNextWindowSize(in WindowSize, ImGuiCond_.ImGuiCond_FirstUseEver);
-            //ImGuiAPI.SetNextWindowDockID(DockId, DockCond);
-            if (EGui.UIProxy.DockProxy.BeginMainForm(AssetName.Name, this, ImGuiWindowFlags_.ImGuiWindowFlags_NoScrollbar))
+            IsDrawing = EGui.UIProxy.DockProxy.BeginMainForm(AssetName.Name, this, ImGuiWindowFlags_.ImGuiWindowFlags_NoSavedSettings);
+            if (IsDrawing)
             {
                 if (ImGuiAPI.IsWindowFocused(ImGuiFocusedFlags_.ImGuiFocusedFlags_RootAndChildWindows))
                 {
@@ -247,58 +209,57 @@ namespace EngineNS.Bricks.Procedure
                 }
                 WindowPos = ImGuiAPI.GetWindowPos();
                 WindowSize = ImGuiAPI.GetWindowSize();
-
                 DrawToolBar();
-                //ImGuiAPI.Separator();
-                //if(ImGuiAPI.BeginChild(id, Vector2.MinusOne, false, ImGuiWindowFlags_.ImGuiWindowFlags_None))
-                {
-                    if (ImGuiAPI.IsWindowDocked())
-                    {
-                        DockId = ImGuiAPI.GetWindowDockID();
-                    }
-                    //InitDockspace(id);
-                }
-                //ImGuiAPI.EndChild();
-
-                //ImGuiAPI.Columns(2, null, true);
-                //if (LeftWidth == 0)
-                //{
-                //    ImGuiAPI.SetColumnWidth(0, 300);
-                //}
-                //LeftWidth = ImGuiAPI.GetColumnWidth(0);
-                //var min = ImGuiAPI.GetWindowContentRegionMin();
-                //var max = ImGuiAPI.GetWindowContentRegionMax();
-
-                //DrawLeft(ref min, ref max);
-                //ImGuiAPI.NextColumn();
-
-                //DrawRight(ref min, ref max);
-                //ImGuiAPI.NextColumn();
-
-                //ImGuiAPI.Columns(1, null, true);
+                //var sz = new Vector2(-1);
+                //ImGuiAPI.BeginChild("Client", ref sz, false, ImGuiWindowFlags_.)
+                ImGuiAPI.Separator();
             }
-            else
-            {
-                //drawing = false;
-            }
-            //var id = ImGuiAPI.GetID(AssetName.Name + "_Dockspace");
             ResetDockspace();
-            EGui.UIProxy.DockProxy.EndMainForm();
+            EGui.UIProxy.DockProxy.EndMainForm(IsDrawing);
 
+            DrawPgcGraph();
+
+            DrawCameralDetails();
             DrawPreview();
-            DrawGraph();
-            DrawPropertyGrid();
+            
+            DrawGraphDetails();
+            DrawNodeDetails();
             DrawUnionNodeConfig();
-            //if (drawing)
-            //{
-            //    if (PreviewDockId != 0)
-            //    {
-            //        PreviewViewport.DockId = PreviewDockId;
-            //        PreviewViewport.DockCond = ImGuiCond_.ImGuiCond_Always;
-            //        PreviewViewport.VieportType = Graphics.Pipeline.UViewportSlate.EVieportType.Window;
-            //        PreviewViewport.OnDraw();
-            //    }
-            //}
+        }
+        bool mDockInitialized = false;
+        protected void ResetDockspace(bool force = false)
+        {
+            var pos = ImGuiAPI.GetCursorPos();
+            var id = ImGuiAPI.GetID(AssetName.Name + "_Dockspace");
+            mDockKeyClass.ClassId = id;
+            ImGuiAPI.DockSpace(id, Vector2.Zero, ImGuiDockNodeFlags_.ImGuiDockNodeFlags_None, mDockKeyClass);
+            if (mDockInitialized && !force)
+                return;
+            ImGuiAPI.DockBuilderRemoveNode(id);
+            ImGuiAPI.DockBuilderAddNode(id, ImGuiDockNodeFlags_.ImGuiDockNodeFlags_None);
+            ImGuiAPI.DockBuilderSetNodePos(id, pos);
+            ImGuiAPI.DockBuilderSetNodeSize(id, Vector2.One);
+            mDockInitialized = true;
+
+            var rightId = id;
+            uint middleId = 0;
+            uint downId = 0;
+            uint leftId = 0;
+            uint rightUpId = 0;
+            uint rightDownId = 0;
+            ImGuiAPI.DockBuilderSplitNode(rightId, ImGuiDir_.ImGuiDir_Left, 0.8f, ref middleId, ref rightId);
+            ImGuiAPI.DockBuilderSplitNode(rightId, ImGuiDir_.ImGuiDir_Down, 0.5f, ref rightDownId, ref rightUpId);
+            ImGuiAPI.DockBuilderSplitNode(middleId, ImGuiDir_.ImGuiDir_Down, 0.3f, ref downId, ref middleId);
+            ImGuiAPI.DockBuilderSplitNode(middleId, ImGuiDir_.ImGuiDir_Left, 0.2f, ref leftId, ref middleId);
+
+            ImGuiAPI.DockBuilderDockWindow(EGui.UIProxy.DockProxy.GetDockWindowName("PgcGraph", mDockKeyClass), middleId);
+            ImGuiAPI.DockBuilderDockWindow(EGui.UIProxy.DockProxy.GetDockWindowName("Preview", mDockKeyClass), rightUpId);
+            ImGuiAPI.DockBuilderDockWindow(EGui.UIProxy.DockProxy.GetDockWindowName("CameralDetails", mDockKeyClass), rightUpId);
+            ImGuiAPI.DockBuilderDockWindow(EGui.UIProxy.DockProxy.GetDockWindowName("GraphDetails", mDockKeyClass), rightDownId);
+            ImGuiAPI.DockBuilderDockWindow(EGui.UIProxy.DockProxy.GetDockWindowName("NodeDetails", mDockKeyClass), rightDownId);
+            ImGuiAPI.DockBuilderDockWindow(EGui.UIProxy.DockProxy.GetDockWindowName("UnionNodeConfig", mDockKeyClass), rightDownId);
+
+            ImGuiAPI.DockBuilderFinish(id);
         }
         protected void DrawToolBar()
         {
@@ -313,6 +274,114 @@ namespace EngineNS.Bricks.Procedure
                 var noused = Compile();
             }
         }
+        bool ShowNodeGraph = true;
+        protected void DrawPgcGraph()
+        {
+            var sz = new Vector2(-1);
+            var show = EGui.UIProxy.DockProxy.BeginPanel(mDockKeyClass, "PgcGraph", ref ShowNodeGraph, ImGuiWindowFlags_.ImGuiWindowFlags_None);
+            if (show)
+            {
+                GraphRenderer.OnDraw();
+            }
+            EGui.UIProxy.DockProxy.EndPanel(show);
+        }
+        bool ShowGrapPropGrid = true;
+        protected void DrawGraphDetails()
+        {
+            var sz = new Vector2(-1);
+            var show = EGui.UIProxy.DockProxy.BeginPanel(mDockKeyClass, "GraphDetails", ref ShowGrapPropGrid, ImGuiWindowFlags_.ImGuiWindowFlags_None);
+            if (show)
+            {
+                GraphPropGrid.OnDraw(true, false, false);
+            }
+            EGui.UIProxy.DockProxy.EndPanel(show);
+        }
+        bool ShowNodePropGrid = true;
+        protected void DrawNodeDetails()
+        {
+            var sz = new Vector2(-1);
+            var show = EGui.UIProxy.DockProxy.BeginPanel(mDockKeyClass, "NodeDetails", ref ShowNodePropGrid, ImGuiWindowFlags_.ImGuiWindowFlags_None);
+            if (show)
+            {
+                if (GraphRenderer.Graph != null && GraphRenderer.Graph.SelectedNodesDirty)
+                {
+                    NodePropGrid.Target = GraphRenderer.Graph.SelectedNodes.ToArray();
+                    GraphRenderer.Graph.SelectedNodesDirty = false;
+                }
+                NodePropGrid.OnDraw(true, false, false, ImGuiWindowFlags_.ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_.ImGuiWindowFlags_AlwaysAutoResize);
+            }
+            EGui.UIProxy.DockProxy.EndPanel(show);
+        }
+        bool ShowCameralPropGrid = true;
+        protected unsafe void DrawCameralDetails()
+        {
+            var sz = new Vector2(-1);
+            var show = EGui.UIProxy.DockProxy.BeginPanel(mDockKeyClass, "CameralDetails", ref ShowCameralPropGrid, ImGuiWindowFlags_.ImGuiWindowFlags_None);
+            if (show)
+            {
+                float v = PreviewViewport.CameraMoveSpeed;
+                ImGuiAPI.SliderFloat("KeyMove", ref v, 1.0f, 150.0f, "%.3f", ImGuiSliderFlags_.ImGuiSliderFlags_None);
+                PreviewViewport.CameraMoveSpeed = v;
+
+                v = PreviewViewport.CameraMouseWheelSpeed;
+                ImGuiAPI.InputFloat("WheelMove", ref v, 0.1f, 1.0f, "%.3f", ImGuiInputTextFlags_.ImGuiInputTextFlags_None);
+                PreviewViewport.CameraMouseWheelSpeed = v;
+
+                var zN = PreviewViewport.CameraController.Camera.mCoreObject.mZNear;
+                var zF = PreviewViewport.CameraController.Camera.mCoreObject.mZFar;
+                ImGuiAPI.SliderFloat("ZNear", ref zN, 0.1f, 100.0f, "%.1f", ImGuiSliderFlags_.ImGuiSliderFlags_None);
+                ImGuiAPI.SliderFloat("ZFar", ref zF, 10.0f, 10000.0f, "%.1f", ImGuiSliderFlags_.ImGuiSliderFlags_None);
+                if (zN != PreviewViewport.CameraController.Camera.mCoreObject.mZNear ||
+                    zF != PreviewViewport.CameraController.Camera.mCoreObject.mZFar)
+                {
+                    PreviewViewport.CameraController.Camera.SetZRange(zN, zF);
+                }
+
+                var camPos = PreviewViewport.CameraController.Camera.mCoreObject.GetPosition();
+                var saved = camPos;
+                ImGuiAPI.InputDouble($"X", ref camPos.X, 0.1, 10.0, "%.2f", ImGuiInputTextFlags_.ImGuiInputTextFlags_None);
+                ImGuiAPI.InputDouble($"Y", ref camPos.Y, 0.1, 10.0, "%.2f", ImGuiInputTextFlags_.ImGuiInputTextFlags_None);
+                ImGuiAPI.InputDouble($"Z", ref camPos.Z, 0.1, 10.0, "%.2f", ImGuiInputTextFlags_.ImGuiInputTextFlags_None);
+                if (saved != camPos)
+                {
+                    var lookAt = PreviewViewport.CameraController.Camera.mCoreObject.GetLookAt();
+                    var up = PreviewViewport.CameraController.Camera.mCoreObject.GetUp();
+                    PreviewViewport.CameraController.Camera.mCoreObject.LookAtLH(in camPos, lookAt - saved + camPos, up);
+                }
+            }
+            EGui.UIProxy.DockProxy.EndPanel(show);
+        }
+        bool ShowPreview = true;
+        protected unsafe void DrawPreview()
+        {
+            var show = EGui.UIProxy.DockProxy.BeginPanel(mDockKeyClass, "Preview", ref ShowPreview, ImGuiWindowFlags_.ImGuiWindowFlags_None);
+            if (show)
+            {
+                PreviewViewport.ViewportType = Graphics.Pipeline.UViewportSlate.EViewportType.ChildWindow;
+                PreviewViewport.OnDraw();
+            }
+            this.PreviewViewport.Visible = show;
+            EGui.UIProxy.DockProxy.EndPanel(show);
+        }
+        NodeGraph.UnionNodeConfigRenderer mUnionNodeConfigRenderer = new NodeGraph.UnionNodeConfigRenderer();
+        bool mUnionNodeConfigShow = false;
+        protected void DrawUnionNodeConfig()
+        {
+            if (!mUnionNodeConfigShow)
+                return;
+            var show = EGui.UIProxy.DockProxy.BeginPanel(mDockKeyClass, "UnionNodeConfig", ref mUnionNodeConfigShow, ImGuiWindowFlags_.ImGuiWindowFlags_None);
+            if (show)
+            {
+                mUnionNodeConfigRenderer.DrawConfigPanel();
+            }
+            EGui.UIProxy.DockProxy.EndPanel(show);
+        }
+        public void SetConfigUnionNode(NodeGraph.IUnionNode node)
+        {
+            mUnionNodeConfigRenderer?.SetUnionNode(node);
+            mUnionNodeConfigShow = (node != null);
+        }
+
         //uint PreviewDockId = 0;
         private async System.Threading.Tasks.Task Save()
         {
@@ -325,129 +394,6 @@ namespace EngineNS.Bricks.Procedure
                 EditAsset.Compile(EditAsset.AssetGraph.Root);
                 return true;
             }, Thread.Async.EAsyncTarget.Logic);
-        }
-        unsafe void DrawPreview()
-        {
-            var size = new Vector2(-1, -1);
-            bool bOpen = true;
-            if (EGui.UIProxy.DockProxy.BeginPanel(mDockKeyClass, "PreviewWindow", ref bOpen, ImGuiWindowFlags_.ImGuiWindowFlags_None))
-            {
-                if (EGui.UIProxy.CollapsingHeaderProxy.CollapsingHeader("Preview", ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_None))
-                {
-                    var winWidth = ImGuiAPI.GetWindowWidth();
-                    PreviewViewport.WindowSize = new Vector2(winWidth, winWidth);
-                    PreviewViewport.ViewportType = Graphics.Pipeline.UViewportSlate.EViewportType.ChildWindow;
-                    PreviewViewport.OnDraw();
-                    if (EGui.UIProxy.CollapsingHeaderProxy.CollapsingHeader("Camera", ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_DefaultOpen))
-                    {
-                        float v = PreviewViewport.CameraMoveSpeed;
-                        ImGuiAPI.SliderFloat("KeyMove", ref v, 1.0f, 150.0f, "%.3f", ImGuiSliderFlags_.ImGuiSliderFlags_None);
-                        PreviewViewport.CameraMoveSpeed = v;
-
-                        v = PreviewViewport.CameraMouseWheelSpeed;
-                        ImGuiAPI.InputFloat("WheelMove", ref v, 0.1f, 1.0f, "%.3f", ImGuiInputTextFlags_.ImGuiInputTextFlags_None);
-                        PreviewViewport.CameraMouseWheelSpeed = v;
-
-                        var zN = PreviewViewport.CameraController.Camera.mCoreObject.mZNear;
-                        var zF = PreviewViewport.CameraController.Camera.mCoreObject.mZFar;
-                        ImGuiAPI.SliderFloat("ZNear", ref zN, 0.1f, 100.0f, "%.1f", ImGuiSliderFlags_.ImGuiSliderFlags_None);
-                        ImGuiAPI.SliderFloat("ZFar", ref zF, 10.0f, 10000.0f, "%.1f", ImGuiSliderFlags_.ImGuiSliderFlags_None);
-                        if (zN != PreviewViewport.CameraController.Camera.mCoreObject.mZNear ||
-                            zF != PreviewViewport.CameraController.Camera.mCoreObject.mZFar)
-                        {
-                            PreviewViewport.CameraController.Camera.SetZRange(zN, zF);
-                        }
-
-                        var camPos = PreviewViewport.CameraController.Camera.mCoreObject.GetPosition();
-                        var saved = camPos;
-                        ImGuiAPI.InputDouble($"X", ref camPos.X, 0.1, 10.0, "%.2f", ImGuiInputTextFlags_.ImGuiInputTextFlags_None);
-                        ImGuiAPI.InputDouble($"Y", ref camPos.Y, 0.1, 10.0, "%.2f", ImGuiInputTextFlags_.ImGuiInputTextFlags_None);
-                        ImGuiAPI.InputDouble($"Z", ref camPos.Z, 0.1, 10.0, "%.2f", ImGuiInputTextFlags_.ImGuiInputTextFlags_None);
-                        if (saved != camPos)
-                        {
-                            var lookAt = PreviewViewport.CameraController.Camera.mCoreObject.GetLookAt();
-                            var up = PreviewViewport.CameraController.Camera.mCoreObject.GetUp();
-                            PreviewViewport.CameraController.Camera.mCoreObject.LookAtLH(in camPos, lookAt - saved + camPos, up);
-                        }
-                    }
-                    //ImGuiDockNodeFlags_ dockspace_flags = ImGuiDockNodeFlags_.ImGuiDockNodeFlags_None;
-                    //var winClass = new ImGuiWindowClass();
-                    //winClass.UnsafeCallConstructor();
-                    //var sz = ImGuiAPI.GetWindowSize();
-                    //sz.Y = sz.X;
-                    //ImGuiAPI.DockSpace(PreviewDockId, in sz, dockspace_flags, in winClass);
-                    //winClass.UnsafeCallDestructor();
-
-                    this.PreviewViewport.Visible = true;
-                }
-                else
-                {
-                    this.PreviewViewport.Visible = false;
-                }
-                //if (ImGuiAPI.CollapsingHeader("NodeProperty", ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_None))
-                //{
-                //    if(GraphRenderer.Graph != null && GraphRenderer.Graph.SelectedNodesDirty)
-                //    {
-                //        NodePropGrid.Target = GraphRenderer.Graph.SelectedNodes;
-                //        GraphRenderer.Graph.SelectedNodesDirty = false;
-                //    }
-                //    NodePropGrid.OnDraw(true, false, false);
-                //}
-                //if (ImGuiAPI.CollapsingHeader("EditorProperty", ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_None))
-                //{
-                //    GraphPropGrid.OnDraw(true, false, false);
-                //}
-            }
-            EGui.UIProxy.DockProxy.EndPanel();
-        }
-
-        protected unsafe void DrawGraph()
-        {
-            var size = new Vector2(-1, -1);
-            bool bOpen = true;
-            if (EGui.UIProxy.DockProxy.BeginPanel(mDockKeyClass, "GraphWindow", ref bOpen, ImGuiWindowFlags_.ImGuiWindowFlags_None))
-            {
-                GraphRenderer.OnDraw();
-            }
-            EGui.UIProxy.DockProxy.EndPanel();
-        }
-        void DrawPropertyGrid()
-        {
-            var size = new Vector2(-1, -1);
-            bool editorOpen = true;
-            if (EGui.UIProxy.DockProxy.BeginPanel(mDockKeyClass, "EditorProperty", ref editorOpen, ImGuiWindowFlags_.ImGuiWindowFlags_None))
-            {
-                GraphPropGrid.OnDraw(true, false, false);
-            }
-            EGui.UIProxy.DockProxy.EndPanel();
-            bool bOpen = true;
-            if (EGui.UIProxy.DockProxy.BeginPanel(mDockKeyClass, "NodeProperty", ref bOpen, ImGuiWindowFlags_.ImGuiWindowFlags_None))
-            {
-                if (GraphRenderer.Graph != null && GraphRenderer.Graph.SelectedNodesDirty)
-                {
-                    NodePropGrid.Target = GraphRenderer.Graph.SelectedNodes.ToArray();
-                    GraphRenderer.Graph.SelectedNodesDirty = false;
-                }
-                NodePropGrid.OnDraw(true, false, false);
-            }
-            EGui.UIProxy.DockProxy.EndPanel();
-        }
-        NodeGraph.UnionNodeConfigRenderer mUnionNodeConfigRenderer = new NodeGraph.UnionNodeConfigRenderer();
-        bool mUnionNodeConfigShow = false;
-        protected void DrawUnionNodeConfig()
-        {
-            if (!mUnionNodeConfigShow)
-                return;
-            if (EGui.UIProxy.DockProxy.BeginPanel(mDockKeyClass, "UnionNodeConfig", ref mUnionNodeConfigShow, ImGuiWindowFlags_.ImGuiWindowFlags_None))
-            {
-                mUnionNodeConfigRenderer.DrawConfigPanel();
-            }
-            EGui.UIProxy.DockProxy.EndPanel();
-        }
-        public void SetConfigUnionNode(NodeGraph.IUnionNode node)
-        {
-            mUnionNodeConfigRenderer?.SetUnionNode(node);
-            mUnionNodeConfigShow = (node != null);
         }
         #endregion
     }

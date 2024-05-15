@@ -44,16 +44,17 @@ namespace EngineNS.EGui.Controls
             ImGuiAPI.SetNextWindowSize(CurItem.Size, ImGuiCond_.ImGuiCond_Always);
             var msPt = ImGuiAPI.GetMousePos();
             ImGuiAPI.SetNextWindowPos(in msPt, ImGuiCond_.ImGuiCond_Always, new Vector2(0.5f));
-            if (EGui.UIProxy.DockProxy.BeginMainForm("ItemDragging", this, ImGuiWindowFlags_.ImGuiWindowFlags_NoCollapse | 
+            var result = EGui.UIProxy.DockProxy.BeginMainForm("ItemDragging", this, ImGuiWindowFlags_.ImGuiWindowFlags_NoCollapse |
                 ImGuiWindowFlags_.ImGuiWindowFlags_NoDocking |
-                ImGuiWindowFlags_.ImGuiWindowFlags_NoNav | ImGuiWindowFlags_.ImGuiWindowFlags_NoDecoration))
+                ImGuiWindowFlags_.ImGuiWindowFlags_NoNav | ImGuiWindowFlags_.ImGuiWindowFlags_NoDecoration);
+            if (result)
             {
                 var cmdlst = ImGuiAPI.GetWindowDrawList();
                 var start = ImGuiAPI.GetWindowPos();
                 //CurItem.Icon.OnDraw(ref cmdlst, start, start + CurItem.Icon.Size, 0);
                 CurItem.AMeta.OnDraw(in cmdlst, in CurItem.Size, CurItem.Browser);
             }
-            EGui.UIProxy.DockProxy.EndMainForm();
+            EGui.UIProxy.DockProxy.EndMainForm(result);
         }
         public class UItem
         {

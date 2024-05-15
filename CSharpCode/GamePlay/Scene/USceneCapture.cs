@@ -200,7 +200,8 @@ namespace EngineNS.GamePlay.Scene
                 return;
 
             ImGuiAPI.SetNextWindowSize(GetNodeData<USceneCaptureData>().TargetSize, ImGuiCond_.ImGuiCond_FirstUseEver);
-            if (EGui.UIProxy.DockProxy.BeginMainForm($"Capture:{this.NodeName}", this, ImGuiWindowFlags_.ImGuiWindowFlags_None))
+            var result = EGui.UIProxy.DockProxy.BeginMainForm($"Capture:{this.NodeName}", this, ImGuiWindowFlags_.ImGuiWindowFlags_None);
+            if (result)
             {
                 if (ImGuiAPI.BeginChild("FinalTexture", in Vector2.MinusOne, true, ImGuiWindowFlags_.ImGuiWindowFlags_None))
                 {
@@ -217,7 +218,7 @@ namespace EngineNS.GamePlay.Scene
                 }
                 ImGuiAPI.EndChild();
             }
-            EGui.UIProxy.DockProxy.EndMainForm();
+            EGui.UIProxy.DockProxy.EndMainForm(result);
         }
         #endregion
     }

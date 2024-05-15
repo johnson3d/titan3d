@@ -40,7 +40,8 @@ namespace EngineNS.DesignMacross.Editor
         public unsafe void OnDraw()
         {
             ImGuiAPI.SetNextWindowDockID(DockId, DockCond);
-            if (EGui.UIProxy.DockProxy.BeginMainForm($"Macross:{IO.TtFileManager.GetPureName(AssetName != null ? AssetName.Name : "NoName")}", this, ImGuiWindowFlags_.ImGuiWindowFlags_None | ImGuiWindowFlags_.ImGuiWindowFlags_MenuBar))
+            var result = EGui.UIProxy.DockProxy.BeginMainForm($"Macross:{IO.TtFileManager.GetPureName(AssetName != null ? AssetName.Name : "NoName")}", this, ImGuiWindowFlags_.ImGuiWindowFlags_None | ImGuiWindowFlags_.ImGuiWindowFlags_MenuBar);
+            if (result)
             {
                 DrawToolbar();
                 if (ImGuiAPI.IsWindowFocused(ImGuiFocusedFlags_.ImGuiFocusedFlags_RootAndChildWindows))
@@ -51,7 +52,7 @@ namespace EngineNS.DesignMacross.Editor
                 OnDrawMainMenu();
             }
             ResetDockspace();
-            EGui.UIProxy.DockProxy.EndMainForm();
+            EGui.UIProxy.DockProxy.EndMainForm(result);
 
             //draw menu
             //draw toolbar
@@ -65,25 +66,28 @@ namespace EngineNS.DesignMacross.Editor
             rendingContext.GraphElementStyleManager = GraphElementCollection;
             rendingContext.DescriptionsElement = DescriptionsElement;
             bool mClassViewShow = true;
-            if (EGui.UIProxy.DockProxy.BeginPanel(mDockKeyClass, "ClassView", ref mClassViewShow, ImGuiWindowFlags_.ImGuiWindowFlags_None))
+            var show = EGui.UIProxy.DockProxy.BeginPanel(mDockKeyClass, "ClassView", ref mClassViewShow, ImGuiWindowFlags_.ImGuiWindowFlags_None);
+            if (show)
             {
                 DeclarationEditPanel.Draw(rendingContext);
             }
-            EGui.UIProxy.DockProxy.EndPanel();
+            EGui.UIProxy.DockProxy.EndPanel(show);
 
             bool mGraphWindowShow = true;
-            if (EGui.UIProxy.DockProxy.BeginPanel(mDockKeyClass, "GraphWindow", ref mGraphWindowShow, ImGuiWindowFlags_.ImGuiWindowFlags_None))
+            show = EGui.UIProxy.DockProxy.BeginPanel(mDockKeyClass, "GraphWindow", ref mGraphWindowShow, ImGuiWindowFlags_.ImGuiWindowFlags_None);
+            if (show)
             {
                 DefinitionGraphPanel.Draw(rendingContext);
             }
-            EGui.UIProxy.DockProxy.EndPanel();
+            EGui.UIProxy.DockProxy.EndPanel(show);
 
             bool mNodePropertyShow = true;
-            if (EGui.UIProxy.DockProxy.BeginPanel(mDockKeyClass, "NodeProperty", ref mNodePropertyShow, ImGuiWindowFlags_.ImGuiWindowFlags_None))
+            show = EGui.UIProxy.DockProxy.BeginPanel(mDockKeyClass, "NodeProperty", ref mNodePropertyShow, ImGuiWindowFlags_.ImGuiWindowFlags_None);
+            if (show)
             {
                 PGMember.OnDraw(true, false, false);
             }
-            EGui.UIProxy.DockProxy.EndPanel();
+            EGui.UIProxy.DockProxy.EndPanel(show);
 
             if (UEngine.Instance.InputSystem.IsKeyPressed(EngineNS.Bricks.Input.Keycode.KEY_z))
             {

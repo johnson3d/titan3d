@@ -88,14 +88,15 @@ namespace EngineNS.EGui
 
             var pivot = new Vector2(0);
             ImGuiAPI.SetNextWindowSize(in WindowSize, ImGuiCond_.ImGuiCond_FirstUseEver);
-            if (EGui.UIProxy.DockProxy.BeginMainForm(UvAnim.AssetName.Name, this, ImGuiWindowFlags_.ImGuiWindowFlags_None |
-                ImGuiWindowFlags_.ImGuiWindowFlags_NoSavedSettings))
+            var result = EGui.UIProxy.DockProxy.BeginMainForm(UvAnim.AssetName.Name, this, ImGuiWindowFlags_.ImGuiWindowFlags_None |
+                ImGuiWindowFlags_.ImGuiWindowFlags_NoSavedSettings);
+            if (result)
             {
                 DrawToolBar();
                 ImGuiAPI.Separator();
             }
             ResetDockspace();
-            EGui.UIProxy.DockProxy.EndMainForm();
+            EGui.UIProxy.DockProxy.EndMainForm(result);
 
             DrawProperty();
             DrawTextureView();
@@ -141,11 +142,12 @@ namespace EngineNS.EGui
         protected unsafe void DrawProperty()
         {
             var sz = new Vector2(-1);
-            if (EGui.UIProxy.DockProxy.BeginPanel(mDockKeyClass, "Property", ref mPropertyShow, ImGuiWindowFlags_.ImGuiWindowFlags_None))
+            var show = EGui.UIProxy.DockProxy.BeginPanel(mDockKeyClass, "Property", ref mPropertyShow, ImGuiWindowFlags_.ImGuiWindowFlags_None);
+            if (show)
             {
                 UvAnimPropGrid.OnDraw(true, false, false);
             }
-            EGui.UIProxy.DockProxy.EndPanel();
+            EGui.UIProxy.DockProxy.EndPanel(show);
         }
         bool IsMovingImage = false;
         bool IsSelectingRect = false;
@@ -159,7 +161,8 @@ namespace EngineNS.EGui
         protected unsafe void DrawTextureView()
         {
             var sz = new Vector2(-1);
-            if (EGui.UIProxy.DockProxy.BeginPanel(mDockKeyClass, "TextureView", ref mTextureViewShow, ImGuiWindowFlags_.ImGuiWindowFlags_NoMove))
+            var show = EGui.UIProxy.DockProxy.BeginPanel(mDockKeyClass, "TextureView", ref mTextureViewShow, ImGuiWindowFlags_.ImGuiWindowFlags_NoMove);
+            if (show)
             {
                 var winPt = ImGuiAPI.GetWindowPos();
                 if (ImGuiAPI.IsWindowHovered(ImGuiHoveredFlags_.ImGuiHoveredFlags_None))
@@ -263,7 +266,7 @@ namespace EngineNS.EGui
                     }
                 }
             }
-            EGui.UIProxy.DockProxy.EndPanel();
+            EGui.UIProxy.DockProxy.EndPanel(show);
         }
         public void OnEvent(in Bricks.Input.Event e)
         {

@@ -94,14 +94,15 @@ namespace EngineNS.Editor
 
             var pivot = new Vector2(0);
             ImGuiAPI.SetNextWindowSize(in WindowSize, ImGuiCond_.ImGuiCond_FirstUseEver);
-            if (EGui.UIProxy.DockProxy.BeginMainForm(AssetName.Name, this, ImGuiWindowFlags_.ImGuiWindowFlags_None |
-                ImGuiWindowFlags_.ImGuiWindowFlags_NoSavedSettings))
+            var result = EGui.UIProxy.DockProxy.BeginMainForm(AssetName.Name, this, ImGuiWindowFlags_.ImGuiWindowFlags_None |
+                ImGuiWindowFlags_.ImGuiWindowFlags_NoSavedSettings);
+            if (result)
             {
                 DrawToolBar();
                 ImGuiAPI.Separator();
             }
             ResetDockspace();
-            EGui.UIProxy.DockProxy.EndMainForm();
+            EGui.UIProxy.DockProxy.EndMainForm(result);
 
             DrawLeft();
             DrawRight();
@@ -122,19 +123,21 @@ namespace EngineNS.Editor
         bool mLeftShow = true;
         protected unsafe void DrawLeft()
         {
-            if (EGui.UIProxy.DockProxy.BeginPanel(mDockKeyClass, "LeftView", ref mLeftShow, ImGuiWindowFlags_.ImGuiWindowFlags_None))
+            var show = EGui.UIProxy.DockProxy.BeginPanel(mDockKeyClass, "LeftView", ref mLeftShow, ImGuiWindowFlags_.ImGuiWindowFlags_None);
+            if (show)
             {
                 VersionPropGrid.OnDraw(true, false, false);
             }
-            EGui.UIProxy.DockProxy.EndPanel();
+            EGui.UIProxy.DockProxy.EndPanel(show);
         }
         bool mRightShow = true;
         protected unsafe void DrawRight()
         {
-            if (EGui.UIProxy.DockProxy.BeginPanel(mDockKeyClass, "TextureView", ref mRightShow, ImGuiWindowFlags_.ImGuiWindowFlags_None))
+            var show = EGui.UIProxy.DockProxy.BeginPanel(mDockKeyClass, "TextureView", ref mRightShow, ImGuiWindowFlags_.ImGuiWindowFlags_None);
+            if (show)
             {
             }
-            EGui.UIProxy.DockProxy.EndPanel();
+            EGui.UIProxy.DockProxy.EndPanel(show);
         }
         public void OnEvent(in Bricks.Input.Event e)
         {

@@ -47,11 +47,12 @@ namespace EngineNS.Editor
         {
             var size = new Vector2(800, 600);
             ImGuiAPI.SetNextWindowSize(in size, ImGuiCond_.ImGuiCond_FirstUseEver);
-            if (EGui.UIProxy.DockProxy.BeginMainForm($"Progress: Open {CurrentEditor.AssetName}", this, ImGuiWindowFlags_.ImGuiWindowFlags_None))
+            var result = EGui.UIProxy.DockProxy.BeginMainForm($"Progress: Open {CurrentEditor.AssetName}", this, ImGuiWindowFlags_.ImGuiWindowFlags_None);
+            if (result)
             {
                 ImGuiAPI.Button($"Loading:{CurrentEditor.LoadingPercent}->{CurrentEditor.ProgressText}");
             }
-            EGui.UIProxy.DockProxy.EndMainForm();
+            EGui.UIProxy.DockProxy.EndMainForm(result);
         }
     }
     public class UAssetEditorManager

@@ -198,6 +198,41 @@ namespace EngineNS.Editor.Forms
             UEngine.Instance.TickableManager.RemoveTickable(this);
             Dispose();
         }
+
+        #region DrawUI
+        public Vector2 WindowPos;
+        public Vector2 WindowSize = new Vector2(800, 600);
+        public bool IsDrawing { get; set; }
+        public unsafe void OnDraw()
+        {
+            if (Visible == false)
+                return;
+
+            var pivot = new Vector2(0);
+            ImGuiAPI.SetNextWindowSize(in WindowSize, ImGuiCond_.ImGuiCond_FirstUseEver);
+            IsDrawing = EGui.UIProxy.DockProxy.BeginMainForm(AssetName.Name, this, ImGuiWindowFlags_.ImGuiWindowFlags_NoSavedSettings);
+            if (IsDrawing)
+            {
+                if (ImGuiAPI.IsWindowFocused(ImGuiFocusedFlags_.ImGuiFocusedFlags_RootAndChildWindows))
+                {
+                    var mainEditor = UEngine.Instance.GfxDevice.SlateApplication as Editor.UMainEditorApplication;
+                    if (mainEditor != null)
+                        mainEditor.AssetEditorManager.CurrentActiveEditor = this;
+                }
+                WindowPos = ImGuiAPI.GetWindowPos();
+                WindowSize = ImGuiAPI.GetWindowSize();
+                DrawToolBar();
+                //var sz = new Vector2(-1);
+                //ImGuiAPI.BeginChild("Client", ref sz, false, ImGuiWindowFlags_.)
+                ImGuiAPI.Separator();
+            }
+            ResetDockspace();
+            EGui.UIProxy.DockProxy.EndMainForm(IsDrawing);
+
+            DrawPreview();
+            DrawEditorDetails();
+            DrawMeshDetails();
+        }
         bool mDockInitialized = false;
         protected void ResetDockspace(bool force = false)
         {
@@ -214,44 +249,21 @@ namespace EngineNS.Editor.Forms
             mDockInitialized = true;
 
             var rightId = id;
+            uint middleId = 0;
+            uint downId = 0;
             uint leftId = 0;
-            ImGuiAPI.DockBuilderSplitNode(rightId, ImGuiDir_.ImGuiDir_Left, 0.2f, ref leftId, ref rightId);
+            uint rightUpId = 0;
+            uint rightDownId = 0;
+            ImGuiAPI.DockBuilderSplitNode(rightId, ImGuiDir_.ImGuiDir_Left, 0.8f, ref middleId, ref rightId);
+            ImGuiAPI.DockBuilderSplitNode(rightId, ImGuiDir_.ImGuiDir_Down, 0.5f, ref rightDownId, ref rightUpId);
+            ImGuiAPI.DockBuilderSplitNode(middleId, ImGuiDir_.ImGuiDir_Down, 0.3f, ref downId, ref middleId);
+            ImGuiAPI.DockBuilderSplitNode(middleId, ImGuiDir_.ImGuiDir_Left, 0.2f, ref leftId, ref middleId);
 
-            ImGuiAPI.DockBuilderDockWindow(EGui.UIProxy.DockProxy.GetDockWindowName("Left", mDockKeyClass), leftId);
-            ImGuiAPI.DockBuilderDockWindow(EGui.UIProxy.DockProxy.GetDockWindowName("Right", mDockKeyClass), rightId);
+            ImGuiAPI.DockBuilderDockWindow(EGui.UIProxy.DockProxy.GetDockWindowName("Preview", mDockKeyClass), middleId);
+            ImGuiAPI.DockBuilderDockWindow(EGui.UIProxy.DockProxy.GetDockWindowName("MeshDetails", mDockKeyClass), rightDownId);
+            ImGuiAPI.DockBuilderDockWindow(EGui.UIProxy.DockProxy.GetDockWindowName("EditorDetails", mDockKeyClass), rightDownId);
+
             ImGuiAPI.DockBuilderFinish(id);
-        }
-        public Vector2 WindowPos;
-        public Vector2 WindowSize = new Vector2(800, 600);
-        public unsafe void OnDraw()
-        {
-            if (Visible == false || Mesh == null)
-                return;
-
-            var pivot = new Vector2(0);
-            ImGuiAPI.SetNextWindowSize(in WindowSize, ImGuiCond_.ImGuiCond_FirstUseEver);
-            ImGuiAPI.SetNextWindowDockID(DockId, DockCond);
-            if (EGui.UIProxy.DockProxy.BeginMainForm(Mesh.AssetName.Name, this, ImGuiWindowFlags_.ImGuiWindowFlags_None |
-                ImGuiWindowFlags_.ImGuiWindowFlags_NoSavedSettings))
-            {
-                if (ImGuiAPI.IsWindowFocused(ImGuiFocusedFlags_.ImGuiFocusedFlags_RootAndChildWindows))
-                {
-                    var mainEditor = UEngine.Instance.GfxDevice.SlateApplication as Editor.UMainEditorApplication;
-                    if (mainEditor != null)
-                        mainEditor.AssetEditorManager.CurrentActiveEditor = this;
-                }
-                WindowPos = ImGuiAPI.GetWindowPos();
-                WindowSize = ImGuiAPI.GetWindowSize();
-                DrawToolBar();
-                //var sz = new Vector2(-1);
-                //ImGuiAPI.BeginChild("Client", ref sz, false, ImGuiWindowFlags_.)
-                ImGuiAPI.Separator();
-            }
-            ResetDockspace();
-            EGui.UIProxy.DockProxy.EndMainForm();
-
-            DrawLeft();
-            DrawRight();
         }
         protected unsafe void DrawToolBar()
         {
@@ -293,50 +305,58 @@ namespace EngineNS.Editor.Forms
                 Mesh.LoadClusterMesh();
             }
         }
-        bool mLeftShow = true;
-        protected unsafe void DrawLeft()
+
+        bool ShowEditorPropGrid = true;
+        protected void DrawEditorDetails()
         {
             var sz = new Vector2(-1);
-            if (EGui.UIProxy.DockProxy.BeginPanel(mDockKeyClass, "Left", ref mLeftShow, ImGuiWindowFlags_.ImGuiWindowFlags_None))
+            var show = EGui.UIProxy.DockProxy.BeginPanel(mDockKeyClass, "EditorDetails", ref ShowEditorPropGrid, ImGuiWindowFlags_.ImGuiWindowFlags_None);
+            if (show)
             {
-                if (ImGuiAPI.CollapsingHeader("MeshProperty", ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_CollapsingHeader))
+                EditorPropGrid.OnDraw(true, false, false);
+            }
+            EGui.UIProxy.DockProxy.EndPanel(show);
+        }
+        bool ShowMeshPropGrid = true;
+        protected void DrawMeshDetails()
+        {
+            var sz = new Vector2(-1);
+            var show = EGui.UIProxy.DockProxy.BeginPanel(mDockKeyClass, "MeshDetails", ref ShowMeshPropGrid, ImGuiWindowFlags_.ImGuiWindowFlags_None);
+            if (show)
+            {
+                MeshPropGrid.OnDraw(true, false, false, ImGuiWindowFlags_.ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_.ImGuiWindowFlags_AlwaysAutoResize);
+                if (ImGuiAPI.Button("Build SDF"))
                 {
-                    MeshPropGrid.OnDraw(true, false, false, ImGuiWindowFlags_.ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_.ImGuiWindowFlags_AlwaysAutoResize);
-                    if(ImGuiAPI.Button("Build SDF"))
+                    UMeshDataProvider meshProvider = new UMeshDataProvider();
+                    if (meshProvider.InitFrom(Mesh))
                     {
-                        UMeshDataProvider meshProvider = new UMeshDataProvider();
-                        if(meshProvider.InitFrom(Mesh))
-                        {
-                            var sdfConfig = new DistanceField.DistanceFieldConfig();
-                            var outSDF = new DistanceField.UDistanceFieldVolumeData();
-                            DistanceField.UMeshUtilities.GenerateSignedDistanceFieldVolumeData(Mesh.AssetName.ToString(), meshProvider, sdfConfig, 1.0f, false, ref outSDF);
+                        var sdfConfig = new DistanceField.DistanceFieldConfig();
+                        var outSDF = new DistanceField.UDistanceFieldVolumeData();
+                        DistanceField.UMeshUtilities.GenerateSignedDistanceFieldVolumeData(Mesh.AssetName.ToString(), meshProvider, sdfConfig, 1.0f, false, ref outSDF);
 
-                            // debug code
-                            //var embreeScene = new DistanceField.UEmbreeScene();
-                            //var embreeManager = new DistanceField.UEmbreeManager();
-                            //embreeManager.SetupEmbreeScene(Mesh.AssetName.ToString(), meshProvider, 1.0f, embreeScene);
-                            //embreeManager.DeleteEmbreeScene(embreeScene);
-                        }
+                        // debug code
+                        //var embreeScene = new DistanceField.UEmbreeScene();
+                        //var embreeManager = new DistanceField.UEmbreeManager();
+                        //embreeManager.SetupEmbreeScene(Mesh.AssetName.ToString(), meshProvider, 1.0f, embreeScene);
+                        //embreeManager.DeleteEmbreeScene(embreeScene);
                     }
                 }
-                if (ImGuiAPI.CollapsingHeader("EditorProperty", ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_CollapsingHeader))
-                {
-                    EditorPropGrid.OnDraw(true, false, false, ImGuiWindowFlags_.ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_.ImGuiWindowFlags_AlwaysAutoResize);
-                }
             }
-            EGui.UIProxy.DockProxy.EndPanel();
+            EGui.UIProxy.DockProxy.EndPanel(show);
         }
-        bool mRightShow = true;
-        protected unsafe void DrawRight()
+        bool ShowPreview = true;
+        protected unsafe void DrawPreview()
         {
-            if (EGui.UIProxy.DockProxy.BeginPanel(mDockKeyClass, "Right", ref mRightShow, ImGuiWindowFlags_.ImGuiWindowFlags_None))
+            var show = EGui.UIProxy.DockProxy.BeginPanel(mDockKeyClass, "Preview", ref ShowPreview, ImGuiWindowFlags_.ImGuiWindowFlags_None);
+            if (show)
             {
                 PreviewViewport.ViewportType = Graphics.Pipeline.UViewportSlate.EViewportType.ChildWindow;
                 PreviewViewport.OnDraw();
             }
-            EGui.UIProxy.DockProxy.EndPanel();
+            this.PreviewViewport.Visible = show;
+            EGui.UIProxy.DockProxy.EndPanel(show);
         }
-
+        #endregion
         public void OnEvent(in Bricks.Input.Event e)
         {
             //throw new NotImplementedException();

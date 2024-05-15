@@ -27,7 +27,8 @@ namespace EngineNS.Editor.Forms
         {
             var size = new Vector2(800, 600);
             ImGuiAPI.SetNextWindowSize(in size, ImGuiCond_.ImGuiCond_FirstUseEver);
-            if (EGui.UIProxy.DockProxy.BeginMainForm("MemProfiler", this, ImGuiWindowFlags_.ImGuiWindowFlags_None))
+            var result = EGui.UIProxy.DockProxy.BeginMainForm("MemProfiler", this, ImGuiWindowFlags_.ImGuiWindowFlags_None);
+            if (result)
             {
                 if (ImGuiAPI.BeginTabBar("RHI", ImGuiTabBarFlags_.ImGuiTabBarFlags_None))
                 {
@@ -41,7 +42,7 @@ namespace EngineNS.Editor.Forms
                 }
                 
             }
-            EGui.UIProxy.DockProxy.EndMainForm();
+            EGui.UIProxy.DockProxy.EndMainForm(result);
         }
     }
 }

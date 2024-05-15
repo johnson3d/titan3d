@@ -40,7 +40,8 @@ namespace EngineNS.Editor.Forms
 
             var size = new Vector2(800, 600);
             ImGuiAPI.SetNextWindowSize(in size, ImGuiCond_.ImGuiCond_FirstUseEver);
-            if (EGui.UIProxy.DockProxy.BeginMainForm("GpuProfiler", this, ImGuiWindowFlags_.ImGuiWindowFlags_None))
+            var result = EGui.UIProxy.DockProxy.BeginMainForm("GpuProfiler", this, ImGuiWindowFlags_.ImGuiWindowFlags_None);
+            if (result)
             {
                 var cmdlst = ImGuiAPI.GetWindowDrawList();
                 var stats = UEngine.Instance.GfxDevice.RenderCmdQueue.GetStat();
@@ -96,7 +97,7 @@ namespace EngineNS.Editor.Forms
                 if (OnDrawMenu != null)
                     OnDrawMenu();
             }
-            EGui.UIProxy.DockProxy.EndMainForm();
+            EGui.UIProxy.DockProxy.EndMainForm(result);
         }
         protected bool mMenuShow = false;
         private unsafe void PopItemMenu(string watchingThread, Profiler.URpcProfiler.RpcProfilerData.ScopeInfo scope, string column)
