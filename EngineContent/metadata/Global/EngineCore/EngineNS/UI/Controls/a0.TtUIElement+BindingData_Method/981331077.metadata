@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Hash_981331077 Type="EngineNS.UI.Controls.TtUIElement.BindingData_Method@EngineCore">
+  <GetMethodName Type="System.String@Unknown" Order="0" />
+  <Mode Type="EngineNS.UI.Bind.EBindingMode@EngineCore" Order="0" />
+  <SetMethodName Type="System.String@Unknown" Order="0" />
+  <Target Type="EngineNS.UI.Controls.TtUIElement.UIBindingData_Element@EngineCore" Order="0" />
+</Hash_981331077>

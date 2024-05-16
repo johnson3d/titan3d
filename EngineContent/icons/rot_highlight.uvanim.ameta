@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Root Type="EngineNS.EGui.UVAnimAMeta@EngineCore">
+  <AssetId Type="System.Guid@Unknown" Value="bcf5a52d-c359-4d09-be9e-62951dd0bc4a" />
+  <Description Type="System.String@Unknown" Value="This is a EngineNS.EGui.UUvAnim&#xA;Hahah" />
+  <Icon Type="EngineNS.EGui.UUvAnim@EngineCore">
+    <Color Type="System.UInt32@Unknown" Value="4294967295" />
+    <Duration Type="System.Single@Unknown" Value="1000" />
+    <FrameUVs Type="System.Collections.Generic.List&lt;EngineNS.Vector4@EngineCore,&gt;@Unknown" Count="1">
+      <e_0 Value="0,0,1,1" />
+    </FrameUVs>
+    <Size Type="EngineNS.Vector2@EngineCore" Value="50,50" />
+  </Icon>
+  <RefAssetRNames Type="System.Collections.Generic.List&lt;EngineNS.RName@EngineCore,&gt;@Unknown" Count="1">
+    <e_0 Value="Engine,icons/icon001.srv,84c6e915-a00f-42a5-885a-91e9427a8456" />
+  </RefAssetRNames>
+  <SnapUVEnd Type="EngineNS.Vector2@EngineCore" Value="0.198,0.038" />
+  <SnapUVStart Type="EngineNS.Vector2@EngineCore" Value="0.16,0" />
+  <TextureName Type="EngineNS.RName@EngineCore" Value="Engine,icons/icon001.srv,84c6e915-a00f-42a5-885a-91e9427a8456" />
+  <TypeStr Type="System.String@Unknown" Value="EngineNS.EGui.UUvAnim@EngineCore" />
+</Root>

@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Hash_2429719554 Type="EngineNS.Graphics.Pipeline.Common.TtClearMRTNode@EngineCore">
+  <OutputDS Type="System.Boolean@Unknown" Order="0" />
+  <OutputRT Type="System.Int32@Unknown" Order="0" />
+</Hash_2429719554>

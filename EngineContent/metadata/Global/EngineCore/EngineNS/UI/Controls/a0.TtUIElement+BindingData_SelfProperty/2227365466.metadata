@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Hash_2227365466 Type="EngineNS.UI.Controls.TtUIElement.BindingData_SelfProperty@EngineCore">
+  <Mode Type="EngineNS.UI.Bind.EBindingMode@EngineCore" Order="0" />
+  <PropertyName Type="System.String@Unknown" Order="0" />
+  <Target Type="EngineNS.UI.Controls.TtUIElement.UIBindingData_Element@EngineCore" Order="0" />
+</Hash_2227365466>

@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Hash_1531436645 Type="EngineNS.UI.Editor.EditorOnlyData.BindingData@EngineCore">
+  <Mode Type="EngineNS.UI.Bind.EBindingMode@EngineCore" Order="0" />
+  <Source Type="EngineNS.UI.Editor.IUIBindingDataBase@EngineCore" Order="0" />
+  <Target Type="EngineNS.UI.Editor.IUIBindingDataBase@EngineCore" Order="0" />
+</Hash_1531436645>

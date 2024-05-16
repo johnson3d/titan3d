@@ -1,0 +1,1 @@
+EngineNS.Animation.Base.TtAnimatedObjectDescription@EngineCore

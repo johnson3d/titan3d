@@ -1,0 +1,1 @@
+EngineNS.Animation.Curve.TtVector3Curve@EngineCore

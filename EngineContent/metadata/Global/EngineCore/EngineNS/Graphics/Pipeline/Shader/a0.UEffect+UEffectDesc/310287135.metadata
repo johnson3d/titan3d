@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Hash_310287135 Type="EngineNS.Graphics.Pipeline.Shader.UEffect.UEffectDesc@EngineCore">
+  <CodeHash Type="EngineNS.Hash160@EngineCore" Order="0" />
+  <EffectVersion Type="System.UInt32@Unknown" Order="0" />
+  <GlobalEnvHash Type="EngineNS.Hash160@EngineCore" Order="0" />
+  <InputStreams Type="System.UInt32@Unknown" Order="0" />
+  <MaterialHash Type="EngineNS.Hash160@EngineCore" Order="0" />
+  <MaterialName Type="EngineNS.RName@EngineCore" Order="0" />
+  <MdfQueueHash Type="EngineNS.Hash160@EngineCore" Order="0" />
+  <MdfQueueType Type="System.String@Unknown" Order="0" />
+  <PermutationId Type="EngineNS.Graphics.Pipeline.Shader.UShadingEnv.FPermutationId@EngineCore" Order="0" />
+  <ShadingType Type="System.String@Unknown" Order="0" />
+</Hash_310287135>

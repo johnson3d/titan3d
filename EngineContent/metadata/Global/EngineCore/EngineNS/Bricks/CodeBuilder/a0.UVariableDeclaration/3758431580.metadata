@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Hash_3758431580 Type="EngineNS.Bricks.CodeBuilder.UVariableDeclaration@EngineCore">
+  <Attributes Type="System.Collections.Generic.List&lt;EngineNS.Bricks.CodeBuilder.TtAttribute@EngineCore,&gt;@Unknown" Order="0" />
+  <Comment Type="EngineNS.Bricks.CodeBuilder.UCommentStatement@EngineCore" Order="0" />
+  <InitValue Type="EngineNS.Bricks.CodeBuilder.UExpressionBase@EngineCore" Order="0" />
+  <IsAutoSaveLoad Type="System.Boolean@Unknown" Order="0" />
+  <IsBindable Type="System.Boolean@Unknown" Order="0" />
+  <VariableName Type="System.String@Unknown" Order="0" />
+  <VariableType Type="EngineNS.Bricks.CodeBuilder.UTypeReference@EngineCore" Order="0" />
+  <VisitMode Type="EngineNS.Bricks.CodeBuilder.EVisisMode@EngineCore" Order="0" />
+</Hash_3758431580>

@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Hash_2018610415 Type="EngineNS.Animation.Curve.TtQuaternionCurve@EngineCore">
+  <Id Type="System.Guid@Unknown" Order="0" />
+  <WCache Type="EngineNS.Animation.Curve.FTrackCache@EngineCore" Order="0" />
+  <WTrack Type="EngineNS.Animation.Curve.TtTrack@EngineCore" Order="0" />
+  <XCache Type="EngineNS.Animation.Curve.FTrackCache@EngineCore" Order="0" />
+  <XTrack Type="EngineNS.Animation.Curve.TtTrack@EngineCore" Order="0" />
+  <YCache Type="EngineNS.Animation.Curve.FTrackCache@EngineCore" Order="0" />
+  <YTrack Type="EngineNS.Animation.Curve.TtTrack@EngineCore" Order="0" />
+  <ZCache Type="EngineNS.Animation.Curve.FTrackCache@EngineCore" Order="0" />
+  <ZTrack Type="EngineNS.Animation.Curve.TtTrack@EngineCore" Order="0" />
+</Hash_2018610415>

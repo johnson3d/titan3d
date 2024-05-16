@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Hash_1427945206 Type="EngineNS.Animation.SceneNode.TtBlendSpaceAnimPlayNode.TtBlendSpaceAnimPlayNodeData@EngineCore">
+  <AnimatinName Type="EngineNS.RName@EngineCore" Order="0" />
+  <Axises Type="System.Collections.Generic.List&lt;EngineNS.Animation.Asset.BlendSpace.TtBlendSpace_Axis@EngineCore,&gt;@Unknown" Order="0" />
+  <Name Type="System.String@Unknown" Order="0" />
+  <NodeStyles Type="EngineNS.GamePlay.Scene.UNode.ENodeStyles@EngineCore" Order="0" />
+  <OverrideAsset Type="System.Boolean@Unknown" Order="0" />
+  <Points Type="System.Collections.Generic.List&lt;EngineNS.Animation.SceneNode.FBlendSpacePoint@EngineCore,&gt;@Unknown" Order="0" />
+  <BoundVolume Type="EngineNS.GamePlay.Scene.UBoundVolume@EngineCore" Order="1" />
+  <Placement Type="EngineNS.GamePlay.UPlacementBase@EngineCore" Order="2" />
+</Hash_1427945206>
