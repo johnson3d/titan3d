@@ -214,6 +214,7 @@ namespace EngineNS.EGui
             }
         }
         Thread.Async.TtTask<NxRHI.USrView>? mTextureTask;
+        [Browsable(false)]
         public NxRHI.USrView Texture
         {
             get
@@ -258,7 +259,7 @@ namespace EngineNS.EGui
                 return false;
             return true;
         }
-        public void OnDraw(ImDrawList cmdlist, in Vector2 rectMin, in Vector2 rectMax, int frame)
+        public void OnDraw(in ImDrawList cmdlist, in Vector2 rectMin, in Vector2 rectMax, int frame)
         {
             if (!IsReadyToDraw())
                 return;
@@ -323,7 +324,7 @@ namespace EngineNS.EGui
 
             return null;
         }
-        public async System.Threading.Tasks.Task<UUvAnim> CreateUVAnim(RName rn)
+        public async Thread.Async.TtTask<UUvAnim> CreateUVAnim(RName rn)
         {
             UUvAnim result;
             result = await UEngine.Instance.EventPoster.Post((state) =>
@@ -347,7 +348,7 @@ namespace EngineNS.EGui
             }, Thread.Async.EAsyncTarget.AsyncIO);
             return result;
         }
-        public async System.Threading.Tasks.Task<bool> ReloadUVAnim(RName rn)
+        public async Thread.Async.TtTask<bool> ReloadUVAnim(RName rn)
         {
             UUvAnim result;
             if (UVAnims.TryGetValue(rn, out result) == false)

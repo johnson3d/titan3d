@@ -289,6 +289,7 @@ namespace EngineNS.Editor.Forms
             {
                 Name = "Shapes",
             };
+            mPlaceItems.Add(shapesItem);
             var planeItem = new PlaceItemData()
             {
                 Name = "Plane",

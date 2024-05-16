@@ -904,6 +904,56 @@ namespace EngineNS.GamePlay
             mHostWorld = world;
             mCameraController = cameraController;
 
+            mSelectButton = new EGui.UIProxy.ImageToggleButtonProxy()
+            {
+                Name = "Select",
+                Normal = RName.GetRName("icons/select_normal.uvanim", RName.ERNameType.Engine),
+                Checked = RName.GetRName("icons/select_highlight.uvanim", RName.ERNameType.Engine),
+                Size = new Vector2(24, 24),
+            };
+            mMoveButton = new EGui.UIProxy.ImageToggleButtonProxy()
+            {
+                Name = "Move",
+                Normal = RName.GetRName("icons/move_normal.uvanim", RName.ERNameType.Engine),
+                Checked = RName.GetRName("icons/move_highlight.uvanim", RName.ERNameType.Engine),
+                Size = new Vector2(24, 24),
+            };
+            mRotButton = new EGui.UIProxy.ImageToggleButtonProxy()
+            {
+                Name = "Rotation",
+                Normal = RName.GetRName("icons/rot_normal.uvanim", RName.ERNameType.Engine),
+                Checked = RName.GetRName("icons/rot_highlight.uvanim", RName.ERNameType.Engine),
+                Size = new Vector2(24, 24),
+            };
+            mScaleButton = new EGui.UIProxy.ImageToggleButtonProxy()
+            {
+                Name = "Scale",
+                Normal = RName.GetRName("icons/scale_normal.uvanim", RName.ERNameType.Engine),
+                Checked = RName.GetRName("icons/scale_highlight.uvanim", RName.ERNameType.Engine),
+                Size = new Vector2(24, 24),
+            };
+            mEdgeButton = new EGui.UIProxy.ImageToggleButtonProxy()
+            {
+                Name = "Edge",
+                Normal = RName.GetRName("icons/edge_normal.uvanim", RName.ERNameType.Engine),
+                Checked = RName.GetRName("icons/edge_highlight.uvanim", RName.ERNameType.Engine),
+                Size = new Vector2(24, 24),
+            };
+            mAxisLocalButton = new EGui.UIProxy.ImageToggleButtonProxy()
+            {
+                Name = "AxisLocal",
+                Normal = RName.GetRName("icons/axis_local_normal.uvanim", RName.ERNameType.Engine),
+                Checked = RName.GetRName("icons/axis_local_highlight.uvanim", RName.ERNameType.Engine),
+                Size = new Vector2(24, 24),
+            };
+            mAxisWorldButton = new EGui.UIProxy.ImageToggleButtonProxy()
+            {
+                Name = "AxisWorld",
+                Normal = RName.GetRName("icons/axis_world_normal.uvanim", RName.ERNameType.Engine),
+                Checked = RName.GetRName("icons/axis_world_highlight.uvanim", RName.ERNameType.Engine),
+                Size = new Vector2(24, 24),
+            };
+
             var tmpAxis = new List<AxisData>();
             for (var i=enAxisType.AxisStart; i<=enAxisType.AxisEnd; i++)
             {
@@ -2640,9 +2690,19 @@ namespace EngineNS.GamePlay
         }
 
         #region UI
+        static string mIconImgName = "icons/icon001.srv";
+        EGui.UIProxy.ImageToggleButtonProxy mSelectButton;
+        EGui.UIProxy.ImageToggleButtonProxy mMoveButton;
+        EGui.UIProxy.ImageToggleButtonProxy mRotButton;
+        EGui.UIProxy.ImageToggleButtonProxy mScaleButton;
+        EGui.UIProxy.ImageToggleButtonProxy mEdgeButton;
+        EGui.UIProxy.ImageToggleButtonProxy mAxisLocalButton;
+        EGui.UIProxy.ImageToggleButtonProxy mAxisWorldButton;
+
         public unsafe bool OnDrawUI(Graphics.Pipeline.UViewportSlate slate, in Vector2 startDrawPos)
         {
             var io = ImGuiAPI.GetIO();
+            var drawList = ImGuiAPI.GetWindowDrawList();
             var oldCaptureValue = io.WantCaptureMouse;
             io.WantCaptureMouse = true;
 
@@ -2652,48 +2712,48 @@ namespace EngineNS.GamePlay
             slate.IsHoverGuiItem = false;
 
             Vector2 btnSize = new Vector2(24, 24);
-            var n = mAxisOperationType == enAxisOperationType.Select;
-            if(ImGuiAPI.ToggleButton("N", ref n, in btnSize, 0))
+            mSelectButton.IsChecked = mAxisOperationType == enAxisOperationType.Select;
+            if(mSelectButton.OnDraw(in drawList, in Support.UAnyPointer.Default))
             {
                 SetAxisOperationType(enAxisOperationType.Select);
                 retValue = true;
             }
             slate.IsHoverGuiItem |= ImGuiAPI.IsItemHovered(ImGuiHoveredFlags_.ImGuiHoveredFlags_None);
             ImGuiAPI.SameLine(0, 4);
-            var m = mAxisOperationType == enAxisOperationType.Move;
-            if(ImGuiAPI.ToggleButton("M", ref m, in btnSize, 0))
+            mMoveButton.IsChecked = mAxisOperationType == enAxisOperationType.Move;
+            if(mMoveButton.OnDraw(in drawList, in Support.UAnyPointer.Default))
             {
                 SetAxisOperationType(enAxisOperationType.Move);
                 retValue = true;
             }
             slate.IsHoverGuiItem |= ImGuiAPI.IsItemHovered(ImGuiHoveredFlags_.ImGuiHoveredFlags_None);
             ImGuiAPI.SameLine(0, 4);
-            var r = mAxisOperationType == enAxisOperationType.Rot;
-            if (ImGuiAPI.ToggleButton("R", ref r, in btnSize, 0))
+            mRotButton.IsChecked = mAxisOperationType == enAxisOperationType.Rot;
+            if (mRotButton.OnDraw(in drawList, in Support.UAnyPointer.Default))
             {
                 SetAxisOperationType(enAxisOperationType.Rot);
                 retValue = true;
             }
             slate.IsHoverGuiItem |= ImGuiAPI.IsItemHovered(ImGuiHoveredFlags_.ImGuiHoveredFlags_None);
             ImGuiAPI.SameLine(0, 4);
-            var s = mAxisOperationType == enAxisOperationType.Scale;
-            if (ImGuiAPI.ToggleButton("S", ref s, in btnSize, 0))
+            mScaleButton.IsChecked = mAxisOperationType == enAxisOperationType.Scale;
+            if (mScaleButton.OnDraw(in drawList, in Support.UAnyPointer.Default))
             {
                 SetAxisOperationType(enAxisOperationType.Scale);
                 retValue = true;
             }
             slate.IsHoverGuiItem |= ImGuiAPI.IsItemHovered(ImGuiHoveredFlags_.ImGuiHoveredFlags_None);
             ImGuiAPI.SameLine(0, 4);
-            var e = mAxisOperationType == enAxisOperationType.Edge;
-            if (ImGuiAPI.ToggleButton("E", ref e, in btnSize, 0))
+            mEdgeButton.IsChecked = mAxisOperationType == enAxisOperationType.Edge;
+            if (mEdgeButton.OnDraw(in drawList, in Support.UAnyPointer.Default))
             {
                 SetAxisOperationType(enAxisOperationType.Edge);
                 retValue = true;
             }
             slate.IsHoverGuiItem |= ImGuiAPI.IsItemHovered(ImGuiHoveredFlags_.ImGuiHoveredFlags_None);
             ImGuiAPI.SameLine(0, 10);
-            var ls = mAxisSpace == enAxisSpace.Local;
-            if(ImGuiAPI.ToggleButton("L", ref ls, in btnSize, 0))
+            mAxisLocalButton.IsChecked = mAxisSpace == enAxisSpace.Local;
+            if(mAxisLocalButton.OnDraw(in drawList, in Support.UAnyPointer.Default))
             {
                 SetAxisSpace(enAxisSpace.Local);
                 retValue = true;
@@ -2707,8 +2767,8 @@ namespace EngineNS.GamePlay
                 default:
                     {
                         ImGuiAPI.SameLine(0, 4);
-                        var ws = mAxisSpace == enAxisSpace.World;
-                        if (ImGuiAPI.ToggleButton("W", ref ws, in btnSize, 0))
+                        mAxisWorldButton.IsChecked = mAxisSpace == enAxisSpace.World;
+                        if (mAxisWorldButton.OnDraw(in drawList, in Support.UAnyPointer.Default))
                         {
                             SetAxisSpace(enAxisSpace.World);
                             retValue = true;

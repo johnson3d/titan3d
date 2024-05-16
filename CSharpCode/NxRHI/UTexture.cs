@@ -2674,6 +2674,21 @@ namespace EngineNS.NxRHI
             }
         }
         #endregion
+        static StbImageWriteSharp.ColorComponents ComponentConvert(StbImageSharp.ColorComponents component)
+        {
+            switch(component)
+            {
+                case ColorComponents.Grey:
+                    return StbImageWriteSharp.ColorComponents.Grey;
+                case ColorComponents.GreyAlpha:
+                    return StbImageWriteSharp.ColorComponents.GreyAlpha;
+                case ColorComponents.RedGreenBlue:
+                    return StbImageWriteSharp.ColorComponents.RedGreenBlue;
+                case ColorComponents.RedGreenBlueAlpha:
+                    return StbImageWriteSharp.ColorComponents.RedGreenBlueAlpha;
+            }
+            return StbImageWriteSharp.ColorComponents.RedGreenBlueAlpha;
+        }
         public static unsafe void SaveOriginImage(RName rn)
         {
             if (System.IO.File.Exists(rn.Address) == false)
@@ -2692,7 +2707,7 @@ namespace EngineNS.NxRHI
                         using (var memStream = new System.IO.FileStream(rn.Address + ".png", System.IO.FileMode.OpenOrCreate))
                         {
                             var writer = new StbImageWriteSharp.ImageWriter();
-                            writer.WritePng(image.Data, image.Width, image.Height, StbImageWriteSharp.ColorComponents.RedGreenBlueAlpha, memStream);
+                            writer.WritePng(image.Data, image.Width, image.Height, ComponentConvert(image.Comp), memStream);
                         }
                     }
                     break;
@@ -2705,7 +2720,7 @@ namespace EngineNS.NxRHI
                             var writer = new StbImageWriteSharp.ImageWriter();
                             fixed (void* fptr = imageFloat.Data)
                             {
-                                writer.WriteHdr(fptr, imageFloat.Width, imageFloat.Height, StbImageWriteSharp.ColorComponents.RedGreenBlueAlpha, memStream);
+                                writer.WriteHdr(fptr, imageFloat.Width, imageFloat.Height, ComponentConvert(imageFloat.Comp), memStream);
                             }
                         }
                     }

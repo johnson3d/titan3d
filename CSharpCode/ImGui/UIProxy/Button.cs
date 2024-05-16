@@ -1,4 +1,6 @@
-﻿using System;
+﻿using EngineNS.Graphics.Pipeline;
+using EngineNS.Support;
+using System;
 using System.Collections.Generic;
 using System.Text;
 
@@ -88,6 +90,142 @@ namespace EngineNS.EGui.UIProxy
 
             var imgPos = rectStart + (size - mImage.ImageSize) * 0.5f;
             mImage.OnDraw(in drawList, in imgPos);
+
+            return retValue;
+        }
+    }
+
+    public class ImageToggleButtonProxy : IUIProxyBase
+    {
+        RName mNormal;
+        public RName Normal
+        {
+            get => mNormal;
+            set
+            {
+                mNormal = value;
+                if (value == null)
+                    mNormalUVAnimTask = null;
+                else
+                    mNormalUVAnimTask = UEngine.Instance.GfxDevice.UvAnimManager.GetUVAnim(value);
+            }
+        }
+        RName mChecked;
+        public RName Checked
+        {
+            get => mChecked;
+            set
+            {
+                mChecked = value;
+                if (value == null)
+                    mCheckedUVAnimTask = null;
+                else
+                    mCheckedUVAnimTask = UEngine.Instance.GfxDevice.UvAnimManager.GetUVAnim(value);
+            }
+        }
+
+        public bool IsChecked = false;
+        public string Name;
+        public Vector2 Size = new Vector2(32, 32);
+        public Action Action;
+
+        Thread.Async.TtTask<UUvAnim>? mNormalUVAnimTask;
+        Thread.Async.TtTask<UUvAnim>? mCheckedUVAnimTask;
+        public EGui.UUvAnim NormalUVAnim
+        {
+            get
+            {
+                if (mNormalUVAnimTask == null)
+                    return null;
+                if (mNormalUVAnimTask.Value.IsCompleted == false)
+                    return null;
+                return mNormalUVAnimTask.Value.Result;
+            }
+        }
+        public EGui.UUvAnim CheckedUVAnim
+        {
+            get
+            {
+                if (mCheckedUVAnimTask == null)
+                    return null;
+                if (mCheckedUVAnimTask.Value.IsCompleted == false)
+                    return null;
+                return mCheckedUVAnimTask.Value.Result;
+            }
+        }
+
+        public void Cleanup()
+        {
+
+        }
+
+        public async Task<bool> Initialize()
+        {
+            return true;
+        }
+
+        public bool IsReadToDraw()
+        {
+            if (mNormalUVAnimTask != null)
+            {
+                if (mNormalUVAnimTask.Value.IsCompleted == false)
+                    return false;
+                if (mNormalUVAnimTask.Value.Result.IsReadyToDraw() == false)
+                    return false;
+            }
+            if (mCheckedUVAnimTask != null)
+            {
+                if (mCheckedUVAnimTask.Value.IsCompleted == false)
+                    return false;
+                if (mCheckedUVAnimTask.Value.Result.IsReadyToDraw() == false)
+                    return false;
+            }
+            return true;
+        }
+
+        public unsafe bool OnDraw(in ImDrawList drawList, in UAnyPointer drawData)
+        {
+            if (!IsReadToDraw())
+                return false;
+
+            bool retValue = false;
+            var rectStart = ImGuiAPI.GetCursorScreenPos();
+
+            var id = ImGuiAPI.GetID(Name);
+            var style = ImGuiAPI.GetStyle();
+            var size = ImGuiAPI.CalcItemSize(ref Size, Size.X + style->FramePadding.X * 2.0f, Size.Y + style->FramePadding.Y * 2.0f);
+            var rectEnd = rectStart + size;
+
+            ImGuiAPI.ItemSize(in size, 0);
+            if (!ImGuiAPI.ItemAdd(in rectStart, in rectEnd, id, 0))
+                return false;
+
+            bool hovered = false, held = false;
+            var pressed = ImGuiAPI.ButtonBehavior(in rectStart, in rectEnd, id, ref hovered, ref held, ImGuiButtonFlags_.ImGuiButtonFlags_MouseButtonLeft);
+
+            if (pressed)
+            {
+                IsChecked = !IsChecked;
+                Action?.Invoke();
+                retValue = true;
+            }
+
+            var imgPos = rectStart + (size - Size) * 0.5f;
+            var imgEnd = imgPos + Size;
+            if(IsChecked)
+            {
+                if(mCheckedUVAnimTask != null)
+                {
+                    mCheckedUVAnimTask.Value.Result.OnDraw(in drawList, in imgPos, in imgEnd, 0);
+                }
+            }
+            else
+            {
+                if(mNormalUVAnimTask != null)
+                {
+                    mNormalUVAnimTask.Value.Result.OnDraw(in drawList, in imgPos, in imgEnd, 0);
+                }
+            }
 
             return retValue;
         }
