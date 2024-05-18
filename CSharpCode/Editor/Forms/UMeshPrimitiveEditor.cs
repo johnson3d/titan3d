@@ -1,4 +1,6 @@
-﻿using EngineNS.Graphics.Mesh;
+﻿using EngineNS.DistanceField;
+using EngineNS.Graphics.Mesh;
+using NPOI.OpenXmlFormats.Dml;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -50,6 +52,8 @@ namespace EngineNS.Editor.Forms
         public EGui.Controls.PropertyGrid.PropertyGrid MeshPropGrid = new EGui.Controls.PropertyGrid.PropertyGrid();
         public EGui.Controls.PropertyGrid.PropertyGrid EditorPropGrid = new EGui.Controls.PropertyGrid.PropertyGrid();
         EngineNS.GamePlay.Scene.UMeshNode mCurrentMeshNode;
+        EngineNS.GamePlay.Scene.UMeshNode mArrowMeshNode;
+        float mCurrentMeshRadius = 1.0f;
         public float PlaneScale = 5.0f;
         EngineNS.GamePlay.Scene.UMeshNode PlaneMeshNode;
         public bool IsCastShadow
@@ -141,11 +145,25 @@ namespace EngineNS.Editor.Forms
             mCurrentMeshNode = meshNode;
 
             var aabb = mesh.MaterialMesh.AABB;
-            float radius = aabb.GetMaxSide();
+            mCurrentMeshRadius = aabb.GetMaxSide();
             BoundingSphere sphere;
             sphere.Center = aabb.GetCenter();
-            sphere.Radius = radius;
+            sphere.Radius = mCurrentMeshRadius;
             policy.DefaultCamera.AutoZoom(ref sphere);
+
+            {
+                var arrowMaterialMesh = await UEngine.Instance.GfxDevice.MaterialMeshManager.GetMaterialMesh(RName.GetRName("mesh/base/arrow.ums", RName.ERNameType.Engine));
+                var arrowMesh = new Graphics.Mesh.TtMesh();
+                var ok = arrowMesh.Initialize(arrowMaterialMesh, Rtti.UTypeDescGetter<Graphics.Mesh.UMdfStaticMesh>.TypeDesc);
+                if (ok)
+                {
+                    mArrowMeshNode = await GamePlay.Scene.UMeshNode.AddMeshNode(viewport.World, viewport.World.Root, new GamePlay.Scene.UMeshNode.UMeshNodeData(), typeof(GamePlay.UPlacement), arrowMesh, DVector3.UnitX * 3, Vector3.One, Quaternion.Identity);
+                    mArrowMeshNode.HitproxyType = Graphics.Pipeline.UHitProxy.EHitproxyType.Root;
+                    mArrowMeshNode.NodeData.Name = "PreviewArrow";
+                    mArrowMeshNode.IsAcceptShadow = false;
+                    mArrowMeshNode.IsCastShadow = false;
+                }
+            }
 
             {
                 var meshCenter = aabb.GetCenter();
@@ -331,14 +349,18 @@ namespace EngineNS.Editor.Forms
                     if (meshProvider.InitFrom(Mesh))
                     {
                         var sdfConfig = new DistanceField.DistanceFieldConfig();
-                        var outSDF = new DistanceField.UDistanceFieldVolumeData();
+                        var outSDF = new DistanceField.TtSdfAsset();
                         DistanceField.UMeshUtilities.GenerateSignedDistanceFieldVolumeData(Mesh.AssetName.ToString(), meshProvider, sdfConfig, 1.0f, false, ref outSDF);
 
-                        // debug code
-                        //var embreeScene = new DistanceField.UEmbreeScene();
-                        //var embreeManager = new DistanceField.UEmbreeManager();
-                        //embreeManager.SetupEmbreeScene(Mesh.AssetName.ToString(), meshProvider, 1.0f, embreeScene);
-                        //embreeManager.DeleteEmbreeScene(embreeScene);
+                        var rn = RName.GetRName(Mesh.AssetName + DistanceField.TtSdfAsset.AssetExt, Mesh.AssetName.RNameType);
+                        var ameta = new DistanceField.TtSdfAssetAMeta();
+                        ameta.SetAssetName(rn);
+                        ameta.AssetId = Guid.NewGuid();
+                        ameta.TypeStr = Rtti.UTypeDescManager.Instance.GetTypeStringFromType(typeof(DistanceField.TtSdfAssetAMeta));
+                        ameta.Description = $"This is a {typeof(DistanceField.TtSdfAssetAMeta).FullName}\n";
+                        ameta.SaveAMeta();
+                        UEngine.Instance.AssetMetaManager.RegAsset(ameta);
+                        outSDF.SaveAssetTo(rn);
                     }
                 }
             }
@@ -366,9 +388,55 @@ namespace EngineNS.Editor.Forms
         {
             PreviewViewport.TickLogic(ellapse);
         }
+        //[Category("Light")]
+        [EGui.Controls.PropertyGrid.PGValueRange(-3.1416f, 3.1416f)]
+        [EGui.Controls.PropertyGrid.PGValueChangeStep(3.1416f / 100.0f)]
+        public float Yaw { get; set; } = -0.955047f;
+        //[Category("Light")]
+        //[EGui.Controls.PropertyGrid.PGValueRange(-3.1416f, 3.1416f)]
+        //[EGui.Controls.PropertyGrid.PGValueChangeStep(3.1416f / 100.0f)]
+        //public float Pitch { get; set; }
+        //[Category("Light")]
+        [EGui.Controls.PropertyGrid.PGValueRange(-3.1416f, 3.1416f)]
+        [EGui.Controls.PropertyGrid.PGValueChangeStep(3.1416f / 100.0f)]
+        public float Roll { get; set; } = -0.552922f;
+
         public void TickRender(float ellapse)
         {
             PreviewViewport.TickRender(ellapse);
+
+            if (IsDrawing == false)
+                return;
+
+            if (ImGuiAPI.IsMouseDragging(ImGuiMouseButton_.ImGuiMouseButton_Left, -1) || ImGuiAPI.IsMouseDragging(ImGuiMouseButton_.ImGuiMouseButton_Right, -1))
+            {
+                if (UEngine.Instance.InputSystem.IsKeyDown(EngineNS.Bricks.Input.Keycode.KEY_l))
+                {
+                    var delta = ImGuiAPI.GetMouseDragDelta(ImGuiMouseButton_.ImGuiMouseButton_Left, -1);
+                    var delta2 = ImGuiAPI.GetMouseDragDelta(ImGuiMouseButton_.ImGuiMouseButton_Right, -1);
+                    delta.X = Math.Max(delta.X, delta.X);
+                    delta.Y = Math.Max(delta.Y, delta.Y);
+
+                    var step = 3.1416f / 500.0f;
+                    Yaw -= delta.X * step;
+                    Roll += delta.Y * step;
+                    ImGuiAPI.ResetMouseDragDelta(ImGuiMouseButton_.ImGuiMouseButton_Left);
+                    ImGuiAPI.ResetMouseDragDelta(ImGuiMouseButton_.ImGuiMouseButton_Right);
+                    mArrowMeshNode.Placement.Scale = new Vector3(Math.Min(mCurrentMeshRadius * 0.5f, 2.0f));
+                }
+            }
+            else
+            {
+                mArrowMeshNode.Placement.Scale = Vector3.Zero;
+            }
+
+
+            var quat = EngineNS.Quaternion.RotationYawPitchRoll(Yaw, 0, Roll);
+            PreviewViewport.World.DirectionLight.Direction = quat * Vector3.UnitX;
+
+            var arrowPos = -mCurrentMeshRadius * PreviewViewport.World.DirectionLight.Direction;
+            mArrowMeshNode.Placement.Position = new DVector3(arrowPos.X, arrowPos.Y, arrowPos.Z);
+            mArrowMeshNode.Placement.Quat = quat;
         }
         public void TickBeginFrame(float ellapse)
         {

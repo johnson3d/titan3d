@@ -335,6 +335,9 @@ namespace EngineNS.Editor.Forms
         {
             PreviewViewport.TickRender(ellapse);
 
+            if (IsDrawing == false)
+                return;
+
             if (ImGuiAPI.IsMouseDragging(ImGuiMouseButton_.ImGuiMouseButton_Left, -1) || ImGuiAPI.IsMouseDragging(ImGuiMouseButton_.ImGuiMouseButton_Right, -1))
             {
                 if (UEngine.Instance.InputSystem.IsKeyDown(EngineNS.Bricks.Input.Keycode.KEY_l))

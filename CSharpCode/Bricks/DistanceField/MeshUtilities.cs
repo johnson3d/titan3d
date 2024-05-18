@@ -276,7 +276,7 @@ namespace EngineNS.DistanceField
             DistanceFieldConfig sdfConfig,
             float DistanceFieldResolutionScale,
             bool bGenerateAsIfTwoSided,
-            ref UDistanceFieldVolumeData OutData)
+            ref TtSdfAsset OutData)
         {
             if (DistanceFieldResolutionScale <= 0)
                 return;
@@ -433,7 +433,7 @@ namespace EngineNS.DistanceField
                 int NumBricks = ValidBricks.Count;
                 int BrickSizeBytes = sdfConfig.BrickSize * sdfConfig.BrickSize * sdfConfig.BrickSize;
 
-                var OutMip = new FSparseDistanceFieldMip();
+                var OutMip = new TtSparseSdfMip();
                 for (int BrickIndex = 0; BrickIndex < ValidBricks.Count; BrickIndex++)
                 {
                     var Brick = ValidBricks[BrickIndex];

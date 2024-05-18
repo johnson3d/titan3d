@@ -1,4 +1,5 @@
-﻿using System;
+﻿using NPOI.SS.Formula.Functions;
+using System;
 using System.Collections.Generic;
 using System.Text;
 
@@ -26,53 +27,184 @@ namespace EngineNS.DistanceField
         public uint InvalidBrickIndex = uint.MaxValue;
     };
 
-    public class FSparseDistanceFieldMip
+    public class TtSparseSdfMip : IO.BaseSerializer
     {
+        [Rtti.Meta]
         public Vector3i IndirectionDimensions = Vector3i.Zero;
+        [Rtti.Meta]
         public int NumDistanceFieldBricks = 0;
+        [Rtti.Meta]
         public Vector3 VolumeToVirtualUVScale = Vector3.Zero;
+        [Rtti.Meta]
         public Vector3 VolumeToVirtualUVAdd = Vector3.Zero;
+        [Rtti.Meta]
         public Vector2 DistanceFieldToVolumeScaleBias = Vector2.Zero;
-        public uint BulkOffset = 0;
-        public uint BulkSize = 0;
 
+        [Rtti.Meta]
         public List<uint> IndirectionTable = new List<uint>();
+        [Rtti.Meta]
         public List<Byte> DistanceFieldBrickData = new List<byte>();
     };
 
-    public class UDistanceFieldVolumeData
+
+    [Rtti.Meta]
+    public class TtSdfAssetAMeta : IO.IAssetMeta
     {
-        public UDistanceFieldVolumeData()
+        public override string GetAssetExtType()
+        {
+            return TtSdfAsset.AssetExt;
+        }
+        public override async System.Threading.Tasks.Task<IO.IAsset> LoadAsset()
+        {
+            return await UEngine.Instance.SdfAssetManager.GetSdfAsset(GetAssetName());
+        }
+        public override bool CanRefAssetType(IO.IAssetMeta ameta)
+        {
+            return true;
+        }
+        public override string GetAssetTypeName()
+        {
+            return "SDFVolumeData";
+        }
+    }
+
+    [Rtti.Meta]
+    public class TtSdfAsset : IO.BaseSerializer, IO.IAsset
+    {
+        public TtSdfAsset()
         {
             bMostlyTwoSided = false;
             Id = NextId.Value;
             NextId++;
-            Mips = new List<FSparseDistanceFieldMip>();
+            Mips = new List<TtSparseSdfMip>();
+        }
+
+        #region IO.IAsset
+        public const string AssetExt = ".sdf";
+        [Rtti.Meta]
+        public RName AssetName { get; set; }
+
+        public IO.IAssetMeta CreateAMeta()
+        {
+            var result = new TtSdfAssetAMeta();
+            return result;
+
+        }
+
+        public IO.IAssetMeta GetAMeta()
+        {
+            return UEngine.Instance.AssetMetaManager.GetAssetMeta(AssetName);
+        }
+
+        public void SaveAssetTo(RName name)
+        {
+            AssetName = name;
+            var typeStr = Rtti.UTypeDescManager.Instance.GetTypeStringFromType(this.GetType());
+            var xnd = new IO.TtXndHolder(typeStr, 0, 0);
+            using (var attr = xnd.NewAttribute("VolumeData", 0, 0))
+            {
+                using (var ar = attr.GetWriter(512))
+                {
+                    ar.Write(this);
+                }
+                xnd.RootNode.AddAttribute(attr);
+            }
+
+            xnd.SaveXnd(name.Address);
+            UEngine.Instance.SourceControlModule.AddFile(name.Address);
+        }
+
+        public void UpdateAMetaReferences(IO.IAssetMeta ameta)
+        {
+            ameta.RefAssetRNames.Clear();
+        }
+        #endregion
+
+        public static TtSdfAsset LoadXnd(TtSdfAssetManager manager, IO.TtXndNode node)
+        {
+            unsafe
+            {
+                IO.ISerializer result = null;
+                var attr = node.TryGetAttribute("VolumeData");
+                if ((IntPtr)attr.CppPointer != IntPtr.Zero)
+                {
+                    using (var ar = attr.GetReader(manager))
+                    {
+                        ar.Read(out result, manager);
+                    }
+                }
+
+                var sdfData = result as TtSdfAsset;
+                if (sdfData != null)
+                {
+                    return sdfData;
+                }
+                return null;
+            }
         }
 
         /** Local space bounding box of the distance field volume. */
+        [Rtti.Meta]
         public BoundingBox LocalSpaceMeshBounds;
 
         /** Whether most of the triangles in the mesh used a two-sided material. */
+        [Rtti.Meta]
         public bool bMostlyTwoSided;
 
         public int Id;
         static Thread.TtAtomic_Int NextId = new Thread.TtAtomic_Int();
 
-        // For stats
-        public string AssetName;
+        [Rtti.Meta]
+        public List<TtSparseSdfMip> Mips;
 
-        public List<FSparseDistanceFieldMip> Mips;
-
-        public void LoadXnd(IO.TtXndNode node)
-        {
-
-        }
-        public void SaveXnd(IO.TtXndNode node)
-        {
-
-        }
 
     };
 
+
+    public partial class TtSdfAssetManager
+    {
+        public Dictionary<RName, TtSdfAsset> sdfAssets { get; } = new Dictionary<RName, TtSdfAsset>();
+        public async System.Threading.Tasks.Task<TtSdfAsset> GetSdfAsset(RName name)
+        {
+            TtSdfAsset result;
+            if (sdfAssets.TryGetValue(name, out result))
+                return result;
+
+            result = await UEngine.Instance.EventPoster.Post((state) =>
+            {
+                using (var xnd = IO.TtXndHolder.LoadXnd(name.Address))
+                {
+                    if (xnd != null)
+                    {
+                        var sdfAsset = TtSdfAsset.LoadXnd(this, xnd.RootNode);
+                        if (sdfAsset == null)
+                            return null;
+
+                        sdfAsset.AssetName = name;
+                        return sdfAsset;
+                    }
+                    else
+                    {
+                        return null;
+                    }
+                }
+            }, Thread.Async.EAsyncTarget.AsyncIO);
+
+            if (result != null)
+            {
+                sdfAssets[name] = result;
+                return result;
+            }
+
+            return null;
+        }
+    }
+}
+
+namespace EngineNS
+{
+    partial class UEngine
+    {
+        public DistanceField.TtSdfAssetManager SdfAssetManager { get; } = new DistanceField.TtSdfAssetManager();
+    }
 }
