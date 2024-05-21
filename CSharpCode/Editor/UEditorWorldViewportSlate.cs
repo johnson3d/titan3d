@@ -1,8 +1,10 @@
-﻿using System;
+﻿using EngineNS.Graphics.Pipeline;
+using System;
 using System.Collections.Generic;
 
 namespace EngineNS.Editor
 {
+    [Obsolete("已废弃")]
     public class UEditorWorldViewportSlate : EGui.Slate.UWorldViewportSlate, IRootForm
     {
         public UEditorWorldViewportSlate(bool regRoot)
@@ -18,13 +20,13 @@ namespace EngineNS.Editor
 
             if (proxy == null)
             {
-                this.ShowBoundVolumes(false, null);
+                this.ShowBoundVolumes(true, false, null);
                 return;
             }
             var node = proxy as GamePlay.Scene.UNode;
             if (node != null)
             {
-                this.ShowBoundVolumes(true, node);
+                this.ShowBoundVolumes(true, true, node);
             }
 
             var app = UEngine.Instance.GfxDevice.SlateApplication as Editor.UMainEditorApplication;

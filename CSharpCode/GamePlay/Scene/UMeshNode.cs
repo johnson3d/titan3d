@@ -55,7 +55,7 @@ namespace EngineNS.GamePlay.Scene
                 }
             }
         }
-        public override async System.Threading.Tasks.Task<bool> InitializeNode(GamePlay.UWorld world, UNodeData data, EBoundVolumeType bvType, Type placementType)
+        public override async Thread.Async.TtTask<bool> InitializeNode(GamePlay.UWorld world, UNodeData data, EBoundVolumeType bvType, Type placementType)
         {
             if (data as UMeshNodeData == null)
             {

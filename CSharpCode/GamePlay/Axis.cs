@@ -178,7 +178,7 @@ namespace EngineNS.GamePlay
 
         class UAxisNode : Scene.USceneActorNode
         {
-            public override async System.Threading.Tasks.Task<bool> InitializeNode(GamePlay.UWorld world, Scene.UNodeData data, Scene.EBoundVolumeType bvType, Type placementType)                
+            public override async Thread.Async.TtTask<bool> InitializeNode(GamePlay.UWorld world, Scene.UNodeData data, Scene.EBoundVolumeType bvType, Type placementType)                
             {
                 return await base.InitializeNode(world, data, bvType, placementType);
             }
@@ -2718,6 +2718,10 @@ namespace EngineNS.GamePlay
                 SetAxisOperationType(enAxisOperationType.Select);
                 retValue = true;
             }
+            var rectMin = ImGuiAPI.GetItemRectMin();
+            var rectMax = ImGuiAPI.GetItemRectMax();
+            slate.RegisterOverlappedArea("SelectButton", new RectangleF(in rectMin, in rectMax));
+
             slate.IsHoverGuiItem |= ImGuiAPI.IsItemHovered(ImGuiHoveredFlags_.ImGuiHoveredFlags_None);
             ImGuiAPI.SameLine(0, 4);
             mMoveButton.IsChecked = mAxisOperationType == enAxisOperationType.Move;
@@ -2726,7 +2730,11 @@ namespace EngineNS.GamePlay
                 SetAxisOperationType(enAxisOperationType.Move);
                 retValue = true;
             }
+            rectMin = ImGuiAPI.GetItemRectMin();
+            rectMax = ImGuiAPI.GetItemRectMax();
+            slate.RegisterOverlappedArea("MoveButton", new RectangleF(in rectMin, in rectMax));
             slate.IsHoverGuiItem |= ImGuiAPI.IsItemHovered(ImGuiHoveredFlags_.ImGuiHoveredFlags_None);
+
             ImGuiAPI.SameLine(0, 4);
             mRotButton.IsChecked = mAxisOperationType == enAxisOperationType.Rot;
             if (mRotButton.OnDraw(in drawList, in Support.UAnyPointer.Default))
@@ -2734,7 +2742,11 @@ namespace EngineNS.GamePlay
                 SetAxisOperationType(enAxisOperationType.Rot);
                 retValue = true;
             }
+            rectMin = ImGuiAPI.GetItemRectMin();
+            rectMax = ImGuiAPI.GetItemRectMax();
+            slate.RegisterOverlappedArea("RotButton", new RectangleF(in rectMin, in rectMax));
             slate.IsHoverGuiItem |= ImGuiAPI.IsItemHovered(ImGuiHoveredFlags_.ImGuiHoveredFlags_None);
+
             ImGuiAPI.SameLine(0, 4);
             mScaleButton.IsChecked = mAxisOperationType == enAxisOperationType.Scale;
             if (mScaleButton.OnDraw(in drawList, in Support.UAnyPointer.Default))
@@ -2742,7 +2754,11 @@ namespace EngineNS.GamePlay
                 SetAxisOperationType(enAxisOperationType.Scale);
                 retValue = true;
             }
+            rectMin = ImGuiAPI.GetItemRectMin();
+            rectMax = ImGuiAPI.GetItemRectMax();
+            slate.RegisterOverlappedArea("ScaleButton", new RectangleF(in rectMin, in rectMax));
             slate.IsHoverGuiItem |= ImGuiAPI.IsItemHovered(ImGuiHoveredFlags_.ImGuiHoveredFlags_None);
+
             ImGuiAPI.SameLine(0, 4);
             mEdgeButton.IsChecked = mAxisOperationType == enAxisOperationType.Edge;
             if (mEdgeButton.OnDraw(in drawList, in Support.UAnyPointer.Default))
@@ -2750,7 +2766,11 @@ namespace EngineNS.GamePlay
                 SetAxisOperationType(enAxisOperationType.Edge);
                 retValue = true;
             }
+            rectMin = ImGuiAPI.GetItemRectMin();
+            rectMax = ImGuiAPI.GetItemRectMax();
+            slate.RegisterOverlappedArea("EdgeButton", new RectangleF(in rectMin, in rectMax));
             slate.IsHoverGuiItem |= ImGuiAPI.IsItemHovered(ImGuiHoveredFlags_.ImGuiHoveredFlags_None);
+
             ImGuiAPI.SameLine(0, 10);
             mAxisLocalButton.IsChecked = mAxisSpace == enAxisSpace.Local;
             if(mAxisLocalButton.OnDraw(in drawList, in Support.UAnyPointer.Default))
@@ -2758,7 +2778,11 @@ namespace EngineNS.GamePlay
                 SetAxisSpace(enAxisSpace.Local);
                 retValue = true;
             }
+            rectMin = ImGuiAPI.GetItemRectMin();
+            rectMax = ImGuiAPI.GetItemRectMax();
+            slate.RegisterOverlappedArea("AxisLocalButton", new RectangleF(in rectMin, in rectMax));
             slate.IsHoverGuiItem |= ImGuiAPI.IsItemHovered(ImGuiHoveredFlags_.ImGuiHoveredFlags_None);
+
             switch (mAxisOperationType)
             {
                 case enAxisOperationType.Scale:
@@ -2773,6 +2797,9 @@ namespace EngineNS.GamePlay
                             SetAxisSpace(enAxisSpace.World);
                             retValue = true;
                         }
+                        rectMin = ImGuiAPI.GetItemRectMin();
+                        rectMax = ImGuiAPI.GetItemRectMax();
+                        slate.RegisterOverlappedArea("AxisWorldButton", new RectangleF(in rectMin, in rectMax));
                         slate.IsHoverGuiItem |= ImGuiAPI.IsItemHovered(ImGuiHoveredFlags_.ImGuiHoveredFlags_None);
                     }
                     break;
@@ -2783,6 +2810,9 @@ namespace EngineNS.GamePlay
                 CenterAxisMode = mCenterAxisMode;
                 retValue = true;
             }
+            rectMin = ImGuiAPI.GetItemRectMin();
+            rectMax = ImGuiAPI.GetItemRectMax();
+            slate.RegisterOverlappedArea("CenterAxisButton", new RectangleF(in rectMin, in rectMax));
             slate.IsHoverGuiItem |= ImGuiAPI.IsItemHovered(ImGuiHoveredFlags_.ImGuiHoveredFlags_None);
 
             ImGuiAPI.SameLine(0, 10);
@@ -2792,6 +2822,9 @@ namespace EngineNS.GamePlay
                 SetSnapType(enSnapType.MoveGrid);
                 retValue = true;
             }
+            rectMin = ImGuiAPI.GetItemRectMin();
+            rectMax = ImGuiAPI.GetItemRectMax();
+            slate.RegisterOverlappedArea("SnapTypeMoveGridButton", new RectangleF(in rectMin, in rectMax));
             slate.IsHoverGuiItem |= ImGuiAPI.IsItemHovered(ImGuiHoveredFlags_.ImGuiHoveredFlags_None);
 
             var minValue = float.MinValue;
@@ -2808,6 +2841,9 @@ namespace EngineNS.GamePlay
                 SetSnapType(enSnapType.RotAngle);
                 retValue = true;
             }
+            rectMin = ImGuiAPI.GetItemRectMin();
+            rectMax = ImGuiAPI.GetItemRectMax();
+            slate.RegisterOverlappedArea("SnapTypeRotAngleButton", new RectangleF(in rectMin, in rectMax));
             ImGuiAPI.SameLine(0, 2);
             ImGuiAPI.SetNextItemWidth(50.0f);
             fixed (float* snapRotPtr = &mSnapRotAngle)
@@ -2820,6 +2856,9 @@ namespace EngineNS.GamePlay
                 SetSnapType(enSnapType.ScaleValue);
                 retValue = true;
             }
+            rectMin = ImGuiAPI.GetItemRectMin();
+            rectMax = ImGuiAPI.GetItemRectMax();
+            slate.RegisterOverlappedArea("SnapTypeScaleValueButton", new RectangleF(in rectMin, in rectMax));
             ImGuiAPI.SameLine(0, 2);
             ImGuiAPI.SetNextItemWidth(100.0f);
             fixed (float* snapScalePtr = &mSnapScaleDelta)

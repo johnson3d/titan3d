@@ -11,7 +11,7 @@ namespace EngineNS.GamePlay.Scene
         {
         }
 
-        public override async System.Threading.Tasks.Task<bool> InitializeNode(GamePlay.UWorld world, UNodeData data, EBoundVolumeType bvType, Type placementType)
+        public override async Thread.Async.TtTask<bool> InitializeNode(GamePlay.UWorld world, UNodeData data, EBoundVolumeType bvType, Type placementType)
         {
             if (data == null)
             {
@@ -26,7 +26,7 @@ namespace EngineNS.GamePlay.Scene
         public Graphics.Pipeline.UViewportSlate ViewportSlate;
         public Graphics.Pipeline.Shader.UMaterialInstance mGridlineMaterial;
         public Graphics.Mesh.UMdfGridUVMesh GridUVModifier;
-        public static async System.Threading.Tasks.Task<UGridNode> AddGridNode(GamePlay.UWorld world, UNode parent)
+        public static async Thread.Async.TtTask<UGridNode> AddGridNode(GamePlay.UWorld world, UNode parent)
         {
             var rc = UEngine.Instance.GfxDevice.RenderContext;
             var material = await UEngine.Instance.GfxDevice.MaterialManager.GetMaterial(RName.GetRName("material/gridline.material", RName.ERNameType.Engine));

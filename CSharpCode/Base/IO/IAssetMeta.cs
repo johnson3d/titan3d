@@ -1,4 +1,5 @@
-﻿using System;
+﻿using EngineNS.Thread;
+using System;
 using System.Collections.Generic;
 using System.Dynamic;
 using System.Text;
@@ -274,8 +275,8 @@ namespace EngineNS.IO
         {
             return true;
         }
-        EGui.UIProxy.MenuItemProxy.MenuState mRefGraphMenuState = new EGui.UIProxy.MenuItemProxy.MenuState();
-        EGui.UIProxy.MenuItemProxy.MenuState mDeleteMenuState = new EGui.UIProxy.MenuItemProxy.MenuState();
+        protected EGui.UIProxy.MenuItemProxy.MenuState mRefGraphMenuState = new EGui.UIProxy.MenuItemProxy.MenuState();
+        protected EGui.UIProxy.MenuItemProxy.MenuState mDeleteMenuState = new EGui.UIProxy.MenuItemProxy.MenuState();
         internal System.Threading.Tasks.Task<Editor.USnapshot> Task;
         protected virtual Color GetBorderColor()
         {
@@ -341,50 +342,57 @@ namespace EngineNS.IO
 
             DrawPopMenu(ContentBrowser);
         }
-        protected virtual void DrawPopMenu(EGui.Controls.UContentBrowser ContentBrowser)
+        protected void DrawPopMenu(EGui.Controls.UContentBrowser ContentBrowser)
         {
-            var createNewAssetValueStore = ContentBrowser.CreateNewAssets;
             if (ImGuiAPI.BeginPopupContextItem(mAssetName.Address, ImGuiPopupFlags_.ImGuiPopupFlags_MouseButtonRight))
             {
-                ContentBrowser.CreateNewAssets = false;
-                var drawList = ImGuiAPI.GetWindowDrawList();
-                Support.UAnyPointer menuData = new Support.UAnyPointer();
-
-                if (EGui.UIProxy.MenuItemProxy.MenuItem("ExplorerTo", null, false, null, in drawList, in menuData, ref mRefGraphMenuState))
-                {
-                    var psi = new System.Diagnostics.ProcessStartInfo("Explorer.exe");
-                    psi.Arguments = "/e,/select," + mAssetName.Address.Replace("/", "\\");
-                    System.Diagnostics.Process.Start(psi);
-                }
-                if (EGui.UIProxy.MenuItemProxy.MenuItem("RefGraph", null, false, null, in drawList, in menuData, ref mRefGraphMenuState))
-                {
-                    var mainEditor = UEngine.Instance.GfxDevice.SlateApplication as Editor.UMainEditorApplication;
-                    var rn = RName.GetRName(mAssetName.Name + ".ameta", mAssetName.RNameType);
-                    var task = mainEditor.AssetEditorManager.OpenEditor(mainEditor, typeof(Editor.Forms.UAssetReferViewer), rn, this);
-                }
-                if (EGui.UIProxy.MenuItemProxy.MenuItem("CopyRName", null, false, null, in drawList, in menuData, ref mRefGraphMenuState))
-                {
-                    ImGuiAPI.SetClipboardText(RName.GetRName(mAssetName.Name + ".ameta", mAssetName.RNameType).ToString());
-                }
-                ImGuiAPI.Separator();
-                if (EGui.UIProxy.MenuItemProxy.MenuItem("Delete", null, false, null, in drawList, in menuData, ref mDeleteMenuState))
-                {
-                    try
-                    {
-                        DeleteAsset(mAssetName.Name, mAssetName.RNameType);
-                    }
-                    catch
-                    {
-
-                    }
-                    ContentBrowser.CreateNewAssets = createNewAssetValueStore;
-                }
-
-                if (OnDrawContextMenu(ref drawList))
-                    ContentBrowser.CreateNewAssets = createNewAssetValueStore;
+                OnDrawPopMenu(ContentBrowser);
                 ImGuiAPI.EndPopup();
             }
             else
+            {
+                var createNewAssetValueStore = ContentBrowser.CreateNewAssets;
+                ContentBrowser.CreateNewAssets = createNewAssetValueStore;
+            }
+        }
+        protected virtual void OnDrawPopMenu(EGui.Controls.UContentBrowser ContentBrowser)
+        {
+            var createNewAssetValueStore = ContentBrowser.CreateNewAssets;
+            ContentBrowser.CreateNewAssets = false;
+            var drawList = ImGuiAPI.GetWindowDrawList();
+            Support.UAnyPointer menuData = new Support.UAnyPointer();
+
+            if (EGui.UIProxy.MenuItemProxy.MenuItem("ExplorerTo", null, false, null, in drawList, in menuData, ref mRefGraphMenuState))
+            {
+                var psi = new System.Diagnostics.ProcessStartInfo("Explorer.exe");
+                psi.Arguments = "/e,/select," + mAssetName.Address.Replace("/", "\\");
+                System.Diagnostics.Process.Start(psi);
+            }
+            if (EGui.UIProxy.MenuItemProxy.MenuItem("RefGraph", null, false, null, in drawList, in menuData, ref mRefGraphMenuState))
+            {
+                var mainEditor = UEngine.Instance.GfxDevice.SlateApplication as Editor.UMainEditorApplication;
+                var rn = RName.GetRName(mAssetName.Name + ".ameta", mAssetName.RNameType);
+                var task = mainEditor.AssetEditorManager.OpenEditor(mainEditor, typeof(Editor.Forms.UAssetReferViewer), rn, this);
+            }
+            if (EGui.UIProxy.MenuItemProxy.MenuItem("CopyRName", null, false, null, in drawList, in menuData, ref mRefGraphMenuState))
+            {
+                ImGuiAPI.SetClipboardText(RName.GetRName(mAssetName.Name + ".ameta", mAssetName.RNameType).ToString());
+            }
+            ImGuiAPI.Separator();
+            if (EGui.UIProxy.MenuItemProxy.MenuItem("Delete", null, false, null, in drawList, in menuData, ref mDeleteMenuState))
+            {
+                try
+                {
+                    DeleteAsset(mAssetName.Name, mAssetName.RNameType);
+                }
+                catch
+                {
+
+                }
+                ContentBrowser.CreateNewAssets = createNewAssetValueStore;
+            }
+
+            if (OnDrawContextMenu(ref drawList))
                 ContentBrowser.CreateNewAssets = createNewAssetValueStore;
         }
         protected virtual bool OnDrawContextMenu(ref ImDrawList cmdlist)
@@ -447,9 +455,29 @@ namespace EngineNS.IO
                 return;
             RefAssetRNames.Add(rn);
         }
-        public virtual void OnDragTo(Graphics.Pipeline.UViewportSlate vpSlate)
+        bool mDraggingInViewport = false;
+        public virtual bool DraggingInViewport
         {
-            
+            get => mDraggingInViewport;
+            set
+            {
+                mDraggingInViewport = value;
+            }
+        }
+        public virtual async Thread.Async.TtTask OnDragTo(Graphics.Pipeline.UViewportSlate vpSlate)
+        {
+            DraggingInViewport = false;
+            await TtAsyncDummyClass.DummyFunc();
+        }
+        public virtual async Thread.Async.TtTask OnDragging(Graphics.Pipeline.UViewportSlate vpSlate)
+        {
+            await TtAsyncDummyClass.DummyFunc();
+        }
+        public virtual bool CanDrawOnDragging()
+        {
+            if (DraggingInViewport)
+                return false;
+            return true;
         }
     }
     public class TtAssetMetaManager

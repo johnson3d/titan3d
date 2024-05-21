@@ -137,7 +137,7 @@ namespace EngineNS.UI
                         VHitResult result = new VHitResult();
                         if(ui.OnLineCheckTriangle(ray.Position, end, ref result))
                         {
-                            distance = (result.Position - ray.Position).LengthSquared();
+                            distance = (float)(result.Position - ray.Position).LengthSquared();
                             if(distance < minDistance)
                             {
                                 minDistance = distance;

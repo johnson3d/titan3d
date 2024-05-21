@@ -150,6 +150,17 @@ namespace EngineNS.NxRHI
             }
             //cmdlist.AddText(in start, 0xFFFFFFFF, "texture", null);
         }
+        protected override void OnDrawPopMenu(EGui.Controls.UContentBrowser ContentBrowser)
+        {
+            base.OnDrawPopMenu(ContentBrowser);
+
+            Support.UAnyPointer menuData = new Support.UAnyPointer();
+            var drawList = ImGuiAPI.GetWindowDrawList();
+            if (EGui.UIProxy.MenuItemProxy.MenuItem("ReImport", null, false, null, in drawList, in menuData, ref mRefGraphMenuState))
+            {
+                //renwind todo
+            }
+        }
     }
     [Rtti.Meta]
     [USrView.Import]
@@ -817,6 +828,7 @@ namespace EngineNS.NxRHI
                 return PicDesc.MipLevel;
             }
         }
+        [Browsable(false)]
         public System.Threading.Tasks.Task<bool> CurLoadTask { get; set; }
         public async System.Threading.Tasks.Task<bool> LoadLOD(int level)
         {

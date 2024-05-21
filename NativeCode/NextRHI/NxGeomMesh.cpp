@@ -1779,7 +1779,8 @@ namespace NxRHI
 						if (scale != nullptr)
 						{
 							result->Position *= (*scale);
-							result->Distance = sqrt(v3dxCalSquareDistance(&result->Position, vStart));
+							auto singleVector = result->Position.ToSingleVector();
+							result->Distance = sqrt(v3dxCalSquareDistance(&singleVector, vStart));
 						}
 						v3dxCalcNormal(&result->Normal, &vA, &vB, &vC, TRUE);
 						result->U = u;
@@ -1824,7 +1825,8 @@ namespace NxRHI
 						if (scale != nullptr)
 						{
 							result->Position *= (*scale);
-							result->Distance = sqrt(v3dxCalSquareDistance(&result->Position, vStart));
+							auto singleVector = result->Position.ToSingleVector();
+							result->Distance = sqrt(v3dxCalSquareDistance(&singleVector, vStart));
 						}
 						v3dxCalcNormal(&result->Normal, &vA, &vB, &vC, TRUE);
 						result->U = u;

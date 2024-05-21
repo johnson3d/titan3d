@@ -1141,6 +1141,7 @@ namespace EngineNS.EGui.Controls.PropertyGrid
 
     public class ListEditor : PGCustomValueEditorAttribute
     {
+        EGui.Controls.UTypeSelector mTypeSelector;
         public override unsafe bool OnDraw(in EditorInfo info, out object newValue)
         {
             bool valueChanged = false;
@@ -1177,17 +1178,20 @@ namespace EngineNS.EGui.Controls.PropertyGrid
                                 baseType = baseTypeAtt.BaseType;
                             else
                                 baseType = dict.GetType().GenericTypeArguments[0];
-                            var typeSlt = new EGui.Controls.UTypeSelector();
-                            typeSlt.BaseType = Rtti.UTypeDescManager.Instance.GetTypeDescFromFullName(baseType.FullName);
-                            typeSlt.OnDraw(150, 6);
-                            if (typeSlt.SelectedType != null)
+                            if(mTypeSelector == null)
+                                mTypeSelector = new EGui.Controls.UTypeSelector();
+                            mTypeSelector.CtrlId = "##ComboTypeSelector_" + info.Name;
+                            mTypeSelector.BaseType = Rtti.UTypeDescManager.Instance.GetTypeDescFromFullName(baseType.FullName);
+                            mTypeSelector.OnDraw(150, 6);
+                            if (mTypeSelector.SelectedType != null)
                             {
-                                var newItem = Rtti.UTypeDescManager.CreateInstance(typeSlt.SelectedType);
+                                var newItem = Rtti.UTypeDescManager.CreateInstance(mTypeSelector.SelectedType);
                                 var idx = dict.Count;
                                 listOpAtt?.OnPreInsert(idx, newItem, info.ObjectInstance);
                                 dict.Insert(idx, newItem);
                                 valueChanged = true;
                                 listOpAtt?.OnAfterInsert(idx, newItem, info.ObjectInstance);
+                                mTypeSelector.SelectedType = null;
                             }
                             ImGuiAPI.SameLine(0, -1);
                         }

@@ -71,7 +71,7 @@ namespace EngineNS.Editor.Forms
         Dictionary<FBoneLine, TtMesh> BoneLineMeshes = new();
         public TtSkeletonAsset SkeletonAsset { get; set; } = null;
         public TtLocalSpaceRuntimePose CurrentPose = null;
-        public override Task<bool> InitializeNode(UWorld world, UNodeData data, EBoundVolumeType bvType, Type placementType)
+        public override Thread.Async.TtTask<bool> InitializeNode(UWorld world, UNodeData data, EBoundVolumeType bvType, Type placementType)
         {
             var nodeData = data as USkeletonShowNodeData;
             SkeletonAsset = nodeData.SkeletonAsset;

@@ -83,7 +83,7 @@ namespace EngineNS.GamePlay.Scene
             this.Dispose();
         }
         public const string EditorKeyword = "UNode";
-        public virtual async System.Threading.Tasks.Task<bool> InitializeNode(GamePlay.UWorld world, UNodeData data, EBoundVolumeType bvType, Type placementType)
+        public virtual async Thread.Async.TtTask<bool> InitializeNode(GamePlay.UWorld world, UNodeData data, EBoundVolumeType bvType, Type placementType)
         {
             NodeData = data;
 
@@ -833,7 +833,7 @@ namespace EngineNS.GamePlay.Scene
                     }
                     if (OnLineCheckTriangle(in localStart, in localEnd, ref result))
                     {
-                        result.Position = Placement.AbsTransform.TransformPositionNoScale(result.m_Position.AsDVector()).ToSingleVector3();
+                        result.Position = Placement.AbsTransform.TransformPositionNoScale(result.m_Position);
                         result.Normal = Placement.AbsTransform.TransformVector3(in result.m_Normal);
                         //result.Position = Vector3.TransformCoordinate(result.Position, Placement.AbsTransform);
                         //result.Normal = Vector3.TransformNormal(result.Normal, Placement.AbsTransform);
@@ -969,7 +969,7 @@ namespace EngineNS.GamePlay.Scene
         {
             return false;
         }
-        public override async System.Threading.Tasks.Task<bool> InitializeNode(GamePlay.UWorld world, UNodeData data, EBoundVolumeType bvType, Type placementType)            
+        public override async Thread.Async.TtTask<bool> InitializeNode(GamePlay.UWorld world, UNodeData data, EBoundVolumeType bvType, Type placementType)            
         {
             return await base.InitializeNode(world, data, bvType, placementType);
         }

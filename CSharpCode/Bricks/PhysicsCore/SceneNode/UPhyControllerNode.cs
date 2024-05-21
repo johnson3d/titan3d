@@ -56,7 +56,7 @@ namespace EngineNS.Bricks.PhysicsCore.SceneNode
         }
         TtPhyCapsuleControllerDesc PhyControllerDesc = null;
 
-        public override async Task<bool> InitializeNode(UWorld world, UNodeData data, EBoundVolumeType bvType, Type placementType)
+        public override async Thread.Async.TtTask<bool> InitializeNode(UWorld world, UNodeData data, EBoundVolumeType bvType, Type placementType)
         {
             var baseResult = await base.InitializeNode(world, data, bvType, placementType);
             if (!baseResult)
@@ -99,7 +99,7 @@ namespace EngineNS.Bricks.PhysicsCore.SceneNode
             get => NodeData as TtBoxPhyControllerNodeData;
         }
         TtPhyBoxControllerDesc PhyControllerDesc = null;
-        public override async Task<bool> InitializeNode(UWorld world, UNodeData data, EBoundVolumeType bvType, Type placementType)
+        public override async Thread.Async.TtTask<bool> InitializeNode(UWorld world, UNodeData data, EBoundVolumeType bvType, Type placementType)
         {
             var baseResult = await base.InitializeNode(world, data, bvType, placementType);
             if (!baseResult)

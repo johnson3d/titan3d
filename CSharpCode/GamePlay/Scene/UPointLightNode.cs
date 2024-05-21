@@ -33,7 +33,7 @@ namespace EngineNS.GamePlay.Scene
             [Rtti.Meta]
             public float Radius { get; set; }
         }
-        public override async System.Threading.Tasks.Task<bool> InitializeNode(GamePlay.UWorld world, UNodeData data, EBoundVolumeType bvType, Type placementType)
+        public override async Thread.Async.TtTask<bool> InitializeNode(GamePlay.UWorld world, UNodeData data, EBoundVolumeType bvType, Type placementType)
         {
             if (data == null)
             {
@@ -44,7 +44,7 @@ namespace EngineNS.GamePlay.Scene
             GetNodeData<ULightNodeData>().HostNode = this;
             return ret;
         }
-        public static async System.Threading.Tasks.Task<UPointLightNode> AddPointLightNode(UWorld world, UNode parent, ULightNodeData data, DVector3 pos)
+        public static async Thread.Async.TtTask<UPointLightNode> AddPointLightNode(UWorld world, UNode parent, ULightNodeData data, DVector3 pos)
         {
             var scene = parent.GetNearestParentScene();
             var scale = new Vector3(data.Radius);

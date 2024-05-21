@@ -20,7 +20,7 @@ namespace EngineNS.GamePlay.Character
             }
         }
         partial void CreatePxCapsuleController(ref bool result, Scene.UScene scene, float radius, float height);
-        public override async System.Threading.Tasks.Task<bool> InitializeNode(UWorld world, UNodeData data, EBoundVolumeType bvType, Type placementType)
+        public override async Thread.Async.TtTask<bool> InitializeNode(UWorld world, UNodeData data, EBoundVolumeType bvType, Type placementType)
         {
             if (await base.InitializeNode(world, data, bvType, placementType) == false)
             {

@@ -41,7 +41,7 @@ namespace EngineNS.GamePlay.Scene
         public DVector3 EyeCenter;
         public Vector3 EyeLocalCenter;
 
-        public override async Task<bool> InitializeNode(UWorld world, UNodeData data, EBoundVolumeType bvType, Type placementType)
+        public override async Thread.Async.TtTask<bool> InitializeNode(UWorld world, UNodeData data, EBoundVolumeType bvType, Type placementType)
         {
             return await base.InitializeNode(world, data, bvType, placementType);
         }

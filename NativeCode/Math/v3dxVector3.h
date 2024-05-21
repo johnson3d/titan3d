@@ -29,6 +29,7 @@
 class v3dxQuaternion;
 class v3dxMatrix3;
 class v3dxVector2;
+class v3dxDVector3;
 
 #pragma pack(push,4)
 class v3dxVector3 : public v3dVector3_t

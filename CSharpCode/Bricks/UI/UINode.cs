@@ -75,7 +75,7 @@ namespace EngineNS.UI
             public RName UIName { get; set; }
         }
 
-        public override async Task<bool> InitializeNode(UWorld world, UNodeData data, EBoundVolumeType bvType, Type placementType)
+        public override async Thread.Async.TtTask<bool> InitializeNode(UWorld world, UNodeData data, EBoundVolumeType bvType, Type placementType)
         {
             if (data as TtUINodeData == null)
                 data = new TtUINodeData();

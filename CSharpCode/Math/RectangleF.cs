@@ -102,12 +102,19 @@ namespace EngineNS
             Height = height;
         }
 
-        public RectangleF(Point2f pt, SizeF size)
+        public RectangleF(in Point2f pt, in SizeF size)
         {
             X = pt.X;
             Y = pt.Y;
             Width = size.Width;
             Height = size.Height;
+        }
+        public RectangleF(in Vector2 min, in Vector2 max)
+        {
+            X = min.X;
+            Y = min.Y;
+            Width = max.X - min.X;
+            Height = max.Y - min.Y;
         }
         public bool Contains(in Point2f pt)
         {

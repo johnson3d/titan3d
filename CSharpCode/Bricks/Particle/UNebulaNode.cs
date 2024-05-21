@@ -44,7 +44,7 @@ namespace EngineNS.Bricks.Particle
         }
         UNebulaParticle mNebulaParticle;
         public UNebulaParticle NebulaParticle { get=> mNebulaParticle; }
-        public override async Task<bool> InitializeNode(UWorld world, UNodeData data, EBoundVolumeType bvType, Type placementType)
+        public override async Thread.Async.TtTask<bool> InitializeNode(UWorld world, UNodeData data, EBoundVolumeType bvType, Type placementType)
         {
             var ret = await base.InitializeNode(world, data, bvType, placementType);
             mNebulaParticle = await UEngine.Instance.NebulaTemplateManager.GetParticle(GetNodeData<UNebulaNodeData>().NebulaName);

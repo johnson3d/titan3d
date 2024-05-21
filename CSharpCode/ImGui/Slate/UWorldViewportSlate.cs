@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using EngineNS.Editor.Forms;
+using EngineNS.GamePlay.Scene;
 using EngineNS.Graphics.Pipeline;
 
 namespace EngineNS.EGui.Slate
@@ -167,11 +168,13 @@ namespace EngineNS.EGui.Slate
             }
             else if(e.Type == Bricks.Input.EventType.MOUSEBUTTONUP)
             {
+                var viewportPoint = new Vector2(e.MouseMotion.X, e.MouseMotion.Y) + ViewportPos;
                 if (e.MouseButton.Button == (byte)Bricks.Input.EMouseButton.BUTTON_LEFT && mAxis != null &&
                     mAxis.CurrentAxisType == GamePlay.UAxis.enAxisType.Null &&
-                    (new Vector2(e.MouseMotion.X, e.MouseMotion.Y) - mStartMousePt).Length() < 1.0f &&
+                    ((new Vector2(e.MouseMotion.X, e.MouseMotion.Y) - mStartMousePt).Length() < 1.0f) &&
                     !mAxisOperated &&
-                    IsMouseIn)
+                    IsMouseIn &&
+                    !PointInOverlappedArea(in viewportPoint))
                 {
                     ProcessHitproxySelected(e.MouseMotion.X, e.MouseMotion.Y);
                 }
@@ -245,18 +248,21 @@ namespace EngineNS.EGui.Slate
             RenderPolicy?.TickSync();
         }
         #region Debug Assist
-        List<FVisibleMesh> mWorldBoundShapes;
-        public void ShowBoundVolumes(bool bShow, GamePlay.Scene.UNode node = null)
+        public List<FVisibleMesh> WorldBoundShapes = new List<FVisibleMesh>();
+        public void ShowBoundVolumes(bool bClear, bool bShow, params GamePlay.Scene.UNode[] nodes)
         {
             if (bShow)
             {
-                mWorldBoundShapes = new List<FVisibleMesh>();
-                World.GatherBoundShapes(mWorldBoundShapes, node);
+                if (bClear)
+                    WorldBoundShapes.Clear();
+                for(int i=0; i<nodes.Length; i++)
+                {
+                    World.GatherBoundShapes(WorldBoundShapes, nodes[i]);
+                }
             }
             else
             {
-                mWorldBoundShapes?.Clear();
-                mWorldBoundShapes = null;
+                WorldBoundShapes?.Clear();
             }
         }
         #endregion
@@ -266,6 +272,20 @@ namespace EngineNS.EGui.Slate
             base.OnHitproxySelected(proxy);
             var node = proxy as GamePlay.Scene.UNode;
             mAxis.SetSelectedNodes(node);
+        }
+
+        public override void OnHitproxySelectedMulti(bool clearPre, params IProxiable[] proxies)
+        {
+            base.OnHitproxySelectedMulti(clearPre, proxies);
+            if (proxies == null || proxies.Length == 0)
+                mAxis.SetSelectedNodes(null);
+            else
+            {
+                UNode[] nodes = new UNode[proxies.Length];
+                for (int i = 0; i < proxies.Length; i++)
+                    nodes[i] = proxies[i] as UNode;
+                mAxis.SetSelectedNodes(nodes);
+            }
         }
 
         bool mAxisOperated = false;

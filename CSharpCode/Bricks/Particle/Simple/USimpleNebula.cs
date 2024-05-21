@@ -134,7 +134,7 @@ namespace EngineNS.Bricks.Particle.Simple
         {
         }
 
-        public override async Task<bool> InitializeNode(UWorld world, UNodeData data, EBoundVolumeType bvType, Type placementType)
+        public override async Thread.Async.TtTask<bool> InitializeNode(UWorld world, UNodeData data, EBoundVolumeType bvType, Type placementType)
         {
             var dd = MathHelper.RoundUpPow2(512, 32);
             var nebulaData = data as UNebulaNodeData;

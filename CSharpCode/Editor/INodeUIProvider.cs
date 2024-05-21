@@ -30,15 +30,15 @@ namespace EngineNS.Editor
                 ImGuiAPI.TreePop();
             }
         }
-        protected virtual void OnNodeUI_LClick(INodeUIProvider provider)
+        public virtual void OnNodeUI_LClick(INodeUIProvider provider)
         {
 
         }
-        protected virtual void OnNodeUI_RClick(INodeUIProvider provider)
+        public virtual void OnNodeUI_RClick(INodeUIProvider provider)
         {
 
         }
-        protected virtual void OnNodeUI_Activated(INodeUIProvider provider)
+        public virtual void OnNodeUI_Activated(INodeUIProvider provider)
         {
 
         }
@@ -47,24 +47,9 @@ namespace EngineNS.Editor
             return provider.DrawNode(this, index, NumOfChild);
             //return ImGuiAPI.TreeNode(index.ToString(), provider.NodeName);
         }
-        protected virtual void AfterNodeShow(INodeUIProvider provider, int index)
+        public virtual void AfterNodeShow(INodeUIProvider provider, int index)
         {
-            if (ImGuiAPI.IsItemActivated())
-            {
-                OnNodeUI_Activated(provider);
-            }
-            if (ImGuiAPI.IsItemDeactivated())
-            {
-                //OnNodeUI_Activated(provider);
-            }
-            if (ImGuiAPI.IsItemClicked(ImGuiMouseButton_.ImGuiMouseButton_Left))
-            {
-                OnNodeUI_LClick(provider);
-            }
-            if (ImGuiAPI.IsItemClicked(ImGuiMouseButton_.ImGuiMouseButton_Right))
-            {
-                OnNodeUI_RClick(provider);
-            }
+
         }
     }
 }
@@ -89,25 +74,50 @@ namespace EngineNS.GamePlay.Scene
         }
         public virtual bool DrawNode(Editor.UTreeNodeDrawer tree, int index, int NumOfChild)
         {
-            ImGuiTreeNodeFlags_ flags = 0;
+            ImGuiTreeNodeFlags_ flags = ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_SpanFullWidth;
             if (this.Selected)
                 flags = ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_Selected;
+            bool ret = false;
+            var name = (string.IsNullOrEmpty(NodeName) ? "EmptyName" : NodeName) + "##" + index;
             if (NumOfChild == 0)
             {
-                var ret = ImGuiAPI.TreeNodeEx(index.ToString(), flags | ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_Leaf, "");
-
-                ImGuiAPI.SameLine(0, -3);
-                ImGuiAPI.Text(string.IsNullOrEmpty(NodeName) ? "EmptyName" : NodeName);
-                return ret;
+                ret = ImGuiAPI.TreeNodeEx(name, flags | ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_Leaf);
+                if (ImGuiAPI.IsItemActivated())
+                {
+                    tree.OnNodeUI_Activated(this);
+                }
+                if (ImGuiAPI.IsItemDeactivated())
+                {
+                }
+                if (ImGuiAPI.IsItemClicked(ImGuiMouseButton_.ImGuiMouseButton_Left))
+                {
+                    tree.OnNodeUI_LClick(this);
+                }
+                if (ImGuiAPI.IsItemClicked(ImGuiMouseButton_.ImGuiMouseButton_Right))
+                {
+                    tree.OnNodeUI_RClick(this);
+                }
             }
             else
             {
-                var ret = ImGuiAPI.TreeNodeEx(index.ToString(), flags, "");
-
-                ImGuiAPI.SameLine(0, -3);
-                ImGuiAPI.Text(string.IsNullOrEmpty(NodeName) ? "EmptyName" : NodeName);
-                return ret;
+                ret = ImGuiAPI.TreeNodeEx(name, flags);
+                if (ImGuiAPI.IsItemActivated())
+                {
+                    tree.OnNodeUI_Activated(this);
+                }
+                if (ImGuiAPI.IsItemDeactivated())
+                {
+                }
+                if (ImGuiAPI.IsItemClicked(ImGuiMouseButton_.ImGuiMouseButton_Left))
+                {
+                    tree.OnNodeUI_LClick(this);
+                }
+                if (ImGuiAPI.IsItemClicked(ImGuiMouseButton_.ImGuiMouseButton_Right))
+                {
+                    tree.OnNodeUI_RClick(this);
+                }
             }
+            return ret;
         }
     }
 }

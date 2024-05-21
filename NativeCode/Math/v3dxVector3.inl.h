@@ -16,6 +16,7 @@
 #include "v3dxMatrix3.h"
 #include "v3dxQuaternion.h"
 #include "v3dxVector2.h"
+#include "v3dxDVector3.h"
 
 #if !defined(PLATFORM_WIN)
 #pragma clang diagnostic push

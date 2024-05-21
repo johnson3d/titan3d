@@ -87,5 +87,18 @@ public:
 		vRet.Z = vect1.Z / fValue;
 		return vRet;
 	}
+	v3dxDVector3& operator *= (const v3dxDVector3& v3)
+	{
+		X *= v3.X;
+		Y *= v3.Y;
+		Z *= v3.Z;
+	}
+	v3dxDVector3& operator *= (const v3dxVector3& v3)
+	{
+		X *= v3.X;
+		Y *= v3.Y;
+		Z *= v3.Z;
+		return *this;
+	}
 };
 #pragma pack(pop)

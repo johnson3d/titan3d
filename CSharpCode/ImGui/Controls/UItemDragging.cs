@@ -44,8 +44,8 @@ namespace EngineNS.EGui.Controls
             ImGuiAPI.SetNextWindowSize(CurItem.Size, ImGuiCond_.ImGuiCond_Always);
             var msPt = ImGuiAPI.GetMousePos();
             ImGuiAPI.SetNextWindowPos(in msPt, ImGuiCond_.ImGuiCond_Always, new Vector2(0.5f));
-            var result = EGui.UIProxy.DockProxy.BeginMainForm("ItemDragging", this, ImGuiWindowFlags_.ImGuiWindowFlags_NoCollapse |
-                ImGuiWindowFlags_.ImGuiWindowFlags_NoDocking |
+            var result = EGui.UIProxy.DockProxy.BeginMainForm("ItemDragging", this, ImGuiWindowFlags_.ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_.ImGuiWindowFlags_NoResize |
+                ImGuiWindowFlags_.ImGuiWindowFlags_NoDocking | ImGuiWindowFlags_.ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_.ImGuiWindowFlags_NoBackground |
                 ImGuiWindowFlags_.ImGuiWindowFlags_NoNav | ImGuiWindowFlags_.ImGuiWindowFlags_NoDecoration);
             if (result)
             {

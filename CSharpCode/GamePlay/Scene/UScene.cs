@@ -63,7 +63,7 @@ namespace EngineNS.GamePlay.Scene
                 PGAsset.Target = mAsset;
             }
         }
-        public override async System.Threading.Tasks.Task<bool> InitializeNode(GamePlay.UWorld world, UNodeData data, EBoundVolumeType bvType, Type placementType)
+        public override async Thread.Async.TtTask<bool> InitializeNode(GamePlay.UWorld world, UNodeData data, EBoundVolumeType bvType, Type placementType)
         {
             if (data == null)
             {
@@ -164,16 +164,16 @@ namespace EngineNS.GamePlay.Scene
                 node.SceneId = UInt32.MaxValue;
             }
         }
-        public async System.Threading.Tasks.Task<USceneActorNode> NewNode(GamePlay.UWorld world, string nodeType, UNodeData data, EBoundVolumeType bvType, Type placementType, bool isSceneManaged = false)
+        public async Thread.Async.TtTask<USceneActorNode> NewNode(GamePlay.UWorld world, string nodeType, UNodeData data, EBoundVolumeType bvType, Type placementType, bool isSceneManaged = false)
         {
             var ntype = Rtti.UTypeDesc.TypeOf(nodeType);
             return await NewNode(world, ntype.SystemType, data, bvType, placementType, false);
         }
-        public async System.Threading.Tasks.Task<USceneActorNode> NewNodeSimple(GamePlay.UWorld world, Type nodeType, UNodeData data, bool isSceneManaged = false)
+        public async Thread.Async.TtTask<USceneActorNode> NewNodeSimple(GamePlay.UWorld world, Type nodeType, UNodeData data, bool isSceneManaged = false)
         {
             return await NewNode(world, nodeType, data, EBoundVolumeType.Box, typeof(GamePlay.UPlacement), isSceneManaged);
         }
-        public async System.Threading.Tasks.Task<USceneActorNode> NewNode(GamePlay.UWorld world, Type nodeType, UNodeData data, EBoundVolumeType bvType, Type placementType, bool isSceneManaged = false)
+        public async Thread.Async.TtTask<USceneActorNode> NewNode(GamePlay.UWorld world, Type nodeType, UNodeData data, EBoundVolumeType bvType, Type placementType, bool isSceneManaged = false)
         {
             var node = Rtti.UTypeDescManager.CreateInstance(nodeType) as USceneActorNode;
             if (node != null)

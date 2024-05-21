@@ -1,6 +1,7 @@
 ﻿using EngineNS.EGui.Controls;
 using System;
 using System.Collections.Generic;
+using System.Security.AccessControl;
 using System.Text;
 
 namespace EngineNS.Editor.Forms
@@ -15,6 +16,7 @@ namespace EngineNS.Editor.Forms
             }
         }
         public EGui.Slate.UWorldViewportSlate WorldViewportState { get; set; }
+
         public UWorldOutliner(EGui.Slate.UWorldViewportSlate viewport, bool regRoot = true)
         {
             WorldViewportState = viewport;
@@ -82,7 +84,11 @@ namespace EngineNS.Editor.Forms
                 }
                 if (World != null)
                 {
+                    ImGuiAPI.PushStyleColor(ImGuiCol_.ImGuiCol_Header, EGui.UIProxy.StyleConfig.Instance.TVHeader);
+                    ImGuiAPI.PushStyleColor(ImGuiCol_.ImGuiCol_HeaderActive, EGui.UIProxy.StyleConfig.Instance.TVHeaderActive);
+                    ImGuiAPI.PushStyleColor(ImGuiCol_.ImGuiCol_HeaderHovered, EGui.UIProxy.StyleConfig.Instance.TVHeaderHovered);
                     DrawTree(World.Root, 0);
+                    ImGuiAPI.PopStyleColor(3);
                 }
             }
             if (OnDrawMenu != null)
@@ -105,64 +111,16 @@ namespace EngineNS.Editor.Forms
                 }
                 if (World != null)
                 {
+                    ImGuiAPI.PushStyleColor(ImGuiCol_.ImGuiCol_Header, EGui.UIProxy.StyleConfig.Instance.TVHeader);
+                    ImGuiAPI.PushStyleColor(ImGuiCol_.ImGuiCol_HeaderActive, EGui.UIProxy.StyleConfig.Instance.TVHeaderActive);
+                    ImGuiAPI.PushStyleColor(ImGuiCol_.ImGuiCol_HeaderHovered, EGui.UIProxy.StyleConfig.Instance.TVHeaderHovered);
                     DrawTree(World.Root, 0);
+                    ImGuiAPI.PopStyleColor(3);
                 }
             }
             if (OnDrawMenu != null)
                 OnDrawMenu();
             EGui.UIProxy.DockProxy.EndMainForm(result);
-        }
-        public List<INodeUIProvider> SelectedNodes = new List<INodeUIProvider>();
-        protected override void AfterNodeShow(INodeUIProvider provider, int index)
-        {
-            if (ImGuiAPI.IsItemActivated())
-            {
-                OnNodeUI_Activated(provider);
-                //if (ImGuiAPI.IsKeyDown((int)SDL2.SDL.SDL_Scancode.SDL_SCANCODE_DELETE))
-                //{
-                //    int xxx = 0;
-                //}
-            }
-            if (ImGuiAPI.IsItemDeactivated())
-            {
-            }
-            if (ImGuiAPI.IsItemClicked(ImGuiMouseButton_.ImGuiMouseButton_Left))
-            {
-                OnNodeUI_LClick(provider);
-            }
-            if (ImGuiAPI.IsItemClicked(ImGuiMouseButton_.ImGuiMouseButton_Right))
-            {
-                OnNodeUI_RClick(provider);
-            }
-            if (ImGuiAPI.IsItemHovered(ImGuiHoveredFlags_.ImGuiHoveredFlags_None) && ImGuiAPI.IsMouseDown(ImGuiMouseButton_.ImGuiMouseButton_Left))
-            {
-                //这里考虑一下单选多选的问题
-                if (ImGuiAPI.IsKeyDown((ImGuiKey)Bricks.Input.Scancode.SCANCODE_LCTRL))
-                {
-                    provider.Selected = !provider.Selected;
-                    if (provider.Selected == false)
-                    {
-                        SelectedNodes.Remove(provider);
-                    }
-                    else
-                    {
-                        if (SelectedNodes.Contains(provider) == false)
-                        {
-                            SelectedNodes.Add(provider);
-                        }
-                    }
-                }
-                else
-                {
-                    foreach (var i in SelectedNodes)
-                    {
-                        i.Selected = false;
-                    }
-                    SelectedNodes.Clear();
-                    provider.Selected = true;
-                    SelectedNodes.Add(provider);
-                }
-            }   
         }
         protected override bool OnDrawNode(INodeUIProvider provider, int index, int NumOfChild)
         {
@@ -282,7 +240,7 @@ namespace EngineNS.Editor.Forms
         }
         #endregion
 
-        protected override void OnNodeUI_RClick(INodeUIProvider provider)
+        public override void OnNodeUI_RClick(INodeUIProvider provider)
         {
             var node = provider as GamePlay.Scene.UNode;
             if (node == null)
@@ -342,14 +300,63 @@ namespace EngineNS.Editor.Forms
                 }
             }
         }
-        protected override void OnNodeUI_LClick(INodeUIProvider provider)
+        public List<GamePlay.Scene.UNode> SelectedNodes = new List<GamePlay.Scene.UNode>();
+        public override void OnNodeUI_LClick(INodeUIProvider provider)
         {
+            //var ctrlKeyDown = UEngine.Instance.InputSystem.IsCtrlKeyDown();
+            //if (ctrlKeyDown)
+            //{
+
+            //}
+            //else
+            //{
+            //    for(int i=0; i<mSelectNodes.Count; i++)
+            //    {
+            //        mSelectNodes[i].Selected = false;
+            //    }
+            //    mSelectNodes.Clear();
+            //    mSelectNodes.Add(provider);
+            //    provider.Selected = true;
+            //    WorldViewportState.OnHitproxySelected((GamePlay.Scene.UNode)provider);
+            //}
+
             //var appliction = UEngine.Instance.GfxDevice.MainWindow as EngineNS.Editor.UMainEditorApplication;
             //if (appliction == null)
             //    return;
             //appliction.mMainInspector.PropertyGrid.Target = provider;
             //appliction.WorldViewportSlate.OnHitproxySelected((GamePlay.Scene.UNode)provider);
-            WorldViewportState.OnHitproxySelected((GamePlay.Scene.UNode)provider);
+
+            var node = provider as GamePlay.Scene.UNode;
+            if (node == null)
+                return;
+
+            if (ImGuiAPI.IsKeyDown((ImGuiKey)Bricks.Input.Scancode.SCANCODE_LCTRL))
+            {
+                node.Selected = !node.Selected;
+                if (node.Selected == false)
+                {
+                    SelectedNodes.Remove(node);
+                }
+                else
+                {
+                    if (SelectedNodes.Contains(node) == false)
+                    {
+                        SelectedNodes.Add(node);
+                    }
+                }
+            }
+            else
+            {
+                foreach (var i in SelectedNodes)
+                {
+                    i.Selected = false;
+                }
+                SelectedNodes.Clear();
+                node.Selected = true;
+                SelectedNodes.Add(node);
+            }
+
+            WorldViewportState.OnHitproxySelectedMulti(true, SelectedNodes.ToArray());
         }
     }
 }

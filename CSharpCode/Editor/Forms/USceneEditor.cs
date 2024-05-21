@@ -3,10 +3,13 @@ using System.Collections.Generic;
 using System.Runtime.InteropServices;
 using System.Xml.Linq;
 using EngineNS.EGui.Controls;
+using EngineNS.GamePlay;
 using EngineNS.GamePlay.Scene;
 using EngineNS.Graphics.Mesh;
+using EngineNS.Graphics.Pipeline;
 using EngineNS.Rtti;
 using EngineNS.Thread;
+using EngineNS.Thread.Async;
 using MathNet.Numerics.LinearAlgebra.Solvers;
 
 namespace EngineNS.Editor.Forms
@@ -18,10 +21,6 @@ namespace EngineNS.Editor.Forms
         {
 
         }
-        protected override void OnNodeUI_LClick(INodeUIProvider provider)
-        {
-            base.OnNodeUI_LClick(provider);
-        }
     }
     public class USceneEditor : Editor.IAssetEditor, ITickable, IRootForm
     {
@@ -31,6 +30,7 @@ namespace EngineNS.Editor.Forms
         }
         public class USceneEditorViewport : EGui.Slate.UWorldViewportSlate
         {
+            public USceneEditor HostEditor;
             public EGui.Controls.PropertyGrid.PropertyGrid NodeInspector = new EGui.Controls.PropertyGrid.PropertyGrid();
             public override async System.Threading.Tasks.Task Initialize(USlateApplication application, RName policyName, float zMin, float zMax)
             {
@@ -39,20 +39,112 @@ namespace EngineNS.Editor.Forms
             }
             public override void OnHitproxySelected(Graphics.Pipeline.IProxiable proxy)
             {
-                base.OnHitproxySelected(proxy);
-
-                if (proxy == null)
+                if(UEngine.Instance.InputSystem.IsCtrlKeyDown())
                 {
-                    this.ShowBoundVolumes(false, null);
-                    return;
+                    OnHitproxySelectedMulti(false, proxy);
                 }
-                var node = proxy as GamePlay.Scene.UNode;
-                if (node != null)
+                else
                 {
-                    this.ShowBoundVolumes(true, node);
+                    OnHitproxySelectedMulti(true, proxy);
                 }
 
-                NodeInspector.Target = proxy;
+                //var edtorPolicy = this.RenderPolicy as Graphics.Pipeline.URenderPolicy;
+                //if (edtorPolicy != null)
+                //{
+                //    if (proxy == null)
+                //    {
+                //        //if (this.IsHoverGuiItem == false)
+                //        edtorPolicy.PickedProxiableManager.ClearSelected();
+                //    }
+                //    else
+                //    {
+                //        edtorPolicy.PickedProxiableManager.Selected(proxy);
+                //    }
+                //}
+
+                //var node = proxy as GamePlay.Scene.UNode;
+                //mAxis.SetSelectedNodes(node);
+
+
+                //if (proxy == null)
+                //{
+                //    this.ShowBoundVolumes(true, false, null);
+                //    //return;
+                //}
+                //var node = proxy as GamePlay.Scene.UNode;
+                //if (node != null)
+                //{
+                //    this.ShowBoundVolumes(true, true, node);
+                //}
+
+                //if(HostEditor.mWorldOutliner.SelectedNodes.Contains)
+                //NodeInspector.Target = HostEditor.mWorldOutliner.SelectedNodes;// proxy;
+            }
+            public override void OnHitproxySelectedMulti(bool clearPre, params IProxiable[] proxies)
+            {
+                base.OnHitproxySelectedMulti(clearPre, proxies);
+
+                if (proxies == null || proxies.Length == 0)
+                    ShowBoundVolumes(true, false, null);
+                else
+                {
+                    ShowBoundVolumes(true, false, null);
+                    for(int i=0; i<proxies.Length; i++)
+                    {
+                        var node = proxies[i] as UNode;
+                        if (node == null)
+                            continue;
+
+                        this.ShowBoundVolumes(false, true, node);
+                    }
+                }
+
+                if(clearPre)
+                {
+                    for(int i=0; i<HostEditor.mWorldOutliner.SelectedNodes.Count; i++)
+                    {
+                        HostEditor.mWorldOutliner.SelectedNodes[i].Selected = false;
+                    }
+                    HostEditor.mWorldOutliner.SelectedNodes.Clear();
+                    for(int i=0; i<proxies.Length; i++)
+                    {
+                        var uNode = proxies[i] as UNode;
+                        if (uNode == null)
+                            continue;
+                        uNode.Selected = true;
+                        HostEditor.mWorldOutliner.SelectedNodes.Add(uNode);
+                    }
+                }
+                else
+                {
+                    var needAddNodes = proxies.Except(HostEditor.mWorldOutliner.SelectedNodes);
+                    var needDelNodes = HostEditor.mWorldOutliner.SelectedNodes.Except(proxies);
+                    foreach(var node in needDelNodes)
+                    {
+                        var uNode = node as UNode;
+                        if (uNode == null)
+                            continue;
+                        uNode.Selected = false;
+                        HostEditor.mWorldOutliner.SelectedNodes.Remove(uNode);
+                    }
+                    foreach(var node in needAddNodes)
+                    {
+                        var uNode = node as UNode;
+                        if (uNode == null)
+                            continue;
+                        uNode.Selected = true;
+                        HostEditor.mWorldOutliner.SelectedNodes.Add(uNode);
+                    }
+                    foreach(var node in proxies)
+                    {
+                        var uNode = node as UNode;
+                        if (uNode == null)
+                            continue;
+                        uNode.Selected = true;
+                        HostEditor.mWorldOutliner.SelectedNodes.Add(uNode);
+                    }
+                }
+                NodeInspector.Target = HostEditor.mWorldOutliner.SelectedNodes; //proxies;
             }
         }
         public RName AssetName { get; set; }
@@ -282,7 +374,7 @@ namespace EngineNS.Editor.Forms
             public List<PlaceItemData> Children = new List<PlaceItemData>();
         }
         List<PlaceItemData> mPlaceItems = new List<PlaceItemData>();
-        unsafe void InitPlaceItems()
+        void InitPlaceItems()
         {
             mPlaceItems.Clear();
             var shapesItem = new PlaceItemData()
@@ -297,8 +389,10 @@ namespace EngineNS.Editor.Forms
                 DropAction = async (data)=>
                 {
                     var gridNode = UMeshDataProvider.MakeGridPlane(UEngine.Instance.GfxDevice.RenderContext, new Vector2(-50, -50), new Vector2(50, 50), 1).ToMesh();
-                    var meshNodeData = new UMeshNode();
-                    //Scene.NewNode(Scene.World, typeof(UMeshNode), )
+
+                    var meshNodeData = new UMeshNode.UMeshNodeData();
+                    var meshNode = await Scene.NewNode(Scene.World, typeof(UMeshNode), meshNodeData, EBoundVolumeType.Box, typeof(UPlacement)) as UMeshNode;
+
                 },
             };
             shapesItem.Children.Add(planeItem);
@@ -307,6 +401,7 @@ namespace EngineNS.Editor.Forms
         public USceneEditor()
         {
             mWorldOutliner = new USceneEditorOutliner(PreviewViewport, false);
+            PreviewViewport.HostEditor = this;
         }
         ~USceneEditor()
         {
@@ -371,6 +466,8 @@ namespace EngineNS.Editor.Forms
             PreviewViewport.Title = $"Scene:{name}";
             PreviewViewport.OnInitialize = Initialize_PreviewScene;
             await PreviewViewport.Initialize(UEngine.Instance.GfxDevice.SlateApplication, UEngine.Instance.Config.MainRPolicyName, 0, 1);
+            var camPos = new DVector3(10, 10, 10);
+            PreviewViewport.CameraController.Camera.mCoreObject.LookAtLH(in camPos, in DVector3.Zero, in Vector3.Up);
 
             Scene = await UEngine.Instance.SceneManager.CreateScene(PreviewViewport.World, name);
             if (Scene == null)
@@ -718,6 +815,30 @@ namespace EngineNS.Editor.Forms
             }
             EGui.UIProxy.DockProxy.EndPanel(show);
         }
+        unsafe void ContentBrowserDragDropPreview()
+        {
+            if (UContentBrowser.IsInDragDropMode)
+            {
+                var payload = ImGuiAPI.GetDragDropPayload();
+                if (payload == null)
+                    return;
+                if (!payload->IsDataType("ContentBrowserAssetDragDrop"))
+                    return;
+
+                var pos = ImGuiAPI.GetWindowPos();
+                var min = ImGuiAPI.GetWindowContentRegionMin() + pos;
+                var max = ImGuiAPI.GetWindowContentRegionMax() + pos;
+                var draggingInViewport = ImGuiAPI.IsMouseHoveringRect(in min, in max, true);
+                var handle = GCHandle.FromIntPtr((IntPtr)(payload->Data));
+                var dragData = (UContentBrowser.DragDropData)handle.Target;
+                for (int i = 0; i < dragData.Metas.Length; i++)
+                {
+                    dragData.Metas[i].DraggingInViewport = draggingInViewport;
+                    if(draggingInViewport)
+                        _ = dragData.Metas[i].OnDragging(PreviewViewport);
+                }
+            }
+        }
         protected unsafe void DrawPreview()
         {
             if (!mPreviewShow.Selected)
@@ -728,8 +849,10 @@ namespace EngineNS.Editor.Forms
                 PreviewViewport.ViewportType = Graphics.Pipeline.UViewportSlate.EViewportType.ChildWindow;
                 PreviewViewport.OnDraw();
 
+                ContentBrowserDragDropPreview();
+
                 // dragdrop
-                if(ImGuiAPI.BeginDragDropTarget())
+                if (ImGuiAPI.BeginDragDropTarget())
                 {
                     var payload = ImGuiAPI.AcceptDragDropPayload("ScenePlaneItemDragDrop", ImGuiDragDropFlags_.ImGuiDragDropFlags_None);
                     if (payload != null)
@@ -741,6 +864,17 @@ namespace EngineNS.Editor.Forms
                             dragData.DropAction?.Invoke(dragData);
                         }
                     }
+                    payload = ImGuiAPI.AcceptDragDropPayload("ContentBrowserAssetDragDrop", ImGuiDragDropFlags_.ImGuiDragDropFlags_None);
+                    if(payload != null)
+                    {
+                        var handle = GCHandle.FromIntPtr((IntPtr)(payload->Data));
+                        var dragData = (UContentBrowser.DragDropData)handle.Target;
+                        for(int i=0; i<dragData.Metas.Length; i++)
+                        {
+                            _ = dragData.Metas[i].OnDragTo(PreviewViewport);
+                        }
+                    }
+                    ImGuiAPI.EndDragDropTarget();
                 }
             }
             this.PreviewViewport.Visible = show;

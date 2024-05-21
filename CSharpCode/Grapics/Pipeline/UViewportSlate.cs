@@ -326,6 +326,26 @@ namespace EngineNS.Graphics.Pipeline
                 }
             }
         }
+        public virtual void OnHitproxySelectedMulti(bool clearPre, params Graphics.Pipeline.IProxiable[] proxies)
+        {
+            var edtorPolicy = this.RenderPolicy as Graphics.Pipeline.URenderPolicy;
+            if (edtorPolicy != null)
+            {
+                if (proxies == null || proxies.Length == 0)
+                    edtorPolicy.PickedProxiableManager.ClearSelected();
+                else
+                {
+                    if(clearPre)
+                        edtorPolicy.PickedProxiableManager.ClearSelected();
+                    for (int i=0; i<proxies.Length; i++)
+                    {
+                        if (proxies[i] == null)
+                            continue;
+                        edtorPolicy.PickedProxiableManager.Selected(proxies[i]);
+                    }
+                }
+            }
+        }
         public delegate System.Threading.Tasks.Task FOnInitialize(UViewportSlate viewport, USlateApplication application, Graphics.Pipeline.URenderPolicy policy, float zMin, float zMax);
         public FOnInitialize OnInitialize = null;
         [Rtti.Meta]
@@ -399,6 +419,26 @@ namespace EngineNS.Graphics.Pipeline
             {
                 _ = i.BuildMesh();
             }
+        }
+
+        protected Dictionary<string, RectangleF> mOverlappedAreas = new Dictionary<string, RectangleF>();
+        public void RegisterOverlappedArea(string name, in RectangleF rect)
+        {
+            mOverlappedAreas[name] = rect;
+        }
+        public void UnRegisterOverlappedArea(string name)
+        {
+            mOverlappedAreas.Remove(name);
+        }
+
+        public bool PointInOverlappedArea(in Vector2 point)
+        {
+            foreach(var rect in mOverlappedAreas.Values)
+            {
+                if (rect.Contains(point.X, point.Y))
+                    return true;
+            }
+            return false;
         }
     }
     public class UViewportSlateManager

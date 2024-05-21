@@ -1,4 +1,7 @@
-﻿using Microsoft.CodeAnalysis.CSharp.Syntax;
+﻿using EngineNS.GamePlay;
+using EngineNS.GamePlay.Scene;
+using EngineNS.Graphics.Pipeline;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -36,23 +39,102 @@ namespace EngineNS.Graphics.Mesh
         {
             return Color.OrangeRed;
         }
-        public override void OnDragTo(Graphics.Pipeline.UViewportSlate vpSlate)
+        DVector3 CalculateDragPosition(Graphics.Pipeline.UViewportSlate vpSlate)
         {
             var worldViewport = vpSlate as EGui.Slate.UWorldViewportSlate;
             if (worldViewport != null)
             {
                 var start = worldViewport.CameraController.Camera.GetPosition();
                 Vector3 dir = Vector3.Zero;
-                var msPt = ImGuiAPI.GetMousePos();
+                var msPt = new Vector2(UEngine.Instance.InputSystem.Mouse.GlobalMouseX, UEngine.Instance.InputSystem.Mouse.GlobalMouseY) - vpSlate.ViewportPos;
                 msPt = worldViewport.Window2Viewport(msPt);
                 worldViewport.CameraController.Camera.GetPickRay(ref dir, msPt.X, msPt.Y, worldViewport.ClientSize.X, worldViewport.ClientSize.Y);
                 var end = start + dir.AsDVector() * 1000.0f;
-                VHitResult htResult = new VHitResult();
-                if (worldViewport.World.Root.LineCheck(in start, in end, ref htResult))
+                VHitResult hitResult = new VHitResult();
+                DVector3 hitPos;
+                if (worldViewport.World.Root.LineCheck(in start, in end, ref hitResult))
                 {
-                    return;
+                    hitPos = hitResult.Position;
+                }
+                else
+                {
+                    var ray = new DRay()
+                    {
+                        Position = start,
+                        Direction = dir,
+                    };
+                    var plane = new DPlane(DVector3.Zero, DVector3.Up);
+                    double distance;
+                    if (DRay.Intersects(in ray, in plane, out distance))
+                        hitPos = start + dir.AsDVector() * distance;
+                    else
+                        hitPos = start + dir.AsDVector() * 10.0f;
+                }
+                return hitPos;
+            }
+            return DVector3.Zero;
+        }
+        public override bool DraggingInViewport 
+        { 
+            get => base.DraggingInViewport;
+            set
+            {
+                base.DraggingInViewport = value;
+                if(!value && mPreviewNode != null)
+                {
+                    mPreviewNode.Parent = null;
                 }
             }
+        }
+        public override async Thread.Async.TtTask OnDragTo(Graphics.Pipeline.UViewportSlate vpSlate)
+        {
+            DraggingInViewport = false;
+            var worldViewport = vpSlate as EGui.Slate.UWorldViewportSlate;
+            if (worldViewport != null)
+            {
+                var hitPos = CalculateDragPosition(vpSlate);
+                var meshNodeData = new UMeshNode.UMeshNodeData();
+                meshNodeData.Name = mAssetName.PureName;
+                meshNodeData.MeshName = mAssetName;
+                var node = await worldViewport.World.Root.ParentScene.NewNode(worldViewport.World, typeof(UMeshNode), meshNodeData, EBoundVolumeType.Box, typeof(UPlacement));
+                node.Parent = worldViewport.World.Root;
+                node.Placement.Position = hitPos;
+                node.HitproxyType = Pipeline.UHitProxy.EHitproxyType.Root;
+
+                if(mPreviewNode != null)
+                {
+                    mPreviewNode.Parent = null;
+                }
+            }
+        }
+        Thread.Async.TtTask<USceneActorNode>? mPreviewNodeTask;
+        UMeshNode mPreviewNode;
+        public override async Thread.Async.TtTask OnDragging(UViewportSlate vpSlate)
+        {
+            var worldViewport = vpSlate as EGui.Slate.UWorldViewportSlate;
+            if (worldViewport == null)
+                return;
+
+            if (mPreviewNodeTask == null)
+            {
+                var meshNodeData = new UMeshNode.UMeshNodeData();
+                meshNodeData.Name = mAssetName.PureName;
+                meshNodeData.MeshName = mAssetName;
+                mPreviewNodeTask = worldViewport.World.Root.ParentScene.NewNode(worldViewport.World, typeof(UMeshNode), meshNodeData, EBoundVolumeType.Box, typeof(UPlacement));
+                return;
+            }
+            else if (mPreviewNodeTask.Value.IsCompleted == false)
+                return;
+            else
+            {
+                mPreviewNode = mPreviewNodeTask.Value.Result as UMeshNode;
+            }
+
+            if (mPreviewNode.Parent != worldViewport.World.Root)
+                mPreviewNode.Parent = worldViewport.World.Root;
+
+            var hitPos = CalculateDragPosition(vpSlate);
+            mPreviewNode.Placement.Position = hitPos;
         }
     }
     [Rtti.Meta]
