@@ -9,7 +9,6 @@ namespace EngineNS.Bricks.CodeBuilder
     [Rtti.Meta]
     public partial class UMacrossConfig
     {
-        public string TargetFramework;
         public List<string> GameReferenceAssemblies = new List<string>();
         public List<CodeCompiler.ProjectConfig> GenProjects = new List<CodeCompiler.ProjectConfig>();
     }
@@ -31,7 +30,6 @@ namespace EngineNS.Bricks.CodeBuilder
             if(Config == null)
             {
                 Config = new UMacrossConfig();
-                Config.TargetFramework = UEngine.DotNetVersion;
                 Config.GameReferenceAssemblies = new List<string>()
                 {
                     IO.TtFileManager.GetRelativePath(

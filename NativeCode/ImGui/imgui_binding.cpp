@@ -460,6 +460,11 @@ bool ImGuiAPI::ToggleButton(const char* label, bool* v, const ImVec2* size_arg, 
 	return pressed;
 }
 
+void ImGuiAPI::SetKeyOwner(ImGuiKey key, ImGuiID owner_id, ImGuiInputFlags flags)
+{
+	ImGui::SetKeyOwner(key, owner_id, flags);
+}
+
 bool ImGuiAPI::IsIDNavInput(ImGuiID id)
 {
 	auto context = ImGui::GetCurrentContext();

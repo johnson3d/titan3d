@@ -129,9 +129,25 @@ namespace EngineNS
 {
     public partial class UEngine
     {
+        static UEngine()
+        {
+            switch (Version.Major)
+            {
+                case 6:
+                    DotNetVersion = "net6.0";
+                    break;
+                case 7:
+                    DotNetVersion = "net7.0";
+                    break;
+                case 8:
+                    DotNetVersion = "net8.0";
+                    break;
+            }
+        }
 
         public Editor.UPIEModule PIEModule { get; } = new Editor.UPIEModule();
-        public const string DotNetVersion = "net7.0";
+        public readonly static System.Version Version = System.Environment.Version;
+        public static string DotNetVersion { get; private set; } = "net7.0";
         public virtual async System.Threading.Tasks.Task<bool> StartPlayInEditor(USlateApplication application, RName main)
         {
             if (this.GameInstance != null)

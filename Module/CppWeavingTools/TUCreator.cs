@@ -42,6 +42,7 @@ namespace CppWeaving
 
             var args = new List<string>();
             args.Add("-std=c++17");
+            args.Add("-stdlib=libc++");
             args.Add("-xc++");
             args.Add("-Wno-pragma-once-outside-header");
             args.Add("-Wno-address-of-temporary");

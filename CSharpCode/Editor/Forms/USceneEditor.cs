@@ -117,9 +117,50 @@ namespace EngineNS.Editor.Forms
                 }
                 else
                 {
-                    var needAddNodes = proxies.Except(HostEditor.mWorldOutliner.SelectedNodes);
-                    var needDelNodes = HostEditor.mWorldOutliner.SelectedNodes.Except(proxies);
-                    foreach(var node in needDelNodes)
+                    List<UNode> needAddNodes = new List<UNode>();
+                    foreach(var i in proxies)
+                    {
+                        var n = i as UNode;
+                        if (n == null)
+                            continue;
+                        bool bFind = false;
+                        foreach(var j in HostEditor.mWorldOutliner.SelectedNodes)
+                        {
+                            if (n == j)
+                            {
+                                bFind = true;
+                                break;
+                            }
+                        }
+                        if (bFind == false)
+                        {
+                            needAddNodes.Add(n);
+                        }
+                    }
+                    var needDelNodes = new List<UNode>();
+                    foreach (var i in HostEditor.mWorldOutliner.SelectedNodes)
+                    {
+                        bool bFind = false;
+                        foreach (var j in proxies)
+                        {
+                            var n = j as UNode;
+                            if (n == null)
+                                continue;
+                            if (n == j)
+                            {
+                                bFind = true;
+                                break;
+                            }
+                        }
+                        if (bFind == false)
+                        {
+                            needDelNodes.Add(i);
+                        }
+                    }
+                    //var needDelNodes = HostEditor.mWorldOutliner.SelectedNodes.Except(proxies);
+                    //System.Diagnostics.Debug.Assert(HostEditor.mWorldOutliner.SelectedNodes != needDelNodes);
+                    
+                    foreach (var node in needDelNodes)
                     {
                         var uNode = node as UNode;
                         if (uNode == null)
@@ -555,6 +596,29 @@ namespace EngineNS.Editor.Forms
                 //var sz = new Vector2(-1);
                 //ImGuiAPI.BeginChild("Client", ref sz, false, ImGuiWindowFlags_.)
                 ImGuiAPI.Separator();
+
+                //if (ImGuiAPI.IsWindowHovered(ImGuiHoveredFlags_.ImGuiHoveredFlags_ChildWindows))
+                {
+                    if (UEngine.Instance.InputSystem.IsKeyPressed(Bricks.Input.Keycode.KEY_f))
+                    {
+                        DBoundingBox box = DBoundingBox.EmptyBox();
+                        for (int i = 0; i < mWorldOutliner.SelectedNodes.Count; i++)
+                        {
+                            var transform = mWorldOutliner.SelectedNodes[i].Placement.AbsTransform;
+                            var corners = mWorldOutliner.SelectedNodes[i].AABB.GetCorners();
+                            for (int cornerIdx = 0; cornerIdx < corners.Length; cornerIdx++)
+                            {
+                                var absPos = transform.TransformPosition(in corners[cornerIdx]);
+                                box.Merge(in absPos);
+                            }
+                        }
+                        if (!box.IsEmpty())
+                        {
+                            BoundingSphere sphere = new BoundingSphere(box.GetCenter().ToSingleVector3(), (float)box.GetMaxSide());
+                            PreviewViewport.CameraController.Camera.AutoZoom(ref sphere, 0.2f);
+                        }
+                    }
+                }
             }
             ResetDockspace();
             EGui.UIProxy.DockProxy.EndMainForm(IsDrawing);
@@ -848,6 +912,7 @@ namespace EngineNS.Editor.Forms
             {
                 PreviewViewport.ViewportType = Graphics.Pipeline.UViewportSlate.EViewportType.ChildWindow;
                 PreviewViewport.OnDraw();
+
 
                 ContentBrowserDragDropPreview();
 

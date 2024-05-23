@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <OutputType>Exe</OutputType>
-    <TargetFramework>net7.0</TargetFramework>
+    <TargetFramework>net8.0</TargetFramework>
     <BaseOutputPath></BaseOutputPath>
   </PropertyGroup>
 
@@ -15,9 +15,9 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="ClangSharp" Version="16.0.0" />
-    <PackageReference Include="libclang" Version="16.0.6" />
-    <PackageReference Include="libClangSharp" Version="16.0.6" />
+    <PackageReference Include="ClangSharp" Version="18.1.0" />
+    <PackageReference Include="libclang" Version="18.1.3.2" />
+    <PackageReference Include="libClangSharp" Version="18.1.3.1" />
   </ItemGroup>
 
 </Project>

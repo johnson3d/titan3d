@@ -24,7 +24,14 @@ namespace EngineNS.Editor
             }
         }
         [Rtti.Meta]
-        public string GameAssembly { get; set; }
+        public string GameModuleName { get; set; } = "GameProject.dll";
+        public string GameAssembly 
+        { 
+            get
+            {
+                return $"binaries/{UEngine.DotNetVersion}/{GameModuleName}";
+            }
+        }
         [Rtti.Meta]
         public RName PhyMaterialIconName { get; set; }
         [Rtti.Meta]
@@ -59,7 +66,6 @@ namespace EngineNS.Editor
             {
                 Config = new UEditorConfig();
                 Config.GameProject = "Module/GameProject/GameProject.csproj";
-                Config.GameAssembly = $"binaries/{UEngine.DotNetVersion}/GameProject.dll";
                 Config.PhyMaterialIconName = RName.GetRName("icons/phymaterialicon.uvanim", RName.ERNameType.Engine);
                 Config.FontIconName = RName.GetRName("icons/font.uvanim", RName.ERNameType.Engine);
                 Config.MacrossIconName = RName.GetRName("icons/macrossicon.uvanim", RName.ERNameType.Engine);

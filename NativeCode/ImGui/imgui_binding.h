@@ -2044,6 +2044,8 @@ public:
 	}
 
 	static bool ToggleButton(const char* label, bool* v, const ImVec2* size_arg, ImGuiButtonFlags flags);
+
+	static void SetKeyOwner(ImGuiKey key, ImGuiID owner_id, ImGuiInputFlags flags = 0);
 };
 
 NS_END

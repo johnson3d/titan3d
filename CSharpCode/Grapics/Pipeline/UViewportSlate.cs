@@ -103,16 +103,16 @@ namespace EngineNS.Graphics.Pipeline
                     //bShow = ImGuiAPI.Begin(Title, ref mVisible, ImGuiWindowFlags_.ImGuiWindowFlags_NoBackground | ImGuiWindowFlags_.ImGuiWindowFlags_NoSavedSettings);
                     {
                         bool vis = true;
-                        bShow = ImGuiAPI.Begin(Title, ref vis, ImGuiWindowFlags_.ImGuiWindowFlags_NoBackground | ImGuiWindowFlags_.ImGuiWindowFlags_NoSavedSettings);
+                        bShow = ImGuiAPI.Begin(Title, ref vis, ImGuiWindowFlags_.ImGuiWindowFlags_NoBackground | ImGuiWindowFlags_.ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_.ImGuiWindowFlags_NoNavFocus);
                     }
                     break;
                 case EViewportType.WindowWithClose:
-                    bShow = ImGuiAPI.Begin(Title, (bool*)0, ImGuiWindowFlags_.ImGuiWindowFlags_NoBackground | ImGuiWindowFlags_.ImGuiWindowFlags_NoSavedSettings);
+                    bShow = ImGuiAPI.Begin(Title, (bool*)0, ImGuiWindowFlags_.ImGuiWindowFlags_NoBackground | ImGuiWindowFlags_.ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_.ImGuiWindowFlags_NoNavFocus);
                     break;
                 case EViewportType.ChildWindow:
                     //if(sz == Vector2.Zero)
                     //    sz = ImGuiAPI.GetWindowSize();
-                    bShow = ImGuiAPI.BeginChild(Title, in sz, false, ImGuiWindowFlags_.ImGuiWindowFlags_NoBackground | 
+                    bShow = ImGuiAPI.BeginChild(Title, in sz, false, ImGuiWindowFlags_.ImGuiWindowFlags_NoBackground | ImGuiWindowFlags_.ImGuiWindowFlags_NoNavFocus |
                         ImGuiWindowFlags_.ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_.ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_.ImGuiWindowFlags_NoScrollWithMouse);
                     break;
             }
@@ -122,6 +122,10 @@ namespace EngineNS.Graphics.Pipeline
             //}
             if (bShow)
             {
+                var idStr = Title + "_Window";
+                var id = ImGuiAPI.GetID(idStr);
+                ImGuiAPI.PushID((int)id);
+                ImGuiAPI.SetKeyOwner(ImGuiKey.ImGuiKey_ModAlt, id, 0);
                 sz = ImGuiAPI.GetWindowSize();
                 var imViewport = ImGuiAPI.GetWindowViewport();
                 if ((IntPtr)imViewport->PlatformUserData != IntPtr.Zero)
@@ -188,6 +192,8 @@ namespace EngineNS.Graphics.Pipeline
                     OnDrawViewportUI(in curPos);                    
                     ImGuiAPI.EndChild();
                 }
+
+                ImGuiAPI.PopID();
             }
             else
             {
