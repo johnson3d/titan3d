@@ -134,6 +134,10 @@ namespace EngineNS
         {
             return *(uint*)&v;
         }
+        public static void CheckResult(bool condition)
+        {
+            System.Diagnostics.Debug.Assert(condition);
+        }
     }
     public unsafe partial struct BigStackBuffer : IDisposable
     {

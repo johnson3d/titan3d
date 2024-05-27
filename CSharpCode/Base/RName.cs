@@ -196,20 +196,28 @@ namespace EngineNS
         public ERNameType RNameType
         {
             get { return mRNameType; }
-            set
-            {
-                mRNameType = value;
-                ChangeAddressWithRNameType();
-            }
+            //private set
+            //{
+            //    mRNameType = value;
+            //    ChangeAddressWithRNameType();
+            //}
         }
         public string Name
         {
             get => mName;
-            set
-            {
-                mName = value.ToLower();
-                ChangeAddressWithRNameType();
-            }
+            //private set
+            //{
+            //    mName = value.ToLower();
+            //    ChangeAddressWithRNameType();
+            //}
+        }
+
+        public void UnsafeUpdate(string name, ERNameType type)
+        {
+            RNameManager.Instance.UnsafeUpdateRName(this, name, type);
+            mRNameType = type;
+            mName = name.ToLower();
+            ChangeAddressWithRNameType();
         }
         public string Address
         {
@@ -335,6 +343,24 @@ namespace EngineNS
                         return result;
                     }
                     return result;
+                }
+            }
+            public void UnsafeUpdateRName(RName rn, string name, ERNameType type)
+            {
+                lock (this)
+                {
+                    var dict = mNameSets[(int)rn.RNameType];
+                    if (dict.TryGetValue(rn.Name, out var result))
+                    {
+                        System.Diagnostics.Debug.Assert(result == rn);
+                    }
+                    else
+                    {
+                        System.Diagnostics.Debug.Assert(false);
+                    }
+                    dict.Remove(rn.Name);
+                    dict = mNameSets[(int)type];
+                    dict.Add(name, rn);
                 }
             }
         }

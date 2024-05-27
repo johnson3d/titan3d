@@ -62,5 +62,23 @@ namespace EngineNS.IO
         {
             return true;
         }
+        internal IStreaming UnsafeRemove(RName name)
+        {
+            lock (StreamingAssets)
+            {
+                if (StreamingAssets.TryGetValue(name, out var result))
+                {
+                    return result;
+                }
+                return null;
+            }
+        }
+        internal void UnsafeAdd(RName name, IStreaming obj)
+        {
+            lock (StreamingAssets)
+            {
+                StreamingAssets.Add(name, obj);
+            }
+        }
     }
 }

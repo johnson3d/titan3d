@@ -19,6 +19,14 @@ namespace EngineNS.Graphics.Mesh
         {
             return await UEngine.Instance.GfxDevice.MeshPrimitiveManager.GetMeshPrimitive(GetAssetName());
         }
+        public override void OnBeforeRenamedAsset(IO.IAsset asset, RName name)
+        {
+            CoreSDK.CheckResult(UEngine.Instance.GfxDevice.MeshPrimitiveManager.UnsafeRemove(name) == asset);
+        }
+        public override void OnAfterRenamedAsset(IO.IAsset asset, RName name)
+        {
+            UEngine.Instance.GfxDevice.MeshPrimitiveManager.UnsafeAdd(name, (UMeshPrimitives)asset);
+        }
         public override bool CanRefAssetType(IO.IAssetMeta ameta)
         {
             return false;
@@ -293,6 +301,24 @@ namespace EngineNS.Graphics.Mesh
             if (Meshes.TryGetValue(name, out result))
                 return result;
             return null;
+        }
+        internal UMeshPrimitives UnsafeRemove(RName name)
+        {
+            lock (Meshes)
+            {
+                if (Meshes.TryGetValue(name, out var result))
+                {
+                    return result;
+                }
+                return null;
+            }
+        }
+        internal void UnsafeAdd(RName name, UMeshPrimitives obj)
+        {
+            lock (Meshes)
+            {
+                Meshes.Add(name, obj);
+            }
         }
         //public async System.Threading.Tasks.Task<UMeshPrimitives> GetMeshPrimitive(RName name)
         public async Thread.Async.TtTask<UMeshPrimitives> GetMeshPrimitive(RName name)

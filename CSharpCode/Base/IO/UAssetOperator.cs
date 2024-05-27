@@ -67,8 +67,7 @@ namespace EngineNS.IO
                 UEngine.Instance.AssetMetaManager.RemoveAMeta(ameta);
                 var nameSets = RName.RNameManager.Instance.mNameSets[(int)i.Source.RNameType];
                 nameSets.Remove(i.Source.Name);
-                i.Source.Name = i.TargetPath;
-                i.Source.RNameType = i.TargetType;
+                i.Source.UnsafeUpdate(i.TargetPath, i.TargetType);
                 var tarNameSets = RName.RNameManager.Instance.mNameSets[(int)i.Source.RNameType];
                 tarNameSets.Add(i.Source.Name, i.Source);
                 var tar = i.Source.Address;

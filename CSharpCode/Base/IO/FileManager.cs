@@ -168,7 +168,17 @@ namespace EngineNS.IO
         }
         public static void CopyFile(string src, string tar)
         {
-            System.IO.File.Copy(src, tar);
+            if (System.IO.File.Exists(src))
+            {
+                System.IO.File.Copy(src, tar);
+            }
+        }
+        public static void MoveFile(string src, string tar)
+        {
+            if (System.IO.File.Exists(src))
+            {
+                System.IO.File.Move(src, tar);
+            }   
         }
         public static string GetRelativePath(string absoluteSourcePath, string absoluteTargetPath)
         {

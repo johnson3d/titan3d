@@ -8,6 +8,7 @@ using Microsoft.Toolkit.HighPerformance;
 using NPOI.OpenXmlFormats.Vml;
 using NPOI.SS.Formula.Functions;
 using NPOI.Util;
+using Org.BouncyCastle.Cms;
 using Org.BouncyCastle.Crypto.IO;
 using SixLabors.ImageSharp.ColorSpaces;
 using SixLabors.ImageSharp.PixelFormats;
@@ -39,6 +40,16 @@ namespace EngineNS.NxRHI
         public override async System.Threading.Tasks.Task<IO.IAsset> LoadAsset()
         {
             return await UEngine.Instance.GfxDevice.TextureManager.GetTexture(GetAssetName());
+        }
+        public override void OnBeforeRenamedAsset(IAsset asset, RName name)
+        {
+            ((USrView)asset).LoadOriginImageObject();
+            CoreSDK.CheckResult(UEngine.Instance.GfxDevice.TextureManager.UnsafeRemove(name) == asset);
+        }
+        public override void OnAfterRenamedAsset(IAsset asset, RName name)
+        {
+            ((USrView)asset).FreeOriginImageObject();
+            UEngine.Instance.GfxDevice.TextureManager.UnsafeAdd(name, (USrView)asset);
         }
         Thread.Async.TtTask<USrView>? SnapTask;
         Thread.Async.TtTask<EngineNS.Graphics.Pipeline.Shader.UEffect>? EffectTask;
@@ -210,6 +221,9 @@ namespace EngineNS.NxRHI
             bool mIsNormal;
             public bool IsNormal { get => mIsNormal; set => mIsNormal=value; }
             public List<Vector3i> MipSizes { get; } = new List<Vector3i>();
+            public int BlockWidth = 0;
+            public int BlockHeight = 0;
+            public int BlockSize = 0;
         }
         public EPixelFormat SrvFormat
         {
@@ -585,6 +599,12 @@ namespace EngineNS.NxRHI
                             mDesc.IsNormal = normalChecker.DoesTextureLookLikelyToBeANormalMap(image);
                         }
 
+                        if(mDesc.MipLevel==0)
+                        {
+                            if (mDesc.Height < 64 && mDesc.Width < 64)
+                                mDesc.MipLevel = 1;
+                        }
+
                         USrView.SaveTexture(rn, xnd.RootNode.mCoreObject, image, mDesc);
                     }
 
@@ -661,7 +681,7 @@ namespace EngineNS.NxRHI
                 ameta.SaveAMeta();
 
                 UEngine.Instance.AssetMetaManager.RegAsset(ameta);
-
+                UEngine.Instance.SourceControlModule.AddFile(rn.Address);
                 return true;
             }
 
@@ -682,7 +702,7 @@ namespace EngineNS.NxRHI
                 ameta.SaveAMeta();
 
                 UEngine.Instance.AssetMetaManager.RegAsset(ameta);
-
+                UEngine.Instance.SourceControlModule.AddFile(rn.Address);
                 return true;
             }
 
@@ -733,8 +753,58 @@ namespace EngineNS.NxRHI
         {
             ameta.RefAssetRNames.Clear();
         }
+        object mOriginImageObject = null;
+        internal void LoadOriginImageObject()
+        {
+            var imgType = GetOriginImageType(this.AssetName);
+            switch (imgType)
+            {
+                case EngienNS.Bricks.ImageDecoder.UImageType.PNG:
+                    {
+                        mOriginImageObject = LoadOriginPng(this.AssetName);
+                    }
+                    break;
+                case EngienNS.Bricks.ImageDecoder.UImageType.HDR:
+                    {
+                        StbImageSharp.ImageResultFloat imageFloat = new StbImageSharp.ImageResultFloat();
+                        LoadOriginHdr(AssetName, ref imageFloat);
+                        mOriginImageObject = imageFloat;
+                    }
+                    break;
+                case EngienNS.Bricks.ImageDecoder.UImageType.EXR:
+                    {
+                        System.IO.Stream outStream = null;
+                        mOriginImageObject = LoadOriginExr(AssetName, ref outStream);
+                    }
+                    break;
+                default:
+                    mOriginImageObject = null;
+                    break;
+            }
+        }
+        internal void FreeOriginImageObject()
+        {
+            mOriginImageObject = null;
+        }
         public void SaveAssetTo(RName name)
         {
+            if (mOriginImageObject != null)
+            {
+                if (mOriginImageObject.GetType() == typeof(ImageResult))
+                {
+                    ImportAttribute.SaveSrv(mOriginImageObject as ImageResult, name, this.PicDesc);
+                }
+                else if (mOriginImageObject.GetType() == typeof(ImageResultFloat))
+                {
+                    ImportAttribute.SaveSrv(mOriginImageObject as ImageResultFloat, name, this.PicDesc);
+                }
+                else if (mOriginImageObject.GetType() == typeof(EXRFile))
+                {
+                    ImportAttribute.SaveSrv(mOriginImageObject as EXRFile, name, this.PicDesc);
+                }
+                return;
+            }
+
             var imgType = GetOriginImageType(this.AssetName);
             switch (imgType)
             {
@@ -1141,6 +1211,13 @@ namespace EngineNS.NxRHI
                         ar.Write(desc.MipSizes[i]);
                     }
                 }
+                attr = node.GetOrAddAttribute("Desc2", 0, 0);
+                using (var ar = attr.GetWriter((ulong)sizeof(Vector3i)))
+                {
+                    ar.Write(desc.BlockWidth);
+                    ar.Write(desc.BlockHeight);
+                    ar.Write(desc.BlockSize);
+                }
             }
         }
         
@@ -1279,6 +1356,13 @@ namespace EngineNS.NxRHI
                     {
                         ar.Write(desc.MipSizes[i]);
                     }
+                }
+                attr = node.GetOrAddAttribute("Desc2", 0, 0);
+                using (var ar = attr.GetWriter((ulong)sizeof(Vector3i)))
+                {
+                    ar.Write(desc.BlockWidth);
+                    ar.Write(desc.BlockHeight);
+                    ar.Write(desc.BlockSize);
                 }
             }
         }
@@ -1494,6 +1578,13 @@ namespace EngineNS.NxRHI
                     {
                         ar.Write(desc.MipSizes[i]);
                     }
+                }
+                attr = node.GetOrAddAttribute("Desc2", 0, 0);
+                using (var ar = attr.GetWriter((ulong)sizeof(Vector3i)))
+                {
+                    ar.Write(desc.BlockWidth);
+                    ar.Write(desc.BlockHeight);
+                    ar.Write(desc.BlockSize);
                 }
             }
         }
@@ -1800,7 +1891,8 @@ namespace EngineNS.NxRHI
 
 
             desc.CubeFaces = 1;
-            desc.MipLevel = CalcMipLevel(curImage.Width, curImage.Height, true) - 3;
+            if(desc.MipLevel == 0)
+                desc.MipLevel = CalcMipLevel(curImage.Width, curImage.Height, true) - 3;
             EPixelFormat descPixelFormat = EPixelFormat.PXF_UNKNOWN;
             switch (desc.CompressFormat)
             {
@@ -1836,11 +1928,9 @@ namespace EngineNS.NxRHI
                     var inputMemory = colorData.AsMemory().AsMemory2D(curImage.Height, curImage.Width);
                     var pixelsBcn = encoder.EncodeToRawBytesHdr(inputMemory, (int)j, out mipSize.X, out mipSize.Y);
 
-                    int blockWidth = 0;
-                    int blockHeight = 0;
-                    encoder.GetBlockCount(mipSize.X, mipSize.Y, out blockWidth, out blockHeight);
-                    var blockSize = encoder.GetBlockSize();
-                    mipSize.Z = blockWidth * blockSize;
+                    encoder.GetBlockCount(mipSize.X, mipSize.Y, out desc.BlockWidth, out desc.BlockHeight);
+                    desc.BlockSize = encoder.GetBlockSize();
+                    mipSize.Z = desc.BlockWidth * desc.BlockSize;
                     desc.MipSizes.Add(mipSize);
 
                     var attr = faceNode.GetOrAddAttribute($"DxtMip{j}", 0, 0);
@@ -1867,7 +1957,8 @@ namespace EngineNS.NxRHI
             BcEncoder encoder = new BcEncoder();
             bool IsKtx = false;
             desc.CubeFaces = 1;
-            desc.MipLevel = CalcMipLevel(curImage.Width, curImage.Height, true)-3;
+            if (desc.MipLevel == 0)
+                desc.MipLevel = CalcMipLevel(curImage.Width, curImage.Height, true)-3;
             EPixelFormat descPixelFormat = EPixelFormat.PXF_UNKNOWN;
             switch (desc.CompressFormat)
             {
@@ -1970,12 +2061,11 @@ namespace EngineNS.NxRHI
                 {
                     var mipSize = new Vector3i();
                     var pixelsBcn = encoder.EncodeToRawBytes(curImage.Data.AsSpan(), curImage.Width, curImage.Height, pixelFormat, (int)j, out mipSize.X, out mipSize.Y);
-                    int blockWidth = 0;
-                    int blockHeight = 0;
-                    encoder.GetBlockCount(mipSize.X, mipSize.Y, out blockWidth, out blockHeight);
-                    var blockSize = encoder.GetBlockSize();
-                    mipSize.Z = blockWidth * blockSize;
+                    encoder.GetBlockCount(mipSize.X, mipSize.Y, out desc.BlockWidth, out desc.BlockHeight);
+                    desc.BlockSize = encoder.GetBlockSize();
+                    mipSize.Z = desc.BlockWidth * desc.BlockSize;
                     desc.MipSizes.Add(mipSize);
+
 
                     if (IsKtx)
                     {
@@ -2024,6 +2114,7 @@ namespace EngineNS.NxRHI
                     return 0;
             }
         }
+        /* 
         public static unsafe StbImageSharp.ImageResult[] LoadImageLevels(RName name, uint mipLevel, ref UPicDesc desc)
         {
             using (var xnd = IO.TtXndHolder.LoadXnd(name.Address))
@@ -2073,6 +2164,7 @@ namespace EngineNS.NxRHI
                 return null;
             }
         }
+        */
         public static unsafe Support.UBlobObject[] LoadPixelMipLevels(RName name, uint mipLevel, UPicDesc desc)
         {
             using (var xnd = IO.TtXndHolder.LoadXnd(name.Address))
@@ -2199,6 +2291,13 @@ namespace EngineNS.NxRHI
                     }
                     desc.MipSizes.Add(tmp);
                 }
+            }
+            attr = node.TryGetAttribute("Desc2");
+            using (var ar = attr.GetReader(null))
+            {
+                ar.Read(out desc.BlockWidth);
+                ar.Read(out desc.BlockHeight);
+                ar.Read(out desc.BlockSize);
             }
         }
         public static unsafe UPicDesc LoadPictureDesc(IO.TtXndNode node)
@@ -2659,10 +2758,17 @@ namespace EngineNS.NxRHI
                         }
 
                         handles[i] = System.Runtime.InteropServices.GCHandle.Alloc(data, System.Runtime.InteropServices.GCHandleType.Pinned);
-                        //pInitData[i].SetDefault();
                         pInitData[i].m_pData = System.Runtime.InteropServices.Marshal.UnsafeAddrOfPinnedArrayElement(data, 0).ToPointer();
-                        pInitData[i].m_RowPitch = (uint)desc.MipSizes[(int)realLevel].Z;
-                        pInitData[i].m_DepthPitch = pInitData[i].m_RowPitch * (uint)desc.MipSizes[(int)realLevel].Y;
+                        if(desc.BlockSize==0)
+                        {
+                            pInitData[i].m_RowPitch = (uint)desc.MipSizes[(int)realLevel].Z;
+                            pInitData[i].m_DepthPitch = pInitData[i].m_RowPitch * (uint)desc.MipSizes[(int)realLevel].Y;
+                        }
+                        else
+                        {
+                            pInitData[i].m_RowPitch = (uint)(desc.BlockWidth * desc.BlockSize);
+                            pInitData[i].m_DepthPitch = pInitData[i].m_RowPitch * (uint)desc.BlockHeight;
+                        }
                     }
                 }
                 var texDesc = new FTextureDesc();
@@ -3008,16 +3114,19 @@ namespace EngineNS.NxRHI
         {
             if (rn == null)
                 return null;
-            USrView srv;
-            IO.IStreaming result;
-            if (StreamingAssets.TryGetValue(rn, out result))
+            lock (StreamingAssets)
             {
-                srv = result as USrView;
-                if (srv == null)
-                    return null;
-                return srv;
+                USrView srv;
+                IO.IStreaming result;
+                if (StreamingAssets.TryGetValue(rn, out result))
+                {
+                    srv = result as USrView;
+                    if (srv == null)
+                        return null;
+                    return srv;
+                }
+                return null;
             }
-            return null;
         }
         public unsafe override bool UpdateTargetLOD(IO.IStreaming asset)
         {

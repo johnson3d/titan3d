@@ -1,9 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Root Type="EngineNS.NxRHI.USrViewAMeta@EngineCore">
-  <AssetId Type="System.Guid@Unknown" Value="88bb693e-9940-444e-b5c9-a1776d0b93da" />
+  <AssetId Type="System.Guid@Unknown" Value="560770de-c559-4718-93cb-bb4e1995176f" />
   <Description Type="System.String@Unknown" Value="This is a EngineNS.NxRHI.USrView&#xA;" />
   <Icon Type="EngineNS.EGui.UUvAnim@EngineCore">
     <Color Type="System.UInt32@Unknown" Value="4294967295" />
+    <Duration Type="System.Single@Unknown" Value="1000" />
     <FrameUVs Type="System.Collections.Generic.List&lt;EngineNS.Vector4@EngineCore,&gt;@Unknown" Count="1">
       <e_0 Value="0,0,1,1" />
     </FrameUVs>

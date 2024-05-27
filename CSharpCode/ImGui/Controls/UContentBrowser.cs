@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 
 namespace EngineNS.EGui.Controls
 {
-    public class UContentBrowser : IRootForm, EGui.IPanel
+    public partial class UContentBrowser : IRootForm, EGui.IPanel
     {
         bool mVisible = true;
         public bool Visible { get => mVisible; set => mVisible = value; }
@@ -870,10 +870,15 @@ namespace EngineNS.EGui.Controls
         IO.IAssetCreateAttribute mAssetImporter;
         public string CurrentImporterFile;
         public bool DrawInWindow = true;
+
+        internal System.Threading.Tasks.Task AssetOpTask = null;
         public unsafe void OnDraw()
         {
             if (Visible == false)
                 return;
+
+            if (AssetOpTask != null && AssetOpTask.IsCompleted)
+                AssetOpTask = null;
 
             //            ImGuiAPI.SetNextWindowDockID(DockId, DockCond);
             var name = Name;

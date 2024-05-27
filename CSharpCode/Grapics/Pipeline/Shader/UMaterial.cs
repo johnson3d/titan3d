@@ -19,6 +19,14 @@ namespace EngineNS.Graphics.Pipeline.Shader
         {
             return await UEngine.Instance.GfxDevice.MaterialManager.GetMaterial(GetAssetName());
         }
+        public override void OnBeforeRenamedAsset(IO.IAsset asset, RName name)
+        {
+            CoreSDK.CheckResult(UEngine.Instance.GfxDevice.MaterialManager.UnsafeRemove(name) == asset);
+        }
+        public override void OnAfterRenamedAsset(IO.IAsset asset, RName name)
+        {
+            UEngine.Instance.GfxDevice.MaterialManager.UnsafeAdd(name, (UMaterial)asset);
+        }
         public override void DeleteAsset(string name, RName.ERNameType type)
         {
             var address = RName.GetAddress(type, name);
@@ -258,17 +266,20 @@ namespace EngineNS.Graphics.Pipeline.Shader
             }
 
             var typeStr = Rtti.UTypeDescManager.Instance.GetTypeStringFromType(this.GetType());
-            var xnd = new IO.TtXndHolder(typeStr, 0, 0);
-            using (var attr = xnd.NewAttribute("Material", 0, 0))
+            using (var xnd = new IO.TtXndHolder(typeStr, 0, 0))
             {
-                using (var ar = attr.GetWriter(512))
+                using (var attr = xnd.NewAttribute("Material", 0, 0))
                 {
-                    ar.Write(this);
+                    using (var ar = attr.GetWriter(512))
+                    {
+                        ar.Write(this);
+                    }
+                    xnd.RootNode.AddAttribute(attr);
                 }
-                xnd.RootNode.AddAttribute(attr);
-            }
 
-            xnd.SaveXnd(name.Address);
+                xnd.SaveXnd(name.Address);
+            }
+            
             UEngine.Instance.SourceControlModule.AddFile(name.Address);
         }
         public static bool ReloadXnd(UMaterial material, UMaterialManager manager, IO.TtXndNode node)
@@ -1245,6 +1256,24 @@ namespace EngineNS.Graphics.Pipeline.Shader
             }
 
             return ok;
+        }
+        internal UMaterial UnsafeRemove(RName name)
+        {
+            lock (Materials)
+            {
+                if (Materials.TryGetValue(name, out var result))
+                {
+                    return result;
+                }
+                return null;
+            }
+        }
+        internal void UnsafeAdd(RName name, UMaterial obj)
+        {
+            lock (Materials)
+            {
+                Materials.Add(name, obj);
+            }
         }
         public async Thread.Async.TtTask<UMaterial> GetMaterial(RName rn)
         {

@@ -25,6 +25,14 @@ namespace EngineNS.Graphics.Mesh
         {
             return await UEngine.Instance.GfxDevice.MaterialMeshManager.GetMaterialMesh(GetAssetName());
         }
+        public override void OnBeforeRenamedAsset(IO.IAsset asset, RName name)
+        {
+            CoreSDK.CheckResult(UEngine.Instance.GfxDevice.MaterialMeshManager.UnsafeRemove(name) == asset);
+        }
+        public override void OnAfterRenamedAsset(IO.IAsset asset, RName name)
+        {
+            UEngine.Instance.GfxDevice.MaterialMeshManager.UnsafeAdd(name, (UMaterialMesh)asset);
+        }
         public override bool CanRefAssetType(IO.IAssetMeta ameta)
         {
             //必须是TextureAsset
@@ -146,6 +154,12 @@ namespace EngineNS.Graphics.Mesh
 
         public class ImportAttribute : IO.CommonCreateAttribute
         {
+            public override async Thread.Async.TtTask DoCreate(RName dir, Rtti.UTypeDesc type, string ext)
+            {
+                await base.DoCreate(dir, type, ext);
+                var mesh = mAsset as UMaterialMesh;
+                mesh.SubMeshes[0].MeshName = RName.GetRName("mesh/base/box.vms", RName.ERNameType.Engine);
+            }
         }
         #region IAsset
         public IO.IAssetMeta CreateAMeta()
@@ -168,6 +182,8 @@ namespace EngineNS.Graphics.Mesh
                 {
                     foreach (var j in i.Materials)
                     {
+                        if (j == null)
+                            continue;
                         ameta.RefAssetRNames.Add(j.AssetName);
                     }
                 }
@@ -182,18 +198,20 @@ namespace EngineNS.Graphics.Mesh
                 ameta.SaveAMeta();
             }
             var typeStr = Rtti.UTypeDescManager.Instance.GetTypeStringFromType(this.GetType());
-            var xnd = new IO.TtXndHolder(typeStr, 0, 0);
-            using (var attr = xnd.NewAttribute("MaterialMesh", 0, 0))
+            using (var xnd = new IO.TtXndHolder(typeStr, 0, 0))
             {
-                using (var ar = attr.GetWriter(512))
+                using (var attr = xnd.NewAttribute("MaterialMesh", 0, 0))
                 {
-                    ar.Write(this);
+                    using (var ar = attr.GetWriter(512))
+                    {
+                        ar.Write(this);
+                    }
+                    xnd.RootNode.AddAttribute(attr);
                 }
-                xnd.RootNode.AddAttribute(attr);
-            }
 
-            xnd.SaveXnd(name.Address);
-            this.SerialId++;
+                xnd.SaveXnd(name.Address);
+                this.SerialId++;
+            }
             UEngine.Instance.SourceControlModule.AddFile(name.Address);
         }
         [Rtti.Meta]
@@ -645,6 +663,24 @@ namespace EngineNS.Graphics.Mesh
             if (Meshes.TryGetValue(name, out result))
                 return result;
             return null;
+        }
+        internal UMaterialMesh UnsafeRemove(RName name)
+        {
+            lock (Meshes)
+            {
+                if (Meshes.TryGetValue(name, out var result))
+                {
+                    return result;
+                }
+                return null;
+            }
+        }
+        internal void UnsafeAdd(RName name, UMaterialMesh obj)
+        {
+            lock (Meshes)
+            {
+                Meshes.Add(name, obj);
+            }
         }
         public async Thread.Async.TtTask<UMaterialMesh> GetMaterialMesh(RName name)
         {

@@ -1,4 +1,5 @@
-﻿using EngineNS.Thread;
+﻿using EngineNS.Bricks.CodeBuilder.MacrossNode;
+using EngineNS.Thread;
 using System;
 using System.Collections.Generic;
 using System.Dynamic;
@@ -62,6 +63,8 @@ namespace EngineNS.IO
             PGAssetInitTask = PGAsset.Initialize();
             mAsset = Rtti.UTypeDescManager.CreateInstance(TypeSlt.SelectedType) as IAsset;
             PGAsset.Target = mAsset;
+
+
         }
         public override unsafe bool OnDraw(EGui.Controls.UContentBrowser ContentBrowser)
         {
@@ -237,15 +240,77 @@ namespace EngineNS.IO
             await Thread.TtAsyncDummyClass.DummyFunc();
             return null;
         }
+        public virtual void OnBeforeRenamedAsset(IAsset asset, RName name)
+        {
+            //Manager.RemapAsset
+        }
+        public virtual void OnAfterRenamedAsset(IAsset asset, RName name)
+        {
+            //Manager.RemapAsset
+        }
         public virtual void DeleteAsset(string name, RName.ERNameType type)
         {
             var address = RName.GetAddress(type, name);
             IO.TtFileManager.DeleteFile(address);
             IO.TtFileManager.DeleteFile(address + MetaExt);
-            if (IO.TtFileManager.FileExists(address + ".snap"))
+            IO.TtFileManager.DeleteFile(address + ".snap");
+        }
+        public virtual async System.Threading.Tasks.Task MoveTo(string name, RName.ERNameType type)
+        {
+            if (mAssetName.Name == name && mAssetName.RNameType == type)
+                return;
+            IAsset asset = await LoadAsset();
+            List<EngineNS.IO.IAssetMeta> holders = new List<EngineNS.IO.IAssetMeta>();
+            UEngine.Instance.AssetMetaManager.GetAssetHolder(this, holders);
+            List<EngineNS.IO.IAsset> holdAssets = new List<EngineNS.IO.IAsset>();
+            foreach (var i in holders)
             {
-                IO.TtFileManager.DeleteFile(address + ".snap");
+                var holdAsset = await i.LoadAsset();
+                if (holdAsset != null)
+                {
+                    holdAssets.Add(holdAsset);
+                }
             }
+
+            var savedName = mAssetName.Name;
+            var savedType = mAssetName.RNameType;
+            OnBeforeRenamedAsset(asset, mAssetName);
+            
+            var tarAddress = RName.GetAddress(type, name);
+            IO.TtFileManager.CopyFile(mAssetName.Address + ".snap", tarAddress + ".snap");
+
+            mAssetName.UnsafeUpdate(name, type);
+            this.SaveAMeta();
+            asset.SaveAssetTo(mAssetName);
+            
+            OnAfterRenamedAsset(asset, mAssetName);
+
+            foreach (var i in holdAssets)
+            {
+                i.SaveAssetTo(i.GetAMeta().GetAssetName());
+            }
+
+            DeleteAsset(savedName, savedType);
+        }
+        public virtual async System.Threading.Tasks.Task CopyTo(string name, RName.ERNameType type)
+        {
+            if (mAssetName.Name == name && mAssetName.RNameType == type)
+                return;
+            IAsset asset = await LoadAsset();
+            if (asset == null)
+                return;
+            var tarName = RName.GetRName(name, type);
+            var ameta = UEngine.Instance.AssetMetaManager.NewAMeta(tarName, asset.GetAMeta().GetType());
+            ameta.TypeStr = Rtti.UTypeDescManager.Instance.GetTypeStringFromType(asset.GetType());
+            foreach (var i in this.RefAssetRNames)
+            {
+                ameta.RefAssetRNames.Add(i);
+            }
+
+            ameta.SaveAMeta();
+            asset.SaveAssetTo(tarName);
+
+            IO.TtFileManager.MoveFile(mAssetName.Address + ".snap", tarName.Address + ".snap");
         }
         public virtual void ResetSnapshot()
         {
@@ -267,9 +332,14 @@ namespace EngineNS.IO
             if (mAssetName != null)
             {
                 var fileName = mAssetName.Address + MetaExt;
-                IO.TtFileManager.SaveObjectToXml(fileName, this);
-                UEngine.Instance.SourceControlModule.AddFile(fileName);
+                SaveAMeta(fileName);
             }
+        }
+
+        public void SaveAMeta(string fileName)
+        {
+            IO.TtFileManager.SaveObjectToXml(fileName, this);
+            UEngine.Instance.SourceControlModule.AddFile(fileName);
         }
         public virtual bool CanRefAssetType(IAssetMeta ameta)
         {
@@ -390,6 +460,48 @@ namespace EngineNS.IO
 
                 }
                 ContentBrowser.CreateNewAssets = createNewAssetValueStore;
+            }
+            if (EGui.UIProxy.MenuItemProxy.MenuItem("MoveTo", null, false, null, in drawList, in menuData, ref mDeleteMenuState))
+            {
+                try
+                {
+                    if (ContentBrowser.AssetOpTask == null || ContentBrowser.AssetOpTask.IsCompleted)
+                    {
+                        var name = mAssetName.Name.Substring(0, mAssetName.Name.Length - mAssetName.ExtName.Length);
+                        name += "_1";
+                        name += mAssetName.ExtName;
+                        ContentBrowser.AssetOpTask = MoveTo(name, mAssetName.RNameType);
+                    }
+                    else
+                    {
+                        Profiler.Log.WriteLine(Profiler.ELogTag.Info, "Asset", "Please wait for Action(MoveTo)");
+                    }
+                }
+                catch
+                {
+
+                }
+            }
+            if (EGui.UIProxy.MenuItemProxy.MenuItem("CopyTo", null, false, null, in drawList, in menuData, ref mDeleteMenuState))
+            {
+                try
+                {
+                    if (ContentBrowser.AssetOpTask == null || ContentBrowser.AssetOpTask.IsCompleted)
+                    {
+                        var name = mAssetName.Name.Substring(0, mAssetName.Name.Length - mAssetName.ExtName.Length);
+                        name += "_1";
+                        name += mAssetName.ExtName;
+                        ContentBrowser.AssetOpTask = CopyTo(name, mAssetName.RNameType);
+                    }
+                    else
+                    {
+                        Profiler.Log.WriteLine(Profiler.ELogTag.Info, "Asset", "Please wait for Action(CopyTo)");
+                    }
+                }
+                catch
+                {
+
+                }
             }
 
             if (OnDrawContextMenu(ref drawList))
@@ -610,6 +722,22 @@ namespace EngineNS.IO
             RNameAssets.Add(ameta.GetAssetName(), ameta);
 
             return asset;
+        }
+        public IAssetMeta NewAMeta(RName name, System.Type metaType)
+        {
+            IAssetMeta ameta;
+            if (RNameAssets.TryGetValue(name, out ameta))
+            {
+                return null;
+            }
+            ameta = Rtti.UTypeDescManager.CreateInstance(metaType) as IAssetMeta;
+            ameta.SetAssetName(name);
+            ameta.AssetId = Guid.NewGuid();
+            //ameta.TypeStr = Rtti.UTypeDescManager.Instance.GetTypeStringFromType(type);
+            ameta.SaveAMeta();
+            Assets.Add(ameta.AssetId, ameta);
+            RNameAssets.Add(ameta.GetAssetName(), ameta);
+            return ameta;
         }
         public IAssetCreateAttribute ImportAsset(RName dir, Rtti.UTypeDesc type, string ext)
         {
