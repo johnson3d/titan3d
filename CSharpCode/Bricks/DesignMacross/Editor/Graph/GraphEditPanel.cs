@@ -1,18 +1,7 @@
-﻿using EngineNS.Bricks.CodeBuilder;
-using EngineNS.Bricks.NodeGraph;
-using EngineNS.DesignMacross.Base.Description;
+﻿using EngineNS.DesignMacross.Base.Description;
 using EngineNS.DesignMacross.Editor.GraphPanel;
 using EngineNS.DesignMacross.Base.Graph;
-using EngineNS.DesignMacross.Base.Outline;
-using EngineNS.DesignMacross.Base.Render;
 using EngineNS.Rtti;
-using Microsoft.CodeAnalysis.Differencing;
-using SixLabors.Fonts;
-using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Reflection;
-using System.Text;
 
 namespace EngineNS.DesignMacross.Editor
 {
@@ -90,6 +79,7 @@ namespace EngineNS.DesignMacross.Editor
                         graphContext.EditorInteroperation = context.EditorInteroperation;
                         graphContext.GraphElementStyleManager = context.GraphElementStyleManager;
                         graphContext.DescriptionsElement = context.DescriptionsElement;
+                        graphContext.DesignedClassDescription = context.DesignedClassDescription;
                         var render = new TtNavigableGraphsPanelRender();
                         render.Draw(ui.Value, context);
                         ImGuiAPI.EndTabItem();

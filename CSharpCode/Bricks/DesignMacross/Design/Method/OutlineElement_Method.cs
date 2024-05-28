@@ -2,11 +2,8 @@
 using EngineNS.DesignMacross.Base.Outline;
 using EngineNS.DesignMacross.Base.Render;
 using EngineNS.Rtti;
-using System;
-using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Diagnostics;
-using System.Text;
 
 namespace EngineNS.DesignMacross.Design
 {

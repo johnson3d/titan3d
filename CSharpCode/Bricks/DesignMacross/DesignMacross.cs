@@ -1,14 +1,9 @@
-﻿using EngineNS.Bricks.CodeBuilder.MacrossNode;
-using EngineNS.Bricks.CodeBuilder;
+﻿using EngineNS.Bricks.CodeBuilder;
 using EngineNS.IO;
-using System;
-using System.Collections.Generic;
-using System.Text;
 using EngineNS.EGui.Controls;
 using EngineNS.Rtti;
 using EngineNS.DesignMacross.Editor;
 using EngineNS.DesignMacross.Design;
-using EngineNS.DesignMacross.Base.Description;
 using System.Text.RegularExpressions;
 
 namespace EngineNS.DesignMacross
@@ -112,6 +107,8 @@ namespace EngineNS.DesignMacross
     {
         public const string AssetExt = ".designmacross";
         public const string MacrossEditorKeyword = "DesignMacross";
+        public const string MacrossScriptEditorKeyword = "DesignMacross_Script";
+        public const string MacrossAnimEditorKeyword = "DesignMacross_Anim";
         public class DesignMacrossCreateAttribute : IO.CommonCreateAttribute
         {
             UTypeDesc mSelectedType = null;

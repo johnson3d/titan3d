@@ -1,10 +1,4 @@
 ﻿using EngineNS.Bricks.CodeBuilder;
-using EngineNS.DesignMacross.Base.Description;
-using EngineNS.DesignMacross.Design;
-using System;
-using System.Collections.Generic;
-using System.Text;
-using System.Xml.Linq;
 
 namespace EngineNS.DesignMacross.Base.Description
 {
@@ -99,10 +93,10 @@ namespace EngineNS.DesignMacross.Base.Description
         {
             var desc = description as Design.TtMethodDescription;
             declaration.VisitMode = desc.VisitMode;
-            declaration.ReturnValue = desc.ReturnValue;
+            //declaration.ReturnValue = desc.ReturnValue;
             declaration.MethodName = desc.MethodName;
-            declaration.Arguments = desc.Arguments;
-            declaration.LocalVariables = desc.LocalVariables;
+            //declaration.Arguments = desc.Arguments;
+            //declaration.LocalVariables = desc.LocalVariables;
             declaration.Comment = desc.Comment;
             declaration.IsOverride = desc.IsOverride;
             declaration.IsAsync = desc.IsAsync;

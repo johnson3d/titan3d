@@ -3,15 +3,7 @@ using EngineNS.DesignMacross.Editor;
 using EngineNS.DesignMacross.Base.Outline;
 using EngineNS.DesignMacross.Base.Render;
 using EngineNS.Rtti;
-using System;
-using System.Collections.Generic;
 using System.Collections.Immutable;
-using System.Collections.ObjectModel;
-using System.Collections.Specialized;
-using System.Reflection;
-using System.Text;
-using System.Collections;
-using System.Diagnostics;
 
 namespace EngineNS.DesignMacross.Design
 {

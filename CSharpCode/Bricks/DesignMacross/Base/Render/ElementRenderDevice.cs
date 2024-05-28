@@ -1,12 +1,7 @@
 ﻿using EngineNS.DesignMacross.Base.Graph;
 using EngineNS.DesignMacross.Base.Outline;
 using EngineNS.Rtti;
-using NPOI.SS.Formula.Functions;
-using SixLabors.Fonts;
-using System;
-using System.Collections.Generic;
 using System.Reflection;
-using System.Text;
 
 namespace EngineNS.DesignMacross.Base.Render
 {
@@ -24,6 +19,7 @@ namespace EngineNS.DesignMacross.Base.Render
         }
         public static IGraphElementRender CreateGraphElementRender(IGraphElement graphElement)
         {
+            System.Diagnostics.Debug.Assert(graphElement != null);
             if(GraphElementRenders.ContainsKey(graphElement.GetType()))
             {
                 return GraphElementRenders[graphElement.GetType()];
@@ -36,6 +32,7 @@ namespace EngineNS.DesignMacross.Base.Render
         }
         public static IGraphRender CreateGraphRender(IGraph graph)
         {
+            System.Diagnostics.Debug.Assert(graph != null);
             if(GraphRenders.ContainsKey(graph.GetType()))
             { 
                 return GraphRenders[graph.GetType()];
@@ -48,6 +45,7 @@ namespace EngineNS.DesignMacross.Base.Render
         }
         public static IOutlineElementRender CreateOutlineElementRender(IOutlineElement outlineElement)
         {
+            System.Diagnostics.Debug.Assert(outlineElement != null);
             if(OutlineElementRenders.ContainsKey(outlineElement.GetType()))
             {
                 return OutlineElementRenders[outlineElement.GetType()];
@@ -67,6 +65,7 @@ namespace EngineNS.DesignMacross.Base.Render
         //}
         public static IOutlineRender CreateOutlineRender(IOutline outline)
         {
+            System.Diagnostics.Debug.Assert(outline != null);
             if(OutlineRenders.ContainsKey(outline.GetType()))
             {
                 return OutlineRenders[outline.GetType()];
@@ -97,6 +96,7 @@ namespace EngineNS.DesignMacross.Base.Render
     {
         public IElementRender<U> CreateRender<U>(IRenderableElement element) where U : struct
         {
+            System.Diagnostics.Debug.Assert(element != null);
             if (element.GetType().GetCustomAttribute(typeof(ImGuiElementRenderAttribute)) is ImGuiElementRenderAttribute attr)
             {
                 if (attr.RenderType.IsAssignableTo(typeof(IElementRender<U>)))

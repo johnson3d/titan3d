@@ -1,14 +1,8 @@
-﻿using EngineNS.Bricks.CodeBuilder;
-using EngineNS.DesignMacross.Base.Description;
-using EngineNS.DesignMacross.Base.Graph;
-using EngineNS.DesignMacross.Base.Outline;
+﻿using EngineNS.DesignMacross.Base.Description;
 using EngineNS.Rtti;
-using System;
 using System.Collections;
-using System.Collections.Generic;
 using System.Diagnostics;
 using System.Reflection;
-using System.Text;
 
 namespace EngineNS.DesignMacross.Base.Outline
 {

@@ -1,14 +1,8 @@
 ﻿using EngineNS.DesignMacross.Base.Description;
 using EngineNS.DesignMacross.Base.Render;
-using EngineNS.Rtti;
-using System;
 using System.Collections;
-using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using System.Diagnostics;
-using System.Linq;
 using System.Reflection;
-using System.Text;
 
 namespace EngineNS.DesignMacross.Base.Outline
 {

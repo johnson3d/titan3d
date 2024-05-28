@@ -26,7 +26,7 @@ namespace EngineNS.Bricks.StateMachine.TimedSM
                 {
                     if (from.WrapMode == ETimedSM_ClockWrapMode.Clamp)
                     {
-                        if (from.StateTime == from.StateTimeDuration)
+                        if (from.StateTime == from.Duration)
                         {
                             return CheckCondition(context);
                         }

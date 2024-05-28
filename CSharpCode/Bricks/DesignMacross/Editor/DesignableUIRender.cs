@@ -1,12 +1,6 @@
-﻿using EngineNS.Bricks.CodeBuilder;
-using EngineNS.Bricks.CodeBuilder.MacrossNode;
-using EngineNS.Bricks.NodeGraph;
-using EngineNS.DesignMacross.Base.Graph;
+﻿using EngineNS.DesignMacross.Base.Graph;
+using EngineNS.DesignMacross.Design;
 using EngineNS.Rtti;
-using NPOI.SS.Formula.Functions;
-using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace EngineNS.DesignMacross.Editor
 {
@@ -100,6 +94,7 @@ namespace EngineNS.DesignMacross.Editor
         public TtEditorInteroperation EditorInteroperation { get; set; } = new TtEditorInteroperation();
         public TtGraphElementStyleCollection GraphElementStyleManager { get; set; } = null;
         public Dictionary<Guid, IGraphElement> DescriptionsElement { get; set; } = null;
+        public TtClassDescription DesignedClassDescription { get; set; } = null;
         public FDesignMacrossEditorRenderingContext()
         {
 

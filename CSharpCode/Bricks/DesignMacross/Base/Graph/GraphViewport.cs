@@ -1,16 +1,4 @@
-﻿using EngineNS.DesignMacross.Base.Description;
-using EngineNS.DesignMacross.Base.Graph;
-using EngineNS.DesignMacross.Base.Outline;
-using EngineNS.DesignMacross.Base.Render;
-using EngineNS.Rtti;
-using NPOI.OpenXml4Net.OPC;
-using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Reflection;
-using System.Text;
-
-namespace EngineNS.DesignMacross.Base.Graph
+﻿namespace EngineNS.DesignMacross.Base.Graph
 {
     public class TtGraphViewport
     {

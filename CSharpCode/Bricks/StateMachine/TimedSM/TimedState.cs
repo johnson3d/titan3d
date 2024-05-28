@@ -30,12 +30,12 @@ namespace EngineNS.Bricks.StateMachine.TimedSM
             mTransitions.Remove(transition);
             return true;
         }
-        protected List<IAttachmentRule<S, T>> mAttachments = new List<IAttachmentRule<S, T>>();
-        public List<IAttachmentRule<S, T>> Attachments
+        protected List<IAttachment<S, T>> mAttachments = new List<IAttachment<S, T>>();
+        public List<IAttachment<S, T>> Attachments
         {
             get => mAttachments;
         }
-        public bool AddAttachment(IAttachmentRule<S, T> attachment)
+        public bool AddAttachment(IAttachment<S, T> attachment)
         {
             if (mAttachments.Contains(attachment))
                 return false;
@@ -43,7 +43,7 @@ namespace EngineNS.Bricks.StateMachine.TimedSM
             return true;
         }
 
-        public bool RemoveAttachment(IAttachmentRule<S, T> attachment)
+        public bool RemoveAttachment(IAttachment<S, T> attachment)
         {
             if (!mAttachments.Contains(attachment))
                 return false;
@@ -57,12 +57,13 @@ namespace EngineNS.Bricks.StateMachine.TimedSM
             set => mClock.WrapMode = value;
         }
         public float StateTime { get => mClock.TimeInSecond; }
-        public float StateTimeDuration { get => mClock.DurationInSecond; set => mClock.DurationInSecond = value; }
+        protected float mDuration = 1.0f;
+        public float Duration { get => mDuration; set { mClock.DurationInSecond = value; mDuration = value; } }
         public float StateMachineTime
         {
             get
             {
-                return (mStateMachine as TtTimedStateMachine<S, T>).Clock.TimeInSecond;
+                return mStateMachine.Time;
             }
         }
         public TtTimedState(string name = "TimedState")
@@ -106,7 +107,7 @@ namespace EngineNS.Bricks.StateMachine.TimedSM
             Update(elapseSecond, context);
             foreach (var attachment in mAttachments)
             {
-                if (attachment.Check())
+                //if (attachment.Check())
                 {
                     attachment.Tick(elapseSecond, context);
                 }

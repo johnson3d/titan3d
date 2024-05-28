@@ -1,13 +1,8 @@
 ﻿using EngineNS.Bricks.CodeBuilder;
-using EngineNS.Bricks.CodeBuilder.MacrossNode;
 using EngineNS.DesignMacross.Base.Description;
-using System;
-using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.Reflection;
-using System.Text;
 
 namespace EngineNS.DesignMacross.Design
 {

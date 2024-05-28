@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace EngineNS.DesignMacross
+﻿namespace EngineNS.DesignMacross
 {
     //本代码页用来描述可Designa的变量或者函数相关的Attribute
     

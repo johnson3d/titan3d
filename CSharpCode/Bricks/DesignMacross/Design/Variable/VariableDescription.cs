@@ -4,7 +4,6 @@ using EngineNS.DesignMacross.Base.Description;
 using EngineNS.DesignMacross.Base.Outline;
 using EngineNS.EGui.Controls.PropertyGrid;
 using EngineNS.Rtti;
-using System;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.Reflection;

@@ -1,14 +1,6 @@
 ﻿using EngineNS.DesignMacross.Base.Description;
-using EngineNS.DesignMacross.Base.Graph;
-using EngineNS.DesignMacross.Base.Outline;
 using EngineNS.DesignMacross.Base.Render;
 using EngineNS.Rtti;
-using NPOI.OpenXml4Net.OPC;
-using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Reflection;
-using System.Text;
 
 namespace EngineNS.DesignMacross.Base.Graph
 {
@@ -36,9 +28,16 @@ namespace EngineNS.DesignMacross.Base.Graph
     public class GraphElementAttribute : Attribute
     {
         public UTypeDesc ClassType { get; set; }
+        public Vector2 DefaultLocation { get; set; }
         public GraphElementAttribute(Type type)
         {
             ClassType = UTypeDesc.TypeOf(type);
+            DefaultLocation = Vector2.Zero;
+        }
+        public GraphElementAttribute(Type type, float defaultLocationX, float defaultLocationY)
+        {
+            ClassType = UTypeDesc.TypeOf(type);
+            DefaultLocation = new Vector2(defaultLocationX, defaultLocationY);
         }
         public static GraphElementAttribute GetAttributeWithSpecificClassType<T>(Type type)
         {
@@ -59,10 +58,29 @@ namespace EngineNS.DesignMacross.Base.Graph
         
     }
 
+    public enum EHorizontalAlignment
+    {
+        Left,
+        Center,
+        Right,
+        Stretch
+    }
+    public enum EVerticalAlignment
+    {
+        Top,
+        Center,
+        Bottom,
+        Stretch
+    }
+
     public interface ILayoutable
     {
         public FMargin Margin { get; set; }
         public SizeF Size { get; set; }
+        public SizeF MinSize { get; set; }
+        public SizeF MaxSize { get; set; }
+        public EHorizontalAlignment HorizontalAlignment { get; set; }
+        public EVerticalAlignment VerticalAlignment { get; set; } 
         public SizeF Measuring(SizeF availableSize);
         public SizeF Arranging(Rect finalRect);
     }
@@ -84,6 +102,12 @@ namespace EngineNS.DesignMacross.Base.Graph
         public bool HitCheck(Vector2 pos);
         public void OnSelected(ref FGraphElementRenderingContext context);
         public void OnUnSelected();
+        public void OnMouseOver(ref FGraphElementRenderingContext context);
+        public void OnMouseLeave(ref FGraphElementRenderingContext context);
+        public void OnMouseLeftButtonDown(ref FGraphElementRenderingContext context);
+        public void OnMouseLeftButtonUp(ref FGraphElementRenderingContext context);
+        public void OnMouseRightButtonDown(ref FGraphElementRenderingContext context);
+        public void OnMouseRightButtonUp(ref FGraphElementRenderingContext context);
     }
     public interface IResizebale
     {
@@ -94,8 +118,8 @@ namespace EngineNS.DesignMacross.Base.Graph
     }
     public interface IContextMeunable
     {
-        public void ConstructContextMenu(ref FGraphElementRenderingContext context, TtPopupMenu PopupMenu);
-        public void SetContextMenuableId(TtPopupMenu PopupMenu);
+        public void ConstructContextMenu(ref FGraphElementRenderingContext context, TtPopupMenu popupMenu);
+        public void SetContextMenuableId(TtPopupMenu popupMenu);
         //public void OpenContextMeun();
         //public void DrawContextMenu(ref FGraphElementRenderingContext context);
     }
@@ -116,6 +140,7 @@ namespace EngineNS.DesignMacross.Base.Graph
         public Vector2 Location { get; set; }
         [Rtti.Meta]
         public SizeF Size { get; set; }
+        public Color4f BackgroundColor { get; set; }
 
     }
 
@@ -123,6 +148,7 @@ namespace EngineNS.DesignMacross.Base.Graph
     {
         public IDescription Description { get; set; }
         public void ConstructElements(ref FGraphElementRenderingContext context);
+        public void AfterConstructElements(ref FGraphElementRenderingContext context);
     }
     public interface IWidgetGraphElement : IGraphElement
     {
@@ -132,5 +158,6 @@ namespace EngineNS.DesignMacross.Base.Graph
     public interface IGraph : IGraphElement
     {
         public void ConstructElements(ref FGraphRenderingContext context);
+        public void AfterConstructElements(ref FGraphRenderingContext context);
     }
 }

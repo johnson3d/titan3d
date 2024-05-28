@@ -9,7 +9,7 @@ namespace EngineNS.Animation.Asset
     {
         public float Duration { get; }
     }
-    public interface IAnimationCompositeAsset : IO.IAsset
+    public interface IAnimationCompositeAsset : IAnimationAsset
     {
 
     }

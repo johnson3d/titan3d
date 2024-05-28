@@ -2,12 +2,6 @@
 using EngineNS.DesignMacross.Base.Graph;
 using EngineNS.DesignMacross.Base.Render;
 using EngineNS.Rtti;
-using SixLabors.Fonts;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Reflection;
-using System.Text;
 
 namespace EngineNS.DesignMacross.Editor.GraphPanel
 {
@@ -70,8 +64,10 @@ namespace EngineNS.DesignMacross.Editor.GraphPanel
             graphContext.EditorInteroperation = context.EditorInteroperation;
             graphContext.GraphElementStyleManager = context.GraphElementStyleManager;
             graphContext.DescriptionsElement = context.DescriptionsElement;
+            graphContext.DesignedClassDescription = context.DesignedClassDescription;
             var currentRenderingGraph = navigableGraphsPanel.Navigation.Peek();
             currentRenderingGraph.ConstructElements(ref graphContext);
+            currentRenderingGraph.AfterConstructElements(ref graphContext);
             var graphRender = TtElementRenderDevice.CreateGraphRender(currentRenderingGraph);
             if (graphRender != null)
             {

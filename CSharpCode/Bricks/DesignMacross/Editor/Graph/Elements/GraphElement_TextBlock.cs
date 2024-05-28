@@ -1,7 +1,5 @@
-﻿using EngineNS.DesignMacross.Base.Description;
-using EngineNS.DesignMacross.Base.Graph;
+﻿using EngineNS.DesignMacross.Base.Graph;
 using EngineNS.DesignMacross.Base.Render;
-using System;
 
 namespace EngineNS.DesignMacross.Editor
 {
@@ -19,34 +17,22 @@ namespace EngineNS.DesignMacross.Editor
             Size = size;
         }
     }
-    public enum EHorizontalAlignment
-    {
-        Left,
-        Center,
-        Right,
-    }
-    public enum EVerticalAlignment
-    {
-        Top,
-        Center,
-        Bottom,
-    }
 
     [ImGuiElementRender(typeof(TtGraphElementRender_TextBlock))]
     public class TtGraphElement_TextBlock : TtWidgetGraphElement, ILayoutable
     {
         public string Content { get; set; } = string.Empty;
-        public EHorizontalAlignment HorizontalAlign { get; set; } = EHorizontalAlignment.Left;
-        public EVerticalAlignment VerticalAlign { get; set; } = EVerticalAlignment.Top;
+        public EHorizontalAlignment HorizontalAlignment { get; set; } = EHorizontalAlignment.Left;
+        public EVerticalAlignment VerticalAlignment { get; set; } = EVerticalAlignment.Top;
         public float FontScale { get; set; } = 1;
         public Color4f TextColor { get; set; } = new Color4f(0, 0, 0);
         public Color4f BackgroundColor { get; set; } = new Color4f(0, 0, 0, 0);
-
+        public float Rounding { get; set; } = 5;
         public TtGraphElement_TextBlock(string content = "TExtBlock", EVerticalAlignment verticalAlignment = EVerticalAlignment.Top, EHorizontalAlignment horizontalAlignment = EHorizontalAlignment.Left)
         {
             Content = content;
-            VerticalAlign = verticalAlignment;
-            HorizontalAlign = horizontalAlignment;
+            VerticalAlignment = verticalAlignment;
+            HorizontalAlignment = horizontalAlignment;
         }
 
         public override bool CanDrag()
@@ -111,7 +97,7 @@ namespace EngineNS.DesignMacross.Editor
         public void HorizontalAligning(Rect finalRect)
         {
             float hLocation = 0;
-            switch (HorizontalAlign)
+            switch (HorizontalAlignment)
             {
                 case EHorizontalAlignment.Left:
                     {
@@ -136,7 +122,7 @@ namespace EngineNS.DesignMacross.Editor
         public void VerticalAligning(Rect finalRect)
         {
             float vLocation = 0;
-            switch (VerticalAlign)
+            switch (VerticalAlignment)
             {
                 case EVerticalAlignment.Top:
                     {
@@ -169,7 +155,7 @@ namespace EngineNS.DesignMacross.Editor
             var cmd = ImGuiAPI.GetWindowDrawList();
             var start = context.ViewPortTransform(textBlock.AbsLocation);
             var end = context.ViewPortTransform(textBlock.AbsLocation + new Vector2(textBlock.Size.Width, textBlock.Size.Height));
-            //cmd.AddRectFilled(start, end, ImGuiAPI.ColorConvertFloat4ToU32(textBlock.Style.BackgroundColor), 0, ImDrawFlags_.ImDrawFlags_RoundCornersNone);
+            cmd.AddRectFilled(start, end, ImGuiAPI.ColorConvertFloat4ToU32(textBlock.BackgroundColor), textBlock.Rounding, ImDrawFlags_.ImDrawFlags_RoundCornersAll);
             var oldScale = ImGuiAPI.GetFont().Scale;
             var font = ImGuiAPI.GetFont();
             font.Scale = textBlock.FontScale;

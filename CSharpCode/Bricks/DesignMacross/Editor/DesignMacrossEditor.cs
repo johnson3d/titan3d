@@ -1,12 +1,6 @@
 ﻿using EngineNS.Bricks.CodeBuilder;
-using System.Collections.Generic;
-using System.Threading.Tasks;
-using EngineNS.DesignMacross.Design;
-using NPOI.SS.Formula.Functions;
-using System;
 using EngineNS.DesignMacross.Base.Graph;
 using EngineNS.DesignMacross.Base.Description;
-using System.Text.RegularExpressions;
 using System.Text;
 using System.Diagnostics;
 
@@ -65,6 +59,7 @@ namespace EngineNS.DesignMacross.Editor
             rendingContext.CommandHistory = CommandHistory;
             rendingContext.GraphElementStyleManager = GraphElementCollection;
             rendingContext.DescriptionsElement = DescriptionsElement;
+            rendingContext.DesignedClassDescription = mDesignMacross.DesignedClassDescription;
             bool mClassViewShow = true;
             var show = EGui.UIProxy.DockProxy.BeginPanel(mDockKeyClass, "ClassView", ref mClassViewShow, ImGuiWindowFlags_.ImGuiWindowFlags_None);
             if (show)
@@ -337,6 +332,7 @@ namespace EngineNS.DesignMacross.Editor
             mDesignMacross.Load(AssetName);
             //LoadClassDescription(AssetName);
             LoadElements(AssetName);
+            DeclarationEditPanel.ClassDesc = mDesignMacross.DesignedClassDescription;
             return true;
         }
 

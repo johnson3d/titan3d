@@ -1,116 +1,57 @@
 ﻿using EngineNS.Bricks.CodeBuilder;
-using EngineNS.Bricks.CodeBuilder.MacrossNode;
-using EngineNS.Bricks.NodeGraph;
 using EngineNS.DesignMacross.Base.Description;
 using EngineNS.DesignMacross.Base.Graph;
 using EngineNS.DesignMacross.Base.Render;
-using EngineNS.DesignMacross.Design;
+using EngineNS.DesignMacross.Design.ConnectingLine;
+using EngineNS.DesignMacross.Design.Expressions;
+using EngineNS.DesignMacross.Editor;
 using EngineNS.EGui.Controls;
-using EngineNS.EGui.Controls.PropertyGrid;
-using NPOI.POIFS.Properties;
-using System;
-using System.Collections.Generic;
-using System.Text;
+using EngineNS.Rtti;
+using System.Collections;
+using System.Diagnostics;
+using System.Reflection;
+using EngineNS.DesignMacross.Design.Statement;
+using Microsoft.CodeAnalysis;
+using System.Linq.Expressions;
 
 namespace EngineNS.DesignMacross.Design
 {
-    public class TtTransitionMacrossHolder : IMacrossMethodHolder
+    [ImGuiElementRender(typeof(TtGraphElementRender_StatementDescription))]
+    public class TtGraphElement_MethodStartDescription : TtGraphElement_StatementDescription
     {
-        public MemberVar DraggingMember { get; set; }
-        public bool IsDraggingMember { get; set; }
-        public UClassDeclaration DefClass { get; set; }
-        UCSharpCodeGenerator mCSCodeGen = new UCSharpCodeGenerator();
-        public UCSharpCodeGenerator CSCodeGen => mCSCodeGen;
-        List<UMacrossMethodGraph> mMethods = new List<UMacrossMethodGraph>();
-        public List<UMacrossMethodGraph> Methods => mMethods;
-
-        public PropertyGrid PGMember { get; set; }
-
-        public void RemoveMethod(UMacrossMethodGraph method)
+        public TtMethodStartDescription MethodStartDescription { get => Description as TtMethodStartDescription; }
+        public TtGraphElement_MethodStartDescription(IDescription description, IGraphElementStyle style) : base(description, style)
         {
 
         }
-
-        public void SetConfigUnionNode(IUnionNode node)
+        public override void OnSelected(ref FGraphElementRenderingContext context)
         {
-
+            context.EditorInteroperation.PGMember.Target = Description.Parent;
         }
     }
-
-    public class TtDesignMacrossMethodGraph : UMacrossMethodGraph
+    [ImGuiElementRender(typeof(TtGraphElementRender_StatementDescription))]
+    public class TtGraphElement_MethodEndDescription : TtGraphElement_StatementDescription
     {
-        public override void UpdateCanvasMenus()
+        public TtMethodEndDescription MethodEndDescription { get => Description as TtMethodEndDescription; }
+        public TtGraphElement_MethodEndDescription(IDescription description, IGraphElementStyle style) : base(description, style)
         {
-            base.UpdateCanvasMenus();
-            //if(MethodDescription != null)
-            //{
-            //    var classDesc = MethodDescription.Parent as TtClassDescription;
-            //    var selfMenu = GetMenu("Self");
-            //    var macrossHolder = MacrossEditor as TtTransitionMacrossHolder;
-            //    FClassBuildContext classBuildContext = new() { MainClassDescription = classDesc };
-            //    var classDec = TtDescriptionASTBuildUtil.BuildDefaultPartForClassDeclaration( classDesc, ref classBuildContext);
-            //    foreach (var variable in classDesc.Variables)
-            //    {
-            //        if(variable.VisitMode == EVisisMode.Public)
-            //        {
-            //            var menuPath = new string[] { variable.Name };
-            //            selfMenu.AddMenuItem("Get " + variable.Name, variable.VariableName, null,
-            //                    (UMenuItem item, object sender) =>
-            //                    {
-            //                        var node = MemberVar.NewMemberVar(classDec, variable.VariableName, true);
-            //                        AddNode(node);
-            //                    });
-            //            selfMenu.AddMenuItem("Set " + variable.Name, variable.Name, null,
-            //                    (UMenuItem item, object sender) =>
-            //                    {
-            //                        var node = MemberVar.NewMemberVar(classDec, variable.VariableName, false);
-            //                        SetDefaultActionForNode(node);
-            //                        AddNode(node);
-            //                    });
-            //        }
-            //    }
-            //}
         }
-        TtMenuItem GetMenu(string menuName)
+        public override void OnSelected(ref FGraphElementRenderingContext context)
         {
-            foreach(var sub in CanvasMenus.SubMenuItems)
-            {
-                if(sub.Text == menuName)
-                {
-                    return sub;
-                }
-            }
-            return null;
-        }
-        public static TtDesignMacrossMethodGraph CreateGraph(IMacrossMethodHolder kls, UMethodDeclaration method = null)
-        {
-            var result = new TtDesignMacrossMethodGraph();
-            result.MacrossEditor = kls;
-            result.Initialize();
-            //result.FunctionName = funName;
-            //if (result.Function == null)
-            //    return null;
-            if (method != null)
-            {
-                var methodData = MethodData.CreateFromMethod(result, method);
-                result.MethodDatas.Add(methodData);
-                result.AddNode(methodData.StartNode);
-                result.GraphName = method.MethodName;
-            }
-            return result;
-        }
-        public void SetMacrossEditor(IMacrossMethodHolder macrossEditor)
-        {
-            MacrossEditor = macrossEditor;
+            context.EditorInteroperation.PGMember.Target = Description.Parent;
         }
     }
-
+    public struct ElementLocation
+    {
+        public Guid Id;
+        public Vector2 Location;
+    }
     [ImGuiElementRender(typeof(TtGraph_MethodRender))]
     public class TtGraph_Method : TtGraph, IContextMeunable
     {
-        public TtMethodDescription MethodDescription { get => Description as TtMethodDescription; }
-        int VariableCount = 0;
-        int MethodCount = 0;
+        public virtual TtMethodDescription MethodDescription { get => Description as TtMethodDescription; }
+        public TtGraphElement_PreviewExecutionLine PreviewExecutionLine { get; set; } = null;
+        public TtGraphElement_PreviewDataLine PreviewDataLine { get; set; } = null;
         public TtGraph_Method(IDescription description) : base(description)
         {
 
@@ -118,55 +59,191 @@ namespace EngineNS.DesignMacross.Design
 
         public override void ConstructElements(ref FGraphRenderingContext context)
         {
-            var classDesc = MethodDescription.Parent as TtClassDescription;
-            if (MethodDescription.MethodGraph == null)
+            Elements.Clear();
+            FGraphElementRenderingContext elementRenderingContext = default;
+            elementRenderingContext.Camera = context.Camera;
+            elementRenderingContext.ViewPort = context.ViewPort;
+            elementRenderingContext.CommandHistory = context.CommandHistory;
+            elementRenderingContext.EditorInteroperation = context.EditorInteroperation;
+            elementRenderingContext.GraphElementStyleManager = context.GraphElementStyleManager;
+            elementRenderingContext.DescriptionsElement = context.DescriptionsElement;
+
+            foreach (var property in MethodDescription.GetType().GetProperties())
             {
-                var macrossHolder = new TtTransitionMacrossHolder();
-                FClassBuildContext classBuildContext = new() { MainClassDescription = classDesc };
-                var classDec = TtDescriptionASTBuildUtil.BuildDefaultPartForClassDeclaration(classDesc, ref classBuildContext);
-                macrossHolder.DefClass = classDec;
-                MethodDescription.MethodGraph = TtDesignMacrossMethodGraph.CreateGraph(macrossHolder, MethodDescription.BuildMethodDeclaration(ref classBuildContext));
-                MethodDescription.MethodGraph.GraphName = MethodDescription.Name;
+                var drawInGraphAttribute = property.GetCustomAttribute<DrawInGraphAttribute>();
+                if (drawInGraphAttribute == null)
+                {
+                    continue;
+                }
+                if (property.PropertyType.IsGenericType)
+                {
+                    if (property.PropertyType.GetInterface("IList") != null)
+                    {
+                        var propertyValueList = property.GetValue(MethodDescription) as IList;
+                        foreach (var propertyValue in propertyValueList)
+                        {
+                            var graphElementAttribute = GraphElementAttribute.GetAttributeWithSpecificClassType<IGraphElement>(propertyValue.GetType());
+                            Debug.Assert(graphElementAttribute != null);
+                            Debug.Assert(propertyValue is IDescription);
+                            var desc = propertyValue as IDescription;
+                            var instance = TtDescriptionGraphElementsPoolManager.Instance.GetDescriptionGraphElement(graphElementAttribute.ClassType, desc, context.GraphElementStyleManager.GetOrAdd(desc.Id));
+                            instance.Parent = this;
+                            Elements.Add(instance);
+                            context.DescriptionsElement.Add(desc.Id, instance);
+                        }
+                    }
+                }
+                else
+                {
+                    var propertyValue = property.GetValue(MethodDescription);
+                    Debug.Assert(propertyValue is IDescription);
+                    var desc = propertyValue as IDescription;
+                    var graphElementAttribute = GraphElementAttribute.GetAttributeWithSpecificClassType<IGraphElement>(propertyValue.GetType());
+
+                    if (!context.GraphElementStyleManager.Contains(desc.Id))
+                    {
+                        //set default location
+                        var style = context.GraphElementStyleManager.GetOrAdd(desc.Id);
+                        style.Location = graphElementAttribute.DefaultLocation;
+                    }
+
+                    var instance = TtDescriptionGraphElementsPoolManager.Instance.GetDescriptionGraphElement(graphElementAttribute.ClassType, desc, context.GraphElementStyleManager.GetOrAdd(desc.Id));
+                    instance.Parent = this;
+                    Elements.Add(instance);
+                    context.DescriptionsElement.Add(desc.Id, instance);
+                }
+
             }
-            if (classDesc.Variables.Count != VariableCount)
+            foreach (var element in Elements)
             {
-                VariableCount = classDesc.Variables.Count;
-                MethodDescription.MethodGraph.CanvasMenuDirty = true;
-            }
-            if (classDesc.Methods.Count != MethodCount)
-            {
-                MethodCount = classDesc.Methods.Count;
-                MethodDescription.MethodGraph.CanvasMenuDirty = true;
-            }
-            if (MethodDescription.MethodGraph.MacrossEditor == null)
-            {
-                var macrossHolder = new TtTransitionMacrossHolder();
-                FClassBuildContext classBuildContext = new() { MainClassDescription = classDesc };
-                var classDec = TtDescriptionASTBuildUtil.BuildDefaultPartForClassDeclaration(classDesc, ref classBuildContext);
-                macrossHolder.DefClass = classDec;
-                MethodDescription.MethodGraph.SetMacrossEditor(macrossHolder);
+                element.ConstructElements(ref elementRenderingContext);
             }
         }
+        public override void AfterConstructElements(ref FGraphRenderingContext context)
+        {
+            FGraphElementRenderingContext elementRenderingContext = default;
+            elementRenderingContext.Camera = context.Camera;
+            elementRenderingContext.ViewPort = context.ViewPort;
+            elementRenderingContext.CommandHistory = context.CommandHistory;
+            elementRenderingContext.EditorInteroperation = context.EditorInteroperation;
+            elementRenderingContext.GraphElementStyleManager = context.GraphElementStyleManager;
+            elementRenderingContext.DescriptionsElement = context.DescriptionsElement;
+            foreach (var element in context.DescriptionsElement)
+            {
+                if (element.Value is IDescriptionGraphElement descriptionGraphElement)
+                {
+                    descriptionGraphElement.AfterConstructElements(ref elementRenderingContext);
+                }
+            }
+        }
+
+        public override void OnMouseLeftButtonUp(ref FGraphElementRenderingContext context)
+        {
+            if (PreviewDataLine != null || PreviewExecutionLine != null)
+            {
+                TtContextMenuHandler.Instance.HandleLinkedPinContextMenu(this, ref context);
+                PreviewDataLine = null;
+                PreviewExecutionLine = null;
+            }
+        }
+
+
+
+        public void ConstructLinkedPinContextMenu(ref FGraphElementRenderingContext context, TtPopupMenu popupMenu)
+        {
+            popupMenu.bHasSearchBox = true;
+            TtMethodGraphLinkedPinContextMenuUtil.ConstructMenuItemsAboutAssembly(ref context, popupMenu, this);
+        }
+
+        #region IContextMeunable
+        public override void ConstructContextMenu(ref FGraphElementRenderingContext context, TtPopupMenu popupMenu)
+        {
+            popupMenu.bHasSearchBox = true;
+            TtMethodGraphContextMenuUtil.ConstructMenuItemsAboutAssembly(ref context, popupMenu, this);
+            TtMethodGraphContextMenuUtil.ConstructMenuItemsAboutDesignedClass(ref context, popupMenu, this);
+            TtMethodGraphContextMenuUtil.ConstructMenuItemsAboutReflection(ref context, popupMenu, this);
+        }
+        #endregion IContextMeunable
+
     }
     public class TtGraph_MethodRender : IGraphRender
     {
-        UGraphRenderer mGraphRender;
-
-
         public void Draw(IRenderableElement renderableElement, ref FGraphRenderingContext context)
         {
-            var graph = renderableElement as TtGraph_Method;
-            if (graph == null)
+            var methodGraph = renderableElement as TtGraph_Method;
+            if (methodGraph == null)
                 return;
-            
-            if (mGraphRender == null)
+            if (ImGuiAPI.BeginChild(methodGraph.Name + "_Graph", in Vector2.Zero, false, ImGuiWindowFlags_.ImGuiWindowFlags_NoMove | ImGuiWindowFlags_.ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_.ImGuiWindowFlags_NoScrollWithMouse))
             {
-                mGraphRender = new UGraphRenderer();
-                mGraphRender.SetGraph(graph.MethodDescription.MethodGraph);
-                mGraphRender.DrawInherit = false;
-            }
+                var cmd = ImGuiAPI.GetWindowDrawList();
 
-            mGraphRender.OnDraw();
+                Vector2 sz = ImGuiAPI.GetWindowContentRegionMax() - ImGuiAPI.GetWindowContentRegionMin();
+                var winPos = ImGuiAPI.GetWindowPos();
+                // initialize
+                methodGraph.Size = new SizeF(sz.X, sz.Y);
+                methodGraph.ViewPort.Location = winPos;
+                methodGraph.ViewPort.Size = new SizeF(sz.X, sz.Y);
+                methodGraph.Camera.Size = new SizeF(sz.X, sz.Y);
+
+                methodGraph.CommandHistory = context.CommandHistory;
+                context.ViewPort = methodGraph.ViewPort;
+                context.Camera = methodGraph.Camera;
+                //
+
+                FGraphElementRenderingContext elementRenderingContext = default;
+                elementRenderingContext.Camera = context.Camera;
+                elementRenderingContext.ViewPort = context.ViewPort;
+                elementRenderingContext.CommandHistory = methodGraph.CommandHistory;
+                elementRenderingContext.EditorInteroperation = context.EditorInteroperation;
+                elementRenderingContext.GraphElementStyleManager = context.GraphElementStyleManager;
+                elementRenderingContext.DescriptionsElement = context.DescriptionsElement;
+                elementRenderingContext.DesignedClassDescription = context.DesignedClassDescription;
+                elementRenderingContext.DesignedGraph = methodGraph;
+
+                TtGraphElement_GridLine grid = new TtGraphElement_GridLine();
+                grid.Size = new SizeF(sz.X, sz.Y);
+                var gridRender = TtElementRenderDevice.CreateGraphElementRender(grid);
+                if (gridRender != null)
+                    gridRender.Draw(grid, ref elementRenderingContext);
+
+                foreach (var element in methodGraph.Elements)
+                {
+                    if (element is ILayoutable layoutable)
+                    {
+                        var size = layoutable.Measuring(new SizeF());
+                        layoutable.Arranging(new Rect(element.Location, size));
+                    }
+                }
+                foreach (var element in methodGraph.Elements)
+                {
+                    var elementRender = TtElementRenderDevice.CreateGraphElementRender(element);
+                    if (elementRender != null)
+                    {
+                        elementRender.Draw(element, ref elementRenderingContext);
+                    }
+                }
+
+                if (methodGraph.PreviewExecutionLine != null)
+                {
+                    var previewExecutionLineRender = TtElementRenderDevice.CreateGraphElementRender(methodGraph.PreviewExecutionLine);
+                    if (previewExecutionLineRender != null)
+                    {
+                        previewExecutionLineRender.Draw(methodGraph.PreviewExecutionLine, ref elementRenderingContext);
+                    }
+                }
+                if (methodGraph.PreviewDataLine != null)
+                {
+                    var previewDataLineRender = TtElementRenderDevice.CreateGraphElementRender(methodGraph.PreviewDataLine);
+                    if (previewDataLineRender != null)
+                    {
+                        previewDataLineRender.Draw(methodGraph.PreviewDataLine, ref elementRenderingContext);
+                    }
+                }
+
+                TtMouseEventProcesser.Instance.Processing(methodGraph, ref elementRenderingContext);
+                TtContextMenuHandler.Instance.HandleContextMenu(TtMouseEventProcesser.Instance.LastElement, ref elementRenderingContext);
+            }
+            ImGuiAPI.EndChild();
         }
     }
 }

@@ -1,16 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Collections.Immutable;
-using System.Collections.Specialized;
+﻿using System.Collections.Immutable;
 using System.Diagnostics;
-using System.Reflection;
-using EngineNS.Bricks.CodeBuilder;
 using EngineNS.DesignMacross.Base.Description;
 using EngineNS.DesignMacross.Base.Outline;
 using EngineNS.DesignMacross.Base.Render;
-using EngineNS.DesignMacross.Editor;
-using EngineNS.DesignMacross.TimedStateMachine;
-using EngineNS.DesignMacross.TimedStateMachine.CompoundState;
 using EngineNS.Rtti;
 
 namespace EngineNS.DesignMacross.Design;

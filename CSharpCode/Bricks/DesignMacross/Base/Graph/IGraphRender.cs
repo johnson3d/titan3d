@@ -1,9 +1,6 @@
 ﻿using EngineNS.DesignMacross.Editor;
 using EngineNS.DesignMacross.Base.Render;
-using NPOI.SS.Formula.Functions;
-using System;
-using System.Collections.Generic;
-using System.Text;
+using EngineNS.DesignMacross.Design;
 
 namespace EngineNS.DesignMacross.Base.Graph
 {
@@ -16,6 +13,7 @@ namespace EngineNS.DesignMacross.Base.Graph
         public TtGraphCamera Camera { get; set; }
         public TtGraphElementStyleCollection GraphElementStyleManager { get; set; }
         public Dictionary<Guid, IGraphElement> DescriptionsElement { get; set; }
+        public TtClassDescription DesignedClassDescription { get; set; }
         public Vector2 ViewPortTransform(Vector2 pos)
         {
             return ViewPort.ViewportTransform(Camera.Location, pos);
@@ -33,6 +31,8 @@ namespace EngineNS.DesignMacross.Base.Graph
         public TtGraphCamera Camera { get; set; }
         public TtGraphElementStyleCollection GraphElementStyleManager { get; set; }
         public Dictionary<Guid, IGraphElement> DescriptionsElement { get; set; }
+        public TtClassDescription DesignedClassDescription { get; set; }
+        public TtGraph DesignedGraph { get; set; }
         public Vector2 ViewPortTransform(Vector2 pos)
         {
             return ViewPort.ViewportTransform(Camera.Location, pos);

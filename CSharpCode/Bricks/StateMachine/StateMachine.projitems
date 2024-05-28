@@ -16,9 +16,6 @@
     <Compile Include="$(MSBuildThisFileDirectory)IAttachment.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)IStateMachine.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)ITransition.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)StackBasedSM\StackBasedStateMachine.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)StackBasedSM\StackBasedState.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)StackBasedSM\StackBasedStateTransition.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)TimedSM\TimedStateAttachment.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)TimedSM\TimedStateMachine.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)TimedSM\TimedState.cs" />
@@ -29,6 +26,26 @@
     <Compile Include="$(MSBuildThisFileDirectory)SampleSM\StateMachine.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)SampleSM\State.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)SampleSM\StateTransition.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Macross\CompoundState\GraphElement_TimedCompoundStateEntry.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Macross\CompoundState\GraphElement_TimedCompoundStateHub.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Macross\CompoundState\Graph_TimedCompoundState.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Macross\CompoundState\OutlineElement_TimedCompoundStateGraph.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Macross\CompoundState\TimedCompoundStateClassDescription.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Macross\CompoundState\TimedCompoundStateEntryClassDescription.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Macross\CompoundState\TimedCompoundStateHubClassDescription.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Macross\StateAttachment\ITimedStateAttachmentClassDescription.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Macross\StateAttachment\Scrpit\GraphElement_TimedStateScriptAttachment.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Macross\StateAttachment\Scrpit\Graph_TimedStateScriptAttachment.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Macross\StateAttachment\Scrpit\TimedStateScriptAttachmentClassDescription.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Macross\StateMachineContextMenuAttribute.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Macross\StateMachine\OutlineElement_TimedStateMachine.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Macross\StateMachine\TimedStateMachineClassDescription.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Macross\StateTransition\GraphElement_TimedStateTransition.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Macross\StateTransition\Graph_TimedStateTransition.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Macross\StateTransition\TimedStateTransitionClassDescription.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Macross\SubState\GraphElement_TimedSubState.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Macross\SubState\OutlineElement_TimedSubState.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Macross\SubState\TimedSubStateClassDescription.cs" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="$(MSBuildThisFileDirectory)SampleSM\" />

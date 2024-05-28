@@ -1,14 +1,7 @@
 ﻿using EngineNS.DesignMacross.Base.Description;
-using EngineNS.DesignMacross.Base.Graph;
 using EngineNS.DesignMacross.Base.Render;
 using EngineNS.Rtti;
-using NPOI.POIFS.Properties;
-using System;
 using System.Collections;
-using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.Collections.Specialized;
-using System.Text;
 
 namespace EngineNS.DesignMacross.Base.Outline
 {

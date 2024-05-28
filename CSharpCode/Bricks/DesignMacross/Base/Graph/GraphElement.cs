@@ -1,15 +1,6 @@
-﻿using EngineNS;
-using EngineNS.Bricks.NodeGraph;
-using EngineNS.DesignMacross.Base.Description;
-using EngineNS.DesignMacross.Base.Graph;
-using EngineNS.DesignMacross.Base.Render;
+﻿using EngineNS.DesignMacross.Base.Description;
 using EngineNS.Rtti;
-using NPOI.SS.Formula.Functions;
-using Org.BouncyCastle.Asn1.X509.Qualified;
-using System;
-using System.Collections.Generic;
 using System.Diagnostics;
-using System.Threading;
 
 namespace EngineNS.DesignMacross.Base.Graph
 {
@@ -30,6 +21,20 @@ namespace EngineNS.DesignMacross.Base.Graph
                 return GraphElementStyles[id];
             }
         }
+        public IGraphElementStyle GetOrAdd(Guid id, Vector2 location)
+        {
+            if (!GraphElementStyles.ContainsKey(id))
+            {
+                GraphElementStyles.Add(id, new TtGraphElementStyle());
+            }
+            var style = GraphElementStyles[id];
+            style.Location = location;
+            return style;
+        }
+        public bool Contains(Guid id)
+        {
+            return GraphElementStyles.ContainsKey(id);
+        }
     }
     public class TtGraphElementStyle : IO.BaseSerializer, IGraphElementStyle
     {
@@ -37,6 +42,7 @@ namespace EngineNS.DesignMacross.Base.Graph
         public Vector2 Location { get; set; }
         [Rtti.Meta]
         public SizeF Size { get; set; } = new SizeF();
+        public Color4f BackgroundColor { get; set; } = new Color4f(0, 0, 0, 0);
     }
     public abstract class TtWidgetGraphElement : IWidgetGraphElement
     {
@@ -45,12 +51,38 @@ namespace EngineNS.DesignMacross.Base.Graph
         public Vector2 Location { get => Style.Location; set => Style.Location = value; }
         public Vector2 AbsLocation { get => TtDesignGraphUtil.CalculateAbsLocation(this); }
         public virtual SizeF Size { get => Style.Size; set => Style.Size = value; }
+        public SizeF MinSize { get; set; }
+        public SizeF MaxSize { get; set; }
         public IGraphElement Parent { get; set; } = null;
         public IDescription Description { get; set; } = null;
         public virtual IGraphElementStyle Style { get; set; } = new TtGraphElementStyle();
         public abstract bool CanDrag();
         public abstract bool HitCheck(Vector2 pos);
         public abstract void OnDragging(Vector2 delta);
+        public virtual void OnMouseOver(ref FGraphElementRenderingContext context)
+        {
+        }
+        public virtual void OnMouseLeave(ref FGraphElementRenderingContext context)
+        {
+        }
+
+        public virtual void OnMouseLeftButtonDown(ref FGraphElementRenderingContext context)
+        {
+
+        }
+
+        public virtual void OnMouseLeftButtonUp(ref FGraphElementRenderingContext context)
+        {
+        }
+
+        public virtual void OnMouseRightButtonDown(ref FGraphElementRenderingContext context)
+        {
+        }
+
+        public virtual void OnMouseRightButtonUp(ref FGraphElementRenderingContext context)
+        {
+        }
+
         public abstract void OnSelected(ref FGraphElementRenderingContext context);
         public abstract void OnUnSelected();
     }
@@ -62,6 +94,8 @@ namespace EngineNS.DesignMacross.Base.Graph
         public Vector2 Location { get => Style.Location; set => Style.Location = value; }
         public Vector2 AbsLocation { get => TtDesignGraphUtil.CalculateAbsLocation(this); }
         public virtual SizeF Size { get => Style.Size; set => Style.Size = value; }
+        public SizeF MinSize { get; set; }
+        public SizeF MaxSize { get; set; }
         public IGraphElement Parent { get; set; } = null;
         public IDescription Description { get; set; } = null;
 
@@ -87,9 +121,13 @@ namespace EngineNS.DesignMacross.Base.Graph
         {
 
         }
-        public void SetContextMenuableId(TtPopupMenu PopupMenu)
+        public virtual void AfterConstructElements(ref FGraphElementRenderingContext context)
         {
-            PopupMenu.StringId = Name + "_" + Id + "_" + "ContextMenu";
+
+        }
+        public void SetContextMenuableId(TtPopupMenu popupMenu)
+        {
+            popupMenu.StringId = Name + "_" + Id + "_" + "ContextMenu";
         }
         #region ISelectable
         public virtual bool HitCheck(Vector2 pos)
@@ -107,11 +145,34 @@ namespace EngineNS.DesignMacross.Base.Graph
         {
 
         }
+        public virtual void OnMouseOver(ref FGraphElementRenderingContext context)
+        {
+        }
+        public virtual void OnMouseLeave(ref FGraphElementRenderingContext context)
+        {
+
+        }
+
+        public virtual void OnMouseLeftButtonDown(ref FGraphElementRenderingContext context)
+        {
+        }
+
+        public virtual void OnMouseLeftButtonUp(ref FGraphElementRenderingContext context)
+        {
+        }
+
+        public virtual void OnMouseRightButtonDown(ref FGraphElementRenderingContext context)
+        {
+        }
+
+        public virtual void OnMouseRightButtonUp(ref FGraphElementRenderingContext context)
+        {
+        }
         #endregion ISelectable
         #region IContextMeunable
-        public virtual void ConstructContextMenu(ref FGraphElementRenderingContext context, TtPopupMenu PopupMenu)
+        public virtual void ConstructContextMenu(ref FGraphElementRenderingContext context, TtPopupMenu popupMenu)
         {
-  
+
         }
         #endregion IContextMeunable
         #region IDraggable
@@ -127,6 +188,9 @@ namespace EngineNS.DesignMacross.Base.Graph
 
         #region ILayoutable
         public virtual FMargin Margin { get; set; } = FMargin.Default;
+        public EHorizontalAlignment HorizontalAlignment { get; set; } = EHorizontalAlignment.Center;
+        public EVerticalAlignment VerticalAlignment { get; set; } = EVerticalAlignment.Center;
+
         public abstract SizeF Measuring(SizeF availableSize);
         public abstract SizeF Arranging(Rect finalRect);
         #endregion ILayoutable

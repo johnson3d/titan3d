@@ -1,8 +1,6 @@
 ﻿using EngineNS.Bricks.CodeBuilder;
 using EngineNS.DesignMacross.Design;
-using System;
-using System.Collections.Generic;
-using System.Text;
+using EngineNS.Rtti;
 
 namespace EngineNS.DesignMacross.Base.Description
 {
@@ -10,6 +8,29 @@ namespace EngineNS.DesignMacross.Base.Description
     {
         public IClassDescription MainClassDescription { get; set; } 
         public UClassDeclaration ClassDeclaration { get; set; }
+    }
+
+    public struct FMethodBuildContext
+    {
+        public IMethodDescription MethodDescription { get; set; } 
+        public UMethodDeclaration MethodDeclaration { get; set; }
+    }
+
+    public struct FStatementBuildContext
+    {
+        public IMethodDescription MethodDescription { get; set; }
+        public UExecuteSequenceStatement ExecuteSequenceStatement { get; set; }
+        public void AddStatement(UStatementBase statement)
+        {
+            if (ExecuteSequenceStatement == null)
+                return;
+            ExecuteSequenceStatement.Sequence.Add(statement);
+        }
+    }
+    public struct FExpressionBuildContext
+    {
+        public IMethodDescription MethodDescription { get; set; }
+        public UExecuteSequenceStatement Sequence { get; set; }
     }
     public interface IDescription  : IO.ISerializer
     {
@@ -44,10 +65,10 @@ namespace EngineNS.DesignMacross.Base.Description
     {
         public EVisisMode VisitMode { get; set; }
         public UCommentStatement Comment { get; set; }
-        public UVariableDeclaration ReturnValue { get; set; }
+        public UTypeDesc ReturnValueType { get; set; }
         public string MethodName { get; }
-        public List<UMethodArgumentDeclaration> Arguments { get; set; } 
-        public List<UVariableDeclaration> LocalVariables { get; set; } 
+        public List<TtMethodArgumentDescription> Arguments { get; set; } 
+        public List<TtVariableDescription> LocalVariables { get; set; } 
         public bool IsOverride { get; set; } 
         public bool IsAsync { get; set; }
         public UMethodDeclaration BuildMethodDeclaration(ref FClassBuildContext classBuildContext);
@@ -56,5 +77,14 @@ namespace EngineNS.DesignMacross.Base.Description
     public interface IDesignableVariableDescription : IVariableDescription, IClassDescription
     {
 
+    }
+
+    public interface IExpressionDescription : IDescription
+    {
+        public UExpressionBase BuildExpression(ref FExpressionBuildContext expressionBuildContext);
+    }
+    public interface IStatementDescription : IDescription
+    {
+        public UStatementBase BuildStatement(ref FStatementBuildContext statementBuildContext);
     }
 }

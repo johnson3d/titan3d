@@ -264,6 +264,7 @@ namespace EngineNS.Editor.Forms
             [Browsable(false)]
             public IO.EAssetState AssetState { get; private set; } = IO.EAssetState.Initialized;
             private RName mPreivewMeshName;
+            [RName.PGRName(FilterExts = UMeshPrimitives.AssetExt)]
             public RName PreivewMesh
             {
                 get

@@ -314,6 +314,9 @@ namespace EngineNS.Animation.Asset.BlendSpace
         }
         #region IAnimationAsset
         public abstract RName AssetName { get; set; }
+
+        public float Duration => 0;
+
         public abstract IAssetMeta CreateAMeta();
         public abstract IAssetMeta GetAMeta();
         public abstract void UpdateAMetaReferences(IAssetMeta ameta);

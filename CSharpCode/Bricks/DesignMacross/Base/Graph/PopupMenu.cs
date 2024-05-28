@@ -1,11 +1,4 @@
-﻿using EngineNS.Bricks.CodeBuilder;
-using EngineNS.Bricks.NodeGraph;
-using EngineNS.DesignMacross.Base.Graph;
-using EngineNS.Rtti;
-using SixLabors.Fonts;
-using System;
-using System.Collections.Generic;
-using System.Text;
+﻿using EngineNS.Rtti;
 using EngineNS.EGui.Controls;
 using static EngineNS.EGui.Controls.TtMenuItem;
 
@@ -44,10 +37,12 @@ namespace EngineNS.DesignMacross.Base.Graph
         public void OpenPopup(TtPopupMenu popupMenu)
         {
             ImGuiAPI.OpenPopup(popupMenu.StringId, ImGuiPopupFlags_.ImGuiPopupFlags_None);
+            mPopMousePosition = ImGuiAPI.GetMousePos();
         }
         int mSelectQuickMenuIdx = 0;
         int mCurrentQuickMenuIdx = 0;
         bool mCanvasMenuFilterFocused = false;
+        Vector2 mPopMousePosition = Vector2.Zero;
         public string CanvasMenuFilterStr = "";
         public void Draw(TtPopupMenu popupMenu, FGraphElementRenderingContext context)
         {
@@ -59,7 +54,7 @@ namespace EngineNS.DesignMacross.Base.Graph
                 ImGuiWindowFlags_.ImGuiWindowFlags_NoNav))
             {
                 {
-                    popupMenu.PopedPosition = context.ViewPortInverseTransform(ImGuiAPI.GetMousePos());
+                    popupMenu.PopedPosition = context.ViewPortInverseTransform(mPopMousePosition);
                     var size = ImGuiAPI.GetWindowSize();
 
 
@@ -220,6 +215,17 @@ namespace EngineNS.DesignMacross.Base.Graph
                 return menuString.Remove(idx, idxEnd - idx + 1);
             }
             return menuString;
+        }
+
+        public static string[] GetContextPath(Rtti.UTypeDesc type, string name)
+        {
+            var typeStr = Rtti.UTypeDescManager.Instance.GetTypeStringFromType(type, false);
+            typeStr = typeStr.Replace("EngineNS.", "").Replace("Bricks.", "");
+            var idx = typeStr.LastIndexOf('@');
+            if (idx >= 0)
+                typeStr = typeStr.Substring(0, idx);
+            typeStr += "." + name;
+            return typeStr.Split('.');
         }
     }
 }

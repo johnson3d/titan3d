@@ -1,10 +1,5 @@
-﻿using EngineNS.DesignMacross.Base.Description;
-using EngineNS.DesignMacross.Base.Graph;
+﻿using EngineNS.DesignMacross.Base.Graph;
 using EngineNS.DesignMacross.Base.Render;
-using Org.BouncyCastle.Asn1.Crmf;
-using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace EngineNS.DesignMacross.Editor
 {
@@ -34,6 +29,11 @@ namespace EngineNS.DesignMacross.Editor
             Children.Add(element);
             element.Parent = this;
         }
+        public void InsertElement(int index, IGraphElement element)
+        {
+            Children.Insert(index, element);
+            element.Parent = this;
+        }
         public void RemoveElement(IGraphElement element)
         {
             element.Parent = null;
@@ -42,7 +42,7 @@ namespace EngineNS.DesignMacross.Editor
 
         public void Clear()
         {
-            foreach(var element in Children)
+            foreach (var element in Children)
             {
                 element.Parent = null;
             }
@@ -67,25 +67,28 @@ namespace EngineNS.DesignMacross.Editor
 
         public override void OnSelected(ref FGraphElementRenderingContext context)
         {
-            
+
         }
 
         public override void OnUnSelected()
         {
-            
+
         }
 
         private Dictionary<ILayoutable, SizeF> ChildrenMeasuringSize = new Dictionary<ILayoutable, SizeF>();
+        public EHorizontalAlignment HorizontalAlignment { get; set; } = EHorizontalAlignment.Left;
+        public EVerticalAlignment VerticalAlignment { get; set; } = EVerticalAlignment.Top;
         public SizeF Measuring(SizeF availableSize)
         {
             ChildrenMeasuringSize.Clear();
-            var childrenDesiredSize = new SizeF();
+            var desiredSize = new SizeF();
             foreach (var element in Children)
             {
                 if (element is ILayoutable layoutable)
                 {
                     var childDesireSize = layoutable.Measuring(availableSize);
-                    if(ChildrenMeasuringSize.ContainsKey(layoutable))
+
+                    if (ChildrenMeasuringSize.ContainsKey(layoutable))
                     {
                         ChildrenMeasuringSize[layoutable] = childDesireSize;
                     }
@@ -95,24 +98,48 @@ namespace EngineNS.DesignMacross.Editor
                     }
                     if (Orientation == EOrientation.Vertical)
                     {
-                        childrenDesiredSize.Height += childDesireSize.Height;
-                        if (childrenDesiredSize.Width < childDesireSize.Width)
+                        desiredSize.Height += childDesireSize.Height;
+                        if (desiredSize.Width < childDesireSize.Width)
                         {
-                            childrenDesiredSize.Width = childDesireSize.Width;
+                            desiredSize.Width = childDesireSize.Width;
                         }
                     }
                     else
                     {
-                        childrenDesiredSize.Width += childDesireSize.Width;
-                        if (childrenDesiredSize.Height < childDesireSize.Height)
+                        desiredSize.Width += childDesireSize.Width;
+                        if (desiredSize.Height < childDesireSize.Height)
                         {
-                            childrenDesiredSize.Height = childDesireSize.Height;
+                            desiredSize.Height = childDesireSize.Height;
                         }
                     }
                 }
             }
 
-            return new SizeF(childrenDesiredSize.Width + Margin.Left + Margin.Right, childrenDesiredSize.Height + Margin.Top + Margin.Bottom);
+            return new SizeF(desiredSize.Width + Margin.Left + Margin.Right, desiredSize.Height + Margin.Top + Margin.Bottom);
+        }
+        Vector2 GetStartLocation(Rect finalRect, int childIndex)
+        {
+            if (Orientation == EOrientation.Vertical)
+            {
+                Vector2 startLocation = Vector2.Zero;
+                for (int i = 0; i < childIndex; ++i)
+                {
+                    var layoutablechild = Children[i] as ILayoutable;
+                    startLocation.Y += ChildrenMeasuringSize[layoutablechild].Height;
+                }
+                return startLocation;
+            }
+            else if (Orientation == EOrientation.Horizontal)
+            {
+                Vector2 startLocation = Vector2.Zero;
+                for (int i = 0; i < childIndex; ++i)
+                {
+                    var layoutablechild = Children[i] as ILayoutable;
+                    startLocation.X += ChildrenMeasuringSize[layoutablechild].Width;
+                }
+                return startLocation;
+            }
+            return Vector2.Zero;
         }
 
         public SizeF Arranging(Rect finalRect)
@@ -120,34 +147,64 @@ namespace EngineNS.DesignMacross.Editor
             Size = new SizeF(finalRect.Width, finalRect.Height);
             Location = finalRect.Location + new Vector2(Margin.Left, Margin.Top);
 
-            var nextElementLocation = Vector2.Zero;
-            foreach (var child in Children)
+            if (Orientation == EOrientation.Vertical)
             {
-                var childMeasuringSize = new SizeF();
-                if(child is ILayoutable layoutable)
+                for (int i = 0; i < Children.Count; ++i)
                 {
-                    childMeasuringSize = ChildrenMeasuringSize[layoutable];
-                    var finaleSize = childMeasuringSize;
-                    if (Orientation == EOrientation.Vertical)
+                    var child = Children[i];
+                    if (child is ILayoutable layoutableChild)
                     {
-                        finaleSize.Width = Size.Width;
-                    }
-                    else
-                    {
-                        finaleSize.Height = Size.Height;
-                    }
-                    var rect = new Rect(nextElementLocation, finaleSize);
-                    layoutable.Arranging(rect);
-                }
-                //TODO: need to deal with not ILayoutable element
+                        var childMeasuringSize = ChildrenMeasuringSize[layoutableChild];
 
-                if (Orientation == EOrientation.Vertical)
-                {
-                    nextElementLocation.Y += childMeasuringSize.Height;
+                        var startLocation = GetStartLocation(finalRect, i);
+                        switch (HorizontalAlignment)
+                        {
+                            case EHorizontalAlignment.Right:
+                                startLocation.X = finalRect.Width - childMeasuringSize.Width;
+                                break;
+                            case EHorizontalAlignment.Center:
+                                startLocation.X = (finalRect.Width - childMeasuringSize.Width) * 0.5f;
+                                break;
+                            case EHorizontalAlignment.Left:
+                                startLocation.X = 0;
+                                break;
+                            case EHorizontalAlignment.Stretch:
+                                childMeasuringSize.Width = finalRect.Width;
+                                break;
+                        }
+                        Rect rect = new Rect(startLocation, childMeasuringSize);
+                        layoutableChild.Arranging(rect);
+
+                    }
                 }
-                else
+            }
+            else if (Orientation == EOrientation.Horizontal)
+            {
+                for (int i = 0; i < Children.Count; ++i)
                 {
-                    nextElementLocation.X += childMeasuringSize.Width;
+                    var child = Children[i];
+                    if (child is ILayoutable layoutableChild)
+                    {
+                        var childMeasuringSize = ChildrenMeasuringSize[layoutableChild];
+                        var startLocation = GetStartLocation(finalRect, i);
+                        switch (VerticalAlignment)
+                        {
+                            case EVerticalAlignment.Bottom:
+                                startLocation.Y = finalRect.Height - childMeasuringSize.Height;
+                                break;
+                            case EVerticalAlignment.Center:
+                                startLocation.Y = (finalRect.Height - childMeasuringSize.Height) * 0.5f;
+                                break;
+                            case EVerticalAlignment.Top:
+                                startLocation.Y = 0;
+                                break;
+                            case EVerticalAlignment.Stretch:
+                                childMeasuringSize.Height = finalRect.Height;
+                                break;
+                        }
+                        Rect rect = new Rect(startLocation, childMeasuringSize);
+                        layoutableChild.Arranging(rect);
+                    }
                 }
             }
             return finalRect.Size;
@@ -167,7 +224,7 @@ namespace EngineNS.DesignMacross.Editor
                 if (render != null)
                 {
                     render.Draw(child, ref context);
-                } 
+                }
             }
         }
     }

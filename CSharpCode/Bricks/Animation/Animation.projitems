@@ -9,6 +9,24 @@
     <Import_RootNamespace>EngineNS.Animation</Import_RootNamespace>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="$(MSBuildThisFileDirectory)Macross\StateMachine\Attachment\AnimPlay\GraphElement_AnimPlayAttachment.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Macross\StateMachine\Attachment\AnimPlay\AnimPlayAttachmentClassDescription.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Macross\StateMachine\Attachment\BlendTree\AnimBlendTreeAttachmentClassDescription.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Macross\StateMachine\Attachment\BlendTree\GraphElement_AnimBlendTreeAttachment.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Macross\StateMachine\Attachment\BlendTree\Graph_AnimBlendTreeAttachment.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Macross\StateMachine\CompoundState\Graph_AnimCompoundState.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Macross\StateMachine\CompoundState\OutlineElement_AnimCompoundStateGraph.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Macross\StateMachine\CompoundState\AnimCompoundStateClassDescription.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Macross\StateMachine\CompoundState\AnimCompoundStateEntryClassDescription.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Macross\StateMachine\CompoundState\AnimCompoundStateHubClassDescription.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Macross\StateMachine\SubState\AnimSubStateClassDescription.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Macross\StateMachine\SubState\GraphElement_AnimSubState.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Macross\StateMachine\Transition\AnimStateTransitionClassDescription.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)StateMachine\AnimCompoundState.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)StateMachine\AnimState.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)StateMachine\AnimStateAttachment.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)StateMachine\AnimStateMachine.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)StateMachine\AnimStateTransition.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Asset\BlendSpace\BlendSpace.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)BlendTree\IBlendTree.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)BlendTree\Node\BlendTree_AdditiveBlendSpace1D.cs" />
@@ -25,8 +43,8 @@
     <Compile Include="$(MSBuildThisFileDirectory)BlendTree\Node\BlendTree_MakeAdditivePose.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)BlendTree\Node\BlendTree_SelectPoseByInt.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)BlendTree\Node\BlendTree_ZeroPose.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Macross\UAnimMacross.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Macross\UAnimMacrossEditor.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Macross\StateMachine\AnimStateMachineClassDescription.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Macross\StateMachine\OutlineElement_AnimStateMachine.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Notify\EffectAnimNotify.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Notify\SoundAnimNotify.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Notify\DurativeAnimNotify.cs" />
@@ -70,6 +88,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)AnimationModule.cs" />
   </ItemGroup>
   <ItemGroup>
+    <Folder Include="$(MSBuildThisFileDirectory)Macross\Postprocessing\" />
     <Folder Include="$(MSBuildThisFileDirectory)MorphAnimation\" />
   </ItemGroup>
   <ItemGroup>

@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace EngineNS.DesignMacross.Editor.DetialsPanel
+﻿namespace EngineNS.DesignMacross.Editor.DetialsPanel
 {
     public class TtDetialsEditPanel
     {

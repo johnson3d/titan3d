@@ -1,6 +1,4 @@
 ﻿using EngineNS.DesignMacross.Base.Description;
-using System;
-using System.Collections.Generic;
 
 namespace EngineNS.DesignMacross.Base.Graph
 {
@@ -9,6 +7,7 @@ namespace EngineNS.DesignMacross.Base.Graph
         public Guid Id { get; set; } = Guid.Empty;
         public TtGraphViewport ViewPort { get; set; } = new TtGraphViewport();
         public TtGraphCamera Camera { get; set; } = new TtGraphCamera();
+        public TtCommandHistory CommandHistory { get; set; } = new TtCommandHistory();
         public string Name { get=>Description.Name; set=>Description.Name = value; }
         public Vector2 Location { get; set; } = Vector2.Zero;
         public Vector2 AbsLocation { get => CalculateAbsLocation(this); }
@@ -27,6 +26,7 @@ namespace EngineNS.DesignMacross.Base.Graph
         }
 
         public abstract void ConstructElements(ref FGraphRenderingContext context);
+        public abstract void AfterConstructElements(ref FGraphRenderingContext context);
         #region IDraggable
         public bool CanDrag()
         {
@@ -44,26 +44,56 @@ namespace EngineNS.DesignMacross.Base.Graph
             Rect rect = new Rect(Location, Size);
             //冗余一点
             Rect mouseRect = new Rect(pos - Vector2.One, new SizeF(1.0f, 1.0f));
-            return rect.IntersectsWith(mouseRect);
+            //return rect.IntersectsWith(mouseRect);
+            return true;
         }
-        public void OnSelected(ref FGraphElementRenderingContext context)
+        public virtual void OnSelected(ref FGraphElementRenderingContext context)
         {
 
         }
-        public void OnUnSelected()
+        public virtual void OnUnSelected()
         {
            
+        }
+        public virtual void OnMouseOver(ref FGraphElementRenderingContext context)
+        {
+            
+        }
+
+        public virtual void OnMouseLeave(ref FGraphElementRenderingContext context)
+        {
+            
+        }
+
+        public virtual void OnMouseLeftButtonDown(ref FGraphElementRenderingContext context)
+        {
+            
+        }
+
+        public virtual void OnMouseLeftButtonUp(ref FGraphElementRenderingContext context)
+        {
+            
+        }
+
+        public virtual void OnMouseRightButtonDown(ref FGraphElementRenderingContext context)
+        {
+            
+        }
+
+        public virtual void OnMouseRightButtonUp(ref FGraphElementRenderingContext context)
+        {
+            
         }
         #endregion ISelectable
         #region IContextMeunable
 
-        public virtual void ConstructContextMenu(ref FGraphElementRenderingContext context, TtPopupMenu PopupMenu)
+        public virtual void ConstructContextMenu(ref FGraphElementRenderingContext context, TtPopupMenu popupMenu)
         {
 
         }
-        public void SetContextMenuableId(TtPopupMenu PopupMenu)
+        public void SetContextMenuableId(TtPopupMenu popupMenu)
         {
-            PopupMenu.StringId = Name + "_" + Id + "_" + "ContextMenu";
+            popupMenu.StringId = Name + "_" + Id + "_" + "ContextMenu";
         }
         #endregion IContextMeunable
         public virtual List<IGraphElement> EnumerateChild<T>() where T : class

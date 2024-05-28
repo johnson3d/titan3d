@@ -22,7 +22,7 @@ namespace EngineNS.GamePlay.StateMachine.AnimationStateMachine
 
         public override bool Initialize()
         {
-            StateTimeDuration = Animation.Duration;
+            Duration = Animation.Duration;
             mExtractPoseFromClipCommand = new TtExtractPoseFromClipCommand(Animation);
             BlendTreeRoot = new TtBlendTree_BindedPose();
             return true;

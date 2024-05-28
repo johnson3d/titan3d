@@ -1,7 +1,4 @@
-﻿using EngineNS.DesignMacross.Base.Render;
-using System;
-using System.Collections.Generic;
-using System.Text;
+﻿using EngineNS.DesignMacross.Design;
 
 namespace EngineNS.DesignMacross.Base.Graph
 {
@@ -9,7 +6,7 @@ namespace EngineNS.DesignMacross.Base.Graph
     {
 
     }
-   
+
     public struct FMargin
     {
         public static readonly FMargin Default = new FMargin(0, 0, 0, 0);
@@ -26,5 +23,73 @@ namespace EngineNS.DesignMacross.Base.Graph
         public float Bottom { get; set; }
     }
 
+    public class TtContextMenuHandler
+    {
+        static TtContextMenuHandler mInstance = null;
+        public static TtContextMenuHandler Instance
+        {
+            get
+            {
+                if (mInstance == null)
+                    mInstance = new TtContextMenuHandler();
+                return mInstance;
+            }
+        }
 
+        bool NeedOpenContextMenu = false;
+        IGraphElement ContextMenuElement = null;
+        public virtual TtPopupMenu PopupMenu { get; set; } = new TtPopupMenu("Graph_PopupMenu" + Guid.NewGuid());
+        public void HandleContextMenu(IGraphElement graphElement, ref FGraphElementRenderingContext elementRenderingContext)
+        {
+            if (graphElement is IContextMeunable meunable)
+            {
+
+                if (ImGuiAPI.IsMouseDown(ImGuiMouseButton_.ImGuiMouseButton_Right))
+                {
+                    NeedOpenContextMenu = true;
+                }
+                if (ImGuiAPI.IsMouseDragging(ImGuiMouseButton_.ImGuiMouseButton_Right, -1.0f))
+                {
+                    NeedOpenContextMenu = false;
+                }
+                if (ImGuiAPI.IsMouseReleased(ImGuiMouseButton_.ImGuiMouseButton_Right)
+                    && NeedOpenContextMenu
+                    && elementRenderingContext.ViewPort.IsInViewport(ImGuiAPI.GetMousePos()))
+                {
+                    ContextMenuElement = graphElement;
+                    meunable.SetContextMenuableId(PopupMenu);
+                    var pos = elementRenderingContext.ViewPortInverseTransform(ImGuiAPI.GetMousePos());
+                    if (ContextMenuElement is IGraphElementSelectable selectable && selectable.HitCheck(pos))
+                    {
+                        ImGuiAPI.CloseCurrentPopup();
+                        PopupMenu.StringId = graphElement.Name + "_" + graphElement.Id + "_" + "ContextMenu";
+                        PopupMenu.Reset();
+                        meunable.ConstructContextMenu(ref elementRenderingContext, PopupMenu);
+                        PopupMenu.OpenPopup();
+                    }
+                    NeedOpenContextMenu = false;
+                }
+                PopupMenu.Draw(ref elementRenderingContext);
+            }
+        }
+        public void HandleLinkedPinContextMenu(TtGraph_Method graph, ref FGraphElementRenderingContext elementRenderingContext)
+        {
+            if (graph is IContextMeunable meunable)
+            {
+                ContextMenuElement = graph;
+                meunable.SetContextMenuableId(PopupMenu);
+                var pos = elementRenderingContext.ViewPortInverseTransform(ImGuiAPI.GetMousePos());
+                if (ContextMenuElement is IGraphElementSelectable selectable && selectable.HitCheck(pos))
+                {
+                    ImGuiAPI.CloseCurrentPopup();
+                    PopupMenu.StringId = graph.Name + "_" + graph.Id + "_" + "ContextMenu";
+                    PopupMenu.Reset();
+                    PopupMenu.bHasSearchBox = true;
+                    graph.ConstructLinkedPinContextMenu(ref elementRenderingContext, PopupMenu);
+                    PopupMenu.OpenPopup();
+                }
+                PopupMenu.Draw(ref elementRenderingContext);
+            }
+        }
+    }
 }

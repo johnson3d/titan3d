@@ -25,7 +25,7 @@ namespace EngineNS.Bricks.StateMachine
         bool ShouldUpdate();
         bool AddTransition(ITransition<S, T> transition);
         bool RemoveTransition(ITransition<S, T> transition);
-        bool AddAttachment(IAttachmentRule<S, T> attachment);
-        bool RemoveAttachment(IAttachmentRule<S, T> attachment);
+        bool AddAttachment(IAttachment<S, T> attachment);
+        bool RemoveAttachment(IAttachment<S, T> attachment);
     }
 }

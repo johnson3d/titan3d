@@ -363,6 +363,7 @@ namespace EngineNS.Editor.Forms
             [Browsable(false)]
             public IO.EAssetState AssetState { get; private set; } = IO.EAssetState.Initialized;
             private RName mPreivewAnimation;
+            [RName.PGRName(FilterExts = TtAnimationClip.AssetExt)]
             public RName PreivewAnimation
             {
                 get

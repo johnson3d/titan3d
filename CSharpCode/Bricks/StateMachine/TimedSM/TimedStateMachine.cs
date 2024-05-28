@@ -77,6 +77,7 @@ namespace EngineNS.Bricks.StateMachine.TimedSM
         public bool EnableTick { get; set; } = true;
         public EStateChangeMode StateChangeMode { get; set; } = EStateChangeMode.NextFrame;
         public TtTimedSMClock Clock { get; set; } = new TtTimedSMClock();
+        public float Time { get=>Clock.TimeInSecond; }
         public TtTimedStateMachine()
         {
 
