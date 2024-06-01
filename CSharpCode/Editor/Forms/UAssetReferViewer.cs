@@ -38,6 +38,7 @@ namespace EngineNS.Editor.Forms
         {
             pin.Name = name;
             pin.LinkDesc = NewInOutPinDesc();
+            pin.MultiLinks = true;
 
             AddPinIn(pin);
         }
@@ -45,6 +46,7 @@ namespace EngineNS.Editor.Forms
         {
             pin.Name = name;
             pin.LinkDesc = NewInOutPinDesc();
+            pin.MultiLinks = true;
 
             AddPinOut(pin);
         }
@@ -56,74 +58,80 @@ namespace EngineNS.Editor.Forms
             ImGuiAPI.PushID($"{this.NodeId.ToString()}");
             if (ImGuiAPI.Button("In"))
             {
-                var linkers = new List<UPinLinker>();
-                this.ParentGraph.FindInLinker(InPin, linkers);
-                var pos = Position;
-                pos.X -= 600;
-                var holders = new List<IO.IAssetMeta>();
-                UEngine.Instance.AssetMetaManager.GetAssetHolder(AMeta, holders);
-                foreach (var i in holders)
+                if (AMeta != null)
                 {
-                    bool bFind = false;
-                    foreach (var j in linkers)
+                    var linkers = new List<UPinLinker>();
+                    this.ParentGraph.FindInLinker(InPin, linkers);
+                    var pos = Position;
+                    pos.X -= 600;
+                    var holders = new List<IO.IAssetMeta>();
+                    UEngine.Instance.AssetMetaManager.GetAssetHolder(AMeta, holders);
+                    foreach (var i in holders)
                     {
-                        if (j.InNode.Name == i.ToString())
+                        bool bFind = false;
+                        foreach (var j in linkers)
                         {
-                            bFind = true;
+                            if (j.InNode.Name == i.ToString())
+                            {
+                                bFind = true;
+                            }
                         }
-                    }
-                    if (bFind == false)
-                    {
-                        var node = new UAssetReferNode();
-                        node.Name = i.GetAssetName().ToString();
-                        node.UserData = this;
-                        node.AMeta = i;
-                        var curPos = pos;
-                        UEngine.Instance.EventPoster.RunOn((state) =>
+                        if (bFind == false)
                         {
-                            this.ParentGraph.AddNode(node);
-                            node.Position = curPos;
-                            this.ParentGraph.AddLink(node.OutPin, InPin, true);
-                            return true;
-                        }, Thread.Async.EAsyncTarget.Main);
+                            var node = new UAssetReferNode();
+                            node.Name = i.GetAssetName().ToString();
+                            node.UserData = this;
+                            node.AMeta = i;
+                            var curPos = pos;
+                            UEngine.Instance.EventPoster.RunOn((state) =>
+                            {
+                                this.ParentGraph.AddNode(node);
+                                node.Position = curPos;
+                                this.ParentGraph.AddLink(node.OutPin, InPin, true);
+                                return true;
+                            }, Thread.Async.EAsyncTarget.Main);
 
-                        pos.Y += 100;
+                            pos.Y += 100;
+                        }
                     }
                 }
             }
             ImGuiAPI.SameLine(0, 10);
             if (ImGuiAPI.Button("Out"))
             {
-                var linkers = new List<UPinLinker>();
-                this.ParentGraph.FindOutLinker(OutPin, linkers);
-                var pos = Position;
-                pos.X += 600;
-                foreach (var i in AMeta.RefAssetRNames)
+                if (AMeta != null)
                 {
-                    bool bFind = false;
-                    foreach (var j in linkers)
+                    var linkers = new List<UPinLinker>();
+                    this.ParentGraph.FindOutLinker(OutPin, linkers);
+                    var pos = Position;
+                    pos.X += 600;
+                    foreach (var i in AMeta.RefAssetRNames)
                     {
-                        if (j.InNode.Name == i.ToString())
+                        bool bFind = false;
+                        foreach (var j in linkers)
                         {
-                            bFind = true;
+                            if (j.InNode.Name == i.ToString())
+                            {
+                                bFind = true;
+                            }
                         }
-                    }
-                    if (bFind == false)
-                    {
-                        var node = new UAssetReferNode();
-                        node.Name = i.ToString();
-                        node.UserData = this;                        
-                        node.AMeta = UEngine.Instance.AssetMetaManager.GetAssetMeta(i);
-                        var curPos = pos;
-                        UEngine.Instance.EventPoster.RunOn((state) =>
+                        if (bFind == false)
                         {
-                            this.ParentGraph.AddNode(node);
-                            node.Position = curPos;
-                            this.ParentGraph.AddLink(OutPin, node.InPin, true);
-                            return true;
-                        }, Thread.Async.EAsyncTarget.Main);
+                            var node = new UAssetReferNode();
+                            node.Name = i.ToString();
+                            node.UserData = this;
+                            node.AMeta = UEngine.Instance.AssetMetaManager.GetAssetMeta(i);
+                            var curPos = pos;
+                            UEngine.Instance.EventPoster.RunOn((state) =>
+                            {
+                                this.ParentGraph.AddNode(node);
+                                node.Position = curPos;
+                                this.ParentGraph.AddLink(OutPin, node.InPin, true);
+                                return true;
+                            }, Thread.Async.EAsyncTarget.Main);
 
-                        pos.Y += 100;
+                            pos.Y += 100;
+                        }
                     }
                 }
             }
@@ -149,9 +157,6 @@ namespace EngineNS.Editor.Forms
         public UGraphRenderer GraphRenderer { get; } = new UGraphRenderer();
 
         public float LeftWidth = 0;
-        public Vector2 WindowPos;
-        public Vector2 WindowSize = new Vector2(800, 600);
-
         public IRootForm GetRootForm()
         {
             return this;
@@ -211,6 +216,40 @@ namespace EngineNS.Editor.Forms
         #endregion
 
         #region DrawUI
+        #endregion
+        #region DrawUI
+        public Vector2 WindowPos;
+        public Vector2 WindowSize = new Vector2(800, 600);
+        public bool IsDrawing { get; set; }
+        public unsafe void OnDraw()
+        {
+            if (Visible == false)
+                return;
+
+            var pivot = new Vector2(0);
+            ImGuiAPI.SetNextWindowSize(in WindowSize, ImGuiCond_.ImGuiCond_FirstUseEver);
+            IsDrawing = EGui.UIProxy.DockProxy.BeginMainForm(AssetName.Name, this, ImGuiWindowFlags_.ImGuiWindowFlags_NoSavedSettings);
+            if (IsDrawing)
+            {
+                if (ImGuiAPI.IsWindowFocused(ImGuiFocusedFlags_.ImGuiFocusedFlags_RootAndChildWindows))
+                {
+                    var mainEditor = UEngine.Instance.GfxDevice.SlateApplication as Editor.UMainEditorApplication;
+                    if (mainEditor != null)
+                        mainEditor.AssetEditorManager.CurrentActiveEditor = this;
+                }
+                WindowPos = ImGuiAPI.GetWindowPos();
+                WindowSize = ImGuiAPI.GetWindowSize();
+                DrawToolBar();
+                //var sz = new Vector2(-1);
+                //ImGuiAPI.BeginChild("Client", ref sz, false, ImGuiWindowFlags_.)
+                ImGuiAPI.Separator();
+            }
+            ResetDockspace();
+            EGui.UIProxy.DockProxy.EndMainForm(IsDrawing);
+
+            DrawRefGraph();
+            DrawEditorDetails();
+        }
         bool mDockInitialized = false;
         protected void ResetDockspace(bool force = false)
         {
@@ -227,103 +266,45 @@ namespace EngineNS.Editor.Forms
             mDockInitialized = true;
 
             var rightId = id;
+            uint middleId = 0;
+            uint downId = 0;
             uint leftId = 0;
-            ImGuiAPI.DockBuilderSplitNode(rightId, ImGuiDir_.ImGuiDir_Left, 0.2f, ref leftId, ref rightId);
+            uint rightUpId = 0;
+            uint rightDownId = 0;
+            ImGuiAPI.DockBuilderSplitNode(rightId, ImGuiDir_.ImGuiDir_Left, 0.8f, ref middleId, ref rightId);
+            ImGuiAPI.DockBuilderSplitNode(rightId, ImGuiDir_.ImGuiDir_Down, 0.5f, ref rightDownId, ref rightUpId);
+            ImGuiAPI.DockBuilderSplitNode(middleId, ImGuiDir_.ImGuiDir_Down, 0.3f, ref downId, ref middleId);
+            ImGuiAPI.DockBuilderSplitNode(middleId, ImGuiDir_.ImGuiDir_Left, 0.2f, ref leftId, ref middleId);
 
-            ImGuiAPI.DockBuilderDockWindow(EGui.UIProxy.DockProxy.GetDockWindowName("Left", mDockKeyClass), leftId);
-            ImGuiAPI.DockBuilderDockWindow(EGui.UIProxy.DockProxy.GetDockWindowName("Right", mDockKeyClass), rightId);
+            ImGuiAPI.DockBuilderDockWindow(EGui.UIProxy.DockProxy.GetDockWindowName("RefGraph", mDockKeyClass), middleId);
+            ImGuiAPI.DockBuilderDockWindow(EGui.UIProxy.DockProxy.GetDockWindowName("EditorDetails", mDockKeyClass), rightDownId);
+
             ImGuiAPI.DockBuilderFinish(id);
-        }
-        public unsafe void OnDraw()
-        {
-            if (Visible == false)
-                return;
-
-            bool drawing = true;
-            var pivot = new Vector2(0);
-            ImGuiAPI.SetNextWindowSize(in WindowSize, ImGuiCond_.ImGuiCond_FirstUseEver);
-            var result = EGui.UIProxy.DockProxy.BeginMainForm(AssetName.Name, this, ImGuiWindowFlags_.ImGuiWindowFlags_None |
-                ImGuiWindowFlags_.ImGuiWindowFlags_NoSavedSettings);
-            if (result)
-            {
-                if (ImGuiAPI.IsWindowFocused(ImGuiFocusedFlags_.ImGuiFocusedFlags_RootAndChildWindows))
-                {
-                    var mainEditor = UEngine.Instance.GfxDevice.SlateApplication as Editor.UMainEditorApplication;
-                    if (mainEditor != null)
-                        mainEditor.AssetEditorManager.CurrentActiveEditor = this;
-                }
-                WindowPos = ImGuiAPI.GetWindowPos();
-                WindowSize = ImGuiAPI.GetWindowSize();
-                DrawToolBar();
-                ImGuiAPI.Separator();
-            }
-            else
-            {
-                drawing = false;
-            }
-            EGui.UIProxy.DockProxy.EndMainForm(result);
-
-            DrawLeft();
-            DrawRight();
-
-            if (drawing)
-            {
-                if (PreviewDockId != 0)
-                {
-
-                }
-            }
         }
         protected void DrawToolBar()
         {
             var btSize = Vector2.Zero;
             if (EGui.UIProxy.CustomButton.ToolButton("ExportRefs", in btSize))
             {
-                
+
             }
         }
-        uint PreviewDockId = 0;
-        
-        private async System.Threading.Tasks.Task Compile()
-        {
-            
-        }
-        bool mLeftShow = true;
-        protected unsafe void DrawLeft()
-        {
-            if (PreviewDockId == 0)
-                PreviewDockId = ImGuiAPI.GetID($"{AssetName}");
 
-            var size = Vector2.MinusOne;
-            var show = EGui.UIProxy.DockProxy.BeginPanel(mDockKeyClass, "Left", ref mLeftShow, ImGuiWindowFlags_.ImGuiWindowFlags_None);
+        bool ShowEditorPropGrid = true;
+        protected void DrawEditorDetails()
+        {
+            var sz = new Vector2(-1);
+            var show = EGui.UIProxy.DockProxy.BeginPanel(mDockKeyClass, "EditorDetails", ref ShowEditorPropGrid, ImGuiWindowFlags_.ImGuiWindowFlags_None);
             if (show)
             {
-                if (ImGuiAPI.CollapsingHeader("Preview", ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_None))
-                {
-                    ImGuiDockNodeFlags_ dockspace_flags = ImGuiDockNodeFlags_.ImGuiDockNodeFlags_None;
-                    var winClass = new ImGuiWindowClass();
-                    winClass.UnsafeCallConstructor();
-                    var sz = ImGuiAPI.GetWindowSize();
-                    sz.Y = sz.X;
-                    ImGuiAPI.DockSpace(PreviewDockId, in sz, dockspace_flags, in winClass);
-                    winClass.UnsafeCallDestructor();
-                }
-                //if (ImGuiAPI.CollapsingHeader("NodeProperty", ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_None))
-                //{
-                //    NodePropGrid.OnDraw(true, false, false);
-                //}
-                //if (ImGuiAPI.CollapsingHeader("EditorProperty", ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_None))
-                //{
-                //    GraphPropGrid.OnDraw(true, false, false);
-                //}
+                
             }
             EGui.UIProxy.DockProxy.EndPanel(show);
         }
-        bool mRightShow = true;
-        protected unsafe void DrawRight()
+        bool ShowPreview = true;
+        protected unsafe void DrawRefGraph()
         {
-            var size = Vector2.MinusOne;
-            var show = EGui.UIProxy.DockProxy.BeginPanel(mDockKeyClass, "Right", ref mRightShow, ImGuiWindowFlags_.ImGuiWindowFlags_None);
+            var show = EGui.UIProxy.DockProxy.BeginPanel(mDockKeyClass, "RefGraph", ref ShowPreview, ImGuiWindowFlags_.ImGuiWindowFlags_None);
             if (show)
             {
                 GraphRenderer.OnDraw();

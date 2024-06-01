@@ -15,6 +15,8 @@ namespace EngineNS.Thread
             BeforeFrame();
 
             RenderMT();
+
+            TickAwaitEvent();
         }
         private void BeforeFrame()
         {

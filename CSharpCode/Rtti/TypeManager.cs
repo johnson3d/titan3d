@@ -533,7 +533,7 @@ namespace EngineNS.Rtti
             {
                 if (t.IsPrimitive == false && args == null && t.GetConstructor(new Type[] { }) == null)
                 {
-                    return System.Runtime.Serialization.FormatterServices.GetUninitializedObject(t);
+                    return RuntimeHelpers.GetUninitializedObject(t);
                 }
                 var result = System.Activator.CreateInstance(t, args);
 
@@ -544,7 +544,7 @@ namespace EngineNS.Rtti
             {
                 
             }
-            return System.Runtime.Serialization.FormatterServices.GetUninitializedObject(t);
+            return RuntimeHelpers.GetUninitializedObject(t);
         }
         public static UTypeDescManager Instance { get; } = new UTypeDescManager();
         public Dictionary<string, ServiceManager> Services { get; } = new Dictionary<string, ServiceManager>();

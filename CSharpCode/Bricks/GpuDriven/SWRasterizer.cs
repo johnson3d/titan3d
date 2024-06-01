@@ -425,15 +425,25 @@ namespace EngineNS.Bricks.GpuDriven
             SetUpRasterizeShading = UEngine.Instance.ShadingEnvManager.GetShadingEnv<TtSwRasterizeSetUpShading>();
 
             mShadingStruct.DispatchArg = SWRasterizer.DispatchArg;
-            unsafe
-            {
-                var size = (uint)(sizeof(NxRHI.FIndirectDispatchArgument) / sizeof(int));
-                var idArg = new NxRHI.FIndirectDispatchArgument();
-                idArg.X = 1;
-                idArg.Y = 1;
-                idArg.Z = 1;
-                IndirectArgBuffer.SetSize(size + 1, &idArg, NxRHI.EBufferType.BFT_UAV | NxRHI.EBufferType.BFT_SRV | NxRHI.EBufferType.BFT_IndirectArgs);
-            }
+            //unsafe
+            //{
+            //    var size = (uint)(sizeof(NxRHI.FIndirectDispatchArgument) / sizeof(int));
+            //    var idArg = new NxRHI.FIndirectDispatchArgument();
+            //    idArg.X = 1;
+            //    idArg.Y = 1;
+            //    idArg.Z = 1;
+            //    IndirectArgBuffer.SetSize(size + 1, &idArg, NxRHI.EBufferType.BFT_UAV | NxRHI.EBufferType.BFT_SRV | NxRHI.EBufferType.BFT_IndirectArgs);
+            //}
+            SetIndirectArgBufferSize();
+        }
+        private unsafe void SetIndirectArgBufferSize()
+        {
+            var size = (uint)(sizeof(NxRHI.FIndirectDispatchArgument) / sizeof(int));
+            var idArg = new NxRHI.FIndirectDispatchArgument();
+            idArg.X = 1;
+            idArg.Y = 1;
+            idArg.Z = 1;
+            IndirectArgBuffer.SetSize(size + 1, &idArg, NxRHI.EBufferType.BFT_UAV | NxRHI.EBufferType.BFT_SRV | NxRHI.EBufferType.BFT_IndirectArgs);
         }
         public unsafe override void TickLogic(UWorld world, URenderPolicy policy, bool bClear)
         {

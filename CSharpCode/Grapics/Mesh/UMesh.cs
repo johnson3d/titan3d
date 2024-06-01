@@ -169,6 +169,8 @@ namespace EngineNS.Graphics.Mesh
                 var mtlMesh = MaterialMesh;
                 if (mtlMesh.SubMeshes.Count <= SubMesh.MeshIndex)
                     return null;
+                if (AtomIndex >= mtlMesh.SubMeshes[SubMesh.MeshIndex].Materials.Count)
+                    return null;
                 return mtlMesh.SubMeshes[SubMesh.MeshIndex].Materials[AtomIndex];
             }            
             public UMaterialMesh MaterialMesh 

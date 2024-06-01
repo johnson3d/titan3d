@@ -125,9 +125,11 @@ namespace EngineNS.Editor.Forms
             {
                 var meshCenter = aabb.GetCenter();
                 var meshSize = aabb.GetSize() * PlaneScale;
+                var maxLength = MathHelper.Max(meshSize.X, meshSize.Z);
+                meshSize.X = meshSize.Z = maxLength;
                 meshSize.Y = aabb.GetSize().Y * 0.05f;
                 var boxStart = meshCenter - meshSize * 0.5f;
-                boxStart.Y -= aabb.GetSize().Y * 0.5f;
+                boxStart.Y -= aabb.GetSize().Y * 0.5f + meshSize.Y * 0.5f + 0.001f;
                 var box = Graphics.Mesh.UMeshDataProvider.MakeBox(boxStart.X, boxStart.Y, boxStart.Z, meshSize.X, meshSize.Y, meshSize.Z).ToMesh();
 
                 var PlaneMesh = new Graphics.Mesh.TtMesh();
@@ -252,7 +254,7 @@ namespace EngineNS.Editor.Forms
             ImGuiAPI.SameLine(0, -1);
             if (EGui.UIProxy.CustomButton.ToolButton("ApplySubMeshes", in btSize))
             {
-                Mesh.SerialId++;
+                Mesh.UpdateSubMeshes();
             }
             ImGuiAPI.SameLine(0, -1);
             if (EGui.UIProxy.CustomButton.ToolButton("Undo", in btSize))

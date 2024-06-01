@@ -190,7 +190,14 @@ namespace EngineNS.Graphics.Mesh
                     IO.ISerializer partialSkeleton = null;
                     using (var ar = attr.GetReader(manager))
                     {
-                        ar.Read(out partialSkeleton, manager);
+                        try
+                        {
+                            ar.Read(out partialSkeleton, manager);
+                        }
+                        catch (Exception exp)
+                        {
+                            Profiler.Log.WriteException(exp);
+                        }
                     }
                     if(partialSkeleton is Animation.SkeletonAnimation.Skeleton.TtSkinSkeleton)
                     {

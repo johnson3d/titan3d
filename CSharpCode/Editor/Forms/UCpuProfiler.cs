@@ -171,7 +171,7 @@ namespace EngineNS.Editor.Forms
                             
                             if (mRpcProfilerData == null || mRpcProfilerData.IsCompleted)
                             {
-                                if (mRpcProfilerData != null)
+                                if (mRpcProfilerData != null && mRpcProfilerData.Result != null)
                                     SetCopes(mRpcProfilerData.Result.Scopes);
                                 mRpcProfilerData = Profiler.URpcProfiler_RpcCaller.GetProfilerData(i);
                             }

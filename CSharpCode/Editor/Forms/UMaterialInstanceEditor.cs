@@ -187,7 +187,6 @@ namespace EngineNS.Editor.Forms
 
         float ObjecRotAngle = 0;
         public float ObjectRotateSpeed { get; set; } = 0;
-        int test0 = 0;
         bool mIsDrawing = true;
         bool IsDrawing
         {
@@ -299,7 +298,6 @@ namespace EngineNS.Editor.Forms
                 ActionRecorder.Redo();
             }
         }
-        bool mPropertyShow = true;
         
         public void OnEvent(in Bricks.Input.Event e)
         {

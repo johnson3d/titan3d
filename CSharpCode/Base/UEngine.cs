@@ -41,7 +41,7 @@ namespace EngineNS
     public partial class UEngineConfig
     {
         public const int MajorVersion = 1;
-        public const int MiniVersion = 1;
+        public const int MiniVersion = 4;
         public void SaveConfig(string sltFile)
         {
             IO.TtFileManager.SaveObjectToXml(sltFile, this);

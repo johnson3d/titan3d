@@ -1201,7 +1201,7 @@ namespace EngineNS.NxRHI
             {
                 desc.Desc.MipLevel = mipLevel;
                 desc.Desc.dwStructureSize = (uint)sizeof(FPictureDesc);
-                var attr = node.GetOrAddAttribute("Desc", 0, 0);
+                var attr = node.GetOrAddAttribute("Desc", 1, 0);
                 using (var ar = attr.GetWriter((ulong)sizeof(FPictureDesc)))
                 {
                     ar.Write(desc.Desc);
@@ -1210,10 +1210,7 @@ namespace EngineNS.NxRHI
                     {
                         ar.Write(desc.MipSizes[i]);
                     }
-                }
-                attr = node.GetOrAddAttribute("Desc2", 0, 0);
-                using (var ar = attr.GetWriter((ulong)sizeof(Vector3i)))
-                {
+
                     ar.Write(desc.BlockWidth);
                     ar.Write(desc.BlockHeight);
                     ar.Write(desc.BlockSize);
@@ -1347,7 +1344,7 @@ namespace EngineNS.NxRHI
             {
                 desc.Desc.MipLevel = mipLevel;
                 desc.Desc.dwStructureSize = (uint)sizeof(FPictureDesc);
-                var attr = node.GetOrAddAttribute("Desc", 0, 0);
+                var attr = node.GetOrAddAttribute("Desc", 1, 0);
                 using (var ar = attr.GetWriter((ulong)sizeof(FPictureDesc)))
                 {
                     ar.Write(desc.Desc);
@@ -1356,10 +1353,7 @@ namespace EngineNS.NxRHI
                     {
                         ar.Write(desc.MipSizes[i]);
                     }
-                }
-                attr = node.GetOrAddAttribute("Desc2", 0, 0);
-                using (var ar = attr.GetWriter((ulong)sizeof(Vector3i)))
-                {
+
                     ar.Write(desc.BlockWidth);
                     ar.Write(desc.BlockHeight);
                     ar.Write(desc.BlockSize);
@@ -1569,7 +1563,7 @@ namespace EngineNS.NxRHI
             {
                 desc.Desc.MipLevel = mipLevel;
                 desc.Desc.dwStructureSize = (uint)sizeof(FPictureDesc);
-                var attr = node.GetOrAddAttribute("Desc", 0, 0);
+                var attr = node.GetOrAddAttribute("Desc", 1, 0);
                 using (var ar = attr.GetWriter((ulong)sizeof(FPictureDesc)))
                 {
                     ar.Write(desc.Desc);
@@ -1578,10 +1572,7 @@ namespace EngineNS.NxRHI
                     {
                         ar.Write(desc.MipSizes[i]);
                     }
-                }
-                attr = node.GetOrAddAttribute("Desc2", 0, 0);
-                using (var ar = attr.GetWriter((ulong)sizeof(Vector3i)))
-                {
+
                     ar.Write(desc.BlockWidth);
                     ar.Write(desc.BlockHeight);
                     ar.Write(desc.BlockSize);
@@ -2291,13 +2282,13 @@ namespace EngineNS.NxRHI
                     }
                     desc.MipSizes.Add(tmp);
                 }
-            }
-            attr = node.TryGetAttribute("Desc2");
-            using (var ar = attr.GetReader(null))
-            {
-                ar.Read(out desc.BlockWidth);
-                ar.Read(out desc.BlockHeight);
-                ar.Read(out desc.BlockSize);
+
+                if(attr.Version==1)
+                {
+                    ar.Read(out desc.BlockWidth);
+                    ar.Read(out desc.BlockHeight);
+                    ar.Read(out desc.BlockSize);
+                }
             }
         }
         public static unsafe UPicDesc LoadPictureDesc(IO.TtXndNode node)

@@ -264,6 +264,18 @@ namespace EngineNS.Graphics.Mesh
             UpdateAABB();
             return true;
         }
+        public void UpdateSubMeshes()
+        {
+            foreach (var i in SubMeshes)
+            {
+                if (false == i.Initialize(i.Mesh, i.Materials))
+                {
+
+                }
+            }
+            UpdateAABB();
+            SerialId++;
+        }
         public unsafe static UMaterialMesh LoadXnd(UMaterialMeshManager manager, IO.TtXndNode node)
         {
             try
@@ -351,6 +363,7 @@ namespace EngineNS.Graphics.Mesh
                         Mesh = await UEngine.Instance.GfxDevice.MeshPrimitiveManager.GetMeshPrimitive(value);
                         if (Mesh.mCoreObject.IsValidPointer == false)
                         {
+                            Profiler.Log.WriteLine(Profiler.ELogTag.Error, "IO", $"GetMeshPrimitive({value}) failed");
                             AssetState = IO.EAssetState.LoadFailed;
                             return;
                         }
@@ -533,6 +546,8 @@ namespace EngineNS.Graphics.Mesh
                 get
                 {
                     var tmp = new TSaveData();
+                    if (this.Mesh == null)
+                        return tmp;
                     tmp.MeshName = this.Mesh.AssetName;
                     for (int i = 0; i < Materials.Count; i++)
                     {
@@ -554,6 +569,7 @@ namespace EngineNS.Graphics.Mesh
                         Mesh = await UEngine.Instance.GfxDevice.MeshPrimitiveManager.GetMeshPrimitive(value.MeshName);
                         if (Mesh == null)
                         {
+                            Profiler.Log.WriteLine(Profiler.ELogTag.Error, "IO", $"GetMeshPrimitive({value.MeshName}) failed");
                             AssetState = IO.EAssetState.LoadFailed;
                             return;
                         }
@@ -595,6 +611,8 @@ namespace EngineNS.Graphics.Mesh
             mAABB.InitEmptyBox();
             foreach (var i in SubMeshes)
             {
+                if (i.Mesh == null)
+                    continue;
                 BoundingBox.Merge(in mAABB, i.Mesh.mCoreObject.mAABB, out mAABB);
             }
         }
