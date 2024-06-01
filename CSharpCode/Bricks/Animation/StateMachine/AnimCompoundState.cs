@@ -1,12 +1,13 @@
-﻿using EngineNS.Animation.SkeletonAnimation.Runtime.Pose;
+﻿using EngineNS.Animation.BlendTree;
+using EngineNS.Animation.SkeletonAnimation.Runtime.Pose;
 using System;
 using System.Collections.Generic;
 using System.Text;
 
 namespace EngineNS.Animation.StateMachine
 {
-    public class TtAnimCompoundState<S> : Bricks.StateMachine.TimedSM.TtTimedCompoundState<S>
+    public class TtAnimCompoundState<S> : Bricks.StateMachine.TimedSM.TtTimedCompoundState<S, FAnimBlendTreeTickContext>
     {
-        public TtLocalSpaceRuntimePose OutPose { get; set; }
+
     }
 }

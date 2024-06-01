@@ -9,24 +9,30 @@ namespace EngineNS.Bricks.StateMachine.TimedSM
         public S CenterData { get; set; }
         public string Name { get; set; }
 
-        public void Enter()
+        public virtual void Enter()
         {
         }
 
-        public void Exit()
+        public virtual void Exit()
         {
         }
 
-        public void Initialize()
+        public virtual bool Initialize()
         {
+            return false;
         }
 
-        public bool ShouldUpdate()
+        public virtual bool ShouldUpdate()
         {
             return true;
         }
 
-        public void Tick(float elapseSecond, in T context)
+        public virtual void Tick(float elapseSecond, in T context)
+        {
+            
+        }
+
+        public virtual void PostTick(float elapseSecond, in T context)
         {
             if (ShouldUpdate())
             {
@@ -43,25 +49,35 @@ namespace EngineNS.Bricks.StateMachine.TimedSM
         public S CenterData { get; set; }
         public string Name { get; set; }
 
-        public void Enter()
+        public virtual void Enter()
         {
         }
 
-        public void Exit()
+        public virtual void Exit()
         {
         }
 
-        public void Initialize()
+        public virtual bool Initialize()
         {
+            return false;
         }
 
-        public bool ShouldUpdate()
+        public virtual bool ShouldUpdate()
         {
             return true;
         }
 
-        public void Tick(float elapseSecond, in T context)
+        public virtual void Tick(float elapseSecond, in T context)
         {
+
+        }
+
+        public virtual void PostTick(float elapseSecond, in T context)
+        {
+            if (ShouldUpdate())
+            {
+                Update(elapseSecond, context);
+            }
         }
 
         public void Update(float elapseSecond, in T context)

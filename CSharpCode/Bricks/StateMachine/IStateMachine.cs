@@ -30,6 +30,6 @@ namespace EngineNS.Bricks.StateMachine
         public void TransitionTo(IState<S, T> state, ITransition<S, T> transition);
         public void TransitionTo(ITransition<S, T> transition);
 
-        public void OnStateChange();
+        public void OnStateChange(IState<S, T> preState, IState<S, T> currentState);
     }
 }

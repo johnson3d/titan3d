@@ -25,9 +25,9 @@ namespace EngineNS.Bricks.StateMachine.SampleSM
            
         }
 
-        public void Initialize()
+        public bool Initialize()
         {
-           
+            return false;
         }
 
         public bool ShouldUpdate()

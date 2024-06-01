@@ -87,10 +87,11 @@ namespace EngineNS.Animation.Asset
                     }
                 }
 
-                var mesh = result as TtSkeletonAsset;
-                if (mesh != null)
+                var asset = result as TtSkeletonAsset;
+                if (asset != null)
                 {
-                    return mesh;
+                    asset.Skeleton.ConstructHierarchy();
+                    return asset;
                 }
                 return null;
             }

@@ -9,6 +9,7 @@
     <Import_RootNamespace>EngineNS.Animation</Import_RootNamespace>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="$(MSBuildThisFileDirectory)BlendTree\Node\BlendTree_AnimStateMachine.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Macross\StateMachine\Attachment\AnimPlay\GraphElement_AnimPlayAttachment.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Macross\StateMachine\Attachment\AnimPlay\AnimPlayAttachmentClassDescription.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Macross\StateMachine\Attachment\BlendTree\AnimBlendTreeAttachmentClassDescription.cs" />

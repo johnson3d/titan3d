@@ -21,8 +21,9 @@ namespace EngineNS.Bricks.StateMachine.TimedSM
         {
         }
 
-        public void Initialize()
+        public bool Initialize()
         {
+            return false;
         }
 
         public bool ShouldUpdate()

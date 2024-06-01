@@ -88,7 +88,7 @@ namespace EngineNS.Animation.BlendTree.Node
             }
             return mAnimationCommand;
         }
-        public override void Tick(float elapseSecond)
+        public override void Tick(float elapseSecond, in FAnimBlendTreeTickContext context)
         {
             mAnimationCommand.Desc.Times.Clear();
             mAnimationCommand.Desc.Weights.Clear();

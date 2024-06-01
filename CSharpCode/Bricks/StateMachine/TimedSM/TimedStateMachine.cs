@@ -102,15 +102,7 @@ namespace EngineNS.Bricks.StateMachine.TimedSM
                 IsInitialized = true;
             }
             Clock.Advance(elapseSecond);
-            Update(elapseSecond, context);
-        }
 
-        public void SetDefaultState(IState<S, T> state)
-        {
-            CurrentState = state;
-        }
-        public virtual void Update(float elapseSecond, in T context)
-        {
             if (StateChangeMode == EStateChangeMode.NextFrame && PostState != null)
             {
                 SwapPostToCurrent();
@@ -120,13 +112,13 @@ namespace EngineNS.Bricks.StateMachine.TimedSM
                 return;
             CurrentState.Tick(elapseSecond, context);
 
-            if(CurrentState.TryCheckTransitions(in context, out var transitions))
+            if (CurrentState.TryCheckTransitions(in context, out var transitions))
             {
                 foreach (var transition in transitions)
                 {
-                    if(transition.To is ICompoundStates<S, T> hub)
+                    if (transition.To is ICompoundStates<S, T> hub)
                     {
-                        if(hub.TryCheckTransitions(in context, out var hubTransitions))
+                        if (hub.TryCheckTransitions(in context, out var hubTransitions))
                         {
                             TransitionTo(hubTransitions[0]);
                             break;
@@ -138,13 +130,28 @@ namespace EngineNS.Bricks.StateMachine.TimedSM
                         break;
                     }
                 }
+                //Immediately swap to post state current frame
+                if (StateChangeMode == EStateChangeMode.Immediately && PostState != null)
+                {
+                    SwapPostToCurrent();
+                    CurrentState.Tick(elapseSecond, context);
+                }
             }
-            //Immediately swap to post state current frame
-            if (StateChangeMode == EStateChangeMode.Immediately && PostState != null)
-            {
-                SwapPostToCurrent();
-                CurrentState.Tick(elapseSecond, context);
-            }
+        }
+
+        public virtual void PostTick(float elapseSecond, in T context)
+        {
+            Update(elapseSecond, context);
+        }
+
+        public virtual void SetDefaultState(IState<S, T> state)
+        {
+            CurrentState = state;
+        }
+
+        //costom logic update
+        public virtual void Update(float elapseSecond, in T context)
+        {
         }
         public virtual void TransitionTo(IState<S, T> state, ITransition<S, T> transition)
         {
@@ -174,9 +181,9 @@ namespace EngineNS.Bricks.StateMachine.TimedSM
             PostTransition = null;
 
             CurrentState.Enter();
-            OnStateChange();
+            OnStateChange(PreState, CurrentState);
         }
-        public virtual void OnStateChange()
+        public virtual void OnStateChange(IState<S, T> preState, IState<S, T> currentState)
         {
 
         }

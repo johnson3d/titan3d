@@ -55,7 +55,7 @@ namespace EngineNS.Animation.BlendTree.Node
             copyCmd.FromCommand = ToNode.ConstructAnimationCommandTree(copyCmd, ref context);
             return copyCmd;
         }
-        public override void Tick(float elapseSecond)
+        public override void Tick(float elapseSecond, in FAnimBlendTreeTickContext context)
         {
             mCurrentTime += elapseSecond;
             mAnimationCommand.Desc.Weight = Math.Min(mCurrentTime / BlendTime, 1.0f);
@@ -66,5 +66,10 @@ namespace EngineNS.Animation.BlendTree.Node
             mCurrentTime = 0.0f;
             BlendCompelete = false;
         }
+    }
+
+    public class TtBlendTree_ClipCrossfadeWithPose<T> : TtBlendTree_CrossfadePose<T> where T : IRuntimePose
+    {
+
     }
 }

@@ -185,6 +185,10 @@ namespace EngineNS.Graphics.Pipeline.Shader
                 result.UsedUniformVars.Add(i.Clone(result));
             }
 
+            result.Rasterizer = mtl.Rasterizer;
+            result.DepthStencil = mtl.DepthStencil;
+            result.Blend = mtl.Blend;
+
             result.SerialId++;
             return result;
         }

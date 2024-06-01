@@ -11,20 +11,30 @@ using EngineNS.Bricks.StateMachine.TimedSM;
 
 namespace EngineNS.Animation.StateMachine
 {
-    public class TtAnimState<S> : Bricks.StateMachine.TimedSM.TtTimedState<S>
+    public class TtAnimState<S> : Bricks.StateMachine.TimedSM.TtTimedState<S, FAnimBlendTreeTickContext>
     {
-        public TtBlendTree_CopyPose<TtLocalSpaceRuntimePose> Root = null;
-        public override void Update(float elapseSecond, in TtStateMachineContext context)
+        public TtBlendTree_CopyPose<TtLocalSpaceRuntimePose> BlendTree = null;
+        public override bool Initialize()
         {
+            // BlendTree initialize now single animAttachment
             foreach (var attachment in Attachments)
             {
-                if (attachment is TtAnimStateAttachment<S> animPlay)
+                if (attachment is TtAnimStateAttachment<S> animAttachment)
                 {
-                    Root.FromNode = animPlay.Root;
+                    attachment.Initialize();
+                    BlendTree.FromNode = animAttachment.BlendTree;
                 }
             }
-            base.Update(elapseSecond, context);
+            return base.Initialize();
         }
-
+        public override void Tick(float elapseSecond, in FAnimBlendTreeTickContext context)
+        {
+            base.Tick(elapseSecond, context);
+            BlendTree.Tick(elapseSecond, context);
+        }
+        public IBlendTree<TtLocalSpaceRuntimePose> ConstructBlendTree(ref FConstructAnimationCommandTreeContext context)
+        {
+            return null;
+        }
     }
 }

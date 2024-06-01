@@ -12,6 +12,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)Base\Graph\GraphElement.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Base\Graph\GraphViewport.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Base\Graph\GraphCamera.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)DesignMacrossNode.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Design\ConnectingLine\GraphElement_DataLine.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Design\Expressions\LogicOperator\GraphElement_LogicOperator.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Design\Expressions\LogicOperator\LogicOperatorDescription.cs" />

@@ -102,14 +102,29 @@ namespace EngineNS.Bricks.StateMachine.TimedSM
             if (!EnableTick)
                 return;
             mClock.Advance(elapseSecond);
-            if (!ShouldUpdate())
-                return;
-            Update(elapseSecond, context);
+
             foreach (var attachment in mAttachments)
             {
                 //if (attachment.Check())
                 {
                     attachment.Tick(elapseSecond, context);
+                }
+            }
+
+
+        }
+        public virtual void PostTick(float elapseSecond, in T context)
+        {
+            if (ShouldUpdate())
+            {
+                Update(elapseSecond, context);
+
+            }
+            foreach (var attachment in mAttachments)
+            {
+                if (attachment.ShouldUpdate())
+                {
+                    attachment.Update(elapseSecond, context);
                 }
             }
         }

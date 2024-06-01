@@ -8,7 +8,7 @@ namespace EngineNS.Bricks.StateMachine
     {
         public S CenterData { get; set; }
         string Name { get; set; }
-        void Initialize();
+        bool Initialize();
         void Enter();
         void Exit();
         /// <summary>

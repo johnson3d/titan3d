@@ -93,9 +93,9 @@ namespace EngineNS.Bricks.StateMachine.SampleSM
             PostTransition = null;
 
             CurrentState.Enter();
-            OnStateChange();
+            OnStateChange(PreState, CurrentState);
         }
-        public virtual void OnStateChange()
+        public virtual void OnStateChange(IState<S, T> preState, IState<S, T> currentState)
         {
 
         }

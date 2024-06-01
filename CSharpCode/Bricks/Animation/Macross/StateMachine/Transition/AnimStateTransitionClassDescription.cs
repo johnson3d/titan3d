@@ -2,7 +2,6 @@
 using EngineNS.Bricks.StateMachine.Macross.CompoundState;
 using EngineNS.DesignMacross.Base.Description;
 using EngineNS.DesignMacross.Base.Graph;
-using EngineNS.DesignMacross.Design;
 using EngineNS.Rtti;
 using System.Diagnostics;
 

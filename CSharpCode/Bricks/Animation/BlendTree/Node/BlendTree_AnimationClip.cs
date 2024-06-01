@@ -55,7 +55,7 @@ namespace EngineNS.Animation.BlendTree.Node
             context.AddCommand(context.TreeDepth, mAnimationCommand);
             return mAnimationCommand;
         }
-        public override void Tick(float elapseSecond)
+        public override void Tick(float elapseSecond, in FAnimBlendTreeTickContext context)
         {
             mAnimationCommand.Desc.Time = Time;
         }

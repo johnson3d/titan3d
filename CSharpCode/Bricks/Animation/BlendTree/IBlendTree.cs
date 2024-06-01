@@ -20,10 +20,14 @@ namespace EngineNS.Animation.BlendTree
             CmdExecuteStack = new TtAnimationCommandExecuteStack();
         }
     }
+    public struct FAnimBlendTreeTickContext
+    {
+
+    }
     public interface IBlendTree<T> where T : IRuntimePose
     {
         void Initialize();
-        void Tick(float elapseSecond);
+        void Tick(float elapseSecond, in FAnimBlendTreeTickContext context);
         //void Notifying();
         TtAnimationCommand<T> ConstructAnimationCommandTree(IAnimationCommand parentNode, ref FConstructAnimationCommandTreeContext context);
     }
@@ -34,7 +38,7 @@ namespace EngineNS.Animation.BlendTree
         {
 
         }
-        public virtual void Tick(float elapseSecond)
+        public virtual void Tick(float elapseSecond, in FAnimBlendTreeTickContext context)
         {
 
         }

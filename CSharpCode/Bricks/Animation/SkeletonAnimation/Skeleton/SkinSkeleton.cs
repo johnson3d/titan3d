@@ -126,7 +126,7 @@ namespace EngineNS.Animation.SkeletonAnimation.Skeleton
             }
             foreach (var limb in Children)
             {
-                if (limb.Desc.Name.ToLower() == "root")
+                if (limb.Desc.Name.ToLower() == "root" || string.IsNullOrEmpty(limb.Desc.ParentName))
                 {
                     Root = limb;
                     break;
