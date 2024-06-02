@@ -230,7 +230,12 @@ namespace CSharpCodeTools.Macross
                             PopBrackets();
 
                             bool needReturen = false;
-                            if (i.MethodSyntax.ReturnType.ToString() == "void" || i.MethodSyntax.ReturnType.ToString() == "System.Void" || i.MethodSyntax.ReturnType.ToString() == "System.Threading.Tasks.Task")
+                            if (i.MethodSyntax.ReturnType.ToString() == "void" || i.MethodSyntax.ReturnType.ToString() == "System.Void" || 
+                                i.MethodSyntax.ReturnType.ToString() == "System.Threading.Tasks.Task" ||
+                                i.MethodSyntax.ReturnType.ToString() == "Task" ||
+                                i.MethodSyntax.ReturnType.ToString() == "EngineNS.Thread.Async.TtTask" ||
+                                i.MethodSyntax.ReturnType.ToString() == "Thread.Async.TtTask" ||
+                                i.MethodSyntax.ReturnType.ToString() == "TtTask")
                             {
                                 if (isAsync)
                                     AddLine($"await {i.MethodSyntax.Identifier.Text}({i.GetParameterCallee()});");
