@@ -16,7 +16,7 @@ namespace EngineNS
         uint DockId { get; set; }
         ImGuiWindowClass DockKeyClass { get; }
         ImGuiCond_ DockCond { get; set; }
-        Task<bool> Initialize();
+        Thread.Async.TtTask<bool> Initialize();
     }
     public class URootFormManager
     {

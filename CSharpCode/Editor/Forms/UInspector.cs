@@ -23,7 +23,7 @@ namespace EngineNS.Editor.Forms
             mPropertyGrid.Dispose();
         }
 
-        public async System.Threading.Tasks.Task<bool> Initialize()
+        public async Thread.Async.TtTask<bool> Initialize()
         {
             return await mPropertyGrid.Initialize();
         }

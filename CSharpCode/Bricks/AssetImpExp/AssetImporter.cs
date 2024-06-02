@@ -5,6 +5,7 @@ using EngineNS.Animation.Base;
 using EngineNS.Animation.Curve;
 using EngineNS.Animation.SkeletonAnimation.Skeleton;
 using EngineNS.Animation.SkeletonAnimation.Skeleton.Limb;
+using EngineNS.Bricks.CodeBuilder.MacrossNode;
 using EngineNS.Graphics.Mesh;
 using EngineNS.NxRHI;
 using MathNet.Numerics;
@@ -171,6 +172,20 @@ namespace EngineNS.Bricks.AssetImpExp
             }
             return meshes;
         }
+        public static Assimp.Mesh FindMeshByBone(string boneName, Assimp.Scene scene)
+        {
+            foreach (var mesh in scene.Meshes)
+            {
+                foreach (var bone in mesh.Bones)
+                {
+                    if (bone.Name == boneName)
+                    {
+                        return mesh;
+                    }
+                }
+            }
+            return null;
+        }
 
         private static Assimp.Node FindNodeRecursively(string name, Assimp.Node parentNode, Assimp.Scene scene)
         {
@@ -221,17 +236,44 @@ namespace EngineNS.Bricks.AssetImpExp
                 return transform;
             }
         }
+        public static Assimp.Matrix4x4 GetAbsBoneNodeMatrix(Assimp.Node node)
+        {
+            if (AssimpSceneUtil.IsSceneRootNode(node.Parent) || node.Parent.HasMeshes || AssimpSceneUtil.IsParentIs_AssimpFbxPre_Node(node))
+            {
+                return node.Transform;
+            }
+            else
+            {
+                return node.Transform * GetAbsBoneNodeMatrix(node.Parent);
+            }
+        }
+        public static bool IsSceneRootNode(Assimp.Node node)
+        {
+            if (node.Name == "RootNode")
+            {
+                return true;
+            }
+            return false;
+        }
+        public static Assimp.Matrix4x4 GetAssimpFbxGeometricTranslation(Assimp.Node node)
+        {
+            if (node.Parent.Name.Contains(node.Name) && IsParentIs_AssimpFbxPre_Node(node) && node.Parent.Name.Contains("GeometricTranslation"))
+            {
+                return node.Parent.Transform;
+            }
+            return Assimp.Matrix4x4.Identity;
+        }
         public static bool IsSceneHave_AssimpFbxPre_Node(Assimp.Node node)
         {
-            if(node.Name.Contains("_$AssimpFbx$_"))
+            if (node.Name.Contains("_$AssimpFbx$_"))
             {
                 return true;
             }
             else
             {
-                foreach(var child in node.Children)
+                foreach (var child in node.Children)
                 {
-                    if(IsSceneHave_AssimpFbxPre_Node(child))
+                    if (IsSceneHave_AssimpFbxPre_Node(child))
                     {
                         return true;
                     }
@@ -242,6 +284,14 @@ namespace EngineNS.Bricks.AssetImpExp
         public static bool IsParentIs_AssimpFbxPre_Node(Assimp.Node node)
         {
             if (node.Parent.Name.Contains("_$AssimpFbx$_"))
+            {
+                return true;
+            }
+            return false;
+        }
+        public static bool Is_AssimpFbxPre_Node(Assimp.Node node)
+        {
+            if (node.Name.Contains("_$AssimpFbx$_"))
             {
                 return true;
             }
@@ -300,11 +350,28 @@ namespace EngineNS.Bricks.AssetImpExp
                 {
                     var boneNode = AssimpSceneUtil.FindNode(bone.Name, scene);
                     Debug.Assert(boneNode != null);
-                    MarkBonesRecursively(boneNode, scene, ref inOutNodesMap, ref inOutSkeletonRootNodes);
+                    MarkBonesUpSideAndSelfRecursively(boneNode, scene, ref inOutNodesMap, ref inOutSkeletonRootNodes);
+                    MarkBonesDownSideRecursively(boneNode, scene, ref inOutNodesMap, ref inOutSkeletonRootNodes);
                 }
             }
         }
-        static void MarkBonesRecursively(Assimp.Node node, Assimp.Scene scene, ref Dictionary<Assimp.Node, bool> inOutNodesMap, ref List<Assimp.Node> inOutSkeletonRootNodes)
+        static void MarkBonesDownSideRecursively(Assimp.Node node, Assimp.Scene scene, ref Dictionary<Assimp.Node, bool> inOutNodesMap, ref List<Assimp.Node> inOutSkeletonRootNodes)
+        {
+            foreach (var child in node.Children)
+            {
+                if(!AssimpSceneUtil.Is_AssimpFbxPre_Node(child))
+                {
+                    if (inOutNodesMap[child])
+                    {
+                        continue;
+                    }
+                    inOutNodesMap[child] = true;
+                }
+                MarkBonesDownSideRecursively(child, scene, ref inOutNodesMap, ref inOutSkeletonRootNodes);
+                
+            }
+        }
+        static void MarkBonesUpSideAndSelfRecursively(Assimp.Node node, Assimp.Scene scene, ref Dictionary<Assimp.Node, bool> inOutNodesMap, ref List<Assimp.Node> inOutSkeletonRootNodes)
         {
             if (node.HasMeshes)
             {
@@ -312,7 +379,7 @@ namespace EngineNS.Bricks.AssetImpExp
                 return;
             }
             var parent = GetValidParentNode(node, scene);
-            if (IsRootBoneNodeParent(parent, scene))
+            if (AssimpSceneUtil.IsSceneRootNode(parent) || parent.HasMeshes)
             {
                 if (!inOutSkeletonRootNodes.Contains(node))
                 {
@@ -332,7 +399,7 @@ namespace EngineNS.Bricks.AssetImpExp
                 {
                     inOutNodesMap[node] = true;
                 }
-                MarkBonesRecursively(parent, scene, ref inOutNodesMap, ref inOutSkeletonRootNodes);
+                MarkBonesUpSideAndSelfRecursively(parent, scene, ref inOutNodesMap, ref inOutSkeletonRootNodes);
             }
             else
             {
@@ -360,49 +427,56 @@ namespace EngineNS.Bricks.AssetImpExp
             Debug.Assert(false);
             return null;
         }
-        static bool IsRootBoneNodeParent(Assimp.Node node, Assimp.Scene scene)
-        {
-            if (node.Name == "RootNode" || node.HasMeshes)
-            {
-                return true;
-            }
-            return false;
-        }
+        static string testName = "Bip001 R Calf";
         static TtBoneDesc MakeBoneDesc(Assimp.Scene scene, Node boneNode, TtAssetImportOption_Mesh importOption, Assimp.Matrix4x4 pre)
         {
+            if (boneNode.Name.Contains(testName))
+            {
+                int i = 0;
+            }
+            Assimp.Matrix4x4 meshGeometricTranslation = Assimp.Matrix4x4.Identity;
+            var boneMesh = AssimpSceneUtil.FindMeshByBone(boneNode.Name, scene);
+            if (boneMesh != null)
+            {
+                var meshNode = AssimpSceneUtil.FindNode(boneMesh.Name, scene);
+                meshGeometricTranslation = AssimpSceneUtil.GetAssimpFbxGeometricTranslation(meshNode);
+            }
             TtBoneDesc boneDesc = new TtBoneDesc();
             boneDesc.Name = boneNode.Name;
             boneDesc.NameHash = Standart.Hash.xxHash.xxHash32.ComputeHash(boneDesc.Name);
             var parentNode = GetValidParentNode(boneNode, scene);
-            if (parentNode == null || !IsRootBoneNodeParent(parentNode, scene))
+            Assimp.Bone parentBone = null;
+            if (parentNode != null && !AssimpSceneUtil.IsSceneRootNode(parentNode) && !parentNode.HasMeshes)
             {
                 boneDesc.ParentName = parentNode.Name;
                 boneDesc.ParentHash = Standart.Hash.xxHash.xxHash32.ComputeHash(boneDesc.ParentName);
+                parentBone = AssimpSceneUtil.FindBone(parentNode.Name, scene);
             }
 
             var assimpBoneOffsetMatrix = Assimp.Matrix4x4.Identity;
             var bone = AssimpSceneUtil.FindBone(boneDesc.Name, scene);
             if (bone != null)
             {
-                assimpBoneOffsetMatrix = bone.OffsetMatrix;
+                assimpBoneOffsetMatrix = meshGeometricTranslation * bone.OffsetMatrix;
+                var matdd = AssimpSceneUtil.AssimpMatrix4xMatrix(bone.OffsetMatrix);
             }
             else
             {
                 var node = AssimpSceneUtil.FindNode(boneDesc.Name, scene);
                 Debug.Assert(node != null);
-                var nodeTransform = node.Transform;
+                var nodeTransform = AssimpSceneUtil.GetAbsBoneNodeMatrix(node);
                 nodeTransform.Inverse();
                 assimpBoneOffsetMatrix = nodeTransform;
             }
-            var preMatrix =  AssimpSceneUtil.AssimpMatrix4xMatrix(pre);
+            var preMatrix = AssimpSceneUtil.AssimpMatrix4xMatrix(pre);
             preMatrix.NoScale();
             var boneOffsetMatrix = AssimpSceneUtil.AssimpMatrix4xMatrix(assimpBoneOffsetMatrix);
             var invInitMatrix = preMatrix * boneOffsetMatrix;
-            
+
             DVector3 invPos = DVector3.Zero;
             Vector3 invScale = Vector3.One;
             Quaternion invQuat = Quaternion.Identity;
-            invInitMatrix.Decompose(out invScale, out  invQuat,out  invPos);
+            invInitMatrix.Decompose(out invScale, out invQuat, out invPos);
             if (!invQuat.IsNormalized())
             {
                 invQuat.Normalize();
@@ -410,9 +484,9 @@ namespace EngineNS.Bricks.AssetImpExp
             boneDesc.InvScale = invScale;
             boneDesc.InvQuat = invQuat;
             boneDesc.InvPos = invPos.ToSingleVector3() * importOption.UnitScale;
-            
+
             var finalInvInitMatrix = Matrix.Transformation(boneDesc.InvScale, boneDesc.InvQuat, boneDesc.InvPos);
-            boneDesc.InvInitMatrix =  finalInvInitMatrix;
+            boneDesc.InvInitMatrix = finalInvInitMatrix;
             finalInvInitMatrix.Inverse();
             boneDesc.InitMatrix = finalInvInitMatrix;
             return boneDesc;
@@ -424,10 +498,10 @@ namespace EngineNS.Bricks.AssetImpExp
                 return skeletonsGenerate;
 
             if (skeletonRootNodes.Count == 1)
-            {        
+            {
                 var skeletonRootNode = skeletonRootNodes[0];
                 var preAssimpTransform = Assimp.Matrix4x4.Identity;
-                if(AssimpSceneUtil.IsZUpLeftHandCoordinate(scene))
+                if (AssimpSceneUtil.IsZUpLeftHandCoordinate(scene))
                 {
                     preAssimpTransform = AssimpSceneUtil.GetCoordinateConvertMatrix(scene);
                 }
@@ -438,7 +512,7 @@ namespace EngineNS.Bricks.AssetImpExp
                         preAssimpTransform = AssimpSceneUtil.AccumulatePreTransform(skeletonRootNode.Parent);
                     }
                 }
-       
+
                 TtSkinSkeleton skeleton = new TtSkinSkeleton();
                 preAssimpTransform.Inverse();
                 foreach (var marked in inOutNodesMap)
@@ -514,7 +588,7 @@ namespace EngineNS.Bricks.AssetImpExp
         private static UMeshPrimitives CreateMeshPrimitives(Assimp.Node meshNode, TtSkinSkeleton skeleton, Assimp.Scene scene, TtAssetImportOption_Mesh importOption)
         {
             var preAssimpTransform = Assimp.Matrix4x4.Identity;
-            if(AssimpSceneUtil.IsZUpLeftHandCoordinate(scene))
+            if (AssimpSceneUtil.IsZUpLeftHandCoordinate(scene))
             {
                 preAssimpTransform = AssimpSceneUtil.GetCoordinateConvertMatrix(scene);
             }
@@ -597,7 +671,7 @@ namespace EngineNS.Bricks.AssetImpExp
                     break;
                 }
             }
-         
+
             if (bHasSkin)
             {
                 skinIndexsStream = new Byte[4 * vertextCount];
@@ -610,7 +684,7 @@ namespace EngineNS.Bricks.AssetImpExp
                     vertexSkinWeight.Add(new List<float>());
                 }
             }
-            
+
             int indicesIndex = 0;
             int vertexIndex = 0;
             int vertexCounting = 0;

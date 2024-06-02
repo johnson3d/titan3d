@@ -44,7 +44,7 @@ namespace EngineNS.Editor.Forms
             return this;
         }
 
-        public async Task<bool> Initialize()
+        public async Thread.Async.TtTask<bool> Initialize()
         {
             await AnimationClipPropGrid.Initialize();
             return true;
@@ -184,13 +184,12 @@ namespace EngineNS.Editor.Forms
             policy.DefaultCamera.AutoZoom(ref sphere);
 
             {
-                var box = Graphics.Mesh.UMeshDataProvider.MakeBox(-5, -0.1001f, -5, 10, 0.1f, 10).ToMesh();
                 var PlaneMesh = new Graphics.Mesh.TtMesh();
                 var tMaterials = new Graphics.Pipeline.Shader.UMaterial[1];
                 tMaterials[0] = await UEngine.Instance.GfxDevice.MaterialInstanceManager.GetMaterialInstance(UEngine.Instance.Config.MeshPrimitiveEditorConfig.PlaneMaterialName);
-                PlaneMesh.Initialize(box, tMaterials,
+                PlaneMesh.Initialize(Graphics.Mesh.UMeshDataProvider.MakePlane(10, 10).ToMesh(), tMaterials,
                     Rtti.UTypeDescGetter<Graphics.Mesh.UMdfStaticMesh>.TypeDesc);
-                PlaneMeshNode = await GamePlay.Scene.UMeshNode.AddMeshNode(viewport.World, viewport.World.Root, new GamePlay.Scene.UMeshNode.UMeshNodeData(), typeof(GamePlay.UPlacement), PlaneMesh, DVector3.Zero, Vector3.One, Quaternion.Identity);
+                PlaneMeshNode = await GamePlay.Scene.UMeshNode.AddMeshNode(viewport.World, viewport.World.Root, new GamePlay.Scene.UMeshNode.UMeshNodeData(), typeof(GamePlay.UPlacement), PlaneMesh, new DVector3(0, -0.0001f, 0), Vector3.One, Quaternion.Identity);
                 PlaneMeshNode.HitproxyType = Graphics.Pipeline.UHitProxy.EHitproxyType.None;
                 PlaneMeshNode.NodeData.Name = "Plane";
                 PlaneMeshNode.IsAcceptShadow = true;
@@ -203,7 +202,7 @@ namespace EngineNS.Editor.Forms
         public float LoadingPercent { get; set; } = 1.0f;
         public string ProgressText { get; set; } = "Loading";
         TtAnimationClipPreview AnimationClipPreview = null;
-        public async Task<bool> OpenEditor(UMainEditorApplication mainEditor, RName name, object arg)
+        public async Thread.Async.TtTask<bool> OpenEditor(UMainEditorApplication mainEditor, RName name, object arg)
         {
             AssetName = name;
             AnimationClip = await UEngine.Instance.AnimationModule.AnimationClipManager.GetAnimationClip(name);

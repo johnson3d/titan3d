@@ -185,7 +185,7 @@ namespace EngineNS.GamePlay.Scene
         public uint DockId { get; set; }
         public ImGuiWindowClass DockKeyClass { get; }
         public ImGuiCond_ DockCond { get; set; }
-        public async Task<bool> Initialize()
+        public async Thread.Async.TtTask<bool> Initialize()
         {
             await EngineNS.Thread.TtAsyncDummyClass.DummyFunc();
             return true;

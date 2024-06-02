@@ -32,7 +32,7 @@ namespace EngineNS.Editor.Forms
         {
             public USceneEditor HostEditor;
             public EGui.Controls.PropertyGrid.PropertyGrid NodeInspector = new EGui.Controls.PropertyGrid.PropertyGrid();
-            public override async System.Threading.Tasks.Task Initialize(USlateApplication application, RName policyName, float zMin, float zMax)
+            public override async Task Initialize(USlateApplication application, RName policyName, float zMin, float zMax)
             {
                 await base.Initialize(application, policyName, zMin, zMax);
                 await NodeInspector.Initialize();
@@ -41,7 +41,10 @@ namespace EngineNS.Editor.Forms
             {
                 if(UEngine.Instance.InputSystem.IsCtrlKeyDown())
                 {
-                    OnHitproxySelectedMulti(false, proxy);
+                    if (proxy.Selected)
+                        OnHitproxyUnSelectedMulti(proxy);
+                    else
+                        OnHitproxySelectedMulti(false, proxy);
                 }
                 else
                 {
@@ -80,6 +83,19 @@ namespace EngineNS.Editor.Forms
                 //if(HostEditor.mWorldOutliner.SelectedNodes.Contains)
                 //NodeInspector.Target = HostEditor.mWorldOutliner.SelectedNodes;// proxy;
             }
+            public override void OnHitproxyUnSelectedMulti(params IProxiable[] proxies)
+            {
+                base.OnHitproxyUnSelectedMulti(proxies);
+
+                foreach(var prox in proxies)
+                {
+                    var uNode = prox as UNode;
+                    if (uNode == null)
+                        continue;
+                    uNode.Selected = false;
+                    HostEditor.mWorldOutliner.SelectedNodes.Remove(uNode);
+                }
+            }
             public override void OnHitproxySelectedMulti(bool clearPre, params IProxiable[] proxies)
             {
                 base.OnHitproxySelectedMulti(clearPre, proxies);
@@ -93,6 +109,8 @@ namespace EngineNS.Editor.Forms
                     {
                         var node = proxies[i] as UNode;
                         if (node == null)
+                            continue;
+                        if (node.Selected)
                             continue;
 
                         this.ShowBoundVolumes(false, true, node);
@@ -176,14 +194,14 @@ namespace EngineNS.Editor.Forms
                         uNode.Selected = true;
                         HostEditor.mWorldOutliner.SelectedNodes.Add(uNode);
                     }
-                    foreach(var node in proxies)
-                    {
-                        var uNode = node as UNode;
-                        if (uNode == null)
-                            continue;
-                        uNode.Selected = true;
-                        HostEditor.mWorldOutliner.SelectedNodes.Add(uNode);
-                    }
+                    //foreach(var node in proxies)
+                    //{
+                    //    var uNode = node as UNode;
+                    //    if (uNode == null)
+                    //        continue;
+                    //    uNode.Selected = true;
+                    //    HostEditor.mWorldOutliner.SelectedNodes.Add(uNode);
+                    //}
                 }
                 NodeInspector.Target = HostEditor.mWorldOutliner.SelectedNodes; //proxies;
             }
@@ -455,7 +473,7 @@ namespace EngineNS.Editor.Forms
             ScenePropGrid.Target = null;
             EditorPropGrid.Target = null;
         }
-        public async System.Threading.Tasks.Task<bool> Initialize()
+        public async Thread.Async.TtTask<bool> Initialize()
         {
             await ScenePropGrid.Initialize();
             await EditorPropGrid.Initialize();
@@ -500,7 +518,7 @@ namespace EngineNS.Editor.Forms
                 CpuCullNode.VisParameter.CullFilters = value;
             }
         }
-        public async virtual System.Threading.Tasks.Task<bool> OpenEditor(UMainEditorApplication mainEditor, RName name, object arg)
+        public async virtual Thread.Async.TtTask<bool> OpenEditor(UMainEditorApplication mainEditor, RName name, object arg)
         {
             AssetName = name;
             //PreviewViewport.PreviewAsset = name;
@@ -1039,7 +1057,7 @@ namespace EngineNS.Editor.Forms
             mWorldOutliner = new TtPrefabEditorOutliner(PreviewViewport, false);
         }
         public override bool IsAssetLoaed { get => Prefab != null; }
-        public async override System.Threading.Tasks.Task<bool> OpenEditor(UMainEditorApplication mainEditor, RName name, object arg)
+        public async override Thread.Async.TtTask<bool> OpenEditor(UMainEditorApplication mainEditor, RName name, object arg)
         {
             AssetName = name;
             //PreviewViewport.PreviewAsset = name;

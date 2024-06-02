@@ -12,7 +12,7 @@ namespace EngineNS.EGui
         void OnDraw();
         uint DockId { get; set; }
         ImGuiCond_ DockCond { get; set; }
-        Task<bool> Initialize();
+        Thread.Async.TtTask<bool> Initialize();
     }
     public class UIFormBase
     {

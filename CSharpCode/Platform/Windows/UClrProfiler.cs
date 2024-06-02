@@ -11,7 +11,7 @@ namespace EngineNS.Windows
             UEngine.RootFormManager.RegRootForm(this);
         }
 
-        public async System.Threading.Tasks.Task<bool> Initialize()
+        public async Thread.Async.TtTask<bool> Initialize()
         {
             await EngineNS.Thread.TtAsyncDummyClass.DummyFunc();
             return true;

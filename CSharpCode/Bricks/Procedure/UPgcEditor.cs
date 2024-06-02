@@ -71,7 +71,7 @@ namespace EngineNS.Bricks.Procedure
         {
             return this;
         }
-        public async System.Threading.Tasks.Task<bool> Initialize()
+        public async Thread.Async.TtTask<bool> Initialize()
         {
             await EngineNS.Thread.TtAsyncDummyClass.DummyFunc();
             await mUnionNodeConfigRenderer.Initialize();
@@ -136,7 +136,7 @@ namespace EngineNS.Bricks.Procedure
         bool IsStarting = false;
         public float LoadingPercent { get; set; } = 1.0f;
         public string ProgressText { get; set; } = "Loading";
-        public async System.Threading.Tasks.Task<bool> OpenEditor(Editor.UMainEditorApplication mainEditor, RName name, object arg)
+        public async Thread.Async.TtTask<bool> OpenEditor(Editor.UMainEditorApplication mainEditor, RName name, object arg)
         {
             if (IsStarting)
                 return false;

@@ -14,6 +14,7 @@ namespace EngineNS.Graphics.Pipeline.Common
                 return;
             if (PickedProxies.Contains(obj))
                 return;
+            obj.Selected = true;
             PickedProxies.Add(obj);
         }
         public void Unselected(IProxiable obj)
@@ -22,6 +23,7 @@ namespace EngineNS.Graphics.Pipeline.Common
             if (node != null && node.HasStyle(GamePlay.Scene.UNode.ENodeStyles.NoPickedDraw))
                 return;
             PickedProxies.Remove(obj);
+            obj.Selected = false;
         }
         public void ClearSelected()
         {

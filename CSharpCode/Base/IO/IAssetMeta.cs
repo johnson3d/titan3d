@@ -45,7 +45,7 @@ namespace EngineNS.IO
         protected string mName;
         protected EGui.Controls.PropertyGrid.PropertyGrid PGAsset = new EGui.Controls.PropertyGrid.PropertyGrid();
         protected EGui.Controls.UTypeSelector TypeSlt = new EGui.Controls.UTypeSelector();
-        protected System.Threading.Tasks.Task<bool> PGAssetInitTask;
+        protected Thread.Async.TtTask<bool> PGAssetInitTask;
         public RName GetAssetRName()
         {
             if (mName == null)
@@ -150,13 +150,12 @@ namespace EngineNS.IO
                     retValue = true;
                 }
 
-                if (PGAssetInitTask != null && !PGAssetInitTask.IsCompleted)
+                if (!PGAssetInitTask.IsCompleted)
                 {
                 }
                 else
                 {
                     PGAsset.OnDraw(false, false, false);
-                    PGAssetInitTask = null;
                 }
                 
                 ImGuiAPI.EndPopup();
@@ -215,6 +214,14 @@ namespace EngineNS.IO
             mDeleteMenuState.HasIndent = false;
             mRefGraphMenuState.Reset();
             mRefGraphMenuState.HasIndent = false;
+            mExplorerToMenuState.Reset();
+            mExplorerToMenuState.HasIndent = false;
+            mCopyRNameMenuState.Reset();
+            mCopyRNameMenuState.HasIndent = false;
+            mMoveToMenuState.Reset();
+            mMoveToMenuState.HasIndent = false;
+            mCopyToMenuState.Reset();
+            mCopyToMenuState.HasIndent = false;
         }
         public virtual string GetAssetTypeName()
         {
@@ -312,6 +319,12 @@ namespace EngineNS.IO
 
             IO.TtFileManager.MoveFile(mAssetName.Address + ".snap", tarName.Address + ".snap");
         }
+        public virtual async System.Threading.Tasks.Task RenameTo(string name, RName.ERNameType type)
+        {
+            if (name == mAssetName.Name && type == mAssetName.RNameType)
+                return;
+            await MoveTo(name, type);
+        }
         public virtual void ResetSnapshot()
         {
             HasSnapshot = true;
@@ -345,8 +358,12 @@ namespace EngineNS.IO
         {
             return true;
         }
+        protected EGui.UIProxy.MenuItemProxy.MenuState mExplorerToMenuState = new EGui.UIProxy.MenuItemProxy.MenuState();
         protected EGui.UIProxy.MenuItemProxy.MenuState mRefGraphMenuState = new EGui.UIProxy.MenuItemProxy.MenuState();
+        protected EGui.UIProxy.MenuItemProxy.MenuState mCopyRNameMenuState = new EGui.UIProxy.MenuItemProxy.MenuState();
         protected EGui.UIProxy.MenuItemProxy.MenuState mDeleteMenuState = new EGui.UIProxy.MenuItemProxy.MenuState();
+        protected EGui.UIProxy.MenuItemProxy.MenuState mMoveToMenuState = new EGui.UIProxy.MenuItemProxy.MenuState();
+        protected EGui.UIProxy.MenuItemProxy.MenuState mCopyToMenuState = new EGui.UIProxy.MenuItemProxy.MenuState();
         internal System.Threading.Tasks.Task<Editor.USnapshot> Task;
         protected virtual Color GetBorderColor()
         {
@@ -432,7 +449,7 @@ namespace EngineNS.IO
             var drawList = ImGuiAPI.GetWindowDrawList();
             Support.UAnyPointer menuData = new Support.UAnyPointer();
 
-            if (EGui.UIProxy.MenuItemProxy.MenuItem("ExplorerTo", null, false, null, in drawList, in menuData, ref mRefGraphMenuState))
+            if (EGui.UIProxy.MenuItemProxy.MenuItem("ExplorerTo", null, false, null, in drawList, in menuData, ref mExplorerToMenuState))
             {
                 var psi = new System.Diagnostics.ProcessStartInfo("Explorer.exe");
                 psi.Arguments = "/e,/select," + mAssetName.Address.Replace("/", "\\");
@@ -444,7 +461,7 @@ namespace EngineNS.IO
                 var rn = RName.GetRName(mAssetName.Name + ".ameta", mAssetName.RNameType);
                 var task = mainEditor.AssetEditorManager.OpenEditor(mainEditor, typeof(Editor.Forms.UAssetReferViewer), rn, this);
             }
-            if (EGui.UIProxy.MenuItemProxy.MenuItem("CopyRName", null, false, null, in drawList, in menuData, ref mRefGraphMenuState))
+            if (EGui.UIProxy.MenuItemProxy.MenuItem("CopyRName", null, false, null, in drawList, in menuData, ref mCopyRNameMenuState))
             {
                 ImGuiAPI.SetClipboardText(RName.GetRName(mAssetName.Name + ".ameta", mAssetName.RNameType).ToString());
             }
@@ -461,47 +478,17 @@ namespace EngineNS.IO
                 }
                 ContentBrowser.CreateNewAssets = createNewAssetValueStore;
             }
-            if (EGui.UIProxy.MenuItemProxy.MenuItem("MoveTo", null, false, null, in drawList, in menuData, ref mDeleteMenuState))
+            if (EGui.UIProxy.MenuItemProxy.MenuItem("Rename", null, false, null, in drawList, in menuData, ref mMoveToMenuState))
             {
-                try
-                {
-                    if (ContentBrowser.AssetOpTask == null || ContentBrowser.AssetOpTask.IsCompleted)
-                    {
-                        var name = mAssetName.Name.Substring(0, mAssetName.Name.Length - mAssetName.ExtName.Length);
-                        name += "_1";
-                        name += mAssetName.ExtName;
-                        ContentBrowser.AssetOpTask = MoveTo(name, mAssetName.RNameType);
-                    }
-                    else
-                    {
-                        Profiler.Log.WriteLine(Profiler.ELogTag.Info, "Asset", "Please wait for Action(MoveTo)");
-                    }
-                }
-                catch
-                {
-
-                }
+                ContentBrowser.OperationAsset(this, EGui.Controls.UContentBrowser.EAssetOperationType.Rename);
             }
-            if (EGui.UIProxy.MenuItemProxy.MenuItem("CopyTo", null, false, null, in drawList, in menuData, ref mDeleteMenuState))
+            if (EGui.UIProxy.MenuItemProxy.MenuItem("MoveTo", null, false, null, in drawList, in menuData, ref mMoveToMenuState))
             {
-                try
-                {
-                    if (ContentBrowser.AssetOpTask == null || ContentBrowser.AssetOpTask.IsCompleted)
-                    {
-                        var name = mAssetName.Name.Substring(0, mAssetName.Name.Length - mAssetName.ExtName.Length);
-                        name += "_1";
-                        name += mAssetName.ExtName;
-                        ContentBrowser.AssetOpTask = CopyTo(name, mAssetName.RNameType);
-                    }
-                    else
-                    {
-                        Profiler.Log.WriteLine(Profiler.ELogTag.Info, "Asset", "Please wait for Action(CopyTo)");
-                    }
-                }
-                catch
-                {
-
-                }
+                ContentBrowser.OperationAsset(this, EGui.Controls.UContentBrowser.EAssetOperationType.MoveTo);
+            }
+            if (EGui.UIProxy.MenuItemProxy.MenuItem("CopyTo", null, false, null, in drawList, in menuData, ref mCopyToMenuState))
+            {
+                ContentBrowser.OperationAsset(this, EGui.Controls.UContentBrowser.EAssetOperationType.CopyTo);
             }
 
             if (OnDrawContextMenu(ref drawList))

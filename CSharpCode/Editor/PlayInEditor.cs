@@ -56,7 +56,7 @@ namespace EngineNS.Editor
         {
         }
 
-        public async Task<bool> Initialize()
+        public async Thread.Async.TtTask<bool> Initialize()
         {
             if (!await mRNameEditor.Initialize())
                 return false;

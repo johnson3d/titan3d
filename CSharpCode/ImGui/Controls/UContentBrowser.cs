@@ -1,4 +1,5 @@
-﻿using System;
+﻿using EngineNS.IO;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
@@ -34,40 +35,28 @@ namespace EngineNS.EGui.Controls
                     return;
                 mExtNames = value;
                 mExtNameArray = mExtNames.Split(',');
-                mDirectoryShowFlags.Clear();
+                mFolderView.ExtNameArray = mExtNameArray;
+                mFolderView.DirectoryShowFlags.Clear();
             }
         }
         string[] mExtNameArray;
-        Dictionary<string, bool> mDirectoryShowFlags = new Dictionary<string, bool>();
 
-        public Rtti.UTypeDesc MacrossBase = null;
+        Rtti.UTypeDesc mMacrossBase = null;
+        public Rtti.UTypeDesc MacrossBase
+        {
+            get => mMacrossBase;
+            set
+            {
+                mMacrossBase = value;
+                mFolderView.MacrossBase = mMacrossBase;
+            }
+        }
         public string FilterText = "";
         public static IO.IAssetMeta GlobalSelectedAsset = null;
         public List<IO.IAssetMeta> SelectedAssets = new List<IO.IAssetMeta>();
         public Action<IO.IAssetMeta> ItemSelectedAction = null;
 
-        public static string FolderOpenImgName = "uestyle/content/folderopen.srv";
-        public static string FolderClosedImgName = "uestyle/content/folderclosed.srv";
-        public static string PreFolderImgName = "uestyle/content/circle-arrow-left.srv";
-        public static string NextFolderImgName = "uestyle/content/circle-arrow-right.srv";
         public static string FilterImgName = "uestyle/content/filter.srv";
-
-        // 引擎预留目录名称
-        static List<string> ReservationFolderNames = new List<string>()
-        {
-            "metadata",
-        };
-        static bool IsReservationFolder(string folderName)
-        {
-            for (int rIdx = 0; rIdx < ReservationFolderNames.Count; rIdx++)
-            {
-                if (ReservationFolderNames[rIdx] == folderName)
-                {
-                    return true;
-                }
-            }
-            return false;   
-        }
 
         public void Dispose()
         {
@@ -85,7 +74,7 @@ namespace EngineNS.EGui.Controls
         bool mContextMenuOpenCheck = false;
         bool mOldContextMenuOpenCheck = false;
 
-        public async Task<bool> Initialize()
+        public async Thread.Async.TtTask<bool> Initialize()
         {
             await Thread.TtAsyncDummyClass.DummyFunc();
 
@@ -104,17 +93,10 @@ namespace EngineNS.EGui.Controls
             mSearchBar.InfoText = "Search Assets";
             //Rtti.UTypeDescManager.Instance.OnTypeChanged += OnTypeChanged;
 
-            InitializeDirContextMenu();
+            await mFolderView.Initialize();
+            await mSelectFolderView.Initialize();
             InitializeFilterMenu();
 
-            if (UEngine.Instance.UIProxyManager[FolderOpenImgName] == null)
-                UEngine.Instance.UIProxyManager[FolderOpenImgName] = new EGui.UIProxy.ImageProxy(RName.GetRName(FolderOpenImgName, RName.ERNameType.Engine));
-            if (UEngine.Instance.UIProxyManager[FolderClosedImgName] == null)
-                UEngine.Instance.UIProxyManager[FolderClosedImgName] = new EGui.UIProxy.ImageProxy(RName.GetRName(FolderClosedImgName, RName.ERNameType.Engine));
-            if (UEngine.Instance.UIProxyManager[PreFolderImgName] == null)
-                UEngine.Instance.UIProxyManager[PreFolderImgName] = new EGui.UIProxy.ImageProxy(RName.GetRName(PreFolderImgName, RName.ERNameType.Engine));
-            if (UEngine.Instance.UIProxyManager[NextFolderImgName] == null)
-                UEngine.Instance.UIProxyManager[NextFolderImgName] = new EGui.UIProxy.ImageProxy(RName.GetRName(NextFolderImgName, RName.ERNameType.Engine));
             if (UEngine.Instance.UIProxyManager[FilterImgName] == null)
                 UEngine.Instance.UIProxyManager[FilterImgName] = new EGui.UIProxy.ImageProxy(RName.GetRName(FilterImgName, RName.ERNameType.Engine));
 
@@ -168,257 +150,14 @@ namespace EngineNS.EGui.Controls
                             parentMenu.AddMenuItem(menuStr, menuStr, null,
                                 (TtMenuItem item, object sender) =>
                                 {
-                                    EnqueueAssetImporter(UEngine.Instance.AssetMetaManager.ImportAsset(CurrentDir, typeDesc, (string)assetExtField.GetValue(null)), ""); 
+                                    EnqueueAssetImporter(UEngine.Instance.AssetMetaManager.ImportAsset(mFolderView.CurrentDir, typeDesc, (string)assetExtField.GetValue(null)), ""); 
                                 });
                         }
                     }
                 }
             }
         }
-        void DrawDirContextMenu(string path)
-        {
-            if (ImGuiAPI.BeginPopupContextItem(path, ImGuiPopupFlags_.ImGuiPopupFlags_MouseButtonRight))
-            {
-                if (mDirContextMenu != null)
-                {
-                    Support.UAnyPointer menuData = new Support.UAnyPointer();
-                    menuData.RefObject = path;
-                    menuData.Value.SetStruct<stDirMenuData>(new stDirMenuData());
-                    var drawList = ImGuiAPI.GetWindowDrawList();
-                    for (int i = 0; i < mDirContextMenu.Count; i++)
-                    {
-                        mDirContextMenu[i].OnDraw(in drawList, in menuData);
-                    }
-                }
-                ImGuiAPI.EndPopup();
-            }
-        }
-        int mCurrentDirHistoryIdx = 0;
-        List<RName> mDirHistory = new List<RName>();
-        void PushHistory(RName dir)
-        {
-            if (CurrentDir == dir)
-                return;
-            CurrentDir = dir;
-            if(mCurrentDirHistoryIdx + 1 < mDirHistory.Count)
-            {
-                mDirHistory.RemoveRange(mCurrentDirHistoryIdx + 1, mDirHistory.Count - mCurrentDirHistoryIdx - 1);
-            }
-            if (mDirHistory.Count > 20)
-                mDirHistory.RemoveAt(0);
-            mCurrentDirHistoryIdx = mDirHistory.Count;
-            mDirHistory.Add(dir);
-            mIsPreFolderDisable = false;
-            mIsNextFolderDisable = true;
-        }
-        public RName CurrentDir;
-        public void DrawDirectories(RName root)
-        {
-            ImGuiTreeNodeFlags_ flags = ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_SpanFullWidth;
-            if (root == CurrentDir)
-                flags |= ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_Selected;
-            UEngine.Instance.GfxDevice.SlateRenderer.PushFont((int)EGui.Slate.UBaseRenderer.enFont.Font_Bold_13px);
-            var treeNodeResult = ImGuiAPI.TreeNodeEx(root.RNameType.ToString(), flags);
-            UEngine.Instance.GfxDevice.SlateRenderer.PopFont();
-            DrawDirContextMenu(root.Address);
-            if (treeNodeResult)
-            {
-                if (ImGuiAPI.IsItemActivated())
-                {
-                    PushHistory(root);
-                }
-                var dirs = IO.TtFileManager.GetDirectories(root.Address, "*.*", false);
-                foreach (var i in dirs)
-                {
-                    var nextDirName = IO.TtFileManager.GetRelativePath(root.Address, i);
-                    if (IsReservationFolder(nextDirName))
-                        continue;
-                    DrawTree(root.RNameType, root.Name, nextDirName);
-                }
-                ImGuiAPI.TreePop();
-            }
-        }
-        struct stDirMenuData
-        {
-        }
-        List<UIProxy.MenuItemProxy> mDirContextMenu;
-        void InitializeDirContextMenu()
-        {
-            mDirContextMenu = new List<UIProxy.MenuItemProxy>()
-            {
-                new UIProxy.MenuItemProxy()
-                {
-                    MenuName = "Browser",
-                    Action = (item, data)=>
-                    {
-                        var psi = new System.Diagnostics.ProcessStartInfo("Explorer.exe");
-                        psi.Arguments = "/e,/select," + data.RefObject.ToString().Replace("/", "\\");
-                        System.Diagnostics.Process.Start(psi);
-                    },
-                },
-                new UIProxy.MenuItemProxy()
-                {
-                    MenuName = "Create Folder",
-                    Action = (item, data)=>
-                    {
-                        mCreateFolderDir = data.RefObject.ToString();
-                    },
-                },
-            };
-        }
-        string mCreateFolderDir = null;
-        string mNewFolderName = "NewFolder";
-        void DrawCreateFolderDialog(string keyName)
-        {
-            if (string.IsNullOrEmpty(mCreateFolderDir))
-                return;
-
-            var pos = ImGuiAPI.GetWindowPos();
-            var min = ImGuiAPI.GetWindowContentRegionMin();
-            var max = ImGuiAPI.GetWindowContentRegionMax();
-            var pivot = new Vector2(0.5f, 0.5f);
-            ImGuiAPI.SetNextWindowPos((min + max) * 0.5f + pos, ImGuiCond_.ImGuiCond_Appearing, in pivot);
-
-            var result = EGui.UIProxy.SingleInputDialog.Draw(keyName, "Folder Name:", ref mNewFolderName, (val) =>
-            {
-                if (string.IsNullOrEmpty(val))
-                    return "Empty folder name";
-                if (!Regex.IsMatch(val, @"^[a-zA-Z0-9\\_]+$"))
-                    return "Invalid folder name!";
-                if (IO.TtFileManager.DirectoryExists(mCreateFolderDir + mNewFolderName))
-                    return $"Directory {mNewFolderName} is exist";
-
-                return null;
-            });
-            switch(result)
-            {
-                case UIProxy.SingleInputDialog.enResult.OK:
-                    IO.TtFileManager.CreateDirectory(mCreateFolderDir + mNewFolderName);
-                    mNewFolderName = "NewFolder";
-                    mCreateFolderDir = null;
-                    break;
-                case UIProxy.SingleInputDialog.enResult.Cancel:
-                    mCreateFolderDir = null;
-                    mNewFolderName = "NewFolder";
-                    break;
-            }
-        }
-        private unsafe void DrawTree(RName.ERNameType type, string parentDir, string dirName)
-        {
-            var nextParent = parentDir + dirName + "/";
-            var path = RName.GetRName(nextParent, type).Address;
-
-            if(mExtNameArray != null && mExtNameArray.Length > 0)
-            {
-                if(!mDirectoryShowFlags.ContainsKey(path))
-                {
-                    bool hasTarget = false;
-                    for(int i=0; i<mExtNameArray.Length; i++)
-                    {
-                        var files = IO.TtFileManager.GetFiles(path, "*" + mExtNameArray[i] + ".ameta");
-                        if (files.Length == 0)
-                            continue;
-                        if (MacrossBase != null && mExtNameArray[i] == Bricks.CodeBuilder.UMacross.AssetExt)
-                        {
-                            foreach (var f in files)
-                            {
-                                var ff = f.Substring(0, f.Length - ".ameta".Length);
-                                var ameta1 = UEngine.Instance.AssetMetaManager.GetAssetMeta(RName.GetRNameFromAbsPath(ff)) as Bricks.CodeBuilder.UMacrossAMeta;
-                                if (ameta1 == null)
-                                    continue;
-
-                                if (ameta1.BaseTypeStr != MacrossBase.TypeString)
-                                {
-                                    continue;
-                                }
-                                hasTarget = true;
-                                break;
-                            }
-                            if (hasTarget)
-                                break;
-                        }
-                        else
-                        {
-                            hasTarget = true;
-                            break;
-                        }
-                    }
-                    mDirectoryShowFlags[path] = hasTarget;
-                }
-                if (!mDirectoryShowFlags[path])
-                    return;
-
-            }
-
-            ImGuiTreeNodeFlags_ flags = ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_SpanFullWidth;
-            var rn = RName.GetRName(nextParent, type);
-            var textColor = EGui.UIProxy.StyleConfig.Instance.TextColor;
-            if (rn == CurrentDir)
-            {
-                flags |= ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_Selected;
-                textColor = 0xffffffff;
-            }
-
-            var style = ImGuiAPI.GetStyle();
-            ImGuiAPI.PushID(dirName);
-            var treeNodeResult = ImGuiAPI.TreeNodeEx("", flags, "");
-
-            var cmdList = ImGuiAPI.GetWindowDrawList();
-            var start = ImGuiAPI.GetItemRectMin();
-            //var end = ImGuiAPI.GetItemRectMax();
-            //cmdList.AddRect(start, end, 0xFF0000FF, 0, ImDrawFlags_.ImDrawFlags_None, 1);
-            //ImGuiAPI.SameLine(0, -1);
-            var curPos = ImGuiAPI.GetCursorScreenPos();
-            start.X = curPos.X;
-            var imgSize = 16;
-            if (treeNodeResult)
-            {
-                var shadowImg = UEngine.Instance.UIProxyManager[FolderOpenImgName] as EGui.UIProxy.ImageProxy;
-                if (shadowImg != null)
-                    shadowImg.OnDraw(cmdList, start, start + new Vector2(imgSize, imgSize), 0xff558fb6);
-            }
-            else
-            {
-                start.X += style->IndentSpacing;
-                var shadowImg = UEngine.Instance.UIProxyManager[FolderClosedImgName] as EGui.UIProxy.ImageProxy;
-                if (shadowImg != null)
-                    shadowImg.OnDraw(cmdList, start, start + new Vector2(imgSize, imgSize), 0xff558fb6);
-            }
-            start.X += imgSize + style->ItemSpacing.X;
-            cmdList.AddText(start, textColor, dirName, null);
-            //ImGuiAPI.SameLine(0, 32);
-            //ImGuiAPI.Text("_" + dirName);
-
-            DrawDirContextMenu(path);
-            if (treeNodeResult)
-            {   
-                if (ImGuiAPI.IsItemActivated())
-                {
-                    PushHistory(rn);
-                }
-
-                var dirs = IO.TtFileManager.GetDirectories(path, "*.*", false);
-                foreach(var i in dirs)
-                {
-                    if(IO.TtFileManager.FileExists(i + IO.IAssetMeta.MetaExt))
-                        continue;
-                    var nextDirName = IO.TtFileManager.GetRelativePath(path, i);
-                    if (IsReservationFolder(nextDirName))
-                        continue;
-                    DrawTree(type, nextParent, nextDirName);
-                }
-                ImGuiAPI.TreePop();
-            }
-            else
-            {
-                if (ImGuiAPI.IsItemActivated())
-                {
-                    PushHistory(rn);
-                }
-            }
-
-            ImGuiAPI.PopID();
-        }
+        
         public unsafe void DrawFiles(RName dir, in Vector2 size)
         {
             var cmdlist = ImGuiAPI.GetWindowDrawList();
@@ -764,10 +503,8 @@ namespace EngineNS.EGui.Controls
         }
         bool mIsPreFolderMouseDown = false;
         bool mIsPreFolderMouseHover = false;
-        bool mIsPreFolderDisable = true;
         bool mIsNextFolderMouseDown = false;
         bool mIsNextFolderMouseHover = false;
-        bool mIsNextFolderDisable = true;
         bool mIsFilterMouseDown = false;
         bool mIsFilterMouseHover = false;
         bool[] mIsDirMouseDown = new bool[256];
@@ -780,40 +517,40 @@ namespace EngineNS.EGui.Controls
             if (EGui.UIProxy.ToolbarIconButtonProxy.DrawButton(cmd,
                 ref mIsPreFolderMouseDown,
                 ref mIsPreFolderMouseHover,
-                UEngine.Instance.UIProxyManager[PreFolderImgName] as EGui.UIProxy.ImageProxy,
-                "", mIsPreFolderDisable))
+                UEngine.Instance.UIProxyManager[FolderView.PreFolderImgName] as EGui.UIProxy.ImageProxy,
+                "", mFolderView.IsPreFolderDisable))
             {
-                mCurrentDirHistoryIdx--;
-                if (mCurrentDirHistoryIdx <= 0)
+                mFolderView.CurrentDirHistoryIdx--;
+                if (mFolderView.CurrentDirHistoryIdx <= 0)
                 {
-                    mIsPreFolderDisable = true;
-                    mCurrentDirHistoryIdx = 0;
+                    mFolderView.IsPreFolderDisable = true;
+                    mFolderView.CurrentDirHistoryIdx = 0;
                 }
-                CurrentDir = mDirHistory[mCurrentDirHistoryIdx];
-                if (mCurrentDirHistoryIdx < mDirHistory.Count - 1)
-                    mIsNextFolderDisable = false;
+                mFolderView.CurrentDir = mFolderView.DirHistory[mFolderView.CurrentDirHistoryIdx];
+                if (mFolderView.CurrentDirHistoryIdx < mFolderView.DirHistory.Count - 1)
+                    mFolderView.IsNextFolderDisable = false;
             }
             if (EGui.UIProxy.ToolbarIconButtonProxy.DrawButton(cmd,
                 ref mIsNextFolderMouseDown,
                 ref mIsNextFolderMouseHover,
-                UEngine.Instance.UIProxyManager[NextFolderImgName] as EGui.UIProxy.ImageProxy,
-                "", mIsNextFolderDisable))
+                UEngine.Instance.UIProxyManager[FolderView.NextFolderImgName] as EGui.UIProxy.ImageProxy,
+                "", mFolderView.IsNextFolderDisable))
             {
-                mCurrentDirHistoryIdx++;
-                if (mCurrentDirHistoryIdx >= mDirHistory.Count - 1)
+                mFolderView.CurrentDirHistoryIdx++;
+                if (mFolderView.CurrentDirHistoryIdx >= mFolderView.DirHistory.Count - 1)
                 {
-                    mCurrentDirHistoryIdx = mDirHistory.Count - 1;
-                    mIsNextFolderDisable = true;
+                    mFolderView.CurrentDirHistoryIdx = mFolderView.DirHistory.Count - 1;
+                    mFolderView.IsNextFolderDisable = true;
                 }
-                CurrentDir = mDirHistory[mCurrentDirHistoryIdx];
-                if (mCurrentDirHistoryIdx > 0)
-                    mIsPreFolderDisable = false;
+                mFolderView.CurrentDir = mFolderView.DirHistory[mFolderView.CurrentDirHistoryIdx];
+                if (mFolderView.CurrentDirHistoryIdx > 0)
+                    mFolderView.IsPreFolderDisable = false;
             }
-            if (CurrentDir != null)
+            if (mFolderView.CurrentDir != null)
             {
-                var root = RName.GetRName("", CurrentDir.RNameType);
-                var dirName = IO.TtFileManager.GetRelativePath(root.Address, CurrentDir.Address).TrimEnd('/');
-                dirName = CurrentDir.RNameType + "/" + dirName;
+                var root = RName.GetRName("", mFolderView.CurrentDir.RNameType);
+                var dirName = IO.TtFileManager.GetRelativePath(root.Address, mFolderView.CurrentDir.Address).TrimEnd('/');
+                dirName = mFolderView.CurrentDir.RNameType + "/" + dirName;
                 var dirSplits = dirName.Split('/');
                 for (int i = 0; i < dirSplits.Length; i++)
                 {
@@ -825,14 +562,14 @@ namespace EngineNS.EGui.Controls
                         if (i != dirSplits.Length - 1)
                         {
                             if (i == 0)
-                                PushHistory(root);
+                                mFolderView.PushHistory(root);
                             else
                             {
                                 string tempDir = "";
                                 for (int j = 0; j <= i - 1; j++)
                                     tempDir += dirSplits[j + 1] + "/";
                                 tempDir.TrimEnd('/');
-                                PushHistory(RName.GetRName(tempDir, CurrentDir.RNameType));
+                                mFolderView.PushHistory(RName.GetRName(tempDir, mFolderView.CurrentDir.RNameType));
                             }
                         }
                     }
@@ -849,8 +586,8 @@ namespace EngineNS.EGui.Controls
             EGui.UIProxy.Toolbar.EndToolbar();
         }
 
+        FolderView mFolderView = new FolderView();
         public UItemDragging ItemDragging = new UItemDragging();
-        Vector2 LeftSize = Vector2.Zero;
         Vector2 RightSize;
         struct stAssetImporter
         {
@@ -908,36 +645,17 @@ namespace EngineNS.EGui.Controls
                 //                }
                 ImGuiAPI.Columns(2, null, true);
 
-                if (LeftSize.X == 0)
+                if (mFolderView.ContentSize.X == 0)
                 {
                     var cltSize = ImGuiAPI.GetWindowContentRegionWidth();
                     ImGuiAPI.SetColumnWidth(0, ((float)cltSize) * 0.3f);
                 }
 
                 //bool open = true;
-                ImGuiAPI.PushStyleColor(ImGuiCol_.ImGuiCol_ChildBg, 0xFF1A1A1A);
-                if (ImGuiAPI.BeginChild("LeftWindow", in Vector2.MinusOne, true, ImGuiWindowFlags_.ImGuiWindowFlags_HorizontalScrollbar | ImGuiWindowFlags_.ImGuiWindowFlags_NoMove))
-                {
-                    //var winMin = ImGuiAPI.GetWindowPos();
-                    //var winMax = winMin + ImGuiAPI.GetWindowSize();
-                    //cmd.AddRect(winMin - style->WindowPadding, winMax + style->WindowPadding, 0xff0000ff, 0, ImDrawFlags_.ImDrawFlags_None, 1);
-                    var min = ImGuiAPI.GetWindowContentRegionMin();
-                    var max = ImGuiAPI.GetWindowContentRegionMax();
-                    LeftSize = max - min;
-
-                    ImGuiAPI.PushStyleColor(ImGuiCol_.ImGuiCol_Header, UIProxy.StyleConfig.Instance.TVHeader);
-                    ImGuiAPI.PushStyleColor(ImGuiCol_.ImGuiCol_HeaderActive, UIProxy.StyleConfig.Instance.TVHeaderActive);
-                    ImGuiAPI.PushStyleColor(ImGuiCol_.ImGuiCol_HeaderHovered, UIProxy.StyleConfig.Instance.TVHeaderHovered);
-                    DrawDirectories(RName.GetRName("", RName.ERNameType.Game));
-                    DrawDirectories(RName.GetRName("", RName.ERNameType.Engine));
-                    ImGuiAPI.PopStyleColor(3);
-                }
-                ImGuiAPI.EndChild();
-                ImGuiAPI.PopStyleColor(1);
-                
+                mFolderView.Draw(in Vector2.MinusOne);
                 ImGuiAPI.NextColumn();
 
-                if (CurrentDir != null)
+                if (mFolderView.CurrentDir != null)
                 {
                     //var cmdlist = ImGuiAPI.GetWindowDrawList();
                     if (mSearchBar != null)
@@ -1007,7 +725,7 @@ namespace EngineNS.EGui.Controls
                                             if (((IO.IAssetCreateAttribute)(attrs[0])).IsAssetSource(fileExt))
                                             {
                                                 var assetExtField = Rtti.UTypeDesc.GetField(importers[j].SystemType, "AssetExt");
-                                                EnqueueAssetImporter(UEngine.Instance.AssetMetaManager.ImportAsset(CurrentDir, importers[j], (string)assetExtField.GetValue(null)), file);
+                                                EnqueueAssetImporter(UEngine.Instance.AssetMetaManager.ImportAsset(mFolderView.CurrentDir, importers[j], (string)assetExtField.GetValue(null)), file);
                                                 break;
                                             }
                                         }
@@ -1021,7 +739,7 @@ namespace EngineNS.EGui.Controls
                             }
                         }
 
-                        DrawFiles(CurrentDir, in RightSize);
+                        DrawFiles(mFolderView.CurrentDir, in RightSize);
 
                     }
                     ImGuiAPI.EndChild();
@@ -1030,27 +748,7 @@ namespace EngineNS.EGui.Controls
                 ImGuiAPI.NextColumn();
 
                 ImGuiAPI.Columns(1, null, true);
-
-                if (!string.IsNullOrEmpty(mCreateFolderDir))
-                {
-                    var pathName = IO.TtFileManager.GetLastestPathName(mCreateFolderDir);
-                    if(UEngine.Instance.FileManager.GetRoot(IO.TtFileManager.ERootDir.Game) == mCreateFolderDir)
-                    {
-                        pathName = "Game";
-                    }
-                    else if(UEngine.Instance.FileManager.GetRoot(IO.TtFileManager.ERootDir.Engine) == mCreateFolderDir)
-                    {
-                        pathName = "Engine";
-                    }
-                    else if(UEngine.Instance.FileManager.GetRoot(IO.TtFileManager.ERootDir.Editor) == mCreateFolderDir)
-                    {
-                        pathName = "Editor";
-                    }
-                    var keyName = $"Create Folder in {pathName}";
-                    EGui.UIProxy.SingleInputDialog.Open(keyName);
-                    DrawCreateFolderDialog(keyName);
-                }
-
+                DrawAssetOperationDialog();
             }
             if (DrawInWindow)
                 EGui.UIProxy.DockProxy.EndMainForm(draw);
@@ -1073,6 +771,128 @@ namespace EngineNS.EGui.Controls
                 var importer = mAssetImporterQueue.Dequeue();
                 mAssetImporter = importer.Creater;
                 CurrentImporterFile = importer.FileName;
+            }
+
+        }
+
+        public enum EAssetOperationType
+        {
+            None,
+            MoveTo,
+            CopyTo,
+            Rename,
+        }
+        EAssetOperationType mOperationType = EAssetOperationType.None;
+        IAssetMeta mOperationAsset = null;
+        FolderView mSelectFolderView = new FolderView();
+        float mSelectFolderOKButtonHeight = 20;
+        public void OperationAsset(IAssetMeta sourceAsset, EAssetOperationType opType)
+        {
+            mOperationAsset = sourceAsset;
+            mOperationType = opType;
+            NewName = mOperationAsset.GetAssetName().PureName;
+        }
+        string NewName;
+        unsafe void DrawAssetOperationDialog()
+        {
+            if (mOperationAsset == null || mOperationType == EAssetOperationType.None)
+                return;
+
+            var sourceName = mOperationAsset.GetAssetName();
+            string keyName = "AssetOperation";
+            switch (mOperationType)
+            {
+                case EAssetOperationType.MoveTo:
+                    keyName = $"Move {sourceName.Name} To";
+                    break;
+                case EAssetOperationType.CopyTo:
+                    keyName = $"Copy {sourceName.Name} To";
+                    break;
+            }
+
+            ImGuiAPI.OpenPopup(keyName, ImGuiPopupFlags_.ImGuiPopupFlags_None | ImGuiPopupFlags_.ImGuiPopupFlags_NoOpenOverExistingPopup);
+
+            var pos = ImGuiAPI.GetWindowPos();
+            var min = ImGuiAPI.GetWindowContentRegionMin();
+            var max = ImGuiAPI.GetWindowContentRegionMax();
+            var pivot = new Vector2(0.5f, 0.5f);
+            ImGuiAPI.SetNextWindowPos((min + max) * 0.5f + pos, ImGuiCond_.ImGuiCond_Appearing, in pivot);
+            ImGuiAPI.SetNextWindowSize(new Vector2(300, 500), ImGuiCond_.ImGuiCond_Appearing);
+            if(ImGuiAPI.BeginPopupModal(keyName, (bool*)0, ImGuiWindowFlags_.ImGuiWindowFlags_None | ImGuiWindowFlags_.ImGuiWindowFlags_NoScrollbar))
+            {
+                if(ImGuiAPI.BeginChild(keyName + "CWin", in Vector2.Zero, false, ImGuiWindowFlags_.ImGuiWindowFlags_NoScrollbar))
+                {
+                    var winSize = new Vector2(ImGuiAPI.GetWindowWidth(), ImGuiAPI.GetWindowHeight() - mSelectFolderOKButtonHeight);
+                    if (mOperationType == EAssetOperationType.MoveTo ||
+                        mOperationType == EAssetOperationType.CopyTo)
+                    {
+                        mSelectFolderView.Draw(in winSize);
+                    }
+                    else if(mOperationType == EAssetOperationType.Rename)
+                    {
+                        if (ImGuiAPI.InputText("NewName", ref NewName))
+                        {
+
+                        }
+                    }
+
+                    if (ImGuiAPI.Button("OK", in Vector2.Zero))
+                    {
+                        try
+                        {
+                            if (AssetOpTask == null || AssetOpTask.IsCompleted)
+                            {
+                                switch(mOperationType)
+                                {
+                                    case EAssetOperationType.MoveTo:
+                                        {
+                                            var name = mSelectFolderView.CurrentDir.Address + sourceName.PureName + sourceName.ExtName;
+                                            AssetOpTask = mOperationAsset.MoveTo(name, sourceName.RNameType);
+                                        }
+                                        break;
+                                    case EAssetOperationType.CopyTo:
+                                        {
+                                            var name = mSelectFolderView.CurrentDir.Address + sourceName.PureName + sourceName.ExtName;
+                                            AssetOpTask = mOperationAsset.CopyTo(name, sourceName.RNameType);
+                                        }
+                                        break;
+                                    case EAssetOperationType.Rename:
+                                        {
+                                            var dir = sourceName.Name.Substring(0, sourceName.Name.Length - sourceName.PureName.Length - sourceName.ExtName.Length);
+                                            var name = dir + NewName + sourceName.ExtName;
+                                            AssetOpTask = mOperationAsset.RenameTo(name, sourceName.RNameType);
+                                        }
+                                        break;
+                                }
+                            }
+                            else
+                            {
+                                Profiler.Log.WriteLine(Profiler.ELogTag.Info, "Asset", "Please wait for Action(MoveTo)");
+                            }
+                        }
+                        catch
+                        {
+
+                        }
+                        mOperationAsset = null;
+                        mOperationType = EAssetOperationType.None;
+                        ImGuiAPI.CloseCurrentPopup();
+                    }
+                    mSelectFolderOKButtonHeight = ImGuiAPI.GetItemRectSize().Y;
+                    ImGuiAPI.SetItemDefaultFocus();
+                    ImGuiAPI.SameLine(0, -1);
+                    if (ImGuiAPI.Button("Cancel", in Vector2.Zero))
+                    {
+                        mOperationAsset = null;
+                        mOperationType = EAssetOperationType.None;
+                        ImGuiAPI.CloseCurrentPopup();
+                    }
+                    mSelectFolderOKButtonHeight = Math.Max(mSelectFolderOKButtonHeight, ImGuiAPI.GetItemRectSize().Y);
+
+                    ImGuiAPI.EndChild();
+                }
+                ImGuiAPI.EndPopup();
+
             }
         }
     }

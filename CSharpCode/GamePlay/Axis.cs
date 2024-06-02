@@ -1083,6 +1083,19 @@ namespace EngineNS.GamePlay
                 return null;
             return mSelectedNodes[mSelectedNodes.Count - 1];
         }
+        public void UnSelectedNode(GamePlay.Scene.UNode node)
+        {
+            if (node == null)
+                return;
+
+            for(int i= SelectedNodes.Count - 1; i>=0; i--)
+            {
+                if(SelectedNodes[i].Node == node)
+                {
+                    SelectedNodes.RemoveAt(i);
+                }
+            }
+        }
         public void SetSelectedNodes(params GamePlay.Scene.UNode[] nodes)
         {
             if (nodes != null)

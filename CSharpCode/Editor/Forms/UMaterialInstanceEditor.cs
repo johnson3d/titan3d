@@ -44,7 +44,7 @@ namespace EngineNS.Editor.Forms
             ActionRecorder?.ClearRecords();
             ActionRecorder = null;
         }
-        public async System.Threading.Tasks.Task<bool> Initialize()
+        public async Thread.Async.TtTask<bool> Initialize()
         {
             await MaterialPropGrid.Initialize();
             await EditorPropGrid.Initialize();
@@ -117,7 +117,7 @@ namespace EngineNS.Editor.Forms
         }
         public float LoadingPercent { get; set; } = 1.0f;
         public string ProgressText { get; set; } = "Loading";
-        public async Task<bool> OpenEditor(UMainEditorApplication mainEditor, RName name, object arg)
+        public async Thread.Async.TtTask<bool> OpenEditor(UMainEditorApplication mainEditor, RName name, object arg)
         {
             LoadingPercent = 0;
             ProgressText = "Load Material";

@@ -15,18 +15,18 @@ namespace EngineNS.Editor
     }
     public interface IAssetEditor : IProgressBar
     {
-        System.Threading.Tasks.Task<bool> OpenEditor(UMainEditorApplication mainEditor, RName name, object arg);
+        Thread.Async.TtTask<bool> OpenEditor(UMainEditorApplication mainEditor, RName name, object arg);
         void OnCloseEditor();
         RName AssetName { get; set; }
         bool Visible { get; set; }
         void OnDraw();
         void OnEvent(in Bricks.Input.Event e);
         IRootForm GetRootForm();
-        System.Threading.Tasks.Task<bool> Initialize();
+        Thread.Async.TtTask<bool> Initialize();
     }
     public class TtAssetEditorOpenProgress : IRootForm
     {
-        public async System.Threading.Tasks.Task<bool> Initialize()
+        public async Thread.Async.TtTask<bool> Initialize()
         {
             await EngineNS.Thread.TtAsyncDummyClass.DummyFunc();
             return true;

@@ -44,7 +44,7 @@ namespace EngineNS.UI.Editor
             DetailsGrid.Target = null;
         }
 
-        public async Task<bool> Initialize()
+        public async Thread.Async.TtTask<bool> Initialize()
         {
             await DetailsGrid.Initialize();
             DetailsGrid.HostEditor = this;
@@ -1352,7 +1352,7 @@ namespace EngineNS.UI.Editor
         Vector2i mDesignResolution;
         public float LoadingPercent { get; set; } = 1.0f;
         public string ProgressText { get; set; } = "Loading";
-        public async Task<bool> OpenEditor(EngineNS.Editor.UMainEditorApplication mainEditor, RName name, object arg)
+        public async Thread.Async.TtTask<bool> OpenEditor(EngineNS.Editor.UMainEditorApplication mainEditor, RName name, object arg)
         {
             AssetName = name;
             mUIHost.Children.Add(UEngine.Instance.UIManager.Load(AssetName));

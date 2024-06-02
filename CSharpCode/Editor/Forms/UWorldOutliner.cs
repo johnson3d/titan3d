@@ -31,7 +31,7 @@ namespace EngineNS.Editor.Forms
 
         }
         //List<EGui.UIProxy.MenuItemProxy> mDirContextMenu;
-        public virtual async System.Threading.Tasks.Task<bool> Initialize()
+        public virtual async Thread.Async.TtTask<bool> Initialize()
         {
             await Thread.TtAsyncDummyClass.DummyFunc();
             //mDirContextMenu = new List<EGui.UIProxy.MenuItemProxy>()

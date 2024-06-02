@@ -14,14 +14,18 @@ namespace EngineNS.Animation
     {
         public struct FNullableVector3
         {
-            public Nullable<float> X;
-            public Nullable<float> Y;
-            public Nullable<float> Z;
+            public Nullable<float> X { get; set; } = null;
+            public Nullable<float> Y { get; set; } = null;
+            public Nullable<float> Z { get; set; } = null;
             public static readonly FNullableVector3 Empty = new FNullableVector3();
             public static readonly FNullableVector3 One = new FNullableVector3() { X = 1.0f, Y = 1.0f, Z = 1.0f };
+            public FNullableVector3()
+            {
+
+            }
             public static FNullableVector3 FromVector3(Vector3 value)
             {
-                FNullableVector3 nullableVector3;
+                FNullableVector3 nullableVector3 = new FNullableVector3();
                 nullableVector3.X = value.X; nullableVector3.Y = value.Y; nullableVector3.Z = value.Z;
                 return nullableVector3;
             }

@@ -33,7 +33,7 @@ namespace EngineNS.EGui.Slate
 
             base.Dispose();
         }
-        public async System.Threading.Tasks.Task<bool> Initialize()
+        public async Thread.Async.TtTask<bool> Initialize()
         {
             await EngineNS.Thread.TtAsyncDummyClass.DummyFunc();
             return true;
@@ -44,7 +44,7 @@ namespace EngineNS.EGui.Slate
 
             CameraController.ControlCamera(RenderPolicy.DefaultCamera);
         }
-        public override async System.Threading.Tasks.Task Initialize(USlateApplication application, RName policyName, float zMin, float zMax)
+        public override async Task Initialize(USlateApplication application, RName policyName, float zMin, float zMax)
         {
             URenderPolicy policy = null;
             var rpAsset = Bricks.RenderPolicyEditor.URenderPolicyAsset.LoadAsset(policyName);
@@ -56,7 +56,7 @@ namespace EngineNS.EGui.Slate
 
             IsInlitialized = true;
         }
-        private async System.Threading.Tasks.Task InitializeImpl(USlateApplication application, Graphics.Pipeline.URenderPolicy policy, float zMin, float zMax)
+        private async Thread.Async.TtTask InitializeImpl(USlateApplication application, Graphics.Pipeline.URenderPolicy policy, float zMin, float zMax)
         {
             await Initialize();
             
@@ -281,10 +281,21 @@ namespace EngineNS.EGui.Slate
                 mAxis.SetSelectedNodes(null);
             else
             {
-                UNode[] nodes = new UNode[proxies.Length];
+                var nodes = new List<UNode>(proxies.Length);
                 for (int i = 0; i < proxies.Length; i++)
-                    nodes[i] = proxies[i] as UNode;
-                mAxis.SetSelectedNodes(nodes);
+                {
+                    var uNode = proxies[i] as UNode;
+                    nodes.Add(uNode);
+                }
+                mAxis.SetSelectedNodes(nodes.ToArray());
+            }
+        }
+        public override void OnHitproxyUnSelectedMulti(params IProxiable[] proxies)
+        {
+            base.OnHitproxyUnSelectedMulti(proxies);
+            for(int i=0; i<proxies.Length; i++)
+            {
+                mAxis.UnSelectedNode(proxies[i] as UNode);
             }
         }
 

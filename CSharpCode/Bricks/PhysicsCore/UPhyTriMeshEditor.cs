@@ -34,7 +34,7 @@ namespace EngineNS.Bricks.PhysicsCore
 
             CoreSDK.DisposeObject(ref PreviewViewport);
         }
-        public async System.Threading.Tasks.Task<bool> Initialize()
+        public async Thread.Async.TtTask<bool> Initialize()
         {
             await TriMeshPropGrid.Initialize();
             return true;
@@ -92,7 +92,7 @@ namespace EngineNS.Bricks.PhysicsCore
         }
         public float LoadingPercent { get; set; } = 1.0f;
         public string ProgressText { get; set; } = "Loading";
-        public async System.Threading.Tasks.Task<bool> OpenEditor(Editor.UMainEditorApplication mainEditor, RName name, object arg)
+        public async Thread.Async.TtTask<bool> OpenEditor(Editor.UMainEditorApplication mainEditor, RName name, object arg)
         {
             AssetName = name;
             TriMesh = await UEngine.Instance.PhyModule.PhyContext.PhyMeshManager.GetMesh(name);

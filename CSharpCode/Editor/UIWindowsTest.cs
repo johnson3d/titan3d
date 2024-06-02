@@ -155,7 +155,7 @@ namespace EngineNS.Editor
             }
         }
 
-        public async Task<bool> Initialize()
+        public async Thread.Async.TtTask<bool> Initialize()
         {
             await EngineNS.Thread.TtAsyncDummyClass.DummyFunc();
 
@@ -475,7 +475,7 @@ namespace EngineNS.Editor
             }
         }
 
-        public async Task<bool> Initialize()
+        public async Thread.Async.TtTask<bool> Initialize()
         {
             await EngineNS.Thread.TtAsyncDummyClass.DummyFunc();
 
@@ -662,7 +662,7 @@ namespace EngineNS.Editor
         //};
 
         public void Dispose() { }
-        public async Task<bool> Initialize() 
+        public async Thread.Async.TtTask<bool> Initialize() 
         {
             await EngineNS.Thread.TtAsyncDummyClass.DummyFunc();
 
@@ -704,7 +704,7 @@ namespace EngineNS.Editor
             mToolbar.Cleanup();
         }
 
-        public async Task<bool> Initialize()
+        public async Thread.Async.TtTask<bool> Initialize()
         {
             await EngineNS.Thread.TtAsyncDummyClass.DummyFunc();
 

@@ -25,7 +25,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
         }
 
         bool mInitialized = false;
-        public virtual async System.Threading.Tasks.Task<bool> Initialize()
+        public virtual async Thread.Async.TtTask<bool> Initialize()
         {
             if (mInitialized)
                 return true;
@@ -1013,7 +1013,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
         }
         public float LoadingPercent { get; set; } = 1.0f;
         public string ProgressText { get; set; } = "Loading";
-        public async Task<bool> OpenEditor(Editor.UMainEditorApplication mainEditor, RName name, object arg)
+        public async Thread.Async.TtTask<bool> OpenEditor(Editor.UMainEditorApplication mainEditor, RName name, object arg)
         {
             LoadClassGraph(AssetName);
             //LoadClassGraph(RName.GetRName("UTest/class_graph.xml"));

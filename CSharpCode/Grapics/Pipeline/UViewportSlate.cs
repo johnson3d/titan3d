@@ -352,10 +352,23 @@ namespace EngineNS.Graphics.Pipeline
                 }
             }
         }
+        public virtual void OnHitproxyUnSelectedMulti(params Graphics.Pipeline.IProxiable[] proxies)
+        {
+            var editorPolicy = this.RenderPolicy as Graphics.Pipeline.URenderPolicy;
+            if(editorPolicy != null)
+            {
+                for(int i=0; i<proxies.Length; i++)
+                {
+                    if (proxies[i] == null)
+                        continue;
+                    editorPolicy.PickedProxiableManager.Unselected(proxies[i]);
+                }
+            }
+        }
         public delegate System.Threading.Tasks.Task FOnInitialize(UViewportSlate viewport, USlateApplication application, Graphics.Pipeline.URenderPolicy policy, float zMin, float zMax);
         public FOnInitialize OnInitialize = null;
         [Rtti.Meta]
-        public virtual async System.Threading.Tasks.Task Initialize(USlateApplication application, RName policyName, float zMin, float zMax)
+        public virtual async Task Initialize(USlateApplication application, RName policyName, float zMin, float zMax)
         {
             var policy = Bricks.RenderPolicyEditor.URenderPolicyAsset.LoadAsset(policyName).CreateRenderPolicy(this);
             if (OnInitialize != null)

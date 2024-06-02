@@ -52,7 +52,7 @@ namespace EngineNS.Editor
             //this.RenderPolicy.GBuffers.GroundLightColor = new Vector3(0.1f, 0.1f, 0.1f);
             //this.RenderPolicy.GBuffers.UpdateViewportCBuffer();
         }
-        public override async System.Threading.Tasks.Task Initialize(USlateApplication application, RName policyName, float zMin, float zMax)
+        public override async Task Initialize(USlateApplication application, RName policyName, float zMin, float zMax)
         {
             Graphics.Pipeline.URenderPolicy policy = await UEngine.Instance.EventPoster.Post((state) =>
             {

@@ -48,7 +48,7 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode
             CoreSDK.DisposeObject(ref PreviewViewport);
             MaterialPropGrid.Target = null;
         }
-        public async System.Threading.Tasks.Task<bool> Initialize()
+        public async Thread.Async.TtTask<bool> Initialize()
         {
             await EngineNS.Thread.TtAsyncDummyClass.DummyFunc();
             return true;
@@ -135,7 +135,7 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode
             var gridNode = await GamePlay.Scene.UGridNode.AddGridNode(viewport.World, viewport.World.Root);
             gridNode.ViewportSlate = this.PreviewViewport;
         }
-        public async System.Threading.Tasks.Task<bool> OpenEditor(Editor.UMainEditorApplication mainEditor, RName name, object arg)
+        public async Thread.Async.TtTask<bool> OpenEditor(Editor.UMainEditorApplication mainEditor, RName name, object arg)
         {
             if (IsStarting)
                 return false;

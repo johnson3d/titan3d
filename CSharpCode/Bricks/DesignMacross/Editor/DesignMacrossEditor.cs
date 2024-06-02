@@ -23,7 +23,7 @@ namespace EngineNS.DesignMacross.Editor
 
         }
         public EGui.Controls.PropertyGrid.PropertyGrid PGMember = new EGui.Controls.PropertyGrid.PropertyGrid();
-        public async Task<bool> Initialize()
+        public async Thread.Async.TtTask<bool> Initialize()
         {
             DeclarationEditPanel.Initialize();
             InitializeMainMenu();
@@ -326,7 +326,7 @@ namespace EngineNS.DesignMacross.Editor
         }
         public float LoadingPercent { get; set; } = 1.0f;
         public string ProgressText { get; set; } = "Loading";
-        public async Task<bool> OpenEditor(EngineNS.Editor.UMainEditorApplication mainEditor, RName name, object arg)
+        public async Thread.Async.TtTask<bool> OpenEditor(EngineNS.Editor.UMainEditorApplication mainEditor, RName name, object arg)
         {
             mDesignMacross = new UDesignMacross();
             mDesignMacross.Load(AssetName);

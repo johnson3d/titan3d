@@ -10,6 +10,7 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="$(MSBuildThisFileDirectory)Controls\BezierControl.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Controls\FolderView.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Controls\UContentBrowser.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Controls\CtrlUtility.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Controls\PropertyGrid\Attributes.cs" />

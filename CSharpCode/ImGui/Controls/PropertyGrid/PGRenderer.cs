@@ -93,7 +93,7 @@ namespace EngineNS.EGui.Controls.PropertyGrid
             mDrawTargetDic.Clear();
         }
 
-        public async System.Threading.Tasks.Task<bool> Initialize()
+        public async Thread.Async.TtTask<bool> Initialize()
         {
             await EngineNS.Thread.TtAsyncDummyClass.DummyFunc();
 

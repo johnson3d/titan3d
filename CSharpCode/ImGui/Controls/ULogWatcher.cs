@@ -18,7 +18,7 @@ namespace EngineNS.EGui.Controls
         {
             Profiler.Log.OnReportLog -= OnReportLog;
         }
-        public async System.Threading.Tasks.Task<bool> Initialize()
+        public async Thread.Async.TtTask<bool> Initialize()
         {
             await EngineNS.Thread.TtAsyncDummyClass.DummyFunc();
             return true;

@@ -77,12 +77,14 @@ namespace EngineNS.Editor.Forms
             SkeletonAsset = nodeData.SkeletonAsset;
             var animPose = SkeletonAsset.Skeleton.CreatePose() as Animation.SkeletonAnimation.AnimatablePose.TtAnimatableSkeletonPose;
             CurrentPose = TtRuntimePoseUtility.CreateLocalSpaceRuntimePose(animPose);
+            var runtimePose = TtRuntimePoseUtility.ConvetToMeshSpaceRuntimePose(CurrentPose);
             for (int i = 0; i < SkeletonAsset.Skeleton.Limbs.Count; ++i)
             {
                 var index = SkeletonAsset.Skeleton.Limbs[i].Index.Value;
-                var meshProvider = Graphics.Mesh.UMeshDataProvider.MakeSphere(0.01f, 5, 5, Color.Green.ToArgb());
+                var meshProvider = Graphics.Mesh.UMeshDataProvider.MakeSphere(0.005f, 5, 5, Color.Green.ToArgb());
                 var mesh = meshProvider.ToDrawMesh(UEngine.Instance.GfxDevice.MaterialInstanceManager.WireVtxColorMateria);
                 BoneMeshes.Add(index, mesh);
+                System.Diagnostics.Debug.Print(runtimePose.Descs[index].Name + " " + runtimePose.Transforms[index].Position.ToString());
             }
             CreateBoneLineMesh(SkeletonAsset.Skeleton.Root);
             return base.InitializeNode(world, data, bvType, placementType);
@@ -93,7 +95,7 @@ namespace EngineNS.Editor.Forms
             foreach (var child in limb.Children)
             {
                 var end = child.Index.Value;
-                var meshProvider = Graphics.Mesh.UMeshDataProvider.MakeBox(0, -0.005f, -0.005f, 1, 0.01f, 0.01f, Color.Green.ToArgb());
+                var meshProvider = Graphics.Mesh.UMeshDataProvider.MakeBox(0, -0.0005f, -0.0005f, 1, 0.001f, 0.001f, Color.Green.ToArgb());
                 var mesh = meshProvider.ToDrawMesh(UEngine.Instance.GfxDevice.MaterialInstanceManager.WireVtxColorMateria);
                 var boneLine = new FBoneLine() { Start = start, End = end };
                 BoneLineMeshes.Add(boneLine, mesh);
@@ -168,7 +170,7 @@ namespace EngineNS.Editor.Forms
             return this;
         }
 
-        public async Task<bool> Initialize()
+        public async Thread.Async.TtTask<bool> Initialize()
         {
             await AnimationClipPropGrid.Initialize();
             return true;
@@ -310,13 +312,12 @@ namespace EngineNS.Editor.Forms
             }
 
             {
-                var box = Graphics.Mesh.UMeshDataProvider.MakeBox(-5, -0.1001f, -5, 10, 0.1f, 10).ToMesh();
                 var PlaneMesh = new Graphics.Mesh.TtMesh();
                 var tMaterials = new Graphics.Pipeline.Shader.UMaterial[1];
                 tMaterials[0] = await UEngine.Instance.GfxDevice.MaterialInstanceManager.GetMaterialInstance(UEngine.Instance.Config.MeshPrimitiveEditorConfig.PlaneMaterialName);
-                PlaneMesh.Initialize(box, tMaterials,
+                PlaneMesh.Initialize(Graphics.Mesh.UMeshDataProvider.MakePlane(10, 10).ToMesh(), tMaterials,
                     Rtti.UTypeDescGetter<Graphics.Mesh.UMdfStaticMesh>.TypeDesc);
-                PlaneMeshNode = await GamePlay.Scene.UMeshNode.AddMeshNode(viewport.World, viewport.World.Root, new GamePlay.Scene.UMeshNode.UMeshNodeData(), typeof(GamePlay.UPlacement), PlaneMesh, DVector3.Zero, Vector3.One, Quaternion.Identity);
+                PlaneMeshNode = await GamePlay.Scene.UMeshNode.AddMeshNode(viewport.World, viewport.World.Root, new GamePlay.Scene.UMeshNode.UMeshNodeData(), typeof(GamePlay.UPlacement), PlaneMesh, new DVector3(0, -0.0001f, 0), Vector3.One, Quaternion.Identity);
                 PlaneMeshNode.HitproxyType = Graphics.Pipeline.UHitProxy.EHitproxyType.None;
                 PlaneMeshNode.NodeData.Name = "Plane";
                 PlaneMeshNode.IsAcceptShadow = true;
@@ -329,7 +330,7 @@ namespace EngineNS.Editor.Forms
         public float LoadingPercent { get; set; } = 1.0f;
         public string ProgressText { get; set; } = "Loading";
         TtAnimationClipPreview AnimationClipPreview = null;
-        public async Task<bool> OpenEditor(UMainEditorApplication mainEditor, RName name, object arg)
+        public async Thread.Async.TtTask<bool> OpenEditor(UMainEditorApplication mainEditor, RName name, object arg)
         {
             AssetName = name;
             SkeletonAsset = await UEngine.Instance.AnimationModule.SkeletonAssetManager.GetSkeletonAsset(name);

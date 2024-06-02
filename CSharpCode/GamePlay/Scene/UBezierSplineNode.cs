@@ -75,6 +75,8 @@ namespace EngineNS.GamePlay.Scene
         }
         public class USplinePoint : Graphics.Pipeline.IProxiable
         {
+            public bool Selected { get; set; }
+
             ~USplinePoint()
             {
                 UEngine.Instance?.GfxDevice.HitproxyManager.UnmapProxy(this);

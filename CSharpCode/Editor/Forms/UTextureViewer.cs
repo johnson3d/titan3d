@@ -58,7 +58,7 @@ namespace EngineNS.Editor.Forms
             }
             CoreSDK.DisposeObject(ref CmdParameters);
         }
-        public async System.Threading.Tasks.Task<bool> Initialize()
+        public async Thread.Async.TtTask<bool> Initialize()
         {
             return await TexturePropGrid.Initialize();
         }
@@ -68,7 +68,7 @@ namespace EngineNS.Editor.Forms
         }
         public float LoadingPercent { get; set; } = 1.0f;
         public string ProgressText { get; set; } = "Loading";
-        public async System.Threading.Tasks.Task<bool> OpenEditor(UMainEditorApplication mainEditor, RName name, object arg)
+        public async Thread.Async.TtTask<bool> OpenEditor(UMainEditorApplication mainEditor, RName name, object arg)
         {
             AssetName = name;
             TextureSRV = await UEngine.Instance.GfxDevice.TextureManager.GetOrNewTexture(name);
