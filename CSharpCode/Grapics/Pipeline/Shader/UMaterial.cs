@@ -394,7 +394,7 @@ namespace EngineNS.Graphics.Pipeline.Shader
             NormalMap,
             NormalNone,
         }
-        ENormalMode mNormalMode = ENormalMode.Normal;
+        ENormalMode mNormalMode = ENormalMode.NormalMap;
         [Rtti.Meta]
         [Category("Option")]
         public virtual ENormalMode NormalMode

@@ -20,6 +20,7 @@ namespace ProjectCooker
         public const string Type_Material = "Material";
         public const string Type_MaterialInst = "MaterialInst";
         public const string Type_Scene = "Scene";
+        public const string Type_Prefab = "Prefab";
         public const string Type_AnimClip = "AnimClip";
         public const string Type_UI = "UI";
 

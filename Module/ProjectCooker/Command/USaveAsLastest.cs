@@ -26,6 +26,7 @@ namespace ProjectCooker.Command
                 await ProcMaterial();
                 await ProcMaterialInstance();
                 await ProcScene();
+                await ProcPrefab();
                 await ProcAnimClip();
                 await ProcUI();
             }
@@ -63,6 +64,11 @@ namespace ProjectCooker.Command
                         case Type_Scene:
                             {
                                 await ProcScene();
+                            }
+                            break;
+                        case Type_Prefab:
+                            {
+                                await ProcPrefab();
                             }
                             break;
                         case Type_AnimClip:
@@ -328,6 +334,46 @@ namespace ProjectCooker.Command
                 else
                 {
                     EngineNS.Profiler.Log.WriteLineSingle($"GetScene {rn} failed");
+                }
+            }
+        }
+        async System.Threading.Tasks.Task ProcPrefab()
+        {
+            var root = EngineNS.UEngine.Instance.FileManager.GetRoot(EngineNS.IO.TtFileManager.ERootDir.Game);
+            var files = EngineNS.IO.TtFileManager.GetFiles(root, "*" + EngineNS.GamePlay.Scene.TtPrefab.AssetExt, true);
+            foreach (var i in files)
+            {
+                var rp = EngineNS.IO.TtFileManager.GetRelativePath(root, i);
+                var rn = EngineNS.RName.GetRName(rp, EngineNS.RName.ERNameType.Game);
+                var world = new EngineNS.GamePlay.UWorld(null);
+                await world.InitWorld();
+                var asset = await EngineNS.UEngine.Instance.PrefabManager.GetPrefab(rn);
+                if (asset != null)
+                {
+                    asset.SaveAssetTo(rn);
+                }
+                else
+                {
+                    EngineNS.Profiler.Log.WriteLineSingle($"GetPrefab {rn} failed");
+                }
+            }
+
+            root = EngineNS.UEngine.Instance.FileManager.GetRoot(EngineNS.IO.TtFileManager.ERootDir.Engine);
+            files = EngineNS.IO.TtFileManager.GetFiles(root, "*" + EngineNS.GamePlay.Scene.TtPrefab.AssetExt, true);
+            foreach (var i in files)
+            {
+                var rp = EngineNS.IO.TtFileManager.GetRelativePath(root, i);
+                var rn = EngineNS.RName.GetRName(rp, EngineNS.RName.ERNameType.Engine);
+                var world = new EngineNS.GamePlay.UWorld(null);
+                await world.InitWorld();
+                var asset = await EngineNS.UEngine.Instance.PrefabManager.GetPrefab(rn);
+                if (asset != null)
+                {
+                    asset.SaveAssetTo(rn);
+                }
+                else
+                {
+                    EngineNS.Profiler.Log.WriteLineSingle($"GetPrefab {rn} failed");
                 }
             }
         }

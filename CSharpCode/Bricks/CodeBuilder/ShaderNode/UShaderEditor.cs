@@ -179,7 +179,7 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode
             await NodePropGrid.Initialize();
 
             await MaterialPropGrid.Initialize();
-            MaterialPropGrid.IsReadOnly = true;
+            //MaterialPropGrid.IsReadOnly = true;
             MaterialPropGrid.Target = Material;
 
             PreviewViewport.PreviewAsset = AssetName;

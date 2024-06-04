@@ -190,6 +190,49 @@ namespace EngineNS.Editor.Forms
             var gridNode = await GamePlay.Scene.UGridNode.AddGridNode(viewport.World, viewport.World.Root);
             gridNode.ViewportSlate = this.PreviewViewport;
         }
+        public Graphics.Mesh.TtMesh SdfDebugMesh;
+        EngineNS.GamePlay.Scene.UMeshNode SdfMeshNode;
+        public async System.Threading.Tasks.Task CreateDebugMesh(GamePlay.UWorld world, DistanceField.TtSdfAsset sdfAsset)
+        {
+            if (sdfAsset==null || sdfAsset.Mips.Count < 0)
+                return;
+
+            var material = await UEngine.Instance.GfxDevice.MaterialInstanceManager.CreateMaterialInstance(RName.GetRName("utest/box_wite.uminst"));
+            SdfDebugMesh = new Graphics.Mesh.TtMesh();
+            var rect = Graphics.Mesh.UMeshDataProvider.MakeBox(-0.5f, -0.5f, -0.5f, 1, 1, 1, 0xffff00ff);
+            var rectMesh = rect.ToMesh();
+            var materials = new Graphics.Pipeline.Shader.UMaterial[1];
+            materials[0] = material;
+            SdfDebugMesh.Initialize(rectMesh, materials, Rtti.UTypeDescGetter<Graphics.Mesh.UMdfInstanceStaticMesh>.TypeDesc);
+            SdfDebugMesh.MdfQueue.MdfDatas = this;
+
+            var meshNode = await GamePlay.Scene.UMeshNode.AddMeshNode(world, world.Root, new GamePlay.Scene.UMeshNode.UMeshNodeData(), typeof(GamePlay.UPlacement), SdfDebugMesh, DVector3.Zero, Vector3.One, Quaternion.Identity);
+            meshNode.SetStyle(GamePlay.Scene.UNode.ENodeStyles.VisibleFollowParent);
+            meshNode.NodeData.Name = "Debug_SdfMeshNode";
+            meshNode.IsAcceptShadow = false;
+            meshNode.IsCastShadow = false;
+            meshNode.HitproxyType = Graphics.Pipeline.UHitProxy.EHitproxyType.None;
+
+            SdfMeshNode = meshNode;
+            var instanceMdf = SdfDebugMesh.MdfQueue as Graphics.Mesh.UMdfInstanceStaticMesh;
+
+            var sdfMip = sdfAsset.Mips[0];
+            instanceMdf.InstanceModifier.SetCapacity((uint)sdfMip.NumDistanceFieldBricks, false);
+
+            foreach (var sdfValue in sdfMip.DistanceFieldBrickData)
+            {
+                var pos = new Vector3(0, 0, 0);
+                pos += new Vector3(0.5f);
+                //DebugMeshInstanceMdf.InstanceModifier.PushInstance(in pos, in Vector3.One, in Quaternion.Identity, in Vector4ui.Zero, meshNode.HitProxy.ProxyId);
+
+                var instance = new Graphics.Mesh.Modifier.FVSInstanceData();
+                instance.Position = pos;
+                instance.Scale = Vector3.One;
+                instance.Quat = Quaternion.Identity;
+
+                instanceMdf.InstanceModifier.PushInstance(in instance, new Graphics.Mesh.Modifier.FCullBounding());
+            }
+        }
         public float LoadingPercent { get; set; } = 1.0f;
         public string ProgressText { get; set; } = "Loading";
         public async Thread.Async.TtTask<bool> OpenEditor(UMainEditorApplication mainEditor, RName name, object arg)
@@ -354,7 +397,7 @@ namespace EngineNS.Editor.Forms
                         var outSDF = new DistanceField.TtSdfAsset();
                         DistanceField.UMeshUtilities.GenerateSignedDistanceFieldVolumeData(Mesh.AssetName.ToString(), meshProvider, sdfConfig, 1.0f, false, ref outSDF);
 
-                        var rn = RName.GetRName(Mesh.AssetName + DistanceField.TtSdfAsset.AssetExt, Mesh.AssetName.RNameType);
+                        var rn = RName.GetRName(Mesh.AssetName.Name + DistanceField.TtSdfAsset.AssetExt, Mesh.AssetName.RNameType);
                         var ameta = new DistanceField.TtSdfAssetAMeta();
                         ameta.SetAssetName(rn);
                         ameta.AssetId = Guid.NewGuid();
@@ -362,7 +405,10 @@ namespace EngineNS.Editor.Forms
                         ameta.Description = $"This is a {typeof(DistanceField.TtSdfAssetAMeta).FullName}\n";
                         ameta.SaveAMeta();
                         UEngine.Instance.AssetMetaManager.RegAsset(ameta);
+
                         outSDF.SaveAssetTo(rn);
+
+                        CreateDebugMesh(PreviewViewport.World, outSDF);
                     }
                 }
             }

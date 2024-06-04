@@ -21,7 +21,8 @@ namespace EngineNS.DistanceField
         public int MaxPerMeshResolution = 256;
         public int MaxIndirectionDimension = 1024;
 
-        public float fDefaultVoxelDensity = 20.0f;
+        // voxel count in 1 meter
+        public float fDefaultVoxelDensity = 5.0f;
 
         public static int NumMips = 1; // TODO
         public uint InvalidBrickIndex = uint.MaxValue;
@@ -29,21 +30,31 @@ namespace EngineNS.DistanceField
 
     public class TtSparseSdfMip : IO.BaseSerializer
     {
+        public TtSparseSdfMip()
+        {
+            IndirectionDimensions = Vector3i.Zero;
+            NumDistanceFieldBricks = 0;
+            VolumeToVirtualUVScale = Vector3.Zero;
+            VolumeToVirtualUVAdd = Vector3.Zero;
+            DistanceFieldToVolumeScaleBias = Vector2.Zero;
+            IndirectionTable = new List<uint>();
+            DistanceFieldBrickData = new List<byte>();
+        }
         [Rtti.Meta]
-        public Vector3i IndirectionDimensions = Vector3i.Zero;
+        public Vector3i IndirectionDimensions { get; set; }
         [Rtti.Meta]
-        public int NumDistanceFieldBricks = 0;
+        public int NumDistanceFieldBricks { get; set; }
         [Rtti.Meta]
-        public Vector3 VolumeToVirtualUVScale = Vector3.Zero;
+        public Vector3 VolumeToVirtualUVScale { get; set; }
         [Rtti.Meta]
-        public Vector3 VolumeToVirtualUVAdd = Vector3.Zero;
+        public Vector3 VolumeToVirtualUVAdd { get; set; }
         [Rtti.Meta]
-        public Vector2 DistanceFieldToVolumeScaleBias = Vector2.Zero;
+        public Vector2 DistanceFieldToVolumeScaleBias { get; set; }
 
         [Rtti.Meta]
-        public List<uint> IndirectionTable = new List<uint>();
+        public List<uint> IndirectionTable { get; set; }
         [Rtti.Meta]
-        public List<Byte> DistanceFieldBrickData = new List<byte>();
+        public List<Byte> DistanceFieldBrickData { get; set; }
     };
 
 
@@ -145,17 +156,17 @@ namespace EngineNS.DistanceField
 
         /** Local space bounding box of the distance field volume. */
         [Rtti.Meta]
-        public BoundingBox LocalSpaceMeshBounds;
+        public BoundingBox LocalSpaceMeshBounds { get; set; }
 
         /** Whether most of the triangles in the mesh used a two-sided material. */
         [Rtti.Meta]
-        public bool bMostlyTwoSided;
+        public bool bMostlyTwoSided { get; set; }
 
         public int Id;
         static Thread.TtAtomic_Int NextId = new Thread.TtAtomic_Int();
 
         [Rtti.Meta]
-        public List<TtSparseSdfMip> Mips;
+        public List<TtSparseSdfMip> Mips { get; set; }
 
 
     };

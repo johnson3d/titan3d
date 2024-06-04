@@ -10,15 +10,15 @@ namespace EngineNS.Graphics.Mesh
 {
     public class TtMeshImprotSetting
     {
-        [Category("FileInfo")]
+        [Category("FileInfo"), ReadOnly(true)]
         public string FileName { get; set; } = "";
-        [Category("FileInfo")]
+        [Category("FileInfo"), ReadOnly(true)]
         public int MeshesCount { get; set; } = 0;
-        [Category("FileInfo")]
+        [Category("FileInfo"), ReadOnly(true)]
         public string UpAxis { get; set; } = "";
-        [Category("FileInfo")]
+        [Category("FileInfo"), ReadOnly(true)]
         public float UnitScaleFactor { get; set; } = 1;
-        [Category("FileInfo")]
+        [Category("FileInfo"), ReadOnly(true)]
         public string Generator { get; set; } = "";
         [Category("ImportSetting")]
         public float UnitScale { get; set; } = 0.01f;

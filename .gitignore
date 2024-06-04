@@ -28,7 +28,9 @@ Module/CompilingGenerator/obj
 Module/CompilingGenerator/bin
 packages
 binaries/net7.0
+binaries/net8.0
 binaries/Tools/net7.0
+binaries/Tools/net8.0
 binaries/Plugins
 *.user
 *.pdb
