@@ -1,6 +1,7 @@
 ﻿using EngineNS.Bricks.NodeGraph;
 using EngineNS.EGui.Controls.PropertyGrid;
 using EngineNS.Rtti;
+using EngineNS.Thread.Async;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -779,8 +780,14 @@ namespace EngineNS.Bricks.CodeBuilder
         public List<TtAttribute> Attributes { get; set; } = new List<TtAttribute>();
         [Rtti.Meta]
         public bool IsOverride { get; set; } = false;
+        public enum EAsyncType
+        {
+            None,
+            SystemTask,
+            CustomTask,
+        }
         [Rtti.Meta]
-        public bool IsAsync { get; set; } = false;
+        public EAsyncType AsyncType { get; set; } = EAsyncType.None;
 
         public bool IsUnsafe
         {
@@ -866,7 +873,12 @@ namespace EngineNS.Bricks.CodeBuilder
                 if (method.ReturnType.BaseType == typeof(System.Threading.Tasks.Task))
                 {
                     retType = method.ReturnType.GetGenericArguments()[0];
-                    retVal.IsAsync = true;
+                    retVal.AsyncType = EAsyncType.SystemTask;
+                }
+                else if(method.ReturnType.BaseType == typeof(TtTask))
+                {
+                    retType = method.ReturnType.GetGenericArguments()[0];
+                    retVal.AsyncType = EAsyncType.CustomTask;
                 }
 
                 retVal.ReturnValue = new UVariableDeclaration()
@@ -877,7 +889,9 @@ namespace EngineNS.Bricks.CodeBuilder
                 };
             }
             else if (method.ReturnType.BaseType == typeof(System.Threading.Tasks.Task))
-                retVal.IsAsync = true;
+                retVal.AsyncType = EAsyncType.SystemTask;
+            else if (method.ReturnType.BaseType == typeof(TtTask))
+                retVal.AsyncType = EAsyncType.CustomTask;
 
             retVal.MethodName = method.Name;
             var parameters = method.GetParameters();
@@ -898,7 +912,12 @@ namespace EngineNS.Bricks.CodeBuilder
                 if(retType.IsSubclassOf(typeof(System.Threading.Tasks.Task)))
                 {
                     retType = Rtti.UTypeDesc.TypeOf(method.ReturnType.GetGenericArguments()[0]);
-                    retVal.IsAsync = true;
+                    retVal.AsyncType = EAsyncType.SystemTask;
+                }
+                else if (retType.IsSubclassOf(typeof(TtTask)))
+                {
+                    retType = Rtti.UTypeDesc.TypeOf(method.ReturnType.GetGenericArguments()[0]);
+                    retVal.AsyncType = EAsyncType.CustomTask;
                 }
                 retVal.ReturnValue = new UVariableDeclaration()
                 {
@@ -908,7 +927,9 @@ namespace EngineNS.Bricks.CodeBuilder
                 };
             }
             else if(method.ReturnType.IsEqual(typeof(System.Threading.Tasks.Task)))
-                retVal.IsAsync = true;
+                retVal.AsyncType = EAsyncType.SystemTask;
+            else if (method.ReturnType.IsEqual(typeof(TtTask)))
+                retVal.AsyncType = EAsyncType.CustomTask;
 
             retVal.MethodName = method.MethodName;
             var parameters = method.Parameters;
@@ -1236,6 +1257,24 @@ namespace EngineNS.Bricks.CodeBuilder
         public override string ToString()
         {
             return "self";
+        }
+    }
+    public class UBaseReferenceExpression : UExpressionBase
+    {
+        public override bool Equals(object obj)
+        {
+            var val = obj as UBaseReferenceExpression;
+            if (val == null)
+                return false;
+            return true;
+        }
+        public override int GetHashCode()
+        {
+            return ToString().GetHashCode();
+        }
+        public override string ToString()
+        {
+            return "base";
         }
     }
 

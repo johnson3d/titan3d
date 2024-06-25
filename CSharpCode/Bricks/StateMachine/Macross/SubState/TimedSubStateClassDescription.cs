@@ -16,17 +16,18 @@ namespace EngineNS.Bricks.StateMachine.Macross.SubState
     public class TtTimedSubStateClassDescription : TtDesignableVariableDescription
     {
         [Rtti.Meta]
+        [Category("Option")]
         public override string Name { get; set; } = "TimedSubState";
         [Rtti.Meta]
+        [Category("Option")]
         public bool bInitialActive { get; set; } = false;
         [Rtti.Meta]
+        [Category("Option")]
         public float Duration { get; set; } = 1;
         [DrawInGraph]
-        [Browsable(false)]
         [Rtti.Meta]
         public List<TtTimedStateTransitionClassDescription> Transitions { get; set; } = new List<TtTimedStateTransitionClassDescription>();
         [DrawInGraph]
-        [Browsable(false)]
         [Rtti.Meta]
         public List<TtTimedStateAttachmentClassDescription> Attachments { get; set; } = new List<TtTimedStateAttachmentClassDescription>();
         public bool AddTransition(TtTimedStateTransitionClassDescription transition)
@@ -58,7 +59,7 @@ namespace EngineNS.Bricks.StateMachine.Macross.SubState
             SupperClassNames.Clear();
             SupperClassNames.Add($"EngineNS.Bricks.StateMachine.TimedSM.TtTimedState<{classBuildContext.MainClassDescription.ClassName}>");
             List<UClassDeclaration> classDeclarationsBuilded = new();
-            UClassDeclaration thisClassDeclaration = TtDescriptionASTBuildUtil.BuildDefaultPartForClassDeclaration(this, ref classBuildContext);
+            UClassDeclaration thisClassDeclaration = TtASTBuildUtil.BuildClassDeclaration(this, ref classBuildContext);
             
             foreach (var transition in Transitions)
             {
@@ -77,7 +78,7 @@ namespace EngineNS.Bricks.StateMachine.Macross.SubState
 
         public override UVariableDeclaration BuildVariableDeclaration(ref FClassBuildContext classBuildContext)
         {
-            return TtDescriptionASTBuildUtil.BuildDefaultPartForVariableDeclaration(this, ref classBuildContext);
+            return TtASTBuildUtil.CreateVariableDeclaration(this, ref classBuildContext);
         }
 
         #region Internal AST Build

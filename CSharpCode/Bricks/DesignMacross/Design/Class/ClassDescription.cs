@@ -5,6 +5,7 @@ using EngineNS.DesignMacross.Base.Description;
 
 namespace EngineNS.DesignMacross.Design
 {
+    [EGui.Controls.PropertyGrid.PGCategoryFilters(ExcludeFilters = new string[] { "Misc" })]
     public class TtClassDescription : IClassDescription
     {
         [Rtti.Meta]
@@ -38,7 +39,7 @@ namespace EngineNS.DesignMacross.Design
         public List<UClassDeclaration> BuildClassDeclarations(ref FClassBuildContext classBuildContext)
         {
             List<UClassDeclaration> classDeclarationsBuilded = new();
-            UClassDeclaration thisClassDeclaration = TtDescriptionASTBuildUtil.BuildDefaultPartForClassDeclaration(this, ref classBuildContext);
+            UClassDeclaration thisClassDeclaration = TtASTBuildUtil.BuildClassDeclaration(this, ref classBuildContext);
             classBuildContext.ClassDeclaration = thisClassDeclaration;
             foreach (var methodDesc in Methods)
             {

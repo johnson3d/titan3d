@@ -23,6 +23,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)Macross\StateMachine\SubState\AnimSubStateClassDescription.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Macross\StateMachine\SubState\GraphElement_AnimSubState.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Macross\StateMachine\Transition\AnimStateTransitionClassDescription.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Player\AnimStateMachinePlayer.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)StateMachine\AnimCompoundState.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)StateMachine\AnimState.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)StateMachine\AnimStateAttachment.cs" />

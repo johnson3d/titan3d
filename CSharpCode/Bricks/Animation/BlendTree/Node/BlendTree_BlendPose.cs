@@ -32,7 +32,7 @@ namespace EngineNS.Animation.BlendTree.Node
         public List<float> Weights { get; set; }
 
         TtBlendPoseCommand<T> mAnimationCommand = null;
-        public override void Initialize()
+        public override void Initialize(ref FAnimBlendTreeContext context)
         {
             mAnimationCommand = new TtBlendPoseCommand<T>();
         }
@@ -55,7 +55,7 @@ namespace EngineNS.Animation.BlendTree.Node
             mAnimationCommand.Desc = desc;
             return mAnimationCommand;
         }
-        public override void Tick(float elapseSecond, in FAnimBlendTreeTickContext context)
+        public override void Tick(float elapseSecond, ref FAnimBlendTreeContext context)
         {
             
         }

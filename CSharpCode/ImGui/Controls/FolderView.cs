@@ -1,4 +1,5 @@
 ﻿using EngineNS.Thread;
+using MathNet.Numerics.Random;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -246,6 +247,7 @@ namespace EngineNS.EGui.Controls
 
             var style = ImGuiAPI.GetStyle();
             ImGuiAPI.PushID(dirName);
+            Vector2 itemRectStart = ImGuiAPI.GetCursorScreenPos();
             var treeNodeResult = ImGuiAPI.TreeNodeEx("", flags, "");
 
             var cmdList = ImGuiAPI.GetWindowDrawList();
@@ -254,6 +256,7 @@ namespace EngineNS.EGui.Controls
             //cmdList.AddRect(start, end, 0xFF0000FF, 0, ImDrawFlags_.ImDrawFlags_None, 1);
             //ImGuiAPI.SameLine(0, -1);
             var curPos = ImGuiAPI.GetCursorScreenPos();
+            Vector2 rectSize = Vector2.Zero;
             start.X = curPos.X;
             var imgSize = 16;
             if (treeNodeResult)
@@ -269,8 +272,16 @@ namespace EngineNS.EGui.Controls
                 if (shadowImg != null)
                     shadowImg.OnDraw(cmdList, start, start + new Vector2(imgSize, imgSize), 0xff558fb6);
             }
-            start.X += imgSize + style->ItemSpacing.X;
+            rectSize.X = imgSize + style->ItemSpacing.X;
+            rectSize.Y = imgSize;
+            start.X += rectSize.X;
+            var textSize = ImGuiAPI.CalcTextSize(dirName, false, 0.0f);
             cmdList.AddText(start, textColor, dirName, null);
+            rectSize.X += textSize.X;
+            rectSize.Y = MathF.Max(rectSize.Y, textSize.Y);
+            rectSize.X += ImGuiAPI.GetFontSize() + style->FramePadding.X;
+            ImGuiAPI.SetCursorScreenPos(in itemRectStart);
+            ImGuiAPI.ItemSize(in itemRectStart, itemRectStart + rectSize, 0);
             //ImGuiAPI.SameLine(0, 32);
             //ImGuiAPI.Text("_" + dirName);
 

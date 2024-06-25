@@ -6,6 +6,7 @@ using EngineNS.Bricks.StateMachine.Macross.CompoundState;
 using EngineNS.DesignMacross;
 using EngineNS.DesignMacross.Base.Description;
 using EngineNS.DesignMacross.Base.Outline;
+using EngineNS.Rtti;
 
 namespace EngineNS.Bricks.Animation.Macross.StateMachine
 {
@@ -21,9 +22,9 @@ namespace EngineNS.Bricks.Animation.Macross.StateMachine
         public override List<UClassDeclaration> BuildClassDeclarations(ref FClassBuildContext classBuildContext)
         {
             SupperClassNames.Clear();
-            SupperClassNames.Add($"EngineNS.Bricks.StateMachine.TimedSM.TtTimedStateMachine<{classBuildContext.MainClassDescription.ClassName}>");
+            SupperClassNames.Add($"EngineNS.Animation.StateMachine.TtAnimStateMachine<{classBuildContext.MainClassDescription.ClassName}>");
             List<UClassDeclaration> classDeclarationsBuilded = new List<UClassDeclaration>();
-            UClassDeclaration thisClassDeclaration = TtDescriptionASTBuildUtil.BuildDefaultPartForClassDeclaration(this, ref classBuildContext);
+            UClassDeclaration thisClassDeclaration = TtASTBuildUtil.BuildClassDeclaration(this, ref classBuildContext);
 
 
             foreach (var compoundState in CompoundStates)
@@ -33,38 +34,36 @@ namespace EngineNS.Bricks.Animation.Macross.StateMachine
                 compoundStateProperty.VisitMode = EVisisMode.Public;
                 thisClassDeclaration.Properties.Add(compoundStateProperty);
             }
-            thisClassDeclaration.AddMethod(BuildOverrideInitializeMethod());
+            thisClassDeclaration.AddMethod(BuildOverrideInitializeMethod(ref classBuildContext));
             classDeclarationsBuilded.Add(thisClassDeclaration);
             return classDeclarationsBuilded;
         }
 
         public override UVariableDeclaration BuildVariableDeclaration(ref FClassBuildContext classBuildContext)
         {
-            return TtDescriptionASTBuildUtil.BuildDefaultPartForVariableDeclaration(this, ref classBuildContext);
+            return TtASTBuildUtil.CreateVariableDeclaration(this, ref classBuildContext);
         }
 
         #region Internal AST Build
-        private UMethodDeclaration BuildOverrideInitializeMethod()
+        private UMethodDeclaration BuildOverrideInitializeMethod(ref FClassBuildContext classBuildContext)
         {
-            UMethodDeclaration methodDeclaration = new UMethodDeclaration();
-            methodDeclaration.IsOverride = true;
-            methodDeclaration.MethodName = "Initialize";
-            methodDeclaration.ReturnValue = new UVariableDeclaration()
+            var returnVar = TtASTBuildUtil.CreateMethodReturnVariableDeclaration(new(typeof(bool)), TtASTBuildUtil.CreateDefaultValueExpression(new(typeof(bool))));
+            var args = new List<UMethodArgumentDeclaration>
             {
-                VariableType = new UTypeReference(typeof(bool)),
-                InitValue = new UDefaultValueExpression(typeof(bool)),
-                VariableName = "result"
+                TtASTBuildUtil.CreateMethodArgumentDeclaration("context", new(UTypeDesc.TypeOf<TtAnimStateMachineContext>()), EMethodArgumentAttribute.Ref)
             };
+            var methodDeclaration = TtASTBuildUtil.CreateMethodDeclaration("Initialize", returnVar, args, true, true);
+
             foreach (var compoundState in CompoundStates)
             {
-                UAssignOperatorStatement compoundStateAssign = new();
-                compoundStateAssign.To = new UVariableReferenceExpression(compoundState.VariableName);
-                compoundStateAssign.From = new UCreateObjectExpression(compoundState.VariableType.TypeFullName);
+                var compoundStateAssignLH = new UVariableReferenceExpression(compoundState.VariableName);
+                var compoundStateAssignRH = new UCreateObjectExpression(compoundState.VariableType.TypeFullName);
+                var compoundStateAssign = TtASTBuildUtil.CreateAssignOperatorStatement(compoundStateAssignLH, compoundStateAssignRH);
                 methodDeclaration.MethodBody.Sequence.Add(compoundStateAssign);
 
-                UAssignOperatorStatement stateMachineAssign = new();
-                stateMachineAssign.To = new UVariableReferenceExpression("StateMachine", new UVariableReferenceExpression(compoundState.VariableName));
-                stateMachineAssign.From = new USelfReferenceExpression();
+                var stateMachineAssignLH = new UVariableReferenceExpression("StateMachine", new UVariableReferenceExpression(compoundState.VariableName));
+                var stateMachineAssignRH = new USelfReferenceExpression();
+                var stateMachineAssign = TtASTBuildUtil.CreateAssignOperatorStatement(stateMachineAssignLH, stateMachineAssignRH);
                 methodDeclaration.MethodBody.Sequence.Add(stateMachineAssign);
             }
             foreach (var compoundState in CompoundStates)
@@ -74,9 +73,9 @@ namespace EngineNS.Bricks.Animation.Macross.StateMachine
                 initializeMethodInvoke.MethodName = "Initialize";
                 methodDeclaration.MethodBody.Sequence.Add(initializeMethodInvoke);
             }
-            UAssignOperatorStatement returnValueAssign = new UAssignOperatorStatement();
-            returnValueAssign.To = new UVariableReferenceExpression("result");
-            returnValueAssign.From = new UPrimitiveExpression(true);
+            var returnValueAssign = TtASTBuildUtil.CreateAssignOperatorStatement(
+                                        new UVariableReferenceExpression(methodDeclaration.ReturnValue.VariableName),
+                                        new UPrimitiveExpression(true));
             methodDeclaration.MethodBody.Sequence.Add(returnValueAssign);
             return methodDeclaration;
         }

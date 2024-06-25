@@ -2,6 +2,7 @@
 using BCnEncoder.Shared;
 using EngienNS.Bricks.ImageDecoder;
 using EngineNS.Bricks.CodeBuilder.MacrossNode;
+using EngineNS.EGui.Controls;
 using EngineNS.IO;
 using Jither.OpenEXR;
 using Microsoft.Toolkit.HighPerformance;
@@ -171,6 +172,22 @@ namespace EngineNS.NxRHI
             {
                 //renwind todo
             }
+        }
+
+        public override void DrawTooltip()
+        {
+            if (SnapTask == null || !SnapTask.Value.IsCompleted)
+                return;
+            CtrlUtility.DrawHelper(
+                "Name: " + GetAssetName().Name,
+                "Desc: " + Description,
+                "Address: " + GetAssetName().Address,
+                "Res: " + SnapTask.Value.Result.PicDesc.Width + "X" + SnapTask.Value.Result.PicDesc.Height + "\r\n" +
+                "Format: " + SnapTask.Value.Result.PicDesc.Format + "\r\n" +
+                "CubeFaces: " + SnapTask.Value.Result.PicDesc.CubeFaces + "\r\n" +
+                "MipLevel: " + SnapTask.Value.Result.PicDesc.MipLevel + "\r\n" +
+                "IsSRGB: " + SnapTask.Value.Result.PicDesc.sRGB + "\r\n" +
+                "IsNormal: " + SnapTask.Value.Result.PicDesc.IsNormal);
         }
     }
     [Rtti.Meta]

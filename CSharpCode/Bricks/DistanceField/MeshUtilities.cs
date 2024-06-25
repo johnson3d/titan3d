@@ -348,9 +348,13 @@ namespace EngineNS.DistanceField
                     (int)MathHelper.DivideAndRoundUp((uint)Mip0IndirectionDimensions.Y, (uint)(1 << MipIndex)),
                     (int)MathHelper.DivideAndRoundUp((uint)Mip0IndirectionDimensions.Z, (uint)(1 << MipIndex)));
 
+                BoundingBox DistanceFieldVolumeBounds = LocalSpaceMeshBounds;
                 // Expand to guarantee one voxel border for gradient reconstruction using bilinear filtering
-                Vector3 TexelObjectSpaceSize = LocalSpaceMeshBounds.GetSize() / new Vector3(IndirectionDimensions * sdfConfig.UniqueDataBrickSize - new Vector3i(2 * sdfConfig.MeshDistanceFieldObjectBorder));
-                BoundingBox DistanceFieldVolumeBounds = BoundingBox.ExpandBy(LocalSpaceMeshBounds, TexelObjectSpaceSize);
+                if (sdfConfig.MeshDistanceFieldObjectBorder != 0)
+                {
+                    Vector3 TexelObjectSpaceSize = LocalSpaceMeshBounds.GetSize() / new Vector3(IndirectionDimensions * sdfConfig.UniqueDataBrickSize - new Vector3i(2 * sdfConfig.MeshDistanceFieldObjectBorder));
+                    DistanceFieldVolumeBounds = BoundingBox.ExpandBy(LocalSpaceMeshBounds, TexelObjectSpaceSize);
+                }
 
                 Vector3 IndirectionVoxelSize = DistanceFieldVolumeBounds.GetSize() / new Vector3(IndirectionDimensions);
                 float IndirectionVoxelRadius = IndirectionVoxelSize.Length();
@@ -463,9 +467,12 @@ namespace EngineNS.DistanceField
 
             if (BuildTime > 0.0f)
             {
+                float memoryKB = OutData.GetAllocatedSize()/1024.0f;
+                var occupied = (int)Math.Round(100.0f * OutData.Mips[0].NumDistanceFieldBricks / (float)(Mip0IndirectionDimensions.X * Mip0IndirectionDimensions.Y * Mip0IndirectionDimensions.Z));
+                   
                 Profiler.Log.WriteLine(Profiler.ELogTag.Info, "SDF Generate", $"SDF Generate: Finished distance field build in {BuildTime:0.00} - " +
                     $"{Mip0IndirectionDimensions.X * sdfConfig.UniqueDataBrickSize}x{Mip0IndirectionDimensions.Y * sdfConfig.UniqueDataBrickSize}x{Mip0IndirectionDimensions.Z * sdfConfig.UniqueDataBrickSize} " +
-                    $"sparse distance field, {1}Mb total, {1}Mb always loaded, {100}% occupied, {embreeScene.NumIndices} triangles, {MeshName}");
+                    $"sparse distance field, {memoryKB:0.0}Kb total, {occupied}% occupied, {embreeScene.NumIndices/3} triangles, {MeshName}");
             }
         }
     }

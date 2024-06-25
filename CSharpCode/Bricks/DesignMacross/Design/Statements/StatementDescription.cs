@@ -7,6 +7,7 @@ using System.Reflection;
 
 namespace EngineNS.DesignMacross.Design.Statement
 {
+    [EGui.Controls.PropertyGrid.PGCategoryFilters(ExcludeFilters = new string[] { "Misc" })]
     public class TtStatementDescription : IStatementDescription
     {
         [Rtti.Meta]

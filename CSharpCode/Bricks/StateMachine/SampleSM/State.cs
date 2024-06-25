@@ -55,7 +55,7 @@ namespace EngineNS.Bricks.StateMachine.SampleSM
             Name = name;
         }
         public bool IsInitialized = false;
-        public virtual bool Initialize()
+        public virtual async Thread.Async.TtTask<bool> Initialize(T context)
         {
             return false;
         }
@@ -64,8 +64,7 @@ namespace EngineNS.Bricks.StateMachine.SampleSM
         {
             if(!IsInitialized)
             {
-                Initialize();
-                IsInitialized = true;
+                
             }
             OnEnter();
         }

@@ -1,5 +1,6 @@
 ﻿using EngineNS.Bricks.CodeBuilder;
 using EngineNS.Bricks.StateMachine.Macross.SubState;
+using EngineNS.DesignMacross;
 using EngineNS.DesignMacross.Base.Description;
 using EngineNS.DesignMacross.Base.Graph;
 using EngineNS.DesignMacross.Base.Outline;
@@ -17,17 +18,13 @@ namespace EngineNS.Bricks.StateMachine.Macross.CompoundState
         public override string Name { get; set; } = "TimedStatesHub";
         [Rtti.Meta]
         [DrawInGraph]
-        [Browsable(false)]
         public TtTimedCompoundStateEntryClassDescription Entry { get; set; } = new TtTimedCompoundStateEntryClassDescription();
         [Rtti.Meta]
         [DrawInGraph]
-        [Browsable(false)]
         public List<TtTimedSubStateClassDescription> States { get; set; } = new List<TtTimedSubStateClassDescription>();
         [Rtti.Meta]
         [DrawInGraph]
-        [Browsable(false)]
         public List<TtTimedCompoundStateHubClassDescription> Hubs { get; set; } = new();
-        [Browsable(false)]
         public TtTimedStateMachineClassDescription StateMachineClassDescription { get=> Parent as TtTimedStateMachineClassDescription;  }
         public TtTimedCompoundStateClassDescription()
         {
@@ -60,7 +57,7 @@ namespace EngineNS.Bricks.StateMachine.Macross.CompoundState
 
         public override UVariableDeclaration BuildVariableDeclaration(ref FClassBuildContext classBuildContext)
         {
-            return TtDescriptionASTBuildUtil.BuildDefaultPartForVariableDeclaration(this, ref classBuildContext);
+            return TtASTBuildUtil.CreateVariableDeclaration(this, ref classBuildContext);
         }
 
         public override List<UClassDeclaration> BuildClassDeclarations(ref FClassBuildContext classBuildContext)
@@ -68,7 +65,7 @@ namespace EngineNS.Bricks.StateMachine.Macross.CompoundState
             SupperClassNames.Clear();
             SupperClassNames.Add($"EngineNS.Bricks.StateMachine.TimedSM.TtTimedCompoundState<{classBuildContext.MainClassDescription.ClassName}>");
             List<UClassDeclaration> classDeclarationsBuilded = new List<UClassDeclaration>();
-            var thisClassDeclaration = TtDescriptionASTBuildUtil.BuildDefaultPartForClassDeclaration(this, ref classBuildContext);
+            var thisClassDeclaration = TtASTBuildUtil.BuildClassDeclaration(this, ref classBuildContext);
             foreach (var state in States)
             {
                 classDeclarationsBuilded.AddRange(state.BuildClassDeclarations(ref classBuildContext));

@@ -201,13 +201,21 @@ namespace EngineNS.Bricks.CodeBuilder
                 methodDecStr += unsafePosCode;
                 if (methodDec.IsOverride)
                     methodDecStr += "override ";
-                if (methodDec.IsAsync)
+                switch(methodDec.AsyncType)
                 {
-                    methodDecStr += "async System.Threading.Tasks.Task";
-                    methodDecStr += ((methodDec.ReturnValue != null) ? ("<" + data.CodeGen.GetTypeString(methodDec.ReturnValue.VariableType) + ">") : "");
+                    case UMethodDeclaration.EAsyncType.None:
+                        methodDecStr += ((methodDec.ReturnValue != null) ? data.CodeGen.GetTypeString(methodDec.ReturnValue.VariableType) : "void");
+                        break;
+                    case UMethodDeclaration.EAsyncType.SystemTask:
+                        methodDecStr += "async System.Threading.Tasks.Task";
+                        methodDecStr += ((methodDec.ReturnValue != null) ? ("<" + data.CodeGen.GetTypeString(methodDec.ReturnValue.VariableType) + ">") : "");
+                        break;
+                    case UMethodDeclaration.EAsyncType.CustomTask:
+                        methodDecStr += "async EngineNS.Thread.Async.TtTask";
+                        methodDecStr += ((methodDec.ReturnValue != null) ? ("<" + data.CodeGen.GetTypeString(methodDec.ReturnValue.VariableType) + ">") : "");
+                        break;
                 }
-                else
-                    methodDecStr += ((methodDec.ReturnValue != null) ? data.CodeGen.GetTypeString(methodDec.ReturnValue.VariableType) : "void");
+
                 methodDecStr += " " + data.Method.MethodName + "(";
                 for(int i= 0; i<methodDec.Arguments.Count; i++)
                 {
@@ -283,7 +291,7 @@ namespace EngineNS.Bricks.CodeBuilder
 
                     var awaitDummyIdx = sourceCode.LastIndexOf(awaitDummyPosCode);
                     sourceCode = sourceCode.Remove(awaitDummyIdx, awaitDummyPosCode.Length);
-                    if (!methodDec.HasAwaitCode && methodDec.IsAsync)
+                    if (!methodDec.HasAwaitCode && methodDec.AsyncType != UMethodDeclaration.EAsyncType.None)
                         sourceCode = sourceCode.Insert(awaitDummyIdx, $"await {typeof(EngineNS.Thread.TtAsyncDummyClass).FullName}.DummyFunc();");
                     else
                         sourceCode = sourceCode.Remove(awaitDummyIdx, data.CodeGen.CurIndentStr.Length + 1);
@@ -398,6 +406,13 @@ namespace EngineNS.Bricks.CodeBuilder
             public void GenCodes(UCodeObject obj, ref string sourceCode, ref UCodeGeneratorData data)
             {
                 sourceCode += "this";
+            }
+        }
+        class UBaseReferenceExpresiionCodeGen : ICodeObjectGen
+        {
+            public void GenCodes(UCodeObject obj, ref string sourceCode, ref UCodeGeneratorData data)
+            {
+                sourceCode += "base";
             }
         }
         class UMethodInvokeArgumentExpressionCodeGen : ICodeObjectGen
@@ -1044,6 +1059,7 @@ namespace EngineNS.Bricks.CodeBuilder
         UClassReferenceExpressionCodeGen mClassReferenceExpressionCodeGen = new UClassReferenceExpressionCodeGen();
         UVariableReferenceExpressionCodeGen mVariableReferenceExpressionCodeGen = new UVariableReferenceExpressionCodeGen();
         USelfReferenceExpressionCodeGen mSelfReferenceExpressionCodeGen = new USelfReferenceExpressionCodeGen();
+        UBaseReferenceExpresiionCodeGen mBaseReferenceExpresiionCodeGen = new UBaseReferenceExpresiionCodeGen();
         UMethodInvokeArgumentExpressionCodeGen mMethodInvokeArgumentExpressionCodeGen = new UMethodInvokeArgumentExpressionCodeGen();
         UMethodInvokeStatementCodeGen mMethodInvokeStatementCodeGen = new UMethodInvokeStatementCodeGen();
         ULambdaExpressionCodeGen mLambdaExpressionCodeGen = new ULambdaExpressionCodeGen();
@@ -1087,6 +1103,8 @@ namespace EngineNS.Bricks.CodeBuilder
                 return mVariableReferenceExpressionCodeGen;
             else if (type.IsEqual(typeof(USelfReferenceExpression)))
                 return mSelfReferenceExpressionCodeGen;
+            else if (type.IsEqual(typeof(UBaseReferenceExpression)))
+                return mBaseReferenceExpresiionCodeGen;
             else if (type.IsEqual(typeof(UMethodInvokeArgumentExpression)))
                 return mMethodInvokeArgumentExpressionCodeGen;
             else if (type.IsEqual(typeof(UMethodInvokeStatement)))

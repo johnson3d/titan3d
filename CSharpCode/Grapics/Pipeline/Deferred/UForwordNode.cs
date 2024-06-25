@@ -200,7 +200,7 @@ namespace EngineNS.Graphics.Pipeline.Deferred
             }
         }
         [Rtti.Meta]
-        public List<ERenderLayer> LayerFilters { get; set; } = new List<ERenderLayer> { ERenderLayer.RL_Translucent, ERenderLayer.RL_Sky };
+        public List<ERenderLayer> LayerFilters { get; set; } = new List<ERenderLayer> { ERenderLayer.RL_Opaque, ERenderLayer.RL_Translucent, ERenderLayer.RL_Sky };
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private bool IsFilters(ERenderLayer layer)
         {

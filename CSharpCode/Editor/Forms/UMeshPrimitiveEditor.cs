@@ -1,4 +1,5 @@
 ﻿using EngineNS.DistanceField;
+using EngineNS.GamePlay.Camera;
 using EngineNS.Graphics.Mesh;
 using NPOI.OpenXmlFormats.Dml;
 using System;
@@ -192,43 +193,121 @@ namespace EngineNS.Editor.Forms
         }
         public Graphics.Mesh.TtMesh SdfDebugMesh;
         EngineNS.GamePlay.Scene.UMeshNode SdfMeshNode;
-        public async System.Threading.Tasks.Task CreateDebugMesh(GamePlay.UWorld world, DistanceField.TtSdfAsset sdfAsset)
+        public void CalcVoxelsInBrick(Vector3i BrickCoordinate, BoundingBox DistanceFieldVolumeBounds, 
+            DistanceField.TtSparseSdfMip SdfData, DistanceField.DistanceFieldConfig SdfConfig,
+            List<Byte> BrickVoxelSdfList, ref List<Vector3> OutVoxelPositions, ref List<Byte> OutVoxelDistance)
+        {
+            if (OutVoxelPositions == null || OutVoxelDistance == null)
+                return;
+            
+            Vector3 IndirectionVoxelSize = DistanceFieldVolumeBounds.GetSize() / new Vector3(SdfData.IndirectionDimensions);
+            Vector3 DistanceFieldVoxelSize = IndirectionVoxelSize / new Vector3(SdfConfig.UniqueDataBrickSize);
+            Vector3 BrickMinPosition = DistanceFieldVolumeBounds.Minimum + new Vector3(BrickCoordinate) * IndirectionVoxelSize;
+
+            for (int YIndex = 0; YIndex < SdfConfig.BrickSize; YIndex++)
+            {
+                for (int ZIndex = 0; ZIndex < SdfConfig.BrickSize; ZIndex++)
+                {
+                    for (int XIndex = 0; XIndex < SdfConfig.BrickSize; XIndex++)
+                    {
+                        Vector3 VoxelPosition = new Vector3(XIndex, YIndex, ZIndex) * DistanceFieldVoxelSize + BrickMinPosition;
+                        int Index = (ZIndex * SdfConfig.BrickSize * SdfConfig.BrickSize + YIndex * SdfConfig.BrickSize + XIndex);
+
+                        Byte QuantizedDistance = BrickVoxelSdfList[Index];
+                        if (QuantizedDistance == 255)
+                            continue;
+
+                        OutVoxelPositions.Add(VoxelPosition);
+                        OutVoxelDistance.Add(QuantizedDistance);
+                    }
+                }
+            }
+        }
+        public async System.Threading.Tasks.Task CreateSdfDebugMesh(GamePlay.UWorld world, DistanceField.TtSdfAsset sdfAsset)
         {
             if (sdfAsset==null || sdfAsset.Mips.Count < 0)
                 return;
 
-            var material = await UEngine.Instance.GfxDevice.MaterialInstanceManager.CreateMaterialInstance(RName.GetRName("utest/box_wite.uminst"));
-            SdfDebugMesh = new Graphics.Mesh.TtMesh();
-            var rect = Graphics.Mesh.UMeshDataProvider.MakeBox(-0.5f, -0.5f, -0.5f, 1, 1, 1, 0xffff00ff);
-            var rectMesh = rect.ToMesh();
-            var materials = new Graphics.Pipeline.Shader.UMaterial[1];
-            materials[0] = material;
-            SdfDebugMesh.Initialize(rectMesh, materials, Rtti.UTypeDescGetter<Graphics.Mesh.UMdfInstanceStaticMesh>.TypeDesc);
-            SdfDebugMesh.MdfQueue.MdfDatas = this;
-
-            var meshNode = await GamePlay.Scene.UMeshNode.AddMeshNode(world, world.Root, new GamePlay.Scene.UMeshNode.UMeshNodeData(), typeof(GamePlay.UPlacement), SdfDebugMesh, DVector3.Zero, Vector3.One, Quaternion.Identity);
-            meshNode.SetStyle(GamePlay.Scene.UNode.ENodeStyles.VisibleFollowParent);
-            meshNode.NodeData.Name = "Debug_SdfMeshNode";
-            meshNode.IsAcceptShadow = false;
-            meshNode.IsCastShadow = false;
-            meshNode.HitproxyType = Graphics.Pipeline.UHitProxy.EHitproxyType.None;
-
-            SdfMeshNode = meshNode;
-            var instanceMdf = SdfDebugMesh.MdfQueue as Graphics.Mesh.UMdfInstanceStaticMesh;
-
-            var sdfMip = sdfAsset.Mips[0];
-            instanceMdf.InstanceModifier.SetCapacity((uint)sdfMip.NumDistanceFieldBricks, false);
-
-            foreach (var sdfValue in sdfMip.DistanceFieldBrickData)
+            if(SdfMeshNode==null)
             {
-                var pos = new Vector3(0, 0, 0);
-                pos += new Vector3(0.5f);
-                //DebugMeshInstanceMdf.InstanceModifier.PushInstance(in pos, in Vector3.One, in Quaternion.Identity, in Vector4ui.Zero, meshNode.HitProxy.ProxyId);
+                var material = await UEngine.Instance.GfxDevice.MaterialInstanceManager.CreateMaterialInstance(RName.GetRName("material/sdfcolor.uminst", RName.ERNameType.Engine));
+                SdfDebugMesh = new Graphics.Mesh.TtMesh();
+                var rect = Graphics.Mesh.UMeshDataProvider.MakeBox(-0.5f, -0.5f, -0.5f, 1, 1, 1, 0xffffffff);
+                var rectMesh = rect.ToMesh();
+                var materials = new Graphics.Pipeline.Shader.UMaterial[1];
+                materials[0] = material;
+                SdfDebugMesh.Initialize(rectMesh, materials, Rtti.UTypeDescGetter<Graphics.Mesh.UMdfInstanceStaticMesh>.TypeDesc);
+                SdfDebugMesh.MdfQueue.MdfDatas = this;
 
+                var meshNode = await GamePlay.Scene.UMeshNode.AddMeshNode(world, world.Root, new GamePlay.Scene.UMeshNode.UMeshNodeData(), typeof(GamePlay.UPlacement), SdfDebugMesh, DVector3.Zero, Vector3.One, Quaternion.Identity);
+                meshNode.SetStyle(GamePlay.Scene.UNode.ENodeStyles.VisibleFollowParent);
+                meshNode.NodeData.Name = "Debug_SdfMeshNode";
+                meshNode.IsAcceptShadow = false;
+                meshNode.IsCastShadow = false;
+                meshNode.HitproxyType = Graphics.Pipeline.UHitProxy.EHitproxyType.None;
+
+                SdfMeshNode = meshNode;
+            }
+
+            var sdfData = sdfAsset.Mips[0];
+
+            DistanceField.DistanceFieldConfig sdfConfig = new DistanceField.DistanceFieldConfig();
+            BoundingBox DistanceFieldVolumeBounds = sdfAsset.LocalSpaceMeshBounds;
+            // Expand to guarantee one voxel border for gradient reconstruction using bilinear filtering
+            if (sdfConfig.MeshDistanceFieldObjectBorder != 0)
+            {
+                Vector3 TexelObjectSpaceSize = sdfAsset.LocalSpaceMeshBounds.GetSize() / new Vector3(sdfData.IndirectionDimensions * sdfConfig.UniqueDataBrickSize - new Vector3i(2 * sdfConfig.MeshDistanceFieldObjectBorder));
+                DistanceFieldVolumeBounds = BoundingBox.ExpandBy(sdfAsset.LocalSpaceMeshBounds, TexelObjectSpaceSize);
+            }
+            Vector3 IndirectionVoxelSize = DistanceFieldVolumeBounds.GetSize() / new Vector3(sdfData.IndirectionDimensions);
+            Vector3 VoxelSize = IndirectionVoxelSize / new Vector3(sdfConfig.UniqueDataBrickSize);
+
+            int VoxelCountInBrick = sdfConfig.BrickSize * sdfConfig.BrickSize * sdfConfig.BrickSize;
+            var OutVoxelPositions = new List<Vector3>(VoxelCountInBrick);
+            var OutVoxelDistance = new List<Byte>(VoxelCountInBrick);
+            int validBrickIndex = 0;
+            for (int YIndex = 0; YIndex < sdfData.IndirectionDimensions.Y; YIndex++)
+            {
+                for (int ZIndex = 0; ZIndex < sdfData.IndirectionDimensions.Z; ZIndex++)
+                {
+                    for (int XIndex = 0; XIndex < sdfData.IndirectionDimensions.X; XIndex++)
+                    {
+                        int IndirectionIndex = (ZIndex * sdfData.IndirectionDimensions.Y + YIndex) * sdfData.IndirectionDimensions.X + XIndex;
+                        if (sdfData.IndirectionTable[IndirectionIndex] != sdfConfig.InvalidBrickIndex)
+                        {
+                            var BrickVoxelSdfList = sdfData.DistanceFieldBrickData.GetRange(validBrickIndex * VoxelCountInBrick, VoxelCountInBrick);
+                            Vector3i BrickCoordinate = new Vector3i(XIndex, YIndex, ZIndex);
+
+                            CalcVoxelsInBrick(BrickCoordinate, DistanceFieldVolumeBounds, sdfData, sdfConfig, BrickVoxelSdfList, ref OutVoxelPositions, ref OutVoxelDistance);
+
+                            validBrickIndex++;
+                            if (validBrickIndex == sdfData.NumDistanceFieldBricks)
+                                break;
+                        }
+                    }
+                }
+            }
+
+            var instanceMdf = SdfDebugMesh.MdfQueue as Graphics.Mesh.UMdfInstanceStaticMesh;
+            instanceMdf.InstanceModifier.InstanceBuffers.ResetInstance();
+            instanceMdf.InstanceModifier.SetCapacity((uint)OutVoxelPositions.Count, false);
+            for ( int i = 0; i < OutVoxelPositions.Count; ++i )
+            {
+                var voxelPos = OutVoxelPositions[i];
+                var QuantizedDistance = OutVoxelDistance[i];
                 var instance = new Graphics.Mesh.Modifier.FVSInstanceData();
-                instance.Position = pos;
-                instance.Scale = Vector3.One;
+                instance.Position = mCurrentMeshNode.Location.ToSingleVector3() + voxelPos;
+                instance.Scale = VoxelSize/**0.2f*/;
                 instance.Quat = Quaternion.Identity;
+                instance.UserData.X = (uint)Byte.MaxValue - (uint)QuantizedDistance;
+
+                // decode to volume space distance
+                float RescaledDistance = (float)QuantizedDistance / 255.0f;
+                float VolumeSpaceDistance = RescaledDistance * sdfData.DistanceFieldToVolumeScaleBias.X + sdfData.DistanceFieldToVolumeScaleBias.Y;
+                // encode 
+                //float RescaledDistance = (VolumeSpaceDistance - DistanceFieldToVolumeScaleBias.Y) / DistanceFieldToVolumeScaleBias.X;
+                //Byte QuantizedDistance = (Byte)Math.Clamp((int)Math.Floor(RescaledDistance * 255.0f + .5f), 0, 255);
+
 
                 instanceMdf.InstanceModifier.PushInstance(in instance, new Graphics.Mesh.Modifier.FCullBounding());
             }
@@ -380,6 +459,7 @@ namespace EngineNS.Editor.Forms
             }
             EGui.UIProxy.DockProxy.EndPanel(show);
         }
+        DistanceField.TtSdfAsset MeshSdfAsset = new DistanceField.TtSdfAsset();
         bool ShowMeshPropGrid = true;
         protected void DrawMeshDetails()
         {
@@ -394,10 +474,11 @@ namespace EngineNS.Editor.Forms
                     if (meshProvider.InitFrom(Mesh))
                     {
                         var sdfConfig = new DistanceField.DistanceFieldConfig();
-                        var outSDF = new DistanceField.TtSdfAsset();
+                        var outSDF = MeshSdfAsset;
                         DistanceField.UMeshUtilities.GenerateSignedDistanceFieldVolumeData(Mesh.AssetName.ToString(), meshProvider, sdfConfig, 1.0f, false, ref outSDF);
 
-                        var rn = RName.GetRName(Mesh.AssetName.Name + DistanceField.TtSdfAsset.AssetExt, Mesh.AssetName.RNameType);
+                        var noExtName = Mesh.AssetName.Name.Substring(0, Mesh.AssetName.Name.Length - Mesh.AssetName.ExtName.Length);
+                        var rn = RName.GetRName(noExtName + DistanceField.TtSdfAsset.AssetExt, Mesh.AssetName.RNameType);
                         var ameta = new DistanceField.TtSdfAssetAMeta();
                         ameta.SetAssetName(rn);
                         ameta.AssetId = Guid.NewGuid();
@@ -408,7 +489,15 @@ namespace EngineNS.Editor.Forms
 
                         outSDF.SaveAssetTo(rn);
 
-                        CreateDebugMesh(PreviewViewport.World, outSDF);
+                        CreateSdfDebugMesh(PreviewViewport.World, outSDF);
+
+                        // test load sdf
+                        Action action = async () =>
+                        {
+                            var testSDF = await UEngine.Instance.SdfAssetManager.GetSdfAsset(rn);
+                        };
+                        action();
+
                     }
                 }
             }

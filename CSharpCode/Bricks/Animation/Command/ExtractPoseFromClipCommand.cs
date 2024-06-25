@@ -9,7 +9,7 @@ namespace EngineNS.Animation.Command
 {
     public class TtExtractPoseFromClipCommand : TtAnimationCommand<TtLocalSpaceRuntimePose>
     {
-        public float Time;
+        public float Time { get; set; } = 0;
         TtAnimatableSkeletonPose ExtractedPose = null;
         Asset.TtAnimationClip AnimationClip = null;
         TtLocalSpaceRuntimePose BindedLocalSpaceRuntimePose = null;

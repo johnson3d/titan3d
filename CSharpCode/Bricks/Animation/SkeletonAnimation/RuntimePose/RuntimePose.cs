@@ -1,6 +1,7 @@
 ﻿using EngineNS.Animation.SkeletonAnimation.AnimatablePose;
 using EngineNS.Animation.SkeletonAnimation.Skeleton;
 using EngineNS.Animation.SkeletonAnimation.Skeleton.Limb;
+using EngineNS.Rtti;
 using System;
 using System.Collections.Generic;
 using System.Reflection;
@@ -289,13 +290,17 @@ namespace EngineNS.Animation.SkeletonAnimation.Runtime.Pose
 
         public static T CopyPose<T>(T pose) where T : IRuntimePose
         {
-            T temp = System.Activator.CreateInstance<T>();
+            T temp = (T)UTypeDescManager.CreateInstance(UTypeDesc.TypeOf<T>());
             temp.Transforms.AddRange(pose.Transforms);
             temp.Descs.AddRange(pose.Descs);
             return temp;
         }
         public static void CopyPose<T>(ref T descPose, T srcPose) where T : IRuntimePose
         {
+            if (descPose == null)
+            {
+                descPose = (T)UTypeDescManager.CreateInstance(UTypeDesc.TypeOf<T>());
+            }
             descPose.Transforms.Clear();
             descPose.Descs.Clear();
             descPose.Transforms.AddRange(srcPose.Transforms);
@@ -303,6 +308,7 @@ namespace EngineNS.Animation.SkeletonAnimation.Runtime.Pose
         }
         public static void CopyTransforms<T>(ref T descPose, T srcPose) where T : IRuntimePose
         {
+            System.Diagnostics.Debug.Assert(descPose != null && srcPose != null);
             descPose.Transforms.Clear();
             descPose.Transforms.AddRange(srcPose.Transforms);
         }

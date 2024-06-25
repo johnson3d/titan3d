@@ -1,4 +1,5 @@
 ﻿using EngineNS.Animation.Command;
+using EngineNS.Animation.SkeletonAnimation.AnimatablePose;
 using EngineNS.Animation.SkeletonAnimation.Runtime.Pose;
 using System;
 using System.Collections.Generic;
@@ -10,6 +11,7 @@ namespace EngineNS.Animation.BlendTree
     {
         public int TreeDepth;
         public TtAnimationCommandExecuteStack CmdExecuteStack;
+        
         public void AddCommand(int depth, IAnimationCommand cmd)
         {
             CmdExecuteStack.AddCommand(depth, cmd);
@@ -20,28 +22,32 @@ namespace EngineNS.Animation.BlendTree
             CmdExecuteStack = new TtAnimationCommandExecuteStack();
         }
     }
-    public struct FAnimBlendTreeTickContext
+    public struct FAnimBlendTreeContext
     {
-
+        public TtAnimatableSkeletonPose AnimatableSkeletonPose;
     }
+
     public interface IBlendTree<T> where T : IRuntimePose
     {
-        void Initialize();
-        void Tick(float elapseSecond, in FAnimBlendTreeTickContext context);
+        void Initialize(ref FAnimBlendTreeContext context);
+        void Tick(float elapseSecond, ref FAnimBlendTreeContext context);
         //void Notifying();
         TtAnimationCommand<T> ConstructAnimationCommandTree(IAnimationCommand parentNode, ref FConstructAnimationCommandTreeContext context);
     }
 
     public class TtBlendTree<T> : IBlendTree<T> where T : IRuntimePose
     {
-        public virtual void Initialize()
+        bool mIsInitialized = false;
+        public virtual void Initialize(ref FAnimBlendTreeContext context)
+        {
+            
+        }
+
+        public virtual void Tick(float elapseSecond, ref FAnimBlendTreeContext context)
         {
 
         }
-        public virtual void Tick(float elapseSecond, in FAnimBlendTreeTickContext context)
-        {
 
-        }
         public virtual TtAnimationCommand<T> ConstructAnimationCommandTree(IAnimationCommand parentNode, ref FConstructAnimationCommandTreeContext context)
         {
             return null;

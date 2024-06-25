@@ -38,7 +38,7 @@ namespace EngineNS.Bricks.StateMachine.Macross
             SupperClassNames.Clear();
             SupperClassNames.Add($"EngineNS.Bricks.StateMachine.TimedSM.TtTimedStateMachine<{classBuildContext.MainClassDescription.ClassName}>");
             List<UClassDeclaration> classDeclarationsBuilded = new List<UClassDeclaration>();
-            UClassDeclaration thisClassDeclaration = TtDescriptionASTBuildUtil.BuildDefaultPartForClassDeclaration(this, ref classBuildContext);
+            UClassDeclaration thisClassDeclaration = TtASTBuildUtil.BuildClassDeclaration(this, ref classBuildContext);
 
 
             foreach (var compoundState in CompoundStates)
@@ -55,7 +55,7 @@ namespace EngineNS.Bricks.StateMachine.Macross
 
         public override UVariableDeclaration BuildVariableDeclaration(ref FClassBuildContext classBuildContext)
         {
-            return TtDescriptionASTBuildUtil.BuildDefaultPartForVariableDeclaration(this, ref classBuildContext);
+            return TtASTBuildUtil.CreateVariableDeclaration(this, ref classBuildContext);
         }
 
         #region Internal AST Build

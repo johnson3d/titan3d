@@ -231,8 +231,8 @@ namespace EngineNS.Editor.Forms
             ResetDockspace();
             EGui.UIProxy.DockProxy.EndMainForm(IsDrawing);
 
-            DrawMaterialDetails();
             DrawEditorDetails();
+            DrawMaterialDetails();
 
             DrawPreview();
         }

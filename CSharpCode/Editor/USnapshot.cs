@@ -70,6 +70,7 @@ namespace EngineNS.Editor
                 writer.WritePng(image.Data, image.Width, image.Height, StbImageWriteSharp.ColorComponents.RedGreenBlueAlpha, memStream);
                 ameta.ResetSnapshot();
             }
+            UEngine.Instance.SourceControlModule.AddFile(file);
             return true;
         }
         public unsafe static bool SavePng(IO.IAssetMeta ameta, string file, Support.UBlobObject bufferData, uint TarW, uint TarH, uint SrcX, uint SrcY)

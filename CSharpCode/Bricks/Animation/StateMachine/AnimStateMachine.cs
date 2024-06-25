@@ -7,15 +7,19 @@ using EngineNS.Bricks.StateMachine;
 
 namespace EngineNS.Animation.StateMachine
 {
-    public class TtAnimStateMachine<S> : Bricks.StateMachine.TimedSM.TtTimedStateMachine<S, FAnimBlendTreeTickContext>
+    public class TtAnimStateMachineContext
+    {
+        public FAnimBlendTreeContext BlendTreeContext;
+    }
+    public class TtAnimStateMachine<S> : Bricks.StateMachine.TimedSM.TtTimedStateMachine<S, TtAnimStateMachineContext>
     {
         public TtBlendTree_CrossfadePose<TtLocalSpaceRuntimePose> BlendTree;
-        public override void Tick(float elapseSecond, in FAnimBlendTreeTickContext context)
+        public override void Tick(float elapseSecond, in TtAnimStateMachineContext context)
         {
             base.Tick(elapseSecond, context);
-            BlendTree.Tick(elapseSecond, context);
+            BlendTree.Tick(elapseSecond, ref context.BlendTreeContext);
         }
-        public override void SetDefaultState(IState<S, FAnimBlendTreeTickContext> state)
+        public override void SetDefaultState(IState<S, TtAnimStateMachineContext> state)
         {
             base.SetDefaultState(state);
             if(CurrentState is TtAnimState<S> animCurrentState)
@@ -23,7 +27,7 @@ namespace EngineNS.Animation.StateMachine
                 BlendTree.ToNode = animCurrentState.BlendTree;
             }    
         }
-        public override void OnStateChange(IState<S, FAnimBlendTreeTickContext> preState, IState<S, FAnimBlendTreeTickContext> currentState)
+        public override void OnStateChange(IState<S, TtAnimStateMachineContext> preState, IState<S, TtAnimStateMachineContext> currentState)
         {
             base.OnStateChange(preState, currentState);
             if (preState == null)
@@ -37,10 +41,6 @@ namespace EngineNS.Animation.StateMachine
                 cf.ToNode = (CurrentState as TtAnimState<S>).BlendTree;
                 BlendTree = cf;
             }
-        }
-        public IBlendTree<TtLocalSpaceRuntimePose> ConstructBlendTree(IAnimationCommand parentNode, ref FConstructAnimationCommandTreeContext context)
-        {
-            return BlendTree;
         }
         
     }

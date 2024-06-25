@@ -6,7 +6,7 @@ using System.Reflection;
 
 namespace EngineNS.DesignMacross.Design.ConnectingLine
 {
-  
+    [EGui.Controls.PropertyGrid.PGCategoryFilters(ExcludeFilters = new string[] { "Misc" })]
     public class TtDataPinDescription : IDescription
     {
         public IDescription Parent { get; set; }
@@ -46,6 +46,7 @@ namespace EngineNS.DesignMacross.Design.ConnectingLine
         
     }
     [GraphElement(typeof(TtGraphElement_DataLine))]
+    [EGui.Controls.PropertyGrid.PGCategoryFilters(ExcludeFilters = new string[] { "Misc" })]
     public class TtDataLineDescription : IDescription
     {
         public IDescription Parent { get; set; }

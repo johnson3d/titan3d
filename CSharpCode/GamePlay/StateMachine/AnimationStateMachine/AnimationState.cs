@@ -6,6 +6,7 @@ using EngineNS.Animation.BlendTree.Node;
 using EngineNS.Animation.Command;
 using EngineNS.Animation.SkeletonAnimation.Runtime.Pose;
 using EngineNS.Bricks.StateMachine.TimedSM;
+using EngineNS.Thread.Async;
 using NPOI.SS.Formula.Functions;
 
 namespace EngineNS.GamePlay.StateMachine.AnimationStateMachine
@@ -18,14 +19,6 @@ namespace EngineNS.GamePlay.StateMachine.AnimationStateMachine
 
         public TtAnimationState(TtGamePlayStateMachine<T> stateMachine, string name = "AnimationState") : base(stateMachine, name)
         {
-        }
-
-        public override bool Initialize()
-        {
-            Duration = Animation.Duration;
-            mExtractPoseFromClipCommand = new TtExtractPoseFromClipCommand(Animation);
-            BlendTreeRoot = new TtBlendTree_BindedPose();
-            return true;
         }
 
         public override void Update(float elapseSecond, in TtStateMachineContext context)

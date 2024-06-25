@@ -1,4 +1,5 @@
 ﻿using EngineNS.Bricks.CodeBuilder.MacrossNode;
+using EngineNS.EGui.Controls;
 using EngineNS.Thread;
 using System;
 using System.Collections.Generic;
@@ -172,7 +173,7 @@ namespace EngineNS.IO
             ameta.SetAssetName(mAsset.AssetName);
             ameta.AssetId = Guid.NewGuid();
             ameta.TypeStr = Rtti.UTypeDescManager.Instance.GetTypeStringFromType(mAsset.GetType());
-            ameta.Description = $"This is a {mAsset.GetType().FullName}\nHahah";
+            ameta.Description = $"This is a {mAsset.GetType().FullName}\n";
             ameta.SaveAMeta();
 
             UEngine.Instance.AssetMetaManager.RegAsset(ameta);
@@ -577,6 +578,14 @@ namespace EngineNS.IO
             if (DraggingInViewport)
                 return false;
             return true;
+        }
+
+        public virtual void DrawTooltip()
+        {
+            CtrlUtility.DrawHelper(
+                "Name: " + GetAssetName().Name, 
+                "Desc: " + Description, 
+                "Address: " + GetAssetName().Address);
         }
     }
     public class TtAssetMetaManager

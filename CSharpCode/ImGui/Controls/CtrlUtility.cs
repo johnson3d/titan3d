@@ -14,12 +14,23 @@ namespace EngineNS.EGui.Controls
             ImGuiAPI.PopTextWrapPos();
             ImGuiAPI.EndTooltip();
         }
-        public static void DrawHelper(string desc1 , string desc2)
+        //public static void DrawHelper(string desc1 , string desc2)
+        //{
+        //    ImGuiAPI.BeginTooltip();
+        //    ImGuiAPI.PushTextWrapPos(ImGuiAPI.GetFontSize() * 35.0f);
+        //    ImGuiAPI.TextUnformatted(desc1);
+        //    ImGuiAPI.TextUnformatted(desc2);
+        //    ImGuiAPI.PopTextWrapPos();
+        //    ImGuiAPI.EndTooltip();
+        //}
+        public static void DrawHelper(params string[] desc)
         {
             ImGuiAPI.BeginTooltip();
             ImGuiAPI.PushTextWrapPos(ImGuiAPI.GetFontSize() * 35.0f);
-            ImGuiAPI.TextUnformatted(desc1);
-            ImGuiAPI.TextUnformatted(desc2);
+            foreach (var i in desc)
+            {
+                ImGuiAPI.TextUnformatted(i);
+            }
             ImGuiAPI.PopTextWrapPos();
             ImGuiAPI.EndTooltip();
         }

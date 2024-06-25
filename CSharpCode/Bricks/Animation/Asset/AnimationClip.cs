@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using System.Text;
 using System.Threading.Tasks;
 using EngineNS.Animation.Notify;
+using EngineNS.Thread.Async;
 
 namespace EngineNS.Animation.Asset
 {
@@ -198,7 +199,7 @@ namespace EngineNS.Animation.Asset
         Dictionary<RName, TtAnimationClip> AnimationClips = new Dictionary<RName, TtAnimationClip>();
 
         //for new don't see animationChunk as the asset
-        public async System.Threading.Tasks.Task<TtAnimationClip> GetAnimationClip(RName name)
+        public async TtTask<TtAnimationClip> GetAnimationClip(RName name)
         {
             TtAnimationClip result;
             if (AnimationClips.TryGetValue(name, out result))

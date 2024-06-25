@@ -14,7 +14,8 @@ namespace EngineNS.Animation.BlendTree.Node
         {
             if (FromCommand == null)
                 return;
-            TtRuntimePoseUtility.CopyTransforms(ref mOutPose, FromCommand.OutPose);
+
+            TtRuntimePoseUtility.CopyPose(ref mOutPose, FromCommand.OutPose);
         }
     }
     public class TtCopyPoseCommandDesc : IAnimationCommandDesc

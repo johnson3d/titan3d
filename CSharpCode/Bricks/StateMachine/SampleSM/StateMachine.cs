@@ -25,7 +25,7 @@ namespace EngineNS.Bricks.StateMachine.SampleSM
             Name = name;
         }
         public bool IsInitialized = false;
-        public virtual bool Initialize()
+        public virtual async Thread.Async.TtTask<bool> Initialize(T context)
         {
             throw new NotImplementedException();
         }
@@ -33,12 +33,6 @@ namespace EngineNS.Bricks.StateMachine.SampleSM
         {
             if (!EnableTick)
                 return;
-
-            if (!IsInitialized)
-            {
-                Initialize();
-                IsInitialized = true;
-            }
 
             Update(elapseSecond, context);
         }

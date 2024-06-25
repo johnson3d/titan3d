@@ -427,13 +427,9 @@ namespace EngineNS.Bricks.AssetImpExp
             Debug.Assert(false);
             return null;
         }
-        static string testName = "Bip001 R Calf";
+
         static TtBoneDesc MakeBoneDesc(Assimp.Scene scene, Node boneNode, TtAssetImportOption_Mesh importOption, Assimp.Matrix4x4 pre)
         {
-            if (boneNode.Name.Contains(testName))
-            {
-                int i = 0;
-            }
             Assimp.Matrix4x4 meshGeometricTranslation = Assimp.Matrix4x4.Identity;
             var boneMesh = AssimpSceneUtil.FindMeshByBone(boneNode.Name, scene);
             if (boneMesh != null)

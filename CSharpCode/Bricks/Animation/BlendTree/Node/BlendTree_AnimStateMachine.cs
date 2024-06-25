@@ -24,25 +24,24 @@ namespace EngineNS.Animation.BlendTree.Node
     }
     public class TtBlendTree_AnimStateMachine<S> : TtBlendTree<TtLocalSpaceRuntimePose>
     {
-        TtBindedPoseCommand<TtLocalSpaceRuntimePose> mAnimationCommand = null;
+        TtAnimStateMachineExtractPoseCommand<TtLocalSpaceRuntimePose> mAnimationCommand = null;
         TtAnimStateMachine<S> AnimStateMachine;
-        public override void Initialize()
+        public override void Initialize(ref FAnimBlendTreeContext context)
         {
-            mAnimationCommand = new TtBindedPoseCommand<TtLocalSpaceRuntimePose>();
+            mAnimationCommand = new TtAnimStateMachineExtractPoseCommand<TtLocalSpaceRuntimePose>();
         }
         public override TtAnimationCommand<TtLocalSpaceRuntimePose> ConstructAnimationCommandTree(IAnimationCommand parentNode, ref FConstructAnimationCommandTreeContext context)
         {
-            var mAnimationCommand = new TtAnimStateMachineExtractPoseCommand<TtLocalSpaceRuntimePose>();
             context.AddCommand(context.TreeDepth, mAnimationCommand);
             context.TreeDepth++;
             mAnimationCommand.AnimStateMachineCmd = AnimStateMachine.BlendTree.ConstructAnimationCommandTree(parentNode, ref context); 
 
             return mAnimationCommand;
         }
-        public override void Tick(float elapseSecond, in FAnimBlendTreeTickContext context)
+        public override void Tick(float elapseSecond, ref FAnimBlendTreeContext context)
         {
             
-            AnimStateMachine.Tick(elapseSecond, context);
+            //AnimStateMachine.Tick(elapseSecond, context);
         }
     }
 }

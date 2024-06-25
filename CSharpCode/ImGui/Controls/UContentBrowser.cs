@@ -322,7 +322,8 @@ namespace EngineNS.EGui.Controls
                 {
                     if (ImGuiAPI.IsItemHovered(ImGuiHoveredFlags_.ImGuiHoveredFlags_None))
                     {
-                        CtrlUtility.DrawHelper(ameta.GetAssetName().Name, ameta.Description);
+                        ameta.DrawTooltip();
+                        //CtrlUtility.DrawHelper(ameta.GetAssetName().Name, ameta.Description);
                         //if (ImGuiAPI.IsMouseDragging(ImGuiMouseButton_.ImGuiMouseButton_Left, 8))
                         //{
                         //    if (ItemDragging.GetCurItem() == null)

@@ -1,5 +1,6 @@
 ﻿using EngineNS.Bricks.CodeBuilder;
 using EngineNS.Bricks.StateMachine.Macross.CompoundState;
+using EngineNS.DesignMacross;
 using EngineNS.DesignMacross.Base.Description;
 using EngineNS.DesignMacross.Base.Graph;
 using EngineNS.Rtti;
@@ -18,8 +19,8 @@ namespace EngineNS.Bricks.StateMachine.Macross.StateTransition
         public override List<UClassDeclaration> BuildClassDeclarations(ref FClassBuildContext classBuildContext)
         {
             SupperClassNames.Clear();
-            SupperClassNames.Add($"EngineNS.Bricks.StateMachine.TimedSM.TtTimedStateTransition<{classBuildContext.MainClassDescription.ClassName}>");
-            UClassDeclaration thisClassDeclaration = TtDescriptionASTBuildUtil.BuildDefaultPartForClassDeclaration(this, ref classBuildContext);
+            SupperClassNames.Add($"EngineNS.Animation.StateMachine.TtAnimStateTransition<{classBuildContext.MainClassDescription.ClassName}>");
+            UClassDeclaration thisClassDeclaration = TtASTBuildUtil.BuildClassDeclaration(this, ref classBuildContext);
             FClassBuildContext transitionClassBuildContext = new FClassBuildContext()
             {
                 MainClassDescription = classBuildContext.MainClassDescription,
@@ -31,11 +32,11 @@ namespace EngineNS.Bricks.StateMachine.Macross.StateTransition
 
         public override UVariableDeclaration BuildVariableDeclaration(ref FClassBuildContext classBuildContext)
         {
-            return TtDescriptionASTBuildUtil.BuildDefaultPartForVariableDeclaration(this, ref classBuildContext);
+            return TtASTBuildUtil.CreateVariableDeclaration(this, ref classBuildContext);
         }
 
         #region Internal AST Build
-        public UMethodDeclaration BuildOverrideCheckConditionMethod(ref FClassBuildContext classBuildContext)
+        private UMethodDeclaration BuildOverrideCheckConditionMethod(ref FClassBuildContext classBuildContext)
         {
             return CheckConditionMethodDescription.BuildMethodDeclaration(ref classBuildContext);
         }

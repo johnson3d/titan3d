@@ -6,19 +6,16 @@ using System.Reflection;
 
 namespace EngineNS.DesignMacross.Design
 {
+    [EGui.Controls.PropertyGrid.PGCategoryFilters(ExcludeFilters = new string[] { "Misc" })]
     public class TtDesignableVariableDescription : IDesignableVariableDescription
     {
         [Rtti.Meta]
-        [Browsable(false)]
         public Guid Id { get; set; } = Guid.NewGuid();
         [Rtti.Meta]
         public virtual string Name { get; set; } = "DesignableVariable";
-        [Browsable(false)]
-        public string VariableName { get => TtDescriptionASTBuildUtil.GenerateVariableName(this); }
-        [Browsable(false)]
-        public string ClassName { get => TtDescriptionASTBuildUtil.GenerateClassName(this); }
+        public string VariableName { get => TtASTBuildUtil.GenerateVariableName(this); }
+        public string ClassName { get => TtASTBuildUtil.GenerateClassName(this); }
         [Rtti.Meta]
-        [Browsable(false)]
         public UTypeReference VariableType { get => new UTypeReference(ClassName); set { } }
         [Rtti.Meta]
         public UExpressionBase InitValue { get; set; }
@@ -27,7 +24,6 @@ namespace EngineNS.DesignMacross.Design
         [Rtti.Meta]
         public EVisisMode VisitMode { get; set; } = EVisisMode.Public;
         [Rtti.Meta]
-        [Browsable(false)]
         public IClassDescription DesignedClassDescription { get; set; }
         [Rtti.Meta]
         public UNamespaceDeclaration Namespace { get; set; }
@@ -36,12 +32,9 @@ namespace EngineNS.DesignMacross.Design
         [Rtti.Meta]
         public List<string> SupperClassNames { get; set; } = new List<string>();
         [Rtti.Meta]
-        [Browsable(false)]
         public List<IVariableDescription> Variables { get; set; } = new List<IVariableDescription>();
         [Rtti.Meta]
-        [Browsable(false)]
         public List<IMethodDescription> Methods { get; set; } = new List<IMethodDescription>();
-        [Browsable(false)]
         public IDescription Parent { get; set; }
 
         public virtual List<UClassDeclaration> BuildClassDeclarations(ref FClassBuildContext classBuildContext)
@@ -53,7 +46,7 @@ namespace EngineNS.DesignMacross.Design
 
         public virtual UVariableDeclaration BuildVariableDeclaration(ref FClassBuildContext classBuildContext)
         {
-            return TtDescriptionASTBuildUtil.BuildDefaultPartForVariableDeclaration(this, ref classBuildContext);
+            return TtASTBuildUtil.CreateVariableDeclaration(this, ref classBuildContext);
         }
         #region ISerializer
         public virtual void OnPreRead(object tagObject, object hostObject, bool fromXml)

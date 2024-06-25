@@ -21,7 +21,7 @@ namespace EngineNS.Bricks.StateMachine.TimedSM
         {
         }
 
-        public bool Initialize()
+        public async Thread.Async.TtTask<bool> Initialize(T context)
         {
             return false;
         }

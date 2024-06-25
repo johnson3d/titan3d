@@ -66,7 +66,10 @@ namespace EngineNS.DesignMacross.Design
                 statementBuildContext.AddStatement(buildContext.ExecuteSequenceStatement);
                 return statement;
             }
-            System.Diagnostics.Debug.Assert(false);
+            else
+            {
+                //empty method
+            }
             return null;
         }
     }
@@ -82,10 +85,11 @@ namespace EngineNS.DesignMacross.Design
 
     [Graph(typeof(TtGraph_Method))]
     [OutlineElement_Leaf(typeof(TtOutlineElement_Method))]
+    [EGui.Controls.PropertyGrid.PGCategoryFilters(ExcludeFilters = new string[] { "Misc" })]
     public partial class TtMethodDescription : IMethodDescription, Bricks.NodeGraph.UEditableValue.IValueEditNotify
     {
         public IDescription Parent { get; set; }
-        public virtual string MethodName { get=> TtDescriptionASTBuildUtil.GenerateMethodName(this);}
+        public virtual string MethodName { get=> TtASTBuildUtil.GenerateMethodName(this);}
         [Rtti.Meta]
         public Guid Id { get; set; } = Guid.NewGuid();
         [Rtti.Meta]
@@ -97,7 +101,7 @@ namespace EngineNS.DesignMacross.Design
         [Rtti.Meta]
         public bool IsOverride { get; set; } = false;
         [Rtti.Meta]
-        public bool IsAsync { get; set; } = false;
+        public UMethodDeclaration.EAsyncType AsyncType { get; set; } = UMethodDeclaration.EAsyncType.None;
         [Rtti.Meta]
         public List<TtMethodArgumentDescription> Arguments { get; set; } = new List<TtMethodArgumentDescription>();
         [Rtti.Meta]
@@ -193,8 +197,7 @@ namespace EngineNS.DesignMacross.Design
         }
         public virtual UMethodDeclaration BuildMethodDeclaration(ref FClassBuildContext classBuildContext)
         {
-            UMethodDeclaration declaration = new UMethodDeclaration();
-            TtDescriptionASTBuildUtil.BuildDefaultPartForMethodDeclaration(this, ref declaration, ref classBuildContext);
+            var declaration = TtASTBuildUtil.CreateMethodDeclaration(this, ref classBuildContext);
             FStatementBuildContext buildContext = new() { ExecuteSequenceStatement = new(), MethodDescription = this };
             Start.BuildStatement(ref buildContext);
             declaration.MethodBody.Sequence.Add(buildContext.ExecuteSequenceStatement);

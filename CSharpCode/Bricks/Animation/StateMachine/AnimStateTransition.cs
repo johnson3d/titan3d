@@ -5,7 +5,7 @@ using System.Text;
 
 namespace EngineNS.Animation.StateMachine
 {
-    public class TtAnimStateTransition<S> : Bricks.StateMachine.TimedSM.TtTimedStateTransition<S, FAnimBlendTreeTickContext>
+    public class TtAnimStateTransition<S> : Bricks.StateMachine.TimedSM.TtTimedStateTransition<S, TtAnimStateMachineContext>
     {
     }
 }

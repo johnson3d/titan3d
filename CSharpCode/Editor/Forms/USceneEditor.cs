@@ -31,12 +31,7 @@ namespace EngineNS.Editor.Forms
         public class USceneEditorViewport : EGui.Slate.UWorldViewportSlate
         {
             public USceneEditor HostEditor;
-            public EGui.Controls.PropertyGrid.PropertyGrid NodeInspector = new EGui.Controls.PropertyGrid.PropertyGrid();
-            public override async Task Initialize(USlateApplication application, RName policyName, float zMin, float zMax)
-            {
-                await base.Initialize(application, policyName, zMin, zMax);
-                await NodeInspector.Initialize();
-            }
+            
             public override void OnHitproxySelected(Graphics.Pipeline.IProxiable proxy)
             {
                 if(UEngine.Instance.InputSystem.IsCtrlKeyDown())
@@ -203,7 +198,7 @@ namespace EngineNS.Editor.Forms
                     //    HostEditor.mWorldOutliner.SelectedNodes.Add(uNode);
                     //}
                 }
-                NodeInspector.Target = HostEditor.mWorldOutliner.SelectedNodes; //proxies;
+                HostEditor.NodeInspector.Target = HostEditor.mWorldOutliner.SelectedNodes; //proxies;
             }
         }
         public RName AssetName { get; set; }
@@ -223,6 +218,7 @@ namespace EngineNS.Editor.Forms
         public UWorldOutliner mWorldOutliner;
         EGui.Controls.UContentBrowser mContentBrowser = new EGui.Controls.UContentBrowser();
 
+        public EGui.Controls.PropertyGrid.PropertyGrid NodeInspector = new EGui.Controls.PropertyGrid.PropertyGrid();
         public EGui.Controls.PropertyGrid.PropertyGrid ScenePropGrid = new EGui.Controls.PropertyGrid.PropertyGrid();
         public EGui.Controls.PropertyGrid.PropertyGrid EditorPropGrid = new EGui.Controls.PropertyGrid.PropertyGrid();
         public Graphics.Pipeline.URenderPolicy RenderPolicy { get => PreviewViewport.RenderPolicy; }
@@ -477,6 +473,7 @@ namespace EngineNS.Editor.Forms
         {
             await ScenePropGrid.Initialize();
             await EditorPropGrid.Initialize();
+            await NodeInspector.Initialize();
 
             mContentBrowser.DrawInWindow = false;
             await mContentBrowser.Initialize();
@@ -532,7 +529,10 @@ namespace EngineNS.Editor.Forms
             if (Scene == null)
                 return false;
 
-            Scene.Parent = PreviewViewport.World.Root;
+            PreviewViewport.World.Root = Scene;
+
+            var gridNode = await GamePlay.Scene.UGridNode.AddGridNode(Scene.World, Scene);
+            gridNode.ViewportSlate = this.PreviewViewport;
 
             ScenePropGrid.Target = Scene;
             EditorPropGrid.Target = this;
@@ -548,7 +548,7 @@ namespace EngineNS.Editor.Forms
         public virtual void OnCloseEditor()
         {
             //UEngine.Instance.EventProcessorManager.UnregProcessor(PreviewViewport);
-            PreviewViewport.NodeInspector.Target = null;
+            NodeInspector.Target = null;
             UEngine.Instance.TickableManager.RemoveTickable(this);
             Dispose();
         }
@@ -739,7 +739,7 @@ namespace EngineNS.Editor.Forms
         EGui.UIProxy.MenuItemProxy mDrawSceneDetailsShow = new EGui.UIProxy.MenuItemProxy()
         {
             MenuName = "SceneDetails",
-            Selected = true,
+            Selected = false,
             Action = (EGui.UIProxy.MenuItemProxy item, Support.UAnyPointer data) =>
             {
                 item.Selected = !item.Selected;
@@ -757,7 +757,7 @@ namespace EngineNS.Editor.Forms
         EGui.UIProxy.MenuItemProxy mEditorSettingsShow = new EGui.UIProxy.MenuItemProxy()
         {
             MenuName = "Editor Settings",
-            Selected = true,
+            Selected = false,
             Action = (EGui.UIProxy.MenuItemProxy item, Support.UAnyPointer data) =>
             {
                 item.Selected = !item.Selected;
@@ -766,7 +766,7 @@ namespace EngineNS.Editor.Forms
         EGui.UIProxy.MenuItemProxy mCameraSettingsShow = new EGui.UIProxy.MenuItemProxy()
         {
             MenuName = "Camera Settings",
-            Selected = true,
+            Selected = false,
             Action = (EGui.UIProxy.MenuItemProxy item, Support.UAnyPointer data) =>
             {
                 item.Selected = !item.Selected;
@@ -802,7 +802,7 @@ namespace EngineNS.Editor.Forms
         EGui.UIProxy.MenuItemProxy mPlaceItemPanelShow = new EGui.UIProxy.MenuItemProxy()
         {
             MenuName = "Place Items",
-            Selected = true,
+            Selected = false,
             Action = (EGui.UIProxy.MenuItemProxy item, Support.UAnyPointer data) =>
             {
                 item.Selected = !item.Selected;
@@ -829,7 +829,7 @@ namespace EngineNS.Editor.Forms
             var show = EGui.UIProxy.DockProxy.BeginPanel(mDockKeyClass, "NodeDetails", ref mDrawNodeDetailsShow.Selected, ImGuiWindowFlags_.ImGuiWindowFlags_None);
             if (show)
             {
-                PreviewViewport.NodeInspector.OnDraw(true, false, false);
+                NodeInspector.OnDraw(true, false, false);
             }
             EGui.UIProxy.DockProxy.EndPanel(show);
         }

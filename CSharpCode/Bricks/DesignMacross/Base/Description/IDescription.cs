@@ -70,7 +70,7 @@ namespace EngineNS.DesignMacross.Base.Description
         public List<TtMethodArgumentDescription> Arguments { get; set; } 
         public List<TtVariableDescription> LocalVariables { get; set; } 
         public bool IsOverride { get; set; } 
-        public bool IsAsync { get; set; }
+        public UMethodDeclaration.EAsyncType AsyncType { get; set; }
         public UMethodDeclaration BuildMethodDeclaration(ref FClassBuildContext classBuildContext);
     }
 

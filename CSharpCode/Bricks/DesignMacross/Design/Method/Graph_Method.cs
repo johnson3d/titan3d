@@ -86,6 +86,14 @@ namespace EngineNS.DesignMacross.Design
                             Debug.Assert(graphElementAttribute != null);
                             Debug.Assert(propertyValue is IDescription);
                             var desc = propertyValue as IDescription;
+
+                            if (!context.GraphElementStyleManager.Contains(desc.Id))
+                            {
+                                //set default location
+                                var style = context.GraphElementStyleManager.GetOrAdd(desc.Id);
+                                style.Location = graphElementAttribute.DefaultLocation;
+                            }
+
                             var instance = TtDescriptionGraphElementsPoolManager.Instance.GetDescriptionGraphElement(graphElementAttribute.ClassType, desc, context.GraphElementStyleManager.GetOrAdd(desc.Id));
                             instance.Parent = this;
                             Elements.Add(instance);

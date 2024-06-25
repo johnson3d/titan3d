@@ -99,12 +99,16 @@ namespace EngineNS
                     RefObject = mDrawData,
                 };
                 var index = ImGuiAPI.TableGetColumnIndex();
-                mComboBox.Flags = ImGuiComboFlags_.ImGuiComboFlags_None | ImGuiComboFlags_.ImGuiComboFlags_NoArrowButton | ImGuiComboFlags_.ImGuiComboFlags_HeightLarge;
+                mComboBox.Flags = ImGuiComboFlags_.ImGuiComboFlags_None | ImGuiComboFlags_.ImGuiComboFlags_NoArrowButton | ImGuiComboFlags_.ImGuiComboFlags_HeightMask_;
+                mComboBox.WinFlags = ImGuiWindowFlags_.ImGuiWindowFlags_Popup |
+                                     ImGuiWindowFlags_.ImGuiWindowFlags_NoTitleBar |
+                                     ImGuiWindowFlags_.ImGuiWindowFlags_NoSavedSettings |
+                                     ImGuiWindowFlags_.ImGuiWindowFlags_NoMove;
                 mComboBox.Width = ImGuiAPI.GetColumnWidth(index) - EGui.UIProxy.StyleConfig.Instance.PGCellPadding.X;
                 mComboBox.Name = TName.FromString2("##", info.Name != null ? info.Name : "").ToString();
                 mComboBox.PreviewValue = preViewStr;
                 var contentBrowserSize = new Vector2(500, 600);
-                ImGuiAPI.SetNextWindowSize(in contentBrowserSize, ImGuiCond_.ImGuiCond_Always);
+                ImGuiAPI.SetNextWindowSize(in contentBrowserSize, ImGuiCond_.ImGuiCond_Appearing);
                 ContentBrowser.ExtNames = FilterExts;
                 ContentBrowser.MacrossBase = Rtti.UTypeDesc.TypeOf(MacrossType);
                 ContentBrowser.SelectedAssets.Clear();

@@ -47,13 +47,59 @@ namespace EngineNS.Animation.SceneNode
             TtRuntimePoseUtility.CopyPose(ref mAnimatedPose, Player.OutPose);
         }
 
-        public static async System.Threading.Tasks.Task<TtSkeletonAnimPlayNode> AddSkeletonAnimPlayNode(GamePlay.UWorld world, UNode parent, UNodeData data, EBoundVolumeType bvType, Type placementType)
+        public static async Thread.Async.TtTask<TtSkeletonAnimPlayNode> AddSkeletonAnimPlayNode(GamePlay.UWorld world, UNode parent, UNodeData data, EBoundVolumeType bvType, Type placementType)
         {
             System.Diagnostics.Debug.Assert(parent is UMeshNode);
             var node = new Animation.SceneNode.TtSkeletonAnimPlayNode();
             await node.InitializeNode(world, data, bvType, placementType);
             node.BindingTo(parent as UMeshNode);
             node.Parent = parent;
+
+            return node;
+        }
+    }
+    public class TtAnimStateMachinePlayNode : GamePlay.Scene.ULightWeightNodeBase
+    {
+        public Animation.Player.TtAnimStateMachinePlayer Player { get; set; }
+
+        public override async Thread.Async.TtTask<bool> InitializeNode(GamePlay.UWorld world, UNodeData data, EBoundVolumeType bvType, Type placementType)
+        {
+            SetStyle(ENodeStyles.Invisible);
+            if (!await base.InitializeNode(world, data, bvType, placementType))
+            {
+                return false;
+            }
+
+            Player = new Player.TtAnimStateMachinePlayer();
+            Player.Initialize();
+            return true;
+        }
+        public async Thread.Async.TtTask BindingTo(UMeshNode meshNode)
+        {
+            System.Diagnostics.Debug.Assert(meshNode != null);
+            var animatablePose = meshNode?.Mesh?.MaterialMesh?.SubMeshes[0].Mesh?.PartialSkeleton?.CreatePose() as SkeletonAnimation.AnimatablePose.TtAnimatableSkeletonPose;
+            var skinMDfQueue = meshNode.Mesh.MdfQueue as Graphics.Mesh.UMdfSkinMesh;
+            mAnimatedPose = SkeletonAnimation.Runtime.Pose.TtRuntimePoseUtility.CreateLocalSpaceRuntimePose(animatablePose);
+            skinMDfQueue.SkinModifier.RuntimePose = mAnimatedPose;
+            await Player.BindingPose(animatablePose);
+        }
+        TtLocalSpaceRuntimePose mAnimatedPose = null;
+        public override void TickLogic(TtNodeTickParameters args)
+        {
+            Player.Update(args.World.DeltaTimeSecond);
+            Player.Evaluate();
+            if (Player.OutPose == null)
+                return;
+            TtRuntimePoseUtility.CopyPose(ref mAnimatedPose, Player.OutPose);
+        }
+
+        public static async System.Threading.Tasks.Task<TtAnimStateMachinePlayNode> Add(GamePlay.UWorld world, UNode parent, UNodeData data, EBoundVolumeType bvType, Type placementType)
+        {
+            System.Diagnostics.Debug.Assert(parent is UMeshNode);
+            var node = new Animation.SceneNode.TtAnimStateMachinePlayNode();
+            await node.InitializeNode(world, data, bvType, placementType);
+            node.Parent = parent;
+            await node.BindingTo(parent as UMeshNode);
 
             return node;
         }

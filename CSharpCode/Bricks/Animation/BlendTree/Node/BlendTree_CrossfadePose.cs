@@ -13,6 +13,11 @@ namespace EngineNS.Animation.BlendTree.Node
         public TtCrossfadePoseCommandDesc Desc { get; set; }
         public override void Execute()
         {
+            if(FromNode == null)
+            {
+                TtRuntimePoseUtility.CopyPose(ref mOutPose, ToNode.OutPose);
+                return;
+            }
             if (Desc.Weight == 0.0f)
             {
                 TtRuntimePoseUtility.CopyPose(ref mOutPose, FromNode.OutPose);
@@ -40,22 +45,27 @@ namespace EngineNS.Animation.BlendTree.Node
         float mCurrentTime = 0.0f;
 
         TtCrossfadePoseCommand<T> mAnimationCommand = null;
-        public override void Initialize()
+        public override void Initialize(ref FAnimBlendTreeContext context)
         {
             mAnimationCommand = new TtCrossfadePoseCommand<T>();
-            base.Initialize();
+            mAnimationCommand.Desc = new();
+            base.Initialize(ref context);
         }
         public override TtAnimationCommand<T> ConstructAnimationCommandTree(IAnimationCommand parentNode, ref FConstructAnimationCommandTreeContext context)
         {
-            var copyCmd = new TtCopyPoseCommand<T>();
-            copyCmd.Desc = new TtCopyPoseCommandDesc();
+            base.ConstructAnimationCommandTree(parentNode, ref context);
+            mAnimationCommand.Desc = new();
             context.AddCommand(context.TreeDepth, mAnimationCommand);
 
             context.TreeDepth++;
-            copyCmd.FromCommand = ToNode.ConstructAnimationCommandTree(copyCmd, ref context);
-            return copyCmd;
+            if(FromNode != null)
+            {
+                mAnimationCommand.FromNode = FromNode.ConstructAnimationCommandTree(mAnimationCommand, ref context);
+            }
+            mAnimationCommand.ToNode = ToNode.ConstructAnimationCommandTree(mAnimationCommand, ref context);
+            return mAnimationCommand;
         }
-        public override void Tick(float elapseSecond, in FAnimBlendTreeTickContext context)
+        public override void Tick(float elapseSecond, ref FAnimBlendTreeContext context)
         {
             mCurrentTime += elapseSecond;
             mAnimationCommand.Desc.Weight = Math.Min(mCurrentTime / BlendTime, 1.0f);

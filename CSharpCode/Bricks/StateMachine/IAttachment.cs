@@ -8,7 +8,7 @@ namespace EngineNS.Bricks.StateMachine
     {
         public S CenterData { get; set; }
         string Name { get; set; }
-        bool Initialize();
+        Thread.Async.TtTask<bool> Initialize(T context);
         void Enter();
         void Exit();
         /// <summary>

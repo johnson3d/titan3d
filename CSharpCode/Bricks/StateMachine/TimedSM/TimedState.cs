@@ -74,7 +74,7 @@ namespace EngineNS.Bricks.StateMachine.TimedSM
             mStateMachine = stateMachine;
         }
         public bool IsInitialized = false;
-        public virtual bool Initialize()
+        public virtual async Thread.Async.TtTask<bool> Initialize(T context)
         {
             return false;
         }
@@ -82,8 +82,7 @@ namespace EngineNS.Bricks.StateMachine.TimedSM
         {
             if (!IsInitialized)
             {
-                Initialize();
-                IsInitialized = true;
+                return;
             }
             OnEnter();
         }

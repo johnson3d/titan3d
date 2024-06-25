@@ -37,6 +37,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)UEditor.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)UEditorWorldViewportSlate.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)UPreviewViewport.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)USdfPreviewViewport.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)USnapshot.cs" />
   </ItemGroup>
   <ItemGroup>

@@ -23,7 +23,7 @@ namespace EngineNS.Animation.BlendTree.Node
     public class TtBlendTree_ZeroPose<T> : TtBlendTree<T> where T : IRuntimePose
     {
         TtZeroPoseCommand<T> mAnimationCommand = null;
-        public override void Initialize()
+        public override void Initialize(ref FAnimBlendTreeContext context)
         {
             mAnimationCommand = new TtZeroPoseCommand<T>();
         }

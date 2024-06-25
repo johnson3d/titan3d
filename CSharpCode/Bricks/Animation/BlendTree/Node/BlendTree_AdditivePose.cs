@@ -51,7 +51,7 @@ namespace EngineNS.Animation.BlendTree.Node
             mAnimationCommand.BaseNode = BaseNode.ConstructAnimationCommandTree(mAnimationCommand, ref context);
             return mAnimationCommand;
         }
-        public override void Tick(float elapseSecond, in FAnimBlendTreeTickContext context)
+        public override void Tick(float elapseSecond, ref FAnimBlendTreeContext context)
         {
             mAnimationCommand.Desc.Alpha = EvaluateAlpha.Invoke();
         }

@@ -15,13 +15,29 @@ namespace EngineNS.Animation.BlendTree.Node
     {
         public TtAnimationClip AnimationClip { get; set; } = null;
         public TtAnimationClipCommandDesc Desc { get; set; }
-        TtAnimatableSkeletonPose ExtractedPose = null;
+        TtAnimatableSkeletonPose mExtractedPose = null;
         public override void Execute()
         {
-            if (ExtractedPose == null)
+            if (mExtractedPose == null)
                 return;
-            System.Diagnostics.Debug.Assert(false);
-            TtRuntimePoseUtility.ConvetToLocalSpaceRuntimePose(ref mOutPose ,ExtractedPose);
+            CurveEvaluate(Desc.Time);
+            TtRuntimePoseUtility.ConvetToLocalSpaceRuntimePose(ref mOutPose , mExtractedPose);
+        }
+        List<TtCurveBindedObject> BindedCurves = new List<TtCurveBindedObject>();
+        public void SetExtractedPose(TtAnimatableSkeletonPose extractedPose)
+        {
+            BindedCurves.Clear();
+            mExtractedPose = extractedPose.Clone() as TtAnimatableSkeletonPose;
+            BindedCurves = TtBindedCurveUtil.BindingCurves(AnimationClip, mExtractedPose);
+            mOutPose = TtRuntimePoseUtility.CreateLocalSpaceRuntimePose(extractedPose);
+        }
+
+        void CurveEvaluate(float time)
+        {
+            foreach (var curve in BindedCurves)
+            {
+                curve.Evaluate(time);
+            }
         }
     }
     public class TtAnimationClipCommandDesc : IAnimationCommandDesc
@@ -42,22 +58,25 @@ namespace EngineNS.Animation.BlendTree.Node
         public float Time { get; set; }
         //public ClipWarpMode WarpMode { get; set; } = ClipWarpMode.Loop;
         TtAnimationClipCommand mAnimationCommand = null;
-        public override void Initialize()
+        public override void Initialize(ref FAnimBlendTreeContext context)
         {
-            mAnimationCommand = new TtAnimationClipCommand();
-            base.Initialize();
+            mAnimationCommand = new();
+            mAnimationCommand.Desc = new();
+            mAnimationCommand.AnimationClip = mClip;
+            mAnimationCommand.SetExtractedPose(context.AnimatableSkeletonPose);
+            base.Initialize(ref context);
         }
         public override TtAnimationCommand<TtLocalSpaceRuntimePose> ConstructAnimationCommandTree(IAnimationCommand parentNode, ref FConstructAnimationCommandTreeContext context)
         {
-            var desc = new TtAnimationClipCommandDesc();
-            mAnimationCommand.Desc = desc;
-            mAnimationCommand.AnimationClip = mClip;
+            base.ConstructAnimationCommandTree(parentNode, ref context);
             context.AddCommand(context.TreeDepth, mAnimationCommand);
             return mAnimationCommand;
         }
-        public override void Tick(float elapseSecond, in FAnimBlendTreeTickContext context)
+        public override void Tick(float elapseSecond, ref FAnimBlendTreeContext context)
         {
-            mAnimationCommand.Desc.Time = Time;
+            var lastTime = mAnimationCommand.Desc.Time;
+            var currentTime = lastTime + elapseSecond;
+            mAnimationCommand.Desc.Time = currentTime % mAnimationCommand.AnimationClip.Duration;
         }
     }
 }

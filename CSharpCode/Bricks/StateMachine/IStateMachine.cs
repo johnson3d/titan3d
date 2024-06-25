@@ -22,7 +22,7 @@ namespace EngineNS.Bricks.StateMachine
         public ITransition<S, T> PostTransition { get; set; }
         public bool EnableTick { get; set; } 
         public EStateChangeMode StateChangeMode { get; set; } 
-        public bool Initialize();
+        public Thread.Async.TtTask<bool> Initialize(T context);
         public void Tick(float elapseSecond, in T context);
 
         public void SetDefaultState(IState<S, T> state);

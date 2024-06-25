@@ -8,33 +8,31 @@ using EngineNS.Animation.Command;
 using EngineNS.Animation.SkeletonAnimation.Runtime.Pose;
 using EngineNS.Bricks.StateMachine.Macross.StateAttachment;
 using EngineNS.Bricks.StateMachine.TimedSM;
+using NPOI.SS.Formula.Functions;
 
 namespace EngineNS.Animation.StateMachine
 {
-    public class TtAnimState<S> : Bricks.StateMachine.TimedSM.TtTimedState<S, FAnimBlendTreeTickContext>
+    public class TtAnimState<S> : Bricks.StateMachine.TimedSM.TtTimedState<S, TtAnimStateMachineContext>
     {
         public TtBlendTree_CopyPose<TtLocalSpaceRuntimePose> BlendTree = null;
-        public override bool Initialize()
+        public override async Thread.Async.TtTask<bool> Initialize(TtAnimStateMachineContext context)
         {
+            BlendTree = new TtBlendTree_CopyPose<TtLocalSpaceRuntimePose>();
             // BlendTree initialize now single animAttachment
             foreach (var attachment in Attachments)
             {
                 if (attachment is TtAnimStateAttachment<S> animAttachment)
                 {
-                    attachment.Initialize();
+                    await attachment.Initialize(context);
                     BlendTree.FromNode = animAttachment.BlendTree;
                 }
             }
-            return base.Initialize();
+            return await base.Initialize(context);
         }
-        public override void Tick(float elapseSecond, in FAnimBlendTreeTickContext context)
+        public override void Tick(float elapseSecond, in TtAnimStateMachineContext context)
         {
             base.Tick(elapseSecond, context);
-            BlendTree.Tick(elapseSecond, context);
-        }
-        public IBlendTree<TtLocalSpaceRuntimePose> ConstructBlendTree(ref FConstructAnimationCommandTreeContext context)
-        {
-            return null;
+            BlendTree.Tick(elapseSecond, ref context.BlendTreeContext);
         }
     }
 }

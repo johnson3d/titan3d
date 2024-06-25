@@ -166,6 +166,7 @@ namespace EngineNS.EGui.Controls.PropertyGrid
         {
             OnDraw(false, true, false);
         }
+        public Func<object, object, CustomPropertyDescriptor, bool> CanSetPropertyValueAction = null;
         public void OnDraw(bool bShowReadOnly, bool bNewForm/*=true*/, bool bKeepColums/*=false*/, ImGuiWindowFlags_ flags = ImGuiWindowFlags_.ImGuiWindowFlags_None)
         {
             if (Visible == false)
@@ -417,6 +418,19 @@ namespace EngineNS.EGui.Controls.PropertyGrid
                     var ctAttr = categoryAtts[0] as PGCategoryFilters;
                     CategoryExcludeFilters = ctAttr.ExcludeFilters;
                 }
+                else if (target.GetType().GetInterface("IList") != null)
+                {
+                    var lst = target as IList;
+                    if (lst.Count == 1)
+                    {
+                        categoryAtts = lst[0].GetType().GetCustomAttributes(typeof(PGCategoryFilters), true);
+                        if (categoryAtts.Length > 0)
+                        {
+                            var ctAttr = categoryAtts[0] as PGCategoryFilters;
+                            CategoryExcludeFilters = ctAttr.ExcludeFilters;
+                        }
+                    }
+                }
             }
             targetNewValue = target;
             if (target == null)
@@ -619,7 +633,10 @@ namespace EngineNS.EGui.Controls.PropertyGrid
                                 PushPGEditorStyleValues();
                                 var changed = EngineNS.UEngine.Instance.PGTypeEditorManagerInstance.ObjectWithCreateEditor.OnDraw(in itemEditorInfo, out newValue);
                                 PopPGEditorStyleValues();
-                                if (changed)
+                                bool canSet = true;
+                                if (CanSetPropertyValueAction != null)
+                                    canSet = CanSetPropertyValueAction.Invoke(target, newValue, propDesc);
+                                if (changed && canSet)
                                 {
                                     propDesc.SetValue(ref target, newValue);
                                     if(propDesc.ParentIsValueType)
@@ -644,7 +661,10 @@ namespace EngineNS.EGui.Controls.PropertyGrid
                                             PushPGEditorStyleValues();
                                             var changed = editorOnDraw.OnDraw(in itemEditorInfo, out newValue);
                                             PopPGEditorStyleValues();
-                                            if (changed)
+                                            bool canSet = true;
+                                            if (CanSetPropertyValueAction != null)
+                                                canSet = CanSetPropertyValueAction.Invoke(target, newValue, propDesc);
+                                            if (changed && canSet)
                                             {
                                                 propDesc.SetValue(ref target, newValue);
                                                 retValue = true;
@@ -678,7 +698,10 @@ namespace EngineNS.EGui.Controls.PropertyGrid
                                         {
                                             object newValue;
                                             var changed = editorOnDraw.OnDraw(in itemEditorInfo, out newValue);
-                                            if (changed)
+                                            bool canSet = true;
+                                            if (CanSetPropertyValueAction != null)
+                                                canSet = CanSetPropertyValueAction.Invoke(target, newValue, propDesc);
+                                            if (changed && canSet)
                                             {
                                                 propDesc.SetValue(ref target, newValue);
                                                 retValue = true;
@@ -715,7 +738,10 @@ namespace EngineNS.EGui.Controls.PropertyGrid
 
                                     object newValue;
                                     var valueChanged = DrawPropertyGridItem(ref itemEditorInfo, out newValue);
-                                    if (valueChanged)
+                                    bool canSet = true;
+                                    if (CanSetPropertyValueAction != null)
+                                        canSet = CanSetPropertyValueAction.Invoke(target, newValue, propDesc);
+                                    if (valueChanged && canSet)
                                     {
                                         propDesc.SetValue(ref target, newValue);
                                         retValue = true;

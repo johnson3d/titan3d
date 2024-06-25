@@ -36,7 +36,7 @@ namespace EngineNS.Bricks.StateMachine.Macross.StateAttachment
         {
             SupperClassNames.Clear();
             SupperClassNames.Add($"EngineNS.Bricks.StateMachine.TimedSM.TtTimedStateAttachment<{classBuildContext.MainClassDescription.ClassName}>");
-            UClassDeclaration thisClassDeclaration = TtDescriptionASTBuildUtil.BuildDefaultPartForClassDeclaration(this, ref classBuildContext);
+            UClassDeclaration thisClassDeclaration = TtASTBuildUtil.BuildClassDeclaration(this, ref classBuildContext);
             FClassBuildContext transitionClassBuildContext = new FClassBuildContext()
             {
                 MainClassDescription = classBuildContext.MainClassDescription,

@@ -237,6 +237,11 @@ namespace EngineNS.Graphics.Pipeline
                 var eyePos = new DVector3(0, 0, -10);
                 camera.mCoreObject.LookAtLH(in eyePos, in DVector3.Zero, in Vector3.Up);
             }
+            // todo, support ortho
+            else if( camera.IsOrtho == true)
+            {
+
+            }
             else
             {
                 camera.mCoreObject.PerspectiveFovLH(3.14f / 4f, 1, 1, camera.ZNear, camera.ZFar);
@@ -263,7 +268,10 @@ namespace EngineNS.Graphics.Pipeline
         public override void OnResize(float x, float y)
         {
             if (DefaultCamera != null)
-                DefaultCamera.mCoreObject.PerspectiveFovLH(3.14f / 4f, x, y, DefaultCamera.ZNear, DefaultCamera.ZFar);
+            {
+                if (DefaultCamera.IsOrtho == false)
+                    DefaultCamera.mCoreObject.PerspectiveFovLH(3.14f / 4f, x, y, DefaultCamera.ZNear, DefaultCamera.ZFar);
+            }
 
             base.OnResize(x, y);
         }

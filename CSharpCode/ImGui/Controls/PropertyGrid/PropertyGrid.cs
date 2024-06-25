@@ -178,7 +178,10 @@ namespace EngineNS.EGui.Controls.PropertyGrid
             return false;
         }
     }
-
+    public interface IPropertySetPreChecker
+    {
+        bool CanSetPropertyValue(string propertyName, object? value);
+    }
     public interface IPropertyCustomization
     {
         bool IsPropertyVisibleDirty { get; set; }

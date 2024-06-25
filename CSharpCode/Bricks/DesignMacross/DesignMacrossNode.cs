@@ -3,6 +3,7 @@ using EngineNS.GamePlay.Scene;
 using EngineNS.Thread.Async;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Text;
 
 namespace EngineNS.DesignMacross
@@ -17,11 +18,20 @@ namespace EngineNS.DesignMacross
             [RName.PGRName(FilterExts = EngineNS.DesignMacross.UDesignMacross.AssetExt)]
             public RName DesignMacrossName { get; set; }
         }
+        Macross.UMacrossGetter<TtDesignMacrossBase> mMacrossGetter = null;
         public override TtTask<bool> InitializeNode(UWorld world, UNodeData data, EBoundVolumeType bvType, Type placementType)
         {
+            if(!RName.IsEmpty(DesignMacross))
+            {
+                mMacrossGetter = Macross.UMacrossGetter<TtDesignMacrossBase>.NewInstance();
+                mMacrossGetter.Name = DesignMacross;
+                mMacrossGetter.Get().MacrossNode = this;
+                mMacrossGetter.Get().Initialize();
+            }
             return base.InitializeNode(world, data, bvType, placementType);
         }
         [RName.PGRName(FilterExts = UDesignMacross.AssetExt)]
+        [Category("Option")]
         public RName DesignMacross
         {
             get
@@ -38,7 +48,16 @@ namespace EngineNS.DesignMacross
                 {
                     data.DesignMacrossName = value;
                 }
+                mMacrossGetter = Macross.UMacrossGetter<TtDesignMacrossBase>.NewInstance();
+                mMacrossGetter.Name = value;
+                mMacrossGetter.Get().MacrossNode = this;
+                mMacrossGetter.Get().Initialize();
             }
+        }
+        public override void TickLogic(TtNodeTickParameters args)
+        {
+            mMacrossGetter.Get().Tick(args.World.TimeSecond);
+            base.TickLogic(args);
         }
     }
 }

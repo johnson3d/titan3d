@@ -68,10 +68,10 @@ namespace EngineNS.Animation.BlendTree.Node
 
         public string SyncPlayPercentGrop { get; set; } = "";
         TtBlendSpaceEvaluateCommand mAnimationCommand = null;
-        public override void Initialize()
+        public override void Initialize(ref FAnimBlendTreeContext context)
         {
             mAnimationCommand = new TtBlendSpaceEvaluateCommand();
-            base.Initialize();
+            base.Initialize(ref context);
         }
         public override TtAnimationCommand<TtLocalSpaceRuntimePose> ConstructAnimationCommandTree(IAnimationCommand parentNode, ref FConstructAnimationCommandTreeContext context)
         {
@@ -88,7 +88,7 @@ namespace EngineNS.Animation.BlendTree.Node
             }
             return mAnimationCommand;
         }
-        public override void Tick(float elapseSecond, in FAnimBlendTreeTickContext context)
+        public override void Tick(float elapseSecond, ref FAnimBlendTreeContext context)
         {
             mAnimationCommand.Desc.Times.Clear();
             mAnimationCommand.Desc.Weights.Clear();

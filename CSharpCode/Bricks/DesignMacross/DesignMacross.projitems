@@ -35,7 +35,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)Design\Expressions\GraphElement_ExpressionDescription.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Design\Expressions\Nodes\Binocular.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)CommandHistory.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Base\Description\DescriptionASTBuildUtil.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)ASTBuildUtil.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Design\DesignableVariable\DesignableVariableDescription.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Base\Description\IDescription.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Design\DesignableVariable\OutlineElement_DesignableVariable.cs" />

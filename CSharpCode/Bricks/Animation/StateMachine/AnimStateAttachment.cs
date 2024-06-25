@@ -7,27 +7,32 @@ using EngineNS.Animation.BlendTree;
 using EngineNS.Animation.Command;
 using EngineNS.Animation.Asset;
 using EngineNS.Animation.BlendTree.Node;
+using EngineNS.Thread.Async;
 
 namespace EngineNS.Animation.StateMachine
 {
-    public class TtAnimStateAttachment<S> : Bricks.StateMachine.TimedSM.TtTimedStateAttachment<S, FAnimBlendTreeTickContext>
+    public class TtAnimStateAttachment<S> : Bricks.StateMachine.TimedSM.TtTimedStateAttachment<S, TtAnimStateMachineContext>
     {
         public IBlendTree<TtLocalSpaceRuntimePose> BlendTree = null;
 
     }
     public class TtClipPlayStateAttachment<S> : TtAnimStateAttachment<S>
     {
-        TtAnimationClip AnimationClip;
-        public override bool Initialize()
+        public RName AnimationClipName;
+        public override async TtTask<bool> Initialize(TtAnimStateMachineContext context)
         {
-            BlendTree = new TtBlendTree_AnimationClip();
-            return base.Initialize();
+            var animClipBlendTree = new TtBlendTree_AnimationClip();
+            animClipBlendTree.Clip = await UEngine.Instance.AnimationModule.AnimationClipManager.GetAnimationClip(AnimationClipName);
+            BlendTree = animClipBlendTree;
+            BlendTree.Initialize(ref context.BlendTreeContext);
+            return await base.Initialize(context);
         }
 
-        public override void Tick(float elapseSecond, in FAnimBlendTreeTickContext context)
+        public override void Tick(float elapseSecond, in TtAnimStateMachineContext context)
         {
             base.Tick(elapseSecond, context);
-            BlendTree.Tick(elapseSecond, context);
+            //(BlendTree as TtBlendTree_AnimationClip).Time = 
+            BlendTree.Tick(elapseSecond, ref context.BlendTreeContext);
         }
 
     }
@@ -37,17 +42,17 @@ namespace EngineNS.Animation.StateMachine
     /// <typeparam name="S"></typeparam>
     public class TtAnimBlendTreeStateAttachment<S> : TtAnimStateAttachment<S>
     {
-        public override bool Initialize()
+        public override async TtTask<bool> Initialize(TtAnimStateMachineContext context)
         {
             //construct the blend tree
 
-            return base.Initialize();
+            return await base.Initialize(context);
         }
 
-        public override void Tick(float elapseSecond, in FAnimBlendTreeTickContext context)
+        public override void Tick(float elapseSecond, in TtAnimStateMachineContext context)
         {
             base.Tick(elapseSecond, context);
-            BlendTree.Tick(elapseSecond, context);
+            BlendTree.Tick(elapseSecond, ref context.BlendTreeContext);
         }
 
     }

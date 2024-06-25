@@ -17,7 +17,7 @@ namespace EngineNS.Bricks.StateMachine.TimedSM
         {
         }
 
-        public virtual bool Initialize()
+        public virtual async Thread.Async.TtTask<bool> Initialize(T context)
         {
             return false;
         }
@@ -57,7 +57,7 @@ namespace EngineNS.Bricks.StateMachine.TimedSM
         {
         }
 
-        public virtual bool Initialize()
+        public virtual async Thread.Async.TtTask<bool> Initialize(T context)
         {
             return false;
         }

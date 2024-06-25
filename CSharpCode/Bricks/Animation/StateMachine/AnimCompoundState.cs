@@ -6,7 +6,7 @@ using System.Text;
 
 namespace EngineNS.Animation.StateMachine
 {
-    public class TtAnimCompoundState<S> : Bricks.StateMachine.TimedSM.TtTimedCompoundState<S, FAnimBlendTreeTickContext>
+    public class TtAnimCompoundState<S> : Bricks.StateMachine.TimedSM.TtTimedCompoundState<S, TtAnimStateMachineContext>
     {
 
     }

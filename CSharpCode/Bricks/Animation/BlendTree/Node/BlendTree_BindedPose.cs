@@ -23,7 +23,7 @@ namespace EngineNS.Animation.BlendTree.Node
     public class TtBlendTree_BindedPose : TtBlendTree<TtLocalSpaceRuntimePose>
     {
         TtBindedPoseCommand<TtLocalSpaceRuntimePose> mAnimationCommand = null;
-        public override void Initialize()
+        public override void Initialize(ref FAnimBlendTreeContext context)
         {
             mAnimationCommand = new TtBindedPoseCommand<TtLocalSpaceRuntimePose>();
         }
@@ -36,7 +36,7 @@ namespace EngineNS.Animation.BlendTree.Node
 
             return mAnimationCommand;
         }
-        public override void Tick(float elapseSecond, in FAnimBlendTreeTickContext context)
+        public override void Tick(float elapseSecond, ref FAnimBlendTreeContext context)
         {
 
         }

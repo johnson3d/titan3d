@@ -84,7 +84,7 @@ namespace EngineNS.Animation.BlendTree.Node
             }
         }
         TtSelectPoseByIntCommand<T> mAnimationCommand = null;
-        public override void Initialize()
+        public override void Initialize(ref FAnimBlendTreeContext context)
         {
             mAnimationCommand = new TtSelectPoseByIntCommand<T>();
         }
@@ -102,9 +102,9 @@ namespace EngineNS.Animation.BlendTree.Node
             return mAnimationCommand;
         }
 
-        public override void Tick(float elapseSecond, in FAnimBlendTreeTickContext context)
+        public override void Tick(float elapseSecond, ref FAnimBlendTreeContext context)
         {
-            base.Tick(elapseSecond, context);
+            base.Tick(elapseSecond, ref context);
             //TODO : alpha evaluate
            
 

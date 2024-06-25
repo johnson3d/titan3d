@@ -174,7 +174,7 @@ namespace EngineNS.Bricks.StateMachine.Macross.StateTransition
 
             if(ImGuiAPI.IsMouseDoubleClickedInRectInCurrentWindow(nodeStart, nodeEnd, ImGuiMouseButton_.ImGuiMouseButton_Left, true))
             {
-                context.EditorInteroperation.GraphEditPanel.ActiveGraphNavigatedPanel.OpenSubGraph(transitionElement.Description);
+                context.EditorInteroperation.GraphEditPanel.ActiveGraphNavigatedPanel.OpenSubGraph(transitionElement.TimedStateTransition.CheckConditionMethodDescription);
             }
 
             if (transitionElement.From is IStateTransitionInitial initiable && transitionElement.To is IStateTransitionAcceptable acceptable)

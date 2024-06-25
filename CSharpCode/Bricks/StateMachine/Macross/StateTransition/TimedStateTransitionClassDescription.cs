@@ -1,8 +1,11 @@
 ﻿using EngineNS.Bricks.CodeBuilder;
 using EngineNS.Bricks.StateMachine.Macross.CompoundState;
+using EngineNS.Bricks.StateMachine.TimedSM;
+using EngineNS.DesignMacross;
 using EngineNS.DesignMacross.Base.Description;
 using EngineNS.DesignMacross.Base.Graph;
 using EngineNS.DesignMacross.Design;
+using EngineNS.DesignMacross.Design.ConnectingLine;
 using EngineNS.Rtti;
 using System.Diagnostics;
 
@@ -11,7 +14,18 @@ namespace EngineNS.Bricks.StateMachine.Macross.StateTransition
     [Graph(typeof(TtGraph_TimedStateTransition))]
     public class TtTransitionCheckConditionMethodDescription : TtMethodDescription
     {
-
+        public TtTransitionCheckConditionMethodDescription()
+        {
+            Name = "CheckCondition";
+            IsOverride = true;
+            ReturnValueType = UTypeDesc.TypeOf<bool>();
+            AddArgument(new TtMethodArgumentDescription { OperationType = EMethodArgumentAttribute.In, VariableType = UTypeDesc.TypeOf<TtStateMachineContext>(), Name = "context" });
+            var endNode = new TtMethodEndDescription() { Parent = this };
+            var dataPinIn = new TtDataInPinDescription() { TypeDesc = UTypeDesc.TypeOf<bool>() , Parent = this };
+            endNode.DataInPins.Add(dataPinIn);
+            AddStatement(endNode);
+            AddExecutionLine(new() { Parent = this, FromId = Start.GetExecutionOutPins()[0].Id, ToId = endNode.ExecutionInPins[0].Id });
+        }
     }
     [GraphElement(typeof(TtGraphElement_TimedStateTransition))]
     public class TtTimedStateTransitionClassDescription : TtDesignableVariableDescription
@@ -90,19 +104,15 @@ namespace EngineNS.Bricks.StateMachine.Macross.StateTransition
         {
             CheckConditionMethodDescription = new TtTransitionCheckConditionMethodDescription()
             {
-                Name = "CheckCondition",
                 Parent = this,
-                IsOverride = true,
             };
-            CheckConditionMethodDescription.SetReturnValue(UTypeDesc.TypeOf<bool>());
-            //OverrideCheckConditionMethodDescription.Arguments.Add(new UMethodArgumentDeclaration { OperationType = EMethodArgumentAttribute.In, VariableType = new UTypeReference(UTypeDesc.TypeOf<TtStateMachineContext>()), VariableName = "context" });
         }
 
         public override List<UClassDeclaration> BuildClassDeclarations(ref FClassBuildContext classBuildContext)
         {
             SupperClassNames.Clear();
             SupperClassNames.Add($"EngineNS.Bricks.StateMachine.TimedSM.TtTimedStateTransition<{classBuildContext.MainClassDescription.ClassName}>");
-            UClassDeclaration thisClassDeclaration = TtDescriptionASTBuildUtil.BuildDefaultPartForClassDeclaration(this, ref classBuildContext);
+            UClassDeclaration thisClassDeclaration = TtASTBuildUtil.BuildClassDeclaration(this, ref classBuildContext);
             FClassBuildContext transitionClassBuildContext = new FClassBuildContext()
             {
                 MainClassDescription = classBuildContext.MainClassDescription,
@@ -114,11 +124,11 @@ namespace EngineNS.Bricks.StateMachine.Macross.StateTransition
 
         public override UVariableDeclaration BuildVariableDeclaration(ref FClassBuildContext classBuildContext)
         {
-            return TtDescriptionASTBuildUtil.BuildDefaultPartForVariableDeclaration(this, ref classBuildContext);
+            return TtASTBuildUtil.CreateVariableDeclaration(this, ref classBuildContext);
         }
 
         #region Internal AST Build
-        public UMethodDeclaration BuildOverrideCheckConditionMethod(ref FClassBuildContext classBuildContext)
+        private UMethodDeclaration BuildOverrideCheckConditionMethod(ref FClassBuildContext classBuildContext)
         {
             return CheckConditionMethodDescription.BuildMethodDeclaration(ref classBuildContext);
         }

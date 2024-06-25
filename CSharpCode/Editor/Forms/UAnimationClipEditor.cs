@@ -2,6 +2,7 @@
 using EngineNS.Animation.Asset;
 using EngineNS.Graphics.Mesh;
 using EngineNS.Graphics.Pipeline;
+using EngineNS.Thread.Async;
 using SixLabors.ImageSharp.PixelFormats;
 using System;
 using System.Collections.Generic;
@@ -220,7 +221,7 @@ namespace EngineNS.Editor.Forms
             UEngine.Instance.TickableManager.AddTickable(this);
             return true;
         }
-        public async Task OnPreviewMeshChange(UMeshPrimitives meshPrimitives)
+        public async TtTask OnPreviewMeshChange(UMeshPrimitives meshPrimitives)
         {
             if(mCurrentMeshNode != null)
             {
@@ -249,10 +250,13 @@ namespace EngineNS.Editor.Forms
             
             mCurrentMeshNode = meshNode;
 
+            //await EngineNS.Animation.SceneNode.TtAnimStateMachinePlayNode.Add(PreviewViewport.World, mCurrentMeshNode, new GamePlay.Scene.UNodeData(),
+            //                EngineNS.GamePlay.Scene.EBoundVolumeType.Box, typeof(EngineNS.GamePlay.UIdentityPlacement));
+
             var sapnd = new EngineNS.Animation.SceneNode.TtSkeletonAnimPlayNode.TtSkeletonAnimPlayNodeData();
             sapnd.Name = "PlayAnim";
             sapnd.AnimatinName = AssetName;
-            await EngineNS.Animation.SceneNode.TtSkeletonAnimPlayNode.AddSkeletonAnimPlayNode(PreviewViewport.World, mCurrentMeshNode, sapnd, 
+            await EngineNS.Animation.SceneNode.TtSkeletonAnimPlayNode.AddSkeletonAnimPlayNode(PreviewViewport.World, mCurrentMeshNode, sapnd,
                             EngineNS.GamePlay.Scene.EBoundVolumeType.Box, typeof(EngineNS.GamePlay.UIdentityPlacement));
         }
 

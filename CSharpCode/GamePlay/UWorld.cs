@@ -7,29 +7,6 @@ using System.Text;
 
 namespace EngineNS.GamePlay
 {
-    public class UWorldRootNode : Scene.UScene
-    {
-        public UWorldRootNode()
-        {
-            
-        }
-        public override string NodeName
-        {
-            get
-            {
-                return "WorldRootNode";
-            }
-        }        
-        public override void OnGatherVisibleMeshes(GamePlay.UWorld.UVisParameter rp)
-        {
-            if (rp.VisibleNodes != null)
-            {
-                rp.VisibleNodes.Add(this);
-            }
-            //base.OnGatherVisibleMeshes(rp);
-        }
-    }
-
     public partial class UWorld : IDisposable
     {
         public void Dispose()
@@ -47,7 +24,7 @@ namespace EngineNS.GamePlay
             mOnVisitNode_GatherVisibleMeshesAll = this.OnVisitNode_GatherVisibleMeshesAll;
             mOnVisitNode_GatherBoundShapes = this.OnVisitNode_GatherBoundShapes;
 
-            mRoot = new UWorldRootNode();
+            mRoot = new Scene.UScene();
             mRoot.World = this;
         }
         UMemberTickables mMemberTickables = new UMemberTickables();
@@ -89,10 +66,11 @@ namespace EngineNS.GamePlay
                 CameralOffsetSerialId++;
             }
         }
-        UWorldRootNode mRoot;
-        public UWorldRootNode Root
+        Scene.UScene mRoot;
+        public Scene.UScene Root
         {
             get => mRoot;
+            set => mRoot = value;
         }
         internal List<Scene.TtSunNode> mSuns = new List<Scene.TtSunNode>();
         public Scene.TtSunNode GetSun(int index = 0)

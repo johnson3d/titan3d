@@ -5,6 +5,7 @@ using EngineNS.Rtti;
 using EngineNS.DesignMacross.Editor;
 using EngineNS.DesignMacross.Design;
 using System.Text.RegularExpressions;
+using EngineNS.GamePlay.Scene;
 
 namespace EngineNS.DesignMacross
 {
@@ -52,8 +53,9 @@ namespace EngineNS.DesignMacross
     [DesignMacross]
     public class TtDesignMacrossBase
     {
-        public void Initialize() { }
-        public void Tick(float elapseSecond) { }
+        public UNode MacrossNode{ get; set; } = null;
+        public virtual void Initialize() { }
+        public virtual void Tick(float elapseSecond) { }
     }
     public partial class TtDesignMacrossAMeta : IO.IAssetMeta
     {

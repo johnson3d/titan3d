@@ -87,7 +87,7 @@ namespace EngineNS.Bricks.StateMachine.TimedSM
             Name = name;
         }
         public bool IsInitialized = false;
-        public virtual bool Initialize()
+        public virtual async Thread.Async.TtTask<bool> Initialize(T context)
         {
             return false;
         }
@@ -96,11 +96,6 @@ namespace EngineNS.Bricks.StateMachine.TimedSM
             if (!EnableTick)
                 return;
 
-            if (!IsInitialized)
-            {
-                Initialize();
-                IsInitialized = true;
-            }
             Clock.Advance(elapseSecond);
 
             if (StateChangeMode == EStateChangeMode.NextFrame && PostState != null)

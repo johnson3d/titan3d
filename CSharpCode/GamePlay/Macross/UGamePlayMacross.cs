@@ -134,7 +134,7 @@ namespace EngineNS.GamePlay.GamePlayMacross
             idleState.LogicalState = new TtLogicalState<UGameplayMacross>(mGamePlayStateMachine);
             var idleAnimState = new TtAnimationState<UGameplayMacross>(mGamePlayStateMachine);
             idleAnimState.Animation = await EngineNS.UEngine.Instance.AnimationModule.AnimationClipManager.GetAnimationClip(RName.GetRName("utest/puppet/animation/w2_stand_aim_idle_ip.animclip"));
-            idleAnimState.Initialize();
+            //idleAnimState.Initialize();
             idleAnimState.mExtractPoseFromClipCommand.SetExtractedPose(ref animatablePose);
             idleState.AnimationState = idleAnimState;
             mGamePlayStateMachine.SetDefaultState(idleState);
@@ -188,7 +188,7 @@ namespace EngineNS.GamePlay.GamePlayMacross
             idleState.LogicalState = new TtLogicalState<UGameplayMacross>(mGamePlayStateMachine);
             var idleAnimState = new TtAnimationState<UGameplayMacross>(mGamePlayStateMachine);
             idleAnimState.Animation = await EngineNS.UEngine.Instance.AnimationModule.AnimationClipManager.GetAnimationClip(RName.GetRName("utest/puppet/animation/w2_stand_aim_idle_ip.animclip"));
-            idleAnimState.Initialize();
+            //idleAnimState.Initialize();
             idleAnimState.mExtractPoseFromClipCommand.SetExtractedPose(ref animatablePose);
             idleState.AnimationState = idleAnimState;
             mGamePlayStateMachine.SetDefaultState(idleState);

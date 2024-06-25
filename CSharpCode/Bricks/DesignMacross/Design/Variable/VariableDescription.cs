@@ -11,6 +11,7 @@ using System.Reflection;
 namespace EngineNS.DesignMacross.Design
 {
     [OutlineElement_Leaf(typeof(TtOutlineElement_Variable))]
+    [EGui.Controls.PropertyGrid.PGCategoryFilters(ExcludeFilters = new string[] { "Misc" })]
     public class TtVariableDescription : IVariableDescription, EGui.Controls.PropertyGrid.IPropertyCustomization, Bricks.NodeGraph.UEditableValue.IValueEditNotify
     {
         public IDescription Parent { get; set; }
@@ -18,7 +19,7 @@ namespace EngineNS.DesignMacross.Design
         public Guid Id { get; set; } = Guid.NewGuid();
         [Rtti.Meta]
         public string Name { get; set; } = "Variable";
-        public string VariableName { get => TtDescriptionASTBuildUtil.VariableNamePrefix + Name; }
+        public string VariableName { get => TtASTBuildUtil.VariableNamePrefix + Name; }
         [Rtti.Meta]
         public UTypeReference VariableType { get; set; } = new UTypeReference(UTypeDesc.TypeOf<bool>());
         [Rtti.Meta]
@@ -32,7 +33,7 @@ namespace EngineNS.DesignMacross.Design
 
         public UVariableDeclaration BuildVariableDeclaration(ref FClassBuildContext classBuildContext)
         {
-            return TtDescriptionASTBuildUtil.BuildDefaultPartForVariableDeclaration(this, ref classBuildContext);
+            return TtASTBuildUtil.CreateVariableDeclaration(this, ref classBuildContext);
         }
 
         public void GetProperties(ref CustomPropertyDescriptorCollection collection, bool parentIsValueType)

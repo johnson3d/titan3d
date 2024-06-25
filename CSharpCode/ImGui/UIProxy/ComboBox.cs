@@ -10,6 +10,13 @@ namespace EngineNS.EGui.UIProxy
         public string Name;
         public string PreviewValue;
         public ImGuiComboFlags_ Flags = ImGuiComboFlags_.ImGuiComboFlags_None;
+        public ImGuiWindowFlags_ WinFlags = 
+            ImGuiWindowFlags_.ImGuiWindowFlags_AlwaysAutoResize |
+            ImGuiWindowFlags_.ImGuiWindowFlags_Popup |
+            ImGuiWindowFlags_.ImGuiWindowFlags_NoTitleBar |
+            ImGuiWindowFlags_.ImGuiWindowFlags_NoResize |
+            ImGuiWindowFlags_.ImGuiWindowFlags_NoSavedSettings |
+            ImGuiWindowFlags_.ImGuiWindowFlags_NoMove;
         public float Width = -1;
 
         public delegate void Delegate_ComboOpenAction(in Support.UAnyPointer data);
@@ -57,7 +64,8 @@ namespace EngineNS.EGui.UIProxy
             var hovered = ImGuiAPI.IsMouseHoveringRectInCurrentWindow(in cursorPos, in endPos, true);
             if (hovered)
                 ImGuiAPI.PushStyleColor(ImGuiCol_.ImGuiCol_Border, EGui.UIProxy.StyleConfig.Instance.PGItemBorderHoveredColor);
-            var comboOpen = ImGuiAPI.BeginCombo(Name, PreviewValue, Flags);
+            var comboOpen = ImGuiAPI.BeginCombo(Name, PreviewValue, Flags, WinFlags);
+            //var comboOpen = ImGuiAPI.BeginCombo(Name, PreviewValue, Flags);
             if(hovered)
                 ImGuiAPI.PopStyleColor(1);
             //var itemSize = ImGuiAPI.GetItemRectSize();
@@ -76,7 +84,14 @@ namespace EngineNS.EGui.UIProxy
             return true;
         }
 
-        public static unsafe bool BeginCombo(string name, string previewValue, float width = -1, ImGuiComboFlags_ flags = ImGuiComboFlags_.ImGuiComboFlags_None)
+        public static unsafe bool BeginCombo(string name, string previewValue, float width = -1, ImGuiComboFlags_ flags = ImGuiComboFlags_.ImGuiComboFlags_None,
+            ImGuiWindowFlags_ winFlags =
+            ImGuiWindowFlags_.ImGuiWindowFlags_AlwaysAutoResize |
+            ImGuiWindowFlags_.ImGuiWindowFlags_Popup |
+            ImGuiWindowFlags_.ImGuiWindowFlags_NoTitleBar |
+            ImGuiWindowFlags_.ImGuiWindowFlags_NoResize |
+            ImGuiWindowFlags_.ImGuiWindowFlags_NoSavedSettings |
+            ImGuiWindowFlags_.ImGuiWindowFlags_NoMove)
         {
             var style = ImGuiAPI.GetStyle();
             ImGuiAPI.SetNextItemWidth(width);
@@ -97,7 +112,8 @@ namespace EngineNS.EGui.UIProxy
             var hovered = ImGuiAPI.IsMouseHoveringRectInCurrentWindow(in cursorPos, in endPos, true);
             if (hovered)
                 ImGuiAPI.PushStyleColor(ImGuiCol_.ImGuiCol_Border, EGui.UIProxy.StyleConfig.Instance.PGItemBorderHoveredColor);
-            var comboOpen = ImGuiAPI.BeginCombo(name, previewValue, flags);
+            var comboOpen = ImGuiAPI.BeginCombo(name, previewValue, flags, winFlags);
+            //var comboOpen = ImGuiAPI.BeginCombo(name, previewValue, flags);
             if (hovered)
                 ImGuiAPI.PopStyleColor(1);
 

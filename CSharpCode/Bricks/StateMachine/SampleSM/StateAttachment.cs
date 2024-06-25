@@ -25,7 +25,7 @@ namespace EngineNS.Bricks.StateMachine.SampleSM
            
         }
 
-        public bool Initialize()
+        public async Thread.Async.TtTask<bool> Initialize(T context)
         {
             return false;
         }

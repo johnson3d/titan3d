@@ -418,13 +418,22 @@ namespace EngineNS.EGui.Controls.PropertyGrid
                         }
                         else
                         {
-                            var elemType = elem.GetType();
-                            var propertyInfo = elemType.GetProperty(Name);
-                            if (propertyInfo != null)
-                                _ProSetValue(propertyInfo, elem, multiValue.Values[index], useProvider);
-                            var fieldInfo = elemType.GetField(Name);
-                            if (fieldInfo != null)
-                                _FieldSetValue(fieldInfo, elem, multiValue.Values[index], useProvider);
+                            bool canSetProperty = true;
+                            var preChecker = elem as IPropertySetPreChecker;
+                            if(preChecker != null)
+                            {
+                                canSetProperty = preChecker.CanSetPropertyValue(Name, multiValue.Values[index]);
+                            }
+                            if(canSetProperty)
+                            {
+                                var elemType = elem.GetType();
+                                var propertyInfo = elemType.GetProperty(Name);
+                                if (propertyInfo != null)
+                                    _ProSetValue(propertyInfo, elem, multiValue.Values[index], useProvider);
+                                var fieldInfo = elemType.GetField(Name);
+                                if (fieldInfo != null)
+                                    _FieldSetValue(fieldInfo, elem, multiValue.Values[index], useProvider);
+                            }
                         }
                         index++;
                     }
@@ -440,16 +449,25 @@ namespace EngineNS.EGui.Controls.PropertyGrid
                         }
                         else
                         {
-                            var elemType = elem.GetType();
-                            var propertyInfo = elemType.GetProperty(Name);
-                            if (propertyInfo != null)
+                            bool canSetProperty = true;
+                            var preChecker = elem as IPropertySetPreChecker;
+                            if(preChecker != null)
                             {
-                                _ProSetValue(propertyInfo, elem, value, useProvider);
+                                canSetProperty = preChecker.CanSetPropertyValue(Name, value);
                             }
-                            var fieldInfo = elemType.GetField(Name);
-                            if (fieldInfo != null)
+                            if(canSetProperty)
                             {
-                                _FieldSetValue(fieldInfo, elem, value, useProvider);
+                                var elemType = elem.GetType();
+                                var propertyInfo = elemType.GetProperty(Name);
+                                if (propertyInfo != null)
+                                {
+                                    _ProSetValue(propertyInfo, elem, value, useProvider);
+                                }
+                                var fieldInfo = elemType.GetField(Name);
+                                if (fieldInfo != null)
+                                {
+                                    _FieldSetValue(fieldInfo, elem, value, useProvider);
+                                }
                             }
                         }
                     }
@@ -464,16 +482,25 @@ namespace EngineNS.EGui.Controls.PropertyGrid
                 }
                 else
                 {
-                    var insType = objIns.GetType();
-                    var propertyInfo = insType.GetProperty(Name);
-                    if (propertyInfo != null)
+                    bool canSetProperty = true;
+                    var preChecker = objIns as IPropertySetPreChecker;
+                    if(preChecker != null)
                     {
-                        _ProSetValue(propertyInfo, objIns, value, useProvider);
+                        canSetProperty = preChecker.CanSetPropertyValue(Name, value);
                     }
-                    var fieldInfo = insType.GetField(Name);
-                    if (fieldInfo != null)
+                    if(canSetProperty)
                     {
-                        _FieldSetValue(fieldInfo, objIns, value, useProvider);
+                        var insType = objIns.GetType();
+                        var propertyInfo = insType.GetProperty(Name);
+                        if (propertyInfo != null)
+                        {
+                            _ProSetValue(propertyInfo, objIns, value, useProvider);
+                        }
+                        var fieldInfo = insType.GetField(Name);
+                        if (fieldInfo != null)
+                        {
+                            _FieldSetValue(fieldInfo, objIns, value, useProvider);
+                        }
                     }
                 }
             }

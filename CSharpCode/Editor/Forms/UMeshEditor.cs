@@ -55,6 +55,44 @@ namespace EngineNS.Editor.Forms
                 mCurrentMeshNode.IsAcceptShadow = value;
             }
         }
+
+        #region Color Sdf Preview
+        DistanceField.TtSdfAsset MeshSdfAsset = new DistanceField.TtSdfAsset();
+        public EngineNS.Editor.USdfPreviewViewport sdfViewport = new EngineNS.Editor.USdfPreviewViewport();
+        protected async System.Threading.Tasks.Task Initialize_SdfViewport(Graphics.Pipeline.UViewportSlate viewport, USlateApplication application, Graphics.Pipeline.URenderPolicy policy, float zMin, float zMax)
+        {
+            viewport.RenderPolicy = policy;
+
+            var subMesh = Mesh.GetMeshPrimitives(0);            
+            var noExtName = subMesh.AssetName.Name.Substring(0, subMesh.AssetName.Name.Length - subMesh.AssetName.ExtName.Length);
+            var rn = RName.GetRName(noExtName + DistanceField.TtSdfAsset.AssetExt, Mesh.AssetName.RNameType);
+            MeshSdfAsset = await UEngine.Instance.SdfAssetManager.GetSdfAsset(rn);
+
+            if (MeshSdfAsset == null)
+            {
+                policy.Initialize(null);
+                return;
+            }
+            var SdfMip = MeshSdfAsset.Mips[0];
+            var sdfVoxelDimensions = SdfMip.GetVoxelDimensions();
+
+
+            var boxSize = MeshSdfAsset.LocalSpaceMeshBounds.GetSize();
+            var boxCenter = MeshSdfAsset.LocalSpaceMeshBounds.GetCenter();
+            var boxExtent = MeshSdfAsset.LocalSpaceMeshBounds.GetExtent();
+
+            var sdfCamera = new UCamera();
+            var center = mCurrentMeshNode.Location + boxCenter.AsDVector();
+            var eye = center - new DVector3(0, 0, boxExtent.Z);
+            sdfCamera.LookAtLH(eye, center, Vector3.Up);
+            sdfCamera.MakeOrtho(boxSize.X, boxSize.Y, 0, boxSize.Z);
+
+            policy.Initialize(sdfCamera);
+            policy.OnResize(sdfVoxelDimensions.X, sdfVoxelDimensions.Y);
+        }
+        #endregion
+
+
         ~UMeshEditor()
         {
             Dispose();
@@ -63,6 +101,7 @@ namespace EngineNS.Editor.Forms
         {
             Mesh = null;
             CoreSDK.DisposeObject(ref PreviewViewport);
+            CoreSDK.DisposeObject(ref sdfViewport);
             MeshPropGrid.Target = null;
             EditorPropGrid.Target = null;
         }
@@ -165,6 +204,24 @@ namespace EngineNS.Editor.Forms
             PreviewViewport.OnInitialize = Initialize_PreviewMesh;
             await PreviewViewport.Initialize(UEngine.Instance.GfxDevice.SlateApplication, UEngine.Instance.Config.MainRPolicyName, 0, 1);
 
+            #region sdf
+            var sdfRPolicyName = RName.GetRName("graphics/sdf.rpolicy", RName.ERNameType.Engine);
+            //sdfViewport.Title = $"MaterialMesh:{name}";
+            sdfViewport.OnInitialize = Initialize_SdfViewport;
+            await sdfViewport.Initialize(UEngine.Instance.GfxDevice.SlateApplication, sdfRPolicyName, 0, 1);
+            var mesh = new Graphics.Mesh.TtMesh();
+            var ok = mesh.Initialize(Mesh, Rtti.UTypeDescGetter<Graphics.Mesh.UMdfStaticMesh>.TypeDesc);
+            if (ok)
+            {
+                var meshNode = await GamePlay.Scene.UMeshNode.AddMeshNode(sdfViewport.World, sdfViewport.World.Root, new GamePlay.Scene.UMeshNode.UMeshNodeData(), typeof(GamePlay.UPlacement), mesh, DVector3.Zero, Vector3.One, Quaternion.Identity);
+                meshNode.HitproxyType = Graphics.Pipeline.UHitProxy.EHitproxyType.None;
+                meshNode.NodeData.Name = "PreviewObject";
+                meshNode.IsAcceptShadow = false;
+                meshNode.IsCastShadow = false;
+                meshNode.IsSceneManaged = false;
+            }
+            #endregion
+
             MeshPropGrid.Target = Mesh;
             EditorPropGrid.Target = this;
             UEngine.Instance.TickableManager.AddTickable(this);
@@ -236,6 +293,7 @@ namespace EngineNS.Editor.Forms
             ImGuiAPI.DockBuilderSplitNode(middleId, ImGuiDir_.ImGuiDir_Left, 0.2f, ref leftId, ref middleId);
 
             ImGuiAPI.DockBuilderDockWindow(EGui.UIProxy.DockProxy.GetDockWindowName("Preview", mDockKeyClass), middleId);
+            ImGuiAPI.DockBuilderDockWindow(EGui.UIProxy.DockProxy.GetDockWindowName("sdfPreview", mDockKeyClass), middleId);
             ImGuiAPI.DockBuilderDockWindow(EGui.UIProxy.DockProxy.GetDockWindowName("MeshDetails", mDockKeyClass), rightDownId);
             ImGuiAPI.DockBuilderDockWindow(EGui.UIProxy.DockProxy.GetDockWindowName("EditorDetails", mDockKeyClass), rightDownId);
 
@@ -293,6 +351,17 @@ namespace EngineNS.Editor.Forms
         bool ShowPreview = true;
         protected unsafe void DrawPreview()
         {
+            #region sdf
+            var showSdf = EGui.UIProxy.DockProxy.BeginPanel(mDockKeyClass, "sdfPreview", ref ShowPreview, ImGuiWindowFlags_.ImGuiWindowFlags_None);
+            if (showSdf)
+            {
+                sdfViewport.ViewportType = Graphics.Pipeline.UViewportSlate.EViewportType.ChildWindow;
+                sdfViewport.OnDraw();
+            }
+            sdfViewport.Visible = true;
+            EGui.UIProxy.DockProxy.EndPanel(showSdf);
+            #endregion
+
             var show = EGui.UIProxy.DockProxy.BeginPanel(mDockKeyClass, "Preview", ref ShowPreview, ImGuiWindowFlags_.ImGuiWindowFlags_None);
             if (show)
             {
@@ -301,6 +370,7 @@ namespace EngineNS.Editor.Forms
             }
             this.PreviewViewport.Visible = show;
             EGui.UIProxy.DockProxy.EndPanel(show);
+
         }
         #endregion
 
@@ -312,6 +382,7 @@ namespace EngineNS.Editor.Forms
         public void TickLogic(float ellapse)
         {
             PreviewViewport.TickLogic(ellapse);
+            sdfViewport.TickLogic(ellapse);
         }
         [Category("Light")]
         [EGui.Controls.PropertyGrid.PGValueRange(-3.1416f, 3.1416f)]
@@ -377,6 +448,7 @@ namespace EngineNS.Editor.Forms
         public void TickSync(float ellapse)
         {
             PreviewViewport.TickSync(ellapse);
+            sdfViewport.TickSync(ellapse);
         }
         #endregion
     }
