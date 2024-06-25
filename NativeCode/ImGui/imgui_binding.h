@@ -697,6 +697,7 @@ public:
 	{
 		return ImGui::BeginCombo(label, preview_value, flags);
 	}
+	static bool          BeginCombo(const char* label, const char* preview_value, ImGuiComboFlags_ flags, ImGuiWindowFlags_ winFlags);
 	static void          EndCombo()
 	{
 		return ImGui::EndCombo();

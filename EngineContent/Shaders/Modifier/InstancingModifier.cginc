@@ -52,6 +52,12 @@ void DoInstancingModifierVS(inout PS_INPUT vsOut, inout VS_MODIFIER vert)
     vsOut.SetNormal(vert.vNormal);
     vsOut.SetSpecialDataX(instData.HitProxyId);
 
+	if(instData.UserData.x>0)
+    {
+        float grayScale = (float) instData.UserData.x / 255.0f;
+        grayScale = pow(grayScale, 3);
+        vsOut.vColor.xyz = float3(grayScale, grayScale, grayScale);
+    }
 	//vsOut.vWorldPos = Pos;
 	
 //#if HW_VS_STRUCTUREBUFFER

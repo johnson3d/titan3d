@@ -50,7 +50,11 @@ PS_OUTPUT PS_MobileBasePass(PS_INPUT input)
 		half3 UnlitShading = Albedo + Emissive;
 		
 		half PerPixelViewerDistance = (half)input.psCustomUV0.w;
+
+#if ENV_DISABLE_AO == 1
+#else
 		UnlitShading.b = (half)floor(UnlitShading.b * AO_M);
+#endif
 		output.RT0 = half4(UnlitShading, PerPixelViewerDistance * rcp((half)gZFar));
 
 		output.RT0.a = 1;
