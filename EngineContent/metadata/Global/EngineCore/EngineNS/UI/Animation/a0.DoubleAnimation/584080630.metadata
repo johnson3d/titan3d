@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Hash_584080630 Type="EngineNS.UI.Animation.DoubleAnimation@EngineCore">
+  <BindingDatas Type="System.Collections.Generic.Dictionary&lt;System.String@Unknown,EngineNS.UI.Controls.TtUIElement.BindingDataBase@EngineCore,&gt;@Unknown" Order="0" />
+  <Id Type="System.UInt64@Unknown" Order="0" />
+  <MacrossMethods Type="System.Collections.Generic.Dictionary&lt;System.String@Unknown,EngineNS.UI.Controls.TtUIElement.MacrossMethodData@EngineCore,&gt;@Unknown" Order="0" />
+</Hash_584080630>

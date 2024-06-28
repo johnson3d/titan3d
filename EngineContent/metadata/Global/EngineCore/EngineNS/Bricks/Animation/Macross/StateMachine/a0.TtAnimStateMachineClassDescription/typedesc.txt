@@ -1,0 +1,1 @@
+EngineNS.Bricks.Animation.Macross.StateMachine.TtAnimStateMachineClassDescription@EngineCore

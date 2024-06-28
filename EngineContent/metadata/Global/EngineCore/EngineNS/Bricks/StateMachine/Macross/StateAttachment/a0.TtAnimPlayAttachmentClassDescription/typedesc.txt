@@ -1,0 +1,1 @@
+EngineNS.Bricks.StateMachine.Macross.StateAttachment.TtAnimPlayAttachmentClassDescription@EngineCore

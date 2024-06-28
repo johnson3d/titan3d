@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Hash_1771698634 Type="EngineNS.DesignMacross.Design.TtMethodArgumentDescription@EngineCore">
+  <Name Type="System.String@Unknown" Order="0" />
+  <OperationType Type="EngineNS.Bricks.CodeBuilder.EMethodArgumentAttribute@EngineCore" Order="0" />
+  <VariableType Type="EngineNS.Rtti.UTypeDesc@EngineCore" Order="0" />
+</Hash_1771698634>

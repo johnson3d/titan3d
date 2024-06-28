@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Hash_275977238 Type="EngineNS.DistanceField.TtSparseSdfMip@EngineCore">
+  <DistanceFieldToVolumeScaleBias Type="EngineNS.Vector2@EngineCore" Order="0" />
+  <IndirectionDimensions Type="EngineNS.Vector3i@EngineCore" Order="0" />
+  <NumDistanceFieldBricks Type="System.Int32@Unknown" Order="0" />
+  <VolumeToVirtualUVAdd Type="EngineNS.Vector3@EngineCore" Order="0" />
+  <VolumeToVirtualUVScale Type="EngineNS.Vector3@EngineCore" Order="0" />
+</Hash_275977238>

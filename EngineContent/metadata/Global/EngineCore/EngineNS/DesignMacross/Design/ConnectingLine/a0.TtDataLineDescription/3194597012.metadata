@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Hash_3194597012 Type="EngineNS.DesignMacross.Design.ConnectingLine.TtDataLineDescription@EngineCore">
+  <FromId Type="System.Guid@Unknown" Order="0" />
+  <Id Type="System.Guid@Unknown" Order="0" />
+  <Name Type="System.String@Unknown" Order="0" />
+  <ToId Type="System.Guid@Unknown" Order="0" />
+</Hash_3194597012>

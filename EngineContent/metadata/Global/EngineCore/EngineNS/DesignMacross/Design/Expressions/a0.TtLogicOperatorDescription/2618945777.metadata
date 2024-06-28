@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Hash_2618945777 Type="EngineNS.DesignMacross.Design.Expressions.TtLogicOperatorDescription@EngineCore">
+  <DataInPins Type="System.Collections.Generic.List&lt;EngineNS.DesignMacross.Design.ConnectingLine.TtDataInPinDescription@EngineCore,&gt;@Unknown" Order="0" />
+  <DataOutPins Type="System.Collections.Generic.List&lt;EngineNS.DesignMacross.Design.ConnectingLine.TtDataOutPinDescription@EngineCore,&gt;@Unknown" Order="0" />
+  <ExecutionInPins Type="System.Collections.Generic.List&lt;EngineNS.DesignMacross.Design.ConnectingLine.TtExecutionInPinDescription@EngineCore,&gt;@Unknown" Order="0" />
+  <ExecutionOutPins Type="System.Collections.Generic.List&lt;EngineNS.DesignMacross.Design.ConnectingLine.TtExecutionOutPinDescription@EngineCore,&gt;@Unknown" Order="0" />
+  <Id Type="System.Guid@Unknown" Order="0" />
+  <Name Type="System.String@Unknown" Order="0" />
+  <Op Type="EngineNS.Bricks.CodeBuilder.UBinaryOperatorExpression.EBinaryOperation@EngineCore" Order="0" />
+</Hash_2618945777>

@@ -54,9 +54,11 @@ void DoInstancingModifierVS(inout PS_INPUT vsOut, inout VS_MODIFIER vert)
 
 	if(instData.UserData.x>0)
     {
+#if USE_PS_Color == 1
         float grayScale = (float) instData.UserData.x / 255.0f;
         grayScale = pow(grayScale, 3);
         vsOut.vColor.xyz = float3(grayScale, grayScale, grayScale);
+#endif
     }
 	//vsOut.vWorldPos = Pos;
 	

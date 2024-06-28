@@ -1,0 +1,1 @@
+EngineNS.DesignMacross.Design.ConnectingLine.TtExecutionOutPinDescription@EngineCore
