@@ -478,7 +478,7 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode
             Material.VSNeedStreams = MaterialOutput.GetVSNeedStreams();
             Material.PSNeedInputs = MaterialOutput.GetPSNeedInputs();
 
-            if(Material.NormalMode == Graphics.Pipeline.Shader.UMaterial.ENormalMode.NormalMap)
+            if (Material.NormalMode == Graphics.Pipeline.Shader.UMaterial.ENormalMode.NormalMap)
             {
                 if (Material.VSNeedStreams.Contains(NxRHI.EVertexStreamType.VST_Normal) == false)
                     Material.VSNeedStreams.Add(NxRHI.EVertexStreamType.VST_Normal);
@@ -490,7 +490,14 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode
                 if (Material.PSNeedInputs.Contains(Graphics.Pipeline.Shader.EPixelShaderInput.PST_Tangent) == false)
                     Material.PSNeedInputs.Add(Graphics.Pipeline.Shader.EPixelShaderInput.PST_Tangent);
             }
-
+            else if (Material.NormalMode == Graphics.Pipeline.Shader.UMaterial.ENormalMode.Normal)
+            {
+                if (Material.VSNeedStreams.Contains(NxRHI.EVertexStreamType.VST_Normal) == false)
+                    Material.VSNeedStreams.Add(NxRHI.EVertexStreamType.VST_Normal);
+                if (Material.PSNeedInputs.Contains(Graphics.Pipeline.Shader.EPixelShaderInput.PST_Normal) == false)
+                    Material.PSNeedInputs.Add(Graphics.Pipeline.Shader.EPixelShaderInput.PST_Normal);
+            }
+        
             Material.UpdateShaderCode(false);
             return code;
         }

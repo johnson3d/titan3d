@@ -133,7 +133,8 @@ namespace EngineNS.Graphics.Mesh
             meshBuilder.AssetName = RName.GetRName("@MakeBox", RName.ERNameType.Transient);
             var builder = meshBuilder.mCoreObject;
             uint streams = (uint)((1 << (int)NxRHI.EVertexStreamType.VST_Position) | 
-                (1 << (int)NxRHI.EVertexStreamType.VST_Normal) | 
+                (1 << (int)NxRHI.EVertexStreamType.VST_Normal) |
+                (1 << (int)NxRHI.EVertexStreamType.VST_Tangent) |
                 (1 << (int)NxRHI.EVertexStreamType.VST_Color) | 
                 (1 << (int)NxRHI.EVertexStreamType.VST_UV));
             builder.Init(streams, false, 1);

@@ -403,22 +403,6 @@ namespace EngineNS.Graphics.Pipeline.Shader
             set
             {
                 mNormalMode = value;
-                if (mNormalMode == ENormalMode.NormalMap)
-                {
-                    if (VSNeedStreams == null)
-                        VSNeedStreams = new List<NxRHI.EVertexStreamType>();
-                    if (VSNeedStreams.Contains(NxRHI.EVertexStreamType.VST_Normal) == false)
-                        VSNeedStreams.Add(NxRHI.EVertexStreamType.VST_Normal);
-                    if (VSNeedStreams.Contains(NxRHI.EVertexStreamType.VST_Tangent) == false)
-                        VSNeedStreams.Add(NxRHI.EVertexStreamType.VST_Tangent);
-
-                    if (PSNeedInputs == null)
-                        PSNeedInputs = new List<EPixelShaderInput>();
-                    if (PSNeedInputs.Contains(Graphics.Pipeline.Shader.EPixelShaderInput.PST_Normal) == false)
-                        PSNeedInputs.Add(Graphics.Pipeline.Shader.EPixelShaderInput.PST_Normal);
-                    if (PSNeedInputs.Contains(Graphics.Pipeline.Shader.EPixelShaderInput.PST_Tangent) == false)
-                        PSNeedInputs.Add(Graphics.Pipeline.Shader.EPixelShaderInput.PST_Tangent);
-                }
             }
         }
         protected ERenderLayer mRenderLayer = ERenderLayer.RL_Opaque;
@@ -655,7 +639,20 @@ namespace EngineNS.Graphics.Pipeline.Shader
             }
             else
             {
-                return VSNeedStreams.ToArray();
+                var result = new List<NxRHI.EVertexStreamType>(VSNeedStreams);
+                if (mNormalMode == ENormalMode.NormalMap)
+                {
+                    if (result.Contains(NxRHI.EVertexStreamType.VST_Normal) == false)
+                        result.Add(NxRHI.EVertexStreamType.VST_Normal);
+                    if (result.Contains(NxRHI.EVertexStreamType.VST_Tangent) == false)
+                        result.Add(NxRHI.EVertexStreamType.VST_Tangent);
+                }
+                else if (mNormalMode == ENormalMode.Normal)
+                {
+                    if (result.Contains(NxRHI.EVertexStreamType.VST_Normal) == false)
+                        result.Add(NxRHI.EVertexStreamType.VST_Normal);
+                }
+                return result.ToArray();
             }
         }
         public EPixelShaderInput[] GetPSNeedInputs()
@@ -684,7 +681,20 @@ namespace EngineNS.Graphics.Pipeline.Shader
             }
             else
             {
-                return PSNeedInputs.ToArray();
+                var result = new List<Graphics.Pipeline.Shader.EPixelShaderInput>(PSNeedInputs);
+                if (mNormalMode == ENormalMode.NormalMap)
+                {
+                    if (result.Contains(Graphics.Pipeline.Shader.EPixelShaderInput.PST_Normal) == false)
+                        result.Add(Graphics.Pipeline.Shader.EPixelShaderInput.PST_Normal);
+                    if (result.Contains(Graphics.Pipeline.Shader.EPixelShaderInput.PST_Tangent) == false)
+                        result.Add(Graphics.Pipeline.Shader.EPixelShaderInput.PST_Tangent);
+                }
+                else if (mNormalMode == ENormalMode.Normal)
+                {
+                    if (result.Contains(Graphics.Pipeline.Shader.EPixelShaderInput.PST_Normal) == false)
+                        result.Add(Graphics.Pipeline.Shader.EPixelShaderInput.PST_Normal);
+                }
+                return result.ToArray();
             }
         }
 

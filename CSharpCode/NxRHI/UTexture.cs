@@ -178,6 +178,11 @@ namespace EngineNS.NxRHI
         {
             if (SnapTask == null || !SnapTask.Value.IsCompleted)
                 return;
+            if (SnapTask.Value.Result == null)
+            {
+                SnapTask = null;
+                return;
+            }
             CtrlUtility.DrawHelper(
                 "Name: " + GetAssetName().Name,
                 "Desc: " + Description,
