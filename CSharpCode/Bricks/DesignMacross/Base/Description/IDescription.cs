@@ -8,6 +8,7 @@ namespace EngineNS.DesignMacross.Base.Description
     {
         public IClassDescription MainClassDescription { get; set; } 
         public UClassDeclaration ClassDeclaration { get; set; }
+        public bool IsGenerateBindingPoseInit { get; set; }
     }
 
     public struct FMethodBuildContext

@@ -1,4 +1,5 @@
-﻿using EngineNS.Animation.StateMachine;
+﻿using EngineNS.Animation.Macross;
+using EngineNS.Animation.StateMachine;
 using EngineNS.Bricks.CodeBuilder;
 using EngineNS.Bricks.StateMachine.Macross;
 using EngineNS.Bricks.StateMachine.Macross.StateAttachment;
@@ -45,26 +46,12 @@ namespace EngineNS.Bricks.StateMachine.Macross.StateAttachment
         #region Internal AST Build
         private UMethodDeclaration BuildOverrideInitializeMethod()
         {
-            var returnVar = TtASTBuildUtil.CreateMethodReturnVariableDeclaration(new(typeof(bool)), TtASTBuildUtil.CreateDefaultValueExpression(new(typeof(bool))));
-            var contextMethodArgument = TtASTBuildUtil.CreateMethodArgumentDeclaration("context", new(UTypeDesc.TypeOf<TtAnimStateMachineContext>()), EMethodArgumentAttribute.Default);
-            var args = new List<UMethodArgumentDeclaration>
-            {
-                contextMethodArgument
-            };
-            var methodDeclaration = TtASTBuildUtil.CreateMethodDeclaration("Initialize", returnVar, args, true);
+            var methodDeclaration = TtAnimASTBuildUtil.CreateOverridedInitMethodStatement();
 
             var getClipRName = new UMethodInvokeStatement("GetRName", TtASTBuildUtil.CreateVariableDeclaration("AnimationClipName", new UTypeReference(typeof(RName)),null), new UClassReferenceExpression(UTypeDesc.TypeOf<RName>()), new UMethodInvokeArgumentExpression { Expression = new UPrimitiveExpression(AnimationClip.ToString())});
             methodDeclaration.MethodBody.Sequence.Add(getClipRName);
-            //var clipAssign = TtASTBuildUtil.CreateAssignOperatorStatement(
-            //                            new UVariableReferenceExpression("AnimationClipName"),
-            //                            new UVariableReferenceExpression(getClipRName.ReturnValue.VariableName));
-            
-            //methodDeclaration.MethodBody.Sequence.Add(clipAssign);
 
-            var baseInvoke = new UMethodInvokeStatement("Initialize",
-                                null, new UBaseReferenceExpression(), 
-                                new UMethodInvokeArgumentExpression { Expression = new UVariableReferenceExpression(contextMethodArgument.VariableName) });
-            methodDeclaration.MethodBody.Sequence.Add(baseInvoke);
+            TtAnimASTBuildUtil.CreateBaseInitInvokeStatement(methodDeclaration);
 
             var returnValueAssign = TtASTBuildUtil.CreateAssignOperatorStatement(
                                         new UVariableReferenceExpression(methodDeclaration.ReturnValue.VariableName),

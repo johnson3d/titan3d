@@ -381,8 +381,8 @@ namespace EngineNS.Graphics.Mesh
                 ameta.SaveAMeta();
                 UEngine.Instance.AssetMetaManager.RegAsset(ameta);
 
-
                 meshPrimitives.SaveAssetTo(name);
+                UEngine.Instance.GfxDevice.MeshPrimitiveManager.UnsafeRemove(name);
             }
         }
     }

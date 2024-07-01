@@ -118,16 +118,20 @@ namespace EngineNS.DesignMacross
 
 
 
-        public static UMethodDeclaration CreateMethodDeclaration(string methodName, UVariableDeclaration returnVar, List<UMethodArgumentDeclaration> arguments, bool isOverrid = false, bool isAsync = false)
+        public static UMethodDeclaration CreateMethodDeclaration(string methodName, UVariableDeclaration returnVar, List<UMethodArgumentDeclaration> arguments, bool isOverrid = false, UMethodDeclaration.EAsyncType asyncType = UMethodDeclaration.EAsyncType.None)
         {
             UMethodDeclaration methodDeclaration = new();
             methodDeclaration.IsOverride = true;
+            methodDeclaration.AsyncType = asyncType;
             methodDeclaration.MethodName = methodName;
             if(returnVar != null)
             {
                 methodDeclaration.ReturnValue = returnVar;
             }
-            methodDeclaration.Arguments = arguments;
+            if(arguments != null)
+            {
+                methodDeclaration.Arguments = arguments;
+            }
            
             return methodDeclaration;
         }

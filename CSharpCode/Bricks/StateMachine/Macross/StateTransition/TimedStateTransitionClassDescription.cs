@@ -14,12 +14,12 @@ namespace EngineNS.Bricks.StateMachine.Macross.StateTransition
     [Graph(typeof(TtGraph_TimedStateTransition))]
     public class TtTransitionCheckConditionMethodDescription : TtMethodDescription
     {
-        public TtTransitionCheckConditionMethodDescription()
+        public TtTransitionCheckConditionMethodDescription(UTypeDesc contextTypeDesc)
         {
             Name = "CheckCondition";
             IsOverride = true;
             ReturnValueType = UTypeDesc.TypeOf<bool>();
-            AddArgument(new TtMethodArgumentDescription { OperationType = EMethodArgumentAttribute.In, VariableType = UTypeDesc.TypeOf<TtStateMachineContext>(), Name = "context" });
+            AddArgument(new TtMethodArgumentDescription { OperationType = EMethodArgumentAttribute.In, VariableType = contextTypeDesc, Name = "context" });
             var endNode = new TtMethodEndDescription() { Parent = this };
             var dataPinIn = new TtDataInPinDescription() { TypeDesc = UTypeDesc.TypeOf<bool>() , Parent = this };
             endNode.DataInPins.Add(dataPinIn);
@@ -102,7 +102,7 @@ namespace EngineNS.Bricks.StateMachine.Macross.StateTransition
         public TtTransitionCheckConditionMethodDescription CheckConditionMethodDescription { get; set; } = null;
         public TtTimedStateTransitionClassDescription()
         {
-            CheckConditionMethodDescription = new TtTransitionCheckConditionMethodDescription()
+            CheckConditionMethodDescription = new TtTransitionCheckConditionMethodDescription(UTypeDesc.TypeOf<TtStateMachineContext>())
             {
                 Parent = this,
             };

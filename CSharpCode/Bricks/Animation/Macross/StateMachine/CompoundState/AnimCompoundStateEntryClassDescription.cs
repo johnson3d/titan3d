@@ -5,12 +5,14 @@ using System.ComponentModel;
 using System.Diagnostics;
 using EngineNS.Bricks.StateMachine.Macross.StateTransition;
 using EngineNS.Bricks.StateMachine.Macross.CompoundState;
+using EngineNS.Bricks.StateMachine.Macross.StateAttachment;
 
 namespace EngineNS.Bricks.Animation.Macross.StateMachine.CompoundState
 {
-    [GraphElement(typeof(TtGraphElement_TimedCompoundStateEntry))]
+    [GraphElement(typeof(TtGraphElement_AnimCompoundStateEntry))]
     public class TtAnimCompoundStateEntryClassDescription : TtTimedCompoundStateEntryClassDescription
     {
 
     }
+
 }

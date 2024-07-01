@@ -10,11 +10,13 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="$(MSBuildThisFileDirectory)BlendTree\Node\BlendTree_AnimStateMachine.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Macross\AnimASTBuildUtil.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Macross\StateMachine\Attachment\AnimPlay\GraphElement_AnimPlayAttachment.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Macross\StateMachine\Attachment\AnimPlay\AnimPlayAttachmentClassDescription.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Macross\StateMachine\Attachment\BlendTree\AnimBlendTreeAttachmentClassDescription.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Macross\StateMachine\Attachment\BlendTree\GraphElement_AnimBlendTreeAttachment.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Macross\StateMachine\Attachment\BlendTree\Graph_AnimBlendTreeAttachment.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Macross\StateMachine\CompoundState\GraphElement_AnimCompoundStateEntry.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Macross\StateMachine\CompoundState\Graph_AnimCompoundState.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Macross\StateMachine\CompoundState\OutlineElement_AnimCompoundStateGraph.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Macross\StateMachine\CompoundState\AnimCompoundStateClassDescription.cs" />

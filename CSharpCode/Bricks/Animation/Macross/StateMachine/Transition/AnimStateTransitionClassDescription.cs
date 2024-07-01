@@ -1,8 +1,11 @@
-﻿using EngineNS.Bricks.CodeBuilder;
+﻿using EngineNS.Animation.StateMachine;
+using EngineNS.Bricks.CodeBuilder;
 using EngineNS.Bricks.StateMachine.Macross.CompoundState;
 using EngineNS.DesignMacross;
 using EngineNS.DesignMacross.Base.Description;
 using EngineNS.DesignMacross.Base.Graph;
+using EngineNS.DesignMacross.Design;
+using EngineNS.DesignMacross.Design.ConnectingLine;
 using EngineNS.Rtti;
 using System.Diagnostics;
 
@@ -13,7 +16,10 @@ namespace EngineNS.Bricks.StateMachine.Macross.StateTransition
     {
         public TtAnimStateTransitionClassDescription() 
         {
-            
+            CheckConditionMethodDescription = new TtTransitionCheckConditionMethodDescription(UTypeDesc.TypeOf<TtAnimStateMachineContext>())
+            {
+                Parent = this,
+            };
         }
 
         public override List<UClassDeclaration> BuildClassDeclarations(ref FClassBuildContext classBuildContext)

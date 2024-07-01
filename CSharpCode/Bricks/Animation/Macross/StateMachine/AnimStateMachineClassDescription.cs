@@ -1,4 +1,5 @@
-﻿using EngineNS.Animation.StateMachine;
+﻿using EngineNS.Animation.Macross;
+using EngineNS.Animation.StateMachine;
 using EngineNS.Bricks.Animation.Macross.StateMachine.CompoundState;
 using EngineNS.Bricks.CodeBuilder;
 using EngineNS.Bricks.StateMachine.Macross;
@@ -6,6 +7,7 @@ using EngineNS.Bricks.StateMachine.Macross.CompoundState;
 using EngineNS.DesignMacross;
 using EngineNS.DesignMacross.Base.Description;
 using EngineNS.DesignMacross.Base.Outline;
+using EngineNS.DesignMacross.Design;
 using EngineNS.Rtti;
 
 namespace EngineNS.Bricks.Animation.Macross.StateMachine
@@ -38,21 +40,48 @@ namespace EngineNS.Bricks.Animation.Macross.StateMachine
             classDeclarationsBuilded.Add(thisClassDeclaration);
             return classDeclarationsBuilded;
         }
-
+        bool TryInitializeMethodInClassDescription(ref FClassBuildContext classBuildContext, out UMethodDeclaration initMethodDescription)
+        {
+            foreach (var initMethod in classBuildContext.ClassDeclaration.Methods)
+            {
+                if (initMethod.MethodName == "Initialize")
+                {
+                    initMethodDescription = initMethod;
+                    return true;
+                }
+            }
+            initMethodDescription = null;
+            return false;
+        }
         public override UVariableDeclaration BuildVariableDeclaration(ref FClassBuildContext classBuildContext)
         {
+            //generate code in initialize method for binding pose
+            if(!classBuildContext.IsGenerateBindingPoseInit)
+            {
+                classBuildContext.IsGenerateBindingPoseInit = true;
+                UMethodDeclaration initMethodDescription = null;
+                if (TryInitializeMethodInClassDescription(ref classBuildContext, out var existInitMethodDescription))
+                {
+                    initMethodDescription = existInitMethodDescription;
+                }
+                else
+                {
+                    initMethodDescription = TtASTBuildUtil.CreateMethodDeclaration("Initialize", null, null);
+                    classBuildContext.ClassDeclaration.Methods.Add(initMethodDescription);
+                }
+                var animStateMachineContextVar = TtASTBuildUtil.CreateVariableDeclaration("AnimStateMachineContext", new UTypeReference(typeof(TtAnimStateMachineContext)), new UNullValueExpression());
+                classBuildContext.ClassDeclaration.Properties.Add(animStateMachineContextVar);
+                initMethodDescription.MethodBody.Sequence.Insert(0, animStateMachineContextVar);
+            }
+            //generate code in tick method for anim
+
             return TtASTBuildUtil.CreateVariableDeclaration(this, ref classBuildContext);
         }
 
         #region Internal AST Build
         private UMethodDeclaration BuildOverrideInitializeMethod(ref FClassBuildContext classBuildContext)
         {
-            var returnVar = TtASTBuildUtil.CreateMethodReturnVariableDeclaration(new(typeof(bool)), TtASTBuildUtil.CreateDefaultValueExpression(new(typeof(bool))));
-            var args = new List<UMethodArgumentDeclaration>
-            {
-                TtASTBuildUtil.CreateMethodArgumentDeclaration("context", new(UTypeDesc.TypeOf<TtAnimStateMachineContext>()), EMethodArgumentAttribute.Ref)
-            };
-            var methodDeclaration = TtASTBuildUtil.CreateMethodDeclaration("Initialize", returnVar, args, true, true);
+            var methodDeclaration = TtAnimASTBuildUtil.CreateOverridedInitMethodStatement();
 
             foreach (var compoundState in CompoundStates)
             {
@@ -71,6 +100,8 @@ namespace EngineNS.Bricks.Animation.Macross.StateMachine
                 var initializeMethodInvoke = new UMethodInvokeStatement();
                 initializeMethodInvoke.Host = new UVariableReferenceExpression(compoundState.VariableName);
                 initializeMethodInvoke.MethodName = "Initialize";
+                initializeMethodInvoke.Arguments.Add(new UMethodInvokeArgumentExpression { Expression = new UVariableReferenceExpression("context") });
+                initializeMethodInvoke.IsAsync = true;
                 methodDeclaration.MethodBody.Sequence.Add(initializeMethodInvoke);
             }
             var returnValueAssign = TtASTBuildUtil.CreateAssignOperatorStatement(

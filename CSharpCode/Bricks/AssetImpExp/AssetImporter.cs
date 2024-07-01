@@ -50,7 +50,7 @@ namespace EngineNS.Bricks.AssetImpExp
             FilePath = filePath;
             Assimp.PostProcessSteps convertToLeftHanded = Assimp.PostProcessSteps.MakeLeftHanded | Assimp.PostProcessSteps.FlipUVs | Assimp.PostProcessSteps.FlipWindingOrder;
             Assimp.AssimpContext assimpContext = new Assimp.AssimpContext();
-            Assimp.PostProcessSteps sceneFlags = convertToLeftHanded | Assimp.PostProcessSteps.Triangulate;
+            Assimp.PostProcessSteps sceneFlags = convertToLeftHanded | Assimp.PostProcessSteps.Triangulate | Assimp.PostProcessSteps.CalculateTangentSpace;
             try
             {
                 AiScene = assimpContext.ImportFile(filePath, sceneFlags);
@@ -117,7 +117,14 @@ namespace EngineNS.Bricks.AssetImpExp
         {
             if (node.MeshCount != 0)
             {
-                outNodes.Add(node);
+                foreach(var meshIndex in node.MeshIndices)
+                {
+                    if (scene.Meshes[meshIndex].PrimitiveType != PrimitiveType.Line && scene.Meshes[meshIndex].PrimitiveType != PrimitiveType.Point)
+                    {
+                        outNodes.Add(node);
+                        break;
+                    }
+                }
             }
             else
             {
@@ -148,6 +155,9 @@ namespace EngineNS.Bricks.AssetImpExp
             {
                 foreach (var mesh in meshes)
                 {
+                    if (!mesh.HasBones)
+                        continue;
+
                     if (skeleton.FindLimb(mesh.Bones[0].Name) != null)
                     {
                         return skeleton;
@@ -580,7 +590,18 @@ namespace EngineNS.Bricks.AssetImpExp
             return meshPrimitives;
         }
 
-
+        static List<Mesh> GetValidMesh(Assimp.Node meshNode, Assimp.Scene scene)
+        {
+            List<Mesh> validMeshes = new();
+            foreach(var meshIndex in meshNode.MeshIndices)
+            {
+                if (scene.Meshes[meshIndex].PrimitiveType != PrimitiveType.Line && scene.Meshes[meshIndex].PrimitiveType != PrimitiveType.Line)
+                {
+                    validMeshes.Add(scene.Meshes[meshIndex]);
+                }
+            }
+            return validMeshes;
+        }
         private static UMeshPrimitives CreateMeshPrimitives(Assimp.Node meshNode, TtSkinSkeleton skeleton, Assimp.Scene scene, TtAssetImportOption_Mesh importOption)
         {
             var preAssimpTransform = Assimp.Matrix4x4.Identity;
@@ -600,13 +621,15 @@ namespace EngineNS.Bricks.AssetImpExp
             var vertexPreTransform = FTransform.CreateTransform(transformTuple.translation.AsDVector(),
                 Vector3.One * importOption.UnitScale, transformTuple.rotation);
 
-            UMeshPrimitives meshPrimitives = new UMeshPrimitives(meshNode.Name, (uint)meshNode.MeshCount);
+            var meshes = GetValidMesh(meshNode, scene);
+
+            UMeshPrimitives meshPrimitives = new UMeshPrimitives(meshNode.Name, (uint)meshes.Count);
             int vertextCount = 0;
             int indicesCount = 0;
             uint nextStartIndex = 0;
-            for (int i = 0; i < meshNode.MeshCount; i++)
+            for (int i = 0; i < meshes.Count; i++)
             {
-                var subMesh = scene.Meshes[meshNode.MeshIndices[i]];
+                var subMesh = meshes[i];
                 FMeshAtomDesc atomDesc = new FMeshAtomDesc();
                 atomDesc.PrimitiveType = EPrimitiveType.EPT_TriangleList;
                 atomDesc.BaseVertexIndex = 0;
@@ -619,9 +642,9 @@ namespace EngineNS.Bricks.AssetImpExp
                 indicesCount += subMesh.GetIndices().Length;
             }
             bool hasVertexColor = true;
-            for (int i = 0; i < meshNode.MeshCount; i++)
+            for (int i = 0; i < meshes.Count; i++)
             {
-                var subMesh = scene.Meshes[meshNode.MeshIndices[i]];
+                var subMesh = meshes[i];
                 if (!subMesh.HasVertexColors(0))
                 {
                     hasVertexColor = false;
@@ -656,7 +679,6 @@ namespace EngineNS.Bricks.AssetImpExp
                 vertexColorStream = new UInt32[vertextCount];
             }
             bool bHasSkin = false;
-            var meshes = AssimpSceneUtil.FindMesh(meshNode, scene);
             foreach (var mesh in meshes)
             {
                 if (mesh.HasBones && !importOption.AsStaticMesh)
@@ -684,9 +706,9 @@ namespace EngineNS.Bricks.AssetImpExp
             int indicesIndex = 0;
             int vertexIndex = 0;
             int vertexCounting = 0;
-            for (int i = 0; i < meshNode.MeshCount; i++)
+            for (int i = 0; i < meshes.Count; i++)
             {
-                var subMesh = scene.Meshes[meshNode.MeshIndices[i]];
+                var subMesh = meshes[i];
                 //build indices
                 var meshIndices = subMesh.GetIndices();
                 for (int j = 0; j < meshIndices.Length; j++)

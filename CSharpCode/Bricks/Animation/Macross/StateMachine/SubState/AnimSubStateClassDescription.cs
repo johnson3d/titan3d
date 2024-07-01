@@ -1,4 +1,5 @@
-﻿using EngineNS.Animation.StateMachine;
+﻿using EngineNS.Animation.Macross;
+using EngineNS.Animation.StateMachine;
 using EngineNS.Bricks.CodeBuilder;
 using EngineNS.Bricks.StateMachine;
 using EngineNS.Bricks.StateMachine.Macross;
@@ -34,7 +35,7 @@ namespace EngineNS.Bricks.Animation.Macross.StateMachine.SubState
             foreach (var transition in Transitions)
             {
                 classDeclarationsBuilded.AddRange(transition.BuildClassDeclarations(ref classBuildContext));
-                thisClassDeclaration.Properties.Add(transition.BuildVariableDeclaration(ref classBuildContext));
+                //thisClassDeclaration.Properties.Add(transition.BuildVariableDeclaration(ref classBuildContext));
             }
             foreach (var attachment in Attachments)
             {
@@ -54,23 +55,12 @@ namespace EngineNS.Bricks.Animation.Macross.StateMachine.SubState
         #region Internal AST Build
         private UMethodDeclaration BuildOverrideInitializeMethod()
         {
-            var returnVar = TtASTBuildUtil.CreateMethodReturnVariableDeclaration(new(typeof(bool)), TtASTBuildUtil.CreateDefaultValueExpression(new(typeof(bool))));
-            var args = new List<UMethodArgumentDeclaration>
-            {
-                TtASTBuildUtil.CreateMethodArgumentDeclaration("context", new(UTypeDesc.TypeOf<TtAnimStateMachineContext>()), EMethodArgumentAttribute.Default)
-            };
-            var methodDeclaration = TtASTBuildUtil.CreateMethodDeclaration("Initialize", returnVar, args, true);
+            var methodDeclaration = TtAnimASTBuildUtil.CreateOverridedInitMethodStatement();
 
             foreach (var attachment in Attachments)
             {
-                var attachmentAssign = TtASTBuildUtil.CreateAssignOperatorStatement(new UVariableReferenceExpression(attachment.Name), new UCreateObjectExpression(attachment.VariableType.TypeFullName));
-                methodDeclaration.MethodBody.Sequence.Add(attachmentAssign);
-
-                var stateAddAttachMentMethodInvoke = new UMethodInvokeStatement();
-                stateAddAttachMentMethodInvoke.Host = new USelfReferenceExpression();
-                stateAddAttachMentMethodInvoke.MethodName = "AddAttachment";
-                stateAddAttachMentMethodInvoke.Arguments.Add(new UMethodInvokeArgumentExpression { Expression = new UVariableReferenceExpression(attachment.VariableName) });
-                methodDeclaration.MethodBody.Sequence.Add(stateAddAttachMentMethodInvoke);
+                TtAnimASTBuildUtil.CreateNewAndInitInvokeStatement(attachment, methodDeclaration);
+                CreateAddAttachmentMethodStatement(attachment, methodDeclaration);
             }
 
             var returnValueAssign = TtASTBuildUtil.CreateAssignOperatorStatement(
@@ -78,6 +68,14 @@ namespace EngineNS.Bricks.Animation.Macross.StateMachine.SubState
                                         new UPrimitiveExpression(true));
             methodDeclaration.MethodBody.Sequence.Add(returnValueAssign);
             return methodDeclaration;
+        }
+        private void CreateAddAttachmentMethodStatement(TtDesignableVariableDescription desc,UMethodDeclaration method)
+        {
+            var stateAddAttachMentMethodInvoke = new UMethodInvokeStatement();
+            stateAddAttachMentMethodInvoke.Host = new USelfReferenceExpression();
+            stateAddAttachMentMethodInvoke.MethodName = "AddAttachment";
+            stateAddAttachMentMethodInvoke.Arguments.Add(new UMethodInvokeArgumentExpression { Expression = new UVariableReferenceExpression(desc.VariableName) });
+            method.MethodBody.Sequence.Add(stateAddAttachMentMethodInvoke);
         }
         #endregion
     }
