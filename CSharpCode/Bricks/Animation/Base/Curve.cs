@@ -23,7 +23,13 @@ namespace EngineNS.Animation
             {
 
             }
-            public static FNullableVector3 FromVector3(Vector3 value)
+            public static FNullableVector3 FromRotator(in FRotator value)
+            {
+                FNullableVector3 nullableVector3 = new FNullableVector3();
+                nullableVector3.X = value.Yaw; nullableVector3.Y = value.Pitch; nullableVector3.Z = value.Roll;
+                return nullableVector3;
+            }
+            public static FNullableVector3 FromVector3(in Vector3 value)
             {
                 FNullableVector3 nullableVector3 = new FNullableVector3();
                 nullableVector3.X = value.X; nullableVector3.Y = value.Y; nullableVector3.Z = value.Z;
@@ -155,7 +161,7 @@ namespace EngineNS.Animation
                 Quaternion leftQuat = new Quaternion(xResult.Left.Value, yResult.Left.Value, zResult.Left.Value, wResult.Left.Value);
                 if(xResult.Left.Time == xResult.Right.Time)
                 {
-                    FNullableVector3 temp = FNullableVector3.FromVector3(leftQuat.ToEuler());
+                    FNullableVector3 temp = FNullableVector3.FromRotator(leftQuat.ToEuler());
                     FCurveValue value = new FCurveValue(temp);
                     return value;
                 }
@@ -164,7 +170,7 @@ namespace EngineNS.Animation
                     Quaternion rightQuat = new Quaternion(xResult.Right.Value, yResult.Right.Value, zResult.Right.Value, wResult.Right.Value);
                     var duration = xResult.Right.Time - xResult.Left.Time;
                     Quaternion lerped = Quaternion.Lerp(leftQuat, rightQuat, (time - xResult.Left.Time) / duration);
-                    FNullableVector3 temp = FNullableVector3.FromVector3(lerped.ToEuler());
+                    FNullableVector3 temp = FNullableVector3.FromRotator(lerped.ToEuler());
                     FCurveValue value = new FCurveValue(temp);
                     return value;
                 }

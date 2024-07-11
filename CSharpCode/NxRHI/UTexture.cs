@@ -471,6 +471,31 @@ namespace EngineNS.NxRHI
                 var noused = PGAsset.Initialize();
                 PGAsset.Target = mDesc;
             }
+            public unsafe void _DumpBasicPicDesc()
+            {
+                using (var stream = System.IO.File.OpenRead(mSourceFile))
+                {
+                    var image = StbImageSharp.ImageResult.FromStream(stream, StbImageSharp.ColorComponents.Default);
+                    if (image != null)
+                    {
+                        mDesc.Width = image.Width;
+                        mDesc.Height = image.Height;
+
+                        int height = image.Height;
+                        int width = image.Width;
+                        int mipLevel = 0;
+                        do
+                        {
+                            height = height / 2;
+                            width = width / 2;
+                            mipLevel++;
+                        }
+                        while (height > 0 && width > 0);
+
+                        mDesc.MipLevel = mipLevel;
+                    }
+                }
+            }
             public override unsafe bool OnDraw(EGui.Controls.UContentBrowser ContentBrowser)
             {
                 if (bPopOpen == false)
@@ -494,30 +519,8 @@ namespace EngineNS.NxRHI
                             if (mFileDialog.IsOk() == true)
                             {
                                 mSourceFile = mFileDialog.GetFilePathName();
-                                string filePath = mFileDialog.GetCurrentPath();
-                                using (var stream = System.IO.File.OpenRead(mSourceFile))
-                                {
-                                    var image = StbImageSharp.ImageResult.FromStream(stream, StbImageSharp.ColorComponents.Default);
-                                    if (image != null)
-                                    {
-                                        mDesc.Width = image.Width;
-                                        mDesc.Height = image.Height;
-
-                                        int height = image.Height;
-                                        int width = image.Width;
-                                        int mipLevel = 0;
-                                        do
-                                        {
-                                            height = height / 2;
-                                            width = width / 2;
-                                            mipLevel++;
-                                        }
-                                        while (height > 0 && width > 0);
-
-                                        mDesc.MipLevel = mipLevel;
-                                    }
-                                    mName = IO.TtFileManager.GetPureName(mSourceFile);
-                                }
+                                mName = IO.TtFileManager.GetPureName(mSourceFile);
+                                _DumpBasicPicDesc();
                             }
                             // close
                             mFileDialog.CloseDialog();
@@ -527,7 +530,9 @@ namespace EngineNS.NxRHI
                     {
                         mSourceFile = ContentBrowser.CurrentImporterFile;
                         mName = IO.TtFileManager.GetPureName(mSourceFile);
+                        _DumpBasicPicDesc();
                     }
+
                     if (bFileExisting)
                     {
                         var clr = new Vector4(1, 0, 0, 1);

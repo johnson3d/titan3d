@@ -627,6 +627,7 @@ namespace EngineNS.Graphics.Mesh
             }
 
             builder.PushAtomLOD(0, &dpDesc);
+            builder.BuildTangent();
             return meshBuilder;
         }
         #endregion
@@ -1584,6 +1585,42 @@ namespace EngineNS.Graphics.Mesh
             builder.SetAABB(ref aabb);
             return meshBuilder;
         }
+        public static unsafe UMeshDataProvider MakeLines(in List<Vector3> lineList, uint color)
+        {
+            var meshBuilder = new Graphics.Mesh.UMeshDataProvider();
+            meshBuilder.AssetName = RName.GetRName("@MakeLine", RName.ERNameType.Transient);
+            var builder = meshBuilder.mCoreObject;
+            uint streams = (uint)((1 << (int)NxRHI.EVertexStreamType.VST_Position) |
+               (1 << (int)NxRHI.EVertexStreamType.VST_Normal) |
+               (1 << (int)NxRHI.EVertexStreamType.VST_Color) |
+               (1 << (int)NxRHI.EVertexStreamType.VST_UV));
+            builder.Init(streams, false, 1);
+
+            var dpDesc = new NxRHI.FMeshAtomDesc();
+            dpDesc.SetDefault();
+            dpDesc.PrimitiveType = NxRHI.EPrimitiveType.EPT_LineList;
+            dpDesc.StartIndex = 0xffffffff;
+
+            var lineCount = MathHelper.FloorToInt(lineList.Count / 2);
+            dpDesc.NumPrimitives = (uint)lineCount;
+            var aabb = new BoundingBox();
+            aabb.InitEmptyBox();
+            for (int i = 0; i < lineCount; ++i)
+            {
+                var from = lineList[i * 2];
+                var to = lineList[i * 2 + 1];
+
+                aabb.Merge(in from);
+                aabb.Merge(in to);
+                builder.AddVertex(in from, in Vector3.UnitX, in Vector2.Zero, color);
+                builder.AddVertex(in to, in Vector3.UnitX, in Vector2.Zero, color);
+            }
+
+            builder.PushAtomLOD(0, &dpDesc);
+            builder.SetAABB(ref aabb);
+            return meshBuilder;
+        }
+
         public static unsafe UMeshDataProvider MakeBezier3DSpline(UBezier3DSpline spline, uint color)
         {
             var meshBuilder = new Graphics.Mesh.UMeshDataProvider();

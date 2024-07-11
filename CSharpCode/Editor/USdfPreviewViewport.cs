@@ -141,6 +141,25 @@ namespace EngineNS.Editor
             get => mVisParameter;
         }
 
+        public override unsafe void OnDrawShowTexture()
+        {
+            var showTexture = GetShowTexture();
+            if (showTexture != IntPtr.Zero)
+            {
+                var drawlist = ImGuiAPI.GetWindowDrawList();
+                var uv1 = Vector2.Zero;
+                var uv2 = Vector2.One;
+                unsafe
+                {
+                    var min = ImGuiAPI.GetWindowContentRegionMin();
+                    var max = ImGuiAPI.GetWindowContentRegionMax();
+                    min = min + WindowPos;
+                    max = max + WindowPos;
+                    drawlist.AddImage(showTexture.ToPointer(), in min, in max, in uv1, in uv2, 0x01FFFFFF);// 0xFFFFFFFF);abgr
+                }
+            }
+        }
+
         public override void TickLogic(float ellapse)
         {
             if (IsInlitialized == false)

@@ -48,13 +48,13 @@ namespace EngineNS.Animation.SkeletonAnimation.AnimatablePose
             result.Z = Position.Z.HasValue ? Position.Z.Value : descInitTranslation.Z;
             return result;
         }
-        private Vector3 GetRotationVector3()
+        private FRotator GetRotationVector3()
         {
             var descInitRotation = Desc.InitMatrix.Rotation.ToEuler();
-            Vector3 result = Vector3.Zero;
-            result.X = Rotation.X.HasValue ? Rotation.X.Value : descInitRotation.X;
-            result.Y = Rotation.Y.HasValue ? Rotation.Y.Value : descInitRotation.Y;
-            result.Z = Rotation.Z.HasValue ? Rotation.Z.Value : descInitRotation.Z;
+            FRotator result;
+            result.Yaw = Rotation.X.HasValue ? Rotation.X.Value : descInitRotation.Yaw;
+            result.Pitch = Rotation.Y.HasValue ? Rotation.Y.Value : descInitRotation.Pitch;
+            result.Roll = Rotation.Z.HasValue ? Rotation.Z.Value : descInitRotation.Roll;
             return result;
         }
         private Vector3 GetScaleVector3()
@@ -115,13 +115,13 @@ namespace EngineNS.Animation.SkeletonAnimation.AnimatablePose
             result.Z = Position.Z.HasValue ? Position.Z.Value : descInitTranslation.Z;
             return result;
         }
-        private Vector3 GetRotationVector3()
+        private FRotator GetRotationVector3()
         {
             var descInitRotation = Desc.InitMatrix.Rotation.ToEuler();
-            Vector3 result = Vector3.Zero;
-            result.X = Rotation.X.HasValue ? Rotation.X.Value : descInitRotation.X;
-            result.Y = Rotation.Y.HasValue ? Rotation.Y.Value : descInitRotation.Y;
-            result.Z = Rotation.Z.HasValue ? Rotation.Z.Value : descInitRotation.Z;
+            FRotator result;
+            result.Yaw = Rotation.X.HasValue ? Rotation.X.Value : descInitRotation.Yaw;
+            result.Pitch = Rotation.Y.HasValue ? Rotation.Y.Value : descInitRotation.Pitch;
+            result.Roll = Rotation.Z.HasValue ? Rotation.Z.Value : descInitRotation.Roll;
             return result;
         }
         private Vector3 GetScaleVector3()

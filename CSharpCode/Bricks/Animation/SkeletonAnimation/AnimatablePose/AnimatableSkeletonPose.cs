@@ -69,7 +69,7 @@ namespace EngineNS.Animation.SkeletonAnimation.AnimatablePose
                 }
                 var bonePose = limbPose as TtAnimatableBonePose;
                 bonePose.Position = FNullableVector3.FromVector3(mat.Translation);
-                bonePose.Rotation = FNullableVector3.FromVector3(mat.Rotation.ToEuler());
+                bonePose.Rotation = FNullableVector3.FromRotator(mat.Rotation.ToEuler());
                 bonePose.Scale = FNullableVector3.FromVector3(mat.Scale);
             }
         }

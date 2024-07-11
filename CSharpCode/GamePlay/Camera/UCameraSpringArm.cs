@@ -78,7 +78,7 @@ namespace EngineNS.GamePlay.Camera
             }   
         }
         #region ICameraControlNode
-        public void AddDelta(Vector3 delta)
+        public void AddDelta(in FRotator delta)
         {
 
             Placement.Quat = Quaternion.FromEuler(Placement.Quat.ToEuler() + delta);
@@ -93,7 +93,7 @@ namespace EngineNS.GamePlay.Camera
 
         public void AddPitch(float delta)
         {
-           Placement.Quat = Quaternion.FromEuler(new Vector3(delta * 0.01f, 0, 0)) * Placement.Quat;
+           Placement.Quat = Quaternion.FromEuler(new FRotator(delta * 0.01f, 0, 0)) * Placement.Quat;
         }
 
         public void AddRoll(float delta)

@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Text;
+using static EngineNS.Graphics.Mesh.UMaterialMesh;
 
 namespace EngineNS.Graphics.Mesh
 {
@@ -24,6 +25,10 @@ namespace EngineNS.Graphics.Mesh
         public float UnitScale { get; set; } = 0.01f;
         [Category("ImportSetting")]
         public bool AsStaticMesh { get; set; } = false;
+        [Category("ImportSetting")]
+        public bool ApplyTransformToVertex { get; set; } = false;
+        [Category("ImportSetting")]
+        public bool GenerateUMS { get; set; } = true;
     }
     public partial class UMeshPrimitives
     {
@@ -310,6 +315,8 @@ namespace EngineNS.Graphics.Mesh
                 var AssetImportOption = new TtAssetImportOption_Mesh();
                 AssetImportOption.UnitScale = MeshImprotSetting.UnitScale;
                 AssetImportOption.AsStaticMesh = MeshImprotSetting.AsStaticMesh;
+                AssetImportOption.ApplyTransformToVertex = MeshImprotSetting.ApplyTransformToVertex;
+                AssetImportOption.GenerateUMS = MeshImprotSetting.GenerateUMS;
                 var skeletons = SkeletonGenerater.Generate(AssetImporter.AiScene, AssetImportOption);
                 if (skeletons.Count == 0)
                 {
@@ -336,6 +343,24 @@ namespace EngineNS.Graphics.Mesh
                 {
                     var rn = RName.GetRName(mDir.Name + mesh.mCoreObject.GetName()+ UMeshPrimitives.AssetExt, mDir.RNameType);
                     await SaveMesh(rn, mesh);
+                    if(AssetImportOption.GenerateUMS)
+                    {
+
+                        var umsRN = RName.GetRName(mDir.Name + mesh.mCoreObject.GetName() + UMaterialMesh.AssetExt, mDir.RNameType);
+                        var ums = new UMaterialMesh
+                        {
+                            AssetName = umsRN,
+                        };
+                        ums.SubMeshes[0].Mesh= mesh;
+                        var ameta = new UMaterialMeshAMeta();
+                        ameta.SetAssetName(umsRN);
+                        ameta.AssetId = Guid.NewGuid();
+                        ameta.TypeStr = Rtti.UTypeDescManager.Instance.GetTypeStringFromType(typeof(UMaterialMesh));
+                        ameta.Description = $"This is a {typeof(UMaterialMesh).FullName}\n";
+                        ameta.SaveAMeta();
+                        UEngine.Instance.AssetMetaManager.RegAsset(ameta);
+                        ums.SaveAssetTo(umsRN);
+                    }
                 }
                 return true;
             }
@@ -380,7 +405,7 @@ namespace EngineNS.Graphics.Mesh
                 ameta.Description = $"This is a {typeof(UMeshPrimitives).FullName}\n";
                 ameta.SaveAMeta();
                 UEngine.Instance.AssetMetaManager.RegAsset(ameta);
-
+                meshPrimitives.AssetName = name;
                 meshPrimitives.SaveAssetTo(name);
                 UEngine.Instance.GfxDevice.MeshPrimitiveManager.UnsafeRemove(name);
             }

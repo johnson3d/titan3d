@@ -74,7 +74,7 @@ namespace EngineNS.GamePlay.Movemnet
             }
             currentAngularVelocity = settedAngularVelocity;
             Parent.Placement.Position += currentLinearVelocity * world.DeltaTimeSecond;
-            Parent.Placement.Quat = Parent.Placement.Quat * Quaternion.FromEuler(currentAngularVelocity * world.DeltaTimeSecond);
+            Parent.Placement.Quat = Parent.Placement.Quat * Quaternion.FromEuler(new FRotator(currentAngularVelocity) * world.DeltaTimeSecond);
         }
     }
 }

@@ -88,6 +88,25 @@ namespace EngineNS.Graphics.Pipeline
         public virtual void OnDrawViewportUI(in Vector2 startDrawPos) { }
         public bool IsHoverGuiItem { get; set; }
         public Vector2 WindowSize = Vector2.Zero;
+
+        public virtual unsafe void OnDrawShowTexture()
+        {
+            var showTexture = GetShowTexture();
+            if (showTexture != IntPtr.Zero)
+            {
+                var drawlist = ImGuiAPI.GetWindowDrawList();
+                var uv1 = Vector2.Zero;
+                var uv2 = Vector2.One;
+                unsafe
+                {
+                    var min = ImGuiAPI.GetWindowContentRegionMin();
+                    var max = ImGuiAPI.GetWindowContentRegionMax();
+                    min = min + WindowPos;
+                    max = max + WindowPos;
+                    drawlist.AddImage(showTexture.ToPointer(), in min, in max, in uv1, in uv2, 0x01FFFFFF);// 0xFFFFFFFF);abgr
+                }
+            }
+        }
         public virtual unsafe void OnDraw()
         {
             if (mVisible == false)
@@ -170,19 +189,20 @@ namespace EngineNS.Graphics.Pipeline
                         mSizeChanged = true;
                     }
                 }
-                var showTexture = GetShowTexture();
-                if (showTexture != IntPtr.Zero)
-                {
-                    var drawlist = ImGuiAPI.GetWindowDrawList();
-                    var uv1 = Vector2.Zero;
-                    var uv2 = Vector2.One;
-                    unsafe
-                    {
-                        min = min + pos;
-                        max = max + pos;
-                        drawlist.AddImage(showTexture.ToPointer(), in min, in max, in uv1, in uv2, 0x01FFFFFF);// 0xFFFFFFFF);abgr
-                    }
-                }
+                OnDrawShowTexture();
+                //var showTexture = GetShowTexture();
+                //if (showTexture != IntPtr.Zero)
+                //{
+                //    var drawlist = ImGuiAPI.GetWindowDrawList();
+                //    var uv1 = Vector2.Zero;
+                //    var uv2 = Vector2.One;
+                //    unsafe
+                //    {
+                //        min = min + pos;
+                //        max = max + pos;
+                //        drawlist.AddImage(showTexture.ToPointer(), in min, in max, in uv1, in uv2, 0x01FFFFFF);// 0xFFFFFFFF);abgr
+                //    }
+                //}
 
                 IsMouseIn = ImGuiAPI.IsMouseHoveringRect(in min, in max, true);
 

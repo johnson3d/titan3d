@@ -56,6 +56,10 @@ namespace EngineNS.Editor.Forms
             }
         }
 
+        UDebugShowTool DebugShowTool;
+        bool mShowNormal = false;
+        bool mShowTangent = false;
+
         #region Color Sdf Preview
         DistanceField.TtSdfAsset MeshSdfAsset = new DistanceField.TtSdfAsset();
         public EngineNS.Editor.USdfPreviewViewport sdfViewport = new EngineNS.Editor.USdfPreviewViewport();
@@ -128,6 +132,16 @@ namespace EngineNS.Editor.Forms
             viewport.World.DirectionLight.Direction = new Vector3(0, 0, 1);
 
             (viewport as Editor.UPreviewViewport).CameraController.ControlCamera(viewport.RenderPolicy.DefaultCamera);
+
+            List<Graphics.Mesh.UMeshPrimitives> MeshPrimitivesList = new List<Graphics.Mesh.UMeshPrimitives>();
+            foreach (var j in Mesh.SubMeshes)
+            {
+                if (j.Mesh == null)
+                    continue;
+                MeshPrimitivesList.Add(j.Mesh);
+            }
+            DebugShowTool = new UDebugShowTool();
+            DebugShowTool.Initialize(MeshPrimitivesList, PreviewViewport.World);
 
             var mesh = new Graphics.Mesh.TtMesh();
 
@@ -323,6 +337,16 @@ namespace EngineNS.Editor.Forms
             if (EGui.UIProxy.CustomButton.ToolButton("Redo", in btSize))
             {
 
+            }
+            ImGuiAPI.SameLine(0, -1);
+            if (ImGuiAPI.ToggleButton("N", ref mShowNormal, in btSize, 0))
+            {
+                DebugShowTool.ShowNormal = mShowNormal;
+            }
+            ImGuiAPI.SameLine(0, -1);
+            if (ImGuiAPI.ToggleButton("T", ref mShowTangent, in btSize, 0))
+            {
+                DebugShowTool.ShowTangent = mShowTangent;
             }
         }
 

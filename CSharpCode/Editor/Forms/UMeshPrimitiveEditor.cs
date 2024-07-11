@@ -1,6 +1,8 @@
-﻿using EngineNS.DistanceField;
+﻿using Assimp;
+using EngineNS.DistanceField;
 using EngineNS.GamePlay.Camera;
 using EngineNS.Graphics.Mesh;
+using ICSharpCode.SharpZipLib.Tar;
 using NPOI.OpenXmlFormats.Dml;
 using System;
 using System.Collections.Generic;
@@ -22,6 +24,118 @@ namespace EngineNS
 
 namespace EngineNS.Editor.Forms
 {
+    public class UDebugShowTool
+    {
+        bool mShowNormal = false;
+        public bool ShowNormal
+        {
+            get {return mShowNormal;}
+            set 
+            {
+                mShowNormal = value;
+                if (value)
+                    NormalNode?.UnsetStyle(GamePlay.Scene.UNode.ENodeStyles.Invisible);
+                else
+                    NormalNode?.SetStyle(GamePlay.Scene.UNode.ENodeStyles.Invisible);
+            }
+        }
+
+        bool mShowTangent = false;
+        public bool ShowTangent
+        {
+            get { return mShowTangent; }
+            set
+            {
+                mShowTangent = value;
+                if (value)
+                    TangentNode?.UnsetStyle(GamePlay.Scene.UNode.ENodeStyles.Invisible);
+                else
+                    TangentNode?.SetStyle(GamePlay.Scene.UNode.ENodeStyles.Invisible);
+            }
+        }
+
+        public EngineNS.GamePlay.Scene.UMeshNode NormalNode;
+        public Graphics.Mesh.TtMesh NormalMesh;
+        public EngineNS.GamePlay.Scene.UMeshNode TangentNode;
+        public Graphics.Mesh.TtMesh TangentMesh;
+
+        public async System.Threading.Tasks.Task Initialize(List<Graphics.Mesh.UMeshPrimitives> MeshPrimitivesList, GamePlay.UWorld world)
+        {
+            List<Vector3> PositionList = new List<Vector3>();
+            List<Vector3> NormalList = new List<Vector3>();
+            List<Vector3> TangentList = new List<Vector3>();
+            unsafe
+            {
+                foreach( var Mesh in MeshPrimitivesList)
+                {
+                    UMeshDataProvider meshProvider = new UMeshDataProvider();
+                    if (meshProvider.InitFrom(Mesh))
+                    {
+                        var builder = meshProvider.mCoreObject;
+                        var pPos = (Vector3*)builder.GetStream(NxRHI.EVertexStreamType.VST_Position).GetData();
+                        var pNor = (Vector3*)builder.GetStream(NxRHI.EVertexStreamType.VST_Normal).GetData();
+                        var pTangent = (Vector3*)builder.GetStream(NxRHI.EVertexStreamType.VST_Tangent).GetData();
+
+                        for (int i = 0; i < (int)builder.VertexNumber; i++)
+                        {
+                            if (pPos != null)
+                            {
+                                PositionList.Add(pPos[i]);
+                                if (pNor != null)
+                                {
+                                    NormalList.Add(pPos[i]);
+                                    NormalList.Add(pPos[i] + pNor[i] * 0.05f);
+                                }
+                                if (pTangent != null)
+                                {
+                                    TangentList.Add(pPos[i]);
+                                    TangentList.Add(pPos[i] + pTangent[i] * 0.05f);
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+            var mtl = await UEngine.Instance.GfxDevice.MaterialManager.GetMaterial(RName.GetRName("material/line_color.material", RName.ERNameType.Engine));
+            var materials = new Graphics.Pipeline.Shader.UMaterial[1];
+            materials[0] = mtl;
+
+            if(NormalList.Count>0)
+            {
+                NormalMesh = new Graphics.Mesh.TtMesh();
+                var normalProvider = Graphics.Mesh.UMeshDataProvider.MakeLines(in NormalList, 0xFF00FF00);
+                NormalMesh.Initialize(normalProvider.ToMesh(), materials, Rtti.UTypeDescGetter<Graphics.Mesh.UMdfStaticMesh>.TypeDesc);
+                NormalMesh.MdfQueue.MdfDatas = this;
+
+                NormalNode = await GamePlay.Scene.UMeshNode.AddMeshNode(world, world.Root, new GamePlay.Scene.UMeshNode.UMeshNodeData(), typeof(GamePlay.UPlacement), NormalMesh, DVector3.Zero, Vector3.One, Quaternion.Identity);
+                NormalNode.SetStyle(GamePlay.Scene.UNode.ENodeStyles.Invisible);
+                //NormalNode.SetStyle(GamePlay.Scene.UNode.ENodeStyles.VisibleFollowParent);
+                NormalNode.NodeData.Name = "Debug_NormalNode";
+                NormalNode.IsAcceptShadow = false;
+                NormalNode.IsCastShadow = false;
+                NormalNode.HitproxyType = Graphics.Pipeline.UHitProxy.EHitproxyType.None;
+            }
+
+            if(TangentList.Count>0)
+            {
+                TangentMesh = new Graphics.Mesh.TtMesh();
+                var tangentProvider = Graphics.Mesh.UMeshDataProvider.MakeLines(in TangentList, 0xFF0000FF);
+                TangentMesh.Initialize(tangentProvider.ToMesh(), materials, Rtti.UTypeDescGetter<Graphics.Mesh.UMdfStaticMesh>.TypeDesc);
+                TangentMesh.MdfQueue.MdfDatas = this;
+
+                TangentNode = await GamePlay.Scene.UMeshNode.AddMeshNode(world, world.Root, new GamePlay.Scene.UMeshNode.UMeshNodeData(), typeof(GamePlay.UPlacement), TangentMesh, DVector3.Zero, Vector3.One, Quaternion.Identity);
+                TangentNode.SetStyle(GamePlay.Scene.UNode.ENodeStyles.Invisible);
+                //TangentNode.SetStyle(GamePlay.Scene.UNode.ENodeStyles.VisibleFollowParent);
+                TangentNode.NodeData.Name = "Debug_TangentMeshNode";
+                TangentNode.IsAcceptShadow = false;
+                TangentNode.IsCastShadow = false;
+                TangentNode.HitproxyType = Graphics.Pipeline.UHitProxy.EHitproxyType.None;
+            }
+
+        }
+    }
+
     public class UMeshPrimitiveEditorConfig : IO.BaseSerializer
     {
         public UMeshPrimitiveEditorConfig()
@@ -87,7 +201,9 @@ namespace EngineNS.Editor.Forms
                 mCurrentMeshNode.IsAcceptShadow = value;
             }
         }
-
+        UDebugShowTool DebugShowTool;
+        bool mShowNormal = false;
+        bool mShowTangent = false;
         ~UMeshPrimitiveEditor()
         {
             Dispose();
@@ -145,6 +261,11 @@ namespace EngineNS.Editor.Forms
 
             mCurrentMeshNode = meshNode;
 
+            DebugShowTool = new UDebugShowTool();
+            List<Graphics.Mesh.UMeshPrimitives> MeshPrimitivesList = new List<Graphics.Mesh.UMeshPrimitives>();
+            MeshPrimitivesList.Add(Mesh);
+            DebugShowTool.Initialize(MeshPrimitivesList, PreviewViewport.World);
+
             var aabb = mesh.MaterialMesh.AABB;
             mCurrentMeshRadius = aabb.GetMaxSide();
             BoundingSphere sphere;
@@ -191,15 +312,16 @@ namespace EngineNS.Editor.Forms
             var gridNode = await GamePlay.Scene.UGridNode.AddGridNode(viewport.World, viewport.World.Root);
             gridNode.ViewportSlate = this.PreviewViewport;
         }
+
         public Graphics.Mesh.TtMesh SdfDebugMesh;
         EngineNS.GamePlay.Scene.UMeshNode SdfMeshNode;
-        public void CalcVoxelsInBrick(Vector3i BrickCoordinate, BoundingBox DistanceFieldVolumeBounds, 
+        public void CalcVoxelsInBrick(Vector3i BrickCoordinate, BoundingBox DistanceFieldVolumeBounds,
             DistanceField.TtSparseSdfMip SdfData, DistanceField.DistanceFieldConfig SdfConfig,
             List<Byte> BrickVoxelSdfList, ref List<Vector3> OutVoxelPositions, ref List<Byte> OutVoxelDistance)
         {
             if (OutVoxelPositions == null || OutVoxelDistance == null)
                 return;
-            
+
             Vector3 IndirectionVoxelSize = DistanceFieldVolumeBounds.GetSize() / new Vector3(SdfData.IndirectionDimensions);
             Vector3 DistanceFieldVoxelSize = IndirectionVoxelSize / new Vector3(SdfConfig.UniqueDataBrickSize);
             Vector3 BrickMinPosition = DistanceFieldVolumeBounds.Minimum + new Vector3(BrickCoordinate) * IndirectionVoxelSize;
@@ -225,10 +347,10 @@ namespace EngineNS.Editor.Forms
         }
         public async System.Threading.Tasks.Task CreateSdfDebugMesh(GamePlay.UWorld world, DistanceField.TtSdfAsset sdfAsset)
         {
-            if (sdfAsset==null || sdfAsset.Mips.Count < 0)
+            if (sdfAsset == null || sdfAsset.Mips.Count < 0)
                 return;
 
-            if(SdfMeshNode==null)
+            if (SdfMeshNode == null)
             {
                 var material = await UEngine.Instance.GfxDevice.MaterialInstanceManager.CreateMaterialInstance(RName.GetRName("material/sdfcolor.uminst", RName.ERNameType.Engine));
                 SdfDebugMesh = new Graphics.Mesh.TtMesh();
@@ -291,7 +413,7 @@ namespace EngineNS.Editor.Forms
             var instanceMdf = SdfDebugMesh.MdfQueue as Graphics.Mesh.UMdfInstanceStaticMesh;
             instanceMdf.InstanceModifier.InstanceBuffers.ResetInstance();
             instanceMdf.InstanceModifier.SetCapacity((uint)OutVoxelPositions.Count, false);
-            for ( int i = 0; i < OutVoxelPositions.Count; ++i )
+            for (int i = 0; i < OutVoxelPositions.Count; ++i)
             {
                 var voxelPos = OutVoxelPositions[i];
                 var QuantizedDistance = OutVoxelDistance[i];
@@ -445,6 +567,16 @@ namespace EngineNS.Editor.Forms
             if (EGui.UIProxy.CustomButton.ToolButton("LoadCluster", in btSize))
             {
                 Mesh.LoadClusterMesh();
+            }
+            ImGuiAPI.SameLine(0, -1);
+            if (ImGuiAPI.ToggleButton("N", ref mShowNormal, in btSize, 0))
+            {
+                DebugShowTool.ShowNormal = mShowNormal;
+            }
+            ImGuiAPI.SameLine(0, -1);
+            if (ImGuiAPI.ToggleButton("T", ref mShowTangent, in btSize, 0))
+            {
+                DebugShowTool.ShowTangent = mShowTangent;
             }
         }
 

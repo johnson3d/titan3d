@@ -71,26 +71,26 @@ namespace EngineNS
                     }
                     var el = v.ToEuler();
                     Vector3 angle;
-                    angle.X = MathHelper.Radian_To_Angle(el.X).X;
-                    angle.Y = MathHelper.Radian_To_Angle(el.Y).X;
-                    angle.Z = MathHelper.Radian_To_Angle(el.Z).X;
+                    angle.X = MathHelper.Radian_To_Angle(el.Yaw).X;
+                    angle.Y = MathHelper.Radian_To_Angle(el.Pitch).X;
+                    angle.Z = MathHelper.Radian_To_Angle(el.Roll).X;
                     var changed = ImGuiAPI.DragScalarN2(TName.FromString2("##", info.Name).ToString(), ImGuiDataType_.ImGuiDataType_Float, (float*)&angle, 3, speed, &minValue, &maxValue, "%0.6f", ImGuiSliderFlags_.ImGuiSliderFlags_None);
                     //ImGuiAPI.InputFloat3(TName.FromString2("##", info.Name).ToString(), (float*)&v, "%.6f", ImGuiInputTextFlags_.ImGuiInputTextFlags_CharsDecimal);
                     //ImGuiAPI.PopStyleVar(1);
                     if (changed && !info.Readonly)//(v != saved)
                     {
-                        el.X = MathHelper.Angle_To_Tadian(angle.X, 0, 0);
-                        el.Y = MathHelper.Angle_To_Tadian(angle.Y, 0, 0);
-                        el.Z = MathHelper.Angle_To_Tadian(angle.Z, 0, 0);
+                        el.Yaw = MathHelper.Angle_To_Tadian(angle.X, 0, 0);
+                        el.Pitch = MathHelper.Angle_To_Tadian(angle.Y, 0, 0);
+                        el.Roll = MathHelper.Angle_To_Tadian(angle.Z, 0, 0);
                         newValue = Quaternion.FromEuler(in el);
                         retValue = true;
                     }
 
                     if (Vector4.Vector4EditorAttribute.OnDrawVectorValue<Vector3>(in info, ref angle, ref angle) && !info.Readonly)
                     {
-                        el.X = MathHelper.Angle_To_Tadian(angle.X, 0, 0);
-                        el.Y = MathHelper.Angle_To_Tadian(angle.Y, 0, 0);
-                        el.Z = MathHelper.Angle_To_Tadian(angle.Z, 0, 0);
+                        el.Yaw = MathHelper.Angle_To_Tadian(angle.X, 0, 0);
+                        el.Pitch = MathHelper.Angle_To_Tadian(angle.Y, 0, 0);
+                        el.Roll = MathHelper.Angle_To_Tadian(angle.Z, 0, 0);
                         newValue = Quaternion.FromEuler(in el);
                         retValue = true;
                     }
@@ -357,6 +357,7 @@ namespace EngineNS
         /// <param name="Pitch">俯仰角</param>
         /// <param name="Roll">翻转角</param>
         [Rtti.Meta]
+        [Obsolete]
         public void GetYawPitchRoll(out float Yaw, out float Pitch, out float Roll)
         {
             //double d0 = X * X + Y * Y - Z * Z - W * W;
@@ -381,18 +382,49 @@ namespace EngineNS
             //	else
             //		Yaw -= Math.PI;
             //}
+            //https://www.euclideanspace.com/maths/geometry/rotations/conversions/quaternionToEuler/
 
-            Yaw = (float)(Math.Atan2(2 * (W * Y + Z * X), 1 - 2 * (X * X + Y * Y)));
             float value = 2 * (W * X - Y * Z);
+            Yaw = (float)(Math.Atan2(2 * (W * Y + Z * X), 1 - 2 * (X * X + Y * Y)));
             value = ((value) > (1.0f) ? (1.0f) : ((value) < (-1.0f) ? (-1.0f) : value));
             Pitch = (float)(Math.Asin(value));
             Roll = (float)(Math.Atan2(2 * (W * Z + X * Y), 1 - 2 * (Z * Z + X * X)));
         }
         [Rtti.Meta]
-        public Vector3 ToEuler()
+        public FRotator ToEuler()
         {
-            Vector3 result = Vector3.Zero;
-            GetYawPitchRoll(out result.Y, out result.X, out result.Z);
+            //https://blog.csdn.net/u012700322/article/details/52252305
+
+            float value = (W * X - Y * Z);
+            float YawY = 2.0f * (W * Y + Z * X);
+            float YawX = (1.0f - 2.0f * (X * X + Y * Y));
+
+            FRotator result = new FRotator();
+
+            const float SINGULARITY_THRESHOLD = 0.4999995f;
+            if (value < -SINGULARITY_THRESHOLD)
+            {
+                result.Yaw = (float)(Math.Atan2(YawY, YawX));
+                
+                result.Pitch = -(MathHelper.PI * 0.5f);
+                result.Roll = -result.Yaw - (2.0f * MathHelper.Atan2(Y, W));
+            }
+            else if (value > SINGULARITY_THRESHOLD)
+            {
+                result.Yaw = (float)(Math.Atan2(YawY, YawX));
+                
+                result.Pitch = (MathHelper.PI * 0.5f);
+                result.Roll = result.Yaw - (2.0f * MathHelper.Atan2(Y, W));
+            }
+            else
+            {
+                result.Yaw = (float)(Math.Atan2(YawY, YawX));
+                //float fValue = 2 * (W * X - Y * Z);
+                //float fValue2 = ((fValue) > (1.0f) ? (1.0f) : ((fValue) < (-1.0f) ? (-1.0f) : fValue));
+                result.Pitch = (float)(Math.Asin(2.0f * value));
+                result.Roll = (float)(Math.Atan2(2 * (W * Z + X * Y), 1 - 2 * (Z * Z + X * X)));
+            }   
+
             return result;
         }
         /// <summary>
@@ -1182,20 +1214,17 @@ namespace EngineNS
             return result;
         }
         [Rtti.Meta]
-        public static Quaternion FromEuler(in Vector3 euler)
+        public static Quaternion FromEuler(in FRotator euler)
         {
-            var yaw = euler.Y;
-            var pitch = euler.X;
-            var roll = euler.Z;
             Quaternion result;
 
-            float halfRoll = roll * 0.5f;
+            float halfRoll = euler.Roll * 0.5f;
             float sinRoll = (float)(Math.Sin((double)(halfRoll)));
             float cosRoll = (float)(Math.Cos((double)(halfRoll)));
-            float halfPitch = pitch * 0.5f;
+            float halfPitch = euler.Pitch * 0.5f;
             float sinPitch = (float)(Math.Sin((double)(halfPitch)));
             float cosPitch = (float)(Math.Cos((double)(halfPitch)));
-            float halfYaw = yaw * 0.5f;
+            float halfYaw = euler.Yaw * 0.5f;
             float sinYaw = (float)(Math.Sin((double)(halfYaw)));
             float cosYaw = (float)(Math.Cos((double)(halfYaw)));
 

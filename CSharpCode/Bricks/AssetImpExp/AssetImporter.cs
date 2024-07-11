@@ -1,4 +1,5 @@
 ﻿using Assimp;
+using Assimp.Configs;
 using Assimp.Unmanaged;
 using EngineNS.Animation.Asset;
 using EngineNS.Animation.Base;
@@ -14,6 +15,8 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Numerics;
+using System.Runtime.InteropServices;
+using System.Security.Cryptography.Xml;
 using System.Text;
 using static NPOI.HSSF.Util.HSSFColor;
 using Matrix4x4 = Assimp.Matrix4x4;
@@ -34,6 +37,7 @@ namespace EngineNS.Bricks.AssetImpExp
     public class TtAssetImportOption_Mesh
     {
         public bool GenerateUMS { get; set; } = false;
+        public bool ApplyTransformToVertex { get; set; } = false;
         public bool AsStaticMesh { get; set; } = false;
         public float UnitScale { get; set; } = 0.01f;
     }
@@ -257,6 +261,28 @@ namespace EngineNS.Bricks.AssetImpExp
                 return node.Transform * GetAbsBoneNodeMatrix(node.Parent);
             }
         }
+        public static Assimp.Matrix4x4 GetAbsNodeMatrix(Assimp.Node node)
+        {
+            if (AssimpSceneUtil.IsSceneRootNode(node.Parent) || node.Parent.HasMeshes)
+            {
+                return node.Transform;
+            }
+            else
+            {
+                node.Transform.Decompose(out var scaling, out var rotation, out var translation);
+                if (scaling.X < 0 || scaling.Y < 0 || scaling.Z < 0)
+                {
+                    var transMat = new Matrix4x4(rotation.GetMatrix()) * Matrix4x4.FromTranslation(translation);
+                    
+                    return transMat * GetAbsNodeMatrix(node.Parent);
+                }
+                else
+                {
+                    return node.Transform * GetAbsNodeMatrix(node.Parent);
+                }
+            }
+        }
+
         public static bool IsSceneRootNode(Assimp.Node node)
         {
             if (node.Name == "RootNode")
@@ -336,7 +362,7 @@ namespace EngineNS.Bricks.AssetImpExp
             var result = AssimpMatrix4x4Decompose(matrix);
             return FTransform.CreateTransform(result.translation.AsDVector(), result.scaling, result.rotation);
         }
-        public static Matrix AssimpMatrix4xMatrix(Assimp.Matrix4x4 matrix)
+        public static Matrix AssimpMatrix4x4ToTtMatrix(Assimp.Matrix4x4 matrix)
         {
             var result = AssimpMatrix4x4Decompose(matrix);
             return Matrix.Transformation(result.scaling, result.rotation, result.translation);
@@ -437,48 +463,27 @@ namespace EngineNS.Bricks.AssetImpExp
             Debug.Assert(false);
             return null;
         }
-
-        static TtBoneDesc MakeBoneDesc(Assimp.Scene scene, Node boneNode, TtAssetImportOption_Mesh importOption, Assimp.Matrix4x4 pre)
+        static TtBoneDesc MakeBoneDesc(Assimp.Scene scene, Node boneNode, TtAssetImportOption_Mesh importOption)
         {
-            Assimp.Matrix4x4 meshGeometricTranslation = Assimp.Matrix4x4.Identity;
-            var boneMesh = AssimpSceneUtil.FindMeshByBone(boneNode.Name, scene);
-            if (boneMesh != null)
-            {
-                var meshNode = AssimpSceneUtil.FindNode(boneMesh.Name, scene);
-                meshGeometricTranslation = AssimpSceneUtil.GetAssimpFbxGeometricTranslation(meshNode);
-            }
             TtBoneDesc boneDesc = new TtBoneDesc();
             boneDesc.Name = boneNode.Name;
             boneDesc.NameHash = Standart.Hash.xxHash.xxHash32.ComputeHash(boneDesc.Name);
             var parentNode = GetValidParentNode(boneNode, scene);
-            Assimp.Bone parentBone = null;
             if (parentNode != null && !AssimpSceneUtil.IsSceneRootNode(parentNode) && !parentNode.HasMeshes)
             {
                 boneDesc.ParentName = parentNode.Name;
                 boneDesc.ParentHash = Standart.Hash.xxHash.xxHash32.ComputeHash(boneDesc.ParentName);
-                parentBone = AssimpSceneUtil.FindBone(parentNode.Name, scene);
             }
+            var boneAbsNodeTransform = AssimpSceneUtil.GetAbsNodeMatrix(boneNode);
+            boneAbsNodeTransform.Decompose(out var scaling1, out var rotation1, out var translation1);
+            var deg = AssimpSceneUtil.ConvertQuaternion(rotation1).ToEuler() * MathHelper.Rad2Deg;
 
-            var assimpBoneOffsetMatrix = Assimp.Matrix4x4.Identity;
-            var bone = AssimpSceneUtil.FindBone(boneDesc.Name, scene);
-            if (bone != null)
-            {
-                assimpBoneOffsetMatrix = meshGeometricTranslation * bone.OffsetMatrix;
-                var matdd = AssimpSceneUtil.AssimpMatrix4xMatrix(bone.OffsetMatrix);
-            }
-            else
-            {
-                var node = AssimpSceneUtil.FindNode(boneDesc.Name, scene);
-                Debug.Assert(node != null);
-                var nodeTransform = AssimpSceneUtil.GetAbsBoneNodeMatrix(node);
-                nodeTransform.Inverse();
-                assimpBoneOffsetMatrix = nodeTransform;
-            }
-            var preMatrix = AssimpSceneUtil.AssimpMatrix4xMatrix(pre);
-            preMatrix.NoScale();
-            var boneOffsetMatrix = AssimpSceneUtil.AssimpMatrix4xMatrix(assimpBoneOffsetMatrix);
-            var invInitMatrix = preMatrix * boneOffsetMatrix;
-
+            var initMatrix = AssimpSceneUtil.AssimpMatrix4x4ToTtMatrix(boneAbsNodeTransform);
+            var initMatrixScaled = initMatrix;
+            initMatrixScaled.SetTrans(initMatrix.Translation * importOption.UnitScale);
+            var invInitMatrix = initMatrixScaled;
+            invInitMatrix.Inverse();
+  
             DVector3 invPos = DVector3.Zero;
             Vector3 invScale = Vector3.One;
             Quaternion invQuat = Quaternion.Identity;
@@ -489,14 +494,14 @@ namespace EngineNS.Bricks.AssetImpExp
             }
             boneDesc.InvScale = invScale;
             boneDesc.InvQuat = invQuat;
-            boneDesc.InvPos = invPos.ToSingleVector3() * importOption.UnitScale;
+            boneDesc.InvPos = invPos.ToSingleVector3();
 
-            var finalInvInitMatrix = Matrix.Transformation(boneDesc.InvScale, boneDesc.InvQuat, boneDesc.InvPos);
-            boneDesc.InvInitMatrix = finalInvInitMatrix;
-            finalInvInitMatrix.Inverse();
-            boneDesc.InitMatrix = finalInvInitMatrix;
+            boneDesc.InvInitMatrix = invInitMatrix;
+            boneDesc.InitMatrix = initMatrixScaled;
+           
             return boneDesc;
         }
+
         static List<TtSkinSkeleton> MakeSkeletons(Assimp.Scene scene, List<Assimp.Node> skeletonRootNodes, TtAssetImportOption_Mesh importOption, ref Dictionary<Assimp.Node, bool> inOutNodesMap)
         {
             List<TtSkinSkeleton> skeletonsGenerate = new List<TtSkinSkeleton>();
@@ -525,7 +530,7 @@ namespace EngineNS.Bricks.AssetImpExp
                 {
                     if (marked.Value)
                     {
-                        TtBoneDesc boneDesc = MakeBoneDesc(scene, marked.Key, importOption, preAssimpTransform);
+                        TtBoneDesc boneDesc = MakeBoneDesc(scene, marked.Key, importOption);
                         skeleton.AddLimb(new TtBone(boneDesc));
                     }
                 }
@@ -617,9 +622,20 @@ namespace EngineNS.Bricks.AssetImpExp
                 }
             }
             Debug.Assert(meshNode.MeshCount > 0);
-            var transformTuple = AssimpSceneUtil.AssimpMatrix4x4Decompose(preAssimpTransform);
-            var vertexPreTransform = FTransform.CreateTransform(transformTuple.translation.AsDVector(),
-                Vector3.One * importOption.UnitScale, transformTuple.rotation);
+            var transformTuple = AssimpSceneUtil.AssimpMatrix4x4DecomposeToTransform(preAssimpTransform);
+            var vertexPreTransform = FTransform.Identity;
+            if(importOption.ApplyTransformToVertex)
+            {
+                var nodeTransform = AssimpSceneUtil.AssimpMatrix4x4DecomposeToTransform(meshNode.Transform);
+                FTransform finalTransform;
+                FTransform.Multiply(out finalTransform, transformTuple, nodeTransform);
+                vertexPreTransform = FTransform.CreateTransform(finalTransform.Position,
+                finalTransform.Scale * importOption.UnitScale, finalTransform.Quat);
+            }
+            else
+            {
+                vertexPreTransform.Scale = Vector3.One * importOption.UnitScale;
+            }
 
             var meshes = GetValidMesh(meshNode, scene);
 
@@ -746,14 +762,18 @@ namespace EngineNS.Bricks.AssetImpExp
                         vertexColorStream[vertexIndex] = AssimpSceneUtil.ConvertColor(subMesh.VertexColorChannels[0][j]).ToAbgr();
                     }
                     int uvChannels = subMesh.TextureCoordinateChannelCount;
-                    var uvChannel = subMesh.TextureCoordinateChannels[0];
-                    uvStream[vertexIndex] = AssimpSceneUtil.ConvertVector2(uvChannel[j].X, uvChannel[j].Y);
-                    if (uvChannels == 2)
+                    if(uvChannels > 0)
                     {
-                        var lightMapChannel = subMesh.TextureCoordinateChannels[1];
-                        var lightMapUV = new Vector4(lightMapChannel[j].X, lightMapChannel[j].Y, 0, 0);
-                        lightMapStream[vertexIndex] = lightMapUV;
+                        var uvChannel = subMesh.TextureCoordinateChannels[0];
+                        uvStream[vertexIndex] = AssimpSceneUtil.ConvertVector2(uvChannel[j].X, uvChannel[j].Y);
+                        if (uvChannels == 2)
+                        {
+                            var lightMapChannel = subMesh.TextureCoordinateChannels[1];
+                            var lightMapUV = new Vector4(lightMapChannel[j].X, lightMapChannel[j].Y, 0, 0);
+                            lightMapStream[vertexIndex] = lightMapUV;
+                        }
                     }
+                    
                 }
 
                 //build skin
