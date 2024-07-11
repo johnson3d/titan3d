@@ -31,7 +31,7 @@ namespace NxRHI
 		virtual void SetSrv(EShaderType type, const FShaderBinder* binder, ISrView* view) override;
 		virtual void SetUav(EShaderType type, const FShaderBinder* binder, IUaView* view) override;
 		virtual void SetSampler(EShaderType type, const FShaderBinder* binder, ISampler* sampler) override;
-		virtual void SetVertexBuffer(UINT slot, IVbView* buffer, UINT32 Offset, UINT Stride) override;
+		virtual void SetVertexBuffer(UINT slot, IVbView* buffer, UINT Offset, UINT Stride) override;
 		virtual void SetIndexBuffer(IIbView* buffer, bool IsBit32) override;
 		virtual void SetGraphicsPipeline(const IGpuDrawState* drawState) override;
 		virtual void SetComputePipeline(const IComputeEffect* drawState) override;

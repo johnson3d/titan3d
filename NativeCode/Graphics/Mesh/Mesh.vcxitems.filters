@@ -4,6 +4,9 @@
     <Filter Include="Modifier">
       <UniqueIdentifier>{33bb52fe-15cd-4a66-80c6-4f4debae48fd}</UniqueIdentifier>
     </Filter>
+    <Filter Include="TanGen">
+      <UniqueIdentifier>{55ff7556-7eed-4972-9e0b-b56366056ecc}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="$(MSBuildThisFileDirectory)Modifier\IModifier.cpp">
@@ -17,6 +20,10 @@
     <ClCompile Include="$(MSBuildThisFileDirectory)Modifier\ISkinModifier.cpp">
       <Filter>Modifier</Filter>
     </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)TanGen\tgen.cpp">
+      <Filter>TanGen</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)MeshDataProvider.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="$(MSBuildThisFileDirectory)Modifier\IModifier.h">
@@ -30,5 +37,14 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)Modifier\ISkinModifier.h">
       <Filter>Modifier</Filter>
     </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)TanGen\tgen.h">
+      <Filter>TanGen</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)MeshDataProvider.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="$(MSBuildThisFileDirectory)TanGen\README.md">
+      <Filter>TanGen</Filter>
+    </None>
   </ItemGroup>
 </Project>

@@ -309,7 +309,7 @@ namespace NxRHI
 		break;
 		}
 	}
-	void DX11CommandList::SetVertexBuffer(UINT slot, IVbView* buffer, UINT32 Offset, UINT Stride)
+	void DX11CommandList::SetVertexBuffer(UINT slot, IVbView* buffer, UINT Offset, UINT Stride)
 	{
 		Offset = Offset + (UINT)buffer->Desc.Offset;
 		if (buffer == nullptr)

@@ -57,7 +57,7 @@ namespace AssetImportAndExport
 		/** Sorting function for vertex Z/index pairs. */
 		struct CompareIndexAndZ
 		{
-			FORCEINLINE bool operator()(IndexAndZ const& A, IndexAndZ const& B) const { return A.Z < B.Z; }
+			inline bool operator()(IndexAndZ const& A, IndexAndZ const& B) const { return A.Z < B.Z; }
 		};
 		/**
 		* Returns true if the specified points are about equal
@@ -159,7 +159,7 @@ namespace AssetImportAndExport
 			EFBXImportResult Process(const FBXFileImportDesc* fileImportOption, const FBXMeshImportDesc* meshImportOption);
 			std::vector <TriangleFace> Faces;
 			std::vector<MeshVertex> Vertexs;
-			std::vector<UINT32> VertexIndices;
+			std::vector<UINT> VertexIndices;
 			bool IsIndex32() { return IndexCount() > 65535 ? true : false; }
 			int IndexCount() { return (int)VertexIndices.size(); }
 			int VertexCount() { return (int)Vertexs.size(); }

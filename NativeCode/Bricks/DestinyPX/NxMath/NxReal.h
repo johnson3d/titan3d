@@ -221,7 +221,7 @@ namespace NxMath
 		//todo: check overflow
 	public:
 		using ValueType = _ValueType;
-		using UnsignedValueType = UnsignedType<ValueType>::ResultType;
+		using UnsignedValueType = typename UnsignedType<ValueType>::ResultType;
 		using ThisType = NxFixed<_FracBit, _ValueType>;
 		
 		static const unsigned int BitWidth = sizeof(ValueType) * 8;
@@ -952,7 +952,7 @@ namespace NxMath
 	public:
 		T mValue;
 		using RealType = T;
-		using ValueType = T::ValueType;
+		using ValueType = typename T::ValueType;
 		using ThisType = NxReal<T>;
 
 		inline double AsDouble() const
@@ -1103,12 +1103,12 @@ namespace NxMath
 		}
 		inline NxReal& operator -= (int rh)
 		{
-			mValue = T::Sub(mValue, rh.mValue);
+			mValue = T::Sub(mValue, rh);
 			return *this;
 		}
 		inline NxReal& operator -= (unsigned int rh)
 		{
-			mValue = T::Sub(mValue, rh.mValue);
+			mValue = T::Sub(mValue, rh);
 			return *this;
 		}
 		inline NxReal& operator -= (const NxReal& rh)

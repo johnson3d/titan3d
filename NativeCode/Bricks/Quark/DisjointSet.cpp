@@ -3,15 +3,15 @@
 
 NS_BEGIN
 
-FDisjointSet::FDisjointSet( const UINT32 Size )
+FDisjointSet::FDisjointSet( const UINT Size )
 {
 	Init( Size );
 }
 
-void FDisjointSet::Init( UINT32 Size )
+void FDisjointSet::Init( UINT Size )
 {
 	Parents.resize( Size);
-	for( UINT32 i = 0; i < Size; i++ )
+	for( UINT i = 0; i < Size; i++ )
 	{
 		Parents[i] = i;
 	}
@@ -22,22 +22,22 @@ void FDisjointSet::Reset()
 	Parents.clear();
 }
 
-void FDisjointSet::AddDefaulted( UINT32 Num )
+void FDisjointSet::AddDefaulted( UINT Num )
 {
-	UINT32 Start = (UINT32)Parents.size();
+	UINT Start = (UINT)Parents.size();
 	Parents.resize(Num + Start);
 
-	for( UINT32 i = Start; i < Start + Num; i++ )
+	for( UINT i = Start; i < Start + Num; i++ )
 	{
 		Parents[i] = i;
 	}
 }
 
 // Union with splicing
-inline void FDisjointSet::Union( UINT32 x, UINT32 y )
+inline void FDisjointSet::Union( UINT x, UINT y )
 {
-	UINT32 px = Parents[x];
-	UINT32 py = Parents[y];
+	UINT px = Parents[x];
+	UINT py = Parents[y];
 
 	while( px != py )
 	{
@@ -67,13 +67,13 @@ inline void FDisjointSet::Union( UINT32 x, UINT32 y )
 
 // Optimized version of Union when iterating for( x : 0 to N ) unioning x with lower indexes.
 // Neither x nor y can have already been unioned with an index > x.
-void FDisjointSet::UnionSequential( UINT32 x, UINT32 y )
+void FDisjointSet::UnionSequential( UINT x, UINT y )
 {
 	assert( x >= y );
 	assert( x == Parents[x] );
 
-	UINT32 px = x;
-	UINT32 py = Parents[y];
+	UINT px = x;
+	UINT py = Parents[y];
 	while( px != py )
 	{
 		Parents[y] = px;
@@ -87,11 +87,11 @@ void FDisjointSet::UnionSequential( UINT32 x, UINT32 y )
 }
 
 // Find with path compression
-UINT32 FDisjointSet::Find( UINT32 i )
+UINT FDisjointSet::Find( UINT i )
 {
 	// Find root
-	UINT32 Start = i;
-	UINT32 Root = Parents[i];
+	UINT Start = i;
+	UINT Root = Parents[i];
 	while( Root != i )
 	{
 		i = Root;
@@ -100,7 +100,7 @@ UINT32 FDisjointSet::Find( UINT32 i )
 
 	// Point all nodes on path to root
 	i = Start;
-	UINT32 Parent = Parents[i];
+	UINT Parent = Parents[i];
 	while( Parent != Root )
 	{
 		Parents[i] = Root;

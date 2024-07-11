@@ -79,7 +79,7 @@ namespace NxRHI
 	{
 		
 	}
-	void NullCommandList::SetVertexBuffer(UINT slot, IVbView* buffer, UINT32 Offset, UINT Stride)
+	void NullCommandList::SetVertexBuffer(UINT slot, IVbView* buffer, UINT Offset, UINT Stride)
 	{
 		
 	}

@@ -170,7 +170,7 @@ namespace NxRHI
 		
 	};
 	enum TR_ENUM(SV_EnumNoFlags = true)
-		EVertexStreamType : UINT32
+		EVertexStreamType : UINT
 	{
 		VST_Position,
 			VST_Normal,

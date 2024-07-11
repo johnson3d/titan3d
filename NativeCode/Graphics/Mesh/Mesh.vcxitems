@@ -16,15 +16,22 @@
   <ItemGroup>
     <ClCompile Include="$(MSBuildThisFileDirectory)IMdfQueue.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)IMesh.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)MeshDataProvider.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)Modifier\IModifier.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)Modifier\ISkinModifier.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)Modifier\IStaticModifier.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)TanGen\tgen.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="$(MSBuildThisFileDirectory)IMdfQueue.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)IMesh.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)MeshDataProvider.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)Modifier\IModifier.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)Modifier\ISkinModifier.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)Modifier\IStaticModifier.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)TanGen\tgen.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="$(MSBuildThisFileDirectory)TanGen\README.md" />
   </ItemGroup>
 </Project>

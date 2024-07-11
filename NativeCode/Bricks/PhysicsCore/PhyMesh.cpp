@@ -2,6 +2,7 @@
 #include "PhyContext.h"
 #include "../../NextRHI/NxRHI.h"
 #include "../../Base/xnd/vfxxnd.h"
+#include "../../Graphics/Mesh/MeshDataProvider.h"
 
 #define new VNEW
 

@@ -467,7 +467,7 @@ namespace NxRHI
 		}*/
 		//vkUpdateDescriptorSets
 	}
-	void VKCommandList::SetVertexBuffer(UINT slot, IVbView* buffer, UINT32 Offset, UINT Stride)
+	void VKCommandList::SetVertexBuffer(UINT slot, IVbView* buffer, UINT Offset, UINT Stride)
 	{
 		ASSERT(mIsRecording);
 		VkDeviceSize vkOffset = Offset;

@@ -1,6 +1,7 @@
 #include "FDrawCmdList.h"
 #include "FCanvas.h"
 #include "FTFont.h"
+#include "../../Graphics/Mesh/MeshDataProvider.h"
 
 #define new VNEW
 
@@ -745,7 +746,7 @@ namespace Canvas
 	static void CalculateCorner(
 		int sliceCount,
 		float radiusStart,
-		byte cornerType,
+		BYTE cornerType,
 		const FRectanglef& clip,
 		const v3dxVector2& min,
 		const v3dxVector2& max,

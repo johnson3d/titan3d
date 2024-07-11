@@ -950,7 +950,7 @@ namespace NxMath
     struct NxConstValueByDouble
     {
         using ThisType = NxConstValueByDouble<_ValueType, _FracBit>;
-        using UnsignedValueType = UnsignedType<_ValueType>::ResultType;
+        using UnsignedValueType = typename UnsignedType<_ValueType>::ResultType;
         static const UnsignedValueType FractionMask = SetBitMask<_ValueType, _FracBit>::ResultValue;
         static const UnsignedValueType Scalar = FractionMask + 1;
         static constexpr const _ValueType ResultValue(double v = 0)

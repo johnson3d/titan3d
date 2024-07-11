@@ -6,36 +6,36 @@
 NS_BEGIN
 
 template <class T>
-static constexpr __forceinline T DivideAndRoundUp(T Dividend, T Divisor)
+static constexpr inline T DivideAndRoundUp(T Dividend, T Divisor)
 {
     return (Dividend + Divisor - 1) / Divisor;
 }
 
 template <class T>
-static constexpr __forceinline T DivideAndRoundNearest(T Dividend, T Divisor)
+static constexpr inline T DivideAndRoundNearest(T Dividend, T Divisor)
 {
     return (Dividend >= 0)
         ? (Dividend + Divisor / 2) / Divisor
         : (Dividend - Divisor / 2 + 1) / Divisor;
 }
 
-FGraphPartitioner::FGraphPartitioner( UINT32 InNumElements )
+FGraphPartitioner::FGraphPartitioner( UINT InNumElements )
 	: NumElements( InNumElements )
 {
 	Indexes.resize( NumElements );
-	for( UINT32 i = 0; i < NumElements; i++ )
+	for( UINT i = 0; i < NumElements; i++ )
 	{
 		Indexes[i] = i;
 	}
 }
 
-void FGraphPartitioner::AddAdjacency(FGraphData* Graph, UINT32 AdjIndex, INT32 Cost)
+void FGraphPartitioner::AddAdjacency(FGraphData* Graph, UINT AdjIndex, INT32 Cost)
 {
     Graph->Adjacency.push_back(SortedTo[AdjIndex]);
     Graph->AdjacencyCost.push_back(Cost);
 }
 
-void FGraphPartitioner::AddLocalityLinks(FGraphData* Graph, UINT32 Index, INT32 Cost)
+void FGraphPartitioner::AddLocalityLinks(FGraphData* Graph, UINT Index, INT32 Cost)
 {
     //for( auto Iter = LocalityLinks.CreateKeyIterator( Index ); Iter; ++Iter )
     auto Iter = LocalityLinks.find(Index);
@@ -44,7 +44,7 @@ void FGraphPartitioner::AddLocalityLinks(FGraphData* Graph, UINT32 Index, INT32 
         auto values = Iter->second;
         for (int i = 0; i < values.size(); ++i)
         {
-            UINT32 AdjIndex = values[i];
+            UINT AdjIndex = values[i];
             Graph->Adjacency.push_back(SortedTo[AdjIndex]);
             Graph->AdjacencyCost.push_back(Cost);
         }
@@ -52,7 +52,7 @@ void FGraphPartitioner::AddLocalityLinks(FGraphData* Graph, UINT32 Index, INT32 
 
 }
 
-void FGraphPartitioner::InsertToLocalityLinks(UINT32 k, UINT32 v)
+void FGraphPartitioner::InsertToLocalityLinks(UINT k, UINT v)
 {
     auto keyIter = LocalityLinks.find(k);
     if (keyIter != LocalityLinks.end())
@@ -67,9 +67,9 @@ void FGraphPartitioner::InsertToLocalityLinks(UINT32 k, UINT32 v)
     }
 }
 
-FGraphPartitioner::FGraphData* FGraphPartitioner::NewGraph( UINT32 NumAdjacency ) const
+FGraphPartitioner::FGraphData* FGraphPartitioner::NewGraph( UINT NumAdjacency ) const
 {
-	NumAdjacency += UINT32(LocalityLinks.size());
+	NumAdjacency += UINT(LocalityLinks.size());
 
 	FGraphData* Graph = new FGraphPartitioner::FGraphData;
 	Graph->Offset = 0;
@@ -332,14 +332,14 @@ void FGraphPartitioner::PartitionStrict( FGraphData* Graph, INT32 InMinPartition
 // 					}
 // 				}
 // 
-// 				static FORCEINLINE TStatId GetStatId()
+// 				static inline TStatId GetStatId()
 // 				{
 // 					RETURN_QUICK_DECLARE_CYCLE_STAT(FBuildTask, STATGROUP_ThreadPoolAsyncTasks);
 // 				}
 // 
-// 				static FORCEINLINE ESubsequentsMode::Type	GetSubsequentsMode()	{ return ESubsequentsMode::TrackSubsequents; }
+// 				static inline ESubsequentsMode::Type	GetSubsequentsMode()	{ return ESubsequentsMode::TrackSubsequents; }
 // 
-// 				FORCEINLINE ENamedThreads::Type GetDesiredThread() const
+// 				inline ENamedThreads::Type GetDesiredThread() const
 // 				{
 // 					return DesiredThread;
 // 				}
@@ -370,7 +370,7 @@ void FGraphPartitioner::PartitionStrict( FGraphData* Graph, INT32 InMinPartition
 	PartitionIDs.clear();
 	SwappedWith.clear();
 
-	for( UINT32 i = 0; i < NumElements; i++ )
+	for( UINT i = 0; i < NumElements; i++ )
 	{
 		SortedTo[ Indexes[i] ] = i;
 	}

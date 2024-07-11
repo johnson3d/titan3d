@@ -181,9 +181,9 @@ DWORD GetSamplerStride4(BYTE* pBuffer, int w, int h, int x, int y)
 
 
 
-DWORD GenerateOnePixel(BYTE* pOriginalBuffer, UINT32 OriginalWidth, UINT32 OriginalHeight, UINT32 PosW, UINT32 PosH)
+DWORD GenerateOnePixel(BYTE* pOriginalBuffer, UINT OriginalWidth, UINT OriginalHeight, UINT PosW, UINT PosH)
 {
-	static const UINT32 Kernel[2][2] = 
+	static const UINT Kernel[2][2] = 
 	{
 		{ 70, 10},
 		{ 10, 10},
@@ -195,21 +195,21 @@ DWORD GenerateOnePixel(BYTE* pOriginalBuffer, UINT32 OriginalWidth, UINT32 Origi
 	UINT Oa = 0;
 	UINT SumKernel = 0;
 	UINT stride = OriginalWidth * 4;
-	for (UINT32 h = 0; h < 2; h++)
+	for (UINT h = 0; h < 2; h++)
 	{
-		UINT32 NowH = PosH + h;
+		UINT NowH = PosH + h;
 		if (NowH > OriginalHeight -1)
 			continue;
-		for (UINT32 w = 0; w < 2; w++)
+		for (UINT w = 0; w < 2; w++)
 		{
-			UINT32 NowW = PosW + w;
+			UINT NowW = PosW + w;
 			if (NowW > OriginalWidth - 1)
 				continue;
-			UINT32 StartIdx = NowH * stride + NowW * 4;
-			UINT32 a = pOriginalBuffer[StartIdx];
-			UINT32 b = pOriginalBuffer[StartIdx + 1];
-			UINT32 g = pOriginalBuffer[StartIdx + 2];
-			UINT32 r = pOriginalBuffer[StartIdx + 3];
+			UINT StartIdx = NowH * stride + NowW * 4;
+			UINT a = pOriginalBuffer[StartIdx];
+			UINT b = pOriginalBuffer[StartIdx + 1];
+			UINT g = pOriginalBuffer[StartIdx + 2];
+			UINT r = pOriginalBuffer[StartIdx + 3];
 
 			Oa += a * Kernel[h][w];
 			Ob += b * Kernel[h][w];

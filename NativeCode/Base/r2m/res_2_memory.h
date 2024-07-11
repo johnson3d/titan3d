@@ -20,7 +20,7 @@ struct VRes2Memory : public EngineNS::IWeakReference
 {
 	virtual VResPtr		Ptr(UINT64 offset=0, UINT64 size=0 ) = 0;
 	virtual vBOOL		Free() = 0;
-	virtual UINT_PTR	Length() const = 0;
+	virtual UINT64		Length() const = 0;
 	virtual LPCSTR		Name() const = 0; 
 
 	virtual void		TryReleaseHolder()

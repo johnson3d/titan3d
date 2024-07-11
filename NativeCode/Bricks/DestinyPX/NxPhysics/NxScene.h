@@ -25,11 +25,11 @@ namespace NxPhysics
 	public:
 		ENGINE_RTTI(NxScene);
 		TR_FUNCTION(SV_NoBind)
-		virtual const NxPQ* GetTransform() const
+		virtual const NxPQ* GetTransform() const override
 		{
 			return &Transform;
 		}
-		virtual NxPQ* GetTransform()
+		virtual NxPQ* GetTransform() override
 		{
 			return &Transform;
 		}

@@ -185,7 +185,7 @@ void VPackFile2Memory::Release()
 	VRes2Memory::Release();
 }
 
-VResPtr VPackFile2Memory::Ptr(UINT_PTR offset, UINT_PTR size)
+VResPtr VPackFile2Memory::Ptr(UINT64 offset, UINT64 size)
 {
 	auto file = this->GetFile();
 	if (file == nullptr)
@@ -219,7 +219,7 @@ vBOOL VPackFile2Memory::Free()
 	return TRUE;
 }
 
-UINT_PTR VPackFile2Memory::Length() const
+UINT64 VPackFile2Memory::Length() const
 {
 	return mAssetDesc.Size;
 }

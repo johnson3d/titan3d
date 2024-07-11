@@ -1,7 +1,7 @@
 #pragma once
 #include "embree3/rtcore.h"
 #include "embree3/rtcore_ray.h"
-#include "../../NextRHI/NxGeomMesh.h"
+#include "../../Graphics/Mesh/MeshDataProvider.h"
 #include "../../Math/v3dxVector3.h"
 
 NS_BEGIN
@@ -20,7 +20,7 @@ struct FEmbreeTriangleDesc
 struct TR_CLASS()
 FEmbreeGeometry : public VIUnknown
 {
-	std::vector<UINT32> IndexArray;
+	std::vector<UINT> IndexArray;
 	std::vector<v3dxVector3> VertexArray;
 	std::vector<FEmbreeTriangleDesc> TriangleDescs; // The material ID of each triangle.
 	RTCGeometry InternalGeometry;

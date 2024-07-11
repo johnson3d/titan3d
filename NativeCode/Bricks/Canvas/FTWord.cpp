@@ -6,6 +6,7 @@
 #include "../../Base/sdf/sdf_8ssedt.h"
 #include "../Canvas/FCanvas.h"
 #include "FDrawCmdList.h"
+#include "../../Graphics/Mesh/MeshDataProvider.h"
 
 #define new VNEW
 

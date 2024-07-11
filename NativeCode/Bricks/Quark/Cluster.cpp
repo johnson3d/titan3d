@@ -25,10 +25,10 @@ void CorrectAttributesColor( float* Attributes )
 
 QuarkCluster::QuarkCluster(
 	const std::vector< v3dxVector3 >& InVerts,
-	const std::vector< UINT32 >& InIndexes,
+	const std::vector< UINT >& InIndexes,
 	//const std::vector< INT32 >& InMaterialIndexes,
-	//UINT32 InNumTexCoords, bool bInHasColors, bool bInPreserveArea,
-	UINT32 TriBegin, UINT32 TriEnd, const FGraphPartitioner& Partitioner, const FAdjacency& Adjacency )
+	//UINT InNumTexCoords, bool bInHasColors, bool bInPreserveArea,
+	UINT TriBegin, UINT TriEnd, const FGraphPartitioner& Partitioner, const FAdjacency& Adjacency )
 {
 	//GUID = (uint64(TriBegin) << 32) | TriEnd;
 	
@@ -47,17 +47,17 @@ QuarkCluster::QuarkCluster(
 
 	//ASSERT(InMaterialIndexes.size() * 3 == InIndexes.size());
 
-	std::map< UINT32, UINT32 > OldToNewIndex;
+	std::map< UINT, UINT > OldToNewIndex;
 	//OldToNewIndex.reserve( NumTris );
 
-	for( UINT32 i = TriBegin; i < TriEnd; i++ )
+	for( UINT i = TriBegin; i < TriEnd; i++ )
 	{
-		UINT32 TriIndex = Partitioner.Indexes[i];
+		UINT TriIndex = Partitioner.Indexes[i];
 
-		for( UINT32 k = 0; k < 3; k++ )
+		for( UINT k = 0; k < 3; k++ )
 		{
-			UINT32 OldIndex = InIndexes[ TriIndex * 3 + k ];
-            UINT32 NewIndex = ~0u;
+			UINT OldIndex = InIndexes[ TriIndex * 3 + k ];
+            UINT NewIndex = ~0u;
 
             auto NewIndexPtr = OldToNewIndex.find(OldIndex);
             if (NewIndexPtr != OldToNewIndex.end())
@@ -83,7 +83,7 @@ QuarkCluster::QuarkCluster(
                 //}
                 //
                 //FVector2f* UVs = GetUVs( NewIndex );
-                //for( UINT32 UVIndex = 0; UVIndex < NumTexCoords; UVIndex++ )
+                //for( UINT UVIndex = 0; UVIndex < NumTexCoords; UVIndex++ )
                 //{
                 //	UVs[ UVIndex ] = InVert.UVs[ UVIndex ];
                 //}
@@ -97,7 +97,7 @@ QuarkCluster::QuarkCluster(
 			Adjacency.ForAll( EdgeIndex,
 				[ &AdjCount, TriBegin, TriEnd, &Partitioner ]( INT32 EdgeIndex, INT32 AdjIndex )
 				{
-					UINT32 AdjTri = Partitioner.SortedTo[ AdjIndex / 3 ];
+					UINT AdjTri = Partitioner.SortedTo[ AdjIndex / 3 ];
 					if( AdjTri < TriBegin || AdjTri >= TriEnd )
 						AdjCount++;
 				} );
@@ -111,7 +111,7 @@ QuarkCluster::QuarkCluster(
 
 	SanitizeVertexData();
 
-    //for( UINT32 VertexIndex = 0; VertexIndex < NumVerts; VertexIndex++ )
+    //for( UINT VertexIndex = 0; VertexIndex < NumVerts; VertexIndex++ )
     //{
     //	float* Attributes = GetAttributes( VertexIndex );
     //
@@ -126,7 +126,7 @@ QuarkCluster::QuarkCluster(
 }
 
 // Split
-QuarkCluster::QuarkCluster( QuarkCluster& SrcCluster, UINT32 TriBegin, UINT32 TriEnd, const FGraphPartitioner& Partitioner, const FAdjacency& Adjacency )
+QuarkCluster::QuarkCluster( QuarkCluster& SrcCluster, UINT TriBegin, UINT TriEnd, const FGraphPartitioner& Partitioner, const FAdjacency& Adjacency )
 	: MipLevel( SrcCluster.MipLevel )
 {
 	//GUID = MurmurFinalize64(SrcCluster.GUID) ^ ((uint64(TriBegin) << 32) | TriEnd);
@@ -143,17 +143,17 @@ QuarkCluster::QuarkCluster( QuarkCluster& SrcCluster, UINT32 TriBegin, UINT32 Tr
 	ExternalEdges.reserve( 3 * NumTris );
 	NumExternalEdges = 0;
 
-	std::map< UINT32, UINT32 > OldToNewIndex;
+	std::map< UINT, UINT > OldToNewIndex;
 	//OldToNewIndex.Reserve( NumTris );
 
-	for( UINT32 i = TriBegin; i < TriEnd; i++ )
+	for( UINT i = TriBegin; i < TriEnd; i++ )
 	{
-		UINT32 TriIndex = Partitioner.Indexes[i];
+		UINT TriIndex = Partitioner.Indexes[i];
 
-		for( UINT32 k = 0; k < 3; k++ )
+		for( UINT k = 0; k < 3; k++ )
 		{
-			UINT32 OldIndex = SrcCluster.Indexes[ TriIndex * 3 + k ];
-            UINT32 NewIndex = ~0u;
+			UINT OldIndex = SrcCluster.Indexes[ TriIndex * 3 + k ];
+            UINT NewIndex = ~0u;
 
             auto NewIndexPtr = OldToNewIndex.find(OldIndex);
             if (NewIndexPtr != OldToNewIndex.end())
@@ -180,7 +180,7 @@ QuarkCluster::QuarkCluster( QuarkCluster& SrcCluster, UINT32 TriBegin, UINT32 Tr
 			Adjacency.ForAll( EdgeIndex,
 				[ &AdjCount, TriBegin, TriEnd, &Partitioner ]( INT32 EdgeIndex, INT32 AdjIndex )
 				{
-					UINT32 AdjTri = Partitioner.SortedTo[ AdjIndex / 3 ];
+					UINT AdjTri = Partitioner.SortedTo[ AdjIndex / 3 ];
 					if( AdjTri < TriBegin || AdjTri >= TriEnd )
 						AdjCount++;
 				} );
@@ -201,7 +201,7 @@ QuarkCluster::QuarkCluster(const std::vector<QuarkCluster*>& MergeList)
 	ASSERT(false);
 }
 
-float QuarkCluster::Simplify( UINT32 TargetNumTris, float TargetError, UINT32 LimitNumTris, bool bForNaniteFallback )
+float QuarkCluster::Simplify( UINT TargetNumTris, float TargetError, UINT LimitNumTris, bool bForNaniteFallback )
 {
 	ASSERT(false);
 	return 0.0;
@@ -220,7 +220,7 @@ void QuarkCluster::Split( FGraphPartitioner& Partitioner, const FAdjacency& Adja
 			} );
 	}
 
-	auto GetCenter = [ this ]( UINT32 TriIndex, v3dxVector3& Center)
+	auto GetCenter = [ this ]( UINT TriIndex, v3dxVector3& Center)
 	{
         if (Indexes[TriIndex * 3 + 0] >= Verts.size() ||
             Indexes[TriIndex * 3 + 1] >= Verts.size() ||
@@ -240,11 +240,11 @@ void QuarkCluster::Split( FGraphPartitioner& Partitioner, const FAdjacency& Adja
 
 	auto  Graph = Partitioner.NewGraph( NumTris * 3 );
 
-	for( UINT32 i = 0; i < NumTris; i++ )
+	for( UINT i = 0; i < NumTris; i++ )
 	{
 		Graph->AdjacencyOffset[i] = INT32(Graph->Adjacency.size());
 
-		UINT32 TriIndex = Partitioner.Indexes[i];
+		UINT TriIndex = Partitioner.Indexes[i];
 
 		// Add shared edges
 		for( int k = 0; k < 3; k++ )
@@ -291,16 +291,16 @@ FAdjacency QuarkCluster::BuildAdjacency() const
 	return Adjacency;
 }
 
-UINT32 QuarkCluster::AddVert( const float* Vert, FHashTable& HashTable )
+UINT QuarkCluster::AddVert( const float* Vert, FHashTable& HashTable )
 {
-	const UINT32 VertSize = GetVertSize();
+	const UINT VertSize = GetVertSize();
 	const v3dxVector3& Position = *reinterpret_cast< const v3dxVector3* >( Vert );
 
-	UINT32 Hash = HashPosition( Position );
-	UINT32 NewIndex;
+	UINT Hash = HashPosition( Position );
+	UINT NewIndex;
 	for( NewIndex = HashTable.First( Hash ); HashTable.IsValid( NewIndex ); NewIndex = HashTable.Next( NewIndex ) )
 	{
-		UINT32 i;
+		UINT i;
 		for( i = 0; i < VertSize; i++ )
 		{
 			if( Vert[i] != Verts[ NewIndex * VertSize + i ] )
@@ -331,7 +331,7 @@ void QuarkCluster::Bound()
 	std::vector< v3dxVector3> Positions;
 	Positions.resize(NumVerts);
 
-	for( UINT32 i = 0; i < NumVerts; i++ )
+	for( UINT i = 0; i < NumVerts; i++ )
 	{
 		Positions[i] = GetPosition(i);
 		Bounds += Positions[i];
@@ -380,7 +380,7 @@ void QuarkCluster::SanitizeVertexData()
 										// so that overflows shouldn't be a concern.
 										// With a 1e12 threshold, even x^3 fits comfortable in float range.
 
-	for( UINT32 VertexIndex = 0; VertexIndex < NumVerts; VertexIndex++ )
+	for( UINT VertexIndex = 0; VertexIndex < NumVerts; VertexIndex++ )
 	{
 		v3dxVector3& Position = GetPosition( VertexIndex );
 		SanitizeFloat( Position.X, -FltThreshold, FltThreshold, 0.0f );
@@ -405,7 +405,7 @@ void QuarkCluster::SanitizeVertexData()
 // 		}
 // 
 // 		FVector2f* UVs = GetUVs( VertexIndex );
-// 		for( UINT32 UvIndex = 0; UvIndex < NumTexCoords; UvIndex++ )
+// 		for( UINT UvIndex = 0; UvIndex < NumTexCoords; UvIndex++ )
 // 		{
 // 			SanitizeFloat( UVs[ UvIndex ].X, -FltThreshold, FltThreshold, 0.0f );
 // 			SanitizeFloat( UVs[ UvIndex ].Y, -FltThreshold, FltThreshold, 0.0f );

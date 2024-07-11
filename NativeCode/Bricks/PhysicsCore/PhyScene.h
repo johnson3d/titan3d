@@ -90,8 +90,8 @@ typedef void(*FonAdvance)(void* selft, const physx::PxRigidBody* const*, const p
 //typedef physx::PxSimulationFilterShader FPxSimulationFilterShader;
 //typedef physx::PxFilterFlags(WINAPI*FPxSimulationFilterShader)(//void* self, 
 typedef USHORT(*FSimulationFilterShader)(//void* self, 
-	UINT32 attributes0, physx::PxFilterData* filterData0,
-	UINT32 attributes1, physx::PxFilterData* filterData1,
+	UINT attributes0, physx::PxFilterData* filterData0,
+	UINT attributes1, physx::PxFilterData* filterData1,
 	physx::PxPairFlags* pairFlags, const void* constantBlock, physx::PxU32 constantBlockSize);
 
 enum TR_ENUM()

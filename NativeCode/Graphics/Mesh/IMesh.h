@@ -8,9 +8,9 @@ class TR_CLASS()
 	IMesh : public IWeakReference
 {
 protected:
-	AutoRef<NxRHI::FMeshPrimitives>			mGeoms;
+	AutoRef<NxRHI::FMeshPrimitives>		mGeoms;
 	AutoRef<IMdfQueue>					mMdfQueue;
-	AutoRef<NxRHI::FVertexArray>				mVertexArray;
+	AutoRef<NxRHI::FVertexArray>		mVertexArray;
 public:
 	IMesh();
 	void Initialize(EngineNS::NxRHI::FMeshPrimitives* mesh, IMdfQueue* mdf);

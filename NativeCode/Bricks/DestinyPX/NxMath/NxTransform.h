@@ -245,7 +245,7 @@ namespace NxMath
 			//Transform using QST is following
 			//QST(P) = Q*S*P*-Q + T where Q = quaternion, S = scale, T = translation
 
-			auto Transform = NxVector4<Type>(NxQuat<Type>.RotateVector3(Quat, V.XYZ() * Scale), Type::Zero());
+			auto Transform = NxVector4<Type>(NxQuat<Type>::RotateVector3(Quat, V.XYZ() * Scale), Type::Zero());
 			if (V.W == Type::One())
 			{
 				Transform += NxVector4<Type>(Position, Type::One());
@@ -495,7 +495,7 @@ namespace NxMath
 			//Transform using QST is following
 			//QST(P) = Q*S*P*-Q + T where Q = quaternion, S = scale, T = translation
 
-			auto Transform = NxVector4<Type>(NxQuat<Type>.RotateVector3(Quat, V.XYZ()), Type::Zero());
+			auto Transform = NxVector4<Type>(NxQuat<Type>::RotateVector3(Quat, V.XYZ()), Type::Zero());
 			if (V.W == Type::One())
 			{
 				Transform += NxVector4<Type>(Position, Type::One());

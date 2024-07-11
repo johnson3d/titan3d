@@ -72,7 +72,7 @@ namespace NxPhysics
 		static_assert(std::is_base_of<Base, T>::value);
 		if (ptr->GetRtti()->IsSubClass(GetClassObject<T>()))
 		{
-			return NxAutoRef((T*)ptr.GetPtr());
+			return NxAutoRef<T>((T*)ptr.GetPtr());
 		}
 		return nullptr;
 	}

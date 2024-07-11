@@ -127,11 +127,11 @@ public:
 
 	inline bool Equals(const v3dxVector3& v,float epsilon = 0.00001f)
 	{
-		return  std::abs(X - v.X) < epsilon &&  std::abs(Y - v.Y) < epsilon &&  std::abs(Z - v.Z) < epsilon;
+		return  (std::abs(X - v.X) < epsilon) &&  (std::abs(Y - v.Y) < epsilon) &&  (std::abs(Z - v.Z) < epsilon);
 	}
 	inline friend bool Equals(const v3dxVector3& v1, const v3dxVector3& v2, float epsilon = 0.00001f)
 	{
-		return  std::abs(v1.X - v2.X) < epsilon &&  std::abs(v1.Y - v2.Y) < epsilon &&  std::abs(v1.Z - v2.Z) < epsilon;
+		return  (std::abs(v1.X - v2.X) < epsilon) &&  (std::abs(v1.Y - v2.Y) < epsilon) && (std::abs(v1.Z - v2.Z) < epsilon);
 	}
 	inline void operator = ( const v3dVector3_t& v2 ){ 
 		X=v2.X ; Y=v2.Y ; Z=v2.Z; 

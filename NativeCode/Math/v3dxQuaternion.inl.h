@@ -2,6 +2,7 @@
 #include "v3dxQuaternion.h"
 #include "v3dxMath.h"
 #include "v3dxMatrix4.h"
+#include "v3dxVector3.h"
 
 // Construction/Destruction ======================================================
 inline v3dxQuaternion::v3dxQuaternion()
@@ -400,4 +401,3 @@ inline float v3dxQuaternion::magnitude() const
 //{
 //	return v3dxQuaternion(quat1.x-quat2.x,quat1.y-quat2.y,quat1.z-quat2.z,quat1.w-quat2.w);
 //}
-

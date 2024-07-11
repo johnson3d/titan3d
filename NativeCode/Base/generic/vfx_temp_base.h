@@ -61,9 +61,9 @@ template<> struct __vfxDefaultCompare<UINT16>
 	inline INT_PTR operator () (const UINT16 & t1, const UINT16 & t2)
 	{	return (INT_PTR)t1 - (INT_PTR)t2;}
 };
-template<> struct __vfxDefaultCompare<UINT32>
+template<> struct __vfxDefaultCompare<UINT>
 {
-	inline INT_PTR operator () (const UINT32 & t1, const UINT32 & t2)
+	inline INT_PTR operator () (const UINT & t1, const UINT & t2)
 	{	return (INT_PTR)(t1 - t2);}
 };
 template<> struct __vfxDefaultCompare<UINT64>

@@ -5,6 +5,7 @@
 #include "PhyShape.h"
 #include "PhyMesh.h"
 #include "PhyHeightfield.h"
+#include "../../Graphics/Mesh/MeshDataProvider.h"
 
 #ifdef PLATFORM_IOS
 	#include <malloc/malloc.h>
@@ -106,7 +107,7 @@ PhyContext::PhyContext()
 	EntityType = Phy_Context;
 }
 
-vBOOL PhyContext::Init(UINT32 featureFlags)
+vBOOL PhyContext::Init(UINT featureFlags)
 {
 	mFoundation = PxCreateFoundation(PX_PHYSICS_VERSION, gDefaultAllocatorCallback, gDefaultErrorCallback);
 	if (mFoundation == NULL)

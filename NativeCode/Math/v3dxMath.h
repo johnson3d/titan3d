@@ -237,6 +237,30 @@ public:
 	static const float HALF_PI;
 	static const float fDeg2Rad;
 	static const float fRad2Deg;
+
+	static inline float ClampAngle(float Angle)
+	{
+		Angle = std::fmodf(Angle, 360.f);
+
+		if (Angle < 0.f)
+		{
+			Angle += 360.f;
+		}
+
+		return Angle;
+	}
+
+	static inline float ClampAngleRad(float Angle)
+	{
+		Angle = std::fmodf(Angle, V_TWOPI);
+
+		if (Angle < 0.f)
+		{
+			Angle += V_TWOPI;
+		}
+
+		return Angle;
+	}
 };
 
 inline int Math::mapToRange(int v, int l, int h)
@@ -292,6 +316,7 @@ class v3dxPoly3;
 class v3dxSegment3;
 class v3dxLine3;
 class v3dxQuaternion;
+class v3dxRotator;
 
 class v3dxVector3;
 class v3dxDVector3;
@@ -1322,7 +1347,7 @@ extern "C"
 	 VFX_API v3dxQuaternion* v3dxQuaternionSlerp(v3dxQuaternion *pOut, CONST v3dxQuaternion *pQ1,CONST v3dxQuaternion *pQ2, float t);
 	 VFX_API v3dxQuaternion* v3dxQuaternionRotationAxis(v3dxQuaternion *pOut, CONST v3dxVector3 *pV, float Angle);
 	 VFX_API v3dxQuaternion* v3dxQuaternionRotationYawPitchRoll(v3dxQuaternion *pOut, float Yaw, float Pitch, float Roll);
-	 VFX_API v3dxVector3*	v3dxYawPitchRollQuaternionRotation(v3dxQuaternion pIn, v3dxVector3* pOutOLAngle);
+	 VFX_API float v3dxYawPitchRollQuaternionRotation(const v3dxQuaternion* pIn, v3dxRotator* pOutOLAngle);
 	 VFX_API v3dxMatrix4* v3dxMatrixRotationQuaternion(v3dxMatrix4 *pOut, CONST v3dxQuaternion *pQ);
 
 	 VFX_API HRESULT v3dxMatrixDecompose(v3dxVector3 *pOutScale, v3dxQuaternion *pOutRotation, v3dxVector3 *pOutTranslation, const v3dxMatrix4 *pM);

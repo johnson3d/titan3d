@@ -1,4 +1,4 @@
-#include "../../NextRHI/NxGeomMesh.h"
+#include "../../Graphics/Mesh/MeshDataProvider.h"
 #include "RcNavMesh.h"
 #include "RcNavQuery.h"
 

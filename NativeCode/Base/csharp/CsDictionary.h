@@ -119,7 +119,7 @@ struct CsDictionary
 		tKey.SetValue(key);
 
 		UAnyValue tValue;
-		if (mImpl.Find(tKey, &tValue))
+		if (mImpl.Find(&tKey, &tValue))
 		{
 			if (value != nullptr)
 				tValue.GetValue(*value);

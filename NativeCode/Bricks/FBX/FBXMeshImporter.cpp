@@ -1495,7 +1495,7 @@ namespace AssetImportAndExport
 			//AssetCreater->OnImportMessageDumping(AMT_Import, 1, "vertex optimize");
 			std::vector<int> remapIndex;
 			VertexIndices.resize(polyVertexCount);
-			//VertexIndex = new UINT32[polyVertexCount];
+			//VertexIndex = new UINT[polyVertexCount];
 			{
 				int theVertexIndex = 0;
 				for (int i = 0; i < polyCount; ++i)

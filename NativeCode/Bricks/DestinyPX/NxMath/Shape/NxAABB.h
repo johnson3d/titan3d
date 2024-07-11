@@ -96,25 +96,25 @@ namespace NxMath
             case 0:
                 SetVector3Value(result, Minimum.X, Maximum.Y, Maximum.Z);
                 break;
-            case 0:
+            case 1:
                 SetVector3Value(result, Maximum.X, Maximum.Y, Maximum.Z); 
                 break;
-            case 0:
+            case 2:
                 SetVector3Value(result, Maximum.X, Minimum.Y, Maximum.Z);
                 break;
-            case 0:
+            case 3:
                 SetVector3Value(result, Minimum.X, Minimum.Y, Maximum.Z);
                 break;
-            case 0:
+            case 4:
                 SetVector3Value(result, Minimum.X, Maximum.Y, Minimum.Z);
                 break;
-            case 0:
+            case 5:
                 SetVector3Value(result, Maximum.X, Maximum.Y, Minimum.Z);
                 break;
-            case 0:
+            case 6:
                 SetVector3Value(result, Maximum.X, Minimum.Y, Minimum.Z);
                 break;
-            case 0:
+            case 7:
                 SetVector3Value(result, Minimum.X, Minimum.Y, Minimum.Z);
             default:
                 break;

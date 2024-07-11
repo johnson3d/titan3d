@@ -80,7 +80,7 @@ namespace NxPhysics
 			auto t = mDesc.Radius* mDesc.Radius* mDesc.Radius;
 			return NxReal::Pi() * t * D2R(0.75);
 		}
-		virtual NxAABB GetAABB() const
+		virtual NxAABB GetAABB() const override
 		{
 			return NxAABB(NxVector3::Zero(), mDesc.Radius * NxReal::F_2_0());
 		}
@@ -111,7 +111,7 @@ namespace NxPhysics
 			auto t = (mDesc.HalfExtent.X * mDesc.HalfExtent.Y * mDesc.HalfExtent.Z) * I2R(8);
 			return t;
 		}
-		virtual NxAABB GetAABB() const
+		virtual NxAABB GetAABB() const override
 		{
 			return NxAABB(-mDesc.HalfExtent, mDesc.HalfExtent);
 		}

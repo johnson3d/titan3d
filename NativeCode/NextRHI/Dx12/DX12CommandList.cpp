@@ -437,7 +437,7 @@ namespace NxRHI
 		}
 #endif
 	}
-	void DX12CommandList::SetVertexBuffer(UINT slot, IVbView* buffer, UINT32 Offset, UINT Stride)
+	void DX12CommandList::SetVertexBuffer(UINT slot, IVbView* buffer, UINT Offset, UINT Stride)
 	{
 		ASSERT(false);
 		Offset = Offset + (UINT)buffer->Desc.Offset;

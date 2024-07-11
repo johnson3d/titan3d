@@ -32,7 +32,16 @@ namespace NxPhysics
 		/*using BaseType::X;
 		using BaseType::Y;
 		using BaseType::Z;*/
+		PxVector3()
+		{
 
+		}
+		PxVector3(const BaseType& rh)
+		{
+			X = rh.X;
+			Y = rh.Y;
+			Z = rh.Z;
+		}
 		inline void ToVector3f(NxVector3f* pValue)
 		{
 			pValue->X = X.AsSingle();
@@ -41,19 +50,19 @@ namespace NxPhysics
 		}
 		inline static PxVector3 Add(const PxVector3& lh, const PxVector3& rh)
 		{
-			return (PxVector3)((const BaseType&)lh + (const BaseType&)rh);
+			return PxVector3(((const BaseType&)lh + (const BaseType&)rh));
 		}
 		inline static PxVector3 Sub(const PxVector3& lh, const PxVector3& rh)
 		{
-			return (PxVector3)((const BaseType&)lh - (const BaseType&)rh);
+			return PxVector3(((const BaseType&)lh - (const BaseType&)rh));
 		}
 		inline static PxVector3 Mul (const PxVector3& lh, const PxVector3& rh)
 		{
-			return (PxVector3)((const BaseType&)lh * (const BaseType&)rh);
+			return PxVector3(((const BaseType&)lh * (const BaseType&)rh));
 		}
 		inline static PxVector3 Div(const PxVector3& lh, const PxVector3& rh)
 		{
-			return (PxVector3)((const BaseType&)lh / (const BaseType&)rh);
+			return PxVector3(((const BaseType&)lh / (const BaseType&)rh));
 		}
 	};
 

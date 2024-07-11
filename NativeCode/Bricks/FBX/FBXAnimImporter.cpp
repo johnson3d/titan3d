@@ -254,13 +254,13 @@ namespace AssetImportAndExport
 
 						FBXAnimCurve xCurve, yCurve, zCurve;
 
-						xCurve.Desc.Name = VNameString("Rotation_X");
+						xCurve.Desc.Name = VNameString("Yaw");
 						xCurve.Desc.NameHash = HashHelper::APHash(xCurve.Desc.Name.c_str());
 						xCurve.Desc.Type = Rotation_X;
-						yCurve.Desc.Name = VNameString("Rotation_Y");
+						yCurve.Desc.Name = VNameString("Pitch");
 						yCurve.Desc.NameHash = HashHelper::APHash(yCurve.Desc.Name.c_str());
 						yCurve.Desc.Type = Rotation_Y;
-						zCurve.Desc.Name = VNameString("Rotation_Z");
+						zCurve.Desc.Name = VNameString("Roll");
 						zCurve.Desc.NameHash = HashHelper::APHash(zCurve.Desc.Name.c_str());
 						zCurve.Desc.Type = Rotation_Z;
 						while (time <= animDesc->Duration)
@@ -269,17 +269,17 @@ namespace AssetImportAndExport
 							fbxTime.SetSecondDouble(time);
 							auto fbxQuat = CalculateLRM(node, fbxTime, !CheckRootNode(node)).GetQ();
 							auto quat = FBXDataConverter::ConvertQuat(fbxQuat);
-							v3dxVector3 lV;
-							v3dxYawPitchRollQuaternionRotation(quat, &lV);
+							v3dxRotator lV;
+							v3dxYawPitchRollQuaternionRotation(&quat, &lV);
 
 							FBXKAnimKeyFrame key;
 							key.Time = time;
 
-							key.Value = lV.X;
+							key.Value = lV.Yaw;
 							xCurve.Keys.push_back(key);
-							key.Value = lV.Y;
+							key.Value = lV.Pitch;
 							yCurve.Keys.push_back(key);
-							key.Value = lV.Z;
+							key.Value = lV.Roll;
 							zCurve.Keys.push_back(key);
 
 							time += delta;

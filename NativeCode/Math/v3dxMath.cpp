@@ -1893,41 +1893,56 @@ extern "C"
 	#endif
 	}
 
-	VFX_API v3dxVector3* v3dxYawPitchRollQuaternionRotation(v3dxQuaternion pIn, v3dxVector3* pOutOLAngle)
+	VFX_API float v3dxYawPitchRollQuaternionRotation(const v3dxQuaternion* pIn, v3dxRotator* pOutOLAngle)
 	{
-		v3dxVector3 &pOlAngle = *pOutOLAngle;
-		float fYaw = 0.0f;
-		float fPitch = 0.0f;
-		float fRoll = 0.0f;
+		//https://blog.csdn.net/u012700322/article/details/52252305
+		
+		const float& X = pIn->X;
+		const float& Y = pIn->Y;
+		const float& Z = pIn->Z;
+		const float& W = pIn->W;
 
-		float fX = pIn.X;
-		float fY = pIn.Y;
-		float fZ = pIn.Z;
-		float fW = pIn.W;
+		float value = (W * X - Y * Z);
+		float YawY = 2.0f * (W * Y + Z * X);
+		float YawX = (1.0f - 2.0f * (X * X + Y * Y));
 
-		fYaw = (float)(atan2(2 * (fW * fY + fZ * fX), 1 - 2 * (fX * fX + fY * fY)));
-		float fValue = 2 * (fW * fX - fY * fZ);
-		fValue = ((fValue) > (1.0f) ? (1.0f) : ((fValue) < (-1.0f) ? (-1.0f) : fValue));
-		fPitch = (float)(asin(fValue));
-		fRoll = (float)(atan2(2 * (fW * fZ + fX * fY), 1 - 2 * (fZ * fZ + fX * fX)));
+		v3dxRotator& result = *pOutOLAngle;
 
-		pOlAngle.Y = fYaw;
-		pOlAngle.X = fPitch;
-		pOlAngle.Z = fRoll;
+		const float SINGULARITY_THRESHOLD = 0.4999995f;
+		if (value < -SINGULARITY_THRESHOLD)
+		{
+			ASSERT(false);
+			result.Yaw = (float)(Math::ATan2(YawY, YawX));
 
-		return pOutOLAngle;
+			result.Pitch = -(Math::V3_PI * 0.5f);
+			result.Roll = -result.Yaw - (2.0f * Math::ATan2(Y, W));
+		}
+		else if (value > SINGULARITY_THRESHOLD)
+		{
+			result.Yaw = (float)(Math::ATan2(YawY, YawX));
+
+			result.Pitch = (Math::V3_PI * 0.5f);
+			result.Roll = result.Yaw - (2.0f * Math::ATan2(Y, W));
+		}
+		else
+		{
+			result.Yaw = (float)(Math::ATan2(YawY, YawX));
+			//float fValue = 2 * (W * X - Y * Z);
+			//float fValue2 = ((fValue) > (1.0f) ? (1.0f) : ((fValue) < (-1.0f) ? (-1.0f) : fValue));
+			result.Pitch = (float)(Math::ASin(2.0f * value));
+			result.Roll = (float)(Math::ATan2(2 * (W * Z + X * Y), 1 - 2 * (Z * Z + X * X)));
+		}
+
+		return value;
 	}
 
 
-	VFX_API v3dxQuaternion* v3dxQuaternionRotationYawPitchRoll(v3dxQuaternion *pOut, float p_y, float p_x, float p_z)
+	VFX_API v3dxQuaternion* v3dxQuaternionRotationYawPitchRoll(v3dxQuaternion *pOut, float yaw, float pitch, float roll)
 	{
 	#if defined(USE_DXMATH) && defined(USE_DX)
 		return (v3dxQuaternion*)D3DXQuaternionRotationYawPitchRoll((D3DXQUATERNION *)pOut, p_y, p_x, p_z);
 	#else
 		v3dxQuaternion &result = *pOut;
-		float yaw = p_y;
-		float pitch = p_x;
-		float roll = p_z;
 
 		float halfRoll = roll * 0.5f;
 		float sinRoll = (float)(Math::Sin((halfRoll)));

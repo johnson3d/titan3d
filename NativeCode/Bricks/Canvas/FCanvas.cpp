@@ -1,6 +1,7 @@
 #include "FCanvas.h"
 #include "FCanvasBrush.h"
 #include "FDrawCmdList.h"
+#include "../../Graphics/Mesh/MeshDataProvider.h"
 
 #define new VNEW
 

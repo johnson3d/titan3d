@@ -103,11 +103,11 @@ public:
 
 	virtual void Release() override;
 
-	virtual  VResPtr	Ptr(UINT_PTR offset, UINT_PTR size = -1) override;
+	virtual  VResPtr	Ptr(UINT64 offset, UINT64 size = -1) override;
 	/*!	\copydoc VRes2Memory::Free */
 	virtual  vBOOL		Free() override;
 	/*!	\copydoc VRes2Memory::Length */
-	virtual  UINT_PTR	Length() const override;
+	virtual  UINT64		Length() const override;
 	/*!	\copydoc VRes2Memory::Name */
 	virtual  LPCSTR		Name() const override;
 

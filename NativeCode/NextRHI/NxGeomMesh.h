@@ -253,23 +253,23 @@ namespace NxRHI
 		{
 			return &mClustersVB[0];
 		}
-		UINT32* GetClustersIB()
+		UINT* GetClustersIB()
 		{
 			return &mClustersIB[0];
 		}
-		UINT32 GetClustersVBCount()
+		UINT GetClustersVBCount()
 		{
-			return (UINT32)mClustersVB.size();
+			return (UINT)mClustersVB.size();
 		}
-		UINT32 GetClustersIBCount()
+		UINT GetClustersIBCount()
 		{
-			return (UINT32)mClustersIB.size();
+			return (UINT)mClustersIB.size();
 		}
 	private:
 		AutoRef<IVbView> LoadVB(IGpuDevice* device, XndAttribute * pAttr, UINT stride, TimeKeys & tkeys, UINT & resSize, EVertexStreamType stream);
 		void SaveVB(IGpuDevice* device, XndAttribute * pAttr, IVbView* vb, TimeKeys & tkeys, UINT stride);
 
-		bool GetMeshBuffer(IGpuDevice* device, std::vector<v3dxVector3>& Verts, std::vector<UINT32>& Indexes);
+		bool GetMeshBuffer(IGpuDevice* device, std::vector<v3dxVector3>& Verts, std::vector<UINT>& Indexes);
 	protected:
 		std::string				mName;
 		AutoRef<FGeomMesh>		mGeometryMesh;
@@ -285,107 +285,126 @@ namespace NxRHI
 		// cluster relative
 		std::vector<QuarkCluster> mClusters;
 		std::vector<v3dxVector3> mClustersVB;
-		std::vector<UINT32> mClustersIB;
+		std::vector<UINT> mClustersIB;
 
         AutoRef<FVertexArray>		mClustersVertexArray;
         AutoRef<IIbView>			mClustersIndexView;
 
 		AutoRef<FTransientBuffer>	mVertexBuffer;
 		AutoRef<FTransientBuffer>	mIndexBuffer;
-	};
-	
-	struct TR_CLASS(SV_LayoutStruct = 8)
-		FMeshVertex
-	{
-		v3dxVector3 Position;
-		v3dxVector3 Normal;
-		v3dVector4_t Tangent;
-		DWORD Color;
-		v3dxVector2 UV;
-		v3dVector4_t LightMap;
-		DWORD SkinIndex;
-		v3dVector4_t SkinWeight;
-	};
-	class TR_CLASS()
-		FMeshDataProvider : public IWeakReference
-	{
 	public:
-		std::vector<std::vector<FMeshAtomDesc>>	mAtoms;
-		std::vector<AutoRef<VIUnknown>>		mAtomExtDatas;
-		v3dxBox3				mAABB;
-		AutoRef<IBlobObject>	mVertexBuffers[VST_Number];
-		AutoRef<IBlobObject>	IndexBuffer;
-		AutoRef<IBlobObject>	FaceBuffer = nullptr;
-		bool					IsIndex32 = false;
-		UINT					VertexNumber = 0;
-		UINT					PrimitiveNumber = 0;
+		struct FStreamTypeInfo
+		{
+			const char* XndName = nullptr;
+			int Stride = 0;
+		};
+		static inline FStreamTypeInfo GetStreamTypeInfo(EVertexStreamType type)
+		{
+			FStreamTypeInfo result;
+			switch (type)
+			{
+			case VST_Position:
+			{
+				result.XndName = "Position";
+				result.Stride = sizeof(v3dxVector3);
+				break;
+			}
+			case VST_Normal:
+			{
+				result.XndName = "Normal";
+				result.Stride = sizeof(v3dxVector3);
+				break;
+			}
+			case VST_Tangent:
+			{
+				result.XndName = "Tangent";
+				result.Stride = sizeof(v3dVector4_t);
+				break;
+			}
+			case VST_Color:
+			{
+				result.XndName = "VertexColor";
+				result.Stride = sizeof(DWORD);
+				break;
+			}
+			case VST_UV:
+			{
+				result.XndName = "DiffuseUV";
+				result.Stride = sizeof(v3dxVector2);
+				break;
+			}
+			case VST_LightMap:
+			{
+				result.XndName = "LightMapUV";
+				result.Stride = sizeof(v3dVector4_t);
+				break;
+			}
+			case VST_SkinIndex:
+			{
+				result.XndName = "BlendIndex";
+				result.Stride = sizeof(DWORD);
+				break;
+			}
+			case VST_SkinWeight:
+			{
+				result.XndName = "BlendWeight";
+				result.Stride = sizeof(v3dVector4_t);
+				break;
+			}
+			case VST_TerrainIndex:
+			{
+				result.XndName = "Fix_VIDTerrain";
+				result.Stride = sizeof(DWORD);
+				break;
+			}
+			case VST_TerrainGradient:
+			{
+				result.XndName = "TerrainGradient";
+				result.Stride = sizeof(DWORD);
+				break;
+			}
+			case VST_InstPos:
+			{
+				result.XndName = nullptr;// "InstPos";
+				result.Stride = sizeof(v3dxVector3);
+				break;
+			}
+			case VST_InstQuat:
+			{
+				result.XndName = nullptr;// "InstQuat";
+				result.Stride = sizeof(v3dxQuaternion);
+				break;
+			}
+			case VST_InstScale:
+			{
+				result.XndName = nullptr;// "InstScale";
+				result.Stride = sizeof(v3dxVector3);
+				break;
+			}
+			case VST_F4_1:
+			{
+				result.XndName = nullptr;// "F41";
+				result.Stride = sizeof(v3dVector4_t);
+				break;
+			}
+			case VST_F4_2:
+			{
+				result.XndName = nullptr;// "F42";
+				result.Stride = sizeof(v3dVector4_t);
+				break;
+			}
+			case VST_F4_3:
+			{
+				result.XndName = nullptr;// "F43";
+				result.Stride = sizeof(v3dVector4_t);
+				break;
+			}
+			default:
+				break;
+			}
 
-		DWORD					StreamTypes = 0;
-		int						AtomSize = 0;
-	public:
-		ENGINE_RTTI(FMeshDataProvider);
-
-		FMeshDataProvider();
-		~FMeshDataProvider();
-		virtual void Cleanup() override;
-
-		void Reset();
-
-		bool InitFromMesh(IGpuDevice* device, FMeshPrimitives* mesh);
-		bool Init(DWORD streams, bool isIndex32, int atom);
-		bool Init();
-
-		bool LoadFromMeshPrimitive(XndNode * pNode, EVertexStreamType streams);
-
-		void GetAABB(v3dxBox3 * box) {
-			*box = mAABB;
+			return result;
 		}
-		void SetAABB(v3dxBox3 * box) {
-			mAABB = *box;
-		}
-		UINT GetVertexNumber() const;
-		UINT GetPrimitiveNumber() const;
-		UINT GetAtomNumber() const;
-		IBlobObject* CreateStream(EVertexStreamType index);
-		IBlobObject* GetStream(EVertexStreamType index);
-		IBlobObject* GetIndices();
-
-		FMeshAtomDesc* GetAtom(UINT index, UINT lod);
-		VIUnknown* GetAtomExtData(UINT index) const{
-			if (index >= mAtomExtDatas.size())
-				return nullptr;
-			return mAtomExtDatas[index];
-		}
-		void PushAtom(const FMeshAtomDesc* pDescLODs, UINT count, VIUnknown* ext);
-		bool SetAtom(UINT index, UINT lod, const FMeshAtomDesc& desc);
-		void PushAtomLOD(UINT index, const FMeshAtomDesc& desc);
-		UINT GetAtomLOD(UINT index);
-		bool GetTriangle(int index, UINT * vA, UINT * vB, UINT * vC);
-		bool GetAtomTriangle(UINT atom, UINT index, UINT * vA, UINT * vB, UINT * vC);
-		int IntersectTriangle(const v3dxVector3 * scale, const v3dxVector3 * vStart, const v3dxVector3 * vEnd, VHitResult * result);
-		void* GetVertexPtr(EVertexStreamType stream, UINT index);
-
-		UINT AddVertex(const v3dxVector3 * pos, const v3dxVector3 * nor, const v3dxVector2 * uv, DWORD color);
-		UINT AddVertex(const v3dxVector3* pos, const v3dxVector3* nor, const v3dxVector3* tangent, const v3dxVector2* uv, DWORD color);
-		UINT AddVertex(const v3dxVector3* pos, const v3dxVector3* nor, const v3dxVector2* uv, const v3dxQuaternion* lighmapUV, DWORD color);
-		UINT AddVertex(const FMeshVertex& vertex);
-		void AddVertex(const FMeshVertex* pVertex, UINT num);
-		
-		bool AddVertex_Pos_UV_Color_Index(const void* pVertex, UINT num, bool bInvertY = false, float CanvasHeight = 0);
-
-		void ResizeVertexBuffers(UINT size);
-
-		//alternative interface for same mesh
-		vBOOL AddTriangle(UINT a, UINT b, UINT c);
-		vBOOL AddTriangle(UINT a, UINT b, UINT c, USHORT faceData);
-		vBOOL AddTriangle(UINT* pTri, UINT numOfTri);
-
-		vBOOL AddLine(UINT a, UINT b);
-
-		bool ToMesh(ICommandList* cmd, FMeshPrimitives * mesh);
-		FInputLayoutDesc* GetInputLayoutDesc();
-	private:
-		void LoadVB(XndAttribute * pAttr, UINT stride, EVertexStreamType stream);
 	};
 }
 

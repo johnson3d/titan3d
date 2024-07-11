@@ -31,6 +31,60 @@ v3dxQuaternion v3dxQuaternion::ZERO(0.f, 0.f, 0.f, 0.f);
 
 using namespace TPL_HELP; 
 
+
+
+struct FTestQuat
+{
+	FTestQuat()
+	{
+		for (int i = 0; i < 360; i++)
+		{
+			for (int j = 0; j < 360; j++)
+			{
+				for (int k = 0; k < 360; k++)
+				{
+					v3dxQuaternion tmp;
+					v3dxRotator a0;
+					a0.Yaw = ((float)i) * V_DEG_TO_RAD;
+					a0.Pitch = ((float)j) * V_DEG_TO_RAD;
+					a0.Roll = ((float)k) * V_DEG_TO_RAD;
+					tmp.eulerRadianAnglesToQuat(a0.Yaw, a0.Pitch, a0.Roll);
+					v3dxRotator a;
+					auto det = tmp.ToEuler(a);
+					
+					v3dxRotator ca;
+					ca.Yaw = a.Yaw - a0.Yaw;
+					ca.Pitch = a.Pitch - a0.Pitch;
+					ca.Roll = a.Roll - a0.Roll;
+					ca.Yaw = Math::ClampAngleRad(ca.Yaw);
+					ca.Pitch = Math::ClampAngleRad(ca.Pitch);
+					ca.Roll = Math::ClampAngleRad(ca.Roll);
+
+					const float Epsl = 0.02f;
+					const float TPI = 6.283;
+					const float CV = TPI - Epsl;
+					if ((ca.Yaw > Epsl && ca.Yaw < CV) ||
+						(ca.Pitch > Epsl && ca.Pitch < CV) ||
+						(ca.Roll > Epsl && ca.Roll < CV))
+					//if (i != x || j != y || k != z)
+					{
+						if (det > 1.0 - 0.05f || det < -1.0f + 0.05f)
+						{
+							//int xxx = 0;
+						}
+						else
+						{
+							//int xxx = 0;
+						}
+					}
+				}
+			}
+		}
+	}
+};
+
+//static FTestQuat ttt;
+
 //-----------------------------------------------------------------------
 void v3dxQuaternion::slerp(v3dxQuaternion& temp, float t, const v3dxQuaternion& rkP,
 	const v3dxQuaternion& to, bool shortestPath)
@@ -948,6 +1002,12 @@ Qz = [ cos(c/2), (0, 0, sin(c/2))]
 //		);
 //		*/
 //}
+
+
+float v3dxQuaternion::ToEuler(v3dxRotator& result)
+{
+	return v3dxYawPitchRollQuaternionRotation(this, &result);
+}
 
 #if !defined(PLATFORM_WIN)
 #pragma clang diagnostic pop

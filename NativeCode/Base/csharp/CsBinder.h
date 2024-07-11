@@ -124,7 +124,7 @@ struct UAnyValue
 		INT64 mI64Value;
 		BYTE mUI8Value;
 		UINT16 mUI16Value;
-		UINT32 mUI32Value;
+		UINT mUI32Value;
 		UINT64 mUI64Value;
 		float mF32Value;
 		double mF64Value;
@@ -204,7 +204,7 @@ struct UAnyValue
 		mValueType = EValueType::UI16;
 		mUI16Value = v;
 	}
-	void SetUI32(UINT32 v)
+	void SetUI32(UINT v)
 	{
 		Dispose();
 		mValueType = EValueType::UI32;
@@ -354,7 +354,7 @@ struct UAnyValue
 	{
 		SetUI16(v);
 	}
-	void SetValue(const UINT32 v)
+	void SetValue(const UINT v)
 	{
 		SetUI32(v);
 	}
@@ -518,7 +518,7 @@ struct UAnyValue
 		case UI16:
 			return sizeof(UINT16);
 		case UI32:
-			return sizeof(UINT32);
+			return sizeof(UINT);
 		case UI64:
 			return sizeof(UINT64);
 		case F32:

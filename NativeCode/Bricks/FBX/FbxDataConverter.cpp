@@ -173,8 +173,8 @@ float FBXDataConverter::ConvertDist(const FbxDouble& Distance)
 v3dxMatrix4 FBXDataConverter::ConvertMatrix(const FbxAMatrix& Matrix)
 {
 	v3dxQuaternion flipRot = ConvertQuat(Matrix.GetQ());
-	v3dxVector3 rot;
-	v3dxYawPitchRollQuaternionRotation(flipRot, &rot);
+	v3dxRotator rot;
+	v3dxYawPitchRollQuaternionRotation(&flipRot, &rot);
 	v3dxVector3 flipPos = ConvertPos(Matrix.GetT());
 	v3dxVector3 flipSacle = ConvertScale(Matrix.GetS());
 	v3dxMatrix4 result;

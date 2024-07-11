@@ -153,7 +153,7 @@ namespace NxRHI
 			return false;
 		}
 
-		UINT32						mDeviceNumber = 0;
+		UINT						mDeviceNumber = 0;
 		vkEnumeratePhysicalDevices(mVKInstance, &mDeviceNumber, nullptr);
 		mHwDevices.resize(mDeviceNumber);
 		vkEnumeratePhysicalDevices(mVKInstance, &mDeviceNumber, mHwDevices.data());

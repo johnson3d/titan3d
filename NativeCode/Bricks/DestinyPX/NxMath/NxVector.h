@@ -44,7 +44,7 @@ namespace NxMath
 		}
 		inline bool Any()
 		{
-			return X || Y || Z && W;
+			return X || Y || Z || W;
 		}
 	};
 #pragma endregion
@@ -98,7 +98,7 @@ namespace NxMath
 		}
 		inline NxVector2<Type> GetSignVector() const
 		{
-			return NxVector3<Type>(Type::FloatSelect(X, Type::One(), Type::MinusOne()),
+			return NxVector2<Type>(Type::FloatSelect(X, Type::One(), Type::MinusOne()),
 				Type::FloatSelect(Y, Type::One(), Type::MinusOne()));
 		}
 		inline Type LengthSquared() const

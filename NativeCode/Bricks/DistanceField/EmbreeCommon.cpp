@@ -28,7 +28,7 @@ void EmbreeFilterFunc(const struct RTCFilterFunctionNArguments* args)
 
 void EmbreeErrorFunc(void* userPtr, RTCError code, const char* str)
 {
-	VFX_LTRACE(ELTT_Error, "Embree error: %s Code=%u", str, (UINT32)code);
+	VFX_LTRACE(ELTT_Error, "Embree error: %s Code=%u", str, (UINT)code);
 }
 
 void EmbreeManager::SetupEmbreeScene(VNameString meshName, NxRHI::FMeshDataProvider& meshProvider, float DistanceFieldResolutionScale, FEmbreeScene& embreeScene)
@@ -66,9 +66,9 @@ void EmbreeManager::SetupEmbreeScene(VNameString meshName, NxRHI::FMeshDataProvi
 	std::vector<INT32> FilteredTriangles;
 	FilteredTriangles.reserve(NumTriangles);
 	auto pPos = (v3dxVector3*)meshProvider.GetStream(NxRHI::VST_Position)->GetData();
-	for (UINT32 triangleIndex = 0; triangleIndex < NumTriangles; ++triangleIndex)
+	for (UINT triangleIndex = 0; triangleIndex < NumTriangles; ++triangleIndex)
 	{
-		UINT32 i0, i1, i2;
+		UINT i0, i1, i2;
 		if (meshProvider.GetTriangle(triangleIndex, &i0, &i1, &i2))
 		{
 			v3dxVector3 v0 = pPos[i0];
@@ -91,12 +91,12 @@ void EmbreeManager::SetupEmbreeScene(VNameString meshName, NxRHI::FMeshDataProvi
 	embreeScene.Geometry.IndexArray.resize(NumFilteredIndices);
 
 	v3dxVector3* EmbreeVertices = embreeScene.Geometry.VertexArray.data();
-	UINT32* EmbreeIndices = embreeScene.Geometry.IndexArray.data();
+	UINT* EmbreeIndices = embreeScene.Geometry.IndexArray.data();
 	embreeScene.Geometry.TriangleDescs.reserve(FilteredTriangles.size());
 
 	for (INT32 FilteredTriangleIndex = 0; FilteredTriangleIndex < FilteredTriangles.size(); FilteredTriangleIndex++)
 	{
-		UINT32 I0, I1, I2;
+		UINT I0, I1, I2;
 		v3dxVector3 V0, V1, V2;
 
 		const INT32 TriangleIndex = FilteredTriangles[FilteredTriangleIndex];
@@ -129,7 +129,7 @@ void EmbreeManager::SetupEmbreeScene(VNameString meshName, NxRHI::FMeshDataProvi
 	embreeScene.Geometry.InternalGeometry = Geometry;
 
 	rtcSetSharedGeometryBuffer(Geometry, RTC_BUFFER_TYPE_VERTEX, 0, RTC_FORMAT_FLOAT3, EmbreeVertices, 0, sizeof(v3dxVector3), NumVertices);
-	rtcSetSharedGeometryBuffer(Geometry, RTC_BUFFER_TYPE_INDEX, 0, RTC_FORMAT_UINT3, EmbreeIndices, 0, sizeof(UINT32) * 3, FilteredTriangles.size());
+	rtcSetSharedGeometryBuffer(Geometry, RTC_BUFFER_TYPE_INDEX, 0, RTC_FORMAT_UINT3, EmbreeIndices, 0, sizeof(UINT) * 3, FilteredTriangles.size());
 
 	rtcSetGeometryUserData(Geometry, &embreeScene.Geometry);
 	rtcSetGeometryIntersectFilterFunction(Geometry, EmbreeFilterFunc);
@@ -171,11 +171,11 @@ bool EmbreePointQueryFunction(RTCPointQueryFunctionArguments* args)
 	assert(TriangleIndex < Context->NumTriangles);
 
 	const v3dxVector3* VertexBuffer = (const v3dxVector3*)rtcGetGeometryBufferData(Context->MeshGeometry, RTC_BUFFER_TYPE_VERTEX, 0);
-	const UINT32* IndexBuffer = (const UINT32*)rtcGetGeometryBufferData(Context->MeshGeometry, RTC_BUFFER_TYPE_INDEX, 0);
+	const UINT* IndexBuffer = (const UINT*)rtcGetGeometryBufferData(Context->MeshGeometry, RTC_BUFFER_TYPE_INDEX, 0);
 
-	const UINT32 I0 = IndexBuffer[TriangleIndex * 3 + 0];
-	const UINT32 I1 = IndexBuffer[TriangleIndex * 3 + 1];
-	const UINT32 I2 = IndexBuffer[TriangleIndex * 3 + 2];
+	const UINT I0 = IndexBuffer[TriangleIndex * 3 + 0];
+	const UINT I1 = IndexBuffer[TriangleIndex * 3 + 1];
+	const UINT I2 = IndexBuffer[TriangleIndex * 3 + 2];
 
 	const v3dxVector3 V0 = VertexBuffer[I0];
 	const v3dxVector3 V1 = VertexBuffer[I1];

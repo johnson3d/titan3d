@@ -22,6 +22,14 @@ class v3dxMatrix4;
 
 #pragma pack(push,4)
 
+class v3dxRotator
+{
+public:
+	float Yaw;
+	float Pitch;
+	float Roll;
+};
+
 class v3dxQuaternion : public v3dVector4_t
 {
 public:
@@ -44,10 +52,11 @@ public:
 	{
 		v3dxQuaternionRotationAxis((v3dxQuaternion*)this, &axis, fRadianAngle);
 	}
-	inline void eulerRadianAnglesToQuat(float p_x, float p_y, float p_z)
+	inline void eulerRadianAnglesToQuat(float yaw, float pitch, float roll)
 	{
-		v3dxQuaternionRotationYawPitchRoll(this, p_y, p_x, p_z);
+		v3dxQuaternionRotationYawPitchRoll(this, yaw, pitch, roll);
 	}
+	float ToEuler(v3dxRotator& angle);
 	void getAxisRadianAngle(v3dxVector3 &v3, float &fAngle) const;
 	
 	void fromRotationMatrix(const v3dxMatrix3& kRot);

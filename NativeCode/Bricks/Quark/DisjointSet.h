@@ -9,20 +9,20 @@ class FDisjointSet
 {
 public:
 			FDisjointSet() {}
-			FDisjointSet( const UINT32 Size );
+			FDisjointSet( const UINT Size );
 	
-	void	Init( UINT32 Size );
+	void	Init( UINT Size );
 	void	Reset();
-	void	AddDefaulted( UINT32 Num = 1 );
+	void	AddDefaulted( UINT Num = 1 );
 
-	void	Union( UINT32 x, UINT32 y );
-	void	UnionSequential( UINT32 x, UINT32 y );
-	UINT32	Find( UINT32 i );
+	void	Union( UINT x, UINT y );
+	void	UnionSequential( UINT x, UINT y );
+	UINT	Find( UINT i );
 
-	UINT32	operator[]( UINT32 i ) const	{ return Parents[i]; }
+	UINT	operator[]( UINT i ) const	{ return Parents[i]; }
 
 private:
-	std::vector< UINT32 >	Parents;
+	std::vector< UINT >	Parents;
 };
 
 NS_END

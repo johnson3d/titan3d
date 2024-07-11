@@ -21,7 +21,7 @@ void RadixSort32(ValueType* Dst, ValueType* Src, CountType Num, SortKeyClass Sor
         const ValueType* s = (const ValueType*)Src;
         for (CountType i = 0; i < Num; i++)
         {
-            UINT32 Key = SortKey(s[i]);
+            UINT Key = SortKey(s[i]);
             Histogram0[(Key >> 0) & 1023]++;
             Histogram1[(Key >> 10) & 2047]++;
             Histogram2[(Key >> 21) & 2047]++;
@@ -54,7 +54,7 @@ void RadixSort32(ValueType* Dst, ValueType* Src, CountType Num, SortKeyClass Sor
         for (CountType i = 0; i < Num; i++)
         {
             ValueType Value = s[i];
-            UINT32 Key = SortKey(Value);
+            UINT Key = SortKey(Value);
             d[++Histogram0[((Key >> 0) & 1023)]] = Value;
         }
     }
@@ -65,7 +65,7 @@ void RadixSort32(ValueType* Dst, ValueType* Src, CountType Num, SortKeyClass Sor
         for (CountType i = 0; i < Num; i++)
         {
             ValueType Value = s[i];
-            UINT32 Key = SortKey(Value);
+            UINT Key = SortKey(Value);
             d[++Histogram1[((Key >> 10) & 2047)]] = Value;
         }
     }
@@ -76,13 +76,13 @@ void RadixSort32(ValueType* Dst, ValueType* Src, CountType Num, SortKeyClass Sor
         for (CountType i = 0; i < Num; i++)
         {
             ValueType Value = s[i];
-            UINT32 Key = SortKey(Value);
+            UINT Key = SortKey(Value);
             d[++Histogram2[((Key >> 21) & 2047)]] = Value;
         }
     }
 }
 
-static __forceinline UINT32 MortonCode3(UINT32 x)
+static inline UINT MortonCode3(UINT x)
 {
     x &= 0x000003ff;
     x = (x ^ (x << 16)) & 0xff0000ff;
@@ -108,24 +108,24 @@ public:
 	// Inclusive
 	struct FRange
 	{
-		UINT32	Begin;
-		UINT32	End;
+		UINT	Begin;
+		UINT	End;
 
 		bool operator<( const FRange& Other) const { return Begin < Other.Begin; }
 	};
 	std::vector< FRange >	Ranges;
-	std::vector< UINT32 >	Indexes;
-	std::vector< UINT32 >	SortedTo;
+	std::vector< UINT >	Indexes;
+	std::vector< UINT >	SortedTo;
 
 public:
-				FGraphPartitioner( UINT32 InNumElements );
+				FGraphPartitioner( UINT InNumElements );
 
-	FGraphData*	NewGraph( UINT32 NumAdjacency ) const;
+	FGraphData*	NewGraph( UINT NumAdjacency ) const;
 
-	void		AddAdjacency( FGraphData* Graph, UINT32 AdjIndex, INT32 Cost );
-	void		AddLocalityLinks( FGraphData* Graph, UINT32 Index, INT32 Cost );
+	void		AddAdjacency( FGraphData* Graph, UINT AdjIndex, INT32 Cost );
+	void		AddLocalityLinks( FGraphData* Graph, UINT Index, INT32 Cost );
 
-//     bool GetCenter(std::vector<v3dxVector3>& Verts, std::vector<UINT32>& Indexes, UINT32 TriIndex, v3dxVector3& Center)
+//     bool GetCenter(std::vector<v3dxVector3>& Verts, std::vector<UINT>& Indexes, UINT TriIndex, v3dxVector3& Center)
 //     {
 //         if (Indexes[TriIndex * 3 + 0] >= Verts.size() ||
 //             Indexes[TriIndex * 3 + 1] >= Verts.size() ||
@@ -141,17 +141,17 @@ public:
 //         return true;
 //     }
 	template< typename FGetCenter >
-	void		BuildLocalityLinks( FDisjointSet& DisjointSet, const v3dxBox3& Bounds, const std::vector<INT32>& GroupIndexes, FGetCenter& GetCenter/*std::vector<v3dxVector3>& Verts, std::vector<UINT32>& Indexes*/)
+	void		BuildLocalityLinks( FDisjointSet& DisjointSet, const v3dxBox3& Bounds, const std::vector<INT32>& GroupIndexes, FGetCenter& GetCenter/*std::vector<v3dxVector3>& Verts, std::vector<UINT>& Indexes*/)
     {
-        std::vector< UINT32 > SortKeys;
+        std::vector< UINT > SortKeys;
         SortKeys.resize(NumElements);
         SortedTo.resize(NumElements);
 
         const bool bElementGroups = !GroupIndexes.empty();	// Only create locality links between elements with the same group index
 
         // 	ParallelFor( TEXT("BuildLocalityLinks.PF"), NumElements, 4096,
-        // 		[&]( UINT32 Index )
-        for (UINT32 Index = 0; Index < NumElements; ++Index)
+        // 		[&]( UINT Index )
+        for (UINT Index = 0; Index < NumElements; ++Index)
         {
             v3dxVector3 Center;
             bool isValid = GetCenter(Index, Center);
@@ -160,16 +160,16 @@ public:
 
             v3dxVector3 CenterLocal = (Center - Bounds.Min()) / v3dxVector3(Bounds.Max() - Bounds.Min()).getMax();
 
-            UINT32 Morton;
-            Morton = MortonCode3(UINT32(CenterLocal.X * 1023));
-            Morton |= MortonCode3(UINT32(CenterLocal.Y * 1023)) << 1;
-            Morton |= MortonCode3(UINT32(CenterLocal.Z * 1023)) << 2;
+            UINT Morton;
+            Morton = MortonCode3(UINT(CenterLocal.X * 1023));
+            Morton |= MortonCode3(UINT(CenterLocal.Y * 1023)) << 1;
+            Morton |= MortonCode3(UINT(CenterLocal.Z * 1023)) << 2;
             SortKeys[Index] = Morton;
         }
         //);
 
         RadixSort32(&SortedTo[0], &Indexes[0], NumElements,
-            [&](UINT32 Index)
+            [&](UINT Index)
             {
                 return SortKeys[Index];
             });
@@ -178,17 +178,17 @@ public:
 
         //Swap( Indexes, SortedTo );
         {
-            std::vector< UINT32 > temp;
+            std::vector< UINT > temp;
             temp.resize(Indexes.size());
             if (Indexes.size() > 0)
             {
-                memcpy(&temp[0], &Indexes[0], sizeof(UINT32) * Indexes.size());
+                memcpy(&temp[0], &Indexes[0], sizeof(UINT) * Indexes.size());
             }
 
             Indexes.resize(SortedTo.size());
             if (SortedTo.size() > 0)
             {
-                memcpy(&Indexes[0], &SortedTo[0], sizeof(UINT32) * SortedTo.size());
+                memcpy(&Indexes[0], &SortedTo[0], sizeof(UINT) * SortedTo.size());
             }
 
             SortedTo.resize(temp.size());
@@ -198,7 +198,7 @@ public:
             }
         }
 
-        for (UINT32 i = 0; i < NumElements; i++)
+        for (UINT i = 0; i < NumElements; i++)
         {
             SortedTo[Indexes[i]] = i;
         }
@@ -210,17 +210,17 @@ public:
         // Range of identical IslandID denoting that elements are connected.
         // Used for jumping past connected elements to the next nearby disjoint element.
         {
-            UINT32 RunIslandID = 0;
-            UINT32 RunFirstElement = 0;
+            UINT RunIslandID = 0;
+            UINT RunFirstElement = 0;
 
-            for (UINT32 i = 0; i < NumElements; i++)
+            for (UINT i = 0; i < NumElements; i++)
             {
-                UINT32 IslandID = DisjointSet.Find(Indexes[i]);
+                UINT IslandID = DisjointSet.Find(Indexes[i]);
 
                 if (RunIslandID != IslandID)
                 {
                     // We found the end so rewind to the beginning of the run and fill.
-                    for (UINT32 j = RunFirstElement; j < i; j++)
+                    for (UINT j = RunFirstElement; j < i; j++)
                     {
                         IslandRuns[j].End = i - 1;
                     }
@@ -233,20 +233,20 @@ public:
                 IslandRuns[i].Begin = RunFirstElement;
             }
             // Finish the last run
-            for (UINT32 j = RunFirstElement; j < NumElements; j++)
+            for (UINT j = RunFirstElement; j < NumElements; j++)
             {
                 IslandRuns[j].End = NumElements - 1;
             }
         }
 
-        for (UINT32 i = 0; i < NumElements; i++)
+        for (UINT i = 0; i < NumElements; i++)
         {
-            UINT32 Index = Indexes[i];
+            UINT Index = Indexes[i];
 
-            UINT32 RunLength = IslandRuns[i].End - IslandRuns[i].Begin + 1;
+            UINT RunLength = IslandRuns[i].End - IslandRuns[i].Begin + 1;
             if (RunLength < 128)
             {
-                UINT32 IslandID = DisjointSet[Index];
+                UINT IslandID = DisjointSet[Index];
                 INT32 GroupID = bElementGroups ? GroupIndexes[Index] : 0;
 
                 v3dxVector3 Center;
@@ -254,9 +254,9 @@ public:
                 if (!isValid)
                     continue;
 
-                const UINT32 MaxLinksPerElement = 5;
+                const UINT MaxLinksPerElement = 5;
 
-                UINT32 ClosestIndex[MaxLinksPerElement];
+                UINT ClosestIndex[MaxLinksPerElement];
                 float  ClosestDist2[MaxLinksPerElement];
                 for (INT32 k = 0; k < MaxLinksPerElement; k++)
                 {
@@ -266,18 +266,18 @@ public:
 
                 for (int Direction = 0; Direction < 2; Direction++)
                 {
-                    UINT32 Limit = Direction ? NumElements - 1 : 0;
-                    UINT32 Step = Direction ? 1 : -1;
+                    UINT Limit = Direction ? NumElements - 1 : 0;
+                    UINT Step = Direction ? 1 : -1;
 
-                    UINT32 Adj = i;
+                    UINT Adj = i;
                     for (INT32 Iterations = 0; Iterations < 16; Iterations++)
                     {
                         if (Adj == Limit)
                             break;
                         Adj += Step;
 
-                        UINT32 AdjIndex = Indexes[Adj];
-                        UINT32 AdjIslandID = DisjointSet[AdjIndex];
+                        UINT AdjIndex = Indexes[Adj];
+                        UINT AdjIslandID = DisjointSet[AdjIndex];
                         INT32 AdjGroupID = bElementGroups ? GroupIndexes[AdjIndex] : 0;
                         if (IslandID == AdjIslandID || (GroupID != AdjGroupID))
                         {
@@ -303,11 +303,11 @@ public:
                                     //Swap( AdjIndex, ClosestIndex[k] );
                                     //Swap( AdjDist2, ClosestDist2[k] );
 
-                                    UINT32 temp = AdjIndex;
+                                    UINT temp = AdjIndex;
                                     AdjIndex = ClosestIndex[k];
                                     ClosestIndex[k] = temp;
 
-                                    temp = UINT32(AdjDist2);
+                                    temp = UINT(AdjDist2);
                                     AdjDist2 = ClosestDist2[k];
                                     ClosestDist2[k] = AdjDist2;
                                 }
@@ -335,22 +335,22 @@ public:
 	void		Partition( FGraphData* Graph, INT32 InMinPartitionSize, INT32 InMaxPartitionSize );
 	void		PartitionStrict( FGraphData* Graph, INT32 InMinPartitionSize, INT32 InMaxPartitionSize, bool bThreaded );
 
-	void		InsertToLocalityLinks(UINT32 k, UINT32 v);
+	void		InsertToLocalityLinks(UINT k, UINT v);
 private:
 	void		BisectGraph( FGraphData* Graph, FGraphData* ChildGraphs[2] );
 	void		RecursiveBisectGraph( FGraphData* Graph );
 
-	UINT32		NumElements;
+	UINT		NumElements;
 	INT32		MinPartitionSize = 0;
 	INT32		MaxPartitionSize = 0;
 
-	std::atomic< UINT32 >	NumPartitions;
+	std::atomic< UINT >	NumPartitions;
 
 	std::vector< INT32 >		PartitionIDs;
 	std::vector< INT32 >		SwappedWith;
 
-	typedef std::vector<UINT32> LinkValues;
-	std::map< UINT32, LinkValues >	LocalityLinks;
+	typedef std::vector<UINT> LinkValues;
+	std::map< UINT, LinkValues >	LocalityLinks;
 };
 
 NS_END

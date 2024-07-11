@@ -1,5 +1,5 @@
 #pragma once
-#include "../../NextRHI/NxGeomMesh.h"
+#include "../../Graphics/Mesh/MeshDataProvider.h"
 #include <string>
 
 NS_BEGIN

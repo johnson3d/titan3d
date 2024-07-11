@@ -23,7 +23,7 @@ namespace NxRHI
 		auto NumRTV = mRenderPass->Desc.NumOfMRT;
 		mDX11RTVArray.resize(NumRTV);
 
-		UINT32 RTVIdx = 0;
+		UINT RTVIdx = 0;
 		for (RTVIdx = 0; RTVIdx < NumRTV; RTVIdx++)
 		{
 			auto refRTV = mRenderTargets[RTVIdx];

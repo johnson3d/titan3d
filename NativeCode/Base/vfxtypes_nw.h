@@ -56,12 +56,12 @@ typedef unsigned int			UINT;
 typedef unsigned long			ULONG;
 typedef unsigned char			UINT8;
 typedef unsigned short			UINT16;
-typedef unsigned int			UINT32;
+typedef unsigned int			UINT;
 typedef uint64_t 				UINT64;
 
 typedef UINT8					BYTE;
 typedef UINT16					WORD;
-typedef UINT32					DWORD;
+typedef UINT					DWORD;
 typedef UINT64					QWORD;
 	
 typedef unsigned char			uchar;
@@ -289,6 +289,16 @@ typedef void*		HWND;
 #define HIWORD(_dw)     ((WORD)((((UINT_PTR)(_dw)) >> 16) & 0xffff))
 #define LODWORD(_qw)    ((DWORD)(_qw))
 #define HIDWORD(_qw)    ((DWORD)(((_qw) >> 32) & 0xffffffff))
+
+inline vBOOL _BitScanReverse(DWORD* Index, DWORD Mask)
+{
+	return vFALSE;
+}
+
+inline vBOOL _BitScanReverse64(DWORD* Index, UINT64 Mask)
+{
+	return vFALSE;
+}
 
 #ifndef _SYSTEMTIME_
 #define _SYSTEMTIME_
