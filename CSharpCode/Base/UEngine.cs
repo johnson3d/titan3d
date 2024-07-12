@@ -354,7 +354,7 @@ namespace EngineNS
                     return false;
                 }
 
-                var bCapturing = GfxDevice.RenderCmdQueue.BeginFrameCapture();
+                var bCapturing = GfxDevice.RenderSwapQueue.BeginFrameCapture();
 
                 //Do engine frame tick
                 {
@@ -367,7 +367,7 @@ namespace EngineNS
                 }
 
                 if (bCapturing)
-                    GfxDevice.RenderCmdQueue.EndFrameCapture();
+                    GfxDevice.RenderSwapQueue.EndFrameCapture();
 
                 InputSystem.AfterTick();
 
@@ -394,7 +394,7 @@ namespace EngineNS
         }
         public void FinalCleanup()
         {
-            GfxDevice.RenderCmdQueue.Reset();
+            GfxDevice.RenderSwapQueue.Reset();
             TickableManager.Cleanup();
             StopSystemThreads();
 

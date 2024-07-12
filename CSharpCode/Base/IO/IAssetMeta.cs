@@ -530,6 +530,10 @@ namespace EngineNS.IO
                 }
             }
         }
+        public virtual async Thread.Async.TtTask<bool> AutoGenSnap()
+        {
+            return true;
+        }
         [Rtti.Meta]
         public EGui.UUvAnim Icon
         {

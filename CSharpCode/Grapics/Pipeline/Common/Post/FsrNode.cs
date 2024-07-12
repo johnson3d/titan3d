@@ -240,7 +240,7 @@ namespace EngineNS.Graphics.Pipeline.Common.Post
                 cmd.PushGpuDraw(RCASDrawcall);
                 cmd.FlushDraws();
             }
-            UEngine.Instance.GfxDevice.RenderCmdQueue.QueueCmdlist(cmd);
+            policy.CommitCommandList(cmd);
         }
         private static float ARcpF1(float v)
         {

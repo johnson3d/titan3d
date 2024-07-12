@@ -179,10 +179,10 @@ namespace EngineNS.Editor.Forms
 
             var aabb = new BoundingBox(3,3,3);
             float radius = aabb.GetMaxSide();
-            BoundingSphere sphere;
-            sphere.Center = aabb.GetCenter() + new Vector3(0, 1, 0);
+            DBoundingSphere sphere;
+            sphere.Center = aabb.GetCenter().AsDVector() + new DVector3(0, 1, 0);
             sphere.Radius = radius;
-            policy.DefaultCamera.AutoZoom(ref sphere);
+            policy.DefaultCamera.AutoZoom(in sphere);
 
             {
                 var PlaneMesh = new Graphics.Mesh.TtMesh();

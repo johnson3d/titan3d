@@ -252,10 +252,10 @@ namespace EngineNS.Bricks.Particle.Editor
 
             var aabb = meshNode.AABB;
             var radius = (float)aabb.GetMaxSide();
-            BoundingSphere sphere;
-            sphere.Center = aabb.GetCenter().ToSingleVector3();
+            DBoundingSphere sphere;
+            sphere.Center = aabb.GetCenter();
             sphere.Radius = radius;
-            policy.DefaultCamera.AutoZoom(ref sphere);
+            policy.DefaultCamera.AutoZoom(in sphere);
             //this.RenderPolicy.GBuffers.SunLightColor = new Vector3(1, 1, 1);
             //this.RenderPolicy.GBuffers.SunLightDirection = new Vector3(1, 1, 1);
             //this.RenderPolicy.GBuffers.SkyLightColor = new Vector3(0.1f, 0.1f, 0.1f);

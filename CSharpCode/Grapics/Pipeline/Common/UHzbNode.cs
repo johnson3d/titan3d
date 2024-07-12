@@ -231,7 +231,7 @@ namespace EngineNS.Graphics.Pipeline.Common
                     cmd.FlushDraws();
                 }
 
-                UEngine.Instance.GfxDevice.RenderCmdQueue.QueueCmdlist(cmd);
+                policy.CommitCommandList(cmd);
             }   
         }
     }

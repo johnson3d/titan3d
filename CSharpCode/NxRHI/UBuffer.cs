@@ -293,10 +293,10 @@ namespace EngineNS.NxRHI
         }
         public enum EUpdateMode
         {
-            FrameEnd = 0,
+            Auto = 0,
             Immediately,
         }
-        public void SetValue<T>(FShaderVarDesc binder, in T v, bool bFlush = true, EUpdateMode mode = EUpdateMode.FrameEnd) where T : unmanaged
+        public void SetValue<T>(FShaderVarDesc binder, in T v, bool bFlush = true, EUpdateMode mode = EUpdateMode.Auto) where T : unmanaged
         {
             if (binder.IsValidPointer == false)
                 return;
@@ -306,7 +306,7 @@ namespace EngineNS.NxRHI
                 {
                     switch (mode)
                     {
-                        case EUpdateMode.FrameEnd:
+                        case EUpdateMode.Auto:
                             mCoreObject.SetValue(binder, p, sizeof(T), bFlush, UEngine.Instance.GfxDevice.CbvUpdater.mCoreObject);
                             break;
                         case EUpdateMode.Immediately:
@@ -316,7 +316,7 @@ namespace EngineNS.NxRHI
                 }
             }
         }
-        public void SetValue<T>(FShaderVarDesc binder, int elemIndex, in T v, bool bFlush = true, EUpdateMode mode = EUpdateMode.FrameEnd) where T : unmanaged
+        public void SetValue<T>(FShaderVarDesc binder, int elemIndex, in T v, bool bFlush = true, EUpdateMode mode = EUpdateMode.Auto) where T : unmanaged
         {
             unsafe
             {
@@ -324,7 +324,7 @@ namespace EngineNS.NxRHI
                 {
                     switch (mode)
                     {
-                        case EUpdateMode.FrameEnd:
+                        case EUpdateMode.Auto:
                             mCoreObject.SetArrrayValue(binder, elemIndex, p, sizeof(T), bFlush, UEngine.Instance.GfxDevice.CbvUpdater.mCoreObject);
                             break;
                         case EUpdateMode.Immediately:
@@ -334,7 +334,7 @@ namespace EngineNS.NxRHI
                 }
             }
         }
-        public bool SetValue<T>(string name, in T v, bool bFlush = true, EUpdateMode mode = EUpdateMode.FrameEnd) where T : unmanaged
+        public bool SetValue<T>(string name, in T v, bool bFlush = true, EUpdateMode mode = EUpdateMode.Auto) where T : unmanaged
         {
             if (ShaderBinder.IsValidPointer == false)
                 return false;
@@ -353,7 +353,7 @@ namespace EngineNS.NxRHI
         {
             return ref *((T*)mCoreObject.GetVarPtrToWrite(binder, (uint)sizeof(T)) + elem);
         }
-        public void SetMatrix(FShaderVarDesc binder, int elem, in Matrix value, bool transpose = true)
+        public void SetMatrix(FShaderVarDesc binder, int elem, in Matrix value, bool transpose = true, EUpdateMode mode = EUpdateMode.Auto)
         {
             if (transpose == false)
             {
@@ -365,7 +365,7 @@ namespace EngineNS.NxRHI
                 SetValue(binder, elem, tm);
             }
         }
-        public void SetMatrix(FShaderVarDesc binder, in Matrix value, bool transpose = true)
+        public void SetMatrix(FShaderVarDesc binder, in Matrix value, bool transpose = true, EUpdateMode mode = EUpdateMode.Auto)
         {
             if (transpose == false)
             {
@@ -397,7 +397,7 @@ namespace EngineNS.NxRHI
             {
                 mCoreObject = FCbvUpdater.CreateInstance();
             }
-            public void TickSync()
+            public void UpdateCBVs()
             {
                 mCoreObject.UpdateCBVs();
             }

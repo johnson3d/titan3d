@@ -264,14 +264,13 @@ namespace EngineNS.Editor.Forms
             DebugShowTool = new UDebugShowTool();
             List<Graphics.Mesh.UMeshPrimitives> MeshPrimitivesList = new List<Graphics.Mesh.UMeshPrimitives>();
             MeshPrimitivesList.Add(Mesh);
-            DebugShowTool.Initialize(MeshPrimitivesList, PreviewViewport.World);
+            await DebugShowTool.Initialize(MeshPrimitivesList, PreviewViewport.World);
 
             var aabb = mesh.MaterialMesh.AABB;
-            mCurrentMeshRadius = aabb.GetMaxSide();
-            BoundingSphere sphere;
-            sphere.Center = aabb.GetCenter();
+            DBoundingSphere sphere;
+            sphere.Center = aabb.GetCenter().AsDVector();
             sphere.Radius = mCurrentMeshRadius;
-            policy.DefaultCamera.AutoZoom(ref sphere);
+            policy.DefaultCamera.AutoZoom(in sphere);
 
             {
                 var arrowMaterialMesh = await UEngine.Instance.GfxDevice.MaterialMeshManager.GetMaterialMesh(RName.GetRName("mesh/base/arrow.ums", RName.ERNameType.Engine));
@@ -455,6 +454,7 @@ namespace EngineNS.Editor.Forms
             MeshPropGrid.Target = Mesh;
             EditorPropGrid.Target = this;
             UEngine.Instance.TickableManager.AddTickable(this);
+
             return true;
         }
         public void OnCloseEditor()
@@ -621,11 +621,12 @@ namespace EngineNS.Editor.Forms
 
                         outSDF.SaveAssetTo(rn);
 
-                        CreateSdfDebugMesh(PreviewViewport.World, outSDF);
+                        _ = CreateSdfDebugMesh(PreviewViewport.World, outSDF);
 
                         // test load sdf
                         Action action = async () =>
                         {
+                            //await CreateSdfDebugMesh(PreviewViewport.World, outSDF);
                             var testSDF = await UEngine.Instance.SdfAssetManager.GetSdfAsset(rn);
                         };
                         action();

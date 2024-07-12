@@ -74,7 +74,7 @@ namespace EngineNS.Editor.Forms
 
             if (MeshSdfAsset == null)
             {
-                policy.Initialize(null);
+                await policy.Initialize(null);
                 return;
             }
             var SdfMip = MeshSdfAsset.Mips[0];
@@ -91,7 +91,7 @@ namespace EngineNS.Editor.Forms
             sdfCamera.LookAtLH(eye, center, Vector3.Up);
             sdfCamera.MakeOrtho(boxSize.X, boxSize.Y, 0, boxSize.Z);
 
-            policy.Initialize(sdfCamera);
+            await policy.Initialize(sdfCamera);
             policy.OnResize(sdfVoxelDimensions.X, sdfVoxelDimensions.Y);
         }
         #endregion
@@ -141,7 +141,7 @@ namespace EngineNS.Editor.Forms
                 MeshPrimitivesList.Add(j.Mesh);
             }
             DebugShowTool = new UDebugShowTool();
-            DebugShowTool.Initialize(MeshPrimitivesList, PreviewViewport.World);
+            await DebugShowTool.Initialize(MeshPrimitivesList, PreviewViewport.World);
 
             var mesh = new Graphics.Mesh.TtMesh();
 
@@ -170,10 +170,10 @@ namespace EngineNS.Editor.Forms
 
             var aabb = mesh.MaterialMesh.AABB;
             mCurrentMeshRadius = aabb.GetMaxSide();
-            BoundingSphere sphere;
-            sphere.Center = aabb.GetCenter();
+            DBoundingSphere sphere;
+            sphere.Center = aabb.GetCenter().AsDVector();
             sphere.Radius = mCurrentMeshRadius;
-            policy.DefaultCamera.AutoZoom(ref sphere);
+            policy.DefaultCamera.AutoZoom(in sphere);
 
             {
                 var meshCenter = aabb.GetCenter();
@@ -239,6 +239,7 @@ namespace EngineNS.Editor.Forms
             MeshPropGrid.Target = Mesh;
             EditorPropGrid.Target = this;
             UEngine.Instance.TickableManager.AddTickable(this);
+
             return true;
         }
         public void OnCloseEditor()
@@ -347,6 +348,12 @@ namespace EngineNS.Editor.Forms
             if (ImGuiAPI.ToggleButton("T", ref mShowTangent, in btSize, 0))
             {
                 DebugShowTool.ShowTangent = mShowTangent;
+            }
+            ImGuiAPI.SameLine(0, -1);
+            if (ImGuiAPI.ToggleButton("TestAuto", ref mShowTangent, in btSize, 0))
+            {
+                var ameta = UEngine.Instance.AssetMetaManager.GetAssetMeta(AssetName);
+                _ = ameta.AutoGenSnap();
             }
         }
 

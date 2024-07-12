@@ -325,7 +325,7 @@ namespace EngineNS.Graphics.Pipeline.Mobile
                     LayerBasePass.BuildRenderPass(policy, in GBuffers.Viewport, passClears, (int)ERenderLayer.RL_Num, GBuffers, GBuffers, "Mobile:");
                 }
 
-                LayerBasePass.ExecuteCommands();
+                LayerBasePass.ExecuteCommands(policy);
 
                 //var cmdlist = LayerBasePass.PassBuffers[(int)ERenderLayer.RL_Opaque].DrawCmdList;
 
@@ -510,7 +510,7 @@ namespace EngineNS.Graphics.Pipeline.Mobile
                     passClears.SetClearColor(0, new Color4f(1, 0, 0, 0));
                     LayerBasePass.BuildTranslucentRenderPass(policy, in passClears, GBuffers, GGizmosBuffers);
                 }
-                LayerBasePass.ExecuteCommands();
+                LayerBasePass.ExecuteCommands(policy);
                 //var passClears = stackalloc NxRHI.FRenderPassClears[(int)ERenderLayer.RL_Num];
                 //for (int i = 0; i < (int)ERenderLayer.RL_Num; i++)
                 //{

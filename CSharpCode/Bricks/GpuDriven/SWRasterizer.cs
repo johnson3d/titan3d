@@ -481,7 +481,7 @@ namespace EngineNS.Bricks.GpuDriven
                 cmd.FlushDraws();
                 cmd.EndEvent();
             }
-            UEngine.Instance.GfxDevice.RenderCmdQueue.QueueCmdlist(cmd);
+            policy.CommitCommandList(cmd);
         }
     }
 

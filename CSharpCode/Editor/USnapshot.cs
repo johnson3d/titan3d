@@ -17,7 +17,7 @@ namespace EngineNS.Editor
             var fence = rc.CreateFence(in fenceDesc, file);
             var cpDraw = UEngine.Instance.GfxDevice.RenderContext.CreateCopyDraw();
             var readable = tex.CreateReadable(UEngine.Instance.GfxDevice.RenderContext.mCoreObject, 0, cpDraw.mCoreObject);
-            UEngine.Instance.GfxDevice.RenderCmdQueue.QueueCmd((NxRHI.ICommandList im_cmd, ref NxRHI.URenderCmdQueue.FRCmdInfo info) =>
+            UEngine.Instance.GfxDevice.RenderSwapQueue.QueueCmd((NxRHI.ICommandList im_cmd, ref NxRHI.FRCmdInfo info) =>
             {
                 im_cmd.PushGpuDraw(cpDraw.mCoreObject.NativeSuper);
                 im_cmd.FlushDraws();
@@ -27,7 +27,7 @@ namespace EngineNS.Editor
             UEngine.Instance.EventPoster.RunOn((state) =>
             {
                 fence.Wait(1);
-                UEngine.Instance.GfxDevice.RenderCmdQueue.QueueCmd((NxRHI.ICommandList im_cmd, ref NxRHI.URenderCmdQueue.FRCmdInfo info) =>
+                UEngine.Instance.GfxDevice.RenderSwapQueue.QueueCmd((NxRHI.ICommandList im_cmd, ref NxRHI.FRCmdInfo info) =>
                 {
                     var gpuDataBlob = new Support.UBlobObject();
                     var bufferData = new Support.UBlobObject();

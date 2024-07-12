@@ -300,10 +300,10 @@ namespace EngineNS.Editor.Forms
 
             (viewport as Editor.UPreviewViewport).CameraController.ControlCamera(viewport.RenderPolicy.DefaultCamera);
 
-            BoundingSphere sphere;
-            sphere.Center = new Vector3(0, 1, 0);
+            DBoundingSphere sphere;
+            sphere.Center = new DVector3(0, 1, 0);
             sphere.Radius = 5;
-            policy.DefaultCamera.AutoZoom(ref sphere);
+            policy.DefaultCamera.AutoZoom(in sphere);
 
             {
                 var nodeDta = new USkeletonShowNode.USkeletonShowNodeData();

@@ -148,7 +148,7 @@ namespace EngineNS.Graphics.Pipeline.Common
                         cmdlist.EndPass();
                     }
                 }
-                UEngine.Instance.GfxDevice.RenderCmdQueue.QueueCmdlist(cmdlist);
+                policy.CommitCommandList(cmdlist);
             }   
         }
     }

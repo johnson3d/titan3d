@@ -152,7 +152,7 @@ namespace EngineNS.Editor.Forms
             if (result)
             {
                 var cmdlst = ImGuiAPI.GetWindowDrawList();
-                var stats = UEngine.Instance.GfxDevice.RenderCmdQueue.GetStat();
+                var stats = UEngine.Instance.GfxDevice.RenderSwapQueue.GetStat();
                 ImGuiAPI.Text($"CmdList = {stats.NumOfCmdlist};Drawcall = {stats.NumOfDrawcall};Primitive = {stats.NumOfPrimitive};");
                 EGui.UIProxy.SearchBarProxy.OnDraw(ref mFilterFocusd, cmdlst, "filter", ref mFilter, ImGuiAPI.GetWindowContentRegionWidth());
                 DockId = ImGuiAPI.GetWindowDockID();

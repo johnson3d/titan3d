@@ -153,7 +153,7 @@ namespace EngineNS.Graphics.Pipeline
 
                 cmd.FlushDraws();
             }
-            UEngine.Instance.GfxDevice.RenderCmdQueue.QueueCmdlist(cmd, "GpuCulling");
+            policy.CommitCommandList(cmd, "GpuCulling");
         }
         public override Shader.UGraphicsShadingEnv GetPassShading(Mesh.TtMesh.TtAtom atom)
         {

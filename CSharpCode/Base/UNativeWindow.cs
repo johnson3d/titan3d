@@ -43,7 +43,7 @@ namespace EngineNS
                 {
                     IRenderDocTool.GetInstance().SetGpuDevice(UEngine.Instance.GfxDevice.RenderContext.mCoreObject);
                     //IRenderDocTool.GetInstance().SetActiveWindow(HWindow.ToPointer());
-                    UEngine.Instance.GfxDevice.RenderCmdQueue.CaptureRenderDocFrame = true;
+                    UEngine.Instance.GfxDevice.RenderSwapQueue.CaptureRenderDocFrame = true;
                 }
             }
 

@@ -38,6 +38,37 @@ namespace EngineNS.Graphics.Mesh
             //必须是TextureAsset
             return true;
         }
+        public override async Thread.Async.TtTask<bool> AutoGenSnap()
+        {
+            var renderer = new Graphics.Pipeline.TtOffscreenRenderer();
+            await renderer.Initialize(RName.GetRName("graphics/deferred.rpolicy", RName.ERNameType.Engine));
+            renderer.SetSize(256, 256);
+            
+            Graphics.Mesh.UMaterialMesh Mesh = await UEngine.Instance.GfxDevice.MaterialMeshManager.CreateMaterialMesh(GetAssetName());
+            var mesh = new Graphics.Mesh.TtMesh();
+            var ok = mesh.Initialize(Mesh, Rtti.UTypeDescGetter<Graphics.Mesh.UMdfStaticMesh>.TypeDesc);
+            if (ok)
+            {
+                var meshNode = await GamePlay.Scene.UMeshNode.AddMeshNode(renderer.World, renderer.World.Root, new GamePlay.Scene.UMeshNode.UMeshNodeData(), typeof(GamePlay.UPlacement), mesh, DVector3.Zero, Vector3.One, Quaternion.Identity);
+                meshNode.HitproxyType = Graphics.Pipeline.UHitProxy.EHitproxyType.None;
+                meshNode.NodeData.Name = "PreviewObject";
+                meshNode.IsAcceptShadow = false;
+                meshNode.IsCastShadow = false;
+                meshNode.IsSceneManaged = false;
+                renderer.RenderPolicy.DefaultCamera.AutoZoom(in meshNode.AABB);
+            }
+
+            UEngine.Instance.GfxDevice.RenderSwapQueue.CaptureRenderDocFrame = true;
+            UEngine.Instance.GfxDevice.RenderSwapQueue.BeginFrameCapture();
+
+            renderer.ExecuteRender();
+
+            UEngine.Instance.GfxDevice.RenderSwapQueue.EndFrameCapture($"AutoGen:{GetAssetName()}");
+
+            renderer.TickSync();
+            Editor.USnapshot.Save(this.GetAssetName(), this, renderer.RenderPolicy.GetFinalShowRSV());
+            return true;
+        }
         //public override void OnDrawSnapshot(in ImDrawList cmdlist, ref Vector2 start, ref Vector2 end)
         //{
         //    base.OnDrawSnapshot(in cmdlist, ref start, ref end);

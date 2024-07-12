@@ -293,8 +293,8 @@ namespace EngineNS.Graphics.Pipeline.Deferred
                     }
                 }
 
-                UEngine.Instance.GfxDevice.RenderCmdQueue.QueueCmdlist(BackgroundPass.DrawCmdList, "DSNodeBackground");
-                UEngine.Instance.GfxDevice.RenderCmdQueue.QueueCmdlist(BasePass.DrawCmdList, "DSNodeBase");
+                policy.CommitCommandList(BackgroundPass.DrawCmdList, "DSNodeBackground");
+                policy.CommitCommandList(BasePass.DrawCmdList, "DSNodeBase");
             }
         }
         public override void TickSync(URenderPolicy policy)

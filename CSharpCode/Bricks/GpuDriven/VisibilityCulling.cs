@@ -279,7 +279,7 @@ namespace EngineNS.Bricks.GpuDriven
                 cmd.EndEvent();
             }
             
-            UEngine.Instance.GfxDevice.RenderCmdQueue.QueueCmdlist(cmd);
+            policy.CommitCommandList(cmd);
         }
 
         public Vector4 TransformViewProj(in Vector3 coord, in Matrix transform)

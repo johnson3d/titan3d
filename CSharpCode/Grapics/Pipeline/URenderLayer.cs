@@ -115,11 +115,11 @@ namespace EngineNS.Graphics.Pipeline
                 PassBuffers[(int)i].DrawCmdList.EndCommand();
             }
         }
-        public void ExecuteCommands()
+        public void ExecuteCommands(URenderPolicy policy)
         {
             for (ERenderLayer i = ERenderLayer.RL_Begin; i < ERenderLayer.RL_Num; i++)
             {
-                UEngine.Instance.GfxDevice.RenderCmdQueue.QueueCmdlist(PassBuffers[(int)i].DrawCmdList);
+                policy.CommitCommandList(PassBuffers[(int)i].DrawCmdList);
             }
         }
         public unsafe void SetViewport(in NxRHI.FViewPort vp)

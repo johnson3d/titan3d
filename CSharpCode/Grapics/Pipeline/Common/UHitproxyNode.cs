@@ -325,7 +325,7 @@ namespace EngineNS.Graphics.Pipeline.Common
                     }
                 }
                 
-                HitproxyPass.ExecuteCommands();
+                HitproxyPass.ExecuteCommands(policy);
             }
             
             var rc = UEngine.Instance.GfxDevice.RenderContext;
@@ -367,10 +367,10 @@ namespace EngineNS.Graphics.Pipeline.Common
                 }
             }
             cmdlist_post.EndCommand();
-            UEngine.Instance.GfxDevice.RenderCmdQueue.QueueCmdlist(HitproxyPass.PostCmds.DrawCmdList);
+            policy.CommitCommandList(HitproxyPass.PostCmds.DrawCmdList);
 
             var fence = mCopyFence;
-            UEngine.Instance.GfxDevice.RenderCmdQueue.QueueCmd((NxRHI.ICommandList im_cmd, ref NxRHI.URenderCmdQueue.FRCmdInfo info) =>
+            UEngine.Instance.GfxDevice.RenderSwapQueue.QueueCmd((NxRHI.ICommandList im_cmd, ref NxRHI.FRCmdInfo info) =>
             {
                 rc.GpuQueue.IncreaseSignal(fence);
                 var targetValue = fence.ExpectValue;

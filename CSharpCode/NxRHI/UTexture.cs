@@ -243,8 +243,7 @@ namespace EngineNS.NxRHI
             bool mIsNormal;
             public bool IsNormal { get => mIsNormal; set => mIsNormal=value; }
             public List<Vector3i> MipSizes { get; } = new List<Vector3i>();
-            public int BlockWidth = 0;
-            public int BlockHeight = 0;
+            public List<Vector2i> BlockDimenstions { get; } = new List<Vector2i>();
             public int BlockSize = 0;
         }
         public EPixelFormat SrvFormat
@@ -481,18 +480,7 @@ namespace EngineNS.NxRHI
                         mDesc.Width = image.Width;
                         mDesc.Height = image.Height;
 
-                        int height = image.Height;
-                        int width = image.Width;
-                        int mipLevel = 0;
-                        do
-                        {
-                            height = height / 2;
-                            width = width / 2;
-                            mipLevel++;
-                        }
-                        while (height > 0 && width > 0);
-
-                        mDesc.MipLevel = mipLevel;
+                        mDesc.MipLevel = Math.Max(CalcMipLevel(mDesc.Width, mDesc.Height, true) - 3, 1);
                     }
                 }
             }
@@ -1228,7 +1216,7 @@ namespace EngineNS.NxRHI
             {
                 desc.Desc.MipLevel = mipLevel;
                 desc.Desc.dwStructureSize = (uint)sizeof(FPictureDesc);
-                var attr = node.GetOrAddAttribute("Desc", 1, 0);
+                var attr = node.GetOrAddAttribute("Desc", 2, 0);
                 using (var ar = attr.GetWriter((ulong)sizeof(FPictureDesc)))
                 {
                     ar.Write(desc.Desc);
@@ -1236,10 +1224,8 @@ namespace EngineNS.NxRHI
                     for (int i = 0; i < desc.MipSizes.Count; i++)
                     {
                         ar.Write(desc.MipSizes[i]);
+                        ar.Write(desc.BlockDimenstions[i]);
                     }
-
-                    ar.Write(desc.BlockWidth);
-                    ar.Write(desc.BlockHeight);
                     ar.Write(desc.BlockSize);
                 }
             }
@@ -1371,7 +1357,7 @@ namespace EngineNS.NxRHI
             {
                 desc.Desc.MipLevel = mipLevel;
                 desc.Desc.dwStructureSize = (uint)sizeof(FPictureDesc);
-                var attr = node.GetOrAddAttribute("Desc", 1, 0);
+                var attr = node.GetOrAddAttribute("Desc", 2, 0);
                 using (var ar = attr.GetWriter((ulong)sizeof(FPictureDesc)))
                 {
                     ar.Write(desc.Desc);
@@ -1379,10 +1365,8 @@ namespace EngineNS.NxRHI
                     for (int i = 0; i < desc.MipSizes.Count; i++)
                     {
                         ar.Write(desc.MipSizes[i]);
+                        ar.Write(desc.BlockDimenstions[i]);
                     }
-
-                    ar.Write(desc.BlockWidth);
-                    ar.Write(desc.BlockHeight);
                     ar.Write(desc.BlockSize);
                 }
             }
@@ -1590,7 +1574,7 @@ namespace EngineNS.NxRHI
             {
                 desc.Desc.MipLevel = mipLevel;
                 desc.Desc.dwStructureSize = (uint)sizeof(FPictureDesc);
-                var attr = node.GetOrAddAttribute("Desc", 1, 0);
+                var attr = node.GetOrAddAttribute("Desc", 2, 0);
                 using (var ar = attr.GetWriter((ulong)sizeof(FPictureDesc)))
                 {
                     ar.Write(desc.Desc);
@@ -1598,10 +1582,8 @@ namespace EngineNS.NxRHI
                     for (int i = 0; i < desc.MipSizes.Count; i++)
                     {
                         ar.Write(desc.MipSizes[i]);
+                        ar.Write(desc.BlockDimenstions[i]);
                     }
-
-                    ar.Write(desc.BlockWidth);
-                    ar.Write(desc.BlockHeight);
                     ar.Write(desc.BlockSize);
                 }
             }
@@ -1935,6 +1917,7 @@ namespace EngineNS.NxRHI
                 for (uint j = 0; j < desc.Desc.MipLevel; j++)
                 {
                     var mipSize = new Vector3i();
+                    var blockDimension = new Vector2i();
 
                     ColorRgbFloat[] colorData = new ColorRgbFloat[curImage.Width * curImage.Height];
                     for(int iC = 0; iC < curImage.Width * curImage.Height; ++iC)
@@ -1946,10 +1929,10 @@ namespace EngineNS.NxRHI
                     var inputMemory = colorData.AsMemory().AsMemory2D(curImage.Height, curImage.Width);
                     var pixelsBcn = encoder.EncodeToRawBytesHdr(inputMemory, (int)j, out mipSize.X, out mipSize.Y);
 
-                    encoder.GetBlockCount(mipSize.X, mipSize.Y, out desc.BlockWidth, out desc.BlockHeight);
+                    encoder.GetBlockCount(mipSize.X, mipSize.Y, out blockDimension.X, out blockDimension.Y);
                     desc.BlockSize = encoder.GetBlockSize();
-                    mipSize.Z = desc.BlockWidth * desc.BlockSize;
                     desc.MipSizes.Add(mipSize);
+                    desc.BlockDimenstions.Add(blockDimension);
 
                     var attr = faceNode.GetOrAddAttribute($"DxtMip{j}", 0, 0);
                     {
@@ -2078,12 +2061,12 @@ namespace EngineNS.NxRHI
                 for (uint j = 0; j < desc.Desc.MipLevel; j++)
                 {
                     var mipSize = new Vector3i();
+                    var blockDimension = new Vector2i();
                     var pixelsBcn = encoder.EncodeToRawBytes(curImage.Data.AsSpan(), curImage.Width, curImage.Height, pixelFormat, (int)j, out mipSize.X, out mipSize.Y);
-                    encoder.GetBlockCount(mipSize.X, mipSize.Y, out desc.BlockWidth, out desc.BlockHeight);
+                    encoder.GetBlockCount(mipSize.X, mipSize.Y, out blockDimension.X, out blockDimension.Y);
                     desc.BlockSize = encoder.GetBlockSize();
-                    mipSize.Z = desc.BlockWidth * desc.BlockSize;
                     desc.MipSizes.Add(mipSize);
-
+                    desc.BlockDimenstions.Add(blockDimension);
 
                     if (IsKtx)
                     {
@@ -2294,6 +2277,7 @@ namespace EngineNS.NxRHI
                 int len;
                 ar.Read(out len);
                 desc.MipSizes.Clear();
+                desc.BlockDimenstions.Clear();
                 for (int i = 0; i < len; i++)
                 {
                     Vector3i tmp = new Vector3i();
@@ -2308,12 +2292,24 @@ namespace EngineNS.NxRHI
                         ar.Read(out tmp);
                     }
                     desc.MipSizes.Add(tmp);
+                    if (attr.Version == 2)
+                    {
+                        Vector2i blockDimension = new Vector2i();
+                        ar.Read(out blockDimension);
+                        desc.BlockDimenstions.Add(blockDimension);
+                    }
                 }
 
-                if(attr.Version==1)
+                if (attr.Version==1)
                 {
-                    ar.Read(out desc.BlockWidth);
-                    ar.Read(out desc.BlockHeight);
+                    Vector2i blockDimension = new Vector2i();
+                    ar.Read(out blockDimension.X);
+                    ar.Read(out blockDimension.Y);
+                    ar.Read(out desc.BlockSize);
+                    desc.BlockDimenstions.Add(blockDimension);
+                }
+                else if(attr.Version==2)
+                {
                     ar.Read(out desc.BlockSize);
                 }
             }
@@ -2784,8 +2780,12 @@ namespace EngineNS.NxRHI
                         }
                         else
                         {
-                            pInitData[i].m_RowPitch = (uint)(desc.BlockWidth * desc.BlockSize);
-                            pInitData[i].m_DepthPitch = pInitData[i].m_RowPitch * (uint)desc.BlockHeight;
+                            if (realLevel > (desc.BlockDimenstions.Count-1))
+                                return null;
+                            var blockWidth = desc.BlockDimenstions[(int)realLevel].X;
+                            var blockHeight = desc.BlockDimenstions[(int)realLevel].Y;
+                            pInitData[i].m_RowPitch = (uint)(blockWidth * desc.BlockSize);
+                            pInitData[i].m_DepthPitch = pInitData[i].m_RowPitch * (uint)blockHeight;
                         }
                     }
                 }

@@ -268,7 +268,7 @@ namespace EngineNS.Graphics.Pipeline.Deferred
                     LayerBasePass.BuildRenderPass(policy, in GBuffers.Viewport, passClears, (int)ERenderLayer.RL_Num, GBuffers, GBuffers, "Forword:");
                 }
 
-                LayerBasePass.ExecuteCommands();
+                LayerBasePass.ExecuteCommands(policy);
             }   
         }
         public override void TickSync(URenderPolicy policy)

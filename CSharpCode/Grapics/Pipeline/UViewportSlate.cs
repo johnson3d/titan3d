@@ -1,4 +1,6 @@
-﻿using System;
+﻿using EngineNS.Editor;
+using EngineNS.GamePlay.Scene;
+using System;
 using System.Collections.Generic;
 
 namespace EngineNS.Graphics.Pipeline
@@ -388,7 +390,7 @@ namespace EngineNS.Graphics.Pipeline
         public delegate System.Threading.Tasks.Task FOnInitialize(UViewportSlate viewport, USlateApplication application, Graphics.Pipeline.URenderPolicy policy, float zMin, float zMax);
         public FOnInitialize OnInitialize = null;
         [Rtti.Meta]
-        public virtual async Task Initialize(USlateApplication application, RName policyName, float zMin, float zMax)
+        public virtual async System.Threading.Tasks.Task Initialize(USlateApplication application, RName policyName, float zMin, float zMax)
         {
             var policy = Bricks.RenderPolicyEditor.URenderPolicyAsset.LoadAsset(policyName).CreateRenderPolicy(this);
             if (OnInitialize != null)
@@ -542,6 +544,53 @@ namespace EngineNS.Graphics.Pipeline
             {
                 Viewports.Remove(i);
             }
+        }
+    }
+
+    public partial class TtOffscreenRenderer
+    {
+        public Graphics.Pipeline.URenderPolicy RenderPolicy { get; set; }
+        public GamePlay.UWorld World { get; set; }
+        public GamePlay.UWorld.UVisParameter VisParameter = new GamePlay.UWorld.UVisParameter();
+        public void SetCameraOffset(in DVector3 offset)
+        {
+            World.CameraOffset = offset;
+            RenderPolicy.DefaultCamera.mCoreObject.SetMatrixStartPosition(in offset);
+        }
+        public virtual async System.Threading.Tasks.Task Initialize(RName policyName)
+        {
+            RenderPolicy = Bricks.RenderPolicyEditor.URenderPolicyAsset.LoadAsset(policyName).CreateRenderPolicy(null);
+            await RenderPolicy.Initialize(null);
+
+            World = new GamePlay.UWorld(null);
+            await this.World.InitWorld();
+            World.DirectionLight.Direction = new Vector3(0, 0, 1);
+            SetCameraOffset(in DVector3.Zero);
+
+            RenderPolicy.CmdQueue = new NxRHI.TtRCmdQueue();
+        }
+        public void SetSize(float w, float h)
+        {
+            RenderPolicy.OnResize(w, h);
+        }
+        public void ExecuteRender()
+        {
+            VisParameter.World = World;
+            VisParameter.CullCamera = RenderPolicy.DefaultCamera;
+            World.GatherVisibleMeshes(VisParameter);
+
+            RenderPolicy.UpdateCameraAttachements(NxRHI.UCbView.EUpdateMode.Auto);
+            
+            RenderPolicy.BeginTickLogic(World);
+            RenderPolicy.TickLogic(World, null);
+            RenderPolicy.EndTickLogic(World);
+
+            UEngine.Instance.GfxDevice.CbvUpdater.UpdateCBVs();
+            RenderPolicy.ExecuteCmdQueue();
+        }
+        public void TickSync()
+        {
+            RenderPolicy?.TickSync();
         }
     }
 }

@@ -189,7 +189,7 @@ namespace EngineNS.Editor
                                 {
                                     IRenderDocTool.GetInstance().SetGpuDevice(UEngine.Instance.GfxDevice.RenderContext.mCoreObject);
                                     IRenderDocTool.GetInstance().SetActiveWindow(this.NativeWindow.HWindow.ToPointer());
-                                    UEngine.Instance.GfxDevice.RenderCmdQueue.CaptureRenderDocFrame = true;
+                                    UEngine.Instance.GfxDevice.RenderSwapQueue.CaptureRenderDocFrame = true;
                                 }
                             },
                         },

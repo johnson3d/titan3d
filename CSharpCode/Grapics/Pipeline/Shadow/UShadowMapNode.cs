@@ -498,7 +498,7 @@ namespace EngineNS.Graphics.Pipeline.Shadow
 
                     }
 
-                    UEngine.Instance.GfxDevice.RenderCmdQueue.QueueCmdlist(cmdlist);
+                    policy.CommitCommandList(cmdlist);
                 }
 
                 //TODO  Global Value...

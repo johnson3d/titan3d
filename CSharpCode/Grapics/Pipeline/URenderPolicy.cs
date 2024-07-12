@@ -130,14 +130,18 @@ namespace EngineNS.Graphics.Pipeline
         }
         [ThreadStatic]
         private static Profiler.TimeScope ScopeTickSync = Profiler.TimeScopeManager.GetTimeScope(typeof(URenderPolicy), nameof(TickSync));
+        public void UpdateCameraAttachements(NxRHI.UCbView.EUpdateMode mode = NxRHI.UCbView.EUpdateMode.Auto)
+        {
+            foreach (var i in CameraAttachments)
+            {
+                i.Value.UpdateConstBufferData(UEngine.Instance.GfxDevice.RenderContext, mode);
+            }
+        }
         public override void TickSync()
         {
             using (new Profiler.TimeScopeHelper(ScopeTickSync))
             {
-                foreach (var i in CameraAttachments)
-                {
-                    i.Value.UpdateConstBufferData(UEngine.Instance.GfxDevice.RenderContext);
-                }
+                UpdateCameraAttachements(NxRHI.UCbView.EUpdateMode.Auto);
                 base.TickSync();
             }
             PolicyOptionData.Clear();
@@ -333,6 +337,31 @@ namespace EngineNS.Graphics.Pipeline
             get
             {
                 return FindFirstNode<Common.TtFogNode>();
+            }
+        }
+
+        public NxRHI.TtRCmdQueue CmdQueue = null;
+        public void ExecuteCmdQueue()
+        {
+            if (CmdQueue == null)
+                return;
+
+            using (var tsCmd = new NxRHI.FTransientCmd(NxRHI.EQueueType.QU_Default, "CmdQueue"))
+            {
+                CmdQueue.Execute(tsCmd.CmdList);
+            }
+        }
+
+        public void CommitCommandList(NxRHI.UCommandList cmd, string name = null, NxRHI.EQueueType qType = NxRHI.EQueueType.QU_Default)
+        {
+            if (CmdQueue != null)
+            {
+                //UEngine.Instance.GfxDevice.RenderContext.GpuQueue.ExecuteCommandList(cmd, qType);
+                CmdQueue.QueueCmdlist(cmd, name, qType);
+            }
+            else
+            {
+                UEngine.Instance.GfxDevice.RenderSwapQueue.QueueCmdlist(cmd, name, qType);
             }
         }
     }

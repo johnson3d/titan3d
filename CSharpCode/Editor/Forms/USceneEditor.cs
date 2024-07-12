@@ -632,8 +632,8 @@ namespace EngineNS.Editor.Forms
                         }
                         if (!box.IsEmpty())
                         {
-                            BoundingSphere sphere = new BoundingSphere(box.GetCenter().ToSingleVector3(), (float)box.GetMaxSide());
-                            PreviewViewport.CameraController.Camera.AutoZoom(ref sphere, 0.2f);
+                            DBoundingSphere sphere = new DBoundingSphere(box.GetCenter(), (float)box.GetMaxSide());
+                            PreviewViewport.CameraController.Camera.AutoZoom(in sphere, 0.2f);
                         }
                     }
                 }

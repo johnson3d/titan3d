@@ -27,6 +27,12 @@ namespace EngineNS.Graphics.Pipeline
                 return mPerCameraCBuffer;
             }
         }
+        public void AutoZoom(in DBoundingBox aabb, float zoomTimeInSecond = 0.0f, bool bOptZRange = true)
+        {
+            var ct = aabb.GetCenter();
+            var sphere = new DBoundingSphere(ct, (float)aabb.GetMaxSide());
+            AutoZoom(in sphere, zoomTimeInSecond, bOptZRange);
+        }
         DVector3 TargetEye;
         DVector3 TargetLookAt;
         Vector3 TargetUp;
@@ -34,10 +40,10 @@ namespace EngineNS.Graphics.Pipeline
         DVector3 TargetLookAtMoveSpeed;
         Vector3 TargetUpMoveSpeed;
         float mZoomTime = 0;
-        public void AutoZoom(ref BoundingSphere sphere, float zoomTimeInSecond = 0.0f, bool bOptZRange = true)
+        public void AutoZoom(in DBoundingSphere sphere, float zoomTimeInSecond = 0.0f, bool bOptZRange = true)
         {
-            var dist = (sphere.Radius) / (float)Math.Sin((float)this.mCoreObject.mFov);
-            var eye = sphere.Center - this.mCoreObject.GetDirection() * dist;
+            var dist = ((float)sphere.Radius) / (float)Math.Sin((float)this.mCoreObject.mFov);
+            var eye = sphere.Center - this.mCoreObject.GetDirection().AsDVector() * dist;
             var up = this.mCoreObject.GetUp();
             if (bOptZRange && this.ZFar < dist)
             {
@@ -45,14 +51,14 @@ namespace EngineNS.Graphics.Pipeline
             }
             if (MathHelper.Abs(zoomTimeInSecond) <= MathHelper.Epsilon)
             {
-                mCoreObject.LookAtLH(eye.AsDVector(), sphere.Center.AsDVector(), in up);
+                mCoreObject.LookAtLH(eye, sphere.Center, in up);
                 UEngine.Instance.TickableManager.RemoveTickable(this);
             }
             else
             {
                 mZoomTime = zoomTimeInSecond;
-                TargetEye = eye.AsDVector();
-                TargetLookAt = sphere.Center.AsDVector();
+                TargetEye = eye;
+                TargetLookAt = sphere.Center;
                 TargetUp = up;
                 TargetEyeMoveSpeed = (TargetEye - mCoreObject.GetPosition()) / zoomTimeInSecond;
                 TargetLookAtMoveSpeed = (TargetLookAt - mCoreObject.GetLookAt()) / zoomTimeInSecond;
@@ -282,7 +288,7 @@ namespace EngineNS.Graphics.Pipeline
         {
             return mCoreObject.GetToViewPortMatrix();
         }
-        public void UpdateConstBufferData(NxRHI.UGpuDevice rc)
+        public void UpdateConstBufferData(NxRHI.UGpuDevice rc, NxRHI.UCbView.EUpdateMode mode = NxRHI.UCbView.EUpdateMode.Auto)
         {
             if (PreFrameViewProjectionMatrix == null)
             {
@@ -292,9 +298,9 @@ namespace EngineNS.Graphics.Pipeline
             {
                 JitterPreFrameViewProjectionMatrix = GetJitterViewProjection();
             }
-            PerCameraCBuffer.SetMatrix(UEngine.Instance.GfxDevice.CoreShaderBinder.CBPerCamera.PreFrameViewPrjMtx, PreFrameViewProjectionMatrix.Value);
-            PerCameraCBuffer.SetMatrix(UEngine.Instance.GfxDevice.CoreShaderBinder.CBPerCamera.JitterPreFrameViewPrjMtx, JitterPreFrameViewProjectionMatrix.Value);
-            mCoreObject.UpdateConstBufferData(rc.mCoreObject, PerCameraCBuffer.mCoreObject, true, UEngine.Instance.GfxDevice.CbvUpdater.mCoreObject);
+            PerCameraCBuffer.SetMatrix(UEngine.Instance.GfxDevice.CoreShaderBinder.CBPerCamera.PreFrameViewPrjMtx, PreFrameViewProjectionMatrix.Value, true, mode);
+            PerCameraCBuffer.SetMatrix(UEngine.Instance.GfxDevice.CoreShaderBinder.CBPerCamera.JitterPreFrameViewPrjMtx, JitterPreFrameViewProjectionMatrix.Value, true, mode);
+            mCoreObject.UpdateConstBufferData(rc.mCoreObject, PerCameraCBuffer.mCoreObject, true, mode == NxRHI.UCbView.EUpdateMode.Immediately ? new NxRHI.FCbvUpdater() : UEngine.Instance.GfxDevice.CbvUpdater.mCoreObject);
             PreFrameViewProjectionMatrix = GetViewProjection();
             JitterPreFrameViewProjectionMatrix = GetJitterViewProjection();
         }

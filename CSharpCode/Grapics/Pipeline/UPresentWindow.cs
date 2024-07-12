@@ -88,7 +88,7 @@ namespace EngineNS.Graphics.Pipeline
 
             if (SwapChain == null)
                 return;
-            UEngine.Instance.GfxDevice.RenderCmdQueue.Reset();
+            UEngine.Instance.GfxDevice.RenderSwapQueue.Reset();
             SwapChain.OnResize(x, y);
             //UEngine.Instance.EventPoster.PostTickSyncEvent(() =>
             //{
@@ -115,7 +115,7 @@ namespace EngineNS.Graphics.Pipeline
             //    cmdlist.EndPass();
             //    cmdlist.EndCommand();
             //}
-            //UEngine.Instance.GfxDevice.RenderCmdQueue.QueueCmdlist(cmdlist);
+            //policy.CommitCommandList(cmdlist);
         }
         public unsafe virtual void TickRender(int ellapse)
         {

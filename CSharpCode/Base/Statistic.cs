@@ -34,11 +34,11 @@ namespace EngineNS
                 return ICopyDraw.GetNumOfInstance();
             }
         }
-        public NxRHI.URenderCmdQueue.UQueueStat RenderCmdQueue
+        public NxRHI.TtRCmdQueue.UQueueStat RenderCmdQueue
         {
             get
             {
-                return UEngine.Instance.GfxDevice.RenderCmdQueue.GetStat();
+                return UEngine.Instance.GfxDevice.RenderSwapQueue.GetStat();
             }
         }
     }

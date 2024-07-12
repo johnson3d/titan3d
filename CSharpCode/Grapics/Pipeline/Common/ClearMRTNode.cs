@@ -156,7 +156,7 @@ namespace EngineNS.Graphics.Pipeline.Common
                     }
                 }
 
-                UEngine.Instance.GfxDevice.RenderCmdQueue.QueueCmdlist(BasePass.DrawCmdList, "ClearRT");
+                policy.CommitCommandList(BasePass.DrawCmdList, "ClearRT");
             }
         }
         public override void TickSync(URenderPolicy policy)

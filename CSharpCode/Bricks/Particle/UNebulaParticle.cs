@@ -99,7 +99,7 @@ namespace EngineNS.Bricks.Particle
                 i.Update(particleSystem, elpased);                
             }
             //cmdlist.EndCommand();
-            //UEngine.Instance.GfxDevice.RenderCmdQueue.QueueCmdlist(cmdlist);
+            //policy.CommitCommandList(cmdlist);
         }
 
         public async Thread.Async.TtTask<UNebulaParticle> CloneNebula()

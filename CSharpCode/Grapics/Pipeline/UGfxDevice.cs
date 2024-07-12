@@ -15,7 +15,7 @@ namespace EngineNS.Graphics.Pipeline
         {
             return 0;
         }
-        public readonly NxRHI.URenderCmdQueue RenderCmdQueue = new NxRHI.URenderCmdQueue();
+        public readonly NxRHI.TtRenderSwapQueue RenderSwapQueue = new NxRHI.TtRenderSwapQueue();
         public override async System.Threading.Tasks.Task<bool> Initialize(UEngine engine)
         {
             if(engine.Config.RHIType == NxRHI.ERhiType.RHI_VirtualDevice)
@@ -97,11 +97,11 @@ namespace EngineNS.Graphics.Pipeline
         }
         public override void TickLogic(UEngine host)
         {
-            RenderCmdQueue.TickLogic(host.ElapsedSecond);
+            RenderSwapQueue.TickLogic(host.ElapsedSecond);
         }
         public override void TickRender(UEngine host)
         {
-            RenderCmdQueue.TickRender(host.ElapsedSecond);
+            RenderSwapQueue.TickRender(host.ElapsedSecond);
         }
         public void TickSync(UEngine host)
         {
@@ -111,8 +111,8 @@ namespace EngineNS.Graphics.Pipeline
 
             AttachBufferManager.Tick();
 
-            RenderCmdQueue.TickSync(host.ElapsedSecond);
-            CbvUpdater.TickSync();
+            RenderSwapQueue.TickSync(host.ElapsedSecond);
+            CbvUpdater.UpdateCBVs();
         }
         public override void EndFrame(UEngine engine)
         {

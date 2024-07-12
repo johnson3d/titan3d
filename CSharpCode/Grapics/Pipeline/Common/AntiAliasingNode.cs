@@ -300,7 +300,7 @@ namespace EngineNS.Graphics.Pipeline.Common
                 case URenderPolicy.ETypeAA.Taa:
                     PreColorPinIn.ImportedBuffer = PreColor;
                     base.TickLogic(world, policy, bClear);
-                    TickCopyLogic();
+                    TickCopyLogic(policy);
                     break;
                 case URenderPolicy.ETypeAA.Fsaa:
                     base.TickLogic(world, policy, bClear);
@@ -339,7 +339,7 @@ namespace EngineNS.Graphics.Pipeline.Common
 
         [ThreadStatic]
         private static Profiler.TimeScope ScopeTick = Profiler.TimeScopeManager.GetTimeScope(typeof(TtAntiAliasingNode), nameof(TickCopyLogic));
-        public unsafe void TickCopyLogic()
+        public unsafe void TickCopyLogic(URenderPolicy policy)
         {
             using (new Profiler.TimeScopeHelper(ScopeTick))
             {
@@ -352,7 +352,7 @@ namespace EngineNS.Graphics.Pipeline.Common
                     CopyAttachBuff(ResultPinOut, PreColor, mCopyColorDrawcall, cmdlist);
                     cmdlist.FlushDraws();
                 }
-                UEngine.Instance.GfxDevice.RenderCmdQueue.QueueCmdlist(cmdlist);
+                policy.CommitCommandList(cmdlist);
             }
         }
         public override void TickSync(URenderPolicy policy)

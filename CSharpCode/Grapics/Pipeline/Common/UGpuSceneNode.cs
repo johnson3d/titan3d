@@ -198,7 +198,7 @@ namespace EngineNS.Graphics.Pipeline.Common
                     TickLogic_Instance(world, policy, cmd);
                 }
                 
-                UEngine.Instance.GfxDevice.RenderCmdQueue.QueueCmdlist(cmd);
+                policy.CommitCommandList(cmd);
             }   
         }
         public unsafe override void TickSync(Graphics.Pipeline.URenderPolicy policy)

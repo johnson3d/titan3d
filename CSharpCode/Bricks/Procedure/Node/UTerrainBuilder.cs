@@ -366,10 +366,10 @@ namespace EngineNS.Bricks.Procedure.Node
             PreviewTerrainNode.UpdateAABB();
             var aabb = PreviewTerrainNode.AABB.ToSingleAABB();
             float radius = aabb.GetMaxSide();
-            BoundingSphere sphere;
-            sphere.Center = aabb.GetCenter();
+            DBoundingSphere sphere;
+            sphere.Center = aabb.GetCenter().AsDVector();
             sphere.Radius = radius;
-            graph.GraphEditor.PreviewViewport.RenderPolicy.DefaultCamera.AutoZoom(ref sphere);
+            graph.GraphEditor.PreviewViewport.RenderPolicy.DefaultCamera.AutoZoom(in sphere);
 
             var hMap = graph.BufferCache.FindBuffer(HMapPin);
             if (hMap == null)

@@ -41,7 +41,7 @@ namespace EngineNS.Bricks.Particle
             cmd.FlushDraws();
             cmd.EndEvent();
             cmd.EndCommand();
-            UEngine.Instance.GfxDevice.RenderCmdQueue.QueueCmdlist(cmd);
+            policy.CommitCommandList(cmd);
         }
         public override void FrameBuild(URenderPolicy policy)
         {

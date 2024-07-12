@@ -103,7 +103,7 @@ namespace EngineNS.Graphics.Pipeline.Common
                     cmdlist.FlushDraws();
                 }
                 
-                UEngine.Instance.GfxDevice.RenderCmdQueue.QueueCmdlist(cmdlist);
+                policy.CommitCommandList(cmdlist);
             }   
         }
     }
@@ -207,7 +207,7 @@ namespace EngineNS.Graphics.Pipeline.Common
                     cmdlist.PushGpuDraw(mCopyDrawcall);
                     cmdlist.FlushDraws();
                 }
-                UEngine.Instance.GfxDevice.RenderCmdQueue.QueueCmdlist(cmdlist);
+                policy.CommitCommandList(cmdlist);
             }
         }
 

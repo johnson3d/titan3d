@@ -82,10 +82,10 @@ namespace EngineNS.Bricks.PhysicsCore
 
             var aabb = mesh.MaterialMesh.AABB;
             float radius = aabb.GetMaxSide();
-            BoundingSphere sphere;
-            sphere.Center = aabb.GetCenter();
+            DBoundingSphere sphere;
+            sphere.Center = aabb.GetCenter().AsDVector();
             sphere.Radius = radius;
-            policy.DefaultCamera.AutoZoom(ref sphere);
+            policy.DefaultCamera.AutoZoom(in sphere);
 
             var gridNode = await GamePlay.Scene.UGridNode.AddGridNode(viewport.World, viewport.World.Root);
             gridNode.ViewportSlate = this.PreviewViewport;

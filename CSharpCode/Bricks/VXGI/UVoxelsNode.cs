@@ -399,7 +399,7 @@ namespace EngineNS.Bricks.VXGI
                         }
                         break;
                 }
-                UEngine.Instance.GfxDevice.RenderCmdQueue.QueueCmdlist(BasePass.DrawCmdList);
+                policy.CommitCommandList(BasePass.DrawCmdList);
             }   
         }
     }

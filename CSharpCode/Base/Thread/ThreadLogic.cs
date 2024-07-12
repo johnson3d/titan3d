@@ -41,7 +41,7 @@ namespace EngineNS.Thread
                 UEngine.Instance.TryTickLogic();
             }
 
-            UEngine.Instance.GfxDevice?.RenderCmdQueue?.QueueCmd(static (NxRHI.ICommandList im_cmd, ref NxRHI.URenderCmdQueue.FRCmdInfo info) =>
+            UEngine.Instance.GfxDevice?.RenderSwapQueue?.QueueCmd(static (NxRHI.ICommandList im_cmd, ref NxRHI.FRCmdInfo info) =>
             {
 
             }, "#TickLogicEnd#");

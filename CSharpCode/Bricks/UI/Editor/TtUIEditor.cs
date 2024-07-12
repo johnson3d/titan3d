@@ -124,10 +124,10 @@ namespace EngineNS.UI.Editor
             else
             { 
                 float radius = Math.Max(mUIHost.WindowSize.Width, mUIHost.WindowSize.Height);
-                BoundingSphere sphere;
-                sphere.Center = new Vector3(mUIHost.WindowSize.Width * 0.5f, mUIHost.WindowSize.Height * 0.5f, 0);
+                DBoundingSphere sphere;
+                sphere.Center = new DVector3(mUIHost.WindowSize.Width * 0.5f, mUIHost.WindowSize.Height * 0.5f, 0);
                 sphere.Radius = radius;
-                policy.DefaultCamera.AutoZoom(ref sphere);
+                policy.DefaultCamera.AutoZoom(in sphere);
             }
 
             //var gridNode = await GamePlay.Scene.UGridNode.AddGridNode(viewport.World, viewport.World.Root);
@@ -1214,11 +1214,11 @@ namespace EngineNS.UI.Editor
             }
             else
             {
-                BoundingSphere sphere;
-                sphere.Center = new Vector3(mUIHost.WindowSize.Width * 0.5f, mUIHost.WindowSize.Height * 0.5f, 0);
+                DBoundingSphere sphere;
+                sphere.Center = new DVector3(mUIHost.WindowSize.Width * 0.5f, mUIHost.WindowSize.Height * 0.5f, 0);
                 sphere.Radius = Math.Max(mUIHost.WindowSize.Width, mUIHost.WindowSize.Height);
                 mUIHost.RenderCamera.LookAtLH(-DVector3.UnitZ, DVector3.Zero, Vector3.UnitY);
-                mUIHost.RenderCamera.AutoZoom(ref sphere);
+                mUIHost.RenderCamera.AutoZoom(in sphere);
             }
         }
         bool mIsWireFrame = false;
@@ -1267,10 +1267,10 @@ namespace EngineNS.UI.Editor
                         var size = rectMax - rectMin;
                         rectMax.Y = mUIHost.DesignRect.Height - rectMax.Y;
                         rectMin.Y = mUIHost.DesignRect.Height - rectMin.Y;
-                        BoundingSphere sphere;
-                        sphere.Center = new Vector3((rectMin.X + rectMax.X) * 0.5f, (rectMin.Y + rectMax.Y) * 0.5f, 0.0f);
+                        DBoundingSphere sphere;
+                        sphere.Center = new DVector3((rectMin.X + rectMax.X) * 0.5f, (rectMin.Y + rectMax.Y) * 0.5f, 0.0f);
                         sphere.Radius = ((size.X > size.Y) ? size.X : size.Y);
-                        mUIHost.RenderCamera.AutoZoom(ref sphere, 0.3f);
+                        mUIHost.RenderCamera.AutoZoom(in sphere, 0.3f);
                     }
                 }
                 else

@@ -71,10 +71,10 @@ namespace EngineNS.Bricks.Procedure
 
             var aabb = mesh.MaterialMesh.AABB;
             float radius = aabb.GetMaxSide();
-            BoundingSphere sphere;
-            sphere.Center = aabb.GetCenter();
+            DBoundingSphere sphere;
+            sphere.Center = aabb.GetCenter().AsDVector();
             sphere.Radius = radius;
-            graph.GraphEditor.PreviewViewport.RenderPolicy.DefaultCamera.AutoZoom(ref sphere);
+            graph.GraphEditor.PreviewViewport.RenderPolicy.DefaultCamera.AutoZoom(in sphere);
         }
         [UCompileButton.UValueEditor]
         public UCompileButton CompileButton

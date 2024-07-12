@@ -157,7 +157,7 @@ namespace EngineNS.Graphics.Pipeline.Common
                     }
                 }
 
-                UEngine.Instance.GfxDevice.RenderCmdQueue.QueueCmdlist(cmdlist);
+                policy.CommitCommandList(cmdlist);
             }   
         }
     }

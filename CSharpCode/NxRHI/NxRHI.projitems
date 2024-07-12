@@ -9,6 +9,7 @@
     <Import_RootNamespace>EngineNS.NxRHI</Import_RootNamespace>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="$(MSBuildThisFileDirectory)CmdQueue.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)UBuffer.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)UCommandList.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)UDrawcall.cs" />
