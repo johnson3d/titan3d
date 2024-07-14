@@ -23,7 +23,7 @@ namespace EngineNS.GamePlay
                 mNstrTitle.SetText(value);
             } 
         }
-        protected override void OnVieportClosed()
+        protected override void OnViewportClosed()
         {
             mPresentWindow?.UnregEventProcessor(this);
             UEngine.Instance.EndPlayInEditor();
@@ -118,7 +118,7 @@ namespace EngineNS.GamePlay
             }
             if (mVisible == false)
             {
-                OnVieportClosed();
+                OnViewportClosed();
             }
         }
     }

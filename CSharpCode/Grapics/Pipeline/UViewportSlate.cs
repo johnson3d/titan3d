@@ -41,7 +41,7 @@ namespace EngineNS.Graphics.Pipeline
                     return;
                 mVisible = value;
                 if (value == false)
-                    OnVieportClosed();
+                    OnViewportClosed();
             }
         }
         public uint DockId { get; set; }
@@ -242,7 +242,7 @@ namespace EngineNS.Graphics.Pipeline
             }
             if (mVisible == false)
             {
-                OnVieportClosed();
+                OnViewportClosed();
             }
         }
         public Vector2 WorldAxis { get; set; } = new Vector2(80, 50);
@@ -291,7 +291,7 @@ namespace EngineNS.Graphics.Pipeline
             cmdlst.AddText(v2Center + v2Y, (uint)Color.Green.ToAbgr(), "y", null);
             cmdlst.AddText(v2Center + v2Z, (uint)Color.Blue.ToAbgr(), "z", null);
         }
-        protected virtual void OnVieportClosed()
+        protected virtual void OnViewportClosed()
         {
             //mPresentWindow.UnregEventProcessor(this);
         }

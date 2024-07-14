@@ -16,11 +16,17 @@ namespace EngineNS.Graphics.Mesh
         [Category("FileInfo"), ReadOnly(true)]
         public int MeshesCount { get; set; } = 0;
         [Category("FileInfo"), ReadOnly(true)]
+        public bool MeshesHaveScale { get; set; } = false;
+        [Category("FileInfo"), ReadOnly(true)]
+        public bool MeshesHaveTranslation { get; set; } = false;
+        [Category("FileInfo"), ReadOnly(true)]
         public string UpAxis { get; set; } = "";
         [Category("FileInfo"), ReadOnly(true)]
         public float UnitScaleFactor { get; set; } = 1;
         [Category("FileInfo"), ReadOnly(true)]
         public string Generator { get; set; } = "";
+        [Category("ImportSetting"), ReadOnly(true)]
+        public string DefaultImportRule { get; } = "Import mesh in Local Space";
         [Category("ImportSetting")]
         public float UnitScale { get; set; } = 0.01f;
         [Category("ImportSetting")]
@@ -87,7 +93,7 @@ namespace EngineNS.Graphics.Mesh
                                 var sz = new Vector2(-1, 0);
                                 if (ImGuiAPI.Button("Select FBX", in sz))
                                 {
-                                    mFileDialog.OpenModal("ChooseFileDlgKey", "Choose File", ".FBX,.fbx", ".");
+                                    mFileDialog.OpenModal("ChooseFileDlgKey", "Choose File", ".*", ".");
                                 }
                                 // display
                                 if (mFileDialog.DisplayDialog("ChooseFileDlgKey"))
@@ -108,6 +114,8 @@ namespace EngineNS.Graphics.Mesh
                                             {
                                                 MeshImprotSetting.FileName = assetDescription.FileName;
                                                 MeshImprotSetting.MeshesCount = assetDescription.MeshesCount;
+                                                MeshImprotSetting.MeshesHaveScale = assetDescription.MeshesHaveScale;
+                                                MeshImprotSetting.MeshesHaveTranslation = assetDescription.MeshesHaveTranslation;
                                                 MeshImprotSetting.UpAxis = assetDescription.UpAxis;
                                                 MeshImprotSetting.UnitScaleFactor = assetDescription.UnitScaleFactor;
                                                 MeshImprotSetting.Generator = assetDescription.Generator;

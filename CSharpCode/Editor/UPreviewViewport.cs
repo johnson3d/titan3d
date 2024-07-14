@@ -52,7 +52,7 @@ namespace EngineNS.Editor
             //this.RenderPolicy.GBuffers.GroundLightColor = new Vector3(0.1f, 0.1f, 0.1f);
             //this.RenderPolicy.GBuffers.UpdateViewportCBuffer();
         }
-        public override async Task Initialize(USlateApplication application, RName policyName, float zMin, float zMax)
+        public override async System.Threading.Tasks.Task Initialize(USlateApplication application, RName policyName, float zMin, float zMax)
         {
             Graphics.Pipeline.URenderPolicy policy = await UEngine.Instance.EventPoster.Post((state) =>
             {
@@ -86,7 +86,11 @@ namespace EngineNS.Editor
             this.PushHUD(mDefaultHUD);
 
             IsInlitialized = true;
+            StartTime = System.DateTime.Now;
+            HasAssetSnap = IO.TtFileManager.FileExists(PreviewAsset.Address + ".snap");
         }
+        public bool HasAssetSnap = false;
+        public System.DateTime StartTime;
         protected override void OnClientChanged(bool bSizeChanged)
         {
             base.OnClientChanged(bSizeChanged);
@@ -107,9 +111,22 @@ namespace EngineNS.Editor
             }
             else
             {
-                if (PreviewAsset != null && EGui.UIProxy.CustomButton.ToolButton("S", in Vector2.Zero))
+                if (PreviewAsset != null)
                 {
-                    Editor.USnapshot.Save(PreviewAsset, UEngine.Instance.AssetMetaManager.GetAssetMeta(PreviewAsset), RenderPolicy.GetFinalShowRSV());
+                    if (EGui.UIProxy.CustomButton.ToolButton("S", in Vector2.Zero))
+                    {
+                        Editor.USnapshot.Save(PreviewAsset, UEngine.Instance.AssetMetaManager.GetAssetMeta(PreviewAsset), RenderPolicy.GetFinalShowRSV());
+                    }
+                    else if (HasAssetSnap == false)
+                    {
+                        var tm = System.DateTime.Now;
+                        TimeSpan ts = tm.Subtract(StartTime);
+                        if (ts.Seconds > 10)
+                        {
+                            Editor.USnapshot.Save(PreviewAsset, UEngine.Instance.AssetMetaManager.GetAssetMeta(PreviewAsset), RenderPolicy.GetFinalShowRSV());
+                            HasAssetSnap = true;
+                        }
+                    }
                 }
             }
             if (ShowWorldAxis && CameraController.Camera != null)

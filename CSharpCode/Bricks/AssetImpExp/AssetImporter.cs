@@ -19,6 +19,7 @@ using System.Runtime.InteropServices;
 using System.Security.Cryptography.Xml;
 using System.Text;
 using static NPOI.HSSF.Util.HSSFColor;
+
 using Matrix4x4 = Assimp.Matrix4x4;
 
 namespace EngineNS.Bricks.AssetImpExp
@@ -28,6 +29,8 @@ namespace EngineNS.Bricks.AssetImpExp
     {
         public string FileName { get; set; } = "";
         public int MeshesCount { get; set; } = 0;
+        public bool MeshesHaveScale { get; set; } = false;
+        public bool MeshesHaveTranslation { get; set; } = false;
         public int AnimationsCount { get; set; } = 0;
         public string UpAxis { get; set; } = "";
         public float UnitScaleFactor { get; set; } = 1;
@@ -68,9 +71,27 @@ namespace EngineNS.Bricks.AssetImpExp
                 return null;
             }
             var meshNodes = AssimpSceneUtil.FindMeshNodes(AiScene);
+            bool nodeHasScale = false;
+            bool nodeHasTranslation = false;
+            foreach (var meshNode in meshNodes)
+            {
+                var preAssimpTransform = AssimpSceneUtil.AccumulatePreTransform(meshNode.Parent);
+                var preTransform = AssimpSceneUtil.AssimpMatrix4x4Decompose(preAssimpTransform);
+                var nodeTransform = AssimpSceneUtil.AssimpMatrix4x4Decompose(meshNode.Transform);
+                if (preTransform.scaling != Vector3.One || nodeTransform.scaling != Vector3.One)
+                {
+                    nodeHasScale = true;
+                }
+                if (preTransform.translation != Vector3.Zero || nodeTransform.translation != Vector3.Zero)
+                {
+                    nodeHasTranslation = true;
+                }
+            }
             TtAssetDescription assetsGenerateDescription = new TtAssetDescription();
             assetsGenerateDescription.FileName = Path.GetFileNameWithoutExtension(filePath); ;
             assetsGenerateDescription.MeshesCount = meshNodes.Count;
+            assetsGenerateDescription.MeshesHaveScale = nodeHasScale;
+            assetsGenerateDescription.MeshesHaveTranslation = nodeHasTranslation;
             assetsGenerateDescription.AnimationsCount = AiScene.AnimationCount;
             string[] Axis = new[] { "X", "Y", "Z" };
             assetsGenerateDescription.UpAxis = (Int32)AiScene.Metadata["UpAxisSign"].Data == -1 ? "-" + Axis[(Int32)AiScene.Metadata["UpAxis"].Data] : Axis[(Int32)AiScene.Metadata["UpAxis"].Data];
@@ -634,7 +655,8 @@ namespace EngineNS.Bricks.AssetImpExp
             }
             else
             {
-                vertexPreTransform.Scale = Vector3.One * importOption.UnitScale;
+                vertexPreTransform = FTransform.CreateTransform(Vector3.Zero.AsDVector(),
+                transformTuple.Scale * importOption.UnitScale, transformTuple.Quat);
             }
 
             var meshes = GetValidMesh(meshNode, scene);
