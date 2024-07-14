@@ -374,8 +374,12 @@ namespace EngineNS.IO
         static Vector2 tempDelta = new Vector2(12, 15);
         public virtual unsafe void OnDraw(in ImDrawList cmdlist, in Vector2 sz, EGui.Controls.UContentBrowser ContentBrowser)
         {
+            OnDraw(in cmdlist, in Vector2.Zero, in sz, ContentBrowser);
+        }
+        public virtual unsafe void OnDraw(in ImDrawList cmdlist, in Vector2 offset, in Vector2 sz, EGui.Controls.UContentBrowser ContentBrowser)
+        {
             var snapSize = sz.X * 0.9f;
-            var start = ImGuiAPI.GetItemRectMin();
+            var start = ImGuiAPI.GetItemRectMin() + offset;
             var end = start + sz;
 
             var shadowImg = UEngine.Instance.UIProxyManager[TtAssetMetaManager.ItemShadowImgName] as EGui.UIProxy.ImageProxy;
@@ -586,10 +590,11 @@ namespace EngineNS.IO
 
         public virtual void DrawTooltip()
         {
+            var name = GetAssetName();
             CtrlUtility.DrawHelper(
-                "Name: " + GetAssetName().Name, 
-                "Desc: " + Description, 
-                "Address: " + GetAssetName().Address);
+                "Name: " + name.Name,
+                "Desc: " + Description,
+                "Address: " + name.Address);
         }
     }
     public class TtAssetMetaManager

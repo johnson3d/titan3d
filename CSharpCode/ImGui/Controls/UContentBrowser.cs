@@ -73,6 +73,7 @@ namespace EngineNS.EGui.Controls
         bool mContextMenuFilterFocused = false;
         bool mContextMenuOpenCheck = false;
         bool mOldContextMenuOpenCheck = false;
+        bool mShiftSelection = false;
 
         public async Thread.Async.TtTask<bool> Initialize()
         {
@@ -164,6 +165,16 @@ namespace EngineNS.EGui.Controls
             var itemSize = new Vector2(100, 140);
                 CreateNewAssets = true;
             
+            if(FirstClickIndex != LastClickIndex)
+            {
+                for(int i=0; i<SelectedAssets.Count; i++)
+                {
+                    SelectedAssets[i].IsSelected = false;
+                }
+                SelectedAssets.Clear();
+                mShiftSelection = true;
+            }
+
             //var cldPos = ImGuiAPI.GetWindowPos();
             //var cldMin = ImGuiAPI.GetWindowContentRegionMin();
             //var cldMax = ImGuiAPI.GetWindowContentRegionMax();
@@ -179,6 +190,7 @@ namespace EngineNS.EGui.Controls
             ImGuiAPI.PushStyleColor(ImGuiCol_.ImGuiCol_HeaderActive, 0x00000000);
             var files = IO.TtFileManager.GetFiles(dir.Address, "*" + IO.IAssetMeta.MetaExt, mWithChildFolders);
             float curPos = 0;
+            int drawIndex = 0;
             for (int i = 0; i < files.Length; i++)
             {
                 var file = files[i];
@@ -227,7 +239,7 @@ namespace EngineNS.EGui.Controls
                 if ((mActiveFiltersCount > 0) && !((UIProxy.MenuItemProxy)mFilterMenus[assetTypeName]).Selected)
                     continue;
 
-                DrawItem(in cmdlist, ameta.Icon, ameta, in itemSize);
+                DrawItem(in cmdlist, ameta.Icon, ameta, in itemSize, drawIndex++);
                 curPos += itemSize.X + style->ItemSpacing.X;
                 if (curPos + itemSize.X < width)
                 {
@@ -257,7 +269,7 @@ namespace EngineNS.EGui.Controls
                     else
                         continue;
 
-                    DrawItem(in cmdlist, ameta.Icon, ameta, in itemSize);
+                    DrawItem(in cmdlist, ameta.Icon, ameta, in itemSize, drawIndex++);
                     curPos += itemSize.X + style->ItemSpacing.X;
                     if (curPos + itemSize.X < width)
                     {
@@ -272,6 +284,13 @@ namespace EngineNS.EGui.Controls
             ImGuiAPI.PopStyleVar(1);
             ImGuiAPI.PopStyleColor(3);
             //cmdlist.PopClipRect();
+
+
+            if (mShiftSelection)
+            {
+                LastClickIndex = FirstClickIndex;
+                mShiftSelection = false;
+            }
 
             ////////////////////////////////////////////////////////////
             //drawList.AddRect(ref min, ref max, 0xFF0000FF, 0, ImDrawFlags_.ImDrawFlags_None, 1);
@@ -311,11 +330,15 @@ namespace EngineNS.EGui.Controls
         }
 
         public static bool IsInDragDropMode = false;
+        int FirstClickIndex = -1;
+        int LastClickIndex = -1;
+        RName LastDir;
 
-        private unsafe void DrawItem(in ImDrawList cmdlist, UUvAnim icon, IO.IAssetMeta ameta, in Vector2 sz)
+        private unsafe void DrawItem(in ImDrawList cmdlist, UUvAnim icon, IO.IAssetMeta ameta, in Vector2 sz, int index)
         {
             ImGuiAPI.PushID($"##{ameta.GetAssetName().Name}");
-            ImGuiAPI.Selectable("", ref ameta.IsSelected, ImGuiSelectableFlags_.ImGuiSelectableFlags_None, in sz);
+            bool isSelected = false;
+            ImGuiAPI.Selectable("", ref isSelected, ImGuiSelectableFlags_.ImGuiSelectableFlags_None, in sz);
             if (ImGuiAPI.IsItemVisible())
             {
                 if(ImGuiAPI.IsWindowFocused(ImGuiFocusedFlags_.ImGuiFocusedFlags_RootAndChildWindows | ImGuiFocusedFlags_.ImGuiFocusedFlags_DockHierarchy))
@@ -368,18 +391,48 @@ namespace EngineNS.EGui.Controls
                             // todo: multi select
                             ItemSelectedAction?.Invoke(ameta);
                         }
-                    }
-                    if (ImGuiAPI.IsItemClicked(ImGuiMouseButton_.ImGuiMouseButton_Left))
-                    {
-                        GlobalSelectedAsset = ameta;
-                        for(var i=0; i<SelectedAssets.Count; i++)
+                        //}
+                        if(ImGuiAPI.IsMouseReleased(ImGuiMouseButton_.ImGuiMouseButton_Left))
+                        //if(ImGuiAPI.IsMouseClicked(ImGuiMouseButton_.ImGuiMouseButton_Left, false))
+                        //if (ImGuiAPI.IsItemClicked(ImGuiMouseButton_.ImGuiMouseButton_Left))
                         {
-                            SelectedAssets[i].IsSelected = false;
+                            //if(ImGuiAPI.IsKeyDown(ImGuiKey.ImGuiKey_ReservedForModCtrl))
+                            if (UEngine.Instance.InputSystem.IsCtrlKeyDown())
+                            {
+                                ameta.IsSelected = !ameta.IsSelected;
+                                if (ameta.IsSelected)
+                                {
+                                    GlobalSelectedAsset = ameta;
+                                    SelectedAssets.Add(ameta);
+                                    ItemSelectedAction?.Invoke(ameta);
+                                }
+                                else
+                                {
+                                    SelectedAssets.Remove(ameta);
+                                }
+                            }
+                            //else if(ImGuiAPI.IsKeyDown(ImGuiKey.ImGuiKey_ReservedForModShift))
+                            else if (UEngine.Instance.InputSystem.IsShiftKeyDown())
+                            {
+                                if (FirstClickIndex < 0)
+                                    FirstClickIndex = 0;
+                                LastClickIndex = index;
+                            }
+                            else
+                            {
+                                GlobalSelectedAsset = ameta;
+                                for (var i = 0; i < SelectedAssets.Count; i++)
+                                {
+                                    SelectedAssets[i].IsSelected = false;
+                                }
+                                SelectedAssets.Clear();
+                                SelectedAssets.Add(ameta);
+                                ameta.IsSelected = true;
+                                FirstClickIndex = index;
+                                LastClickIndex = index;
+                                ItemSelectedAction?.Invoke(ameta);
+                            }
                         }
-                        SelectedAssets.Clear();
-                        SelectedAssets.Add(ameta);
-                        // todo: multi select
-                        ItemSelectedAction?.Invoke(ameta);
                     }
                 }
                 ameta.ShowIconTime = UEngine.Instance.CurrentTickCountUS;
@@ -388,6 +441,16 @@ namespace EngineNS.EGui.Controls
                 if (ImGuiAPI.BeginDragDropSource(ImGuiDragDropFlags_.ImGuiDragDropFlags_SourceNoDisableHover))
                 {
                     IsInDragDropMode = true;
+                    if(!ameta.IsSelected)
+                    {
+                        for(int i=0; i<SelectedAssets.Count; i++)
+                        {
+                            SelectedAssets[i].IsSelected = false;
+                        }
+                        SelectedAssets.Clear();
+                        ameta.IsSelected = true;
+                        SelectedAssets.Add(ameta);
+                    }
                     var data = new DragDropData();
                     data.Metas = new IO.IAssetMeta[SelectedAssets.Count];
                     SelectedAssets.CopyTo(data.Metas, 0);
@@ -401,22 +464,40 @@ namespace EngineNS.EGui.Controls
                             drawCount++;
                     }
                     var dragDropCmdlist = ImGuiAPI.GetWindowDrawList();
-                    var offsetOri = new Vector2(4, 4);
+                    var offsetOri = new Vector2(16, 16);
+                    var offsetDelta = 1.0f;
                     if(drawCount > 0)
                     {
-                        var winSize = sz + (offsetOri * (SelectedAssets.Count - 1));
-                        if (ImGuiAPI.BeginChild("ContentBrowserDrag", in winSize, false, ImGuiWindowFlags_.ImGuiWindowFlags_NoTitleBar))
+                        float decreaseDelta = 0.15f;
+                        Vector2 offset = Vector2.Zero;
+                        int totalCount = 0;
+                        for (int i = 0; i < SelectedAssets.Count && offsetDelta > 0; i++)
                         {
-                            int offsetIdx = 0;
-                            for (int i = 0; i < SelectedAssets.Count; i++)
+                            if (i != 0)
+                                offset += offsetOri * offsetDelta;
+                            offsetDelta -= decreaseDelta;
+                            totalCount = i + 1;
+                        }
+                        var winSize = sz + offset + new Vector2(0, 30);
+                        if (ImGuiAPI.BeginChild("ContentBrowserDrag", in winSize, false, 
+                            ImGuiWindowFlags_.ImGuiWindowFlags_NoTitleBar | 
+                            ImGuiWindowFlags_.ImGuiWindowFlags_NoScrollbar | 
+                            ImGuiWindowFlags_.ImGuiWindowFlags_NoBackground))
+                        {
+                            for(int i = totalCount - 1; i>=0; i--)
                             {
+                                if(i != (totalCount - 1))
+                                    offset -= offsetOri * offsetDelta;
                                 if (!SelectedAssets[i].CanDrawOnDragging())
+                                {
                                     continue;
-                                var offset = offsetOri * offsetIdx;
-                                offsetIdx++;
-                                ImGuiAPI.SetCursorPos(ImGuiAPI.GetCursorPos() + offset);
-                                SelectedAssets[i].OnDraw(in dragDropCmdlist, in sz, this);
+                                }
+                                offsetDelta += decreaseDelta;
+                                SelectedAssets[i].OnDraw(in dragDropCmdlist, offset, in sz, this);
                             }
+                            var posY = ImGuiAPI.GetCursorPosY();
+                            ImGuiAPI.SetCursorPosY(posY + winSize.Y - 20);
+                            ImGuiAPI.Text(SelectedAssets.Count + " items");
                         }
                         ImGuiAPI.EndChild();
                     }
@@ -425,6 +506,17 @@ namespace EngineNS.EGui.Controls
                 }
             }
             ImGuiAPI.PopID();
+
+            if (mShiftSelection)
+            {
+                var min = Math.Min(FirstClickIndex, LastClickIndex);
+                var max = Math.Max(FirstClickIndex, LastClickIndex);
+                if(index >= min && index <= max)
+                {
+                    ameta.IsSelected = true;
+                    SelectedAssets.Add(ameta);
+                }
+            }
         }
         Dictionary<string, UIProxy.IUIProxyBase> mFilterMenus = new Dictionary<string, UIProxy.IUIProxyBase>();
         int mActiveFiltersCount = 0;
@@ -549,6 +641,12 @@ namespace EngineNS.EGui.Controls
             }
             if (mFolderView.CurrentDir != null)
             {
+                if(LastDir != mFolderView.CurrentDir)
+                {
+                    FirstClickIndex = -1;
+                    LastClickIndex = -1;
+                    LastDir = mFolderView.CurrentDir;
+                }
                 var root = RName.GetRName("", mFolderView.CurrentDir.RNameType);
                 var dirName = IO.TtFileManager.GetRelativePath(root.Address, mFolderView.CurrentDir.Address).TrimEnd('/');
                 dirName = mFolderView.CurrentDir.RNameType + "/" + dirName;

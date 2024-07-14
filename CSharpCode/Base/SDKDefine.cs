@@ -39,6 +39,10 @@ namespace EngineNS
         {
             return (left > right) ? left : right;
         }
+        public static Vector2 Max(Vector2 left, Vector2 right)
+        {
+            return new Vector2(Max(left.X, right.X), Max(left.Y, right.Y));
+        }
         public static int Min(int left, int right)
         {
             return (left < right) ? left : right;
@@ -54,6 +58,10 @@ namespace EngineNS
         public static double Min(double left, double right)
         {
             return (left < right) ? left : right;
+        }
+        public static Vector2 Min(Vector2 left, Vector2 right)
+        {
+            return new Vector2(Min(left.X, right.X), Min(left.Y, right.Y));
         }
         public static float Angle_To_Tadian(float degree, float min, float second)
         {
