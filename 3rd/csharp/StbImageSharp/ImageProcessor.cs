@@ -1,4 +1,5 @@
-﻿using System;
+﻿using BCnEncoder.Shared;
+using System;
 using System.Collections.Generic;
 using System.Text;
 
@@ -6,6 +7,60 @@ namespace StbImageSharp
 {
     public class ImageProcessor
     {
+        public static unsafe ImageResult GetCenterSquare(ImageResult src)
+        {
+            var size = Math.Min(src.Width, src.Height);
+            ImageResult result = new ImageResult();
+            var x = (src.Width - size) / 2;
+            var y = (src.Height - size) / 2;
+            result.Width = size;
+            result.Height = size;
+            result.SourceComp = src.SourceComp;
+            result.Comp = src.Comp;
+            switch (src.Comp)
+            {
+                case ColorComponents.RedGreenBlueAlpha:
+                    {
+                        result.Data = new byte[size * size * 4];
+                        fixed (byte* pSrc = &src.Data[0])
+                        fixed (byte* pTar = &result.Data[0])
+                        {
+                            var pS = (uint*)pSrc;
+                            var pT = (uint*)pTar;
+                            for (int i = 0; i < size; i++)
+                            {
+                                for (int j = 0; j < size; j++)
+                                {
+                                    pT[i * result.Width + j] = pS[(i + y) * src.Width + j + x];
+                                }
+                            }
+                        }
+                    }
+                    break;
+                case ColorComponents.RedGreenBlue:
+                    {
+                        result.Data = new byte[size * size * 3];
+                        fixed (byte* pSrc = &src.Data[0])
+                        fixed (byte* pTar = &result.Data[0])
+                        {
+                            for (int i = 0; i < size; i++)
+                            {
+                                for (int j = 0; j < size; j++)
+                                {
+                                    pTar[(i * result.Width + j) * 3] = pSrc[((i + y) * src.Width + j + x) * 3];
+                                    pTar[(i * result.Width + j) * 3 + 1] = pSrc[((i + y) * src.Width + j + x) * 3 + 1];
+                                    pTar[(i * result.Width + j) * 3 + 2] = pSrc[((i + y) * src.Width + j + x) * 3 + 2];
+                                }
+                            }
+                        }
+                    }
+                    break;
+                default:
+                    break;
+            }
+            
+            return result;
+        }
         public static unsafe ImageResult GetBoxDownSampler(ImageResult src, int targetWidth, int targetHeight)
         {
             switch (src.Comp)

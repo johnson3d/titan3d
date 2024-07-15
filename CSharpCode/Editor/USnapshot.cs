@@ -60,10 +60,11 @@ namespace EngineNS.Editor
             {
                 var writer = new StbImageWriteSharp.ImageWriter();
                 var image = StbImageSharp.ImageResult.FromResult(pPixelData, (int)pBitmapDesc->Width, (int)pBitmapDesc->Height, StbImageSharp.ColorComponents.RedGreenBlueAlpha, StbImageSharp.ColorComponents.RedGreenBlueAlpha);
+                image = StbImageSharp.ImageProcessor.GetCenterSquare(image);
                 if (pBitmapDesc->Width > 128)
                 {
-                    float rate = 128 / (float)pBitmapDesc->Width;
-                    int height = (int)((float)pBitmapDesc->Height * rate);
+                    float rate = 128 / (float)image.Width;// pBitmapDesc->Width;
+                    int height = (int)((float)image.Height * rate);
                     image = StbImageSharp.ImageProcessor.GetBoxDownSampler(image, 128, height);
                 }
 
