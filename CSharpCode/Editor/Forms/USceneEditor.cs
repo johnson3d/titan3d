@@ -494,8 +494,6 @@ namespace EngineNS.Editor.Forms
 
             //await viewport.RenderPolicy.Initialize(null);
 
-            await viewport.World.InitWorld();
-
             (viewport as EGui.Slate.UWorldViewportSlate).CameraController.ControlCamera(viewport.RenderPolicy.DefaultCamera);
 
             var gridNode = await GamePlay.Scene.UGridNode.AddGridNode(viewport.World, viewport.World.Root);
@@ -529,6 +527,7 @@ namespace EngineNS.Editor.Forms
             if (Scene == null)
                 return false;
 
+            PreviewViewport.Axis.RootNode.Parent = Scene;
             PreviewViewport.World.Root = Scene;
 
             var gridNode = await GamePlay.Scene.UGridNode.AddGridNode(Scene.World, Scene);

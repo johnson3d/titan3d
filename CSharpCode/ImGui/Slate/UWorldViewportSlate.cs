@@ -17,6 +17,10 @@ namespace EngineNS.EGui.Slate
         public NxRHI.URenderPass SwapChainPassDesc;
 
         GamePlay.UAxis mAxis;
+        public GamePlay.UAxis Axis
+        {
+            get => mAxis;
+        }
 
         public Graphics.Pipeline.ICameraController CameraController { get; set; }
         public UWorldViewportSlate()
@@ -64,13 +68,13 @@ namespace EngineNS.EGui.Slate
             if (mViewport.Width > 1 && mViewport.Height > 1)
                 policy.OnResize(mViewport.Width, mViewport.Height);
 
+            await this.World.InitWorld();
             if (OnInitialize == null)
             {
                 OnInitialize = this.Initialize_Default;
             }
             await OnInitialize(this, application, policy, zMin, zMax);
 
-            await this.World.InitWorld();
             SetCameraOffset(in DVector3.Zero);
 
             mDefaultHUD.RenderCamera = this.RenderPolicy.DefaultCamera;

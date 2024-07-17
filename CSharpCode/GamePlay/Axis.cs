@@ -176,7 +176,7 @@ namespace EngineNS.GamePlay
         float mSnapGridSize = 0.1f;
         #endregion
 
-        class UAxisNode : Scene.USceneActorNode
+        public class UAxisNode : Scene.USceneActorNode
         {
             public override async Thread.Async.TtTask<bool> InitializeNode(GamePlay.UWorld world, Scene.UNodeData data, Scene.EBoundVolumeType bvType, Type placementType)                
             {
@@ -891,6 +891,7 @@ namespace EngineNS.GamePlay
 
         GamePlay.UWorld mHostWorld;
         UAxisNode mRootNode;
+        public UAxisNode RootNode { get => mRootNode; }
         float mRootNodeScaleValue = 1.0f;
         Scene.UMeshNode mRotArrowAssetNode;
         bool mInitialized = false;
