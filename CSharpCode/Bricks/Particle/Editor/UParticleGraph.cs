@@ -6,9 +6,9 @@ using EngineNS.EGui.Controls;
 
 namespace EngineNS.Bricks.Particle.Editor
 {
-    public class UParticleGraph : NodeGraph.UNodeGraph
+    public class TtParticleGraph : NodeGraph.UNodeGraph
     {
-        public UParticleGraph()
+        public TtParticleGraph()
         {
             UpdateCanvasMenus();
             UpdateNodeMenus();

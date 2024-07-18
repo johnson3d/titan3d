@@ -325,7 +325,7 @@ namespace EngineNS.Bricks.GpuDriven
             foreach (var i in rp.VisibleNodes)
             {
                 var meshNode = i as GamePlay.Scene.UMeshNode;
-                if (meshNode == null)
+                if (meshNode == null || meshNode.Mesh == null)
                     continue;
 
                 foreach (var j in meshNode.Mesh.MaterialMesh.SubMeshes)

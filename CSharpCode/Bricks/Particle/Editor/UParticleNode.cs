@@ -1,15 +1,18 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using EngineNS.Bricks.NodeGraph;
+using EngineNS.Graphics.Pipeline.Shader;
 
 namespace EngineNS.Bricks.Particle.Editor
 {
+    [EGui.Controls.PropertyGrid.PGCategoryFilters(ExcludeFilters = new string[] { "Misc" })]
     public partial class UParticleNode : NodeGraph.UNodeBase
     {
         internal UParticleEditor NebulaEditor;
         public override void OnLinkedFrom(PinIn iPin, UNodeBase OutNode, PinOut oPin)
         {
-            var funcGraph = ParentGraph as UParticleGraph;
+            var funcGraph = ParentGraph as TtParticleGraph;
             if (funcGraph == null || oPin.LinkDesc == null || iPin.LinkDesc == null)
             {
                 return;
@@ -18,6 +21,12 @@ namespace EngineNS.Bricks.Particle.Editor
             {
                 funcGraph.RemoveLinkedInExcept(iPin, OutNode, oPin.Name);
             }
+        }
+        public override void OnLButtonClicked(NodePin hitPin)
+        {
+            var funcGraph = ParentGraph as TtParticleGraph;
+            var editor = funcGraph.Editor as UParticleEditor;
+            editor.NodePropGrid.Target = this;
         }
     }
     public class UEmitterNode : UParticleNode
@@ -46,6 +55,16 @@ namespace EngineNS.Bricks.Particle.Editor
             AddPinOut(Shapes);
             AddPinOut(Effectors);
         }
+        [Category("Option")]
+        [RName.PGRName(FilterExts = Graphics.Mesh.UMaterialMesh.AssetExt)]
+        public RName MeshName
+        {
+            get; set;
+        }
+        [Category("Option")]
+        public bool IsGpuDriven { get; set; } = true;
+        [Category("Option")]
+        public int MaxParticle { get; set; } = 1024;
     }
     public class UEmitShapeNode : UParticleNode
     {
@@ -118,7 +137,7 @@ namespace EngineNS.Bricks.Particle.Editor
 
     public class UBoxEmitShapeNode : UEmitShapeNode
     {
-        public UShapeBox Shape = new UShapeBox();
+        public TtShapeBox Shape = new TtShapeBox();
         public UBoxEmitShapeNode()
         {
             Name = "BoxShape";
@@ -126,7 +145,7 @@ namespace EngineNS.Bricks.Particle.Editor
     }
     public class USphereEmitShapeNode : UEmitShapeNode
     {
-        public UShapeSphere Shape = new UShapeSphere();
+        public TtShapeSphere Shape = new TtShapeSphere();
         public USphereEmitShapeNode()
         {
             Name = "SphereShape";

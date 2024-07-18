@@ -34,7 +34,7 @@ namespace EngineNS.Bricks.Particle
     [UNebulaParticle.UNebulaParticleImport]
     [IO.AssetCreateMenu(MenuName = "FX/NubulaParticle")]
     [EngineNS.Editor.UAssetEditor(EditorType = typeof(Editor.UParticleEditor))]
-    public class UNebulaParticle : IO.IAsset, IDisposable
+    public partial class UNebulaParticle : IO.IAsset, IDisposable
     {
         public const string AssetExt = ".nebula";
         public class UNebulaParticleImportAttribute : IO.CommonCreateAttribute
@@ -80,6 +80,7 @@ namespace EngineNS.Bricks.Particle
             Emitter.Clear();
         }
         public Dictionary<string, IParticleEmitter> Emitter { get; } = new Dictionary<string, IParticleEmitter>();
+        [Rtti.Meta]
         public IParticleEmitter AddEmitter(System.Type type, string name)
         {
             var emitter = Rtti.UTypeDescManager.CreateInstance(type) as IParticleEmitter;

@@ -62,7 +62,7 @@ namespace EngineNS.Bricks.Particle
             defines.mCoreObject.AddDefine("DispatchX", $"{Dispatch_SetupDimArray1.X}");
             defines.mCoreObject.AddDefine("DispatchY", $"{Dispatch_SetupDimArray1.Y}");
             defines.mCoreObject.AddDefine("DispatchZ", $"{Dispatch_SetupDimArray1.Z}");
-            defines.mCoreObject.AddDefine("BufferHeadSize", $"{UGpuParticleResources.BufferHeadSize*4}");
+            defines.mCoreObject.AddDefine("BufferHeadSize", $"{TtGpuParticleResources.BufferHeadSize*4}");
 
             ParticleVar = new NxRHI.UShaderCode();
             ParticleVar.TextCode = particleVar;
@@ -156,25 +156,19 @@ namespace EngineNS.Bricks.Particle
                 var Emitter = result.AddEmitter(typeof(Simple.USimpleEmitter), "emitter0") as Simple.USimpleEmitter;
                 Emitter.IsGpuDriven = true;
 
-                var umesh = await UEngine.Instance.GfxDevice.MaterialMeshManager.GetMaterialMesh(RName.GetRName("utest/mesh/unit_sphere.ums"));
-                var mesh = new Graphics.Mesh.TtMesh();
-                mesh.Initialize(umesh, Rtti.UTypeDescGetter<Simple.USimpleMdfQueue>.TypeDesc);
-                Emitter.InitEmitter(UEngine.Instance.GfxDevice.RenderContext, mesh, 1024);
+                await Emitter.InitEmitter(RName.GetRName("utest/mesh/unit_sphere.ums"), 1024);
 
-                var sphereShape = new Bricks.Particle.UShapeSphere();
+                var sphereShape = new Bricks.Particle.TtShapeSphere();
                 sphereShape.Radius = 10.0f;
                 sphereShape.Thinness = 0.1f;
-                var boxShape = new Bricks.Particle.UShapeBox();
+                var boxShape = new Bricks.Particle.TtShapeBox();
                 boxShape.Thinness = 0.2f;
                 Emitter.EmitterShapes.Add(sphereShape);
                 Emitter.EmitterShapes.Add(boxShape);
-                var ef1 = new UAcceleratedEffector();
+                var ef1 = new TtAcceleratedEffector();
                 ef1.Acceleration = new Vector3(0, -0.1f, 0);
                 Emitter.AddEffector("default", ef1);
                 Emitter.SetCurrentQueue("default");
-
-                var nblMdf = mesh.MdfQueue as Simple.USimpleMdfQueue;
-                nblMdf.Emitter = Emitter;
 
                 await UEngine.Instance.NebulaTemplateManager.UpdateShaders(result);
             }

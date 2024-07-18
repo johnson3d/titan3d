@@ -5,7 +5,7 @@ using EngineNS.Bricks.NodeGraph;
 
 namespace EngineNS.Bricks.Particle.Editor
 {
-    public partial class UParticleEditor : EngineNS.Editor.IAssetEditor, IO.ISerializer, ITickable, IRootForm
+    public partial class UParticleEditor : EngineNS.Editor.IAssetEditor, IO.ISerializer, ITickable, IRootForm, IGraphEditor
     {
         public int GetTickOrder()
         {
@@ -49,23 +49,20 @@ namespace EngineNS.Bricks.Particle.Editor
         {
             return this;
         }
+        #region DrawUI
+        public Vector2 WindowPos;
+        public Vector2 WindowSize = new Vector2(800, 600);
+        public bool IsDrawing { get; set; }
         public unsafe void OnDraw()
         {
             if (Visible == false)
                 return;
 
-            bool drawing = true;
             var pivot = new Vector2(0);
             ImGuiAPI.SetNextWindowSize(in WindowSize, ImGuiCond_.ImGuiCond_FirstUseEver);
-            ImGuiAPI.SetNextWindowDockID(DockId, DockCond);
-            var result = EGui.UIProxy.DockProxy.BeginMainForm(AssetName.Name, this, ImGuiWindowFlags_.ImGuiWindowFlags_None |
-                ImGuiWindowFlags_.ImGuiWindowFlags_NoSavedSettings);
-            if (result)
+            IsDrawing = EGui.UIProxy.DockProxy.BeginMainForm(AssetName.Name, this, ImGuiWindowFlags_.ImGuiWindowFlags_NoSavedSettings);
+            if (IsDrawing)
             {
-                if (ImGuiAPI.IsWindowDocked())
-                {
-                    DockId = ImGuiAPI.GetWindowDockID();
-                }
                 if (ImGuiAPI.IsWindowFocused(ImGuiFocusedFlags_.ImGuiFocusedFlags_RootAndChildWindows))
                 {
                     var mainEditor = UEngine.Instance.GfxDevice.SlateApplication as EngineNS.Editor.UMainEditorApplication;
@@ -75,100 +72,118 @@ namespace EngineNS.Bricks.Particle.Editor
                 WindowPos = ImGuiAPI.GetWindowPos();
                 WindowSize = ImGuiAPI.GetWindowSize();
                 DrawToolBar();
+                //var sz = new Vector2(-1);
+                //ImGuiAPI.BeginChild("Client", ref sz, false, ImGuiWindowFlags_.)
                 ImGuiAPI.Separator();
-                ImGuiAPI.Columns(2, null, true);
-                if (LeftWidth == 0)
-                {
-                    ImGuiAPI.SetColumnWidth(0, 300);
-                }
-                LeftWidth = ImGuiAPI.GetColumnWidth(0);
-                var min = ImGuiAPI.GetWindowContentRegionMin();
-                var max = ImGuiAPI.GetWindowContentRegionMax();
-
-                DrawLeft(ref min, ref max);
-                ImGuiAPI.NextColumn();
-
-                DrawRight(ref min, ref max);
-                ImGuiAPI.NextColumn();
-
-                ImGuiAPI.Columns(1, null, true);
             }
-            else
-            {
-                drawing = false;
-            }
-            EGui.UIProxy.DockProxy.EndMainForm(result);
+            ResetDockspace();
+            EGui.UIProxy.DockProxy.EndMainForm(IsDrawing);
 
-            if (drawing)
-            {
-                if (PreviewDockId != 0)
-                {
-                    PreviewViewport.DockId = PreviewDockId;
-                    PreviewViewport.DockCond = ImGuiCond_.ImGuiCond_Always;
-                    PreviewViewport.ViewportType = Graphics.Pipeline.UViewportSlate.EViewportType.Window;
-                    PreviewViewport.OnDraw();
-                }
-            }
+            DrawPreview();
+            DrawParticleStructBuilder();
+            DrawNodeDetails();
+            DrawGraph();
         }
-        protected void DrawToolBar()
+        bool mDockInitialized = false;
+        protected void ResetDockspace(bool force = false)
+        {
+            var pos = ImGuiAPI.GetCursorPos();
+            var id = ImGuiAPI.GetID(AssetName.Name + "_Dockspace");
+            mDockKeyClass.ClassId = id;
+            ImGuiAPI.DockSpace(id, Vector2.Zero, ImGuiDockNodeFlags_.ImGuiDockNodeFlags_None, mDockKeyClass);
+            if (mDockInitialized && !force)
+                return;
+            ImGuiAPI.DockBuilderRemoveNode(id);
+            ImGuiAPI.DockBuilderAddNode(id, ImGuiDockNodeFlags_.ImGuiDockNodeFlags_None);
+            ImGuiAPI.DockBuilderSetNodePos(id, pos);
+            ImGuiAPI.DockBuilderSetNodeSize(id, Vector2.One);
+            mDockInitialized = true;
+
+            var rightId = id;
+            uint middleId = 0;
+            uint downId = 0;
+            uint leftId = 0;
+            uint rightUpId = 0;
+            uint rightDownId = 0;
+            ImGuiAPI.DockBuilderSplitNode(rightId, ImGuiDir_.ImGuiDir_Left, 0.8f, ref middleId, ref rightId);
+            ImGuiAPI.DockBuilderSplitNode(rightId, ImGuiDir_.ImGuiDir_Down, 0.5f, ref rightDownId, ref rightUpId);
+            ImGuiAPI.DockBuilderSplitNode(middleId, ImGuiDir_.ImGuiDir_Down, 0.3f, ref downId, ref middleId);
+            ImGuiAPI.DockBuilderSplitNode(middleId, ImGuiDir_.ImGuiDir_Left, 0.2f, ref leftId, ref middleId);
+
+            ImGuiAPI.DockBuilderDockWindow(EGui.UIProxy.DockProxy.GetDockWindowName("Preview", mDockKeyClass), rightUpId);
+            ImGuiAPI.DockBuilderDockWindow(EGui.UIProxy.DockProxy.GetDockWindowName("NodeDetails", mDockKeyClass), rightDownId);
+            ImGuiAPI.DockBuilderDockWindow(EGui.UIProxy.DockProxy.GetDockWindowName("ParticleStruct", mDockKeyClass), rightDownId);
+            ImGuiAPI.DockBuilderDockWindow(EGui.UIProxy.DockProxy.GetDockWindowName("Graph", mDockKeyClass), middleId);
+
+            ImGuiAPI.DockBuilderFinish(id);
+        }
+        protected unsafe void DrawToolBar()
         {
             var btSize = Vector2.Zero;
             if (EGui.UIProxy.CustomButton.ToolButton("Save", in btSize))
             {
-                //EngineNS.Editor.USnapshot.Save(NebulaParticle.AssetName, NebulaParticle.GetAMeta(), PreviewViewport.RenderPolicy.GetFinalShowRSV(), UEngine.Instance.GfxDevice.RenderContext.mCoreObject.GetImmCommandList());
+                
             }
             ImGuiAPI.SameLine(0, -1);
-            if (EGui.UIProxy.CustomButton.ToolButton("Compile", in btSize))
+            if (EGui.UIProxy.CustomButton.ToolButton("Undo", in btSize))
             {
-                
-            }
-        }
-        uint PreviewDockId = 0;
-        protected unsafe void DrawLeft(ref Vector2 min, ref Vector2 max)
-        {
-            if (PreviewDockId == 0)
-                PreviewDockId = ImGuiAPI.GetID($"{AssetName}");
 
-            var size = new Vector2(-1, -1);
-            if (ImGuiAPI.BeginChild("LeftWindow", in size, false, ImGuiWindowFlags_.ImGuiWindowFlags_None))
-            {
-                if (ImGuiAPI.CollapsingHeader("Preview", ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_None))
-                {
-                    PreviewViewport.Visible = true;
-                    ImGuiDockNodeFlags_ dockspace_flags = ImGuiDockNodeFlags_.ImGuiDockNodeFlags_None;
-                    var winClass = new ImGuiWindowClass();
-                    winClass.UnsafeCallConstructor();
-                    var sz = ImGuiAPI.GetWindowSize();
-                    sz.Y = sz.X;
-                    ImGuiAPI.DockSpace(PreviewDockId, in sz, dockspace_flags, in winClass);
-                    winClass.UnsafeCallDestructor();
-                }
-                else
-                {
-                    PreviewViewport.Visible = false;
-                }
-                if (ImGuiAPI.CollapsingHeader("ParticleStruct", ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_None))
-                {
-                    ParticleStructBuilder.OnDraw();
-                }
-                if (ImGuiAPI.CollapsingHeader("NodeProperty", ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_None))
-                {
-                    NodePropGrid.OnDraw(true, false, false);
-                }
-                
             }
-            ImGuiAPI.EndChild();
+            ImGuiAPI.SameLine(0, -1);
+            if (EGui.UIProxy.CustomButton.ToolButton("Redo", in btSize))
+            {
+
+            }
         }
-        protected unsafe void DrawRight(ref Vector2 min, ref Vector2 max)
+
+        bool ShowEditorPropGrid = true;
+        protected void DrawParticleStructBuilder()
         {
-            
-            var size = new Vector2(-1, -1);
-            if (ImGuiAPI.BeginChild("RightWindow", in size, false, ImGuiWindowFlags_.ImGuiWindowFlags_None))
+            var sz = new Vector2(-1);
+            var show = EGui.UIProxy.DockProxy.BeginPanel(mDockKeyClass, "ParticleStruct", ref ShowEditorPropGrid, ImGuiWindowFlags_.ImGuiWindowFlags_None);
+            if (show)
+            {
+                ParticleStructBuilder.OnDraw();
+            }
+            EGui.UIProxy.DockProxy.EndPanel(show);
+        }
+        bool ShowMeshPropGrid = true;
+        protected void DrawNodeDetails()
+        {
+            var sz = new Vector2(-1);
+            var show = EGui.UIProxy.DockProxy.BeginPanel(mDockKeyClass, "NodeDetails", ref ShowMeshPropGrid, ImGuiWindowFlags_.ImGuiWindowFlags_None);
+            if (show)
+            {
+                NodePropGrid.OnDraw(true, false, false);
+            }
+            EGui.UIProxy.DockProxy.EndPanel(show);
+        }
+        bool ShowPreview = true;
+        protected unsafe void DrawPreview()
+        {
+            var show = EGui.UIProxy.DockProxy.BeginPanel(mDockKeyClass, "Preview", ref ShowPreview, ImGuiWindowFlags_.ImGuiWindowFlags_None);
+            if (show)
+            {
+                PreviewViewport.ViewportType = Graphics.Pipeline.UViewportSlate.EViewportType.ChildWindow;
+                PreviewViewport.OnDraw();
+            }
+            this.PreviewViewport.Visible = show;
+            EGui.UIProxy.DockProxy.EndPanel(show);
+
+        }
+        bool ShowGraph = true;
+        protected unsafe void DrawGraph()
+        {
+            var show = EGui.UIProxy.DockProxy.BeginPanel(mDockKeyClass, "Graph", ref ShowGraph, ImGuiWindowFlags_.ImGuiWindowFlags_None);
+            if (show)
             {
                 GraphRenderer.OnDraw();
             }
-            ImGuiAPI.EndChild();
+            this.PreviewViewport.Visible = show;
+            EGui.UIProxy.DockProxy.EndPanel(show);
+
         }
+        #endregion
         #region ISerializer
         public void OnPreRead(object tagObject, object hostObject, bool fromXml)
         {
@@ -202,25 +217,21 @@ namespace EngineNS.Bricks.Particle.Editor
         public EngineNS.Editor.UPreviewViewport PreviewViewport;
         public EGui.Controls.PropertyGrid.PropertyGrid NodePropGrid = new EGui.Controls.PropertyGrid.PropertyGrid();
         public float LeftWidth = 0;
-        public Vector2 WindowPos;
-        public Vector2 WindowSize = new Vector2(800, 600);
-
-        public UParticleGraph ParticleGraph { get; } = new UParticleGraph();
+        
+        public TtParticleGraph ParticleGraph { get; } = new TtParticleGraph();
         public UGraphRenderer GraphRenderer { get; } = new UGraphRenderer();
         public CodeBuilder.UClassLayoutBuilder ParticleStructBuilder { get; } = new CodeBuilder.UClassLayoutBuilder();
         bool IsStarting = false;
-        protected async System.Threading.Tasks.Task Initialize_PreviewMaterial(Graphics.Pipeline.UViewportSlate viewport, USlateApplication application, Graphics.Pipeline.URenderPolicy policy, float zMin, float zMax)
+        protected async System.Threading.Tasks.Task Initialize_PreviewParticle(Graphics.Pipeline.UViewportSlate viewport, USlateApplication application, Graphics.Pipeline.URenderPolicy policy, float zMin, float zMax)
         {
             ParticleGraph.NebulaEditor = this;
             viewport.RenderPolicy = policy;
 
-            await viewport.World.InitWorld();
-
             (viewport as EngineNS.Editor.UPreviewViewport).CameraController.ControlCamera(viewport.RenderPolicy.DefaultCamera);
 
-            var nebulaData = new Bricks.Particle.Simple.USimpleNebulaNode.USimpleNebulaNodeData();
+            var nebulaData = new Bricks.Particle.TtNebulaNode.TtNebulaNodeData();
             nebulaData.NebulaName = AssetName;
-            var meshNode = new Bricks.Particle.Simple.USimpleNebulaNode();
+            var meshNode = new Bricks.Particle.TtNebulaNode();
             await meshNode.InitializeNode(viewport.World, nebulaData, GamePlay.Scene.EBoundVolumeType.Box, typeof(GamePlay.UPlacement));
             meshNode.Parent = viewport.World.Root;
             meshNode.Placement.Position = DVector3.Zero;
@@ -277,6 +288,7 @@ namespace EngineNS.Bricks.Particle.Editor
             {
                 GraphRenderer.SetGraph(graph);
             };
+            ParticleGraph.Editor = this;
             IsStarting = true;
 
             AssetName = name;
@@ -286,7 +298,7 @@ namespace EngineNS.Bricks.Particle.Editor
 
             PreviewViewport.PreviewAsset = AssetName;
             PreviewViewport.Title = $"NebulaPreview:{AssetName}";
-            PreviewViewport.OnInitialize = Initialize_PreviewMaterial;
+            PreviewViewport.OnInitialize = Initialize_PreviewParticle;
             await PreviewViewport.Initialize(UEngine.Instance.GfxDevice.SlateApplication, UEngine.Instance.Config.MainRPolicyName, 0, 1);
 
             UEngine.Instance.TickableManager.AddTickable(this);

@@ -28,7 +28,7 @@ namespace EngineNS.Bricks.Particle
         public Vector3 Location;
         public uint Flags;
     }
-    public class UGpuParticleResources : IDisposable
+    public class TtGpuParticleResources : IDisposable
     {
         public void Dispose()
         {
@@ -87,18 +87,16 @@ namespace EngineNS.Bricks.Particle
 
         public NxRHI.UBuffer DrawArgBuffer;
         public NxRHI.UUaView DrawArgUav;
-        public unsafe void Initialize<FParticle, FParticleSystem>(UEmitter<FParticle, FParticleSystem> emitter, in FParticleSystem sysData) 
-            where FParticle : unmanaged
-            where FParticleSystem : unmanaged
+        public unsafe void Initialize(TtEmitter emitter, in FParticleSystemBase sysData) 
         {
             var rc = UEngine.Instance.GfxDevice.RenderContext;
             var bfDesc = new NxRHI.FBufferDesc();
             bfDesc.SetDefault(false, NxRHI.EBufferType.BFT_SRV | NxRHI.EBufferType.BFT_UAV);
             bfDesc.Type = NxRHI.EBufferType.BFT_UAV | NxRHI.EBufferType.BFT_SRV;
-            bfDesc.StructureStride = (uint)sizeof(FParticle);
-            bfDesc.Size = (uint)sizeof(FParticle) * emitter.MaxParticle;
+            bfDesc.StructureStride = (uint)sizeof(FParticleBase);
+            bfDesc.Size = (uint)sizeof(FParticleBase) * emitter.MaxParticle;
             {
-                var pAddr = (FParticle*)CoreSDK.Alloc(bfDesc.Size, "Nebula", 0);                
+                var pAddr = (FParticleBase*)CoreSDK.Alloc(bfDesc.Size, "Nebula", 0);                
                 for (uint i = 0; i < emitter.MaxParticle; i++)
                 {
                     ((FParticleBase*)&pAddr[i])->RandomSeed = (uint)emitter.RandomNext();
@@ -122,9 +120,9 @@ namespace EngineNS.Bricks.Particle
             ParticlesSrv = rc.CreateSRV(ParticlesBuffer, in srvDesc);
 
             {
-                bfDesc.StructureStride = (uint)sizeof(FParticleSystem);
-                bfDesc.Size = (uint)sizeof(FParticleSystem) * 1;
-                fixed (FParticleSystem* pAddr = &sysData)
+                bfDesc.StructureStride = (uint)sizeof(FParticleSystemBase);
+                bfDesc.Size = (uint)sizeof(FParticleSystemBase) * 1;
+                fixed (FParticleSystemBase* pAddr = &sysData)
                 {
                     bfDesc.InitData = pAddr;
                     SystemDataBuffer = rc.CreateBuffer(in bfDesc);
@@ -237,7 +235,7 @@ namespace EngineNS.Bricks.Particle
             MathHelper.Swap(ref CurAlivesSrv, ref BackendAlivesSrv);
         }
     }
-    public class UEffectorQueue : IDisposable
+    public class TtEffectorQueue : IDisposable
     {
         public void Dispose()
         {
@@ -254,7 +252,7 @@ namespace EngineNS.Bricks.Particle
         
         public unsafe void UpdateComputeDrawcall(NxRHI.UGpuDevice rc, IParticleEmitter emitter)
         {
-            UGpuParticleResources gpuResources = emitter.GpuResources;
+            TtGpuParticleResources gpuResources = emitter.GpuResources;
 
             var coreBinder = UEngine.Instance.GfxDevice.CoreShaderBinder;
             if (mParticleUpdateDrawcall == null)
@@ -338,7 +336,7 @@ namespace EngineNS.Bricks.Particle
             var codeBuilder = new Bricks.CodeBuilder.Backends.UHLSLCodeGenerator();
             string sourceCode = "";
             //var codeBuilder = new Bricks.CodeBuilder.HLSL.UHLSLGen();
-            codeBuilder.AddLine("\nvoid DoParticleEffectors(uint3 id, inout FParticle particle)", ref sourceCode);
+            codeBuilder.AddLine("\nvoid DoParticleEffectors(uint3 id, inout FParticleBase particle)", ref sourceCode);
             codeBuilder.PushSegment(ref sourceCode);
             int index = 0;
             foreach (var i in Effectors)
@@ -362,11 +360,9 @@ namespace EngineNS.Bricks.Particle
             }
             return result;
         }
-        public unsafe void Update<FParticle, FParticleSystem>(UEmitter<FParticle, FParticleSystem> emiter, float elapsed) 
-            where FParticle : unmanaged
-            where FParticleSystem : unmanaged
+        public unsafe void Update(TtEmitter emiter, float elapsed) 
         {
-            var pParticles = (FParticle*)emiter.mCoreObject.GetParticleAddress();
+            var pParticles = (FParticleBase*)emiter.mCoreObject.GetParticleAddress();
             var pAlives = emiter.mCoreObject.GetCurrentAliveAddress();
             uint aliveNum = emiter.mCoreObject.GetLiveNumber();
             foreach (var e in Effectors)
@@ -394,10 +390,10 @@ namespace EngineNS.Bricks.Particle
         void Update(UParticleGraphNode particleSystem, float elapsed);
         unsafe void Flush2GPU(NxRHI.ICommandList cmd);
         uint MaxParticle { get; }
-        List<UShape> EmitterShapes { get; }
-        Dictionary<string, UEffectorQueue> EffectorQueues { get; }
-        UEffectorQueue CurrentQueue { get; set; }
-        UGpuParticleResources GpuResources { get; }
+        List<TtShape> EmitterShapes { get; }
+        Dictionary<string, TtEffectorQueue> EffectorQueues { get; }
+        TtEffectorQueue CurrentQueue { get; set; }
+        TtGpuParticleResources GpuResources { get; }
         string GetParticleDefine();
         string GetSystemDataDefine();
         string GetCBufferDefines();
@@ -411,9 +407,7 @@ namespace EngineNS.Bricks.Particle
 
         void SetCBuffer(NxRHI.UCbView CBuffer);
     }
-    public class UEmitter<FParticle, FParticleSystem> : AuxPtrType<IEmitter>, IParticleEmitter 
-        where FParticle : unmanaged
-        where FParticleSystem : unmanaged
+    public partial class TtEmitter : AuxPtrType<IEmitter>, IParticleEmitter 
     {
         public override void Dispose()
         {
@@ -432,15 +426,38 @@ namespace EngineNS.Bricks.Particle
 
         public virtual IParticleEmitter CloneEmitter()
         {
-            return null;
+            var emt = Rtti.UTypeDescManager.CreateInstance(this.GetType()) as TtEmitter;
+            emt.IsGpuDriven = IsGpuDriven;
+            var mesh = new Graphics.Mesh.TtMesh();
+            mesh.Initialize(Mesh.MaterialMesh, Rtti.UTypeDescGetter<UParticleMdfQueue>.TypeDesc); //mesh.MdfQueue
+            emt.InitEmitter(UEngine.Instance.GfxDevice.RenderContext, mesh, 1024);
+
+            foreach (var i in EmitterShapes)
+            {
+                var shp = i.CloneShape();
+                emt.EmitterShapes.Add(shp);
+            }
+
+            foreach (var i in EffectorQueues)
+            {
+                foreach (var j in i.Value.Effectors)
+                {
+                    emt.AddEffector(i.Key, j.CloneEffector());
+                }
+            }
+
+            var nblMdf = mesh.MdfQueue as UParticleMdfQueue;
+            nblMdf.Emitter = emt;
+
+            return emt;
         }
         public bool IsGpuDriven { get; set; } = false;
-        public FParticleSystem SystemData = default;
-        public Dictionary<string, UEffectorQueue> EffectorQueues { get; } = new Dictionary<string, UEffectorQueue>();
-        public UEffectorQueue CurrentQueue { get; set; }
+        public FParticleSystemBase SystemData = default;
+        public Dictionary<string, TtEffectorQueue> EffectorQueues { get; } = new Dictionary<string, TtEffectorQueue>();
+        public TtEffectorQueue CurrentQueue { get; set; }
         public Support.ULogicTimerManager Timers { get; } = new Support.ULogicTimerManager();
-        public List<UShape> EmitterShapes { get; } = new List<UShape>();
-        public UEmitter()
+        public List<TtShape> EmitterShapes { get; } = new List<TtShape>();
+        public TtEmitter()
         {
             mCoreObject = IEmitter.CreateInstance();
         }
@@ -481,27 +498,11 @@ namespace EngineNS.Bricks.Particle
         public string GetParticleDefine()
         {
             string result = "";
-            var type = typeof(FParticle);
-            var flds = type.GetFields();
-            foreach (var i in flds)
-            {
-                if (i.Name == "BaseData")
-                    continue;
-                result += $"{GetTypeDef(i.FieldType)} {i.Name};\n";
-            }
             return result;
         }
         public string GetSystemDataDefine()
         {
             string result = "";
-            var type = typeof(FParticleSystem);
-            var flds = type.GetFields();
-            foreach (var i in flds)
-            {
-                if (i.Name == "BaseData")
-                    continue;
-                result += $"{GetTypeDef(i.FieldType)} {i.Name};\n";
-            }
             return result;
         }
         public virtual string GetCBufferDefines()
@@ -517,20 +518,62 @@ namespace EngineNS.Bricks.Particle
         }
         public virtual string GetHLSL()
         {
-            return "";
+            var codeBuilder = new Bricks.CodeBuilder.Backends.UHLSLCodeGenerator();
+            string sourceCode = "";
+            //var codeBuilder = new Bricks.CodeBuilder.HLSL.UHLSLGen();
+
+            var code = IO.TtFileManager.ReadAllText($"{RName.GetRName("UTest\\Particles\\USimpleEmitter\\Emitter.compute").Address}");
+            codeBuilder.AddLine(code, ref sourceCode);
+
+            codeBuilder.AddLine("\nvoid DoParticleEmitShape(uint3 id, inout FParticle cur, uint shapeIndex)", ref sourceCode);
+            codeBuilder.PushSegment(ref sourceCode);
+            {
+                int index = 0;
+                codeBuilder.AddLine("switch(shapeIndex)", ref sourceCode);
+                codeBuilder.PushSegment(ref sourceCode);
+                {
+                    foreach (var i in EmitterShapes)
+                    {
+                        codeBuilder.AddLine($"case {index}:", ref sourceCode);
+                        codeBuilder.PushSegment(ref sourceCode);
+                        {
+                            codeBuilder.AddLine($"{i.Name}_UpdateLocation(id, EmitShape{index}, cur);", ref sourceCode);
+                        }
+                        codeBuilder.PopSegment(ref sourceCode);
+                        codeBuilder.AddLine($"break;", ref sourceCode);
+                        index++;
+                    }
+                }
+                codeBuilder.PopSegment(ref sourceCode);
+            }
+            codeBuilder.PopSegment(ref sourceCode);
+
+            return sourceCode;
         }
         #endregion
+        [Rtti.Meta]
+        public virtual async Thread.Async.TtTask InitEmitter(RName meshName, uint maxParticle)
+        {
+            NxRHI.UGpuDevice rc = UEngine.Instance.GfxDevice.RenderContext;
+            var umesh = await UEngine.Instance.GfxDevice.MaterialMeshManager.GetMaterialMesh(meshName);
+            var mesh = new Graphics.Mesh.TtMesh();
+            mesh.Initialize(umesh, Rtti.UTypeDescGetter<UParticleMdfQueue>.TypeDesc);
+            InitEmitter(rc, mesh, maxParticle);
+        }
         public virtual unsafe void InitEmitter(NxRHI.UGpuDevice rc, Graphics.Mesh.TtMesh mesh, uint maxParticle)
         {
             MaxParticle = maxParticle;
-            mCoreObject.InitEmitter((uint)sizeof(FParticle), maxParticle);
+            mCoreObject.InitEmitter((uint)sizeof(FParticleBase), maxParticle);
 
             Mesh = mesh;
             if (rc != null)
             {
-                mGpuResources = new UGpuParticleResources();
+                mGpuResources = new TtGpuParticleResources();
                 mGpuResources.Initialize(this, SystemData);
             }
+
+            var nblMdf = mesh.MdfQueue as UParticleMdfQueue;
+            nblMdf.Emitter = this;
         }
         public bool SetCurrentQueue(string name)
         {
@@ -542,9 +585,9 @@ namespace EngineNS.Bricks.Particle
             }
             return false;
         }
-        public UEffectorQueue GetEffectorQueue(string name)
+        public TtEffectorQueue GetEffectorQueue(string name)
         {
-            UEffectorQueue queue;
+            TtEffectorQueue queue;
             if (EffectorQueues.TryGetValue(name, out queue))
             {
                 return queue;
@@ -553,10 +596,10 @@ namespace EngineNS.Bricks.Particle
         }
         public void AddEffector(string queueName, IEffector effector)
         {
-            UEffectorQueue queue;
+            TtEffectorQueue queue;
             if(EffectorQueues.TryGetValue(queueName, out queue)==false)
             {
-                queue = new UEffectorQueue();
+                queue = new TtEffectorQueue();
                 queue.Name = queueName;
                 EffectorQueues.Add(queueName, queue);
             }
@@ -595,7 +638,7 @@ namespace EngineNS.Bricks.Particle
 
             if (mCoreObject.IsChanged())
             {
-                var pParticles = (FParticle*)mCoreObject.GetParticleAddress();
+                var pParticles = (FParticleBase*)mCoreObject.GetParticleAddress();
                 var bkNum = mCoreObject.GetBackendNumber();
                 var pBackend = mCoreObject.GetBackendAliveAddress();
                 for (uint i = 0; i < bkNum; i++)
@@ -629,7 +672,7 @@ namespace EngineNS.Bricks.Particle
                 return;
             if (mGpuResources.ParticlesBuffer != null)
             {
-                mGpuResources.ParticlesBuffer.UpdateGpuData(cmd, 16, mCoreObject.GetParticleAddress(), MaxParticle * (uint)sizeof(FParticle));
+                mGpuResources.ParticlesBuffer.UpdateGpuData(cmd, 16, mCoreObject.GetParticleAddress(), MaxParticle * (uint)sizeof(FParticleBase));
             }
             if (mGpuResources.CurAlivesBuffer != null)
             {
@@ -661,15 +704,15 @@ namespace EngineNS.Bricks.Particle
         {
 
         }
-        public unsafe virtual void OnInitParticle(FParticle* pParticleArray, ref FParticle particle)
+        public unsafe virtual void OnInitParticle(FParticleBase* pParticleArray, ref FParticleBase particle)
         {
 
         }
-        public unsafe virtual void OnDeadParticle(uint index, ref FParticle particle)
+        public unsafe virtual void OnDeadParticle(uint index, ref FParticleBase particle)
         {
 
         }
-        protected virtual void OnQueueExecuted(UEffectorQueue queue)
+        protected virtual void OnQueueExecuted(TtEffectorQueue queue)
         {
 
         }
@@ -702,8 +745,8 @@ namespace EngineNS.Bricks.Particle
         #endregion
 
         #region RenderResurce        
-        UGpuParticleResources mGpuResources;
-        public UGpuParticleResources GpuResources 
+        TtGpuParticleResources mGpuResources;
+        public TtGpuParticleResources GpuResources 
         {
             get => mGpuResources;
         }

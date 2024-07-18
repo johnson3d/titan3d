@@ -4,7 +4,7 @@ using System.Text;
 
 namespace EngineNS.Bricks.Particle
 {
-    public abstract class UShape
+    public abstract class TtShape
     {
         public virtual string Name { get; }
         public virtual void SetCBuffer(uint index, NxRHI.UCbView cbuffer)
@@ -12,9 +12,9 @@ namespace EngineNS.Bricks.Particle
 
         }
         public unsafe abstract void UpdateLocation(IParticleEmitter emitter, FParticleBase* particle);
-        public abstract UShape CloneShape();
+        public abstract TtShape CloneShape();
     }
-    public class UShapeBox : UShape
+    public class TtShapeBox : TtShape
     {
         [System.Runtime.InteropServices.StructLayout(System.Runtime.InteropServices.LayoutKind.Sequential, Pack = 16)]
         public struct FShapeBox
@@ -50,7 +50,7 @@ namespace EngineNS.Bricks.Particle
             set => mShapeBox.Thinness = value;
         }
         #endregion
-        public UShapeBox()
+        public TtShapeBox()
         {
             mShapeBox.HalfExtent = Vector3.One;
             mShapeBox.Thinness = 1.0f;
@@ -118,14 +118,14 @@ namespace EngineNS.Bricks.Particle
         {
             CBuffer.SetValue($"EmitShape{index}", in mShapeBox);
         }
-        public override UShape CloneShape()
+        public override TtShape CloneShape()
         {
-            var result = new UShapeBox();
+            var result = new TtShapeBox();
             result.mShapeBox = mShapeBox;
             return result;
         }
     }
-    public class UShapeSphere : UShape
+    public class TtShapeSphere : TtShape
     {
         [System.Runtime.InteropServices.StructLayout(System.Runtime.InteropServices.LayoutKind.Sequential, Pack = 16)]
         public struct FShapeSphere
@@ -159,7 +159,7 @@ namespace EngineNS.Bricks.Particle
             get => mShapeSphere.Thinness;
             set => mShapeSphere.Thinness = value;
         }
-        public UShapeSphere()
+        public TtShapeSphere()
         {
             mShapeSphere.Radius = 1.0f;
         }
@@ -173,9 +173,9 @@ namespace EngineNS.Bricks.Particle
         {
             CBuffer.SetValue($"EmitShape{index}", in mShapeSphere);
         }
-        public override UShape CloneShape()
+        public override TtShape CloneShape()
         {
-            var result = new UShapeSphere();
+            var result = new TtShapeSphere();
             result.mShapeSphere = mShapeSphere;
             return result;
         }

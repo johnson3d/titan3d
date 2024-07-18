@@ -832,10 +832,10 @@ namespace EngineNS.Editor
             //}
 
             {
-                var nebulaData = new Bricks.Particle.Simple.USimpleNebulaNode.USimpleNebulaNodeData();
+                var nebulaData = new Bricks.Particle.TtNebulaNode.TtNebulaNodeData();
                 //nebulaData.MeshName = RName.GetRName("utest/mesh/unit_sphere.ums");
                 nebulaData.NebulaName = RName.GetRName("utest/particle001.nebula");
-                var meshNode = new Bricks.Particle.Simple.USimpleNebulaNode();
+                var meshNode = new Bricks.Particle.TtNebulaNode();
                 await meshNode.InitializeNode(world, nebulaData, GamePlay.Scene.EBoundVolumeType.Box, typeof(GamePlay.UPlacement));
                 meshNode.Parent = root;
                 meshNode.Placement.Position = DVector3.Zero;

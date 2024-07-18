@@ -7,21 +7,20 @@ using System.Threading.Tasks;
 
 namespace EngineNS.Bricks.Particle
 {
-    public class UNebulaNode<FParticle, FParticleSystem, TEmitter, TMdfQueueType> : GamePlay.Scene.UMeshNode 
-        where FParticle : unmanaged
-        where FParticleSystem : unmanaged
-        where TEmitter : UEmitter<FParticle, FParticleSystem>, new()
+    [Bricks.CodeBuilder.ContextMenu("NebulaNode ", "NebulaNode ", UNode.EditorKeyword)]
+    [UNode(NodeDataType = typeof(TtNebulaNode.TtNebulaNodeData), DefaultNamePrefix = "Nebula")]
+    public class TtNebulaNode : GamePlay.Scene.UMeshNode 
     {
         public override void Dispose()
         {
             CoreSDK.DisposeObject(ref mNebulaParticle);
             base.Dispose();
         }
-        public abstract class UNebulaNodeData : GamePlay.Scene.UMeshNode.UMeshNodeData
+        public class TtNebulaNodeData : GamePlay.Scene.UMeshNode.UMeshNodeData
         {
-            public UNebulaNodeData()
+            public TtNebulaNodeData()
             {
-                this.MdfQueueType = Rtti.UTypeDesc.TypeStr(typeof(TMdfQueueType));
+                this.MdfQueueType = Rtti.UTypeDesc.TypeStr(typeof(UParticleMdfQueue));
             }
             [Rtti.Meta]
             public RName NebulaName { get; set; }
@@ -30,11 +29,11 @@ namespace EngineNS.Bricks.Particle
         { 
             get
             {
-                return GetNodeData<UNebulaNodeData>().NebulaName;
+                return GetNodeData<TtNebulaNodeData>().NebulaName;
             }
             set
             {
-                GetNodeData<UNebulaNodeData>().NebulaName = value;
+                GetNodeData<TtNebulaNodeData>().NebulaName = value;
                 System.Action action = async () =>
                 {
                     mNebulaParticle = await UEngine.Instance.NebulaTemplateManager.GetParticle(value);
@@ -47,7 +46,7 @@ namespace EngineNS.Bricks.Particle
         public override async Thread.Async.TtTask<bool> InitializeNode(UWorld world, UNodeData data, EBoundVolumeType bvType, Type placementType)
         {
             var ret = await base.InitializeNode(world, data, bvType, placementType);
-            mNebulaParticle = await UEngine.Instance.NebulaTemplateManager.GetParticle(GetNodeData<UNebulaNodeData>().NebulaName);
+            mNebulaParticle = await UEngine.Instance.NebulaTemplateManager.GetParticle(GetNodeData<TtNebulaNodeData>().NebulaName);
             return ret;
         }
         public override void OnGatherVisibleMeshes(UWorld.UVisParameter rp)

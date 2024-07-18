@@ -13,7 +13,7 @@ namespace EngineNS.Bricks.Particle
         void SetCBuffer(uint index, NxRHI.UCbView CBuffer);
         IEffector CloneEffector();
     }
-    public class UEffector<FParticle> : IEffector where FParticle : unmanaged
+    public class TtEffector : IEffector
     {
         public virtual string Name
         {
@@ -21,9 +21,9 @@ namespace EngineNS.Bricks.Particle
         }
         public unsafe void DoEffect(IParticleEmitter emitter, float elapsed, void* particle)
         {
-            DoEffect(emitter, elapsed, ref *(FParticle*)particle);
+            DoEffect(emitter, elapsed, ref *(FParticleBase*)particle);
         }
-        public unsafe virtual void DoEffect(IParticleEmitter emitter, float elapsed, ref FParticle particle)
+        public unsafe virtual void DoEffect(IParticleEmitter emitter, float elapsed, ref FParticleBase particle)
         {
 
         }
@@ -45,7 +45,7 @@ namespace EngineNS.Bricks.Particle
         }
     }
 
-    public class UAcceleratedEffector : IEffector
+    public class TtAcceleratedEffector : IEffector
     {
         [System.Runtime.InteropServices.StructLayout(System.Runtime.InteropServices.LayoutKind.Sequential, Pack = 16)]
         public struct FAcceleratedEffector
@@ -55,7 +55,7 @@ namespace EngineNS.Bricks.Particle
         };
         public virtual IEffector CloneEffector()
         {
-            var result = new UAcceleratedEffector();
+            var result = new TtAcceleratedEffector();
             result.mAcceleratedEffector = mAcceleratedEffector;
             return result;
         }

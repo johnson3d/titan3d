@@ -4,6 +4,7 @@
   <Description Type="System.String@Unknown" Value="This is a EngineNS.EGui.UUvAnim&#xA;Hahah" />
   <Icon Type="EngineNS.EGui.UUvAnim@EngineCore">
     <Color Type="System.UInt32@Unknown" Value="4294967295" />
+    <Duration Type="System.Single@Unknown" Value="1000" />
     <FrameUVs Type="System.Collections.Generic.List&lt;EngineNS.Vector4@EngineCore,&gt;@Unknown" Count="2">
       <e_0 Value="0,0,1,1" />
       <e_1 Value="0,0,1,1" />
@@ -11,10 +12,10 @@
     <Size Type="EngineNS.Vector2@EngineCore" Value="50,50" />
   </Icon>
   <RefAssetRNames Type="System.Collections.Generic.List&lt;EngineNS.RName@EngineCore,&gt;@Unknown" Count="1">
-    <e_0 Value="Engine,texture/default_envmap.srv,092dd21c-4707-4e69-9cb5-c9c6bb6a2c4b" />
+    <e_0 Value="Engine,texture/default_envmap.srv,503f8435-1844-4cd7-9725-4a5db9892a88" />
   </RefAssetRNames>
-  <SnapUVEnd Type="EngineNS.Vector2@EngineCore" Value="0.5,0.5" />
+  <SnapUVEnd Type="EngineNS.Vector2@EngineCore" Value="1,1" />
   <SnapUVStart Type="EngineNS.Vector2@EngineCore" Value="0,0" />
-  <TextureName Type="EngineNS.RName@EngineCore" Value="Engine,texture/default_envmap.srv,092dd21c-4707-4e69-9cb5-c9c6bb6a2c4b" />
+  <TextureName Type="EngineNS.RName@EngineCore" Value="Engine,texture/default_envmap.srv,503f8435-1844-4cd7-9725-4a5db9892a88" />
   <TypeStr Type="System.String@Unknown" Value="EngineNS.EGui.UUvAnim@EngineCore" />
 </Root>
