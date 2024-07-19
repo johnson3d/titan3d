@@ -5,7 +5,7 @@ using EngineNS.Bricks.NodeGraph;
 
 namespace EngineNS.Bricks.Particle.Editor
 {
-    public partial class UParticleEditor : EngineNS.Editor.IAssetEditor, IO.ISerializer, ITickable, IRootForm, IGraphEditor
+    public partial class TtParticleEditor : EngineNS.Editor.IAssetEditor, IO.ISerializer, ITickable, IRootForm, IGraphEditor
     {
         public int GetTickOrder()
         {
@@ -21,11 +21,11 @@ namespace EngineNS.Bricks.Particle.Editor
             result.CanLinks.Add(linkType);
             return result;
         }
-        public UParticleEditor()
+        public TtParticleEditor()
         {
             PreviewViewport = new EngineNS.Editor.UPreviewViewport();
         }
-        ~UParticleEditor()
+        ~TtParticleEditor()
         {
             Dispose();
         }
@@ -42,7 +42,8 @@ namespace EngineNS.Bricks.Particle.Editor
         public bool Visible { get => mVisible; set => mVisible = value; }
         public uint DockId { get; set; }
         public ImGuiCond_ DockCond { get; set; } = ImGuiCond_.ImGuiCond_FirstUseEver;
-        public UNebulaParticle NebulaParticle;
+        public TtNebulaParticle NebulaParticle;
+        public TtNebulaNode NubulaNode;
         protected ImGuiWindowClass mDockKeyClass;
         public ImGuiWindowClass DockKeyClass => mDockKeyClass;
         public IRootForm GetRootForm()
@@ -117,12 +118,12 @@ namespace EngineNS.Bricks.Particle.Editor
 
             ImGuiAPI.DockBuilderFinish(id);
         }
-        protected unsafe void DrawToolBar()
+        protected void DrawToolBar()
         {
             var btSize = Vector2.Zero;
             if (EGui.UIProxy.CustomButton.ToolButton("Save", in btSize))
             {
-                
+                this.NebulaParticle.SaveAssetTo(NebulaParticle.AssetName);
             }
             ImGuiAPI.SameLine(0, -1);
             if (EGui.UIProxy.CustomButton.ToolButton("Undo", in btSize))
@@ -133,6 +134,15 @@ namespace EngineNS.Bricks.Particle.Editor
             if (EGui.UIProxy.CustomButton.ToolButton("Redo", in btSize))
             {
 
+            }
+            ImGuiAPI.SameLine(0, -1);
+            if (EGui.UIProxy.CustomButton.ToolButton("Compile", in btSize))
+            {
+                System.Action action = async () =>
+                {
+                    
+                };
+                action();
             }
         }
 
@@ -217,14 +227,13 @@ namespace EngineNS.Bricks.Particle.Editor
         public EngineNS.Editor.UPreviewViewport PreviewViewport;
         public EGui.Controls.PropertyGrid.PropertyGrid NodePropGrid = new EGui.Controls.PropertyGrid.PropertyGrid();
         public float LeftWidth = 0;
-        
-        public TtParticleGraph ParticleGraph { get; } = new TtParticleGraph();
+
+        public TtParticleGraph ParticleGraph { get => NebulaParticle.ParticleGraph; }
         public UGraphRenderer GraphRenderer { get; } = new UGraphRenderer();
         public CodeBuilder.UClassLayoutBuilder ParticleStructBuilder { get; } = new CodeBuilder.UClassLayoutBuilder();
         bool IsStarting = false;
         protected async System.Threading.Tasks.Task Initialize_PreviewParticle(Graphics.Pipeline.UViewportSlate viewport, USlateApplication application, Graphics.Pipeline.URenderPolicy policy, float zMin, float zMax)
         {
-            ParticleGraph.NebulaEditor = this;
             viewport.RenderPolicy = policy;
 
             (viewport as EngineNS.Editor.UPreviewViewport).CameraController.ControlCamera(viewport.RenderPolicy.DefaultCamera);
@@ -233,6 +242,7 @@ namespace EngineNS.Bricks.Particle.Editor
             nebulaData.NebulaName = AssetName;
             var meshNode = new Bricks.Particle.TtNebulaNode();
             await meshNode.InitializeNode(viewport.World, nebulaData, GamePlay.Scene.EBoundVolumeType.Box, typeof(GamePlay.UPlacement));
+            meshNode.UnsafeSetNebula(await UEngine.Instance.NebulaTemplateManager.CreateParticle(AssetName));
             meshNode.Parent = viewport.World.Root;
             meshNode.Placement.Position = DVector3.Zero;
             meshNode.HitproxyType = Graphics.Pipeline.UHitProxy.EHitproxyType.None;
@@ -241,6 +251,7 @@ namespace EngineNS.Bricks.Particle.Editor
             meshNode.IsCastShadow = false;
 
             NebulaParticle = meshNode.NebulaParticle;
+            NubulaNode = meshNode;
 
             //var materials = new Graphics.Pipeline.Shader.UMaterial[1];
             //materials[0] = UEngine.Instance.GfxDevice.MaterialManager.PxDebugMaterial;
@@ -253,7 +264,7 @@ namespace EngineNS.Bricks.Particle.Editor
             //if (ok)
             //{
             //    //mesh.DirectSetWorldMatrix(ref Matrix.mIdentity);
-            
+
             //    var meshNode = await GamePlay.Scene.UMeshNode.AddMeshNode(viewport.World, viewport.World.Root, new GamePlay.Scene.UMeshNode.UMeshNodeData(), typeof(GamePlay.UPlacement), mesh, DVector3.Zero, Vector3.One, Quaternion.Identity);
             //    meshNode.HitproxyType = Graphics.Pipeline.UHitProxy.EHitproxyType.Root;
             //    meshNode.NodeData.Name = "PreviewObject";
@@ -283,12 +294,6 @@ namespace EngineNS.Bricks.Particle.Editor
             if (IsStarting)
                 return false;
 
-            ParticleGraph.ResetGraph();
-            ParticleGraph.OnChangeGraph = (UNodeGraph graph) =>
-            {
-                GraphRenderer.SetGraph(graph);
-            };
-            ParticleGraph.Editor = this;
             IsStarting = true;
 
             AssetName = name;
@@ -303,11 +308,18 @@ namespace EngineNS.Bricks.Particle.Editor
 
             UEngine.Instance.TickableManager.AddTickable(this);
 
+            //ParticleGraph.ResetGraph();
+            ParticleGraph.OnChangeGraph = (UNodeGraph graph) =>
+            {
+                GraphRenderer.SetGraph(graph);
+            };
+            ParticleGraph.Editor = this;
             GraphRenderer.SetGraph(this.ParticleGraph);
             return true;
         }
         public void OnCloseEditor()
         {
+            ParticleGraph.Editor = null;
             UEngine.Instance.TickableManager.RemoveTickable(this);
             Dispose();
         }

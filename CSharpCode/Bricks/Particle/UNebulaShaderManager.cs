@@ -11,7 +11,7 @@ namespace EngineNS.Bricks.Particle
 
         public NxRHI.UComputeEffect Particle_SetupParameters;
 
-        public IParticleEmitter Emitter;
+        public TtEmitter Emitter;
         public RName NebulaName;
         public NxRHI.UShaderCode ParticleVar;
         public NxRHI.UShaderCode SystemData;
@@ -56,7 +56,7 @@ namespace EngineNS.Bricks.Particle
             }
         }
 
-        public async Thread.Async.TtTask<bool> Init(RName nebula, IParticleEmitter emitter, string particleVar, string sysData, string cbVar, string define, string code)
+        public async Thread.Async.TtTask<bool> Init(RName nebula, TtEmitter emitter, string particleVar, string sysData, string cbVar, string define, string code)
         {
             var defines = new NxRHI.UShaderDefinitions();
             defines.mCoreObject.AddDefine("DispatchX", $"{Dispatch_SetupDimArray1.X}");
@@ -99,7 +99,7 @@ namespace EngineNS.Bricks.Particle
 
         public NxRHI.USrView RandomPoolSrv;
         public UNebulaShaderManager NebulaShaderManager { get; } = new UNebulaShaderManager();
-        public Dictionary<RName, UNebulaParticle> Particles { get; } = new Dictionary<RName, UNebulaParticle>();
+        public Dictionary<RName, TtNebulaParticle> Particles { get; } = new Dictionary<RName, TtNebulaParticle>();
         public float RandomSignedUnit()//[-1,1]
         {
             return ((float)mRandom.NextDouble() - 0.5f) * 2.0f;
@@ -142,41 +142,29 @@ namespace EngineNS.Bricks.Particle
             }
             return true;
         }
-        public async System.Threading.Tasks.Task<UNebulaParticle> GetParticle(RName name)
+        public async System.Threading.Tasks.Task<TtNebulaParticle> GetParticle(RName name)
         {
             if (name == null)
                 return null;
-            UNebulaParticle result;
+            TtNebulaParticle result;
             if (Particles.TryGetValue(name, out result))
                 return await result.CloneNebula();
 
-            {//temp code
-                result = new UNebulaParticle();
-                result.AssetName = name;
-                var Emitter = result.AddEmitter(typeof(Simple.USimpleEmitter), "emitter0") as Simple.USimpleEmitter;
-                Emitter.IsGpuDriven = true;
-
-                await Emitter.InitEmitter(RName.GetRName("utest/mesh/unit_sphere.ums"), 1024);
-
-                var sphereShape = new Bricks.Particle.TtShapeSphere();
-                sphereShape.Radius = 10.0f;
-                sphereShape.Thinness = 0.1f;
-                var boxShape = new Bricks.Particle.TtShapeBox();
-                boxShape.Thinness = 0.2f;
-                Emitter.EmitterShapes.Add(sphereShape);
-                Emitter.EmitterShapes.Add(boxShape);
-                var ef1 = new TtAcceleratedEffector();
-                ef1.Acceleration = new Vector3(0, -0.1f, 0);
-                Emitter.AddEffector("default", ef1);
-                Emitter.SetCurrentQueue("default");
-
-                await UEngine.Instance.NebulaTemplateManager.UpdateShaders(result);
-            }
-
+            result = await TtNebulaParticle.LoadAsset(name);
+            
             Particles.Add(name, result);
             return await result.CloneNebula();
         }
-        public async Thread.Async.TtTask<bool> UpdateShaders(UNebulaParticle particle)
+        public async System.Threading.Tasks.Task<TtNebulaParticle> CreateParticle(RName name)
+        {
+            if (name == null)
+                return null;
+            
+            var result = await TtNebulaParticle.LoadAsset(name);
+
+            return await result.CloneNebula();
+        }
+        public async Thread.Async.TtTask<bool> UpdateShaders(TtNebulaParticle particle)
         {
             foreach (var i in particle.Emitter.Values)
             {

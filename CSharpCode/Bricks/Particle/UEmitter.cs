@@ -244,13 +244,13 @@ namespace EngineNS.Bricks.Particle
             CoreSDK.DisposeObject(ref mParticleSetupDrawcall);
         }
         public string Name;
-        public List<IEffector> Effectors { get; } = new List<IEffector>();
+        public List<TtEffector> Effectors { get; } = new List<TtEffector>();
         public UNebulaShader Shader { get; set; }
         public NxRHI.UCbView CBuffer;
         public NxRHI.UComputeDraw mParticleUpdateDrawcall;
         public NxRHI.UComputeDraw mParticleSetupDrawcall;
         
-        public unsafe void UpdateComputeDrawcall(NxRHI.UGpuDevice rc, IParticleEmitter emitter)
+        public unsafe void UpdateComputeDrawcall(NxRHI.UGpuDevice rc, TtEmitter emitter)
         {
             TtGpuParticleResources gpuResources = emitter.GpuResources;
 
@@ -381,33 +381,7 @@ namespace EngineNS.Bricks.Particle
             }
         }
     }
-    public interface IParticleEmitter : IDisposable
-    {
-        IParticleEmitter CloneEmitter();
-        void InitEmitter(NxRHI.UGpuDevice rc, Graphics.Mesh.TtMesh mesh, uint maxParticle);
-        //void Cleanup();
-        bool SetCurrentQueue(string name);
-        void Update(UParticleGraphNode particleSystem, float elapsed);
-        unsafe void Flush2GPU(NxRHI.ICommandList cmd);
-        uint MaxParticle { get; }
-        List<TtShape> EmitterShapes { get; }
-        Dictionary<string, TtEffectorQueue> EffectorQueues { get; }
-        TtEffectorQueue CurrentQueue { get; set; }
-        TtGpuParticleResources GpuResources { get; }
-        string GetParticleDefine();
-        string GetSystemDataDefine();
-        string GetCBufferDefines();
-        string GetHLSL();
-
-        float RandomUnit();
-        float RandomSignedUnit();
-        int RandomNext();
-        Vector3 RandomVector(bool normalized = true);
-        Graphics.Mesh.TtMesh Mesh { get; set; }
-
-        void SetCBuffer(NxRHI.UCbView CBuffer);
-    }
-    public partial class TtEmitter : AuxPtrType<IEmitter>, IParticleEmitter 
+    public partial class TtEmitter : AuxPtrType<IEmitter> 
     {
         public override void Dispose()
         {
@@ -424,12 +398,12 @@ namespace EngineNS.Bricks.Particle
             base.Dispose();
         }
 
-        public virtual IParticleEmitter CloneEmitter()
+        public virtual TtEmitter CloneEmitter()
         {
             var emt = Rtti.UTypeDescManager.CreateInstance(this.GetType()) as TtEmitter;
             emt.IsGpuDriven = IsGpuDriven;
             var mesh = new Graphics.Mesh.TtMesh();
-            mesh.Initialize(Mesh.MaterialMesh, Rtti.UTypeDescGetter<UParticleMdfQueue>.TypeDesc); //mesh.MdfQueue
+            mesh.Initialize(Mesh.MaterialMesh, Rtti.UTypeDescGetter<TtParticleMdfQueue>.TypeDesc); //mesh.MdfQueue
             emt.InitEmitter(UEngine.Instance.GfxDevice.RenderContext, mesh, 1024);
 
             foreach (var i in EmitterShapes)
@@ -446,7 +420,7 @@ namespace EngineNS.Bricks.Particle
                 }
             }
 
-            var nblMdf = mesh.MdfQueue as UParticleMdfQueue;
+            var nblMdf = mesh.MdfQueue as TtParticleMdfQueue;
             nblMdf.Emitter = emt;
 
             return emt;
@@ -552,13 +526,16 @@ namespace EngineNS.Bricks.Particle
         }
         #endregion
         [Rtti.Meta]
-        public virtual async Thread.Async.TtTask InitEmitter(RName meshName, uint maxParticle)
+        public virtual async Thread.Async.TtTask<bool> InitEmitter(RName meshName, uint maxParticle)
         {
             NxRHI.UGpuDevice rc = UEngine.Instance.GfxDevice.RenderContext;
             var umesh = await UEngine.Instance.GfxDevice.MaterialMeshManager.GetMaterialMesh(meshName);
+            if (umesh == null)
+                return false;
             var mesh = new Graphics.Mesh.TtMesh();
-            mesh.Initialize(umesh, Rtti.UTypeDescGetter<UParticleMdfQueue>.TypeDesc);
+            mesh.Initialize(umesh, Rtti.UTypeDescGetter<TtParticleMdfQueue>.TypeDesc);
             InitEmitter(rc, mesh, maxParticle);
+            return true;
         }
         public virtual unsafe void InitEmitter(NxRHI.UGpuDevice rc, Graphics.Mesh.TtMesh mesh, uint maxParticle)
         {
@@ -572,7 +549,7 @@ namespace EngineNS.Bricks.Particle
                 mGpuResources.Initialize(this, SystemData);
             }
 
-            var nblMdf = mesh.MdfQueue as UParticleMdfQueue;
+            var nblMdf = mesh.MdfQueue as TtParticleMdfQueue;
             nblMdf.Emitter = this;
         }
         public bool SetCurrentQueue(string name)
@@ -594,7 +571,7 @@ namespace EngineNS.Bricks.Particle
             }
             return null;
         }
-        public void AddEffector(string queueName, IEffector effector)
+        public void AddEffector(string queueName, TtEffector effector)
         {
             TtEffectorQueue queue;
             if(EffectorQueues.TryGetValue(queueName, out queue)==false)

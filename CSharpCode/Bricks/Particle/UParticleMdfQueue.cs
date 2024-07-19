@@ -41,12 +41,12 @@ namespace EngineNS.Bricks.Particle
         }
     }
 
-    public class UParticleMdfQueue : Graphics.Pipeline.Shader.TtMdfQueue1<TtParticleModifier>
+    public class TtParticleMdfQueue : Graphics.Pipeline.Shader.TtMdfQueue1<TtParticleModifier>
     {
         public override void CopyFrom(Graphics.Pipeline.Shader.TtMdfQueueBase mdf)
         {
             base.CopyFrom(mdf);
-            Emitter = (mdf as UParticleMdfQueue).Emitter;
+            Emitter = (mdf as TtParticleMdfQueue).Emitter;
         }
         public TtEmitter Emitter;
         public override unsafe void OnDrawCall(NxRHI.ICommandList cmd, NxRHI.UGraphicDraw drawcall, URenderPolicy policy, TtMesh.TtAtom atom)

@@ -1,0 +1,120 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Root Type="EngineNS.Bricks.Particle.Editor.TtParticleGraph@EngineCore">
+  <GraphName Type="System.String@Unknown" Value="NodeGraph" />
+  <Nodes Type="System.Collections.Generic.List&lt;EngineNS.Bricks.NodeGraph.UNodeBase@EngineCore,&gt;@Unknown" Count="7">
+    <e_0 Type="EngineNS.Bricks.Particle.Simple.TtSimpleEmitterNode@EngineCore">
+      <DefaultCurrentQueue Type="System.String@Unknown" Value="Default" />
+      <EmitterName Type="System.String@Unknown" Value="Default" />
+      <IsGpuDriven Type="System.Boolean@Unknown" Value="True" />
+      <Label Type="System.String@Unknown" Value="Emitter" />
+      <MaxParticle Type="System.UInt32@Unknown" Value="1024" />
+      <MeshName Type="EngineNS.RName@EngineCore" Value="Game,utest/mesh/unit_sphere.ums,887ddcfe-6da8-4cdc-b3c7-150ce117b94d" />
+      <Name Type="System.String@Unknown" Value="SimpleEmitter" />
+      <NodeId Type="System.Guid@Unknown" Value="5ce620dd-1414-411b-92fb-28970448db6a" />
+      <Position Type="EngineNS.Vector2@EngineCore" Value="511.00003,319" />
+      <InputEditableValues Type="System.Collections.Generic.List&lt;EngineNS.Bricks.NodeGraph.UNodeBase.UInputEditableValueInfo@EngineCore,&gt;@Unknown" Count="0" />
+    </e_0>
+    <e_1 Type="EngineNS.Bricks.Particle.Editor.TtSphereEmitShapeNode@EngineCore">
+      <Center Type="EngineNS.Vector3@EngineCore" Value="0,0,0" />
+      <Label Type="System.String@Unknown" Value="EmitShape" />
+      <Name Type="System.String@Unknown" Value="SphereShape" />
+      <NodeId Type="System.Guid@Unknown" Value="a24dd448-74fc-4288-94b6-ded8010dcd99" />
+      <Position Type="EngineNS.Vector2@EngineCore" Value="880,236.99997" />
+      <Radius Type="System.Single@Unknown" Value="10" />
+      <Thinness Type="System.Single@Unknown" Value="1" />
+      <InputEditableValues Type="System.Collections.Generic.List&lt;EngineNS.Bricks.NodeGraph.UNodeBase.UInputEditableValueInfo@EngineCore,&gt;@Unknown" Count="0" />
+    </e_1>
+    <e_2 Type="EngineNS.Bricks.Particle.Editor.TtBoxEmitShapeNode@EngineCore">
+      <Center Type="EngineNS.Vector3@EngineCore" Value="0,0,0" />
+      <HalfExtent Type="EngineNS.Vector3@EngineCore" Value="1,1,1" />
+      <Label Type="System.String@Unknown" Value="EmitShape" />
+      <Name Type="System.String@Unknown" Value="BoxShape" />
+      <NodeId Type="System.Guid@Unknown" Value="f7543458-68e0-4bf1-b398-d0afe08dc9e4" />
+      <Position Type="EngineNS.Vector2@EngineCore" Value="1173,233.00002" />
+      <Thinness Type="System.Single@Unknown" Value="0.1" />
+      <InputEditableValues Type="System.Collections.Generic.List&lt;EngineNS.Bricks.NodeGraph.UNodeBase.UInputEditableValueInfo@EngineCore,&gt;@Unknown" Count="0" />
+    </e_2>
+    <e_3 Type="EngineNS.Bricks.Particle.Editor.TtAcceleratedEffectorNode@EngineCore">
+      <Acceleration Type="EngineNS.Vector3@EngineCore" Value="0,-0.1,0" />
+      <Label Type="System.String@Unknown" Value="Effector" />
+      <Name Type="System.String@Unknown" Value="Accelerated" />
+      <NodeId Type="System.Guid@Unknown" Value="5fec977c-39e2-4949-a2e2-fbe339a67df4" />
+      <Position Type="EngineNS.Vector2@EngineCore" Value="1178,463.99997" />
+      <InputEditableValues Type="System.Collections.Generic.List&lt;EngineNS.Bricks.NodeGraph.UNodeBase.UInputEditableValueInfo@EngineCore,&gt;@Unknown" Count="0" />
+    </e_3>
+    <e_4 Type="EngineNS.Bricks.Particle.Editor.TtEffectorQueueNode@EngineCore">
+      <Label Type="System.String@Unknown" Value="Queue:Default" />
+      <Name Type="System.String@Unknown" Value="Queue:Default" />
+      <NodeId Type="System.Guid@Unknown" Value="bc2d0f6a-4dc6-4611-b2d9-f38cdd007c28" />
+      <Position Type="EngineNS.Vector2@EngineCore" Value="877,482" />
+      <QueueName Type="System.String@Unknown" Value="Default" />
+      <InputEditableValues Type="System.Collections.Generic.List&lt;EngineNS.Bricks.NodeGraph.UNodeBase.UInputEditableValueInfo@EngineCore,&gt;@Unknown" Count="0" />
+    </e_4>
+    <e_5 Type="EngineNS.Bricks.Particle.Editor.TtEffectorQueueNode@EngineCore">
+      <Label Type="System.String@Unknown" Value="Queue:Default" />
+      <Name Type="System.String@Unknown" Value="EffectorQueue" />
+      <NodeId Type="System.Guid@Unknown" Value="ce675588-cd7b-40f6-b19c-9ab9a82b1df4" />
+      <Position Type="EngineNS.Vector2@EngineCore" Value="871,655" />
+      <QueueName Type="System.String@Unknown" Value="Queue2" />
+      <InputEditableValues Type="System.Collections.Generic.List&lt;EngineNS.Bricks.NodeGraph.UNodeBase.UInputEditableValueInfo@EngineCore,&gt;@Unknown" Count="0" />
+    </e_5>
+    <e_6 Type="EngineNS.Bricks.Particle.Editor.TtAcceleratedEffectorNode@EngineCore">
+      <Acceleration Type="EngineNS.Vector3@EngineCore" Value="0,-0.1,0" />
+      <Label Type="System.String@Unknown" Value="Effector" />
+      <Name Type="System.String@Unknown" Value="Accelerated" />
+      <NodeId Type="System.Guid@Unknown" Value="04e91996-4462-4c82-9d8e-e82ccac93a56" />
+      <Position Type="EngineNS.Vector2@EngineCore" Value="1171,653" />
+      <InputEditableValues Type="System.Collections.Generic.List&lt;EngineNS.Bricks.NodeGraph.UNodeBase.UInputEditableValueInfo@EngineCore,&gt;@Unknown" Count="0" />
+    </e_6>
+  </Nodes>
+  <Linkers Type="System.Collections.Generic.List&lt;EngineNS.Bricks.NodeGraph.UPinLinker@EngineCore,&gt;@Unknown" Count="6">
+    <e_0 Type="EngineNS.Bricks.NodeGraph.UPinLinker@EngineCore">
+      <SaveData Type="EngineNS.Bricks.NodeGraph.UPinLinker.TSaveData@EngineCore">
+        <InNodeId Type="System.Guid@Unknown" Value="a24dd448-74fc-4288-94b6-ded8010dcd99" />
+        <InPinName Type="System.String@Unknown" Value="in" />
+        <OutNodeId Type="System.Guid@Unknown" Value="5ce620dd-1414-411b-92fb-28970448db6a" />
+        <OutPinName Type="System.String@Unknown" Value="Shapes" />
+      </SaveData>
+    </e_0>
+    <e_1 Type="EngineNS.Bricks.NodeGraph.UPinLinker@EngineCore">
+      <SaveData Type="EngineNS.Bricks.NodeGraph.UPinLinker.TSaveData@EngineCore">
+        <InNodeId Type="System.Guid@Unknown" Value="f7543458-68e0-4bf1-b398-d0afe08dc9e4" />
+        <InPinName Type="System.String@Unknown" Value="in" />
+        <OutNodeId Type="System.Guid@Unknown" Value="a24dd448-74fc-4288-94b6-ded8010dcd99" />
+        <OutPinName Type="System.String@Unknown" Value="out" />
+      </SaveData>
+    </e_1>
+    <e_2 Type="EngineNS.Bricks.NodeGraph.UPinLinker@EngineCore">
+      <SaveData Type="EngineNS.Bricks.NodeGraph.UPinLinker.TSaveData@EngineCore">
+        <InNodeId Type="System.Guid@Unknown" Value="bc2d0f6a-4dc6-4611-b2d9-f38cdd007c28" />
+        <InPinName Type="System.String@Unknown" Value="in" />
+        <OutNodeId Type="System.Guid@Unknown" Value="5ce620dd-1414-411b-92fb-28970448db6a" />
+        <OutPinName Type="System.String@Unknown" Value="Effectors" />
+      </SaveData>
+    </e_2>
+    <e_3 Type="EngineNS.Bricks.NodeGraph.UPinLinker@EngineCore">
+      <SaveData Type="EngineNS.Bricks.NodeGraph.UPinLinker.TSaveData@EngineCore">
+        <InNodeId Type="System.Guid@Unknown" Value="5fec977c-39e2-4949-a2e2-fbe339a67df4" />
+        <InPinName Type="System.String@Unknown" Value="in" />
+        <OutNodeId Type="System.Guid@Unknown" Value="bc2d0f6a-4dc6-4611-b2d9-f38cdd007c28" />
+        <OutPinName Type="System.String@Unknown" Value="out" />
+      </SaveData>
+    </e_3>
+    <e_4 Type="EngineNS.Bricks.NodeGraph.UPinLinker@EngineCore">
+      <SaveData Type="EngineNS.Bricks.NodeGraph.UPinLinker.TSaveData@EngineCore">
+        <InNodeId Type="System.Guid@Unknown" Value="ce675588-cd7b-40f6-b19c-9ab9a82b1df4" />
+        <InPinName Type="System.String@Unknown" Value="in" />
+        <OutNodeId Type="System.Guid@Unknown" Value="5ce620dd-1414-411b-92fb-28970448db6a" />
+        <OutPinName Type="System.String@Unknown" Value="Effectors" />
+      </SaveData>
+    </e_4>
+    <e_5 Type="EngineNS.Bricks.NodeGraph.UPinLinker@EngineCore">
+      <SaveData Type="EngineNS.Bricks.NodeGraph.UPinLinker.TSaveData@EngineCore">
+        <InNodeId Type="System.Guid@Unknown" Value="04e91996-4462-4c82-9d8e-e82ccac93a56" />
+        <InPinName Type="System.String@Unknown" Value="in" />
+        <OutNodeId Type="System.Guid@Unknown" Value="ce675588-cd7b-40f6-b19c-9ab9a82b1df4" />
+        <OutPinName Type="System.String@Unknown" Value="out" />
+      </SaveData>
+    </e_5>
+  </Linkers>
+</Root>

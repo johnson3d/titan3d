@@ -20,11 +20,12 @@ namespace EngineNS.Bricks.Particle
         {
             public TtNebulaNodeData()
             {
-                this.MdfQueueType = Rtti.UTypeDesc.TypeStr(typeof(UParticleMdfQueue));
+                this.MdfQueueType = Rtti.UTypeDesc.TypeStr(typeof(TtParticleMdfQueue));
             }
             [Rtti.Meta]
             public RName NebulaName { get; set; }
         }
+        [RName.PGRName(FilterExts = TtNebulaParticle.AssetExt)]
         public RName NebulaName 
         { 
             get
@@ -41,8 +42,12 @@ namespace EngineNS.Bricks.Particle
                 action();
             }
         }
-        UNebulaParticle mNebulaParticle;
-        public UNebulaParticle NebulaParticle { get=> mNebulaParticle; }
+        TtNebulaParticle mNebulaParticle;
+        public void UnsafeSetNebula(TtNebulaParticle nebula)
+        {
+            mNebulaParticle = nebula;
+        }
+        public TtNebulaParticle NebulaParticle { get=> mNebulaParticle; }
         public override async Thread.Async.TtTask<bool> InitializeNode(UWorld world, UNodeData data, EBoundVolumeType bvType, Type placementType)
         {
             var ret = await base.InitializeNode(world, data, bvType, placementType);

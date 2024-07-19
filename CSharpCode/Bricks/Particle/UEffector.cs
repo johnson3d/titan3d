@@ -4,26 +4,17 @@ using System.Text;
 
 namespace EngineNS.Bricks.Particle
 {
-    public interface IEffector
-    {
-        string Name { get; }
-        unsafe void DoEffect(IParticleEmitter emitter, float elapsed, void* particle);
-        string GetParametersDefine();
-        string GetHLSL();
-        void SetCBuffer(uint index, NxRHI.UCbView CBuffer);
-        IEffector CloneEffector();
-    }
-    public class TtEffector : IEffector
+    public class TtEffector
     {
         public virtual string Name
         {
             get { return "NullEffector"; }
         }
-        public unsafe void DoEffect(IParticleEmitter emitter, float elapsed, void* particle)
+        public unsafe virtual void DoEffect(TtEmitter emitter, float elapsed, void* particle)
         {
             DoEffect(emitter, elapsed, ref *(FParticleBase*)particle);
         }
-        public unsafe virtual void DoEffect(IParticleEmitter emitter, float elapsed, ref FParticleBase particle)
+        public unsafe virtual void DoEffect(TtEmitter emitter, float elapsed, ref FParticleBase particle)
         {
 
         }
@@ -39,13 +30,13 @@ namespace EngineNS.Bricks.Particle
         {
 
         }
-        public virtual IEffector CloneEffector()
+        public virtual TtEffector CloneEffector()
         {
             return null;
         }
     }
 
-    public class TtAcceleratedEffector : IEffector
+    public class TtAcceleratedEffector : TtEffector
     {
         [System.Runtime.InteropServices.StructLayout(System.Runtime.InteropServices.LayoutKind.Sequential, Pack = 16)]
         public struct FAcceleratedEffector
@@ -53,13 +44,13 @@ namespace EngineNS.Bricks.Particle
             public Vector3 Acceleration;
             public uint FAcceleratedEffector_Pad0;
         };
-        public virtual IEffector CloneEffector()
+        public override TtEffector CloneEffector()
         {
             var result = new TtAcceleratedEffector();
             result.mAcceleratedEffector = mAcceleratedEffector;
             return result;
         }
-        public string Name
+        public override string Name
         {
             get { return "Accelerated"; }
         }
@@ -69,7 +60,7 @@ namespace EngineNS.Bricks.Particle
             get => mAcceleratedEffector.Acceleration;
             set => mAcceleratedEffector.Acceleration = value;
         }        
-        public virtual string GetParametersDefine()
+        public override string GetParametersDefine()
         {
             var codeBuilder = new Bricks.CodeBuilder.Backends.UHLSLCodeGenerator();
             string sourceCode = "";
@@ -85,7 +76,7 @@ namespace EngineNS.Bricks.Particle
 
             return sourceCode;
         }
-        public string GetHLSL()
+        public override string GetHLSL()
         {
             var codeBuilder = new Bricks.CodeBuilder.Backends.UHLSLCodeGenerator();
             string sourceCode = "";
@@ -96,12 +87,12 @@ namespace EngineNS.Bricks.Particle
 
             return sourceCode;
         }
-        public unsafe void DoEffect(IParticleEmitter emitter, float elapsed, void* particle)
+        public override unsafe void DoEffect(TtEmitter emitter, float elapsed, void* particle)
         {
             ref var cur = ref *(FParticleBase*)particle;
             cur.Location += Acceleration * elapsed * (1.0f + emitter.RandomUnit() * 2.5f);
         }
-        public void SetCBuffer(uint index, NxRHI.UCbView CBuffer)
+        public override void SetCBuffer(uint index, NxRHI.UCbView CBuffer)
         {
             CBuffer.SetValue($"EffectorParameters{index}", in mAcceleratedEffector);
         }

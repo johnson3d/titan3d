@@ -1,6 +1,7 @@
 ﻿using EngineNS.GamePlay;
 using EngineNS.GamePlay.Scene;
 using EngineNS.Graphics.Pipeline;
+using EngineNS.Rtti;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -8,7 +9,7 @@ using System.Threading.Tasks;
 
 namespace EngineNS.Bricks.Particle.Simple
 {
-    public class USimpleEmitter : Bricks.Particle.TtEmitter
+    public class TtSimpleEmitter : Bricks.Particle.TtEmitter
     {
         public override unsafe void InitEmitter(NxRHI.UGpuDevice rc, Graphics.Mesh.TtMesh mesh, uint maxParticle)
         {
@@ -48,6 +49,19 @@ namespace EngineNS.Bricks.Particle.Simple
             }
 
             //mCoreObject.Spawn(1, SetParticleFlags(EParticleFlags.EmitIndex, index), 3.0f);
+        }
+    }
+
+    [Bricks.CodeBuilder.ContextMenu(filterStrings: "SimpleEmitter", "Emitter\\SimpleEmitter", Editor.TtParticleGraph.NebulaEditorKeyword)]
+    public class TtSimpleEmitterNode : Editor.TtEmitterNode
+    {
+        public TtSimpleEmitterNode()
+        {
+            Name = "SimpleEmitter";
+        }
+        public override UTypeDesc CreateEmitterType()
+        {
+            return UTypeDescGetter<TtSimpleEmitter>.TypeDesc;
         }
     }
 }
