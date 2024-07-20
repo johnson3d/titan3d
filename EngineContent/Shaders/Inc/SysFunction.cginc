@@ -237,7 +237,7 @@ void UnpackNormal( half3 packedNormal, out half3 normal )
 	//normal = packedNormal.xyz * 2 - 1;
 	
     normal.xy = packedNormal.xy * 2 - 1;
-    normal.z = sqrt(saturate(1.0f - dot(normal.xy, normal.xy)));
+    normal.z = sqrt(saturate(1.0h - dot(normal.xy, normal.xy)));
     normal.xyz = normal.xzy;
 	
     //normal.xyz = packedNormal.xyz;
@@ -1039,8 +1039,8 @@ void Pivot_WindAnimation(
 	float timeperSecond = Time;
 
 	// rotation axis
-	float3 localWindAxisX = mul(float4(windAxisX, 0.0h), WorldMatrixInverse);
-	float3 localWindAxisY = mul(float4(windAxisY, 0.0h), WorldMatrixInverse);
+	float3 localWindAxisX = mul(float4(windAxisX, 0.0f), WorldMatrixInverse).xyz;
+    float3 localWindAxisY = mul(float4(windAxisY, 0.0f), WorldMatrixInverse).xyz;
 	localWindAxisX = localWindAxisY = float3(1.0f, 0.0f, 0.0f);
 	float3 localWindAxisZ = float3(1.0f, 0.0f, 1.0f);
 	float2 windSpeed = float2(speedX, speedY);

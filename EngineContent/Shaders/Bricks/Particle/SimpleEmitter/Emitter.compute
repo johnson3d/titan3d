@@ -14,6 +14,7 @@ void DoUpdateSystem(uint3 id, uint3 GroupId, uint3 GroupThreadId, uint GroupInde
         SpawnParticle((uint3) 0, 1, SetParticleFlags(Nebula_EmitShape, 0), 3.0f);
     }
 }
+#define USER_PARTICLE_UPDATESYS
 
 void OnInitParticle(uint3 id, inout FParticle particle)
 {
@@ -37,6 +38,7 @@ void OnInitParticle(uint3 id, inout FParticle particle)
 		particle.Scale = 0.5f - rdValue.z * 0.2f;
 	}
 }
+#define USER_PARTICLE_INITIALIZE
 
 void OnDeadParticle(uint3 id, inout FParticle particle)
 {
@@ -53,9 +55,4 @@ void OnDeadParticle(uint3 id, inout FParticle particle)
 		}
 	}
 }
-
-#define USER_EMITSHAPE
-#define USER_PARTICLE_INITIALIZE
 #define USER_PARTICLE_FINALIZE
-#define USER_PARTICLE_DOEFFECTORS
-#define USER_PARTICLE_UPDATESYS

@@ -99,7 +99,7 @@ struct GBufferData
             float3 vn;
             vn.xy = rt1.xy * 2.0f - 1.0f;
             vn.z = -sqrt(saturate(1.0f - dot(vn.xy, vn.xy)));
-            WorldNormal.xyz = mul(float4(vn.xyz, 0), CameraViewInverse).xyz;
+            WorldNormal.xyz = (half3)mul(float4(vn.xyz, 0), CameraViewInverse).xyz;
             RenderFlags_10Bit = (int) (rt1.z * 1024.0h); //asint(rt1.z); //
 		#else
             WorldNormal.xyz = DecodeNormalXYZ(rt1.xyz);
@@ -113,8 +113,8 @@ struct GBufferData
 		Specular = rt2.g;
         AO = rt2.b;
 
-		MotionVector.xy = DecodeMotionVector(rt3.rg);
-	}
+        MotionVector.xy = (half2)DecodeMotionVector(rt3.rg);
+    }
 };
 
 #endif//_MobileBasePassPS_H_

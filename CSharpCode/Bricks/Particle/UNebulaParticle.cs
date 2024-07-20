@@ -123,6 +123,8 @@ namespace EngineNS.Bricks.Particle
                     var emt = this.AddEmitter(emtNode.CreateEmitterType().SystemType, emtNode.EmitterName);
                     emt.IsGpuDriven = emtNode.IsGpuDriven;
                     await emt.InitEmitter(emtNode.MeshName, emtNode.MaxParticle);
+                    if (bForEditor)
+                        emtNode.EditingObject = emt;
 
                     var shapeNode = ParticleGraph.FindOutLinkerSingle(emtNode.Shapes).InNode as Editor.TtEmitShapeNode;
                     while (shapeNode != null)

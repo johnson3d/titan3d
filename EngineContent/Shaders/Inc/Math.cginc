@@ -278,7 +278,7 @@ float4 FromRGBE(float4 inColor)
 static const float kRGBMRange = 8.0;
 half4 ToRGBM(half3 color)
 {
-	color *= 1.0 / kRGBMRange;
+    color *= 1.0h / (half)kRGBMRange;
 	half m = max(max(color.x, color.y), max(color.z, 1e-5));
 	m = ceil(m * 255) / 255;
 	return half4(color / m, m);
@@ -286,7 +286,7 @@ half4 ToRGBM(half3 color)
 
 half3 FromRGBM(half4 rgbm)
 {
-	return rgbm.xyz * rgbm.w * kRGBMRange;
+    return rgbm.xyz * rgbm.w * (half)kRGBMRange;
 }
 
 float3 RGBToYCoCg(float3 RGB)

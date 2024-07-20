@@ -76,6 +76,23 @@ namespace EngineNS.Bricks.Particle.Editor
         [Category("Option")]
         [Rtti.Meta]
         public string EmitterName { get; set; } = "Default";
+
+        public TtEmitter EditingObject = null;
+        Vector3 mLocation;
+        [Category("Option")]
+        [Rtti.Meta]
+        public Vector3 Location
+        {
+            get => mLocation;
+            set
+            {
+                mLocation = value;
+                if (EditingObject != null)
+                {
+                    EditingObject.Location = value;
+                }
+            }
+        }
         public virtual UTypeDesc CreateEmitterType()
         {
             return null;

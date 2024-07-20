@@ -107,6 +107,8 @@ namespace EngineNS.Bricks.Particle
             }
             codeBuilder.PopSegment(ref sourceCode);
 
+            codeBuilder.AddLine("#define USER_PARTICLE_DOEFFECTORS", ref sourceCode);
+
             result += sourceCode;
             return result;
         }

@@ -1,6 +1,7 @@
 ﻿using MathNet.Numerics.Statistics.Mcmc;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Text;
 
 namespace EngineNS.Bricks.Particle
@@ -184,6 +185,13 @@ namespace EngineNS.Bricks.Particle
         }
         public bool IsGpuDriven { get; set; } = false;
         public FParticleSystemBase SystemData = default;
+        [Category("Option")]
+        [Rtti.Meta]
+        public Vector3 Location
+        {
+            get => SystemData.Location;
+            set => SystemData.Location = value;
+        }
         public Dictionary<string, TtEffectorQueue> EffectorQueues { get; } = new Dictionary<string, TtEffectorQueue>();
         public TtEffectorQueue CurrentQueue { get; set; }
         public Support.ULogicTimerManager Timers { get; } = new Support.ULogicTimerManager();
@@ -282,6 +290,8 @@ namespace EngineNS.Bricks.Particle
                 codeBuilder.PopSegment(ref sourceCode);
             }
             codeBuilder.PopSegment(ref sourceCode);
+
+            codeBuilder.AddLine("#define USER_EMITSHAPE", ref sourceCode);
 
             return sourceCode;
         }

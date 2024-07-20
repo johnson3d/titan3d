@@ -35,7 +35,7 @@ PS_OUTPUT PS_MobileBasePass(PS_INPUT input)
 #endif // AlphaTest
 
 	//half3 Albedo = sRGB2Linear((half3)mtl.mAlbedo);
-	GBuffer.MtlColorRaw = (half3)mtl.mAlbedo + mtl.mEmissive;
+    GBuffer.MtlColorRaw = (half3)mtl.mAlbedo + (half3)mtl.mEmissive;
 	GBuffer.Metallicity = (half)mtl.mMetallic;
 	GBuffer.Roughness = (half)mtl.mRough;
     GBuffer.WorldNormal = mtl.GetWorldNormal(input);
@@ -51,7 +51,7 @@ PS_OUTPUT PS_MobileBasePass(PS_INPUT input)
 	float2 currentScreenPos = (input.psCustomUV2.xy / input.psCustomUV2.w) * 0.5 + 0.5;
 	//previousScreenPos.y = 1.0 - previousScreenPos.y;
 	//currentScreenPos.y = 1.0 - currentScreenPos.y;
-	GBuffer.MotionVector.xy = currentScreenPos - previousScreenPos;
+    GBuffer.MotionVector.xy = (half2) (currentScreenPos - previousScreenPos);
 	GBuffer.MotionVector.y = -GBuffer.MotionVector.y;
 
 	//float2 noJitterScreenPos = (input.psCustomUV3.xy / input.psCustomUV3.w) * 0.5 + 0.5;

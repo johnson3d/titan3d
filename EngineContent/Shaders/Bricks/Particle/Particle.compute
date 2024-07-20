@@ -71,6 +71,7 @@ void SpawnParticle(uint3 id, uint num, uint flags, float life)
             DoParticleEmitShape(id, bfParticles[index], shapeIndex);
         }
 
+        bfParticles[index].Location += SystemData.Location;
         OnInitParticle(id, bfParticles[index]);
     }
 }
