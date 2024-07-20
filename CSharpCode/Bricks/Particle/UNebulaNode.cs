@@ -22,6 +22,7 @@ namespace EngineNS.Bricks.Particle
             {
                 this.MdfQueueType = Rtti.UTypeDesc.TypeStr(typeof(TtParticleMdfQueue));
             }
+            public TtNebulaParticle NebulaParticle = null;
             [Rtti.Meta]
             public RName NebulaName { get; set; }
         }
@@ -43,40 +44,41 @@ namespace EngineNS.Bricks.Particle
             }
         }
         TtNebulaParticle mNebulaParticle;
-        public void UnsafeSetNebula(TtNebulaParticle nebula)
-        {
-            mNebulaParticle = nebula;
-        }
         public TtNebulaParticle NebulaParticle { get=> mNebulaParticle; }
         public override async Thread.Async.TtTask<bool> InitializeNode(UWorld world, UNodeData data, EBoundVolumeType bvType, Type placementType)
         {
             var ret = await base.InitializeNode(world, data, bvType, placementType);
-            mNebulaParticle = await UEngine.Instance.NebulaTemplateManager.GetParticle(GetNodeData<TtNebulaNodeData>().NebulaName);
+            if (GetNodeData<TtNebulaNodeData>().NebulaParticle != null)
+                mNebulaParticle = GetNodeData<TtNebulaNodeData>().NebulaParticle; 
+            else
+                mNebulaParticle = await UEngine.Instance.NebulaTemplateManager.GetParticle(GetNodeData<TtNebulaNodeData>().NebulaName);
             return ret;
         }
         public override void OnGatherVisibleMeshes(UWorld.UVisParameter rp)
         {
-            base.OnGatherVisibleMeshes(rp);
-
             if (mNebulaParticle == null)
                 return;
+            base.OnGatherVisibleMeshes(rp);
 
             foreach (var i in mNebulaParticle.Emitter.Values)
             {
                 if (i.Mesh != null)
                 {
-                    if (rp.World.CameralOffsetSerialId != CameralOffsetSerialId)
-                    {
-                        CameralOffsetSerialId = rp.World.CameralOffsetSerialId;
-                        i.Mesh.UpdateCameraOffset(rp.World);
-                    }
-
                     rp.AddVisibleMesh(i.Mesh);
                 }
             }
             if (rp.VisibleNodes != null)
             {
                 rp.VisibleNodes.Add(this);
+            }
+        }
+        protected override void OnCameralOffsetChanged(UWorld world)
+        {
+            foreach (var i in mNebulaParticle.Emitter.Values)
+            {
+                if (i.Mesh == null)
+                    continue;
+                i.Mesh.UpdateCameraOffset(world);
             }
         }
         public override bool OnTickLogic(GamePlay.UWorld world, Graphics.Pipeline.URenderPolicy policy)

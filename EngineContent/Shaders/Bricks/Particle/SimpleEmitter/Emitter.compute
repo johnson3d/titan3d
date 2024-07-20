@@ -1,12 +1,18 @@
 
-void DoUpdateSystem()
+void DoUpdateSystem(uint3 id, uint3 GroupId, uint3 GroupThreadId, uint GroupIndex)
 {
-	uint oldValue;
-	InterlockedCompareExchange(bfSystemData[0].Flags, 0, 1, oldValue);
-	if (oldValue == 0)
-	{
-		SpawnParticle((uint3)0, 512, SetParticleFlags(Nebula_EmitShape, 0), 3.0f);
-	}
+    //uint oldValue;
+    //InterlockedCompareExchange(bfSystemData[0].Flags, 0, 1, oldValue);
+    //if (oldValue == 0)
+    //{
+    //    SpawnParticle((uint3) 0, 512, SetParticleFlags(Nebula_EmitShape, 0), 3.0f);
+    //}
+    uint oldValue;
+    InterlockedAdd(bfSystemData[0].Flags, 1, oldValue);
+    if (oldValue < 512)
+    {
+        SpawnParticle((uint3) 0, 1, SetParticleFlags(Nebula_EmitShape, 0), 3.0f);
+    }
 }
 
 void OnInitParticle(uint3 id, inout FParticle particle)

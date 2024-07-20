@@ -606,9 +606,10 @@ namespace EngineNS.Graphics.Pipeline.Shader
             if (shadingEnv != null)
                 hashStr += shadingEnv.ToString();
             if (defines != null)
-                hashStr += defines.mCoreObject.NativeSuper.GetHash64().ToString();
+                hashStr += defines.ToString();
             hashStr += UEngine.Instance.GfxDevice.RenderContext.GlobalEnvHash.ToString();
-            var hash = Hash160.CreateHash160(hashStr);            var shadingCode = Editor.ShaderCompiler.UShaderCodeManager.Instance.GetShaderCode(shaderName);
+            var hash = Hash160.CreateHash160(hashStr);
+            var shadingCode = Editor.ShaderCompiler.UShaderCodeManager.Instance.GetShaderCode(shaderName);
             NxRHI.UComputeEffect result;
             lock (Effects)
             {

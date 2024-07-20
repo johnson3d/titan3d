@@ -943,11 +943,24 @@ namespace EngineNS.GamePlay.Scene
         {
             get { return Guid.Empty; }
         }
+        protected uint CameralOffsetSerialId = 0;
+        public void UpdateCameralOffset(UWorld world)
+        {
+            if (world.CameralOffsetSerialId != CameralOffsetSerialId)
+            {
+                CameralOffsetSerialId = world.CameralOffsetSerialId;
+                OnCameralOffsetChanged(world);
+            }
+        }
+        protected virtual void OnCameralOffsetChanged(UWorld world)
+        {
+
+        }
     }
     public partial class TtGpuSceneNode : USceneActorNode
     {
         public int GpuSceneIndex = -1;
-
+        
         public List<TtClusteredMesh> ClusteredMeshs = new List<TtClusteredMesh>();
 
         public void BuildClusterBuffer()

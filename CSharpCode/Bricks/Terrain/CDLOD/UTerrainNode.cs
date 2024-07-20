@@ -1,4 +1,5 @@
-﻿using EngineNS.Graphics.Mesh;
+﻿using EngineNS.GamePlay;
+using EngineNS.Graphics.Mesh;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -443,7 +444,6 @@ namespace EngineNS.Bricks.Terrain.CDLOD
                 }
             }
         }
-        private uint CameralOffsetSerialId = 0;
         public override void GetHitProxyDrawMesh(List<TtMesh> meshes)
         {
             foreach (var i in ActiveLevels)
@@ -453,18 +453,18 @@ namespace EngineNS.Bricks.Terrain.CDLOD
                 i.LevelData?.PlantManager.GetHitProxyDrawMesh(meshes);
             }
         }
+        protected override void OnCameralOffsetChanged(UWorld world)
+        {
+            foreach (var i in ActiveLevels)
+            {
+                if (i == null)
+                    continue;
+                i.LevelData?.UpdateCameraOffset(world);
+            }
+        }
         public override void OnGatherVisibleMeshes(GamePlay.UWorld.UVisParameter rp)
         {
-            if (rp.World.CameralOffsetSerialId != CameralOffsetSerialId)
-            {
-                CameralOffsetSerialId = rp.World.CameralOffsetSerialId;
-                foreach (var i in ActiveLevels)
-                {
-                    if (i == null)
-                        continue;
-                    i.LevelData?.UpdateCameraOffset(rp.World);
-                }
-            }
+            UpdateCameralOffset(rp.World);
             //todo: QTree culling?
             //foreach (var i in ActiveLevels)
             //{

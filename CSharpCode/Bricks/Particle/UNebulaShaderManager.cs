@@ -9,8 +9,6 @@ namespace EngineNS.Bricks.Particle
         public static readonly Vector3ui Dispatch_SetupDimArray1 = new Vector3ui(32, 1, 1);
         public NxRHI.UComputeEffect Particle_Update;
 
-        public NxRHI.UComputeEffect Particle_SetupParameters;
-
         public TtEmitter Emitter;
         public RName NebulaName;
         public NxRHI.UShaderCode ParticleVar;
@@ -56,13 +54,13 @@ namespace EngineNS.Bricks.Particle
             }
         }
 
-        public async Thread.Async.TtTask<bool> Init(RName nebula, TtEmitter emitter, string particleVar, string sysData, string cbVar, string define, string code)
+        public async Thread.Async.TtTask<bool> Init(Hash160 codeHash, RName nebula, TtEmitter emitter, string particleVar, string sysData, string cbVar, string define, string code)
         {
             var defines = new NxRHI.UShaderDefinitions();
             defines.mCoreObject.AddDefine("DispatchX", $"{Dispatch_SetupDimArray1.X}");
             defines.mCoreObject.AddDefine("DispatchY", $"{Dispatch_SetupDimArray1.Y}");
             defines.mCoreObject.AddDefine("DispatchZ", $"{Dispatch_SetupDimArray1.Z}");
-            defines.mCoreObject.AddDefine("BufferHeadSize", $"{TtGpuParticleResources.BufferHeadSize*4}");
+            defines.mCoreObject.AddDefine("NebulaCodeHash", $"{codeHash}");
 
             ParticleVar = new NxRHI.UShaderCode();
             ParticleVar.TextCode = particleVar;
@@ -80,9 +78,6 @@ namespace EngineNS.Bricks.Particle
             incProvider.Host = this;
             Particle_Update = await UEngine.Instance.GfxDevice.EffectManager.GetComputeEffect(RName.GetRName("Shaders/Bricks/Particle/Particle.compute", RName.ERNameType.Engine),
                 "CS_Particle_Update", NxRHI.EShaderType.SDT_ComputeShader, null, defines, incProvider);
-
-            Particle_SetupParameters = await UEngine.Instance.GfxDevice.EffectManager.GetComputeEffect(RName.GetRName("Shaders/Bricks/Particle/Particle.compute", RName.ERNameType.Engine),
-                "CS_Particle_SetupParameters", NxRHI.EShaderType.SDT_ComputeShader, null, defines, incProvider);
 
             return true;
         }
@@ -150,7 +145,7 @@ namespace EngineNS.Bricks.Particle
             if (Particles.TryGetValue(name, out result))
                 return await result.CloneNebula();
 
-            result = await TtNebulaParticle.LoadAsset(name);
+            result = await TtNebulaParticle.LoadAsset(name, false);
             
             Particles.Add(name, result);
             return await result.CloneNebula();
@@ -160,9 +155,9 @@ namespace EngineNS.Bricks.Particle
             if (name == null)
                 return null;
             
-            var result = await TtNebulaParticle.LoadAsset(name);
+            return await TtNebulaParticle.LoadAsset(name, true);
 
-            return await result.CloneNebula();
+            //return await result.CloneNebula();
         }
         public async Thread.Async.TtTask<bool> UpdateShaders(TtNebulaParticle particle)
         {
@@ -183,7 +178,7 @@ namespace EngineNS.Bricks.Particle
                     if (NebulaShaderManager.Shaders.TryGetValue(hash, out shader) == false)
                     {
                         shader = new UNebulaShader();
-                        await shader.Init(particle.AssetName, i, particleVar, sysData, hlslVar, hlslDefine, hlsl);
+                        await shader.Init(hash, particle.AssetName, i, particleVar, sysData, hlslVar, hlslDefine, hlsl);
                         NebulaShaderManager.Shaders.Add(hash, shader);
                     }
                     j.Shader = shader;

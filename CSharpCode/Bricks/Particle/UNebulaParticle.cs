@@ -74,7 +74,7 @@ namespace EngineNS.Bricks.Particle
             IO.TtFileManager.SaveObjectToXml(name.Address, ParticleGraph);
             UEngine.Instance.SourceControlModule.AddFile(name.Address);
         }
-        public static async Thread.Async.TtTask<TtNebulaParticle> LoadAsset(RName name)
+        public static async Thread.Async.TtTask<TtNebulaParticle> LoadAsset(RName name, bool bForEditor)
         {
             TtNebulaParticle result;
             
@@ -107,12 +107,12 @@ namespace EngineNS.Bricks.Particle
                 //return null;
             }
 
-            await result.CreateEmitters();
+            await result.CreateEmitters(bForEditor);
 
             return result;
         }
 
-        internal async Thread.Async.TtTask CreateEmitters()
+        internal async Thread.Async.TtTask CreateEmitters(bool bForEditor)
         {
             Emitter.Clear();
             foreach (var i in ParticleGraph.Nodes)
@@ -129,6 +129,8 @@ namespace EngineNS.Bricks.Particle
                     {
                         var shape = shapeNode.CreateShape();
                         emt.EmitterShapes.Add(shape);
+                        if (bForEditor)
+                            shapeNode.EditingObject = shape;
                         shapeNode = ParticleGraph.FindOutLinkerSingle(shapeNode.Right)?.InNode as Editor.TtEmitShapeNode;
                     }
 
@@ -139,6 +141,8 @@ namespace EngineNS.Bricks.Particle
                         while (effectorNode != null)
                         {
                             var effector = effectorNode.CreateEffector();
+                            if (bForEditor)
+                                effectorNode.EditingObject = effector;
                             emt.AddEffector(effectorQueueNode.QueueName, effector);
                             effectorNode = ParticleGraph.FindOutLinkerSingle(effectorNode.Right)?.InNode as Editor.TtEffectorNode;
                         }

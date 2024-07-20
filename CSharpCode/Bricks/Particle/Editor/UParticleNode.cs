@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using EngineNS.Bricks.NodeGraph;
 using EngineNS.Graphics.Pipeline.Shader;
+using EngineNS.NxPhysics;
 using EngineNS.Rtti;
 
 namespace EngineNS.Bricks.Particle.Editor
@@ -121,6 +122,7 @@ namespace EngineNS.Bricks.Particle.Editor
         {
             return null;
         }
+        public TtShape EditingObject = null;
     }
 
     [Bricks.CodeBuilder.ContextMenu(filterStrings: "EffectorQueue", "EffectorQueue", TtParticleGraph.NebulaEditorKeyword)]
@@ -195,6 +197,7 @@ namespace EngineNS.Bricks.Particle.Editor
         {
             return null;
         }
+        public TtEffector EditingObject = null;
     }
 
     [Bricks.CodeBuilder.ContextMenu(filterStrings: "BoxShape", "Shape\\BoxShape", TtParticleGraph.NebulaEditorKeyword)]
@@ -205,15 +208,54 @@ namespace EngineNS.Bricks.Particle.Editor
         {
             Name = "BoxShape";
         }
+        Vector3 mCenter = Vector3.Zero;
         [Category("Option")]
         [Rtti.Meta]
-        public Vector3 Center { get; set; } = Vector3.Zero;
+        public Vector3 Center 
+        { 
+            get => mCenter;
+            set
+            {
+                mCenter = value;
+                var shape = EditingObject as Bricks.Particle.TtShapeBox;
+                if (shape != null)
+                {
+                    shape.Center = value;
+                }
+            }
+        }
+        Vector3 mHalfExtent = Vector3.One;
         [Category("Option")]
         [Rtti.Meta]
-        public Vector3 HalfExtent { get; set; } = Vector3.One;
+        public Vector3 HalfExtent 
+        { 
+            get => mHalfExtent;
+            set
+            {
+                mHalfExtent = value;
+                var shape = EditingObject as Bricks.Particle.TtShapeBox;
+                if (shape != null)
+                {
+                    shape.HalfExtent = value;
+                }
+            }
+        }
+        float mThinness = 1.0f;
         [Category("Option")]
         [Rtti.Meta]
-        public float Thinness { get; set; } = 1.0f;
+        public float Thinness 
+        { 
+            get => mThinness;
+            set
+            {
+                mThinness = value;
+                var shape = EditingObject as Bricks.Particle.TtShapeBox;
+                if (shape != null)
+                {
+                    shape.Thinness = value;
+                }
+            }
+        }
         public override TtShape CreateShape()
         {
             var boxShape = new Bricks.Particle.TtShapeBox();
@@ -231,12 +273,38 @@ namespace EngineNS.Bricks.Particle.Editor
         {
             Name = "SphereShape";
         }
+        Vector3 mCenter = Vector3.Zero;
         [Category("Option")]
         [Rtti.Meta]
-        public Vector3 Center { get; set; } = Vector3.Zero;
+        public Vector3 Center
+        {
+            get => mCenter;
+            set
+            {
+                mCenter = value;
+                var shape = EditingObject as Bricks.Particle.TtShapeSphere;
+                if (shape != null)
+                {
+                    shape.Center = value;
+                }
+            }
+        }
+        float mRadius = 1.0f;
         [Category("Option")]
         [Rtti.Meta]
-        public float Radius { get; set; } = 1.0f;
+        public float Radius
+        {
+            get => mRadius;
+            set
+            { 
+                mRadius = value;
+                var shape = EditingObject as Bricks.Particle.TtShapeSphere;
+                if (shape != null)
+                {
+                    shape.Radius = value;
+                }
+            }
+        }
         [Category("Option")]
         [Rtti.Meta]
         public float Thinness { get; set; } = 1.0f;
@@ -257,9 +325,22 @@ namespace EngineNS.Bricks.Particle.Editor
         {
             Name = "Accelerated";
         }
+        Vector3 mAcceleration = new Vector3(0, -0.1f, 0);
         [Category("Option")]
         [Rtti.Meta]
-        public Vector3 Acceleration { get; set; } = new Vector3(0, -0.1f, 0);
+        public Vector3 Acceleration 
+        { 
+            get => mAcceleration;
+            set
+            {
+                mAcceleration = value;
+                var effector = EditingObject as TtAcceleratedEffector;
+                if (effector != null)
+                {
+                    effector.Acceleration = mAcceleration;
+                }
+            }
+        }
         public override TtEffector CreateEffector()
         {
             var result = new TtAcceleratedEffector();

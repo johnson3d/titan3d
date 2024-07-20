@@ -24,6 +24,8 @@ struct FParticleSystem
 {
 	float3 Location;
 	uint Flags;
+	
+    int4 TempData;
 #include "ParticleSystemVar"
 };
 
@@ -61,12 +63,17 @@ cbuffer cbParticleDesc DX_AUTOBIND
 	uint		ParticleRandomSeed;
 	uint		ParticleRandomPoolSize;
 	uint		ParticleMaxSize;
-
+    
 	uint		Draw_IndexCountPerInstance;
 	uint		Draw_StartIndexLocation;
 	uint		Draw_BaseVertexLocation;
 	uint		Draw_StartInstanceLocation;
 
+    uint AllocatorCapacity;
+    uint CurAliveCapacity;
+    uint BackendAliveCapacity;
+    uint ParticleCapacity;
+	
 	FParticleSystem		SystemData;
 #include "ParticleCBufferVar"
 }

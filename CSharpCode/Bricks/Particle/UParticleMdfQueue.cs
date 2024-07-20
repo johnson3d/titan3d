@@ -55,20 +55,9 @@ namespace EngineNS.Bricks.Particle
 
             if (Emitter != null)
             {
-                drawcall.BindSRV(drawcall.FindBinder("sbParticleInstance"), Emitter.GpuResources.ParticlesSrv);
-                drawcall.BindSRV(drawcall.FindBinder("sbAlives"), Emitter.GpuResources.CurAlivesSrv);
-                var binder = drawcall.FindBinder("cbForMultiDraw");
-                if (binder.IsValidPointer)
-                {
-                    if (Emitter.GpuResources.DrawIdBuffer == null)
-                    {
-                        Emitter.GpuResources.DrawIdBuffer = UEngine.Instance.GfxDevice.RenderContext.CreateCBV(binder);
-                    }
-                    
-                    drawcall.BindCBuffer(binder, Emitter.GpuResources.DrawIdBuffer);
-                }   
-
-
+                drawcall.BindSRV(drawcall.FindBinder("sbParticleInstance"), Emitter.GpuResources.ParticlesBuffer.Srv);
+                drawcall.BindSRV(drawcall.FindBinder("sbAlives"), Emitter.GpuResources.CurAlivesBuffer.Srv);
+                
                 if (Emitter.IsGpuDriven)
                 {
                     drawcall.BindIndirectDrawArgsBuffer(Emitter.GpuResources.DrawArgBuffer, 0);

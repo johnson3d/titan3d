@@ -4,6 +4,145 @@ using System.Text;
 
 namespace EngineNS.Bricks.Particle
 {
+    public class TtEffectorQueue : IDisposable
+    {
+        public void Dispose()
+        {
+            CoreSDK.DisposeObject(ref CBuffer);
+            CoreSDK.DisposeObject(ref mParticleUpdateDrawcall);
+        }
+        public string Name;
+        public List<TtEffector> Effectors { get; } = new List<TtEffector>();
+        public UNebulaShader Shader { get; set; }
+        public NxRHI.UCbView CBuffer;
+        public NxRHI.UComputeDraw mParticleUpdateDrawcall;
+
+        public unsafe void UpdateComputeDrawcall(NxRHI.UGpuDevice rc, TtEmitter emitter)
+        {
+            TtGpuParticleResources gpuResources = emitter.GpuResources;
+
+            var coreBinder = UEngine.Instance.GfxDevice.CoreShaderBinder;
+            if (mParticleUpdateDrawcall == null)
+            {
+                mParticleUpdateDrawcall = rc.CreateComputeDraw();
+                coreBinder.CBPerParticle.UpdateFieldVar(Shader.Particle_Update.mComputeShader, "cbParticleDesc");
+                CBuffer = rc.CreateCBV(coreBinder.CBPerParticle.Binder.mCoreObject);
+
+                CBuffer.SetValue(coreBinder.CBPerParticle.ParticleRandomPoolSize, UEngine.Instance.NebulaTemplateManager.ShaderRandomPoolSize);
+                var dpDesc = emitter.Mesh.SubMeshes[0].Atoms[0].GetMeshAtomDesc(0);
+                CBuffer.SetValue(coreBinder.CBPerParticle.Draw_IndexCountPerInstance, dpDesc->m_NumPrimitives * 3);
+                CBuffer.SetValue(coreBinder.CBPerParticle.Draw_StartIndexLocation, dpDesc->m_StartIndex);
+                CBuffer.SetValue(coreBinder.CBPerParticle.Draw_BaseVertexLocation, dpDesc->m_BaseVertexIndex);
+                CBuffer.SetValue(coreBinder.CBPerParticle.Draw_StartInstanceLocation, 0);
+                CBuffer.SetValue(coreBinder.CBPerParticle.ParticleMaxSize, emitter.MaxParticle);
+                
+                CBuffer.SetValue(coreBinder.CBPerParticle.AllocatorCapacity, emitter.MaxParticle);
+                CBuffer.SetValue(coreBinder.CBPerParticle.CurAliveCapacity, emitter.MaxParticle);
+                CBuffer.SetValue(coreBinder.CBPerParticle.BackendAliveCapacity, emitter.MaxParticle);
+                CBuffer.SetValue(coreBinder.CBPerParticle.ParticleCapacity, emitter.MaxParticle);
+
+                mParticleUpdateDrawcall.SetComputeEffect(Shader.Particle_Update);
+
+                mParticleUpdateDrawcall.BindCBuffer("cbParticleDesc", CBuffer);
+                mParticleUpdateDrawcall.BindSrv("bfRandomPool", UEngine.Instance.NebulaTemplateManager.RandomPoolSrv);
+
+                mParticleUpdateDrawcall.BindUav("bfParticles", gpuResources.ParticlesBuffer.Uav);
+                mParticleUpdateDrawcall.BindUav("bfSystemData", gpuResources.SystemDataBuffer.Uav);
+                mParticleUpdateDrawcall.BindUav("bfFreeParticles", gpuResources.AllocatorBuffer.Uav);
+
+                mParticleUpdateDrawcall.BindUav("bfDrawArg", gpuResources.DrawArgUav);
+                mParticleUpdateDrawcall.BindUav("bfDispatchArg", gpuResources.DispatchArgUav);
+
+                mParticleUpdateDrawcall.BindIndirectDispatchArgsBuffer(gpuResources.DispatchArgBuffer);
+            }
+
+            CBuffer.SetValue(coreBinder.CBPerParticle.ParticleElapsedTime, UEngine.Instance.ElapsedSecond);
+            CBuffer.SetValue(coreBinder.CBPerParticle.ParticleRandomSeed, emitter.RandomNext());
+
+            emitter.SetCBuffer(CBuffer);
+
+            uint index = 0;
+            foreach (var i in emitter.EmitterShapes)
+            {
+                i.SetCBuffer(index, CBuffer);
+                index++;
+            }
+
+            index = 0;
+            foreach (var i in this.Effectors)
+            {
+                i.SetCBuffer(index, CBuffer);
+                index++;
+            }
+
+            mParticleUpdateDrawcall.BindUav("bfCurAlives", gpuResources.CurAlivesBuffer.Uav);
+            mParticleUpdateDrawcall.BindUav("bfBackendAlives", gpuResources.BackendAlivesBuffer.Uav);
+        }
+        public string GetParametersDefine()
+        {
+            string result = "";
+            foreach (var i in Effectors)
+            {
+                result += i.GetParametersDefine();
+            }
+            return result;
+        }
+        public string GetHLSL()
+        {
+            string result = "";
+            foreach (var i in Effectors)
+            {
+                result += i.GetHLSL();
+            }
+            var codeBuilder = new Bricks.CodeBuilder.Backends.UHLSLCodeGenerator();
+            string sourceCode = "";
+            //var codeBuilder = new Bricks.CodeBuilder.HLSL.UHLSLGen();
+            codeBuilder.AddLine("\nvoid DoParticleEffectors(uint3 id, inout FParticle particle)", ref sourceCode);
+            codeBuilder.PushSegment(ref sourceCode);
+            int index = 0;
+            foreach (var i in Effectors)
+            {
+                codeBuilder.AddLine($"{i.Name}_EffectorExecute(id, particle, EffectorParameters{index});", ref sourceCode);
+                index++;
+            }
+            codeBuilder.PopSegment(ref sourceCode);
+
+            result += sourceCode;
+            return result;
+        }
+        public string GetCBufferDefines()
+        {
+            string result = "";
+            int index = 0;
+            foreach (var i in Effectors)
+            {
+                result += $"{i.Name}_EffectorParameters EffectorParameters{index};\n";
+                index++;
+            }
+            return result;
+        }
+        public unsafe void Update(TtEmitter emiter, float elapsed)
+        {
+            var pParticles = (FParticleBase*)emiter.mCoreObject.GetParticleAddress();
+            var pAlives = emiter.mCoreObject.GetCurrentAliveAddress();
+            uint aliveNum = emiter.mCoreObject.GetLiveNumber();
+            foreach (var e in Effectors)
+            {
+                for (uint i = 0; i < aliveNum; i++)
+                {
+                    var index = pAlives[i];
+                    var cur = (FParticleBase*)&pParticles[index];
+                    if (cur->Life <= 0)
+                    {
+                        emiter.OnDeadParticle(index, ref pParticles[index]);
+                        continue;
+                    }
+                    e.DoEffect(emiter, elapsed, cur);
+                }
+            }
+        }
+    }
+
     public class TtEffector
     {
         public virtual string Name

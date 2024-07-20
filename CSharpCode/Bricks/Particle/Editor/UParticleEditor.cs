@@ -138,11 +138,7 @@ namespace EngineNS.Bricks.Particle.Editor
             ImGuiAPI.SameLine(0, -1);
             if (EGui.UIProxy.CustomButton.ToolButton("Compile", in btSize))
             {
-                System.Action action = async () =>
-                {
-                    
-                };
-                action();
+                _ = NebulaParticle.CreateEmitters(true);
             }
         }
 
@@ -240,9 +236,9 @@ namespace EngineNS.Bricks.Particle.Editor
 
             var nebulaData = new Bricks.Particle.TtNebulaNode.TtNebulaNodeData();
             nebulaData.NebulaName = AssetName;
+            nebulaData.NebulaParticle = await UEngine.Instance.NebulaTemplateManager.CreateParticle(AssetName);
             var meshNode = new Bricks.Particle.TtNebulaNode();
             await meshNode.InitializeNode(viewport.World, nebulaData, GamePlay.Scene.EBoundVolumeType.Box, typeof(GamePlay.UPlacement));
-            meshNode.UnsafeSetNebula(await UEngine.Instance.NebulaTemplateManager.CreateParticle(AssetName));
             meshNode.Parent = viewport.World.Root;
             meshNode.Placement.Position = DVector3.Zero;
             meshNode.HitproxyType = Graphics.Pipeline.UHitProxy.EHitproxyType.None;

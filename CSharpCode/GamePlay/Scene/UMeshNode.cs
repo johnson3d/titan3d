@@ -311,25 +311,24 @@ namespace EngineNS.GamePlay.Scene
                 action();
             }
         }
-        protected uint CameralOffsetSerialId = 0;
         public override void OnGatherVisibleMeshes(UWorld.UVisParameter rp)
         {
+            UpdateCameralOffset(rp.World);
+
             if (mMesh == null)
                 return;
 
             NodeData.CheckDirty(this);
-
-            if (rp.World.CameralOffsetSerialId != CameralOffsetSerialId)
-            {
-                CameralOffsetSerialId = rp.World.CameralOffsetSerialId;
-                mMesh.UpdateCameraOffset(rp.World);
-            }
 
             rp.AddVisibleMesh(mMesh);
             if (rp.VisibleNodes != null)
             {
                 rp.VisibleNodes.Add(this);
             }
+        }
+        protected override void OnCameralOffsetChanged(UWorld world)
+        {
+            mMesh?.UpdateCameraOffset(world);
         }
         protected override void OnAbsTransformChanged()
         {

@@ -41,6 +41,7 @@
     <None Include="$(MSBuildThisFileDirectory)Font.shadingenv" />
     <None Include="$(MSBuildThisFileDirectory)FSBase.shadingenv" />
     <None Include="$(MSBuildThisFileDirectory)Inc\Algorithm\Queue.cginc" />
+    <None Include="$(MSBuildThisFileDirectory)Inc\Algorithm\RingBuffer.cginc" />
     <None Include="$(MSBuildThisFileDirectory)Inc\Algorithm\WaveTask.cginc" />
     <None Include="$(MSBuildThisFileDirectory)Inc\BaseStructure\Box2.cginc" />
     <None Include="$(MSBuildThisFileDirectory)Inc\BaseStructure\Frustum.cginc" />
@@ -122,6 +123,7 @@
     <FxCompile Include="$(MSBuildThisFileDirectory)Bricks\Particle\Effectors.compute" />
     <FxCompile Include="$(MSBuildThisFileDirectory)Bricks\Particle\EmitShape.compute" />
     <FxCompile Include="$(MSBuildThisFileDirectory)Bricks\Particle\Particle.compute" />
+    <FxCompile Include="$(MSBuildThisFileDirectory)Bricks\Particle\SimpleEmitter\Emitter.compute" />
     <FxCompile Include="$(MSBuildThisFileDirectory)Bricks\Procedure\Height2FlowMap.compute" />
     <FxCompile Include="$(MSBuildThisFileDirectory)Bricks\Procedure\WaterBasin.compute" />
     <FxCompile Include="$(MSBuildThisFileDirectory)Bricks\VXGI\VoxelAllocator.compute" />

@@ -280,6 +280,14 @@ namespace EngineNS.Graphics.Pipeline
             public NxRHI.FShaderVarDesc ParticleElapsedTime;
             [NxRHI.UShader.UShaderVar(VarType = typeof(uint))]
             public NxRHI.FShaderVarDesc ParticleRandomSeed;
+            [NxRHI.UShader.UShaderVar(VarType = typeof(uint))]
+            public NxRHI.FShaderVarDesc AllocatorCapacity;
+            [NxRHI.UShader.UShaderVar(VarType = typeof(uint))]
+            public NxRHI.FShaderVarDesc CurAliveCapacity;
+            [NxRHI.UShader.UShaderVar(VarType = typeof(uint))]
+            public NxRHI.FShaderVarDesc BackendAliveCapacity;
+            [NxRHI.UShader.UShaderVar(VarType = typeof(uint))]
+            public NxRHI.FShaderVarDesc ParticleCapacity;
             [NxRHI.UShader.UShaderVar(VarType = typeof(Bricks.Particle.FParticleSystemBase))]
             public NxRHI.FShaderVarDesc SystemData; 
         }

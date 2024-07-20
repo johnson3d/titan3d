@@ -91,6 +91,9 @@
     <Filter Include="Bricks\Procedure\Erosion">
       <UniqueIdentifier>{78b0777d-0f66-4381-ac1e-cec5d95ca416}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Bricks\Particle\SimpleEmitter">
+      <UniqueIdentifier>{81e0ef76-1030-4095-81ae-fb4a2552414f}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <None Include="$(MSBuildThisFileDirectory)Material\TestMaterial.mtl">
@@ -391,6 +394,9 @@
     <None Include="$(MSBuildThisFileDirectory)Bricks\Procedure\PgcCommon.cginc">
       <Filter>Bricks\Procedure</Filter>
     </None>
+    <None Include="$(MSBuildThisFileDirectory)Inc\Algorithm\RingBuffer.cginc">
+      <Filter>Inc\Algorithm</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="$(MSBuildThisFileDirectory)Compute\calcrate.compute">
@@ -455,6 +461,9 @@
     </FxCompile>
     <FxCompile Include="$(MSBuildThisFileDirectory)Bricks\Procedure\WaterBasin.compute">
       <Filter>Bricks\Procedure</Filter>
+    </FxCompile>
+    <FxCompile Include="$(MSBuildThisFileDirectory)Bricks\Particle\SimpleEmitter\Emitter.compute">
+      <Filter>Bricks\Particle\SimpleEmitter</Filter>
     </FxCompile>
   </ItemGroup>
   <ItemGroup>
