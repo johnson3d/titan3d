@@ -51,7 +51,7 @@ PS_INPUT VS_Main(VS_INPUT input1)
 
 	//output.vPosition = mul(float4(output.vWorldPos, 1), GetViewPrjMtx(true));
 	output.vPosition = mul(wp4, GetViewPrjMtx(true));
-
+	
 	//float2 previousScreenPos = prePos.xy * 0.5 + 0.5;
 	//float2 currentScreenPos = (output.vPosition.xy / output.vPosition.w) * 0.5 + 0.5;
 	//output.psCustomUV0.xy = currentScreenPos - previousScreenPos;

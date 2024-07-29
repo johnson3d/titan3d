@@ -8,7 +8,10 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
     public partial class Monocular : UNodeBase
     {
         public PinIn Left { get; set; } = new PinIn();
-        public PinOut Result { get; set; } = new PinOut();
+        public PinOut Result { get; set; } = new PinOut()
+        {
+            MultiLinks = true,
+        };
     }
     public partial class TypeConverterVar : Monocular//, UEditableValue.IValueEditNotify
     {

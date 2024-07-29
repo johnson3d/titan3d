@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Hash_2346355749 Type="EngineNS.Bricks.Particle.TtNebulaParticle@EngineCore">
+  <AssetName Type="EngineNS.RName@EngineCore" Order="0" />
+  <McName Type="EngineNS.RName@EngineCore" Order="0" />
+  <ParticleGraph Type="EngineNS.Bricks.Particle.Editor.TtParticleGraph@EngineCore" Order="0" />
+</Hash_2346355749>

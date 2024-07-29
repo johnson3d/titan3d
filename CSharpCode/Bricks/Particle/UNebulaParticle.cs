@@ -34,7 +34,7 @@ namespace EngineNS.Bricks.Particle
     [TtNebulaParticle.UNebulaParticleImport]
     [IO.AssetCreateMenu(MenuName = "FX/NubulaParticle")]
     [EngineNS.Editor.UAssetEditor(EditorType = typeof(Editor.TtParticleEditor))]
-    public partial class TtNebulaParticle : IO.IAsset, IDisposable
+    public partial class TtNebulaParticle : IO.BaseSerializer, IO.IAsset, IDisposable
     {
         public const string AssetExt = ".nebula";
         public class UNebulaParticleImportAttribute : IO.CommonCreateAttribute
@@ -71,7 +71,7 @@ namespace EngineNS.Bricks.Particle
             }
             UEngine.Instance.SourceControlModule.AddFile(name.Address);
 
-            IO.TtFileManager.SaveObjectToXml(name.Address, ParticleGraph);
+            IO.TtFileManager.SaveObjectToXml(name.Address, this);
             UEngine.Instance.SourceControlModule.AddFile(name.Address);
         }
         public static async Thread.Async.TtTask<TtNebulaParticle> LoadAsset(RName name, bool bForEditor)
@@ -81,7 +81,7 @@ namespace EngineNS.Bricks.Particle
             result = new TtNebulaParticle();
             result.AssetName = name;
             result.ParticleGraph = new Editor.TtParticleGraph();
-            if (IO.TtFileManager.LoadXmlToObject(name.Address, result.ParticleGraph) == false)
+            if (IO.TtFileManager.LoadXmlToObject(name.Address, result) == false)
             {
                 result = new TtNebulaParticle();
                 result.AssetName = name;
@@ -123,6 +123,7 @@ namespace EngineNS.Bricks.Particle
                     var emt = this.AddEmitter(emtNode.CreateEmitterType().SystemType, emtNode.EmitterName);
                     emt.IsGpuDriven = emtNode.IsGpuDriven;
                     await emt.InitEmitter(emtNode.MeshName, emtNode.MaxParticle);
+                    emtNode.InitEmitter(emt);
                     if (bForEditor)
                         emtNode.EditingObject = emt;
 
@@ -155,6 +156,8 @@ namespace EngineNS.Bricks.Particle
                 }
             }
             await UEngine.Instance.NebulaTemplateManager.UpdateShaders(this);
+
+            mMcObject?.Get()?.OnCreated(this);
         }
         [Rtti.Meta]
         public RName AssetName
@@ -170,6 +173,7 @@ namespace EngineNS.Bricks.Particle
             }
             Emitter.Clear();
         }
+        [Rtti.Meta]
         public Editor.TtParticleGraph ParticleGraph { get; set; }
         public Dictionary<string, TtEmitter> Emitter { get; } = new Dictionary<string, TtEmitter>();
         [Rtti.Meta]
@@ -185,16 +189,43 @@ namespace EngineNS.Bricks.Particle
         }
         public void Update(UParticleGraphNode particleSystem, float elpased)
         {
+            mMcObject?.Get()?.OnUpdate(this, particleSystem, elpased);
+
             //var cmdlist = particleSystem.BasePass.DrawCmdList;
             //cmdlist.BeginCommand();
             foreach (var i in Emitter.Values)
             {
+                mMcObject?.Get()?.OnUpdateEmitter(this, i, particleSystem, elpased);
                 i.Update(particleSystem, elpased);                
             }
             //cmdlist.EndCommand();
             //policy.CommitCommandList(cmdlist);
         }
-
+        [Rtti.Meta]
+        [RName.PGRName(FilterExts = CodeBuilder.UMacross.AssetExt, MacrossType = typeof(TtNebulaMacross))]
+        public RName McName
+        {
+            get
+            {
+                if (mMcObject == null)
+                    return null;
+                return mMcObject.Name;
+            }
+            set
+            {
+                if (value == null)
+                {
+                    mMcObject = null;
+                    return;
+                }
+                if (mMcObject == null)
+                {
+                    mMcObject = Macross.UMacrossGetter<TtNebulaMacross>.NewInstance();
+                }
+                mMcObject.Name = value;
+            }
+        }
+        Macross.UMacrossGetter<TtNebulaMacross> mMcObject;
         public async Thread.Async.TtTask<TtNebulaParticle> CloneNebula()
         {
             var result = new TtNebulaParticle();
@@ -207,6 +238,26 @@ namespace EngineNS.Bricks.Particle
             await UEngine.Instance.NebulaTemplateManager.UpdateShaders(result);
             return result;
             //return this;
+        }
+    }
+
+    [Macross.UMacross]
+    public partial class TtNebulaMacross
+    {
+        [Rtti.Meta]
+        public virtual void OnCreated(TtNebulaParticle nebula)
+        {
+
+        }
+        [Rtti.Meta]
+        public virtual void OnUpdate(TtNebulaParticle nebula, UParticleGraphNode particleSystem, float elpased)
+        {
+
+        }
+        [Rtti.Meta]
+        public virtual void OnUpdateEmitter(TtNebulaParticle nebula, TtEmitter emitter, UParticleGraphNode particleSystem, float elpased)
+        {
+
         }
     }
 }

@@ -21,7 +21,7 @@ namespace EngineNS.Editor.Forms
         public ImGuiCond_ DockCond { get; set; } = ImGuiCond_.ImGuiCond_FirstUseEver;
 
         public Graphics.Pipeline.Shader.UMaterialInstance Material;
-        public Editor.UPreviewViewport PreviewViewport { get; set; } = new Editor.UPreviewViewport();
+        public Editor.TtPreviewViewport PreviewViewport { get; set; } = new Editor.TtPreviewViewport();
         public EGui.Controls.PropertyGrid.PropertyGrid MaterialPropGrid = new EGui.Controls.PropertyGrid.PropertyGrid();
         public EGui.Controls.PropertyGrid.PropertyGrid EditorPropGrid = new EGui.Controls.PropertyGrid.PropertyGrid();
         public UMaterialInstanceEditorRecorder ActionRecorder = new UMaterialInstanceEditorRecorder();
@@ -54,13 +54,13 @@ namespace EngineNS.Editor.Forms
         {
             return this;
         }
-        protected async System.Threading.Tasks.Task Initialize_PreviewMaterialInstance(Graphics.Pipeline.UViewportSlate viewport, USlateApplication application, Graphics.Pipeline.URenderPolicy policy, float zMin, float zMax)
+        protected async System.Threading.Tasks.Task Initialize_PreviewMaterialInstance(Graphics.Pipeline.TtViewportSlate viewport, USlateApplication application, Graphics.Pipeline.URenderPolicy policy, float zMin, float zMax)
         {
             viewport.RenderPolicy = policy;
 
             await viewport.World.InitWorld();
 
-            (viewport as Editor.UPreviewViewport).CameraController.ControlCamera(viewport.RenderPolicy.DefaultCamera);
+            (viewport as Editor.TtPreviewViewport).CameraController.ControlCamera(viewport.RenderPolicy.DefaultCamera);
 
             var materials = new Graphics.Pipeline.Shader.UMaterial[1];
             materials[0] = Material;
@@ -99,7 +99,7 @@ namespace EngineNS.Editor.Forms
             var gridNode = await GamePlay.Scene.UGridNode.AddGridNode(viewport.World, viewport.World.Root);
             gridNode.ViewportSlate = this.PreviewViewport;
         }
-        async System.Threading.Tasks.Task CreateAnother(Graphics.Pipeline.UViewportSlate viewport, Graphics.Mesh.UMeshPrimitives rectMesh, Graphics.Pipeline.Shader.UMaterial[] materials)
+        async System.Threading.Tasks.Task CreateAnother(Graphics.Pipeline.TtViewportSlate viewport, Graphics.Mesh.UMeshPrimitives rectMesh, Graphics.Pipeline.Shader.UMaterial[] materials)
         {
             materials[0] = Material.CloneMaterialInstance();
             materials[0].RenderLayer = ERenderLayer.RL_Translucent;
@@ -264,7 +264,7 @@ namespace EngineNS.Editor.Forms
             var show = EGui.UIProxy.DockProxy.BeginPanel(mDockKeyClass, "Preview", ref ShowPreview, ImGuiWindowFlags_.ImGuiWindowFlags_None);
             if (show)
             {
-                PreviewViewport.ViewportType = Graphics.Pipeline.UViewportSlate.EViewportType.ChildWindow;
+                PreviewViewport.ViewportType = Graphics.Pipeline.TtViewportSlate.EViewportType.ChildWindow;
                 PreviewViewport.OnDraw();
             }
             this.PreviewViewport.Visible = show;

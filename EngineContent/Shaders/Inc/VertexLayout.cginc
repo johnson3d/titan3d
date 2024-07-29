@@ -410,7 +410,9 @@ MTL_OUTPUT Default_PSInput2Material(PS_INPUT input)
 {
 	MTL_OUTPUT mtl = (MTL_OUTPUT)0;
     mtl.mNormal = input.GetNormal();
-	mtl.mAbsSpecular = 0.0h;
+	mtl.mAbsSpecular = 0.0;
+	// mtl.mAbsSpecular = 0.5h;
+	mtl.mRough = 1.0h;
 	//mtl.mEmissive = float3(0,0,0);
 	//mtl.mSubAlbedo = half3(0.3h, 0.3h, 0.3h);
 	mtl.mAO = 1.0h;

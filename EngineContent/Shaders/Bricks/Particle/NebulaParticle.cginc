@@ -8,7 +8,7 @@ void DoNebulaModifierVS(inout PS_INPUT vsOut, inout VS_MODIFIER vert)
 {
 	//float3 Pos = vert.vInstPos.xyz + QuatRotatePosition(vert.vPosition * vert.vInstScale.xyz, vert.vInstQuat);
 	
-	uint idx = sbAlives.Load(vert.vInstanceId * 4 + 16);
+	uint idx = sbAlives.Load(vert.vInstanceId * 4 + 4);
 	//uint idx = sbAlives[vert.vInstanceId * 4 + 16];
 #if RHI_TYPE != RHI_DX11
 	//idx += vert.vMultiDrawId;
@@ -16,6 +16,8 @@ void DoNebulaModifierVS(inout PS_INPUT vsOut, inout VS_MODIFIER vert)
 	FParticle inst = sbParticleInstance[idx];
 	float3 Pos = inst.Location + vert.vPosition.xyz * inst.Scale;
 	vsOut.vPosition.xyz = Pos;
+    vsOut.vColor = (float4)ToColor4f(inst.Color);
+
 }
 
 //#define MDFQUEUE_FUNCTION_PS

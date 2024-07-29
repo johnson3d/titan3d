@@ -166,7 +166,7 @@ namespace EngineNS.Bricks.Particle
                 var particleVar = i.GetParticleDefine();
                 var sysData = i.GetSystemDataDefine();
                 var defineCode = "";
-                var emitterCode = i.GetHLSL();
+                var emitterCode = i.GetEmitShapeHLSL();
                 string cbVarDefine = i.GetCBufferDefines();
                 foreach (var j in i.EffectorQueues.Values)
                 {

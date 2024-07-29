@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 using System.Runtime.InteropServices;
+using System.Runtime.CompilerServices;
 
 namespace EngineNS.Support
 {
@@ -746,6 +747,10 @@ namespace EngineNS.Support
         public void SetValue(object v)
         {
             RefObject = v;
+        }
+        public unsafe void SetValue(void* v)
+        {
+            Value.SetPointer((IntPtr)v);
         }
         public object ToObject()
         {

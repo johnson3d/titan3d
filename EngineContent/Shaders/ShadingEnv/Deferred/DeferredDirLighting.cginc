@@ -134,8 +134,7 @@ PS_OUTPUT PS_Main(PS_INPUT input)
 
 	half3 N = GBuffer.WorldNormal;
 	half Metallic = (half)GBuffer.Metallicity;
-	half Smoothness = (half)GBuffer.Roughness;
-	half Roughness = GetRoughness(1.0h - Smoothness, GBuffer.WorldNormal);
+	half Roughness = GetRoughness((half)GBuffer.Roughness, GBuffer.WorldNormal);
     half AOs = GBuffer.AO;
 	half AoOffsetEncoded = 0.0h;
 
@@ -283,7 +282,8 @@ PS_OUTPUT PS_Main(PS_INPUT input)
 	/////=======
 
 	BaseShading = DirLightDiffuseShading * FinalShadowValue + DirLightSpecShading * ShadowValue + SkyShading;
-    BaseShading = BaseShading * (1.0h - AOs) + EnvSpec * min(ShadowValue + 0.85h, 1.0h);
+    BaseShading = BaseShading * AOs + EnvSpec * min(ShadowValue + 0.85h, 1.0h);
+    //BaseShading = BaseShading * (1.0h - AOs) + EnvSpec * min(ShadowValue + 0.85h, 1.0h);
 	
 #if ENV_DISABLE_POINTLIGHTS == 0
 	if (NoPixel == false)

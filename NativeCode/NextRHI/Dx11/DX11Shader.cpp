@@ -123,6 +123,7 @@ namespace NxRHI
 		if (bDebugShader)
 		{
 			dwShaderFlags |= D3DCOMPILE_DEBUG;
+			dwShaderFlags |= D3DCOMPILE_SKIP_OPTIMIZATION;			
 		}
 
 		ID3DBlob* pBlob;

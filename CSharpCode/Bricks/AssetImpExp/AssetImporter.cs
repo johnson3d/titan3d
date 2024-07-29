@@ -340,7 +340,7 @@ namespace EngineNS.Bricks.AssetImpExp
         }
         public static bool IsParentIs_AssimpFbxPre_Node(Assimp.Node node)
         {
-            if (node.Parent.Name.Contains("_$AssimpFbx$_"))
+            if (node.Parent!=null && node.Parent.Name.Contains("_$AssimpFbx$_"))
             {
                 return true;
             }

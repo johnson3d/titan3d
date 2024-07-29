@@ -23,7 +23,7 @@ namespace EngineNS.Bricks.Particle.Editor
         }
         public TtParticleEditor()
         {
-            PreviewViewport = new EngineNS.Editor.UPreviewViewport();
+            PreviewViewport = new EngineNS.Editor.TtPreviewViewport();
         }
         ~TtParticleEditor()
         {
@@ -113,7 +113,7 @@ namespace EngineNS.Bricks.Particle.Editor
 
             ImGuiAPI.DockBuilderDockWindow(EGui.UIProxy.DockProxy.GetDockWindowName("Preview", mDockKeyClass), rightUpId);
             ImGuiAPI.DockBuilderDockWindow(EGui.UIProxy.DockProxy.GetDockWindowName("NodeDetails", mDockKeyClass), rightDownId);
-            ImGuiAPI.DockBuilderDockWindow(EGui.UIProxy.DockProxy.GetDockWindowName("ParticleStruct", mDockKeyClass), rightDownId);
+            ImGuiAPI.DockBuilderDockWindow(EGui.UIProxy.DockProxy.GetDockWindowName("ParticlsDetails", mDockKeyClass), rightDownId);
             ImGuiAPI.DockBuilderDockWindow(EGui.UIProxy.DockProxy.GetDockWindowName("Graph", mDockKeyClass), middleId);
 
             ImGuiAPI.DockBuilderFinish(id);
@@ -146,10 +146,10 @@ namespace EngineNS.Bricks.Particle.Editor
         protected void DrawParticleStructBuilder()
         {
             var sz = new Vector2(-1);
-            var show = EGui.UIProxy.DockProxy.BeginPanel(mDockKeyClass, "ParticleStruct", ref ShowEditorPropGrid, ImGuiWindowFlags_.ImGuiWindowFlags_None);
+            var show = EGui.UIProxy.DockProxy.BeginPanel(mDockKeyClass, "ParticlsDetails", ref ShowEditorPropGrid, ImGuiWindowFlags_.ImGuiWindowFlags_None);
             if (show)
             {
-                ParticleStructBuilder.OnDraw();
+                NebulaPropGrid.OnDraw(true, false, false);
             }
             EGui.UIProxy.DockProxy.EndPanel(show);
         }
@@ -170,7 +170,7 @@ namespace EngineNS.Bricks.Particle.Editor
             var show = EGui.UIProxy.DockProxy.BeginPanel(mDockKeyClass, "Preview", ref ShowPreview, ImGuiWindowFlags_.ImGuiWindowFlags_None);
             if (show)
             {
-                PreviewViewport.ViewportType = Graphics.Pipeline.UViewportSlate.EViewportType.ChildWindow;
+                PreviewViewport.ViewportType = Graphics.Pipeline.TtViewportSlate.EViewportType.ChildWindow;
                 PreviewViewport.OnDraw();
             }
             this.PreviewViewport.Visible = show;
@@ -220,19 +220,20 @@ namespace EngineNS.Bricks.Particle.Editor
         #endregion
         #region IAssetEditor
         public RName AssetName { get; set; }
-        public EngineNS.Editor.UPreviewViewport PreviewViewport;
+        public EngineNS.Editor.TtPreviewViewport PreviewViewport;
+        public EGui.Controls.PropertyGrid.PropertyGrid NebulaPropGrid = new EGui.Controls.PropertyGrid.PropertyGrid();
         public EGui.Controls.PropertyGrid.PropertyGrid NodePropGrid = new EGui.Controls.PropertyGrid.PropertyGrid();
         public float LeftWidth = 0;
 
         public TtParticleGraph ParticleGraph { get => NebulaParticle.ParticleGraph; }
         public UGraphRenderer GraphRenderer { get; } = new UGraphRenderer();
-        public CodeBuilder.UClassLayoutBuilder ParticleStructBuilder { get; } = new CodeBuilder.UClassLayoutBuilder();
+        //public CodeBuilder.UClassLayoutBuilder ParticleStructBuilder { get; } = new CodeBuilder.UClassLayoutBuilder();
         bool IsStarting = false;
-        protected async System.Threading.Tasks.Task Initialize_PreviewParticle(Graphics.Pipeline.UViewportSlate viewport, USlateApplication application, Graphics.Pipeline.URenderPolicy policy, float zMin, float zMax)
+        protected async System.Threading.Tasks.Task Initialize_PreviewParticle(Graphics.Pipeline.TtViewportSlate viewport, USlateApplication application, Graphics.Pipeline.URenderPolicy policy, float zMin, float zMax)
         {
             viewport.RenderPolicy = policy;
 
-            (viewport as EngineNS.Editor.UPreviewViewport).CameraController.ControlCamera(viewport.RenderPolicy.DefaultCamera);
+            (viewport as EngineNS.Editor.TtPreviewViewport).CameraController.ControlCamera(viewport.RenderPolicy.DefaultCamera);
 
             var nebulaData = new Bricks.Particle.TtNebulaNode.TtNebulaNodeData();
             nebulaData.NebulaName = AssetName;
@@ -295,6 +296,7 @@ namespace EngineNS.Bricks.Particle.Editor
             AssetName = name;
             IsStarting = false;
 
+            await NebulaPropGrid.Initialize();
             await NodePropGrid.Initialize();
 
             PreviewViewport.PreviewAsset = AssetName;
@@ -311,6 +313,8 @@ namespace EngineNS.Bricks.Particle.Editor
             };
             ParticleGraph.Editor = this;
             GraphRenderer.SetGraph(this.ParticleGraph);
+
+            NebulaPropGrid.Target = NebulaParticle;
             return true;
         }
         public void OnCloseEditor()

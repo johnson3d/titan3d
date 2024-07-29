@@ -1,6 +1,18 @@
 #ifndef _DeferredBasePassPS_H_
 #define _DeferredBasePassPS_H_
 
+#include "../../Inc/ShadingCommon.cginc"
+#include "../../Inc/Math.cginc"
+
+// [ Jimenez et al. 2016, "Practical Realtime Strategies for Accurate Indirect Occlusion" ]
+float3 AOMultiBounce( float3 BaseColor, float AO )
+{
+	float3 a =  2.0404 * BaseColor - 0.3324;
+	float3 b = -4.7951 * BaseColor + 0.6417;
+	float3 c =  2.7552 * BaseColor + 0.6903;
+	return max( AO, ( ( AO * a + b ) * AO + c ) * AO );
+}
+
 struct PS_OUTPUT
 {
 	float4 RT0 : SV_Target0;//R8G8B8A8:abedo.rgb - metallicty
@@ -36,10 +48,19 @@ PS_OUTPUT PS_MobileBasePass(PS_INPUT input)
 
 	//half3 Albedo = sRGB2Linear((half3)mtl.mAlbedo);
     GBuffer.MtlColorRaw = (half3)mtl.mAlbedo + (half3)mtl.mEmissive;
-	GBuffer.Metallicity = (half)mtl.mMetallic;
-	GBuffer.Roughness = (half)mtl.mRough;
     GBuffer.WorldNormal = mtl.GetWorldNormal(input);
+	GBuffer.Metallicity = (half)mtl.mMetallic;
 	GBuffer.Specular = (half)mtl.mAbsSpecular;
+	GBuffer.Roughness = (half)mtl.mRough;
+
+	float3 SpecularColor = ComputeF0(GBuffer.Specular, GBuffer.MtlColorRaw, GBuffer.Metallicity);
+	float DiffOcclusion = mtl.mAO;
+	float SpecOcclusion = mtl.mAO;
+	// TODO: ApplyBentNormal
+	// float3 BentNormal = GBuffer.WorldNormal;
+	GBuffer.CustomData.r = (half)SpecOcclusion;
+	GBuffer.AO = (half)(AOMultiBounce( CalcLuminance( SpecularColor ), SpecOcclusion ).g);
+
 	GBuffer.ObjectFlags_2Bit = ObjectFLags_2Bit;
 #ifdef MTL_ID_UNLIT
 	GBuffer.SetUnlit(true);

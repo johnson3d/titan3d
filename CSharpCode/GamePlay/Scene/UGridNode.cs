@@ -23,7 +23,7 @@ namespace EngineNS.GamePlay.Scene
             //this.ViewportSlate = world.;
             return true;
         }
-        public Graphics.Pipeline.UViewportSlate ViewportSlate;
+        public Graphics.Pipeline.TtViewportSlate ViewportSlate;
         public Graphics.Pipeline.Shader.UMaterialInstance mGridlineMaterial;
         public Graphics.Mesh.UMdfGridUVMesh GridUVModifier;
         public static async Thread.Async.TtTask<UGridNode> AddGridNode(GamePlay.UWorld world, UNode parent)

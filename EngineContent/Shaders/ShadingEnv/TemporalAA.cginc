@@ -1,21 +1,21 @@
 #ifndef __TEMPORAL_AA_H__
 #define __TEMPORAL_AA_H__
 
+static const int2 kOffsets3x3[9] =
+{
+    int2(-1, -1),
+    int2(0, -1),
+    int2(1, -1),
+    int2(-1,  0),
+    int2(0,  0),
+    int2(1,  0),
+    int2(-1,  1),
+    int2(0,  1),
+    int2(1,  1),
+};
+
 struct TAA
 {
-    static const int2 kOffsets3x3[9] =
-    {
-        int2(-1, -1),
-        int2(0, -1),
-        int2(1, -1),
-        int2(-1,  0),
-        int2(0,  0),
-        int2(1,  0),
-        int2(-1,  1),
-        int2(0,  1),
-        int2(1,  1),
-    };
-
     static float2 ViewportClamp(float2 uv)
     {
         return uv;
@@ -79,7 +79,7 @@ struct TAA
 
     float GetBlendFactor(float4 Color, inout float4 HistoryColor, float2 Depth, float2 uv, float2 HistoryUV, float Motion, float alpha)
     {
-        // ÔÚ YCoCgÉ«²Ê¿Õ¼äÖÐ½øÐÐClipÅÐ¶Ï
+        // ï¿½ï¿½ YCoCgÉ«ï¿½Ê¿Õ¼ï¿½ï¿½Ð½ï¿½ï¿½ï¿½Clipï¿½Ð¶ï¿½
         float3 AABBMin, AABBMax;
         AABBMax = AABBMin = RGBToYCoCg(Color);
         for (int k = 0; k < 9; k++)
@@ -89,12 +89,12 @@ struct TAA
             AABBMax = max(AABBMax, C);
         }
         float3 HistoryYCoCg = RGBToYCoCg(HistoryColor);
-        //¸ù¾ÝAABB°üÎ§ºÐ½øÐÐClip¼ÆËã:
+        //ï¿½ï¿½ï¿½ï¿½AABBï¿½ï¿½Î§ï¿½Ð½ï¿½ï¿½ï¿½Clipï¿½ï¿½ï¿½ï¿½:
         //HistoryColor.rgb = YCoCgToRGB(ClipHistory(HistoryYCoCg, AABBMin, AABBMax));
-        // Clamp¼ÆËã
+        // Clampï¿½ï¿½ï¿½ï¿½
         HistoryColor.rgb = YCoCgToRGB(clamp(HistoryYCoCg, AABBMin, AABBMax));
 
-        //¸úËæËÙ¶È±ä»¯»ìºÏÏµÊý
+        //ï¿½ï¿½ï¿½ï¿½ï¿½Ù¶È±ä»¯ï¿½ï¿½ï¿½Ïµï¿½ï¿½
         float scaleLength = 1000;
         float BlendFactor = saturate(alpha + length(Motion) * scaleLength);
 
@@ -144,10 +144,10 @@ struct TAA
         float4 Color = ColorBuffer.Sample(Samp_ColorBuffer, uv);
         Color.rgb = sRGB2Linear((half3)Color.rgb);
         Depth.x = DepthBuffer.Sample(Samp_DepthBuffer, uv).r;
-        //ÒòÎª¾µÍ·µÄÒÆ¶¯»áµ¼ÖÂÎïÌå±»ÕÚµ²¹ØÏµ±ä»¯£¬Õâ²½µÄÄ¿µÄÊÇÑ¡Ôñ³öÖÜÎ§¾àÀë¾µÍ·×î½üµÄµã
+        //ï¿½ï¿½Îªï¿½ï¿½Í·ï¿½ï¿½ï¿½Æ¶ï¿½ï¿½áµ¼ï¿½ï¿½ï¿½ï¿½ï¿½å±»ï¿½Úµï¿½ï¿½ï¿½Ïµï¿½ä»¯ï¿½ï¿½ï¿½â²½ï¿½ï¿½Ä¿ï¿½ï¿½ï¿½ï¿½Ñ¡ï¿½ï¿½ï¿½ï¿½ï¿½Î§ï¿½ï¿½ï¿½ë¾µÍ·ï¿½ï¿½ï¿½ï¿½Äµï¿½
         float2 closest = GetClosestUV(screen_uv.xy);
 
-        //µÃµ½ÔÚÆÁÄ»¿Õ¼äÖÐ£¬ºÍÉÏÖ¡Ïà±ÈUVÆ«ÒÆµÄ¾àÀë
+        //ï¿½Ãµï¿½ï¿½ï¿½ï¿½ï¿½Ä»ï¿½Õ¼ï¿½ï¿½Ð£ï¿½ï¿½ï¿½ï¿½ï¿½Ö¡ï¿½ï¿½ï¿½UVÆ«ï¿½ÆµÄ¾ï¿½ï¿½ï¿½
         float2 Motion = DecodeMotionVector(MotionBuffer.SampleLevel(Samp_MotionBuffer, closest.xy, 0).xy);
         float2 HistoryUV = screen_uv.xy - Motion;
         half4 HistoryColor = PrevColorBuffer.Sample(Samp_PrevColorBuffer, HistoryUV);

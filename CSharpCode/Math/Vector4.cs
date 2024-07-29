@@ -164,7 +164,9 @@ namespace EngineNS
                 return retValue;
             }
 
-            public unsafe static bool OnDrawVectorValue<T>(in EditorInfo info, ref T v, ref T newValue, string dimName0 = "X", string dimName1 = "Y", string dimName2 = "Z", string dimName3 = "W") where T : unmanaged
+            public delegate void FGetSetVectorValueFunction<T>(ref T target, int index, ref float v, bool bSet);
+            public unsafe static bool OnDrawVectorValue<T>(in EditorInfo info, ref T v, ref T newValue, 
+                string dimName0 = "X", string dimName1 = "Y", string dimName2 = "Z", string dimName3 = "W", FGetSetVectorValueFunction<T> fun = null) where T : unmanaged
             {
                 bool retValue = false;
                 if (info.Expand)
@@ -213,11 +215,26 @@ namespace EngineNS
                         ImGuiAPI.SetNextItemWidth(-1);
                         fixed (T* vPtr = &v)
                         {
-                            var dimV = ((float*)vPtr)[dimIdx];
+                            float dimV = 0;
+                            if (fun != null)
+                            {
+                                fun(ref *vPtr, dimIdx, ref dimV, false);
+                            }
+                            else
+                            {
+                                dimV = ((float*)vPtr)[dimIdx];
+                            }
                             var dimVChanged = ImGuiAPI.DragScalar2(dimName, ImGuiDataType_.ImGuiDataType_Float, &dimV, 0.1f, &minValue, &maxValue, "%0.6f", ImGuiSliderFlags_.ImGuiSliderFlags_None);
                             if (dimVChanged)
                             {
-                                ((float*)vPtr)[dimIdx] = dimV;
+                                if (fun != null)
+                                {
+                                    fun(ref *vPtr, dimIdx, ref dimV, true);
+                                }
+                                else
+                                {
+                                    ((float*)vPtr)[dimIdx] = dimV;
+                                }
                                 newValue = v;
                                 retValue = true;
                             }

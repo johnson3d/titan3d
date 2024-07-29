@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 
 namespace EngineNS.GamePlay
 {
-    public class UGameViewportSlate : EngineNS.EGui.Slate.UWorldViewportSlate, IRootForm
+    public class UGameViewportSlate : EngineNS.EGui.Slate.TtWorldViewportSlate, IRootForm
     {
         public UGameViewportSlate(bool regRoot)
         {

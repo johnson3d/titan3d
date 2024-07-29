@@ -421,7 +421,7 @@ namespace EngineNS.EGui.Controls.PropertyGrid
                 else if (target.GetType().GetInterface("IList") != null)
                 {
                     var lst = target as IList;
-                    if (lst.Count == 1)
+                    if (lst.Count == 1 && lst[0] != null)
                     {
                         categoryAtts = lst[0].GetType().GetCustomAttributes(typeof(PGCategoryFilters), true);
                         if (categoryAtts.Length > 0)

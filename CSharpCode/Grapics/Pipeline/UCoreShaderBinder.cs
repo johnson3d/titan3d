@@ -288,7 +288,7 @@ namespace EngineNS.Graphics.Pipeline
             public NxRHI.FShaderVarDesc BackendAliveCapacity;
             [NxRHI.UShader.UShaderVar(VarType = typeof(uint))]
             public NxRHI.FShaderVarDesc ParticleCapacity;
-            [NxRHI.UShader.UShaderVar(VarType = typeof(Bricks.Particle.FParticleSystemBase))]
+            [NxRHI.UShader.UShaderVar(VarType = typeof(Bricks.Particle.FParticleEmitter))]
             public NxRHI.FShaderVarDesc SystemData; 
         }
         public readonly UCBufferPerParticlIndexer CBPerParticle = new UCBufferPerParticlIndexer();

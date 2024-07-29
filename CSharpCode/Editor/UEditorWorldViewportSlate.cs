@@ -5,7 +5,7 @@ using System.Collections.Generic;
 namespace EngineNS.Editor
 {
     [Obsolete("已废弃")]
-    public class UEditorWorldViewportSlate : EGui.Slate.UWorldViewportSlate, IRootForm
+    public class UEditorWorldViewportSlate : EGui.Slate.TtWorldViewportSlate, IRootForm
     {
         public UEditorWorldViewportSlate(bool regRoot)
         {

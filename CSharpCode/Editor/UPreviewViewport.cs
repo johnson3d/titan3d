@@ -4,14 +4,13 @@ using System.Security.Permissions;
 
 namespace EngineNS.Editor
 {
-    public class UPreviewViewport : Graphics.Pipeline.UViewportSlate
+    public class TtPreviewViewport : EGui.Slate.TtWorldViewportSlate// Graphics.Pipeline.UViewportSlate
     {
-        public Editor.Controller.EditorCameraController CameraController = new Editor.Controller.EditorCameraController();
-        public UPreviewViewport()
+        public TtPreviewViewport()
         {
 
         }
-        ~UPreviewViewport()
+        ~TtPreviewViewport()
         {
             Dispose();
         }
@@ -22,7 +21,7 @@ namespace EngineNS.Editor
             RenderPolicy = null;
             base.Dispose();
         }
-        protected async System.Threading.Tasks.Task Initialize_Default(Graphics.Pipeline.UViewportSlate viewport, USlateApplication application, Graphics.Pipeline.URenderPolicy policy, float zMin, float zMax)
+        new protected async System.Threading.Tasks.Task Initialize_Default(Graphics.Pipeline.TtViewportSlate viewport, USlateApplication application, Graphics.Pipeline.URenderPolicy policy, float zMin, float zMax)
         {
             RenderPolicy = policy;
 
@@ -85,6 +84,9 @@ namespace EngineNS.Editor
             mDefaultHUD.RenderCamera = this.RenderPolicy.DefaultCamera;
             this.PushHUD(mDefaultHUD);
 
+            mAxis = new GamePlay.UAxis();
+            await mAxis.Initialize(this.World, CameraController);
+
             IsInlitialized = true;
             StartTime = System.DateTime.Now;
             HasAssetSnap = IO.TtFileManager.FileExists(PreviewAsset.Address + ".snap");
@@ -105,7 +107,8 @@ namespace EngineNS.Editor
         public Delegate_OnDrawViewportUIAction OnDrawViewportUIAction;
         public override void OnDrawViewportUI(in Vector2 startDrawPos) 
         {
-            if(OnDrawViewportUIAction != null)
+            base.OnDrawViewportUI(in startDrawPos);
+            if (OnDrawViewportUIAction != null)
             {
                 OnDrawViewportUIAction.Invoke(startDrawPos);
             }
@@ -113,6 +116,7 @@ namespace EngineNS.Editor
             {
                 if (PreviewAsset != null)
                 {
+                    ImGuiAPI.SameLine(0, -1);
                     if (EGui.UIProxy.CustomButton.ToolButton("S", in Vector2.Zero))
                     {
                         Editor.USnapshot.Save(PreviewAsset, UEngine.Instance.AssetMetaManager.GetAssetMeta(PreviewAsset), RenderPolicy.GetFinalShowRSV());
@@ -141,8 +145,6 @@ namespace EngineNS.Editor
         }
         #region CameraControl
         Vector2 mPreMousePt;
-        public float CameraMoveSpeed { get; set; } = 1.0f;
-        public float CameraMouseWheelSpeed { get; set; } = 1.0f;
         public float CameraRotSpeed = 1.0f;
         public bool FreezCameraControl = false;
         public delegate void Delegate_OnEvent(in Bricks.Input.Event e);
@@ -214,7 +216,7 @@ namespace EngineNS.Editor
             return true;
         }
         #endregion
-        protected virtual void TickOnFocus()
+        protected override void TickOnFocus()
         {
             float step = (UEngine.Instance.ElapseTickCountMS * 0.001f) * CameraMoveSpeed;
             var keyboards = UEngine.Instance.InputSystem;
@@ -232,7 +234,7 @@ namespace EngineNS.Editor
                 CameraController.Move(Graphics.Pipeline.ECameraAxis.Right, step, true);
             }
             else if (keyboards.IsKeyDown(Bricks.Input.Keycode.KEY_d))
-                {
+            {
                 CameraController.Move(Graphics.Pipeline.ECameraAxis.Right, -step, true);
             }
         }
@@ -272,7 +274,7 @@ namespace EngineNS.Editor
             
         }
         public Action AfterTickSync;
-        public void TickSync(float ellapse)
+        public override void TickSync(float ellapse)
         {
             if (IsInlitialized == false)
                 return;

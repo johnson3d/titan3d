@@ -17,7 +17,7 @@ namespace EngineNS.GamePlay
 
             mMemberTickables.CleanupMembers(this);
         }
-        public UWorld(Graphics.Pipeline.UViewportSlate viewport)
+        public UWorld(Graphics.Pipeline.TtViewportSlate viewport)
         {
             mMemberTickables.CollectMembers(this);
 

@@ -11,7 +11,7 @@ namespace EngineNS.Bricks.Particle
         {
 
         }
-        public unsafe abstract void UpdateLocation(TtEmitter emitter, FParticleBase* particle);
+        public unsafe abstract void UpdateLocation(TtEmitter emitter, FParticle* particle);
         public abstract TtShape CloneShape();
     }
     public class TtShapeBox : TtShape
@@ -55,7 +55,7 @@ namespace EngineNS.Bricks.Particle
             mShapeBox.HalfExtent = Vector3.One;
             mShapeBox.Thinness = 1.0f;
         }
-        public unsafe override void UpdateLocation(TtEmitter emitter, FParticleBase* particle)
+        public unsafe override void UpdateLocation(TtEmitter emitter, FParticle* particle)
         {
             var offset = new Vector3();
             if (Thinness >= 1.0f)
@@ -163,7 +163,7 @@ namespace EngineNS.Bricks.Particle
         {
             mShapeSphere.Radius = 1.0f;
         }
-        public override unsafe void UpdateLocation(TtEmitter emitter, FParticleBase* particle)
+        public override unsafe void UpdateLocation(TtEmitter emitter, FParticle* particle)
         {
             Vector3 offset;            
             offset = emitter.RandomVector() * (Radius - Radius * (Thinness * emitter.RandomUnit()));

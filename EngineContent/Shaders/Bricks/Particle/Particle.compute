@@ -9,7 +9,7 @@
 #include "EmitShape.compute"
 void DoParticleEmitShape(uint3 id, inout FParticle cur, uint shapeIndex);
 void OnInitParticle(uint3 id, inout FParticle particle);
-void OnDeadParticle(uint3 id, inout FParticle particle);
+void OnDeadParticle(uint3 id, uint idxInPool, inout FParticle particle);
 void DoParticleEffectors(uint3 id, inout FParticle particle);
 void DoUpdateSystem(uint3 id, uint3 GroupId, uint3 GroupThreadId, uint GroupIndex);
 
@@ -71,7 +71,7 @@ void SpawnParticle(uint3 id, uint num, uint flags, float life)
             DoParticleEmitShape(id, bfParticles[index], shapeIndex);
         }
 
-        bfParticles[index].Location += SystemData.Location;
+        bfParticles[index].Location += EmitterData.Location;
         OnInitParticle(id, bfParticles[index]);
     }
 }
@@ -106,13 +106,15 @@ void CS_Particle_Update(uint3 id : SV_DispatchThreadID,
         if (bfParticles[idx].Life <= 0)
 		{
             Allocator.Push(idx);
-            OnDeadParticle(id, bfParticles[idx]);
+            OnDeadParticle(id, idx, bfParticles[idx]);
         }
 		else
 		{
             BackendAlives.Push(idx);
             DoParticleEffectors(id, bfParticles[idx]);
-		}
+            
+            bfParticles[idx].Location += bfParticles[idx].Velocity * ParticleElapsedTime;
+        }
 		InterlockedAdd(GroupRunParticleNumber, 1, tmpCount);
 	}
 	GroupMemoryBarrierWithGroupSync();
@@ -156,7 +158,7 @@ void OnInitParticle(uint3 id, inout FParticle particle)
 #endif
 
 #ifndef USER_PARTICLE_FINALIZE
-void OnDeadParticle(uint3 id, inout FParticle particle)
+void OnDeadParticle(uint3 id, uint idxInPool, inout FParticle particle)
 {
 
 }

@@ -4,12 +4,198 @@ using System.Text;
 
 namespace EngineNS
 {
+    [FRotator.FRotatorEditor]
+    [FRotator.TypeConverter]
     [System.Runtime.InteropServices.StructLayout(System.Runtime.InteropServices.LayoutKind.Sequential)]
     public struct FRotator : System.IEquatable<FRotator>
     {
         public float Yaw;
         public float Pitch;
         public float Roll;
+
+        public const float R2D = 180.0f / MathF.PI;
+        public const float D2R = MathF.PI / 180.0f;
+        public float YawDegree
+        {
+            get
+            {
+                return Yaw * R2D;
+            }
+            set
+            {
+                Yaw = value * D2R;
+            }
+        }
+        public float PitchDegree
+        {
+            get
+            {
+                return Pitch * R2D;
+            }
+            set
+            {
+                Pitch = value * D2R;
+            }
+        }
+        public float RollDegree
+        {
+            get
+            {
+                return Roll * R2D;
+            }
+            set
+            {
+                Roll = value * D2R;
+            }
+        }
+
+        #region editor attributes
+        public class FRotatorEditorAttribute : EGui.Controls.PropertyGrid.PGCustomValueEditorAttribute
+        {
+            public override unsafe bool OnDraw(in EditorInfo info, out object newValue)
+            {
+                this.Expandable = true;
+                bool retValue = false;
+                newValue = info.Value;
+                //var saved = v;
+                var index = ImGuiAPI.TableGetColumnIndex();
+                var width = ImGuiAPI.GetColumnWidth(index);
+                ImGuiAPI.SetNextItemWidth(width - EGui.UIProxy.StyleConfig.Instance.PGCellPadding.X);
+                //ImGuiAPI.PushStyleVar(ImGuiStyleVar_.ImGuiStyleVar_FramePadding, ref EGui.UIProxy.StyleConfig.Instance.PGInputFramePadding);
+                var minValue = float.MinValue;
+                var maxValue = float.MaxValue;
+                var multiValue = info.Value as EGui.Controls.PropertyGrid.PropertyMultiValue;
+                if (multiValue != null && multiValue.HasDifferentValue())
+                {
+                    ImGuiAPI.Text(multiValue.MultiValueString);
+                    if (multiValue.DrawVector<FRotator>(in info, "Yaw", "Pitch", "Roll", "W", (ref FRotator target, int index, ref float v, bool bSet) =>
+                    {
+                        if(bSet)
+                        {
+                            switch (index)
+                            {
+                                case 0:
+                                    target.YawDegree = v;
+                                    break;
+                                case 1:
+                                    target.PitchDegree = v;
+                                    break;
+                                case 2:
+                                    target.RollDegree = v;
+                                    break;
+                            }
+                        }
+                        else
+                        {
+                            switch (index)
+                            {
+                                case 0:
+                                    v = target.YawDegree;
+                                    break;
+                                case 1:
+                                    v = target.PitchDegree;
+                                    break;
+                                case 2:
+                                    v = target.RollDegree;
+                                    break;
+                            }
+                        }
+                    }) && !info.Readonly)
+                    {
+                        newValue = multiValue;
+                        retValue = true;
+                    }
+                }
+                else
+                {
+                    var v = (FRotator)info.Value;
+                    Vector3 rv;
+                    rv.X = v.YawDegree;
+                    rv.Y = v.PitchDegree;
+                    rv.Z = v.RollDegree;
+                    float speed = 0.1f;
+                    var format = "%.6f";
+                    if (info.HostProperty != null)
+                    {
+                        var vR = info.HostProperty.GetAttribute<EGui.Controls.PropertyGrid.PGValueRange>();
+                        if (vR != null)
+                        {
+                            minValue = (float)vR.Min;
+                            maxValue = (float)vR.Max;
+                        }
+                        var vStep = info.HostProperty.GetAttribute<EGui.Controls.PropertyGrid.PGValueChangeStep>();
+                        if (vStep != null)
+                        {
+                            speed = vStep.Step;
+                        }
+                        var vFormat = info.HostProperty.GetAttribute<EGui.Controls.PropertyGrid.PGValueFormat>();
+                        if (vFormat != null)
+                            format = vFormat.Format;
+                    }
+                    var changed = ImGuiAPI.DragScalarN2(TName.FromString2("##", info.Name).ToString(), ImGuiDataType_.ImGuiDataType_Float, (float*)&rv, 3, speed, &minValue, &maxValue, format, ImGuiSliderFlags_.ImGuiSliderFlags_None);
+                    //ImGuiAPI.InputFloat3(TName.FromString2("##", info.Name).ToString(), (float*)&v, "%.6f", ImGuiInputTextFlags_.ImGuiInputTextFlags_CharsDecimal);
+                    //ImGuiAPI.PopStyleVar(1);
+                    if (changed && !info.Readonly)//(v != saved)
+                    {
+                        v.YawDegree = rv.X;
+                        v.PitchDegree = rv.Y;
+                        v.Roll = rv.Z;
+                        newValue = v;
+                        retValue = true;
+                    }
+
+                    if (Vector4.Vector4EditorAttribute.OnDrawVectorValue<FRotator>(in info, ref v, ref v, "Yaw", "Pitch", "Roll", "W", 
+                        (ref FRotator target, int index, ref float v, bool bSet) =>
+                        {
+                            if (bSet)
+                            {
+                                switch (index)
+                                {
+                                    case 0:
+                                        target.YawDegree = v;
+                                        break;
+                                    case 1:
+                                        target.PitchDegree = v;
+                                        break;
+                                    case 2:
+                                        target.RollDegree = v;
+                                        break;
+                                }
+                            }
+                            else
+                            {
+                                switch (index)
+                                {
+                                    case 0:
+                                        v = target.YawDegree;
+                                        break;
+                                    case 1:
+                                        v = target.PitchDegree;
+                                        break;
+                                    case 2:
+                                        v = target.RollDegree;
+                                        break;
+                                }
+                            }
+                        }) && !info.Readonly)
+                    {
+                        newValue = v;
+                        retValue = true;
+                    }
+
+                }
+                return retValue;
+            }
+        }
+        public class TypeConverterAttribute : Support.TypeConverterAttributeBase
+        {
+            public override bool ConvertFromString(ref object obj, string text)
+            {
+                obj = FRotator.FromString(text);
+                return true;
+            }
+        }
+        #endregion
         public FRotator()
         {
 

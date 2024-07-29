@@ -125,7 +125,7 @@ namespace EngineNS.Bricks.Particle
         }
         public unsafe void Update(TtEmitter emiter, float elapsed)
         {
-            var pParticles = (FParticleBase*)emiter.mCoreObject.GetParticleAddress();
+            var pParticles = (FParticle*)emiter.mCoreObject.GetParticleAddress();
             var pAlives = emiter.mCoreObject.GetCurrentAliveAddress();
             uint aliveNum = emiter.mCoreObject.GetLiveNumber();
             foreach (var e in Effectors)
@@ -133,7 +133,7 @@ namespace EngineNS.Bricks.Particle
                 for (uint i = 0; i < aliveNum; i++)
                 {
                     var index = pAlives[i];
-                    var cur = (FParticleBase*)&pParticles[index];
+                    var cur = (FParticle*)&pParticles[index];
                     if (cur->Life <= 0)
                     {
                         emiter.OnDeadParticle(index, ref pParticles[index]);
@@ -141,6 +141,13 @@ namespace EngineNS.Bricks.Particle
                     }
                     e.DoEffect(emiter, elapsed, cur);
                 }
+            }
+
+            for (uint i = 0; i < aliveNum; i++)
+            {
+                var index = pAlives[i];
+                var cur = (FParticle*)&pParticles[index];
+                cur->Location += cur->Velocity * elapsed;
             }
         }
     }
@@ -153,9 +160,9 @@ namespace EngineNS.Bricks.Particle
         }
         public unsafe virtual void DoEffect(TtEmitter emitter, float elapsed, void* particle)
         {
-            DoEffect(emitter, elapsed, ref *(FParticleBase*)particle);
+            DoEffect(emitter, elapsed, ref *(FParticle*)particle);
         }
-        public unsafe virtual void DoEffect(TtEmitter emitter, float elapsed, ref FParticleBase particle)
+        public unsafe virtual void DoEffect(TtEmitter emitter, float elapsed, ref FParticle particle)
         {
 
         }
@@ -230,8 +237,9 @@ namespace EngineNS.Bricks.Particle
         }
         public override unsafe void DoEffect(TtEmitter emitter, float elapsed, void* particle)
         {
-            ref var cur = ref *(FParticleBase*)particle;
-            cur.Location += Acceleration * elapsed * (1.0f + emitter.RandomUnit() * 2.5f);
+            ref var cur = ref *(FParticle*)particle;
+            //cur.Location += Acceleration * elapsed * (1.0f + emitter.RandomUnit() * 2.5f);
+            cur.Velocity += Acceleration;
         }
         public override void SetCBuffer(uint index, NxRHI.UCbView CBuffer)
         {

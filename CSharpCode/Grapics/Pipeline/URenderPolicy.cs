@@ -80,7 +80,7 @@ namespace EngineNS.Graphics.Pipeline
         //public TtRenderGraphNode TagObject;
         public object TagObject;
         protected UCamera mDefaultCamera;
-        public UViewportSlate ViewportSlate
+        public TtViewportSlate ViewportSlate
         {
             get;
             internal set;

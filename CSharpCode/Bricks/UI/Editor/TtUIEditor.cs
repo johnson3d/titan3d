@@ -32,7 +32,7 @@ namespace EngineNS.UI.Editor
         ImGuiWindowClass mDockKeyClass;
         public ImGuiWindowClass DockKeyClass => mDockKeyClass;
         public ImGuiCond_ DockCond { get; set; } = ImGuiCond_.ImGuiCond_FirstUseEver;        
-        public EngineNS.Editor.UPreviewViewport PreviewViewport = new EngineNS.Editor.UPreviewViewport();
+        public EngineNS.Editor.TtPreviewViewport PreviewViewport = new EngineNS.Editor.TtPreviewViewport();
 
         public EditorUIHost mUIHost;
         public TtUINode mUINode;
@@ -87,13 +87,13 @@ namespace EngineNS.UI.Editor
 
             return true;
         }
-        protected async System.Threading.Tasks.Task Initialize_PreviewMaterialInstance(Graphics.Pipeline.UViewportSlate viewport, USlateApplication application, Graphics.Pipeline.URenderPolicy policy, float zMin, float zMax)
+        protected async System.Threading.Tasks.Task Initialize_PreviewMaterialInstance(Graphics.Pipeline.TtViewportSlate viewport, USlateApplication application, Graphics.Pipeline.URenderPolicy policy, float zMin, float zMax)
         {
             viewport.RenderPolicy = policy;
 
             await viewport.World.InitWorld();
 
-            (viewport as EngineNS.Editor.UPreviewViewport).CameraController.ControlCamera(viewport.RenderPolicy.DefaultCamera);
+            (viewport as EngineNS.Editor.TtPreviewViewport).CameraController.ControlCamera(viewport.RenderPolicy.DefaultCamera);
 
             var scene = PreviewViewport.World.Root.GetNearestParentScene();
             mUINode = await scene.NewNode(PreviewViewport.World, typeof(TtUINode), new TtUINode.TtUINodeData(),
@@ -509,7 +509,7 @@ namespace EngineNS.UI.Editor
                 mUIHost.WindowRectangle.Height = (end.Y - start.Y);
 
                 //PreviewViewport.WindowSize = ImGuiAPI.GetWindowSize();
-                PreviewViewport.ViewportType = Graphics.Pipeline.UViewportSlate.EViewportType.ChildWindow;
+                PreviewViewport.ViewportType = Graphics.Pipeline.TtViewportSlate.EViewportType.ChildWindow;
                 PreviewViewport.OnDraw();
 
                 // debug ///////////////////

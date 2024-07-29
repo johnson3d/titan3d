@@ -688,7 +688,7 @@ namespace EngineNS.Editor
         //    await UEngine.Instance.StartPlayInEditor(UEngine.Instance.GfxDevice.SlateApplication, assetName);
         //}
         #region TestCode
-        public static async System.Threading.Tasks.Task TestCreateScene(Graphics.Pipeline.UViewportSlate vpSlate,GamePlay.UWorld world, GamePlay.Scene.UNode root, bool hideTerrain = false)
+        public static async System.Threading.Tasks.Task TestCreateScene(Graphics.Pipeline.TtViewportSlate vpSlate,GamePlay.UWorld world, GamePlay.Scene.UNode root, bool hideTerrain = false)
         {
             var materials = new Graphics.Pipeline.Shader.UMaterialInstance[2];
             materials[0] = await UEngine.Instance.GfxDevice.MaterialInstanceManager.GetMaterialInstance(RName.GetRName("utest/ddd.uminst"));

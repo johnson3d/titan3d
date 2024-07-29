@@ -4,7 +4,7 @@ using System.Security.Permissions;
 
 namespace EngineNS.Editor
 {
-    public class USdfPreviewViewport : Graphics.Pipeline.UViewportSlate
+    public class USdfPreviewViewport : Graphics.Pipeline.TtViewportSlate
     {
         public Editor.Controller.EditorCameraController CameraController = new Editor.Controller.EditorCameraController();
         public USdfPreviewViewport()

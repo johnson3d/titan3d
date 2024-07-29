@@ -5,14 +5,14 @@ using System.Collections.Generic;
 
 namespace EngineNS.Graphics.Pipeline
 {
-    public partial class UViewportSlate : IEventProcessor, IDisposable
+    public partial class TtViewportSlate : IEventProcessor, IDisposable
     {
-        public UViewportSlate()
+        public TtViewportSlate()
         {
             World = new GamePlay.UWorld(this);
             UEngine.Instance.ViewportSlateManager.AddViewport(this);
         }
-        ~UViewportSlate()
+        ~TtViewportSlate()
         {
             PresentWindow?.UnregEventProcessor(this);
             UEngine.Instance?.ViewportSlateManager.RemoveViewport(this);
@@ -387,7 +387,7 @@ namespace EngineNS.Graphics.Pipeline
                 }
             }
         }
-        public delegate System.Threading.Tasks.Task FOnInitialize(UViewportSlate viewport, USlateApplication application, Graphics.Pipeline.URenderPolicy policy, float zMin, float zMax);
+        public delegate System.Threading.Tasks.Task FOnInitialize(TtViewportSlate viewport, USlateApplication application, Graphics.Pipeline.URenderPolicy policy, float zMin, float zMax);
         public FOnInitialize OnInitialize = null;
         [Rtti.Meta]
         public virtual async System.Threading.Tasks.Task Initialize(USlateApplication application, RName policyName, float zMin, float zMax)
@@ -484,12 +484,12 @@ namespace EngineNS.Graphics.Pipeline
     }
     public class UViewportSlateManager
     {
-        public List<WeakReference<UViewportSlate>> Viewports { get; } = new List<WeakReference<UViewportSlate>>();
-        public UViewportSlate GetPressedViewport()
+        public List<WeakReference<TtViewportSlate>> Viewports { get; } = new List<WeakReference<TtViewportSlate>>();
+        public TtViewportSlate GetPressedViewport()
         {
             foreach (var i in Viewports)
             {
-                UViewportSlate t;
+                TtViewportSlate t;
                 if (i.TryGetTarget(out t) == false)
                 {
                     continue;
@@ -504,12 +504,12 @@ namespace EngineNS.Graphics.Pipeline
             }
             return null;
         }
-        public void AddViewport(UViewportSlate slate)
+        public void AddViewport(TtViewportSlate slate)
         {
-            var rmv = new List<WeakReference<UViewportSlate>>();
+            var rmv = new List<WeakReference<TtViewportSlate>>();
             foreach (var i in Viewports)
             {
-                UViewportSlate t;
+                TtViewportSlate t;
                 if (i.TryGetTarget(out t) == false)
                 {
                     rmv.Add(i);
@@ -518,18 +518,18 @@ namespace EngineNS.Graphics.Pipeline
                 else if (t == slate)
                     return;
             }
-            Viewports.Add(new WeakReference<UViewportSlate>(slate));
+            Viewports.Add(new WeakReference<TtViewportSlate>(slate));
             foreach (var i in rmv)
             {
                 Viewports.Remove(i);
             }
         }
-        public void RemoveViewport(UViewportSlate slate)
+        public void RemoveViewport(TtViewportSlate slate)
         {
-            var rmv = new List<WeakReference<UViewportSlate>>();
+            var rmv = new List<WeakReference<TtViewportSlate>>();
             foreach (var i in Viewports)
             {
-                UViewportSlate t;
+                TtViewportSlate t;
                 if (i.TryGetTarget(out t) == false)
                 {
                     rmv.Add(i);

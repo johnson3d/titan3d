@@ -48,14 +48,14 @@ namespace EngineNS.Bricks.Procedure
         public float LeftWidth = 0;
         public Vector2 WindowPos;
         public Vector2 WindowSize = new Vector2(800, 600);
-        public Editor.UPreviewViewport PreviewViewport;
+        public Editor.TtPreviewViewport PreviewViewport;
         [RName.PGRName(FilterExts = UPgcAsset.AssetExt)]
         public RName PreviewPGC { get; set; }
         public NxRHI.UGpuSystem GpuSystem { get; private set; }
         public NxRHI.UGpuDevice GpuDevice { get; private set; }
         public UPgcEditor()
         {
-            PreviewViewport = new Editor.UPreviewViewport();
+            PreviewViewport = new Editor.TtPreviewViewport();
             PreviewPGC = RName.GetRName("template/emptyterrain.pgc", RName.ERNameType.Engine);
         }
         ~UPgcEditor()
@@ -87,13 +87,13 @@ namespace EngineNS.Bricks.Procedure
             
             return true;
         }
-        protected async System.Threading.Tasks.Task Initialize_PreviewMaterial(Graphics.Pipeline.UViewportSlate viewport, USlateApplication application, Graphics.Pipeline.URenderPolicy policy, float zMin, float zMax)
+        protected async System.Threading.Tasks.Task Initialize_PreviewMaterial(Graphics.Pipeline.TtViewportSlate viewport, USlateApplication application, Graphics.Pipeline.URenderPolicy policy, float zMin, float zMax)
         {
             viewport.RenderPolicy = policy;
 
             await viewport.World.InitWorld();
 
-            (viewport as Editor.UPreviewViewport).CameraController.ControlCamera(viewport.RenderPolicy.DefaultCamera);
+            (viewport as Editor.TtPreviewViewport).CameraController.ControlCamera(viewport.RenderPolicy.DefaultCamera);
 
             var gridNode = await GamePlay.Scene.UGridNode.AddGridNode(viewport.World, viewport.World.Root);
             gridNode.ViewportSlate = this.PreviewViewport;
@@ -357,7 +357,7 @@ namespace EngineNS.Bricks.Procedure
             var show = EGui.UIProxy.DockProxy.BeginPanel(mDockKeyClass, "Preview", ref ShowPreview, ImGuiWindowFlags_.ImGuiWindowFlags_None);
             if (show)
             {
-                PreviewViewport.ViewportType = Graphics.Pipeline.UViewportSlate.EViewportType.ChildWindow;
+                PreviewViewport.ViewportType = Graphics.Pipeline.TtViewportSlate.EViewportType.ChildWindow;
                 PreviewViewport.OnDraw();
             }
             this.PreviewViewport.Visible = show;

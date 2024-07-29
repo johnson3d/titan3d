@@ -16,7 +16,7 @@ namespace EngineNS.Editor.Forms
 {
     public class USceneEditorOutliner : UWorldOutliner
     {
-        public USceneEditorOutliner(EGui.Slate.UWorldViewportSlate viewport, bool regRoot)
+        public USceneEditorOutliner(EGui.Slate.TtWorldViewportSlate viewport, bool regRoot)
             : base(viewport, regRoot)
         {
 
@@ -28,7 +28,7 @@ namespace EngineNS.Editor.Forms
         {
             return 0;
         }
-        public class USceneEditorViewport : EGui.Slate.UWorldViewportSlate
+        public class USceneEditorViewport : EGui.Slate.TtWorldViewportSlate
         {
             public USceneEditor HostEditor;
             
@@ -488,13 +488,13 @@ namespace EngineNS.Editor.Forms
         {
             return this;
         }
-        protected async System.Threading.Tasks.Task Initialize_PreviewScene(Graphics.Pipeline.UViewportSlate viewport, USlateApplication application, Graphics.Pipeline.URenderPolicy policy, float zMin, float zMax)
+        protected async System.Threading.Tasks.Task Initialize_PreviewScene(Graphics.Pipeline.TtViewportSlate viewport, USlateApplication application, Graphics.Pipeline.URenderPolicy policy, float zMin, float zMax)
         {
             viewport.RenderPolicy = policy;
 
             //await viewport.RenderPolicy.Initialize(null);
 
-            (viewport as EGui.Slate.UWorldViewportSlate).CameraController.ControlCamera(viewport.RenderPolicy.DefaultCamera);
+            (viewport as EGui.Slate.TtWorldViewportSlate).CameraController.ControlCamera(viewport.RenderPolicy.DefaultCamera);
 
             var gridNode = await GamePlay.Scene.UGridNode.AddGridNode(viewport.World, viewport.World.Root);
             gridNode.ViewportSlate = this.PreviewViewport;
@@ -927,7 +927,7 @@ namespace EngineNS.Editor.Forms
             var show = EGui.UIProxy.DockProxy.BeginPanel(mDockKeyClass, "Preview", ref mPreviewShow.Selected, ImGuiWindowFlags_.ImGuiWindowFlags_None);
             if (show)
             {
-                PreviewViewport.ViewportType = Graphics.Pipeline.UViewportSlate.EViewportType.ChildWindow;
+                PreviewViewport.ViewportType = Graphics.Pipeline.TtViewportSlate.EViewportType.ChildWindow;
                 PreviewViewport.OnDraw();
 
 
@@ -1030,7 +1030,7 @@ namespace EngineNS.Editor.Forms
 
     public class TtPrefabEditorOutliner : UWorldOutliner
     {
-        public TtPrefabEditorOutliner(EGui.Slate.UWorldViewportSlate viewport, bool regRoot)
+        public TtPrefabEditorOutliner(EGui.Slate.TtWorldViewportSlate viewport, bool regRoot)
             : base(viewport, regRoot)
         {
 

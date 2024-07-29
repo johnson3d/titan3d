@@ -92,6 +92,7 @@ public:
 		X *= v3.X;
 		Y *= v3.Y;
 		Z *= v3.Z;
+		return *this;
 	}
 	v3dxDVector3& operator *= (const v3dxVector3& v3)
 	{

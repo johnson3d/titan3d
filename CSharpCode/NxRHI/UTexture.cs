@@ -5,6 +5,7 @@ using EngineNS.Bricks.CodeBuilder.MacrossNode;
 using EngineNS.EGui.Controls;
 using EngineNS.IO;
 using Jither.OpenEXR;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.Toolkit.HighPerformance;
 using NPOI.OpenXmlFormats.Vml;
 using NPOI.SS.Formula.Functions;
@@ -242,6 +243,8 @@ namespace EngineNS.NxRHI
             public bool AutoCheckNormal { get => mAutoCheckNormal; set => mAutoCheckNormal = value; }
             bool mIsNormal;
             public bool IsNormal { get => mIsNormal; set => mIsNormal=value; }
+            bool mIsAutoSaveSrcImage = false;
+            public bool IsAutoSaveSrcImage { get => mIsAutoSaveSrcImage; set => mIsAutoSaveSrcImage = value; }
             public List<Vector3i> MipSizes { get; } = new List<Vector3i>();
             public List<Vector2i> BlockDimenstions { get; } = new List<Vector2i>();
             public int BlockSize = 0;
@@ -1400,30 +1403,31 @@ namespace EngineNS.NxRHI
             }
             else
             {
-                using (var memStream = new System.IO.MemoryStream(image.Data.Length))
+                if(desc.IsAutoSaveSrcImage==true)
                 {
-                    var writer = new StbImageWriteSharp.ImageWriter();
-
-
-
-                    writer.WritePng(image.Data, image.Width, image.Height, GetImageWriteFormat(image), memStream);
-                    var pngData = memStream.ToArray();
-
-                    var size = (uint)memStream.Length;
-                    if (size > 0)
+                    using (var memStream = new System.IO.MemoryStream(image.Data.Length))
                     {
-                        var len = CoreSDK.CompressBound_ZSTD(size) + 5;
-                        using (var d = BigStackBuffer.CreateInstance((int)len))
+                        var writer = new StbImageWriteSharp.ImageWriter();
+
+                        writer.WritePng(image.Data, image.Width, image.Height, GetImageWriteFormat(image), memStream);
+                        var pngData = memStream.ToArray();
+
+                        var size = (uint)memStream.Length;
+                        if (size > 0)
                         {
-                            void *srcBuffer = System.Runtime.InteropServices.Marshal.UnsafeAddrOfPinnedArrayElement(pngData, 0).ToPointer();
-                            var wSize = (uint)CoreSDK.Compress_ZSTD(d.GetBuffer(), len, srcBuffer, size, 1);
+                            var len = CoreSDK.CompressBound_ZSTD(size) + 5;
+                            using (var d = BigStackBuffer.CreateInstance((int)len))
+                            {
+                                void* srcBuffer = System.Runtime.InteropServices.Marshal.UnsafeAddrOfPinnedArrayElement(pngData, 0).ToPointer();
+                                var wSize = (uint)CoreSDK.Compress_ZSTD(d.GetBuffer(), len, srcBuffer, size, 1);
+                            }
                         }
-                    }
 
-                    var attr = node.GetOrAddAttribute("Png", 0, 0);
-                    using (var ar = attr.GetWriter((ulong)memStream.Position))
-                    {
-                        ar.WriteNoSize(pngData, (int)memStream.Position);
+                        var attr = node.GetOrAddAttribute("Png", 0, 0);
+                        using (var ar = attr.GetWriter((ulong)memStream.Position))
+                        {
+                            ar.WriteNoSize(pngData, (int)memStream.Position);
+                        }
                     }
                 }
             }
@@ -2057,12 +2061,34 @@ namespace EngineNS.NxRHI
 
             for (uint i = 0; i < desc.Desc.CubeFaces; i++)
             {
+                System.Threading.Tasks.Task<byte[]>[] taskArray = null;
+                bool isEncodeMultiThread = true;
+                if (isEncodeMultiThread==true)
+                {
+                    taskArray = new System.Threading.Tasks.Task<byte[]>[desc.Desc.MipLevel];
+                    for (uint j = 0; j < desc.Desc.MipLevel; j++)
+                    {
+                        taskArray[j] = encoder.EncodeToRawBytesAsync(curImage.Data, curImage.Width, curImage.Height, pixelFormat, (int)j);
+                    }
+                    System.Threading.Tasks.Task.WaitAll(taskArray);
+                }
+
+
                 var faceNode = mipsNode.GetOrAddNode($"Face{i}", 0, 0);
                 for (uint j = 0; j < desc.Desc.MipLevel; j++)
                 {
                     var mipSize = new Vector3i();
                     var blockDimension = new Vector2i();
-                    var pixelsBcn = encoder.EncodeToRawBytes(curImage.Data.AsSpan(), curImage.Width, curImage.Height, pixelFormat, (int)j, out mipSize.X, out mipSize.Y);
+                    byte[] pixelsBcn = null;
+                    if(isEncodeMultiThread==true)
+                    {
+                        pixelsBcn = taskArray[j].Result;
+                        encoder.CalculateMipMapSize(curImage.Width, curImage.Height, (int)j, out mipSize.X, out mipSize.Y);
+                    }
+                    else
+                    {
+                        pixelsBcn = encoder.EncodeToRawBytes(curImage.Data.AsSpan(), curImage.Width, curImage.Height, pixelFormat, (int)j, out mipSize.X, out mipSize.Y);
+                    }
                     encoder.GetBlockCount(mipSize.X, mipSize.Y, out blockDimension.X, out blockDimension.Y);
                     desc.BlockSize = encoder.GetBlockSize();
                     desc.MipSizes.Add(mipSize);

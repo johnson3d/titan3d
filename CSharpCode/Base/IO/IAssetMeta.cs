@@ -572,12 +572,12 @@ namespace EngineNS.IO
                 mDraggingInViewport = value;
             }
         }
-        public virtual async Thread.Async.TtTask OnDragTo(Graphics.Pipeline.UViewportSlate vpSlate)
+        public virtual async Thread.Async.TtTask OnDragTo(Graphics.Pipeline.TtViewportSlate vpSlate)
         {
             DraggingInViewport = false;
             await TtAsyncDummyClass.DummyFunc();
         }
-        public virtual async Thread.Async.TtTask OnDragging(Graphics.Pipeline.UViewportSlate vpSlate)
+        public virtual async Thread.Async.TtTask OnDragging(Graphics.Pipeline.TtViewportSlate vpSlate)
         {
             await TtAsyncDummyClass.DummyFunc();
         }

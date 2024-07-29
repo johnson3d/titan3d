@@ -86,13 +86,13 @@ namespace EngineNS
                         retValue = true;
                     }
 
-                    if (Vector4.Vector4EditorAttribute.OnDrawVectorValue<Vector3>(in info, ref angle, ref angle) && !info.Readonly)
+                    if (Vector4.Vector4EditorAttribute.OnDrawVectorValue<Vector3>(in info, ref angle, ref angle, "Yaw", "Pitch", "Roll") && !info.Readonly)
                     {
                         el.Yaw = MathHelper.Angle_To_Tadian(angle.X, 0, 0);
                         el.Pitch = MathHelper.Angle_To_Tadian(angle.Y, 0, 0);
                         el.Roll = MathHelper.Angle_To_Tadian(angle.Z, 0, 0);
                         newValue = Quaternion.FromEuler(in el);
-                        retValue = true;
+                        retValue = true;    
                     }
 
                 }

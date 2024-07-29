@@ -781,11 +781,13 @@ namespace EngineNS.EGui.Controls.PropertyGrid
             return retValue;
         }
 
+        public delegate void FGetSetVectorValueFunction<T>(ref T target, int index, ref float v, bool bSet);
         public unsafe bool DrawVector<T>(in PGCustomValueEditorAttribute.EditorInfo info, 
             string dimName0 = "X", 
             string dimName1 = "Y", 
             string dimName2 = "Z",
-            string dimName3 = "W") where T : unmanaged
+            string dimName3 = "W",
+            FGetSetVectorValueFunction<T> setFun = null) where T : unmanaged
         {
             bool retValue = false;
             var minValue = float.MinValue;
@@ -867,7 +869,15 @@ namespace EngineNS.EGui.Controls.PropertyGrid
                                     for (int i = 0; i < Values.Count; i++)
                                     {
                                         var vv = (T)Values[i];
-                                        ((float*)&vv)[dimIdx] = v;
+                                        if (setFun != null)
+                                        {
+                                            setFun(ref vv, dimIdx, ref v, true);
+                                        }
+                                        else
+                                        {
+                                            ((float*)&vv)[dimIdx] = v;
+                                        }
+                                        
                                         Values[i] = vv;
                                     }
                                     retValue = true;
@@ -889,7 +899,14 @@ namespace EngineNS.EGui.Controls.PropertyGrid
                             for (int i = 0; i < Values.Count; i++)
                             {
                                 var vv = (T)Values[i];
-                                ((float*)&vv)[dimIdx] = v;
+                                if (setFun != null)
+                                {
+                                    setFun(ref vv, dimIdx, ref v, true);
+                                }
+                                else
+                                {
+                                    ((float*)&vv)[dimIdx] = v;
+                                }
                                 Values[i] = vv;
                             }
                             retValue = true;

@@ -258,6 +258,28 @@ float4 max3(float4 a, float4 b, float4 c)
 		);
 }
 
+half4 ToColor4f(uint color)
+{
+    half4 result;
+    result.b = (half) (color & 0xff);
+    result.g = (half) ((color >> 8) & 0xff);
+    result.r = (half) ((color >> 16) & 0xff);
+    result.a = (half) ((color >> 24) & 0xff);
+    result /= 255.0h;
+    return result;
+}
+
+uint ToColorUint(half4 color)
+{
+    uint result = 0;
+    color *= 255.0h;
+    result |= ((uint) color.b);
+    result |= ((uint) color.g) << 8;
+    result |= ((uint) color.b) << 16;
+    result |= ((uint) color.a) << 24;
+    return result;
+}
+
 // ToRGBE - takes a float RGB value and converts it to a float RGB value with a shared exponent
 float4 ToRGBE(float4 inColor)
 {

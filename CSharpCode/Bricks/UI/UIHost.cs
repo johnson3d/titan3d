@@ -18,7 +18,7 @@ namespace EngineNS.UI
         {
             node.AddUIHost(this);
         }
-        public Graphics.Pipeline.UViewportSlate ViewportSlate { get; internal set; }
+        public Graphics.Pipeline.TtViewportSlate ViewportSlate { get; internal set; }
 
         #region Popup
         protected List<TtUIHost> mPopupUIHost = new List<TtUIHost>();

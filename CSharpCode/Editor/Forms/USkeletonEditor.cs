@@ -144,7 +144,7 @@ namespace EngineNS.Editor.Forms
             return 0;
         }
         public Animation.Asset.TtSkeletonAsset SkeletonAsset;
-        public Editor.UPreviewViewport PreviewViewport = new Editor.UPreviewViewport();
+        public Editor.TtPreviewViewport PreviewViewport = new Editor.TtPreviewViewport();
         public EGui.Controls.PropertyGrid.PropertyGrid AnimationClipPropGrid = new EGui.Controls.PropertyGrid.PropertyGrid();
         ~USkeletonEditor()
         {
@@ -281,7 +281,7 @@ namespace EngineNS.Editor.Forms
             var show = EGui.UIProxy.DockProxy.BeginPanel(mDockKeyClass, "Right", ref mRightShow, ImGuiWindowFlags_.ImGuiWindowFlags_None);
             if (show)
             {
-                PreviewViewport.ViewportType = Graphics.Pipeline.UViewportSlate.EViewportType.ChildWindow;
+                PreviewViewport.ViewportType = Graphics.Pipeline.TtViewportSlate.EViewportType.ChildWindow;
                 PreviewViewport.OnDraw();
             }
             EGui.UIProxy.DockProxy.EndPanel(show);
@@ -292,13 +292,13 @@ namespace EngineNS.Editor.Forms
         }
         EngineNS.GamePlay.Scene.UMeshNode PlaneMeshNode;
         USkeletonShowNode SkeletonShowNode = null;
-        protected async System.Threading.Tasks.Task Initialize_PreviewScene(Graphics.Pipeline.UViewportSlate viewport, USlateApplication application, Graphics.Pipeline.URenderPolicy policy, float zMin, float zMax)
+        protected async System.Threading.Tasks.Task Initialize_PreviewScene(Graphics.Pipeline.TtViewportSlate viewport, USlateApplication application, Graphics.Pipeline.URenderPolicy policy, float zMin, float zMax)
         {
             viewport.RenderPolicy = policy;
 
             await viewport.World.InitWorld();
 
-            (viewport as Editor.UPreviewViewport).CameraController.ControlCamera(viewport.RenderPolicy.DefaultCamera);
+            (viewport as Editor.TtPreviewViewport).CameraController.ControlCamera(viewport.RenderPolicy.DefaultCamera);
 
             DBoundingSphere sphere;
             sphere.Center = new DVector3(0, 1, 0);

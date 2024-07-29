@@ -129,7 +129,7 @@ namespace EngineNS.Bricks.RenderPolicyEditor
         }
         [Rtti.Meta]
         public UPolicyGraph PolicyGraph { get; } = new UPolicyGraph();
-        public Graphics.Pipeline.URenderPolicy CreateRenderPolicy(UViewportSlate viewport, string endingName = "Copy2SwapChainNode")
+        public Graphics.Pipeline.URenderPolicy CreateRenderPolicy(TtViewportSlate viewport, string endingName = "Copy2SwapChainNode")
         {
             var typeDesc = PolicyGraph.PolicyType;
             var policy = Rtti.UTypeDescManager.CreateInstance(typeDesc) as Graphics.Pipeline.URenderPolicy; // new Graphics.Pipeline.URenderPolicy();

@@ -66,6 +66,14 @@ namespace EngineNS.Bricks.Particle.Editor
         }
         [Category("Option")]
         [Rtti.Meta]
+        [RName.PGRName(FilterExts = CodeBuilder.UMacross.AssetExt, MacrossType = typeof(TtEmitterMacross))]
+        public RName McName
+        {
+            get;
+            set;
+        } = null;
+        [Category("Option")]
+        [Rtti.Meta]
         public bool IsGpuDriven { get; set; } = true;
         [Category("Option")]
         [Rtti.Meta]
@@ -93,9 +101,31 @@ namespace EngineNS.Bricks.Particle.Editor
                 }
             }
         }
+        Vector3 mVelocity;
+        [Category("Option")]
+        [Rtti.Meta]
+        public Vector3 Velocity
+        {
+            get => mVelocity;
+            set
+            {
+                mVelocity = value;
+                if (EditingObject != null)
+                {
+                    EditingObject.Velocity = value;
+                }
+            }
+        }
         public virtual UTypeDesc CreateEmitterType()
         {
             return null;
+        }
+        public virtual void InitEmitter(TtEmitter emt)
+        {
+            emt.EmitterData.Location = Location;
+            emt.EmitterData.Velocity = Velocity;
+            emt.McName = McName;
+            //emt.EmitterData.Flags = Flags;
         }
     }
     public class TtEmitShapeNode : TtParticleNode

@@ -102,13 +102,14 @@ inline v3dxMatrix3& v3dxMatrix3::operator= (const v3dxMatrix3& Matrix)
 inline bool v3dxMatrix3::operator == (const v3dxMatrix3& Matrix) const
 {
 	for (int nRow=0; nRow<3; nRow++)
+	{
 		for (int nCol=0; nCol<3; nCol++)
 		{
 			if (Matrix[nRow][nCol] != m[nRow][nCol])
 				return false;
 		}
-
-		return true;
+	}
+	return true;
 }
 
 inline bool v3dxMatrix3::operator != (const v3dxMatrix3& Matrix) const
@@ -122,12 +123,13 @@ inline v3dxMatrix3 v3dxMatrix3::operator+ (const v3dxMatrix3& Matrix) const
 	v3dxMatrix3 matrix3;
 
 	for (int nRow=0; nRow<3; nRow++)
+	{
 		for (int nCol=0; nCol<3; nCol++)
 		{
 			matrix3[nRow][nCol] = m[nRow][nCol] + Matrix[nRow][nCol];
 		}
-
-		return matrix3;
+	}
+	return matrix3;
 }
 
 inline v3dxMatrix3 v3dxMatrix3::operator- (const v3dxMatrix3& Matrix) const
@@ -135,12 +137,14 @@ inline v3dxMatrix3 v3dxMatrix3::operator- (const v3dxMatrix3& Matrix) const
 	v3dxMatrix3 matrix3;
 
 	for (int nRow=0; nRow<3; nRow++)
+	{
 		for (int nCol=0; nCol<3; nCol++)
 		{
 			matrix3[nRow][nCol] = m[nRow][nCol] - Matrix[nRow][nCol];
 		}
+	}
 
-		return matrix3;
+	return matrix3;
 }
 
 inline v3dxMatrix3 v3dxMatrix3::operator- () const
@@ -148,12 +152,13 @@ inline v3dxMatrix3 v3dxMatrix3::operator- () const
 	v3dxMatrix3 matrix3;
 
 	for (int nRow=0; nRow<3; nRow++)
+	{
 		for (int nCol=0; nCol<3; nCol++)
 		{
 			matrix3[nRow][nCol] = -m[nRow][nCol];
 		}
-
-		return matrix3;
+	}
+	return matrix3;
 }
 
 inline v3dxMatrix3 v3dxMatrix3::operator* (const v3dxMatrix3& Matrix) const
@@ -161,6 +166,7 @@ inline v3dxMatrix3 v3dxMatrix3::operator* (const v3dxMatrix3& Matrix) const
 	v3dxMatrix3 matrix3;
 
 	for (int nRow=0; nRow<3; nRow++)
+	{
 		for (int nCol=0; nCol<3; nCol++)
 		{
 			matrix3[nRow][nCol] = 
@@ -168,8 +174,8 @@ inline v3dxMatrix3 v3dxMatrix3::operator* (const v3dxMatrix3& Matrix) const
 				m[nRow][1] * Matrix[1][nCol]+
 				m[nRow][2] * Matrix[2][nCol];
 		}
-
-		return matrix3;
+	}
+	return matrix3;
 }
 
 //*-------------------------------------------------------------*
@@ -212,12 +218,13 @@ inline v3dxMatrix3 v3dxMatrix3::operator *(float fScalar) const
 	v3dxMatrix3 matrix3;
 
 	for (int nRow=0; nRow<3; nRow++)
+	{
 		for (int nCol=0; nCol<3; nCol++)
 		{
 			matrix3[nRow][nCol] = m[nRow][nCol]*fScalar;
 		}
-
-		return matrix3;
+	}
+	return matrix3;
 }
 
 inline v3dxMatrix3 operator*(float fScalar, const v3dxMatrix3 &Matrix)
@@ -225,12 +232,13 @@ inline v3dxMatrix3 operator*(float fScalar, const v3dxMatrix3 &Matrix)
 	v3dxMatrix3 matrix3;
 
 	for (int nRow=0; nRow<3; nRow++)
+	{
 		for (int nCol=0; nCol<3; nCol++)
 		{
 			matrix3[nRow][nCol] = Matrix[nRow][nCol]*fScalar;
 		}
-
-		return matrix3;
+	}
+	return matrix3;
 }
 
 inline v3dxMatrix3 v3dxMatrix3::transpose() const
@@ -238,11 +246,12 @@ inline v3dxMatrix3 v3dxMatrix3::transpose() const
 	v3dxMatrix3 matrix3;
 
 	for (int nRow=0; nRow<3; nRow++)
+	{
 		for (int nCol=0; nCol<3; nCol++)
 		{
 			matrix3[nRow][nCol] = m[nCol][nRow];
 		}
-
+	}
 	return matrix3;
 }
 
@@ -283,7 +292,9 @@ inline bool v3dxMatrix3::inverse(v3dxMatrix3 &retMatrix, float fTolerance /* = 1
 	for (int nRow = 0; nRow < 3; nRow++)
 	{
 		for (int nCol = 0; nCol < 3; nCol++)
+		{
 			retMatrix[nRow][nCol] *= fInvDet;
+		}
 	}
 
 	return true;

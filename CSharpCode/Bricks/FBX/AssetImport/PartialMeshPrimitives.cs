@@ -15,7 +15,7 @@ namespace EngineNS.Graphics.Mesh
                 ExtName = UMeshPrimitives.AssetExt;
             }
             AssetImportAndExport.FBX.FBXImporter mFBXImporter; //for now we only have one file to import
-            string MeshType = "FBX";
+            string MeshType = "FromFile";
             UMeshDataProvider.UMakeBoxParameter BoxParameter = new UMeshDataProvider.UMakeBoxParameter();
             UMeshDataProvider.UMakeRect2DParameter Rect2DParameter = new UMeshDataProvider.UMakeRect2DParameter();
             UMeshDataProvider.UMakeSphereParameter SphereParameter = new UMeshDataProvider.UMakeSphereParameter();

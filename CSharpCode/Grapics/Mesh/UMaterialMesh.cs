@@ -78,9 +78,9 @@ namespace EngineNS.Graphics.Mesh
         {
             return Color.OrangeRed;
         }
-        DVector3 CalculateDragPosition(Graphics.Pipeline.UViewportSlate vpSlate)
+        DVector3 CalculateDragPosition(Graphics.Pipeline.TtViewportSlate vpSlate)
         {
-            var worldViewport = vpSlate as EGui.Slate.UWorldViewportSlate;
+            var worldViewport = vpSlate as EGui.Slate.TtWorldViewportSlate;
             if (worldViewport != null)
             {
                 var start = worldViewport.CameraController.Camera.GetPosition();
@@ -125,10 +125,10 @@ namespace EngineNS.Graphics.Mesh
                 }
             }
         }
-        public override async Thread.Async.TtTask OnDragTo(Graphics.Pipeline.UViewportSlate vpSlate)
+        public override async Thread.Async.TtTask OnDragTo(Graphics.Pipeline.TtViewportSlate vpSlate)
         {
             DraggingInViewport = false;
-            var worldViewport = vpSlate as EGui.Slate.UWorldViewportSlate;
+            var worldViewport = vpSlate as EGui.Slate.TtWorldViewportSlate;
             if (worldViewport != null)
             {
                 var hitPos = CalculateDragPosition(vpSlate);
@@ -148,9 +148,9 @@ namespace EngineNS.Graphics.Mesh
         }
         Thread.Async.TtTask<USceneActorNode>? mPreviewNodeTask;
         UMeshNode mPreviewNode;
-        public override async Thread.Async.TtTask OnDragging(UViewportSlate vpSlate)
+        public override async Thread.Async.TtTask OnDragging(TtViewportSlate vpSlate)
         {
-            var worldViewport = vpSlate as EGui.Slate.UWorldViewportSlate;
+            var worldViewport = vpSlate as EGui.Slate.TtWorldViewportSlate;
             if (worldViewport == null)
                 return;
 

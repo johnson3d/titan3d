@@ -6,7 +6,7 @@ using EngineNS.Graphics.Pipeline;
 
 namespace EngineNS.EGui.Slate
 {
-    public class UWorldViewportSlate : Graphics.Pipeline.UViewportSlate
+    public class TtWorldViewportSlate : Graphics.Pipeline.TtViewportSlate
     {
         NxRHI.FViewPort mViewport = new NxRHI.FViewPort();
         public NxRHI.FViewPort Viewport { get => mViewport; }
@@ -16,14 +16,14 @@ namespace EngineNS.EGui.Slate
         public Graphics.Pipeline.UDrawBuffers Copy2SwapChainPass = new Graphics.Pipeline.UDrawBuffers();
         public NxRHI.URenderPass SwapChainPassDesc;
 
-        GamePlay.UAxis mAxis;
+        protected GamePlay.UAxis mAxis;
         public GamePlay.UAxis Axis
         {
             get => mAxis;
         }
 
         public Graphics.Pipeline.ICameraController CameraController { get; set; }
-        public UWorldViewportSlate()
+        public TtWorldViewportSlate()
         {
             CameraController = new Editor.Controller.EditorCameraController();
         }
@@ -42,13 +42,13 @@ namespace EngineNS.EGui.Slate
             await EngineNS.Thread.TtAsyncDummyClass.DummyFunc();
             return true;
         }
-        public async System.Threading.Tasks.Task Initialize_Default(Graphics.Pipeline.UViewportSlate viewport, USlateApplication application, Graphics.Pipeline.URenderPolicy policy, float zMin, float zMax)
+        public async System.Threading.Tasks.Task Initialize_Default(Graphics.Pipeline.TtViewportSlate viewport, USlateApplication application, Graphics.Pipeline.URenderPolicy policy, float zMin, float zMax)
         {
             RenderPolicy = policy;
 
             CameraController.ControlCamera(RenderPolicy.DefaultCamera);
         }
-        public override async Task Initialize(USlateApplication application, RName policyName, float zMin, float zMax)
+        public override async System.Threading.Tasks.Task Initialize(USlateApplication application, RName policyName, float zMin, float zMax)
         {
             URenderPolicy policy = null;
             var rpAsset = Bricks.RenderPolicyEditor.URenderPolicyAsset.LoadAsset(policyName);
@@ -211,9 +211,9 @@ namespace EngineNS.EGui.Slate
             }
         }
         [ThreadStatic]
-        private static Profiler.TimeScope ScopeTick = Profiler.TimeScopeManager.GetTimeScope(typeof(UWorldViewportSlate), nameof(TickLogic));
+        private static Profiler.TimeScope ScopeTick = Profiler.TimeScopeManager.GetTimeScope(typeof(TtWorldViewportSlate), nameof(TickLogic));
         [ThreadStatic]
-        private static Profiler.TimeScope ScopeRPolicyTick = Profiler.TimeScopeManager.GetTimeScope(typeof(UWorldViewportSlate), "TickRPolicy");
+        private static Profiler.TimeScope ScopeRPolicyTick = Profiler.TimeScopeManager.GetTimeScope(typeof(TtWorldViewportSlate), "TickRPolicy");
         public override unsafe void TickLogic(float ellapse)
         {
             base.TickLogic(ellapse);
@@ -247,7 +247,7 @@ namespace EngineNS.EGui.Slate
                 }
             }   
         }
-        public void TickSync(float ellapse)
+        public virtual void TickSync(float ellapse)
         {
             RenderPolicy?.TickSync();
         }

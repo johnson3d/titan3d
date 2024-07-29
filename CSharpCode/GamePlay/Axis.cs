@@ -1200,7 +1200,7 @@ namespace EngineNS.GamePlay
         protected bool mCtrlKeyIsDown = false;
         protected bool mShiftKeyIsDown = false;
         protected bool mAltKeyIsDown = false;
-        public void OnEvent(Graphics.Pipeline.UViewportSlate viewport, in Bricks.Input.Event e)
+        public void OnEvent(Graphics.Pipeline.TtViewportSlate viewport, in Bricks.Input.Event e)
         {
             if (mAxisMeshDatas == null)
                 return;
@@ -1379,7 +1379,7 @@ namespace EngineNS.GamePlay
 
         }
 
-        float GetScreenSizeInWorld(in Vector3 worldPos, float screenSize, Graphics.Pipeline.UViewportSlate viewport)
+        float GetScreenSizeInWorld(in Vector3 worldPos, float screenSize, Graphics.Pipeline.TtViewportSlate viewport)
         {
             var camera = mCameraController.Camera.mCoreObject;
             var fov = camera.mFov;
@@ -1395,7 +1395,7 @@ namespace EngineNS.GamePlay
             }
         }
 
-        void FitAxisSize(Graphics.Pipeline.UViewportSlate viewport)
+        void FitAxisSize(Graphics.Pipeline.TtViewportSlate viewport)
         {
             if (!mInitialized)
                 return;
@@ -1441,7 +1441,7 @@ namespace EngineNS.GamePlay
                 absRot = node.Placement.AbsTransform.mQuat;
 
         }
-        void UpdateAxisShow(Graphics.Pipeline.UViewportSlate viewport)
+        void UpdateAxisShow(Graphics.Pipeline.TtViewportSlate viewport)
         {
             if (!mInitialized)
                 return;
@@ -1635,7 +1635,7 @@ namespace EngineNS.GamePlay
             }
         }
 
-        bool PickPlanePos(Graphics.Pipeline.UViewportSlate viewport, int x, int y, in DVector3 planePos, in EngineNS.Vector3 planeNormal, out DVector3 resultPos)
+        bool PickPlanePos(Graphics.Pipeline.TtViewportSlate viewport, int x, int y, in DVector3 planePos, in EngineNS.Vector3 planeNormal, out DVector3 resultPos)
         {
             resultPos = DVector3.Zero;
             EngineNS.Vector3 pickRay = -EngineNS.Vector3.UnitY;
@@ -1691,7 +1691,7 @@ namespace EngineNS.GamePlay
         Vector3 mMouseStartScreenLocation;
         bool mIsTransAxisOperation = false;
         FTransform mPosNodeStartTransform;
-        void StartTransAxis(Graphics.Pipeline.UViewportSlate viewport, in Bricks.Input.Event e)
+        void StartTransAxis(Graphics.Pipeline.TtViewportSlate viewport, in Bricks.Input.Event e)
         {
             if (!mInitialized)
                 return;
@@ -1951,7 +1951,7 @@ namespace EngineNS.GamePlay
         }
 
         bool mFirstTransAxis = false;
-        async System.Threading.Tasks.Task TransAxis(Vector2 newMouseLoc, Graphics.Pipeline.UViewportSlate viewport)
+        async System.Threading.Tasks.Task TransAxis(Vector2 newMouseLoc, Graphics.Pipeline.TtViewportSlate viewport)
         {
             if (!mInitialized)
                 return;
@@ -2224,7 +2224,7 @@ namespace EngineNS.GamePlay
             }
         }
 
-        void MoveWithPlane(in Vector2 newMouseLoc, in Vector3 planeNormal, Graphics.Pipeline.UViewportSlate viewport)
+        void MoveWithPlane(in Vector2 newMouseLoc, in Vector3 planeNormal, Graphics.Pipeline.TtViewportSlate viewport)
         {
             var camera = mCameraController.Camera.mCoreObject;
             if(camera.mIsOrtho)
@@ -2713,7 +2713,7 @@ namespace EngineNS.GamePlay
         EGui.UIProxy.ImageToggleButtonProxy mAxisLocalButton;
         EGui.UIProxy.ImageToggleButtonProxy mAxisWorldButton;
 
-        public unsafe bool OnDrawUI(Graphics.Pipeline.UViewportSlate slate, in Vector2 startDrawPos)
+        public unsafe bool OnDrawUI(Graphics.Pipeline.TtViewportSlate slate, in Vector2 startDrawPos)
         {
             var io = ImGuiAPI.GetIO();
             var drawList = ImGuiAPI.GetWindowDrawList();

@@ -15,9 +15,9 @@ namespace EngineNS.Editor.Forms
                 return WorldViewportState.World;
             }
         }
-        public EGui.Slate.UWorldViewportSlate WorldViewportState { get; set; }
+        public EGui.Slate.TtWorldViewportSlate WorldViewportState { get; set; }
 
-        public UWorldOutliner(EGui.Slate.UWorldViewportSlate viewport, bool regRoot = true)
+        public UWorldOutliner(EGui.Slate.TtWorldViewportSlate viewport, bool regRoot = true)
         {
             WorldViewportState = viewport;
             if (regRoot)

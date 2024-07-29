@@ -17,18 +17,18 @@ namespace EngineNS.Bricks.Particle.Simple
         }
         public override unsafe void InitEmitter(NxRHI.UGpuDevice rc, Graphics.Mesh.TtMesh mesh, uint maxParticle)
         {
-            SystemData.Flags = 0;
+            EmitterData.Flags = 0;
             base.InitEmitter(rc, mesh, maxParticle);
         }
         public override void DoUpdateSystem()
         {
-            if (SystemData.Flags == 0)
+            if (EmitterData.Flags == 0)
             {
                 mCoreObject.Spawn(512, SetParticleFlags(EParticleFlags.EmitShape, 0), 3.0f);
-                SystemData.Flags = 1;
+                EmitterData.Flags = 1;
             }
         }
-        public unsafe override void OnInitParticle(FParticleBase* pParticles, ref FParticleBase particle)
+        public unsafe override void OnInitParticle(FParticle* pParticles, ref FParticle particle)
         {
             if (HasFlags(in particle, EParticleFlags.EmitIndex) != 0)
             {
@@ -38,10 +38,11 @@ namespace EngineNS.Bricks.Particle.Simple
                 //particle.mLocation.Z = RandomUnit() * 10.0f;
             }
             particle.Life += RandomUnit() * 0.5f;
-            
+            particle.Velocity = EmitterData.Velocity;
             particle.Scale = 0.5f - RandomUnit() * 0.2f;
+            particle.Color = ((uint)RandomNext() | 0xff000000);
         }
-        public override unsafe void OnDeadParticle(uint index, ref FParticleBase particle)
+        public override unsafe void OnDeadParticle(uint index, ref FParticle particle)
         {
             if (HasFlags(in particle, EParticleFlags.EmitShape) != 0)
             {

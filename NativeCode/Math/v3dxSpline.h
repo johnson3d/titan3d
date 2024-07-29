@@ -106,7 +106,7 @@ public:
 	}
 	inline float getValBegin() {
 		if ( m_bRandomOnHead )
-			return m_fValBgn + m_fValRand * (((float)((rand()%2)-1)*(float)rand())/RAND_MAX);
+			return m_fValBgn + m_fValRand * (((float)((rand()%2)-1)*(float)rand())/(float)RAND_MAX);
 		return m_fValBgn;
 	}
 	inline float getValEnd() {

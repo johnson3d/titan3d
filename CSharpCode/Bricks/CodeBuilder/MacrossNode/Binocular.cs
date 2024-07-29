@@ -27,7 +27,10 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
         
         public PinIn Left { get; set; } = new PinIn();
         public PinIn Right { get; set; } = new PinIn();
-        public PinOut Result { get; set; } = new PinOut();
+        public PinOut Result { get; set; } = new PinOut()
+        {
+            MultiLinks = true,
+        };
         public Binocular(UBinaryOperatorExpression.EBinaryOperation InOp, string name)
         {
             Op = InOp;

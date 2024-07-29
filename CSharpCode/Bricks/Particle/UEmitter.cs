@@ -14,21 +14,25 @@ namespace EngineNS.Bricks.Particle
         FlagMask = 0xF0000000,
     }
     [System.Runtime.InteropServices.StructLayout(System.Runtime.InteropServices.LayoutKind.Sequential, Pack = 16)]
-    public struct FParticleBase
+    public struct FParticle
     {
         public uint Flags;
         public float Life;
         public float Scale;
         public uint RandomSeed;
         public Vector3 Location;
-        public uint Pad1;
+        public uint Color;
+        public Vector3 Velocity;
+        public uint UserData1;
     }
     [System.Runtime.InteropServices.StructLayout(System.Runtime.InteropServices.LayoutKind.Sequential, Pack = 16)]
-    public struct FParticleSystemBase
+    public struct FParticleEmitter
     {
         public Vector3 Location;
         public uint Flags;
-        public Vector4i TempData;
+        public Vector3 Velocity;
+        public uint Flags1;
+        public Vector4i TempData;//for compute UAV
     }
     public class TtGpuParticleResources : IDisposable
     {
@@ -47,8 +51,8 @@ namespace EngineNS.Bricks.Particle
             CoreSDK.DisposeObject(ref DrawArgUav);
         }
         
-        public Graphics.Pipeline.TtGpuBuffer<FParticleSystemBase> SystemDataBuffer = new Graphics.Pipeline.TtGpuBuffer<FParticleSystemBase>();
-        public Graphics.Pipeline.TtGpuBuffer<FParticleBase> ParticlesBuffer = new Graphics.Pipeline.TtGpuBuffer<FParticleBase>();
+        public Graphics.Pipeline.TtGpuBuffer<FParticleEmitter> SystemDataBuffer = new Graphics.Pipeline.TtGpuBuffer<FParticleEmitter>();
+        public Graphics.Pipeline.TtGpuBuffer<FParticle> ParticlesBuffer = new Graphics.Pipeline.TtGpuBuffer<FParticle>();
         public Graphics.Pipeline.TtGpuBuffer<uint> AllocatorBuffer = new Graphics.Pipeline.TtGpuBuffer<uint>();
         public Graphics.Pipeline.TtGpuBuffer<uint> CurAlivesBuffer = new Graphics.Pipeline.TtGpuBuffer<uint>();
         public Graphics.Pipeline.TtGpuBuffer<uint> BackendAlivesBuffer = new Graphics.Pipeline.TtGpuBuffer<uint>();
@@ -58,20 +62,21 @@ namespace EngineNS.Bricks.Particle
 
         public NxRHI.UBuffer DrawArgBuffer;
         public NxRHI.UUaView DrawArgUav;
-        public unsafe void Initialize(TtEmitter emitter, in FParticleSystemBase sysData) 
+        public unsafe void Initialize(TtEmitter emitter, in FParticleEmitter sysData) 
         {
             var rc = UEngine.Instance.GfxDevice.RenderContext;
 
-            fixed (FParticleSystemBase* pAddr = &sysData)
+            fixed (FParticleEmitter* pAddr = &sysData)
             {
                 SystemDataBuffer.SetSize(1, pAddr, NxRHI.EBufferType.BFT_UAV);
             }
 
             {
-                var pAddr = (FParticleBase*)CoreSDK.Alloc(emitter.MaxParticle * (uint)sizeof(FParticleBase), "Nebula", 0);
+                var pAddr = (FParticle*)CoreSDK.Alloc(emitter.MaxParticle * (uint)sizeof(FParticle), "Nebula", 0);
                 for (uint i = 0; i < emitter.MaxParticle; i++)
                 {
-                    ((FParticleBase*)&pAddr[i])->RandomSeed = (uint)emitter.RandomNext();
+                    ((FParticle*)&pAddr[i])->RandomSeed = (uint)emitter.RandomNext();
+                    ((FParticle*)&pAddr[i])->Flags = i;
                 }
                 ParticlesBuffer.SetSize(emitter.MaxParticle, pAddr, NxRHI.EBufferType.BFT_UAV | NxRHI.EBufferType.BFT_SRV);
                 CoreSDK.Free(pAddr);
@@ -92,8 +97,8 @@ namespace EngineNS.Bricks.Particle
             {
                 var pAddr = (uint*)CoreSDK.Alloc(emitter.MaxParticle * sizeof(uint) + 4, "Nebula", 0);
                 pAddr[0] = 0;
-                CurAlivesBuffer.SetSize(emitter.MaxParticle, pAddr, NxRHI.EBufferType.BFT_UAV | NxRHI.EBufferType.BFT_SRV);
-                BackendAlivesBuffer.SetSize(emitter.MaxParticle, pAddr, NxRHI.EBufferType.BFT_UAV | NxRHI.EBufferType.BFT_SRV);
+                CurAlivesBuffer.SetSize(emitter.MaxParticle + 1, pAddr, NxRHI.EBufferType.BFT_UAV | NxRHI.EBufferType.BFT_SRV);
+                BackendAlivesBuffer.SetSize(emitter.MaxParticle + 1, pAddr, NxRHI.EBufferType.BFT_UAV | NxRHI.EBufferType.BFT_SRV);
                 CoreSDK.Free(pAddr);
             }
             {
@@ -184,13 +189,23 @@ namespace EngineNS.Bricks.Particle
             return emt;
         }
         public bool IsGpuDriven { get; set; } = false;
-        public FParticleSystemBase SystemData = default;
+        public FParticleEmitter EmitterData = default;
         [Category("Option")]
         [Rtti.Meta]
         public Vector3 Location
         {
-            get => SystemData.Location;
-            set => SystemData.Location = value;
+            get => EmitterData.Location;
+            set => EmitterData.Location = value;
+        }
+        [Category("Option")]
+        [Rtti.Meta]
+        public Vector3 Velocity
+        {
+            get => EmitterData.Velocity;
+            set
+            {
+                EmitterData.Velocity = value;
+            }
         }
         public Dictionary<string, TtEffectorQueue> EffectorQueues { get; } = new Dictionary<string, TtEffectorQueue>();
         public TtEffectorQueue CurrentQueue { get; set; }
@@ -257,9 +272,12 @@ namespace EngineNS.Bricks.Particle
         }
         public virtual RName GetEmitterShader()
         {
-            return RName.GetRName("Shaders/Bricks/Particle/SimpleEmitter/Emitter.compute", RName.ERNameType.Engine);
+            if (mMcObject == null)
+                return RName.GetRName("Shaders/Bricks/Particle/SimpleEmitter/Emitter.compute", RName.ERNameType.Engine);
+
+            return RName.GetRName(mMcObject.Name.Name + "/NebulaEmitter.compute", mMcObject.Name.RNameType);
         }
-        public virtual string GetHLSL()
+        public virtual string GetEmitShapeHLSL()
         {
             var codeBuilder = new Bricks.CodeBuilder.Backends.UHLSLCodeGenerator();
             string sourceCode = "";
@@ -311,13 +329,14 @@ namespace EngineNS.Bricks.Particle
         public virtual unsafe void InitEmitter(NxRHI.UGpuDevice rc, Graphics.Mesh.TtMesh mesh, uint maxParticle)
         {
             MaxParticle = maxParticle;
-            mCoreObject.InitEmitter((uint)sizeof(FParticleBase), maxParticle);
+            mCoreObject.InitEmitter((uint)sizeof(FParticle), maxParticle);
 
+            EmitterData.Velocity = Vector3.Zero;
             Mesh = mesh;
             if (rc != null)
             {
                 mGpuResources = new TtGpuParticleResources();
-                mGpuResources.Initialize(this, SystemData);
+                mGpuResources.Initialize(this, EmitterData);
             }
 
             var nblMdf = mesh.MdfQueue as TtParticleMdfQueue;
@@ -359,6 +378,8 @@ namespace EngineNS.Bricks.Particle
         #region Update
         public unsafe void Update(UParticleGraphNode particleSystem, float elapsed)
         {
+            if (Mesh == null)
+                return;
             if (IsGpuDriven)
             {
                 UpdateGPU(particleSystem, elapsed);
@@ -386,13 +407,13 @@ namespace EngineNS.Bricks.Particle
 
             if (mCoreObject.IsChanged())
             {
-                var pParticles = (FParticleBase*)mCoreObject.GetParticleAddress();
+                var pParticles = (FParticle*)mCoreObject.GetParticleAddress();
                 var bkNum = mCoreObject.GetBackendNumber();
                 var pBackend = mCoreObject.GetBackendAliveAddress();
                 for (uint i = 0; i < bkNum; i++)
                 {
                     var index = pBackend[i];
-                    var cur = (FParticleBase*)&pParticles[index];
+                    var cur = (FParticle*)&pParticles[index];
                     var flags = cur->Flags;
                     if (HasFlags(in *cur, EParticleFlags.EmitShape) != 0)
                     {
@@ -420,23 +441,25 @@ namespace EngineNS.Bricks.Particle
                 return;
             if (mGpuResources.ParticlesBuffer != null)
             {
-                mGpuResources.ParticlesBuffer.GpuBuffer.UpdateGpuData(cmd, 16, mCoreObject.GetParticleAddress(), MaxParticle * (uint)sizeof(FParticleBase));
+                mGpuResources.ParticlesBuffer.GpuBuffer.UpdateGpuData(cmd, 0, mCoreObject.GetParticleAddress(), MaxParticle * (uint)sizeof(FParticle));
             }
             if (mGpuResources.CurAlivesBuffer != null)
             {
-                mGpuResources.CurAlivesBuffer.GpuBuffer.UpdateGpuData(cmd, 16, mCoreObject.GetCurrentAliveAddress(), MaxParticle * (uint)sizeof(uint));//mCoreObject.GetLiveNumber()
+                mGpuResources.CurAlivesBuffer.GpuBuffer.UpdateGpuData(cmd, 4, mCoreObject.GetCurrentAliveAddress(), MaxParticle * (uint)sizeof(uint));//mCoreObject.GetLiveNumber()
             }
         }
         public void SetCBuffer(NxRHI.UCbView CBuffer)
         {
-            CBuffer.SetValue("SystemData", in SystemData);
+            CBuffer.SetValue("EmitterData", in EmitterData);
         }
         #endregion
-        public EParticleFlags HasFlags(in FParticleBase particle, EParticleFlags flags)
+
+        #region Flags Op
+        public EParticleFlags HasFlags(in FParticle particle, EParticleFlags flags)
         {
             return (EParticleFlags)(particle.Flags & (uint)flags);
         }
-        public void SetFlags(ref FParticleBase particle, EParticleFlags flags)
+        public void SetFlags(ref FParticle particle, EParticleFlags flags)
         {
             particle.Flags |= (uint)flags;
         }
@@ -448,22 +471,52 @@ namespace EngineNS.Bricks.Particle
         {
             return (uint)flags | (data & ((uint)~EParticleFlags.FlagMask));
         }
+        #endregion
+
+        #region Callback
         public virtual void DoUpdateSystem()
         {
-
+            mMcObject?.Get().DoUpdateSystem();
         }
-        public unsafe virtual void OnInitParticle(FParticleBase* pParticleArray, ref FParticleBase particle)
+        public unsafe virtual void OnInitParticle(FParticle* pParticleArray, ref FParticle particle)
         {
-
+            mMcObject?.Get().OnInitParticle(pParticleArray, ref particle);
         }
-        public unsafe virtual void OnDeadParticle(uint index, ref FParticleBase particle)
+        public unsafe virtual void OnDeadParticle(uint index, ref FParticle particle)
         {
-
+            mMcObject?.Get().OnDeadParticle(index, ref particle);
         }
         protected virtual void OnQueueExecuted(TtEffectorQueue queue)
         {
 
         }
+        [Category("Option")]
+        [Rtti.Meta]
+        [RName.PGRName(FilterExts = CodeBuilder.UMacross.AssetExt, MacrossType = typeof(TtEmitterMacross))]
+        public RName McName
+        {
+            get
+            {
+                if (mMcObject == null)
+                    return null;
+                return mMcObject.Name;
+            }
+            set
+            {
+                if (value == null)
+                {
+                    mMcObject = null;
+                    return;
+                }
+                if (mMcObject == null)
+                {
+                    mMcObject = Macross.UMacrossGetter<TtEmitterMacross>.NewInstance();
+                }
+                mMcObject.Name = value;
+            }
+        }
+        Macross.UMacrossGetter<TtEmitterMacross> mMcObject;
+        #endregion
 
         #region Random
         public float RandomUnit()//[0,1]
@@ -499,5 +552,31 @@ namespace EngineNS.Bricks.Particle
             get => mGpuResources;
         }
         #endregion
+    }
+
+    [Macross.UMacross]
+    public partial class TtEmitterMacross
+    {
+        [Rtti.Meta]
+        public string HLSLDoUpdateSystem { get; set; } = "";
+        [Rtti.Meta]
+        public string HLSLOnInitParticle { get; set; } = "";
+        [Rtti.Meta]
+        public string HLSLOnDeadParticle { get; set; } = "";
+        [Rtti.Meta]
+        public virtual void DoUpdateSystem()
+        {
+
+        }
+        [Rtti.Meta]
+        public unsafe virtual void OnInitParticle(FParticle* pParticles, ref FParticle particle)
+        {
+
+        }
+        [Rtti.Meta]
+        public virtual unsafe void OnDeadParticle(uint index, ref FParticle particle)
+        {
+
+        }
     }
 }

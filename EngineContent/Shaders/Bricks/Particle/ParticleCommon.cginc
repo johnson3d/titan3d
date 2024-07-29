@@ -15,15 +15,21 @@ struct FParticle
 	uint RandomSeed;
 
 	float3 Location;
-	uint FParticle_UserData1;
+    uint Color;
+	
+    float3 Velocity;
+    uint UserData1;
 
 #include "ParticleVar"
 };
 
-struct FParticleSystem
+struct FParticleEmitter
 {
 	float3 Location;
 	uint Flags;
+	
+    float3 Velocity;
+    uint Flags1;
 	
     int4 TempData;
 #include "ParticleSystemVar"
@@ -74,12 +80,12 @@ cbuffer cbParticleDesc DX_AUTOBIND
     uint BackendAliveCapacity;
     uint ParticleCapacity;
 	
-	FParticleSystem		SystemData;
+    FParticleEmitter EmitterData;
 #include "ParticleCBufferVar"
 }
 
 StructuredBuffer<float4>			bfRandomPool;
-RWStructuredBuffer<FParticleSystem>	bfSystemData;
+RWStructuredBuffer<FParticleEmitter> bfSystemData;
 
 float4 RandomFloat4(uint id)
 {

@@ -21,7 +21,7 @@ namespace EngineNS.Bricks.PhysicsCore
 
         public TtPhyTriMesh TriMesh;
         public Graphics.Mesh.UMaterialMesh ShowMesh;
-        public Editor.UPreviewViewport PreviewViewport = new Editor.UPreviewViewport();
+        public Editor.TtPreviewViewport PreviewViewport = new Editor.TtPreviewViewport();
         public EGui.Controls.PropertyGrid.PropertyGrid TriMeshPropGrid = new EGui.Controls.PropertyGrid.PropertyGrid();
         ~UPhyTriMeshEditor()
         {
@@ -43,7 +43,7 @@ namespace EngineNS.Bricks.PhysicsCore
         {
             return this;
         }
-        protected async System.Threading.Tasks.Task Initialize_PreviewMesh(Graphics.Pipeline.UViewportSlate viewport, USlateApplication application, Graphics.Pipeline.URenderPolicy policy, float zMin, float zMax)
+        protected async System.Threading.Tasks.Task Initialize_PreviewMesh(Graphics.Pipeline.TtViewportSlate viewport, USlateApplication application, Graphics.Pipeline.URenderPolicy policy, float zMin, float zMax)
         {
             viewport.RenderPolicy = policy;
 
@@ -51,7 +51,7 @@ namespace EngineNS.Bricks.PhysicsCore
 
             await viewport.World.InitWorld();
 
-            (viewport as Editor.UPreviewViewport).CameraController.ControlCamera(viewport.RenderPolicy.DefaultCamera);
+            (viewport as Editor.TtPreviewViewport).CameraController.ControlCamera(viewport.RenderPolicy.DefaultCamera);
 
             ShowMesh = new Graphics.Mesh.UMaterialMesh();
             //pxmesh: no normal, no uv
@@ -196,7 +196,7 @@ namespace EngineNS.Bricks.PhysicsCore
             var show = EGui.UIProxy.DockProxy.BeginPanel(mDockKeyClass, "Right", ref mRightDraw, ImGuiWindowFlags_.ImGuiWindowFlags_None);
             if (show)
             {
-                PreviewViewport.ViewportType = Graphics.Pipeline.UViewportSlate.EViewportType.ChildWindow;
+                PreviewViewport.ViewportType = Graphics.Pipeline.TtViewportSlate.EViewportType.ChildWindow;
                 PreviewViewport.OnDraw();
             }
             EGui.UIProxy.DockProxy.EndPanel(show);
