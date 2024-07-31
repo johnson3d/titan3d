@@ -167,6 +167,13 @@ namespace EngineNS.Bricks.NodeGraph
                 result.Value = Color4f.FromABGR(Color.White);
                 return result;
             }
+            else if(type.IsEnum)
+            {
+                var result = CreateEditableValue_Internal(notify, type, tag);
+                result.Value = System.Enum.GetValues(type.SystemType).GetValue(0);
+                result.UserDraw = false;
+                return result;
+            }
             return null;
         }
         private string LabelName;

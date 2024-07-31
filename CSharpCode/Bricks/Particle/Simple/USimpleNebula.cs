@@ -24,7 +24,7 @@ namespace EngineNS.Bricks.Particle.Simple
         {
             if (EmitterData.Flags == 0)
             {
-                mCoreObject.Spawn(512, SetParticleFlags(EParticleFlags.EmitShape, 0), 3.0f);
+                Spawn(512, SetParticleFlags(EParticleFlags.EmitShape, 0), 3.0f);
                 EmitterData.Flags = 1;
             }
         }
@@ -34,11 +34,11 @@ namespace EngineNS.Bricks.Particle.Simple
             {
                 var particleIndex = GetParticleData(particle.Flags);
                 particle.Location = pParticles[particleIndex].Location;
-                particle.Location.Y += 2.0f;
+                particle.mLocation.Y += 2.0f;
                 //particle.mLocation.Z = RandomUnit() * 10.0f;
             }
             particle.Life += RandomUnit() * 0.5f;
-            particle.Velocity = EmitterData.Velocity;
+            particle.Velocity = Velocity;
             particle.Scale = 0.5f - RandomUnit() * 0.2f;
             particle.Color = ((uint)RandomNext() | 0xff000000);
         }
@@ -48,9 +48,9 @@ namespace EngineNS.Bricks.Particle.Simple
             {
                 uint shapeIndex = GetParticleData(particle.Flags);
                 if (shapeIndex == 0)
-                    mCoreObject.Spawn(1, SetParticleFlags(EParticleFlags.EmitShape, 1), 5.0f);
+                    Spawn(1, SetParticleFlags(EParticleFlags.EmitShape, 1), 5.0f);
                 else
-                    mCoreObject.Spawn(1, SetParticleFlags(EParticleFlags.EmitShape, 0), 3.0f);
+                    Spawn(1, SetParticleFlags(EParticleFlags.EmitShape, 0), 3.0f);
             }
 
             //mCoreObject.Spawn(1, SetParticleFlags(EParticleFlags.EmitIndex, index), 3.0f);

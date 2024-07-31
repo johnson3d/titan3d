@@ -96,7 +96,6 @@
     <ClCompile Include="$(MSBuildThisFileDirectory)src\lzw\ftlzw.c">
       <Filter>src</Filter>
     </ClCompile>
-    <ClCompile Include="$(MSBuildThisFileDirectory)windows\ftsystem.c" />
     <ClCompile Include="$(MSBuildThisFileDirectory)src\pcf\pcf.c">
       <Filter>src</Filter>
     </ClCompile>

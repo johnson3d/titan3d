@@ -59,6 +59,5 @@
     <ClCompile Include="$(MSBuildThisFileDirectory)src\type42\type42.c" />
     <ClCompile Include="$(MSBuildThisFileDirectory)src\winfonts\winfnt.c" />
     <ClCompile Include="$(MSBuildThisFileDirectory)windows\ftdebug.c" />
-    <ClCompile Include="$(MSBuildThisFileDirectory)windows\ftsystem.c" />
   </ItemGroup>
 </Project>

@@ -146,6 +146,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
                 if (argPin == null)
                 {
                     argPin = new PinOut();
+                    argPin.MultiLinks = true;
                     argPin.Tag = i.VariableType;
                     argPin.Name = i.VariableName;
                 }
@@ -1463,7 +1464,12 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
             var type = PopMenuPressObject as Rtti.UTypeDesc;
             if (type == null)
                 return;
-            var classMeta = Rtti.TtClassMetaManager.Instance.GetMetaFromFullName(type.FullName);
+            var typeFullName = type.FullName;
+            if (type.IsRefType)
+            {
+                typeFullName = type.FullName.Substring(0, type.FullName.Length - 1);
+            }
+            var classMeta = Rtti.TtClassMetaManager.Instance.GetMetaFromFullName(typeFullName);
             if (classMeta != null)
             {
                 UpdateMenuWithClassMeta(classMeta, ObjectMenus);

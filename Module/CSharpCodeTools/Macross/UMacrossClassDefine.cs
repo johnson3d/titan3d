@@ -60,6 +60,7 @@ namespace CSharpCodeTools.Macross
         {
             string result = kls.FullName + "->";
             var staticPrefix = IsStatic ? "static " : "";
+
             result += $"{staticPrefix}{MethodSyntax.ReturnType.ToString()} {MethodSyntax.Identifier.ValueText}({GetParameterDefine()})";
             return result;
         }
@@ -229,6 +230,7 @@ namespace CSharpCodeTools.Macross
                             }
                             PopBrackets();
 
+                            var isRefReturn = i.MethodSyntax.ReturnType.ToString().StartsWith("ref ") ? "ref " : "";
                             bool needReturen = false;
                             if (i.MethodSyntax.ReturnType.ToString() == "void" || i.MethodSyntax.ReturnType.ToString() == "System.Void" || 
                                 i.MethodSyntax.ReturnType.ToString() == "System.Threading.Tasks.Task" ||
@@ -248,7 +250,7 @@ namespace CSharpCodeTools.Macross
                                 if (isAsync)
                                     AddLine($"var _return_value = await {i.MethodSyntax.Identifier.Text}{genericDef}({i.GetParameterCallee()});");
                                 else
-                                    AddLine($"var _return_value = {i.MethodSyntax.Identifier.Text}{genericDef}({i.GetParameterCallee()});");
+                                    AddLine($"{isRefReturn}var _return_value = {isRefReturn}{i.MethodSyntax.Identifier.Text}{genericDef}({i.GetParameterCallee()});");
                             }
 
                             if (hasOut)
@@ -276,7 +278,7 @@ namespace CSharpCodeTools.Macross
 
                             if (needReturen)
                             {
-                                AddLine($"return _return_value;");
+                                AddLine($"return {isRefReturn}_return_value;");
                             }
                         }
                         PopBrackets();

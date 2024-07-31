@@ -9,18 +9,31 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
     [ContextMenu("Sequence", "FlowControl\\Sequence", UMacross.MacrossEditorKeyword, ShaderNode.UMaterialGraph.MaterialEditorKeyword)]
     public partial class SequenceNode : UNodeBase, IBeforeExecNode, IBreakableNode
     {
-        int mSequenceCount = 0;
-        [Browsable(false)]
         [Rtti.Meta]
         public int SequenceCount 
         {
-            get => mSequenceCount;
+            get => Outputs.Count;
             set
             {
-                mSequenceCount = value;
-                for(int i=0; i < mSequenceCount; i++)
-                    AddSequencePin();
-
+                int nSaveCount = Outputs.Count;
+                if (nSaveCount == value)
+                {
+                    return;
+                }
+                else if (nSaveCount < value)
+                {
+                    for (int i = 0; i < value - nSaveCount; i++)
+                    {
+                        AddSequencePin();
+                    }
+                }
+                else
+                {
+                    for (int i = 0; i < nSaveCount - value; i++)
+                    {
+                        RemoveSequecePin();
+                    }
+                }
                 OnPositionChanged();
             }
         }
@@ -70,12 +83,18 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
             Sequences.Add(aPin);
             AddPinOut(aPin);
         }
+        void RemoveSequecePin()
+        {
+            var t = Sequences[Sequences.Count - 1];
+            Sequences.RemoveAt(Sequences.Count - 1);
+            RemovePinOut(t);
+        }
         public override void OnShowPinMenu(NodePin pin)
         {
             if(ImGuiAPI.MenuItem("AddPin", null, false, true))
             {
                 AddSequencePin();
-                mSequenceCount = Sequences.Count;
+                SequenceCount = Sequences.Count;
                 OnPositionChanged();
             }
             if(pin != FirstPin && pin != BeforeExec)

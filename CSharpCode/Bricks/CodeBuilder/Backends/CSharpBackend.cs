@@ -327,9 +327,9 @@ namespace EngineNS.Bricks.CodeBuilder
                         break;
                 }
                 if (classDec.IsStruct)
-                    tempCode += "partial struct ";
+                    tempCode += (classDec.IsUnsafe ? "unsafe " : "") + "partial struct ";
                 else
-                    tempCode += "partial class ";
+                    tempCode += (classDec.IsUnsafe ? "unsafe " : "") + "partial class ";
 
                 tempCode += classDec.ClassName;
                 if(classDec.SupperClassNames.Count > 0)
@@ -481,7 +481,7 @@ namespace EngineNS.Bricks.CodeBuilder
                 {
                     if (methodInvokeExp.DeclarationReturnValue)
                         invokeStr += data.CodeGen.GetTypeString(methodInvokeExp.ReturnValue.VariableType) + " ";
-                    invokeStr += methodInvokeExp.ReturnValue.VariableName + " = ";
+                    invokeStr += methodInvokeExp.ReturnValue.VariableName + " = " + (methodInvokeExp.IsReturnRef ? "ref " : "");
                     if (methodInvokeExp.ForceCastReturnType)
                         invokeStr += "(" + data.CodeGen.GetTypeString(methodInvokeExp.ReturnValue.VariableType) + ")";
                 }
@@ -843,7 +843,14 @@ namespace EngineNS.Bricks.CodeBuilder
             public void GenCodes(UCodeObject obj, ref string sourceCode, ref UCodeGeneratorData data)
             {
                 var defaultValExp = obj as UDefaultValueExpression;
-                sourceCode += "default(" + data.CodeGen.GetTypeString(defaultValExp.Type) + ")";
+                if (defaultValExp.Type.IsRefType == false)
+                {
+                    sourceCode += "default(" + data.CodeGen.GetTypeString(defaultValExp.Type) + ")";
+                }
+                else
+                {   
+                    sourceCode += $"ref EngineNS.Rtti.UTypeDescGetter<{defaultValExp.Type.TypeFullName.Substring(4)}>.DefaultObject";
+                }
             }
         }
 
@@ -1163,12 +1170,13 @@ namespace EngineNS.Bricks.CodeBuilder
         {
             if (t == null)
                 return "";
-            if (t.SystemType != null)
-            {
-                return Rtti.UTypeDesc.GetCSharpTypeNameString(t.SystemType);
-            }
-            else
-                return t.FullName;
+            return base.GetTypeString(t);
+            //if (t.SystemType != null)
+            //{
+            //    return Rtti.UTypeDesc.GetCSharpTypeNameString(t.SystemType);
+            //}
+            //else
+            //    return t.FullName;
         }
     }
 

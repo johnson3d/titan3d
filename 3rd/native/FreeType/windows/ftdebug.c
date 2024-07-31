@@ -696,3 +696,7 @@
 
 
 /* END */
+
+#if defined(PLATFORM_WIN)
+#include "ftsystem.c"
+#endif

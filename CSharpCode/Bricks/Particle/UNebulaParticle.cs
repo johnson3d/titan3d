@@ -118,7 +118,7 @@ namespace EngineNS.Bricks.Particle
             foreach (var i in ParticleGraph.Nodes)
             {
                 var emtNode = i as Editor.TtEmitterNode;
-                if (emtNode != null)
+                if (emtNode != null && emtNode.Enable)
                 {
                     var emt = this.AddEmitter(emtNode.CreateEmitterType().SystemType, emtNode.EmitterName);
                     emt.IsGpuDriven = emtNode.IsGpuDriven;
@@ -180,7 +180,7 @@ namespace EngineNS.Bricks.Particle
         public TtEmitter AddEmitter(System.Type type, string name)
         {
             var emitter = Rtti.UTypeDescManager.CreateInstance(type) as TtEmitter;
-            Emitter.Add(name, emitter);
+            Emitter[name] = emitter;
             return emitter;
         }
         public void RemoveEmitter(string name)

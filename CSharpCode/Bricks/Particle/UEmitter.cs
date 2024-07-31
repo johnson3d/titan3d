@@ -16,23 +16,49 @@ namespace EngineNS.Bricks.Particle
     [System.Runtime.InteropServices.StructLayout(System.Runtime.InteropServices.LayoutKind.Sequential, Pack = 16)]
     public struct FParticle
     {
-        public uint Flags;
-        public float Life;
-        public float Scale;
-        public uint RandomSeed;
-        public Vector3 Location;
-        public uint Color;
-        public Vector3 Velocity;
-        public uint UserData1;
+        public uint mFlags;
+        public float mLife;
+        public float mScale;
+        public uint mRandomSeed;
+        public Vector3 mLocation;
+        public uint mColor;
+        public Vector3 mVelocity;
+        public uint mUserData1;
+        [Rtti.Meta]
+        public uint Flags { get => mFlags; set => mFlags = value; }
+        [Rtti.Meta]
+        public float Life { get => mLife; set => mLife = value; }
+        [Rtti.Meta]
+        public float Scale { get => mScale; set => mScale = value; }
+        [Rtti.Meta]
+        public uint RandomSeed { get => mRandomSeed; set => mRandomSeed = value; }
+        [Rtti.Meta]
+        public Vector3 Location { get => mLocation; set => mLocation = value; }
+        [Rtti.Meta]
+        public uint Color { get => mColor; set => mColor = value; }
+        [Rtti.Meta]
+        public Vector3 Velocity { get => mVelocity; set => mVelocity = value; }
+        [Rtti.Meta]
+        public uint UserData1 { get => mUserData1; set => mUserData1 = value; }
     }
     [System.Runtime.InteropServices.StructLayout(System.Runtime.InteropServices.LayoutKind.Sequential, Pack = 16)]
     public struct FParticleEmitter
     {
-        public Vector3 Location;
-        public uint Flags;
-        public Vector3 Velocity;
-        public uint Flags1;
-        public Vector4i TempData;//for compute UAV
+        public Vector3 mLocation;
+        public uint mFlags;
+        public Vector3 mVelocity;
+        public uint mFlags1;
+        public Vector4i mTempData;//for compute UAV
+        [Rtti.Meta]
+        public Vector3 Location { get => mLocation; set => mLocation = value; }
+        [Rtti.Meta]
+        public uint Flags { get => mFlags; set => mFlags = value; }
+        [Rtti.Meta]
+        public Vector3 Velocity { get => mVelocity; set => mVelocity = value; }
+        [Rtti.Meta]
+        public uint Flags1 { get => mFlags1; set => mFlags1 = value; }
+        [Rtti.Meta]
+        public Vector4i TempData { get => mTempData; set => mTempData = value; }
     }
     public class TtGpuParticleResources : IDisposable
     {
@@ -190,22 +216,10 @@ namespace EngineNS.Bricks.Particle
         }
         public bool IsGpuDriven { get; set; } = false;
         public FParticleEmitter EmitterData = default;
-        [Category("Option")]
         [Rtti.Meta]
-        public Vector3 Location
+        public ref FParticleEmitter GetEmitterData()
         {
-            get => EmitterData.Location;
-            set => EmitterData.Location = value;
-        }
-        [Category("Option")]
-        [Rtti.Meta]
-        public Vector3 Velocity
-        {
-            get => EmitterData.Velocity;
-            set
-            {
-                EmitterData.Velocity = value;
-            }
+            return ref EmitterData;
         }
         public Dictionary<string, TtEffectorQueue> EffectorQueues { get; } = new Dictionary<string, TtEffectorQueue>();
         public TtEffectorQueue CurrentQueue { get; set; }
@@ -427,6 +441,8 @@ namespace EngineNS.Bricks.Particle
         }
         public unsafe void UpdateGPU(UParticleGraphNode particleSystem, float elapsed)
         {
+            if (CurrentQueue.Shader == null)
+                return;
             CurrentQueue.UpdateComputeDrawcall(UEngine.Instance.GfxDevice.RenderContext, this);
 
             var cmdlist = particleSystem.BasePass.DrawCmdList;
@@ -445,7 +461,7 @@ namespace EngineNS.Bricks.Particle
             }
             if (mGpuResources.CurAlivesBuffer != null)
             {
-                mGpuResources.CurAlivesBuffer.GpuBuffer.UpdateGpuData(cmd, 4, mCoreObject.GetCurrentAliveAddress(), MaxParticle * (uint)sizeof(uint));//mCoreObject.GetLiveNumber()
+                mGpuResources.CurAlivesBuffer.GpuBuffer.UpdateGpuData(cmd, 4, mCoreObject.GetCurrentAliveAddress(), mCoreObject.GetLiveNumber() * (uint)sizeof(uint));//mCoreObject.GetLiveNumber()
             }
         }
         public void SetCBuffer(NxRHI.UCbView CBuffer)
@@ -454,37 +470,63 @@ namespace EngineNS.Bricks.Particle
         }
         #endregion
 
-        #region Flags Op
+        #region Macross API
+        [Category("Option")]
+        [Rtti.Meta]
+        public Vector3 Location
+        {
+            get => EmitterData.Location;
+            set => EmitterData.Location = value;
+        }
+        [Category("Option")]
+        [Rtti.Meta]
+        public Vector3 Velocity
+        {
+            get => EmitterData.Velocity;
+            set
+            {
+                EmitterData.Velocity = value;
+            }
+        }
+        [Rtti.Meta]
         public EParticleFlags HasFlags(in FParticle particle, EParticleFlags flags)
         {
             return (EParticleFlags)(particle.Flags & (uint)flags);
         }
+        [Rtti.Meta]
         public void SetFlags(ref FParticle particle, EParticleFlags flags)
         {
             particle.Flags |= (uint)flags;
         }
+        [Rtti.Meta]
         public uint GetParticleData(uint flags)
         {
             return (flags & (uint)(~EParticleFlags.FlagMask));
         }
+        [Rtti.Meta]
         public uint SetParticleFlags(EParticleFlags flags, uint data)
         {
             return (uint)flags | (data & ((uint)~EParticleFlags.FlagMask));
+        }
+        [Rtti.Meta]
+        public uint Spawn(uint num, uint flags, float life)
+        {
+            return mCoreObject.Spawn(num, flags, life);
         }
         #endregion
 
         #region Callback
         public virtual void DoUpdateSystem()
         {
-            mMcObject?.Get().DoUpdateSystem();
+            mMcObject?.Get()?.DoUpdateSystem(this);
         }
         public unsafe virtual void OnInitParticle(FParticle* pParticleArray, ref FParticle particle)
         {
-            mMcObject?.Get().OnInitParticle(pParticleArray, ref particle);
+            mMcObject?.Get()?.OnInitParticle(this, pParticleArray, ref particle);
         }
         public unsafe virtual void OnDeadParticle(uint index, ref FParticle particle)
         {
-            mMcObject?.Get().OnDeadParticle(index, ref particle);
+            mMcObject?.Get()?.OnDeadParticle(this, index, ref particle);
         }
         protected virtual void OnQueueExecuted(TtEffectorQueue queue)
         {
@@ -519,18 +561,22 @@ namespace EngineNS.Bricks.Particle
         #endregion
 
         #region Random
+        [Rtti.Meta]
         public float RandomUnit()//[0,1]
         {
             return (float)UEngine.Instance.NebulaTemplateManager.mRandom.NextDouble();
         }
+        [Rtti.Meta]
         public float RandomSignedUnit()//[-1,1]
         {
             return UEngine.Instance.NebulaTemplateManager.RandomSignedUnit();
         }
+        [Rtti.Meta]
         public int RandomNext()
         {
             return UEngine.Instance.NebulaTemplateManager.mRandom.Next();
         }
+        [Rtti.Meta]
         public Vector3 RandomVector(bool normalized = true)
         {
             var result = new Vector3();
@@ -564,17 +610,17 @@ namespace EngineNS.Bricks.Particle
         [Rtti.Meta]
         public string HLSLOnDeadParticle { get; set; } = "";
         [Rtti.Meta]
-        public virtual void DoUpdateSystem()
+        public virtual void DoUpdateSystem(TtEmitter emt)
         {
 
         }
         [Rtti.Meta]
-        public unsafe virtual void OnInitParticle(FParticle* pParticles, ref FParticle particle)
+        public unsafe virtual void OnInitParticle(TtEmitter emt, FParticle* pParticles, ref FParticle particle)
         {
 
         }
         [Rtti.Meta]
-        public virtual unsafe void OnDeadParticle(uint index, ref FParticle particle)
+        public virtual unsafe void OnDeadParticle(TtEmitter emt, uint index, ref FParticle particle)
         {
 
         }

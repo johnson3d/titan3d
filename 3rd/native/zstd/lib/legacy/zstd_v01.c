@@ -135,7 +135,7 @@ typedef struct
 *  Compiler specifics
 ****************************************************************/
 #ifdef _MSC_VER    /* Visual Studio */
-#  define FORCE_INLINE static __forceinline
+#  define FORCE_INLINE static inline
 #  include <intrin.h>                    /* For Visual 2005 */
 #  pragma warning(disable : 4127)        /* disable: C4127: conditional expression is constant */
 #  pragma warning(disable : 4214)        /* disable: C4214: non-int bitfields */

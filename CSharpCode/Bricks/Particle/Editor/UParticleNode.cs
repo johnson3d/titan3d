@@ -31,6 +31,7 @@ namespace EngineNS.Bricks.Particle.Editor
             editor.NodePropGrid.Target = this;
         }
     }
+    [Bricks.CodeBuilder.ContextMenu(filterStrings: "McEmitter", "Emitter\\McEmitter", Editor.TtParticleGraph.NebulaEditorKeyword)]
     public class TtEmitterNode : TtParticleNode
     {
         public PinOut Shapes { get; set; } = new PinOut()
@@ -57,6 +58,9 @@ namespace EngineNS.Bricks.Particle.Editor
             AddPinOut(Shapes);
             AddPinOut(Effectors);
         }
+        [Category("Option")]
+        [Rtti.Meta]
+        public bool Enable { get; set; } = true;
         [Category("Option")]
         [Rtti.Meta]
         [RName.PGRName(FilterExts = Graphics.Mesh.UMaterialMesh.AssetExt)]
@@ -118,7 +122,7 @@ namespace EngineNS.Bricks.Particle.Editor
         }
         public virtual UTypeDesc CreateEmitterType()
         {
-            return null;
+            return UTypeDescGetter<TtEmitter>.TypeDesc;
         }
         public virtual void InitEmitter(TtEmitter emt)
         {

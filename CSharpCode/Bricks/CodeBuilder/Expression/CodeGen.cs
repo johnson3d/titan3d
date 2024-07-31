@@ -146,7 +146,11 @@ namespace EngineNS.Bricks.CodeBuilder
         }
         public virtual string GetTypeString(Rtti.UTypeDesc t)
         {
-            return t.FullName;
+            var name = Rtti.UTypeDesc.GetCSharpTypeNameString(t.SystemType);
+            if (t.IsRefType==false)
+                return name;
+            
+            return "ref " + name.Substring(0, name.Length - 1);
         }
     }
 }

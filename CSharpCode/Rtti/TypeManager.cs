@@ -177,6 +177,15 @@ namespace EngineNS.Rtti
         public bool IsRemoved = false;
         public Type SystemType;
         public UAssemblyDesc Assembly;
+        public bool IsRefType
+        {
+            get
+            {
+                if (SystemType == null)
+                    return false;
+                return SystemType.IsByRef;
+            }
+        }
         public bool IsPrimitive
         {
             get
@@ -438,6 +447,7 @@ namespace EngineNS.Rtti
     }
     public struct UTypeDescGetter<T>
     {
+        public static T DefaultObject;
         static UTypeDesc mTypeDesc;
         public static UTypeDesc TypeDesc
         { 

@@ -116,10 +116,20 @@
     <Import Project="..\NativeCode\Bricks\MathLib\MathLib.vcxitems" Label="Shared" />
     <Import Project="..\NativeCode\Bricks\MeshSimplify\MeshSimplify.vcxitems" Label="Shared" />
     <Import Project="..\NativeCode\NextRHI\NextRHI.vcxitems" Label="Shared" />
-    <Import Project="..\NativeCode\Bricks\TextFont\TextFont.vcxitems" Label="Shared" />
     <Import Project="..\NativeCode\NextRHI\Vulkan\Vulkan.vcxitems" Label="Shared" />
     <Import Project="..\3rd\native\iconv\iconv.vcxitems" Label="Shared" />
     <Import Project="..\3rd\native\spirv-cross\spirv-cross.vcxitems" Label="Shared" />
+    <Import Project="..\3rd\native\Recast\Recast\Recast.vcxitems" Label="Shared" />
+    <Import Project="..\NativeCode\Bricks\RecastRuntime\RecastRuntime.vcxitems" Label="Shared" />
+    <Import Project="..\NativeCode\Bricks\RecastBuilder\RecastBuilder.vcxitems" Label="Shared" />
+    <Import Project="..\3rd\native\Recast\DetourTileCache\DetourTileCache.vcxitems" Label="Shared" />
+    <Import Project="..\3rd\native\Recast\DetourCrowd\DetourCrowd.vcxitems" Label="Shared" />
+    <Import Project="..\3rd\native\Recast\Detour\Detour.vcxitems" Label="Shared" />
+    <Import Project="..\3rd\native\Recast\DebugUtils\DebugUtils.vcxitems" Label="Shared" />
+    <Import Project="..\NativeCode\Bricks\Localization\Localization.vcxitems" Label="Shared" />
+    <Import Project="..\3rd\native\zstd\zstd.vcxitems" Label="Shared" />
+    <Import Project="..\3rd\native\zlib\zlib.vcxitems" Label="Shared" />
+    <Import Project="..\3rd\native\miniz\miniz.vcxitems" Label="Shared" />
   </ImportGroup>
   <ImportGroup Label="PropertySheets" />
   <PropertyGroup Label="UserMacros" />
@@ -167,7 +177,7 @@
     <ClCompile>
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
-      <PreprocessorDefinitions>VFX_EXPORTS;GLEW_STATIC;GLEW_NO_GLU;AS_DLLMODULE;PLATFORM_DROID;COREWINDOW_EXPORTS;FT2_BUILD_LIBRARY;_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>PLATFORM_DROID;VFX_EXPORTS;GLEW_STATIC;GLEW_NO_GLU;AS_DLLMODULE;COREWINDOW_EXPORTS;FT2_BUILD_LIBRARY;_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <EnableNeonCodegen>true</EnableNeonCodegen>
       <CppLanguageStandard>c++1z</CppLanguageStandard>
       <ExceptionHandling>Enabled</ExceptionHandling>
@@ -182,7 +192,7 @@
     <ClCompile>
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
-      <PreprocessorDefinitions>VFX_EXPORTS;GLEW_STATIC;GLEW_NO_GLU;AS_DLLMODULE;PLATFORM_DROID;COREWINDOW_EXPORTS;FT2_BUILD_LIBRARY;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>PLATFORM_DROID;VFX_EXPORTS;GLEW_STATIC;GLEW_NO_GLU;AS_DLLMODULE;COREWINDOW_EXPORTS;FT2_BUILD_LIBRARY;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <CppLanguageStandard>c++1z</CppLanguageStandard>
       <ExceptionHandling>Enabled</ExceptionHandling>
       <AdditionalIncludeDirectories>..\3rd\native\FreeType\include;..\3rd\native\PhysX-4.1\physx\include;..\3rd\native\PhysX-4.1\PxShared\include;..\3rd\native\eigen-3.4.0;..\3rd\native\Vulkan\Include;..\3rd\native\PhysX-4.1\physx\include;..\3rd\native\PhysX-4.1\PxShared\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
@@ -196,7 +206,7 @@
     <ClCompile>
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
-      <PreprocessorDefinitions>VFX_EXPORTS;GLEW_STATIC;GLEW_NO_GLU;AS_DLLMODULE;PLATFORM_DROID;COREWINDOW_EXPORTS;FT2_BUILD_LIBRARY;_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>PLATFORM_DROID;VFX_EXPORTS;GLEW_STATIC;GLEW_NO_GLU;AS_DLLMODULE;COREWINDOW_EXPORTS;FT2_BUILD_LIBRARY;_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <CppLanguageStandard>c++1z</CppLanguageStandard>
       <EnableNeonCodegen>true</EnableNeonCodegen>
       <ExceptionHandling>Enabled</ExceptionHandling>
@@ -211,7 +221,7 @@
     <ClCompile>
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
-      <PreprocessorDefinitions>VFX_EXPORTS;GLEW_STATIC;GLEW_NO_GLU;AS_DLLMODULE;PLATFORM_DROID;COREWINDOW_EXPORTS;FT2_BUILD_LIBRARY;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>PLATFORM_DROID;VFX_EXPORTS;GLEW_STATIC;GLEW_NO_GLU;AS_DLLMODULE;COREWINDOW_EXPORTS;FT2_BUILD_LIBRARY;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <CppLanguageStandard>c++1z</CppLanguageStandard>
       <ExceptionHandling>Enabled</ExceptionHandling>
       <AdditionalIncludeDirectories>..\3rd\native\FreeType\include;..\3rd\native\PhysX-4.1\physx\include;..\3rd\native\PhysX-4.1\PxShared\include;..\3rd\native\eigen-3.4.0;..\3rd\native\Vulkan\Include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
@@ -225,40 +235,40 @@
     <ClCompile>
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
-      <PreprocessorDefinitions>VFX_EXPORTS;GLEW_STATIC;GLEW_NO_GLU;AS_DLLMODULE;PLATFORM_DROID;COREWINDOW_EXPORTS;FT2_BUILD_LIBRARY;PTR_64;_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>PLATFORM_DROID;VFX_EXPORTS;GLEW_STATIC;GLEW_NO_GLU;AS_DLLMODULE;COREWINDOW_EXPORTS;FT2_BUILD_LIBRARY;PTR_64;_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <CppLanguageStandard>c++1z</CppLanguageStandard>
       <EnableNeonCodegen>true</EnableNeonCodegen>
       <ExceptionHandling>Enabled</ExceptionHandling>
-      <AdditionalIncludeDirectories>..\3rd\native\FreeType\include;..\3rd\native\PhysX-4.1\physx\include;..\3rd\native\PhysX-4.1\PxShared\include;..\3rd\native\eigen-3.4.0;..\3rd\native\Vulkan\Include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\3rd\native\FreeType\include;..\3rd\native\PhysX-4.1\physx\include;..\3rd\native\PhysX-4.1\PxShared\include;..\3rd\native\eigen-3.4.0;..\3rd\native\Vulkan\Include;..\3rd\native\Recast\Detour\include;..\3rd\native\Recast\DetourCrowd\include;..\3rd\native\Recast\DetourTileCache\include;..\3rd\native\Recast\DebugUtils\include;..\3rd\native\Recast\Recast\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <AdditionalOptions>-frtti %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
     <Link>
-      <LibraryDependencies>c;m;atomic;log;gcc;android;EGL;GLESv2;vulkan;%(LibraryDependencies)</LibraryDependencies>
+      <LibraryDependencies>c;m;atomic;log;android;EGL;GLESv2;vulkan;%(LibraryDependencies)</LibraryDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|ARM64'">
     <ClCompile>
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
-      <PreprocessorDefinitions>VFX_EXPORTS;GLEW_STATIC;GLEW_NO_GLU;AS_DLLMODULE;PLATFORM_DROID;COREWINDOW_EXPORTS;FT2_BUILD_LIBRARY;PTR_64;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>PLATFORM_DROID;VFX_EXPORTS;GLEW_STATIC;GLEW_NO_GLU;AS_DLLMODULE;COREWINDOW_EXPORTS;FT2_BUILD_LIBRARY;PTR_64;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <CppLanguageStandard>c++1z</CppLanguageStandard>
       <ExceptionHandling>Enabled</ExceptionHandling>
-      <AdditionalIncludeDirectories>..\3rd\native\FreeType\include;..\3rd\native\PhysX-4.1\physx\include;..\3rd\native\PhysX-4.1\PxShared\include;..\3rd\native\eigen-3.4.0;..\3rd\native\Vulkan\Include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\3rd\native\FreeType\include;..\3rd\native\PhysX-4.1\physx\include;..\3rd\native\PhysX-4.1\PxShared\include;..\3rd\native\eigen-3.4.0;..\3rd\native\Vulkan\Include;..\3rd\native\Recast\Detour\include;..\3rd\native\Recast\DetourCrowd\include;..\3rd\native\Recast\DetourTileCache\include;..\3rd\native\Recast\DebugUtils\include;..\3rd\native\Recast\Recast\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <AdditionalOptions>-frtti %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
     <Link>
-      <LibraryDependencies>c;m;atomic;log;gcc;android;EGL;GLESv2;vulkan;%(LibraryDependencies)</LibraryDependencies>
+      <LibraryDependencies>c;m;atomic;log;android;EGL;GLESv2;vulkan;%(LibraryDependencies)</LibraryDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|ARM'">
     <ClCompile>
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
-      <PreprocessorDefinitions>VFX_EXPORTS;GLEW_STATIC;GLEW_NO_GLU;AS_DLLMODULE;PLATFORM_DROID;COREWINDOW_EXPORTS;FT2_BUILD_LIBRARY;_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>PLATFORM_DROID;VFX_EXPORTS;GLEW_STATIC;GLEW_NO_GLU;AS_DLLMODULE;COREWINDOW_EXPORTS;FT2_BUILD_LIBRARY;_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <CppLanguageStandard>c++1z</CppLanguageStandard>
       <EnableNeonCodegen>true</EnableNeonCodegen>
       <ExceptionHandling>Enabled</ExceptionHandling>
-      <AdditionalIncludeDirectories>..\3rd\native\FreeType\include;..\3rd\native\PhysX-4.1\physx\include;..\3rd\native\PhysX-4.1\PxShared\include;..\3rd\native\eigen-3.4.0;..\3rd\native\Vulkan\Include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\3rd\native\FreeType\include;..\3rd\native\PhysX-4.1\physx\include;..\3rd\native\PhysX-4.1\PxShared\include;..\3rd\native\eigen-3.4.0;..\3rd\native\Vulkan\Include;..\3rd\native\Recast\Detour\include;..\3rd\native\Recast\DetourCrowd\include;..\3rd\native\Recast\DetourTileCache\include;..\3rd\native\Recast\DebugUtils\include;..\3rd\native\Recast\Recast\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <AdditionalOptions>-frtti %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
     <Link>
@@ -269,10 +279,10 @@
     <ClCompile>
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
-      <PreprocessorDefinitions>VFX_EXPORTS;GLEW_STATIC;GLEW_NO_GLU;AS_DLLMODULE;PLATFORM_DROID;COREWINDOW_EXPORTS;FT2_BUILD_LIBRARY;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>PLATFORM_DROID;VFX_EXPORTS;GLEW_STATIC;GLEW_NO_GLU;AS_DLLMODULE;COREWINDOW_EXPORTS;FT2_BUILD_LIBRARY;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <CppLanguageStandard>c++1z</CppLanguageStandard>
       <ExceptionHandling>Enabled</ExceptionHandling>
-      <AdditionalIncludeDirectories>..\3rd\native\FreeType\include;..\3rd\native\PhysX-4.1\physx\include;..\3rd\native\PhysX-4.1\PxShared\include;..\3rd\native\eigen-3.4.0;..\3rd\native\Vulkan\Include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\3rd\native\FreeType\include;..\3rd\native\PhysX-4.1\physx\include;..\3rd\native\PhysX-4.1\PxShared\include;..\3rd\native\eigen-3.4.0;..\3rd\native\Vulkan\Include;..\3rd\native\Recast\Detour\include;..\3rd\native\Recast\DetourCrowd\include;..\3rd\native\Recast\DetourTileCache\include;..\3rd\native\Recast\DebugUtils\include;..\3rd\native\Recast\Recast\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <AdditionalOptions>-frtti %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
     <Link>

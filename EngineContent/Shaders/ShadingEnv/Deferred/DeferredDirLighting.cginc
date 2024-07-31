@@ -232,10 +232,12 @@ PS_OUTPUT PS_Main(PS_INPUT input)
 
 	half3 H = normalize(L + V);
 	half NoLsigned = dot(N, L);
-	half NoL = max(NoLsigned, 0.0h);
-	half NoH = max(dot(N, H), 0.0h);
-	half LoH = max(dot(L, H), 0.0h);
-	half NoV = max(dot(N, V), 0.0h);
+	half NoL = saturate(NoLsigned);
+	half NoH = saturate(dot(N, H));
+	half LoH = saturate(dot(L, H));
+	half NoV = saturate(dot(N, V));
+	half VoH = saturate(dot(V, H));
+	// NoV = saturate( abs( NoV ) + 1e-5 );
     
 	//sky light;
 	//half SkyAtten = 1.0h - NoL;
@@ -252,7 +254,8 @@ PS_OUTPUT PS_Main(PS_INPUT input)
 	//half3 DirLightDiffuseShading = NoL * Idir * Cdir * OptDiffShading * ECCd;
 	half3 DirLightDiffuseShading = RetroDiffuseMobile(NoL, NoV, LoH, Roughness) * Idir * Cdir * OptDiffShading;
 
-	half3 DirLightSpecShading = BRDFMobile(Roughness, N, H, NoH, LoH, NoV, NoL, OptSpecShading) * sqrt(NoL) * Idir * Cdir;
+	half3 DirLightSpecShading = NoL * Idir * Cdir * SpecularGGX( Roughness, OptSpecShading, NoH, NoV, NoL, VoH );
+	// half3 DirLightSpecShading = BRDFMobile(Roughness, N, H, NoH, LoH, NoV, NoL, OptSpecShading) * sqrt(NoL) * Idir * Cdir;
 
 	//sphere env mapping;
 	half3 VrN = 2.0h * NoV * N - V;
@@ -282,9 +285,8 @@ PS_OUTPUT PS_Main(PS_INPUT input)
 	/////=======
 
 	BaseShading = DirLightDiffuseShading * FinalShadowValue + DirLightSpecShading * ShadowValue + SkyShading;
-    BaseShading = BaseShading * AOs + EnvSpec * min(ShadowValue + 0.85h, 1.0h);
-    //BaseShading = BaseShading * (1.0h - AOs) + EnvSpec * min(ShadowValue + 0.85h, 1.0h);
-	
+    BaseShading = BaseShading * AOs + EnvSpec * min(ShadowValue + 0.85h, 1.0h) * AOs;
+
 #if ENV_DISABLE_POINTLIGHTS == 0
 	if (NoPixel == false)
 	{

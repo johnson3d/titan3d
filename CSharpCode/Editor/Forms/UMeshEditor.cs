@@ -55,6 +55,24 @@ namespace EngineNS.Editor.Forms
                 mCurrentMeshNode.IsAcceptShadow = value;
             }
         }
+        public bool IsShowGrid
+        {
+            get
+            {
+                if (GridNode == null)
+                    return false;
+                return !GridNode.HasStyle(GamePlay.Scene.UNode.ENodeStyles.Invisible);
+            }
+            set
+            {
+                if (mCurrentMeshNode == null)
+                    return;
+                if(value==true)
+                    GridNode.UnsetStyle(GamePlay.Scene.UNode.ENodeStyles.Invisible);
+                else
+                    GridNode.SetStyle(GamePlay.Scene.UNode.ENodeStyles.Invisible);
+            }
+        }
 
         UDebugShowTool DebugShowTool;
         bool mShowNormal = false;
@@ -123,6 +141,7 @@ namespace EngineNS.Editor.Forms
         EngineNS.GamePlay.Scene.UMeshNode PlaneMeshNode;
         EngineNS.GamePlay.Scene.UMeshNode mCurrentMeshNode;
         EngineNS.GamePlay.Scene.UMeshNode mArrowMeshNode;
+        EngineNS.GamePlay.Scene.UGridNode GridNode;
         float mCurrentMeshRadius = 1.0f;
         protected async System.Threading.Tasks.Task Initialize_PreviewMesh(Graphics.Pipeline.TtViewportSlate viewport, USlateApplication application, Graphics.Pipeline.URenderPolicy policy, float zMin, float zMax)
         {
@@ -197,8 +216,8 @@ namespace EngineNS.Editor.Forms
                 PlaneMeshNode.IsCastShadow = false;
             }
 
-            var gridNode = await GamePlay.Scene.UGridNode.AddGridNode(viewport.World, viewport.World.Root);
-            gridNode.ViewportSlate = this.PreviewViewport;
+            GridNode = await GamePlay.Scene.UGridNode.AddGridNode(viewport.World, viewport.World.Root);
+            GridNode.ViewportSlate = this.PreviewViewport;
         }
         public float LoadingPercent { get; set; } = 1.0f;
         public string ProgressText { get; set; } = "Loading";
@@ -216,7 +235,10 @@ namespace EngineNS.Editor.Forms
             PreviewViewport.PreviewAsset = AssetName;
             PreviewViewport.Title = $"MaterialMesh:{name}";
             PreviewViewport.OnInitialize = Initialize_PreviewMesh;
-            await PreviewViewport.Initialize(UEngine.Instance.GfxDevice.SlateApplication, UEngine.Instance.Config.MainRPolicyName, 0, 1);
+            var SimpleRPolicyName = RName.GetRName("graphics/deferred_simple.rpolicy", RName.ERNameType.Engine);
+            await PreviewViewport.Initialize(UEngine.Instance.GfxDevice.SlateApplication, SimpleRPolicyName, 0, 1);
+            //await PreviewViewport.Initialize(UEngine.Instance.GfxDevice.SlateApplication, UEngine.Instance.Config.MainRPolicyName, 0, 1);
+            PreviewViewport.World.DirectionLight.mSunLightIntensity = 1.0f;
 
             #region sdf
             var sdfRPolicyName = RName.GetRName("graphics/sdf.rpolicy", RName.ERNameType.Engine);
@@ -418,7 +440,7 @@ namespace EngineNS.Editor.Forms
         [Category("Light")]
         [EGui.Controls.PropertyGrid.PGValueRange(-3.1416f, 3.1416f)]
         [EGui.Controls.PropertyGrid.PGValueChangeStep(3.1416f / 100.0f)]
-        public float Yaw { get; set; } = -0.955047f;
+        public float Yaw { get; set; } = 0;
         //[Category("Light")]
         //[EGui.Controls.PropertyGrid.PGValueRange(-3.1416f, 3.1416f)]
         //[EGui.Controls.PropertyGrid.PGValueChangeStep(3.1416f / 100.0f)]
@@ -426,7 +448,7 @@ namespace EngineNS.Editor.Forms
         [Category("Light")]
         [EGui.Controls.PropertyGrid.PGValueRange(-3.1416f, 3.1416f)]
         [EGui.Controls.PropertyGrid.PGValueChangeStep(3.1416f / 100.0f)]
-        public float Roll { get; set; } = -0.552922f;
+        public float Roll { get; set; } = /*-1.178f*/-0.698f;
         [Category("Light")]
         public GamePlay.TtDirectionLight DirLight
         {

@@ -48,7 +48,7 @@ namespace EngineNS.Macross
             mFrameStates[name] = tmp;
         }
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public unsafe void SetWatchVariable(string name, void* value)
+        public unsafe void SetWatchVariable(string name, void* value, bool dummy = false)
         {
             Support.UAnyPointer tmp;
             if (mFrameStates.TryGetValue(name, out tmp))

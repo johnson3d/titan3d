@@ -369,6 +369,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
                 {
                     var pinOut = new PinOut();
                     pinOut.LinkDesc = MacrossStyles.Instance.NewInOutPinDesc();
+                    pinOut.MultiLinks = true;
                     pinOut.LinkDesc.CanLinks.Add("Value");
                     pinOut.Name = info.Name;
                     pinOut.Tag = Rtti.UTypeDesc.TypeOf(info.ParameterType);
@@ -443,6 +444,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
             {
                 Result = new PinOut();
                 Result.LinkDesc = MacrossStyles.Instance.NewInOutPinDesc();
+                Result.MultiLinks = true;
                 Result.LinkDesc.CanLinks.Add("Value");
                 Result.Name = "Result";
                 AddPinOut(Result);
@@ -554,6 +556,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
                     {
                         var pinOut = new PinOut();
                         pinOut.LinkDesc = MacrossStyles.Instance.NewInOutPinDesc();
+                        pinOut.MultiLinks = true;
                         pinOut.LinkDesc.CanLinks.Add("Value");
                         pinOut.Name = i.Name;
                         pinOut.Tag = i.ParameterType;
@@ -628,6 +631,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
             if(m.ReturnValue != null)
             {
                 Result = new PinOut();
+                Result.MultiLinks = true;
                 Result.LinkDesc = MacrossStyles.Instance.NewInOutPinDesc();
                 Result.LinkDesc.CanLinks.Add("Value");
                 Result.Name = "Result";
@@ -675,6 +679,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
                 {
                     var pinOut = new PinOut();
                     pinOut.LinkDesc = MacrossStyles.Instance.NewInOutPinDesc();
+                    pinOut.MultiLinks = true;
                     pinOut.LinkDesc.CanLinks.Add("Value");
                     pinOut.Name = i.VariableName;
                     pinOut.Tag = i.VariableType.TypeDesc;
@@ -1347,16 +1352,18 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
         public override void BuildStatements(NodePin pin, ref BuildCodeStatementsData data)
         {
             if (MethodDesc != null)
-                BuildStatementsWithMethodDec(pin, ref data);
+                BuildStatementsWithMethodDesc(pin, ref data);
             else
                 BuildStatementsWithMethodMeta(pin, ref data);
         }
-        private void BuildStatementsWithMethodDec(NodePin pin, ref BuildCodeStatementsData data)
+        private void BuildStatementsWithMethodDesc(NodePin pin, ref BuildCodeStatementsData data)
         {
             var methodInvokeExp = new UMethodInvokeStatement()
             {
                 MethodName = MethodDesc.MethodName,
             };
+            if (MethodDesc.ReturnValue != null)
+                methodInvokeExp.IsReturnRef = MethodDesc.ReturnValue.VariableType.IsRefType;
             if (Self != null)
             {
                 if (data.NodeGraph.PinHasLinker(Self))
@@ -1423,7 +1430,9 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
             {
                 MethodName = method.MethodName,
             };
-            if(Self != null)
+            if (method.ReturnType != null)
+                methodInvokeExp.IsReturnRef = method.ReturnType.IsRefType;
+            if (Self != null)
             {
                 if(data.NodeGraph.PinHasLinker(Self))
                     methodInvokeExp.Host = data.NodeGraph.GetOppositePinExpression(Self, ref data);

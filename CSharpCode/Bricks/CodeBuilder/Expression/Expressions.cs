@@ -70,7 +70,12 @@ namespace EngineNS.Bricks.CodeBuilder
             {
                 if(mTypeDesc != null)
                 {
-                    return mTypeDesc.FullName;
+                    var name = Rtti.UTypeDesc.GetCSharpTypeNameString(mTypeDesc.SystemType);
+                    if (mTypeDesc.IsRefType)
+                    {
+                        return "ref " + name.Substring(0, name.Length - 1);
+                    }
+                    return name;
                 }
                 return mTypeFullName;
             }
@@ -112,6 +117,16 @@ namespace EngineNS.Bricks.CodeBuilder
             {
                 if (mTypeDesc != null)
                     return mTypeDesc.IsPointer;
+                return false;
+            }
+        }
+
+        public bool IsRefType
+        {
+            get
+            {
+                if (mTypeDesc != null)
+                    return mTypeDesc.IsRefType;
                 return false;
             }
         }
@@ -1028,6 +1043,8 @@ namespace EngineNS.Bricks.CodeBuilder
     public class UClassDeclaration : UCodeObject, IO.ISerializer
     {
         [Rtti.Meta]
+        public bool IsUnsafe { get; set; } = true;
+        [Rtti.Meta]
         public EVisisMode VisitMode { get; set; } = EVisisMode.Public;
         [Rtti.Meta]
         public bool IsStruct { get; set; } = false;
@@ -1318,6 +1335,8 @@ namespace EngineNS.Bricks.CodeBuilder
         public UExpressionBase Host { get; set; }
         [Rtti.Meta]
         public string MethodName { get; set; } = "Unknow";
+        [Rtti.Meta]
+        public bool IsReturnRef { get; set; } = false;
         [Rtti.Meta]
         public List<UMethodInvokeArgumentExpression> Arguments { get; set; } = new List<UMethodInvokeArgumentExpression>();
         [Rtti.Meta]

@@ -977,7 +977,7 @@ namespace EngineNS.EGui.Controls.PropertyGrid
                     }
                     else
                     {
-                        newFlags &= ~v;
+                        
                     }
                 }
                 if (newFlags != enumFlags && !data.Readonly)
