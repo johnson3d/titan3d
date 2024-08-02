@@ -34,6 +34,14 @@ namespace EngineNS.Bricks.Terrain.CDLOD
                 return RName.GetRName("shaders/Bricks/Terrain/TerrainCDLOD.cginc", RName.ERNameType.Engine);
             }
         }
+        public unsafe NxRHI.FShaderCode* GetHLSLCode(string includeName, string includeOriName)
+        {
+            return (NxRHI.FShaderCode*)0;
+        }
+        public string GetUniqueText()
+        {
+            return "";
+        }
         public NxRHI.EVertexStreamType[] GetNeedStreams()
         {
             return new NxRHI.EVertexStreamType[] { NxRHI.EVertexStreamType.VST_Position,

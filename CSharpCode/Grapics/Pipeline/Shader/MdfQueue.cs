@@ -143,6 +143,8 @@ namespace EngineNS.Graphics.Pipeline.Shader
         public RName SourceName { get; }
         public NxRHI.EVertexStreamType[] GetNeedStreams();
         public EPixelShaderInput[] GetPSNeedInputs();
+        public unsafe NxRHI.FShaderCode* GetHLSLCode(string includeName, string includeOriName);
+        public string GetUniqueText();
         public void Initialize(Graphics.Mesh.UMaterialMesh materialMesh);
         public void OnDrawCall(TtMdfQueueBase mdfQueue, NxRHI.ICommandList cmd, NxRHI.UGraphicDraw drawcall, Graphics.Pipeline.URenderPolicy policy, Graphics.Mesh.TtMesh.TtAtom atom);
     }
@@ -193,6 +195,18 @@ namespace EngineNS.Graphics.Pipeline.Shader
                 result.AddRange(i.GetPSNeedInputs());
             }
             return result.ToArray();
+        }
+        public virtual unsafe NxRHI.FShaderCode* GetHLSLCode(string includeName, string oriInc)
+        {
+            foreach (var i in Modifiers)
+            {
+                var code = i.GetHLSLCode(includeName, oriInc);
+                if (code != (NxRHI.FShaderCode*)0)
+                {
+                    return code;
+                }
+            }
+            return (NxRHI.FShaderCode*)0;
         }
         protected virtual void BuildMdfFunctions(ref string codeString, Bricks.CodeBuilder.Backends.UHLSLCodeGenerator codeBuilder)
         {
@@ -284,6 +298,7 @@ namespace EngineNS.Graphics.Pipeline.Shader
                         continue;
                     var shadingCode = Editor.ShaderCompiler.UShaderCodeManager.Instance.GetShaderCode(i.SourceName);
                     result += shadingCode;
+                    result += i.GetUniqueText();
                 }
                 mMdfQueueHash = Hash160.CreateHash160(result);
             }

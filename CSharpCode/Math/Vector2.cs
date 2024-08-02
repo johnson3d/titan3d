@@ -250,7 +250,7 @@ namespace EngineNS
         /// <param name="value1">二维向量对象</param>
         /// <param name="value2">二维向量对象</param>
         /// <returns>如果两个对象相同返回true，否则返回false</returns>
-	    public static bool Equals( ref Vector2 value1, ref Vector2 value2, float epsilon = MathHelper.Epsilon)
+	    public static bool Equals(in Vector2 value1, in Vector2 value2, float epsilon = MathHelper.Epsilon)
 	    {
             bool reX = (Math.Abs(value1.X - value2.X) < MathHelper.Epsilon);
             bool reY = (Math.Abs(value1.Y - value2.Y) < MathHelper.Epsilon);

@@ -36,9 +36,9 @@ namespace EngineNS.Graphics.Mesh
         //    base.OnDrawSnapshot(in cmdlist, ref start, ref end);
         //    cmdlist.AddText(in start, 0xFFFFFFFF, "vms", null);
         //}
-        protected override Color GetBorderColor()
+        protected override Color4b GetBorderColor()
         {
-            return Color.LightYellow;
+            return Color4b.LightYellow;
         }
 
         [Rtti.Meta]

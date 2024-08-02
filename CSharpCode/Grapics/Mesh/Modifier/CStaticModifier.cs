@@ -35,5 +35,13 @@ namespace EngineNS.Graphics.Mesh.Modifier
         {
 
         }
+        public unsafe NxRHI.FShaderCode* GetHLSLCode(string includeName, string includeOriName)
+        {
+            return (NxRHI.FShaderCode*)0;
+        }
+        public string GetUniqueText()
+        {
+            return "";
+        }
     }
 }

@@ -74,9 +74,9 @@ namespace EngineNS.Graphics.Mesh
         //    base.OnDrawSnapshot(in cmdlist, ref start, ref end);
         //    cmdlist.AddText(in start, 0xFFFFFFFF, "ums", null);
         //}
-        protected override Color GetBorderColor()
+        protected override Color4b GetBorderColor()
         {
-            return Color.OrangeRed;
+            return Color4b.OrangeRed;
         }
         DVector3 CalculateDragPosition(Graphics.Pipeline.TtViewportSlate vpSlate)
         {

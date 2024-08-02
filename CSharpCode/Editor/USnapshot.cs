@@ -8,7 +8,13 @@ namespace EngineNS.Editor
     public class USnapshot
     {
         public NxRHI.USrView mTextureRSV;
-        public unsafe static void Save(RName rname, IO.IAssetMeta ameta, NxRHI.ITexture tex, uint x, uint y, uint w, uint h)
+        public enum ESnapSide
+        {
+            Center,
+            Left,
+            Right,
+        }
+        public unsafe static void Save(RName rname, IO.IAssetMeta ameta, NxRHI.ITexture tex, uint x, uint y, uint w, uint h, ESnapSide side = ESnapSide.Center)
         {
             var file = rname.Address + ".snap";
             var rc = UEngine.Instance.GfxDevice.RenderContext;
@@ -35,7 +41,7 @@ namespace EngineNS.Editor
                     NxRHI.ITexture.BuildImage2DBlob(bufferData.mCoreObject, gpuDataBlob.mCoreObject, tex.Desc);
                     UEngine.Instance.EventPoster.RunOn((state) =>
                     {
-                        SavePng(ameta, file, bufferData);
+                        SavePng(ameta, file, bufferData, side);
                         return true;
                     }, Thread.Async.EAsyncTarget.AsyncEditor);
                 }, "Fetch");
@@ -48,7 +54,7 @@ namespace EngineNS.Editor
             uint h = srv.GetTexture().Desc.Height;
             Save(rname, ameta, srv.GetTexture(),0,0,w,h);
         }
-        public unsafe static bool SavePng(IO.IAssetMeta ameta, string file, Support.UBlobObject bufferData)
+        public unsafe static bool SavePng(IO.IAssetMeta ameta, string file, Support.UBlobObject bufferData, ESnapSide side = ESnapSide.Center)
         {
             byte* pPixelData = (byte*)bufferData.mCoreObject.GetData();
             if (pPixelData == (byte*)0)
@@ -60,7 +66,22 @@ namespace EngineNS.Editor
             {
                 var writer = new StbImageWriteSharp.ImageWriter();
                 var image = StbImageSharp.ImageResult.FromResult(pPixelData, (int)pBitmapDesc->Width, (int)pBitmapDesc->Height, StbImageSharp.ColorComponents.RedGreenBlueAlpha, StbImageSharp.ColorComponents.RedGreenBlueAlpha);
-                image = StbImageSharp.ImageProcessor.GetCenterSquare(image);
+                switch (side)
+                {
+                    case ESnapSide.Center:
+                        image = StbImageSharp.ImageProcessor.GetCenterSquare(image);
+                        break;
+                    case ESnapSide.Left:
+                        image = StbImageSharp.ImageProcessor.GetCenterLeft(image);
+                        break;
+                    case ESnapSide.Right:
+                        image = StbImageSharp.ImageProcessor.GetCenterRight(image);
+                        break;
+                    default:
+                        image = StbImageSharp.ImageProcessor.GetCenterSquare(image);
+                        break;
+                }
+                
                 if (pBitmapDesc->Width > 128)
                 {
                     float rate = 128 / (float)image.Width;// pBitmapDesc->Width;

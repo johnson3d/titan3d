@@ -706,7 +706,7 @@ namespace EngineNS
         MenuHighlight = 174
     }
 
-    public struct Color
+    public struct Color4b
     {
         public Byte4 Value;
         public Byte R
@@ -737,9 +737,9 @@ namespace EngineNS
             }
         }
 
-        public static Color FromRgb(Int32 r, Int32 g, Int32 b)
+        public static Color4b FromRgb(Int32 r, Int32 g, Int32 b)
         {
-            var ret = new Color();
+            var ret = new Color4b();
             ret.A = (byte)255;
             ret.R = (byte)r;
             ret.G = (byte)g;
@@ -747,9 +747,9 @@ namespace EngineNS
             return ret;
         }
 
-        public static Color FromArgb(Int32 a, Int32 r, Int32 g, Int32 b)
+        public static Color4b FromArgb(Int32 a, Int32 r, Int32 g, Int32 b)
         {
-            var ret = new Color();
+            var ret = new Color4b();
             ret.A = (byte)a;
             ret.R = (byte)r;
             ret.G = (byte)g;
@@ -757,9 +757,9 @@ namespace EngineNS
             return ret;
         }
 
-        public static Color FromArgb( int alpha, Color baseColor )
+        public static Color4b FromArgb( int alpha, Color4b baseColor )
         {
-            var ret = new Color();
+            var ret = new Color4b();
             ret.A = (byte)alpha;
             ret.R = baseColor.R;
             ret.G = baseColor.G;
@@ -768,9 +768,9 @@ namespace EngineNS
 
         }
 
-        public static Color FromArgb(int value)
+        public static Color4b FromArgb(int value)
         {
-            var ret = new Color();
+            var ret = new Color4b();
             ret.A = (byte)(value >> 24);
             ret.R = (byte)(value >> 16);
             ret.G = (byte)(value >> 8);
@@ -803,7 +803,7 @@ namespace EngineNS
         {
             return R + "," + G + "," + B + "," + A;
         }
-        public static Color FromString(string val)
+        public static Color4b FromString(string val)
         {
             //var ret = Color.White;
             //var segs = val.Split(',');
@@ -816,7 +816,7 @@ namespace EngineNS
 
             try
             {
-                var result = Color.White;
+                var result = Color4b.White;
                 ReadOnlySpan<char> chars = val.ToCharArray();
                 int iStart = 0;
                 int j = 0;
@@ -854,18 +854,18 @@ namespace EngineNS
             }
             catch
             {
-                return Color.White;
+                return Color4b.White;
             }
         }
 
-        public static bool operator == (in Color val1, in Color val2)
+        public static bool operator == (in Color4b val1, in Color4b val2)
         {
             return (val1.Value.R == val2.Value.R) &&
                    (val1.Value.G == val2.Value.G) &&
                    (val1.Value.B == val2.Value.B) &&
                    (val1.Value.A == val2.Value.A);
         }
-        public static bool operator != (in Color val1, in Color val2)
+        public static bool operator != (in Color4b val1, in Color4b val2)
         {
             return !((val1.Value.R == val2.Value.R) &&
                      (val1.Value.G == val2.Value.G) &&
@@ -874,7 +874,7 @@ namespace EngineNS
         }
         public override bool Equals([NotNullWhen(true)] object obj)
         {
-            return this == (Color)obj;
+            return this == (Color4b)obj;
         }
         public override int GetHashCode()
         {
@@ -882,563 +882,563 @@ namespace EngineNS
         }
         #region 颜色
 
-        public static Color AliceBlue
+        public static Color4b AliceBlue
         {
             get { return FromArgb(unchecked((int)(0xFFF0F8FF))); }
         }
-        public static Color AntiqueWhite
+        public static Color4b AntiqueWhite
         {
             get { return FromArgb(unchecked((int)(0xFFFAEBD7))); }
         }
-        public static Color Aqua
+        public static Color4b Aqua
         {
             get { return FromArgb(unchecked((int)(0xFF00FFFF))); }
         }
-        public static Color Aquamarine
+        public static Color4b Aquamarine
         {
             get { return FromArgb(unchecked((int)(0xFF7FFFD4))); }
         }
-        public static Color Azure
+        public static Color4b Azure
         {
             get { return FromArgb(unchecked((int)(0xFFF0FFFF))); }
         }
-        public static Color Bisque
+        public static Color4b Bisque
         {
             get { return FromArgb(unchecked((int)(0xFFFFE4C4))); }
         }
-        public static Color Black
+        public static Color4b Black
         {
             get { return FromArgb(unchecked((int)(0xFF000000))); }
         }
-        public static Color BlanchedAlmond
+        public static Color4b BlanchedAlmond
         {
             get { return FromArgb(unchecked((int)(0xFFFFEBCD))); }
         }
-        public static Color Blue
+        public static Color4b Blue
         {
             get { return FromArgb(unchecked((int)(0xFF0000FF))); }
         }
-        public static Color BlueViolet
+        public static Color4b BlueViolet
         {
             get { return FromArgb(unchecked((int)(0xFF8A2BE2))); }
         }
-        public static Color Brown
+        public static Color4b Brown
         {
             get { return FromArgb(unchecked((int)(0xFFA52A2A))); }
         }
-        public static Color BurlyWood
+        public static Color4b BurlyWood
         {
             get { return FromArgb(unchecked((int)(0xFFDEB887))); }
         }
-        public static Color CadetBlue
+        public static Color4b CadetBlue
         {
             get { return FromArgb(unchecked((int)(0xFF5F9EA0))); }
         }
-        public static Color Chartreuse
+        public static Color4b Chartreuse
         {
             get { return FromArgb(unchecked((int)(0xFF7FFF00))); }
         }
-        public static Color Chocolate
+        public static Color4b Chocolate
         {
             get { return FromArgb(unchecked((int)(0xFFD2691E))); }
         }
-        public static Color Coral
+        public static Color4b Coral
         {
             get { return FromArgb(unchecked((int)(0xFFFF7F50))); }
         }
-        public static Color CornflowerBlue
+        public static Color4b CornflowerBlue
         {
             get { return FromArgb(unchecked((int)(0xFF6495ED))); }
         }
-        public static Color Cornsilk
+        public static Color4b Cornsilk
         {
             get { return FromArgb(unchecked((int)(0xFFFFF8DC))); }
         }
-        public static Color Crimson
+        public static Color4b Crimson
         {
             get { return FromArgb(unchecked((int)(0xFFDC143C))); }
         }
-        public static Color Cyan
+        public static Color4b Cyan
         {
             get { return FromArgb(unchecked((int)(0xFF00FFFF))); }
         }
-        public static Color DarkBlue
+        public static Color4b DarkBlue
         {
             get { return FromArgb(unchecked((int)(0xFF00008B))); }
         }
-        public static Color DarkCyan
+        public static Color4b DarkCyan
         {
             get { return FromArgb(unchecked((int)(0xFF008B8B))); }
         }
-        public static Color DarkGoldenrod
+        public static Color4b DarkGoldenrod
         {
             get { return FromArgb(unchecked((int)(0xFFB8860B))); }
         }
-        public static Color DarkGray
+        public static Color4b DarkGray
         {
             get { return FromArgb(unchecked((int)(0xFFA9A9A9))); }
         }
-        public static Color DarkGreen
+        public static Color4b DarkGreen
         {
             get { return FromArgb(unchecked((int)(0xFF006400))); }
         }
-        public static Color DarkKhaki
+        public static Color4b DarkKhaki
         {
             get { return FromArgb(unchecked((int)(0xFFBDB76B))); }
         }
-        public static Color DarkMagenta
+        public static Color4b DarkMagenta
         {
             get { return FromArgb(unchecked((int)(0xFF8B008B))); }
         }
-        public static Color DarkOliveGreen
+        public static Color4b DarkOliveGreen
         {
             get { return FromArgb(unchecked((int)(0xFF556B2F))); }
         }
-        public static Color DarkOrange
+        public static Color4b DarkOrange
         {
             get { return FromArgb(unchecked((int)(0xFFFF8C00))); }
         }
-        public static Color DarkOrchid
+        public static Color4b DarkOrchid
         {
             get { return FromArgb(unchecked((int)(0xFF9932CC))); }
         }
-        public static Color DarkRed
+        public static Color4b DarkRed
         {
             get { return FromArgb(unchecked((int)(0xFF8B0000))); }
         }
-        public static Color DarkSalmon
+        public static Color4b DarkSalmon
         {
             get { return FromArgb(unchecked((int)(0xFFE9967A))); }
         }
-        public static Color DarkSeaGreen
+        public static Color4b DarkSeaGreen
         {
             get { return FromArgb(unchecked((int)(0xFF8FBC8F))); }
         }
-        public static Color DarkSlateBlue
+        public static Color4b DarkSlateBlue
         {
             get { return FromArgb(unchecked((int)(0xFF483D8B))); }
         }
-        public static Color DarkSlateGray
+        public static Color4b DarkSlateGray
         {
             get { return FromArgb(unchecked((int)(0xFF2F4F4F))); }
         }
-        public static Color DarkTurquoise
+        public static Color4b DarkTurquoise
         {
             get { return FromArgb(unchecked((int)(0xFF00CED1))); }
         }
-        public static Color DarkViolet
+        public static Color4b DarkViolet
         {
             get { return FromArgb(unchecked((int)(0xFF9400D3))); }
         }
-        public static Color DeepPink
+        public static Color4b DeepPink
         {
             get { return FromArgb(unchecked((int)(0xFFFF1493))); }
         }
-        public static Color DeepSkyBlue
+        public static Color4b DeepSkyBlue
         {
             get { return FromArgb(unchecked((int)(0xFF00BFFF))); }
         }
-        public static Color DimGray
+        public static Color4b DimGray
         {
             get { return FromArgb(unchecked((int)(0xFF696969))); }
         }
-        public static Color DodgerBlue
+        public static Color4b DodgerBlue
         {
             get { return FromArgb(unchecked((int)(0xFF1E90FF))); }
         }
-        public static Color Firebrick
+        public static Color4b Firebrick
         {
             get { return FromArgb(unchecked((int)(0xFFB22222))); }
         }
-        public static Color FloralWhite
+        public static Color4b FloralWhite
         {
             get { return FromArgb(unchecked((int)(0xFFFFFAF0))); }
         }
-        public static Color ForestGreen
+        public static Color4b ForestGreen
         {
             get { return FromArgb(unchecked((int)(0xFF228B22))); }
         }
-        public static Color Fuchsia
+        public static Color4b Fuchsia
         {
             get { return FromArgb(unchecked((int)(0xFFFF00FF))); }
         }
-        public static Color Gainsboro
+        public static Color4b Gainsboro
         {
             get { return FromArgb(unchecked((int)(0xFFDCDCDC))); }
         }
-        public static Color GhostWhite
+        public static Color4b GhostWhite
         {
             get { return FromArgb(unchecked((int)(0xFFF8F8FF))); }
         }
-        public static Color Gold
+        public static Color4b Gold
         {
             get { return FromArgb(unchecked((int)(0xFFFFD700))); }
         }
-        public static Color Goldenrod
+        public static Color4b Goldenrod
         {
             get { return FromArgb(unchecked((int)(0xFFDAA520))); }
         }
-        public static Color Gray
+        public static Color4b Gray
         {
             get { return FromArgb(unchecked((int)(0xFF808080))); }
         }
-        public static Color Green
+        public static Color4b Green
         {
             get { return FromArgb(unchecked((int)(0xFF008000))); }
         }
-        public static Color GreenYellow
+        public static Color4b GreenYellow
         {
             get { return FromArgb(unchecked((int)(0xFFADFF2F))); }
         }
-        public static Color Honeydew
+        public static Color4b Honeydew
         {
             get { return FromArgb(unchecked((int)(0xFFF0FFF0))); }
         }
-        public static Color HotPink
+        public static Color4b HotPink
         {
             get { return FromArgb(unchecked((int)(0xFFFF69B4))); }
         }
-        public static Color IndianRed
+        public static Color4b IndianRed
         {
             get { return FromArgb(unchecked((int)(0xFFCD5C5C))); }
         }
-        public static Color Indigo
+        public static Color4b Indigo
         {
             get { return FromArgb(unchecked((int)(0xFF4B0082))); }
         }
-        public static Color Ivory
+        public static Color4b Ivory
         {
             get { return FromArgb(unchecked((int)(0xFFFFFFF0))); }
         }
-        public static Color Khaki
+        public static Color4b Khaki
         {
             get { return FromArgb(unchecked((int)(0xFFF0E68C))); }
         }
-        public static Color Lavender
+        public static Color4b Lavender
         {
             get { return FromArgb(unchecked((int)(0xFFE6E6FA))); }
         }
-        public static Color LavenderBlush
+        public static Color4b LavenderBlush
         {
             get { return FromArgb(unchecked((int)(0xFFFFF0F5))); }
         }
-        public static Color LawnGreen
+        public static Color4b LawnGreen
         {
             get { return FromArgb(unchecked((int)(0xFF7CFC00))); }
         }
-        public static Color LemonChiffon
+        public static Color4b LemonChiffon
         {
             get { return FromArgb(unchecked((int)(0xFFFFFACD))); }
         }
-        public static Color LightBlue
+        public static Color4b LightBlue
         {
             get { return FromArgb(unchecked((int)(0xFFADD8E6))); }
         }
-        public static Color LightCoral
+        public static Color4b LightCoral
         {
             get { return FromArgb(unchecked((int)(0xFFF08080))); }
         }
-        public static Color LightCyan
+        public static Color4b LightCyan
         {
             get { return FromArgb(unchecked((int)(0xFFE0FFFF))); }
         }
-        public static Color LightGoldenrodYellow
+        public static Color4b LightGoldenrodYellow
         {
             get { return FromArgb(unchecked((int)(0xFFFAFAD2))); }
         }
-        public static Color LightGray
+        public static Color4b LightGray
         {
             get { return FromArgb(unchecked((int)(0xFFD3D3D3))); }
         }
-        public static Color LightGreen
+        public static Color4b LightGreen
         {
             get { return FromArgb(unchecked((int)(0xFF90EE90))); }
         }
-        public static Color LightPink
+        public static Color4b LightPink
         {
             get { return FromArgb(unchecked((int)(0xFFFFB6C1))); }
         }
-        public static Color LightSalmon
+        public static Color4b LightSalmon
         {
             get { return FromArgb(unchecked((int)(0xFFFFA07A))); }
         }
-        public static Color LightSeaGreen
+        public static Color4b LightSeaGreen
         {
             get { return FromArgb(unchecked((int)(0xFF20B2AA))); }
         }
-        public static Color LightSkyBlue
+        public static Color4b LightSkyBlue
         {
             get { return FromArgb(unchecked((int)(0xFF87CEFA))); }
         }
-        public static Color LightSlateGray
+        public static Color4b LightSlateGray
         {
             get { return FromArgb(unchecked((int)(0xFF778899))); }
         }
-        public static Color LightSteelBlue
+        public static Color4b LightSteelBlue
         {
             get { return FromArgb(unchecked((int)(0xFFB0C4DE))); }
         }
-        public static Color LightYellow
+        public static Color4b LightYellow
         {
             get { return FromArgb(unchecked((int)(0xFFFFFFE0))); }
         }
-        public static Color Lime
+        public static Color4b Lime
         {
             get { return FromArgb(unchecked((int)(0xFF00FF00))); }
         }
-        public static Color LimeGreen
+        public static Color4b LimeGreen
         {
             get { return FromArgb(unchecked((int)(0xFF32CD32))); }
         }
-        public static Color Linen
+        public static Color4b Linen
         {
             get { return FromArgb(unchecked((int)(0xFFFAF0E6))); }
         }
-        public static Color Magenta
+        public static Color4b Magenta
         {
             get { return FromArgb(unchecked((int)(0xFFFF00FF))); }
         }
-        public static Color Maroon
+        public static Color4b Maroon
         {
             get { return FromArgb(unchecked((int)(0xFF800000))); }
         }
-        public static Color MediumAquamarine
+        public static Color4b MediumAquamarine
         {
             get { return FromArgb(unchecked((int)(0xFF66CDAA))); }
         }
-        public static Color MediumBlue
+        public static Color4b MediumBlue
         {
             get { return FromArgb(unchecked((int)(0xFF0000CD))); }
         }
-        public static Color MediumOrchid
+        public static Color4b MediumOrchid
         {
             get { return FromArgb(unchecked((int)(0xFFBA55D3))); }
         }
-        public static Color MediumPurple
+        public static Color4b MediumPurple
         {
             get { return FromArgb(unchecked((int)(0xFF9370DB))); }
         }
-        public static Color MediumSeaGreen
+        public static Color4b MediumSeaGreen
         {
             get { return FromArgb(unchecked((int)(0xFF3CB371))); }
         }
-        public static Color MediumSlateBlue
+        public static Color4b MediumSlateBlue
         {
             get { return FromArgb(unchecked((int)(0xFF7B68EE))); }
         }
-        public static Color MediumSpringGreen
+        public static Color4b MediumSpringGreen
         {
             get { return FromArgb(unchecked((int)(0xFF00FA9A))); }
         }
-        public static Color MediumTurquoise
+        public static Color4b MediumTurquoise
         {
             get { return FromArgb(unchecked((int)(0xFF48D1CC))); }
         }
-        public static Color MediumVioletRed
+        public static Color4b MediumVioletRed
         {
             get { return FromArgb(unchecked((int)(0xFFC71585))); }
         }
-        public static Color MidnightBlue
+        public static Color4b MidnightBlue
         {
             get { return FromArgb(unchecked((int)(0xFF191970))); }
         }
-        public static Color MintCream
+        public static Color4b MintCream
         {
             get { return FromArgb(unchecked((int)(0xFFF5FFFA))); }
         }
-        public static Color MistyRose
+        public static Color4b MistyRose
         {
             get { return FromArgb(unchecked((int)(0xFFFFE4E1))); }
         }
-        public static Color Moccasin
+        public static Color4b Moccasin
         {
             get { return FromArgb(unchecked((int)(0xFFFFE4B5))); }
         }
-        public static Color NavajoWhite
+        public static Color4b NavajoWhite
         {
             get { return FromArgb(unchecked((int)(0xFFFFDEAD))); }
         }
-        public static Color Navy
+        public static Color4b Navy
         {
             get { return FromArgb(unchecked((int)(0xFF000080))); }
         }
-        public static Color OldLace
+        public static Color4b OldLace
         {
             get { return FromArgb(unchecked((int)(0xFFFDF5E6))); }
         }
-        public static Color Olive
+        public static Color4b Olive
         {
             get { return FromArgb(unchecked((int)(0xFF808000))); }
         }
-        public static Color OliveDrab
+        public static Color4b OliveDrab
         {
             get { return FromArgb(unchecked((int)(0xFF6B8E23))); }
         }
-        public static Color Orange
+        public static Color4b Orange
         {
             get { return FromArgb(unchecked((int)(0xFFFFA500))); }
         }
-        public static Color OrangeRed
+        public static Color4b OrangeRed
         {
             get { return FromArgb(unchecked((int)(0xFFFF4500))); }
         }
-        public static Color Orchid
+        public static Color4b Orchid
         {
             get { return FromArgb(unchecked((int)(0xFFDA70D6))); }
         }
-        public static Color PaleGoldenrod
+        public static Color4b PaleGoldenrod
         {
             get { return FromArgb(unchecked((int)(0xFFEEE8AA))); }
         }
-        public static Color PaleGreen
+        public static Color4b PaleGreen
         {
             get { return FromArgb(unchecked((int)(0xFF98FB98))); }
         }
-        public static Color PaleTurquoise
+        public static Color4b PaleTurquoise
         {
             get { return FromArgb(unchecked((int)(0xFFAFEEEE))); }
         }
-        public static Color PaleVioletRed
+        public static Color4b PaleVioletRed
         {
             get { return FromArgb(unchecked((int)(0xFFDB7093))); }
         }
-        public static Color PapayaWhip
+        public static Color4b PapayaWhip
         {
             get { return FromArgb(unchecked((int)(0xFFFFEFD5))); }
         }
-        public static Color PeachPuff
+        public static Color4b PeachPuff
         {
             get { return FromArgb(unchecked((int)(0xFFFFDAB9))); }
         }
-        public static Color Peru
+        public static Color4b Peru
         {
             get { return FromArgb(unchecked((int)(0xFFCD853F))); }
         }
-        public static Color Pink
+        public static Color4b Pink
         {
             get { return FromArgb(unchecked((int)(0xFFFFC0CB))); }
         }
-        public static Color Plum
+        public static Color4b Plum
         {
             get { return FromArgb(unchecked((int)(0xFFDDA0DD))); }
         }
-        public static Color PowderBlue
+        public static Color4b PowderBlue
         {
             get { return FromArgb(unchecked((int)(0xFFB0E0E6))); }
         }
-        public static Color Purple
+        public static Color4b Purple
         {
             get { return FromArgb(unchecked((int)(0xFF800080))); }
         }
-        public static Color Red
+        public static Color4b Red
         {
             get { return FromArgb(unchecked((int)(0xFFFF0000))); }
         }
-        public static Color RosyBrown
+        public static Color4b RosyBrown
         {
             get { return FromArgb(unchecked((int)(0xFFBC8F8F))); }
         }
-        public static Color RoyalBlue
+        public static Color4b RoyalBlue
         {
             get { return FromArgb(unchecked((int)(0xFF4169E1))); }
         }
-        public static Color SaddleBrown
+        public static Color4b SaddleBrown
         {
             get { return FromArgb(unchecked((int)(0xFF8B4513))); }
         }
-        public static Color Salmon
+        public static Color4b Salmon
         {
             get { return FromArgb(unchecked((int)(0xFFFA8072))); }
         }
-        public static Color SandyBrown
+        public static Color4b SandyBrown
         {
             get { return FromArgb(unchecked((int)(0xFFF4A460))); }
         }
-        public static Color SeaGreen
+        public static Color4b SeaGreen
         {
             get { return FromArgb(unchecked((int)(0xFF2E8B57))); }
         }
-        public static Color SeaShell
+        public static Color4b SeaShell
         {
             get { return FromArgb(unchecked((int)(0xFFFFF5EE))); }
         }
-        public static Color Sienna
+        public static Color4b Sienna
         {
             get { return FromArgb(unchecked((int)(0xFFA0522D))); }
         }
-        public static Color Silver
+        public static Color4b Silver
         {
             get { return FromArgb(unchecked((int)(0xFFC0C0C0))); }
         }
-        public static Color SkyBlue
+        public static Color4b SkyBlue
         {
             get { return FromArgb(unchecked((int)(0xFF87CEEB))); }
         }
-        public static Color SlateBlue
+        public static Color4b SlateBlue
         {
             get { return FromArgb(unchecked((int)(0xFF6A5ACD))); }
         }
-        public static Color SlateGray
+        public static Color4b SlateGray
         {
             get { return FromArgb(unchecked((int)(0xFF708090))); }
         }
-        public static Color Snow
+        public static Color4b Snow
         {
             get { return FromArgb(unchecked((int)(0xFFFFFAFA))); }
         }
-        public static Color SpringGreen
+        public static Color4b SpringGreen
         {
             get { return FromArgb(unchecked((int)(0xFF00FF7F))); }
         }
-        public static Color SteelBlue
+        public static Color4b SteelBlue
         {
             get { return FromArgb(unchecked((int)(0xFF4682B4))); }
         }
-        public static Color Tan
+        public static Color4b Tan
         {
             get { return FromArgb(unchecked((int)(0xFFD2B48C))); }
         }
-        public static Color Teal
+        public static Color4b Teal
         {
             get { return FromArgb(unchecked((int)(0xFF008080))); }
         }
-        public static Color Thistle
+        public static Color4b Thistle
         {
             get { return FromArgb(unchecked((int)(0xFFD8BFD8))); }
         }
-        public static Color Tomato
+        public static Color4b Tomato
         {
             get { return FromArgb(unchecked((int)(0xFFFF6347))); }
         }
-        public static Color Turquoise
+        public static Color4b Turquoise
         {
             get { return FromArgb(unchecked((int)(0xFF40E0D0))); }
         }
-        public static Color Violet
+        public static Color4b Violet
         {
             get { return FromArgb(unchecked((int)(0xFFEE82EE))); }
         }
-        public static Color Wheat
+        public static Color4b Wheat
         {
             get { return FromArgb(unchecked((int)(0xFFF5DEB3))); }
         }
-        public static Color White
+        public static Color4b White
         {
             get { return FromArgb(unchecked((int)(0xFFFFFFFF))); }
         }
-        public static Color WhiteSmoke
+        public static Color4b WhiteSmoke
         {
             get { return FromArgb(unchecked((int)(0xFFF5F5F5))); }
         }
-        public static Color Yellow
+        public static Color4b Yellow
         {
             get { return FromArgb(unchecked((int)(0xFFFFFF00))); }
         }
-        public static Color YellowGreen
+        public static Color4b YellowGreen
         {
             get { return FromArgb(unchecked((int)(0xFF9ACD32))); }
         }
-        public static Color Transparent
+        public static Color4b Transparent
         {
             get { return FromArgb(unchecked((int)(0x00000000))); }
         }

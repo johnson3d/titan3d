@@ -52,6 +52,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)RenderGraph.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)RenderGraphNode.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Shader\MdfQueue.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Shader\ShaderAsset.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Shadow\UCascadedShadowMap.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Shadow\UExponentialShadowNode.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Shadow\UShadowMapNode.cs" />

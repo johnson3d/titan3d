@@ -278,6 +278,10 @@ namespace EngineNS.Graphics.Pipeline
             public NxRHI.FShaderVarDesc ParticleMaxSize;
             [NxRHI.UShader.UShaderVar(VarType = typeof(float))]
             public NxRHI.FShaderVarDesc ParticleElapsedTime;
+            [NxRHI.UShader.UShaderVar(VarType = typeof(float))]
+            public NxRHI.FShaderVarDesc ParticleStartSecond;
+            [NxRHI.UShader.UShaderVar(VarType = typeof(uint))]
+            public NxRHI.FShaderVarDesc OnTimer;
             [NxRHI.UShader.UShaderVar(VarType = typeof(uint))]
             public NxRHI.FShaderVarDesc ParticleRandomSeed;
             [NxRHI.UShader.UShaderVar(VarType = typeof(uint))]

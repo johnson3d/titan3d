@@ -68,7 +68,7 @@ namespace EngineNS.Bricks.Procedure.Algorithm
             {
                 for (int j = 0; j < SimTex.Height; j++)
                 {
-                    SimTex.SetPixel(i, j, Color4f.FromABGR(Color.White));
+                    SimTex.SetPixel(i, j, Color4f.FromABGR(Color4b.White));
                 }
             }
             //SimTex.Apply();
@@ -293,7 +293,7 @@ namespace EngineNS.Bricks.Procedure.Algorithm
                 foreach (var pos in toAddList)
                 {
                     LowSet.Add(pos);
-                    SimTex.SetPixel(pos.X, pos.Y, Color4f.FromABGR(Color.Blue));
+                    SimTex.SetPixel(pos.X, pos.Y, Color4f.FromABGR(Color4b.Blue));
                 }
             }
             // UpFlow

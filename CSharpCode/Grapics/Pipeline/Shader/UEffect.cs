@@ -241,6 +241,7 @@ namespace EngineNS.Graphics.Pipeline.Shader
             result.DescVS = await UEngine.Instance.EventPoster.Post((state) =>
             {
                 var compilier = new Editor.ShaderCompiler.UHLSLCompiler();
+                compilier.MdfQueue = mdf;
                 return compilier.CompileShader(shading.CodeName.Address, "VS_Main", NxRHI.EShaderType.SDT_VertexShader,
                     shading, material, mdf.GetType(), defines, null, null, UEngine.Instance.Config.IsDebugShader);
             }, Thread.Async.EAsyncTarget.AsyncIO);
@@ -250,6 +251,7 @@ namespace EngineNS.Graphics.Pipeline.Shader
             result.DescPS = await UEngine.Instance.EventPoster.Post((state) =>
             {
                 var compilier = new Editor.ShaderCompiler.UHLSLCompiler();
+                compilier.MdfQueue = mdf;
                 return compilier.CompileShader(shading.CodeName.Address, "PS_Main", NxRHI.EShaderType.SDT_PixelShader, 
                     shading, material, mdf.GetType(), defines, null, null, UEngine.Instance.Config.IsDebugShader);
             }, Thread.Async.EAsyncTarget.AsyncIO);
@@ -339,6 +341,7 @@ namespace EngineNS.Graphics.Pipeline.Shader
             var descVS = await UEngine.Instance.EventPoster.Post((state) =>
             {
                 var compilier = new Editor.ShaderCompiler.UHLSLCompiler();
+                compilier.MdfQueue = mdf;
                 return compilier.CompileShader(shading.CodeName.Address, "VS_Main", NxRHI.EShaderType.SDT_VertexShader, 
                     shading, material, mdfType.SystemType, defines, null, null, UEngine.Instance.Config.IsDebugShader);
             }, Thread.Async.EAsyncTarget.AsyncIO);
@@ -348,6 +351,7 @@ namespace EngineNS.Graphics.Pipeline.Shader
             var descPS = await UEngine.Instance.EventPoster.Post((state) =>
             {
                 var compilier = new Editor.ShaderCompiler.UHLSLCompiler();
+                compilier.MdfQueue = mdf;
                 return compilier.CompileShader(shading.CodeName.Address, "PS_Main", NxRHI.EShaderType.SDT_PixelShader, 
                     shading, material, mdfType.SystemType, defines, null, null, UEngine.Instance.Config.IsDebugShader);
             }, Thread.Async.EAsyncTarget.AsyncIO);
@@ -633,6 +637,7 @@ namespace EngineNS.Graphics.Pipeline.Shader
             }
             var rc = UEngine.Instance.GfxDevice.RenderContext;
             var compiler = new Editor.ShaderCompiler.UHLSLCompiler();
+            compiler.MdfQueue = null;
             if (defines == null)
             {
                 defines = new NxRHI.UShaderDefinitions();

@@ -44,9 +44,9 @@ namespace EngineNS.Graphics.Pipeline.Shader
             HasSnapshot = true;
             OnShowIconTimout(0);
         }
-        protected override Color GetBorderColor()
+        protected override Color4b GetBorderColor()
         {
-            return Color.Cyan;
+            return Color4b.Cyan;
         }
     }
     [Rtti.Meta]

@@ -14,6 +14,7 @@
     <ProjectCapability Include="SourceItemsFromImports" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="$(MSBuildThisFileDirectory)ColorTextEditor\TextEditor.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)dirent_win.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)imconfig.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)imgui.h" />
@@ -26,6 +27,7 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)misc\freetype\imgui_freetype.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="$(MSBuildThisFileDirectory)ColorTextEditor\TextEditor.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)imgui.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)ImGuiFileDialog.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)imgui_demo.cpp" />
@@ -43,5 +45,10 @@
     <Text Include="$(MSBuildThisFileDirectory)LICENSE.txt">
       <ExcludedFromBuild>true</ExcludedFromBuild>
     </Text>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="$(MSBuildThisFileDirectory)ColorTextEditor\CONTRIBUTING" />
+    <None Include="$(MSBuildThisFileDirectory)ColorTextEditor\LICENSE" />
+    <None Include="$(MSBuildThisFileDirectory)ColorTextEditor\README.md" />
   </ItemGroup>
 </Project>

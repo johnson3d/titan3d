@@ -120,6 +120,36 @@ namespace EngineNS.Bricks.Particle.Editor
                 }
             }
         }
+        float mTimerRemain;
+        [Category("Option")]
+        public float TimerRemain 
+        {
+            get => mTimerRemain;
+            set
+            {
+                mTimerRemain = value;
+                if (EditingObject != null)
+                {
+                    EditingObject.TimerRemain = value;
+                }
+            }
+        }
+        float mTimerInterval;
+        [Category("Option")]
+        [Rtti.Meta]
+        public float TimerInterval 
+        {
+            get => mTimerInterval;
+            set
+            {
+                mTimerInterval = value;
+                if (EditingObject != null)
+                {
+                    EditingObject.TimerInterval = value;
+                }
+            }
+
+        }
         public virtual UTypeDesc CreateEmitterType()
         {
             return UTypeDescGetter<TtEmitter>.TypeDesc;
@@ -129,6 +159,8 @@ namespace EngineNS.Bricks.Particle.Editor
             emt.EmitterData.Location = Location;
             emt.EmitterData.Velocity = Velocity;
             emt.McName = McName;
+            emt.TimerInterval = TimerInterval;
+            emt.TimerRemain = TimerRemain;
             //emt.EmitterData.Flags = Flags;
         }
     }
@@ -376,26 +408,139 @@ namespace EngineNS.Bricks.Particle.Editor
         {
             Name = "Accelerated";
         }
-        Vector3 mAcceleration = new Vector3(0, -0.1f, 0);
+        Vector3 mAccelerationMin = new Vector3(0, -0.1f, 0);
         [Category("Option")]
         [Rtti.Meta]
-        public Vector3 Acceleration 
+        public Vector3 AccelerationMin 
         { 
-            get => mAcceleration;
+            get => mAccelerationMin;
             set
             {
-                mAcceleration = value;
+                mAccelerationMin = value;
                 var effector = EditingObject as TtAcceleratedEffector;
                 if (effector != null)
                 {
-                    effector.Acceleration = mAcceleration;
+                    effector.AccelerationMin = value;
+                }
+            }
+        }
+        Vector3 mAccelerationRange = new Vector3(0, -0.1f, 0);
+        [Category("Option")]
+        [Rtti.Meta]
+        public Vector3 AccelerationRange
+        {
+            get => mAccelerationRange;
+            set
+            {
+                mAccelerationRange = value;
+                var effector = EditingObject as TtAcceleratedEffector;
+                if (effector != null)
+                {
+                    effector.AccelerationRange = value;
                 }
             }
         }
         public override TtEffector CreateEffector()
         {
             var result = new TtAcceleratedEffector();
-            result.Acceleration = Acceleration;
+            result.AccelerationMin = AccelerationMin;
+            result.AccelerationRange = AccelerationRange;
+            return result;
+        }
+    }
+
+    [Bricks.CodeBuilder.ContextMenu(filterStrings: "Color", "Effector\\Color", TtParticleGraph.NebulaEditorKeyword)]
+    public class TtColorEffectorNode : TtEffectorNode
+    {
+        public TtColorEffectorNode()
+        {
+            Name = "Color";
+        }
+        Vector4 mOpColorMin = Vector4.Zero;
+        [Category("Option")]
+        [Rtti.Meta]
+        public Vector4 OpColorMin
+        {
+            get => mOpColorMin;
+            set
+            {
+                mOpColorMin = value;
+                var effector = EditingObject as TtColorEffector;
+                if (effector != null)
+                {
+                    effector.OpColorMin = value;
+                }
+            }
+        }
+        Vector4 mOpColorRange = Vector4.Zero;
+        [Category("Option")]
+        [Rtti.Meta]
+        public Vector4 OpColorRange
+        {
+            get => mOpColorRange;
+            set
+            {
+                mOpColorRange = value;
+                var effector = EditingObject as TtColorEffector;
+                if (effector != null)
+                {
+                    effector.OpColorRange = value;
+                }
+            }
+        }
+        public override TtEffector CreateEffector()
+        {
+            var result = new TtColorEffector();
+            result.OpColorMin = OpColorMin;
+            result.OpColorRange = OpColorRange;
+            return result;
+        }
+    }
+
+    [Bricks.CodeBuilder.ContextMenu(filterStrings: "Scale", "Effector\\Scale", TtParticleGraph.NebulaEditorKeyword)]
+    public class TtScaleEffectorNode : TtEffectorNode
+    {
+        public TtScaleEffectorNode()
+        {
+            Name = "Scale";
+        }
+        float mOpScaleMin = 0;
+        [Category("Option")]
+        [Rtti.Meta]
+        public float OpScaleMin
+        {
+            get => mOpScaleMin;
+            set
+            {
+                mOpScaleMin = value;
+                var effector = EditingObject as TtScaleEffector;
+                if (effector != null)
+                {
+                    effector.OpScaleMin = value;
+                }
+            }
+        }
+        float mOpScaleRange = 0;
+        [Category("Option")]
+        [Rtti.Meta]
+        public float OpScaleRange
+        {
+            get => mOpScaleRange;
+            set
+            {
+                mOpScaleRange = value;
+                var effector = EditingObject as TtScaleEffector;
+                if (effector != null)
+                {
+                    effector.OpScaleRange = value;
+                }
+            }
+        }
+        public override TtEffector CreateEffector()
+        {
+            var result = new TtScaleEffector();
+            result.OpScaleMin = OpScaleMin;
+            result.OpScaleRange = OpScaleRange;
             return result;
         }
     }

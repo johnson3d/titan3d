@@ -89,7 +89,7 @@ namespace EngineNS
             return Result;
         }
 
-        public ThreeBandSHVectorRGB MulSH3(in ThreeBandSHVector SHVector, in Color color)
+        public ThreeBandSHVectorRGB MulSH3(in ThreeBandSHVector SHVector, in Color4b color)
         {
             ThreeBandSHVectorRGB Result = new ThreeBandSHVectorRGB();
 
@@ -162,7 +162,7 @@ namespace EngineNS
             return new Vector4(H.X, H.Y, H.Z, PDF);
         }
 
-        public void GenerateData(in Vector3 Direction, in Color PixelColor, float Weight)
+        public void GenerateData(in Vector3 Direction, in Color4b PixelColor, float Weight)
         {
             ThreeBandSHVector SHVector = SHBasisFunction3(in Direction);
             ThreeBandSHVectorRGB SHVectorRGB = MulSH3(in SHVector, in PixelColor);
@@ -176,7 +176,7 @@ namespace EngineNS
             float SampleWeight = 1.0f / (UniformPDF * Normals.Length);
             for (int i = 0; i < Normals.Length; i++)
             {
-                GenerateData(Normals[i], Color.FromRgb(255, 255, 255), SampleWeight); //Color -> Compute Color 
+                GenerateData(Normals[i], Color4b.FromRgb(255, 255, 255), SampleWeight); //Color -> Compute Color 
             }
         }
 
@@ -186,7 +186,7 @@ namespace EngineNS
             float SampleWeight = 1.0f / (UniformPDF * count);
             for (int i = 0; i < count; i++)
             {
-                GenerateData(Normals[i], Color.FromRgb(255, 255, 255), SampleWeight); //Color -> Compute Color 
+                GenerateData(Normals[i], Color4b.FromRgb(255, 255, 255), SampleWeight); //Color -> Compute Color 
             }
         }
 

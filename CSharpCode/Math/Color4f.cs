@@ -102,7 +102,7 @@ namespace EngineNS
         /// 带参构造函数
         /// </summary>
         /// <param name="color">颜色</param>
-        public Color4f(Color color)
+        public Color4f(Color4b color)
 	    {
 		    Alpha = color.A / 255.0f;
 		    Red = color.R / 255.0f;
@@ -163,9 +163,9 @@ namespace EngineNS
     /// 颜色转换
     /// </summary>
     /// <returns>返回转换后的颜色</returns>
-    public Color ToColor()
+    public Color4b ToColor()
 	    {
-		    return Color.FromArgb( (int)(Alpha * 255), (int)(Red * 255), (int)(Green * 255), (int)(Blue * 255) );
+		    return Color4b.FromArgb( (int)(Alpha * 255), (int)(Red * 255), (int)(Green * 255), (int)(Blue * 255) );
 	    }
         /// <summary>
         /// 转换成不带Alpha通道值的颜色值
@@ -215,7 +215,7 @@ namespace EngineNS
 
 		    return value;
         }
-        public static Color4f FromABGR(Color color)
+        public static Color4f FromABGR(Color4b color)
         {
             Color4f retValue = new Color4f();
             retValue.Alpha = ((float)color.A) / 255.0f;
@@ -645,7 +645,7 @@ namespace EngineNS
         /// 自定义CSUtility.Support.Color类型转换方式
         /// </summary>
         /// <param name="value">颜色对象</param>
-	    public static implicit operator Color( Color4f value )
+	    public static implicit operator Color4b( Color4f value )
 	    {
 		    return value.ToColor();
 	    }
@@ -695,7 +695,7 @@ namespace EngineNS
         /// 自定义Color4类型转换方式
         /// </summary>
         /// <param name="value">CSUtility.Support.Color类型的对象</param>
-	    public static implicit operator Color4f( Color value )
+	    public static implicit operator Color4f( Color4b value )
 	    {
             Color4f result;
             result.Red = value.R;

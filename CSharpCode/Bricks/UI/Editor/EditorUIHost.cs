@@ -24,7 +24,7 @@ namespace EngineNS.UI.Editor
         TtCanvasBrush mDrawBrush = new TtCanvasBrush()
         {
             Name = "@MatInst:ui/uimat_inst_default.uminst:Engine",
-            Color = Color.White,
+            Color = Color4b.White,
         };
         TtCanvasBrush mGridBrush = new TtCanvasBrush()
         {
@@ -258,7 +258,7 @@ namespace EngineNS.UI.Editor
             {
                 canvas.PushBrush(mGridBrush);
                 var winRect = new RectangleF(0, 0, WindowSize.Width, WindowSize.Height);
-                canvas.AddRectFill(in winRect, Vector4.Zero, Color.White, ref mDrawCmd);
+                canvas.AddRectFill(in winRect, Vector4.Zero, Color4b.White, ref mDrawCmd);
                 canvas.PopBrush();
                 mGridBrush.IsDirty = true;
             }
@@ -315,7 +315,7 @@ namespace EngineNS.UI.Editor
         TtCanvasBrush mDrawBrush = new TtCanvasBrush()
         {
             Name = "@MatInst:ui/uimat_inst_default.uminst:Engine",
-            Color = Color.White,
+            Color = Color4b.White,
         };
         public TtCanvasBrush DrawBrush => mDrawBrush;
 

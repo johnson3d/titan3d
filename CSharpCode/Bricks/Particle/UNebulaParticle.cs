@@ -18,8 +18,7 @@ namespace EngineNS.Bricks.Particle
         }
         public override async System.Threading.Tasks.Task<IO.IAsset> LoadAsset()
         {
-            //return await UEngine.Instance.GfxDevice.TextureManager.GetTexture(GetAssetName());
-            return new TtNebulaParticle();
+            return await UEngine.Instance.NebulaTemplateManager.GetParticle(GetAssetName());
         }
         public override bool CanRefAssetType(IO.IAssetMeta ameta)
         {
@@ -31,13 +30,13 @@ namespace EngineNS.Bricks.Particle
         //    cmdlist.AddText(in start, 0xFFFFFFFF, "nebula", null);
         //}
     }
-    [TtNebulaParticle.UNebulaParticleImport]
+    [TtNebulaParticle.TtNebulaParticleImport]
     [IO.AssetCreateMenu(MenuName = "FX/NubulaParticle")]
     [EngineNS.Editor.UAssetEditor(EditorType = typeof(Editor.TtParticleEditor))]
     public partial class TtNebulaParticle : IO.BaseSerializer, IO.IAsset, IDisposable
     {
         public const string AssetExt = ".nebula";
-        public class UNebulaParticleImportAttribute : IO.CommonCreateAttribute
+        public class TtNebulaParticleImportAttribute : IO.CommonCreateAttribute
         {
             protected override bool CheckAsset()
             {
@@ -60,6 +59,14 @@ namespace EngineNS.Bricks.Particle
         public void UpdateAMetaReferences(IO.IAssetMeta ameta)
         {
             ameta.RefAssetRNames.Clear();
+            foreach (var i in ParticleGraph.Nodes)
+            {
+                var emtNode = i as Editor.TtEmitterNode;
+                if (emtNode != null)
+                {
+                    ameta.AddReferenceAsset(emtNode.MeshName);
+                }
+            }
         }
         public void SaveAssetTo(RName name)
         {
@@ -98,7 +105,8 @@ namespace EngineNS.Bricks.Particle
                 Emitter.EmitterShapes.Add(sphereShape);
                 Emitter.EmitterShapes.Add(boxShape);
                 var ef1 = new TtAcceleratedEffector();
-                ef1.Acceleration = new Vector3(0, -0.1f, 0);
+                ef1.AccelerationMin = new Vector3(0, -0.1f, 0);
+                ef1.AccelerationRange = new Vector3(0, 0.1f, 0);
                 Emitter.AddEffector("default", ef1);
                 Emitter.SetCurrentQueue("default");
 

@@ -123,9 +123,9 @@ namespace EngineNS.Graphics.Pipeline.Common
             AddInput(SrcPinIn, NxRHI.EBufferType.BFT_SRV);
             AddOutput(PrevPinOut, NxRHI.EBufferType.BFT_SRV);
         }
-        public override Color GetTileColor()
+        public override Color4b GetTileColor()
         {
-            return Color.FromRgb(255, 255, 0);
+            return Color4b.FromRgb(255, 255, 0);
         }
         public override async System.Threading.Tasks.Task Initialize(URenderPolicy policy, string debugName)
         {

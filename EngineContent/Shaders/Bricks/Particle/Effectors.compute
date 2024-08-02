@@ -1,12 +1,33 @@
 #ifndef _PARTICLE_EFFECTORS_H_
 #define _PARTICLE_EFFECTORS_H_
 
-void Accelerated_EffectorExecute(uint3 id, inout FParticle particle, Accelerated_EffectorParameters parameter)
+#if defined(USE_EFFECTOR_Accelerated)
+void Accelerated_EffectorExecute(uint3 id, float elapseTime, inout FParticle particle, Accelerated_EffectorParameters parameter)
 {
 	float rdValue = RandomFloatBySeedSignedUnit(particle);// RandomFloat4(id.x);
-	//rdValue = 0;
-	//particle.Location += parameter.Acceleration * ParticleElapsedTime * (1.0f + rdValue * 2.5f);
-    particle.Velocity += parameter.Acceleration;
+	particle.Velocity += (parameter.AccelerationMin + parameter.AccelerationRange * rdValue) * elapseTime;
 }
+#endif
+
+#if defined(USE_EFFECTOR_Color)
+void Color_EffectorExecute(uint3 id, float elapseTime, inout FParticle particle, Color_EffectorParameters parameter)
+{
+    float rdValue = RandomFloatBySeedSignedUnit(particle);
+    float4 clr = ToColor4f(particle.Color);
+    float4 opColor = parameter.OpColorMin + parameter.OpColorRange * rdValue;
+    clr += opColor * elapseTime;
+    clr = fmod(clr, float4(1.0f,1.0f,1.0f,1.0f));
+	particle.Color = ToColorUint(clr);
+}
+#endif
+
+#if defined(USE_EFFECTOR_Scale)
+void Scale_EffectorExecute(uint3 id, float elapseTime, inout FParticle particle, Scale_EffectorParameters parameter)
+{
+    float rdValue = RandomFloatBySeedSignedUnit(particle);
+    float scale = parameter.OpScaleMin +  parameter.OpScaleRange * rdValue;
+    particle.Scale += scale* elapseTime;
+}
+#endif
 
 #endif//#ifndef _PARTICLE_EFFECTORS_H_

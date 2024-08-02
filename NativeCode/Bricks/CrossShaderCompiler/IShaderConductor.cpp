@@ -38,7 +38,7 @@ struct UEngineInclude : public ID3DInclude
 			//todo: not windows platform
 			root = pFileName;
 		}
-		auto ar = ShaderConductor->GetShaderCodeStream(root.c_str());
+		auto ar = ShaderConductor->GetShaderCodeStream(root.c_str(), pFileName);
 		if (ar == nullptr)
 		{
 			VFX_LTRACE(ELTT_Graphics, "Include %s failed", root.c_str());
@@ -117,7 +117,7 @@ bool IShaderConductor::CompileShader(NxRHI::FShaderCompiler* compiler, NxRHI::FS
 	if (sl == NxRHI::EShaderLanguage::SL_DXBC)
 	{
 #if defined(PLATFORM_WIN)
-		auto ar = compiler->GetShaderCodeStream(shader);
+		auto ar = compiler->GetShaderCodeStream(shader, shader);
 		if (ar == nullptr)
 			return false;
 
@@ -204,7 +204,7 @@ bool IShaderConductor::CompileHLSL(NxRHI::FShaderCompiler* compiler, NxRHI::FSha
 	const NxRHI::IShaderDefinitions* defines, NxRHI::EShaderLanguage sl, bool debugShader, const char* extHlslVersion, const char* dxcArgs)
 {
 #if defined(PLATFORM_WIN)
-	auto ar = compiler->GetShaderCodeStream(hlsl);
+	auto ar = compiler->GetShaderCodeStream(hlsl, hlsl);
 	std::string codeText((const char*)ar->GetSourceCode(), (size_t)ar->GetSize());
 	
 	ShaderConductor::ShaderStage stage = ShaderConductor::ShaderStage::VertexShader;
@@ -263,7 +263,7 @@ bool IShaderConductor::CompileHLSL(NxRHI::FShaderCompiler* compiler, NxRHI::FSha
 	src.fileName = hlsl;
 	src.loadIncludeCallback = [=](const char* includeName)->ShaderConductor::Blob
 	{
-		auto ar_inc = compiler->GetShaderCodeStream(includeName);
+		auto ar_inc = compiler->GetShaderCodeStream(includeName, includeName);
 		
 		if (ar_inc != nullptr)
 			return ShaderConductor::Blob(ar_inc->GetSourceCode(), static_cast<uint32_t>(ar_inc->GetSize()));

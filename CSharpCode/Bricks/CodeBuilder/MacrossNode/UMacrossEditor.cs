@@ -33,6 +33,9 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
             InitializeManMenu();
             await PGMember.Initialize();
             await mUnionNodeConfigRenderer.Initialize();
+            mShaderEditor.mCoreObject.SetLanguage("C#");
+            mShaderEditor.mCoreObject.ApplyLangDefine();
+            mShaderEditor.mCoreObject.ApplyErrorMarkers();
             return true;
         }
 
@@ -126,7 +129,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
         UCSharpCodeGenerator mCSCodeGen = new UCSharpCodeGenerator();
         public UCSharpCodeGenerator CSCodeGen => mCSCodeGen;
 
-
+        EGui.TtCodeEditor mCodeEditor = new EGui.TtCodeEditor();
         public void SaveClassGraph(RName rn)
         {
             var ameta = UEngine.Instance.AssetMetaManager.GetAssetMeta(AssetName) as UMacrossAMeta;
@@ -281,6 +284,8 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
                 mCSCodeGen.GenerateClassCode(DefClass, AssetName, ref code);
                 SaveCSFile(code);
                 //GenerateAssemblyDescCreateInstanceCode();
+
+                mShaderEditor.mCoreObject.SetText(code);
 
                 EngineNS.UEngine.Instance.MacrossManager.GenerateProjects();
                 return code;
@@ -492,6 +497,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
             ImGuiAPI.DockBuilderSplitNode(graphId, ImGuiDir_.ImGuiDir_Right, 0.4f, ref unionConfigId, ref graphId);
 
             ImGuiAPI.DockBuilderDockWindow(EGui.UIProxy.DockProxy.GetDockWindowName("GraphWindow", mDockKeyClass), graphId);
+            ImGuiAPI.DockBuilderDockWindow(EGui.UIProxy.DockProxy.GetDockWindowName("TextEditor", mDockKeyClass), graphId);
             ImGuiAPI.DockBuilderDockWindow(EGui.UIProxy.DockProxy.GetDockWindowName("NodeProperty", mDockKeyClass), propertyId);
             ImGuiAPI.DockBuilderDockWindow(EGui.UIProxy.DockProxy.GetDockWindowName("UnionNodeConfig", mDockKeyClass), unionConfigId);
             ImGuiAPI.DockBuilderDockWindow(EGui.UIProxy.DockProxy.GetDockWindowName("ClassView", mDockKeyClass), leftId);
@@ -633,6 +639,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
 
             DrawClassView();
             DrawGraph();
+            DrawTextEditor();
             DrawPropertyGrid();
             DrawUnionNodeConfig();
 
@@ -937,7 +944,21 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
             mUnionNodeConfigRenderer?.SetUnionNode(node);
             mUnionNodeConfigShow = (node != null);
         }
-
+        EGui.TtCodeEditor mShaderEditor = new EGui.TtCodeEditor();
+        bool ShowTextEditor = true;
+        protected void DrawTextEditor()
+        {
+            var sz = new Vector2(-1);
+            var show = EGui.UIProxy.DockProxy.BeginPanel(mDockKeyClass, "TextEditor", ref ShowTextEditor, ImGuiWindowFlags_.ImGuiWindowFlags_None);
+            if (show)
+            {
+                var winPos = ImGuiAPI.GetWindowPos();
+                var vpMin = ImGuiAPI.GetWindowContentRegionMin();
+                var vpMax = ImGuiAPI.GetWindowContentRegionMax();
+                mShaderEditor.mCoreObject.Render(AssetName.Name, in Vector2.Zero, false);
+            }
+            EGui.UIProxy.DockProxy.EndPanel(show);
+        }
         Macross.UMacrossBreak mBreakerStore = null;
         bool mGraphWindowShow = true;
         int mSettingCurrentFuncIndex = -1;

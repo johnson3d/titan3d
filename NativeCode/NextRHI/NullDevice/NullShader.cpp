@@ -9,7 +9,7 @@ namespace NxRHI
 {
 	bool NullShader::CompileShader(FShaderCompiler* compiler, FShaderDesc* desc, const char* shader, const char* entry, EShaderType type, const char* sm, const IShaderDefinitions* defines, EShaderLanguage sl, bool bDebugShader)
 	{
-		AutoRef<FShaderCode> ar = compiler->GetShaderCodeStream(shader);
+		AutoRef<FShaderCode> ar = compiler->GetShaderCodeStream(shader, shader);
 		if (ar == nullptr)
 			return false;
 

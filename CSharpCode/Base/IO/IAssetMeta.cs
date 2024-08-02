@@ -353,7 +353,7 @@ namespace EngineNS.IO
         public void SaveAMeta(string fileName)
         {
             IO.TtFileManager.SaveObjectToXml(fileName, this);
-            UEngine.Instance.SourceControlModule.AddFile(fileName);
+            UEngine.Instance.SourceControlModule.AddFile(fileName, true);
         }
         public virtual bool CanRefAssetType(IAssetMeta ameta)
         {
@@ -366,7 +366,7 @@ namespace EngineNS.IO
         protected EGui.UIProxy.MenuItemProxy.MenuState mMoveToMenuState = new EGui.UIProxy.MenuItemProxy.MenuState();
         protected EGui.UIProxy.MenuItemProxy.MenuState mCopyToMenuState = new EGui.UIProxy.MenuItemProxy.MenuState();
         internal System.Threading.Tasks.Task<Editor.USnapshot> Task;
-        protected virtual Color GetBorderColor()
+        protected virtual Color4b GetBorderColor()
         {
             return EGui.UCoreStyles.Instance.SnapBorderColor;
         }

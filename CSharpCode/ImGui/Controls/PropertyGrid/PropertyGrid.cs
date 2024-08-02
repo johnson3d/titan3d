@@ -395,8 +395,8 @@ namespace EngineNS.EGui.Controls.PropertyGrid
                     misc_flags | ImGuiColorEditFlags_.ImGuiColorEditFlags_NoSidePreview | ImGuiColorEditFlags_.ImGuiColorEditFlags_NoSmallPreview);
                 if (v != saved)
                 {
-                    if (info.Type.IsEqual(typeof(Color)))
-                        newValue = Color.FromArgb((int)(255), (int)(v.R * 255), (int)(v.G * 255), (int)(v.B * 255));
+                    if (info.Type.IsEqual(typeof(Color4b)))
+                        newValue = Color4b.FromArgb((int)(255), (int)(v.R * 255), (int)(v.G * 255), (int)(v.B * 255));
                     else if (info.Type.IsEqual(typeof(Color3f)))
                         newValue = (Color3f)v;
                     else
@@ -467,8 +467,8 @@ namespace EngineNS.EGui.Controls.PropertyGrid
                     misc_flags | ImGuiColorEditFlags_.ImGuiColorEditFlags_NoSidePreview | ImGuiColorEditFlags_.ImGuiColorEditFlags_NoSmallPreview, (float*)0);
                 if (v != saved)
                 {
-                    if (info.Type.IsEqual(typeof(Color)))
-                        newValue = Color.FromArgb((int)(v.A * 255), (int)(v.R * 255), (int)(v.G * 255), (int)(v.B * 255));
+                    if (info.Type.IsEqual(typeof(Color4b)))
+                        newValue = Color4b.FromArgb((int)(v.A * 255), (int)(v.R * 255), (int)(v.G * 255), (int)(v.B * 255));
                     else if (info.Type.IsEqual(typeof(Color4f)))
                         newValue = (Color4f)v;
                     else
@@ -527,15 +527,15 @@ namespace EngineNS.EGui.Controls.PropertyGrid
                 mPopupOn = true;
                 ImGuiColorEditFlags_ misc_flags = (mHDR ? ImGuiColorEditFlags_.ImGuiColorEditFlags_HDR : 0) | (mDragAndDrop ? 0 : ImGuiColorEditFlags_.ImGuiColorEditFlags_NoDragDrop) | (mAlphaHalfPreview ? ImGuiColorEditFlags_.ImGuiColorEditFlags_AlphaPreviewHalf : (mAlphaPreview ? ImGuiColorEditFlags_.ImGuiColorEditFlags_AlphaPreview : 0)) | (mOptionMenu ? 0 : ImGuiColorEditFlags_.ImGuiColorEditFlags_NoOptions);
                 Color4f v;
-                Color srcValue = Color.FromRgb(0,0,0);
+                Color4b srcValue = Color4b.FromRgb(0,0,0);
                 if(multiValue != null)
                 {
                     if (!multiValue.HasDifferentValue())
-                        srcValue = (Color)multiValue.Values[0];
+                        srcValue = (Color4b)multiValue.Values[0];
                 }
                 else
                 {
-                    srcValue = (Color)info.Value;
+                    srcValue = (Color4b)info.Value;
                 }
                 if (IsABGR)
                     v = Color4f.FromABGR(srcValue);

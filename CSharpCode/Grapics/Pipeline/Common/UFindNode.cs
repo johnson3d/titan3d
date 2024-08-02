@@ -29,9 +29,9 @@ namespace EngineNS.Graphics.Pipeline.Common
             }
             return mNode;
         }
-        public override Color GetTileColor()
+        public override Color4b GetTileColor()
         {
-            return Color.FromRgb(0, 255, 255);
+            return Color4b.FromRgb(0, 255, 255);
         }
         [Rtti.Meta]
         public string ProxyPinName

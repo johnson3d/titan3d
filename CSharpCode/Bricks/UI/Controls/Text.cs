@@ -114,10 +114,10 @@ namespace EngineNS.UI.Controls
             }
         }
 
-        EngineNS.Color mColor = EngineNS.Color.White;
+        EngineNS.Color4b mColor = EngineNS.Color4b.White;
         [Rtti.Meta, BindProperty, Category("Text")]
         [EGui.Controls.PropertyGrid.Color4PickerEditor()]
-        public EngineNS.Color Color
+        public EngineNS.Color4b Color
         {
             get => mColor;
             set

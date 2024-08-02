@@ -243,11 +243,11 @@ namespace NxRHI
 		const char* GetSourceCode() const;
 	};
 	TR_CALLBACK(SV_CallConvention = System.Runtime.InteropServices.CallingConvention.Cdecl, SV_NameSpace = EngineNS)
-	typedef NxRHI::FShaderCode* (*FnGetShaderCodeStream)(TR_META(SV_NoStringConverter) const char* name);
+	typedef NxRHI::FShaderCode* (*FnGetShaderCodeStream)(TR_META(SV_NoStringConverter) const char* name, TR_META(SV_NoStringConverter) const char* oriName);
 	class TR_CLASS()
 		FShaderCompiler : public IWeakReference
 	{
-		typedef NxRHI::FShaderCode* (*FnGetShaderCodeStream)(TR_META(SV_NoStringConverter) const char* name);
+		typedef NxRHI::FShaderCode* (*FnGetShaderCodeStream)(TR_META(SV_NoStringConverter) const char* name, TR_META(SV_NoStringConverter) const char* oriName);
 		FnGetShaderCodeStream			GetShaderCodeStreamPtr;
 	public:
 		ENGINE_RTTI(FShaderCompiler);
@@ -259,7 +259,7 @@ namespace NxRHI
 		{
 			GetShaderCodeStreamPtr = fn;
 		}
-		FShaderCode* GetShaderCodeStream(const char* name);
+		FShaderCode* GetShaderCodeStream(const char* name, const char* oriName);
 		bool CompileShader(FShaderDesc* desc, const char* shader, const char* entry, EShaderType type, const char* sm, const IShaderDefinitions* defines, EShaderLanguage sl, bool bDebugShader, const char* extHlslVersion, const char* dxcArgs);
 	};
 }

@@ -38,6 +38,7 @@ void OnInitParticle(uint3 id, inout FParticle particle)
 		particle.Scale = 0.5f - rdValue.z * 0.2f;
         particle.Location = bfParticles[index].Location;
     }
+    //particle.Scale = 1.0f;
     particle.Velocity = EmitterData.Velocity;
     particle.Color = ToColorUint(rdValue);
 
@@ -64,3 +65,16 @@ void OnDeadParticle(uint3 id, uint idxInPool, inout FParticle particle)
     }
 }
 #define USER_PARTICLE_FINALIZE
+
+void DoOnTimer(uint3 id, uint3 GroupId, uint3 GroupThreadId, uint GroupIndex, float second)
+{
+    TtReadonlyRawArray CurAlives = GetCurrentAlives();
+    uint CountOfAlive = CurAlives.GetCount();
+    if (id.x < CountOfAlive)
+    {
+        //uint index = GetParticleIndexByThreadID(id.x);
+        uint index = CurAlives.GetValue(id.x);
+        FParticle particle = bfParticles[index];
+    }
+}
+#define USER_PARTICLE_ONTIMER

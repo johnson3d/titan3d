@@ -46,6 +46,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)DVector2.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)DVector3.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)DVector4.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Editor\ValueRange.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Half.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Harmonics.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)HermiteSpline.cs" />

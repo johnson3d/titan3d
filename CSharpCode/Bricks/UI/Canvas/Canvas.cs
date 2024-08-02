@@ -206,7 +206,7 @@ namespace EngineNS.UI.Canvas
                 mCoreObject.Name = VNameString.FromString(value);
             }
         }
-        public Color Color
+        public Color4b Color
         {
             get => mCoreObject.Color;
             set => mCoreObject.SetColor(value);

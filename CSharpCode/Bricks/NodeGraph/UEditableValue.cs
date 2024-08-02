@@ -158,13 +158,13 @@ namespace EngineNS.Bricks.NodeGraph
             else if (type.IsEqual(typeof(Color3f)))
             {
                 var result = CreateEditableValue_Internal(notify, type, tag);
-                result.Value = Color3f.FromColor(Color.White);
+                result.Value = Color3f.FromColor(Color4b.White);
                 return result;
             }
             else if(type.IsEqual(typeof(Color4f)))
             {
                 var result = CreateEditableValue_Internal(notify, type, tag);
-                result.Value = Color4f.FromABGR(Color.White);
+                result.Value = Color4f.FromABGR(Color4b.White);
                 return result;
             }
             else if(type.IsEnum)

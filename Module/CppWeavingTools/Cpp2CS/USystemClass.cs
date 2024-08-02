@@ -101,7 +101,7 @@ namespace CppWeaving.Cpp2CS
             RegClass("v3dxDVector3", new USystemTypeStruct() { CppName = "v3dxDVector3", CSName = "EngineNS.DVector3", RetPodName = "v3dDVector3_t" });
 			RegClass("v3dxQuaternion", new USystemTypeStruct() { CppName = "v3dxQuaternion", CSName = "EngineNS.Quaternion", RetPodName = "v3dVector4_t" });
 			RegClass("v3dxColor4", new USystemTypeStruct() { CppName = "v3dxColor4", CSName = "EngineNS.Color4f", RetPodName = "v3dVector4_t" });
-            RegClass("FColor", new USystemTypeStruct() { CppName = "FColor", CSName = "EngineNS.Color", RetPodName = "UINT" });
+            RegClass("FColor", new USystemTypeStruct() { CppName = "FColor", CSName = "EngineNS.Color4b", RetPodName = "UINT" });
             RegClass("v3dxBox3", new USystemTypeStruct() { CppName = "v3dxBox3", CSName = "EngineNS.BoundingBox", RetPodName = "v3dBox3_t" });
 			RegClass("v3dxMatrix4", new USystemTypeStruct() { CppName = "v3dxMatrix4", CSName = "EngineNS.Matrix", RetPodName = "v3dMatrix4_t" });
 			RegClass("ImVec2", new USystemTypeStruct() { CppName = "ImVec2", CSName = "EngineNS.Vector2", RetPodName = "v3dVector2_t" });

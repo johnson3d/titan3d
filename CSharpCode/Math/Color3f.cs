@@ -121,7 +121,7 @@ namespace EngineNS
         {
             return new Vector3(Red, Green, Blue);
         }
-        public static Color3f FromColor(Color color)
+        public static Color3f FromColor(Color4b color)
         {
             Color3f retValue = new Color3f();
             retValue.Red = ((float)color.R) / 255.0f;

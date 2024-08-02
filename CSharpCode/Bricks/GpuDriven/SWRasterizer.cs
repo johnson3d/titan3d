@@ -56,7 +56,7 @@ namespace EngineNS.Bricks.GpuDriven
             float v = ((AP_AC) * (AB_AC) - (AP_AB) * (AC_AC)) / DenominatorV;
             return new Vector2(u, v);
         }
-        public void Rasterize(StbImageSharp.ImageResult image, Color clr, ref Vector2i a, ref Vector2i B, ref Vector2i C)
+        public void Rasterize(StbImageSharp.ImageResult image, Color4b clr, ref Vector2i a, ref Vector2i B, ref Vector2i C)
         {
             var Size = new Vector2i(image.Width, image.Height);
             Setup(in a, in B, in C, in Size);
@@ -80,7 +80,7 @@ namespace EngineNS.Bricks.GpuDriven
 
     public struct FRasterTriangle_Rect2
     {
-        public void Rasterize(StbImageSharp.ImageResult image, Color clr, ref Vector2i A, ref Vector2i B, ref Vector2i C)
+        public void Rasterize(StbImageSharp.ImageResult image, Color4b clr, ref Vector2i A, ref Vector2i B, ref Vector2i C)
         {
             var Size = new Vector2i(image.Width, image.Height);
             var Min = Vector2i.Minimize(Vector2i.Minimize(in A, in B), in C);
@@ -126,7 +126,7 @@ namespace EngineNS.Bricks.GpuDriven
 
     public struct FRasterTriangle_Scanline
     {
-        public void Rasterize(StbImageSharp.ImageResult image, Color clr, ref Vector2i v1, ref Vector2i v2, ref Vector2i v3)
+        public void Rasterize(StbImageSharp.ImageResult image, Color4b clr, ref Vector2i v1, ref Vector2i v2, ref Vector2i v3)
         {
             var Size = new Vector2i(image.Width, image.Height);
             SortVertices(ref v1, ref v2, ref v3); //v1.Y <= v2.Y <= v3.Y
@@ -163,7 +163,7 @@ namespace EngineNS.Bricks.GpuDriven
                 MathHelper.Swap(ref v2, ref v3);
             }
         }
-        private void DrawTopFlatTriangle(StbImageSharp.ImageResult image, Color clr, in Vector2i Size, in Vector2i v1, in Vector2i v2, in Vector2i v3)
+        private void DrawTopFlatTriangle(StbImageSharp.ImageResult image, Color4b clr, in Vector2i Size, in Vector2i v1, in Vector2i v2, in Vector2i v3)
         {
             float slope1 = (float)(v3.X - v1.X) / (float)(v3.Y - v1.Y);
             float slope2 = (float)(v3.X - v2.X) / (float)(v3.Y - v2.Y);
@@ -189,7 +189,7 @@ namespace EngineNS.Bricks.GpuDriven
             }
         }
 
-        private void DrawBottomFlatTriangle(StbImageSharp.ImageResult image, Color clr, in Vector2i Size, in Vector2i v1, in Vector2i v2, in Vector2i v3)
+        private void DrawBottomFlatTriangle(StbImageSharp.ImageResult image, Color4b clr, in Vector2i Size, in Vector2i v1, in Vector2i v2, in Vector2i v3)
         {
             float slope1 = (float)(v2.X - v1.X) / (float)(v2.Y - v1.Y);
             float slope2 = (float)(v3.X - v1.X) / (float)(v3.Y - v1.Y);
@@ -674,9 +674,9 @@ namespace EngineNS.UTest
             var C = new Vector2i(700, 50);
             {
                 var image = StbImageSharp.ImageResult.CreateImage(1024, 1024, StbImageSharp.ColorComponents.RedGreenBlueAlpha);
-                image.Clear(Color.Black);
+                image.Clear(Color4b.Black);
                 var tri = new Bricks.GpuDriven.FRasterTriangle_Rect();
-                tri.Rasterize(image, Color.Red, ref A, ref B, ref C);
+                tri.Rasterize(image, Color4b.Red, ref A, ref B, ref C);
                 using (var memStream = new System.IO.FileStream(RName.GetRName("utest/TestSoftRaster.png").Address, System.IO.FileMode.OpenOrCreate))
                 {
                     var writer = new StbImageWriteSharp.ImageWriter();
@@ -685,9 +685,9 @@ namespace EngineNS.UTest
             }
             {
                 var image = StbImageSharp.ImageResult.CreateImage(1024, 1024, StbImageSharp.ColorComponents.RedGreenBlueAlpha);
-                image.Clear(Color.Black);
+                image.Clear(Color4b.Black);
                 var tri = new Bricks.GpuDriven.FRasterTriangle_Rect2();
-                tri.Rasterize(image, Color.Red, ref A, ref B, ref C);
+                tri.Rasterize(image, Color4b.Red, ref A, ref B, ref C);
                 using (var memStream = new System.IO.FileStream(RName.GetRName("utest/TestSoftRaster2.png").Address, System.IO.FileMode.OpenOrCreate))
                 {
                     var writer = new StbImageWriteSharp.ImageWriter();
@@ -696,9 +696,9 @@ namespace EngineNS.UTest
             }
             {
                 var image = StbImageSharp.ImageResult.CreateImage(1024, 1024, StbImageSharp.ColorComponents.RedGreenBlueAlpha);
-                image.Clear(Color.Black);
+                image.Clear(Color4b.Black);
                 var tri = new Bricks.GpuDriven.FRasterTriangle_Scanline();
-                tri.Rasterize(image, Color.Red, ref A, ref B, ref C);
+                tri.Rasterize(image, Color4b.Red, ref A, ref B, ref C);
                 using (var memStream = new System.IO.FileStream(RName.GetRName("utest/TestSoftRaster3.png").Address, System.IO.FileMode.OpenOrCreate))
                 {
                     var writer = new StbImageWriteSharp.ImageWriter();

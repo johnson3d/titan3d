@@ -48,9 +48,13 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode
             CoreSDK.DisposeObject(ref PreviewViewport);
             MaterialPropGrid.Target = null;
         }
+        EGui.TtCodeEditor mShaderEditor = new EGui.TtCodeEditor();
         public async Thread.Async.TtTask<bool> Initialize()
         {
             await EngineNS.Thread.TtAsyncDummyClass.DummyFunc();
+            mShaderEditor.mCoreObject.SetLanguage("HLSL");
+            mShaderEditor.mCoreObject.ApplyLangDefine();
+            mShaderEditor.mCoreObject.ApplyErrorMarkers();
             return true;
         }
         protected bool mVisible = true;
@@ -268,6 +272,7 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode
             ResetDockspace();
             EGui.UIProxy.DockProxy.EndMainForm(IsDrawing);
 
+            DrawTextEditor();
             DrawShaderGraph();
             DrawNodeDetails();
             DrawMaterialDetails();
@@ -302,6 +307,7 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode
             ImGuiAPI.DockBuilderSplitNode(middleId, ImGuiDir_.ImGuiDir_Left, 0.2f, ref leftId, ref middleId);
 
             ImGuiAPI.DockBuilderDockWindow(EGui.UIProxy.DockProxy.GetDockWindowName("ShaderGraph", mDockKeyClass), middleId);
+            ImGuiAPI.DockBuilderDockWindow(EGui.UIProxy.DockProxy.GetDockWindowName("TextEditor", mDockKeyClass), middleId);
             ImGuiAPI.DockBuilderDockWindow(EGui.UIProxy.DockProxy.GetDockWindowName("NodeDetails", mDockKeyClass), rightDownId);
             ImGuiAPI.DockBuilderDockWindow(EGui.UIProxy.DockProxy.GetDockWindowName("EditorDetails", mDockKeyClass), rightDownId);
             ImGuiAPI.DockBuilderDockWindow(EGui.UIProxy.DockProxy.GetDockWindowName("MaterialDetails", mDockKeyClass), rightDownId);
@@ -344,6 +350,20 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode
             if (show)
             {
                 GraphRenderer.OnDraw();
+            }
+            EGui.UIProxy.DockProxy.EndPanel(show);
+        }
+        bool ShowTextEditor = true;
+        protected void DrawTextEditor()
+        {
+            var sz = new Vector2(-1);
+            var show = EGui.UIProxy.DockProxy.BeginPanel(mDockKeyClass, "TextEditor", ref ShowTextEditor, ImGuiWindowFlags_.ImGuiWindowFlags_None);
+            if (show)
+            {
+                var winPos = ImGuiAPI.GetWindowPos();
+                var vpMin = ImGuiAPI.GetWindowContentRegionMin();
+                var vpMax = ImGuiAPI.GetWindowContentRegionMax();
+                mShaderEditor.mCoreObject.Render(AssetName.Name, in Vector2.Zero, false);
             }
             EGui.UIProxy.DockProxy.EndPanel(show);
         }
@@ -499,6 +519,8 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode
             }
         
             Material.UpdateShaderCode(false);
+
+            mShaderEditor.mCoreObject.SetText(code);
             return code;
         }
         //[Obsolete]

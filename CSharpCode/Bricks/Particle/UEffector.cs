@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Text;
+using System.ComponentModel;
 
 namespace EngineNS.Bricks.Particle
 {
@@ -92,6 +92,10 @@ namespace EngineNS.Bricks.Particle
             string result = "";
             foreach (var i in Effectors)
             {
+                result += $"#define USE_EFFECTOR_{i.Name}\n";
+            }
+            foreach (var i in Effectors)
+            {
                 result += i.GetHLSL();
             }
             var codeBuilder = new Bricks.CodeBuilder.Backends.UHLSLCodeGenerator();
@@ -102,7 +106,7 @@ namespace EngineNS.Bricks.Particle
             int index = 0;
             foreach (var i in Effectors)
             {
-                codeBuilder.AddLine($"{i.Name}_EffectorExecute(id, particle, EffectorParameters{index});", ref sourceCode);
+                codeBuilder.AddLine($"{i.Name}_EffectorExecute(id, ParticleElapsedTime, particle, EffectorParameters{index});", ref sourceCode);
                 index++;
             }
             codeBuilder.PopSegment(ref sourceCode);
@@ -166,9 +170,34 @@ namespace EngineNS.Bricks.Particle
         {
 
         }
-        public virtual string GetParametersDefine()
+
+        protected virtual void AddParameters(Bricks.CodeBuilder.Backends.UHLSLCodeGenerator codeBuilder, ref string sourceCode)
         {
-            return "";
+            
+        }
+        protected void AddParameters(Bricks.CodeBuilder.Backends.UHLSLCodeGenerator codeBuilder, ref string sourceCode, System.Type paramType)
+        {
+            var members = paramType.GetFields();
+            foreach (var i in members)
+            {
+                codeBuilder.AddLine($"{TtEmitter.ToHLSLTypeString(i.FieldType)} {i.Name};", ref sourceCode);
+            }
+        }
+        public string GetParametersDefine()
+        {
+            var codeBuilder = new Bricks.CodeBuilder.Backends.UHLSLCodeGenerator();
+            string sourceCode = "";
+            //var codeBuilder = new Bricks.CodeBuilder.HLSL.UHLSLGen();
+
+            codeBuilder.AddLine($"struct {Name}_EffectorParameters", ref sourceCode);
+            codeBuilder.PushSegment(ref sourceCode);
+            {
+                AddParameters(codeBuilder, ref sourceCode);
+            }
+            codeBuilder.PopSegment(ref sourceCode);
+            sourceCode += ";";
+
+            return sourceCode;
         }
         public virtual string GetHLSL()
         {
@@ -184,45 +213,22 @@ namespace EngineNS.Bricks.Particle
         }
     }
 
-    public class TtAcceleratedEffector : TtEffector
+    public class TtAuxEffector<T> : TtEffector where T : unmanaged
     {
-        [System.Runtime.InteropServices.StructLayout(System.Runtime.InteropServices.LayoutKind.Sequential, Pack = 16)]
-        public struct FAcceleratedEffector
-        {
-            public Vector3 Acceleration;
-            public uint FAcceleratedEffector_Pad0;
-        };
+        protected T mEffectorParameter;
         public override TtEffector CloneEffector()
         {
-            var result = new TtAcceleratedEffector();
-            result.mAcceleratedEffector = mAcceleratedEffector;
+            var result = Rtti.UTypeDescManager.CreateInstance(GetType()) as TtAuxEffector<T>;
+            result.mEffectorParameter = mEffectorParameter;
             return result;
         }
-        public override string Name
+        protected override void AddParameters(Bricks.CodeBuilder.Backends.UHLSLCodeGenerator codeBuilder, ref string sourceCode)
         {
-            get { return "Accelerated"; }
+            AddParameters(codeBuilder, ref sourceCode, typeof(T));
         }
-        FAcceleratedEffector mAcceleratedEffector;
-        public Vector3 Acceleration
+        public override void SetCBuffer(uint index, NxRHI.UCbView CBuffer)
         {
-            get => mAcceleratedEffector.Acceleration;
-            set => mAcceleratedEffector.Acceleration = value;
-        }        
-        public override string GetParametersDefine()
-        {
-            var codeBuilder = new Bricks.CodeBuilder.Backends.UHLSLCodeGenerator();
-            string sourceCode = "";
-            //var codeBuilder = new Bricks.CodeBuilder.HLSL.UHLSLGen();
-
-            codeBuilder.AddLine($"struct {Name}_EffectorParameters", ref sourceCode);
-            codeBuilder.PushSegment(ref sourceCode);
-            {
-                codeBuilder.AddLine("float3 Acceleration;", ref sourceCode);
-            }
-            codeBuilder.PopSegment(ref sourceCode);
-            sourceCode += ";";
-
-            return sourceCode;
+            CBuffer.SetValue($"EffectorParameters{index}", in mEffectorParameter);
         }
         public override string GetHLSL()
         {
@@ -235,15 +241,108 @@ namespace EngineNS.Bricks.Particle
 
             return sourceCode;
         }
+    }
+
+
+    public class TtAcceleratedEffector : TtAuxEffector<TtAcceleratedEffector.FAcceleratedEffector>
+    {
+        [System.Runtime.InteropServices.StructLayout(System.Runtime.InteropServices.LayoutKind.Sequential, Pack = 16)]
+        public struct FAcceleratedEffector
+        {
+            public Vector3 AccelerationMin;
+            public uint FAcceleratedEffector_Pad0;
+            public Vector3 AccelerationRange;
+            public uint FAcceleratedEffector_Pad1;
+        };
+        public override string Name
+        {
+            get { return "Accelerated"; }
+        }
+        public Vector3 AccelerationMin
+        {
+            get => mEffectorParameter.AccelerationMin;
+            set => mEffectorParameter.AccelerationMin = value;
+        }
+        public Vector3 AccelerationRange
+        {
+            get => mEffectorParameter.AccelerationRange;
+            set => mEffectorParameter.AccelerationRange = value;
+        }
         public override unsafe void DoEffect(TtEmitter emitter, float elapsed, void* particle)
         {
             ref var cur = ref *(FParticle*)particle;
             //cur.Location += Acceleration * elapsed * (1.0f + emitter.RandomUnit() * 2.5f);
-            cur.Velocity += Acceleration;
+            cur.Velocity += (AccelerationMin + AccelerationRange * emitter.RandomUnit()) * elapsed;
         }
-        public override void SetCBuffer(uint index, NxRHI.UCbView CBuffer)
+    }
+
+    public class TtColorEffector : TtAuxEffector<TtColorEffector.FColorEffector>
+    {
+        [System.Runtime.InteropServices.StructLayout(System.Runtime.InteropServices.LayoutKind.Sequential, Pack = 16)]
+        public struct FColorEffector
         {
-            CBuffer.SetValue($"EffectorParameters{index}", in mAcceleratedEffector);
+            public Vector4 OpColorMin;
+            public Vector4 OpColorRange;
+        };
+        public override string Name
+        {
+            get { return "Color"; }
+        }
+        public Vector4 OpColorMin
+        {
+            get => mEffectorParameter.OpColorMin;
+            set => mEffectorParameter.OpColorMin = value;
+        }
+        public Vector4 OpColorRange
+        {
+            get => mEffectorParameter.OpColorRange;
+            set => mEffectorParameter.OpColorRange = value;
+        }
+        public override unsafe void DoEffect(TtEmitter emitter, float elapsed, void* particle)
+        {
+            ref var cur = ref *(FParticle*)particle;
+            //cur.Location += Acceleration * elapsed * (1.0f + emitter.RandomUnit() * 2.5f);
+            Color4f clr = cur.Colorf;
+            clr += OpColorMin + OpColorRange * emitter.RandomUnit() * elapsed;
+            clr.Red %= 1.0f;
+            clr.Green %= 1.0f;
+            clr.Blue %= 1.0f;
+            clr.Alpha %= 1.0f;
+            //Color4f. .Clamp(CoreSDK.Cla
+            cur.Colorf = clr;
+        }
+    }
+
+    public class TtScaleEffector : TtAuxEffector<TtScaleEffector.FScaleEffector>
+    {
+        [System.Runtime.InteropServices.StructLayout(System.Runtime.InteropServices.LayoutKind.Sequential, Pack = 16)]
+        public struct FScaleEffector
+        {
+            public float OpScaleMin;
+            public float OpScaleRange;
+            public uint ColorEffector_Pad1;
+            public uint ColorEffector_Pad2;
+        };
+        public override string Name
+        {
+            get { return "Scale"; }
+        }
+        public float OpScaleMin
+        {
+            get => mEffectorParameter.OpScaleMin;
+            set => mEffectorParameter.OpScaleMin = value;
+        }
+        public float OpScaleRange
+        {
+            get => mEffectorParameter.OpScaleRange;
+            set => mEffectorParameter.OpScaleRange = value;
+        }
+        public override unsafe void DoEffect(TtEmitter emitter, float elapsed, void* particle)
+        {
+            ref var cur = ref *(FParticle*)particle;
+            //cur.Location += Acceleration * elapsed * (1.0f + emitter.RandomUnit() * 2.5f);
+            float scale = OpScaleMin + emitter.RandomUnit() * OpScaleRange;
+            cur.Scale += scale * elapsed;
         }
     }
 }

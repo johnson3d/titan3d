@@ -73,7 +73,7 @@ namespace EngineNS.Graphics.Pipeline.Common
         {
             public void SetDefault()
             {
-                FogColor = Color3f.FromColor(Color.GreenYellow);
+                FogColor = Color3f.FromColor(Color4b.GreenYellow);
                 MinFogOpacity = 0.0f;
 
                 FogDensity = 0.004f;
@@ -81,7 +81,7 @@ namespace EngineNS.Graphics.Pipeline.Common
                 FogHeightFalloff = 0.022f;
                 StartDistance = 0.0f;
 
-                InscatterColor = Color3f.FromColor(Color.PaleVioletRed);
+                InscatterColor = Color3f.FromColor(Color4b.PaleVioletRed);
                 InscatteringExponent = 0.01f;
 
                 LightPosition = Vector3.Zero;

@@ -43,7 +43,7 @@ namespace StbImageSharp
             return image;
         }
 
-        public void Clear(EngineNS.Color color)
+        public void Clear(EngineNS.Color4b color)
         {
             switch (Comp)
             {
@@ -102,7 +102,7 @@ namespace StbImageSharp
                     break;
             }
         }
-        public void SetPixel(int x, int y, EngineNS.Color color)
+        public void SetPixel(int x, int y, EngineNS.Color4b color)
         {
             switch (Comp)
             {
@@ -137,9 +137,9 @@ namespace StbImageSharp
                     break;
             }
         }
-        public EngineNS.Color GetPixel(int x, int y)
+        public EngineNS.Color4b GetPixel(int x, int y)
         {
-            var color = new EngineNS.Color();
+            var color = new EngineNS.Color4b();
             switch (Comp)
             {
                 case ColorComponents.Grey:

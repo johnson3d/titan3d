@@ -7,33 +7,8 @@
 #define NebulaParticleFlags_EmitShape (1u << 31)
 #define NebulaParticleFlags_EmitIndex (1u << 30)
 
-struct FParticle
-{
-	uint Flags;
-	float Life;
-	float Scale;
-	uint RandomSeed;
-
-	float3 Location;
-    uint Color;
-	
-    float3 Velocity;
-    uint UserData1;
-
 #include "ParticleVar"
-};
-
-struct FParticleEmitter
-{
-	float3 Location;
-	uint Flags;
-	
-    float3 Velocity;
-    uint Flags1;
-	
-    int4 TempData;
 #include "ParticleSystemVar"
-};
 
 bool IsParticleEmitShape(in FParticle cur)
 {
@@ -79,6 +54,10 @@ cbuffer cbParticleDesc DX_AUTOBIND
     uint CurAliveCapacity;
     uint BackendAliveCapacity;
     uint ParticleCapacity;
+	
+    float2 ParticleStartSecond_Pad;
+    float ParticleStartSecond;
+    uint OnTimer;
 	
     FParticleEmitter EmitterData;
 #include "ParticleCBufferVar"

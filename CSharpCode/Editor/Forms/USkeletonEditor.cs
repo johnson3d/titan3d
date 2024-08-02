@@ -81,7 +81,7 @@ namespace EngineNS.Editor.Forms
             for (int i = 0; i < SkeletonAsset.Skeleton.Limbs.Count; ++i)
             {
                 var index = SkeletonAsset.Skeleton.Limbs[i].Index.Value;
-                var meshProvider = Graphics.Mesh.UMeshDataProvider.MakeSphere(0.005f, 5, 5, Color.Green.ToArgb());
+                var meshProvider = Graphics.Mesh.UMeshDataProvider.MakeSphere(0.005f, 5, 5, Color4b.Green.ToArgb());
                 var mesh = meshProvider.ToDrawMesh(UEngine.Instance.GfxDevice.MaterialInstanceManager.WireVtxColorMateria);
                 BoneMeshes.Add(index, mesh);
                 System.Diagnostics.Debug.Print(runtimePose.Descs[index].Name + " T" + runtimePose.Transforms[index].Position.ToString() + ", R" + runtimePose.Transforms[index].Quat.ToEuler().ToString());
@@ -95,7 +95,7 @@ namespace EngineNS.Editor.Forms
             foreach (var child in limb.Children)
             {
                 var end = child.Index.Value;
-                var meshProvider = Graphics.Mesh.UMeshDataProvider.MakeBox(0, -0.0005f, -0.0005f, 1, 0.001f, 0.001f, Color.Green.ToArgb());
+                var meshProvider = Graphics.Mesh.UMeshDataProvider.MakeBox(0, -0.0005f, -0.0005f, 1, 0.001f, 0.001f, Color4b.Green.ToArgb());
                 var mesh = meshProvider.ToDrawMesh(UEngine.Instance.GfxDevice.MaterialInstanceManager.WireVtxColorMateria);
                 var boneLine = new FBoneLine() { Start = start, End = end };
                 BoneLineMeshes.Add(boneLine, mesh);

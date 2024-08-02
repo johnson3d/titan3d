@@ -300,8 +300,8 @@ namespace EngineNS.UI.Controls
                 TargetType = UTypeDesc.TypeOf(typeof(TtButton)),
             };
             // 设置属性的默认值
-            buttonTemplate.DefaultValues.Add(new Template.TtTemplateSimpleValue(new TtBrush(Color.White, TtBrush.EBrushType.Rectangle), TtButton.BackgroundProperty));
-            buttonTemplate.DefaultValues.Add(new Template.TtTemplateSimpleValue(new TtBrush(Color.Tomato, TtBrush.EBrushType.Border), TtButton.BorderBrushProperty));
+            buttonTemplate.DefaultValues.Add(new Template.TtTemplateSimpleValue(new TtBrush(Color4b.White, TtBrush.EBrushType.Rectangle), TtButton.BackgroundProperty));
+            buttonTemplate.DefaultValues.Add(new Template.TtTemplateSimpleValue(new TtBrush(Color4b.Tomato, TtBrush.EBrushType.Border), TtButton.BorderBrushProperty));
 
             // 添加模板控件
             var buttonRoot = new Template.TtUIElementFactory(UTypeDesc.TypeOf(typeof(Controls.Containers.TtBorder)));
@@ -321,20 +321,20 @@ namespace EngineNS.UI.Controls
             // 设置Trigger
             var proTrigger = new Trigger.TtUIPropertyTrigger();
             proTrigger.AddCondition(TtButton.IsEnabledProperty, false);
-            proTrigger.AddTriggerValue(TtBorder.BackgroundProperty, new TtBrush(Color.Gray, TtBrush.EBrushType.Rectangle), "border");
-            proTrigger.AddTriggerValue(TtBorder.BorderBrushProperty, new TtBrush(Color.DarkGray, TtBrush.EBrushType.Rectangle), "border");
+            proTrigger.AddTriggerValue(TtBorder.BackgroundProperty, new TtBrush(Color4b.Gray, TtBrush.EBrushType.Rectangle), "border");
+            proTrigger.AddTriggerValue(TtBorder.BorderBrushProperty, new TtBrush(Color4b.DarkGray, TtBrush.EBrushType.Rectangle), "border");
             buttonTemplate.AddTrigger(proTrigger);
 
             var mouseOverTrigger = new Trigger.TtUIPropertyTrigger();
             mouseOverTrigger.AddCondition(TtButton.IsMouseOverProperty, true);
-            mouseOverTrigger.AddTriggerValue(TtBorder.BackgroundProperty, new TtBrush(Color.GreenYellow, TtBrush.EBrushType.Rectangle), "border");
-            mouseOverTrigger.AddTriggerValue(TtBorder.BorderBrushProperty, new TtBrush(Color.Yellow, TtBrush.EBrushType.Rectangle), "border");
+            mouseOverTrigger.AddTriggerValue(TtBorder.BackgroundProperty, new TtBrush(Color4b.GreenYellow, TtBrush.EBrushType.Rectangle), "border");
+            mouseOverTrigger.AddTriggerValue(TtBorder.BorderBrushProperty, new TtBrush(Color4b.Yellow, TtBrush.EBrushType.Rectangle), "border");
             buttonTemplate.AddTrigger(mouseOverTrigger);
 
             var pressedTrigger = new Trigger.TtUIPropertyTrigger();
             pressedTrigger.AddCondition(TtButton.IsPressedProperty, true);
-            pressedTrigger.AddTriggerValue(TtBorder.BackgroundProperty, new TtBrush(Color.Red, TtBrush.EBrushType.Rectangle), "border");
-            pressedTrigger.AddTriggerValue(TtBorder.BorderBrushProperty, new TtBrush(Color.IndianRed, TtBrush.EBrushType.Rectangle), "border");
+            pressedTrigger.AddTriggerValue(TtBorder.BackgroundProperty, new TtBrush(Color4b.Red, TtBrush.EBrushType.Rectangle), "border");
+            pressedTrigger.AddTriggerValue(TtBorder.BorderBrushProperty, new TtBrush(Color4b.IndianRed, TtBrush.EBrushType.Rectangle), "border");
             buttonTemplate.AddTrigger(pressedTrigger);
         }
 

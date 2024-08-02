@@ -326,6 +326,14 @@ namespace EngineNS.Graphics.Mesh.Modifier
                 return RName.GetRName("shaders/modifier/InstancingModifier.cginc", RName.ERNameType.Engine);
             }
         }
+        public unsafe NxRHI.FShaderCode* GetHLSLCode(string includeName, string includeOriName)
+        {
+            return (NxRHI.FShaderCode*)0;
+        }
+        public string GetUniqueText()
+        {
+            return "";
+        }
         public NxRHI.EVertexStreamType[] GetNeedStreams()
         {
             return new NxRHI.EVertexStreamType[] {

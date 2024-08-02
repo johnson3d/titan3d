@@ -27,9 +27,9 @@ namespace EngineNS.NxRHI
     [Rtti.Meta]
     public class USrViewAMeta : IO.IAssetMeta
     {
-        protected override Color GetBorderColor()
+        protected override Color4b GetBorderColor()
         {
-            return Color.LightPink;
+            return Color4b.LightPink;
         }
         public override string GetAssetExtType()
         {

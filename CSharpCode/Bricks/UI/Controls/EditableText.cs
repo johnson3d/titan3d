@@ -141,7 +141,7 @@ namespace EngineNS.UI.Controls
             mSelectionBrush = new TtBrush();
             mSelectionBrush.HostElement = this;
             mSelectionBrush.BrushType = TtBrush.EBrushType.Rectangle;
-            mSelectionBrush.Color = EngineNS.Color.Blue;
+            mSelectionBrush.Color = EngineNS.Color4b.Blue;
 
             MouseLeftButtonDown += TtEditableText_MouseLeftButtonDown;
             TouchDown += TtEditableText_MouseLeftButtonDown;

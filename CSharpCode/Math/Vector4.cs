@@ -17,12 +17,12 @@ namespace EngineNS
                 return (Vector4)obj;
             else if (obj.GetType() == typeof(Color4f))
                 return (Color4f)obj;
-            else if(obj.GetType() == typeof(Color))
+            else if(obj.GetType() == typeof(Color4b))
             {
-                return new Vector4(((Color)obj).R / 255.0f,
-                                   ((Color)obj).G / 255.0f,
-                                   ((Color)obj).B / 255.0f,
-                                   ((Color)obj).A / 255.0f);
+                return new Vector4(((Color4b)obj).R / 255.0f,
+                                   ((Color4b)obj).G / 255.0f,
+                                   ((Color4b)obj).B / 255.0f,
+                                   ((Color4b)obj).A / 255.0f);
             }
             else
             {

@@ -53,11 +53,11 @@ namespace EngineNS.UI.Controls
 
             var headerBorder = new Template.TtUIElementFactory(UTypeDesc.TypeOf(typeof(TtBorder)));
             headerBorder.SetValue(TtBorder.NameProperty, "headerBorder");
-            headerBorder.SetValue(TtBorder.BackgroundProperty, new TtBrush(Color.Transparent, TtBrush.EBrushType.Rectangle));
+            headerBorder.SetValue(TtBorder.BackgroundProperty, new TtBrush(Color4b.Transparent, TtBrush.EBrushType.Rectangle));
             root.AppendChild(headerBorder);
             var headerToggle = new Template.TtUIElementFactory(UTypeDesc.TypeOf(typeof(TtToggleButton)));
             headerToggle.SetValue(TtToggleButton.NameProperty, "headerToggle");
-            headerToggle.SetValue(TtToggleButton.BackgroundProperty, new TtBrush(Color.Transparent, TtBrush.EBrushType.Rectangle));
+            headerToggle.SetValue(TtToggleButton.BackgroundProperty, new TtBrush(Color4b.Transparent, TtBrush.EBrushType.Rectangle));
             headerToggle.SetValue(TtToggleButton.SizeToContentProperty, ESizeToContent.WidthAndHeight);
             headerToggle.SetValue(TtBorder.HorizontalAlignmentProperty, HorizontalAlignment.Stretch);
             headerToggle.SetValue(TtBorder.VerticalAlignmentProperty, VerticalAlignment.Stretch);

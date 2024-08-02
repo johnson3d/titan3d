@@ -1,4 +1,5 @@
-﻿using NPOI.HPSF;
+﻿using Microsoft.CodeAnalysis.CSharp.Syntax;
+using NPOI.HPSF;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -17,6 +18,7 @@ namespace EngineNS.Editor.ShaderCompiler
     public unsafe class UHLSLCompiler
     {
         NxRHI.UShaderCompiler mShaderCompiler = null;
+        public Graphics.Pipeline.Shader.TtMdfQueueBase MdfQueue = null;
         static CoreSDK.FDelegate_FOnShaderTranslated OnShaderTranslated = OnShaderTranslatedImpl;
         static void OnShaderTranslatedImpl(NxRHI.FShaderDesc arg0)
         {
@@ -49,27 +51,29 @@ namespace EngineNS.Editor.ShaderCompiler
             GetShaderCodeStream = this.GetHLSLCode;
             mShaderCompiler = new NxRHI.UShaderCompiler(GetShaderCodeStream);
         }
-        private static void FixRootPath(ref string file)
+        private static string FixRootPath(string file)
         {
+            string result = file;
             var repPos = file.IndexOf("@Engine/");
             if (repPos >= 0)
             {
-                file = file.Substring(repPos);
-                file = file.Replace("@Engine/", UEngine.Instance.FileManager.GetRoot(IO.TtFileManager.ERootDir.Engine));
+                result = file.Substring(repPos);
+                result = file.Replace("@Engine/", UEngine.Instance.FileManager.GetRoot(IO.TtFileManager.ERootDir.Engine));
             }
             else
             {
                 repPos = file.IndexOf("@Game/");
                 if (repPos >= 0)
                 {
-                    file = file.Substring(repPos);
-                    file = file.Replace("@Game/", UEngine.Instance.FileManager.GetRoot(IO.TtFileManager.ERootDir.Game));
+                    result = file.Substring(repPos);
+                    result = result.Replace("@Game/", UEngine.Instance.FileManager.GetRoot(IO.TtFileManager.ERootDir.Game));
                 }
             }
+            return result;
         }
         public static NxRHI.FShaderCode GetIncludeCode(string file)
         {
-            FixRootPath(ref file);
+            file = FixRootPath(file);
             RName rn = null;
             if (file.StartsWith(UEngine.Instance.FileManager.GetRoot(IO.TtFileManager.ERootDir.Engine)))
             {
@@ -98,10 +102,11 @@ namespace EngineNS.Editor.ShaderCompiler
         private NxRHI.FShaderCompiler.FDelegate_FnGetShaderCodeStream GetShaderCodeStream;
         public string MaterialCodeForDebug;
         //[UnmanagedFunctionPointer(System.Runtime.InteropServices.CallingConvention.Cdecl)]
-        private NxRHI.FShaderCode* GetHLSLCode(sbyte* includeName)
+        private NxRHI.FShaderCode* GetHLSLCode(sbyte* includeName, sbyte* includeOriName)
         {
+            var oriInc = System.Runtime.InteropServices.Marshal.PtrToStringAnsi((IntPtr)includeOriName);
             var file = System.Runtime.InteropServices.Marshal.PtrToStringAnsi((IntPtr)includeName);
-            FixRootPath(ref file);
+            file = FixRootPath(file);
 
             if (UserInclude != null)
             {
@@ -159,6 +164,10 @@ namespace EngineNS.Editor.ShaderCompiler
                     else
                         return code.SourceCode.mCoreObject;
                 }
+            }
+            if (MdfQueue != null)
+            {
+                return MdfQueue.GetHLSLCode(file, oriInc);
             }
             return (NxRHI.FShaderCode*)0;
         }

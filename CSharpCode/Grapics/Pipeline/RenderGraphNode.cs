@@ -121,9 +121,9 @@ namespace EngineNS.Graphics.Pipeline
                 }
             }
         }
-        public virtual Color GetTileColor()
+        public virtual Color4b GetTileColor()
         {
-            return Color.FromRgb(255, 0, 255);
+            return Color4b.FromRgb(255, 0, 255);
         }
         public UDrawBuffers BasePass = new UDrawBuffers();
         public TtRenderGraph RenderGraph { get; internal set; }

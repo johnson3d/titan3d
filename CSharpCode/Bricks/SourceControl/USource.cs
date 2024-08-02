@@ -102,8 +102,15 @@ namespace EngineNS.Bricks.SourceControl
             }
             return true;
         }
-        public void AddFile(string file)
+        public void AddFile(string file, bool bWaitFile = false)
         {
+            if (bWaitFile)
+            {
+                while (IO.TtFileManager.FileExists(file) == false)
+                {
+                    System.Threading.Thread.Sleep(100);
+                }
+            }
             if (Source != null)
             {
                 Source.AddFile(file);

@@ -34,7 +34,7 @@ namespace NxRHI
 			{
 				root = pFileName;
 			}
-			auto ar = Compiler->GetShaderCodeStream(root.c_str());
+			auto ar = Compiler->GetShaderCodeStream(root.c_str(), pFileName);
 			if (ar == nullptr)
 			{
 				*ppData = nullptr;
@@ -78,7 +78,7 @@ namespace NxRHI
 	bool DX11Shader::CompileShader(FShaderCompiler* compiler, FShaderDesc* desc, const char* shader, const char* entry, EShaderType type, const char* sm, const IShaderDefinitions* defines, EShaderLanguage sl, bool bDebugShader)
 	{
 		desc->FunctionName = entry;
-		AutoRef<FShaderCode> ar = compiler->GetShaderCodeStream(shader);
+		AutoRef<FShaderCode> ar = compiler->GetShaderCodeStream(shader, shader);
 		if (ar == nullptr)
 			return false;
 

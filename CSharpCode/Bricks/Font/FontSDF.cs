@@ -37,9 +37,9 @@ namespace EngineNS.Bricks.Font
         {
             return false;
         }
-        protected override Color GetBorderColor()
+        protected override Color4b GetBorderColor()
         {
-            return Color.LightGray;
+            return Color4b.LightGray;
         }
     }
     [Rtti.Meta]

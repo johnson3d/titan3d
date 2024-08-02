@@ -36,6 +36,17 @@ namespace EngineNS.Bricks.Particle
         public Vector3 Location { get => mLocation; set => mLocation = value; }
         [Rtti.Meta]
         public uint Color { get => mColor; set => mColor = value; }
+        public Color4f Colorf
+        {
+            get
+            {
+                return Color4f.FromABGR(EngineNS.Color4b.FromArgb((int)Color));
+            }
+            set
+            {
+                Color = value.ToArgb();
+            }
+        }
         [Rtti.Meta]
         public Vector3 Velocity { get => mVelocity; set => mVelocity = value; }
         [Rtti.Meta]
@@ -44,10 +55,12 @@ namespace EngineNS.Bricks.Particle
     [System.Runtime.InteropServices.StructLayout(System.Runtime.InteropServices.LayoutKind.Sequential, Pack = 16)]
     public struct FParticleEmitter
     {
-        public Vector3 mLocation;
-        public uint mFlags;
+        public Vector3 mLocation;//system need
+        public uint mFlags;//system need
+
         public Vector3 mVelocity;
         public uint mFlags1;
+
         public Vector4i mTempData;//for compute UAV
         [Rtti.Meta]
         public Vector3 Location { get => mLocation; set => mLocation = value; }
@@ -216,6 +229,9 @@ namespace EngineNS.Bricks.Particle
         }
         public bool IsGpuDriven { get; set; } = false;
         public FParticleEmitter EmitterData = default;
+        public float TimerRemain { get; set; } = float.MaxValue;
+        [Rtti.Meta]
+        public float TimerInterval { get; set; } = float.MaxValue;
         [Rtti.Meta]
         public ref FParticleEmitter GetEmitterData()
         {
@@ -234,7 +250,7 @@ namespace EngineNS.Bricks.Particle
         Graphics.Mesh.TtMesh mMesh;
         public Graphics.Mesh.TtMesh Mesh { get => mMesh; set => mMesh = value; }
         #region HLSL
-        string GetTypeDef(Type type)
+        public static string ToHLSLTypeString(System.Type type)
         {
             string memberType = "";
             if (type == typeof(Vector4))
@@ -249,11 +265,39 @@ namespace EngineNS.Bricks.Particle
             {
                 memberType = "float2";
             }
-            else if (type == typeof(uint))
-            {
-                memberType = "uint";
-            }
             else if (type == typeof(float))
+            {
+                memberType = "float";
+            }
+            else if (type == typeof(Vector4i))
+            {
+                memberType = "int4";
+            }
+            else if (type == typeof(Vector3i))
+            {
+                memberType = "int3";
+            }
+            else if (type == typeof(Vector2i))
+            {
+                memberType = "int2";
+            }
+            else if (type == typeof(int))
+            {
+                memberType = "int";
+            }
+            else if (type == typeof(Vector4ui))
+            {
+                memberType = "uint4";
+            }
+            else if (type == typeof(Vector3ui))
+            {
+                memberType = "uint3";
+            }
+            else if (type == typeof(Vector2ui))
+            {
+                memberType = "uint2";
+            }
+            else if (type == typeof(uint))
             {
                 memberType = "uint";
             }
@@ -265,13 +309,43 @@ namespace EngineNS.Bricks.Particle
         }
         public string GetParticleDefine()
         {
-            string result = "";
-            return result;
+            var codeBuilder = new Bricks.CodeBuilder.Backends.UHLSLCodeGenerator();
+            string sourceCode = "";
+            //var codeBuilder = new Bricks.CodeBuilder.HLSL.UHLSLGen();
+
+            codeBuilder.AddLine($"struct FParticle", ref sourceCode);
+            codeBuilder.PushSegment(ref sourceCode);
+            {
+                var members = typeof(FParticle).GetFields();
+                foreach (var i in members)
+                {
+                    codeBuilder.AddLine($"{ToHLSLTypeString(i.FieldType)} {i.Name.Substring(1)};", ref sourceCode);
+                }
+            }
+            codeBuilder.PopSegment(ref sourceCode);
+            sourceCode += ";";
+
+            return sourceCode;
         }
         public string GetSystemDataDefine()
         {
-            string result = "";
-            return result;
+            var codeBuilder = new Bricks.CodeBuilder.Backends.UHLSLCodeGenerator();
+            string sourceCode = "";
+            //var codeBuilder = new Bricks.CodeBuilder.HLSL.UHLSLGen();
+
+            codeBuilder.AddLine($"struct FParticleEmitter", ref sourceCode);
+            codeBuilder.PushSegment(ref sourceCode);
+            {
+                var members = typeof(FParticleEmitter).GetFields();
+                foreach (var i in members)
+                {
+                    codeBuilder.AddLine($"{ToHLSLTypeString(i.FieldType)} {i.Name.Substring(1)};", ref sourceCode);
+                }
+            }
+            codeBuilder.PopSegment(ref sourceCode);
+            sourceCode += ";";
+
+            return sourceCode;
         }
         public virtual string GetCBufferDefines()
         {
@@ -355,6 +429,9 @@ namespace EngineNS.Bricks.Particle
 
             var nblMdf = mesh.MdfQueue as TtParticleMdfQueue;
             nblMdf.Emitter = this;
+
+            mParticleStartSecond = UEngine.Instance.TickCountSecond;
+            TimerRemain = TimerInterval;
         }
         public bool SetCurrentQueue(string name)
         {
@@ -390,10 +467,25 @@ namespace EngineNS.Bricks.Particle
                 CurrentQueue = queue;
         }
         #region Update
+        private float mParticleStartSecond;
         public unsafe void Update(UParticleGraphNode particleSystem, float elapsed)
         {
             if (Mesh == null)
                 return;
+            var coreBinder = UEngine.Instance.GfxDevice.CoreShaderBinder;
+            var timeSecond = UEngine.Instance.TickCountSecond - mParticleStartSecond;
+            CurrentQueue?.CBuffer?.SetValue(coreBinder.CBPerParticle.ParticleStartSecond, timeSecond);
+            TimerRemain -= elapsed;
+            if (TimerRemain < 0)
+            {   
+                CurrentQueue?.CBuffer?.SetValue(coreBinder.CBPerParticle.OnTimer, 1);
+                TimerRemain = TimerInterval;
+                OnTimer(timeSecond);
+            }
+            else
+            {
+                CurrentQueue?.CBuffer?.SetValue(coreBinder.CBPerParticle.OnTimer, 0);
+            }
             if (IsGpuDriven)
             {
                 UpdateGPU(particleSystem, elapsed);
@@ -528,6 +620,10 @@ namespace EngineNS.Bricks.Particle
         {
             mMcObject?.Get()?.OnDeadParticle(this, index, ref particle);
         }
+        public unsafe virtual void OnTimer(float second)
+        {
+            mMcObject?.Get()?.OnTimer(this, second);
+        }
         protected virtual void OnQueueExecuted(TtEffectorQueue queue)
         {
 
@@ -620,7 +716,12 @@ namespace EngineNS.Bricks.Particle
 
         }
         [Rtti.Meta]
-        public virtual unsafe void OnDeadParticle(TtEmitter emt, uint index, ref FParticle particle)
+        public unsafe virtual void OnDeadParticle(TtEmitter emt, uint index, ref FParticle particle)
+        {
+
+        }
+        [Rtti.Meta]
+        public virtual unsafe void OnTimer(TtEmitter emt, float second)
         {
 
         }

@@ -38,9 +38,9 @@ namespace EngineNS.Graphics.Pipeline.Shader
             //必须是TextureAsset
             return true;
         }
-        protected override Color GetBorderColor()
+        protected override Color4b GetBorderColor()
         {
-            return Color.Gold;
+            return Color4b.Gold;
         }
         //public override void OnDrawSnapshot(in ImDrawList cmdlist, ref Vector2 start, ref Vector2 end)
         //{

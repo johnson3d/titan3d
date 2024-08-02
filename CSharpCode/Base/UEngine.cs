@@ -409,7 +409,25 @@ namespace EngineNS
 
             TtObjectPoolManager.Instance.Cleanup();
             base.CleanupModules();
+
+            lock (FinalCleanupActions)
+            {
+                foreach (var i in FinalCleanupActions)
+                {
+                    i();
+                }
+                FinalCleanupActions.Clear();
+            }
+
             mInstance = null;
+        }
+        List<System.Action> FinalCleanupActions = new List<Action>();
+        public void RegFinalCleanupAction(Action act)
+        {
+            lock(FinalCleanupActions)
+            {
+                FinalCleanupActions.Add(act);
+            }
         }
     }
 }

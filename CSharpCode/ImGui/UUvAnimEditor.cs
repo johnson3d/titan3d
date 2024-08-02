@@ -260,8 +260,8 @@ namespace EngineNS.EGui
                             sb = sb * ScaleFactor + min1;
                             se = se * ScaleFactor + min1;
 
-                            drawlist.AddRect(in sb, in se, (uint)Color.Green.ToArgb(), 1, ImDrawFlags_.ImDrawFlags_None, 1);
-                            drawlist.AddText(in sb, (uint)Color.White.ToArgb(), i.ToString(), null);
+                            drawlist.AddRect(in sb, in se, (uint)Color4b.Green.ToArgb(), 1, ImDrawFlags_.ImDrawFlags_None, 1);
+                            drawlist.AddText(in sb, (uint)Color4b.White.ToArgb(), i.ToString(), null);
                         }
                     }
                 }
