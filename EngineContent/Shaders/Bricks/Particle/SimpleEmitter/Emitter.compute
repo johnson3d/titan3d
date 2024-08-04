@@ -9,6 +9,7 @@ void DoUpdateSystem(uint3 id, uint3 GroupId, uint3 GroupThreadId, uint GroupInde
     //}
     uint oldValue;
     InterlockedAdd(bfSystemData[0].Flags, 1, oldValue);
+    [branch]
     if (oldValue < 512)
     {
         SpawnParticle((uint3) 0, 1, SetParticleFlags(Nebula_EmitShape, 0), 3.0f);
@@ -65,6 +66,14 @@ void OnDeadParticle(uint3 id, uint idxInPool, inout FParticle particle)
     }
 }
 #define USER_PARTICLE_FINALIZE
+
+void DoParticleTick(uint3 id, float elapsed, inout FParticle particle)
+{
+    half4 angles = ToColor4f(particle.Rotator);
+    angles.y += elapsed * 1.14f;
+    particle.Rotator = ToColorUint(angles);
+}
+#define USER_PARTICLE_DOTICK
 
 void DoOnTimer(uint3 id, uint3 GroupId, uint3 GroupThreadId, uint GroupIndex, float second)
 {

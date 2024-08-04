@@ -62,11 +62,12 @@ class IParticlePool
 public:
 	UINT					mDataStride;
 	std::vector<BYTE>		mParticleArray;
-	std::vector<UINT>		mFreeParticles;
+	std::queue<UINT>		mFreeParticles;//need be a queue
 	std::vector<UINT>*		mCurAlives;
 	std::vector<UINT>*		mBackendAlives;
 	std::vector<UINT>		mLivedParticles[2];
 	bool					mChanged;
+	VSLLock					mLocker;
 public:
 	IParticlePool()
 	{

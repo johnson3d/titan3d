@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Drawing;
 using System.Text;
 
@@ -25,6 +26,8 @@ namespace EngineNS.Graphics.Pipeline.Shader
         {
             return false;
         }
+        [Rtti.Meta]
+        public string ShaderType { get; set; }
         [Rtti.Meta]
         [RName.PGRName(FilterExts = TtShaderAsset.AssetExt)]
         public RName TemplateName
@@ -60,7 +63,39 @@ namespace EngineNS.Graphics.Pipeline.Shader
 
                 PGAssetInitTask = PGAsset.Initialize();
                 mAsset = new TtShaderAsset() { ShaderCode = "//This is a ShaderAsset"};
-                PGAsset.Target = mAsset;
+                PGAsset.Target = this;
+            }
+            protected override bool DoImportAsset()
+            {
+                base.DoImportAsset();
+
+                var ameta = mAsset.GetAMeta() as TtShaderAssetAMeta;
+                ameta.ShaderType = ShaderType;
+                if (TemplateName != null)
+                {
+                    ameta.TemplateName = TemplateName;
+                    var templateAMeta = UEngine.Instance.AssetMetaManager.GetAssetMeta(TemplateName) as TtShaderAssetAMeta;
+                    ameta.ShaderType = templateAMeta.ShaderType;
+
+                    var shader = (mAsset as TtShaderAsset);
+                    shader.ShaderCode = IO.TtFileManager.ReadAllText(TemplateName.Address);
+                }
+                mAsset.SaveAssetTo(mAsset.AssetName);
+
+                return true;
+            }
+            [Category("Option")]
+            public string ShaderType
+            {
+                get;
+                set;
+            }
+            [Category("Option")]
+            [RName.PGRName(FilterExts = AssetExt)]
+            public RName TemplateName
+            {
+                get;
+                set;
             }
         }
         #region IAsset
@@ -107,7 +142,6 @@ namespace EngineNS.Graphics.Pipeline.Shader
             return result;
         }
 
-        [Rtti.Meta]
         [RName.PGRName(FilterExts = AssetExt)]
         public RName TemplateName
         {
@@ -118,14 +152,15 @@ namespace EngineNS.Graphics.Pipeline.Shader
                     return ameta.TemplateName;
                 return null;
             }
-            set
+        }
+        public string ShaderType
+        {
+            get
             {
                 var ameta = (GetAMeta() as TtShaderAssetAMeta);
                 if (ameta != null)
-                {
-                    ameta.TemplateName = value;
-                }   
-                ShaderCode = IO.TtFileManager.ReadAllText(value.Address);
+                    return ameta.ShaderType;
+                return null;
             }
         }
         public string ShaderCode { get; set; } = null;

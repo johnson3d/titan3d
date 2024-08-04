@@ -17,6 +17,7 @@
         <Name Type="System.String@Unknown" Value="SimpleEmitter" />
         <NodeId Type="System.Guid@Unknown" Value="d2397b14-d674-4389-9681-2e0a67d0dfb6" />
         <Position Type="EngineNS.Vector2@EngineCore" Value="439,161" />
+        <TimerInterval Type="System.Single@Unknown" Value="0" />
         <Velocity Type="EngineNS.Vector3@EngineCore" Value="20,10,0" />
         <InputEditableValues Type="System.Collections.Generic.List&lt;EngineNS.Bricks.NodeGraph.UNodeBase.UInputEditableValueInfo@EngineCore,&gt;@Unknown" Count="0" />
       </e_0>
@@ -61,7 +62,7 @@
         <DefaultCurrentQueue Type="System.String@Unknown" Value="Default" />
         <EmitterName Type="System.String@Unknown" Value="Emitter2" />
         <Enable Type="System.Boolean@Unknown" Value="True" />
-        <IsGpuDriven Type="System.Boolean@Unknown" Value="False" />
+        <IsGpuDriven Type="System.Boolean@Unknown" Value="True" />
         <Label Type="System.String@Unknown" Value="Emitter" />
         <Location Type="EngineNS.Vector3@EngineCore" Value="0,0,0" />
         <MaxParticle Type="System.UInt32@Unknown" Value="1024" />
@@ -70,6 +71,8 @@
         <Name Type="System.String@Unknown" Value="McEmitter" />
         <NodeId Type="System.Guid@Unknown" Value="1bff78af-90ff-49f8-a4a6-14c7e0421227" />
         <Position Type="EngineNS.Vector2@EngineCore" Value="452,517" />
+        <ShaderName Type="EngineNS.RName@EngineCore" Value="Game,tutorials/particles/emitter_test0.shader,39576676-8117-4d2d-89a3-0f1ae2f1eab3" />
+        <TimerInterval Type="System.Single@Unknown" Value="0" />
         <Velocity Type="EngineNS.Vector3@EngineCore" Value="0,0,0" />
         <InputEditableValues Type="System.Collections.Generic.List&lt;EngineNS.Bricks.NodeGraph.UNodeBase.UInputEditableValueInfo@EngineCore,&gt;@Unknown" Count="0" />
       </e_5>
@@ -103,7 +106,7 @@
       </e_8>
       <e_9 Type="EngineNS.Bricks.Particle.Editor.TtAcceleratedEffectorNode@EngineCore">
         <AccelerationMin Type="EngineNS.Vector3@EngineCore" Value="0,-0.1,0" />
-        <AccelerationRange Type="EngineNS.Vector3@EngineCore" Value="0,-0.1,0" />
+        <AccelerationRange Type="EngineNS.Vector3@EngineCore" Value="0,-5,0" />
         <Label Type="System.String@Unknown" Value="Effector" />
         <Name Type="System.String@Unknown" Value="Accelerated" />
         <NodeId Type="System.Guid@Unknown" Value="d5351363-4fc2-4297-9073-3d1a0355a766" />

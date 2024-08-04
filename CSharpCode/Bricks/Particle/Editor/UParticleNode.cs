@@ -78,6 +78,14 @@ namespace EngineNS.Bricks.Particle.Editor
         } = null;
         [Category("Option")]
         [Rtti.Meta]
+        [RName.PGRName(FilterExts = Graphics.Pipeline.Shader.TtShaderAsset.AssetExt, ShaderType = "NebulaEmitter")]
+        public RName ShaderName
+        {
+            get;
+            set;
+        } = null;
+        [Category("Option")]
+        [Rtti.Meta]
         public bool IsGpuDriven { get; set; } = true;
         [Category("Option")]
         [Rtti.Meta]
@@ -159,6 +167,7 @@ namespace EngineNS.Bricks.Particle.Editor
             emt.EmitterData.Location = Location;
             emt.EmitterData.Velocity = Velocity;
             emt.McName = McName;
+            emt.ShaderName = ShaderName;
             emt.TimerInterval = TimerInterval;
             emt.TimerRemain = TimerRemain;
             //emt.EmitterData.Flags = Flags;

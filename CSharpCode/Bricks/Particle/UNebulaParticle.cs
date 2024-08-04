@@ -11,7 +11,10 @@ namespace EngineNS.Bricks.Particle
         {
             return TtNebulaParticle.AssetExt;
         }
-
+        protected override Color4b GetBorderColor()
+        {
+            return Color4b.HotPink;
+        }
         public override string GetAssetTypeName()
         {
             return "Nebula";

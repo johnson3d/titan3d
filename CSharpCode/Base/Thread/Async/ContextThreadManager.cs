@@ -248,7 +248,9 @@ namespace EngineNS.Thread.Async
         private TtPooledSemaphoreAllocator ParrallelForSmpAllocator = new TtPooledSemaphoreAllocator();
         public void ParrallelFor(int num, Delegate_ParrallelForAction action, object userData1 = null, object userData2 = null)
         {
-            if(EnableMTForeach==false)
+            if (num == 0)
+                return;
+            if (EnableMTForeach == false)
             {
                 for (int i = 0; i < num; i++)
                 {

@@ -12,4 +12,5 @@
   </Icon>
   <RefAssetRNames Type="System.Collections.Generic.List&lt;EngineNS.RName@EngineCore,&gt;@Unknown" Count="0" />
   <TypeStr Type="System.String@Unknown" Value="EngineNS.Graphics.Pipeline.Shader.TtShaderAsset@EngineCore" />
+  <ShaderType Type="System.String@Unknown" Value="NebulaShape" />
 </Root>

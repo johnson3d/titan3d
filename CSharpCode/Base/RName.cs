@@ -33,6 +33,7 @@ namespace EngineNS
         {
             public string FilterExts;   // "ext1" / "ext1,ext2"
             public System.Type MacrossType;
+            public string ShaderType;
             EGui.UIProxy.ComboBox mComboBox;
 
             class DrawData
@@ -111,6 +112,7 @@ namespace EngineNS
                 ImGuiAPI.SetNextWindowSize(in contentBrowserSize, ImGuiCond_.ImGuiCond_Appearing);
                 ContentBrowser.ExtNames = FilterExts;
                 ContentBrowser.MacrossBase = Rtti.UTypeDesc.TypeOf(MacrossType);
+                ContentBrowser.ShaderType = ShaderType;
                 ContentBrowser.SelectedAssets.Clear();
                 mComboBox.OnDraw(in drawList, in anyPt);
                 if(ContentBrowser.SelectedAssets.Count > 0 &&

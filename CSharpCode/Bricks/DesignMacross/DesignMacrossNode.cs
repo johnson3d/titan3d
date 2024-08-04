@@ -21,7 +21,7 @@ namespace EngineNS.DesignMacross
         Macross.UMacrossGetter<TtDesignMacrossBase> mMacrossGetter = null;
         public override TtTask<bool> InitializeNode(UWorld world, UNodeData data, EBoundVolumeType bvType, Type placementType)
         {
-            if(!RName.IsEmpty(DesignMacross))
+            if(DesignMacross!=null && !RName.IsEmpty(DesignMacross))
             {
                 mMacrossGetter = Macross.UMacrossGetter<TtDesignMacrossBase>.NewInstance();
                 mMacrossGetter.Name = DesignMacross;

@@ -18,6 +18,7 @@ namespace EngineNS.EGui.Controls
         public string[] ExtNameArray;
         public Dictionary<string, bool> DirectoryShowFlags = new Dictionary<string, bool>();
         public Rtti.UTypeDesc MacrossBase = null;
+        public string ShaderType = null;
 
         public static string FolderOpenImgName = "uestyle/content/folderopen.srv";
         public static string FolderClosedImgName = "uestyle/content/folderclosed.srv";
@@ -214,6 +215,25 @@ namespace EngineNS.EGui.Controls
                                     continue;
 
                                 if (ameta1.BaseTypeStr != MacrossBase.TypeString)
+                                {
+                                    continue;
+                                }
+                                hasTarget = true;
+                                break;
+                            }
+                            if (hasTarget)
+                                break;
+                        }
+                        else if (ShaderType != null && ExtNameArray[i] == Graphics.Pipeline.Shader.TtShaderAsset.AssetExt)
+                        {
+                            foreach (var f in files)
+                            {
+                                var ff = f.Substring(0, f.Length - ".ameta".Length);
+                                var ameta1 = UEngine.Instance.AssetMetaManager.GetAssetMeta(RName.GetRNameFromAbsPath(ff)) as Graphics.Pipeline.Shader.TtShaderAssetAMeta;
+                                if (ameta1 == null)
+                                    continue;
+
+                                if (ameta1.ShaderType != ShaderType)
                                 {
                                     continue;
                                 }

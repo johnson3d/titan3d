@@ -55,10 +55,11 @@ bool IParticlePool::InitPool(UINT dataStride, UINT maxNum)
 {
 	mDataStride = dataStride;
 	mParticleArray.resize((size_t)maxNum * mDataStride);
-	mFreeParticles.resize(maxNum);
-	for (size_t i = 0; i < mFreeParticles.size(); i++)
+	//mFreeParticles.resize(maxNum);
+	for (UINT i = 0; i < maxNum; i++)
 	{
-		mFreeParticles[i] = (UINT)i;
+		//mFreeParticles[i] = (UINT)i;
+		mFreeParticles.push((UINT)i);
 	}
 	mLivedParticles[0].clear();
 	mLivedParticles[1].clear();
@@ -70,6 +71,7 @@ bool IParticlePool::InitPool(UINT dataStride, UINT maxNum)
 }
 UINT IParticlePool::Alloc(IEmitter* pEmitter, UINT num, UINT flags, float life)
 {
+	VAutoVSLLock lk(mLocker);
 	if (mFreeParticles.size() < num)
 	{
 		num = (UINT)mFreeParticles.size();
@@ -79,20 +81,24 @@ UINT IParticlePool::Alloc(IEmitter* pEmitter, UINT num, UINT flags, float life)
 	ASSERT(life > 0);
 	for (UINT i = 0; i < num; i++)
 	{
-		UINT addr = mFreeParticles[i];
+		//UINT addr = mFreeParticles[i];
+		UINT addr = mFreeParticles.front();
+		mFreeParticles.pop();
 		auto pParticle = (IBaseParticleState*)GetParticle(addr);
 		pParticle->Flags = flags;
 		ASSERT(pParticle->Life <= 0);
 		pParticle->Life = life;
+		mBackendAlives->push_back(addr);
 	}
 	mChanged = true;
-	mBackendAlives->insert(mBackendAlives->begin(), mFreeParticles.begin(), mFreeParticles.begin() + num);
-	mFreeParticles.erase(mFreeParticles.begin(), mFreeParticles.begin() + num);
+	//mBackendAlives->insert(mBackendAlives->begin(), mFreeParticles.begin(), mFreeParticles.begin() + num);
+	//mFreeParticles.erase(mFreeParticles.begin(), mFreeParticles.begin() + num);
 
 	return num;
 }
 void IParticlePool::Recycle(IEmitter* pEmitter)
 {
+	VAutoVSLLock lk(mLocker);
 	std::vector<UINT>& prev = *mCurAlives;
 	std::vector<UINT>& cur = *mBackendAlives;
 	for (size_t i = 0; i < prev.size(); i++)
@@ -100,7 +106,8 @@ void IParticlePool::Recycle(IEmitter* pEmitter)
 		UINT addr = prev[i];
 		if (GetParticle(addr)->IsDeath())
 		{
-			mFreeParticles.push_back(addr);
+			//mFreeParticles.push_back(addr);
+			mFreeParticles.push(addr);
 		}
 		else
 		{

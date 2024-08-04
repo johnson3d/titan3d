@@ -1,5 +1,4 @@
-﻿using Assimp;
-using EngineNS.Bricks.GpuDriven;
+﻿using EngineNS.Bricks.GpuDriven;
 using NPOI.SS.UserModel;
 using System;
 using System.Collections.Generic;

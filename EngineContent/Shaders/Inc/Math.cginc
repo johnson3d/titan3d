@@ -183,7 +183,23 @@ uint ReverseBitsN(uint Bitfield, const uint BitCount)
 	return ReverseBits32(Bitfield) >> (32 - BitCount);
 }
 
-float3 QuatRotatePosition(in float3 inPos, in float4 inQuat)
+float4 QuatFromAxisAngle(float3 axis, float angle)
+{
+    axis = normalize(axis);
+	
+    float4 result;
+    float hA= angle * 0.5f;
+    float sinV = sin(hA);
+    float cosV = cos(hA);
+
+    result.x = axis.x * sinV;
+    result.y = axis.y * sinV;
+    result.z = axis.z * sinV;
+    result.w = cosV;
+    return result;
+}
+
+float3 QuatRotateVector(in float3 inPos, in float4 inQuat)
 {
 	float3 uv = cross(inQuat.xyz, inPos);
 	float3 uuv = cross(inQuat.xyz, uv);
@@ -192,6 +208,11 @@ float3 QuatRotatePosition(in float3 inPos, in float4 inQuat)
 
 	return inPos + uv + uuv;
 }
+
+//half3 transform_quat(half3 v, half4 quat)
+//{
+//    return v + (half3) cross(quat.xyz, cross(quat.xyz, v) + quat.w * v) * 2;
+//}
 
 
 float min3(float a, float b, float c)

@@ -562,9 +562,9 @@ namespace EngineNS.Graphics.Pipeline.Shader
                 }
 
                 result = await UEffect.CreateEffect(shading, shading.mCurrentPermutationId, material, mdf);
-                result.Desc.EffectHash = hash;
                 if (result != null)
                 {
+                    result.Desc.EffectHash = hash;
                     result.Desc.PermutationId = shading.mCurrentPermutationId;
                     //if (material.IsEditingMaterial == false)
                     {
@@ -647,7 +647,9 @@ namespace EngineNS.Graphics.Pipeline.Shader
             var shaderDesc = await UEngine.Instance.EventPoster.Post((state) =>
             {
                 return compiler.CompileShader(shader, entry, type, shadingEnv, null, null, defines, incProvider, sm, bDebugShader);
-            }, Thread.Async.EAsyncTarget.AsyncIO); 
+            }, Thread.Async.EAsyncTarget.AsyncIO);
+            if (shaderDesc == null)
+                return null;
             var csShader = rc.CreateShader(shaderDesc);
             if (csShader == null)
                 return null;

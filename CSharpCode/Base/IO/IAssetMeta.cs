@@ -10,6 +10,7 @@ using System.Threading.Tasks;
 namespace EngineNS.IO
 {
     //资源导入引擎的接口
+    [EGui.Controls.PropertyGrid.PGCategoryFilters(ExcludeFilters = new string[] { "Misc" })]
     public class IAssetCreateAttribute : Attribute
     {
         public virtual async Thread.Async.TtTask DoCreate(RName dir, Rtti.UTypeDesc type, string ext)
@@ -64,8 +65,6 @@ namespace EngineNS.IO
             PGAssetInitTask = PGAsset.Initialize();
             mAsset = Rtti.UTypeDescManager.CreateInstance(TypeSlt.SelectedType) as IAsset;
             PGAsset.Target = mAsset;
-
-
         }
         public override unsafe bool OnDraw(EGui.Controls.UContentBrowser ContentBrowser)
         {

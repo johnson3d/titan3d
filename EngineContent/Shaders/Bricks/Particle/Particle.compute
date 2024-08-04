@@ -12,6 +12,7 @@ void DoParticleEmitShape(uint3 id, inout FParticle cur, uint shapeIndex);
 void OnInitParticle(uint3 id, inout FParticle particle);
 void OnDeadParticle(uint3 id, uint idxInPool, inout FParticle particle);
 void DoParticleEffectors(uint3 id, inout FParticle particle);
+void DoParticleTick(uint3 id, float elapsed, inout FParticle particle);
 void DoUpdateSystem(uint3 id, uint3 GroupId, uint3 GroupThreadId, uint GroupIndex);
 void DoOnTimer(uint3 id, uint3 GroupId, uint3 GroupThreadId, uint GroupIndex, float second);
 
@@ -56,29 +57,34 @@ uint GetParticleIndexByThreadID(uint id)
     return CurAlives.GetValue(id.x);
 }
 
+//recomment num>0 && num<10
 void SpawnParticle(uint3 id, uint num, uint flags, float life)
 {
     TtRawRingBuffer Allocator = GetAllocator();
     TtRawArray Alives = GetBackendAlives();
     
-    //int SrcIndexId = Allocator.GetPopNumIndex(num);
-    //int TarIndexId = Alives.GetPushNumIndex(num);
+    [unroll]
     for (uint i = 0; i < num; i++)
     {
-        //int index = Allocator.GetValue(SrcIndexId + i);
-        //Alives.SetValue(TarIndexId + i, index);
         int index = Allocator.Pop();
+        if (index < 0)
+            continue;
         Alives.Push(index);
 		
         bfParticles[index].Life = life;
         bfParticles[index].Flags = flags;
+        bfParticles[index].Scale = 1.0f;
 		
+        [branch]
         if (IsParticleEmitShape(bfParticles[index]))
         {
             uint shapeIndex = GetParticleData(bfParticles[index].Flags); // % (uint)EmitterShapes.Count;
             DoParticleEmitShape(id, bfParticles[index], shapeIndex);
         }
-
+        else
+        {
+            bfParticles[index].Location = float3(0, 0, 0);
+        }
         bfParticles[index].Location += EmitterData.Location;
         OnInitParticle(id, bfParticles[index]);
     }
@@ -115,6 +121,7 @@ void CS_Particle_Update(uint3 id : SV_DispatchThreadID,
         int idx = CurAlives.GetValue(id.x);
 		bfParticles[idx].Life -= ParticleElapsedTime;
 
+        [branch]
         if (bfParticles[idx].Life <= 0)
 		{
             Allocator.Push(idx);
@@ -124,6 +131,7 @@ void CS_Particle_Update(uint3 id : SV_DispatchThreadID,
 		{
             BackendAlives.Push(idx);
             DoParticleEffectors(id, bfParticles[idx]);
+            DoParticleTick(id, ParticleElapsedTime, bfParticles[idx]);
             
             bfParticles[idx].Location += bfParticles[idx].Velocity * ParticleElapsedTime;
         }
@@ -178,6 +186,13 @@ void OnDeadParticle(uint3 id, uint idxInPool, inout FParticle particle)
 
 #ifndef USER_PARTICLE_DOEFFECTORS
 void DoParticleEffectors(uint3 id, inout FParticle particle)
+{
+
+}
+#endif
+
+#ifndef USER_PARTICLE_DOTICK
+void DoParticleTick(uint3 id, float elapsed, inout FParticle particle)
 {
 
 }

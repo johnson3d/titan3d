@@ -13,6 +13,14 @@ struct TtRawRingBuffer
     }
     uint Pop()
     {
+        if (IsFull())
+            return -1;
+        uint index;
+        RingBuffer.InterlockedAdd(4, 1, index);
+        return RingBuffer.Load((index % Capacity) * 4 + 8);
+    }
+    uint PopNoCheck()
+    {
         uint index;
         RingBuffer.InterlockedAdd(4, 1, index);
         return RingBuffer.Load((index % Capacity) * 4 + 8);
@@ -33,7 +41,7 @@ struct TtRawRingBuffer
     }
     bool IsFull()
     {
-        return GetCount() >= Capacity;
+        return GetCount() > Capacity;
     }
     bool IsEmpty()
     {

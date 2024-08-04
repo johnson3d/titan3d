@@ -53,4 +53,9 @@ namespace EngineNS.Animation.BlendTree
             return null;
         }
     }
+
+    public class TtLocalSpacePoseBlendTree :TtBlendTree<TtLocalSpaceRuntimePose>
+    {
+
+    }
 }

@@ -13,16 +13,6 @@ VSInstanceData GetInstanceData(VS_MODIFIER input)
 //#define VS_NO_WorldTransform
 #define VPS_SpecialData_X_HitProxy
 
-float3 InstancingRotateVec(in float3 inPos, in float4 inQuat)
-{
-	float3 uv = cross(inQuat.xyz, inPos);
-	float3 uuv = cross(inQuat.xyz, uv);
-	uv = uv * (2.0f * inQuat.w);
-	uuv *= 2.0f;
-	
-	return inPos + uv + uuv;
-}
-
 void DoInstancingModifierVS(inout PS_INPUT vsOut, inout VS_MODIFIER vert)
 {
 	VSInstanceData instData = GetInstanceData(vert);
@@ -43,10 +33,10 @@ void DoInstancingModifierVS(inout PS_INPUT vsOut, inout VS_MODIFIER vert)
 	inst_pos = float3(1,1,1);
 	#endif
 	
-	float3 Pos = instData.Position.xyz + InstancingRotateVec(vert.vPosition * instData.Scale.xyz, instData.Quat);
+    float3 Pos = instData.Position.xyz + QuatRotateVector(vert.vPosition * instData.Scale.xyz, instData.Quat);
 
 	vert.vPosition.xyz = Pos;
-	vert.vNormal.xyz = InstancingRotateVec(vert.vNormal.xyz, instData.Quat);
+    vert.vNormal.xyz = QuatRotateVector(vert.vNormal.xyz, instData.Quat);
 
 	vsOut.vPosition.xyz = Pos;
     vsOut.SetNormal(vert.vNormal);

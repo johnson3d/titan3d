@@ -11,6 +11,13 @@
   <ItemGroup>
     <Compile Include="$(MSBuildThisFileDirectory)BlendTree\Node\BlendTree_AnimStateMachine.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Macross\AnimASTBuildUtil.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Macross\BlendTree\BlendTreeClassDescription.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Macross\BlendTree\Graph_BlendTree.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Macross\BlendTree\Node\BlendTree_AnimStateMachineClassDescription.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Macross\BlendTree\Node\GraphElement_BlendTree_AnimStateMachine.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Macross\BlendTree\OutlineElement_BlendTreeGraph.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Macross\Postprocessing\AnimFinalPoseOutputCclassDescription.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Macross\Postprocessing\OutlineElement_AnimFinalPoseOutput.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Macross\StateMachine\Attachment\AnimPlay\GraphElement_AnimPlayAttachment.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Macross\StateMachine\Attachment\AnimPlay\AnimPlayAttachmentClassDescription.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Macross\StateMachine\Attachment\BlendTree\AnimBlendTreeAttachmentClassDescription.cs" />
@@ -92,7 +99,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)AnimationModule.cs" />
   </ItemGroup>
   <ItemGroup>
-    <Folder Include="$(MSBuildThisFileDirectory)Macross\Postprocessing\" />
+    <Folder Include="$(MSBuildThisFileDirectory)Macross\BlendTree\Node\" />
     <Folder Include="$(MSBuildThisFileDirectory)MorphAnimation\" />
   </ItemGroup>
   <ItemGroup>

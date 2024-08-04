@@ -23,7 +23,7 @@ namespace EngineNS.Bricks.Particle
         public Vector3 mLocation;
         public uint mColor;
         public Vector3 mVelocity;
-        public uint mUserData1;
+        public uint mRotator;
         [Rtti.Meta]
         public uint Flags { get => mFlags; set => mFlags = value; }
         [Rtti.Meta]
@@ -50,7 +50,33 @@ namespace EngineNS.Bricks.Particle
         [Rtti.Meta]
         public Vector3 Velocity { get => mVelocity; set => mVelocity = value; }
         [Rtti.Meta]
-        public uint UserData1 { get => mUserData1; set => mUserData1 = value; }
+        public uint Rotator { get => mRotator; set => mRotator = value; }
+        //float[0-1]
+        public Vector3 Rotatorf
+        {
+            get
+            {
+                var result = new Vector3();
+                result.X = ((float)((byte)(mRotator >> 16)))/ 255.0f;
+                result.Y = ((float)((byte)(mRotator >> 8))) / 255.0f;
+                result.Z = ((float)((byte)(mRotator))) / 255.0f;
+
+                //result *= (float)Math.PI * 2.0f;
+                return result;
+            }
+            set
+            {
+                //var t = value / (float)Math.PI * 2.0f;
+                var t = value;
+                var x = (UInt32)(t.X * 255.0f);
+                var y = (UInt32)(t.Y * 255.0f);
+                var z = (UInt32)(t.Z * 255.0f);
+
+                mRotator = x;
+                mRotator |= y << 8;
+                mRotator |= z << 16;
+            }
+        }
     }
     [System.Runtime.InteropServices.StructLayout(System.Runtime.InteropServices.LayoutKind.Sequential, Pack = 16)]
     public struct FParticleEmitter
@@ -360,9 +386,10 @@ namespace EngineNS.Bricks.Particle
         }
         public virtual RName GetEmitterShader()
         {
-            if (mMcObject == null)
-                return RName.GetRName("Shaders/Bricks/Particle/SimpleEmitter/Emitter.compute", RName.ERNameType.Engine);
-
+            if (ShaderName != null)
+            {
+                return ShaderName;
+            }
             return RName.GetRName(mMcObject.Name.Name + "/NebulaEmitter.compute", mMcObject.Name.RNameType);
         }
         public virtual string GetEmitShapeHLSL()
@@ -533,7 +560,7 @@ namespace EngineNS.Bricks.Particle
         }
         public unsafe void UpdateGPU(UParticleGraphNode particleSystem, float elapsed)
         {
-            if (CurrentQueue.Shader == null)
+            if (CurrentQueue.Shader == null || CurrentQueue.Shader.Particle_Update == null)
                 return;
             CurrentQueue.UpdateComputeDrawcall(UEngine.Instance.GfxDevice.RenderContext, this);
 
@@ -624,6 +651,10 @@ namespace EngineNS.Bricks.Particle
         {
             mMcObject?.Get()?.OnTimer(this, second);
         }
+        public virtual void OnParticleTick(TtEmitter emitter, float elapsed, ref FParticle particle)
+        {
+            mMcObject?.Get()?.OnParticleTick(emitter, elapsed, ref particle);
+        }
         protected virtual void OnQueueExecuted(TtEffectorQueue queue)
         {
 
@@ -654,6 +685,18 @@ namespace EngineNS.Bricks.Particle
             }
         }
         Macross.UMacrossGetter<TtEmitterMacross> mMcObject;
+        public Macross.UMacrossGetter<TtEmitterMacross> McObject
+        {
+            get => mMcObject;
+        }
+        [Category("Option")]
+        [Rtti.Meta]
+        [RName.PGRName(FilterExts = Graphics.Pipeline.Shader.TtShaderAsset.AssetExt, ShaderType = "NebulaEmitter")]
+        public RName ShaderName
+        {
+            get;
+            set;
+        } = null;
         #endregion
 
         #region Random
@@ -717,6 +760,11 @@ namespace EngineNS.Bricks.Particle
         }
         [Rtti.Meta]
         public unsafe virtual void OnDeadParticle(TtEmitter emt, uint index, ref FParticle particle)
+        {
+
+        }
+        [Rtti.Meta]
+        public virtual unsafe void OnParticleTick(TtEmitter emt, float elapsed, ref FParticle particle)
         {
 
         }

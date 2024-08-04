@@ -10,6 +10,7 @@ namespace EngineNS.Bricks.Particle
         {
             CoreSDK.DisposeObject(ref CBuffer);
             CoreSDK.DisposeObject(ref mParticleUpdateDrawcall);
+            ForParameters.Reset();
         }
         public string Name;
         public List<TtEffector> Effectors { get; } = new List<TtEffector>();
@@ -127,33 +128,97 @@ namespace EngineNS.Bricks.Particle
             }
             return result;
         }
-        public unsafe void Update(TtEmitter emiter, float elapsed)
+        public unsafe void Update(TtEmitter emitter, float elapsed)
         {
-            var pParticles = (FParticle*)emiter.mCoreObject.GetParticleAddress();
-            var pAlives = emiter.mCoreObject.GetCurrentAliveAddress();
-            uint aliveNum = emiter.mCoreObject.GetLiveNumber();
+            var pParticles = (FParticle*)emitter.mCoreObject.GetParticleAddress();
+            var pAlives = emitter.mCoreObject.GetCurrentAliveAddress();
+            uint aliveNum = emitter.mCoreObject.GetLiveNumber();
+            
+            bool bUseMT = true;
+            if (bUseMT)
+            {
+                ForParameters.emitter = emitter;
+                ForParameters.This = this;
+                ForParameters.pParticles = pParticles;
+                ForParameters.pAlives = pAlives;
+                ForParameters.elapsed = elapsed;
+            }
+
             foreach (var e in Effectors)
+            {
+                if (bUseMT == false)
+                {
+                    for (uint i = 0; i < aliveNum; i++)
+                    {
+                        var index = pAlives[i];
+                        var cur = (FParticle*)&pParticles[index];
+                        if (cur->Life <= 0)
+                        {
+                            emitter.OnDeadParticle(index, ref *cur);
+                            continue;
+                        }
+                        e.DoEffect(emitter, elapsed, cur);
+                    }
+                }
+                else
+                {
+                    ForParameters.effector = e;
+                    UEngine.Instance.EventPoster.ParrallelFor((int)aliveNum, static (i, arg1, arg2) =>
+                    {
+                        var ForParameters = (TtForParameters)arg1;
+                        var index = ForParameters.pAlives[i];
+                        var cur = (FParticle*)&ForParameters.pParticles[index];
+                        if (cur->Life <= 0)
+                        {
+                            ForParameters.emitter.OnDeadParticle(index, ref *cur);
+                            return;
+                        }
+                        ForParameters.effector.DoEffect(ForParameters.emitter, ForParameters.elapsed, cur);
+                    }, ForParameters);
+                    ForParameters.effector = null;
+                }
+            }
+
+            if (bUseMT == false)
             {
                 for (uint i = 0; i < aliveNum; i++)
                 {
                     var index = pAlives[i];
                     var cur = (FParticle*)&pParticles[index];
-                    if (cur->Life <= 0)
-                    {
-                        emiter.OnDeadParticle(index, ref pParticles[index]);
-                        continue;
-                    }
-                    e.DoEffect(emiter, elapsed, cur);
+                    emitter.OnParticleTick(emitter, elapsed, ref *cur);
+                    cur->Location += cur->Velocity * elapsed;
                 }
             }
-
-            for (uint i = 0; i < aliveNum; i++)
+            else
+            {   
+                UEngine.Instance.EventPoster.ParrallelFor((int)aliveNum, static (i, arg1, arg2) =>
+                {
+                    var ForParameters = (TtForParameters)arg1;
+                    var index = ForParameters.pAlives[i];
+                    var cur = (FParticle*)&ForParameters.pParticles[index];
+                    ForParameters.emitter.OnParticleTick(ForParameters.emitter, ForParameters.elapsed, ref *cur);
+                    cur->Location += cur->Velocity * ForParameters.elapsed;
+                }, ForParameters);
+            }
+            ForParameters.Reset();
+        }
+        private unsafe class TtForParameters
+        {
+            public TtEmitter emitter;
+            public TtEffectorQueue This;
+            public TtEffector effector;
+            public FParticle* pParticles;
+            public uint* pAlives;
+            public float elapsed;
+            public void Reset()
             {
-                var index = pAlives[i];
-                var cur = (FParticle*)&pParticles[index];
-                cur->Location += cur->Velocity * elapsed;
+                emitter = null;
+                This = null;
+                pParticles = null;
+                pAlives = null;
             }
         }
+        private TtForParameters ForParameters = new TtForParameters();
     }
 
     public class TtEffector

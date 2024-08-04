@@ -14,8 +14,10 @@ void DoNebulaModifierVS(inout PS_INPUT vsOut, inout VS_MODIFIER vert)
 	//idx += vert.vMultiDrawId;
 #endif
 	FParticle inst = sbParticleInstance[idx];
-	float3 Pos = inst.Location + vert.vPosition.xyz * inst.Scale;
-	vsOut.vPosition.xyz = Pos;
+    half4 angles = ToColor4f(inst.Rotator);
+    float4 quat = QuatFromAxisAngle(float3(0, 1, 0), angles.y);
+    float3 Pos = inst.Location + QuatRotateVector(vert.vPosition.xyz * inst.Scale, quat); //QuateFromAxisAngle
+	vsOut.vPosition.xyz = Pos ;
     vsOut.vColor = (float4)ToColor4f(inst.Color);
 
 }

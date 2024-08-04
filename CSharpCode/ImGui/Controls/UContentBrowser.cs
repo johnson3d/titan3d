@@ -51,6 +51,16 @@ namespace EngineNS.EGui.Controls
                 mFolderView.MacrossBase = mMacrossBase;
             }
         }
+        string mShaderType = null;
+        public string ShaderType
+        {
+            get => mShaderType;
+            set
+            {
+                mShaderType = value;
+                mFolderView.ShaderType = mShaderType;
+            }
+        }
         public string FilterText = "";
         public static IO.IAssetMeta GlobalSelectedAsset = null;
         public List<IO.IAssetMeta> SelectedAssets = new List<IO.IAssetMeta>();
@@ -218,6 +228,17 @@ namespace EngineNS.EGui.Controls
                             continue;
 
                         if (ameta1.BaseTypeStr != MacrossBase.TypeString)
+                        {
+                            continue;
+                        }
+                    }
+                    else if (ShaderType != null && ext == Graphics.Pipeline.Shader.TtShaderAsset.AssetExt)
+                    {
+                        var ameta1 = UEngine.Instance.AssetMetaManager.GetAssetMeta(RName.GetRName(dir.Name + name, dir.RNameType)) as Graphics.Pipeline.Shader.TtShaderAssetAMeta;
+                        if (ameta1 == null)
+                            continue;
+
+                        if (ameta1.ShaderType != ShaderType)
                         {
                             continue;
                         }

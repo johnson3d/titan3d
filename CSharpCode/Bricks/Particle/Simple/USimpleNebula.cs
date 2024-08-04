@@ -55,6 +55,13 @@ namespace EngineNS.Bricks.Particle.Simple
 
             //mCoreObject.Spawn(1, SetParticleFlags(EParticleFlags.EmitIndex, index), 3.0f);
         }
+        public override void OnParticleTick(TtEmitter emitter, float elapsed, ref FParticle particle)
+        {
+            //base.OnParticleTick(emitter, elapsed, ref particle);
+            var rf = particle.Rotatorf;
+            rf.Y += 1.14f * elapsed;
+            particle.Rotatorf = rf;
+        }
     }
 
     [Bricks.CodeBuilder.ContextMenu(filterStrings: "SimpleEmitter", "Emitter\\SimpleEmitter", Editor.TtParticleGraph.NebulaEditorKeyword)]
