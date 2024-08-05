@@ -13,10 +13,12 @@ namespace EngineNS.IO
             SetSysDir(ESystemDir.Effect, "effect");
             SetSysDir(ESystemDir.Shader, "shader");
             SetSysDir(ESystemDir.RenderDoc, "renderdoc");
+            SetSysDir(ESystemDir.DebugUtility, "debugutility");
             SureDirectory(GetPath(ERootDir.Engine, ESystemDir.MetaData));
             SureDirectory(GetPath(ERootDir.Cache, ESystemDir.Effect));
             SureDirectory(GetPath(ERootDir.Cache, ESystemDir.Shader));
             SureDirectory(GetPath(ERootDir.Cache, ESystemDir.RenderDoc));
+            SureDirectory(GetPath(ERootDir.Cache, ESystemDir.DebugUtility));
         }
         partial void InitDirectory(string[] args);
         public enum ERootDir
@@ -39,6 +41,7 @@ namespace EngineNS.IO
             Effect,
             Shader,
             RenderDoc,
+            DebugUtility,
             Count,
         }
         public string[] Roots = new string[(int)ERootDir.Count];

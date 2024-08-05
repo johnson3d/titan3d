@@ -134,7 +134,7 @@ namespace EngineNS.Graphics.Pipeline.Shader
                     if (effectDesc.EffectVersion != UEffectDesc.CurrentEffectVersion)
                         return null;
 
-                    var shadingCode = Editor.ShaderCompiler.UShaderCodeManager.Instance.GetShaderCode(shading.CodeName);
+                    var shadingCode = Editor.ShaderCompiler.TtShaderCodeManager.Instance.GetShaderCode(shading.CodeName);
                     if (rc.GlobalEnvHash != effectDesc.GlobalEnvHash ||
                             shadingCode.CodeHash != effectDesc.CodeHash ||
                             material.GetHash() != effectDesc.MaterialHash ||
@@ -221,7 +221,7 @@ namespace EngineNS.Graphics.Pipeline.Shader
             var rc = UEngine.Instance.GfxDevice.RenderContext;
 
             var result = new UEffect();
-            var shadingCode = Editor.ShaderCompiler.UShaderCodeManager.Instance.GetShaderCode(shading.CodeName);
+            var shadingCode = Editor.ShaderCompiler.TtShaderCodeManager.Instance.GetShaderCode(shading.CodeName);
             if (shadingCode == null)
                 return null;
 
@@ -613,7 +613,7 @@ namespace EngineNS.Graphics.Pipeline.Shader
                 hashStr += defines.ToString();
             hashStr += UEngine.Instance.GfxDevice.RenderContext.GlobalEnvHash.ToString();
             var hash = Hash160.CreateHash160(hashStr);
-            var shadingCode = Editor.ShaderCompiler.UShaderCodeManager.Instance.GetShaderCode(shaderName);
+            var shadingCode = Editor.ShaderCompiler.TtShaderCodeManager.Instance.GetShaderCode(shaderName);
             NxRHI.UComputeEffect result;
             lock (Effects)
             {

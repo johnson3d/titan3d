@@ -496,47 +496,92 @@ namespace EngineNS.Editor
             }
 
             AssetEditorManager.OnDrawTopMost();
+            TickToOperationMenus();
         }
         List<EGui.UIProxy.MenuItemProxy> mMenuItems = new List<EGui.UIProxy.MenuItemProxy>();
+        List<EGui.UIProxy.MenuItemProxy> mMenusToRemove = new List<EGui.UIProxy.MenuItemProxy>();
+        List<EGui.UIProxy.MenuItemProxy> mMenusToAdd = new List<EGui.UIProxy.MenuItemProxy>();
+        byte mDelayFrame = 0;
         public void AppendToMainMenu(params EGui.UIProxy.MenuItemProxy[] menus)
         {
-            for(int i=0; i<menus.Length; i++)
+            UEngine.Instance.EventPoster.RunOn((state) =>
             {
-                if (mMenuItems.Contains(menus[i]))
-                    continue;
-
-                bool hasSameName = false;
-                for(int j=0; j<mMenuItems.Count; j++)
-                {
-                    if(mMenuItems[j].MenuName == menus[i].MenuName)
-                    {
-                        hasSameName = true;
-                        mMenuItems[j].Merge(menus[i]);
-                        break;
-                    }
-                }
-                if(!hasSameName)
-                    mMenuItems.Add(menus[i]);
-            }
+                mMenusToAdd.AddRange(menus);
+                mDelayFrame = 2;
+                return true;
+            }, Thread.Async.EAsyncTarget.Main);
+        }
+        public void AppendToMainMenu(List<EGui.UIProxy.MenuItemProxy> menus)
+        {
+            UEngine.Instance.EventPoster.RunOn((state) =>
+            {
+                mMenusToAdd.AddRange(menus);
+                mDelayFrame = 2;
+                return true;
+            }, Thread.Async.EAsyncTarget.Main);
         }
         public void RemoveFromMainMenu(params EGui.UIProxy.MenuItemProxy[] menus)
         {
-            for(int i=0; i<menus.Length; i++)
+            UEngine.Instance.EventPoster.RunOn((state) =>
             {
-                if (mMenuItems.Contains(menus[i]))
-                    mMenuItems.Remove(menus[i]);
+                mMenusToRemove.AddRange(menus);
+                mDelayFrame = 2;
+                return true;
+            }, Thread.Async.EAsyncTarget.Main);
+        }
+        public void RemoveFromMainMenu(List<EGui.UIProxy.MenuItemProxy> menus)
+        {
+            UEngine.Instance.EventPoster.RunOn((state) =>
+            {
+                mMenusToRemove.AddRange(menus);
+                mDelayFrame = 2;
+                return true;
+            }, Thread.Async.EAsyncTarget.Main);
+        }
+        void TickToOperationMenus()
+        {
+            if (mDelayFrame > 0)
+            {
+                mDelayFrame--;
+                return;
+            }
+            for (int i=0; i< mMenusToRemove.Count; i++)
+            {
+                if (mMenuItems.Contains(mMenusToRemove[i]))
+                    mMenuItems.Remove(mMenusToRemove[i]);
                 else
                 {
                     for(int j=0; j<mMenuItems.Count; j++)
                     {
-                        if (mMenuItems[j].MenuName == menus[i].MenuName)
+                        if (mMenuItems[j].MenuName == mMenusToRemove[i].MenuName)
                         {
-                            mMenuItems[j].Eliminate(menus[i]);
+                            mMenuItems[j].Eliminate(mMenusToRemove[i]);
                             break;
                         }
                     }
                 }
             }
+            mMenusToRemove.Clear();
+
+            for (int i = 0; i < mMenusToAdd.Count; i++)
+            {
+                if (mMenuItems.Contains(mMenusToAdd[i]))
+                    continue;
+
+                bool hasSameName = false;
+                for (int j = 0; j < mMenuItems.Count; j++)
+                {
+                    if (mMenuItems[j].MenuName == mMenusToAdd[i].MenuName)
+                    {
+                        hasSameName = true;
+                        mMenuItems[j].Merge(mMenusToAdd[i]);
+                        break;
+                    }
+                }
+                if (!hasSameName)
+                    mMenuItems.Add(mMenusToAdd[i]);
+            }
+            mMenusToAdd.Clear();
         }
         private void DrawMainMenu()
         {

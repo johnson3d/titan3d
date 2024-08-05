@@ -629,7 +629,16 @@ namespace EngineNS.Rtti
                     }
                 }
             }
-            
+        }
+        public void InterateTypes(Action<UTypeDesc> cb)
+        {
+            foreach (var i in Services)
+            {
+                foreach (var j in i.Value.Types)
+                {
+                    cb(j.Value);
+                }
+            }
         }
         public class ServiceManager
         {

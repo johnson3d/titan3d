@@ -198,7 +198,7 @@ namespace EngineNS.Bricks.Particle
         {
             Emitter.Remove(name);
         }
-        public void Update(UParticleGraphNode particleSystem, float elpased)
+        public void Update(Graphics.Pipeline.URenderPolicy policy, UParticleGraphNode particleSystem, float elpased)
         {
             mMcObject?.Get()?.OnUpdate(this, particleSystem, elpased);
 
@@ -207,7 +207,7 @@ namespace EngineNS.Bricks.Particle
             foreach (var i in Emitter.Values)
             {
                 mMcObject?.Get()?.OnUpdateEmitter(this, i, particleSystem, elpased);
-                i.Update(particleSystem, elpased);                
+                i.Update(policy, particleSystem, elpased);                
             }
             //cmdlist.EndCommand();
             //policy.CommitCommandList(cmdlist);

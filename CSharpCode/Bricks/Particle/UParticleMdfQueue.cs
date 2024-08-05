@@ -14,43 +14,43 @@ namespace EngineNS.Bricks.Particle
             {
                 UniqueText = "";
                 {
-                    var codeBuilder = new Bricks.CodeBuilder.Backends.UHLSLCodeGenerator();
-                    string sourceCode = "";
-                    //var codeBuilder = new Bricks.CodeBuilder.HLSL.UHLSLGen();
+                //    var codeBuilder = new Bricks.CodeBuilder.Backends.UHLSLCodeGenerator();
+                //    string sourceCode = "";
+                //    //var codeBuilder = new Bricks.CodeBuilder.HLSL.UHLSLGen();
 
-                    codeBuilder.AddLine($"struct FParticle", ref sourceCode);
-                    codeBuilder.PushSegment(ref sourceCode);
-                    {
-                        var members = typeof(FParticle).GetFields();
-                        foreach (var i in members)
-                        {
-                            codeBuilder.AddLine($"{TtEmitter.ToHLSLTypeString(i.FieldType)} {i.Name.Substring(1)};", ref sourceCode);
-                        }
-                    }
-                    codeBuilder.PopSegment(ref sourceCode);
-                    sourceCode += ";";
-                    ParticleVarCode.TextCode = sourceCode;
-                    UniqueText += sourceCode;
-                }
-                {
-                    var codeBuilder = new Bricks.CodeBuilder.Backends.UHLSLCodeGenerator();
-                    string sourceCode = "";
-                    //var codeBuilder = new Bricks.CodeBuilder.HLSL.UHLSLGen();
+                //    codeBuilder.AddLine($"struct FParticle", ref sourceCode);
+                //    codeBuilder.PushSegment(ref sourceCode);
+                //    {
+                //        var members = typeof(FParticle).GetFields();
+                //        foreach (var i in members)
+                //        {
+                //            codeBuilder.AddLine($"{TtEmitter.ToHLSLTypeString(i.FieldType)} {i.Name.Substring(1)};", ref sourceCode);
+                //        }
+                //    }
+                //    codeBuilder.PopSegment(ref sourceCode);
+                //    sourceCode += ";";
+                //    ParticleVarCode.TextCode = sourceCode;
+                //    UniqueText += sourceCode;
+                //}
+                //{
+                //    var codeBuilder = new Bricks.CodeBuilder.Backends.UHLSLCodeGenerator();
+                //    string sourceCode = "";
+                //    //var codeBuilder = new Bricks.CodeBuilder.HLSL.UHLSLGen();
 
-                    codeBuilder.AddLine($"struct FParticleEmitter", ref sourceCode);
-                    codeBuilder.PushSegment(ref sourceCode);
-                    {
-                        var members = typeof(FParticleEmitter).GetFields();
-                        foreach (var i in members)
-                        {
-                            codeBuilder.AddLine($"{TtEmitter.ToHLSLTypeString(i.FieldType)} {i.Name.Substring(1)};", ref sourceCode);
-                        }
-                    }
-                    codeBuilder.PopSegment(ref sourceCode);
-                    sourceCode += ";";
-                    ParticleEmitterCode.TextCode = sourceCode;
+                //    codeBuilder.AddLine($"struct FParticleEmitter", ref sourceCode);
+                //    codeBuilder.PushSegment(ref sourceCode);
+                //    {
+                //        var members = typeof(FParticleEmitter).GetFields();
+                //        foreach (var i in members)
+                //        {
+                //            codeBuilder.AddLine($"{TtEmitter.ToHLSLTypeString(i.FieldType)} {i.Name.Substring(1)};", ref sourceCode);
+                //        }
+                //    }
+                //    codeBuilder.PopSegment(ref sourceCode);
+                //    sourceCode += ";";
+                //    ParticleEmitterCode.TextCode = sourceCode;
 
-                    UniqueText += sourceCode;
+                //    UniqueText += sourceCode;
                 }
 
                 UniqueText = Hash160.CreateHash160(UniqueText).ToString();
@@ -133,7 +133,8 @@ namespace EngineNS.Bricks.Particle
             {
                 drawcall.BindSRV(drawcall.FindBinder("sbParticleInstance"), Emitter.GpuResources.ParticlesBuffer.Srv);
                 drawcall.BindSRV(drawcall.FindBinder("sbAlives"), Emitter.GpuResources.CurAlivesBuffer.Srv);
-                
+                drawcall.BindCBuffer(drawcall.FindBinder("cbParticleDesc"), Emitter.CurrentQueue.CBuffer);
+
                 if (Emitter.IsGpuDriven)
                 {
                     drawcall.BindIndirectDrawArgsBuffer(Emitter.GpuResources.DrawArgBuffer, 0);

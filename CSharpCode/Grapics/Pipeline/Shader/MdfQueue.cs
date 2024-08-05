@@ -225,7 +225,7 @@ namespace EngineNS.Graphics.Pipeline.Shader
                         continue;
                     codeBuilder.AddLine($"{i.ModifierNameVS}(output, input);", ref codeString);
 
-                    var mdfCode = Editor.ShaderCompiler.UShaderCodeManager.Instance.GetShaderCodeProvider(i.SourceName);
+                    var mdfCode = Editor.ShaderCompiler.TtShaderCodeManager.Instance.GetShaderCodeProvider(i.SourceName);
                     hashCode += mdfCode.SourceCode.TextCode;
                 }
             }
@@ -240,7 +240,7 @@ namespace EngineNS.Graphics.Pipeline.Shader
                         continue;
                     codeBuilder.AddLine($"{i.ModifierNamePS}(input, mtl);", ref codeString);
 
-                    var mdfCode = Editor.ShaderCompiler.UShaderCodeManager.Instance.GetShaderCodeProvider(i.SourceName);
+                    var mdfCode = Editor.ShaderCompiler.TtShaderCodeManager.Instance.GetShaderCodeProvider(i.SourceName);
                     hashCode += mdfCode.SourceCode.TextCode;
                 }
             }
@@ -296,7 +296,7 @@ namespace EngineNS.Graphics.Pipeline.Shader
                 {
                     if (i.SourceName == null)
                         continue;
-                    var shadingCode = Editor.ShaderCompiler.UShaderCodeManager.Instance.GetShaderCode(i.SourceName);
+                    var shadingCode = Editor.ShaderCompiler.TtShaderCodeManager.Instance.GetShaderCode(i.SourceName);
                     result += shadingCode;
                     result += i.GetUniqueText();
                 }

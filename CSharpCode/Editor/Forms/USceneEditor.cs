@@ -223,7 +223,7 @@ namespace EngineNS.Editor.Forms
         public EGui.Controls.PropertyGrid.PropertyGrid EditorPropGrid = new EGui.Controls.PropertyGrid.PropertyGrid();
         public Graphics.Pipeline.URenderPolicy RenderPolicy { get => PreviewViewport.RenderPolicy; }
 
-        bool mIsDrawing = true;
+        bool mIsDrawing = false;
         bool IsDrawing
         {
             get => mIsDrawing;
@@ -232,12 +232,12 @@ namespace EngineNS.Editor.Forms
                 if(mIsDrawing && !value)
                 {
                     var mainEditor = UEngine.Instance.GfxDevice.SlateApplication as Editor.UMainEditorApplication;
-                    mainEditor?.RemoveFromMainMenu(mMenuItems.ToArray());
+                    mainEditor?.RemoveFromMainMenu(mMenuItems);
                 }
                 else if(!mIsDrawing && value)
                 {
                     var mainEditor = UEngine.Instance.GfxDevice.SlateApplication as Editor.UMainEditorApplication;
-                    mainEditor?.AppendToMainMenu(mMenuItems.ToArray());
+                    mainEditor?.AppendToMainMenu(mMenuItems);
                 }
                 mIsDrawing = value;
             }
@@ -415,7 +415,7 @@ namespace EngineNS.Editor.Forms
                     mPlaceItemPanelShow,
                 }
             });
-            mainEditor.AppendToMainMenu(mMenuItems.ToArray());
+            //mainEditor.AppendToMainMenu(mMenuItems.ToArray());
         }
 
         protected class PlaceItemData

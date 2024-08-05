@@ -349,47 +349,6 @@ namespace EngineNS
             }
         }
 
-        //#define CLAMP(x , min , max) ((x) > (max) ? (max) : ((x) < (min) ? (min) : x))
-        /// <summary>
-        /// 获取欧拉角
-        /// </summary>
-        /// <param name="Yaw">航向角</param>
-        /// <param name="Pitch">俯仰角</param>
-        /// <param name="Roll">翻转角</param>
-        [Rtti.Meta]
-        [Obsolete]
-        public void GetYawPitchRoll(out float Yaw, out float Pitch, out float Roll)
-        {
-            //double d0 = X * X + Y * Y - Z * Z - W * W;
-            //double d1 = 2 * (Y * Z + X * W);
-            //double d2 = X * X - Y * Y - Z * Z + W * W;
-            //Yaw = (float)(Math.Atan(d1 / d0));
-            //Pitch = (float)(Math.Asin(-2 * (Y * W - X * Z)));
-            //Roll = (float)(Math.Atan( 2 * (Z * W + X * Y) / d2));
-
-            //if(d2 < 0)
-            //{
-            //	if(Roll < 0)
-            //		Roll += Math.PI;
-            //	else
-            //		Roll -= Math.PI;
-            //}
-
-            //if(d0 < 0)
-            //{
-            //	if(d1 > 0)
-            //		Yaw += Math.PI;
-            //	else
-            //		Yaw -= Math.PI;
-            //}
-            //https://www.euclideanspace.com/maths/geometry/rotations/conversions/quaternionToEuler/
-
-            float value = 2 * (W * X - Y * Z);
-            Yaw = (float)(Math.Atan2(2 * (W * Y + Z * X), 1 - 2 * (X * X + Y * Y)));
-            value = ((value) > (1.0f) ? (1.0f) : ((value) < (-1.0f) ? (-1.0f) : value));
-            Pitch = (float)(Math.Asin(value));
-            Roll = (float)(Math.Atan2(2 * (W * Z + X * Y), 1 - 2 * (Z * Z + X * X)));
-        }
         [Rtti.Meta]
         public FRotator ToEuler()
         {

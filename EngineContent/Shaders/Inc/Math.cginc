@@ -1,6 +1,8 @@
 #ifndef _MATH_INC_
 #define _MATH_INC_
 
+#include "@engine_preprosessors.cginc"
+
 #define Pi  3.14159265h
 #define PI 3.1415926535897932f
 #define Invc2PI 1.0 / (PI * 2.0)
@@ -196,6 +198,28 @@ float4 QuatFromAxisAngle(float3 axis, float angle)
     result.y = axis.y * sinV;
     result.z = axis.z * sinV;
     result.w = cosV;
+    return result;
+}
+
+float4 QuatFromEuler(float3 euler)
+{
+    float4 result;
+
+    float halfRoll = euler.z * 0.5f;
+    float sinRoll = sin(halfRoll);
+    float cosRoll = cos(halfRoll);
+    float halfPitch = euler.x * 0.5f;
+    float sinPitch = sin(halfPitch);
+    float cosPitch = cos(halfPitch);
+    float halfYaw = euler.y * 0.5f;
+    float sinYaw = sin(halfYaw);
+    float cosYaw = cos(halfYaw);
+
+    result.x = (cosYaw * sinPitch * cosRoll) + (sinYaw * cosPitch * sinRoll);
+    result.y = (sinYaw * cosPitch * cosRoll) - (cosYaw * sinPitch * sinRoll);
+    result.z = (cosYaw * cosPitch * sinRoll) - (sinYaw * sinPitch * cosRoll);
+    result.w = (cosYaw * cosPitch * cosRoll) + (sinYaw * sinPitch * sinRoll);
+
     return result;
 }
 

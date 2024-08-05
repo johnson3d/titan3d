@@ -156,7 +156,21 @@ namespace EngineNS.Bricks.Particle.Editor
                     EditingObject.TimerInterval = value;
                 }
             }
-
+        }
+        EParticleEmitterStyles mEmitterStyles;
+        [Category("Option")]
+        [Rtti.Meta]
+        public EParticleEmitterStyles EmitterStyles
+        {
+            get => mEmitterStyles;
+            set
+            {
+                mEmitterStyles = value;
+                if (EditingObject != null)
+                {
+                    EditingObject.EmitterData.Flags = (uint)(value);
+                }
+            }
         }
         public virtual UTypeDesc CreateEmitterType()
         {
@@ -170,6 +184,7 @@ namespace EngineNS.Bricks.Particle.Editor
             emt.ShaderName = ShaderName;
             emt.TimerInterval = TimerInterval;
             emt.TimerRemain = TimerRemain;
+            emt.EmitterData.Flags = (uint)EmitterStyles;
             //emt.EmitterData.Flags = Flags;
         }
     }

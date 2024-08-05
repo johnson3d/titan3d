@@ -68,6 +68,10 @@ namespace EngineNS.Editor.ShaderCompiler
                     result = file.Substring(repPos);
                     result = result.Replace("@Game/", UEngine.Instance.FileManager.GetRoot(IO.TtFileManager.ERootDir.Game));
                 }
+                else
+                {
+                    
+                }
             }
             return result;
         }
@@ -75,7 +79,11 @@ namespace EngineNS.Editor.ShaderCompiler
         {
             file = FixRootPath(file);
             RName rn = null;
-            if (file.StartsWith(UEngine.Instance.FileManager.GetRoot(IO.TtFileManager.ERootDir.Engine)))
+            if (file.StartsWith("@"))
+            {
+                rn = RName.GetRName(file, RName.ERNameType.Engine);
+            }
+            else if (file.StartsWith(UEngine.Instance.FileManager.GetRoot(IO.TtFileManager.ERootDir.Engine)))
             {
                 var path = IO.TtFileManager.GetRelativePath(UEngine.Instance.FileManager.GetRoot(IO.TtFileManager.ERootDir.Engine), file);
                 rn = RName.GetRName(path, RName.ERNameType.Engine);
@@ -91,7 +99,7 @@ namespace EngineNS.Editor.ShaderCompiler
             }
             if (rn != null)
             {
-                var code = UShaderCodeManager.Instance.GetShaderCodeProvider(rn);
+                var code = TtShaderCodeManager.Instance.GetShaderCodeProvider(rn);
                 if (code != null)
                 {
                     return code.SourceCode.mCoreObject;
@@ -117,7 +125,11 @@ namespace EngineNS.Editor.ShaderCompiler
             }
             bool isVar = false;
             RName rn = null;
-            if (file.EndsWith("/Material"))
+            if (file.EndsWith("/EnginePresessors"))
+            {
+
+            }
+            else if (file.EndsWith("/Material"))
             {
                 if (Material == null)
                     return (NxRHI.FShaderCode*)0;
@@ -140,6 +152,10 @@ namespace EngineNS.Editor.ShaderCompiler
                 else
                     return (NxRHI.FShaderCode*)0;
             }
+            else if (file.StartsWith("@"))
+            {
+                rn = RName.GetRName(file, RName.ERNameType.Engine);
+            }
             else if (file.StartsWith(UEngine.Instance.FileManager.GetRoot(IO.TtFileManager.ERootDir.Engine)))
             {
                 var path = IO.TtFileManager.GetRelativePath(UEngine.Instance.FileManager.GetRoot(IO.TtFileManager.ERootDir.Engine), file);
@@ -156,7 +172,7 @@ namespace EngineNS.Editor.ShaderCompiler
             }
             if (rn != null)
             {
-                var code = UShaderCodeManager.Instance.GetShaderCodeProvider(rn);
+                var code = TtShaderCodeManager.Instance.GetShaderCodeProvider(rn);
                 if (code != null)
                 {
                     if (isVar)

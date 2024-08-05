@@ -263,7 +263,13 @@ bool IShaderConductor::CompileHLSL(NxRHI::FShaderCompiler* compiler, NxRHI::FSha
 	src.fileName = hlsl;
 	src.loadIncludeCallback = [=](const char* includeName)->ShaderConductor::Blob
 	{
-		auto ar_inc = compiler->GetShaderCodeStream(includeName, includeName);
+		auto inc = std::string(includeName);
+		auto pos = inc.find_first_of('@');
+		if (pos != std::string::npos)
+		{
+			inc = inc.substr(pos);
+		}
+		auto ar_inc = compiler->GetShaderCodeStream(inc.c_str(), inc.c_str());
 		
 		if (ar_inc != nullptr)
 			return ShaderConductor::Blob(ar_inc->GetSourceCode(), static_cast<uint32_t>(ar_inc->GetSize()));

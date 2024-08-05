@@ -14,11 +14,27 @@ void DoNebulaModifierVS(inout PS_INPUT vsOut, inout VS_MODIFIER vert)
 	//idx += vert.vMultiDrawId;
 #endif
 	FParticle inst = sbParticleInstance[idx];
-    half4 angles = ToColor4f(inst.Rotator);
-    float4 quat = QuatFromAxisAngle(float3(0, 1, 0), angles.y);
+    float4 quat = float4(0, 0, 0, 1);
+    if (EmitterData.Flags & EParticleEmitterStyles_YawFaceToCameral)
+    {
+        quat = QuatFromAxisAngle(float3(0, 1, 0), EmitterData.CameralEuler.y);
+    }
+    else if (EmitterData.Flags & EParticleEmitterStyles_FreeFaceToCameral)
+    {
+        half3 angles = EmitterData.CameralEuler;
+        angles.z = 0;
+        quat = QuatFromEuler(angles.xyz);
+    }
+    else
+    {
+        half4 angles = ToColor4f(inst.Rotator) * (PI * 2);
+        quat = QuatFromEuler(angles.xyz); //QuatFromAxisAngle(float3(0, 1, 0), angles.y);
+    }
     float3 Pos = inst.Location + QuatRotateVector(vert.vPosition.xyz * inst.Scale, quat); //QuateFromAxisAngle
-	vsOut.vPosition.xyz = Pos ;
-    vsOut.vColor = (float4)ToColor4f(inst.Color);
+    vsOut.vPosition.xyz = Pos;
+    vert.vNormal.xyz = QuatRotateVector(vert.vNormal.xyz, quat);
+    vsOut.SetNormal(vert.vNormal);
+    vsOut.vColor = (float4) ToColor4f(inst.Color);
 
 }
 

@@ -88,7 +88,7 @@ namespace EngineNS.Bricks.Particle
             if (particleNode == null)
                 return true;
 
-            NebulaParticle.Update(particleNode, UEngine.Instance.ElapsedSecond);
+            NebulaParticle.Update(policy, particleNode, UEngine.Instance.ElapsedSecond);
 
             return true;
         }

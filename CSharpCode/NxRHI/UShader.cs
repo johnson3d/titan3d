@@ -118,7 +118,7 @@ namespace EngineNS.NxRHI
             {
                 ar.Write(shader);
                 ar.Write(this.PermutationId);
-                var shadingCode = Editor.ShaderCompiler.UShaderCodeManager.Instance.GetShaderCode(shader);
+                var shadingCode = Editor.ShaderCompiler.TtShaderCodeManager.Instance.GetShaderCode(shader);
                 ar.Write(shadingCode.CodeHash);
 
                 ar.Write(mCoreObject.GetDesc().Type);
@@ -145,7 +145,7 @@ namespace EngineNS.NxRHI
                 ar.Read(out permutationId);
                 Hash160 hash;
                 ar.Read(out hash);
-                var shadingCode = Editor.ShaderCompiler.UShaderCodeManager.Instance.GetShaderCode(shader);
+                var shadingCode = Editor.ShaderCompiler.TtShaderCodeManager.Instance.GetShaderCode(shader);
                 if (shadingCode.CodeHash != hash)
                     return null;
             }

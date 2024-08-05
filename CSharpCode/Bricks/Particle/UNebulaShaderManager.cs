@@ -11,8 +11,6 @@ namespace EngineNS.Bricks.Particle
 
         public TtEmitter Emitter;
         public RName NebulaName;
-        public NxRHI.UShaderCode ParticleVar;
-        public NxRHI.UShaderCode SystemData;
         public NxRHI.UShaderCode CBufferVar;
         public NxRHI.UShaderCode HLSLDefine;
         public NxRHI.UShaderCode HLSLCode;
@@ -21,17 +19,7 @@ namespace EngineNS.Bricks.Particle
             public UNebulaShader Host;
             public override unsafe NxRHI.FShaderCode* GetHLSLCode(string includeName, out bool bIncluded)
             {
-                if (includeName.EndsWith("/ParticleVar"))
-                {
-                    bIncluded = true;
-                    return Host.ParticleVar.mCoreObject;
-                }
-                else if (includeName.EndsWith("/ParticleSystemVar"))
-                {
-                    bIncluded = true;
-                    return Host.SystemData.mCoreObject;
-                }
-                else if (includeName.EndsWith("/NebulaModifierDefine"))
+                if (includeName.EndsWith("/NebulaModifierDefine"))
                 {
                     bIncluded = true;
                     return Host.HLSLDefine.mCoreObject;
@@ -54,7 +42,7 @@ namespace EngineNS.Bricks.Particle
             }
         }
 
-        public async Thread.Async.TtTask<bool> Init(Hash160 codeHash, RName nebula, TtEmitter emitter, string particleVar, string sysData, string cbVar, string define, string code)
+        public async Thread.Async.TtTask<bool> Init(Hash160 codeHash, RName nebula, TtEmitter emitter, string cbVar, string define, string code)
         {
             var defines = new NxRHI.UShaderDefinitions();
             defines.mCoreObject.AddDefine("DispatchX", $"{Dispatch_SetupDimArray1.X}");
@@ -62,10 +50,6 @@ namespace EngineNS.Bricks.Particle
             defines.mCoreObject.AddDefine("DispatchZ", $"{Dispatch_SetupDimArray1.Z}");
             defines.mCoreObject.AddDefine("NebulaCodeHash", $"{codeHash}");
 
-            ParticleVar = new NxRHI.UShaderCode();
-            ParticleVar.TextCode = particleVar;
-            SystemData = new NxRHI.UShaderCode();
-            SystemData.TextCode = sysData;
             HLSLDefine = new NxRHI.UShaderCode();
             HLSLDefine.TextCode = define;
             HLSLCode = new NxRHI.UShaderCode();
@@ -163,8 +147,6 @@ namespace EngineNS.Bricks.Particle
         {
             foreach (var i in particle.Emitter.Values)
             {
-                var particleVar = i.GetParticleDefine();
-                var sysData = i.GetSystemDataDefine();
                 var defineCode = "";
                 var emitterCode = i.GetEmitShapeHLSL();
                 string cbVarDefine = i.GetCBufferDefines();
@@ -173,12 +155,12 @@ namespace EngineNS.Bricks.Particle
                     var hlslVar = cbVarDefine + j.GetCBufferDefines();
                     var hlslDefine = defineCode + j.GetParametersDefine();
                     var hlsl = emitterCode + j.GetHLSL();
-                    var hash = Hash160.CreateHash160(particleVar + sysData + hlslVar + hlslDefine + hlsl);
+                    var hash = Hash160.CreateHash160(hlslVar + hlslDefine + hlsl);
                     UNebulaShader shader;
                     if (NebulaShaderManager.Shaders.TryGetValue(hash, out shader) == false)
                     {
                         shader = new UNebulaShader();
-                        await shader.Init(hash, particle.AssetName, i, particleVar, sysData, hlslVar, hlslDefine, hlsl);
+                        await shader.Init(hash, particle.AssetName, i, hlslVar, hlslDefine, hlsl);
                         NebulaShaderManager.Shaders.Add(hash, shader);
                     }
                     j.Shader = shader;

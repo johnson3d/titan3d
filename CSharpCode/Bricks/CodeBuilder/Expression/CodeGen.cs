@@ -72,11 +72,11 @@ namespace EngineNS.Bricks.CodeBuilder
             if (data.Method != null)
                 data.Method.MethodSegmentDeep++;
         }
-        public void PopSegment(ref string sourceCode)
+        public void PopSegment(ref string sourceCode, bool bSemicolon = false)
         {
             PopIndent();
             if (!string.IsNullOrEmpty(mSegmentEndStr))
-                AddLine(mSegmentEndStr, ref sourceCode);
+                AddLine(mSegmentEndStr + (bSemicolon ? ";" : ""), ref sourceCode);
         }
         public void PopSegment(ref string sourceCode, in UCodeGeneratorData data)
         {

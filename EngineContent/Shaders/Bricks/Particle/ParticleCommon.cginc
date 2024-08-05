@@ -2,13 +2,8 @@
 #define _PARTICLE_COMMON_H_
 #include "../../Inc/VertexLayout.cginc"
 #include "../../Inc/GpuSceneCommon.cginc"
+#include "../../Inc/Math.cginc"
 #include "../../Inc/Random.cginc"
-
-#define NebulaParticleFlags_EmitShape (1u << 31)
-#define NebulaParticleFlags_EmitIndex (1u << 30)
-
-#include "ParticleVar"
-#include "ParticleSystemVar"
 
 bool IsParticleEmitShape(in FParticle cur)
 {

@@ -7,6 +7,7 @@ using System.Text;
 namespace EngineNS.Bricks.Particle
 {
     [Flags]
+    [EngineNS.Editor.ShaderCompiler.TtShaderDefine(ShaderName = "NebulaParticleFlags")]
     public enum EParticleFlags : uint
     {
         EmitShape = (1u << 31),//Spawn by Shapes
@@ -14,10 +15,11 @@ namespace EngineNS.Bricks.Particle
         FlagMask = 0xF0000000,
     }
     [System.Runtime.InteropServices.StructLayout(System.Runtime.InteropServices.LayoutKind.Sequential, Pack = 16)]
+    [EngineNS.Editor.ShaderCompiler.TtShaderDefine(ShaderName = "FParticle")]
     public struct FParticle
     {
-        public uint mFlags;
-        public float mLife;
+        public uint mFlags;//system need
+        public float mLife;//system need
         public float mScale;
         public uint mRandomSeed;
         public Vector3 mLocation;
@@ -78,14 +80,26 @@ namespace EngineNS.Bricks.Particle
             }
         }
     }
+
+    [Flags]
+    [EngineNS.Editor.ShaderCompiler.TtShaderDefine(ShaderName = "EParticleEmitterStyles")]
+    public enum EParticleEmitterStyles : uint
+    {
+        FreeFaceToCameral = 1,
+        YawFaceToCameral = (1 << 1),
+    };
     [System.Runtime.InteropServices.StructLayout(System.Runtime.InteropServices.LayoutKind.Sequential, Pack = 16)]
+    [EngineNS.Editor.ShaderCompiler.TtShaderDefine(ShaderName = "FParticleEmitter")]
     public struct FParticleEmitter
     {
-        public Vector3 mLocation;//system need
-        public uint mFlags;//system need
+        public Vector3 mLocation;
+        public uint mFlags;
 
         public Vector3 mVelocity;
         public uint mFlags1;
+
+        public FRotator mCameralEuler;
+        public uint mFlags2;
 
         public Vector4i mTempData;//for compute UAV
         [Rtti.Meta]
@@ -96,6 +110,10 @@ namespace EngineNS.Bricks.Particle
         public Vector3 Velocity { get => mVelocity; set => mVelocity = value; }
         [Rtti.Meta]
         public uint Flags1 { get => mFlags1; set => mFlags1 = value; }
+        [Rtti.Meta]
+        public FRotator CameralEuler { get => mCameralEuler; set => mCameralEuler = value; }
+        [Rtti.Meta]
+        public uint Flags2 { get => mFlags2; set => mFlags2 = value; }
         [Rtti.Meta]
         public Vector4i TempData { get => mTempData; set => mTempData = value; }
     }
@@ -276,103 +294,6 @@ namespace EngineNS.Bricks.Particle
         Graphics.Mesh.TtMesh mMesh;
         public Graphics.Mesh.TtMesh Mesh { get => mMesh; set => mMesh = value; }
         #region HLSL
-        public static string ToHLSLTypeString(System.Type type)
-        {
-            string memberType = "";
-            if (type == typeof(Vector4))
-            {
-                memberType = "float4";
-            }
-            else if (type == typeof(Vector3))
-            {
-                memberType = "float3";
-            }
-            else if (type == typeof(Vector2))
-            {
-                memberType = "float2";
-            }
-            else if (type == typeof(float))
-            {
-                memberType = "float";
-            }
-            else if (type == typeof(Vector4i))
-            {
-                memberType = "int4";
-            }
-            else if (type == typeof(Vector3i))
-            {
-                memberType = "int3";
-            }
-            else if (type == typeof(Vector2i))
-            {
-                memberType = "int2";
-            }
-            else if (type == typeof(int))
-            {
-                memberType = "int";
-            }
-            else if (type == typeof(Vector4ui))
-            {
-                memberType = "uint4";
-            }
-            else if (type == typeof(Vector3ui))
-            {
-                memberType = "uint3";
-            }
-            else if (type == typeof(Vector2ui))
-            {
-                memberType = "uint2";
-            }
-            else if (type == typeof(uint))
-            {
-                memberType = "uint";
-            }
-            else
-            {
-                System.Diagnostics.Debug.Assert(false);
-            }
-            return memberType;
-        }
-        public string GetParticleDefine()
-        {
-            var codeBuilder = new Bricks.CodeBuilder.Backends.UHLSLCodeGenerator();
-            string sourceCode = "";
-            //var codeBuilder = new Bricks.CodeBuilder.HLSL.UHLSLGen();
-
-            codeBuilder.AddLine($"struct FParticle", ref sourceCode);
-            codeBuilder.PushSegment(ref sourceCode);
-            {
-                var members = typeof(FParticle).GetFields();
-                foreach (var i in members)
-                {
-                    codeBuilder.AddLine($"{ToHLSLTypeString(i.FieldType)} {i.Name.Substring(1)};", ref sourceCode);
-                }
-            }
-            codeBuilder.PopSegment(ref sourceCode);
-            sourceCode += ";";
-
-            return sourceCode;
-        }
-        public string GetSystemDataDefine()
-        {
-            var codeBuilder = new Bricks.CodeBuilder.Backends.UHLSLCodeGenerator();
-            string sourceCode = "";
-            //var codeBuilder = new Bricks.CodeBuilder.HLSL.UHLSLGen();
-
-            codeBuilder.AddLine($"struct FParticleEmitter", ref sourceCode);
-            codeBuilder.PushSegment(ref sourceCode);
-            {
-                var members = typeof(FParticleEmitter).GetFields();
-                foreach (var i in members)
-                {
-                    codeBuilder.AddLine($"{ToHLSLTypeString(i.FieldType)} {i.Name.Substring(1)};", ref sourceCode);
-                }
-            }
-            codeBuilder.PopSegment(ref sourceCode);
-            sourceCode += ";";
-
-            return sourceCode;
-        }
         public virtual string GetCBufferDefines()
         {
             string result = "";
@@ -495,10 +416,12 @@ namespace EngineNS.Bricks.Particle
         }
         #region Update
         private float mParticleStartSecond;
-        public unsafe void Update(UParticleGraphNode particleSystem, float elapsed)
+        public unsafe void Update(Graphics.Pipeline.URenderPolicy policy, UParticleGraphNode particleSystem, float elapsed)
         {
             if (Mesh == null)
                 return;
+            var quat = Quaternion.RotationMatrix(policy.DefaultCamera.GetViewMatrix());
+            EmitterData.CameralEuler = quat.ToEuler();
             var coreBinder = UEngine.Instance.GfxDevice.CoreShaderBinder;
             var timeSecond = UEngine.Instance.TickCountSecond - mParticleStartSecond;
             CurrentQueue?.CBuffer?.SetValue(coreBinder.CBPerParticle.ParticleStartSecond, timeSecond);

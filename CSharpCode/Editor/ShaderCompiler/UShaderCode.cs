@@ -1,10 +1,16 @@
-﻿using System;
+﻿using NPOI.HPSF;
+using System;
 using System.Collections.Generic;
 using System.Text;
 
 namespace EngineNS.Editor.ShaderCompiler
 {
-    public class UShaderSourceCode : Graphics.Pipeline.Shader.IShaderCodeProvider
+    public class TtShaderDefineAttribute : Attribute
+    {
+        public string ShaderName;
+    }
+
+    public class TtShaderSourceCode : Graphics.Pipeline.Shader.IShaderCodeProvider
     {
         public void Cleanup()
         {
@@ -39,7 +45,7 @@ namespace EngineNS.Editor.ShaderCompiler
 
                     var curPath = IO.TtFileManager.GetParentPathName(CodeName.Name);
                     var file = IO.TtFileManager.CombinePath(curPath, inc);
-                    var rn = UShaderCodeManager.Instance.GetShaderCode(RName.GetRName(file, CodeName.RNameType));
+                    var rn = TtShaderCodeManager.Instance.GetShaderCode(RName.GetRName(file, CodeName.RNameType));
                     if (rn != null)
                     {
                         if (!DependencyCodes.Contains(rn))
@@ -61,7 +67,7 @@ namespace EngineNS.Editor.ShaderCompiler
                 return x.CodeName.CompareTo(y.CodeName);
             });
         }
-        public void GatherDependencyTree(List<UShaderSourceCode> depends)
+        public void GatherDependencyTree(List<TtShaderSourceCode> depends)
         {
             foreach (var i in DependencyCodes)
             {
@@ -74,7 +80,7 @@ namespace EngineNS.Editor.ShaderCompiler
         }
         public void UpdateCodeHash()
         {
-            var depends = new List<UShaderSourceCode>();
+            var depends = new List<TtShaderSourceCode>();
             GatherDependencyTree(depends);
             depends.Sort((x, y) =>
             {
@@ -91,15 +97,15 @@ namespace EngineNS.Editor.ShaderCompiler
         public NxRHI.UShaderCode DefineCode { get; private set; } = new NxRHI.UShaderCode();
         public NxRHI.UShaderCode SourceCode { get; private set; } = new NxRHI.UShaderCode();
         public Hash160 CodeHash { get; private set; }
-        public List<UShaderSourceCode> DependencyCodes { get; } = new List<UShaderSourceCode>();
+        public List<TtShaderSourceCode> DependencyCodes { get; } = new List<TtShaderSourceCode>();
     }
-    public class UShaderCodeManager
+    public class TtShaderCodeManager : IDisposable
     {
-        public static UShaderCodeManager Instance { get; } = new UShaderCodeManager();
-        public Dictionary<RName, UShaderSourceCode> Codes { get; } = new Dictionary<RName, UShaderSourceCode>();
-        ~UShaderCodeManager()
+        public static TtShaderCodeManager Instance { get; } = new TtShaderCodeManager();
+        public Dictionary<RName, TtShaderSourceCode> Codes { get; } = new Dictionary<RName, TtShaderSourceCode>();
+        ~TtShaderCodeManager()
         {
-            Cleanup();
+            Dispose();
         }
         public void Initialize(RName shaderDir)
         {
@@ -120,7 +126,13 @@ namespace EngineNS.Editor.ShaderCompiler
                 Codes.Add(rn, code);
             }
 
-            foreach(var i in Codes)
+            {
+                var rn = RName.GetRName("@engine_preprosessors.cginc", RName.ERNameType.Engine);
+                var code = GetEnginePreprocessors(rn, true);
+                Codes.Add(rn, code);
+            }
+
+            foreach (var i in Codes)
             {
                 i.Value.CollectIncludes();
             }
@@ -130,7 +142,140 @@ namespace EngineNS.Editor.ShaderCompiler
                 i.Value.UpdateCodeHash();
             }
         }
-        public void Cleanup()
+        public static string ToHLSLTypeString(System.Type type)
+        {
+            string memberType = "";
+            if (type == typeof(Vector4))
+            {
+                memberType = "float4";
+            }
+            else if (type == typeof(Vector3) || type == typeof(FRotator))
+            {
+                memberType = "float3";
+            }
+            else if (type == typeof(Vector2))
+            {
+                memberType = "float2";
+            }
+            else if (type == typeof(float))
+            {
+                memberType = "float";
+            }
+            else if (type == typeof(Vector4i))
+            {
+                memberType = "int4";
+            }
+            else if (type == typeof(Vector3i))
+            {
+                memberType = "int3";
+            }
+            else if (type == typeof(Vector2i))
+            {
+                memberType = "int2";
+            }
+            else if (type == typeof(int))
+            {
+                memberType = "int";
+            }
+            else if (type == typeof(Vector4ui))
+            {
+                memberType = "uint4";
+            }
+            else if (type == typeof(Vector3ui))
+            {
+                memberType = "uint3";
+            }
+            else if (type == typeof(Vector2ui))
+            {
+                memberType = "uint2";
+            }
+            else if (type == typeof(uint))
+            {
+                memberType = "uint";
+            }
+            else
+            {
+                System.Diagnostics.Debug.Assert(false);
+            }
+            return memberType;
+        }
+        private TtShaderSourceCode GetEnginePreprocessors(RName name, bool bWriteFile)
+        {
+            var result = new TtShaderSourceCode();
+            var codeBuilder = new Bricks.CodeBuilder.Backends.UHLSLCodeGenerator();
+            string sourceCode = "";
+
+            var ShaderEnums = new List<KeyValuePair<TtShaderDefineAttribute, Rtti.UTypeDesc>>();
+            var ShaderStructs = new List<KeyValuePair<TtShaderDefineAttribute, Rtti.UTypeDesc>>();
+            Rtti.UTypeDescManager.Instance.InterateTypes((Rtti.UTypeDesc type) =>
+            {
+                var attrs = type.SystemType.GetCustomAttributes(typeof(TtShaderDefineAttribute), false);
+                if (attrs.Length != 1)
+                {
+                    return;
+                }
+                var sdAttr = attrs[0] as TtShaderDefineAttribute;
+                if (type.IsEnum)
+                {
+                    ShaderEnums.Add(KeyValuePair.Create(sdAttr, type));
+                }
+                else if (type.IsValueType)
+                {
+                    ShaderStructs.Add(KeyValuePair.Create(sdAttr, type));
+                }
+            });
+
+            ShaderEnums.Sort((x, y) =>
+            {
+                return x.Key.ShaderName.CompareTo(y.Key.ShaderName);
+            });
+            ShaderStructs.Sort((x, y) =>
+            {
+                return x.Key.ShaderName.CompareTo(y.Key.ShaderName);
+            });
+            codeBuilder.AddLine($"#ifndef ENGINE_PREPROCESSORTS_INC", ref sourceCode);
+            codeBuilder.AddLine($"#define ENGINE_PREPROCESSORTS_INC", ref sourceCode);
+            foreach (var kv in ShaderEnums)
+            {
+                codeBuilder.AddLine($"//Begin enum {kv.Key.ShaderName}", ref sourceCode);
+                var values = Enum.GetValues(kv.Value.SystemType);
+                var names = Enum.GetNames(kv.Value.SystemType);
+                for (int i = 0; i < names.Length; i++)
+                {
+                    object r;
+                    Enum.TryParse(kv.Value.SystemType, values.GetValue(i).ToString(), out r);
+                    codeBuilder.AddLine($"#define {kv.Key.ShaderName}_{names[i]} {(uint)r}", ref sourceCode);
+                }
+                codeBuilder.AddLine($"//End enum {kv.Key.ShaderName}", ref sourceCode);
+                codeBuilder.AddLine("\n", ref sourceCode);
+            }
+
+            foreach (var kv in ShaderStructs)
+            {
+                codeBuilder.AddLine($"struct {kv.Key.ShaderName}", ref sourceCode);
+                codeBuilder.PushSegment(ref sourceCode);
+                {
+                    var members = kv.Value.SystemType.GetFields();
+                    foreach (var i in members)
+                    {
+                        codeBuilder.AddLine($"{ToHLSLTypeString(i.FieldType)} {i.Name.Substring(1)};", ref sourceCode);
+                    }
+                }
+                codeBuilder.PopSegment(ref sourceCode, true);
+            }
+            codeBuilder.AddLine($"#endif//define ENGINE_PREPROCESSORTS_INC", ref sourceCode);
+
+            result.SourceCode.TextCode = sourceCode;
+            result.CodeName = name;
+
+            if (bWriteFile)
+            {
+                IO.TtFileManager.WriteAllText(UEngine.Instance.FileManager.GetPath(IO.TtFileManager.ERootDir.Cache, IO.TtFileManager.ESystemDir.DebugUtility)
+                    + $"/engine_preprosessors.cginc", sourceCode);
+            }
+            return result;
+        }
+        public void Dispose()
         {
             foreach (var i in Codes)
             {
@@ -157,9 +302,9 @@ namespace EngineNS.Editor.ShaderCompiler
                 return GetShaderCode(name);
             }
         }
-        public UShaderSourceCode GetShaderCode(RName name)
+        public TtShaderSourceCode GetShaderCode(RName name)
         {
-            UShaderSourceCode result;
+            TtShaderSourceCode result;
             if (Codes.TryGetValue(name, out result))
                 return result;
 
@@ -171,13 +316,13 @@ namespace EngineNS.Editor.ShaderCompiler
             }
             return null;
         }
-        protected UShaderSourceCode LoadCode(RName name)
+        protected TtShaderSourceCode LoadCode(RName name)
         {
             if (IO.TtFileManager.FileExists(name.Address) == false)
                 return null;
 
             var code = IO.TtFileManager.ReadAllText(name.Address);
-            var result = new UShaderSourceCode();
+            var result = new TtShaderSourceCode();
             result.SourceCode.TextCode = code;
             result.CodeName = name;
             return result;

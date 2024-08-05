@@ -245,7 +245,7 @@ namespace EngineNS.Bricks.Particle
             var members = paramType.GetFields();
             foreach (var i in members)
             {
-                codeBuilder.AddLine($"{TtEmitter.ToHLSLTypeString(i.FieldType)} {i.Name};", ref sourceCode);
+                codeBuilder.AddLine($"{EngineNS.Editor.ShaderCompiler.TtShaderCodeManager.ToHLSLTypeString(i.FieldType)} {i.Name};", ref sourceCode);
             }
         }
         public string GetParametersDefine()

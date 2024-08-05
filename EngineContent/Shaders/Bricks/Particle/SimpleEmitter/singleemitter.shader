@@ -1,3 +1,4 @@
+//This is a ShaderAsset
 
 void DoUpdateSystem(uint3 id, uint3 GroupId, uint3 GroupThreadId, uint GroupIndex)
 {
@@ -66,15 +67,6 @@ void OnDeadParticle(uint3 id, uint idxInPool, inout FParticle particle)
     }
 }
 #define USER_PARTICLE_FINALIZE
-
-void DoParticleTick(uint3 id, float elapsed, inout FParticle particle)
-{
-    half4 angles = ToColor4f(particle.Rotator);
-    angles.xz = float2(0, 0);
-    angles.y += elapsed * 1.14f;
-    particle.Rotator = ToColorUint(angles);
-}
-#define USER_PARTICLE_DOTICK
 
 void DoOnTimer(uint3 id, uint3 GroupId, uint3 GroupThreadId, uint GroupIndex, float second)
 {

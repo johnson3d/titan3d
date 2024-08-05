@@ -143,7 +143,7 @@ namespace EngineNS.Graphics.Pipeline
             SlateApplication?.Cleanup();
             SlateApplication = null;
 
-            Editor.ShaderCompiler.UShaderCodeManager.Instance.Cleanup();
+            Editor.ShaderCompiler.TtShaderCodeManager.Instance.Dispose();
 
             RenderContext.mCoreObject.TryFinalizeDevice(RenderSystem.mCoreObject);
             while (RenderContext.mCoreObject.IsFinalized() == false)
@@ -169,7 +169,7 @@ namespace EngineNS.Graphics.Pipeline
         {
             if (UEngine.Instance.PlayMode != EPlayMode.Game)
             {
-                Editor.ShaderCompiler.UShaderCodeManager.Instance.Initialize(RName.GetRName("shaders/", RName.ERNameType.Engine));
+                Editor.ShaderCompiler.TtShaderCodeManager.Instance.Initialize(RName.GetRName("shaders/", RName.ERNameType.Engine));
             }
 
             unsafe
