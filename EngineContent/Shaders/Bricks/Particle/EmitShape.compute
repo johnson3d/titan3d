@@ -1,7 +1,7 @@
 #ifndef _PARTICLE_EMITSHAPE_H_
 #define _PARTICLE_EMITSHAPE_H_
 
-void UShapeBox_UpdateLocation(uint3 id, in UShapeBox shape, inout FParticle particle)
+void UShapeBox_UpdateLocation(FComputeEnv env, in UShapeBox shape, inout FParticle particle)
 {
     float4 rdValue = RandomFloat4BySeed3(particle); //RandomFloat4(id.x);
     float3 dir = normalize(rdValue.xyz);
@@ -61,7 +61,7 @@ void UShapeBox_UpdateLocation(uint3 id, in UShapeBox shape, inout FParticle part
     particle.Location = shape.Center + offset;
 }
 
-void UShapeSphere_UpdateLocation(uint3 id, in UShapeSphere shape,  inout FParticle particle)
+void UShapeSphere_UpdateLocation(FComputeEnv env, in UShapeSphere shape, inout FParticle particle)
 {
     float4 rdValue = RandomFloat4BySeed2(particle);
 	float3 dir = normalize(rdValue.xyz);

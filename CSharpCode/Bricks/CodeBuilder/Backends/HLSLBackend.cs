@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace EngineNS.Bricks.CodeBuilder.Backends
+namespace EngineNS.Bricks.CodeBuilder
 {
     public class UHLSLCodeGenerator : UCodeGeneratorBase
     {
@@ -147,10 +147,16 @@ namespace EngineNS.Bricks.CodeBuilder.Backends
                         var memCodeGen = data.CodeGen.GetCodeObjectGen(mem.GetType()) as UVariableDeclarationCodeGen;
                         memCodeGen.GenCodes(mem, ref sourceCode, ref data);
                     }
-                }
-                data.CodeGen.PopSegment(ref sourceCode, in data);
 
-                for(int i=0; i<classDec.Methods.Count; i++)
+                    //for (int i = 0; i < classDec.Methods.Count; i++)
+                    //{
+                    //    var methodDecGen = data.CodeGen.GetCodeObjectGen(classDec.Methods[i].GetType());
+                    //    methodDecGen.GenCodes(classDec.Methods[i], ref sourceCode, ref data);
+                    //}
+                }
+                data.CodeGen.PopSegment(ref sourceCode, in data, true);
+
+                for (int i = 0; i < classDec.Methods.Count; i++)
                 {
                     var methodDecGen = data.CodeGen.GetCodeObjectGen(classDec.Methods[i].GetType());
                     methodDecGen.GenCodes(classDec.Methods[i], ref sourceCode, ref data);
@@ -207,8 +213,15 @@ namespace EngineNS.Bricks.CodeBuilder.Backends
                         invokeStr += data.CodeGen.GetTypeString(methodInvokeExp.ReturnValue.VariableType) + " ";
                     invokeStr += methodInvokeExp.ReturnValue.VariableName + " = ";
                 }
+                if (methodInvokeExp.Host != null)
+                {
+                    var hostGen = data.CodeGen.GetCodeObjectGen(methodInvokeExp.Host.GetType());
+                    hostGen.GenCodes(methodInvokeExp.Host, ref invokeStr, ref data);
+                    invokeStr += ".";
+                }
+                
                 invokeStr += methodInvokeExp.MethodName + "(";
-                if(methodInvokeExp.Arguments.Count > 0)
+                if (methodInvokeExp.Arguments.Count > 0)
                 {
                     for(int i=0; i<methodInvokeExp.Arguments.Count; i++)
                     {
@@ -437,6 +450,7 @@ namespace EngineNS.Bricks.CodeBuilder.Backends
                 {
                     case "float":
                     case "int":
+                    case "uint":
                     case "half":
                         sourceCode += "0";
                         break;
@@ -445,6 +459,9 @@ namespace EngineNS.Bricks.CodeBuilder.Backends
                         break;
                     case "int2":
                         sourceCode += "(int2)0";
+                        break;
+                    case "uint2":
+                        sourceCode += "(uint2)0";
                         break;
                     case "half2":
                         sourceCode += "(half2)0";
@@ -455,6 +472,9 @@ namespace EngineNS.Bricks.CodeBuilder.Backends
                     case "int3":
                         sourceCode += "(int3)0";
                         break;
+                    case "uint3":
+                        sourceCode += "(uint3)0";
+                        break;
                     case "half3":
                         sourceCode += "(half3)0";
                         break;
@@ -464,8 +484,25 @@ namespace EngineNS.Bricks.CodeBuilder.Backends
                     case "int4":
                         sourceCode += "(int4)0";
                         break;
+                    case "uint4":
+                        sourceCode += "(uint4)0";
+                        break;
                     case "half4":
                         sourceCode += "(half4)0";
+                        break;
+                    default:
+                        {
+                            var meta = defaultValExp.Type.TypeDesc.GetCustomAttribute<Rtti.MetaAttribute>(false);
+                            if (meta != null)
+                            {
+                                sourceCode += $"({meta.ShaderName})0";
+                            }
+                            else
+                            {
+                                System.Diagnostics.Debug.Assert(false);
+                                sourceCode += $"({defaultValExp.Type.TypeFullName})0";
+                            }
+                        }
                         break;
                 }
             }
@@ -659,6 +696,22 @@ namespace EngineNS.Bricks.CodeBuilder.Backends
             }
         }
 
+        class UDebuggerTryBreakCodeGen : ICodeObjectGen
+        {
+            public void GenCodes(UCodeObject obj, ref string sourceCode, ref UCodeGeneratorData data)
+            {
+                var exp = obj as UDebuggerTryBreak;
+            }
+        }
+
+        class UDebuggerSetWatchVariableCodeGen : ICodeObjectGen
+        {
+            public void GenCodes(UCodeObject obj, ref string sourceCode, ref UCodeGeneratorData data)
+            {
+                var exp = obj as UDebuggerSetWatchVariable;
+            }
+        }
+
         UVariableDeclarationCodeGen mVariableDeclarationCodeGen = new UVariableDeclarationCodeGen();
         TtIncludeDeclarationCodeGen mIncludeDeclarationCodeGen = new TtIncludeDeclarationCodeGen();
         UMethodDeclarationCodeGen mMethodDeclarationCodeGen = new UMethodDeclarationCodeGen();
@@ -686,7 +739,8 @@ namespace EngineNS.Bricks.CodeBuilder.Backends
         UBreakStatementCodeGen mBreakStatementCodeGen = new UBreakStatementCodeGen();
         UCommentStatementCodeGen mCommentStatementCodeGen = new UCommentStatementCodeGen();
         UExpressionStatementCodeGen mExpressionStatementCodeGen = new UExpressionStatementCodeGen();
-
+        UDebuggerTryBreakCodeGen mDebuggerTryBreakCodeGen = new UDebuggerTryBreakCodeGen();
+        UDebuggerSetWatchVariableCodeGen mDebuggerSetWatchVariableCodeGen = new UDebuggerSetWatchVariableCodeGen();
         public override ICodeObjectGen GetCodeObjectGen(Rtti.UTypeDesc type)
         {
             if (type.IsEqual(typeof(UVariableDeclaration)))
@@ -743,6 +797,11 @@ namespace EngineNS.Bricks.CodeBuilder.Backends
                 return mCommentStatementCodeGen;
             else if (type.IsEqual(typeof(UExpressionStatement)))
                 return mExpressionStatementCodeGen;
+            else if (type.IsEqual(typeof(UDebuggerTryBreak)))
+                return mDebuggerTryBreakCodeGen;
+            else if (type.IsEqual(typeof(UDebuggerSetWatchVariable)))
+                return mDebuggerSetWatchVariableCodeGen; 
+            System.Diagnostics.Debug.Assert(false);
             return null;
         }
         public override string GetTypeString(Rtti.UTypeDesc t)
@@ -784,7 +843,22 @@ namespace EngineNS.Bricks.CodeBuilder.Backends
         public override string GetTypeString(UTypeReference t)
         {
             if (t.TypeDesc != null)
+            {
+                var meta = t.TypeDesc.GetCustomAttribute<Rtti.MetaAttribute>(false);
+                if (meta != null && meta.ShaderName != null)
+                {
+                    return meta.ShaderName;
+                }
+                else
+                {
+                    var meta1 = t.TypeDesc.GetCustomAttribute<EngineNS.Editor.ShaderCompiler.TtShaderDefineAttribute>(false);
+                    if (meta1 != null && meta1.ShaderName != null)
+                    {
+                        return meta1.ShaderName;
+                    }
+                }
                 return GetTypeString(t.TypeDesc);
+            }
             return t.TypeFullName;
         }
     }

@@ -202,7 +202,7 @@ namespace EngineNS.Editor.ShaderCompiler
         private TtShaderSourceCode GetEnginePreprocessors(RName name, bool bWriteFile)
         {
             var result = new TtShaderSourceCode();
-            var codeBuilder = new Bricks.CodeBuilder.Backends.UHLSLCodeGenerator();
+            var codeBuilder = new Bricks.CodeBuilder.UHLSLCodeGenerator();
             string sourceCode = "";
 
             var ShaderEnums = new List<KeyValuePair<TtShaderDefineAttribute, Rtti.UTypeDesc>>();
@@ -258,6 +258,7 @@ namespace EngineNS.Editor.ShaderCompiler
                     var members = kv.Value.SystemType.GetFields();
                     foreach (var i in members)
                     {
+                        System.Diagnostics.Debug.Assert(i.Name[0] == 'm');
                         codeBuilder.AddLine($"{ToHLSLTypeString(i.FieldType)} {i.Name.Substring(1)};", ref sourceCode);
                     }
                 }

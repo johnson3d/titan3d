@@ -1,4 +1,5 @@
-﻿using NPOI.SS.Formula.Functions;
+﻿using EngineNS.UI;
+using NPOI.SS.Formula.Functions;
 using System;
 using System.Collections.Generic;
 using System.Reflection;
@@ -59,6 +60,7 @@ namespace EngineNS.Rtti
         }
         public int Order = 0;
         public EMetaFlags Flags = 0;
+        public string ShaderName;
         public string[] NameAlias = null;
         public System.Type[] MethodGenericParameters = null;
         public string[] MacrossDisplayPath = null;
@@ -581,7 +583,13 @@ namespace EngineNS.Rtti
             {
                 return this.GetMethod().GetCustomAttributes(type, inherit);
             }
-
+            public T GetFirstCustomAttribute<T>(bool inherit) where T : Attribute
+            {
+                var attrs = this.GetMethod().GetCustomAttributes(typeof(T), inherit);
+                if (attrs.Length == 0)
+                    return default(T);
+                return attrs[0] as T;
+            }
             public bool HasReturnValue()
             {
                 if (ReturnType == null)

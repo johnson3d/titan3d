@@ -10,7 +10,6 @@ namespace EngineNS.Bricks.PhysicsCore
     [Bricks.CodeBuilder.ContextMenu("PxMeshNode", "PxMeshNode", GamePlay.Scene.UNode.EditorKeyword)]
     [GamePlay.Scene.UNode(NodeDataType = typeof(TtRigidBodyNode.TtRigidBodyNodeData), DefaultNamePrefix = "PxMesh")]
     [EGui.Controls.PropertyGrid.PGCategoryFilters(ExcludeFilters = new string[] { "Misc" })]
-    //[Rtti.Meta(NameAlias = new string[] { "URigidBodyNode" })]
     public class TtRigidBodyNode : GamePlay.Scene.USceneActorNode
     {
         public class TtRigidBodyNodeData : GamePlay.Scene.UNodeData

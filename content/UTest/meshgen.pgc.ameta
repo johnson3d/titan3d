@@ -4,6 +4,7 @@
   <Description Type="System.String@Unknown" Value="This is a EngineNS.Bricks.Procedure.UPgcAsset&#xA;Hahah" />
   <Icon Type="EngineNS.EGui.UUvAnim@EngineCore">
     <Color Type="System.UInt32@Unknown" Value="4294967295" />
+    <Duration Type="System.Single@Unknown" Value="1000" />
     <FrameUVs Type="System.Collections.Generic.List&lt;EngineNS.Vector4@EngineCore,&gt;@Unknown" Count="1">
       <e_0 Value="0,0,1,1" />
     </FrameUVs>
@@ -11,7 +12,7 @@
   </Icon>
   <RefAssetRNames Type="System.Collections.Generic.List&lt;EngineNS.RName@EngineCore,&gt;@Unknown" Count="2">
     <e_0 Value="Game,utest/pgc/testprog.macross,15889cf3-0ce5-4b3d-b65d-1bb774080e19" />
-    <e_1 Value="Engine,texture/checkboard.srv,4d677056-465a-4cd4-a387-6718e10447e4" />
+    <e_1 Value="Engine,texture/checkboard.srv,560770de-c559-4718-93cb-bb4e1995176f" />
   </RefAssetRNames>
   <TypeStr Type="System.String@Unknown" Value="EngineNS.Bricks.Procedure.UPgcAsset@EngineCore" />
 </Root>

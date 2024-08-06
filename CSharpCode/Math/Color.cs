@@ -706,6 +706,7 @@ namespace EngineNS
         MenuHighlight = 174
     }
 
+    [Rtti.Meta(NameAlias = new string[] { "EngineNS.Color@EngineCore" })]
     public struct Color4b
     {
         public Byte4 Value;

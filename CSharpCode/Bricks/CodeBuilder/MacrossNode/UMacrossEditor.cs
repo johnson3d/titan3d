@@ -23,7 +23,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
         {
 
         }
-
+        public bool IsGenShader { get; set; } = false;
         bool mInitialized = false;
         public virtual async Thread.Async.TtTask<bool> Initialize()
         {
@@ -129,6 +129,20 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
         UCSharpCodeGenerator mCSCodeGen = new UCSharpCodeGenerator();
         public UCSharpCodeGenerator CSCodeGen => mCSCodeGen;
 
+        UHLSLCodeGenerator mHlslCodeGen = new UHLSLCodeGenerator();
+        public UHLSLCodeGenerator HlslCodeGen => mHlslCodeGen;
+
+        public UCodeGeneratorBase CodeGen
+        {
+            get
+            {
+                if (IsGenShader)
+                    return HlslCodeGen;
+                else
+                    return CSCodeGen;
+            }
+        }
+
         EGui.TtCodeEditor mCodeEditor = new EGui.TtCodeEditor();
         public void SaveClassGraph(RName rn)
         {
@@ -176,7 +190,12 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
                 funcXml.AppendChild(funcXmlRoot);
                 IO.SerializerHelper.WriteObjectMetaFields(funcXml, funcXmlRoot, Methods[i]);
                 var funcXmlText = IO.TtFileManager.GetXmlText(funcXml);
-                var methodFileName = $"{rn.Address}/{Methods[i].Name}.func";
+                string declName = "";
+                foreach (var k in Methods[i].MethodDatas)
+                {
+                    declName += k.MethodDec.GetKeyword();
+                }
+                var methodFileName = $"{rn.Address}/{Methods[i].Name}_{Hash160.CreateHash160(declName)}.fn";
                 IO.TtFileManager.WriteAllText(methodFileName, funcXmlText);
                 UEngine.Instance.SourceControlModule.AddFile(methodFileName);
             }
@@ -189,6 +208,8 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
             Methods.Clear();
             OpenFunctions.Clear();
             PGMember.Target = null;
+
+            //Rtti.UTypeDescManager.Instance.Services .InterateTypes 
 
             {
                 // old
@@ -212,7 +233,11 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
                     Profiler.Log.WriteLine(Profiler.ELogTag.Warning, "Macross", $"Get namespace failed, {rn.Name} has invalid char!");
                 }    
                 DefClass.ClearMethods();
-                var funcFiles = IO.TtFileManager.GetFiles(rn.Address, "*.func", false);
+                var funcFiles = IO.TtFileManager.GetFiles(rn.Address, "*.fn", false);
+                if (funcFiles.Length == 0)
+                {
+                    funcFiles = IO.TtFileManager.GetFiles(rn.Address, "*.func", false);
+                }
                 for (int i = 0; i < funcFiles.Length; i++)
                 {
                     try
@@ -267,6 +292,17 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
             }
 
             InitializeOverrideMethodList();
+
+            foreach (var i in DefClass.SupperClassNames)
+            {
+                var type = Rtti.UTypeDesc.TypeOfFullName(i);
+                var macrossAttr = type.GetCustomAttribute<Macross.UMacrossAttribute>(false);
+                if (macrossAttr != null)
+                {
+                    this.IsGenShader = macrossAttr.IsGenShader;
+                    return;
+                }
+            }
         }
         public Action<UClassDeclaration> BeforeGenerateCode;
         public string GenerateCode()
@@ -281,11 +317,26 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
                 }
 
                 string code = "";
-                mCSCodeGen.GenerateClassCode(DefClass, AssetName, ref code);
-                SaveCSFile(code);
-                //GenerateAssemblyDescCreateInstanceCode();
+                if (IsGenShader)
+                {
+                    mHlslCodeGen.GenerateClassCode(DefClass, AssetName, ref code);
+                    code += "\n";
+                    code += $"#define USER_EMITTER\n";
+                    SaveHlslFile(code);
+                    mShaderEditor.mCoreObject.SetText(code);
 
-                mShaderEditor.mCoreObject.SetText(code);
+                    code = "";
+                    mCSCodeGen.GenerateClassCode(DefClass, AssetName, ref code);
+                    SaveCSFile(code);
+                }
+                else
+                {
+                    mCSCodeGen.GenerateClassCode(DefClass, AssetName, ref code);
+                    SaveCSFile(code);
+                    mShaderEditor.mCoreObject.SetText(code);
+                }
+                DefClass.ResetRuntimeData();
+                //GenerateAssemblyDescCreateInstanceCode();
 
                 EngineNS.UEngine.Instance.MacrossManager.GenerateProjects();
                 return code;
@@ -417,6 +468,15 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
         {
             var fileName = AssetName.Address + "/" + DefClass.ClassName + ".cs";
             using(var sr = new System.IO.StreamWriter(fileName, false, Encoding.UTF8))
+            {
+                sr.Write(code);
+            }
+            UEngine.Instance.SourceControlModule.AddFile(fileName);
+        }
+        void SaveHlslFile(string code)
+        {
+            var fileName = AssetName.Address + "/" + DefClass.ClassName + ".shader";
+            using (var sr = new System.IO.StreamWriter(fileName, false, Encoding.UTF8))
             {
                 sr.Write(code);
             }
@@ -638,8 +698,8 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
             EGui.UIProxy.DockProxy.EndMainForm(result);
 
             DrawClassView();
-            DrawGraph();
             DrawTextEditor();
+            DrawGraph();
             DrawPropertyGrid();
             DrawUnionNodeConfig();
 

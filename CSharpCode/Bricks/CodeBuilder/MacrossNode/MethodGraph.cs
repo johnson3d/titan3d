@@ -18,6 +18,8 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
         public bool IsDraggingMember { get; set; }
         public UClassDeclaration DefClass { get; }
         public UCSharpCodeGenerator CSCodeGen { get; }
+        public UHLSLCodeGenerator HlslCodeGen { get; }
+        public UCodeGeneratorBase CodeGen { get; }
         public List<UMacrossMethodGraph> Methods { get; }
         public EGui.Controls.PropertyGrid.PropertyGrid PGMember { get; set; }
         public void RemoveMethod(UMacrossMethodGraph method);
@@ -831,7 +833,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
                 {
                     ClassDec = classDesc,
                     MethodDec = MethodDatas[i].MethodDec,
-                    CodeGen = MacrossEditor.CSCodeGen,
+                    CodeGen = MacrossEditor.CodeGen,
                     NodeGraph = this,
                     CurrentStatements = MethodDatas[i].MethodDec.MethodBody.Sequence,
                 };
@@ -1261,12 +1263,21 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
         {
             return GraphRenderer;
         }
-
+        public bool IsMetaFilter(Rtti.MetaAttribute attr)
+        {
+            var editor = this.Editor as UMacrossEditor;
+            if (editor != null && editor.IsGenShader && attr.ShaderName == null)
+                return false;
+            return true;
+        }
         private void UpdateMenuWithClassMeta(Rtti.UClassMeta classMeta, TtMenuItem menu)
         {
             for (int proIdx = 0; proIdx < classMeta.Properties.Count; proIdx++)
             {
                 var pro = classMeta.Properties[proIdx];
+                var metaAttr = pro.PropInfo.GetCustomAttribute<Rtti.MetaAttribute>(false);
+                if (IsMetaFilter(metaAttr) == false)
+                    continue;
                 string[] menuPath = null;
                 string filterStr = pro.PropertyName;
                 var proInfo = pro.PropInfo;
@@ -1346,6 +1357,9 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
                 var field = classMeta.Fields[fieldIdx];
                 string[] menuPath = null;
                 var fieldInfo = field.GetFieldInfo();
+                var metaAttr = fieldInfo.GetCustomAttribute<Rtti.MetaAttribute>(false);
+                if (IsMetaFilter(metaAttr) == false)
+                    continue;
                 string filterStr = fieldInfo.Name;
                 var atts = fieldInfo.GetCustomAttributes(typeof(ContextMenuAttribute), false);
                 if (atts.Length > 0)
@@ -1410,6 +1424,9 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
             for (int methodIdx = 0; methodIdx < classMeta.Methods.Count; methodIdx++)
             {
                 var method = classMeta.Methods[methodIdx];
+                var metaAttr = method.GetFirstCustomAttribute<Rtti.MetaAttribute>(false);
+                if (IsMetaFilter(metaAttr) == false)
+                    continue;
                 string[] menuPath = null;
                 string filterStr = method.MethodName;
                 var atts = method.GetCustomAttributes(typeof(ContextMenuAttribute), false);
@@ -1473,28 +1490,32 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
             if (classMeta != null)
             {
                 UpdateMenuWithClassMeta(classMeta, ObjectMenus);
-                // only down cast here
-                for(int i=0; i<classMeta.SubClasses.Count; i++)
+                var editor = this.Editor as UMacrossEditor;
+                if (editor != null && editor.IsGenShader == false)
                 {
-                    var subClass = classMeta.SubClasses[i];
-                    if (subClass != null)
+                    // only down cast here
+                    for (int i = 0; i < classMeta.SubClasses.Count; i++)
                     {
-                        var clsTypeName = subClass.ClassType.FullName;
-                        ObjectMenus.AddMenuItem($"Cast to {clsTypeName}", clsTypeName, null,
-                            (TtMenuItem item, object sender) =>
-                            {
-                                var node = TypeConverterVar.NewTypeConverterVar(classMeta, subClass);
-                                node.UserData = MacrossEditor;
-                                node.Position = PopMenuPosition;
-                                SetDefaultActionForNode(node);
-                                this.AddNode(node);
-
-                                if(LinkingOp.StartPin != null && Rtti.UTypeDesc.CanCast(LinkingOp.StartPin.GetType(), typeof(PinOut)))
+                        var subClass = classMeta.SubClasses[i];
+                        if (subClass != null)
+                        {
+                            var clsTypeName = subClass.ClassType.FullName;
+                            ObjectMenus.AddMenuItem($"Cast to {clsTypeName}", clsTypeName, null,
+                                (TtMenuItem item, object sender) =>
                                 {
-                                    var outPin = LinkingOp.StartPin as PinOut;
-                                    AddLink(outPin, node.Left, true);
-                                }
-                            });
+                                    var node = TypeConverterVar.NewTypeConverterVar(classMeta, subClass);
+                                    node.UserData = MacrossEditor;
+                                    node.Position = PopMenuPosition;
+                                    SetDefaultActionForNode(node);
+                                    this.AddNode(node);
+
+                                    if (LinkingOp.StartPin != null && Rtti.UTypeDesc.CanCast(LinkingOp.StartPin.GetType(), typeof(PinOut)))
+                                    {
+                                        var outPin = LinkingOp.StartPin as PinOut;
+                                        AddLink(outPin, node.Left, true);
+                                    }
+                                });
+                        }
                     }
                 }
             }

@@ -397,6 +397,12 @@
     <None Include="$(MSBuildThisFileDirectory)Inc\Algorithm\RingBuffer.cginc">
       <Filter>Inc\Algorithm</Filter>
     </None>
+    <None Include="$(MSBuildThisFileDirectory)Bricks\Particle\EmitterBase.cginc">
+      <Filter>Bricks\Particle</Filter>
+    </None>
+    <None Include="$(MSBuildThisFileDirectory)Bricks\Particle\EmitterBaseImpl.cginc">
+      <Filter>Bricks\Particle</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="$(MSBuildThisFileDirectory)Compute\calcrate.compute">

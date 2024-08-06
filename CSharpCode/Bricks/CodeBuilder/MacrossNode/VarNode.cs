@@ -499,7 +499,10 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
                     AddPinIn(Self);
                 }
 
-                GetPin = new PinOut();
+                GetPin = new PinOut()
+                {
+                    MultiLinks = true
+                };
                 AddPinOut(GetPin);
             }
             else if(!isGet && pro.PropInfo.CanWrite)
@@ -521,7 +524,10 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
                 SetPin.EditValue = UEditableValue.CreateEditableValue(this, pro.PropInfo.PropertyType, SetPin);
                 AddPinIn(SetPin);
 
-                GetPin = new PinOut();
+                GetPin = new PinOut()
+                {
+                    MultiLinks = true
+                };
                 AddPinOut(GetPin);
             }
         }

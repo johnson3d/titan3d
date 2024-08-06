@@ -18,6 +18,8 @@
     <None Include="$(MSBuildThisFileDirectory)Bricks\GpuDriven\FRaster.cginc" />
     <None Include="$(MSBuildThisFileDirectory)Bricks\GpuDriven\GpuCulling.cginc" />
     <None Include="$(MSBuildThisFileDirectory)Bricks\GpuDriven\QuarkResolve.cginc" />
+    <None Include="$(MSBuildThisFileDirectory)Bricks\Particle\EmitterBase.cginc" />
+    <None Include="$(MSBuildThisFileDirectory)Bricks\Particle\EmitterBaseImpl.cginc" />
     <None Include="$(MSBuildThisFileDirectory)Bricks\Particle\NebulaParticle.cginc" />
     <None Include="$(MSBuildThisFileDirectory)Bricks\Particle\ParticleCommon.cginc" />
     <None Include="$(MSBuildThisFileDirectory)Bricks\Procedure\Erosion\IncWater.compute" />

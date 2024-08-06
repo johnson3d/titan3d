@@ -29,6 +29,7 @@ namespace ProjectCooker.Command
                 await ProcPrefab();
                 await ProcAnimClip();
                 await ProcUI();
+                await ProcMacross();
             }
             else
             {
@@ -79,6 +80,11 @@ namespace ProjectCooker.Command
                         case Type_UI:
                             {
                                 await ProcUI();
+                            }
+                            break;
+                        case Type_Macross:
+                            {
+                                await ProcMacross();
                             }
                             break;
                         default:
@@ -420,14 +426,14 @@ namespace ProjectCooker.Command
         }
         async System.Threading.Tasks.Task ProcMacross()
         {
-            var macrossEditor = new UMacrossEditor();
-            await macrossEditor.Initialize();
             var root = EngineNS.UEngine.Instance.FileManager.GetRoot(EngineNS.IO.TtFileManager.ERootDir.Game);
-            var files = new List<string>(EngineNS.IO.TtFileManager.GetFiles(root, "*" + UMacross.AssetExt, true));
+            var files = new List<string>(EngineNS.IO.TtFileManager.GetDirectories(root, "*" + UMacross.AssetExt, true));
             foreach (var i in files)
             {
                 try
                 {
+                    var macrossEditor = new UMacrossEditor();
+                    await macrossEditor.Initialize();
                     var rp = EngineNS.IO.TtFileManager.GetRelativePath(root, i);
                     var rn = EngineNS.RName.GetRName(rp, EngineNS.RName.ERNameType.Game);
                     macrossEditor.LoadClassGraph(rn);
@@ -439,11 +445,13 @@ namespace ProjectCooker.Command
                 }
             }
             root = EngineNS.UEngine.Instance.FileManager.GetRoot(EngineNS.IO.TtFileManager.ERootDir.Engine);
-            files = new List<string>(EngineNS.IO.TtFileManager.GetFiles(root, "*" + UMacross.AssetExt, true));
+            files = new List<string>(EngineNS.IO.TtFileManager.GetDirectories(root, "*" + UMacross.AssetExt, true));
             foreach (var i in files)
             {
                 try
                 {
+                    var macrossEditor = new UMacrossEditor();
+                    await macrossEditor.Initialize();
                     var rp = EngineNS.IO.TtFileManager.GetRelativePath(root, i);
                     var rn = EngineNS.RName.GetRName(rp, EngineNS.RName.ERNameType.Engine);
                     macrossEditor.LoadClassGraph(rn);

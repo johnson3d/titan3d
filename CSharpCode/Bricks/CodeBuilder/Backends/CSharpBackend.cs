@@ -201,7 +201,13 @@ namespace EngineNS.Bricks.CodeBuilder
                 methodDecStr += unsafePosCode;
                 if (methodDec.IsOverride)
                     methodDecStr += "override ";
-                switch(methodDec.AsyncType)
+                bool bTest = false;
+                if (bTest)
+                {
+                    methodDec.AsyncType = UMethodDeclaration.EAsyncType.None;
+                    methodDec.AsyncType = UMethodDeclaration.EAsyncType.SystemTask;
+                }
+                switch (methodDec.AsyncType)
                 {
                     case UMethodDeclaration.EAsyncType.None:
                         methodDecStr += ((methodDec.ReturnValue != null) ? data.CodeGen.GetTypeString(methodDec.ReturnValue.VariableType) : "void");
@@ -326,6 +332,7 @@ namespace EngineNS.Bricks.CodeBuilder
                     default:
                         break;
                 }
+                classDec.IsUnsafe = false;
                 if (classDec.IsStruct)
                     tempCode += (classDec.IsUnsafe ? "unsafe " : "") + "partial struct ";
                 else

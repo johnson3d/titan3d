@@ -28,12 +28,12 @@ namespace EngineNS.Bricks.Particle.Simple
                 EmitterData.Flags = 1;
             }
         }
-        public unsafe override void OnInitParticle(FParticle* pParticles, ref FParticle particle)
+        public unsafe override void OnInitParticle(ref FParticle particle)
         {
             if (HasFlags(in particle, EParticleFlags.EmitIndex) != 0)
             {
                 var particleIndex = GetParticleData(particle.Flags);
-                particle.Location = pParticles[particleIndex].Location;
+                particle.Location = GetParticle(particleIndex).Location;
                 particle.mLocation.Y += 2.0f;
                 //particle.mLocation.Z = RandomUnit() * 10.0f;
             }

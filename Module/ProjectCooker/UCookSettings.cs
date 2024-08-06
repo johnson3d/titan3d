@@ -23,6 +23,7 @@ namespace ProjectCooker
         public const string Type_Prefab = "Prefab";
         public const string Type_AnimClip = "AnimClip";
         public const string Type_UI = "UI";
+        public const string Type_Macross = "Macross";
 
         public const string DS_Port = "DS_Port=";
 

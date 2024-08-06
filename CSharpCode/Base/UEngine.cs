@@ -262,6 +262,7 @@ namespace EngineNS
             Config = IO.TtFileManager.LoadXmlToObject<UEngineConfig>(cfgFile);
             if (Config == null)
             {
+                System.Diagnostics.Debug.Assert(false);
                 Profiler.Log.WriteLine(Profiler.ELogTag.Warning, "Cook", $"Load failed: {cfgFile}");
                 Config = new UEngineConfig();
                 Config.DefaultTexture = RName.GetRName("texture/checkboard.txpic", RName.ERNameType.Engine);

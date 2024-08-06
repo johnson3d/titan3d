@@ -7,6 +7,7 @@ namespace EngineNS.Macross
 {
     public class UMacrossAttribute : Attribute
     {
+        public bool IsGenShader = false;
     }
     [UMacross]
     public partial class BaseClass

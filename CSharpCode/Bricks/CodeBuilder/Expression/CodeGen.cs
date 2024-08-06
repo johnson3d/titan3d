@@ -78,11 +78,11 @@ namespace EngineNS.Bricks.CodeBuilder
             if (!string.IsNullOrEmpty(mSegmentEndStr))
                 AddLine(mSegmentEndStr + (bSemicolon ? ";" : ""), ref sourceCode);
         }
-        public void PopSegment(ref string sourceCode, in UCodeGeneratorData data)
+        public void PopSegment(ref string sourceCode, in UCodeGeneratorData data, bool bSemicolon = false)
         {
             if (data.Method != null)
                 data.Method.MethodSegmentDeep--;
-            PopSegment(ref sourceCode);
+            PopSegment(ref sourceCode, bSemicolon);
         }
     }
 
@@ -98,7 +98,6 @@ namespace EngineNS.Bricks.CodeBuilder
             var gen = GetCodeObjectGen(Rtti.UTypeDescGetter<UClassDeclaration>.TypeDesc);
             var data = new UCodeGeneratorData(ns, cls, this, assetName);
             gen.GenCodes(cls, ref code, ref data);
-            cls.ResetRuntimeData();
         }
         public void GenerateClassCode(UClassDeclaration cls, in RName assetName, ref string code)
         {

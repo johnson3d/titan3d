@@ -7,12 +7,12 @@
 
 bool IsParticleEmitShape(in FParticle cur)
 {
-	return (cur.Flags & NebulaParticleFlags_EmitShape) != 0;
+    return (cur.Flags & EParticleFlags_EmitShape) != 0;
 }
 
 bool IsParticleEmitIndex(in FParticle cur)
 {
-	return (cur.Flags & NebulaParticleFlags_EmitIndex) != 0;
+    return (cur.Flags & EParticleFlags_EmitIndex) != 0;
 }
 
 struct UShapeBox
@@ -116,18 +116,13 @@ float4 RandomFloat4BySeed3(inout FParticle cur)
 	return result;
 }
 
-#define Nebula_EmitShape (1u << 31)
-#define Nebula_EmitIndex (1u << 30)
-#define Nebula_FlagMask 0xF0000000
-#define Nebula_FlagInverseMask 0x0FFFFFFF
-
 uint GetParticleData(uint flags)
 {
-	return (flags & Nebula_FlagInverseMask);
+    return (flags & (~EParticleFlags_FlagMask));
 }
 uint SetParticleFlags(uint flags, uint data)
 {
-	return (uint)flags | (data & Nebula_FlagInverseMask);
+    return (uint) flags | (data & (~EParticleFlags_FlagMask));
 }
 bool HasParticleFlags(FParticle particle, uint flags)
 {

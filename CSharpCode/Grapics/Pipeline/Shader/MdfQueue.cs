@@ -9,7 +9,7 @@ namespace EngineNS.Graphics.Pipeline.Shader
     #region Modifier Permutations
     public class TtMdfPermutation
     {
-        public virtual void BuildPermutationCode(ref string codeString, Bricks.CodeBuilder.Backends.UHLSLCodeGenerator builder)
+        public virtual void BuildPermutationCode(ref string codeString, Bricks.CodeBuilder.UHLSLCodeGenerator builder)
         {
         }
     }
@@ -33,7 +33,7 @@ namespace EngineNS.Graphics.Pipeline.Shader
                 return x.FullName.CompareTo(y.FullName);
             });
         }
-        public void BuildPermutationCode(ref string codeString, Bricks.CodeBuilder.Backends.UHLSLCodeGenerator builder)
+        public void BuildPermutationCode(ref string codeString, Bricks.CodeBuilder.UHLSLCodeGenerator builder)
         {
             foreach (var i in Permutations)
             {
@@ -208,7 +208,7 @@ namespace EngineNS.Graphics.Pipeline.Shader
             }
             return (NxRHI.FShaderCode*)0;
         }
-        protected virtual void BuildMdfFunctions(ref string codeString, Bricks.CodeBuilder.Backends.UHLSLCodeGenerator codeBuilder)
+        protected virtual void BuildMdfFunctions(ref string codeString, Bricks.CodeBuilder.UHLSLCodeGenerator codeBuilder)
         {
             string hashCode = "";
             foreach (var i in Modifiers)
@@ -251,13 +251,13 @@ namespace EngineNS.Graphics.Pipeline.Shader
             codeBuilder.AddLine($"//Hash for :{UniHash32.APHash(hashCode)}", ref codeString);
         }
 
-        protected virtual void PreBuildMdfFunctions(ref string codeString, Bricks.CodeBuilder.Backends.UHLSLCodeGenerator codeBuilder)
+        protected virtual void PreBuildMdfFunctions(ref string codeString, Bricks.CodeBuilder.UHLSLCodeGenerator codeBuilder)
         {
 
         }
         protected void UpdateShaderCode()
         {
-            var codeBuilder = new Bricks.CodeBuilder.Backends.UHLSLCodeGenerator();
+            var codeBuilder = new Bricks.CodeBuilder.UHLSLCodeGenerator();
             string codeString = "";
 
             PreBuildMdfFunctions(ref codeString, codeBuilder);

@@ -2,7 +2,7 @@
 <Root Type="EngineNS.Bricks.CodeBuilder.UMacrossAMeta@EngineCore">
   <AssetId Type="System.Guid@Unknown" Value="ee0b9aa1-a1d5-4d8f-83c9-b708c4e9ddb9" />
   <BaseTypeStr Type="System.String@Unknown" Value="EngineNS.GamePlay.UMacrossGame@EngineCore" />
-  <Description Type="System.String@Unknown" Value="This is a EngineNS.Bricks.CodeBuilder.UMacross&#xA;Hahah" />
+  <Description Type="System.String@Unknown" Value="MacrossType:EngineNS.GamePlay.UMacrossGame@EngineCore&#xA;" />
   <Icon Type="EngineNS.EGui.UUvAnim@EngineCore">
     <Color Type="System.UInt32@Unknown" Value="4294967295" />
     <Duration Type="System.Single@Unknown" Value="1000" />
@@ -11,9 +11,10 @@
     </FrameUVs>
     <Size Type="EngineNS.Vector2@EngineCore" Value="50,50" />
   </Icon>
-  <RefAssetRNames Type="System.Collections.Generic.List&lt;EngineNS.RName@EngineCore,&gt;@Unknown" Count="2">
+  <RefAssetRNames Type="System.Collections.Generic.List&lt;EngineNS.RName@EngineCore,&gt;@Unknown" Count="3">
     <e_0 Value="Game,utest/deferred.rpolicy,6bec2549-4d63-4af4-90eb-ec4cda04da9b" />
-    <e_1 Value="Game,tutorials/helloword/hello.ui,0002b096-d007-4e86-b532-9e7920a70cfa" />
+    <e_1 Value="Game,tutorials/helloword/hello.ui,e1520501-a052-4abe-a7d6-e9cfdf41e8e0" />
+    <e_2 Value="Game,tutorials/helloword/map01.scene,40c22bd4-a6ad-4599-b3e9-dbfe79f1a7d7" />
   </RefAssetRNames>
   <TypeStr Type="System.String@Unknown" Value="EngineNS.Bricks.CodeBuilder.UMacross@EngineCore" />
 </Root>

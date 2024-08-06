@@ -99,15 +99,15 @@ namespace EngineNS.Bricks.Particle
             {
                 result += i.GetHLSL();
             }
-            var codeBuilder = new Bricks.CodeBuilder.Backends.UHLSLCodeGenerator();
+            var codeBuilder = new Bricks.CodeBuilder.UHLSLCodeGenerator();
             string sourceCode = "";
             //var codeBuilder = new Bricks.CodeBuilder.HLSL.UHLSLGen();
-            codeBuilder.AddLine("\nvoid DoParticleEffectors(uint3 id, inout FParticle particle)", ref sourceCode);
+            codeBuilder.AddLine("\nvoid DoParticleEffectors(FComputeEnv env, inout FParticle particle)", ref sourceCode);
             codeBuilder.PushSegment(ref sourceCode);
             int index = 0;
             foreach (var i in Effectors)
             {
-                codeBuilder.AddLine($"{i.Name}_EffectorExecute(id, ParticleElapsedTime, particle, EffectorParameters{index});", ref sourceCode);
+                codeBuilder.AddLine($"{i.Name}_EffectorExecute(env, ParticleElapsedTime, particle, EffectorParameters{index});", ref sourceCode);
                 index++;
             }
             codeBuilder.PopSegment(ref sourceCode);
@@ -236,11 +236,11 @@ namespace EngineNS.Bricks.Particle
 
         }
 
-        protected virtual void AddParameters(Bricks.CodeBuilder.Backends.UHLSLCodeGenerator codeBuilder, ref string sourceCode)
+        protected virtual void AddParameters(Bricks.CodeBuilder.UHLSLCodeGenerator codeBuilder, ref string sourceCode)
         {
             
         }
-        protected void AddParameters(Bricks.CodeBuilder.Backends.UHLSLCodeGenerator codeBuilder, ref string sourceCode, System.Type paramType)
+        protected void AddParameters(Bricks.CodeBuilder.UHLSLCodeGenerator codeBuilder, ref string sourceCode, System.Type paramType)
         {
             var members = paramType.GetFields();
             foreach (var i in members)
@@ -250,7 +250,7 @@ namespace EngineNS.Bricks.Particle
         }
         public string GetParametersDefine()
         {
-            var codeBuilder = new Bricks.CodeBuilder.Backends.UHLSLCodeGenerator();
+            var codeBuilder = new Bricks.CodeBuilder.UHLSLCodeGenerator();
             string sourceCode = "";
             //var codeBuilder = new Bricks.CodeBuilder.HLSL.UHLSLGen();
 
@@ -287,7 +287,7 @@ namespace EngineNS.Bricks.Particle
             result.mEffectorParameter = mEffectorParameter;
             return result;
         }
-        protected override void AddParameters(Bricks.CodeBuilder.Backends.UHLSLCodeGenerator codeBuilder, ref string sourceCode)
+        protected override void AddParameters(Bricks.CodeBuilder.UHLSLCodeGenerator codeBuilder, ref string sourceCode)
         {
             AddParameters(codeBuilder, ref sourceCode, typeof(T));
         }
@@ -297,7 +297,7 @@ namespace EngineNS.Bricks.Particle
         }
         public override string GetHLSL()
         {
-            var codeBuilder = new Bricks.CodeBuilder.Backends.UHLSLCodeGenerator();
+            var codeBuilder = new Bricks.CodeBuilder.UHLSLCodeGenerator();
             string sourceCode = "";
             //var codeBuilder = new Bricks.CodeBuilder.HLSL.UHLSLGen();
 

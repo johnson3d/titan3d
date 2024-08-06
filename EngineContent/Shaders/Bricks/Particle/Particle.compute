@@ -7,14 +7,18 @@
 
 #include "ParticleCommon.cginc"
 #include "EmitShape.compute"
+#include "EmitterBase.cginc"
 
-void DoParticleEmitShape(uint3 id, inout FParticle cur, uint shapeIndex);
-void OnInitParticle(uint3 id, inout FParticle particle);
-void OnDeadParticle(uint3 id, uint idxInPool, inout FParticle particle);
-void DoParticleEffectors(uint3 id, inout FParticle particle);
-void DoParticleTick(uint3 id, float elapsed, inout FParticle particle);
-void DoUpdateSystem(uint3 id, uint3 GroupId, uint3 GroupThreadId, uint GroupIndex);
-void DoOnTimer(uint3 id, uint3 GroupId, uint3 GroupThreadId, uint GroupIndex, float second);
+void DoParticleEmitShape(FComputeEnv env, inout FParticle cur, uint shapeIndex);
+void DoParticleEffectors(FComputeEnv env, inout FParticle particle);
+
+//begin TtEmitterMacross
+void DoUpdateSystem(TtEmitter emt);
+void OnInitParticle(TtEmitter emt, inout FParticle particle);
+void OnDeadParticle(TtEmitter emt, uint idxInPool, inout FParticle particle);
+void DoParticleTick(TtEmitter emt, float elapsed, inout FParticle particle);
+void DoOnTimer(TtEmitter emt, float second);
+//end TtEmitterMacross
 
 RWStructuredBuffer<FParticle>	bfParticles;
 
@@ -57,56 +61,29 @@ uint GetParticleIndexByThreadID(uint id)
     return CurAlives.GetValue(id.x);
 }
 
-//recomment num>0 && num<10
-void SpawnParticle(uint3 id, uint num, uint flags, float life)
-{
-    TtRawRingBuffer Allocator = GetAllocator();
-    TtRawArray Alives = GetBackendAlives();
-    
-    [unroll]
-    for (uint i = 0; i < num; i++)
-    {
-        int index = Allocator.Pop();
-        if (index < 0)
-            continue;
-        Alives.Push(index);
-		
-        bfParticles[index].Life = life;
-        bfParticles[index].Flags = flags;
-        bfParticles[index].Scale = 1.0f;
-		
-        [branch]
-        if (IsParticleEmitShape(bfParticles[index]))
-        {
-            uint shapeIndex = GetParticleData(bfParticles[index].Flags); // % (uint)EmitterShapes.Count;
-            DoParticleEmitShape(id, bfParticles[index], shapeIndex);
-        }
-        else
-        {
-            bfParticles[index].Location = float3(0, 0, 0);
-        }
-        bfParticles[index].Location += EmitterData.Location;
-        OnInitParticle(id, bfParticles[index]);
-    }
-}
-
 uint NebulaRoundup(uint num, uint width)
 {
     return (num % width == 0) ? (num / width) : (num / width + 1);
 }
 
 [numthreads(DispatchX, DispatchY, DispatchZ)]
-void CS_Particle_Update(uint3 id : SV_DispatchThreadID,
+void CS_Particle_Update(uint3 Id : SV_DispatchThreadID,
 	uint3 GroupId : SV_GroupID,
 	uint3 GroupThreadId : SV_GroupThreadID,
 	uint GroupIndex : SV_GroupIndex)
-{
+{   
+    TtEmitter emt = (TtEmitter) emt;
+    emt.ComputeEnv.Id = Id;
+    emt.ComputeEnv.GroupId = GroupId;
+    emt.ComputeEnv.GroupThreadId = GroupThreadId;
+    emt.ComputeEnv.GroupIndex = GroupIndex;
+    
     if (OnTimer == 1)
     {
-        DoOnTimer(id, GroupId, GroupThreadId, GroupIndex, ParticleStartSecond);
+        DoOnTimer(emt, ParticleStartSecond);
     }
-    DoUpdateSystem(id, GroupId, GroupThreadId, GroupIndex);
-	
+    DoUpdateSystem(emt);
+    
     TtRawRingBuffer Allocator = GetAllocator();
     TtReadonlyRawArray CurAlives = GetCurrentAlives();
     TtRawArray BackendAlives = GetBackendAlives();
@@ -116,22 +93,22 @@ void CS_Particle_Update(uint3 id : SV_DispatchThreadID,
 	
     int tmpCount;
     uint CountOfAlive = CurAlives.GetCount();
-	if (id.x < CountOfAlive)
+    if (Id.x < CountOfAlive)
 	{
-        int idx = CurAlives.GetValue(id.x);
+        int idx = CurAlives.GetValue(Id.x);
 		bfParticles[idx].Life -= ParticleElapsedTime;
 
         [branch]
         if (bfParticles[idx].Life <= 0)
 		{
             Allocator.Push(idx);
-            OnDeadParticle(id, idx, bfParticles[idx]);
+            OnDeadParticle(emt, idx, bfParticles[idx]);
         }
 		else
 		{
             BackendAlives.Push(idx);
-            DoParticleEffectors(id, bfParticles[idx]);
-            DoParticleTick(id, ParticleElapsedTime, bfParticles[idx]);
+            DoParticleEffectors(emt.ComputeEnv, bfParticles[idx]);
+            DoParticleTick(emt, ParticleElapsedTime, bfParticles[idx]);
             
             bfParticles[idx].Location += bfParticles[idx].Velocity * ParticleElapsedTime;
         }
@@ -164,52 +141,46 @@ void CS_Particle_Update(uint3 id : SV_DispatchThreadID,
 #include "NebulaModifier"
 
 #ifndef USER_EMITSHAPE
-void DoParticleEmitShape(uint3 id, inout FParticle particle, uint shapeIndex)
-{
-
-}
-#endif
-
-#ifndef USER_PARTICLE_INITIALIZE
-void OnInitParticle(uint3 id, inout FParticle particle)
-{
-
-}
-#endif
-
-#ifndef USER_PARTICLE_FINALIZE
-void OnDeadParticle(uint3 id, uint idxInPool, inout FParticle particle)
+void DoParticleEmitShape(FComputeEnv env, inout FParticle particle, uint shapeIndex)
 {
 
 }
 #endif
 
 #ifndef USER_PARTICLE_DOEFFECTORS
-void DoParticleEffectors(uint3 id, inout FParticle particle)
+void DoParticleEffectors(FComputeEnv env, inout FParticle particle)
 {
 
 }
 #endif
 
-#ifndef USER_PARTICLE_DOTICK
-void DoParticleTick(uint3 id, float elapsed, inout FParticle particle)
+#ifndef USER_EMITTER
+void DoUpdateSystem(TtEmitter emt)
+{
+
+}
+
+void OnInitParticle(TtEmitter emt, inout FParticle particle)
+{
+
+}
+
+void OnDeadParticle(TtEmitter emt, uint idxInPool, inout FParticle particle)
+{
+
+}
+
+void DoParticleTick(TtEmitter emt, float elapsed, inout FParticle particle)
+{
+
+}
+
+void DoOnTimer(TtEmitter emt, float second)
 {
 
 }
 #endif
 
-#ifndef USER_PARTICLE_UPDATESYS
-void DoUpdateSystem(uint3 id, uint3 GroupId, uint3 GroupThreadId, uint GroupIndex)
-{
-
-}
-#endif
-
-#ifndef USER_PARTICLE_ONTIMER
-void DoOnTimer(uint3 id, uint3 GroupId, uint3 GroupThreadId, uint GroupIndex, float second)
-{
-
-}
-#endif
+#include "EmitterBaseImpl.cginc"
 
 #endif//#ifndef _PARTICLE_H_

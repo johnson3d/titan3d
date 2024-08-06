@@ -465,7 +465,7 @@ namespace EngineNS.Graphics.Pipeline.Shader
         public List<string> UserDefines { get; set; } = new List<string>();
         internal virtual void UpdateShaderCode(bool EmptyMaterial)
         {
-            var codeBuilder = new Bricks.CodeBuilder.Backends.UHLSLCodeGenerator();
+            var codeBuilder = new Bricks.CodeBuilder.UHLSLCodeGenerator();
             string sourceCode = "";
             codeBuilder.AddLine($"#ifndef _Material_H_", ref sourceCode);
             codeBuilder.AddLine($"#define _Material_H_", ref sourceCode);

@@ -15,7 +15,7 @@ namespace EngineNS.Bricks.Terrain.Grass
     public class UMdfGrassStaticMeshPermutation<TGrassFollowHeight> : UMdfGrassStaticMesh 
         where TGrassFollowHeight : UMdf_Grass_VertexFollowHeight
     {
-        protected override void PreBuildMdfFunctions(ref string codeString, Bricks.CodeBuilder.Backends.UHLSLCodeGenerator codeBuilder)
+        protected override void PreBuildMdfFunctions(ref string codeString, Bricks.CodeBuilder.UHLSLCodeGenerator codeBuilder)
         {
             if (typeof(TGrassFollowHeight) == typeof(UMdf_Grass_VertexFollowHeight))
             {

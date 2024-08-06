@@ -447,7 +447,7 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode
         }
         #endregion
 
-        Backends.UHLSLCodeGenerator mHLSLCodeGen = new Backends.UHLSLCodeGenerator();
+        UHLSLCodeGenerator mHLSLCodeGen = new UHLSLCodeGenerator();
         private string GenHLSLCode()
         {
             Material.UsedRSView.Clear();

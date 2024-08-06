@@ -1043,7 +1043,7 @@ namespace EngineNS.Bricks.CodeBuilder
     public class UClassDeclaration : UCodeObject, IO.ISerializer
     {
         [Rtti.Meta]
-        public bool IsUnsafe { get; set; } = true;
+        public bool IsUnsafe { get; set; } = false;
         [Rtti.Meta]
         public EVisisMode VisitMode { get; set; } = EVisisMode.Public;
         [Rtti.Meta]

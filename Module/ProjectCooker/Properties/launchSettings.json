@@ -2,7 +2,7 @@
   "profiles": {
     "ProjectCooker": {
       "commandName": "Project",
-      "commandLineArgs": "ExeCmd=SaveAsLastest AssetType=Scene+Mesh+Material+MaterialInst+AnimClip+MeshPrimitive+UI+Prefab CookCfg=$(SolutionDir)content\\\\EngineConfigForCook.cfg ",
+      "commandLineArgs": "ExeCmd=SaveAsLastest AssetType=Scene+Mesh+Material+MaterialInst+AnimClip+MeshPrimitive+UI+Prefab+Macross CookCfg=$(SolutionDir)content\\\\EngineConfigForCook.cfg ",
       "workingDirectory": "..\\..\\binaries\\",
       "nativeDebugging": true
     }
