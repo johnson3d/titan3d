@@ -60,54 +60,54 @@ namespace EngineNS.Bricks.Particle
             var offset = new Vector3();
             if (Thinness >= 1.0f)
             {
-                offset.X = emitter.RandomSignedUnit() * HalfExtent.X;
-                offset.Y = emitter.RandomSignedUnit() * HalfExtent.Y;
-                offset.Z = emitter.RandomSignedUnit() * HalfExtent.Z;
+                offset.X = emitter.RandomSignedUnit(ref *particle) * HalfExtent.X;
+                offset.Y = emitter.RandomSignedUnit(ref *particle) * HalfExtent.Y;
+                offset.Z = emitter.RandomSignedUnit(ref *particle) * HalfExtent.Z;
             }
             else
             {
-                switch (emitter.RandomNext() % 6)
+                switch (emitter.RandomNext(ref *particle) % 6)
                 {
                     case 0://x
                         {
-                            offset.X = HalfExtent.X - (Thinness * emitter.RandomUnit()) * HalfExtent.X;
-                            offset.Y = emitter.RandomSignedUnit() * HalfExtent.Y;
-                            offset.Z = emitter.RandomSignedUnit() * HalfExtent.Z;
+                            offset.X = HalfExtent.X - (Thinness * emitter.RandomUnit(ref *particle)) * HalfExtent.X;
+                            offset.Y = emitter.RandomSignedUnit(ref *particle) * HalfExtent.Y;
+                            offset.Z = emitter.RandomSignedUnit(ref *particle) * HalfExtent.Z;
                         }
                         break;
                     case 1://-x
                         {
-                            offset.X = -HalfExtent.X + (Thinness * emitter.RandomUnit()) * HalfExtent.X;
-                            offset.Y = emitter.RandomSignedUnit() * HalfExtent.Y;
-                            offset.Z = emitter.RandomSignedUnit() * HalfExtent.Z;
+                            offset.X = -HalfExtent.X + (Thinness * emitter.RandomUnit(ref *particle)) * HalfExtent.X;
+                            offset.Y = emitter.RandomSignedUnit(ref *particle) * HalfExtent.Y;
+                            offset.Z = emitter.RandomSignedUnit(ref *particle) * HalfExtent.Z;
                         }
                         break;
                     case 2://y
                         {
-                            offset.Y = HalfExtent.Y - (Thinness * emitter.RandomUnit()) * HalfExtent.Y;
-                            offset.X = emitter.RandomSignedUnit() * HalfExtent.X;
-                            offset.Z = emitter.RandomSignedUnit() * HalfExtent.Z;
+                            offset.Y = HalfExtent.Y - (Thinness * emitter.RandomUnit(ref *particle)) * HalfExtent.Y;
+                            offset.X = emitter.RandomSignedUnit(ref *particle) * HalfExtent.X;
+                            offset.Z = emitter.RandomSignedUnit(ref *particle) * HalfExtent.Z;
                         }
                         break;
                     case 3://-y
                         {
-                            offset.X = -HalfExtent.Y + (Thinness * emitter.RandomUnit()) * HalfExtent.Y;
-                            offset.X = emitter.RandomSignedUnit() * HalfExtent.X;
-                            offset.Z = emitter.RandomSignedUnit() * HalfExtent.Z;
+                            offset.X = -HalfExtent.Y + (Thinness * emitter.RandomUnit(ref *particle)) * HalfExtent.Y;
+                            offset.X = emitter.RandomSignedUnit(ref *particle) * HalfExtent.X;
+                            offset.Z = emitter.RandomSignedUnit(ref *particle) * HalfExtent.Z;
                         }
                         break;
                     case 4://z
                         {
-                            offset.Z = HalfExtent.Z - (Thinness * emitter.RandomUnit()) * HalfExtent.Z;
-                            offset.X = emitter.RandomSignedUnit() * HalfExtent.X;
-                            offset.Y = emitter.RandomSignedUnit() * HalfExtent.Y;
+                            offset.Z = HalfExtent.Z - (Thinness * emitter.RandomUnit(ref *particle)) * HalfExtent.Z;
+                            offset.X = emitter.RandomSignedUnit(ref *particle) * HalfExtent.X;
+                            offset.Y = emitter.RandomSignedUnit(ref *particle) * HalfExtent.Y;
                         }
                         break;
                     case 5://-z
                         {
-                            offset.Z = -HalfExtent.Z + (Thinness * emitter.RandomUnit()) * HalfExtent.Z;
-                            offset.X = emitter.RandomSignedUnit() * HalfExtent.X;
-                            offset.Y = emitter.RandomSignedUnit() * HalfExtent.Y;
+                            offset.Z = -HalfExtent.Z + (Thinness * emitter.RandomUnit(ref *particle)) * HalfExtent.Z;
+                            offset.X = emitter.RandomSignedUnit(ref *particle) * HalfExtent.X;
+                            offset.Y = emitter.RandomSignedUnit(ref *particle) * HalfExtent.Y;
                         }
                         break;
                 }
@@ -166,7 +166,7 @@ namespace EngineNS.Bricks.Particle
         public override unsafe void UpdateLocation(TtEmitter emitter, FParticle* particle)
         {
             Vector3 offset;            
-            offset = emitter.RandomVector() * (Radius - Radius * (Thinness * emitter.RandomUnit()));
+            offset = emitter.RandomVector3(ref *particle) * (Radius - Radius * (Thinness * emitter.RandomUnit(ref *particle)));
             particle->Location = Center + offset;
         }
         public override void SetCBuffer(uint index, NxRHI.UCbView CBuffer)

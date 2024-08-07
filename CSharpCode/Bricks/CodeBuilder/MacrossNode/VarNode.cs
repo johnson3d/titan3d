@@ -283,6 +283,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
             {
                 VariableName = MemberName,
                 IsProperty = true,
+                PropertyDeclClass = mDefClass.TryGetTypeDesc(),
             };
             data.CurrentStatements.Add(assignSt);
 
@@ -297,6 +298,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
             {
                 VariableName = MemberName,
                 IsProperty = true,
+                PropertyDeclClass = mDefClass.TryGetTypeDesc(),
             };
         }
         public override Rtti.UTypeDesc GetOutPinType(PinOut pin)
@@ -589,6 +591,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
                 Host = GetHostExpression(ref data),
                 VariableName = ClassProperty.PropertyName,
                 IsProperty = true,
+                PropertyDeclClass = ClassProperty.HostType,
             };
             data.CurrentStatements.Add(assignSt);
 
@@ -607,6 +610,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
                 Host = GetHostExpression(ref data),
                 VariableName = ClassProperty.PropertyName,
                 IsProperty = true,
+                PropertyDeclClass = ClassProperty.HostType,
             };
         }
 
@@ -941,7 +945,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
             {
                 Host = GetHostExpression(ref data),
                 VariableName = ClassField.FieldName,
-                IsProperty = false,
+                //IsProperty = false,
             };
             data.CurrentStatements.Add(assignSt);
 
@@ -959,7 +963,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
             {
                 Host = GetHostExpression(ref data),
                 VariableName = ClassField.FieldName,
-                IsProperty = false,
+                //IsProperty = false,
             };
         }
 

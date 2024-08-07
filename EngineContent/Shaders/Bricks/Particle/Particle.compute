@@ -2,22 +2,23 @@
 #define _PARTICLE_H_
 
 #include "../../Inc/Algorithm/RingBuffer.cginc"
+#include "../../Inc/Math.cginc"
+#include "EmitterBase.cginc"
 
 #include "NebulaModifierDefine"
 
 #include "ParticleCommon.cginc"
 #include "EmitShape.compute"
-#include "EmitterBase.cginc"
 
-void DoParticleEmitShape(FComputeEnv env, inout FParticle cur, uint shapeIndex);
-void DoParticleEffectors(FComputeEnv env, inout FParticle particle);
+void DoParticleEmitShape(TtEmitter emt, inout FParticle cur, uint shapeIndex);
+void DoParticleEffectors(TtEmitter emt, inout FParticle particle);
 
 //begin TtEmitterMacross
 void DoUpdateSystem(TtEmitter emt);
 void OnInitParticle(TtEmitter emt, inout FParticle particle);
 void OnDeadParticle(TtEmitter emt, uint idxInPool, inout FParticle particle);
-void DoParticleTick(TtEmitter emt, float elapsed, inout FParticle particle);
-void DoOnTimer(TtEmitter emt, float second);
+void OnParticleTick(TtEmitter emt, float elapsed, inout FParticle particle);
+void OnTimer(TtEmitter emt, float second);
 //end TtEmitterMacross
 
 RWStructuredBuffer<FParticle>	bfParticles;
@@ -77,10 +78,11 @@ void CS_Particle_Update(uint3 Id : SV_DispatchThreadID,
     emt.ComputeEnv.GroupId = GroupId;
     emt.ComputeEnv.GroupThreadId = GroupThreadId;
     emt.ComputeEnv.GroupIndex = GroupIndex;
+    emt.InitMembers(EmitterData, bfEmitterData);
     
-    if (OnTimer == 1)
+    if (OnTimerState == 1)
     {
-        DoOnTimer(emt, ParticleStartSecond);
+        OnTimer(emt, ParticleStartSecond);
     }
     DoUpdateSystem(emt);
     
@@ -107,8 +109,8 @@ void CS_Particle_Update(uint3 Id : SV_DispatchThreadID,
 		else
 		{
             BackendAlives.Push(idx);
-            DoParticleEffectors(emt.ComputeEnv, bfParticles[idx]);
-            DoParticleTick(emt, ParticleElapsedTime, bfParticles[idx]);
+            DoParticleEffectors(emt, bfParticles[idx]);
+            OnParticleTick(emt, ParticleElapsedTime, bfParticles[idx]);
             
             bfParticles[idx].Location += bfParticles[idx].Velocity * ParticleElapsedTime;
         }
@@ -116,7 +118,7 @@ void CS_Particle_Update(uint3 Id : SV_DispatchThreadID,
 	}
 	GroupMemoryBarrierWithGroupSync();
 	
-    InterlockedAdd(bfSystemData[0].TempData.x, GroupRunParticleNumber, tmpCount);
+    InterlockedAdd(bfEmitterData[0].TempData.x, GroupRunParticleNumber, tmpCount);
     if (tmpCount + GroupRunParticleNumber >= CountOfAlive)
     {
         bfCurAlives.Store(0, 0);
@@ -141,14 +143,14 @@ void CS_Particle_Update(uint3 Id : SV_DispatchThreadID,
 #include "NebulaModifier"
 
 #ifndef USER_EMITSHAPE
-void DoParticleEmitShape(FComputeEnv env, inout FParticle particle, uint shapeIndex)
+void DoParticleEmitShape(TtEmitter emt, inout FParticle particle, uint shapeIndex)
 {
 
 }
 #endif
 
 #ifndef USER_PARTICLE_DOEFFECTORS
-void DoParticleEffectors(FComputeEnv env, inout FParticle particle)
+void DoParticleEffectors(TtEmitter emt, inout FParticle particle)
 {
 
 }
@@ -170,12 +172,12 @@ void OnDeadParticle(TtEmitter emt, uint idxInPool, inout FParticle particle)
 
 }
 
-void DoParticleTick(TtEmitter emt, float elapsed, inout FParticle particle)
+void OnParticleTick(TtEmitter emt, float elapsed, inout FParticle particle)
 {
 
 }
 
-void DoOnTimer(TtEmitter emt, float second)
+void OnTimer(TtEmitter emt, float second)
 {
 
 }

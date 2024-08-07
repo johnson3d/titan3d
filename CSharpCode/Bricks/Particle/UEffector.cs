@@ -48,7 +48,7 @@ namespace EngineNS.Bricks.Particle
                 mParticleUpdateDrawcall.BindSrv("bfRandomPool", UEngine.Instance.NebulaTemplateManager.RandomPoolSrv);
 
                 mParticleUpdateDrawcall.BindUav("bfParticles", gpuResources.ParticlesBuffer.Uav);
-                mParticleUpdateDrawcall.BindUav("bfSystemData", gpuResources.SystemDataBuffer.Uav);
+                mParticleUpdateDrawcall.BindUav("bfEmitterData", gpuResources.SystemDataBuffer.Uav);
                 mParticleUpdateDrawcall.BindUav("bfFreeParticles", gpuResources.AllocatorBuffer.Uav);
 
                 mParticleUpdateDrawcall.BindUav("bfDrawArg", gpuResources.DrawArgUav);
@@ -58,7 +58,7 @@ namespace EngineNS.Bricks.Particle
             }
 
             CBuffer.SetValue(coreBinder.CBPerParticle.ParticleElapsedTime, UEngine.Instance.ElapsedSecond);
-            CBuffer.SetValue(coreBinder.CBPerParticle.ParticleRandomSeed, emitter.RandomNext());
+            CBuffer.SetValue(coreBinder.CBPerParticle.ParticleRandomSeed, UEngine.Instance.NebulaTemplateManager.mRandom.Next());
 
             emitter.SetCBuffer(CBuffer);
 
@@ -102,12 +102,12 @@ namespace EngineNS.Bricks.Particle
             var codeBuilder = new Bricks.CodeBuilder.UHLSLCodeGenerator();
             string sourceCode = "";
             //var codeBuilder = new Bricks.CodeBuilder.HLSL.UHLSLGen();
-            codeBuilder.AddLine("\nvoid DoParticleEffectors(FComputeEnv env, inout FParticle particle)", ref sourceCode);
+            codeBuilder.AddLine("\nvoid DoParticleEffectors(TtEmitter emt, inout FParticle particle)", ref sourceCode);
             codeBuilder.PushSegment(ref sourceCode);
             int index = 0;
             foreach (var i in Effectors)
             {
-                codeBuilder.AddLine($"{i.Name}_EffectorExecute(env, ParticleElapsedTime, particle, EffectorParameters{index});", ref sourceCode);
+                codeBuilder.AddLine($"{i.Name}_EffectorExecute(emt, ParticleElapsedTime, particle, EffectorParameters{index});", ref sourceCode);
                 index++;
             }
             codeBuilder.PopSegment(ref sourceCode);
@@ -337,7 +337,7 @@ namespace EngineNS.Bricks.Particle
         {
             ref var cur = ref *(FParticle*)particle;
             //cur.Location += Acceleration * elapsed * (1.0f + emitter.RandomUnit() * 2.5f);
-            cur.Velocity += (AccelerationMin + AccelerationRange * emitter.RandomUnit()) * elapsed;
+            cur.Velocity += (AccelerationMin + AccelerationRange * emitter.RandomUnit(ref *(FParticle*)particle)) * elapsed;
         }
     }
 
@@ -368,7 +368,7 @@ namespace EngineNS.Bricks.Particle
             ref var cur = ref *(FParticle*)particle;
             //cur.Location += Acceleration * elapsed * (1.0f + emitter.RandomUnit() * 2.5f);
             Color4f clr = cur.Colorf;
-            clr += OpColorMin + OpColorRange * emitter.RandomUnit() * elapsed;
+            clr += OpColorMin + OpColorRange * emitter.RandomUnit(ref *(FParticle*)particle) * elapsed;
             clr.Red %= 1.0f;
             clr.Green %= 1.0f;
             clr.Blue %= 1.0f;
@@ -406,7 +406,7 @@ namespace EngineNS.Bricks.Particle
         {
             ref var cur = ref *(FParticle*)particle;
             //cur.Location += Acceleration * elapsed * (1.0f + emitter.RandomUnit() * 2.5f);
-            float scale = OpScaleMin + emitter.RandomUnit() * OpScaleRange;
+            float scale = OpScaleMin + emitter.RandomUnit(ref *(FParticle*)particle) * OpScaleRange;
             cur.Scale += scale * elapsed;
         }
     }

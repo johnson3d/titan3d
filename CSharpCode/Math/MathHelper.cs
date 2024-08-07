@@ -723,6 +723,12 @@ namespace EngineNS
         {
             return (float)System.Math.Atan2(y, x);
         }
+        [Rtti.Meta]
+        public static float Pow(float x, float y)
+        {
+            return (float)System.Math.Pow(x, y);
+        }
+
         private static System.Random sRandom = new Random((int)Support.Time.GetTickCount());
         [Rtti.Meta]
         public static int Random()

@@ -7,6 +7,12 @@ half GetTexMipLevelFromRoughness(half Roughness, half MipMaxLevel)
 	return MipMaxLevel * Roughness;
 }
 
+float GetShadowDepth(Texture2D tex, SamplerState samp, float2 tcShadow)
+{
+	float lightSpaceDepth = tex.Sample(samp, tcShadow).r;
+	return lightSpaceDepth + SHADOW_EPSILON	;
+}
+
 half3 EnvBRDFMobile(half3 LightColorSpec, half3 OptSpecShading, half Roughness, half NoV)
 {
 	//the algorithm is inspired by Call of Duty: Black Ops II;

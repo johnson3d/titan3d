@@ -215,7 +215,7 @@ namespace EngineNS
 
 		    return value;
         }
-        public static Color4f FromABGR(Color4b color)
+        public static Color4f FromColor4b(Color4b color)
         {
             Color4f retValue = new Color4f();
             retValue.Alpha = ((float)color.A) / 255.0f;

@@ -50,7 +50,7 @@ namespace EngineNS.Bricks.Particle
         {
             get
             {
-                return Color4f.FromABGR(EngineNS.Color4b.FromArgb((int)Color));
+                return Color4f.FromColor4b(EngineNS.Color4b.FromArgb((int)Color));
             }
             set
             {
@@ -166,7 +166,7 @@ namespace EngineNS.Bricks.Particle
                 var pAddr = (FParticle*)CoreSDK.Alloc(emitter.MaxParticle * (uint)sizeof(FParticle), "Nebula", 0);
                 for (uint i = 0; i < emitter.MaxParticle; i++)
                 {
-                    ((FParticle*)&pAddr[i])->RandomSeed = (uint)emitter.RandomNext();
+                    ((FParticle*)&pAddr[i])->RandomSeed = (uint)UEngine.Instance.NebulaTemplateManager.mRandom.Next();
                     ((FParticle*)&pAddr[i])->Flags = i;
                 }
                 ParticlesBuffer.SetSize(emitter.MaxParticle, pAddr, NxRHI.EBufferType.BFT_UAV | NxRHI.EBufferType.BFT_SRV);
@@ -285,7 +285,7 @@ namespace EngineNS.Bricks.Particle
         public float TimerRemain { get; set; } = float.MaxValue;
         [Rtti.Meta]
         public float TimerInterval { get; set; } = float.MaxValue;
-        [Rtti.Meta(ShaderName = "EmitterDataRef")]
+        [Rtti.Meta(ShaderName = "EmitterDataRef[0]")]
         public ref FParticleEmitter EmitterDataRef
         {
             get
@@ -323,7 +323,7 @@ namespace EngineNS.Bricks.Particle
             {
                 return ShaderName;
             }
-            return RName.GetRName(mMcObject.Name.Name + "/NebulaEmitter.compute", mMcObject.Name.RNameType);
+            return RName.GetRName(mMcObject.Name.Name + $"/{mMcObject.Name.PureName}.shader", mMcObject.Name.RNameType);
         }
         public virtual string GetEmitShapeHLSL()
         {
@@ -334,7 +334,7 @@ namespace EngineNS.Bricks.Particle
             var code = IO.TtFileManager.ReadAllText($"{GetEmitterShader().Address}");
             codeBuilder.AddLine(code, ref sourceCode);
 
-            codeBuilder.AddLine("\nvoid DoParticleEmitShape(FComputeEnv env, inout FParticle cur, uint shapeIndex)", ref sourceCode);
+            codeBuilder.AddLine("\nvoid DoParticleEmitShape(TtEmitter emt, inout FParticle cur, uint shapeIndex)", ref sourceCode);
             codeBuilder.PushSegment(ref sourceCode);
             {
                 int index = 0;
@@ -346,7 +346,7 @@ namespace EngineNS.Bricks.Particle
                         codeBuilder.AddLine($"case {index}:", ref sourceCode);
                         codeBuilder.PushSegment(ref sourceCode);
                         {
-                            codeBuilder.AddLine($"{i.Name}_UpdateLocation(env, EmitShape{index}, cur);", ref sourceCode);
+                            codeBuilder.AddLine($"{i.Name}_UpdateLocation(emt, EmitShape{index}, cur);", ref sourceCode);
                         }
                         codeBuilder.PopSegment(ref sourceCode);
                         codeBuilder.AddLine($"break;", ref sourceCode);
@@ -362,6 +362,8 @@ namespace EngineNS.Bricks.Particle
             return sourceCode;
         }
         #endregion
+
+        #region Queue&Emitter
         [Rtti.Meta]
         public virtual async Thread.Async.TtTask<bool> InitEmitter(RName meshName, uint maxParticle)
         {
@@ -426,6 +428,8 @@ namespace EngineNS.Bricks.Particle
             if (CurrentQueue == null)
                 CurrentQueue = queue;
         }
+        #endregion
+
         #region Update
         private float mParticleStartSecond;
         public unsafe void Update(Graphics.Pipeline.URenderPolicy policy, UParticleGraphNode particleSystem, float elapsed)
@@ -440,13 +444,13 @@ namespace EngineNS.Bricks.Particle
             TimerRemain -= elapsed;
             if (TimerRemain < 0)
             {   
-                CurrentQueue?.CBuffer?.SetValue(coreBinder.CBPerParticle.OnTimer, 1);
+                CurrentQueue?.CBuffer?.SetValue(coreBinder.CBPerParticle.OnTimerState, 1);
                 TimerRemain = TimerInterval;
                 OnTimer(timeSecond);
             }
             else
             {
-                CurrentQueue?.CBuffer?.SetValue(coreBinder.CBPerParticle.OnTimer, 0);
+                CurrentQueue?.CBuffer?.SetValue(coreBinder.CBPerParticle.OnTimerState, 0);
             }
             if (IsGpuDriven)
             {
@@ -542,15 +546,20 @@ namespace EngineNS.Bricks.Particle
                 EmitterData.Velocity = value;
             }
         }
+        [Rtti.Meta(ShaderName = "Color2Uint")]
+        public uint Color2Uint(Color4f color)
+        {
+            return color.ToArgb();
+        }
+        [Rtti.Meta(ShaderName = "Uint2Color4f")]
+        public Color4f Uint2Color4f(uint value)
+        {
+            return Color4f.FromColor4b(Color4b.FromArgb((int)value));
+        }
         [Rtti.Meta(ShaderName = "HasFlags")]
         public EParticleFlags HasFlags(in FParticle particle, EParticleFlags flags)
         {
             return (EParticleFlags)(particle.Flags & (uint)flags);
-        }
-        [Rtti.Meta(ShaderName = "SetFlags")]
-        public void SetFlags(ref FParticle particle, EParticleFlags flags)
-        {
-            particle.Flags |= (uint)flags;
         }
         [Rtti.Meta(ShaderName = "GetParticleData")]
         public uint GetParticleData(uint flags)
@@ -567,40 +576,61 @@ namespace EngineNS.Bricks.Particle
         {
             return mCoreObject.Spawn(num, flags, life);
         }
-        [Rtti.Meta(ShaderName = "Spawn")]
+        [Rtti.Meta(ShaderName = "GetParticle")]
         public unsafe FParticle GetParticle(uint index)
         {
             var pParticles = (FParticle*)mCoreObject.GetParticleAddress();
             return pParticles[index];
         }
-
+        private static uint rand_lcg(uint rng_state)
+        {
+            // LCG values from Numerical Recipes
+            rng_state = 1664525 * rng_state + 1013904223;
+            return rng_state;
+        }
+        [Rtti.Meta(ShaderName = "AtomicAdd_EmitterFlags")]
+        public void AtomicAdd_EmitterFlags(uint value, out uint oldValue)
+        {
+            oldValue = System.Threading.Interlocked.Add(ref EmitterData.mFlags, value);
+        }
         #region Random
         [Rtti.Meta(ShaderName = "RandomUnit")]
-        public float RandomUnit()//[0,1]
+        public float RandomUnit(ref FParticle cur)//[0,1]
         {
+            //cur.RandomSeed = rand_lcg(cur.RandomSeed);
             return (float)UEngine.Instance.NebulaTemplateManager.mRandom.NextDouble();
         }
         [Rtti.Meta(ShaderName = "RandomSignedUnit")]
-        public float RandomSignedUnit()//[-1,1]
+        public float RandomSignedUnit(ref FParticle cur)//[-1,1]
         {
             return UEngine.Instance.NebulaTemplateManager.RandomSignedUnit();
         }
         [Rtti.Meta(ShaderName = "RandomNext")]
-        public int RandomNext()
+        public int RandomNext(ref FParticle cur)
         {
             return UEngine.Instance.NebulaTemplateManager.mRandom.Next();
         }
-        [Rtti.Meta(ShaderName = "RandomVector")]
-        public Vector3 RandomVector(bool normalized = true)
+        [Rtti.Meta(ShaderName = "RandomVector3")]
+        public Vector3 RandomVector3(ref FParticle cur, bool normalized = true)
         {
             var result = new Vector3();
-            result.X = RandomSignedUnit();
-            result.Y = RandomSignedUnit();
-            result.Z = RandomSignedUnit();
+            result.X = RandomSignedUnit(ref cur);
+            result.Y = RandomSignedUnit(ref cur);
+            result.Z = RandomSignedUnit(ref cur);
             if (normalized)
             {
                 result.Normalize();
             }
+            return result;
+        }
+        [Rtti.Meta(ShaderName = "RandomVector3")]
+        public Vector4 RandomVector4(ref FParticle cur)
+        {
+            var result = new Vector4();
+            result.X = RandomSignedUnit(ref cur);
+            result.Y = RandomSignedUnit(ref cur);
+            result.Z = RandomSignedUnit(ref cur);
+            result.W = RandomSignedUnit(ref cur);
             return result;
         }
         #endregion

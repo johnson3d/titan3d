@@ -349,6 +349,10 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
     }
     public partial class UMacrossMethodGraph : UNodeGraph, IPropertyCustomization
     {
+        [Rtti.Meta, Category("Option")]
+        public string CustumCode { get; set; } = null;
+        [Rtti.Meta, Category("Option")]
+        public bool IsUseCustumCode { get; set; } = false;
         bool mInputsDirty = true;
         List<UMethodArgumentDeclaration> mInputs = new List<UMethodArgumentDeclaration>();
         [InputsOperationCallback, Category("Params")]

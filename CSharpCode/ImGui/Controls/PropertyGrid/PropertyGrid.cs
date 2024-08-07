@@ -538,7 +538,7 @@ namespace EngineNS.EGui.Controls.PropertyGrid
                     srcValue = (Color4b)info.Value;
                 }
                 if (IsABGR)
-                    v = Color4f.FromABGR(srcValue);
+                    v = Color4f.FromColor4b(srcValue);
                 else
                     v = new Color4f(srcValue);
                 var saved = v;

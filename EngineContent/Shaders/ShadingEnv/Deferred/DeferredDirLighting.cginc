@@ -43,6 +43,9 @@ SamplerState Samp_GShadowMap DX_AUTOBIND;
 Texture2D gEnvMap DX_AUTOBIND;
 SamplerState Samp_gEnvMap DX_AUTOBIND;
 
+Texture2D gPreIntegratedGF DX_AUTOBIND;
+SamplerState Samp_gPreIntegratedGF DX_AUTOBIND;
+
 Texture2D GVignette DX_AUTOBIND;
 SamplerState Samp_GVignette DX_AUTOBIND;
 
@@ -271,7 +274,7 @@ PS_OUTPUT PS_Main(PS_INPUT input)
     }
 	half Ihdr = max(0.6h, CalcLuminanceYCbCr(EnvSpecLightColor));
 	Ihdr = exp2((Ihdr - 0.6h) * 7.5h);
-	half3 EnvSpec = (half3)EnvBRDFMobile(EnvSpecLightColor, OptSpecShading, Roughness, NoV) * Ihdr;
+	half3 EnvSpec = (half3)EnvBRDF(EnvSpecLightColor, OptSpecShading, Roughness, NoV, gPreIntegratedGF, Samp_gPreIntegratedGF) * Ihdr;
 
 	half FinalShadowValue = min(1.0h, ShadowValue + DirLightLeak);
 	//AOs = min((NoL + FinalShadowValue) * 0.25h + AOs, 1.0h);

@@ -1,4 +1,5 @@
 ﻿using Microsoft.CodeAnalysis;
+using NPOI.SS.Formula.Functions;
 using NPOI.Util;
 using System;
 using System.Collections.Generic;
@@ -33,9 +34,9 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
             InitializeManMenu();
             await PGMember.Initialize();
             await mUnionNodeConfigRenderer.Initialize();
-            mShaderEditor.mCoreObject.SetLanguage("C#");
-            mShaderEditor.mCoreObject.ApplyLangDefine();
-            mShaderEditor.mCoreObject.ApplyErrorMarkers();
+            mCodeEditor.mCoreObject.SetLanguage("C#");
+            mCodeEditor.mCoreObject.ApplyLangDefine();
+            mCodeEditor.mCoreObject.ApplyErrorMarkers();
             return true;
         }
 
@@ -143,7 +144,6 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
             }
         }
 
-        EGui.TtCodeEditor mCodeEditor = new EGui.TtCodeEditor();
         public void SaveClassGraph(RName rn)
         {
             var ameta = UEngine.Instance.AssetMetaManager.GetAssetMeta(AssetName) as UMacrossAMeta;
@@ -319,11 +319,28 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
                 string code = "";
                 if (IsGenShader)
                 {
-                    mHlslCodeGen.GenerateClassCode(DefClass, AssetName, ref code);
+                    foreach(var i in this.Methods)
+                    {
+                        if (i.IsUseCustumCode)
+                        {
+                            code += i.CustumCode;
+                            continue;
+                        }
+                        foreach(var j in i.MethodDatas)
+                        {
+                            string funcCode = "";
+                            var data = new UCodeGeneratorData(DefClass.Namespace, DefClass, mHlslCodeGen, null);
+                            var methodDecGen = data.CodeGen.GetCodeObjectGen(j.MethodDec.GetType());
+                            methodDecGen.GenCodes(j.MethodDec, ref funcCode, ref data);
+                            code += funcCode;
+                        }
+                    }
+                    //mHlslCodeGen.GenerateClassCode(DefClass, AssetName, ref code);
                     code += "\n";
                     code += $"#define USER_EMITTER\n";
                     SaveHlslFile(code);
-                    mShaderEditor.mCoreObject.SetText(code);
+                    mCodeEditor.mCoreObject.SetText(code);
+                    TextEditorTitle = AssetName.PureName;
 
                     code = "";
                     mCSCodeGen.GenerateClassCode(DefClass, AssetName, ref code);
@@ -333,7 +350,8 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
                 {
                     mCSCodeGen.GenerateClassCode(DefClass, AssetName, ref code);
                     SaveCSFile(code);
-                    mShaderEditor.mCoreObject.SetText(code);
+                    mCodeEditor.mCoreObject.SetText(code);
+                    TextEditorTitle = AssetName.PureName;
                 }
                 DefClass.ResetRuntimeData();
                 //GenerateAssemblyDescCreateInstanceCode();
@@ -356,6 +374,44 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
                 Profiler.Log.WriteException(ex);
                 return "";
             }
+        }
+        public string GenerateMethodCode(UCodeGeneratorBase gen, int methodIndex)
+        {
+            if (methodIndex < 0 || methodIndex >= DefClass.Methods.Count)
+                return "";
+
+            string funcCode = "";
+            try
+            {
+                BeforeGenerateCode?.Invoke(DefClass);
+                foreach (var i in Methods)
+                {
+                    i.BuildExpression(DefClass);
+                }
+
+                var mtd = DefClass.Methods[methodIndex];
+                var data = new UCodeGeneratorData(DefClass.Namespace, DefClass, gen, null);
+                var methodDecGen = data.CodeGen.GetCodeObjectGen(mtd.GetType());
+                methodDecGen.GenCodes(mtd, ref funcCode, ref data);
+            }
+            catch (NodeGraph.GraphException ex)
+            {
+                if (ex.ErrorNode != null)
+                {
+                    ex.ErrorNode.HasError = true;
+                    ex.ErrorNode.CodeExcept = ex;
+                }
+                Profiler.Log.WriteException(ex);
+                return "";
+            }
+            catch (Exception ex)
+            {
+                Profiler.Log.WriteException(ex);
+                return "";
+            }
+            
+
+            return funcCode;
         }
 
         //void GenerateAssemblyDescCreateInstanceCode()
@@ -557,7 +613,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
             ImGuiAPI.DockBuilderSplitNode(graphId, ImGuiDir_.ImGuiDir_Right, 0.4f, ref unionConfigId, ref graphId);
 
             ImGuiAPI.DockBuilderDockWindow(EGui.UIProxy.DockProxy.GetDockWindowName("GraphWindow", mDockKeyClass), graphId);
-            ImGuiAPI.DockBuilderDockWindow(EGui.UIProxy.DockProxy.GetDockWindowName("TextEditor", mDockKeyClass), graphId);
+            ImGuiAPI.DockBuilderDockWindow(EGui.UIProxy.DockProxy.GetDockWindowName("CodeEditor", mDockKeyClass), graphId);
             ImGuiAPI.DockBuilderDockWindow(EGui.UIProxy.DockProxy.GetDockWindowName("NodeProperty", mDockKeyClass), propertyId);
             ImGuiAPI.DockBuilderDockWindow(EGui.UIProxy.DockProxy.GetDockWindowName("UnionNodeConfig", mDockKeyClass), unionConfigId);
             ImGuiAPI.DockBuilderDockWindow(EGui.UIProxy.DockProxy.GetDockWindowName("ClassView", mDockKeyClass), leftId);
@@ -604,6 +660,14 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
             {
                 GenerateCode();
                 CompileCode();
+            }
+            toolBarItemIdx++;
+            EGui.UIProxy.ToolbarSeparator.DrawSeparator(in drawList, in Support.UAnyPointer.Default);
+            if (EGui.UIProxy.ToolbarIconButtonProxy.DrawButton(in drawList,
+                ref mToolBtnDatas[toolBarItemIdx].IsMouseDown, ref mToolBtnDatas[toolBarItemIdx].IsMouseHover, null, "MethodCustum", false, -1, 0, spacing))
+            {
+                if (CurrentTextoutMethod != null)
+                    CurrentTextoutMethod.CustumCode = mCodeEditor.Text;
             }
             toolBarItemIdx++;
             EGui.UIProxy.ToolbarSeparator.DrawSeparator(in drawList, in Support.UAnyPointer.Default);
@@ -654,10 +718,6 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
             {
                 DrawToolbar();
 
-                //if (ImGuiAPI.IsWindowDocked())
-                //{
-                //    DockId = ImGuiAPI.GetWindowDockID();
-                //}
                 if (ImGuiAPI.IsWindowFocused(ImGuiFocusedFlags_.ImGuiFocusedFlags_RootAndChildWindows))
                 {
                     var mainEditor = UEngine.Instance.GfxDevice.SlateApplication as Editor.UMainEditorApplication;
@@ -666,33 +726,6 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
                 }
 
                 OnDrawMainMenu(); 
-
-                //ImGuiAPI.Columns(2, null, true);
-                //if (bFirstDraw)
-                //{
-                //    ImGuiAPI.SetColumnWidth(0, LeftWidth);
-                //    bFirstDraw = false;
-                //}
-                //var curPos = ImGuiAPI.GetCursorScreenPos();
-                //LeftWidth = ImGuiAPI.GetColumnWidth(0);
-                //var szLeft = new Vector2(LeftWidth, 0);
-                //if (ImGuiAPI.BeginChild("LeftWin", in szLeft, true, ImGuiWindowFlags_.ImGuiWindowFlags_NoMove))
-                //{
-                //    OnLeftWindow();
-                //}
-                //ImGuiAPI.EndChild();
-                //ImGuiAPI.NextColumn();
-
-                //var colWidth = ImGuiAPI.GetColumnWidth(1);
-                //var szRight = new Vector2(colWidth, 0);
-                //if (ImGuiAPI.BeginChild("RightWin", in szRight, true, ImGuiWindowFlags_.ImGuiWindowFlags_NoMove))
-                //{
-                //    OnDrawGraph();
-                //}
-                //ImGuiAPI.EndChild();
-
-                //ImGuiAPI.Columns(1, null, true);
-                //ImGuiAPI.NextColumn();
             }
             ResetDockspace();
             EGui.UIProxy.DockProxy.EndMainForm(result);
@@ -929,10 +962,38 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
                         if (method.IsDelegateGraph())
                             continue;
                         var displayName = method.DisplayName;
+
+                        if (method.IsUseCustumCode)
+                        {
+                            ImGuiAPI.PushStyleColor(ImGuiCol_.ImGuiCol_Text, 0xFF0000FF);
+                        }
                         var methodTreeNodeResult = ImGuiAPI.TreeNodeEx(displayName, flags);
                         ImGuiAPI.SameLine(0, EGui.UIProxy.StyleConfig.Instance.ItemSpacing.X);
+                        if (method.IsUseCustumCode)
+                        {
+                            ImGuiAPI.PopStyleColor(1);
+                        }
                         var methodTreeNodeDoubleClicked = ImGuiAPI.IsItemDoubleClicked(ImGuiMouseButton_.ImGuiMouseButton_Left);
                         var methodTreeNodeIsItemClicked = ImGuiAPI.IsItemClicked(ImGuiMouseButton_.ImGuiMouseButton_Left);
+                        ImGuiAPI.SameLine(regionSize.X - buttonSize.X * 3 - buttonOffset, -1.0f);
+                        if (EGui.UIProxy.CustomButton.ToolButton("g", in buttonSize, 0xFF00FF00, "func_G_" + i))
+                        {
+                            mCodeEditor.mCoreObject.SetText(GenerateMethodCode(this.CodeGen, i));
+                            TextEditorTitle = "Gen:" + method.DisplayName;
+                            CurrentTextoutMethod = method;
+                            break;
+                        }
+                        ImGuiAPI.SameLine(regionSize.X - buttonSize.X * 2 - buttonOffset, -1.0f);
+                        if (EGui.UIProxy.CustomButton.ToolButton("c", in buttonSize, 0xFF00FF00, "func_C_" + i))
+                        {
+                            if (Methods[i].CustumCode != null)
+                                mCodeEditor.mCoreObject.SetText(Methods[i].CustumCode);
+                            else
+                                mCodeEditor.mCoreObject.SetText("//No CustumCode");
+                            TextEditorTitle = "Custum:" + method.DisplayName;
+                            CurrentTextoutMethod = method;
+                            break;
+                        }
                         ImGuiAPI.SameLine(regionSize.X - buttonSize.X - buttonOffset, -1.0f);
                         var keyName = $"Delete func {displayName}?";
                         if (EGui.UIProxy.CustomButton.ToolButton("x", in buttonSize, 0xFF0000FF, "func_X_" + i))
@@ -1004,18 +1065,21 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
             mUnionNodeConfigRenderer?.SetUnionNode(node);
             mUnionNodeConfigShow = (node != null);
         }
-        EGui.TtCodeEditor mShaderEditor = new EGui.TtCodeEditor();
+        EGui.TtCodeEditor mCodeEditor = new EGui.TtCodeEditor();
         bool ShowTextEditor = true;
+        string TextEditorTitle = "TextEditor";
+        UMacrossMethodGraph CurrentTextoutMethod = null;
         protected void DrawTextEditor()
         {
             var sz = new Vector2(-1);
-            var show = EGui.UIProxy.DockProxy.BeginPanel(mDockKeyClass, "TextEditor", ref ShowTextEditor, ImGuiWindowFlags_.ImGuiWindowFlags_None);
+            var show = EGui.UIProxy.DockProxy.BeginPanel(mDockKeyClass, "CodeEditor", ref ShowTextEditor, ImGuiWindowFlags_.ImGuiWindowFlags_None);
             if (show)
             {
                 var winPos = ImGuiAPI.GetWindowPos();
                 var vpMin = ImGuiAPI.GetWindowContentRegionMin();
                 var vpMax = ImGuiAPI.GetWindowContentRegionMax();
-                mShaderEditor.mCoreObject.Render(AssetName.Name, in Vector2.Zero, false);
+                ImGuiAPI.TextColored(Color4f.FromColor4b(Color4b.LightGoldenrodYellow), TextEditorTitle);
+                mCodeEditor.mCoreObject.Render(AssetName.Name, in Vector2.Zero, false);
             }
             EGui.UIProxy.DockProxy.EndPanel(show);
         }

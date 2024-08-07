@@ -5,6 +5,7 @@
     {
         [EngineNS.Rtti.Meta]
         private System.Int32 Member_0 { get; set; } = 0;
+        public EngineNS.Macross.UMacrossBreak breaker_AtomicAdd_EmitterFlags_2788520947 = new EngineNS.Macross.UMacrossBreak("breaker_AtomicAdd_EmitterFlags_2788520947");
         public EngineNS.Macross.UMacrossBreak breaker_SetParticleFlags_4124938284 = new EngineNS.Macross.UMacrossBreak("breaker_SetParticleFlags_4124938284");
         public EngineNS.Macross.UMacrossBreak breaker_Spawn_318270620 = new EngineNS.Macross.UMacrossBreak("breaker_Spawn_318270620");
         public EngineNS.Macross.UMacrossBreak breaker_if_801148221 = new EngineNS.Macross.UMacrossBreak("breaker_if_801148221");
@@ -14,8 +15,8 @@
         public EngineNS.Macross.UMacrossBreak breaker_if_1932775334 = new EngineNS.Macross.UMacrossBreak("breaker_if_1932775334");
         public EngineNS.Macross.UMacrossBreak breaker_SetParticleFlags_2645294717 = new EngineNS.Macross.UMacrossBreak("breaker_SetParticleFlags_2645294717");
         public EngineNS.Macross.UMacrossBreak breaker_Spawn_4269439374 = new EngineNS.Macross.UMacrossBreak("breaker_Spawn_4269439374");
-        public EngineNS.Macross.UMacrossBreak breaker_RandomUnit_2399714997 = new EngineNS.Macross.UMacrossBreak("breaker_RandomUnit_2399714997");
-        public EngineNS.Macross.UMacrossBreak breaker_RandomNext_2440437032 = new EngineNS.Macross.UMacrossBreak("breaker_RandomNext_2440437032");
+        public EngineNS.Macross.UMacrossBreak breaker_RandomUnit_3537506712 = new EngineNS.Macross.UMacrossBreak("breaker_RandomUnit_3537506712");
+        public EngineNS.Macross.UMacrossBreak breaker_RandomUnit_2843124104 = new EngineNS.Macross.UMacrossBreak("breaker_RandomUnit_2843124104");
         EngineNS.Macross.UMacrossStackFrame mFrame_DoUpdateSystem = new EngineNS.Macross.UMacrossStackFrame(EngineNS.RName.GetRName("tutorials/particles/testemitter.macross", EngineNS.RName.ERNameType.Game));
         [EngineNS.Rtti.MetaAttribute]
         public override void DoUpdateSystem(EngineNS.Bricks.Particle.TtEmitter emt)
@@ -25,22 +26,26 @@
                 mFrame_DoUpdateSystem.SetWatchVariable("emt", emt);
                 System.UInt32 tmp_r_SetParticleFlags_4124938284 = default(System.UInt32);
                 System.UInt32 tmp_r_Spawn_318270620 = default(System.UInt32);
-                mFrame_DoUpdateSystem.SetWatchVariable("Condition0_801148221", (emt.EmitterDataRef.Flags == 0));
+                mFrame_DoUpdateSystem.SetWatchVariable("v_value_AtomicAdd_EmitterFlags_2788520947", 0);
+                System.UInt32 v_oldValue_AtomicAdd_EmitterFlags_2788520947;
+                mFrame_DoUpdateSystem.SetWatchVariable("v_oldValue_AtomicAdd_EmitterFlags_2788520947", v_oldValue_AtomicAdd_EmitterFlags_2788520947);
+                breaker_AtomicAdd_EmitterFlags_2788520947.TryBreak();
+                emt.AtomicAdd_EmitterFlags(0,out v_oldValue_AtomicAdd_EmitterFlags_2788520947);
+                mFrame_DoUpdateSystem.SetWatchVariable("Condition0_801148221", (v_oldValue_AtomicAdd_EmitterFlags_2788520947 < 512));
                 breaker_if_801148221.TryBreak();
-                if ((emt.EmitterDataRef.Flags == 0))
+                if ((v_oldValue_AtomicAdd_EmitterFlags_2788520947 < 512))
                 {
                     mFrame_DoUpdateSystem.SetWatchVariable("v_flags_SetParticleFlags_4124938284", EngineNS.Bricks.Particle.EParticleFlags.EmitShape);
                     mFrame_DoUpdateSystem.SetWatchVariable("v_data_SetParticleFlags_4124938284", 0);
                     breaker_SetParticleFlags_4124938284.TryBreak();
                     tmp_r_SetParticleFlags_4124938284 = emt.SetParticleFlags(EngineNS.Bricks.Particle.EParticleFlags.EmitShape,0);
                     mFrame_DoUpdateSystem.SetWatchVariable("tmp_r_SetParticleFlags_4124938284", tmp_r_SetParticleFlags_4124938284);
-                    mFrame_DoUpdateSystem.SetWatchVariable("v_num_Spawn_318270620", 512);
+                    mFrame_DoUpdateSystem.SetWatchVariable("v_num_Spawn_318270620", 1);
                     mFrame_DoUpdateSystem.SetWatchVariable("v_flags_Spawn_318270620", tmp_r_SetParticleFlags_4124938284);
                     mFrame_DoUpdateSystem.SetWatchVariable("v_life_Spawn_318270620", 3f);
                     breaker_Spawn_318270620.TryBreak();
-                    tmp_r_Spawn_318270620 = emt.Spawn(512,tmp_r_SetParticleFlags_4124938284,3f);
+                    tmp_r_Spawn_318270620 = emt.Spawn(1,tmp_r_SetParticleFlags_4124938284,3f);
                     mFrame_DoUpdateSystem.SetWatchVariable("tmp_r_Spawn_318270620", tmp_r_Spawn_318270620);
-                    emt.EmitterDataRef.Flags = 1;
                 }
                 else
                 {
@@ -105,17 +110,19 @@
             {
                 mFrame_OnInitParticle.SetWatchVariable("emt", emt);
                 mFrame_OnInitParticle.SetWatchVariable("particle", particle);
-                System.Single tmp_r_RandomUnit_2399714997 = default(System.Single);
-                System.Int32 tmp_r_RandomNext_2440437032 = default(System.Int32);
+                System.Single tmp_r_RandomUnit_3537506712 = default(System.Single);
+                System.Single tmp_r_RandomUnit_2843124104 = default(System.Single);
                 particle.Velocity = emt.Velocity;
-                breaker_RandomUnit_2399714997.TryBreak();
-                tmp_r_RandomUnit_2399714997 = emt.RandomUnit();
-                mFrame_OnInitParticle.SetWatchVariable("tmp_r_RandomUnit_2399714997", tmp_r_RandomUnit_2399714997);
-                particle.Life = (tmp_r_RandomUnit_2399714997 + particle.Life);
-                breaker_RandomNext_2440437032.TryBreak();
-                tmp_r_RandomNext_2440437032 = emt.RandomNext();
-                mFrame_OnInitParticle.SetWatchVariable("tmp_r_RandomNext_2440437032", tmp_r_RandomNext_2440437032);
-                particle.Color = (System.UInt32)(tmp_r_RandomNext_2440437032);
+                mFrame_OnInitParticle.SetWatchVariable("particle", particle);
+                breaker_RandomUnit_3537506712.TryBreak();
+                tmp_r_RandomUnit_3537506712 = emt.RandomUnit(ref particle);
+                mFrame_OnInitParticle.SetWatchVariable("tmp_r_RandomUnit_3537506712", tmp_r_RandomUnit_3537506712);
+                particle.Life = (tmp_r_RandomUnit_3537506712 + particle.Life);
+                mFrame_OnInitParticle.SetWatchVariable("particle", particle);
+                breaker_RandomUnit_2843124104.TryBreak();
+                tmp_r_RandomUnit_2843124104 = emt.RandomUnit(ref particle);
+                mFrame_OnInitParticle.SetWatchVariable("tmp_r_RandomUnit_2843124104", tmp_r_RandomUnit_2843124104);
+                particle.Color = (System.UInt32)(tmp_r_RandomUnit_2843124104);
                 particle.Scale = 1f;
             }
         }

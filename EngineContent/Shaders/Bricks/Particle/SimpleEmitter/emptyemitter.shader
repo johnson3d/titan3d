@@ -1,35 +1,22 @@
-//This is a ShaderAsset
 
-void DoUpdateSystem(FComputeEnv env)
-{
-
-}
-#define USER_PARTICLE_UPDATESYS
-
-void OnInitParticle(FComputeEnv env, inout FParticle particle)
+void DoUpdateSystem(TtEmitter emt)
 {
 }
-#define USER_PARTICLE_INITIALIZE
 
-void OnDeadParticle(FComputeEnv env, uint idxInPool, inout FParticle particle)
+void OnInitParticle(TtEmitter emt, inout FParticle particle)
 {
 }
-#define USER_PARTICLE_FINALIZE
 
-void DoParticleTick(FComputeEnv env, float elapsed, inout FParticle particle)
+void OnDeadParticle(TtEmitter emt, uint idxInPool, inout FParticle particle)
 {
-    
 }
-#define USER_PARTICLE_DOTICK
 
-void DoOnTimer(FComputeEnv env, float second)
+void DoParticleTick(TtEmitter emt, float elapsed, inout FParticle particle)
 {
-    TtReadonlyRawArray CurAlives = GetCurrentAlives();
-    uint CountOfAlive = CurAlives.GetCount();
-    if (id.x < CountOfAlive)
-    {
-        uint index = CurAlives.GetValue(id.x);
-        FParticle particle = bfParticles[index];
-    }
 }
-#define USER_PARTICLE_ONTIMER
+
+void DoOnTimer(TtEmitter emt, float second)
+{
+}
+
+#define USER_EMITTER

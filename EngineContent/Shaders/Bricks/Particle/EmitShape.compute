@@ -1,9 +1,9 @@
 #ifndef _PARTICLE_EMITSHAPE_H_
 #define _PARTICLE_EMITSHAPE_H_
 
-void UShapeBox_UpdateLocation(FComputeEnv env, in UShapeBox shape, inout FParticle particle)
+void UShapeBox_UpdateLocation(TtEmitter emt, in UShapeBox shape, inout FParticle particle)
 {
-    float4 rdValue = RandomFloat4BySeed3(particle); //RandomFloat4(id.x);
+    float4 rdValue = emt.RandomVector4(particle); //RandomFloat4(id.x);
     float3 dir = normalize(rdValue.xyz);
     float3 offset = (float3)0;
     if (shape.Thinness >= 1.0f)
@@ -61,9 +61,9 @@ void UShapeBox_UpdateLocation(FComputeEnv env, in UShapeBox shape, inout FPartic
     particle.Location = shape.Center + offset;
 }
 
-void UShapeSphere_UpdateLocation(FComputeEnv env, in UShapeSphere shape, inout FParticle particle)
+void UShapeSphere_UpdateLocation(TtEmitter emt, in UShapeSphere shape, inout FParticle particle)
 {
-    float4 rdValue = RandomFloat4BySeed2(particle);
+    float4 rdValue = emt.RandomVector4(particle);
 	float3 dir = normalize(rdValue.xyz);
 	float3 offset;     
 	offset = dir * (shape.Radius - shape.Radius * (shape.Thinness * rdValue.w));

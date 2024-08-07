@@ -76,6 +76,15 @@ half3 CalcSphereMapUV(half3 VrN, half roughness, half MipMaxLevel)
 	return SphereMapUV;
 }
 
+half3 EnvBRDF( half3 LightColorSpec, half3 OptSpecShading, half Roughness, half NoV, Texture2D PreIntegrateGF, SamplerState samp )
+{
+	// Importance sampled preintegrated G * F
+	float2 AB = PreIntegrateGF.Sample(samp, float2( NoV, Roughness )).rg;
+
+	// Anything less than 2% is physically impossible and is instead considered to be shadowing 
+	float3 GF = OptSpecShading * AB.x + saturate( 50.0 * OptSpecShading.g ) * AB.y;
+	return GF * LightColorSpec;
+}
 
 half3 EnvBRDFMobile(half3 LightColorSpec, half3 OptSpecShading, half Roughness, half NoV)
 {

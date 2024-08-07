@@ -62,6 +62,7 @@
     <None Include="$(MSBuildThisFileDirectory)Inc\PostEffectCommon.cginc" />
     <None Include="$(MSBuildThisFileDirectory)Inc\Random.cginc" />
     <None Include="$(MSBuildThisFileDirectory)Inc\ShaderDebugOutput.cginc" />
+    <None Include="$(MSBuildThisFileDirectory)Inc\ShadingCommon.cginc" />
     <None Include="$(MSBuildThisFileDirectory)Inc\ShadowCommon.cginc" />
     <None Include="$(MSBuildThisFileDirectory)Inc\SysFunction.cginc" />
     <None Include="$(MSBuildThisFileDirectory)Inc\SysFunctionDefImpl.cginc" />

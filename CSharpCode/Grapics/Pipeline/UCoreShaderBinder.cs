@@ -281,7 +281,7 @@ namespace EngineNS.Graphics.Pipeline
             [NxRHI.UShader.UShaderVar(VarType = typeof(float))]
             public NxRHI.FShaderVarDesc ParticleStartSecond;
             [NxRHI.UShader.UShaderVar(VarType = typeof(uint))]
-            public NxRHI.FShaderVarDesc OnTimer;
+            public NxRHI.FShaderVarDesc OnTimerState;
             [NxRHI.UShader.UShaderVar(VarType = typeof(uint))]
             public NxRHI.FShaderVarDesc ParticleRandomSeed;
             [NxRHI.UShader.UShaderVar(VarType = typeof(uint))]

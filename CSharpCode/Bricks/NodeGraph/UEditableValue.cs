@@ -164,7 +164,7 @@ namespace EngineNS.Bricks.NodeGraph
             else if(type.IsEqual(typeof(Color4f)))
             {
                 var result = CreateEditableValue_Internal(notify, type, tag);
-                result.Value = Color4f.FromABGR(Color4b.White);
+                result.Value = Color4f.FromColor4b(Color4b.White);
                 return result;
             }
             else if(type.IsEnum)

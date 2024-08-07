@@ -403,6 +403,9 @@
     <None Include="$(MSBuildThisFileDirectory)Bricks\Particle\EmitterBaseImpl.cginc">
       <Filter>Bricks\Particle</Filter>
     </None>
+    <None Include="$(MSBuildThisFileDirectory)Inc\ShadingCommon.cginc">
+      <Filter>Inc</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="$(MSBuildThisFileDirectory)Compute\calcrate.compute">

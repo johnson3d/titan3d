@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Reflection;
 using System.Text;
 
 namespace EngineNS.Bricks.CodeBuilder
@@ -27,13 +28,19 @@ namespace EngineNS.Bricks.CodeBuilder
             public void GenCodes(UCodeObject obj, ref string sourceCode, ref UCodeGeneratorData data)
             {
                 var varDec = obj as UVariableDeclaration;
+                GenCommentCodes(varDec.Comment, ref data, ref sourceCode);
+                string codeStr = "";
+                codeStr += data.CodeGen.GetTypeString(varDec.VariableType) + " " + varDec.VariableName;
                 if (varDec.InitValue != null)
                 {
-                    GenCommentCodes(varDec.Comment, ref data, ref sourceCode);
-                    string codeStr = "";
-                    codeStr += data.CodeGen.GetTypeString(varDec.VariableType) + " " + varDec.VariableName + " = ";
+                    codeStr += " = ";
                     var initClsGen = data.CodeGen.GetCodeObjectGen(varDec.InitValue.GetType());
                     initClsGen.GenCodes(varDec.InitValue, ref codeStr, ref data);
+                    codeStr += ";";
+                    data.CodeGen.AddLine(codeStr, ref sourceCode);
+                }
+                else
+                {
                     codeStr += ";";
                     data.CodeGen.AddLine(codeStr, ref sourceCode);
                 }
@@ -148,19 +155,19 @@ namespace EngineNS.Bricks.CodeBuilder
                         memCodeGen.GenCodes(mem, ref sourceCode, ref data);
                     }
 
-                    //for (int i = 0; i < classDec.Methods.Count; i++)
-                    //{
-                    //    var methodDecGen = data.CodeGen.GetCodeObjectGen(classDec.Methods[i].GetType());
-                    //    methodDecGen.GenCodes(classDec.Methods[i], ref sourceCode, ref data);
-                    //}
+                    for (int i = 0; i < classDec.Methods.Count; i++)
+                    {
+                        var methodDecGen = data.CodeGen.GetCodeObjectGen(classDec.Methods[i].GetType());
+                        methodDecGen.GenCodes(classDec.Methods[i], ref sourceCode, ref data);
+                    }
                 }
                 data.CodeGen.PopSegment(ref sourceCode, in data, true);
 
-                for (int i = 0; i < classDec.Methods.Count; i++)
-                {
-                    var methodDecGen = data.CodeGen.GetCodeObjectGen(classDec.Methods[i].GetType());
-                    methodDecGen.GenCodes(classDec.Methods[i], ref sourceCode, ref data);
-                }
+                //for (int i = 0; i < classDec.Methods.Count; i++)
+                //{
+                //    var methodDecGen = data.CodeGen.GetCodeObjectGen(classDec.Methods[i].GetType());
+                //    methodDecGen.GenCodes(classDec.Methods[i], ref sourceCode, ref data);
+                //}
             }
         }
 
@@ -181,6 +188,16 @@ namespace EngineNS.Bricks.CodeBuilder
                     var hostGen = data.CodeGen.GetCodeObjectGen(varRefExp.Host.GetType());
                     hostGen.GenCodes(varRefExp.Host, ref sourceCode, ref data);
                     sourceCode += ".";
+                }
+                if (varRefExp.PropertyDeclClass != null)
+                {
+                    var prop = varRefExp.PropertyDeclClass.SystemType.GetProperty(varRefExp.VariableName);
+                    var meta = prop.GetCustomAttribute<Rtti.MetaAttribute>();
+                    if (meta != null && meta.ShaderName != null)
+                    {
+                        sourceCode += meta.ShaderName;
+                        return;
+                    }
                 }
                 sourceCode += varRefExp.VariableName;
             }
@@ -407,7 +424,26 @@ namespace EngineNS.Bricks.CodeBuilder
                         sourceCode += typeStr + "(" + primitiveExp.ValueStr + ")";
                         break;
                     default:
-                        sourceCode += primitiveExp.ValueStr;
+                        {
+                            if (primitiveExp.Type.IsEnum)
+                            {
+                                var attr = primitiveExp.Type.GetCustomAttribute<EngineNS.Editor.ShaderCompiler.TtShaderDefineAttribute>(false);
+                                if (attr != null)
+                                {
+                                    sourceCode += $"{attr.ShaderName}_{primitiveExp.ValueStr}";
+                                }
+                                else
+                                {
+                                    object eValue;
+                                    Enum.TryParse(primitiveExp.Type.SystemType, primitiveExp.ValueStr, out eValue);
+                                    sourceCode += $"{(int)eValue}";
+                                }
+                            }
+                            else
+                            {
+                                sourceCode += primitiveExp.ValueStr;
+                            }
+                        }
                         break;
                 }
             }
@@ -813,6 +849,8 @@ namespace EngineNS.Bricks.CodeBuilder
             else if (t.IsEqual(typeof(Vector3)))
                 return "float3";
             else if (t.IsEqual(typeof(Vector4)))
+                return "float4";
+            else if (t.IsEqual(typeof(Color4f)))
                 return "float4";
             else if (t.IsEqual(typeof(Matrix)))
                 return "matrix";

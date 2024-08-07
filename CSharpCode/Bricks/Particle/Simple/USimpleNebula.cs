@@ -37,10 +37,10 @@ namespace EngineNS.Bricks.Particle.Simple
                 particle.mLocation.Y += 2.0f;
                 //particle.mLocation.Z = RandomUnit() * 10.0f;
             }
-            particle.Life += RandomUnit() * 0.5f;
+            particle.Life += RandomUnit(ref particle) * 0.5f;
             particle.Velocity = Velocity;
-            particle.Scale = 0.5f - RandomUnit() * 0.2f;
-            particle.Color = ((uint)RandomNext() | 0xff000000);
+            particle.Scale = 0.5f - RandomUnit(ref particle) * 0.2f;
+            particle.Color = ((uint)RandomNext(ref particle) | 0xff000000);
         }
         public override unsafe void OnDeadParticle(uint index, ref FParticle particle)
         {

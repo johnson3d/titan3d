@@ -1192,7 +1192,17 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
                                 }
                                 if (texp is UVariableReferenceExpression)
                                 {
-                                    if (((UVariableReferenceExpression)texp).IsProperty)
+                                    var refExpr = ((UVariableReferenceExpression)texp);
+                                    bool IsRefVar = false;
+                                    if (refExpr.PropertyDeclClass != null)
+                                    {
+                                        var prop = refExpr.PropertyDeclClass.GetProperty(refExpr.VariableName);
+                                        if (prop != null)
+                                        {
+                                            IsRefVar = prop.PropertyType.IsByRef;
+                                        }
+                                    }
+                                    if (refExpr.IsProperty && IsRefVar == false)
                                     {
                                         exp = new UVariableReferenceExpression(paramName);
                                         var typeRef = new UTypeReference(pinType);

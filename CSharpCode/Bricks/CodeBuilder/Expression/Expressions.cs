@@ -1223,9 +1223,10 @@ namespace EngineNS.Bricks.CodeBuilder
         public UExpressionBase Host { get; set; }
         [Rtti.Meta]
         public string VariableName { get; set; } = "Unknow";
+        public bool IsProperty { get; set; }
         [Rtti.Meta]
-        public bool IsProperty { get; set; } = false;
-
+        public UTypeDesc PropertyDeclClass { get; set; } = null;
+        
         public UVariableReferenceExpression()
         {
         }

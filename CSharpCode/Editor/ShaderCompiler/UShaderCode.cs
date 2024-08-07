@@ -193,6 +193,10 @@ namespace EngineNS.Editor.ShaderCompiler
             {
                 memberType = "uint";
             }
+            else if (type == typeof(Color4f))
+            {
+                memberType = "float4";
+            }
             else
             {
                 System.Diagnostics.Debug.Assert(false);
