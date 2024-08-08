@@ -34,6 +34,41 @@
 	#define V_Select(cond, a, b) (cond) ? a : b;
 #endif
 
+static float2 CreateVector2f(float x, float y)
+{
+    return float2(x, y);
+}
+
+static float3 CreateVector3f(float x, float y, float z)
+{
+    return float3(x, y, z);
+}
+
+static float4 CreateVector4f(float x, float y, float z, float w)
+{
+    return float4(x, y, z, w);
+}
+
+static float3 CreateColor3f(float r, float g, float b)
+{
+    float3 result;
+    result.r = r;
+    result.g = g;
+    result.b = b;
+    return result;
+}
+
+static float4 CreateColor4f(float r, float g, float b, float a)
+{
+    float4 result;
+    result.r = r;
+    result.g = g;
+    result.b = b;
+    result.a = a;
+    return result;
+}
+
+
 uint RoundUpPow2(uint numToRound, uint multiple)
 {
 	return (numToRound + multiple - 1) & -multiple;

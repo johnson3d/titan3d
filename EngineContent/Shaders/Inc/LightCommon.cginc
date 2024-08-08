@@ -76,6 +76,11 @@ half3 CalcSphereMapUV(half3 VrN, half roughness, half MipMaxLevel)
 	return SphereMapUV;
 }
 
+float GetSpecularOcclusion(float NoV, float RoughnessSq, float AO)
+{
+	return saturate( pow( NoV + AO, RoughnessSq ) - 1 + AO );
+}
+
 half3 EnvBRDF( half3 LightColorSpec, half3 OptSpecShading, half Roughness, half NoV, Texture2D PreIntegrateGF, SamplerState samp )
 {
 	// Importance sampled preintegrated G * F

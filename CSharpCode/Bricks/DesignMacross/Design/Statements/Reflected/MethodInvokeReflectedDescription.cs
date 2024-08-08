@@ -51,6 +51,7 @@ namespace EngineNS.DesignMacross.Design.Statement
             UMethodInvokeStatement methodInvoke = new UMethodInvokeStatement()
             {
                 MethodName = MethodMeta.MethodName,
+                Method = MethodMeta,
                 Host = new UClassReferenceExpression() { Class = MethodMeta.DeclaringType }
             };
             foreach(var pin in DataInPins)

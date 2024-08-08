@@ -125,6 +125,8 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
         public List<UMacrossMethodGraph> OpenFunctions = new List<UMacrossMethodGraph>();
         public MemberVar DraggingMember { get; set; }
         public bool IsDraggingMember { get; set; } = false;
+        public MethodLocalVar DraggingLocalVar { get; set; }
+        public bool IsDraggingLocalVar { get; set; } = false;
         public float LeftWidth = 300;
         //bool bFirstDraw = true;
         UCSharpCodeGenerator mCSCodeGen = new UCSharpCodeGenerator();
@@ -383,13 +385,17 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
             string funcCode = "";
             try
             {
+                var mtd = DefClass.Methods[methodIndex];
+
                 BeforeGenerateCode?.Invoke(DefClass);
                 foreach (var i in Methods)
                 {
-                    i.BuildExpression(DefClass);
+                    //if (i.MethodDatas[0].MethodDec == mtd)
+                    {
+                        i.BuildExpression(DefClass);
+                    }
                 }
-
-                var mtd = DefClass.Methods[methodIndex];
+                
                 var data = new UCodeGeneratorData(DefClass.Namespace, DefClass, gen, null);
                 var methodDecGen = data.CodeGen.GetCodeObjectGen(mtd.GetType());
                 methodDecGen.GenCodes(mtd, ref funcCode, ref data);
@@ -741,6 +747,11 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
                 IsDraggingMember = false;
                 DraggingMember = null;
             }
+            if (IsDraggingLocalVar == true && ImGuiAPI.IsMouseDown(ImGuiMouseButton_.ImGuiMouseButton_Left) == false)
+            {
+                IsDraggingLocalVar = false;
+                DraggingLocalVar = null;
+            }
         }
 
         public void RemoveMethod(UMethodDeclaration methodDesc)
@@ -817,6 +828,9 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
         public Func<UVariableDeclaration, bool> OnAddMember;
         public Func<UVariableDeclaration, bool> OnRemoveMember;
 
+        public Func<UVariableDeclaration, UMacrossMethodGraph, bool> OnAddMethodLocalVar;
+        public Func<UVariableDeclaration, UMacrossMethodGraph, bool> OnRemoveMethodLocalVar;
+
         bool mClassViewShow = true;
         EGui.UIProxy.MenuItemProxy.MenuState mNewMethodMenuState = new EGui.UIProxy.MenuItemProxy.MenuState();
         EGui.UIProxy.MenuItemProxy.MenuState mOverrideMenuState = new EGui.UIProxy.MenuItemProxy.MenuState();
@@ -836,7 +850,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
                 ImGuiAPI.SameLine(regionSize.X - buttonSize.X - buttonOffset, -1.0f);
                 if (EGui.UIProxy.CustomButton.ToolButton("+", in buttonSize, 0xFF00FF00))
                 {
-                    ImGuiAPI.OpenPopup("MacrossMemTypeSelPopup", ImGuiPopupFlags_.ImGuiPopupFlags_None);
+                    //ImGuiAPI.OpenPopup("MacrossMemTypeSelPopup", ImGuiPopupFlags_.ImGuiPopupFlags_None);
                     Type selectedType = typeof(int);
                     if(selectedType != null)
                     { 
@@ -1023,8 +1037,92 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
 
                     ImGuiAPI.TreePop();
                 }
+
+                if (CurrentOpenMethod != null)
+                {
+                    DrawMethodLocalVars(in regionSize, in buttonSize, buttonOffset, flags);
+                }
+                
             }
             EGui.UIProxy.DockProxy.EndPanel(show);
+        }
+        private unsafe void DrawMethodLocalVars(in Vector2 regionSize, in Vector2 buttonSize, float buttonOffset, ImGuiTreeNodeFlags_ flags)
+        {
+            var localVarsTreeNodeResult = ImGuiAPI.TreeNodeEx("LocalVars", ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_AllowItemOverlap);
+            ImGuiAPI.SameLine(regionSize.X - buttonSize.X - buttonOffset, -1.0f);
+            if (EGui.UIProxy.CustomButton.ToolButton("+", in buttonSize, 0xFF00FF00))
+            {
+                Type selectedType = typeof(int);
+                if (selectedType != null)
+                {
+                    var num = 0;
+                    while (true)
+                    {
+                        bool bFind = false;
+                        for (int i = 0; i < CurrentOpenMethod.LocalVars.Count; i++)
+                        {
+                            if (CurrentOpenMethod.LocalVars[i].VariableName == $"Local_{num}")
+                            {
+                                num++;
+                                bFind = true;
+                                break;
+                            }
+                        }
+                        if (!bFind)
+                            break;
+                    }
+
+                    var mb = new UVariableDeclaration();
+                    mb.VariableType = new UTypeReference(selectedType);
+                    mb.VariableName = $"Local_{num}";
+                    mb.VisitMode = EVisisMode.Local;
+                    mb.InitValue = new UPrimitiveExpression(Rtti.UTypeDesc.TypeOf(selectedType), selectedType.IsValueType ? Rtti.UTypeDescManager.CreateInstance(selectedType) : null);
+                    mb.Comment = new UCommentStatement("");
+                    bool result = true;
+                    if (OnAddMethodLocalVar != null)
+                        result = OnAddMethodLocalVar.Invoke(mb, CurrentOpenMethod);
+                    if (result)
+                        CurrentOpenMethod.LocalVars.Add(mb);
+                }
+            }
+
+            if (localVarsTreeNodeResult)
+            {
+                if (DraggingLocalVar != null && IsDraggingLocalVar == false && ImGuiAPI.IsMouseDragging(ImGuiMouseButton_.ImGuiMouseButton_Left, 10))
+                {
+                    IsDraggingLocalVar = true;
+                }
+                var memRegionSize = ImGuiAPI.GetContentRegionAvail();
+                for (int i = 0; i < CurrentOpenMethod.LocalVars.Count; i++)
+                {
+                    var mem = CurrentOpenMethod.LocalVars[i];
+                    var memberTreeNodeResult = ImGuiAPI.TreeNodeEx(mem.DisplayName, flags);
+                    var memberTreeNodeClicked = ImGuiAPI.IsItemClicked(ImGuiMouseButton_.ImGuiMouseButton_Left);
+                    ImGuiAPI.SameLine(regionSize.X - buttonSize.X - buttonOffset, -1.0f);
+                    if (EGui.UIProxy.CustomButton.ToolButton("x", in buttonSize, 0xFF0000FF, "mem_X_" + i))
+                    {
+                        // todo: 引用删除警告
+                        bool result = true;
+                        if (OnRemoveMethodLocalVar != null)
+                            result = OnRemoveMethodLocalVar.Invoke(mem, CurrentOpenMethod);
+                        if (result)
+                            CurrentOpenMethod.LocalVars.Remove(mem);
+                        break;
+                    }
+                    if (memberTreeNodeResult)
+                    {
+                        if (memberTreeNodeClicked)
+                        {
+                            PGMember.Target = mem;
+                            DraggingLocalVar = MethodLocalVar.NewMethodLocalVar(CurrentOpenMethod, mem.VariableName,
+                                UEngine.Instance.InputSystem.IsKeyDown(Input.Keycode.KEY_LCTRL) ? false : true);
+                            DraggingLocalVar.UserData = this;
+                            IsDraggingLocalVar = false;
+                        }
+                    }
+                }
+                ImGuiAPI.TreePop();
+            }
         }
         public void OpenMethodGraph(UMacrossMethodGraph method)
         {
@@ -1086,6 +1184,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
         Macross.UMacrossBreak mBreakerStore = null;
         bool mGraphWindowShow = true;
         int mSettingCurrentFuncIndex = -1;
+        UMacrossMethodGraph CurrentOpenMethod = null;
         protected unsafe void DrawGraph()
         {
             var show = EGui.UIProxy.DockProxy.BeginPanel(mDockKeyClass, "GraphWindow", ref mGraphWindowShow, ImGuiWindowFlags_.ImGuiWindowFlags_None);
@@ -1093,6 +1192,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
             {
                 var vMin = ImGuiAPI.GetWindowContentRegionMin();
                 var vMax = ImGuiAPI.GetWindowContentRegionMax();
+                CurrentOpenMethod = null;
                 if (ImGuiAPI.BeginTabBar("OpenFuncTab", ImGuiTabBarFlags_.ImGuiTabBarFlags_None))
                 {
                     var itMax = ImGuiAPI.GetItemRectSize();
@@ -1104,6 +1204,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
                         mBreakerStore = Macross.UMacrossDebugger.Instance.CurrrentBreak;
                         breakerChanged = true;
                     }
+                    
                     for (int i = 0; i < OpenFunctions.Count; i++)
                     {
                         var func = OpenFunctions[i];
@@ -1128,6 +1229,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
                         if (ImGuiAPI.BeginTabItem(func.DisplayName, ref func.VisibleInClassGraphTables, flag))
                         {
                             DrawFunctionGraph(func, sz);
+                            CurrentOpenMethod = func;
 
                             ImGuiAPI.EndTabItem();
                         }

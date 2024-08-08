@@ -380,6 +380,250 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
             }
         }
     }
+
+    public partial class MethodLocalVar : VarNode, UEditableValue.IValueEditNotify, IAfterExecNode, IBeforeExecNode, EGui.Controls.PropertyGrid.IPropertyCustomization
+    {
+        public PinOut AfterExec { get; set; } = new PinOut();
+        public PinIn BeforeExec { get; set; } = new PinIn();
+
+        public class TSaveData : IO.BaseSerializer
+        {
+            [Rtti.Meta]
+            public string DefaultValue { get; set; } = null;
+        }
+        [Rtti.Meta(Order = 2)]
+        public TSaveData SaveData
+        {
+            get
+            {
+                var tmp = new TSaveData();
+                if (SetPin.EditValue != null)
+                    tmp.DefaultValue = SetPin.EditValue.Value.ToString();
+                return tmp;
+            }
+            set
+            {
+                if (SetPin.EditValue != null)
+                {
+                    SetPin.EditValue.Value = Support.TConvert.ToObject(VarType, value.DefaultValue);
+                    OnValueChanged(SetPin.EditValue);
+                }
+            }
+        }
+
+        public static MethodLocalVar NewMethodLocalVar(UMacrossMethodGraph kls, string varName, bool isGet)
+        {
+            var result = new MethodLocalVar();
+            result.Initialize(kls, varName, isGet);
+            return result;
+        }
+        public MethodLocalVar()
+        {
+            Icon = MacrossStyles.Instance.MemberIcon;
+            TitleColor = MacrossStyles.Instance.VarTitleColor;
+            BackColor = MacrossStyles.Instance.VarBGColor;
+        }
+        private void Initialize(UMacrossMethodGraph kls, string varName, bool isGet)
+        {
+            mDefMethod = kls;
+            IsGet = isGet;
+            if (LocalName != varName)
+                LocalName = varName;
+
+            //VarType = kls.TryGetTypeDesc();
+
+            if (isGet)
+                AddPinOut(GetPin);
+            else
+            {
+                BeforeExec.Name = " >>";
+                AfterExec.Name = ">> ";
+                BeforeExec.LinkDesc = MacrossStyles.Instance.NewExecPinDesc();
+                AfterExec.LinkDesc = MacrossStyles.Instance.NewExecPinDesc();
+                AddPinIn(BeforeExec);
+                AddPinOut(AfterExec);
+
+                if (Var != null)
+                    SetPin.EditValue = UEditableValue.CreateEditableValue(this, Var.VariableType.TypeDesc, SetPin);
+
+                AddPinIn(SetPin);
+                AddPinOut(GetPin);
+            }
+            OnPositionChanged();
+        }
+        public override void OnPreRead(object tagObject, object hostObject, bool fromXml)
+        {
+            base.OnPreRead(tagObject, hostObject, fromXml);
+            var klsGraph = hostObject as UMacrossMethodGraph;
+            if (klsGraph == null)
+                return;
+            mDefMethod = klsGraph;
+        }
+        private UMacrossMethodGraph mDefMethod;
+        [Rtti.Meta(Order = 1)]
+        public string LocalName
+        {
+            get
+            {
+                if (Var == null)
+                    return null;
+                return Var.VariableName;
+            }
+            protected set
+            {
+                Var = mDefMethod.FindLocalVar(value);
+                if (Var != null)
+                {
+                    VarType = Var.VariableType.TypeDesc;
+                    Name = Var.VariableName;
+                }
+                else
+                {
+                    HasError = true;
+                    CodeExcept = new GraphException(this, null, $"LocalVar {value} not found");
+                }
+                Initialize(mDefMethod, LocalName, IsGet);
+            }
+        }
+        public override string Label
+        {
+            get
+            {
+                if (Var != null)
+                    return Var.DisplayName;
+                return base.Label;
+            }
+            set => base.Label = value;
+        }
+        bool mIsGet = true;
+        [Rtti.Meta(Order = 0)]
+        public bool IsGet
+        {
+            get => mIsGet;
+            set => mIsGet = value;
+        }
+
+        public override void BuildStatements(NodePin pin, ref BuildCodeStatementsData data)
+        {
+            if (IsGet)
+                return;
+
+            if (!data.NodeGraph.PinHasLinker(SetPin))
+                return;
+            var assignSt = new UAssignOperatorStatement();
+            var srcExp = data.NodeGraph.GetOppositePinExpression(SetPin, ref data);
+            var oppoType = data.NodeGraph.GetOppositePinType(SetPin);
+            var curType = GetInPinType(SetPin);
+            if (oppoType != curType)
+            {
+                srcExp = new UCastExpression()
+                {
+                    TargetType = new UTypeReference(curType),
+                    SourceType = new UTypeReference(oppoType),
+                    Expression = srcExp,
+                };
+            }
+            assignSt.From = srcExp;
+            assignSt.To = new UVariableReferenceExpression()
+            {
+                VariableName = LocalName,
+                IsProperty = false,
+            };
+            data.CurrentStatements.Add(assignSt);
+
+            var oppoNodePin = data.NodeGraph.GetOppositePin(AfterExec);
+            var oppoNode = data.NodeGraph.GetOppositePinNode(AfterExec);
+            if (oppoNode != null)
+                oppoNode.BuildStatements(oppoNodePin, ref data);
+        }
+        public override UExpressionBase GetExpression(NodePin pin, ref BuildCodeStatementsData data)
+        {
+            return new UVariableReferenceExpression()
+            {
+                VariableName = LocalName,
+                IsProperty = false,
+            };
+        }
+        public override Rtti.UTypeDesc GetOutPinType(PinOut pin)
+        {
+            if (Var != null)
+                return Var.VariableType.TypeDesc;
+            return null;
+        }
+        public override Rtti.UTypeDesc GetInPinType(PinIn pin)
+        {
+            if (Var != null)
+                return Var.VariableType.TypeDesc;
+            return null;
+        }
+        public override void OnMouseStayPin(NodePin stayPin, UNodeGraph graph)
+        {
+            if (Var == null)
+                return;
+            if (stayPin == SetPin || stayPin == GetPin)
+            {
+                EGui.Controls.CtrlUtility.DrawHelper(Var.VariableType.TypeDesc.FullName);
+            }
+        }
+
+        [Browsable(false)]
+        public bool IsPropertyVisibleDirty { get; set; } = false;
+        public void GetProperties(ref CustomPropertyDescriptorCollection collection, bool parentIsValueType)
+        {
+            if (IsGet)
+                return;
+
+            var proDesc = EGui.Controls.PropertyGrid.PropertyCollection.PropertyDescPool.QueryObjectSync();
+            proDesc.Name = Name;
+            proDesc.DisplayName = Name;
+            proDesc.PropertyType = VarType;
+            //proDesc.CustomValueEditor = SetPin.EditValue;
+            collection.Add(proDesc);
+        }
+
+        public object GetPropertyValue(string propertyName)
+        {
+            if (IsGet)
+                return null;
+            return SetPin.EditValue?.Value;
+        }
+
+        public void SetPropertyValue(string propertyName, object value)
+        {
+            if (IsGet || SetPin.EditValue == null)
+                return;
+            SetPin.EditValue.Value = value;
+        }
+
+        public void OnValueChanged(UEditableValue ev)
+        {
+        }
+
+        public void LightDebuggerLine()
+        {
+            var linker = ParentGraph.GetFirstLinker(BeforeExec);
+            if (linker != null)
+            {
+                linker.InDebuggerLine = true;
+                var node = ParentGraph.GetOppositePinNode(BeforeExec) as IBeforeExecNode;
+                if (node != null)
+                    node.LightDebuggerLine();
+            }
+        }
+
+        public void UnLightDebuggerLine()
+        {
+            var linker = ParentGraph.GetFirstLinker(BeforeExec);
+            if (linker != null)
+            {
+                linker.InDebuggerLine = false;
+                var node = ParentGraph.GetOppositePinNode(BeforeExec) as IBeforeExecNode;
+                if (node != null)
+                    node.UnLightDebuggerLine();
+            }
+        }
+    }
+
     public partial class ClassPropertyVar : VarNode, UEditableValue.IValueEditNotify, IBeforeExecNode, IAfterExecNode, EGui.Controls.PropertyGrid.IPropertyCustomization
     {
         public static ClassPropertyVar NewClassProperty(Rtti.UClassMeta.TtPropertyMeta meta, bool isGet)

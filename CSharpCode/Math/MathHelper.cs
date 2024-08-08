@@ -797,30 +797,30 @@ namespace EngineNS
             return (int)((float)to * t + (float)from * (1.0f - t));
         }
         #region CreateInstance
-        [Rtti.Meta]
-        public static Vector2 CreateVector2(float x, float y)
+        [Rtti.Meta(ShaderName = "CreateVector2f")]
+        public static Vector2 CreateVector2f(float x, float y)
         {
             return new Vector2(x, y);
         }
-        [Rtti.Meta]
-        public static Vector3 CreateVector3(float x, float y, float z)
+        [Rtti.Meta(ShaderName = "CreateVector3f")]
+        public static Vector3 CreateVector3f(float x, float y, float z)
         {
             return new Vector3(x, y, z);
         }
-        [Rtti.Meta]
-        public static Vector4 CreateVectorf(float x, float y, float z, float w)
+        [Rtti.Meta(ShaderName = "CreateVector4f")]
+        public static Vector4 CreateVector4f(float x, float y, float z, float w)
         {
             return new Vector4(x, y, z, w);
         }
-        [Rtti.Meta]
+        [Rtti.Meta(ShaderName = "CreateColor3f")]
         public static Color3f CreateColor3f(float r, float g, float b)
         {
             return new Color3f(r, g, b);
         }
-        [Rtti.Meta]
-        public static Color4f CreateColor4f(float r, float g, float b)
+        [Rtti.Meta(ShaderName = "CreateColor4f")]
+        public static Color4f CreateColor4f(float r, float g, float b, float a)
         {
-            return new Color4f(r, g, b);
+            return new Color4f(a, r, g, b);
         }
         #endregion
         // 圆与线段碰撞检测

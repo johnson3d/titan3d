@@ -139,7 +139,6 @@ PS_OUTPUT PS_Main(PS_INPUT input)
 	half Metallic = (half)GBuffer.Metallicity;
 	half Roughness = GetRoughness((half)GBuffer.Roughness, GBuffer.WorldNormal);
     half AOs = GBuffer.AO;
-	half AoOffsetEncoded = 0.0h;
 
 	half3 BaseShading = half3(0.0h, 0.0h, 0.0h);
 
@@ -274,21 +273,16 @@ PS_OUTPUT PS_Main(PS_INPUT input)
     }
 	half Ihdr = max(0.6h, CalcLuminanceYCbCr(EnvSpecLightColor));
 	Ihdr = exp2((Ihdr - 0.6h) * 7.5h);
-	half3 EnvSpec = (half3)EnvBRDF(EnvSpecLightColor, OptSpecShading, Roughness, NoV, gPreIntegratedGF, Samp_gPreIntegratedGF) * Ihdr;
+
+	float RoughnessSq = GBuffer.Roughness * GBuffer.Roughness;
+	float SpecularOcclusion = GetSpecularOcclusion(NoV, RoughnessSq, AOs);
+
+	half3 EnvSpec = (half3)EnvBRDF(EnvSpecLightColor, OptSpecShading, Roughness, NoV, gPreIntegratedGF, Samp_gPreIntegratedGF) * Ihdr * SpecularOcclusion;
 
 	half FinalShadowValue = min(1.0h, ShadowValue + DirLightLeak);
-	//AOs = min((NoL + FinalShadowValue) * 0.25h + AOs, 1.0h);
-
-	half AoOffset = CalcLuminanceYCbCr((EnvSpec) * 10.0h);
-	AoOffsetEncoded = 0.9999h - min(0.9999h, FinalShadowValue * 0.5h + AoOffset);
-
-	/////=======
-	//AOs = 1.0h;
-	AoOffsetEncoded = 0.0h;
-	/////=======
 
 	BaseShading = DirLightDiffuseShading * FinalShadowValue + DirLightSpecShading * ShadowValue + SkyShading;
-    BaseShading = BaseShading * AOs + EnvSpec * min(ShadowValue + 0.85h, 1.0h) * AOs;
+    BaseShading = BaseShading * AOs + EnvSpec * min(ShadowValue + 0.85h, 1.0h);
 
 #if ENV_DISABLE_POINTLIGHTS == 0
 	if (NoPixel == false)

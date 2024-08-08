@@ -333,6 +333,8 @@ namespace EngineNS
                 Profiler.Log.WriteLine(Profiler.ELogTag.Info, "System", $"Unit Test:{(t3 - t2) / 1000} ms");
             }
 
+            InitPreIntegratedDF();
+
             var tEnd = Support.Time.HighPrecision_GetTickCount();
             Profiler.Log.WriteLine(Profiler.ELogTag.Info, "System", $"Engine PreInit Time:{(tEnd - t1) / 1000} ms");
 

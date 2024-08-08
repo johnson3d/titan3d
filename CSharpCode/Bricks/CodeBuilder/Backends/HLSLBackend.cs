@@ -175,6 +175,9 @@ namespace EngineNS.Bricks.CodeBuilder
         {
             public void GenCodes(UCodeObject obj, ref string sourceCode, ref UCodeGeneratorData data)
             {
+                //HLSL don't have static function
+                //var clsRefExp = obj as UClassReferenceExpression;
+                //sourceCode += data.CodeGen.GetTypeString(clsRefExp.Class);
             }
         }
 
@@ -189,14 +192,17 @@ namespace EngineNS.Bricks.CodeBuilder
                     hostGen.GenCodes(varRefExp.Host, ref sourceCode, ref data);
                     sourceCode += ".";
                 }
-                if (varRefExp.PropertyDeclClass != null)
+                if (varRefExp.PropertyDeclClass != null && varRefExp.VariableName != null)
                 {
                     var prop = varRefExp.PropertyDeclClass.SystemType.GetProperty(varRefExp.VariableName);
-                    var meta = prop.GetCustomAttribute<Rtti.MetaAttribute>();
-                    if (meta != null && meta.ShaderName != null)
+                    if (prop != null)
                     {
-                        sourceCode += meta.ShaderName;
-                        return;
+                        var meta = prop.GetCustomAttribute<Rtti.MetaAttribute>();
+                        if (meta != null && meta.ShaderName != null)
+                        {
+                            sourceCode += meta.ShaderName;
+                            return;
+                        }
                     }
                 }
                 sourceCode += varRefExp.VariableName;
@@ -234,10 +240,21 @@ namespace EngineNS.Bricks.CodeBuilder
                 {
                     var hostGen = data.CodeGen.GetCodeObjectGen(methodInvokeExp.Host.GetType());
                     hostGen.GenCodes(methodInvokeExp.Host, ref invokeStr, ref data);
-                    invokeStr += ".";
+                    var klsRef = methodInvokeExp.Host as UClassReferenceExpression;
+                    if (klsRef == null)
+                        invokeStr += ".";
                 }
-                
-                invokeStr += methodInvokeExp.MethodName + "(";
+
+                var methodName = methodInvokeExp.MethodName;
+                if (methodInvokeExp.Method != null)
+                {
+                    var attr = methodInvokeExp.Method.GetFirstCustomAttribute<Rtti.MetaAttribute>(false);
+                    if (attr != null)
+                    {
+                        methodName = attr.ShaderName;
+                    }
+                }
+                invokeStr += methodName + "(";
                 if (methodInvokeExp.Arguments.Count > 0)
                 {
                     for(int i=0; i<methodInvokeExp.Arguments.Count; i++)
@@ -421,7 +438,25 @@ namespace EngineNS.Bricks.CodeBuilder
                     case "uint2":
                     case "uint3":
                     case "uint4":
-                        sourceCode += typeStr + "(" + primitiveExp.ValueStr + ")";
+                        {
+                            //sourceCode += typeStr + "(" + primitiveExp.ValueStr + ")";
+                            if (primitiveExp.ObjectStr != null)
+                            {
+                                var attr = primitiveExp.Type.SystemType.GetType().GetCustomAttribute<Rtti.MetaAttribute>();
+                                if (attr != null)
+                                {
+                                    sourceCode += typeStr + "(" + primitiveExp.ObjectStr + ")";
+                                }
+                                else
+                                {
+                                    sourceCode += typeStr + "(" + primitiveExp.ObjectStr + ")";
+                                }
+                            }
+                            else
+                            {
+                                sourceCode += typeStr + "(" + primitiveExp.ObjectStr + ")";
+                            }
+                        }
                         break;
                     default:
                         {

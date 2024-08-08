@@ -1147,6 +1147,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
                                 {
                                     VariableType = typeRef,
                                     VariableName = paramName,
+                                    InitValue = new UDefaultValueExpression(typeRef.TypeDesc),
                                 };
                                 beforeStatements.Add(varDec);
                                 beforeStatements.Add(new UDebuggerSetWatchVariable()
@@ -1371,6 +1372,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
             var methodInvokeExp = new UMethodInvokeStatement()
             {
                 MethodName = MethodDesc.MethodName,
+                Method = null,
             };
             if (MethodDesc.ReturnValue != null)
                 methodInvokeExp.IsReturnRef = MethodDesc.ReturnValue.VariableType.IsRefType;
@@ -1439,6 +1441,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
             var methodInvokeExp = new UMethodInvokeStatement()
             {
                 MethodName = method.MethodName,
+                Method = method,
             };
             if (method.ReturnType != null)
                 methodInvokeExp.IsReturnRef = method.ReturnType.IsRefType;

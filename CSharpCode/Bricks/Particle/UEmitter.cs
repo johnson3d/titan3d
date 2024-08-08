@@ -34,17 +34,17 @@ namespace EngineNS.Bricks.Particle
         public uint mColor;
         public Vector3 mVelocity;
         public uint mRotator;
-        [Rtti.Meta]
+        [Rtti.Meta(ShaderName = "Flags")]
         public uint Flags { get => mFlags; set => mFlags = value; }
-        [Rtti.Meta]
+        [Rtti.Meta(ShaderName = "Life")]
         public float Life { get => mLife; set => mLife = value; }
-        [Rtti.Meta]
+        [Rtti.Meta(ShaderName = "Scale")]
         public float Scale { get => mScale; set => mScale = value; }
-        [Rtti.Meta]
+        [Rtti.Meta(ShaderName = "RandomSeed")]
         public uint RandomSeed { get => mRandomSeed; set => mRandomSeed = value; }
-        [Rtti.Meta]
+        [Rtti.Meta(ShaderName = "Location")]
         public Vector3 Location { get => mLocation; set => mLocation = value; }
-        [Rtti.Meta]
+        [Rtti.Meta(ShaderName = "Color")]
         public uint Color { get => mColor; set => mColor = value; }
         public Color4f Colorf
         {
@@ -57,9 +57,9 @@ namespace EngineNS.Bricks.Particle
                 Color = value.ToArgb();
             }
         }
-        [Rtti.Meta]
+        [Rtti.Meta(ShaderName = "Velocity")]
         public Vector3 Velocity { get => mVelocity; set => mVelocity = value; }
-        [Rtti.Meta]
+        [Rtti.Meta(ShaderName = "Rotator")]
         public uint Rotator { get => mRotator; set => mRotator = value; }
         //float[0-1]
         public Vector3 Rotatorf

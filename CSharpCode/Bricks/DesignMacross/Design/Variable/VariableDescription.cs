@@ -118,7 +118,7 @@ namespace EngineNS.DesignMacross.Design
             var pe = InitValue as UPrimitiveExpression;
             if (pe != null)
             {
-                pe.ValueStr = UPrimitiveExpression.CalculateValueString(pe.Type, ev.Value);
+                pe.CalculateValueString(pe.Type, ev.Value);
             }
         }
 
@@ -140,7 +140,7 @@ namespace EngineNS.DesignMacross.Design
                     {
                         var pe = InitValue as UPrimitiveExpression;
                         if (pe != null)
-                            pe.ValueStr = UPrimitiveExpression.CalculateValueString(pe.Type, value);
+                            pe.CalculateValueString(pe.Type, value);
                     }
                     break;
                 case "Comment":

@@ -441,8 +441,10 @@ namespace EngineNS.Bricks.CodeBuilder
                 case "InitValue":
                     {
                         var pe = InitValue as UPrimitiveExpression;
-                        if(pe != null)
-                            pe.ValueStr = UPrimitiveExpression.CalculateValueString(pe.Type, value);
+                        if (pe != null)
+                        {
+                            pe.CalculateValueString(pe.Type, value);
+                        }
                     }
                     break;
                 case "Comment":
@@ -465,7 +467,7 @@ namespace EngineNS.Bricks.CodeBuilder
             var pe = InitValue as UPrimitiveExpression;
             if(pe != null)
             {
-                pe.ValueStr = UPrimitiveExpression.CalculateValueString(pe.Type, ev.Value);
+                pe.CalculateValueString(pe.Type, ev.Value);
             }
         }
     }
@@ -745,7 +747,9 @@ namespace EngineNS.Bricks.CodeBuilder
                     {
                         var pe = InitValue as UPrimitiveExpression;
                         if (pe != null)
-                            pe.ValueStr = UPrimitiveExpression.CalculateValueString(pe.Type, value);
+                        {
+                            pe.CalculateValueString(pe.Type, value);
+                        }
                     }
                     break;
                 default:
@@ -762,7 +766,7 @@ namespace EngineNS.Bricks.CodeBuilder
             var pe = InitValue as UPrimitiveExpression;
             if (pe != null)
             {
-                pe.ValueStr = UPrimitiveExpression.CalculateValueString(pe.Type, ev.Value);
+                pe.CalculateValueString(pe.Type, ev.Value);
             }
         }
     }
@@ -1332,6 +1336,7 @@ namespace EngineNS.Bricks.CodeBuilder
 
     public class UMethodInvokeStatement : UStatementBase, IO.ISerializer
     {
+        public Rtti.UClassMeta.TtMethodMeta Method = null;
         [Rtti.Meta]
         public UExpressionBase Host { get; set; }
         [Rtti.Meta]
@@ -1577,6 +1582,9 @@ namespace EngineNS.Bricks.CodeBuilder
     {
         [Rtti.Meta(Order = 0)]
         public Rtti.UTypeDesc Type { get; set; }
+
+        [Rtti.Meta]
+        public string ObjectStr { get; set; }
         string mValueStr;
         [Rtti.Meta]
         public string ValueStr 
@@ -1607,56 +1615,67 @@ namespace EngineNS.Bricks.CodeBuilder
         {
             Type = Rtti.UTypeDesc.TypeOf(typeof(Byte));
             mValueStr = val.ToString();
+            ObjectStr = mValueStr;
         }
         public UPrimitiveExpression(UInt16 val)
         {
             Type = Rtti.UTypeDesc.TypeOf(typeof(UInt16));
             mValueStr = val.ToString();
+            ObjectStr = mValueStr;
         }
         public UPrimitiveExpression(UInt32 val)
         {
             Type = Rtti.UTypeDesc.TypeOf(typeof(UInt32));
             mValueStr = val.ToString();
+            ObjectStr = mValueStr;
         }
         public UPrimitiveExpression(UInt64 val)
         {
             Type = Rtti.UTypeDesc.TypeOf(typeof(UInt64));
             mValueStr = val.ToString();
+            ObjectStr = mValueStr;
         }
         public UPrimitiveExpression(SByte val)
         {
             Type = Rtti.UTypeDesc.TypeOf(typeof(SByte));
             mValueStr = val.ToString();
+            ObjectStr = mValueStr;
         }
         public UPrimitiveExpression(Int16 val)
         {
             Type = Rtti.UTypeDesc.TypeOf(typeof(Int16));
             mValueStr = val.ToString();
+            ObjectStr = mValueStr;
         }
         public UPrimitiveExpression(Int32 val)
         {
             Type = Rtti.UTypeDesc.TypeOf(typeof(Int32));
             mValueStr = val.ToString();
+            ObjectStr = mValueStr;
         }
         public UPrimitiveExpression(Int64 val)
         {
             Type = Rtti.UTypeDesc.TypeOf(typeof(Int64));
             mValueStr = val.ToString();
+            ObjectStr = mValueStr;
         }
         public UPrimitiveExpression(float val)
         {
             Type = Rtti.UTypeDesc.TypeOf(typeof(float));
             mValueStr = val.ToString();
+            ObjectStr = mValueStr;
         }
         public UPrimitiveExpression(double val)
         {
             Type = Rtti.UTypeDesc.TypeOf(typeof(double));
             mValueStr = val.ToString();
+            ObjectStr = mValueStr;
         }
         public UPrimitiveExpression(string val)
         {
             Type = Rtti.UTypeDesc.TypeOf(typeof(string));
             mValueStr = val;
+            ObjectStr = mValueStr;
         }
         public UPrimitiveExpression(bool val)
         {
@@ -1666,70 +1685,81 @@ namespace EngineNS.Bricks.CodeBuilder
                 mValueStr = "true";
             else
                 mValueStr = "false";
+            ObjectStr = mValueStr;
         }
         public UPrimitiveExpression(Vector2 val)
         {
             Type = Rtti.UTypeDesc.TypeOf(typeof(Vector2));
             mValueStr = val.ToString();
+            ObjectStr = mValueStr;
         }
         public UPrimitiveExpression(Vector3 val)
         {
             Type = Rtti.UTypeDesc.TypeOf(typeof(Vector3));
             mValueStr = val.ToString();
+            ObjectStr = mValueStr;
         }
         public UPrimitiveExpression(Color3f val)
         {
             Type = Rtti.UTypeDesc.TypeOf(typeof(Color3f));
             mValueStr = val.ToString();
+            ObjectStr = mValueStr;
         }
         public UPrimitiveExpression(Vector4 val)
         {
             Type = Rtti.UTypeDesc.TypeOf(typeof(Vector4));
             mValueStr = val.ToString();
+            ObjectStr = mValueStr;
         }
         public UPrimitiveExpression(Color4f val)
         {
             Type = Rtti.UTypeDesc.TypeOf(typeof(Color4f));
             mValueStr = val.ToString();
+            ObjectStr = mValueStr;
         }
         public UPrimitiveExpression(Vector2i val)
         {
             Type = Rtti.UTypeDesc.TypeOf(typeof(Vector2i));
             mValueStr = val.ToString();
+            ObjectStr = mValueStr;
         }
         public UPrimitiveExpression(Vector3i val)
         {
             Type = Rtti.UTypeDesc.TypeOf(typeof(Vector3i));
             mValueStr = val.ToString();
+            ObjectStr = mValueStr;
         }
         public UPrimitiveExpression(Vector4i val)
         {
             Type = Rtti.UTypeDesc.TypeOf(typeof(Vector4i));
             mValueStr = val.ToString();
+            ObjectStr = mValueStr;
         }
         public UPrimitiveExpression(Matrix val)
         {
             Type = Rtti.UTypeDesc.TypeOf(typeof(Matrix));
             mValueStr = val.ToString();
+            ObjectStr = mValueStr;
         }
         public UPrimitiveExpression(Rtti.UTypeDesc type, object value)
         {
             Type = type;
-            ValueStr = CalculateValueString(type, value);
+            CalculateValueString(type, value);
         }
         public UPrimitiveExpression(Rtti.UTypeDesc type, bool typeIsTypeOf)
         {
             Type = Rtti.UTypeDesc.TypeOf(typeof(System.Type));
             TypeIsTypeof = typeIsTypeOf;
-            ValueStr = CalculateValueString(Type, type, typeIsTypeOf);
+            CalculateValueString(Type, type, typeIsTypeOf);
         }
         public UPrimitiveExpression(Enum enumVal)
         {
             Type = Rtti.UTypeDesc.TypeOf(enumVal.GetType());
             ValueStr = enumVal.ToString();
         }
-        public static string CalculateValueString(Rtti.UTypeDesc type, object value, bool typeIsTypeof = true)
+        public void CalculateValueString(Rtti.UTypeDesc type, object value, bool typeIsTypeof = true)
         {
+            ObjectStr = value.ToString();
             string retValue;
             if (value == null)
             {
@@ -1765,7 +1795,8 @@ namespace EngineNS.Bricks.CodeBuilder
             {
                 retValue = value.ToString();
             }
-            return retValue;
+
+            ValueStr = retValue;
         }
         public object GetValue()
         {

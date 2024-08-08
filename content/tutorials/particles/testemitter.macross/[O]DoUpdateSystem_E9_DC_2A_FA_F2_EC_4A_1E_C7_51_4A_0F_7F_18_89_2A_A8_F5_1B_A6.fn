@@ -3,6 +3,7 @@
   <AssetName Type="EngineNS.RName@EngineCore" Value="Game,tutorials/particles/testemitter.macross,b778ef00-25fd-47f3-ac2a-e1c2f71056fd" />
   <GraphName Type="System.String@Unknown" Value="DoUpdateSystem" />
   <IsUseCustumCode Type="System.Boolean@Unknown" Value="False" />
+  <LocalVars Type="System.Collections.Generic.List&lt;EngineNS.Bricks.CodeBuilder.UVariableDeclaration@EngineCore,&gt;@Unknown" Count="0" />
   <MethodDatas Type="System.Collections.Generic.List&lt;EngineNS.Bricks.CodeBuilder.MacrossNode.MethodData@EngineCore,&gt;@Unknown" Count="1">
     <e_0 Type="EngineNS.Bricks.CodeBuilder.MacrossNode.MethodData@EngineCore">
       <IsDelegate Type="System.Boolean@Unknown" Value="False" />
@@ -84,12 +85,12 @@
       </MethodDec>
     </e_0>
   </MethodDatas>
-  <Nodes Type="System.Collections.Generic.List&lt;EngineNS.Bricks.NodeGraph.UNodeBase@EngineCore,&gt;@Unknown" Count="8">
+  <Nodes Type="System.Collections.Generic.List&lt;EngineNS.Bricks.NodeGraph.UNodeBase@EngineCore,&gt;@Unknown" Count="7">
     <e_0 Type="EngineNS.Bricks.CodeBuilder.MacrossNode.UMethodStartNode@EngineCore">
       <MethodDecKeyword Type="System.String@Unknown" Value=" DoUpdateSystem(EngineNS.Bricks.Particle.TtEmitter)" />
       <Name Type="System.String@Unknown" Value="DoUpdateSystem" />
       <NodeId Type="System.Guid@Unknown" Value="37e58f2c-597d-44f7-837d-cd1cc5d95c94" />
-      <Position Type="EngineNS.Vector2@EngineCore" Value="100,100" />
+      <Position Type="EngineNS.Vector2@EngineCore" Value="89,-72" />
       <InputEditableValues Type="System.Collections.Generic.List&lt;EngineNS.Bricks.NodeGraph.UNodeBase.UInputEditableValueInfo@EngineCore,&gt;@Unknown" Count="0" />
     </e_0>
     <e_1 Type="EngineNS.Bricks.CodeBuilder.MacrossNode.IfNode@EngineCore">
@@ -104,7 +105,7 @@
       <Label Type="System.String@Unknown" Value="Int32_5" />
       <Name Type="System.String@Unknown" Value="Int32_5" />
       <NodeId Type="System.Guid@Unknown" Value="a19ecd6c-c5f4-47c2-b125-5dcc03c1e667" />
-      <Position Type="EngineNS.Vector2@EngineCore" Value="764,159.00006" />
+      <Position Type="EngineNS.Vector2@EngineCore" Value="779,69.00006" />
       <Value Type="System.Int32@Unknown" Value="512" />
       <InputEditableValues Type="System.Collections.Generic.List&lt;EngineNS.Bricks.NodeGraph.UNodeBase.UInputEditableValueInfo@EngineCore,&gt;@Unknown" Count="0" />
     </e_2>
@@ -154,7 +155,7 @@
       <MethodMeta Type="System.String@Unknown" Value="EngineNS.Bricks.Particle.TtEmitter@EngineCore#System.UInt32 SetParticleFlags(EngineNS.Bricks.Particle.EParticleFlags,System.UInt32)" />
       <Name Type="System.String@Unknown" Value="SetParticleFlags" />
       <NodeId Type="System.Guid@Unknown" Value="9d6fd05a-4217-46f8-b03e-a42cd13cee02" />
-      <Position Type="EngineNS.Vector2@EngineCore" Value="779,406.00006" />
+      <Position Type="EngineNS.Vector2@EngineCore" Value="635,359.00006" />
       <SelfMethod Type="System.Boolean@Unknown" Value="False" />
       <InputEditableValues Type="System.Collections.Generic.List&lt;EngineNS.Bricks.NodeGraph.UNodeBase.UInputEditableValueInfo@EngineCore,&gt;@Unknown" Count="2">
         <e_0 Type="EngineNS.Bricks.NodeGraph.UNodeBase.UInputEditableValueInfo@EngineCore">
@@ -185,7 +186,7 @@
       <LeftTypeString Type="System.String@Unknown" Value="System.UInt32@Unknown" />
       <Name Type="System.String@Unknown" Value="&lt;" />
       <NodeId Type="System.Guid@Unknown" Value="32ddff19-84b6-4308-9a3b-842f1d754cfd" />
-      <Position Type="EngineNS.Vector2@EngineCore" Value="975,65" />
+      <Position Type="EngineNS.Vector2@EngineCore" Value="918,-4" />
       <InputEditableValues Type="System.Collections.Generic.List&lt;EngineNS.Bricks.NodeGraph.UNodeBase.UInputEditableValueInfo@EngineCore,&gt;@Unknown" Count="0" />
     </e_5>
     <e_6 Type="EngineNS.Bricks.CodeBuilder.MacrossNode.MethodNode@EngineCore">
@@ -212,16 +213,8 @@
         <DelegateArgumentSaveDatas Type="System.Collections.Generic.List&lt;EngineNS.Bricks.CodeBuilder.MacrossNode.MethodNode.DelegateArgumentSaveData@EngineCore,&gt;@Unknown" Count="0" />
       </SaveData>
     </e_6>
-    <e_7 Type="EngineNS.Bricks.CodeBuilder.MacrossNode.UInt32LVar@EngineCore">
-      <Label Type="System.String@Unknown" Value="UInt32_7" />
-      <Name Type="System.String@Unknown" Value="UInt32_7" />
-      <NodeId Type="System.Guid@Unknown" Value="862c014d-f998-4f84-bf83-893961f57720" />
-      <Position Type="EngineNS.Vector2@EngineCore" Value="428.00003,120" />
-      <Value Type="System.UInt32@Unknown" Value="0" />
-      <InputEditableValues Type="System.Collections.Generic.List&lt;EngineNS.Bricks.NodeGraph.UNodeBase.UInputEditableValueInfo@EngineCore,&gt;@Unknown" Count="0" />
-    </e_7>
   </Nodes>
-  <Linkers Type="System.Collections.Generic.List&lt;EngineNS.Bricks.NodeGraph.UPinLinker@EngineCore,&gt;@Unknown" Count="12">
+  <Linkers Type="System.Collections.Generic.List&lt;EngineNS.Bricks.NodeGraph.UPinLinker@EngineCore,&gt;@Unknown" Count="11">
     <e_0 Type="EngineNS.Bricks.NodeGraph.UPinLinker@EngineCore">
       <SaveData Type="EngineNS.Bricks.NodeGraph.UPinLinker.TSaveData@EngineCore">
         <InNodeId Type="System.Guid@Unknown" Value="9e44d4c9-b5ec-4e58-bace-a18e03c3454c" />
@@ -310,13 +303,5 @@
         <OutPinName Type="System.String@Unknown" Value="oldValue" />
       </SaveData>
     </e_10>
-    <e_11 Type="EngineNS.Bricks.NodeGraph.UPinLinker@EngineCore">
-      <SaveData Type="EngineNS.Bricks.NodeGraph.UPinLinker.TSaveData@EngineCore">
-        <InNodeId Type="System.Guid@Unknown" Value="470ac0ca-ba2d-47bb-b5b9-ffe0a1b07b46" />
-        <InPinName Type="System.String@Unknown" Value="value" />
-        <OutNodeId Type="System.Guid@Unknown" Value="862c014d-f998-4f84-bf83-893961f57720" />
-        <OutPinName Type="System.String@Unknown" Value="Get" />
-      </SaveData>
-    </e_11>
   </Linkers>
 </Root>

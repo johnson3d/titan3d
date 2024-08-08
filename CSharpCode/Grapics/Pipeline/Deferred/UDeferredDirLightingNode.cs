@@ -314,7 +314,11 @@ namespace EngineNS
     {
         public void Dispose()
         {
-            //CoreSDK.DisposeObject(ref PreIntegratedDFBuffer);
+            unsafe
+            {
+                if(PreIntegratedDFData != IntPtr.Zero)
+                    CoreSDK.Free(PreIntegratedDFData.ToPointer());
+            }
 
             PreIntegratedDFTexture?.Dispose();
             PreIntegratedDFTexture = null;
@@ -330,6 +334,106 @@ namespace EngineNS
             Bits = ((Bits & 0x33333333) << 2) | ((Bits & 0xcccccccc) >> 2);
             Bits = ((Bits & 0x55555555) << 1) | ((Bits & 0xaaaaaaaa) >> 1);
             return Bits;
+        }
+        IntPtr PreIntegratedDFData;
+        void InitPreIntegratedDF()
+        {
+            unsafe
+            {
+                int Y = 32;
+                int X = 128;
+                uint BufferSize = (uint)X * (uint)Y * (uint)sizeof(UInt16) * 2;
+                var pAddr = (UInt16*)CoreSDK.Alloc(BufferSize, "PreIntegratedDFTexture", 0);
+                for (int y = 0; y < Y; y++)
+                {
+                    float Roughness = (float)(y + 0.5f) / Y;
+                    float m = Roughness * Roughness;
+                    float m2 = m * m;
+
+                    for (int x = 0; x < X; x++)
+                    {
+                        float NoV = (float)(x + 0.5f) / X;
+
+                        Vector3 V;
+                        V.X = MathHelper.Sqrt(1.0f - NoV * NoV);    // sin
+                        V.Y = 0.0f;
+                        V.Z = NoV;                              // cos
+
+                        float A = 0.0f;
+                        float B = 0.0f;
+                        float C = 0.0f;
+
+                        const uint NumSamples = 128;
+                        for (uint i = 0; i < NumSamples; i++)
+                        {
+                            float E1 = (float)i / NumSamples;
+                            double v1 = ReverseBits(i);
+                            double v2 = 4294967296;
+                            float E2 = (float)(v1 / v2);
+
+                            {
+                                float Phi = 2.0f * MathHelper.PI * E1;
+                                float CosPhi = MathHelper.Cos(Phi);
+                                float SinPhi = MathHelper.Sin(Phi);
+                                float CosTheta = MathHelper.Sqrt((1.0f - E2) / (1.0f + (m2 - 1.0f) * E2));
+                                float SinTheta = MathHelper.Sqrt(1.0f - CosTheta * CosTheta);
+
+                                Vector3 H = new Vector3(SinTheta * MathHelper.Cos(Phi), SinTheta * MathHelper.Sin(Phi), CosTheta);
+                                Vector3 L = 2.0f * Vector3.Dot(V, H) * H - V;
+
+                                float NoL = MathHelper.Max(L.Z, 0.0f);
+                                float NoH = MathHelper.Max(H.Z, 0.0f);
+                                float VoH = MathHelper.Max(Vector3.Dot(V, H), 0.0f);
+
+                                if (NoL > 0.0f)
+                                {
+                                    float Vis_SmithV = NoL * (NoV * (1 - m) + m);
+                                    float Vis_SmithL = NoV * (NoL * (1 - m) + m);
+                                    float Vis = 0.5f / (Vis_SmithV + Vis_SmithL);
+
+                                    float NoL_Vis_PDF = NoL * Vis * (4.0f * VoH / NoH);
+                                    float Fc = 1.0f - VoH;
+
+                                    Fc *= (Fc * Fc) * (Fc * Fc);
+                                    A += NoL_Vis_PDF * (1.0f - Fc);
+                                    B += NoL_Vis_PDF * Fc;
+                                }
+                            }
+
+                            {
+                                float Phi = 2.0f * MathHelper.PI * E1;
+                                float CosPhi = MathHelper.Cos(Phi);
+                                float SinPhi = MathHelper.Sin(Phi);
+                                float CosTheta = MathHelper.Sqrt(E2);
+                                float SinTheta = MathHelper.Sqrt(1.0f - CosTheta * CosTheta);
+
+                                Vector3 L = new Vector3(SinTheta * MathHelper.Cos(Phi), SinTheta * MathHelper.Sin(Phi), CosTheta);
+                                Vector3 H = (V + L);
+                                H.Normalize();
+
+                                float NoL = MathHelper.Max(L.Z, 0.0f);
+                                float NoH = MathHelper.Max(H.Z, 0.0f);
+                                float VoH = MathHelper.Max(Vector3.Dot(V, H), 0.0f);
+
+                                float FD90 = 0.5f + 2.0f * VoH * VoH * Roughness;
+                                float FdV = 1.0f + (FD90 - 1.0f) * MathHelper.Pow(1.0f - NoV, 5);
+                                float FdL = 1.0f + (FD90 - 1.0f) * MathHelper.Pow(1.0f - NoL, 5);
+                                C += FdV * FdL;// * ( 1.0f - 0.3333f * Roughness );
+                            }
+                        }
+                        A /= NumSamples;
+                        B /= NumSamples;
+                        C /= NumSamples;
+
+                        //if (Desc.Format == PF_G16R16)
+                        {
+                            pAddr[(x + y * X) * 2] = (UInt16)(MathHelper.Clamp(A, 0.0f, 1.0f) * 65535.0f + 0.5f);
+                            pAddr[(x + y * X) * 2 + 1] = (UInt16)(MathHelper.Clamp(B, 0.0f, 1.0f) * 65535.0f + 0.5f);
+                        }
+                    }
+                }
+                PreIntegratedDFData = (IntPtr)pAddr;
+            }
         }
 
         public USrView GetPreIntegratedDFSrv(NxRHI.ICommandList cmd)
@@ -352,112 +456,19 @@ namespace EngineNS
                 srvDesc.Texture2DArray.MostDetailedMip = 0;
                 PreIntegratedDFSrv = UEngine.Instance.GfxDevice.RenderContext.CreateSRV(PreIntegratedDFTexture, in srvDesc);
 
+                var fp = new NxRHI.FSubResourceFootPrint();
+                fp.SetDefault();
+                fp.Format = PreIntegratedDFTexture.mCoreObject.Desc.Format;
+                fp.Width = PreIntegratedDFTexture.mCoreObject.Desc.Width;
+                fp.Height = PreIntegratedDFTexture.mCoreObject.Desc.Height;
+                fp.Depth = 1;
+                fp.RowPitch = (uint)fp.Width * sizeof(UInt16) * 2;
+                uint BufferSize = 128 * 32 * (uint)sizeof(UInt16) * 2;
+                fp.TotalSize = BufferSize;
+
                 unsafe
                 {
-                    int Y = 32;
-                    int X = 128;
-                    uint BufferSize = (uint)X * (uint)Y * (uint)sizeof(UInt16) * 2;
-                    var pAddr = (UInt16*)CoreSDK.Alloc(BufferSize, "PreIntegratedDFTexture", 0);
-                    for (int y = 0; y < Y; y++)
-                    {
-                        float Roughness = (float)(y + 0.5f) / Y;
-                        float m = Roughness * Roughness;
-                        float m2 = m * m;
-
-                        for (int x = 0; x < X; x++)
-                        {
-                            float NoV = (float)(x + 0.5f) / X;
-
-                            Vector3 V;
-                            V.X = MathHelper.Sqrt(1.0f - NoV * NoV);    // sin
-                            V.Y = 0.0f;
-                            V.Z = NoV;                              // cos
-
-                            float A = 0.0f;
-                            float B = 0.0f;
-                            float C = 0.0f;
-
-                            const uint NumSamples = 128;
-                            for (uint i = 0; i < NumSamples; i++)
-                            {
-                                float E1 = (float)i / NumSamples;
-                                double v1 = ReverseBits(i);
-                                double v2 = 4294967296;
-                                float E2 = (float)(v1 / v2);
-
-                                {
-                                    float Phi = 2.0f * MathHelper.PI * E1;
-                                    float CosPhi = MathHelper.Cos(Phi);
-                                    float SinPhi = MathHelper.Sin(Phi);
-                                    float CosTheta = MathHelper.Sqrt((1.0f - E2) / (1.0f + (m2 - 1.0f) * E2));
-                                    float SinTheta = MathHelper.Sqrt(1.0f - CosTheta * CosTheta);
-
-                                    Vector3 H = new Vector3(SinTheta * MathHelper.Cos(Phi), SinTheta * MathHelper.Sin(Phi), CosTheta);
-                                    Vector3 L = 2.0f * Vector3.Dot(V, H) * H - V;
-
-                                    float NoL = MathHelper.Max(L.Z, 0.0f);
-                                    float NoH = MathHelper.Max(H.Z, 0.0f);
-                                    float VoH = MathHelper.Max(Vector3.Dot(V, H), 0.0f);
-
-                                    if (NoL > 0.0f)
-                                    {
-                                        float Vis_SmithV = NoL * (NoV * (1 - m) + m);
-                                        float Vis_SmithL = NoV * (NoL * (1 - m) + m);
-                                        float Vis = 0.5f / (Vis_SmithV + Vis_SmithL);
-
-                                        float NoL_Vis_PDF = NoL * Vis * (4.0f * VoH / NoH);
-                                        float Fc = 1.0f - VoH;
-
-                                        Fc *= (Fc * Fc) * (Fc * Fc);
-                                        A += NoL_Vis_PDF * (1.0f - Fc);
-                                        B += NoL_Vis_PDF * Fc;
-                                    }
-                                }
-
-                                {
-                                    float Phi = 2.0f * MathHelper.PI * E1;
-                                    float CosPhi = MathHelper.Cos(Phi);
-                                    float SinPhi = MathHelper.Sin(Phi);
-                                    float CosTheta = MathHelper.Sqrt(E2);
-                                    float SinTheta = MathHelper.Sqrt(1.0f - CosTheta * CosTheta);
-
-                                    Vector3 L = new Vector3(SinTheta * MathHelper.Cos(Phi), SinTheta * MathHelper.Sin(Phi), CosTheta);
-                                    Vector3 H = (V + L);
-                                    H.Normalize();
-
-                                    float NoL = MathHelper.Max(L.Z, 0.0f);
-                                    float NoH = MathHelper.Max(H.Z, 0.0f);
-                                    float VoH = MathHelper.Max(Vector3.Dot(V, H), 0.0f);
-
-                                    float FD90 = 0.5f + 2.0f * VoH * VoH * Roughness;
-                                    float FdV = 1.0f + (FD90 - 1.0f) * MathHelper.Pow(1.0f - NoV, 5);
-                                    float FdL = 1.0f + (FD90 - 1.0f) * MathHelper.Pow(1.0f - NoL, 5);
-                                    C += FdV * FdL;// * ( 1.0f - 0.3333f * Roughness );
-                                }
-                            }
-                            A /= NumSamples;
-                            B /= NumSamples;
-                            C /= NumSamples;
-
-                            //if (Desc.Format == PF_G16R16)
-                            {
-                                pAddr[(x + y * X) * 2] = (UInt16)(MathHelper.Clamp(A, 0.0f, 1.0f) * 65535.0f + 0.5f);
-                                pAddr[(x + y * X) * 2 + 1] = (UInt16)(MathHelper.Clamp(B, 0.0f, 1.0f) * 65535.0f + 0.5f);
-                            }
-                        }
-                    }
-
-                    var fp = new NxRHI.FSubResourceFootPrint();
-                    fp.SetDefault();
-                    fp.Format = PreIntegratedDFTexture.mCoreObject.Desc.Format;
-                    fp.Width = PreIntegratedDFTexture.mCoreObject.Desc.Width;
-                    fp.Height = PreIntegratedDFTexture.mCoreObject.Desc.Height;
-                    fp.Depth = 1;
-                    fp.RowPitch = (uint)fp.Width * sizeof(UInt16) * 2;
-                    fp.TotalSize = BufferSize;
-
-                    PreIntegratedDFTexture.UpdateGpuData(cmd, 0, (void*)pAddr, &fp);
-                    CoreSDK.Free(pAddr);
+                    PreIntegratedDFTexture.UpdateGpuData(cmd, 0, PreIntegratedDFData.ToPointer(), &fp);
                 }
             }
 

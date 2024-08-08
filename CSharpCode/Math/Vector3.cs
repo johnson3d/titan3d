@@ -233,28 +233,21 @@ namespace EngineNS
         }
 
         #region Def Struct
-        /// <summary>
-        /// Gets or sets the X component of the vector.
-        /// </summary>
-        /// <value>The X component of the vector.</value>
-        [Rtti.Meta]
         public float X;
-
-        /// <summary>
-        /// Gets or sets the Y component of the vector.
-        /// </summary>
-        /// <value>The Y component of the vector.</value>
-        [Rtti.Meta]
         public float Y;
-        /// <summary>
-        /// Gets or sets the Z component of the vector.
-        /// </summary>
-        /// <value>The Z component of the vector.</value>
-        [Rtti.Meta]
         public float Z;
-        public float R => X;
-        public float G => Y;
-        public float B => Z;
+        [Rtti.Meta(ShaderName = "x")]
+        public float x { get => X; set => X = value; }
+        [Rtti.Meta(ShaderName = "y")]
+        public float y { get => Y; set => Y = value; }
+        [Rtti.Meta(ShaderName = "z")]
+        public float z { get => Z; set => Z = value; }
+        [Rtti.Meta(ShaderName = "r")]
+        public float r => X;
+        [Rtti.Meta(ShaderName = "g")]
+        public float g => Y;
+        [Rtti.Meta(ShaderName = "b")]
+        public float b => Z;
         public float this[int index]
         {
             get

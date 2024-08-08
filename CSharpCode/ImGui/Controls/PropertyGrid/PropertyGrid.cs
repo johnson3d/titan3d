@@ -396,7 +396,7 @@ namespace EngineNS.EGui.Controls.PropertyGrid
                 if (v != saved)
                 {
                     if (info.Type.IsEqual(typeof(Color4b)))
-                        newValue = Color4b.FromArgb((int)(255), (int)(v.R * 255), (int)(v.G * 255), (int)(v.B * 255));
+                        newValue = Color4b.FromArgb((int)(255), (int)(v.r * 255), (int)(v.g * 255), (int)(v.b * 255));
                     else if (info.Type.IsEqual(typeof(Color3f)))
                         newValue = (Color3f)v;
                     else

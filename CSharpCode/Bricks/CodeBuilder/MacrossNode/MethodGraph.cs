@@ -16,6 +16,8 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
     {
         public MemberVar DraggingMember { get; set; }
         public bool IsDraggingMember { get; set; }
+        public MethodLocalVar DraggingLocalVar { get; set; }
+        public bool IsDraggingLocalVar { get; set; }
         public UClassDeclaration DefClass { get; }
         public UCSharpCodeGenerator CSCodeGen { get; }
         public UHLSLCodeGenerator HlslCodeGen { get; }
@@ -349,6 +351,17 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
     }
     public partial class UMacrossMethodGraph : UNodeGraph, IPropertyCustomization
     {
+        [Rtti.Meta, Category("Option")]
+        public List<UVariableDeclaration> LocalVars { get; set; } = new List<UVariableDeclaration>();
+        public UVariableDeclaration FindLocalVar(string name)
+        {
+            foreach(var i in LocalVars)
+            {
+                if (i.VariableName == name)
+                    return i;
+            }
+            return null;
+        }
         [Rtti.Meta, Category("Option")]
         public string CustumCode { get; set; } = null;
         [Rtti.Meta, Category("Option")]
@@ -833,6 +846,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
             {
                 MethodDatas[i].MethodDec.MethodBody.Sequence.Clear();
                 MethodDatas[i].MethodDec.LocalVariables.Clear();
+                MethodDatas[i].MethodDec.LocalVariables.AddRange(this.LocalVars);
                 BuildCodeStatementsData data = new BuildCodeStatementsData()
                 {
                     ClassDec = classDesc,
@@ -986,6 +1000,8 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
         }
         public override void UpdateCanvasMenus()
         {
+            var editor = this.Editor as UMacrossEditor;
+
             CanvasMenus.SubMenuItems.Clear();
             CanvasMenus.Text = "Canvas";
             foreach (var service in Rtti.UTypeDescManager.Instance.Services.Values)
@@ -1040,6 +1056,10 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
                         continue;
                     if (methodMeta.Meta.IsNoMacrossUseable)
                         continue;
+
+                    if (this.IsMetaFilter(methodMeta.Meta) == false)
+                        continue;
+
                     string[] path = methodMeta.Meta.MacrossDisplayPath;
                     if(path == null)
                         path = GetContextPath(methodMeta.DeclaringType, methodMeta.MethodName);
@@ -1071,6 +1091,8 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
                     if(!fieldMeta.IsPublic)
                         continue;
                     if (fieldMeta.Meta.IsNoMacrossUseable)
+                        continue;
+                    if (this.IsMetaFilter(fieldMeta.Meta) == false)
                         continue;
                     var path = fieldMeta.Meta.MacrossDisplayPath;
                     if (path == null)
@@ -1111,6 +1133,8 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
                     if (!proMeta.IsGetPublic && !proMeta.IsSetPublic)
                         continue;
                     if (proMeta.Meta.IsNoMacrossUseable)
+                        continue;
+                    if (this.IsMetaFilter(proMeta.Meta) == false)
                         continue;
                     string[] path = proMeta.Meta.MacrossDisplayPath;
                     if (path == null)
@@ -1583,6 +1607,24 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
                     this.AddNode(MacrossEditor.DraggingMember);
                     MacrossEditor.IsDraggingMember = false;
                     MacrossEditor.DraggingMember = null;
+                }
+            }
+
+            if (MacrossEditor != null && MacrossEditor.IsDraggingLocalVar && MacrossEditor.DraggingLocalVar != null)
+            {
+                MacrossEditor.DraggingLocalVar.ParentGraph = this;
+                var screenPt = this.ToScreenPos(mousePt.X, mousePt.Y);
+                MacrossEditor.DraggingLocalVar.Position = this.ViewportRateToCanvas(in screenPt);
+                //MacrossEditor.DraggingMember.Position = this.View2WorldSpace(ref mousePt);
+                //MacrossEditor.DraggingMember.OnDraw(styles);
+                renderer.DrawNode(cmdlist, MacrossEditor.DraggingLocalVar);
+
+                if (ImGuiAPI.IsMouseDown(ImGuiMouseButton_.ImGuiMouseButton_Left) == false)
+                {
+                    SetDefaultActionForNode(MacrossEditor.DraggingLocalVar);
+                    this.AddNode(MacrossEditor.DraggingLocalVar);
+                    MacrossEditor.IsDraggingLocalVar = false;
+                    MacrossEditor.DraggingLocalVar = null;
                 }
             }
 

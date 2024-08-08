@@ -189,11 +189,15 @@ namespace EngineNS.Bricks.NodeGraph
                 if (Nodes[i].NodeId == id)
                     return Nodes[i];
             }
-            foreach(var subGraph in SubGraphs.Values)
+            if (findInSubGraphs == false || SubGraphs == null)
+                return null;
+            
+            foreach (var subGraph in SubGraphs.Values)
             {
                 var node = subGraph.FindNode(id, findInSubGraphs);
-                if(node != null) return node;
+                if (node != null) return node;
             }
+
             return null;
         }
         public void AddLink(UNodeBase OutNode, string OutPin,

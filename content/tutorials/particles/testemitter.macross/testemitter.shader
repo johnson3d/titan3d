@@ -2,8 +2,8 @@
 {
     uint tmp_r_SetParticleFlags_4124938284 = 0;
     uint tmp_r_Spawn_318270620 = 0;
-    uint v_oldValue_AtomicAdd_EmitterFlags_2788520947;
-    emt.AtomicAdd_EmitterFlags(0,v_oldValue_AtomicAdd_EmitterFlags_2788520947);
+    uint v_oldValue_AtomicAdd_EmitterFlags_2788520947 = 0;
+    emt.AtomicAdd_EmitterFlags(1,v_oldValue_AtomicAdd_EmitterFlags_2788520947);
     if ((v_oldValue_AtomicAdd_EmitterFlags_2788520947 < 512))
     {
         tmp_r_SetParticleFlags_4124938284 = emt.SetParticleFlags(EParticleFlags_EmitShape,0);
@@ -45,6 +45,14 @@ void OnInitParticle(TtEmitter emt,inout FParticle particle)
 }
 void OnParticleTick(TtEmitter emt,float elapsed,inout FParticle particle)
 {
+    float4 Angles = float4(0,0,0,0);
+    float4 tmp_r_Uint2Color4f_3287025661 = (float4)0;
+    float4 tmp_r_CreateColor4f_1754197827 = (float4)0;
+    uint tmp_r_Color2Uint_1566520051 = 0;
+    tmp_r_Uint2Color4f_3287025661 = emt.Uint2Color4f(particle.Rotator);
+    tmp_r_CreateColor4f_1754197827 = CreateColor4f(0,(tmp_r_Uint2Color4f_3287025661.g + (elapsed * 1.14)),0,0);
+    tmp_r_Color2Uint_1566520051 = emt.Color2Uint(tmp_r_CreateColor4f_1754197827);
+    particle.Rotator = tmp_r_Color2Uint_1566520051;
 }
 void OnTimer(TtEmitter emt,float second)
 {

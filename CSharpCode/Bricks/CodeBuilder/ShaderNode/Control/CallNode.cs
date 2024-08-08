@@ -494,6 +494,7 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Control
             var methodInvokeExp = new UMethodInvokeStatement()
             {
                 MethodName = method.MethodName,
+                Method = method,
             };
 
             if(method.HasReturnValue())

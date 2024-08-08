@@ -10,22 +10,18 @@ namespace EngineNS
 	[System.Runtime.InteropServices.StructLayout(System.Runtime.InteropServices.LayoutKind.Sequential)]
 	public struct Color4f
     {
-        /// <summary>
-        /// 红色值
-        /// </summary>
         public float Red;
-        /// <summary>
-        /// 绿色值
-        /// </summary>
         public float Green;
-        /// <summary>
-        /// 蓝色值
-        /// </summary>
         public float Blue;
-        /// <summary>
-        /// Alpha通道值
-        /// </summary>
         public float Alpha;
+        [Rtti.Meta(ShaderName = "r")]
+        public float r { get => Red; set => Red = value; }
+        [Rtti.Meta(ShaderName = "g")]
+        public float g { get => Green; set => Green = value; }
+        [Rtti.Meta(ShaderName = "b")]
+        public float b { get => Blue; set => Blue = value; }
+        [Rtti.Meta(ShaderName = "a")]
+        public float a { get => Alpha; set => Alpha = value; }
         public static Color4f FromObject(object obj)
         {
             if (obj.GetType() == typeof(Color4f))
