@@ -193,6 +193,61 @@ namespace EngineNS.EGui.UIProxy
 
             return retValue && !disable;
         }
+        public static bool DrawCheckBox(in ImDrawList drawList,
+                                  ImageProxy icon,
+                                  string name, ref bool value, bool readOnly = false,
+                                  bool disable = false,
+                                  float parentHeight = -1,
+                                  float itemOffset = 0,
+                                  float itemSpacing = -1)
+        {
+            ImGuiAPI.SameLine(itemOffset, itemSpacing);
+
+            if (parentHeight < 0)
+                parentHeight = StyleConfig.Instance.ToolbarHeight;
+
+            bool retValue = false;
+            var cursorScrPos = ImGuiAPI.GetCursorScreenPos();
+            ImGuiAPI.BeginGroup();
+            var tempScrPos = cursorScrPos;
+            var clickDelta = 0.0f;
+            
+            Vector2 hitRectMin = new Vector2(float.MaxValue, float.MaxValue);
+            Vector2 hitRectMax = new Vector2(float.MinValue, float.MinValue);
+            if (icon != null)
+            {
+                tempScrPos.Y = cursorScrPos.Y + (parentHeight - icon.ImageSize.Y) * 0.5f + clickDelta;
+                hitRectMin.X = cursorScrPos.X;
+                hitRectMin.Y = tempScrPos.Y;
+                icon.OnDraw(in drawList, in tempScrPos);
+
+                tempScrPos.X = cursorScrPos.X + icon.ImageSize.X + StyleConfig.Instance.ToolbarButtonIconTextSpacing;
+                hitRectMax.X = tempScrPos.X;
+                hitRectMax.Y = tempScrPos.Y + icon.ImageSize.Y;
+            }
+
+            if (!string.IsNullOrEmpty(name))
+            {
+                var textSize = ImGuiAPI.CalcTextSize(name, false, -1);
+                tempScrPos.Y = cursorScrPos.Y + (parentHeight - textSize.Y) * 0.5f + clickDelta;
+                hitRectMin.X = System.Math.Min(hitRectMin.X, tempScrPos.X);
+                hitRectMin.Y = System.Math.Min(hitRectMin.Y, tempScrPos.Y);
+                hitRectMax.X = System.Math.Max(hitRectMax.X, tempScrPos.X + textSize.X);
+                hitRectMax.Y = System.Math.Max(hitRectMax.Y, tempScrPos.Y + textSize.Y);
+            }
+            ImGuiAPI.SetCursorScreenPos(in tempScrPos);
+
+            Vector4 color = ImGuiAPI.ColorConvertU32ToFloat4(StyleConfig.Instance.ToolbarButtonTextColor);
+
+            retValue = EGui.UIProxy.CheckBox.DrawCheckBox(name, ref value, readOnly);
+
+            if (icon != null)
+                icon.Color = ImGuiAPI.ColorConvertFloat4ToU32(in color);
+
+            ImGuiAPI.EndGroup();
+            
+            return retValue && !disable;
+        }
     }
 
     public class ToolbarSeparator : IToolbarItem

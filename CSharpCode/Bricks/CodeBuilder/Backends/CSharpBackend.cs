@@ -27,20 +27,26 @@ namespace EngineNS.Bricks.CodeBuilder
         {
             public void GenCodes(UCodeObject obj, ref string sourceCode, ref UCodeGeneratorData data)
             {
-                var exp = obj as UDebuggerSetWatchVariable;
-                var codeStr = $"mFrame_{data.Method.MethodName}.SetWatchVariable(\"{exp.VariableName}\", ";
-                var varGen = data.CodeGen.GetCodeObjectGen(exp.VariableValue.GetType());
-                varGen.GenCodes(exp.VariableValue, ref codeStr, ref data);
-                codeStr += ");";
-                data.CodeGen.AddLine(codeStr, ref sourceCode);
+                if (data.CodeGen.IsEditorDebug)
+                {
+                    var exp = obj as UDebuggerSetWatchVariable;
+                    var codeStr = $"mFrame_{data.Method.MethodName}.SetWatchVariable(\"{exp.VariableName}\", ";
+                    var varGen = data.CodeGen.GetCodeObjectGen(exp.VariableValue.GetType());
+                    varGen.GenCodes(exp.VariableValue, ref codeStr, ref data);
+                    codeStr += ");";
+                    data.CodeGen.AddLine(codeStr, ref sourceCode);
+                }   
             }
         }
         class UDebuggerTryBreakCodeGen : ICodeObjectGen
         {
             public void GenCodes(UCodeObject obj, ref string sourceCode, ref UCodeGeneratorData data)
             {
-                var exp = obj as UDebuggerTryBreak;
-                data.CodeGen.AddLine($"{exp.BreakName}.TryBreak();", ref sourceCode);
+                if (data.CodeGen.IsEditorDebug)
+                {
+                    var exp = obj as UDebuggerTryBreak;
+                    data.CodeGen.AddLine($"{exp.BreakName}.TryBreak();", ref sourceCode);
+                }
             }
         }
         class TtAttributeCodeGen : ICodeObjectGen
@@ -272,7 +278,8 @@ namespace EngineNS.Bricks.CodeBuilder
                                     }
                                     break;
                             }
-                            data.CodeGen.AddLine($"{frameName}.SetWatchVariable(\"{arg.VariableName}\", {arg.VariableName});", ref sourceCode);
+                            if (data.CodeGen.IsEditorDebug)
+                                data.CodeGen.AddLine($"{frameName}.SetWatchVariable(\"{arg.VariableName}\", {arg.VariableName});", ref sourceCode);
                         }
                         for(int i=0; i<methodDec.LocalVariables.Count; i++)
                         {
@@ -364,6 +371,12 @@ namespace EngineNS.Bricks.CodeBuilder
 
                     for(int i=0; i<classDec.PreDefineVariables.Count; i++)
                     {
+                        if (data.CodeGen.IsEditorDebug == false &&
+                            classDec.PreDefineVariables[i].VariableType.TypeDesc != null &&
+                            classDec.PreDefineVariables[i].VariableType.TypeDesc.SystemType == typeof(Macross.UMacrossBreak))
+                        {
+                            continue;
+                        }
                         var gen = data.CodeGen.GetCodeObjectGen(classDec.PreDefineVariables[i].GetType()) as UVariableDeclarationCodeGen;
                         gen.IsClassMember = true;
                         gen.GenCodes(classDec.PreDefineVariables[i], ref sourceCode, ref data);

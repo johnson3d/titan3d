@@ -88,6 +88,7 @@ namespace EngineNS.Bricks.CodeBuilder
 
     public abstract class UCodeGeneratorBase : UCodeCreator
     {
+        public bool IsEditorDebug = true;
         public abstract ICodeObjectGen GetCodeObjectGen(Rtti.UTypeDesc type);
         public ICodeObjectGen GetCodeObjectGen(Type type)
         {
