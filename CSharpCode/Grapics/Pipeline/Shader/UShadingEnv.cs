@@ -61,6 +61,11 @@ namespace EngineNS.Graphics.Pipeline.Shader
             //    System.Diagnostics.Debug.Assert(false);
             //}
         }
+        internal virtual async Thread.Async.TtTask<bool> OnCreateEffect()
+        {
+            await Thread.TtAsyncDummyClass.DummyFunc();
+            return true;
+        }
         #region PermutationID
         public class UPermutationItem
         {
@@ -280,7 +285,12 @@ namespace EngineNS.Graphics.Pipeline.Shader
     {
         [Rtti.Meta]
         public string MainName { get; set; }
-        private NxRHI.UComputeEffect CurrentEffect;
+        private NxRHI.UComputeEffect mCurrentEffect;
+        public NxRHI.UComputeEffect CurrentEffect
+        {
+            get => mCurrentEffect;
+        }
+
         public bool IsReady
         {
             get => CurrentEffect != null;
@@ -293,11 +303,10 @@ namespace EngineNS.Graphics.Pipeline.Shader
         public override void UpdatePermutation()
         {
             base.UpdatePermutation();
-            var nu = OnCreateEffect();
         }
-        protected async Thread.Async.TtTask<bool> OnCreateEffect()
+        internal override async Thread.Async.TtTask<bool> OnCreateEffect()
         {
-            CurrentEffect = await UEngine.Instance.GfxDevice.EffectManager.GetComputeEffect(CodeName,
+            mCurrentEffect = await UEngine.Instance.GfxDevice.EffectManager.GetComputeEffect(CodeName,
                 MainName, NxRHI.EShaderType.SDT_ComputeShader, this, null, null);
             System.Diagnostics.Debug.Assert(this.mCurrentPermutationId == CurrentEffect.PermutationId);
 
@@ -372,12 +381,13 @@ namespace EngineNS.Graphics.Pipeline.Shader
             Shadings.Add(name, shading);
             return shading;
         }
-        public T GetShadingEnv<T>() where T : UShadingEnv, new()
+        public async Thread.Async.TtTask<T> GetShadingEnv<T>() where T : UShadingEnv, new()
         {
             UShadingEnv shading;
             if (Shadings.TryGetValue(typeof(T), out shading))
                 return shading as T;
             T result = new T();
+            await result.OnCreateEffect();
             Shadings.Add(typeof(T), result);
             return result;
         }

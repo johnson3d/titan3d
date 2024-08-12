@@ -418,11 +418,11 @@ namespace EngineNS.Graphics.Pipeline.Shader
         public UEffect DummyEffect;
         public async System.Threading.Tasks.Task<bool> Initialize(UGfxDevice device)
         {
-            DummyEffect = await this.GetEffect(UEngine.Instance.ShadingEnvManager.GetShadingEnv<UDummyShading>(), device.MaterialManager.ScreenMaterial, new Mesh.UMdfStaticMesh());
+            DummyEffect = await this.GetEffect(await UEngine.Instance.ShadingEnvManager.GetShadingEnv<UDummyShading>(), device.MaterialManager.ScreenMaterial, new Mesh.UMdfStaticMesh());
 
             if (DummyEffect == null)
             {
-                DummyEffect = await UEffect.CreateEffect(UEngine.Instance.ShadingEnvManager.GetShadingEnv<UDummyShading>(),
+                DummyEffect = await UEffect.CreateEffect(await UEngine.Instance.ShadingEnvManager.GetShadingEnv<UDummyShading>(),
                    new UShadingEnv.FPermutationId(0), device.MaterialManager.ScreenMaterial, new Mesh.UMdfStaticMesh());
             }
             if (DummyEffect == null)
@@ -600,6 +600,7 @@ namespace EngineNS.Graphics.Pipeline.Shader
                 mCreatingSession.FinishSession(hash, session, result);
             }
         }
+        //需要逐渐被UComputeShadingEnv替换
         public async Thread.Async.TtTask<NxRHI.UComputeEffect> GetComputeEffect(RName shaderName, string entry, NxRHI.EShaderType type,
             Graphics.Pipeline.Shader.UShadingEnv shadingEnv, NxRHI.UShaderDefinitions defines, 
             Editor.ShaderCompiler.UHLSLInclude incProvider, string sm = null, bool bDebugShader = true)

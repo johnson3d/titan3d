@@ -9,6 +9,13 @@ namespace EngineNS.Bricks.Particle
     [EngineNS.Editor.ShaderCompiler.TtShaderDefine(ShaderName = "FComputeEnv")]
     struct FComputeEnv
     {
+        public FComputeEnv(Vector3ui Id, Vector3ui GroupId, Vector3ui GroupThreadId, uint GroupIndex)
+        {
+            mId = Id;
+            mGroupId = GroupId;
+            mGroupThreadId = GroupThreadId;
+            mGroupIndex = GroupIndex;
+        }
         public Vector3ui mId;//SV_DispatchThreadID
         public Vector3ui mGroupId;//SV_GroupID
         public Vector3ui mGroupThreadId;//SV_GroupThreadID
@@ -112,15 +119,15 @@ namespace EngineNS.Bricks.Particle
         public Vector4i mTempData;//for compute UAV
         [Rtti.Meta(ShaderName = "Location")]
         public Vector3 Location { get => mLocation; set => mLocation = value; }
-        [Rtti.Meta(ShaderName = "Flags")]
+        [Rtti.Meta(Flags = Rtti.MetaAttribute.EMetaFlags.CanRefForMacross, ShaderName = "Flags")]
         public uint Flags { get => mFlags; set => mFlags = value; }
         [Rtti.Meta(ShaderName = "Velocity")]
         public Vector3 Velocity { get => mVelocity; set => mVelocity = value; }
-        [Rtti.Meta(ShaderName = "Flags1")]
+        [Rtti.Meta(Flags = Rtti.MetaAttribute.EMetaFlags.CanRefForMacross, ShaderName = "Flags1")]
         public uint Flags1 { get => mFlags1; set => mFlags1 = value; }
         [Rtti.Meta(ShaderName = "CameralEuler")]
         public FRotator CameralEuler { get => mCameralEuler; set => mCameralEuler = value; }
-        [Rtti.Meta(ShaderName = "Flags2")]
+        [Rtti.Meta(Flags = Rtti.MetaAttribute.EMetaFlags.CanRefForMacross, ShaderName = "Flags2")]
         public uint Flags2 { get => mFlags2; set => mFlags2 = value; }
         [Rtti.Meta(ShaderName = "TempData")]
         public Vector4i TempData { get => mTempData; set => mTempData = value; }
@@ -587,11 +594,6 @@ namespace EngineNS.Bricks.Particle
             // LCG values from Numerical Recipes
             rng_state = 1664525 * rng_state + 1013904223;
             return rng_state;
-        }
-        [Rtti.Meta(ShaderName = "AtomicAdd_EmitterFlags")]
-        public void AtomicAdd_EmitterFlags(uint value, out uint oldValue)
-        {
-            oldValue = System.Threading.Interlocked.Add(ref EmitterData.mFlags, value);
         }
         #region Random
         [Rtti.Meta(ShaderName = "RandomUnit")]

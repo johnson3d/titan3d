@@ -93,7 +93,7 @@ namespace EngineNS.Graphics.Pipeline.Common.Post
         public override async System.Threading.Tasks.Task Initialize(URenderPolicy policy, string debugName)
         {
             await base.Initialize(policy, debugName);
-            mBasePassShading = UEngine.Instance.ShadingEnvManager.GetShadingEnv<TtAdditiveShading>();
+            mBasePassShading = await UEngine.Instance.ShadingEnvManager.GetShadingEnv<TtAdditiveShading>();
         }
         [System.Runtime.InteropServices.StructLayout(System.Runtime.InteropServices.LayoutKind.Sequential, Pack = 16)]
         struct FAdditiveStruct
@@ -170,7 +170,7 @@ namespace EngineNS.Graphics.Pipeline.Common.Post
         public override async System.Threading.Tasks.Task Initialize(URenderPolicy policy, string debugName)
         {
             await base.Initialize(policy, debugName);
-            mAdditiveLumShading = UEngine.Instance.ShadingEnvManager.GetShadingEnv<TtAdditiveLumShading>();
+            mAdditiveLumShading = await UEngine.Instance.ShadingEnvManager.GetShadingEnv<TtAdditiveLumShading>();
         }
     }
 }

@@ -105,7 +105,7 @@ namespace EngineNS.Graphics.Pipeline.Deferred
 
             CreateGBuffers(policy, Rt0PinOut.Attachement.Format);
             
-            mOpaqueShading = UEngine.Instance.ShadingEnvManager.GetShadingEnv<UDeferredOpaque>();
+            mOpaqueShading = await UEngine.Instance.ShadingEnvManager.GetShadingEnv<UDeferredOpaque>();
 
             var linker = VisiblesPinIn.FindInLinker();
             if (linker != null)

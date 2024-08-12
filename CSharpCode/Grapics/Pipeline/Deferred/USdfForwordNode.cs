@@ -121,8 +121,8 @@ namespace EngineNS.Graphics.Pipeline.Deferred
 
             CreateGBuffers(policy, ColorPinInOut.Attachement.Format);
 
-            mOpaqueShading = UEngine.Instance.ShadingEnvManager.GetShadingEnv<USdfOpaqueShading>();
-            mTranslucentShading = UEngine.Instance.ShadingEnvManager.GetShadingEnv<USdfTranslucentShading>();
+            mOpaqueShading = await UEngine.Instance.ShadingEnvManager.GetShadingEnv<USdfOpaqueShading>();
+            mTranslucentShading = await UEngine.Instance.ShadingEnvManager.GetShadingEnv<USdfTranslucentShading>();
 
             var linker = VisiblesPinIn.FindInLinker();
             if (linker != null)

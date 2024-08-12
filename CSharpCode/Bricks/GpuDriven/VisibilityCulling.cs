@@ -134,7 +134,7 @@ namespace EngineNS.Bricks.GpuDriven
 
             CoreSDK.DisposeObject(ref CullClusterShadingDrawcall);
             CullClusterShadingDrawcall = rc.CreateComputeDraw();
-            CullClusterShading = UEngine.Instance.ShadingEnvManager.GetShadingEnv<TtCullClusterShading>();
+            CullClusterShading = await UEngine.Instance.ShadingEnvManager.GetShadingEnv<TtCullClusterShading>();
 
             Vertices.Initialize(NxRHI.EBufferType.BFT_SRV);
             Indices.Initialize(NxRHI.EBufferType.BFT_SRV);

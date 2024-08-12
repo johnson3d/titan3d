@@ -1,4 +1,5 @@
-﻿using System;
+﻿using EngineNS.Graphics.Pipeline;
+using System;
 using System.Collections.Generic;
 using System.Text;
 
@@ -47,19 +48,9 @@ namespace EngineNS.Bricks.VXGI
             {
                 return;
             }
-            //if (mAttachSRVs == null)
-            //{
-            //    mAttachSRVs = new RHI.CShaderResources();
-
-            //    var bindInfo = drawcall.Effect.ShaderProgram.mCoreObject.GetReflector().GetShaderBinder(EShaderBindType.SBT_Srv,"VxDebugInstanceSRV");
-            //    if (bindInfo != (IShaderBinder*)0)
-            //    {
-            //        mAttachSRVs.mCoreObject.BindVS(bindInfo->VSBindPoint, vxNode.SrvVoxelDebugger.mCoreObject);
-            //    }
-            //}
             var binder = drawcall.FindBinder("VxDebugInstanceSRV");
-            drawcall.BindSRV(binder, vxNode.SrvVoxelDebugger);
-            drawcall.mCoreObject.BindIndirectDrawArgsBuffer(vxNode.VxIndirectDebugDraws.mCoreObject, (uint)sizeof(UVoxelsNode.FIndirectDrawArgs));
+            drawcall.BindSRV(binder, vxNode.VoxelDebugger.Srv);
+            drawcall.BindIndirectDrawArgsBuffer(vxNode.VxIndirectDebugDraws.GpuBuffer, 5 * 4);
         }
     }
     public class UMdfVoxelDebugMesh : Graphics.Pipeline.Shader.TtMdfQueue1<TtVoxelDebugModifier>
@@ -70,35 +61,119 @@ namespace EngineNS.Bricks.VXGI
     partial class UVoxelsNode
     {
         #region VxDebugger
-        public struct FIndirectDrawArgs
-        {
-            public uint IndexCountPerInstance;
-            public uint InstanceCount;
-            public uint StartIndexLocation;
-            public int BaseVertexLocation;
-            public uint StartInstanceLocation;
-        }
+        [EngineNS.Editor.ShaderCompiler.TtShaderDefine(ShaderName = "FVoxelDebugger")]
         public struct FVoxelDebugger
         {
-            public Vector3 Position;
-            public float Scale;
+            public Vector3 mPosition;
+            public float mScale;
 
-            public Vector3 Color;
-            public float Pad0;
+            public Vector3 mColor;
+            public float mPad0;
         }
-        public NxRHI.UBuffer VoxelGroupDebugger;
-        public NxRHI.UBuffer VoxelDebugger;
-        public NxRHI.UBuffer VxIndirectDebugDraws;
+        public TtGpuBuffer<FVoxelDebugger> VoxelDebugger = new TtGpuBuffer<FVoxelDebugger>();
+        public TtGpuBuffer<FVoxelDebugger> VoxelGroupDebugger = new TtGpuBuffer<FVoxelDebugger>();
+        public TtGpuBuffer<uint> VxIndirectDebugDraws = new TtGpuBuffer<uint>();
 
-        public NxRHI.UUaView UavVoxelGroupDebugger;
-        public NxRHI.UUaView UavVoxelDebugger;
-        public NxRHI.USrView SrvVoxelDebugger;
-        public NxRHI.UUaView UavVxIndirectDebugDraws;
+        public class SetupVxDebuggerShading : Graphics.Pipeline.Shader.UComputeShadingEnv
+        {
+            public override Vector3ui DispatchArg
+            {
+                get => new Vector3ui(2, 1, 1);
+            }
+            public SetupVxDebuggerShading()
+            {
+                CodeName = RName.GetRName("Shaders/Bricks/VXGI/VxVisualDebugger.compute", RName.ERNameType.Engine);
+                MainName = "CS_SetupVxDebugger";
+                
+                this.UpdatePermutation();
+            }
+            protected override void EnvShadingDefines(in FPermutationId id, NxRHI.UShaderDefinitions defines)
+            {
+                base.EnvShadingDefines(in id, defines);
+                defines.AddDefine("VxSize", $"{VxSize}");
+                defines.AddDefine("VxGroupPoolSize", $"{VxGroupPoolSize}");
+                defines.AddDefine("VxGroupCubeSide", $"{VxGroupCubeSide}");
+                defines.AddDefine("VxSceneX", $"{VxSceneX}");
+                defines.AddDefine("VxSceneY", $"{VxSceneY}");
+                defines.AddDefine("VxSceneZ", $"{VxSceneZ}");
+            }
+            public override void OnDrawCall(NxRHI.UComputeDraw drawcall, Graphics.Pipeline.URenderPolicy policy)
+            {
+                var node = drawcall.TagObject as UVoxelsNode;
 
-        private NxRHI.UComputeEffect SetupVxDebugger;
+                var srvIdx = drawcall.FindBinder(NxRHI.EShaderBindType.SBT_CBuffer, "cbGBufferDesc");///???
+                if (srvIdx.IsValidPointer)
+                {
+                    drawcall.BindCBuffer(srvIdx, node.CBuffer);
+                }
+                srvIdx = drawcall.FindBinder(NxRHI.EShaderBindType.SBT_UAV, "VxIndirectDebugDraws");
+                if (srvIdx.IsValidPointer)
+                {
+                    drawcall.BindUav(srvIdx, node.VxIndirectDebugDraws.Uav);
+                }
+            }
+        }
+
+        public class CollectVxDebuggerShading : Graphics.Pipeline.Shader.UComputeShadingEnv
+        {
+            public override Vector3ui DispatchArg
+            {
+                get => new Vector3ui(Dispatch_SetupDimArray1.X, 1, 1);
+            }
+            public CollectVxDebuggerShading()
+            {
+                CodeName = RName.GetRName("Shaders/Bricks/VXGI/VxVisualDebugger.compute", RName.ERNameType.Engine);
+                MainName = "CS_CollectVxDebugger";
+
+                this.UpdatePermutation();
+            }
+            protected override void EnvShadingDefines(in FPermutationId id, NxRHI.UShaderDefinitions defines)
+            {
+                base.EnvShadingDefines(in id, defines);
+                defines.AddDefine("VxSize", $"{VxSize}");
+                defines.AddDefine("VxGroupPoolSize", $"{VxGroupPoolSize}");
+                defines.AddDefine("VxGroupCubeSide", $"{VxGroupCubeSide}");
+                defines.AddDefine("VxSceneX", $"{VxSceneX}");
+                defines.AddDefine("VxSceneY", $"{VxSceneY}");
+                defines.AddDefine("VxSceneZ", $"{VxSceneZ}");
+            }
+            public override void OnDrawCall(NxRHI.UComputeDraw drawcall, Graphics.Pipeline.URenderPolicy policy)
+            {
+                var node = drawcall.TagObject as UVoxelsNode;
+                // renwind test
+                var srvIdx = drawcall.FindBinder(NxRHI.EShaderBindType.SBT_UAV, "VxGroupPool");
+                if (srvIdx.IsValidPointer)
+                {
+                    drawcall.BindUav(srvIdx, node.UavVoxelPool);
+                }
+                srvIdx = drawcall.FindBinder(NxRHI.EShaderBindType.SBT_UAV, "VxIndirectDebugDraws");
+                if (srvIdx.IsValidPointer)
+                {
+                    drawcall.BindUav(srvIdx, node.VxIndirectDebugDraws.Uav);
+                }
+
+                srvIdx = drawcall.FindBinder(NxRHI.EShaderBindType.SBT_CBuffer, "cbGBufferDesc");
+                if (srvIdx.IsValidPointer)
+                {
+                    drawcall.BindCBuffer(srvIdx, node.CBuffer);
+                }
+                srvIdx = drawcall.FindBinder(NxRHI.EShaderBindType.SBT_UAV, "VoxelGroupDebugger");
+                if (srvIdx.IsValidPointer)
+                {
+                    drawcall.BindUav(srvIdx, node.VoxelGroupDebugger.Uav);
+                }
+                srvIdx = drawcall.FindBinder(NxRHI.EShaderBindType.SBT_UAV, "VoxelDebugger");
+                if (srvIdx.IsValidPointer)
+                {
+                    drawcall.BindUav(srvIdx, node.VoxelDebugger.Uav);
+                }
+            }
+        }
+
+        private SetupVxDebuggerShading SetupVxDebugger;
         private NxRHI.UComputeDraw SetupVxDebuggerDrawcall;
 
-        private NxRHI.UComputeEffect CollectVxDebugger;
+        private CollectVxDebuggerShading CollectVxDebugger;
         private NxRHI.UComputeDraw CollectVxDebuggerDrawcall;
 
         public Graphics.Mesh.TtMesh VxDebugMesh;
@@ -109,54 +184,9 @@ namespace EngineNS.Bricks.VXGI
             var rc = UEngine.Instance.GfxDevice.RenderContext;
             CoreSDK.DisposeObject(ref SetupVxDebuggerDrawcall);
             SetupVxDebuggerDrawcall = rc.CreateComputeDraw();
-            SetupVxDebuggerDrawcall.SetComputeEffect(SetupVxDebugger);
-            SetupVxDebuggerDrawcall.SetDispatch(1, 1, 1);
-
-            var srvIdx = SetupVxDebuggerDrawcall.FindBinder(NxRHI.EShaderBindType.SBT_CBuffer, "cbGBufferDesc");///???
-            if (srvIdx.IsValidPointer)
-            {
-                SetupVxDebuggerDrawcall.BindCBuffer(srvIdx, CBuffer);
-            }
-            srvIdx = SetupVxDebuggerDrawcall.FindBinder(NxRHI.EShaderBindType.SBT_UAV, "VxIndirectDebugDraws");
-            if (srvIdx.IsValidPointer)
-            {
-                SetupVxDebuggerDrawcall.BindUav(srvIdx, UavVxIndirectDebugDraws);
-            }
 
             CoreSDK.DisposeObject(ref CollectVxDebuggerDrawcall);
             CollectVxDebuggerDrawcall = rc.CreateComputeDraw();
-            CollectVxDebuggerDrawcall.SetComputeEffect(CollectVxDebugger);
-            CollectVxDebuggerDrawcall.SetDispatch(MathHelper.Roundup(VxGroupPoolSize, Dispatch_SetupDimArray1.X),
-                1,
-                1);
-
-            // renwind test
-            srvIdx = CollectVxDebuggerDrawcall.FindBinder(NxRHI.EShaderBindType.SBT_UAV, "VxGroupPool");
-            if (srvIdx.IsValidPointer)
-            {
-                CollectVxDebuggerDrawcall.BindUav(srvIdx, UavVoxelPool);
-            }
-            srvIdx = CollectVxDebuggerDrawcall.FindBinder(NxRHI.EShaderBindType.SBT_UAV, "VxIndirectDebugDraws");
-            if (srvIdx.IsValidPointer)
-            {
-                CollectVxDebuggerDrawcall.BindUav(srvIdx, UavVxIndirectDebugDraws);
-            }
-
-            srvIdx = CollectVxDebuggerDrawcall.FindBinder(NxRHI.EShaderBindType.SBT_CBuffer, "cbGBufferDesc");
-            if (srvIdx.IsValidPointer)
-            {
-                CollectVxDebuggerDrawcall.BindCBuffer(srvIdx, CBuffer);
-            }
-            srvIdx = CollectVxDebuggerDrawcall.FindBinder(NxRHI.EShaderBindType.SBT_UAV, "VoxelGroupDebugger");
-            if (srvIdx.IsValidPointer)
-            {
-                CollectVxDebuggerDrawcall.BindUav(srvIdx, UavVoxelGroupDebugger);
-            }
-            srvIdx = CollectVxDebuggerDrawcall.FindBinder(NxRHI.EShaderBindType.SBT_UAV, "VoxelDebugger");
-            if (srvIdx.IsValidPointer)
-            {
-                CollectVxDebuggerDrawcall.BindUav(srvIdx, UavVoxelDebugger);
-            }
         }
         public void ResetDebugMeshNode(GamePlay.UWorld world)
         {
@@ -198,64 +228,18 @@ namespace EngineNS.Bricks.VXGI
 
             unsafe
             {
-                var desc = new NxRHI.FBufferDesc();
-                desc.SetDefault(false, NxRHI.EBufferType.BFT_SRV | NxRHI.EBufferType.BFT_UAV);
-                desc.Type = NxRHI.EBufferType.BFT_SRV | NxRHI.EBufferType.BFT_UAV;// | NxRHI.EBufferType.TBuffer;
-                desc.Size = VxGroupPoolSize * (uint)sizeof(FVoxelDebugger);
-                desc.StructureStride = (uint)sizeof(FVoxelDebugger);
-                VoxelGroupDebugger = rc.CreateBuffer(in desc);
-                var uavDesc = new NxRHI.FUavDesc();
-                uavDesc.SetBuffer(false);
-                uavDesc.Buffer.NumElements = (uint)VxGroupPoolSize;
-                uavDesc.Buffer.StructureByteStride = desc.StructureStride;
-                UavVoxelGroupDebugger = rc.CreateUAV(VoxelGroupDebugger, in uavDesc);
+                VoxelGroupDebugger.SetSize(VxGroupPoolSize, (void*)0, NxRHI.EBufferType.BFT_SRV | NxRHI.EBufferType.BFT_UAV);
 
-                desc.Size = VxGroupPoolSize * VxGroupCubeSide * VxGroupCubeSide * VxGroupCubeSide * (uint)sizeof(FVoxelDebugger);
-                desc.StructureStride = (uint)sizeof(FVoxelDebugger);
-                VoxelDebugger = rc.CreateBuffer(in desc);
-                uavDesc.Buffer.NumElements = (uint)VxGroupPoolSize * VxGroupCubeSide * VxGroupCubeSide * VxGroupCubeSide;
-                UavVoxelDebugger = rc.CreateUAV(VoxelDebugger, in uavDesc);
+                VoxelDebugger.SetSize((uint)VxGroupPoolSize * VxGroupCubeSide * VxGroupCubeSide * VxGroupCubeSide, (void*)0, NxRHI.EBufferType.BFT_SRV | NxRHI.EBufferType.BFT_UAV);
 
-                var srvDesc = new NxRHI.FSrvDesc();
-                srvDesc.SetBuffer(false);
-                srvDesc.Buffer.NumElements = uavDesc.Buffer.NumElements;
-                srvDesc.Buffer.StructureByteStride = desc.StructureStride;
-                SrvVoxelDebugger = rc.CreateSRV(VoxelDebugger, in srvDesc);
-
-                desc.Size = 2 * (uint)sizeof(FIndirectDrawArgs);
-                desc.StructureStride = (uint)sizeof(uint);
-                desc.Type = NxRHI.EBufferType.BFT_UAV | NxRHI.EBufferType.BFT_IndirectArgs;
-                desc.MiscFlags = NxRHI.EResourceMiscFlag.RM_DRAWINDIRECT_ARGS | NxRHI.EResourceMiscFlag.RM_BUFFER_ALLOW_RAW_VIEWS;
-                VxIndirectDebugDraws = rc.CreateBuffer(in desc);
-                desc.MiscFlags = NxRHI.EResourceMiscFlag.RM_BUFFER_STRUCTURED;
-
-                uavDesc.SetBuffer(true);
-                uavDesc.Format = EPixelFormat.PXF_R32_TYPELESS;
-                uavDesc.Buffer.NumElements = 2 * 5;
-                uavDesc.Buffer.StructureByteStride = desc.StructureStride;
-                UavVxIndirectDebugDraws = rc.CreateUAV(VxIndirectDebugDraws, in uavDesc);
-                uavDesc.Format = EPixelFormat.PXF_UNKNOWN;
+                VxIndirectDebugDraws.SetSize(2 * 5, (void*)0, NxRHI.EBufferType.BFT_UAV | NxRHI.EBufferType.BFT_IndirectArgs);
             }
             
-            var defines = new NxRHI.UShaderDefinitions();
-            defines.mCoreObject.AddDefine("VxSize", $"{VxSize}");
-            defines.mCoreObject.AddDefine("VxGroupPoolSize", $"{VxGroupPoolSize}");
-            defines.mCoreObject.AddDefine("VxGroupCubeSide", $"{VxGroupCubeSide}");
-            defines.mCoreObject.AddDefine("VxSceneX", $"{VxSceneX}");
-            defines.mCoreObject.AddDefine("VxSceneY", $"{VxSceneY}");
-            defines.mCoreObject.AddDefine("VxSceneZ", $"{VxSceneZ}");
-
-            defines.mCoreObject.AddDefine("DispatchX", $"2");
-            defines.mCoreObject.AddDefine("DispatchY", $"1");
-            defines.mCoreObject.AddDefine("DispatchZ", $"1");
-            SetupVxDebugger = await UEngine.Instance.GfxDevice.EffectManager.GetComputeEffect(RName.GetRName("Shaders/Bricks/VXGI/VxVisualDebugger.compute", RName.ERNameType.Engine),
-                "CS_SetupVxDebugger", NxRHI.EShaderType.SDT_ComputeShader, null, defines, null);
+            CoreSDK.DisposeObject(ref SetupVxDebuggerDrawcall);
+            SetupVxDebuggerDrawcall = rc.CreateComputeDraw();
+            SetupVxDebugger = await UEngine.Instance.ShadingEnvManager.GetShadingEnv<SetupVxDebuggerShading>();
             
-            defines.mCoreObject.AddDefine("DispatchX", $"{Dispatch_SetupDimArray1.X}");
-            defines.mCoreObject.AddDefine("DispatchY", $"1");
-            defines.mCoreObject.AddDefine("DispatchZ", $"1");
-            CollectVxDebugger = await UEngine.Instance.GfxDevice.EffectManager.GetComputeEffect(RName.GetRName("Shaders/Bricks/VXGI/VxVisualDebugger.compute", RName.ERNameType.Engine),
-                "CS_CollectVxDebugger", NxRHI.EShaderType.SDT_ComputeShader, null, defines, null);
+            CollectVxDebugger = await UEngine.Instance.ShadingEnvManager.GetShadingEnv<CollectVxDebuggerShading>();
 
             VxDebugMesh = new Graphics.Mesh.TtMesh();
             var rect = Graphics.Mesh.UMeshDataProvider.MakeBox(-0.5f, -0.5f, -0.5f, 1, 1, 1);
@@ -290,7 +274,7 @@ namespace EngineNS.Bricks.VXGI
             }
         }
 
-        private unsafe void TickVxDebugger(GamePlay.UWorld world)
+        private unsafe void TickVxDebugger(GamePlay.UWorld world, Graphics.Pipeline.URenderPolicy policy)
         {
             if (DebugVoxels == false)
             {
@@ -298,10 +282,16 @@ namespace EngineNS.Bricks.VXGI
             }
             
             var cmd = BasePass.DrawCmdList;
-            //SetupVxDebuggerDrawcall.Commit(cmd);
-            //CollectVxDebuggerDrawcall.Commit(cmd);
 
+            SetupVxDebugger.SetDrawcallDispatch(this, policy, SetupVxDebuggerDrawcall, 
+                                        1, 1, 1, true);
             cmd.PushGpuDraw(SetupVxDebuggerDrawcall);
+
+            CollectVxDebugger.SetDrawcallDispatch(this, policy, CollectVxDebuggerDrawcall,
+                                        VxGroupPoolSize,
+                                        1,
+                                        1,
+                                        true);
             cmd.PushGpuDraw(CollectVxDebuggerDrawcall);
 
             if (VxDebugMesh != null && world.Root.FindFirstChild("Debug_VoxelDebugMeshNode") == null)

@@ -57,6 +57,8 @@ namespace EngineNS.Rtti
             ManualMarshal = (1 << 8),
 
             Unserializable = (1 << 9),// 不能序列化
+
+            CanRefForMacross = (1 << 11),// Macross代码生成时，可以用ref做传引用，这里有一个潜规则，需要提供对应名为m{PropertyName}的public成员变量
         }
         public int Order = 0;
         public EMetaFlags Flags = 0;
@@ -71,6 +73,7 @@ namespace EngineNS.Rtti
         public bool IsMacrossReadOnly => (Flags & EMetaFlags.MacrossReadOnly) != 0;
         //public bool IsMacrossDeclareable => (Flags & EMetaFlags.MacrossDeclareable) != 0;
         public bool IsUnserializable => (Flags & EMetaFlags.Unserializable) != 0;
+        public bool IsCanRefForMacross => (Flags & EMetaFlags.CanRefForMacross) != 0; 
     }
     public class UClassMeta
     {

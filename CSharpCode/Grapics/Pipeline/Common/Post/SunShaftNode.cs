@@ -110,7 +110,7 @@ namespace EngineNS.Graphics.Pipeline.Common.Post
         public override async System.Threading.Tasks.Task Initialize(URenderPolicy policy, string debugName)
         {
             await base.Initialize(policy, debugName);
-            mBasePassShading = UEngine.Instance.ShadingEnvManager.GetShadingEnv<TtDepthThresholeShading>();
+            mBasePassShading = await UEngine.Instance.ShadingEnvManager.GetShadingEnv<TtDepthThresholeShading>();
         }
 
         FSunShaftStruct mSunShaftStruct = new FSunShaftStruct();
@@ -248,7 +248,7 @@ namespace EngineNS.Graphics.Pipeline.Common.Post
         public override async System.Threading.Tasks.Task Initialize(URenderPolicy policy, string debugName)
         {
             await base.Initialize(policy, debugName);
-            mBasePassShading = UEngine.Instance.ShadingEnvManager.GetShadingEnv<TtRadialBlurShading>();
+            mBasePassShading = await UEngine.Instance.ShadingEnvManager.GetShadingEnv<TtRadialBlurShading>();
         }
 
         FSunShaftStruct mSunShaftStruct = new FSunShaftStruct();

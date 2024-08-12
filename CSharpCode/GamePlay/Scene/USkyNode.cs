@@ -72,7 +72,7 @@ namespace EngineNS.GamePlay.Scene
             var materials = new Graphics.Pipeline.Shader.UMaterialInstance[1];
             materials[0] = SunMaterial;
             SunMesh.Initialize(rectMesh, materials, Rtti.UTypeDescGetter<Graphics.Mesh.UMdfStaticMesh>.TypeDesc);
-            SunMesh.UserShading = UEngine.Instance.ShadingEnvManager.GetShadingEnv<Graphics.Pipeline.Shader.CommanShading.UDrawViewportShading>();
+            SunMesh.UserShading = await UEngine.Instance.ShadingEnvManager.GetShadingEnv<Graphics.Pipeline.Shader.CommanShading.UDrawViewportShading>();
             return true;
         }
         public override void OnGatherVisibleMeshes(UWorld.UVisParameter rp)

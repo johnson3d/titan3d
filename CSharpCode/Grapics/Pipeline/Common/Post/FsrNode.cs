@@ -184,9 +184,9 @@ namespace EngineNS.Graphics.Pipeline.Common.Post
 
             CoreSDK.DisposeObject(ref UpSampleDrawcall);
             UpSampleDrawcall = rc.CreateComputeDraw();
-            UpSampleShadingEnv = UEngine.Instance.ShadingEnvManager.GetShadingEnv<TtFsrUpSampleShading>();
+            UpSampleShadingEnv = await UEngine.Instance.ShadingEnvManager.GetShadingEnv<TtFsrUpSampleShading>();
             RCASDrawcall = rc.CreateComputeDraw();
-            RCASShading = UEngine.Instance.ShadingEnvManager.GetShadingEnv<TtRCASShading>();
+            RCASShading = await UEngine.Instance.ShadingEnvManager.GetShadingEnv<TtRCASShading>();
         }
         public override void OnResize(URenderPolicy policy, float x, float y)
         {

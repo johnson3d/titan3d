@@ -113,7 +113,7 @@ namespace EngineNS.Graphics.Pipeline.Shadow
             await Thread.TtAsyncDummyClass.DummyFunc();
             var rc = UEngine.Instance.GfxDevice.RenderContext;
 
-            mShadowShading = UEngine.Instance.ShadingEnvManager.GetShadingEnv<Shadow.UShadowShading>();
+            mShadowShading = await UEngine.Instance.ShadingEnvManager.GetShadingEnv<Shadow.UShadowShading>();
 
             mShadowCameraArray = new UCamera[4];
             for (UInt32 CamIdx = 0; CamIdx < mCsmNum; CamIdx++)

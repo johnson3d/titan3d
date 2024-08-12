@@ -1,6 +1,7 @@
 ﻿using EngineNS.Rtti;
 using System;
 using System.Collections.Generic;
+using System.Reflection;
 using System.Text;
 
 namespace EngineNS.Bricks.CodeBuilder
@@ -416,6 +417,19 @@ namespace EngineNS.Bricks.CodeBuilder
                     var hostGen = data.CodeGen.GetCodeObjectGen(varRefExp.Host.GetType());
                     hostGen.GenCodes(varRefExp.Host, ref sourceCode, ref data);
                     sourceCode += ".";
+                }
+                if (varRefExp.PropertyDeclClass != null && varRefExp.VariableName != null)
+                {
+                    var prop = varRefExp.PropertyDeclClass.SystemType.GetProperty(varRefExp.VariableName);
+                    if (prop != null)
+                    {
+                        var meta = prop.GetCustomAttribute<Rtti.MetaAttribute>();
+                        if (meta != null && meta.IsCanRefForMacross)
+                        {
+                            sourceCode += "m" + meta.ShaderName;
+                            return;
+                        }
+                    }
                 }
                 sourceCode += varRefExp.VariableName;
             }

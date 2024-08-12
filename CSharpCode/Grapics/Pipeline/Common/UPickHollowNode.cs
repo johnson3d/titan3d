@@ -74,7 +74,7 @@ namespace EngineNS.Graphics.Pipeline.Common
         public override async System.Threading.Tasks.Task Initialize(URenderPolicy policy, string debugName)
         {
             await base.Initialize(policy, debugName);
-            mBasePassShading = UEngine.Instance.ShadingEnvManager.GetShadingEnv<UPickHollowShading>();
+            mBasePassShading = await UEngine.Instance.ShadingEnvManager.GetShadingEnv<UPickHollowShading>();
         }
         public override void OnLinkIn(TtRenderGraphLinker linker)
         {
@@ -184,7 +184,7 @@ namespace EngineNS.Graphics.Pipeline.Common
         public override async System.Threading.Tasks.Task Initialize(URenderPolicy policy, string debugName)
         {
             await base.Initialize(policy, debugName);
-            mBasePassShading = UEngine.Instance.ShadingEnvManager.GetShadingEnv<TtPickHollowBlendShading>();
+            mBasePassShading = await UEngine.Instance.ShadingEnvManager.GetShadingEnv<TtPickHollowBlendShading>();
         }
         public override void OnLinkIn(TtRenderGraphLinker linker)
         {

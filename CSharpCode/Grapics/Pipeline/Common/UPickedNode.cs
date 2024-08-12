@@ -62,7 +62,7 @@ namespace EngineNS.Graphics.Pipeline.Common
         public async override System.Threading.Tasks.Task Initialize(URenderPolicy policy, string debugName)
         {
             await Thread.TtAsyncDummyClass.DummyFunc();
-            PickedShading = UEngine.Instance.ShadingEnvManager.GetShadingEnv<UPickSetupShading>();
+            PickedShading = await UEngine.Instance.ShadingEnvManager.GetShadingEnv<UPickSetupShading>();
 
             var rc = UEngine.Instance.GfxDevice.RenderContext;
             BasePass.Initialize(rc, debugName + ".BasePass");

@@ -49,7 +49,7 @@ namespace EngineNS.Graphics.Pipeline.Common
             return mBasePassShading;
         }
         public TtScreenSpaceUIShading mBasePassShading;
-        public override async Task Initialize(URenderPolicy policy, string debugName)
+        public override async System.Threading.Tasks.Task Initialize(URenderPolicy policy, string debugName)
         {
             var rc = UEngine.Instance.GfxDevice.RenderContext;
 
@@ -58,7 +58,7 @@ namespace EngineNS.Graphics.Pipeline.Common
             BasePass.Initialize(rc, debugName + ".BasePass");
             DebugName = debugName;
 
-            mBasePassShading = UEngine.Instance.ShadingEnvManager.GetShadingEnv<TtScreenSpaceUIShading>();
+            mBasePassShading = await UEngine.Instance.ShadingEnvManager.GetShadingEnv<TtScreenSpaceUIShading>();
         }
         public override unsafe TtGraphicsBuffers CreateGBuffers(URenderPolicy policy, EPixelFormat format)
         {

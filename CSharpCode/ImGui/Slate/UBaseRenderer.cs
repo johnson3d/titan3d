@@ -19,7 +19,7 @@ namespace EngineNS.EGui.Slate
             var rc = UEngine.Instance.GfxDevice.RenderContext;
 
             SlateEffect = await UEngine.Instance.GfxDevice.EffectManager.GetEffect(
-                UEngine.Instance.ShadingEnvManager.GetShadingEnv<Graphics.Pipeline.Shader.CommanShading.USlateGUIShading>(),
+                await UEngine.Instance.ShadingEnvManager.GetShadingEnv<Graphics.Pipeline.Shader.CommanShading.USlateGUIShading>(),
                 UEngine.Instance.GfxDevice.MaterialManager.ScreenMaterial, new Graphics.Mesh.UMdfStaticMesh());
 
             var iptDesc = new NxRHI.UInputLayoutDesc();

@@ -185,7 +185,7 @@ namespace EngineNS.Graphics.Pipeline.Common
 
             var rc = UEngine.Instance.GfxDevice.RenderContext;
 
-            mBasePassShading = UEngine.Instance.ShadingEnvManager.GetShadingEnv<TtAntiAliasingShading>();
+            mBasePassShading = await UEngine.Instance.ShadingEnvManager.GetShadingEnv<TtAntiAliasingShading>();
 
             mCopyColorDrawcall = UEngine.Instance.GfxDevice.RenderContext.CreateCopyDraw();
             mCopyDepthDrawcall = UEngine.Instance.GfxDevice.RenderContext.CreateCopyDraw();

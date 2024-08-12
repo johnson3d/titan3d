@@ -118,8 +118,8 @@ namespace EngineNS.Graphics.Pipeline.Deferred
 
             CreateGBuffers(policy, ColorPinInOut.Attachement.Format);
 
-            mOpaqueShading = UEngine.Instance.ShadingEnvManager.GetShadingEnv<UOpaqueShading>();
-            mTranslucentShading = UEngine.Instance.ShadingEnvManager.GetShadingEnv<UTranslucentShading>();
+            mOpaqueShading = await UEngine.Instance.ShadingEnvManager.GetShadingEnv<UOpaqueShading>();
+            mTranslucentShading = await UEngine.Instance.ShadingEnvManager.GetShadingEnv<UTranslucentShading>();
 
             var linker = VisiblesPinIn.FindInLinker();
             if (linker != null)
@@ -318,8 +318,8 @@ namespace EngineNS.Graphics.Pipeline.Deferred
 
             CreateGBuffers(policy, ColorPinInOut.Attachement.Format);
 
-            mOpaqueShading = UEngine.Instance.ShadingEnvManager.GetShadingEnv<UOpaqueShading>();
-            mTranslucentShading = UEngine.Instance.ShadingEnvManager.GetShadingEnv<UTranslucentShading>();
+            mOpaqueShading = await UEngine.Instance.ShadingEnvManager.GetShadingEnv<UOpaqueShading>();
+            mTranslucentShading = await UEngine.Instance.ShadingEnvManager.GetShadingEnv<UTranslucentShading>();
 
             var linker = VisiblesPinIn.FindInLinker();
             if (linker != null)

@@ -85,7 +85,7 @@ namespace EngineNS.Graphics.Pipeline.Common
         public override async System.Threading.Tasks.Task Initialize(URenderPolicy policy, string debugName)
         {
             await base.Initialize(policy, debugName);
-            mBasePassShading = UEngine.Instance.ShadingEnvManager.GetShadingEnv<TtFogShading>();
+            mBasePassShading = await UEngine.Instance.ShadingEnvManager.GetShadingEnv<TtFogShading>();
         }
         public override void FrameBuild(URenderPolicy policy)
         {

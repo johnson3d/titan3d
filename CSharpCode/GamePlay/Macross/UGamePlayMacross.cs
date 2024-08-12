@@ -135,7 +135,7 @@ namespace EngineNS.GamePlay.GamePlayMacross
             var idleAnimState = new TtAnimationState<UGameplayMacross>(mGamePlayStateMachine);
             idleAnimState.Animation = await EngineNS.UEngine.Instance.AnimationModule.AnimationClipManager.GetAnimationClip(RName.GetRName("utest/puppet/animation/w2_stand_aim_idle_ip.animclip"));
             //idleAnimState.Initialize();
-            idleAnimState.mExtractPoseFromClipCommand.SetExtractedPose(ref animatablePose);
+            idleAnimState.mExtractPoseFromClipCommand?.SetExtractedPose(ref animatablePose);
             idleState.AnimationState = idleAnimState;
             mGamePlayStateMachine.SetDefaultState(idleState);
             return true;
@@ -165,6 +165,8 @@ namespace EngineNS.GamePlay.GamePlayMacross
             context.Create();
             TtAnimationCommand<TtLocalSpaceRuntimePose> cmd = null;
             var root = mGamePlayStateMachine.ConstructAnimationCommandTree(cmd, ref context);
+            if (root == null)
+                return;
             context.CmdExecuteStack.Execute();
             TtRuntimePoseUtility.CopyPose(ref mRuntimePose, root.OutPose);
         }

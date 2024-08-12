@@ -79,7 +79,7 @@ namespace EngineNS.Graphics.Pipeline.Shadow
         public override async System.Threading.Tasks.Task Initialize(URenderPolicy policy, string debugName)
         {
             await base.Initialize(policy, debugName);
-            mBasePassShading = UEngine.Instance.ShadingEnvManager.GetShadingEnv<UExponentialShadowShading>();
+            mBasePassShading = await UEngine.Instance.ShadingEnvManager.GetShadingEnv<UExponentialShadowShading>();
         }
         public override void OnLinkIn(TtRenderGraphLinker linker)
         {

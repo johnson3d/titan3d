@@ -21,6 +21,7 @@ using System.ComponentModel;
 using System.IO;
 using System.Runtime.InteropServices;
 using System.Text;
+using System.Linq;
 
 namespace EngineNS.NxRHI
 {
@@ -92,7 +93,14 @@ namespace EngineNS.NxRHI
         }
         protected bool mShowA = false;
         EngineNS.Editor.Forms.TtTextureViewerCmdParams CmdParameters = null;
-        public unsafe override void OnDrawSnapshot(in ImDrawList cmdlist, ref Vector2 start, ref Vector2 end)
+        private async Thread.Async.TtTask<EngineNS.Graphics.Pipeline.Shader.UEffect> GetEffect()
+        {
+            var shading = await UEngine.Instance.ShadingEnvManager.GetShadingEnv<EngineNS.Editor.Forms.USlateTextureViewerShading>();
+            return await UEngine.Instance.GfxDevice.EffectManager.GetEffect(shading,
+                UEngine.Instance.GfxDevice.MaterialManager.ScreenMaterial,
+                new Graphics.Mesh.UMdfStaticMesh());
+        }
+        public override void OnDrawSnapshot(in ImDrawList cmdlist, ref Vector2 start, ref Vector2 end)
         {
             if (SnapTask == null)
             {
@@ -100,9 +108,7 @@ namespace EngineNS.NxRHI
                 SnapTask = UEngine.Instance.GfxDevice.TextureManager.GetTexture(this.GetAssetName(), 1);
                 //cmdlist.AddText(in start, 0xFFFFFFFF, "texture", null);
 
-                EffectTask = UEngine.Instance.GfxDevice.EffectManager.GetEffect(
-                    UEngine.Instance.ShadingEnvManager.GetShadingEnv<EngineNS.Editor.Forms.USlateTextureViewerShading>(),
-                    UEngine.Instance.GfxDevice.MaterialManager.ScreenMaterial, new Graphics.Mesh.UMdfStaticMesh());
+                EffectTask = GetEffect();
 
                 return;
             }
@@ -213,7 +219,6 @@ namespace EngineNS.NxRHI
             public ETextureCompressFormat CompressFormat { get => Desc.CompressFormat; set => Desc.CompressFormat = value; }
             [ReadOnly(true)]
             public EPixelFormat Format { get => Desc.Format; set => Desc.Format = value; }
-            [ReadOnly(true)]
             public uint CubeFaces { get => Desc.CubeFaces; set => Desc.CubeFaces = value; }
             public int MipLevel { get => Desc.MipLevel; set => Desc.MipLevel = value; }
             [ReadOnly(true)]
@@ -265,6 +270,243 @@ namespace EngineNS.NxRHI
         {
             mCoreObject.NativeSuper.SetDebugName(name);
         }
+
+        #region Cubemap
+        // transform world space vector to a space relative to the face
+        static Vector3 TransformSideToWorldSpace(uint CubemapFace, Vector3 InDirection)
+        {
+            float x = InDirection.X, y = InDirection.Y, z = InDirection.Z;
+
+            Vector3 Ret = new Vector3(0, 0, 0);
+
+            // see http://msdn.microsoft.com/en-us/library/bb204881(v=vs.85).aspx
+            switch (CubemapFace)
+            {
+                case 0: Ret = new Vector3(+z, -y, -x); break;
+                case 1: Ret = new Vector3(-z, -y, +x); break;
+                case 2: Ret = new Vector3(+x, +z, +y); break;
+                case 3: Ret = new Vector3(+x, -z, -y); break;
+                case 4: Ret = new Vector3(+x, -y, +z); break;
+                case 5: Ret = new Vector3(-x, -y, -z); break;
+            }
+
+            // this makes it with the Unreal way (z and y are flipped)
+            return Ret;
+        }
+
+        // transform vector relative to the face to world space
+        static Vector3 TransformWorldToSideSpace(uint CubemapFace, Vector3 InDirection)
+        {
+            // undo Unreal way (z and y are flipped)
+            float x = InDirection.X, y = InDirection.Z, z = InDirection.Y;
+
+            Vector3 Ret = new Vector3(0, 0, 0);
+
+            // see http://msdn.microsoft.com/en-us/library/bb204881(v=vs.85).aspx
+            switch (CubemapFace)
+            {
+                case 0: Ret = new Vector3(-z, -y, +x); break;
+                case 1: Ret = new Vector3(+z, -y, -x); break;
+                case 2: Ret = new Vector3(+x, +z, +y); break;
+                case 3: Ret = new Vector3(+x, -z, -y); break;
+                case 4: Ret = new Vector3(+x, -y, +z); break;
+                case 5: Ret = new Vector3(-x, -y, -z); break;
+            }
+
+            return Ret;
+        }
+
+        static Vector3 ComputeSSCubeDirectionAtTexelCenter(uint x, uint y, float InvSideExtent)
+        {
+            // center of the texels
+            Vector3 DirectionSS = new Vector3((x +0.5f) *InvSideExtent * 2 - 1, (y + 0.5f) * InvSideExtent * 2 - 1, 1);
+            DirectionSS.Normalize();
+            return DirectionSS;
+        }
+
+        static Vector3 ComputeWSCubeDirectionAtTexelCenter(uint CubemapFace, uint x, uint y, float InvSideExtent)
+        {
+            Vector3 DirectionSS = ComputeSSCubeDirectionAtTexelCenter(x, y, InvSideExtent);
+            Vector3 DirectionWS = TransformSideToWorldSpace(CubemapFace, DirectionSS);
+            return DirectionWS;
+        }
+
+        static int ComputeLongLatCubemapExtents(int SrcImageWidth, int MaxCubemapTextureResolution)
+        {
+            int width = 1 << (int)MathHelper.ILog2Const((uint)SrcImageWidth / 2);
+            return MathHelper.Clamp(width, 32, MaxCubemapTextureResolution);
+        }
+
+        /**
+ * View in to an image that allows access by converting a direction to longitude and latitude.
+ */
+        struct ImageViewLongLat
+        {
+            /** Image colors. */
+            Vector4[] ImageColors;
+            /** Width of the image. */
+            int SizeX;
+            /** Height of the image. */
+            int SizeY;
+
+            /** Initialization constructor. */
+            public ImageViewLongLat(ImageResultFloat Image)
+            {
+                SizeX = Image.Width;
+                SizeY = Image.Height;
+                ImageColors = new Vector4[Image.Width * Image.Height];
+                if (Image.Comp == ColorComponents.RedGreenBlueAlpha)
+                {
+                    for (int i = 0; i < ImageColors.Length; ++i)
+                    {
+                        ImageColors[i].X = Image.Data[i * 4 + 0];
+                        ImageColors[i].Y = Image.Data[i * 4 + 1];
+                        ImageColors[i].Z = Image.Data[i * 4 + 2];
+                        ImageColors[i].W = Image.Data[i * 4 + 3];
+                    }
+                }
+            }
+
+            /** Wraps X around W. */
+            static void WrapTo(ref int X, int W)
+            {
+                X = X % W;
+
+                if (X < 0)
+                {
+                    X += W;
+                }
+            }
+
+            /** Const access to a texel. */
+            Vector4 Access(int X, int Y)
+        	{
+		        return ImageColors[X + Y * SizeX];
+	        }
+
+            /** Makes a filtered lookup. */
+            Vector4 LookupFiltered(float X, float Y)
+    	    {
+                int X0 = (int)MathHelper.Floor(X);
+                int Y0 = (int)MathHelper.Floor(Y);
+
+                float FracX = X - X0;
+                float FracY = Y - Y0;
+
+                int X1 = X0 + 1;
+                int Y1 = Y0 + 1;
+
+                WrapTo(ref X0, SizeX);
+                WrapTo(ref X1, SizeX);
+                Y0 = MathHelper.Clamp(Y0, 0, (int) (SizeY - 1));
+		        Y1 = MathHelper.Clamp(Y1, 0, (int) (SizeY - 1));
+
+		        Vector4 CornerRGB00 = Access(X0, Y0);
+                Vector4 CornerRGB10 = Access(X1, Y0);
+                Vector4 CornerRGB01 = Access(X0, Y1);
+                Vector4 CornerRGB11 = Access(X1, Y1);
+
+                Vector4 CornerRGB0 = Vector4.Lerp(CornerRGB00, CornerRGB10, FracX);
+                Vector4 CornerRGB1 = Vector4.Lerp(CornerRGB01, CornerRGB11, FracX);
+
+		        return Vector4.Lerp(CornerRGB0, CornerRGB1, FracY);
+	        }
+
+            /** Makes a filtered lookup using a direction. */
+            public Vector4 LookupLongLat(Vector3 NormalizedDirection)
+	        {
+                // see http://gl.ict.usc.edu/Data/HighResProbes
+                // latitude-longitude panoramic format = equirectangular mapping
+                float X = (1 + MathHelper.Atan2(NormalizedDirection.X, NormalizedDirection.Z) / MathHelper.PI) / 2 * SizeX;
+                float Y = MathHelper.Acos(NormalizedDirection.Y) / MathHelper.PI * SizeY;
+
+                return LookupFiltered(X, Y);
+            }
+        };
+
+        static void CopyFaceToCubemapContinus(Vector4[] faceData, Vector4[] cubeMapExpand, int faceStartIndex, int Extent)
+        {
+            var faceDataSize = Extent * Extent;
+            for (int y = 0; y < Extent; ++y)
+            {
+                for (int x = 0; x < Extent; ++x)
+                {
+                    cubeMapExpand[faceStartIndex + x + y * 4 * Extent] = faceData[x + y * Extent];
+                }
+            }
+        }
+
+        /**
+         * Generates the base cubemap mip from a longitude-latitude 2D image.
+         * @param OutMip - The output mip.
+         * @param SrcImage - The source longlat image.
+         */
+        public static void GenerateBaseCubeMipFromLongitudeLatitude2D(ref StbImageSharp.ImageResultFloat OutMip, StbImageSharp.ImageResultFloat LongLatImage, int MaxCubemapTextureResolution)
+        {
+            ImageViewLongLat LongLatView = new ImageViewLongLat(LongLatImage);
+
+            // TODO_TEXTURE: Expose target size to user.
+            int Extent = ComputeLongLatCubemapExtents(LongLatImage.Width, MaxCubemapTextureResolution);
+            float InvExtent = 1.0f / Extent;
+
+            Vector4[] faceDataContinus = new Vector4[6 * Extent * Extent];
+            Vector4[][] faceDatas = new Vector4[6][];
+            for (uint Face = 0; Face < 6; ++Face)
+            {
+                faceDatas[Face] = new Vector4[Extent*Extent];
+                //Vector4[] faceData = new Vector4[Extent * Extent];
+                for (int y = 0; y < Extent; ++y)
+                {
+                    for (int x = 0; x < Extent; ++x)
+                    {
+                        Vector3 DirectionWS = ComputeWSCubeDirectionAtTexelCenter(Face, (uint)x, (uint)y, InvExtent);
+                        faceDatas[Face][x + y*Extent] = LongLatView.LookupLongLat(DirectionWS);
+                    }
+                }
+
+                faceDatas[Face].CopyTo(faceDataContinus, Face * Extent * Extent);
+            }
+
+            float[] floatArray = faceDataContinus.SelectMany(vector => new float[] { vector.X, vector.Y, vector.Z, vector.W }).ToArray();
+            unsafe
+            {
+                fixed (float* floatPtr = floatArray)
+                {
+                    OutMip = StbImageSharp.ImageResultFloat.FromResult(floatPtr, Extent, 6 * Extent, ColorComponents.RedGreenBlueAlpha, ColorComponents.RedGreenBlueAlpha);
+                }
+
+                #region Debug
+                if (false)
+                {
+                    var faceDataSize = Extent * Extent;
+                    Vector4[] cubeMapExpand = new Vector4[4 * 3 * faceDataSize];
+
+                    CopyFaceToCubemapContinus(faceDatas[0], cubeMapExpand, 2 * Extent + 4 * faceDataSize, Extent);
+                    CopyFaceToCubemapContinus(faceDatas[1], cubeMapExpand, 4 * faceDataSize, Extent);
+                    CopyFaceToCubemapContinus(faceDatas[2], cubeMapExpand, 1 * Extent, Extent);
+                    CopyFaceToCubemapContinus(faceDatas[3], cubeMapExpand, 1 * Extent + 8 * faceDataSize, Extent);
+                    CopyFaceToCubemapContinus(faceDatas[4], cubeMapExpand, 1 * Extent + 4 * faceDataSize, Extent);
+                    CopyFaceToCubemapContinus(faceDatas[5], cubeMapExpand, 3 * Extent + 4 * faceDataSize, Extent);
+
+                    float[] floatArrayDebug = cubeMapExpand.SelectMany(vector => new float[] { vector.X, vector.Y, vector.Z, vector.W }).ToArray();
+
+                    fixed (float* floatPtrDebug = floatArrayDebug)
+                    {
+                        OutMip = StbImageSharp.ImageResultFloat.FromResult(floatPtrDebug, 4 * Extent, 3 * Extent, ColorComponents.RedGreenBlueAlpha, ColorComponents.RedGreenBlueAlpha);
+
+                        var sourceFile = "F:/CubeFaces" + ".hdr";
+                        using (var stream = System.IO.File.Create(sourceFile))
+                        {
+                            var writer = new StbImageWriteSharp.ImageWriter();
+                            writer.WriteHdr(floatPtrDebug, 4 * Extent, 3 * Extent, StbImageWriteSharp.ColorComponents.RedGreenBlueAlpha, stream);
+                        }
+                    }
+                }
+                #endregion
+            }
+
+        }
+        #endregion
 
         public class NormalmapChecker
         {
@@ -594,7 +836,15 @@ namespace EngineNS.NxRHI
                         if (imageFloat == null)
                             return false;
 
-                        USrView.SaveTexture(rn, xnd.RootNode.mCoreObject, imageFloat, mDesc);
+                        StbImageSharp.ImageResultFloat processedImage = null;
+                        if (mDesc.CubeFaces == 6)
+                        {
+                            USrView.GenerateBaseCubeMipFromLongitudeLatitude2D(ref processedImage, imageFloat, 512);
+                        }
+                        else
+                            processedImage = imageFloat;
+
+                        USrView.SaveTexture(rn, xnd.RootNode.mCoreObject, processedImage, mDesc);
                     }
                     else if (extName.ToLower() == ".exr")
                     {
@@ -1252,33 +1502,24 @@ namespace EngineNS.NxRHI
             }
             else
             {
-                using (var memStream = new System.IO.MemoryStream())
+                if (desc.IsAutoSaveSrcImage == true)
                 {
-                    var writer = new StbImageWriteSharp.ImageWriter();
-                    fixed (void* fptr = image.Data)
+                    using (var memStream = new System.IO.MemoryStream())
                     {
-                        writer.WriteHdr(fptr, image.Width, image.Height, writeComp, memStream);
-                    }
-                    var rawData = memStream.ToArray();
+                        var writer = new StbImageWriteSharp.ImageWriter();
+                        fixed (void* fptr = image.Data)
+                        {
+                            writer.WriteHdr(fptr, image.Width, image.Height, writeComp, memStream);
+                        }
+                        var rawData = memStream.ToArray();
 
 
-                    var rawAttr = node.GetOrAddAttribute("Hdr", 0, 0);
-                    using (var ar = rawAttr.GetWriter((ulong)memStream.Position))
-                    {
-                        ar.WriteNoSize(rawData, (int)memStream.Position);
+                        var rawAttr = node.GetOrAddAttribute("Hdr", 0, 0);
+                        using (var ar = rawAttr.GetWriter((ulong)memStream.Position))
+                        {
+                            ar.WriteNoSize(rawData, (int)memStream.Position);
+                        }
                     }
-                    //var size = (uint)memStream.Length;
-                    //if (size > 0)
-                    //{
-                    //    var len = CoreSDK.CompressBound_ZSTD(size) + 5;
-                    //    using (var d = BigStackBuffer.CreateInstance((int)len))
-                    //    {
-                    //        void* srcBuffer = System.Runtime.InteropServices.Marshal.UnsafeAddrOfPinnedArrayElement(rawData, 0).ToPointer();
-                    //        var wSize = (uint)CoreSDK.Compress_ZSTD(d.GetBuffer(), len, srcBuffer, size, 1);
-                    //        rawAttr.Write(wSize);
-                    //        rawAttr.Write(d.GetBuffer(), wSize);
-                    //    }
-                    //}
                 }
             }
 
@@ -1893,8 +2134,7 @@ namespace EngineNS.NxRHI
         {
             System.Diagnostics.Debug.Assert(desc.DontCompress == false);
 
-
-            desc.CubeFaces = 1;
+            //desc.CubeFaces = 1;
             if(desc.MipLevel == 0)
                 desc.MipLevel = CalcMipLevel(curImage.Width, curImage.Height, true) - 3;
             EPixelFormat descPixelFormat = EPixelFormat.PXF_UNKNOWN;
@@ -1912,6 +2152,14 @@ namespace EngineNS.NxRHI
             encoder.OutputOptions.Quality = CompressionQuality.Balanced;
             encoder.OutputOptions.Format = CompressionFormat.Bc6U;
             encoder.OutputOptions.FileFormat = OutputFileFormat.Dds;
+
+
+            int imageWidth = curImage.Width;
+            int imageHeight = curImage.Height;
+            if (desc.CubeFaces == 6)
+            {
+                imageHeight = curImage.Width;
+            }
 
             System.DateTime beginTime = System.DateTime.Now;
             Profiler.Log.WriteInfoSimple("Start SaveDxtMips_BcEncoder");
@@ -2822,6 +3070,11 @@ namespace EngineNS.NxRHI
                 texDesc.MipLevels = (uint)mipLevel;
                 texDesc.InitData = pInitData;
                 texDesc.Format = desc.Desc.Format;
+                if(desc.CubeFaces==6)
+                {
+                    texDesc.ArraySize = 6;
+                    texDesc.MiscFlags = EResourceMiscFlag.RM_TEXTURECUBE;
+                }
 
                 var result = rc.CreateTexture(in texDesc);
                 return result;
@@ -3055,6 +3308,10 @@ namespace EngineNS.NxRHI
                 return null;
             }
 
+            return CreateTexture(image, file);
+        }
+        private unsafe USrView CreateTexture(StbImageSharp.ImageResult image, string file)
+        {
             var texDesc = new FTextureDesc();
             texDesc.SetDefault();
             texDesc.Width = (uint)image.Width;
@@ -3068,33 +3325,30 @@ namespace EngineNS.NxRHI
                     pixelWidth = 4;
                     break;
             }
-            unsafe
+            var data = new FMappedSubResource();
+            data.RowPitch = texDesc.m_Width * pixelWidth;
+            data.DepthPitch = data.RowPitch * texDesc.Height;
+            texDesc.InitData = &data;
+            fixed (byte* pData = &image.Data[0])
             {
-                var data = new FMappedSubResource();
-                data.RowPitch = texDesc.m_Width * pixelWidth;
-                data.DepthPitch = data.RowPitch * texDesc.Height;
-                texDesc.InitData = &data;
-                fixed (byte* pData = &image.Data[0])
-                {
-                    data.pData = pData;
+                data.pData = pData;
 
-                    var rc = UEngine.Instance.GfxDevice.RenderContext;
-                    var texture2d = rc.CreateTexture(in texDesc);
-                    texture2d.SetDebugName(file);
+                var rc = UEngine.Instance.GfxDevice.RenderContext;
+                var texture2d = rc.CreateTexture(in texDesc);
+                texture2d.SetDebugName(file);
 
-                    var srvDesc = new FSrvDesc();
-                    srvDesc.SetTexture2D();
-                    srvDesc.Type = ESrvType.ST_Texture2D;
-                    srvDesc.Format = texDesc.Format;
-                    srvDesc.Texture2D.MipLevels = texDesc.MipLevels;
-                    var result = rc.CreateSRV(texture2d, in srvDesc);
-                    //result.PicDesc.Desc = texDesc;
-                    //result.LevelOfDetail = mipLevel;
-                    //result.TargetLOD = mipLevel;
-                    //result.AssetName = rn;
+                var srvDesc = new FSrvDesc();
+                srvDesc.SetTexture2D();
+                srvDesc.Type = ESrvType.ST_Texture2D;
+                srvDesc.Format = texDesc.Format;
+                srvDesc.Texture2D.MipLevels = texDesc.MipLevels;
+                var result = rc.CreateSRV(texture2d, in srvDesc);
+                //result.PicDesc.Desc = texDesc;
+                //result.LevelOfDetail = mipLevel;
+                //result.TargetLOD = mipLevel;
+                //result.AssetName = rn;
 
-                    return result;
-                }
+                return result;
             }
         }
         public async Thread.Async.TtTask<USrView> GetOrNewTexture(RName rn, int mipLevel = 1)

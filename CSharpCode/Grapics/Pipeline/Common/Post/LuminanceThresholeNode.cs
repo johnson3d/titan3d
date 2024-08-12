@@ -81,7 +81,7 @@ namespace EngineNS.Graphics.Pipeline.Common.Post
         public override async System.Threading.Tasks.Task Initialize(URenderPolicy policy, string debugName)
         {
             await base.Initialize(policy, debugName);
-            mBasePassShading = UEngine.Instance.ShadingEnvManager.GetShadingEnv<TtLuminanceThresholeShading>();
+            mBasePassShading = await UEngine.Instance.ShadingEnvManager.GetShadingEnv<TtLuminanceThresholeShading>();
         }
         [System.Runtime.InteropServices.StructLayout(System.Runtime.InteropServices.LayoutKind.Sequential, Pack = 16)]
         struct FLuminanceThresholeStruct
@@ -153,7 +153,7 @@ namespace EngineNS.Graphics.Pipeline.Common.Post
         public override async System.Threading.Tasks.Task Initialize(URenderPolicy policy, string debugName)
         {
             await base.Initialize(policy, debugName);
-            mLuminanceShading = UEngine.Instance.ShadingEnvManager.GetShadingEnv<TtLuminanceThresholeOutLumShading>();
+            mLuminanceShading = await UEngine.Instance.ShadingEnvManager.GetShadingEnv<TtLuminanceThresholeOutLumShading>();
         }
         public override void BeforeTickLogic(URenderPolicy policy)
         {
