@@ -12,7 +12,7 @@ namespace EngineNS.Bricks.GpuDriven
 {
     //nanite: https://zhuanlan.zhihu.com/p/382687738
 
-    public class TtCullClusterShading : Graphics.Pipeline.Shader.UComputeShadingEnv
+    public class TtCullClusterShading : Graphics.Pipeline.Shader.TtComputeShadingEnv
     {
         public override Vector3ui DispatchArg
         {
@@ -134,7 +134,7 @@ namespace EngineNS.Bricks.GpuDriven
 
             CoreSDK.DisposeObject(ref CullClusterShadingDrawcall);
             CullClusterShadingDrawcall = rc.CreateComputeDraw();
-            CullClusterShading = UEngine.Instance.ShadingEnvManager.GetShadingEnv<TtCullClusterShading>();
+            CullClusterShading = await UEngine.Instance.ShadingEnvManager.GetShadingEnv<TtCullClusterShading>();
 
             Vertices.Initialize(NxRHI.EBufferType.BFT_SRV);
             Indices.Initialize(NxRHI.EBufferType.BFT_SRV);

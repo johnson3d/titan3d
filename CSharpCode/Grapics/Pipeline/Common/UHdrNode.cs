@@ -6,7 +6,7 @@ using System.Text;
 
 namespace EngineNS.Graphics.Pipeline.Common
 {
-    public class UHdrShading : Shader.UGraphicsShadingEnv
+    public class UHdrShading : Shader.TtGraphicsShadingEnv
     {
         public UHdrShading()
         {
@@ -63,14 +63,14 @@ namespace EngineNS.Graphics.Pipeline.Common
             //base Result
         }
         public UHdrShading mBasePassShading;
-        public override UGraphicsShadingEnv GetPassShading(TtMesh.TtAtom atom = null)
+        public override TtGraphicsShadingEnv GetPassShading(TtMesh.TtAtom atom = null)
         {
             return mBasePassShading;
         }
         public override async System.Threading.Tasks.Task Initialize(URenderPolicy policy, string debugName)
         {
             await base.Initialize(policy, debugName);
-            mBasePassShading = UEngine.Instance.ShadingEnvManager.GetShadingEnv<UHdrShading>();
+            mBasePassShading = await UEngine.Instance.ShadingEnvManager.GetShadingEnv<UHdrShading>();
         }
     }
 }

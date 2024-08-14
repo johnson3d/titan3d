@@ -367,7 +367,7 @@ namespace EngineNS.Graphics.Pipeline
             }
         }
 
-        public virtual Shader.UGraphicsShadingEnv GetPassShading(Mesh.TtMesh.TtAtom atom = null)
+        public virtual Shader.TtGraphicsShadingEnv GetPassShading(Mesh.TtMesh.TtAtom atom = null)
         {
             return null;
         }

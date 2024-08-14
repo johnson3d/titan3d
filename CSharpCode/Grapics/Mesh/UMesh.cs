@@ -36,7 +36,7 @@ namespace EngineNS.Graphics.Mesh
             MdfQueue = null;
             CoreSDK.DisposeObject(ref mPerMeshCBuffer);
         }
-        public Graphics.Pipeline.Shader.UGraphicsShadingEnv UserShading = null;
+        public Graphics.Pipeline.Shader.TtGraphicsShadingEnv UserShading = null;
         public GamePlay.Scene.UNode HostNode { get; set; }
         bool mIsCastShadow = false;
         public bool IsCastShadow 
@@ -194,7 +194,7 @@ namespace EngineNS.Graphics.Mesh
             {
                 return MeshPrimitives.mCoreObject.GetAtomExtData((uint)AtomIndex);
             }
-            public Graphics.Pipeline.Shader.UGraphicsShadingEnv UserShading
+            public Graphics.Pipeline.Shader.TtGraphicsShadingEnv UserShading
             {
                 get => SubMesh.Mesh.UserShading;
             }
@@ -221,7 +221,7 @@ namespace EngineNS.Graphics.Mesh
                 Pipeline.TtRenderGraphNode node)
             {
                 var device = UEngine.Instance.GfxDevice;
-                Graphics.Pipeline.Shader.UGraphicsShadingEnv shading = null;
+                Graphics.Pipeline.Shader.TtGraphicsShadingEnv shading = null;
                 try
                 {
                     shading = node.GetPassShading(this);

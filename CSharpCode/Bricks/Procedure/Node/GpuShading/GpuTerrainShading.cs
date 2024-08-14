@@ -5,7 +5,7 @@ using EngineNS.Graphics.Pipeline;
 
 namespace EngineNS.Bricks.Procedure.Node.GpuShading
 {
-    public class TtErosionIncWaterShading : Graphics.Pipeline.Shader.UComputeShadingEnv
+    public class TtErosionIncWaterShading : Graphics.Pipeline.Shader.TtComputeShadingEnv
     {
         public override Vector3ui DispatchArg
         {
@@ -103,10 +103,10 @@ namespace EngineNS.Bricks.Procedure.Node.GpuShading
 
             base.InitNodePins();
         }
-        public override async Task Initialize(URenderPolicy policy, string debugName)
+        public override async System.Threading.Tasks.Task Initialize(URenderPolicy policy, string debugName)
         {
             await base.Initialize(policy, debugName);
-            ShadingEnv = UEngine.Instance.ShadingEnvManager.GetShadingEnv<TtErosionIncWaterShading>();
+            ShadingEnv = await UEngine.Instance.ShadingEnvManager.GetShadingEnv<TtErosionIncWaterShading>();
 
             var rc = UEngine.Instance.GfxDevice.RenderContext;
             mCmdList = rc.CreateCommandList();
@@ -129,7 +129,7 @@ namespace EngineNS.Bricks.Procedure.Node.GpuShading
         }
     }
 
-    public class TtHeigh2FlowMapShading : Graphics.Pipeline.Shader.UComputeShadingEnv
+    public class TtHeigh2FlowMapShading : Graphics.Pipeline.Shader.TtComputeShadingEnv
     {
         public override Vector3ui DispatchArg
         {
@@ -199,10 +199,10 @@ namespace EngineNS.Bricks.Procedure.Node.GpuShading
 
             base.InitNodePins();
         }
-        public override async Task Initialize(URenderPolicy policy, string debugName)
+        public override async System.Threading.Tasks.Task Initialize(URenderPolicy policy, string debugName)
         {
             await base.Initialize(policy, debugName);
-            ShadingEnv = UEngine.Instance.ShadingEnvManager.GetShadingEnv<TtHeigh2FlowMapShading>();
+            ShadingEnv = await UEngine.Instance.ShadingEnvManager.GetShadingEnv<TtHeigh2FlowMapShading>();
 
             var rc = UEngine.Instance.GfxDevice.RenderContext;
             mCmdList = rc.CreateCommandList();
@@ -222,7 +222,7 @@ namespace EngineNS.Bricks.Procedure.Node.GpuShading
         }
     }
 
-    public class TtWaterBasinShading : Graphics.Pipeline.Shader.UComputeShadingEnv
+    public class TtWaterBasinShading : Graphics.Pipeline.Shader.TtComputeShadingEnv
     {
         public override Vector3ui DispatchArg
         {
@@ -303,10 +303,10 @@ namespace EngineNS.Bricks.Procedure.Node.GpuShading
 
             base.InitNodePins();
         }
-        public override async Task Initialize(URenderPolicy policy, string debugName)
+        public override async System.Threading.Tasks.Task Initialize(URenderPolicy policy, string debugName)
         {
             await base.Initialize(policy, debugName);
-            ShadingEnv = UEngine.Instance.ShadingEnvManager.GetShadingEnv<TtWaterBasinShading>();
+            ShadingEnv = await UEngine.Instance.ShadingEnvManager.GetShadingEnv<TtWaterBasinShading>();
 
             var rc = UEngine.Instance.GfxDevice.RenderContext;
             mCmdList = rc.CreateCommandList();

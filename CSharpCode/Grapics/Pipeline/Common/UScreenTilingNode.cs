@@ -60,10 +60,96 @@ namespace EngineNS.Graphics.Pipeline.Common
         public NxRHI.UUaView TileUAV;
         public NxRHI.USrView TileSRV;
 
-        private NxRHI.UComputeEffect SetupTileData;
+        public class SetupTileDataShading : Graphics.Pipeline.Shader.TtComputeShadingEnv
+        {
+            public override Vector3ui DispatchArg
+            {
+                get => new Vector3ui(32, 32, 1);
+            }
+            public SetupTileDataShading()
+            {
+                CodeName = RName.GetRName("Shaders/Compute/ScreenSpace/Tiling.compute", RName.ERNameType.Engine);
+                MainName = "CS_SetupTileData";
+
+                this.UpdatePermutation();
+            }
+            protected override void EnvShadingDefines(in FPermutationId id, NxRHI.UShaderDefinitions defines)
+            {
+                base.EnvShadingDefines(in id, defines);
+            }
+            public override void OnDrawCall(NxRHI.UComputeDraw drawcall, Graphics.Pipeline.URenderPolicy policy)
+            {
+                var ConfigCBuffer = policy.GetGpuSceneNode().PerGpuSceneCbv;
+                var node = drawcall.TagObject as UScreenTilingNode;
+
+                var srvIdx = drawcall.FindBinder(NxRHI.EShaderBindType.SBT_CBuffer, "cbPerGpuScene");
+                drawcall.BindCBuffer(srvIdx, ConfigCBuffer);
+                srvIdx = drawcall.FindBinder(NxRHI.EShaderBindType.SBT_CBuffer, "cbPerCamera");
+                if (srvIdx.IsValidPointer)
+                {
+                    var camera = policy.DefaultCamera;
+                    drawcall.BindCBuffer(srvIdx, camera.PerCameraCBuffer);
+                }
+                srvIdx = drawcall.FindBinder(NxRHI.EShaderBindType.SBT_UAV, "DstBuffer");
+                if (srvIdx.IsValidPointer)
+                {
+                    drawcall.BindUav(srvIdx, node.TileUAV);
+                }
+                srvIdx = drawcall.FindBinder(NxRHI.EShaderBindType.SBT_SRV, "DepthBuffer");
+                if (srvIdx.IsValidPointer)
+                {
+                    var depth = node.GetAttachBuffer(node.DepthPinIn);
+                    drawcall.BindSrv(srvIdx, depth.Srv);
+                }
+            }
+        }
+        private SetupTileDataShading SetupTileData;
         private NxRHI.UComputeDraw SetupTileDataDrawcall;
 
-        private NxRHI.UComputeEffect PushLightToTileData;
+        public class PushLightToTileDataShading : Graphics.Pipeline.Shader.TtComputeShadingEnv
+        {
+            public override Vector3ui DispatchArg
+            {
+                get => new Vector3ui(32, 32, 1);
+            }
+            public PushLightToTileDataShading()
+            {
+                CodeName = RName.GetRName("Shaders/Compute/ScreenSpace/Tiling.compute", RName.ERNameType.Engine);
+                MainName = "CS_PushLightToTileData";
+
+                this.UpdatePermutation();
+            }
+            protected override void EnvShadingDefines(in FPermutationId id, NxRHI.UShaderDefinitions defines)
+            {
+                base.EnvShadingDefines(in id, defines);
+            }
+            public override void OnDrawCall(NxRHI.UComputeDraw drawcall, Graphics.Pipeline.URenderPolicy policy)
+            {
+                var ConfigCBuffer = policy.GetGpuSceneNode().PerGpuSceneCbv;
+                var node = drawcall.TagObject as UScreenTilingNode;
+
+                var srvIdx = drawcall.FindBinder(NxRHI.EShaderBindType.SBT_CBuffer, "cbPerGpuScene");
+                if (srvIdx.IsValidPointer)
+                {
+                    drawcall.BindCBuffer(srvIdx, ConfigCBuffer);
+                }
+                srvIdx = drawcall.FindBinder(NxRHI.EShaderBindType.SBT_UAV, "DstBuffer");
+                if (srvIdx.IsValidPointer)
+                {
+                    drawcall.BindUav(srvIdx, node.TileUAV);
+                }
+                srvIdx = drawcall.FindBinder(NxRHI.EShaderBindType.SBT_SRV, "GpuScene_PointLights");
+                if (srvIdx.IsValidPointer)
+                {
+                    var attachBuffer = node.GetAttachBuffer(node.PointLightsPinIn);
+                    if (attachBuffer.Srv != null)
+                    {
+                        drawcall.BindSrv(srvIdx, attachBuffer.Srv);
+                    }
+                }
+            }
+        }
+        private PushLightToTileDataShading PushLightToTileData;
         private NxRHI.UComputeDraw PushLightToTileDataDrawcall;
 
         public async override System.Threading.Tasks.Task Initialize(URenderPolicy policy, string debugName)
@@ -73,16 +159,8 @@ namespace EngineNS.Graphics.Pipeline.Common
 
             BasePass.Initialize(rc, debugName + ".BasePass");
 
-            var defines = new NxRHI.UShaderDefinitions();
-            defines.mCoreObject.AddDefine("DispatchX", $"{Dispatch_SetupDimArray2.X}");
-            defines.mCoreObject.AddDefine("DispatchY", $"{Dispatch_SetupDimArray2.Y}");
-            defines.mCoreObject.AddDefine("DispatchZ", $"{Dispatch_SetupDimArray2.Z}");
-
-            SetupTileData = await UEngine.Instance.GfxDevice.EffectManager.GetComputeEffect(RName.GetRName("Shaders/Compute/ScreenSpace/Tiling.compute", RName.ERNameType.Engine),
-                "CS_SetupTileData", NxRHI.EShaderType.SDT_ComputeShader, null, defines, null);
-            
-            PushLightToTileData = await UEngine.Instance.GfxDevice.EffectManager.GetComputeEffect(RName.GetRName("Shaders/Compute/ScreenSpace/Tiling.compute", RName.ERNameType.Engine),
-                "CS_PushLightToTileData", NxRHI.EShaderType.SDT_ComputeShader, null, defines, null);
+            SetupTileData = await UEngine.Instance.ShadingEnvManager.GetShadingEnv<SetupTileDataShading>();
+            PushLightToTileData = await UEngine.Instance.ShadingEnvManager.GetShadingEnv<PushLightToTileDataShading>();
         }
         private unsafe void ResetComputeDrawcall(URenderPolicy policy)
         {
@@ -95,36 +173,9 @@ namespace EngineNS.Graphics.Pipeline.Common
 
             CoreSDK.DisposeObject(ref SetupTileDataDrawcall);
             SetupTileDataDrawcall = rc.CreateComputeDraw();
-            SetupTileDataDrawcall.SetComputeEffect(SetupTileData);
-            var srvIdx = SetupTileDataDrawcall.FindBinder(NxRHI.EShaderBindType.SBT_CBuffer, "cbPerGpuScene");
-            SetupTileDataDrawcall.BindCBuffer(srvIdx, ConfigCBuffer);
-            srvIdx = SetupTileDataDrawcall.FindBinder(NxRHI.EShaderBindType.SBT_CBuffer, "cbPerCamera");
-            if (srvIdx.IsValidPointer)
-            {
-                var camera = policy.DefaultCamera;
-                SetupTileDataDrawcall.BindCBuffer(srvIdx, camera.PerCameraCBuffer);
-            }
-            srvIdx = SetupTileDataDrawcall.FindBinder(NxRHI.EShaderBindType.SBT_UAV, "DstBuffer");
-            if (srvIdx.IsValidPointer)
-            {
-                SetupTileDataDrawcall.BindUav(srvIdx, TileUAV);
-            }
-            SetupTileDataDrawcall.mCoreObject.SetDispatch(MathHelper.Roundup(TileX, Dispatch_SetupDimArray2.X), MathHelper.Roundup(TileY, Dispatch_SetupDimArray2.Y), 1);
-
+            
             CoreSDK.DisposeObject(ref PushLightToTileDataDrawcall);
             PushLightToTileDataDrawcall = rc.CreateComputeDraw();
-            PushLightToTileDataDrawcall.SetComputeEffect(PushLightToTileData);
-            srvIdx = PushLightToTileDataDrawcall.FindBinder(NxRHI.EShaderBindType.SBT_CBuffer, "cbPerGpuScene");
-            if (srvIdx.IsValidPointer)
-            {
-                PushLightToTileDataDrawcall.BindCBuffer(srvIdx, ConfigCBuffer);
-            }            
-            srvIdx = PushLightToTileDataDrawcall.FindBinder(NxRHI.EShaderBindType.SBT_UAV, "DstBuffer");
-            if (srvIdx.IsValidPointer)
-            {
-                PushLightToTileDataDrawcall.BindUav(srvIdx, TileUAV);
-            }
-            PushLightToTileDataDrawcall.SetDispatch(MathHelper.Roundup(TileX, Dispatch_SetupDimArray2.X), MathHelper.Roundup(TileY, Dispatch_SetupDimArray2.Y), 1);
         }
         public override void Dispose()
         {
@@ -207,31 +258,16 @@ namespace EngineNS.Graphics.Pipeline.Common
 
                     #region Setup
                     {
-                        var srvIdx = SetupTileDataDrawcall.FindBinder(NxRHI.EShaderBindType.SBT_SRV, "DepthBuffer");
-                        if (srvIdx.IsValidPointer)
-                        {
-                            var depth = this.GetAttachBuffer(DepthPinIn);
-                            SetupTileDataDrawcall.BindSrv(srvIdx, depth.Srv);
-                        }
-                        //SetupTileDataDrawcall.Commit(cmd);
+                        SetupTileData.SetDrawcallDispatch(this, policy, SetupTileDataDrawcall, TileX, TileY, 1, true);
+
                         cmd.PushGpuDraw(SetupTileDataDrawcall);
                     }
                     #endregion
 
                     #region PushLights
                     {
-                        var srvIdx = PushLightToTileDataDrawcall.FindBinder(NxRHI.EShaderBindType.SBT_SRV, "GpuScene_PointLights");
-                        if (srvIdx.IsValidPointer)
-                        {
-                            var attachBuffer = this.GetAttachBuffer(PointLightsPinIn);
-                            if (attachBuffer.Srv != null)
-                            {
-                                PushLightToTileDataDrawcall.BindSrv(srvIdx, attachBuffer.Srv);
-                                //PushLightToTileDataDrawcall.Commit(cmd);
-                                cmd.PushGpuDraw(PushLightToTileDataDrawcall);
-                            }
-                        }
-
+                        PushLightToTileData.SetDrawcallDispatch(this, policy, PushLightToTileDataDrawcall, TileX, TileY, 1, true);
+                        cmd.PushGpuDraw(PushLightToTileDataDrawcall);
                     }
                     #endregion
 

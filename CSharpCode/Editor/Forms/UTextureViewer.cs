@@ -8,7 +8,7 @@ using EngineNS.Graphics.Pipeline.Shader;
 
 namespace EngineNS.Editor.Forms
 {
-    public class USlateTextureViewerShading : Graphics.Pipeline.Shader.UGraphicsShadingEnv
+    public class USlateTextureViewerShading : Graphics.Pipeline.Shader.TtGraphicsShadingEnv
     {
         public USlateTextureViewerShading()
         {
@@ -87,7 +87,7 @@ namespace EngineNS.Editor.Forms
             var rc = UEngine.Instance.GfxDevice.RenderContext;
 
             SlateEffect = await UEngine.Instance.GfxDevice.EffectManager.GetEffect(
-                UEngine.Instance.ShadingEnvManager.GetShadingEnv<USlateTextureViewerShading>(),
+                await UEngine.Instance.ShadingEnvManager.GetShadingEnv<USlateTextureViewerShading>(),
                 UEngine.Instance.GfxDevice.MaterialManager.ScreenMaterial, new Graphics.Mesh.UMdfStaticMesh());
             var iptDesc = new NxRHI.UInputLayoutDesc();
             unsafe

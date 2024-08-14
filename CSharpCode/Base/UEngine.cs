@@ -130,6 +130,8 @@ namespace EngineNS
         public string EditorLanguage { get; set; } = "English";
         [Rtti.Meta]
         public RName UIDefaultTexture { get; set; }
+        [Rtti.Meta]
+        public bool IsWriteShaderDebugFile { get; set; } = false;
         public UEngineConfig()
         {
             EditorFont = RName.GetRName("fonts/Roboto-Regular.ttf", RName.ERNameType.Engine);

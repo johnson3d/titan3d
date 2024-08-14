@@ -6,7 +6,7 @@ using System.Text;
 
 namespace EngineNS.Graphics.Pipeline.Mobile
 {
-    public class UFinalCopyShading : Shader.UGraphicsShadingEnv
+    public class UFinalCopyShading : Shader.TtGraphicsShadingEnv
     {
         public UPermutationItem DisableAO
         {
@@ -148,14 +148,14 @@ namespace EngineNS.Graphics.Pipeline.Mobile
             //result by base
         }
         public UFinalCopyShading mBasePassShading;
-        public override UGraphicsShadingEnv GetPassShading(TtMesh.TtAtom atom = null)
+        public override TtGraphicsShadingEnv GetPassShading(TtMesh.TtAtom atom = null)
         {
             return mBasePassShading;
         }
         public override async System.Threading.Tasks.Task Initialize(URenderPolicy policy, string debugName)
         {
             await base.Initialize(policy, debugName);
-            mBasePassShading = UEngine.Instance.ShadingEnvManager.GetShadingEnv<UFinalCopyShading>();
+            mBasePassShading = await UEngine.Instance.ShadingEnvManager.GetShadingEnv<UFinalCopyShading>();
         }
     }
 }

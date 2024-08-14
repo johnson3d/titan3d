@@ -3,7 +3,7 @@
     [EngineNS.Macross.UMacross]
     public partial class testemitter : EngineNS.Bricks.Particle.TtEmitterMacross
     {
-        public EngineNS.Macross.UMacrossBreak breaker_AtomicAdd_EmitterFlags_2788520947 = new EngineNS.Macross.UMacrossBreak("breaker_AtomicAdd_EmitterFlags_2788520947");
+        public EngineNS.Macross.UMacrossBreak breaker_InterlockedAddUInt32_1872985343 = new EngineNS.Macross.UMacrossBreak("breaker_InterlockedAddUInt32_1872985343");
         public EngineNS.Macross.UMacrossBreak breaker_SetParticleFlags_4124938284 = new EngineNS.Macross.UMacrossBreak("breaker_SetParticleFlags_4124938284");
         public EngineNS.Macross.UMacrossBreak breaker_Spawn_318270620 = new EngineNS.Macross.UMacrossBreak("breaker_Spawn_318270620");
         public EngineNS.Macross.UMacrossBreak breaker_if_801148221 = new EngineNS.Macross.UMacrossBreak("breaker_if_801148221");
@@ -27,14 +27,15 @@
                 mFrame_DoUpdateSystem.SetWatchVariable("emt", emt);
                 System.UInt32 tmp_r_SetParticleFlags_4124938284 = default(System.UInt32);
                 System.UInt32 tmp_r_Spawn_318270620 = default(System.UInt32);
-                mFrame_DoUpdateSystem.SetWatchVariable("v_value_AtomicAdd_EmitterFlags_2788520947", 1);
-                System.UInt32 v_oldValue_AtomicAdd_EmitterFlags_2788520947 = default(System.UInt32);
-                mFrame_DoUpdateSystem.SetWatchVariable("v_oldValue_AtomicAdd_EmitterFlags_2788520947", v_oldValue_AtomicAdd_EmitterFlags_2788520947);
-                breaker_AtomicAdd_EmitterFlags_2788520947.TryBreak();
-                emt.AtomicAdd_EmitterFlags(1,out v_oldValue_AtomicAdd_EmitterFlags_2788520947);
-                mFrame_DoUpdateSystem.SetWatchVariable("Condition0_801148221", (v_oldValue_AtomicAdd_EmitterFlags_2788520947 < 512));
+                mFrame_DoUpdateSystem.SetWatchVariable("Flags", emt.EmitterDataRef.mFlags);
+                mFrame_DoUpdateSystem.SetWatchVariable("v_value_InterlockedAddUInt32_1872985343", 1);
+                System.UInt32 v_oriValue_InterlockedAddUInt32_1872985343 = default(System.UInt32);
+                mFrame_DoUpdateSystem.SetWatchVariable("v_oriValue_InterlockedAddUInt32_1872985343", v_oriValue_InterlockedAddUInt32_1872985343);
+                breaker_InterlockedAddUInt32_1872985343.TryBreak();
+                EngineNS.Graphics.Pipeline.Shader.TtMacrossShaderUtility.InterlockedAddUInt32(ref emt.EmitterDataRef.mFlags,1,out v_oriValue_InterlockedAddUInt32_1872985343);
+                mFrame_DoUpdateSystem.SetWatchVariable("Condition0_801148221", (v_oriValue_InterlockedAddUInt32_1872985343 < 512));
                 breaker_if_801148221.TryBreak();
-                if ((v_oldValue_AtomicAdd_EmitterFlags_2788520947 < 512))
+                if ((v_oriValue_InterlockedAddUInt32_1872985343 < 512))
                 {
                     mFrame_DoUpdateSystem.SetWatchVariable("v_flags_SetParticleFlags_4124938284", EngineNS.Bricks.Particle.EParticleFlags.EmitShape);
                     mFrame_DoUpdateSystem.SetWatchVariable("v_data_SetParticleFlags_4124938284", 0);

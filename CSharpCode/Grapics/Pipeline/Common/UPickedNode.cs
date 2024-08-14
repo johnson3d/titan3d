@@ -6,7 +6,7 @@ using System.Text;
 
 namespace EngineNS.Graphics.Pipeline.Common
 {
-    public class UPickSetupShading : Shader.UGraphicsShadingEnv
+    public class UPickSetupShading : Shader.TtGraphicsShadingEnv
     {
         public UPickSetupShading()
         {
@@ -55,14 +55,14 @@ namespace EngineNS.Graphics.Pipeline.Common
         public UPickSetupShading PickedShading = null;
         public TtGraphicsBuffers PickedBuffer { get; protected set; } = new TtGraphicsBuffers();
         public NxRHI.URenderPass RenderPass;
-        public override UGraphicsShadingEnv GetPassShading(TtMesh.TtAtom atom = null)
+        public override TtGraphicsShadingEnv GetPassShading(TtMesh.TtAtom atom = null)
         {
             return PickedShading;
         }
         public async override System.Threading.Tasks.Task Initialize(URenderPolicy policy, string debugName)
         {
             await Thread.TtAsyncDummyClass.DummyFunc();
-            PickedShading = UEngine.Instance.ShadingEnvManager.GetShadingEnv<UPickSetupShading>();
+            PickedShading = await UEngine.Instance.ShadingEnvManager.GetShadingEnv<UPickSetupShading>();
 
             var rc = UEngine.Instance.GfxDevice.RenderContext;
             BasePass.Initialize(rc, debugName + ".BasePass");

@@ -32,10 +32,58 @@ namespace EngineNS.Graphics.Pipeline.Common
         public NxRHI.USrView HzbSRV;
         public NxRHI.UUaView[] HzbMipsUAVs;
 
-        private NxRHI.UComputeEffect Setup;
+        public class SetupShading : Graphics.Pipeline.Shader.TtComputeShadingEnv
+        {
+            public override Vector3ui DispatchArg
+            {
+                get => new Vector3ui(32, 32, 1);
+            }
+            public SetupShading()
+            {
+                CodeName = RName.GetRName("Shaders/Compute/GpuDriven/Hzb.compute", RName.ERNameType.Engine);
+                MainName = "CS_Setup";
+
+                this.UpdatePermutation();
+            }
+            protected override void EnvShadingDefines(in FPermutationId id, NxRHI.UShaderDefinitions defines)
+            {
+                base.EnvShadingDefines(in id, defines);
+            }
+            public override void OnDrawCall(NxRHI.UComputeDraw drawcall, Graphics.Pipeline.URenderPolicy policy)
+            {
+                var node = drawcall.TagObject as UHzbNode;
+
+                
+            }
+        }
+        private SetupShading Setup;
         private NxRHI.UComputeDraw SetupDrawcall;
 
-        private NxRHI.UComputeEffect DownSample;
+        public class DownSampleShading : Graphics.Pipeline.Shader.TtComputeShadingEnv
+        {
+            public override Vector3ui DispatchArg
+            {
+                get => new Vector3ui(32, 32, 1);
+            }
+            public DownSampleShading()
+            {
+                CodeName = RName.GetRName("Shaders/Compute/GpuDriven/Hzb.compute", RName.ERNameType.Engine);
+                MainName = "CS_DownSample";
+
+                this.UpdatePermutation();
+            }
+            protected override void EnvShadingDefines(in FPermutationId id, NxRHI.UShaderDefinitions defines)
+            {
+                base.EnvShadingDefines(in id, defines);
+            }
+            public override void OnDrawCall(NxRHI.UComputeDraw drawcall, Graphics.Pipeline.URenderPolicy policy)
+            {
+                var node = drawcall.TagObject as UHzbNode;
+
+
+            }
+        }
+        private DownSampleShading DownSample;
         private NxRHI.UComputeDraw[] MipsDrawcalls;
         
         public async override System.Threading.Tasks.Task Initialize(URenderPolicy policy, string debugName)
@@ -51,11 +99,9 @@ namespace EngineNS.Graphics.Pipeline.Common
             defines.mCoreObject.AddDefine("DispatchY", $"{Dispatch_SetupDimArray2.Y}");
             defines.mCoreObject.AddDefine("DispatchZ", $"{Dispatch_SetupDimArray2.Z}");
 
-            Setup = await UEngine.Instance.GfxDevice.EffectManager.GetComputeEffect(RName.GetRName("Shaders/Compute/GpuDriven/Hzb.compute", RName.ERNameType.Engine),
-                "CS_Setup", NxRHI.EShaderType.SDT_ComputeShader, null, defines, null);
+            Setup = await UEngine.Instance.ShadingEnvManager.GetShadingEnv<SetupShading>();
 
-            DownSample = await UEngine.Instance.GfxDevice.EffectManager.GetComputeEffect(RName.GetRName("Shaders/Compute/GpuDriven/Hzb.compute", RName.ERNameType.Engine),
-                "CS_DownSample", NxRHI.EShaderType.SDT_ComputeShader, null, defines, null);
+            DownSample = await UEngine.Instance.ShadingEnvManager.GetShadingEnv<DownSampleShading>();
 
             //ResetComputeDrawcall(policy);
         }
@@ -67,8 +113,9 @@ namespace EngineNS.Graphics.Pipeline.Common
             if (SetupDrawcall == null)
                 SetupDrawcall = UEngine.Instance.GfxDevice.RenderContext.CreateComputeDraw();
 
-            SetupDrawcall.SetComputeEffect(Setup);
-            SetupDrawcall.SetDispatch(MaxSRVWidth / Dispatch_SetupDimArray2.X, MaxSRVHeight / Dispatch_SetupDimArray2.Y, 1);
+            Setup.SetDrawcallDispatch(this, policy, SetupDrawcall, MaxSRVWidth / Dispatch_SetupDimArray2.X, MaxSRVHeight / Dispatch_SetupDimArray2.Y, 1, false);
+            //SetupDrawcall.SetComputeEffect(Setup.CurrentEffect);
+            //SetupDrawcall.SetDispatch(MaxSRVWidth / Dispatch_SetupDimArray2.X, MaxSRVHeight / Dispatch_SetupDimArray2.Y, 1);
 
             var srvIdx = SetupDrawcall.FindBinder(NxRHI.EShaderBindType.SBT_UAV, "DstBuffer");
             if (srvIdx.IsValidPointer)
@@ -110,8 +157,9 @@ namespace EngineNS.Graphics.Pipeline.Common
                 var drawcall = UEngine.Instance.GfxDevice.RenderContext.CreateComputeDraw();
                 CoreSDK.DisposeObject(ref MipsDrawcalls[i - 1]);
                 MipsDrawcalls[i - 1] = drawcall;
-                drawcall.SetComputeEffect(DownSample);
-                drawcall.SetDispatch(MathHelper.Roundup(width, Dispatch_SetupDimArray2.X), MathHelper.Roundup(height, Dispatch_SetupDimArray2.Y), 1);
+                DownSample.SetDrawcallDispatch(this, policy, drawcall, width, height, 1, true);
+                //drawcall.SetComputeEffect(DownSample);
+                //drawcall.SetDispatch(MathHelper.Roundup(width, Dispatch_SetupDimArray2.X), MathHelper.Roundup(height, Dispatch_SetupDimArray2.Y), 1);
                 srvIdx = drawcall.FindBinder(NxRHI.EShaderBindType.SBT_UAV, "SrcBuffer");
                 if (srvIdx.IsValidPointer)
                 {

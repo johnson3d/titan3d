@@ -8,7 +8,7 @@ using NPOI.SS.Formula.Functions;
 
 namespace EngineNS.Graphics.Pipeline.Shadow
 {
-    public class UShadowShading : Shader.UGraphicsShadingEnv
+    public class UShadowShading : Shader.TtGraphicsShadingEnv
     {
         public UShadowShading()
         {
@@ -104,7 +104,7 @@ namespace EngineNS.Graphics.Pipeline.Shadow
 
         public UShadowShading mShadowShading;
 
-        public override UGraphicsShadingEnv GetPassShading(TtMesh.TtAtom atom = null)
+        public override TtGraphicsShadingEnv GetPassShading(TtMesh.TtAtom atom = null)
         {
             return mShadowShading;
         }
@@ -113,7 +113,7 @@ namespace EngineNS.Graphics.Pipeline.Shadow
             await Thread.TtAsyncDummyClass.DummyFunc();
             var rc = UEngine.Instance.GfxDevice.RenderContext;
 
-            mShadowShading = UEngine.Instance.ShadingEnvManager.GetShadingEnv<Shadow.UShadowShading>();
+            mShadowShading = await UEngine.Instance.ShadingEnvManager.GetShadingEnv<Shadow.UShadowShading>();
 
             mShadowCameraArray = new UCamera[4];
             for (UInt32 CamIdx = 0; CamIdx < mCsmNum; CamIdx++)

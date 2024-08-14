@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Hash_3212418162 Type="EngineNS.Bricks.Particle.Simple.TtSimpleEmitter@EngineCore">
+  <EmitterDataRef Type="EngineNS.Bricks.Particle.FParticleEmitter&amp;@EngineCore" Order="0" />
+  <Location Type="EngineNS.Vector3@EngineCore" Order="0" />
+  <McName Type="EngineNS.RName@EngineCore" Order="0" />
+  <ShaderName Type="EngineNS.RName@EngineCore" Order="0" />
+  <TimerInterval Type="System.Single@Unknown" Order="0" />
+  <Velocity Type="EngineNS.Vector3@EngineCore" Order="0" />
+</Hash_3212418162>

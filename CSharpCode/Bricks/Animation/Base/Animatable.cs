@@ -34,8 +34,7 @@ namespace EngineNS.Animation.Animatable
                 TtCurveBindedObject curveBindedObject = new TtCurveBindedObject();
                 curveBindedObject.AnimatableObject = animatableSkeletonPose.LimbPoses[i];
                 Curve.ICurve curve = null;
-                var isExsit = animationClip.AnimCurvesList.TryGetValue(AnimatedObjectDesc.TranslationProperty.CurveId, out curve);
-                if (isExsit)
+                if(AnimatedObjectDesc.TranslationProperty != null && animationClip.AnimCurvesList.TryGetValue(AnimatedObjectDesc.TranslationProperty.CurveId, out curve))
                 {
                     TtCurveBindedProperty bindedProperty = new TtCurveBindedProperty();
                     bindedProperty.Curve = curve;
@@ -43,8 +42,7 @@ namespace EngineNS.Animation.Animatable
                     bindedProperty.PropertySetter.AssignObject(animatableSkeletonPose.LimbPoses[i]);
                     curveBindedObject.CurveBindedProperties.Add(bindedProperty);
                 }
-                isExsit = animationClip.AnimCurvesList.TryGetValue(AnimatedObjectDesc.RotationProperty.CurveId, out curve);
-                if (isExsit)
+                if(AnimatedObjectDesc.RotationProperty != null && animationClip.AnimCurvesList.TryGetValue(AnimatedObjectDesc.RotationProperty.CurveId, out curve))
                 {
                     TtCurveBindedProperty bindedProperty = new TtCurveBindedProperty();
                     bindedProperty.Curve = curve;

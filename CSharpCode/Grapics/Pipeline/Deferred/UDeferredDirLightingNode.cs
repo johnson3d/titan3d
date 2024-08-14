@@ -9,7 +9,7 @@ using System.Text;
 
 namespace EngineNS.Graphics.Pipeline.Deferred
 {
-    public partial class UDeferredDirLightingShading : Shader.UGraphicsShadingEnv
+    public partial class UDeferredDirLightingShading : Shader.TtGraphicsShadingEnv
     {
         #region Permutation
         public UPermutationItem DisableAO
@@ -282,14 +282,14 @@ namespace EngineNS.Graphics.Pipeline.Deferred
             base.FrameBuild(policy);
         }
         public UDeferredDirLightingShading mBasePassShading;
-        public override UGraphicsShadingEnv GetPassShading(TtMesh.TtAtom atom = null)
+        public override TtGraphicsShadingEnv GetPassShading(TtMesh.TtAtom atom = null)
         {
             return mBasePassShading;
         }
         public override async System.Threading.Tasks.Task Initialize(URenderPolicy policy, string debugName)
         {
             await base.Initialize(policy, debugName);
-            mBasePassShading = UEngine.Instance.ShadingEnvManager.GetShadingEnv<UDeferredDirLightingShading>();
+            mBasePassShading = await UEngine.Instance.ShadingEnvManager.GetShadingEnv<UDeferredDirLightingShading>();
         }
         [ThreadStatic]
         private static Profiler.TimeScope ScopeTick = Profiler.TimeScopeManager.GetTimeScope(typeof(UDeferredDirLightingNode), nameof(TickLogic));

@@ -105,7 +105,7 @@ namespace EngineNS.NxRHI
             }
         }
 
-        public Graphics.Pipeline.Shader.UShadingEnv.FPermutationId PermutationId { get; set; }
+        public Graphics.Pipeline.Shader.TtShadingEnv.FPermutationId PermutationId { get; set; }
         public const string AssetExt = ".shader";
         public unsafe void SaveTo(RName shader, in Hash160 hash)
         {
@@ -137,7 +137,7 @@ namespace EngineNS.NxRHI
             var descAttr = xnd.RootNode.mCoreObject.TryGetAttribute("Desc");
             if (descAttr.IsValidPointer == false)
                 return null;
-            Graphics.Pipeline.Shader.UShadingEnv.FPermutationId permutationId = new Graphics.Pipeline.Shader.UShadingEnv.FPermutationId();
+            Graphics.Pipeline.Shader.TtShadingEnv.FPermutationId permutationId = new Graphics.Pipeline.Shader.TtShadingEnv.FPermutationId();
             using (var ar = descAttr.GetReader(null))
             {
                 RName shader;

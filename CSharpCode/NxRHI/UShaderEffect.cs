@@ -53,7 +53,7 @@ namespace EngineNS.NxRHI
     }
     public class UComputeEffect : AuxPtrType<NxRHI.IComputeEffect>
     {
-        public Graphics.Pipeline.Shader.UShadingEnv.FPermutationId PermutationId { get => mComputeShader.PermutationId; }
+        public Graphics.Pipeline.Shader.TtShadingEnv.FPermutationId PermutationId { get => mComputeShader.PermutationId; }
         internal UShader mComputeShader;
         public UShader ComputeShader
         {

@@ -17,6 +17,13 @@ namespace EngineNS.Editor.ShaderCompiler
     }
     public unsafe class UHLSLCompiler
     {
+        public bool IsWriteDebugFile
+        {
+            get
+            {
+                return UEngine.Instance.Config.IsWriteShaderDebugFile;
+            }
+        }
         NxRHI.UShaderCompiler mShaderCompiler = null;
         public Graphics.Pipeline.Shader.TtMdfQueueBase MdfQueue = null;
         static CoreSDK.FDelegate_FOnShaderTranslated OnShaderTranslated = OnShaderTranslatedImpl;
@@ -134,12 +141,26 @@ namespace EngineNS.Editor.ShaderCompiler
                 if (Material == null)
                     return (NxRHI.FShaderCode*)0;
                 MaterialCodeForDebug = Material.SourceCode.TextCode;
+
+                if (IsWriteDebugFile && Material.AssetName != null)
+                {
+                    var path = UEngine.Instance.FileManager.GetPath(IO.TtFileManager.ERootDir.Cache, IO.TtFileManager.ESystemDir.DebugUtility) + $"/material/{Material.AssetName.RNameType}/{IO.TtFileManager.GetBaseDirectory(Material.AssetName.Name)}";
+                    IO.TtFileManager.SureDirectory(path);
+                    IO.TtFileManager.WriteAllText(path + $"{Material.AssetName.PureName}.shader", MaterialCodeForDebug);
+                }
                 return Material.SourceCode.mCoreObject;
             }
             else if (file.EndsWith("/MaterialVar"))
             {
                 if (Material == null)
                     return (NxRHI.FShaderCode*)0;
+                if (IsWriteDebugFile && Material.AssetName != null)
+                {
+                    var path = UEngine.Instance.FileManager.GetPath(IO.TtFileManager.ERootDir.Cache, IO.TtFileManager.ESystemDir.DebugUtility) + $"/material/{Material.AssetName.RNameType}/{IO.TtFileManager.GetBaseDirectory(Material.AssetName.Name)}";
+                    IO.TtFileManager.SureDirectory(path);
+                    
+                    IO.TtFileManager.WriteAllText(path + $"{Material.AssetName.PureName}_var.shader", Material.DefineCode.TextCode);
+                }
                 return Material.DefineCode.mCoreObject;
             }
             else if (file.EndsWith("/MdfQueue"))
@@ -147,6 +168,12 @@ namespace EngineNS.Editor.ShaderCompiler
                 var mdf = Rtti.UTypeDescManager.CreateInstance(MdfQueueType) as Graphics.Pipeline.Shader.TtMdfQueueBase;
                 if (mdf != null)
                 {
+                    if (IsWriteDebugFile)
+                    {
+                        var path = UEngine.Instance.FileManager.GetPath(IO.TtFileManager.ERootDir.Cache, IO.TtFileManager.ESystemDir.DebugUtility) + $"/mdfqueue/";
+                        IO.TtFileManager.SureDirectory(path);
+                        IO.TtFileManager.WriteAllText(path + $"{mdf.GetType().FullName}.shader", mdf.SourceCode.TextCode);
+                    }
                     return mdf.SourceCode.mCoreObject;
                 }
                 else
@@ -271,7 +298,7 @@ namespace EngineNS.Editor.ShaderCompiler
             return null;
         }
         public unsafe NxRHI.UShaderDesc CompileShader(string shader, string entry, NxRHI.EShaderType type,
-            Graphics.Pipeline.Shader.UShadingEnv shadingEnvshadingEnv, Graphics.Pipeline.Shader.UMaterial mtl, Type mdfType,
+            Graphics.Pipeline.Shader.TtShadingEnv shadingEnvshadingEnv, Graphics.Pipeline.Shader.UMaterial mtl, Type mdfType,
             NxRHI.UShaderDefinitions defines, UHLSLInclude incProvider, string sm = null, bool bDebugShader = true, string extHlslVersion = null)
         {
             var code_text = IO.TtFileManager.ReadAllText(shader);
@@ -348,7 +375,7 @@ namespace EngineNS.Editor.ShaderCompiler
                         }
                     }
                 }
-                var graphicsEnv = shadingEnvshadingEnv as Graphics.Pipeline.Shader.UGraphicsShadingEnv;
+                var graphicsEnv = shadingEnvshadingEnv as Graphics.Pipeline.Shader.TtGraphicsShadingEnv;
                 if (graphicsEnv != null)
                 {
                     {
@@ -394,7 +421,7 @@ namespace EngineNS.Editor.ShaderCompiler
                 }
                 else
                 {
-                    var computeEnv = shadingEnvshadingEnv as Graphics.Pipeline.Shader.UComputeShadingEnv;
+                    var computeEnv = shadingEnvshadingEnv as Graphics.Pipeline.Shader.TtComputeShadingEnv;
                     if (computeEnv != null)
                     {
                         defines.mCoreObject.AddDefine("DispatchX", $"{computeEnv.DispatchArg.X}");

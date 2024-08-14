@@ -113,11 +113,127 @@ namespace EngineNS.Graphics.Pipeline.Common
 
         public List<TtClusteDrawArgs> ClusteDrawArgsList = new List<TtClusteDrawArgs>();
 
-        public NxRHI.UComputeEffect Cull_CullGpuIndexs;
-        public NxRHI.UComputeEffect Cull_SetupCullClusterArgs;
+        public class CullGpuIndexsShading : Graphics.Pipeline.Shader.TtComputeShadingEnv
+        {
+            public override Vector3ui DispatchArg
+            {
+                //get => new Vector3ui((MathHelper.Max(1, MathHelper.DivideAndRoundUp((uint)GpuSceneActors.Count, 64u))), 1, 1);
+                get => new Vector3ui(64, 1, 1);
+            }
+            public CullGpuIndexsShading()
+            {
+                CodeName = RName.GetRName("Shaders/Occlusion/GpuSceneCullInstance.cginc", RName.ERNameType.Engine);
+                MainName = "GpuSceneCullInstance";
 
-        public NxRHI.UComputeEffect Cull_CullCluster;
-        public NxRHI.UComputeEffect Cull_SetupDrawClusterArgsBuffer;
+                this.UpdatePermutation();
+            }
+            protected override void EnvShadingDefines(in FPermutationId id, NxRHI.UShaderDefinitions defines)
+            {
+                base.EnvShadingDefines(in id, defines);
+            }
+            public override void OnDrawCall(NxRHI.UComputeDraw drawcall, Graphics.Pipeline.URenderPolicy policy)
+            {
+                var node = drawcall.TagObject as UGpuSceneNode;
+
+                node.cbPerHZBCullData_CullInstance = CurrentEffect.FindBinder("cbPerPatchHZBCullData");
+
+                node.HZBCullInstanceData.UpdateFieldVar(CurrentEffect.mComputeShader, "cbPerPatchHZBCullData");
+                node.HZBCullInstanceCBuffer = UEngine.Instance.GfxDevice.RenderContext.CreateCBV(node.HZBCullInstanceData.Binder.mCoreObject);
+
+                //HZBCullInstanceCBuffer.SetValue
+
+                drawcall.BindUav("InstanceSceneData", node.CullInstancesBuffer.Uav);
+                drawcall.BindUav("NumberVisibilityGpuActorBuffer", node.NumberVisibilityGpuActorBuffer.Uav);
+                drawcall.BindUav("VisibilityGpuActorsBuffer", node.VisibilityGpuActorsBuffer.Uav);
+                drawcall.BindSrv("NumberGpuActors", node.NumberGpuActorsBuffer.Srv);
+            }
+        }
+        public CullGpuIndexsShading Cull_CullGpuIndexs;
+
+        public class SetupCullClusterArgsShading : Graphics.Pipeline.Shader.TtComputeShadingEnv
+        {
+            public override Vector3ui DispatchArg
+            {
+                //get => new Vector3ui((MathHelper.Max(1, MathHelper.DivideAndRoundUp((uint)GpuSceneActors.Count, 64u))), 1, 1);
+                get => new Vector3ui(1, 1, 1);
+            }
+            public SetupCullClusterArgsShading()
+            {
+                CodeName = RName.GetRName("Shaders/Occlusion/GpuSceneSetupCullCluster.cginc", RName.ERNameType.Engine);
+                MainName = "SetupCullClusterArgsCS";
+
+                this.UpdatePermutation();
+            }
+            protected override void EnvShadingDefines(in FPermutationId id, NxRHI.UShaderDefinitions defines)
+            {
+                base.EnvShadingDefines(in id, defines);
+            }
+            public override void OnDrawCall(NxRHI.UComputeDraw drawcall, Graphics.Pipeline.URenderPolicy policy)
+            {
+                var node = drawcall.TagObject as UGpuSceneNode;
+
+                drawcall.BindUav("CullClusterIndirectArgs", node.CullClusterIndirectArgs.Uav);
+                drawcall.BindSrv("NumberVisibilityGpuActorBuffer", node.NumberVisibilityGpuActorBuffer.Srv);
+            }
+        }
+        public SetupCullClusterArgsShading Cull_SetupCullClusterArgs;
+
+        public class CullClusterShading : Graphics.Pipeline.Shader.TtComputeShadingEnv
+        {
+            public override Vector3ui DispatchArg
+            {
+                //get => new Vector3ui((MathHelper.Max(1, MathHelper.DivideAndRoundUp((uint)GpuSceneActors.Count, 64u))), 1, 1);
+                get => new Vector3ui(1, 1, 1);
+            }
+            public CullClusterShading()
+            {
+                CodeName = RName.GetRName("Shaders/Occlusion/GpuSceneCullCluster.cginc", RName.ERNameType.Engine);
+                MainName = "GpuSceneCullCluster";
+
+                this.UpdatePermutation();
+            }
+            protected override void EnvShadingDefines(in FPermutationId id, NxRHI.UShaderDefinitions defines)
+            {
+                base.EnvShadingDefines(in id, defines);
+            }
+            public override void OnDrawCall(NxRHI.UComputeDraw drawcall, Graphics.Pipeline.URenderPolicy policy)
+            {
+                var node = drawcall.TagObject as UGpuSceneNode;
+
+                drawcall.BindSrv("NumberVisibilityGpuActorBuffer", node.NumberVisibilityGpuActorBuffer.Srv);
+                drawcall.BindUav("VisibleClusterMeshData", node.VisibleClusterMeshData.Uav);
+                drawcall.BindUav("NumnerVisibleClusterMeshData", node.NumnerVisibleClusterMeshData.Uav);
+            }
+        }
+        public CullClusterShading Cull_CullCluster;
+
+        public class SetupDrawClusterArgsBufferShading : Graphics.Pipeline.Shader.TtComputeShadingEnv
+        {
+            public override Vector3ui DispatchArg
+            {
+                //get => new Vector3ui((MathHelper.Max(1, MathHelper.DivideAndRoundUp((uint)GpuSceneActors.Count, 64u))), 1, 1);
+                get => new Vector3ui(1, 1, 1);
+            }
+            public SetupDrawClusterArgsBufferShading()
+            {
+                CodeName = RName.GetRName("Shaders/Occlusion/SetupDrawClusterArgs.cginc", RName.ERNameType.Engine);
+                MainName = "SetupDrawClusterArgsCS";
+
+                this.UpdatePermutation();
+            }
+            protected override void EnvShadingDefines(in FPermutationId id, NxRHI.UShaderDefinitions defines)
+            {
+                base.EnvShadingDefines(in id, defines);
+            }
+            public override void OnDrawCall(NxRHI.UComputeDraw drawcall, Graphics.Pipeline.URenderPolicy policy)
+            {
+                var node = drawcall.TagObject as UGpuSceneNode;
+
+                drawcall.BindSrv("NumnerVisibleClusterMeshData", node.NumnerVisibleClusterMeshData.Srv);
+                drawcall.BindUav("DrawClusterIndirectArgs", node.SetupDrawClusterIndirectArgs.Uav);
+            }
+        }
+        public SetupDrawClusterArgsBufferShading Cull_SetupDrawClusterArgsBuffer;
 
         public NxRHI.UComputeDraw Cull_CullGpuIndexsDrawcall;
         public NxRHI.UComputeDraw Cull_SetupCullClusterArgsDrawcall;
@@ -147,34 +263,14 @@ namespace EngineNS.Graphics.Pipeline.Common
 
             //After BuildInstances function..
             var defines = new NxRHI.UShaderDefinitions();
-            defines.mCoreObject.AddDefine("DispatchX", $"{(MathHelper.Max(1, MathHelper.DivideAndRoundUp((uint)GpuSceneActors.Count, 64u)))}");
-            defines.mCoreObject.AddDefine("DispatchY", $"1");
-            defines.mCoreObject.AddDefine("DispatchZ", $"1");
+            
+            Cull_CullGpuIndexs = await UEngine.Instance.ShadingEnvManager.GetShadingEnv<CullGpuIndexsShading>();
 
-            Cull_CullGpuIndexs = await UEngine.Instance.GfxDevice.EffectManager.GetComputeEffect(RName.GetRName("Shaders/Occlusion/GpuSceneCullInstance.cginc", RName.ERNameType.Engine),
-                "GpuSceneCullInstance", NxRHI.EShaderType.SDT_ComputeShader, null, defines, null);
+            Cull_SetupCullClusterArgs = await UEngine.Instance.ShadingEnvManager.GetShadingEnv<SetupCullClusterArgsShading>();
 
-            cbPerHZBCullData_CullInstance = Cull_CullGpuIndexs.FindBinder("cbPerPatchHZBCullData");
+            Cull_CullCluster = await UEngine.Instance.ShadingEnvManager.GetShadingEnv<CullClusterShading>();
 
-            defines.mCoreObject.AddDefine("DispatchX", $"1");
-            defines.mCoreObject.AddDefine("DispatchY", $"1");
-            defines.mCoreObject.AddDefine("DispatchZ", $"1");
-            //defines.mCoreObject.AddDefine("NumThreadsPerGroup", $"{NumThreadsPerGroup}"); 
-            Cull_SetupCullClusterArgs = await UEngine.Instance.GfxDevice.EffectManager.GetComputeEffect(RName.GetRName("Shaders/Occlusion/GpuSceneSetupCullCluster.cginc", RName.ERNameType.Engine),
-                "SetupCullClusterArgsCS", NxRHI.EShaderType.SDT_ComputeShader, null, defines, null);
-
-            defines.mCoreObject.AddDefine("DispatchX", $"1");
-            defines.mCoreObject.AddDefine("DispatchY", $"1");
-            defines.mCoreObject.AddDefine("DispatchZ", $"1");
-            //defines.mCoreObject.AddDefine("NumThreadsPerGroup", $"{NumThreadsPerGroup}"); 
-            Cull_CullCluster = await UEngine.Instance.GfxDevice.EffectManager.GetComputeEffect(RName.GetRName("Shaders/Occlusion/GpuSceneCullCluster.cginc", RName.ERNameType.Engine),
-                "GpuSceneCullCluster", NxRHI.EShaderType.SDT_ComputeShader, null, defines, null);
-
-            defines.mCoreObject.AddDefine("DispatchX", $"1");
-            defines.mCoreObject.AddDefine("DispatchY", $"1");
-            defines.mCoreObject.AddDefine("DispatchZ", $"1");
-            Cull_SetupDrawClusterArgsBuffer = await UEngine.Instance.GfxDevice.EffectManager.GetComputeEffect(RName.GetRName("Shaders/Occlusion/SetupDrawClusterArgs.cginc", RName.ERNameType.Engine),
-                "SetupDrawClusterArgsCS", NxRHI.EShaderType.SDT_ComputeShader, null, defines, null);
+            Cull_SetupDrawClusterArgsBuffer = await UEngine.Instance.ShadingEnvManager.GetShadingEnv<SetupDrawClusterArgsBufferShading>();
 
             //cbPerHZBCullData_CullCluster = Cull_CullCluster.FindBinder("cbPerPatchHZBCullData");
             //HZBCullClusterCBuffer = UEngine.Instance.GfxDevice.RenderContext.CreateCBV(HZBCullClusterData.Binder.mCoreObject);
@@ -291,9 +387,12 @@ namespace EngineNS.Graphics.Pipeline.Common
             CullInstancesBuffer.Flush2GPU(cmd.mCoreObject);
         }
 
-        private unsafe void Cull(NxRHI.UGpuDevice rc)
+        private unsafe void Cull(NxRHI.UGpuDevice rcj, Graphics.Pipeline.URenderPolicy policy)
         {
+            var rc = UEngine.Instance.GfxDevice.RenderContext;
             var cmd = BasePass.DrawCmdList;
+            cmd.BeginCommand();
+
             {
                 VisibilityGpuActorsBuffer.SetSize((uint)CullInstancesBuffer.DataArray.Count, null, NxRHI.EBufferType.BFT_SRV | NxRHI.EBufferType.BFT_UAV);
                 NeedCullClusterMesBuffer.SetSize((uint)CullClustersBuffer.DataArray.Count, null, NxRHI.EBufferType.BFT_SRV | NxRHI.EBufferType.BFT_UAV);
@@ -307,19 +406,10 @@ namespace EngineNS.Graphics.Pipeline.Common
                 if (Cull_CullGpuIndexsDrawcall == null)
                 {
                     Cull_CullGpuIndexsDrawcall = rc.CreateComputeDraw();
-                    Cull_CullGpuIndexsDrawcall.SetComputeEffect(Cull_CullGpuIndexs);
                 }
 
-                HZBCullInstanceData.UpdateFieldVar(Cull_CullGpuIndexs.mComputeShader, "cbPerPatchHZBCullData");
-                HZBCullInstanceCBuffer = UEngine.Instance.GfxDevice.RenderContext.CreateCBV(HZBCullInstanceData.Binder.mCoreObject);
-
-                //HZBCullInstanceCBuffer.SetValue
-
-                Cull_CullGpuIndexsDrawcall.BindUav("InstanceSceneData", CullInstancesBuffer.Uav);
-                Cull_CullGpuIndexsDrawcall.BindUav("NumberVisibilityGpuActorBuffer", NumberVisibilityGpuActorBuffer.Uav);
-                Cull_CullGpuIndexsDrawcall.BindUav("VisibilityGpuActorsBuffer", VisibilityGpuActorsBuffer.Uav);
-                Cull_CullGpuIndexsDrawcall.BindSrv("NumberGpuActors", NumberGpuActorsBuffer.Srv);
-
+                Cull_CullGpuIndexs.SetDrawcallDispatch(this, policy, Cull_CullGpuIndexsDrawcall, (uint)GpuSceneActors.Count, 1, 1, true);
+                
                 //Cull_CullGpuIndexsDrawcall.Commit(cmd);
                 cmd.PushGpuDraw(Cull_CullGpuIndexsDrawcall);
             }
@@ -331,11 +421,9 @@ namespace EngineNS.Graphics.Pipeline.Common
                 if (Cull_SetupCullClusterArgsDrawcall == null)
                 {
                     Cull_SetupCullClusterArgsDrawcall = rc.CreateComputeDraw();
-                    Cull_SetupCullClusterArgsDrawcall.SetComputeEffect(Cull_SetupCullClusterArgs);
                 }
 
-                Cull_SetupCullClusterArgsDrawcall.BindUav("CullClusterIndirectArgs", CullClusterIndirectArgs.Uav);
-                Cull_SetupCullClusterArgsDrawcall.BindSrv("NumberVisibilityGpuActorBuffer", NumberVisibilityGpuActorBuffer.Srv);
+                Cull_SetupCullClusterArgs.SetDrawcallDispatch(this, policy, Cull_SetupCullClusterArgsDrawcall, 1, 1, 1, true);
 
                 //Cull_SetupCullClusterArgsDrawcall.Commit(cmd);
                 cmd.PushGpuDraw(Cull_SetupCullClusterArgsDrawcall);
@@ -352,13 +440,9 @@ namespace EngineNS.Graphics.Pipeline.Common
                 if (Cull_CullClusterDrawcall == null)
                 {
                     Cull_CullClusterDrawcall = rc.CreateComputeDraw();
-                    Cull_CullClusterDrawcall.SetComputeEffect(Cull_CullCluster);
-                    Cull_CullClusterDrawcall.BindIndirectDispatchArgsBuffer(CullClusterIndirectArgs.GpuBuffer);
                 }
 
-                Cull_CullClusterDrawcall.BindSrv("NumberVisibilityGpuActorBuffer", NumberVisibilityGpuActorBuffer.Srv);
-                Cull_CullClusterDrawcall.BindUav("VisibleClusterMeshData", VisibleClusterMeshData.Uav);
-                Cull_CullClusterDrawcall.BindUav("NumnerVisibleClusterMeshData", NumnerVisibleClusterMeshData.Uav);
+                Cull_CullCluster.SetDrawcallIndirectDispatch(this, policy, Cull_CullClusterDrawcall, CullClusterIndirectArgs.GpuBuffer);
 
                 //Cull_CullClusterDrawcall.Commit(cmd);
                 cmd.PushGpuDraw(Cull_CullClusterDrawcall);
@@ -371,21 +455,19 @@ namespace EngineNS.Graphics.Pipeline.Common
                 if (Cull_SetupDrawClusterArgsDrawcall == null)
                 {
                     Cull_SetupDrawClusterArgsDrawcall = rc.CreateComputeDraw();
-                    Cull_SetupDrawClusterArgsDrawcall.SetComputeEffect(Cull_SetupDrawClusterArgsBuffer);
                 }
 
-                Cull_SetupDrawClusterArgsDrawcall.BindSrv("NumnerVisibleClusterMeshData", NumnerVisibleClusterMeshData.Srv);
-                Cull_SetupDrawClusterArgsDrawcall.BindUav("DrawClusterIndirectArgs", SetupDrawClusterIndirectArgs.Uav);
-
+                Cull_SetupDrawClusterArgsBuffer.SetDrawcallDispatch(this, policy, Cull_SetupDrawClusterArgsDrawcall, 1, 1, 1, true);
+                
                 //Cull_SetupDrawClusterArgsDrawcall.Commit(cmd);
                 cmd.PushGpuDraw(Cull_SetupDrawClusterArgsDrawcall);
             }
-            //Cull_CullGpuIndexsDrawcall.
-
-            //defines.mCoreObject.AddDefine("BufferHeadSize", $"{UGpuParticleResources.BufferHeadSize * 4}");
-
-            //awzklyq!
+            
+            //awzklyq!            
             cmd.FlushDraws();
+            cmd.EndCommand();
+
+            policy.CommitCommandList(cmd);
         }
     }
 }

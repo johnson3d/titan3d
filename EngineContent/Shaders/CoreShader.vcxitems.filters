@@ -406,6 +406,12 @@
     <None Include="$(MSBuildThisFileDirectory)Inc\ShadingCommon.cginc">
       <Filter>Inc</Filter>
     </None>
+    <None Include="$(MSBuildThisFileDirectory)Compute\MacrossComputeShadingEnv.cginc">
+      <Filter>Compute</Filter>
+    </None>
+    <None Include="$(MSBuildThisFileDirectory)Compute\MacrossComputeShadingEnvImpl.cginc">
+      <Filter>Compute</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="$(MSBuildThisFileDirectory)Compute\calcrate.compute">
@@ -473,6 +479,9 @@
     </FxCompile>
     <FxCompile Include="$(MSBuildThisFileDirectory)Bricks\Particle\SimpleEmitter\Emitter.compute">
       <Filter>Bricks\Particle\SimpleEmitter</Filter>
+    </FxCompile>
+    <FxCompile Include="$(MSBuildThisFileDirectory)Compute\MacrossComputShading.shader">
+      <Filter>Compute</Filter>
     </FxCompile>
   </ItemGroup>
   <ItemGroup>

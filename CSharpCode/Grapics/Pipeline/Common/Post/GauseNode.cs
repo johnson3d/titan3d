@@ -8,7 +8,7 @@ using EngineNS.Rtti;
 
 namespace EngineNS.Graphics.Pipeline.Common.Post
 {
-    public class TtGaussShading : Shader.UGraphicsShadingEnv
+    public class TtGaussShading : Shader.TtGraphicsShadingEnv
     {
         public TtGaussShading()
         {
@@ -70,14 +70,14 @@ namespace EngineNS.Graphics.Pipeline.Common.Post
             base.InitNodePins();
         }
         public TtGaussShading mBasePassShading;
-        public override UGraphicsShadingEnv GetPassShading(TtMesh.TtAtom atom = null)
+        public override TtGraphicsShadingEnv GetPassShading(TtMesh.TtAtom atom = null)
         {
             return mBasePassShading;
         }
         public override async System.Threading.Tasks.Task Initialize(URenderPolicy policy, string debugName)
         {
             await base.Initialize(policy, debugName);
-            mBasePassShading = UEngine.Instance.ShadingEnvManager.GetShadingEnv<TtGaussShading>();
+            mBasePassShading = await UEngine.Instance.ShadingEnvManager.GetShadingEnv<TtGaussShading>();
         }
         public override void OnResize(URenderPolicy policy, float x, float y)
         {
@@ -154,7 +154,7 @@ namespace EngineNS.Graphics.Pipeline.Common.Post
         }
     }
 
-    public class TtGaussAdditiveShading : Shader.UGraphicsShadingEnv
+    public class TtGaussAdditiveShading : Shader.TtGraphicsShadingEnv
     {
         public TtGaussAdditiveShading()
         {
@@ -228,14 +228,14 @@ namespace EngineNS.Graphics.Pipeline.Common.Post
             base.InitNodePins();
         }
         public TtGaussAdditiveShading mBasePassShading;
-        public override UGraphicsShadingEnv GetPassShading(TtMesh.TtAtom atom = null)
+        public override TtGraphicsShadingEnv GetPassShading(TtMesh.TtAtom atom = null)
         {
             return mBasePassShading;
         }
         public override async System.Threading.Tasks.Task Initialize(URenderPolicy policy, string debugName)
         {
             await base.Initialize(policy, debugName);
-            mBasePassShading = UEngine.Instance.ShadingEnvManager.GetShadingEnv<TtGaussAdditiveShading>();
+            mBasePassShading = await UEngine.Instance.ShadingEnvManager.GetShadingEnv<TtGaussAdditiveShading>();
         }
         [System.Runtime.InteropServices.StructLayout(System.Runtime.InteropServices.LayoutKind.Sequential, Pack = 16)]
         struct FGaussStruct

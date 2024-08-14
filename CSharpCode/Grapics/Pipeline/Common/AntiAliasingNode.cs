@@ -9,7 +9,7 @@ using System.Text;
 namespace EngineNS.Graphics.Pipeline.Common
 {
     //https://www.irimsky.top/archives/301/
-    public class TtAntiAliasingShading : Shader.UGraphicsShadingEnv
+    public class TtAntiAliasingShading : Shader.TtGraphicsShadingEnv
     {
         public TtAntiAliasingShading()
         {
@@ -175,7 +175,7 @@ namespace EngineNS.Graphics.Pipeline.Common
             base.InitNodePins();
         }
         public TtAntiAliasingShading mBasePassShading;
-        public override UGraphicsShadingEnv GetPassShading(TtMesh.TtAtom atom = null)
+        public override TtGraphicsShadingEnv GetPassShading(TtMesh.TtAtom atom = null)
         {
             return mBasePassShading;
         }
@@ -185,7 +185,7 @@ namespace EngineNS.Graphics.Pipeline.Common
 
             var rc = UEngine.Instance.GfxDevice.RenderContext;
 
-            mBasePassShading = UEngine.Instance.ShadingEnvManager.GetShadingEnv<TtAntiAliasingShading>();
+            mBasePassShading = await UEngine.Instance.ShadingEnvManager.GetShadingEnv<TtAntiAliasingShading>();
 
             mCopyColorDrawcall = UEngine.Instance.GfxDevice.RenderContext.CreateCopyDraw();
             mCopyDepthDrawcall = UEngine.Instance.GfxDevice.RenderContext.CreateCopyDraw();

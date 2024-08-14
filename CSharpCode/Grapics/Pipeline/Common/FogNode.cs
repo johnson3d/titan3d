@@ -7,7 +7,7 @@ using System.Text;
 
 namespace EngineNS.Graphics.Pipeline.Common
 {
-    public partial class TtFogShading : Shader.UGraphicsShadingEnv
+    public partial class TtFogShading : Shader.TtGraphicsShadingEnv
     {
         public TtFogShading()
         {
@@ -78,14 +78,14 @@ namespace EngineNS.Graphics.Pipeline.Common
             base.InitNodePins();
         }
         public TtFogShading mBasePassShading;
-        public override UGraphicsShadingEnv GetPassShading(TtMesh.TtAtom atom)
+        public override TtGraphicsShadingEnv GetPassShading(TtMesh.TtAtom atom)
         {
             return mBasePassShading;
         }
         public override async System.Threading.Tasks.Task Initialize(URenderPolicy policy, string debugName)
         {
             await base.Initialize(policy, debugName);
-            mBasePassShading = UEngine.Instance.ShadingEnvManager.GetShadingEnv<TtFogShading>();
+            mBasePassShading = await UEngine.Instance.ShadingEnvManager.GetShadingEnv<TtFogShading>();
         }
         public override void FrameBuild(URenderPolicy policy)
         {

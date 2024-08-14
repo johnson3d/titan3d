@@ -1200,7 +1200,15 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
                                         var prop = refExpr.PropertyDeclClass.GetProperty(refExpr.VariableName);
                                         if (prop != null)
                                         {
-                                            IsRefVar = prop.PropertyType.IsByRef;
+                                            var attrs = prop.GetCustomAttributes(typeof(Rtti.MetaAttribute), false);
+                                            if (attrs.Length==1)
+                                            {
+                                                var meta = attrs[0] as Rtti.MetaAttribute;
+                                                if (meta.IsCanRefForMacross)
+                                                {
+                                                    IsRefVar = true;
+                                                }
+                                            }
                                         }
                                     }
                                     if (refExpr.IsProperty && IsRefVar == false)

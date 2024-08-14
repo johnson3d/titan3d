@@ -7,7 +7,7 @@ using System.Text;
 
 namespace EngineNS.Graphics.Pipeline.Mobile
 {
-    public class UBasePassShading : Shader.UGraphicsShadingEnv
+    public class UBasePassShading : Shader.TtGraphicsShadingEnv
     {
         public UBasePassShading()
         {
@@ -248,7 +248,7 @@ namespace EngineNS.Graphics.Pipeline.Mobile
             GGizmosBuffers.TargetViewIdentifier = GBuffers.TargetViewIdentifier;
 
             //mBasePassShading = shading as Pipeline.Mobile.UBasePassOpaque;
-            mOpaqueShading = UEngine.Instance.ShadingEnvManager.GetShadingEnv<UBasePassOpaque>();
+            mOpaqueShading = await UEngine.Instance.ShadingEnvManager.GetShadingEnv<UBasePassOpaque>();
 
             var linker = VisiblesPinIn.FindInLinker();
             if (linker != null)
@@ -438,7 +438,7 @@ namespace EngineNS.Graphics.Pipeline.Mobile
             GGizmosBuffers.SetDepthStencil(policy, GizmosDepthPinOut);
             GGizmosBuffers.TargetViewIdentifier = policy.DefaultCamera.TargetViewIdentifier;
 
-            mTranslucentShading = UEngine.Instance.ShadingEnvManager.GetShadingEnv<UBasePassTranslucent>();
+            mTranslucentShading = await UEngine.Instance.ShadingEnvManager.GetShadingEnv<UBasePassTranslucent>();
 
             var linker = VisiblesPinIn.FindInLinker();
             if (linker != null)
@@ -526,28 +526,6 @@ namespace EngineNS.Graphics.Pipeline.Mobile
         public override void TickSync(URenderPolicy policy)
         {
             LayerBasePass.SwapBuffer();
-        }
-    }
-}
-
-namespace EngineNS.UTest
-{
-    [UTest.UTest]
-    public class UTest_ShadingEnv
-    {
-        public void UnitTestEntrance()
-        {
-            var env = UEngine.Instance.ShadingEnvManager.GetShadingEnv<Graphics.Pipeline.Mobile.UBasePassOpaque>();
-
-            env.BeginPermutaion();
-            var Name1 = env.PushPermutation<EPixelFormat>("Name1", 3);
-
-            Name1.SetValue((int)EPixelFormat.PXF_R16_FLOAT);
-            var Str = Name1.GetValueString(in Name1.Value);
-            env.UpdatePermutation();
-
-            UnitTestManager.TAssert(Str == "PXF_R16_FLOAT", "");
-            UnitTestManager.TAssert(env.CurrentPermutationId.Data == (int)EPixelFormat.PXF_R16_FLOAT, "");
         }
     }
 }

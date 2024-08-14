@@ -3,6 +3,7 @@ using NPOI.SS.Formula.Functions;
 using NPOI.Util;
 using System;
 using System.Collections.Generic;
+using System.Drawing;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -330,6 +331,16 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
                         }
                         foreach(var j in i.MethodDatas)
                         {
+                            var mtd = DefClass.FindMethod(j.GetMethodName());
+                            if (mtd.OverrideMethod != null)
+                            {
+                                var meta = mtd.OverrideMethod.GetFirstCustomAttribute<Rtti.MetaAttribute>(false);
+                                if (meta.ShaderName == null)
+                                {
+                                    code += $"//warning:{mtd.MethodName} is not a shader funtion";
+                                }
+                                continue;
+                            }
                             string funcCode = "";
                             var data = new UCodeGeneratorData(DefClass.Namespace, DefClass, mHlslCodeGen, null);
                             var methodDecGen = data.CodeGen.GetCodeObjectGen(j.MethodDec.GetType());
@@ -386,6 +397,12 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
             try
             {
                 var mtd = DefClass.Methods[methodIndex];
+                if (gen == mHlslCodeGen && mtd.OverrideMethod != null)
+                {
+                    var meta = mtd.OverrideMethod.GetFirstCustomAttribute<Rtti.MetaAttribute>(false);
+                    if (meta.ShaderName == null)
+                        return $"//warning:{mtd.MethodName} is not a shader funtion";
+                }
 
                 BeforeGenerateCode?.Invoke(DefClass);
                 foreach (var i in Methods)
@@ -658,6 +675,12 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
                 SaveClassGraph(AssetName);
                 GenerateCode();
                 CompileCode();
+            }
+            toolBarItemIdx++;
+            EGui.UIProxy.ToolbarSeparator.DrawSeparator(in drawList, in Support.UAnyPointer.Default);
+            if (EGui.UIProxy.ToolbarIconButtonProxy.DrawCheckBox(in drawList, null, "EditorDebug", ref mCSCodeGen.IsEditorDebug))
+            {
+                
             }
             toolBarItemIdx++;
             EGui.UIProxy.ToolbarSeparator.DrawSeparator(in drawList, in Support.UAnyPointer.Default);

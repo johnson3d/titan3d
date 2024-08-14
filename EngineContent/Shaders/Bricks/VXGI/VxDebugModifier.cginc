@@ -1,13 +1,4 @@
 
-struct FVoxelDebugger
-{
-	float3		Position;	
-	float		Scale;
-
-	float3		Color;
-	float		Pad0;
-};
-
 StructuredBuffer<FVoxelDebugger> VxDebugInstanceSRV DX_AUTOBIND;//: register(t13);
 void DoVoxelDebugMeshVS(inout PS_INPUT vsOut, inout VS_MODIFIER vert)
 {

@@ -7,7 +7,7 @@ using System.Text;
 
 namespace EngineNS.Graphics.Pipeline.Common
 {
-    public class UPickBlurShading : Shader.UGraphicsShadingEnv
+    public class UPickBlurShading : Shader.TtGraphicsShadingEnv
     {
         public UPickBlurShading()
         {
@@ -68,14 +68,14 @@ namespace EngineNS.Graphics.Pipeline.Common
             base.InitNodePins();
         }
         public UPickBlurShading mBasePassShading;
-        public override UGraphicsShadingEnv GetPassShading(TtMesh.TtAtom atom = null)
+        public override TtGraphicsShadingEnv GetPassShading(TtMesh.TtAtom atom = null)
         {
             return mBasePassShading;
         }
         public override async System.Threading.Tasks.Task Initialize(URenderPolicy policy, string debugName)
         {
             await base.Initialize(policy, debugName);
-            mBasePassShading = UEngine.Instance.ShadingEnvManager.GetShadingEnv<UPickBlurShading>();
+            mBasePassShading = await UEngine.Instance.ShadingEnvManager.GetShadingEnv<UPickBlurShading>();
         }
         public override void OnLinkIn(TtRenderGraphLinker linker)
         {

@@ -6,7 +6,7 @@ using System.Text;
 
 namespace EngineNS.Graphics.Pipeline.Common
 {
-    public class UHitproxyShading : Shader.UGraphicsShadingEnv
+    public class UHitproxyShading : Shader.TtGraphicsShadingEnv
     {
         public UHitproxyShading()
         {
@@ -141,7 +141,7 @@ namespace EngineNS.Graphics.Pipeline.Common
         public NxRHI.URenderPass GizmosRenderPass;
         [Rtti.Meta]
         public float ScaleFactor { get; set; } = 0.5f;
-        public override UGraphicsShadingEnv GetPassShading(TtMesh.TtAtom atom = null)
+        public override TtGraphicsShadingEnv GetPassShading(TtMesh.TtAtom atom = null)
         {
             return mHitproxyShading;
         }
@@ -152,6 +152,8 @@ namespace EngineNS.Graphics.Pipeline.Common
 
             var rc = UEngine.Instance.GfxDevice.RenderContext;
             HitproxyPass.Initialize(rc, debugName);
+
+            mHitproxyShading = await UEngine.Instance.ShadingEnvManager.GetShadingEnv<UHitproxyShading>();
 
             CreateGBuffers(policy, DepthPinInOut.Attachement.Format, true);
             mCopyFence = rc.CreateFence(new NxRHI.FFenceDesc(), "Copy Hitproxy Texture");
@@ -205,8 +207,6 @@ namespace EngineNS.Graphics.Pipeline.Common
                 //GizmosPassDesc.mStencilClearValue = 0u;
             }
             GizmosRenderPass = UEngine.Instance.GfxDevice.RenderPassManager.GetPipelineState<NxRHI.FRenderPassDesc>(rc, in GizmosPassDesc);
-
-            mHitproxyShading = UEngine.Instance.ShadingEnvManager.GetShadingEnv<UHitproxyShading>();
 
             GHitproxyBuffers.Initialize(policy, HitproxyRenderPass);
             GHitproxyBuffers.SetRenderTarget(policy, 0, HitIdPinOut);

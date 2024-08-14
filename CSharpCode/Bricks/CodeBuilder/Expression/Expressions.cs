@@ -773,6 +773,7 @@ namespace EngineNS.Bricks.CodeBuilder
 
     public class UMethodDeclaration : UCodeObject, IO.ISerializer
     {
+        public Rtti.UClassMeta.TtMethodMeta OverrideMethod = null;
         [Rtti.Meta]
         public EVisisMode VisitMode { get; set; } = EVisisMode.Public;
         [Rtti.Meta]
@@ -925,6 +926,7 @@ namespace EngineNS.Bricks.CodeBuilder
         {
             var retVal = new UMethodDeclaration();
             retVal.IsOverride = true;
+            retVal.OverrideMethod = method;
             if(!method.ReturnType.IsEqual(typeof(void)) && !method.ReturnType.IsEqual(typeof(System.Threading.Tasks.Task)))
             {
                 var retType = method.ReturnType;

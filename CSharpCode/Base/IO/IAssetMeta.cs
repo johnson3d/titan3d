@@ -828,6 +828,62 @@ namespace EngineNS.IO
             }
         }
     }
+
+    public class TtAssetManager
+    {
+        public Dictionary<RName, WeakReference<IAsset>> Assets { get; } = new Dictionary<RName, WeakReference<IAsset>>();
+        public async Thread.Async.TtTask<IAsset> GetAsset(RName rn)
+        {
+            IAsset asset;
+            WeakReference<IAsset> result;
+            lock (Assets)
+            {
+                if (Assets.TryGetValue(rn, out result))
+                {
+                    if (result.TryGetTarget(out asset))
+                    {
+                        return asset;
+                    }
+                    else
+                    {
+                        Assets.Remove(rn);
+                    }
+                }
+            }
+            var meta = UEngine.Instance.AssetMetaManager.GetAssetMeta(rn);
+            if (meta == null)
+                return null;
+            asset = await meta.LoadAsset();
+            lock (Assets)
+            {
+                Assets[rn] = new WeakReference<IAsset>(asset);
+                return asset;
+            }
+        }
+        public async Thread.Async.TtTask<T> GetAsset<T>(RName rn) where T : class, IAsset
+        {
+            return GetAsset(rn) as T;
+        }
+        List<RName> mRmvAssets = new List<RName>();
+        public void TickSync()
+        {
+            mRmvAssets.Clear();
+            lock (Assets)
+            {   
+                foreach (var i in Assets)
+                {
+                    if (i.Value.TryGetTarget(out var asset) == false)
+                    {
+                        mRmvAssets.Add(i.Key);
+                    }
+                }
+                foreach (var i in mRmvAssets)
+                {
+                    Assets.Remove(i);
+                }
+            }
+        }
+    }
 }
 
 namespace EngineNS
@@ -835,6 +891,7 @@ namespace EngineNS
     partial class UEngine
     {
         public IO.TtAssetMetaManager AssetMetaManager { get; } = new IO.TtAssetMetaManager();
+        public IO.TtAssetManager AssetManager { get; } = new IO.TtAssetManager();
     }
 }
 

@@ -6,7 +6,7 @@ using System.Runtime.CompilerServices;
 
 namespace EngineNS.Graphics.Pipeline.Deferred
 {
-    public class USdfOpaqueShading : Shader.UGraphicsShadingEnv
+    public class USdfOpaqueShading : Shader.TtGraphicsShadingEnv
     {
         public UPermutationItem DisableAO
         {
@@ -63,7 +63,7 @@ namespace EngineNS.Graphics.Pipeline.Deferred
             };
         }
     }
-    public class USdfTranslucentShading : Shader.UGraphicsShadingEnv
+    public class USdfTranslucentShading : Shader.TtGraphicsShadingEnv
     {
         public USdfTranslucentShading()
         {
@@ -121,8 +121,8 @@ namespace EngineNS.Graphics.Pipeline.Deferred
 
             CreateGBuffers(policy, ColorPinInOut.Attachement.Format);
 
-            mOpaqueShading = UEngine.Instance.ShadingEnvManager.GetShadingEnv<USdfOpaqueShading>();
-            mTranslucentShading = UEngine.Instance.ShadingEnvManager.GetShadingEnv<USdfTranslucentShading>();
+            mOpaqueShading = await UEngine.Instance.ShadingEnvManager.GetShadingEnv<USdfOpaqueShading>();
+            mTranslucentShading = await UEngine.Instance.ShadingEnvManager.GetShadingEnv<USdfTranslucentShading>();
 
             var linker = VisiblesPinIn.FindInLinker();
             if (linker != null)
@@ -177,7 +177,7 @@ namespace EngineNS.Graphics.Pipeline.Deferred
                 GBuffers.SetSize(x, y);
             }
         }
-        public override Shader.UGraphicsShadingEnv GetPassShading(Mesh.TtMesh.TtAtom atom)
+        public override Shader.TtGraphicsShadingEnv GetPassShading(Mesh.TtMesh.TtAtom atom)
         {
             switch (atom.Material.RenderLayer)
             {

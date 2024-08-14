@@ -21,6 +21,8 @@ namespace EngineNS.Animation.Asset
         public string Generator { get; set; } = "";
         [Category("ImportSetting")]
         public float UnitScale { get; set; } = 0.01f;
+        [Category("ImportSetting")]
+        public bool IgnoreScale { get; set; } = true;
     }
     public partial class TtAnimationClip
     {
@@ -145,6 +147,7 @@ namespace EngineNS.Animation.Asset
                     var rn = RName.GetRName(mDir.Name + animName + TtAnimationClip.AssetExt);
                     var importSetting = new TtAssetImportOption_Animation();
                     importSetting.Scale = AnimImprotSetting.UnitScale;
+                    importSetting.IgnoreScale = AnimImprotSetting.IgnoreScale;
                     var chunk = AnimationChunkGenerater.Generate(rn, anim, AssetImporter.AiScene, importSetting);
                     var animClip = new TtAnimationClip();
                     animClip.SampleRate = (float)anim.TicksPerSecond;

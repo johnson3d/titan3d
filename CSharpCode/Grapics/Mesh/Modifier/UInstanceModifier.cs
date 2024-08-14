@@ -48,7 +48,7 @@ namespace EngineNS.Graphics.Mesh.Modifier
         public float Radius;
     }
 
-    public class TtGpuCullSetupShading : Graphics.Pipeline.Shader.UComputeShadingEnv
+    public class TtGpuCullSetupShading : Graphics.Pipeline.Shader.TtComputeShadingEnv
     {
         public override Vector3ui DispatchArg
         {
@@ -72,7 +72,7 @@ namespace EngineNS.Graphics.Mesh.Modifier
                 return;
         }
     }
-    public class TtGpuCullFlushShading : Graphics.Pipeline.Shader.UComputeShadingEnv
+    public class TtGpuCullFlushShading : Graphics.Pipeline.Shader.TtComputeShadingEnv
     {
         public override Vector3ui DispatchArg
         {
@@ -96,7 +96,7 @@ namespace EngineNS.Graphics.Mesh.Modifier
                 return;
         }
     }
-    public class TtGpuCullShading : Graphics.Pipeline.Shader.UComputeShadingEnv
+    public class TtGpuCullShading : Graphics.Pipeline.Shader.TtComputeShadingEnv
     {
         public override Vector3ui DispatchArg
         {
@@ -131,16 +131,21 @@ namespace EngineNS.Graphics.Mesh.Modifier
         public Pipeline.TtCpu2GpuBuffer<uint> DrawArgsBuffer = null;
         public Dictionary<uint, FDrawArgs> DrawArgsOffsetDict = null;
 
-        public TtGpuCullSetupShading GpuCullSetupShading;
-        public NxRHI.UComputeDraw GpuCullSetupDrawcall;
-        public TtGpuCullFlushShading GpuCullFlushShading;
-        public NxRHI.UComputeDraw GpuCullFlushDrawcall;
-        public TtGpuCullShading GpuCullShading;
+        public NxRHI.UComputeDraw GpuCullSetupDrawcall;        
+        public NxRHI.UComputeDraw GpuCullFlushDrawcall;        
         public NxRHI.UComputeDraw GpuCullDrawcall;
         public NxRHI.UCbView GPUCullingCBV = null;
 
-        public unsafe void SetupGpuData(TtInstanceModifier instanceModifier)
+        public Mesh.Modifier.TtGpuCullSetupShading GpuCullSetupShading;
+        public Mesh.Modifier.TtGpuCullFlushShading GpuCullFlushShading;
+        public Mesh.Modifier.TtGpuCullShading GpuCullShading;
+
+        public void SetupGpuData(Graphics.Pipeline.TtGpuCullingNode node, TtInstanceModifier instanceModifier)
         {
+            GpuCullSetupShading = node.GpuCullSetupShading;
+            GpuCullFlushShading = node.GpuCullFlushShading;
+            GpuCullShading = node.GpuCullShading;
+
             DrawArgsOffsetDict = instanceModifier.DrawArgsOffsetDict;
             if (DrawArgsBuffer == null)
             {
@@ -149,27 +154,29 @@ namespace EngineNS.Graphics.Mesh.Modifier
             }
             DrawArgsBuffer.SetSize(DrawArgsOffsetDict.Count * 5);
 
-            using (var tsCmd = new NxRHI.FTransientCmd(NxRHI.EQueueType.QU_Default, "TtInstanceModifier.FlushArgsBuffer"))
+            unsafe
             {
-                foreach (var i in DrawArgsOffsetDict.Values)
+                using (var tsCmd = new NxRHI.FTransientCmd(NxRHI.EQueueType.QU_Default, "TtInstanceModifier.FlushArgsBuffer"))
                 {
-                    DrawArgsBuffer.UpdateData((int)i.Offset * sizeof(uint), i.Arguments, 5 * sizeof(uint));
-                }
-                DrawArgsBuffer.Flush2GPU(tsCmd.CmdList);
-                DrawArgsBuffer.GpuBuffer.TransitionTo(tsCmd.CmdList, NxRHI.EGpuResourceState.GRS_UavIndirect);
-            }
+                    foreach (var i in DrawArgsOffsetDict.Values)
+                    {
+                        DrawArgsBuffer.UpdateData((int)i.Offset * sizeof(uint), i.Arguments, 5 * sizeof(uint));
+                    }
 
-            if (instanceModifier.InstanceBuffers.NumOfInstance > 0)
-                CullingBuffer.SetSize((uint)instanceModifier.InstanceBuffers.NumOfInstance, IntPtr.Zero.ToPointer(), NxRHI.EBufferType.BFT_UAV | NxRHI.EBufferType.BFT_SRV);
-            GpuCullSetupShading = UEngine.Instance.ShadingEnvManager.GetShadingEnv<TtGpuCullSetupShading>();
+                    DrawArgsBuffer.Flush2GPU(tsCmd.CmdList);
+                    DrawArgsBuffer.GpuBuffer.TransitionTo(tsCmd.CmdList, NxRHI.EGpuResourceState.GRS_UavIndirect);
+
+                    if (instanceModifier.InstanceBuffers.NumOfInstance > 0)
+                        CullingBuffer.SetSize((uint)instanceModifier.InstanceBuffers.NumOfInstance, IntPtr.Zero.ToPointer(), NxRHI.EBufferType.BFT_UAV | NxRHI.EBufferType.BFT_SRV);
+                }
+            }
+            
             GpuCullSetupDrawcall = UEngine.Instance.GfxDevice.RenderContext.CreateComputeDraw();
             GpuCullSetupDrawcall.TagObject = this;
 
-            GpuCullFlushShading = UEngine.Instance.ShadingEnvManager.GetShadingEnv<TtGpuCullFlushShading>();
             GpuCullFlushDrawcall = UEngine.Instance.GfxDevice.RenderContext.CreateComputeDraw();
             GpuCullFlushDrawcall.TagObject = this;
-
-            GpuCullShading = UEngine.Instance.ShadingEnvManager.GetShadingEnv<TtGpuCullShading>();
+            
             GpuCullDrawcall = UEngine.Instance.GfxDevice.RenderContext.CreateComputeDraw();
             GpuCullDrawcall.TagObject = this;
         }

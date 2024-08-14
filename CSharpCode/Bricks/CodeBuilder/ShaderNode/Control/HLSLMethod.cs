@@ -605,7 +605,7 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Control
                     TextureSRV = await UEngine.Instance.GfxDevice.TextureManager.GetTexture(value);
 
                     mSlateEffect = await UEngine.Instance.GfxDevice.EffectManager.GetEffect(
-                        UEngine.Instance.ShadingEnvManager.GetShadingEnv<EngineNS.Editor.Forms.USlateTextureViewerShading>(),
+                        await UEngine.Instance.ShadingEnvManager.GetShadingEnv<EngineNS.Editor.Forms.USlateTextureViewerShading>(),
                         UEngine.Instance.GfxDevice.MaterialManager.ScreenMaterial, new Graphics.Mesh.UMdfStaticMesh());
                 };
                 exec();
@@ -816,7 +816,7 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Control
                     TextureSRV = await UEngine.Instance.GfxDevice.TextureManager.GetTexture(value);
 
                     mSlateEffect = await UEngine.Instance.GfxDevice.EffectManager.GetEffect(
-                        UEngine.Instance.ShadingEnvManager.GetShadingEnv<EngineNS.Editor.Forms.USlateTextureViewerShading>(),
+                        await UEngine.Instance.ShadingEnvManager.GetShadingEnv<EngineNS.Editor.Forms.USlateTextureViewerShading>(),
                         UEngine.Instance.GfxDevice.MaterialManager.ScreenMaterial, new Graphics.Mesh.UMdfStaticMesh());
 
                 };

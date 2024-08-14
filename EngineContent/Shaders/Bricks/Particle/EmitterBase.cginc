@@ -34,10 +34,6 @@ struct TtEmitter
     {
         return ToColor4f(value);
     }
-    void AtomicAdd_EmitterFlags(uint value, out uint oldValue)
-    {
-        InterlockedAdd(EmitterDataRef[0].Flags, value, oldValue);
-    }
 };
 
 #endif//EMITTER_BASE_CGINC

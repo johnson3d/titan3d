@@ -57,6 +57,8 @@ namespace EngineNS.Rtti
             ManualMarshal = (1 << 8),
 
             Unserializable = (1 << 9),// 不能序列化
+
+            CanRefForMacross = (1 << 11),// Macross代码生成时，可以用ref做传引用，这里有一个潜规则，需要提供对应名为m{PropertyName}的public成员变量
         }
         public int Order = 0;
         public EMetaFlags Flags = 0;
@@ -71,6 +73,7 @@ namespace EngineNS.Rtti
         public bool IsMacrossReadOnly => (Flags & EMetaFlags.MacrossReadOnly) != 0;
         //public bool IsMacrossDeclareable => (Flags & EMetaFlags.MacrossDeclareable) != 0;
         public bool IsUnserializable => (Flags & EMetaFlags.Unserializable) != 0;
+        public bool IsCanRefForMacross => (Flags & EMetaFlags.CanRefForMacross) != 0; 
     }
     public class UClassMeta
     {
@@ -835,20 +838,18 @@ namespace EngineNS.Rtti
             {
                 mHostType = metaVersion.HostClass.ClassType;
                 mPropertyName = name;
-                mPropInfoRef = null;
-                if (propType == null)
-                {
-                    mFieldType = null;
-                    CustumSerializer = null;
-                    return;
-                }
-                var info = metaVersion.FindPropertyByName(propType.SystemType, name);
+                var info = metaVersion.FindPropertyByName(propType?.SystemType, name);
                 if (info == null)
                 {
                     mFieldType = propType;
                     CustumSerializer = null;
                     return;
                 }
+                if (propType == null || propType.SystemType != info.PropertyType)
+                {
+                    Profiler.Log.WriteLine(Profiler.ELogTag.Warning, "Rtti", $"Property {mHostType}.{name}'s type is not match: {propType}!={info.PropertyType}");
+                }
+                mPropInfoRef = info;
                 mHostType = metaVersion.HostClass.ClassType;
                 mFieldType = UTypeDesc.TypeOf(info.PropertyType);// propType;
 
@@ -1223,38 +1224,52 @@ namespace EngineNS.Rtti
             foreach (var i in UTypeDescManager.Instance.Services)
             {
                 var klsColloector = new List<UClassMeta>();
-                foreach(var j in i.Value.Types)
-                {
-                    if (moduleName != null && j.Value.Assembly.Name != moduleName)
-                    {
-                        continue;
-                    }
-                    MetaAttribute meta;
-                    if (j.Value.GetInterface(nameof(EngineNS.IO.ISerializer)) == null)
-                    {
-                        var attrs = j.Value.GetCustomAttributes(typeof(MetaAttribute), true);
-                        if (attrs.Length == 0)
-                            continue;
-                        meta = attrs[0] as MetaAttribute;
-                    }
 
-                    UClassMeta kls = null;
-                    var metaName = j.Value.TypeString;// Rtti.UTypeDescManager.Instance.GetTypeStringFromType(j.Value.SystemType);
-                    if (mMetas.TryGetValue(metaName, out kls) == false)
+                bool bFinished = false;
+                while (bFinished == false)
+                {
+                    try
                     {
-                        kls = new UClassMeta(j.Value);
-                        kls.Path = GetPath(kls);                        
-                        var ver = kls.BuildCurrentVersion();
-                        mMetas.Add(metaName, kls);
-                        kls.SaveClass();
+                        foreach (var j in i.Value.Types)
+                        {
+                            if (moduleName != null && j.Value.Assembly.Name != moduleName)
+                            {
+                                continue;
+                            }
+                            MetaAttribute meta;
+                            if (j.Value.GetInterface(nameof(EngineNS.IO.ISerializer)) == null)
+                            {
+                                var attrs = j.Value.GetCustomAttributes(typeof(MetaAttribute), true);
+                                if (attrs.Length == 0)
+                                    continue;
+                                meta = attrs[0] as MetaAttribute;
+                            }
+
+                            UClassMeta kls = null;
+                            var metaName = j.Value.TypeString;// Rtti.UTypeDescManager.Instance.GetTypeStringFromType(j.Value.SystemType);
+                            if (mMetas.TryGetValue(metaName, out kls) == false)
+                            {
+                                kls = new UClassMeta(j.Value);
+                                kls.Path = GetPath(kls);
+                                var ver = kls.BuildCurrentVersion();
+                                mMetas.Add(metaName, kls);
+                                kls.SaveClass();
+                            }
+                            else
+                            {
+                                klsColloector.Add(kls);
+                                //var ver = kls.BuildCurrentVersion();
+                            }
+                        }
+                        bFinished = true;
                     }
-                    else
+                    catch (System.InvalidOperationException ex)
                     {
-                        klsColloector.Add(kls);
-                        //var ver = kls.BuildCurrentVersion();
+                        bFinished = false;
                     }
                 }
-                foreach(var j in klsColloector)
+
+                foreach (var j in klsColloector)
                 {
                     var ver = j.BuildCurrentVersion();
                 }

@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Root Type="EngineNS.Graphics.Pipeline.Shader.TtMacrossShadingEnv@EngineCore">
+  <AssetName Type="EngineNS.RName@EngineCore" Value="Game,tutorials/mcshader/test_shading.mcshading,df64ad7a-e969-466d-b546-ef4792028841" />
+  <CodeName Type="EngineNS.RName@EngineCore" Value="Engine,shaders/compute/macrosscomputshading.shader,7ea66999-2a9a-46db-a935-29bd37122753" />
+  <MainName Type="System.String@Unknown" Value="CS_Main" />
+</Root>

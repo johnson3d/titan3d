@@ -7,7 +7,7 @@ using System.Text;
 
 namespace EngineNS.Graphics.Pipeline.Shadow
 {
-    public class UExponentialShadowShading : Shader.UGraphicsShadingEnv
+    public class UExponentialShadowShading : Shader.TtGraphicsShadingEnv
     {
         public UExponentialShadowShading()
         {
@@ -72,14 +72,14 @@ namespace EngineNS.Graphics.Pipeline.Shadow
             base.InitNodePins();
         }
         public UExponentialShadowShading mBasePassShading;
-        public override UGraphicsShadingEnv GetPassShading(TtMesh.TtAtom atom = null)
+        public override TtGraphicsShadingEnv GetPassShading(TtMesh.TtAtom atom = null)
         {
             return mBasePassShading;
         }
         public override async System.Threading.Tasks.Task Initialize(URenderPolicy policy, string debugName)
         {
             await base.Initialize(policy, debugName);
-            mBasePassShading = UEngine.Instance.ShadingEnvManager.GetShadingEnv<UExponentialShadowShading>();
+            mBasePassShading = await UEngine.Instance.ShadingEnvManager.GetShadingEnv<UExponentialShadowShading>();
         }
         public override void OnLinkIn(TtRenderGraphLinker linker)
         {

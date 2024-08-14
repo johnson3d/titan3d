@@ -53,10 +53,16 @@ namespace EngineNS.Bricks.NodeGraph
             get
             {
                 var tmp = new TSaveData();
-                tmp.InNodeId = InPin.NodeId;
-                tmp.OutNodeId = OutPin.NodeId;
-                tmp.InPinName = InPin.Name;
-                tmp.OutPinName = OutPin.Name;
+                if (InPin != null)//??
+                {
+                    tmp.InNodeId = InPin.NodeId;
+                    tmp.InPinName = InPin.Name;
+                }
+                if (OutPin != null)//??
+                {
+                    tmp.OutNodeId = OutPin.NodeId;
+                    tmp.OutPinName = OutPin.Name;
+                }
                 return tmp;
             }
             set

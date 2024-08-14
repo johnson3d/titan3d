@@ -2,9 +2,9 @@
 {
     uint tmp_r_SetParticleFlags_4124938284 = 0;
     uint tmp_r_Spawn_318270620 = 0;
-    uint v_oldValue_AtomicAdd_EmitterFlags_2788520947 = 0;
-    emt.AtomicAdd_EmitterFlags(1,v_oldValue_AtomicAdd_EmitterFlags_2788520947);
-    if ((v_oldValue_AtomicAdd_EmitterFlags_2788520947 < 512))
+    uint v_oriValue_InterlockedAddUInt32_1872985343 = 0;
+    InterlockedAdd(emt.EmitterDataRef[0].Flags,1,v_oriValue_InterlockedAddUInt32_1872985343);
+    if ((v_oriValue_InterlockedAddUInt32_1872985343 < 512))
     {
         tmp_r_SetParticleFlags_4124938284 = emt.SetParticleFlags(EParticleFlags_EmitShape,0);
         tmp_r_Spawn_318270620 = emt.Spawn(1,tmp_r_SetParticleFlags_4124938284,3);

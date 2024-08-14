@@ -217,7 +217,7 @@ namespace EngineNS.Bricks.GpuDriven
     }
     #endregion
 
-    public class TtSwRasterizeDispatchArgShading : Graphics.Pipeline.Shader.UComputeShadingEnv
+    public class TtSwRasterizeDispatchArgShading : Graphics.Pipeline.Shader.TtComputeShadingEnv
     {
         public override Vector3ui DispatchArg
         {
@@ -254,7 +254,7 @@ namespace EngineNS.Bricks.GpuDriven
         }
     }
 
-    public class TtSwRasterizeSetUpShading : Graphics.Pipeline.Shader.UComputeShadingEnv
+    public class TtSwRasterizeSetUpShading : Graphics.Pipeline.Shader.TtComputeShadingEnv
     {
         public override Vector3ui DispatchArg
         {
@@ -289,7 +289,7 @@ namespace EngineNS.Bricks.GpuDriven
         }
     }
 
-    public class TtSwRasterizeShading : Graphics.Pipeline.Shader.UComputeShadingEnv
+    public class TtSwRasterizeShading : Graphics.Pipeline.Shader.TtComputeShadingEnv
     {
         public override Vector3ui DispatchArg
         {
@@ -414,15 +414,15 @@ namespace EngineNS.Bricks.GpuDriven
             mShadingStruct.SetDefault();
             CoreSDK.DisposeObject(ref SWRasterizerDrawcall);
             SWRasterizerDrawcall = rc.CreateComputeDraw();
-            SWRasterizer = UEngine.Instance.ShadingEnvManager.GetShadingEnv<TtSwRasterizeShading>();
+            SWRasterizer = await UEngine.Instance.ShadingEnvManager.GetShadingEnv<TtSwRasterizeShading>();
 
             CoreSDK.DisposeObject(ref DispatchArgShadingDrawcall);
             DispatchArgShadingDrawcall = rc.CreateComputeDraw();
-            DispatchArgShading = UEngine.Instance.ShadingEnvManager.GetShadingEnv<TtSwRasterizeDispatchArgShading>();
+            DispatchArgShading = await UEngine.Instance.ShadingEnvManager.GetShadingEnv<TtSwRasterizeDispatchArgShading>();
 
             CoreSDK.DisposeObject(ref SetUpRasterizeDrawcall);
             SetUpRasterizeDrawcall = rc.CreateComputeDraw();
-            SetUpRasterizeShading = UEngine.Instance.ShadingEnvManager.GetShadingEnv<TtSwRasterizeSetUpShading>();
+            SetUpRasterizeShading = await UEngine.Instance.ShadingEnvManager.GetShadingEnv<TtSwRasterizeSetUpShading>();
 
             mShadingStruct.DispatchArg = SWRasterizer.DispatchArg;
             //unsafe
@@ -485,7 +485,7 @@ namespace EngineNS.Bricks.GpuDriven
         }
     }
 
-    public class TtQuarkResolveShading : Graphics.Pipeline.Shader.UGraphicsShadingEnv
+    public class TtQuarkResolveShading : Graphics.Pipeline.Shader.TtGraphicsShadingEnv
     {
         public TtQuarkResolveShading()
         {
@@ -549,7 +549,7 @@ namespace EngineNS.Bricks.GpuDriven
             //base.InitNodePins();
         }
         public TtQuarkResolveShading mBasePassShading;
-        public override UGraphicsShadingEnv GetPassShading(TtMesh.TtAtom atom)
+        public override TtGraphicsShadingEnv GetPassShading(TtMesh.TtAtom atom)
         {
             return mBasePassShading;
         }
@@ -559,7 +559,7 @@ namespace EngineNS.Bricks.GpuDriven
 
             CreateGBuffers(policy, DepthStencilPinIn.Attachement.Format);
 
-            mBasePassShading = UEngine.Instance.ShadingEnvManager.GetShadingEnv<TtQuarkResolveShading>();
+            mBasePassShading = await UEngine.Instance.ShadingEnvManager.GetShadingEnv<TtQuarkResolveShading>();
         }
 
         public override unsafe TtGraphicsBuffers CreateGBuffers(URenderPolicy policy, EPixelFormat format)

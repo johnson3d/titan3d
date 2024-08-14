@@ -73,7 +73,7 @@ namespace EngineNS.NxRHI
     }
     public class UShaderDesc : AuxPtrType<NxRHI.FShaderDesc>
     {
-        public Graphics.Pipeline.Shader.UShadingEnv.FPermutationId PermutationId { get; set; }
+        public Graphics.Pipeline.Shader.TtShadingEnv.FPermutationId PermutationId { get; set; }
         public UShaderDesc()
         {
             mCoreObject = FShaderDesc.CreateInstance();

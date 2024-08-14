@@ -6,7 +6,7 @@ namespace EngineNS.Graphics.Pipeline.Shader.CommanShading
 {
     public class UBasePassPolicy : URenderPolicy
     {
-        public UGraphicsShadingEnv mBasePassShading;
+        public TtGraphicsShadingEnv mBasePassShading;
         public override void OnDrawCall(NxRHI.ICommandList cmd, NxRHI.UGraphicDraw drawcall, Mesh.TtMesh.TtAtom atom)
         {
             base.OnDrawCall(cmd, drawcall, atom);

@@ -2,6 +2,8 @@
 using System;
 using System.Collections.Generic;
 using System.Text;
+using System.ComponentModel;
+using NPOI.HSSF.Record;
 
 namespace EngineNS.Graphics.Pipeline.Shader
 {
@@ -34,9 +36,9 @@ namespace EngineNS.Graphics.Pipeline.Shader
         TrueValue = 1,
         BitWidth = 1,
     }
-    public class UShadingEnv
+    public class TtShadingEnv
     {
-        public UShadingEnv()
+        public TtShadingEnv()
         {
             //var flds = this.GetType().GetFields();
             //foreach (var i in flds)
@@ -60,6 +62,11 @@ namespace EngineNS.Graphics.Pipeline.Shader
             //        continue;
             //    System.Diagnostics.Debug.Assert(false);
             //}
+        }
+        internal virtual async Thread.Async.TtTask<bool> OnCreateEffect()
+        {
+            await Thread.TtAsyncDummyClass.DummyFunc();
+            return true;
         }
         #region PermutationID
         public class UPermutationItem
@@ -225,7 +232,7 @@ namespace EngineNS.Graphics.Pipeline.Shader
         {
             get => mCurrentPermutationId;
         }
-        public RName CodeName { get; set; }
+        public virtual RName CodeName { get; set; }
         public NxRHI.UCbView PerShadingCBuffer;                
         public bool GetShaderDefines(in FPermutationId id, NxRHI.UShaderDefinitions defines)
         {
@@ -244,8 +251,8 @@ namespace EngineNS.Graphics.Pipeline.Shader
         }
     }
 
-    public abstract class UGraphicsShadingEnv
-        : UShadingEnv
+    public abstract class TtGraphicsShadingEnv
+        : TtShadingEnv
     {
         public abstract NxRHI.EVertexStreamType[] GetNeedStreams();
         //public abstract EPixelShaderInput[] GetPSNeedInputs();
@@ -276,11 +283,15 @@ namespace EngineNS.Graphics.Pipeline.Shader
 
         }
     }
-    public abstract class UComputeShadingEnv : UShadingEnv
+    public abstract class TtComputeShadingEnv : TtShadingEnv
     {
-        [Rtti.Meta]
-        public string MainName { get; set; }
-        private NxRHI.UComputeEffect CurrentEffect;
+        public virtual string MainName { get; set; }
+        private NxRHI.UComputeEffect mCurrentEffect;
+        public NxRHI.UComputeEffect CurrentEffect
+        {
+            get => mCurrentEffect;
+        }
+
         public bool IsReady
         {
             get => CurrentEffect != null;
@@ -293,11 +304,10 @@ namespace EngineNS.Graphics.Pipeline.Shader
         public override void UpdatePermutation()
         {
             base.UpdatePermutation();
-            var nu = OnCreateEffect();
         }
-        protected async Thread.Async.TtTask<bool> OnCreateEffect()
+        internal override async Thread.Async.TtTask<bool> OnCreateEffect()
         {
-            CurrentEffect = await UEngine.Instance.GfxDevice.EffectManager.GetComputeEffect(CodeName,
+            mCurrentEffect = await UEngine.Instance.GfxDevice.EffectManager.GetComputeEffect(CodeName,
                 MainName, NxRHI.EShaderType.SDT_ComputeShader, this, null, null);
             System.Diagnostics.Debug.Assert(this.mCurrentPermutationId == CurrentEffect.PermutationId);
 
@@ -340,7 +350,8 @@ namespace EngineNS.Graphics.Pipeline.Shader
             defines.AddDefine("DispatchZ", (int)DispatchArg.Z);
         }
     }
-    public class UDummyShading : Shader.UGraphicsShadingEnv
+    
+    public class UDummyShading : Shader.TtGraphicsShadingEnv
     {
         public UDummyShading()
         {
@@ -357,29 +368,465 @@ namespace EngineNS.Graphics.Pipeline.Shader
                 };
         }
     }
-    public class UShadingEnvManager : UModule<UEngine>
+    public class TtShadingEnvManager : UModule<UEngine>
     {
-        public Dictionary<Type, UShadingEnv> Shadings { get; } = new Dictionary<Type, UShadingEnv>();
-        public UShadingEnv GetShadingEnv(Type name)
+        public Dictionary<Type, TtShadingEnv> Shadings { get; } = new Dictionary<Type, TtShadingEnv>();
+        public TtShadingEnv GetShadingEnv(Type name)
         {
-            UShadingEnv shading;
+            TtShadingEnv shading;
             if (Shadings.TryGetValue(name, out shading))
                 return shading;
 
-            shading = Rtti.UTypeDescManager.CreateInstance(name) as UShadingEnv;
+            shading = Rtti.UTypeDescManager.CreateInstance(name) as TtShadingEnv;
             if (shading == null)
                 return null;
             Shadings.Add(name, shading);
             return shading;
         }
-        public T GetShadingEnv<T>() where T : UShadingEnv, new()
+        public async Thread.Async.TtTask<T> GetShadingEnv<T>() where T : TtShadingEnv, new()
         {
-            UShadingEnv shading;
+            TtShadingEnv shading;
             if (Shadings.TryGetValue(typeof(T), out shading))
                 return shading as T;
             T result = new T();
+            await result.OnCreateEffect();
             Shadings.Add(typeof(T), result);
             return result;
+        }
+    }
+
+    public class TtMacrossShadingEnvAMeta : IO.IAssetMeta
+    {
+        public override string GetAssetExtType()
+        {
+            return TtMacrossShadingEnv.AssetExt;
+        }
+
+        public override string GetAssetTypeName()
+        {
+            return "McShading";
+        }
+        public override async System.Threading.Tasks.Task<IO.IAsset> LoadAsset()
+        {
+            //return await UEngine.Instance.GfxDevice.TextureManager.GetTexture(GetAssetName());
+            return null;
+        }
+        public override bool CanRefAssetType(IO.IAssetMeta ameta)
+        {
+            return false;
+        }
+        [Rtti.Meta]
+        public string ShaderType { get; set; }
+        [Rtti.Meta]
+        [RName.PGRName(FilterExts = TtShaderAsset.AssetExt)]
+        public RName TemplateName
+        {
+            get;
+            set;
+        }
+    }
+    [Rtti.Meta]
+    [TtMacrossShadingEnv.TtMacrossShadingEnvImport]
+    [IO.AssetCreateMenu(MenuName = "FX/McShader")]
+    [EngineNS.Editor.UAssetEditor(EditorType = typeof(TtMacrossShadingEnvEditor))]
+    public class TtMacrossShadingEnv : TtComputeShadingEnv, IO.IAsset
+    {
+        public const string AssetExt = ".mcshading";
+        public class TtMacrossShadingEnvImportAttribute : IO.CommonCreateAttribute
+        {
+            protected override bool CheckAsset()
+            {
+                var material = mAsset as TtMacrossShadingEnv;
+                if (material == null)
+                    return false;
+
+                return true;
+            }
+            public override async Thread.Async.TtTask DoCreate(RName dir, Rtti.UTypeDesc type, string ext)
+            {
+                ExtName = ext;
+                mName = null;
+                mDir = dir;
+                TypeSlt.BaseType = type;
+                TypeSlt.SelectedType = type;
+
+                PGAssetInitTask = PGAsset.Initialize();
+                mAsset = new TtMacrossShadingEnv();
+                PGAsset.Target = this;
+            }
+            protected override bool DoImportAsset()
+            {
+                base.DoImportAsset();
+
+                var ameta = mAsset.GetAMeta() as TtMacrossShadingEnvAMeta;
+                mAsset.SaveAssetTo(mAsset.AssetName);
+
+                return true;
+            }
+        }
+        #region IAsset
+        public IO.IAssetMeta CreateAMeta()
+        {
+            var result = new TtMacrossShadingEnvAMeta();
+            return result;
+        }
+        public IO.IAssetMeta GetAMeta()
+        {
+            return UEngine.Instance.AssetMetaManager.GetAssetMeta(AssetName);
+        }
+        public void UpdateAMetaReferences(IO.IAssetMeta ameta)
+        {
+            ameta.RefAssetRNames.Clear();
+        }
+        public void SaveAssetTo(RName name)
+        {
+            var ameta = this.GetAMeta();
+            if (ameta != null)
+            {
+                UpdateAMetaReferences(ameta);
+                ameta.SaveAMeta();
+            }
+            IO.TtFileManager.SaveObjectToXml(name.Address, this);
+            UEngine.Instance.SourceControlModule.AddFile(name.Address, true);
+        }
+        public static TtMacrossShadingEnv LoadAsset(RName rn)
+        {
+            var result = new TtMacrossShadingEnv();
+            IO.TtFileManager.LoadXmlToObject(rn.Address, result);
+            return result;
+        }
+        [Rtti.Meta]
+        public RName AssetName
+        {
+            get;
+            set;
+        }
+        #endregion
+        public override Vector3ui DispatchArg
+        {
+            get
+            {
+                if (McObject != null && McObject.Get() != null)
+                {
+                    return McObject.Get().GetDispatchArg(this);
+                }
+                else
+                {
+                    return Vector3ui.Zero;
+                }
+            }
+        }
+        protected override void EnvShadingDefines(in FPermutationId id, UShaderDefinitions defines)
+        {
+            base.EnvShadingDefines(in id, defines);
+
+        }
+        [Category("Option")]
+        [Rtti.Meta()]
+        [RName.PGRName(FilterExts = Graphics.Pipeline.Shader.TtShaderAsset.AssetExt, ShaderType = "ComputeShadingMacross")]
+        public override RName CodeName
+        {
+            get => base.CodeName;
+            set
+            {
+                base.CodeName = value;
+                ShaderAsset = TtShaderAsset.LoadAsset(value);
+            }
+        }
+        [Category("Option")]
+        [Rtti.Meta]
+        public override string MainName
+        {
+            get => base.MainName;
+            set => base.MainName = value;
+        }
+        [Category("Option")]
+        [Rtti.Meta]
+        [RName.PGRName(FilterExts = Bricks.CodeBuilder.UMacross.AssetExt, MacrossType = typeof(TtShadingMacross))]
+        public RName McName
+        {
+            get
+            {
+                if (mMcObject == null)
+                    return null;
+                return mMcObject.Name;
+            }
+            set
+            {
+                if (value == null)
+                {
+                    mMcObject = null;
+                    return;
+                }
+                if (mMcObject == null)
+                {
+                    mMcObject = Macross.UMacrossGetter<TtShadingMacross>.NewInstance();
+                }
+                mMcObject.Name = value;
+            }
+        }
+        Macross.UMacrossGetter<TtShadingMacross> mMcObject;
+        public Macross.UMacrossGetter<TtShadingMacross> McObject
+        {
+            get => mMcObject;
+        }
+
+        public Shader.TtShaderAsset ShaderAsset { get; protected set; }
+    }
+    [Macross.UMacross(IsGenShader = true)]
+    public partial class TtShadingMacross
+    {
+        [Rtti.Meta]
+        public virtual Vector3ui GetDispatchArg(TtMacrossShadingEnv shading)
+        {
+            return Vector3ui.Zero;
+        }
+        [Rtti.Meta(ShaderName = "CSMacrossShaderMain")]
+        public virtual void CSMacrossShaderMain(TtMacrossShadingEnv shading)
+        {
+
+        }
+    }
+
+    public partial class TtMacrossShadingEnvEditor : EngineNS.Editor.IAssetEditor, IRootForm
+    {
+        #region IAssetEditor
+        public RName AssetName { get; set; }
+        public EGui.Controls.PropertyGrid.PropertyGrid AssetPropGrid = new EGui.Controls.PropertyGrid.PropertyGrid();
+        public float LeftWidth = 0;
+        public TtMacrossShadingEnv ShaderAsset;
+        bool IsStarting = false;
+        public float LoadingPercent { get; set; } = 1.0f;
+        public string ProgressText { get; set; } = "Loading";
+        public async Thread.Async.TtTask<bool> OpenEditor(EngineNS.Editor.UMainEditorApplication mainEditor, RName name, object arg)
+        {
+            if (IsStarting)
+                return false;
+
+            IsStarting = true;
+
+            AssetName = name;
+            IsStarting = false;
+
+            await AssetPropGrid.Initialize();
+
+            ShaderAsset = TtMacrossShadingEnv.LoadAsset(name);
+
+            mShaderEditor.mCoreObject.ApplyLangDefine();
+            mShaderEditor.mCoreObject.ApplyErrorMarkers();
+            if (ShaderAsset.CodeName != null)
+            {
+                mShaderEditor.mCoreObject.SetText(ShaderAsset.ShaderAsset.GetShaderCode());
+            }
+
+            AssetPropGrid.Target = this;
+            return true;
+        }
+        public void OnCloseEditor()
+        {
+        }
+        public void OnEvent(in Bricks.Input.Event e)
+        {
+            //PreviewViewport.OnEvent(ref e);
+        }
+        #endregion
+
+        public void Dispose()
+        {
+
+        }
+        protected bool mVisible = true;
+        public bool Visible { get => mVisible; set => mVisible = value; }
+        public uint DockId { get; set; }
+        public ImGuiCond_ DockCond { get; set; } = ImGuiCond_.ImGuiCond_FirstUseEver;
+        protected ImGuiWindowClass mDockKeyClass;
+        public ImGuiWindowClass DockKeyClass => mDockKeyClass;
+        public IRootForm GetRootForm()
+        {
+            return this;
+        }
+        public async Thread.Async.TtTask<bool> Initialize()
+        {
+            await EngineNS.Thread.TtAsyncDummyClass.DummyFunc();
+            return true;
+        }
+        #region DrawUI
+        public Vector2 WindowPos;
+        public Vector2 WindowSize = new Vector2(800, 600);
+        public bool IsDrawing { get; set; }
+        public unsafe void OnDraw()
+        {
+            if (Visible == false)
+                return;
+
+            var pivot = new Vector2(0);
+            ImGuiAPI.SetNextWindowSize(in WindowSize, ImGuiCond_.ImGuiCond_FirstUseEver);
+            IsDrawing = EGui.UIProxy.DockProxy.BeginMainForm(AssetName.Name, this, ImGuiWindowFlags_.ImGuiWindowFlags_NoSavedSettings);
+            if (IsDrawing)
+            {
+                if (ImGuiAPI.IsWindowFocused(ImGuiFocusedFlags_.ImGuiFocusedFlags_RootAndChildWindows))
+                {
+                    var mainEditor = UEngine.Instance.GfxDevice.SlateApplication as EngineNS.Editor.UMainEditorApplication;
+                    if (mainEditor != null)
+                        mainEditor.AssetEditorManager.CurrentActiveEditor = this;
+                }
+                WindowPos = ImGuiAPI.GetWindowPos();
+                WindowSize = ImGuiAPI.GetWindowSize();
+                DrawToolBar();
+                ImGuiAPI.Separator();
+            }
+            ResetDockspace();
+            EGui.UIProxy.DockProxy.EndMainForm(IsDrawing);
+
+            DrawNodeDetails();
+            DrawTextEditor();
+        }
+        bool mDockInitialized = false;
+        protected void ResetDockspace(bool force = false)
+        {
+            var pos = ImGuiAPI.GetCursorPos();
+            var id = ImGuiAPI.GetID(AssetName.Name + "_Dockspace");
+            mDockKeyClass.ClassId = id;
+            ImGuiAPI.DockSpace(id, Vector2.Zero, ImGuiDockNodeFlags_.ImGuiDockNodeFlags_None, mDockKeyClass);
+            if (mDockInitialized && !force)
+                return;
+            ImGuiAPI.DockBuilderRemoveNode(id);
+            ImGuiAPI.DockBuilderAddNode(id, ImGuiDockNodeFlags_.ImGuiDockNodeFlags_None);
+            ImGuiAPI.DockBuilderSetNodePos(id, pos);
+            ImGuiAPI.DockBuilderSetNodeSize(id, Vector2.One);
+            mDockInitialized = true;
+
+            var rightId = id;
+            uint middleId = 0;
+            uint downId = 0;
+            uint leftId = 0;
+            uint rightUpId = 0;
+            uint rightDownId = 0;
+            ImGuiAPI.DockBuilderSplitNode(rightId, ImGuiDir_.ImGuiDir_Left, 0.8f, ref middleId, ref rightId);
+            ImGuiAPI.DockBuilderSplitNode(rightId, ImGuiDir_.ImGuiDir_Down, 0.5f, ref rightDownId, ref rightUpId);
+            ImGuiAPI.DockBuilderSplitNode(middleId, ImGuiDir_.ImGuiDir_Down, 0.3f, ref downId, ref middleId);
+            ImGuiAPI.DockBuilderSplitNode(middleId, ImGuiDir_.ImGuiDir_Left, 0.2f, ref leftId, ref middleId);
+
+            ImGuiAPI.DockBuilderDockWindow(EGui.UIProxy.DockProxy.GetDockWindowName("NodeDetails", mDockKeyClass), rightDownId);
+            ImGuiAPI.DockBuilderDockWindow(EGui.UIProxy.DockProxy.GetDockWindowName("TextEditor", mDockKeyClass), middleId);
+
+            ImGuiAPI.DockBuilderFinish(id);
+        }
+        protected unsafe void DrawToolBar()
+        {
+            var btSize = Vector2.Zero;
+            if (EGui.UIProxy.CustomButton.ToolButton("Save", in btSize))
+            {
+                ShaderAsset.SaveAssetTo(AssetName);
+            }
+            ImGuiAPI.SameLine(0, -1);
+            if (EGui.UIProxy.CustomButton.ToolButton("SaveShader", in btSize))
+            {
+                var blob = new Support.UBlobObject();
+                mShaderEditor.mCoreObject.GetText(blob.mCoreObject);
+                var code = System.Runtime.InteropServices.Marshal.PtrToStringAnsi((IntPtr)blob.mCoreObject.GetData(), (int)blob.mCoreObject.GetSize());
+                IO.TtFileManager.WriteAllText(ShaderAsset.CodeName.Address, code);
+            }
+            ImGuiAPI.SameLine(0, -1);
+            if (EGui.UIProxy.CustomButton.ToolButton("Undo", in btSize))
+            {
+                mShaderEditor.mCoreObject.Undo();
+            }
+            ImGuiAPI.SameLine(0, -1);
+            if (EGui.UIProxy.CustomButton.ToolButton("Redo", in btSize))
+            {
+                mShaderEditor.mCoreObject.Redo();
+            }
+            ImGuiAPI.SameLine(0, -1);
+            if (EGui.UIProxy.CustomButton.ToolButton("Copy", in btSize))
+            {
+                mShaderEditor.mCoreObject.Copy();
+            }
+            ImGuiAPI.SameLine(0, -1);
+            if (EGui.UIProxy.CustomButton.ToolButton("Paste", in btSize))
+            {
+                mShaderEditor.mCoreObject.Paste();
+            }
+            ImGuiAPI.SameLine(0, -1);
+            if (EGui.UIProxy.CustomButton.ToolButton("Snapshot", in btSize))
+            {
+                var presentWindow = ImGuiAPI.GetWindowViewportData();
+                Editor.USnapshot.Save(AssetName, ShaderAsset.GetAMeta(), presentWindow.SwapChain.mCoreObject.GetBackBuffer(0),
+                            (uint)DrawOffset.X, (uint)DrawOffset.Y, (uint)GraphSize.X, (uint)GraphSize.Y, Editor.USnapshot.ESnapSide.Left);
+            }
+        }
+
+        bool ShowMeshPropGrid = true;
+        protected void DrawNodeDetails()
+        {
+            var sz = new Vector2(-1);
+            var show = EGui.UIProxy.DockProxy.BeginPanel(mDockKeyClass, "NodeDetails", ref ShowMeshPropGrid, ImGuiWindowFlags_.ImGuiWindowFlags_None);
+            if (show)
+            {
+                AssetPropGrid.OnDraw(true, false, false);
+            }
+            EGui.UIProxy.DockProxy.EndPanel(show);
+        }
+        EGui.TtCodeEditor mShaderEditor = new EGui.TtCodeEditor();
+        Vector2 DrawOffset;
+        protected Vector2 GraphSize;
+        bool ShowTextEditor = true;
+        protected void DrawTextEditor()
+        {
+            var sz = new Vector2(-1);
+            var show = EGui.UIProxy.DockProxy.BeginPanel(mDockKeyClass, "TextEditor", ref ShowTextEditor, ImGuiWindowFlags_.ImGuiWindowFlags_None);
+            if (show)
+            {
+                var winPos = ImGuiAPI.GetWindowPos();
+                var vpMin = ImGuiAPI.GetWindowContentRegionMin();
+                var vpMax = ImGuiAPI.GetWindowContentRegionMax();
+                DrawOffset.SetValue(winPos.X + vpMin.X, winPos.Y + vpMin.Y);
+                GraphSize = sz;
+                mShaderEditor.mCoreObject.Render(AssetName.Name, in Vector2.Zero, false);
+            }
+            EGui.UIProxy.DockProxy.EndPanel(show);
+        }
+        #endregion
+
+        [Category("Option")]
+        [Rtti.Meta()]
+        [RName.PGRName(FilterExts = Graphics.Pipeline.Shader.TtShaderAsset.AssetExt, ShaderType = "ComputeShadingMacross")]
+        public RName CodeName
+        {
+            get => ShaderAsset.CodeName;
+            set
+            {
+                ShaderAsset.CodeName = value;
+
+                if (ShaderAsset.CodeName != null)
+                {
+                    mShaderEditor.mCoreObject.SetText(ShaderAsset.ShaderAsset.GetShaderCode());
+                }
+            }
+        }
+        [Category("Option")]
+        [Rtti.Meta]
+        public string MainName
+        {
+            get => ShaderAsset.MainName;
+            set
+            {
+                ShaderAsset.MainName = value;
+            }
+        }
+        [Category("Option")]
+        [Rtti.Meta]
+        [RName.PGRName(FilterExts = Bricks.CodeBuilder.UMacross.AssetExt, MacrossType = typeof(TtShadingMacross))]
+        public RName McName
+        {
+            get
+            {
+                return ShaderAsset.McName;
+            }
+            set
+            {
+                ShaderAsset.McName = value;
+            }
         }
     }
 }
@@ -388,7 +835,7 @@ namespace EngineNS
 {
     partial class UEngine
     {
-        public Graphics.Pipeline.Shader.UShadingEnvManager ShadingEnvManager { get; } = new Graphics.Pipeline.Shader.UShadingEnvManager();
+        public Graphics.Pipeline.Shader.TtShadingEnvManager ShadingEnvManager { get; } = new Graphics.Pipeline.Shader.TtShadingEnvManager();
     }
 
     namespace NxRHI
@@ -396,7 +843,7 @@ namespace EngineNS
         public partial class UGraphicDraw
         {
             public Graphics.Pipeline.Shader.UEffect Effect { get; private set; }
-            internal Graphics.Pipeline.Shader.UShadingEnv.FPermutationId PermutationId;
+            internal Graphics.Pipeline.Shader.TtShadingEnv.FPermutationId PermutationId;
             public bool IsPermutationChanged()
             {
                 var shading = Effect.ShadingEnv;

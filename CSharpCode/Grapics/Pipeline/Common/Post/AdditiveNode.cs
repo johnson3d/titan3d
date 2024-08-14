@@ -8,7 +8,7 @@ using EngineNS.NxRHI;
 
 namespace EngineNS.Graphics.Pipeline.Common.Post
 {
-    public class TtAdditiveShading : Shader.UGraphicsShadingEnv
+    public class TtAdditiveShading : Shader.TtGraphicsShadingEnv
     {
         public TtAdditiveShading()
         {
@@ -86,14 +86,14 @@ namespace EngineNS.Graphics.Pipeline.Common.Post
             base.InitNodePins();
         }
         public TtAdditiveShading mBasePassShading;
-        public override UGraphicsShadingEnv GetPassShading(TtMesh.TtAtom atom = null)
+        public override TtGraphicsShadingEnv GetPassShading(TtMesh.TtAtom atom = null)
         {
             return mBasePassShading;
         }
         public override async System.Threading.Tasks.Task Initialize(URenderPolicy policy, string debugName)
         {
             await base.Initialize(policy, debugName);
-            mBasePassShading = UEngine.Instance.ShadingEnvManager.GetShadingEnv<TtAdditiveShading>();
+            mBasePassShading = await UEngine.Instance.ShadingEnvManager.GetShadingEnv<TtAdditiveShading>();
         }
         [System.Runtime.InteropServices.StructLayout(System.Runtime.InteropServices.LayoutKind.Sequential, Pack = 16)]
         struct FAdditiveStruct
@@ -163,14 +163,14 @@ namespace EngineNS.Graphics.Pipeline.Common.Post
             Name = "AdditiveLumNode";
         }
         public TtAdditiveLumShading mAdditiveLumShading;
-        public override UGraphicsShadingEnv GetPassShading(TtMesh.TtAtom atom = null)
+        public override TtGraphicsShadingEnv GetPassShading(TtMesh.TtAtom atom = null)
         {
             return mAdditiveLumShading;
         }
         public override async System.Threading.Tasks.Task Initialize(URenderPolicy policy, string debugName)
         {
             await base.Initialize(policy, debugName);
-            mAdditiveLumShading = UEngine.Instance.ShadingEnvManager.GetShadingEnv<TtAdditiveLumShading>();
+            mAdditiveLumShading = await UEngine.Instance.ShadingEnvManager.GetShadingEnv<TtAdditiveLumShading>();
         }
     }
 }

@@ -6,7 +6,7 @@ using System.Text;
 
 namespace EngineNS.Graphics.Pipeline.Shader.CommanShading
 {
-    public class USlateGUIShading : UGraphicsShadingEnv
+    public class USlateGUIShading : TtGraphicsShadingEnv
     {
         public USlateGUIShading()
         {
@@ -42,7 +42,7 @@ namespace EngineNS.Graphics.Pipeline.Shader.CommanShading
             //}
         }
     }
-    public class UDrawViewportShading : UGraphicsShadingEnv
+    public class UDrawViewportShading : TtGraphicsShadingEnv
     {
         public UDrawViewportShading()
         {

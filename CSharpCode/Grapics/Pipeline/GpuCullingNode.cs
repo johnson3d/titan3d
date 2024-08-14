@@ -36,13 +36,13 @@ namespace EngineNS.Graphics.Pipeline
         public Graphics.Mesh.TtMesh RenderMesh;
         public Mesh.UMdfInstanceStaticMesh MdfQueue;
         public Graphics.Mesh.Modifier.TtGpuDrivenData GpuDrivenData = new Graphics.Mesh.Modifier.TtGpuDrivenData();
-        public void Initialize(Mesh.UMaterialMesh mesh, Mesh.UMdfInstanceStaticMesh mdfQueue)
+        public void Initialize(Graphics.Pipeline.TtGpuCullingNode node, Mesh.UMaterialMesh mesh, Mesh.UMdfInstanceStaticMesh mdfQueue)
         {
             RenderMesh = new Graphics.Mesh.TtMesh();
             RenderMesh.Initialize(mesh, Rtti.UTypeDescGetter<Mesh.UMdfInstanceStaticMesh>.TypeDesc);
 
             MdfQueue = RenderMesh.MdfQueue as Mesh.UMdfInstanceStaticMesh;
-            GpuDrivenData.SetupGpuData(mdfQueue.InstanceModifier);
+            GpuDrivenData.SetupGpuData(node, mdfQueue.InstanceModifier);
             MdfQueue.InstanceModifier.GpuDrivenData = GpuDrivenData;
             IsDraw = true;
         }
@@ -56,11 +56,11 @@ namespace EngineNS.Graphics.Pipeline
     public class TtStaticMeshBatch : TtMeshBatchBase
     {
         public Mesh.UMdfInstanceStaticMesh MdfQueue;
-        public void Initialize(Mesh.UMaterialMesh.TtSubMaterialedMesh mesh)
+        public void Initialize(Graphics.Pipeline.TtGpuCullingNode node, Mesh.UMaterialMesh.TtSubMaterialedMesh mesh)
         {
             MdfQueue = InitRenderMesh<Mesh.UMdfInstanceStaticMesh>(mesh);
             MdfQueue.InstanceModifier.SetCapacity(512, true);
-            GpuDrivenData.SetupGpuData(MdfQueue.InstanceModifier);
+            GpuDrivenData.SetupGpuData(node, MdfQueue.InstanceModifier);
             MdfQueue.InstanceModifier.GpuDrivenData = GpuDrivenData;
         }
         public override Graphics.Mesh.Modifier.TtInstanceModifier GetInstanceModifier()
@@ -82,11 +82,11 @@ namespace EngineNS.Graphics.Pipeline
     {
         public bool IsAlloc { get; set; }
         public Bricks.Terrain.CDLOD.UTerrainInstanceMdfQueue MdfQueue;
-        public void Initialize(Mesh.UMaterialMesh.TtSubMaterialedMesh mesh)
+        public void Initialize(Graphics.Pipeline.TtGpuCullingNode node, Mesh.UMaterialMesh.TtSubMaterialedMesh mesh)
         {
             MdfQueue = InitRenderMesh<Bricks.Terrain.CDLOD.UTerrainInstanceMdfQueue>(mesh);
             MdfQueue.InstanceModifier.SetCapacity(512, true);
-            GpuDrivenData.SetupGpuData(MdfQueue.InstanceModifier);
+            GpuDrivenData.SetupGpuData(node, MdfQueue.InstanceModifier);
             MdfQueue.InstanceModifier.GpuDrivenData = GpuDrivenData;
         }
         public override Graphics.Mesh.Modifier.TtInstanceModifier GetInstanceModifier()
@@ -114,6 +114,10 @@ namespace EngineNS.Graphics.Pipeline
         public TtRenderGraphPin VisiblesPinIn = TtRenderGraphPin.CreateInput("Visibles");
         public TtRenderGraphPin HzbPinIn = TtRenderGraphPin.CreateInput("Hzb");
         public TtRenderGraphPin GpuCullOut = TtRenderGraphPin.CreateOutput("GpuCull", false, EPixelFormat.PXF_UNKNOWN);
+
+        public Mesh.Modifier.TtGpuCullSetupShading GpuCullSetupShading;
+        public Mesh.Modifier.TtGpuCullFlushShading GpuCullFlushShading;
+        public Mesh.Modifier.TtGpuCullShading GpuCullShading;
         
         public TtGpuCullingNode()
         {
@@ -127,13 +131,13 @@ namespace EngineNS.Graphics.Pipeline
             GpuCullOut.LifeMode = TtAttachBuffer.ELifeMode.Imported;
             AddOutput(GpuCullOut, NxRHI.EBufferType.BFT_NONE);
         }
-        public Shader.UGraphicsShadingEnv mOpaqueShading;
+        public Shader.TtGraphicsShadingEnv mOpaqueShading;
         public TtCpuCullingNode CpuCullNode = null;
         public async override System.Threading.Tasks.Task Initialize(URenderPolicy policy, string debugName)
         {
             await Thread.TtAsyncDummyClass.DummyFunc();
 
-            mOpaqueShading = UEngine.Instance.ShadingEnvManager.GetShadingEnv<Graphics.Pipeline.Deferred.UDeferredOpaque>();
+            mOpaqueShading = await UEngine.Instance.ShadingEnvManager.GetShadingEnv<Graphics.Pipeline.Deferred.UDeferredOpaque>();
             var rc = UEngine.Instance.GfxDevice.RenderContext;
             BasePass.Initialize(rc, debugName);
 
@@ -143,6 +147,10 @@ namespace EngineNS.Graphics.Pipeline
                 CpuCullNode = linker.OutPin.HostNode as TtCpuCullingNode;
             }
             System.Diagnostics.Debug.Assert(CpuCullNode != null);
+
+            GpuCullSetupShading = await UEngine.Instance.ShadingEnvManager.GetShadingEnv<Mesh.Modifier.TtGpuCullSetupShading>();
+            GpuCullFlushShading = await UEngine.Instance.ShadingEnvManager.GetShadingEnv<Mesh.Modifier.TtGpuCullFlushShading>();
+            GpuCullShading = await UEngine.Instance.ShadingEnvManager.GetShadingEnv<Mesh.Modifier.TtGpuCullShading>();
         }
         public override unsafe void TickLogic(GamePlay.UWorld world, Graphics.Pipeline.URenderPolicy policy, bool bClear)
         {
@@ -155,7 +163,7 @@ namespace EngineNS.Graphics.Pipeline
             }
             policy.CommitCommandList(cmd, "GpuCulling");
         }
-        public override Shader.UGraphicsShadingEnv GetPassShading(Mesh.TtMesh.TtAtom atom)
+        public override Shader.TtGraphicsShadingEnv GetPassShading(Mesh.TtMesh.TtAtom atom)
         {
             return mOpaqueShading;
         }
@@ -302,7 +310,7 @@ namespace EngineNS.Graphics.Pipeline
             if (InstanceMeshes.TryGetValue(hash, out batch) == false)
             {
                 batch = new TtInstanceStaticMeshBatch();
-                batch.Initialize(mesh.MaterialMesh, mdfQueue);
+                batch.Initialize(this, mesh.MaterialMesh, mdfQueue);
                 InstanceMeshes.Add(hash, batch);
             }
             batch.IsDraw = true;
@@ -332,7 +340,7 @@ namespace EngineNS.Graphics.Pipeline
                 if (StaticMeshBatches.TryGetValue(hash, out batch) == false)
                 {
                     batch = new TtStaticMeshBatch();
-                    batch.Initialize(i);
+                    batch.Initialize(this, i);
                     StaticMeshBatches.Add(hash, batch);
                 }
                 var cb = mesh.PerMeshCBuffer;
@@ -363,7 +371,7 @@ namespace EngineNS.Graphics.Pipeline
                 if (TerrainMeshBatches.TryGetValue(hash, out batch) == false)
                 {
                     batch = new TtTerrainMeshBatch();
-                    batch.Initialize(i);
+                    batch.Initialize(this, i);
                     batch.MdfQueue.TerrainModifier.Patch = mdfQueue.Patch;
                     batch.MdfQueue.TerrainModifier.TerrainNode = mdfQueue.Patch.TerrainNode;
                     batch.RenderMesh.SetWorldTransform(in mdfQueue.Patch.TerrainNode.Placement.TransformRef, mdfQueue.Patch.TerrainNode.GetWorld(), true);

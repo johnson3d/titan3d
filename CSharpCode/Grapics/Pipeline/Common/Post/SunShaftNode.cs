@@ -29,7 +29,7 @@ namespace EngineNS.Graphics.Pipeline.Common.Post
         public float BlurDecay;
         public int BlurSampleCount;
     }
-    public class TtDepthThresholeShading : Shader.UGraphicsShadingEnv
+    public class TtDepthThresholeShading : Shader.TtGraphicsShadingEnv
     {
         public TtDepthThresholeShading()
         {
@@ -103,14 +103,14 @@ namespace EngineNS.Graphics.Pipeline.Common.Post
             ResultPinOut.Attachement.Format = EPixelFormat.PXF_R16_FLOAT;
         }
         public TtDepthThresholeShading mBasePassShading;
-        public override UGraphicsShadingEnv GetPassShading(TtMesh.TtAtom atom = null)
+        public override TtGraphicsShadingEnv GetPassShading(TtMesh.TtAtom atom = null)
         {
             return mBasePassShading;
         }
         public override async System.Threading.Tasks.Task Initialize(URenderPolicy policy, string debugName)
         {
             await base.Initialize(policy, debugName);
-            mBasePassShading = UEngine.Instance.ShadingEnvManager.GetShadingEnv<TtDepthThresholeShading>();
+            mBasePassShading = await UEngine.Instance.ShadingEnvManager.GetShadingEnv<TtDepthThresholeShading>();
         }
 
         FSunShaftStruct mSunShaftStruct = new FSunShaftStruct();
@@ -178,7 +178,7 @@ namespace EngineNS.Graphics.Pipeline.Common.Post
         }
     }
 
-    public class TtRadialBlurShading : Shader.UGraphicsShadingEnv
+    public class TtRadialBlurShading : Shader.TtGraphicsShadingEnv
     {
         public TtRadialBlurShading()
         {
@@ -241,14 +241,14 @@ namespace EngineNS.Graphics.Pipeline.Common.Post
             ResultPinOut.Attachement.Format = EPixelFormat.PXF_R16_FLOAT;
         }
         public TtRadialBlurShading mBasePassShading;
-        public override UGraphicsShadingEnv GetPassShading(TtMesh.TtAtom atom = null)
+        public override TtGraphicsShadingEnv GetPassShading(TtMesh.TtAtom atom = null)
         {
             return mBasePassShading;
         }
         public override async System.Threading.Tasks.Task Initialize(URenderPolicy policy, string debugName)
         {
             await base.Initialize(policy, debugName);
-            mBasePassShading = UEngine.Instance.ShadingEnvManager.GetShadingEnv<TtRadialBlurShading>();
+            mBasePassShading = await UEngine.Instance.ShadingEnvManager.GetShadingEnv<TtRadialBlurShading>();
         }
 
         FSunShaftStruct mSunShaftStruct = new FSunShaftStruct();

@@ -84,7 +84,6 @@ namespace EngineNS.Editor.Forms
                 var meshProvider = Graphics.Mesh.UMeshDataProvider.MakeSphere(0.005f, 5, 5, Color4b.Green.ToArgb());
                 var mesh = meshProvider.ToDrawMesh(UEngine.Instance.GfxDevice.MaterialInstanceManager.WireVtxColorMateria);
                 BoneMeshes.Add(index, mesh);
-                System.Diagnostics.Debug.Print(runtimePose.Descs[index].Name + " T" + runtimePose.Transforms[index].Position.ToString() + ", R" + runtimePose.Transforms[index].Quat.ToEuler().ToString());
             }
             CreateBoneLineMesh(SkeletonAsset.Skeleton.Root);
             return base.InitializeNode(world, data, bvType, placementType);

@@ -25,7 +25,7 @@ namespace EngineNS.Graphics.Pipeline.Shader
             {
 
             }
-            public const uint CurrentEffectVersion = 4;
+            public const uint CurrentEffectVersion = 5;
             [Rtti.Meta()]
             public uint EffectVersion { get; set; } = CurrentEffectVersion;
             [Rtti.Meta()]
@@ -41,7 +41,7 @@ namespace EngineNS.Graphics.Pipeline.Shader
             [Rtti.Meta(Flags = Rtti.MetaAttribute.EMetaFlags.DiscardWhenCooked)]
             public string MdfQueueType { get; set; }
             [Rtti.Meta(Flags = Rtti.MetaAttribute.EMetaFlags.DiscardWhenCooked)]
-            public Shader.UShadingEnv.FPermutationId PermutationId { get; set; }
+            public Shader.TtShadingEnv.FPermutationId PermutationId { get; set; }
             [Rtti.Meta(Flags = Rtti.MetaAttribute.EMetaFlags.DiscardWhenCooked)]
             public string ShadingType { get; set; }
             [Rtti.Meta(Flags = Rtti.MetaAttribute.EMetaFlags.DiscardWhenCooked)]
@@ -53,7 +53,7 @@ namespace EngineNS.Graphics.Pipeline.Shader
         public NxRHI.UShaderEffect ShaderEffect { get; private set; }
         public NxRHI.UShaderDesc DescVS { get; private set; }
         public NxRHI.UShaderDesc DescPS { get; private set; }
-        public UShadingEnv ShadingEnv { get; internal set; }
+        public TtShadingEnv ShadingEnv { get; internal set; }
 
         internal UEffect UnsafeCloneForEditor()
         {
@@ -91,7 +91,7 @@ namespace EngineNS.Graphics.Pipeline.Shader
 
             xnd.SaveXnd(file);
         }
-        public static async Thread.Async.TtTask<UEffect> LoadEffect(Hash160 hash, UShadingEnv shading, UMaterial material, TtMdfQueueBase mdf)
+        public static async Thread.Async.TtTask<UEffect> LoadEffect(Hash160 hash, TtShadingEnv shading, UMaterial material, TtMdfQueueBase mdf)
         {
             var rc = UEngine.Instance.GfxDevice.RenderContext;
             var path = UEngine.Instance.FileManager.GetPath(IO.TtFileManager.ERootDir.Cache, IO.TtFileManager.ESystemDir.Effect);
@@ -216,7 +216,7 @@ namespace EngineNS.Graphics.Pipeline.Shader
             result.ShadingEnv = shading;
             return result;
         }
-        public static async Thread.Async.TtTask<UEffect> CreateEffect(UShadingEnv shading, UShadingEnv.FPermutationId permutationId, UMaterial material, TtMdfQueueBase mdf)
+        public static async Thread.Async.TtTask<UEffect> CreateEffect(TtShadingEnv shading, TtShadingEnv.FPermutationId permutationId, UMaterial material, TtMdfQueueBase mdf)
         {
             var rc = UEngine.Instance.GfxDevice.RenderContext;
 
@@ -418,12 +418,12 @@ namespace EngineNS.Graphics.Pipeline.Shader
         public UEffect DummyEffect;
         public async System.Threading.Tasks.Task<bool> Initialize(UGfxDevice device)
         {
-            DummyEffect = await this.GetEffect(UEngine.Instance.ShadingEnvManager.GetShadingEnv<UDummyShading>(), device.MaterialManager.ScreenMaterial, new Mesh.UMdfStaticMesh());
+            DummyEffect = await this.GetEffect(await UEngine.Instance.ShadingEnvManager.GetShadingEnv<UDummyShading>(), device.MaterialManager.ScreenMaterial, new Mesh.UMdfStaticMesh());
 
             if (DummyEffect == null)
             {
-                DummyEffect = await UEffect.CreateEffect(UEngine.Instance.ShadingEnvManager.GetShadingEnv<UDummyShading>(),
-                   new UShadingEnv.FPermutationId(0), device.MaterialManager.ScreenMaterial, new Mesh.UMdfStaticMesh());
+                DummyEffect = await UEffect.CreateEffect(await UEngine.Instance.ShadingEnvManager.GetShadingEnv<UDummyShading>(),
+                   new TtShadingEnv.FPermutationId(0), device.MaterialManager.ScreenMaterial, new Mesh.UMdfStaticMesh());
             }
             if (DummyEffect == null)
                 return false;
@@ -461,7 +461,7 @@ namespace EngineNS.Graphics.Pipeline.Shader
                 return null;
             }
         }
-        public static Hash160 GetShaderHash(UShadingEnv shading, UMaterial material, TtMdfQueueBase mdf)
+        public static Hash160 GetShaderHash(TtShadingEnv shading, UMaterial material, TtMdfQueueBase mdf)
         {
             //var caps = new IRenderContextCaps();
             //UEngine.Instance.GfxDevice.RenderContext.mCoreObject.GetRenderContextCaps(ref caps);
@@ -469,7 +469,7 @@ namespace EngineNS.Graphics.Pipeline.Shader
             return Hash160.CreateHash160($"{UEngine.Instance.GfxDevice.RenderContext.GlobalEnvHash},{shading},{material.AssetName},{mdf}");
         }
         public Dictionary<Hash160, UEffect> MaterialEditingEffects { get; } = new Dictionary<Hash160, UEffect>();
-        public async Thread.Async.TtTask<UEffect> GetEffect(UShadingEnv shading, UMaterial material, TtMdfQueueBase mdf)
+        public async Thread.Async.TtTask<UEffect> GetEffect(TtShadingEnv shading, UMaterial material, TtMdfQueueBase mdf)
         {
             UEffect result = null;
             Hash160 hash = new Hash160();
@@ -514,7 +514,7 @@ namespace EngineNS.Graphics.Pipeline.Shader
                 MaterialEditingEffects.Remove(i);
             }
         }
-        private async Thread.Async.TtTask<UEffect> GetEffectImpl(UShadingEnv shading, UMaterial material, TtMdfQueueBase mdf)
+        private async Thread.Async.TtTask<UEffect> GetEffectImpl(TtShadingEnv shading, UMaterial material, TtMdfQueueBase mdf)
         {
             UEffect result = null;
             //if (material.IsEditingMaterial)
@@ -600,8 +600,9 @@ namespace EngineNS.Graphics.Pipeline.Shader
                 mCreatingSession.FinishSession(hash, session, result);
             }
         }
+        //需要逐渐被UComputeShadingEnv替换
         public async Thread.Async.TtTask<NxRHI.UComputeEffect> GetComputeEffect(RName shaderName, string entry, NxRHI.EShaderType type,
-            Graphics.Pipeline.Shader.UShadingEnv shadingEnv, NxRHI.UShaderDefinitions defines, 
+            Graphics.Pipeline.Shader.TtShadingEnv shadingEnv, NxRHI.UShaderDefinitions defines, 
             Editor.ShaderCompiler.UHLSLInclude incProvider, string sm = null, bool bDebugShader = true)
         {
             var shader = shaderName.Address;

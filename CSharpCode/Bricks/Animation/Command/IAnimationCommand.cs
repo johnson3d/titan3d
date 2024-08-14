@@ -43,7 +43,7 @@ namespace EngineNS.Animation.Command
         {
             foreach(var cmd in Commands)
             {
-                cmd.Execute();
+                cmd?.Execute();
             }
         }
     }

@@ -9,7 +9,7 @@ using EngineNS.GamePlay;
 
 namespace EngineNS.Graphics.Pipeline.Deferred
 {
-    public class UDeferredOpaque : Shader.UGraphicsShadingEnv
+    public class UDeferredOpaque : Shader.TtGraphicsShadingEnv
     {
         public UDeferredOpaque()
         {
@@ -105,7 +105,7 @@ namespace EngineNS.Graphics.Pipeline.Deferred
 
             CreateGBuffers(policy, Rt0PinOut.Attachement.Format);
             
-            mOpaqueShading = UEngine.Instance.ShadingEnvManager.GetShadingEnv<UDeferredOpaque>();
+            mOpaqueShading = await UEngine.Instance.ShadingEnvManager.GetShadingEnv<UDeferredOpaque>();
 
             var linker = VisiblesPinIn.FindInLinker();
             if (linker != null)
@@ -168,7 +168,7 @@ namespace EngineNS.Graphics.Pipeline.Deferred
 
             base.Dispose();
         }
-        public override Shader.UGraphicsShadingEnv GetPassShading(Mesh.TtMesh.TtAtom atom)
+        public override Shader.TtGraphicsShadingEnv GetPassShading(Mesh.TtMesh.TtAtom atom)
         {
             return mOpaqueShading;
         }

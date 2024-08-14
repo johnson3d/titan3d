@@ -40,6 +40,8 @@
     <None Include="$(MSBuildThisFileDirectory)Compute\GpuDriven\GpuDrivenDataDef.cginc" />
     <None Include="$(MSBuildThisFileDirectory)Compute\GpuDriven\MergeInstance.shadingenv" />
     <None Include="$(MSBuildThisFileDirectory)Compute\GpuDriven\VertexShaderVTF.cginc" />
+    <None Include="$(MSBuildThisFileDirectory)Compute\MacrossComputeShadingEnv.cginc" />
+    <None Include="$(MSBuildThisFileDirectory)Compute\MacrossComputeShadingEnvImpl.cginc" />
     <None Include="$(MSBuildThisFileDirectory)Font.shadingenv" />
     <None Include="$(MSBuildThisFileDirectory)FSBase.shadingenv" />
     <None Include="$(MSBuildThisFileDirectory)Inc\Algorithm\Queue.cginc" />
@@ -141,6 +143,7 @@
     <FxCompile Include="$(MSBuildThisFileDirectory)Compute\GpuDriven\Hzb.compute" />
     <FxCompile Include="$(MSBuildThisFileDirectory)Compute\GpuDriven\VirtualTexture.compute" />
     <FxCompile Include="$(MSBuildThisFileDirectory)Compute\HashSparseSpace.compute" />
+    <FxCompile Include="$(MSBuildThisFileDirectory)Compute\MacrossComputShading.shader" />
     <FxCompile Include="$(MSBuildThisFileDirectory)Compute\ScreenSpace\AvgBrightness.compute" />
     <FxCompile Include="$(MSBuildThisFileDirectory)Compute\ScreenSpace\Tiling.compute" />
     <FxCompile Include="$(MSBuildThisFileDirectory)Inc\BaseStructure\Box3.cginc" />

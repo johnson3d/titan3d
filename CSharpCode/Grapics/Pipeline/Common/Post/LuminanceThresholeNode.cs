@@ -8,7 +8,7 @@ using EngineNS.NxRHI;
 
 namespace EngineNS.Graphics.Pipeline.Common.Post
 {
-    public class TtLuminanceThresholeShading : Shader.UGraphicsShadingEnv
+    public class TtLuminanceThresholeShading : Shader.TtGraphicsShadingEnv
     {
         public TtLuminanceThresholeShading()
         {
@@ -74,14 +74,14 @@ namespace EngineNS.Graphics.Pipeline.Common.Post
             base.InitNodePins();
         }
         public TtLuminanceThresholeShading mBasePassShading;
-        public override UGraphicsShadingEnv GetPassShading(TtMesh.TtAtom atom = null)
+        public override TtGraphicsShadingEnv GetPassShading(TtMesh.TtAtom atom = null)
         {
             return mBasePassShading;
         }
         public override async System.Threading.Tasks.Task Initialize(URenderPolicy policy, string debugName)
         {
             await base.Initialize(policy, debugName);
-            mBasePassShading = UEngine.Instance.ShadingEnvManager.GetShadingEnv<TtLuminanceThresholeShading>();
+            mBasePassShading = await UEngine.Instance.ShadingEnvManager.GetShadingEnv<TtLuminanceThresholeShading>();
         }
         [System.Runtime.InteropServices.StructLayout(System.Runtime.InteropServices.LayoutKind.Sequential, Pack = 16)]
         struct FLuminanceThresholeStruct
@@ -146,14 +146,14 @@ namespace EngineNS.Graphics.Pipeline.Common.Post
             Name = "LuminanceThresholeOutLumNode";
         }
         public TtLuminanceThresholeOutLumShading mLuminanceShading;
-        public override UGraphicsShadingEnv GetPassShading(TtMesh.TtAtom atom = null)
+        public override TtGraphicsShadingEnv GetPassShading(TtMesh.TtAtom atom = null)
         {
             return mLuminanceShading;
         }
         public override async System.Threading.Tasks.Task Initialize(URenderPolicy policy, string debugName)
         {
             await base.Initialize(policy, debugName);
-            mLuminanceShading = UEngine.Instance.ShadingEnvManager.GetShadingEnv<TtLuminanceThresholeOutLumShading>();
+            mLuminanceShading = await UEngine.Instance.ShadingEnvManager.GetShadingEnv<TtLuminanceThresholeOutLumShading>();
         }
         public override void BeforeTickLogic(URenderPolicy policy)
         {

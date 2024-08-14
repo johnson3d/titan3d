@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Hash_1269591358 Type="EngineNS.Bricks.CodeBuilder.UPrimitiveExpression@EngineCore">
+  <ObjectStr Type="System.String@Unknown" Order="0" />
+  <Type Type="EngineNS.Rtti.UTypeDesc@EngineCore" Order="0" />
+  <TypeIsTypeof Type="System.Boolean@Unknown" Order="0" />
+  <ValueStr Type="System.String@Unknown" Order="0" />
+</Hash_1269591358>

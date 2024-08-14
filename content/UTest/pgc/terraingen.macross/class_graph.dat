@@ -3,6 +3,7 @@
   <DefClass Type="EngineNS.Bricks.CodeBuilder.UClassDeclaration@EngineCore">
     <ClassName Type="System.String@Unknown" Value="terraingen" />
     <IsStruct Type="System.Boolean@Unknown" Value="False" />
+    <IsUnsafe Type="System.Boolean@Unknown" Value="False" />
     <Methods Type="System.Collections.Generic.List&lt;EngineNS.Bricks.CodeBuilder.UMethodDeclaration@EngineCore,&gt;@Unknown" Count="1">
       <e_0 Type="EngineNS.Bricks.CodeBuilder.UMethodDeclaration@EngineCore">
         <Arguments Type="System.Collections.Generic.List&lt;EngineNS.Bricks.CodeBuilder.UMethodArgumentDeclaration@EngineCore,&gt;@Unknown" Count="2">
@@ -10,9 +11,12 @@
             <HasDefaultValue Type="System.Boolean@Unknown" Value="True" />
             <InitValue Type="EngineNS.Bricks.CodeBuilder.UPrimitiveExpression@EngineCore">
               <Type Type="EngineNS.Rtti.UTypeDesc@EngineCore" Value="System.DBNull@Unknown" />
+              <TypeIsTypeof Type="System.Boolean@Unknown" Value="False" />
             </InitValue>
+            <InitValueVisible Type="System.Boolean@Unknown" Value="True" />
             <IsParamArray Type="System.Boolean@Unknown" Value="False" />
             <OperationType Type="EngineNS.Bricks.CodeBuilder.EMethodArgumentAttribute@EngineCore" Value="Default" />
+            <OperationVisible Type="System.Boolean@Unknown" Value="True" />
             <VariableName Type="System.String@Unknown" Value="graph" />
             <VariableType Type="EngineNS.Bricks.CodeBuilder.UTypeReference@EngineCore">
               <IsEnum Type="System.Boolean@Unknown" Value="False" />
@@ -24,9 +28,12 @@
             <HasDefaultValue Type="System.Boolean@Unknown" Value="True" />
             <InitValue Type="EngineNS.Bricks.CodeBuilder.UPrimitiveExpression@EngineCore">
               <Type Type="EngineNS.Rtti.UTypeDesc@EngineCore" Value="System.DBNull@Unknown" />
+              <TypeIsTypeof Type="System.Boolean@Unknown" Value="False" />
             </InitValue>
+            <InitValueVisible Type="System.Boolean@Unknown" Value="True" />
             <IsParamArray Type="System.Boolean@Unknown" Value="False" />
             <OperationType Type="EngineNS.Bricks.CodeBuilder.EMethodArgumentAttribute@EngineCore" Value="Default" />
+            <OperationVisible Type="System.Boolean@Unknown" Value="True" />
             <VariableName Type="System.String@Unknown" Value="node" />
             <VariableType Type="EngineNS.Bricks.CodeBuilder.UTypeReference@EngineCore">
               <IsEnum Type="System.Boolean@Unknown" Value="False" />
@@ -35,10 +42,12 @@
             </VariableType>
           </e_1>
         </Arguments>
-        <IsAsync Type="System.Boolean@Unknown" Value="False" />
+        <AsyncType Type="EngineNS.Bricks.CodeBuilder.UMethodDeclaration.EAsyncType@EngineCore" Value="None" />
+        <Attributes Type="System.Collections.Generic.List&lt;EngineNS.Bricks.CodeBuilder.TtAttribute@EngineCore,&gt;@Unknown" Count="0" />
         <IsOverride Type="System.Boolean@Unknown" Value="True" />
         <LocalVariables Type="System.Collections.Generic.List&lt;EngineNS.Bricks.CodeBuilder.UVariableDeclaration@EngineCore,&gt;@Unknown" Count="1">
           <e_0 Type="EngineNS.Bricks.CodeBuilder.UVariableDeclaration@EngineCore">
+            <Attributes Type="System.Collections.Generic.List&lt;EngineNS.Bricks.CodeBuilder.TtAttribute@EngineCore,&gt;@Unknown" Count="0" />
             <InitValue Type="EngineNS.Bricks.CodeBuilder.UDefaultValueExpression@EngineCore">
               <Type Type="EngineNS.Bricks.CodeBuilder.UTypeReference@EngineCore">
                 <IsEnum Type="System.Boolean@Unknown" Value="False" />
@@ -46,6 +55,8 @@
                 <TypeFullName Type="System.String@Unknown" Value="EngineNS.Bricks.Procedure.Node.UNoisePerlin" />
               </Type>
             </InitValue>
+            <IsAutoSaveLoad Type="System.Boolean@Unknown" Value="True" />
+            <IsBindable Type="System.Boolean@Unknown" Value="False" />
             <VariableName Type="System.String@Unknown" Value="tmp_r_FindPgcNodeByName_1051611981" />
             <VariableType Type="EngineNS.Bricks.CodeBuilder.UTypeReference@EngineCore">
               <IsEnum Type="System.Boolean@Unknown" Value="False" />
@@ -57,6 +68,7 @@
         </LocalVariables>
         <MethodName Type="System.String@Unknown" Value="OnNodeInitialized" />
         <ReturnValue Type="EngineNS.Bricks.CodeBuilder.UVariableDeclaration@EngineCore">
+          <Attributes Type="System.Collections.Generic.List&lt;EngineNS.Bricks.CodeBuilder.TtAttribute@EngineCore,&gt;@Unknown" Count="0" />
           <InitValue Type="EngineNS.Bricks.CodeBuilder.UDefaultValueExpression@EngineCore">
             <Type Type="EngineNS.Bricks.CodeBuilder.UTypeReference@EngineCore">
               <IsEnum Type="System.Boolean@Unknown" Value="False" />
@@ -64,6 +76,8 @@
               <TypeFullName Type="System.String@Unknown" Value="System.Boolean" />
             </Type>
           </InitValue>
+          <IsAutoSaveLoad Type="System.Boolean@Unknown" Value="True" />
+          <IsBindable Type="System.Boolean@Unknown" Value="False" />
           <VariableName Type="System.String@Unknown" Value="ret_2298037646" />
           <VariableType Type="EngineNS.Bricks.CodeBuilder.UTypeReference@EngineCore">
             <IsEnum Type="System.Boolean@Unknown" Value="False" />

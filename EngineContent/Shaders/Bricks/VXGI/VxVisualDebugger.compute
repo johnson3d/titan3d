@@ -1,24 +1,6 @@
 #include "VXGICommon.compute"
 
-struct FIndirectDrawArgs
-{
-	uint IndexCountPerInstance;
-	uint InstanceCount;
-	uint StartIndexLocation;
-	int BaseVertexLocation;
-	uint StartInstanceLocation;
-};
-
 #define IndirectDrawStructStride 4 * 5
-
-struct FVoxelDebugger
-{
-	float3		Position;
-	float		Scale;
-
-	float3		Color;
-	float		Pad0;
-};
 
 RWByteAddressBuffer VxIndirectDebugDraws;//RWStructuredBuffer<FIndirectDrawArgs> VxIndirectDebugDraws;
 RWStructuredBuffer<FVoxelDebugger> VoxelGroupDebugger;

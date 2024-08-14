@@ -60,9 +60,9 @@ namespace EngineNS.Bricks.VXGI
         public const uint VxSceneX = 256;
         public const uint VxSceneZ = 256;
         public const uint VxSceneY = 64;
-        public readonly Vector3ui Dispatch_SetupDimArray1 = new Vector3ui(128,1,1);
-        public readonly Vector3ui Dispatch_SetupDimArray2 = new Vector3ui(32, 32, 1);
-        public readonly Vector3ui Dispatch_SetupDimArray3 = new Vector3ui(8, 8, 4);
+        public static readonly Vector3ui Dispatch_SetupDimArray1 = new Vector3ui(128,1,1);
+        public static readonly Vector3ui Dispatch_SetupDimArray2 = new Vector3ui(32, 32, 1);
+        public static readonly Vector3ui Dispatch_SetupDimArray3 = new Vector3ui(8, 8, 4);
         #endregion
         public override void Dispose()
         {
@@ -75,10 +75,6 @@ namespace EngineNS.Bricks.VXGI
             CoreSDK.DisposeObject(ref VoxelGroupDebugger);
             CoreSDK.DisposeObject(ref VoxelDebugger);
             CoreSDK.DisposeObject(ref VxIndirectDebugDraws);
-            CoreSDK.DisposeObject(ref UavVoxelGroupDebugger);
-            CoreSDK.DisposeObject(ref UavVoxelDebugger);
-            CoreSDK.DisposeObject(ref SrvVoxelDebugger);
-            CoreSDK.DisposeObject(ref UavVxIndirectDebugDraws);
 
             //UavAbedo?.Dispose();
             //UavAbedo = null;
@@ -96,14 +92,171 @@ namespace EngineNS.Bricks.VXGI
         public uint DiffuseRTHeight;
         //public NxRHI.UUaView UavAbedo;
         //public NxRHI.UUaView UavNormal;
+        public class SetupVoxelGroupAllocatorShading : Graphics.Pipeline.Shader.TtComputeShadingEnv
+        {
+            public override Vector3ui DispatchArg
+            {
+                get => new Vector3ui(Dispatch_SetupDimArray1.X, 1, 1);
+            }
+            public SetupVoxelGroupAllocatorShading()
+            {
+                CodeName = RName.GetRName("Shaders/Bricks/VXGI/VoxelAllocator.compute", RName.ERNameType.Engine);
+                MainName = "CS_SetupVoxelGroupAllocator";
 
-        private NxRHI.UComputeEffect SetupVoxelGroupAllocator;
+                this.UpdatePermutation();
+            }
+            protected override void EnvShadingDefines(in FPermutationId id, NxRHI.UShaderDefinitions defines)
+            {
+                base.EnvShadingDefines(in id, defines);
+                defines.mCoreObject.AddDefine("VxSize", $"{VxSize}");
+                defines.mCoreObject.AddDefine("VxGroupPoolSize", $"{VxGroupPoolSize}");
+                defines.mCoreObject.AddDefine("VxGroupCubeSide", $"{VxGroupCubeSide}");
+                defines.mCoreObject.AddDefine("VxSceneX", $"{VxSceneX}");
+                defines.mCoreObject.AddDefine("VxSceneY", $"{VxSceneY}");
+                defines.mCoreObject.AddDefine("VxSceneZ", $"{VxSceneZ}");
+            }
+            public override void OnDrawCall(NxRHI.UComputeDraw drawcall, Graphics.Pipeline.URenderPolicy policy)
+            {
+                var node = drawcall.TagObject as UVoxelsNode;
+
+                var srvIdx = drawcall.FindBinder(NxRHI.EShaderBindType.SBT_UAV, "VxGroupPool");
+                if (srvIdx.IsValidPointer)
+                {
+                    drawcall.BindUav(srvIdx, node.UavVoxelPool);
+                }
+                srvIdx = drawcall.FindBinder(NxRHI.EShaderBindType.SBT_UAV, "GpuSceneDesc");
+                if (srvIdx.IsValidPointer)
+                {
+                    var attachBuffer = node.GetAttachBuffer(node.GpuScenePinInOut);
+                    drawcall.BindUav(srvIdx, attachBuffer.Uav);
+                }
+            }
+        }
+        private SetupVoxelGroupAllocatorShading SetupVoxelGroupAllocator;
         private NxRHI.UComputeDraw SetupVoxelGroupAllocatorDrawcall;
 
-        private NxRHI.UComputeEffect InjectVoxels;
+        public class InjectVoxelsShading : Graphics.Pipeline.Shader.TtComputeShadingEnv
+        {
+            public override Vector3ui DispatchArg
+            {
+                get => new Vector3ui(Dispatch_SetupDimArray2.X, Dispatch_SetupDimArray2.Y, 1);
+            }
+            public InjectVoxelsShading()
+            {
+                CodeName = RName.GetRName("Shaders/Bricks/VXGI/VoxelInject.compute", RName.ERNameType.Engine);
+                MainName = "CS_InjectVoxels";
+
+                this.UpdatePermutation();
+            }
+            protected override void EnvShadingDefines(in FPermutationId id, NxRHI.UShaderDefinitions defines)
+            {
+                base.EnvShadingDefines(in id, defines);
+                defines.mCoreObject.AddDefine("VxSize", $"{VxSize}");
+                defines.mCoreObject.AddDefine("VxGroupPoolSize", $"{VxGroupPoolSize}");
+                defines.mCoreObject.AddDefine("VxGroupCubeSide", $"{VxGroupCubeSide}");
+                defines.mCoreObject.AddDefine("VxSceneX", $"{VxSceneX}");
+                defines.mCoreObject.AddDefine("VxSceneY", $"{VxSceneY}");
+                defines.mCoreObject.AddDefine("VxSceneZ", $"{VxSceneZ}");
+            }
+            public override void OnDrawCall(NxRHI.UComputeDraw drawcall, Graphics.Pipeline.URenderPolicy policy)
+            {
+                var node = drawcall.TagObject as UVoxelsNode;
+
+                var cbIndex = CurrentEffect.FindBinder(TtNameTable.cbGBufferDesc);
+                if (node.CBuffer == null)
+                {
+                    node.CBuffer = UEngine.Instance.GfxDevice.RenderContext.CreateCBV(cbIndex);
+                }
+
+                var srvIdx = drawcall.FindBinder(NxRHI.EShaderBindType.SBT_CBuffer, "cbGBufferDesc");
+                if (srvIdx.IsValidPointer)
+                {
+                    drawcall.BindCBuffer(srvIdx, node.CBuffer);
+                }
+                srvIdx = drawcall.FindBinder(NxRHI.EShaderBindType.SBT_CBuffer, "cbPerCamera");
+                if (srvIdx.IsValidPointer)
+                {
+                    var camera = policy.DefaultCamera;
+                    drawcall.BindCBuffer(srvIdx, camera.PerCameraCBuffer);
+                }
+                srvIdx = drawcall.FindBinder(NxRHI.EShaderBindType.SBT_UAV, "VxGroupPool");
+                if (srvIdx.IsValidPointer)
+                {
+                    drawcall.BindUav(srvIdx, node.UavVoxelPool);
+                }
+
+                srvIdx = drawcall.FindBinder(NxRHI.EShaderBindType.SBT_UAV, "GpuSceneDesc");
+                if (srvIdx.IsValidPointer)
+                {
+                    drawcall.BindUav(srvIdx, node.GetAttachBuffer(node.GpuScenePinInOut).Uav);
+                }
+                srvIdx = drawcall.FindBinder(NxRHI.EShaderBindType.SBT_SRV, "GBufferAbedo");
+                if (srvIdx.IsValidPointer)
+                {
+                    drawcall.BindSrv(srvIdx, node.GetAttachBuffer(node.AlbedoPinInOut).Srv);
+                }
+                srvIdx = drawcall.FindBinder(NxRHI.EShaderBindType.SBT_SRV, "GBufferDepth");
+                if (srvIdx.IsValidPointer)
+                {
+                    drawcall.BindSrv(srvIdx, node.GetAttachBuffer(node.DepthPinInOut).Srv);
+                }
+            }
+        }
+        private InjectVoxelsShading InjectVoxels;
         private NxRHI.UComputeDraw InjectVoxelsDrawcall;
 
-        private NxRHI.UComputeEffect EraseVoxelGroup;
+        public class EraseVoxelGroupShading : Graphics.Pipeline.Shader.TtComputeShadingEnv
+        {
+            public override Vector3ui DispatchArg
+            {
+                get => new Vector3ui(Dispatch_SetupDimArray3.X, Dispatch_SetupDimArray3.Y, Dispatch_SetupDimArray3.Z);
+            }
+            public EraseVoxelGroupShading()
+            {
+                CodeName = RName.GetRName("Shaders/Bricks/VXGI/VoxelInject.compute", RName.ERNameType.Engine);
+                MainName = "CS_InjectVoxels";
+
+                this.UpdatePermutation();
+            }
+            protected override void EnvShadingDefines(in FPermutationId id, NxRHI.UShaderDefinitions defines)
+            {
+                base.EnvShadingDefines(in id, defines);
+                defines.mCoreObject.AddDefine("VxSize", $"{VxSize}");
+                defines.mCoreObject.AddDefine("VxGroupPoolSize", $"{VxGroupPoolSize}");
+                defines.mCoreObject.AddDefine("VxGroupCubeSide", $"{VxGroupCubeSide}");
+                defines.mCoreObject.AddDefine("VxSceneX", $"{VxSceneX}");
+                defines.mCoreObject.AddDefine("VxSceneY", $"{VxSceneY}");
+                defines.mCoreObject.AddDefine("VxSceneZ", $"{VxSceneZ}");
+            }
+            public override void OnDrawCall(NxRHI.UComputeDraw drawcall, Graphics.Pipeline.URenderPolicy policy)
+            {
+                var node = drawcall.TagObject as UVoxelsNode;
+
+                var srvIdx = drawcall.FindBinder(NxRHI.EShaderBindType.SBT_CBuffer, "cbGBufferDesc");
+                if (srvIdx.IsValidPointer)
+                {
+                    drawcall.BindCBuffer(srvIdx, node.CBuffer);
+                }
+                srvIdx = drawcall.FindBinder(NxRHI.EShaderBindType.SBT_CBuffer, "cbPerCamera");
+                if (srvIdx.IsValidPointer)
+                {
+                    var camera = policy.DefaultCamera;
+                    drawcall.BindCBuffer(srvIdx, camera.PerCameraCBuffer);
+                }
+                srvIdx = drawcall.FindBinder(NxRHI.EShaderBindType.SBT_UAV, "VxGroupPool");
+                if (srvIdx.IsValidPointer)
+                {
+                    drawcall.BindUav(srvIdx, node.UavVoxelPool);
+                }
+                srvIdx = drawcall.FindBinder(NxRHI.EShaderBindType.SBT_UAV, "GpuSceneDesc");
+                if (srvIdx.IsValidPointer)
+                {
+                    var attachBuffer = node.GetAttachBuffer(node.GpuScenePinInOut);
+                    drawcall.BindUav(srvIdx, attachBuffer.Uav);
+                }
+            }
+        }
+        private EraseVoxelGroupShading EraseVoxelGroup;
         private NxRHI.UComputeDraw EraseVoxelGroupDrawcall;
         #endregion
 
@@ -129,35 +282,12 @@ namespace EngineNS.Bricks.VXGI
             UavVoxelPool = rc.CreateUAV(VoxelPool, in uavDesc);
             System.Diagnostics.Debug.Assert(UavVoxelPool != null);
 
-            var defines = new NxRHI.UShaderDefinitions();
-            defines.mCoreObject.AddDefine("VxSize", $"{VxSize}");
-            defines.mCoreObject.AddDefine("VxGroupPoolSize", $"{VxGroupPoolSize}"); 
-            defines.mCoreObject.AddDefine("VxGroupCubeSide", $"{VxGroupCubeSide}"); 
-            defines.mCoreObject.AddDefine("VxSceneX", $"{VxSceneX}");
-            defines.mCoreObject.AddDefine("VxSceneY", $"{VxSceneY}");
-            defines.mCoreObject.AddDefine("VxSceneZ", $"{VxSceneZ}");
+            SetupVoxelGroupAllocator = await UEngine.Instance.ShadingEnvManager.GetShadingEnv<SetupVoxelGroupAllocatorShading>();
+            
+            EraseVoxelGroup = await UEngine.Instance.ShadingEnvManager.GetShadingEnv<EraseVoxelGroupShading>();
 
-            defines.mCoreObject.AddDefine("DispatchX", $"{Dispatch_SetupDimArray1.X}");
-            defines.mCoreObject.AddDefine("DispatchY", $"1");
-            defines.mCoreObject.AddDefine("DispatchZ", $"1");
-            SetupVoxelGroupAllocator = await UEngine.Instance.GfxDevice.EffectManager.GetComputeEffect(RName.GetRName("Shaders/Bricks/VXGI/VoxelAllocator.compute", RName.ERNameType.Engine),
-                "CS_SetupVoxelGroupAllocator", NxRHI.EShaderType.SDT_ComputeShader, null, defines, null);
-
-            defines.mCoreObject.AddDefine("DispatchX", $"{Dispatch_SetupDimArray2.X}");
-            defines.mCoreObject.AddDefine("DispatchY", $"{Dispatch_SetupDimArray2.Y}");
-            defines.mCoreObject.AddDefine("DispatchZ", $"1");
-            InjectVoxels = await UEngine.Instance.GfxDevice.EffectManager.GetComputeEffect(RName.GetRName("Shaders/Bricks/VXGI/VoxelInject.compute", RName.ERNameType.Engine),
-                "CS_InjectVoxels", NxRHI.EShaderType.SDT_ComputeShader, null, defines, null);
-
-            defines.mCoreObject.AddDefine("DispatchX", $"{Dispatch_SetupDimArray3.X}");
-            defines.mCoreObject.AddDefine("DispatchY", $"{Dispatch_SetupDimArray3.Y}");
-            defines.mCoreObject.AddDefine("DispatchZ", $"{Dispatch_SetupDimArray3.Z}");
-            EraseVoxelGroup = await UEngine.Instance.GfxDevice.EffectManager.GetComputeEffect(RName.GetRName("Shaders/Bricks/VXGI/VoxelInject.compute", RName.ERNameType.Engine),
-                "CS_EraseVoxelGroup", NxRHI.EShaderType.SDT_ComputeShader, null, defines, null);
-
-            var cbIndex = InjectVoxels.FindBinder(TtNameTable.cbGBufferDesc);
-            CBuffer = rc.CreateCBV(cbIndex);
-
+            InjectVoxels = await UEngine.Instance.ShadingEnvManager.GetShadingEnv<InjectVoxelsShading>();
+            
             if (true)
             {
                 var material = await UEngine.Instance.GfxDevice.MaterialInstanceManager.CreateMaterialInstance(RName.GetRName("utest/box_wite.uminst"));
@@ -180,54 +310,14 @@ namespace EngineNS.Bricks.VXGI
 
             CoreSDK.DisposeObject(ref SetupVoxelGroupAllocatorDrawcall);
             SetupVoxelGroupAllocatorDrawcall = rc.CreateComputeDraw();
-            SetupVoxelGroupAllocatorDrawcall.SetComputeEffect(SetupVoxelGroupAllocator);
-            SetupVoxelGroupAllocatorDrawcall.SetDispatch(MathHelper.Roundup(VxGroupPoolSize, Dispatch_SetupDimArray1.X), 1, 1);
-            var srvIdx = SetupVoxelGroupAllocatorDrawcall.FindBinder(NxRHI.EShaderBindType.SBT_UAV, "VxGroupPool");
-            if (srvIdx.IsValidPointer)
-            {
-                SetupVoxelGroupAllocatorDrawcall.BindUav(srvIdx, UavVoxelPool);
-            }
-
+            
             CoreSDK.DisposeObject(ref EraseVoxelGroupDrawcall);
             EraseVoxelGroupDrawcall = rc.CreateComputeDraw();
-            EraseVoxelGroupDrawcall.SetComputeEffect(EraseVoxelGroup);
             
-            srvIdx = EraseVoxelGroupDrawcall.FindBinder(NxRHI.EShaderBindType.SBT_CBuffer, "cbGBufferDesc");
-            if (srvIdx.IsValidPointer)
-            {
-                EraseVoxelGroupDrawcall.BindCBuffer(srvIdx, CBuffer);
-            }
-            srvIdx = EraseVoxelGroupDrawcall.FindBinder(NxRHI.EShaderBindType.SBT_CBuffer, "cbPerCamera");
-            if (srvIdx.IsValidPointer)
-            {
-                var camera = policy.DefaultCamera;
-                EraseVoxelGroupDrawcall.BindCBuffer(srvIdx, camera.PerCameraCBuffer);
-            }
-            srvIdx = EraseVoxelGroupDrawcall.FindBinder(NxRHI.EShaderBindType.SBT_UAV, "VxGroupPool");
-            if (srvIdx.IsValidPointer)
-            {
-                EraseVoxelGroupDrawcall.BindUav(srvIdx, UavVoxelPool);
-            }
-
+            
             CoreSDK.DisposeObject(ref InjectVoxelsDrawcall);
             InjectVoxelsDrawcall = rc.CreateComputeDraw();
-            InjectVoxelsDrawcall.SetComputeEffect(InjectVoxels);            
-            srvIdx = InjectVoxelsDrawcall.FindBinder(NxRHI.EShaderBindType.SBT_CBuffer, "cbGBufferDesc");
-            if (srvIdx.IsValidPointer)
-            {
-                InjectVoxelsDrawcall.BindCBuffer(srvIdx, CBuffer);
-            }
-            srvIdx = InjectVoxelsDrawcall.FindBinder(NxRHI.EShaderBindType.SBT_CBuffer, "cbPerCamera");
-            if (srvIdx.IsValidPointer)
-            {
-                var camera = policy.DefaultCamera;
-                InjectVoxelsDrawcall.BindCBuffer(srvIdx, camera.PerCameraCBuffer);
-            }
-            srvIdx = InjectVoxelsDrawcall.FindBinder(NxRHI.EShaderBindType.SBT_UAV, "VxGroupPool");
-            if (srvIdx.IsValidPointer)
-            {
-                InjectVoxelsDrawcall.BindUav(srvIdx, UavVoxelPool);
-            }
+            
         }
         public override void OnResize(Graphics.Pipeline.URenderPolicy policy, float x, float y)
         {
@@ -320,18 +410,14 @@ namespace EngineNS.Bricks.VXGI
 
                                 using (new NxRHI.TtCmdListScope(cmd))
                                 {
-                                    var srvIdx = SetupVoxelGroupAllocatorDrawcall.FindBinder(NxRHI.EShaderBindType.SBT_UAV, "GpuSceneDesc");
-                                    if (srvIdx.IsValidPointer)
-                                    {
-                                        var attachBuffer = GetAttachBuffer(GpuScenePinInOut);
-                                        SetupVoxelGroupAllocatorDrawcall.BindUav(srvIdx, attachBuffer.Uav);
-                                    }
-
-                                    //SetupVoxelGroupAllocatorDrawcall.Commit(cmd);
+                                    SetupVoxelGroupAllocator.SetDrawcallDispatch(this, policy, SetupVoxelGroupAllocatorDrawcall, VxGroupPoolSize, 1, 1, true);
                                     cmd.PushGpuDraw(SetupVoxelGroupAllocatorDrawcall);
 
+                                    cmd.BeginEvent(Name + "Setup");
                                     cmd.FlushDraws();
+                                    cmd.EndEvent();
                                 }
+                                policy.CommitCommandList(cmd);
                             }
                             mCurStep = EStep.InjectVoxels;
                         }
@@ -347,18 +433,11 @@ namespace EngineNS.Bricks.VXGI
                                     #region erase voxelgroups
                                     if (VxEraseGroupSize != Vector3ui.Zero)
                                     {
-                                        var srvIdx = EraseVoxelGroupDrawcall.FindBinder(NxRHI.EShaderBindType.SBT_UAV, "GpuSceneDesc");
-                                        if (srvIdx.IsValidPointer)
-                                        {
-                                            var attachBuffer = GetAttachBuffer(GpuScenePinInOut);
-                                            EraseVoxelGroupDrawcall.BindUav(srvIdx, attachBuffer.Uav);
-                                        }
-
-                                        EraseVoxelGroupDrawcall.SetDispatch(
-                                            MathHelper.Roundup(VxEraseGroupSize.X, Dispatch_SetupDimArray3.X),
-                                            MathHelper.Roundup(VxEraseGroupSize.Y, Dispatch_SetupDimArray3.Y),
-                                            MathHelper.Roundup(VxEraseGroupSize.Z, Dispatch_SetupDimArray3.Z));
-                                        //EraseVoxelGroupDrawcall.Commit(cmd);
+                                        EraseVoxelGroup.SetDrawcallDispatch(this, policy, EraseVoxelGroupDrawcall, 
+                                            VxEraseGroupSize.X,
+                                            VxEraseGroupSize.Y,
+                                            VxEraseGroupSize.Z,
+                                            true);
                                         cmd.PushGpuDraw(EraseVoxelGroupDrawcall);
                                         VxEraseGroupSize = Vector3ui.Zero;
                                     }
@@ -366,40 +445,25 @@ namespace EngineNS.Bricks.VXGI
 
                                     #region inject voxels
                                     {
-                                        var srvIdx = InjectVoxelsDrawcall.FindBinder(NxRHI.EShaderBindType.SBT_UAV, "GpuSceneDesc");
-                                        if (srvIdx.IsValidPointer)
-                                        {
-                                            InjectVoxelsDrawcall.BindUav(srvIdx, GetAttachBuffer(GpuScenePinInOut).Uav);
-                                        }
-                                        srvIdx = InjectVoxelsDrawcall.FindBinder(NxRHI.EShaderBindType.SBT_SRV, "GBufferAbedo");
-                                        if (srvIdx.IsValidPointer)
-                                        {
-                                            InjectVoxelsDrawcall.BindSrv(srvIdx, GetAttachBuffer(AlbedoPinInOut).Srv);
-                                        }
-                                        srvIdx = InjectVoxelsDrawcall.FindBinder(NxRHI.EShaderBindType.SBT_SRV, "GBufferDepth");
-                                        if (srvIdx.IsValidPointer)
-                                        {
-                                            InjectVoxelsDrawcall.BindSrv(srvIdx, GetAttachBuffer(DepthPinInOut).Srv);
-                                        }
-
-                                        InjectVoxelsDrawcall.SetDispatch(
-                                            MathHelper.Roundup(DiffuseRTWidth, Dispatch_SetupDimArray2.X),
-                                            MathHelper.Roundup(DiffuseRTHeight, Dispatch_SetupDimArray2.Y),
-                                            1);
+                                        InjectVoxels.SetDrawcallDispatch(this, policy, InjectVoxelsDrawcall,
+                                            DiffuseRTWidth,
+                                            DiffuseRTHeight,
+                                            1,
+                                            true);
                                         //InjectVoxelsDrawcall.Commit(cmd);
                                         cmd.PushGpuDraw(InjectVoxelsDrawcall);
                                     }
                                     #endregion
 
-                                    TickVxDebugger(world);
+                                    TickVxDebugger(world, policy);
 
                                     cmd.FlushDraws();
                                 }
+                                policy.CommitCommandList(cmd);
                             }
                         }
                         break;
                 }
-                policy.CommitCommandList(BasePass.DrawCmdList);
             }   
         }
     }
