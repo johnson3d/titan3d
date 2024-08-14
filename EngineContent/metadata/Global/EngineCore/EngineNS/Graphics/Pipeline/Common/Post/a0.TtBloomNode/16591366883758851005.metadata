@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Hash_16591366883758851005 Type="EngineNS.Graphics.Pipeline.Common.Post.TtBloomNode@EngineCore">
+  <DownSampleSigma Type="System.Single@Unknown" Order="0" />
+  <NumDownSample Type="System.Int32@Unknown" Order="0" />
+</Hash_16591366883758851005>

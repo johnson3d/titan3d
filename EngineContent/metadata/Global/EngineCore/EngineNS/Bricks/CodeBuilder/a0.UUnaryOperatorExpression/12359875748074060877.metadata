@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Hash_12359875748074060877 Type="EngineNS.Bricks.CodeBuilder.UUnaryOperatorExpression@EngineCore">
+  <Operation Type="EngineNS.Bricks.CodeBuilder.UUnaryOperatorExpression.EUnaryOperation@EngineCore" Order="0" />
+  <Value Type="EngineNS.Bricks.CodeBuilder.UExpressionBase@EngineCore" Order="0" />
+</Hash_12359875748074060877>

@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Hash_6505852241367752174 Type="EngineNS.GamePlay.UGameInstance@EngineCore">
+  <ChiefPlayer Type="EngineNS.GamePlay.Scene.Actor.UActor@EngineCore" Order="0" />
+  <DefaultCamera Type="EngineNS.Graphics.Pipeline.UCamera@EngineCore" Order="0" />
+  <WorldViewportSlate Type="EngineNS.GamePlay.UGameViewportSlate@EngineCore" Order="0" />
+</Hash_6505852241367752174>

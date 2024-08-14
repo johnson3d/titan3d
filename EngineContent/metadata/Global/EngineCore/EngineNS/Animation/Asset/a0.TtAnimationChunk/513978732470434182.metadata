@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Hash_513978732470434182 Type="EngineNS.Animation.Asset.TtAnimationChunk@EngineCore">
+  <AnimatedObjectDescs Type="System.Collections.Generic.Dictionary&lt;System.String@Unknown,EngineNS.Animation.Base.TtAnimatedObjectDescription@EngineCore,&gt;@Unknown" Order="0" />
+  <AnimCurvesList Type="System.Collections.Generic.Dictionary&lt;System.Guid@Unknown,EngineNS.Animation.Curve.ICurve@EngineCore,&gt;@Unknown" Order="0" />
+  <RescouceName Type="EngineNS.RName@EngineCore" Order="0" />
+</Hash_513978732470434182>

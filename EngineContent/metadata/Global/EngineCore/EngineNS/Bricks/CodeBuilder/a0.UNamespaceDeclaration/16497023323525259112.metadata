@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Hash_16497023323525259112 Type="EngineNS.Bricks.CodeBuilder.UNamespaceDeclaration@EngineCore">
+  <Classes Type="System.Collections.Generic.List&lt;EngineNS.Bricks.CodeBuilder.UClassDeclaration@EngineCore,&gt;@Unknown" Order="0" />
+  <Namespace Type="System.String@Unknown" Order="0" />
+</Hash_16497023323525259112>

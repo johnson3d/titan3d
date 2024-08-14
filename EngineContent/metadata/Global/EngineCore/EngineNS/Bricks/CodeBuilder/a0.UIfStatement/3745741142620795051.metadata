@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Hash_3745741142620795051 Type="EngineNS.Bricks.CodeBuilder.UIfStatement@EngineCore">
+  <Condition Type="EngineNS.Bricks.CodeBuilder.UExpressionBase@EngineCore" Order="0" />
+  <ElseIfs Type="System.Collections.Generic.List&lt;EngineNS.Bricks.CodeBuilder.UIfStatement@EngineCore,&gt;@Unknown" Order="0" />
+  <FalseStatement Type="EngineNS.Bricks.CodeBuilder.UStatementBase@EngineCore" Order="0" />
+  <TrueStatement Type="EngineNS.Bricks.CodeBuilder.UStatementBase@EngineCore" Order="0" />
+</Hash_3745741142620795051>

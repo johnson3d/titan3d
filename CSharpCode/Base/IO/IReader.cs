@@ -293,8 +293,18 @@ namespace EngineNS.IO
             }
             Hash64 typeHash;
             this.Read(out typeHash);
-            uint versionHash;
-            this.Read(out versionHash);
+
+            uint magic;
+            this.Read(out magic);
+            UInt64 versionHash;
+            if (magic != SerializerHelper.HashMagic)
+            {
+                versionHash = magic;
+            }
+            else
+            {
+                this.Read(out versionHash);
+            }
 
             var savePos = this.GetPosition();
             uint ObjDataSize = 0;
@@ -332,8 +342,17 @@ namespace EngineNS.IO
             }
             Hash64 typeHash;
             this.Read(out typeHash);
-            uint versionHash;
-            this.Read(out versionHash);
+            uint magic;
+            this.Read(out magic);
+            UInt64 versionHash;
+            if (magic != SerializerHelper.HashMagic)
+            {
+                versionHash = magic;
+            }
+            else
+            {
+                this.Read(out versionHash);
+            }
 
             //var savePos = this.GetPosition();
             //uint ObjDataSize = 0;

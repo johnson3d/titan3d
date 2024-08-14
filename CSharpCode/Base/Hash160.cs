@@ -250,7 +250,7 @@ namespace EngineNS
         public static Hash64 FromString(string source)
         {
             Hash64 result = new Hash64();
-            CalcHash64(in result, source);
+            CalcHash64(ref result, source);
             return result;
         }
         public static unsafe Hash64 FromData(byte* pData, int size)
@@ -259,13 +259,20 @@ namespace EngineNS
             CalcHash64(in result, pData, size);
             return result;
         }
-        public static void CalcHash64(in Hash64 hash, string source)
+        public static void CalcHash64(ref Hash64 hash, string source)
         {
-            CalcHash64(in hash, System.Text.Encoding.ASCII.GetBytes(source));
+            CalcHash64(ref hash, System.Text.Encoding.ASCII.GetBytes(source));
         }
-        public static void CalcHash64(in Hash64 hash, byte[] source)
+        public unsafe static void CalcHash64(ref Hash64 hash, byte[] source)
         {
-            unsafe
+            if (source.Length == 0)
+            {
+                fixed (Hash64* p = &hash)
+                {
+                    SDK_HashHelper_CalcHash64(p, null, 0);
+                }
+            }
+            else
             {
                 fixed (Hash64* p = &hash)
                 fixed (byte* pSource = &source[0])

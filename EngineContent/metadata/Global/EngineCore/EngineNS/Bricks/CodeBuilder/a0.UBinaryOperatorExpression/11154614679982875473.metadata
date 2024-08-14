@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Hash_11154614679982875473 Type="EngineNS.Bricks.CodeBuilder.UBinaryOperatorExpression@EngineCore">
+  <Cell Type="System.Boolean@Unknown" Order="0" />
+  <Left Type="EngineNS.Bricks.CodeBuilder.UExpressionBase@EngineCore" Order="0" />
+  <Operation Type="EngineNS.Bricks.CodeBuilder.UBinaryOperatorExpression.EBinaryOperation@EngineCore" Order="0" />
+  <Right Type="EngineNS.Bricks.CodeBuilder.UExpressionBase@EngineCore" Order="0" />
+</Hash_11154614679982875473>

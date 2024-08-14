@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Hash_6304458675377650456 Type="EngineNS.Bricks.CodeBuilder.ShaderNode.Var.VarDimI3@EngineCore">
+  <IsHalfPrecision Type="System.Boolean@Unknown" Order="0" />
+  <IsUniform Type="System.Boolean@Unknown" Order="0" />
+  <Label Type="System.String@Unknown" Order="0" />
+  <Name Type="System.String@Unknown" Order="0" />
+  <NodeId Type="System.Guid@Unknown" Order="0" />
+  <Position Type="EngineNS.Vector2@EngineCore" Order="0" />
+  <Value Type="EngineNS.Vector3i@EngineCore" Order="0" />
+  <InputEditableValues Type="System.Collections.Generic.List&lt;EngineNS.Bricks.NodeGraph.UNodeBase.UInputEditableValueInfo@EngineCore,&gt;@Unknown" Order="1" />
+</Hash_6304458675377650456>

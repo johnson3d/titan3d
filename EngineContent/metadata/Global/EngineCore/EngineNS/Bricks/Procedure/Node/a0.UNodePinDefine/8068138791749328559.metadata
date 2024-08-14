@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Hash_8068138791749328559 Type="EngineNS.Bricks.Procedure.Node.UNodePinDefine@EngineCore">
+  <BufferCreator Type="EngineNS.Bricks.Procedure.UBufferCreator@EngineCore" Order="0" />
+  <Name Type="System.String@Unknown" Order="0" />
+  <TypeValue Type="System.String@Unknown" Order="0" />
+</Hash_8068138791749328559>

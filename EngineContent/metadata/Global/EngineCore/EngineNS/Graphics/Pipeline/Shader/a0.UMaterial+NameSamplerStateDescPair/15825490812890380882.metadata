@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Hash_15825490812890380882 Type="EngineNS.Graphics.Pipeline.Shader.UMaterial.NameSamplerStateDescPair@EngineCore">
+  <Name Type="System.String@Unknown" Order="0" />
+  <Value Type="EngineNS.NxRHI.FSamplerDesc@EngineCore" Order="0" />
+</Hash_15825490812890380882>

@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Hash_4709753961727995544 Type="EngineNS.UTest.UTest_MetaObject@EngineCore">
+  <A Type="System.Int32@Unknown" Order="0" />
+  <B Type="System.Single@Unknown" Order="0" />
+  <C Type="System.String@Unknown" Order="0" />
+  <D Type="EngineNS.UTest.UTest_MetaObject.TestSubClass@EngineCore" Order="0" />
+  <E Type="EngineNS.UTest.UTest_MetaObject.TestSubClass@EngineCore" Order="0" />
+  <F Type="EngineNS.FTransform@EngineCore" Order="0" />
+  <G Type="System.Collections.Generic.List&lt;System.Int32@Unknown,&gt;@Unknown" Order="0" />
+  <H Type="System.Collections.Generic.List&lt;EngineNS.UTest.UTest_MetaObject.TestSubClass@EngineCore,&gt;@Unknown" Order="0" />
+  <I Type="System.Collections.Generic.Dictionary&lt;System.Int32@Unknown,System.String@Unknown,&gt;@Unknown" Order="0" />
+  <J Type="System.Collections.Generic.Dictionary&lt;System.Int32@Unknown,EngineNS.UTest.UTest_MetaObject.TestSubClass@EngineCore,&gt;@Unknown" Order="0" />
+  <ReadSignal Type="System.Boolean@Unknown" Order="100" />
+</Hash_4709753961727995544>

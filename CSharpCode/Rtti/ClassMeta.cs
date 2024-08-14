@@ -247,10 +247,10 @@ namespace EngineNS.Rtti
                 return Hash160.CreateHash160(ClassMetaName).ToString();
             }
         }
-        public Dictionary<uint, UMetaVersion> MetaVersions
+        public Dictionary<UInt64, UMetaVersion> MetaVersions
         {
             get;
-        } = new Dictionary<uint, UMetaVersion>();
+        } = new Dictionary<UInt64, UMetaVersion>();
         UMetaVersion mCurrentVersion;
         public UMetaVersion CurrentVersion
         {
@@ -267,7 +267,7 @@ namespace EngineNS.Rtti
                 i.ResetSystemRef();
             }
         }
-        public UMetaVersion GetMetaVersion(uint hash)
+        public UMetaVersion GetMetaVersion(UInt64 hash)
         {
             UMetaVersion result;
             if (MetaVersions.TryGetValue(hash, out result))
@@ -297,7 +297,7 @@ namespace EngineNS.Rtti
                     var myXmlDoc = new System.Xml.XmlDocument();
                     myXmlDoc.Load(i);
                     var ver = new UMetaVersion(this);
-                    ver.LoadVersion(System.Convert.ToUInt32(filename), myXmlDoc.LastChild);
+                    ver.LoadVersion(System.Convert.ToUInt64(filename), myXmlDoc.LastChild);
                     MetaVersions[ver.MetaHash] = ver;
                 }
             }
@@ -362,7 +362,7 @@ namespace EngineNS.Rtti
             {
                 hashString += i.ToString();
             }
-            result.MetaHash = EngineNS.UniHash32.APHash(hashString);
+            result.MetaHash = EngineNS.Hash64.FromString(hashString).AllData;
             if (MetaAttribute != null || type.GetInterface(nameof(IO.ISerializer)) != null)
             {
                 if (MetaVersions.TryGetValue(result.MetaHash, out mCurrentVersion) == false)
@@ -971,7 +971,7 @@ namespace EngineNS.Rtti
             get;
             private set;
         }
-        public uint MetaHash
+        public UInt64 MetaHash
         {
             get;
             internal set;
@@ -1043,7 +1043,7 @@ namespace EngineNS.Rtti
             }
             return result;
         }
-        public bool LoadVersion(uint hash, System.Xml.XmlNode node)
+        public bool LoadVersion(UInt64 hash, System.Xml.XmlNode node)
         {
             MetaHash = hash;
             foreach (System.Xml.XmlNode i in node.ChildNodes)
@@ -1265,6 +1265,7 @@ namespace EngineNS.Rtti
                     }
                     catch (System.InvalidOperationException ex)
                     {
+                        Profiler.Log.WriteException(ex);
                         bFinished = false;
                     }
                 }

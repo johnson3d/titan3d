@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Hash_14408915736467140862 Type="EngineNS.Graphics.Pipeline.Mobile.UMobileEditorFSPolicy@EngineCore">
+  <TypeAA Type="EngineNS.Graphics.Pipeline.URenderPolicy.ETypeAA@EngineCore" Order="0" />
+  <TypeFog Type="EngineNS.Graphics.Pipeline.URenderPolicy.ETypeFog@EngineCore" Order="0" />
+</Hash_14408915736467140862>

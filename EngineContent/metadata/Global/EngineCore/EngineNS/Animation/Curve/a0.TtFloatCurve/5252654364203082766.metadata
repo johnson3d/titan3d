@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Hash_5252654364203082766 Type="EngineNS.Animation.Curve.TtFloatCurve@EngineCore">
+  <Cache Type="EngineNS.Animation.Curve.FTrackCache@EngineCore" Order="0" />
+  <Id Type="System.Guid@Unknown" Order="0" />
+  <Track Type="EngineNS.Animation.Curve.TtTrack@EngineCore" Order="0" />
+</Hash_5252654364203082766>

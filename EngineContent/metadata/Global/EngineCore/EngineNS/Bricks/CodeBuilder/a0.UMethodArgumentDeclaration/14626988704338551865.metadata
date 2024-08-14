@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Hash_14626988704338551865 Type="EngineNS.Bricks.CodeBuilder.UMethodArgumentDeclaration@EngineCore">
+  <HasDefaultValue Type="System.Boolean@Unknown" Order="0" />
+  <InitValue Type="EngineNS.Bricks.CodeBuilder.UExpressionBase@EngineCore" Order="0" />
+  <InitValueVisible Type="System.Boolean@Unknown" Order="0" />
+  <IsParamArray Type="System.Boolean@Unknown" Order="0" />
+  <OperationType Type="EngineNS.Bricks.CodeBuilder.EMethodArgumentAttribute@EngineCore" Order="0" />
+  <OperationVisible Type="System.Boolean@Unknown" Order="0" />
+  <VariableName Type="System.String@Unknown" Order="0" />
+  <VariableType Type="EngineNS.Bricks.CodeBuilder.UTypeReference@EngineCore" Order="0" />
+</Hash_14626988704338551865>

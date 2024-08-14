@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Hash_9063032728928050910 Type="EngineNS.Animation.Asset.TtSkeletonAsset@EngineCore">
+  <AssetName Type="EngineNS.RName@EngineCore" Order="0" />
+  <Skeleton Type="EngineNS.Animation.SkeletonAnimation.Skeleton.TtSkinSkeleton@EngineCore" Order="0" />
+</Hash_9063032728928050910>

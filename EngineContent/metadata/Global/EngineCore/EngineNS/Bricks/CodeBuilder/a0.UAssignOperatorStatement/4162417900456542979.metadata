@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Hash_4162417900456542979 Type="EngineNS.Bricks.CodeBuilder.UAssignOperatorStatement@EngineCore">
+  <From Type="EngineNS.Bricks.CodeBuilder.UExpressionBase@EngineCore" Order="0" />
+  <To Type="EngineNS.Bricks.CodeBuilder.UExpressionBase@EngineCore" Order="0" />
+</Hash_4162417900456542979>

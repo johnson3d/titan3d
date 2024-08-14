@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Hash_4212456926795027174 Type="EngineNS.Graphics.Pipeline.Common.Post.TtSunShaftRadialBlurNode@EngineCore">
+  <BlurDecay Type="System.Single@Unknown" Order="0" />
+  <BlurRadius Type="EngineNS.Vector2@EngineCore" Order="0" />
+  <OutputScaleFactor Type="System.Single@Unknown" Order="0" />
+</Hash_4212456926795027174>

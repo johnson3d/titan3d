@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Hash_1065465964911168607 Type="EngineNS.Plugins.LoginServer.UAccountData@GameServer">
+  <Password Type="System.String@Unknown" Order="0" />
+  <SessionId Type="System.Guid@Unknown" Order="0" />
+  <UserName Type="System.String@Unknown" Order="0" />
+</Hash_1065465964911168607>

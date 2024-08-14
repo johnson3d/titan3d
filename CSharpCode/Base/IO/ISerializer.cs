@@ -78,6 +78,8 @@ namespace EngineNS.IO
             return offset + size;
         }
 
+        //过一段时间，等资产转换基本都完成了，就把HashMagic去掉，这个是用来兼容老版本hash32 MetaVersion的临时产物
+        public static uint HashMagic = 0;
         public static bool Read(IReader ar, out ISerializer obj, object hostObject)
         {
             bool isNull;
@@ -90,8 +92,18 @@ namespace EngineNS.IO
             obj = null;
             Hash64 typeHash;
             ar.Read(out typeHash);
-            uint versionHash;
-            ar.Read(out versionHash);
+
+            uint magic;
+            ar.Read(out magic);
+            UInt64 versionHash;
+            if (magic != HashMagic)
+            {
+                versionHash = magic;
+            }
+            else
+            {
+                ar.Read(out versionHash);
+            }
 
             var savePos = ar.GetPosition();
             uint ObjDataSize = 0;
@@ -229,7 +241,8 @@ namespace EngineNS.IO
             var typeHash = Hash64.FromString(typeStr);
             ar.Write(typeHash);
 
-            uint versionHash = metaVersion.MetaHash;
+            ar.Write(HashMagic);
+            var versionHash = metaVersion.MetaHash;
             ar.Write(versionHash);
 
             var savePos = ar.GetPosition();
@@ -541,8 +554,18 @@ namespace EngineNS.IO
 
                 Hash64 typeHash;
                 ar.Read(out typeHash);
-                uint versionHash;
-                ar.Read(out versionHash);
+                
+                uint magic;
+                ar.Read(out magic);
+                UInt64 versionHash;
+                if (magic != SerializerHelper.HashMagic)
+                {
+                    versionHash = magic;
+                }
+                else
+                {
+                    ar.Read(out versionHash);
+                }
 
                 var savePos = ar.GetPosition();
                 uint ObjDataSize = 0;

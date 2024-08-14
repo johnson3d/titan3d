@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Hash_832831031623221906 Type="EngineNS.Bricks.CodeBuilder.MacrossNode.MethodData@EngineCore">
+  <IsDelegate Type="System.Boolean@Unknown" Order="0" />
+  <MethodDec Type="EngineNS.Bricks.CodeBuilder.UMethodDeclaration@EngineCore" Order="0" />
+</Hash_832831031623221906>

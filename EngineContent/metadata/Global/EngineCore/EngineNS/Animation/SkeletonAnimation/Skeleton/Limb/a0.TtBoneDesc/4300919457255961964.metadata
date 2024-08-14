@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Hash_4300919457255961964 Type="EngineNS.Animation.SkeletonAnimation.Skeleton.Limb.TtBoneDesc@EngineCore">
+  <InitMatrix Type="EngineNS.Matrix@EngineCore" Order="0" />
+  <InvInitMatrix Type="EngineNS.Matrix@EngineCore" Order="0" />
+  <InvPos Type="EngineNS.Vector3@EngineCore" Order="0" />
+  <InvQuat Type="EngineNS.Quaternion@EngineCore" Order="0" />
+  <InvScale Type="EngineNS.Vector3@EngineCore" Order="0" />
+  <Name Type="System.String@Unknown" Order="0" />
+  <NameHash Type="System.UInt32@Unknown" Order="0" />
+  <ParentHash Type="System.UInt32@Unknown" Order="0" />
+  <ParentName Type="System.String@Unknown" Order="0" />
+</Hash_4300919457255961964>

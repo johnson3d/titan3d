@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Hash_14782260696390120655 Type="EngineNS.Bricks.CodeBuilder.UCastExpression@EngineCore">
+  <Expression Type="EngineNS.Bricks.CodeBuilder.UExpressionBase@EngineCore" Order="0" />
+  <SourceType Type="EngineNS.Bricks.CodeBuilder.UTypeReference@EngineCore" Order="0" />
+  <TargetType Type="EngineNS.Bricks.CodeBuilder.UTypeReference@EngineCore" Order="0" />
+</Hash_14782260696390120655>
