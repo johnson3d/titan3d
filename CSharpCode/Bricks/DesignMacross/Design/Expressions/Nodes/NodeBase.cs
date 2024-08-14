@@ -27,8 +27,8 @@ namespace EngineNS.DesignMacross.Nodes
         public EFlowMode FlowMode { get; set; } = EFlowMode.Horizon;
         public class PinStyle
         {
-            public EGui.UUvAnim Image { get; set; } = new EGui.UUvAnim();
-            public EGui.UUvAnim DisconnectImage { get; set; } = new EGui.UUvAnim();
+            public EGui.TtUVAnim Image { get; set; } = new EGui.TtUVAnim();
+            public EGui.TtUVAnim DisconnectImage { get; set; } = new EGui.TtUVAnim();
             public float Offset { get; set; } = 3;
             public float TextOffset { get; set; } = 3;
         }

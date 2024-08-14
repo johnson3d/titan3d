@@ -185,7 +185,7 @@ namespace EngineNS.Editor.Forms
         }
         public float LeftWidth = 0;
 
-        float ObjecRotAngle = 0;
+        //float ObjecRotAngle = 0;
         public float ObjectRotateSpeed { get; set; } = 0;
         bool mIsDrawing = true;
         bool IsDrawing

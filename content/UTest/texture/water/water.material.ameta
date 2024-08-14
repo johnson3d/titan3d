@@ -2,7 +2,7 @@
 <Root Type="EngineNS.Graphics.Pipeline.Shader.UMaterialAMeta@EngineCore">
   <AssetId Type="System.Guid@Unknown" Value="f81bb2c9-fad9-4a40-9f9a-464a29de0bf0" />
   <Description Type="System.String@Unknown" Value="This is a EngineNS.Graphics.Pipeline.Shader.UMaterial&#xA;Hahah" />
-  <Icon Type="EngineNS.EGui.UUvAnim@EngineCore">
+  <Icon Type="EngineNS.EGui.TtUVAnim@EngineCore">
     <Color Type="System.UInt32@Unknown" Value="4294967295" />
     <Duration Type="System.Single@Unknown" Value="1000" />
     <FrameUVs Type="System.Collections.Generic.List&lt;EngineNS.Vector4@EngineCore,&gt;@Unknown" Count="1">

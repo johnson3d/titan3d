@@ -15,7 +15,7 @@ namespace EngineNS.GamePlay.StateMachine.AnimationStateMachine
     {
         public Animation.Asset.TtAnimationClip Animation { get; set; }
         public TtExtractPoseFromClipCommand mExtractPoseFromClipCommand { get; set; } = null;
-        IBlendTree<TtLocalSpaceRuntimePose> BlendTreeRoot = null;
+        internal IBlendTree<TtLocalSpaceRuntimePose> BlendTreeRoot = null;
 
         public TtAnimationState(TtGamePlayStateMachine<T> stateMachine, string name = "AnimationState") : base(stateMachine, name)
         {

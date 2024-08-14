@@ -476,7 +476,8 @@ namespace EngineNS.NxRHI
                 }
 
                 #region Debug
-                if (false)
+                bool bDebug = false;
+                if (bDebug)
                 {
                     var faceDataSize = Extent * Extent;
                     Vector4[] cubeMapExpand = new Vector4[4 * 3 * faceDataSize];
@@ -2134,7 +2135,6 @@ namespace EngineNS.NxRHI
         {
             System.Diagnostics.Debug.Assert(desc.DontCompress == false);
 
-            //desc.CubeFaces = 1;
             if(desc.MipLevel == 0)
                 desc.MipLevel = CalcMipLevel(curImage.Width, curImage.Height, true) - 3;
             EPixelFormat descPixelFormat = EPixelFormat.PXF_UNKNOWN;
@@ -2153,37 +2153,41 @@ namespace EngineNS.NxRHI
             encoder.OutputOptions.Format = CompressionFormat.Bc6U;
             encoder.OutputOptions.FileFormat = OutputFileFormat.Dds;
 
-
             int imageWidth = curImage.Width;
             int imageHeight = curImage.Height;
             if (desc.CubeFaces == 6)
             {
-                imageHeight = curImage.Width;
+                imageWidth = imageHeight = MathHelper.Min(imageWidth, imageHeight);
             }
+            else
+                desc.CubeFaces = 1;
 
+            int imageSize = imageWidth * imageHeight;
             System.DateTime beginTime = System.DateTime.Now;
             Profiler.Log.WriteInfoSimple("Start SaveDxtMips_BcEncoder");
             for (uint i = 0; i < desc.Desc.CubeFaces; i++)
             {
+                ColorRgbFloat[] colorDataFace = new ColorRgbFloat[imageSize];
+                for (int iC = 0; iC < imageSize; ++iC)
+                {
+                    colorDataFace[iC].r = curImage.Data[(i * imageSize + iC) * (int)curImage.Comp];
+                    colorDataFace[iC].g = curImage.Data[(i * imageSize + iC) * (int)curImage.Comp + Math.Min(1, (int)curImage.Comp - 1)];
+                    colorDataFace[iC].b = curImage.Data[(i * imageSize + iC) * (int)curImage.Comp + Math.Min(2, (int)curImage.Comp - 1)];
+                }
+                var memory2DFace = colorDataFace.AsMemory().AsMemory2D(imageHeight, imageWidth);
+
                 var faceNode = mipsNode.GetOrAddNode($"Face{i}", 0, 0);
-                for (uint j = 0; j < desc.Desc.MipLevel; j++)
+                for (uint j = 0; j < desc.MipLevel; j++)
                 {
                     var mipSize = new Vector3i();
                     var blockDimension = new Vector2i();
 
-                    ColorRgbFloat[] colorData = new ColorRgbFloat[curImage.Width * curImage.Height];
-                    for(int iC = 0; iC < curImage.Width * curImage.Height; ++iC)
-                    {
-                        colorData[iC].r = curImage.Data[iC * (int)curImage.Comp];
-                        colorData[iC].g = curImage.Data[iC * (int)curImage.Comp + Math.Min(1, (int)curImage.Comp-1)];
-                        colorData[iC].b = curImage.Data[iC * (int)curImage.Comp + Math.Min(2, (int)curImage.Comp - 1)];
-                    }
-                    var inputMemory = colorData.AsMemory().AsMemory2D(curImage.Height, curImage.Width);
-                    var pixelsBcn = encoder.EncodeToRawBytesHdr(inputMemory, (int)j, out mipSize.X, out mipSize.Y);
+                    var pixelsBcn = encoder.EncodeToRawBytesHdr(memory2DFace, (int)j, out mipSize.X, out mipSize.Y);
 
                     encoder.GetBlockCount(mipSize.X, mipSize.Y, out blockDimension.X, out blockDimension.Y);
                     desc.BlockSize = encoder.GetBlockSize();
-                    desc.MipSizes.Add(mipSize);
+                    if(desc.MipSizes.Count < desc.MipLevel)
+                        desc.MipSizes.Add(mipSize);
                     desc.BlockDimenstions.Add(blockDimension);
 
                     var attr = faceNode.GetOrAddAttribute($"DxtMip{j}", 0, 0);
@@ -2678,10 +2682,13 @@ namespace EngineNS.NxRHI
             if (exrNode.NativePointer == IntPtr.Zero)
                 return null;
 
-            var handles = stackalloc System.Runtime.InteropServices.GCHandle[mipLevel];
+            var num = (int)desc.CubeFaces * mipLevel;
+            if (num == 0)
+                return null;
+            var handles = stackalloc System.Runtime.InteropServices.GCHandle[num];
             try
             {
-                var pInitData = stackalloc FMappedSubResource[mipLevel];
+                var pInitData = stackalloc FMappedSubResource[num];
 
 
                 for (uint i = 0; i < mipLevel; i++)
@@ -3020,10 +3027,10 @@ namespace EngineNS.NxRHI
             if (pngNode.NativePointer == IntPtr.Zero)
                 return null;
 
-            var handles = stackalloc System.Runtime.InteropServices.GCHandle[mipLevel];
+            var handles = stackalloc System.Runtime.InteropServices.GCHandle[(int)desc.CubeFaces * mipLevel];
             try
             {
-                var pInitData = stackalloc FMappedSubResource[mipLevel];
+                var pInitData = stackalloc FMappedSubResource[(int)desc.CubeFaces * mipLevel];
 
                 for (uint j = 0; j < desc.Desc.CubeFaces; j++)
                 {
@@ -3045,12 +3052,13 @@ namespace EngineNS.NxRHI
                             ar.ReadNoSize(out data, (int)mipAttr.GetReaderLength());
                         }
 
-                        handles[i] = System.Runtime.InteropServices.GCHandle.Alloc(data, System.Runtime.InteropServices.GCHandleType.Pinned);
-                        pInitData[i].m_pData = System.Runtime.InteropServices.Marshal.UnsafeAddrOfPinnedArrayElement(data, 0).ToPointer();
+                        int dataIndex = (int)(j * mipLevel + i);
+                        handles[dataIndex] = System.Runtime.InteropServices.GCHandle.Alloc(data, System.Runtime.InteropServices.GCHandleType.Pinned);
+                        pInitData[dataIndex].m_pData = System.Runtime.InteropServices.Marshal.UnsafeAddrOfPinnedArrayElement(data, 0).ToPointer();
                         if(desc.BlockSize==0)
                         {
-                            pInitData[i].m_RowPitch = (uint)desc.MipSizes[(int)realLevel].Z;
-                            pInitData[i].m_DepthPitch = pInitData[i].m_RowPitch * (uint)desc.MipSizes[(int)realLevel].Y;
+                            pInitData[dataIndex].m_RowPitch = (uint)desc.MipSizes[(int)realLevel].Z;
+                            pInitData[dataIndex].m_DepthPitch = pInitData[i].m_RowPitch * (uint)desc.MipSizes[(int)realLevel].Y;
                         }
                         else
                         {
@@ -3058,8 +3066,8 @@ namespace EngineNS.NxRHI
                                 return null;
                             var blockWidth = desc.BlockDimenstions[(int)realLevel].X;
                             var blockHeight = desc.BlockDimenstions[(int)realLevel].Y;
-                            pInitData[i].m_RowPitch = (uint)(blockWidth * desc.BlockSize);
-                            pInitData[i].m_DepthPitch = pInitData[i].m_RowPitch * (uint)blockHeight;
+                            pInitData[dataIndex].m_RowPitch = (uint)(blockWidth * desc.BlockSize);
+                            pInitData[dataIndex].m_DepthPitch = pInitData[dataIndex].m_RowPitch * (uint)blockHeight;
                         }
                     }
                 }
@@ -3081,7 +3089,7 @@ namespace EngineNS.NxRHI
             }
             finally
             {
-                for (uint i = 0; i < mipLevel; i++)
+                for (uint i = 0; i < (int)desc.CubeFaces * mipLevel; i++)
                 {
                     if (handles[i].IsAllocated)
                         handles[i].Free();

@@ -231,9 +231,9 @@ namespace EngineNS.Bricks.NodeGraph
             }
         }
 
-        bool mIsLeftMouseFocusOnGraph = false;
-        bool mIsRightMouseFocusOnGraph = false;
-        bool mIsMiddleMouseFocusOnGraph = false;
+        internal bool mIsLeftMouseFocusOnGraph = false;
+        internal bool mIsRightMouseFocusOnGraph = false;
+        internal bool mIsMiddleMouseFocusOnGraph = false;
         unsafe void ProcessMouse(in Vector2 screenPt, in Vector2 rectSize, UNodeGraph graph)
         {
             //if (ImGuiAPI.IsWindowFocused(ImGuiFocusedFlags_.ImGuiFocusedFlags_ChildWindows | ImGuiFocusedFlags_.ImGuiFocusedFlags_RootWindow) == false)
@@ -324,7 +324,7 @@ namespace EngineNS.Bricks.NodeGraph
                 }
             }
         }
-        public void DrawImage(ImDrawList cmdlist, EGui.UUvAnim icon, in Vector2 rcMin, in Vector2 rcMax)
+        public void DrawImage(ImDrawList cmdlist, EGui.TtUVAnim icon, in Vector2 rcMin, in Vector2 rcMax)
         {
             icon.OnDraw(cmdlist, rcMin, rcMax, 0);
         }

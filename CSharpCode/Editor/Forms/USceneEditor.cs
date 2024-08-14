@@ -973,7 +973,7 @@ namespace EngineNS.Editor.Forms
             }
             EGui.UIProxy.DockProxy.EndPanel(show);
         }
-        string mSelectedPlaceItemName;
+        internal string mSelectedPlaceItemName = null;
         protected void DrawPlaceItemPanel()
         {
             if (!mPlaceItemPanelShow.Selected)

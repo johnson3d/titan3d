@@ -5,8 +5,8 @@ using EngineNS;
 
 namespace EngineNS.EGui
 {
-    [Rtti.Meta]
-    public partial class UVAnimAMeta : IO.IAssetMeta
+    //[Rtti.Meta(NameAlias = new string[] { "EngineNS.EGui.UVAnimAMeta@EngineCore" })]
+    public partial class TtUVAnimAMeta : IO.IAssetMeta
     {
         [Rtti.Meta]
         public RName TextureName { get; set; }
@@ -16,7 +16,7 @@ namespace EngineNS.EGui
         public Vector2 SnapUVEnd { get; set; } = new Vector2(1, 1);
         public override string GetAssetExtType()
         {
-            return UUvAnim.AssetExt;
+            return TtUVAnim.AssetExt;
         }
         public override string GetAssetTypeName()
         {
@@ -78,11 +78,11 @@ namespace EngineNS.EGui
         }
         Thread.Async.TtTask<NxRHI.USrView>? SnapTask;
     }
-    [Rtti.Meta]
-    [UUvAnim.Import]
+    //[Rtti.Meta(NameAlias = new string[] { "EngineNS.EGui.UUvAnim@EngineCore" })]
+    [TtUVAnim.Import]
     [Editor.UAssetEditor(EditorType = typeof(UUvAnimEditor))]
     [IO.AssetCreateMenu(MenuName = "UI/UVAnim")]
-    public partial class UUvAnim : IO.IAsset, IO.ISerializer
+    public partial class TtUVAnim : IO.IAsset, IO.ISerializer
     {
         public const string AssetExt = ".uvanim";
         #region ISerializer
@@ -98,7 +98,7 @@ namespace EngineNS.EGui
         public class ImportAttribute : IO.CommonCreateAttribute
         {
         }
-        public UUvAnim(UInt32 clr, float sz)
+        public TtUVAnim(UInt32 clr, float sz)
         {
             Size = new Vector2(sz, sz);
             Color = clr;
@@ -106,7 +106,7 @@ namespace EngineNS.EGui
             Vector4 uv = new Vector4(0,0,1,1);
             FrameUVs.Add(uv);
         }
-        public UUvAnim()
+        public TtUVAnim()
         {
             Vector4 uv = new Vector4(0, 0, 1, 1);
             FrameUVs.Add(uv);
@@ -114,8 +114,8 @@ namespace EngineNS.EGui
         #region IAsset
         public IO.IAssetMeta CreateAMeta()
         {
-            var result = new UVAnimAMeta();
-            result.Icon = new UUvAnim();
+            var result = new TtUVAnimAMeta();
+            result.Icon = new TtUVAnim();
             return result;
         }
         public IO.IAssetMeta GetAMeta()
@@ -124,7 +124,7 @@ namespace EngineNS.EGui
         }
         public void UpdateAMetaReferences(IO.IAssetMeta ameta)
         {
-            var uvAnimAMeta = ameta as UVAnimAMeta;
+            var uvAnimAMeta = ameta as TtUVAnimAMeta;
             if (uvAnimAMeta != null)
             {
                 uvAnimAMeta.TextureName = TextureName;
@@ -160,14 +160,14 @@ namespace EngineNS.EGui
             xnd.SaveXnd(name.Address);
             UEngine.Instance.SourceControlModule.AddFile(name.Address);
         }
-        public static UUvAnim LoadXnd(TtUvAnimManager manager, IO.TtXndNode node)
+        public static TtUVAnim LoadXnd(TtUvAnimManager manager, IO.TtXndNode node)
         {
-            UUvAnim result = new UUvAnim();
+            TtUVAnim result = new TtUVAnim();
             if (ReloadXnd(result, manager, node) == false)
                 return null;
             return result;
         }
-        public static bool ReloadXnd(UUvAnim material, TtUvAnimManager manager, IO.TtXndNode node)
+        public static bool ReloadXnd(TtUVAnim material, TtUvAnimManager manager, IO.TtXndNode node)
         {
             var attr = node.TryGetAttribute("UVAnim");
             if (attr.NativePointer != IntPtr.Zero)
@@ -286,13 +286,13 @@ namespace EngineNS.EGui
         {
             UVAnims.Clear();
         }
-        public Dictionary<RName, UUvAnim> UVAnims { get; } = new Dictionary<RName, UUvAnim>();
-        public async Thread.Async.TtTask<UUvAnim> GetUVAnim(RName rn)
+        public Dictionary<RName, TtUVAnim> UVAnims { get; } = new Dictionary<RName, TtUVAnim>();
+        public async Thread.Async.TtTask<TtUVAnim> GetUVAnim(RName rn)
         {
             if (rn == null)
                 return null;
 
-            UUvAnim result;
+            TtUVAnim result;
             if (UVAnims.TryGetValue(rn, out result))
                 return result;
 
@@ -302,7 +302,7 @@ namespace EngineNS.EGui
                 {
                     if (xnd != null)
                     {
-                        var material = UUvAnim.LoadXnd(this, xnd.RootNode);
+                        var material = TtUVAnim.LoadXnd(this, xnd.RootNode);
                         if (material == null)
                             return null;
 
@@ -324,16 +324,16 @@ namespace EngineNS.EGui
 
             return null;
         }
-        public async Thread.Async.TtTask<UUvAnim> CreateUVAnim(RName rn)
+        public async Thread.Async.TtTask<TtUVAnim> CreateUVAnim(RName rn)
         {
-            UUvAnim result;
+            TtUVAnim result;
             result = await UEngine.Instance.EventPoster.Post((state) =>
             {
                 using (var xnd = IO.TtXndHolder.LoadXnd(rn.Address))
                 {
                     if (xnd != null)
                     {
-                        var material = UUvAnim.LoadXnd(this, xnd.RootNode);
+                        var material = TtUVAnim.LoadXnd(this, xnd.RootNode);
                         if (material == null)
                             return null;
 
@@ -350,7 +350,7 @@ namespace EngineNS.EGui
         }
         public async Thread.Async.TtTask<bool> ReloadUVAnim(RName rn)
         {
-            UUvAnim result;
+            TtUVAnim result;
             if (UVAnims.TryGetValue(rn, out result) == false)
                 return true;
 
@@ -360,7 +360,7 @@ namespace EngineNS.EGui
                 {
                     if (xnd != null)
                     {
-                        return UUvAnim.ReloadXnd(result, this, xnd.RootNode);
+                        return TtUVAnim.ReloadXnd(result, this, xnd.RootNode);
                     }
                     else
                     {

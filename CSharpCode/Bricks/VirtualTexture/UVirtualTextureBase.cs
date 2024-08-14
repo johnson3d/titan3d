@@ -105,7 +105,7 @@ namespace EngineNS.Bricks.VirtualTexture
         private List<uint> AddTexIDs = new List<uint>();
         private List<uint> RemoveTexIDs = new List<uint>();
         private List<uint> DirtyTexIDs = new List<uint>();
-        NxRHI.FTextureDesc TexDesc = new NxRHI.FTextureDesc();
+        internal NxRHI.FTextureDesc TexDesc = new NxRHI.FTextureDesc();
         public void ActiveRVT(NxRHI.USrView tex)
         {
             if (tex == null)

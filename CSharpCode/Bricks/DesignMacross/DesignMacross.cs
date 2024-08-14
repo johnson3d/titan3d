@@ -246,7 +246,7 @@ namespace EngineNS.DesignMacross
         public IAssetMeta CreateAMeta()
         {
             var result = new TtDesignMacrossAMeta();
-            result.Icon = new EGui.UUvAnim();
+            result.Icon = new EGui.TtUVAnim();
             return result;
         }
 

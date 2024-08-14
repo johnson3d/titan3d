@@ -2704,7 +2704,7 @@ namespace EngineNS.GamePlay
         }
 
         #region UI
-        static string mIconImgName = "icons/icon001.srv";
+        //static readonly string mIconImgName = "icons/icon001.srv";
         EGui.UIProxy.ImageToggleButtonProxy mSelectButton;
         EGui.UIProxy.ImageToggleButtonProxy mMoveButton;
         EGui.UIProxy.ImageToggleButtonProxy mRotButton;

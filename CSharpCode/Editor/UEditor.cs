@@ -49,9 +49,9 @@ namespace EngineNS.Editor
     public partial class UEditor : UModule<UEngine>
     {
         public UEditorConfig Config { get; set; } = new UEditorConfig();
-        public EGui.UUvAnim PhyMaterialIcon { get; set; }
-        public EGui.UUvAnim FontIcon { get; set; }
-        public EGui.UUvAnim MacrossIcon { get; set; }
+        public EGui.TtUVAnim PhyMaterialIcon { get; set; }
+        public EGui.TtUVAnim FontIcon { get; set; }
+        public EGui.TtUVAnim MacrossIcon { get; set; }
         public override void Cleanup(UEngine host)
         {
             //CoreSDK.DisposeObject(ref RNamePopupContentBrowser);

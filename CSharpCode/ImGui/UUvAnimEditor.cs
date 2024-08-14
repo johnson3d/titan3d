@@ -13,7 +13,7 @@ namespace EngineNS.EGui
         public ImGuiWindowClass DockKeyClass => mDockKeyClass;
         public ImGuiCond_ DockCond { get; set; } = ImGuiCond_.ImGuiCond_FirstUseEver;
 
-        public UUvAnim UvAnim;
+        public TtUVAnim UvAnim;
         public EGui.Controls.PropertyGrid.PropertyGrid UvAnimPropGrid = new EGui.Controls.PropertyGrid.PropertyGrid();
         ~UUvAnimEditor()
         {

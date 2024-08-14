@@ -129,9 +129,9 @@ namespace EngineNS.EGui.UIProxy
         public Vector2 Size = new Vector2(32, 32);
         public Action Action;
 
-        Thread.Async.TtTask<UUvAnim>? mNormalUVAnimTask;
-        Thread.Async.TtTask<UUvAnim>? mCheckedUVAnimTask;
-        public EGui.UUvAnim NormalUVAnim
+        Thread.Async.TtTask<TtUVAnim>? mNormalUVAnimTask;
+        Thread.Async.TtTask<TtUVAnim>? mCheckedUVAnimTask;
+        public EGui.TtUVAnim NormalUVAnim
         {
             get
             {
@@ -142,7 +142,7 @@ namespace EngineNS.EGui.UIProxy
                 return mNormalUVAnimTask.Value.Result;
             }
         }
-        public EGui.UUvAnim CheckedUVAnim
+        public EGui.TtUVAnim CheckedUVAnim
         {
             get
             {

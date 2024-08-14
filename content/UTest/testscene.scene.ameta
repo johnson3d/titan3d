@@ -2,7 +2,7 @@
 <Root Type="EngineNS.GamePlay.Scene.USceneAMeta@EngineCore">
   <AssetId Type="System.Guid@Unknown" Value="a00c461a-6cda-478a-8ff7-0f27abd247a7" />
   <Description Type="System.String@Unknown" Value="This is a EngineNS.GamePlay.Scene.UScene&#xA;Hahah" />
-  <Icon Type="EngineNS.EGui.UUvAnim@EngineCore">
+  <Icon Type="EngineNS.EGui.TtUVAnim@EngineCore">
     <Color Type="System.UInt32@Unknown" Value="4294967295" />
     <Duration Type="System.Single@Unknown" Value="1000" />
     <FrameUVs Type="System.Collections.Generic.List&lt;EngineNS.Vector4@EngineCore,&gt;@Unknown" Count="1">

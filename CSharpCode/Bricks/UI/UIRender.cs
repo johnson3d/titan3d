@@ -80,7 +80,7 @@ namespace EngineNS.UI
         RName mUVAnimAsset;
         [Rtti.Meta, BindProperty]
         [DisplayName("Texture")]
-        [RName.PGRName(FilterExts = EGui.UUvAnim.AssetExt)]
+        [RName.PGRName(FilterExts = EGui.TtUVAnim.AssetExt)]
         public RName UVAnimAsset
         {
             get => mUVAnimAsset;
@@ -95,7 +95,7 @@ namespace EngineNS.UI
                 UpdateMesh();
             }
         }
-        Thread.Async.TtTask<EGui.UUvAnim>? mUVAnimTask;
+        Thread.Async.TtTask<EGui.TtUVAnim>? mUVAnimTask;
 
         RName mMaterial = RName.GetRName("ui/uimat_inst_default.uminst", RName.ERNameType.Engine);
         [Rtti.Meta, BindProperty]

@@ -236,7 +236,7 @@ namespace EngineNS.Bricks.CodeBuilder
         public IO.IAssetMeta CreateAMeta()
         {
             var result = new UMacrossAMeta();
-            result.Icon = new EGui.UUvAnim();
+            result.Icon = new EGui.TtUVAnim();
             return result;
         }
 

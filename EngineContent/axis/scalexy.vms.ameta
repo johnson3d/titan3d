@@ -2,7 +2,7 @@
 <Root Type="EngineNS.Graphics.Mesh.UMeshPrimitivesAMeta@EngineCore">
   <AssetId Type="System.Guid@Unknown" Value="c33a5705-4746-4efb-8ee3-833c377a6a89" />
   <Description Type="System.String@Unknown" Value="This is a EngineNS.Graphics.Mesh.CMeshPrimitives&#xA;" />
-  <Icon Type="EngineNS.EGui.UUvAnim@EngineCore">
+  <Icon Type="EngineNS.EGui.TtUVAnim@EngineCore">
     <Color Type="System.UInt32@Unknown" Value="4294967295" />
     <Duration Type="System.Single@Unknown" Value="1000" />
     <FrameUVs Type="System.Collections.Generic.List&lt;EngineNS.Vector4@EngineCore,&gt;@Unknown" Count="1">

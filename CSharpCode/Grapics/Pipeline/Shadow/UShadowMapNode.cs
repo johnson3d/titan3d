@@ -84,7 +84,7 @@ namespace EngineNS.Graphics.Pipeline.Shadow
         public Vector3 mDirLightDirection = new Vector3(0.0f, -1.5f, 1.0f);
 
         public float mShadowDistance = 1200.0f;
-        private float mShadowCameraOffset = 100.0f;
+        //private float mShadowCameraOffset = 100.0f;
         public UInt32 mCsmNum = 4;
         public float[] mSumDistanceFarArray = new float[4];
         public Vector4 mSumDistanceFarVec = new Vector4();

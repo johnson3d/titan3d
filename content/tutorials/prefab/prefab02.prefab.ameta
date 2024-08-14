@@ -2,7 +2,7 @@
 <Root Type="EngineNS.GamePlay.Scene.TtPrefabAMeta@EngineCore">
   <AssetId Type="System.Guid@Unknown" Value="21d34d07-eee2-4618-9d5c-102c1f930d78" />
   <Description Type="System.String@Unknown" Value="This is a EngineNS.GamePlay.Scene.TtPrefab&#xA;Hahah" />
-  <Icon Type="EngineNS.EGui.UUvAnim@EngineCore">
+  <Icon Type="EngineNS.EGui.TtUVAnim@EngineCore">
     <Color Type="System.UInt32@Unknown" Value="4294967295" />
     <Duration Type="System.Single@Unknown" Value="1000" />
     <FrameUVs Type="System.Collections.Generic.List&lt;EngineNS.Vector4@EngineCore,&gt;@Unknown" Count="1">

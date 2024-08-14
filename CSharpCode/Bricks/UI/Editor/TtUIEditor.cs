@@ -1222,7 +1222,7 @@ namespace EngineNS.UI.Editor
             }
         }
         bool mIsWireFrame = false;
-        string mDimensionToolButtonName = "3D";
+        //string mDimensionToolButtonName = "3D";
         void DrawViewportUIAction(in Vector2 startDrawPos)
         {
             if (AssetName != null)

@@ -1190,6 +1190,16 @@ namespace EngineNS.Rtti
                     }
                     continue;
                 }
+                var attr = i.Value.ClassType.GetCustomAttribute<Rtti.MetaAttribute>(false);
+                if (attr != null && attr.NameAlias != null)
+                {
+                    foreach (var n in attr.NameAlias)
+                    {
+                        var aliasCode = Hash64.FromString(n);
+                        mHashMetas[aliasCode] = i.Value;
+                    }
+                }
+                
                 mHashMetas[hashCode] = i.Value;
 
                 TreeManager.RegType(i.Value);

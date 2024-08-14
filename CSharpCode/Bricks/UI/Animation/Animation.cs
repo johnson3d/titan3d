@@ -469,13 +469,18 @@ namespace EngineNS.UI.Animation
         public UAnyValue UserData;
 
         public delegate void Delegate_OnCompleted(AnimationTimeline<T> animTimeline);
-        public event Delegate_OnCompleted OnCompleted;
+        public event Delegate_OnCompleted OnCompleted = null;
 
         public virtual T GetCurrentValue() { return default(T); }
 
         public override void Reset()
         {
-
+            //no warning
+            OnCompleted = null;
+            if (OnCompleted != null)
+            {
+                OnCompleted(null);
+            }
         }
     }
 }

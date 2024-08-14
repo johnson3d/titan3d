@@ -70,8 +70,8 @@ namespace EngineNS.Bricks.NodeGraph
 
     public class LinkDesc
     {
-        public EGui.UUvAnim Icon { get; set; } = new EGui.UUvAnim();
-        public EGui.UUvAnim DisconnectIcon { get; set; } = new EGui.UUvAnim();
+        public EGui.TtUVAnim Icon { get; set; } = new EGui.TtUVAnim();
+        public EGui.TtUVAnim DisconnectIcon { get; set; } = new EGui.TtUVAnim();
         public uint LineColor { get; set; } = 0xFFFF0000; // 0xFF00FFFF
         public float LineThinkness { get; set; } = 3.0f;
         public float ExtPadding { get; set; } = 10;
@@ -261,7 +261,7 @@ namespace EngineNS.Bricks.NodeGraph
         [System.ComponentModel.Browsable(false)]
         public Vector2 PrevSize { get; set; }
         [System.ComponentModel.Browsable(false)]
-        public EGui.UUvAnim Icon { get; set; } = new EGui.UUvAnim();
+        public EGui.TtUVAnim Icon { get; set; } = new EGui.TtUVAnim();
         [System.ComponentModel.Browsable(false)]
         public float TitleHeight { get; set; }
         [System.ComponentModel.Browsable(false)]

@@ -260,7 +260,7 @@ namespace EngineNS.Thread
             get;
             set;
         } = 5 * 1000;//5 ms
-        private bool TimeOut = false;
+        internal bool TimeOut = false;
 
         private bool TestTimeOut(long start, long t1, long limit, Async.TtAsyncTaskStateBase state)
         {

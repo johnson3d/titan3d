@@ -25,7 +25,7 @@ namespace EngineNS.Animation.BlendTree.Node
     public class TtBlendTree_AnimStateMachine<S> : TtBlendTree<TtLocalSpaceRuntimePose>
     {
         TtAnimStateMachineExtractPoseCommand<TtLocalSpaceRuntimePose> mAnimationCommand = null;
-        TtAnimStateMachine<S> AnimStateMachine;
+        internal TtAnimStateMachine<S> AnimStateMachine = null;
         public override void Initialize(ref FAnimBlendTreeContext context)
         {
             mAnimationCommand = new TtAnimStateMachineExtractPoseCommand<TtLocalSpaceRuntimePose>();

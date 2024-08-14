@@ -355,7 +355,7 @@ namespace EngineNS.EGui.Controls
         int LastClickIndex = -1;
         RName LastDir;
 
-        private unsafe void DrawItem(in ImDrawList cmdlist, UUvAnim icon, IO.IAssetMeta ameta, in Vector2 sz, int index)
+        private unsafe void DrawItem(in ImDrawList cmdlist, TtUVAnim icon, IO.IAssetMeta ameta, in Vector2 sz, int index)
         {
             ImGuiAPI.PushID($"##{ameta.GetAssetName().Name}");
             bool isSelected = false;

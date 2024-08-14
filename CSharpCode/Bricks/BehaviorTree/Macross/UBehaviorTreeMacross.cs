@@ -201,7 +201,7 @@ namespace EngineNS.BehaviorTree.Macross
         public IAssetMeta CreateAMeta()
         {
             var result = new UBehaviorTreeMacrossAMeta();
-            result.Icon = new EGui.UUvAnim();
+            result.Icon = new EGui.TtUVAnim();
             return result;
         }
 

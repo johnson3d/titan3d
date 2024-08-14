@@ -8,7 +8,7 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode
     public class UShaderEditorStyles
     {
         public static UShaderEditorStyles Instance = new UShaderEditorStyles();
-        public EGui.UUvAnim FunctionIcon = new EGui.UUvAnim(0xFF00FF00, 25);
+        public EGui.TtUVAnim FunctionIcon = new EGui.TtUVAnim(0xFF00FF00, 25);
         public uint FunctionTitleColor = 0xFF204020;
         public uint FunctionBGColor = 0x80808080;
         public LinkDesc NewInOutPinDesc(string linkType = "Value")

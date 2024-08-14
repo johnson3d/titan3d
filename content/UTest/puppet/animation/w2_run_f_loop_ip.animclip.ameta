@@ -2,7 +2,7 @@
 <Root Type="EngineNS.Animation.Asset.TtAnimationClipAMeta@EngineCore">
   <AssetId Type="System.Guid@Unknown" Value="5db561c7-7adf-4880-ad1e-f213caae7e90" />
   <Description Type="System.String@Unknown" Value="This is a EngineNS.Animation.Asset.TtAnimationClip&#xA;" />
-  <Icon Type="EngineNS.EGui.UUvAnim@EngineCore">
+  <Icon Type="EngineNS.EGui.TtUVAnim@EngineCore">
     <Color Type="System.UInt32@Unknown" Value="4294967295" />
     <Duration Type="System.Single@Unknown" Value="1000" />
     <FrameUVs Type="System.Collections.Generic.List&lt;EngineNS.Vector4@EngineCore,&gt;@Unknown" Count="1">

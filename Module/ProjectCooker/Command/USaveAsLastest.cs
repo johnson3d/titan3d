@@ -21,6 +21,7 @@ namespace ProjectCooker.Command
             {
                 //throw new Exception("AssetType error");
                 //await ProcTextures();
+                await ProcUVAnim();
                 await ProcMeshPrimitive();
                 await ProcUMesh();
                 await ProcMaterial();
@@ -40,6 +41,11 @@ namespace ProjectCooker.Command
                         case Type_Texture:
                             {
                                 await ProcTextures();
+                            }
+                            break;
+                        case Type_UVAnim:
+                            {
+                                await ProcUVAnim();
                             }
                             break;
                         case Type_Mesh:
@@ -93,6 +99,42 @@ namespace ProjectCooker.Command
                 }
             }
         }
+        async System.Threading.Tasks.Task ProcUVAnim()
+        {
+            var root = EngineNS.UEngine.Instance.FileManager.GetRoot(EngineNS.IO.TtFileManager.ERootDir.Game);
+            var files = EngineNS.IO.TtFileManager.GetFiles(root, "*" + EngineNS.EGui.TtUVAnim.AssetExt, true);
+            foreach (var i in files)
+            {
+                var rp = EngineNS.IO.TtFileManager.GetRelativePath(root, i);
+                var rn = EngineNS.RName.GetRName(rp, EngineNS.RName.ERNameType.Game);
+                var asset = await EngineNS.UEngine.Instance.GfxDevice.UvAnimManager.GetUVAnim(rn);
+                if (asset != null)
+                {
+                    asset.SaveAssetTo(rn);
+                }
+                else
+                {
+                    EngineNS.Profiler.Log.WriteLineSingle($"GetUVAnim {rn} failed");
+                }
+            }
+
+            root = EngineNS.UEngine.Instance.FileManager.GetRoot(EngineNS.IO.TtFileManager.ERootDir.Engine);
+            files = EngineNS.IO.TtFileManager.GetFiles(root, "*" + EngineNS.EGui.TtUVAnim.AssetExt, true);
+            foreach (var i in files)
+            {
+                var rp = EngineNS.IO.TtFileManager.GetRelativePath(root, i);
+                var rn = EngineNS.RName.GetRName(rp, EngineNS.RName.ERNameType.Engine);
+                var asset = await EngineNS.UEngine.Instance.GfxDevice.UvAnimManager.GetUVAnim(rn);
+                if (asset != null)
+                {
+                    asset.SaveAssetTo(rn);
+                }
+                else
+                {
+                    EngineNS.Profiler.Log.WriteLineSingle($"GetUVAnim {rn} failed");
+                }
+            }
+        }
         async System.Threading.Tasks.Task ProcTextures()
         {
             var root = EngineNS.UEngine.Instance.FileManager.GetRoot(EngineNS.IO.TtFileManager.ERootDir.Game);
@@ -102,11 +144,16 @@ namespace ProjectCooker.Command
                 var rp = EngineNS.IO.TtFileManager.GetRelativePath(root, i);
                 var rn = EngineNS.RName.GetRName(rp, EngineNS.RName.ERNameType.Game);
                 var asset = await EngineNS.UEngine.Instance.GfxDevice.TextureManager.GetTexture(rn);
+                if (asset == null)
+                    continue;
                 //if (asset.PicDesc.DontCompress == false)
                 //    asset.PicDesc.CompressFormat = EngineNS.UEngine.Instance.Config.CompressFormat;
                 //else
                 //    asset.PicDesc.CompressFormat = EngineNS.NxRHI.ETextureCompressFormat.TCF_None;
+
+
                 asset.SaveAssetTo(rn);
+                //asset.GetAMeta().SaveAMeta();
             }
 
             root = EngineNS.UEngine.Instance.FileManager.GetRoot(EngineNS.IO.TtFileManager.ERootDir.Engine);
@@ -116,11 +163,15 @@ namespace ProjectCooker.Command
                 var rp = EngineNS.IO.TtFileManager.GetRelativePath(root, i);
                 var rn = EngineNS.RName.GetRName(rp, EngineNS.RName.ERNameType.Engine);
                 var asset = await EngineNS.UEngine.Instance.GfxDevice.TextureManager.GetTexture(rn);
+                if (asset == null)
+                    continue;
                 //if (asset.PicDesc.DontCompress == false)
                 //    asset.PicDesc.CompressFormat = EngineNS.UEngine.Instance.Config.CompressFormat;
                 //else
                 //    asset.PicDesc.CompressFormat = EngineNS.NxRHI.ETextureCompressFormat.TCF_None;
+
                 asset.SaveAssetTo(rn);
+                //asset.GetAMeta().SaveAMeta();
             }
         }
         async System.Threading.Tasks.Task ProcUMesh()

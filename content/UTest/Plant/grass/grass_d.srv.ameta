@@ -2,8 +2,9 @@
 <Root Type="EngineNS.NxRHI.USrViewAMeta@EngineCore">
   <AssetId Type="System.Guid@Unknown" Value="efde052b-f977-4b43-8808-7034a2fc26e1" />
   <Description Type="System.String@Unknown" Value="This is a EngineNS.NxRHI.USrView&#xA;" />
-  <Icon Type="EngineNS.EGui.UUvAnim@EngineCore">
+  <Icon Type="EngineNS.EGui.TtUVAnim@EngineCore">
     <Color Type="System.UInt32@Unknown" Value="4294967295" />
+    <Duration Type="System.Single@Unknown" Value="1000" />
     <FrameUVs Type="System.Collections.Generic.List&lt;EngineNS.Vector4@EngineCore,&gt;@Unknown" Count="1">
       <e_0 Value="0,0,1,1" />
     </FrameUVs>

@@ -37,7 +37,7 @@ namespace EngineNS.Animation.BlendTree
 
     public class TtBlendTree<T> : IBlendTree<T> where T : IRuntimePose
     {
-        bool mIsInitialized = false;
+        internal bool mIsInitialized = false;
         public virtual void Initialize(ref FAnimBlendTreeContext context)
         {
             

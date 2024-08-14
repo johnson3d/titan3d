@@ -72,7 +72,7 @@ namespace EngineNS.DesignMacross.Editor
             var nodeEnd = context.ViewPortTransform(pinElement.AbsLocation + new Vector2(pinElement.Size.Width, pinElement.Size.Height));
             cmdlist.AddRectFilled(nodeStart, nodeEnd, ImGuiAPI.ColorConvertFloat4ToU32(pinElement.BackgroundColor), pinElement.Rounding, ImDrawFlags_.ImDrawFlags_RoundCornersAll);
             var styles = UNodeGraphStyles.DefaultStyles;
-            EGui.UUvAnim icon = new EGui.UUvAnim();
+            EGui.TtUVAnim icon = new EGui.TtUVAnim();
             icon.TextureName = pinElement.IconName;
             icon.Size = new Vector2(pinElement.Size.Width, pinElement.Size.Height);
             icon.OnDraw(cmdlist, nodeStart, nodeEnd, 0);

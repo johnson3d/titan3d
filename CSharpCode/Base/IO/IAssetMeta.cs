@@ -538,11 +538,11 @@ namespace EngineNS.IO
             return true;
         }
         [Rtti.Meta]
-        public EGui.UUvAnim Icon
+        public EGui.TtUVAnim Icon
         {
             get;
             set;
-        } = new EGui.UUvAnim();
+        } = new EGui.TtUVAnim();
         [Rtti.Meta]
         public string TypeStr { get; set; }
         [Rtti.Meta]

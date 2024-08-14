@@ -15,6 +15,7 @@ namespace ProjectCooker
     {
         public const string Param_Types = "AssetType=";
         public const string Type_Texture = "Texture";
+        public const string Type_UVAnim = "UVAnim";
         public const string Type_Mesh = "Mesh";
         public const string Type_MeshPrimitive = "MeshPrimitive";
         public const string Type_Material = "Material";
