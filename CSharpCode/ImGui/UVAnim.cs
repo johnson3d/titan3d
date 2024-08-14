@@ -160,14 +160,14 @@ namespace EngineNS.EGui
             xnd.SaveXnd(name.Address);
             UEngine.Instance.SourceControlModule.AddFile(name.Address);
         }
-        public static UUvAnim LoadXnd(UUvAnimManager manager, IO.TtXndNode node)
+        public static UUvAnim LoadXnd(TtUvAnimManager manager, IO.TtXndNode node)
         {
             UUvAnim result = new UUvAnim();
             if (ReloadXnd(result, manager, node) == false)
                 return null;
             return result;
         }
-        public static bool ReloadXnd(UUvAnim material, UUvAnimManager manager, IO.TtXndNode node)
+        public static bool ReloadXnd(UUvAnim material, TtUvAnimManager manager, IO.TtXndNode node)
         {
             var attr = node.TryGetAttribute("UVAnim");
             if (attr.NativePointer != IntPtr.Zero)
@@ -280,7 +280,7 @@ namespace EngineNS.EGui
         }
     }
 
-    public class UUvAnimManager
+    public class TtUvAnimManager
     {
         public void Cleanup()
         {
@@ -377,6 +377,6 @@ namespace EngineNS.Graphics.Pipeline
 {
     partial class UGfxDevice
     {
-        public EGui.UUvAnimManager UvAnimManager { get; } = new EGui.UUvAnimManager();
+        public EGui.TtUvAnimManager UvAnimManager { get; } = new EGui.TtUvAnimManager();
     }
 }

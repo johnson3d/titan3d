@@ -299,6 +299,7 @@ namespace EngineNS.IO
             UInt64 versionHash;
             if (magic != SerializerHelper.HashMagic)
             {
+                Profiler.Log.WriteLine(Profiler.ELogTag.Warning, "IO", $"读取到老的资产格式请重新保存成最新版本");
                 versionHash = magic;
             }
             else
@@ -347,6 +348,7 @@ namespace EngineNS.IO
             UInt64 versionHash;
             if (magic != SerializerHelper.HashMagic)
             {
+                Profiler.Log.WriteLine(Profiler.ELogTag.Warning, "IO", $"读取到老的资产格式请重新保存成最新版本");
                 versionHash = magic;
             }
             else

@@ -11,10 +11,10 @@
     <Size Type="EngineNS.Vector2@EngineCore" Value="50,50" />
   </Icon>
   <RefAssetRNames Type="System.Collections.Generic.List&lt;EngineNS.RName@EngineCore,&gt;@Unknown" Count="1">
-    <e_0 Value="Engine,texture/ui.srv,3715a5b3-4ff4-4022-afb9-16eea3e837d5" />
+    <e_0 Value="Engine,texture/ui.srv,00000000-0000-0000-0000-000000000000" />
   </RefAssetRNames>
   <SnapUVEnd Type="EngineNS.Vector2@EngineCore" Value="0.0685,0.0685" />
   <SnapUVStart Type="EngineNS.Vector2@EngineCore" Value="0,0" />
-  <TextureName Type="EngineNS.RName@EngineCore" Value="Engine,texture/ui.srv,3715a5b3-4ff4-4022-afb9-16eea3e837d5" />
+  <TextureName Type="EngineNS.RName@EngineCore" Value="Engine,texture/ui.srv,00000000-0000-0000-0000-000000000000" />
   <TypeStr Type="System.String@Unknown" Value="EngineNS.EGui.UUvAnim@EngineCore" />
 </Root>

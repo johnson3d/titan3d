@@ -79,7 +79,7 @@ namespace EngineNS.IO
         }
 
         //过一段时间，等资产转换基本都完成了，就把HashMagic去掉，这个是用来兼容老版本hash32 MetaVersion的临时产物
-        public static uint HashMagic = 0;
+        public static uint HashMagic { get; } = 0;
         public static bool Read(IReader ar, out ISerializer obj, object hostObject)
         {
             bool isNull;
@@ -98,6 +98,7 @@ namespace EngineNS.IO
             UInt64 versionHash;
             if (magic != HashMagic)
             {
+                Profiler.Log.WriteLine(Profiler.ELogTag.Warning, "IO", $"读取到老的资产格式请重新保存成最新版本");
                 versionHash = magic;
             }
             else
@@ -560,6 +561,7 @@ namespace EngineNS.IO
                 UInt64 versionHash;
                 if (magic != SerializerHelper.HashMagic)
                 {
+                    Profiler.Log.WriteLine(Profiler.ELogTag.Warning, "IO", $"读取到老的资产格式请重新保存成最新版本");
                     versionHash = magic;
                 }
                 else
